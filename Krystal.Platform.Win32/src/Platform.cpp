@@ -1,0 +1,93 @@
+#include "Krystal.Platform/Platform.hpp"
+
+#include "Krystal.Core/Core.hpp"
+
+#include <algorithm>
+#include <cassert>
+#include <optional>
+
+#define NOMINMAX
+#include <windows.h>
+
+#include <profileapi.h>
+#include <stringapiset.h>
+#include <synchapi.h>
+#include <timeapi.h>
+#include <WinNls.h>
+
+namespace Krys::Platform
+{
+  int64 StartTicks = 0;
+  int64 TickFrequency = 0;
+
+  void Initialise() noexcept
+  {
+    SetTimerPrecision();
+
+    {
+      LARGE_INTEGER freq;
+      auto result = ::QueryPerformanceFrequency(&freq);
+      assert(result);
+      TickFrequency = freq.QuadPart;
+    }
+
+    {
+      LARGE_INTEGER start;
+      auto result = ::QueryPerformanceCounter(&start);
+      assert(result);
+      StartTicks = start.QuadPart;
+    }
+  }
+
+  double GetTime() noexcept
+  {
+    LARGE_INTEGER now;
+    {
+      auto result = ::QueryPerformanceCounter(&now);
+      assert(result);
+    }
+    return static_cast<double>(now.QuadPart - StartTicks) / TickFrequency;
+  }
+
+  double GetTimeMilliseconds() noexcept
+  {
+    LARGE_INTEGER now;
+    {
+      auto result = ::QueryPerformanceCounter(&now);
+      assert(result);
+    }
+    return static_cast<double>(now.QuadPart - StartTicks) * 1000.0 / TickFrequency;
+  }
+
+  uint SetTimerPrecision(Nullable<uint> min) noexcept
+  {
+    TIMECAPS timeCaps {};
+
+    {
+      auto result = ::timeGetDevCaps(&timeCaps, sizeof(timeCaps));
+      assert(result != TIMERR_NOCANDO);
+    }
+
+    auto minUint = min.has_value() ? min.value() : 0;
+    const uint &period = ::std::max(timeCaps.wPeriodMin, minUint);
+    {
+      auto result = ::timeBeginPeriod(period);
+      assert(result != TIMERR_NOCANDO);
+    }
+
+    return period;
+  }
+
+  void Sleep(uint32 milliseconds) noexcept
+  {
+    ::Sleep(milliseconds);
+  }
+
+  wstring ToWideString(const string &utf8String) noexcept
+  {
+    int len = ::MultiByteToWideChar(CP_UTF8, 0, utf8String.c_str(), -1, nullptr, 0);
+    wstring wstr(len, 0);
+    ::MultiByteToWideChar(CP_UTF8, 0, utf8String.c_str(), -1, &wstr[0], len);
+    return wstr;
+  }
+}

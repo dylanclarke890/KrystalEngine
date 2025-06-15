@@ -1,0 +1,39 @@
+---
+Checks: >
+  -*,
+  clang-analyzer-*,
+  cppcoreguidelines-*,
+  modernize-*,
+  -modernize-use-trailing-return-type,
+  performance-*,
+  readability-*,
+  -readability-convert-member-functions-to-static,
+  bugprone-*,
+  -bugprone-branch-clone,
+  hicpp-*,
+  -hicpp-member-init,
+  portability-*,
+  misc-*,
+  -misc-include-cleaner,
+  -misc-non-private-member-variables-in-classes,
+  documentation-*
+
+WarningsAsErrors: >
+  clang-analyzer-*,
+  cppcoreguidelines-*,
+  modernize-*,
+  bugprone-* # Treat these warnings as errors.
+
+HeaderFilterRegex: '.*' # Analyze all headers in the project.
+FormatStyle: file # Use the .clang-format file in the project for formatting.
+CheckOptions:
+  - key: cppcoreguidelines-pro-type-member-init.MemberInit
+    value: 'false' # Allow missing member initializations (adjust based on project needs).
+  - key: readability-identifier-naming.NamespaceCase
+    value: CamelCase # Enforce consistent naming for namespaces.
+  - key: documentation-unknown-command
+    value: 'false' # Suppress warnings about unknown commands in comments.
+  - key: modernize-use-nullptr.NullMacros
+    value: 'NULL' # Ensure `nullptr` is used instead of `NULL`.
+  - key: performance-unnecessary-value-param.AllowedType
+    value: 'std::string' # Allow std::string by value for performance checks.

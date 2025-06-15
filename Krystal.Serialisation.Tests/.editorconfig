@@ -1,0 +1,6 @@
+# Visual Studio generated .editorconfig file with C++ settings.
+root = true
+
+[*.{c++,cc,cpp,cppm,cxx,h,h++,hh,hpp,hxx,inl,ipp,ixx,tlh,tli}]
+
+cpp_include_cleanup_excluded_files = Krystal.Serialisation/Types/Builtins.hpp, Krystal.Serialisation/Types/Vector.hpp, Krystal.Serialisation/Types/Array.hpp, Krystal.Serialisation/Types/Pair.hpp

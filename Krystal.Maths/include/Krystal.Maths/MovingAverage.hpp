@@ -1,0 +1,42 @@
+#pragma once
+
+#include "Krystal.Core/Core.hpp"
+
+namespace Krys::Maths
+{
+  template <Arithmetic T, int MaxSamples>
+  class MovingAverage
+  {
+    using Type = T;
+
+    Array<T, MaxSamples> _samples;
+    uint32 _currentSample, _sampleCount;
+    T _sum;
+
+  public:
+    constexpr MovingAverage() noexcept
+        : _sum(static_cast<T>(0)), _samples({}), _currentSample(0), _sampleCount(0)
+    {
+    }
+
+    constexpr void Add(T sample) noexcept
+    {
+      if (_sampleCount == MaxSamples)
+        _sum -= _samples[_currentSample];
+      else
+        _sampleCount++;
+
+      _samples[_currentSample] = sample;
+      _sum += sample;
+
+      _currentSample = (_currentSample + 1) % MaxSamples;
+    }
+
+    NO_DISCARD constexpr T GetAverage() const noexcept
+    {
+      if (_sampleCount == 0)
+        return static_cast<T>(0);
+      return _sum / static_cast<T>(_sampleCount);
+    }
+  };
+}

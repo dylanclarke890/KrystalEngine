@@ -1,0 +1,84 @@
+Language: Cpp
+Standard: Latest
+BasedOnStyle: LLVM
+ColumnLimit: 110
+
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortCompoundRequirementOnASingleLine: true
+AllowShortCaseLabelsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: None
+AllowShortLambdasOnASingleLine: Inline
+
+AlignConsecutiveShortCaseStatements:
+  Enabled: true
+  AcrossEmptyLines: true
+  AcrossComments: true
+  AlignCaseColons: false
+# ArrayInitializerAlignmentStyle: Right
+# EscapedNewlineAlignmentStyle: LeftWithLastLine
+BinPackArguments: true
+
+TabWidth: 2
+UseTab: Never
+IndentWidth: 2
+IndentCaseLabels: true
+# IndentCaseContents: true
+IndentCaseBlocks: false
+IndentRequiresClause: false
+IndentWrappedFunctionNames: true
+ContinuationIndentWidth: 2
+NamespaceIndentation: All
+FixNamespaceComments: false
+ReflowComments: true
+CompactNamespaces: false
+IndentExternBlock: AfterExternBlock
+IndentPPDirectives: BeforeHash
+AccessModifierOffset: -2
+Cpp11BracedListStyle: true
+
+SortIncludes: CaseInsensitive
+# SortUsingDeclarationsOptions: Lexicographic
+
+# BreakBeforeConceptDeclarationsStyle: Always
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeTernaryOperators: true
+AlwaysBreakTemplateDeclarations: true
+BreakConstructorInitializers: BeforeColon
+BreakFunctionDefinitionParameters: false
+BreakBeforeBraces: Allman
+BreakAfterAttributes: Never
+
+IntegerLiteralSeparator:
+  Binary: 3
+  BinaryMinDigits: 7
+  Decimal: 3
+  DecimalMinDigits: 4
+  Hex: 2
+  HexMinDigits: 8
+
+KeepEmptyLines:
+  AtEndOfFile: false
+  AtStartOfBlock: false
+  AtStartOfFile: false
+
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
+SpaceAfterTemplateKeyword: true
+SpaceAroundPointerQualifiers: Default
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeCaseColon: false
+SpaceBeforeCpp11BracedList: true
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeInheritanceColon: true
+SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceBeforeSquareBrackets: false
+SpaceInEmptyBlock: false
+SpacesBeforeTrailingComments: 1
+SpacesInAngles: Never
+SpacesInLineCommentPrefix:
+ Minimum: 1
+ Maximum: 1
+SpacesInParens: Never
+IfMacros: [KRYS_IF_COMPILE_CONTEXT, KRYS_IF_RUNTIME_CONTEXT]

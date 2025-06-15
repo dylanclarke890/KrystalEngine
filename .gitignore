@@ -30,3 +30,42 @@
 *.exe
 *.out
 *.app
+
+# Visual Studio temporary files and build directories
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+[Bb]uild/
+[Bb]uilds/
+[Dd]ebug/
+[Rr]elease/
+[Rr]eleases/
+[Pp]ackages/
+
+# Visual Studio cache/options files
+.vs/
+.vscode/
+*.VC.db
+*.VC.VC.opendb
+*.opendb
+*.db
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.aps
+
+# IntelliSense cache
+*.ncb
+*.sdf
+
+# MSTest
+*.Test.xml
+*.testsettings
+
+# Custom
+/Krystal.Editor/logs
