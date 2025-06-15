@@ -1585,559 +1585,571 @@ namespace Krys::Gfx::OpenGL
   {
     return false;
   }
+}
 
-  namespace Krys::Gfx::OpenGL
-  {
+namespace Krys::Gfx::OpenGL
+{
 #pragma region GL Core Functions
 
 #pragma region 1.0
 
-    void glCullFace(GLenum mode) noexcept
-    {
-      gl.CullFace(mode);
-    }
+  void glCullFace(GLenum mode) noexcept
+  {
+    gl.CullFace(mode);
+  }
 
-    void glFrontFace(GLenum mode) noexcept
-    {
-      gl.FrontFace(mode);
-    }
+  void glFrontFace(GLenum mode) noexcept
+  {
+    gl.FrontFace(mode);
+  }
 
-    void glHint(GLenum target, GLenum mode) noexcept
-    {
-      gl.Hint(target, mode);
-    }
+  void glHint(GLenum target, GLenum mode) noexcept
+  {
+    gl.Hint(target, mode);
+  }
 
-    void glLineWidth(GLfloat width) noexcept
-    {
-      gl.LineWidth(width);
-    }
+  void glLineWidth(GLfloat width) noexcept
+  {
+    gl.LineWidth(width);
+  }
 
-    void glPointSize(GLfloat size) noexcept
-    {
-      gl.PointSize(size);
-    }
+  void glPointSize(GLfloat size) noexcept
+  {
+    gl.PointSize(size);
+  }
 
-    void glPolygonMode(GLenum face, GLenum mode) noexcept
-    {
-      gl.PolygonMode(face, mode);
-    }
+  void glPolygonMode(GLenum face, GLenum mode) noexcept
+  {
+    gl.PolygonMode(face, mode);
+  }
 
-    void glScissor(GLint x, GLint y, GLsizei width, GLsizei height) noexcept
-    {
-      gl.Scissor(x, y, width, height);
-    }
+  void glScissor(GLint x, GLint y, GLsizei width, GLsizei height) noexcept
+  {
+    gl.Scissor(x, y, width, height);
+  }
 
-    void glTexParameterf(GLenum target, GLenum pname, GLfloat param) noexcept
-    {
-      gl.TexParameterf(target, pname, param);
-    }
+  void glTexParameterf(GLenum target, GLenum pname, GLfloat param) noexcept
+  {
+    gl.TexParameterf(target, pname, param);
+  }
 
-    void glTexParameterfv(GLenum target, GLenum pname, const GLfloat *params) noexcept
-    {
-      gl.TexParameterfv(target, pname, params);
-    }
+  void glTexParameterfv(GLenum target, GLenum pname, const GLfloat *params) noexcept
+  {
+    gl.TexParameterfv(target, pname, params);
+  }
 
-    void glTexParameteri(GLenum target, GLenum pname, GLint param) noexcept
-    {
-      gl.TexParameteri(target, pname, param);
-    }
+  void glTexParameteri(GLenum target, GLenum pname, GLint param) noexcept
+  {
+    gl.TexParameteri(target, pname, param);
+  }
 
-    void glTexParameteriv(GLenum target, GLenum pname, const GLint *params) noexcept
-    {
-      gl.TexParameteriv(target, pname, params);
-    }
+  void glTexParameteriv(GLenum target, GLenum pname, const GLint *params) noexcept
+  {
+    gl.TexParameteriv(target, pname, params);
+  }
 
-    void glTexImage1D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLint border,
-                      GLenum format, GLenum type, const void *pixels) noexcept
-    {
-      gl.TexImage1D(target, level, internalformat, width, border, format, type, pixels);
-    }
+  void glTexImage1D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLint border,
+                    GLenum format, GLenum type, const void *pixels) noexcept
+  {
+    gl.TexImage1D(target, level, internalformat, width, border, format, type, pixels);
+  }
 
-    void glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height,
-                      GLint border, GLenum format, GLenum type, const void *pixels) noexcept
-    {
-      gl.TexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
-    }
+  void glTexImage2D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height,
+                    GLint border, GLenum format, GLenum type, const void *pixels) noexcept
+  {
+    gl.TexImage2D(target, level, internalformat, width, height, border, format, type, pixels);
+  }
 
-    void glDrawBuffer(GLenum buf) noexcept
-    {
-      gl.DrawBuffer(buf);
-    }
+  void glDrawBuffer(GLenum buf) noexcept
+  {
+    gl.DrawBuffer(buf);
+  }
 
-    void glClear(GLbitfield mask) noexcept
-    {
-      gl.Clear(mask);
-    }
+  void glClear(GLbitfield mask) noexcept
+  {
+    gl.Clear(mask);
+  }
 
-    void glClearColor(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) noexcept
-    {
-      gl.ClearColor(red, green, blue, alpha);
-    }
+  void glClearColor(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) noexcept
+  {
+    gl.ClearColor(red, green, blue, alpha);
+  }
 
-    void glClearStencil(GLint s) noexcept
-    {
-      gl.ClearStencil(s);
-    }
+  void glClearStencil(GLint s) noexcept
+  {
+    gl.ClearStencil(s);
+  }
 
-    void glClearDepth(GLdouble depth) noexcept
-    {
-      gl.ClearDepth(depth);
-    }
+  void glClearDepth(GLdouble depth) noexcept
+  {
+    gl.ClearDepth(depth);
+  }
 
-    void glStencilMask(GLuint mask) noexcept
-    {
-      gl.StencilMask(mask);
-    }
+  void glStencilMask(GLuint mask) noexcept
+  {
+    gl.StencilMask(mask);
+  }
 
-    void glColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha) noexcept
-    {
-      gl.ColorMask(red, green, blue, alpha);
-    }
+  void glColorMask(GLboolean red, GLboolean green, GLboolean blue, GLboolean alpha) noexcept
+  {
+    gl.ColorMask(red, green, blue, alpha);
+  }
 
-    void glDepthMask(GLboolean flag) noexcept
-    {
-      gl.DepthMask(flag);
-    }
+  void glDepthMask(GLboolean flag) noexcept
+  {
+    gl.DepthMask(flag);
+  }
 
-    void glDisable(GLenum cap) noexcept
-    {
-      gl.Disable(cap);
-    }
+  void glDisable(GLenum cap) noexcept
+  {
+    gl.Disable(cap);
+  }
 
-    void glEnable(GLenum cap) noexcept
-    {
-      gl.Enable(cap);
-    }
+  void glEnable(GLenum cap) noexcept
+  {
+    gl.Enable(cap);
+  }
 
-    void glFinish() noexcept
-    {
-      gl.Finish();
-    }
+  void glFinish() noexcept
+  {
+    gl.Finish();
+  }
 
-    void glFlush() noexcept
-    {
-      gl.Flush();
-    }
+  void glFlush() noexcept
+  {
+    gl.Flush();
+  }
 
-    void glBlendFunc(GLenum sfactor, GLenum dfactor) noexcept
-    {
-      gl.BlendFunc(sfactor, dfactor);
-    }
+  void glBlendFunc(GLenum sfactor, GLenum dfactor) noexcept
+  {
+    gl.BlendFunc(sfactor, dfactor);
+  }
 
-    void glLogicOp(GLenum opcode) noexcept
-    {
-      gl.LogicOp(opcode);
-    }
+  void glLogicOp(GLenum opcode) noexcept
+  {
+    gl.LogicOp(opcode);
+  }
 
-    void glStencilFunc(GLenum func, GLint ref, GLuint mask) noexcept
-    {
-      gl.StencilFunc(func, ref, mask);
-    }
+  void glStencilFunc(GLenum func, GLint ref, GLuint mask) noexcept
+  {
+    gl.StencilFunc(func, ref, mask);
+  }
 
-    void glStencilOp(GLenum fail, GLenum zfail, GLenum zpass) noexcept
-    {
-      gl.StencilOp(fail, zfail, zpass);
-    }
+  void glStencilOp(GLenum fail, GLenum zfail, GLenum zpass) noexcept
+  {
+    gl.StencilOp(fail, zfail, zpass);
+  }
 
-    void glDepthFunc(GLenum func) noexcept
-    {
-      gl.DepthFunc(func);
-    }
+  void glDepthFunc(GLenum func) noexcept
+  {
+    gl.DepthFunc(func);
+  }
 
-    void glPixelStoref(GLenum pname, GLfloat param) noexcept
-    {
-      gl.PixelStoref(pname, param);
-    }
+  void glPixelStoref(GLenum pname, GLfloat param) noexcept
+  {
+    gl.PixelStoref(pname, param);
+  }
 
-    void glPixelStorei(GLenum pname, GLint param) noexcept
-    {
-      gl.PixelStorei(pname, param);
-    }
+  void glPixelStorei(GLenum pname, GLint param) noexcept
+  {
+    gl.PixelStorei(pname, param);
+  }
 
-    void glReadBuffer(GLenum src) noexcept
-    {
-      gl.ReadBuffer(src);
-    }
+  void glReadBuffer(GLenum src) noexcept
+  {
+    gl.ReadBuffer(src);
+  }
 
-    void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type,
-                      void *pixels) noexcept
-    {
-      gl.ReadPixels(x, y, width, height, format, type, pixels);
-    }
+  void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type,
+                    void *pixels) noexcept
+  {
+    gl.ReadPixels(x, y, width, height, format, type, pixels);
+  }
 
-    void glGetBooleanv(GLenum pname, GLboolean *data) noexcept
-    {
-      gl.GetBooleanv(pname, data);
-    }
+  void glGetBooleanv(GLenum pname, GLboolean *data) noexcept
+  {
+    gl.GetBooleanv(pname, data);
+  }
 
-    void glGetDoublev(GLenum pname, GLdouble *data) noexcept
-    {
-      gl.GetDoublev(pname, data);
-    }
+  void glGetDoublev(GLenum pname, GLdouble *data) noexcept
+  {
+    gl.GetDoublev(pname, data);
+  }
 
-    GLenum glGetError() noexcept
-    {
-      return gl.GetError();
-    }
+  GLenum glGetError() noexcept
+  {
+    return gl.GetError();
+  }
 
-    void glGetFloatv(GLenum pname, GLfloat *data) noexcept
-    {
-      gl.GetFloatv(pname, data);
-    }
+  void glGetFloatv(GLenum pname, GLfloat *data) noexcept
+  {
+    gl.GetFloatv(pname, data);
+  }
 
-    void glGetIntegerv(GLenum pname, GLint *data) noexcept
-    {
-      gl.GetIntegerv(pname, data);
-    }
+  void glGetIntegerv(GLenum pname, GLint *data) noexcept
+  {
+    gl.GetIntegerv(pname, data);
+  }
 
-    const GLubyte *glGetString(GLenum name) noexcept
-    {
-      return gl.GetString(name);
-    }
+  const GLubyte *glGetString(GLenum name) noexcept
+  {
+    return gl.GetString(name);
+  }
 
-    void glGetTexImage(GLenum target, GLint level, GLenum format, GLenum type, void *pixels) noexcept
-    {
-      gl.GetTexImage(target, level, format, type, pixels);
-    }
+  void glGetTexImage(GLenum target, GLint level, GLenum format, GLenum type, void *pixels) noexcept
+  {
+    gl.GetTexImage(target, level, format, type, pixels);
+  }
 
-    void glGetTexParameterfv(GLenum target, GLenum pname, GLfloat *params) noexcept
-    {
-      gl.GetTexParameterfv(target, pname, params);
-    }
+  void glGetTexParameterfv(GLenum target, GLenum pname, GLfloat *params) noexcept
+  {
+    gl.GetTexParameterfv(target, pname, params);
+  }
 
-    void glGetTexParameteriv(GLenum target, GLenum pname, GLint *params) noexcept
-    {
-      gl.GetTexParameteriv(target, pname, params);
-    }
+  void glGetTexParameteriv(GLenum target, GLenum pname, GLint *params) noexcept
+  {
+    gl.GetTexParameteriv(target, pname, params);
+  }
 
-    void glGetTexLevelParameterfv(GLenum target, GLint level, GLenum pname, GLfloat *params) noexcept
-    {
-      gl.GetTexLevelParameterfv(target, level, pname, params);
-    }
+  void glGetTexLevelParameterfv(GLenum target, GLint level, GLenum pname, GLfloat *params) noexcept
+  {
+    gl.GetTexLevelParameterfv(target, level, pname, params);
+  }
 
-    void glGetTexLevelParameteriv(GLenum target, GLint level, GLenum pname, GLint *params) noexcept
-    {
-      gl.GetTexLevelParameteriv(target, level, pname, params);
-    }
+  void glGetTexLevelParameteriv(GLenum target, GLint level, GLenum pname, GLint *params) noexcept
+  {
+    gl.GetTexLevelParameteriv(target, level, pname, params);
+  }
 
-    GLboolean glIsEnabled(GLenum cap) noexcept
-    {
-      return gl.IsEnabled(cap);
-    }
+  GLboolean glIsEnabled(GLenum cap) noexcept
+  {
+    return gl.IsEnabled(cap);
+  }
 
-    void glDepthRange(GLdouble n, GLdouble f) noexcept
-    {
-      gl.DepthRange(n, f);
-    }
+  void glDepthRange(GLdouble n, GLdouble f) noexcept
+  {
+    gl.DepthRange(n, f);
+  }
 
-    void glViewport(GLint x, GLint y, GLsizei width, GLsizei height) noexcept
-    {
-      gl.Viewport(x, y, width, height);
-    }
+  void glViewport(GLint x, GLint y, GLsizei width, GLsizei height) noexcept
+  {
+    gl.Viewport(x, y, width, height);
+  }
 
 #pragma endregion
 
 #pragma region 1.1
 
-    void glDrawArrays(GLenum mode, GLint first, GLsizei count) noexcept
-    {
-      gl.DrawArrays(mode, first, count);
-    }
+  void glDrawArrays(GLenum mode, GLint first, GLsizei count) noexcept
+  {
+    gl.DrawArrays(mode, first, count);
+  }
 
-    void glDrawElements(GLenum mode, GLsizei count, GLenum type, const void *indices) noexcept
-    {
-      gl.DrawElements(mode, count, type, indices);
-    }
+  void glDrawElements(GLenum mode, GLsizei count, GLenum type, const void *indices) noexcept
+  {
+    gl.DrawElements(mode, count, type, indices);
+  }
 
-    void glGetPointerv(GLenum pname, void **params) noexcept
-    {
-      gl.GetPointerv(pname, params);
-    }
+  void glGetPointerv(GLenum pname, void **params) noexcept
+  {
+    gl.GetPointerv(pname, params);
+  }
 
-    void glPolygonOffset(GLfloat factor, GLfloat units) noexcept
-    {
-      gl.PolygonOffset(factor, units);
-    }
+  void glPolygonOffset(GLfloat factor, GLfloat units) noexcept
+  {
+    gl.PolygonOffset(factor, units);
+  }
 
-    void glCopyTexImage1D(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width,
-                          GLint border) noexcept
-    {
-      gl.CopyTexImage1D(target, level, internalformat, x, y, width, border);
-    }
+  void glCopyTexImage1D(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width,
+                        GLint border) noexcept
+  {
+    gl.CopyTexImage1D(target, level, internalformat, x, y, width, border);
+  }
 
-    void glCopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width,
-                          GLsizei height, GLint border) noexcept
-    {
-      gl.CopyTexImage2D(target, level, internalformat, x, y, width, height, border);
-    }
+  void glCopyTexImage2D(GLenum target, GLint level, GLenum internalformat, GLint x, GLint y, GLsizei width,
+                        GLsizei height, GLint border) noexcept
+  {
+    gl.CopyTexImage2D(target, level, internalformat, x, y, width, height, border);
+  }
 
-    void glCopyTexSubImage1D(GLenum target, GLint level, GLint xoffset, GLint x, GLint y,
-                             GLsizei width) noexcept
-    {
-      gl.CopyTexSubImage1D(target, level, xoffset, x, y, width);
-    }
+  void glCopyTexSubImage1D(GLenum target, GLint level, GLint xoffset, GLint x, GLint y,
+                           GLsizei width) noexcept
+  {
+    gl.CopyTexSubImage1D(target, level, xoffset, x, y, width);
+  }
 
-    void glCopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y,
-                             GLsizei width, GLsizei height) noexcept
-    {
-      gl.CopyTexSubImage2D(target, level, xoffset, yoffset, x, y, width, height);
-    }
+  void glCopyTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint x, GLint y,
+                           GLsizei width, GLsizei height) noexcept
+  {
+    gl.CopyTexSubImage2D(target, level, xoffset, yoffset, x, y, width, height);
+  }
 
-    void glTexSubImage1D(GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type,
-                         const void *pixels) noexcept
-    {
-      gl.TexSubImage1D(target, level, xoffset, width, format, type, pixels);
-    }
+  void glTexSubImage1D(GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format, GLenum type,
+                       const void *pixels) noexcept
+  {
+    gl.TexSubImage1D(target, level, xoffset, width, format, type, pixels);
+  }
 
-    void glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width,
-                         GLsizei height, GLenum format, GLenum type, const void *pixels) noexcept
-    {
-      gl.TexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
-    }
+  void glTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width,
+                       GLsizei height, GLenum format, GLenum type, const void *pixels) noexcept
+  {
+    gl.TexSubImage2D(target, level, xoffset, yoffset, width, height, format, type, pixels);
+  }
 
-    void glBindTexture(GLenum target, GLuint texture) noexcept
-    {
-      gl.BindTexture(target, texture);
-    }
+  void glBindTexture(GLenum target, GLuint texture) noexcept
+  {
+    gl.BindTexture(target, texture);
+  }
 
-    void glDeleteTextures(GLsizei n, const GLuint *textures) noexcept
-    {
-      gl.DeleteTextures(n, textures);
-    }
+  void glDeleteTextures(GLsizei n, const GLuint *textures) noexcept
+  {
+    gl.DeleteTextures(n, textures);
+  }
 
-    void glGenTextures(GLsizei n, GLuint *textures) noexcept
-    {
-      gl.GenTextures(n, textures);
-    }
+  void glGenTextures(GLsizei n, GLuint *textures) noexcept
+  {
+    gl.GenTextures(n, textures);
+  }
 
-    GLboolean glIsTexture(GLuint texture) noexcept
-    {
-      return gl.IsTexture(texture);
-    }
+  GLboolean glIsTexture(GLuint texture) noexcept
+  {
+    return gl.IsTexture(texture);
+  }
 
 #pragma endregion
 
 #pragma region 1.2
 
-    void glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type,
-                             const void *indices) noexcept
-    {
-      gl.DrawRangeElements(mode, start, end, count, type, indices);
-    }
+  void glDrawRangeElements(GLenum mode, GLuint start, GLuint end, GLsizei count, GLenum type,
+                           const void *indices) noexcept
+  {
+    gl.DrawRangeElements(mode, start, end, count, type, indices);
+  }
 
-    void glTexImage3D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height,
-                      GLsizei depth, GLint border, GLenum format, GLenum type, const void *pixels) noexcept
-    {
-      gl.TexImage3D(target, level, internalformat, width, height, depth, border, format, type, pixels);
-    }
+  void glTexImage3D(GLenum target, GLint level, GLint internalformat, GLsizei width, GLsizei height,
+                    GLsizei depth, GLint border, GLenum format, GLenum type, const void *pixels) noexcept
+  {
+    gl.TexImage3D(target, level, internalformat, width, height, depth, border, format, type, pixels);
+  }
 
-    void glTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset,
-                         GLsizei width, GLsizei height, GLsizei depth, GLenum format, GLenum type,
-                         const void *pixels) noexcept
-    {
-      gl.TexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, pixels);
-    }
+  void glTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLsizei width,
+                       GLsizei height, GLsizei depth, GLenum format, GLenum type, const void *pixels) noexcept
+  {
+    gl.TexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format, type, pixels);
+  }
 
-    void glCopyTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x,
-                             GLint y, GLsizei width, GLsizei height) noexcept
-    {
-      gl.CopyTexSubImage3D(target, level, xoffset, yoffset, zoffset, x, y, width, height);
-    }
+  void glCopyTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset, GLint x,
+                           GLint y, GLsizei width, GLsizei height) noexcept
+  {
+    gl.CopyTexSubImage3D(target, level, xoffset, yoffset, zoffset, x, y, width, height);
+  }
 
 #pragma endregion
 
 #pragma region 1.3
 
-    void glActiveTexture(GLenum texture) noexcept
-    {
-      gl.ActiveTexture(texture);
-    }
+  void glActiveTexture(GLenum texture) noexcept
+  {
+    gl.ActiveTexture(texture);
+  }
 
-    void glSampleCoverage(GLfloat value, GLboolean invert) noexcept
-    {
-      gl.SampleCoverage(value, invert);
-    }
+  void glSampleCoverage(GLfloat value, GLboolean invert) noexcept
+  {
+    gl.SampleCoverage(value, invert);
+  }
 
-    void glCompressedTexImage3D(GLenum target, GLint level, GLenum internalformat, GLsizei width,
-                                GLsizei height, GLsizei depth, GLint border, GLsizei imageSize,
-                                const void *data) noexcept
-    {
-      gl.CompressedTexImage3D(target, level, internalformat, width, height, depth, border, imageSize, data);
-    }
+  void glCompressedTexImage3D(GLenum target, GLint level, GLenum internalformat, GLsizei width,
+                              GLsizei height, GLsizei depth, GLint border, GLsizei imageSize,
+                              const void *data) noexcept
+  {
+    gl.CompressedTexImage3D(target, level, internalformat, width, height, depth, border, imageSize, data);
+  }
 
-    void glCompressedTexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei width,
-                                GLsizei height, GLint border, GLsizei imageSize, const void *data) noexcept
-    {
-      gl.CompressedTexImage2D(target, level, internalformat, width, height, border, imageSize, data);
-    }
+  void glCompressedTexImage2D(GLenum target, GLint level, GLenum internalformat, GLsizei width,
+                              GLsizei height, GLint border, GLsizei imageSize, const void *data) noexcept
+  {
+    gl.CompressedTexImage2D(target, level, internalformat, width, height, border, imageSize, data);
+  }
 
-    void glCompressedTexImage1D(GLenum target, GLint level, GLenum internalformat, GLsizei width,
-                                GLint border, GLsizei imageSize, const void *data) noexcept
-    {
-      gl.CompressedTexImage1D(target, level, internalformat, width, border, imageSize, data);
-    }
+  void glCompressedTexImage1D(GLenum target, GLint level, GLenum internalformat, GLsizei width, GLint border,
+                              GLsizei imageSize, const void *data) noexcept
+  {
+    gl.CompressedTexImage1D(target, level, internalformat, width, border, imageSize, data);
+  }
 
-    void glCompressedTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset,
-                                   GLsizei width, GLsizei height, GLsizei depth, GLenum format,
-                                   GLsizei imageSize, const void *data) noexcept
-    {
-      gl.CompressedTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format,
-                                 imageSize, data);
-    }
+  void glCompressedTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLint zoffset,
+                                 GLsizei width, GLsizei height, GLsizei depth, GLenum format,
+                                 GLsizei imageSize, const void *data) noexcept
+  {
+    gl.CompressedTexSubImage3D(target, level, xoffset, yoffset, zoffset, width, height, depth, format,
+                               imageSize, data);
+  }
 
-    void glCompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width,
-                                   GLsizei height, GLenum format, GLsizei imageSize,
-                                   const void *data) noexcept
-    {
-      gl.CompressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, imageSize, data);
-    }
+  void glCompressedTexSubImage2D(GLenum target, GLint level, GLint xoffset, GLint yoffset, GLsizei width,
+                                 GLsizei height, GLenum format, GLsizei imageSize, const void *data) noexcept
+  {
+    gl.CompressedTexSubImage2D(target, level, xoffset, yoffset, width, height, format, imageSize, data);
+  }
 
-    void glCompressedTexSubImage1D(GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format,
-                                   GLsizei imageSize, const void *data) noexcept
-    {
-      gl.CompressedTexSubImage1D(target, level, xoffset, width, format, imageSize, data);
-    }
+  void glCompressedTexSubImage1D(GLenum target, GLint level, GLint xoffset, GLsizei width, GLenum format,
+                                 GLsizei imageSize, const void *data) noexcept
+  {
+    gl.CompressedTexSubImage1D(target, level, xoffset, width, format, imageSize, data);
+  }
 
-    void glGetCompressedTexImage(GLenum target, GLint level, void *img) noexcept
-    {
-      gl.GetCompressedTexImage(target, level, img);
-    }
+  void glGetCompressedTexImage(GLenum target, GLint level, void *img) noexcept
+  {
+    gl.GetCompressedTexImage(target, level, img);
+  }
 
 #pragma endregion
 
 #pragma region 1.4
 
-    void glBlendFuncSeparate(GLenum sfactorRGB, GLenum dfactorRGB, GLenum sfactorAlpha,
-                             GLenum dfactorAlpha) noexcept
-    {
-      gl.BlendFuncSeparate(sfactorRGB, dfactorRGB, sfactorAlpha, dfactorAlpha);
-    }
+  void glBlendFuncSeparate(GLenum sfactorRGB, GLenum dfactorRGB, GLenum sfactorAlpha,
+                           GLenum dfactorAlpha) noexcept
+  {
+    gl.BlendFuncSeparate(sfactorRGB, dfactorRGB, sfactorAlpha, dfactorAlpha);
+  }
 
-    void glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei drawcount) noexcept
-    {
-      gl.MultiDrawArrays(mode, first, count, drawcount);
-    }
+  void glMultiDrawArrays(GLenum mode, const GLint *first, const GLsizei *count, GLsizei drawcount) noexcept
+  {
+    gl.MultiDrawArrays(mode, first, count, drawcount);
+  }
 
-    void glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const void *const *indices,
-                             GLsizei drawcount) noexcept
-    {
-      gl.MultiDrawElements(mode, count, type, indices, drawcount);
-    }
+  void glMultiDrawElements(GLenum mode, const GLsizei *count, GLenum type, const void *const *indices,
+                           GLsizei drawcount) noexcept
+  {
+    gl.MultiDrawElements(mode, count, type, indices, drawcount);
+  }
 
-    void glPointParameterf(GLenum pname, GLfloat param) noexcept
-    {
-      gl.PointParameterf(pname, param);
-    }
+  void glPointParameterf(GLenum pname, GLfloat param) noexcept
+  {
+    gl.PointParameterf(pname, param);
+  }
 
-    void glPointParameterfv(GLenum pname, const GLfloat *params) noexcept
-    {
-      gl.PointParameterfv(pname, params);
-    }
+  void glPointParameterfv(GLenum pname, const GLfloat *params) noexcept
+  {
+    gl.PointParameterfv(pname, params);
+  }
 
-    void glPointParameteri(GLenum pname, GLint param) noexcept
-    {
-      gl.PointParameteri(pname, param);
-    }
+  void glPointParameteri(GLenum pname, GLint param) noexcept
+  {
+    gl.PointParameteri(pname, param);
+  }
 
-    void glPointParameteriv(GLenum pname, const GLint *params) noexcept
-    {
-      gl.PointParameteriv(pname, params);
-    }
+  void glPointParameteriv(GLenum pname, const GLint *params) noexcept
+  {
+    gl.PointParameteriv(pname, params);
+  }
 
-    void glBlendColor(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) noexcept
-    {
-      gl.BlendColor(red, green, blue, alpha);
-    }
+  void glBlendColor(GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha) noexcept
+  {
+    gl.BlendColor(red, green, blue, alpha);
+  }
 
-    void glBlendEquation(GLenum mode) noexcept
-    {
-      gl.BlendEquation(mode);
-    }
+  void glBlendEquation(GLenum mode) noexcept
+  {
+    gl.BlendEquation(mode);
+  }
 
 #pragma endregion
 
 #pragma region 1.5
 
-    void glGenQueries(GLsizei n, GLuint *ids) noexcept
-    {
-    }
+  void glGenQueries(GLsizei n, GLuint *ids) noexcept
+  {
+    gl.GenQueries(n, ids);
+  }
 
-    void glDeleteQueries(GLsizei n, const GLuint *ids) noexcept
-    {
-    }
+  void glDeleteQueries(GLsizei n, const GLuint *ids) noexcept
+  {
+    gl.DeleteQueries(n, ids);
+  }
 
-    GLboolean glIsQuery(GLuint id) noexcept
-    {
-      return GLboolean();
-    }
+  GLboolean glIsQuery(GLuint id) noexcept
+  {
+    return gl.IsQuery(id);
+  }
 
-    void glBeginQuery(GLenum target, GLuint id) noexcept
-    {
-    }
+  void glBeginQuery(GLenum target, GLuint id) noexcept
+  {
+    gl.BeginQuery(target, id);
+  }
 
-    void glEndQuery(GLenum target) noexcept
-    {
-    }
+  void glEndQuery(GLenum target) noexcept
+  {
+    gl.EndQuery(target);
+  }
 
-    void glGetQueryiv(GLenum target, GLenum pname, GLint *params) noexcept
-    {
-    }
+  void glGetQueryiv(GLenum target, GLenum pname, GLint *params) noexcept
+  {
+    gl.GetQueryiv(target, pname, params);
+  }
 
-    void glGetQueryObjectiv(GLuint id, GLenum pname, GLint *params) noexcept
-    {
-    }
+  void glGetQueryObjectiv(GLuint id, GLenum pname, GLint *params) noexcept
+  {
+    gl.GetQueryObjectiv(id, pname, params);
+  }
 
-    void glGetQueryObjectuiv(GLuint id, GLenum pname, GLuint *params) noexcept
-    {
-    }
+  void glGetQueryObjectuiv(GLuint id, GLenum pname, GLuint *params) noexcept
+  {
+    gl.GetQueryObjectuiv(id, pname, params);
+  }
 
-    void glBindBuffer(GLenum target, GLuint buffer) noexcept
-    {
-    }
+  void glBindBuffer(GLenum target, GLuint buffer) noexcept
+  {
+    gl.BindBuffer(target, buffer);
+  }
 
-    void glDeleteBuffers(GLsizei n, const GLuint *buffers) noexcept
-    {
-    }
+  void glDeleteBuffers(GLsizei n, const GLuint *buffers) noexcept
+  {
+    gl.DeleteBuffers(n, buffers);
+  }
 
-    void glGenBuffers(GLsizei n, GLuint *buffers) noexcept
-    {
-    }
+  void glGenBuffers(GLsizei n, GLuint *buffers) noexcept
+  {
+    gl.GenBuffers(n, buffers);
+  }
 
-    GLboolean glIsBuffer(GLuint buffer) noexcept
-    {
-      return GLboolean();
-    }
+  GLboolean glIsBuffer(GLuint buffer) noexcept
+  {
+    return gl.IsBuffer(buffer);
+  }
 
-    void glBufferData(GLenum target, GLsizeiptr size, const void *data, GLenum usage) noexcept
-    {
-    }
+  void glBufferData(GLenum target, GLsizeiptr size, const void *data, GLenum usage) noexcept
+  {
+    gl.BufferData(target, size, data, usage);
+  }
 
-    void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const void *data) noexcept
-    {
-    }
+  void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, const void *data) noexcept
+  {
+    gl.BufferSubData(target, offset, size, data);
+  }
 
-    void glGetBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, void *data) noexcept
-    {
-    }
+  void glGetBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size, void *data) noexcept
+  {
+    gl.GetBufferSubData(target, offset, size, data);
+  }
 
-    void *glMapBuffer(GLenum target, GLenum access) noexcept
-    {
-      return nullptr;
-    }
+  void *glMapBuffer(GLenum target, GLenum access) noexcept
+  {
+    return gl.MapBuffer(target, access);
+  }
 
-    GLboolean glUnmapBuffer(GLenum target) noexcept
-    {
-      return GLboolean();
-    }
+  GLboolean glUnmapBuffer(GLenum target) noexcept
+  {
+    return gl.UnmapBuffer(target);
+  }
 
-    void glGetBufferParameteriv(GLenum target, GLenum pname, GLint *params) noexcept
-    {
-    }
+  void glGetBufferParameteriv(GLenum target, GLenum pname, GLint *params) noexcept
+  {
+    gl.GetBufferParameteriv(target, pname, params);
+  }
 
-    void glGetBufferPointerv(GLenum target, GLenum pname, void **params) noexcept
-    {
-    }
-
+  void glGetBufferPointerv(GLenum target, GLenum pname, void **params) noexcept
+  {
+    gl.GetBufferPointerv(target, pname, params);
   }
 
 #pragma endregion

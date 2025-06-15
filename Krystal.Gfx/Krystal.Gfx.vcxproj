@@ -19,9 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.Gfx\Gfx.hpp" />
     <ClInclude Include="include\Krystal.Gfx\IContext.hpp" />
-    <ClInclude Include="include\Krystal.Gfx\IDevice.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\placeholder.cpp" />

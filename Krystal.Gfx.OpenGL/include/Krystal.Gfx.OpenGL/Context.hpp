@@ -8,15 +8,20 @@ namespace Krys::Gfx
   class OpenGLContext final : public IContext
   {
     NO_COPY_MOVE(OpenGLContext)
-    class Impl;
 
     NativeHandle _windowHandle;
-    Unique<Impl> _impl;
+
+    class GLContextPlatformImpl;
+    Unique<GLContextPlatformImpl> _platformImpl;
 
   public:
     OpenGLContext(NativeHandle windowHandle);
 
     ~OpenGLContext() noexcept override = default;
+
+    void SetupTestTriangle() noexcept override;
+
+    void DrawTestTriangle() noexcept override;
 
     void Present() noexcept override;
   };

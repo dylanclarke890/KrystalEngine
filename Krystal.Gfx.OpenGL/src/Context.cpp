@@ -5,10 +5,37 @@
 #include "Krystal.Gfx/IContext.hpp"
 
 #ifdef KRYS_PLATFORM_WINDOWS
-  #include "Krystal.Gfx.OpenGL/Win32/Impl.hpp"
+  #include "Krystal.Gfx.OpenGL/Win32/GLContextPlatformImpl.hpp"
 #else
   #error "Unsupported platform for OpenGL context creation."
 #endif
+
+#include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
+
+namespace
+{
+  float vertices[] = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
+
+  unsigned int VAO;
+  unsigned int VBO;
+
+  static unsigned int vertexShader;
+  static unsigned int fragmentShader;
+  static unsigned int shaderProgram;
+
+  const char *vertexShaderSource = "#version 330 core\n"
+                                   "layout (location = 0) in vec3 aPos;\n"
+                                   "void main()\n"
+                                   "{\n"
+                                   "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+                                   "}\0";
+  const char *fragmentShaderSource = "#version 330 core\n"
+                                     "out vec4 FragColor;\n"
+                                     "void main()\n"
+                                     "{\n"
+                                     "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+                                     "}\n\0";
+}
 
 namespace Krys::Gfx
 {
@@ -25,12 +52,52 @@ namespace Krys::Gfx
   }
 
   OpenGLContext::OpenGLContext(NativeHandle windowHandle)
-      : _windowHandle(windowHandle), _impl(CreateUnique<Impl>(windowHandle))
+      : _windowHandle(windowHandle), _platformImpl(CreateUnique<GLContextPlatformImpl>(windowHandle))
   {
+  }
+
+  void OpenGLContext::SetupTestTriangle() noexcept
+  {
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glCompileShader(vertexShader);
+
+    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glCompileShader(fragmentShader);
+
+    shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+    glUseProgram(shaderProgram);
+
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+    glEnableVertexAttribArray(0);
+  }
+
+  void OpenGLContext::DrawTestTriangle() noexcept
+  {
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glUseProgram(shaderProgram);
+    glBindVertexArray(VAO);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
   }
 
   void OpenGLContext::Present() noexcept
   {
-    _impl->Present();
+    _platformImpl->Present();
   }
 }

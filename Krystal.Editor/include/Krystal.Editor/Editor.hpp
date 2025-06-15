@@ -25,6 +25,7 @@ namespace Krys
         [&](const auto &event)
         {
           Stop();
+
           return true;
         });
 
@@ -38,11 +39,19 @@ namespace Krys
 
           if (event.GetKey() == Platform::Key::ESCAPE)
           {
-            _context->Logger->Info("Escape key pressed, quitting application");
+            _context->Logger->Info("Escape key pressed, quitting application...");
             Stop();
           }
+
           return true;
         });
+
+      _context->GraphicsContext->SetupTestTriangle();
+    }
+
+    void OnRender() noexcept override
+    {
+      _context->GraphicsContext->DrawTestTriangle();
     }
   };
 }

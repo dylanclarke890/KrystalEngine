@@ -109,11 +109,11 @@ namespace
 #include "Krystal.Gfx.OpenGL/Context.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/wgl.hpp"
-#include "Krystal.Gfx.OpenGL/Win32/Impl.hpp"
+#include "Krystal.Gfx.OpenGL/Win32/GLContextPlatformImpl.hpp"
 
 namespace Krys::Gfx
 {
-  OpenGLContext::Impl::Impl(NativeHandle nativeHandle)
+  OpenGLContext::GLContextPlatformImpl::GLContextPlatformImpl(NativeHandle nativeHandle)
       : _handle(nativeHandle.As<HWND>()), _deviceContext(nullptr), _renderingContext(nullptr)
   {
     const auto instance = ::GetModuleHandleA(NULL);
@@ -130,7 +130,7 @@ namespace Krys::Gfx
     SetupContext();
   }
 
-  void OpenGLContext::Impl::SetupPixelFormat() const
+  void OpenGLContext::GLContextPlatformImpl::SetupPixelFormat() const
   {
     using namespace Krys::Gfx::OpenGL;
 
@@ -160,7 +160,7 @@ namespace Krys::Gfx
     }
   }
 
-  List<int> OpenGLContext::Impl::GetPixelFormatAttributes() const noexcept
+  List<int> OpenGLContext::GLContextPlatformImpl::GetPixelFormatAttributes() const noexcept
   {
     List<int> attributes;
 
@@ -225,7 +225,7 @@ namespace Krys::Gfx
     return attributes;
   }
 
-  void OpenGLContext::Impl::SetupContext()
+  void OpenGLContext::GLContextPlatformImpl::SetupContext()
   {
     auto attributes = GetContextAttributes();
     _renderingContext = wglCreateContextAttribsARB(_deviceContext, 0, attributes.data());
@@ -237,7 +237,7 @@ namespace Krys::Gfx
       throw std::runtime_error("Failed to make OpenGL rendering context current.");
   }
 
-  List<int> OpenGLContext::Impl::GetContextAttributes() const noexcept
+  List<int> OpenGLContext::GLContextPlatformImpl::GetContextAttributes() const noexcept
   {
     List<int> attributes;
     attributes.push_back(WGL_CONTEXT_MAJOR_VERSION_ARB);
@@ -275,7 +275,7 @@ namespace Krys::Gfx
     return attributes;
   }
 
-  void OpenGLContext::Impl::Present() const noexcept
+  void OpenGLContext::GLContextPlatformImpl::Present() const noexcept
   {
     assert(_deviceContext && _renderingContext);
     auto result = wglSwapBuffers(_deviceContext);

@@ -11,16 +11,16 @@
 
 namespace Krys::Gfx
 {
-  class OpenGLContext::Impl
+  class OpenGLContext::GLContextPlatformImpl
   {
-    NO_COPY_MOVE(Impl)
+    NO_COPY_MOVE(GLContextPlatformImpl)
 
     HWND _handle;
     HDC _deviceContext;
     HGLRC _renderingContext;
 
   public:
-    explicit Impl(NativeHandle nativeHandle);
+    explicit GLContextPlatformImpl(NativeHandle nativeHandle);
 
     void Present() const noexcept;
 

@@ -18,6 +18,10 @@ namespace Krys::Gfx
   public:
     virtual ~IContext() noexcept = default;
 
+    virtual void SetupTestTriangle() noexcept = 0;
+
+    virtual void DrawTestTriangle() noexcept = 0;
+
     virtual void Present() noexcept = 0;
   };
 }
