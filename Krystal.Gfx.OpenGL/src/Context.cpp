@@ -12,19 +12,21 @@
 
 namespace Krys::Gfx
 {
-  Unique<IContext> CreateContext(NativeHandle windowHandle) noexcept
+  Expected<Unique<IContext>> CreateContext(NativeHandle windowHandle) noexcept
   {
-    return Unique<OpenGLContext>(new OpenGLContext(windowHandle));
+    try
+    {
+      return Expected<Unique<IContext>>(CreateUnique<OpenGLContext>(windowHandle));
+    }
+    catch (const std::exception &e)
+    {
+      return Unexpected(e.what());
+    }
   }
 
-  OpenGLContext::OpenGLContext(NativeHandle windowHandle) noexcept
-      : IContext(), _windowHandle(windowHandle), _impl(CreateUnique<Impl>(windowHandle))
+  OpenGLContext::OpenGLContext(NativeHandle windowHandle)
+      : _windowHandle(windowHandle), _impl(CreateUnique<Impl>(windowHandle))
   {
-  }
-
-  void OpenGLContext::Initialise() noexcept
-  {
-    _impl->Initialise();
   }
 
   void OpenGLContext::Present() noexcept

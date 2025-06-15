@@ -14,11 +14,9 @@ namespace Krys::Gfx
     Unique<Impl> _impl;
 
   public:
-    OpenGLContext(NativeHandle windowHandle) noexcept;
+    OpenGLContext(NativeHandle windowHandle);
 
     ~OpenGLContext() noexcept override = default;
-
-    void Initialise() noexcept override;
 
     void Present() noexcept override;
   };

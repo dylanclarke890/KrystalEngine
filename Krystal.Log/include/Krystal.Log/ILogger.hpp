@@ -6,6 +6,15 @@
 
 namespace Krys::Log
 {
+  struct LoggerSettings;
+  class ILogger;
+
+  NO_DISCARD Expected<Unique<ILogger>> CreateLogger(const LoggerSettings &settings) noexcept;
+
+  void SetGlobalLogger(const Unique<ILogger> &logger) noexcept;
+
+  NO_DISCARD ILogger *GetGlobalLogger() noexcept;
+
   enum class Level : uint8
   {
     Trace,
@@ -15,6 +24,24 @@ namespace Krys::Log
     Error,
     Critical,
     Off
+  };
+
+  struct LoggerSettings
+  {
+    string Name;
+    bool OutputToConsole;
+    string FilePath;
+    Level Level;
+
+    static constexpr LoggerSettings Default()
+    {
+      LoggerSettings settings {};
+      settings.Name = "Default";
+      settings.OutputToConsole = true;
+      settings.FilePath = "logs/log.txt";
+      settings.Level = Level::Info;
+      return settings;
+    }
   };
 
   class ILogger
@@ -53,19 +80,9 @@ namespace Krys::Log
 
     virtual void Flush() noexcept = 0;
 
-    virtual void AddConsoleSink() noexcept = 0;
-
-    virtual void AddFileSink(const string &path) noexcept = 0;
-
   protected:
     ILogger() noexcept = default;
 
     virtual void LogImpl(Level level, const string &message) noexcept = 0;
   };
-
-  NO_DISCARD Unique<ILogger> CreateLogger(const string &name) noexcept;
-
-  void SetGlobalLogger(const Unique<ILogger> &logger) noexcept;
-
-  NO_DISCARD ILogger *GetGlobalLogger() noexcept;
 }

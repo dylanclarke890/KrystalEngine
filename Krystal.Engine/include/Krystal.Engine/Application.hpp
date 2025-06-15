@@ -15,10 +15,16 @@ namespace Krys
 {
   struct ApplicationSettings
   {
-    string Title;
-    Platform::WindowSettings WindowSettings;
+    string Name {};
+
+    Log::LoggerSettings GlobalLoggerSettings {Log::LoggerSettings::Default()};
+
+    Platform::WindowSettings WindowSettings {};
+
     uint32 RenderFramerate {30};
+
     uint32 PhysicsFramerate {30};
+
     /// @brief Maximum number of physics updates to process per frame if the accumulated time exceeds the
     /// fixed time step. Keep this low to avoid stuttering.
     uint32 MaxPhysicsUpdatesPerFrame {5};
@@ -28,11 +34,11 @@ namespace Krys
   {
     List<string> CommandLineArgs {};
     ApplicationSettings Settings {};
+    Unique<Log::ILogger> Logger {};
+    Unique<EventManager> Events {};
     Unique<Platform::IWindow> Window {};
     Unique<Platform::IInput> Input {};
-    Unique<EventManager> Events {};
     Unique<Gfx::IContext> GraphicsContext {};
-    Unique<Log::ILogger> Logger {};
   };
 
   /// @brief Base class for a Krystal application.
@@ -78,32 +84,53 @@ namespace Krys
     /// @param argc Command line argument count.
     /// @param argv Command line arguments.
     /// @param settings Application settings.
-    template <DerivedFrom<Application> TApplication>
-    static Unique<Application> Create(int argc, char **argv, const ApplicationSettings &settings) noexcept
+    template <DerivedFrom<Application> TApplication, typename... Args>
+    static Expected<Unique<TApplication>> Create(int argc, char **argv, const ApplicationSettings &settings,
+                                                 Args &&...args) noexcept
     {
-      Platform::Initialise();
-
       Unique<ApplicationContext> context = CreateUnique<ApplicationContext>();
 
+      context->Settings = settings;
       context->CommandLineArgs.resize(argc);
       std::transform(argv, argv + argc, context->CommandLineArgs.begin(),
                      [](const char *arg) -> string { return arg; });
 
-      context->Settings = settings;
-      context->Events = CreateUnique<EventManager>();
-      context->Input = Platform::CreateInput(context->Events.get());
-      context->Window =
-        Platform::CreateWindow(settings.WindowSettings, context->Input.get(), context->Events.get());
+      Platform::Initialise();
 
-      context->GraphicsContext = Gfx::CreateContext(context->Window->GetNativeHandle());
-      context->GraphicsContext->Initialise();
+      try
+      {
+        auto logger = Log::CreateLogger(context->Settings.GlobalLoggerSettings);
+        if (!logger.has_value())
+          return Unexpected("Failed to create logger: " + logger.error());
+        context->Logger = std::move(logger.value());
+        Log::SetGlobalLogger(context->Logger);
 
-      context->Logger = Log::CreateLogger(settings.WindowSettings.Title);
-      context->Logger->AddConsoleSink();
-      context->Logger->AddFileSink("logs/log.txt");
-      Log::SetGlobalLogger(context->Logger);
+        context->Events = CreateUnique<EventManager>();
+        if (!context->Events)
+          return Unexpected("Failed to create event manager");
 
-      return CreateUnique<TApplication>(std::move(context));
+        auto input = Platform::CreateInput(context->Events.get());
+        if (!input.has_value())
+          return Unexpected("Failed to create input manager: " + input.error());
+        context->Input = std::move(input.value());
+
+        auto window = Platform::CreateWindow(context->Settings.WindowSettings, context->Input.get(),
+                                             context->Events.get());
+        if (!window.has_value())
+          return Unexpected("Failed to create window: " + window.error());
+        context->Window = std::move(window.value());
+
+        auto gfxContext = Gfx::CreateContext(context->Window->GetNativeHandle());
+        if (!gfxContext.has_value())
+          return Unexpected("Failed to create graphics context: " + gfxContext.error());
+        context->GraphicsContext = std::move(gfxContext.value());
+      }
+      catch (const std::exception &e)
+      {
+        return Unexpected("Exception during application creation: " + string(e.what()));
+      }
+
+      return CreateUnique<TApplication>(std::move(context), std::forward<Args>(args)...);
     }
 
   private:

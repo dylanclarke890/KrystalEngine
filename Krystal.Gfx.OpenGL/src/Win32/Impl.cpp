@@ -4,6 +4,8 @@
   #include <windows.h>
 #endif
 
+#include <stdexcept>
+
 namespace Krys::Gfx::OpenGL
 {
   bool InitialiseWGLHooks(HDC deviceContext) noexcept;
@@ -15,7 +17,7 @@ namespace Krys::Gfx::OpenGL
 namespace
 {
   /// @brief Creates a dummy window and context to initialize WGL extensions.
-  static void InitialiseExtensions(const HMODULE instance) noexcept
+  static void InitialiseExtensions(const HMODULE instance)
   {
     WNDCLASSA _class {};
     _class.lpfnWndProc = ::DefWindowProcA;
@@ -25,15 +27,18 @@ namespace
 
     {
       auto result = ::RegisterClassA(&_class);
-      assert(result);
+      if (!result && ::GetLastError() != ERROR_CLASS_ALREADY_EXISTS)
+        throw std::runtime_error("Failed to register WGL extension loader class.");
     }
 
     HWND handle = ::CreateWindowA(_class.lpszClassName, "Fake Window", WS_CLIPSIBLINGS | WS_CLIPCHILDREN, 0,
                                   0, 1, 1, NULL, NULL, instance, NULL);
-    assert(handle);
+    if (!handle)
+      throw std::runtime_error("Failed to create dummy window for WGL extension loading.");
 
     HDC deviceContext = ::GetDC(handle);
-    assert(deviceContext);
+    if (!deviceContext)
+      throw std::runtime_error("Failed to get device context for dummy window.");
 
     {
       // specify an arbitrary PFD with OpenGL capabilities
@@ -48,43 +53,54 @@ namespace
       pixelFormatDesc.cStencilBits = 8;
 
       int pixelFormat = ::ChoosePixelFormat(deviceContext, &pixelFormatDesc);
-      assert(pixelFormat != 0);
+      if (pixelFormat == 0)
+        throw std::runtime_error("Failed to choose pixel format for dummy window.");
 
       auto result = ::SetPixelFormat(deviceContext, pixelFormat, &pixelFormatDesc);
-      assert(result);
+      if (!result)
+        throw std::runtime_error("Failed to set pixel format for dummy window.");
     }
 
     HGLRC context = ::wglCreateContext(deviceContext);
+    if (!context)
+      throw std::runtime_error("Failed to create OpenGL context for dummy window.");
 
     {
-      assert(context);
       auto result = ::wglMakeCurrent(deviceContext, context);
-      assert(result);
+      if (!result)
+        throw std::runtime_error("Failed to make OpenGL context current for dummy window.");
     }
 
     {
       auto result = Krys::Gfx::OpenGL::InitialiseWGLHooks(deviceContext);
-      assert(result);
+      if (!result)
+        throw std::runtime_error("Failed to initialize WGL hooks.");
 
       result = Krys::Gfx::OpenGL::InitialiseGLHooks();
-      assert(result);
+      if (!result)
+        throw std::runtime_error("Failed to initialize OpenGL hooks.");
     }
 
     {
       auto result = ::wglMakeCurrent(NULL, NULL);
-      assert(result);
+      if (!result)
+        throw std::runtime_error("Failed to release OpenGL context for dummy window.");
 
       result = ::wglDeleteContext(context);
-      assert(result);
+      if (!result)
+        throw std::runtime_error("Failed to delete OpenGL context for dummy window.");
 
       result = ::ReleaseDC(handle, deviceContext);
-      assert(result);
+      if (!result)
+        throw std::runtime_error("Failed to release device context for dummy window.");
 
       result = ::DestroyWindow(handle);
-      assert(result);
+      if (!result)
+        throw std::runtime_error("Failed to destroy dummy window.");
 
       result = ::UnregisterClassA(_class.lpszClassName, instance);
-      assert(result);
+      if (!result && ::GetLastError() != ERROR_CLASS_DOES_NOT_EXIST)
+        throw std::runtime_error("Failed to unregister WGL extension loader class.");
     }
   }
 }
@@ -97,21 +113,24 @@ namespace
 
 namespace Krys::Gfx
 {
-  void OpenGLContext::Impl::Initialise() noexcept
+  OpenGLContext::Impl::Impl(NativeHandle nativeHandle)
+      : _handle(nativeHandle.As<HWND>()), _deviceContext(nullptr), _renderingContext(nullptr)
   {
     const auto instance = ::GetModuleHandleA(NULL);
-    assert(instance);
+    if (!instance)
+      throw std::runtime_error("Failed to get module handle for OpenGL context creation.");
 
     InitialiseExtensions(instance);
 
     _deviceContext = ::GetDC(_handle);
-    assert(_deviceContext);
+    if (!_deviceContext)
+      throw std::runtime_error("Failed to get device context for OpenGL context creation.");
 
     SetupPixelFormat();
     SetupContext();
   }
 
-  void OpenGLContext::Impl::SetupPixelFormat() const noexcept
+  void OpenGLContext::Impl::SetupPixelFormat() const
   {
     using namespace Krys::Gfx::OpenGL;
 
@@ -121,19 +140,23 @@ namespace Krys::Gfx
       UINT numFormats = 0;
       auto result =
         wglChoosePixelFormatARB(_deviceContext, attributes.data(), NULL, 1, &pixelFormat, &numFormats);
-      assert(result && numFormats > 0 && pixelFormat != 0);
+
+      if (!result || numFormats == 0 || pixelFormat == 0)
+        throw std::runtime_error("Failed to choose pixel format for OpenGL context creation.");
     }
 
     PIXELFORMATDESCRIPTOR pixelFormatDesc {};
     {
       auto result =
         ::DescribePixelFormat(_deviceContext, pixelFormat, sizeof(PIXELFORMATDESCRIPTOR), &pixelFormatDesc);
-      assert(result);
+      if (!result)
+        throw std::runtime_error("Failed to describe pixel format for OpenGL context creation.");
     }
 
     {
       auto result = ::SetPixelFormat(_deviceContext, pixelFormat, &pixelFormatDesc);
-      assert(result);
+      if (!result)
+        throw std::runtime_error("Failed to set pixel format for OpenGL context creation.");
     }
   }
 
@@ -202,16 +225,16 @@ namespace Krys::Gfx
     return attributes;
   }
 
-  void OpenGLContext::Impl::SetupContext() noexcept
+  void OpenGLContext::Impl::SetupContext()
   {
     auto attributes = GetContextAttributes();
     _renderingContext = wglCreateContextAttribsARB(_deviceContext, 0, attributes.data());
-    assert(_renderingContext);
+    if (!_renderingContext)
+      throw std::runtime_error("Failed to create OpenGL rendering context.");
 
-    {
-      auto result = wglMakeCurrent(_deviceContext, _renderingContext);
-      assert(result);
-    }
+    auto result = wglMakeCurrent(_deviceContext, _renderingContext);
+    if (!result)
+      throw std::runtime_error("Failed to make OpenGL rendering context current.");
   }
 
   List<int> OpenGLContext::Impl::GetContextAttributes() const noexcept

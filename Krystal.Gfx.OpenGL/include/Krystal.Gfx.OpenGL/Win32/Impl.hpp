@@ -20,20 +20,15 @@ namespace Krys::Gfx
     HGLRC _renderingContext;
 
   public:
-    explicit Impl(NativeHandle nativeHandle) noexcept
-        : _handle(nativeHandle.As<HWND>()), _deviceContext(nullptr), _renderingContext(nullptr)
-    {
-    }
-
-    void Initialise() noexcept;
+    explicit Impl(NativeHandle nativeHandle);
 
     void Present() const noexcept;
 
   private:
-    void SetupPixelFormat() const noexcept;
+    void SetupPixelFormat() const;
     List<int> GetPixelFormatAttributes() const noexcept;
 
-    void SetupContext() noexcept;
+    void SetupContext();
     List<int> GetContextAttributes() const noexcept;
   };
 }

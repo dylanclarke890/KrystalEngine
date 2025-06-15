@@ -18,7 +18,8 @@ namespace Krys::Platform
 
     NO_COPY_MOVE(Win32Input)
   public:
-    Win32Input(Ptr<EventManager> eventManager) noexcept;
+    Win32Input(Ptr<EventManager> eventManager);
+
     ~Win32Input() noexcept override = default;
 
     void BeginFrame() noexcept override;

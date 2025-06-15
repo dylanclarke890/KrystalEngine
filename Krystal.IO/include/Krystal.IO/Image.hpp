@@ -33,5 +33,5 @@ namespace Krys::IO
   /// @brief Reads an image from a stream.
   /// @param stream Stream to read from.
   /// @return Image read from the stream.
-  NO_DISCARD Result<Image> LoadImage(IStreamReader &stream, const ImageLoadSettings &settings = {}) noexcept;
+  NO_DISCARD Expected<Image> LoadImage(IStreamReader &stream, const ImageLoadSettings &settings = {}) noexcept;
 }

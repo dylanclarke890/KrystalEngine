@@ -35,27 +35,33 @@ namespace Krys::Log
 
   class SpdlogLogger : public ILogger
   {
-    Level _level = Level::Trace;
+    LoggerSettings _settings;
     logger _logger;
 
   public:
     NO_COPY_MOVE(SpdlogLogger)
 
-    SpdlogLogger(const string &name) noexcept : ILogger(), _logger(name)
+    SpdlogLogger(const LoggerSettings &settings) : _settings(settings), _logger(settings.Name)
     {
+      if (_settings.OutputToConsole)
+        AddConsoleSink();
+
+      if (!_settings.FilePath.empty())
+        AddFileSink(_settings.FilePath);
+
       _logger.set_pattern("[%H:%M:%S.%e] [%l] %v", pattern_time_type::local);
-      _logger.set_level(spdlog::level::trace);
+      _logger.set_level(ToSpdLogLevel(_settings.Level));
     }
 
     void SetLevel(Level level) noexcept override
     {
       _logger.set_level(ToSpdLogLevel(level));
-      _level = level;
+      _settings.Level = level;
     }
 
     NO_DISCARD Level GetLevel() const noexcept
     {
-      return _level;
+      return _settings.Level;
     }
 
     void Flush() noexcept
@@ -63,14 +69,14 @@ namespace Krys::Log
       _logger.flush();
     }
 
-    void AddConsoleSink() noexcept override
+    void AddConsoleSink() noexcept
     {
       auto consoleSink = std::make_shared<spdlog::sinks::stdout_color_sink_mt>();
       consoleSink->set_pattern("[%H:%M:%S] [%^%l%$] %v");
       _logger.sinks().push_back(consoleSink);
     }
 
-    void AddFileSink(const string &path) noexcept override
+    void AddFileSink(const string &path) noexcept
     {
       auto fileSink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path, true);
       fileSink->set_pattern("[%H:%M:%S] [%^%l%$] %v");
@@ -80,7 +86,7 @@ namespace Krys::Log
   protected:
     void LogImpl(Level level, const string &message) noexcept override
     {
-      if (level < _level)
+      if (level < _settings.Level)
         return;
 
       // source_loc spdlogLoc(loc.file_name(), loc.line(), loc.function_name());
@@ -88,9 +94,22 @@ namespace Krys::Log
     }
   };
 
-  Unique<ILogger> CreateLogger(const string &name) noexcept
+  Expected<Unique<ILogger>> CreateLogger(const LoggerSettings &settings) noexcept
   {
-    return CreateUnique<SpdlogLogger>(name);
+    if (settings.Name.empty())
+      return Unexpected("Logger name cannot be empty.");
+
+    if (settings.FilePath.empty() && !settings.OutputToConsole)
+      return Unexpected("At least one sink (console or file) must be enabled.");
+
+    try
+    {
+      return Expected<Unique<ILogger>>(CreateUnique<SpdlogLogger>(settings));
+    }
+    catch (const std::exception &e)
+    {
+      return Unexpected(e.what());
+    }
   }
 
   static ILogger *GlobalLogger = nullptr;

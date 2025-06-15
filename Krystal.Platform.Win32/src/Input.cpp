@@ -12,12 +12,19 @@
 
 namespace Krys::Platform
 {
-  Unique<IInput> CreateInput(Ptr<EventManager> eventManager) noexcept
+  Expected<Unique<IInput>> CreateInput(Ptr<EventManager> eventManager) noexcept
   {
-    return Unique<IInput>(new Win32Input(eventManager));
+    try
+    {
+      return Expected<Unique<IInput>>(CreateUnique<Win32Input>(eventManager));
+    }
+    catch (const std::exception &e)
+    {
+      return Unexpected(e.what());
+    }
   }
 
-  Win32Input::Win32Input(Ptr<EventManager> eventManager) noexcept : _eventManager(eventManager)
+  Win32Input::Win32Input(Ptr<EventManager> eventManager) : IInput(), _eventManager(eventManager)
   {
   }
 

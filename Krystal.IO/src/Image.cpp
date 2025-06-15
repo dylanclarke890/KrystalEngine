@@ -31,7 +31,7 @@ namespace
 
 namespace Krys::IO
 {
-  Result<Image> LoadImage(IStreamReader &stream, const ImageLoadSettings &settings) noexcept
+  Expected<Image> LoadImage(IStreamReader &stream, const ImageLoadSettings &settings) noexcept
   {
     stbi_io_callbacks callbacks {};
     callbacks.read = stbi_stream_read;
@@ -49,7 +49,7 @@ namespace Krys::IO
 
     if (imageData == nullptr)
     {
-      return Fail(stbi_failure_reason());
+      return Unexpected(stbi_failure_reason());
     }
 
     image.Width = width;
@@ -63,6 +63,6 @@ namespace Krys::IO
 
     stbi_image_free(imageData);
 
-    return Result<Image>(std::move(image));
+    return Expected<Image>(std::move(image));
   }
 }

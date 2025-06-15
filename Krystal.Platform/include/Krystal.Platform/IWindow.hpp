@@ -8,7 +8,8 @@ namespace Krys::Platform
   struct WindowSettings;
   class IWindow;
 
-  Unique<IWindow> CreateWindow(const WindowSettings &settings, Ptr<IInput> input, Ptr<EventManager> events) noexcept;
+  Expected<Unique<IWindow>> CreateWindow(const WindowSettings &settings, Ptr<IInput> input,
+                                         Ptr<EventManager> events) noexcept;
 
   struct WindowSettings
   {
@@ -27,26 +28,24 @@ namespace Krys::Platform
 
   class IWindow
   {
-  protected:
-    WindowSettings _settings;
-
-    explicit IWindow(const WindowSettings &settings) noexcept : _settings(settings)
-    {
-    }
-
   public:
     NO_COPY_MOVE(IWindow)
 
     virtual ~IWindow() noexcept = default;
 
+    NO_DISCARD virtual NativeHandle GetNativeHandle() const noexcept = 0;
+
+    virtual void ProcessMessages() noexcept = 0;
+
     virtual void SetTitle(const string &title) noexcept = 0;
+
+    NO_DISCARD virtual const string &GetTitle() const noexcept = 0;
 
     virtual void Show() noexcept = 0;
 
     virtual void Hide() noexcept = 0;
 
-    virtual void ProcessMessages() noexcept = 0;
-
-    NO_DISCARD virtual NativeHandle GetNativeHandle() const noexcept = 0;
+  protected:
+    IWindow() noexcept = default;
   };
 }

@@ -118,10 +118,10 @@ namespace Krys
   using Func = std::function<T>;
 
   template <typename T, typename ErrorType = string>
-  using Result = std::expected<T, ErrorType>;
+  using Expected = std::expected<T, ErrorType>;
 
   template <typename T>
-  using Fail = std::unexpected<T>;
+  using Unexpected = std::unexpected<T>;
 
   template <bool predicate, typename T, typename U>
   using ConditionalType = std::conditional_t<predicate, T, U>;

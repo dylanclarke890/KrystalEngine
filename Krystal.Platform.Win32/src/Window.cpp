@@ -2,21 +2,20 @@
 
 #include "Krystal.Core/Core.hpp"
 #include "Krystal.Platform.Win32/Input.hpp"
+#include "Krystal.Platform.Win32/Utils.hpp"
 #include "Krystal.Platform/Events.hpp"
 #include "Krystal.Platform/IInput.hpp"
 #include "Krystal.Platform/IWindow.hpp"
 #include "Krystal.Platform/Platform.hpp"
 
-#ifndef UNICODE
-  #define UNICODE
-#endif
-
 #include <cassert>
 #include <hidusage.h>
+#include <string>
 #include <windows.h>
 
-#include <libloaderapi.h>
-#include <string>
+#ifdef CreateWindow
+  #undef CreateWindow
+#endif
 
 namespace
 {
@@ -44,90 +43,91 @@ namespace
 
 namespace Krys::Platform
 {
-#ifdef CreateWindow
-  #pragma push_macro("CreateWindow")
-  #undef CreateWindow
-#endif
-
-  Unique<IWindow> CreateWindow(const WindowSettings &settings, Ptr<IInput> input,
-                               Ptr<EventManager> events) noexcept
+  Expected<Unique<IWindow>> CreateWindow(const WindowSettings &settings, Ptr<IInput> input,
+                                         Ptr<EventManager> events) noexcept
   {
-    return Unique<IWindow>(new Win32Window(settings, input, events));
+    try
+    {
+      return Expected<Unique<IWindow>>(CreateUnique<Win32Window>(settings, input, events));
+    }
+    catch (const std::exception &e)
+    {
+      return Unexpected(e.what());
+    }
   }
 
-#pragma pop_macro("CreateWindow")
-
-  Win32Window::Win32Window(const WindowSettings &settings, Ptr<IInput> input,
-                           Ptr<EventManager> events) noexcept
-      : IWindow(settings), _windowHandle(nullptr), _input(input), _events(events)
+  Win32Window::Win32Window(const WindowSettings &settings, Ptr<IInput> input, Ptr<EventManager> events)
+      : _handle(nullptr), _input(input), _events(events), _settings(settings)
   {
-    Create();
+    const auto instance = ::GetModuleHandle(NULL);
+    if (!instance)
+      throw std::runtime_error("Failed to get module handle: " + Win32::GetLastErrorAsString());
+
+    CreateWindowClass(instance);
+    CreateWindowHandle(instance);
+    RegisterRawInput();
   }
 
   Win32Window::~Win32Window() noexcept
   {
   }
 
-  void Win32Window::Create() noexcept
+  NativeHandle Win32Window::GetNativeHandle() const noexcept
   {
-    const auto instance = ::GetModuleHandle(NULL);
+    return NativeHandle {_handle};
+  }
 
-    WNDCLASS windowClass = {};
-    windowClass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-    windowClass.hInstance = instance;
-    windowClass.lpfnWndProc = &WindowProc;
-    windowClass.hbrBackground = NULL;
-    windowClass.hCursor = ::LoadCursor(instance, IDC_ARROW);
-    windowClass.cbWndExtra = sizeof(Win32Window *);
-    windowClass.lpszClassName = L"KrystalWindowClass";
+  void Win32Window::CreateWindowClass(HMODULE instance)
+  {
+    _class = {};
+    _class.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+    _class.hInstance = instance;
+    _class.lpfnWndProc = &WindowProc;
+    _class.lpszMenuName = NULL;
+    _class.hbrBackground = NULL;
+    _class.hCursor = ::LoadCursor(instance, IDC_ARROW);
+    _class.cbWndExtra = sizeof(Win32Window *);
+    _class.lpszClassName = L"KrystalWindowClass";
 
-    {
-      auto result = ::RegisterClass(&windowClass);
-      assert(result);
-    }
+    auto result = ::RegisterClass(&_class);
+    if (!result && ::GetLastError() != ERROR_CLASS_ALREADY_EXISTS)
+      throw std::runtime_error("Failed to register window class: " + Win32::GetLastErrorAsString());
+  }
 
+  void Win32Window::CreateWindowHandle(HMODULE instance)
+  {
     RECT dimensions = {0, 0, (LONG)_settings.Width, (LONG)_settings.Height};
     int styles = WS_OVERLAPPEDWINDOW | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_VISIBLE;
-
-    {
-      auto result = ::AdjustWindowRect(&dimensions, styles, 0);
-      assert(result);
-    }
+    auto result = ::AdjustWindowRect(&dimensions, styles, 0);
+    if (!result)
+      throw std::runtime_error("Failed to adjust window rect: " + Win32::GetLastErrorAsString());
 
     int width = dimensions.right - dimensions.left;
     int height = dimensions.bottom - dimensions.top;
-
-    _windowHandle =
-      ::CreateWindowEx(0, windowClass.lpszClassName, ToWideString(_settings.Title).c_str(), styles,
-                       CW_USEDEFAULT, CW_USEDEFAULT, width, height, 0, 0, instance, this);
-    assert(_windowHandle != nullptr);
-
-    {
-      auto result = ::UpdateWindow(_windowHandle);
-      assert(result);
-    }
-
-    RegisterRawInput();
+    _handle = ::CreateWindowEx(0, _class.lpszClassName, ToWideString(_settings.Title).c_str(), styles,
+                               CW_USEDEFAULT, CW_USEDEFAULT, width, height, 0, 0, instance, this);
+    if (!_handle)
+      throw std::runtime_error("Failed to create window: " + Win32::GetLastErrorAsString());
   }
 
-  void Win32Window::RegisterRawInput() const noexcept
+  void Win32Window::RegisterRawInput() const
   {
     // TODO: account for dpi?
-
     RAWINPUTDEVICE rid {};
     rid.usUsagePage = HID_USAGE_PAGE_GENERIC;
     rid.usUsage = HID_USAGE_GENERIC_MOUSE;
     rid.dwFlags = RIDEV_INPUTSINK;
-    rid.hwndTarget = _windowHandle;
+    rid.hwndTarget = _handle;
 
     auto result = ::RegisterRawInputDevices(&rid, 1, sizeof(rid));
-    assert(result);
+    if (!result)
+      throw std::runtime_error("Failed to register raw input device: " + Win32::GetLastErrorAsString());
   }
 
   void Win32Window::ProcessMessages() noexcept
   {
     MSG message {};
-    while (::PeekMessage(&message, _windowHandle, 0, 0, PM_REMOVE) != 0)
+    while (::PeekMessage(&message, _handle, 0, 0, PM_REMOVE) != 0)
     {
       ::TranslateMessage(&message);
       ::DispatchMessage(&message);
@@ -167,25 +167,28 @@ namespace Krys::Platform
 
   void Win32Window::SetTitle(const string &title) noexcept
   {
-    _settings.Title = title;
-    auto result = ::SetWindowText(_windowHandle, ToWideString(title).c_str());
+    auto result = ::SetWindowText(_handle, ToWideString(title).c_str());
     assert(result);
+    if (result)
+    {
+      _settings.Title = title;
+    }
+  }
+
+  const string &Win32Window::GetTitle() const noexcept
+  {
+    return _settings.Title;
   }
 
   void Win32Window::Show() noexcept
   {
-    auto result = ::ShowWindow(_windowHandle, SW_SHOW);
+    auto result = ::ShowWindow(_handle, SW_SHOW);
     assert(result);
   }
 
   void Win32Window::Hide() noexcept
   {
-    auto result = ::ShowWindow(_windowHandle, SW_HIDE);
+    auto result = ::ShowWindow(_handle, SW_HIDE);
     assert(result);
-  }
-
-  NativeHandle Win32Window::GetNativeHandle() const noexcept
-  {
-    return NativeHandle {_windowHandle};
   }
 }

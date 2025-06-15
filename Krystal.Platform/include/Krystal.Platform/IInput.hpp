@@ -11,7 +11,7 @@ namespace Krys::Platform
 {
   class IInput;
 
-  Unique<IInput> CreateInput(Ptr<EventManager> eventManager) noexcept;
+  Expected<Unique<IInput>> CreateInput(Ptr<EventManager> eventManager) noexcept;
 
   class IInput
   {

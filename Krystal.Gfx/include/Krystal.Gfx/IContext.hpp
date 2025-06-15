@@ -6,7 +6,7 @@ namespace Krys::Gfx
 {
   class IContext;
 
-  Unique<IContext> CreateContext(NativeHandle windowHandle) noexcept;
+  Expected<Unique<IContext>> CreateContext(NativeHandle windowHandle) noexcept;
 
   class IContext
   {
@@ -17,8 +17,6 @@ namespace Krys::Gfx
 
   public:
     virtual ~IContext() noexcept = default;
-
-    virtual void Initialise() noexcept = 0;
 
     virtual void Present() noexcept = 0;
   };
