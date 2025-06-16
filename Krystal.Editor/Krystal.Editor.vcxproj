@@ -92,7 +92,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>winmm.lib;opengl32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies);</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;$(CoreLibraryDependencies);%(AdditionalDependencies);</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -119,7 +119,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>winmm.lib;opengl32.lib;$(CoreLibraryDependencies);%(AdditionalDependencies);</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;$(CoreLibraryDependencies);%(AdditionalDependencies);</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -142,6 +142,9 @@
     </ProjectReference>
     <ProjectReference Include="..\Krystal.Engine\Krystal.Engine.vcxproj">
       <Project>{1169be54-100b-4d6a-830f-50b29301e1cc}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Krystal.Gfx.D3D11\Krystal.Gfx.D3D11.vcxproj">
+      <Project>{d5ade052-3508-465b-9916-9ebf45ca1f03}</Project>
     </ProjectReference>
     <ProjectReference Include="..\Krystal.Gfx.OpenGL\Krystal.Gfx.OpenGL.vcxproj">
       <Project>{70dcee10-579e-44e3-b6a9-8fa5505f42d4}</Project>

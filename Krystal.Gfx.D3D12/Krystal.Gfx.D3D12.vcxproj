@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -18,11 +18,26 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Krystal.Gfx.D3D12\Context.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.D3D12\Hooks\d3d12.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Krystal.Core\Krystal.Core.vcxproj">
+      <Project>{a37816bb-d90c-49da-b724-b81362317bfa}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Krystal.Gfx\Krystal.Gfx.vcxproj">
+      <Project>{f0f40133-75a2-4345-893f-f7e69e477155}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Context.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{a37816bb-d90c-49da-b724-b81362317bfa}</ProjectGuid>
-    <RootNamespace>KrystalCore</RootNamespace>
+    <ProjectGuid>{64fa60f7-b2ee-4cf7-a722-c5b713169e8d}</ProjectGuid>
+    <RootNamespace>KrystalGfxD3D12</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -33,7 +48,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -46,7 +61,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -74,20 +89,18 @@
     <Import Project="..\KrystalEngine.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <AllProjectIncludesArePublic>false</AllProjectIncludesArePublic>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <AllProjectIncludesArePublic>false</AllProjectIncludesArePublic>
-  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>
+      </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -97,22 +110,29 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>
+      </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>
+      </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -122,43 +142,17 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>
+      </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClInclude Include="include\Krystal.Core\BitUtils.hpp" />
-    <ClInclude Include="include\Krystal.Core\ByteUtils.hpp" />
-    <ClInclude Include="include\Krystal.Core\Core.hpp" />
-    <ClInclude Include="include\Krystal.Core\DebugBreak.hpp" />
-    <ClInclude Include="include\Krystal.Core\Detection.hpp" />
-    <ClInclude Include="include\Krystal.Core\Endian.hpp" />
-    <ClInclude Include="include\Krystal.Core\Events\Event.hpp" />
-    <ClInclude Include="include\Krystal.Core\Events\EventManager.hpp" />
-    <ClInclude Include="include\Krystal.Core\Flags.hpp" />
-    <ClInclude Include="include\Krystal.Core\HashUtils.hpp" />
-    <ClInclude Include="include\Krystal.Core\Lazy.hpp" />
-    <ClInclude Include="include\Krystal.Core\Locks\LockVerifier.hpp" />
-    <ClInclude Include="include\Krystal.Core\Locks\ReadersWriterLock.hpp" />
-    <ClInclude Include="include\Krystal.Core\Locks\ReentrantLock.hpp" />
-    <ClInclude Include="include\Krystal.Core\Locks\ScopedLock.hpp" />
-    <ClInclude Include="include\Krystal.Core\Locks\SpinLock.hpp" />
-    <ClInclude Include="include\Krystal.Core\RangeUtils.hpp" />
-    <ClInclude Include="include\Krystal.Core\StringId.hpp" />
-    <ClInclude Include="include\Krystal.Core\StringUtils.hpp" />
-    <ClInclude Include="include\Krystal.Core\Version.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\Events\EventManager.cpp" />
-    <ClCompile Include="src\Locks\LockVerifier.cpp" />
-    <ClCompile Include="src\Locks\ReadersWriterLock.cpp" />
-    <ClCompile Include="src\Locks\ReentrantLock.cpp" />
-    <ClCompile Include="src\Locks\SpinLock.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

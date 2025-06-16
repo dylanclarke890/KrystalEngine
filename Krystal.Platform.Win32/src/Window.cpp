@@ -150,14 +150,14 @@ namespace Krys::Platform
       case WM_CLOSE:
       {
         _events->Enqueue(CreateUnique<QuitEvent>(NativeHandle {handle}));
-        return TRUE;
+        return 0;
       }
       default:
       {
         auto handled =
           static_cast<Win32Input *>(_input)->HandleWindowMessage(message, wParam, lParam, handle);
         if (handled)
-          return TRUE;
+          return 0;
         break;
       }
     }

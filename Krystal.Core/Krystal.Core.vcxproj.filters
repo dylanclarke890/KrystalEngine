@@ -42,9 +42,6 @@
     <ClInclude Include="include\Krystal.Core\ByteUtils.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Core\IndexedRange.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Core\Locks\LockVerifier.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

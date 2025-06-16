@@ -14,43 +14,31 @@
 
 namespace
 {
-  float vertices[] = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
+  static float vertices[] = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
 
-  unsigned int VAO;
-  unsigned int VBO;
+  static unsigned int VAO;
+  static unsigned int VBO;
 
   static unsigned int vertexShader;
   static unsigned int fragmentShader;
   static unsigned int shaderProgram;
 
-  const char *vertexShaderSource = "#version 330 core\n"
-                                   "layout (location = 0) in vec3 aPos;\n"
-                                   "void main()\n"
-                                   "{\n"
-                                   "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-                                   "}\0";
-  const char *fragmentShaderSource = "#version 330 core\n"
-                                     "out vec4 FragColor;\n"
-                                     "void main()\n"
-                                     "{\n"
-                                     "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-                                     "}\n\0";
+  static const char *vertexShaderSource = "#version 330 core\n"
+                                          "layout (location = 0) in vec3 aPos;\n"
+                                          "void main()\n"
+                                          "{\n"
+                                          "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+                                          "}\0";
+  static const char *fragmentShaderSource = "#version 330 core\n"
+                                            "out vec4 FragColor;\n"
+                                            "void main()\n"
+                                            "{\n"
+                                            "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+                                            "}\n\0";
 }
 
-namespace Krys::Gfx
+namespace Krys::Gfx::OpenGL
 {
-  Expected<Unique<IContext>> CreateContext(NativeHandle windowHandle) noexcept
-  {
-    try
-    {
-      return Expected<Unique<IContext>>(CreateUnique<OpenGLContext>(windowHandle));
-    }
-    catch (const std::exception &e)
-    {
-      return Unexpected(e.what());
-    }
-  }
-
   OpenGLContext::OpenGLContext(NativeHandle windowHandle)
       : _windowHandle(windowHandle), _platformImpl(CreateUnique<GLContextPlatformImpl>(windowHandle))
   {
@@ -99,5 +87,20 @@ namespace Krys::Gfx
   void OpenGLContext::Present() noexcept
   {
     _platformImpl->Present();
+  }
+}
+
+namespace Krys::Gfx
+{
+  Expected<Unique<IContext>> CreateContext(NativeHandle windowHandle) noexcept
+  {
+    try
+    {
+      return Expected<Unique<IContext>>(CreateUnique<OpenGL::OpenGLContext>(windowHandle));
+    }
+    catch (const std::exception &e)
+    {
+      return Unexpected(e.what());
+    }
   }
 }

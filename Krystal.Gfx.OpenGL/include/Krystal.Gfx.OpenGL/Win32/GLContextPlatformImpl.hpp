@@ -9,7 +9,9 @@
   #include <windows.h>
 #endif
 
-namespace Krys::Gfx
+#pragma comment(lib, "opengl32.lib")
+
+namespace Krys::Gfx::OpenGL
 {
   class OpenGLContext::GLContextPlatformImpl
   {

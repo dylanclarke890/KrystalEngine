@@ -3,7 +3,7 @@
 #include "Krystal.Core/Core.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 
-namespace Krys::Gfx
+namespace Krys::Gfx::OpenGL
 {
   class OpenGLContext final : public IContext
   {

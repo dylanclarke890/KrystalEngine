@@ -8,6 +8,13 @@ namespace Krys::Gfx
 
   Expected<Unique<IContext>> CreateContext(NativeHandle windowHandle) noexcept;
 
+  enum class API
+  {
+    None = 0,
+    OpenGL = 1,
+    D3D11 = 2,
+  };
+
   class IContext
   {
     NO_COPY_MOVE(IContext)

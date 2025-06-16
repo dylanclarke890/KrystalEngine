@@ -37,6 +37,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Krystal.Engine", "Krystal.E
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Krystal.Editor", "Krystal.Editor\Krystal.Editor.vcxproj", "{5C647086-B412-41D0-B961-F94A0C07A263}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Krystal.Gfx.D3D11", "Krystal.Gfx.D3D11\Krystal.Gfx.D3D11.vcxproj", "{D5ADE052-3508-465B-9916-9EBF45CA1F03}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -173,6 +175,14 @@ Global
 		{5C647086-B412-41D0-B961-F94A0C07A263}.Release|x64.Build.0 = Release|x64
 		{5C647086-B412-41D0-B961-F94A0C07A263}.Release|x86.ActiveCfg = Release|Win32
 		{5C647086-B412-41D0-B961-F94A0C07A263}.Release|x86.Build.0 = Release|Win32
+		{D5ADE052-3508-465B-9916-9EBF45CA1F03}.Debug|x64.ActiveCfg = Debug|x64
+		{D5ADE052-3508-465B-9916-9EBF45CA1F03}.Debug|x64.Build.0 = Debug|x64
+		{D5ADE052-3508-465B-9916-9EBF45CA1F03}.Debug|x86.ActiveCfg = Debug|Win32
+		{D5ADE052-3508-465B-9916-9EBF45CA1F03}.Debug|x86.Build.0 = Debug|Win32
+		{D5ADE052-3508-465B-9916-9EBF45CA1F03}.Release|x64.ActiveCfg = Release|x64
+		{D5ADE052-3508-465B-9916-9EBF45CA1F03}.Release|x64.Build.0 = Release|x64
+		{D5ADE052-3508-465B-9916-9EBF45CA1F03}.Release|x86.ActiveCfg = Release|Win32
+		{D5ADE052-3508-465B-9916-9EBF45CA1F03}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

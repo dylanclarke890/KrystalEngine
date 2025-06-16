@@ -111,7 +111,7 @@ namespace
 #include "Krystal.Gfx.OpenGL/Hooks/wgl.hpp"
 #include "Krystal.Gfx.OpenGL/Win32/GLContextPlatformImpl.hpp"
 
-namespace Krys::Gfx
+namespace Krys::Gfx::OpenGL
 {
   OpenGLContext::GLContextPlatformImpl::GLContextPlatformImpl(NativeHandle nativeHandle)
       : _handle(nativeHandle.As<HWND>()), _deviceContext(nullptr), _renderingContext(nullptr)
