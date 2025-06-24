@@ -420,11 +420,34 @@ namespace Krys::Platform
         }
         case WM_SIZE:
         {
-          if (_callbacks.OnResize)
+          static bool isMinimised = false;
+          switch (wParam)
           {
-            const auto width = LOWORD(lParam);
-            const auto height = HIWORD(lParam);
-            _callbacks.OnResize(handle, width, height);
+            case SIZE_MINIMIZED:
+              isMinimised = true;
+              if (_callbacks.OnMinimise)
+              {
+                _callbacks.OnMinimise(handle);
+              }
+              break;
+            case SIZE_MAXIMIZED:
+            case SIZE_RESTORED:
+              if (isMinimised)
+              {
+                isMinimised = false;
+                if (_callbacks.OnRestore)
+                {
+                  _callbacks.OnRestore(handle);
+                }
+              }
+
+              if (_callbacks.OnResize)
+              {
+                const auto width = LOWORD(lParam);
+                const auto height = HIWORD(lParam);
+                _callbacks.OnResize(handle, width, height);
+              }
+              break;
           }
           break;
         }

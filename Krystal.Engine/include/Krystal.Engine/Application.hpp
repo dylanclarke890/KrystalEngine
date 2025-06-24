@@ -71,7 +71,7 @@ namespace Krys
     NO_COPY_MOVE(Application)
 
   protected:
-    bool _running;
+    bool _running, _isWindowMinimised;
     Unique<ApplicationContext> _context;
 
   public:
@@ -106,7 +106,7 @@ namespace Krys
   private:
     void CreateServices(int argc, char **argv, const ApplicationSettings &settings);
 
-    Platform::WindowCallbacks CreateWindowCallbacks() const noexcept;
+    Platform::WindowCallbacks CreateWindowCallbacks() noexcept;
 
     /// @brief CPU friendly way to cap the frame rate.
     void ClampFramerate(double &elapsedMs, const double startTime);

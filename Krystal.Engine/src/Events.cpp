@@ -158,4 +158,30 @@ namespace Krys::Engine
   }
 
 #pragma endregion
+
+#pragma region WindowMinimiseEvent
+
+  WindowMinimiseEvent::WindowMinimiseEvent(Platform::WindowHandle window) noexcept : Event(), _window(window)
+  {
+  }
+
+  Platform::WindowHandle WindowMinimiseEvent::GetWindowHandle() const noexcept
+  {
+    return _window;
+  }
+
+#pragma endregion
+
+#pragma region WindowRestoreEvent
+
+  WindowRestoreEvent::WindowRestoreEvent(Platform::WindowHandle window) noexcept : Event(), _window(window)
+  {
+  }
+
+  Platform::WindowHandle WindowRestoreEvent::GetWindowHandle() const noexcept
+  {
+    return _window;
+  }
+
+#pragma endregion
 }

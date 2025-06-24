@@ -164,4 +164,32 @@ namespace Krys::Engine
     Platform::WindowHandle _window;
     uint32 _width, _height;
   };
+
+  class WindowMinimiseEvent : public Event
+  {
+  public:
+    KRYS_EVENT_CLASS_TYPE("window-minimise-event")
+
+    /// @brief Constructs a `WindowMinimiseEvent`.
+    WindowMinimiseEvent(Platform::WindowHandle window) noexcept;
+
+    NO_DISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
+
+  private:
+    Platform::WindowHandle _window;
+  };
+
+  class WindowRestoreEvent : public Event
+  {
+  public:
+    KRYS_EVENT_CLASS_TYPE("window-restore-event")
+
+    /// @brief Constructs a `WindowRestoreEvent`.
+    WindowRestoreEvent(Platform::WindowHandle window) noexcept;
+
+    NO_DISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
+
+  private:
+    Platform::WindowHandle _window;
+  };
 }

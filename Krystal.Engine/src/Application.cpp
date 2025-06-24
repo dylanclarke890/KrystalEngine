@@ -11,7 +11,7 @@
 namespace Krys
 {
   Application::Application(int argc, char **argv, const ApplicationSettings &settings)
-      : _context(CreateUnique<ApplicationContext>()), _running(false)
+      : _context(CreateUnique<ApplicationContext>()), _running(false), _isWindowMinimised(false)
   {
     Platform::Initialise();
     CreateServices(argc, argv, settings);
@@ -63,7 +63,10 @@ namespace Krys
         // Per-frame update and render.
         {
           OnUpdate(elapsedMs / 1'000.0);
-          OnRender();
+          if (!_isWindowMinimised)
+          {
+            OnRender();
+          }
         }
 
         _context->GraphicsContext->Present();
@@ -125,7 +128,7 @@ namespace Krys
     _context->GraphicsContext = std::move(gfxContext.value());
   }
 
-  Platform::WindowCallbacks Application::CreateWindowCallbacks() const noexcept
+  Platform::WindowCallbacks Application::CreateWindowCallbacks() noexcept
   {
     using namespace Platform;
     using namespace Engine;
@@ -152,6 +155,18 @@ namespace Krys
       {
         _context->Events->Enqueue(CreateUnique<WindowResizeEvent>(window, width, height));
         _context->GraphicsContext->Resize(width, height);
+      },
+      .OnMinimise =
+        [&](WindowHandle window) noexcept
+      {
+        _context->Events->Enqueue(CreateUnique<WindowMinimiseEvent>(window));
+        _isWindowMinimised = true;
+      },
+      .OnRestore =
+        [&](WindowHandle window) noexcept
+      {
+        _context->Events->Enqueue(CreateUnique<WindowRestoreEvent>(window));
+        _isWindowMinimised = false;
       },
     };
   }
