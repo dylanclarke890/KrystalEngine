@@ -9,12 +9,6 @@
 #define NOMINMAX
 #include <windows.h>
 
-#include <profileapi.h>
-#include <stringapiset.h>
-#include <synchapi.h>
-#include <timeapi.h>
-#include <WinNls.h>
-
 namespace Krys::Platform
 {
   int64 StartTicks = 0;
@@ -36,6 +30,18 @@ namespace Krys::Platform
       auto result = ::QueryPerformanceCounter(&start);
       assert(result);
       StartTicks = start.QuadPart;
+    }
+  }
+
+  void Shutdown() noexcept
+  {
+    // Reset timer precision to default
+    TIMECAPS timeCaps {};
+    auto result = ::timeGetDevCaps(&timeCaps, sizeof(timeCaps));
+    assert(result != TIMERR_NOCANDO);
+    if (timeCaps.wPeriodMin > 0)
+    {
+      ::timeEndPeriod(timeCaps.wPeriodMin);
     }
   }
 

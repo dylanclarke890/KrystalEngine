@@ -1,0 +1,22 @@
+#include "Krystal.Engine/Keyboard.hpp"
+
+#include "Krystal.Core/Core.hpp"
+#include "Krystal.Platform/Keys.hpp"
+
+namespace Krys::Engine
+{
+  NO_DISCARD bool Keyboard::IsKeyPressed(Key key) const noexcept
+  {
+    return _pressed.contains(key);
+  }
+
+  NO_DISCARD bool Keyboard::IsKeyHeld(Key key) const noexcept
+  {
+    return _held.contains(key);
+  }
+
+  NO_DISCARD bool Keyboard::WasKeyReleased(Key key) const noexcept
+  {
+    return _released.contains(key);
+  }
+}

@@ -92,7 +92,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>winmm.lib;$(CoreLibraryDependencies);%(AdditionalDependencies);</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;$(CoreLibraryDependencies);vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.4.313.2\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -119,7 +120,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>winmm.lib;$(CoreLibraryDependencies);%(AdditionalDependencies);</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;$(CoreLibraryDependencies);vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.4.313.2\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -143,11 +145,8 @@
     <ProjectReference Include="..\Krystal.Engine\Krystal.Engine.vcxproj">
       <Project>{1169be54-100b-4d6a-830f-50b29301e1cc}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\Krystal.Gfx.D3D11\Krystal.Gfx.D3D11.vcxproj">
-      <Project>{d5ade052-3508-465b-9916-9ebf45ca1f03}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Krystal.Gfx.OpenGL\Krystal.Gfx.OpenGL.vcxproj">
-      <Project>{70dcee10-579e-44e3-b6a9-8fa5505f42d4}</Project>
+    <ProjectReference Include="..\Krystal.Gfx.Vulkan\Krystal.Gfx.Vulkan.vcxproj">
+      <Project>{86954901-acca-4400-b4f6-3c9a260be337}</Project>
     </ProjectReference>
     <ProjectReference Include="..\Krystal.Gfx\Krystal.Gfx.vcxproj">
       <Project>{f0f40133-75a2-4345-893f-f7e69e477155}</Project>
@@ -167,6 +166,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.Editor\Editor.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\shaders\triangle.frag" />
+    <None Include="data\shaders\triangle.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

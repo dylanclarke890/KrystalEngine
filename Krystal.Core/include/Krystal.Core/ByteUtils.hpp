@@ -43,7 +43,7 @@ namespace Krys
       elements.resize(elementCount);
 
       for (size_t i = 0; i < elementCount; i++)
-        elements[i] = AsNumeric<T, TSource, TDestination>(&bytes[i * sizeof(T)]);
+        elements[i] = AsNumeric<T, Src, Dst>(&bytes[i * sizeof(T)]);
 
       return elements;
     }

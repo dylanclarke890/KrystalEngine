@@ -5,136 +5,6 @@
 #include <cassert>
 #include <format>
 
-namespace Krys::Platform
-{
-  /// @brief The state of a key during an interaction.
-  enum class KeyState : uint8
-  {
-    Pressed,
-    Held,
-    Released
-  };
-
-  /// @brief Supported keyboard keys.
-  enum class Key : uint32
-  {
-    UNKNOWN,
-    NUM_0,
-    NUM_1,
-    NUM_2,
-    NUM_3,
-    NUM_4,
-    NUM_5,
-    NUM_6,
-    NUM_7,
-    NUM_8,
-    NUM_9,
-    A,
-    B,
-    C,
-    D,
-    E,
-    F,
-    G,
-    H,
-    I,
-    J,
-    K,
-    L,
-    M,
-    N,
-    O,
-    P,
-    Q,
-    R,
-    S,
-    T,
-    U,
-    V,
-    W,
-    X,
-    Y,
-    Z,
-    EQUAL,
-    MINUS,
-    RIGHT_BRACKET,
-    LEFT_BRACKET,
-    QUOTE,
-    SEMI_COLON,
-    BACKSLASH,
-    COMMA,
-    SLASH,
-    PERIOD,
-    GRAVE,
-    KEYPAD_DECIMAL,
-    KEYPAD_MULTIPLY,
-    KEYPAD_PLUS,
-    KEYPAD_CLEAR,
-    KEYPAD_DIVIDE,
-    KEYPAD_ENTER,
-    KEYPAD_MINUS,
-    KEYPAD_EQUALS,
-    KEYPAD_0,
-    KEYPAD_1,
-    KEYPAD_2,
-    KEYPAD_3,
-    KEYPAD_4,
-    KEYPAD_5,
-    KEYPAD_6,
-    KEYPAD_7,
-    KEYPAD_8,
-    KEYPAD_9,
-    RETURN,
-    TAB,
-    SPACE,
-    DEL,
-    ESCAPE,
-    COMMAND,
-    SHIFT,
-    CAPS_LOCK,
-    OPTION,
-    CONTROL,
-    RIGHT_SHIFT,
-    RIGHT_OPTION,
-    RIGHT_CONTROL,
-    FUNCTION,
-    VOLUME_UP,
-    VOLUME_DOWN,
-    MUTE,
-    F1,
-    F2,
-    F3,
-    F4,
-    F5,
-    F6,
-    F7,
-    F8,
-    F9,
-    F10,
-    F11,
-    F12,
-    F13,
-    F14,
-    F15,
-    F16,
-    F17,
-    F18,
-    F19,
-    F20,
-    HELP,
-    HOME,
-    FORWARD_DELETE,
-    END,
-    PAGE_UP,
-    PAGE_DOWN,
-    LEFT_ARROW,
-    RIGHT_ARROW,
-    DOWN_ARROW,
-    UP_ARROW,
-    ENTER
-  };
-}
-
 #pragma region Helper Macros
 
 #define FOR_EACH_KEY_STATE(func)                                                                             \
@@ -144,16 +14,16 @@ namespace Krys::Platform
 
 #define FOR_EACH_KEY(func)                                                                                   \
   func(UNKNOWN);                                                                                             \
-  func(NUM_0);                                                                                               \
-  func(NUM_1);                                                                                               \
-  func(NUM_2);                                                                                               \
-  func(NUM_3);                                                                                               \
-  func(NUM_4);                                                                                               \
-  func(NUM_5);                                                                                               \
-  func(NUM_6);                                                                                               \
-  func(NUM_7);                                                                                               \
-  func(NUM_8);                                                                                               \
-  func(NUM_9);                                                                                               \
+  func(Num0);                                                                                                \
+  func(Num1);                                                                                                \
+  func(Num2);                                                                                                \
+  func(Num3);                                                                                                \
+  func(Num4);                                                                                                \
+  func(Num5);                                                                                                \
+  func(Num6);                                                                                                \
+  func(Num7);                                                                                                \
+  func(Num8);                                                                                                \
+  func(Num9);                                                                                                \
   func(A);                                                                                                   \
   func(B);                                                                                                   \
   func(C);                                                                                                   \
@@ -180,52 +50,52 @@ namespace Krys::Platform
   func(X);                                                                                                   \
   func(Y);                                                                                                   \
   func(Z);                                                                                                   \
-  func(EQUAL);                                                                                               \
-  func(MINUS);                                                                                               \
-  func(RIGHT_BRACKET);                                                                                       \
-  func(LEFT_BRACKET);                                                                                        \
-  func(QUOTE);                                                                                               \
-  func(SEMI_COLON);                                                                                          \
-  func(BACKSLASH);                                                                                           \
-  func(COMMA);                                                                                               \
-  func(SLASH);                                                                                               \
-  func(PERIOD);                                                                                              \
-  func(GRAVE);                                                                                               \
-  func(KEYPAD_DECIMAL);                                                                                      \
-  func(KEYPAD_MULTIPLY);                                                                                     \
-  func(KEYPAD_PLUS);                                                                                         \
-  func(KEYPAD_CLEAR);                                                                                        \
-  func(KEYPAD_DIVIDE);                                                                                       \
-  func(KEYPAD_ENTER);                                                                                        \
-  func(KEYPAD_MINUS);                                                                                        \
-  func(KEYPAD_EQUALS);                                                                                       \
-  func(KEYPAD_0);                                                                                            \
-  func(KEYPAD_1);                                                                                            \
-  func(KEYPAD_2);                                                                                            \
-  func(KEYPAD_3);                                                                                            \
-  func(KEYPAD_4);                                                                                            \
-  func(KEYPAD_5);                                                                                            \
-  func(KEYPAD_6);                                                                                            \
-  func(KEYPAD_7);                                                                                            \
-  func(KEYPAD_8);                                                                                            \
-  func(KEYPAD_9);                                                                                            \
-  func(RETURN);                                                                                              \
-  func(TAB);                                                                                                 \
-  func(SPACE);                                                                                               \
-  func(DEL);                                                                                                 \
-  func(ESCAPE);                                                                                              \
-  func(COMMAND);                                                                                             \
-  func(SHIFT);                                                                                               \
-  func(CAPS_LOCK);                                                                                           \
-  func(OPTION);                                                                                              \
-  func(CONTROL);                                                                                             \
-  func(RIGHT_SHIFT);                                                                                         \
-  func(RIGHT_OPTION);                                                                                        \
-  func(RIGHT_CONTROL);                                                                                       \
-  func(FUNCTION);                                                                                            \
-  func(VOLUME_UP);                                                                                           \
-  func(VOLUME_DOWN);                                                                                         \
-  func(MUTE);                                                                                                \
+  func(Equal);                                                                                               \
+  func(Minus);                                                                                               \
+  func(RightBracket);                                                                                        \
+  func(LeftBracket);                                                                                         \
+  func(Quote);                                                                                               \
+  func(SemiColon);                                                                                           \
+  func(Backslash);                                                                                           \
+  func(Comma);                                                                                               \
+  func(Slash);                                                                                               \
+  func(Period);                                                                                              \
+  func(Grave);                                                                                               \
+  func(KeypadDecimal);                                                                                       \
+  func(KeypadMultiply);                                                                                      \
+  func(KeypadPlus);                                                                                          \
+  func(KeypadClear);                                                                                         \
+  func(KeypadDivide);                                                                                        \
+  func(KeypadEnter);                                                                                         \
+  func(KeypadMinus);                                                                                         \
+  func(KeypadEquals);                                                                                        \
+  func(Keypad0);                                                                                             \
+  func(Keypad1);                                                                                             \
+  func(Keypad2);                                                                                             \
+  func(Keypad3);                                                                                             \
+  func(Keypad4);                                                                                             \
+  func(Keypad5);                                                                                             \
+  func(Keypad6);                                                                                             \
+  func(Keypad7);                                                                                             \
+  func(Keypad8);                                                                                             \
+  func(Keypad9);                                                                                             \
+  func(Return);                                                                                              \
+  func(Tab);                                                                                                 \
+  func(Space);                                                                                               \
+  func(Del);                                                                                                 \
+  func(Escape);                                                                                              \
+  func(Command);                                                                                             \
+  func(Shift);                                                                                               \
+  func(CapsLock);                                                                                            \
+  func(Option);                                                                                              \
+  func(Control);                                                                                             \
+  func(RightShift);                                                                                          \
+  func(RightOption);                                                                                         \
+  func(RightControl);                                                                                        \
+  func(Function);                                                                                            \
+  func(VolumeUp);                                                                                            \
+  func(VolumeDown);                                                                                          \
+  func(Mute);                                                                                                \
   func(F1);                                                                                                  \
   func(F2);                                                                                                  \
   func(F3);                                                                                                  \
@@ -246,19 +116,149 @@ namespace Krys::Platform
   func(F18);                                                                                                 \
   func(F19);                                                                                                 \
   func(F20);                                                                                                 \
-  func(HELP);                                                                                                \
-  func(HOME);                                                                                                \
-  func(FORWARD_DELETE);                                                                                      \
-  func(END);                                                                                                 \
-  func(PAGE_UP);                                                                                             \
-  func(PAGE_DOWN);                                                                                           \
-  func(LEFT_ARROW);                                                                                          \
-  func(RIGHT_ARROW);                                                                                         \
-  func(DOWN_ARROW);                                                                                          \
-  func(UP_ARROW);                                                                                            \
-  func(ENTER)
+  func(Help);                                                                                                \
+  func(Home);                                                                                                \
+  func(ForwardDelete);                                                                                       \
+  func(End);                                                                                                 \
+  func(PageUp);                                                                                              \
+  func(PageDown);                                                                                            \
+  func(LeftArrow);                                                                                           \
+  func(RightArrow);                                                                                          \
+  func(DownArrow);                                                                                           \
+  func(UpArrow);                                                                                             \
+  func(Enter)
 
 #pragma endregion
+
+namespace Krys::Platform
+{
+  /// @brief The state of a key during an interaction.
+  enum class KeyState : uint8
+  {
+    Pressed,
+    Held,
+    Released
+  };
+
+  /// @brief Supported keyboard keys.
+  enum class Key : uint32
+  {
+    UNKNOWN,
+    Num0,
+    Num1,
+    Num2,
+    Num3,
+    Num4,
+    Num5,
+    Num6,
+    Num7,
+    Num8,
+    Num9,
+    A,
+    B,
+    C,
+    D,
+    E,
+    F,
+    G,
+    H,
+    I,
+    J,
+    K,
+    L,
+    M,
+    N,
+    O,
+    P,
+    Q,
+    R,
+    S,
+    T,
+    U,
+    V,
+    W,
+    X,
+    Y,
+    Z,
+    Equal,
+    Minus,
+    RightBracket,
+    LeftBracket,
+    Quote,
+    SemiColon,
+    Backslash,
+    Comma,
+    Slash,
+    Period,
+    Grave,
+    KeypadDecimal,
+    KeypadMultiply,
+    KeypadPlus,
+    KeypadClear,
+    KeypadDivide,
+    KeypadEnter,
+    KeypadMinus,
+    KeypadEquals,
+    Keypad0,
+    Keypad1,
+    Keypad2,
+    Keypad3,
+    Keypad4,
+    Keypad5,
+    Keypad6,
+    Keypad7,
+    Keypad8,
+    Keypad9,
+    Return,
+    Tab,
+    Space,
+    Del,
+    Escape,
+    Command,
+    Shift,
+    CapsLock,
+    Option,
+    Control,
+    RightShift,
+    RightOption,
+    RightControl,
+    Function,
+    VolumeUp,
+    VolumeDown,
+    Mute,
+    F1,
+    F2,
+    F3,
+    F4,
+    F5,
+    F6,
+    F7,
+    F8,
+    F9,
+    F10,
+    F11,
+    F12,
+    F13,
+    F14,
+    F15,
+    F16,
+    F17,
+    F18,
+    F19,
+    F20,
+    Help,
+    Home,
+    ForwardDelete,
+    End,
+    PageUp,
+    PageDown,
+    LeftArrow,
+    RightArrow,
+    DownArrow,
+    UpArrow,
+    Enter
+  };
+}
 
 template <>
 struct std::formatter<Krys::Platform::Key>

@@ -28,20 +28,10 @@ namespace Krys::Log
 
   struct LoggerSettings
   {
-    string Name;
-    bool OutputToConsole;
-    string FilePath;
-    Level Level;
-
-    static constexpr LoggerSettings Default()
-    {
-      LoggerSettings settings {};
-      settings.Name = "Default";
-      settings.OutputToConsole = true;
-      settings.FilePath = "logs/log.txt";
-      settings.Level = Level::Info;
-      return settings;
-    }
+    string Name {"Default"};
+    bool OutputToConsole {true};
+    string FilePath {"logs/log.txt"};
+    Level Level {Level::Info};
   };
 
   class ILogger

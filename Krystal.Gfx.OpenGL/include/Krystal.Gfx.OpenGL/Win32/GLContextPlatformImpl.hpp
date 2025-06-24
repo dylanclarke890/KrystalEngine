@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Krystal.Core/Core.hpp"
-#include "Krystal.Gfx.OpenGL/Context.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/wgl.hpp"
+#include "Krystal.Gfx.OpenGL/OpenGLContext.hpp"
 
 #ifndef WIN32_LEAN_AND_MEAN
   #define WIN32_LEAN_AND_MEAN

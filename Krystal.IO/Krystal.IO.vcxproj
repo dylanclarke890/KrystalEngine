@@ -28,7 +28,7 @@
     <ClCompile Include="src\Image.cpp" />
     <ClCompile Include="src\Path.cpp" />
     <ClCompile Include="src\Backends\NativeFileBackend.cpp" />
-    <ClCompile Include="src\Streams\NativeStream.cpp" />
+    <ClCompile Include="src\Streams\NativeFileStream.cpp" />
     <ClCompile Include="src\VirtualFileSystem.cpp" />
     <ClCompile Include="stb\stb.cpp" />
   </ItemGroup>
@@ -36,9 +36,10 @@
     <ClInclude Include="include\Krystal.IO\Backends\NativeFileBackend.hpp" />
     <ClInclude Include="include\Krystal.IO\Image.hpp" />
     <ClInclude Include="include\Krystal.IO\Streams\MemoryStream.hpp" />
-    <ClInclude Include="include\Krystal.IO\Streams\NativeStream.hpp" />
+    <ClInclude Include="include\Krystal.IO\Streams\NativeFileStream.hpp" />
     <ClInclude Include="include\Krystal.IO\Common.hpp" />
     <ClInclude Include="include\Krystal.IO\IStream.hpp" />
+    <ClInclude Include="include\Krystal.IO\Streams\StreamUtils.hpp" />
     <ClInclude Include="include\Krystal.IO\VirtualFileSystem.hpp" />
     <ClInclude Include="include\Krystal.IO\Path.hpp" />
     <ClInclude Include="stb\stb_image.h" />

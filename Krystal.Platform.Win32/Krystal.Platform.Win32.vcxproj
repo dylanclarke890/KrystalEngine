@@ -19,15 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.Platform.Win32\Input.hpp" />
     <ClInclude Include="include\Krystal.Platform.Win32\Utils.hpp" />
-    <ClInclude Include="include\Krystal.Platform.Win32\Window.hpp" />
+    <ClInclude Include="include\Krystal.Platform.Win32\Win32Window.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Input.cpp" />
     <ClCompile Include="src\Platform.cpp" />
     <ClCompile Include="src\Utils.cpp" />
-    <ClCompile Include="src\Window.cpp" />
+    <ClCompile Include="src\Win32Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Krystal.Core\Krystal.Core.vcxproj">

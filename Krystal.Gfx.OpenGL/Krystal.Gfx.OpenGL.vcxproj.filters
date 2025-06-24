@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Context.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\OpenGLContext.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Win32\GLContextPlatformImpl.hpp">
@@ -41,7 +41,7 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Context.cpp">
+    <ClCompile Include="src\OpenGLContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Win32\GLContextPlatformImpl.cpp">

@@ -2,8 +2,8 @@
 
 #include "Krystal.Core/Core.hpp"
 #include "Krystal.Engine/Application.hpp"
+#include "Krystal.Engine/Events.hpp"
 #include "Krystal.Log/ILogger.hpp"
-#include "Krystal.Platform/Events.hpp"
 #include "Krystal.Platform/Keys.hpp"
 
 #include <utility>
@@ -13,15 +13,17 @@ namespace Krys
   class Editor : public Application
   {
   public:
-    explicit Editor(Unique<ApplicationContext> context) noexcept : Application(std::move(context))
+    explicit Editor(int argc, char **argv, const ApplicationSettings &settings) noexcept
+        : Application(argc, argv, settings)
     {
-      _context->Logger->SetLevel(Log::Level::Info);
-      _context->Logger->Info("Editor Application Initialized");
     }
 
     void OnInit() noexcept override
     {
-      _context->Events->On<Platform::QuitEvent>(
+      _context->Logger->SetLevel(Log::Level::Info);
+      _context->Logger->Info("Initialising Krystal Editor...");
+
+      _context->Events->On<Engine::CloseEvent>(
         [&](const auto &event)
         {
           Stop();
@@ -29,15 +31,15 @@ namespace Krys
           return true;
         });
 
-      _context->Events->On<Platform::KeyboardEvent>(
+      _context->Events->On<Engine::KeyboardEvent>(
         [&](const auto &event)
         {
-          if (event.GetState() == Platform::KeyState::Pressed)
+          if (event.State() == Platform::KeyState::Pressed)
           {
-            _context->Logger->Info("Key Pressed {}", event.GetKey());
+            _context->Logger->Info("Key Pressed {}", event.Key());
           }
 
-          if (event.GetKey() == Platform::Key::ESCAPE)
+          if (event.Key() == Platform::Key::Escape)
           {
             _context->Logger->Info("Escape key pressed, quitting application...");
             Stop();
@@ -45,6 +47,7 @@ namespace Krys
 
           return true;
         });
+
 
       _context->GraphicsContext->SetupTestTriangle();
     }

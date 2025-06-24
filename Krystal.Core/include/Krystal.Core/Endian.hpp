@@ -83,9 +83,9 @@ namespace Krys
     NO_DISCARD static constexpr T ToSystemEndian(T value) noexcept
     {
       if constexpr (Src == Little)
-        return IsLittleEndian() ? value : SwapEndian(value);
+        return IsSystemLittleEndian() ? value : SwapEndian(value);
       else if constexpr (Src == Big)
-        return IsBigEndian() ? value : SwapEndian(value);
+        return IsSystemBigEndian() ? value : SwapEndian(value);
       else
         return value;
     }

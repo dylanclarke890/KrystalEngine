@@ -10,17 +10,28 @@
 
 namespace Krys
 {
-  Application::Application(Unique<ApplicationContext> context) noexcept
-      : _context(std::move(context)), _running(false)
+  Application::Application(int argc, char **argv, const ApplicationSettings &settings)
+      : _context(CreateUnique<ApplicationContext>()), _running(false)
   {
+    Platform::Initialise();
+    CreateServices(argc, argv, settings);
+    _context->Window->SetCallbacks(CreateWindowCallbacks());
+  }
+
+  Application::~Application() noexcept
+  {
+    _context->Events.reset();
+    _context->Input.reset();
+    _context->Window.reset();
+    _context->GraphicsContext.reset();
+    _context->Logger.reset();
+    _context.reset();
+
+    Platform::Shutdown();
   }
 
   void Application::Run() noexcept
   {
-    assert(_context->Settings.PhysicsFramerate > 0);
-    assert(_context->Settings.RenderFramerate > 0);
-    assert(_context->Settings.MaxPhysicsUpdatesPerFrame > 0);
-
     OnInit();
     {
       _running = true;
@@ -34,7 +45,6 @@ namespace Krys
 
         _context->Input->BeginFrame();
         _context->Window->ProcessMessages();
-        _context->Input->PollDevices();
         _context->Events->DispatchAll();
 
         // Fixed update loop.
@@ -70,13 +80,80 @@ namespace Krys
       }
     }
     OnShutdown();
-
-    // Here we can add any cleanup code that needs to run after the main loop ends.
   }
 
   void Application::Stop() noexcept
   {
     _running = false;
+  }
+
+  void Application::CreateServices(int argc, char **argv, const ApplicationSettings &settings)
+  {
+    assert(settings.PhysicsFramerate > 0);
+    assert(settings.RenderFramerate > 0);
+    assert(settings.MaxPhysicsUpdatesPerFrame > 0);
+
+    _context->Settings = settings;
+    _context->CommandLineArgs.resize(argc);
+    std::transform(argv, argv + argc, _context->CommandLineArgs.begin(),
+                   [](const char *arg) -> string { return arg; });
+
+    auto logger = Log::CreateLogger(_context->Settings.GlobalLoggerSettings);
+    if (!logger.has_value())
+      throw new std::runtime_error("Failed to create logger: " + logger.error());
+    _context->Logger = std::move(logger.value());
+    Log::SetGlobalLogger(_context->Logger);
+
+    _context->Events = CreateUnique<EventManager>();
+    if (!_context->Events)
+      throw new std::runtime_error("Failed to create event manager");
+
+    _context->Input = CreateUnique<Engine::Input>(_context->Events.get());
+    if (!_context->Input)
+      throw new std::runtime_error("Failed to create input manager");
+
+    auto window = Platform::CreateWindow(_context->Settings.WindowSettings);
+    if (!window.has_value())
+      throw new std::runtime_error("Failed to create window: " + window.error());
+    _context->Window = std::move(window.value());
+
+    auto gfxContext =
+      Gfx::CreateContext(_context->Window->GetWindowHandle(), settings.WindowSettings.Size.Width,
+                         settings.WindowSettings.Size.Height);
+    if (!gfxContext.has_value())
+      throw new std::runtime_error("Failed to create graphics context: " + gfxContext.error());
+    _context->GraphicsContext = std::move(gfxContext.value());
+  }
+
+  Platform::WindowCallbacks Application::CreateWindowCallbacks() const noexcept
+  {
+    using namespace Platform;
+    using namespace Engine;
+
+    return {
+      .OnMouseMove =
+        [&](WindowHandle window, float deltaX, float deltaY, float clientX, float clientY) noexcept
+      { _context->Input->OnMouseMoveEvent(window, deltaX, deltaY, clientX, clientY); },
+
+      .OnMouseButton = [&](WindowHandle window, MouseButton button, MouseButtonState state) noexcept
+      { _context->Input->OnMouseButtonEvent(window, button, state); },
+
+      .OnMouseScroll = [&](WindowHandle window, float delta) noexcept
+      { _context->Input->OnMouseScrollEvent(window, delta); },
+
+      .OnKey = [&](WindowHandle window, Key key, KeyState state) noexcept
+      { _context->Input->OnKeyboardEvent(window, key, state); },
+
+      .OnClose = [&](WindowHandle window) noexcept
+      { _context->Events->Enqueue(CreateUnique<CloseEvent>(window)); },
+
+      .OnResize =
+        [&](WindowHandle window, uint32 width, uint32 height) noexcept
+      {
+        _context->Events->Enqueue(CreateUnique<WindowResizeEvent>(window, width, height));
+        _context->GraphicsContext->Resize(width, height);
+      },
+    };
   }
 
   void Application::ClampFramerate(double &elapsedMs, const double startTime)

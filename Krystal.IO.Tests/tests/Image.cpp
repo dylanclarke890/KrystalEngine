@@ -2,7 +2,7 @@
 
 #include "Krystal.IO/Image.hpp"
 #include "Krystal.IO/Path.hpp"
-#include <Krystal.IO/Streams/NativeStream.hpp>
+#include <Krystal.IO/Streams/NativeFileStream.hpp>
 
 #include <catch_all.hpp>
 

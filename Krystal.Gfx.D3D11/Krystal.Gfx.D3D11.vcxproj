@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.Gfx.D3D11\Context.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.D3D11\D3D11Context.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Krystal.Core\Krystal.Core.vcxproj">
@@ -30,7 +30,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="include\Krystal.Gfx.D3D11\Context.cpp" />
+    <ClCompile Include="src\D3D11Context.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

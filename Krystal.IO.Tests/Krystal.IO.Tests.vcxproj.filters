@@ -27,7 +27,7 @@
     <ClCompile Include="tests\VirtualFileSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Streams\NativeStream.cpp">
+    <ClCompile Include="tests\Streams\NativeFileStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tests\Streams\MemoryStream.cpp">

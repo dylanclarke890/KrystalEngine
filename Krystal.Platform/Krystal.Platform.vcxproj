@@ -19,13 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.Platform\Events.hpp" />
-    <ClInclude Include="include\Krystal.Platform\IInput.hpp" />
     <ClInclude Include="include\Krystal.Platform\IWindow.hpp" />
     <ClInclude Include="include\Krystal.Platform\MouseButtons.hpp" />
-    <ClInclude Include="include\Krystal.Platform\Keyboard.hpp" />
     <ClInclude Include="include\Krystal.Platform\Keys.hpp" />
-    <ClInclude Include="include\Krystal.Platform\Mouse.hpp" />
     <ClInclude Include="include\Krystal.Platform\Platform.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -34,10 +30,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Events.cpp" />
-    <ClCompile Include="src\IInput.cpp" />
-    <ClCompile Include="src\Keyboard.cpp" />
-    <ClCompile Include="src\Mouse.cpp" />
+    <ClCompile Include="src\placeholder.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

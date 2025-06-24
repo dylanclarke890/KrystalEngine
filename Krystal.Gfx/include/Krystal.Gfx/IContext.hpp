@@ -6,7 +6,7 @@ namespace Krys::Gfx
 {
   class IContext;
 
-  Expected<Unique<IContext>> CreateContext(NativeHandle windowHandle) noexcept;
+  Expected<Unique<IContext>> CreateContext(NativeHandle windowHandle, uint32 width, uint32 height) noexcept;
 
   enum class API
   {
@@ -30,5 +30,7 @@ namespace Krys::Gfx
     virtual void DrawTestTriangle() noexcept = 0;
 
     virtual void Present() noexcept = 0;
+
+    virtual void Resize(uint32 width, uint32 height) noexcept = 0;
   };
 }

@@ -27,7 +27,7 @@
     <ClCompile Include="src\Backends\NativeFileBackend.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Streams\NativeStream.cpp">
+    <ClCompile Include="src\Streams\NativeFileStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Path.cpp">
@@ -56,13 +56,16 @@
     <ClInclude Include="include\Krystal.IO\IStream.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.IO\Streams\NativeStream.hpp">
+    <ClInclude Include="include\Krystal.IO\Streams\NativeFileStream.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.IO\Streams\MemoryStream.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.IO\Image.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.IO\Streams\StreamUtils.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

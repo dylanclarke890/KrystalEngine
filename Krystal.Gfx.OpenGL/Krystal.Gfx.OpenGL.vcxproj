@@ -27,7 +27,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Context.cpp" />
+    <ClCompile Include="src\OpenGLContext.cpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Hooks\gl.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Hooks\wgl.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Official\glcorearb.h" />
@@ -40,7 +40,7 @@
     <ClCompile Include="src\Win32\GLContextPlatformImpl.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Context.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\OpenGLContext.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

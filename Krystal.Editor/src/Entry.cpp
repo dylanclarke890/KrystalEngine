@@ -18,10 +18,10 @@ int main(int argc, char **argv)
   settings.WindowSettings = {};
   settings.WindowSettings.Title = "Krystal Editor";
   settings.WindowSettings.VSync = false;
-  settings.WindowSettings.Width = 1'920;
-  settings.WindowSettings.Height = 1'080;
+  settings.WindowSettings.Size = {1'280, 720};
+  settings.WindowSettings.SizeBounds = {.Resizable = true, .Min = {500, 500}, .Max = {1'520, 1'080}};
 
-  auto result = Application::Create<Editor>(argc, argv, settings);
+  auto result = CreateApplication<Editor>(argc, argv, settings);
   if (!result.has_value())
   {
 #ifdef KRYS_PLATFORM_WINDOWS

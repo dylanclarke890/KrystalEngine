@@ -9,6 +9,9 @@ namespace Krys::Platform
   /// @brief Initialises platform-specific functionality.
   void Initialise() noexcept;
 
+  /// @brief Shuts down platform-specific functionality.
+  void Shutdown() noexcept;
+
   /// @brief Gets the time in seconds since the application started.
   NO_DISCARD double GetTime() noexcept;
 
@@ -19,7 +22,7 @@ namespace Krys::Platform
   /// @param min The requested precision. nullopt can be passed to request the lowest possible
   /// precision.
   /// @returns The actual timer precision set, in milliseconds.
-  uint SetTimerPrecision(Nullable<uint> min = ::std::nullopt) noexcept;
+  uint SetTimerPrecision(Nullable<uint> min = std::nullopt) noexcept;
 
   /// @brief Sleep for the specified number of milliseconds.
   void Sleep(uint32 milliseconds) noexcept;

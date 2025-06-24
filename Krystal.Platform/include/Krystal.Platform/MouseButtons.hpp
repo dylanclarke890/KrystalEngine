@@ -16,11 +16,11 @@ namespace Krys::Platform
   enum class MouseButton : uint16
   {
     None = 0,
-    LEFT = 1,
-    RIGHT = 2,
-    MIDDLE = 4,
-    THUMB_1 = 8,
-    THUMB_2 = 16,
+    Left = 1,
+    Right = 2,
+    Middle = 4,
+    Thumb1 = 8,
+    Thumb2 = 16,
     UNKNOWN = 32
   };
 
