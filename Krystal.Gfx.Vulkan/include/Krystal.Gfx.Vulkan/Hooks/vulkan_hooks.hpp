@@ -94,7 +94,9 @@ namespace Krys::Gfx::Vulkan
   KRYS_DECLARE_VK_FUNC_PTR(vkCmdSetViewport)
   KRYS_DECLARE_VK_FUNC_PTR(vkCmdSetScissor)
   KRYS_DECLARE_VK_FUNC_PTR(vkCmdBindPipeline)
+  KRYS_DECLARE_VK_FUNC_PTR(vkCmdCopyBuffer)
   KRYS_DECLARE_VK_FUNC_PTR(vkCmdDraw)
+  KRYS_DECLARE_VK_FUNC_PTR(vkCmdDrawIndexed)
 
   KRYS_DECLARE_VK_FUNC_PTR(vkCreateFramebuffer)
   KRYS_DECLARE_VK_FUNC_PTR(vkDestroyFramebuffer)
@@ -130,6 +132,28 @@ namespace Krys::Gfx::Vulkan
 
   KRYS_DECLARE_VK_FUNC_PTR(vkCreateImageView)
   KRYS_DECLARE_VK_FUNC_PTR(vkDestroyImageView)
+
+  KRYS_DECLARE_VK_FUNC_PTR(vkCreateBuffer)
+  KRYS_DECLARE_VK_FUNC_PTR(vkDestroyBuffer)
+  KRYS_DECLARE_VK_FUNC_PTR(vkCmdBindVertexBuffers)
+  KRYS_DECLARE_VK_FUNC_PTR(vkCmdBindIndexBuffer)
+  KRYS_DECLARE_VK_FUNC_PTR(vkGetBufferMemoryRequirements)
+  KRYS_DECLARE_VK_FUNC_PTR(vkBindBufferMemory)
+
+  KRYS_DECLARE_VK_FUNC_PTR(vkAllocateMemory)
+  KRYS_DECLARE_VK_FUNC_PTR(vkFreeMemory)
+  KRYS_DECLARE_VK_FUNC_PTR(vkMapMemory)
+  KRYS_DECLARE_VK_FUNC_PTR(vkUnmapMemory)
+
+  KRYS_DECLARE_VK_FUNC_PTR(vkCreateDescriptorSetLayout)
+  KRYS_DECLARE_VK_FUNC_PTR(vkDestroyDescriptorSetLayout)
+  KRYS_DECLARE_VK_FUNC_PTR(vkCreateDescriptorPool)
+  KRYS_DECLARE_VK_FUNC_PTR(vkDestroyDescriptorPool)
+  KRYS_DECLARE_VK_FUNC_PTR(vkResetDescriptorPool)
+  KRYS_DECLARE_VK_FUNC_PTR(vkAllocateDescriptorSets)
+  KRYS_DECLARE_VK_FUNC_PTR(vkFreeDescriptorSets)
+  KRYS_DECLARE_VK_FUNC_PTR(vkUpdateDescriptorSets)
+  KRYS_DECLARE_VK_FUNC_PTR(vkCmdBindDescriptorSets)
 
 #undef KRYS_DECLARE_VK_FUNC_PTR
 }

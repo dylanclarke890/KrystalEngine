@@ -102,7 +102,9 @@ namespace Krys::Gfx::Vulkan::Hooks
     LOAD_VK_FUNC_PTR(vkCmdSetViewport)
     LOAD_VK_FUNC_PTR(vkCmdSetScissor)
     LOAD_VK_FUNC_PTR(vkCmdBindPipeline)
+    LOAD_VK_FUNC_PTR(vkCmdCopyBuffer)
     LOAD_VK_FUNC_PTR(vkCmdDraw)
+    LOAD_VK_FUNC_PTR(vkCmdDrawIndexed)
 
     LOAD_VK_FUNC_PTR(vkCreateFramebuffer)
     LOAD_VK_FUNC_PTR(vkDestroyFramebuffer)
@@ -138,6 +140,28 @@ namespace Krys::Gfx::Vulkan::Hooks
 
     LOAD_VK_FUNC_PTR(vkCreateImageView)
     LOAD_VK_FUNC_PTR(vkDestroyImageView)
+
+    LOAD_VK_FUNC_PTR(vkCreateBuffer)
+    LOAD_VK_FUNC_PTR(vkDestroyBuffer)
+    LOAD_VK_FUNC_PTR(vkGetBufferMemoryRequirements)
+    LOAD_VK_FUNC_PTR(vkBindBufferMemory)
+    LOAD_VK_FUNC_PTR(vkCmdBindVertexBuffers)
+    LOAD_VK_FUNC_PTR(vkCmdBindIndexBuffer)
+
+    LOAD_VK_FUNC_PTR(vkAllocateMemory)
+    LOAD_VK_FUNC_PTR(vkFreeMemory)
+    LOAD_VK_FUNC_PTR(vkMapMemory)
+    LOAD_VK_FUNC_PTR(vkUnmapMemory)
+
+    LOAD_VK_FUNC_PTR(vkCreateDescriptorSetLayout)
+    LOAD_VK_FUNC_PTR(vkDestroyDescriptorSetLayout)
+    LOAD_VK_FUNC_PTR(vkCreateDescriptorPool)
+    LOAD_VK_FUNC_PTR(vkDestroyDescriptorPool)
+    LOAD_VK_FUNC_PTR(vkResetDescriptorPool)
+    LOAD_VK_FUNC_PTR(vkAllocateDescriptorSets)
+    LOAD_VK_FUNC_PTR(vkFreeDescriptorSets)
+    LOAD_VK_FUNC_PTR(vkUpdateDescriptorSets)
+    LOAD_VK_FUNC_PTR(vkCmdBindDescriptorSets)
 
 #undef LOAD_VK_FUNC_PTR
 

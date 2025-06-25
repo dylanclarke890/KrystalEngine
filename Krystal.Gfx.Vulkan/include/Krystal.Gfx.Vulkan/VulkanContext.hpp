@@ -33,6 +33,7 @@ namespace Krys::Gfx::Vulkan
 
     VkDevice _device = VK_NULL_HANDLE;
     VkQueue _presentQueue = VK_NULL_HANDLE;
+    VkQueue _graphicsQueue = VK_NULL_HANDLE;
 
     VkSwapchainKHR _swapchain = VK_NULL_HANDLE;
     List<VkImage> _swapchainImages {};
@@ -42,8 +43,20 @@ namespace Krys::Gfx::Vulkan
     List<VkFramebuffer> _swapchainFramebuffers {};
 
     VkRenderPass _renderPass = VK_NULL_HANDLE;
+    VkDescriptorSetLayout _descriptorSetLayout = VK_NULL_HANDLE;
     VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
     VkPipeline _pipeline = VK_NULL_HANDLE;
+    VkBuffer _vertexBuffer = VK_NULL_HANDLE;
+    VkBuffer _indexBuffer = VK_NULL_HANDLE;
+    VkDeviceMemory _vertexBufferMemory = VK_NULL_HANDLE;
+    VkDeviceMemory _indexBufferMemory = VK_NULL_HANDLE;
+
+    List<VkBuffer> _uniformBuffers;
+    List<VkDeviceMemory> _uniformBuffersMemory;
+    List<void *> _uniformBuffersMapped;
+
+    VkDescriptorPool _descriptorPool = VK_NULL_HANDLE;
+    List<VkDescriptorSet> _descriptorSets;
 
     VkCommandPool _commandPool = VK_NULL_HANDLE;
     List<VkCommandBuffer> _commandBuffers {};
@@ -95,11 +108,23 @@ namespace Krys::Gfx::Vulkan
     void CleanupSwapchain();
 
     void CreateRenderPass() noexcept;
+    void CreateDescriptorSetLayout();
     void CreateGraphicsPipeline();
     void CreateFramebuffers();
     void CreateCommandPool() noexcept;
     void CreateCommandBuffers() noexcept;
     void CreateSyncObjects();
+    void CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties,
+                      VkBuffer &buffer, VkDeviceMemory &bufferMemory) const;
+    void CopyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size) const;
+    void CreateVertexBuffer();
+    void CreateIndexBuffer();
+    void CreateUniformBuffers();
+    void UpdateUniformBuffer(uint32 currentImageIndex) const;
+    uint32 FindMemoryType(uint32 typeFilter, VkMemoryPropertyFlags properties) const;
+
+    void CreateDescriptorPool();
+    void CreateDescriptorSets();
 
     void RecordCommandBuffer(VkCommandBuffer commandBuffer, uint32 imageIndex) const;
   };

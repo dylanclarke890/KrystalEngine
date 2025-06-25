@@ -9,6 +9,12 @@
 
 #include "Krystal.IO/Streams/NativeFileStream.hpp"
 #include "Krystal.IO/Streams/StreamUtils.hpp"
+#include "Krystal.Maths/Clipspace.hpp"
+#include "Krystal.Maths/Convert.hpp"
+#include "Krystal.Maths/Matrix.hpp"
+#include "Krystal.Maths/Transform.hpp"
+#include "Krystal.Maths/Vector.hpp"
+#include <chrono>
 #include <iostream>
 #include <ranges>
 
@@ -35,6 +41,48 @@ namespace
   Krys::List<const char *> DeviceExtensions {VK_KHR_SWAPCHAIN_EXTENSION_NAME};
 
   Krys::List<const char *> ValidationLayers {"VK_LAYER_KHRONOS_validation"};
+
+  struct Vertex
+  {
+    Krys::Maths::Vec2 Position;
+    Krys::Maths::Vec3 Color;
+
+    static VkVertexInputBindingDescription GetBindingDescription()
+    {
+      return VkVertexInputBindingDescription {
+        .binding = 0, .stride = sizeof(Vertex), .inputRate = VK_VERTEX_INPUT_RATE_VERTEX};
+    }
+
+    static Krys::Array<VkVertexInputAttributeDescription, 2> GetAttributeDescriptions()
+    {
+      return Krys::Array<VkVertexInputAttributeDescription, 2> {VkVertexInputAttributeDescription {
+                                                                  .location = 0,
+                                                                  .binding = 0,
+                                                                  .format = VK_FORMAT_R32G32_SFLOAT,
+                                                                  .offset = offsetof(Vertex, Position),
+                                                                },
+                                                                VkVertexInputAttributeDescription {
+                                                                  .location = 1,
+                                                                  .binding = 0,
+                                                                  .format = VK_FORMAT_R32G32B32_SFLOAT,
+                                                                  .offset = offsetof(Vertex, Color),
+                                                                }};
+    }
+  };
+
+  struct UniformBufferObject
+  {
+    alignas(16) Krys::Maths::Mat4 model;
+    alignas(16) Krys::Maths::Mat4 view;
+    alignas(16) Krys::Maths::Mat4 proj;
+  };
+
+  const Krys::List<Vertex> vertices = {{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+                                       {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+                                       {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+                                       {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}};
+
+  const Krys::List<Krys::uint16> indices = {0, 1, 2, 2, 3, 0};
 
 #ifdef KRYS_DEBUG
   bool EnableValidationLayers = false;
@@ -91,14 +139,18 @@ namespace Krys::Gfx::Vulkan
     _surface = CreateSurface(_instance, _windowHandle);
     SelectPhysicalDevice();
     CreateDevice();
-
     CreateSwapchain();
     CreateSwapchainImageViews();
-
     CreateRenderPass();
+    CreateDescriptorSetLayout();
     CreateGraphicsPipeline();
     CreateFramebuffers();
     CreateCommandPool();
+    CreateVertexBuffer();
+    CreateIndexBuffer();
+    CreateUniformBuffers();
+    CreateDescriptorPool();
+    CreateDescriptorSets();
     CreateCommandBuffers();
     CreateSyncObjects();
   }
@@ -115,6 +167,20 @@ namespace Krys::Gfx::Vulkan
     vkDestroyCommandPool(_device, _commandPool, nullptr);
 
     CleanupSwapchain();
+
+    vkDestroyDescriptorPool(_device, _descriptorPool, nullptr);
+    vkDestroyDescriptorSetLayout(_device, _descriptorSetLayout, nullptr);
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    {
+      vkDestroyBuffer(_device, _uniformBuffers[i], nullptr);
+      vkFreeMemory(_device, _uniformBuffersMemory[i], nullptr);
+    }
+
+    vkDestroyBuffer(_device, _vertexBuffer, nullptr);
+    vkFreeMemory(_device, _vertexBufferMemory, nullptr);
+    vkDestroyBuffer(_device, _indexBuffer, nullptr);
+    vkFreeMemory(_device, _indexBufferMemory, nullptr);
 
     vkDestroyPipeline(_device, _pipeline, nullptr);
     vkDestroyPipelineLayout(_device, _pipelineLayout, nullptr);
@@ -429,6 +495,7 @@ namespace Krys::Gfx::Vulkan
       throw std::runtime_error("Failed to initialize Vulkan hooks for device");
     }
 
+    vkGetDeviceQueue(_device, _queueFamilyIndices.GraphicsFamily, 0, &_graphicsQueue);
     vkGetDeviceQueue(_device, _queueFamilyIndices.PresentFamily, 0, &_presentQueue);
   }
 
@@ -643,6 +710,30 @@ namespace Krys::Gfx::Vulkan
     vkCreateRenderPass(_device, &renderPassInfo, nullptr, &_renderPass);
   }
 
+  void VulkanContext::CreateDescriptorSetLayout()
+  {
+    VkDescriptorSetLayoutBinding uboLayoutBinding {
+      .binding = 0,
+      .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+      .descriptorCount = 1,
+      .stageFlags = VK_SHADER_STAGE_VERTEX_BIT,
+      .pImmutableSamplers = nullptr,
+    };
+
+    VkDescriptorSetLayoutCreateInfo layoutInfo {
+      .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO,
+      .pNext = nullptr,
+      .flags = 0,
+      .bindingCount = 1,
+      .pBindings = &uboLayoutBinding,
+    };
+
+    if (vkCreateDescriptorSetLayout(_device, &layoutInfo, nullptr, &_descriptorSetLayout) != VK_SUCCESS)
+    {
+      throw std::runtime_error("Failed to create descriptor set layout");
+    }
+  }
+
   void VulkanContext::CreateGraphicsPipeline()
   {
     auto vertexShaderModule =
@@ -688,14 +779,17 @@ namespace Krys::Gfx::Vulkan
       .pScissors = nullptr,
     };
 
+    auto vertexBindingDescription = Vertex::GetBindingDescription();
+    auto vertexAttributeDescriptions = Vertex::GetAttributeDescriptions();
+
     VkPipelineVertexInputStateCreateInfo vertexInputState {
       .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
       .pNext = nullptr,
       .flags = 0,
-      .vertexBindingDescriptionCount = 0,
-      .pVertexBindingDescriptions = nullptr,
-      .vertexAttributeDescriptionCount = 0,
-      .pVertexAttributeDescriptions = nullptr,
+      .vertexBindingDescriptionCount = 1,
+      .pVertexBindingDescriptions = &vertexBindingDescription,
+      .vertexAttributeDescriptionCount = static_cast<uint32>(vertexAttributeDescriptions.size()),
+      .pVertexAttributeDescriptions = vertexAttributeDescriptions.data(),
     };
 
     VkPipelineInputAssemblyStateCreateInfo inputAssemblyState {
@@ -761,8 +855,8 @@ namespace Krys::Gfx::Vulkan
       .sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
       .pNext = nullptr,
       .flags = 0,
-      .setLayoutCount = 0,
-      .pSetLayouts = nullptr,
+      .setLayoutCount = 1,
+      .pSetLayouts = &_descriptorSetLayout,
       .pushConstantRangeCount = 0,
       .pPushConstantRanges = nullptr,
     };
@@ -925,14 +1019,269 @@ namespace Krys::Gfx::Vulkan
     };
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-    vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+    VkBuffer vertexBuffers[] = {_vertexBuffer};
+    VkDeviceSize offsets[] = {0};
+
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+    vkCmdBindIndexBuffer(commandBuffer, _indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+    vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipelineLayout, 0, 1,
+                            &_descriptorSets[_currentFrame], 0, nullptr);
+
+    vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
 
     vkCmdEndRenderPass(commandBuffer);
-
     if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
     {
       throw std::runtime_error("failed to record command buffer!");
     }
+  }
+
+  void VulkanContext::CreateBuffer(VkDeviceSize size, VkBufferUsageFlags usage,
+                                   VkMemoryPropertyFlags properties, VkBuffer &buffer,
+                                   VkDeviceMemory &bufferMemory) const
+  {
+    VkBufferCreateInfo bufferInfo {
+      .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
+      .pNext = nullptr,
+      .flags = 0,
+      .size = size,
+      .usage = usage,
+      .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
+    };
+
+    if (vkCreateBuffer(_device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
+    {
+      throw std::runtime_error("Failed to create buffer");
+    }
+
+    VkMemoryRequirements memoryRequirements;
+    vkGetBufferMemoryRequirements(_device, buffer, &memoryRequirements);
+
+    VkMemoryAllocateInfo allocInfo {
+      .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+      .pNext = nullptr,
+      .allocationSize = memoryRequirements.size,
+      .memoryTypeIndex = FindMemoryType(memoryRequirements.memoryTypeBits, properties),
+    };
+
+    if (vkAllocateMemory(_device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
+    {
+      throw std::runtime_error("Failed to allocate buffer memory");
+    }
+
+    vkBindBufferMemory(_device, buffer, bufferMemory, 0);
+  }
+
+  void VulkanContext::CopyBuffer(VkBuffer src, VkBuffer dst, VkDeviceSize size) const
+  {
+    VkCommandBufferAllocateInfo allocInfo {
+      .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
+      .pNext = nullptr,
+      .commandPool = _commandPool,
+      .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
+      .commandBufferCount = 1,
+    };
+
+    VkCommandBuffer commandBuffer;
+    vkAllocateCommandBuffers(_device, &allocInfo, &commandBuffer);
+
+    VkCommandBufferBeginInfo beginInfo {
+      .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
+      .pNext = nullptr,
+      .flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT,
+      .pInheritanceInfo = nullptr,
+    };
+    vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+    VkBufferCopy copyRegion {
+      .srcOffset = 0,
+      .dstOffset = 0,
+      .size = size,
+    };
+
+    vkCmdCopyBuffer(commandBuffer, src, dst, 1, &copyRegion);
+
+    if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
+    {
+      throw std::runtime_error("Failed to record command buffer for buffer copy");
+    }
+
+    VkSubmitInfo submitInfo {
+      .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
+      .pNext = nullptr,
+      .waitSemaphoreCount = 0,
+      .pWaitSemaphores = nullptr,
+      .pWaitDstStageMask = nullptr,
+      .commandBufferCount = 1,
+      .pCommandBuffers = &commandBuffer,
+      .signalSemaphoreCount = 0,
+      .pSignalSemaphores = nullptr,
+    };
+
+    if (vkQueueSubmit(_graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS)
+    {
+      throw std::runtime_error("Failed to submit command buffer for buffer copy");
+    }
+
+    vkQueueWaitIdle(_graphicsQueue);
+    vkFreeCommandBuffers(_device, _commandPool, 1, &commandBuffer);
+  }
+
+  void VulkanContext::CreateVertexBuffer()
+  {
+    VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingBufferMemory;
+    CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
+                 stagingBufferMemory);
+
+    void *data;
+    vkMapMemory(_device, stagingBufferMemory, 0, bufferSize, 0, &data);
+    memcpy(data, vertices.data(), (size_t)bufferSize);
+    vkUnmapMemory(_device, stagingBufferMemory);
+
+    CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, _vertexBuffer, _vertexBufferMemory);
+
+    CopyBuffer(stagingBuffer, _vertexBuffer, bufferSize);
+    vkDestroyBuffer(_device, stagingBuffer, nullptr);
+    vkFreeMemory(_device, stagingBufferMemory, nullptr);
+  }
+
+  void VulkanContext::CreateIndexBuffer()
+  {
+    VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+    VkBuffer stagingBuffer;
+    VkDeviceMemory stagingBufferMemory;
+    CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                 VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
+                 stagingBufferMemory);
+    void *data;
+    vkMapMemory(_device, stagingBufferMemory, 0, bufferSize, 0, &data);
+    memcpy(data, indices.data(), (size_t)bufferSize);
+    vkUnmapMemory(_device, stagingBufferMemory);
+    CreateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+                 VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, _indexBuffer, _indexBufferMemory);
+    CopyBuffer(stagingBuffer, _indexBuffer, bufferSize);
+    vkDestroyBuffer(_device, stagingBuffer, nullptr);
+    vkFreeMemory(_device, stagingBufferMemory, nullptr);
+  }
+
+  void VulkanContext::CreateUniformBuffers()
+  {
+    VkDeviceSize bufferSize = sizeof(UniformBufferObject);
+
+    _uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+    _uniformBuffersMemory.resize(MAX_FRAMES_IN_FLIGHT);
+    _uniformBuffersMapped.resize(MAX_FRAMES_IN_FLIGHT);
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    {
+      CreateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                   VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                   _uniformBuffers[i], _uniformBuffersMemory[i]);
+
+      vkMapMemory(_device, _uniformBuffersMemory[i], 0, bufferSize, 0, &_uniformBuffersMapped[i]);
+    }
+  }
+
+  void VulkanContext::UpdateUniformBuffer(uint32 currentImage) const
+  {
+    static auto startTime = std::chrono::high_resolution_clock::now();
+
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+
+    using namespace Krys::Maths;
+
+    UniformBufferObject ubo {
+      .model = Rotate(Identity<Mat4>(), time * Radians(90.0f), Vec3(0.0f, 0.0f, 1.0f)),
+      .view = LookAt(Vec3(2.0f, 2.0f, 2.0f), Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, 1.0f)),
+      .proj =
+        Perspective(Radians(45.0f), _swapchainExtent.width / (float)_swapchainExtent.height, 0.1f, 10.0f)};
+
+    ubo.proj[1][1] *= -1;
+
+    memcpy(_uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
+  }
+
+  void VulkanContext::CreateDescriptorPool()
+  {
+    VkDescriptorPoolSize poolSize {
+      .type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+      .descriptorCount = static_cast<uint32>(MAX_FRAMES_IN_FLIGHT),
+    };
+
+    VkDescriptorPoolCreateInfo poolInfo {
+      .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
+      .pNext = nullptr,
+      .flags = 0,
+      .maxSets = static_cast<uint32>(MAX_FRAMES_IN_FLIGHT),
+      .poolSizeCount = 1,
+      .pPoolSizes = &poolSize,
+    };
+
+    if (vkCreateDescriptorPool(_device, &poolInfo, nullptr, &_descriptorPool) != VK_SUCCESS)
+    {
+      throw std::runtime_error("Failed to create descriptor pool");
+    }
+  }
+
+  void VulkanContext::CreateDescriptorSets()
+  {
+    List<VkDescriptorSetLayout> layouts(MAX_FRAMES_IN_FLIGHT, _descriptorSetLayout);
+    VkDescriptorSetAllocateInfo allocInfo {
+      .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
+      .pNext = nullptr,
+      .descriptorPool = _descriptorPool,
+      .descriptorSetCount = static_cast<uint32>(MAX_FRAMES_IN_FLIGHT),
+      .pSetLayouts = layouts.data(),
+    };
+
+    _descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
+    if (vkAllocateDescriptorSets(_device, &allocInfo, _descriptorSets.data()) != VK_SUCCESS)
+    {
+      throw std::runtime_error("Failed to allocate descriptor sets");
+    }
+
+    for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+    {
+      VkDescriptorBufferInfo bufferInfo {
+        .buffer = _uniformBuffers[i],
+        .offset = 0,
+        .range = sizeof(UniformBufferObject),
+      };
+
+      VkWriteDescriptorSet descriptorWrite {
+        .sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET,
+        .pNext = nullptr,
+        .dstSet = _descriptorSets[i],
+        .dstBinding = 0,
+        .dstArrayElement = 0,
+        .descriptorCount = 1,
+        .descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER,
+        .pImageInfo = nullptr,
+        .pBufferInfo = &bufferInfo,
+        .pTexelBufferView = nullptr,
+      };
+      vkUpdateDescriptorSets(_device, 1, &descriptorWrite, 0, nullptr);
+    }
+  }
+
+  uint32 VulkanContext::FindMemoryType(uint32 typeFilter, VkMemoryPropertyFlags properties) const
+  {
+    VkPhysicalDeviceMemoryProperties memProperties;
+    vkGetPhysicalDeviceMemoryProperties(_physicalDevice, &memProperties);
+    for (uint32 i = 0; i < memProperties.memoryTypeCount; i++)
+    {
+      if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties)
+      {
+        return i;
+      }
+    }
+    throw std::runtime_error("Failed to find suitable memory type");
   }
 
   void VulkanContext::SetupTestTriangle() noexcept
@@ -956,6 +1305,8 @@ namespace Krys::Gfx::Vulkan
       /*throw std::runtime_error("Failed to acquire swap chain image");*/
     }
 
+    UpdateUniformBuffer(_currentFrame);
+
     vkResetFences(_device, 1, &_inFlightFences[_currentFrame]);
 
     vkResetCommandBuffer(_commandBuffers[_currentFrame], 0);
@@ -974,7 +1325,7 @@ namespace Krys::Gfx::Vulkan
       .pSignalSemaphores = &_renderFinishedSemaphores[_currentFrame],
     };
 
-    vkQueueSubmit(_presentQueue, 1, &submitInfo, _inFlightFences[_currentFrame]);
+    vkQueueSubmit(_graphicsQueue, 1, &submitInfo, _inFlightFences[_currentFrame]);
 
     VkPresentInfoKHR presentInfo {
       .sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR,

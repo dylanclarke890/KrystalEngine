@@ -31,8 +31,6 @@ namespace Krys::Engine
     _keyboard._released.clear();
   }
 
-  // TODO: figure out what to do with the window handle
-
   void Input::OnKeyboardEvent(Platform::WindowHandle window, Platform::Key key,
                               Platform::KeyState state) noexcept
   {
