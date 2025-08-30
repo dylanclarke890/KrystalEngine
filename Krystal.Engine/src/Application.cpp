@@ -1,7 +1,7 @@
 #include "Krystal.Engine/Application.hpp"
 
 #include "Krystal.Core/Core.hpp"
-#include "Krystal.Engine/Debug/ScopedProfiler.hpp"
+#include "Krystal.Debug/ScopedProfiler.hpp"
 #include "Krystal.Platform/Platform.hpp"
 
 #include <cassert>
@@ -40,7 +40,7 @@ namespace Krys
       double accumulatedMs = 0;
       while (_running)
       {
-        KRYS_SCOPED_PROFILER("Frame", *_context->Logger);
+        auto profiler = Debug::ScopedProfiler("Frame");
         const double startTime = Platform::GetTimeMilliseconds();
 
         _context->Input->BeginFrame();

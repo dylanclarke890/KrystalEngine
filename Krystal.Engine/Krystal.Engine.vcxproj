@@ -31,6 +31,9 @@
     <ProjectReference Include="..\Krystal.Core\Krystal.Core.vcxproj">
       <Project>{a37816bb-d90c-49da-b724-b81362317bfa}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\Krystal.Debug\Krystal.Debug.vcxproj">
+      <Project>{0d3fc524-252e-46af-977c-dc4eba9efac2}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Krystal.Gfx\Krystal.Gfx.vcxproj">
       <Project>{f0f40133-75a2-4345-893f-f7e69e477155}</Project>
     </ProjectReference>
