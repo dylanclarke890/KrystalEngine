@@ -27,5 +27,7 @@
   <ItemGroup>
     <None Include="data\shaders\triangle.vert" />
     <None Include="data\shaders\triangle.frag" />
+    <None Include="build\shaders\triangle.frag.spv" />
+    <None Include="build\shaders\triangle.vert.spv" />
   </ItemGroup>
 </Project>

@@ -19,9 +19,9 @@ namespace Krys::Gfx::OpenGL
 
     ~OpenGLContext() noexcept override = default;
 
-    void SetupTestTriangle() noexcept override;
+    void Setup() noexcept override;
 
-    void DrawTestTriangle() noexcept override;
+    void Render() noexcept override;
 
     void Present() noexcept override;
 

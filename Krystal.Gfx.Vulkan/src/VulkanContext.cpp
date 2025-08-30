@@ -1284,11 +1284,11 @@ namespace Krys::Gfx::Vulkan
     throw std::runtime_error("Failed to find suitable memory type");
   }
 
-  void VulkanContext::SetupTestTriangle() noexcept
+  void VulkanContext::Setup() noexcept
   {
   }
 
-  void VulkanContext::DrawTestTriangle() noexcept
+  void VulkanContext::Render() noexcept
   {
     vkWaitForFences(_device, 1, &_inFlightFences[_currentFrame], VK_TRUE, UINT64_MAX);
 

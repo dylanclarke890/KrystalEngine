@@ -168,6 +168,8 @@
     <ClInclude Include="include\Krystal.Editor\Editor.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="build\shaders\triangle.frag.spv" />
+    <None Include="build\shaders\triangle.vert.spv" />
     <None Include="data\shaders\triangle.frag" />
     <None Include="data\shaders\triangle.vert" />
   </ItemGroup>

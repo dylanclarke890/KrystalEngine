@@ -75,9 +75,9 @@ namespace Krys::Gfx::Vulkan
 
     ~VulkanContext() noexcept;
 
-    void SetupTestTriangle() noexcept override;
+    void Setup() noexcept override;
 
-    void DrawTestTriangle() noexcept override;
+    void Render() noexcept override;
 
     void Present() noexcept override;
 

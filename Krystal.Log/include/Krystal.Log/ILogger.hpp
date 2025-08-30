@@ -41,19 +41,19 @@ namespace Krys::Log
 
     virtual ~ILogger() noexcept = default;
 
-#define LOG_METHOD(level)                                                                                    \
-  template <typename... Args>                                                                                \
-  void level(stringview fmt, Args &&...args)                                                                 \
-  {                                                                                                          \
-    Log(Level::##level, fmt, std::forward<Args>(args)...);                                                   \
-  }
-
     template <typename... Args>
     void Log(Level level, stringview fmt, Args &&...args)
     {
       auto message = std::vformat(fmt, std::make_format_args(args...));
       LogImpl(level, message);
     }
+
+#define LOG_METHOD(level)                                                                                    \
+  template <typename... Args>                                                                                \
+  void level(stringview fmt, Args &&...args)                                                                 \
+  {                                                                                                          \
+    Log(Level::##level, fmt, std::forward<Args>(args)...);                                                   \
+  }
 
     LOG_METHOD(Trace)
     LOG_METHOD(Debug)

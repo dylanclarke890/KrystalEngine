@@ -59,7 +59,7 @@ namespace Krys::Gfx::OpenGL
   {
   }
 
-  void OpenGLContext::SetupTestTriangle() noexcept
+  void OpenGLContext::Setup() noexcept
   {
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
@@ -89,7 +89,7 @@ namespace Krys::Gfx::OpenGL
     glEnableVertexAttribArray(0);
   }
 
-  void OpenGLContext::DrawTestTriangle() noexcept
+  void OpenGLContext::Render() noexcept
   {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);

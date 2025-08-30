@@ -36,12 +36,12 @@ namespace Krys
         {
           if (event.State() == Platform::KeyState::Pressed)
           {
-            _context->Logger->Info("Key Pressed {}", event.Key());
+            _context->Logger->Info("Key Pressed '{}'", event.Key());
           }
 
           if (event.Key() == Platform::Key::Escape)
           {
-            _context->Logger->Info("Escape key pressed, quitting application...");
+            _context->Logger->Info("ESC key pressed, quitting application...");
             Stop();
           }
 
@@ -49,12 +49,12 @@ namespace Krys
         });
 
 
-      _context->GraphicsContext->SetupTestTriangle();
+      _context->GraphicsContext->Setup();
     }
 
     void OnRender() noexcept override
     {
-      _context->GraphicsContext->DrawTestTriangle();
+      _context->GraphicsContext->Render();
     }
   };
 }

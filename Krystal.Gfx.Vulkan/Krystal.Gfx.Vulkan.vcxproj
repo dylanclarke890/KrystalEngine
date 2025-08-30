@@ -102,7 +102,7 @@
     <IncludePath>C:\VulkanSDK\1.4.313.2\Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\VulkanSDK\1.4.313.2\Include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\VulkanSDK\1.4.321.1\Include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

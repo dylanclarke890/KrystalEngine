@@ -143,7 +143,7 @@ namespace Krys::Gfx::D3D11
     _context->RSSetViewports(1, &viewport);
   }
 
-  void D3D11Context::SetupTestTriangle() noexcept
+  void D3D11Context::Setup() noexcept
   {
     static UINT compileFlags = D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 
@@ -216,7 +216,7 @@ namespace Krys::Gfx::D3D11
     _context->IASetInputLayout(pLayout);
   }
 
-  void D3D11Context::DrawTestTriangle() noexcept
+  void D3D11Context::Render() noexcept
   {
     FLOAT clearColor[4] = {0.3f, 0.3f, 0.3f, 1.0f};
     _context->ClearRenderTargetView(_backbuffer, clearColor);

@@ -22,9 +22,9 @@ namespace Krys::Gfx::D3D11
     D3D11Context(NativeHandle windowHandle, uint32 width, uint32 height);
     ~D3D11Context() noexcept override;
 
-    void SetupTestTriangle() noexcept override;
+    void Setup() noexcept override;
 
-    void DrawTestTriangle() noexcept override;
+    void Render() noexcept override;
 
     void Present() noexcept override;
 
