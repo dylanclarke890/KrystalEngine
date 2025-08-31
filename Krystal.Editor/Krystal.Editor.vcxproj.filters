@@ -25,9 +25,33 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="data\shaders\triangle.vert" />
-    <None Include="data\shaders\triangle.frag" />
+    <None Include="data\shaders\vulkan\triangle.vert" />
+    <None Include="data\shaders\vulkan\triangle.frag" />
     <None Include="build\shaders\triangle.frag.spv" />
     <None Include="build\shaders\triangle.vert.spv" />
+    <None Include="data\shaders\opengl\triangle.vert" />
+    <None Include="data\shaders\opengl\triangle.frag" />
+    <None Include="data\shaders\opengl\skybox.vert" />
+    <None Include="data\shaders\opengl\skybox.frag" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="data\assets\skyboxes\sky\back.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\skyboxes\sky\bottom.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\skyboxes\sky\front.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\skyboxes\sky\left.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\skyboxes\sky\right.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\skyboxes\sky\top.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

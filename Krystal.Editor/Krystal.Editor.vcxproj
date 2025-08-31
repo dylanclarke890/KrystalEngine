@@ -114,8 +114,9 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);KRYS_ENABLE_PROFILING;</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <ShowIncludes>false</ShowIncludes>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -151,8 +152,14 @@
     <ProjectReference Include="..\Krystal.Gfx\Krystal.Gfx.vcxproj">
       <Project>{f0f40133-75a2-4345-893f-f7e69e477155}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\Krystal.IO\Krystal.IO.vcxproj">
+      <Project>{85cea139-a547-4747-b050-05c8de66d591}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Krystal.Log\Krystal.Log.vcxproj">
       <Project>{dfd59bfd-d1ba-4f1d-ab1a-ecd50440d091}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Krystal.Maths\Krystal.Maths.vcxproj">
+      <Project>{2c0a90e5-aa87-46b7-b599-e56a9dd5047b}</Project>
     </ProjectReference>
     <ProjectReference Include="..\Krystal.Platform.Win32\Krystal.Platform.Win32.vcxproj">
       <Project>{3112e8fb-ba78-4ca3-a1de-79baa4c348d5}</Project>
@@ -170,8 +177,20 @@
   <ItemGroup>
     <None Include="build\shaders\triangle.frag.spv" />
     <None Include="build\shaders\triangle.vert.spv" />
-    <None Include="data\shaders\triangle.frag" />
-    <None Include="data\shaders\triangle.vert" />
+    <None Include="data\shaders\opengl\skybox.frag" />
+    <None Include="data\shaders\opengl\skybox.vert" />
+    <None Include="data\shaders\opengl\triangle.frag" />
+    <None Include="data\shaders\opengl\triangle.vert" />
+    <None Include="data\shaders\vulkan\triangle.frag" />
+    <None Include="data\shaders\vulkan\triangle.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="data\assets\skyboxes\sky\back.jpg" />
+    <Image Include="data\assets\skyboxes\sky\bottom.jpg" />
+    <Image Include="data\assets\skyboxes\sky\front.jpg" />
+    <Image Include="data\assets\skyboxes\sky\left.jpg" />
+    <Image Include="data\assets\skyboxes\sky\right.jpg" />
+    <Image Include="data\assets\skyboxes\sky\top.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

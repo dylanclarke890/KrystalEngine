@@ -21,7 +21,9 @@ namespace Krys::IO
 
       auto size = stream.Size();
       if (size == 0)
+      {
         return List<T>();
+      }
 
       if (size % sizeof(T) != 0)
       {
@@ -39,6 +41,50 @@ namespace Krys::IO
       stream.Close();
 
       return ByteUtils::AsNumericArray<T>(buffer);
+    }
+
+    template <DerivedFrom<IStreamReader> TReader>
+    static Expected<List<byte>> ReadAll(TReader &stream) noexcept
+    {
+      stream.Open();
+      if (!stream.IsOpen())
+      {
+        return Unexpected("Failed to open stream.");
+      }
+
+      auto size = stream.Size();
+      if (size == 0)
+      {
+        return List<byte>();
+      }
+
+      List<byte> buffer(size);
+      auto bytesRead = stream.Read(buffer.data(), size);
+
+      if (bytesRead != size)
+      {
+        return Unexpected("Failed to read all bytes from the stream.");
+      }
+
+      stream.Close();
+
+      return buffer;
+    }
+
+    template <DerivedFrom<IStreamReader> TReader>
+    static Expected<string> ReadAllText(TReader &stream) noexcept
+    {
+      return ReadAll(stream).and_then(
+        [](List<byte> &&bytes) -> Expected<string>
+        {
+          auto size = bytes.size();
+          if (size == 0)
+          {
+            return string();
+          }
+          // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+          return string(reinterpret_cast<const char *>(bytes.data()), size);
+        });
     }
   };
 }

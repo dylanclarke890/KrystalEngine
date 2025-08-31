@@ -19,10 +19,20 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.Gfx\Cameras\PerspectiveCamera.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\ICamera.hpp" />
     <ClInclude Include="include\Krystal.Gfx\IContext.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\placeholder.cpp" />
+    <ProjectReference Include="..\Krystal.Core\Krystal.Core.vcxproj">
+      <Project>{a37816bb-d90c-49da-b724-b81362317bfa}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Krystal.Maths\Krystal.Maths.vcxproj">
+      <Project>{2c0a90e5-aa87-46b7-b599-e56a9dd5047b}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Cameras\PerspectiveCamera.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -120,6 +130,8 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <ShowIncludes>false</ShowIncludes>
+      <ErrorReporting>None</ErrorReporting>
     </ClCompile>
     <Link>
       <SubSystem>

@@ -1288,7 +1288,7 @@ namespace Krys::Gfx::Vulkan
   {
   }
 
-  void VulkanContext::Render() noexcept
+  void VulkanContext::Render(ICamera &camera) noexcept
   {
     vkWaitForFences(_device, 1, &_inFlightFences[_currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -1346,6 +1346,12 @@ namespace Krys::Gfx::Vulkan
     }
     _currentFrame = (_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
   }
+
+  
+  void VulkanContext::SetSkybox(const IO::CubeMapImage &skybox) noexcept
+  {
+  }
+
 
   void VulkanContext::Present() noexcept
   {

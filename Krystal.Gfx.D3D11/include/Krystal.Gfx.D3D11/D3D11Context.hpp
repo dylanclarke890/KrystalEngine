@@ -2,6 +2,7 @@
 
 #include "Krystal.Core/Core.hpp"
 #include "Krystal.Gfx/IContext.hpp"
+#include "Krystal.IO/Image.hpp"
 
 #include <d3d11.h>
 
@@ -24,7 +25,9 @@ namespace Krys::Gfx::D3D11
 
     void Setup() noexcept override;
 
-    void Render() noexcept override;
+    void Render(ICamera& camera) noexcept override;
+
+    void SetSkybox(const IO::CubeMapImage &skybox) noexcept override;
 
     void Present() noexcept override;
 

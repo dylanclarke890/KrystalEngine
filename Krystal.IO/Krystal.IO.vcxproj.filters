@@ -62,10 +62,10 @@
     <ClInclude Include="include\Krystal.IO\Streams\MemoryStream.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.IO\Image.hpp">
+    <ClInclude Include="include\Krystal.IO\Streams\StreamUtils.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.IO\Streams\StreamUtils.hpp">
+    <ClInclude Include="include\Krystal.IO\Image.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

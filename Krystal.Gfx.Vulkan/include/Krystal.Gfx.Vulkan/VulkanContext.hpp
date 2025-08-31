@@ -2,6 +2,7 @@
 
 #include "Krystal.Core/Core.hpp"
 #include "Krystal.Gfx/IContext.hpp"
+#include "Krystal.IO/Image.hpp"
 
 #include "Krystal.Gfx.Vulkan/Hooks/vulkan_hooks.hpp"
 
@@ -77,7 +78,9 @@ namespace Krys::Gfx::Vulkan
 
     void Setup() noexcept override;
 
-    void Render() noexcept override;
+    void Render(ICamera &camera) noexcept override;
+
+    void SetSkybox(const IO::CubeMapImage &skybox) noexcept override;
 
     void Present() noexcept override;
 

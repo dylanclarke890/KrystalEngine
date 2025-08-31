@@ -107,42 +107,6 @@ namespace Krys::Gfx::D3D11
     pLayout->Release();
   }
 
-  void D3D11Context::Present() noexcept
-  {
-    _swapchain->Present(0, 0);
-  }
-
-  void D3D11Context::Resize(uint32 width, uint32 height) noexcept
-  {
-    if (_backbuffer)
-    {
-      _backbuffer->Release();
-      _backbuffer = nullptr;
-    }
-    // resize the swap chain
-    _swapchain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
-    // get the address of the back buffer
-    ID3D11Texture2D *pBackBuffer {};
-    _swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID *)&pBackBuffer);
-    if (!pBackBuffer)
-    {
-      return;
-    }
-    // use the back buffer address to create the render target
-    _device->CreateRenderTargetView(pBackBuffer, NULL, &_backbuffer);
-    pBackBuffer->Release();
-    // set the render target as the back buffer
-    _context->OMSetRenderTargets(1, &_backbuffer, NULL);
-    // Set the viewport
-    D3D11_VIEWPORT viewport;
-    ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
-    viewport.TopLeftX = 0;
-    viewport.TopLeftY = 0;
-    viewport.Width = static_cast<FLOAT>(width);
-    viewport.Height = static_cast<FLOAT>(height);
-    _context->RSSetViewports(1, &viewport);
-  }
-
   void D3D11Context::Setup() noexcept
   {
     static UINT compileFlags = D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
@@ -216,7 +180,7 @@ namespace Krys::Gfx::D3D11
     _context->IASetInputLayout(pLayout);
   }
 
-  void D3D11Context::Render() noexcept
+  void D3D11Context::Render(ICamera &camera) noexcept
   {
     FLOAT clearColor[4] = {0.3f, 0.3f, 0.3f, 1.0f};
     _context->ClearRenderTargetView(_backbuffer, clearColor);
@@ -229,5 +193,45 @@ namespace Krys::Gfx::D3D11
 
     // draw the vertex buffer to the back buffer
     _context->Draw(3, 0);
+  }
+
+  void D3D11Context::SetSkybox(const IO::CubeMapImage &skybox) noexcept
+  {
+  }
+
+  void D3D11Context::Present() noexcept
+  {
+    _swapchain->Present(0, 0);
+  }
+
+  void D3D11Context::Resize(uint32 width, uint32 height) noexcept
+  {
+    if (_backbuffer)
+    {
+      _backbuffer->Release();
+      _backbuffer = nullptr;
+    }
+    // resize the swap chain
+    _swapchain->ResizeBuffers(0, width, height, DXGI_FORMAT_UNKNOWN, 0);
+    // get the address of the back buffer
+    ID3D11Texture2D *pBackBuffer {};
+    _swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID *)&pBackBuffer);
+    if (!pBackBuffer)
+    {
+      return;
+    }
+    // use the back buffer address to create the render target
+    _device->CreateRenderTargetView(pBackBuffer, NULL, &_backbuffer);
+    pBackBuffer->Release();
+    // set the render target as the back buffer
+    _context->OMSetRenderTargets(1, &_backbuffer, NULL);
+    // Set the viewport
+    D3D11_VIEWPORT viewport;
+    ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
+    viewport.TopLeftX = 0;
+    viewport.TopLeftY = 0;
+    viewport.Width = static_cast<FLOAT>(width);
+    viewport.Height = static_cast<FLOAT>(height);
+    _context->RSSetViewports(1, &viewport);
   }
 }
