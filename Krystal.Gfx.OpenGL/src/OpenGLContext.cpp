@@ -227,18 +227,28 @@ namespace Krys::Gfx::OpenGL
 
     glGenTextures(1, &skyboxTexture);
     glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, GL_RGB, skybox.Width, skybox.Height, 0, GL_RGB,
-                 GL_UNSIGNED_BYTE, skybox.Right.data());
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, GL_RGB, skybox.Width, skybox.Height, 0, GL_RGB,
-                 GL_UNSIGNED_BYTE, skybox.Left.data());
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, GL_RGB, skybox.Width, skybox.Height, 0, GL_RGB,
-                 GL_UNSIGNED_BYTE, skybox.Top.data());
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, GL_RGB, skybox.Width, skybox.Height, 0, GL_RGB,
-                 GL_UNSIGNED_BYTE, skybox.Bottom.data());
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, GL_RGB, skybox.Width, skybox.Height, 0, GL_RGB,
-                 GL_UNSIGNED_BYTE, skybox.Front.data());
-    glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, GL_RGB, skybox.Width, skybox.Height, 0, GL_RGB,
-                 GL_UNSIGNED_BYTE, skybox.Back.data());
+
+    GLint internalFormat = GL_RGB;
+    GLenum format = GL_RGB;
+    assert((skybox.Channels == 3 || skybox.Channels == 4) && "Skybox image data must be 3 or 4 channels.");
+    if (skybox.Channels == 4)
+    {
+      internalFormat = GL_RGBA;
+      format = GL_RGBA;
+    }
+
+#define UploadFace(face, faceData)                                                                           \
+  glTexImage2D(face, 0, internalFormat, skybox.Width, skybox.Height, 0, format, GL_UNSIGNED_BYTE,            \
+               faceData.data());
+
+    UploadFace(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, skybox.Left);
+    UploadFace(GL_TEXTURE_CUBE_MAP_POSITIVE_X, skybox.Right);
+    UploadFace(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, skybox.Top);
+    UploadFace(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, skybox.Bottom);
+    UploadFace(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, skybox.Front);
+    UploadFace(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, skybox.Back);
+
+#undef UploadFace
 
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
