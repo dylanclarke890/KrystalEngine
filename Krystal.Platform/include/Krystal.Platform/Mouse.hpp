@@ -3,7 +3,7 @@
 #include "Krystal.Core/Core.hpp"
 #include "Krystal.Platform/MouseButtons.hpp"
 
-namespace Krys::Engine
+namespace Krys::Platform
 {
   class Input;
 
@@ -16,7 +16,6 @@ namespace Krys::Engine
   {
     friend class Input;
 
-    using MouseButton = Krys::Platform::MouseButton;
   public:
     /// @brief Constructs a `Mouse`.
     Mouse() noexcept = default;

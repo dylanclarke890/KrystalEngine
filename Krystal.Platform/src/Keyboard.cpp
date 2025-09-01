@@ -1,9 +1,9 @@
-#include "Krystal.Engine/Keyboard.hpp"
+#include "Krystal.Platform/Keyboard.hpp"
 
 #include "Krystal.Core/Core.hpp"
 #include "Krystal.Platform/Keys.hpp"
 
-namespace Krys::Engine
+namespace Krys::Platform
 {
   NO_DISCARD bool Keyboard::IsKeyPressed(Key key) const noexcept
   {

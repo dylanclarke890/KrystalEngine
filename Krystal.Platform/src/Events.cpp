@@ -1,25 +1,12 @@
-#include "Krystal.Engine/Events.hpp"
+#include "Krystal.Platform/Events.hpp"
 
 #include "Krystal.Core/Core.hpp"
 #include "Krystal.Core/Events/Event.hpp"
 #include "Krystal.Platform/Keys.hpp"
 #include "Krystal.Platform/MouseButtons.hpp"
 
-namespace Krys::Engine
+namespace Krys::Events
 {
-#pragma region CloseEvent
-
-  CloseEvent::CloseEvent(Platform::WindowHandle window) noexcept : _window(window)
-  {
-  }
-
-  Platform::WindowHandle CloseEvent::GetWindowHandle() const noexcept
-  {
-    return _window;
-  }
-
-#pragma endregion
-
 #pragma region KeyboardEvent
 
   KeyboardEvent::KeyboardEvent(Platform::WindowHandle window, const Platform::Key key,
@@ -179,6 +166,19 @@ namespace Krys::Engine
   }
 
   Platform::WindowHandle WindowRestoreEvent::GetWindowHandle() const noexcept
+  {
+    return _window;
+  }
+
+#pragma endregion
+
+#pragma region WindowCloseEvent
+
+  WindowCloseEvent::WindowCloseEvent(Platform::WindowHandle window) noexcept : _window(window)
+  {
+  }
+
+  Platform::WindowHandle WindowCloseEvent::GetWindowHandle() const noexcept
   {
     return _window;
   }

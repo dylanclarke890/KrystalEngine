@@ -1,9 +1,9 @@
-#include "Krystal.Engine/Mouse.hpp"
+#include "Krystal.Platform/Mouse.hpp"
 
 #include "Krystal.Core/Core.hpp"
 #include "Krystal.Platform/MouseButtons.hpp"
 
-namespace Krys::Engine
+namespace Krys::Platform
 {
   NO_DISCARD float Mouse::ClientX() const noexcept
   {
@@ -23,6 +23,11 @@ namespace Krys::Engine
   NO_DISCARD float Mouse::DeltaY() const noexcept
   {
     return _deltaY;
+  }
+
+  NO_DISCARD float Mouse::ScrollDelta() const noexcept
+  {
+    return _scrollDelta;
   }
 
   NO_DISCARD bool Mouse::IsButtonPressed(MouseButton button) const noexcept

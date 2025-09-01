@@ -3,7 +3,7 @@
 #include "Krystal.Core/Core.hpp"
 #include "Krystal.Platform/Keys.hpp"
 
-namespace Krys::Engine
+namespace Krys::Platform
 {
   class Input;
 
@@ -17,9 +17,7 @@ namespace Krys::Engine
   {
     friend class Input;
 
-    using Key = Krys::Platform::Key;
   public:
-
     /// @brief Constructs a `Keyboard`.
     Keyboard() noexcept = default;
 

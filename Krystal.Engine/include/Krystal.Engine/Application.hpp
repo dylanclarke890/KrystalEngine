@@ -2,8 +2,8 @@
 
 #include "Krystal.Core/Core.hpp"
 #include "Krystal.Core/Events/EventManager.hpp"
-#include "Krystal.Engine/Events.hpp"
-#include "Krystal.Engine/Input.hpp"
+#include "Krystal.Platform/Events.hpp"
+#include "Krystal.Platform/Input.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include "Krystal.Platform/IWindow.hpp"
@@ -61,7 +61,7 @@ namespace Krys
     Unique<Log::ILogger> Logger {};
     Unique<EventManager> Events {};
     Unique<Platform::IWindow> Window {};
-    Unique<Engine::Input> Input {};
+    Unique<Platform::Input> Input {};
     Unique<Gfx::IContext> GraphicsContext {};
   };
 

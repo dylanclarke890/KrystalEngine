@@ -2,6 +2,7 @@
 
 #include "Krystal.Core/Core.hpp"
 #include "Krystal.Debug/ScopedProfiler.hpp"
+#include "Krystal.Platform/Input.hpp"
 #include "Krystal.Platform/Platform.hpp"
 
 #include <cassert>
@@ -111,7 +112,7 @@ namespace Krys
     if (!_context->Events)
       throw new std::runtime_error("Failed to create event manager");
 
-    _context->Input = CreateUnique<Engine::Input>(_context->Events.get());
+    _context->Input = CreateUnique<Platform::Input>(_context->Events.get());
     if (!_context->Input)
       throw new std::runtime_error("Failed to create input manager");
 
@@ -131,7 +132,7 @@ namespace Krys
   Platform::WindowCallbacks Application::CreateWindowCallbacks() noexcept
   {
     using namespace Platform;
-    using namespace Engine;
+    using namespace Events;
 
     return {
       .OnMouseMove =
@@ -148,7 +149,7 @@ namespace Krys
       { _context->Input->OnKeyboardEvent(window, key, state); },
 
       .OnClose = [&](WindowHandle window) noexcept
-      { _context->Events->Enqueue(CreateUnique<CloseEvent>(window)); },
+      { _context->Events->Enqueue(CreateUnique<WindowCloseEvent>(window)); },
 
       .OnResize =
         [&](WindowHandle window, uint32 width, uint32 height) noexcept

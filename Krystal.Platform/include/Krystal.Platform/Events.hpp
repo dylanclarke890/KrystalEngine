@@ -6,27 +6,8 @@
 #include "Krystal.Platform/Keys.hpp"
 #include "Krystal.Platform/MouseButtons.hpp"
 
-namespace Krys::Engine
+namespace Krys::Events
 {
-  /// @brief Represents an attempt to close the application.
-  ///
-  /// A `CloseEvent` is raised automatically in response to common exit requests,
-  /// such as pressing the close button or using keyboard shortcuts like ALT + F4 (on Windows).
-  class CloseEvent : public Event
-  {
-  public:
-    KRYS_EVENT_CLASS_TYPE("close-event")
-
-    /// @brief Constructs a `QuitEvent`.
-    /// @param handle The native handle of the window that requested the quit event.
-    CloseEvent(Platform::WindowHandle window) noexcept;
-
-    NO_DISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
-
-  private:
-    Platform::WindowHandle _window;
-  };
-
   /// @brief Represents an interaction with a keyboard.
   class KeyboardEvent : public Event
   {
@@ -186,6 +167,25 @@ namespace Krys::Engine
 
     /// @brief Constructs a `WindowRestoreEvent`.
     WindowRestoreEvent(Platform::WindowHandle window) noexcept;
+
+    NO_DISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
+
+  private:
+    Platform::WindowHandle _window;
+  };
+
+  /// @brief Represents an attempt to close the application.
+  ///
+  /// A `WindowCloseEvent` is raised automatically in response to common exit requests,
+  /// such as pressing the close button or using keyboard shortcuts like ALT + F4 (on Windows).
+  class WindowCloseEvent : public Event
+  {
+  public:
+    KRYS_EVENT_CLASS_TYPE("window-close-event")
+
+    /// @brief Constructs a `WindowCloseEvent`.
+    /// @param handle The native handle of the window that requested the quit event.
+    WindowCloseEvent(Platform::WindowHandle window) noexcept;
 
     NO_DISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
 

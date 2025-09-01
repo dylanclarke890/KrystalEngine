@@ -49,5 +49,13 @@ namespace Krys::Gfx
     /// @brief Gets the right direction of the camera.
     /// @return The right direction of the camera.
     const Maths::Vec3 &Right() const noexcept override;
+
+    /// @brief Notifies the camera that the viewport has been resized.
+    void OnResize(uint32 width, uint32 height) noexcept override;
+
+    /// @brief Updates the camera's position and orientation based on input.
+    /// @param deltaTime The time elapsed since the last frame in seconds.
+    /// @param input The current input state.
+    virtual void Update(double deltaTime, const Platform::Input &input) noexcept override;
   };
 }
