@@ -53,7 +53,7 @@ namespace Krys::Gfx
     using namespace Platform;
     using namespace Maths;
 
-    float cameraSpeed = 0.05f; // Adjust accordingly
+    float cameraSpeed = 0.05f;
 
     const auto &keyboard = input.GetKeyboard();
     if (keyboard.IsKeyHeld(Key::W))
@@ -76,42 +76,31 @@ namespace Krys::Gfx
       _position += Normalize(Cross(_forward, _up)) * cameraSpeed;
     }
 
-    if (keyboard.IsKeyHeld(Key::UpArrow))
-    {
-      _position += cameraSpeed * _up;
-    }
-
-    if (keyboard.IsKeyHeld(Key::DownArrow))
-    {
-      _position -= cameraSpeed * _up;
-    }
-
-    float sensitivity = 0.1f; // Adjust accordingly
+    float lookSensitivity = 0.1f;
 
     const auto &mouse = input.GetMouse();
-    const auto deltaX = mouse.DeltaX();
-    const auto deltaY = mouse.DeltaY();
-
-    if (deltaX != 0 || deltaY != 0)
+    if (mouse.IsButtonHeld(MouseButton::Right))
     {
-      float yaw = Radians(deltaX * sensitivity);
-      float pitch = Radians(deltaY * sensitivity);
-      // Rotate around the up vector (yaw)
-      Mat4 yawMatrix = Rotate(Mat4(1.0f), yaw, _up);
-      _forward = Normalize(Vec3(yawMatrix * Vec4(_forward, 0.0f)));
-      _right = Normalize(Cross(_forward, _up));
-      // Rotate around the right vector (pitch)
-      Mat4 pitchMatrix = Rotate(Mat4(1.0f), pitch, _right);
-      Vec3 newForward = Normalize(Vec3(pitchMatrix * Vec4(_forward, 0.0f)));
-      // Prevent flipping
-      float pitchAngle = Degrees(Asin(newForward.y));
-      if (pitchAngle > -89.0f && pitchAngle < 89.0f)
-      {
-        _forward = newForward;
-        _up = Normalize(Cross(_right, _forward));
-      }
-    }
+      auto deltaX = mouse.DeltaX();
+      auto deltaY = mouse.DeltaY();
 
+      deltaX *= lookSensitivity;
+      deltaY *= lookSensitivity;
+
+      _yaw += deltaX;
+      _pitch += deltaY;
+
+      if (_pitch > 89.0f)
+        _pitch = 89.0f;
+      if (_pitch < -89.0f)
+        _pitch = -89.0f;
+
+      Vec3 direction {};
+      direction.x = std::cos(Radians(_yaw)) * std::cos(Radians(_pitch));
+      direction.y = std::sin(Radians(_pitch));
+      direction.z = std::sin(Radians(_yaw)) * std::cos(Radians(_pitch));
+      _forward = Normalize(direction);
+    }
 
     _viewMatrix = LookAt(_position, _position + _forward, _up);
   }

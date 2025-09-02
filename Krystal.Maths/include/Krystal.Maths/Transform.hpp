@@ -26,7 +26,7 @@ namespace Krys::Maths
     Vector3<T> axis(Normalize(v));
     Vector3<T> temp((T(1) - c) * axis);
 
-    Matrix4x4<T> rot;
+    Matrix4x4<T> rot {};
     rot[0][0] = c + temp[0] * axis[0];
     rot[0][1] = temp[0] * axis[1] + s * axis[2];
     rot[0][2] = temp[0] * axis[2] - s * axis[1];
@@ -213,8 +213,8 @@ namespace Krys::Maths
     if (oldLength != 0.f)
     {
       T halfCosAngle = 0.5f * sourceDirection.Dot(targetDirection);
-      T cosHalfAngle = Sqrt(0.5f + halfCosAngle);
-      T sinHalfAngle = Sqrt(0.5f - halfCosAngle);
+      T cosHalfAngle = std::sqrt(0.5f + halfCosAngle);
+      T sinHalfAngle = std::sqrt(0.5f - halfCosAngle);
       return Quaternion<T>(axis.x * sinHalfAngle, axis.y * sinHalfAngle, axis.z * sinHalfAngle, cosHalfAngle);
     }
     else

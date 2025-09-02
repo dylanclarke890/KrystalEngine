@@ -43,6 +43,8 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Official\glext.h" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Official\khrplatform.h" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Official\wglext.h" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\OpenGLShader.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\OpenGLTexture.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Win32\GLContextPlatformImpl.hpp" />
     <ClCompile Include="src\Hooks\gl.cpp" />
     <ClCompile Include="src\Hooks\wgl.cpp" />

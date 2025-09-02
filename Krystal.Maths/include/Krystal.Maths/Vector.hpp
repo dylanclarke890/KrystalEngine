@@ -159,10 +159,20 @@ namespace Krys::Maths
     constexpr Vector() noexcept : x(T(0)), y(T(0)), z(T(0))
     {
     }
+
     constexpr explicit Vector(T value) noexcept : x(value), y(value), z(value)
     {
     }
+
     constexpr Vector(T xValue, T yValue, T zValue) noexcept : x(xValue), y(yValue), z(zValue)
+    {
+    }
+
+    constexpr Vector(const Vector<T, 2> &vec2, T zValue) noexcept : x(vec2.x), y(vec2.y), z(zValue)
+    {
+    }
+
+    constexpr Vector(const Vector<T, 4> &vec4) noexcept : x(vec4.x), y(vec4.y), z(vec4.z)
     {
     }
 
@@ -201,11 +211,18 @@ namespace Krys::Maths
     constexpr Vector() noexcept : x(T(0)), y(T(0)), z(T(0)), w(T(0))
     {
     }
+
     constexpr explicit Vector(T value) noexcept : x(value), y(value), z(value), w(value)
     {
     }
+
     constexpr Vector(T xValue, T yValue, T zValue, T wValue) noexcept
         : x(xValue), y(yValue), z(zValue), w(wValue)
+    {
+    }
+    
+    constexpr Vector(const Vector<T, 3> &vec3, T wValue) noexcept
+        : x(vec3.x), y(vec3.y), z(vec3.z), w(wValue)
     {
     }
 

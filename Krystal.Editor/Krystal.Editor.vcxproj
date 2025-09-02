@@ -185,12 +185,15 @@
     <None Include="data\shaders\vulkan\triangle.vert" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="data\assets\awesomeface.png" />
+    <Image Include="data\assets\container.jpg" />
     <Image Include="data\assets\skyboxes\sky\back.jpg" />
     <Image Include="data\assets\skyboxes\sky\bottom.jpg" />
     <Image Include="data\assets\skyboxes\sky\front.jpg" />
     <Image Include="data\assets\skyboxes\sky\left.jpg" />
     <Image Include="data\assets\skyboxes\sky\right.jpg" />
     <Image Include="data\assets\skyboxes\sky\top.jpg" />
+    <Image Include="data\assets\wall.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

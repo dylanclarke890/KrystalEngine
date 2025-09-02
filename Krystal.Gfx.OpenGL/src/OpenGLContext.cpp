@@ -8,15 +8,38 @@
 
 #ifdef KRYS_PLATFORM_WINDOWS
   #include "Krystal.Gfx.OpenGL/Win32/GLContextPlatformImpl.hpp"
+  #undef CreateWindow
+  #undef LoadImage
+  #undef min
+  #undef max
 #else
   #error "Unsupported platform for OpenGL context creation."
 #endif
 
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
+#include "Krystal.Gfx.OpenGL/OpenGLShader.hpp"
+#include "Krystal.Gfx.OpenGL/OpenGLTexture.hpp"
+#include "Krystal.Maths/Convert.hpp"
+#include "Krystal.Maths/Matrix.hpp"
+#include "Krystal.Maths/Transform.hpp"
+#include "Krystal.Maths/Vector.hpp"
+#include "Krystal.Platform/Platform.hpp"
 
 namespace
 {
-  static float vertices[] = {-0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f, 0.0f, 0.5f, 0.0f};
+  static float vertices[] = {
+    // positions          // colors           // texture coords
+    0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
+    0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
+    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
+    -0.5f, 0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
+  };
+
+  static unsigned int indices[] = {
+    0, 1, 3, // first triangle
+    1, 2, 3  // second triangle
+  };
+
   float skyboxVertices[] = {
     // positions
     -1.0f, 1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  -1.0f, -1.0f,
@@ -37,100 +60,21 @@ namespace
     -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, -1.0f,
     1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f};
 
-  static unsigned int triangleVAO;
-  static unsigned int triangleVBO;
-  static unsigned int triangleShaderProgram;
+  using namespace Krys;
+  using namespace Krys::Gfx::OpenGL;
 
-  static unsigned int skyboxVAO;
-  static unsigned int skyboxVBO;
-  static unsigned int skyboxShaderProgram;
-  static unsigned int skyboxTexture;
+  static Map<string, Unique<OpenGLShader>> shaders;
+  static Map<string, Unique<OpenGLTexture2D>> textures;
+  static Map<string, Unique<OpenGLCubeMap>> cubemaps;
+
+  static GLuint triangleVAO;
+  static GLuint triangleVBO;
+  static GLuint triangleEBO;
+
+  static GLuint skyboxVAO;
+  static GLuint skyboxVBO;
+  static GLuint skyboxTexture;
   static bool skyboxSet = false;
-
-  static void CreateShader(const Krys::IO::Path &filepath, unsigned int shader) noexcept
-  {
-    auto reader = Krys::IO::NativeFileReader(filepath);
-    auto sourceResult = Krys::IO::StreamUtils::ReadAllText(reader);
-    assert(sourceResult.has_value());
-    auto source = sourceResult->c_str();
-    glShaderSource(shader, 1, &source, NULL);
-    glCompileShader(shader);
-  }
-
-  static unsigned int CreateProgram(const Krys::IO::Path &vertexFilepath,
-                                    const Krys::IO::Path &fragmentFilepath) noexcept
-  {
-    auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    CreateShader(vertexFilepath, vertexShader);
-
-    auto fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    CreateShader(fragmentFilepath, fragmentShader);
-
-    auto shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    return shaderProgram;
-  }
-
-  template <typename T>
-  static void SetUniform(GLuint shaderProgram, const Krys::string &uniformName, const T &value) noexcept
-  {
-    using namespace Krys;
-    using namespace Krys::Maths;
-
-    GLint location = glGetUniformLocation(shaderProgram, uniformName.c_str());
-    if (location == -1)
-    {
-      // Uniform not found, possibly optimized out by the compiler
-      return;
-    }
-
-    if constexpr (std::is_same_v<T, bool>)
-      glProgramUniform1i(shaderProgram, location, value);
-    else if constexpr (std::is_same_v<T, int32>)
-      glProgramUniform1i(shaderProgram, location, value);
-    else if constexpr (std::is_same_v<T, List<int32>>)
-      glProgramUniform1iv(shaderProgram, location, value.size(), value.data());
-    else if constexpr (std::is_same_v<T, uint32>)
-      glProgramUniform1ui(shaderProgram, location, value);
-    else if constexpr (std::is_same_v<T, List<uint32>>)
-      glProgramUniform1uiv(shaderProgram, location, value.size(), value.data());
-    else if constexpr (std::is_same_v<T, float32>)
-      glProgramUniform1f(shaderProgram, location, value);
-    else if constexpr (std::is_same_v<T, List<float32>>)
-      glProgramUniform1fv(shaderProgram, location, value.size(), value.data());
-    else if constexpr (std::is_same_v<T, Vec2>)
-      glProgramUniform2f(shaderProgram, location, value.x, value.y);
-    else if constexpr (std::is_same_v<T, List<Vec2>>)
-      glProgramUniform2fv(shaderProgram, location, value.size(), &value[0].x);
-    else if constexpr (std::is_same_v<T, Vec3>)
-      glProgramUniform3f(shaderProgram, location, value.x, value.y, value.z);
-    else if constexpr (std::is_same_v<T, List<Vec3>>)
-      glProgramUniform3fv(shaderProgram, location, value.size(), &value[0].x);
-    else if constexpr (std::is_same_v<T, Vec4>)
-      glProgramUniform4f(shaderProgram, location, value.x, value.y, value.z, value.w);
-    else if constexpr (std::is_same_v<T, List<Vec4>>)
-      glProgramUniform4fv(shaderProgram, location, value.size(), &value[0].x);
-    else if constexpr (std::is_same_v<T, Mat2>)
-      glProgramUniformMatrix2fv(shaderProgram, location, 1, GL_FALSE, &value[0].x);
-    else if constexpr (std::is_same_v<T, List<Mat2>>)
-      glProgramUniformMatrix2fv(shaderProgram, location, value.size(), GL_FALSE, &value[0][0].x);
-    else if constexpr (std::is_same_v<T, Mat3>)
-      glProgramUniformMatrix3fv(shaderProgram, location, 1, GL_FALSE, &value[0].x);
-    else if constexpr (std::is_same_v<T, List<Mat3>>)
-      glProgramUniformMatrix3fv(shaderProgram, location, value.size(), GL_FALSE, &value[0][0].x);
-    else if constexpr (std::is_same_v<T, Mat4>)
-      glProgramUniformMatrix4fv(shaderProgram, location, 1, GL_FALSE, &value[0].x);
-    else if constexpr (std::is_same_v<T, List<Mat4>>)
-      glProgramUniformMatrix4fv(shaderProgram, location, value.size(), GL_FALSE, &value[0][0].x);
-    else
-      assert(false && "Unsupported uniform type.");
-  }
 }
 
 namespace Krys::Gfx
@@ -157,106 +101,88 @@ namespace Krys::Gfx::OpenGL
 
   void OpenGLContext::Setup() noexcept
   {
+    // Shaders
     {
       using namespace IO;
-      triangleShaderProgram =
-        CreateProgram(Path("data/shaders/opengl/triangle.vert"), Path("data/shaders/opengl/triangle.frag"));
-      skyboxShaderProgram =
-        CreateProgram(Path("data/shaders/opengl/skybox.vert"), Path("data/shaders/opengl/skybox.frag"));
+
+      Path base = Path("data/shaders/opengl");
+      shaders["triangle"] =
+        CreateUnique<OpenGLShader>(base / Path("triangle.vert"), base / Path("triangle.frag"));
+      shaders["skybox"] = CreateUnique<OpenGLShader>(base / Path("skybox.vert"), base / Path("skybox.frag"));
     }
 
-    glGenVertexArrays(1, &triangleVAO);
-    glBindVertexArray(triangleVAO);
-    glGenBuffers(1, &triangleVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-    glEnableVertexAttribArray(0);
+    // Textures
+    {
+      using namespace IO;
 
-    glGenVertexArrays(1, &skyboxVAO);
+      Path base = Path("data/assets");
+      textures["wall"] = CreateUnique<OpenGLTexture2D>(base / Path("wall.jpg"));
+      textures["container"] = CreateUnique<OpenGLTexture2D>(base / Path("container.jpg"));
+      textures["awesomeface"] = CreateUnique<OpenGLTexture2D>(base / Path("awesomeface.png"));
+    }
+
+    glCreateVertexArrays(1, &triangleVAO);
+    glBindVertexArray(triangleVAO);
+
+    glCreateBuffers(1, &triangleVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
+    glNamedBufferData(triangleVBO, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glCreateBuffers(1, &triangleEBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, triangleEBO);
+    glNamedBufferData(triangleEBO, sizeof(indices), indices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    glCreateVertexArrays(1, &skyboxVAO);
     glBindVertexArray(skyboxVAO);
-    glGenBuffers(1, &skyboxVBO);
+
+    glCreateBuffers(1, &skyboxVBO);
     glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+    glNamedBufferData(skyboxVBO, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
     glEnable(GL_DEPTH_TEST);
   }
 
+  void OpenGLContext::SetSkybox(const IO::CubeMapImage &) noexcept
+  {
+  }
+
   void OpenGLContext::Render(ICamera &camera) noexcept
   {
-    auto &view = camera.ViewMatrix();
-    auto &projection = camera.ProjectionMatrix();
-
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glUseProgram(triangleShaderProgram);
+    auto &view = camera.ViewMatrix();
+    auto &projection = camera.ProjectionMatrix();
 
-    SetUniform(triangleShaderProgram, "view", view);
-    SetUniform(triangleShaderProgram, "projection", projection);
+    Maths::Mat4 transform = Maths::Identity<Maths::Mat4>();
+    //transform = Maths::Translate(transform, Maths::Vec3(0.0f, 0.0f, 0.0f));
+    //transform = Maths::Scale(transform, Maths::Vec3(0.50f));
+    transform = Maths::Rotate(transform, Maths::Radians(90.0f), Maths::Vec3(0.0f, 1.0f, 0.0f));
+
+    auto &triangleShader = *shaders.at("triangle");
+    triangleShader.Bind();
+    triangleShader.SetUniform("model", transform);
+    triangleShader.SetUniform("view", view, false);
+    triangleShader.SetUniform("projection", projection, false);
+
+    textures.at("container")->Bind(0);
+    triangleShader.SetUniform("texture1", 0);
+
+    textures.at("awesomeface")->Bind(1);
+    triangleShader.SetUniform("texture2", 1);
 
     glBindVertexArray(triangleVAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-
-    if (skyboxSet)
-    {
-      glDepthFunc(GL_LEQUAL);
-      glDepthMask(GL_FALSE);
-      glUseProgram(skyboxShaderProgram);
-
-      SetUniform(skyboxShaderProgram, "view", view);
-      SetUniform(skyboxShaderProgram, "projection", projection);
-
-      glBindVertexArray(skyboxVAO);
-      glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
-      glDrawArrays(GL_TRIANGLES, 0, 36);
-      glDepthMask(GL_TRUE);
-      glDepthFunc(GL_LESS);
-    }
-  }
-
-  void OpenGLContext::SetSkybox(const IO::CubeMapImage &skybox) noexcept
-  {
-    if (skyboxSet)
-    {
-      glDeleteTextures(1, &skyboxTexture);
-    }
-
-    glGenTextures(1, &skyboxTexture);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
-
-    GLint internalFormat = GL_RGB;
-    GLenum format = GL_RGB;
-    assert((skybox.Channels == 3 || skybox.Channels == 4) && "Skybox image data must be 3 or 4 channels.");
-    if (skybox.Channels == 4)
-    {
-      internalFormat = GL_RGBA;
-      format = GL_RGBA;
-    }
-
-#define UploadFace(face, faceData)                                                                           \
-  glTexImage2D(face, 0, internalFormat, skybox.Width, skybox.Height, 0, format, GL_UNSIGNED_BYTE,            \
-               faceData.data());
-
-    UploadFace(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, skybox.Left);
-    UploadFace(GL_TEXTURE_CUBE_MAP_POSITIVE_X, skybox.Right);
-    UploadFace(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, skybox.Top);
-    UploadFace(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, skybox.Bottom);
-    UploadFace(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, skybox.Front);
-    UploadFace(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, skybox.Back);
-
-#undef UploadFace
-
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-    skyboxSet = true;
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
   }
 
   void OpenGLContext::Present() noexcept

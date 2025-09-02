@@ -2,7 +2,10 @@
 #ifndef WIN32_LEAN_AND_MEAN
   #define WIN32_LEAN_AND_MEAN
   #include <windows.h>
-  #undef CreateWindowW
+  #undef CreateWindow
+  #undef LoadImage
+  #undef min
+  #undef max
 #endif
 
 #include <stdexcept>

@@ -19,6 +19,8 @@ namespace Krys::Gfx
     Maths::Vec3 _forward {};
     Maths::Vec3 _up {};
     Maths::Vec3 _right {};
+    float _yaw {-90.0f}; // Yaw is initialized to -90.0 degrees to look along the negative Z axis
+    float _pitch {0.0f};
 
   public:
     virtual ~PerspectiveCamera() noexcept = default;

@@ -53,5 +53,14 @@
     <Image Include="data\assets\skyboxes\sky\top.jpg">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="data\assets\container.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\wall.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\awesomeface.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

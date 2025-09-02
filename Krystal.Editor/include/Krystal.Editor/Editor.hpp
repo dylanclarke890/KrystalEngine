@@ -40,7 +40,7 @@ namespace Krys
 
         auto baseDir = Path("data/assets/skyboxes/sky");
         auto skybox =
-          LoadCubeMap(baseDir / Path("right.jpg"), baseDir / Path("left.jpg"), baseDir / Path("top.jpg"),
+          LoadCubeMap(baseDir / Path("left.jpg"), baseDir / Path("right.jpg"), baseDir / Path("top.jpg"),
                       baseDir / Path("bottom.jpg"), baseDir / Path("front.jpg"), baseDir / Path("back.jpg"));
         assert(skybox.has_value());
 

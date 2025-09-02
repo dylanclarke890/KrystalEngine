@@ -7,6 +7,8 @@
 #ifndef WIN32_LEAN_AND_MEAN
   #define WIN32_LEAN_AND_MEAN
   #include <windows.h>
+  #undef CreateWindow
+  #undef LoadImage
 #endif
 
 #pragma comment(lib, "opengl32.lib")
