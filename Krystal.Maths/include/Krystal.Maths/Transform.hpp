@@ -16,7 +16,7 @@ namespace Krys::Maths
     return result;
   }
 
-  /// @brief Apply a rotation to a matrix around the X axis.
+  /// @brief Apply a rotation to a matrix around axis `v`.
   template <FloatingPoint T>
   NO_DISCARD constexpr auto Rotate(const Matrix4x4<T> &m, T angle, const Vector3<T> &v) noexcept
   {

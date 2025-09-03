@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Core.hpp"
 #include "Krystal.Engine/Application.hpp"
-#include "Krystal.Gfx/Cameras/PerspectiveCamera.hpp"
+#include "Krystal.Gfx/Cameras/FlyballCamera.hpp"
 #include "Krystal.IO/Image.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include "Krystal.Maths/Convert.hpp"
@@ -14,12 +14,12 @@ namespace Krys
   class Editor : public Application
   {
   private:
-    Gfx::PerspectiveCamera _camera;
+    Gfx::FlyballCamera _camera;
 
   public:
     explicit Editor(int argc, char **argv, const ApplicationSettings &settings) noexcept
         : Application(argc, argv, settings),
-          _camera(Maths::Vec3(0.0f, 0.0f, 2.0f), Maths::Vec3(0.0f, 0.0f, 0.0f), Maths::Vec3(0.0f, 1.0f, 0.0f),
+          _camera(Maths::Vec3(0.0f, 0.0f, 3.0f), Maths::Vec3(0.0f, 0.0f, 0.0f), Maths::Vec3(0.0f, 1.0f, 0.0f),
                   Maths::Radians(45.0f),
                   static_cast<float>(settings.WindowSettings.Size.Width)
                     / static_cast<float>(settings.WindowSettings.Size.Height),

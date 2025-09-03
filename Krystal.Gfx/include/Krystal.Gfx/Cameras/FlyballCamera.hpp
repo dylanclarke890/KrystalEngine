@@ -9,8 +9,7 @@
 
 namespace Krys::Gfx
 {
-  /// @brief A perspective camera implementation.
-  class PerspectiveCamera : public ICamera
+  class FlyballCamera : public ICamera
   {
   private:
     Maths::Mat4 _viewMatrix {};
@@ -19,13 +18,15 @@ namespace Krys::Gfx
     Maths::Vec3 _forward {};
     Maths::Vec3 _up {};
     Maths::Vec3 _right {};
+    float _fovY {0.0f};
+    float _aspect {1.0f};
     float _yaw {-90.0f}; // Yaw is initialized to -90.0 degrees to look along the negative Z axis
     float _pitch {0.0f};
 
   public:
-    virtual ~PerspectiveCamera() noexcept = default;
+    virtual ~FlyballCamera() noexcept = default;
 
-    PerspectiveCamera(const Maths::Vec3 &position, const Maths::Vec3 &target, const Maths::Vec3 &up,
+    FlyballCamera(const Maths::Vec3 &position, const Maths::Vec3 &target, const Maths::Vec3 &up,
                       float fovY, float aspect, float nearPlane, float farPlane) noexcept;
 
     /// @brief Gets the view matrix of the camera.

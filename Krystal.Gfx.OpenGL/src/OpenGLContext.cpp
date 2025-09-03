@@ -28,12 +28,23 @@
 namespace
 {
   static float vertices[] = {
-    // positions          // colors           // texture coords
-    0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
-    0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
-    -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-    -0.5f, 0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
-  };
+    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 0.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
+    0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+
+    -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+    0.5f,  0.5f,  0.5f,  1.0f, 1.0f, -0.5f, 0.5f,  0.5f,  0.0f, 1.0f, -0.5f, -0.5f, 0.5f,  0.0f, 0.0f,
+
+    -0.5f, 0.5f,  0.5f,  1.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 1.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  0.5f,  1.0f, 0.0f,
+
+    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 0.0f, 1.0f,
+    0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 1.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f,
+    0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+
+    -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, -0.5f, 0.5f,  0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f};
 
   static unsigned int indices[] = {
     0, 1, 3, // first triangle
@@ -132,12 +143,10 @@ namespace Krys::Gfx::OpenGL
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, triangleEBO);
     glNamedBufferData(triangleEBO, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
 
     glCreateVertexArrays(1, &skyboxVAO);
     glBindVertexArray(skyboxVAO);
@@ -164,16 +173,10 @@ namespace Krys::Gfx::OpenGL
     auto &view = camera.ViewMatrix();
     auto &projection = camera.ProjectionMatrix();
 
-    Maths::Mat4 transform = Maths::Identity<Maths::Mat4>();
-    //transform = Maths::Translate(transform, Maths::Vec3(0.0f, 0.0f, 0.0f));
-    //transform = Maths::Scale(transform, Maths::Vec3(0.50f));
-    transform = Maths::Rotate(transform, Maths::Radians(90.0f), Maths::Vec3(0.0f, 1.0f, 0.0f));
-
     auto &triangleShader = *shaders.at("triangle");
     triangleShader.Bind();
-    triangleShader.SetUniform("model", transform);
-    triangleShader.SetUniform("view", view, false);
-    triangleShader.SetUniform("projection", projection, false);
+    triangleShader.SetUniform("view", view);
+    triangleShader.SetUniform("projection", projection);
 
     textures.at("container")->Bind(0);
     triangleShader.SetUniform("texture1", 0);
@@ -182,7 +185,31 @@ namespace Krys::Gfx::OpenGL
     triangleShader.SetUniform("texture2", 1);
 
     glBindVertexArray(triangleVAO);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+    {
+      Maths::Vec3 cubePositions[] = {{0.0f, 0.0f, 0.0f},     {2.0f, 5.0f, -15.0f}, {-1.5f, -2.2f, -2.5f},
+                                     {-3.8f, -2.0f, -12.3f}, {2.4f, -0.4f, -3.5f}, {-1.7f, 3.0f, -7.5f},
+                                     {1.3f, -2.0f, -2.5f},   {1.5f, 2.0f, -2.5f},  {1.5f, 0.2f, -1.5f},
+                                     {-1.3f, 1.0f, -1.5f}};
+
+      for (uint i = 0; i < 10; i++)
+      {
+        Maths::Mat4 model = Maths::Identity<Maths::Mat4>();
+        model = Maths::Translate(model, cubePositions[i]);
+
+        float rotateSpeed = Maths::Radians(((i == 0 ? 12 : i) * 25.0f) / 4.f);
+        float radians = i % 3 == 0 ? (float)Platform::GetTime() * rotateSpeed : 20.0f * i;
+
+        if (i % 4 == 0)
+        {
+          radians = -(float)Platform::GetTime() * rotateSpeed;
+        }
+
+        model = Maths::Rotate(model, radians, Maths::Vec3(1.0f, 0.3f, 0.5f));
+        triangleShader.SetUniform("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+      }
+    }
   }
 
   void OpenGLContext::Present() noexcept
