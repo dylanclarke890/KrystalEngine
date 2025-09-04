@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Core.hpp"
 #include "Krystal.Engine/Application.hpp"
-#include "Krystal.Gfx/Cameras/FlyballCamera.hpp"
+#include "Krystal.Gfx/Cameras/FirstPersonCamera.hpp"
 #include "Krystal.IO/Image.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include "Krystal.Maths/Convert.hpp"
@@ -14,7 +14,7 @@ namespace Krys
   class Editor : public Application
   {
   private:
-    Gfx::FlyballCamera _camera;
+    Gfx::FirstPersonCamera _camera;
 
   public:
     explicit Editor(int argc, char **argv, const ApplicationSettings &settings) noexcept

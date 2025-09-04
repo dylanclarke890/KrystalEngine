@@ -1,11 +1,13 @@
-#include "Krystal.Gfx/Cameras/FlyballCamera.hpp"
+#include "Krystal.Gfx/Cameras/FirstPersonCamera.hpp"
 
 #include "Krystal.Maths/Convert.hpp"
+#include "Krystal.Maths/Clamp.hpp"
 
 namespace Krys::Gfx
 {
-  FlyballCamera::FlyballCamera(const Maths::Vec3 &position, const Maths::Vec3 &target, const Maths::Vec3 &up,
-                               float fovY, float aspect, float nearPlane, float farPlane) noexcept
+  FirstPersonCamera::FirstPersonCamera(const Maths::Vec3 &position, const Maths::Vec3 &target,
+                                       const Maths::Vec3 &up, float fovY, float aspect, float nearPlane,
+                                       float farPlane) noexcept
       : _position(position), _up(up), _fovY(fovY), _aspect(aspect)
   {
     using namespace Maths;
@@ -17,63 +19,70 @@ namespace Krys::Gfx
     _projectionMatrix = Perspective(_fovY, _aspect, nearPlane, farPlane);
   }
 
-  const Maths::Mat4 &FlyballCamera::ViewMatrix() const noexcept
+  const Maths::Mat4 &FirstPersonCamera::ViewMatrix() const noexcept
   {
     return _viewMatrix;
   }
 
-  const Maths::Mat4 &FlyballCamera::ProjectionMatrix() const noexcept
+  const Maths::Mat4 &FirstPersonCamera::ProjectionMatrix() const noexcept
   {
     return _projectionMatrix;
   }
 
-  const Maths::Vec3 &FlyballCamera::Position() const noexcept
+  const Maths::Vec3 &FirstPersonCamera::Position() const noexcept
   {
     return _position;
   }
 
-  const Maths::Vec3 &FlyballCamera::Forward() const noexcept
+  const Maths::Vec3 &FirstPersonCamera::Forward() const noexcept
   {
     return _forward;
   }
 
-  const Maths::Vec3 &FlyballCamera::Up() const noexcept
+  const Maths::Vec3 &FirstPersonCamera::Up() const noexcept
   {
     return _up;
   }
 
-  const Maths::Vec3 &FlyballCamera::Right() const noexcept
+  const Maths::Vec3 &FirstPersonCamera::Right() const noexcept
   {
     return _right;
   }
 
-  void FlyballCamera::Update(double deltaTime, const Platform::Input &input) noexcept
+  void FirstPersonCamera::Update(double deltaTime, const Platform::Input &input) noexcept
   {
     using namespace Platform;
     using namespace Maths;
 
-    float cameraSpeed = 5.f * (float)deltaTime;
+    float cameraSpeed = 5.f * static_cast<float>(deltaTime);
 
     const auto &keyboard = input.GetKeyboard();
+
+    if (keyboard.IsKeyPressed(Key::F))
+    {
+      _fixedYPosition = !_fixedYPosition;
+    }
+    auto yPosition = _position.y;
+    
     if (keyboard.IsKeyHeld(Key::W))
     {
       _position += cameraSpeed * _forward;
     }
-
     if (keyboard.IsKeyHeld(Key::S))
     {
       _position -= cameraSpeed * _forward;
     }
-
     if (keyboard.IsKeyHeld(Key::A))
     {
       _position -= Normalize(Cross(_up, _forward)) * cameraSpeed;
     }
-
     if (keyboard.IsKeyHeld(Key::D))
     {
       _position += Normalize(Cross(_up, _forward)) * cameraSpeed;
     }
+
+    if (_fixedYPosition)
+      _position.y = yPosition;
 
     float lookSensitivity = 0.1f;
     const auto &mouse = input.GetMouse();
@@ -85,13 +94,9 @@ namespace Krys::Gfx
       deltaX *= lookSensitivity;
       deltaY *= lookSensitivity;
 
-      _yaw += deltaX;
+      _yaw -= deltaX;
       _pitch += deltaY;
-
-      if (_pitch > 89.0f)
-        _pitch = 89.0f;
-      if (_pitch < -89.0f)
-        _pitch = -89.0f;
+      _pitch = Maths::Clamp(_pitch, -89.0f, 89.0f);
 
       Vec3 direction {};
       direction.x = std::cos(Radians(_yaw)) * std::cos(Radians(_pitch));
@@ -106,19 +111,15 @@ namespace Krys::Gfx
     if (scrollDelta != 0.0)
     {
       _fovY -= (float)mouse.ScrollDelta();
-      if (_fovY < 1.0f)
-        _fovY = 1.0f;
-      if (_fovY > 45.0f)
-        _fovY = 45.0f;
-
+      _fovY = Maths::Clamp(_fovY, 1.0f, 45.0f);
       _projectionMatrix = Perspective(_fovY, _aspect, 0.1f, 100.0f);
     }
   }
 
-  void FlyballCamera::OnResize(uint32 width, uint32 height) noexcept
+  void FirstPersonCamera::OnResize(uint32 width, uint32 height) noexcept
   {
     using namespace Maths;
-    float _aspect = static_cast<float>(width) / static_cast<float>(height);
+    _aspect = static_cast<float>(width) / static_cast<float>(height);
     _projectionMatrix = Perspective(_fovY, _aspect, 0.1f, 100.0f);
   }
 }

@@ -6,6 +6,7 @@
 #include "Krystal.Maths/Vector.hpp"
 
 #include <limits>
+#include <algorithm>
 
 namespace Krys::Maths
 {

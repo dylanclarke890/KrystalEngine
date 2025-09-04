@@ -21,12 +21,12 @@
     <ClInclude Include="include\Krystal.Gfx\ICamera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx\Cameras\FlyballCamera.hpp">
+    <ClInclude Include="include\Krystal.Gfx\Cameras\FirstPersonCamera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Cameras\FlyballCamera.cpp">
+    <ClCompile Include="src\Cameras\FirstPersonCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

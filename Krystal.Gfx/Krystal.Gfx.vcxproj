@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.Gfx\Cameras\FlyballCamera.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Cameras\FirstPersonCamera.hpp" />
     <ClInclude Include="include\Krystal.Gfx\ICamera.hpp" />
     <ClInclude Include="include\Krystal.Gfx\IContext.hpp" />
   </ItemGroup>
@@ -35,7 +35,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Cameras\FlyballCamera.cpp" />
+    <ClCompile Include="src\Cameras\FirstPersonCamera.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

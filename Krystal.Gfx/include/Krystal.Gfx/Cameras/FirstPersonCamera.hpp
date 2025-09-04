@@ -9,7 +9,7 @@
 
 namespace Krys::Gfx
 {
-  class FlyballCamera : public ICamera
+  class FirstPersonCamera : public ICamera
   {
   private:
     Maths::Mat4 _viewMatrix {};
@@ -22,11 +22,12 @@ namespace Krys::Gfx
     float _aspect {1.0f};
     float _yaw {-90.0f}; // Yaw is initialized to -90.0 degrees to look along the negative Z axis
     float _pitch {0.0f};
+    bool _fixedYPosition {false};
 
   public:
-    virtual ~FlyballCamera() noexcept = default;
+    virtual ~FirstPersonCamera() noexcept = default;
 
-    FlyballCamera(const Maths::Vec3 &position, const Maths::Vec3 &target, const Maths::Vec3 &up,
+    FirstPersonCamera(const Maths::Vec3 &position, const Maths::Vec3 &target, const Maths::Vec3 &up,
                       float fovY, float aspect, float nearPlane, float farPlane) noexcept;
 
     /// @brief Gets the view matrix of the camera.
