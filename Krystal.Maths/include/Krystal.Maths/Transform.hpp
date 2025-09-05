@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Krystal.Core/Core.hpp"
+#include "Krystal.Maths/Conventions.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Quaternion.hpp"
 #include "Krystal.Maths/Vector.hpp"
@@ -112,15 +113,18 @@ namespace Krys::Maths
   }
 
   /// @brief Constructs a look at matrix.
-  template <FloatingPoint T>
+  template <FloatingPoint T, Conventions::Handedness Handedness = Conventions::DefaultHandedness>
   NO_DISCARD constexpr auto LookAt(const Vector3<T> &eye, const Vector3<T> &center,
                                    const Vector3<T> &up) noexcept -> Matrix4x4<T>
   {
-#if KRYS_MATRIX_HANDEDNESS == KRYS_MATRIX_HANDEDNESS_LH
-    return LookAt_LH(eye, center, up);
-#else
-    return LookAt_RH(eye, center, up);
-#endif
+    if constexpr (Handedness == Conventions::Handedness::Left)
+    {
+      return LookAt_LH(eye, center, up);
+    }
+    else
+    {
+      return LookAt_RH(eye, center, up);
+    }
   }
 
   /// @brief Rotates the given vector by the given quaternion.
