@@ -2,6 +2,7 @@
 
 #include "Krystal.Core/Core.hpp"
 #include "Krystal.Gfx/ICamera.hpp"
+#define KRYS_MATRIX_HANDEDNESS KRYS_MATRIX_HANDEDNESS_RH
 #include "Krystal.Maths/Clipspace.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Transform.hpp"
@@ -12,14 +13,14 @@ namespace Krys::Gfx
   class FirstPersonCamera : public ICamera
   {
   private:
-    Maths::Mat4 _viewMatrix {};
-    Maths::Mat4 _projectionMatrix {};
     Maths::Vec3 _position {};
     Maths::Vec3 _forward {};
     Maths::Vec3 _up {};
     Maths::Vec3 _right {};
     float _fovY {0.0f};
     float _aspect {1.0f};
+    float _nearPlane {0.1f};
+    float _farPlane {100.f};
     float _yaw {-90.0f}; // Yaw is initialized to -90.0 degrees to look along the negative Z axis
     float _pitch {0.0f};
     bool _fixedYPosition {false};
@@ -32,11 +33,11 @@ namespace Krys::Gfx
 
     /// @brief Gets the view matrix of the camera.
     /// @return The view matrix.
-    const Maths::Mat4 &ViewMatrix() const noexcept override;
+    Maths::Mat4 ViewMatrix() const noexcept override;
 
     /// @brief Gets the projection matrix of the camera.
     /// @return The projection matrix.
-    const Maths::Mat4 &ProjectionMatrix() const noexcept override;
+    Maths::Mat4 ProjectionMatrix() const noexcept override;
 
     /// @brief Gets the position of the camera in world space.
     /// @return The position of the camera.
@@ -61,5 +62,8 @@ namespace Krys::Gfx
     /// @param deltaTime The time elapsed since the last frame in seconds.
     /// @param input The current input state.
     virtual void Update(double deltaTime, const Platform::Input &input) noexcept override;
+
+    private:
+    void UpdateCameraVectors() noexcept;
   };
 }

@@ -23,6 +23,7 @@
     <ClInclude Include="include\Krystal.Maths\Clipspace.hpp" />
     <ClInclude Include="include\Krystal.Maths\Compare.hpp" />
     <ClInclude Include="include\Krystal.Maths\Clamp.hpp" />
+    <ClInclude Include="include\Krystal.Maths\Conventions.hpp" />
     <ClInclude Include="include\Krystal.Maths\Convert.hpp" />
     <ClInclude Include="include\Krystal.Maths\Easing.hpp" />
     <ClInclude Include="include\Krystal.Maths\EulerAngles.hpp" />

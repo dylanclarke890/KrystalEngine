@@ -87,6 +87,9 @@
     <ClInclude Include="include\Krystal.Maths\Clamp.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Maths\Conventions.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\placeholder.cpp">

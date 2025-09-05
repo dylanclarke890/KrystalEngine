@@ -17,11 +17,11 @@ namespace Krys::Gfx
 
     /// @brief Gets the view matrix of the camera.
     /// @return The view matrix.
-    virtual const Maths::Mat4 &ViewMatrix() const noexcept = 0;
+    virtual Maths::Mat4 ViewMatrix() const noexcept = 0;
 
     /// @brief Gets the projection matrix of the camera.
     /// @return The projection matrix.
-    virtual const Maths::Mat4 &ProjectionMatrix() const noexcept = 0;
+    virtual Maths::Mat4 ProjectionMatrix() const noexcept = 0;
 
     /// @brief Gets the position of the camera in world space.
     /// @return The position of the camera.

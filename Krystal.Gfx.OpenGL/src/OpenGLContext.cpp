@@ -28,23 +28,29 @@
 namespace
 {
   static float vertices[] = {
-    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 0.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
-    0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.5f,  -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f,
+    0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f,
+    -0.5f, 0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f,
 
-    -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-    0.5f,  0.5f,  0.5f,  1.0f, 1.0f, -0.5f, 0.5f,  0.5f,  0.0f, 1.0f, -0.5f, -0.5f, 0.5f,  0.0f, 0.0f,
+    -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.5f,  -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+    -0.5f, 0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,
 
-    -0.5f, 0.5f,  0.5f,  1.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 1.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  0.5f,  1.0f, 0.0f,
+    -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, -1.0f, 0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,
+    -0.5f, -0.5f, 0.5f,  -1.0f, 0.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,
 
-    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 0.0f, 1.0f,
-    0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.5f,  0.5f,  -0.5f, 1.0f,  0.0f,  0.0f,
+    0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,
+    0.5f,  -0.5f, 0.5f,  1.0f,  0.0f,  0.0f,  0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 1.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f,
-    0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.5f,  -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,
+    0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,
+    -0.5f, -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,
 
-    -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, -0.5f, 0.5f,  0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f};
+    -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.5f,  0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+    -0.5f, 0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f};
 
   static unsigned int indices[] = {
     0, 1, 3, // first triangle
@@ -78,9 +84,9 @@ namespace
   static Map<string, Unique<OpenGLTexture2D>> textures;
   static Map<string, Unique<OpenGLCubeMap>> cubemaps;
 
-  static GLuint triangleVAO;
-  static GLuint triangleVBO;
-  static GLuint triangleEBO;
+  static GLuint objectVAO;
+  static GLuint objectVBO;
+  static GLuint objectEBO;
 
   static GLuint skyboxVAO;
   static GLuint skyboxVBO;
@@ -122,8 +128,6 @@ namespace Krys::Gfx::OpenGL
       using namespace IO;
 
       Path base = Path("data/shaders/opengl");
-      shaders["triangle"] =
-        CreateUnique<OpenGLShader>(base / Path("triangle.vert"), base / Path("triangle.frag"));
       shaders["skybox"] = CreateUnique<OpenGLShader>(base / Path("skybox.vert"), base / Path("skybox.frag"));
       shaders["lightsource"] =
         CreateUnique<OpenGLShader>(base / Path("lightsource.vert"), base / Path("lightsource.frag"));
@@ -140,26 +144,27 @@ namespace Krys::Gfx::OpenGL
       textures["container"] = CreateUnique<OpenGLTexture2D>(base / Path("container.jpg"));
       textures["awesomeface"] = CreateUnique<OpenGLTexture2D>(base / Path("awesomeface.png"));
 
-      //base = Path("data/assets/skyboxes/sky");
-      //cubemaps["skybox"] =
-      //  CreateUnique<OpenGLCubeMap>(base / Path("left.jpg"), base / Path("right.jpg"), base / Path("top.jpg"),
-      //              base / Path("bottom.jpg"), base / Path("front.jpg"), base / Path("back.jpg"));
+      // base = Path("data/assets/skyboxes/sky");
+      // cubemaps["skybox"] =
+      //   CreateUnique<OpenGLCubeMap>(base / Path("left.jpg"), base / Path("right.jpg"), base /
+      //   Path("top.jpg"),
+      //               base / Path("bottom.jpg"), base / Path("front.jpg"), base / Path("back.jpg"));
     }
 
-    glCreateVertexArrays(1, &triangleVAO);
-    glBindVertexArray(triangleVAO);
+    glCreateVertexArrays(1, &objectVAO);
+    glBindVertexArray(objectVAO);
 
-    glCreateBuffers(1, &triangleVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
-    glNamedBufferData(triangleVBO, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glCreateBuffers(1, &objectVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, objectVBO);
+    glNamedBufferData(objectVBO, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glCreateBuffers(1, &triangleEBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, triangleEBO);
-    glNamedBufferData(triangleEBO, sizeof(indices), indices, GL_STATIC_DRAW);
+    glCreateBuffers(1, &objectEBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, objectEBO);
+    glNamedBufferData(objectEBO, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
     glCreateVertexArrays(1, &skyboxVAO);
@@ -167,7 +172,7 @@ namespace Krys::Gfx::OpenGL
 
     glCreateBuffers(1, &skyboxVBO);
     glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-    glNamedBufferData(skyboxVBO, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+    glNamedBufferData(skyboxVBO, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
@@ -179,7 +184,7 @@ namespace Krys::Gfx::OpenGL
     glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
     glNamedBufferData(lightVBO, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
     glEnable(GL_DEPTH_TEST);
@@ -190,8 +195,13 @@ namespace Krys::Gfx::OpenGL
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    auto &view = camera.ViewMatrix();
-    auto &projection = camera.ProjectionMatrix();
+    auto view = camera.ViewMatrix();
+    auto projection = camera.ProjectionMatrix();
+
+    /*const float radius = 1.1f;
+    float lightX = std::sin((float)Platform::GetTime()) * radius;
+    float lightZ = std::cos((float)Platform::GetTime()) * radius;
+    lightPos = Maths::Vec3(lightX, 0.5f, lightZ);*/
 
     {
       auto &lightingShader = *shaders.at("lighting");
@@ -200,11 +210,13 @@ namespace Krys::Gfx::OpenGL
       lightingShader.SetUniform("projection", projection);
       lightingShader.SetUniform("objectColor", Maths::Vec3(1.0f, 0.5f, 0.31f));
       lightingShader.SetUniform("lightColor", Maths::Vec3(1.0f));
+      lightingShader.SetUniform("lightPos", lightPos);
+      lightingShader.SetUniform("viewPos", camera.Position());
 
       Maths::Mat4 model = Maths::Identity<Maths::Mat4>();
       lightingShader.SetUniform("model", model);
 
-      glBindVertexArray(triangleVAO);
+      glBindVertexArray(objectVAO);
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 

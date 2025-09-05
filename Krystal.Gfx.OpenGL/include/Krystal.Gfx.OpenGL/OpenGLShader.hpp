@@ -51,7 +51,7 @@ namespace Krys::Gfx::OpenGL
     }
 
     template <typename T>
-    void SetUniform(const Krys::string &uniformName, const T &value, bool required = true) noexcept
+    void SetUniform(const Krys::string &uniformName, const T &value, bool required = false) noexcept
     {
       using namespace Krys::Maths;
 
