@@ -34,18 +34,6 @@ namespace Krys
 
       BindEvents();
       _context->GraphicsContext->Setup();
-
-      {
-        using namespace IO;
-
-        auto baseDir = Path("data/assets/skyboxes/sky");
-        auto skybox =
-          LoadCubeMap(baseDir / Path("left.jpg"), baseDir / Path("right.jpg"), baseDir / Path("top.jpg"),
-                      baseDir / Path("bottom.jpg"), baseDir / Path("front.jpg"), baseDir / Path("back.jpg"));
-        assert(skybox.has_value());
-
-        _context->GraphicsContext->SetSkybox(skybox.value());
-      }
     }
 
     void BindEvents() noexcept

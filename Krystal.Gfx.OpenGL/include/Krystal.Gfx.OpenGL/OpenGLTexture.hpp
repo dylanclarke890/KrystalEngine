@@ -44,6 +44,8 @@ namespace Krys::Gfx::OpenGL
         glTextureParameteri(_handle, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTextureParameteri(_handle, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
       }
+      // TODO: were you on drugs? This needs 6 filepaths, one for each face of the cubemap. Move it to it's
+      // own constructor.
       else if constexpr (TextureType == GL_TEXTURE_CUBE_MAP)
       {
         auto cubeMapResult = IO::LoadCubeMap(filepath, settings);

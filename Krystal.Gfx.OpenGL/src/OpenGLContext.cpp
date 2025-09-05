@@ -139,6 +139,11 @@ namespace Krys::Gfx::OpenGL
       textures["wall"] = CreateUnique<OpenGLTexture2D>(base / Path("wall.jpg"));
       textures["container"] = CreateUnique<OpenGLTexture2D>(base / Path("container.jpg"));
       textures["awesomeface"] = CreateUnique<OpenGLTexture2D>(base / Path("awesomeface.png"));
+
+      //base = Path("data/assets/skyboxes/sky");
+      //cubemaps["skybox"] =
+      //  CreateUnique<OpenGLCubeMap>(base / Path("left.jpg"), base / Path("right.jpg"), base / Path("top.jpg"),
+      //              base / Path("bottom.jpg"), base / Path("front.jpg"), base / Path("back.jpg"));
     }
 
     glCreateVertexArrays(1, &triangleVAO);
@@ -178,10 +183,6 @@ namespace Krys::Gfx::OpenGL
     glEnableVertexAttribArray(0);
 
     glEnable(GL_DEPTH_TEST);
-  }
-
-  void OpenGLContext::SetSkybox(const IO::CubeMapImage &) noexcept
-  {
   }
 
   void OpenGLContext::Render(ICamera &camera) noexcept

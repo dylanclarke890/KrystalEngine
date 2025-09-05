@@ -27,8 +27,6 @@ namespace Krys::Gfx::D3D11
 
     void Render(ICamera& camera) noexcept override;
 
-    void SetSkybox(const IO::CubeMapImage &skybox) noexcept override;
-
     void Present() noexcept override;
 
     virtual void Resize(uint32 width, uint32 height) noexcept override;
