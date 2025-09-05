@@ -177,6 +177,9 @@
   <ItemGroup>
     <None Include="build\shaders\triangle.frag.spv" />
     <None Include="build\shaders\triangle.vert.spv" />
+    <None Include="data\shaders\opengl\lighting.frag" />
+    <None Include="data\shaders\opengl\lightsource.frag" />
+    <None Include="data\shaders\opengl\lightsource.vert" />
     <None Include="data\shaders\opengl\skybox.frag" />
     <None Include="data\shaders\opengl\skybox.vert" />
     <None Include="data\shaders\opengl\triangle.frag" />

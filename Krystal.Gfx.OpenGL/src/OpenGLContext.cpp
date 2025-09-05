@@ -86,6 +86,11 @@ namespace
   static GLuint skyboxVBO;
   static GLuint skyboxTexture;
   static bool skyboxSet = false;
+
+  static GLuint lightVAO;
+  static GLuint lightVBO;
+
+  static Maths::Vec3 lightPos(1.2f, 1.0f, 2.0f);
 }
 
 namespace Krys::Gfx
@@ -120,6 +125,10 @@ namespace Krys::Gfx::OpenGL
       shaders["triangle"] =
         CreateUnique<OpenGLShader>(base / Path("triangle.vert"), base / Path("triangle.frag"));
       shaders["skybox"] = CreateUnique<OpenGLShader>(base / Path("skybox.vert"), base / Path("skybox.frag"));
+      shaders["lightsource"] =
+        CreateUnique<OpenGLShader>(base / Path("lightsource.vert"), base / Path("lightsource.frag"));
+      shaders["lighting"] =
+        CreateUnique<OpenGLShader>(base / Path("triangle.vert"), base / Path("lighting.frag"));
     }
 
     // Textures
@@ -158,6 +167,16 @@ namespace Krys::Gfx::OpenGL
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
+    glCreateVertexArrays(1, &lightVAO);
+    glBindVertexArray(lightVAO);
+
+    glCreateBuffers(1, &lightVBO);
+    glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
+    glNamedBufferData(lightVBO, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+    glEnableVertexAttribArray(0);
+
     glEnable(GL_DEPTH_TEST);
   }
 
@@ -173,42 +192,34 @@ namespace Krys::Gfx::OpenGL
     auto &view = camera.ViewMatrix();
     auto &projection = camera.ProjectionMatrix();
 
-    auto &triangleShader = *shaders.at("triangle");
-    triangleShader.Bind();
-    triangleShader.SetUniform("view", view);
-    triangleShader.SetUniform("projection", projection);
+    {
+      auto &lightingShader = *shaders.at("lighting");
+      lightingShader.Bind();
+      lightingShader.SetUniform("view", view);
+      lightingShader.SetUniform("projection", projection);
+      lightingShader.SetUniform("objectColor", Maths::Vec3(1.0f, 0.5f, 0.31f));
+      lightingShader.SetUniform("lightColor", Maths::Vec3(1.0f));
 
-    textures.at("container")->Bind(0);
-    triangleShader.SetUniform("texture1", 0);
+      Maths::Mat4 model = Maths::Identity<Maths::Mat4>();
+      lightingShader.SetUniform("model", model);
 
-    textures.at("awesomeface")->Bind(1);
-    triangleShader.SetUniform("texture2", 1);
-
-    glBindVertexArray(triangleVAO);
+      glBindVertexArray(triangleVAO);
+      glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
 
     {
-      Maths::Vec3 cubePositions[] = {{0.0f, 0.0f, 0.0f},     {2.0f, 5.0f, -15.0f}, {-1.5f, -2.2f, -2.5f},
-                                     {-3.8f, -2.0f, -12.3f}, {2.4f, -0.4f, -3.5f}, {-1.7f, 3.0f, -7.5f},
-                                     {1.3f, -2.0f, -2.5f},   {1.5f, 2.0f, -2.5f},  {1.5f, 0.2f, -1.5f},
-                                     {-1.3f, 1.0f, -1.5f}};
+      auto &lightSourceShader = *shaders.at("lightsource");
+      lightSourceShader.Bind();
+      lightSourceShader.SetUniform("view", view);
+      lightSourceShader.SetUniform("projection", projection);
 
-      for (uint i = 0; i < 10; i++)
-      {
-        Maths::Mat4 model = Maths::Identity<Maths::Mat4>();
-        model = Maths::Translate(model, cubePositions[i]);
+      Maths::Mat4 model = Maths::Identity<Maths::Mat4>();
+      model = Maths::Translate(model, lightPos);
+      model = Maths::Scale(model, Maths::Vec3(0.2f)); // a smaller cube
+      lightSourceShader.SetUniform("model", model);
 
-        float rotateSpeed = Maths::Radians(((i == 0 ? 12 : i) * 25.0f) / 4.f);
-        float radians = i % 3 == 0 ? (float)Platform::GetTime() * rotateSpeed : 20.0f * i;
-
-        if (i % 4 == 0)
-        {
-          radians = -(float)Platform::GetTime() * rotateSpeed;
-        }
-
-        model = Maths::Rotate(model, radians, Maths::Vec3(1.0f, 0.3f, 0.5f));
-        triangleShader.SetUniform("model", model);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
-      }
+      glBindVertexArray(lightVAO);
+      glDrawArrays(GL_TRIANGLES, 0, 36);
     }
   }
 

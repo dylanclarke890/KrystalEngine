@@ -33,6 +33,9 @@
     <None Include="data\shaders\opengl\triangle.frag" />
     <None Include="data\shaders\opengl\skybox.vert" />
     <None Include="data\shaders\opengl\skybox.frag" />
+    <None Include="data\shaders\opengl\lightsource.frag" />
+    <None Include="data\shaders\opengl\lightsource.vert" />
+    <None Include="data\shaders\opengl\lighting.frag" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">
