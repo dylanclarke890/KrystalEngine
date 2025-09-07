@@ -24,6 +24,7 @@
     <ClInclude Include="include\Krystal.Gfx\Material.hpp" />
     <ClInclude Include="include\Krystal.Gfx\ICamera.hpp" />
     <ClInclude Include="include\Krystal.Gfx\IContext.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\VertexBufferLayout.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Krystal.Core\Krystal.Core.vcxproj">

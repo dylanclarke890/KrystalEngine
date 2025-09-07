@@ -21,6 +21,7 @@
 #include "Krystal.Gfx.OpenGL/OpenGLShader.hpp"
 #include "Krystal.Gfx.OpenGL/OpenGLTexture.hpp"
 #include "Krystal.Gfx/Material.hpp"
+#include "Krystal.Gfx/VertexBufferLayout.hpp"
 #include "Krystal.Maths/Convert.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Transform.hpp"
@@ -118,12 +119,78 @@ namespace
 
   static OpenGLModel *backpack;
 
+  static VertexBufferLayout basicLayout({
+    {VertexAttributeType::Float, 3}, // Position
+    {VertexAttributeType::Float, 3}, // Normal
+    {VertexAttributeType::Float, 2}, // TexCoord
+  });
+
+  static VertexBufferLayout lightSourceLayout({
+    {VertexAttributeType::Float, 3},                   // Position
+    {VertexAttributeType::Float, 3, IsEnabled(false)}, // Normal
+    {VertexAttributeType::Float, 2, IsEnabled(false)}, // TexCoord
+  });
+
+  static VertexBufferLayout positionOnlyLayout({
+    {VertexAttributeType::Float, 3}, // Position
+  });
+
   static void SetFlatColourMaterial(OpenGLShader &shader, FlatColourMaterial &material)
   {
     shader.SetUniform("material.ambient", Colour::ToVec3(material.Ambient));
     shader.SetUniform("material.diffuse", Colour::ToVec3(material.Diffuse));
     shader.SetUniform("material.specular", Colour::ToVec3(material.Specular));
     shader.SetUniform("material.shininess", material.Shininess);
+  }
+
+  static GLenum GLTypeFromVertexAttributeType(VertexAttributeType type) noexcept
+  {
+    switch (type)
+    {
+      case VertexAttributeType::Int32:  return GL_INT;
+      case VertexAttributeType::UInt32: return GL_UNSIGNED_INT;
+      case VertexAttributeType::Float:  return GL_FLOAT;
+      case VertexAttributeType::Double: return GL_DOUBLE;
+      default:                          return 0;
+    }
+  }
+
+  static void ApplyVertexBufferLayout(const VertexBufferLayout &layout) noexcept
+  {
+    uint32 stride = 0;
+    for (const auto &element : layout)
+    {
+      stride += element.Count * VertexBufferElement::GetSizeOfType(element.Type);
+    }
+
+    uint32 offset = 0;
+    for (uint32 i = 0; i < layout.size(); i++)
+    {
+      const auto &element = layout[i];
+      if (element.Enabled)
+      {
+        switch (element.Type)
+        {
+          case VertexAttributeType::Int32:
+          case VertexAttributeType::UInt32:
+            glVertexAttribIPointer(i, element.Count, GLTypeFromVertexAttributeType(element.Type), stride,
+                                   (const void *)(uintptr_t)offset);
+            break;
+          case VertexAttributeType::Double:
+            glVertexAttribLPointer(i, element.Count, GLTypeFromVertexAttributeType(element.Type), stride,
+                                   (const void *)(uintptr_t)offset);
+            break;
+          case VertexAttributeType::Float:
+            glVertexAttribPointer(i, element.Count, GLTypeFromVertexAttributeType(element.Type),
+                                  element.Normalized ? GL_TRUE : GL_FALSE, stride,
+                                  (const void *)(uintptr_t)offset);
+          default: break;
+        }
+        glEnableVertexAttribArray(i);
+      }
+
+      offset += element.Count * VertexBufferElement::GetSizeOfType(element.Type);
+    }
   }
 }
 
@@ -195,43 +262,39 @@ namespace Krys::Gfx::OpenGL
       backpack = new OpenGLModel(base / Path("backpack/backpack.obj"));
     }
 
-    glCreateVertexArrays(1, &objectVAO);
-    glBindVertexArray(objectVAO);
+    {
+      glCreateVertexArrays(1, &objectVAO);
+      glBindVertexArray(objectVAO);
 
-    glCreateBuffers(1, &objectVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, objectVBO);
-    glNamedBufferData(objectVBO, sizeof(vertices), vertices, GL_STATIC_DRAW);
+      glCreateBuffers(1, &objectEBO);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, objectEBO);
+      glNamedBufferData(objectEBO, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glCreateBuffers(1, &objectEBO);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, objectEBO);
-    glNamedBufferData(objectEBO, sizeof(indices), indices, GL_STATIC_DRAW);
+      glCreateBuffers(1, &objectVBO);
+      glBindBuffer(GL_ARRAY_BUFFER, objectVBO);
+      glNamedBufferData(objectVBO, sizeof(vertices), vertices, GL_STATIC_DRAW);
+      ApplyVertexBufferLayout(basicLayout);
+    }
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
+    {
+      glCreateVertexArrays(1, &skyboxVAO);
+      glBindVertexArray(skyboxVAO);
 
-    glCreateVertexArrays(1, &skyboxVAO);
-    glBindVertexArray(skyboxVAO);
+      glCreateBuffers(1, &skyboxVBO);
+      glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+      glNamedBufferData(skyboxVBO, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
+      ApplyVertexBufferLayout(positionOnlyLayout);
+    }
 
-    glCreateBuffers(1, &skyboxVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-    glNamedBufferData(skyboxVBO, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
+    {
+      glCreateVertexArrays(1, &lightVAO);
+      glBindVertexArray(lightVAO);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-    glEnableVertexAttribArray(0);
-
-    glCreateVertexArrays(1, &lightVAO);
-    glBindVertexArray(lightVAO);
-
-    glCreateBuffers(1, &lightVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
-    glNamedBufferData(lightVBO, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
-    glEnableVertexAttribArray(0);
+      glCreateBuffers(1, &lightVBO);
+      glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
+      glNamedBufferData(lightVBO, sizeof(vertices), vertices, GL_STATIC_DRAW);
+      ApplyVertexBufferLayout(basicLayout);
+    }
 
     glEnable(GL_DEPTH_TEST);
   }
