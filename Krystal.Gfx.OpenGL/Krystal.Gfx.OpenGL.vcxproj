@@ -43,6 +43,7 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Official\glext.h" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Official\khrplatform.h" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Official\wglext.h" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\OpenGLModel.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\OpenGLShader.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\OpenGLTexture.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Win32\GLContextPlatformImpl.hpp" />
@@ -113,7 +114,7 @@
     <IncludePath>$(KrysProjectInclude);$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(KrysProjectInclude);$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <IncludePath>$(KrysProjectInclude);$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Program Files\Assimp\include;</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

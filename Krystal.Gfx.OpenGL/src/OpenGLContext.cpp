@@ -17,6 +17,7 @@
 #endif
 
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
+#include "Krystal.Gfx.OpenGL/OpenGLModel.hpp"
 #include "Krystal.Gfx.OpenGL/OpenGLShader.hpp"
 #include "Krystal.Gfx.OpenGL/OpenGLTexture.hpp"
 #include "Krystal.Gfx/Material.hpp"
@@ -115,6 +116,8 @@ namespace
   static FlatColourMaterial cubeMaterial(Colour(1.0f, 0.5f, 0.31f), Colour(1.0f, 0.5f, 0.31f),
                                          Colour(0.5f, 0.5f, 0.5f), 32.0f);
 
+  static OpenGLModel *backpack;
+
   static void SetFlatColourMaterial(OpenGLShader &shader, FlatColourMaterial &material)
   {
     shader.SetUniform("material.ambient", Colour::ToVec3(material.Ambient));
@@ -162,6 +165,8 @@ namespace Krys::Gfx::OpenGL
         CreateUnique<OpenGLShader>(base / Path("basic.vert"), base / Path("flat-colour-phong-material.frag"));
       shaders["phong-material"] =
         CreateUnique<OpenGLShader>(base / Path("basic.vert"), base / Path("phong-material.frag"));
+      shaders["backpack"] =
+        CreateUnique<OpenGLShader>(base / Path("backpack.vert"), base / Path("backpack.frag"));
     }
 
     // Textures
@@ -181,6 +186,13 @@ namespace Krys::Gfx::OpenGL
       //   CreateUnique<OpenGLCubeMap>(base / Path("left.jpg"), base / Path("right.jpg"), base /
       //   Path("top.jpg"),
       //               base / Path("bottom.jpg"), base / Path("front.jpg"), base / Path("back.jpg"));
+    }
+
+    // Models
+    {
+      using namespace IO;
+      Path base = Path("data/assets/models");
+      backpack = new OpenGLModel(base / Path("backpack/backpack.obj"));
     }
 
     glCreateVertexArrays(1, &objectVAO);
@@ -241,6 +253,7 @@ namespace Krys::Gfx::OpenGL
     Maths::Vec3 ambientColor = {0.2f, 0.2f, 0.2f};
     Maths::Vec3 specularColor = {1.0f, 1.0f, 1.0f};
 
+    // Draw cubes
     {
       auto &lightingShader = *shaders.at("phong-material");
       lightingShader.Bind();
@@ -312,6 +325,7 @@ namespace Krys::Gfx::OpenGL
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
+    // Draw lights
     {
       auto &lightSourceShader = *shaders.at("light-source");
       lightSourceShader.Bind();
@@ -329,6 +343,22 @@ namespace Krys::Gfx::OpenGL
         lightSourceShader.SetUniform("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
       }
+    }
+
+    {
+      auto &backpackShader = *shaders.at("backpack");
+      backpackShader.Bind();
+      backpackShader.SetUniform("view", view);
+      backpackShader.SetUniform("projection", projection);
+
+      Maths::Mat4 model = Maths::Identity<Maths::Mat4>();
+      model = Maths::Translate(
+        model, Maths::Vec3(0.0f, -1.75f, 0.0f)); // translate it down so it's at the center of the scene
+      model = Maths::Scale(
+        model, Maths::Vec3(0.2f, 0.2f, 0.2f)); // it's a bit too big for our scene, so scale it down
+
+      backpackShader.SetUniform("model", model);
+      backpack->Draw(backpackShader);
     }
   }
 

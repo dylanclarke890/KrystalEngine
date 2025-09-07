@@ -121,8 +121,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>winmm.lib;$(CoreLibraryDependencies);vulkan-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\VulkanSDK\1.4.321.1\Lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>winmm.lib;$(CoreLibraryDependencies);vulkan-1.lib;%(AdditionalDependencies);assimp-vc143-mt.lib;</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\VulkanSDK\1.4.321.1\Lib;C:\Program Files\Assimp\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -177,6 +177,7 @@
   <ItemGroup>
     <None Include="build\shaders\triangle.frag.spv" />
     <None Include="build\shaders\triangle.vert.spv" />
+    <None Include="data\assets\models\backpack\backpack.mtl" />
     <None Include="data\shaders\opengl\lighting.frag" />
     <None Include="data\shaders\opengl\lightsource.frag" />
     <None Include="data\shaders\opengl\lightsource.vert" />
@@ -193,6 +194,11 @@
     <Image Include="data\assets\container-emission.png" />
     <Image Include="data\assets\container.jpg" />
     <Image Include="data\assets\container-specular.png" />
+    <Image Include="data\assets\models\backpack\ao.jpg" />
+    <Image Include="data\assets\models\backpack\diffuse.jpg" />
+    <Image Include="data\assets\models\backpack\normal.png" />
+    <Image Include="data\assets\models\backpack\roughness.jpg" />
+    <Image Include="data\assets\models\backpack\specular.jpg" />
     <Image Include="data\assets\skyboxes\sky\back.jpg" />
     <Image Include="data\assets\skyboxes\sky\bottom.jpg" />
     <Image Include="data\assets\skyboxes\sky\front.jpg" />
@@ -217,6 +223,38 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="data\shaders\opengl\phong-material.frag">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\assets\models\backpack\backpack.obj">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="data\assets\models\backpack\source_attribution.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\shaders\opengl\backpack.frag">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <FileType>Document</FileType>
+    </None>
+    <None Include="data\shaders\opengl\backpack.vert">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
       <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>

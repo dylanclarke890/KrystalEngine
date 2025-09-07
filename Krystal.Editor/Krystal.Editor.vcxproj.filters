@@ -38,6 +38,10 @@
     <None Include="data\shaders\opengl\lighting.frag" />
     <None Include="data\shaders\opengl\flat-colour-phong-material.frag" />
     <None Include="data\shaders\opengl\phong-material.frag" />
+    <None Include="data\assets\models\backpack\backpack.mtl" />
+    <None Include="data\shaders\opengl\backpack.vert" />
+    <None Include="data\shaders\opengl\backpack.frag" />
+    <None Include="data\assets\models\backpack\backpack.obj" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">
@@ -76,5 +80,23 @@
     <Image Include="data\assets\container-emission.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="data\assets\models\backpack\ao.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\models\backpack\diffuse.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\models\backpack\normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\models\backpack\roughness.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\models\backpack\specular.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="data\assets\models\backpack\source_attribution.txt" />
   </ItemGroup>
 </Project>
