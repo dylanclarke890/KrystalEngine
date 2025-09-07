@@ -5,6 +5,7 @@
 
 namespace Krys::Gfx
 {
+  // TODO: we need to be able to lock the cursor to the center of the window when looking around
   FirstPersonCamera::FirstPersonCamera(const Maths::Vec3 &position, const Maths::Vec3 &target,
                                        const Maths::Vec3 &up, float fovY, float aspect, float nearPlane,
                                        float farPlane) noexcept

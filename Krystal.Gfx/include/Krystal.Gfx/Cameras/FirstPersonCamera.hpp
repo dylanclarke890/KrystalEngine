@@ -2,7 +2,6 @@
 
 #include "Krystal.Core/Core.hpp"
 #include "Krystal.Gfx/ICamera.hpp"
-#define KRYS_MATRIX_HANDEDNESS KRYS_MATRIX_HANDEDNESS_RH
 #include "Krystal.Maths/Clipspace.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Transform.hpp"

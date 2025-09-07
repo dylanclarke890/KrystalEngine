@@ -102,7 +102,7 @@ namespace Krys::Gfx::OpenGL
       else if constexpr (std::is_same_v<T, List<Mat4>>)
         glProgramUniformMatrix4fv(_handle, location, value.size(), GL_FALSE, &value[0][0].x);
       else
-        assert(false && "Unsupported uniform type.");
+        static_assert(false && "Unsupported uniform type.");
     }
 
     NO_DISCARD GLuint GetNativeHandle() const noexcept

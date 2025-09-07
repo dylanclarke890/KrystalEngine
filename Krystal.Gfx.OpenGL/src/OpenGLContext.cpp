@@ -19,6 +19,7 @@
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
 #include "Krystal.Gfx.OpenGL/OpenGLShader.hpp"
 #include "Krystal.Gfx.OpenGL/OpenGLTexture.hpp"
+#include "Krystal.Gfx/Material.hpp"
 #include "Krystal.Maths/Convert.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Transform.hpp"
@@ -28,29 +29,36 @@
 namespace
 {
   static float vertices[] = {
-    -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.5f,  -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f,
-    0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f,
-    -0.5f, 0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f,
+    // positions          // normals           // texture coords
+    -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f,  0.0f,  0.5f,  -0.5f, -0.5f, 0.0f,
+    0.0f,  -1.0f, 1.0f,  0.0f,  0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f,  1.0f,
+    0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f,  1.0f,  -0.5f, 0.5f,  -0.5f, 0.0f,
+    0.0f,  -1.0f, 0.0f,  1.0f,  -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f,  0.0f,
 
-    -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.5f,  -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-    -0.5f, 0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,
+    -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,  0.5f,  -0.5f, 0.5f,  0.0f,
+    0.0f,  1.0f,  1.0f,  0.0f,  0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,  -0.5f, 0.5f,  0.5f,  0.0f,
+    0.0f,  1.0f,  0.0f,  1.0f,  -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
 
-    -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, -1.0f, 0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,
-    -0.5f, -0.5f, 0.5f,  -1.0f, 0.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,
+    -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, -1.0f,
+    0.0f,  0.0f,  1.0f,  1.0f,  -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  -0.5f, -0.5f, 0.5f,  -1.0f,
+    0.0f,  0.0f,  0.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
 
-    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.5f,  0.5f,  -0.5f, 1.0f,  0.0f,  0.0f,
-    0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,
-    0.5f,  -0.5f, 0.5f,  1.0f,  0.0f,  0.0f,  0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
+    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.5f,  0.5f,  -0.5f, 1.0f,
+    0.0f,  0.0f,  1.0f,  1.0f,  0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
+    0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.0f,  1.0f,  0.5f,  -0.5f, 0.5f,  1.0f,
+    0.0f,  0.0f,  0.0f,  0.0f,  0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
 
-    -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.5f,  -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,
-    0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,
-    -0.5f, -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.0f,  1.0f,  0.5f,  -0.5f, -0.5f, 0.0f,
+    -1.0f, 0.0f,  1.0f,  1.0f,  0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  1.0f,  0.0f,
+    0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  1.0f,  0.0f,  -0.5f, -0.5f, 0.5f,  0.0f,
+    -1.0f, 0.0f,  0.0f,  0.0f,  -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.0f,  1.0f,
 
-    -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.5f,  0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-    -0.5f, 0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f};
+    -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.5f,  0.5f,  -0.5f, 0.0f,
+    1.0f,  0.0f,  1.0f,  1.0f,  0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  0.0f,
+    1.0f,  0.0f,  0.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f};
 
   static unsigned int indices[] = {
     0, 1, 3, // first triangle
@@ -78,6 +86,7 @@ namespace
     1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f};
 
   using namespace Krys;
+  using namespace Krys::Gfx;
   using namespace Krys::Gfx::OpenGL;
 
   static Map<string, Unique<OpenGLShader>> shaders;
@@ -96,7 +105,19 @@ namespace
   static GLuint lightVAO;
   static GLuint lightVBO;
 
-  static Maths::Vec3 lightPos(1.2f, 1.0f, 2.0f);
+  static Maths::Vec3 lightPosition(1.2f, 1.0f, 2.0f);
+  static Maths::Vec3 lightDirection(-0.2f, -1.0f, -0.3f);
+
+  static FlatColourMaterial cubeMaterial(Colour(1.0f, 0.5f, 0.31f), Colour(1.0f, 0.5f, 0.31f),
+                                         Colour(0.5f, 0.5f, 0.5f), 32.0f);
+
+  static void SetFlatColourMaterial(OpenGLShader &shader, FlatColourMaterial &material)
+  {
+    shader.SetUniform("material.ambient", Colour::ToVec3(material.Ambient));
+    shader.SetUniform("material.diffuse", Colour::ToVec3(material.Diffuse));
+    shader.SetUniform("material.specular", Colour::ToVec3(material.Specular));
+    shader.SetUniform("material.shininess", material.Shininess);
+  }
 }
 
 namespace Krys::Gfx
@@ -129,10 +150,14 @@ namespace Krys::Gfx::OpenGL
 
       Path base = Path("data/shaders/opengl");
       shaders["skybox"] = CreateUnique<OpenGLShader>(base / Path("skybox.vert"), base / Path("skybox.frag"));
-      shaders["lightsource"] =
+      shaders["light-source"] =
         CreateUnique<OpenGLShader>(base / Path("lightsource.vert"), base / Path("lightsource.frag"));
       shaders["lighting"] =
-        CreateUnique<OpenGLShader>(base / Path("triangle.vert"), base / Path("lighting.frag"));
+        CreateUnique<OpenGLShader>(base / Path("basic.vert"), base / Path("lighting.frag"));
+      shaders["flat-colour-phong-material"] =
+        CreateUnique<OpenGLShader>(base / Path("basic.vert"), base / Path("flat-colour-phong-material.frag"));
+      shaders["phong-material"] =
+        CreateUnique<OpenGLShader>(base / Path("basic.vert"), base / Path("phong-material.frag"));
     }
 
     // Textures
@@ -143,6 +168,9 @@ namespace Krys::Gfx::OpenGL
       textures["wall"] = CreateUnique<OpenGLTexture2D>(base / Path("wall.jpg"));
       textures["container"] = CreateUnique<OpenGLTexture2D>(base / Path("container.jpg"));
       textures["awesomeface"] = CreateUnique<OpenGLTexture2D>(base / Path("awesomeface.png"));
+      textures["container-diffuse"] = CreateUnique<OpenGLTexture2D>(base / Path("container-diffuse.png"));
+      textures["container-specular"] = CreateUnique<OpenGLTexture2D>(base / Path("container-specular.png"));
+      textures["container-emission"] = CreateUnique<OpenGLTexture2D>(base / Path("container-emission.png"));
 
       // base = Path("data/assets/skyboxes/sky");
       // cubemaps["skybox"] =
@@ -162,10 +190,12 @@ namespace Krys::Gfx::OpenGL
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, objectEBO);
     glNamedBufferData(objectEBO, sizeof(indices), indices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
 
     glCreateVertexArrays(1, &skyboxVAO);
     glBindVertexArray(skyboxVAO);
@@ -184,7 +214,7 @@ namespace Krys::Gfx::OpenGL
     glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
     glNamedBufferData(lightVBO, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
     glEnableVertexAttribArray(0);
 
     glEnable(GL_DEPTH_TEST);
@@ -198,38 +228,93 @@ namespace Krys::Gfx::OpenGL
     auto view = camera.ViewMatrix();
     auto projection = camera.ProjectionMatrix();
 
-    /*const float radius = 1.1f;
-    float lightX = std::sin((float)Platform::GetTime()) * radius;
-    float lightZ = std::cos((float)Platform::GetTime()) * radius;
-    lightPos = Maths::Vec3(lightX, 0.5f, lightZ);*/
+    // const float radius = 1.1f;
+    // float lightX = std::sin((float)Platform::GetTime()) * radius;
+    // float lightZ = std::cos((float)Platform::GetTime()) * radius;
+    // lightPos = Maths::Vec3(lightX, 0.5f, lightZ);
+
+    Maths::Vec3 diffuseColor = {0.5f, 0.5f, 0.5f};
+    Maths::Vec3 ambientColor = {0.2f, 0.2f, 0.2f};
+    Maths::Vec3 specularColor = {1.0f, 1.0f, 1.0f};
 
     {
-      auto &lightingShader = *shaders.at("lighting");
+      auto &lightingShader = *shaders.at("phong-material");
       lightingShader.Bind();
+      lightingShader.SetUniform("time", (float)Platform::GetTime());
       lightingShader.SetUniform("view", view);
       lightingShader.SetUniform("projection", projection);
-      lightingShader.SetUniform("objectColor", Maths::Vec3(1.0f, 0.5f, 0.31f));
-      lightingShader.SetUniform("lightColor", Maths::Vec3(1.0f));
-      lightingShader.SetUniform("lightPos", lightPos);
       lightingShader.SetUniform("viewPos", camera.Position());
 
-      Maths::Mat4 model = Maths::Identity<Maths::Mat4>();
-      lightingShader.SetUniform("model", model);
+      // Lights
+      {
+        lightingShader.SetUniform("directionalLight.direction", lightDirection);
+        lightingShader.SetUniform("directionalLight.diffuse", diffuseColor);
+        lightingShader.SetUniform("directionalLight.ambient", ambientColor);
+        lightingShader.SetUniform("directionalLight.specular", specularColor);
+
+        lightingShader.SetUniform("pointLight.position", lightPosition);
+        lightingShader.SetUniform("pointLight.diffuse", diffuseColor);
+        lightingShader.SetUniform("pointLight.ambient", ambientColor);
+        lightingShader.SetUniform("pointLight.specular", specularColor);
+        lightingShader.SetUniform("pointLight.constant", 1.0f);
+        lightingShader.SetUniform("pointLight.linear", 0.09f);
+        lightingShader.SetUniform("pointLight.quadratic", 0.032f);
+
+        lightingShader.SetUniform("spotLight.position", camera.Position());
+        lightingShader.SetUniform("spotLight.direction", camera.Forward());
+        lightingShader.SetUniform("spotLight.diffuse", diffuseColor);
+        lightingShader.SetUniform("spotLight.ambient", ambientColor);
+        lightingShader.SetUniform("spotLight.specular", specularColor);
+        lightingShader.SetUniform("spotLight.constant", 1.0f);
+        lightingShader.SetUniform("spotLight.linear", 0.09f);
+        lightingShader.SetUniform("spotLight.quadratic", 0.032f);
+        lightingShader.SetUniform("spotLight.cutOff", std::cos(Maths::Radians(12.5f)));
+        lightingShader.SetUniform("spotLight.outerCutOff", std::cos(Maths::Radians(15.0f)));
+      }
+
+      // Material
+      {
+        lightingShader.SetUniform("material.ambient", 0);
+        lightingShader.SetUniform("material.specular", 1);
+        lightingShader.SetUniform("material.emission", 2);
+        lightingShader.SetUniform("material.shininess", cubeMaterial.Shininess);
+
+        textures.at("container-diffuse")->Bind(0);
+        textures.at("container-specular")->Bind(1);
+        textures.at("container-emission")->Bind(2);
+      }
 
       glBindVertexArray(objectVAO);
+      Maths::Vec3 cubePositions[] = {Maths::Vec3(0.0f, 0.0f, 0.0f),    Maths::Vec3(2.0f, 5.0f, -15.0f),
+                                     Maths::Vec3(-1.5f, -2.2f, -2.5f), Maths::Vec3(-3.8f, -2.0f, -12.3f),
+                                     Maths::Vec3(2.4f, -0.4f, -3.5f),  Maths::Vec3(-1.7f, 3.0f, -7.5f),
+                                     Maths::Vec3(1.3f, -2.0f, -2.5f),  Maths::Vec3(1.5f, 2.0f, -2.5f),
+                                     Maths::Vec3(1.5f, 0.2f, -1.5f),   Maths::Vec3(-1.3f, 1.0f, -1.5f)};
+      for (unsigned int i = 0; i < 10; i++)
+      {
+        Maths::Mat4 model = Maths::Identity<Maths::Mat4>();
+        model = Maths::Translate(model, cubePositions[i]);
+        float angle = 20.0f * i;
+        model = Maths::Rotate(model, Maths::Radians(angle), {1.0f, 0.3f, 0.5f});
+        lightingShader.SetUniform("model", model);
+
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+      }
+
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
     {
-      auto &lightSourceShader = *shaders.at("lightsource");
+      auto &lightSourceShader = *shaders.at("light-source");
       lightSourceShader.Bind();
       lightSourceShader.SetUniform("view", view);
       lightSourceShader.SetUniform("projection", projection);
 
       Maths::Mat4 model = Maths::Identity<Maths::Mat4>();
-      model = Maths::Translate(model, lightPos);
+      model = Maths::Translate(model, lightPosition);
       model = Maths::Scale(model, Maths::Vec3(0.2f)); // a smaller cube
       lightSourceShader.SetUniform("model", model);
+      lightSourceShader.SetUniform("lightColor", diffuseColor);
 
       glBindVertexArray(lightVAO);
       glDrawArrays(GL_TRIANGLES, 0, 36);

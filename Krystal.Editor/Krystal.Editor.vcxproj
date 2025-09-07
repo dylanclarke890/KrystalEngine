@@ -182,14 +182,17 @@
     <None Include="data\shaders\opengl\lightsource.vert" />
     <None Include="data\shaders\opengl\skybox.frag" />
     <None Include="data\shaders\opengl\skybox.vert" />
-    <None Include="data\shaders\opengl\triangle.frag" />
-    <None Include="data\shaders\opengl\triangle.vert" />
+    <None Include="data\shaders\opengl\basic.frag" />
+    <None Include="data\shaders\opengl\basic.vert" />
     <None Include="data\shaders\vulkan\triangle.frag" />
     <None Include="data\shaders\vulkan\triangle.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\awesomeface.png" />
+    <Image Include="data\assets\container-diffuse.png" />
+    <Image Include="data\assets\container-emission.png" />
     <Image Include="data\assets\container.jpg" />
+    <Image Include="data\assets\container-specular.png" />
     <Image Include="data\assets\skyboxes\sky\back.jpg" />
     <Image Include="data\assets\skyboxes\sky\bottom.jpg" />
     <Image Include="data\assets\skyboxes\sky\front.jpg" />
@@ -197,6 +200,33 @@
     <Image Include="data\assets\skyboxes\sky\right.jpg" />
     <Image Include="data\assets\skyboxes\sky\top.jpg" />
     <Image Include="data\assets\wall.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\shaders\opengl\flat-colour-phong-material.frag">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\shaders\opengl\phong-material.frag">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

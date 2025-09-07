@@ -29,13 +29,15 @@
     <None Include="data\shaders\vulkan\triangle.frag" />
     <None Include="build\shaders\triangle.frag.spv" />
     <None Include="build\shaders\triangle.vert.spv" />
-    <None Include="data\shaders\opengl\triangle.vert" />
-    <None Include="data\shaders\opengl\triangle.frag" />
+    <None Include="data\shaders\opengl\basic.vert" />
+    <None Include="data\shaders\opengl\basic.frag" />
     <None Include="data\shaders\opengl\skybox.vert" />
     <None Include="data\shaders\opengl\skybox.frag" />
     <None Include="data\shaders\opengl\lightsource.frag" />
     <None Include="data\shaders\opengl\lightsource.vert" />
     <None Include="data\shaders\opengl\lighting.frag" />
+    <None Include="data\shaders\opengl\flat-colour-phong-material.frag" />
+    <None Include="data\shaders\opengl\phong-material.frag" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">
@@ -63,6 +65,15 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="data\assets\awesomeface.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\container-diffuse.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\container-specular.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\container-emission.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
