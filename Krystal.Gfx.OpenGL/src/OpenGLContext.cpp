@@ -105,7 +105,11 @@ namespace
   static GLuint lightVAO;
   static GLuint lightVBO;
 
-  static Maths::Vec3 lightPosition(1.2f, 1.0f, 2.0f);
+  static Maths::Vec3 pointLightPositions[] = {Maths::Vec3(0.7f, 0.2f, 2.0f), Maths::Vec3(2.3f, -3.3f, -4.0f),
+                                              Maths::Vec3(-4.0f, 2.0f, -12.0f),
+                                              Maths::Vec3(0.0f, 0.0f, -3.0f)};
+  static Maths::Vec3 pointLightColors[] = {Maths::Vec3(1.0f, 0.6f, 0.0f), Maths::Vec3(1.0f, 0.0f, 0.0f),
+                                           Maths::Vec3(1.0f, 1.0f, 0.0f), Maths::Vec3(0.2f, 0.2f, 1.0f)};
   static Maths::Vec3 lightDirection(-0.2f, -1.0f, -0.3f);
 
   static FlatColourMaterial cubeMaterial(Colour(1.0f, 0.5f, 0.31f), Colour(1.0f, 0.5f, 0.31f),
@@ -252,13 +256,17 @@ namespace Krys::Gfx::OpenGL
         lightingShader.SetUniform("directionalLight.ambient", ambientColor);
         lightingShader.SetUniform("directionalLight.specular", specularColor);
 
-        lightingShader.SetUniform("pointLight.position", lightPosition);
-        lightingShader.SetUniform("pointLight.diffuse", diffuseColor);
-        lightingShader.SetUniform("pointLight.ambient", ambientColor);
-        lightingShader.SetUniform("pointLight.specular", specularColor);
-        lightingShader.SetUniform("pointLight.constant", 1.0f);
-        lightingShader.SetUniform("pointLight.linear", 0.09f);
-        lightingShader.SetUniform("pointLight.quadratic", 0.032f);
+        for (unsigned int i = 0; i < 4; i++)
+        {
+          string index = std::to_string(i);
+          lightingShader.SetUniform("pointLights[" + index + "].position", pointLightPositions[i]);
+          lightingShader.SetUniform("pointLights[" + index + "].diffuse", pointLightColors[i]);
+          lightingShader.SetUniform("pointLights[" + index + "].ambient", ambientColor);
+          lightingShader.SetUniform("pointLights[" + index + "].specular", specularColor);
+          lightingShader.SetUniform("pointLights[" + index + "].constant", 1.0f);
+          lightingShader.SetUniform("pointLights[" + index + "].linear", 0.09f);
+          lightingShader.SetUniform("pointLights[" + index + "].quadratic", 0.032f);
+        }
 
         lightingShader.SetUniform("spotLight.position", camera.Position());
         lightingShader.SetUniform("spotLight.direction", camera.Forward());
@@ -296,8 +304,8 @@ namespace Krys::Gfx::OpenGL
         model = Maths::Translate(model, cubePositions[i]);
         float angle = 20.0f * i;
         model = Maths::Rotate(model, Maths::Radians(angle), {1.0f, 0.3f, 0.5f});
-        lightingShader.SetUniform("model", model);
 
+        lightingShader.SetUniform("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
       }
 
@@ -310,14 +318,17 @@ namespace Krys::Gfx::OpenGL
       lightSourceShader.SetUniform("view", view);
       lightSourceShader.SetUniform("projection", projection);
 
-      Maths::Mat4 model = Maths::Identity<Maths::Mat4>();
-      model = Maths::Translate(model, lightPosition);
-      model = Maths::Scale(model, Maths::Vec3(0.2f)); // a smaller cube
-      lightSourceShader.SetUniform("model", model);
-      lightSourceShader.SetUniform("lightColor", diffuseColor);
-
       glBindVertexArray(lightVAO);
-      glDrawArrays(GL_TRIANGLES, 0, 36);
+      for (unsigned int i = 0; i < 4; i++)
+      {
+        Maths::Mat4 model = Maths::Identity<Maths::Mat4>();
+        model = Maths::Translate(model, pointLightPositions[i]);
+        model = Maths::Scale(model, Maths::Vec3(0.2f)); // a smaller cube
+
+        lightSourceShader.SetUniform("lightColor", pointLightColors[i]);
+        lightSourceShader.SetUniform("model", model);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
+      }
     }
   }
 

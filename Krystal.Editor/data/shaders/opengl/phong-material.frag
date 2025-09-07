@@ -62,7 +62,10 @@ in vec2 TexCoords;
 uniform vec3 viewPos;
 uniform Material material;
 uniform DirectionalLight directionalLight;
-uniform PointLight pointLight;
+
+#define NR_POINT_LIGHTS 4  
+uniform PointLight pointLights[NR_POINT_LIGHTS];
+
 uniform SpotLight spotLight;
 
 uniform float time;
@@ -76,11 +79,12 @@ vec3 CalcEmission();
 
 void main()
 {
-  vec3 directionalLightColor = CalcDirectionalLight(directionalLight);
-  vec3 pointLightColor = CalcPointLight(pointLight);
-  vec3 spotLightColor = CalcSpotLight(spotLight);
-  vec3 emission = CalcEmission();
-  vec3 result = spotLightColor;
+  vec3 result = vec3(0.0);
+  result += CalcDirectionalLight(directionalLight);
+  for (int i = 0; i < NR_POINT_LIGHTS; i++)
+    result += CalcPointLight(pointLights[i]);
+  result += CalcSpotLight(spotLight);
+  // result += CalcEmission();
   FragColor = vec4(result, 1.0);
 }
 
