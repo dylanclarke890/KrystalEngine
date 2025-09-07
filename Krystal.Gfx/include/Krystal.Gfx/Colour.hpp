@@ -172,6 +172,11 @@ namespace Krys::Gfx
       *this += (other * amount);
     }
 
+    constexpr Maths::Vec3 ToVec3() const noexcept
+    {
+      return Maths::Vec3 {r, g, b};
+    }
+
     /// @brief Linear interpolate between two colours.
     /// @param start Colour to start from.
     /// @param end Colour to lerp towards.

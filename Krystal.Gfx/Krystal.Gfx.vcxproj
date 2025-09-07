@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="include\Krystal.Gfx\Cameras\FirstPersonCamera.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Colour.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Light.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Material.hpp" />
     <ClInclude Include="include\Krystal.Gfx\ICamera.hpp" />
     <ClInclude Include="include\Krystal.Gfx\IContext.hpp" />

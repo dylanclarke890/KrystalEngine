@@ -37,7 +37,7 @@ namespace Krys::Gfx
     }
 
     constexpr VertexBufferElement(VertexAttributeType type, uint32 count, IsEnabled enabled) noexcept
-        : Type(VertexAttributeType::Float), Count(0), Normalized(false), Enabled(enabled)
+        : Type(VertexAttributeType::Float), Count(count), Normalized(false), Enabled(enabled)
     {
     }
 
@@ -61,4 +61,13 @@ namespace Krys::Gfx
   };
 
   using VertexBufferLayout = List<VertexBufferElement>;
+
+  namespace VertexLayouts
+  {
+    static const VertexBufferLayout Basic({
+      {VertexAttributeType::Float, 3}, // Position
+      {VertexAttributeType::Float, 3}, // Normal
+      {VertexAttributeType::Float, 2}, // TexCoord
+    });
+  }
 }

@@ -20,6 +20,7 @@
 #include "Krystal.Gfx.OpenGL/OpenGLModel.hpp"
 #include "Krystal.Gfx.OpenGL/OpenGLShader.hpp"
 #include "Krystal.Gfx.OpenGL/OpenGLTexture.hpp"
+#include "Krystal.Gfx/Light.hpp"
 #include "Krystal.Gfx/Material.hpp"
 #include "Krystal.Gfx/VertexBufferLayout.hpp"
 #include "Krystal.Maths/Convert.hpp"
@@ -30,6 +31,11 @@
 
 namespace
 {
+  using namespace Krys;
+  using namespace Krys::Gfx;
+  using namespace Krys::Gfx::OpenGL;
+  using namespace Krys::Maths;
+
   static float vertices[] = {
     // positions          // normals           // texture coords
     -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f,  0.0f,  0.5f,  -0.5f, -0.5f, 0.0f,
@@ -62,86 +68,88 @@ namespace
     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  0.0f,
     1.0f,  0.0f,  0.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f};
 
-  static unsigned int indices[] = {
+  static uint indices[] = {
     0, 1, 3, // first triangle
     1, 2, 3  // second triangle
   };
 
-  float skyboxVertices[] = {
-    // positions
-    -1.0f, 1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  -1.0f, -1.0f,
-    1.0f,  -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, -1.0f, 1.0f,  -1.0f,
+  static Vec3 cubePositions[] = {{0.0f, 0.0f, 0.0f},     {2.0f, 5.0f, -15.0f}, {-1.5f, -2.2f, -2.5f},
+                                 {-3.8f, -2.0f, -12.3f}, {2.4f, -0.4f, -3.5f}, {-1.7f, 3.0f, -7.5f},
+                                 {1.3f, -2.0f, -2.5f},   {1.5f, 2.0f, -2.5f},  {1.5f, 0.2f, -1.5f},
+                                 {-1.3f, 1.0f, -1.5f}};
 
-    -1.0f, -1.0f, 1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  -1.0f,
-    -1.0f, 1.0f,  -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, -1.0f, 1.0f,
-
-    1.0f,  -1.0f, -1.0f, 1.0f,  -1.0f, 1.0f,  1.0f,  1.0f,  1.0f,
-    1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  -1.0f, 1.0f,  -1.0f, -1.0f,
-
-    -1.0f, -1.0f, 1.0f,  -1.0f, 1.0f,  1.0f,  1.0f,  1.0f,  1.0f,
-    1.0f,  1.0f,  1.0f,  1.0f,  -1.0f, 1.0f,  -1.0f, -1.0f, 1.0f,
-
-    -1.0f, 1.0f,  -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f,  1.0f,  1.0f,
-    1.0f,  1.0f,  1.0f,  -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f,  -1.0f,
-
-    -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, -1.0f,
-    1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f};
-
-  using namespace Krys;
-  using namespace Krys::Gfx;
-  using namespace Krys::Gfx::OpenGL;
-
-  static Map<string, Unique<OpenGLShader>> shaders;
-  static Map<string, Unique<OpenGLTexture2D>> textures;
-  static Map<string, Unique<OpenGLCubeMap>> cubemaps;
-
-  static GLuint objectVAO;
-  static GLuint objectVBO;
-  static GLuint objectEBO;
-
-  static GLuint skyboxVAO;
-  static GLuint skyboxVBO;
-  static GLuint skyboxTexture;
-  static bool skyboxSet = false;
-
-  static GLuint lightVAO;
-  static GLuint lightVBO;
-
-  static Maths::Vec3 pointLightPositions[] = {Maths::Vec3(0.7f, 0.2f, 2.0f), Maths::Vec3(2.3f, -3.3f, -4.0f),
-                                              Maths::Vec3(-4.0f, 2.0f, -12.0f),
-                                              Maths::Vec3(0.0f, 0.0f, -3.0f)};
-  static Maths::Vec3 pointLightColors[] = {Maths::Vec3(1.0f, 0.6f, 0.0f), Maths::Vec3(1.0f, 0.0f, 0.0f),
-                                           Maths::Vec3(1.0f, 1.0f, 0.0f), Maths::Vec3(0.2f, 0.2f, 1.0f)};
-  static Maths::Vec3 lightDirection(-0.2f, -1.0f, -0.3f);
-
-  static FlatColourMaterial cubeMaterial(Colour(1.0f, 0.5f, 0.31f), Colour(1.0f, 0.5f, 0.31f),
-                                         Colour(0.5f, 0.5f, 0.5f), 32.0f);
-
-  static OpenGLModel *backpack;
-
-  static VertexBufferLayout basicLayout({
-    {VertexAttributeType::Float, 3}, // Position
-    {VertexAttributeType::Float, 3}, // Normal
-    {VertexAttributeType::Float, 2}, // TexCoord
-  });
-
-  static VertexBufferLayout lightSourceLayout({
-    {VertexAttributeType::Float, 3},                   // Position
-    {VertexAttributeType::Float, 3, IsEnabled(false)}, // Normal
-    {VertexAttributeType::Float, 2, IsEnabled(false)}, // TexCoord
-  });
-
-  static VertexBufferLayout positionOnlyLayout({
-    {VertexAttributeType::Float, 3}, // Position
-  });
-
-  static void SetFlatColourMaterial(OpenGLShader &shader, FlatColourMaterial &material)
+  static void SetFlatColourMaterialUniforms(OpenGLShader &shader, FlatColourMaterial &material,
+                                            const string &uniformPrefix = "material")
   {
-    shader.SetUniform("material.ambient", Colour::ToVec3(material.Ambient));
-    shader.SetUniform("material.diffuse", Colour::ToVec3(material.Diffuse));
-    shader.SetUniform("material.specular", Colour::ToVec3(material.Specular));
-    shader.SetUniform("material.shininess", material.Shininess);
+    shader.SetUniform(uniformPrefix + ".ambient", material.Ambient.ToVec3());
+    shader.SetUniform(uniformPrefix + ".diffuse", material.Diffuse.ToVec3());
+    shader.SetUniform(uniformPrefix + ".specular", material.Specular.ToVec3());
+    shader.SetUniform(uniformPrefix + ".shininess", material.Shininess);
   }
+
+#pragma region Lights
+
+  static LightAttenuation attenuation {1.0f, 0.09f, 0.032f};
+  static Colour ambientColor = {0.2f, 0.2f, 0.2f};
+  static Colour diffuseColor = {0.5f, 0.5f, 0.5f};
+  static Colour specularColor = {1.0f, 1.0f, 1.0f};
+
+  static DirectionalLight directionalLight {
+    {-0.2f, -1.0f, -0.3f}, LightColour {{0.05f, 0.05f, 0.05f}, {0.4f, 0.4f, 0.4f}, {0.5f, 0.5f, 0.5f}}};
+
+  static SpotLight spotLight {
+    {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f},   LightColour {ambientColor, diffuseColor, specularColor},
+    attenuation,        Maths::Radians(12.5f), Maths::Radians(15.0f)};
+
+  static PointLight pointLights[4] = {
+    {Maths::Vec3(0.7f, 0.2f, 2.0f), LightColour {ambientColor, {1.0f, 0.6f, 0.0f}, specularColor},
+     attenuation},
+    {Maths::Vec3(2.3f, -3.3f, -4.0f), LightColour {ambientColor, {1.0f, 0.0f, 0.0f}, specularColor},
+     attenuation},
+    {Maths::Vec3(-4.0f, 2.0f, -12.0f), LightColour {ambientColor, {1.0f, 1.0f, 0.0f}, specularColor},
+     attenuation},
+    {Maths::Vec3(0.0f, 0.0f, -3.0f), LightColour {ambientColor, {0.2f, 0.2f, 1.0f}, specularColor},
+     attenuation}};
+
+  static void SetDirectionalLightUniforms(OpenGLShader &shader, DirectionalLight &light,
+                                          const string &uniformPrefix = "directionalLight")
+  {
+    shader.SetUniform(uniformPrefix + ".direction", light.Direction);
+    shader.SetUniform(uniformPrefix + ".diffuse", light.Colour.Diffuse.ToVec3());
+    shader.SetUniform(uniformPrefix + ".ambient", light.Colour.Ambient.ToVec3());
+    shader.SetUniform(uniformPrefix + ".specular", light.Colour.Specular.ToVec3());
+  }
+
+  static void SetPointLightUniforms(OpenGLShader &shader, const PointLight &light,
+                                    const string &uniformPrefix = "pointLight")
+  {
+    shader.SetUniform(uniformPrefix + ".position", light.Position);
+    shader.SetUniform(uniformPrefix + ".ambient", light.Colour.Ambient.ToVec3());
+    shader.SetUniform(uniformPrefix + ".diffuse", light.Colour.Diffuse.ToVec3());
+    shader.SetUniform(uniformPrefix + ".specular", light.Colour.Specular.ToVec3());
+    shader.SetUniform(uniformPrefix + ".constant", light.Attenuation.Constant);
+    shader.SetUniform(uniformPrefix + ".linear", light.Attenuation.Linear);
+    shader.SetUniform(uniformPrefix + ".quadratic", light.Attenuation.Quadratic);
+  }
+
+  static void SetSpotLightUniforms(OpenGLShader &shader, const SpotLight &light,
+                                   const string &uniformPrefix = "spotLight")
+  {
+    shader.SetUniform(uniformPrefix + ".position", light.Position);
+    shader.SetUniform(uniformPrefix + ".direction", light.Direction);
+    shader.SetUniform(uniformPrefix + ".ambient", light.Colour.Ambient.ToVec3());
+    shader.SetUniform(uniformPrefix + ".diffuse", light.Colour.Diffuse.ToVec3());
+    shader.SetUniform(uniformPrefix + ".specular", light.Colour.Specular.ToVec3());
+    shader.SetUniform(uniformPrefix + ".constant", light.Attenuation.Constant);
+    shader.SetUniform(uniformPrefix + ".linear", light.Attenuation.Linear);
+    shader.SetUniform(uniformPrefix + ".quadratic", light.Attenuation.Quadratic);
+    shader.SetUniform(uniformPrefix + ".cutOff", std::cos(light.CutOffRadians));
+    shader.SetUniform(uniformPrefix + ".outerCutOff", std::cos(light.OuterCutOffRadians));
+  }
+
+#pragma endregion
+
+#pragma region Vertex Buffer Layouts
 
   static GLenum GLTypeFromVertexAttributeType(VertexAttributeType type) noexcept
   {
@@ -169,6 +177,7 @@ namespace
       const auto &element = layout[i];
       if (element.Enabled)
       {
+        glEnableVertexAttribArray(i);
         switch (element.Type)
         {
           case VertexAttributeType::Int32:
@@ -186,12 +195,25 @@ namespace
                                   (const void *)(uintptr_t)offset);
           default: break;
         }
-        glEnableVertexAttribArray(i);
       }
 
       offset += element.Count * VertexBufferElement::GetSizeOfType(element.Type);
     }
   }
+
+#pragma endregion
+
+  static OpenGLModel *backpack;
+
+  static Map<string, Unique<OpenGLShader>> shaders;
+  static Map<string, Unique<OpenGLTexture2D>> textures;
+
+  static GLuint objectVAO;
+  static GLuint objectVBO;
+  static GLuint objectEBO;
+
+  static GLuint lightVAO;
+  static GLuint lightVBO;
 }
 
 namespace Krys::Gfx
@@ -273,17 +295,7 @@ namespace Krys::Gfx::OpenGL
       glCreateBuffers(1, &objectVBO);
       glBindBuffer(GL_ARRAY_BUFFER, objectVBO);
       glNamedBufferData(objectVBO, sizeof(vertices), vertices, GL_STATIC_DRAW);
-      ApplyVertexBufferLayout(basicLayout);
-    }
-
-    {
-      glCreateVertexArrays(1, &skyboxVAO);
-      glBindVertexArray(skyboxVAO);
-
-      glCreateBuffers(1, &skyboxVBO);
-      glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-      glNamedBufferData(skyboxVBO, sizeof(skyboxVertices), skyboxVertices, GL_STATIC_DRAW);
-      ApplyVertexBufferLayout(positionOnlyLayout);
+      ApplyVertexBufferLayout(VertexLayouts::Basic);
     }
 
     {
@@ -293,7 +305,7 @@ namespace Krys::Gfx::OpenGL
       glCreateBuffers(1, &lightVBO);
       glBindBuffer(GL_ARRAY_BUFFER, lightVBO);
       glNamedBufferData(lightVBO, sizeof(vertices), vertices, GL_STATIC_DRAW);
-      ApplyVertexBufferLayout(basicLayout);
+      ApplyVertexBufferLayout(VertexLayouts::Basic);
     }
 
     glEnable(GL_DEPTH_TEST);
@@ -301,80 +313,51 @@ namespace Krys::Gfx::OpenGL
 
   void OpenGLContext::Render(ICamera &camera) noexcept
   {
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     auto view = camera.ViewMatrix();
     auto projection = camera.ProjectionMatrix();
 
-    // const float radius = 1.1f;
-    // float lightX = std::sin((float)Platform::GetTime()) * radius;
-    // float lightZ = std::cos((float)Platform::GetTime()) * radius;
-    // lightPos = Maths::Vec3(lightX, 0.5f, lightZ);
+    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    Maths::Vec3 diffuseColor = {0.5f, 0.5f, 0.5f};
-    Maths::Vec3 ambientColor = {0.2f, 0.2f, 0.2f};
-    Maths::Vec3 specularColor = {1.0f, 1.0f, 1.0f};
+    auto &lightingShader = *shaders.at("phong-material");
+    lightingShader.Bind();
+    lightingShader.SetUniform("time", (float)Platform::GetTime());
+    lightingShader.SetUniform("view", view);
+    lightingShader.SetUniform("projection", projection);
+    lightingShader.SetUniform("viewPos", camera.Position());
 
-    // Draw cubes
+    // Light uniforms
     {
-      auto &lightingShader = *shaders.at("phong-material");
-      lightingShader.Bind();
-      lightingShader.SetUniform("time", (float)Platform::GetTime());
-      lightingShader.SetUniform("view", view);
-      lightingShader.SetUniform("projection", projection);
-      lightingShader.SetUniform("viewPos", camera.Position());
+      SetDirectionalLightUniforms(lightingShader, directionalLight);
 
-      // Lights
+      for (uint i = 0; i < 4; i++)
       {
-        lightingShader.SetUniform("directionalLight.direction", lightDirection);
-        lightingShader.SetUniform("directionalLight.diffuse", diffuseColor);
-        lightingShader.SetUniform("directionalLight.ambient", ambientColor);
-        lightingShader.SetUniform("directionalLight.specular", specularColor);
-
-        for (unsigned int i = 0; i < 4; i++)
-        {
-          string index = std::to_string(i);
-          lightingShader.SetUniform("pointLights[" + index + "].position", pointLightPositions[i]);
-          lightingShader.SetUniform("pointLights[" + index + "].diffuse", pointLightColors[i]);
-          lightingShader.SetUniform("pointLights[" + index + "].ambient", ambientColor);
-          lightingShader.SetUniform("pointLights[" + index + "].specular", specularColor);
-          lightingShader.SetUniform("pointLights[" + index + "].constant", 1.0f);
-          lightingShader.SetUniform("pointLights[" + index + "].linear", 0.09f);
-          lightingShader.SetUniform("pointLights[" + index + "].quadratic", 0.032f);
-        }
-
-        lightingShader.SetUniform("spotLight.position", camera.Position());
-        lightingShader.SetUniform("spotLight.direction", camera.Forward());
-        lightingShader.SetUniform("spotLight.diffuse", diffuseColor);
-        lightingShader.SetUniform("spotLight.ambient", ambientColor);
-        lightingShader.SetUniform("spotLight.specular", specularColor);
-        lightingShader.SetUniform("spotLight.constant", 1.0f);
-        lightingShader.SetUniform("spotLight.linear", 0.09f);
-        lightingShader.SetUniform("spotLight.quadratic", 0.032f);
-        lightingShader.SetUniform("spotLight.cutOff", std::cos(Maths::Radians(12.5f)));
-        lightingShader.SetUniform("spotLight.outerCutOff", std::cos(Maths::Radians(15.0f)));
+        SetPointLightUniforms(lightingShader, pointLights[i], "pointLights[" + std::to_string(i) + "]");
       }
 
-      // Material
-      {
-        lightingShader.SetUniform("material.ambient", 0);
-        lightingShader.SetUniform("material.specular", 1);
-        lightingShader.SetUniform("material.emission", 2);
-        lightingShader.SetUniform("material.shininess", cubeMaterial.Shininess);
+      spotLight.Position = camera.Position();
+      spotLight.Direction = camera.Forward();
+      SetSpotLightUniforms(lightingShader, spotLight);
+    }
 
+    // Cubes
+    {
+      // Material uniforms
+      {
+        lightingShader.SetUniform("material.diffuse", 0);
         textures.at("container-diffuse")->Bind(0);
+
+        lightingShader.SetUniform("material.specular", 1);
         textures.at("container-specular")->Bind(1);
+
+        lightingShader.SetUniform("material.emission", 2);
         textures.at("container-emission")->Bind(2);
+
+        lightingShader.SetUniform("material.shininess", 32.f);
       }
 
       glBindVertexArray(objectVAO);
-      Maths::Vec3 cubePositions[] = {Maths::Vec3(0.0f, 0.0f, 0.0f),    Maths::Vec3(2.0f, 5.0f, -15.0f),
-                                     Maths::Vec3(-1.5f, -2.2f, -2.5f), Maths::Vec3(-3.8f, -2.0f, -12.3f),
-                                     Maths::Vec3(2.4f, -0.4f, -3.5f),  Maths::Vec3(-1.7f, 3.0f, -7.5f),
-                                     Maths::Vec3(1.3f, -2.0f, -2.5f),  Maths::Vec3(1.5f, 2.0f, -2.5f),
-                                     Maths::Vec3(1.5f, 0.2f, -1.5f),   Maths::Vec3(-1.3f, 1.0f, -1.5f)};
-      for (unsigned int i = 0; i < 10; i++)
+      for (uint i = 0; i < 10; i++)
       {
         Maths::Mat4 model = Maths::Identity<Maths::Mat4>();
         model = Maths::Translate(model, cubePositions[i]);
@@ -384,8 +367,6 @@ namespace Krys::Gfx::OpenGL
         lightingShader.SetUniform("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
       }
-
-      glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
     // Draw lights
@@ -396,31 +377,30 @@ namespace Krys::Gfx::OpenGL
       lightSourceShader.SetUniform("projection", projection);
 
       glBindVertexArray(lightVAO);
-      for (unsigned int i = 0; i < 4; i++)
+      for (uint i = 0; i < 4; i++)
       {
         Maths::Mat4 model = Maths::Identity<Maths::Mat4>();
-        model = Maths::Translate(model, pointLightPositions[i]);
+        model = Maths::Translate(model, pointLights[i].Position);
         model = Maths::Scale(model, Maths::Vec3(0.2f)); // a smaller cube
 
-        lightSourceShader.SetUniform("lightColor", pointLightColors[i]);
+        lightSourceShader.SetUniform("lightColor", pointLights[i].Colour.Diffuse.ToVec3());
         lightSourceShader.SetUniform("model", model);
         glDrawArrays(GL_TRIANGLES, 0, 36);
       }
     }
 
     {
+      using namespace Maths;
       auto &backpackShader = *shaders.at("backpack");
       backpackShader.Bind();
       backpackShader.SetUniform("view", view);
       backpackShader.SetUniform("projection", projection);
 
-      Maths::Mat4 model = Maths::Identity<Maths::Mat4>();
-      model = Maths::Translate(
-        model, Maths::Vec3(0.0f, -1.75f, 0.0f)); // translate it down so it's at the center of the scene
-      model = Maths::Scale(
-        model, Maths::Vec3(0.2f, 0.2f, 0.2f)); // it's a bit too big for our scene, so scale it down
-
+      Mat4 model = Identity<Mat4>();
+      model = Translate(model, {0.0f, -1.75f, 0.0f}); // translate it down so it's at the center of the scene
+      model = Scale(model, {0.2f, 0.2f, 0.2f});       // it's a bit too big for our scene, so scale it down
       backpackShader.SetUniform("model", model);
+
       backpack->Draw(backpackShader);
     }
   }
