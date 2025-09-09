@@ -42,6 +42,8 @@
     <None Include="data\shaders\opengl\backpack.vert" />
     <None Include="data\shaders\opengl\backpack.frag" />
     <None Include="data\assets\models\backpack\backpack.obj" />
+    <None Include="data\shaders\opengl\depth-testing.frag" />
+    <None Include="data\shaders\opengl\depth-testing.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">
@@ -93,6 +95,12 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="data\assets\models\backpack\specular.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\marble.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\metal.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
