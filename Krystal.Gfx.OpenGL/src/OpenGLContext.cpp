@@ -69,6 +69,38 @@ namespace
 
 #pragma endregion
 
+  static float cubeVertices[] = {
+    // positions          // texture Coords
+    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 0.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
+    0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+
+    -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+    0.5f,  0.5f,  0.5f,  1.0f, 1.0f, -0.5f, 0.5f,  0.5f,  0.0f, 1.0f, -0.5f, -0.5f, 0.5f,  0.0f, 0.0f,
+
+    -0.5f, 0.5f,  0.5f,  1.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 1.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  0.5f,  1.0f, 0.0f,
+
+    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 0.0f, 1.0f,
+    0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 1.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f,
+    0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+
+    -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, -0.5f, 0.5f,  0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f};
+
+  static float planeVertices[] = {
+    // positions          // texture Coords (note we set these higher than 1 (together with GL_REPEAT as
+    // texture wrapping mode). this will cause the floor texture to repeat)
+    5.0f, -0.5f, 5.0f, 2.0f, 0.0f, -5.0f, -0.5f, 5.0f,  0.0f, 0.0f, -5.0f, -0.5f, -5.0f, 0.0f, 2.0f,
+
+    5.0f, -0.5f, 5.0f, 2.0f, 0.0f, -5.0f, -0.5f, -5.0f, 0.0f, 2.0f, 5.0f,  -0.5f, -5.0f, 2.0f, 2.0f};
+
+  static VertexBufferLayout depthTestLayout({
+    {VertexAttributeType::Float, 3}, // Position
+    {VertexAttributeType::Float, 2}  // Texture Coordinates
+  });
+
   static float vertices[] = {
     // positions          // normals           // texture coords
     -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f,  0.0f,  0.5f,  -0.5f, -0.5f, 0.0f,
@@ -123,6 +155,20 @@ namespace
     glNamedBufferData(vbo, vertexCount * sizeof(float), vertices, GL_STATIC_DRAW);
     Utils::ApplyVertexBufferLayout(layout);
   }
+
+  static void SetLightUniforms(OpenGLShader &shader, ICamera &camera) noexcept
+  {
+    Utils::SetDirectionalLightUniforms(shader, directionalLight);
+
+    for (uint i = 0; i < 4; i++)
+    {
+      Utils::SetPointLightUniforms(shader, pointLights[i], "pointLights[" + std::to_string(i) + "]");
+    }
+
+    spotLight.Position = camera.Position();
+    spotLight.Direction = camera.Forward();
+    Utils::SetSpotLightUniforms(shader, spotLight);
+  }
 }
 
 namespace Krys::Gfx
@@ -165,6 +211,8 @@ namespace Krys::Gfx::OpenGL
         CreateUnique<OpenGLShader>(base / Path("basic.vert"), base / Path("phong-material.frag"));
       shaders["backpack"] =
         CreateUnique<OpenGLShader>(base / Path("backpack.vert"), base / Path("backpack.frag"));
+      shaders["depth-testing"] =
+        CreateUnique<OpenGLShader>(base / Path("depth-testing.vert"), base / Path("depth-testing.frag"));
     }
 
     // Textures
@@ -178,17 +226,17 @@ namespace Krys::Gfx::OpenGL
       textures["container-diffuse"] = CreateUnique<OpenGLTexture2D>(base / Path("container-diffuse.png"));
       textures["container-specular"] = CreateUnique<OpenGLTexture2D>(base / Path("container-specular.png"));
       textures["container-emission"] = CreateUnique<OpenGLTexture2D>(base / Path("container-emission.png"));
-    }
+      textures["metal"] = CreateUnique<OpenGLTexture2D>(base / Path("metal.png"));
 
-    // Models
-    {
-      using namespace IO;
-      Path base = Path("data/assets/models");
-      models["backpack"] = CreateUnique<OpenGLModel>(base / Path("backpack/backpack.obj"));
+      textures["marble"] = CreateUnique<OpenGLTexture2D>(base / Path("marble.jpg"));
+      textures["marble"]->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures["marble"]->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
     }
 
     CreateVertexArray("object", vertices, std::size(vertices), VertexLayouts::Basic);
     CreateVertexArray("light-source", vertices, std::size(vertices), VertexLayouts::Basic);
+    CreateVertexArray("plane", planeVertices, std::size(planeVertices), depthTestLayout);
+    CreateVertexArray("cube", cubeVertices, std::size(cubeVertices), depthTestLayout);
 
     glEnable(GL_DEPTH_TEST);
   }
@@ -197,94 +245,38 @@ namespace Krys::Gfx::OpenGL
   {
     auto view = camera.ViewMatrix();
     auto projection = camera.ProjectionMatrix();
+    Maths::Mat4 model;
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    auto &lightingShader = *shaders.at("phong-material");
-    lightingShader.Bind();
-    lightingShader.SetUniform("time", (float)Platform::GetTime());
-    lightingShader.SetUniform("view", view);
-    lightingShader.SetUniform("projection", projection);
-    lightingShader.SetUniform("viewPos", camera.Position());
+    auto &shader = *shaders.at("depth-testing");
+    shader.Bind();
 
-    // Light uniforms
+    shader.SetUniform("view", view);
+    shader.SetUniform("projection", projection);
+    shader.SetUniform("texture1", 0);
+
+    glBindVertexArray(vaos.at("cube"));
+    textures.at("metal")->Bind(0);
     {
-      Utils::SetDirectionalLightUniforms(lightingShader, directionalLight);
+      model = Maths::Identity<Maths::Mat4>();
+      model = Maths::Translate(model, {-1.0f, 0.0f, -1.0f});
+      shader.SetUniform("model", model);
+      Utils::DrawTriangles(36);
 
-      for (uint i = 0; i < 4; i++)
-      {
-        Utils::SetPointLightUniforms(lightingShader, pointLights[i],
-                                     "pointLights[" + std::to_string(i) + "]");
-      }
-
-      spotLight.Position = camera.Position();
-      spotLight.Direction = camera.Forward();
-      Utils::SetSpotLightUniforms(lightingShader, spotLight);
+      model = Maths::Identity<Maths::Mat4>();
+      model = Maths::Translate(model, {2.0f, 0.0f, 0.0f});
+      shader.SetUniform("model", model);
+      Utils::DrawTriangles(36);
     }
 
-    // Cubes
+    glBindVertexArray(vaos.at("plane"));
+    textures.at("marble")->Bind(0);
     {
-      // Material uniforms
-      {
-        lightingShader.SetUniform("material.diffuse", 0);
-        textures.at("container-diffuse")->Bind(0);
-
-        lightingShader.SetUniform("material.specular", 1);
-        textures.at("container-specular")->Bind(1);
-
-        lightingShader.SetUniform("material.emission", 2);
-        textures.at("container-emission")->Bind(2);
-
-        lightingShader.SetUniform("material.shininess", 32.f);
-      }
-
-      glBindVertexArray(vaos.at("object"));
-      for (uint i = 0; i < 10; i++)
-      {
-        Maths::Mat4 model = Maths::Identity<Maths::Mat4>();
-        model = Maths::Translate(model, cubePositions[i]);
-        float angle = 20.0f * i;
-        model = Maths::Rotate(model, Maths::Radians(angle), {1.0f, 0.3f, 0.5f});
-
-        lightingShader.SetUniform("model", model);
-        Utils::DrawTriangles(36);
-      }
-    }
-
-    // Draw lights
-    {
-      auto &lightSourceShader = *shaders.at("light-source");
-      lightSourceShader.Bind();
-      lightSourceShader.SetUniform("view", view);
-      lightSourceShader.SetUniform("projection", projection);
-
-      glBindVertexArray(vaos.at("light-source"));
-      for (uint i = 0; i < 4; i++)
-      {
-        Maths::Mat4 model = Maths::Identity<Maths::Mat4>();
-        model = Maths::Translate(model, pointLights[i].Position);
-        model = Maths::Scale(model, Maths::Vec3(0.2f)); // a smaller cube
-
-        lightSourceShader.SetUniform("lightColor", pointLights[i].Colour.Diffuse.ToVec3());
-        lightSourceShader.SetUniform("model", model);
-        Utils::DrawTriangles(36);
-      }
-    }
-
-    {
-      using namespace Maths;
-      auto &backpackShader = *shaders.at("backpack");
-      backpackShader.Bind();
-      backpackShader.SetUniform("view", view);
-      backpackShader.SetUniform("projection", projection);
-
-      Mat4 model = Identity<Mat4>();
-      model = Translate(model, {0.0f, -1.75f, 0.0f}); // translate it down so it's at the center of the scene
-      model = Scale(model, {0.2f, 0.2f, 0.2f});       // it's a bit too big for our scene, so scale it down
-      backpackShader.SetUniform("model", model);
-
-      models.at("backpack")->Draw(backpackShader);
+      model = Maths::Identity<Maths::Mat4>();
+      shader.SetUniform("model", model);
+      Utils::DrawTriangles(6);
     }
   }
 

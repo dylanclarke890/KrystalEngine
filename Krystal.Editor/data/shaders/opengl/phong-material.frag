@@ -8,7 +8,8 @@ struct Material
   float shininess;
 };
 
-struct DirectionalLight {
+struct DirectionalLight
+{
   vec3 direction;
   
   vec3 ambient;
@@ -16,7 +17,8 @@ struct DirectionalLight {
   vec3 specular;
 };
 
-struct PointLight {
+struct PointLight
+{
  vec3 position;
   
   vec3 ambient;
@@ -28,7 +30,8 @@ struct PointLight {
   float quadratic;
 };
 
-struct PointLight {
+struct PointLight
+{
   vec3 position;
   
   vec3 ambient;
@@ -40,7 +43,8 @@ struct PointLight {
   float quadratic;
 };
 
-struct SpotLight {
+struct SpotLight
+{
   vec3 position;
   vec3 direction;
   float cutOff;
@@ -85,6 +89,7 @@ void main()
     result += CalcPointLight(pointLights[i]);
   result += CalcSpotLight(spotLight);
   // result += CalcEmission();
+
   FragColor = vec4(result, 1.0);
 }
 
