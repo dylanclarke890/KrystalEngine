@@ -48,6 +48,9 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\OpenGLModel.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Utils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\OpenGLContext.cpp">
