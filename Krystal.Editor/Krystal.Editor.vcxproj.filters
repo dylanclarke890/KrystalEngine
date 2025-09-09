@@ -44,6 +44,7 @@
     <None Include="data\assets\models\backpack\backpack.obj" />
     <None Include="data\shaders\opengl\depth-testing.frag" />
     <None Include="data\shaders\opengl\depth-testing.vert" />
+    <None Include="data\shaders\opengl\linearize-depth.frag" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">
