@@ -241,9 +241,7 @@ namespace Krys::Gfx::OpenGL
     CreateVertexArray("cube", cubeVertices, std::size(cubeVertices), depthTestLayout);
 
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_STENCIL_TEST);
-    glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
   }
   
   void OpenGLContext::Render(ICamera &camera) noexcept
@@ -252,7 +250,7 @@ namespace Krys::Gfx::OpenGL
     auto projection = camera.ProjectionMatrix();
     Maths::Mat4 model;
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     auto &shader = *shaders.at("depth-testing");
     shader.Bind();
@@ -261,8 +259,6 @@ namespace Krys::Gfx::OpenGL
     shader.SetUniform("projection", projection);
     shader.SetUniform("texture1", 0);
 
-    glStencilMask(0x00);
-
     glBindVertexArray(vaos.at("plane"));
     textures.at("marble")->Bind(0);
     {
@@ -270,9 +266,6 @@ namespace Krys::Gfx::OpenGL
       shader.SetUniform("model", model);
       Utils::DrawTriangles(6);
     }
-
-    glStencilFunc(GL_ALWAYS, 1, 0xFF);
-    glStencilMask(0xFF);
 
     glBindVertexArray(vaos.at("cube"));
     textures.at("metal")->Bind(0);
@@ -287,34 +280,6 @@ namespace Krys::Gfx::OpenGL
       shader.SetUniform("model", model);
       Utils::DrawTriangles(36);
     }
-
-    auto &stencilShader = *shaders.at("single-colour");
-    stencilShader.Bind();
-
-    stencilShader.SetUniform("view", view);
-    stencilShader.SetUniform("projection", projection);
-
-    glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
-    glStencilMask(0x00);
-    glDisable(GL_DEPTH_TEST);
-
-    {
-      model = Maths::Identity<Maths::Mat4>();
-      model = Maths::Translate(model, {-1.0f, 0.0f, -1.0f});
-      model = Maths::Scale(model, {1.1f, 1.1f, 1.1f});
-      stencilShader.SetUniform("model", model);
-      Utils::DrawTriangles(36);
-
-      model = Maths::Identity<Maths::Mat4>();
-      model = Maths::Translate(model, {2.0f, 0.0f, 0.0f});
-      model = Maths::Scale(model, {1.1f, 1.1f, 1.1f});
-      stencilShader.SetUniform("model", model);
-      Utils::DrawTriangles(36);
-    }
-
-    glStencilMask(0xFF);
-    glStencilFunc(GL_ALWAYS, 0, 0xFF);
-    glEnable(GL_DEPTH_TEST);
   }
 
   void OpenGLContext::Present() noexcept
