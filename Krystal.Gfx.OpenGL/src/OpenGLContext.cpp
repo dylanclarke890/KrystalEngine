@@ -329,6 +329,7 @@ namespace Krys::Gfx::OpenGL
 
     CreateFramebuffer("offscreen", _width, _height);
     glEnable(GL_DEPTH_TEST);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
   }
 
   void OpenGLContext::Render(ICamera &camera) noexcept
@@ -337,54 +338,34 @@ namespace Krys::Gfx::OpenGL
     auto projection = camera.ProjectionMatrix();
     Maths::Mat4 model;
 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    auto &shader = *shaders.at("depth-testing");
+    shader.Bind();
+    shader.SetUniform("view", view);
+    shader.SetUniform("projection", projection);
+    shader.SetUniform("texture1", 0);
+
+    glBindVertexArray(vaos.at("plane"));
+    textures.at("marble")->Bind(0);
     {
-      glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.at("offscreen").FBO);
-      glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      glEnable(GL_DEPTH_TEST);
-
-      auto &shader = *shaders.at("depth-testing");
-      shader.Bind();
-      shader.SetUniform("view", view);
-      shader.SetUniform("projection", projection);
-      shader.SetUniform("texture1", 0);
-
-      glBindVertexArray(vaos.at("plane"));
-      textures.at("marble")->Bind(0);
-      {
-        model = Maths::Identity<Maths::Mat4>();
-        shader.SetUniform("model", model);
-        Utils::DrawTriangles(6);
-      }
-
-      glBindVertexArray(vaos.at("cube"));
-      textures.at("container")->Bind(0);
-      {
-        model = Maths::Identity<Maths::Mat4>();
-        model = Maths::Translate(model, {-1.0f, 0.0f, -1.0f});
-        shader.SetUniform("model", model);
-        Utils::DrawTriangles(36);
-
-        model = Maths::Identity<Maths::Mat4>();
-        model = Maths::Translate(model, {2.0f, 0.0f, 0.0f});
-        shader.SetUniform("model", model);
-        Utils::DrawTriangles(36);
-      }
+      model = Maths::Identity<Maths::Mat4>();
+      shader.SetUniform("model", model);
+      Utils::DrawTriangles(6);
     }
 
+    glBindVertexArray(vaos.at("cube"));
+    textures.at("container")->Bind(0);
     {
-      glBindFramebuffer(GL_FRAMEBUFFER, 0);
-      glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-      glClear(GL_COLOR_BUFFER_BIT);
-      glDisable(GL_DEPTH_TEST);
+      model = Maths::Identity<Maths::Mat4>();
+      model = Maths::Translate(model, {-1.0f, 0.0f, -1.0f});
+      shader.SetUniform("model", model);
+      Utils::DrawTriangles(36);
 
-      auto &shader = *shaders.at("framebuffer");
-      shader.Bind();
-      shader.SetUniform("screenTexture", 0);
-
-      glBindVertexArray(vaos.at("screen"));
-      glBindTexture(GL_TEXTURE_2D, framebuffers.at("offscreen").Texture);
-      Utils::DrawTriangles(6);
+      model = Maths::Identity<Maths::Mat4>();
+      model = Maths::Translate(model, {2.0f, 0.0f, 0.0f});
+      shader.SetUniform("model", model);
+      Utils::DrawTriangles(36);
     }
   }
 
