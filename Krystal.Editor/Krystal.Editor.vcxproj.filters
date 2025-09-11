@@ -105,6 +105,12 @@
     <Image Include="data\assets\metal.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="data\assets\grass.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\blending_transparent_window.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="data\assets\models\backpack\source_attribution.txt" />

@@ -70,24 +70,49 @@ namespace
 #pragma endregion
 
   static float cubeVertices[] = {
-    // positions          // texture Coords
-    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 0.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
-    0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
-
-    -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-    0.5f,  0.5f,  0.5f,  1.0f, 1.0f, -0.5f, 0.5f,  0.5f,  0.0f, 1.0f, -0.5f, -0.5f, 0.5f,  0.0f, 0.0f,
-
-    -0.5f, 0.5f,  0.5f,  1.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 1.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  0.5f,  1.0f, 0.0f,
-
-    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 0.0f, 1.0f,
-    0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 1.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f,
-    0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
-
-    -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    0.5f,  0.5f,  0.5f,  1.0f, 0.0f, -0.5f, 0.5f,  0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f};
+    // Back face
+    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // Bottom-left
+    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,   // top-right
+    0.5f, -0.5f, -0.5f, 1.0f, 0.0f,  // bottom-right
+    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,   // top-right
+    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // bottom-left
+    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,  // top-left
+    // Front face
+    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, // bottom-left
+    0.5f, -0.5f, 0.5f, 1.0f, 0.0f,  // bottom-right
+    0.5f, 0.5f, 0.5f, 1.0f, 1.0f,   // top-right
+    0.5f, 0.5f, 0.5f, 1.0f, 1.0f,   // top-right
+    -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,  // top-left
+    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, // bottom-left
+    // Left face
+    -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,   // top-right
+    -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,  // top-left
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // bottom-left
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // bottom-left
+    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,  // bottom-right
+    -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,   // top-right
+                                     // Right face
+    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,    // top-left
+    0.5f, -0.5f, -0.5f, 0.0f, 1.0f,  // bottom-right
+    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,   // top-right
+    0.5f, -0.5f, -0.5f, 0.0f, 1.0f,  // bottom-right
+    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,    // top-left
+    0.5f, -0.5f, 0.5f, 0.0f, 0.0f,   // bottom-left
+    // Bottom face
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // top-right
+    0.5f, -0.5f, -0.5f, 1.0f, 1.0f,  // top-left
+    0.5f, -0.5f, 0.5f, 1.0f, 0.0f,   // bottom-left
+    0.5f, -0.5f, 0.5f, 1.0f, 0.0f,   // bottom-left
+    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,  // bottom-right
+    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // top-right
+    // Top face
+    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, // top-left
+    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,   // bottom-right
+    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,  // top-right
+    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,   // bottom-right
+    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, // top-left
+    -0.5f, 0.5f, 0.5f, 0.0f, 0.0f   // bottom-left
+  };
 
   static float planeVertices[] = {
     // positions          // texture Coords (note we set these higher than 1 (together with GL_REPEAT as
@@ -95,6 +120,11 @@ namespace
     5.0f, -0.5f, 5.0f, 2.0f, 0.0f, -5.0f, -0.5f, 5.0f,  0.0f, 0.0f, -5.0f, -0.5f, -5.0f, 0.0f, 2.0f,
 
     5.0f, -0.5f, 5.0f, 2.0f, 0.0f, -5.0f, -0.5f, -5.0f, 0.0f, 2.0f, 5.0f,  -0.5f, -5.0f, 2.0f, 2.0f};
+
+  static float transparentVertices[] = {
+    // positions         // texture Coords
+    0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, -0.5f, 0.0f, 1.0f, 0.0f,
+    0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.5f,  0.0f, 1.0f, 1.0f};
 
   static VertexBufferLayout depthTestLayout({
     {VertexAttributeType::Float, 3}, // Position
@@ -133,10 +163,11 @@ namespace
     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  0.0f,
     1.0f,  0.0f,  0.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f};
 
-  static Vec3 cubePositions[] = {{0.0f, 0.0f, 0.0f},     {2.0f, 5.0f, -15.0f}, {-1.5f, -2.2f, -2.5f},
-                                 {-3.8f, -2.0f, -12.3f}, {2.4f, -0.4f, -3.5f}, {-1.7f, 3.0f, -7.5f},
-                                 {1.3f, -2.0f, -2.5f},   {1.5f, 2.0f, -2.5f},  {1.5f, 0.2f, -1.5f},
-                                 {-1.3f, 1.0f, -1.5f}};
+  static Maths::Vec3 transparentPositions[] = {{-1.5f, 0.0f, -0.48f},
+                                               {1.5f, 0.0f, 0.51f},
+                                               {0.0f, 0.0f, 0.7f},
+                                               {-0.3f, 0.0f, -2.3f},
+                                               {0.5f, 0.0f, -0.6f}};
 
   static void CreateVertexArray(const string &name, const float *vertices, size_t vertexCount,
                                 const VertexBufferLayout &layout) noexcept
@@ -229,6 +260,8 @@ namespace Krys::Gfx::OpenGL
       textures["container-specular"] = CreateUnique<OpenGLTexture2D>(base / Path("container-specular.png"));
       textures["container-emission"] = CreateUnique<OpenGLTexture2D>(base / Path("container-emission.png"));
       textures["metal"] = CreateUnique<OpenGLTexture2D>(base / Path("metal.png"));
+      textures["grass"] = CreateUnique<OpenGLTexture2D>(base / Path("grass.png"));
+      textures["window"] = CreateUnique<OpenGLTexture2D>(base / Path("blending_transparent_window.png"));
 
       textures["marble"] = CreateUnique<OpenGLTexture2D>(base / Path("marble.jpg"));
       textures["marble"]->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -239,11 +272,16 @@ namespace Krys::Gfx::OpenGL
     CreateVertexArray("light-source", vertices, std::size(vertices), VertexLayouts::Basic);
     CreateVertexArray("plane", planeVertices, std::size(planeVertices), depthTestLayout);
     CreateVertexArray("cube", cubeVertices, std::size(cubeVertices), depthTestLayout);
+    CreateVertexArray("window", transparentVertices, std::size(transparentVertices), depthTestLayout);
+
+    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
     glEnable(GL_DEPTH_TEST);
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   }
-  
+
   void OpenGLContext::Render(ICamera &camera) noexcept
   {
     auto view = camera.ViewMatrix();
@@ -279,6 +317,24 @@ namespace Krys::Gfx::OpenGL
       model = Maths::Translate(model, {2.0f, 0.0f, 0.0f});
       shader.SetUniform("model", model);
       Utils::DrawTriangles(36);
+    }
+
+    {
+      const Maths::Vec3 &pos = camera.Position();
+      std::sort(std::begin(transparentPositions), std::end(transparentPositions),
+                [&pos](const Vec3 &a, const Vec3 &b)
+                { return Maths::LengthSquared(pos - a) > Maths::LengthSquared(pos - b); });
+      glBindVertexArray(vaos.at("window"));
+      textures.at("window")->Bind(0);
+      {
+        for (const auto &position : transparentPositions)
+        {
+          model = Maths::Identity<Maths::Mat4>();
+          model = Maths::Translate(model, position);
+          shader.SetUniform("model", model);
+          Utils::DrawTriangles(6);
+        }
+      }
     }
   }
 

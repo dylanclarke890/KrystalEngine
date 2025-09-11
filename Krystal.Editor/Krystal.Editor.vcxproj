@@ -192,10 +192,12 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\awesomeface.png" />
+    <Image Include="data\assets\blending_transparent_window.png" />
     <Image Include="data\assets\container-diffuse.png" />
     <Image Include="data\assets\container-emission.png" />
     <Image Include="data\assets\container.jpg" />
     <Image Include="data\assets\container-specular.png" />
+    <Image Include="data\assets\grass.png" />
     <Image Include="data\assets\marble.jpg" />
     <Image Include="data\assets\metal.png" />
     <Image Include="data\assets\models\backpack\ao.jpg" />
