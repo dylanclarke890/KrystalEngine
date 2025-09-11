@@ -184,6 +184,8 @@
     <None Include="data\shaders\opengl\lightsource.frag" />
     <None Include="data\shaders\opengl\lightsource.vert" />
     <None Include="data\shaders\opengl\linearize-depth.frag" />
+    <None Include="data\shaders\opengl\reflection.frag" />
+    <None Include="data\shaders\opengl\reflection.vert" />
     <None Include="data\shaders\opengl\single-colour.frag" />
     <None Include="data\shaders\opengl\skybox.frag" />
     <None Include="data\shaders\opengl\skybox.vert" />

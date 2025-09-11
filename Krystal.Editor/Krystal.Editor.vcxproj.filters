@@ -48,6 +48,8 @@
     <None Include="data\shaders\opengl\single-colour.frag" />
     <None Include="data\shaders\opengl\framebuffer.frag" />
     <None Include="data\shaders\opengl\framebuffer.vert" />
+    <None Include="data\shaders\opengl\reflection.frag" />
+    <None Include="data\shaders\opengl\reflection.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">

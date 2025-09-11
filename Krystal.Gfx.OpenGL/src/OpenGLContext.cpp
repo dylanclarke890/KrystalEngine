@@ -142,9 +142,9 @@ namespace
     {VertexAttributeType::Float, 2}  // Texture Coordinates
   });
 
-  static VertexBufferLayout screenLayout({
-    {VertexAttributeType::Float, 2}, // Position
-    {VertexAttributeType::Float, 2}  // Texture Coordinates
+  static VertexBufferLayout reflectiveCubeLayout({
+    {VertexAttributeType::Float, 3}, // Position
+    {VertexAttributeType::Float, 3}  // Normal
   });
 
   static VertexBufferLayout positionOnlyLayout({
@@ -152,36 +152,29 @@ namespace
   });
 
   static float vertices[] = {
-    // positions          // normals           // texture coords
-    -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f,  0.0f,  0.5f,  -0.5f, -0.5f, 0.0f,
-    0.0f,  -1.0f, 1.0f,  0.0f,  0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f,  1.0f,
-    0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f,  1.0f,  -0.5f, 0.5f,  -0.5f, 0.0f,
-    0.0f,  -1.0f, 0.0f,  1.0f,  -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.5f,  -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f,
+    0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f,
+    -0.5f, 0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f,
 
-    -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,  0.5f,  -0.5f, 0.5f,  0.0f,
-    0.0f,  1.0f,  1.0f,  0.0f,  0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,  -0.5f, 0.5f,  0.5f,  0.0f,
-    0.0f,  1.0f,  0.0f,  1.0f,  -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
+    -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.5f,  -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
+    -0.5f, 0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,
 
-    -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, -1.0f,
-    0.0f,  0.0f,  1.0f,  1.0f,  -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  -0.5f, -0.5f, 0.5f,  -1.0f,
-    0.0f,  0.0f,  0.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
+    -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, -1.0f, 0.0f,  0.0f,
+    -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,
+    -0.5f, -0.5f, 0.5f,  -1.0f, 0.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,
 
-    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.5f,  0.5f,  -0.5f, 1.0f,
-    0.0f,  0.0f,  1.0f,  1.0f,  0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-    0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.0f,  1.0f,  0.5f,  -0.5f, 0.5f,  1.0f,
-    0.0f,  0.0f,  0.0f,  0.0f,  0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
+    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.5f,  0.5f,  -0.5f, 1.0f,  0.0f,  0.0f,
+    0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,
+    0.5f,  -0.5f, 0.5f,  1.0f,  0.0f,  0.0f,  0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
 
-    -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.0f,  1.0f,  0.5f,  -0.5f, -0.5f, 0.0f,
-    -1.0f, 0.0f,  1.0f,  1.0f,  0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  1.0f,  0.0f,
-    0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  1.0f,  0.0f,  -0.5f, -0.5f, 0.5f,  0.0f,
-    -1.0f, 0.0f,  0.0f,  0.0f,  -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.0f,  1.0f,
+    -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.5f,  -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,
+    0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,
+    -0.5f, -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,
 
-    -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.5f,  0.5f,  -0.5f, 0.0f,
-    1.0f,  0.0f,  1.0f,  1.0f,  0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  0.0f,
-    1.0f,  0.0f,  0.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f};
+    -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.5f,  0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,
+    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
+    -0.5f, 0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f};
 
   static float quadVertices[] = {
     // positions   // texCoords
@@ -323,6 +316,8 @@ namespace Krys::Gfx::OpenGL
         CreateUnique<OpenGLShader>(base / Path("depth-testing.vert"), base / Path("single-colour.frag"));
       shaders["framebuffer"] =
         CreateUnique<OpenGLShader>(base / Path("framebuffer.vert"), base / Path("framebuffer.frag"));
+      shaders["reflection"] =
+        CreateUnique<OpenGLShader>(base / Path("reflection.vert"), base / Path("reflection.frag"));
     }
 
     // Textures
@@ -354,15 +349,9 @@ namespace Krys::Gfx::OpenGL
                                                     base / Path("front.jpg"), base / Path("back.jpg"));
     }
 
-    CreateVertexArray("object", vertices, std::size(vertices), VertexLayouts::Basic);
-    CreateVertexArray("light-source", vertices, std::size(vertices), VertexLayouts::Basic);
-    CreateVertexArray("plane", planeVertices, std::size(planeVertices), depthTestLayout);
-    CreateVertexArray("cube", cubeVertices, std::size(cubeVertices), depthTestLayout);
-    CreateVertexArray("window", transparentVertices, std::size(transparentVertices), depthTestLayout);
-    CreateVertexArray("screen", quadVertices, std::size(quadVertices), screenLayout);
+    CreateVertexArray("cube", vertices, std::size(vertices), reflectiveCubeLayout);
     CreateVertexArray("skybox", skyboxVertices, std::size(skyboxVertices), positionOnlyLayout);
 
-    CreateFramebuffer("offscreen", _width, _height);
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
   }
@@ -375,30 +364,18 @@ namespace Krys::Gfx::OpenGL
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    auto &shader = *shaders.at("depth-testing");
+    auto &shader = *shaders.at("reflection");
     shader.Bind();
     shader.SetUniform("view", view);
     shader.SetUniform("projection", projection);
-    shader.SetUniform("texture1", 0);
-
-    glBindVertexArray(vaos.at("plane"));
-    textures.at("marble")->Bind(0);
-    {
-      model = Maths::Identity<Maths::Mat4>();
-      shader.SetUniform("model", model);
-      Utils::DrawTriangles(6);
-    }
+    shader.SetUniform("skybox", 0);
+    shader.SetUniform("cameraPos", camera.Position());
 
     glBindVertexArray(vaos.at("cube"));
-    textures.at("container")->Bind(0);
+    cubemaps.at("sky")->Bind(0);
     {
       model = Maths::Identity<Maths::Mat4>();
       model = Maths::Translate(model, {-1.0f, 0.0f, -1.0f});
-      shader.SetUniform("model", model);
-      Utils::DrawTriangles(36);
-
-      model = Maths::Identity<Maths::Mat4>();
-      model = Maths::Translate(model, {2.0f, 0.0f, 0.0f});
       shader.SetUniform("model", model);
       Utils::DrawTriangles(36);
     }
@@ -415,7 +392,6 @@ namespace Krys::Gfx::OpenGL
       skyboxShader.SetUniform("skybox", 0);
 
       // skybox cube
-      cubemaps.at("sky")->Bind(0);
       Utils::DrawTriangles(36);
       glBindVertexArray(0);
       glDepthFunc(GL_LESS); // set depth function back to default
