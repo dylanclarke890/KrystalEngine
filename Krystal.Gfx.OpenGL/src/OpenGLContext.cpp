@@ -52,6 +52,7 @@ namespace
   static Map<string, Unique<OpenGLModel>> models;
   static Map<string, GLuint> vaos;
   static Map<string, GLuint> vbos;
+  static Map<string, GLuint> ubos;
   static Map<string, FramebufferData> framebuffers;
 
 #pragma region Lights
@@ -254,6 +255,17 @@ namespace
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
   }
 
+  static void CreateUniformBuffer(const string &name, size_t size, uint binding) noexcept
+  {
+    GLuint ubo;
+    glCreateBuffers(1, &ubo);
+    ubos[name] = ubo;
+    glBindBuffer(GL_UNIFORM_BUFFER, ubo);
+    glNamedBufferData(ubo, size, NULL, GL_STATIC_DRAW);
+    glBindBufferBase(GL_UNIFORM_BUFFER, binding, ubo);
+    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+  }
+
   static void SetLightUniforms(OpenGLShader &shader, ICamera &camera) noexcept
   {
     Utils::SetDirectionalLightUniforms(shader, directionalLight);
@@ -351,6 +363,8 @@ namespace Krys::Gfx::OpenGL
 
     CreateVertexArray("cube", vertices, std::size(vertices), reflectiveCubeLayout);
     CreateVertexArray("skybox", skyboxVertices, std::size(skyboxVertices), positionOnlyLayout);
+
+    CreateUniformBuffer("Matrices", 2 * sizeof(Maths::Mat4), 0);
 
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
