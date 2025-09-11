@@ -47,7 +47,7 @@ namespace Krys::Gfx::OpenGL
 
     OpenGLTexture(const IO::Path &left, const IO::Path &right, const IO::Path &top, const IO::Path &bottom,
                   const IO::Path &front, const IO::Path &back,
-                  const IO::ImageLoadSettings &settings = {.FlipVertically = true,
+                  const IO::ImageLoadSettings &settings = {.FlipVertically = false,
                                                            .DesiredComponents = 0}) noexcept
         : _handle(0)
     {

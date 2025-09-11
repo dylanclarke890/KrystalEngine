@@ -48,6 +48,7 @@ namespace
 
   static Map<string, Unique<OpenGLShader>> shaders;
   static Map<string, Unique<OpenGLTexture2D>> textures;
+  static Map<string, Unique<OpenGLCubeMap>> cubemaps;
   static Map<string, Unique<OpenGLModel>> models;
   static Map<string, GLuint> vaos;
   static Map<string, GLuint> vbos;
@@ -146,6 +147,10 @@ namespace
     {VertexAttributeType::Float, 2}  // Texture Coordinates
   });
 
+  static VertexBufferLayout positionOnlyLayout({
+    {VertexAttributeType::Float, 3} // Position
+  });
+
   static float vertices[] = {
     // positions          // normals           // texture coords
     -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f,  0.0f,  0.5f,  -0.5f, -0.5f, 0.0f,
@@ -183,6 +188,26 @@ namespace
     -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 1.0f, 0.0f,
 
     -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  1.0f, 1.0f};
+
+  static float skyboxVertices[] = {
+    // positions
+    -1.0f, 1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  -1.0f, -1.0f,
+    1.0f,  -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, -1.0f, 1.0f,  -1.0f,
+
+    -1.0f, -1.0f, 1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  -1.0f,
+    -1.0f, 1.0f,  -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, -1.0f, 1.0f,
+
+    1.0f,  -1.0f, -1.0f, 1.0f,  -1.0f, 1.0f,  1.0f,  1.0f,  1.0f,
+    1.0f,  1.0f,  1.0f,  1.0f,  1.0f,  -1.0f, 1.0f,  -1.0f, -1.0f,
+
+    -1.0f, -1.0f, 1.0f,  -1.0f, 1.0f,  1.0f,  1.0f,  1.0f,  1.0f,
+    1.0f,  1.0f,  1.0f,  1.0f,  -1.0f, 1.0f,  -1.0f, -1.0f, 1.0f,
+
+    -1.0f, 1.0f,  -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f,  1.0f,  1.0f,
+    1.0f,  1.0f,  1.0f,  -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f,  -1.0f,
+
+    -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, -1.0f,
+    1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f};
 
   static void CreateVertexArray(const string &name, const float *vertices, size_t vertexCount,
                                 const VertexBufferLayout &layout) noexcept
@@ -320,12 +345,22 @@ namespace Krys::Gfx::OpenGL
       textures["marble"]->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
     }
 
+    {
+      using namespace IO;
+
+      Path base = Path("data/assets/skyboxes/sky");
+      cubemaps["sky"] = CreateUnique<OpenGLCubeMap>(base / Path("left.jpg"), base / Path("right.jpg"),
+                                                    base / Path("top.jpg"), base / Path("bottom.jpg"),
+                                                    base / Path("front.jpg"), base / Path("back.jpg"));
+    }
+
     CreateVertexArray("object", vertices, std::size(vertices), VertexLayouts::Basic);
     CreateVertexArray("light-source", vertices, std::size(vertices), VertexLayouts::Basic);
     CreateVertexArray("plane", planeVertices, std::size(planeVertices), depthTestLayout);
     CreateVertexArray("cube", cubeVertices, std::size(cubeVertices), depthTestLayout);
     CreateVertexArray("window", transparentVertices, std::size(transparentVertices), depthTestLayout);
     CreateVertexArray("screen", quadVertices, std::size(quadVertices), screenLayout);
+    CreateVertexArray("skybox", skyboxVertices, std::size(skyboxVertices), positionOnlyLayout);
 
     CreateFramebuffer("offscreen", _width, _height);
     glEnable(GL_DEPTH_TEST);
@@ -366,6 +401,24 @@ namespace Krys::Gfx::OpenGL
       model = Maths::Translate(model, {2.0f, 0.0f, 0.0f});
       shader.SetUniform("model", model);
       Utils::DrawTriangles(36);
+    }
+
+    // draw skybox last
+    glBindVertexArray(vaos.at("skybox"));
+    {
+      glDepthFunc(GL_LEQUAL); // change depth function so depth test passes when values are equal to depth
+                              // buffer's content
+      auto &skyboxShader = *shaders.at("skybox");
+      skyboxShader.Bind();
+      skyboxShader.SetUniform("view", view);
+      skyboxShader.SetUniform("projection", projection);
+      skyboxShader.SetUniform("skybox", 0);
+
+      // skybox cube
+      cubemaps.at("sky")->Bind(0);
+      Utils::DrawTriangles(36);
+      glBindVertexArray(0);
+      glDepthFunc(GL_LESS); // set depth function back to default
     }
   }
 

@@ -8,8 +8,7 @@ uniform mat4 view;
 
 void main()
 {
-  TexCoords = aPos;
-  mat4 rotView = mat4(mat3(view)); // remove translation from the view matrix
-  vec4 position = rotView * projection * vec4(aPos, 1.0);
-  gl_Position = position.xyww; // set w component to the z component to ensure depth is 1.0 (max depth).
+    TexCoords = aPos;
+    vec4 position = projection * mat4(mat3(view)) * vec4(aPos, 1.0);
+    gl_Position = position.xyww;
 }  
