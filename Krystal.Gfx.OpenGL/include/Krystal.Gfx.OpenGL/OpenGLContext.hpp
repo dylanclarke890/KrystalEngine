@@ -11,6 +11,8 @@ namespace Krys::Gfx::OpenGL
     NO_COPY_MOVE(OpenGLContext)
 
     NativeHandle _windowHandle;
+    uint32 _width;
+    uint32 _height;
 
     class GLContextPlatformImpl;
     Unique<GLContextPlatformImpl> _platformImpl;

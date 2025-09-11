@@ -37,11 +37,21 @@ namespace
   using namespace Krys::Gfx::OpenGL;
   using namespace Krys::Maths;
 
+  struct FramebufferData
+  {
+    GLuint FBO;
+    GLuint Texture;
+    GLuint RBO;
+    uint32 Width;
+    uint32 Height;
+  };
+
   static Map<string, Unique<OpenGLShader>> shaders;
   static Map<string, Unique<OpenGLTexture2D>> textures;
   static Map<string, Unique<OpenGLModel>> models;
   static Map<string, GLuint> vaos;
   static Map<string, GLuint> vbos;
+  static Map<string, FramebufferData> framebuffers;
 
 #pragma region Lights
 
@@ -131,6 +141,11 @@ namespace
     {VertexAttributeType::Float, 2}  // Texture Coordinates
   });
 
+  static VertexBufferLayout screenLayout({
+    {VertexAttributeType::Float, 2}, // Position
+    {VertexAttributeType::Float, 2}  // Texture Coordinates
+  });
+
   static float vertices[] = {
     // positions          // normals           // texture coords
     -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f,  0.0f,  0.5f,  -0.5f, -0.5f, 0.0f,
@@ -163,11 +178,11 @@ namespace
     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  0.0f,
     1.0f,  0.0f,  0.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f};
 
-  static Maths::Vec3 transparentPositions[] = {{-1.5f, 0.0f, -0.48f},
-                                               {1.5f, 0.0f, 0.51f},
-                                               {0.0f, 0.0f, 0.7f},
-                                               {-0.3f, 0.0f, -2.3f},
-                                               {0.5f, 0.0f, -0.6f}};
+  static float quadVertices[] = {
+    // positions   // texCoords
+    -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 1.0f, 0.0f,
+
+    -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  1.0f, 1.0f};
 
   static void CreateVertexArray(const string &name, const float *vertices, size_t vertexCount,
                                 const VertexBufferLayout &layout) noexcept
@@ -185,6 +200,40 @@ namespace
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glNamedBufferData(vbo, vertexCount * sizeof(float), vertices, GL_STATIC_DRAW);
     Utils::ApplyVertexBufferLayout(layout);
+  }
+
+  static void CreateFramebuffer(const string &name, uint32 width, uint32 height)
+  {
+    GLuint framebuffer;
+    glCreateFramebuffers(1, &framebuffer);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    // Create a color attachment texture
+    GLuint textureColorbuffer;
+    glCreateTextures(GL_TEXTURE_2D, 1, &textureColorbuffer);
+    glBindTexture(GL_TEXTURE_2D, textureColorbuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+    glTextureParameteri(textureColorbuffer, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(textureColorbuffer, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureColorbuffer, 0);
+
+    GLuint rbo;
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+    glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, rbo);
+
+    assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE
+           && "framebuffer is incomplete");
+
+    framebuffers[name] = {framebuffer, textureColorbuffer, rbo, width, height};
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
   }
 
   static void SetLightUniforms(OpenGLShader &shader, ICamera &camera) noexcept
@@ -220,7 +269,8 @@ namespace Krys::Gfx
 namespace Krys::Gfx::OpenGL
 {
   OpenGLContext::OpenGLContext(NativeHandle windowHandle, uint32 width, uint32 height)
-      : _windowHandle(windowHandle), _platformImpl(CreateUnique<GLContextPlatformImpl>(windowHandle))
+      : _windowHandle(windowHandle), _platformImpl(CreateUnique<GLContextPlatformImpl>(windowHandle)),
+        _width(width), _height(height)
   {
   }
 
@@ -246,6 +296,8 @@ namespace Krys::Gfx::OpenGL
         CreateUnique<OpenGLShader>(base / Path("depth-testing.vert"), base / Path("depth-testing.frag"));
       shaders["single-colour"] =
         CreateUnique<OpenGLShader>(base / Path("depth-testing.vert"), base / Path("single-colour.frag"));
+      shaders["framebuffer"] =
+        CreateUnique<OpenGLShader>(base / Path("framebuffer.vert"), base / Path("framebuffer.frag"));
     }
 
     // Textures
@@ -273,13 +325,10 @@ namespace Krys::Gfx::OpenGL
     CreateVertexArray("plane", planeVertices, std::size(planeVertices), depthTestLayout);
     CreateVertexArray("cube", cubeVertices, std::size(cubeVertices), depthTestLayout);
     CreateVertexArray("window", transparentVertices, std::size(transparentVertices), depthTestLayout);
+    CreateVertexArray("screen", quadVertices, std::size(quadVertices), screenLayout);
 
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-
+    CreateFramebuffer("offscreen", _width, _height);
     glEnable(GL_DEPTH_TEST);
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
   }
 
   void OpenGLContext::Render(ICamera &camera) noexcept
@@ -288,53 +337,54 @@ namespace Krys::Gfx::OpenGL
     auto projection = camera.ProjectionMatrix();
     Maths::Mat4 model;
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    auto &shader = *shaders.at("depth-testing");
-    shader.Bind();
-
-    shader.SetUniform("view", view);
-    shader.SetUniform("projection", projection);
-    shader.SetUniform("texture1", 0);
-
-    glBindVertexArray(vaos.at("plane"));
-    textures.at("marble")->Bind(0);
     {
-      model = Maths::Identity<Maths::Mat4>();
-      shader.SetUniform("model", model);
-      Utils::DrawTriangles(6);
-    }
+      glBindFramebuffer(GL_FRAMEBUFFER, framebuffers.at("offscreen").FBO);
+      glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      glEnable(GL_DEPTH_TEST);
 
-    glBindVertexArray(vaos.at("cube"));
-    textures.at("metal")->Bind(0);
-    {
-      model = Maths::Identity<Maths::Mat4>();
-      model = Maths::Translate(model, {-1.0f, 0.0f, -1.0f});
-      shader.SetUniform("model", model);
-      Utils::DrawTriangles(36);
+      auto &shader = *shaders.at("depth-testing");
+      shader.Bind();
+      shader.SetUniform("view", view);
+      shader.SetUniform("projection", projection);
+      shader.SetUniform("texture1", 0);
 
-      model = Maths::Identity<Maths::Mat4>();
-      model = Maths::Translate(model, {2.0f, 0.0f, 0.0f});
-      shader.SetUniform("model", model);
-      Utils::DrawTriangles(36);
-    }
-
-    {
-      const Maths::Vec3 &pos = camera.Position();
-      std::sort(std::begin(transparentPositions), std::end(transparentPositions),
-                [&pos](const Vec3 &a, const Vec3 &b)
-                { return Maths::LengthSquared(pos - a) > Maths::LengthSquared(pos - b); });
-      glBindVertexArray(vaos.at("window"));
-      textures.at("window")->Bind(0);
+      glBindVertexArray(vaos.at("plane"));
+      textures.at("marble")->Bind(0);
       {
-        for (const auto &position : transparentPositions)
-        {
-          model = Maths::Identity<Maths::Mat4>();
-          model = Maths::Translate(model, position);
-          shader.SetUniform("model", model);
-          Utils::DrawTriangles(6);
-        }
+        model = Maths::Identity<Maths::Mat4>();
+        shader.SetUniform("model", model);
+        Utils::DrawTriangles(6);
       }
+
+      glBindVertexArray(vaos.at("cube"));
+      textures.at("container")->Bind(0);
+      {
+        model = Maths::Identity<Maths::Mat4>();
+        model = Maths::Translate(model, {-1.0f, 0.0f, -1.0f});
+        shader.SetUniform("model", model);
+        Utils::DrawTriangles(36);
+
+        model = Maths::Identity<Maths::Mat4>();
+        model = Maths::Translate(model, {2.0f, 0.0f, 0.0f});
+        shader.SetUniform("model", model);
+        Utils::DrawTriangles(36);
+      }
+    }
+
+    {
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+      glClear(GL_COLOR_BUFFER_BIT);
+      glDisable(GL_DEPTH_TEST);
+
+      auto &shader = *shaders.at("framebuffer");
+      shader.Bind();
+      shader.SetUniform("screenTexture", 0);
+
+      glBindVertexArray(vaos.at("screen"));
+      glBindTexture(GL_TEXTURE_2D, framebuffers.at("offscreen").Texture);
+      Utils::DrawTriangles(6);
     }
   }
 
