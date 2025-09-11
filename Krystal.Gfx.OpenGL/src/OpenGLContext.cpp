@@ -376,12 +376,14 @@ namespace Krys::Gfx::OpenGL
     auto projection = camera.ProjectionMatrix();
     Maths::Mat4 model;
 
+    glBindBuffer(GL_UNIFORM_BUFFER, ubos.at("Matrices"));
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Maths::Mat4), &view[0][0]);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(Maths::Mat4), sizeof(Maths::Mat4), &projection[0][0]);
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     auto &shader = *shaders.at("reflection");
     shader.Bind();
-    shader.SetUniform("view", view);
-    shader.SetUniform("projection", projection);
     shader.SetUniform("skybox", 0);
     shader.SetUniform("cameraPos", camera.Position());
 
@@ -401,8 +403,6 @@ namespace Krys::Gfx::OpenGL
                               // buffer's content
       auto &skyboxShader = *shaders.at("skybox");
       skyboxShader.Bind();
-      skyboxShader.SetUniform("view", view);
-      skyboxShader.SetUniform("projection", projection);
       skyboxShader.SetUniform("skybox", 0);
 
       // skybox cube
