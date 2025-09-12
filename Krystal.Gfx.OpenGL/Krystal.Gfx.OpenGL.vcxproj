@@ -37,6 +37,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Buffer.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Utils.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Hooks\gl.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Hooks\wgl.hpp" />

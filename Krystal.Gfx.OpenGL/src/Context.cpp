@@ -16,6 +16,7 @@
   #error "Unsupported platform for OpenGL context creation."
 #endif
 
+#include "Krystal.Gfx.OpenGL/Buffer.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Model.hpp"
 #include "Krystal.Gfx.OpenGL/Shader.hpp"
@@ -51,8 +52,8 @@ namespace
   static Map<string, Unique<CubeMap>> cubemaps;
   static Map<string, Unique<Model>> models;
   static Map<string, GLuint> vaos;
-  static Map<string, GLuint> vbos;
-  static Map<string, GLuint> ubos;
+  static Map<string, Unique<VertexBuffer>> vbos;
+  static Map<string, Unique<UniformBuffer>> ubos;
   static Map<string, FramebufferData> framebuffers;
 
 #pragma region Lights
@@ -81,7 +82,7 @@ namespace
 
 #pragma endregion
 
-  static float cubeVertices[] = {
+  static List<float> cubeVertices = {
     // Back face
     -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // Bottom-left
     0.5f, 0.5f, -0.5f, 1.0f, 1.0f,   // top-right
@@ -126,14 +127,14 @@ namespace
     -0.5f, 0.5f, 0.5f, 0.0f, 0.0f   // bottom-left
   };
 
-  static float planeVertices[] = {
+  static List<float> planeVertices = {
     // positions          // texture Coords (note we set these higher than 1 (together with GL_REPEAT as
     // texture wrapping mode). this will cause the floor texture to repeat)
     5.0f, -0.5f, 5.0f, 2.0f, 0.0f, -5.0f, -0.5f, 5.0f,  0.0f, 0.0f, -5.0f, -0.5f, -5.0f, 0.0f, 2.0f,
 
     5.0f, -0.5f, 5.0f, 2.0f, 0.0f, -5.0f, -0.5f, -5.0f, 0.0f, 2.0f, 5.0f,  -0.5f, -5.0f, 2.0f, 2.0f};
 
-  static float transparentVertices[] = {
+  static List<float> transparentVertices = {
     // positions         // texture Coords
     0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, -0.5f, 0.0f, 1.0f, 0.0f,
     0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.5f,  0.0f, 1.0f, 1.0f};
@@ -154,7 +155,7 @@ namespace
                         {VertexAttributeType::Float, 4, VertexInputRate::PerInstance},
                         {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}});
 
-  static float vertices[] = {
+  static List<float> vertices = {
     -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.5f,  -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f,
     0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f,
     -0.5f, 0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f,
@@ -179,12 +180,12 @@ namespace
     0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
     -0.5f, 0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f};
 
-  static float quadVertices[] = {
+  static List<float> quadVertices = {
     // positions     // colors
     -0.05f, 0.05f, 1.0f, 0.0f, 0.0f, 0.05f, -0.05f, 0.0f, 1.0f, 0.0f, -0.05f, -0.05f, 0.0f, 0.0f, 1.0f,
 
     -0.05f, 0.05f, 1.0f, 0.0f, 0.0f, 0.05f, -0.05f, 0.0f, 1.0f, 0.0f, 0.05f,  0.05f,  0.0f, 1.0f, 1.0f};
-  static float skyboxVertices[] = {
+  static List<float> skyboxVertices = {
     // positions
     -1.0f, 1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  -1.0f, -1.0f,
     1.0f,  -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, -1.0f, 1.0f,  -1.0f,
@@ -204,7 +205,7 @@ namespace
     -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, -1.0f,
     1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f};
 
-  static float points[] = {
+  static List<float> points = {
     -0.5f, 0.5f,  1.0f, 0.0f, 0.0f, // top-left
     0.5f,  0.5f,  0.0f, 1.0f, 0.0f, // top-right
     0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, // bottom-right
@@ -214,7 +215,7 @@ namespace
   static uint32 instanceCount = 500'000;
   static Maths::Mat4 *modelMatrices;
 
-  static void CreateVertexArray(const string &name, const float *vertices, size_t vertexCount,
+  static void CreateVertexArray(const string &name, const List<float> vertices,
                                 const VertexBufferLayout &layout) noexcept
   {
     GLuint vao;
@@ -223,12 +224,9 @@ namespace
 
     glBindVertexArray(vao);
 
-    GLuint vbo;
-    glCreateBuffers(1, &vbo);
-    vbos[name] = vbo;
+    vbos[name] = CreateUnique<VertexBuffer>(vertices);
+    vbos[name]->Bind();
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glNamedBufferData(vbo, vertexCount * sizeof(float), vertices, GL_STATIC_DRAW);
     Utils::ApplyVertexBufferLayout(layout);
   }
 
@@ -264,17 +262,6 @@ namespace
     framebuffers[name] = {framebuffer, textureColorbuffer, rbo, width, height};
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-  }
-
-  static void CreateUniformBuffer(const string &name, size_t size, uint binding) noexcept
-  {
-    GLuint ubo;
-    glCreateBuffers(1, &ubo);
-    ubos[name] = ubo;
-    glBindBuffer(GL_UNIFORM_BUFFER, ubo);
-    glNamedBufferData(ubo, size, NULL, GL_STATIC_DRAW);
-    glBindBufferBase(GL_UNIFORM_BUFFER, binding, ubo);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
   }
 
   static void SetLightUniforms(Shader &shader, ICamera &camera) noexcept
@@ -325,14 +312,12 @@ namespace Krys::Gfx::OpenGL
       shaders["skybox"] = CreateUnique<Shader>(base / Path("skybox.vert"), base / Path("skybox.frag"));
       shaders["light-source"] =
         CreateUnique<Shader>(base / Path("lightsource.vert"), base / Path("lightsource.frag"));
-      shaders["lighting"] =
-        CreateUnique<Shader>(base / Path("basic.vert"), base / Path("lighting.frag"));
+      shaders["lighting"] = CreateUnique<Shader>(base / Path("basic.vert"), base / Path("lighting.frag"));
       shaders["flat-colour-phong-material"] =
         CreateUnique<Shader>(base / Path("basic.vert"), base / Path("flat-colour-phong-material.frag"));
       shaders["phong-material"] =
         CreateUnique<Shader>(base / Path("basic.vert"), base / Path("phong-material.frag"));
-      shaders["backpack"] =
-        CreateUnique<Shader>(base / Path("backpack.vert"), base / Path("backpack.frag"));
+      shaders["backpack"] = CreateUnique<Shader>(base / Path("backpack.vert"), base / Path("backpack.frag"));
       shaders["instanced-model"] =
         CreateUnique<Shader>(base / Path("instanced-model.vert"), base / Path("instanced-model.frag"));
       shaders["depth-testing"] =
@@ -344,14 +329,14 @@ namespace Krys::Gfx::OpenGL
       shaders["reflection"] =
         CreateUnique<Shader>(base / Path("reflection.vert"), base / Path("reflection.frag"));
       shaders["points"] = CreateUnique<Shader>(base / Path("points.vert"), base / Path("points.geo"),
-                                                     base / Path("points.frag"));
+                                               base / Path("points.frag"));
       shaders["explode-model"] =
         CreateUnique<Shader>(base / Path("explode-model.vert"), base / Path("explode-model.geo"),
-                                   base / Path("explode-model.frag"));
+                             base / Path("explode-model.frag"));
 
-      shaders["visualise-normals"] = CreateUnique<Shader>(base / Path("visualise-normals.vert"),
-                                                                base / Path("visualise-normals.geo"),
-                                                                base / Path("visualise-normals.frag"));
+      shaders["visualise-normals"] =
+        CreateUnique<Shader>(base / Path("visualise-normals.vert"), base / Path("visualise-normals.geo"),
+                             base / Path("visualise-normals.frag"));
       shaders["instanced-quad"] =
         CreateUnique<Shader>(base / Path("instanced-quad.vert"), base / Path("instanced-quad.frag"));
     }
@@ -380,9 +365,9 @@ namespace Krys::Gfx::OpenGL
       using namespace IO;
 
       Path base = Path("data/assets/skyboxes/sky");
-      cubemaps["sky"] = CreateUnique<CubeMap>(base / Path("left.jpg"), base / Path("right.jpg"),
-                                                    base / Path("top.jpg"), base / Path("bottom.jpg"),
-                                                    base / Path("front.jpg"), base / Path("back.jpg"));
+      cubemaps["sky"] =
+        CreateUnique<CubeMap>(base / Path("left.jpg"), base / Path("right.jpg"), base / Path("top.jpg"),
+                              base / Path("bottom.jpg"), base / Path("front.jpg"), base / Path("back.jpg"));
     }
 
     {
@@ -393,13 +378,17 @@ namespace Krys::Gfx::OpenGL
       models["planet"] = CreateUnique<Model>(base / Path("planet/planet.obj"));
     }
 
-    CreateVertexArray("cube", vertices, std::size(vertices), reflectiveCubeLayout);
-    CreateVertexArray("skybox", skyboxVertices, std::size(skyboxVertices), {{VertexAttributeType::Float, 3}});
-    CreateUniformBuffer("matrices", 2 * sizeof(Maths::Mat4), 0);
+    CreateVertexArray("cube", vertices, reflectiveCubeLayout);
+    CreateVertexArray("skybox", skyboxVertices, {{VertexAttributeType::Float, 3}});
+
+    {
+      ubos["matrices"] = CreateUnique<UniformBuffer>(2 * sizeof(Mat4));
+      ubos["matrices"]->Bind(0);
+    }
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
-    //glEnable(GL_FRAMEBUFFER_SRGB);
+    // glEnable(GL_FRAMEBUFFER_SRGB);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
     modelMatrices = new Maths::Mat4[instanceCount];
@@ -445,9 +434,9 @@ namespace Krys::Gfx::OpenGL
     auto view = camera.ViewMatrix();
     auto projection = camera.ProjectionMatrix();
 
-    glBindBuffer(GL_UNIFORM_BUFFER, ubos.at("matrices"));
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Maths::Mat4), &view[0][0]);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(Maths::Mat4), sizeof(Maths::Mat4), &projection[0][0]);
+    ubos.at("matrices")->Bind();
+    ubos.at("matrices")->Update(ByteUtils::AsBytesView(view));
+    ubos.at("matrices")->Update(ByteUtils::AsBytesView(projection), sizeof(Mat4));
 
     {
       auto &shader = shaders.at("backpack");

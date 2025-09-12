@@ -63,5 +63,22 @@ namespace Krys
     {
       return string(reinterpret_cast<const char *>(bytes.data()), length);
     }
+
+    NO_DISCARD static inline Span<const byte> AsBytesView(const string &str) noexcept
+    {
+      return Span<const byte>(reinterpret_cast<const byte *>(str.data()), str.size());
+    }
+
+    template <typename T>
+    NO_DISCARD static inline Span<const byte> AsBytesView(const List<T> &list) noexcept
+    {
+      return Span<const byte>(reinterpret_cast<const byte *>(list.data()), list.size() * sizeof(T));
+    }
+
+    template <typename T>
+    NO_DISCARD static inline Span<const byte> AsBytesView(const T &object) noexcept
+    {
+      return Span<const byte>(reinterpret_cast<const byte *>(&object), sizeof(T));
+    }
   };
 }

@@ -13,6 +13,7 @@
 #include <optional>
 #include <queue>
 #include <set>
+#include <span>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -113,6 +114,9 @@ namespace Krys
 
   template <typename T>
   using Set = std::set<T>;
+
+  template <typename T>
+  using Span = std::span<T>;
 
   template <typename T>
   using Func = std::function<T>;
