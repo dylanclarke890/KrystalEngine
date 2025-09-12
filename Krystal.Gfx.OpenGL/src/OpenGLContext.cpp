@@ -398,6 +398,7 @@ namespace Krys::Gfx::OpenGL
     CreateUniformBuffer("matrices", 2 * sizeof(Maths::Mat4), 0);
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_MULTISAMPLE);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
     modelMatrices = new Maths::Mat4[instanceCount];

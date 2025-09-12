@@ -213,7 +213,7 @@ namespace Krys::Gfx::OpenGL
     }
 
     // TODO: this should be configurable
-    bool multisampleCapable = false;
+    bool multisampleCapable = true;
     if (multisampleCapable && OpenGL::IsWGLExtensionSupported("WGL_ARB_multisample"))
     {
       attributes.push_back(WGL_SAMPLE_BUFFERS_ARB);
