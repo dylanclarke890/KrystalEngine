@@ -399,6 +399,7 @@ namespace Krys::Gfx::OpenGL
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
+    glEnable(GL_FRAMEBUFFER_SRGB);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
     modelMatrices = new Maths::Mat4[instanceCount];
