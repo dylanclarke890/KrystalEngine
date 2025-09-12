@@ -6,7 +6,7 @@
 *.lo
 *.o
 *.obj
-!backpack.obj
+!Krystal.Editor/data/assets/models/*/*.obj
 
 # Precompiled Headers
 *.gch

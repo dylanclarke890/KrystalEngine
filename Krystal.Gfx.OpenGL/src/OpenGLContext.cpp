@@ -382,8 +382,9 @@ namespace Krys::Gfx::OpenGL
     {
       using namespace IO;
 
-      // Path base = Path("data/assets/models");
-      // models["backpack"] = CreateUnique<OpenGLModel>(base / Path("backpack/backpack.obj"));
+       Path base = Path("data/assets/models");
+      models["rock"] = CreateUnique<OpenGLModel>(base / Path("rock/rock.obj"));
+      models["planet"] = CreateUnique<OpenGLModel>(base / Path("planet/planet.obj"));
     }
 
     CreateVertexArray("cube", vertices, std::size(vertices), reflectiveCubeLayout);

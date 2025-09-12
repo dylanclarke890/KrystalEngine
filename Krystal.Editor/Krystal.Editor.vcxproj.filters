@@ -63,6 +63,8 @@
     <None Include="data\shaders\opengl\instanced-quad.vert" />
     <None Include="data\assets\models\rock\rock.mtl" />
     <None Include="data\assets\models\planet\planet.mtl" />
+    <None Include="data\assets\models\rock\rock.obj" />
+    <None Include="data\assets\models\planet\planet.obj" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">
@@ -138,9 +140,5 @@
   <ItemGroup>
     <Text Include="data\assets\models\backpack\source_attribution.txt" />
     <Text Include="data\assets\models\planet\source.txt" />
-  </ItemGroup>
-  <ItemGroup>
-    <Object Include="data\assets\models\rock\rock.obj" />
-    <Object Include="data\assets\models\planet\planet.obj" />
   </ItemGroup>
 </Project>

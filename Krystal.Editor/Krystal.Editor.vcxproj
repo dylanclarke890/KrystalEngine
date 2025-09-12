@@ -309,8 +309,12 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Object Include="data\assets\models\planet\planet.obj" />
-    <Object Include="data\assets\models\rock\rock.obj" />
+    <None Include="data\assets\models\planet\planet.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="data\assets\models\rock\rock.obj">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
