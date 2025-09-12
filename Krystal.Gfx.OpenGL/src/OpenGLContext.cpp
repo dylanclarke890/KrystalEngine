@@ -148,10 +148,6 @@ namespace
     {VertexAttributeType::Float, 3}  // Normal
   });
 
-  static VertexBufferLayout positionOnlyLayout({
-    {VertexAttributeType::Float, 3} // Position
-  });
-
   static float vertices[] = {
     -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.5f,  -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f,
     0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f,
@@ -202,6 +198,13 @@ namespace
 
     -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, -1.0f,
     1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f};
+
+  static float points[] = {
+    -0.5f, 0.5f,  1.0f, 0.0f, 0.0f, // top-left
+    0.5f,  0.5f,  0.0f, 1.0f, 0.0f, // top-right
+    0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, // bottom-right
+    -0.5f, -0.5f, 1.0f, 1.0f, 0.0f  // bottom-left
+  };
 
   static void CreateVertexArray(const string &name, const float *vertices, size_t vertexCount,
                                 const VertexBufferLayout &layout) noexcept
@@ -330,6 +333,11 @@ namespace Krys::Gfx::OpenGL
         CreateUnique<OpenGLShader>(base / Path("framebuffer.vert"), base / Path("framebuffer.frag"));
       shaders["reflection"] =
         CreateUnique<OpenGLShader>(base / Path("reflection.vert"), base / Path("reflection.frag"));
+      shaders["points"] = CreateUnique<OpenGLShader>(base / Path("points.vert"), base / Path("points.geo"),
+                                                     base / Path("points.frag"));
+      shaders["explode-model"] =
+        CreateUnique<OpenGLShader>(base / Path("explode-model.vert"), base / Path("explode-model.geo"),
+                                   base / Path("explode-model.frag"));
     }
 
     // Textures
@@ -361,10 +369,19 @@ namespace Krys::Gfx::OpenGL
                                                     base / Path("front.jpg"), base / Path("back.jpg"));
     }
 
-    CreateVertexArray("cube", vertices, std::size(vertices), reflectiveCubeLayout);
-    CreateVertexArray("skybox", skyboxVertices, std::size(skyboxVertices), positionOnlyLayout);
+    {
+      using namespace IO;
 
-    CreateUniformBuffer("Matrices", 2 * sizeof(Maths::Mat4), 0);
+      Path base = Path("data/assets/models");
+      models["backpack"] = CreateUnique<OpenGLModel>(base / Path("backpack/backpack.obj"));
+    }
+
+    CreateVertexArray("cube", vertices, std::size(vertices), reflectiveCubeLayout);
+    CreateVertexArray("skybox", skyboxVertices, std::size(skyboxVertices), {{VertexAttributeType::Float, 3}});
+    CreateVertexArray("points", points, std::size(points),
+                      {{VertexAttributeType::Float, 2}, {VertexAttributeType::Float, 3}});
+
+    CreateUniformBuffer("matrices", 2 * sizeof(Maths::Mat4), 0);
 
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -372,44 +389,52 @@ namespace Krys::Gfx::OpenGL
 
   void OpenGLContext::Render(ICamera &camera) noexcept
   {
-    auto view = camera.ViewMatrix();
-    auto projection = camera.ProjectionMatrix();
-    Maths::Mat4 model;
+     auto view = camera.ViewMatrix();
+     auto projection = camera.ProjectionMatrix();
+     Maths::Mat4 model;
 
-    glBindBuffer(GL_UNIFORM_BUFFER, ubos.at("Matrices"));
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Maths::Mat4), &view[0][0]);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(Maths::Mat4), sizeof(Maths::Mat4), &projection[0][0]);
+    // glBindBuffer(GL_UNIFORM_BUFFER, ubos.at("matrices"));
+    // glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Maths::Mat4), &view[0][0]);
+    // glBufferSubData(GL_UNIFORM_BUFFER, sizeof(Maths::Mat4), sizeof(Maths::Mat4), &projection[0][0]);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    model = Maths::Identity<Maths::Mat4>();
+    shaders.at("explode-model")->Bind();
+    shaders.at("explode-model")->SetUniform("view", view);
+    shaders.at("explode-model")->SetUniform("projection", projection);
+    shaders.at("explode-model")->SetUniform("time", (float)Platform::GetTime());
+    shaders.at("explode-model")->SetUniform("model", model);
 
-    auto &shader = *shaders.at("reflection");
-    shader.Bind();
-    shader.SetUniform("skybox", 0);
-    shader.SetUniform("cameraPos", camera.Position());
+    models.at("backpack")->Draw(*shaders.at("explode-model"));
 
-    glBindVertexArray(vaos.at("cube"));
-    cubemaps.at("sky")->Bind(0);
-    {
-      model = Maths::Identity<Maths::Mat4>();
-      model = Maths::Translate(model, {-1.0f, 0.0f, -1.0f});
-      shader.SetUniform("model", model);
-      Utils::DrawTriangles(36);
-    }
+    // auto &shader = *shaders.at("reflection");
+    // shader.Bind();
+    // shader.SetUniform("skybox", 0);
+    // shader.SetUniform("cameraPos", camera.Position());
 
-    // draw skybox last
-    glBindVertexArray(vaos.at("skybox"));
-    {
-      glDepthFunc(GL_LEQUAL); // change depth function so depth test passes when values are equal to depth
-                              // buffer's content
-      auto &skyboxShader = *shaders.at("skybox");
-      skyboxShader.Bind();
-      skyboxShader.SetUniform("skybox", 0);
+    // glBindVertexArray(vaos.at("cube"));
+    // cubemaps.at("sky")->Bind(0);
+    //{
+    //   model = Maths::Identity<Maths::Mat4>();
+    //   model = Maths::Translate(model, {-1.0f, 0.0f, -1.0f});
+    //   shader.SetUniform("model", model);
+    //   Utils::DrawTriangles(36);
+    // }
 
-      // skybox cube
-      Utils::DrawTriangles(36);
-      glBindVertexArray(0);
-      glDepthFunc(GL_LESS); // set depth function back to default
-    }
+    //// draw skybox last
+    // glBindVertexArray(vaos.at("skybox"));
+    //{
+    //   glDepthFunc(GL_LEQUAL); // change depth function so depth test passes when values are equal to depth
+    //                           // buffer's content
+    //   auto &skyboxShader = *shaders.at("skybox");
+    //   skyboxShader.Bind();
+    //   skyboxShader.SetUniform("skybox", 0);
+
+    // // skybox cube
+    // Utils::DrawTriangles(36);
+    // glBindVertexArray(0);
+    // glDepthFunc(GL_LESS); // set depth function back to default
+    // }
   }
 
   void OpenGLContext::Present() noexcept

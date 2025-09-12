@@ -25,18 +25,36 @@ namespace Krys::Gfx::OpenGL
 
       glAttachShader(_handle, vertexShader);
       glAttachShader(_handle, fragmentShader);
-      glLinkProgram(_handle);
 
-      int success;
-      char infoLog[512];
-      glGetProgramiv(_handle, GL_LINK_STATUS, &success);
-      if (!success)
-      {
-        glGetProgramInfoLog(_handle, 512, NULL, infoLog);
-        assert(false && "Shader program linking failed. See log for details.");
-      }
+      glLinkProgram(_handle);
+      EnsureProgramLinked();
 
       glDeleteShader(vertexShader);
+      glDeleteShader(fragmentShader);
+    }
+
+    OpenGLShader(const Krys::IO::Path &vertexFilepath, const Krys::IO::Path &geometryFilepath,
+                 const Krys::IO::Path &fragmentFilepath) noexcept
+        : _handle(glCreateProgram())
+    {
+      auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
+      CreateShader(vertexFilepath, vertexShader);
+
+      auto geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
+      CreateShader(geometryFilepath, geometryShader);
+
+      auto fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+      CreateShader(fragmentFilepath, fragmentShader);
+
+      glAttachShader(_handle, vertexShader);
+      glAttachShader(_handle, geometryShader);
+      glAttachShader(_handle, fragmentShader);
+
+      glLinkProgram(_handle);
+      EnsureProgramLinked();
+
+      glDeleteShader(vertexShader);
+      glDeleteShader(geometryShader);
       glDeleteShader(fragmentShader);
     }
 
@@ -127,6 +145,18 @@ namespace Krys::Gfx::OpenGL
       {
         glGetShaderInfoLog(shader, 512, NULL, infoLog);
         assert(false && "Shader compilation failed. See log for details.");
+      }
+    }
+
+    void EnsureProgramLinked() const noexcept
+    {
+      int success;
+      char infoLog[512];
+      glGetProgramiv(_handle, GL_LINK_STATUS, &success);
+      if (!success)
+      {
+        glGetProgramInfoLog(_handle, 512, NULL, infoLog);
+        assert(false && "Shader program linking failed. See log for details.");
       }
     }
 

@@ -50,6 +50,12 @@
     <None Include="data\shaders\opengl\framebuffer.vert" />
     <None Include="data\shaders\opengl\reflection.frag" />
     <None Include="data\shaders\opengl\reflection.vert" />
+    <None Include="data\shaders\opengl\points.geo" />
+    <None Include="data\shaders\opengl\points.frag" />
+    <None Include="data\shaders\opengl\points.vert" />
+    <None Include="data\shaders\opengl\explode-model.frag" />
+    <None Include="data\shaders\opengl\explode-model.geo" />
+    <None Include="data\shaders\opengl\explode-model.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">

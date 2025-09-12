@@ -110,5 +110,10 @@ namespace Krys::Gfx::OpenGL
     {
       glDrawArrays(GL_TRIANGLES, 0, vertexCount);
     }
+
+    static void DrawPoints(uint32 vertexCount, uint32 offset = 0) noexcept
+    {
+      glDrawArrays(GL_POINTS, 0, vertexCount);
+    }
   };
 }
