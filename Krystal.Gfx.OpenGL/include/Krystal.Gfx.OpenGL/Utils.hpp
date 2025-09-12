@@ -111,6 +111,11 @@ namespace Krys::Gfx::OpenGL
       glDrawArrays(GL_TRIANGLES, 0, vertexCount);
     }
 
+    static void DrawTrianglesInstanced(uint32 vertexCount, uint32 instanceCount, uint32 offset = 0) noexcept
+    {
+      glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, instanceCount);
+    }
+
     static void DrawPoints(uint32 vertexCount, uint32 offset = 0) noexcept
     {
       glDrawArrays(GL_POINTS, 0, vertexCount);

@@ -59,6 +59,8 @@
     <None Include="data\shaders\opengl\visualise-normals.frag" />
     <None Include="data\shaders\opengl\visualise-normals.geo" />
     <None Include="data\shaders\opengl\visualise-normals.vert" />
+    <None Include="data\shaders\opengl\instanced-quad.frag" />
+    <None Include="data\shaders\opengl\instanced-quad.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">

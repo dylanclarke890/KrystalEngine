@@ -174,11 +174,10 @@ namespace
     -0.5f, 0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f};
 
   static float quadVertices[] = {
-    // positions   // texCoords
-    -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 1.0f, 0.0f,
+    // positions     // colors
+    -0.05f, 0.05f, 1.0f, 0.0f, 0.0f, 0.05f, -0.05f, 0.0f, 1.0f, 0.0f, -0.05f, -0.05f, 0.0f, 0.0f, 1.0f,
 
-    -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  1.0f, 1.0f};
-
+    -0.05f, 0.05f, 1.0f, 0.0f, 0.0f, 0.05f, -0.05f, 0.0f, 1.0f, 0.0f, 0.05f,  0.05f,  0.0f, 1.0f, 1.0f};  
   static float skyboxVertices[] = {
     // positions
     -1.0f, 1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  -1.0f, -1.0f,
@@ -205,6 +204,8 @@ namespace
     0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, // bottom-right
     -0.5f, -0.5f, 1.0f, 1.0f, 0.0f  // bottom-left
   };
+
+  static Maths::Vec2 translations[100];
 
   static void CreateVertexArray(const string &name, const float *vertices, size_t vertexCount,
                                 const VertexBufferLayout &layout) noexcept
@@ -342,6 +343,8 @@ namespace Krys::Gfx::OpenGL
       shaders["visualise-normals"] = CreateUnique<OpenGLShader>(base / Path("visualise-normals.vert"),
                                                                 base / Path("visualise-normals.geo"),
                                                                 base / Path("visualise-normals.frag"));
+      shaders["instanced-quad"] =
+        CreateUnique<OpenGLShader>(base / Path("instanced-quad.vert"), base / Path("instanced-quad.frag"));
     }
 
     // Textures
@@ -376,55 +379,57 @@ namespace Krys::Gfx::OpenGL
     {
       using namespace IO;
 
-      Path base = Path("data/assets/models");
-      models["backpack"] = CreateUnique<OpenGLModel>(base / Path("backpack/backpack.obj"));
+      //Path base = Path("data/assets/models");
+      //models["backpack"] = CreateUnique<OpenGLModel>(base / Path("backpack/backpack.obj"));
     }
 
     CreateVertexArray("cube", vertices, std::size(vertices), reflectiveCubeLayout);
     CreateVertexArray("skybox", skyboxVertices, std::size(skyboxVertices), {{VertexAttributeType::Float, 3}});
     CreateVertexArray("points", points, std::size(points),
                       {{VertexAttributeType::Float, 2}, {VertexAttributeType::Float, 3}});
+    CreateVertexArray("quad", quadVertices, std::size(quadVertices),
+                      {{VertexAttributeType::Float, 2}, {VertexAttributeType::Float, 3}});
 
     CreateUniformBuffer("matrices", 2 * sizeof(Maths::Mat4), 0);
 
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+
+    int index = 0;
+    float offset = 0.1f;
+    for (int y = -10; y < 10; y += 2)
+    {
+      for (int x = -10; x < 10; x += 2)
+      {
+        Maths::Vec2 translation;
+        translation.x = (float)x / 10.0f + offset;
+        translation.y = (float)y / 10.0f + offset;
+        translations[index++] = translation;
+      }
+    } 
   }
 
   void OpenGLContext::Render(ICamera &camera) noexcept
   {
-    auto view = camera.ViewMatrix();
-    auto projection = camera.ProjectionMatrix();
-    Maths::Mat4 model;
-
-    glBindBuffer(GL_UNIFORM_BUFFER, ubos.at("matrices"));
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Maths::Mat4), &view[0][0]);
-    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(Maths::Mat4), sizeof(Maths::Mat4), &projection[0][0]);
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    model = Maths::Identity<Maths::Mat4>();
-    shaders.at("backpack")->Bind();
-    shaders.at("backpack")->SetUniform("model", model);
 
-    models.at("backpack")->Draw(*shaders.at("explode-model"));
+    // auto view = camera.ViewMatrix();
+    //auto projection = camera.ProjectionMatrix();
+    //Maths::Mat4 model;
 
-    shaders.at("visualise-normals")->Bind();
-    shaders.at("visualise-normals")->SetUniform("model", model);
-    models.at("backpack")->Draw(*shaders.at("visualise-normals"));
+    //glBindBuffer(GL_UNIFORM_BUFFER, ubos.at("matrices"));
+    //glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Maths::Mat4), &view[0][0]);
+    //glBufferSubData(GL_UNIFORM_BUFFER, sizeof(Maths::Mat4), sizeof(Maths::Mat4), &projection[0][0]);
 
-    // auto &shader = *shaders.at("reflection");
-    // shader.Bind();
-    // shader.SetUniform("skybox", 0);
-    // shader.SetUniform("cameraPos", camera.Position());
+    auto &shader = *shaders.at("instanced-quad");
+    shader.Bind();
 
-    // glBindVertexArray(vaos.at("cube"));
-    // cubemaps.at("sky")->Bind(0);
-    //{
-    //   model = Maths::Identity<Maths::Mat4>();
-    //   model = Maths::Translate(model, {-1.0f, 0.0f, -1.0f});
-    //   shader.SetUniform("model", model);
-    //   Utils::DrawTriangles(36);
-    // }
+    for (uint i = 0; i < 100; i++)
+    {
+      shader.SetUniform("offsets[" + std::to_string(i) + "]", translations[i]);
+    }
+    glBindVertexArray(vaos.at("quad"));
+    Utils::DrawTrianglesInstanced(6, 100);
 
     //// draw skybox last
     // glBindVertexArray(vaos.at("skybox"));
