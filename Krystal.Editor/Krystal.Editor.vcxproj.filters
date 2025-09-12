@@ -65,6 +65,8 @@
     <None Include="data\assets\models\planet\planet.mtl" />
     <None Include="data\assets\models\rock\rock.obj" />
     <None Include="data\assets\models\planet\planet.obj" />
+    <None Include="data\shaders\opengl\instanced-model.frag" />
+    <None Include="data\shaders\opengl\instanced-model.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">

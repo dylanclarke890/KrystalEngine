@@ -3,6 +3,7 @@
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
 #include "Krystal.Gfx.OpenGL/OpenGLShader.hpp"
 #include "Krystal.Gfx.OpenGL/OpenGLTexture.hpp"
+#include "Krystal.Gfx.OpenGL/Utils.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
@@ -55,7 +56,7 @@ namespace Krys::Gfx::OpenGL
     List<Vertex> _vertices;
     List<uint> _indices;
     List<MeshTexture> _textures;
-    uint VAO;
+    GLuint VAO;
 
     Mesh(List<Vertex> vertices, List<uint> indices, List<MeshTexture> textures) noexcept
         : _vertices(vertices), _indices(indices), _textures(textures)
@@ -65,51 +66,29 @@ namespace Krys::Gfx::OpenGL
 
     void Draw(OpenGLShader &shader) noexcept
     {
-      // bind appropriate textures
-      uint diffuseNr = 1;
-      uint specularNr = 1;
-      uint normalNr = 1;
-      uint heightNr = 1;
-      for (uint i = 0; i < _textures.size(); i++)
-      {
-        _textures[i].Texture->Bind(i);
-
-        // retrieve texture number (the N in diffuse_textureN)
-        string number;
-        string name;
-        switch (_textures[i].Type)
-        {
-          case TextureType::Diffuse:
-            number = std::to_string(diffuseNr++);
-            name = "texture_diffuse";
-            break;
-          case TextureType::Specular:
-            number = std::to_string(specularNr++);
-            name = "texture_specular";
-            break;
-          case TextureType::Normal:
-            number = std::to_string(normalNr++);
-            name = "texture_normal";
-            break;
-          case TextureType::Height:
-            number = std::to_string(heightNr++);
-            name = "texture_height";
-            break;
-          default: break;
-        }
-
-        // now set the sampler to the correct texture unit
-        shader.SetUniform(name + number, i);
-        // and finally bind the texture
-      }
+      Bind(shader);
 
       // draw mesh
-      glBindVertexArray(VAO);
       glDrawElements(GL_TRIANGLES, static_cast<uint>(_indices.size()), GL_UNSIGNED_INT, 0);
+      
       glBindVertexArray(0);
-
-      // always good practice to set everything back to defaults once configured.
       glActiveTexture(GL_TEXTURE0);
+    }
+
+    void DrawInstanced(OpenGLShader &shader, uint instanceCount) noexcept
+    {
+      Bind(shader);
+
+      // draw mesh
+      glDrawElementsInstanced(GL_TRIANGLES, static_cast<uint>(_indices.size()), GL_UNSIGNED_INT, 0, instanceCount);
+
+      glBindVertexArray(0);
+      glActiveTexture(GL_TEXTURE0);
+    }
+
+    GLuint GetVAO() const noexcept
+    {
+      return VAO;
     }
 
   private:
@@ -162,6 +141,49 @@ namespace Krys::Gfx::OpenGL
 
       glBindVertexArray(0);
     }
+  
+    void Bind(OpenGLShader& shader) noexcept
+    {
+      // bind appropriate textures
+      uint diffuseNr = 1;
+      uint specularNr = 1;
+      uint normalNr = 1;
+      uint heightNr = 1;
+      for (uint i = 0; i < _textures.size(); i++)
+      {
+        _textures[i].Texture->Bind(i);
+
+        // retrieve texture number (the N in diffuse_textureN)
+        string number;
+        string name;
+        switch (_textures[i].Type)
+        {
+          case TextureType::Diffuse:
+            number = std::to_string(diffuseNr++);
+            name = "texture_diffuse";
+            break;
+          case TextureType::Specular:
+            number = std::to_string(specularNr++);
+            name = "texture_specular";
+            break;
+          case TextureType::Normal:
+            number = std::to_string(normalNr++);
+            name = "texture_normal";
+            break;
+          case TextureType::Height:
+            number = std::to_string(heightNr++);
+            name = "texture_height";
+            break;
+          default: break;
+        }
+
+        // now set the sampler to the correct texture unit
+        shader.SetUniform(name + number, i);
+        // and finally bind the texture
+      }
+
+      glBindVertexArray(VAO);
+    }
   };
 
   class OpenGLModel
@@ -182,6 +204,22 @@ namespace Krys::Gfx::OpenGL
     {
       for (uint i = 0; i < _meshes.size(); i++)
         _meshes[i].Draw(shader);
+    }
+
+    void DrawInstanced(OpenGLShader &shader, uint instanceCount)
+    {
+      for (uint i = 0; i < _meshes.size(); i++)
+        _meshes[i].DrawInstanced(shader, instanceCount);
+    }
+
+    void ApplyVertexLayout(VertexBufferLayout layout, uint32 attributeIndexOffset = 0u) noexcept
+    {
+      const uint32 modelAttributeCount = 5; // position, normal, texcoords, tangent, bitangent
+      for (uint i = 0; i < _meshes.size(); i++)
+      {
+        glBindVertexArray(_meshes[i].GetVAO());
+        Utils::ApplyVertexBufferLayout(layout, attributeIndexOffset + modelAttributeCount);
+      }
     }
 
   private:

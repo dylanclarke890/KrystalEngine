@@ -149,7 +149,10 @@ namespace
   });
 
   static VertexBufferLayout
-    instanceDataLayout({{VertexAttributeType::Float, 2, VertexInputRate::PerInstance}});
+    instanceDataLayout({{VertexAttributeType::Float, 4, VertexInputRate::PerInstance},
+                        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance},
+                        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance},
+                        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}});
 
   static float vertices[] = {
     -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.5f,  -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f,
@@ -208,7 +211,8 @@ namespace
     -0.5f, -0.5f, 1.0f, 1.0f, 0.0f  // bottom-left
   };
 
-  static Maths::Vec2 offsets[100];
+  static uint32 instanceCount = 500'000;
+  static Maths::Mat4 *modelMatrices;
 
   static void CreateVertexArray(const string &name, const float *vertices, size_t vertexCount,
                                 const VertexBufferLayout &layout) noexcept
@@ -329,6 +333,8 @@ namespace Krys::Gfx::OpenGL
         CreateUnique<OpenGLShader>(base / Path("basic.vert"), base / Path("phong-material.frag"));
       shaders["backpack"] =
         CreateUnique<OpenGLShader>(base / Path("backpack.vert"), base / Path("backpack.frag"));
+      shaders["instanced-model"] =
+        CreateUnique<OpenGLShader>(base / Path("instanced-model.vert"), base / Path("instanced-model.frag"));
       shaders["depth-testing"] =
         CreateUnique<OpenGLShader>(base / Path("depth-testing.vert"), base / Path("depth-testing.frag"));
       shaders["single-colour"] =
@@ -382,72 +388,80 @@ namespace Krys::Gfx::OpenGL
     {
       using namespace IO;
 
-       Path base = Path("data/assets/models");
+      Path base = Path("data/assets/models");
       models["rock"] = CreateUnique<OpenGLModel>(base / Path("rock/rock.obj"));
       models["planet"] = CreateUnique<OpenGLModel>(base / Path("planet/planet.obj"));
     }
 
     CreateVertexArray("cube", vertices, std::size(vertices), reflectiveCubeLayout);
     CreateVertexArray("skybox", skyboxVertices, std::size(skyboxVertices), {{VertexAttributeType::Float, 3}});
-
     CreateUniformBuffer("matrices", 2 * sizeof(Maths::Mat4), 0);
 
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
-    int index = 0;
-    float offset = 0.1f;
-    for (int y = -10; y < 10; y += 2)
+    modelMatrices = new Maths::Mat4[instanceCount];
+    srand((uint)Platform::GetTime()); // initialize random seed
+    float radius = 150.0f;
+    float offset = 25.f;
+    for (uint i = 0; i < instanceCount; i++)
     {
-      for (int x = -10; x < 10; x += 2)
-      {
-        Maths::Vec2 translation;
-        translation.x = (float)x / 10.0f + offset;
-        translation.y = (float)y / 10.0f + offset;
-        offsets[index++] = translation;
-      }
+      Mat4 model = Identity<Mat4>();
+      // 1. translation: displace along circle with 'radius' in range [-offset, offset]
+      float angle = (float)i / (float)instanceCount * 360.0f;
+      float displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+      float x = sin(angle) * radius + displacement;
+      displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+      float y = displacement * 0.4f; // keep height of field smaller compared to width of x and z
+      displacement = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+      float z = cos(angle) * radius + displacement;
+      model = Translate(model, Vec3(x, y, z));
+
+      // 2. scale: scale between 0.05 and 0.25f
+      float scale = (rand() % 20) / 100.0f + 0.05f;
+      model = Scale(model, Vec3(scale));
+
+      // 3. rotation: add random rotation around a (semi)randomly picked rotation axis vector
+      float rotAngle = (float)(rand() % 360);
+      model = Rotate(model, rotAngle, Vec3(0.4f, 0.6f, 0.8f));
+
+      // 4. now add to list of matrices
+      modelMatrices[i] = model;
     }
 
-    CreateVertexArray("quad", quadVertices, std::size(quadVertices),
-                      {{VertexAttributeType::Float, 2}, {VertexAttributeType::Float, 3}});
-    glCreateBuffers(1, &vbos["instance-data"]);
-    glBindBuffer(GL_ARRAY_BUFFER, vbos["instance-data"]);
-    glNamedBufferData(vbos["instance-data"], sizeof(offsets), &offsets[0], GL_STATIC_DRAW);
-    glBindVertexArray(vaos.at("quad"));
-    Utils::ApplyVertexBufferLayout(instanceDataLayout, 2);
+    unsigned int buffer;
+    glCreateBuffers(1, &buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferData(GL_ARRAY_BUFFER, instanceCount * sizeof(Mat4), &modelMatrices[0], GL_STATIC_DRAW);
+    models["rock"]->ApplyVertexLayout(instanceDataLayout);
   }
 
   void OpenGLContext::Render(ICamera &camera) noexcept
   {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // auto view = camera.ViewMatrix();
-    // auto projection = camera.ProjectionMatrix();
-    // Maths::Mat4 model;
+    auto view = camera.ViewMatrix();
+    auto projection = camera.ProjectionMatrix();
 
-    // glBindBuffer(GL_UNIFORM_BUFFER, ubos.at("matrices"));
-    // glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Maths::Mat4), &view[0][0]);
-    // glBufferSubData(GL_UNIFORM_BUFFER, sizeof(Maths::Mat4), sizeof(Maths::Mat4), &projection[0][0]);
+    glBindBuffer(GL_UNIFORM_BUFFER, ubos.at("matrices"));
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Maths::Mat4), &view[0][0]);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(Maths::Mat4), sizeof(Maths::Mat4), &projection[0][0]);
 
-    auto &shader = *shaders.at("instanced-quad");
-    shader.Bind();
-    glBindVertexArray(vaos.at("quad"));
-    Utils::DrawTrianglesInstanced(6, 100);
+    {
+      auto &shader = shaders.at("backpack");
+      shader->Bind();
+      Maths::Mat4 model = Maths::Identity<Mat4>();
+      model = Maths::Translate(model, Maths::Vec3(0.0f, -3.0f, 0.0f));
+      model = Maths::Scale(model, Maths::Vec3(4.0f, 4.0f, 4.0f));
+      shader->SetUniform("model", model);
+      models.at("planet")->Draw(*shader);
+    }
 
-    //// draw skybox last
-    // glBindVertexArray(vaos.at("skybox"));
-    //{
-    //   glDepthFunc(GL_LEQUAL); // change depth function so depth test passes when values are equal to depth
-    //                           // buffer's content
-    //   auto &skyboxShader = *shaders.at("skybox");
-    //   skyboxShader.Bind();
-    //   skyboxShader.SetUniform("skybox", 0);
-
-    // // skybox cube
-    // Utils::DrawTriangles(36);
-    // glBindVertexArray(0);
-    // glDepthFunc(GL_LESS); // set depth function back to default
-    // }
+    {
+      auto &shader = shaders.at("instanced-model");
+      shader->Bind();
+      models.at("rock")->DrawInstanced(*shader, instanceCount);
+    }
   }
 
   void OpenGLContext::Present() noexcept
