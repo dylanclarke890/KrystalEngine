@@ -148,6 +148,9 @@ namespace
     {VertexAttributeType::Float, 3}  // Normal
   });
 
+  static VertexBufferLayout
+    instanceDataLayout({{VertexAttributeType::Float, 2, VertexInputRate::PerInstance}});
+
   static float vertices[] = {
     -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.5f,  -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f,
     0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f,
@@ -177,7 +180,7 @@ namespace
     // positions     // colors
     -0.05f, 0.05f, 1.0f, 0.0f, 0.0f, 0.05f, -0.05f, 0.0f, 1.0f, 0.0f, -0.05f, -0.05f, 0.0f, 0.0f, 1.0f,
 
-    -0.05f, 0.05f, 1.0f, 0.0f, 0.0f, 0.05f, -0.05f, 0.0f, 1.0f, 0.0f, 0.05f,  0.05f,  0.0f, 1.0f, 1.0f};  
+    -0.05f, 0.05f, 1.0f, 0.0f, 0.0f, 0.05f, -0.05f, 0.0f, 1.0f, 0.0f, 0.05f,  0.05f,  0.0f, 1.0f, 1.0f};
   static float skyboxVertices[] = {
     // positions
     -1.0f, 1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  -1.0f, -1.0f,
@@ -205,7 +208,7 @@ namespace
     -0.5f, -0.5f, 1.0f, 1.0f, 0.0f  // bottom-left
   };
 
-  static Maths::Vec2 translations[100];
+  static Maths::Vec2 offsets[100];
 
   static void CreateVertexArray(const string &name, const float *vertices, size_t vertexCount,
                                 const VertexBufferLayout &layout) noexcept
@@ -379,16 +382,12 @@ namespace Krys::Gfx::OpenGL
     {
       using namespace IO;
 
-      //Path base = Path("data/assets/models");
-      //models["backpack"] = CreateUnique<OpenGLModel>(base / Path("backpack/backpack.obj"));
+      // Path base = Path("data/assets/models");
+      // models["backpack"] = CreateUnique<OpenGLModel>(base / Path("backpack/backpack.obj"));
     }
 
     CreateVertexArray("cube", vertices, std::size(vertices), reflectiveCubeLayout);
     CreateVertexArray("skybox", skyboxVertices, std::size(skyboxVertices), {{VertexAttributeType::Float, 3}});
-    CreateVertexArray("points", points, std::size(points),
-                      {{VertexAttributeType::Float, 2}, {VertexAttributeType::Float, 3}});
-    CreateVertexArray("quad", quadVertices, std::size(quadVertices),
-                      {{VertexAttributeType::Float, 2}, {VertexAttributeType::Float, 3}});
 
     CreateUniformBuffer("matrices", 2 * sizeof(Maths::Mat4), 0);
 
@@ -404,9 +403,17 @@ namespace Krys::Gfx::OpenGL
         Maths::Vec2 translation;
         translation.x = (float)x / 10.0f + offset;
         translation.y = (float)y / 10.0f + offset;
-        translations[index++] = translation;
+        offsets[index++] = translation;
       }
-    } 
+    }
+
+    CreateVertexArray("quad", quadVertices, std::size(quadVertices),
+                      {{VertexAttributeType::Float, 2}, {VertexAttributeType::Float, 3}});
+    glCreateBuffers(1, &vbos["instance-data"]);
+    glBindBuffer(GL_ARRAY_BUFFER, vbos["instance-data"]);
+    glNamedBufferData(vbos["instance-data"], sizeof(offsets), &offsets[0], GL_STATIC_DRAW);
+    glBindVertexArray(vaos.at("quad"));
+    Utils::ApplyVertexBufferLayout(instanceDataLayout, 2);
   }
 
   void OpenGLContext::Render(ICamera &camera) noexcept
@@ -414,20 +421,15 @@ namespace Krys::Gfx::OpenGL
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // auto view = camera.ViewMatrix();
-    //auto projection = camera.ProjectionMatrix();
-    //Maths::Mat4 model;
+    // auto projection = camera.ProjectionMatrix();
+    // Maths::Mat4 model;
 
-    //glBindBuffer(GL_UNIFORM_BUFFER, ubos.at("matrices"));
-    //glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Maths::Mat4), &view[0][0]);
-    //glBufferSubData(GL_UNIFORM_BUFFER, sizeof(Maths::Mat4), sizeof(Maths::Mat4), &projection[0][0]);
+    // glBindBuffer(GL_UNIFORM_BUFFER, ubos.at("matrices"));
+    // glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Maths::Mat4), &view[0][0]);
+    // glBufferSubData(GL_UNIFORM_BUFFER, sizeof(Maths::Mat4), sizeof(Maths::Mat4), &projection[0][0]);
 
     auto &shader = *shaders.at("instanced-quad");
     shader.Bind();
-
-    for (uint i = 0; i < 100; i++)
-    {
-      shader.SetUniform("offsets[" + std::to_string(i) + "]", translations[i]);
-    }
     glBindVertexArray(vaos.at("quad"));
     Utils::DrawTrianglesInstanced(6, 100);
 

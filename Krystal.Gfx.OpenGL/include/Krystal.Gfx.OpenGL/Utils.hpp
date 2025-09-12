@@ -23,7 +23,8 @@ namespace Krys::Gfx::OpenGL
       }
     }
 
-    static void ApplyVertexBufferLayout(const VertexBufferLayout &layout) noexcept
+    static void ApplyVertexBufferLayout(const VertexBufferLayout &layout,
+                                        uint32 attributeIndexOffset = 0u) noexcept
     {
       uint32 stride = 0;
       for (const auto &element : layout)
@@ -37,24 +38,28 @@ namespace Krys::Gfx::OpenGL
         const auto &element = layout[i];
         if (element.Enabled)
         {
-          glEnableVertexAttribArray(i);
+          uint32 attributeIndex = i + attributeIndexOffset;
+          glEnableVertexAttribArray(attributeIndex);
           switch (element.Type)
           {
             case VertexAttributeType::Int32:
             case VertexAttributeType::UInt32:
-              glVertexAttribIPointer(i, element.Count, MapVertexAttributeType(element.Type), stride,
-                                     (const void *)(uintptr_t)offset);
+              glVertexAttribIPointer(attributeIndex, element.Count, MapVertexAttributeType(element.Type),
+                                     stride, (const void *)(uintptr_t)offset);
               break;
             case VertexAttributeType::Double:
-              glVertexAttribLPointer(i, element.Count, MapVertexAttributeType(element.Type), stride,
-                                     (const void *)(uintptr_t)offset);
+              glVertexAttribLPointer(attributeIndex, element.Count, MapVertexAttributeType(element.Type),
+                                     stride, (const void *)(uintptr_t)offset);
               break;
             case VertexAttributeType::Float:
-              glVertexAttribPointer(i, element.Count, MapVertexAttributeType(element.Type),
+              glVertexAttribPointer(attributeIndex, element.Count, MapVertexAttributeType(element.Type),
                                     element.Normalized ? GL_TRUE : GL_FALSE, stride,
                                     (const void *)(uintptr_t)offset);
             default: break;
           }
+
+          if (element.InputRate == VertexInputRate::PerInstance)
+            glVertexAttribDivisor(attributeIndex, 1);
         }
 
         offset += element.Count * VertexBufferElement::GetSizeOfType(element.Type);

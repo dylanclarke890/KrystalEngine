@@ -12,6 +12,12 @@ namespace Krys::Gfx
     Double
   };
 
+  enum class VertexInputRate
+  {
+    PerVertex,
+    PerInstance
+  };
+
   struct IsNormalized : TypedBool<IsNormalized>
   {
     explicit constexpr IsNormalized(bool value) noexcept : TypedBool<IsNormalized>(value)
@@ -25,25 +31,31 @@ namespace Krys::Gfx
     uint32 Count;
     bool Normalized;
     bool Enabled;
+    VertexInputRate InputRate;
 
-    constexpr VertexBufferElement(VertexAttributeType type, uint32 count) noexcept
-        : Type(type), Count(count), Normalized(false), Enabled(true)
-    {
-    }
-
-    constexpr VertexBufferElement(VertexAttributeType type, uint32 count, IsNormalized normalized) noexcept
-        : Type(type), Count(count), Normalized(normalized), Enabled(true)
-    {
-    }
-
-    constexpr VertexBufferElement(VertexAttributeType type, uint32 count, IsEnabled enabled) noexcept
-        : Type(VertexAttributeType::Float), Count(count), Normalized(false), Enabled(enabled)
+    constexpr VertexBufferElement(VertexAttributeType type, uint32 count,
+                                  VertexInputRate inputRate = VertexInputRate::PerVertex) noexcept
+        : Type(type), Count(count), Normalized(false), Enabled(true), InputRate(inputRate)
     {
     }
 
     constexpr VertexBufferElement(VertexAttributeType type, uint32 count, IsNormalized normalized,
-                                  IsEnabled enabled) noexcept
-        : Type(type), Count(count), Normalized(normalized), Enabled(enabled)
+                                  VertexInputRate inputRate = VertexInputRate::PerVertex) noexcept
+        : Type(type), Count(count), Normalized(normalized), Enabled(true), InputRate(inputRate)
+    {
+    }
+
+    constexpr VertexBufferElement(VertexAttributeType type, uint32 count, IsEnabled enabled,
+                                  VertexInputRate inputRate = VertexInputRate::PerVertex) noexcept
+        : Type(VertexAttributeType::Float), Count(count), Normalized(false), Enabled(enabled),
+          InputRate(inputRate)
+    {
+    }
+
+    constexpr VertexBufferElement(VertexAttributeType type, uint32 count, IsNormalized normalized,
+                                  IsEnabled enabled,
+                                  VertexInputRate inputRate = VertexInputRate::PerVertex) noexcept
+        : Type(type), Count(count), Normalized(normalized), Enabled(enabled), InputRate(inputRate)
     {
     }
 
