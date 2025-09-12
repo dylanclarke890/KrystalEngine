@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
-#include "Krystal.Gfx.OpenGL/OpenGLShader.hpp"
+#include "Krystal.Gfx.OpenGL/Shader.hpp"
 #include "Krystal.Gfx/Light.hpp"
 #include "Krystal.Gfx/Material.hpp"
 #include "Krystal.Gfx/VertexBufferLayout.hpp"
@@ -66,7 +66,7 @@ namespace Krys::Gfx::OpenGL
       }
     }
 
-    static void SetDirectionalLightUniforms(OpenGLShader &shader, DirectionalLight &light,
+    static void SetDirectionalLightUniforms(Shader &shader, DirectionalLight &light,
                                             const string &uniformPrefix = "directionalLight")
     {
       shader.SetUniform(uniformPrefix + ".direction", light.Direction);
@@ -75,7 +75,7 @@ namespace Krys::Gfx::OpenGL
       shader.SetUniform(uniformPrefix + ".specular", light.Colour.Specular.ToVec3());
     }
 
-    static void SetPointLightUniforms(OpenGLShader &shader, const PointLight &light,
+    static void SetPointLightUniforms(Shader &shader, const PointLight &light,
                                       const string &uniformPrefix = "pointLight")
     {
       shader.SetUniform(uniformPrefix + ".position", light.Position);
@@ -87,7 +87,7 @@ namespace Krys::Gfx::OpenGL
       shader.SetUniform(uniformPrefix + ".quadratic", light.Attenuation.Quadratic);
     }
 
-    static void SetSpotLightUniforms(OpenGLShader &shader, const SpotLight &light,
+    static void SetSpotLightUniforms(Shader &shader, const SpotLight &light,
                                      const string &uniformPrefix = "spotLight")
     {
       shader.SetUniform(uniformPrefix + ".position", light.Position);
@@ -102,7 +102,7 @@ namespace Krys::Gfx::OpenGL
       shader.SetUniform(uniformPrefix + ".outerCutOff", std::cos(light.OuterCutOffRadians));
     }
 
-    static void SetFlatColourMaterialUniforms(OpenGLShader &shader, FlatColourMaterial &material,
+    static void SetFlatColourMaterialUniforms(Shader &shader, FlatColourMaterial &material,
                                               const string &uniformPrefix = "material")
     {
       shader.SetUniform(uniformPrefix + ".ambient", material.Ambient.ToVec3());

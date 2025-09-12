@@ -36,7 +36,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\OpenGLContext.cpp" />
+    <ClCompile Include="src\Context.cpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Utils.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Hooks\gl.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Hooks\wgl.hpp" />
@@ -44,16 +44,16 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Official\glext.h" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Official\khrplatform.h" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Official\wglext.h" />
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\OpenGLModel.hpp" />
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\OpenGLShader.hpp" />
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\OpenGLTexture.hpp" />
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Win32\GLContextPlatformImpl.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Model.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Shader.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Texture.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Win32\ContextPlatformImpl.hpp" />
     <ClCompile Include="src\Hooks\gl.cpp" />
     <ClCompile Include="src\Hooks\wgl.cpp" />
-    <ClCompile Include="src\Win32\GLContextPlatformImpl.cpp" />
+    <ClCompile Include="src\Win32\ContextPlatformImpl.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\OpenGLContext.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Context.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\OpenGLContext.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Context.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Win32\GLContextPlatformImpl.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Win32\ContextPlatformImpl.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Official\khrplatform.h">
@@ -39,13 +39,13 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Official\glcorearb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\OpenGLShader.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Shader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\OpenGLTexture.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Texture.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\OpenGLModel.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Model.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Utils.hpp">
@@ -53,10 +53,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\OpenGLContext.cpp">
+    <ClCompile Include="src\Context.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Win32\GLContextPlatformImpl.cpp">
+    <ClCompile Include="src\Win32\ContextPlatformImpl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Hooks\wgl.cpp">

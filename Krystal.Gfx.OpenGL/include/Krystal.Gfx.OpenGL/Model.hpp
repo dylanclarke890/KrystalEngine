@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
-#include "Krystal.Gfx.OpenGL/OpenGLShader.hpp"
-#include "Krystal.Gfx.OpenGL/OpenGLTexture.hpp"
+#include "Krystal.Gfx.OpenGL/Shader.hpp"
+#include "Krystal.Gfx.OpenGL/Texture.hpp"
 #include "Krystal.Gfx.OpenGL/Utils.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Maths/Vector.hpp"
@@ -30,7 +30,7 @@ namespace Krys::Gfx::OpenGL
 
   struct MeshTexture
   {
-    OpenGLTexture2D *Texture;
+    Texture2D *Texture;
     TextureType Type;
   };
 
@@ -38,7 +38,7 @@ namespace Krys::Gfx::OpenGL
   {
     TextureType Type;
     string Path;
-    Unique<OpenGLTexture2D> Texture;
+    Unique<Texture2D> Texture;
   };
 
   struct Vertex
@@ -64,7 +64,7 @@ namespace Krys::Gfx::OpenGL
       SetupMesh();
     }
 
-    void Draw(OpenGLShader &shader) noexcept
+    void Draw(Shader &shader) noexcept
     {
       Bind(shader);
 
@@ -75,7 +75,7 @@ namespace Krys::Gfx::OpenGL
       glActiveTexture(GL_TEXTURE0);
     }
 
-    void DrawInstanced(OpenGLShader &shader, uint instanceCount) noexcept
+    void DrawInstanced(Shader &shader, uint instanceCount) noexcept
     {
       Bind(shader);
 
@@ -142,7 +142,7 @@ namespace Krys::Gfx::OpenGL
       glBindVertexArray(0);
     }
   
-    void Bind(OpenGLShader& shader) noexcept
+    void Bind(Shader& shader) noexcept
     {
       // bind appropriate textures
       uint diffuseNr = 1;
@@ -186,27 +186,27 @@ namespace Krys::Gfx::OpenGL
     }
   };
 
-  class OpenGLModel
+  class Model
   {
   private:
-    Map<string, Unique<OpenGLTexture2D>> _loadedTextures;
+    Map<string, Unique<Texture2D>> _loadedTextures;
     List<Mesh> _meshes;
     IO::Path _directory;
     bool _gammaCorrection;
 
   public:
-    OpenGLModel(const IO::Path &path, bool gamma = false) : _gammaCorrection(gamma), _directory("")
+    Model(const IO::Path &path, bool gamma = false) : _gammaCorrection(gamma), _directory("")
     {
       LoadModel(path);
     }
 
-    void Draw(OpenGLShader &shader)
+    void Draw(Shader &shader)
     {
       for (uint i = 0; i < _meshes.size(); i++)
         _meshes[i].Draw(shader);
     }
 
-    void DrawInstanced(OpenGLShader &shader, uint instanceCount)
+    void DrawInstanced(Shader &shader, uint instanceCount)
     {
       for (uint i = 0; i < _meshes.size(); i++)
         _meshes[i].DrawInstanced(shader, instanceCount);
@@ -388,7 +388,7 @@ namespace Krys::Gfx::OpenGL
         else
         {
           auto fullPath = _directory / path;
-          _loadedTextures[path.ToString()] = CreateUnique<OpenGLTexture2D>(fullPath);
+          _loadedTextures[path.ToString()] = CreateUnique<Texture2D>(fullPath);
           textures.push_back({_loadedTextures[path.ToString()].get(), textureType});
         }
       }

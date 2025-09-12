@@ -2,7 +2,7 @@
 
 #include "Krystal.Core/Core.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/wgl.hpp"
-#include "Krystal.Gfx.OpenGL/OpenGLContext.hpp"
+#include "Krystal.Gfx.OpenGL/Context.hpp"
 
 #ifndef WIN32_LEAN_AND_MEAN
   #define WIN32_LEAN_AND_MEAN
@@ -15,16 +15,16 @@
 
 namespace Krys::Gfx::OpenGL
 {
-  class OpenGLContext::GLContextPlatformImpl
+  class Context::ContextPlatformImpl
   {
-    NO_COPY_MOVE(GLContextPlatformImpl)
+    NO_COPY_MOVE(ContextPlatformImpl)
 
     HWND _handle;
     HDC _deviceContext;
     HGLRC _renderingContext;
 
   public:
-    explicit GLContextPlatformImpl(NativeHandle nativeHandle);
+    explicit ContextPlatformImpl(NativeHandle nativeHandle);
 
     void Present() const noexcept;
 

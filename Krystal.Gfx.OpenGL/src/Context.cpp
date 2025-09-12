@@ -1,4 +1,4 @@
-#include "Krystal.Gfx.OpenGL/OpenGLContext.hpp"
+#include "Krystal.Gfx.OpenGL/Context.hpp"
 
 #include "Krystal.Core/Core.hpp"
 #include "Krystal.Core/Detection.hpp"
@@ -7,7 +7,7 @@
 #include "Krystal.IO/Streams/StreamUtils.hpp"
 
 #ifdef KRYS_PLATFORM_WINDOWS
-  #include "Krystal.Gfx.OpenGL/Win32/GLContextPlatformImpl.hpp"
+  #include "Krystal.Gfx.OpenGL/Win32/ContextPlatformImpl.hpp"
   #undef CreateWindow
   #undef LoadImage
   #undef min
@@ -17,9 +17,9 @@
 #endif
 
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
-#include "Krystal.Gfx.OpenGL/OpenGLModel.hpp"
-#include "Krystal.Gfx.OpenGL/OpenGLShader.hpp"
-#include "Krystal.Gfx.OpenGL/OpenGLTexture.hpp"
+#include "Krystal.Gfx.OpenGL/Model.hpp"
+#include "Krystal.Gfx.OpenGL/Shader.hpp"
+#include "Krystal.Gfx.OpenGL/Texture.hpp"
 #include "Krystal.Gfx.OpenGL/Utils.hpp"
 #include "Krystal.Gfx/Light.hpp"
 #include "Krystal.Gfx/Material.hpp"
@@ -46,10 +46,10 @@ namespace
     uint32 Height;
   };
 
-  static Map<string, Unique<OpenGLShader>> shaders;
-  static Map<string, Unique<OpenGLTexture2D>> textures;
-  static Map<string, Unique<OpenGLCubeMap>> cubemaps;
-  static Map<string, Unique<OpenGLModel>> models;
+  static Map<string, Unique<Shader>> shaders;
+  static Map<string, Unique<Texture2D>> textures;
+  static Map<string, Unique<CubeMap>> cubemaps;
+  static Map<string, Unique<Model>> models;
   static Map<string, GLuint> vaos;
   static Map<string, GLuint> vbos;
   static Map<string, GLuint> ubos;
@@ -277,7 +277,7 @@ namespace
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
   }
 
-  static void SetLightUniforms(OpenGLShader &shader, ICamera &camera) noexcept
+  static void SetLightUniforms(Shader &shader, ICamera &camera) noexcept
   {
     Utils::SetDirectionalLightUniforms(shader, directionalLight);
 
@@ -298,7 +298,7 @@ namespace Krys::Gfx
   {
     try
     {
-      return Expected<Unique<IContext>>(CreateUnique<OpenGL::OpenGLContext>(windowHandle, width, height));
+      return Expected<Unique<IContext>>(CreateUnique<OpenGL::Context>(windowHandle, width, height));
     }
     catch (const std::exception &e)
     {
@@ -309,51 +309,51 @@ namespace Krys::Gfx
 
 namespace Krys::Gfx::OpenGL
 {
-  OpenGLContext::OpenGLContext(NativeHandle windowHandle, uint32 width, uint32 height)
-      : _windowHandle(windowHandle), _platformImpl(CreateUnique<GLContextPlatformImpl>(windowHandle)),
+  Context::Context(NativeHandle windowHandle, uint32 width, uint32 height)
+      : _windowHandle(windowHandle), _platformImpl(CreateUnique<ContextPlatformImpl>(windowHandle)),
         _width(width), _height(height)
   {
   }
 
-  void OpenGLContext::Setup() noexcept
+  void Context::Setup() noexcept
   {
     // Shaders
     {
       using namespace IO;
 
       Path base = Path("data/shaders/opengl");
-      shaders["skybox"] = CreateUnique<OpenGLShader>(base / Path("skybox.vert"), base / Path("skybox.frag"));
+      shaders["skybox"] = CreateUnique<Shader>(base / Path("skybox.vert"), base / Path("skybox.frag"));
       shaders["light-source"] =
-        CreateUnique<OpenGLShader>(base / Path("lightsource.vert"), base / Path("lightsource.frag"));
+        CreateUnique<Shader>(base / Path("lightsource.vert"), base / Path("lightsource.frag"));
       shaders["lighting"] =
-        CreateUnique<OpenGLShader>(base / Path("basic.vert"), base / Path("lighting.frag"));
+        CreateUnique<Shader>(base / Path("basic.vert"), base / Path("lighting.frag"));
       shaders["flat-colour-phong-material"] =
-        CreateUnique<OpenGLShader>(base / Path("basic.vert"), base / Path("flat-colour-phong-material.frag"));
+        CreateUnique<Shader>(base / Path("basic.vert"), base / Path("flat-colour-phong-material.frag"));
       shaders["phong-material"] =
-        CreateUnique<OpenGLShader>(base / Path("basic.vert"), base / Path("phong-material.frag"));
+        CreateUnique<Shader>(base / Path("basic.vert"), base / Path("phong-material.frag"));
       shaders["backpack"] =
-        CreateUnique<OpenGLShader>(base / Path("backpack.vert"), base / Path("backpack.frag"));
+        CreateUnique<Shader>(base / Path("backpack.vert"), base / Path("backpack.frag"));
       shaders["instanced-model"] =
-        CreateUnique<OpenGLShader>(base / Path("instanced-model.vert"), base / Path("instanced-model.frag"));
+        CreateUnique<Shader>(base / Path("instanced-model.vert"), base / Path("instanced-model.frag"));
       shaders["depth-testing"] =
-        CreateUnique<OpenGLShader>(base / Path("depth-testing.vert"), base / Path("depth-testing.frag"));
+        CreateUnique<Shader>(base / Path("depth-testing.vert"), base / Path("depth-testing.frag"));
       shaders["single-colour"] =
-        CreateUnique<OpenGLShader>(base / Path("depth-testing.vert"), base / Path("single-colour.frag"));
+        CreateUnique<Shader>(base / Path("depth-testing.vert"), base / Path("single-colour.frag"));
       shaders["framebuffer"] =
-        CreateUnique<OpenGLShader>(base / Path("framebuffer.vert"), base / Path("framebuffer.frag"));
+        CreateUnique<Shader>(base / Path("framebuffer.vert"), base / Path("framebuffer.frag"));
       shaders["reflection"] =
-        CreateUnique<OpenGLShader>(base / Path("reflection.vert"), base / Path("reflection.frag"));
-      shaders["points"] = CreateUnique<OpenGLShader>(base / Path("points.vert"), base / Path("points.geo"),
+        CreateUnique<Shader>(base / Path("reflection.vert"), base / Path("reflection.frag"));
+      shaders["points"] = CreateUnique<Shader>(base / Path("points.vert"), base / Path("points.geo"),
                                                      base / Path("points.frag"));
       shaders["explode-model"] =
-        CreateUnique<OpenGLShader>(base / Path("explode-model.vert"), base / Path("explode-model.geo"),
+        CreateUnique<Shader>(base / Path("explode-model.vert"), base / Path("explode-model.geo"),
                                    base / Path("explode-model.frag"));
 
-      shaders["visualise-normals"] = CreateUnique<OpenGLShader>(base / Path("visualise-normals.vert"),
+      shaders["visualise-normals"] = CreateUnique<Shader>(base / Path("visualise-normals.vert"),
                                                                 base / Path("visualise-normals.geo"),
                                                                 base / Path("visualise-normals.frag"));
       shaders["instanced-quad"] =
-        CreateUnique<OpenGLShader>(base / Path("instanced-quad.vert"), base / Path("instanced-quad.frag"));
+        CreateUnique<Shader>(base / Path("instanced-quad.vert"), base / Path("instanced-quad.frag"));
     }
 
     // Textures
@@ -361,17 +361,17 @@ namespace Krys::Gfx::OpenGL
       using namespace IO;
 
       Path base = Path("data/assets");
-      textures["wall"] = CreateUnique<OpenGLTexture2D>(base / Path("wall.jpg"));
-      textures["container"] = CreateUnique<OpenGLTexture2D>(base / Path("container.jpg"));
-      textures["awesomeface"] = CreateUnique<OpenGLTexture2D>(base / Path("awesomeface.png"));
-      textures["container-diffuse"] = CreateUnique<OpenGLTexture2D>(base / Path("container-diffuse.png"));
-      textures["container-specular"] = CreateUnique<OpenGLTexture2D>(base / Path("container-specular.png"));
-      textures["container-emission"] = CreateUnique<OpenGLTexture2D>(base / Path("container-emission.png"));
-      textures["metal"] = CreateUnique<OpenGLTexture2D>(base / Path("metal.png"));
-      textures["grass"] = CreateUnique<OpenGLTexture2D>(base / Path("grass.png"));
-      textures["window"] = CreateUnique<OpenGLTexture2D>(base / Path("blending_transparent_window.png"));
+      textures["wall"] = CreateUnique<Texture2D>(base / Path("wall.jpg"));
+      textures["container"] = CreateUnique<Texture2D>(base / Path("container.jpg"));
+      textures["awesomeface"] = CreateUnique<Texture2D>(base / Path("awesomeface.png"));
+      textures["container-diffuse"] = CreateUnique<Texture2D>(base / Path("container-diffuse.png"));
+      textures["container-specular"] = CreateUnique<Texture2D>(base / Path("container-specular.png"));
+      textures["container-emission"] = CreateUnique<Texture2D>(base / Path("container-emission.png"));
+      textures["metal"] = CreateUnique<Texture2D>(base / Path("metal.png"));
+      textures["grass"] = CreateUnique<Texture2D>(base / Path("grass.png"));
+      textures["window"] = CreateUnique<Texture2D>(base / Path("blending_transparent_window.png"));
 
-      textures["marble"] = CreateUnique<OpenGLTexture2D>(base / Path("marble.jpg"));
+      textures["marble"] = CreateUnique<Texture2D>(base / Path("marble.jpg"));
       textures["marble"]->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
       textures["marble"]->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
     }
@@ -380,7 +380,7 @@ namespace Krys::Gfx::OpenGL
       using namespace IO;
 
       Path base = Path("data/assets/skyboxes/sky");
-      cubemaps["sky"] = CreateUnique<OpenGLCubeMap>(base / Path("left.jpg"), base / Path("right.jpg"),
+      cubemaps["sky"] = CreateUnique<CubeMap>(base / Path("left.jpg"), base / Path("right.jpg"),
                                                     base / Path("top.jpg"), base / Path("bottom.jpg"),
                                                     base / Path("front.jpg"), base / Path("back.jpg"));
     }
@@ -389,8 +389,8 @@ namespace Krys::Gfx::OpenGL
       using namespace IO;
 
       Path base = Path("data/assets/models");
-      models["rock"] = CreateUnique<OpenGLModel>(base / Path("rock/rock.obj"));
-      models["planet"] = CreateUnique<OpenGLModel>(base / Path("planet/planet.obj"));
+      models["rock"] = CreateUnique<Model>(base / Path("rock/rock.obj"));
+      models["planet"] = CreateUnique<Model>(base / Path("planet/planet.obj"));
     }
 
     CreateVertexArray("cube", vertices, std::size(vertices), reflectiveCubeLayout);
@@ -399,7 +399,7 @@ namespace Krys::Gfx::OpenGL
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
-    glEnable(GL_FRAMEBUFFER_SRGB);
+    //glEnable(GL_FRAMEBUFFER_SRGB);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
     modelMatrices = new Maths::Mat4[instanceCount];
@@ -438,7 +438,7 @@ namespace Krys::Gfx::OpenGL
     models["rock"]->ApplyVertexLayout(instanceDataLayout);
   }
 
-  void OpenGLContext::Render(ICamera &camera) noexcept
+  void Context::Render(ICamera &camera) noexcept
   {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -466,12 +466,12 @@ namespace Krys::Gfx::OpenGL
     }
   }
 
-  void OpenGLContext::Present() noexcept
+  void Context::Present() noexcept
   {
     _platformImpl->Present();
   }
 
-  void OpenGLContext::Resize(uint32 width, uint32 height) noexcept
+  void Context::Resize(uint32 width, uint32 height) noexcept
   {
     glViewport(0, 0, width, height);
   }

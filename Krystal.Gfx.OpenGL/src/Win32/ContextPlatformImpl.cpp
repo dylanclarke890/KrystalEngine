@@ -112,12 +112,12 @@ namespace
 #include "Krystal.Core/Detection.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/wgl.hpp"
-#include "Krystal.Gfx.OpenGL/OpenGLContext.hpp"
-#include "Krystal.Gfx.OpenGL/Win32/GLContextPlatformImpl.hpp"
+#include "Krystal.Gfx.OpenGL/Context.hpp"
+#include "Krystal.Gfx.OpenGL/Win32/ContextPlatformImpl.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
-  OpenGLContext::GLContextPlatformImpl::GLContextPlatformImpl(NativeHandle nativeHandle)
+  Context::ContextPlatformImpl::ContextPlatformImpl(NativeHandle nativeHandle)
       : _handle(nativeHandle.As<HWND>()), _deviceContext(nullptr), _renderingContext(nullptr)
   {
     const auto instance = ::GetModuleHandleA(NULL);
@@ -134,7 +134,7 @@ namespace Krys::Gfx::OpenGL
     SetupContext();
   }
 
-  void OpenGLContext::GLContextPlatformImpl::SetupPixelFormat() const
+  void Context::ContextPlatformImpl::SetupPixelFormat() const
   {
     using namespace Krys::Gfx::OpenGL;
 
@@ -164,7 +164,7 @@ namespace Krys::Gfx::OpenGL
     }
   }
 
-  List<int> OpenGLContext::GLContextPlatformImpl::GetPixelFormatAttributes() const noexcept
+  List<int> Context::ContextPlatformImpl::GetPixelFormatAttributes() const noexcept
   {
     List<int> attributes;
 
@@ -205,7 +205,7 @@ namespace Krys::Gfx::OpenGL
     }
 
     // TODO: this should be configurable
-    bool srgbCapable = false;
+    bool srgbCapable = true;
     if (srgbCapable && OpenGL::IsWGLExtensionSupported("WGL_ARB_framebuffer_sRGB"))
     {
       attributes.push_back(WGL_FRAMEBUFFER_SRGB_CAPABLE_ARB);
@@ -229,7 +229,7 @@ namespace Krys::Gfx::OpenGL
     return attributes;
   }
 
-  void OpenGLContext::GLContextPlatformImpl::SetupContext()
+  void Context::ContextPlatformImpl::SetupContext()
   {
     auto attributes = GetContextAttributes();
     _renderingContext = wglCreateContextAttribsARB(_deviceContext, 0, attributes.data());
@@ -241,7 +241,7 @@ namespace Krys::Gfx::OpenGL
       throw std::runtime_error("Failed to make OpenGL rendering context current.");
   }
 
-  List<int> OpenGLContext::GLContextPlatformImpl::GetContextAttributes() const noexcept
+  List<int> Context::ContextPlatformImpl::GetContextAttributes() const noexcept
   {
     List<int> attributes;
     attributes.push_back(WGL_CONTEXT_MAJOR_VERSION_ARB);
@@ -279,7 +279,7 @@ namespace Krys::Gfx::OpenGL
     return attributes;
   }
 
-  void OpenGLContext::GLContextPlatformImpl::Present() const noexcept
+  void Context::ContextPlatformImpl::Present() const noexcept
   {
     assert(_deviceContext && _renderingContext);
     auto result = wglSwapBuffers(_deviceContext);

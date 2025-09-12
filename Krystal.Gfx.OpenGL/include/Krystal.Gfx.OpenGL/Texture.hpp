@@ -9,10 +9,10 @@ namespace Krys::Gfx::OpenGL
 {
   template <GLenum TextureType>
   requires(TextureType == GL_TEXTURE_2D || TextureType == GL_TEXTURE_CUBE_MAP)
-  class OpenGLTexture
+  class Texture
   {
   public:
-    OpenGLTexture(const IO::Path &filepath,
+    Texture(const IO::Path &filepath,
                   const IO::ImageLoadSettings &settings = {.FlipVertically = true,
                                                            .DesiredComponents = 0}) noexcept
         : _handle(0)
@@ -45,7 +45,7 @@ namespace Krys::Gfx::OpenGL
       glTextureParameteri(_handle, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
 
-    OpenGLTexture(const IO::Path &left, const IO::Path &right, const IO::Path &top, const IO::Path &bottom,
+    Texture(const IO::Path &left, const IO::Path &right, const IO::Path &top, const IO::Path &bottom,
                   const IO::Path &front, const IO::Path &back,
                   const IO::ImageLoadSettings &settings = {.FlipVertically = false,
                                                            .DesiredComponents = 0}) noexcept
@@ -91,7 +91,7 @@ namespace Krys::Gfx::OpenGL
       glTextureParameteri(_handle, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
     }
 
-    ~OpenGLTexture() noexcept
+    ~Texture() noexcept
     {
       glDeleteTextures(1, &_handle);
     }
@@ -111,6 +111,6 @@ namespace Krys::Gfx::OpenGL
     GLuint _handle;
   };
 
-  using OpenGLTexture2D = OpenGLTexture<GL_TEXTURE_2D>;
-  using OpenGLCubeMap = OpenGLTexture<GL_TEXTURE_CUBE_MAP>;
+  using Texture2D = Texture<GL_TEXTURE_2D>;
+  using CubeMap = Texture<GL_TEXTURE_CUBE_MAP>;
 }

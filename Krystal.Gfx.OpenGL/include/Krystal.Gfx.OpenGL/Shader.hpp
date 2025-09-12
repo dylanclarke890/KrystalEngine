@@ -11,10 +11,12 @@
 
 namespace Krys::Gfx::OpenGL
 {
-  class OpenGLShader
+  class Shader
   {
+    GLuint _handle;
+
   public:
-    OpenGLShader(const Krys::IO::Path &vertexFilepath, const Krys::IO::Path &fragmentFilepath) noexcept
+    Shader(const Krys::IO::Path &vertexFilepath, const Krys::IO::Path &fragmentFilepath) noexcept
         : _handle(glCreateProgram())
     {
       auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -33,8 +35,8 @@ namespace Krys::Gfx::OpenGL
       glDeleteShader(fragmentShader);
     }
 
-    OpenGLShader(const Krys::IO::Path &vertexFilepath, const Krys::IO::Path &geometryFilepath,
-                 const Krys::IO::Path &fragmentFilepath) noexcept
+    Shader(const Krys::IO::Path &vertexFilepath, const Krys::IO::Path &geometryFilepath,
+           const Krys::IO::Path &fragmentFilepath) noexcept
         : _handle(glCreateProgram())
     {
       auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -58,7 +60,7 @@ namespace Krys::Gfx::OpenGL
       glDeleteShader(fragmentShader);
     }
 
-    ~OpenGLShader() noexcept
+    ~Shader() noexcept
     {
       glDeleteProgram(_handle);
     }
@@ -159,8 +161,5 @@ namespace Krys::Gfx::OpenGL
         assert(false && "Shader program linking failed. See log for details.");
       }
     }
-
-  private:
-    GLuint _handle;
   };
 }
