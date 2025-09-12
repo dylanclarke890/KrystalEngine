@@ -61,6 +61,8 @@
     <None Include="data\shaders\opengl\visualise-normals.vert" />
     <None Include="data\shaders\opengl\instanced-quad.frag" />
     <None Include="data\shaders\opengl\instanced-quad.vert" />
+    <None Include="data\assets\models\rock\rock.mtl" />
+    <None Include="data\assets\models\planet\planet.mtl" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">
@@ -126,8 +128,19 @@
     <Image Include="data\assets\blending_transparent_window.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="data\assets\models\rock\rock.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\models\planet\mars.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="data\assets\models\backpack\source_attribution.txt" />
+    <Text Include="data\assets\models\planet\source.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="data\assets\models\rock\rock.obj" />
+    <Object Include="data\assets\models\planet\planet.obj" />
   </ItemGroup>
 </Project>

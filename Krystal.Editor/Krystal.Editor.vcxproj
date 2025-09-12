@@ -178,6 +178,8 @@
     <None Include="build\shaders\triangle.frag.spv" />
     <None Include="build\shaders\triangle.vert.spv" />
     <None Include="data\assets\models\backpack\backpack.mtl" />
+    <None Include="data\assets\models\planet\planet.mtl" />
+    <None Include="data\assets\models\rock\rock.mtl" />
     <None Include="data\shaders\opengl\explode-model.frag" />
     <None Include="data\shaders\opengl\explode-model.geo" />
     <None Include="data\shaders\opengl\explode-model.vert" />
@@ -220,6 +222,8 @@
     <Image Include="data\assets\models\backpack\normal.png" />
     <Image Include="data\assets\models\backpack\roughness.jpg" />
     <Image Include="data\assets\models\backpack\specular.jpg" />
+    <Image Include="data\assets\models\planet\mars.png" />
+    <Image Include="data\assets\models\rock\rock.png" />
     <Image Include="data\assets\skyboxes\sky\back.jpg" />
     <Image Include="data\assets\skyboxes\sky\bottom.jpg" />
     <Image Include="data\assets\skyboxes\sky\front.jpg" />
@@ -262,6 +266,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="data\assets\models\backpack\source_attribution.txt" />
+    <Text Include="data\assets\models\planet\source.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\shaders\opengl\backpack.frag">
@@ -302,6 +307,10 @@
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
       <FileType>Document</FileType>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="data\assets\models\planet\planet.obj" />
+    <Object Include="data\assets\models\rock\rock.obj" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
