@@ -338,6 +338,10 @@ namespace Krys::Gfx::OpenGL
       shaders["explode-model"] =
         CreateUnique<OpenGLShader>(base / Path("explode-model.vert"), base / Path("explode-model.geo"),
                                    base / Path("explode-model.frag"));
+
+      shaders["visualise-normals"] = CreateUnique<OpenGLShader>(base / Path("visualise-normals.vert"),
+                                                                base / Path("visualise-normals.geo"),
+                                                                base / Path("visualise-normals.frag"));
     }
 
     // Textures
@@ -389,23 +393,24 @@ namespace Krys::Gfx::OpenGL
 
   void OpenGLContext::Render(ICamera &camera) noexcept
   {
-     auto view = camera.ViewMatrix();
-     auto projection = camera.ProjectionMatrix();
-     Maths::Mat4 model;
+    auto view = camera.ViewMatrix();
+    auto projection = camera.ProjectionMatrix();
+    Maths::Mat4 model;
 
-    // glBindBuffer(GL_UNIFORM_BUFFER, ubos.at("matrices"));
-    // glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Maths::Mat4), &view[0][0]);
-    // glBufferSubData(GL_UNIFORM_BUFFER, sizeof(Maths::Mat4), sizeof(Maths::Mat4), &projection[0][0]);
+    glBindBuffer(GL_UNIFORM_BUFFER, ubos.at("matrices"));
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Maths::Mat4), &view[0][0]);
+    glBufferSubData(GL_UNIFORM_BUFFER, sizeof(Maths::Mat4), sizeof(Maths::Mat4), &projection[0][0]);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     model = Maths::Identity<Maths::Mat4>();
-    shaders.at("explode-model")->Bind();
-    shaders.at("explode-model")->SetUniform("view", view);
-    shaders.at("explode-model")->SetUniform("projection", projection);
-    shaders.at("explode-model")->SetUniform("time", (float)Platform::GetTime());
-    shaders.at("explode-model")->SetUniform("model", model);
+    shaders.at("backpack")->Bind();
+    shaders.at("backpack")->SetUniform("model", model);
 
     models.at("backpack")->Draw(*shaders.at("explode-model"));
+
+    shaders.at("visualise-normals")->Bind();
+    shaders.at("visualise-normals")->SetUniform("model", model);
+    models.at("backpack")->Draw(*shaders.at("visualise-normals"));
 
     // auto &shader = *shaders.at("reflection");
     // shader.Bind();

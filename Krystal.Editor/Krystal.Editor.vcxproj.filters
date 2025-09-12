@@ -56,6 +56,9 @@
     <None Include="data\shaders\opengl\explode-model.frag" />
     <None Include="data\shaders\opengl\explode-model.geo" />
     <None Include="data\shaders\opengl\explode-model.vert" />
+    <None Include="data\shaders\opengl\visualise-normals.frag" />
+    <None Include="data\shaders\opengl\visualise-normals.geo" />
+    <None Include="data\shaders\opengl\visualise-normals.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">
