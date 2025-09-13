@@ -308,13 +308,12 @@ namespace Krys::Gfx::OpenGL
       vaos["quad"]->Bind();
       List<float> vertices = {
         // positions   // texCoords
-        -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-        1.0f,  1.0f, 0.0f, 1.0f, 1.0f, 1.0f,  -1.0f, 0.0f, 1.0f, 0.0f,
+        -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 0.0f,
       };
       vbos["quad"] = CreateUnique<VertexBuffer>(vertices);
       vbos["quad"]->Bind();
       Utils::ApplyVertexBufferLayout({
-        {VertexAttributeType::Float, 3}, // position
+        {VertexAttributeType::Float, 2}, // position
         {VertexAttributeType::Float, 2}  // texcoord
       });
     }
@@ -383,7 +382,7 @@ namespace Krys::Gfx::OpenGL
       glBindTexture(GL_TEXTURE_2D, shadowMaps["directional"].Texture);
 
       vaos.at("quad")->Bind();
-      //Utils::Draw(GL_TRIANGLE_STRIP, 4);
+       Utils::Draw(GL_TRIANGLE_STRIP, 4);
     }
   }
 
