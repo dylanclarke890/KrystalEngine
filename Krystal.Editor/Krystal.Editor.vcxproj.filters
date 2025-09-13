@@ -67,6 +67,12 @@
     <None Include="data\assets\models\planet\planet.obj" />
     <None Include="data\shaders\opengl\instanced-model.frag" />
     <None Include="data\shaders\opengl\instanced-model.vert" />
+    <None Include="data\shaders\opengl\empty.frag" />
+    <None Include="data\shaders\opengl\directional-shadow-map.vert" />
+    <None Include="data\shaders\opengl\shadow-mapping.frag" />
+    <None Include="data\shaders\opengl\shadow-mapping.vert" />
+    <None Include="data\shaders\opengl\debug-quad-shadow-map.frag" />
+    <None Include="data\shaders\opengl\debug-quad-shadow-map.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">
@@ -136,6 +142,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="data\assets\models\planet\mars.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\wood.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

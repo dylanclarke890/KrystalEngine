@@ -125,11 +125,6 @@ namespace Krys::Gfx::OpenGL
         static_assert(false && "Unsupported uniform type.");
     }
 
-    NO_DISCARD GLuint GetNativeHandle() const noexcept
-    {
-      return _handle;
-    }
-
   private:
     void CreateShader(const Krys::IO::Path &filepath, unsigned int shader) noexcept
     {

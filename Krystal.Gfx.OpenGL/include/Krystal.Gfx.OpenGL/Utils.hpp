@@ -111,19 +111,15 @@ namespace Krys::Gfx::OpenGL
       shader.SetUniform(uniformPrefix + ".shininess", material.Shininess);
     }
 
-    static void DrawTriangles(uint32 vertexCount, uint32 offset = 0) noexcept
+    static void Draw(GLenum primitive, uint32 vertexCount, uint32 offset = 0) noexcept
     {
-      glDrawArrays(GL_TRIANGLES, 0, vertexCount);
+      glDrawArrays(primitive, 0, vertexCount);
     }
 
-    static void DrawTrianglesInstanced(uint32 vertexCount, uint32 instanceCount, uint32 offset = 0) noexcept
+    static void DrawInstanced(GLenum primitive, uint32 vertexCount, uint32 instanceCount,
+                              uint32 offset = 0) noexcept
     {
-      glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, instanceCount);
-    }
-
-    static void DrawPoints(uint32 vertexCount, uint32 offset = 0) noexcept
-    {
-      glDrawArrays(GL_POINTS, 0, vertexCount);
+      glDrawArraysInstanced(primitive, offset, vertexCount, instanceCount);
     }
   };
 }

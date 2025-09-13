@@ -180,6 +180,10 @@
     <None Include="data\assets\models\backpack\backpack.mtl" />
     <None Include="data\assets\models\planet\planet.mtl" />
     <None Include="data\assets\models\rock\rock.mtl" />
+    <None Include="data\shaders\opengl\debug-quad-shadow-map.frag" />
+    <None Include="data\shaders\opengl\debug-quad-shadow-map.vert" />
+    <None Include="data\shaders\opengl\directional-shadow-map.vert" />
+    <None Include="data\shaders\opengl\empty.frag" />
     <None Include="data\shaders\opengl\explode-model.frag" />
     <None Include="data\shaders\opengl\explode-model.geo" />
     <None Include="data\shaders\opengl\explode-model.vert" />
@@ -198,6 +202,8 @@
     <None Include="data\shaders\opengl\points.vert" />
     <None Include="data\shaders\opengl\reflection.frag" />
     <None Include="data\shaders\opengl\reflection.vert" />
+    <None Include="data\shaders\opengl\shadow-mapping.frag" />
+    <None Include="data\shaders\opengl\shadow-mapping.vert" />
     <None Include="data\shaders\opengl\single-colour.frag" />
     <None Include="data\shaders\opengl\skybox.frag" />
     <None Include="data\shaders\opengl\skybox.vert" />
@@ -233,6 +239,7 @@
     <Image Include="data\assets\skyboxes\sky\right.jpg" />
     <Image Include="data\assets\skyboxes\sky\top.jpg" />
     <Image Include="data\assets\wall.jpg" />
+    <Image Include="data\assets\wood.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\shaders\opengl\flat-colour-phong-material.frag">
