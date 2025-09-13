@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Krystal.Core/Core.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Shader.hpp"
 #include "Krystal.Gfx.OpenGL/Texture.hpp"
@@ -9,10 +10,6 @@
 
 #include <fstream>
 #include <iostream>
-#include <map>
-#include <sstream>
-#include <string>
-#include <vector>
 
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
