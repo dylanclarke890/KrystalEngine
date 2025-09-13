@@ -283,7 +283,6 @@ namespace Krys::Gfx::OpenGL
     auto view = camera.ViewMatrix();
     auto projection = camera.ProjectionMatrix();
 
-    ubos.at("matrices")->Bind();
     ubos.at("matrices")->Update(ByteUtils::AsBytesView(view));
     ubos.at("matrices")->Update(ByteUtils::AsBytesView(projection), sizeof(Mat4));
 

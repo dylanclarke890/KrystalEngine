@@ -23,7 +23,7 @@ namespace Krys
                   Maths::Radians(45.0f),
                   static_cast<float>(settings.WindowSettings.Size.Width)
                     / static_cast<float>(settings.WindowSettings.Size.Height),
-                  0.1f, 100.0f)
+                  0.1f, 1000.0f)
     {
     }
 
