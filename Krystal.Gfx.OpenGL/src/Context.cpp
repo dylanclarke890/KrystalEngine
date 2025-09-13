@@ -166,6 +166,17 @@ namespace
     shader.SetUniform("model", model);
     Utils::Draw(GL_TRIANGLES, 36);
   }
+
+  static void CreateVertexArray(const string &name, const BufferData &vertices,
+                                const VertexBufferLayout &layout) noexcept
+  {
+    vaos[name] = CreateUnique<VertexArray>();
+    vbos[name] = CreateUnique<VertexBuffer>(vertices);
+
+    vaos.at(name)->Bind();
+    vbos.at(name)->Bind();
+    Utils::ApplyVertexBufferLayout(layout);
+  }
 }
 
 namespace Krys::Gfx
@@ -230,17 +241,8 @@ namespace Krys::Gfx::OpenGL
       textures.at("wood")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
     }
 
-    // Buffers
-    {
-      ubos["matrices"] = CreateUnique<UniformBuffer>(2 * sizeof(Mat4));
-      ubos["matrices"]->Bind(0);
-    }
-
     // Cube
     {
-      vaos["cube"] = CreateUnique<VertexArray>();
-      vaos["cube"]->Bind();
-
       List<float> vertices = {
         // positions          // normals           // texture coords
         -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f,  0.0f,  0.5f,  -0.5f, -0.5f, 0.0f,
@@ -272,20 +274,18 @@ namespace Krys::Gfx::OpenGL
         1.0f,  0.0f,  1.0f,  1.0f,  0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
         0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  0.0f,
         1.0f,  0.0f,  0.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f};
-      vbos["cube"] = CreateUnique<VertexBuffer>(vertices);
-      vbos["cube"]->Bind();
-      Utils::ApplyVertexBufferLayout({
+
+      VertexBufferLayout layout = {
         {VertexAttributeType::Float, 3}, // position
         {VertexAttributeType::Float, 3}, // normal
         {VertexAttributeType::Float, 2}  // texcoord
-      });
+      };
+
+      CreateVertexArray("cube", ByteUtils::AsBytesView(vertices), layout);
     }
 
     // Plane
     {
-      vaos["plane"] = CreateUnique<VertexArray>();
-      vaos["plane"]->Bind();
-
       List<float> vertices = {// positions            // normals         // texcoords
                               25.0f, -0.5f, 25.0f,  0.0f,  1.0f,   0.0f,  25.0f,  0.0f,  -25.0f, -0.5f,
                               25.0f, 0.0f,  1.0f,   0.0f,  0.0f,   0.0f,  -25.0f, -0.5f, -25.0f, 0.0f,
@@ -293,35 +293,35 @@ namespace Krys::Gfx::OpenGL
                               25.0f, 0.0f,  -25.0f, -0.5f, -25.0f, 0.0f,  1.0f,   0.0f,  0.0f,   25.0f,
                               25.0f, -0.5f, -25.0f, 0.0f,  1.0f,   0.0f,  25.0f,  25.0f};
 
-      vbos["plane"] = CreateUnique<VertexBuffer>(vertices);
-      vbos["plane"]->Bind();
-      Utils::ApplyVertexBufferLayout({
+      VertexBufferLayout layout = {
         {VertexAttributeType::Float, 3}, // position
         {VertexAttributeType::Float, 3}, // normal
         {VertexAttributeType::Float, 2}  // texcoord
-      });
+      };
+
+      CreateVertexArray("plane", ByteUtils::AsBytesView(vertices), layout);
     }
 
     // Screen quad
     {
-      vaos["quad"] = CreateUnique<VertexArray>();
-      vaos["quad"]->Bind();
       List<float> vertices = {
         // positions   // texCoords
         -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 0.0f,
       };
-      vbos["quad"] = CreateUnique<VertexBuffer>(vertices);
-      vbos["quad"]->Bind();
-      Utils::ApplyVertexBufferLayout({
+
+      VertexBufferLayout layout = {
         {VertexAttributeType::Float, 2}, // position
         {VertexAttributeType::Float, 2}  // texcoord
-      });
+      };
+
+      CreateVertexArray("quad", ByteUtils::AsBytesView(vertices), layout);
     }
 
     // Shadow maps
-    {
-      CreateShadowMapFramebuffer("directional", 1'024, 1'024);
-    }
+    CreateShadowMapFramebuffer("directional", 1'024, 1'024);
+
+    ubos["matrices"] = CreateUnique<UniformBuffer>(2 * sizeof(Mat4));
+    ubos.at("matrices")->Bind(0);
 
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
@@ -382,7 +382,7 @@ namespace Krys::Gfx::OpenGL
       glBindTexture(GL_TEXTURE_2D, shadowMaps["directional"].Texture);
 
       vaos.at("quad")->Bind();
-       Utils::Draw(GL_TRIANGLE_STRIP, 4);
+      //Utils::Draw(GL_TRIANGLE_STRIP, 4);
     }
   }
 
