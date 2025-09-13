@@ -22,6 +22,7 @@
 #include "Krystal.Gfx.OpenGL/Shader.hpp"
 #include "Krystal.Gfx.OpenGL/Texture.hpp"
 #include "Krystal.Gfx.OpenGL/Utils.hpp"
+#include "Krystal.Gfx.OpenGL/VertexArray.hpp"
 #include "Krystal.Gfx/Light.hpp"
 #include "Krystal.Gfx/Material.hpp"
 #include "Krystal.Gfx/VertexBufferLayout.hpp"
@@ -51,7 +52,7 @@ namespace
   static Map<string, Unique<Texture2D>> textures;
   static Map<string, Unique<CubeMap>> cubemaps;
   static Map<string, Unique<Model>> models;
-  static Map<string, GLuint> vaos;
+  static Map<string, Unique<VertexArray>> vaos;
   static Map<string, Unique<VertexBuffer>> vbos;
   static Map<string, Unique<UniformBuffer>> ubos;
   static Map<string, FramebufferData> framebuffers;
@@ -80,111 +81,22 @@ namespace
     {Maths::Vec3(0.0f, 0.0f, -3.0f), LightColour {ambientColor, {0.2f, 0.2f, 1.0f}, specularColor},
      attenuation}};
 
+  static void SetLightUniforms(Shader &shader, ICamera &camera) noexcept
+  {
+    Utils::SetDirectionalLightUniforms(shader, directionalLight);
+
+    for (uint i = 0; i < 4; i++)
+    {
+      Utils::SetPointLightUniforms(shader, pointLights[i], "pointLights[" + std::to_string(i) + "]");
+    }
+
+    spotLight.Position = camera.Position();
+    spotLight.Direction = camera.Forward();
+    Utils::SetSpotLightUniforms(shader, spotLight);
+  }
+
 #pragma endregion
 
-  static List<float> cubeVertices = {
-    // Back face
-    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // Bottom-left
-    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,   // top-right
-    0.5f, -0.5f, -0.5f, 1.0f, 0.0f,  // bottom-right
-    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,   // top-right
-    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, // bottom-left
-    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f,  // top-left
-    // Front face
-    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, // bottom-left
-    0.5f, -0.5f, 0.5f, 1.0f, 0.0f,  // bottom-right
-    0.5f, 0.5f, 0.5f, 1.0f, 1.0f,   // top-right
-    0.5f, 0.5f, 0.5f, 1.0f, 1.0f,   // top-right
-    -0.5f, 0.5f, 0.5f, 0.0f, 1.0f,  // top-left
-    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, // bottom-left
-    // Left face
-    -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,   // top-right
-    -0.5f, 0.5f, -0.5f, 1.0f, 1.0f,  // top-left
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // bottom-left
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // bottom-left
-    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,  // bottom-right
-    -0.5f, 0.5f, 0.5f, 1.0f, 0.0f,   // top-right
-                                     // Right face
-    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,    // top-left
-    0.5f, -0.5f, -0.5f, 0.0f, 1.0f,  // bottom-right
-    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,   // top-right
-    0.5f, -0.5f, -0.5f, 0.0f, 1.0f,  // bottom-right
-    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,    // top-left
-    0.5f, -0.5f, 0.5f, 0.0f, 0.0f,   // bottom-left
-    // Bottom face
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // top-right
-    0.5f, -0.5f, -0.5f, 1.0f, 1.0f,  // top-left
-    0.5f, -0.5f, 0.5f, 1.0f, 0.0f,   // bottom-left
-    0.5f, -0.5f, 0.5f, 1.0f, 0.0f,   // bottom-left
-    -0.5f, -0.5f, 0.5f, 0.0f, 0.0f,  // bottom-right
-    -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, // top-right
-    // Top face
-    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, // top-left
-    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,   // bottom-right
-    0.5f, 0.5f, -0.5f, 1.0f, 1.0f,  // top-right
-    0.5f, 0.5f, 0.5f, 1.0f, 0.0f,   // bottom-right
-    -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, // top-left
-    -0.5f, 0.5f, 0.5f, 0.0f, 0.0f   // bottom-left
-  };
-
-  static List<float> planeVertices = {
-    // positions          // texture Coords (note we set these higher than 1 (together with GL_REPEAT as
-    // texture wrapping mode). this will cause the floor texture to repeat)
-    5.0f, -0.5f, 5.0f, 2.0f, 0.0f, -5.0f, -0.5f, 5.0f,  0.0f, 0.0f, -5.0f, -0.5f, -5.0f, 0.0f, 2.0f,
-
-    5.0f, -0.5f, 5.0f, 2.0f, 0.0f, -5.0f, -0.5f, -5.0f, 0.0f, 2.0f, 5.0f,  -0.5f, -5.0f, 2.0f, 2.0f};
-
-  static List<float> transparentVertices = {
-    // positions         // texture Coords
-    0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, -0.5f, 0.0f, 1.0f, 0.0f,
-    0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.5f,  0.0f, 1.0f, 1.0f};
-
-  static VertexBufferLayout depthTestLayout({
-    {VertexAttributeType::Float, 3}, // Position
-    {VertexAttributeType::Float, 2}  // Texture Coordinates
-  });
-
-  static VertexBufferLayout reflectiveCubeLayout({
-    {VertexAttributeType::Float, 3}, // Position
-    {VertexAttributeType::Float, 3}  // Normal
-  });
-
-  static VertexBufferLayout
-    instanceDataLayout({{VertexAttributeType::Float, 4, VertexInputRate::PerInstance},
-                        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance},
-                        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance},
-                        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}});
-
-  static List<float> vertices = {
-    -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.5f,  -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f,
-    0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f,
-    -0.5f, 0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f,
-
-    -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.5f,  -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,
-    -0.5f, 0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,
-
-    -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, -1.0f, 0.0f,  0.0f,
-    -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,
-    -0.5f, -0.5f, 0.5f,  -1.0f, 0.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,
-
-    0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  0.5f,  0.5f,  -0.5f, 1.0f,  0.0f,  0.0f,
-    0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,
-    0.5f,  -0.5f, 0.5f,  1.0f,  0.0f,  0.0f,  0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,
-
-    -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.5f,  -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,
-    0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,
-    -0.5f, -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,
-
-    -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.5f,  0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,
-    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
-    -0.5f, 0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f};
-
-  static List<float> quadVertices = {
-    // positions     // colors
-    -0.05f, 0.05f, 1.0f, 0.0f, 0.0f, 0.05f, -0.05f, 0.0f, 1.0f, 0.0f, -0.05f, -0.05f, 0.0f, 0.0f, 1.0f,
-
-    -0.05f, 0.05f, 1.0f, 0.0f, 0.0f, 0.05f, -0.05f, 0.0f, 1.0f, 0.0f, 0.05f,  0.05f,  0.0f, 1.0f, 1.0f};
   static List<float> skyboxVertices = {
     // positions
     -1.0f, 1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  -1.0f, -1.0f,
@@ -205,30 +117,7 @@ namespace
     -1.0f, -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, -1.0f,
     1.0f,  -1.0f, -1.0f, -1.0f, -1.0f, 1.0f,  1.0f,  -1.0f, 1.0f};
 
-  static List<float> points = {
-    -0.5f, 0.5f,  1.0f, 0.0f, 0.0f, // top-left
-    0.5f,  0.5f,  0.0f, 1.0f, 0.0f, // top-right
-    0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, // bottom-right
-    -0.5f, -0.5f, 1.0f, 1.0f, 0.0f  // bottom-left
-  };
-
-  static uint32 instanceCount = 500'000;
-  static Maths::Mat4 *modelMatrices;
-
-  static void CreateVertexArray(const string &name, const List<float> vertices,
-                                const VertexBufferLayout &layout) noexcept
-  {
-    GLuint vao;
-    glCreateVertexArrays(1, &vao);
-    vaos[name] = vao;
-
-    glBindVertexArray(vao);
-
-    vbos[name] = CreateUnique<VertexBuffer>(vertices);
-    vbos[name]->Bind();
-
-    Utils::ApplyVertexBufferLayout(layout);
-  }
+  static uint32 instanceCount = 400'000;
 
   static void CreateFramebuffer(const string &name, uint32 width, uint32 height)
   {
@@ -263,20 +152,6 @@ namespace
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
   }
-
-  static void SetLightUniforms(Shader &shader, ICamera &camera) noexcept
-  {
-    Utils::SetDirectionalLightUniforms(shader, directionalLight);
-
-    for (uint i = 0; i < 4; i++)
-    {
-      Utils::SetPointLightUniforms(shader, pointLights[i], "pointLights[" + std::to_string(i) + "]");
-    }
-
-    spotLight.Position = camera.Position();
-    spotLight.Direction = camera.Forward();
-    Utils::SetSpotLightUniforms(shader, spotLight);
-  }
 }
 
 namespace Krys::Gfx
@@ -307,8 +182,14 @@ namespace Krys::Gfx::OpenGL
     // Shaders
     {
       using namespace IO;
-
       Path base = Path("data/shaders/opengl");
+
+      shaders["model"] = CreateUnique<Shader>(base / Path("model.vert"), base / Path("model.frag"));
+      shaders["instanced-model"] =
+        CreateUnique<Shader>(base / Path("instanced-model.vert"), base / Path("instanced-model.frag"));
+      shaders["visualise-normals"] =
+        CreateUnique<Shader>(base / Path("visualise-normals.vert"), base / Path("visualise-normals.geo"),
+                             base / Path("visualise-normals.frag"));
       shaders["skybox"] = CreateUnique<Shader>(base / Path("skybox.vert"), base / Path("skybox.frag"));
       shaders["light-source"] =
         CreateUnique<Shader>(base / Path("lightsource.vert"), base / Path("lightsource.frag"));
@@ -317,59 +198,25 @@ namespace Krys::Gfx::OpenGL
         CreateUnique<Shader>(base / Path("basic.vert"), base / Path("flat-colour-phong-material.frag"));
       shaders["phong-material"] =
         CreateUnique<Shader>(base / Path("basic.vert"), base / Path("phong-material.frag"));
-      shaders["backpack"] = CreateUnique<Shader>(base / Path("backpack.vert"), base / Path("backpack.frag"));
-      shaders["instanced-model"] =
-        CreateUnique<Shader>(base / Path("instanced-model.vert"), base / Path("instanced-model.frag"));
-      shaders["depth-testing"] =
-        CreateUnique<Shader>(base / Path("depth-testing.vert"), base / Path("depth-testing.frag"));
-      shaders["single-colour"] =
-        CreateUnique<Shader>(base / Path("depth-testing.vert"), base / Path("single-colour.frag"));
-      shaders["framebuffer"] =
-        CreateUnique<Shader>(base / Path("framebuffer.vert"), base / Path("framebuffer.frag"));
-      shaders["reflection"] =
-        CreateUnique<Shader>(base / Path("reflection.vert"), base / Path("reflection.frag"));
-      shaders["points"] = CreateUnique<Shader>(base / Path("points.vert"), base / Path("points.geo"),
-                                               base / Path("points.frag"));
-      shaders["explode-model"] =
-        CreateUnique<Shader>(base / Path("explode-model.vert"), base / Path("explode-model.geo"),
-                             base / Path("explode-model.frag"));
-
-      shaders["visualise-normals"] =
-        CreateUnique<Shader>(base / Path("visualise-normals.vert"), base / Path("visualise-normals.geo"),
-                             base / Path("visualise-normals.frag"));
-      shaders["instanced-quad"] =
-        CreateUnique<Shader>(base / Path("instanced-quad.vert"), base / Path("instanced-quad.frag"));
     }
 
     // Textures
     {
       using namespace IO;
-
       Path base = Path("data/assets");
-      textures["wall"] = CreateUnique<Texture2D>(base / Path("wall.jpg"));
-      textures["container"] = CreateUnique<Texture2D>(base / Path("container.jpg"));
-      textures["awesomeface"] = CreateUnique<Texture2D>(base / Path("awesomeface.png"));
-      textures["container-diffuse"] = CreateUnique<Texture2D>(base / Path("container-diffuse.png"));
-      textures["container-specular"] = CreateUnique<Texture2D>(base / Path("container-specular.png"));
-      textures["container-emission"] = CreateUnique<Texture2D>(base / Path("container-emission.png"));
-      textures["metal"] = CreateUnique<Texture2D>(base / Path("metal.png"));
-      textures["grass"] = CreateUnique<Texture2D>(base / Path("grass.png"));
-      textures["window"] = CreateUnique<Texture2D>(base / Path("blending_transparent_window.png"));
-
-      textures["marble"] = CreateUnique<Texture2D>(base / Path("marble.jpg"));
-      textures["marble"]->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures["marble"]->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
     }
 
+    // Cubemaps
     {
       using namespace IO;
-
       Path base = Path("data/assets/skyboxes/sky");
+
       cubemaps["sky"] =
         CreateUnique<CubeMap>(base / Path("left.jpg"), base / Path("right.jpg"), base / Path("top.jpg"),
                               base / Path("bottom.jpg"), base / Path("front.jpg"), base / Path("back.jpg"));
     }
 
+    // Models
     {
       using namespace IO;
 
@@ -378,10 +225,12 @@ namespace Krys::Gfx::OpenGL
       models["planet"] = CreateUnique<Model>(base / Path("planet/planet.obj"));
     }
 
-    CreateVertexArray("cube", vertices, reflectiveCubeLayout);
-    CreateVertexArray("skybox", skyboxVertices, {{VertexAttributeType::Float, 3}});
-
+    // Buffers
     {
+      vaos["skybox"] = CreateUnique<VertexArray>();
+      vbos["skybox"] = CreateUnique<VertexBuffer>(skyboxVertices);
+      vaos["skybox"]->AddVertexBuffer(vbos["skybox"].get(), {{VertexAttributeType::Float, 3}});
+
       ubos["matrices"] = CreateUnique<UniformBuffer>(2 * sizeof(Mat4));
       ubos["matrices"]->Bind(0);
     }
@@ -391,7 +240,7 @@ namespace Krys::Gfx::OpenGL
     // glEnable(GL_FRAMEBUFFER_SRGB);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
-    modelMatrices = new Maths::Mat4[instanceCount];
+    List<Mat4> modelMatrices(instanceCount);
     srand((uint)Platform::GetTime()); // initialize random seed
     float radius = 150.0f;
     float offset = 25.f;
@@ -419,12 +268,12 @@ namespace Krys::Gfx::OpenGL
       // 4. now add to list of matrices
       modelMatrices[i] = model;
     }
-
-    unsigned int buffer;
-    glCreateBuffers(1, &buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferData(GL_ARRAY_BUFFER, instanceCount * sizeof(Mat4), &modelMatrices[0], GL_STATIC_DRAW);
-    models["rock"]->ApplyVertexLayout(instanceDataLayout);
+    vbos["model-matrices"] = CreateUnique<VertexBuffer>(modelMatrices);
+    vbos["model-matrices"]->Bind();
+    models["rock"]->ApplyVertexLayout({{VertexAttributeType::Float, 4, VertexInputRate::PerInstance},
+                                       {VertexAttributeType::Float, 4, VertexInputRate::PerInstance},
+                                       {VertexAttributeType::Float, 4, VertexInputRate::PerInstance},
+                                       {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}});
   }
 
   void Context::Render(ICamera &camera) noexcept
@@ -437,16 +286,6 @@ namespace Krys::Gfx::OpenGL
     ubos.at("matrices")->Bind();
     ubos.at("matrices")->Update(ByteUtils::AsBytesView(view));
     ubos.at("matrices")->Update(ByteUtils::AsBytesView(projection), sizeof(Mat4));
-
-    {
-      auto &shader = shaders.at("backpack");
-      shader->Bind();
-      Maths::Mat4 model = Maths::Identity<Mat4>();
-      model = Maths::Translate(model, Maths::Vec3(0.0f, -3.0f, 0.0f));
-      model = Maths::Scale(model, Maths::Vec3(4.0f, 4.0f, 4.0f));
-      shader->SetUniform("model", model);
-      models.at("planet")->Draw(*shader);
-    }
 
     {
       auto &shader = shaders.at("instanced-model");

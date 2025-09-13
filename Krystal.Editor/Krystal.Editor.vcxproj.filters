@@ -39,8 +39,8 @@
     <None Include="data\shaders\opengl\flat-colour-phong-material.frag" />
     <None Include="data\shaders\opengl\phong-material.frag" />
     <None Include="data\assets\models\backpack\backpack.mtl" />
-    <None Include="data\shaders\opengl\backpack.vert" />
-    <None Include="data\shaders\opengl\backpack.frag" />
+    <None Include="data\shaders\opengl\model.vert" />
+    <None Include="data\shaders\opengl\model.frag" />
     <None Include="data\assets\models\backpack\backpack.obj" />
     <None Include="data\shaders\opengl\depth-testing.frag" />
     <None Include="data\shaders\opengl\depth-testing.vert" />

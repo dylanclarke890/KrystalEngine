@@ -48,6 +48,7 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Model.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Shader.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Texture.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\VertexArray.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Win32\ContextPlatformImpl.hpp" />
     <ClCompile Include="src\Hooks\gl.cpp" />
     <ClCompile Include="src\Hooks\wgl.cpp" />

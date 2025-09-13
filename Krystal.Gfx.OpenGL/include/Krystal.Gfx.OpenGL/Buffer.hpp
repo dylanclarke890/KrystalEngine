@@ -27,7 +27,7 @@ namespace Krys::Gfx::OpenGL
     {
     }
 
-    Buffer(uint32 size, GLenum bufferUsage = GL_DYNAMIC_DRAW) noexcept : _handle(0)
+    Buffer(size_t size, GLenum bufferUsage = GL_DYNAMIC_DRAW) noexcept : _handle(0)
     {
       glCreateBuffers(1, &_handle);
       glNamedBufferData(_handle, size, nullptr, bufferUsage);

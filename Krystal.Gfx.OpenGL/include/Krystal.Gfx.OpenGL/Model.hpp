@@ -43,6 +43,17 @@ namespace Krys::Gfx::OpenGL
 
   struct Vertex
   {
+    static VertexBufferLayout Layout() noexcept
+    {
+      return {
+        {VertexAttributeType::Float, 3}, // position
+        {VertexAttributeType::Float, 3}, // normal
+        {VertexAttributeType::Float, 2}, // texcoords
+        {VertexAttributeType::Float, 3}, // tangent
+        {VertexAttributeType::Float, 3}  // bitangent
+      };
+    }
+
     Maths::Vec3 Position;
     Maths::Vec3 Normal;
     Maths::Vec2 TexCoords;
@@ -52,12 +63,13 @@ namespace Krys::Gfx::OpenGL
 
   class Mesh
   {
-  public:
     List<Vertex> _vertices;
     List<uint> _indices;
     List<MeshTexture> _textures;
     GLuint VAO;
+    GLuint VBO, EBO;
 
+  public:
     Mesh(List<Vertex> vertices, List<uint> indices, List<MeshTexture> textures) noexcept
         : _vertices(vertices), _indices(indices), _textures(textures)
     {
@@ -70,7 +82,7 @@ namespace Krys::Gfx::OpenGL
 
       // draw mesh
       glDrawElements(GL_TRIANGLES, static_cast<uint>(_indices.size()), GL_UNSIGNED_INT, 0);
-      
+
       glBindVertexArray(0);
       glActiveTexture(GL_TEXTURE0);
     }
@@ -80,7 +92,8 @@ namespace Krys::Gfx::OpenGL
       Bind(shader);
 
       // draw mesh
-      glDrawElementsInstanced(GL_TRIANGLES, static_cast<uint>(_indices.size()), GL_UNSIGNED_INT, 0, instanceCount);
+      glDrawElementsInstanced(GL_TRIANGLES, static_cast<uint>(_indices.size()), GL_UNSIGNED_INT, 0,
+                              instanceCount);
 
       glBindVertexArray(0);
       glActiveTexture(GL_TEXTURE0);
@@ -92,57 +105,27 @@ namespace Krys::Gfx::OpenGL
     }
 
   private:
-    // render data
-    uint VBO, EBO;
-
-    // initializes all the buffer objects/arrays
     void SetupMesh()
     {
-      // create buffers/arrays
-      glGenVertexArrays(1, &VAO);
-      glGenBuffers(1, &VBO);
-      glGenBuffers(1, &EBO);
+      glCreateVertexArrays(1, &VAO);
+      glCreateBuffers(1, &VBO);
+      glCreateBuffers(1, &EBO);
 
       glBindVertexArray(VAO);
 
-      // load data into vertex buffers
       glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-      // A great thing about structs is that their memory layout is sequential for all its items.
-      // The effect is that we can simply pass a pointer to the struct and it translates perfectly to a
-      // Maths::Vec3/2 array which again translates to 3/2 floats which translates to a byte array.
       glBufferData(GL_ARRAY_BUFFER, _vertices.size() * sizeof(Vertex), &_vertices[0], GL_STATIC_DRAW);
 
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, _indices.size() * sizeof(unsigned int), &_indices[0],
                    GL_STATIC_DRAW);
 
-      // set the vertex attribute pointers
-
-      // vertex Positions
-      glEnableVertexAttribArray(0);
-      glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)0);
-
-      // vertex normals
-      glEnableVertexAttribArray(1);
-      glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Normal));
-
-      // vertex texture coords
-      glEnableVertexAttribArray(2);
-      glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, TexCoords));
-
-      // vertex tangent
-      glEnableVertexAttribArray(3);
-      glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Tangent));
-
-      // vertex bitangent
-      glEnableVertexAttribArray(4);
-      glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)offsetof(Vertex, Bitangent));
+      Utils::ApplyVertexBufferLayout(Vertex::Layout());
 
       glBindVertexArray(0);
     }
-  
-    void Bind(Shader& shader) noexcept
+
+    void Bind(Shader &shader) noexcept
     {
       // bind appropriate textures
       uint diffuseNr = 1;
@@ -202,14 +185,18 @@ namespace Krys::Gfx::OpenGL
 
     void Draw(Shader &shader)
     {
-      for (uint i = 0; i < _meshes.size(); i++)
-        _meshes[i].Draw(shader);
+      for (auto &mesh : _meshes)
+      {
+        mesh.Draw(shader);
+      }
     }
 
     void DrawInstanced(Shader &shader, uint instanceCount)
     {
-      for (uint i = 0; i < _meshes.size(); i++)
-        _meshes[i].DrawInstanced(shader, instanceCount);
+      for (auto &mesh : _meshes)
+      {
+        mesh.DrawInstanced(shader, instanceCount);
+      }
     }
 
     void ApplyVertexLayout(VertexBufferLayout layout, uint32 attributeIndexOffset = 0u) noexcept
@@ -265,6 +252,16 @@ namespace Krys::Gfx::OpenGL
       }
     }
 
+    Maths::Vec2 AssimpVec2DToVec2(const aiVector3D &vec) const noexcept
+    {
+      return Maths::Vec2(vec.x, vec.y);
+    }
+
+    Maths::Vec3 AssimpVec3DToVec3(const aiVector3D &vec) const noexcept
+    {
+      return Maths::Vec3(vec.x, vec.y, vec.z);
+    }
+
     Mesh ProcessMesh(aiMesh *mesh, const aiScene *scene)
     {
       List<Vertex> vertices;
@@ -275,53 +272,25 @@ namespace Krys::Gfx::OpenGL
       for (uint i = 0; i < mesh->mNumVertices; i++)
       {
         Vertex vertex;
-        Maths::Vec3 vector; // we declare a placeholder vector since assimp uses its own vector class that
-                            // doesn't directly convert to our vec3 class so we transfer the data to this
-                            // placeholder Maths::Vec3 first.
-        // positions
-        vector.x = mesh->mVertices[i].x;
-        vector.y = mesh->mVertices[i].y;
-        vector.z = mesh->mVertices[i].z;
-        vertex.Position = vector;
 
-        // normals
+        vertex.Position = AssimpVec3DToVec3(mesh->mVertices[i]);
+
         if (mesh->HasNormals())
         {
-          vector.x = mesh->mNormals[i].x;
-          vector.y = mesh->mNormals[i].y;
-          vector.z = mesh->mNormals[i].z;
-          vertex.Normal = vector;
+          vertex.Normal = AssimpVec3DToVec3(mesh->mNormals[i]);
         }
-
-        // texture coordinates
-        if (mesh->mTextureCoords[0]) // does the mesh contain texture coordinates?
+       
+        // A model can have up to 8 sets of texture coordinates but for now we only care about the first.
+        if (mesh->HasTextureCoords(0u))
         {
-          Maths::Vec2 vec;
-
-          // a vertex can contain up to 8 different texture coordinates. We thus make the assumption that we
-          // won't use models where a vertex can have multiple texture coordinates so we always take the first
-          // set (0).
-          vec.x = mesh->mTextureCoords[0][i].x;
-          vec.y = mesh->mTextureCoords[0][i].y;
-          vertex.TexCoords = vec;
-
-          // tangent
-          vector.x = mesh->mTangents[i].x;
-          vector.y = mesh->mTangents[i].y;
-          vector.z = mesh->mTangents[i].z;
-          vertex.Tangent = vector;
-
-          // bitangent
-          vector.x = mesh->mBitangents[i].x;
-          vector.y = mesh->mBitangents[i].y;
-          vector.z = mesh->mBitangents[i].z;
-          vertex.Bitangent = vector;
+          vertex.TexCoords = AssimpVec2DToVec2(mesh->mTextureCoords[0][i]);
         }
-        else
+
+        if (mesh->HasTangentsAndBitangents())
         {
-          vertex.TexCoords = Maths::Vec2(0.0f, 0.0f);
+          vertex.Tangent = AssimpVec3DToVec3(mesh->mTangents[i]);
+          vertex.Bitangent = AssimpVec3DToVec3(mesh->mBitangents[i]);
         }
-
         vertices.push_back(vertex);
       }
 
@@ -368,8 +337,6 @@ namespace Krys::Gfx::OpenGL
       return Mesh(vertices, indices, textures);
     }
 
-    // checks all material textures of a given type and loads the textures if they're not loaded yet.
-    // the required info is returned as a Texture struct.
     List<MeshTexture> LoadMaterialTextures(aiMaterial *mat, aiTextureType type, TextureType textureType)
     {
       List<MeshTexture> textures;
