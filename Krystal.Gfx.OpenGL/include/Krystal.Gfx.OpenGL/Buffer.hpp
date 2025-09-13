@@ -3,6 +3,7 @@
 #include "Krystal.Core/ByteUtils.hpp"
 #include "Krystal.Core/Core.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
+#include "Krystal.Maths/Matrix.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
@@ -58,6 +59,16 @@ namespace Krys::Gfx::OpenGL
     void Update(const BufferData &data, size_t offset = 0) noexcept
     {
       glNamedBufferSubData(_handle, offset, data.size(), data.data());
+    }
+
+    void Update(const List<byte> &data, size_t offset = 0) noexcept
+    {
+      Update(ByteUtils::AsBytesView(data), offset);
+    }
+
+    void Update(const Maths::Mat4 &data, size_t offset = 0) noexcept
+    {
+      Update(ByteUtils::AsBytesView(data), offset);
     }
   };
 

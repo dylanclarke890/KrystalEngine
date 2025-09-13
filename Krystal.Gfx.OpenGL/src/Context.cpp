@@ -46,7 +46,6 @@ namespace
     GLuint Texture {};
     uint32 Width {};
     uint32 Height {};
-    Mat4 LightSpaceMatrix {};
   };
 
   static Map<string, Unique<Shader>> shaders;
@@ -128,14 +127,40 @@ namespace
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
 
-    Mat4 lightProjection = Ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
-    Mat4 lightView = LookAt(lightPos, Vec3(0.0f), Vec3(0.0f, 1.0f, 0.0f));
-
-    shadowMaps[name] = {depthMapFBO, depthMap, width, height, lightProjection * lightView};
+    shadowMaps[name] = {depthMapFBO, depthMap, width, height};
 
     assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE
            && "framebuffer is incomplete");
 
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  }
+
+  static void CreateCubeShadowMapFramebuffer(const string &name, uint32 width, uint32 height) noexcept
+  {
+    GLuint depthMapFBO;
+    glGenFramebuffers(1, &depthMapFBO);
+    // create depth cubemap texture
+    GLuint depthCubemap;
+    glGenTextures(1, &depthCubemap);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, depthCubemap);
+    for (uint i = 0; i < 6; i++)
+    {
+      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_DEPTH_COMPONENT, width, height, 0,
+                   GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+    }
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    // attach depth texture as FBO's depth buffer
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+    shadowMaps[name] = {depthMapFBO, depthCubemap, width, height};
+    assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE
+           && "framebuffer is incomplete");
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
   }
 
@@ -319,6 +344,7 @@ namespace Krys::Gfx::OpenGL
 
     // Shadow maps
     CreateShadowMapFramebuffer("directional", 1'024, 1'024);
+    CreateCubeShadowMapFramebuffer("point", 1'024, 1'024);
 
     ubos["matrices"] = CreateUnique<UniformBuffer>(2 * sizeof(Mat4));
     ubos.at("matrices")->Bind(0);
@@ -341,12 +367,14 @@ namespace Krys::Gfx::OpenGL
     auto view = camera.ViewMatrix();
     auto projection = camera.ProjectionMatrix();
 
-    ubos.at("matrices")->Update(ByteUtils::AsBytesView(view));
-    ubos.at("matrices")->Update(ByteUtils::AsBytesView(projection), sizeof(Mat4));
+    ubos.at("matrices")->Update(view);
+    ubos.at("matrices")->Update(projection, sizeof(Mat4));
+
+    Mat4 lightProjection = Ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
+    Mat4 lightView = LookAt(lightPos, Vec3(0.0f), Vec3(0.0f, 1.0f, 0.0f));
+    Mat4 lightSpaceMatrix = lightProjection * lightView;
 
     {
-      Mat4 lightSpaceMatrix = shadowMaps["directional"].LightSpaceMatrix;
-
       auto &shader = shaders.at("depth");
       shader->Bind();
       shader->SetUniform("lightSpaceMatrix", lightSpaceMatrix);
@@ -362,7 +390,7 @@ namespace Krys::Gfx::OpenGL
       glViewport(0, 0, _width, _height);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       shader->Bind();
-      shader->SetUniform("lightSpaceMatrix", shadowMaps["directional"].LightSpaceMatrix);
+      shader->SetUniform("lightSpaceMatrix", lightSpaceMatrix);
       shader->SetUniform("viewPos", camera.Position());
       shader->SetUniform("lightPos", lightPos);
 
@@ -382,7 +410,7 @@ namespace Krys::Gfx::OpenGL
       glBindTexture(GL_TEXTURE_2D, shadowMaps["directional"].Texture);
 
       vaos.at("quad")->Bind();
-      //Utils::Draw(GL_TRIANGLE_STRIP, 4);
+      // Utils::Draw(GL_TRIANGLE_STRIP, 4);
     }
   }
 
