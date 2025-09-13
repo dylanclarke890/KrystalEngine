@@ -1,21 +1,13 @@
 #include "Krystal.Gfx.OpenGL/Context.hpp"
 
-#include "Krystal.Core/Core.hpp"
 #include "Krystal.Core/Detection.hpp"
-#include "Krystal.Gfx/IContext.hpp"
-#include "Krystal.IO/Streams/NativeFileStream.hpp"
-#include "Krystal.IO/Streams/StreamUtils.hpp"
-
 #ifdef KRYS_PLATFORM_WINDOWS
   #include "Krystal.Gfx.OpenGL/Win32/ContextPlatformImpl.hpp"
-  #undef CreateWindow
-  #undef LoadImage
-  #undef min
-  #undef max
 #else
   #error "Unsupported platform for OpenGL context creation."
 #endif
 
+#include "Krystal.Core/Core.hpp"
 #include "Krystal.Gfx.OpenGL/Buffer.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Model.hpp"
@@ -23,8 +15,8 @@
 #include "Krystal.Gfx.OpenGL/Texture.hpp"
 #include "Krystal.Gfx.OpenGL/Utils.hpp"
 #include "Krystal.Gfx.OpenGL/VertexArray.hpp"
+#include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/Light.hpp"
-#include "Krystal.Gfx/Material.hpp"
 #include "Krystal.Gfx/VertexBufferLayout.hpp"
 #include "Krystal.Maths/Clipspace.hpp"
 #include "Krystal.Maths/Convert.hpp"
