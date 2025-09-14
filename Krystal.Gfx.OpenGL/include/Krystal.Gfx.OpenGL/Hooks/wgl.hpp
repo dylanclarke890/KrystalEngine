@@ -45,6 +45,8 @@
   #define NOMCX
   // #define NOGDI - we need GDI for pixel format functions
   #include <windows.h>
+  #undef near
+  #undef far
 #endif
 
 // #ifndef KRYS_GL_OVERRIDE_FUNCTIONS

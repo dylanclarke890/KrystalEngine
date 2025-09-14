@@ -240,10 +240,15 @@ namespace Krys::Gfx::OpenGL
         CreateUnique<Shader>(base / Path("basic.vert"), base / Path("flat-colour-phong-material.frag"));
       shaders["phong-material"] =
         CreateUnique<Shader>(base / Path("basic.vert"), base / Path("phong-material.frag"));
-      shaders["depth"] =
+      shaders["directional-depth"] =
         CreateUnique<Shader>(base / Path("directional-shadow-map.vert"), base / Path("empty.frag"));
-      shaders["shadow-mapping"] =
+      shaders["point-depth"] =
+        CreateUnique<Shader>(base / Path("point-shadows.vert"), base / Path("point-shadows.geo"),
+                             base / Path("point-shadows.frag"));
+      shaders["directional-shadow-mapping"] =
         CreateUnique<Shader>(base / Path("shadow-mapping.vert"), base / Path("shadow-mapping.frag"));
+      shaders["point-shadow-mapping"] = CreateUnique<Shader>(base / Path("point-shadow-mapping.vert"),
+                                                             base / Path("point-shadow-mapping.frag"));
       shaders["debug-quad"] = CreateUnique<Shader>(base / Path("debug-quad-shadow-map.vert"),
                                                    base / Path("debug-quad-shadow-map.frag"));
     }
@@ -338,15 +343,18 @@ namespace Krys::Gfx::OpenGL
     CreateShadowMapFramebuffer("directional", 1'024, 1'024);
     CreateCubeShadowMapFramebuffer("point", 1'024, 1'024);
 
-    ubos["matrices"] = CreateUnique<UniformBuffer>(2 * sizeof(Mat4));
-    ubos.at("matrices")->Bind(0);
+    // Uniform buffers
+    {
+      ubos["matrices"] = CreateUnique<UniformBuffer>(2 * sizeof(Mat4));
+      ubos.at("matrices")->Bind(0);
+    }
 
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
-    shaders.at("shadow-mapping")->Bind();
-    shaders.at("shadow-mapping")->SetUniform("diffuseTexture", 0);
-    shaders.at("shadow-mapping")->SetUniform("shadowMap", 1);
+    shaders.at("point-shadow-mapping")->Bind();
+    shaders.at("point-shadow-mapping")->SetUniform("diffuseTexture", 0);
+    shaders.at("point-shadow-mapping")->SetUniform("depthMap", 1);
 
     shaders.at("debug-quad")->Bind();
     shaders.at("debug-quad")->SetUniform("depthMap", 0);
@@ -362,48 +370,80 @@ namespace Krys::Gfx::OpenGL
     ubos.at("matrices")->Update(view);
     ubos.at("matrices")->Update(projection, sizeof(Mat4));
 
-    Mat4 lightProjection = Ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
-    Mat4 lightView = LookAt(lightPos, Vec3(0.0f), Vec3(0.0f, 1.0f, 0.0f));
-    Mat4 lightSpaceMatrix = lightProjection * lightView;
+    // Change light position over time
+    lightPos =
+      Vec3(4.0f * std::sin((float)Platform::GetTime()), 4.0f, 4.0f * std::cos((float)Platform::GetTime()));
 
     {
-      auto &shader = shaders.at("depth");
-      shader->Bind();
-      shader->SetUniform("lightSpaceMatrix", lightSpaceMatrix);
-      glViewport(0, 0, shadowMaps["directional"].Width, shadowMaps["directional"].Height);
-      glBindFramebuffer(GL_FRAMEBUFFER, shadowMaps["directional"].FBO);
+      auto &shadowMap = shadowMaps["point"];
+      float aspect = (float)shadowMap.Width / (float)shadowMap.Height;
+      float near = 1.0f;
+      float far = 25.0f;
+      Mat4 shadowProj = Perspective(Radians(90.0f), aspect, near, far);
+
+      List<Mat4> shadowTransforms(
+        {{shadowProj * LookAt(lightPos, lightPos + Vec3(1.0, 0.0, 0.0), Vec3(0.0, -1.0, 0.0))},
+         {shadowProj * LookAt(lightPos, lightPos + Vec3(-1.0, 0.0, 0.0), Vec3(0.0, -1.0, 0.0))},
+         {shadowProj * LookAt(lightPos, lightPos + Vec3(0.0, 1.0, 0.0), Vec3(0.0, 0.0, 1.0))},
+         {shadowProj * LookAt(lightPos, lightPos + Vec3(0.0, -1.0, 0.0), Vec3(0.0, 0.0, -1.0))},
+         {shadowProj * LookAt(lightPos, lightPos + Vec3(0.0, 0.0, 1.0), Vec3(0.0, -1.0, 0.0))},
+         {shadowProj * LookAt(lightPos, lightPos + Vec3(0.0, 0.0, -1.0), Vec3(0.0, -1.0, 0.0))}});
+
+      glBindFramebuffer(GL_FRAMEBUFFER, shadowMap.FBO);
+      glViewport(0, 0, shadowMap.Width, shadowMap.Height);
       glClear(GL_DEPTH_BUFFER_BIT);
+
+      auto &shader = shaders.at("point-depth");
+      shader->Bind();
+      shader->SetUniform("shadowMatrices", shadowTransforms);
+      shader->SetUniform("lightPos", lightPos);
+      shader->SetUniform("far_plane", far);
       RenderScene(*shader);
     }
 
     {
-      auto &shader = shaders.at("shadow-mapping");
+      auto &shader = shaders.at("point-shadow-mapping");
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
       glViewport(0, 0, _width, _height);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       shader->Bind();
-      shader->SetUniform("lightSpaceMatrix", lightSpaceMatrix);
       shader->SetUniform("viewPos", camera.Position());
       shader->SetUniform("lightPos", lightPos);
+      shader->SetUniform("far_plane", 25.0f);
 
       textures.at("wood")->Bind(0);
       glActiveTexture(GL_TEXTURE1);
-      glBindTexture(GL_TEXTURE_2D, shadowMaps["directional"].Texture);
+      glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps["point"].Texture);
       RenderScene(*shader);
     }
 
+    // Light source
     {
-      auto &shader = shaders.at("debug-quad");
+      auto &shader = shaders.at("light-source");
       shader->Bind();
-      shader->SetUniform("near_plane", nearPlane);
-      shader->SetUniform("far_plane", farPlane);
-
-      glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, shadowMaps["directional"].Texture);
-
-      vaos.at("quad")->Bind();
-      // Utils::Draw(GL_TRIANGLE_STRIP, 4);
+      Mat4 model = Identity<Mat4>();
+      model = Translate(model, lightPos);
+      model = Scale(model, Vec3(0.2f));
+      shader->SetUniform("model", model);
+      shader->SetUniform("view", view);
+      shader->SetUniform("projection", projection);
+      shader->SetUniform("lightColor", (Colour {1.0f, 1.0f, 1.0f}).ToVec3());
+      vaos.at("cube")->Bind();
+      Utils::Draw(GL_TRIANGLES, 36);
     }
+
+    //{
+    //  auto &shader = shaders.at("debug-quad");
+    //  shader->Bind();
+    //  shader->SetUniform("near_plane", nearPlane);
+    //  shader->SetUniform("far_plane", farPlane);
+
+    // glActiveTexture(GL_TEXTURE0);
+    // glBindTexture(GL_TEXTURE_2D, shadowMaps["directional"].Texture);
+
+    // vaos.at("quad")->Bind();
+    // // Utils::Draw(GL_TRIANGLE_STRIP, 4);
+    // }
   }
 
   void Context::Present() noexcept

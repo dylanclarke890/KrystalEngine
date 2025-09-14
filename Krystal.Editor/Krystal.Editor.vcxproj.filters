@@ -73,6 +73,11 @@
     <None Include="data\shaders\opengl\shadow-mapping.vert" />
     <None Include="data\shaders\opengl\debug-quad-shadow-map.frag" />
     <None Include="data\shaders\opengl\debug-quad-shadow-map.vert" />
+    <None Include="data\shaders\opengl\point-shadows.frag" />
+    <None Include="data\shaders\opengl\point-shadows.geo" />
+    <None Include="data\shaders\opengl\point-shadows.vert" />
+    <None Include="data\shaders\opengl\point-shadow-mapping.frag" />
+    <None Include="data\shaders\opengl\point-shadow-mapping.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">

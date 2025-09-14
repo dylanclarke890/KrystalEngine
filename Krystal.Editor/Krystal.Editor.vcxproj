@@ -197,6 +197,11 @@
     <None Include="data\shaders\opengl\lightsource.frag" />
     <None Include="data\shaders\opengl\lightsource.vert" />
     <None Include="data\shaders\opengl\linearize-depth.frag" />
+    <None Include="data\shaders\opengl\point-shadow-mapping.frag" />
+    <None Include="data\shaders\opengl\point-shadow-mapping.vert" />
+    <None Include="data\shaders\opengl\point-shadows.frag" />
+    <None Include="data\shaders\opengl\point-shadows.geo" />
+    <None Include="data\shaders\opengl\point-shadows.vert" />
     <None Include="data\shaders\opengl\points.frag" />
     <None Include="data\shaders\opengl\points.geo" />
     <None Include="data\shaders\opengl\points.vert" />

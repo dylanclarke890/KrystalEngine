@@ -88,39 +88,42 @@ namespace Krys::Gfx::OpenGL
       else if constexpr (std::is_same_v<T, int32>)
         glProgramUniform1i(_handle, location, value);
       else if constexpr (std::is_same_v<T, List<int32>>)
-        glProgramUniform1iv(_handle, location, value.size(), value.data());
+        glProgramUniform1iv(_handle, location, static_cast<GLsizei>(value.size()), value.data());
       else if constexpr (std::is_same_v<T, uint32>)
         glProgramUniform1ui(_handle, location, value);
       else if constexpr (std::is_same_v<T, List<uint32>>)
-        glProgramUniform1uiv(_handle, location, value.size(), value.data());
+        glProgramUniform1uiv(_handle, location, static_cast<GLsizei>(value.size()), value.data());
       else if constexpr (std::is_same_v<T, float32>)
         glProgramUniform1f(_handle, location, value);
       else if constexpr (std::is_same_v<T, List<float32>>)
-        glProgramUniform1fv(_handle, location, value.size(), value.data());
+        glProgramUniform1fv(_handle, location, static_cast<GLsizei>(value.size()), value.data());
       else if constexpr (std::is_same_v<T, Vec2>)
         glProgramUniform2f(_handle, location, value.x, value.y);
       else if constexpr (std::is_same_v<T, List<Vec2>>)
-        glProgramUniform2fv(_handle, location, value.size(), &value[0].x);
+        glProgramUniform2fv(_handle, location, static_cast<GLsizei>(value.size()), &value[0].x);
       else if constexpr (std::is_same_v<T, Vec3>)
         glProgramUniform3f(_handle, location, value.x, value.y, value.z);
       else if constexpr (std::is_same_v<T, List<Vec3>>)
-        glProgramUniform3fv(_handle, location, value.size(), &value[0].x);
+        glProgramUniform3fv(_handle, location, static_cast<GLsizei>(value.size()), &value[0].x);
       else if constexpr (std::is_same_v<T, Vec4>)
         glProgramUniform4f(_handle, location, value.x, value.y, value.z, value.w);
       else if constexpr (std::is_same_v<T, List<Vec4>>)
-        glProgramUniform4fv(_handle, location, value.size(), &value[0].x);
+        glProgramUniform4fv(_handle, location, static_cast<GLsizei>(value.size()), &value[0].x);
       else if constexpr (std::is_same_v<T, Mat2>)
         glProgramUniformMatrix2fv(_handle, location, 1, GL_FALSE, &value[0].x);
       else if constexpr (std::is_same_v<T, List<Mat2>>)
-        glProgramUniformMatrix2fv(_handle, location, value.size(), GL_FALSE, &value[0][0].x);
+        glProgramUniformMatrix2fv(_handle, location, static_cast<GLsizei>(value.size()), GL_FALSE,
+                                  &value[0][0].x);
       else if constexpr (std::is_same_v<T, Mat3>)
         glProgramUniformMatrix3fv(_handle, location, 1, GL_FALSE, &value[0].x);
       else if constexpr (std::is_same_v<T, List<Mat3>>)
-        glProgramUniformMatrix3fv(_handle, location, value.size(), GL_FALSE, &value[0][0].x);
+        glProgramUniformMatrix3fv(_handle, location, static_cast<GLsizei>(value.size()), GL_FALSE,
+                                  &value[0][0].x);
       else if constexpr (std::is_same_v<T, Mat4>)
         glProgramUniformMatrix4fv(_handle, location, 1, GL_FALSE, &value[0].x);
       else if constexpr (std::is_same_v<T, List<Mat4>>)
-        glProgramUniformMatrix4fv(_handle, location, value.size(), GL_FALSE, &value[0][0].x);
+        glProgramUniformMatrix4fv(_handle, location, static_cast<GLsizei>(value.size()), GL_FALSE,
+                                  &value[0][0].x);
       else
         static_assert(false && "Unsupported uniform type.");
     }
