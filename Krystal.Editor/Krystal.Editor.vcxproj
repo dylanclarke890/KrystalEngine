@@ -197,6 +197,8 @@
     <None Include="data\shaders\opengl\lightsource.frag" />
     <None Include="data\shaders\opengl\lightsource.vert" />
     <None Include="data\shaders\opengl\linearize-depth.frag" />
+    <None Include="data\shaders\opengl\normal-mapping.frag" />
+    <None Include="data\shaders\opengl\normal-mapping.vert" />
     <None Include="data\shaders\opengl\point-shadow-mapping.frag" />
     <None Include="data\shaders\opengl\point-shadow-mapping.vert" />
     <None Include="data\shaders\opengl\point-shadows.frag" />
@@ -223,6 +225,8 @@
   <ItemGroup>
     <Image Include="data\assets\awesomeface.png" />
     <Image Include="data\assets\blending_transparent_window.png" />
+    <Image Include="data\assets\brick-diffuse.jpg" />
+    <Image Include="data\assets\brick-normal.jpg" />
     <Image Include="data\assets\container-diffuse.png" />
     <Image Include="data\assets\container-emission.png" />
     <Image Include="data\assets\container.jpg" />

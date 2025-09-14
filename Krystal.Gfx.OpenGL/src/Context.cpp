@@ -89,7 +89,7 @@ namespace
 
 #pragma endregion
 
-  static Vec3 lightPos(-2.0f, 4.0f, -1.0f);
+  static Vec3 lightPos(0.5f, 1.0f, 0.3f);
 
   static float nearPlane = 1.0f;
   static float farPlane = 7.5f;
@@ -251,6 +251,8 @@ namespace Krys::Gfx::OpenGL
                                                              base / Path("point-shadow-mapping.frag"));
       shaders["debug-quad"] = CreateUnique<Shader>(base / Path("debug-quad-shadow-map.vert"),
                                                    base / Path("debug-quad-shadow-map.frag"));
+      shaders["normal-mapping"] =
+        CreateUnique<Shader>(base / Path("normal-mapping.vert"), base / Path("normal-mapping.frag"));
     }
 
     // Textures
@@ -261,6 +263,12 @@ namespace Krys::Gfx::OpenGL
       textures["wood"] = CreateUnique<Texture2D>(base / Path("wood.png"));
       textures.at("wood")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
       textures.at("wood")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+      textures["brick-diffuse"] = CreateUnique<Texture2D>(base / Path("brick-diffuse.jpg"));
+      textures.at("brick-diffuse")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures.at("brick-diffuse")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+      textures["brick-normal"] = CreateUnique<Texture2D>(base / Path("brick-normal.jpg"));
+      textures.at("brick-normal")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures.at("brick-normal")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
     }
 
     // Cube
@@ -324,6 +332,86 @@ namespace Krys::Gfx::OpenGL
       CreateVertexArray("plane", ByteUtils::AsBytesView(vertices), layout);
     }
 
+    // Quad with pos, normal, tex coords, tangent, bitangent
+    {
+      // positions
+      Vec3 pos1(-1.0f, 1.0f, 0.0f);
+      Vec3 pos2(-1.0f, -1.0f, 0.0f);
+      Vec3 pos3(1.0f, -1.0f, 0.0f);
+      Vec3 pos4(1.0f, 1.0f, 0.0f);
+      // texture coordinates
+      Vec2 uv1(0.0f, 1.0f);
+      Vec2 uv2(0.0f, 0.0f);
+      Vec2 uv3(1.0f, 0.0f);
+      Vec2 uv4(1.0f, 1.0f);
+      // normal vector
+      Vec3 nm(0.0f, 0.0f, 1.0f);
+
+      // calculate tangent/bitangent vectors of both triangles
+      Vec3 tangent1, bitangent1;
+      Vec3 tangent2, bitangent2;
+      // triangle 1
+      // ----------
+      Vec3 edge1 = pos2 - pos1;
+      Vec3 edge2 = pos3 - pos1;
+      Vec2 deltaUV1 = uv2 - uv1;
+      Vec2 deltaUV2 = uv3 - uv1;
+
+      float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+      tangent1.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+      tangent1.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+      tangent1.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+
+      bitangent1.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+      bitangent1.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+      bitangent1.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+
+      // triangle 2
+      // ----------
+      edge1 = pos3 - pos1;
+      edge2 = pos4 - pos1;
+      deltaUV1 = uv3 - uv1;
+      deltaUV2 = uv4 - uv1;
+
+      f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+      tangent2.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+      tangent2.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+      tangent2.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+
+      bitangent2.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
+      bitangent2.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
+      bitangent2.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
+
+      List<float> vertices = {
+        // positions            // normal         // texcoords  // tangent                          //
+        // bitangent
+        pos1.x, pos1.y,     pos1.z,     nm.x,       nm.y,         nm.z,         uv1.x,
+        uv1.y,  tangent1.x, tangent1.y, tangent1.z, bitangent1.x, bitangent1.y, bitangent1.z,
+        pos2.x, pos2.y,     pos2.z,     nm.x,       nm.y,         nm.z,         uv2.x,
+        uv2.y,  tangent1.x, tangent1.y, tangent1.z, bitangent1.x, bitangent1.y, bitangent1.z,
+        pos3.x, pos3.y,     pos3.z,     nm.x,       nm.y,         nm.z,         uv3.x,
+        uv3.y,  tangent1.x, tangent1.y, tangent1.z, bitangent1.x, bitangent1.y, bitangent1.z,
+
+        pos1.x, pos1.y,     pos1.z,     nm.x,       nm.y,         nm.z,         uv1.x,
+        uv1.y,  tangent2.x, tangent2.y, tangent2.z, bitangent2.x, bitangent2.y, bitangent2.z,
+        pos3.x, pos3.y,     pos3.z,     nm.x,       nm.y,         nm.z,         uv3.x,
+        uv3.y,  tangent2.x, tangent2.y, tangent2.z, bitangent2.x, bitangent2.y, bitangent2.z,
+        pos4.x, pos4.y,     pos4.z,     nm.x,       nm.y,         nm.z,         uv4.x,
+        uv4.y,  tangent2.x, tangent2.y, tangent2.z, bitangent2.x, bitangent2.y, bitangent2.z};
+
+      VertexBufferLayout layout = {
+        {VertexAttributeType::Float, 3}, // position
+        {VertexAttributeType::Float, 3}, // normal
+        {VertexAttributeType::Float, 2}, // texcoord
+        {VertexAttributeType::Float, 3}, // tangent
+        {VertexAttributeType::Float, 3}, // bitangent
+      };
+
+      CreateVertexArray("quad", ByteUtils::AsBytesView(vertices), layout);
+    }
+
     // Screen quad
     {
       List<float> vertices = {
@@ -336,7 +424,7 @@ namespace Krys::Gfx::OpenGL
         {VertexAttributeType::Float, 2}  // texcoord
       };
 
-      CreateVertexArray("quad", ByteUtils::AsBytesView(vertices), layout);
+      CreateVertexArray("screen-quad", ByteUtils::AsBytesView(vertices), layout);
     }
 
     // Shadow maps
@@ -352,9 +440,8 @@ namespace Krys::Gfx::OpenGL
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
-    shaders.at("point-shadow-mapping")->Bind();
-    shaders.at("point-shadow-mapping")->SetUniform("diffuseTexture", 0);
-    shaders.at("point-shadow-mapping")->SetUniform("depthMap", 1);
+    shaders.at("normal-mapping")->SetUniform("diffuseTexture", 0);
+    shaders.at("normal-mapping")->SetUniform("normalMap", 1);
 
     shaders.at("debug-quad")->Bind();
     shaders.at("debug-quad")->SetUniform("depthMap", 0);
@@ -370,51 +457,20 @@ namespace Krys::Gfx::OpenGL
     ubos.at("matrices")->Update(view);
     ubos.at("matrices")->Update(projection, sizeof(Mat4));
 
-    // Change light position over time
-    lightPos =
-      Vec3(4.0f * std::sin((float)Platform::GetTime()), 4.0f, 4.0f * std::cos((float)Platform::GetTime()));
-
     {
-      auto &shadowMap = shadowMaps["point"];
-      float aspect = (float)shadowMap.Width / (float)shadowMap.Height;
-      float near = 1.0f;
-      float far = 25.0f;
-      Mat4 shadowProj = Perspective(Radians(90.0f), aspect, near, far);
-
-      List<Mat4> shadowTransforms(
-        {{shadowProj * LookAt(lightPos, lightPos + Vec3(1.0, 0.0, 0.0), Vec3(0.0, -1.0, 0.0))},
-         {shadowProj * LookAt(lightPos, lightPos + Vec3(-1.0, 0.0, 0.0), Vec3(0.0, -1.0, 0.0))},
-         {shadowProj * LookAt(lightPos, lightPos + Vec3(0.0, 1.0, 0.0), Vec3(0.0, 0.0, 1.0))},
-         {shadowProj * LookAt(lightPos, lightPos + Vec3(0.0, -1.0, 0.0), Vec3(0.0, 0.0, -1.0))},
-         {shadowProj * LookAt(lightPos, lightPos + Vec3(0.0, 0.0, 1.0), Vec3(0.0, -1.0, 0.0))},
-         {shadowProj * LookAt(lightPos, lightPos + Vec3(0.0, 0.0, -1.0), Vec3(0.0, -1.0, 0.0))}});
-
-      glBindFramebuffer(GL_FRAMEBUFFER, shadowMap.FBO);
-      glViewport(0, 0, shadowMap.Width, shadowMap.Height);
-      glClear(GL_DEPTH_BUFFER_BIT);
-
-      auto &shader = shaders.at("point-depth");
+      auto &shader = shaders.at("normal-mapping");
       shader->Bind();
-      shader->SetUniform("shadowMatrices", shadowTransforms);
-      shader->SetUniform("lightPos", lightPos);
-      shader->SetUniform("far_plane", far);
-      RenderScene(*shader);
-    }
 
-    {
-      auto &shader = shaders.at("point-shadow-mapping");
-      glBindFramebuffer(GL_FRAMEBUFFER, 0);
-      glViewport(0, 0, _width, _height);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      shader->Bind();
+      // render normal-mapped quad
+      Mat4 model = Identity<Mat4>();
+      model = Rotate(model, Radians((float)Platform::GetTime() * -10.0f), Normalize(Vec3(1.0, 0.0, 1.0)));
+      shader->SetUniform("model", model);
       shader->SetUniform("viewPos", camera.Position());
       shader->SetUniform("lightPos", lightPos);
-      shader->SetUniform("far_plane", 25.0f);
-
-      textures.at("wood")->Bind(0);
-      glActiveTexture(GL_TEXTURE1);
-      glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps["point"].Texture);
-      RenderScene(*shader);
+      textures.at("brick-diffuse")->Bind(0);
+      textures.at("brick-normal")->Bind(1);
+      vaos.at("quad")->Bind();
+      Utils::Draw(GL_TRIANGLES, 6);
     }
 
     // Light source
@@ -425,25 +481,10 @@ namespace Krys::Gfx::OpenGL
       model = Translate(model, lightPos);
       model = Scale(model, Vec3(0.2f));
       shader->SetUniform("model", model);
-      shader->SetUniform("view", view);
-      shader->SetUniform("projection", projection);
       shader->SetUniform("lightColor", (Colour {1.0f, 1.0f, 1.0f}).ToVec3());
       vaos.at("cube")->Bind();
       Utils::Draw(GL_TRIANGLES, 36);
     }
-
-    //{
-    //  auto &shader = shaders.at("debug-quad");
-    //  shader->Bind();
-    //  shader->SetUniform("near_plane", nearPlane);
-    //  shader->SetUniform("far_plane", farPlane);
-
-    // glActiveTexture(GL_TEXTURE0);
-    // glBindTexture(GL_TEXTURE_2D, shadowMaps["directional"].Texture);
-
-    // vaos.at("quad")->Bind();
-    // // Utils::Draw(GL_TRIANGLE_STRIP, 4);
-    // }
   }
 
   void Context::Present() noexcept
