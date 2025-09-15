@@ -32,10 +32,11 @@ namespace
   using namespace Krys::Gfx::OpenGL;
   using namespace Krys::Maths;
 
-  struct ShadowMapData
+  struct FrameBufferData
   {
     GLuint FBO {};
-    GLuint Texture {};
+    List<GLuint> ColorTextures {};
+    GLuint DepthTexture {};
     uint32 Width {};
     uint32 Height {};
   };
@@ -47,7 +48,9 @@ namespace
   static Map<string, Unique<VertexArray>> vaos;
   static Map<string, Unique<VertexBuffer>> vbos;
   static Map<string, Unique<UniformBuffer>> ubos;
-  static Map<string, ShadowMapData> shadowMaps;
+  static Map<string, FrameBufferData> shadowMaps;
+
+  static FrameBufferData pingPongFBOs[2];
 
 #pragma region Lights
 
@@ -114,7 +117,7 @@ namespace
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
 
-    shadowMaps[name] = {depthMapFBO, depthMap, width, height};
+    shadowMaps[name] = {depthMapFBO, {}, depthMap, width, height};
 
     assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE
            && "framebuffer is incomplete");
@@ -145,7 +148,7 @@ namespace
     glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthCubemap, 0);
     glDrawBuffer(GL_NONE);
     glReadBuffer(GL_NONE);
-    shadowMaps[name] = {depthMapFBO, depthCubemap, width, height};
+    shadowMaps[name] = {depthMapFBO, {}, depthCubemap, width, height};
     assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE
            && "framebuffer is incomplete");
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -153,27 +156,64 @@ namespace
 
   static void CreateFloatingPointFramebuffer(const string &name, uint32 width, uint32 height)
   {
-    GLuint hdrFBO;
+    unsigned int hdrFBO;
     glGenFramebuffers(1, &hdrFBO);
     glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
-    GLuint colorBuffer;
-    glGenTextures(1, &colorBuffer);
-    glBindTexture(GL_TEXTURE_2D, colorBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBuffer, 0);
-    GLuint rbo;
-    glGenRenderbuffers(1, &rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
+    // create 2 floating point color buffers (1 for normal rendering, other for brightness threshold values)
+    uint colorBuffers[2];
+    glGenTextures(2, colorBuffers);
+    for (unsigned int i = 0; i < 2; i++)
+    {
+      glBindTexture(GL_TEXTURE_2D, colorBuffers[i]);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, NULL);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+                      GL_CLAMP_TO_EDGE); // we clamp to the edge as the blur filter would otherwise sample
+                                         // repeated texture values!
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      // attach texture to framebuffer
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, colorBuffers[i], 0);
+    }
+    // create and attach depth buffer (renderbuffer)
+    unsigned int rboDepth;
+    glGenRenderbuffers(1, &rboDepth);
+    glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+    // tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
+    unsigned int attachments[2] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1};
+    glDrawBuffers(2, attachments);
+    // finally check if framebuffer is complete
     assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE
-           && "Framebuffer not complete!");
+           && "framebuffer is incomplete");
+    shadowMaps[name] = {hdrFBO, {colorBuffers[0], colorBuffers[1]}, rboDepth, width, height};
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    shadowMaps[name] = {hdrFBO, colorBuffer, width, height};
+  }
+
+  static void CreatePingPongFramebuffer(const string &name, uint32 width, uint32 height)
+  {
+    uint pingpongFBO[2];
+    uint pingpongColorbuffers[2];
+    glGenFramebuffers(2, pingpongFBO);
+    glGenTextures(2, pingpongColorbuffers);
+    for (uint i = 0; i < 2; i++)
+    {
+      glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[i]);
+      glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[i]);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, NULL);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+                      GL_CLAMP_TO_EDGE); // we clamp to the edge as the blur filter would otherwise sample
+                                         // repeated texture values!
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongColorbuffers[i], 0);
+      // also check if framebuffers are complete (no need for depth buffer)
+      assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE
+             && "framebuffer is incomplete");
+      shadowMaps[name + std::to_string(i)] = {pingpongFBO[i], {pingpongColorbuffers[i]}, 0, width, height};
+    }
   }
 
   static void RenderScene(Shader &shader)
@@ -280,6 +320,13 @@ namespace Krys::Gfx::OpenGL
       shaders["hdr"] = CreateUnique<Shader>(base / Path("hdr.vert"), base / Path("hdr.frag"));
       shaders["hdr-lighting"] =
         CreateUnique<Shader>(base / Path("hdr-test-lighting.vert"), base / Path("hdr-test-lighting.frag"));
+
+      shaders["bloom"] = CreateUnique<Shader>(base / Path("7/bloom.vert"), base / Path("7/bloom.frag"));
+      shaders["bloom-light"] =
+        CreateUnique<Shader>(base / Path("7/bloom.vert"), base / Path("7/light-box.frag"));
+      shaders["bloom-final"] =
+        CreateUnique<Shader>(base / Path("7/bloom-final.vert"), base / Path("7/bloom-final.frag"));
+      shaders["blur"] = CreateUnique<Shader>(base / Path("7/blur.vert"), base / Path("7/blur.frag"));
     }
 
     // Textures
@@ -287,9 +334,12 @@ namespace Krys::Gfx::OpenGL
       using namespace IO;
       Path base = Path("data/assets");
 
-      textures["wood"] = CreateUnique<Texture2D>(base / Path("wood.png"));
+      textures["wood"] = CreateUnique<Texture2D>(base / Path("wood.png"), IsSRGBTexture(true));
       textures.at("wood")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
       textures.at("wood")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+      textures["container"] =
+        CreateUnique<Texture2D>(base / Path("container-diffuse.png"), IsSRGBTexture(true));
 
       textures["toybox-normal"] = CreateUnique<Texture2D>(base / Path("toybox-normal.png"));
       textures.at("toybox-normal")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -493,7 +543,10 @@ namespace Krys::Gfx::OpenGL
     CreateShadowMapFramebuffer("directional", 1'024, 1'024);
     CreateCubeShadowMapFramebuffer("point", 1'024, 1'024);
 
-    CreateFloatingPointFramebuffer("hdr", _width, _height);
+    CreateFloatingPointFramebuffer("bloom", _width, _height);
+    CreatePingPongFramebuffer("blur", _width, _height);
+    pingPongFBOs[0] = shadowMaps.at("blur0");
+    pingPongFBOs[1] = shadowMaps.at("blur1");
 
     // Uniform buffers
     {
@@ -502,10 +555,12 @@ namespace Krys::Gfx::OpenGL
     }
 
     glEnable(GL_DEPTH_TEST);
-    glClearColor(0.5f, 0.f, 0.f, 1.f);
+    glClearColor(0.f, 0.f, 0.f, 1.f);
 
-    shaders.at("hdr-lighting")->SetUniform("diffuseTexture", 0);
-    shaders.at("hdr")->SetUniform("hdrBuffer", 0);
+    shaders.at("bloom")->SetUniform("diffuseTexture", 0);
+    shaders.at("blur")->SetUniform("image", 0);
+    shaders.at("bloom-final")->SetUniform("scene", 0);
+    shaders.at("bloom-final")->SetUniform("bloomBlur", 1);
   }
 
   void Context::Render(ICamera &camera) noexcept
@@ -517,25 +572,24 @@ namespace Krys::Gfx::OpenGL
     ubos.at("matrices")->Update(projection, sizeof(Mat4));
 
     std::vector<Vec3> lightPositions;
-    lightPositions.push_back(Vec3(0.0f, 0.0f, 49.5f)); // back light
-    lightPositions.push_back(Vec3(-1.4f, -1.9f, 9.0f));
-    lightPositions.push_back(Vec3(0.0f, -1.8f, 4.0f));
-    lightPositions.push_back(Vec3(0.8f, -1.7f, 6.0f));
+    lightPositions.push_back(Vec3(0.0f, 0.5f, 1.5f));
+    lightPositions.push_back(Vec3(-4.0f, 0.5f, -3.0f));
+    lightPositions.push_back(Vec3(3.0f, 0.5f, 1.0f));
+    lightPositions.push_back(Vec3(-.8f, 2.4f, -1.0f));
 
+    // colors
     std::vector<Vec3> lightColors;
-    lightColors.push_back(Vec3(200.0f, 200.0f, 200.0f));
-    lightColors.push_back(Vec3(0.1f, 0.0f, 0.0f));
-    lightColors.push_back(Vec3(0.0f, 0.0f, 0.2f));
-    lightColors.push_back(Vec3(0.0f, 0.1f, 0.0f));
+    lightColors.push_back(Vec3(5.0f, 5.0f, 5.0f));
+    lightColors.push_back(Vec3(10.0f, 0.0f, 0.0f));
+    lightColors.push_back(Vec3(0.0f, 0.0f, 15.0f));
+    lightColors.push_back(Vec3(0.0f, 5.0f, 0.0f));
 
-    glBindFramebuffer(GL_FRAMEBUFFER, shadowMaps.at("hdr").FBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, shadowMaps.at("bloom").FBO);
     {
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
       auto &shader = shaders.at("hdr-lighting");
       shader->Bind();
-
-      textures.at("wood")->Bind(0);
 
       // colors
 
@@ -544,47 +598,140 @@ namespace Krys::Gfx::OpenGL
         shader->SetUniform("lights[" + std::to_string(i) + "].Position", lightPositions[i]);
         shader->SetUniform("lights[" + std::to_string(i) + "].Color", lightColors[i]);
       }
-
-      Mat4 model = Identity<Mat4>();
-      model = Translate(model, Vec3(0.0f, 0.0f, 25.0f));
-      model = Scale(model, Vec3(2.5f, 2.5f, 27.5f));
-
-      shader->SetUniform("model", model);
-      shader->SetUniform("inverse_normals", true);
-
+      shader->SetUniform("viewPos", camera.Position());
       vaos.at("cube")->Bind();
-      Utils::Draw(GL_TRIANGLES, 36);
+
+      // create one large cube that acts as the floor
+      textures.at("wood")->Bind(0);
+      {
+        Mat4 model = Identity<Mat4>();
+        model = Translate(model, Vec3(0.0f, -1.0f, 0.0));
+        model = Scale(model, Vec3(12.5f, 0.5f, 12.5f));
+        shader->SetUniform("model", model);
+        Utils::Draw(GL_TRIANGLES, 36);
+      }
+
+      // then create multiple cubes as the scenery
+      textures.at("container")->Bind(0);
+      {
+        Mat4 model = Identity<Mat4>();
+        model = Translate(model, Vec3(0.0f, 1.5f, 0.0));
+        model = Scale(model, Vec3(0.5f));
+        shader->SetUniform("model", model);
+        Utils::Draw(GL_TRIANGLES, 36);
+      }
+
+      {
+        Mat4 model = Identity<Mat4>();
+        model = Translate(model, Vec3(2.0f, 0.0f, 1.0));
+        model = Scale(model, Vec3(0.5f));
+        shader->SetUniform("model", model);
+        Utils::Draw(GL_TRIANGLES, 36);
+      }
+
+      {
+        Mat4 model = Identity<Mat4>();
+        model = Translate(model, Vec3(-1.0f, -1.0f, 2.0));
+        model = Rotate(model, Radians(60.0f), Normalize(Vec3(1.0, 0.0, 1.0)));
+        shader->SetUniform("model", model);
+        Utils::Draw(GL_TRIANGLES, 36);
+      }
+
+      {
+        Mat4 model = Identity<Mat4>();
+        model = Translate(model, Vec3(0.0f, 2.7f, 4.0));
+        model = Rotate(model, Radians(23.0f), Normalize(Vec3(1.0, 0.0, 1.0)));
+        model = Scale(model, Vec3(1.25));
+        shader->SetUniform("model", model);
+        Utils::Draw(GL_TRIANGLES, 36);
+      }
+
+      {
+        Mat4 model = Identity<Mat4>();
+        model = Translate(model, Vec3(-2.0f, 1.0f, -3.0));
+        model = Rotate(model, Radians(124.0f), Normalize(Vec3(1.0, 0.0, 1.0)));
+        shader->SetUniform("model", model);
+        Utils::Draw(GL_TRIANGLES, 36);
+      }
+
+      {
+        Mat4 model = Identity<Mat4>();
+        model = Translate(model, Vec3(-3.0f, 0.0f, 0.0));
+        model = Scale(model, Vec3(0.5f));
+        shader->SetUniform("model", model);
+        Utils::Draw(GL_TRIANGLES, 36);
+      }
+    }
+
+    {
+      auto &shader = shaders.at("bloom-light");
+      shader->Bind();
+      for (uint i = 0; i < lightPositions.size(); i++)
+      {
+        Mat4 model = Identity<Mat4>();
+        model = Translate(model, lightPositions[i]);
+        model = Scale(model, Vec3(0.25f));
+        shader->SetUniform("model", model);
+        shader->SetUniform("lightColor", lightColors[i]);
+        Utils::Draw(GL_TRIANGLES, 36);
+      }
+    }
+
+    vaos.at("screen-quad")->Bind();
+    bool horizontal = true;
+    {
+      auto &shader = shaders.at("blur");
+      shader->Bind();
+
+      uint amount = 10;
+      for (uint i = 0; i < amount; i++)
+      {
+        glBindFramebuffer(GL_FRAMEBUFFER, pingPongFBOs[horizontal].FBO);
+        shader->SetUniform("horizontal", horizontal);
+        glActiveTexture(GL_TEXTURE0);
+        GLuint texture = i == 0
+                           ? shadowMaps.at("bloom").ColorTextures[1]     // (or scene if first iteration)
+                           : pingPongFBOs[!horizontal].ColorTextures[0]; // bind texture of other framebuffer
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        Utils::Draw(GL_TRIANGLE_STRIP, 4);
+        horizontal = !horizontal;
+      }
     }
 
     //{
-    //  auto &shader = shaders.at("light-source");
+    //  vaos.at("cube")->Bind();
+    //  glBindFramebuffer(GL_FRAMEBUFFER, shadowMaps.at("bloom").FBO);
+    //  auto &shader = shaders.at("bloom-light");
     //  shader->Bind();
-
+    //  shader->SetUniform("countsTowardsBloom", false);
     //  for (uint i = 0; i < lightPositions.size(); i++)
     //  {
     //    Mat4 model = Identity<Mat4>();
     //    model = Translate(model, lightPositions[i]);
-    //    model = Scale(model, Vec3(0.25f));
+    //    model = Scale(model, Vec3(0.275f));
     //    shader->SetUniform("model", model);
     //    shader->SetUniform("lightColor", lightColors[i]);
-    //    vaos.at("cube")->Bind();
     //    Utils::Draw(GL_TRIANGLES, 36);
     //  }
+    //  shader->SetUniform("countsTowardsBloom", true);
     //}
 
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
+    // 3. now render floating point color buffer to 2D quad and tonemap HDR colors to default framebuffer's
+    // (clamped) color range
+    // --------------------------------------------------------------------------------------------------------------------------
     {
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      auto &shader = shaders.at("hdr");
-      shader->Bind();
-      shader->SetUniform("exposure", 0.1f);
-      shader->SetUniform("hdr", true);
-
-      glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, shadowMaps.at("hdr").Texture);
-
       vaos.at("screen-quad")->Bind();
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      auto &shader = shaders.at("bloom-final");
+      shader->Bind();
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, shadowMaps.at("bloom").ColorTextures[0]);
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, pingPongFBOs[horizontal].ColorTextures[0]);
+      shader->SetUniform("bloom", true);
+      shader->SetUniform("exposure", 1.f);
       Utils::Draw(GL_TRIANGLE_STRIP, 4);
     }
   }

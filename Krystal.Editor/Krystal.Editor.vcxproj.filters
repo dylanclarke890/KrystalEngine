@@ -86,6 +86,13 @@
     <None Include="data\shaders\opengl\hdr.vert" />
     <None Include="data\shaders\opengl\hdr-test-lighting.frag" />
     <None Include="data\shaders\opengl\hdr-test-lighting.vert" />
+    <None Include="data\shaders\opengl\7\bloom.frag" />
+    <None Include="data\shaders\opengl\7\bloom.vert" />
+    <None Include="data\shaders\opengl\7\bloom-final.frag" />
+    <None Include="data\shaders\opengl\7\bloom-final.vert" />
+    <None Include="data\shaders\opengl\7\blur.frag" />
+    <None Include="data\shaders\opengl\7\blur.vert" />
+    <None Include="data\shaders\opengl\7\light-box.frag" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">

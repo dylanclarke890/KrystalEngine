@@ -180,6 +180,13 @@
     <None Include="data\assets\models\backpack\backpack.mtl" />
     <None Include="data\assets\models\planet\planet.mtl" />
     <None Include="data\assets\models\rock\rock.mtl" />
+    <None Include="data\shaders\opengl\7\bloom-final.frag" />
+    <None Include="data\shaders\opengl\7\bloom-final.vert" />
+    <None Include="data\shaders\opengl\7\bloom.frag" />
+    <None Include="data\shaders\opengl\7\bloom.vert" />
+    <None Include="data\shaders\opengl\7\blur.frag" />
+    <None Include="data\shaders\opengl\7\blur.vert" />
+    <None Include="data\shaders\opengl\7\light-box.frag" />
     <None Include="data\shaders\opengl\debug-quad-shadow-map.frag" />
     <None Include="data\shaders\opengl\debug-quad-shadow-map.vert" />
     <None Include="data\shaders\opengl\directional-shadow-map.vert" />
