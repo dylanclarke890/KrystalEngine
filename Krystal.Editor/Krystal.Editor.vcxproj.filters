@@ -171,6 +171,12 @@
     <Image Include="data\assets\brickwall-displacement.jpg">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="data\assets\toybox-normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\toybox-displacement.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="data\assets\models\backpack\source_attribution.txt" />

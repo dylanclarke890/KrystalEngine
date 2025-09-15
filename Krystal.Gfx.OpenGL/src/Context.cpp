@@ -267,6 +267,14 @@ namespace Krys::Gfx::OpenGL
       textures.at("wood")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
       textures.at("wood")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
 
+      textures["toybox-normal"] = CreateUnique<Texture2D>(base / Path("toybox-normal.png"));
+      textures.at("toybox-normal")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures.at("toybox-normal")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+      textures["toybox-displacement"] = CreateUnique<Texture2D>(base / Path("toybox-displacement.png"));
+      textures.at("toybox-displacement")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures.at("toybox-displacement")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
       textures["brick-diffuse"] = CreateUnique<Texture2D>(base / Path("brick-diffuse.jpg"));
       textures.at("brick-diffuse")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
       textures.at("brick-diffuse")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -278,11 +286,11 @@ namespace Krys::Gfx::OpenGL
       textures["brickwall-diffuse"] = CreateUnique<Texture2D>(base / Path("brickwall-diffuse.jpg"));
       textures.at("brickwall-diffuse")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
       textures.at("brickwall-diffuse")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-      
+
       textures["brickwall-normal"] = CreateUnique<Texture2D>(base / Path("brickwall-normal.jpg"));
       textures.at("brickwall-normal")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
       textures.at("brickwall-normal")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-      
+
       textures["brickwall-displacement"] = CreateUnique<Texture2D>(base / Path("brickwall-displacement.jpg"));
       textures.at("brickwall-displacement")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
       textures.at("brickwall-displacement")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -473,19 +481,31 @@ namespace Krys::Gfx::OpenGL
     ubos.at("matrices")->Update(projection, sizeof(Mat4));
 
     {
+      auto &shader = shaders.at("model");
+      shader->Bind();
+
+      textures.at("wood")->Bind(0);
+      vaos.at("plane")->Bind();
+
+      Mat4 model = Identity<Mat4>();
+      model = Translate(model, Vec3(0.0f, -0.5f, 0.0f));
+
+      shader->SetUniform("model", model);
+      Utils::Draw(GL_TRIANGLE_STRIP, 4);
+    }
+
+    {
       auto &shader = shaders.at("parallax-mapping");
       shader->Bind();
 
-      // render normal-mapped quad
       Mat4 model = Identity<Mat4>();
-      //model = Rotate(model, Radians((float)Platform::GetTime() * -10.0f), Normalize(Vec3(1.0, 0.0, 1.0)));
       shader->SetUniform("model", model);
       shader->SetUniform("viewPos", camera.Position());
       shader->SetUniform("lightPos", lightPos);
       shader->SetUniform("heightScale", 0.1f);
-      textures.at("brickwall-diffuse")->Bind(0);
-      textures.at("brickwall-normal")->Bind(1);
-      textures.at("brickwall-displacement")->Bind(2);
+      textures.at("wood")->Bind(0);
+      textures.at("toybox-normal")->Bind(1);
+      textures.at("toybox-displacement")->Bind(2);
       vaos.at("quad")->Bind();
       Utils::Draw(GL_TRIANGLES, 6);
     }

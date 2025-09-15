@@ -252,6 +252,8 @@
     <Image Include="data\assets\skyboxes\sky\left.jpg" />
     <Image Include="data\assets\skyboxes\sky\right.jpg" />
     <Image Include="data\assets\skyboxes\sky\top.jpg" />
+    <Image Include="data\assets\toybox-displacement.png" />
+    <Image Include="data\assets\toybox-normal.png" />
     <Image Include="data\assets\wall.jpg" />
     <Image Include="data\assets\wood.png" />
   </ItemGroup>
