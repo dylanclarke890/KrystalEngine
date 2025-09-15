@@ -80,6 +80,8 @@
     <None Include="data\shaders\opengl\point-shadow-mapping.vert" />
     <None Include="data\shaders\opengl\normal-mapping.frag" />
     <None Include="data\shaders\opengl\normal-mapping.vert" />
+    <None Include="data\shaders\opengl\parallax-mapping.frag" />
+    <None Include="data\shaders\opengl\parallax-mapping.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">
@@ -158,6 +160,15 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="data\assets\brick-normal.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\brickwall-diffuse.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\brickwall-normal.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\brickwall-displacement.jpg">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

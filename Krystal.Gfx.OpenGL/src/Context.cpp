@@ -253,6 +253,9 @@ namespace Krys::Gfx::OpenGL
                                                    base / Path("debug-quad-shadow-map.frag"));
       shaders["normal-mapping"] =
         CreateUnique<Shader>(base / Path("normal-mapping.vert"), base / Path("normal-mapping.frag"));
+
+      shaders["parallax-mapping"] =
+        CreateUnique<Shader>(base / Path("parallax-mapping.vert"), base / Path("parallax-mapping.frag"));
     }
 
     // Textures
@@ -263,12 +266,26 @@ namespace Krys::Gfx::OpenGL
       textures["wood"] = CreateUnique<Texture2D>(base / Path("wood.png"));
       textures.at("wood")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
       textures.at("wood")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
       textures["brick-diffuse"] = CreateUnique<Texture2D>(base / Path("brick-diffuse.jpg"));
       textures.at("brick-diffuse")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
       textures.at("brick-diffuse")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
       textures["brick-normal"] = CreateUnique<Texture2D>(base / Path("brick-normal.jpg"));
       textures.at("brick-normal")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
       textures.at("brick-normal")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+      textures["brickwall-diffuse"] = CreateUnique<Texture2D>(base / Path("brickwall-diffuse.jpg"));
+      textures.at("brickwall-diffuse")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures.at("brickwall-diffuse")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+      
+      textures["brickwall-normal"] = CreateUnique<Texture2D>(base / Path("brickwall-normal.jpg"));
+      textures.at("brickwall-normal")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures.at("brickwall-normal")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+      
+      textures["brickwall-displacement"] = CreateUnique<Texture2D>(base / Path("brickwall-displacement.jpg"));
+      textures.at("brickwall-displacement")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures.at("brickwall-displacement")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
     }
 
     // Cube
@@ -440,11 +457,9 @@ namespace Krys::Gfx::OpenGL
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
-    shaders.at("normal-mapping")->SetUniform("diffuseTexture", 0);
-    shaders.at("normal-mapping")->SetUniform("normalMap", 1);
-
-    shaders.at("debug-quad")->Bind();
-    shaders.at("debug-quad")->SetUniform("depthMap", 0);
+    shaders.at("parallax-mapping")->SetUniform("diffuseTexture", 0);
+    shaders.at("parallax-mapping")->SetUniform("normalMap", 1);
+    shaders.at("parallax-mapping")->SetUniform("depthMap", 2);
   }
 
   void Context::Render(ICamera &camera) noexcept
@@ -458,17 +473,19 @@ namespace Krys::Gfx::OpenGL
     ubos.at("matrices")->Update(projection, sizeof(Mat4));
 
     {
-      auto &shader = shaders.at("normal-mapping");
+      auto &shader = shaders.at("parallax-mapping");
       shader->Bind();
 
       // render normal-mapped quad
       Mat4 model = Identity<Mat4>();
-      model = Rotate(model, Radians((float)Platform::GetTime() * -10.0f), Normalize(Vec3(1.0, 0.0, 1.0)));
+      //model = Rotate(model, Radians((float)Platform::GetTime() * -10.0f), Normalize(Vec3(1.0, 0.0, 1.0)));
       shader->SetUniform("model", model);
       shader->SetUniform("viewPos", camera.Position());
       shader->SetUniform("lightPos", lightPos);
-      textures.at("brick-diffuse")->Bind(0);
-      textures.at("brick-normal")->Bind(1);
+      shader->SetUniform("heightScale", 0.1f);
+      textures.at("brickwall-diffuse")->Bind(0);
+      textures.at("brickwall-normal")->Bind(1);
+      textures.at("brickwall-displacement")->Bind(2);
       vaos.at("quad")->Bind();
       Utils::Draw(GL_TRIANGLES, 6);
     }
