@@ -19,11 +19,11 @@ namespace Krys
   public:
     explicit Editor(int argc, char **argv, const ApplicationSettings &settings) noexcept
         : Application(argc, argv, settings),
-          _camera(Maths::Vec3(0.0f, 0.0f, 3.0f), Maths::Vec3(0.0f, 0.0f, 0.0f), Maths::Vec3(0.0f, 1.0f, 0.0f),
+          _camera(Maths::Vec3(0.0f, 0.0f, 5.0f), Maths::Vec3(0.0f, 0.0f, 0.0f), Maths::Vec3(0.0f, 1.0f, 0.0f),
                   Maths::Radians(45.0f),
                   static_cast<float>(settings.WindowSettings.Size.Width)
                     / static_cast<float>(settings.WindowSettings.Size.Height),
-                  0.1f, 1000.0f)
+                  0.1f, 100.0f)
     {
     }
 

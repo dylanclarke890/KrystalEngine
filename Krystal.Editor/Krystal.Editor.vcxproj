@@ -189,6 +189,10 @@
     <None Include="data\shaders\opengl\explode-model.vert" />
     <None Include="data\shaders\opengl\framebuffer.frag" />
     <None Include="data\shaders\opengl\framebuffer.vert" />
+    <None Include="data\shaders\opengl\hdr-test-lighting.frag" />
+    <None Include="data\shaders\opengl\hdr-test-lighting.vert" />
+    <None Include="data\shaders\opengl\hdr.frag" />
+    <None Include="data\shaders\opengl\hdr.vert" />
     <None Include="data\shaders\opengl\instanced-model.frag" />
     <None Include="data\shaders\opengl\instanced-model.vert" />
     <None Include="data\shaders\opengl\instanced-quad.frag" />

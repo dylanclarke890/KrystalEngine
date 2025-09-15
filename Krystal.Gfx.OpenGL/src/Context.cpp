@@ -89,11 +89,6 @@ namespace
 
 #pragma endregion
 
-  static Vec3 lightPos(0.5f, 1.0f, 0.3f);
-
-  static float nearPlane = 1.0f;
-  static float farPlane = 7.5f;
-
   static void CreateShadowMapFramebuffer(const string &name, uint32 width, uint32 height) noexcept
   {
     GLuint depthMapFBO;
@@ -154,6 +149,31 @@ namespace
     assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE
            && "framebuffer is incomplete");
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  }
+
+  static void CreateFloatingPointFramebuffer(const string &name, uint32 width, uint32 height)
+  {
+    GLuint hdrFBO;
+    glGenFramebuffers(1, &hdrFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+    GLuint colorBuffer;
+    glGenTextures(1, &colorBuffer);
+    glBindTexture(GL_TEXTURE_2D, colorBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, nullptr);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorBuffer, 0);
+    GLuint rbo;
+    glGenRenderbuffers(1, &rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rbo);
+    assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE
+           && "Framebuffer not complete!");
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    shadowMaps[name] = {hdrFBO, colorBuffer, width, height};
   }
 
   static void RenderScene(Shader &shader)
@@ -256,6 +276,10 @@ namespace Krys::Gfx::OpenGL
 
       shaders["parallax-mapping"] =
         CreateUnique<Shader>(base / Path("parallax-mapping.vert"), base / Path("parallax-mapping.frag"));
+
+      shaders["hdr"] = CreateUnique<Shader>(base / Path("hdr.vert"), base / Path("hdr.frag"));
+      shaders["hdr-lighting"] =
+        CreateUnique<Shader>(base / Path("hdr-test-lighting.vert"), base / Path("hdr-test-lighting.frag"));
     }
 
     // Textures
@@ -299,36 +323,49 @@ namespace Krys::Gfx::OpenGL
     // Cube
     {
       List<float> vertices = {
-        // positions          // normals           // texture coords
-        -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f,  0.0f,  0.5f,  -0.5f, -0.5f, 0.0f,
-        0.0f,  -1.0f, 1.0f,  0.0f,  0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f,  1.0f,
-        0.5f,  0.5f,  -0.5f, 0.0f,  0.0f,  -1.0f, 1.0f,  1.0f,  -0.5f, 0.5f,  -0.5f, 0.0f,
-        0.0f,  -1.0f, 0.0f,  1.0f,  -0.5f, -0.5f, -0.5f, 0.0f,  0.0f,  -1.0f, 0.0f,  0.0f,
-
-        -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,  0.5f,  -0.5f, 0.5f,  0.0f,
-        0.0f,  1.0f,  1.0f,  0.0f,  0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  0.0f,  1.0f,  1.0f,  1.0f,  -0.5f, 0.5f,  0.5f,  0.0f,
-        0.0f,  1.0f,  0.0f,  1.0f,  -0.5f, -0.5f, 0.5f,  0.0f,  0.0f,  1.0f,  0.0f,  0.0f,
-
-        -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, -1.0f,
-        0.0f,  0.0f,  1.0f,  1.0f,  -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,
-        -0.5f, -0.5f, -0.5f, -1.0f, 0.0f,  0.0f,  0.0f,  1.0f,  -0.5f, -0.5f, 0.5f,  -1.0f,
-        0.0f,  0.0f,  0.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
-
-        0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,  0.5f,  0.5f,  -0.5f, 1.0f,
-        0.0f,  0.0f,  1.0f,  1.0f,  0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.0f,  1.0f,
-        0.5f,  -0.5f, -0.5f, 1.0f,  0.0f,  0.0f,  0.0f,  1.0f,  0.5f,  -0.5f, 0.5f,  1.0f,
-        0.0f,  0.0f,  0.0f,  0.0f,  0.5f,  0.5f,  0.5f,  1.0f,  0.0f,  0.0f,  1.0f,  0.0f,
-
-        -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.0f,  1.0f,  0.5f,  -0.5f, -0.5f, 0.0f,
-        -1.0f, 0.0f,  1.0f,  1.0f,  0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  1.0f,  0.0f,
-        0.5f,  -0.5f, 0.5f,  0.0f,  -1.0f, 0.0f,  1.0f,  0.0f,  -0.5f, -0.5f, 0.5f,  0.0f,
-        -1.0f, 0.0f,  0.0f,  0.0f,  -0.5f, -0.5f, -0.5f, 0.0f,  -1.0f, 0.0f,  0.0f,  1.0f,
-
-        -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f,  0.5f,  0.5f,  -0.5f, 0.0f,
-        1.0f,  0.0f,  1.0f,  1.0f,  0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,
-        0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,  1.0f,  0.0f,  -0.5f, 0.5f,  0.5f,  0.0f,
-        1.0f,  0.0f,  0.0f,  0.0f,  -0.5f, 0.5f,  -0.5f, 0.0f,  1.0f,  0.0f,  0.0f,  1.0f};
+        // back face
+        -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+        1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,   // top-right
+        1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,  // bottom-right
+        1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,   // top-right
+        -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
+        -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,  // top-left
+        // front face
+        -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom-left
+        1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,  // bottom-right
+        1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,   // top-right
+        1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,   // top-right
+        -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,  // top-left
+        -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom-left
+        // left face
+        -1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,   // top-right
+        -1.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,  // top-left
+        -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-left
+        -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-left
+        -1.0f, -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,  // bottom-right
+        -1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,   // top-right
+                                                            // right face
+        1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,     // top-left
+        1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,   // bottom-right
+        1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,    // top-right
+        1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,   // bottom-right
+        1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,     // top-left
+        1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,    // bottom-left
+        // bottom face
+        -1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top-right
+        1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,  // top-left
+        1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,   // bottom-left
+        1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,   // bottom-left
+        -1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,  // bottom-right
+        -1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top-right
+        // top face
+        -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top-left
+        1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,   // bottom-right
+        1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,  // top-right
+        1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,   // bottom-right
+        -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top-left
+        -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f   // bottom-left
+      };
 
       VertexBufferLayout layout = {
         {VertexAttributeType::Float, 3}, // position
@@ -456,6 +493,8 @@ namespace Krys::Gfx::OpenGL
     CreateShadowMapFramebuffer("directional", 1'024, 1'024);
     CreateCubeShadowMapFramebuffer("point", 1'024, 1'024);
 
+    CreateFloatingPointFramebuffer("hdr", _width, _height);
+
     // Uniform buffers
     {
       ubos["matrices"] = CreateUnique<UniformBuffer>(2 * sizeof(Mat4));
@@ -463,64 +502,90 @@ namespace Krys::Gfx::OpenGL
     }
 
     glEnable(GL_DEPTH_TEST);
-    glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+    glClearColor(0.5f, 0.f, 0.f, 1.f);
 
-    shaders.at("parallax-mapping")->SetUniform("diffuseTexture", 0);
-    shaders.at("parallax-mapping")->SetUniform("normalMap", 1);
-    shaders.at("parallax-mapping")->SetUniform("depthMap", 2);
+    shaders.at("hdr-lighting")->SetUniform("diffuseTexture", 0);
+    shaders.at("hdr")->SetUniform("hdrBuffer", 0);
   }
 
   void Context::Render(ICamera &camera) noexcept
   {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
     auto view = camera.ViewMatrix();
     auto projection = camera.ProjectionMatrix();
 
     ubos.at("matrices")->Update(view);
     ubos.at("matrices")->Update(projection, sizeof(Mat4));
 
+    std::vector<Vec3> lightPositions;
+    lightPositions.push_back(Vec3(0.0f, 0.0f, 49.5f)); // back light
+    lightPositions.push_back(Vec3(-1.4f, -1.9f, 9.0f));
+    lightPositions.push_back(Vec3(0.0f, -1.8f, 4.0f));
+    lightPositions.push_back(Vec3(0.8f, -1.7f, 6.0f));
+
+    std::vector<Vec3> lightColors;
+    lightColors.push_back(Vec3(200.0f, 200.0f, 200.0f));
+    lightColors.push_back(Vec3(0.1f, 0.0f, 0.0f));
+    lightColors.push_back(Vec3(0.0f, 0.0f, 0.2f));
+    lightColors.push_back(Vec3(0.0f, 0.1f, 0.0f));
+
+    glBindFramebuffer(GL_FRAMEBUFFER, shadowMaps.at("hdr").FBO);
     {
-      auto &shader = shaders.at("model");
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+      auto &shader = shaders.at("hdr-lighting");
       shader->Bind();
 
       textures.at("wood")->Bind(0);
-      vaos.at("plane")->Bind();
+
+      // colors
+
+      for (uint i = 0; i < lightPositions.size(); i++)
+      {
+        shader->SetUniform("lights[" + std::to_string(i) + "].Position", lightPositions[i]);
+        shader->SetUniform("lights[" + std::to_string(i) + "].Color", lightColors[i]);
+      }
 
       Mat4 model = Identity<Mat4>();
-      model = Translate(model, Vec3(0.0f, -0.5f, 0.0f));
+      model = Translate(model, Vec3(0.0f, 0.0f, 25.0f));
+      model = Scale(model, Vec3(2.5f, 2.5f, 27.5f));
 
       shader->SetUniform("model", model);
-      Utils::Draw(GL_TRIANGLE_STRIP, 4);
-    }
+      shader->SetUniform("inverse_normals", true);
 
-    {
-      auto &shader = shaders.at("parallax-mapping");
-      shader->Bind();
-
-      Mat4 model = Identity<Mat4>();
-      shader->SetUniform("model", model);
-      shader->SetUniform("viewPos", camera.Position());
-      shader->SetUniform("lightPos", lightPos);
-      shader->SetUniform("heightScale", 0.1f);
-      textures.at("wood")->Bind(0);
-      textures.at("toybox-normal")->Bind(1);
-      textures.at("toybox-displacement")->Bind(2);
-      vaos.at("quad")->Bind();
-      Utils::Draw(GL_TRIANGLES, 6);
-    }
-
-    // Light source
-    {
-      auto &shader = shaders.at("light-source");
-      shader->Bind();
-      Mat4 model = Identity<Mat4>();
-      model = Translate(model, lightPos);
-      model = Scale(model, Vec3(0.2f));
-      shader->SetUniform("model", model);
-      shader->SetUniform("lightColor", (Colour {1.0f, 1.0f, 1.0f}).ToVec3());
       vaos.at("cube")->Bind();
       Utils::Draw(GL_TRIANGLES, 36);
+    }
+
+    //{
+    //  auto &shader = shaders.at("light-source");
+    //  shader->Bind();
+
+    //  for (uint i = 0; i < lightPositions.size(); i++)
+    //  {
+    //    Mat4 model = Identity<Mat4>();
+    //    model = Translate(model, lightPositions[i]);
+    //    model = Scale(model, Vec3(0.25f));
+    //    shader->SetUniform("model", model);
+    //    shader->SetUniform("lightColor", lightColors[i]);
+    //    vaos.at("cube")->Bind();
+    //    Utils::Draw(GL_TRIANGLES, 36);
+    //  }
+    //}
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    {
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      auto &shader = shaders.at("hdr");
+      shader->Bind();
+      shader->SetUniform("exposure", 0.1f);
+      shader->SetUniform("hdr", true);
+
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, shadowMaps.at("hdr").Texture);
+
+      vaos.at("screen-quad")->Bind();
+      Utils::Draw(GL_TRIANGLE_STRIP, 4);
     }
   }
 

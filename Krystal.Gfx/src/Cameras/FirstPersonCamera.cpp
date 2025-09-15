@@ -13,7 +13,7 @@ namespace Krys::Gfx
   {
     using namespace Maths;
 
-    _forward = Normalize(target - position);
+    _forward = Normalize(Vec3(0.0f, 0.0f, -1.0f));
     _right = Normalize(Cross(_forward, _up));
     _up = Normalize(Cross(_right, _forward));
   }

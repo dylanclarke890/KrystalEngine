@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Krystal.Core/Core.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
 #include "Krystal.IO/Image.hpp"
 
@@ -7,14 +8,20 @@
 
 namespace Krys::Gfx::OpenGL
 {
+  struct IsSRGBTexture : TypedBool<IsSRGBTexture>
+  {
+    explicit constexpr IsSRGBTexture(bool value) noexcept : TypedBool<IsSRGBTexture>(value)
+    {
+    }
+  };
+
   template <GLenum TextureType>
   requires(TextureType == GL_TEXTURE_2D || TextureType == GL_TEXTURE_CUBE_MAP)
   class Texture
   {
   public:
-    Texture(const IO::Path &filepath,
-                  const IO::ImageLoadSettings &settings = {.FlipVertically = true,
-                                                           .DesiredComponents = 0}) noexcept
+    Texture(const IO::Path &filepath, IsSRGBTexture isSRGBTexture = IsSRGBTexture(false),
+            const IO::ImageLoadSettings &settings = {.FlipVertically = true, .DesiredComponents = 0}) noexcept
         : _handle(0)
     {
       static_assert(TextureType == GL_TEXTURE_2D, "This constructor is only for 2d textures.");
@@ -28,11 +35,11 @@ namespace Krys::Gfx::OpenGL
       auto &image = *imageResult;
       assert((image.Channels == 3 || image.Channels == 4) && "Texture image data must be 3 or 4 channels.");
 
-      GLint internalFormat = GL_RGB;
+      GLint internalFormat = isSRGBTexture ? GL_SRGB : GL_RGB;
       GLenum format = GL_RGB;
       if (image.Channels == 4)
       {
-        internalFormat = GL_RGBA;
+        internalFormat = isSRGBTexture ? GL_SRGB_ALPHA : GL_RGBA;
         format = GL_RGBA;
       }
 
@@ -46,9 +53,9 @@ namespace Krys::Gfx::OpenGL
     }
 
     Texture(const IO::Path &left, const IO::Path &right, const IO::Path &top, const IO::Path &bottom,
-                  const IO::Path &front, const IO::Path &back,
-                  const IO::ImageLoadSettings &settings = {.FlipVertically = false,
-                                                           .DesiredComponents = 0}) noexcept
+            const IO::Path &front, const IO::Path &back,
+            const IO::ImageLoadSettings &settings = {.FlipVertically = false,
+                                                     .DesiredComponents = 0}) noexcept
         : _handle(0)
     {
       static_assert(TextureType == GL_TEXTURE_CUBE_MAP, "This constructor is only for cubemaps.");
