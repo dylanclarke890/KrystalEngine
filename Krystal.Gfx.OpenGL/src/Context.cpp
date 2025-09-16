@@ -216,6 +216,54 @@ namespace
     }
   }
 
+  static void CreateGFramebuffer(uint32 width, uint32 height)
+  {
+    uint gBuffer;
+    glGenFramebuffers(1, &gBuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
+    uint gPosition, gNormal, gColorSpec;
+
+    // - position color buffer
+    glGenTextures(1, &gPosition);
+    glBindTexture(GL_TEXTURE_2D, gPosition);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
+
+    // - normal color buffer
+    glGenTextures(1, &gNormal);
+    glBindTexture(GL_TEXTURE_2D, gNormal);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
+
+    // - color + specular color buffer
+    glGenTextures(1, &gColorSpec);
+    glBindTexture(GL_TEXTURE_2D, gColorSpec);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gColorSpec, 0);
+
+    // - tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
+    List<uint> attachments = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+    glDrawBuffers(3, attachments.data());
+
+    unsigned int rboDepth;
+    glGenRenderbuffers(1, &rboDepth);
+    glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
+
+    assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE
+           && "framebuffer is incomplete");
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    shadowMaps["g-buffer"] = {gBuffer, {gPosition, gNormal, gColorSpec}, rboDepth, width, height};
+  }
+
   static void RenderScene(Shader &shader)
   {
     vaos.at("plane")->Bind();
@@ -327,6 +375,17 @@ namespace Krys::Gfx::OpenGL
       shaders["bloom-final"] =
         CreateUnique<Shader>(base / Path("7/bloom-final.vert"), base / Path("7/bloom-final.frag"));
       shaders["blur"] = CreateUnique<Shader>(base / Path("7/blur.vert"), base / Path("7/blur.frag"));
+
+      shaders["g-buffer"] =
+        CreateUnique<Shader>(base / Path("8/g-buffer.vert"), base / Path("8/g-buffer.frag"));
+      shaders["deferred-shading"] =
+        CreateUnique<Shader>(base / Path("8/deferred-shading.vert"), base / Path("8/deferred-shading.frag"));
+      shaders["deferred-light"] = CreateUnique<Shader>(base / Path("8/deferred-light-box.vert"),
+                                                       base / Path("8/deferred-light-box.frag"));
+    }
+
+    {
+      models["backpack"] = CreateUnique<Model>(IO::Path("data/assets/models/backpack/backpack.obj"));
     }
 
     // Textures
@@ -540,13 +599,7 @@ namespace Krys::Gfx::OpenGL
     }
 
     // Shadow maps
-    CreateShadowMapFramebuffer("directional", 1'024, 1'024);
-    CreateCubeShadowMapFramebuffer("point", 1'024, 1'024);
-
-    CreateFloatingPointFramebuffer("bloom", _width, _height);
-    CreatePingPongFramebuffer("blur", _width, _height);
-    pingPongFBOs[0] = shadowMaps.at("blur0");
-    pingPongFBOs[1] = shadowMaps.at("blur1");
+    CreateGFramebuffer(_width, _height);
 
     // Uniform buffers
     {
@@ -557,10 +610,9 @@ namespace Krys::Gfx::OpenGL
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.f, 0.f, 0.f, 1.f);
 
-    shaders.at("bloom")->SetUniform("diffuseTexture", 0);
-    shaders.at("blur")->SetUniform("image", 0);
-    shaders.at("bloom-final")->SetUniform("scene", 0);
-    shaders.at("bloom-final")->SetUniform("bloomBlur", 1);
+    shaders.at("deferred-shading")->SetUniform("gPosition", 0);
+    shaders.at("deferred-shading")->SetUniform("gNormal", 1);
+    shaders.at("deferred-shading")->SetUniform("gAlbedoSpec", 2);
   }
 
   void Context::Render(ICamera &camera) noexcept
@@ -571,168 +623,110 @@ namespace Krys::Gfx::OpenGL
     ubos.at("matrices")->Update(view);
     ubos.at("matrices")->Update(projection, sizeof(Mat4));
 
-    std::vector<Vec3> lightPositions;
-    lightPositions.push_back(Vec3(0.0f, 0.5f, 1.5f));
-    lightPositions.push_back(Vec3(-4.0f, 0.5f, -3.0f));
-    lightPositions.push_back(Vec3(3.0f, 0.5f, 1.0f));
-    lightPositions.push_back(Vec3(-.8f, 2.4f, -1.0f));
-
-    // colors
-    std::vector<Vec3> lightColors;
-    lightColors.push_back(Vec3(5.0f, 5.0f, 5.0f));
-    lightColors.push_back(Vec3(10.0f, 0.0f, 0.0f));
-    lightColors.push_back(Vec3(0.0f, 0.0f, 15.0f));
-    lightColors.push_back(Vec3(0.0f, 5.0f, 0.0f));
-
-    glBindFramebuffer(GL_FRAMEBUFFER, shadowMaps.at("bloom").FBO);
+    std::vector<Vec3> objectPositions;
     {
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      objectPositions.push_back(Vec3(-3.0, -0.5, -3.0));
+      objectPositions.push_back(Vec3(0.0, -0.5, -3.0));
+      objectPositions.push_back(Vec3(3.0, -0.5, -3.0));
+      objectPositions.push_back(Vec3(-3.0, -0.5, 0.0));
+      objectPositions.push_back(Vec3(0.0, -0.5, 0.0));
+      objectPositions.push_back(Vec3(3.0, -0.5, 0.0));
+      objectPositions.push_back(Vec3(-3.0, -0.5, 3.0));
+      objectPositions.push_back(Vec3(0.0, -0.5, 3.0));
+      objectPositions.push_back(Vec3(3.0, -0.5, 3.0));
+    }
 
-      auto &shader = shaders.at("hdr-lighting");
-      shader->Bind();
-
-      // colors
-
-      for (uint i = 0; i < lightPositions.size(); i++)
+    const unsigned int NR_LIGHTS = 32;
+    std::vector<Vec3> lightPositions;
+    std::vector<Vec3> lightColors;
+    {
+      srand(13);
+      for (unsigned int i = 0; i < NR_LIGHTS; i++)
       {
-        shader->SetUniform("lights[" + std::to_string(i) + "].Position", lightPositions[i]);
-        shader->SetUniform("lights[" + std::to_string(i) + "].Color", lightColors[i]);
-      }
-      shader->SetUniform("viewPos", camera.Position());
-      vaos.at("cube")->Bind();
-
-      // create one large cube that acts as the floor
-      textures.at("wood")->Bind(0);
-      {
-        Mat4 model = Identity<Mat4>();
-        model = Translate(model, Vec3(0.0f, -1.0f, 0.0));
-        model = Scale(model, Vec3(12.5f, 0.5f, 12.5f));
-        shader->SetUniform("model", model);
-        Utils::Draw(GL_TRIANGLES, 36);
-      }
-
-      // then create multiple cubes as the scenery
-      textures.at("container")->Bind(0);
-      {
-        Mat4 model = Identity<Mat4>();
-        model = Translate(model, Vec3(0.0f, 1.5f, 0.0));
-        model = Scale(model, Vec3(0.5f));
-        shader->SetUniform("model", model);
-        Utils::Draw(GL_TRIANGLES, 36);
-      }
-
-      {
-        Mat4 model = Identity<Mat4>();
-        model = Translate(model, Vec3(2.0f, 0.0f, 1.0));
-        model = Scale(model, Vec3(0.5f));
-        shader->SetUniform("model", model);
-        Utils::Draw(GL_TRIANGLES, 36);
-      }
-
-      {
-        Mat4 model = Identity<Mat4>();
-        model = Translate(model, Vec3(-1.0f, -1.0f, 2.0));
-        model = Rotate(model, Radians(60.0f), Normalize(Vec3(1.0, 0.0, 1.0)));
-        shader->SetUniform("model", model);
-        Utils::Draw(GL_TRIANGLES, 36);
-      }
-
-      {
-        Mat4 model = Identity<Mat4>();
-        model = Translate(model, Vec3(0.0f, 2.7f, 4.0));
-        model = Rotate(model, Radians(23.0f), Normalize(Vec3(1.0, 0.0, 1.0)));
-        model = Scale(model, Vec3(1.25));
-        shader->SetUniform("model", model);
-        Utils::Draw(GL_TRIANGLES, 36);
-      }
-
-      {
-        Mat4 model = Identity<Mat4>();
-        model = Translate(model, Vec3(-2.0f, 1.0f, -3.0));
-        model = Rotate(model, Radians(124.0f), Normalize(Vec3(1.0, 0.0, 1.0)));
-        shader->SetUniform("model", model);
-        Utils::Draw(GL_TRIANGLES, 36);
-      }
-
-      {
-        Mat4 model = Identity<Mat4>();
-        model = Translate(model, Vec3(-3.0f, 0.0f, 0.0));
-        model = Scale(model, Vec3(0.5f));
-        shader->SetUniform("model", model);
-        Utils::Draw(GL_TRIANGLES, 36);
+        // calculate slightly random offsets
+        float xPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 3.0);
+        float yPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 4.0);
+        float zPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 3.0);
+        lightPositions.push_back(Vec3(xPos, yPos, zPos));
+        // also calculate random color
+        float rColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
+        float gColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
+        float bColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
+        lightColors.push_back(Vec3(rColor, gColor, bColor));
       }
     }
 
+    glBindFramebuffer(GL_FRAMEBUFFER, shadowMaps.at("g-buffer").FBO);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    Mat4 model = Identity<Mat4>();
     {
-      auto &shader = shaders.at("bloom-light");
+      auto &shader = shaders.at("g-buffer");
       shader->Bind();
-      for (uint i = 0; i < lightPositions.size(); i++)
+
+      for (uint i = 0; i < objectPositions.size(); i++)
       {
-        Mat4 model = Identity<Mat4>();
-        model = Translate(model, lightPositions[i]);
+        model = Identity<Mat4>();
+        model = Translate(model, objectPositions[i]);
         model = Scale(model, Vec3(0.25f));
+        shader->SetUniform("model", model);
+        models.at("backpack")->Draw(*shader);
+      }
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    {
+      auto &shader = shaders.at("deferred-shading");
+      shader->Bind();
+      auto &fb = shadowMaps.at("g-buffer");
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, fb.ColorTextures[0]);
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, fb.ColorTextures[1]);
+      glActiveTexture(GL_TEXTURE2);
+      glBindTexture(GL_TEXTURE_2D, fb.ColorTextures[2]);
+
+      for (unsigned int i = 0; i < lightPositions.size(); i++)
+      {
+        shader->SetUniform("lights[" + std::to_string(i) + "].Position", lightPositions[i]);
+        shader->SetUniform("lights[" + std::to_string(i) + "].Color", lightColors[i]);
+        // update attenuation parameters and calculate radius
+        const float linear = 0.7f;
+        const float quadratic = 1.8f;
+        shader->SetUniform("lights[" + std::to_string(i) + "].Linear", linear);
+        shader->SetUniform("lights[" + std::to_string(i) + "].Quadratic", quadratic);
+      }
+      shader->SetUniform("viewPos", camera.Position());
+      vaos.at("screen-quad")->Bind();
+      Utils::Draw(GL_TRIANGLE_STRIP, 4);
+
+      glBindFramebuffer(GL_READ_FRAMEBUFFER, fb.FBO);
+      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
+
+      // blit to default framebuffer. Note that this may or may not work as the internal formats of both the
+      // FBO and default framebuffer have to match. the internal formats are implementation defined. This
+      // works on all of my systems, but if it doesn't on yours you'll likely have to write to the depth
+      // buffer in another shader stage (or somehow see to match the default framebuffer's internal format
+      // with the FBO's internal format).
+      glBlitFramebuffer(0, 0, fb.Width, fb.Height, 0, 0, _width, _height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    }
+
+    {
+      auto &shader = shaders.at("deferred-light");
+      shader->Bind();
+      vaos.at("cube")->Bind();
+      for (unsigned int i = 0; i < lightPositions.size(); i++)
+      {
+        model = Identity<Mat4>();
+        model = Translate(model, lightPositions[i]);
+        model = Scale(model, Vec3(0.125f));
         shader->SetUniform("model", model);
         shader->SetUniform("lightColor", lightColors[i]);
         Utils::Draw(GL_TRIANGLES, 36);
       }
-    }
-
-    vaos.at("screen-quad")->Bind();
-    bool horizontal = true;
-    {
-      auto &shader = shaders.at("blur");
-      shader->Bind();
-
-      uint amount = 10;
-      for (uint i = 0; i < amount; i++)
-      {
-        glBindFramebuffer(GL_FRAMEBUFFER, pingPongFBOs[horizontal].FBO);
-        shader->SetUniform("horizontal", horizontal);
-        glActiveTexture(GL_TEXTURE0);
-        GLuint texture = i == 0
-                           ? shadowMaps.at("bloom").ColorTextures[1]     // (or scene if first iteration)
-                           : pingPongFBOs[!horizontal].ColorTextures[0]; // bind texture of other framebuffer
-        glBindTexture(GL_TEXTURE_2D, texture);
-
-        Utils::Draw(GL_TRIANGLE_STRIP, 4);
-        horizontal = !horizontal;
-      }
-    }
-
-    //{
-    //  vaos.at("cube")->Bind();
-    //  glBindFramebuffer(GL_FRAMEBUFFER, shadowMaps.at("bloom").FBO);
-    //  auto &shader = shaders.at("bloom-light");
-    //  shader->Bind();
-    //  shader->SetUniform("countsTowardsBloom", false);
-    //  for (uint i = 0; i < lightPositions.size(); i++)
-    //  {
-    //    Mat4 model = Identity<Mat4>();
-    //    model = Translate(model, lightPositions[i]);
-    //    model = Scale(model, Vec3(0.275f));
-    //    shader->SetUniform("model", model);
-    //    shader->SetUniform("lightColor", lightColors[i]);
-    //    Utils::Draw(GL_TRIANGLES, 36);
-    //  }
-    //  shader->SetUniform("countsTowardsBloom", true);
-    //}
-
-    // 3. now render floating point color buffer to 2D quad and tonemap HDR colors to default framebuffer's
-    // (clamped) color range
-    // --------------------------------------------------------------------------------------------------------------------------
-    {
-      vaos.at("screen-quad")->Bind();
-      glBindFramebuffer(GL_FRAMEBUFFER, 0);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      auto &shader = shaders.at("bloom-final");
-      shader->Bind();
-      glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, shadowMaps.at("bloom").ColorTextures[0]);
-      glActiveTexture(GL_TEXTURE1);
-      glBindTexture(GL_TEXTURE_2D, pingPongFBOs[horizontal].ColorTextures[0]);
-      shader->SetUniform("bloom", true);
-      shader->SetUniform("exposure", 1.f);
-      Utils::Draw(GL_TRIANGLE_STRIP, 4);
     }
   }
 
