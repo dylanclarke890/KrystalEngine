@@ -715,9 +715,7 @@ namespace Krys::Gfx::OpenGL
   {
     auto view = camera.ViewMatrix();
     auto projection = camera.ProjectionMatrix();
-
-    ubos.at("matrices")->Update(view);
-    ubos.at("matrices")->Update(projection, sizeof(Mat4));
+    ubos.at("matrices")->Update({view, projection});
 
     glBindFramebuffer(GL_FRAMEBUFFER, shadowMaps.at("g-buffer").FBO);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

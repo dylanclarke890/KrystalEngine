@@ -70,6 +70,11 @@ namespace Krys::Gfx::OpenGL
     {
       Update(ByteUtils::AsBytesView(data), offset);
     }
+
+    void Update(const List<Maths::Mat4> &data, size_t offset = 0) noexcept
+    {
+      Update(ByteUtils::AsBytesView(data), offset);
+    }
   };
 
   using VertexBuffer = Buffer<GL_ARRAY_BUFFER>;
