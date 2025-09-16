@@ -99,6 +99,12 @@
     <None Include="data\shaders\opengl\8\deferred-shading.vert" />
     <None Include="data\shaders\opengl\8\g-buffer.frag" />
     <None Include="data\shaders\opengl\8\g-buffer.vert" />
+    <None Include="data\shaders\opengl\9\ssao.frag" />
+    <None Include="data\shaders\opengl\9\ssao.vert" />
+    <None Include="data\shaders\opengl\9\ssao-blur.frag" />
+    <None Include="data\shaders\opengl\9\ssao-geometry.frag" />
+    <None Include="data\shaders\opengl\9\ssao-geometry.vert" />
+    <None Include="data\shaders\opengl\9\ssao-lighting.frag" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">

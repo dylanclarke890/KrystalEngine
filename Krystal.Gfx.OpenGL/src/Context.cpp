@@ -24,6 +24,7 @@
 #include "Krystal.Maths/Transform.hpp"
 #include "Krystal.Maths/Vector.hpp"
 #include "Krystal.Platform/Platform.hpp"
+#include <random>
 
 namespace
 {
@@ -41,6 +42,9 @@ namespace
     uint32 Height {};
   };
 
+  static Vec3 lightPos = Vec3(2.0f, 4.0f, -2.0f);
+  static Vec3 lightColor = Vec3(0.2f, 0.2f, 0.7f);
+
   static Map<string, Unique<Shader>> shaders;
   static Map<string, Unique<Texture2D>> textures;
   static Map<string, Unique<CubeMap>> cubemaps;
@@ -51,6 +55,9 @@ namespace
   static Map<string, FrameBufferData> shadowMaps;
 
   static FrameBufferData pingPongFBOs[2];
+
+  static GLuint noiseTexture;
+  static std::vector<Vec3> ssaoKernel;
 
 #pragma region Lights
 
@@ -264,6 +271,80 @@ namespace
     shadowMaps["g-buffer"] = {gBuffer, {gPosition, gNormal, gColorSpec}, rboDepth, width, height};
   }
 
+  static void CreateSSAOFramebuffer(uint32 width, uint32 height)
+  {
+    unsigned int ssaoFBO, ssaoBlurFBO;
+    glGenFramebuffers(1, &ssaoFBO);
+    glGenFramebuffers(1, &ssaoBlurFBO);
+    glBindFramebuffer(GL_FRAMEBUFFER, ssaoFBO);
+    unsigned int ssaoColorBuffer, ssaoColorBufferBlur;
+
+    // SSAO color buffer
+    glGenTextures(1, &ssaoColorBuffer);
+    glBindTexture(GL_TEXTURE_2D, ssaoColorBuffer);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoColorBuffer, 0);
+    assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE
+           && "framebuffer is incomplete");
+
+    // and blur stage
+    glBindFramebuffer(GL_FRAMEBUFFER, ssaoBlurFBO);
+    glGenTextures(1, &ssaoColorBufferBlur);
+    glBindTexture(GL_TEXTURE_2D, ssaoColorBufferBlur);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_FLOAT, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoColorBufferBlur, 0);
+    assert(glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE
+           && "framebuffer is incomplete");
+
+    shadowMaps["ssao"] = {ssaoFBO, {ssaoColorBuffer}, 0, width, height};
+    shadowMaps["ssao-blur"] = {ssaoBlurFBO, {ssaoColorBufferBlur}, 0, width, height};
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  }
+
+  static float Lerp(float a, float b, float f)
+  {
+    return a + f * (b - a);
+  }
+
+  static void CreateNoiseTexture()
+  {
+    std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0);
+    std::default_random_engine generator;
+    for (unsigned int i = 0; i < 64; ++i)
+    {
+      Vec3 sample(randomFloats(generator) * 2.0f - 1.0f, randomFloats(generator) * 2.0f - 1.0f,
+                  randomFloats(generator));
+      sample = Normalize(sample);
+      sample *= randomFloats(generator);
+      float scale = float(i) / 64.0f;
+
+      // scale samples s.t. they're more aligned to center of kernel
+      scale = Lerp(0.1f, 1.0f, scale * scale);
+      sample *= scale;
+      ssaoKernel.push_back(sample);
+    }
+
+    List<Vec3> ssaoNoise;
+    for (unsigned int i = 0; i < 16; i++)
+    {
+      Vec3 noise(randomFloats(generator) * 2.0f - 1.0f, randomFloats(generator) * 2.0f - 1.0f,
+                 0.0f); // rotate around z-axis (in tangent space)
+      ssaoNoise.push_back(noise);
+    }
+    glGenTextures(1, &noiseTexture);
+    glBindTexture(GL_TEXTURE_2D, noiseTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, 4, 4, 0, GL_RGB, GL_FLOAT, ssaoNoise.data());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  }
+
   static void RenderScene(Shader &shader)
   {
     vaos.at("plane")->Bind();
@@ -382,6 +463,14 @@ namespace Krys::Gfx::OpenGL
         CreateUnique<Shader>(base / Path("8/deferred-shading.vert"), base / Path("8/deferred-shading.frag"));
       shaders["deferred-light"] = CreateUnique<Shader>(base / Path("8/deferred-light-box.vert"),
                                                        base / Path("8/deferred-light-box.frag"));
+
+      shaders["ssao-geometry"] =
+        CreateUnique<Shader>(base / Path("9/ssao-geometry.vert"), base / Path("9/ssao-geometry.frag"));
+      shaders["ssao"] = CreateUnique<Shader>(base / Path("9/ssao.vert"), base / Path("9/ssao.frag"));
+      shaders["ssao-blur"] =
+        CreateUnique<Shader>(base / Path("9/ssao.vert"), base / Path("9/ssao-blur.frag"));
+      shaders["ssao-lighting"] =
+        CreateUnique<Shader>(base / Path("9/ssao.vert"), base / Path("9/ssao-lighting.frag"));
     }
 
     {
@@ -600,6 +689,8 @@ namespace Krys::Gfx::OpenGL
 
     // Shadow maps
     CreateGFramebuffer(_width, _height);
+    CreateSSAOFramebuffer(_width, _height);
+    CreateNoiseTexture();
 
     // Uniform buffers
     {
@@ -608,11 +699,16 @@ namespace Krys::Gfx::OpenGL
     }
 
     glEnable(GL_DEPTH_TEST);
-    glClearColor(0.f, 0.f, 0.f, 1.f);
+    glClearColor(0.2f, 0.2f, 0.f, 1.f);
 
-    shaders.at("deferred-shading")->SetUniform("gPosition", 0);
-    shaders.at("deferred-shading")->SetUniform("gNormal", 1);
-    shaders.at("deferred-shading")->SetUniform("gAlbedoSpec", 2);
+    shaders.at("ssao-lighting")->SetUniform("gPosition", 0);
+    shaders.at("ssao-lighting")->SetUniform("gNormal", 1);
+    shaders.at("ssao-lighting")->SetUniform("gAlbedo", 2);
+    shaders.at("ssao-lighting")->SetUniform("ssao", 3);
+    shaders.at("ssao")->SetUniform("gPosition", 0);
+    shaders.at("ssao")->SetUniform("gNormal", 1);
+    shaders.at("ssao")->SetUniform("texNoise", 2);
+    shaders.at("ssao-blur")->SetUniform("ssaoInput", 0);
   }
 
   void Context::Render(ICamera &camera) noexcept
@@ -623,110 +719,95 @@ namespace Krys::Gfx::OpenGL
     ubos.at("matrices")->Update(view);
     ubos.at("matrices")->Update(projection, sizeof(Mat4));
 
-    std::vector<Vec3> objectPositions;
-    {
-      objectPositions.push_back(Vec3(-3.0, -0.5, -3.0));
-      objectPositions.push_back(Vec3(0.0, -0.5, -3.0));
-      objectPositions.push_back(Vec3(3.0, -0.5, -3.0));
-      objectPositions.push_back(Vec3(-3.0, -0.5, 0.0));
-      objectPositions.push_back(Vec3(0.0, -0.5, 0.0));
-      objectPositions.push_back(Vec3(3.0, -0.5, 0.0));
-      objectPositions.push_back(Vec3(-3.0, -0.5, 3.0));
-      objectPositions.push_back(Vec3(0.0, -0.5, 3.0));
-      objectPositions.push_back(Vec3(3.0, -0.5, 3.0));
-    }
-
-    const unsigned int NR_LIGHTS = 32;
-    std::vector<Vec3> lightPositions;
-    std::vector<Vec3> lightColors;
-    {
-      srand(13);
-      for (unsigned int i = 0; i < NR_LIGHTS; i++)
-      {
-        // calculate slightly random offsets
-        float xPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 3.0);
-        float yPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 4.0);
-        float zPos = static_cast<float>(((rand() % 100) / 100.0) * 6.0 - 3.0);
-        lightPositions.push_back(Vec3(xPos, yPos, zPos));
-        // also calculate random color
-        float rColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
-        float gColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
-        float bColor = static_cast<float>(((rand() % 100) / 200.0f) + 0.5); // between 0.5 and 1.0
-        lightColors.push_back(Vec3(rColor, gColor, bColor));
-      }
-    }
-
     glBindFramebuffer(GL_FRAMEBUFFER, shadowMaps.at("g-buffer").FBO);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    Mat4 model = Identity<Mat4>();
     {
-      auto &shader = shaders.at("g-buffer");
+      Mat4 model = Identity<Mat4>();
+      auto &shader = shaders.at("ssao-geometry");
       shader->Bind();
 
-      for (uint i = 0; i < objectPositions.size(); i++)
-      {
-        model = Identity<Mat4>();
-        model = Translate(model, objectPositions[i]);
-        model = Scale(model, Vec3(0.25f));
-        shader->SetUniform("model", model);
-        models.at("backpack")->Draw(*shader);
-      }
+      // room cube
+      model = Translate(model, Vec3(0.0, 7.0f, 0.0f));
+      model = Scale(model, Vec3(7.5f, 7.5f, 7.5f));
+      shader->SetUniform("model", model);
+      shader->SetUniform("invertedNormals", 1); // invert normals as we're inside the cube
+      vaos.at("cube")->Bind();
+      Utils::Draw(GL_TRIANGLES, 36);
+
+      // backpack model on the floor
+      shader->SetUniform("invertedNormals", 0);
+      model = Identity<Mat4>();
+      model = Translate(model, Vec3(0.0f, 0.5f, 0.0));
+      model = Rotate(model, Radians(-90.0f), Vec3(1.0, 0.0, 0.0));
+      model = Scale(model, Vec3(1.0f));
+      shader->SetUniform("model", model);
+      models.at("backpack")->Draw(*shader);
     }
-
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // 2. generate SSAO texture
+    // ------------------------
+    glBindFramebuffer(GL_FRAMEBUFFER, shadowMaps.at("ssao").FBO);
     {
-      auto &shader = shaders.at("deferred-shading");
-      shader->Bind();
       auto &fb = shadowMaps.at("g-buffer");
+      glClear(GL_COLOR_BUFFER_BIT);
+      auto &shader = shaders.at("ssao");
+      shader->Bind();
+      // Send kernel + rotation
+      for (unsigned int i = 0; i < 64; ++i)
+        shader->SetUniform("samples[" + std::to_string(i) + "]", ssaoKernel[i]);
+      shader->SetUniform("projection", projection);
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, fb.ColorTextures[0]);
+      glActiveTexture(GL_TEXTURE1);
+      glBindTexture(GL_TEXTURE_2D, fb.ColorTextures[1]);
+      glActiveTexture(GL_TEXTURE2);
+      glBindTexture(GL_TEXTURE_2D, noiseTexture);
+      vaos.at("screen-quad")->Bind();
+      Utils::Draw(GL_TRIANGLE_STRIP, 4);
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // 3. blur SSAO texture to remove noise
+    // ------------------------------------
+    glBindFramebuffer(GL_FRAMEBUFFER, shadowMaps.at("ssao-blur").FBO);
+    {
+      glClear(GL_COLOR_BUFFER_BIT);
+      shaders.at("ssao-blur")->Bind();
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, shadowMaps.at("ssao").ColorTextures[0]);
+      vaos.at("screen-quad")->Bind();
+      Utils::Draw(GL_TRIANGLE_STRIP, 4);
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // 4. lighting pass: traditional deferred Blinn-Phong lighting with added screen-space ambient occlusion
+    // -----------------------------------------------------------------------------------------------------
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    {
+      auto &fb = shadowMaps.at("g-buffer");
+      auto &shader = shaders.at("ssao-lighting");
+      shader->Bind();
+
+      // send light relevant uniforms
+      Vec3 lightPosView = Vec3(view * Vec4(lightPos, 1.0));
+      shader->SetUniform("light.Position", lightPosView);
+      shader->SetUniform("light.Color", lightColor);
+      // Update attenuation parameters
+      const float linear = 0.09f;
+      const float quadratic = 0.032f;
+      shader->SetUniform("light.Linear", linear);
+      shader->SetUniform("light.Quadratic", quadratic);
       glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_2D, fb.ColorTextures[0]);
       glActiveTexture(GL_TEXTURE1);
       glBindTexture(GL_TEXTURE_2D, fb.ColorTextures[1]);
       glActiveTexture(GL_TEXTURE2);
       glBindTexture(GL_TEXTURE_2D, fb.ColorTextures[2]);
-
-      for (unsigned int i = 0; i < lightPositions.size(); i++)
-      {
-        shader->SetUniform("lights[" + std::to_string(i) + "].Position", lightPositions[i]);
-        shader->SetUniform("lights[" + std::to_string(i) + "].Color", lightColors[i]);
-        // update attenuation parameters and calculate radius
-        const float linear = 0.7f;
-        const float quadratic = 1.8f;
-        shader->SetUniform("lights[" + std::to_string(i) + "].Linear", linear);
-        shader->SetUniform("lights[" + std::to_string(i) + "].Quadratic", quadratic);
-      }
-      shader->SetUniform("viewPos", camera.Position());
+      glActiveTexture(GL_TEXTURE3); // add extra SSAO texture to lighting pass
+      glBindTexture(GL_TEXTURE_2D, shadowMaps.at("ssao-blur").ColorTextures[0]);
       vaos.at("screen-quad")->Bind();
       Utils::Draw(GL_TRIANGLE_STRIP, 4);
-
-      glBindFramebuffer(GL_READ_FRAMEBUFFER, fb.FBO);
-      glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0); // write to default framebuffer
-
-      // blit to default framebuffer. Note that this may or may not work as the internal formats of both the
-      // FBO and default framebuffer have to match. the internal formats are implementation defined. This
-      // works on all of my systems, but if it doesn't on yours you'll likely have to write to the depth
-      // buffer in another shader stage (or somehow see to match the default framebuffer's internal format
-      // with the FBO's internal format).
-      glBlitFramebuffer(0, 0, fb.Width, fb.Height, 0, 0, _width, _height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-      glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    }
-
-    {
-      auto &shader = shaders.at("deferred-light");
-      shader->Bind();
-      vaos.at("cube")->Bind();
-      for (unsigned int i = 0; i < lightPositions.size(); i++)
-      {
-        model = Identity<Mat4>();
-        model = Translate(model, lightPositions[i]);
-        model = Scale(model, Vec3(0.125f));
-        shader->SetUniform("model", model);
-        shader->SetUniform("lightColor", lightColors[i]);
-        Utils::Draw(GL_TRIANGLES, 36);
-      }
     }
   }
 
