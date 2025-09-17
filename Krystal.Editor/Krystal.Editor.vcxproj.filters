@@ -109,6 +109,12 @@
     <None Include="data\shaders\opengl\10\pbr.vert" />
     <None Include="data\shaders\opengl\10\pbr-with-maps.frag" />
     <None Include="data\shaders\opengl\10\pbr-with-maps.vert" />
+    <None Include="data\shaders\opengl\11\background.frag" />
+    <None Include="data\shaders\opengl\11\background.vert" />
+    <None Include="data\shaders\opengl\11\cubemap.frag" />
+    <None Include="data\shaders\opengl\11\cubemap.vert" />
+    <None Include="data\shaders\opengl\11\pbr.frag" />
+    <None Include="data\shaders\opengl\11\pbr.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">

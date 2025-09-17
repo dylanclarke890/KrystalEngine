@@ -21,6 +21,22 @@ namespace Krys::IO
     int Channels {};
   };
 
+  /// @brief Represents a high dynamic range (HDR) image.
+  struct HDRImage
+  {
+    /// @brief Image data.
+    List<float> Data {};
+
+    /// @brief Width of image (in pixels).
+    int Width {};
+
+    /// @brief Height of image (in pixels).
+    int Height {};
+
+    /// @brief Number of channels.
+    int Channels {};
+  };
+
   /// @brief Represents a cubemap image consisting of 6 faces.
   struct CubeMapImage
   {
@@ -73,6 +89,20 @@ namespace Krys::IO
   /// @return Image read from the file.
   // NOLINTNEXTLINE(misc-use-internal-linkage)
   NO_DISCARD Expected<Image> LoadImage(const Path &path, const ImageLoadSettings &settings = {}) noexcept;
+
+  /// @brief Reads a HDR image from a stream.
+  /// @param stream Source stream to read from.
+  /// @return HDR image read from the stream.
+  // NOLINTNEXTLINE(misc-use-internal-linkage)
+  NO_DISCARD Expected<HDRImage> LoadHDRImage(IStreamReader &stream,
+                                          const ImageLoadSettings &settings = {}) noexcept;
+
+  /// @brief Reads a HDR image from a file.
+  /// @param path Path to the image file.
+  /// @return HDR image read from the file.
+  // NOLINTNEXTLINE(misc-use-internal-linkage)
+  NO_DISCARD Expected<HDRImage> LoadHDRImage(const Path &path,
+                                             const ImageLoadSettings &settings = {}) noexcept;
 
   /// @brief Reads a cubemap image from 6 separate files.
   /// @param left Path to the left face image file.

@@ -28,6 +28,15 @@ namespace
     auto *stream = static_cast<Krys::IO::IStreamReader *>(user);
     return static_cast<int>(stream->EndOfStream());
   }
+
+  stbi_io_callbacks GetStbiLoadCallbacks() noexcept
+  {
+    stbi_io_callbacks callbacks {};
+    callbacks.read = stbi_stream_read;
+    callbacks.skip = stbi_stream_skip;
+    callbacks.eof = stbi_stream_eof;
+    return callbacks;
+  }
 }
 
 namespace Krys::IO
@@ -35,14 +44,9 @@ namespace Krys::IO
   // NOLINTNEXTLINE(misc-use-internal-linkage)
   Expected<Image> LoadImage(IStreamReader &stream, const ImageLoadSettings &settings) noexcept
   {
-    stbi_io_callbacks callbacks {};
-    callbacks.read = stbi_stream_read;
-    callbacks.skip = stbi_stream_skip;
-    callbacks.eof = stbi_stream_eof;
-
-    Image image;
     stbi_set_flip_vertically_on_load(static_cast<int>(settings.FlipVertically));
 
+    const stbi_io_callbacks callbacks = GetStbiLoadCallbacks();
     int width {};
     int height {};
     int channels {};
@@ -54,6 +58,7 @@ namespace Krys::IO
       return Unexpected(stbi_failure_reason());
     }
 
+    Image image;
     image.Width = width;
     image.Height = height;
     image.Channels = channels;
@@ -66,6 +71,46 @@ namespace Krys::IO
     stbi_image_free(imageData);
 
     return Expected<Image>(std::move(image));
+  }
+
+  // NOLINTNEXTLINE(misc-use-internal-linkage)
+  Expected<HDRImage> LoadHDRImage(IStreamReader &stream, const ImageLoadSettings &settings) noexcept
+  {
+    stbi_set_flip_vertically_on_load(static_cast<int>(settings.FlipVertically));
+
+    const stbi_io_callbacks callbacks = GetStbiLoadCallbacks();
+    int width {};
+    int height {};
+    int channels {};
+    auto *imageData =
+      stbi_loadf_from_callbacks(&callbacks, &stream, &width, &height, &channels, settings.DesiredComponents);
+
+    if (imageData == nullptr)
+    {
+      return Unexpected(stbi_failure_reason());
+    }
+
+    HDRImage image;
+    image.Width = width;
+    image.Height = height;
+    image.Channels = channels;
+    image.Data.resize(static_cast<std::size_t>(width) * height * channels);
+
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    std::copy(imageData, imageData + (static_cast<std::size_t>(width) * height * channels),
+              image.Data.begin());
+
+    stbi_image_free(imageData);
+
+    return Expected<HDRImage>(std::move(image));
+  }
+
+  // NOLINTNEXTLINE(misc-use-internal-linkage)
+  Expected<HDRImage> LoadHDRImage(const Path &path, const ImageLoadSettings &settings) noexcept
+  {
+    // NOLINTNEXTLINE(misc-const-correctness)
+    NativeFileReader fileReader {path};
+    return LoadHDRImage(fileReader, settings);
   }
 
   // NOLINTNEXTLINE(misc-use-internal-linkage)

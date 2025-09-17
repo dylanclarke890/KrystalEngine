@@ -15,12 +15,19 @@ namespace Krys::Gfx::OpenGL
     }
   };
 
+  struct IsHDRTexture : TypedBool<IsHDRTexture>
+  {
+    explicit constexpr IsHDRTexture(bool value) noexcept : TypedBool<IsHDRTexture>(value)
+    {
+    }
+  };
+
   template <GLenum TextureType>
   requires(TextureType == GL_TEXTURE_2D || TextureType == GL_TEXTURE_CUBE_MAP)
   class Texture
   {
   public:
-    Texture(const IO::Path &filepath, IsSRGBTexture isSRGBTexture = IsSRGBTexture(false),
+    Texture(const IO::Path &filepath,
             const IO::ImageLoadSettings &settings = {.FlipVertically = true, .DesiredComponents = 0}) noexcept
         : _handle(0)
     {
@@ -33,7 +40,46 @@ namespace Krys::Gfx::OpenGL
       assert(imageResult.has_value() && "Failed to load texture image.");
 
       auto &image = *imageResult;
-      assert((image.Channels == 1 || image.Channels == 3 || image.Channels == 4) && "Texture image data must be 1, 3 or 4 channels.");
+      assert((image.Channels == 1 || image.Channels == 3 || image.Channels == 4)
+             && "Texture image data must be 1, 3 or 4 channels.");
+
+      GLint internalFormat =  GL_RGB;
+      GLenum format = GL_RGB;
+      if (image.Channels == 1)
+      {
+        internalFormat = GL_RED;
+        format = GL_RED;
+      }
+      else if (image.Channels == 4)
+      {
+        internalFormat = GL_RGBA;
+        format = GL_RGBA;
+      }
+
+      glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, image.Width, image.Height, 0, format, GL_UNSIGNED_BYTE,
+                   image.Data.data());
+
+      glTextureParameteri(_handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTextureParameteri(_handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTextureParameteri(_handle, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTextureParameteri(_handle, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    }
+
+    Texture(const IO::Path &filepath, IsSRGBTexture isSRGBTexture,
+            const IO::ImageLoadSettings &settings = {.FlipVertically = true, .DesiredComponents = 0}) noexcept
+        : _handle(0)
+    {
+      static_assert(TextureType == GL_TEXTURE_2D, "This constructor is only for 2d textures.");
+
+      glGenTextures(1, &_handle);
+      glBindTexture(TextureType, _handle);
+
+      auto imageResult = IO::LoadImage(filepath, settings);
+      assert(imageResult.has_value() && "Failed to load texture image.");
+
+      auto &image = *imageResult;
+      assert((image.Channels == 1 || image.Channels == 3 || image.Channels == 4)
+             && "Texture image data must be 1, 3 or 4 channels.");
 
       GLint internalFormat = isSRGBTexture ? GL_SRGB : GL_RGB;
       GLenum format = GL_RGB;
@@ -42,14 +88,46 @@ namespace Krys::Gfx::OpenGL
         internalFormat = GL_RED;
         format = GL_RED;
       }
-      else
-      if (image.Channels == 4)
+      else if (image.Channels == 4)
       {
         internalFormat = isSRGBTexture ? GL_SRGB_ALPHA : GL_RGBA;
         format = GL_RGBA;
       }
 
       glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, image.Width, image.Height, 0, format, GL_UNSIGNED_BYTE,
+                   image.Data.data());
+
+      glTextureParameteri(_handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTextureParameteri(_handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTextureParameteri(_handle, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTextureParameteri(_handle, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    }
+
+    Texture(const IO::Path &filepath, IsHDRTexture isHDRTexture,
+            const IO::ImageLoadSettings &settings = {.FlipVertically = true, .DesiredComponents = 0}) noexcept
+        : _handle(0)
+    {
+      static_assert(TextureType == GL_TEXTURE_2D, "This constructor is only for 2d textures.");
+      assert(isHDRTexture == true && "This constructor is only for 2d HDR textures.");
+
+      glGenTextures(1, &_handle);
+      glBindTexture(TextureType, _handle);
+
+      auto imageResult = IO::LoadHDRImage(filepath, settings);
+      assert(imageResult.has_value() && "Failed to load texture image.");
+
+      auto &image = *imageResult;
+      assert((image.Channels == 3 || image.Channels == 4) && "Texture image data must be 3 or 4 channels.");
+
+      GLint internalFormat = GL_RGB16F;
+      GLenum format = GL_RGB;
+      if (image.Channels == 4)
+      {
+        internalFormat = GL_RGBA16F;
+        format = GL_RGBA;
+      }
+
+      glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, image.Width, image.Height, 0, format, GL_FLOAT,
                    image.Data.data());
 
       glTextureParameteri(_handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR);

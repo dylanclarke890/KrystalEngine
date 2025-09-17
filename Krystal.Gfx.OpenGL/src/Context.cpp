@@ -42,24 +42,24 @@ namespace
     uint32 Height {};
   };
 
-  static Vec3 lightPos = Vec3(2.0f, 4.0f, -2.0f);
-  static Vec3 lightColor = Vec3(0.2f, 0.2f, 0.7f);
+  Vec3 lightPos = Vec3(2.0f, 4.0f, -2.0f);
+  Vec3 lightColor = Vec3(0.2f, 0.2f, 0.7f);
 
-  static Map<string, Unique<Shader>> shaders;
-  static Map<string, Unique<Texture2D>> textures;
-  static Map<string, Unique<CubeMap>> cubemaps;
-  static Map<string, Unique<Model>> models;
-  static Map<string, Unique<VertexArray>> vaos;
-  static Map<string, Unique<VertexBuffer>> vbos;
-  static Map<string, Unique<IndexBuffer>> ebos;
-  static Map<string, Unique<UniformBuffer>> ubos;
-  static Map<string, FrameBufferData> shadowMaps;
+  Map<string, Unique<Shader>> shaders;
+  Map<string, Unique<Texture2D>> textures;
+  Map<string, Unique<CubeMap>> cubemaps;
+  Map<string, Unique<Model>> models;
+  Map<string, Unique<VertexArray>> vaos;
+  Map<string, Unique<VertexBuffer>> vbos;
+  Map<string, Unique<IndexBuffer>> ebos;
+  Map<string, Unique<UniformBuffer>> ubos;
+  Map<string, FrameBufferData> shadowMaps;
 
-  static FrameBufferData pingPongFBOs[2];
+  FrameBufferData pingPongFBOs[2];
 
-  static GLuint noiseTexture;
-  static List<Vec3> ssaoKernel;
-  static uint sphereIndexCount = 0;
+  GLuint noiseTexture;
+  List<Vec3> ssaoKernel;
+  uint sphereIndexCount = 0;
 
 #pragma region Lights
 
@@ -101,7 +101,7 @@ namespace
 
 #pragma endregion
 
-  static void CreateShadowMapFramebuffer(const string &name, uint32 width, uint32 height) noexcept
+  void CreateShadowMapFramebuffer(const string &name, uint32 width, uint32 height) noexcept
   {
     GLuint depthMapFBO;
     glGenFramebuffers(1, &depthMapFBO);
@@ -134,7 +134,7 @@ namespace
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
   }
 
-  static void CreateCubeShadowMapFramebuffer(const string &name, uint32 width, uint32 height) noexcept
+  void CreateCubeShadowMapFramebuffer(const string &name, uint32 width, uint32 height) noexcept
   {
     GLuint depthMapFBO;
     glGenFramebuffers(1, &depthMapFBO);
@@ -163,7 +163,7 @@ namespace
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
   }
 
-  static void CreateFloatingPointFramebuffer(const string &name, uint32 width, uint32 height)
+  void CreateFloatingPointFramebuffer(const string &name, uint32 width, uint32 height)
   {
     unsigned int hdrFBO;
     glGenFramebuffers(1, &hdrFBO);
@@ -200,7 +200,7 @@ namespace
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
   }
 
-  static void CreatePingPongFramebuffer(const string &name, uint32 width, uint32 height)
+  void CreatePingPongFramebuffer(const string &name, uint32 width, uint32 height)
   {
     uint pingpongFBO[2];
     uint pingpongColorbuffers[2];
@@ -225,7 +225,7 @@ namespace
     }
   }
 
-  static void CreateGFramebuffer(uint32 width, uint32 height)
+  void CreateGFramebuffer(uint32 width, uint32 height)
   {
     uint gBuffer;
     glGenFramebuffers(1, &gBuffer);
@@ -273,7 +273,7 @@ namespace
     shadowMaps["g-buffer"] = {gBuffer, {gPosition, gNormal, gColorSpec}, rboDepth, width, height};
   }
 
-  static void CreateSSAOFramebuffer(uint32 width, uint32 height)
+  void CreateSSAOFramebuffer(uint32 width, uint32 height)
   {
     unsigned int ssaoFBO, ssaoBlurFBO;
     glGenFramebuffers(1, &ssaoFBO);
@@ -308,12 +308,69 @@ namespace
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
   }
 
-  static float Lerp(float a, float b, float f)
+  void CreateEnvironmentCubemap(uint32 width, uint32 height)
+  {
+    uint captureFBO;
+    uint captureRBO;
+    glGenFramebuffers(1, &captureFBO);
+    glGenRenderbuffers(1, &captureRBO);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+    glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, width, height);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRBO);
+
+    uint envCubemap;
+    glGenTextures(1, &envCubemap);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+    for (uint i = 0; i < 6; ++i)
+    {
+      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT,
+                   nullptr);
+    }
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    Mat4 captureProjection = Perspective(Radians(90.0f), 1.0f, 0.1f, 10.0f);
+    Mat4 captureViews[] = {LookAt(Vec3(0.0f, 0.0f, 0.0f), Vec3(1.0f, 0.0f, 0.0f), Vec3(0.0f, -1.0f, 0.0f)),
+                           LookAt(Vec3(0.0f, 0.0f, 0.0f), Vec3(-1.0f, 0.0f, 0.0f), Vec3(0.0f, -1.0f, 0.0f)),
+                           LookAt(Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 1.0f, 0.0f), Vec3(0.0f, 0.0f, 1.0f)),
+                           LookAt(Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, -1.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f)),
+                           LookAt(Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, 1.0f), Vec3(0.0f, -1.0f, 0.0f)),
+                           LookAt(Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(0.0f, -1.0f, 0.0f))};
+
+    auto &shader = shaders.at("hdr-to-cubemap");
+    shader->Bind();
+    shader->SetUniform("equirectangularMap", 0);
+    shader->SetUniform("projection", captureProjection);
+
+    textures.at("hdr-environment")->Bind(0);
+    vaos.at("cube")->Bind();
+
+    glViewport(0, 0, width, height);
+    glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+    for (uint i = 0; i < 6; ++i)
+    {
+      shader->SetUniform("view", captureViews[i]);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                             envCubemap, 0);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      Utils::Draw(GL_TRIANGLES, 36);
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    shadowMaps["hdr-cubemap"] = {captureFBO, {envCubemap}, captureRBO, width, height};
+  }
+
+  float Lerp(float a, float b, float f)
   {
     return a + f * (b - a);
   }
 
-  static void CreateNoiseTexture()
+  void CreateNoiseTexture()
   {
     std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0);
     std::default_random_engine generator;
@@ -347,7 +404,7 @@ namespace
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   }
 
-  static void RenderScene(Shader &shader)
+  void RenderScene(Shader &shader)
   {
     vaos.at("plane")->Bind();
     Mat4 model = Identity<Mat4>();
@@ -375,8 +432,8 @@ namespace
     Utils::Draw(GL_TRIANGLES, 36);
   }
 
-  static void CreateVertexArray(const string &name, const BufferData &vertices,
-                                const VertexBufferLayout &layout) noexcept
+  void CreateVertexArray(const string &name, const BufferData &vertices,
+                         const VertexBufferLayout &layout) noexcept
   {
     vaos[name] = CreateUnique<VertexArray>();
     vbos[name] = CreateUnique<VertexBuffer>(vertices);
@@ -386,8 +443,8 @@ namespace
     Utils::ApplyVertexBufferLayout(layout);
   }
 
-  static void CreateVertexArray(const string &name, const BufferData &vertices, const BufferData &indices,
-                                const VertexBufferLayout &layout) noexcept
+  void CreateVertexArray(const string &name, const BufferData &vertices, const BufferData &indices,
+                         const VertexBufferLayout &layout) noexcept
   {
     vaos[name] = CreateUnique<VertexArray>();
     vbos[name] = CreateUnique<VertexBuffer>(vertices);
@@ -487,9 +544,13 @@ namespace Krys::Gfx::OpenGL
       shaders["ssao-lighting"] =
         CreateUnique<Shader>(base / Path("9/ssao.vert"), base / Path("9/ssao-lighting.frag"));
 
-      shaders["pbr"] = CreateUnique<Shader>(base / Path("10/pbr.vert"), base / Path("10/pbr.frag"));
+      shaders["pbr"] = CreateUnique<Shader>(base / Path("11/pbr.vert"), base / Path("11/pbr.frag"));
       shaders["pbr-with-maps"] =
         CreateUnique<Shader>(base / Path("10/pbr-with-maps.vert"), base / Path("10/pbr-with-maps.frag"));
+      shaders["hdr-to-cubemap"] =
+        CreateUnique<Shader>(base / Path("11/cubemap.vert"), base / Path("11/cubemap.frag"));
+      shaders["hdr-background"] =
+        CreateUnique<Shader>(base / Path("11/background.vert"), base / Path("11/background.frag"));
     }
 
     {
@@ -535,6 +596,9 @@ namespace Krys::Gfx::OpenGL
       textures["brickwall-displacement"] = CreateUnique<Texture2D>(base / Path("brickwall-displacement.jpg"));
       textures.at("brickwall-displacement")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
       textures.at("brickwall-displacement")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+      textures["hdr-environment"] =
+        CreateUnique<Texture2D>(base / Path("newport-loft.hdr"), IsHDRTexture(true));
     }
 
     // PBR textures
@@ -562,50 +626,6 @@ namespace Krys::Gfx::OpenGL
       textures["rustediron-ao"] = CreateUnique<Texture2D>(base / Path("rusted-iron/ao.png"));
       textures.at("rustediron-ao")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
       textures.at("rustediron-ao")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      // silver
-      textures["silver-albedo"] = CreateUnique<Texture2D>(base / Path("silver/albedo.png"));
-      textures.at("silver-albedo")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("silver-albedo")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      textures["silver-normal"] = CreateUnique<Texture2D>(base / Path("silver/normal.png"));
-      textures.at("silver-normal")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("silver-normal")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      textures["silver-metallic"] = CreateUnique<Texture2D>(base / Path("silver/metallic.png"));
-      textures.at("silver-metallic")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("silver-metallic")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      textures["silver-roughness"] = CreateUnique<Texture2D>(base / Path("silver/roughness.png"));
-      textures.at("silver-roughness")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("silver-roughness")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      textures["silver-ao"] = CreateUnique<Texture2D>(base / Path("silver/ao.png"));
-      textures.at("silver-ao")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("silver-ao")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      // damascus-steel
-      textures["damascus-steel-albedo"] = CreateUnique<Texture2D>(base / Path("damascus-steel/albedo.png"));
-      textures.at("damascus-steel-albedo")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("damascus-steel-albedo")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      textures["damascus-steel-normal"] = CreateUnique<Texture2D>(base / Path("damascus-steel/normal.png"));
-      textures.at("damascus-steel-normal")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("damascus-steel-normal")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      textures["damascus-steel-metallic"] =
-        CreateUnique<Texture2D>(base / Path("damascus-steel/metallic.png"));
-      textures.at("damascus-steel-metallic")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("damascus-steel-metallic")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      textures["damascus-steel-roughness"] =
-        CreateUnique<Texture2D>(base / Path("damascus-steel/roughness.png"));
-      textures.at("damascus-steel-roughness")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("damascus-steel-roughness")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      textures["damascus-steel-ao"] = CreateUnique<Texture2D>(base / Path("damascus-steel/ao.png"));
-      textures.at("damascus-steel-ao")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("damascus-steel-ao")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
     }
 
     // Cube
@@ -866,14 +886,18 @@ namespace Krys::Gfx::OpenGL
     }
 
     glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
     glClearColor(0.1f, 0.1f, 0.1f, 1.f);
 
-    shaders.at("pbr-with-maps")->Bind();
-    shaders.at("pbr-with-maps")->SetUniform("albedoMap", 0);
-    shaders.at("pbr-with-maps")->SetUniform("normalMap", 1);
-    shaders.at("pbr-with-maps")->SetUniform("metallicMap", 2);
-    shaders.at("pbr-with-maps")->SetUniform("roughnessMap", 3);
-    shaders.at("pbr-with-maps")->SetUniform("aoMap", 4);
+    CreateEnvironmentCubemap(1'024, 1'024);
+    glViewport(0, 0, _width, _height);
+
+    shaders.at("pbr")->Bind();
+    shaders.at("pbr")->SetUniform("albedo", Vec3 {0.5f, 0.0f, 0.f});
+    shaders.at("pbr")->SetUniform("ao", 1.f);
+
+    shaders.at("hdr-background")->Bind();
+    shaders.at("hdr-background")->SetUniform("environmentMap", 0);
   }
 
   void Context::Render(ICamera &camera) noexcept
@@ -881,6 +905,7 @@ namespace Krys::Gfx::OpenGL
     auto view = camera.ViewMatrix();
     auto projection = camera.ProjectionMatrix();
     ubos.at("matrices")->Update({view, projection});
+    shaders.at("hdr-background")->SetUniform("projection", projection);
 
     Vec3 lightPositions[] = {
       Vec3(-10.0f, 10.0f, 10.0f),
@@ -895,15 +920,9 @@ namespace Krys::Gfx::OpenGL
     float spacing = 2.5;
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    auto &shader = shaders.at("pbr-with-maps");
+    auto &shader = shaders.at("pbr");
+    shader->Bind();
     shader->SetUniform("camPos", camera.Position());
-
-    textures.at("damascus-steel-albedo")->Bind(0);
-    textures.at("damascus-steel-normal")->Bind(1);
-    textures.at("damascus-steel-metallic")->Bind(2);
-    textures.at("damascus-steel-roughness")->Bind(3);
-    textures.at("damascus-steel-ao")->Bind(4);
-
     vaos.at("sphere")->Bind();
 
     // render rows*column number of spheres with varying metallic/roughness values scaled by rows and columns
@@ -943,6 +962,16 @@ namespace Krys::Gfx::OpenGL
       shader->SetUniform("model", model);
       shader->SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
       Utils::DrawElements(GL_TRIANGLE_STRIP, sphereIndexCount);
+    }
+
+    {
+      auto& shader = shaders.at("hdr-background");
+      vaos.at("cube")->Bind();
+      shader->Bind();
+      shader->SetUniform("view", view);
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps["hdr-cubemap"].ColorTextures[0]);
+      Utils::Draw(GL_TRIANGLES, 36);
     }
   }
 
