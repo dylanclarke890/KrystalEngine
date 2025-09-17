@@ -116,6 +116,11 @@ namespace Krys::Gfx::OpenGL
       glDrawArrays(primitive, 0, vertexCount);
     }
 
+    static void DrawElements(GLenum primitive, uint32 indexCount, uint32 offset = 0) noexcept
+    {
+      glDrawElements(primitive, indexCount, GL_UNSIGNED_INT, (const void *)(uintptr_t)offset);
+    }
+
     static void DrawInstanced(GLenum primitive, uint32 vertexCount, uint32 instanceCount,
                               uint32 offset = 0) noexcept
     {

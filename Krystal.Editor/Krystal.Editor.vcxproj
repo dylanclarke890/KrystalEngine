@@ -180,6 +180,8 @@
     <None Include="data\assets\models\backpack\backpack.mtl" />
     <None Include="data\assets\models\planet\planet.mtl" />
     <None Include="data\assets\models\rock\rock.mtl" />
+    <None Include="data\shaders\opengl\10\pbr.frag" />
+    <None Include="data\shaders\opengl\10\pbr.vert" />
     <None Include="data\shaders\opengl\7\bloom-final.frag" />
     <None Include="data\shaders\opengl\7\bloom-final.vert" />
     <None Include="data\shaders\opengl\7\bloom.frag" />

@@ -105,6 +105,8 @@
     <None Include="data\shaders\opengl\9\ssao-geometry.frag" />
     <None Include="data\shaders\opengl\9\ssao-geometry.vert" />
     <None Include="data\shaders\opengl\9\ssao-lighting.frag" />
+    <None Include="data\shaders\opengl\10\pbr.frag" />
+    <None Include="data\shaders\opengl\10\pbr.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">

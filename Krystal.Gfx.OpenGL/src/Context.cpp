@@ -51,13 +51,15 @@ namespace
   static Map<string, Unique<Model>> models;
   static Map<string, Unique<VertexArray>> vaos;
   static Map<string, Unique<VertexBuffer>> vbos;
+  static Map<string, Unique<IndexBuffer>> ebos;
   static Map<string, Unique<UniformBuffer>> ubos;
   static Map<string, FrameBufferData> shadowMaps;
 
   static FrameBufferData pingPongFBOs[2];
 
   static GLuint noiseTexture;
-  static std::vector<Vec3> ssaoKernel;
+  static List<Vec3> ssaoKernel;
+  static uint sphereIndexCount = 0;
 
 #pragma region Lights
 
@@ -383,6 +385,19 @@ namespace
     vbos.at(name)->Bind();
     Utils::ApplyVertexBufferLayout(layout);
   }
+
+  static void CreateVertexArray(const string &name, const BufferData &vertices, const BufferData &indices,
+                                const VertexBufferLayout &layout) noexcept
+  {
+    vaos[name] = CreateUnique<VertexArray>();
+    vbos[name] = CreateUnique<VertexBuffer>(vertices);
+    ebos[name] = CreateUnique<IndexBuffer>(indices);
+
+    vaos.at(name)->Bind();
+    vbos.at(name)->Bind();
+    ebos.at(name)->Bind();
+    Utils::ApplyVertexBufferLayout(layout);
+  }
 }
 
 namespace Krys::Gfx
@@ -471,6 +486,8 @@ namespace Krys::Gfx::OpenGL
         CreateUnique<Shader>(base / Path("9/ssao.vert"), base / Path("9/ssao-blur.frag"));
       shaders["ssao-lighting"] =
         CreateUnique<Shader>(base / Path("9/ssao.vert"), base / Path("9/ssao-lighting.frag"));
+
+      shaders["pbr"] = CreateUnique<Shader>(base / Path("10/pbr.vert"), base / Path("10/pbr.frag"));
     }
 
     {
@@ -687,6 +704,83 @@ namespace Krys::Gfx::OpenGL
       CreateVertexArray("screen-quad", ByteUtils::AsBytesView(vertices), layout);
     }
 
+    // Sphere
+    {
+      List<Vec3> positions;
+      List<Vec2> uv;
+      List<Vec3> normals;
+      List<uint> indices;
+
+      const uint X_SEGMENTS = 64;
+      const uint Y_SEGMENTS = 64;
+      const float PI = 3.14159265359f;
+      for (uint x = 0; x <= X_SEGMENTS; ++x)
+      {
+        for (uint y = 0; y <= Y_SEGMENTS; ++y)
+        {
+          float xSegment = (float)x / (float)X_SEGMENTS;
+          float ySegment = (float)y / (float)Y_SEGMENTS;
+          float xPos = std::cos(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
+          float yPos = std::cos(ySegment * PI);
+          float zPos = std::sin(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
+
+          positions.push_back(Vec3(xPos, yPos, zPos));
+          uv.push_back(Vec2(xSegment, ySegment));
+          normals.push_back(Vec3(xPos, yPos, zPos));
+        }
+      }
+
+      bool oddRow = false;
+      for (unsigned int y = 0; y < Y_SEGMENTS; ++y)
+      {
+        if (!oddRow) // even rows: y == 0, y == 2; and so on
+        {
+          for (unsigned int x = 0; x <= X_SEGMENTS; ++x)
+          {
+            indices.push_back(y * (X_SEGMENTS + 1) + x);
+            indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
+          }
+        }
+        else
+        {
+          for (int x = X_SEGMENTS; x >= 0; --x)
+          {
+            indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
+            indices.push_back(y * (X_SEGMENTS + 1) + x);
+          }
+        }
+        oddRow = !oddRow;
+      }
+      sphereIndexCount = static_cast<uint>(indices.size());
+
+      List<float> vertices;
+      for (uint i = 0; i < positions.size(); ++i)
+      {
+        vertices.push_back(positions[i].x);
+        vertices.push_back(positions[i].y);
+        vertices.push_back(positions[i].z);
+        if (normals.size() > 0)
+        {
+          vertices.push_back(normals[i].x);
+          vertices.push_back(normals[i].y);
+          vertices.push_back(normals[i].z);
+        }
+        if (uv.size() > 0)
+        {
+          vertices.push_back(uv[i].x);
+          vertices.push_back(uv[i].y);
+        }
+      }
+
+      VertexBufferLayout layout = {
+        {VertexAttributeType::Float, 3}, // position
+        {VertexAttributeType::Float, 3}, // normal
+        {VertexAttributeType::Float, 2}  // texcoord
+      };
+
+      CreateVertexArray("sphere", ByteUtils::AsBytesView(vertices), ByteUtils::AsBytesView(indices), layout);
+    }
+
     // Shadow maps
     CreateGFramebuffer(_width, _height);
     CreateSSAOFramebuffer(_width, _height);
@@ -699,16 +793,11 @@ namespace Krys::Gfx::OpenGL
     }
 
     glEnable(GL_DEPTH_TEST);
-    glClearColor(0.2f, 0.2f, 0.f, 1.f);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.f);
 
-    shaders.at("ssao-lighting")->SetUniform("gPosition", 0);
-    shaders.at("ssao-lighting")->SetUniform("gNormal", 1);
-    shaders.at("ssao-lighting")->SetUniform("gAlbedo", 2);
-    shaders.at("ssao-lighting")->SetUniform("ssao", 3);
-    shaders.at("ssao")->SetUniform("gPosition", 0);
-    shaders.at("ssao")->SetUniform("gNormal", 1);
-    shaders.at("ssao")->SetUniform("texNoise", 2);
-    shaders.at("ssao-blur")->SetUniform("ssaoInput", 0);
+    shaders.at("pbr")->Bind();
+    shaders.at("pbr")->SetUniform("albedo", Vec3(0.5f, 0.0f, 0.0f));
+    shaders.at("pbr")->SetUniform("ao", 1.0f);
   }
 
   void Context::Render(ICamera &camera) noexcept
@@ -717,95 +806,60 @@ namespace Krys::Gfx::OpenGL
     auto projection = camera.ProjectionMatrix();
     ubos.at("matrices")->Update({view, projection});
 
-    glBindFramebuffer(GL_FRAMEBUFFER, shadowMaps.at("g-buffer").FBO);
+    Vec3 lightPositions[] = {
+      Vec3(-10.0f, 10.0f, 10.0f),
+      Vec3(10.0f, 10.0f, 10.0f),
+      Vec3(-10.0f, -10.0f, 10.0f),
+      Vec3(10.0f, -10.0f, 10.0f),
+    };
+    Vec3 lightColors[] = {Vec3(300.0f, 300.0f, 300.0f), Vec3(300.0f, 300.0f, 300.0f),
+                          Vec3(300.0f, 300.0f, 300.0f), Vec3(300.0f, 300.0f, 300.0f)};
+    int nrRows = 7;
+    int nrColumns = 7;
+    float spacing = 2.5;
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    auto &shader = shaders.at("pbr");
+    shader->SetUniform("camPos", camera.Position());
+    vaos.at("sphere")->Bind();
+
+    // render rows*column number of spheres with varying metallic/roughness values scaled by rows and columns
+    // respectively
+    Mat4 model = Identity<Mat4>();
+    for (int row = 0; row < nrRows; ++row)
     {
-      Mat4 model = Identity<Mat4>();
-      auto &shader = shaders.at("ssao-geometry");
-      shader->Bind();
+      shader->SetUniform("metallic", (float)row / (float)nrRows);
+      for (int col = 0; col < nrColumns; ++col)
+      {
+        // we clamp the roughness to 0.05 - 1.0 as perfectly smooth surfaces (roughness of 0.0) tend to look a
+        // bit off on direct lighting.
+        shader->SetUniform("roughness", std::clamp((float)col / (float)nrColumns, 0.05f, 1.0f));
 
-      // room cube
-      model = Translate(model, Vec3(0.0, 7.0f, 0.0f));
-      model = Scale(model, Vec3(7.5f, 7.5f, 7.5f));
-      shader->SetUniform("model", model);
-      shader->SetUniform("invertedNormals", 1); // invert normals as we're inside the cube
-      vaos.at("cube")->Bind();
-      Utils::Draw(GL_TRIANGLES, 36);
+        model = Identity<Mat4>();
+        model =
+          Translate(model, Vec3((col - (nrColumns / 2)) * spacing, (row - (nrRows / 2)) * spacing, 0.0f));
+        shader->SetUniform("model", model);
+        shader->SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
+        Utils::DrawElements(GL_TRIANGLE_STRIP, sphereIndexCount);
+      }
+    }
 
-      // backpack model on the floor
-      shader->SetUniform("invertedNormals", 0);
+    // render light source (simply re-render sphere at light positions)
+    // this looks a bit off as we use the same shader, but it'll make their positions obvious and
+    // keeps the codeprint small.
+    for (unsigned int i = 0; i < sizeof(lightPositions) / sizeof(lightPositions[0]); ++i)
+    {
+      Vec3 newPos = lightPositions[i] + Vec3(std::sin((float)Platform::GetTime() * 5.0f) * 5.0f, 0.0f, 0.0f);
+      newPos = lightPositions[i];
+      shader->SetUniform("lightPositions[" + std::to_string(i) + "]", newPos);
+      shader->SetUniform("lightColors[" + std::to_string(i) + "]", lightColors[i]);
+
       model = Identity<Mat4>();
-      model = Translate(model, Vec3(0.0f, 0.5f, 0.0));
-      model = Rotate(model, Radians(-90.0f), Vec3(1.0, 0.0, 0.0));
-      model = Scale(model, Vec3(1.0f));
+      model = Translate(model, newPos);
+      model = Scale(model, Vec3(0.5f));
       shader->SetUniform("model", model);
-      models.at("backpack")->Draw(*shader);
-    }
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    // 2. generate SSAO texture
-    // ------------------------
-    glBindFramebuffer(GL_FRAMEBUFFER, shadowMaps.at("ssao").FBO);
-    {
-      auto &fb = shadowMaps.at("g-buffer");
-      glClear(GL_COLOR_BUFFER_BIT);
-      auto &shader = shaders.at("ssao");
-      shader->Bind();
-      // Send kernel + rotation
-      for (unsigned int i = 0; i < 64; ++i)
-        shader->SetUniform("samples[" + std::to_string(i) + "]", ssaoKernel[i]);
-      shader->SetUniform("projection", projection);
-      glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, fb.ColorTextures[0]);
-      glActiveTexture(GL_TEXTURE1);
-      glBindTexture(GL_TEXTURE_2D, fb.ColorTextures[1]);
-      glActiveTexture(GL_TEXTURE2);
-      glBindTexture(GL_TEXTURE_2D, noiseTexture);
-      vaos.at("screen-quad")->Bind();
-      Utils::Draw(GL_TRIANGLE_STRIP, 4);
-    }
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    // 3. blur SSAO texture to remove noise
-    // ------------------------------------
-    glBindFramebuffer(GL_FRAMEBUFFER, shadowMaps.at("ssao-blur").FBO);
-    {
-      glClear(GL_COLOR_BUFFER_BIT);
-      shaders.at("ssao-blur")->Bind();
-      glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, shadowMaps.at("ssao").ColorTextures[0]);
-      vaos.at("screen-quad")->Bind();
-      Utils::Draw(GL_TRIANGLE_STRIP, 4);
-    }
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    // 4. lighting pass: traditional deferred Blinn-Phong lighting with added screen-space ambient occlusion
-    // -----------------------------------------------------------------------------------------------------
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    {
-      auto &fb = shadowMaps.at("g-buffer");
-      auto &shader = shaders.at("ssao-lighting");
-      shader->Bind();
-
-      // send light relevant uniforms
-      Vec3 lightPosView = Vec3(view * Vec4(lightPos, 1.0));
-      shader->SetUniform("light.Position", lightPosView);
-      shader->SetUniform("light.Color", lightColor);
-      // Update attenuation parameters
-      const float linear = 0.09f;
-      const float quadratic = 0.032f;
-      shader->SetUniform("light.Linear", linear);
-      shader->SetUniform("light.Quadratic", quadratic);
-      glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_2D, fb.ColorTextures[0]);
-      glActiveTexture(GL_TEXTURE1);
-      glBindTexture(GL_TEXTURE_2D, fb.ColorTextures[1]);
-      glActiveTexture(GL_TEXTURE2);
-      glBindTexture(GL_TEXTURE_2D, fb.ColorTextures[2]);
-      glActiveTexture(GL_TEXTURE3); // add extra SSAO texture to lighting pass
-      glBindTexture(GL_TEXTURE_2D, shadowMaps.at("ssao-blur").ColorTextures[0]);
-      vaos.at("screen-quad")->Bind();
-      Utils::Draw(GL_TRIANGLE_STRIP, 4);
+      shader->SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
+      Utils::DrawElements(GL_TRIANGLE_STRIP, sphereIndexCount);
     }
   }
 

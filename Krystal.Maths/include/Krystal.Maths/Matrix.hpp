@@ -220,6 +220,11 @@ namespace Krys::Maths
     {
     }
 
+    constexpr Matrix(const Matrix<T, 4, 4> &other) noexcept
+        : _data {ColumnType(other[0]), ColumnType(other[1]), ColumnType(other[2])}
+    {
+    }
+
     MATRIX_COMMON_MEMBER_FUNCTIONS()
   };
 
