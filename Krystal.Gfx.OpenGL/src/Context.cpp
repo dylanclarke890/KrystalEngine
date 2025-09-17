@@ -488,11 +488,12 @@ namespace Krys::Gfx::OpenGL
         CreateUnique<Shader>(base / Path("9/ssao.vert"), base / Path("9/ssao-lighting.frag"));
 
       shaders["pbr"] = CreateUnique<Shader>(base / Path("10/pbr.vert"), base / Path("10/pbr.frag"));
-      shaders["pbr-with-maps"] = CreateUnique<Shader>(base / Path("10/pbr-with-maps.vert"), base / Path("10/pbr-with-maps.frag"));
+      shaders["pbr-with-maps"] =
+        CreateUnique<Shader>(base / Path("10/pbr-with-maps.vert"), base / Path("10/pbr-with-maps.frag"));
     }
 
     {
-      models["backpack"] = CreateUnique<Model>(IO::Path("data/assets/models/backpack/backpack.obj"));
+      // models["backpack"] = CreateUnique<Model>(IO::Path("data/assets/models/backpack/backpack.obj"));
     }
 
     // Textures
@@ -541,6 +542,7 @@ namespace Krys::Gfx::OpenGL
       using namespace IO;
       Path base = Path("data/assets/pbr");
 
+      // rusted iron
       textures["rustediron-albedo"] = CreateUnique<Texture2D>(base / Path("rusted-iron/albedo.png"));
       textures.at("rustediron-albedo")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
       textures.at("rustediron-albedo")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -560,6 +562,50 @@ namespace Krys::Gfx::OpenGL
       textures["rustediron-ao"] = CreateUnique<Texture2D>(base / Path("rusted-iron/ao.png"));
       textures.at("rustediron-ao")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
       textures.at("rustediron-ao")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+      // silver
+      textures["silver-albedo"] = CreateUnique<Texture2D>(base / Path("silver/albedo.png"));
+      textures.at("silver-albedo")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures.at("silver-albedo")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+      textures["silver-normal"] = CreateUnique<Texture2D>(base / Path("silver/normal.png"));
+      textures.at("silver-normal")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures.at("silver-normal")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+      textures["silver-metallic"] = CreateUnique<Texture2D>(base / Path("silver/metallic.png"));
+      textures.at("silver-metallic")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures.at("silver-metallic")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+      textures["silver-roughness"] = CreateUnique<Texture2D>(base / Path("silver/roughness.png"));
+      textures.at("silver-roughness")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures.at("silver-roughness")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+      textures["silver-ao"] = CreateUnique<Texture2D>(base / Path("silver/ao.png"));
+      textures.at("silver-ao")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures.at("silver-ao")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+      // damascus-steel
+      textures["damascus-steel-albedo"] = CreateUnique<Texture2D>(base / Path("damascus-steel/albedo.png"));
+      textures.at("damascus-steel-albedo")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures.at("damascus-steel-albedo")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+      textures["damascus-steel-normal"] = CreateUnique<Texture2D>(base / Path("damascus-steel/normal.png"));
+      textures.at("damascus-steel-normal")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures.at("damascus-steel-normal")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+      textures["damascus-steel-metallic"] =
+        CreateUnique<Texture2D>(base / Path("damascus-steel/metallic.png"));
+      textures.at("damascus-steel-metallic")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures.at("damascus-steel-metallic")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+      textures["damascus-steel-roughness"] =
+        CreateUnique<Texture2D>(base / Path("damascus-steel/roughness.png"));
+      textures.at("damascus-steel-roughness")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures.at("damascus-steel-roughness")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+      textures["damascus-steel-ao"] = CreateUnique<Texture2D>(base / Path("damascus-steel/ao.png"));
+      textures.at("damascus-steel-ao")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures.at("damascus-steel-ao")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
     }
 
     // Cube
@@ -852,11 +898,11 @@ namespace Krys::Gfx::OpenGL
     auto &shader = shaders.at("pbr-with-maps");
     shader->SetUniform("camPos", camera.Position());
 
-    textures.at("rustediron-albedo")->Bind(0);
-    textures.at("rustediron-normal")->Bind(1);
-    textures.at("rustediron-metallic")->Bind(2);
-    textures.at("rustediron-roughness")->Bind(3);
-    textures.at("rustediron-ao")->Bind(4);
+    textures.at("damascus-steel-albedo")->Bind(0);
+    textures.at("damascus-steel-normal")->Bind(1);
+    textures.at("damascus-steel-metallic")->Bind(2);
+    textures.at("damascus-steel-roughness")->Bind(3);
+    textures.at("damascus-steel-ao")->Bind(4);
 
     vaos.at("sphere")->Bind();
 

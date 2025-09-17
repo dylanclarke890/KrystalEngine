@@ -219,6 +219,42 @@
     <Image Include="data\assets\pbr\rusted-iron\roughness.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="data\assets\pbr\damascus-steel\albedo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\damascus-steel\ao.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\damascus-steel\height.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\damascus-steel\metallic.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\damascus-steel\normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\damascus-steel\roughness.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\silver\albedo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\silver\ao.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\silver\height.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\silver\metallic.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\silver\normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\silver\roughness.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="data\assets\models\backpack\source_attribution.txt" />
