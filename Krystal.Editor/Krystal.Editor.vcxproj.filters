@@ -107,6 +107,8 @@
     <None Include="data\shaders\opengl\9\ssao-lighting.frag" />
     <None Include="data\shaders\opengl\10\pbr.frag" />
     <None Include="data\shaders\opengl\10\pbr.vert" />
+    <None Include="data\shaders\opengl\10\pbr-with-maps.frag" />
+    <None Include="data\shaders\opengl\10\pbr-with-maps.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">
@@ -200,6 +202,21 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="data\assets\toybox-displacement.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\rusted-iron\albedo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\rusted-iron\ao.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\rusted-iron\metallic.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\rusted-iron\normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\rusted-iron\roughness.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

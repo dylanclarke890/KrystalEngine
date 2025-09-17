@@ -180,6 +180,8 @@
     <None Include="data\assets\models\backpack\backpack.mtl" />
     <None Include="data\assets\models\planet\planet.mtl" />
     <None Include="data\assets\models\rock\rock.mtl" />
+    <None Include="data\shaders\opengl\10\pbr-with-maps.frag" />
+    <None Include="data\shaders\opengl\10\pbr-with-maps.vert" />
     <None Include="data\shaders\opengl\10\pbr.frag" />
     <None Include="data\shaders\opengl\10\pbr.vert" />
     <None Include="data\shaders\opengl\7\bloom-final.frag" />
@@ -271,6 +273,11 @@
     <Image Include="data\assets\models\backpack\specular.jpg" />
     <Image Include="data\assets\models\planet\mars.png" />
     <Image Include="data\assets\models\rock\rock.png" />
+    <Image Include="data\assets\pbr\rusted-iron\albedo.png" />
+    <Image Include="data\assets\pbr\rusted-iron\ao.png" />
+    <Image Include="data\assets\pbr\rusted-iron\metallic.png" />
+    <Image Include="data\assets\pbr\rusted-iron\normal.png" />
+    <Image Include="data\assets\pbr\rusted-iron\roughness.png" />
     <Image Include="data\assets\skyboxes\sky\back.jpg" />
     <Image Include="data\assets\skyboxes\sky\bottom.jpg" />
     <Image Include="data\assets\skyboxes\sky\front.jpg" />

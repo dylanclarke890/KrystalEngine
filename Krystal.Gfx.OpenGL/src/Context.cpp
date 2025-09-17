@@ -488,6 +488,7 @@ namespace Krys::Gfx::OpenGL
         CreateUnique<Shader>(base / Path("9/ssao.vert"), base / Path("9/ssao-lighting.frag"));
 
       shaders["pbr"] = CreateUnique<Shader>(base / Path("10/pbr.vert"), base / Path("10/pbr.frag"));
+      shaders["pbr-with-maps"] = CreateUnique<Shader>(base / Path("10/pbr-with-maps.vert"), base / Path("10/pbr-with-maps.frag"));
     }
 
     {
@@ -533,6 +534,32 @@ namespace Krys::Gfx::OpenGL
       textures["brickwall-displacement"] = CreateUnique<Texture2D>(base / Path("brickwall-displacement.jpg"));
       textures.at("brickwall-displacement")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
       textures.at("brickwall-displacement")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+    }
+
+    // PBR textures
+    {
+      using namespace IO;
+      Path base = Path("data/assets/pbr");
+
+      textures["rustediron-albedo"] = CreateUnique<Texture2D>(base / Path("rusted-iron/albedo.png"));
+      textures.at("rustediron-albedo")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures.at("rustediron-albedo")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+      textures["rustediron-normal"] = CreateUnique<Texture2D>(base / Path("rusted-iron/normal.png"));
+      textures.at("rustediron-normal")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures.at("rustediron-normal")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+      textures["rustediron-metallic"] = CreateUnique<Texture2D>(base / Path("rusted-iron/metallic.png"));
+      textures.at("rustediron-metallic")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures.at("rustediron-metallic")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+      textures["rustediron-roughness"] = CreateUnique<Texture2D>(base / Path("rusted-iron/roughness.png"));
+      textures.at("rustediron-roughness")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures.at("rustediron-roughness")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+      textures["rustediron-ao"] = CreateUnique<Texture2D>(base / Path("rusted-iron/ao.png"));
+      textures.at("rustediron-ao")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+      textures.at("rustediron-ao")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
     }
 
     // Cube
@@ -795,9 +822,12 @@ namespace Krys::Gfx::OpenGL
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.1f, 0.1f, 0.1f, 1.f);
 
-    shaders.at("pbr")->Bind();
-    shaders.at("pbr")->SetUniform("albedo", Vec3(0.5f, 0.0f, 0.0f));
-    shaders.at("pbr")->SetUniform("ao", 1.0f);
+    shaders.at("pbr-with-maps")->Bind();
+    shaders.at("pbr-with-maps")->SetUniform("albedoMap", 0);
+    shaders.at("pbr-with-maps")->SetUniform("normalMap", 1);
+    shaders.at("pbr-with-maps")->SetUniform("metallicMap", 2);
+    shaders.at("pbr-with-maps")->SetUniform("roughnessMap", 3);
+    shaders.at("pbr-with-maps")->SetUniform("aoMap", 4);
   }
 
   void Context::Render(ICamera &camera) noexcept
@@ -819,8 +849,15 @@ namespace Krys::Gfx::OpenGL
     float spacing = 2.5;
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    auto &shader = shaders.at("pbr");
+    auto &shader = shaders.at("pbr-with-maps");
     shader->SetUniform("camPos", camera.Position());
+
+    textures.at("rustediron-albedo")->Bind(0);
+    textures.at("rustediron-normal")->Bind(1);
+    textures.at("rustediron-metallic")->Bind(2);
+    textures.at("rustediron-roughness")->Bind(3);
+    textures.at("rustediron-ao")->Bind(4);
+
     vaos.at("sphere")->Bind();
 
     // render rows*column number of spheres with varying metallic/roughness values scaled by rows and columns

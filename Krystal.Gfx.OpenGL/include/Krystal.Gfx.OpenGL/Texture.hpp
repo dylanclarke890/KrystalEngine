@@ -33,10 +33,16 @@ namespace Krys::Gfx::OpenGL
       assert(imageResult.has_value() && "Failed to load texture image.");
 
       auto &image = *imageResult;
-      assert((image.Channels == 3 || image.Channels == 4) && "Texture image data must be 3 or 4 channels.");
+      assert((image.Channels == 1 || image.Channels == 3 || image.Channels == 4) && "Texture image data must be 1, 3 or 4 channels.");
 
       GLint internalFormat = isSRGBTexture ? GL_SRGB : GL_RGB;
       GLenum format = GL_RGB;
+      if (image.Channels == 1)
+      {
+        internalFormat = GL_RED;
+        format = GL_RED;
+      }
+      else
       if (image.Channels == 4)
       {
         internalFormat = isSRGBTexture ? GL_SRGB_ALPHA : GL_RGBA;
