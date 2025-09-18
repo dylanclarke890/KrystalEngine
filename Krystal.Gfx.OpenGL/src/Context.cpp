@@ -308,7 +308,7 @@ namespace
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
   }
 
-  void CreateEnvironmentCubemap(uint32 width, uint32 height)
+  void CreateEnvironmentAndIrradianceCubemaps(uint32 width, uint32 height)
   {
     uint captureFBO;
     uint captureRBO;
@@ -342,27 +342,69 @@ namespace
                            LookAt(Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, 1.0f), Vec3(0.0f, -1.0f, 0.0f)),
                            LookAt(Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(0.0f, -1.0f, 0.0f))};
 
-    auto &shader = shaders.at("hdr-to-cubemap");
-    shader->Bind();
-    shader->SetUniform("equirectangularMap", 0);
-    shader->SetUniform("projection", captureProjection);
-
-    textures.at("hdr-environment")->Bind(0);
-    vaos.at("cube")->Bind();
-
-    glViewport(0, 0, width, height);
-    glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
-    for (uint i = 0; i < 6; ++i)
     {
-      shader->SetUniform("view", captureViews[i]);
-      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-                             envCubemap, 0);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      Utils::Draw(GL_TRIANGLES, 36);
+      auto &shader = shaders.at("hdr-to-cubemap");
+      shader->Bind();
+      shader->SetUniform("equirectangularMap", 0);
+      shader->SetUniform("projection", captureProjection);
+
+      textures.at("hdr-environment")->Bind(0);
+      vaos.at("cube")->Bind();
+
+      glViewport(0, 0, width, height);
+      glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+      for (uint i = 0; i < 6; ++i)
+      {
+        shader->SetUniform("view", captureViews[i]);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                               envCubemap, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        Utils::Draw(GL_TRIANGLES, 36);
+      }
+      glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+      shadowMaps["hdr-cubemap"] = {captureFBO, {envCubemap}, captureRBO, width, height};
+    }
+
+    {
+      auto &shader = shaders.at("irradiance-convolution");
+      GLuint irradianceMap;
+      glGenTextures(1, &irradianceMap);
+      glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
+      for (GLuint i = 0; i < 6; ++i)
+      {
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 32, 32, 0, GL_RGB, GL_FLOAT, nullptr);
+      }
+      glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+      glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+      glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+      glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
+
+      shader->Bind();
+      shader->SetUniform("environmentMap", 0);
+      shader->SetUniform("projection", captureProjection);
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+
+      glViewport(0, 0, 32, 32); // don't forget to configure the viewport to the capture dimensions.
+      glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+      for (uint i = 0; i < 6; ++i)
+      {
+        shader->SetUniform("view", captureViews[i]);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                               irradianceMap, 0);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        Utils::Draw(GL_TRIANGLES, 36);
+      }
+
+      shadowMaps["irradiance-cubemap"] = {captureFBO, {irradianceMap}, captureRBO, width, height};
     }
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    shadowMaps["hdr-cubemap"] = {captureFBO, {envCubemap}, captureRBO, width, height};
   }
 
   float Lerp(float a, float b, float f)
@@ -547,8 +589,10 @@ namespace Krys::Gfx::OpenGL
       shaders["pbr"] = CreateUnique<Shader>(base / Path("11/pbr.vert"), base / Path("11/pbr.frag"));
       shaders["pbr-with-maps"] =
         CreateUnique<Shader>(base / Path("10/pbr-with-maps.vert"), base / Path("10/pbr-with-maps.frag"));
-      shaders["hdr-to-cubemap"] =
-        CreateUnique<Shader>(base / Path("11/cubemap.vert"), base / Path("11/cubemap.frag"));
+      shaders["hdr-to-cubemap"] = CreateUnique<Shader>(base / Path("11/cubemap.vert"),
+                                                       base / Path("11/equirectangular-to-cubemap.frag"));
+      shaders["irradiance-convolution"] =
+        CreateUnique<Shader>(base / Path("11/cubemap.vert"), base / Path("11/irradiance-convolution.frag"));
       shaders["hdr-background"] =
         CreateUnique<Shader>(base / Path("11/background.vert"), base / Path("11/background.frag"));
     }
@@ -889,10 +933,11 @@ namespace Krys::Gfx::OpenGL
     glDepthFunc(GL_LEQUAL);
     glClearColor(0.1f, 0.1f, 0.1f, 1.f);
 
-    CreateEnvironmentCubemap(1'024, 1'024);
+    CreateEnvironmentAndIrradianceCubemaps(1'024, 1'024);
     glViewport(0, 0, _width, _height);
 
     shaders.at("pbr")->Bind();
+    shaders.at("pbr")->SetUniform("irradianceMap", 0);
     shaders.at("pbr")->SetUniform("albedo", Vec3 {0.5f, 0.0f, 0.f});
     shaders.at("pbr")->SetUniform("ao", 1.f);
 
@@ -909,12 +954,14 @@ namespace Krys::Gfx::OpenGL
 
     Vec3 lightPositions[] = {
       Vec3(-10.0f, 10.0f, 10.0f),
-      Vec3(10.0f, 10.0f, 10.0f),
-      Vec3(-10.0f, -10.0f, 10.0f),
-      Vec3(10.0f, -10.0f, 10.0f),
+      //Vec3(10.0f, 10.0f, 10.0f),
+      //Vec3(-10.0f, -10.0f, 10.0f),
+      //Vec3(10.0f, -10.0f, 10.0f),
     };
-    Vec3 lightColors[] = {Vec3(300.0f, 300.0f, 300.0f), Vec3(300.0f, 300.0f, 300.0f),
-                          Vec3(300.0f, 300.0f, 300.0f), Vec3(300.0f, 300.0f, 300.0f)};
+    Vec3 lightColors[] = {Vec3(300.0f, 300.0f, 300.0f),
+      //Vec3(300.0f, 300.0f, 300.0f),
+      //                    Vec3(300.0f, 300.0f, 300.0f), Vec3(300.0f, 300.0f, 300.0f)
+    };
     int nrRows = 7;
     int nrColumns = 7;
     float spacing = 2.5;
@@ -923,6 +970,9 @@ namespace Krys::Gfx::OpenGL
     auto &shader = shaders.at("pbr");
     shader->Bind();
     shader->SetUniform("camPos", camera.Position());
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps["irradiance-cubemap"].ColorTextures[0]);
+
     vaos.at("sphere")->Bind();
 
     // render rows*column number of spheres with varying metallic/roughness values scaled by rows and columns
@@ -965,7 +1015,7 @@ namespace Krys::Gfx::OpenGL
     }
 
     {
-      auto& shader = shaders.at("hdr-background");
+      auto &shader = shaders.at("hdr-background");
       vaos.at("cube")->Bind();
       shader->Bind();
       shader->SetUniform("view", view);
