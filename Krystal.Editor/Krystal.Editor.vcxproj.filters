@@ -116,6 +116,9 @@
     <None Include="data\shaders\opengl\11\pbr.vert" />
     <None Include="data\shaders\opengl\11\equirectangular-to-cubemap.frag" />
     <None Include="data\shaders\opengl\11\irradiance-convolution.frag" />
+    <None Include="data\shaders\opengl\11\prefilter.frag" />
+    <None Include="data\shaders\opengl\11\brdf.frag" />
+    <None Include="data\shaders\opengl\11\brdf.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">

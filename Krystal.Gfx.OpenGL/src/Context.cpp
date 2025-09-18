@@ -331,7 +331,7 @@ namespace
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     Mat4 captureProjection = Perspective(Radians(90.0f), 1.0f, 0.1f, 10.0f);
@@ -362,6 +362,9 @@ namespace
         Utils::Draw(GL_TRIANGLES, 36);
       }
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+      glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+      glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
       shadowMaps["hdr-cubemap"] = {captureFBO, {envCubemap}, captureRBO, width, height};
     }
@@ -404,6 +407,89 @@ namespace
 
       shadowMaps["irradiance-cubemap"] = {captureFBO, {irradianceMap}, captureRBO, width, height};
     }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    {
+      unsigned int prefilterMap;
+      glGenTextures(1, &prefilterMap);
+      glBindTexture(GL_TEXTURE_CUBE_MAP, prefilterMap);
+      for (unsigned int i = 0; i < 6; ++i)
+      {
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB16F, 128, 128, 0, GL_RGB, GL_FLOAT,
+                     nullptr);
+      }
+      glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER,
+                      GL_LINEAR_MIPMAP_LINEAR); // be sure to set minification filter to mip_linear
+      glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      // generate mipmaps for the cubemap so OpenGL automatically allocates the required memory.
+      glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+
+      auto &shader = shaders.at("prefilter");
+      shader->Bind();
+      shader->SetUniform("environmentMap", 0);
+      shader->SetUniform("projection", captureProjection);
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
+      glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+      unsigned int maxMipLevels = 5;
+      for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
+      {
+        // reisze framebuffer according to mip-level size.
+        unsigned int mipWidth = static_cast<unsigned int>(128 * std::pow(0.5, mip));
+        unsigned int mipHeight = static_cast<unsigned int>(128 * std::pow(0.5, mip));
+        glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
+        glViewport(0, 0, mipWidth, mipHeight);
+        float roughness = (float)mip / (float)(maxMipLevels - 1);
+        shader->SetUniform("roughness", roughness);
+        for (unsigned int i = 0; i < 6; ++i)
+        {
+          shader->SetUniform("view", captureViews[i]);
+          glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                                 prefilterMap, mip);
+          glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+          Utils::Draw(GL_TRIANGLES, 36);
+        }
+      }
+
+      shadowMaps["prefilter-cubemap"] = {captureFBO, {prefilterMap}, captureRBO, width, height};
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    {
+      auto &shader = shaders.at("brdf");
+      // pbr: generate a 2D LUT from the BRDF equations used.
+      // ----------------------------------------------------
+      unsigned int brdfLUTTexture;
+      glGenTextures(1, &brdfLUTTexture);
+
+      // pre-allocate enough memory for the LUT texture.
+      glBindTexture(GL_TEXTURE_2D, brdfLUTTexture);
+      glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, 512, 512, 0, GL_RG, GL_FLOAT, 0);
+      // be sure to set wrapping mode to GL_CLAMP_TO_EDGE
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+      // then re-configure capture framebuffer object and render screen-space quad with BRDF shader.
+      glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
+      glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
+      glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 512, 512);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdfLUTTexture, 0);
+
+      glViewport(0, 0, 512, 512);
+      shader->Bind();
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      vaos.at("screen-quad")->Bind();
+      Utils::Draw(GL_TRIANGLE_STRIP, 4);
+
+      shadowMaps["brdf-lut"] = {captureFBO, {brdfLUTTexture}, captureRBO, 512, 512};
+    }
+
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
   }
 
@@ -593,6 +679,9 @@ namespace Krys::Gfx::OpenGL
                                                        base / Path("11/equirectangular-to-cubemap.frag"));
       shaders["irradiance-convolution"] =
         CreateUnique<Shader>(base / Path("11/cubemap.vert"), base / Path("11/irradiance-convolution.frag"));
+      shaders["prefilter"] =
+        CreateUnique<Shader>(base / Path("11/cubemap.vert"), base / Path("11/prefilter.frag"));
+      shaders["brdf"] = CreateUnique<Shader>(base / Path("11/brdf.vert"), base / Path("11/brdf.frag"));
       shaders["hdr-background"] =
         CreateUnique<Shader>(base / Path("11/background.vert"), base / Path("11/background.frag"));
     }
@@ -931,6 +1020,7 @@ namespace Krys::Gfx::OpenGL
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     glClearColor(0.1f, 0.1f, 0.1f, 1.f);
 
     CreateEnvironmentAndIrradianceCubemaps(1'024, 1'024);
@@ -938,6 +1028,8 @@ namespace Krys::Gfx::OpenGL
 
     shaders.at("pbr")->Bind();
     shaders.at("pbr")->SetUniform("irradianceMap", 0);
+    shaders.at("pbr")->SetUniform("prefilterMap", 1);
+    shaders.at("pbr")->SetUniform("brdfLUT", 2);
     shaders.at("pbr")->SetUniform("albedo", Vec3 {0.5f, 0.0f, 0.f});
     shaders.at("pbr")->SetUniform("ao", 1.f);
 
@@ -954,13 +1046,14 @@ namespace Krys::Gfx::OpenGL
 
     Vec3 lightPositions[] = {
       Vec3(-10.0f, 10.0f, 10.0f),
-      //Vec3(10.0f, 10.0f, 10.0f),
-      //Vec3(-10.0f, -10.0f, 10.0f),
-      //Vec3(10.0f, -10.0f, 10.0f),
+      // Vec3(10.0f, 10.0f, 10.0f),
+      // Vec3(-10.0f, -10.0f, 10.0f),
+      // Vec3(10.0f, -10.0f, 10.0f),
     };
-    Vec3 lightColors[] = {Vec3(300.0f, 300.0f, 300.0f),
-      //Vec3(300.0f, 300.0f, 300.0f),
-      //                    Vec3(300.0f, 300.0f, 300.0f), Vec3(300.0f, 300.0f, 300.0f)
+    Vec3 lightColors[] = {
+      Vec3(300.0f, 300.0f, 300.0f),
+      // Vec3(300.0f, 300.0f, 300.0f),
+      //                     Vec3(300.0f, 300.0f, 300.0f), Vec3(300.0f, 300.0f, 300.0f)
     };
     int nrRows = 7;
     int nrColumns = 7;
@@ -972,6 +1065,10 @@ namespace Krys::Gfx::OpenGL
     shader->SetUniform("camPos", camera.Position());
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps["irradiance-cubemap"].ColorTextures[0]);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps["prefilter-cubemap"].ColorTextures[0]);
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, shadowMaps["brdf-lut"].ColorTextures[0]);
 
     vaos.at("sphere")->Bind();
 

@@ -186,11 +186,14 @@
     <None Include="data\shaders\opengl\10\pbr.vert" />
     <None Include="data\shaders\opengl\11\background.frag" />
     <None Include="data\shaders\opengl\11\background.vert" />
+    <None Include="data\shaders\opengl\11\brdf.frag" />
+    <None Include="data\shaders\opengl\11\brdf.vert" />
     <None Include="data\shaders\opengl\11\cubemap.vert" />
     <None Include="data\shaders\opengl\11\equirectangular-to-cubemap.frag" />
     <None Include="data\shaders\opengl\11\irradiance-convolution.frag" />
     <None Include="data\shaders\opengl\11\pbr.frag" />
     <None Include="data\shaders\opengl\11\pbr.vert" />
+    <None Include="data\shaders\opengl\11\prefilter.frag" />
     <None Include="data\shaders\opengl\7\bloom-final.frag" />
     <None Include="data\shaders\opengl\7\bloom-final.vert" />
     <None Include="data\shaders\opengl\7\bloom.frag" />
