@@ -119,6 +119,9 @@
     <None Include="data\shaders\opengl\11\prefilter.frag" />
     <None Include="data\shaders\opengl\11\brdf.frag" />
     <None Include="data\shaders\opengl\11\brdf.vert" />
+    <None Include="data\shaders\opengl\11\pbr-with-maps.frag" />
+    <None Include="data\shaders\opengl\11\pbr-with-maps.vert" />
+    <None Include="data\assets\newport-loft.hdr" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">
@@ -263,6 +266,66 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="data\assets\pbr\silver\roughness.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\gold\albedo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\gold\ao.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\gold\metallic.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\gold\normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\gold\roughness.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\grass\albedo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\grass\ao.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\grass\metallic.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\grass\normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\grass\roughness.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\plastic\albedo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\plastic\ao.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\plastic\metallic.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\plastic\normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\plastic\roughness.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\wall\albedo.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\wall\ao.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\wall\metallic.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\wall\normal.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="data\assets\pbr\wall\roughness.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

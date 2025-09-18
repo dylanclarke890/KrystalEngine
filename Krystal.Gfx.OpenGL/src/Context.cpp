@@ -583,6 +583,32 @@ namespace
     ebos.at(name)->Bind();
     Utils::ApplyVertexBufferLayout(layout);
   }
+
+  void LoadPBRTextures(const string &name)
+  {
+    using namespace IO;
+    Path base = Path("data/assets/pbr/") / Path(name);
+
+    textures[name + "-albedo"] = CreateUnique<Texture2D>(base / Path("albedo.png"));
+    textures.at(name + "-albedo")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+    textures.at(name + "-albedo")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    textures[name + "-normal"] = CreateUnique<Texture2D>(base / Path("normal.png"));
+    textures.at(name + "-normal")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+    textures.at(name + "-normal")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    textures[name + "-metallic"] = CreateUnique<Texture2D>(base / Path("metallic.png"));
+    textures.at(name + "-metallic")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+    textures.at(name + "-metallic")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    textures[name + "-roughness"] = CreateUnique<Texture2D>(base / Path("roughness.png"));
+    textures.at(name + "-roughness")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+    textures.at(name + "-roughness")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+    textures[name + "-ao"] = CreateUnique<Texture2D>(base / Path("ao.png"));
+    textures.at(name + "-ao")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+    textures.at(name + "-ao")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+  }
 }
 
 namespace Krys::Gfx
@@ -674,7 +700,7 @@ namespace Krys::Gfx::OpenGL
 
       shaders["pbr"] = CreateUnique<Shader>(base / Path("11/pbr.vert"), base / Path("11/pbr.frag"));
       shaders["pbr-with-maps"] =
-        CreateUnique<Shader>(base / Path("10/pbr-with-maps.vert"), base / Path("10/pbr-with-maps.frag"));
+        CreateUnique<Shader>(base / Path("11/pbr-with-maps.vert"), base / Path("11/pbr-with-maps.frag"));
       shaders["hdr-to-cubemap"] = CreateUnique<Shader>(base / Path("11/cubemap.vert"),
                                                        base / Path("11/equirectangular-to-cubemap.frag"));
       shaders["irradiance-convolution"] =
@@ -737,28 +763,12 @@ namespace Krys::Gfx::OpenGL
     // PBR textures
     {
       using namespace IO;
-      Path base = Path("data/assets/pbr");
 
-      // rusted iron
-      textures["rustediron-albedo"] = CreateUnique<Texture2D>(base / Path("rusted-iron/albedo.png"));
-      textures.at("rustediron-albedo")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("rustediron-albedo")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      textures["rustediron-normal"] = CreateUnique<Texture2D>(base / Path("rusted-iron/normal.png"));
-      textures.at("rustediron-normal")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("rustediron-normal")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      textures["rustediron-metallic"] = CreateUnique<Texture2D>(base / Path("rusted-iron/metallic.png"));
-      textures.at("rustediron-metallic")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("rustediron-metallic")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      textures["rustediron-roughness"] = CreateUnique<Texture2D>(base / Path("rusted-iron/roughness.png"));
-      textures.at("rustediron-roughness")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("rustediron-roughness")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      textures["rustediron-ao"] = CreateUnique<Texture2D>(base / Path("rusted-iron/ao.png"));
-      textures.at("rustediron-ao")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("rustediron-ao")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+      LoadPBRTextures("rusted-iron");
+      LoadPBRTextures("gold");
+      LoadPBRTextures("grass");
+      LoadPBRTextures("plastic");
+      LoadPBRTextures("wall");
     }
 
     // Cube
@@ -1026,12 +1036,15 @@ namespace Krys::Gfx::OpenGL
     CreateEnvironmentAndIrradianceCubemaps(1'024, 1'024);
     glViewport(0, 0, _width, _height);
 
-    shaders.at("pbr")->Bind();
-    shaders.at("pbr")->SetUniform("irradianceMap", 0);
-    shaders.at("pbr")->SetUniform("prefilterMap", 1);
-    shaders.at("pbr")->SetUniform("brdfLUT", 2);
-    shaders.at("pbr")->SetUniform("albedo", Vec3 {0.5f, 0.0f, 0.f});
-    shaders.at("pbr")->SetUniform("ao", 1.f);
+    shaders.at("pbr-with-maps")->Bind();
+    shaders.at("pbr-with-maps")->SetUniform("irradianceMap", 0);
+    shaders.at("pbr-with-maps")->SetUniform("prefilterMap", 1);
+    shaders.at("pbr-with-maps")->SetUniform("brdfLUT", 2);
+    shaders.at("pbr-with-maps")->SetUniform("albedoMap", 3);
+    shaders.at("pbr-with-maps")->SetUniform("normalMap", 4);
+    shaders.at("pbr-with-maps")->SetUniform("metallicMap", 5);
+    shaders.at("pbr-with-maps")->SetUniform("roughnessMap", 6);
+    shaders.at("pbr-with-maps")->SetUniform("aoMap", 7);
 
     shaders.at("hdr-background")->Bind();
     shaders.at("hdr-background")->SetUniform("environmentMap", 0);
@@ -1060,9 +1073,13 @@ namespace Krys::Gfx::OpenGL
     float spacing = 2.5;
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    auto &shader = shaders.at("pbr");
+
+    auto &shader = shaders.at("pbr-with-maps");
     shader->Bind();
     shader->SetUniform("camPos", camera.Position());
+
+    vaos.at("sphere")->Bind();
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps["irradiance-cubemap"].ColorTextures[0]);
     glActiveTexture(GL_TEXTURE1);
@@ -1070,40 +1087,92 @@ namespace Krys::Gfx::OpenGL
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, shadowMaps["brdf-lut"].ColorTextures[0]);
 
-    vaos.at("sphere")->Bind();
-
-    // render rows*column number of spheres with varying metallic/roughness values scaled by rows and columns
-    // respectively
-    Mat4 model = Identity<Mat4>();
-    for (int row = 0; row < nrRows; ++row)
+    // rusted iron
     {
-      shader->SetUniform("metallic", (float)row / (float)nrRows);
-      for (int col = 0; col < nrColumns; ++col)
-      {
-        // we clamp the roughness to 0.05 - 1.0 as perfectly smooth surfaces (roughness of 0.0) tend to look a
-        // bit off on direct lighting.
-        shader->SetUniform("roughness", std::clamp((float)col / (float)nrColumns, 0.05f, 1.0f));
+      textures.at("rusted-iron-albedo")->Bind(3);
+      textures.at("rusted-iron-normal")->Bind(4);
+      textures.at("rusted-iron-metallic")->Bind(5);
+      textures.at("rusted-iron-roughness")->Bind(6);
+      textures.at("rusted-iron-ao")->Bind(7);
 
-        model = Identity<Mat4>();
-        model =
-          Translate(model, Vec3((col - (nrColumns / 2)) * spacing, (row - (nrRows / 2)) * spacing, 0.0f));
-        shader->SetUniform("model", model);
-        shader->SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
-        Utils::DrawElements(GL_TRIANGLE_STRIP, sphereIndexCount);
-      }
+      Mat4 model = Identity<Mat4>();
+      model = Translate(model, Vec3(-5.0, 0.0, 2.0));
+      shader->SetUniform("model", model);
+      shader->SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
+      Utils::DrawElements(GL_TRIANGLE_STRIP, sphereIndexCount);
+    }
+
+    // gold
+    {
+      textures.at("gold-albedo")->Bind(3);
+      textures.at("gold-normal")->Bind(4);
+      textures.at("gold-metallic")->Bind(5);
+      textures.at("gold-roughness")->Bind(6);
+      textures.at("gold-ao")->Bind(7);
+
+      Mat4 model = Identity<Mat4>();
+      model = Translate(model, Vec3(-3.0, 0.0, 2.0));
+      shader->SetUniform("model", model);
+      shader->SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
+      Utils::DrawElements(GL_TRIANGLE_STRIP, sphereIndexCount);
+    }
+
+    // grass
+    {
+      textures.at("grass-albedo")->Bind(3);
+      textures.at("grass-normal")->Bind(4);
+      textures.at("grass-metallic")->Bind(5);
+      textures.at("grass-roughness")->Bind(6);
+      textures.at("grass-ao")->Bind(7);
+
+      Mat4 model = Identity<Mat4>();
+      model = Translate(model, Vec3(-1.0, 0.0, 2.0));
+      shader->SetUniform("model", model);
+      shader->SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
+      Utils::DrawElements(GL_TRIANGLE_STRIP, sphereIndexCount);
+    }
+
+    // plastic
+    {
+      textures.at("plastic-albedo")->Bind(3);
+      textures.at("plastic-normal")->Bind(4);
+      textures.at("plastic-metallic")->Bind(5);
+      textures.at("plastic-roughness")->Bind(6);
+      textures.at("plastic-ao")->Bind(7);
+
+      Mat4 model = Identity<Mat4>();
+      model = Translate(model, Vec3(1.0, 0.0, 2.0));
+      shader->SetUniform("model", model);
+      shader->SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
+      Utils::DrawElements(GL_TRIANGLE_STRIP, sphereIndexCount);
+    }
+
+    // wall
+    {
+      textures.at("wall-albedo")->Bind(3);
+      textures.at("wall-normal")->Bind(4);
+      textures.at("wall-metallic")->Bind(5);
+      textures.at("wall-roughness")->Bind(6);
+      textures.at("wall-ao")->Bind(7);
+
+      Mat4 model = Identity<Mat4>();
+      model = Translate(model, Vec3(3.0, 0.0, 2.0));
+      shader->SetUniform("model", model);
+      shader->SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
+      Utils::DrawElements(GL_TRIANGLE_STRIP, sphereIndexCount);
     }
 
     // render light source (simply re-render sphere at light positions)
     // this looks a bit off as we use the same shader, but it'll make their positions obvious and
     // keeps the codeprint small.
-    for (unsigned int i = 0; i < sizeof(lightPositions) / sizeof(lightPositions[0]); ++i)
+    for (uint i = 0; i < sizeof(lightPositions) / sizeof(lightPositions[0]); ++i)
     {
       Vec3 newPos = lightPositions[i] + Vec3(std::sin((float)Platform::GetTime() * 5.0f) * 5.0f, 0.0f, 0.0f);
       newPos = lightPositions[i];
       shader->SetUniform("lightPositions[" + std::to_string(i) + "]", newPos);
       shader->SetUniform("lightColors[" + std::to_string(i) + "]", lightColors[i]);
 
-      model = Identity<Mat4>();
+      Mat4 model = Identity<Mat4>();
       model = Translate(model, newPos);
       model = Scale(model, Vec3(0.5f));
       shader->SetUniform("model", model);
