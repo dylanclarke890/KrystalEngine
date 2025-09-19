@@ -175,13 +175,16 @@ namespace Krys
   concept DerivedFrom = std::derived_from<D, B>;
 
   template <typename T, typename U>
-  concept SameType = std::same_as<T, U>;
+  concept SameType = std::is_same_v<T, U>;
 
   template <typename T>
   concept IsEnum = std::is_enum_v<T>;
 
   template <typename T>
   concept IsScopedEnum = std::is_scoped_enum_v<T>;
+
+  template <typename T>
+  concept IsList = std::is_same_v<T, List<typename T::value_type>>;
 
 #pragma endregion
 

@@ -1054,7 +1054,7 @@ namespace Krys::Gfx::OpenGL
   {
     auto view = camera.ViewMatrix();
     auto projection = camera.ProjectionMatrix();
-    ubos.at("matrices")->Update({view, projection});
+    ubos.at("matrices")->Update(List<Mat4>{view, projection});
     shaders.at("hdr-background")->SetUniform("projection", projection);
 
     Vec3 lightPositions[] = {

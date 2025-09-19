@@ -15,11 +15,10 @@ namespace Krys::Gfx::OpenGL
     GLuint _handle;
 
   public:
-    Buffer(const BufferData &data, GLenum bufferUsage = GL_STATIC_DRAW) noexcept : _handle(0)
+    Buffer(const BufferData &data, GLenum bufferUsage = GL_STATIC_DRAW) noexcept : _handle(0u)
     {
       glCreateBuffers(1, &_handle);
       glNamedBufferData(_handle, data.size(), data.data(), bufferUsage);
-      assert(_handle != 0 && "Failed to create buffer.");
     }
 
     template <typename T>
@@ -28,11 +27,10 @@ namespace Krys::Gfx::OpenGL
     {
     }
 
-    Buffer(size_t size, GLenum bufferUsage = GL_DYNAMIC_DRAW) noexcept : _handle(0)
+    Buffer(size_t size, GLenum bufferUsage = GL_DYNAMIC_DRAW) noexcept : _handle(0u)
     {
       glCreateBuffers(1, &_handle);
       glNamedBufferData(_handle, size, nullptr, bufferUsage);
-      assert(_handle != 0 && "Failed to create buffer.");
     }
 
     ~Buffer() noexcept
@@ -56,24 +54,20 @@ namespace Krys::Gfx::OpenGL
       glBindBuffer(BufferType, 0);
     }
 
-    void Update(const BufferData &data, size_t offset = 0) noexcept
+    void Update(const BufferData &data, size_t offset = 0u) const noexcept
     {
       glNamedBufferSubData(_handle, offset, data.size(), data.data());
     }
 
-    void Update(const List<byte> &data, size_t offset = 0) noexcept
+    template <typename T>
+    void Update(const T &data, size_t offset = 0u) const noexcept
     {
       Update(ByteUtils::AsBytesView(data), offset);
     }
 
-    void Update(const Maths::Mat4 &data, size_t offset = 0) noexcept
+    GLuint GetHandle() const noexcept
     {
-      Update(ByteUtils::AsBytesView(data), offset);
-    }
-
-    void Update(const List<Maths::Mat4> &data, size_t offset = 0) noexcept
-    {
-      Update(ByteUtils::AsBytesView(data), offset);
+      return _handle;
     }
   };
 
