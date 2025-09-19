@@ -28,8 +28,7 @@ namespace Krys::Gfx::OpenGL
       glAttachShader(_handle, vertexShader);
       glAttachShader(_handle, fragmentShader);
 
-      glLinkProgram(_handle);
-      EnsureProgramLinked();
+      Link();
 
       glDeleteShader(vertexShader);
       glDeleteShader(fragmentShader);
@@ -52,8 +51,7 @@ namespace Krys::Gfx::OpenGL
       glAttachShader(_handle, geometryShader);
       glAttachShader(_handle, fragmentShader);
 
-      glLinkProgram(_handle);
-      EnsureProgramLinked();
+      Link();
 
       glDeleteShader(vertexShader);
       glDeleteShader(geometryShader);
@@ -71,61 +69,64 @@ namespace Krys::Gfx::OpenGL
     }
 
     template <typename T>
-    void SetUniform(const Krys::string &uniformName, const T &value, bool required = false) noexcept
+    void SetUniform(const Krys::string &uniformName, const T &value, bool required = false) const noexcept
     {
       using namespace Krys::Maths;
 
       GLint location = glGetUniformLocation(_handle, uniformName.c_str());
       if (location == -1)
       {
-        assert(!required && "Uniform not found in shader.");
-        // Uniform not found, possibly optimized out by the compiler
+        assert(!required && "Uniform not found in shader, possibly optimized out by the compiler.");
         return;
       }
 
-      if constexpr (std::is_same_v<T, bool>)
+#define IsUniformType(type) constexpr(std::is_same_v<T, type>)
+
+      if IsUniformType (bool)
         glProgramUniform1i(_handle, location, value);
-      else if constexpr (std::is_same_v<T, int32>)
+      else if IsUniformType (int32)
         glProgramUniform1i(_handle, location, value);
-      else if constexpr (std::is_same_v<T, List<int32>>)
-        glProgramUniform1iv(_handle, location, static_cast<GLsizei>(value.size()), value.data());
-      else if constexpr (std::is_same_v<T, uint32>)
+      else if IsUniformType (uint32)
         glProgramUniform1ui(_handle, location, value);
-      else if constexpr (std::is_same_v<T, List<uint32>>)
-        glProgramUniform1uiv(_handle, location, static_cast<GLsizei>(value.size()), value.data());
-      else if constexpr (std::is_same_v<T, float32>)
+      else if IsUniformType (float32)
         glProgramUniform1f(_handle, location, value);
-      else if constexpr (std::is_same_v<T, List<float32>>)
-        glProgramUniform1fv(_handle, location, static_cast<GLsizei>(value.size()), value.data());
-      else if constexpr (std::is_same_v<T, Vec2>)
+      else if IsUniformType (Vec2)
         glProgramUniform2f(_handle, location, value.x, value.y);
-      else if constexpr (std::is_same_v<T, List<Vec2>>)
-        glProgramUniform2fv(_handle, location, static_cast<GLsizei>(value.size()), &value[0].x);
-      else if constexpr (std::is_same_v<T, Vec3>)
+      else if IsUniformType (Vec3)
         glProgramUniform3f(_handle, location, value.x, value.y, value.z);
-      else if constexpr (std::is_same_v<T, List<Vec3>>)
-        glProgramUniform3fv(_handle, location, static_cast<GLsizei>(value.size()), &value[0].x);
-      else if constexpr (std::is_same_v<T, Vec4>)
+      else if IsUniformType (Vec4)
         glProgramUniform4f(_handle, location, value.x, value.y, value.z, value.w);
-      else if constexpr (std::is_same_v<T, List<Vec4>>)
-        glProgramUniform4fv(_handle, location, static_cast<GLsizei>(value.size()), &value[0].x);
-      else if constexpr (std::is_same_v<T, Mat2>)
+      else if IsUniformType (Mat2)
         glProgramUniformMatrix2fv(_handle, location, 1, GL_FALSE, &value[0].x);
-      else if constexpr (std::is_same_v<T, List<Mat2>>)
+      else if IsUniformType (Mat3)
+        glProgramUniformMatrix3fv(_handle, location, 1, GL_FALSE, &value[0].x);
+      else if IsUniformType (Mat4)
+        glProgramUniformMatrix4fv(_handle, location, 1, GL_FALSE, &value[0].x);
+      else if IsUniformType (List<int32>)
+        glProgramUniform1iv(_handle, location, static_cast<GLsizei>(value.size()), value.data());
+      else if IsUniformType (List<uint32>)
+        glProgramUniform1uiv(_handle, location, static_cast<GLsizei>(value.size()), value.data());
+      else if IsUniformType (List<float32>)
+        glProgramUniform1fv(_handle, location, static_cast<GLsizei>(value.size()), value.data());
+      else if IsUniformType (List<Vec2>)
+        glProgramUniform2fv(_handle, location, static_cast<GLsizei>(value.size()), &value[0].x);
+      else if IsUniformType (List<Vec3>)
+        glProgramUniform3fv(_handle, location, static_cast<GLsizei>(value.size()), &value[0].x);
+      else if IsUniformType (List<Vec4>)
+        glProgramUniform4fv(_handle, location, static_cast<GLsizei>(value.size()), &value[0].x);
+      else if IsUniformType (List<Mat2>)
         glProgramUniformMatrix2fv(_handle, location, static_cast<GLsizei>(value.size()), GL_FALSE,
                                   &value[0][0].x);
-      else if constexpr (std::is_same_v<T, Mat3>)
-        glProgramUniformMatrix3fv(_handle, location, 1, GL_FALSE, &value[0].x);
-      else if constexpr (std::is_same_v<T, List<Mat3>>)
+      else if IsUniformType (List<Mat3>)
         glProgramUniformMatrix3fv(_handle, location, static_cast<GLsizei>(value.size()), GL_FALSE,
                                   &value[0][0].x);
-      else if constexpr (std::is_same_v<T, Mat4>)
-        glProgramUniformMatrix4fv(_handle, location, 1, GL_FALSE, &value[0].x);
-      else if constexpr (std::is_same_v<T, List<Mat4>>)
+      else if IsUniformType (List<Mat4>)
         glProgramUniformMatrix4fv(_handle, location, static_cast<GLsizei>(value.size()), GL_FALSE,
                                   &value[0][0].x);
       else
-        static_assert(false && "Unsupported uniform type.");
+        static_assert(false, "Unsupported uniform type.");
+
+#undef IsUniformType
     }
 
   private:
@@ -134,6 +135,7 @@ namespace Krys::Gfx::OpenGL
       auto reader = Krys::IO::NativeFileReader(filepath);
       auto sourceResult = Krys::IO::StreamUtils::ReadAllText(reader);
       assert(sourceResult.has_value());
+
       auto source = sourceResult->c_str();
       glShaderSource(shader, 1, &source, NULL);
       glCompileShader(shader);
@@ -148,8 +150,10 @@ namespace Krys::Gfx::OpenGL
       }
     }
 
-    void EnsureProgramLinked() const noexcept
+    void Link() const noexcept
     {
+      glLinkProgram(_handle);
+
       int success;
       char infoLog[512];
       glGetProgramiv(_handle, GL_LINK_STATUS, &success);

@@ -22,6 +22,7 @@ namespace Krys::Gfx::OpenGL
     }
   };
 
+  // TODO: generate mipmaps
   template <GLenum TextureType>
   requires(TextureType == GL_TEXTURE_2D || TextureType == GL_TEXTURE_CUBE_MAP)
   class Texture
