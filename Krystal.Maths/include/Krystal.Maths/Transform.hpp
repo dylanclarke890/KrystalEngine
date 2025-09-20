@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
+#include "Krystal.Lib/Concepts.hpp"
+#include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Maths/Conventions.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Quaternion.hpp"

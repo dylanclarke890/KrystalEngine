@@ -1,14 +1,15 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
-
-#include <type_traits>
+#include "Krystal.Lib/Concepts.hpp"
 
 namespace Krys
 {
   template <IsEnum T>
   class Flags
   {
+  private:
+    T value;
+
   public:
     using UnderlyingType = std::underlying_type_t<T>;
 

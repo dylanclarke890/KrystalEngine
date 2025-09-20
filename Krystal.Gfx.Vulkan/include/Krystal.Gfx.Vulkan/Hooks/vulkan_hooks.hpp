@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
+#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/NativeHandle.hpp"
 
 #define VK_NO_PROTOTYPES
 #include <vulkan/vulkan.h>

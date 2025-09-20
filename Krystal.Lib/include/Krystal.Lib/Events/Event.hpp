@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
-#include "Krystal.Core/StringId.hpp"
+#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/StringId.hpp"
 
 namespace Krys
 {

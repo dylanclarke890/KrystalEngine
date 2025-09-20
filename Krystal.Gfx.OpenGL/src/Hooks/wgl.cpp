@@ -1,8 +1,6 @@
 #define KRYS_WGL_OVERRIDE_FUNCTIONS 0
 #include "Krystal.Gfx.OpenGL/Hooks/wgl.hpp"
-
-#include "Krystal.Core/Core.hpp"
-#include "Krystal.Core/StringUtils.hpp"
+#include "Krystal.Lib/StringUtils.hpp"
 #include <algorithm>
 #include <cassert>
 

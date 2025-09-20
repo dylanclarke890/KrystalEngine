@@ -1,7 +1,9 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
-#include "Krystal.Core/Events/Event.hpp"
+#include "Krystal.Lib/Concepts.hpp"
+#include "Krystal.Lib/Events/Event.hpp"
+#include "Krystal.Lib/SmartPointers.hpp"
+#include "Krystal.Lib/Types.hpp"
 
 namespace Krys
 {

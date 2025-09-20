@@ -1,7 +1,4 @@
 #include "Krystal.IO/Path.hpp"
-
-#include "Krystal.Core/Core.hpp"
-
 #include <filesystem>
 #include <utility>
 
@@ -34,7 +31,7 @@ namespace Krys::IO
     return *this;
   }
 
-  NO_DISCARD Path Path::operator/(const Path &other) const noexcept
+  Path Path::operator/(const Path &other) const noexcept
   {
     return Path(_path / other._path);
   }
@@ -45,57 +42,57 @@ namespace Krys::IO
     return *this;
   }
 
-  NO_DISCARD bool Path::operator==(const Path &other) const noexcept
+  bool Path::operator==(const Path &other) const noexcept
   {
     return _path == other._path;
   }
 
-  NO_DISCARD bool Path::operator!=(const Path &other) const noexcept
+  bool Path::operator!=(const Path &other) const noexcept
   {
     return _path != other._path;
   }
 
-  NO_DISCARD Path Path::ParentPath() const noexcept
+  Path Path::ParentPath() const noexcept
   {
     return Path(_path.parent_path());
   }
 
-  NO_DISCARD bool Path::HasFilename() const noexcept
+  bool Path::HasFilename() const noexcept
   {
     return _path.has_filename();
   }
 
-  NO_DISCARD Path Path::Filename() const noexcept
+  Path Path::Filename() const noexcept
   {
     return Path(_path.filename());
   }
 
-  NO_DISCARD bool Path::HasExtension() const noexcept
+  bool Path::HasExtension() const noexcept
   {
     return _path.has_extension();
   }
 
-  NO_DISCARD Path Path::Extension() const noexcept
+  Path Path::Extension() const noexcept
   {
     return Path(_path.extension());
   }
 
-  NO_DISCARD bool Path::StartsWith(const Path &other) const noexcept
+  bool Path::StartsWith(const Path &other) const noexcept
   {
     return _path.string().starts_with(other._path.string());
   }
 
-  NO_DISCARD bool Path::IsRelative() const noexcept
+  bool Path::IsRelative() const noexcept
   {
     return _path.is_relative();
   }
 
-  NO_DISCARD bool Path::IsRelativeTo(const Path &other) const noexcept
+  bool Path::IsRelativeTo(const Path &other) const noexcept
   {
     return !_path.lexically_relative(other._path).empty();
   }
 
-  NO_DISCARD Path Path::RelativePath(const Path &base) const noexcept
+  Path Path::RelativePath(const Path &base) const noexcept
   {
     if (!StartsWith(base))
     {
@@ -105,12 +102,12 @@ namespace Krys::IO
     return Path(_path.lexically_relative(base._path).string());
   }
 
-  NO_DISCARD Path Path::LexicallyNormal() const noexcept
+  Path Path::LexicallyNormal() const noexcept
   {
     return Path(_path.lexically_normal());
   }
 
-  NO_DISCARD string Path::ToString() const noexcept
+  string Path::ToString() const noexcept
   {
     return _path.string();
   }
@@ -120,7 +117,7 @@ namespace Krys::IO
     return !_path.empty();
   }
 
-  NO_DISCARD size_t Path::Length() const noexcept
+  size_t Path::Length() const noexcept
   {
     return _path.string().size();
   }

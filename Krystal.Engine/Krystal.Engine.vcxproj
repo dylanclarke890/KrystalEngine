@@ -24,9 +24,6 @@
     <ClInclude Include="include\Krystal.Engine\Debug\ScopedProfiler.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Krystal.Core\Krystal.Core.vcxproj">
-      <Project>{a37816bb-d90c-49da-b724-b81362317bfa}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\Krystal.Debug\Krystal.Debug.vcxproj">
       <Project>{0d3fc524-252e-46af-977c-dc4eba9efac2}</Project>
     </ProjectReference>
@@ -35,6 +32,9 @@
     </ProjectReference>
     <ProjectReference Include="..\Krystal.IO\Krystal.IO.vcxproj">
       <Project>{85cea139-a547-4747-b050-05c8de66d591}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Krystal.Lib\Krystal.Lib.vcxproj">
+      <Project>{38f26636-5d57-4740-a8d2-df219340309a}</Project>
     </ProjectReference>
     <ProjectReference Include="..\Krystal.Log\Krystal.Log.vcxproj">
       <Project>{dfd59bfd-d1ba-4f1d-ab1a-ecd50440d091}</Project>

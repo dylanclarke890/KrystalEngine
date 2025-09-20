@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
-#include "Krystal.Core/Events/EventManager.hpp"
+#include "Krystal.Lib/Events/EventManager.hpp"
 #include "Krystal.Platform/Events.hpp"
 #include "Krystal.Platform/IWindow.hpp"
 #include "Krystal.Platform/Keyboard.hpp"

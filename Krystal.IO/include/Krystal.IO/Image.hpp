@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Krystal.Core\Core.hpp"
 #include "Krystal.IO\IStream.hpp"
+#include "Krystal.Lib\Attributes.hpp"
+#include "Krystal.Lib\Types.hpp"
 
 namespace Krys::IO
 {
@@ -95,7 +96,7 @@ namespace Krys::IO
   /// @return HDR image read from the stream.
   // NOLINTNEXTLINE(misc-use-internal-linkage)
   NO_DISCARD Expected<HDRImage> LoadHDRImage(IStreamReader &stream,
-                                          const ImageLoadSettings &settings = {}) noexcept;
+                                             const ImageLoadSettings &settings = {}) noexcept;
 
   /// @brief Reads a HDR image from a file.
   /// @param path Path to the image file.

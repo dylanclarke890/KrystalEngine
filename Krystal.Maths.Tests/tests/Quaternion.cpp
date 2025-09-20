@@ -2,9 +2,6 @@
 
 #include "Krystal.Maths/Quaternion.hpp"
 
-#include <catch_all.hpp>
-#include <utility>
-
 namespace Krys::Tests
 {
   using namespace Krys::Maths;

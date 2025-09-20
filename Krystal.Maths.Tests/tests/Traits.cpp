@@ -1,14 +1,6 @@
 #include "pch.hpp"
 
 #include "Krystal.Maths/Traits.hpp"
-#include <Krystal.Maths/Matrix.hpp>
-#include <Krystal.Maths/Vector.hpp>
-
-#include <array>
-#include <catch_all.hpp>
-#include <string>
-#include <tuple>
-#include <vector>
 
 namespace Krys::Tests
 {

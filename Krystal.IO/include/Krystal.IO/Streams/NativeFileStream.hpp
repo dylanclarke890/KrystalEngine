@@ -1,10 +1,11 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
 #include "Krystal.IO/Common.hpp"
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.IO/Path.hpp"
-
+#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Types.hpp"
 #include <fstream>
 
 namespace Krys::IO

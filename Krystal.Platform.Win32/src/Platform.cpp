@@ -1,7 +1,4 @@
 #include "Krystal.Platform/Platform.hpp"
-
-#include "Krystal.Core/Core.hpp"
-
 #include <algorithm>
 #include <cassert>
 #include <optional>

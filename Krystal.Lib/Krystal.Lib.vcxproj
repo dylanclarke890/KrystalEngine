@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -21,13 +21,13 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{a37816bb-d90c-49da-b724-b81362317bfa}</ProjectGuid>
-    <RootNamespace>KrystalCore</RootNamespace>
+    <ProjectGuid>{38f26636-5d57-4740-a8d2-df219340309a}</ProjectGuid>
+    <RootNamespace>KrystalLib</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -74,14 +74,9 @@
     <Import Project="..\KrystalEngine.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <AllProjectIncludesArePublic>false</AllProjectIncludesArePublic>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <AllProjectIncludesArePublic>false</AllProjectIncludesArePublic>
-  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
@@ -107,6 +102,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
@@ -131,21 +127,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.Core\BitUtils.hpp" />
-    <ClInclude Include="include\Krystal.Core\ByteUtils.hpp" />
-    <ClInclude Include="include\Krystal.Core\Core.hpp" />
-    <ClInclude Include="include\Krystal.Core\DebugBreak.hpp" />
-    <ClInclude Include="include\Krystal.Core\Detection.hpp" />
-    <ClInclude Include="include\Krystal.Core\Endian.hpp" />
-    <ClInclude Include="include\Krystal.Core\Events\Event.hpp" />
-    <ClInclude Include="include\Krystal.Core\Events\EventManager.hpp" />
-    <ClInclude Include="include\Krystal.Core\Flags.hpp" />
-    <ClInclude Include="include\Krystal.Core\HashUtils.hpp" />
-    <ClInclude Include="include\Krystal.Core\Lazy.hpp" />
-    <ClInclude Include="include\Krystal.Core\RangeUtils.hpp" />
-    <ClInclude Include="include\Krystal.Core\StringId.hpp" />
-    <ClInclude Include="include\Krystal.Core\StringUtils.hpp" />
-    <ClInclude Include="include\Krystal.Core\Version.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Attributes.hpp" />
+    <ClInclude Include="include\Krystal.Lib\BitUtils.hpp" />
+    <ClInclude Include="include\Krystal.Lib\ByteUtils.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Concepts.hpp" />
+    <ClInclude Include="include\Krystal.Lib\DebugBreak.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Detection.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Endian.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Flags.hpp" />
+    <ClInclude Include="include\Krystal.Lib\FuncPtrTraits.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Lazy.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Macros.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Events\Event.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Events\EventManager.hpp" />
+    <ClInclude Include="include\Krystal.Lib\HashUtils.hpp" />
+    <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp" />
+    <ClInclude Include="include\Krystal.Lib\RangeUtils.hpp" />
+    <ClInclude Include="include\Krystal.Lib\SmartPointers.hpp" />
+    <ClInclude Include="include\Krystal.Lib\StringId.hpp" />
+    <ClInclude Include="include\Krystal.Lib\StringUtils.hpp" />
+    <ClInclude Include="include\Krystal.Lib\TypedBool.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Version.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Events\EventManager.cpp" />

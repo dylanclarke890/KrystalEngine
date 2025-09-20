@@ -1,10 +1,10 @@
 #pragma once
 
+#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Endian.hpp"
+#include "Krystal.Lib/Macros.hpp"
 #include <cassert>
 #include <cstring>
-
-#include "Krystal.Core/Core.hpp"
-#include "Krystal.Core/Endian.hpp"
 
 namespace Krys
 {

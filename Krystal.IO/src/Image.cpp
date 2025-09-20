@@ -1,6 +1,6 @@
 #include "Krystal.IO/Image.hpp"
 
-#include "Krystal.Core/Core.hpp"
+#include "Krystal.Lib/Types.hpp"
 #include "Krystal.IO/Common.hpp"
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.IO/Streams/NativeFileStream.hpp"

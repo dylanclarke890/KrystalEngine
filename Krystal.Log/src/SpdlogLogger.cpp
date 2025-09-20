@@ -1,16 +1,13 @@
-#include "Krystal.Core/Core.hpp"
 #include "Krystal.Log/ILogger.hpp"
 
 #define SPDLOG_HEADER_ONLY
+#include <cassert>
+#include <chrono>
+#include <memory>
 #include <spdlog/common.h>
 #include <spdlog/logger.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
-
-#include <cassert>
-#include <chrono>
-#include <memory>
-
 namespace
 {
   spdlog::level::level_enum ToSpdLogLevel(Krys::Log::Level level) noexcept

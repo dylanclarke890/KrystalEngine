@@ -15,49 +15,70 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.Core\Core.hpp">
+    <ClInclude Include="include\Krystal.Lib\Attributes.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Core\Detection.hpp">
+    <ClInclude Include="include\Krystal.Lib\Events\Event.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Core\Endian.hpp">
+    <ClInclude Include="include\Krystal.Lib\Events\EventManager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Core\HashUtils.hpp">
+    <ClInclude Include="include\Krystal.Lib\Concepts.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Core\Lazy.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Core\RangeUtils.hpp">
+    <ClInclude Include="include\Krystal.Lib\StringId.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Core\StringId.hpp">
+    <ClInclude Include="include\Krystal.Lib\HashUtils.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Core\BitUtils.hpp">
+    <ClInclude Include="include\Krystal.Lib\Macros.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Core\ByteUtils.hpp">
+    <ClInclude Include="include\Krystal.Lib\SmartPointers.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Core\Events\Event.hpp">
+    <ClInclude Include="include\Krystal.Lib\FuncPtrTraits.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Core\Events\EventManager.hpp">
+    <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Core\DebugBreak.hpp">
+    <ClInclude Include="include\Krystal.Lib\TypedBool.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Core\Flags.hpp">
+    <ClInclude Include="include\Krystal.Lib\Lazy.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Core\StringUtils.hpp">
+    <ClInclude Include="include\Krystal.Lib\Version.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Core\Version.hpp">
+    <ClInclude Include="include\Krystal.Lib\Flags.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\StringUtils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\RangeUtils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Detection.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\DebugBreak.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\BitUtils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\ByteUtils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Endian.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

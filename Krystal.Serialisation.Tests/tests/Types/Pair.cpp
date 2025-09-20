@@ -1,7 +1,6 @@
 #include "Krystal.Serialisation/Types/Pair.hpp"
-
-#include "Krystal.Core/Core.hpp"
 #include "Krystal.IO/Streams/MemoryStream.hpp"
+#include "Krystal.Lib/Types.hpp"
 #include "Krystal.Serialisation/Archives/BinaryArchive.hpp"
 #include "Krystal.Serialisation/ISerialiser.hpp"
 

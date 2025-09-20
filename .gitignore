@@ -26,6 +26,7 @@
 *.la
 *.a
 *.lib
+!Krystal.Lib
 
 # Executables
 *.exe

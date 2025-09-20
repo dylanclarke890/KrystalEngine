@@ -3,7 +3,6 @@
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Quaternion.hpp"
 #include "Krystal.Maths/Vector.hpp"
-
 #include <format>
 #include <iostream>
 

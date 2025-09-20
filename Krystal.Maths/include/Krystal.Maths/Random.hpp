@@ -1,8 +1,7 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
+#include "Krystal.Lib/Types.hpp"
 #include "Krystal.Maths/Vector.hpp"
-
 #include <limits>
 #include <random>
 

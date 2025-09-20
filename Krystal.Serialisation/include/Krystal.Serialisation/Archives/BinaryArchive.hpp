@@ -1,9 +1,8 @@
 #pragma once
 
-#include <Krystal.Core/Core.hpp>
-#include <Krystal.IO/IStream.hpp>
-#include <Krystal.Serialisation/IArchive.hpp>
-
+#include "Krystal.Lib/Concepts.hpp"
+#include "Krystal.IO/IStream.hpp"
+#include "Krystal.Serialisation/IArchive.hpp"
 #include <bit>
 #include <memory>
 

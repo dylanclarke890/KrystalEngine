@@ -109,11 +109,11 @@ namespace
   }
 }
 
-#include "Krystal.Core/Detection.hpp"
+#include "Krystal.Gfx.OpenGL/Context.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/wgl.hpp"
-#include "Krystal.Gfx.OpenGL/Context.hpp"
 #include "Krystal.Gfx.OpenGL/Win32/ContextPlatformImpl.hpp"
+#include "Krystal.Lib/Detection.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
@@ -268,9 +268,9 @@ namespace Krys::Gfx::OpenGL
     {
       attributes.push_back(WGL_CONTEXT_FLAGS_ARB);
       int ContextFlags = WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB;
-//#ifdef KRYS_DEBUG
+      // #ifdef KRYS_DEBUG
       ContextFlags |= WGL_CONTEXT_DEBUG_BIT_ARB;
-//#endif
+      // #endif
       attributes.push_back(ContextFlags);
     }
 

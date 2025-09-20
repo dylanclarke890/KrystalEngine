@@ -46,12 +46,12 @@
     <ClInclude Include="include\Krystal.Maths\Vector.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Krystal.Core\Krystal.Core.vcxproj">
-      <Project>{a37816bb-d90c-49da-b724-b81362317bfa}</Project>
-    </ProjectReference>
+    <ClCompile Include="src\placeholder.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\placeholder.cpp" />
+    <ProjectReference Include="..\Krystal.Lib\Krystal.Lib.vcxproj">
+      <Project>{38f26636-5d57-4740-a8d2-df219340309a}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
@@ -151,7 +151,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>

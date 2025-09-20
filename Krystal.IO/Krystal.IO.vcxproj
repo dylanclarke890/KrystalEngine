@@ -19,11 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Krystal.Core\Krystal.Core.vcxproj">
-      <Project>{a37816bb-d90c-49da-b724-b81362317bfa}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="include\Krystal.IO\IFileBackend.hpp" />
     <ClCompile Include="src\Image.cpp" />
     <ClCompile Include="src\Path.cpp" />
@@ -46,6 +41,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Krystal.Lib\Krystal.Lib.vcxproj">
+      <Project>{38f26636-5d57-4740-a8d2-df219340309a}</Project>
+    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

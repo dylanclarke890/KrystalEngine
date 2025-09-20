@@ -1,4 +1,5 @@
 #include "Krystal.Gfx.Vulkan/Hooks/vulkan_win32_hooks.hpp"
+#include <stdexcept>
 
 namespace Krys::Gfx::Vulkan
 {

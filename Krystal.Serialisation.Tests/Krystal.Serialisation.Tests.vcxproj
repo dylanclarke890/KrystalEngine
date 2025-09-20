@@ -74,7 +74,7 @@
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(solutionDir)Krystal.Serialisation\include\Krystal.Serialisation;$(solutionDir)Krystal.IO\include</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(solutionDir)Krystal.Serialisation\include\Krystal.Serialisation;$(solutionDir)Krystal.IO\include</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(solutionDir)Krystal.IO\include</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -138,8 +138,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Krystal.Core\Krystal.Core.vcxproj">
-      <Project>{a37816bb-d90c-49da-b724-b81362317bfa}</Project>
+    <ProjectReference Include="..\Krystal.Lib\Krystal.Lib.vcxproj">
+      <Project>{38f26636-5d57-4740-a8d2-df219340309a}</Project>
     </ProjectReference>
     <ProjectReference Include="..\Krystal.Serialisation\Krystal.Serialisation.vcxproj">
       <Project>{a10684ae-2957-477b-9459-688fb621466b}</Project>
@@ -154,6 +154,9 @@
     <ClCompile Include="tests\Types\Array.cpp" />
     <ClCompile Include="tests\Types\Pair.cpp" />
     <ClCompile Include="tests\Types\Vector.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".editorconfig" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Krystal.Core/ByteUtils.hpp"
-#include "Krystal.Core/Core.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
+#include "Krystal.Lib/ByteUtils.hpp"
+#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 
 namespace Krys::Gfx::OpenGL
@@ -65,7 +66,7 @@ namespace Krys::Gfx::OpenGL
       Update(ByteUtils::AsBytesView(data), offset);
     }
 
-    GLuint GetHandle() const noexcept
+    NO_DISCARD GLuint GetHandle() const noexcept
     {
       return _handle;
     }

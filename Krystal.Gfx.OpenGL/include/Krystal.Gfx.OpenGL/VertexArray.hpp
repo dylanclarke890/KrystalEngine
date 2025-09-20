@@ -10,12 +10,12 @@ namespace Krys::Gfx::OpenGL
   class VertexArray
   {
     GLuint _handle;
-    size_t _attributeCount;
+    uint32 _attributeCount;
     List<VertexBuffer *> _vertexBuffers;
     IndexBuffer *_indexBuffer;
 
   public:
-    VertexArray() noexcept : _handle(0u), _attributeCount(0), _indexBuffer(nullptr)
+    VertexArray() noexcept : _handle(0u), _attributeCount(0u), _indexBuffer(nullptr)
     {
       glCreateVertexArrays(1, &_handle);
     }
@@ -42,7 +42,7 @@ namespace Krys::Gfx::OpenGL
       Bind();
       buffer->Bind();
 
-      Utils::ApplyVertexBufferLayout(layout);
+      Utils::ApplyVertexBufferLayout(layout, _attributeCount);
       _attributeCount += static_cast<uint32>(layout.size());
     }
 

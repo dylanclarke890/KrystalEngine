@@ -1,8 +1,10 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
+#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Concepts.hpp"
+#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Types.hpp"
 #include "Krystal.Maths/Vector.hpp"
-
 #include <bit>
 
 namespace Krys::Maths

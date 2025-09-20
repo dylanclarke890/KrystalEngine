@@ -3,7 +3,8 @@
 #include <cmath>
 #include <limits>
 
-#include "Krystal.Core/Core.hpp"
+#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Vector.hpp"
 

@@ -1,7 +1,9 @@
 #pragma once
 
-#include <Krystal.Core/Core.hpp>
-
+#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/SmartPointers.hpp"
+#include "Krystal.Lib/Types.hpp"
 #include <format>
 
 namespace Krys::Log

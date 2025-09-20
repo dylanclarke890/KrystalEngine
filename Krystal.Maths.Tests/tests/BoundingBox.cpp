@@ -2,8 +2,6 @@
 
 #include "Krystal.Maths/BoundingBox.hpp"
 
-#include <catch_all.hpp>
-
 namespace Krys::Tests
 {
   using namespace Krys::Maths;

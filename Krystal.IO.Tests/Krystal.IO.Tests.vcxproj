@@ -144,11 +144,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Krystal.Core\Krystal.Core.vcxproj">
-      <Project>{a37816bb-d90c-49da-b724-b81362317bfa}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\Krystal.IO\Krystal.IO.vcxproj">
       <Project>{85cea139-a547-4747-b050-05c8de66d591}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Krystal.Lib\Krystal.Lib.vcxproj">
+      <Project>{38f26636-5d57-4740-a8d2-df219340309a}</Project>
     </ProjectReference>
     <ProjectReference Include="..\Krystal.Tests\Krystal.Tests.vcxproj">
       <Project>{35350715-4cbc-4386-8fbd-609a0da7c74b}</Project>

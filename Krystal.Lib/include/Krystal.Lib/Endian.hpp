@@ -1,9 +1,10 @@
 #pragma once
 
+#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Concepts.hpp"
+#include "Krystal.Lib/Types.hpp"
 #include <bit>
-
-#include "Krystal.Core/Core.hpp"
-#include <type_traits>
 
 namespace Krys
 {

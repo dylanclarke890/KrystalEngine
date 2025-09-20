@@ -1,6 +1,9 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
+#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Concepts.hpp"
+#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Types.hpp"
 #include "Krystal.Maths/Traits.hpp"
 
 #include <cassert>
@@ -220,9 +223,8 @@ namespace Krys::Maths
         : x(xValue), y(yValue), z(zValue), w(wValue)
     {
     }
-    
-    constexpr Vector(const Vector<T, 3> &vec3, T wValue) noexcept
-        : x(vec3.x), y(vec3.y), z(vec3.z), w(wValue)
+
+    constexpr Vector(const Vector<T, 3> &vec3, T wValue) noexcept : x(vec3.x), y(vec3.y), z(vec3.z), w(wValue)
     {
     }
 

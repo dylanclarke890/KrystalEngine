@@ -2,12 +2,8 @@
 
 #include "Krystal.Maths/Convert.hpp"
 #include "Krystal.Maths/Transform.hpp"
-#include <Krystal.Maths/Maths.hpp>
-#include <Krystal.Maths/Matrix.hpp>
-#include <Krystal.Maths/Quaternion.hpp>
-#include <Krystal.Maths/Vector.hpp>
+#include "Krystal.Maths/Maths.hpp"
 
-#include <catch_all.hpp>
 
 namespace Krys::Tests
 {

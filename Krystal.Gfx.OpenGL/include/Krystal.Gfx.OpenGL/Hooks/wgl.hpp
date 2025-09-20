@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
-#include <tuple>
+#include "Krystal.Lib/Attributes.hpp"
 
 #ifndef WIN32_LEAN_AND_MEAN
   #define WIN32_LEAN_AND_MEAN

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
+#include "Krystal.Lib/Concepts.hpp"
+#include "Krystal.Lib/Types.hpp"
 
 namespace Krys::Serialisation
 {
@@ -46,14 +47,14 @@ namespace Krys::Serialisation
     archive(value);
   }
 
-  /// @brief Serialisation of boolean values.
+  /// @brief Serialisation of string values.
   template <typename Archive>
   void Save(Archive &archive, const string &value) noexcept
   {
     archive(value);
   }
 
-  /// @brief Deserialisation of boolean values.
+  /// @brief Deserialisation of string values.
   template <typename Archive>
   void Load(Archive &archive, string &value) noexcept
   {

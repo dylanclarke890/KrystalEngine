@@ -2,10 +2,6 @@
 
 #include "Krystal.Maths/Clipspace.hpp"
 #include "Krystal.Maths/Convert.hpp"
-#include <Krystal.Core/Core.hpp>
-#include <Krystal.Maths/Matrix.hpp>
-
-#include <catch_all.hpp>
 #include <cmath>
 
 namespace Krys::Tests

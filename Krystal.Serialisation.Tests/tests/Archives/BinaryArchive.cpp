@@ -1,7 +1,5 @@
-#include "Archives/BinaryArchive.hpp"
-
+#include "Krystal.Serialisation/Archives/BinaryArchive.hpp"
 #include "Krystal.IO/Streams/MemoryStream.hpp"
-#include <Krystal.Core/Core.hpp>
 
 #include "catch_all.hpp"
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
+#include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Platform/IWindow.hpp"
 
 #ifndef WIN32_LEAN_AND_MEAN

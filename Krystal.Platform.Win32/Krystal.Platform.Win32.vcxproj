@@ -28,8 +28,8 @@
     <ClCompile Include="src\Win32Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Krystal.Core\Krystal.Core.vcxproj">
-      <Project>{a37816bb-d90c-49da-b724-b81362317bfa}</Project>
+    <ProjectReference Include="..\Krystal.Lib\Krystal.Lib.vcxproj">
+      <Project>{38f26636-5d57-4740-a8d2-df219340309a}</Project>
     </ProjectReference>
     <ProjectReference Include="..\Krystal.Platform\Krystal.Platform.vcxproj">
       <Project>{42e8c0a6-1f92-456b-a8b7-0050bfdf97e2}</Project>

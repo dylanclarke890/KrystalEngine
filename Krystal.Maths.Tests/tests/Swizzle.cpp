@@ -1,9 +1,6 @@
 #include "pch.hpp"
 
 #include "Krystal.Maths/Swizzle.hpp"
-#include <Krystal.Maths/Vector.hpp>
-
-#include <catch_all.hpp>
 
 namespace Krys::Tests
 {

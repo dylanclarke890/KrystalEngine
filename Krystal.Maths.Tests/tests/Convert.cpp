@@ -2,8 +2,6 @@
 
 #include "Krystal.Maths/Convert.hpp"
 
-#include <catch_all.hpp>
-
 namespace Krys::Tests
 {
   using namespace Krys::Maths;

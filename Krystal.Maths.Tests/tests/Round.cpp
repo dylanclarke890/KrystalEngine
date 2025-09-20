@@ -1,10 +1,6 @@
 #include "pch.hpp"
 
-#include <Krystal.Maths/Matrix.hpp>
-#include <Krystal.Maths/Round.hpp>
-#include <Krystal.Maths/Vector.hpp>
-
-#include <catch_all.hpp>
+#include "Krystal.Maths/Round.hpp"
 
 namespace Krys::Tests
 {

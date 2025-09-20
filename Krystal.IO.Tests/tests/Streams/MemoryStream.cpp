@@ -1,6 +1,5 @@
 #include "pch.hpp"
 
-#include "Krystal.Core/Core.hpp"
 #include "Krystal.IO/Common.hpp"
 #include "Krystal.IO/Streams/MemoryStream.hpp"
 

@@ -1,8 +1,11 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
-#include "Krystal.IO/Image.hpp"
 #include "Krystal.Gfx/ICamera.hpp"
+#include "Krystal.IO/Image.hpp"
+#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/NativeHandle.hpp"
+#include "Krystal.Lib/SmartPointers.hpp"
+#include "Krystal.Lib/Types.hpp"
 
 namespace Krys::Gfx
 {

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
-#include "Krystal.Core/Detection.hpp"
+#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Detection.hpp"
 
 #ifndef KRYS_GL_OVERRIDE_FUNCTIONS
   #define KRYS_GL_OVERRIDE_FUNCTIONS 1

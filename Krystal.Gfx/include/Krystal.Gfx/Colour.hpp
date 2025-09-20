@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
-#include "Krystal.Core/HashUtils.hpp"
+#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/HashUtils.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
 #include <format>

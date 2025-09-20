@@ -1,7 +1,6 @@
 #pragma once
 
-#include <Krystal.Core/Core.hpp>
-#include <Krystal.IO/IStream.hpp>
+#include "Krystal.IO/IStream.hpp"
 
 namespace Krys::Serialisation
 {

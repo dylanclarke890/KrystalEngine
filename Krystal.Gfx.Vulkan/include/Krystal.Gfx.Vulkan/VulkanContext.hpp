@@ -1,9 +1,7 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.IO/Image.hpp"
-
 #include "Krystal.Gfx.Vulkan/Hooks/vulkan_hooks.hpp"
 
 namespace Krys::Gfx::Vulkan

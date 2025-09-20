@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
 #include "Krystal.Gfx/ICamera.hpp"
 #include "Krystal.Maths/Clipspace.hpp"
 #include "Krystal.Maths/Matrix.hpp"

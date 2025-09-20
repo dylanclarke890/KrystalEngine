@@ -1,9 +1,8 @@
 #pragma once
 
-#include "Krystal.Core/HashUtils.hpp"
+#include "Krystal.Lib/HashUtils.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Vector.hpp"
-
 #include <functional>
 
 namespace std

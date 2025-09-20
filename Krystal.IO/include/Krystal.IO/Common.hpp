@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
 #include "Krystal.IO/Path.hpp"
+#include "Krystal.Lib/Types.hpp"
 
 namespace Krys::IO
 {

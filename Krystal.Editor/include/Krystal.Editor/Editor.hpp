@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
 #include "Krystal.Engine/Application.hpp"
 #include "Krystal.Gfx/Cameras/FirstPersonCamera.hpp"
 #include "Krystal.IO/Image.hpp"

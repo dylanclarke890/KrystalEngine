@@ -1,7 +1,7 @@
-#include "Krystal.Core/Core.hpp"
 #include "Krystal.Debug/ScopedProfiler.hpp"
-#include "Krystal.Platform/Platform.hpp"
+#include "Krystal.Lib/Types.hpp"
 #include "Krystal.Log/ILogger.hpp"
+#include "Krystal.Platform/Platform.hpp"
 
 namespace Krys::Debug
 {
@@ -17,6 +17,6 @@ namespace Krys::Debug
 
     auto *logger = Log::GetGlobalLogger();
     if (logger)
-        logger->Info("{} took {:.3f} ms.", _name, elapsedMs);
+      logger->Info("{} took {:.3f} ms.", _name, elapsedMs);
   }
 }

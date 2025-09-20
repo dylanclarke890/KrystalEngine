@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
-
+#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Types.hpp"
 #include <filesystem>
 #include <string>
 

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
+#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/TypedBool.hpp"
 
 namespace Krys::Gfx
 {

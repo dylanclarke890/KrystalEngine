@@ -1,8 +1,8 @@
 #pragma once
 
+#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Types.hpp"
 #include <type_traits>
-
-#include "Krystal.Core/Core.hpp"
 
 namespace Krys
 {
@@ -11,7 +11,7 @@ namespace Krys
     STATIC_CLASS(RangeUtils)
 
     template <typename T>
-    static void Init(T* first, size_t count)
+    static void Init(T *first, size_t count)
     {
       if constexpr (std::is_trivial_v<T>)
       {
@@ -25,7 +25,7 @@ namespace Krys
     }
 
     template <typename T>
-    static void Destroy(T* first, size_t count)
+    static void Destroy(T *first, size_t count)
     {
       if constexpr (std::is_trivially_destructible_v<T>)
       {
@@ -39,7 +39,7 @@ namespace Krys
     }
 
     template <typename T>
-    static void Copy(const T* src, T* dest, size_t count)
+    static void Copy(const T *src, T *dest, size_t count)
     {
       if constexpr (std::is_trivially_copyable_v<T>)
       {
@@ -53,7 +53,7 @@ namespace Krys
     }
 
     template <typename T>
-    static void Move(T* src, T* dest, size_t count)
+    static void Move(T *src, T *dest, size_t count)
     {
       if constexpr (std::is_trivially_copyable_v<T>)
       {
@@ -67,7 +67,7 @@ namespace Krys
     }
 
     template <typename T>
-    static int Compare(const T* a, const T* b, size_t count)
+    static int Compare(const T *a, const T *b, size_t count)
     {
       if constexpr (std::is_trivial_v<T>)
       {

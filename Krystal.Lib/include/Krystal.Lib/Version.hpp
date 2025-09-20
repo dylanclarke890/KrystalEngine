@@ -1,20 +1,19 @@
 #pragma once
 
-#include <optional>
-
 namespace Krys
 {
   struct Version
   {
-    int Major;
-    int Minor;
-    std::optional<int> Patch = std::nullopt;
+    unsigned int Major;
+    unsigned int Minor;
+    unsigned int Patch;
 
-    constexpr Version(int major, int minor) noexcept : Major(major), Minor(minor)
+    constexpr Version(unsigned int major, unsigned int minor) noexcept : Major(major), Minor(minor), Patch(0)
     {
     }
 
-    constexpr Version(int major, int minor, int patch) noexcept : Major(major), Minor(minor), Patch(patch)
+    constexpr Version(unsigned int major, unsigned int minor, unsigned int patch) noexcept
+        : Major(major), Minor(minor), Patch(patch)
     {
     }
 

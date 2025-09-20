@@ -1,10 +1,7 @@
 #include "Krystal.Platform.Win32/Win32Window.hpp"
-
-#include "Krystal.Core/Core.hpp"
 #include "Krystal.Platform.Win32/Utils.hpp"
 #include "Krystal.Platform/IWindow.hpp"
 #include "Krystal.Platform/Platform.hpp"
-
 #include <cassert>
 #include <hidusage.h>
 #include <string>

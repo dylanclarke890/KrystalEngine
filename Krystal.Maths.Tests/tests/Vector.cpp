@@ -1,14 +1,5 @@
 #include "pch.hpp"
 
-#include <Krystal.Core/Core.hpp>
-#include <Krystal.Maths/Maths.hpp>
-#include <Krystal.Maths/Vector.hpp>
-
-#include <catch_all.hpp>
-#include <cmath>
-#include <limits>
-#include <utility>
-
 using namespace Krys::Maths;
 
 namespace Krys::Tests

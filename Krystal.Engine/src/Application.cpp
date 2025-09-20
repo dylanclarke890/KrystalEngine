@@ -1,6 +1,5 @@
 #include "Krystal.Engine/Application.hpp"
 
-#include "Krystal.Core/Core.hpp"
 #include "Krystal.Debug/ScopedProfiler.hpp"
 #include "Krystal.Platform/Input.hpp"
 #include "Krystal.Platform/Platform.hpp"

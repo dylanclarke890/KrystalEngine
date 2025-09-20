@@ -1,8 +1,5 @@
-#include "Krystal.Core/Events/EventManager.hpp"
-
-#include "Krystal.Core/Core.hpp"
-#include "Krystal.Core/Events/Event.hpp"
-
+#include "Krystal.Lib/Events/EventManager.hpp"
+#include "Krystal.Lib/Events/Event.hpp"
 #include <utility>
 
 namespace Krys

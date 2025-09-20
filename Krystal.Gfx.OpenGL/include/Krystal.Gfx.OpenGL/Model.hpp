@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Shader.hpp"
 #include "Krystal.Gfx.OpenGL/Texture.hpp"
 #include "Krystal.Gfx.OpenGL/Utils.hpp"
+#include "Krystal.Gfx.OpenGL/VertexArray.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
@@ -172,10 +172,9 @@ namespace Krys::Gfx::OpenGL
     Map<string, Unique<Texture2D>> _loadedTextures;
     List<Mesh> _meshes;
     IO::Path _directory;
-    bool _gammaCorrection;
 
   public:
-    Model(const IO::Path &path, bool gamma = false) : _gammaCorrection(gamma), _directory("")
+    Model(const IO::Path &path) noexcept : _directory("")
     {
       LoadModel(path);
     }
@@ -276,7 +275,7 @@ namespace Krys::Gfx::OpenGL
         {
           vertex.Normal = AssimpVec3DToVec3(mesh->mNormals[i]);
         }
-       
+
         // A model can have up to 8 sets of texture coordinates but for now we only care about the first.
         if (mesh->HasTextureCoords(0u))
         {

@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Krystal.Core/Core.hpp"
+#include "Krystal.Lib/Concepts.hpp"
+#include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
@@ -44,6 +45,7 @@ namespace Krys::Maths
     return Vector<T, 3>(tmp);
   }
 
+  // TODO: use policy based design to select between ZO and NO at compile time
   /// Map the specified object coordinates (obj.x, obj.y, obj.z) into window coordinates.
   template <FloatingPoint T, Arithmetic U>
   NO_DISCARD constexpr Vector<T, 3> Project(const Vector<T, 3> &obj, const Matrix<T, 4, 4> &model,
