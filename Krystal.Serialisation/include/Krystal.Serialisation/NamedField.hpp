@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/String.hpp"
 
 namespace Krys::Serialisation
 {

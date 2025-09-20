@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Krystal.Lib/Expected.hpp"
+#include "Krystal.Lib/Func.hpp"
 #include "Krystal.Lib/NativeHandle.hpp"
 #include "Krystal.Lib/SmartPointers.hpp"
 #include "Krystal.Lib/Types.hpp"

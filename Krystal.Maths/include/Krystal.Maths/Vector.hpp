@@ -5,8 +5,9 @@
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Maths/Traits.hpp"
-
 #include <cassert>
+#include <cmath>
+#include <compare>
 #include <type_traits>
 
 #pragma region Helper Macros

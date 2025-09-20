@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/String.hpp"
+#include "Krystal.Lib/List.hpp"
 
 namespace Krys
 {

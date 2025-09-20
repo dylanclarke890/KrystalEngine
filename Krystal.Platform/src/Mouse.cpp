@@ -1,5 +1,4 @@
 #include "Krystal.Platform/Mouse.hpp"
-#include "Krystal.Platform/MouseButtons.hpp"
 
 namespace Krys::Platform
 {

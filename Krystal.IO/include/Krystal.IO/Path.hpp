@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/String.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include <filesystem>
-#include <string>
 
 namespace Krys::IO
 {
@@ -68,7 +68,7 @@ namespace std
   {
     size_t operator()(const Krys::IO::Path &path) const noexcept
     {
-      return std::hash<std::string>()(path.ToString());
+      return std::hash<Krys::string>()(path.ToString());
     }
   };
 }

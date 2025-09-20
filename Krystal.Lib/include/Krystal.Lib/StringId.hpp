@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/Types.hpp"
 #include "Krystal.Lib/HashUtils.hpp"
+#include "Krystal.Lib/String.hpp"
 #include <xhash>
 
 namespace Krys

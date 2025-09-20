@@ -3,6 +3,7 @@
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/Endian.hpp"
 #include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Span.hpp"
 #include <cassert>
 #include <cstring>
 

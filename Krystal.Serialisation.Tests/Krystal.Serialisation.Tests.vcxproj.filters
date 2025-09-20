@@ -24,7 +24,7 @@
     <ClCompile Include="tests\Types\Pair.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Types\Vector.cpp">
+    <ClCompile Include="tests\Types\List.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tests\Types\Array.cpp">

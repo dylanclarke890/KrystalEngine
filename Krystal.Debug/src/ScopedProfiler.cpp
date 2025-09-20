@@ -1,5 +1,4 @@
 #include "Krystal.Debug/ScopedProfiler.hpp"
-#include "Krystal.Lib/Types.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include "Krystal.Platform/Platform.hpp"
 

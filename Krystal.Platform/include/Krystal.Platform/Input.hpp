@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Krystal.Lib/Events/EventManager.hpp"
+#include "Krystal.Lib/SmartPointers.hpp"
 #include "Krystal.Platform/Events.hpp"
 #include "Krystal.Platform/IWindow.hpp"
 #include "Krystal.Platform/Keyboard.hpp"

@@ -7,6 +7,8 @@
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Nullable.hpp"
+#include "Krystal.Lib/Pair.hpp"
 #include "Krystal.Lib/Types.hpp"
 
 namespace Krys::IO

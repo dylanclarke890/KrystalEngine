@@ -3,7 +3,6 @@
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
 #include "Krystal.Serialisation/IArchive.hpp"
 #include "Krystal.Serialisation/Types/Builtins.hpp"
 

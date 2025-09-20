@@ -1,21 +1,8 @@
 #pragma once
 
-#include <array>
 #include <cstddef>
 #include <cstdint>
-#include <expected>
-#include <functional>
-#include <list>
-#include <map>
-#include <optional>
-#include <queue>
-#include <set>
-#include <span>
-#include <string>
-#include <string_view>
-#include <unordered_map>
-#include <utility>
-#include <vector>
+#include <type_traits>
 
 namespace Krys
 {
@@ -46,56 +33,7 @@ namespace Krys
   using float32 = float;
   using float64 = double;
 
-  using string = std::string;
-  using wstring = std::wstring;
-  using stringview = std::string_view;
-
   using std::declval;
-
-  template <typename T>
-  using Nullable = std::optional<T>;
-
-  template <typename TKey, typename TValue, typename TKeyHasher = std::hash<TKey>>
-  using Map = std::unordered_map<TKey, TValue, TKeyHasher>;
-
-  template <typename TKey, typename TValue, typename TKeyHasher = std::hash<TKey>>
-  using MultiMap = std::unordered_multimap<TKey, TValue, TKeyHasher>;
-
-  template <typename TKey, typename TValue, typename TKeyHasher = std::hash<TKey>>
-  using OrderedMap = std::map<TKey, TValue, TKeyHasher>;
-
-  template <typename TKey, typename TValue, typename TKeyHasher = std::hash<TKey>>
-  using OrderedMultiMap = std::multimap<TKey, TValue, TKeyHasher>;
-
-  template <typename T, typename U>
-  using Pair = std::pair<T, U>;
-
-  template <typename T, size_t size>
-  using Array = std::array<T, size>;
-
-  template <typename T>
-  using List = std::vector<T>;
-
-  template <typename T>
-  using LinkedList = std::list<T>;
-
-  template <typename T>
-  using Queue = std::queue<T>;
-
-  template <typename T>
-  using Set = std::set<T>;
-
-  template <typename T>
-  using Span = std::span<T>;
-
-  template <typename T>
-  using Func = std::function<T>;
-
-  template <typename T, typename ErrorType = string>
-  using Expected = std::expected<T, ErrorType>;
-
-  template <typename T>
-  using Unexpected = std::unexpected<T>;
 
   template <bool predicate, typename T, typename U>
   using ConditionalType = std::conditional_t<predicate, T, U>;

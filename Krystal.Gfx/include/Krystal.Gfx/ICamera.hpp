@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Krystal.Lib/Types.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Vector.hpp"
 #include "Krystal.Platform/Input.hpp"
@@ -41,7 +42,7 @@ namespace Krys::Gfx
 
     /// @brief Notifies the camera that the viewport has been resized.
     virtual void OnResize(uint32 width, uint32 height) noexcept = 0;
-    
+
     /// @brief Updates the camera's position and orientation based on input.
     /// @param deltaTime The time elapsed since the last frame in seconds.
     /// @param input The current input state.

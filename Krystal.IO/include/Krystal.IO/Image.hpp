@@ -1,8 +1,10 @@
 #pragma once
 
-#include "Krystal.IO\IStream.hpp"
-#include "Krystal.Lib\Attributes.hpp"
-#include "Krystal.Lib\Types.hpp"
+#include "Krystal.IO/IStream.hpp"
+#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Expected.hpp"
+#include "Krystal.Lib/List.hpp"
+#include "Krystal.Lib/Types.hpp"
 
 namespace Krys::IO
 {

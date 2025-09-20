@@ -6,7 +6,6 @@
 #include "Krystal.IO/Streams/StreamUtils.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Vector.hpp"
-
 #include <cassert>
 
 namespace Krys::Gfx::OpenGL
@@ -69,7 +68,7 @@ namespace Krys::Gfx::OpenGL
     }
 
     template <typename T>
-    void SetUniform(const Krys::string &uniformName, const T &value, bool required = false) const noexcept
+    void SetUniform(const string &uniformName, const T &value, bool required = false) const noexcept
     {
       using namespace Krys::Maths;
 

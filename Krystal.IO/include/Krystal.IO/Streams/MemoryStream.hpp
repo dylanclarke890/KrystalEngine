@@ -3,6 +3,7 @@
 #include "Krystal.IO/Common.hpp"
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include <algorithm>
@@ -24,7 +25,10 @@ namespace Krys::IO
       Open();
     }
 
-    ~MemoryStreamReader() noexcept override = default;
+    ~MemoryStreamReader() noexcept override
+    {
+      Close();
+    }
 
     /// @brief Checks if the stream is open.
     NO_DISCARD bool IsOpen() const noexcept override
@@ -125,7 +129,10 @@ namespace Krys::IO
       Open();
     }
 
-    ~MemoryStreamWriter() noexcept override = default;
+    ~MemoryStreamWriter() noexcept override
+    {
+      Close();
+    }
 
     /// @brief Checks if the stream is open.
     NO_DISCARD bool IsOpen() const noexcept override

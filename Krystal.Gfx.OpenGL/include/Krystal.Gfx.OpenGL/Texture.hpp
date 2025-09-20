@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Krystal.Lib/TypedBool.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
 #include "Krystal.IO/Image.hpp"
-
+#include "Krystal.Lib/Pair.hpp"
+#include "Krystal.Lib/TypedBool.hpp"
 #include <cassert>
 
 namespace Krys::Gfx::OpenGL

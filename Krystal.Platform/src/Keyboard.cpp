@@ -1,5 +1,4 @@
 #include "Krystal.Platform/Keyboard.hpp"
-#include "Krystal.Platform/Keys.hpp"
 
 namespace Krys::Platform
 {

@@ -1,7 +1,5 @@
 #include "Krystal.IO/VirtualFileSystem.hpp"
 #include <algorithm>
-#include <optional>
-#include <utility>
 
 namespace Krys::IO
 {

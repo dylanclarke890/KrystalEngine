@@ -1,6 +1,6 @@
 #pragma once
 
-#include <optional>
+#include "Krystal.Lib/Nullable.hpp"
 
 namespace Krys
 {
@@ -12,7 +12,7 @@ namespace Krys
   class Lazy
   {
   private:
-    std::optional<T> _value;
+    Nullable<T> _value;
     Fn _func;
 
   public:

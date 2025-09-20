@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Set.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Platform/Keys.hpp"
 

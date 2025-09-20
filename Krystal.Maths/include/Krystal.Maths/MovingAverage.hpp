@@ -1,17 +1,19 @@
 #pragma once
 
+#include "Krystal.Lib/Array.hpp"
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/Concepts.hpp"
+#include "Krystal.Lib/Types.hpp"
 
 namespace Krys::Maths
 {
-  template <Arithmetic T, int MaxSamples>
+  template <Arithmetic T, size_t MaxSamples>
   class MovingAverage
   {
     using Type = T;
 
     Array<T, MaxSamples> _samples;
-    uint32 _currentSample, _sampleCount;
+    size_t _currentSample, _sampleCount;
     T _sum;
 
   public:

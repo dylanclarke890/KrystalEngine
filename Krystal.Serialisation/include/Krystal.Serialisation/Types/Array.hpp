@@ -1,11 +1,11 @@
 #pragma once
 
-#include <array>
+#include "Krystal.Lib/Array.hpp"
 
 namespace Krys::Serialisation
 {
   template <typename Archive, typename T, size_t N>
-  void Save(Archive &archive, const std::array<T, N> &arr) noexcept
+  void Save(Archive &archive, const Array<T, N> &arr) noexcept
   {
     size_t size = arr.size();
     archive(size);
@@ -15,7 +15,7 @@ namespace Krys::Serialisation
   }
 
   template <typename Archive, typename T, size_t N>
-  void Load(Archive &archive, std::array<T, N> &arr) noexcept
+  void Load(Archive &archive, Array<T, N> &arr) noexcept
   {
     size_t size {};
     archive(size);

@@ -27,7 +27,7 @@
     <ClInclude Include="include\Krystal.Serialisation\IArchive.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Serialisation\Types\Vector.hpp">
+    <ClInclude Include="include\Krystal.Serialisation\Types\List.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Serialisation\Types\Builtins.hpp">
@@ -37,6 +37,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Serialisation\Types\Array.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Serialisation\Types\String.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,18 +1,20 @@
 #pragma once
 
+#include "Krystal.Lib/Types.hpp"
+
 namespace Krys
 {
   struct Version
   {
-    unsigned int Major;
-    unsigned int Minor;
-    unsigned int Patch;
+    uint32 Major;
+    uint32 Minor;
+    uint32 Patch;
 
-    constexpr Version(unsigned int major, unsigned int minor) noexcept : Major(major), Minor(minor), Patch(0)
+    constexpr Version(uint32 major, uint32 minor) noexcept : Major(major), Minor(minor), Patch(0u)
     {
     }
 
-    constexpr Version(unsigned int major, unsigned int minor, unsigned int patch) noexcept
+    constexpr Version(uint32 major, uint32 minor, uint32 patch) noexcept
         : Major(major), Minor(minor), Patch(patch)
     {
     }

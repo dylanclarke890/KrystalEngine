@@ -1,8 +1,9 @@
 #pragma once
 
 #include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Nullable.hpp"
+#include "Krystal.Lib/String.hpp"
 #include "Krystal.Lib/Types.hpp"
-#include <optional>
 
 namespace Krys::Platform
 {

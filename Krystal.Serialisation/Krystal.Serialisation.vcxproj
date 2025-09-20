@@ -164,7 +164,8 @@
     <ClInclude Include="include\Krystal.Serialisation\Types\Array.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Types\Builtins.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Types\Pair.hpp" />
-    <ClInclude Include="include\Krystal.Serialisation\Types\Vector.hpp" />
+    <ClInclude Include="include\Krystal.Serialisation\Types\String.hpp" />
+    <ClInclude Include="include\Krystal.Serialisation\Types\List.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\placeholder.cpp" />
