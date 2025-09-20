@@ -1,8 +1,6 @@
-#include "pch.hpp"
-
 #include "Krystal.Maths/Clipspace.hpp"
 #include "Krystal.Maths/Convert.hpp"
-#include <cmath>
+#include <catch_all.hpp>
 
 namespace Krys::Tests
 {

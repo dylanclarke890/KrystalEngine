@@ -1,7 +1,6 @@
 #include "Krystal.Serialisation/Archives/BinaryArchive.hpp"
 #include "Krystal.IO/Streams/MemoryStream.hpp"
-
-#include "catch_all.hpp"
+#include <catch_all.hpp>
 
 namespace Krys::Tests
 {

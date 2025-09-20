@@ -1,10 +1,8 @@
 #include "Krystal.Serialisation/Types/Vector.hpp"
-
 #include "Krystal.IO/Streams/MemoryStream.hpp"
 #include "Krystal.Serialisation/Archives/BinaryArchive.hpp"
 #include "Krystal.Serialisation/ISerialiser.hpp"
-
-#include "catch_all.hpp"
+#include <catch_all.hpp>
 
 namespace Krys::Tests
 {

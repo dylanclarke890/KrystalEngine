@@ -118,10 +118,10 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
-      <PrecompiledHeader>Create</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.hpp</PrecompiledHeaderFile>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
@@ -156,16 +156,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="catch_main.cpp" />
-    <ClCompile Include="pch.cpp" />
     <ClCompile Include="tests\Backends\NativeFileBackend.cpp" />
     <ClCompile Include="tests\Image.cpp" />
     <ClCompile Include="tests\Streams\MemoryStream.cpp" />
     <ClCompile Include="tests\Streams\NativeFileStream.cpp" />
     <ClCompile Include="tests\Path.cpp" />
     <ClCompile Include="tests\VirtualFileSystem.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="pch.hpp" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\24bpp-320x240.bmp">

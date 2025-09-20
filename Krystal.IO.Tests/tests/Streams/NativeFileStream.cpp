@@ -1,10 +1,7 @@
-#include "pch.hpp"
-
+#include "Krystal.IO/Streams/NativeFileStream.hpp"
 #include "Krystal.IO/Common.hpp"
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.IO/Streams/NativeFileStream.hpp"
-#include <fstream>
-#include <vector>
+#include <catch_all.hpp>
 
 namespace Krys::Tests
 {

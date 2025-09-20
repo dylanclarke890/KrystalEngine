@@ -1,7 +1,5 @@
-#include "pch.hpp"
-
 #include "Krystal.Maths/Interpolate.hpp"
-
+#include <catch_all.hpp>
 
 namespace Krys::Tests
 {

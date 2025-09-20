@@ -1,7 +1,5 @@
-#include "pch.hpp"
-
 #include "Krystal.Maths/Clamp.hpp"
-
+#include <catch_all.hpp>
 
 namespace Krys::Tests
 {

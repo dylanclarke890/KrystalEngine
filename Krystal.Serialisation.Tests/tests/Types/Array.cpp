@@ -3,7 +3,6 @@
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Serialisation/Archives/BinaryArchive.hpp"
 #include "Krystal.Serialisation/ISerialiser.hpp"
-#include <array>
 #include <catch_all.hpp>
 
 namespace Krys::Tests

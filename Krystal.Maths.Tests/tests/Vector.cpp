@@ -1,4 +1,6 @@
-#include "pch.hpp"
+#include "Krystal.Maths/Vector.hpp"
+#include "Krystal.Maths/Maths.hpp"
+#include <catch_all.hpp>
 
 using namespace Krys::Maths;
 

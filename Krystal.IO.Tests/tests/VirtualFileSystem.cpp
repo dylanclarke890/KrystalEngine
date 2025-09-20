@@ -1,8 +1,7 @@
-#include "pch.hpp"
-
+#include "Krystal.IO/VirtualFileSystem.hpp"
 #include "Krystal.IO/Backends/NativeFileBackend.hpp"
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.IO/VirtualFileSystem.hpp"
+#include <catch_all.hpp>
 
 #include <cstring>
 #include <fstream>

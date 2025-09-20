@@ -1,6 +1,5 @@
-#include "pch.hpp"
-
 #include "Krystal.Maths/BoundingBox.hpp"
+#include <catch_all.hpp>
 
 namespace Krys::Tests
 {

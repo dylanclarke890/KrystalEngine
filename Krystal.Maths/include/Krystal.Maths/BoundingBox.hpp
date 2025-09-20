@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Krystal.Lib/Concepts.hpp"
+#include "Krystal.Lib/Attributes.hpp"
 
 namespace Krys::Maths
 {

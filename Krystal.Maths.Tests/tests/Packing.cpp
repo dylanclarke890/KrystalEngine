@@ -1,6 +1,5 @@
-#include "pch.hpp"
-
 #include "Krystal.Maths/Packing.hpp"
+#include <catch_all.hpp>
 
 namespace Krys::Tests
 {

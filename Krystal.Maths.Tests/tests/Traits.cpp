@@ -1,6 +1,7 @@
-#include "pch.hpp"
-
 #include "Krystal.Maths/Traits.hpp"
+#include "Krystal.Maths/Matrix.hpp"
+#include "Krystal.Maths/Vector.hpp"
+#include <catch_all.hpp>
 
 namespace Krys::Tests
 {
@@ -60,64 +61,64 @@ namespace Krys::Tests
   {
     STATIC_REQUIRE(Traits<Mat2x2>::IsMatrix);
     STATIC_REQUIRE_FALSE(Traits<Mat2x2>::IsVector);
-    STATIC_REQUIRE(Traits<Mat2x2>::Rows == 2);
     STATIC_REQUIRE(Traits<Mat2x2>::Columns == 2);
+    STATIC_REQUIRE(Traits<Mat2x2>::Rows == 2);
     STATIC_REQUIRE(Traits<Mat2x2>::TotalComponents == 4);
 
     STATIC_REQUIRE(Traits<Mat2x3>::IsMatrix);
     STATIC_REQUIRE_FALSE(Traits<Mat2x3>::IsVector);
 
-    STATIC_REQUIRE(Traits<Mat2x3>::Rows == 2);
-    STATIC_REQUIRE(Traits<Mat2x3>::Columns == 3);
+    STATIC_REQUIRE(Traits<Mat2x3>::Columns == 2);
+    STATIC_REQUIRE(Traits<Mat2x3>::Rows == 3);
     STATIC_REQUIRE(Traits<Mat2x3>::TotalComponents == 6);
 
     STATIC_REQUIRE(Traits<Mat2x4>::IsMatrix);
     STATIC_REQUIRE_FALSE(Traits<Mat2x4>::IsVector);
 
-    STATIC_REQUIRE(Traits<Mat2x4>::Rows == 2);
-    STATIC_REQUIRE(Traits<Mat2x4>::Columns == 4);
+    STATIC_REQUIRE(Traits<Mat2x4>::Columns == 2);
+    STATIC_REQUIRE(Traits<Mat2x4>::Rows == 4);
     STATIC_REQUIRE(Traits<Mat2x4>::TotalComponents == 8);
 
     STATIC_REQUIRE(Traits<Mat3x2>::IsMatrix);
     STATIC_REQUIRE_FALSE(Traits<Mat3x2>::IsVector);
 
-    STATIC_REQUIRE(Traits<Mat3x2>::Rows == 3);
-    STATIC_REQUIRE(Traits<Mat3x2>::Columns == 2);
+    STATIC_REQUIRE(Traits<Mat3x2>::Columns == 3);
+    STATIC_REQUIRE(Traits<Mat3x2>::Rows == 2);
     STATIC_REQUIRE(Traits<Mat3x2>::TotalComponents == 6);
 
     STATIC_REQUIRE(Traits<Mat3x3>::IsMatrix);
     STATIC_REQUIRE_FALSE(Traits<Mat3x3>::IsVector);
 
-    STATIC_REQUIRE(Traits<Mat3x3>::Rows == 3);
     STATIC_REQUIRE(Traits<Mat3x3>::Columns == 3);
+    STATIC_REQUIRE(Traits<Mat3x3>::Rows == 3);
     STATIC_REQUIRE(Traits<Mat3x3>::TotalComponents == 9);
 
     STATIC_REQUIRE(Traits<Mat3x4>::IsMatrix);
     STATIC_REQUIRE_FALSE(Traits<Mat3x4>::IsVector);
 
-    STATIC_REQUIRE(Traits<Mat3x4>::Rows == 3);
-    STATIC_REQUIRE(Traits<Mat3x4>::Columns == 4);
+    STATIC_REQUIRE(Traits<Mat3x4>::Columns == 3);
+    STATIC_REQUIRE(Traits<Mat3x4>::Rows == 4);
     STATIC_REQUIRE(Traits<Mat3x4>::TotalComponents == 12);
 
     STATIC_REQUIRE(Traits<Mat4x2>::IsMatrix);
     STATIC_REQUIRE_FALSE(Traits<Mat4x2>::IsVector);
 
-    STATIC_REQUIRE(Traits<Mat4x2>::Rows == 4);
-    STATIC_REQUIRE(Traits<Mat4x2>::Columns == 2);
+    STATIC_REQUIRE(Traits<Mat4x2>::Columns == 4);
+    STATIC_REQUIRE(Traits<Mat4x2>::Rows == 2);
     STATIC_REQUIRE(Traits<Mat4x2>::TotalComponents == 8);
 
     STATIC_REQUIRE(Traits<Mat4x3>::IsMatrix);
     STATIC_REQUIRE_FALSE(Traits<Mat4x3>::IsVector);
 
-    STATIC_REQUIRE(Traits<Mat4x3>::Rows == 4);
-    STATIC_REQUIRE(Traits<Mat4x3>::Columns == 3);
+    STATIC_REQUIRE(Traits<Mat4x3>::Columns == 4);
+    STATIC_REQUIRE(Traits<Mat4x3>::Rows == 3);
     STATIC_REQUIRE(Traits<Mat4x3>::TotalComponents == 12);
 
     STATIC_REQUIRE(Traits<Mat4x4>::IsMatrix);
     STATIC_REQUIRE_FALSE(Traits<Mat4x4>::IsVector);
 
-    STATIC_REQUIRE(Traits<Mat4x4>::Rows == 4);
     STATIC_REQUIRE(Traits<Mat4x4>::Columns == 4);
+    STATIC_REQUIRE(Traits<Mat4x4>::Rows == 4);
     STATIC_REQUIRE(Traits<Mat4x4>::TotalComponents == 16);
   }
 }
