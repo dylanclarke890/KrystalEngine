@@ -1,8 +1,11 @@
 #pragma once
 
 #include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Concepts.hpp"
+#include "Krystal.Lib/List.hpp"
+#include "Krystal.Lib/Nullable.hpp"
+#include "Krystal.Lib/Queue.hpp"
 #include "Krystal.Lib/Types.hpp"
-
 #include <cassert>
 
 namespace Krys::Impl
@@ -22,6 +25,7 @@ namespace Krys::Impl
 namespace Krys::Gfx::OpenGL
 {
   template <typename T, typename THandle>
+  requires(MoveConstructible<T> && !CopyConstructible<T> && DerivedFrom<Impl::Handle<THandle>, THandle>)
   class ResourceManager
   {
   protected:
@@ -65,30 +69,6 @@ namespace Krys::Gfx::OpenGL
       }
     }
 
-    bool Destroy(THandle handle) noexcept
-    {
-      uint16 index = GetIndex(handle);
-      uint16 generation = GetGeneration(handle);
-
-      if (index >= _resources.size()) [[unlikely]]
-      {
-        return false;
-      }
-
-      ResourceEntry &entry = _resources[index];
-      if (!entry.Resource.has_value() || entry.Generation != generation) [[unlikely]]
-      {
-        return false;
-      }
-
-      entry.Resource.reset();
-      entry.Generation++;
-
-      _freeIndices.push(index);
-
-      return true;
-    }
-
   protected:
     NO_DISCARD THandle CreateHandle(uint16 index, uint16 generation) const noexcept
     {
@@ -124,6 +104,32 @@ namespace Krys::Gfx::OpenGL
       {
         return static_cast<uint16>(_resources.size());
       }
+    }
+
+    bool FreeResource(THandle handle) noexcept
+    {
+      assert(handle.IsValid() && "Invalid handle.");
+
+      uint16 index = GetIndex(handle);
+      uint16 generation = GetGeneration(handle);
+
+      if (index >= _resources.size()) [[unlikely]]
+      {
+        return false;
+      }
+
+      ResourceEntry &entry = _resources[index];
+      if (!entry.Resource.has_value() || entry.Generation != generation) [[unlikely]]
+      {
+        return false;
+      }
+
+      entry.Resource.reset();
+      entry.Generation++;
+
+      _freeIndices.push(index);
+
+      return true;
     }
   };
 }

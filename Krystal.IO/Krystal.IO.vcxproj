@@ -25,7 +25,7 @@
     <ClCompile Include="src\Backends\NativeFileBackend.cpp" />
     <ClCompile Include="src\Streams\NativeFileStream.cpp" />
     <ClCompile Include="src\VirtualFileSystem.cpp" />
-    <ClCompile Include="stb\stb.cpp" />
+    <ClCompile Include="third-party\stb\stb.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.IO\Backends\NativeFileBackend.hpp" />
@@ -37,7 +37,7 @@
     <ClInclude Include="include\Krystal.IO\Streams\StreamUtils.hpp" />
     <ClInclude Include="include\Krystal.IO\VirtualFileSystem.hpp" />
     <ClInclude Include="include\Krystal.IO\Path.hpp" />
-    <ClInclude Include="stb\stb_image.h" />
+    <ClInclude Include="third-party\stb\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -110,7 +110,7 @@
     <ClangTidyChecks>-Wno-pragma-once-outside-header</ClangTidyChecks>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(KrysProjectInclude);$(VC_IncludePath);$(WindowsSDK_IncludePath);stb;</IncludePath>
+    <IncludePath>$(KrysProjectInclude);$(VC_IncludePath);$(WindowsSDK_IncludePath);$(ProjectDir)third-party/stb;</IncludePath>
     <RunCodeAnalysis>false</RunCodeAnalysis>
     <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
     <ClangTidyChecks>-Wno-pragma-once-outside-header</ClangTidyChecks>

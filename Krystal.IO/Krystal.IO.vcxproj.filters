@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="stb\stb.cpp">
+    <ClCompile Include="third-party\stb\stb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="include\Krystal.IO\IFileBackend.hpp">
@@ -38,7 +38,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stb\stb_image.h">
+    <ClInclude Include="third-party\stb\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.IO\VirtualFileSystem.hpp">

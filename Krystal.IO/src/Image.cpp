@@ -1,10 +1,8 @@
 #include "Krystal.IO/Image.hpp"
-
-#include "Krystal.Lib/Types.hpp"
 #include "Krystal.IO/Common.hpp"
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.IO/Streams/NativeFileStream.hpp"
-
+#include "Krystal.Lib/Types.hpp"
 #include <stb_image.h>
 #include <utility>
 
