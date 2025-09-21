@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
-#include "Krystal.IO/Path.hpp"
-#include "Krystal.IO/Streams/NativeFileStream.hpp"
-#include "Krystal.IO/Streams/StreamUtils.hpp"
+#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/String.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Vector.hpp"
 #include <cassert>
@@ -12,20 +11,21 @@ namespace Krys::Gfx::OpenGL
 {
   class Shader
   {
-    GLuint _handle;
+    NO_COPY(Shader)
+
+    GLuint _id;
 
   public:
-    Shader(const Krys::IO::Path &vertexFilepath, const Krys::IO::Path &fragmentFilepath) noexcept
-        : _handle(glCreateProgram())
+    Shader(const string &vertex, const string &fragment) noexcept : _id(glCreateProgram())
     {
       auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
-      CreateShader(vertexFilepath, vertexShader);
-
       auto fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-      CreateShader(fragmentFilepath, fragmentShader);
 
-      glAttachShader(_handle, vertexShader);
-      glAttachShader(_handle, fragmentShader);
+      CreateShader(vertex, vertexShader);
+      CreateShader(fragment, fragmentShader);
+
+      glAttachShader(_id, vertexShader);
+      glAttachShader(_id, fragmentShader);
 
       Link();
 
@@ -33,22 +33,20 @@ namespace Krys::Gfx::OpenGL
       glDeleteShader(fragmentShader);
     }
 
-    Shader(const Krys::IO::Path &vertexFilepath, const Krys::IO::Path &geometryFilepath,
-           const Krys::IO::Path &fragmentFilepath) noexcept
-        : _handle(glCreateProgram())
+    Shader(const string &vertex, const string &geometry, const string &fragment) noexcept
+        : _id(glCreateProgram())
     {
       auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
-      CreateShader(vertexFilepath, vertexShader);
-
       auto geometryShader = glCreateShader(GL_GEOMETRY_SHADER);
-      CreateShader(geometryFilepath, geometryShader);
-
       auto fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-      CreateShader(fragmentFilepath, fragmentShader);
 
-      glAttachShader(_handle, vertexShader);
-      glAttachShader(_handle, geometryShader);
-      glAttachShader(_handle, fragmentShader);
+      CreateShader(vertex, vertexShader);
+      CreateShader(geometry, geometryShader);
+      CreateShader(fragment, fragmentShader);
+
+      glAttachShader(_id, vertexShader);
+      glAttachShader(_id, geometryShader);
+      glAttachShader(_id, fragmentShader);
 
       Link();
 
@@ -57,14 +55,28 @@ namespace Krys::Gfx::OpenGL
       glDeleteShader(fragmentShader);
     }
 
+    Shader(Shader &&other) noexcept : _id(0u)
+    {
+      Swap(other);
+    }
+
+    Shader &operator=(Shader &&other) noexcept
+    {
+      Swap(other);
+      return *this;
+    }
+
     ~Shader() noexcept
     {
-      glDeleteProgram(_handle);
+      if (_id != 0u)
+      {
+        glDeleteProgram(_id);
+      }
     }
 
     void Bind() const noexcept
     {
-      glUseProgram(_handle);
+      glUseProgram(_id);
     }
 
     template <typename T>
@@ -72,7 +84,7 @@ namespace Krys::Gfx::OpenGL
     {
       using namespace Krys::Maths;
 
-      GLint location = glGetUniformLocation(_handle, uniformName.c_str());
+      GLint location = glGetUniformLocation(_id, uniformName.c_str());
       if (location == -1)
       {
         assert(!required && "Uniform not found in shader, possibly optimized out by the compiler.");
@@ -82,45 +94,45 @@ namespace Krys::Gfx::OpenGL
 #define IsUniformType(type) constexpr(std::is_same_v<T, type>)
 
       if IsUniformType (bool)
-        glProgramUniform1i(_handle, location, value);
+        glProgramUniform1i(_id, location, value);
       else if IsUniformType (int32)
-        glProgramUniform1i(_handle, location, value);
+        glProgramUniform1i(_id, location, value);
       else if IsUniformType (uint32)
-        glProgramUniform1ui(_handle, location, value);
+        glProgramUniform1ui(_id, location, value);
       else if IsUniformType (float32)
-        glProgramUniform1f(_handle, location, value);
+        glProgramUniform1f(_id, location, value);
       else if IsUniformType (Vec2)
-        glProgramUniform2f(_handle, location, value.x, value.y);
+        glProgramUniform2f(_id, location, value.x, value.y);
       else if IsUniformType (Vec3)
-        glProgramUniform3f(_handle, location, value.x, value.y, value.z);
+        glProgramUniform3f(_id, location, value.x, value.y, value.z);
       else if IsUniformType (Vec4)
-        glProgramUniform4f(_handle, location, value.x, value.y, value.z, value.w);
+        glProgramUniform4f(_id, location, value.x, value.y, value.z, value.w);
       else if IsUniformType (Mat2)
-        glProgramUniformMatrix2fv(_handle, location, 1, GL_FALSE, &value[0].x);
+        glProgramUniformMatrix2fv(_id, location, 1, GL_FALSE, &value[0].x);
       else if IsUniformType (Mat3)
-        glProgramUniformMatrix3fv(_handle, location, 1, GL_FALSE, &value[0].x);
+        glProgramUniformMatrix3fv(_id, location, 1, GL_FALSE, &value[0].x);
       else if IsUniformType (Mat4)
-        glProgramUniformMatrix4fv(_handle, location, 1, GL_FALSE, &value[0].x);
+        glProgramUniformMatrix4fv(_id, location, 1, GL_FALSE, &value[0].x);
       else if IsUniformType (List<int32>)
-        glProgramUniform1iv(_handle, location, static_cast<GLsizei>(value.size()), value.data());
+        glProgramUniform1iv(_id, location, static_cast<GLsizei>(value.size()), value.data());
       else if IsUniformType (List<uint32>)
-        glProgramUniform1uiv(_handle, location, static_cast<GLsizei>(value.size()), value.data());
+        glProgramUniform1uiv(_id, location, static_cast<GLsizei>(value.size()), value.data());
       else if IsUniformType (List<float32>)
-        glProgramUniform1fv(_handle, location, static_cast<GLsizei>(value.size()), value.data());
+        glProgramUniform1fv(_id, location, static_cast<GLsizei>(value.size()), value.data());
       else if IsUniformType (List<Vec2>)
-        glProgramUniform2fv(_handle, location, static_cast<GLsizei>(value.size()), &value[0].x);
+        glProgramUniform2fv(_id, location, static_cast<GLsizei>(value.size()), &value[0].x);
       else if IsUniformType (List<Vec3>)
-        glProgramUniform3fv(_handle, location, static_cast<GLsizei>(value.size()), &value[0].x);
+        glProgramUniform3fv(_id, location, static_cast<GLsizei>(value.size()), &value[0].x);
       else if IsUniformType (List<Vec4>)
-        glProgramUniform4fv(_handle, location, static_cast<GLsizei>(value.size()), &value[0].x);
+        glProgramUniform4fv(_id, location, static_cast<GLsizei>(value.size()), &value[0].x);
       else if IsUniformType (List<Mat2>)
-        glProgramUniformMatrix2fv(_handle, location, static_cast<GLsizei>(value.size()), GL_FALSE,
+        glProgramUniformMatrix2fv(_id, location, static_cast<GLsizei>(value.size()), GL_FALSE,
                                   &value[0][0].x);
       else if IsUniformType (List<Mat3>)
-        glProgramUniformMatrix3fv(_handle, location, static_cast<GLsizei>(value.size()), GL_FALSE,
+        glProgramUniformMatrix3fv(_id, location, static_cast<GLsizei>(value.size()), GL_FALSE,
                                   &value[0][0].x);
       else if IsUniformType (List<Mat4>)
-        glProgramUniformMatrix4fv(_handle, location, static_cast<GLsizei>(value.size()), GL_FALSE,
+        glProgramUniformMatrix4fv(_id, location, static_cast<GLsizei>(value.size()), GL_FALSE,
                                   &value[0][0].x);
       else
         static_assert(false, "Unsupported uniform type.");
@@ -129,14 +141,10 @@ namespace Krys::Gfx::OpenGL
     }
 
   private:
-    void CreateShader(const Krys::IO::Path &filepath, unsigned int shader) noexcept
+    void CreateShader(const string &source, unsigned int shader) noexcept
     {
-      auto reader = Krys::IO::NativeFileReader(filepath);
-      auto sourceResult = Krys::IO::StreamUtils::ReadAllText(reader);
-      assert(sourceResult.has_value());
-
-      auto source = sourceResult->c_str();
-      glShaderSource(shader, 1, &source, NULL);
+      const auto *src = source.c_str();
+      glShaderSource(shader, 1, &src, NULL);
       glCompileShader(shader);
 
       int success;
@@ -151,16 +159,21 @@ namespace Krys::Gfx::OpenGL
 
     void Link() const noexcept
     {
-      glLinkProgram(_handle);
+      glLinkProgram(_id);
 
       int success;
       char infoLog[512];
-      glGetProgramiv(_handle, GL_LINK_STATUS, &success);
+      glGetProgramiv(_id, GL_LINK_STATUS, &success);
       if (!success)
       {
-        glGetProgramInfoLog(_handle, 512, NULL, infoLog);
+        glGetProgramInfoLog(_id, 512, NULL, infoLog);
         assert(false && "Shader program linking failed. See log for details.");
       }
+    }
+
+    void Swap(Shader &other) noexcept
+    {
+      std::swap(_id, other._id);
     }
   };
 }

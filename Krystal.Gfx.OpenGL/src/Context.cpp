@@ -46,8 +46,8 @@ namespace
   Vec3 lightPos = Vec3(2.0f, 4.0f, -2.0f);
   Vec3 lightColor = Vec3(0.2f, 0.2f, 0.7f);
 
-  Map<string, Unique<Shader>> shaders;
   Map<string, TextureHandle> textureHandles;
+  Map<string, ShaderHandle> shaderHandles;
   Map<string, Unique<VertexArray>> vaos;
   Map<string, Unique<VertexBuffer>> vbos;
   Map<string, Unique<IndexBuffer>> ebos;
@@ -307,7 +307,8 @@ namespace
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
   }
 
-  void CreateEnvironmentAndIrradianceCubemaps(uint32 width, uint32 height, TextureSystem &textureSystem)
+  void CreateEnvironmentAndIrradianceCubemaps(uint32 width, uint32 height, TextureSystem &textureSystem,
+                                              ShaderSystem &shaderSystem)
   {
     uint captureFBO;
     uint captureRBO;
@@ -342,10 +343,10 @@ namespace
                            LookAt(Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(0.0f, -1.0f, 0.0f))};
 
     {
-      auto &shader = shaders.at("hdr-to-cubemap");
-      shader->Bind();
-      shader->SetUniform("equirectangularMap", 0);
-      shader->SetUniform("projection", captureProjection);
+      auto &shader = shaderSystem.Get(shaderHandles.at("hdr-to-cubemap"));
+      shader.Bind();
+      shader.SetUniform("equirectangularMap", 0);
+      shader.SetUniform("projection", captureProjection);
 
       textureSystem.Get(textureHandles.at("hdr-environment")).Bind(0);
       vaos.at("cube")->Bind();
@@ -354,7 +355,7 @@ namespace
       glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
       for (uint i = 0; i < 6; ++i)
       {
-        shader->SetUniform("view", captureViews[i]);
+        shader.SetUniform("view", captureViews[i]);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
                                envCubemap, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -369,7 +370,7 @@ namespace
     }
 
     {
-      auto &shader = shaders.at("irradiance-convolution");
+      auto &shader = shaderSystem.Get(shaderHandles.at("irradiance-convolution"));
       GLuint irradianceMap;
       glGenTextures(1, &irradianceMap);
       glBindTexture(GL_TEXTURE_CUBE_MAP, irradianceMap);
@@ -387,9 +388,9 @@ namespace
       glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
       glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, 32, 32);
 
-      shader->Bind();
-      shader->SetUniform("environmentMap", 0);
-      shader->SetUniform("projection", captureProjection);
+      shader.Bind();
+      shader.SetUniform("environmentMap", 0);
+      shader.SetUniform("projection", captureProjection);
       glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
 
@@ -397,7 +398,7 @@ namespace
       glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
       for (uint i = 0; i < 6; ++i)
       {
-        shader->SetUniform("view", captureViews[i]);
+        shader.SetUniform("view", captureViews[i]);
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
                                irradianceMap, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -426,10 +427,10 @@ namespace
       // generate mipmaps for the cubemap so OpenGL automatically allocates the required memory.
       glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
-      auto &shader = shaders.at("prefilter");
-      shader->Bind();
-      shader->SetUniform("environmentMap", 0);
-      shader->SetUniform("projection", captureProjection);
+      auto &shader = shaderSystem.Get(shaderHandles.at("prefilter"));
+      shader.Bind();
+      shader.SetUniform("environmentMap", 0);
+      shader.SetUniform("projection", captureProjection);
       glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_CUBE_MAP, envCubemap);
       glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
@@ -443,10 +444,10 @@ namespace
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
         glViewport(0, 0, mipWidth, mipHeight);
         float roughness = (float)mip / (float)(maxMipLevels - 1);
-        shader->SetUniform("roughness", roughness);
+        shader.SetUniform("roughness", roughness);
         for (unsigned int i = 0; i < 6; ++i)
         {
-          shader->SetUniform("view", captureViews[i]);
+          shader.SetUniform("view", captureViews[i]);
           glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
                                  prefilterMap, mip);
           glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -459,7 +460,7 @@ namespace
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     {
-      auto &shader = shaders.at("brdf");
+      auto &shader = shaderSystem.Get(shaderHandles.at("brdf"));
       // pbr: generate a 2D LUT from the BRDF equations used.
       // ----------------------------------------------------
       unsigned int brdfLUTTexture;
@@ -481,7 +482,7 @@ namespace
       glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, brdfLUTTexture, 0);
 
       glViewport(0, 0, 512, 512);
-      shader->Bind();
+      shader.Bind();
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
       vaos.at("screen-quad")->Bind();
       Utils::Draw(GL_TRIANGLE_STRIP, 4);
@@ -640,75 +641,74 @@ namespace Krys::Gfx::OpenGL
       using namespace IO;
       Path base = Path("data/shaders/opengl");
 
-      shaders["model"] = CreateUnique<Shader>(base / Path("model.vert"), base / Path("model.frag"));
-      shaders["instanced-model"] =
-        CreateUnique<Shader>(base / Path("instanced-model.vert"), base / Path("instanced-model.frag"));
-      shaders["visualise-normals"] =
-        CreateUnique<Shader>(base / Path("visualise-normals.vert"), base / Path("visualise-normals.geo"),
-                             base / Path("visualise-normals.frag"));
-      shaders["skybox"] = CreateUnique<Shader>(base / Path("skybox.vert"), base / Path("skybox.frag"));
-      shaders["light-source"] =
-        CreateUnique<Shader>(base / Path("lightsource.vert"), base / Path("lightsource.frag"));
-      shaders["lighting"] = CreateUnique<Shader>(base / Path("basic.vert"), base / Path("lighting.frag"));
-      shaders["flat-colour-phong-material"] =
-        CreateUnique<Shader>(base / Path("basic.vert"), base / Path("flat-colour-phong-material.frag"));
-      shaders["phong-material"] =
-        CreateUnique<Shader>(base / Path("basic.vert"), base / Path("phong-material.frag"));
-      shaders["directional-depth"] =
-        CreateUnique<Shader>(base / Path("directional-shadow-map.vert"), base / Path("empty.frag"));
-      shaders["point-depth"] =
-        CreateUnique<Shader>(base / Path("point-shadows.vert"), base / Path("point-shadows.geo"),
-                             base / Path("point-shadows.frag"));
-      shaders["directional-shadow-mapping"] =
-        CreateUnique<Shader>(base / Path("shadow-mapping.vert"), base / Path("shadow-mapping.frag"));
-      shaders["point-shadow-mapping"] = CreateUnique<Shader>(base / Path("point-shadow-mapping.vert"),
-                                                             base / Path("point-shadow-mapping.frag"));
-      shaders["debug-quad"] = CreateUnique<Shader>(base / Path("debug-quad-shadow-map.vert"),
-                                                   base / Path("debug-quad-shadow-map.frag"));
-      shaders["normal-mapping"] =
-        CreateUnique<Shader>(base / Path("normal-mapping.vert"), base / Path("normal-mapping.frag"));
+      shaderHandles["model"] = _shaders.Load(base / Path("model.vert"), base / Path("model.frag"));
+      shaderHandles["instanced-model"] =
+        _shaders.Load(base / Path("instanced-model.vert"), base / Path("instanced-model.frag"));
+      shaderHandles["visualise-normals"] =
+        _shaders.Load(base / Path("visualise-normals.vert"), base / Path("visualise-normals.geo"),
+                      base / Path("visualise-normals.frag"));
+      shaderHandles["skybox"] = _shaders.Load(base / Path("skybox.vert"), base / Path("skybox.frag"));
+      shaderHandles["light-source"] =
+        _shaders.Load(base / Path("lightsource.vert"), base / Path("lightsource.frag"));
+      shaderHandles["lighting"] = _shaders.Load(base / Path("basic.vert"), base / Path("lighting.frag"));
+      shaderHandles["flat-colour-phong-material"] =
+        _shaders.Load(base / Path("basic.vert"), base / Path("flat-colour-phong-material.frag"));
+      shaderHandles["phong-material"] =
+        _shaders.Load(base / Path("basic.vert"), base / Path("phong-material.frag"));
+      shaderHandles["directional-depth"] =
+        _shaders.Load(base / Path("directional-shadow-map.vert"), base / Path("empty.frag"));
+      shaderHandles["point-depth"] =
+        _shaders.Load(base / Path("point-shadows.vert"), base / Path("point-shadows.geo"),
+                      base / Path("point-shadows.frag"));
+      shaderHandles["directional-shadow-mapping"] =
+        _shaders.Load(base / Path("shadow-mapping.vert"), base / Path("shadow-mapping.frag"));
+      shaderHandles["point-shadow-mapping"] =
+        _shaders.Load(base / Path("point-shadow-mapping.vert"), base / Path("point-shadow-mapping.frag"));
+      shaderHandles["debug-quad"] =
+        _shaders.Load(base / Path("debug-quad-shadow-map.vert"), base / Path("debug-quad-shadow-map.frag"));
+      shaderHandles["normal-mapping"] =
+        _shaders.Load(base / Path("normal-mapping.vert"), base / Path("normal-mapping.frag"));
 
-      shaders["parallax-mapping"] =
-        CreateUnique<Shader>(base / Path("parallax-mapping.vert"), base / Path("parallax-mapping.frag"));
+      shaderHandles["parallax-mapping"] =
+        _shaders.Load(base / Path("parallax-mapping.vert"), base / Path("parallax-mapping.frag"));
 
-      shaders["hdr"] = CreateUnique<Shader>(base / Path("hdr.vert"), base / Path("hdr.frag"));
-      shaders["hdr-lighting"] =
-        CreateUnique<Shader>(base / Path("hdr-test-lighting.vert"), base / Path("hdr-test-lighting.frag"));
+      shaderHandles["hdr"] = _shaders.Load(base / Path("hdr.vert"), base / Path("hdr.frag"));
+      shaderHandles["hdr-lighting"] =
+        _shaders.Load(base / Path("hdr-test-lighting.vert"), base / Path("hdr-test-lighting.frag"));
 
-      shaders["bloom"] = CreateUnique<Shader>(base / Path("7/bloom.vert"), base / Path("7/bloom.frag"));
-      shaders["bloom-light"] =
-        CreateUnique<Shader>(base / Path("7/bloom.vert"), base / Path("7/light-box.frag"));
-      shaders["bloom-final"] =
-        CreateUnique<Shader>(base / Path("7/bloom-final.vert"), base / Path("7/bloom-final.frag"));
-      shaders["blur"] = CreateUnique<Shader>(base / Path("7/blur.vert"), base / Path("7/blur.frag"));
+      shaderHandles["bloom"] = _shaders.Load(base / Path("7/bloom.vert"), base / Path("7/bloom.frag"));
+      shaderHandles["bloom-light"] =
+        _shaders.Load(base / Path("7/bloom.vert"), base / Path("7/light-box.frag"));
+      shaderHandles["bloom-final"] =
+        _shaders.Load(base / Path("7/bloom-final.vert"), base / Path("7/bloom-final.frag"));
+      shaderHandles["blur"] = _shaders.Load(base / Path("7/blur.vert"), base / Path("7/blur.frag"));
 
-      shaders["g-buffer"] =
-        CreateUnique<Shader>(base / Path("8/g-buffer.vert"), base / Path("8/g-buffer.frag"));
-      shaders["deferred-shading"] =
-        CreateUnique<Shader>(base / Path("8/deferred-shading.vert"), base / Path("8/deferred-shading.frag"));
-      shaders["deferred-light"] = CreateUnique<Shader>(base / Path("8/deferred-light-box.vert"),
-                                                       base / Path("8/deferred-light-box.frag"));
+      shaderHandles["g-buffer"] =
+        _shaders.Load(base / Path("8/g-buffer.vert"), base / Path("8/g-buffer.frag"));
+      shaderHandles["deferred-shading"] =
+        _shaders.Load(base / Path("8/deferred-shading.vert"), base / Path("8/deferred-shading.frag"));
+      shaderHandles["deferred-light"] =
+        _shaders.Load(base / Path("8/deferred-light-box.vert"), base / Path("8/deferred-light-box.frag"));
 
-      shaders["ssao-geometry"] =
-        CreateUnique<Shader>(base / Path("9/ssao-geometry.vert"), base / Path("9/ssao-geometry.frag"));
-      shaders["ssao"] = CreateUnique<Shader>(base / Path("9/ssao.vert"), base / Path("9/ssao.frag"));
-      shaders["ssao-blur"] =
-        CreateUnique<Shader>(base / Path("9/ssao.vert"), base / Path("9/ssao-blur.frag"));
-      shaders["ssao-lighting"] =
-        CreateUnique<Shader>(base / Path("9/ssao.vert"), base / Path("9/ssao-lighting.frag"));
+      shaderHandles["ssao-geometry"] =
+        _shaders.Load(base / Path("9/ssao-geometry.vert"), base / Path("9/ssao-geometry.frag"));
+      shaderHandles["ssao"] = _shaders.Load(base / Path("9/ssao.vert"), base / Path("9/ssao.frag"));
+      shaderHandles["ssao-blur"] = _shaders.Load(base / Path("9/ssao.vert"), base / Path("9/ssao-blur.frag"));
+      shaderHandles["ssao-lighting"] =
+        _shaders.Load(base / Path("9/ssao.vert"), base / Path("9/ssao-lighting.frag"));
 
-      shaders["pbr"] = CreateUnique<Shader>(base / Path("11/pbr.vert"), base / Path("11/pbr.frag"));
-      shaders["pbr-with-maps"] =
-        CreateUnique<Shader>(base / Path("11/pbr-with-maps.vert"), base / Path("11/pbr-with-maps.frag"));
-      shaders["hdr-to-cubemap"] = CreateUnique<Shader>(base / Path("11/cubemap.vert"),
-                                                       base / Path("11/equirectangular-to-cubemap.frag"));
-      shaders["irradiance-convolution"] =
-        CreateUnique<Shader>(base / Path("11/cubemap.vert"), base / Path("11/irradiance-convolution.frag"));
-      shaders["prefilter"] =
-        CreateUnique<Shader>(base / Path("11/cubemap.vert"), base / Path("11/prefilter.frag"));
-      shaders["brdf"] = CreateUnique<Shader>(base / Path("11/brdf.vert"), base / Path("11/brdf.frag"));
-      shaders["hdr-background"] =
-        CreateUnique<Shader>(base / Path("11/background.vert"), base / Path("11/background.frag"));
+      shaderHandles["pbr"] = _shaders.Load(base / Path("11/pbr.vert"), base / Path("11/pbr.frag"));
+      shaderHandles["pbr-with-maps"] =
+        _shaders.Load(base / Path("11/pbr-with-maps.vert"), base / Path("11/pbr-with-maps.frag"));
+      shaderHandles["hdr-to-cubemap"] =
+        _shaders.Load(base / Path("11/cubemap.vert"), base / Path("11/equirectangular-to-cubemap.frag"));
+      shaderHandles["irradiance-convolution"] =
+        _shaders.Load(base / Path("11/cubemap.vert"), base / Path("11/irradiance-convolution.frag"));
+      shaderHandles["prefilter"] =
+        _shaders.Load(base / Path("11/cubemap.vert"), base / Path("11/prefilter.frag"));
+      shaderHandles["brdf"] = _shaders.Load(base / Path("11/brdf.vert"), base / Path("11/brdf.frag"));
+      shaderHandles["hdr-background"] =
+        _shaders.Load(base / Path("11/background.vert"), base / Path("11/background.frag"));
     }
 
     {
@@ -996,21 +996,24 @@ namespace Krys::Gfx::OpenGL
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     glClearColor(0.1f, 0.1f, 0.1f, 1.f);
 
-    CreateEnvironmentAndIrradianceCubemaps(1'024, 1'024, _textures);
+    CreateEnvironmentAndIrradianceCubemaps(1'024, 1'024, _textures, _shaders);
     glViewport(0, 0, _width, _height);
 
-    shaders.at("pbr-with-maps")->Bind();
-    shaders.at("pbr-with-maps")->SetUniform("irradianceMap", 0);
-    shaders.at("pbr-with-maps")->SetUniform("prefilterMap", 1);
-    shaders.at("pbr-with-maps")->SetUniform("brdfLUT", 2);
-    shaders.at("pbr-with-maps")->SetUniform("albedoMap", 3);
-    shaders.at("pbr-with-maps")->SetUniform("normalMap", 4);
-    shaders.at("pbr-with-maps")->SetUniform("metallicMap", 5);
-    shaders.at("pbr-with-maps")->SetUniform("roughnessMap", 6);
-    shaders.at("pbr-with-maps")->SetUniform("aoMap", 7);
-
-    shaders.at("hdr-background")->Bind();
-    shaders.at("hdr-background")->SetUniform("environmentMap", 0);
+    {
+      auto &shader = _shaders.Get(shaderHandles.at("pbr-with-maps"));
+      shader.SetUniform("irradianceMap", 0);
+      shader.SetUniform("prefilterMap", 1);
+      shader.SetUniform("brdfLUT", 2);
+      shader.SetUniform("albedoMap", 3);
+      shader.SetUniform("normalMap", 4);
+      shader.SetUniform("metallicMap", 5);
+      shader.SetUniform("roughnessMap", 6);
+      shader.SetUniform("aoMap", 7);
+    }
+    {
+      auto &shader = _shaders.Get(shaderHandles.at("hdr-background"));
+      shader.SetUniform("environmentMap", 0);
+    }
   }
 
   void Context::Render(ICamera &camera) noexcept
@@ -1018,7 +1021,7 @@ namespace Krys::Gfx::OpenGL
     auto view = camera.ViewMatrix();
     auto projection = camera.ProjectionMatrix();
     ubos.at("matrices")->Update(List<Mat4> {view, projection});
-    shaders.at("hdr-background")->SetUniform("projection", projection);
+    _shaders.Get(shaderHandles.at("hdr-background")).SetUniform("projection", projection);
 
     Vec3 lightPositions[] = {
       Vec3(-10.0f, 10.0f, 10.0f),
@@ -1037,9 +1040,9 @@ namespace Krys::Gfx::OpenGL
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    auto &shader = shaders.at("pbr-with-maps");
-    shader->Bind();
-    shader->SetUniform("camPos", camera.Position());
+    auto &shader = _shaders.Get(shaderHandles.at("pbr-with-maps"));
+    shader.Bind();
+    shader.SetUniform("camPos", camera.Position());
 
     vaos.at("sphere")->Bind();
 
@@ -1060,8 +1063,8 @@ namespace Krys::Gfx::OpenGL
 
       Mat4 model = Identity<Mat4>();
       model = Translate(model, Vec3(-5.0, 0.0, 2.0));
-      shader->SetUniform("model", model);
-      shader->SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
+      shader.SetUniform("model", model);
+      shader.SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
       Utils::DrawElements(GL_TRIANGLE_STRIP, sphereIndexCount);
     }
 
@@ -1075,8 +1078,8 @@ namespace Krys::Gfx::OpenGL
 
       Mat4 model = Identity<Mat4>();
       model = Translate(model, Vec3(-3.0, 0.0, 2.0));
-      shader->SetUniform("model", model);
-      shader->SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
+      shader.SetUniform("model", model);
+      shader.SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
       Utils::DrawElements(GL_TRIANGLE_STRIP, sphereIndexCount);
     }
 
@@ -1090,8 +1093,8 @@ namespace Krys::Gfx::OpenGL
 
       Mat4 model = Identity<Mat4>();
       model = Translate(model, Vec3(-1.0, 0.0, 2.0));
-      shader->SetUniform("model", model);
-      shader->SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
+      shader.SetUniform("model", model);
+      shader.SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
       Utils::DrawElements(GL_TRIANGLE_STRIP, sphereIndexCount);
     }
 
@@ -1105,8 +1108,8 @@ namespace Krys::Gfx::OpenGL
 
       Mat4 model = Identity<Mat4>();
       model = Translate(model, Vec3(1.0, 0.0, 2.0));
-      shader->SetUniform("model", model);
-      shader->SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
+      shader.SetUniform("model", model);
+      shader.SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
       Utils::DrawElements(GL_TRIANGLE_STRIP, sphereIndexCount);
     }
 
@@ -1120,8 +1123,8 @@ namespace Krys::Gfx::OpenGL
 
       Mat4 model = Identity<Mat4>();
       model = Translate(model, Vec3(3.0, 0.0, 2.0));
-      shader->SetUniform("model", model);
-      shader->SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
+      shader.SetUniform("model", model);
+      shader.SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
       Utils::DrawElements(GL_TRIANGLE_STRIP, sphereIndexCount);
     }
 
@@ -1132,22 +1135,22 @@ namespace Krys::Gfx::OpenGL
     {
       Vec3 newPos = lightPositions[i] + Vec3(std::sin((float)Platform::GetTime() * 5.0f) * 5.0f, 0.0f, 0.0f);
       newPos = lightPositions[i];
-      shader->SetUniform("lightPositions[" + std::to_string(i) + "]", newPos);
-      shader->SetUniform("lightColors[" + std::to_string(i) + "]", lightColors[i]);
+      shader.SetUniform("lightPositions[" + std::to_string(i) + "]", newPos);
+      shader.SetUniform("lightColors[" + std::to_string(i) + "]", lightColors[i]);
 
       Mat4 model = Identity<Mat4>();
       model = Translate(model, newPos);
       model = Scale(model, Vec3(0.5f));
-      shader->SetUniform("model", model);
-      shader->SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
+      shader.SetUniform("model", model);
+      shader.SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
       Utils::DrawElements(GL_TRIANGLE_STRIP, sphereIndexCount);
     }
 
     {
-      auto &shader = shaders.at("hdr-background");
+      auto &shader = _shaders.Get(shaderHandles.at("hdr-background"));
       vaos.at("cube")->Bind();
-      shader->Bind();
-      shader->SetUniform("view", view);
+      shader.Bind();
+      shader.SetUniform("view", view);
       glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps["hdr-cubemap"].ColorTextures[0]);
       Utils::Draw(GL_TRIANGLES, 36);
@@ -1169,5 +1172,10 @@ namespace Krys::Gfx::OpenGL
   ITextureSystem &Context::Textures() noexcept
   {
     return _textures;
+  }
+
+  IShaderSystem &Context::Shaders() noexcept
+  {
+    return _shaders;
   }
 }

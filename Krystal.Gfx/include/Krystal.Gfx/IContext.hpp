@@ -11,6 +11,7 @@ namespace Krys::Gfx
 {
   class IContext;
   class ITextureSystem;
+  class IShaderSystem;
 
   Expected<Unique<IContext>> CreateContext(NativeHandle windowHandle, uint32 width, uint32 height) noexcept;
 
@@ -42,5 +43,7 @@ namespace Krys::Gfx
     virtual void Resize(uint32 width, uint32 height) noexcept = 0;
 
     virtual ITextureSystem &Textures() noexcept = 0;
+
+    virtual IShaderSystem &Shaders() noexcept = 0;
   };
 }

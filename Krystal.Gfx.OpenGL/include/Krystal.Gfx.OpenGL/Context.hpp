@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Krystal.Gfx.OpenGL/TextureSystem.hpp"
+#include "Krystal.Gfx.OpenGL/ShaderSystem.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 
 namespace Krys::Gfx::OpenGL
@@ -16,6 +17,7 @@ namespace Krys::Gfx::OpenGL
     class ContextPlatformImpl;
     Unique<ContextPlatformImpl> _platformImpl;
     TextureSystem _textures;
+    ShaderSystem _shaders;
 
   public:
     Context(NativeHandle windowHandle, uint32 width, uint32 height);
@@ -31,5 +33,7 @@ namespace Krys::Gfx::OpenGL
     void Resize(uint32 width, uint32 height) noexcept override;
 
     ITextureSystem &Textures() noexcept override;
+
+    IShaderSystem &Shaders() noexcept override;
   };
 }
