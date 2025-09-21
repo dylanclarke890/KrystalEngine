@@ -109,6 +109,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp23</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -162,7 +163,7 @@
     <ClInclude Include="include\Krystal.Lib\String.hpp" />
     <ClInclude Include="include\Krystal.Lib\StringId.hpp" />
     <ClInclude Include="include\Krystal.Lib\StringUtils.hpp" />
-    <ClInclude Include="include\Krystal.Lib\TypedBool.hpp" />
+    <ClInclude Include="include\Krystal.Lib\StronglyTypedBool.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types.hpp" />
     <ClInclude Include="include\Krystal.Lib\Version.hpp" />
   </ItemGroup>

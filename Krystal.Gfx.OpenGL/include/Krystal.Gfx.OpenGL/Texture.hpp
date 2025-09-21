@@ -3,192 +3,162 @@
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
 #include "Krystal.IO/Image.hpp"
 #include "Krystal.Lib/Pair.hpp"
-#include "Krystal.Lib/TypedBool.hpp"
+#include "Krystal.Lib/Span.hpp"
+#include "Krystal.Lib/StronglyTypedBool.hpp"
 #include <cassert>
 
 namespace Krys::Gfx::OpenGL
 {
-  struct IsSRGBTexture : TypedBool<IsSRGBTexture>
+  using TextureData = Span<const byte>;
+
+  struct IsCubemap : StronglyTypedTrue<IsCubemap>
   {
-    explicit constexpr IsSRGBTexture(bool value) noexcept : TypedBool<IsSRGBTexture>(value)
-    {
-    }
   };
 
-  struct IsHDRTexture : TypedBool<IsHDRTexture>
-  {
-    explicit constexpr IsHDRTexture(bool value) noexcept : TypedBool<IsHDRTexture>(value)
-    {
-    }
-  };
-
-  // TODO: generate mipmaps
-  template <GLenum TextureType>
-  requires(TextureType == GL_TEXTURE_2D || TextureType == GL_TEXTURE_CUBE_MAP)
   class Texture
   {
-    GLuint _handle;
+    NO_COPY(Texture)
+
+  private:
+    GLuint _id;
+    GLenum _type;
+    GLenum _internalFormat;
+    GLsizei _width;
+    GLsizei _height;
+    GLsizei _depth;
+    uint32 _mipLevels;
 
   public:
-    Texture(const IO::Path &filepath,
-            const IO::ImageLoadSettings &settings = {.FlipVertically = true, .DesiredComponents = 0}) noexcept
-    requires(TextureType == GL_TEXTURE_2D)
-        : _handle(0u)
+    Texture(GLenum internalFormat, GLsizei width, uint32 mipLevels) noexcept
+        : _id(0u), _type(GL_TEXTURE_1D), _internalFormat(internalFormat), _width(width), _height(1),
+          _depth(1), _mipLevels(std::max(1u, mipLevels))
     {
-      Load(filepath, settings, IsSRGBTexture(false), IsHDRTexture(false));
+      glCreateTextures(_type, 1, &_id);
+      AllocateStorage();
     }
 
-    Texture(const IO::Path &filepath, IsSRGBTexture isSRGBTexture,
-            const IO::ImageLoadSettings &settings = {.FlipVertically = true, .DesiredComponents = 0}) noexcept
-    requires(TextureType == GL_TEXTURE_2D)
-        : _handle(0u)
+    Texture(GLenum internalFormat, GLsizei width, GLsizei height, uint32 mipLevels) noexcept
+        : _id(0u), _type(GL_TEXTURE_2D), _internalFormat(internalFormat), _width(width), _height(height),
+          _depth(1), _mipLevels(std::max(1u, mipLevels))
     {
-      Load(filepath, settings, isSRGBTexture, IsHDRTexture(false));
+      glCreateTextures(_type, 1, &_id);
+      AllocateStorage();
     }
 
-    Texture(const IO::Path &filepath, IsHDRTexture isHDRTexture,
-            const IO::ImageLoadSettings &settings = {.FlipVertically = true, .DesiredComponents = 0}) noexcept
-    requires(TextureType == GL_TEXTURE_2D)
-        : _handle(0u)
+    Texture(GLenum internalFormat, GLsizei width, GLsizei height, uint32 mipLevels, IsCubemap) noexcept
+        : _id(0u), _type(GL_TEXTURE_CUBE_MAP), _internalFormat(internalFormat), _width(width),
+          _height(height), _depth(1), _mipLevels(std::max(1u, mipLevels))
     {
-      Load(filepath, settings, IsSRGBTexture(false), isHDRTexture);
+      glCreateTextures(_type, 1, &_id);
+      AllocateStorage();
     }
 
-    Texture(const IO::Path &left, const IO::Path &right, const IO::Path &top, const IO::Path &bottom,
-            const IO::Path &front, const IO::Path &back, IsSRGBTexture isSRGBTexture = IsSRGBTexture(false),
-            const IO::ImageLoadSettings &settings = {.FlipVertically = false,
-                                                     .DesiredComponents = 0}) noexcept
-    requires(TextureType == GL_TEXTURE_CUBE_MAP)
-        : _handle(0u)
+    Texture(GLenum type, GLenum internalFormat, GLsizei width, GLsizei height, GLsizei depth,
+            uint32 mipLevels) noexcept
+        : _id(0u), _type(type), _internalFormat(internalFormat), _width(width), _height(height),
+          _depth(depth), _mipLevels(std::max(1u, mipLevels))
     {
-      Load(left, right, top, bottom, front, back, settings, isSRGBTexture);
+      assert((_type == GL_TEXTURE_3D || _type == GL_TEXTURE_2D_ARRAY) && "Invalid type for 3D/array ctor");
+      glCreateTextures(_type, 1, &_id);
+      AllocateStorage();
     }
 
     ~Texture() noexcept
     {
-      glDeleteTextures(1, &_handle);
+      if (_id != 0u)
+      {
+        glDeleteTextures(1, &_id);
+      }
+    }
+
+    Texture(Texture &&other) noexcept
+        : _id(0u), _type(GL_NONE), _internalFormat(GL_NONE), _width(0), _height(0), _depth(1), _mipLevels(1u)
+    {
+      Swap(other);
+    }
+
+    Texture &operator=(Texture &&other) noexcept
+    {
+      Swap(other);
+      return *this;
+    }
+
+    GLuint GetId() const noexcept
+    {
+      return _id;
     }
 
     void Bind(GLuint unit = 0u) const noexcept
     {
-      glBindTextureUnit(unit, _handle);
+      glBindTextureUnit(unit, _id);
     }
 
-    void SetParameter(GLenum pname, GLint param) noexcept
+    void SetParameter(GLenum pname, GLint param) const noexcept
     {
-      glTextureParameteri(_handle, pname, param);
+      glTextureParameteri(_id, pname, param);
+    }
+
+    void SetParameter(GLenum pname, GLfloat param) const noexcept
+    {
+      glTextureParameterf(_id, pname, param);
+    }
+
+    /// @brief Sets the contents of a 2d texture.
+    /// @param data The texture data.
+    /// @param format Format of the pixel data (e.g., GL_RGB, GL_RGBA).
+    /// @param dataType Data type of the pixel data (e.g., GL_UNSIGNED_BYTE, GL_FLOAT).
+    void SetData(const TextureData &data, GLenum format, GLenum dataType) const noexcept
+    {
+      assert(_type == GL_TEXTURE_2D && "SetData only supports 2D textures.");
+      glTextureSubImage2D(_id, 0, 0, 0, _width, _height, format, dataType, data.data());
+    }
+
+    /// @brief Sets the contents of a cubemap face.
+    /// @param face The face to update (e.g., GL_TEXTURE_CUBE_MAP_POSITIVE_X).
+    /// @param data The texture data.
+    /// @param format Format of the pixel data (e.g., GL_RGB, GL_RGBA).
+    /// @param dataType Data type of the pixel data (e.g., GL_UNSIGNED_BYTE, GL_FLOAT).
+    void SetData(GLenum face, const TextureData &data, GLenum format, GLenum dataType) const noexcept
+    {
+      assert(_type == GL_TEXTURE_CUBE_MAP && "SetData only supports cubemap textures.");
+      glTextureSubImage3D(_id, 0, 0, 0, face - GL_TEXTURE_CUBE_MAP_POSITIVE_X, _width, _height, 1, format,
+                          dataType, data.data());
+    }
+
+    void GenerateMipmaps() const noexcept
+    {
+      if (_mipLevels > 1u)
+      {
+        glGenerateTextureMipmap(_id);
+      }
     }
 
   private:
-    static Pair<GLenum, GLenum> GetLinearTextureFormat(int channels) noexcept
+    void AllocateStorage() const noexcept
     {
-      assert(channels >= 1 && channels <= 4 && "Invalid number of channels.");
-      switch (channels)
+      switch (_type)
       {
-        case 1: return {GL_R8, GL_RED};
-        case 2: return {GL_RG8, GL_RG};
-        case 3: return {GL_RGB8, GL_RGB};
-        case 4: return {GL_RGBA8, GL_RGBA};
-      }
-      return {GL_RGB8, GL_RGB};
-    }
+        case GL_TEXTURE_1D:       glTextureStorage1D(_id, _mipLevels, _internalFormat, _width); break;
+        case GL_TEXTURE_CUBE_MAP: // Cubemap faces are implicit; just like 2D but 6 faces
+        case GL_TEXTURE_2D:       glTextureStorage2D(_id, _mipLevels, _internalFormat, _width, _height); break;
+        case GL_TEXTURE_3D:
+        case GL_TEXTURE_2D_ARRAY:
+          glTextureStorage3D(_id, _mipLevels, _internalFormat, _width, _height, _depth);
+          break;
 
-    static Pair<GLenum, GLenum> GetSRGBTextureFormat(int channels) noexcept
-    {
-      assert(channels > 2 && channels <= 4 && "Invalid number of channels.");
-      switch (channels)
-      {
-        case 3: return {GL_SRGB8, GL_RGB};
-        case 4: return {GL_SRGB8_ALPHA8, GL_RGBA};
-      }
-      return {GL_SRGB8, GL_RGB};
-    }
-
-    static Pair<GLenum, GLenum> GetFloatTextureFormat(int channels, bool isHalfFloat) noexcept
-    {
-      assert(channels >= 1 && channels <= 4 && "Invalid number of channels.");
-      switch (channels)
-      {
-        case 1: return {isHalfFloat ? GL_R16F : GL_R32F, GL_RED};
-        case 2: return {isHalfFloat ? GL_RG16F : GL_RG32F, GL_RG};
-        case 3: return {isHalfFloat ? GL_RGB16F : GL_RGB32F, GL_RGB};
-        case 4: return {isHalfFloat ? GL_RGBA16F : GL_RGBA32F, GL_RGBA};
-      }
-      return {isHalfFloat ? GL_RGB16F : GL_RGB32F, GL_RGB};
-    }
-
-    void Load(const IO::Path &filepath, const IO::ImageLoadSettings &settings, IsSRGBTexture isSRGBTexture,
-              IsHDRTexture isHDRTexture) noexcept
-    {
-      assert(isSRGBTexture == false || isHDRTexture == false && "A texture cannot be both sRGB and HDR.");
-      glCreateTextures(TextureType, 1, &_handle);
-
-      glTextureParameteri(_handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTextureParameteri(_handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTextureParameteri(_handle, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTextureParameteri(_handle, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-      if (isHDRTexture)
-      {
-        auto imageResult = IO::LoadHDRImage(filepath, settings);
-        assert(imageResult.has_value() && "Failed to load texture image.");
-        auto &image = *imageResult;
-
-        auto [internalFormat, format] = GetFloatTextureFormat(image.Channels, false);
-        glTextureStorage2D(_handle, 1, internalFormat, image.Width, image.Height);
-        glTextureSubImage2D(_handle, 0, 0, 0, image.Width, image.Height, format, GL_FLOAT, image.Data.data());
-      }
-      else
-      {
-        auto imageResult = IO::LoadImage(filepath, settings);
-        assert(imageResult.has_value() && "Failed to load texture image.");
-        auto &image = *imageResult;
-
-        auto [internalFormat, format] =
-          isSRGBTexture ? GetSRGBTextureFormat(image.Channels) : GetLinearTextureFormat(image.Channels);
-
-        glTextureStorage2D(_handle, 1, internalFormat, image.Width, image.Height);
-        glTextureSubImage2D(_handle, 0, 0, 0, image.Width, image.Height, format, GL_UNSIGNED_BYTE,
-                            image.Data.data());
+        default: assert(false && "Unsupported texture type");
       }
     }
 
-    void Load(const IO::Path &left, const IO::Path &right, const IO::Path &top, const IO::Path &bottom,
-              const IO::Path &front, const IO::Path &back, const IO::ImageLoadSettings &settings,
-              IsSRGBTexture isSRGBTexture) noexcept
+    void Swap(Texture &other) noexcept
     {
-      glCreateTextures(TextureType, 1, &_handle);
-
-      glTextureParameteri(_handle, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTextureParameteri(_handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTextureParameteri(_handle, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTextureParameteri(_handle, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-      glTextureParameteri(_handle, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
-      auto cubeMapResult = IO::LoadCubeMap(left, right, top, bottom, front, back, settings);
-      assert(cubeMapResult.has_value() && "Failed to load cubemap image.");
-
-      auto &cubeMap = *cubeMapResult;
-      auto [internalFormat, format] =
-        isSRGBTexture ? GetSRGBTextureFormat(cubeMap.Channels) : GetLinearTextureFormat(cubeMap.Channels);
-
-      glTextureStorage2D(_handle, 1, internalFormat, cubeMap.Width, cubeMap.Height);
-
-#define UploadFace(face, faceData)                                                                           \
-  glTextureSubImage3D(_handle, 0, 0, 0, face - GL_TEXTURE_CUBE_MAP_POSITIVE_X, cubeMap.Width,                \
-                      cubeMap.Height, 1, format, GL_UNSIGNED_BYTE, faceData.data());
-
-      UploadFace(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, cubeMap.Left);
-      UploadFace(GL_TEXTURE_CUBE_MAP_POSITIVE_X, cubeMap.Right);
-      UploadFace(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, cubeMap.Top);
-      UploadFace(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, cubeMap.Bottom);
-      UploadFace(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, cubeMap.Front);
-      UploadFace(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, cubeMap.Back);
-
-#undef UploadFace
+      std::swap(_id, other._id);
+      std::swap(_type, other._type);
+      std::swap(_internalFormat, other._internalFormat);
+      std::swap(_width, other._width);
+      std::swap(_height, other._height);
+      std::swap(_depth, other._depth);
+      std::swap(_mipLevels, other._mipLevels);
     }
   };
-
-  using Texture2D = Texture<GL_TEXTURE_2D>;
-  using CubeMap = Texture<GL_TEXTURE_CUBE_MAP>;
 }

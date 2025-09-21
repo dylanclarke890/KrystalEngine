@@ -57,7 +57,10 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\VertexArray.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\ResourceManager.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\TextureSystem.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\gl.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

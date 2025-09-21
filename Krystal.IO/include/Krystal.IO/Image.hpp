@@ -22,22 +22,9 @@ namespace Krys::IO
 
     /// @brief Number of channels.
     int Channels {};
-  };
 
-  /// @brief Represents a high dynamic range (HDR) image.
-  struct HDRImage
-  {
-    /// @brief Image data.
-    List<float> Data {};
-
-    /// @brief Width of image (in pixels).
-    int Width {};
-
-    /// @brief Height of image (in pixels).
-    int Height {};
-
-    /// @brief Number of channels.
-    int Channels {};
+    /// @brief Whether the image is in HDR format.
+    bool IsHDR {};
   };
 
   /// @brief Represents a cubemap image consisting of 6 faces.
@@ -80,32 +67,23 @@ namespace Krys::IO
     int DesiredComponents = 0;
   };
 
+  /// @brief Checks if the image at the given path is a HDR image.
+  NO_DISCARD extern bool IsHDRImage(const Path &path) noexcept;
+
+  /// @brief Checks if the image from the stream is a HDR image.
+  NO_DISCARD extern bool IsHDRImage(IStreamReader &stream) noexcept;
+
   /// @brief Reads an image from a stream.
   /// @param stream Source stream to read from.
   /// @return Image read from the stream.
-  // NOLINTNEXTLINE(misc-use-internal-linkage)
-  NO_DISCARD Expected<Image> LoadImage(IStreamReader &stream,
-                                       const ImageLoadSettings &settings = {}) noexcept;
+  NO_DISCARD extern Expected<Image> LoadImage(IStreamReader &stream, bool hdr,
+                                              const ImageLoadSettings &settings = {}) noexcept;
 
   /// @brief Reads an image from a file.
   /// @param path Path to the image file.
   /// @return Image read from the file.
-  // NOLINTNEXTLINE(misc-use-internal-linkage)
-  NO_DISCARD Expected<Image> LoadImage(const Path &path, const ImageLoadSettings &settings = {}) noexcept;
-
-  /// @brief Reads a HDR image from a stream.
-  /// @param stream Source stream to read from.
-  /// @return HDR image read from the stream.
-  // NOLINTNEXTLINE(misc-use-internal-linkage)
-  NO_DISCARD Expected<HDRImage> LoadHDRImage(IStreamReader &stream,
-                                             const ImageLoadSettings &settings = {}) noexcept;
-
-  /// @brief Reads a HDR image from a file.
-  /// @param path Path to the image file.
-  /// @return HDR image read from the file.
-  // NOLINTNEXTLINE(misc-use-internal-linkage)
-  NO_DISCARD Expected<HDRImage> LoadHDRImage(const Path &path,
-                                             const ImageLoadSettings &settings = {}) noexcept;
+  NO_DISCARD extern Expected<Image> LoadImage(const Path &path,
+                                              const ImageLoadSettings &settings = {}) noexcept;
 
   /// @brief Reads a cubemap image from 6 separate files.
   /// @param left Path to the left face image file.
@@ -116,8 +94,8 @@ namespace Krys::IO
   /// @param back Path to the back face image file.
   /// @param settings Settings for loading each image.
   /// @return Cubemap image read from the files.
-  // NOLINTNEXTLINE(misc-use-internal-linkage)
-  NO_DISCARD Expected<CubeMapImage> LoadCubeMap(const Path &left, const Path &right, const Path &top,
-                                                const Path &bottom, const Path &front, const Path &back,
-                                                const ImageLoadSettings &settings = {}) noexcept;
+  NO_DISCARD extern Expected<CubeMapImage> LoadCubeMap(const Path &left, const Path &right, const Path &top,
+                                                       const Path &bottom, const Path &front,
+                                                       const Path &back,
+                                                       const ImageLoadSettings &settings = {}) noexcept;
 }

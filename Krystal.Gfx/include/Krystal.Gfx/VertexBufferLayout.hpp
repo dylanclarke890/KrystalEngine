@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Krystal.Lib/Types.hpp"
-#include "Krystal.Lib/TypedBool.hpp"
+#include "Krystal.Lib/StronglyTypedBool.hpp"
 
 namespace Krys::Gfx
 {
@@ -19,11 +19,8 @@ namespace Krys::Gfx
     PerInstance
   };
 
-  struct IsNormalized : TypedBool<IsNormalized>
+  struct IsNormalized : public StronglyTypedBool<IsNormalized>
   {
-    explicit constexpr IsNormalized(bool value) noexcept : TypedBool<IsNormalized>(value)
-    {
-    }
   };
 
   struct VertexBufferElement

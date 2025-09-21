@@ -46,7 +46,13 @@ namespace Krys
   concept CopyConstructible = std::is_copy_constructible_v<T>;
 
   template <typename T>
+  concept CopyAssignable = std::is_copy_constructible_v<T>;
+
+  template <typename T>
   concept MoveConstructible = std::is_move_constructible_v<T>;
+
+  template <typename T>
+  concept MoveAssignable = std::is_move_assignable_v<T>;
 
   template <typename D, typename B>
   concept DerivedFrom = std::derived_from<D, B>;

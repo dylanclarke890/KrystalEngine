@@ -27,7 +27,7 @@ namespace
     return static_cast<int>(stream->EndOfStream());
   }
 
-  stbi_io_callbacks GetStbiLoadCallbacks() noexcept
+  stbi_io_callbacks GetStbIOCallbacks() noexcept
   {
     stbi_io_callbacks callbacks {};
     callbacks.read = stbi_stream_read;
@@ -39,76 +39,68 @@ namespace
 
 namespace Krys::IO
 {
-  // NOLINTNEXTLINE(misc-use-internal-linkage)
-  Expected<Image> LoadImage(IStreamReader &stream, const ImageLoadSettings &settings) noexcept
-  {
-    stbi_set_flip_vertically_on_load(static_cast<int>(settings.FlipVertically));
-
-    const stbi_io_callbacks callbacks = GetStbiLoadCallbacks();
-    int width {};
-    int height {};
-    int channels {};
-    auto *imageData =
-      stbi_load_from_callbacks(&callbacks, &stream, &width, &height, &channels, settings.DesiredComponents);
-
-    if (imageData == nullptr)
-    {
-      return Unexpected(stbi_failure_reason());
-    }
-
-    Image image;
-    image.Width = width;
-    image.Height = height;
-    image.Channels = channels;
-
-    auto *first = imageData;
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    auto *last = imageData + (static_cast<std::size_t>(width) * height * channels);
-    image.Data.assign(reinterpret_cast<byte *>(first), reinterpret_cast<byte *>(last));
-
-    stbi_image_free(imageData);
-
-    return Expected<Image>(std::move(image));
-  }
-
-  // NOLINTNEXTLINE(misc-use-internal-linkage)
-  Expected<HDRImage> LoadHDRImage(IStreamReader &stream, const ImageLoadSettings &settings) noexcept
-  {
-    stbi_set_flip_vertically_on_load(static_cast<int>(settings.FlipVertically));
-
-    const stbi_io_callbacks callbacks = GetStbiLoadCallbacks();
-    int width {};
-    int height {};
-    int channels {};
-    auto *imageData =
-      stbi_loadf_from_callbacks(&callbacks, &stream, &width, &height, &channels, settings.DesiredComponents);
-
-    if (imageData == nullptr)
-    {
-      return Unexpected(stbi_failure_reason());
-    }
-
-    HDRImage image;
-    image.Width = width;
-    image.Height = height;
-    image.Channels = channels;
-    image.Data.resize(static_cast<std::size_t>(width) * height * channels);
-
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    std::copy(imageData, imageData + (static_cast<std::size_t>(width) * height * channels),
-              image.Data.begin());
-
-    stbi_image_free(imageData);
-
-    return Expected<HDRImage>(std::move(image));
-  }
-
-  // NOLINTNEXTLINE(misc-use-internal-linkage)
-  Expected<HDRImage> LoadHDRImage(const Path &path, const ImageLoadSettings &settings) noexcept
+  bool IsHDRImage(const Path &path) noexcept
   {
     // NOLINTNEXTLINE(misc-const-correctness)
     NativeFileReader fileReader {path};
-    return LoadHDRImage(fileReader, settings);
+    return IsHDRImage(fileReader);
+  }
+
+  bool IsHDRImage(IStreamReader &stream) noexcept
+  {
+    if (!stream.IsOpen() && !stream.Open())
+    {
+      return false;
+    }
+    const stbi_io_callbacks callbacks = GetStbIOCallbacks();
+    return stbi_is_hdr_from_callbacks(&callbacks, &stream) != 0;
+  }
+
+  // NOLINTNEXTLINE(misc-use-internal-linkage)
+  Expected<Image> LoadImage(IStreamReader &stream, bool hdr, const ImageLoadSettings &settings) noexcept
+  {
+    stbi_set_flip_vertically_on_load(static_cast<int>(settings.FlipVertically));
+    const stbi_io_callbacks callbacks = GetStbIOCallbacks();
+
+    int width {};
+    int height {};
+    int channels {};
+    Image image;
+    image.IsHDR = hdr;
+
+    if (hdr)
+    {
+      float *data = stbi_loadf_from_callbacks(&callbacks, &stream, &width, &height, &channels,
+                                              settings.DesiredComponents);
+      if (data == nullptr)
+      {
+        return Unexpected(stbi_failure_reason());
+      }
+
+      const size_t count = static_cast<size_t>(width) * height * channels;
+      image.Data.resize(count * sizeof(float));
+      std::memcpy(image.Data.data(), data, image.Data.size());
+      stbi_image_free(data);
+    }
+    else
+    {
+      stbi_uc *data =
+        stbi_load_from_callbacks(&callbacks, &stream, &width, &height, &channels, settings.DesiredComponents);
+      if (data == nullptr)
+      {
+        return Unexpected(stbi_failure_reason());
+      }
+
+      const size_t count = static_cast<size_t>(width) * height * channels;
+      image.Data.resize(count);
+      std::memcpy(image.Data.data(), data, image.Data.size());
+      stbi_image_free(data);
+    }
+
+    image.Width = width;
+    image.Height = height;
+    image.Channels = channels;
+    return Expected<Image>(std::move(image));
   }
 
   // NOLINTNEXTLINE(misc-use-internal-linkage)
@@ -116,7 +108,9 @@ namespace Krys::IO
   {
     // NOLINTNEXTLINE(misc-const-correctness)
     NativeFileReader fileReader {path};
-    return LoadImage(fileReader, settings);
+    bool hdr = IsHDRImage(fileReader);
+    fileReader.Seek(0, SeekOrigin::Begin);
+    return LoadImage(fileReader, hdr, settings);
   }
 
   // NOLINTNEXTLINE(misc-use-internal-linkage, bugprone-easily-swappable-parameters)

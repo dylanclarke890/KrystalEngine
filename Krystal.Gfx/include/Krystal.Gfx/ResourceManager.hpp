@@ -8,37 +8,39 @@
 #include "Krystal.Lib/Types.hpp"
 #include <cassert>
 
-namespace Krys::Impl
+namespace Krys::Gfx
 {
-  template <typename Derived>
-  struct Handle
-  {
-    uint32 Id = 0;
+  template <typename T>
+  concept Resource = MoveConstructible<T> && MoveAssignable<T> && !CopyConstructible<T> && !CopyAssignable<T>;
 
-    bool IsValid() const noexcept
-    {
-      return Id != 0;
-    }
-  };
-}
-
-namespace Krys::Gfx::OpenGL
-{
-  template <typename T, typename THandle>
-  requires(MoveConstructible<T> && !CopyConstructible<T> && DerivedFrom<Impl::Handle<THandle>, THandle>)
+  template <Resource T, typename THandle>
   class ResourceManager
   {
-  protected:
+  private:
     struct ResourceEntry
     {
       Nullable<T> Resource;
-      uint16 Generation = 0u;
+      uint16 Generation = 1u;
     };
 
     List<ResourceEntry> _resources;
     Queue<uint16> _freeIndices;
 
   public:
+    NO_DISCARD THandle Add(T &&resource) noexcept
+    {
+      uint16 index = NextIndex();
+      if (index >= _resources.size()) [[unlikely]]
+      {
+        _resources.push_back(ResourceEntry {});
+      }
+
+      ResourceEntry &entry = _resources[index];
+      entry.Resource = std::move(resource);
+
+      return CreateHandle(index, entry.Generation);
+    }
+
     NO_DISCARD T &Get(THandle handle)
     {
       uint16 index = GetIndex(handle);
@@ -49,12 +51,12 @@ namespace Krys::Gfx::OpenGL
       }
 
       ResourceEntry &entry = _resources[index];
-      if (!entry.InUse || entry.Generation != generation) [[unlikely]]
+      if (!entry.Resource.has_value() || entry.Generation != generation) [[unlikely]]
       {
         throw std::invalid_argument("Invalid handle: generation mismatch or resource not in use");
       }
 
-      return entry.Resource;
+      return *entry.Resource;
     }
 
     NO_DISCARD T *TryGet(THandle handle) noexcept
@@ -69,7 +71,33 @@ namespace Krys::Gfx::OpenGL
       }
     }
 
-  protected:
+    bool Remove(THandle handle) noexcept
+    {
+      assert(handle.IsValid() && "Invalid handle.");
+
+      uint16 index = GetIndex(handle);
+      uint16 generation = GetGeneration(handle);
+
+      if (index >= _resources.size()) [[unlikely]]
+      {
+        return false;
+      }
+
+      ResourceEntry &entry = _resources[index];
+      if (!entry.Resource.has_value() || entry.Generation != generation) [[unlikely]]
+      {
+        return false;
+      }
+
+      entry.Resource.reset();
+      entry.Generation++;
+
+      _freeIndices.push(index);
+
+      return true;
+    }
+
+  private:
     NO_DISCARD THandle CreateHandle(uint16 index, uint16 generation) const noexcept
     {
       THandle handle {};
@@ -104,32 +132,6 @@ namespace Krys::Gfx::OpenGL
       {
         return static_cast<uint16>(_resources.size());
       }
-    }
-
-    bool FreeResource(THandle handle) noexcept
-    {
-      assert(handle.IsValid() && "Invalid handle.");
-
-      uint16 index = GetIndex(handle);
-      uint16 generation = GetGeneration(handle);
-
-      if (index >= _resources.size()) [[unlikely]]
-      {
-        return false;
-      }
-
-      ResourceEntry &entry = _resources[index];
-      if (!entry.Resource.has_value() || entry.Generation != generation) [[unlikely]]
-      {
-        return false;
-      }
-
-      entry.Resource.reset();
-      entry.Generation++;
-
-      _freeIndices.push(index);
-
-      return true;
     }
   };
 }

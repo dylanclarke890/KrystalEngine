@@ -9,9 +9,7 @@
 
 #include "Krystal.Gfx.OpenGL/Buffer.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
-#include "Krystal.Gfx.OpenGL/Model.hpp"
 #include "Krystal.Gfx.OpenGL/Shader.hpp"
-#include "Krystal.Gfx.OpenGL/Texture.hpp"
 #include "Krystal.Gfx.OpenGL/Utils.hpp"
 #include "Krystal.Gfx.OpenGL/VertexArray.hpp"
 #include "Krystal.Gfx/IContext.hpp"
@@ -49,9 +47,7 @@ namespace
   Vec3 lightColor = Vec3(0.2f, 0.2f, 0.7f);
 
   Map<string, Unique<Shader>> shaders;
-  Map<string, Unique<Texture2D>> textures;
-  Map<string, Unique<CubeMap>> cubemaps;
-  Map<string, Unique<Model>> models;
+  Map<string, TextureHandle> textureHandles;
   Map<string, Unique<VertexArray>> vaos;
   Map<string, Unique<VertexBuffer>> vbos;
   Map<string, Unique<IndexBuffer>> ebos;
@@ -311,7 +307,7 @@ namespace
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
   }
 
-  void CreateEnvironmentAndIrradianceCubemaps(uint32 width, uint32 height)
+  void CreateEnvironmentAndIrradianceCubemaps(uint32 width, uint32 height, TextureSystem &textureSystem)
   {
     uint captureFBO;
     uint captureRBO;
@@ -351,7 +347,7 @@ namespace
       shader->SetUniform("equirectangularMap", 0);
       shader->SetUniform("projection", captureProjection);
 
-      textures.at("hdr-environment")->Bind(0);
+      textureSystem.Get(textureHandles.at("hdr-environment")).Bind(0);
       vaos.at("cube")->Bind();
 
       glViewport(0, 0, width, height);
@@ -587,30 +583,30 @@ namespace
     Utils::ApplyVertexBufferLayout(layout);
   }
 
-  void LoadPBRTextures(const string &name)
+  void LoadPBRTextures(const string &name, TextureSystem &textureSystem)
   {
     using namespace IO;
     Path base = Path("data/assets/pbr/") / Path(name);
 
-    textures[name + "-albedo"] = CreateUnique<Texture2D>(base / Path("albedo.png"));
-    textures.at(name + "-albedo")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-    textures.at(name + "-albedo")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+    textureHandles[name + "-albedo"] = textureSystem.Load(base / Path("albedo.png"));
+    textureSystem.Get(textureHandles.at(name + "-albedo")).SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+    textureSystem.Get(textureHandles.at(name + "-albedo")).SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    textures[name + "-normal"] = CreateUnique<Texture2D>(base / Path("normal.png"));
-    textures.at(name + "-normal")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-    textures.at(name + "-normal")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+    textureHandles[name + "-normal"] = textureSystem.Load(base / Path("normal.png"));
+    textureSystem.Get(textureHandles.at(name + "-normal")).SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+    textureSystem.Get(textureHandles.at(name + "-normal")).SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    textures[name + "-metallic"] = CreateUnique<Texture2D>(base / Path("metallic.png"));
-    textures.at(name + "-metallic")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-    textures.at(name + "-metallic")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+    textureHandles[name + "-metallic"] = textureSystem.Load(base / Path("metallic.png"));
+    textureSystem.Get(textureHandles.at(name + "-metallic")).SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+    textureSystem.Get(textureHandles.at(name + "-metallic")).SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    textures[name + "-roughness"] = CreateUnique<Texture2D>(base / Path("roughness.png"));
-    textures.at(name + "-roughness")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-    textures.at(name + "-roughness")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+    textureHandles[name + "-roughness"] = textureSystem.Load(base / Path("roughness.png"));
+    textureSystem.Get(textureHandles.at(name + "-roughness")).SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+    textureSystem.Get(textureHandles.at(name + "-roughness")).SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-    textures[name + "-ao"] = CreateUnique<Texture2D>(base / Path("ao.png"));
-    textures.at(name + "-ao")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-    textures.at(name + "-ao")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+    textureHandles[name + "-ao"] = textureSystem.Load(base / Path("ao.png"));
+    textureSystem.Get(textureHandles.at(name + "-ao")).SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
+    textureSystem.Get(textureHandles.at(name + "-ao")).SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
   }
 }
 
@@ -724,54 +720,18 @@ namespace Krys::Gfx::OpenGL
       using namespace IO;
       Path base = Path("data/assets");
 
-      textures["wood"] = CreateUnique<Texture2D>(base / Path("wood.png"), IsSRGBTexture(true));
-      textures.at("wood")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("wood")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      textures["container"] =
-        CreateUnique<Texture2D>(base / Path("container-diffuse.png"), IsSRGBTexture(true));
-
-      textures["toybox-normal"] = CreateUnique<Texture2D>(base / Path("toybox-normal.png"));
-      textures.at("toybox-normal")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("toybox-normal")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      textures["toybox-displacement"] = CreateUnique<Texture2D>(base / Path("toybox-displacement.png"));
-      textures.at("toybox-displacement")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("toybox-displacement")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      textures["brick-diffuse"] = CreateUnique<Texture2D>(base / Path("brick-diffuse.jpg"));
-      textures.at("brick-diffuse")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("brick-diffuse")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      textures["brick-normal"] = CreateUnique<Texture2D>(base / Path("brick-normal.jpg"));
-      textures.at("brick-normal")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("brick-normal")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      textures["brickwall-diffuse"] = CreateUnique<Texture2D>(base / Path("brickwall-diffuse.jpg"));
-      textures.at("brickwall-diffuse")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("brickwall-diffuse")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      textures["brickwall-normal"] = CreateUnique<Texture2D>(base / Path("brickwall-normal.jpg"));
-      textures.at("brickwall-normal")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("brickwall-normal")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      textures["brickwall-displacement"] = CreateUnique<Texture2D>(base / Path("brickwall-displacement.jpg"));
-      textures.at("brickwall-displacement")->SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-      textures.at("brickwall-displacement")->SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-      textures["hdr-environment"] =
-        CreateUnique<Texture2D>(base / Path("newport-loft.hdr"), IsHDRTexture(true));
+      textureHandles["hdr-environment"] = _textures.Load(base / Path("newport-loft.hdr"));
     }
 
     // PBR textures
     {
       using namespace IO;
 
-      LoadPBRTextures("rusted-iron");
-      LoadPBRTextures("gold");
-      LoadPBRTextures("grass");
-      LoadPBRTextures("plastic");
-      LoadPBRTextures("wall");
+      LoadPBRTextures("rusted-iron", _textures);
+      LoadPBRTextures("gold", _textures);
+      LoadPBRTextures("grass", _textures);
+      LoadPBRTextures("plastic", _textures);
+      LoadPBRTextures("wall", _textures);
     }
 
     // Cube
@@ -1036,7 +996,7 @@ namespace Krys::Gfx::OpenGL
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     glClearColor(0.1f, 0.1f, 0.1f, 1.f);
 
-    CreateEnvironmentAndIrradianceCubemaps(1'024, 1'024);
+    CreateEnvironmentAndIrradianceCubemaps(1'024, 1'024, _textures);
     glViewport(0, 0, _width, _height);
 
     shaders.at("pbr-with-maps")->Bind();
@@ -1092,11 +1052,11 @@ namespace Krys::Gfx::OpenGL
 
     // rusted iron
     {
-      textures.at("rusted-iron-albedo")->Bind(3);
-      textures.at("rusted-iron-normal")->Bind(4);
-      textures.at("rusted-iron-metallic")->Bind(5);
-      textures.at("rusted-iron-roughness")->Bind(6);
-      textures.at("rusted-iron-ao")->Bind(7);
+      _textures.Get(textureHandles.at("rusted-iron-albedo")).Bind(3);
+      _textures.Get(textureHandles.at("rusted-iron-normal")).Bind(4);
+      _textures.Get(textureHandles.at("rusted-iron-metallic")).Bind(5);
+      _textures.Get(textureHandles.at("rusted-iron-roughness")).Bind(6);
+      _textures.Get(textureHandles.at("rusted-iron-ao")).Bind(7);
 
       Mat4 model = Identity<Mat4>();
       model = Translate(model, Vec3(-5.0, 0.0, 2.0));
@@ -1107,11 +1067,11 @@ namespace Krys::Gfx::OpenGL
 
     // gold
     {
-      textures.at("gold-albedo")->Bind(3);
-      textures.at("gold-normal")->Bind(4);
-      textures.at("gold-metallic")->Bind(5);
-      textures.at("gold-roughness")->Bind(6);
-      textures.at("gold-ao")->Bind(7);
+      _textures.Get(textureHandles.at("gold-albedo")).Bind(3);
+      _textures.Get(textureHandles.at("gold-normal")).Bind(4);
+      _textures.Get(textureHandles.at("gold-metallic")).Bind(5);
+      _textures.Get(textureHandles.at("gold-roughness")).Bind(6);
+      _textures.Get(textureHandles.at("gold-ao")).Bind(7);
 
       Mat4 model = Identity<Mat4>();
       model = Translate(model, Vec3(-3.0, 0.0, 2.0));
@@ -1122,11 +1082,11 @@ namespace Krys::Gfx::OpenGL
 
     // grass
     {
-      textures.at("grass-albedo")->Bind(3);
-      textures.at("grass-normal")->Bind(4);
-      textures.at("grass-metallic")->Bind(5);
-      textures.at("grass-roughness")->Bind(6);
-      textures.at("grass-ao")->Bind(7);
+      _textures.Get(textureHandles.at("grass-albedo")).Bind(3);
+      _textures.Get(textureHandles.at("grass-normal")).Bind(4);
+      _textures.Get(textureHandles.at("grass-metallic")).Bind(5);
+      _textures.Get(textureHandles.at("grass-roughness")).Bind(6);
+      _textures.Get(textureHandles.at("grass-ao")).Bind(7);
 
       Mat4 model = Identity<Mat4>();
       model = Translate(model, Vec3(-1.0, 0.0, 2.0));
@@ -1137,11 +1097,11 @@ namespace Krys::Gfx::OpenGL
 
     // plastic
     {
-      textures.at("plastic-albedo")->Bind(3);
-      textures.at("plastic-normal")->Bind(4);
-      textures.at("plastic-metallic")->Bind(5);
-      textures.at("plastic-roughness")->Bind(6);
-      textures.at("plastic-ao")->Bind(7);
+      _textures.Get(textureHandles.at("plastic-albedo")).Bind(3);
+      _textures.Get(textureHandles.at("plastic-normal")).Bind(4);
+      _textures.Get(textureHandles.at("plastic-metallic")).Bind(5);
+      _textures.Get(textureHandles.at("plastic-roughness")).Bind(6);
+      _textures.Get(textureHandles.at("plastic-ao")).Bind(7);
 
       Mat4 model = Identity<Mat4>();
       model = Translate(model, Vec3(1.0, 0.0, 2.0));
@@ -1152,11 +1112,11 @@ namespace Krys::Gfx::OpenGL
 
     // wall
     {
-      textures.at("wall-albedo")->Bind(3);
-      textures.at("wall-normal")->Bind(4);
-      textures.at("wall-metallic")->Bind(5);
-      textures.at("wall-roughness")->Bind(6);
-      textures.at("wall-ao")->Bind(7);
+      _textures.Get(textureHandles.at("wall-albedo")).Bind(3);
+      _textures.Get(textureHandles.at("wall-normal")).Bind(4);
+      _textures.Get(textureHandles.at("wall-metallic")).Bind(5);
+      _textures.Get(textureHandles.at("wall-roughness")).Bind(6);
+      _textures.Get(textureHandles.at("wall-ao")).Bind(7);
 
       Mat4 model = Identity<Mat4>();
       model = Translate(model, Vec3(3.0, 0.0, 2.0));
@@ -1204,5 +1164,10 @@ namespace Krys::Gfx::OpenGL
     _width = width;
     _height = height;
     glViewport(0, 0, _width, _height);
+  }
+
+  ITextureSystem &Context::Textures() noexcept
+  {
+    return _textures;
   }
 }
