@@ -2,6 +2,7 @@
 
 #include "Krystal.Gfx.OpenGL/TextureSystem.hpp"
 #include "Krystal.Gfx.OpenGL/ShaderSystem.hpp"
+#include "Krystal.Gfx.OpenGL/MeshSystem.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 
 namespace Krys::Gfx::OpenGL
@@ -18,6 +19,7 @@ namespace Krys::Gfx::OpenGL
     Unique<ContextPlatformImpl> _platformImpl;
     TextureSystem _textures;
     ShaderSystem _shaders;
+    MeshSystem _meshes;
 
   public:
     Context(NativeHandle windowHandle, uint32 width, uint32 height);
@@ -35,5 +37,7 @@ namespace Krys::Gfx::OpenGL
     ITextureSystem &Textures() noexcept override;
 
     IShaderSystem &Shaders() noexcept override;
+
+    IMeshSystem &Meshes() noexcept override;
   };
 }

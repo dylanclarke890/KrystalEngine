@@ -9,9 +9,7 @@
 
 #include "Krystal.Gfx.OpenGL/Buffer.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
-#include "Krystal.Gfx.OpenGL/Shader.hpp"
 #include "Krystal.Gfx.OpenGL/Utils.hpp"
-#include "Krystal.Gfx.OpenGL/VertexArray.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/Light.hpp"
 #include "Krystal.Gfx/VertexBufferLayout.hpp"
@@ -48,17 +46,14 @@ namespace
 
   Map<string, TextureHandle> textureHandles;
   Map<string, ShaderHandle> shaderHandles;
-  Map<string, Unique<VertexArray>> vaos;
-  Map<string, Unique<VertexBuffer>> vbos;
-  Map<string, Unique<IndexBuffer>> ebos;
-  Map<string, Unique<UniformBuffer>> ubos;
+  Map<string, MeshHandle> meshHandles;
   Map<string, FrameBufferData> shadowMaps;
+  Map<string, Unique<UniformBuffer>> ubos;
 
   FrameBufferData pingPongFBOs[2];
 
   GLuint noiseTexture;
   List<Vec3> ssaoKernel;
-  uint sphereIndexCount = 0;
 
 #pragma region Lights
 
@@ -308,7 +303,7 @@ namespace
   }
 
   void CreateEnvironmentAndIrradianceCubemaps(uint32 width, uint32 height, TextureSystem &textureSystem,
-                                              ShaderSystem &shaderSystem)
+                                              ShaderSystem &shaderSystem, MeshSystem &meshSystem)
   {
     uint captureFBO;
     uint captureRBO;
@@ -342,6 +337,9 @@ namespace
                            LookAt(Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, 1.0f), Vec3(0.0f, -1.0f, 0.0f)),
                            LookAt(Vec3(0.0f, 0.0f, 0.0f), Vec3(0.0f, 0.0f, -1.0f), Vec3(0.0f, -1.0f, 0.0f))};
 
+    auto &cube = meshSystem.Get(meshHandles.at("cube"));
+    cube.Bind();
+
     {
       auto &shader = shaderSystem.Get(shaderHandles.at("hdr-to-cubemap"));
       shader.Bind();
@@ -349,7 +347,6 @@ namespace
       shader.SetUniform("projection", captureProjection);
 
       textureSystem.Get(textureHandles.at("hdr-environment")).Bind(0);
-      vaos.at("cube")->Bind();
 
       glViewport(0, 0, width, height);
       glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
@@ -359,7 +356,7 @@ namespace
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
                                envCubemap, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        Utils::Draw(GL_TRIANGLES, 36);
+        cube.Draw();
       }
       glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -402,7 +399,7 @@ namespace
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
                                irradianceMap, 0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        Utils::Draw(GL_TRIANGLES, 36);
+        cube.Draw();
       }
 
       shadowMaps["irradiance-cubemap"] = {captureFBO, {irradianceMap}, captureRBO, width, height};
@@ -438,8 +435,8 @@ namespace
       for (unsigned int mip = 0; mip < maxMipLevels; ++mip)
       {
         // reisze framebuffer according to mip-level size.
-        unsigned int mipWidth = static_cast<unsigned int>(128 * std::pow(0.5, mip));
-        unsigned int mipHeight = static_cast<unsigned int>(128 * std::pow(0.5, mip));
+        uint mipWidth = static_cast<unsigned int>(128 * std::pow(0.5, mip));
+        uint mipHeight = static_cast<unsigned int>(128 * std::pow(0.5, mip));
         glBindRenderbuffer(GL_RENDERBUFFER, captureRBO);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipWidth, mipHeight);
         glViewport(0, 0, mipWidth, mipHeight);
@@ -451,7 +448,7 @@ namespace
           glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
                                  prefilterMap, mip);
           glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-          Utils::Draw(GL_TRIANGLES, 36);
+          cube.Draw();
         }
       }
 
@@ -484,8 +481,10 @@ namespace
       glViewport(0, 0, 512, 512);
       shader.Bind();
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      vaos.at("screen-quad")->Bind();
-      Utils::Draw(GL_TRIANGLE_STRIP, 4);
+
+      auto &mesh = meshSystem.Get(meshHandles.at("screen-quad"));
+      mesh.Bind();
+      mesh.Draw();
 
       shadowMaps["brdf-lut"] = {captureFBO, {brdfLUTTexture}, captureRBO, 512, 512};
     }
@@ -530,58 +529,6 @@ namespace
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  }
-
-  void RenderScene(Shader &shader)
-  {
-    vaos.at("plane")->Bind();
-    Mat4 model = Identity<Mat4>();
-    shader.SetUniform("model", model);
-    Utils::Draw(GL_TRIANGLES, 36);
-
-    vaos.at("cube")->Bind();
-    model = Identity<Mat4>();
-    model = Translate(model, Vec3(0.0f, 1.5f, 0.0));
-    model = Scale(model, Vec3(0.5f));
-    shader.SetUniform("model", model);
-    Utils::Draw(GL_TRIANGLES, 36);
-
-    model = Identity<Mat4>();
-    model = Translate(model, Vec3(2.0f, 0.0f, 1.0));
-    model = Scale(model, Vec3(0.5f));
-    shader.SetUniform("model", model);
-    Utils::Draw(GL_TRIANGLES, 36);
-
-    model = Identity<Mat4>();
-    model = Translate(model, Vec3(-1.0f, 0.0f, 2.0));
-    model = Rotate(model, Radians(60.0f), Normalize(Vec3(1.0, 0.0, 1.0)));
-    model = Scale(model, Vec3(0.25));
-    shader.SetUniform("model", model);
-    Utils::Draw(GL_TRIANGLES, 36);
-  }
-
-  void CreateVertexArray(const string &name, const BufferData &vertices,
-                         const VertexBufferLayout &layout) noexcept
-  {
-    vaos[name] = CreateUnique<VertexArray>();
-    vbos[name] = CreateUnique<VertexBuffer>(vertices);
-
-    vaos.at(name)->Bind();
-    vbos.at(name)->Bind();
-    Utils::ApplyVertexBufferLayout(layout);
-  }
-
-  void CreateVertexArray(const string &name, const BufferData &vertices, const BufferData &indices,
-                         const VertexBufferLayout &layout) noexcept
-  {
-    vaos[name] = CreateUnique<VertexArray>();
-    vbos[name] = CreateUnique<VertexBuffer>(vertices);
-    ebos[name] = CreateUnique<IndexBuffer>(indices);
-
-    vaos.at(name)->Bind();
-    vbos.at(name)->Bind();
-    ebos.at(name)->Bind();
-    Utils::ApplyVertexBufferLayout(layout);
   }
 
   void LoadPBRTextures(const string &name, TextureSystem &textureSystem)
@@ -734,251 +681,9 @@ namespace Krys::Gfx::OpenGL
       LoadPBRTextures("wall", _textures);
     }
 
-    // Cube
-    {
-      List<float> vertices = {
-        // back face
-        -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
-        1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,   // top-right
-        1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,  // bottom-right
-        1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,   // top-right
-        -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, // bottom-left
-        -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,  // top-left
-        // front face
-        -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom-left
-        1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,  // bottom-right
-        1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,   // top-right
-        1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,   // top-right
-        -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,  // top-left
-        -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom-left
-        // left face
-        -1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,   // top-right
-        -1.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,  // top-left
-        -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-left
-        -1.0f, -1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f, // bottom-left
-        -1.0f, -1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,  // bottom-right
-        -1.0f, 1.0f, 1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,   // top-right
-                                                            // right face
-        1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,     // top-left
-        1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,   // bottom-right
-        1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,    // top-right
-        1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,   // bottom-right
-        1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,     // top-left
-        1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,    // bottom-left
-        // bottom face
-        -1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top-right
-        1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,  // top-left
-        1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,   // bottom-left
-        1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,   // bottom-left
-        -1.0f, -1.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,  // bottom-right
-        -1.0f, -1.0f, -1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f, // top-right
-        // top face
-        -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top-left
-        1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,   // bottom-right
-        1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,  // top-right
-        1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,   // bottom-right
-        -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, // top-left
-        -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f   // bottom-left
-      };
-
-      VertexBufferLayout layout = {
-        {VertexAttributeType::Float, 3}, // position
-        {VertexAttributeType::Float, 3}, // normal
-        {VertexAttributeType::Float, 2}  // texcoord
-      };
-
-      CreateVertexArray("cube", ByteUtils::AsBytesView(vertices), layout);
-    }
-
-    // Plane
-    {
-      List<float> vertices = {// positions            // normals         // texcoords
-                              25.0f, -0.5f, 25.0f,  0.0f,  1.0f,   0.0f,  25.0f,  0.0f,  -25.0f, -0.5f,
-                              25.0f, 0.0f,  1.0f,   0.0f,  0.0f,   0.0f,  -25.0f, -0.5f, -25.0f, 0.0f,
-                              1.0f,  0.0f,  0.0f,   25.0f, 25.0f,  -0.5f, 25.0f,  0.0f,  1.0f,   0.0f,
-                              25.0f, 0.0f,  -25.0f, -0.5f, -25.0f, 0.0f,  1.0f,   0.0f,  0.0f,   25.0f,
-                              25.0f, -0.5f, -25.0f, 0.0f,  1.0f,   0.0f,  25.0f,  25.0f};
-
-      VertexBufferLayout layout = {
-        {VertexAttributeType::Float, 3}, // position
-        {VertexAttributeType::Float, 3}, // normal
-        {VertexAttributeType::Float, 2}  // texcoord
-      };
-
-      CreateVertexArray("plane", ByteUtils::AsBytesView(vertices), layout);
-    }
-
-    // Quad with pos, normal, tex coords, tangent, bitangent
-    {
-      // positions
-      Vec3 pos1(-1.0f, 1.0f, 0.0f);
-      Vec3 pos2(-1.0f, -1.0f, 0.0f);
-      Vec3 pos3(1.0f, -1.0f, 0.0f);
-      Vec3 pos4(1.0f, 1.0f, 0.0f);
-      // texture coordinates
-      Vec2 uv1(0.0f, 1.0f);
-      Vec2 uv2(0.0f, 0.0f);
-      Vec2 uv3(1.0f, 0.0f);
-      Vec2 uv4(1.0f, 1.0f);
-      // normal vector
-      Vec3 nm(0.0f, 0.0f, 1.0f);
-
-      // calculate tangent/bitangent vectors of both triangles
-      Vec3 tangent1, bitangent1;
-      Vec3 tangent2, bitangent2;
-      // triangle 1
-      // ----------
-      Vec3 edge1 = pos2 - pos1;
-      Vec3 edge2 = pos3 - pos1;
-      Vec2 deltaUV1 = uv2 - uv1;
-      Vec2 deltaUV2 = uv3 - uv1;
-
-      float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
-
-      tangent1.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
-      tangent1.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
-      tangent1.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
-
-      bitangent1.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
-      bitangent1.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
-      bitangent1.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
-
-      // triangle 2
-      // ----------
-      edge1 = pos3 - pos1;
-      edge2 = pos4 - pos1;
-      deltaUV1 = uv3 - uv1;
-      deltaUV2 = uv4 - uv1;
-
-      f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
-
-      tangent2.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
-      tangent2.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
-      tangent2.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
-
-      bitangent2.x = f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x);
-      bitangent2.y = f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y);
-      bitangent2.z = f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z);
-
-      List<float> vertices = {
-        // positions            // normal         // texcoords  // tangent                          //
-        // bitangent
-        pos1.x, pos1.y,     pos1.z,     nm.x,       nm.y,         nm.z,         uv1.x,
-        uv1.y,  tangent1.x, tangent1.y, tangent1.z, bitangent1.x, bitangent1.y, bitangent1.z,
-        pos2.x, pos2.y,     pos2.z,     nm.x,       nm.y,         nm.z,         uv2.x,
-        uv2.y,  tangent1.x, tangent1.y, tangent1.z, bitangent1.x, bitangent1.y, bitangent1.z,
-        pos3.x, pos3.y,     pos3.z,     nm.x,       nm.y,         nm.z,         uv3.x,
-        uv3.y,  tangent1.x, tangent1.y, tangent1.z, bitangent1.x, bitangent1.y, bitangent1.z,
-
-        pos1.x, pos1.y,     pos1.z,     nm.x,       nm.y,         nm.z,         uv1.x,
-        uv1.y,  tangent2.x, tangent2.y, tangent2.z, bitangent2.x, bitangent2.y, bitangent2.z,
-        pos3.x, pos3.y,     pos3.z,     nm.x,       nm.y,         nm.z,         uv3.x,
-        uv3.y,  tangent2.x, tangent2.y, tangent2.z, bitangent2.x, bitangent2.y, bitangent2.z,
-        pos4.x, pos4.y,     pos4.z,     nm.x,       nm.y,         nm.z,         uv4.x,
-        uv4.y,  tangent2.x, tangent2.y, tangent2.z, bitangent2.x, bitangent2.y, bitangent2.z};
-
-      VertexBufferLayout layout = {
-        {VertexAttributeType::Float, 3}, // position
-        {VertexAttributeType::Float, 3}, // normal
-        {VertexAttributeType::Float, 2}, // texcoord
-        {VertexAttributeType::Float, 3}, // tangent
-        {VertexAttributeType::Float, 3}, // bitangent
-      };
-
-      CreateVertexArray("quad", ByteUtils::AsBytesView(vertices), layout);
-    }
-
-    // Screen quad
-    {
-      List<float> vertices = {
-        // positions   // texCoords
-        -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 0.0f,
-      };
-
-      VertexBufferLayout layout = {
-        {VertexAttributeType::Float, 2}, // position
-        {VertexAttributeType::Float, 2}  // texcoord
-      };
-
-      CreateVertexArray("screen-quad", ByteUtils::AsBytesView(vertices), layout);
-    }
-
-    // Sphere
-    {
-      List<Vec3> positions;
-      List<Vec2> uv;
-      List<Vec3> normals;
-      List<uint> indices;
-
-      const uint X_SEGMENTS = 64;
-      const uint Y_SEGMENTS = 64;
-      const float PI = 3.14159265359f;
-      for (uint x = 0; x <= X_SEGMENTS; ++x)
-      {
-        for (uint y = 0; y <= Y_SEGMENTS; ++y)
-        {
-          float xSegment = (float)x / (float)X_SEGMENTS;
-          float ySegment = (float)y / (float)Y_SEGMENTS;
-          float xPos = std::cos(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
-          float yPos = std::cos(ySegment * PI);
-          float zPos = std::sin(xSegment * 2.0f * PI) * std::sin(ySegment * PI);
-
-          positions.push_back(Vec3(xPos, yPos, zPos));
-          uv.push_back(Vec2(xSegment, ySegment));
-          normals.push_back(Vec3(xPos, yPos, zPos));
-        }
-      }
-
-      bool oddRow = false;
-      for (unsigned int y = 0; y < Y_SEGMENTS; ++y)
-      {
-        if (!oddRow) // even rows: y == 0, y == 2; and so on
-        {
-          for (unsigned int x = 0; x <= X_SEGMENTS; ++x)
-          {
-            indices.push_back(y * (X_SEGMENTS + 1) + x);
-            indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
-          }
-        }
-        else
-        {
-          for (int x = X_SEGMENTS; x >= 0; --x)
-          {
-            indices.push_back((y + 1) * (X_SEGMENTS + 1) + x);
-            indices.push_back(y * (X_SEGMENTS + 1) + x);
-          }
-        }
-        oddRow = !oddRow;
-      }
-      sphereIndexCount = static_cast<uint>(indices.size());
-
-      List<float> vertices;
-      for (uint i = 0; i < positions.size(); ++i)
-      {
-        vertices.push_back(positions[i].x);
-        vertices.push_back(positions[i].y);
-        vertices.push_back(positions[i].z);
-        if (normals.size() > 0)
-        {
-          vertices.push_back(normals[i].x);
-          vertices.push_back(normals[i].y);
-          vertices.push_back(normals[i].z);
-        }
-        if (uv.size() > 0)
-        {
-          vertices.push_back(uv[i].x);
-          vertices.push_back(uv[i].y);
-        }
-      }
-
-      VertexBufferLayout layout = {
-        {VertexAttributeType::Float, 3}, // position
-        {VertexAttributeType::Float, 3}, // normal
-        {VertexAttributeType::Float, 2}  // texcoord
-      };
-
-      CreateVertexArray("sphere", ByteUtils::AsBytesView(vertices), ByteUtils::AsBytesView(indices), layout);
-    }
+    meshHandles["cube"] = _meshes.CreateCube();
+    meshHandles["sphere"] = _meshes.CreateSphere();
+    meshHandles["screen-quad"] = _meshes.CreateScreenQuad();
 
     // Shadow maps
     CreateGFramebuffer(_width, _height);
@@ -996,7 +701,7 @@ namespace Krys::Gfx::OpenGL
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     glClearColor(0.1f, 0.1f, 0.1f, 1.f);
 
-    CreateEnvironmentAndIrradianceCubemaps(1'024, 1'024, _textures, _shaders);
+    CreateEnvironmentAndIrradianceCubemaps(1'024, 1'024, _textures, _shaders, _meshes);
     glViewport(0, 0, _width, _height);
 
     {
@@ -1044,7 +749,8 @@ namespace Krys::Gfx::OpenGL
     shader.Bind();
     shader.SetUniform("camPos", camera.Position());
 
-    vaos.at("sphere")->Bind();
+    auto &sphere = _meshes.Get(meshHandles.at("sphere"));
+    sphere.Bind();
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps["irradiance-cubemap"].ColorTextures[0]);
@@ -1065,7 +771,7 @@ namespace Krys::Gfx::OpenGL
       model = Translate(model, Vec3(-5.0, 0.0, 2.0));
       shader.SetUniform("model", model);
       shader.SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
-      Utils::DrawElements(GL_TRIANGLE_STRIP, sphereIndexCount);
+      sphere.Draw();
     }
 
     // gold
@@ -1080,7 +786,7 @@ namespace Krys::Gfx::OpenGL
       model = Translate(model, Vec3(-3.0, 0.0, 2.0));
       shader.SetUniform("model", model);
       shader.SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
-      Utils::DrawElements(GL_TRIANGLE_STRIP, sphereIndexCount);
+      sphere.Draw();
     }
 
     // grass
@@ -1095,7 +801,7 @@ namespace Krys::Gfx::OpenGL
       model = Translate(model, Vec3(-1.0, 0.0, 2.0));
       shader.SetUniform("model", model);
       shader.SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
-      Utils::DrawElements(GL_TRIANGLE_STRIP, sphereIndexCount);
+      sphere.Draw();
     }
 
     // plastic
@@ -1110,7 +816,7 @@ namespace Krys::Gfx::OpenGL
       model = Translate(model, Vec3(1.0, 0.0, 2.0));
       shader.SetUniform("model", model);
       shader.SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
-      Utils::DrawElements(GL_TRIANGLE_STRIP, sphereIndexCount);
+      sphere.Draw();
     }
 
     // wall
@@ -1125,7 +831,7 @@ namespace Krys::Gfx::OpenGL
       model = Translate(model, Vec3(3.0, 0.0, 2.0));
       shader.SetUniform("model", model);
       shader.SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
-      Utils::DrawElements(GL_TRIANGLE_STRIP, sphereIndexCount);
+      sphere.Draw();
     }
 
     // render light source (simply re-render sphere at light positions)
@@ -1143,17 +849,20 @@ namespace Krys::Gfx::OpenGL
       model = Scale(model, Vec3(0.5f));
       shader.SetUniform("model", model);
       shader.SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
-      Utils::DrawElements(GL_TRIANGLE_STRIP, sphereIndexCount);
+      sphere.Draw();
     }
 
     {
       auto &shader = _shaders.Get(shaderHandles.at("hdr-background"));
-      vaos.at("cube")->Bind();
       shader.Bind();
       shader.SetUniform("view", view);
+
       glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps["hdr-cubemap"].ColorTextures[0]);
-      Utils::Draw(GL_TRIANGLES, 36);
+
+      auto &cube = _meshes.Get(meshHandles.at("cube"));
+      cube.Bind();
+      cube.Draw();
     }
   }
 
@@ -1177,5 +886,10 @@ namespace Krys::Gfx::OpenGL
   IShaderSystem &Context::Shaders() noexcept
   {
     return _shaders;
+  }
+
+  IMeshSystem &Context::Meshes() noexcept
+  {
+    return _meshes;
   }
 }

@@ -23,8 +23,8 @@ namespace Krys::Gfx::OpenGL
       }
     }
 
-    static void ApplyVertexBufferLayout(const VertexBufferLayout &layout,
-                                        uint32 attributeIndexOffset = 0u) noexcept
+    static uint32 ApplyVertexBufferLayout(const VertexBufferLayout &layout,
+                                          uint32 attributeIndexOffset = 0u) noexcept
     {
       uint32 stride = 0;
       for (const auto &element : layout)
@@ -64,6 +64,8 @@ namespace Krys::Gfx::OpenGL
 
         offset += element.Count * VertexBufferElement::GetSizeOfType(element.Type);
       }
+
+      return offset;
     }
 
     static void SetDirectionalLightUniforms(Shader &shader, DirectionalLight &light,
@@ -109,22 +111,6 @@ namespace Krys::Gfx::OpenGL
       shader.SetUniform(uniformPrefix + ".diffuse", material.Diffuse.ToVec3());
       shader.SetUniform(uniformPrefix + ".specular", material.Specular.ToVec3());
       shader.SetUniform(uniformPrefix + ".shininess", material.Shininess);
-    }
-
-    static void Draw(GLenum primitive, uint32 vertexCount, uint32 offset = 0) noexcept
-    {
-      glDrawArrays(primitive, 0, vertexCount);
-    }
-
-    static void DrawElements(GLenum primitive, uint32 indexCount, uint32 offset = 0) noexcept
-    {
-      glDrawElements(primitive, indexCount, GL_UNSIGNED_INT, (const void *)(uintptr_t)offset);
-    }
-
-    static void DrawInstanced(GLenum primitive, uint32 vertexCount, uint32 instanceCount,
-                              uint32 offset = 0) noexcept
-    {
-      glDrawArraysInstanced(primitive, offset, vertexCount, instanceCount);
     }
   };
 }

@@ -54,9 +54,6 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Buffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\VertexArray.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\TextureSystem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -64,6 +61,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\ShaderSystem.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\MeshSystem.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Mesh.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
