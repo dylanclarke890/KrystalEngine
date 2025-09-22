@@ -16,5 +16,6 @@ namespace Krys::Gfx::OpenGL
 {
   FontHandle FontSystem::Load(const IO::Path &path, float size) noexcept
   {
+    return {};
   }
 }

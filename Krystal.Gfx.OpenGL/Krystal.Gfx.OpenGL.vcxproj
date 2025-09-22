@@ -28,6 +28,9 @@
     <ProjectReference Include="..\Krystal.Lib\Krystal.Lib.vcxproj">
       <Project>{38f26636-5d57-4740-a8d2-df219340309a}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\Krystal.Log\Krystal.Log.vcxproj">
+      <Project>{dfd59bfd-d1ba-4f1d-ab1a-ecd50440d091}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Krystal.Maths\Krystal.Maths.vcxproj">
       <Project>{2c0a90e5-aa87-46b7-b599-e56a9dd5047b}</Project>
     </ProjectReference>

@@ -13,10 +13,12 @@
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/Light.hpp"
 #include "Krystal.Gfx/VertexBufferLayout.hpp"
+#include "Krystal.Lib/DebugBreak.hpp"
 #include "Krystal.Lib/Expected.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Map.hpp"
 #include "Krystal.Lib/String.hpp"
+#include "Krystal.Log/ILogger.hpp"
 #include "Krystal.Maths/Clipspace.hpp"
 #include "Krystal.Maths/Convert.hpp"
 #include "Krystal.Maths/Interpolate.hpp"
@@ -24,6 +26,7 @@
 #include "Krystal.Maths/Transform.hpp"
 #include "Krystal.Maths/Vector.hpp"
 #include "Krystal.Platform/Platform.hpp"
+#include <format>
 #include <random>
 
 namespace
@@ -501,6 +504,86 @@ namespace
     textures.Get(std::get<TextureHandle>(material.Parameters[10].Value)).Bind(4);
     mesh.Draw();
   }
+
+  void DebugMessageCallback(GLenum source, GLenum type, uint id, GLenum severity, GLsizei, const char *msg,
+                            const void *)
+  {
+    auto *logger = Log::GetGlobalLogger();
+    if (logger == nullptr)
+    {
+      return;
+    }
+
+    string message {};
+
+    switch (severity)
+    {
+      case GL_DEBUG_SEVERITY_HIGH:         message += std::format("OPENGL ({0}): {1}", id, msg); break;
+      case GL_DEBUG_SEVERITY_MEDIUM:       message += std::format("OPENGL ({0}): {1}", id, msg); break;
+      case GL_DEBUG_SEVERITY_LOW:          message += std::format("OPENGL ({0}): {1}", id, msg); break;
+      case GL_DEBUG_SEVERITY_NOTIFICATION: message += std::format("OPENGL ({0}): {1}", id, msg); break;
+      default:                             assert(false && "Unknown enum value: OpenGL severity level"); break;
+    }
+    message += "\n";
+
+    message += " - Type: ";
+    switch (type)
+    {
+      case GL_DEBUG_TYPE_ERROR:               message += "Error"; break;
+      case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: message += "Deprecated Behavior"; break;
+      case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  message += "Undefined Behavior"; break;
+      case GL_DEBUG_TYPE_PORTABILITY:         message += "Portability"; break;
+      case GL_DEBUG_TYPE_PERFORMANCE:         message += "Performance"; break;
+      case GL_DEBUG_TYPE_MARKER:              message += "Marker"; break;
+      case GL_DEBUG_TYPE_PUSH_GROUP:          message += "Push Group"; break;
+      case GL_DEBUG_TYPE_POP_GROUP:           message += "Pop Group"; break;
+      case GL_DEBUG_TYPE_OTHER:               message += "Other"; break;
+      default:                                assert(false && "Unknown enum value: OpenGL message type"); break;
+    }
+    message += "\n";
+
+    message += " - Source: ";
+    switch (source)
+    {
+      case GL_DEBUG_SOURCE_API:             message += "API"; break;
+      case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   message += "Window System"; break;
+      case GL_DEBUG_SOURCE_SHADER_COMPILER: message += "Shader Compiler"; break;
+      case GL_DEBUG_SOURCE_THIRD_PARTY:     message += "Third Party"; break;
+      case GL_DEBUG_SOURCE_APPLICATION:     message += "Application"; break;
+      case GL_DEBUG_SOURCE_OTHER:           message += "Other"; break;
+      default:                              assert(false && "Unknown enum value: OpenGL source type"); break;
+    }
+
+    switch (severity)
+    {
+      case GL_DEBUG_SEVERITY_HIGH:         logger->Critical(message); break;
+      case GL_DEBUG_SEVERITY_MEDIUM:       logger->Error(message); break;
+      case GL_DEBUG_SEVERITY_LOW:          logger->Warn(message); break;
+      case GL_DEBUG_SEVERITY_NOTIFICATION: logger->Info(message); break;
+      default:                             assert(false && "Unknown enum value: OpenGL severity level"); break;
+    }
+
+    if (severity != GL_DEBUG_SEVERITY_NOTIFICATION && severity != GL_DEBUG_SEVERITY_LOW)
+      KRYS_DEBUG_BREAK();
+  }
+
+  void DisableDebugMessageIds(GLenum source, GLenum type, const List<uint32> &ids)
+  {
+    glDebugMessageControl(source, type, GL_DONT_CARE, static_cast<GLsizei>(ids.size()), ids.data(), GL_FALSE);
+  }
+
+  void EnableDebugOutput()
+  {
+    glDebugMessageCallback(DebugMessageCallback, nullptr);
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, 0, GL_TRUE);
+    DisableDebugMessageIds(GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_OTHER,
+                           {
+                             131'169, // Driver allocated storage for renderbuffer
+                             131'185, // Buffer detailed info
+                           });
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+  }
 }
 
 namespace Krys::Gfx
@@ -645,6 +728,8 @@ namespace Krys::Gfx::OpenGL
     glDepthFunc(GL_LEQUAL);
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     glClearColor(0.1f, 0.1f, 0.1f, 1.f);
+
+    EnableDebugOutput();
 
     CreateEnvironmentAndIrradianceCubemaps(1'024, 1'024, _textures, _shaders, _meshes);
     glViewport(0, 0, _width, _height);
