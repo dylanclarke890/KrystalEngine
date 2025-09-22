@@ -38,6 +38,8 @@
   <ItemGroup>
     <ClCompile Include="src\Context.cpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Buffer.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Fonts\Font.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Fonts\FontSystem.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\gl.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Material.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\MaterialSystem.hpp" />
@@ -58,6 +60,7 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Shader.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Texture.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Win32\ContextPlatformImpl.hpp" />
+    <ClCompile Include="src\Fonts\FontManager.cpp" />
     <ClCompile Include="src\Hooks\gl.cpp" />
     <ClCompile Include="src\Hooks\wgl.cpp" />
     <ClCompile Include="src\Win32\ContextPlatformImpl.cpp" />
