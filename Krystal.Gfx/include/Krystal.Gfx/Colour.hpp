@@ -2,6 +2,8 @@
 
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/HashUtils.hpp"
+#include "Krystal.Lib/List.hpp"
+#include "Krystal.Lib/Types.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
 #include <format>

@@ -118,10 +118,7 @@ namespace Krys::Gfx::OpenGL
     void Unload(TextureHandle handle) noexcept override
     {
       assert(handle.IsValid() && "Invalid handle.");
-
-      Texture *texture = _textures.TryGet(handle);
-      if (texture == nullptr)
-        return;
+      assert(_textures.TryGet(handle) != nullptr && "Texture not found in manager.");
 
       auto it = std::find_if(_loadedTextures.begin(), _loadedTextures.end(),
                              [handle](const auto &pair) { return pair.second.Handle.Id == handle.Id; });

@@ -2,6 +2,7 @@
 
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/VertexBufferLayout.hpp"
+#include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/Span.hpp"
 #include "Krystal.Lib/Types.hpp"
 
@@ -15,10 +16,6 @@ namespace Krys::Gfx
     Triangles,
     TriangleStrip,
     TriangleFan,
-  };
-
-  struct MeshHandle : Handle<MeshHandle>
-  {
   };
 
   class IMeshSystem

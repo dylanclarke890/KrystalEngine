@@ -1,9 +1,8 @@
 #pragma once
 
-#include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
+#include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Shader.hpp"
 #include "Krystal.Gfx/Light.hpp"
-#include "Krystal.Gfx/Material.hpp"
 #include "Krystal.Gfx/VertexBufferLayout.hpp"
 
 namespace Krys::Gfx::OpenGL

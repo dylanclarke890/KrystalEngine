@@ -3,6 +3,7 @@
 #include "Krystal.Gfx.OpenGL/Mesh.hpp"
 #include "Krystal.Gfx/IMeshSystem.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
+#include "Krystal.Lib/ByteUtils.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Maths/Vector.hpp"
@@ -189,7 +190,10 @@ namespace Krys::Gfx::OpenGL
 
     void Unload(MeshHandle handle) noexcept override
     {
-      assert(handle.IsValid() && "Invalid handle.");
+      if (!handle.IsValid())
+      {
+        return;
+      }
       _meshes.Remove(handle);
     }
 

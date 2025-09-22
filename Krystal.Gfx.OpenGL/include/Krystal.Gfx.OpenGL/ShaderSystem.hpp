@@ -60,11 +60,12 @@ namespace Krys::Gfx::OpenGL
 
     void Unload(ShaderHandle handle) noexcept override
     {
-      assert(handle.IsValid() && "Invalid handle.");
-
-      Shader *texture = _shaders.TryGet(handle);
-      if (texture == nullptr)
+      if (!handle.IsValid())
+      {
         return;
+      }
+
+      assert(_shaders.TryGet(handle) != nullptr && "Shader not found in manager.");
 
       auto it = std::find_if(_loadedShaders.begin(), _loadedShaders.end(),
                              [handle](const auto &pair) { return pair.second.Handle.Id == handle.Id; });

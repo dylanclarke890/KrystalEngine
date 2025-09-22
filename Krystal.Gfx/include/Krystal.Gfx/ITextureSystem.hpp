@@ -2,6 +2,7 @@
 
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.IO/Path.hpp"
+#include "Krystal.Lib/Attributes.hpp"
 
 namespace Krys::Gfx
 {
@@ -10,10 +11,6 @@ namespace Krys::Gfx
     bool IsSRGB {false};
     bool GenerateMipmaps {true};
     uint32 MaxMipLevels {0u};
-  };
-
-  struct TextureHandle : Handle<TextureHandle>
-  {
   };
 
   class ITextureSystem

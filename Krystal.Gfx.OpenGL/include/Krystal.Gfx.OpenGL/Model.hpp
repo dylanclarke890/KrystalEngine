@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
+#include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Shader.hpp"
 #include "Krystal.Gfx.OpenGL/Texture.hpp"
 #include "Krystal.Gfx.OpenGL/Utils.hpp"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
+#include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.IO/Image.hpp"
 #include "Krystal.Lib/Pair.hpp"
 #include "Krystal.Lib/Span.hpp"
@@ -88,7 +88,7 @@ namespace Krys::Gfx::OpenGL
       return _id;
     }
 
-    void Bind(GLuint unit = 0u) const noexcept
+    void Bind(GLuint unit) const noexcept
     {
       glBindTextureUnit(unit, _id);
     }

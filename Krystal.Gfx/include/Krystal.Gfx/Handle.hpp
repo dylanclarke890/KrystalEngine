@@ -2,7 +2,6 @@
 
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/Types.hpp"
-#include "Krystal.Lib/Concepts.hpp"
 
 namespace Krys::Gfx
 {
@@ -15,5 +14,25 @@ namespace Krys::Gfx
     {
       return Id != 0u;
     }
+  };
+
+  struct TextureHandle : Handle<TextureHandle>
+  {
+  };
+
+  struct SamplerHandle : Handle<SamplerHandle>
+  {
+  };
+
+  struct ShaderHandle : Handle<ShaderHandle>
+  {
+  };
+
+  struct MeshHandle : Handle<MeshHandle>
+  {
+  };
+
+  struct MaterialHandle : Handle<MaterialHandle>
+  {
   };
 }

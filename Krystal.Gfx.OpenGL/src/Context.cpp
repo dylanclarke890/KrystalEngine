@@ -19,6 +19,7 @@
 #include "Krystal.Lib/String.hpp"
 #include "Krystal.Maths/Clipspace.hpp"
 #include "Krystal.Maths/Convert.hpp"
+#include "Krystal.Maths/Interpolate.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Transform.hpp"
 #include "Krystal.Maths/Vector.hpp"
@@ -46,7 +47,9 @@ namespace
 
   Map<string, TextureHandle> textureHandles;
   Map<string, ShaderHandle> shaderHandles;
+  Map<string, MaterialHandle> materialHandles;
   Map<string, MeshHandle> meshHandles;
+
   Map<string, FrameBufferData> shadowMaps;
   Map<string, Unique<UniformBuffer>> ubos;
 
@@ -54,46 +57,6 @@ namespace
 
   GLuint noiseTexture;
   List<Vec3> ssaoKernel;
-
-#pragma region Lights
-
-  static LightAttenuation attenuation {1.0f, 0.09f, 0.032f};
-  static Colour ambientColor = {0.2f, 0.2f, 0.2f};
-  static Colour diffuseColor = {0.5f, 0.5f, 0.5f};
-  static Colour specularColor = {1.0f, 1.0f, 1.0f};
-
-  static DirectionalLight directionalLight {
-    {-0.2f, -1.0f, -0.3f}, LightColour {{0.05f, 0.05f, 0.05f}, {0.4f, 0.4f, 0.4f}, {0.5f, 0.5f, 0.5f}}};
-
-  static SpotLight spotLight {
-    {0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f},   LightColour {ambientColor, diffuseColor, specularColor},
-    attenuation,        Maths::Radians(12.5f), Maths::Radians(15.0f)};
-
-  static PointLight pointLights[4] = {
-    {Maths::Vec3(0.7f, 0.2f, 2.0f), LightColour {ambientColor, {1.0f, 0.6f, 0.0f}, specularColor},
-     attenuation},
-    {Maths::Vec3(2.3f, -3.3f, -4.0f), LightColour {ambientColor, {1.0f, 0.0f, 0.0f}, specularColor},
-     attenuation},
-    {Maths::Vec3(-4.0f, 2.0f, -12.0f), LightColour {ambientColor, {1.0f, 1.0f, 0.0f}, specularColor},
-     attenuation},
-    {Maths::Vec3(0.0f, 0.0f, -3.0f), LightColour {ambientColor, {0.2f, 0.2f, 1.0f}, specularColor},
-     attenuation}};
-
-  static void SetLightUniforms(Shader &shader, ICamera &camera) noexcept
-  {
-    Utils::SetDirectionalLightUniforms(shader, directionalLight);
-
-    for (uint i = 0; i < 4; i++)
-    {
-      Utils::SetPointLightUniforms(shader, pointLights[i], "pointLights[" + std::to_string(i) + "]");
-    }
-
-    spotLight.Position = camera.Position();
-    spotLight.Direction = camera.Forward();
-    Utils::SetSpotLightUniforms(shader, spotLight);
-  }
-
-#pragma endregion
 
   void CreateShadowMapFramebuffer(const string &name, uint32 width, uint32 height) noexcept
   {
@@ -492,11 +455,6 @@ namespace
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
   }
 
-  float Lerp(float a, float b, float f)
-  {
-    return a + f * (b - a);
-  }
-
   void CreateNoiseTexture()
   {
     std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0);
@@ -531,30 +489,17 @@ namespace
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
   }
 
-  void LoadPBRTextures(const string &name, TextureSystem &textureSystem)
+  void DrawPBRObject(Mesh &mesh, Shader &shader, Material &material, const Mat4 &model,
+                     TextureSystem &textures)
   {
-    using namespace IO;
-    Path base = Path("data/assets/pbr/") / Path(name);
-
-    textureHandles[name + "-albedo"] = textureSystem.Load(base / Path("albedo.png"));
-    textureSystem.Get(textureHandles.at(name + "-albedo")).SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-    textureSystem.Get(textureHandles.at(name + "-albedo")).SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    textureHandles[name + "-normal"] = textureSystem.Load(base / Path("normal.png"));
-    textureSystem.Get(textureHandles.at(name + "-normal")).SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-    textureSystem.Get(textureHandles.at(name + "-normal")).SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    textureHandles[name + "-metallic"] = textureSystem.Load(base / Path("metallic.png"));
-    textureSystem.Get(textureHandles.at(name + "-metallic")).SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-    textureSystem.Get(textureHandles.at(name + "-metallic")).SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    textureHandles[name + "-roughness"] = textureSystem.Load(base / Path("roughness.png"));
-    textureSystem.Get(textureHandles.at(name + "-roughness")).SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-    textureSystem.Get(textureHandles.at(name + "-roughness")).SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-    textureHandles[name + "-ao"] = textureSystem.Load(base / Path("ao.png"));
-    textureSystem.Get(textureHandles.at(name + "-ao")).SetParameter(GL_TEXTURE_WRAP_S, GL_REPEAT);
-    textureSystem.Get(textureHandles.at(name + "-ao")).SetParameter(GL_TEXTURE_WRAP_T, GL_REPEAT);
+    shader.SetUniform("model", model);
+    shader.SetUniform("normalMatrix", Inverse(Transpose(Mat3(model))));
+    textures.Get(std::get<TextureHandle>(material.Parameters[6].Value)).Bind(3);
+    textures.Get(std::get<TextureHandle>(material.Parameters[7].Value)).Bind(5);
+    textures.Get(std::get<TextureHandle>(material.Parameters[8].Value)).Bind(6);
+    textures.Get(std::get<TextureHandle>(material.Parameters[9].Value)).Bind(7);
+    textures.Get(std::get<TextureHandle>(material.Parameters[10].Value)).Bind(4);
+    mesh.Draw();
   }
 }
 
@@ -576,8 +521,8 @@ namespace Krys::Gfx
 namespace Krys::Gfx::OpenGL
 {
   Context::Context(NativeHandle windowHandle, uint32 width, uint32 height)
-      : _windowHandle(windowHandle), _platformImpl(CreateUnique<ContextPlatformImpl>(windowHandle)),
-        _width(width), _height(height)
+      : _windowHandle(windowHandle), _width(width), _height(height),
+        _platformImpl(CreateUnique<ContextPlatformImpl>(windowHandle))
   {
   }
 
@@ -673,12 +618,12 @@ namespace Krys::Gfx::OpenGL
     // PBR textures
     {
       using namespace IO;
-
-      LoadPBRTextures("rusted-iron", _textures);
-      LoadPBRTextures("gold", _textures);
-      LoadPBRTextures("grass", _textures);
-      LoadPBRTextures("plastic", _textures);
-      LoadPBRTextures("wall", _textures);
+      ShaderHandle handle = shaderHandles.at("pbr-with-maps");
+      materialHandles["rusted-iron"] = _materials.LoadPBRMaterial("rusted-iron", handle, _textures);
+      materialHandles["gold"] = _materials.LoadPBRMaterial("gold", handle, _textures);
+      materialHandles["grass"] = _materials.LoadPBRMaterial("grass", handle, _textures);
+      materialHandles["plastic"] = _materials.LoadPBRMaterial("plastic", handle, _textures);
+      materialHandles["wall"] = _materials.LoadPBRMaterial("wall", handle, _textures);
     }
 
     meshHandles["cube"] = _meshes.CreateCube();
@@ -728,21 +673,6 @@ namespace Krys::Gfx::OpenGL
     ubos.at("matrices")->Update(List<Mat4> {view, projection});
     _shaders.Get(shaderHandles.at("hdr-background")).SetUniform("projection", projection);
 
-    Vec3 lightPositions[] = {
-      Vec3(-10.0f, 10.0f, 10.0f),
-      // Vec3(10.0f, 10.0f, 10.0f),
-      // Vec3(-10.0f, -10.0f, 10.0f),
-      // Vec3(10.0f, -10.0f, 10.0f),
-    };
-    Vec3 lightColors[] = {
-      Vec3(300.0f, 300.0f, 300.0f),
-      // Vec3(300.0f, 300.0f, 300.0f),
-      //                     Vec3(300.0f, 300.0f, 300.0f), Vec3(300.0f, 300.0f, 300.0f)
-    };
-    int nrRows = 7;
-    int nrColumns = 7;
-    float spacing = 2.5;
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     auto &shader = _shaders.Get(shaderHandles.at("pbr-with-maps"));
@@ -752,95 +682,48 @@ namespace Krys::Gfx::OpenGL
     auto &sphere = _meshes.Get(meshHandles.at("sphere"));
     sphere.Bind();
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps["irradiance-cubemap"].ColorTextures[0]);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps["prefilter-cubemap"].ColorTextures[0]);
-    glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, shadowMaps["brdf-lut"].ColorTextures[0]);
+    glBindTextureUnit(0, shadowMaps["irradiance-cubemap"].ColorTextures[0]);
+    glBindTextureUnit(1, shadowMaps["prefilter-cubemap"].ColorTextures[0]);
+    glBindTextureUnit(2, shadowMaps["brdf-lut"].ColorTextures[0]);
 
-    // rusted iron
     {
-      _textures.Get(textureHandles.at("rusted-iron-albedo")).Bind(3);
-      _textures.Get(textureHandles.at("rusted-iron-normal")).Bind(4);
-      _textures.Get(textureHandles.at("rusted-iron-metallic")).Bind(5);
-      _textures.Get(textureHandles.at("rusted-iron-roughness")).Bind(6);
-      _textures.Get(textureHandles.at("rusted-iron-ao")).Bind(7);
-
-      Mat4 model = Identity<Mat4>();
-      model = Translate(model, Vec3(-5.0, 0.0, 2.0));
-      shader.SetUniform("model", model);
-      shader.SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
-      sphere.Draw();
+      Mat4 model = Translate(Identity<Mat4>(), Vec3(-5.0, 0.0, 2.0));
+      auto &material = _materials.Get(materialHandles.at("rusted-iron"));
+      DrawPBRObject(sphere, shader, material, model, _textures);
+    }
+    {
+      Mat4 model = Translate(Identity<Mat4>(), Vec3(-3.0, 0.0, 2.0));
+      auto &material = _materials.Get(materialHandles.at("gold"));
+      DrawPBRObject(sphere, shader, material, model, _textures);
+    }
+    {
+      Mat4 model = Translate(Identity<Mat4>(), Vec3(-1.0, 0.0, 2.0));
+      auto &material = _materials.Get(materialHandles.at("grass"));
+      DrawPBRObject(sphere, shader, material, model, _textures);
+    }
+    {
+      Mat4 model = Translate(Identity<Mat4>(), Vec3(1.0, 0.0, 2.0));
+      auto &material = _materials.Get(materialHandles.at("plastic"));
+      DrawPBRObject(sphere, shader, material, model, _textures);
+    }
+    {
+      Mat4 model = Translate(Identity<Mat4>(), Vec3(3.0, 0.0, 2.0));
+      auto &material = _materials.Get(materialHandles.at("wall"));
+      DrawPBRObject(sphere, shader, material, model, _textures);
     }
 
-    // gold
-    {
-      _textures.Get(textureHandles.at("gold-albedo")).Bind(3);
-      _textures.Get(textureHandles.at("gold-normal")).Bind(4);
-      _textures.Get(textureHandles.at("gold-metallic")).Bind(5);
-      _textures.Get(textureHandles.at("gold-roughness")).Bind(6);
-      _textures.Get(textureHandles.at("gold-ao")).Bind(7);
+    Vec3 lightPositions[] = {
+      Vec3(-10.0f, 10.0f, 10.0f),
+      Vec3(10.0f, 10.0f, 10.0f),
+      Vec3(-10.0f, -10.0f, 10.0f),
+      Vec3(10.0f, -10.0f, 10.0f),
+    };
+    Vec3 lightColors[] = {Vec3(300.0f, 300.0f, 300.0f), Vec3(300.0f, 300.0f, 300.0f),
+                          Vec3(300.0f, 300.0f, 300.0f), Vec3(300.0f, 300.0f, 300.0f)};
 
-      Mat4 model = Identity<Mat4>();
-      model = Translate(model, Vec3(-3.0, 0.0, 2.0));
-      shader.SetUniform("model", model);
-      shader.SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
-      sphere.Draw();
-    }
-
-    // grass
-    {
-      _textures.Get(textureHandles.at("grass-albedo")).Bind(3);
-      _textures.Get(textureHandles.at("grass-normal")).Bind(4);
-      _textures.Get(textureHandles.at("grass-metallic")).Bind(5);
-      _textures.Get(textureHandles.at("grass-roughness")).Bind(6);
-      _textures.Get(textureHandles.at("grass-ao")).Bind(7);
-
-      Mat4 model = Identity<Mat4>();
-      model = Translate(model, Vec3(-1.0, 0.0, 2.0));
-      shader.SetUniform("model", model);
-      shader.SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
-      sphere.Draw();
-    }
-
-    // plastic
-    {
-      _textures.Get(textureHandles.at("plastic-albedo")).Bind(3);
-      _textures.Get(textureHandles.at("plastic-normal")).Bind(4);
-      _textures.Get(textureHandles.at("plastic-metallic")).Bind(5);
-      _textures.Get(textureHandles.at("plastic-roughness")).Bind(6);
-      _textures.Get(textureHandles.at("plastic-ao")).Bind(7);
-
-      Mat4 model = Identity<Mat4>();
-      model = Translate(model, Vec3(1.0, 0.0, 2.0));
-      shader.SetUniform("model", model);
-      shader.SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
-      sphere.Draw();
-    }
-
-    // wall
-    {
-      _textures.Get(textureHandles.at("wall-albedo")).Bind(3);
-      _textures.Get(textureHandles.at("wall-normal")).Bind(4);
-      _textures.Get(textureHandles.at("wall-metallic")).Bind(5);
-      _textures.Get(textureHandles.at("wall-roughness")).Bind(6);
-      _textures.Get(textureHandles.at("wall-ao")).Bind(7);
-
-      Mat4 model = Identity<Mat4>();
-      model = Translate(model, Vec3(3.0, 0.0, 2.0));
-      shader.SetUniform("model", model);
-      shader.SetUniform("normalMatrix", Transpose(Inverse(Mat3(model))));
-      sphere.Draw();
-    }
-
-    // render light source (simply re-render sphere at light positions)
-    // this looks a bit off as we use the same shader, but it'll make their positions obvious and
-    // keeps the codeprint small.
     for (uint i = 0; i < sizeof(lightPositions) / sizeof(lightPositions[0]); ++i)
     {
       Vec3 newPos = lightPositions[i] + Vec3(std::sin((float)Platform::GetTime() * 5.0f) * 5.0f, 0.0f, 0.0f);
-      newPos = lightPositions[i];
       shader.SetUniform("lightPositions[" + std::to_string(i) + "]", newPos);
       shader.SetUniform("lightColors[" + std::to_string(i) + "]", lightColors[i]);
 
@@ -857,8 +740,7 @@ namespace Krys::Gfx::OpenGL
       shader.Bind();
       shader.SetUniform("view", view);
 
-      glActiveTexture(GL_TEXTURE0);
-      glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps["hdr-cubemap"].ColorTextures[0]);
+      glBindTextureUnit(0, shadowMaps["hdr-cubemap"].ColorTextures[0]);
 
       auto &cube = _meshes.Get(meshHandles.at("cube"));
       cube.Bind();
@@ -878,6 +760,11 @@ namespace Krys::Gfx::OpenGL
     glViewport(0, 0, _width, _height);
   }
 
+  ISamplerSystem &Context::Samplers() noexcept
+  {
+    return _samplers;
+  }
+
   ITextureSystem &Context::Textures() noexcept
   {
     return _textures;
@@ -891,5 +778,10 @@ namespace Krys::Gfx::OpenGL
   IMeshSystem &Context::Meshes() noexcept
   {
     return _meshes;
+  }
+
+  IMaterialSystem &Context::Materials() noexcept
+  {
+    return _materials;
   }
 }

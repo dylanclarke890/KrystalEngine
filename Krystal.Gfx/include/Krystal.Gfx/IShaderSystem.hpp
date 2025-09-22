@@ -2,13 +2,10 @@
 
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.IO/Path.hpp"
+#include "Krystal.Lib/Attributes.hpp"
 
 namespace Krys::Gfx
 {
-  struct ShaderHandle : Handle<ShaderHandle>
-  {
-  };
-
   class IShaderSystem
   {
   public:

@@ -22,11 +22,12 @@
     <ClInclude Include="include\Krystal.Gfx\Cameras\FirstPersonCamera.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Colour.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Handle.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\IMaterialSystem.hpp" />
     <ClInclude Include="include\Krystal.Gfx\IMeshSystem.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\ISamplerSystem.hpp" />
     <ClInclude Include="include\Krystal.Gfx\IShaderSystem.hpp" />
     <ClInclude Include="include\Krystal.Gfx\ITextureSystem.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Light.hpp" />
-    <ClInclude Include="include\Krystal.Gfx\Material.hpp" />
     <ClInclude Include="include\Krystal.Gfx\ICamera.hpp" />
     <ClInclude Include="include\Krystal.Gfx\IContext.hpp" />
     <ClInclude Include="include\Krystal.Gfx\ResourceManager.hpp" />
