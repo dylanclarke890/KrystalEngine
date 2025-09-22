@@ -3,6 +3,7 @@
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Texture.hpp"
 #include "Krystal.Gfx/ITextureSystem.hpp"
+#include "Krystal.Gfx/ResourceHandleCache.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.IO/Image.hpp"
 #include "Krystal.Lib/Macros.hpp"
@@ -19,16 +20,11 @@ namespace Krys::Gfx::OpenGL
     NO_COPY_MOVE(TextureSystem)
 
     using TextureManager = ResourceManager<Texture, TextureHandle>;
-
-    struct TextureResource
-    {
-      TextureHandle Handle;
-      uint16 ReferenceCount {1u};
-    };
+    using TextureCache = ResourceHandleCache<string, TextureHandle>;
 
   private:
     TextureManager _textures;
-    Map<string, TextureResource> _loadedTextures;
+    TextureCache _cache;
 
   public:
     TextureSystem() = default;
@@ -37,7 +33,7 @@ namespace Krys::Gfx::OpenGL
     NO_DISCARD TextureHandle Load(const IO::Path &path, const TextureDesc &desc = {}) noexcept override
     {
       auto key = path.ToString();
-      auto existing = GetExisting(key);
+      auto existing = _cache.Get(key);
       if (existing.IsValid())
       {
         return existing;
@@ -65,7 +61,7 @@ namespace Krys::Gfx::OpenGL
       }
 
       auto handle = _textures.Add(std::move(texture));
-      _loadedTextures[key] = {.Handle = handle, .ReferenceCount = 1u};
+      _cache.Add(key, handle);
 
       assert(handle.IsValid() && "Failed to load texture.");
       return handle;
@@ -77,7 +73,7 @@ namespace Krys::Gfx::OpenGL
     {
       auto key = left.ToString() + "|" + right.ToString() + "|" + top.ToString() + "|" + bottom.ToString()
                  + "|" + front.ToString() + "|" + back.ToString();
-      auto existing = GetExisting(key);
+      auto existing = _cache.Get(key);
       if (existing.IsValid())
       {
         return existing;
@@ -109,8 +105,7 @@ namespace Krys::Gfx::OpenGL
       }
 
       auto handle = _textures.Add(std::move(texture));
-      _loadedTextures[key] = {.Handle = handle, .ReferenceCount = 1u};
-      assert(handle.IsValid() && "Failed to load cubemap texture.");
+      _cache.Add(key, handle);
 
       return handle;
     }
@@ -118,25 +113,9 @@ namespace Krys::Gfx::OpenGL
     void Unload(TextureHandle handle) noexcept override
     {
       assert(handle.IsValid() && "Invalid handle.");
-      assert(_textures.TryGet(handle) != nullptr && "Texture not found in manager.");
-
-      auto it = std::find_if(_loadedTextures.begin(), _loadedTextures.end(),
-                             [handle](const auto &pair) { return pair.second.Handle.Id == handle.Id; });
-
-      if (it != _loadedTextures.end())
-      {
-        auto &resource = it->second;
-
-        assert(resource.ReferenceCount > 0u && "Reference count is already zero.");
-        if (--resource.ReferenceCount > 0u)
-        {
-          return; // Still in use.
-        }
-
-        _loadedTextures.erase(it);
-        _textures.Remove(handle);
-      }
-      else
+      assert(_textures.TryGet(handle) != nullptr && "Texture not found in resource manager.");
+      
+      if (_cache.Remove(handle))
       {
         _textures.Remove(handle);
       }
@@ -148,17 +127,6 @@ namespace Krys::Gfx::OpenGL
     }
 
   private:
-    TextureHandle GetExisting(const string &key) noexcept
-    {
-      auto it = _loadedTextures.find(key);
-      if (it != _loadedTextures.end() && it->second.Handle.IsValid())
-      {
-        ++it->second.ReferenceCount;
-        return it->second.Handle;
-      }
-      return {};
-    }
-
     static uint32 GetMipLevels(uint32 mipLevels, GLsizei width, GLsizei height) noexcept
     {
       if (mipLevels != 0u)

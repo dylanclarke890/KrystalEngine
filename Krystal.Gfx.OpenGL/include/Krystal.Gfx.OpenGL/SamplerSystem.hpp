@@ -3,6 +3,7 @@
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Sampler.hpp"
 #include "Krystal.Gfx/ISamplerSystem.hpp"
+#include "Krystal.Gfx/ResourceHandleCache.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/HashUtils.hpp"
@@ -11,21 +12,17 @@
 
 namespace Krys::Gfx::OpenGL
 {
-  using SamplerManager = ResourceManager<Sampler, SamplerHandle>;
 
   class SamplerSystem final : public ISamplerSystem
   {
     NO_COPY_MOVE(SamplerSystem)
 
-    struct SamplerResource
-    {
-      SamplerHandle Handle;
-      uint16 ReferenceCount {1u};
-    };
+    using SamplerManager = ResourceManager<Sampler, SamplerHandle>;
+    using SamplerCache = ResourceHandleCache<size_t, SamplerHandle>;
 
   private:
     SamplerManager _samplers;
-    Map<size_t, SamplerResource> _samplerCache;
+    SamplerCache _cache;
 
   public:
     SamplerSystem() = default;
@@ -40,49 +37,26 @@ namespace Krys::Gfx::OpenGL
       GLenum wrapT = MapWrapMode(desc.WrapT);
       GLenum wrapR = MapWrapMode(desc.WrapR);
 
-      size_t hash = HashUtils::HashCombine(min, mag, wrapS, wrapT, wrapR, desc.AnisotropicLevel);
-      auto it = _samplerCache.find(hash);
-      if (it != _samplerCache.end())
+      size_t key = HashUtils::HashCombine(min, mag, wrapS, wrapT, wrapR, desc.AnisotropicLevel);
+      auto existing = _cache.Get(key);
+      if (existing.IsValid())
       {
-        it->second.ReferenceCount++;
-        return it->second.Handle;
+        return existing;
       }
 
       Sampler sampler {min, mag, wrapS, wrapT, wrapR, desc.AnisotropicLevel};
       SamplerHandle handle = _samplers.Add(std::move(sampler));
-
-      assert(handle.IsValid() && "Invalid handle");
-      _samplerCache[hash] = {handle, 1u};
+      _cache.Add(key, handle);
 
       return handle;
     }
 
     void Unload(SamplerHandle handle) noexcept override
     {
-      if (!handle.IsValid())
-      {
-        return;
-      }
+      assert(handle.IsValid() && "Invalid handle.");
+      assert(_samplers.TryGet(handle) != nullptr && "Sampler not found in resource manager.");
 
-      assert(_samplers.TryGet(handle) != nullptr && "Sampler not found in manager.");
-
-      auto it = std::find_if(_samplerCache.begin(), _samplerCache.end(),
-                             [handle](const auto &pair) { return pair.second.Handle.Id == handle.Id; });
-
-      if (it != _samplerCache.end())
-      {
-        auto &resource = it->second;
-
-        assert(resource.ReferenceCount > 0u && "Reference count is already zero.");
-        if (--resource.ReferenceCount > 0u)
-        {
-          return; // Still in use.
-        }
-
-        _samplerCache.erase(it);
-        _samplers.Remove(handle);
-      }
-      else
+      if (_cache.Remove(handle))
       {
         _samplers.Remove(handle);
       }

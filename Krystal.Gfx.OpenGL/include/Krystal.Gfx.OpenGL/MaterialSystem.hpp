@@ -4,6 +4,7 @@
 #include "Krystal.Gfx.OpenGL/TextureSystem.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/IMaterialSystem.hpp"
+#include "Krystal.Gfx/ResourceHandleCache.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Macros.hpp"
@@ -12,15 +13,17 @@
 
 namespace Krys::Gfx::OpenGL
 {
-  using MaterialManager = ResourceManager<Material, MaterialHandle>;
 
   class MaterialSystem final : public IMaterialSystem
   {
     NO_COPY_MOVE(MaterialSystem)
 
+    using MaterialManager = ResourceManager<Material, MaterialHandle>;
+    using MaterialCache = ResourceHandleCache<string, MaterialHandle>;
+
   private:
     MaterialManager _materials;
-    Map<string, MaterialHandle> _materialCache;
+    MaterialCache _cache;
 
   public:
     MaterialSystem() = default;
@@ -29,9 +32,10 @@ namespace Krys::Gfx::OpenGL
     NO_DISCARD MaterialHandle Create(const string &name, ShaderHandle shader,
                                      const PBRMaterialDesc &desc) noexcept override
     {
-      if (auto it = _materialCache.find(name); it != _materialCache.end())
+      auto existing = _cache.Get(name);
+      if (existing.IsValid())
       {
-        return it->second;
+        return existing;
       }
 
       List<MaterialParameter> params;
@@ -52,7 +56,7 @@ namespace Krys::Gfx::OpenGL
 
       Material material {name, shader, params};
       auto handle = _materials.Add(std::move(material));
-      _materialCache[name] = handle;
+      _cache.Add(name, handle);
 
       return handle;
     }
@@ -80,16 +84,13 @@ namespace Krys::Gfx::OpenGL
 
     void Unload(MaterialHandle handle) noexcept override
     {
-      if (!handle.IsValid())
+      assert(handle.IsValid() && "Invalid handle.");
+      assert(_materials.TryGet(handle) != nullptr && "Material not found in manager.");
+
+      if (_cache.Remove(handle))
       {
-        return;
+        _materials.Remove(handle);
       }
-
-      Material *material = _materials.TryGet(handle);
-      assert(material != nullptr && "Material not found in manager.");
-
-      // TODO: remove from cache
-      _materials.Remove(handle);
     }
   };
 }
