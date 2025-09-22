@@ -19,9 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.Gfx\ResourceHandleCache.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Cameras\FirstPersonCamera.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Colour.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Handle.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\IFontSystem.hpp" />
     <ClInclude Include="include\Krystal.Gfx\IMaterialSystem.hpp" />
     <ClInclude Include="include\Krystal.Gfx\IMeshSystem.hpp" />
     <ClInclude Include="include\Krystal.Gfx\ISamplerSystem.hpp" />
@@ -32,6 +34,61 @@
     <ClInclude Include="include\Krystal.Gfx\IContext.hpp" />
     <ClInclude Include="include\Krystal.Gfx\ResourceManager.hpp" />
     <ClInclude Include="include\Krystal.Gfx\VertexBufferLayout.hpp" />
+    <ClInclude Include="third-party\freetype\include\freetype\config\ftconfig.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\config\ftheader.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\config\ftmodule.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\config\ftoption.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\config\ftstdlib.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\config\integer-types.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\config\mac-support.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\config\public-macros.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\freetype.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftadvanc.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftbbox.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftbdf.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftbitmap.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftbzip2.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftcache.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftchapters.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftcid.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftcolor.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftdriver.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\fterrdef.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\fterrors.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftfntfmt.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftgasp.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftglyph.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftgxval.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftgzip.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftimage.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftincrem.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftlcdfil.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftlist.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftlogging.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftlzw.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftmac.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftmm.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftmodapi.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftmoderr.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftotval.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftoutln.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftparams.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftpfr.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftrender.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftsizes.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftsnames.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftstroke.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftsynth.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftsystem.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\fttrigon.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\fttypes.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ftwinfnt.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\otsvg.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\t1tables.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\ttnameid.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\tttables.h" />
+    <ClInclude Include="third-party\freetype\include\freetype\tttags.h" />
+    <ClInclude Include="third-party\freetype\include\ft2build.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Krystal.Lib\Krystal.Lib.vcxproj">
@@ -46,6 +103,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Cameras\FirstPersonCamera.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="third-party\freetype\freetype.lib" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>

@@ -125,7 +125,7 @@
     <IncludePath>$(KrysProjectInclude);$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(KrysProjectInclude);$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Program Files\Assimp\include;</IncludePath>
+    <IncludePath>$(KrysProjectInclude);$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Program Files\Assimp\include;$(SolutionDir)Krystal.Gfx\third-party\freetype\include</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
