@@ -858,15 +858,12 @@ namespace Krys::Gfx::OpenGL
       shader.Bind();
       shader.SetUniform("projection", ScreenOrthoProjection);
       string testText = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";
-      Vec3 color(1.f);
-      for (float i = 0.f; i < _height; i++)
+      Vec3 color(0.f);
+      for (float i = 0.f; i < _height; i += 30.f)
       {
         shader.SetUniform("textColor", color);
-        font.DrawText(testText, {25.0f, i});
-        font.DrawText(testText, {25.0f, i});
-        font.DrawText(testText, {25.0f, i});
-        font.DrawText(testText, {25.0f, i});
-        color -= Vec3(1.0f / static_cast<float>(_height) * 2.0f);
+        color += Vec3((i / _height), 0.f, 0.f);
+        font.DrawText(testText, {25.f, i});
       }
     }
     glDisable(GL_BLEND);

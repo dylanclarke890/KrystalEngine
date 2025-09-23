@@ -164,7 +164,7 @@ namespace Krys::Gfx::OpenGL
       packList.push_back(std::move(pg));
     }
 
-    int atlasW = 512, atlasH = 512;
+    uint atlasW = 512, atlasH = 512;
     while (!TryPack(packList, atlasW, atlasH))
     {
       if (atlasW <= atlasH)
@@ -234,7 +234,7 @@ namespace Krys::Gfx::OpenGL
       characters[(char)g.ch] = ch;
     }
 
-    Font font {atlasTex, {atlasW, atlasH}, characters};
+    Font font {{atlasTex, characters, {atlasW, atlasH}}};
     FT_Done_Face(face);
 
     FontHandle handle = _fonts.Add(std::move(font));

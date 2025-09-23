@@ -21,6 +21,13 @@ namespace Krys::Gfx::OpenGL
     Maths::Vec2 UVMax; // (u1, v1)
   };
 
+  struct FontAtlas
+  {
+    GLuint Texture {0u};
+    Map<char, Character> Characters;
+    Maths::Vec2u AtlasSize {0u};
+  };
+
   struct TextVertex
   {
     Maths::Vec2 Position {};
@@ -42,16 +49,13 @@ namespace Krys::Gfx::OpenGL
     constexpr static int MaxGlyphsPerDrawCall = 4'096;
     constexpr static int VerticesPerGlyph = 6; // 2 triangles per glyph
 
-    GLuint _atlas;
-    Maths::Vec2i _size;
-    Map<char, Character> _characters;
+    FontAtlas _bitmapAtlas {};
     GLuint _vao;
     GLuint _vbo;
     List<TextVertex> _vertexBuffer;
 
   public:
-    Font(GLuint texture, Maths::Vec2i size, const Map<char, Character> &characters) noexcept
-        : _atlas(texture), _size(size), _characters(characters)
+    Font(const FontAtlas &bitmapAtlas) noexcept : _bitmapAtlas(bitmapAtlas)
     {
       glCreateVertexArrays(1, &_vao);
       glCreateBuffers(1, &_vbo);
@@ -69,9 +73,9 @@ namespace Krys::Gfx::OpenGL
 
     ~Font()
     {
-      if (_atlas != 0u)
+      if (_bitmapAtlas.Texture != 0u)
       {
-        glDeleteTextures(1, &_atlas);
+        glDeleteTextures(1, &_bitmapAtlas.Texture);
       }
       if (_vbo != 0u)
       {
@@ -100,7 +104,7 @@ namespace Krys::Gfx::OpenGL
     void DrawText(const string &text, const Maths::Vec2 &position, float scale = 1.0f)
     {
       glBindVertexArray(_vao);
-      glBindTextureUnit(0, _atlas);
+      glBindTextureUnit(0, _bitmapAtlas.Texture);
 
       Maths::Vec2 pos = position;
 
@@ -114,7 +118,7 @@ namespace Krys::Gfx::OpenGL
         _vertexBuffer.clear();
         for (const char c : batch)
         {
-          const Character &ch = _characters[c];
+          const Character &ch = _bitmapAtlas.Characters[c];
 
           float xpos = pos.x + ch.Bearing.x * scale;
           float ypos = pos.y - (ch.Size.y - ch.Bearing.y) * scale;
@@ -141,9 +145,7 @@ namespace Krys::Gfx::OpenGL
   private:
     void Swap(Font &other) noexcept
     {
-      std::swap(other._atlas, _atlas);
-      std::swap(other._size, _size);
-      std::swap(other._characters, _characters);
+      std::swap(other._bitmapAtlas, _bitmapAtlas);
       std::swap(other._vao, _vao);
       std::swap(other._vbo, _vbo);
     }
