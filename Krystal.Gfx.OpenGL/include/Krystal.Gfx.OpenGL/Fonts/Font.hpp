@@ -11,6 +11,20 @@
 
 namespace Krys::Gfx::OpenGL
 {
+  struct TextVertex
+  {
+    Maths::Vec2 Position {};
+    Maths::Vec2 UV {};
+
+    static VertexBufferLayout Layout() noexcept
+    {
+      return {
+        {VertexAttributeType::Float, 2}, // Position
+        {VertexAttributeType::Float, 2}  // UV
+      };
+    }
+  };
+
   struct Character
   {
     Maths::Vec2u Size {};    // Size of glyph
@@ -26,20 +40,6 @@ namespace Krys::Gfx::OpenGL
     GLuint Texture {0u};
     Map<char, Character> Characters;
     Maths::Vec2u AtlasSize {0u};
-  };
-
-  struct TextVertex
-  {
-    Maths::Vec2 Position {};
-    Maths::Vec2 UV {};
-
-    static VertexBufferLayout Layout() noexcept
-    {
-      return {
-        {VertexAttributeType::Float, 2}, // Position
-        {VertexAttributeType::Float, 2}  // UV
-      };
-    }
   };
 
   class Font
@@ -62,16 +62,14 @@ namespace Krys::Gfx::OpenGL
 
       glBindVertexArray(_vao);
       glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+      Utils::ApplyVertexBufferLayout(TextVertex::Layout());
 
       auto bufferSize = sizeof(TextVertex) * VerticesPerGlyph * MaxGlyphsPerDrawCall;
       glNamedBufferStorage(_vbo, bufferSize, 0, GL_DYNAMIC_STORAGE_BIT);
-
-      Utils::ApplyVertexBufferLayout(TextVertex::Layout());
-
       _vertexBuffer.reserve(VerticesPerGlyph * MaxGlyphsPerDrawCall);
     }
 
-    ~Font()
+    ~Font() noexcept
     {
       if (_bitmapAtlas.Texture != 0u)
       {
@@ -119,19 +117,17 @@ namespace Krys::Gfx::OpenGL
         for (const char c : batch)
         {
           const Character &ch = _bitmapAtlas.Characters[c];
-
-          float xpos = pos.x + ch.Bearing.x * scale;
-          float ypos = pos.y - (ch.Size.y - ch.Bearing.y) * scale;
-
+          float posX = pos.x + ch.Bearing.x * scale;
+          float posY = pos.y - (ch.Size.y - ch.Bearing.y) * scale;
           float w = ch.Size.x * scale;
           float h = ch.Size.y * scale;
 
-          _vertexBuffer.push_back({{xpos, ypos + h}, {ch.UVMin.x, ch.UVMin.y}});
-          _vertexBuffer.push_back({{xpos, ypos}, {ch.UVMin.x, ch.UVMax.y}});
-          _vertexBuffer.push_back({{xpos + w, ypos}, {ch.UVMax.x, ch.UVMax.y}});
-          _vertexBuffer.push_back({{xpos, ypos + h}, {ch.UVMin.x, ch.UVMin.y}});
-          _vertexBuffer.push_back({{xpos + w, ypos}, {ch.UVMax.x, ch.UVMax.y}});
-          _vertexBuffer.push_back({{xpos + w, ypos + h}, {ch.UVMax.x, ch.UVMin.y}});
+          _vertexBuffer.push_back({{posX, posY + h}, {ch.UVMin.x, ch.UVMin.y}});
+          _vertexBuffer.push_back({{posX, posY}, {ch.UVMin.x, ch.UVMax.y}});
+          _vertexBuffer.push_back({{posX + w, posY}, {ch.UVMax.x, ch.UVMax.y}});
+          _vertexBuffer.push_back({{posX, posY + h}, {ch.UVMin.x, ch.UVMin.y}});
+          _vertexBuffer.push_back({{posX + w, posY}, {ch.UVMax.x, ch.UVMax.y}});
+          _vertexBuffer.push_back({{posX + w, posY + h}, {ch.UVMax.x, ch.UVMin.y}});
 
           pos.x += ch.Advance * scale;
         }
@@ -148,6 +144,7 @@ namespace Krys::Gfx::OpenGL
       std::swap(other._bitmapAtlas, _bitmapAtlas);
       std::swap(other._vao, _vao);
       std::swap(other._vbo, _vbo);
+      std::swap(other._vertexBuffer, _vertexBuffer);
     }
   };
 }

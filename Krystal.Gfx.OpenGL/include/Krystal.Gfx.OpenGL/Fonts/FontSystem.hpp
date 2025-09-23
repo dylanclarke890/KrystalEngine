@@ -26,7 +26,8 @@ namespace Krys::Gfx::OpenGL
 
     ~FontSystem() noexcept override;
 
-    NO_DISCARD FontHandle Load(const IO::Path &path, float size) noexcept override;
+    NO_DISCARD FontHandle Load(const IO::Path &path, float size,
+                               FontType fontType = FontType::Bitmap) noexcept override;
 
     Font &Get(FontHandle);
   };
