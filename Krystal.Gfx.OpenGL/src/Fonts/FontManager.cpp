@@ -7,6 +7,8 @@
 #include "Krystal.Lib/Map.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include <ft2build.h>
+#include <msdfgen.h>
+#include <msdfgen-ext.h>
 #include <stb_rect_pack.h>
 #include FT_FREETYPE_H
 #include <algorithm>
@@ -64,7 +66,6 @@ namespace
     }
     return true;
   }
-
 }
 
 namespace Krys::Gfx::OpenGL
