@@ -2,106 +2,150 @@
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Shader.hpp"
+#include "Krystal.Gfx.OpenGL/Utils.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
+#include "Krystal.Lib/Span.hpp"
+#include "Krystal.Maths/Clamp.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
   struct Character
   {
-    GLuint Texture {0u};     // ID handle of the glyph texture
     Maths::Vec2u Size {};    // Size of glyph
     Maths::Vec2i Bearing {}; // Offset from baseline to left/top of glyph
     uint32 Advance {0u};     // Offset to advance to next glyph
+
+    Maths::Vec2 UVMin; // (u0, v0)
+    Maths::Vec2 UVMax; // (u1, v1)
+  };
+
+  struct TextVertex
+  {
+    Maths::Vec2 Position {};
+    Maths::Vec2 UV {};
+
+    static VertexBufferLayout Layout() noexcept
+    {
+      return {
+        {VertexAttributeType::Float, 2}, // Position
+        {VertexAttributeType::Float, 2}  // UV
+      };
+    }
   };
 
   class Font
   {
     NO_COPY(Font)
 
+    constexpr static int MaxGlyphsPerDrawCall = 4'096;
+    constexpr static int VerticesPerGlyph = 6; // 2 triangles per glyph
+
+    GLuint _atlas;
+    Maths::Vec2i _size;
     Map<char, Character> _characters;
-    GLuint VAO, VBO;
+    GLuint _vao;
+    GLuint _vbo;
+    List<TextVertex> _vertexBuffer;
 
   public:
-    Font(const Map<char, Character> &characters) noexcept : _characters(characters)
+    Font(GLuint texture, Maths::Vec2i size, const Map<char, Character> &characters) noexcept
+        : _atlas(texture), _size(size), _characters(characters)
     {
-      glCreateVertexArrays(1, &VAO);
-      glCreateBuffers(1, &VBO);
+      glCreateVertexArrays(1, &_vao);
+      glCreateBuffers(1, &_vbo);
 
-      glBindVertexArray(VAO);
-      glBindBuffer(GL_ARRAY_BUFFER, VBO);
+      glBindVertexArray(_vao);
+      glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-      glNamedBufferData(VBO, sizeof(float) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+      auto bufferSize = sizeof(TextVertex) * VerticesPerGlyph * MaxGlyphsPerDrawCall;
+      glNamedBufferStorage(_vbo, bufferSize, 0, GL_DYNAMIC_STORAGE_BIT);
 
-      glEnableVertexAttribArray(0);
-      glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), 0);
+      Utils::ApplyVertexBufferLayout(TextVertex::Layout());
+
+      _vertexBuffer.reserve(VerticesPerGlyph * MaxGlyphsPerDrawCall);
     }
 
     ~Font()
     {
-      for (const auto &[_, character] : _characters)
+      if (_atlas != 0u)
       {
-        glDeleteTextures(1, &character.Texture);
+        glDeleteTextures(1, &_atlas);
+      }
+      if (_vbo != 0u)
+      {
+        glDeleteBuffers(1, &_vbo);
+      }
+      if (_vao != 0u)
+      {
+        glDeleteVertexArrays(1, &_vao);
       }
     }
 
     Font(Font &&other) noexcept
     {
-      std::swap(other.VAO, VAO);
-      std::swap(other.VBO, VBO);
-      _characters = std::move(other._characters);
-      other._characters.clear();
+      Swap(other);
     }
 
     Font &operator=(Font &&other) noexcept
     {
       if (this != &other)
       {
-        std::swap(other.VAO, VAO);
-        std::swap(other.VBO, VBO);
-        _characters = std::move(other._characters);
-        other._characters.clear();
+        Swap(other);
       }
       return *this;
     }
 
-    void DrawText(Shader &s, string text, float x, float y, float scale, Maths::Vec3 color)
+    void DrawText(const string &text, const Maths::Vec2 &position, float scale = 1.0f)
     {
-      // activate corresponding render state
-      s.SetUniform("textColor", color);
-      glBindVertexArray(VAO);
+      glBindVertexArray(_vao);
+      glBindTextureUnit(0, _atlas);
 
-      for (const char c : text)
+      Maths::Vec2 pos = position;
+
+      auto count = text.size();
+      while (count > 0)
       {
-        Character ch = _characters[c];
+        auto batchSize = Maths::Min(count, static_cast<size_t>(MaxGlyphsPerDrawCall));
+        Span<const char> batch(text.data() + (text.size() - count), batchSize);
+        count -= batchSize;
 
-        float xpos = x + ch.Bearing.x * scale;
-        float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
-
-        float w = ch.Size.x * scale;
-        float h = ch.Size.y * scale;
-
-        if (c != ' ')
+        _vertexBuffer.clear();
+        for (const char c : batch)
         {
-          // update VBO for each character
-          float vertices[6][4] = {
-            {xpos, ypos + h, 0.0f, 0.0f}, {xpos, ypos, 0.0f, 1.0f},     {xpos + w, ypos, 1.0f, 1.0f},
+          const Character &ch = _characters[c];
 
-            {xpos, ypos + h, 0.0f, 0.0f}, {xpos + w, ypos, 1.0f, 1.0f}, {xpos + w, ypos + h, 1.0f, 0.0f}};
+          float xpos = pos.x + ch.Bearing.x * scale;
+          float ypos = pos.y - (ch.Size.y - ch.Bearing.y) * scale;
 
-          glBindTextureUnit(0, ch.Texture);
+          float w = ch.Size.x * scale;
+          float h = ch.Size.y * scale;
 
-          // update content of VBO memory
-          glNamedBufferSubData(VBO, 0, sizeof(vertices), vertices);
+          _vertexBuffer.push_back({{xpos, ypos + h}, {ch.UVMin.x, ch.UVMin.y}});
+          _vertexBuffer.push_back({{xpos, ypos}, {ch.UVMin.x, ch.UVMax.y}});
+          _vertexBuffer.push_back({{xpos + w, ypos}, {ch.UVMax.x, ch.UVMax.y}});
+          _vertexBuffer.push_back({{xpos, ypos + h}, {ch.UVMin.x, ch.UVMin.y}});
+          _vertexBuffer.push_back({{xpos + w, ypos}, {ch.UVMax.x, ch.UVMax.y}});
+          _vertexBuffer.push_back({{xpos + w, ypos + h}, {ch.UVMax.x, ch.UVMin.y}});
 
-          // render glyph texture over quad
-          glDrawArrays(GL_TRIANGLES, 0, 6);
+          pos.x += ch.Advance * scale;
         }
 
-        // now advance cursors for next glyph (note that advance is number of 1/64 pixels)
-        x += (ch.Advance >> 6) * scale; // bitshift by 6 to get value in pixels (2^6 = 64)
+        glNamedBufferSubData(_vbo, 0, static_cast<GLsizeiptr>(sizeof(TextVertex) * _vertexBuffer.size()),
+                             _vertexBuffer.data());
+        glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(_vertexBuffer.size()));
       }
+    }
+
+  private:
+    void Swap(Font &other) noexcept
+    {
+      std::swap(other._atlas, _atlas);
+      std::swap(other._size, _size);
+      std::swap(other._characters, _characters);
+      std::swap(other._vao, _vao);
+      std::swap(other._vbo, _vbo);
     }
   };
 }

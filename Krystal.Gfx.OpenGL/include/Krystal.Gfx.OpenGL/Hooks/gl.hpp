@@ -1968,7 +1968,7 @@ namespace Krys::Gfx::OpenGL
   NO_DISCARD void *glMapNamedBufferRange(GLuint buffer, GLintptr offset, GLsizeiptr length,
                                          GLbitfield access) noexcept;
 
-  NO_DISCARD GLboolean glUnmapNamedBuffer(GLuint buffer) noexcept;
+  GLboolean glUnmapNamedBuffer(GLuint buffer) noexcept;
 
   void glFlushMappedNamedBufferRange(GLuint buffer, GLintptr offset, GLsizeiptr length) noexcept;
 

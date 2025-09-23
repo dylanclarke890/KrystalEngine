@@ -102,14 +102,5 @@ namespace Krys::Gfx::OpenGL
       shader.SetUniform(uniformPrefix + ".cutOff", std::cos(light.CutOffRadians));
       shader.SetUniform(uniformPrefix + ".outerCutOff", std::cos(light.OuterCutOffRadians));
     }
-
-    static void SetFlatColourMaterialUniforms(Shader &shader, FlatColourMaterial &material,
-                                              const string &uniformPrefix = "material")
-    {
-      shader.SetUniform(uniformPrefix + ".ambient", material.Ambient.ToVec3());
-      shader.SetUniform(uniformPrefix + ".diffuse", material.Diffuse.ToVec3());
-      shader.SetUniform(uniformPrefix + ".specular", material.Specular.ToVec3());
-      shader.SetUniform(uniformPrefix + ".shininess", material.Shininess);
-    }
   };
 }

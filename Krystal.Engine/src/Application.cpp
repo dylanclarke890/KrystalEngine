@@ -38,7 +38,7 @@ namespace Krys
       double accumulatedMs = 0;
       while (_running)
       {
-        //auto profiler = Debug::ScopedProfiler("Frame");
+        auto profiler = Debug::ScopedProfiler("Frame");
         const double startTime = Platform::GetTimeMilliseconds();
 
         _context->Input->BeginFrame();
