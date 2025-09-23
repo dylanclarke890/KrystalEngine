@@ -32,10 +32,9 @@ namespace Krys::Gfx::OpenGL
     NO_DISCARD MaterialHandle Create(const string &name, ShaderHandle shader,
                                      const PBRMaterialDesc &desc) noexcept override
     {
-      auto existing = _cache.Get(name);
-      if (existing.IsValid())
+      if (auto cached = _cache.Get(name); cached.IsValid())
       {
-        return existing;
+        return cached;
       }
 
       List<MaterialParameter> params;
@@ -64,6 +63,11 @@ namespace Krys::Gfx::OpenGL
     NO_DISCARD MaterialHandle LoadPBRMaterial(const string &name, ShaderHandle shader,
                                               TextureSystem &textureSystem) noexcept
     {
+      if (auto cached = _cache.Get(name); cached.IsValid())
+      {
+        return cached;
+      }
+
       using namespace IO;
       Path base = Path("data/assets/pbr/") / Path(name);
 

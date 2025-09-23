@@ -53,6 +53,9 @@ namespace
   Map<string, MaterialHandle> materialHandles;
   Map<string, MeshHandle> meshHandles;
 
+  Mat4 ScreenOrthoProjection;
+  FontHandle DefaultFont;
+
   Map<string, FrameBufferData> shadowMaps;
   Map<string, Unique<UniformBuffer>> ubos;
 
@@ -505,6 +508,8 @@ namespace
     mesh.Draw();
   }
 
+#pragma region Debug Output
+
   void DebugMessageCallback(GLenum source, GLenum type, uint id, GLenum severity, GLsizei, const char *msg,
                             const void *)
   {
@@ -576,14 +581,23 @@ namespace
   {
     glDebugMessageCallback(DebugMessageCallback, nullptr);
     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, 0, GL_TRUE);
+
     DisableDebugMessageIds(GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_OTHER,
                            {
                              131'169, // Driver allocated storage for renderbuffer
                              131'185, // Buffer detailed info
                            });
+
+    DisableDebugMessageIds(GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_PERFORMANCE,
+                           {
+                             131'218, // Vertex shader is being recompiled based on GL state
+                           });
+
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
   }
+
+#pragma endregion
 }
 
 namespace Krys::Gfx
@@ -684,6 +698,8 @@ namespace Krys::Gfx::OpenGL
       shaderHandles["brdf"] = _shaders.Load(base / Path("11/brdf.vert"), base / Path("11/brdf.frag"));
       shaderHandles["hdr-background"] =
         _shaders.Load(base / Path("11/background.vert"), base / Path("11/background.frag"));
+
+      shaderHandles["text"] = _shaders.Load(base / Path("text.vert"), base / Path("text.frag"));
     }
 
     {
@@ -733,7 +749,9 @@ namespace Krys::Gfx::OpenGL
 
     CreateEnvironmentAndIrradianceCubemaps(1'024, 1'024, _textures, _shaders, _meshes);
     glViewport(0, 0, _width, _height);
+    ScreenOrthoProjection = Ortho(0.0f, static_cast<float>(_width), 0.0f, static_cast<float>(_height));
 
+    DefaultFont = _fonts.Load(IO::Path("data/assets/fonts/Antonio-Bold.ttf"), 32);
     {
       auto &shader = _shaders.Get(shaderHandles.at("pbr-with-maps"));
       shader.SetUniform("irradianceMap", 0);
@@ -831,6 +849,18 @@ namespace Krys::Gfx::OpenGL
       cube.Bind();
       cube.Draw();
     }
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    {
+      auto &font = _fonts.Get(DefaultFont);
+      auto &shader = _shaders.Get(shaderHandles.at("text"));
+      shader.Bind();
+      //shader.SetUniform("projection", ScreenOrthoProjection);
+      shader.SetUniform("projection", projection * view);
+      font.DrawText(shader, "Hello world", 25.0f, 25.0f, 1.0f, Vec3(0.5f, 0.8f, 0.2f));
+    }
+    glDisable(GL_BLEND);
   }
 
   void Context::Present() noexcept
@@ -843,6 +873,7 @@ namespace Krys::Gfx::OpenGL
     _width = width;
     _height = height;
     glViewport(0, 0, _width, _height);
+    ScreenOrthoProjection = Ortho(0.0f, static_cast<float>(_width), 0.0f, static_cast<float>(_height));
   }
 
   ISamplerSystem &Context::Samplers() noexcept
@@ -868,5 +899,10 @@ namespace Krys::Gfx::OpenGL
   IMaterialSystem &Context::Materials() noexcept
   {
     return _materials;
+  }
+
+  IFontSystem &Context::Fonts() noexcept
+  {
+    return _fonts;
   }
 }

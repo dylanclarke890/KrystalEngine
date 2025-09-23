@@ -15,6 +15,7 @@ namespace Krys::Gfx
   class IShaderSystem;
   class IMeshSystem;
   class IMaterialSystem;
+  class IFontSystem;
 
   Expected<Unique<IContext>> CreateContext(NativeHandle windowHandle, uint32 width, uint32 height) noexcept;
 
@@ -54,5 +55,7 @@ namespace Krys::Gfx
     virtual IMeshSystem &Meshes() noexcept = 0;
 
     virtual IMaterialSystem &Materials() noexcept = 0;
+
+    virtual IFontSystem &Fonts() noexcept = 0;
   };
 }

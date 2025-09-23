@@ -52,7 +52,10 @@ namespace Krys::Gfx::OpenGL
 
     Sampler &operator=(Sampler &&other) noexcept
     {
-      Swap(other);
+      if (this != &other)
+      {
+        Swap(other);
+      }
       return *this;
     }
 

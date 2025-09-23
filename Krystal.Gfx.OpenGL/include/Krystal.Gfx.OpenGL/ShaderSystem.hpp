@@ -36,10 +36,9 @@ namespace Krys::Gfx::OpenGL
     NO_DISCARD ShaderHandle Load(const IO::Path &vertex, const IO::Path &fragment) noexcept override
     {
       auto key = vertex.ToString() + "|" + fragment.ToString();
-      auto existing = _cache.Get(key);
-      if (existing.IsValid())
+      if (auto cached = _cache.Get(key); cached.IsValid())
       {
-        return existing;
+        return cached;
       }
 
       Shader shader {ReadFile(vertex), ReadFile(fragment)};
@@ -50,10 +49,9 @@ namespace Krys::Gfx::OpenGL
                                  const IO::Path &fragment) noexcept override
     {
       auto key = vertex.ToString() + "|" + geometry.ToString() + "|" + fragment.ToString();
-      auto existing = _cache.Get(key);
-      if (existing.IsValid())
+      if (auto cached = _cache.Get(key); cached.IsValid())
       {
-        return existing;
+        return cached;
       }
 
       Shader shader {ReadFile(vertex), ReadFile(geometry), ReadFile(fragment)};

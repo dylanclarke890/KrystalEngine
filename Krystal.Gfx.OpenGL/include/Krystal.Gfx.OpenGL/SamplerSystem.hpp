@@ -38,10 +38,9 @@ namespace Krys::Gfx::OpenGL
       GLenum wrapR = MapWrapMode(desc.WrapR);
 
       size_t key = HashUtils::HashCombine(min, mag, wrapS, wrapT, wrapR, desc.AnisotropicLevel);
-      auto existing = _cache.Get(key);
-      if (existing.IsValid())
+      if (auto cached = _cache.Get(key); cached.IsValid())
       {
-        return existing;
+        return cached;
       }
 
       Sampler sampler {min, mag, wrapS, wrapT, wrapR, desc.AnisotropicLevel};

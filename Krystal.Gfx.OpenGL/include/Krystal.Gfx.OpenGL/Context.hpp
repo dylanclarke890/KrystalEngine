@@ -1,10 +1,12 @@
 #pragma once
 
+#include "Krystal.Gfx.OpenGL/Fonts/FontSystem.hpp"
 #include "Krystal.Gfx.OpenGL/MaterialSystem.hpp"
 #include "Krystal.Gfx.OpenGL/MeshSystem.hpp"
 #include "Krystal.Gfx.OpenGL/SamplerSystem.hpp"
 #include "Krystal.Gfx.OpenGL/ShaderSystem.hpp"
 #include "Krystal.Gfx.OpenGL/TextureSystem.hpp"
+
 #include "Krystal.Gfx/IContext.hpp"
 
 namespace Krys::Gfx::OpenGL
@@ -25,6 +27,7 @@ namespace Krys::Gfx::OpenGL
     ShaderSystem _shaders;
     MeshSystem _meshes;
     MaterialSystem _materials;
+    FontSystem _fonts;
 
   public:
     Context(NativeHandle windowHandle, uint32 width, uint32 height);
@@ -48,5 +51,7 @@ namespace Krys::Gfx::OpenGL
     IMeshSystem &Meshes() noexcept override;
 
     IMaterialSystem &Materials() noexcept override;
+
+    IFontSystem &Fonts() noexcept override;
   };
 }

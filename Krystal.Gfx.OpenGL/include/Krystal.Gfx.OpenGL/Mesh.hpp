@@ -78,7 +78,11 @@ namespace Krys::Gfx::OpenGL
 
     Mesh &operator=(Mesh &&other) noexcept
     {
-      Swap(other);
+      if (this != &other)
+      {
+        Swap(other);
+      }
+
       return *this;
     }
 

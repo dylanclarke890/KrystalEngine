@@ -122,6 +122,8 @@
     <None Include="data\shaders\opengl\11\pbr-with-maps.frag" />
     <None Include="data\shaders\opengl\11\pbr-with-maps.vert" />
     <None Include="data\assets\newport-loft.hdr" />
+    <None Include="data\shaders\opengl\text.vert" />
+    <None Include="data\shaders\opengl\text.frag" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">

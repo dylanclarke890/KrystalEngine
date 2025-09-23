@@ -79,7 +79,10 @@ namespace Krys::Gfx::OpenGL
 
     Texture &operator=(Texture &&other) noexcept
     {
-      Swap(other);
+      if (this != &other)
+      {
+        Swap(other);
+      }
       return *this;
     }
 
