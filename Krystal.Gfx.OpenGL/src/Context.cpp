@@ -878,6 +878,7 @@ namespace Krys::Gfx::OpenGL
     }
 
     {
+      // TODO: pass font sdf params (pixel range, etc)
       auto &font = _fonts.Get(DefaultMSDFFont);
       auto &shader = _shaders.Get(shaderHandles.at("msdf-font"));
       shader.Bind();
