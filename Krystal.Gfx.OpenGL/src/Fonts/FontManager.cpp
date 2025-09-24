@@ -7,9 +7,9 @@
 #include "Krystal.Lib/Map.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include <ft2build.h>
+#include <msdf-atlas-gen.h>
 #include <msdfgen-ext.h>
 #include <msdfgen.h>
-#include <msdf-atlas-gen.h>
 #include <stb_rect_pack.h>
 #include FT_FREETYPE_H
 #include <algorithm>
@@ -31,7 +31,7 @@ namespace
     stbrp_rect Rect {};
   };
 
-  struct Result
+  struct BitmapLoadResult
   {
     List<GlyphToPack> Glyphs;
     int Padding {0};
@@ -39,7 +39,7 @@ namespace
     bool Success {false};
   };
 
-  static bool TryPack(List<GlyphToPack> &glyphs, Vec2u &size)
+  bool TryPack(List<GlyphToPack> &glyphs, Vec2u &size)
   {
     bool success = false;
     while (!success)
@@ -98,11 +98,11 @@ namespace
     return true;
   }
 
-  Result LoadBitmapAtlas(const IO::Path &path, float size, Log::ILogger *logger)
+  BitmapLoadResult LoadBitmapAtlas(const IO::Path &path, float size, Log::ILogger *logger)
   {
     const int padding = 2; // pixels of padding around each glyph
 
-    Result result {};
+    BitmapLoadResult result {};
     result.Glyphs.reserve(95);
     result.Padding = padding;
 
@@ -196,118 +196,6 @@ namespace
 
     return result;
   }
-
-  Result LoadMTSDFBitmap(const IO::Path &path, float size, Log::ILogger *logger, Gfx::FontType fontType)
-  {
-    using namespace msdfgen;
-
-    const int padding = 8;       // SDF needs more padding than bmp fonts so the distance field isn't clipped
-    const double pxPerEm = size; // because we're going to load glyphs as EM normalized
-    ulong seed = 0;              // for edgeColoringSimple randomness
-    const int pxRange = 8;
-
-    Result result {};
-    result.Glyphs.reserve(95);
-    result.Padding = padding;
-
-    FT_Library ftLib;
-    FT_Face face;
-    FT_Init_FreeType(&ftLib);
-    FT_New_Face(ftLib, path.ToString().c_str(), 0, &face);
-    FT_Set_Pixel_Sizes(face, 0, (uint32)size);
-
-    if (FreetypeHandle *ft = initializeFreetype())
-    {
-      if (FontHandle *font = loadFont(ft, path.ToString().c_str()))
-      {
-        for (uchar c = 32; c < 127; ++c)
-        {
-          // Outline
-          Shape shape;
-          if (!loadGlyph(shape, font, c, FONT_SCALING_EM_NORMALIZED))
-          {
-            if (logger)
-              logger->Warn("MSDFGEN: Failed to load outline for '{}'", (int)c);
-            continue;
-          }
-
-          shape.normalize();
-          if (fontType == Gfx::FontType::MSDF || fontType == Gfx::FontType::MTSDF)
-            edgeColoringSimple(shape, 3.0, ++seed);
-
-          // Bounds in EM space
-          Shape::Bounds bounds = shape.getBounds();
-
-          // Pixel size (tight) + generator padding (pxRange) + your safety padding
-          const int innerPad = padding + pxRange;
-          int w = int(std::ceil((bounds.r - bounds.l) * pxPerEm)) + 2 * innerPad;
-          int h = int(std::ceil((bounds.t - bounds.b) * pxPerEm)) + 2 * innerPad;
-          if (c == ' ')
-          {
-            w = h = 0;
-          }
-
-          GlyphToPack glyph {};
-          glyph.Char = c;
-          glyph.BitmapSize = {(uint32)w, (uint32)h};
-
-          // Vectorial metrics (pixels)
-          if (!FT_Load_Char(face, c, FT_LOAD_DEFAULT | FT_LOAD_NO_BITMAP))
-          {
-            FT_GlyphSlot slot = face->glyph;
-            glyph.Bearing = {int(slot->metrics.horiBearingX >> 6), int(slot->metrics.horiBearingY >> 6)};
-            glyph.Advance = (uint32)(slot->metrics.horiAdvance >> 6);
-          }
-
-          // Build transform: scale = pxPerEm, translate = make left/bottom land at innerPad pixels
-          const double s = pxPerEm;
-          const double padPx = double(innerPad);
-          const msdfgen::Vector2 scale(s, s);
-          const msdfgen::Vector2 translate(padPx / s - bounds.l, padPx / s - bounds.b);
-          const double range = double(pxRange) / s;
-
-          SDFTransformation transform(Projection(scale, translate), Range(range));
-
-          if (fontType == Gfx::FontType::SDF && w > 0 && h > 0)
-          {
-            Bitmap<float, 1> sdf(w, h);
-            generateSDF(sdf, shape, transform);
-            glyph.Pixels.resize(size_t(w) * h);
-            for (int y = 0; y < h; ++y)
-              for (int x = 0; x < w; ++x)
-              {
-                float d = sdf(x, y)[0];
-                float v = 0.5f + d / (2.0f * (float)range);
-                v = std::clamp(v, 0.0f, 1.0f);
-                glyph.Pixels[y * w + x] = (uint8)std::lround(v * 255.0f);
-              }
-          }
-
-          // Reserve extra atlas spacing outside the generated bitmap:
-          glyph.PackedSize = {glyph.BitmapSize.x + uint32(2 * padding),
-                              glyph.BitmapSize.y + uint32(2 * padding)};
-
-          result.Glyphs.push_back(std::move(glyph));
-        }
-        destroyFont(font);
-      }
-      else if (logger)
-      {
-        logger->Error("FREETYPE: Could not init FreeType Library");
-      }
-      deinitializeFreetype(ft);
-    }
-    else if (logger)
-    {
-      logger->Error("FREETYPE: Could not init FreeType Library");
-    }
-
-    FT_Done_Face(face);
-    FT_Done_FreeType(ftLib);
-
-    result.Success = true;
-    return result;
-  }
 }
 
 namespace Krys::Gfx::OpenGL
@@ -328,69 +216,68 @@ namespace Krys::Gfx::OpenGL
 
     auto *logger = Log::GetGlobalLogger();
 
-    Result result = [&]()
+    FontHandle handle;
+    if (fontType == FontType::Bitmap)
     {
-      if (fontType == FontType::Bitmap)
-        return LoadBitmapAtlas(path, size, logger);
-      else
-        return LoadMTSDFBitmap(path, size, logger, fontType);
-    }();
-
-    if (!result.Success)
-    {
-      if (logger)
-        logger->Error("Failed to load font '{}'", path.ToString());
-      return {};
-    }
-
-    List<uint8> atlas(result.AtlasSize.x * result.AtlasSize.y, 0);
-    for (const auto &glyph : result.Glyphs)
-    {
-      const int dstX = glyph.Rect.x + result.Padding;
-      const int dstY = glyph.Rect.y + result.Padding;
-      for (uint row = 0; row < glyph.BitmapSize.y; ++row)
+      BitmapLoadResult result = LoadBitmapAtlas(path, size, logger);
+      if (!result.Success)
       {
-        const uint8 *src = glyph.Pixels.data() + row * glyph.BitmapSize.x;
-        uint8 *dst = atlas.data() + (dstY + row) * result.AtlasSize.x + dstX;
-        std::memcpy(dst, src, glyph.BitmapSize.x);
+        if (logger)
+          logger->Error("Failed to load font '{}'", path.ToString());
+        return {};
       }
+
+      List<uint8> atlas(result.AtlasSize.x * result.AtlasSize.y, 0);
+      for (const auto &glyph : result.Glyphs)
+      {
+        const int dstX = glyph.Rect.x + result.Padding;
+        const int dstY = glyph.Rect.y + result.Padding;
+        for (uint row = 0; row < glyph.BitmapSize.y; ++row)
+        {
+          const uint8 *src = glyph.Pixels.data() + row * glyph.BitmapSize.x;
+          uint8 *dst = atlas.data() + (dstY + row) * result.AtlasSize.x + dstX;
+          std::memcpy(dst, src, glyph.BitmapSize.x);
+        }
+      }
+
+      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+      GLuint atlasTexture = 0;
+      glCreateTextures(GL_TEXTURE_2D, 1, &atlasTexture);
+      glTextureStorage2D(atlasTexture, 1, GL_R8, result.AtlasSize.x, result.AtlasSize.y);
+      glTextureSubImage2D(atlasTexture, 0, 0, 0, result.AtlasSize.x, result.AtlasSize.y, GL_RED,
+                          GL_UNSIGNED_BYTE, atlas.data());
+      glTextureParameteri(atlasTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTextureParameteri(atlasTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTextureParameteri(atlasTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTextureParameteri(atlasTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+      Map<char, Character> characters;
+      characters.reserve(95);
+
+      for (const auto &glyph : result.Glyphs)
+      {
+        const float u0 = float(glyph.Rect.x + result.Padding) / float(result.AtlasSize.x);
+        const float v0 = float(glyph.Rect.y + result.Padding) / float(result.AtlasSize.y);
+        const float u1 =
+          float(glyph.Rect.x + result.Padding + glyph.BitmapSize.x) / float(result.AtlasSize.x);
+        const float v1 =
+          float(glyph.Rect.y + result.Padding + glyph.BitmapSize.y) / float(result.AtlasSize.y);
+
+        Character ch = {
+          .Size = glyph.BitmapSize,
+          .Bearing = glyph.Bearing,
+          .Advance = glyph.Advance,
+          .UVMin = {u0, v0},
+          .UVMax = {u1, v1},
+        };
+        characters[glyph.Char] = ch;
+      }
+
+      Font font {fontType, {atlasTexture, characters, result.AtlasSize}};
+      handle = _fonts.Add(std::move(font));
+      _cache.Add(key, handle);
     }
-
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-    GLuint atlasTexture = 0;
-    glCreateTextures(GL_TEXTURE_2D, 1, &atlasTexture);
-    glTextureStorage2D(atlasTexture, 1, GL_R8, result.AtlasSize.x, result.AtlasSize.y);
-    glTextureSubImage2D(atlasTexture, 0, 0, 0, result.AtlasSize.x, result.AtlasSize.y, GL_RED,
-                        GL_UNSIGNED_BYTE, atlas.data());
-    glTextureParameteri(atlasTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTextureParameteri(atlasTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTextureParameteri(atlasTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTextureParameteri(atlasTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-
-    Map<char, Character> characters;
-    characters.reserve(95);
-
-    for (const auto &glyph : result.Glyphs)
-    {
-      const float u0 = float(glyph.Rect.x + result.Padding) / float(result.AtlasSize.x);
-      const float v0 = float(glyph.Rect.y + result.Padding) / float(result.AtlasSize.y);
-      const float u1 = float(glyph.Rect.x + result.Padding + glyph.BitmapSize.x) / float(result.AtlasSize.x);
-      const float v1 = float(glyph.Rect.y + result.Padding + glyph.BitmapSize.y) / float(result.AtlasSize.y);
-
-      Character ch = {
-        .Size = glyph.BitmapSize,
-        .Bearing = glyph.Bearing,
-        .Advance = glyph.Advance,
-        .UVMin = {u0, v0},
-        .UVMax = {u1, v1},
-      };
-      characters[glyph.Char] = ch;
-    }
-
-    Font font {fontType, {atlasTexture, characters, result.AtlasSize}};
-    FontHandle handle = _fonts.Add(std::move(font));
-    _cache.Add(key, handle);
 
     return handle;
   }
