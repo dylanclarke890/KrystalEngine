@@ -127,6 +127,7 @@
     <None Include="data\shaders\opengl\font\bitmap.frag" />
     <None Include="data\shaders\opengl\font\glyph.vert" />
     <None Include="data\shaders\opengl\font\sdf.frag" />
+    <None Include="data\shaders\opengl\font\msdf.frag" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">

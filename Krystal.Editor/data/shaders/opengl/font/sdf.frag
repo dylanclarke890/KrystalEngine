@@ -11,4 +11,4 @@ void main()
   float w = fwidth(sd);
   float alpha = smoothstep(-w, +w, sd);
   color = vec4(textColor.rgb, alpha);
-} 
+}

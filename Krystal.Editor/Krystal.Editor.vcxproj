@@ -225,6 +225,7 @@
     <None Include="data\shaders\opengl\explode-model.vert" />
     <None Include="data\shaders\opengl\font\bitmap.frag" />
     <None Include="data\shaders\opengl\font\glyph.vert" />
+    <None Include="data\shaders\opengl\font\msdf.frag" />
     <None Include="data\shaders\opengl\font\sdf.frag" />
     <None Include="data\shaders\opengl\framebuffer.frag" />
     <None Include="data\shaders\opengl\framebuffer.vert" />

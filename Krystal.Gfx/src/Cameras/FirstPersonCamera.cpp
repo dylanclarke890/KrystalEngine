@@ -53,7 +53,7 @@ namespace Krys::Gfx
     using namespace Platform;
     using namespace Maths;
 
-    float cameraSpeed = 5.f * static_cast<float>(deltaTime);
+    float cameraSpeed = 50.f * static_cast<float>(deltaTime);
 
     const auto &keyboard = input.GetKeyboard();
 
