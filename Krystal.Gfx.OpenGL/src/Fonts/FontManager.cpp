@@ -243,7 +243,7 @@ namespace
         // setScale for a fixed size or setMinimumScale to use the largest that fits
         packer.setMinimumScale(size);
         // setPixelRange or setUnitRange
-        packer.setPixelRange(2.0);
+        packer.setPixelRange(4.0);
         packer.setMiterLimit(1.0);
         // Compute atlas layout - pack glyphs
         packer.pack(glyphs.data(), (int)glyphs.size());

@@ -756,8 +756,8 @@ namespace Krys::Gfx::OpenGL
     glViewport(0, 0, _width, _height);
     ScreenOrthoProjection = Ortho(0.0f, static_cast<float>(_width), 0.0f, static_cast<float>(_height));
 
-    DefaultBitmapFont = _fonts.Load(IO::Path("data/assets/fonts/Antonio-Bold.ttf"), 32, FontType::Bitmap);
-    DefaultMSDFFont = _fonts.Load(IO::Path("data/assets/fonts/Antonio-Bold.ttf"), 32, FontType::MSDF);
+    DefaultBitmapFont = _fonts.Load(IO::Path("data/assets/fonts/Antonio-Bold.ttf"), 64, FontType::Bitmap);
+    DefaultMSDFFont = _fonts.Load(IO::Path("data/assets/fonts/Antonio-Bold.ttf"), 64, FontType::MSDF);
     {
       auto &shader = _shaders.Get(shaderHandles.at("pbr-with-maps"));
       shader.SetUniform("irradianceMap", 0);
@@ -859,18 +859,18 @@ namespace Krys::Gfx::OpenGL
     glEnable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    Vec3 colour(0.f);
     {
       auto &font = _fonts.Get(DefaultBitmapFont);
       auto &shader = _shaders.Get(shaderHandles.at("bitmap-font"));
       shader.Bind();
-      shader.SetUniform("projection", projection * view);
+      shader.SetUniform("projection", ScreenOrthoProjection);
+      shader.SetUniform("textColor", colour);
+
       string testText = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";
-      Vec3 color(0.f);
       for (float i = 0.f; i < (_height / 2.f); i += 120.f)
       {
-        shader.SetUniform("textColor", color);
-        color += Vec3((i / _height), 0.f, 0.f);
-        font.DrawText(testText, {25.f, i}, 1.0f);
+        //font.DrawText(testText, {25.f, i}, 1.0f);
       }
     }
 
@@ -878,14 +878,14 @@ namespace Krys::Gfx::OpenGL
       auto &font = _fonts.Get(DefaultMSDFFont);
       auto &shader = _shaders.Get(shaderHandles.at("msdf-font"));
       shader.Bind();
-      shader.SetUniform("projection", projection * view);
+      shader.SetUniform("projection", ScreenOrthoProjection);
+      shader.SetUniform("textColor", colour);
+
       string testText = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";
       Vec3 color(0.f);
       for (float i = (float)(_height / 2); i < (float)_height; i += 120.f)
       {
-        shader.SetUniform("textColor", color);
-        color += Vec3((i / _height), 0.f, 0.f);
-        font.DrawText(testText, {25.f, i}, 1.0f);
+        font.DrawText(testText, {25.f, i}, 0.5f);
       }
     }
     glEnable(GL_DEPTH_TEST);
