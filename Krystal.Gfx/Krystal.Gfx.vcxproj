@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.Gfx\FontType.hpp" />
     <ClInclude Include="include\Krystal.Gfx\ResourceHandleCache.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Cameras\FirstPersonCamera.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Colour.hpp" />
@@ -89,6 +90,41 @@
     <ClInclude Include="third-party\freetype\include\freetype\tttables.h" />
     <ClInclude Include="third-party\freetype\include\freetype\tttags.h" />
     <ClInclude Include="third-party\freetype\include\ft2build.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\artery-font-export.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\AtlasGenerator.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\AtlasStorage.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\bitmap-blit.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\BitmapAtlasStorage.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\BitmapAtlasStorage.hpp" />
+    <ClInclude Include="third-party\msdf-atlas-gen\Charset.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\csv-export.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\DynamicAtlas.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\DynamicAtlas.hpp" />
+    <ClInclude Include="third-party\msdf-atlas-gen\FontGeometry.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\glyph-generators.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\GlyphBox.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\GlyphGeometry.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\GridAtlasPacker.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\image-encode.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\image-save.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\image-save.hpp" />
+    <ClInclude Include="third-party\msdf-atlas-gen\ImmediateAtlasGenerator.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\ImmediateAtlasGenerator.hpp" />
+    <ClInclude Include="third-party\msdf-atlas-gen\json-export.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\msdf-atlas-gen.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\Padding.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\rectangle-packing.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\rectangle-packing.hpp" />
+    <ClInclude Include="third-party\msdf-atlas-gen\Rectangle.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\RectanglePacker.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\Remap.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\shadron-preview-generator.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\size-selectors.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\TightAtlasPacker.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\types.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\utf8.h" />
+    <ClInclude Include="third-party\msdf-atlas-gen\utils.hpp" />
+    <ClInclude Include="third-party\msdf-atlas-gen\Workload.h" />
     <ClInclude Include="third-party\msdfgen\core\arithmetics.hpp" />
     <ClInclude Include="third-party\msdfgen\core\base.h" />
     <ClInclude Include="third-party\msdfgen\core\bitmap-interpolation.hpp" />
@@ -150,6 +186,24 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Cameras\FirstPersonCamera.cpp" />
+    <ClCompile Include="third-party\msdf-atlas-gen\artery-font-export.cpp" />
+    <ClCompile Include="third-party\msdf-atlas-gen\bitmap-blit.cpp" />
+    <ClCompile Include="third-party\msdf-atlas-gen\charset-parser.cpp" />
+    <ClCompile Include="third-party\msdf-atlas-gen\Charset.cpp" />
+    <ClCompile Include="third-party\msdf-atlas-gen\csv-export.cpp" />
+    <ClCompile Include="third-party\msdf-atlas-gen\FontGeometry.cpp" />
+    <ClCompile Include="third-party\msdf-atlas-gen\glyph-generators.cpp" />
+    <ClCompile Include="third-party\msdf-atlas-gen\GlyphGeometry.cpp" />
+    <ClCompile Include="third-party\msdf-atlas-gen\GridAtlasPacker.cpp" />
+    <ClCompile Include="third-party\msdf-atlas-gen\image-encode.cpp" />
+    <ClCompile Include="third-party\msdf-atlas-gen\json-export.cpp" />
+    <ClCompile Include="third-party\msdf-atlas-gen\Padding.cpp" />
+    <ClCompile Include="third-party\msdf-atlas-gen\RectanglePacker.cpp" />
+    <ClCompile Include="third-party\msdf-atlas-gen\shadron-preview-generator.cpp" />
+    <ClCompile Include="third-party\msdf-atlas-gen\size-selectors.cpp" />
+    <ClCompile Include="third-party\msdf-atlas-gen\TightAtlasPacker.cpp" />
+    <ClCompile Include="third-party\msdf-atlas-gen\utf8.cpp" />
+    <ClCompile Include="third-party\msdf-atlas-gen\Workload.cpp" />
     <ClCompile Include="third-party\msdfgen\core\contour-combiners.cpp" />
     <ClCompile Include="third-party\msdfgen\core\Contour.cpp" />
     <ClCompile Include="third-party\msdfgen\core\convergent-curve-ordering.cpp" />
@@ -178,7 +232,6 @@
     <ClCompile Include="third-party\msdfgen\ext\import-svg.cpp" />
     <ClCompile Include="third-party\msdfgen\ext\resolve-shape-geometry.cpp" />
     <ClCompile Include="third-party\msdfgen\ext\save-png.cpp" />
-    <ClCompile Include="third-party\msdfgen\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="third-party\freetype\freetype.lib" />
@@ -243,7 +296,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)third-party\freetype\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)third-party\msdfgen\;$(ProjectDir)third-party\freetype\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

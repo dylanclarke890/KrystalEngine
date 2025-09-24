@@ -699,7 +699,9 @@ namespace Krys::Gfx::OpenGL
       shaderHandles["hdr-background"] =
         _shaders.Load(base / Path("11/background.vert"), base / Path("11/background.frag"));
 
-      shaderHandles["text"] = _shaders.Load(base / Path("text.vert"), base / Path("text.frag"));
+      shaderHandles["bitmap-font"] =
+        _shaders.Load(base / Path("font/glyph.vert"), base / Path("font/bitmap.frag"));
+      shaderHandles["sdf-font"] = _shaders.Load(base / Path("font/glyph.vert"), base / Path("font/sdf.frag"));
     }
 
     {
@@ -751,7 +753,7 @@ namespace Krys::Gfx::OpenGL
     glViewport(0, 0, _width, _height);
     ScreenOrthoProjection = Ortho(0.0f, static_cast<float>(_width), 0.0f, static_cast<float>(_height));
 
-    DefaultFont = _fonts.Load(IO::Path("data/assets/fonts/Antonio-Bold.ttf"), 32);
+    DefaultFont = _fonts.Load(IO::Path("data/assets/fonts/Antonio-Bold.ttf"), 32, FontType::Bitmap);
     {
       auto &shader = _shaders.Get(shaderHandles.at("pbr-with-maps"));
       shader.SetUniform("irradianceMap", 0);
@@ -854,7 +856,8 @@ namespace Krys::Gfx::OpenGL
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     {
       auto &font = _fonts.Get(DefaultFont);
-      auto &shader = _shaders.Get(shaderHandles.at("text"));
+      auto &shader =
+        _shaders.Get(shaderHandles.at(font.Type() == FontType::SDF ? "sdf-font" : "bitmap-font"));
       shader.Bind();
       shader.SetUniform("projection", ScreenOrthoProjection);
       string testText = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";

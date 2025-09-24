@@ -3,6 +3,7 @@
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Shader.hpp"
 #include "Krystal.Gfx.OpenGL/Utils.hpp"
+#include "Krystal.Gfx/FontType.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
 #include "Krystal.Lib/Span.hpp"
@@ -50,12 +51,13 @@ namespace Krys::Gfx::OpenGL
     constexpr static int VerticesPerGlyph = 6; // 2 triangles per glyph
 
     FontAtlas _bitmapAtlas {};
+    FontType _type {FontType::Bitmap};
     GLuint _vao;
     GLuint _vbo;
     List<TextVertex> _vertexBuffer;
 
   public:
-    Font(const FontAtlas &bitmapAtlas) noexcept : _bitmapAtlas(bitmapAtlas)
+    Font(FontType type, const FontAtlas &bitmapAtlas) noexcept : _type(type), _bitmapAtlas(bitmapAtlas)
     {
       glCreateVertexArrays(1, &_vao);
       glCreateBuffers(1, &_vbo);
@@ -138,10 +140,16 @@ namespace Krys::Gfx::OpenGL
       }
     }
 
+    FontType Type() const noexcept
+    {
+      return _type;
+    }
+
   private:
     void Swap(Font &other) noexcept
     {
       std::swap(other._bitmapAtlas, _bitmapAtlas);
+      std::swap(other._type, _type);
       std::swap(other._vao, _vao);
       std::swap(other._vbo, _vbo);
       std::swap(other._vertexBuffer, _vertexBuffer);

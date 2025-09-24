@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx.OpenGL/Fonts/Font.hpp"
 #include "Krystal.Gfx.OpenGL/Fonts/FontSystem.hpp"
@@ -9,6 +9,7 @@
 #include <ft2build.h>
 #include <msdfgen-ext.h>
 #include <msdfgen.h>
+#include <msdf-atlas-gen.h>
 #include <stb_rect_pack.h>
 #include FT_FREETYPE_H
 #include <algorithm>
@@ -19,7 +20,7 @@ namespace
   using namespace Krys::Maths;
   using namespace Krys::Gfx::OpenGL;
 
-  struct PackedGlyph
+  struct GlyphToPack
   {
     char Char {};
     Vec2u BitmapSize {};   // glyph bitmap size (tight)
@@ -30,14 +31,15 @@ namespace
     stbrp_rect Rect {};
   };
 
-  struct GlyphPackResult
+  struct Result
   {
-    List<PackedGlyph> Glyphs;
+    List<GlyphToPack> Glyphs;
     int Padding {0};
+    Vec2u AtlasSize {0u};
     bool Success {false};
   };
 
-  static bool TryPack(List<PackedGlyph> &glyphs, Vec2u &size)
+  static bool TryPack(List<GlyphToPack> &glyphs, Vec2u &size)
   {
     bool success = false;
     while (!success)
@@ -96,11 +98,11 @@ namespace
     return true;
   }
 
-  GlyphPackResult LoadBitmapGlyphs(const IO::Path &path, float size, Log::ILogger *logger)
+  Result LoadBitmapAtlas(const IO::Path &path, float size, Log::ILogger *logger)
   {
     const int padding = 2; // pixels of padding around each glyph
 
-    GlyphPackResult result {};
+    Result result {};
     result.Glyphs.reserve(95);
     result.Padding = padding;
 
@@ -156,7 +158,7 @@ namespace
       const FT_GlyphSlot slot = face->glyph;
       const FT_Bitmap &bm = slot->bitmap;
 
-      PackedGlyph glyph {};
+      GlyphToPack glyph {};
       glyph.Char = c;
       glyph.BitmapSize = {bm.width, bm.rows};
       glyph.Bearing = {slot->bitmap_left, slot->bitmap_top};
@@ -176,25 +178,43 @@ namespace
       result.Glyphs.push_back(std::move(glyph));
     }
 
-    result.Success = true;
     FT_Done_Face(face);
     FT_Done_FreeType(fontLibraryHandle);
+
+    result.Success = true;
+
+    result.AtlasSize = {512, 512};
+    if (!TryPack(result.Glyphs, result.AtlasSize))
+    {
+      if (logger)
+      {
+        logger->Error("FREETYPE: Failed to pack glyphs for font '{}'", path.ToString());
+      }
+      KRYS_DEBUG_BREAK();
+      return {};
+    }
 
     return result;
   }
 
-  GlyphPackResult LoadMTSDFGlyphs(const IO::Path &path, float size, Log::ILogger *logger,
-                                  Gfx::FontType fontType)
+  Result LoadMTSDFBitmap(const IO::Path &path, float size, Log::ILogger *logger, Gfx::FontType fontType)
   {
     using namespace msdfgen;
 
     const int padding = 8;       // SDF needs more padding than bmp fonts so the distance field isn't clipped
     const double pxPerEm = size; // because we're going to load glyphs as EM normalized
     ulong seed = 0;              // for edgeColoringSimple randomness
+    const int pxRange = 8;
 
-    GlyphPackResult result {};
+    Result result {};
     result.Glyphs.reserve(95);
     result.Padding = padding;
+
+    FT_Library ftLib;
+    FT_Face face;
+    FT_Init_FreeType(&ftLib);
+    FT_New_Face(ftLib, path.ToString().c_str(), 0, &face);
+    FT_Set_Pixel_Sizes(face, 0, (uint32)size);
 
     if (FreetypeHandle *ft = initializeFreetype())
     {
@@ -202,6 +222,7 @@ namespace
       {
         for (uchar c = 32; c < 127; ++c)
         {
+          // Outline
           Shape shape;
           if (!loadGlyph(shape, font, c, FONT_SCALING_EM_NORMALIZED))
           {
@@ -211,15 +232,62 @@ namespace
           }
 
           shape.normalize();
-          if (fontType == Gfx::FontType::SDF)
-          {
-            BitmapRef<float, 1> bitmap;
-            generateSDF(bitmap, shape, SDFTransformation(), GeneratorConfig());
-          }
-          else if (fontType == Gfx::FontType::MSDF)
-          {
+          if (fontType == Gfx::FontType::MSDF || fontType == Gfx::FontType::MTSDF)
             edgeColoringSimple(shape, 3.0, ++seed);
+
+          // Bounds in EM space
+          Shape::Bounds bounds = shape.getBounds();
+
+          // Pixel size (tight) + generator padding (pxRange) + your safety padding
+          const int innerPad = padding + pxRange;
+          int w = int(std::ceil((bounds.r - bounds.l) * pxPerEm)) + 2 * innerPad;
+          int h = int(std::ceil((bounds.t - bounds.b) * pxPerEm)) + 2 * innerPad;
+          if (c == ' ')
+          {
+            w = h = 0;
           }
+
+          GlyphToPack glyph {};
+          glyph.Char = c;
+          glyph.BitmapSize = {(uint32)w, (uint32)h};
+
+          // Vectorial metrics (pixels)
+          if (!FT_Load_Char(face, c, FT_LOAD_DEFAULT | FT_LOAD_NO_BITMAP))
+          {
+            FT_GlyphSlot slot = face->glyph;
+            glyph.Bearing = {int(slot->metrics.horiBearingX >> 6), int(slot->metrics.horiBearingY >> 6)};
+            glyph.Advance = (uint32)(slot->metrics.horiAdvance >> 6);
+          }
+
+          // Build transform: scale = pxPerEm, translate = make left/bottom land at innerPad pixels
+          const double s = pxPerEm;
+          const double padPx = double(innerPad);
+          const msdfgen::Vector2 scale(s, s);
+          const msdfgen::Vector2 translate(padPx / s - bounds.l, padPx / s - bounds.b);
+          const double range = double(pxRange) / s;
+
+          SDFTransformation transform(Projection(scale, translate), Range(range));
+
+          if (fontType == Gfx::FontType::SDF && w > 0 && h > 0)
+          {
+            Bitmap<float, 1> sdf(w, h);
+            generateSDF(sdf, shape, transform);
+            glyph.Pixels.resize(size_t(w) * h);
+            for (int y = 0; y < h; ++y)
+              for (int x = 0; x < w; ++x)
+              {
+                float d = sdf(x, y)[0];
+                float v = 0.5f + d / (2.0f * (float)range);
+                v = std::clamp(v, 0.0f, 1.0f);
+                glyph.Pixels[y * w + x] = (uint8)std::lround(v * 255.0f);
+              }
+          }
+
+          // Reserve extra atlas spacing outside the generated bitmap:
+          glyph.PackedSize = {glyph.BitmapSize.x + uint32(2 * padding),
+                              glyph.BitmapSize.y + uint32(2 * padding)};
+
+          result.Glyphs.push_back(std::move(glyph));
         }
         destroyFont(font);
       }
@@ -233,6 +301,9 @@ namespace
     {
       logger->Error("FREETYPE: Could not init FreeType Library");
     }
+
+    FT_Done_Face(face);
+    FT_Done_FreeType(ftLib);
 
     result.Success = true;
     return result;
@@ -257,52 +328,30 @@ namespace Krys::Gfx::OpenGL
 
     auto *logger = Log::GetGlobalLogger();
 
-    GlyphPackResult packResult = [&]()
+    Result result = [&]()
     {
-      switch (fontType)
-      {
-        case FontType::Bitmap: return LoadBitmapGlyphs(path, size, logger);
-        case FontType::SDF:
-        case FontType::MSDF:
-        default:
-          if (logger)
-            logger->Error("FREETYPE: Unsupported font type for font '{}'", path.ToString());
-          KRYS_DEBUG_BREAK();
-          return LoadBitmapGlyphs(path, size, logger);
-      }
-      return LoadBitmapGlyphs(path, size, logger);
+      if (fontType == FontType::Bitmap)
+        return LoadBitmapAtlas(path, size, logger);
+      else
+        return LoadMTSDFBitmap(path, size, logger, fontType);
     }();
 
-    if (!packResult.Success)
+    if (!result.Success)
     {
       if (logger)
-      {
-        logger->Error("FREETYPE: Failed to load glyphs for font '{}'", path.ToString());
-      }
-      KRYS_DEBUG_BREAK();
+        logger->Error("Failed to load font '{}'", path.ToString());
       return {};
     }
 
-    Vec2u atlasSize {512, 512};
-    if (!TryPack(packResult.Glyphs, atlasSize))
+    List<uint8> atlas(result.AtlasSize.x * result.AtlasSize.y, 0);
+    for (const auto &glyph : result.Glyphs)
     {
-      if (logger)
-      {
-        logger->Error("FREETYPE: Failed to pack glyphs for font '{}'", path.ToString());
-      }
-      KRYS_DEBUG_BREAK();
-      return {};
-    }
-
-    List<uint8> atlas(atlasSize.x * atlasSize.y, 0);
-    for (const auto &glyph : packResult.Glyphs)
-    {
-      const int dstX = glyph.Rect.x + packResult.Padding;
-      const int dstY = glyph.Rect.y + packResult.Padding;
+      const int dstX = glyph.Rect.x + result.Padding;
+      const int dstY = glyph.Rect.y + result.Padding;
       for (uint row = 0; row < glyph.BitmapSize.y; ++row)
       {
         const uint8 *src = glyph.Pixels.data() + row * glyph.BitmapSize.x;
-        uint8 *dst = atlas.data() + (dstY + row) * atlasSize.x + dstX;
+        uint8 *dst = atlas.data() + (dstY + row) * result.AtlasSize.x + dstX;
         std::memcpy(dst, src, glyph.BitmapSize.x);
       }
     }
@@ -310,9 +359,9 @@ namespace Krys::Gfx::OpenGL
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
     GLuint atlasTexture = 0;
     glCreateTextures(GL_TEXTURE_2D, 1, &atlasTexture);
-    glTextureStorage2D(atlasTexture, 1, GL_R8, atlasSize.x, atlasSize.y);
-    glTextureSubImage2D(atlasTexture, 0, 0, 0, atlasSize.x, atlasSize.y, GL_RED, GL_UNSIGNED_BYTE,
-                        atlas.data());
+    glTextureStorage2D(atlasTexture, 1, GL_R8, result.AtlasSize.x, result.AtlasSize.y);
+    glTextureSubImage2D(atlasTexture, 0, 0, 0, result.AtlasSize.x, result.AtlasSize.y, GL_RED,
+                        GL_UNSIGNED_BYTE, atlas.data());
     glTextureParameteri(atlasTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTextureParameteri(atlasTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTextureParameteri(atlasTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -322,12 +371,12 @@ namespace Krys::Gfx::OpenGL
     Map<char, Character> characters;
     characters.reserve(95);
 
-    for (const auto &glyph : packResult.Glyphs)
+    for (const auto &glyph : result.Glyphs)
     {
-      const float u0 = float(glyph.Rect.x + packResult.Padding) / float(atlasSize.x);
-      const float v0 = float(glyph.Rect.y + packResult.Padding) / float(atlasSize.y);
-      const float u1 = float(glyph.Rect.x + packResult.Padding + glyph.BitmapSize.x) / float(atlasSize.x);
-      const float v1 = float(glyph.Rect.y + packResult.Padding + glyph.BitmapSize.y) / float(atlasSize.y);
+      const float u0 = float(glyph.Rect.x + result.Padding) / float(result.AtlasSize.x);
+      const float v0 = float(glyph.Rect.y + result.Padding) / float(result.AtlasSize.y);
+      const float u1 = float(glyph.Rect.x + result.Padding + glyph.BitmapSize.x) / float(result.AtlasSize.x);
+      const float v1 = float(glyph.Rect.y + result.Padding + glyph.BitmapSize.y) / float(result.AtlasSize.y);
 
       Character ch = {
         .Size = glyph.BitmapSize,
@@ -339,7 +388,7 @@ namespace Krys::Gfx::OpenGL
       characters[glyph.Char] = ch;
     }
 
-    Font font {{atlasTexture, characters, atlasSize}};
+    Font font {fontType, {atlasTexture, characters, result.AtlasSize}};
     FontHandle handle = _fonts.Add(std::move(font));
     _cache.Add(key, handle);
 
