@@ -20,15 +20,18 @@ namespace Krys::Gfx::OpenGL
 
     FontManager _fonts;
     FontCache _cache;
+    int _dpi;
 
   public:
-    FontSystem() noexcept;
+    FontSystem(int dpi) noexcept;
 
     ~FontSystem() noexcept override;
 
     NO_DISCARD FontHandle Load(const IO::Path &path, float size,
                                FontType fontType = FontType::Bitmap) noexcept override;
 
-    Font &Get(FontHandle);
+    NO_DISCARD Font &Get(FontHandle handle);
+
+    void DPIChanged(int dpi) noexcept;
   };
 }

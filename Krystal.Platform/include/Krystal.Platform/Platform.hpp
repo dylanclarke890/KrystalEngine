@@ -4,6 +4,7 @@
 #include "Krystal.Lib/Nullable.hpp"
 #include "Krystal.Lib/String.hpp"
 #include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/NativeHandle.hpp"
 
 namespace Krys::Platform
 {
@@ -18,6 +19,9 @@ namespace Krys::Platform
 
   /// @brief Gets the time in milliseconds since the application started.
   NO_DISCARD double GetTimeMilliseconds() noexcept;
+
+  /// @brief Gets dpi of the given window.
+  NO_DISCARD int GetDPIForWindow(NativeHandle windowHandle) noexcept;
 
   /// @brief Sets the timer precision for the application.
   /// @param min The requested precision. nullopt can be passed to request the lowest possible

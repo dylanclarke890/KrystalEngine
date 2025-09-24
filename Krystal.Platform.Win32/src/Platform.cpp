@@ -5,7 +5,10 @@
 #include <optional>
 
 #define NOMINMAX
+#include <shellscalingapi.h>
 #include <windows.h>
+
+#pragma comment(lib, "Shcore.lib")
 
 namespace Krys::Platform
 {
@@ -61,6 +64,16 @@ namespace Krys::Platform
       assert(result);
     }
     return static_cast<double>(now.QuadPart - StartTicks) * 1000.0 / TickFrequency;
+  }
+
+  int GetDPIForWindow(NativeHandle windowHandle) noexcept
+  {
+    HMONITOR monitor = ::MonitorFromWindow(windowHandle.As<HWND>(), MONITOR_DEFAULTTONEAREST);
+    UINT dpiX = 96, dpiY = 96;
+    auto result = ::GetDpiForMonitor(monitor, MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
+    if (result != S_OK)
+      return 96;
+    return static_cast<int>(dpiX);
   }
 
   uint SetTimerPrecision(Nullable<uint> min) noexcept

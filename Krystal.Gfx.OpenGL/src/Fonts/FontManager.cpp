@@ -106,7 +106,7 @@ namespace
     return true;
   }
 
-  BitmapLoadResult LoadBitmapAtlas(const IO::Path &path, float size, Log::ILogger *logger)
+  BitmapLoadResult LoadBitmapAtlas(const IO::Path &path, double sizeInPixels, Log::ILogger *logger)
   {
     const int padding = 2; // pixels of padding around each glyph
 
@@ -124,8 +124,11 @@ namespace
       return result;
     }
 
+    if (logger)
+    {
+      logger->Info("FREETYPE: Loading bitmap font from '{}'", path.ToString());
+    }
     FT_Face face {};
-
     if (FT_New_Face(fontLibraryHandle, path.ToString().c_str(), 0, &face))
     {
       FT_Done_FreeType(fontLibraryHandle);
@@ -136,13 +139,21 @@ namespace
       return result;
     }
 
-    if (FT_Set_Pixel_Sizes(face, 0, (uint32)size))
+    if (logger)
+    {
+      logger->Info("FREETYPE: Loaded font.", path.ToString());
+      logger->Info("FREETYPE:   Family: {}", face->family_name);
+      logger->Info("FREETYPE:   Style: {}", face->style_name);
+      logger->Info("FREETYPE:   {} face(s) in font", face->num_faces);
+      logger->Info("FREETYPE: Setting font size to {}px", (uint32)sizeInPixels);
+    }
+    if (FT_Set_Pixel_Sizes(face, 0, (uint32)sizeInPixels))
     {
       FT_Done_Face(face);
       FT_Done_FreeType(fontLibraryHandle);
       if (logger)
       {
-        logger->Error("FREETYPE: Failed to set font size {}px", (uint32)size);
+        logger->Error("FREETYPE: Failed to set font size {}px", (uint32)sizeInPixels);
       }
       return result;
     }
@@ -205,7 +216,51 @@ namespace
     return result;
   }
 
-  MTSDFResult LoadMTSDFAtlas(const IO::Path &path, float size, Log::ILogger *logger, Gfx::FontType fontType)
+  Map<char, Character> CreateBitmapCharacters(List<GlyphToPack> &glyphs, int padding,
+                                              const Maths::Vec2u &atlasSize)
+  {
+    // Create character map
+    Map<char, Character> characters;
+    characters.reserve(95);
+    for (const auto &glyph : glyphs)
+    {
+      const float u0 = float(glyph.Rect.x + padding) / float(atlasSize.x);
+      const float v0 = float(glyph.Rect.y + padding) / float(atlasSize.y);
+      const float u1 = float(glyph.Rect.x + padding + glyph.BitmapSize.x) / float(atlasSize.x);
+      const float v1 = float(glyph.Rect.y + padding + glyph.BitmapSize.y) / float(atlasSize.y);
+
+      Character ch = {
+        .Size = glyph.BitmapSize,
+        .Bearing = glyph.Bearing,
+        .Advance = glyph.Advance,
+        .UVMin = {u0, v0},
+        .UVMax = {u1, v1},
+      };
+      characters[glyph.Char] = ch;
+    }
+
+    return characters;
+  }
+
+  List<uint8> CreateBitmapAtlasPixels(List<GlyphToPack> &glyphs, const Maths::Vec2u &atlasSize)
+  {
+    List<uint8> pixels;
+    pixels.resize(atlasSize.x * atlasSize.y);
+    std::fill(pixels.begin(), pixels.end(), 0);
+    for (const auto &glyph : glyphs)
+    {
+      for (uint row = 0; row < glyph.BitmapSize.y; ++row)
+      {
+        uint8 *dst = pixels.data() + (glyph.Rect.y + row + 2) * atlasSize.x + (glyph.Rect.x + 2);
+        const uint8 *src = glyph.Pixels.data() + row * glyph.BitmapSize.x;
+        std::memcpy(dst, src, glyph.BitmapSize.x);
+      }
+    }
+    return pixels;
+  }
+
+  MTSDFResult LoadMTSDFAtlas(const IO::Path &path, Log::ILogger *logger, Gfx::FontType fontType,
+                             const SDFParams &params)
   {
     MTSDFResult result {};
 
@@ -217,76 +272,91 @@ namespace
       // Load font file
       if (msdfgen::FontHandle *font = msdfgen::loadFont(ft, path.ToString().c_str()))
       {
-        // Storage for glyph geometry and their coordinates in the atlas
-        std::vector<GlyphGeometry> glyphs;
-
         // FontGeometry is a helper class that loads a set of glyphs from a single font.
         // It can also be used to get additional font metrics, kerning information, etc.
+        List<GlyphGeometry> glyphs;
         FontGeometry fontGeometry(&glyphs);
-
-        // Load a set of character glyphs:
-        // The second argument can be ignored unless you mix different font sizes in one atlas.
-        // In the last argument, you can specify a charset other than ASCII.
-        // To load specific glyph indices, use loadGlyphs instead.
         fontGeometry.loadCharset(font, 1.0, Charset::ASCII);
 
-        // Apply MSDF edge coloring. See edge-coloring.h for other coloring strategies.
-        const double maxCornerAngle = 3.0;
+        const double maxCornerAngle = 3.0; // Apply MSDF edge coloring. edge-coloring.h for other strategies.
         for (GlyphGeometry &glyph : glyphs)
           glyph.edgeColoring(&msdfgen::edgeColoringInkTrap, maxCornerAngle, 0);
 
-        // TightAtlasPacker class computes the layout of the atlas.
-        TightAtlasPacker packer;
-        // Set atlas parameters:
-        // setDimensions or setDimensionsConstraint to find the best value
-        packer.setDimensionsConstraint(DimensionsConstraint::SQUARE);
-        // setScale for a fixed size or setMinimumScale to use the largest that fits
-        packer.setMinimumScale(size);
-        // setPixelRange or setUnitRange
-        packer.setPixelRange(4.0);
-        packer.setMiterLimit(1.0);
-        // Compute atlas layout - pack glyphs
-        packer.pack(glyphs.data(), (int)glyphs.size());
-        // Get final atlas dimensions
         int width = 0, height = 0;
-        packer.getDimensions(width, height);
+        TightAtlasPacker packer;
+        packer.setDimensionsConstraint(DimensionsConstraint::SQUARE);
+        packer.setScale(params.EMSizeInPixels);
+        packer.setPixelRange(params.PixelRange);
+        packer.setMiterLimit(params.MiterLimit);
+        packer.pack(glyphs.data(), (int)glyphs.size());
+        packer.getDimensions(width, height); // final atlas dimensions
 
-        // TODO: generate based on fontType (SDF, MSDF, MTSDF)
-        // The ImmediateAtlasGenerator class facilitates the generation of the atlas bitmap.
-        ImmediateAtlasGenerator<
-          float,         // pixel type of buffer for individual glyphs depends on generator function
-          3,             // number of atlas color channels
-          msdfGenerator, // function to generate bitmaps for individual glyphs
-          BitmapAtlasStorage<msdfgen::byte, 3> // class that stores the atlas bitmap
-          // For example, a custom atlas storage class that stores it in VRAM can be used.
-          >
-          generator(width, height);
-        // GeneratorAttributes can be modified to change the generator's default settings.
-        GeneratorAttributes attributes;
-        generator.setAttributes(attributes);
-        generator.setThreadCount(4);
-        // Generate atlas bitmap
-        generator.generate(glyphs.data(), (int)glyphs.size());
-
-        // The atlas bitmap can now be retrieved via atlasStorage as a BitmapConstRef.
-        // The glyphs array (or fontGeometry) contains positioning data for typesetting text.
-        // success = my_project::submitAtlasBitmapAndLayout(generator.atlasStorage(), glyphs);
-        const auto &storage = generator.atlasStorage();
-        const msdfgen::BitmapConstRef<msdfgen::byte, 3> &atlas = storage;
-
-        // Upload to OpenGL texture
-        GLuint tex;
-        glCreateTextures(GL_TEXTURE_2D, 1, &tex);
-        glTextureStorage2D(tex, 1, GL_RGB8, atlas.width, atlas.height);
+        GLuint texture;
+        glCreateTextures(GL_TEXTURE_2D, 1, &texture);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        glTextureSubImage2D(tex, 0, 0, 0, atlas.width, atlas.height, GL_RGB, GL_UNSIGNED_BYTE, atlas.pixels);
+        if (fontType == Gfx::FontType::SDF)
+        {
+          using SDFAtlasData = const msdfgen::BitmapConstRef<msdfgen::byte, 1> &;
+          using SDFGenerator =
+            ImmediateAtlasGenerator<float, 1, sdfGenerator, BitmapAtlasStorage<msdfgen::byte, 1>>;
+
+          SDFGenerator generator(width, height);
+          generator.setAttributes({});
+          generator.setThreadCount(4);
+          generator.generate(glyphs.data(), (int)glyphs.size());
+          SDFAtlasData atlas = generator.atlasStorage();
+
+          glTextureStorage2D(texture, 1, GL_R8, atlas.width, atlas.height);
+          glTextureSubImage2D(texture, 0, 0, 0, atlas.width, atlas.height, GL_RED, GL_UNSIGNED_BYTE,
+                              atlas.pixels);
+
+          result.Texture = texture;
+          result.AtlasSize = {uint32(atlas.width), uint32(atlas.height)};
+        }
+        else if (fontType == Gfx::FontType::MSDF)
+        {
+          using MSDFAtlasData = const msdfgen::BitmapConstRef<msdfgen::byte, 3> &;
+          using MSDFGenerator =
+            ImmediateAtlasGenerator<float, 3, msdfGenerator, BitmapAtlasStorage<msdfgen::byte, 3>>;
+
+          MSDFGenerator generator(width, height);
+          generator.setAttributes({});
+          generator.setThreadCount(4);
+          generator.generate(glyphs.data(), (int)glyphs.size());
+          MSDFAtlasData atlas = generator.atlasStorage();
+
+          glTextureStorage2D(texture, 1, GL_RGB8, atlas.width, atlas.height);
+          glTextureSubImage2D(texture, 0, 0, 0, atlas.width, atlas.height, GL_RGB, GL_UNSIGNED_BYTE,
+                              atlas.pixels);
+
+          result.Texture = texture;
+          result.AtlasSize = {uint32(atlas.width), uint32(atlas.height)};
+        }
+        else
+        {
+          using MTSDFAtlasData = const msdfgen::BitmapConstRef<msdfgen::byte, 4> &;
+          using MTSDFGenerator =
+            ImmediateAtlasGenerator<float, 4, mtsdfGenerator, BitmapAtlasStorage<msdfgen::byte, 4>>;
+
+          MTSDFGenerator generator(width, height);
+          generator.setAttributes({});
+          generator.setThreadCount(4);
+          generator.generate(glyphs.data(), (int)glyphs.size());
+          MTSDFAtlasData atlas = generator.atlasStorage();
+
+          glTextureStorage2D(texture, 1, GL_RGBA8, atlas.width, atlas.height);
+          glTextureSubImage2D(texture, 0, 0, 0, atlas.width, atlas.height, GL_RGBA, GL_UNSIGNED_BYTE,
+                              atlas.pixels);
+
+          result.Texture = texture;
+          result.AtlasSize = {uint32(atlas.width), uint32(atlas.height)};
+        }
         glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-        glTextureParameteri(tex, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTextureParameteri(tex, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTextureParameteri(tex, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTextureParameteri(tex, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        result.Texture = tex;
-        result.AtlasSize = {uint32(atlas.width), uint32(atlas.height)};
+
+        glTextureParameteri(result.Texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(result.Texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTextureParameteri(result.Texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTextureParameteri(result.Texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         result.Success = true;
 
         double emScale = packer.getScale();
@@ -302,23 +372,27 @@ namespace
           ch.Size = {(uint32)std::round((pr - pl) * emScale), (uint32)std::round((pt - pb) * emScale)};
           ch.Bearing = {(int)std::round(pl * emScale), (int)std::round(pt * emScale)};
           ch.Advance = (uint32)std::round(glyph.getAdvance() * emScale);
-          ch.UVMin = {float(l / atlas.width), float(t / atlas.height)};
-          ch.UVMax = {float(r / atlas.width), float(b / atlas.height)};
+          ch.UVMin = {float(l / result.AtlasSize.x), float(t / result.AtlasSize.y)};
+          ch.UVMax = {float(r / result.AtlasSize.x), float(b / result.AtlasSize.y)};
           result.Characters.emplace((char)glyph.getCodepoint(), ch);
         }
 
-        // Cleanup
         msdfgen::destroyFont(font);
       }
       msdfgen::deinitializeFreetype(ft);
     }
     return result;
   }
+
+  double PtSizeToPixels(float ptSize, int dpi)
+  {
+    return (ptSize * dpi) / 72.0;
+  }
 }
 
 namespace Krys::Gfx::OpenGL
 {
-  FontSystem::FontSystem() noexcept
+  FontSystem::FontSystem(int dpi) noexcept : _dpi(dpi)
   {
   }
 
@@ -326,79 +400,61 @@ namespace Krys::Gfx::OpenGL
   {
   }
 
-  FontHandle FontSystem::Load(const IO::Path &path, float size, FontType fontType) noexcept
+  FontHandle FontSystem::Load(const IO::Path &path, float ptSize, FontType fontType) noexcept
   {
-    string key = std::format("{0}-{1}-{2}", path.ToString(), size, (int)fontType);
-    if (auto cached = _cache.Get(key); cached.IsValid())
-      return cached;
-
     auto *logger = Log::GetGlobalLogger();
+    double sizeInPixels = PtSizeToPixels(ptSize, _dpi);
 
     FontHandle handle;
     if (fontType == FontType::Bitmap)
     {
-      BitmapLoadResult result = LoadBitmapAtlas(path, size, logger);
+      // We cache bitmap fonts by path+target pt size as they need to be reloaded on DPI change.
+      string key = std::format("{0}-{1}", path.ToString(), ptSize);
+      if (auto cached = _cache.Get(key); cached.IsValid())
+      {
+        if (logger)
+        {
+          logger->Debug("Font cache hit for '{}'", key);
+        }
+        return cached;
+      }
+
+      BitmapLoadResult result = LoadBitmapAtlas(path, sizeInPixels, logger);
       if (!result.Success)
       {
         if (logger)
+        {
           logger->Error("Failed to load font '{}'", path.ToString());
+        }
         return {};
       }
 
-      List<uint8> atlas(result.AtlasSize.x * result.AtlasSize.y, 0);
-      for (const auto &glyph : result.Glyphs)
-      {
-        const int dstX = glyph.Rect.x + result.Padding;
-        const int dstY = glyph.Rect.y + result.Padding;
-        for (uint row = 0; row < glyph.BitmapSize.y; ++row)
-        {
-          const uint8 *src = glyph.Pixels.data() + row * glyph.BitmapSize.x;
-          uint8 *dst = atlas.data() + (dstY + row) * result.AtlasSize.x + dstX;
-          std::memcpy(dst, src, glyph.BitmapSize.x);
-        }
-      }
+      List<uint8> atlas = CreateBitmapAtlasPixels(result.Glyphs, result.AtlasSize);
+      auto characters = CreateBitmapCharacters(result.Glyphs, result.Padding, result.AtlasSize);
 
-      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-      GLuint atlasTexture = 0;
-      glCreateTextures(GL_TEXTURE_2D, 1, &atlasTexture);
-      glTextureStorage2D(atlasTexture, 1, GL_R8, result.AtlasSize.x, result.AtlasSize.y);
-      glTextureSubImage2D(atlasTexture, 0, 0, 0, result.AtlasSize.x, result.AtlasSize.y, GL_RED,
-                          GL_UNSIGNED_BYTE, atlas.data());
-      glTextureParameteri(atlasTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTextureParameteri(atlasTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTextureParameteri(atlasTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTextureParameteri(atlasTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-      glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-
-      Map<char, Character> characters;
-      characters.reserve(95);
-
-      for (const auto &glyph : result.Glyphs)
-      {
-        const float u0 = float(glyph.Rect.x + result.Padding) / float(result.AtlasSize.x);
-        const float v0 = float(glyph.Rect.y + result.Padding) / float(result.AtlasSize.y);
-        const float u1 =
-          float(glyph.Rect.x + result.Padding + glyph.BitmapSize.x) / float(result.AtlasSize.x);
-        const float v1 =
-          float(glyph.Rect.y + result.Padding + glyph.BitmapSize.y) / float(result.AtlasSize.y);
-
-        Character ch = {
-          .Size = glyph.BitmapSize,
-          .Bearing = glyph.Bearing,
-          .Advance = glyph.Advance,
-          .UVMin = {u0, v0},
-          .UVMax = {u1, v1},
-        };
-        characters[glyph.Char] = ch;
-      }
-
-      Font font {fontType, {atlasTexture, characters, result.AtlasSize}};
+      Font font {fontType, ptSize, path, GL_RED};
+      font.SetAtlasData(atlas, result.AtlasSize, characters);
       handle = _fonts.Add(std::move(font));
       _cache.Add(key, handle);
     }
     else
     {
-      MTSDFResult result = LoadMTSDFAtlas(path, size, logger, fontType);
+      // We cache sdf fonts by path+fontType as they are resolution-independent.
+      string stringifiedFontType = (fontType == FontType::SDF)    ? "sdf"
+                                   : (fontType == FontType::MSDF) ? "msdf"
+                                                                  : "mtsdf";
+      string key = std::format("{0}-{1}", path.ToString(), stringifiedFontType);
+      if (auto cached = _cache.Get(key); cached.IsValid())
+      {
+        if (logger)
+        {
+          logger->Debug("Font cache hit for '{}'", key);
+        }
+        return cached;
+      }
+
+      SDFParams params {};
+      MTSDFResult result = LoadMTSDFAtlas(path, logger, fontType, params);
 
       if (!result.Success)
       {
@@ -409,15 +465,55 @@ namespace Krys::Gfx::OpenGL
         return {};
       }
 
-      Font font {fontType, {result.Texture, result.Characters, result.AtlasSize}};
+      Font font {fontType, ptSize, path, {result.Texture, result.Characters, result.AtlasSize}, params};
       handle = _fonts.Add(std::move(font));
       _cache.Add(key, handle);
     }
+
     return handle;
   }
 
   Font &FontSystem::Get(FontHandle handle)
   {
     return _fonts.Get(handle);
+  }
+
+  void FontSystem::DPIChanged(int dpi) noexcept
+  {
+    if (dpi == _dpi)
+    {
+      return; // no change
+    }
+
+    _dpi = dpi;
+
+    auto *logger = Log::GetGlobalLogger();
+
+    for (auto &[key, resource] : _cache)
+    {
+      FontHandle handle = resource.Handle;
+      Font &font = _fonts.Get(handle);
+
+      if (font.Type() != FontType::Bitmap)
+      {
+        continue; // the rest of the font types are resolution-independent
+      }
+
+      auto sizeInPixels = PtSizeToPixels(font.PtSize(), _dpi);
+      BitmapLoadResult result = LoadBitmapAtlas(font.Path(), sizeInPixels, logger);
+      if (!result.Success)
+      {
+        if (logger)
+        {
+          logger->Error("Failed to load font '{}'", font.Path().ToString());
+        }
+        KRYS_DEBUG_BREAK();
+        continue;
+      }
+
+      List<uint8> atlas = CreateBitmapAtlasPixels(result.Glyphs, result.AtlasSize);
+      auto characters = CreateBitmapCharacters(result.Glyphs, result.Padding, result.AtlasSize);
+      font.SetAtlasData(atlas, result.AtlasSize, characters);
+    }
   }
 }

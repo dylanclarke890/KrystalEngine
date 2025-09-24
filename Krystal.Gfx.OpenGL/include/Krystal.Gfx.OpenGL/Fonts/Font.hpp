@@ -4,6 +4,7 @@
 #include "Krystal.Gfx.OpenGL/Shader.hpp"
 #include "Krystal.Gfx.OpenGL/Utils.hpp"
 #include "Krystal.Gfx/FontType.hpp"
+#include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
 #include "Krystal.Lib/Span.hpp"
@@ -41,6 +42,14 @@ namespace Krys::Gfx::OpenGL
     GLuint Texture {0u};
     Map<char, Character> Characters;
     Maths::Vec2u AtlasSize {0u};
+    GLenum Format;
+  };
+
+  struct SDFParams
+  {
+    float EMSizeInPixels {64.0f};
+    float PixelRange {4.0f};
+    float MiterLimit {1.0f};
   };
 
   class Font
@@ -50,32 +59,35 @@ namespace Krys::Gfx::OpenGL
     constexpr static int MaxGlyphsPerDrawCall = 4'096;
     constexpr static int VerticesPerGlyph = 6; // 2 triangles per glyph
 
-    FontAtlas _bitmapAtlas {};
     FontType _type {FontType::Bitmap};
-    GLuint _vao;
-    GLuint _vbo;
-    List<TextVertex> _vertexBuffer;
+    float _ptSize {};
+    IO::Path _path;
+    FontAtlas _atlas {};
+    GLuint _vao {};
+    GLuint _vbo {};
+    List<TextVertex> _vertexBuffer {};
+    SDFParams _sdfParams {};
 
   public:
-    Font(FontType type, const FontAtlas &bitmapAtlas) noexcept : _type(type), _bitmapAtlas(bitmapAtlas)
+    Font(FontType type, float ptSize, const IO::Path &path, GLenum format) noexcept
+        : _type(type), _ptSize(ptSize), _path(path)
     {
-      glCreateVertexArrays(1, &_vao);
-      glCreateBuffers(1, &_vbo);
+      _atlas.Format = format;
+      CreateVertexArray();
+    }
 
-      glBindVertexArray(_vao);
-      glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-      Utils::ApplyVertexBufferLayout(TextVertex::Layout());
-
-      auto bufferSize = sizeof(TextVertex) * VerticesPerGlyph * MaxGlyphsPerDrawCall;
-      glNamedBufferStorage(_vbo, bufferSize, 0, GL_DYNAMIC_STORAGE_BIT);
-      _vertexBuffer.reserve(VerticesPerGlyph * MaxGlyphsPerDrawCall);
+    Font(FontType type, float ptSize, const IO::Path &path, const FontAtlas &bitmapAtlas,
+         const SDFParams &sdfParams) noexcept
+        : _type(type), _ptSize(ptSize), _path(path), _atlas(bitmapAtlas), _sdfParams(sdfParams)
+    {
+      CreateVertexArray();
     }
 
     ~Font() noexcept
     {
-      if (_bitmapAtlas.Texture != 0u)
+      if (_atlas.Texture != 0u)
       {
-        glDeleteTextures(1, &_bitmapAtlas.Texture);
+        glDeleteTextures(1, &_atlas.Texture);
       }
       if (_vbo != 0u)
       {
@@ -87,7 +99,7 @@ namespace Krys::Gfx::OpenGL
       }
     }
 
-    Font(Font &&other) noexcept
+    Font(Font &&other) noexcept : _path("")
     {
       Swap(other);
     }
@@ -104,9 +116,14 @@ namespace Krys::Gfx::OpenGL
     void DrawText(const string &text, const Maths::Vec2 &position, float scale = 1.0f)
     {
       glBindVertexArray(_vao);
-      glBindTextureUnit(0, _bitmapAtlas.Texture);
+      glBindTextureUnit(0, _atlas.Texture);
 
       Maths::Vec2 pos = position;
+
+      if (_type != FontType::Bitmap)
+      {
+        scale = (scale * _ptSize) / _sdfParams.EMSizeInPixels;
+      }
 
       auto count = text.size();
       while (count > 0)
@@ -118,7 +135,7 @@ namespace Krys::Gfx::OpenGL
         _vertexBuffer.clear();
         for (const char c : batch)
         {
-          const Character &ch = _bitmapAtlas.Characters[c];
+          const Character &ch = _atlas.Characters[c];
           float posX = pos.x + ch.Bearing.x * scale;
           float posY = pos.y - (ch.Size.y - ch.Bearing.y) * scale;
           float w = ch.Size.x * scale;
@@ -145,14 +162,79 @@ namespace Krys::Gfx::OpenGL
       return _type;
     }
 
+    float PtSize() const noexcept
+    {
+      return _ptSize;
+    }
+
+    const IO::Path &Path() const noexcept
+    {
+      return _path;
+    }
+
+    void SetAtlasData(const List<uint8> &data, const Maths::Vec2u &atlasSize,
+                      const Map<char, Character> &characters) noexcept
+    {
+      if (_atlas.Texture != 0u)
+      {
+        glDeleteTextures(1, &_atlas.Texture);
+      }
+
+      glCreateTextures(GL_TEXTURE_2D, 1, &_atlas.Texture);
+
+      GLenum format = _atlas.Format;
+      GLenum internalFormat;
+      switch (format)
+      {
+        case GL_RED:  internalFormat = GL_R8; break;
+        case GL_RG:   internalFormat = GL_RG8; break;
+        case GL_RGB:  internalFormat = GL_RGB8; break;
+        case GL_RGBA: internalFormat = GL_RGBA8; break;
+        default:
+          assert(false && "Unsupported texture format.");
+          internalFormat = GL_R8;
+          break;
+      }
+
+      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+      glTextureStorage2D(_atlas.Texture, 1, internalFormat, atlasSize.x, atlasSize.y);
+      glTextureSubImage2D(_atlas.Texture, 0, 0, 0, atlasSize.x, atlasSize.y, format, GL_UNSIGNED_BYTE,
+                          data.data());
+      glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+      glTextureParameteri(_atlas.Texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      glTextureParameteri(_atlas.Texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+      glTextureParameteri(_atlas.Texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+      glTextureParameteri(_atlas.Texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+      _atlas.AtlasSize = atlasSize;
+      _atlas.Characters = characters;
+    }
+
   private:
     void Swap(Font &other) noexcept
     {
-      std::swap(other._bitmapAtlas, _bitmapAtlas);
       std::swap(other._type, _type);
+      std::swap(other._ptSize, _ptSize);
+      std::swap(other._path, _path);
+      std::swap(other._atlas, _atlas);
       std::swap(other._vao, _vao);
       std::swap(other._vbo, _vbo);
       std::swap(other._vertexBuffer, _vertexBuffer);
+    }
+
+    void CreateVertexArray() noexcept
+    {
+      glCreateVertexArrays(1, &_vao);
+      glCreateBuffers(1, &_vbo);
+
+      glBindVertexArray(_vao);
+      glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+      Utils::ApplyVertexBufferLayout(TextVertex::Layout());
+
+      auto bufferSize = sizeof(TextVertex) * VerticesPerGlyph * MaxGlyphsPerDrawCall;
+      glNamedBufferStorage(_vbo, bufferSize, 0, GL_DYNAMIC_STORAGE_BIT);
+      _vertexBuffer.reserve(VerticesPerGlyph * MaxGlyphsPerDrawCall);
     }
   };
 }

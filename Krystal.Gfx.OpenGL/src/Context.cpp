@@ -620,7 +620,8 @@ namespace Krys::Gfx::OpenGL
 {
   Context::Context(NativeHandle windowHandle, uint32 width, uint32 height)
       : _windowHandle(windowHandle), _width(width), _height(height),
-        _platformImpl(CreateUnique<ContextPlatformImpl>(windowHandle))
+        _dpi(Platform::GetDPIForWindow(_windowHandle)),
+        _platformImpl(CreateUnique<ContextPlatformImpl>(windowHandle)), _fonts(_dpi)
   {
   }
 
@@ -758,6 +759,7 @@ namespace Krys::Gfx::OpenGL
 
     DefaultBitmapFont = _fonts.Load(IO::Path("data/assets/fonts/Antonio-Bold.ttf"), 64, FontType::Bitmap);
     DefaultMSDFFont = _fonts.Load(IO::Path("data/assets/fonts/Antonio-Bold.ttf"), 64, FontType::MSDF);
+
     {
       auto &shader = _shaders.Get(shaderHandles.at("pbr-with-maps"));
       shader.SetUniform("irradianceMap", 0);
@@ -856,10 +858,12 @@ namespace Krys::Gfx::OpenGL
       cube.Draw();
     }
 
+    glClear(GL_COLOR_BUFFER_BIT);
     glEnable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     Vec3 colour(0.f);
+    auto centerY = static_cast<float>(_height) / 2.f;
     {
       auto &font = _fonts.Get(DefaultBitmapFont);
       auto &shader = _shaders.Get(shaderHandles.at("bitmap-font"));
@@ -867,11 +871,10 @@ namespace Krys::Gfx::OpenGL
       shader.SetUniform("projection", ScreenOrthoProjection);
       shader.SetUniform("textColor", colour);
 
+      string title = "BITMAP Rendering";
       string testText = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";
-      for (float i = 0.f; i < (_height / 2.f); i += 120.f)
-      {
-        //font.DrawText(testText, {25.f, i}, 1.0f);
-      }
+      font.DrawText(title, {25.f, centerY - 80.f});
+      font.DrawText(testText, {25.f, centerY - 0});
     }
 
     {
@@ -881,12 +884,13 @@ namespace Krys::Gfx::OpenGL
       shader.SetUniform("projection", ScreenOrthoProjection);
       shader.SetUniform("textColor", colour);
 
+      string title = "MSDF Rendering";
       string testText = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";
       Vec3 color(0.f);
-      for (float i = (float)(_height / 2); i < (float)_height; i += 120.f)
-      {
-        font.DrawText(testText, {25.f, i}, 0.5f);
-      }
+
+      const auto scale = _dpi / 72.0f;
+      font.DrawText(title, {25.f, centerY + 80.f}, scale);
+      font.DrawText(testText, {25.f, centerY + 160.f}, scale);
     }
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
@@ -903,6 +907,12 @@ namespace Krys::Gfx::OpenGL
     _height = height;
     glViewport(0, 0, _width, _height);
     ScreenOrthoProjection = Ortho(0.0f, static_cast<float>(_width), 0.0f, static_cast<float>(_height));
+  }
+
+  void Context::DPIChanged(int dpi) noexcept
+  {
+    _dpi = dpi;
+    _fonts.DPIChanged(dpi);
   }
 
   ISamplerSystem &Context::Samplers() noexcept

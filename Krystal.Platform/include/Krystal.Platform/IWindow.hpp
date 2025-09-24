@@ -62,6 +62,7 @@ namespace Krys::Platform
     using ResizeHandler = Func<void(WindowHandle, int, int)>;
     using MinimiseHandler = Func<void(WindowHandle)>;
     using RestoreHandler = Func<void(WindowHandle)>;
+    using DPIChangeHandler = Func<void(WindowHandle, int)>;
 
     MouseMoveHandler OnMouseMove = nullptr;
     MouseButtonHandler OnMouseButton = nullptr;
@@ -71,6 +72,7 @@ namespace Krys::Platform
     ResizeHandler OnResize = nullptr;
     MinimiseHandler OnMinimise = nullptr;
     RestoreHandler OnRestore = nullptr;
+    DPIChangeHandler OnDPIChange = nullptr;
   };
 
   class IWindow

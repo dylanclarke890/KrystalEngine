@@ -262,8 +262,6 @@
     <None Include="data\shaders\opengl\skybox.vert" />
     <None Include="data\shaders\opengl\basic.frag" />
     <None Include="data\shaders\opengl\basic.vert" />
-    <None Include="data\shaders\opengl\text.frag" />
-    <None Include="data\shaders\opengl\text.vert" />
     <None Include="data\shaders\opengl\visualise-normals.frag" />
     <None Include="data\shaders\opengl\visualise-normals.geo" />
     <None Include="data\shaders\opengl\visualise-normals.vert" />

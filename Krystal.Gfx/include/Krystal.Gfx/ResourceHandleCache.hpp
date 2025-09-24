@@ -58,5 +58,15 @@ namespace Krys::Gfx
       }
       return false;
     }
+
+    auto begin() noexcept
+    {
+      return _cache.begin();
+    }
+
+    auto end() noexcept
+    {
+      return _cache.end();
+    }
   };
 }

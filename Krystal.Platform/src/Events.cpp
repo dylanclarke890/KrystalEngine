@@ -183,4 +183,23 @@ namespace Krys::Events
   }
 
 #pragma endregion
+
+#pragma region WindowCloseEvent
+
+  WindowDPIChangeEvent::WindowDPIChangeEvent(Platform::WindowHandle window, int dpi) noexcept
+      : _window(window), _dpi(dpi)
+  {
+  }
+
+  int WindowDPIChangeEvent::DPI() const noexcept
+  {
+    return _dpi;
+  }
+
+  Platform::WindowHandle WindowDPIChangeEvent::GetWindowHandle() const noexcept
+  {
+    return _window;
+  }
+
+#pragma endregion
 }

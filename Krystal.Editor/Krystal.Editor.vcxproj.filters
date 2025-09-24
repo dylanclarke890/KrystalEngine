@@ -122,8 +122,6 @@
     <None Include="data\shaders\opengl\11\pbr-with-maps.frag" />
     <None Include="data\shaders\opengl\11\pbr-with-maps.vert" />
     <None Include="data\assets\newport-loft.hdr" />
-    <None Include="data\shaders\opengl\text.vert" />
-    <None Include="data\shaders\opengl\text.frag" />
     <None Include="data\shaders\opengl\font\bitmap.frag" />
     <None Include="data\shaders\opengl\font\glyph.vert" />
     <None Include="data\shaders\opengl\font\sdf.frag" />

@@ -192,4 +192,24 @@ namespace Krys::Events
   private:
     Platform::WindowHandle _window;
   };
+
+  /// @brief Represents a dpi change, usually due to moving a window between monitors with different dpi
+  /// settings.
+  class WindowDPIChangeEvent : public Event
+  {
+  public:
+    KRYS_EVENT_CLASS_TYPE("window-dpi-change-event")
+
+    /// @brief Constructs a `WindowDPIChangeEvent`.
+    /// @param dpi The new dpi of the window.
+    WindowDPIChangeEvent(Platform::WindowHandle window, const int dpi) noexcept;
+
+    NO_DISCARD int DPI() const noexcept;
+
+    NO_DISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
+
+  private:
+    Platform::WindowHandle _window;
+    int _dpi;
+  };
 }

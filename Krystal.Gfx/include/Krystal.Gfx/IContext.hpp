@@ -46,6 +46,8 @@ namespace Krys::Gfx
 
     virtual void Resize(uint32 width, uint32 height) noexcept = 0;
 
+    virtual void DPIChanged(int dpi) noexcept = 0;
+
     virtual ISamplerSystem &Samplers() noexcept = 0;
 
     virtual ITextureSystem &Textures() noexcept = 0;

@@ -97,6 +97,16 @@ namespace Krys::Gfx
       return true;
     }
 
+    auto begin() noexcept
+    {
+      return _resources.begin();
+    }
+
+    auto end() noexcept
+    {
+      return _resources.end();
+    }
+
   private:
     NO_DISCARD THandle CreateHandle(uint16 index, uint16 generation) const noexcept
     {

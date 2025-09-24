@@ -20,6 +20,7 @@ namespace Krys::Gfx::OpenGL
     NativeHandle _windowHandle;
     uint32 _width;
     uint32 _height;
+    int _dpi;
     Unique<ContextPlatformImpl> _platformImpl;
 
     SamplerSystem _samplers;
@@ -41,6 +42,8 @@ namespace Krys::Gfx::OpenGL
     void Present() noexcept override;
 
     void Resize(uint32 width, uint32 height) noexcept override;
+
+    void DPIChanged(int dpi) noexcept override;
 
     ISamplerSystem &Samplers() noexcept override;
 

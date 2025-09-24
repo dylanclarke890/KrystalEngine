@@ -156,6 +156,8 @@ namespace Krys::Platform
       if (!instance)
         throw std::runtime_error("Failed to get module handle: " + Win32::GetLastErrorAsString());
 
+      ::SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+
       CreateWindowClass(instance);
       CreateWindowHandle(instance);
       RegisterRawInput();
@@ -258,6 +260,7 @@ namespace Krys::Platform
           }
           break;
         }
+#pragma region Input Messages
         case WM_KEYDOWN:
         {
           if (_callbacks.OnKey)
@@ -281,7 +284,7 @@ namespace Krys::Platform
           break;
         }
 
-#define BTN_STATE(BTN, STATE)                                                                                \
+#define BUTTON_STATE(BTN, STATE)                                                                             \
   const auto button = MouseButton::BTN;                                                                      \
   const auto state = MouseButtonState::STATE;
 
@@ -289,7 +292,7 @@ namespace Krys::Platform
         {
           if (_callbacks.OnMouseButton)
           {
-            BTN_STATE(Left, Pressed)
+            BUTTON_STATE(Left, Pressed)
             _callbacks.OnMouseButton(handle, button, state);
           }
           break;
@@ -298,7 +301,7 @@ namespace Krys::Platform
         {
           if (_callbacks.OnMouseButton)
           {
-            BTN_STATE(Left, Released)
+            BUTTON_STATE(Left, Released)
             _callbacks.OnMouseButton(handle, button, state);
           }
           break;
@@ -307,7 +310,7 @@ namespace Krys::Platform
         {
           if (_callbacks.OnMouseButton)
           {
-            BTN_STATE(Right, Pressed)
+            BUTTON_STATE(Right, Pressed)
             _callbacks.OnMouseButton(handle, button, state);
           }
           break;
@@ -316,7 +319,7 @@ namespace Krys::Platform
         {
           if (_callbacks.OnMouseButton)
           {
-            BTN_STATE(Right, Released)
+            BUTTON_STATE(Right, Released)
             _callbacks.OnMouseButton(handle, button, state);
           }
           break;
@@ -325,7 +328,7 @@ namespace Krys::Platform
         {
           if (_callbacks.OnMouseButton)
           {
-            BTN_STATE(Middle, Pressed)
+            BUTTON_STATE(Middle, Pressed)
             _callbacks.OnMouseButton(handle, button, state);
           }
           break;
@@ -334,7 +337,7 @@ namespace Krys::Platform
         {
           if (_callbacks.OnMouseButton)
           {
-            BTN_STATE(Middle, Released)
+            BUTTON_STATE(Middle, Released)
             _callbacks.OnMouseButton(handle, button, state);
           }
           break;
@@ -416,6 +419,7 @@ namespace Krys::Platform
           }
           break;
         }
+#pragma endregion
         case WM_SIZE:
         {
           static bool isMinimised = false;
@@ -456,6 +460,19 @@ namespace Krys::Platform
           info.ptMaxTrackSize.y = _settings.SizeBounds.Max.Height;
           info.ptMinTrackSize.x = _settings.SizeBounds.Min.Width;
           info.ptMinTrackSize.y = _settings.SizeBounds.Min.Height;
+          break;
+        }
+        case WM_DPICHANGED:
+        {
+          RECT* rect = reinterpret_cast<RECT *>(lParam);
+          ::SetWindowPos(window, NULL, rect->left, rect->top, rect->right - rect->left,
+                         rect->bottom - rect->top, SWP_NOZORDER);
+          if (_callbacks.OnDPIChange)
+          {
+            assert(HIWORD(wParam) == LOWORD(wParam) && "Unexpected dpi");
+            _callbacks.OnDPIChange(handle, HIWORD(wParam));
+          }
+          return 0;
         }
       }
 
