@@ -99,6 +99,10 @@ namespace Krys::Maths
     constexpr explicit Vector(T value) noexcept : x(value)
     {
     }
+    template <ConvertibleTo<T> U>
+    constexpr Vector(const Vector<U, 1> &other) noexcept : x(static_cast<T>(other.x))
+    {
+    }
 
     NO_DISCARD constexpr auto operator[](int index) const noexcept
     {
@@ -129,6 +133,11 @@ namespace Krys::Maths
     {
     }
     constexpr Vector(T xValue, T yValue) noexcept : x(xValue), y(yValue)
+    {
+    }
+    template <ConvertibleTo<T> U>
+    constexpr Vector(const Vector<U, 2> &other) noexcept
+        : x(static_cast<T>(other.x)), y(static_cast<T>(other.y))
     {
     }
 
@@ -180,6 +189,12 @@ namespace Krys::Maths
     {
     }
 
+    template <ConvertibleTo<T> U>
+    constexpr Vector(const Vector<U, 3> &other) noexcept
+        : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), z(static_cast<T>(other.z))
+    {
+    }
+
     NO_DISCARD constexpr auto operator[](int index) const noexcept
     {
       assert(index >= 0 && index < Length);
@@ -226,6 +241,13 @@ namespace Krys::Maths
     }
 
     constexpr Vector(const Vector<T, 3> &vec3, T wValue) noexcept : x(vec3.x), y(vec3.y), z(vec3.z), w(wValue)
+    {
+    }
+
+    template <ConvertibleTo<T> U>
+    constexpr Vector(const Vector<U, 4> &other) noexcept
+        : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), z(static_cast<T>(other.z)),
+          w(static_cast<T>(other.w))
     {
     }
 

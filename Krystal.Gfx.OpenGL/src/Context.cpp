@@ -1,6 +1,6 @@
 #include "Krystal.Gfx.OpenGL/Context.hpp"
-
 #include "Krystal.Lib/Detection.hpp"
+
 #ifdef KRYS_PLATFORM_WINDOWS
   #include "Krystal.Gfx.OpenGL/Win32/ContextPlatformImpl.hpp"
 #else
@@ -36,6 +36,97 @@ namespace
   using namespace Krys::Gfx::OpenGL;
   using namespace Krys::Maths;
 
+#pragma region Debug Output
+
+  void DebugMessageCallback(GLenum source, GLenum type, uint id, GLenum severity, GLsizei, const char *msg,
+                            const void *)
+  {
+    auto *logger = Log::GetGlobalLogger();
+    if (logger == nullptr)
+    {
+      return;
+    }
+
+    string message {};
+
+    switch (severity)
+    {
+      case GL_DEBUG_SEVERITY_HIGH:         message += std::format("OPENGL ({0}): {1}", id, msg); break;
+      case GL_DEBUG_SEVERITY_MEDIUM:       message += std::format("OPENGL ({0}): {1}", id, msg); break;
+      case GL_DEBUG_SEVERITY_LOW:          message += std::format("OPENGL ({0}): {1}", id, msg); break;
+      case GL_DEBUG_SEVERITY_NOTIFICATION: message += std::format("OPENGL ({0}): {1}", id, msg); break;
+      default:                             assert(false && "Unknown enum value: OpenGL severity level"); break;
+    }
+    message += "\n";
+
+    message += " - Type: ";
+    switch (type)
+    {
+      case GL_DEBUG_TYPE_ERROR:               message += "Error"; break;
+      case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: message += "Deprecated Behavior"; break;
+      case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  message += "Undefined Behavior"; break;
+      case GL_DEBUG_TYPE_PORTABILITY:         message += "Portability"; break;
+      case GL_DEBUG_TYPE_PERFORMANCE:         message += "Performance"; break;
+      case GL_DEBUG_TYPE_MARKER:              message += "Marker"; break;
+      case GL_DEBUG_TYPE_PUSH_GROUP:          message += "Push Group"; break;
+      case GL_DEBUG_TYPE_POP_GROUP:           message += "Pop Group"; break;
+      case GL_DEBUG_TYPE_OTHER:               message += "Other"; break;
+      default:                                assert(false && "Unknown enum value: OpenGL message type"); break;
+    }
+    message += "\n";
+
+    message += " - Source: ";
+    switch (source)
+    {
+      case GL_DEBUG_SOURCE_API:             message += "API"; break;
+      case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   message += "Window System"; break;
+      case GL_DEBUG_SOURCE_SHADER_COMPILER: message += "Shader Compiler"; break;
+      case GL_DEBUG_SOURCE_THIRD_PARTY:     message += "Third Party"; break;
+      case GL_DEBUG_SOURCE_APPLICATION:     message += "Application"; break;
+      case GL_DEBUG_SOURCE_OTHER:           message += "Other"; break;
+      default:                              assert(false && "Unknown enum value: OpenGL source type"); break;
+    }
+
+    switch (severity)
+    {
+      case GL_DEBUG_SEVERITY_HIGH:         logger->Critical(message); break;
+      case GL_DEBUG_SEVERITY_MEDIUM:       logger->Error(message); break;
+      case GL_DEBUG_SEVERITY_LOW:          logger->Warn(message); break;
+      case GL_DEBUG_SEVERITY_NOTIFICATION: logger->Info(message); break;
+      default:                             assert(false && "Unknown enum value: OpenGL severity level"); break;
+    }
+
+    if (severity != GL_DEBUG_SEVERITY_NOTIFICATION && severity != GL_DEBUG_SEVERITY_LOW)
+      KRYS_DEBUG_BREAK();
+  }
+
+  void DisableDebugMessageIds(GLenum source, GLenum type, const List<uint32> &ids)
+  {
+    glDebugMessageControl(source, type, GL_DONT_CARE, static_cast<GLsizei>(ids.size()), ids.data(), GL_FALSE);
+  }
+
+  void EnableDebugOutput()
+  {
+    glDebugMessageCallback(DebugMessageCallback, nullptr);
+    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, 0, GL_TRUE);
+
+    DisableDebugMessageIds(GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_OTHER,
+                           {
+                             131'169, // Driver allocated storage for renderbuffer
+                             131'185, // Buffer detailed info
+                           });
+
+    DisableDebugMessageIds(GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_PERFORMANCE,
+                           {
+                             131'218, // Vertex shader is being recompiled based on GL state
+                           });
+
+    glEnable(GL_DEBUG_OUTPUT);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+  }
+
+#pragma endregion
+
   struct FrameBufferData
   {
     GLuint FBO {};
@@ -45,9 +136,6 @@ namespace
     uint32 Height {};
   };
 
-  Vec3 lightPos = Vec3(2.0f, 4.0f, -2.0f);
-  Vec3 lightColor = Vec3(0.2f, 0.2f, 0.7f);
-
   Map<string, TextureHandle> textureHandles;
   Map<string, ShaderHandle> shaderHandles;
   Map<string, MaterialHandle> materialHandles;
@@ -55,7 +143,21 @@ namespace
 
   Mat4 ScreenOrthoProjection;
   FontHandle DefaultBitmapFont;
+  FontHandle DefaultSDFFont;
   FontHandle DefaultMSDFFont;
+  FontHandle DefaultMTSDFFont;
+
+  Shader &GetFontShader(FontType fontType, ShaderSystem &shaderSystem)
+  {
+    switch (fontType)
+    {
+      case FontType::Bitmap: return shaderSystem.Get(shaderHandles.at("bitmap-font"));
+      case FontType::SDF:    return shaderSystem.Get(shaderHandles.at("sdf-font"));
+      case FontType::MSDF:   return shaderSystem.Get(shaderHandles.at("msdf-font"));
+      case FontType::MTSDF:  return shaderSystem.Get(shaderHandles.at("mtsdf-font"));
+      default:               assert(false && "Unknown font type"); return shaderSystem.Get(shaderHandles.at("bitmap-font"));
+    }
+  }
 
   Map<string, FrameBufferData> shadowMaps;
   Map<string, Unique<UniformBuffer>> ubos;
@@ -508,97 +610,6 @@ namespace
     textures.Get(std::get<TextureHandle>(material.Parameters[10].Value)).Bind(4);
     mesh.Draw();
   }
-
-#pragma region Debug Output
-
-  void DebugMessageCallback(GLenum source, GLenum type, uint id, GLenum severity, GLsizei, const char *msg,
-                            const void *)
-  {
-    auto *logger = Log::GetGlobalLogger();
-    if (logger == nullptr)
-    {
-      return;
-    }
-
-    string message {};
-
-    switch (severity)
-    {
-      case GL_DEBUG_SEVERITY_HIGH:         message += std::format("OPENGL ({0}): {1}", id, msg); break;
-      case GL_DEBUG_SEVERITY_MEDIUM:       message += std::format("OPENGL ({0}): {1}", id, msg); break;
-      case GL_DEBUG_SEVERITY_LOW:          message += std::format("OPENGL ({0}): {1}", id, msg); break;
-      case GL_DEBUG_SEVERITY_NOTIFICATION: message += std::format("OPENGL ({0}): {1}", id, msg); break;
-      default:                             assert(false && "Unknown enum value: OpenGL severity level"); break;
-    }
-    message += "\n";
-
-    message += " - Type: ";
-    switch (type)
-    {
-      case GL_DEBUG_TYPE_ERROR:               message += "Error"; break;
-      case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: message += "Deprecated Behavior"; break;
-      case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  message += "Undefined Behavior"; break;
-      case GL_DEBUG_TYPE_PORTABILITY:         message += "Portability"; break;
-      case GL_DEBUG_TYPE_PERFORMANCE:         message += "Performance"; break;
-      case GL_DEBUG_TYPE_MARKER:              message += "Marker"; break;
-      case GL_DEBUG_TYPE_PUSH_GROUP:          message += "Push Group"; break;
-      case GL_DEBUG_TYPE_POP_GROUP:           message += "Pop Group"; break;
-      case GL_DEBUG_TYPE_OTHER:               message += "Other"; break;
-      default:                                assert(false && "Unknown enum value: OpenGL message type"); break;
-    }
-    message += "\n";
-
-    message += " - Source: ";
-    switch (source)
-    {
-      case GL_DEBUG_SOURCE_API:             message += "API"; break;
-      case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   message += "Window System"; break;
-      case GL_DEBUG_SOURCE_SHADER_COMPILER: message += "Shader Compiler"; break;
-      case GL_DEBUG_SOURCE_THIRD_PARTY:     message += "Third Party"; break;
-      case GL_DEBUG_SOURCE_APPLICATION:     message += "Application"; break;
-      case GL_DEBUG_SOURCE_OTHER:           message += "Other"; break;
-      default:                              assert(false && "Unknown enum value: OpenGL source type"); break;
-    }
-
-    switch (severity)
-    {
-      case GL_DEBUG_SEVERITY_HIGH:         logger->Critical(message); break;
-      case GL_DEBUG_SEVERITY_MEDIUM:       logger->Error(message); break;
-      case GL_DEBUG_SEVERITY_LOW:          logger->Warn(message); break;
-      case GL_DEBUG_SEVERITY_NOTIFICATION: logger->Info(message); break;
-      default:                             assert(false && "Unknown enum value: OpenGL severity level"); break;
-    }
-
-    if (severity != GL_DEBUG_SEVERITY_NOTIFICATION && severity != GL_DEBUG_SEVERITY_LOW)
-      KRYS_DEBUG_BREAK();
-  }
-
-  void DisableDebugMessageIds(GLenum source, GLenum type, const List<uint32> &ids)
-  {
-    glDebugMessageControl(source, type, GL_DONT_CARE, static_cast<GLsizei>(ids.size()), ids.data(), GL_FALSE);
-  }
-
-  void EnableDebugOutput()
-  {
-    glDebugMessageCallback(DebugMessageCallback, nullptr);
-    glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, 0, GL_TRUE);
-
-    DisableDebugMessageIds(GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_OTHER,
-                           {
-                             131'169, // Driver allocated storage for renderbuffer
-                             131'185, // Buffer detailed info
-                           });
-
-    DisableDebugMessageIds(GL_DEBUG_SOURCE_API, GL_DEBUG_TYPE_PERFORMANCE,
-                           {
-                             131'218, // Vertex shader is being recompiled based on GL state
-                           });
-
-    glEnable(GL_DEBUG_OUTPUT);
-    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-  }
-
-#pragma endregion
 }
 
 namespace Krys::Gfx
@@ -621,12 +632,17 @@ namespace Krys::Gfx::OpenGL
   Context::Context(NativeHandle windowHandle, uint32 width, uint32 height)
       : _windowHandle(windowHandle), _width(width), _height(height),
         _dpi(Platform::GetDPIForWindow(_windowHandle)),
-        _platformImpl(CreateUnique<ContextPlatformImpl>(windowHandle)), _fonts(_dpi)
+        _platformImpl(CreateUnique<ContextPlatformImpl>(windowHandle)), _textures(), _samplers(), _shaders(),
+        _meshes(), _materials(_textures), _fonts(_dpi)
   {
   }
 
   void Context::Setup() noexcept
   {
+    EnableDebugOutput();
+
+    auto *logger = Log::GetGlobalLogger();
+
     // Shaders
     {
       using namespace IO;
@@ -706,6 +722,8 @@ namespace Krys::Gfx::OpenGL
       shaderHandles["sdf-font"] = _shaders.Load(base / Path("font/glyph.vert"), base / Path("font/sdf.frag"));
       shaderHandles["msdf-font"] =
         _shaders.Load(base / Path("font/glyph.vert"), base / Path("font/msdf.frag"));
+      shaderHandles["mtsdf-font"] =
+        _shaders.Load(base / Path("font/glyph.vert"), base / Path("font/mtsdf.frag"));
     }
 
     {
@@ -723,12 +741,12 @@ namespace Krys::Gfx::OpenGL
     // PBR textures
     {
       using namespace IO;
-      ShaderHandle handle = shaderHandles.at("pbr-with-maps");
-      materialHandles["rusted-iron"] = _materials.LoadPBRMaterial("rusted-iron", handle, _textures);
-      materialHandles["gold"] = _materials.LoadPBRMaterial("gold", handle, _textures);
-      materialHandles["grass"] = _materials.LoadPBRMaterial("grass", handle, _textures);
-      materialHandles["plastic"] = _materials.LoadPBRMaterial("plastic", handle, _textures);
-      materialHandles["wall"] = _materials.LoadPBRMaterial("wall", handle, _textures);
+      ShaderHandle shader = shaderHandles.at("pbr-with-maps");
+      materialHandles["rusted-iron"] = _materials.LoadPBRMaterial("rusted-iron", shader);
+      materialHandles["gold"] = _materials.LoadPBRMaterial("gold", shader);
+      materialHandles["grass"] = _materials.LoadPBRMaterial("grass", shader);
+      materialHandles["plastic"] = _materials.LoadPBRMaterial("plastic", shader);
+      materialHandles["wall"] = _materials.LoadPBRMaterial("wall", shader);
     }
 
     meshHandles["cube"] = _meshes.CreateCube();
@@ -746,19 +764,7 @@ namespace Krys::Gfx::OpenGL
       ubos.at("matrices")->Bind(0);
     }
 
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LEQUAL);
-    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-    glClearColor(0.1f, 0.1f, 0.1f, 1.f);
-
-    EnableDebugOutput();
-
     CreateEnvironmentAndIrradianceCubemaps(1'024, 1'024, _textures, _shaders, _meshes);
-    glViewport(0, 0, _width, _height);
-    ScreenOrthoProjection = Ortho(0.0f, static_cast<float>(_width), 0.0f, static_cast<float>(_height));
-
-    DefaultBitmapFont = _fonts.Load(IO::Path("data/assets/fonts/Antonio-Bold.ttf"), 64, FontType::Bitmap);
-    DefaultMSDFFont = _fonts.Load(IO::Path("data/assets/fonts/Antonio-Bold.ttf"), 64, FontType::MSDF);
 
     {
       auto &shader = _shaders.Get(shaderHandles.at("pbr-with-maps"));
@@ -775,6 +781,22 @@ namespace Krys::Gfx::OpenGL
       auto &shader = _shaders.Get(shaderHandles.at("hdr-background"));
       shader.SetUniform("environmentMap", 0);
     }
+
+    glViewport(0, 0, _width, _height);
+    logger->Info("Viewport set to {}x{}", _width, _height);
+
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LEQUAL);
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+    glClearColor(0.1f, 0.1f, 0.1f, 1.f);
+
+    const auto fontPath = IO::Path("data/assets/fonts/Antonio-Bold.ttf");
+    const auto fontSize = 96;
+    DefaultBitmapFont = _fonts.Load(fontPath, fontSize, FontType::Bitmap);
+    DefaultSDFFont = _fonts.Load(fontPath, fontSize, FontType::SDF);
+    DefaultMSDFFont = _fonts.Load(fontPath, fontSize, FontType::MSDF);
+    DefaultMTSDFFont = _fonts.Load(fontPath, fontSize, FontType::MTSDF);
+    ScreenOrthoProjection = Ortho(0.0f, static_cast<float>(_width), 0.0f, static_cast<float>(_height));
   }
 
   void Context::Render(ICamera &camera) noexcept
@@ -858,41 +880,20 @@ namespace Krys::Gfx::OpenGL
       cube.Draw();
     }
 
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT); // This is just to make the text easier to see
+
     glEnable(GL_BLEND);
     glDisable(GL_DEPTH_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    Vec3 colour(0.f);
-    auto centerY = static_cast<float>(_height) / 2.f;
-    {
-      auto &font = _fonts.Get(DefaultBitmapFont);
-      auto &shader = _shaders.Get(shaderHandles.at("bitmap-font"));
-      shader.Bind();
-      shader.SetUniform("projection", ScreenOrthoProjection);
-      shader.SetUniform("textColor", colour);
 
-      string title = "BITMAP Rendering";
-      string testText = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";
-      font.DrawText(title, {25.f, centerY - 80.f});
-      font.DrawText(testText, {25.f, centerY - 0});
-    }
+    Colour textColour = Colours::Yellow;
+    const float xPos = 25.f;
+    const auto height = static_cast<float>(_height);
+    DrawText(DefaultBitmapFont, "Font Rendering - Bitmap", {xPos, height - 150.f}, Colours::Black);
+    DrawText(DefaultSDFFont, "Font Rendering - SDF", {xPos, height - 300.f}, Colours::Black);
+    DrawText(DefaultMSDFFont, "Font Rendering - MSDF", {xPos, height - 450.f}, Colours::Purple);
+    DrawText(DefaultMTSDFFont, "Font Rendering - MTSDF", {xPos, height - 600.f}, Colours::Black);
 
-    {
-      // TODO: pass font sdf params (pixel range, etc)
-      auto &font = _fonts.Get(DefaultMSDFFont);
-      auto &shader = _shaders.Get(shaderHandles.at("msdf-font"));
-      shader.Bind();
-      shader.SetUniform("projection", ScreenOrthoProjection);
-      shader.SetUniform("textColor", colour);
-
-      string title = "MSDF Rendering";
-      string testText = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890";
-      Vec3 color(0.f);
-
-      const auto scale = _dpi / 72.0f;
-      font.DrawText(title, {25.f, centerY + 80.f}, scale);
-      font.DrawText(testText, {25.f, centerY + 160.f}, scale);
-    }
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
   }
@@ -944,5 +945,29 @@ namespace Krys::Gfx::OpenGL
   IFontSystem &Context::Fonts() noexcept
   {
     return _fonts;
+  }
+
+  void Context::DrawText(FontHandle fontHandle, const string &text, const Maths::Vec2 &position,
+                         Colour textColour) noexcept
+  {
+    float scale = 1.0f;
+
+    auto &font = _fonts.Get(fontHandle);
+
+    auto &shader = GetFontShader(font.Type(), _shaders);
+    shader.Bind();
+
+    shader.SetUniform("projection", ScreenOrthoProjection);
+    shader.SetUniform("u_TextColor", textColour.ToVec3());
+
+    if (font.Type() != FontType::Bitmap)
+    {
+      const auto dpiScale = _dpi / 72.0f;
+      scale = dpiScale;
+      shader.SetUniform("u_PixelRange", font.SDFParams().PixelRange);
+      shader.SetUniform("u_AtlasSize", Vec2(font.Atlas().AtlasSize));
+    }
+
+    font.DrawText(text, position, scale);
   }
 }

@@ -6,7 +6,7 @@
 #include "Krystal.Gfx.OpenGL/SamplerSystem.hpp"
 #include "Krystal.Gfx.OpenGL/ShaderSystem.hpp"
 #include "Krystal.Gfx.OpenGL/TextureSystem.hpp"
-
+#include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 
 namespace Krys::Gfx::OpenGL
@@ -23,8 +23,8 @@ namespace Krys::Gfx::OpenGL
     int _dpi;
     Unique<ContextPlatformImpl> _platformImpl;
 
-    SamplerSystem _samplers;
     TextureSystem _textures;
+    SamplerSystem _samplers;
     ShaderSystem _shaders;
     MeshSystem _meshes;
     MaterialSystem _materials;
@@ -56,5 +56,8 @@ namespace Krys::Gfx::OpenGL
     IMaterialSystem &Materials() noexcept override;
 
     IFontSystem &Fonts() noexcept override;
+
+    void DrawText(FontHandle font, const string &text, const Maths::Vec2 &position,
+                  Colour textColour = Colours::White) noexcept;
   };
 }

@@ -23,11 +23,17 @@ namespace Krys::Gfx::OpenGL
 
   private:
     MaterialManager _materials;
+    TextureSystem &_textureSystem;
     MaterialCache _cache;
 
   public:
-    MaterialSystem() = default;
-    ~MaterialSystem() noexcept = default;
+    MaterialSystem(TextureSystem &textureSystem) noexcept : _textureSystem(textureSystem)
+    {
+    }
+
+    ~MaterialSystem() noexcept
+    {
+    }
 
     NO_DISCARD MaterialHandle Create(const string &name, ShaderHandle shader,
                                      const PBRMaterialDesc &desc) noexcept override
@@ -60,8 +66,7 @@ namespace Krys::Gfx::OpenGL
       return handle;
     }
 
-    NO_DISCARD MaterialHandle LoadPBRMaterial(const string &name, ShaderHandle shader,
-                                              TextureSystem &textureSystem) noexcept
+    NO_DISCARD MaterialHandle LoadPBRMaterial(const string &name, ShaderHandle shader) noexcept
     {
       if (auto cached = _cache.Get(name); cached.IsValid())
       {
@@ -72,11 +77,11 @@ namespace Krys::Gfx::OpenGL
       Path base = Path("data/assets/pbr/") / Path(name);
 
       PBRMaterialDesc desc;
-      desc.AlbedoMap = textureSystem.Load(base / Path("albedo.png"));
-      desc.NormalMap = textureSystem.Load(base / Path("normal.png"));
-      desc.MetallicMap = textureSystem.Load(base / Path("metallic.png"));
-      desc.RoughnessMap = textureSystem.Load(base / Path("roughness.png"));
-      desc.AmbientOcclusionMap = textureSystem.Load(base / Path("ao.png"));
+      desc.AlbedoMap = _textureSystem.Load(base / Path("albedo.png"));
+      desc.NormalMap = _textureSystem.Load(base / Path("normal.png"));
+      desc.MetallicMap = _textureSystem.Load(base / Path("metallic.png"));
+      desc.RoughnessMap = _textureSystem.Load(base / Path("roughness.png"));
+      desc.AmbientOcclusionMap = _textureSystem.Load(base / Path("ao.png"));
 
       return Create(name, shader, desc);
     }
@@ -93,6 +98,18 @@ namespace Krys::Gfx::OpenGL
 
       if (_cache.Remove(handle))
       {
+        Material &material = _materials.Get(handle);
+        for (const auto &param : material.Parameters)
+        {
+          if (param.Type == MaterialParameterType::Texture)
+          {
+            TextureHandle textureHandle = std::get<TextureHandle>(param.Value);
+            if (textureHandle.IsValid())
+            {
+              _textureSystem.Unload(textureHandle);
+            }
+          }
+        }
         _materials.Remove(handle);
       }
     }

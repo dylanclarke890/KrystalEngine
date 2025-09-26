@@ -30,6 +30,8 @@ namespace Krys::Gfx::OpenGL
     NO_DISCARD FontHandle Load(const IO::Path &path, float size,
                                FontType fontType = FontType::Bitmap) noexcept override;
 
+    void Unload(FontHandle handle) noexcept override;
+
     NO_DISCARD Font &Get(FontHandle handle);
 
     void DPIChanged(int dpi) noexcept;

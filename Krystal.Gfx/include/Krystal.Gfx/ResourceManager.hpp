@@ -43,6 +43,8 @@ namespace Krys::Gfx
 
     NO_DISCARD T &Get(THandle handle)
     {
+      assert(handle.IsValid() && "Invalid handle.");
+
       uint16 index = GetIndex(handle);
       uint16 generation = GetGeneration(handle);
       if (index >= _resources.size()) [[unlikely]]
@@ -61,6 +63,8 @@ namespace Krys::Gfx
 
     NO_DISCARD T *TryGet(THandle handle) noexcept
     {
+      assert(handle.IsValid() && "Invalid handle.");
+
       try
       {
         return &Get(handle);

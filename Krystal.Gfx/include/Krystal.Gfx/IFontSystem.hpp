@@ -12,5 +12,9 @@ namespace Krys::Gfx
     virtual ~IFontSystem() = default;
 
     virtual FontHandle Load(const IO::Path &path, float size, FontType fontType) noexcept = 0;
+
+    virtual void Unload(FontHandle handle) noexcept = 0;
+
+    virtual void DPIChanged(int dpi) noexcept = 0;
   };
 }

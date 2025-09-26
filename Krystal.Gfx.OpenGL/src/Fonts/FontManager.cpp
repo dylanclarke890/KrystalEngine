@@ -163,14 +163,18 @@ namespace
       if (FT_Load_Char(face, c, FT_LOAD_RENDER))
       {
         if (logger)
+        {
           logger->Warn("FREETYPE: Failed to load glyph {}", (int)c);
+        }
         continue;
       }
 
       if (face->glyph->bitmap.pixel_mode != FT_PIXEL_MODE_GRAY)
       {
         if (logger)
+        {
           logger->Warn("FREETYPE: Glyph {} not grayscale; skipping", (int)c);
+        }
         continue;
       }
 
@@ -184,7 +188,7 @@ namespace
       glyph.Advance = (uint32)(slot->advance.x >> 6);
 
       // Copy to tight buffer (handle negative pitch)
-      glyph.Pixels.resize(glyph.BitmapSize.x * glyph.BitmapSize.y);
+      glyph.Pixels.resize(size_t(glyph.BitmapSize.x) * glyph.BitmapSize.y);
       for (uint row = 0; row < glyph.BitmapSize.y; ++row)
       {
         const uint8 *src = (bm.pitch >= 0) ? (bm.buffer + row * bm.pitch)
@@ -244,9 +248,9 @@ namespace
 
   List<uint8> CreateBitmapAtlasPixels(List<GlyphToPack> &glyphs, const Maths::Vec2u &atlasSize)
   {
-    List<uint8> pixels;
-    pixels.resize(atlasSize.x * atlasSize.y);
+    List<uint8> pixels(size_t(atlasSize.x) * atlasSize.y);
     std::fill(pixels.begin(), pixels.end(), 0);
+
     for (const auto &glyph : glyphs)
     {
       for (uint row = 0; row < glyph.BitmapSize.y; ++row)
@@ -266,10 +270,8 @@ namespace
 
     using namespace msdf_atlas;
 
-    // Initialize instance of FreeType library
     if (msdfgen::FreetypeHandle *ft = msdfgen::initializeFreetype())
     {
-      // Load font file
       if (msdfgen::FontHandle *font = msdfgen::loadFont(ft, path.ToString().c_str()))
       {
         // FontGeometry is a helper class that loads a set of glyphs from a single font.
@@ -473,6 +475,14 @@ namespace Krys::Gfx::OpenGL
     return handle;
   }
 
+  void FontSystem::Unload(FontHandle handle) noexcept
+  {
+    if (_cache.Remove(handle))
+    {
+      _fonts.Remove(handle);
+    }
+  }
+
   Font &FontSystem::Get(FontHandle handle)
   {
     return _fonts.Get(handle);
@@ -489,6 +499,8 @@ namespace Krys::Gfx::OpenGL
 
     auto *logger = Log::GetGlobalLogger();
 
+    // We want to preserve the validity of existing FontHandles, so we need to reload
+    // all bitmap fonts at the new DPI in-place.
     for (auto &[key, resource] : _cache)
     {
       FontHandle handle = resource.Handle;

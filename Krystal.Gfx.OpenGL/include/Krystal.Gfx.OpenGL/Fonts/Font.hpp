@@ -211,6 +211,16 @@ namespace Krys::Gfx::OpenGL
       _atlas.Characters = characters;
     }
 
+    const SDFParams &SDFParams() const noexcept
+    {
+      return _sdfParams;
+    }
+
+    const FontAtlas &Atlas() const noexcept
+    {
+      return _atlas;
+    }
+
   private:
     void Swap(Font &other) noexcept
     {
