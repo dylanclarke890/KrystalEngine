@@ -4,7 +4,7 @@
 #include "Krystal.Gfx.OpenGL/MaterialSystem.hpp"
 #include "Krystal.Gfx.OpenGL/MeshSystem.hpp"
 #include "Krystal.Gfx.OpenGL/SamplerSystem.hpp"
-#include "Krystal.Gfx.OpenGL/ShaderSystem.hpp"
+#include "Krystal.Gfx.OpenGL/Shaders/ShaderSystem.hpp"
 #include "Krystal.Gfx.OpenGL/TextureSystem.hpp"
 #include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/IContext.hpp"

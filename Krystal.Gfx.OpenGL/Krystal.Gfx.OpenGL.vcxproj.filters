@@ -39,7 +39,7 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Official\glcorearb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Shader.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Shaders\Shader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Texture.hpp">
@@ -60,7 +60,7 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\gl.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\ShaderSystem.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Shaders\ShaderSystem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\MeshSystem.hpp">
@@ -88,6 +88,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="third-party\stb\stb_rect_pack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Shaders\UberShaderPaths.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

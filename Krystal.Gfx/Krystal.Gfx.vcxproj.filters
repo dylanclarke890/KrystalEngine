@@ -471,6 +471,12 @@
     <ClInclude Include="third-party\msdf-atlas-gen\Workload.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\ShaderPreprocessorConfig.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\TextShaderDesc.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Cameras\FirstPersonCamera.cpp">

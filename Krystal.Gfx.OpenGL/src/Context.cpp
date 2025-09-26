@@ -633,7 +633,7 @@ namespace Krys::Gfx::OpenGL
       : _windowHandle(windowHandle), _width(width), _height(height),
         _dpi(Platform::GetDPIForWindow(_windowHandle)),
         _platformImpl(CreateUnique<ContextPlatformImpl>(windowHandle)), _textures(), _samplers(), _shaders(),
-        _meshes(), _materials(_textures), _fonts(_dpi)
+        _meshes(), _materials(_textures), _fonts(_shaders, _dpi)
   {
   }
 

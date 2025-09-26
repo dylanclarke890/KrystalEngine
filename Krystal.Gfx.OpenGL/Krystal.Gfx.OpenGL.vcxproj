@@ -51,7 +51,8 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\MeshSystem.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Sampler.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\SamplerSystem.hpp" />
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\ShaderSystem.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Shaders\ShaderSystem.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Shaders\UberShaderPaths.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\TextureSystem.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Utils.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Hooks\gl.hpp" />
@@ -61,7 +62,7 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Official\khrplatform.h" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Official\wglext.h" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Model.hpp" />
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Shader.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Shaders\Shader.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Texture.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Win32\ContextPlatformImpl.hpp" />
     <ClCompile Include="src\Fonts\FontManager.cpp" />

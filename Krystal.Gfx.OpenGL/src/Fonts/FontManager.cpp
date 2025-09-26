@@ -394,7 +394,7 @@ namespace
 
 namespace Krys::Gfx::OpenGL
 {
-  FontSystem::FontSystem(int dpi) noexcept : _dpi(dpi)
+  FontSystem::FontSystem(ShaderSystem &shaders, int dpi) noexcept : _shaders(shaders), _dpi(dpi)
   {
   }
 

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.Gfx\TextShaderDesc.hpp" />
     <ClInclude Include="include\Krystal.Gfx\FontType.hpp" />
     <ClInclude Include="include\Krystal.Gfx\ResourceHandleCache.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Cameras\FirstPersonCamera.hpp" />
@@ -34,6 +35,7 @@
     <ClInclude Include="include\Krystal.Gfx\ICamera.hpp" />
     <ClInclude Include="include\Krystal.Gfx\IContext.hpp" />
     <ClInclude Include="include\Krystal.Gfx\ResourceManager.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\ShaderPreprocessorConfig.hpp" />
     <ClInclude Include="include\Krystal.Gfx\VertexBufferLayout.hpp" />
     <ClInclude Include="third-party\freetype\include\freetype\config\ftconfig.h" />
     <ClInclude Include="third-party\freetype\include\freetype\config\ftheader.h" />

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Krystal.Gfx.OpenGL/Fonts/Font.hpp"
+#include "Krystal.Gfx.OpenGL/Shaders/ShaderSystem.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/IFontSystem.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
@@ -20,15 +21,15 @@ namespace Krys::Gfx::OpenGL
 
     FontManager _fonts;
     FontCache _cache;
+    ShaderSystem &_shaders;
     int _dpi;
 
   public:
-    FontSystem(int dpi) noexcept;
+    FontSystem(ShaderSystem& shaders, int dpi) noexcept;
 
     ~FontSystem() noexcept override;
 
-    NO_DISCARD FontHandle Load(const IO::Path &path, float size,
-                               FontType fontType = FontType::Bitmap) noexcept override;
+    NO_DISCARD FontHandle Load(const IO::Path &path, float ptSize, FontType fontType) noexcept override;
 
     void Unload(FontHandle handle) noexcept override;
 
