@@ -12,7 +12,6 @@
 
 namespace Krys::Gfx::OpenGL
 {
-
   class SamplerRegistry final : public ISamplerRegistry
   {
     NO_COPY_MOVE(SamplerRegistry)

@@ -147,18 +147,6 @@ namespace
   FontHandle DefaultMSDFFont;
   FontHandle DefaultMTSDFFont;
 
-  Shader &GetFontShader(FontType fontType, ShaderRegistry &shaders)
-  {
-    switch (fontType)
-    {
-      case FontType::Bitmap: return shaders.Get(shaderHandles.at("bitmap-font"));
-      case FontType::SDF:    return shaders.Get(shaderHandles.at("sdf-font"));
-      case FontType::MSDF:   return shaders.Get(shaderHandles.at("msdf-font"));
-      case FontType::MTSDF:  return shaders.Get(shaderHandles.at("mtsdf-font"));
-      default:               assert(false && "Unknown font type"); return shaders.Get(shaderHandles.at("bitmap-font"));
-    }
-  }
-
   Map<string, FrameBufferData> shadowMaps;
   Map<string, Unique<UniformBuffer>> ubos;
 
@@ -633,7 +621,7 @@ namespace Krys::Gfx::OpenGL
       : _windowHandle(windowHandle), _width(width), _height(height),
         _dpi(Platform::GetDPIForWindow(_windowHandle)),
         _platformImpl(CreateUnique<ContextPlatformImpl>(windowHandle)), _textures(), _samplers(), _shaders(),
-        _meshes(), _materials(_textures), _fonts(_dpi)
+        _meshes(), _materials(_textures), _fonts(_dpi), _text(_fonts, _shaders, _dpi)
   {
   }
 
@@ -760,7 +748,7 @@ namespace Krys::Gfx::OpenGL
 
     // Uniform buffers
     {
-      ubos["matrices"] = CreateUnique<UniformBuffer>(2 * sizeof(Mat4));
+      ubos["matrices"] = CreateUnique<UniformBuffer>(3 * sizeof(Mat4));
       ubos.at("matrices")->Bind(0);
     }
 
@@ -797,6 +785,7 @@ namespace Krys::Gfx::OpenGL
     DefaultMSDFFont = _fonts.Load(fontPath, fontSize, FontType::MSDF);
     DefaultMTSDFFont = _fonts.Load(fontPath, fontSize, FontType::MTSDF);
     ScreenOrthoProjection = Ortho(0.0f, static_cast<float>(_width), 0.0f, static_cast<float>(_height));
+    ubos.at("matrices")->Update(ScreenOrthoProjection, 2 * sizeof(Mat4));
   }
 
   void Context::Render(ICamera &camera) noexcept
@@ -883,18 +872,16 @@ namespace Krys::Gfx::OpenGL
     glClear(GL_COLOR_BUFFER_BIT); // This is just to make the text easier to see
 
     glEnable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    Colour textColour = Colours::Yellow;
     const float xPos = 25.f;
     const auto height = static_cast<float>(_height);
-    DrawText(DefaultBitmapFont, "Font Rendering - Bitmap", {xPos, height - 150.f}, Colours::Black);
-    DrawText(DefaultSDFFont, "Font Rendering - SDF", {xPos, height - 300.f}, Colours::Black);
-    DrawText(DefaultMSDFFont, "Font Rendering - MSDF", {xPos, height - 450.f}, Colours::Purple);
-    DrawText(DefaultMTSDFFont, "Font Rendering - MTSDF", {xPos, height - 600.f}, Colours::Black);
 
-    glEnable(GL_DEPTH_TEST);
+    _text.Draw("Font Rendering - Bitmap", DefaultBitmapFont, {xPos, height - 150.f}, Colours::Black);
+    _text.Draw("Font Rendering - SDF", DefaultSDFFont, {xPos, height - 300.f}, Colours::Black);
+    _text.Draw("Font Rendering - MSDF", DefaultMSDFFont, {xPos, height - 450.f}, Colours::Purple);
+    _text.Draw("Font Rendering - MTSDF", DefaultMTSDFFont, {xPos, height - 600.f}, Colours::Black);
+
     glDisable(GL_BLEND);
   }
 
@@ -945,29 +932,5 @@ namespace Krys::Gfx::OpenGL
   IFontRegistry &Context::Fonts() noexcept
   {
     return _fonts;
-  }
-
-  void Context::DrawText(FontHandle fontHandle, const string &text, const Maths::Vec2 &position,
-                         Colour textColour) noexcept
-  {
-    float scale = 1.0f;
-
-    auto &font = _fonts.Get(fontHandle);
-
-    auto &shader = GetFontShader(font.Type(), _shaders);
-    shader.Bind();
-
-    shader.SetUniform("projection", ScreenOrthoProjection);
-    shader.SetUniform("u_TextColor", textColour.ToVec3());
-
-    if (font.Type() != FontType::Bitmap)
-    {
-      const auto dpiScale = _dpi / 72.0f;
-      scale = dpiScale;
-      shader.SetUniform("u_PixelRange", font.SDFParams().PixelRange);
-      shader.SetUniform("u_AtlasSize", Vec2(font.Atlas().AtlasSize));
-    }
-
-    font.DrawText(text, position, scale);
   }
 }

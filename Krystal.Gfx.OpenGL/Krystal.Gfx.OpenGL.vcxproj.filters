@@ -90,6 +90,9 @@
     <ClInclude Include="third-party\stb\stb_rect_pack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\TextRenderer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">

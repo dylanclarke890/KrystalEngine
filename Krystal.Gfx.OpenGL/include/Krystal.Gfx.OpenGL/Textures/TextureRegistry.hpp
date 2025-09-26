@@ -14,7 +14,6 @@
 
 namespace Krys::Gfx::OpenGL
 {
-
   class TextureRegistry final : public ITextureRegistry
   {
     NO_COPY_MOVE(TextureRegistry)

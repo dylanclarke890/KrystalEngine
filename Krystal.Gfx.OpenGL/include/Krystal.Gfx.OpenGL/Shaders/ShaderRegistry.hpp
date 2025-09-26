@@ -77,10 +77,7 @@ namespace Krys::Gfx::OpenGL
         return cached;
       }
 
-      string vertexSource = defines + ReadFile(vertex);
-      string fragmentSource = defines + ReadFile(fragment);
-      Shader shader {std::move(vertexSource), std::move(fragmentSource)};
-
+      Shader shader {AddDefines(ReadFile(vertex), defines), AddDefines(ReadFile(fragment), defines)};
       return AddShader(key, std::move(shader));
     }
 
@@ -121,7 +118,7 @@ namespace Krys::Gfx::OpenGL
     }
 
   private:
-    string ReadFile(const IO::Path &filepath) noexcept
+    NO_DISCARD string ReadFile(const IO::Path &filepath) noexcept
     {
       IO::NativeFileReader reader {filepath};
       auto result = IO::StreamUtils::ReadAllText(reader);
@@ -129,11 +126,18 @@ namespace Krys::Gfx::OpenGL
       return result.value();
     }
 
-    ShaderHandle AddShader(const string &key, Shader &&shader) noexcept
+    NO_DISCARD ShaderHandle AddShader(const string &key, Shader &&shader) noexcept
     {
       auto handle = _shaders.Add(std::move(shader));
       _cache.Add(key, handle);
       return handle;
+    }
+
+    NO_DISCARD static string AddDefines(const string &source, const string &defines) noexcept
+    {
+      const string lineDirective = "#line 1\n";
+      string versionLine = source.substr(0, source.find('\n') + 1);
+      return versionLine + defines + lineDirective + source.substr(versionLine.size());
     }
   };
 }

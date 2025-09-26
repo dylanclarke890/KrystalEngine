@@ -52,6 +52,7 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Samplers\Sampler.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Samplers\SamplerRegistry.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Shaders\ShaderRegistry.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\TextRenderer.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Textures\TextureRegistry.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Utils.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Hooks\gl.hpp" />

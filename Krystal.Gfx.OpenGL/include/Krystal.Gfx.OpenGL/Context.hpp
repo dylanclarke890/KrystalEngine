@@ -5,6 +5,7 @@
 #include "Krystal.Gfx.OpenGL/Meshes/MeshRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Samplers/SamplerRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Shaders/ShaderRegistry.hpp"
+#include "Krystal.Gfx.OpenGL/TextRenderer.hpp"
 #include "Krystal.Gfx.OpenGL/Textures/TextureRegistry.hpp"
 #include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/IContext.hpp"
@@ -29,6 +30,7 @@ namespace Krys::Gfx::OpenGL
     MeshRegistry _meshes;
     MaterialRegistry _materials;
     FontRegistry _fonts;
+    TextRenderer _text;
 
   public:
     Context(NativeHandle windowHandle, uint32 width, uint32 height);
