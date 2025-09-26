@@ -42,7 +42,7 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Shaders\Shader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Texture.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Textures\Texture.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Model.hpp">
@@ -54,43 +54,40 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Buffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\TextureSystem.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Textures\TextureRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\gl.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Shaders\ShaderSystem.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Shaders\ShaderRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\MeshSystem.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Meshes\MeshRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Mesh.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Meshes\Mesh.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\SamplerSystem.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Samplers\SamplerRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Sampler.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Samplers\Sampler.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\MaterialSystem.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Materials\MaterialRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Material.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Materials\Material.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Fonts\FontSystem.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Fonts\FontRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Fonts\Font.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="third-party\stb\stb_rect_pack.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Shaders\UberShaderPaths.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -107,7 +104,7 @@
     <ClCompile Include="src\Hooks\gl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Fonts\FontManager.cpp">
+    <ClCompile Include="src\Fonts\FontRegistry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="third-party\stb\stb_rect_pack.cpp">

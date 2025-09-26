@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Krystal.Gfx.OpenGL/Material.hpp"
-#include "Krystal.Gfx.OpenGL/TextureSystem.hpp"
+#include "Krystal.Gfx.OpenGL/Materials/Material.hpp"
+#include "Krystal.Gfx.OpenGL/Textures/TextureRegistry.hpp"
 #include "Krystal.Gfx/Handle.hpp"
-#include "Krystal.Gfx/IMaterialSystem.hpp"
+#include "Krystal.Gfx/Registries/IMaterialRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.IO/Path.hpp"
@@ -13,25 +13,32 @@
 
 namespace Krys::Gfx::OpenGL
 {
-
-  class MaterialSystem final : public IMaterialSystem
+  class MaterialRegistry final : public IMaterialRegistry
   {
-    NO_COPY_MOVE(MaterialSystem)
+    NO_COPY_MOVE(MaterialRegistry)
 
     using MaterialManager = ResourceManager<Material, MaterialHandle>;
     using MaterialCache = ResourceHandleCache<string, MaterialHandle>;
 
   private:
     MaterialManager _materials;
-    TextureSystem &_textureSystem;
+    TextureRegistry &_textures;
     MaterialCache _cache;
 
   public:
-    MaterialSystem(TextureSystem &textureSystem) noexcept : _textureSystem(textureSystem)
+    MaterialRegistry(TextureRegistry &textures) noexcept : _textures(textures)
     {
     }
 
-    ~MaterialSystem() noexcept
+    ~MaterialRegistry() noexcept
+    {
+    }
+    
+    void Startup() noexcept override
+    {
+    }
+
+    void Shutdown() noexcept override
     {
     }
 
@@ -77,11 +84,11 @@ namespace Krys::Gfx::OpenGL
       Path base = Path("data/assets/pbr/") / Path(name);
 
       PBRMaterialDesc desc;
-      desc.AlbedoMap = _textureSystem.Load(base / Path("albedo.png"));
-      desc.NormalMap = _textureSystem.Load(base / Path("normal.png"));
-      desc.MetallicMap = _textureSystem.Load(base / Path("metallic.png"));
-      desc.RoughnessMap = _textureSystem.Load(base / Path("roughness.png"));
-      desc.AmbientOcclusionMap = _textureSystem.Load(base / Path("ao.png"));
+      desc.AlbedoMap = _textures.Load(base / Path("albedo.png"));
+      desc.NormalMap = _textures.Load(base / Path("normal.png"));
+      desc.MetallicMap = _textures.Load(base / Path("metallic.png"));
+      desc.RoughnessMap = _textures.Load(base / Path("roughness.png"));
+      desc.AmbientOcclusionMap = _textures.Load(base / Path("ao.png"));
 
       return Create(name, shader, desc);
     }
@@ -106,7 +113,7 @@ namespace Krys::Gfx::OpenGL
             TextureHandle textureHandle = std::get<TextureHandle>(param.Value);
             if (textureHandle.IsValid())
             {
-              _textureSystem.Unload(textureHandle);
+              _textures.Unload(textureHandle);
             }
           }
         }

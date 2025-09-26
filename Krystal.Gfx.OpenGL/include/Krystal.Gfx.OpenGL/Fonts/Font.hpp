@@ -3,7 +3,7 @@
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Shaders/Shader.hpp"
 #include "Krystal.Gfx.OpenGL/Utils.hpp"
-#include "Krystal.Gfx/FontType.hpp"
+#include "Krystal.Gfx/Common.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"

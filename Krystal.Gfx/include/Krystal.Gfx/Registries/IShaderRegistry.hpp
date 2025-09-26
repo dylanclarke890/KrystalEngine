@@ -7,10 +7,14 @@
 
 namespace Krys::Gfx
 {
-  class IShaderSystem
+  class IShaderRegistry
   {
   public:
-    virtual ~IShaderSystem() = default;
+    virtual ~IShaderRegistry() = default;
+
+    virtual void Startup() noexcept = 0;
+
+    virtual void Shutdown() noexcept = 0;
 
     NO_DISCARD virtual ShaderHandle Load(const IO::Path &vertex, const IO::Path &fragment) noexcept = 0;
 

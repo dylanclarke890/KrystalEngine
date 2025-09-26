@@ -1,28 +1,12 @@
 #pragma once
 
+#include "Krystal.Gfx/Common.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Lib/Attributes.hpp"
 
 namespace Krys::Gfx
 {
-  enum class FilterMode : uint8
-  {
-    Nearest = 0,
-    Linear,
-    NearestMipmapNearest,
-    LinearMipmapNearest,
-    NearestMipmapLinear,
-    LinearMipmapLinear,
-  };
-
-  enum class WrapMode : uint8
-  {
-    Repeat = 0,
-    ClampToEdge,
-    ClampToBorder,
-  };
-
-  struct SamplerDesc 
+  struct SamplerDesc
   {
     FilterMode MinFilter {FilterMode::Linear};
     FilterMode MagFilter {FilterMode::Linear};
@@ -32,10 +16,14 @@ namespace Krys::Gfx
     float AnisotropicLevel {1.0f};
   };
 
-  class ISamplerSystem
+  class ISamplerRegistry
   {
   public:
-    virtual ~ISamplerSystem() = default;
+    virtual ~ISamplerRegistry() = default;
+
+    virtual void Startup() noexcept = 0;
+
+    virtual void Shutdown() noexcept = 0;
 
     NO_DISCARD virtual SamplerHandle Create(const SamplerDesc &desc) noexcept = 0;
 

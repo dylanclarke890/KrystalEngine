@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Krystal.Gfx.OpenGL/Fonts/FontSystem.hpp"
-#include "Krystal.Gfx.OpenGL/MaterialSystem.hpp"
-#include "Krystal.Gfx.OpenGL/MeshSystem.hpp"
-#include "Krystal.Gfx.OpenGL/SamplerSystem.hpp"
-#include "Krystal.Gfx.OpenGL/Shaders/ShaderSystem.hpp"
-#include "Krystal.Gfx.OpenGL/TextureSystem.hpp"
+#include "Krystal.Gfx.OpenGL/Fonts/FontRegistry.hpp"
+#include "Krystal.Gfx.OpenGL/Materials/MaterialRegistry.hpp"
+#include "Krystal.Gfx.OpenGL/Meshes/MeshRegistry.hpp"
+#include "Krystal.Gfx.OpenGL/Samplers/SamplerRegistry.hpp"
+#include "Krystal.Gfx.OpenGL/Shaders/ShaderRegistry.hpp"
+#include "Krystal.Gfx.OpenGL/Textures/TextureRegistry.hpp"
 #include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 
@@ -23,12 +23,12 @@ namespace Krys::Gfx::OpenGL
     int _dpi;
     Unique<ContextPlatformImpl> _platformImpl;
 
-    TextureSystem _textures;
-    SamplerSystem _samplers;
-    ShaderSystem _shaders;
-    MeshSystem _meshes;
-    MaterialSystem _materials;
-    FontSystem _fonts;
+    TextureRegistry _textures;
+    SamplerRegistry _samplers;
+    ShaderRegistry _shaders;
+    MeshRegistry _meshes;
+    MaterialRegistry _materials;
+    FontRegistry _fonts;
 
   public:
     Context(NativeHandle windowHandle, uint32 width, uint32 height);
@@ -45,17 +45,17 @@ namespace Krys::Gfx::OpenGL
 
     void DPIChanged(int dpi) noexcept override;
 
-    ISamplerSystem &Samplers() noexcept override;
+    ISamplerRegistry &Samplers() noexcept override;
 
-    ITextureSystem &Textures() noexcept override;
+    ITextureRegistry &Textures() noexcept override;
 
-    IShaderSystem &Shaders() noexcept override;
+    IShaderRegistry &Shaders() noexcept override;
 
-    IMeshSystem &Meshes() noexcept override;
+    IMeshRegistry &Meshes() noexcept override;
 
-    IMaterialSystem &Materials() noexcept override;
+    IMaterialRegistry &Materials() noexcept override;
 
-    IFontSystem &Fonts() noexcept override;
+    IFontRegistry &Fonts() noexcept override;
 
     void DrawText(FontHandle font, const string &text, const Maths::Vec2 &position,
                   Colour textColour = Colours::White) noexcept;

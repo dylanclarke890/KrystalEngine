@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
-#include "Krystal.Gfx.OpenGL/Sampler.hpp"
-#include "Krystal.Gfx/ISamplerSystem.hpp"
+#include "Krystal.Gfx.OpenGL/Samplers/Sampler.hpp"
+#include "Krystal.Gfx/Registries/ISamplerRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Lib/Attributes.hpp"
@@ -13,9 +13,9 @@
 namespace Krys::Gfx::OpenGL
 {
 
-  class SamplerSystem final : public ISamplerSystem
+  class SamplerRegistry final : public ISamplerRegistry
   {
-    NO_COPY_MOVE(SamplerSystem)
+    NO_COPY_MOVE(SamplerRegistry)
 
     using SamplerManager = ResourceManager<Sampler, SamplerHandle>;
     using SamplerCache = ResourceHandleCache<size_t, SamplerHandle>;
@@ -25,9 +25,17 @@ namespace Krys::Gfx::OpenGL
     SamplerCache _cache;
 
   public:
-    SamplerSystem() = default;
+    SamplerRegistry() = default;
 
-    ~SamplerSystem() noexcept override = default;
+    ~SamplerRegistry() noexcept override = default;
+
+    void Startup() noexcept override
+    {
+    }
+
+    void Shutdown() noexcept override
+    {
+    }
 
     NO_DISCARD SamplerHandle Create(const SamplerDesc &desc) noexcept override
     {

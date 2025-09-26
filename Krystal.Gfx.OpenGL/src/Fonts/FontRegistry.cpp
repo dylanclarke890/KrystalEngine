@@ -1,7 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Gfx.OpenGL/Fonts/FontRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Fonts/Font.hpp"
-#include "Krystal.Gfx.OpenGL/Fonts/FontSystem.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Lib/DebugBreak.hpp"
 #include "Krystal.Lib/Map.hpp"
@@ -394,15 +394,23 @@ namespace
 
 namespace Krys::Gfx::OpenGL
 {
-  FontSystem::FontSystem(ShaderSystem &shaders, int dpi) noexcept : _shaders(shaders), _dpi(dpi)
+  FontRegistry::FontRegistry(int dpi) noexcept : _dpi(dpi)
   {
   }
 
-  FontSystem::~FontSystem() noexcept
+  FontRegistry::~FontRegistry() noexcept
   {
   }
 
-  FontHandle FontSystem::Load(const IO::Path &path, float ptSize, FontType fontType) noexcept
+  void FontRegistry::Startup() noexcept
+  {
+  }
+
+  void FontRegistry::Shutdown() noexcept
+  {
+  }
+
+  FontHandle FontRegistry::Load(const IO::Path &path, float ptSize, FontType fontType) noexcept
   {
     auto *logger = Log::GetGlobalLogger();
     double sizeInPixels = PtSizeToPixels(ptSize, _dpi);
@@ -475,7 +483,7 @@ namespace Krys::Gfx::OpenGL
     return handle;
   }
 
-  void FontSystem::Unload(FontHandle handle) noexcept
+  void FontRegistry::Unload(FontHandle handle) noexcept
   {
     if (_cache.Remove(handle))
     {
@@ -483,12 +491,12 @@ namespace Krys::Gfx::OpenGL
     }
   }
 
-  Font &FontSystem::Get(FontHandle handle)
+  Font &FontRegistry::Get(FontHandle handle)
   {
     return _fonts.Get(handle);
   }
 
-  void FontSystem::DPIChanged(int dpi) noexcept
+  void FontRegistry::DPIChanged(int dpi) noexcept
   {
     if (dpi == _dpi)
     {

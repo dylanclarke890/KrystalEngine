@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
-#include "Krystal.Gfx.OpenGL/Texture.hpp"
-#include "Krystal.Gfx/ITextureSystem.hpp"
+#include "Krystal.Gfx.OpenGL/Textures/Texture.hpp"
+#include "Krystal.Gfx/Registries/ITextureRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.IO/Image.hpp"
@@ -15,9 +15,9 @@
 namespace Krys::Gfx::OpenGL
 {
 
-  class TextureSystem final : public ITextureSystem
+  class TextureRegistry final : public ITextureRegistry
   {
-    NO_COPY_MOVE(TextureSystem)
+    NO_COPY_MOVE(TextureRegistry)
 
     using TextureManager = ResourceManager<Texture, TextureHandle>;
     using TextureCache = ResourceHandleCache<string, TextureHandle>;
@@ -27,8 +27,16 @@ namespace Krys::Gfx::OpenGL
     TextureCache _cache;
 
   public:
-    TextureSystem() = default;
-    ~TextureSystem() override = default;
+    TextureRegistry() = default;
+    ~TextureRegistry() override = default;
+
+    void Startup() noexcept override
+    {
+    }
+
+    void Shutdown() noexcept override
+    {
+    }
 
     NO_DISCARD TextureHandle Load(const IO::Path &path, const TextureDesc &desc = {}) noexcept override
     {
@@ -114,7 +122,7 @@ namespace Krys::Gfx::OpenGL
     {
       assert(handle.IsValid() && "Invalid handle.");
       assert(_textures.TryGet(handle) != nullptr && "Texture not found in resource manager.");
-      
+
       if (_cache.Remove(handle))
       {
         _textures.Remove(handle);

@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Krystal.Gfx.OpenGL/Fonts/Font.hpp"
-#include "Krystal.Gfx.OpenGL/Shaders/ShaderSystem.hpp"
 #include "Krystal.Gfx/Handle.hpp"
-#include "Krystal.Gfx/IFontSystem.hpp"
+#include "Krystal.Gfx/Registries/IFontRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.IO/Path.hpp"
@@ -12,22 +11,25 @@
 
 namespace Krys::Gfx::OpenGL
 {
-  class FontSystem final : public IFontSystem
+  class FontRegistry final : public IFontRegistry
   {
-    NO_COPY_MOVE(FontSystem)
+    NO_COPY_MOVE(FontRegistry)
 
     using FontManager = ResourceManager<Font, FontHandle>;
     using FontCache = ResourceHandleCache<string, FontHandle>;
 
     FontManager _fonts;
     FontCache _cache;
-    ShaderSystem &_shaders;
     int _dpi;
 
   public:
-    FontSystem(ShaderSystem& shaders, int dpi) noexcept;
+    FontRegistry(int dpi) noexcept;
 
-    ~FontSystem() noexcept override;
+    ~FontRegistry() noexcept override;
+
+    void Startup() noexcept override;
+
+    void Shutdown() noexcept override;
 
     NO_DISCARD FontHandle Load(const IO::Path &path, float ptSize, FontType fontType) noexcept override;
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Krystal.Gfx/Common.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/VertexBufferLayout.hpp"
 #include "Krystal.Lib/Attributes.hpp"
@@ -8,20 +9,14 @@
 
 namespace Krys::Gfx
 {
-  enum class PrimitiveType : uint8
-  {
-    Points = 0,
-    Lines,
-    LineStrip,
-    Triangles,
-    TriangleStrip,
-    TriangleFan,
-  };
-
-  class IMeshSystem
+  class IMeshRegistry
   {
   public:
-    virtual ~IMeshSystem() = default;
+    virtual ~IMeshRegistry() = default;
+
+    virtual void Startup() noexcept = 0;
+
+    virtual void Shutdown() noexcept = 0;
 
     NO_DISCARD virtual MeshHandle Create(const Span<const byte> &vertexBuffer,
                                          const VertexBufferLayout &layout,

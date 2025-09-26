@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Krystal.Gfx.OpenGL/Mesh.hpp"
-#include "Krystal.Gfx/IMeshSystem.hpp"
+#include "Krystal.Gfx.OpenGL/Meshes/Mesh.hpp"
+#include "Krystal.Gfx/Registries/IMeshRegistry.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
 #include "Krystal.Lib/List.hpp"
@@ -10,9 +10,9 @@
 
 namespace Krys::Gfx::OpenGL
 {
-  class MeshSystem final : public IMeshSystem
+  class MeshRegistry final : public IMeshRegistry
   {
-    NO_COPY_MOVE(MeshSystem)
+    NO_COPY_MOVE(MeshRegistry)
 
     using MeshManager = ResourceManager<Mesh, MeshHandle>;
 
@@ -20,9 +20,17 @@ namespace Krys::Gfx::OpenGL
     MeshManager _meshes;
 
   public:
-    MeshSystem() = default;
+    MeshRegistry() = default;
 
-    ~MeshSystem() noexcept override = default;
+    ~MeshRegistry() noexcept override = default;
+
+    void Startup() noexcept override
+    {
+    }
+
+    void Shutdown() noexcept override
+    {
+    }
 
     virtual MeshHandle Create(const Span<const byte> &vertexBuffer, const VertexBufferLayout &layout,
                               PrimitiveType type) noexcept override

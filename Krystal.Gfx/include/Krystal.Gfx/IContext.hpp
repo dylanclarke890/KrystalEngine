@@ -10,12 +10,12 @@
 namespace Krys::Gfx
 {
   class IContext;
-  class ISamplerSystem;
-  class ITextureSystem;
-  class IShaderSystem;
-  class IMeshSystem;
-  class IMaterialSystem;
-  class IFontSystem;
+  class ISamplerRegistry;
+  class ITextureRegistry;
+  class IShaderRegistry;
+  class IMeshRegistry;
+  class IMaterialRegistry;
+  class IFontRegistry;
 
   Expected<Unique<IContext>> CreateContext(NativeHandle windowHandle, uint32 width, uint32 height) noexcept;
 
@@ -48,16 +48,16 @@ namespace Krys::Gfx
 
     virtual void DPIChanged(int dpi) noexcept = 0;
 
-    virtual ISamplerSystem &Samplers() noexcept = 0;
+    virtual ISamplerRegistry &Samplers() noexcept = 0;
 
-    virtual ITextureSystem &Textures() noexcept = 0;
+    virtual ITextureRegistry &Textures() noexcept = 0;
 
-    virtual IShaderSystem &Shaders() noexcept = 0;
+    virtual IShaderRegistry &Shaders() noexcept = 0;
 
-    virtual IMeshSystem &Meshes() noexcept = 0;
+    virtual IMeshRegistry &Meshes() noexcept = 0;
 
-    virtual IMaterialSystem &Materials() noexcept = 0;
+    virtual IMaterialRegistry &Materials() noexcept = 0;
 
-    virtual IFontSystem &Fonts() noexcept = 0;
+    virtual IFontRegistry &Fonts() noexcept = 0;
   };
 }

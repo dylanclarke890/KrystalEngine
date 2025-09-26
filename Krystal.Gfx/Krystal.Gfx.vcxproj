@@ -19,18 +19,18 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.Gfx\Common.hpp" />
     <ClInclude Include="include\Krystal.Gfx\TextShaderDesc.hpp" />
-    <ClInclude Include="include\Krystal.Gfx\FontType.hpp" />
     <ClInclude Include="include\Krystal.Gfx\ResourceHandleCache.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Cameras\FirstPersonCamera.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Colour.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Handle.hpp" />
-    <ClInclude Include="include\Krystal.Gfx\IFontSystem.hpp" />
-    <ClInclude Include="include\Krystal.Gfx\IMaterialSystem.hpp" />
-    <ClInclude Include="include\Krystal.Gfx\IMeshSystem.hpp" />
-    <ClInclude Include="include\Krystal.Gfx\ISamplerSystem.hpp" />
-    <ClInclude Include="include\Krystal.Gfx\IShaderSystem.hpp" />
-    <ClInclude Include="include\Krystal.Gfx\ITextureSystem.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Registries\IFontRegistry.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Registries\IMaterialRegistry.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Registries\IMeshRegistry.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Registries\ISamplerRegistry.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Registries\IShaderRegistry.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Registries\ITextureRegistry.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Light.hpp" />
     <ClInclude Include="include\Krystal.Gfx\ICamera.hpp" />
     <ClInclude Include="include\Krystal.Gfx\IContext.hpp" />

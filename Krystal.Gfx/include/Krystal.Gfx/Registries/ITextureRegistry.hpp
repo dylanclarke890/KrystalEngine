@@ -13,10 +13,14 @@ namespace Krys::Gfx
     uint32 MaxMipLevels {0u};
   };
 
-  class ITextureSystem
+  class ITextureRegistry
   {
   public:
-    virtual ~ITextureSystem() = default;
+    virtual ~ITextureRegistry() = default;
+
+    virtual void Startup() noexcept = 0;
+
+    virtual void Shutdown() noexcept = 0;
 
     NO_DISCARD virtual TextureHandle Load(const IO::Path &path, const TextureDesc &desc) noexcept = 0;
 

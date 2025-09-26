@@ -147,15 +147,15 @@ namespace
   FontHandle DefaultMSDFFont;
   FontHandle DefaultMTSDFFont;
 
-  Shader &GetFontShader(FontType fontType, ShaderSystem &shaderSystem)
+  Shader &GetFontShader(FontType fontType, ShaderRegistry &shaders)
   {
     switch (fontType)
     {
-      case FontType::Bitmap: return shaderSystem.Get(shaderHandles.at("bitmap-font"));
-      case FontType::SDF:    return shaderSystem.Get(shaderHandles.at("sdf-font"));
-      case FontType::MSDF:   return shaderSystem.Get(shaderHandles.at("msdf-font"));
-      case FontType::MTSDF:  return shaderSystem.Get(shaderHandles.at("mtsdf-font"));
-      default:               assert(false && "Unknown font type"); return shaderSystem.Get(shaderHandles.at("bitmap-font"));
+      case FontType::Bitmap: return shaders.Get(shaderHandles.at("bitmap-font"));
+      case FontType::SDF:    return shaders.Get(shaderHandles.at("sdf-font"));
+      case FontType::MSDF:   return shaders.Get(shaderHandles.at("msdf-font"));
+      case FontType::MTSDF:  return shaders.Get(shaderHandles.at("mtsdf-font"));
+      default:               assert(false && "Unknown font type"); return shaders.Get(shaderHandles.at("bitmap-font"));
     }
   }
 
@@ -374,8 +374,8 @@ namespace
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
   }
 
-  void CreateEnvironmentAndIrradianceCubemaps(uint32 width, uint32 height, TextureSystem &textureSystem,
-                                              ShaderSystem &shaderSystem, MeshSystem &meshSystem)
+  void CreateEnvironmentAndIrradianceCubemaps(uint32 width, uint32 height, TextureRegistry &textureSystem,
+                                              ShaderRegistry &shaderSystem, MeshRegistry &meshSystem)
   {
     uint captureFBO;
     uint captureRBO;
@@ -599,7 +599,7 @@ namespace
   }
 
   void DrawPBRObject(Mesh &mesh, Shader &shader, Material &material, const Mat4 &model,
-                     TextureSystem &textures)
+                     TextureRegistry &textures)
   {
     shader.SetUniform("model", model);
     shader.SetUniform("normalMatrix", Inverse(Transpose(Mat3(model))));
@@ -633,7 +633,7 @@ namespace Krys::Gfx::OpenGL
       : _windowHandle(windowHandle), _width(width), _height(height),
         _dpi(Platform::GetDPIForWindow(_windowHandle)),
         _platformImpl(CreateUnique<ContextPlatformImpl>(windowHandle)), _textures(), _samplers(), _shaders(),
-        _meshes(), _materials(_textures), _fonts(_shaders, _dpi)
+        _meshes(), _materials(_textures), _fonts(_dpi)
   {
   }
 
@@ -917,32 +917,32 @@ namespace Krys::Gfx::OpenGL
     _fonts.DPIChanged(dpi);
   }
 
-  ISamplerSystem &Context::Samplers() noexcept
+  ISamplerRegistry &Context::Samplers() noexcept
   {
     return _samplers;
   }
 
-  ITextureSystem &Context::Textures() noexcept
+  ITextureRegistry &Context::Textures() noexcept
   {
     return _textures;
   }
 
-  IShaderSystem &Context::Shaders() noexcept
+  IShaderRegistry &Context::Shaders() noexcept
   {
     return _shaders;
   }
 
-  IMeshSystem &Context::Meshes() noexcept
+  IMeshRegistry &Context::Meshes() noexcept
   {
     return _meshes;
   }
 
-  IMaterialSystem &Context::Materials() noexcept
+  IMaterialRegistry &Context::Materials() noexcept
   {
     return _materials;
   }
 
-  IFontSystem &Context::Fonts() noexcept
+  IFontRegistry &Context::Fonts() noexcept
   {
     return _fonts;
   }

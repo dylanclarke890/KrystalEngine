@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Krystal.Gfx/FontType.hpp"
+#include "Krystal.Gfx/Common.hpp"
 
 namespace Krys::Gfx
 {

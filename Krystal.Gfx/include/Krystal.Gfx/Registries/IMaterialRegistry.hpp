@@ -24,10 +24,14 @@ namespace Krys::Gfx
     TextureHandle EmissiveMap {};
   };
 
-  class IMaterialSystem
+  class IMaterialRegistry
   {
   public:
-    virtual ~IMaterialSystem() = default;
+    virtual ~IMaterialRegistry() = default;
+
+    virtual void Startup() noexcept = 0;
+
+    virtual void Shutdown() noexcept = 0;
 
     NO_DISCARD virtual MaterialHandle Create(const string &name, ShaderHandle shader,
                                              const PBRMaterialDesc &desc) noexcept = 0;

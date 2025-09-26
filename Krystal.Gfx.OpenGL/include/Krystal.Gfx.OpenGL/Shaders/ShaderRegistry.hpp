@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Krystal.Gfx.OpenGL/Shaders/Shader.hpp"
-#include "Krystal.Gfx/IShaderSystem.hpp"
+#include "Krystal.Gfx/Common.hpp"
+#include "Krystal.Gfx/Registries/IShaderRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Gfx/ShaderPreprocessorConfig.hpp"
@@ -13,9 +14,9 @@
 
 namespace Krys::Gfx::OpenGL
 {
-  class ShaderSystem final : public IShaderSystem
+  class ShaderRegistry final : public IShaderRegistry
   {
-    NO_COPY_MOVE(ShaderSystem)
+    NO_COPY_MOVE(ShaderRegistry)
 
     using ShaderManager = ResourceManager<Shader, ShaderHandle>;
     using ShaderHandleCache = ResourceHandleCache<string, ShaderHandle>;
@@ -25,8 +26,16 @@ namespace Krys::Gfx::OpenGL
     ShaderHandleCache _cache;
 
   public:
-    ShaderSystem() = default;
-    ~ShaderSystem() noexcept override = default;
+    ShaderRegistry() = default;
+    ~ShaderRegistry() noexcept override = default;
+
+    void Startup() noexcept override
+    {
+    }
+
+    void Shutdown() noexcept override
+    {
+    }
 
     NO_DISCARD ShaderHandle Load(const IO::Path &vertex, const IO::Path &fragment) noexcept override
     {

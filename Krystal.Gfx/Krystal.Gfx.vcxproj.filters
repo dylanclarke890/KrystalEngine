@@ -36,22 +36,22 @@
     <ClInclude Include="include\Krystal.Gfx\ResourceManager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx\ITextureSystem.hpp">
+    <ClInclude Include="include\Krystal.Gfx\Registries\ITextureRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Gfx\Handle.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx\IShaderSystem.hpp">
+    <ClInclude Include="include\Krystal.Gfx\Registries\IShaderRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx\IMeshSystem.hpp">
+    <ClInclude Include="include\Krystal.Gfx\Registries\IMeshRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx\ISamplerSystem.hpp">
+    <ClInclude Include="include\Krystal.Gfx\Registries\ISamplerRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx\IMaterialSystem.hpp">
+    <ClInclude Include="include\Krystal.Gfx\Registries\IMaterialRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="third-party\freetype\include\freetype\config\ftconfig.h">
@@ -219,7 +219,7 @@
     <ClInclude Include="third-party\freetype\include\ft2build.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx\IFontSystem.hpp">
+    <ClInclude Include="include\Krystal.Gfx\Registries\IFontRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Gfx\ResourceHandleCache.hpp">
@@ -363,9 +363,6 @@
     <ClInclude Include="third-party\msdfgen\resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx\FontType.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="third-party\msdf-atlas-gen\artery-font-export.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -475,6 +472,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Gfx\TextShaderDesc.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Common.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
