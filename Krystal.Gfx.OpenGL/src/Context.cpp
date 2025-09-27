@@ -900,6 +900,7 @@ namespace Krys::Gfx::OpenGL
     _height = height;
     glViewport(0, 0, _width, _height);
     ScreenOrthoProjection = Ortho(0.0f, static_cast<float>(_width), 0.0f, static_cast<float>(_height));
+    ubos.at("matrices")->Update(ScreenOrthoProjection, 2 * sizeof(Mat4));
   }
 
   void Context::DPIChanged(int dpi) noexcept
