@@ -47,9 +47,9 @@ namespace Krys::Gfx::OpenGL
 
   struct SDFParams
   {
-    float EMSizeInPixels {64.0f};
-    float PixelRange {4.0f};
-    float MiterLimit {1.0f};
+    float EMSizeInPixels {64.f};
+    float PixelRange {12.5f};
+    float MiterLimit {1.f};
   };
 
   class Font

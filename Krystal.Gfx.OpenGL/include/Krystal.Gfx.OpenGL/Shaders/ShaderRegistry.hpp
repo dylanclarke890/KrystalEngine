@@ -94,9 +94,10 @@ namespace Krys::Gfx::OpenGL
         case FontType::MTSDF:  cfg.Define("FONT_MTSDF", "1"); break;
       }
 
-      cfg.Define("ENABLE_SHADOW", desc.EnableShadow ? "1" : "0");
-      cfg.Define("ENABLE_OUTLINE", desc.EnableOutline ? "1" : "0");
-      cfg.Define("ENABLE_GLOW", desc.EnableGlow ? "1" : "0");
+      if (desc.EnableOutline)
+      {
+        cfg.Define("FEATURE_OUTLINE", "1");
+      }
 
       return Load(vertex, fragment, cfg);
     }
@@ -118,19 +119,19 @@ namespace Krys::Gfx::OpenGL
     }
 
   private:
-    NO_DISCARD string ReadFile(const IO::Path &filepath) noexcept
-    {
-      IO::NativeFileReader reader {filepath};
-      auto result = IO::StreamUtils::ReadAllText(reader);
-      assert(result.has_value() && "Failed to read shader file.");
-      return result.value();
-    }
-
     NO_DISCARD ShaderHandle AddShader(const string &key, Shader &&shader) noexcept
     {
       auto handle = _shaders.Add(std::move(shader));
       _cache.Add(key, handle);
       return handle;
+    }
+
+    NO_DISCARD static string ReadFile(const IO::Path &filepath) noexcept
+    {
+      IO::NativeFileReader reader {filepath};
+      auto result = IO::StreamUtils::ReadAllText(reader);
+      assert(result.has_value() && "Failed to read shader file.");
+      return result.value();
     }
 
     NO_DISCARD static string AddDefines(const string &source, const string &defines) noexcept

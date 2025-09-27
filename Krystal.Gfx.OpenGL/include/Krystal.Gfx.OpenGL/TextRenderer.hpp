@@ -10,6 +10,7 @@
 #include "Krystal.Lib/Map.hpp"
 #include "Krystal.Lib/String.hpp"
 #include "Krystal.Maths/Vector.hpp"
+#include <cassert>
 
 namespace Krys::Gfx::OpenGL
 {
@@ -30,10 +31,10 @@ namespace Krys::Gfx::OpenGL
     }
 
     void Draw(const string &text, FontHandle fontHandle, const Maths::Vec2 &position,
-                    const Colour &colour = Colours::Black) noexcept
+              const Colour &colour = Colours::Black) noexcept
     {
-      auto &font = _fonts.Get(fontHandle);
-      auto &shader = GetOrAdd({.FontType = font.Type()});
+      Font &font = _fonts.Get(fontHandle);
+      Shader &shader = GetOrAdd({.FontType = font.Type()});
 
       shader.Bind();
       shader.SetUniform("u_TextColor", colour.ToVec3());
@@ -42,9 +43,32 @@ namespace Krys::Gfx::OpenGL
       if (font.Type() != FontType::Bitmap)
       {
         scale = _dpi / 72.0f;
-        shader.SetUniform("u_PixelRange", font.SDFParams().PixelRange);
-        shader.SetUniform("u_AtlasSize", Maths::Vec2(font.Atlas().AtlasSize));
+        SetSDFParams(shader, font);
       }
+
+      font.DrawText(text, position, scale);
+    }
+
+    void DrawOutlined(const string &text, FontHandle fontHandle, const Maths::Vec2 &position,
+                      const Colour &textColour = Colours::Black, const Colour &outlineColour = Colours::White,
+                      float outlineWidth = 1.f) noexcept
+    {
+      Font &font = _fonts.Get(fontHandle);
+      Shader &shader = GetOrAdd({.FontType = font.Type(), .EnableOutline = true});
+
+      assert(font.Type() != FontType::Bitmap && "Outlined text is not supported for bitmap fonts.");
+
+      shader.Bind();
+      shader.SetUniform("u_TextColor", textColour.ToVec3());
+
+      float scale = _dpi / 72.0f;
+      SetSDFParams(shader, font);
+
+      shader.SetUniform("u_OutlineColor", outlineColour.ToVec3());
+      shader.SetUniform("u_OutlineWidthAbsolute", outlineWidth);
+      shader.SetUniform("u_OutlineWidthRelative", 1.f / 20.f);
+      shader.SetUniform("u_Threshold", 0.5f);
+      shader.SetUniform("u_OutBias", 0.f);
 
       font.DrawText(text, position, scale);
     }
@@ -62,6 +86,12 @@ namespace Krys::Gfx::OpenGL
 
       _fontShaders[desc] = shader;
       return _shaders.Get(shader);
+    }
+
+    void SetSDFParams(Shader &shader, Font &font) noexcept
+    {
+      Maths::Vec2 unitRange = Maths::Vec2(font.SDFParams().PixelRange) / Maths::Vec2(font.Atlas().AtlasSize);
+      shader.SetUniform("u_UnitRange", unitRange);
     }
   };
 }

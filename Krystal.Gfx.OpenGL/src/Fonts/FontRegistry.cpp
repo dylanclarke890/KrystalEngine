@@ -293,6 +293,9 @@ namespace
         packer.pack(glyphs.data(), (int)glyphs.size());
         packer.getDimensions(width, height); // final atlas dimensions
 
+        GeneratorAttributes attributes {};
+        attributes.scanlinePass = true;
+
         GLuint texture;
         glCreateTextures(GL_TEXTURE_2D, 1, &texture);
         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

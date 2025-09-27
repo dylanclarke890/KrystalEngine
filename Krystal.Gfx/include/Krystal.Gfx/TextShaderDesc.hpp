@@ -10,13 +10,10 @@ namespace Krys::Gfx
   {
     FontType FontType {};
     bool EnableOutline {false};
-    bool EnableShadow {false};
-    bool EnableGlow {false};
 
     bool operator==(const TextShaderDesc &other) const noexcept
     {
-      return FontType == other.FontType && EnableOutline == other.EnableOutline &&
-             EnableShadow == other.EnableShadow && EnableGlow == other.EnableGlow;
+      return FontType == other.FontType && EnableOutline == other.EnableOutline;
     }
   };
 }
@@ -28,8 +25,7 @@ namespace std
   {
     size_t operator()(const Krys::Gfx::TextShaderDesc &desc) const noexcept
     {
-      return Krys::HashUtils::HashCombine(desc.FontType, desc.EnableOutline, desc.EnableShadow,
-                                          desc.EnableGlow);
+      return Krys::HashUtils::HashCombine(desc.FontType, desc.EnableOutline);
     }
   };
 }

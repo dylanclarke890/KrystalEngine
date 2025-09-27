@@ -779,7 +779,7 @@ namespace Krys::Gfx::OpenGL
     glClearColor(0.1f, 0.1f, 0.1f, 1.f);
 
     const auto fontPath = IO::Path("data/assets/fonts/Antonio-Bold.ttf");
-    const auto fontSize = 96;
+    const auto fontSize = 32;
     DefaultBitmapFont = _fonts.Load(fontPath, fontSize, FontType::Bitmap);
     DefaultSDFFont = _fonts.Load(fontPath, fontSize, FontType::SDF);
     DefaultMSDFFont = _fonts.Load(fontPath, fontSize, FontType::MSDF);
@@ -872,15 +872,19 @@ namespace Krys::Gfx::OpenGL
     glClear(GL_COLOR_BUFFER_BIT); // This is just to make the text easier to see
 
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     const float xPos = 25.f;
     const auto height = static_cast<float>(_height);
 
     _text.Draw("Font Rendering - Bitmap", DefaultBitmapFont, {xPos, height - 150.f}, Colours::Black);
-    _text.Draw("Font Rendering - SDF", DefaultSDFFont, {xPos, height - 300.f}, Colours::Black);
-    _text.Draw("Font Rendering - MSDF", DefaultMSDFFont, {xPos, height - 450.f}, Colours::Purple);
-    _text.Draw("Font Rendering - MTSDF", DefaultMTSDFFont, {xPos, height - 600.f}, Colours::Black);
+    _text.DrawOutlined("Font Rendering - SDF", DefaultSDFFont, {xPos, height - 300.f}, Colours::Black);
+    _text.DrawOutlined("Font Rendering - MSDF", DefaultMSDFFont, {xPos, height - 450.f}, Colours::Purple,
+                       Colours::Green);
+    _text.DrawOutlined("Font Rendering - MTSDF", DefaultMTSDFFont, {xPos, height - 600.f}, Colours::Black);
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    _text.Draw("Font Rendering - MSDF", DefaultMSDFFont, {xPos, height - 500.f}, Colours::Purple);
 
     glDisable(GL_BLEND);
   }
