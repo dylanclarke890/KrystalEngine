@@ -51,7 +51,7 @@ namespace Krys::Gfx::OpenGL
 
     void DrawOutlined(const string &text, FontHandle fontHandle, const Maths::Vec2 &position,
                       const Colour &textColour = Colours::Black, const Colour &outlineColour = Colours::White,
-                      float outlineWidth = 1.f) noexcept
+                      float outlineWidth = 3.f) noexcept
     {
       Font &font = _fonts.Get(fontHandle);
       Shader &shader = GetOrAdd({.FontType = font.Type(), .EnableOutline = true});
@@ -68,7 +68,6 @@ namespace Krys::Gfx::OpenGL
       shader.SetUniform("u_OutlineWidthAbsolute", outlineWidth);
       shader.SetUniform("u_OutlineWidthRelative", 1.f / 20.f);
       shader.SetUniform("u_Threshold", 0.5f);
-      shader.SetUniform("u_OutBias", 0.f);
 
       font.DrawText(text, position, scale);
     }

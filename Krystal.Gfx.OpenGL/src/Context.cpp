@@ -705,14 +705,6 @@ namespace Krys::Gfx::OpenGL
       shaderHandles["brdf"] = _shaders.Load(base / Path("11/brdf.vert"), base / Path("11/brdf.frag"));
       shaderHandles["hdr-background"] =
         _shaders.Load(base / Path("11/background.vert"), base / Path("11/background.frag"));
-
-      shaderHandles["bitmap-font"] =
-        _shaders.Load(base / Path("font/glyph.vert"), base / Path("font/bitmap.frag"));
-      shaderHandles["sdf-font"] = _shaders.Load(base / Path("font/glyph.vert"), base / Path("font/sdf.frag"));
-      shaderHandles["msdf-font"] =
-        _shaders.Load(base / Path("font/glyph.vert"), base / Path("font/msdf.frag"));
-      shaderHandles["mtsdf-font"] =
-        _shaders.Load(base / Path("font/glyph.vert"), base / Path("font/mtsdf.frag"));
     }
 
     {
