@@ -40,6 +40,9 @@ namespace Krys::Gfx::OpenGL
     {
       GLenum min = MapFilterMode(desc.MinFilter);
       GLenum mag = MapFilterMode(desc.MagFilter);
+      assert(mag != GL_NEAREST_MIPMAP_NEAREST && mag != GL_LINEAR_MIPMAP_NEAREST
+             && mag != GL_NEAREST_MIPMAP_LINEAR && mag != GL_LINEAR_MIPMAP_LINEAR
+             && "Mag filter cannot be a mipmap filter.");
       GLenum wrapS = MapWrapMode(desc.WrapS);
       GLenum wrapT = MapWrapMode(desc.WrapT);
       GLenum wrapR = MapWrapMode(desc.WrapR);

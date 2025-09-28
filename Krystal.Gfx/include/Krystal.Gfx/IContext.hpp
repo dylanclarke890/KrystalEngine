@@ -10,10 +10,12 @@
 namespace Krys::Gfx
 {
   class IContext;
+  class IImageRegistry;
+  class IImageViewRegistry;
   class ISamplerRegistry;
-  class ITextureRegistry;
   class IShaderRegistry;
   class IMeshRegistry;
+  class ITextureRegistry;
   class IMaterialRegistry;
   class IFontRegistry;
 
@@ -48,16 +50,22 @@ namespace Krys::Gfx
 
     virtual void DPIChanged(int dpi) noexcept = 0;
 
-    virtual ISamplerRegistry &Samplers() noexcept = 0;
+    NO_DISCARD virtual IImageRegistry &Images() noexcept = 0;
 
-    virtual ITextureRegistry &Textures() noexcept = 0;
+    NO_DISCARD virtual IImageViewRegistry &ImageViews() noexcept = 0;
 
-    virtual IShaderRegistry &Shaders() noexcept = 0;
+    NO_DISCARD virtual ISamplerRegistry &Samplers() noexcept = 0;
 
-    virtual IMeshRegistry &Meshes() noexcept = 0;
+    NO_DISCARD virtual ITextureRegistry &Textures() noexcept = 0;
 
-    virtual IMaterialRegistry &Materials() noexcept = 0;
+    NO_DISCARD virtual IShaderRegistry &Shaders() noexcept = 0;
 
-    virtual IFontRegistry &Fonts() noexcept = 0;
+    NO_DISCARD virtual IMeshRegistry &Meshes() noexcept = 0;
+
+    NO_DISCARD virtual IMaterialRegistry &Materials() noexcept = 0;
+
+    NO_DISCARD virtual IFontRegistry &Fonts() noexcept = 0;
+
+    NO_DISCARD virtual API GetAPI() const noexcept = 0;
   };
 }

@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Krystal.Gfx.OpenGL/Fonts/FontRegistry.hpp"
+#include "Krystal.Gfx.OpenGL/Images/ImageRegistry.hpp"
+#include "Krystal.Gfx.OpenGL/ImageViews/ImageViewRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Materials/MaterialRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Meshes/MeshRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Samplers/SamplerRegistry.hpp"
@@ -24,10 +26,12 @@ namespace Krys::Gfx::OpenGL
     int _dpi;
     Unique<ContextPlatformImpl> _platformImpl;
 
-    TextureRegistry _textures;
+    ImageRegistry _images;
+    ImageViewRegistry _imageViews;
     SamplerRegistry _samplers;
     ShaderRegistry _shaders;
     MeshRegistry _meshes;
+    TextureRegistry _textures;
     MaterialRegistry _materials;
     FontRegistry _fonts;
     TextRenderer _text;
@@ -47,19 +51,22 @@ namespace Krys::Gfx::OpenGL
 
     void DPIChanged(int dpi) noexcept override;
 
-    ISamplerRegistry &Samplers() noexcept override;
+    NO_DISCARD IImageRegistry &Images() noexcept override;
 
-    ITextureRegistry &Textures() noexcept override;
+    NO_DISCARD IImageViewRegistry &ImageViews() noexcept override;
 
-    IShaderRegistry &Shaders() noexcept override;
+    NO_DISCARD ISamplerRegistry &Samplers() noexcept override;
 
-    IMeshRegistry &Meshes() noexcept override;
+    NO_DISCARD ITextureRegistry &Textures() noexcept override;
 
-    IMaterialRegistry &Materials() noexcept override;
+    NO_DISCARD IShaderRegistry &Shaders() noexcept override;
 
-    IFontRegistry &Fonts() noexcept override;
+    NO_DISCARD IMeshRegistry &Meshes() noexcept override;
 
-    void DrawText(FontHandle font, const string &text, const Maths::Vec2 &position,
-                  Colour textColour = Colours::White) noexcept;
+    NO_DISCARD IMaterialRegistry &Materials() noexcept override;
+
+    NO_DISCARD IFontRegistry &Fonts() noexcept override;
+
+    NO_DISCARD API GetAPI() const noexcept override;
   };
 }

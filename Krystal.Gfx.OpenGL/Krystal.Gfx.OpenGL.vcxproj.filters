@@ -93,6 +93,18 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\TextRenderer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Images\Image.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\ImageViews\ImageView.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Images\ImageRegistry.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\ImageViews\ImageViewRegistry.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">

@@ -145,7 +145,7 @@ namespace Krys::Gfx::OpenGL
     }
 
   private:
-    void CreateShader(const string &source, unsigned int shader) noexcept
+    void CreateShader(const string &source, GLuint shader) noexcept
     {
       const auto *src = source.c_str();
       glShaderSource(shader, 1, &src, NULL);

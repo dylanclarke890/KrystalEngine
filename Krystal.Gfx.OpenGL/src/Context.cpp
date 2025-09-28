@@ -406,7 +406,7 @@ namespace
       shader.SetUniform("equirectangularMap", 0);
       shader.SetUniform("projection", captureProjection);
 
-      textureSystem.Get(textureHandles.at("hdr-environment")).Bind(0);
+      textureSystem.GetView(textureHandles.at("hdr-environment")).Bind(0);
 
       glViewport(0, 0, width, height);
       glBindFramebuffer(GL_FRAMEBUFFER, captureFBO);
@@ -591,11 +591,11 @@ namespace
   {
     shader.SetUniform("model", model);
     shader.SetUniform("normalMatrix", Inverse(Transpose(Mat3(model))));
-    textures.Get(std::get<TextureHandle>(material.Parameters[6].Value)).Bind(3);
-    textures.Get(std::get<TextureHandle>(material.Parameters[7].Value)).Bind(5);
-    textures.Get(std::get<TextureHandle>(material.Parameters[8].Value)).Bind(6);
-    textures.Get(std::get<TextureHandle>(material.Parameters[9].Value)).Bind(7);
-    textures.Get(std::get<TextureHandle>(material.Parameters[10].Value)).Bind(4);
+    textures.GetView(std::get<TextureHandle>(material.Parameters[6].Value)).Bind(3);
+    textures.GetView(std::get<TextureHandle>(material.Parameters[7].Value)).Bind(5);
+    textures.GetView(std::get<TextureHandle>(material.Parameters[8].Value)).Bind(6);
+    textures.GetView(std::get<TextureHandle>(material.Parameters[9].Value)).Bind(7);
+    textures.GetView(std::get<TextureHandle>(material.Parameters[10].Value)).Bind(4);
     mesh.Draw();
   }
 }
@@ -620,8 +620,9 @@ namespace Krys::Gfx::OpenGL
   Context::Context(NativeHandle windowHandle, uint32 width, uint32 height)
       : _windowHandle(windowHandle), _width(width), _height(height),
         _dpi(Platform::GetDPIForWindow(_windowHandle)),
-        _platformImpl(CreateUnique<ContextPlatformImpl>(windowHandle)), _textures(), _samplers(), _shaders(),
-        _meshes(), _materials(_textures), _fonts(_dpi), _text(_fonts, _shaders, _dpi)
+        _platformImpl(CreateUnique<ContextPlatformImpl>(windowHandle)), _images(), _imageViews(_images),
+        _samplers(), _shaders(), _meshes(), _textures(_images, _imageViews, _samplers), _materials(_textures),
+        _fonts(_dpi), _text(_fonts, _shaders, _dpi)
   {
   }
 
@@ -909,6 +910,16 @@ namespace Krys::Gfx::OpenGL
     _fonts.DPIChanged(dpi);
   }
 
+  IImageRegistry &Context::Images() noexcept
+  {
+    return _images;
+  }
+
+  IImageViewRegistry &Context::ImageViews() noexcept
+  {
+    return _imageViews;
+  }
+
   ISamplerRegistry &Context::Samplers() noexcept
   {
     return _samplers;
@@ -937,5 +948,10 @@ namespace Krys::Gfx::OpenGL
   IFontRegistry &Context::Fonts() noexcept
   {
     return _fonts;
+  }
+
+  API Context::GetAPI() const noexcept
+  {
+    return API::OpenGL;
   }
 }

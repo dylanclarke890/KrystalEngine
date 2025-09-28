@@ -45,6 +45,10 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Fonts\Font.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Fonts\FontRegistry.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\gl.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Images\Image.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Images\ImageRegistry.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\ImageViews\ImageView.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\ImageViews\ImageViewRegistry.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Materials\Material.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Materials\MaterialRegistry.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Meshes\Mesh.hpp" />

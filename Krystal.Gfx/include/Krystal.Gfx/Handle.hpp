@@ -16,7 +16,11 @@ namespace Krys::Gfx
     }
   };
 
-  struct TextureHandle : Handle<TextureHandle>
+  struct ImageHandle : Handle<ImageHandle>
+  {
+  };
+
+  struct ImageViewHandle : Handle<ImageViewHandle>
   {
   };
 
@@ -29,6 +33,10 @@ namespace Krys::Gfx
   };
 
   struct MeshHandle : Handle<MeshHandle>
+  {
+  };
+
+  struct TextureHandle : Handle<TextureHandle>
   {
   };
 

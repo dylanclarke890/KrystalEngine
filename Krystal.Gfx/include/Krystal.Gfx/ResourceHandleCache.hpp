@@ -59,6 +59,11 @@ namespace Krys::Gfx
       return false;
     }
 
+    void Clear() noexcept
+    {
+      _cache.clear();
+    }
+
     auto begin() noexcept
     {
       return _cache.begin();
