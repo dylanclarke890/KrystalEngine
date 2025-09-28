@@ -306,7 +306,7 @@ namespace
             ImmediateAtlasGenerator<float, 1, sdfGenerator, BitmapAtlasStorage<msdfgen::byte, 1>>;
 
           SDFGenerator generator(width, height);
-          generator.setAttributes({});
+          generator.setAttributes(attributes);
           generator.setThreadCount(4);
           generator.generate(glyphs.data(), (int)glyphs.size());
           SDFAtlasData atlas = generator.atlasStorage();
@@ -325,7 +325,7 @@ namespace
             ImmediateAtlasGenerator<float, 3, msdfGenerator, BitmapAtlasStorage<msdfgen::byte, 3>>;
 
           MSDFGenerator generator(width, height);
-          generator.setAttributes({});
+          generator.setAttributes(attributes);
           generator.setThreadCount(4);
           generator.generate(glyphs.data(), (int)glyphs.size());
           MSDFAtlasData atlas = generator.atlasStorage();
@@ -344,7 +344,7 @@ namespace
             ImmediateAtlasGenerator<float, 4, mtsdfGenerator, BitmapAtlasStorage<msdfgen::byte, 4>>;
 
           MTSDFGenerator generator(width, height);
-          generator.setAttributes({});
+          generator.setAttributes(attributes);
           generator.setThreadCount(4);
           generator.generate(glyphs.data(), (int)glyphs.size());
           MTSDFAtlasData atlas = generator.atlasStorage();

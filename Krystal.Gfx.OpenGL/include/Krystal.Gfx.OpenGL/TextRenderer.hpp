@@ -65,8 +65,8 @@ namespace Krys::Gfx::OpenGL
       SetSDFParams(shader, font);
 
       shader.SetUniform("u_OutlineColor", outlineColour.ToVec3());
-      shader.SetUniform("u_OutlineWidthAbsolute", outlineWidth);
-      shader.SetUniform("u_OutlineWidthRelative", 1.f / 20.f);
+      shader.SetUniform("u_OutlineWidthAbsolute", outlineWidth / 3.f);
+      shader.SetUniform("u_OutlineWidthRelative", outlineWidth / 20.f);
       shader.SetUniform("u_Threshold", 0.5f);
 
       font.DrawText(text, position, scale);

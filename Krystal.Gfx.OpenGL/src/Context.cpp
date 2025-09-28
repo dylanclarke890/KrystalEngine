@@ -876,9 +876,6 @@ namespace Krys::Gfx::OpenGL
                        Colours::Green);
     _text.DrawOutlined("Font Rendering - MTSDF", DefaultMTSDFFont, {xPos, height - 600.f}, Colours::Black);
 
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    _text.Draw("Font Rendering - MSDF", DefaultMSDFFont, {xPos, height - 500.f}, Colours::Purple);
-
     glDisable(GL_BLEND);
   }
 
