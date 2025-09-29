@@ -159,11 +159,11 @@
   <ItemGroup>
     <ClInclude Include="include\Krystal.Serialisation\Archives\BinaryArchive.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Archives\JsonArchive.hpp" />
+    <ClInclude Include="include\Krystal.Serialisation\Concepts.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\ISerialiser.hpp" />
+    <ClInclude Include="include\Krystal.Serialisation\NamedField.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Types\Array.hpp" />
-    <ClInclude Include="include\Krystal.Serialisation\Types\Builtins.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Types\Pair.hpp" />
-    <ClInclude Include="include\Krystal.Serialisation\Types\String.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Types\List.hpp" />
   </ItemGroup>
   <ItemGroup>
