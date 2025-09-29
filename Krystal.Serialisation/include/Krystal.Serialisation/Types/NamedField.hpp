@@ -16,17 +16,19 @@ namespace Krys::Serialisation
   };
 
   template <typename Archive, typename T>
-  void Save(Archive &archive, const NamedField<T> &field) noexcept
+  void Save(Archive &ar, const NamedField<T> &f) noexcept
   {
-    archive(pair.first);
-    archive(pair.second);
+    string name(f.Name);
+    Save(ar, name);
+    Save(ar, f.Value);
   }
 
   template <typename Archive, typename T>
-  void Load(Archive &archive, const NamedField<T> &field) noexcept
+  void Load(Archive &ar, const NamedField<T> &f) noexcept
   {
-    archive(pair.first);
-    archive(pair.second);
+    string nameFromStream;
+    Load(ar, nameFromStream);
+    Load(ar, const_cast<T &>(f.Value));
   }
 
 #define KRYS_NAMED_FIELD(value) ::Krys::Serialisation::NamedField<decltype(value)>(#value, value)
