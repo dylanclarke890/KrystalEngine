@@ -159,7 +159,6 @@
   <ItemGroup>
     <ClInclude Include="include\Krystal.Serialisation\Archives\BinaryArchive.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Archives\JsonArchive.hpp" />
-    <ClInclude Include="include\Krystal.Serialisation\IArchive.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\ISerialiser.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Types\Array.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Types\Builtins.hpp" />

@@ -2,23 +2,25 @@
 
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.Lib/Concepts.hpp"
-#include "Krystal.Serialisation/IArchive.hpp"
+#include "Krystal.Lib/String.hpp"
+#include "Krystal.Lib/Types.hpp"
 #include <bit>
 #include <memory>
 
 namespace Krys::Serialisation
 {
-  class JsonArchiveWriter : public IArchiveWriter<JsonArchiveWriter>
+  class JsonArchiveWriter
   {
-    using Base = IArchiveWriter<JsonArchiveWriter>;
+  private:
+    IO::IStreamWriter &_stream;
 
   public:
-    JsonArchiveWriter(IO::IStreamWriter &stream) noexcept : Base(stream)
+    JsonArchiveWriter(IO::IStreamWriter &stream) noexcept : _stream(stream)
     {
     }
 
     template <Arithmetic T>
-    JsonArchiveWriter &operator()(T &value) noexcept
+    JsonArchiveWriter &operator()(const T &value) noexcept
     {
       auto *data = std::bit_cast<byte *>(std::addressof(value));
       _stream.Write(data, sizeof(T));
@@ -26,7 +28,7 @@ namespace Krys::Serialisation
       return *this;
     }
 
-    JsonArchiveWriter &operator()(byte &value) noexcept
+    JsonArchiveWriter &operator()(const byte &value) noexcept
     {
       _stream.Write(std::addressof(value), sizeof(byte));
 
@@ -48,12 +50,13 @@ namespace Krys::Serialisation
     }
   };
 
-  class JsonArchiveReader : public IArchiveReader<JsonArchiveReader>
+  class JsonArchiveReader
   {
-    using Base = IArchiveReader<JsonArchiveReader>;
+  private:
+    IO::IStreamReader &_stream;
 
   public:
-    JsonArchiveReader(IO::IStreamReader &stream) noexcept : Base(stream)
+    JsonArchiveReader(IO::IStreamReader &stream) noexcept : _stream(stream)
     {
     }
 

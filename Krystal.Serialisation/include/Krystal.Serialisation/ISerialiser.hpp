@@ -3,7 +3,6 @@
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Serialisation/IArchive.hpp"
 #include "Krystal.Serialisation/Types/Builtins.hpp"
 
 namespace Krys::Serialisation
@@ -11,9 +10,6 @@ namespace Krys::Serialisation
   template <typename Archive>
   class ISerialiser
   {
-    static_assert(DerivedFrom<Archive, IArchiveWriter<Archive>>,
-                  "'Archive' must derive from 'IArchiveWriter<T>'");
-
     NO_COPY_MOVE(ISerialiser)
 
   protected:
@@ -46,9 +42,6 @@ namespace Krys::Serialisation
   template <typename Archive>
   class IDeserialiser
   {
-    static_assert(DerivedFrom<Archive, IArchiveReader<Archive>>,
-                  "'Archive' must derive from 'IArchiveReader<T>'");
-
     NO_COPY_MOVE(IDeserialiser)
 
   protected:

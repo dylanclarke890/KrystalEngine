@@ -4,18 +4,18 @@
 #include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Lib/String.hpp"
 #include "Krystal.Lib/Types.hpp"
-#include "Krystal.Serialisation/IArchive.hpp"
 #include <bit>
 #include <memory>
 
 namespace Krys::Serialisation
 {
-  class BinaryArchiveWriter : public IArchiveWriter<BinaryArchiveWriter>
+  class BinaryArchiveWriter
   {
-    using Base = IArchiveWriter<BinaryArchiveWriter>;
-
+  private:
+    IO::IStreamWriter &_stream;
+    
   public:
-    BinaryArchiveWriter(IO::IStreamWriter &stream) noexcept : Base(stream)
+    BinaryArchiveWriter(IO::IStreamWriter &stream) noexcept : _stream(stream)
     {
     }
 
@@ -48,28 +48,15 @@ namespace Krys::Serialisation
 
       return *this;
     }
-
-    BinaryArchiveWriter &operator()(const stringview &value) noexcept
-    {
-      size_t length = value.length();
-      (*this)(length);
-
-      if (length == 0)
-        return *this;
-
-      auto *data = std::bit_cast<const byte *>(value.data());
-      _stream.Write(data, length);
-
-      return *this;
-    }
   };
 
-  class BinaryArchiveReader : public IArchiveReader<BinaryArchiveReader>
+  class BinaryArchiveReader
   {
-    using Base = IArchiveReader<BinaryArchiveReader>;
+  private:
+    IO::IStreamReader &_stream;
 
   public:
-    BinaryArchiveReader(IO::IStreamReader &stream) noexcept : Base(stream)
+    BinaryArchiveReader(IO::IStreamReader &stream) noexcept : _stream(stream)
     {
     }
 

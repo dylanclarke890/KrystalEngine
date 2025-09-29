@@ -1,4 +1,5 @@
 #include "Krystal.IO/Streams/NativeFileStream.hpp"
+#include "Krystal.Lib/Types.hpp"
 #include <filesystem>
 #include <ios>
 
@@ -23,7 +24,7 @@ namespace Krys::IO
 
   bool NativeFileReader::Open() noexcept
   {
-    const std::filesystem::path path = _path.ToString();
+    const auto path = _path.ToString();
     if (!std::filesystem::exists(path) || !std::filesystem::is_regular_file(path))
     {
       return false; // Cannot open a reader for a non-regular file
@@ -37,7 +38,14 @@ namespace Krys::IO
   {
     if (_stream.is_open())
     {
-      _stream.close();
+      try
+      {
+        _stream.close();
+      }
+      // NOLINTNEXTLINE(bugprone-empty-catch)
+      catch (...)
+      {
+      }
     }
   }
 
@@ -48,7 +56,17 @@ namespace Krys::IO
     {
       return 0;
     }
-    _stream.read(reinterpret_cast<char *>(dest), size);
+
+    try
+    {
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+      _stream.read(reinterpret_cast<char *>(dest), (int64)size);
+    }
+    catch (...)
+    {
+      return 0;
+    }
+
     return _stream.gcount();
   }
 
@@ -70,7 +88,15 @@ namespace Krys::IO
       return std::ios_base::beg; // Default case, should not happen
     }();
 
-    _stream.seekg(offset, dir);
+    try
+    {
+      _stream.seekg(offset, dir);
+    }
+    catch (...)
+    {
+      return false;
+    }
+
     return !_stream.fail();
   }
 
@@ -80,10 +106,20 @@ namespace Krys::IO
     {
       return 0;
     }
-    std::streampos currentPos = _stream.tellg();
-    _stream.seekg(0, std::ios_base::end);  // Move to the end to get size
-    std::streampos size = _stream.tellg(); // Get the size
-    _stream.seekg(currentPos);             // Restore the original position
+
+    std::streampos size;
+    try
+    {
+      const std::streampos currentPos = _stream.tellg();
+      _stream.seekg(0, std::ios_base::end); // Move to the end to get size
+      size = _stream.tellg();               // Get the size
+      _stream.seekg(currentPos);            // Restore the original position
+    }
+    catch (...)
+    {
+      return 0;
+    }
+
     return size;
   }
 
@@ -122,7 +158,7 @@ namespace Krys::IO
 
   bool NativeFileWriter::Open() noexcept
   {
-    const std::filesystem::path path = _path.ToString();
+    const auto path = _path.ToString();
     if (std::filesystem::exists(path) && !std::filesystem::is_regular_file(path))
     {
       return false; // Cannot open a writer for a non-regular file
@@ -136,7 +172,14 @@ namespace Krys::IO
   {
     if (_stream.is_open())
     {
-      _stream.close();
+      try
+      {
+        _stream.close();
+      }
+      // NOLINTNEXTLINE(bugprone-empty-catch)
+      catch (...)
+      {
+      }
     }
   }
 
@@ -148,7 +191,16 @@ namespace Krys::IO
       return false;
     }
 
-    _stream.write(reinterpret_cast<const char *>(src), size);
+    try
+    {
+      // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+      _stream.write(reinterpret_cast<const char *>(src), (int64)size);
+    }
+    catch (...)
+    {
+      return false;
+    }
+
     return !_stream.fail();
   }
 
@@ -170,7 +222,15 @@ namespace Krys::IO
       return std::ios_base::beg; // Default case, should not happen
     }();
 
-    _stream.seekp(offset, dir);
+    try
+    {
+      _stream.seekp(offset, dir);
+    }
+    catch (...)
+    {
+      return false;
+    }
+
     return _stream.good();
   }
 
@@ -181,12 +241,19 @@ namespace Krys::IO
       return 0;
     }
 
-    std::streampos currentPos = _stream.tellp();
-    _stream.seekp(0, std::ios_base::end); // Move to the end to get size
+    uint64 size {};
+    try
+    {
+      const std::streampos currentPos = _stream.tellp();
+      _stream.seekp(0, std::ios_base::end); // Move to the end to get size
+      size = _stream.tellp();
+      _stream.seekp(currentPos); // Restore the original position
+    }
+    catch (...)
+    {
+      return 0;
+    }
 
-    uint64 size = _stream.tellp(); // NOLINT(cppcoreguidelines-init-variables)
-
-    _stream.seekp(currentPos); // Restore the original position
     return size;
   }
 
