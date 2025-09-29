@@ -27,7 +27,7 @@ namespace Krys::Serialisation
     ~ISerialiser() noexcept = default;
 
     template <typename T>
-    void Serialise(T &value) noexcept
+    void Serialise(const T &value) noexcept
     {
       Save(_archive, value);
     }

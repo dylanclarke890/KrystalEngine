@@ -10,7 +10,7 @@ namespace Krys::Tests
 
   TEST_CASE("Serialise(Vector)", "[Serialisation][Types]")
   {
-    SECTION("Vector<int>")
+    SECTION("List<int>")
     {
       using Type = std::vector<int>;
 
@@ -36,7 +36,7 @@ namespace Krys::Tests
       REQUIRE(deserialised[0] == 1);
     }
 
-    SECTION("Map<string>")
+    SECTION("List<string>")
     {
       using Type = std::vector<string>;
 

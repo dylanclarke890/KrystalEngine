@@ -12,7 +12,7 @@ namespace Krys::Tests
     auto stream = NativeFileReader(Path("data/24bpp-320x240.bmp"));
     REQUIRE(stream.IsOpen());
 
-    auto image = LoadImage(stream);
+    auto image = IO::LoadImage(stream, false);
     REQUIRE(image.has_value());
     REQUIRE(image->Width == 320);
     REQUIRE(image->Height == 240);

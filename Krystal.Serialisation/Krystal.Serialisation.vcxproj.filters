@@ -21,9 +21,6 @@
     <ClInclude Include="include\Krystal.Serialisation\Archives\BinaryArchive.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Serialisation\Types\NamedField.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Serialisation\IArchive.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -40,6 +37,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Serialisation\Types\String.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Serialisation\Archives\JsonArchive.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

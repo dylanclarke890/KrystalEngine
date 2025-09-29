@@ -20,7 +20,7 @@ namespace Krys::Gfx::Vulkan
     List<VkPresentModeKHR> PresentModes {};
   };
 
-  class VulkanContext : public IContext
+  class VulkanContext
   {
     NativeHandle _windowHandle = nullptr;
     uint32 _width = 0, _height = 0;
@@ -75,13 +75,13 @@ namespace Krys::Gfx::Vulkan
 
     ~VulkanContext() noexcept;
 
-    void Setup() noexcept override;
+    void Setup() noexcept;
 
-    void Render(ICamera &camera) noexcept override;
+    void Render(ICamera &camera) noexcept;
 
-    void Present() noexcept override;
+    void Present() noexcept;
 
-    virtual void Resize(uint32 width, uint32 height) noexcept override;
+    virtual void Resize(uint32 width, uint32 height) noexcept;
 
   private:
     void CreateInstance();

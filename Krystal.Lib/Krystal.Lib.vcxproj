@@ -165,6 +165,7 @@
     <ClInclude Include="include\Krystal.Lib\StringUtils.hpp" />
     <ClInclude Include="include\Krystal.Lib\StronglyTypedBool.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types.hpp" />
+    <ClInclude Include="include\Krystal.Lib\TypeName.hpp" />
     <ClInclude Include="include\Krystal.Lib\Version.hpp" />
   </ItemGroup>
   <ItemGroup>

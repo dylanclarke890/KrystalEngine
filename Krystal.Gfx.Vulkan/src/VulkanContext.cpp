@@ -21,17 +21,17 @@
 
 namespace Krys::Gfx
 {
-  Expected<Unique<IContext>> CreateContext(NativeHandle windowHandle, uint32 width, uint32 height) noexcept
-  {
-    try
-    {
-      return Expected<Unique<IContext>>(CreateUnique<Vulkan::VulkanContext>(windowHandle, width, height));
-    }
-    catch (const std::exception &e)
-    {
-      return Unexpected(e.what());
-    }
-  }
+  //Expected<Unique<IContext>> CreateContext(NativeHandle windowHandle, uint32 width, uint32 height) noexcept
+  //{
+  //  try
+  //  {
+  //    return Expected<Unique<IContext>>(CreateUnique<Vulkan::VulkanContext>(windowHandle, width, height));
+  //  }
+  //  catch (const std::exception &e)
+  //  {
+  //    return Unexpected(e.what());
+  //  }
+  //}
 }
 
 namespace

@@ -9,7 +9,7 @@
 
 namespace Krys::Gfx::D3D11
 {
-  class D3D11Context final : public IContext
+  class D3D11Context final
   {
     HWND _windowHandle;
     IDXGISwapChain *_swapchain;
@@ -20,14 +20,14 @@ namespace Krys::Gfx::D3D11
     NO_COPY_MOVE(D3D11Context)
   public:
     D3D11Context(NativeHandle windowHandle, uint32 width, uint32 height);
-    ~D3D11Context() noexcept override;
+    ~D3D11Context() noexcept;
 
-    void Setup() noexcept override;
+    void Setup() noexcept;
 
-    void Render(ICamera& camera) noexcept override;
+    void Render(ICamera &camera) noexcept;
 
-    void Present() noexcept override;
+    void Present() noexcept;
 
-    virtual void Resize(uint32 width, uint32 height) noexcept override;
+    virtual void Resize(uint32 width, uint32 height) noexcept;
   };
 }
