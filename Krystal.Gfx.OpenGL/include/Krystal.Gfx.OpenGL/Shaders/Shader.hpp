@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
+#include "Krystal.Gfx.OpenGL/Shaders/ShaderReflector.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/String.hpp"
@@ -14,7 +15,8 @@ namespace Krys::Gfx::OpenGL
   {
     NO_COPY(Shader)
 
-    GLuint _id;
+    GLuint _id {0u};
+    ShaderLayout _layout {};
 
   public:
     Shader(const string &vertex, const string &fragment) noexcept : _id(glCreateProgram())
@@ -29,6 +31,7 @@ namespace Krys::Gfx::OpenGL
       glAttachShader(_id, fragmentShader);
 
       Link();
+      Reflect();
 
       glDeleteShader(vertexShader);
       glDeleteShader(fragmentShader);
@@ -50,6 +53,7 @@ namespace Krys::Gfx::OpenGL
       glAttachShader(_id, fragmentShader);
 
       Link();
+      Reflect();
 
       glDeleteShader(vertexShader);
       glDeleteShader(geometryShader);
@@ -144,6 +148,23 @@ namespace Krys::Gfx::OpenGL
 #undef IsUniformType
     }
 
+    NO_DISCARD GLuint Id() const noexcept
+    {
+      return _id;
+    }
+
+    NO_DISCARD GLuint GetSamplerUnit(const string &samplerName) const noexcept
+    {
+      auto it = _layout.Samplers.find(samplerName);
+      if (it != _layout.Samplers.end())
+      {
+        return it->second.FirstUnit;
+      }
+
+      assert(false && "Sampler not found in shader layout.");
+      return 0u;
+    }
+
   private:
     void CreateShader(const string &source, GLuint shader) noexcept
     {
@@ -172,6 +193,26 @@ namespace Krys::Gfx::OpenGL
       {
         glGetProgramInfoLog(_id, 512, NULL, infoLog);
         assert(false && "Shader program linking failed. See log for details.");
+      }
+    }
+
+    void Reflect() noexcept
+    {
+      ShaderReflector reflector {};
+      _layout = reflector.Reflect(_id);
+      reflector.LogReflectionInfo(_layout);
+
+      SetSamplerUniforms();
+    }
+
+    void SetSamplerUniforms() noexcept
+    {
+      int textureUnit = 0;
+      for (auto &[name, sampler] : _layout.Samplers)
+      {
+        SetUniform(name, textureUnit);
+        sampler.FirstUnit = textureUnit;
+        textureUnit += sampler.ArraySize;
       }
     }
 

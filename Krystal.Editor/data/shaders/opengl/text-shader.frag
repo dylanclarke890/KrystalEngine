@@ -1,9 +1,14 @@
-﻿#version 330 core
+﻿#version 420 core
 
 in vec2 TextureCoords;
 
 uniform sampler2D u_Atlas;
 uniform vec3 u_TextColor;
+
+layout (std140, binding = 3) uniform TestBinding
+{
+  vec4 testColor;
+};
 
 out vec4 FragmentColor;
 

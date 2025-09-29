@@ -105,6 +105,9 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\ImageViews\ImageViewRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Shaders\ShaderReflector.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">

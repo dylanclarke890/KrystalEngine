@@ -19,6 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Krystal.Debug\Krystal.Debug.vcxproj">
+      <Project>{0d3fc524-252e-46af-977c-dc4eba9efac2}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Krystal.Gfx\Krystal.Gfx.vcxproj">
       <Project>{f0f40133-75a2-4345-893f-f7e69e477155}</Project>
     </ProjectReference>
@@ -55,6 +58,7 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Meshes\MeshRegistry.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Samplers\Sampler.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Samplers\SamplerRegistry.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Shaders\ShaderReflector.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Shaders\ShaderRegistry.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\TextRenderer.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Textures\TextureRegistry.hpp" />

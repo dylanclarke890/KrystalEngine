@@ -11,6 +11,7 @@
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
 #include "Krystal.Lib/String.hpp"
+#include "Krystal.Debug/ScopedProfiler.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
@@ -84,6 +85,7 @@ namespace Krys::Gfx::OpenGL
     NO_DISCARD ShaderHandle LoadTextShader(const IO::Path &vertex, const IO::Path &fragment,
                                            const TextShaderDesc &desc) noexcept override
     {
+      auto profiler = Debug::ScopedProfiler("LoadTextShader");
       ShaderPreprocessorConfig cfg {};
 
       switch (desc.FontType)
