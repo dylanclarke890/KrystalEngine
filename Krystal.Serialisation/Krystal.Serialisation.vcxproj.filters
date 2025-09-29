@@ -21,7 +21,7 @@
     <ClInclude Include="include\Krystal.Serialisation\Archives\BinaryArchive.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Serialisation\NamedField.hpp">
+    <ClInclude Include="include\Krystal.Serialisation\Types\NamedField.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Serialisation\IArchive.hpp">

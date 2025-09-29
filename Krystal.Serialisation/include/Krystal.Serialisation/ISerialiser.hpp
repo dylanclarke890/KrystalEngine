@@ -32,7 +32,12 @@ namespace Krys::Serialisation
       Save(_archive, value);
     }
 
-    Archive &GetArchive() const noexcept
+    Archive &GetArchive() noexcept
+    {
+      return _archive;
+    }
+
+    const Archive &GetArchive() const noexcept
     {
       return _archive;
     }
@@ -62,7 +67,12 @@ namespace Krys::Serialisation
       Load(_archive, value);
     }
 
-    Archive &GetArchive() const noexcept
+    Archive &GetArchive() noexcept
+    {
+      return _archive;
+    }
+
+    const Archive &GetArchive() const noexcept
     {
       return _archive;
     }

@@ -15,5 +15,19 @@ namespace Krys::Serialisation
     }
   };
 
+  template <typename Archive, typename T>
+  void Save(Archive &archive, const NamedField<T> &field) noexcept
+  {
+    archive(pair.first);
+    archive(pair.second);
+  }
+
+  template <typename Archive, typename T>
+  void Load(Archive &archive, const NamedField<T> &field) noexcept
+  {
+    archive(pair.first);
+    archive(pair.second);
+  }
+
 #define KRYS_NAMED_FIELD(value) ::Krys::Serialisation::NamedField<decltype(value)>(#value, value)
 }
