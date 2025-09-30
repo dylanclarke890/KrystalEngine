@@ -11,25 +11,25 @@ namespace Krys::Serialisation
   template <typename T>
   concept ArchiveBuiltin = Arithmetic<T> || SameType<T, byte> || SameType<T, string>;
 
-  /// @brief Denotes a custom type that requires a serialisation method.
+  /// @brief Denotes a custom type that requires a custom serialisation method.
   template <typename T>
   concept ArchiveCustom = !ArchiveBuiltin<T>;
 
-  template <class Archive, class T>
-  concept HasTransferMember = requires(Archive &a, T &t) { Access::Transfer(a, t); }; // T&
+  template <typename Archive, typename T>
+  concept HasTransferMember = requires(Archive &archive, T &value) { Access::Transfer(archive, value); };
 
-  template <class Archive, class T>
-  concept HasSaveMember = requires(Archive &a, const T &t) { Access::Save(a, t); }; // const T&
+  template <typename Archive, typename T>
+  concept HasSaveMember = requires(Archive &archive, const T &value) { Access::Save(archive, value); };
 
-  template <class Archive, class T>
-  concept HasLoadMember = requires(Archive &a, T &t) { Access::Load(a, t); }; // T&
+  template <typename Archive, typename T>
+  concept HasLoadMember = requires(Archive &archive, T &value) { Access::Load(archive, value); };
 
-  template <class Archive, class T>
-  concept HasTransferNonMember = requires(Archive &a, T &t) { Transfer(a, t); }; // T&
+  template <typename Archive, typename T>
+  concept HasTransferNonMember = requires(Archive &archive, T &value) { Transfer(archive, value); };
 
-  template <class Archive, class T>
-  concept HasSaveNonMember = requires(Archive &a, const T &t) { Save(a, t); }; // const T&
+  template <typename Archive, typename T>
+  concept HasSaveNonMember = requires(Archive &archive, const T &value) { Save(archive, value); };
 
-  template <class Archive, class T>
-  concept HasLoadNonMember = requires(Archive &a, T &t) { Load(a, t); }; // T&
+  template <typename Archive, typename T>
+  concept HasLoadNonMember = requires(Archive &archive, T &value) { Load(archive, value); };
 }

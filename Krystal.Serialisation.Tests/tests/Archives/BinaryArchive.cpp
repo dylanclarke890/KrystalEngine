@@ -62,7 +62,7 @@ namespace Krys::Serialisation
     }
 
   private:
-    friend struct Access;
+    friend class Access;
 
     int Int;
     float Float;

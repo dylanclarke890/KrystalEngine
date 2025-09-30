@@ -2,25 +2,26 @@
 
 namespace Krys::Serialisation
 {
-  struct Access
+  class Access
   {
-    template <class Archive, class T>
-    requires requires(Archive &ar, T &t) { t.Transfer(ar); }
-    static auto Transfer(Archive &ar, T &t) -> decltype(t.Transfer(ar))
+  public:
+    template <typename Archive, typename T>
+    requires requires(Archive &archive, T &value) { value.Transfer(archive); }
+    static auto Transfer(Archive &archive, T &value) -> decltype(value.Transfer(archive))
     {
       return t.Transfer(ar);
     }
 
-    template <class Archive, class T>
-    requires requires(Archive &ar, const T &t) { t.Save(ar); }
-    static auto Save(Archive &ar, T const &t) -> decltype(t.Save(ar))
+    template <typename Archive, typename T>
+    requires requires(Archive &archive, const T &value) { value.Save(archive); }
+    static auto Save(Archive &archive, T const &value) -> decltype(value.Save(archive))
     {
       return t.Save(ar);
     }
 
-    template <class Archive, class T>
-    requires requires(Archive &ar, T &t) { t.Load(ar); }
-    static auto Load(Archive &ar, T &t) -> decltype(t.Load(ar))
+    template <typename Archive, typename T>
+    requires requires(Archive &archive, T &value) { value.Load(archive); }
+    static auto Load(Archive &archive, T &value) -> decltype(value.Load(archive))
     {
       return t.Load(ar);
     }
