@@ -38,23 +38,13 @@ namespace Krys::Serialisation
   template <typename Archive>
   void Save(Archive &archive, const TestStruct &obj) noexcept
   {
-    archive(obj.IntValue);
-    archive(obj.FloatValue);
-    archive(obj.BoolValue);
-    archive(obj.ByteValue);
-    archive(obj.StringValue);
-    archive(obj.InnerStruct);
+    archive(obj.IntValue, obj.FloatValue, obj.BoolValue, obj.ByteValue, obj.StringValue, obj.InnerStruct);
   }
 
   template <typename Archive>
   void Load(Archive &archive, TestStruct &obj) noexcept
   {
-    archive(obj.IntValue);
-    archive(obj.FloatValue);
-    archive(obj.BoolValue);
-    archive(obj.ByteValue);
-    archive(obj.StringValue);
-    archive(obj.InnerStruct);
+    archive(obj.IntValue, obj.FloatValue, obj.BoolValue, obj.ByteValue, obj.StringValue, obj.InnerStruct);
   }
 }
 

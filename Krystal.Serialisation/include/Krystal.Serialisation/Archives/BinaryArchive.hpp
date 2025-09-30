@@ -51,6 +51,14 @@ namespace Krys::Serialisation
       Save(*this, obj);
       return *this;
     }
+
+    template <class... Types>
+    requires(sizeof...(Types) > 1)
+    BinaryArchiveWriter &operator()(Types &&...types) noexcept
+    {
+      ((void)(*this)(std::forward<Types>(types)), ...);
+      return *this;
+    }
   };
 
   class BinaryArchiveReader
@@ -95,6 +103,14 @@ namespace Krys::Serialisation
     BinaryArchiveReader &operator()(T &obj) noexcept
     {
       Load(*this, obj);
+      return *this;
+    }
+
+    template <class... Types>
+    requires(sizeof...(Types) > 1)
+    BinaryArchiveReader &operator()(Types &...types) noexcept
+    {
+      ((void)(*this)(types), ...);
       return *this;
     }
   };
