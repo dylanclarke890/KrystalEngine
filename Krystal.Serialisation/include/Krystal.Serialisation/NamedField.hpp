@@ -7,10 +7,10 @@ namespace Krys::Serialisation
   template <typename T>
   struct NamedField
   {
-    stringview Name;
+    string Name;
     T &Value;
 
-    constexpr NamedField(stringview name, T &value) : Name(name), Value(value)
+    constexpr NamedField(string name, T &value) : Name(name), Value(value)
     {
     }
   };

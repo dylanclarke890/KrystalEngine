@@ -160,6 +160,7 @@
     <ClInclude Include="include\Krystal.Lib\Set.hpp" />
     <ClInclude Include="include\Krystal.Lib\SmartPointers.hpp" />
     <ClInclude Include="include\Krystal.Lib\Span.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Stack.hpp" />
     <ClInclude Include="include\Krystal.Lib\String.hpp" />
     <ClInclude Include="include\Krystal.Lib\StringId.hpp" />
     <ClInclude Include="include\Krystal.Lib\StringUtils.hpp" />

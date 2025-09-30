@@ -79,6 +79,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <AllProjectBMIsArePublic>false</AllProjectBMIsArePublic>
+    <IncludePath>$(ProjectDir)third-party\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -166,6 +167,44 @@
     <ClInclude Include="include\Krystal.Serialisation\Types\Array.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Types\Pair.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Types\List.hpp" />
+    <ClInclude Include="third-party\rapidjson\allocators.h" />
+    <ClInclude Include="third-party\rapidjson\cursorstreamwrapper.h" />
+    <ClInclude Include="third-party\rapidjson\document.h" />
+    <ClInclude Include="third-party\rapidjson\encodedstream.h" />
+    <ClInclude Include="third-party\rapidjson\encodings.h" />
+    <ClInclude Include="third-party\rapidjson\error\en.h" />
+    <ClInclude Include="third-party\rapidjson\error\error.h" />
+    <ClInclude Include="third-party\rapidjson\filereadstream.h" />
+    <ClInclude Include="third-party\rapidjson\filewritestream.h" />
+    <ClInclude Include="third-party\rapidjson\fwd.h" />
+    <ClInclude Include="third-party\rapidjson\internal\biginteger.h" />
+    <ClInclude Include="third-party\rapidjson\internal\clzll.h" />
+    <ClInclude Include="third-party\rapidjson\internal\diyfp.h" />
+    <ClInclude Include="third-party\rapidjson\internal\dtoa.h" />
+    <ClInclude Include="third-party\rapidjson\internal\ieee754.h" />
+    <ClInclude Include="third-party\rapidjson\internal\itoa.h" />
+    <ClInclude Include="third-party\rapidjson\internal\meta.h" />
+    <ClInclude Include="third-party\rapidjson\internal\pow10.h" />
+    <ClInclude Include="third-party\rapidjson\internal\regex.h" />
+    <ClInclude Include="third-party\rapidjson\internal\stack.h" />
+    <ClInclude Include="third-party\rapidjson\internal\strfunc.h" />
+    <ClInclude Include="third-party\rapidjson\internal\strtod.h" />
+    <ClInclude Include="third-party\rapidjson\internal\swap.h" />
+    <ClInclude Include="third-party\rapidjson\istreamwrapper.h" />
+    <ClInclude Include="third-party\rapidjson\memorybuffer.h" />
+    <ClInclude Include="third-party\rapidjson\memorystream.h" />
+    <ClInclude Include="third-party\rapidjson\msinttypes\inttypes.h" />
+    <ClInclude Include="third-party\rapidjson\msinttypes\stdint.h" />
+    <ClInclude Include="third-party\rapidjson\ostreamwrapper.h" />
+    <ClInclude Include="third-party\rapidjson\pointer.h" />
+    <ClInclude Include="third-party\rapidjson\prettywriter.h" />
+    <ClInclude Include="third-party\rapidjson\rapidjson.h" />
+    <ClInclude Include="third-party\rapidjson\reader.h" />
+    <ClInclude Include="third-party\rapidjson\schema.h" />
+    <ClInclude Include="third-party\rapidjson\stream.h" />
+    <ClInclude Include="third-party\rapidjson\stringbuffer.h" />
+    <ClInclude Include="third-party\rapidjson\uri.h" />
+    <ClInclude Include="third-party\rapidjson\writer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\placeholder.cpp" />
