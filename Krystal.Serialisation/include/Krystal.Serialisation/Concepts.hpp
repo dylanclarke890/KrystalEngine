@@ -3,6 +3,7 @@
 #include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Lib/String.hpp"
 #include "Krystal.Lib/Types.hpp"
+#include "Krystal.Serialisation/Access.hpp"
 
 namespace Krys::Serialisation
 {
@@ -13,20 +14,20 @@ namespace Krys::Serialisation
   concept NonArchiveBuiltin = !ArchiveBuiltin<T>;
 
   template <class Archive, class T>
-  concept HasMemberSave = requires(Archive &a, const T &t) { t.Save(a); }; // const T&
+  concept HasTransferMember = requires(Archive &a, T &t) { Access::Transfer(a, t); }; // T&
 
   template <class Archive, class T>
-  concept HasNonMemberSave = requires(Archive &a, const T &t) { Save(a, t); }; // const T&
+  concept HasSaveMember = requires(Archive &a, const T &t) { Access::Save(a, t); }; // const T&
 
   template <class Archive, class T>
-  concept HasMemberLoad = requires(Archive &a, T &t) { t.Load(a); }; // T&
+  concept HasLoadMember = requires(Archive &a, T &t) { Access::Load(a, t); }; // T&
 
   template <class Archive, class T>
-  concept HasNonMemberLoad = requires(Archive &a, T &t) { Load(a, t); }; // T&
+  concept HasTransferNonMember = requires(Archive &a, T &t) { Transfer(a, t); }; // T&
 
   template <class Archive, class T>
-  concept HasMemberTransfer = requires(Archive &a, T &t) { t.Transfer(a); }; // T&
+  concept HasSaveNonMember = requires(Archive &a, const T &t) { Save(a, t); }; // const T&
 
   template <class Archive, class T>
-  concept HasNonMemberTransfer = requires(Archive &a, T &t) { Transfer(a, t); }; // T&
+  concept HasLoadNonMember = requires(Archive &a, T &t) { Load(a, t); }; // T&
 }

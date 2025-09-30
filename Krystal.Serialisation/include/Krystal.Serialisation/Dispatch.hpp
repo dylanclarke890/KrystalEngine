@@ -1,14 +1,21 @@
 #pragma once
 
 #include "Krystal.Lib/Concepts.hpp"
+#include "Krystal.Serialisation/Access.hpp"
 #include "Krystal.Serialisation/Concepts.hpp"
 
 namespace Krys::Serialisation
 {
-  /// Hook Resolution Order (ADL-discovered):
-  /// void Load(Archive& ar, T& value) noexcept;
-  /// void Save(Archive& ar, const T& value) noexcept
-  /// void Transfer(Archive& ar, T& value) noexcept; NOTE: do not mutate 'value' in custom implementations!
+  /// Dispatch Resolution Order:
+  /// Is T an ArchiveBuiltin type?
+  /// Is there a member function:
+  ///   1.  void value.Transfer(Archive& ar) noexcept;
+  ///   2a. void value.Save(Archive& ar) noexcept;
+  ///   2b. void value.Load(Archive& ar) noexcept;
+  /// Is there a non-member function:
+  ///   1.  void Transfer(Archive& ar, T& value) noexcept;
+  ///   2a. void Save(Archive& ar, const T& value) noexcept
+  ///   2b. void Load(Archive& ar, T& value) noexcept;
 
   template <class Archive, class T>
   void DispatchSave(Archive &ar, const T &v) noexcept
@@ -17,16 +24,23 @@ namespace Krys::Serialisation
     {
       ar(v);
     }
-    else if constexpr (HasNonMemberSave<Archive, T>)
+    else if constexpr (HasTransferMember<Archive, RemoveConst<T>>)
+    {
+      // We need to cast away const-ness for these calls because Transfer requires a non-const reference.
+      Access::Transfer(ar, const_cast<RemoveConst<T> &>(v));
+    }
+    else if constexpr (HasTransferNonMember<Archive, RemoveConst<T>>)
+    {
+      // We need to cast away const-ness for these calls because Transfer requires a non-const reference.
+      Transfer(ar, const_cast<RemoveConst<T> &>(v));
+    }
+    else if constexpr (HasSaveMember<Archive, T>)
+    {
+      Access::Save(ar, v);
+    }
+    else if constexpr (HasSaveNonMember<Archive, T>)
     {
       Save(ar, v);
-    }
-    else if constexpr (HasNonMemberTransfer<Archive, std::remove_const_t<T>>)
-    {
-      // We need to cast away const-ness here because Transfer requires a non-const reference.
-      // It's safe as long as custom Transfer implementations do not modify the object.
-      auto &m = const_cast<RemoveConst<T> &>(v);
-      Transfer(ar, m);
     }
     else
     {
@@ -41,13 +55,21 @@ namespace Krys::Serialisation
     {
       ar(v);
     }
-    else if constexpr (HasNonMemberLoad<Archive, T>)
+    else if constexpr (HasTransferMember<Archive, T>)
     {
-      Load(ar, v);
+      Access::Transfer(ar, v);
     }
-    else if constexpr (HasNonMemberTransfer<Archive, T>)
+    else if constexpr (HasTransferNonMember<Archive, T>)
     {
       Transfer(ar, v);
+    }
+    else if constexpr (HasLoadMember<Archive, T>)
+    {
+      Access::Load(ar, v);
+    }
+    else if constexpr (HasLoadNonMember<Archive, T>)
+    {
+      Load(ar, v);
     }
     else
     {

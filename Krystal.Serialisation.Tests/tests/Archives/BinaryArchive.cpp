@@ -1,43 +1,110 @@
 #include "Krystal.Serialisation/Archives/BinaryArchive.hpp"
 #include "Krystal.IO/Streams/MemoryStream.hpp"
+#include "Krystal.Serialisation/Access.hpp"
 #include "Krystal.Serialisation/ISerialiser.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Serialisation
 {
-  struct InnerTestStruct
+  struct FreeTransfer
   {
-    int InnerIntValue;
-    float InnerFloatValue;
+    int Int;
+    float Float;
+  };
+
+  template <typename Archive>
+  void Transfer(Archive &archive, FreeTransfer &obj) noexcept
+  {
+    archive(obj.Int);
+    archive(obj.Float);
+  }
+
+  struct FreeSaveLoad
+  {
+    int Int;
+    float Float;
+  };
+
+  template <typename Archive>
+  void Load(Archive &archive, FreeSaveLoad &obj) noexcept
+  {
+    archive(obj.Int, obj.Float);
+  }
+
+  template <typename Archive>
+  void Save(Archive &archive, const FreeSaveLoad &obj) noexcept
+  {
+    archive(obj.Int, obj.Float);
+  }
+
+  struct MemberPublicTransfer
+  {
+    int Int;
+    float Float;
+
+    template <typename Archive>
+    void Transfer(Archive &archive) noexcept
+    {
+      archive(Int, Float);
+    }
+  };
+
+  struct MemberPrivateSaveLoad
+  {
+    MemberPrivateSaveLoad() = default;
+
+    MemberPrivateSaveLoad(int i, float f) : Int(i), Float(f)
+    {
+    }
+
+    bool operator==(const MemberPrivateSaveLoad &other) const noexcept
+    {
+      return Int == other.Int && Float == other.Float;
+    }
+
+  private:
+    friend struct Access;
+
+    int Int;
+    float Float;
+
+    template <typename Archive>
+    void Load(Archive &archive) noexcept
+    {
+      archive(Int, Float);
+    }
+
+    template <typename Archive>
+    void Save(Archive &archive) const noexcept
+    {
+      archive(Int, Float);
+    }
   };
 
   struct TestStruct
   {
-    int IntValue;
-    float FloatValue;
-    bool BoolValue;
-    byte ByteValue;
-    string StringValue;
-    InnerTestStruct InnerStruct;
+    int Int;
+    float Float;
+    bool Bool;
+    byte Byte;
+    string String;
+    FreeTransfer NestedA;
+    MemberPublicTransfer NestedB;
+    FreeSaveLoad NestedC;
+    MemberPrivateSaveLoad NestedD;
+
+    template <typename Archive>
+    void Save(Archive &archive) const noexcept
+    {
+      archive(Int, Float, Bool, Byte, String, NestedA, NestedB, NestedC, NestedD);
+    }
   };
-
-  template <typename Archive>
-  void Transfer(Archive &archive, const InnerTestStruct &obj) noexcept
-  {
-    archive(obj.InnerIntValue);
-    archive(obj.InnerFloatValue);
-  }
-
-  template <typename Archive>
-  void Save(Archive &archive, const TestStruct &obj) noexcept
-  {
-    archive(obj.IntValue, obj.FloatValue, obj.BoolValue, obj.ByteValue, obj.StringValue, obj.InnerStruct);
-  }
 
   template <typename Archive>
   void Load(Archive &archive, TestStruct &obj) noexcept
   {
-    archive(obj.IntValue, obj.FloatValue, obj.BoolValue, obj.ByteValue, obj.StringValue, obj.InnerStruct);
+    archive(obj.Int, obj.Float, obj.Bool, obj.Byte, obj.String, obj.NestedA, obj.NestedB, obj.NestedC,
+            obj.NestedD);
   }
 }
 
@@ -47,59 +114,43 @@ namespace Krys::Tests
 
   TEST_CASE("BinaryArchiveWriter", "[BinaryArchive]")
   {
-    int iValue = 42;
-    float fValue = 3.14f;
-    bool bValue = true;
-    byte byteValue = byte {0x11};
-    string strValue = "Hello, World!";
-    TestStruct testStruct {iValue, fValue, bValue, byteValue, strValue};
-    testStruct.InnerStruct = {7, 2.71f};
-
+    TestStruct input {
+      .Int = 42,
+      .Float = 3.14f,
+      .Bool = true,
+      .Byte = byte {0x7F},
+      .String = "Hello, World!",
+      .NestedA = {100, 1.23f},
+      .NestedB = {200, 4.56f},
+      .NestedC = {300, 7.89f},
+      .NestedD = {400, 0.12f},
+    };
+    TestStruct output {};
     List<byte> data(1'024);
 
     {
       IO::MemoryStreamWriter stream(data);
       ISerialiser<BinaryArchiveWriter> serialiser(stream);
-
-      serialiser.Serialise(iValue);
-      serialiser.Serialise(fValue);
-      serialiser.Serialise(bValue);
-      serialiser.Serialise(byteValue);
-      serialiser.Serialise(strValue);
-      serialiser.Serialise(testStruct);
+      serialiser.Serialise(input);
     }
 
     {
-      int iValueOut = 0;
-      float fValueOut = 0.0f;
-      bool bValueOut = false;
-      byte byteValueOut = byte {0};
-      string strValueOut;
-      TestStruct testStructOut {};
-
       IO::MemoryStreamReader stream(data);
       IDeserialiser<BinaryArchiveReader> deserialiser(stream);
-
-      deserialiser.Deserialise(iValueOut);
-      deserialiser.Deserialise(fValueOut);
-      deserialiser.Deserialise(bValueOut);
-      deserialiser.Deserialise(byteValueOut);
-      deserialiser.Deserialise(strValueOut);
-      deserialiser.Deserialise(testStructOut);
-
-      REQUIRE(iValueOut == iValue);
-      REQUIRE_THAT(fValueOut, Catch::Matchers::WithinRel(fValue));
-      REQUIRE(bValueOut == bValue);
-      REQUIRE(byteValueOut == byteValue);
-      REQUIRE(strValueOut == strValue);
-      REQUIRE(testStructOut.IntValue == testStruct.IntValue);
-      REQUIRE_THAT(testStructOut.FloatValue, Catch::Matchers::WithinRel(testStruct.FloatValue));
-      REQUIRE(testStructOut.BoolValue == testStruct.BoolValue);
-      REQUIRE(testStructOut.ByteValue == testStruct.ByteValue);
-      REQUIRE(testStructOut.StringValue == testStruct.StringValue);
-      REQUIRE(testStructOut.InnerStruct.InnerIntValue == testStruct.InnerStruct.InnerIntValue);
-      REQUIRE_THAT(testStructOut.InnerStruct.InnerFloatValue,
-                   Catch::Matchers::WithinRel(testStruct.InnerStruct.InnerFloatValue));
+      deserialiser.Deserialise(output);
     }
+
+    REQUIRE(input.Int == output.Int);
+    REQUIRE(input.Float == output.Float);
+    REQUIRE(input.Bool == output.Bool);
+    REQUIRE(input.Byte == output.Byte);
+    REQUIRE(input.String == output.String);
+    REQUIRE(input.NestedA.Int == output.NestedA.Int);
+    REQUIRE(input.NestedA.Float == output.NestedA.Float);
+    REQUIRE(input.NestedB.Int == output.NestedB.Int);
+    REQUIRE(input.NestedB.Float == output.NestedB.Float);
+    REQUIRE(input.NestedC.Int == output.NestedC.Int);
+    REQUIRE(input.NestedC.Float == output.NestedC.Float);
+    REQUIRE(input.NestedD == output.NestedD);
   }
 }
