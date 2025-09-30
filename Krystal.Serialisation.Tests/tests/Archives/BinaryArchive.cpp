@@ -5,6 +5,12 @@
 
 namespace Krys::Serialisation
 {
+  struct InnerTestStruct
+  {
+    int InnerIntValue;
+    float InnerFloatValue;
+  };
+
   struct TestStruct
   {
     int IntValue;
@@ -12,7 +18,22 @@ namespace Krys::Serialisation
     bool BoolValue;
     byte ByteValue;
     string StringValue;
+    InnerTestStruct InnerStruct;
   };
+
+  template <typename Archive>
+  void Save(Archive &archive, const InnerTestStruct &obj) noexcept
+  {
+    archive(obj.InnerIntValue);
+    archive(obj.InnerFloatValue);
+  }
+
+  template <typename Archive>
+  void Load(Archive &archive, InnerTestStruct &obj) noexcept
+  {
+    archive(obj.InnerIntValue);
+    archive(obj.InnerFloatValue);
+  }
 
   template <typename Archive>
   void Save(Archive &archive, const TestStruct &obj) noexcept
@@ -22,6 +43,7 @@ namespace Krys::Serialisation
     archive(obj.BoolValue);
     archive(obj.ByteValue);
     archive(obj.StringValue);
+    archive(obj.InnerStruct);
   }
 
   template <typename Archive>
@@ -32,6 +54,7 @@ namespace Krys::Serialisation
     archive(obj.BoolValue);
     archive(obj.ByteValue);
     archive(obj.StringValue);
+    archive(obj.InnerStruct);
   }
 }
 
@@ -47,6 +70,7 @@ namespace Krys::Tests
     byte byteValue = byte {0x11};
     string strValue = "Hello, World!";
     TestStruct testStruct {iValue, fValue, bValue, byteValue, strValue};
+    testStruct.InnerStruct = {7, 2.71f};
 
     List<byte> data(1'024);
 
@@ -90,6 +114,9 @@ namespace Krys::Tests
       REQUIRE(testStructOut.BoolValue == testStruct.BoolValue);
       REQUIRE(testStructOut.ByteValue == testStruct.ByteValue);
       REQUIRE(testStructOut.StringValue == testStruct.StringValue);
+      REQUIRE(testStructOut.InnerStruct.InnerIntValue == testStruct.InnerStruct.InnerIntValue);
+      REQUIRE_THAT(testStructOut.InnerStruct.InnerFloatValue,
+                   Catch::Matchers::WithinRel(testStruct.InnerStruct.InnerFloatValue));
     }
   }
 }

@@ -44,6 +44,13 @@ namespace Krys::Serialisation
 
       return *this;
     }
+
+    template <NonArchiveBuiltin T>
+    BinaryArchiveWriter &operator()(const T &obj) noexcept
+    {
+      Save(*this, obj);
+      return *this;
+    }
   };
 
   class BinaryArchiveReader
@@ -81,6 +88,13 @@ namespace Krys::Serialisation
         _stream.Read(data, length);
       }
 
+      return *this;
+    }
+
+    template <NonArchiveBuiltin T>
+    BinaryArchiveReader &operator()(T &obj) noexcept
+    {
+      Load(*this, obj);
       return *this;
     }
   };
