@@ -65,4 +65,7 @@ namespace Krys
 
   template <typename T>
   concept IsScopedEnum = std::is_scoped_enum_v<T>;
+
+  template <class T>
+  using RemoveConst = typename std::remove_const<T>::type;
 }

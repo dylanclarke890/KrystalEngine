@@ -5,6 +5,7 @@
 #include "Krystal.Lib/String.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Serialisation/Concepts.hpp"
+#include "Krystal.Serialisation/Dispatch.hpp"
 #include <bit>
 #include <memory>
 
@@ -48,7 +49,7 @@ namespace Krys::Serialisation
     template <NonArchiveBuiltin T>
     BinaryArchiveWriter &operator()(const T &obj) noexcept
     {
-      Save(*this, obj);
+      DispatchSave(*this, obj);
       return *this;
     }
 
@@ -102,7 +103,7 @@ namespace Krys::Serialisation
     template <NonArchiveBuiltin T>
     BinaryArchiveReader &operator()(T &obj) noexcept
     {
-      Load(*this, obj);
+      DispatchLoad(*this, obj);
       return *this;
     }
 

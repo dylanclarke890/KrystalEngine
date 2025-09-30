@@ -160,6 +160,7 @@
     <ClInclude Include="include\Krystal.Serialisation\Archives\BinaryArchive.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Archives\JsonArchive.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Concepts.hpp" />
+    <ClInclude Include="include\Krystal.Serialisation\Dispatch.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\ISerialiser.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\NamedField.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Types\Array.hpp" />

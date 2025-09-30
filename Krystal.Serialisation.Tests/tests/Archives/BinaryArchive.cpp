@@ -22,14 +22,7 @@ namespace Krys::Serialisation
   };
 
   template <typename Archive>
-  void Save(Archive &archive, const InnerTestStruct &obj) noexcept
-  {
-    archive(obj.InnerIntValue);
-    archive(obj.InnerFloatValue);
-  }
-
-  template <typename Archive>
-  void Load(Archive &archive, InnerTestStruct &obj) noexcept
+  void Transfer(Archive &archive, const InnerTestStruct &obj) noexcept
   {
     archive(obj.InnerIntValue);
     archive(obj.InnerFloatValue);

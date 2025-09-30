@@ -39,6 +39,9 @@
     <ClInclude Include="include\Krystal.Serialisation\Concepts.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Serialisation\Dispatch.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\placeholder.cpp">
