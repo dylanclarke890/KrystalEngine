@@ -54,7 +54,7 @@ namespace Krys::IO
     /// @return The number of bytes actually read from the stream.
     uint64 Read(byte *dst, uint64 count) noexcept override
     {
-      if (!_isOpen || count <= 0 || _position >= _buffer.size())
+      if (!_isOpen || count == 0 || EndOfStream())
       {
         return 0;
       }
@@ -92,6 +92,16 @@ namespace Krys::IO
       }
 
       _position = newPosition;
+      return true;
+    }
+
+    NO_DISCARD bool Peek(byte &next) noexcept override
+    {
+      if (!_isOpen || _position >= _buffer.size())
+      {
+        return false;
+      }
+      next = _buffer[_position];
       return true;
     }
 
@@ -211,6 +221,11 @@ namespace Krys::IO
     NO_DISCARD uint64 Position() noexcept override
     {
       return _position;
+    }
+
+    void Flush() noexcept override
+    {
+      // No-op for memory stream
     }
 
     /// @brief Checks if the end of the stream has been reached.

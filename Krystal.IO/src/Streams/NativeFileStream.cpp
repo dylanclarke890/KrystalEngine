@@ -50,9 +50,9 @@ namespace Krys::IO
   }
 
   // NOLINTNEXTLINE(readability-make-member-function-const)
-  uint64 NativeFileReader::Read(byte *dest, uint64 size) noexcept
+  uint64 NativeFileReader::Read(byte *dest, uint64 count) noexcept
   {
-    if (!IsOpen())
+    if (!IsOpen() || count == 0 || EndOfStream())
     {
       return 0;
     }
@@ -60,7 +60,7 @@ namespace Krys::IO
     try
     {
       // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-      _stream.read(reinterpret_cast<char *>(dest), (int64)size);
+      _stream.read(reinterpret_cast<char *>(dest), (int64)count);
     }
     catch (...)
     {
@@ -97,6 +97,23 @@ namespace Krys::IO
       return false;
     }
 
+    return !_stream.fail();
+  }
+
+  bool NativeFileReader::Peek(byte &next) noexcept
+  {
+    if (!IsOpen() || EndOfStream())
+    {
+      return false;
+    }
+    try
+    {
+      next = static_cast<byte>(_stream.peek());
+    }
+    catch (...)
+    {
+      return false;
+    }
     return !_stream.fail();
   }
 
@@ -264,6 +281,21 @@ namespace Krys::IO
       return 0;
     }
     return _stream.tellp();
+  }
+
+  void NativeFileWriter::Flush() noexcept
+  {
+    if (IsOpen())
+    {
+      try
+      {
+        _stream.flush();
+      }
+      // NOLINTNEXTLINE(bugprone-empty-catch)
+      catch (...)
+      {
+      }
+    }
   }
 
   bool NativeFileWriter::EndOfStream() const noexcept

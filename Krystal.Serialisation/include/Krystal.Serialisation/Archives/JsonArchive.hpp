@@ -1,29 +1,28 @@
 #pragma once
 
-#include "Krystal.IO/IStream.hpp"
 #include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Lib/Stack.hpp"
 #include "Krystal.Lib/String.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Serialisation/Concepts.hpp"
 #include "Krystal.Serialisation/Dispatch.hpp"
+#include "Krystal.Serialisation/Helpers/RapidJsonStreamAdapters.hpp"
 #include "rapidjson/document.h"
-#include "rapidjson/istreamwrapper.h"
-#include "rapidjson/ostreamwrapper.h"
 #include "rapidjson/prettywriter.h"
 #include <bit>
+#include <format>
 #include <memory>
 
 namespace Krys::Serialisation
 {
   class JsonArchiveWriter
   {
-    using rapidjsonStream = rapidjson::OStreamWrapper;
+    using rapidjsonStream = RapidJsonStreamWriterAdapter;
     using rapidjsonWriter = rapidjson::PrettyWriter<rapidjsonStream>;
 
     struct Settings
     {
-      char IndentChar = ' ';
+      char IndentChar = ' '; // Must be ' ', '\t', '\n' or '\r'.
       uint IndentLength = 4;
       int DecimalPrecision = rapidjsonWriter::kDefaultMaxDecimalPlaces;
     };
@@ -37,18 +36,104 @@ namespace Krys::Serialisation
     };
 
   private:
-    IO::IStreamWriter &_stream;
     Settings _settings;
-    rapidjsonStream _rapidjsonStream;
-    rapidjsonWriter _rapidJsonWriter;
-    char const *itsNextName;        // The next name
-    Stack<uint32_t> itsNameCounter; // Counter for creating unique names for unnamed nodes
-    Stack<NodeType> itsNodeStack;
+    rapidjsonStream _stream;
+    rapidjsonWriter _writer;
+    string _nextName {}; // The next name, can be specified using a NamedField or generated automatically.
+    Stack<uint32_t> _counter {}; // Counter for creating unique names for unnamed nodes
+    Stack<NodeType> _nodeStack {};
 
   public:
     JsonArchiveWriter(IO::IStreamWriter &stream, const Settings &settings = {}) noexcept
-        : _stream(stream), _settings(settings)
+        : _settings(settings), _stream(stream), _writer(_stream)
     {
+      _writer.SetMaxDecimalPlaces(_settings.DecimalPrecision);
+      _writer.SetIndent(_settings.IndentChar, _settings.IndentLength);
+      _counter.push(0);
+      _nodeStack.push(NodeType::StartObject);
+    }
+
+    ~JsonArchiveWriter() noexcept
+    {
+      if (_nodeStack.top() == NodeType::InObject)
+      {
+        _writer.EndObject();
+      }
+      else if (_nodeStack.top() == NodeType::InArray)
+      {
+        _writer.EndArray();
+      }
+    }
+
+    void WriteName()
+    {
+      NodeType const &nodeType = _nodeStack.top();
+
+      // Start up either an object or an array, depending on state
+      if (nodeType == NodeType::StartArray)
+      {
+        _writer.StartArray();
+        _nodeStack.top() = NodeType::InArray;
+      }
+      else if (nodeType == NodeType::StartObject)
+      {
+        _writer.StartObject();
+        _nodeStack.top() = NodeType::InObject;
+      }
+
+      // Array types do not output names
+      if (nodeType == NodeType::InArray)
+      {
+        return;
+      }
+
+      if (_nextName.empty())
+      {
+        _nextName = std::format("value{}\0", _counter.top()++);
+      }
+
+      (*this)(_nextName);
+      _nextName.clear();
+    }
+
+    void StartNode()
+    {
+      WriteName();
+      _nodeStack.push(NodeType::StartObject);
+      _counter.push(0);
+    }
+
+    void FinishNode()
+    {
+      // if we ended up serializing an empty object or array, writeName
+      // will never have been called - so start and then immediately end
+      // the object/array.
+      if (_nodeStack.top() == NodeType::StartArray)
+      {
+        _writer.StartArray();
+        _writer.EndArray();
+      }
+      else if (_nodeStack.top() == NodeType::StartObject)
+      {
+        _writer.StartObject();
+        _writer.EndObject();
+      }
+      else if (_nodeStack.top() == NodeType::InObject)
+      {
+        _writer.EndObject();
+      }
+      else if (_nodeStack.top() == NodeType::InArray)
+      {
+        _writer.EndArray();
+      }
+
+      _nodeStack.pop();
+      _counter.pop();
+    }
+
+    void SetNextName(const char *name) noexcept
+    {
+      _nextName = name;
     }
 
     template <ArchiveBuiltin T>
@@ -56,23 +141,41 @@ namespace Krys::Serialisation
     {
       TransferGuard guard(*this, value);
 
-      if constexpr (Arithmetic<T>)
+      if constexpr (SameType<T, bool>)
       {
-        auto *data = std::bit_cast<byte *>(std::addressof(value));
-        _stream.Write(data, sizeof(T));
+        _writer.Bool(b);
+      }
+      else if constexpr (SameType<T, int>)
+      {
+        _writer.Int(i);
+      }
+      else if constexpr (SameType<T, uint>)
+      {
+        _writer.Uint(u);
+      }
+      else if constexpr (SameType<T, int64>)
+      {
+        _writer.Int64(i64);
+      }
+      else if constexpr (SameType<T, uint64>)
+      {
+        _writer.Uint64(u64);
+      }
+      else if constexpr (OneOf<T, double, float>) // rapidjson does not have a Float() method
+      {
+        _writer.Double(d);
       }
       else if constexpr (SameType<T, byte>)
       {
-        _stream.Write(std::addressof(value), sizeof(byte));
+        _writer.Uint(static_cast<uint>(b));
       }
       else if constexpr (SameType<T, string>)
       {
-        size_t length = value.length();
-        (*this)(length);
-        if (length == 0)
-          return *this;
-        auto *data = std::bit_cast<const byte *>(value.data());
-        _stream.Write(data, length);
+        _writer.String(s.c_str(), static_cast<rapidjson::SizeType>(s.size()));
+      }
+      else
+      {
+        static_assert(DependentFalse<T>, "Unsupported arithmetic type");
       }
 
       return *this;

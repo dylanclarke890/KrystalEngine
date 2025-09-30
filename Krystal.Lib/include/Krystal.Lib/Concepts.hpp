@@ -60,6 +60,9 @@ namespace Krys
   template <typename T, typename U>
   concept SameType = std::is_same_v<T, U>;
 
+  template <typename T, typename... Types>
+  concept OneOf = (std::is_same_v<T, Types> || ...);
+
   template <typename T>
   concept IsEnum = std::is_enum_v<T>;
 
@@ -76,5 +79,11 @@ namespace Krys
   using AlwaysFalse = std::false_type;
 
   template <typename T>
+  constexpr bool DependentFalse = AlwaysFalse<T>::value;
+
+  template <typename T>
   using AlwaysTrue = std::true_type;
+
+  template <typename T>
+  constexpr bool DependentTrue = AlwaysTrue<T>::value;
 }

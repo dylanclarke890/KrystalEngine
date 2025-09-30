@@ -33,6 +33,10 @@ namespace Krys::IO
     /// @return True if the seek operation was successful, false otherwise.
     virtual bool Seek(int64 offset, SeekOrigin origin = SeekOrigin::Current) noexcept = 0;
 
+    /// @brief Peeks at the next byte in the stream without advancing the position.
+    /// @return True if a byte was successfully peeked, false if the end of the stream was reached.
+    NO_DISCARD virtual bool Peek(byte &next) noexcept = 0;
+
     /// @brief Gets the total size of the stream in bytes, or 0 if the size is unknown.
     NO_DISCARD virtual uint64 Size() noexcept = 0;
 
@@ -75,6 +79,9 @@ namespace Krys::IO
 
     /// @brief Gets the current position in the stream.
     NO_DISCARD virtual uint64 Position() noexcept = 0;
+
+    /// @brief Flushes any buffered data to the underlying storage, if applicable.
+    virtual void Flush() noexcept = 0;
 
     /// @brief Checks if the end of the stream has been reached.
     /// @return True if the end of the stream has been reached, false otherwise.

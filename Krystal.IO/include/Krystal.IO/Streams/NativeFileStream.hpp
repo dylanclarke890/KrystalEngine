@@ -32,6 +32,8 @@ namespace Krys::IO
 
     bool Seek(int64 offset, SeekOrigin origin) noexcept override;
 
+    NO_DISCARD bool Peek(byte &next) noexcept override;
+
     NO_DISCARD uint64 Size() noexcept override;
 
     NO_DISCARD uint64 Position() noexcept override;
@@ -66,6 +68,8 @@ namespace Krys::IO
     NO_DISCARD uint64 Size() noexcept override;
 
     NO_DISCARD uint64 Position() noexcept override;
+
+    void Flush() noexcept override;
 
     /// @brief Checks if the end of the stream has been reached.
     /// @return True if the end of the stream has been reached, false otherwise.
