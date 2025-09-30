@@ -24,6 +24,8 @@ namespace Krys::Serialisation
     template <ArchiveBuiltin T>
     BinaryArchiveWriter &operator()(const T &value) noexcept
     {
+      TransferGuard guard(*this, value);
+
       if constexpr (Arithmetic<T>)
       {
         auto *data = std::bit_cast<byte *>(std::addressof(value));
@@ -47,9 +49,10 @@ namespace Krys::Serialisation
     }
 
     template <ArchiveCustom T>
-    BinaryArchiveWriter &operator()(const T &obj) noexcept
+    BinaryArchiveWriter &operator()(const T &value) noexcept
     {
-      DispatchSave(*this, obj);
+      TransferGuard guard(*this, value);
+      DispatchSave(*this, value);
       return *this;
     }
 
@@ -75,6 +78,8 @@ namespace Krys::Serialisation
     template <ArchiveBuiltin T>
     BinaryArchiveReader &operator()(T &value) noexcept
     {
+      TransferGuard guard(*this, value);
+
       if constexpr (Arithmetic<T>)
       {
         auto *data = std::bit_cast<byte *>(std::addressof(value));
@@ -101,9 +106,10 @@ namespace Krys::Serialisation
     }
 
     template <ArchiveCustom T>
-    BinaryArchiveReader &operator()(T &obj) noexcept
+    BinaryArchiveReader &operator()(T &value) noexcept
     {
-      DispatchLoad(*this, obj);
+      TransferGuard guard(*this, value);
+      DispatchLoad(*this, value);
       return *this;
     }
 

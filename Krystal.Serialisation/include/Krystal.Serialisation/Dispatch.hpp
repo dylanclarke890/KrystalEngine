@@ -6,6 +6,38 @@
 
 namespace Krys::Serialisation
 {
+  /// @brief Hook called before serialisation or deserialisation of a value. No-op by default.
+  template <typename Archive, typename T>
+  void BeforeTransfer(Archive &, const T &) noexcept
+  {
+  }
+
+  /// @brief Hook called after serialisation or deserialisation of a value. No-op by default.
+  template <typename Archive, typename T>
+  void AfterTransfer(Archive &, const T &) noexcept
+  {
+  }
+
+  /// @brief RAII guard that calls BeforeTransfer on construction and AfterTransfer on destruction.
+  template <typename Archive, typename T>
+  class TransferGuard
+  {
+  private:
+    Archive &_archive;
+    const T &_value;
+
+  public:
+    TransferGuard(Archive &archive, const T &value) noexcept : _archive(archive), _value(value)
+    {
+      BeforeTransfer(_archive, _value);
+    }
+
+    ~TransferGuard() noexcept
+    {
+      AfterTransfer(_archive, _value);
+    }
+  };
+
   /// Dispatch Resolution Order:
   /// T is an ArchiveBuiltin type -> serialised directly, no need for overload.
   /// Is there a member function (public or private with Access friend class):
@@ -73,7 +105,7 @@ namespace Krys::Serialisation
     }
     else
     {
-      static_assert(<T>::value, "Missing 'Load' or 'Transfer' specialisation for this type.");
+      static_assert(AlwaysFalse<T>::value, "Missing 'Load' or 'Transfer' specialisation for this type.");
     }
   }
 }
