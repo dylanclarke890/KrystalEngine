@@ -2,7 +2,6 @@
 #include "Krystal.IO/Streams/MemoryStream.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Serialisation/Archives/BinaryArchive.hpp"
-#include "Krystal.Serialisation/ISerialiser.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
@@ -22,15 +21,15 @@ namespace Krys::Tests
 
       {
         IO::MemoryStreamWriter stream(buffer);
-        ISerialiser<BinaryArchiveWriter> serialiser(stream);
-        serialiser.Serialise(type);
+        BinaryArchiveWriter archive(stream);
+        archive(type);
       }
 
       Type deserialised;
       {
         IO::MemoryStreamReader stream(buffer);
-        IDeserialiser<BinaryArchiveReader> deserialiser(stream);
-        deserialiser.Deserialise(deserialised);
+        BinaryArchiveReader archive(stream);
+        archive(deserialised);
       }
 
       REQUIRE(deserialised.size() == 1);
@@ -48,15 +47,15 @@ namespace Krys::Tests
 
       {
         IO::MemoryStreamWriter stream(buffer);
-        ISerialiser<BinaryArchiveWriter> serialiser(stream);
-        serialiser.Serialise(type);
+        BinaryArchiveWriter archive(stream);
+        archive(type);
       }
 
       Type deserialised;
       {
         IO::MemoryStreamReader stream(buffer);
-        IDeserialiser<BinaryArchiveReader> deserialiser(stream);
-        deserialiser.Deserialise(deserialised);
+        BinaryArchiveReader archive(stream);
+        archive(deserialised);
       }
 
       REQUIRE(deserialised.size() == 1);

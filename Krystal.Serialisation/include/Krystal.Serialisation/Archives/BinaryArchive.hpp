@@ -46,7 +46,7 @@ namespace Krys::Serialisation
       return *this;
     }
 
-    template <NonArchiveBuiltin T>
+    template <ArchiveCustom T>
     BinaryArchiveWriter &operator()(const T &obj) noexcept
     {
       DispatchSave(*this, obj);
@@ -100,7 +100,7 @@ namespace Krys::Serialisation
       return *this;
     }
 
-    template <NonArchiveBuiltin T>
+    template <ArchiveCustom T>
     BinaryArchiveReader &operator()(T &obj) noexcept
     {
       DispatchLoad(*this, obj);

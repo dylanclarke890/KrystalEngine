@@ -154,7 +154,6 @@
     <ClCompile Include="tests\Types\Array.cpp" />
     <ClCompile Include="tests\Types\Pair.cpp" />
     <ClCompile Include="tests\Types\List.cpp" />
-    <ClCompile Include="tests\ISerialiser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />

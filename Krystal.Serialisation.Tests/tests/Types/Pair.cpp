@@ -3,7 +3,6 @@
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/String.hpp"
 #include "Krystal.Serialisation/Archives/BinaryArchive.hpp"
-#include "Krystal.Serialisation/ISerialiser.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
@@ -21,15 +20,15 @@ namespace Krys::Tests
       Type type(1, 2);
       {
         IO::MemoryStreamWriter stream(buffer);
-        ISerialiser<BinaryArchiveWriter> serialiser(stream);
-        serialiser.Serialise(type);
+        BinaryArchiveWriter archive(stream);
+        archive(type);
       }
 
       Type deserialised;
       {
         IO::MemoryStreamReader stream(buffer);
-        IDeserialiser<BinaryArchiveReader> deserialiser(stream);
-        deserialiser.Deserialise(deserialised);
+        BinaryArchiveReader archive(stream);
+        archive(deserialised);
       }
 
       REQUIRE(deserialised.first == type.first);
@@ -45,15 +44,15 @@ namespace Krys::Tests
       Type type("Test", 2);
       {
         IO::MemoryStreamWriter stream(buffer);
-        ISerialiser<BinaryArchiveWriter> serialiser(stream);
-        serialiser.Serialise(type);
+        BinaryArchiveWriter archive(stream);
+        archive(type);
       }
 
       Type deserialised;
       {
         IO::MemoryStreamReader stream(buffer);
-        IDeserialiser<BinaryArchiveReader> deserialiser(stream);
-        deserialiser.Deserialise(deserialised);
+        BinaryArchiveReader archive(stream);
+        archive(deserialised);
       }
 
       REQUIRE(deserialised.first == type.first);

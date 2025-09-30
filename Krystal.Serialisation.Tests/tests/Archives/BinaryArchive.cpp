@@ -1,7 +1,6 @@
 #include "Krystal.Serialisation/Archives/BinaryArchive.hpp"
 #include "Krystal.IO/Streams/MemoryStream.hpp"
 #include "Krystal.Serialisation/Access.hpp"
-#include "Krystal.Serialisation/ISerialiser.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Serialisation
@@ -130,14 +129,14 @@ namespace Krys::Tests
 
     {
       IO::MemoryStreamWriter stream(data);
-      ISerialiser<BinaryArchiveWriter> serialiser(stream);
-      serialiser.Serialise(input);
+      BinaryArchiveWriter archive(stream);
+      archive(input);
     }
 
     {
       IO::MemoryStreamReader stream(data);
-      IDeserialiser<BinaryArchiveReader> deserialiser(stream);
-      deserialiser.Deserialise(output);
+      BinaryArchiveReader archive(stream);
+      archive(output);
     }
 
     REQUIRE(input.Int == output.Int);

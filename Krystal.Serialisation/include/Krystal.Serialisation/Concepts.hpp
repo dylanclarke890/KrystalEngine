@@ -7,11 +7,13 @@
 
 namespace Krys::Serialisation
 {
+  /// @brief Denotes a type that is supported by all archives by default.
   template <typename T>
   concept ArchiveBuiltin = Arithmetic<T> || SameType<T, byte> || SameType<T, string>;
 
+  /// @brief Denotes a custom type that requires a serialisation method.
   template <typename T>
-  concept NonArchiveBuiltin = !ArchiveBuiltin<T>;
+  concept ArchiveCustom = !ArchiveBuiltin<T>;
 
   template <class Archive, class T>
   concept HasTransferMember = requires(Archive &a, T &t) { Access::Transfer(a, t); }; // T&

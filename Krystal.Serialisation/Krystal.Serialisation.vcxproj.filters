@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.Serialisation\ISerialiser.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Serialisation\Archives\BinaryArchive.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
