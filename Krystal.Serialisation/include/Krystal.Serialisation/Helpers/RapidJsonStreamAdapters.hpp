@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Krystal.Lib/Macros.hpp"
 #include "Krystal.IO/IStream.hpp"
+#include "Krystal.Lib/Macros.hpp"
+#include <cassert>
 
 namespace Krys::Serialisation
 {
@@ -23,6 +24,18 @@ namespace Krys::Serialisation
     {
       byte b = static_cast<byte>(c);
       _stream.Write(&b, 1);
+    }
+
+    Ch *PutBegin()
+    {
+      assert(false && "Not implemented!");
+      return 0;
+    }
+
+    size_t PutEnd(Ch *)
+    {
+      assert(false && "Not implemented!");
+      return 0;
     }
 
     void Flush()
@@ -67,6 +80,23 @@ namespace Krys::Serialisation
     size_t Tell() const
     {
       return (size_t)_stream.Position();
+    }
+
+    void Put(Ch)
+    {
+      assert(false && "Not implemented!");
+    }
+
+    Ch *PutBegin()
+    {
+      assert(false && "Not implemented!");
+      return 0;
+    }
+
+    size_t PutEnd(Ch *)
+    {
+      assert(false && "Not implemented!");
+      return 0;
     }
   };
 

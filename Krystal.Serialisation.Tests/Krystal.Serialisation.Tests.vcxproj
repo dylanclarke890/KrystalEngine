@@ -74,7 +74,7 @@
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(solutionDir)Krystal.Serialisation\include\Krystal.Serialisation;$(solutionDir)Krystal.IO\include</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(solutionDir)Krystal.IO\include</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(solutionDir)Krystal.IO\include;$(solutionDir)Krystal.Serialisation\third-party</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -151,6 +151,7 @@
   <ItemGroup>
     <ClCompile Include="catch_main.cpp" />
     <ClCompile Include="tests\Archives\BinaryArchive.cpp" />
+    <ClCompile Include="tests\Archives\JsonArchive.cpp" />
     <ClCompile Include="tests\Types\Array.cpp" />
     <ClCompile Include="tests\Types\Pair.cpp" />
     <ClCompile Include="tests\Types\List.cpp" />

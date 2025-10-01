@@ -86,4 +86,7 @@ namespace Krys
 
   template <typename T>
   constexpr bool DependentTrue = AlwaysTrue<T>::value;
+
+  template <std::size_t N, typename... Types>
+  concept PackSizeAtLeast = (sizeof...(Types) >= N);
 }
