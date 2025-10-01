@@ -57,19 +57,17 @@ namespace Krys::Serialisation
 
     ~JsonArchiveWriter() noexcept
     {
-      if (_nodeStack.top() == NodeType::InObject)
-      {
-        _writer.EndObject();
-      }
-      else if (_nodeStack.top() == NodeType::InArray)
-      {
-        _writer.EndArray();
-      }
+      FinishNode();
     }
 
     void SetNextName(const string &name) noexcept
     {
       _nextName = name;
+    }
+
+    void StartArray() noexcept
+    {
+      _nodeStack.top() = NodeType::StartArray;
     }
 
     void WriteName()
@@ -136,11 +134,6 @@ namespace Krys::Serialisation
 
       _nodeStack.pop();
       _counter.pop();
-    }
-
-    void MakeArray() noexcept
-    {
-      _nodeStack.top() = NodeType::StartArray;
     }
 
     template <ArchiveBuiltin T>
@@ -406,41 +399,43 @@ namespace Krys::Serialisation
     {
       TransferGuard guard(*this, value);
 
+      const GenericValue &node = _iteratorStack.back().Value();
+
       if constexpr (SameType<T, bool>)
       {
-        value = _iteratorStack.back().Value().GetBool();
+        value = node.GetBool();
       }
       else if constexpr (SameType<T, int>)
       {
-        value = _iteratorStack.back().Value().GetInt();
+        value = node.GetInt();
       }
       else if constexpr (SameType<T, uint>)
       {
-        value = _iteratorStack.back().Value().GetUint();
+        value = node.GetUint();
       }
       else if constexpr (SameType<T, int64>)
       {
-        value = _iteratorStack.back().Value().GetInt64();
+        value = node.GetInt64();
       }
       else if constexpr (SameType<T, uint64>)
       {
-        value = _iteratorStack.back().Value().GetUint64();
+        value = node.GetUint64();
       }
       else if constexpr (SameType<T, float>)
       {
-        value = _iteratorStack.back().Value().GetFloat();
+        value = node.GetFloat();
       }
       else if constexpr (SameType<T, double>)
       {
-        value = _iteratorStack.back().Value().GetDouble();
+        value = node.GetDouble();
       }
       else if constexpr (SameType<T, byte>)
       {
-        value = static_cast<byte>(_iteratorStack.back().Value().GetUint());
+        value = static_cast<byte>(node.GetUint());
       }
       else if constexpr (SameType<T, string>)
       {
-        value = _iteratorStack.back().Value().GetString();
+        value = node.GetString();
       }
       else
       {
