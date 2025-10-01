@@ -99,5 +99,4 @@ namespace Krys::Serialisation
       return 0;
     }
   };
-
 }

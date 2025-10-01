@@ -1,6 +1,6 @@
+#include "Krystal.Serialisation/Archives/JsonArchive.hpp"
 #include "Krystal.IO/Streams/MemoryStream.hpp"
 #include "Krystal.Serialisation/Access.hpp"
-#include "Krystal.Serialisation/Archives/JsonArchive.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Serialisation
@@ -44,7 +44,7 @@ namespace Krys::Serialisation
     template <typename Archive>
     void Transfer(Archive &archive) noexcept
     {
-      archive(Int, Float);
+      archive(KRYS_NAMED_FIELD(Int), KRYS_NAMED_FIELD(Float));
     }
   };
 
@@ -70,13 +70,13 @@ namespace Krys::Serialisation
     template <typename Archive>
     void Load(Archive &archive) noexcept
     {
-      archive(Int, Float);
+      archive(KRYS_NAMED_FIELD(Int), KRYS_NAMED_FIELD(Float));
     }
 
     template <typename Archive>
     void Save(Archive &archive) const noexcept
     {
-      archive(Int, Float);
+      archive(KRYS_NAMED_FIELD(Int), KRYS_NAMED_FIELD(Float));
     }
   };
 
@@ -125,13 +125,14 @@ namespace Krys::Tests
       .NestedD = {400, 0.12f},
     };
     TestStruct output {};
-    List<byte> data(1'024);
+    List<byte> data;
 
     {
       IO::MemoryStreamWriter stream(data);
       JsonArchiveWriter archive(stream);
-      archive(input);
+      archive(KRYS_NAMED_FIELD(input));
     }
+    string json((const char *)data.data(), data.size());
 
     {
       IO::MemoryStreamReader stream(data);

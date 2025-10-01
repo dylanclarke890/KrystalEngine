@@ -6,6 +6,7 @@
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Serialisation/Concepts.hpp"
 #include "Krystal.Serialisation/Dispatch.hpp"
+#include "Krystal.Serialisation/Builtins.hpp"
 #include <bit>
 #include <memory>
 
@@ -48,7 +49,7 @@ namespace Krys::Serialisation
       return *this;
     }
 
-    template <ArchiveCustom T>
+    template <typename T>
     BinaryArchiveWriter &operator()(const T &value) noexcept
     {
       TransferGuard guard(*this, value);
@@ -105,7 +106,7 @@ namespace Krys::Serialisation
       return *this;
     }
 
-    template <ArchiveCustom T>
+    template <typename T>
     BinaryArchiveReader &operator()(T &value) noexcept
     {
       TransferGuard guard(*this, value);
@@ -121,4 +122,11 @@ namespace Krys::Serialisation
       return *this;
     }
   };
+
+  template <typename Archive, typename T>
+  requires OneOf<Archive, BinaryArchiveWriter, BinaryArchiveReader>
+  void Transfer(Archive &archive, NamedField<T> &field) noexcept
+  {
+    archive(field.Value);
+  }
 }

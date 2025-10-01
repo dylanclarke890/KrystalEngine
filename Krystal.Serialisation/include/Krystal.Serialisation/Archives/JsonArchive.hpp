@@ -1,9 +1,11 @@
 #pragma once
 
 #include "Krystal.Lib/Concepts.hpp"
+#include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Stack.hpp"
 #include "Krystal.Lib/String.hpp"
 #include "Krystal.Lib/Types.hpp"
+#include "Krystal.Serialisation/Builtins.hpp"
 #include "Krystal.Serialisation/Concepts.hpp"
 #include "Krystal.Serialisation/Dispatch.hpp"
 #include "Krystal.Serialisation/Helpers/RapidJsonStreamAdapters.hpp"
@@ -110,7 +112,7 @@ namespace Krys::Serialisation
 
     void FinishNode()
     {
-      // if we ended up serializing an empty object or array, writeName
+      // if we ended up serializing an empty object or array, WriteName
       // will never have been called - so start and then immediately end
       // the object/array.
       if (_nodeStack.top() == NodeType::StartArray)
@@ -186,7 +188,7 @@ namespace Krys::Serialisation
       return *this;
     }
 
-    template <ArchiveCustom T>
+    template <typename T>
     JsonArchiveWriter &operator()(const T &value) noexcept
     {
       TransferGuard guard(*this, value);
@@ -303,10 +305,10 @@ namespace Krys::Serialisation
     };
 
   private:
-    string _nextName {};              //@brief Next name set by NVP
-    rapidjsonStream _stream;          //@brief Rapidjson read stream
-    List<Iterator> _iteratorStack {}; //@brief 'Stack' of rapidJSON iterators
-    rapidjson::Document _document;    //@brief Rapidjson document
+    string _nextName {};              /// @brief Next name set by NVP
+    rapidjsonStream _stream;          /// @brief Rapidjson read stream
+    List<Iterator> _iteratorStack {}; /// @brief 'Stack' of rapidJSON iterators
+    rapidjson::Document _document;    /// @brief Rapidjson document
 
   public:
     JsonArchiveReader(IO::IStreamReader &stream) noexcept : _stream(stream)
@@ -351,7 +353,7 @@ namespace Krys::Serialisation
     void FinishNode()
     {
       _iteratorStack.pop_back();
-      ++_iteratorStack.back();
+      Next();
     }
 
     /// @brief Searches for the expectedName node if it doesn't match the actualName
@@ -365,7 +367,7 @@ namespace Krys::Serialisation
     {
       // store pointer to itsNextName locally and reset to nullptr in case search() throws
       string localNextName = _nextName;
-      _nextName.clear();
+      _nextName = string();
 
       // The name an NVP provided with setNextName()
       if (!localNextName.empty())
@@ -448,7 +450,7 @@ namespace Krys::Serialisation
       return *this;
     }
 
-    template <ArchiveCustom T>
+    template <typename T>
     JsonArchiveReader &operator()(T &value) noexcept
     {
       TransferGuard guard(*this, value);
@@ -458,62 +460,66 @@ namespace Krys::Serialisation
 
     template <class... Types>
     requires(sizeof...(Types) > 1)
-    JsonArchiveReader &operator()(Types &...types) noexcept
+    JsonArchiveReader &operator()(Types &&...types) noexcept
     {
       ((void)(*this)(types), ...);
       return *this;
     }
   };
 
-  /// @brief Open a new object or array node before serialising a value.
   template <typename T>
-  void BeforeTransfer(JsonArchiveWriter &archive, const T &) noexcept
+  void BeforeTransfer(JsonArchiveWriter &archive, const T &value) noexcept
   {
     if constexpr (ArchiveBuiltin<T>)
     {
-      archive.WriteName(); // field key (if in object); noop for arrays
+      archive.WriteName(); // we're still inside a {} or [].
+    }
+    else if constexpr (ArchiveNamedField<T>)
+    {
+      archive.SetNextName(value.Name); // Set the name for the next node.
     }
     else
     {
-      archive.StartNode(); // open {} by default; [] if user calls MakeArray() before values
+      archive.StartNode(); // enter {} or []. also calls WriteName().
     }
   }
 
-  /// @brief Close the object or array node after serialising a value.
   template <typename T>
   void AfterTransfer(JsonArchiveWriter &archive, const T &) noexcept
   {
-    if constexpr (!ArchiveBuiltin<T>)
+    if constexpr (!ArchiveBuiltin<T> && !ArchiveNamedField<T>)
     {
-      archive.FinishNode();
+      archive.FinishNode(); // exit {} or [].
     }
   }
 
-  /// @brief Open a new object or array node before serialising a value.
   template <typename T>
-  void BeforeTransfer(JsonArchiveReader &archive, const T &) noexcept
+  void BeforeTransfer(JsonArchiveReader &archive, const T &value) noexcept
   {
-    if constexpr (ArchiveBuiltin<T>)
+    if constexpr (ArchiveNamedField<T>)
     {
-      archive.Search(); // align to name if set
+      archive.SetNextName(value.Name);
+    }
+    else if constexpr (ArchiveBuiltin<T>)
+    {
+      archive.Search(); // consume _nextName if set, aligning the iterator to that member
     }
     else
     {
-      archive.StartNode(); // enter {} or []
+      archive.StartNode(); // enter {} or [].
     }
   }
 
-  /// @brief Close the object or array node after serialising a value.
   template <typename T>
   void AfterTransfer(JsonArchiveReader &archive, const T &) noexcept
   {
     if constexpr (ArchiveBuiltin<T>)
     {
-      archive.Next(); // advance to next node
+      archive.Next(); // move to next value in {} or [].
     }
-    else
+    else if constexpr (!ArchiveNamedField<T>)
     {
-      archive.FinishNode(); // exit {} or []
+      archive.FinishNode(); // exit {} or [].
     }
   }
 }

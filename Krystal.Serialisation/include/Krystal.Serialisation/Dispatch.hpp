@@ -39,7 +39,7 @@ namespace Krys::Serialisation
   };
 
   /// Dispatch Resolution Order:
-  /// T is an ArchiveBuiltin type -> serialised directly, no need for overload.
+  /// T is an ArchiveBuiltin type -> serialised by archive directly, no need for overload.
   /// Is there a member function (public or private with Access friend class):
   ///   1.  void Transfer(Archive& ar) noexcept;
   ///   2a. void Save(Archive& ar) noexcept;

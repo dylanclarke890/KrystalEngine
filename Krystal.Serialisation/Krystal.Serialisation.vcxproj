@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -164,7 +164,7 @@
     <ClInclude Include="include\Krystal.Serialisation\Concepts.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Dispatch.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Helpers\RapidJsonStreamAdapters.hpp" />
-    <ClInclude Include="include\Krystal.Serialisation\NamedField.hpp" />
+    <ClInclude Include="include\Krystal.Serialisation\Builtins.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Types\Array.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Types\Pair.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Types\List.hpp" />

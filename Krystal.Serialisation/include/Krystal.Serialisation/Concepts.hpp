@@ -4,16 +4,20 @@
 #include "Krystal.Lib/String.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Serialisation/Access.hpp"
+#include "Krystal.Serialisation/Builtins.hpp"
 
 namespace Krys::Serialisation
 {
-  /// @brief Denotes a type that is supported by all archives by default.
+  /// @brief Denotes a type that needs to be supported by all archives by default.
   template <typename T>
   concept ArchiveBuiltin = Arithmetic<T> || SameType<T, byte> || SameType<T, string>;
 
-  /// @brief Denotes a custom type that requires a custom serialisation method.
   template <typename T>
-  concept ArchiveCustom = !ArchiveBuiltin<T>;
+  concept ArchiveNamedField = DerivedFrom<RemoveCvRef<T>, Impl::NamedField>;
+
+  /// @brief Denotes a type that requires custom serialisation methods.
+  template <typename T>
+  concept ArchiveCustom = !ArchiveBuiltin<T> && !ArchiveNamedField<T>;
 
   template <typename Archive, typename T>
   concept HasTransferMember = requires(Archive &archive, T &value) { Access::Transfer(archive, value); };

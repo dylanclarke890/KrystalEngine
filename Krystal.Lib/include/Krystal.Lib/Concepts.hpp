@@ -61,7 +61,7 @@ namespace Krys
   concept SameType = std::is_same_v<T, U>;
 
   template <typename T, typename... Types>
-  concept OneOf = (std::is_same_v<T, Types> || ...);
+  concept OneOf = std::disjunction_v<std::is_same<T, Types>...>;
 
   template <typename T>
   concept IsEnum = std::is_enum_v<T>;
@@ -70,7 +70,32 @@ namespace Krys
   concept IsScopedEnum = std::is_scoped_enum_v<T>;
 
   template <typename T>
+  concept IsArray = std::is_array_v<T>;
+
+  template <class T, template <class...> class Template>
+  struct IsSpecializationOf : std::false_type
+  {
+  };
+
+  template <template <class...> class Template, class... Args>
+  struct IsSpecializationOf<Template<Args...>, Template> : std::true_type
+  {
+  };
+
+  template <typename T>
   using RemoveConst = typename std::remove_const<T>::type;
+
+  template <typename T>
+  using RemoveCv = typename std::remove_cv<T>::type;
+
+  template <typename T>
+  using RemoveRef = typename std::remove_reference<T>::type;
+
+  template <typename T>
+  using RemoveCvRef = typename std::remove_cvref_t<T>;
+
+  template <typename T>
+  using IsLValueRef = std::is_lvalue_reference<T>;
 
   template <typename T>
   using Decay = typename std::decay_t<T>;
