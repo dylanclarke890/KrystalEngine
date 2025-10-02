@@ -163,9 +163,11 @@
     <ClInclude Include="include\Krystal.Serialisation\Archives\BinaryArchive.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Archives\JsonArchive.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Concepts.hpp" />
-    <ClInclude Include="include\Krystal.Serialisation\Helpers\RapidJsonStreamAdapters.hpp" />
+    <ClInclude Include="include\Krystal.Serialisation\Archives\Adapters\RapidJsonStreamAdapters.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Builtins.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Types\Array.hpp" />
+    <ClInclude Include="include\Krystal.Serialisation\Types\Generic\KeyValuePairContainer.hpp" />
+    <ClInclude Include="include\Krystal.Serialisation\Types\Map.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Types\Pair.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Types\List.hpp" />
     <ClInclude Include="third-party\rapidjson\allocators.h" />

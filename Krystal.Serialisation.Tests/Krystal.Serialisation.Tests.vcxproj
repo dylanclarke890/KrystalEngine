@@ -153,6 +153,7 @@
     <ClCompile Include="tests\Access.cpp" />
     <ClCompile Include="tests\Builtins.cpp" />
     <ClCompile Include="tests\Types\Array.cpp" />
+    <ClCompile Include="tests\Types\Map.cpp" />
     <ClCompile Include="tests\Types\Pair.cpp" />
     <ClCompile Include="tests\Types\List.cpp" />
   </ItemGroup>

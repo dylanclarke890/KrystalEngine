@@ -108,4 +108,46 @@ namespace Krys::Serialisation
   }
 
 #pragma endregion
+
+#pragma region KeyValuePair
+
+  namespace Impl
+  {
+    class KeyValuePair
+    {
+    };
+  }
+
+  template <typename TKey, typename TValue>
+  struct KeyValuePair : public Impl::KeyValuePair
+  {
+    NO_COPY(KeyValuePair)
+
+    using KeyType = Conditional<IsLValueRef<TKey>, TKey, Decay<TKey>>;
+    using ValueType = Conditional<IsLValueRef<TValue>, TValue, Decay<TValue>>;
+
+    KeyValuePair(TKey &&key, TValue &&value) noexcept
+        : Key(std::forward<TKey>(key)), Value(std::forward<TValue>(value))
+    {
+    }
+
+    KeyType Key;
+    ValueType Value;
+  };
+
+  template <typename TKey, typename TValue>
+  KeyValuePair<TKey, TValue> CreateKeyValuePair(TKey &&key, TValue &&value) noexcept
+  {
+    return {std::forward<TKey>(key), std::forward<TValue>(value)};
+  }
+
+#define KRYS_KEY_VALUE_PAIR(key, value) ::Krys::Serialisation::CreateKeyValuePair(key, value)
+
+  template <class Archive, typename TKey, typename TValue>
+  void Transfer(Archive &archive, KeyValuePair<TKey, TValue> &pair) noexcept
+  {
+    archive(CreateNamedField("key", pair.Key), CreateNamedField("value", pair.Value));
+  }
+
+#pragma endregion
 }

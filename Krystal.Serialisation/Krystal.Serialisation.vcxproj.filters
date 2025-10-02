@@ -150,13 +150,19 @@
     <ClInclude Include="third-party\rapidjson\writer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Serialisation\Helpers\RapidJsonStreamAdapters.hpp">
+    <ClInclude Include="include\Krystal.Serialisation\Archives\Adapters\RapidJsonStreamAdapters.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Serialisation\Builtins.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Serialisation\Archives\BaseArchive.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Serialisation\Types\Map.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Serialisation\Types\Generic\KeyValuePairContainer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

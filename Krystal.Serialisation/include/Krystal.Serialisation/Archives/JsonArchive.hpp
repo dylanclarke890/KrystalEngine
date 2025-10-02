@@ -5,10 +5,10 @@
 #include "Krystal.Lib/Stack.hpp"
 #include "Krystal.Lib/String.hpp"
 #include "Krystal.Lib/Types.hpp"
+#include "Krystal.Serialisation/Archives/Adapters/RapidJsonStreamAdapters.hpp"
 #include "Krystal.Serialisation/Archives/BaseArchive.hpp"
 #include "Krystal.Serialisation/Builtins.hpp"
 #include "Krystal.Serialisation/Concepts.hpp"
-#include "Krystal.Serialisation/Helpers/RapidJsonStreamAdapters.hpp"
 #include "rapidjson/document.h"
 #include "rapidjson/prettywriter.h"
 #include <bit>

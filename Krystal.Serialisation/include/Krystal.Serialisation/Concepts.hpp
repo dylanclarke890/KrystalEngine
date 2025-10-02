@@ -21,9 +21,14 @@ namespace Krys::Serialisation
   template <typename T>
   concept ArchiveContainerSize = DerivedFrom<RemoveCvRef<T>, Impl::ContainerSize>;
 
+  /// @brief A special type that indicates a container is about to be serialised, and provides its size.
+  template <typename T>
+  concept ArchiveKeyValuePair = DerivedFrom<RemoveCvRef<T>, Impl::KeyValuePair>;
+
   /// @brief A type that requires custom serialisation methods.
   template <typename T>
-  concept ArchiveCustom = !ArchiveBuiltin<T> && !ArchiveNamedField<T> && !ArchiveContainerSize<T>;
+  concept ArchiveCustom =
+    !ArchiveBuiltin<T> && !ArchiveNamedField<T> && !ArchiveContainerSize<T> && !ArchiveKeyValuePair<T>;
 
   template <typename Archive, typename T>
   concept HasTransferMember = requires(Archive &archive, T &value) { Access::Transfer(archive, value); };
