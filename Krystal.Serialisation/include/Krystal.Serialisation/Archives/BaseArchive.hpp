@@ -177,4 +177,10 @@ namespace Krys::Serialisation
       return _self;
     }
   };
+
+  template <typename T>
+  concept IsArchiveWriter = DerivedFrom<BaseArchive, T> && requires(T t) { T::IsWriter; };
+
+  template <typename T>
+  concept IsArchiveReader = DerivedFrom<BaseArchive, T> && requires(T t) { T::IsReader; };
 }

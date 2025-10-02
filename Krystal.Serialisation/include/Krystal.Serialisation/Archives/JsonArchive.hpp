@@ -19,40 +19,35 @@ namespace Krys::Serialisation
 {
   class JsonArchiveWriter : public BaseArchiveWriter<JsonArchiveWriter>
   {
-    using rapidjsonStream = RapidJsonStreamWriterAdapter;
-    using rapidjsonWriter = rapidjson::PrettyWriter<rapidjsonStream>;
-
-    struct Settings
+    struct Node
     {
-      char IndentChar = ' '; // Must be ' ', '\t', '\n' or '\r'.
-      uint IndentLength = 4;
-      int DecimalPrecision = rapidjsonWriter::kDefaultMaxDecimalPlaces;
+      enum NodeType
+      {
+        StartObject,
+        InObject,
+        StartArray,
+        InArray
+      } Type {StartObject};
+
+      uint32 NameCounter {0u};
     };
 
-    enum class NodeType
-    {
-      StartObject,
-      InObject,
-      StartArray,
-      InArray
-    };
+    using Stream = RapidJsonStreamWriterAdapter;
+    using Writer = rapidjson::PrettyWriter<Stream>;
 
   private:
-    Settings _settings;
-    rapidjsonStream _stream;
-    rapidjsonWriter _writer;
+    Stream _stream;
+    Writer _writer;
     string _nextName {}; // The next name, can be specified using a NamedField or generated automatically.
-    Stack<uint32_t> _counter {}; // Counter for creating unique names for unnamed nodes
-    Stack<NodeType> _nodeStack {};
+    Stack<Node> _nodes {};
 
   public:
-    JsonArchiveWriter(IO::IStreamWriter &stream, const Settings &settings = {}) noexcept
-        : _settings(settings), _stream(stream), _writer(_stream)
+    JsonArchiveWriter(IO::IStreamWriter &stream, bool prettyPrint = true) noexcept
+        : _stream(stream), _writer(_stream)
     {
-      _writer.SetMaxDecimalPlaces(_settings.DecimalPrecision);
-      _writer.SetIndent(_settings.IndentChar, _settings.IndentLength);
-      _counter.push(0);
-      _nodeStack.push(NodeType::StartObject);
+      _writer.SetMaxDecimalPlaces(Writer::kDefaultMaxDecimalPlaces);
+      _writer.SetIndent(' ', prettyPrint ? 4 : 0);
+      _nodes.push({Node::StartObject, 0u});
     }
 
     ~JsonArchiveWriter() noexcept override
@@ -110,34 +105,34 @@ namespace Krys::Serialisation
 
     void StartArray() noexcept
     {
-      _nodeStack.top() = NodeType::StartArray;
+      _nodes.top().Type = Node::StartArray;
     }
 
     void WriteName()
     {
-      const NodeType &nodeType = _nodeStack.top();
+      const auto &nodeType = _nodes.top().Type;
 
       // Start up either an object or an array, depending on state
-      if (nodeType == NodeType::StartArray)
+      if (nodeType == Node::StartArray)
       {
         _writer.StartArray();
-        _nodeStack.top() = NodeType::InArray;
+        _nodes.top().Type = Node::InArray;
       }
-      else if (nodeType == NodeType::StartObject)
+      else if (nodeType == Node::StartObject)
       {
         _writer.StartObject();
-        _nodeStack.top() = NodeType::InObject;
+        _nodes.top().Type = Node::InObject;
       }
 
       // Array types do not output names
-      if (nodeType == NodeType::InArray)
+      if (nodeType == Node::InArray)
       {
         return;
       }
 
       if (_nextName.empty())
       {
-        _nextName = std::format("value{}", _counter.top()++);
+        _nextName = std::format("value{}", _nodes.top().NameCounter++);
       }
 
       _writer.Key(_nextName.c_str(), static_cast<rapidjson::SizeType>(_nextName.size()));
@@ -147,43 +142,40 @@ namespace Krys::Serialisation
     void StartNode()
     {
       WriteName();
-      _nodeStack.push(NodeType::StartObject);
-      _counter.push(0);
+      _nodes.push({Node::StartObject, 0u});
     }
 
     void FinishNode()
     {
-      // if we ended up serializing an empty object or array, WriteName
-      // will never have been called - so start and then immediately end
-      // the object/array.
-      if (_nodeStack.top() == NodeType::StartArray)
+      // Handles serialising empty objects (WriteName is never called)
+      if (_nodes.top().Type == Node::StartArray)
       {
         _writer.StartArray();
         _writer.EndArray();
       }
-      else if (_nodeStack.top() == NodeType::StartObject)
+      else if (_nodes.top().Type == Node::StartObject)
       {
         _writer.StartObject();
         _writer.EndObject();
       }
-      else if (_nodeStack.top() == NodeType::InObject)
+      // Exiting an object or array
+      else if (_nodes.top().Type == Node::InObject)
       {
         _writer.EndObject();
       }
-      else if (_nodeStack.top() == NodeType::InArray)
+      else if (_nodes.top().Type == Node::InArray)
       {
         _writer.EndArray();
       }
 
-      _nodeStack.pop();
-      _counter.pop();
+      _nodes.pop();
     }
   };
 
   class JsonArchiveReader : public BaseArchiveReader<JsonArchiveReader>
   {
-    using rapidjsonStream = RapidJsonStreamReaderAdapter;
-    using rapidjsonReader = rapidjson::Reader;
+    using Stream = RapidJsonStreamReaderAdapter;
+    using Reader = rapidjson::Reader;
     using JSONValue = rapidjson::GenericValue<rapidjson::UTF8<>>;
     using MemberIterator = JSONValue::ConstMemberIterator;
     using ValueIterator = JSONValue::ConstValueIterator;
@@ -221,17 +213,12 @@ namespace Krys::Serialisation
         {
           throw std::exception("No more objects in input");
         }
-
-        switch (_type)
+        else if (_type == Type::Null)
         {
-          case Type::Value:  return _valueIteratorBegin[_index];
-          case Type::Member: return _memberIteratorBegin[_index].value;
-          default:
-          {
-            throw std::exception(
-              "JSONInputArchive internal error: null or empty iterator to object or array!");
-          }
+          throw std::exception("Null or empty iterator");
         }
+
+        return _type == Type::Value ? _valueIteratorBegin[_index] : _memberIteratorBegin[_index].value;
       }
 
       /// @brief Get the name of the current node, or nullptr if it has no name
@@ -249,7 +236,7 @@ namespace Krys::Serialisation
 
       /// @brief Adjust our position such that we are at the node with the given name.
       /// @throws Exception if no such named node exists.
-      inline void Search(const char *searchName)
+      void Search(const char *searchName)
       {
         const auto len = std::strlen(searchName);
         size_t index = 0;
@@ -264,7 +251,7 @@ namespace Krys::Serialisation
         }
 
         throw std::exception(
-          (string("JSON Parsing failed - provided NVP not found.") + string(searchName)).c_str());
+          (string("Parsing failed: provided NamedField not found.") + string(searchName)).c_str());
       }
 
     private:
@@ -280,8 +267,8 @@ namespace Krys::Serialisation
     };
 
   private:
-    string _nextName {};              /// @brief Next name set by NVP
-    rapidjsonStream _stream;          /// @brief Rapidjson read stream
+    string _nextName {};              /// @brief Next name set by NamedField
+    Stream _stream;                   /// @brief Rapidjson read stream
     List<Iterator> _iteratorStack {}; /// @brief 'Stack' of rapidJSON iterators
     rapidjson::Document _document;    /// @brief Rapidjson document
 
@@ -361,15 +348,14 @@ namespace Krys::Serialisation
     {
       Search();
 
-      if (_iteratorStack.back().Value().IsArray())
+      const GenericValue &value = _iteratorStack.back().Value();
+      if (value.IsArray())
       {
-        _iteratorStack.emplace_back(_iteratorStack.back().Value().Begin(),
-                                    _iteratorStack.back().Value().End());
+        _iteratorStack.emplace_back(value.Begin(), value.End());
       }
       else
       {
-        _iteratorStack.emplace_back(_iteratorStack.back().Value().MemberBegin(),
-                                    _iteratorStack.back().Value().MemberEnd());
+        _iteratorStack.emplace_back(value.MemberBegin(), value.MemberEnd());
       }
     }
 
@@ -388,20 +374,13 @@ namespace Krys::Serialisation
         return;
       }
 
-      string localNextName = _nextName;
+      string requiredFieldName = _nextName;
       _nextName.clear();
 
-      // The name an NVP provided with setNextName()
-      if (!localNextName.empty())
+      string currentFieldName = _iteratorStack.back().Name();
+      if (currentFieldName != requiredFieldName)
       {
-        // The actual name of the current node
-        string actualName = _iteratorStack.back().Name();
-
-        // Do a search if we don't see a name coming up, or if the names don't match
-        if (localNextName != actualName)
-        {
-          _iteratorStack.back().Search(localNextName.c_str());
-        }
+        _iteratorStack.back().Search(requiredFieldName.c_str());
       }
     }
 
@@ -449,7 +428,7 @@ namespace Krys::Serialisation
   {
     if constexpr (ArchiveBuiltin<T>)
     {
-      archive.Search(); // consume _nextName if set, aligning the iterator to that member
+      archive.Search(); // Ensure we're at the right node before reading a value.
     }
     else if constexpr (ArchiveNamedField<T>)
     {

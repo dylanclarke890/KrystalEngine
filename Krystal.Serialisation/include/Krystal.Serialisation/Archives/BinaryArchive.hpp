@@ -90,16 +90,4 @@ namespace Krys::Serialisation
       return *this;
     }
   };
-
-  template <typename T>
-  void Transfer(BinaryArchiveWriter &archive, NamedField<T> &field) noexcept
-  {
-    archive(field.Value);
-  }
-
-  template <typename T>
-  void Transfer(BinaryArchiveReader &archive, NamedField<T> &field) noexcept
-  {
-    archive(field.Value);
-  }
 }
