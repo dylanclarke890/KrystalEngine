@@ -18,9 +18,6 @@
     <ClCompile Include="catch_main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Archives\BinaryArchive.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="tests\Types\Pair.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -30,10 +27,10 @@
     <ClCompile Include="tests\Types\Array.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Archives\JsonArchive.cpp">
+    <ClCompile Include="tests\Builtins.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Builtins.cpp">
+    <ClCompile Include="tests\Access.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -150,8 +150,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="catch_main.cpp" />
-    <ClCompile Include="tests\Archives\BinaryArchive.cpp" />
-    <ClCompile Include="tests\Archives\JsonArchive.cpp" />
+    <ClCompile Include="tests\Access.cpp" />
     <ClCompile Include="tests\Builtins.cpp" />
     <ClCompile Include="tests\Types\Array.cpp" />
     <ClCompile Include="tests\Types\Pair.cpp" />

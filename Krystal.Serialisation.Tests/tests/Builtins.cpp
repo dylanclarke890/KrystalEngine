@@ -12,6 +12,17 @@ namespace Krys::Tests
 
 #pragma region Setup
 
+  struct NestedValue
+  {
+    int Value;
+
+    template <typename Archive>
+    void Transfer(Archive &archive) noexcept
+    {
+      archive(Value);
+    }
+  };
+
   struct BasicTypes
   {
     bool Bool;
@@ -25,12 +36,13 @@ namespace Krys::Tests
     string String;
     int IntArray[4];
     float FloatArray[4];
+    NestedValue Nested {};
 
     template <typename Archive>
     void Transfer(Archive &archive) noexcept
     {
       archive(KRYS_NAMED_FIELD(Bool), Int32, Uint32, Int64, Uint64, Byte, Float, Double, String, IntArray,
-              KRYS_NAMED_FIELD(FloatArray));
+              KRYS_NAMED_FIELD(FloatArray), Nested);
     }
   };
 
@@ -49,6 +61,7 @@ namespace Krys::Tests
       .String = "Hello, world!",
       .IntArray = {1, 2, 3, 4},
       .FloatArray = {1.5f, 3.f, 4.5f, 6.f},
+      .Nested = {5},
     };
     BasicTypes output {};
     List<byte> data(sizeof(BasicTypes));
@@ -79,6 +92,7 @@ namespace Krys::Tests
       REQUIRE(input.IntArray[i] == output.IntArray[i]);
       REQUIRE(input.FloatArray[i] == output.FloatArray[i]);
     }
+    REQUIRE(input.Nested.Value == output.Nested.Value);
   }
 
 #pragma endregion

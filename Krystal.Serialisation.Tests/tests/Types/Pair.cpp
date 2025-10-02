@@ -1,62 +1,49 @@
 #include "Krystal.Serialisation/Types/Pair.hpp"
 #include "Krystal.IO/Streams/MemoryStream.hpp"
-#include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/String.hpp"
+#include "Krystal.Lib/Types.hpp"
 #include "Krystal.Serialisation/Archives/BinaryArchive.hpp"
+#include "Krystal.Serialisation/Archives/JsonArchive.hpp"
+#include "Krystal.Serialisation/Builtins.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
 {
   using namespace Krys::Serialisation;
 
-  TEST_CASE("Serialise(Pair)", "[Serialisation][Types]")
+#pragma region Setup
+
+  template <typename ArchiveReader, typename ArchiveWriter>
+  void TestArchive()
   {
-    SECTION("Pair<int, int>")
+    Pair<int, float> input {42, 3.14f};
+    Pair<int, float> output {0, 0.0f};
+    List<byte> data(sizeof(Pair<int, float>));
+
     {
-      using Type = Pair<int, int>;
-
-      List<byte> buffer(sizeof(Type));
-
-      Type type(1, 2);
-      {
-        IO::MemoryStreamWriter stream(buffer);
-        BinaryArchiveWriter archive(stream);
-        archive(type);
-      }
-
-      Type deserialised;
-      {
-        IO::MemoryStreamReader stream(buffer);
-        BinaryArchiveReader archive(stream);
-        archive(deserialised);
-      }
-
-      REQUIRE(deserialised.first == type.first);
-      REQUIRE(deserialised.second == type.second);
+      IO::MemoryStreamWriter stream(data);
+      ArchiveWriter archive(stream);
+      archive(input);
     }
 
-    SECTION("Pair<std::string, int>")
     {
-      using Type = Pair<string, int>;
-
-      List<byte> buffer(sizeof(Type));
-
-      Type type("Test", 2);
-      {
-        IO::MemoryStreamWriter stream(buffer);
-        BinaryArchiveWriter archive(stream);
-        archive(type);
-      }
-
-      Type deserialised;
-      {
-        IO::MemoryStreamReader stream(buffer);
-        BinaryArchiveReader archive(stream);
-        archive(deserialised);
-      }
-
-      REQUIRE(deserialised.first == type.first);
-      REQUIRE(deserialised.second == type.second);
+      IO::MemoryStreamReader stream(data);
+      ArchiveReader archive(stream);
+      archive(output);
     }
+
+    REQUIRE(input.first == output.first);
+    REQUIRE(input.second == output.second);
+  }
+
+#pragma endregion
+
+  TEST_CASE("BinaryArchive Type: Pair", "[BinaryArchive][Types]")
+  {
+    TestArchive<BinaryArchiveReader, BinaryArchiveWriter>();
+  }
+
+  TEST_CASE("JsonArchive Type: Pair", "[JsonArchive][Types]")
+  {
+    TestArchive<JsonArchiveReader, JsonArchiveWriter>();
   }
 }

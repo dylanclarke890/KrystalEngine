@@ -2,64 +2,52 @@
 #include "Krystal.IO/Streams/MemoryStream.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Serialisation/Archives/BinaryArchive.hpp"
+#include "Krystal.Serialisation/Archives/JsonArchive.hpp"
+#include "Krystal.Serialisation/Builtins.hpp"
+#include "Krystal.Serialisation/Types/List.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
 {
   using namespace Krys::Serialisation;
 
-  TEST_CASE("Serialise(Array)", "[Serialisation][Types]")
+#pragma region Setup
+
+  template <typename ArchiveReader, typename ArchiveWriter>
+  void TestArchive()
   {
-    SECTION("Array<int>")
+    Array<int, 5> input {1, 2, 3, 4, 5};
+    Array<int, 5> output {0, 0, 0, 0, 0};
+    List<byte> data(input.size() * sizeof(int));
+
     {
-      using Type = std::array<int, 1>;
-
-      List<byte> buffer(sizeof(Type));
-
-      Type type {};
-      type[0] = 1;
-
-      {
-        IO::MemoryStreamWriter stream(buffer);
-        BinaryArchiveWriter archive(stream);
-        archive(type);
-      }
-
-      Type deserialised;
-      {
-        IO::MemoryStreamReader stream(buffer);
-        BinaryArchiveReader archive(stream);
-        archive(deserialised);
-      }
-
-      REQUIRE(deserialised.size() == 1);
-      REQUIRE(deserialised[0] == 1);
+      IO::MemoryStreamWriter stream(data);
+      ArchiveWriter archive(stream);
+      archive(input);
     }
 
-    SECTION("Array<string>")
     {
-      using Type = std::array<string, 1>;
-
-      List<byte> buffer(sizeof(Type));
-
-      Type type {};
-      type[0] = "1";
-
-      {
-        IO::MemoryStreamWriter stream(buffer);
-        BinaryArchiveWriter archive(stream);
-        archive(type);
-      }
-
-      Type deserialised;
-      {
-        IO::MemoryStreamReader stream(buffer);
-        BinaryArchiveReader archive(stream);
-        archive(deserialised);
-      }
-
-      REQUIRE(deserialised.size() == 1);
-      REQUIRE(deserialised[0] == "1");
+      IO::MemoryStreamReader stream(data);
+      ArchiveReader archive(stream);
+      archive(output);
     }
+
+    for (size_t i = 0; i < input.size(); ++i)
+    {
+      REQUIRE(input[i] == output[i]);
+      REQUIRE(input[i] == output[i]);
+    }
+  }
+
+#pragma endregion
+
+  TEST_CASE("BinaryArchive Type: Array", "[BinaryArchive][Types]")
+  {
+    TestArchive<BinaryArchiveReader, BinaryArchiveWriter>();
+  }
+
+  TEST_CASE("JsonArchive Type: Array", "[JsonArchive][Types]")
+  {
+    TestArchive<JsonArchiveReader, JsonArchiveWriter>();
   }
 }
