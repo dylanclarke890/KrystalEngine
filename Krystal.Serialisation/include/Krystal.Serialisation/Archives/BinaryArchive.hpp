@@ -4,15 +4,15 @@
 #include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Lib/String.hpp"
 #include "Krystal.Lib/Types.hpp"
-#include "Krystal.Serialisation/Concepts.hpp"
-#include "Krystal.Serialisation/Dispatch.hpp"
+#include "Krystal.Serialisation/Archives/BaseArchive.hpp"
 #include "Krystal.Serialisation/Builtins.hpp"
+#include "Krystal.Serialisation/Concepts.hpp"
 #include <bit>
 #include <memory>
 
 namespace Krys::Serialisation
 {
-  class BinaryArchiveWriter
+  class BinaryArchiveWriter : public BaseArchiveWriter<BinaryArchiveWriter>
   {
   private:
     IO::IStreamWriter &_stream;
@@ -22,11 +22,11 @@ namespace Krys::Serialisation
     {
     }
 
-    template <ArchiveBuiltin T>
-    BinaryArchiveWriter &operator()(const T &value) noexcept
-    {
-      TransferGuard guard(*this, value);
+    ~BinaryArchiveWriter() noexcept override = default;
 
+    template <ArchiveBuiltin T>
+    BinaryArchiveWriter &Write(const T &value) noexcept
+    {
       if constexpr (Arithmetic<T>)
       {
         auto *data = std::bit_cast<byte *>(std::addressof(value));
@@ -48,25 +48,9 @@ namespace Krys::Serialisation
 
       return *this;
     }
-
-    template <typename T>
-    BinaryArchiveWriter &operator()(const T &value) noexcept
-    {
-      TransferGuard guard(*this, value);
-      DispatchSave(*this, value);
-      return *this;
-    }
-
-    template <class... Types>
-    requires(sizeof...(Types) > 1)
-    BinaryArchiveWriter &operator()(Types &&...types) noexcept
-    {
-      ((void)(*this)(std::forward<Types>(types)), ...);
-      return *this;
-    }
   };
 
-  class BinaryArchiveReader
+  class BinaryArchiveReader : public BaseArchiveReader<BinaryArchiveReader>
   {
   private:
     IO::IStreamReader &_stream;
@@ -76,11 +60,11 @@ namespace Krys::Serialisation
     {
     }
 
-    template <ArchiveBuiltin T>
-    BinaryArchiveReader &operator()(T &value) noexcept
-    {
-      TransferGuard guard(*this, value);
+    ~BinaryArchiveReader() noexcept override = default;
 
+    template <ArchiveBuiltin T>
+    BinaryArchiveReader &Read(T &value) noexcept
+    {
       if constexpr (Arithmetic<T>)
       {
         auto *data = std::bit_cast<byte *>(std::addressof(value));
@@ -105,27 +89,16 @@ namespace Krys::Serialisation
 
       return *this;
     }
-
-    template <typename T>
-    BinaryArchiveReader &operator()(T &value) noexcept
-    {
-      TransferGuard guard(*this, value);
-      DispatchLoad(*this, value);
-      return *this;
-    }
-
-    template <class... Types>
-    requires(sizeof...(Types) > 1)
-    BinaryArchiveReader &operator()(Types &...types) noexcept
-    {
-      ((void)(*this)(types), ...);
-      return *this;
-    }
   };
 
-  template <typename Archive, typename T>
-  requires OneOf<Archive, BinaryArchiveWriter, BinaryArchiveReader>
-  void Transfer(Archive &archive, NamedField<T> &field) noexcept
+  template <typename T>
+  void Transfer(BinaryArchiveWriter &archive, NamedField<T> &field) noexcept
+  {
+    archive(field.Value);
+  }
+
+  template <typename T>
+  void Transfer(BinaryArchiveReader &archive, NamedField<T> &field) noexcept
   {
     archive(field.Value);
   }

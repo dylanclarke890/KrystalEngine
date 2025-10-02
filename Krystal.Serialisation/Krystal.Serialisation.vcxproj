@@ -159,10 +159,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.Serialisation\Access.hpp" />
+    <ClInclude Include="include\Krystal.Serialisation\Archives\BaseArchive.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Archives\BinaryArchive.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Archives\JsonArchive.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Concepts.hpp" />
-    <ClInclude Include="include\Krystal.Serialisation\Dispatch.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Helpers\RapidJsonStreamAdapters.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Builtins.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Types\Array.hpp" />

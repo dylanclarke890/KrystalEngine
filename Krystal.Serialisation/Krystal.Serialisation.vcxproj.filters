@@ -30,13 +30,7 @@
     <ClInclude Include="include\Krystal.Serialisation\Archives\JsonArchive.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Serialisation\NamedField.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Serialisation\Concepts.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Serialisation\Dispatch.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Serialisation\Access.hpp">
@@ -157,6 +151,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Serialisation\Helpers\RapidJsonStreamAdapters.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Serialisation\Builtins.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Serialisation\Archives\BaseArchive.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

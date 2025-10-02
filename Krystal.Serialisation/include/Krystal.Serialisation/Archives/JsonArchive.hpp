@@ -5,9 +5,9 @@
 #include "Krystal.Lib/Stack.hpp"
 #include "Krystal.Lib/String.hpp"
 #include "Krystal.Lib/Types.hpp"
+#include "Krystal.Serialisation/Archives/BaseArchive.hpp"
 #include "Krystal.Serialisation/Builtins.hpp"
 #include "Krystal.Serialisation/Concepts.hpp"
-#include "Krystal.Serialisation/Dispatch.hpp"
 #include "Krystal.Serialisation/Helpers/RapidJsonStreamAdapters.hpp"
 #include "rapidjson/document.h"
 #include "rapidjson/prettywriter.h"
@@ -17,7 +17,7 @@
 
 namespace Krys::Serialisation
 {
-  class JsonArchiveWriter
+  class JsonArchiveWriter : public BaseArchiveWriter<JsonArchiveWriter>
   {
     using rapidjsonStream = RapidJsonStreamWriterAdapter;
     using rapidjsonWriter = rapidjson::PrettyWriter<rapidjsonStream>;
@@ -55,9 +55,52 @@ namespace Krys::Serialisation
       _nodeStack.push(NodeType::StartObject);
     }
 
-    ~JsonArchiveWriter() noexcept
+    ~JsonArchiveWriter() noexcept override
     {
       FinishNode();
+    }
+
+    template <ArchiveBuiltin T>
+    JsonArchiveWriter &Write(const T &value) noexcept
+    {
+      if constexpr (SameType<T, bool>)
+      {
+        _writer.Bool(value);
+      }
+      else if constexpr (SameType<T, int>)
+      {
+        _writer.Int(value);
+      }
+      else if constexpr (SameType<T, uint>)
+      {
+        _writer.Uint(value);
+      }
+      else if constexpr (SameType<T, int64>)
+      {
+        _writer.Int64(value);
+      }
+      else if constexpr (SameType<T, uint64>)
+      {
+        _writer.Uint64(value);
+      }
+      else if constexpr (OneOf<T, float, double>) // rapidjson does not have a Float() method
+      {
+        _writer.Double(value);
+      }
+      else if constexpr (SameType<T, byte>)
+      {
+        _writer.Uint(static_cast<uint>(value));
+      }
+      else if constexpr (SameType<T, string>)
+      {
+        _writer.String(value.c_str(), static_cast<rapidjson::SizeType>(value.size()));
+      }
+      else
+      {
+        static_assert(DependentFalse<T>, "Unsupported type");
+      }
+
+      return *this;
     }
 
     void SetNextName(const string &name) noexcept
@@ -135,70 +178,9 @@ namespace Krys::Serialisation
       _nodeStack.pop();
       _counter.pop();
     }
-
-    template <ArchiveBuiltin T>
-    JsonArchiveWriter &operator()(const T &value) noexcept
-    {
-      TransferGuard guard(*this, value);
-
-      if constexpr (SameType<T, bool>)
-      {
-        _writer.Bool(value);
-      }
-      else if constexpr (SameType<T, int>)
-      {
-        _writer.Int(value);
-      }
-      else if constexpr (SameType<T, uint>)
-      {
-        _writer.Uint(value);
-      }
-      else if constexpr (SameType<T, int64>)
-      {
-        _writer.Int64(value);
-      }
-      else if constexpr (SameType<T, uint64>)
-      {
-        _writer.Uint64(value);
-      }
-      else if constexpr (OneOf<T, float, double>) // rapidjson does not have a Float() method
-      {
-        _writer.Double(value);
-      }
-      else if constexpr (SameType<T, byte>)
-      {
-        _writer.Uint(static_cast<uint>(value));
-      }
-      else if constexpr (SameType<T, string>)
-      {
-        _writer.String(value.c_str(), static_cast<rapidjson::SizeType>(value.size()));
-      }
-      else
-      {
-        static_assert(DependentFalse<T>, "Unsupported type");
-      }
-
-      return *this;
-    }
-
-    template <typename T>
-    JsonArchiveWriter &operator()(const T &value) noexcept
-    {
-      TransferGuard guard(*this, value);
-      DispatchSave(*this, value);
-      return *this;
-    }
-
-    template <class... Types>
-    requires(sizeof...(Types) > 1)
-    JsonArchiveWriter &operator()(Types &&...types) noexcept
-    {
-      ((void)(*this)(std::forward<Types>(types)), ...);
-      return *this;
-    }
   };
 
-  class JsonArchiveReader
+  class JsonArchiveReader : public BaseArchiveReader<JsonArchiveReader>
   {
     using rapidjsonStream = RapidJsonStreamReaderAdapter;
     using rapidjsonReader = rapidjson::Reader;
@@ -319,86 +301,13 @@ namespace Krys::Serialisation
       }
     }
 
-    /// @brief This places an iterator for the next node to be parsed onto the iterator stack.  If the next
-    /// node is an array, this will be a value iterator, otherwise it will be a member iterator.
-    /// By default our strategy is to start with the document root node and then recursively iterate through
-    /// all children in the order they show up in the document.
-    /// We don't need to know NVPs to do this; we'll just blindly load in the order things appear in.
-    /// If we were given an NVP, we will search for it if it does not match our the name of the next node
-    /// that would normally be loaded.  This functionality is provided by search().
-    void StartNode()
+    ~JsonArchiveReader() noexcept override
     {
-      Search();
-
-      if (_iteratorStack.back().Value().IsArray())
-      {
-        _iteratorStack.emplace_back(_iteratorStack.back().Value().Begin(),
-                                    _iteratorStack.back().Value().End());
-      }
-      else
-      {
-        _iteratorStack.emplace_back(_iteratorStack.back().Value().MemberBegin(),
-                                    _iteratorStack.back().Value().MemberEnd());
-      }
-    }
-
-    /// @brief Finishes the most recently started node
-    void FinishNode()
-    {
-      _iteratorStack.pop_back();
-      Next();
-    }
-
-    /// @brief Searches for the expectedName node if it doesn't match the actualName
-    /// @brief This needs to be called before every load or node start occurs.  This function will
-    /// check to see if an NVP has been provided (with setNextName) and if so, see if that name matches the
-    /// actual next name given.  If the names do not match, it will search in the current level of the JSON
-    /// for that name. If the name is not found, an exception will be thrown. Resets the NVP name after
-    /// called.
-    /// @throws Exception if a match is not found for the provided NVP name.
-    void Search()
-    {
-      // store pointer to itsNextName locally and reset to nullptr in case search() throws
-      string localNextName = _nextName;
-      _nextName = string();
-
-      // The name an NVP provided with setNextName()
-      if (!localNextName.empty())
-      {
-        // The actual name of the current node
-        string actualName = _iteratorStack.back().Name();
-
-        // Do a search if we don't see a name coming up, or if the names don't match
-        if (localNextName != actualName)
-        {
-          _iteratorStack.back().Search(localNextName.c_str());
-        }
-      }
-    }
-
-    /// @brief Retrieves the current node name
-    /// @return nullptr if no name exists
-    const char *GetNodeName() const
-    {
-      return _iteratorStack.back().Name();
-    }
-
-    /// @brief Sets the name for the next node created with StartNode
-    void SetNextName(const string &name)
-    {
-      _nextName = name;
-    }
-
-    void Next()
-    {
-      ++_iteratorStack.back();
     }
 
     template <ArchiveBuiltin T>
-    JsonArchiveReader &operator()(T &value) noexcept
+    JsonArchiveReader &Read(T &value) noexcept
     {
-      TransferGuard guard(*this, value);
-
       const GenericValue &node = _iteratorStack.back().Value();
 
       if constexpr (SameType<T, bool>)
@@ -445,20 +354,67 @@ namespace Krys::Serialisation
       return *this;
     }
 
-    template <typename T>
-    JsonArchiveReader &operator()(T &value) noexcept
+    /// @brief This places an iterator for the next node to be parsed onto the iterator stack. Depending on
+    /// the node's type it will be a member or value iterator to allow arrays and objects to be iterated
+    /// recursively.
+    void StartNode()
     {
-      TransferGuard guard(*this, value);
-      DispatchLoad(*this, value);
-      return *this;
+      Search();
+
+      if (_iteratorStack.back().Value().IsArray())
+      {
+        _iteratorStack.emplace_back(_iteratorStack.back().Value().Begin(),
+                                    _iteratorStack.back().Value().End());
+      }
+      else
+      {
+        _iteratorStack.emplace_back(_iteratorStack.back().Value().MemberBegin(),
+                                    _iteratorStack.back().Value().MemberEnd());
+      }
     }
 
-    template <class... Types>
-    requires(sizeof...(Types) > 1)
-    JsonArchiveReader &operator()(Types &&...types) noexcept
+    /// @brief Finishes the most recently started node.
+    void FinishNode()
     {
-      ((void)(*this)(types), ...);
-      return *this;
+      _iteratorStack.pop_back();
+      Next();
+    }
+
+    /// @brief Must be called on every load/node start. Ensures the iterator is aligned with the named node.
+    void Search()
+    {
+      if (_nextName.empty())
+      {
+        return;
+      }
+
+      string localNextName = _nextName;
+      _nextName.clear();
+
+      // The name an NVP provided with setNextName()
+      if (!localNextName.empty())
+      {
+        // The actual name of the current node
+        string actualName = _iteratorStack.back().Name();
+
+        // Do a search if we don't see a name coming up, or if the names don't match
+        if (localNextName != actualName)
+        {
+          _iteratorStack.back().Search(localNextName.c_str());
+        }
+      }
+    }
+
+    /// @brief Sets the name for the next node created with StartNode
+    void SetNextName(const string &name)
+    {
+      _nextName = name;
+    }
+
+    /// @brief Advance to the next node in the current object or array.
+    void Next()
+    {
+      ++_iteratorStack.back();
     }
   };
 
@@ -473,7 +429,7 @@ namespace Krys::Serialisation
     {
       archive.SetNextName(value.Name); // Set the name for the next node.
     }
-    else
+    else if constexpr (ArchiveCustom<T>)
     {
       archive.StartNode(); // enter {} or []. also calls WriteName().
     }
@@ -482,7 +438,7 @@ namespace Krys::Serialisation
   template <typename T>
   void AfterTransfer(JsonArchiveWriter &archive, const T &) noexcept
   {
-    if constexpr (!ArchiveBuiltin<T> && !ArchiveNamedField<T>)
+    if constexpr (ArchiveCustom<T>)
     {
       archive.FinishNode(); // exit {} or [].
     }
@@ -491,15 +447,15 @@ namespace Krys::Serialisation
   template <typename T>
   void BeforeTransfer(JsonArchiveReader &archive, const T &value) noexcept
   {
-    if constexpr (ArchiveNamedField<T>)
-    {
-      archive.SetNextName(value.Name);
-    }
-    else if constexpr (ArchiveBuiltin<T>)
+    if constexpr (ArchiveBuiltin<T>)
     {
       archive.Search(); // consume _nextName if set, aligning the iterator to that member
     }
-    else
+    else if constexpr (ArchiveNamedField<T>)
+    {
+      archive.SetNextName(value.Name);
+    }
+    else if constexpr (ArchiveCustom<T>)
     {
       archive.StartNode(); // enter {} or [].
     }
@@ -512,7 +468,7 @@ namespace Krys::Serialisation
     {
       archive.Next(); // move to next value in {} or [].
     }
-    else if constexpr (!ArchiveNamedField<T>)
+    else if constexpr (ArchiveCustom<T>)
     {
       archive.FinishNode(); // exit {} or [].
     }
