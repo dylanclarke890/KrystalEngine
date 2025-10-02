@@ -178,9 +178,13 @@ namespace Krys::Serialisation
     }
   };
 
-  template <typename T>
-  concept IsArchiveWriter = DerivedFrom<BaseArchive, T> && requires(T t) { T::IsWriter; };
-
-  template <typename T>
-  concept IsArchiveReader = DerivedFrom<BaseArchive, T> && requires(T t) { T::IsReader; };
+  template <typename Archive, IsArray T>
+  void Transfer(Archive &archive, T &value) noexcept
+  {
+    using ElementType = RemoveCvRef<RemoveExtent<T>>;
+    for (size_t i = 0; i < Extent<T>; i++)
+    {
+      archive(value[i]);
+    }
+  }
 }

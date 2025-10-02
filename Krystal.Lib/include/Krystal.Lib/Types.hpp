@@ -34,7 +34,4 @@ namespace Krys
   using float64 = double;
 
   using std::declval;
-
-  template <bool predicate, typename T, typename U>
-  using ConditionalType = std::conditional_t<predicate, T, U>;
 }

@@ -1,27 +1,32 @@
 #pragma once
 
 #include "Krystal.Lib/List.hpp"
+#include "Krystal.Serialisation/Builtins.hpp"
 
 namespace Krys::Serialisation
 {
   template <typename Archive, typename T>
-  void Save(Archive &archive, const List<T> &vec) noexcept
+  void Save(Archive &archive, const List<T> &value) noexcept
   {
-    size_t size = vec.size();
-    archive(size);
+    size_t size = value.size();
+    archive(KRYS_CONTAINER_SIZE(size));
 
-    for (const auto &item : vec)
+    for (const auto &item : value)
+    {
       archive(item);
+    }
   }
 
   template <typename Archive, typename T>
-  void Load(Archive &archive, List<T> &vec) noexcept
+  void Load(Archive &archive, List<T> &value) noexcept
   {
-    size_t size {};
-    archive(size);
+    size_t size {0u};
+    archive(KRYS_CONTAINER_SIZE(size));
 
-    vec.resize(size);
-    for (auto &item : vec)
+    value.resize(size);
+    for (auto &item : value)
+    {
       archive(item);
+    }
   }
 }

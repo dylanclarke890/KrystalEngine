@@ -4,15 +4,19 @@
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/String.hpp"
 
-namespace Krys::Impl
-{
-  class NamedField
-  {
-  };
-}
-
 namespace Krys::Serialisation
 {
+#pragma region NamedField
+
+  namespace Impl
+  {
+    class NamedField
+    {
+    };
+  }
+
+  /// @brief A wrapper around a field to be serialised, to provide a more readable name for the appropriate
+  /// archives to display. Use CreateNamedField() or the KRYS_NAMED_FIELD() macro for convenience.
   template <typename T>
   class NamedField : public Impl::NamedField
   {
@@ -23,8 +27,8 @@ namespace Krys::Serialisation
     // If array   - store as is so we preserve the array type/size.
     // if l-value - take l-value reference.
     // else       - make a copy of the data (not ideal).
-    using Type = std::conditional_t<IsArray<RemoveRef<T>>, RemoveCv<T>,
-                                    std::conditional_t<IsLValueRef<T>::value, T, std::decay_t<T>>>;
+    using FieldType =
+      Conditional<IsArray<RemoveCvRef<T>>, RemoveCv<T>, Conditional<IsLValueRef<T>, T, Decay<T>>>;
 
   public:
     constexpr NamedField(char const *name, T &&value) noexcept : Name(name), Value(std::forward<T>(value))
@@ -32,23 +36,7 @@ namespace Krys::Serialisation
     }
 
     char const *Name;
-    Type Value;
-  };
-
-  template <typename T>
-  class SizeTag
-  {
-    NO_COPY(SizeTag)
-
-    // Store a reference if passed an lvalue reference, otherwise make a copy of the data
-    using SizeType = std::conditional_t<IsLValueRef<T>::type, T, Decay<T>>;
-
-  public:
-    SizeTag(T &&value) noexcept : Size(std::forward<T>(value))
-    {
-    }
-
-    SizeType Size;
+    FieldType Value;
   };
 
   template <typename T>
@@ -63,11 +51,61 @@ namespace Krys::Serialisation
     return NamedField<T>(name, std::forward<T>(value));
   }
 
-#define KRYS_NAMED_FIELD(var) ::Krys::Serialisation::CreateNamedField(#var, var)
-
   template <typename Archive, typename T>
   void Transfer(Archive &archive, NamedField<T> &field) noexcept
   {
+    // Every NamedField ultimately just serialises its value as normal for a given archive, its name is
+    // handled by the Before/AfterTransfer hooks, specialised by each Archive implementation.
     archive(field.Value);
   }
+
+#define KRYS_NAMED_FIELD(var) ::Krys::Serialisation::CreateNamedField(#var, var)
+
+#pragma endregion
+
+#pragma region ContainerSize
+
+  namespace Impl
+  {
+    class ContainerSize
+    {
+    };
+  }
+
+  /// @brief Allows archives to prepare to serialise a container of known size (not possible with an arbitrary
+  /// int). Archives can either serialise the size to make deserialisation easier, or use it to set up
+  /// internal state as needed (e.g. start a JSON array) by utilising the
+  /// BeforeTransfer/Transfer/AfterTransfer hooks.
+  template <typename T>
+  class ContainerSize : public Impl::ContainerSize
+  {
+    NO_COPY(ContainerSize)
+
+  public:
+    // Stores a reference if passed an lvalue reference, otherwise makes a copy of the data.
+    using SizeType = Conditional<IsLValueRef<T>, T, Decay<T>>;
+
+    ContainerSize(T &&value) noexcept : Size(std::forward<T>(value))
+    {
+    }
+
+    SizeType Size;
+  };
+
+  template <typename T>
+  auto CreateContainerSize(T &&value) noexcept
+  {
+    return ContainerSize<T>(std::forward<T>(value));
+  }
+
+#define KRYS_CONTAINER_SIZE(var) ::Krys::Serialisation::CreateContainerSize(var)
+
+  template <typename Archive, typename T>
+  void Transfer(Archive &archive, ContainerSize<T> &container) noexcept
+  {
+    // By default, just serialise the size as normal.
+    archive(container.Size);
+  }
+
+#pragma endregion
 }

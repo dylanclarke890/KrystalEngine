@@ -8,18 +8,22 @@
 
 namespace Krys::Serialisation
 {
-  /// @brief Denotes a type that needs to be supported by all archives by default.
+  /// @brief A type that needs to be supported by all archives by default.
   template <typename T>
   concept ArchiveBuiltin = Arithmetic<RemoveCvRef<T>> || OneOf<RemoveCvRef<T>, byte, string>;
 
-  /// @brief Denotes a special type that provides a name for the next field to be serialised along with its
+  /// @brief A special type that provides a name for the next field to be serialised along with its
   /// value.
   template <typename T>
   concept ArchiveNamedField = DerivedFrom<RemoveCvRef<T>, Impl::NamedField>;
 
-  /// @brief Denotes a type that requires custom serialisation methods.
+  /// @brief A special type that indicates a container is about to be serialised, and provides its size.
   template <typename T>
-  concept ArchiveCustom = !ArchiveBuiltin<T> && !ArchiveNamedField<T>;
+  concept ArchiveContainerSize = DerivedFrom<RemoveCvRef<T>, Impl::ContainerSize>;
+
+  /// @brief A type that requires custom serialisation methods.
+  template <typename T>
+  concept ArchiveCustom = !ArchiveBuiltin<T> && !ArchiveNamedField<T> && !ArchiveContainerSize<T>;
 
   template <typename Archive, typename T>
   concept HasTransferMember = requires(Archive &archive, T &value) { Access::Transfer(archive, value); };

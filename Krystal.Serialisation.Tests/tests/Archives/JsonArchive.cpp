@@ -1,6 +1,7 @@
 #include "Krystal.Serialisation/Archives/JsonArchive.hpp"
 #include "Krystal.IO/Streams/MemoryStream.hpp"
 #include "Krystal.Serialisation/Access.hpp"
+#include "Krystal.Serialisation/Types/List.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Serialisation
@@ -91,11 +92,12 @@ namespace Krys::Serialisation
     MemberPublicTransfer NestedB;
     FreeSaveLoad NestedC;
     MemberPrivateSaveLoad NestedD;
+    List<int> Ints;
 
     template <typename Archive>
     void Save(Archive &archive) const noexcept
     {
-      archive(Int, Float, Bool, Byte, String, NestedA, NestedB, NestedC, NestedD);
+      archive(Int, Float, Bool, Byte, String, NestedA, NestedB, NestedC, NestedD, Ints);
     }
   };
 
@@ -103,7 +105,7 @@ namespace Krys::Serialisation
   void Load(Archive &archive, TestStruct &obj) noexcept
   {
     archive(obj.Int, obj.Float, obj.Bool, obj.Byte, obj.String, obj.NestedA, obj.NestedB, obj.NestedC,
-            obj.NestedD);
+            obj.NestedD, obj.Ints);
   }
 }
 
@@ -123,6 +125,7 @@ namespace Krys::Tests
       .NestedB = {200, 4.56f},
       .NestedC = {300, 7.89f},
       .NestedD = {400, 0.12f},
+      .Ints = {1, 2, 3, 4, 5},
     };
     TestStruct output {};
     List<byte> data;
@@ -152,5 +155,10 @@ namespace Krys::Tests
     REQUIRE(input.NestedC.Int == output.NestedC.Int);
     REQUIRE(input.NestedC.Float == output.NestedC.Float);
     REQUIRE(input.NestedD == output.NestedD);
+    REQUIRE(input.Ints.size() == output.Ints.size());
+    for (size_t i = 0; i < input.Ints.size(); i++)
+    {
+      REQUIRE(input.Ints[i] == output.Ints[i]);
+    }
   }
 }

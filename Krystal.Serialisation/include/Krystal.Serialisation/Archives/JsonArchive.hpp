@@ -98,14 +98,46 @@ namespace Krys::Serialisation
       return *this;
     }
 
-    void SetNextName(const string &name) noexcept
+    void StartNode()
     {
-      _nextName = name;
+      WriteName();
+      _nodes.push({Node::StartObject, 0u});
+    }
+
+    void FinishNode()
+    {
+      // Handles serialising empty objects (WriteName is never called)
+      if (_nodes.top().Type == Node::StartArray)
+      {
+        _writer.StartArray();
+        _writer.EndArray();
+      }
+      else if (_nodes.top().Type == Node::StartObject)
+      {
+        _writer.StartObject();
+        _writer.EndObject();
+      }
+      // Exiting an object or array
+      else if (_nodes.top().Type == Node::InObject)
+      {
+        _writer.EndObject();
+      }
+      else if (_nodes.top().Type == Node::InArray)
+      {
+        _writer.EndArray();
+      }
+
+      _nodes.pop();
     }
 
     void StartArray() noexcept
     {
       _nodes.top().Type = Node::StartArray;
+    }
+
+    void SetNextName(const string &name) noexcept
+    {
+      _nextName = name;
     }
 
     void WriteName()
@@ -137,38 +169,6 @@ namespace Krys::Serialisation
 
       _writer.Key(_nextName.c_str(), static_cast<rapidjson::SizeType>(_nextName.size()));
       _nextName.clear();
-    }
-
-    void StartNode()
-    {
-      WriteName();
-      _nodes.push({Node::StartObject, 0u});
-    }
-
-    void FinishNode()
-    {
-      // Handles serialising empty objects (WriteName is never called)
-      if (_nodes.top().Type == Node::StartArray)
-      {
-        _writer.StartArray();
-        _writer.EndArray();
-      }
-      else if (_nodes.top().Type == Node::StartObject)
-      {
-        _writer.StartObject();
-        _writer.EndObject();
-      }
-      // Exiting an object or array
-      else if (_nodes.top().Type == Node::InObject)
-      {
-        _writer.EndObject();
-      }
-      else if (_nodes.top().Type == Node::InArray)
-      {
-        _writer.EndArray();
-      }
-
-      _nodes.pop();
     }
   };
 
@@ -341,6 +341,16 @@ namespace Krys::Serialisation
       return *this;
     }
 
+    template <typename T>
+    void Read(ContainerSize<T> &value) noexcept
+    {
+      using Size = RemoveRef<typename ContainerSize<T>::SizeType>;
+      Size size = _iteratorStack.size() == 1
+                    ? static_cast<Size>(_document.Size())
+                    : static_cast<Size>((_iteratorStack.rbegin() + 1)->Value().Size());
+      value.Size = size;
+    }
+
     /// @brief This places an iterator for the next node to be parsed onto the iterator stack. Depending on
     /// the node's type it will be a member or value iterator to allow arrays and objects to be iterated
     /// recursively.
@@ -398,6 +408,18 @@ namespace Krys::Serialisation
   };
 
   template <typename T>
+  void Transfer(JsonArchiveWriter &, ContainerSize<T> &) noexcept
+  {
+    // No-op
+  }
+
+  template <typename T>
+  void Transfer(JsonArchiveReader &archive, ContainerSize<T> &value) noexcept
+  {
+    archive.Read(value); // we get this value by counting the number of elements in the array/object.
+  }
+
+  template <typename T>
   void BeforeTransfer(JsonArchiveWriter &archive, const T &value) noexcept
   {
     if constexpr (ArchiveBuiltin<T>)
@@ -408,9 +430,18 @@ namespace Krys::Serialisation
     {
       archive.SetNextName(value.Name); // Set the name for the next node.
     }
+    else if constexpr (ArchiveContainerSize<T>)
+    {
+      archive.StartArray(); // we don't need to store size, just start the array.
+    }
     else if constexpr (ArchiveCustom<T>)
     {
-      archive.StartNode(); // enter {} or []. also calls WriteName().
+      archive.StartNode(); // enters {}. also calls WriteName().
+    }
+    else if constexpr (IsArray<T>)
+    {
+      archive.StartNode();  // enters {}
+      archive.StartArray(); // change to []
     }
   }
 
@@ -419,7 +450,7 @@ namespace Krys::Serialisation
   {
     if constexpr (ArchiveCustom<T>)
     {
-      archive.FinishNode(); // exit {} or [].
+      archive.FinishNode(); // exits {} or [].
     }
   }
 
