@@ -183,6 +183,9 @@
     <ClInclude Include="include\Krystal.Serialisation\Archives\Adapters\RapidJsonStreamAdapters.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="third-party\rapidxml\include.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\placeholder.cpp">

@@ -1,45 +1,13 @@
 #pragma once
 
 #include "Krystal.IO/IStream.hpp"
+#include "Krystal.Lib/Array.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Stack.hpp"
 #include "Krystal.Serialisation/Archives/BaseArchive.hpp"
 #include "Krystal.Serialisation/Builtins.hpp"
 #include "Krystal.Serialisation/Concepts.hpp"
-#include "rapidxml/rapidxml.hpp"
-namespace rapidxml
-{
-  namespace internal
-  {
-    template <class OutIt, class Ch>
-    inline OutIt print_children(OutIt out, const xml_node<Ch> *node, int flags, int indent);
-
-    template <class OutIt, class Ch>
-    inline OutIt print_attributes(OutIt out, const xml_node<Ch> *node, int flags);
-
-    template <class OutIt, class Ch>
-    inline OutIt print_data_node(OutIt out, const xml_node<Ch> *node, int flags, int indent);
-
-    template <class OutIt, class Ch>
-    inline OutIt print_cdata_node(OutIt out, const xml_node<Ch> *node, int flags, int indent);
-
-    template <class OutIt, class Ch>
-    inline OutIt print_element_node(OutIt out, const xml_node<Ch> *node, int flags, int indent);
-
-    template <class OutIt, class Ch>
-    inline OutIt print_declaration_node(OutIt out, const xml_node<Ch> *node, int flags, int indent);
-
-    template <class OutIt, class Ch>
-    inline OutIt print_comment_node(OutIt out, const xml_node<Ch> *node, int flags, int indent);
-
-    template <class OutIt, class Ch>
-    inline OutIt print_doctype_node(OutIt out, const xml_node<Ch> *node, int flags, int indent);
-
-    template <class OutIt, class Ch>
-    inline OutIt print_pi_node(OutIt out, const xml_node<Ch> *node, int flags, int indent);
-  }
-}
-#include "rapidxml/rapidxml_print.hpp"
+#include "rapidxml/include.hpp"
 #include <format>
 #include <sstream>
 
@@ -85,45 +53,78 @@ namespace Krys::Serialisation
       _nodes.emplace(root);
     }
 
-    ~XmlArchiveWriter() noexcept
+    ~XmlArchiveWriter() noexcept override
     {
-      std::string output;
-      const int flags = 0;
-      rapidxml::print(std::back_inserter(output), _document, flags);
-
+      struct StreamOutIt
+      {
+        IO::IStreamWriter *s;
+        using iterator_category = std::output_iterator_tag;
+        StreamOutIt &operator=(char c)
+        {
+          s->Write(reinterpret_cast<const byte *>(&c), 1);
+          return *this;
+        }
+        StreamOutIt &operator*()
+        {
+          return *this;
+        }
+        StreamOutIt &operator++()
+        {
+          return *this;
+        }
+        StreamOutIt operator++(int)
+        {
+          return *this;
+        }
+      };
+      rapidxml::print(StreamOutIt {&_stream}, _document, 0);
       _document.clear();
-      _stream.Write(reinterpret_cast<const byte *>(output.data()), output.size());
     }
 
     template <ArchiveBuiltin T>
-    XmlArchiveWriter &Write(const T &value) noexcept
+    XmlArchiveWriter &Write(const T &value)
     {
-      if constexpr (SameType<T, byte>)
+      string data {};
+      if constexpr (SameType<T, bool>)
       {
-        Write(static_cast<uint32>(value));
+        data = value ? "true" : "false";
       }
-      else
+      else if constexpr (OneOf<T, int, uint, int64, uint64>)
       {
-        std::ostringstream oss;
-        oss << std::boolalpha;
-        oss.precision(std::numeric_limits<double>::digits10);
-
-        oss << value;
-        auto asString = oss.str();
-
-        // If the first or last character is a whitespace, add xml:space attribute
-        const auto len = asString.length();
-        if (len > 0 && (IsWhitespace(asString[0]) || IsWhitespace(asString[len - 1])))
+        data = std::to_string(value);
+      }
+      else if constexpr (OneOf<T, float, double>)
+      {
+        Array<char, 128> buffer {};
+        auto [ptr, ec] = std::to_chars(buffer.data(), buffer.data() + buffer.size(), value,
+                                       std::chars_format::fixed, std::numeric_limits<T>::max_digits10);
+        if (ec != std::errc {})
         {
-          _nodes.top().Node->append_attribute(_document.allocate_attribute("xml:space", "preserve"));
+          throw std::runtime_error("Invalid numeric in XML");
         }
-
-        // allocate strings for all of the data in the XML object
-        auto dataPtr = _document.allocate_string(asString.c_str(), asString.length() + 1);
-
-        // insert into the XML
-        _nodes.top().Node->append_node(_document.allocate_node(rapidxml::node_data, nullptr, dataPtr));
+        data = string {buffer.data(), ptr};
       }
+      else if constexpr (SameType<T, string>)
+      {
+        data = value;
+      }
+      else if constexpr (SameType<T, byte>)
+      {
+        data = std::to_string(static_cast<uint>(value));
+      }
+
+      // If the first or last character is a whitespace, add xml:space attribute
+      const auto len = data.length();
+      if (len > 0 && (IsWhitespace(data[0]) || IsWhitespace(data[len - 1])))
+      {
+        _nodes.top().Node->append_attribute(_document.allocate_attribute("xml:space", "preserve"));
+      }
+
+      // allocate strings for all of the data in the XML object
+      auto dataPtr = _document.allocate_string(data.c_str(), data.length() + 1);
+
+      // insert into the XML
+      _nodes.top().Node->append_node(_document.allocate_node(rapidxml::node_data, nullptr, dataPtr));
 
       return *this;
     }
@@ -246,67 +247,29 @@ namespace Krys::Serialisation
     template <ArchiveBuiltin T>
     XmlArchiveReader &Read(T &value)
     {
+      NodeType *node = _nodes.top().Node;
       if constexpr (SameType<T, bool>)
       {
-        std::istringstream is(_nodes.top().Node->value());
-        is.setf(std::ios::boolalpha);
-        is >> value;
+        stringview text(_nodes.top().Node->value(), _nodes.top().Node->value_size());
+        value = (text == "true" || text == "1");
       }
-      else if constexpr (SameType<T, int>)
+      else if constexpr (OneOf<T, int, uint, int64, uint64, float, double>)
       {
-        value = std::stoi(_nodes.top().Node->value());
-      }
-      else if constexpr (SameType<T, uint>)
-      {
-        value = static_cast<uint>(std::stoul(_nodes.top().Node->value()));
-      }
-      else if constexpr (SameType<T, int64>)
-      {
-        value = std::stoll(_nodes.top().Node->value());
-      }
-      else if constexpr (SameType<T, uint64>)
-      {
-        value = static_cast<uint64>(std::stoull(_nodes.top().Node->value()));
-      }
-      else if constexpr (SameType<T, float>)
-      {
-        try
-        {
-          value = std::stof(_nodes.top().Node->value());
-        }
-        catch (std::out_of_range const &)
-        {
-          // special case for denormalized values
-          std::istringstream is(_nodes.top().Node->value());
-          is >> value;
-          if (std::fpclassify(value) != FP_SUBNORMAL)
-            throw;
-        }
-      }
-      else if constexpr (SameType<T, double>)
-      {
-        try
-        {
-          value = std::stod(_nodes.top().Node->value());
-        }
-        catch (std::out_of_range const &)
-        {
-          // special case for denormalized values
-          std::istringstream is(_nodes.top().Node->value());
-          is >> value;
-          if (std::fpclassify(value) != FP_SUBNORMAL)
-            throw;
-        }
+        std::from_chars(node->value(), node->value() + node->value_size(), value);
       }
       else if constexpr (SameType<T, byte>)
       {
-        value = static_cast<byte>(std::stoul(_nodes.top().Node->value()));
+        uint32 temp = 0;
+        auto [_, ec] = std::from_chars(node->value(), node->value() + node->value_size(), temp);
+        if (ec != std::errc {})
+        {
+          throw std::runtime_error("Invalid numeric in XML");
+        }
+        value = static_cast<byte>(temp);
       }
       else if constexpr (SameType<T, string>)
       {
-        std::istringstream is(_nodes.top().Node->value());
-        using Iter = std::istreambuf_iterator<char>;
-        value.assign(Iter(is), Iter());
+        value.assign(node->value(), node->value_size());
       }
       else
       {
@@ -341,18 +304,21 @@ namespace Krys::Serialisation
             ("XML Parsing failed - provided NVP (" + std::string(expectedName) + ") not found").c_str());
       }
 
-      _nodes.emplace(next);
+      if (next != nullptr)
+      {
+        _nodes.emplace(next);
+      }
+      else
+      {
+        throw std::exception("XML Parsing failed - no more nodes to read.");
+      }
     }
 
     void FinishNode()
     {
-      // remove current
+      // remove current, advance parent and clear its name
       _nodes.pop();
-
-      // advance parent
       _nodes.top().Advance();
-
-      // Reset name
       _nodes.top().Name.clear();
     }
 
@@ -361,7 +327,7 @@ namespace Krys::Serialisation
       return _nodes.top().GetNextChildName();
     }
 
-    void SetNextName(const string &name)
+    void SetNextName(const string &name) noexcept
     {
       _nodes.top().Name = name;
     }
