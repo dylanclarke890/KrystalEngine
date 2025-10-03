@@ -27,14 +27,9 @@ namespace Krys::Serialisation
     template <ArchiveBuiltin T>
     BinaryArchiveWriter &Write(const T &value) noexcept
     {
-      if constexpr (Arithmetic<T>)
+      if constexpr (SameType<T, byte>)
       {
-        auto *data = std::bit_cast<byte *>(std::addressof(value));
-        _stream.Write(data, sizeof(T));
-      }
-      else if constexpr (SameType<T, byte>)
-      {
-        _stream.Write(std::addressof(value), sizeof(byte));
+        _stream.Write(std::addressof(value), 1);
       }
       else if constexpr (SameType<T, string>)
       {
@@ -44,6 +39,11 @@ namespace Krys::Serialisation
           return *this;
         auto *data = std::bit_cast<const byte *>(value.data());
         _stream.Write(data, length);
+      }
+      else
+      {
+        auto *data = std::bit_cast<byte *>(std::addressof(value));
+        _stream.Write(data, sizeof(T));
       }
 
       return *this;
@@ -65,14 +65,9 @@ namespace Krys::Serialisation
     template <ArchiveBuiltin T>
     BinaryArchiveReader &Read(T &value) noexcept
     {
-      if constexpr (Arithmetic<T>)
+      if constexpr (SameType<T, byte>)
       {
-        auto *data = std::bit_cast<byte *>(std::addressof(value));
-        _stream.Read(data, sizeof(T));
-      }
-      else if constexpr (SameType<T, byte>)
-      {
-        _stream.Read(&value, 1);
+        _stream.Read(std::addressof(value), 1);
       }
       else if constexpr (SameType<T, string>)
       {
@@ -85,6 +80,11 @@ namespace Krys::Serialisation
         value.resize(length);
         auto *data = std::bit_cast<byte *>(value.data());
         _stream.Read(data, length);
+      }
+      else
+      {
+        auto *data = std::bit_cast<byte *>(std::addressof(value));
+        _stream.Read(data, sizeof(T));
       }
 
       return *this;

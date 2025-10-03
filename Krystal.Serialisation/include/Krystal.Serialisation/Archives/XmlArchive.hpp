@@ -89,11 +89,11 @@ namespace Krys::Serialisation
       {
         data = value ? "true" : "false";
       }
-      else if constexpr (OneOf<T, int, uint, int64, uint64>)
+      else if constexpr (OneOf<T, int64, uint64, ulong, long, long long, unsigned long long>)
       {
         data = std::to_string(value);
       }
-      else if constexpr (OneOf<T, float, double>)
+      else if constexpr (OneOf<T, float, double, long double>)
       {
         Array<char, 128> buffer {};
         auto [ptr, ec] = std::to_chars(buffer.data(), buffer.data() + buffer.size(), value,
@@ -108,9 +108,13 @@ namespace Krys::Serialisation
       {
         data = value;
       }
-      else if constexpr (SameType<T, byte>)
+      else if constexpr (OneOf<T, byte, uchar, ushort, uint8, uint16, uint32>)
       {
-        data = std::to_string(static_cast<uint>(value));
+        data = std::to_string(static_cast<uint32>(value));
+      }
+      else if constexpr (OneOf<T, char, short, int8, int16, int32>)
+      {
+        data = std::to_string(static_cast<int32>(value));
       }
 
       // If the first or last character is a whitespace, add xml:space attribute
@@ -253,11 +257,12 @@ namespace Krys::Serialisation
         stringview text(_nodes.top().Node->value(), _nodes.top().Node->value_size());
         value = (text == "true" || text == "1");
       }
-      else if constexpr (OneOf<T, int, uint, int64, uint64, float, double>)
+      else if constexpr (OneOf<T, int32, uint32, int64, uint64, char, uchar, short, ushort, ulong, long,
+                               long long, unsigned long long, float, double, long double>)
       {
         std::from_chars(node->value(), node->value() + node->value_size(), value);
       }
-      else if constexpr (SameType<T, byte>)
+      else if constexpr (OneOf<T, byte, uchar, ushort, uint8, uint16, uint32>)
       {
         uint32 temp = 0;
         auto [_, ec] = std::from_chars(node->value(), node->value() + node->value_size(), temp);
@@ -265,7 +270,17 @@ namespace Krys::Serialisation
         {
           throw std::runtime_error("Invalid numeric in XML");
         }
-        value = static_cast<byte>(temp);
+        value = static_cast<T>(temp);
+      }
+      else if constexpr (OneOf<T, char, short, int8, int16, int32>)
+      {
+        int32 temp = 0;
+        auto [_, ec] = std::from_chars(node->value(), node->value() + node->value_size(), temp);
+        if (ec != std::errc {})
+        {
+          throw std::runtime_error("Invalid numeric in XML");
+        }
+        value = static_cast<T>(temp);
       }
       else if constexpr (SameType<T, string>)
       {

@@ -10,7 +10,7 @@ namespace Krys::Serialisation
 {
   /// @brief A type that needs to be supported by all archives by default.
   template <typename T>
-  concept ArchiveBuiltin = Arithmetic<RemoveCvRef<T>> || OneOf<RemoveCvRef<T>, byte, string>;
+  concept ArchiveBuiltin = Arithmetic<RemoveCvRef<T>> || OneOf<RemoveCvRef<T>, byte, char, uchar, short, ushort, string>;
 
   /// @brief A special type that provides a name for the next field to be serialised along with its
   /// value.

@@ -44,8 +44,7 @@ namespace Krys::Serialisation
     Stack<Node> _nodes {};
 
   public:
-    JsonArchiveWriter(IO::IStreamWriter &stream) noexcept
-        : _stream(stream), _writer(_stream)
+    JsonArchiveWriter(IO::IStreamWriter &stream) noexcept : _stream(stream), _writer(_stream)
     {
       _writer.SetMaxDecimalPlaces(Writer::kDefaultMaxDecimalPlaces);
       _writer.SetIndent(' ', 2);
@@ -64,29 +63,25 @@ namespace Krys::Serialisation
       {
         _writer.Bool(value);
       }
-      else if constexpr (SameType<T, int>)
+      else if constexpr (OneOf<T, char, short, int8, int16, int32, long>)
       {
-        _writer.Int(value);
+        _writer.Int(static_cast<int32>(value));
       }
-      else if constexpr (SameType<T, uint>)
+      else if constexpr (OneOf<T, byte, uchar, ushort, uint8, uint16, uint32, ulong>)
       {
-        _writer.Uint(value);
+        _writer.Uint(static_cast<uint32>(value));
       }
-      else if constexpr (SameType<T, int64>)
+      else if constexpr (OneOf<T, int64, long long>)
       {
-        _writer.Int64(value);
+        _writer.Int64(static_cast<int64>(value));
       }
-      else if constexpr (SameType<T, uint64>)
+      else if constexpr (OneOf<T, uint64, unsigned long long>)
       {
-        _writer.Uint64(value);
+        _writer.Uint64(static_cast<uint64>(value));
       }
-      else if constexpr (OneOf<T, float, double>) // rapidjson does not have a Float() method
+      else if constexpr (OneOf<T, float, double, long double>) // rapidjson does not have a Float() method
       {
-        _writer.Double(value);
-      }
-      else if constexpr (SameType<T, byte>)
-      {
-        _writer.Uint(static_cast<uint>(value));
+        _writer.Double(static_cast<double>(value));
       }
       else if constexpr (SameType<T, string>)
       {
@@ -303,19 +298,19 @@ namespace Krys::Serialisation
       {
         value = node.GetBool();
       }
-      else if constexpr (SameType<T, int>)
+      else if constexpr (OneOf<T, char, short, int8, int16, int32, long>)
       {
-        value = node.GetInt();
+        value = static_cast<T>(node.GetInt());
       }
-      else if constexpr (SameType<T, uint>)
+      else if constexpr (OneOf<T, byte, uchar, ushort, uint8, uint16, uint32, ulong>)
       {
-        value = node.GetUint();
+        value = static_cast<T>(node.GetUint());
       }
-      else if constexpr (SameType<T, int64>)
+      else if constexpr (OneOf<T, int64, long long>)
       {
         value = node.GetInt64();
       }
-      else if constexpr (SameType<T, uint64>)
+      else if constexpr (OneOf<T, uint64, unsigned long long>)
       {
         value = node.GetUint64();
       }
@@ -323,13 +318,9 @@ namespace Krys::Serialisation
       {
         value = node.GetFloat();
       }
-      else if constexpr (SameType<T, double>)
+      else if constexpr (OneOf<T, double, long double>)
       {
         value = node.GetDouble();
-      }
-      else if constexpr (SameType<T, byte>)
-      {
-        value = static_cast<byte>(node.GetUint());
       }
       else if constexpr (SameType<T, string>)
       {
