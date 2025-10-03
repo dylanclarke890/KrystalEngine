@@ -4,6 +4,7 @@
 #include "Krystal.Serialisation/Access.hpp"
 #include "Krystal.Serialisation/Archives/BinaryArchive.hpp"
 #include "Krystal.Serialisation/Archives/JsonArchive.hpp"
+#include "Krystal.Serialisation/Archives/XmlArchive.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
@@ -72,10 +73,6 @@ namespace Krys::Tests
       archive(input);
     }
 
-    string json {};
-    for (auto &ch : data)
-      json += static_cast<char>(ch);
-
     {
       IO::MemoryStreamReader stream(data);
       ArchiveReader archive(stream);
@@ -109,5 +106,10 @@ namespace Krys::Tests
   TEST_CASE("JsonArchive Builtins", "[JsonArchive][Builtins]")
   {
     TestArchiveBuiltins<JsonArchiveReader, JsonArchiveWriter>();
+  }
+
+  TEST_CASE("XmlArchive Builtins", "[XmlArchive][Builtins]")
+  {
+    TestArchiveBuiltins<XmlArchiveReader, XmlArchiveWriter>();
   }
 }

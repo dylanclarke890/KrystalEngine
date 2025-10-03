@@ -3,6 +3,7 @@
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Serialisation/Archives/BinaryArchive.hpp"
 #include "Krystal.Serialisation/Archives/JsonArchive.hpp"
+#include "Krystal.Serialisation/Archives/XmlArchive.hpp"
 #include "Krystal.Serialisation/Builtins.hpp"
 #include <catch_all.hpp>
 
@@ -45,5 +46,10 @@ namespace Krys::Tests
   TEST_CASE("JsonArchive Type: Pair", "[JsonArchive][Types]")
   {
     TestArchiveTypePair<JsonArchiveReader, JsonArchiveWriter>();
+  }
+
+  TEST_CASE("XmlArchive Type: Pair", "[XmlArchive][Types]")
+  {
+    TestArchiveTypePair<XmlArchiveReader, XmlArchiveWriter>();
   }
 }

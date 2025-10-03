@@ -3,6 +3,7 @@
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Serialisation/Archives/BinaryArchive.hpp"
 #include "Krystal.Serialisation/Archives/JsonArchive.hpp"
+#include "Krystal.Serialisation/Archives/XmlArchive.hpp"
 #include "Krystal.Serialisation/Builtins.hpp"
 #include "Krystal.Serialisation/Types/List.hpp"
 #include <catch_all.hpp>
@@ -48,5 +49,10 @@ namespace Krys::Tests
   TEST_CASE("JsonArchive Type: Map", "[JsonArchive][Types]")
   {
     TestArchiveTypeMap<JsonArchiveReader, JsonArchiveWriter>();
+  }
+
+  TEST_CASE("XmlArchive Type: Map", "[XmlArchive][Types]")
+  {
+    TestArchiveTypeMap<XmlArchiveReader, XmlArchiveWriter>();
   }
 }

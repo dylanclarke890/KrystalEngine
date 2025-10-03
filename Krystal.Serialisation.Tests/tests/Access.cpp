@@ -3,6 +3,7 @@
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Serialisation/Archives/BinaryArchive.hpp"
 #include "Krystal.Serialisation/Archives/JsonArchive.hpp"
+#include "Krystal.Serialisation/Archives/XmlArchive.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
@@ -125,5 +126,10 @@ namespace Krys::Tests
   TEST_CASE("JsonArchive Access", "[JsonArchive][Access]")
   {
     TestArchiveAccess<JsonArchiveReader, JsonArchiveWriter>();
+  }
+
+  TEST_CASE("XmlArchive Access", "[XmlArchive][Access]")
+  {
+    TestArchiveAccess<XmlArchiveReader, XmlArchiveWriter>();
   }
 }

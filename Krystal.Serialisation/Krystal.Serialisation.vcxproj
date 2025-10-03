@@ -159,11 +159,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.Serialisation\Access.hpp" />
+    <ClInclude Include="include\Krystal.Serialisation\Archives\Adapters\RapidJsonStreamAdapters.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Archives\BaseArchive.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Archives\BinaryArchive.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Archives\JsonArchive.hpp" />
+    <ClInclude Include="include\Krystal.Serialisation\Archives\XmlArchive.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Concepts.hpp" />
-    <ClInclude Include="include\Krystal.Serialisation\Archives\Adapters\RapidJsonStreamAdapters.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Builtins.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Types\Array.hpp" />
     <ClInclude Include="include\Krystal.Serialisation\Types\Generic\KeyValuePairContainer.hpp" />
@@ -209,9 +210,19 @@
     <ClInclude Include="third-party\rapidjson\stringbuffer.h" />
     <ClInclude Include="third-party\rapidjson\uri.h" />
     <ClInclude Include="third-party\rapidjson\writer.h" />
+    <ClInclude Include="third-party\rapidxml\rapidxml.hpp" />
+    <ClInclude Include="third-party\rapidxml\rapidxml_iterators.hpp" />
+    <ClInclude Include="third-party\rapidxml\rapidxml_print.hpp" />
+    <ClInclude Include="third-party\rapidxml\rapidxml_utils.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\placeholder.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="third-party\rapidxml\license.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="third-party\rapidxml\manual.html" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

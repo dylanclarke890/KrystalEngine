@@ -150,9 +150,6 @@
     <ClInclude Include="third-party\rapidjson\writer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Serialisation\Archives\Adapters\RapidJsonStreamAdapters.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Serialisation\Builtins.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -168,10 +165,34 @@
     <ClInclude Include="include\Krystal.Serialisation\Types\OrderedMap.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Serialisation\Archives\XmlArchive.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidxml\rapidxml.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidxml\rapidxml_iterators.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidxml\rapidxml_print.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\rapidxml\rapidxml_utils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Serialisation\Archives\Adapters\RapidJsonStreamAdapters.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\placeholder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="third-party\rapidxml\license.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="third-party\rapidxml\manual.html" />
   </ItemGroup>
 </Project>
