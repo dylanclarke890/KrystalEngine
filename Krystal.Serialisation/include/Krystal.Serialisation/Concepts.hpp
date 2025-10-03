@@ -10,7 +10,8 @@ namespace Krys::Serialisation
 {
   /// @brief A type that needs to be supported by all archives by default.
   template <typename T>
-  concept ArchiveBuiltin = Arithmetic<RemoveCvRef<T>> || OneOf<RemoveCvRef<T>, byte, char, uchar, short, ushort, string>;
+  concept ArchiveBuiltin =
+    Arithmetic<RemoveCvRef<T>> || OneOf<RemoveCvRef<T>, byte, char, uchar, short, ushort, string>;
 
   /// @brief A special type that provides a name for the next field to be serialised along with its
   /// value.
@@ -47,4 +48,28 @@ namespace Krys::Serialisation
 
   template <typename Archive, typename T>
   concept HasLoadNonMember = requires(Archive &archive, T &value) { Load(archive, value); };
+
+  template <typename T>
+  struct ArchiveTraits
+  {
+    static constexpr bool IsWriter = false;
+    static constexpr bool IsReader = false;
+    static constexpr bool IsBinary = false;
+    static constexpr bool IsText = false;
+  };
+
+  template <typename Archive>
+  concept IsArchiveWriter = ArchiveTraits<Archive>::IsWriter;
+
+  template <typename Archive>
+  concept IsArchiveReader = ArchiveTraits<Archive>::IsReader;
+
+  template <typename Archive>
+  concept IsArchive = IsArchiveWriter<Archive> || IsArchiveReader<Archive>;
+
+  template <typename Archive>
+  concept IsBinaryArchive = ArchiveTraits<Archive>::IsBinary;
+
+  template <typename Archive>
+  concept IsTextArchive = ArchiveTraits<Archive>::IsText;
 }

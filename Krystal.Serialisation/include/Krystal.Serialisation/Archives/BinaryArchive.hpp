@@ -90,4 +90,22 @@ namespace Krys::Serialisation
       return *this;
     }
   };
+
+  template <>
+  struct ArchiveTraits<BinaryArchiveWriter>
+  {
+    static constexpr bool IsWriter = true;
+    static constexpr bool IsReader = false;
+    static constexpr bool IsBinary = true;
+    static constexpr bool IsText = false;
+  };
+
+  template <>
+  struct ArchiveTraits<BinaryArchiveReader>
+  {
+    static constexpr bool IsWriter = false;
+    static constexpr bool IsReader = true;
+    static constexpr bool IsBinary = true;
+    static constexpr bool IsText = false;
+  };
 }

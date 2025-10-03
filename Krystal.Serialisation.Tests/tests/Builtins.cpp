@@ -65,7 +65,7 @@ namespace Krys::Tests
     }
   };
 
-  template <typename ArchiveReader, typename ArchiveWriter>
+  template <IsArchiveReader ArchiveReader, IsArchiveWriter ArchiveWriter>
   void TestArchiveBuiltins()
   {
     BasicTypes input {

@@ -400,6 +400,24 @@ namespace Krys::Serialisation
     }
   };
 
+  template <>
+  struct ArchiveTraits<JsonArchiveWriter>
+  {
+    static constexpr bool IsWriter = true;
+    static constexpr bool IsReader = false;
+    static constexpr bool IsBinary = false;
+    static constexpr bool IsText = true;
+  };
+
+  template <>
+  struct ArchiveTraits<JsonArchiveReader>
+  {
+    static constexpr bool IsWriter = false;
+    static constexpr bool IsReader = true;
+    static constexpr bool IsBinary = false;
+    static constexpr bool IsText = true;
+  };
+
   template <typename T>
   void Transfer(JsonArchiveWriter &, ContainerSize<T> &) noexcept
   {
