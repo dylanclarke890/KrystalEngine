@@ -14,7 +14,7 @@ namespace Krys::Tests
 #pragma region Setup
 
   template <typename ArchiveReader, typename ArchiveWriter>
-  void TestArchive()
+  void TestArchiveTypeArray()
   {
     Array<int, 5> input {1, 2, 3, 4, 5};
     Array<int, 5> output {0, 0, 0, 0, 0};
@@ -43,11 +43,11 @@ namespace Krys::Tests
 
   TEST_CASE("BinaryArchive Type: Array", "[BinaryArchive][Types]")
   {
-    TestArchive<BinaryArchiveReader, BinaryArchiveWriter>();
+    TestArchiveTypeArray<BinaryArchiveReader, BinaryArchiveWriter>();
   }
 
   TEST_CASE("JsonArchive Type: Array", "[JsonArchive][Types]")
   {
-    TestArchive<JsonArchiveReader, JsonArchiveWriter>();
+    TestArchiveTypeArray<JsonArchiveReader, JsonArchiveWriter>();
   }
 }

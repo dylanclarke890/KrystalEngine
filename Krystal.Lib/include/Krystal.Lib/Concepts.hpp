@@ -110,4 +110,14 @@ namespace Krys
 
   template <typename T>
   constexpr bool IsLValueRef = std::is_lvalue_reference<T>::value;
+
+  template <typename Test, template <typename...> class Ref>
+  struct IsSpecialisation : std::false_type
+  {
+  };
+
+  template <template <typename...> class Ref, typename... Args>
+  struct IsSpecialisation<Ref<Args...>, Ref> : std::true_type
+  {
+  };
 }

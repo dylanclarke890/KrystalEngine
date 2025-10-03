@@ -19,19 +19,21 @@ namespace Krys::Serialisation
 {
   class JsonArchiveWriter : public BaseArchiveWriter<JsonArchiveWriter>
   {
+  public:
     struct Node
     {
-      enum NodeType
+      enum class Type
       {
         StartObject,
         InObject,
         StartArray,
         InArray
-      } Type {StartObject};
+      } NodeType {Type::StartObject};
 
       uint32 NameCounter {0u};
     };
 
+  private:
     using Stream = RapidJsonStreamWriterAdapter;
     using Writer = rapidjson::PrettyWriter<Stream>;
 
@@ -42,12 +44,12 @@ namespace Krys::Serialisation
     Stack<Node> _nodes {};
 
   public:
-    JsonArchiveWriter(IO::IStreamWriter &stream, bool prettyPrint = true) noexcept
+    JsonArchiveWriter(IO::IStreamWriter &stream) noexcept
         : _stream(stream), _writer(_stream)
     {
       _writer.SetMaxDecimalPlaces(Writer::kDefaultMaxDecimalPlaces);
-      _writer.SetIndent(' ', prettyPrint ? 4 : 0);
-      _nodes.push({Node::StartObject, 0u});
+      _writer.SetIndent(' ', 2);
+      _nodes.push({Node::Type::StartObject, 0u});
     }
 
     ~JsonArchiveWriter() noexcept override
@@ -98,31 +100,31 @@ namespace Krys::Serialisation
       return *this;
     }
 
-    void StartNode()
+    void StartNode(Node::Type type)
     {
       WriteName();
-      _nodes.push({Node::StartObject, 0u});
+      _nodes.push({type, 0u});
     }
 
     void FinishNode()
     {
       // Handles serialising empty objects (WriteName is never called)
-      if (_nodes.top().Type == Node::StartArray)
+      if (_nodes.top().NodeType == Node::Type::StartArray)
       {
         _writer.StartArray();
         _writer.EndArray();
       }
-      else if (_nodes.top().Type == Node::StartObject)
+      else if (_nodes.top().NodeType == Node::Type::StartObject)
       {
         _writer.StartObject();
         _writer.EndObject();
       }
       // Exiting an object or array
-      else if (_nodes.top().Type == Node::InObject)
+      else if (_nodes.top().NodeType == Node::Type::InObject)
       {
         _writer.EndObject();
       }
-      else if (_nodes.top().Type == Node::InArray)
+      else if (_nodes.top().NodeType == Node::Type::InArray)
       {
         _writer.EndArray();
       }
@@ -130,9 +132,9 @@ namespace Krys::Serialisation
       _nodes.pop();
     }
 
-    void StartArray() noexcept
+    void SetCurrentNodeAsArray() noexcept
     {
-      _nodes.top().Type = Node::StartArray;
+      _nodes.top().NodeType = Node::Type::StartArray;
     }
 
     void SetNextName(const string &name) noexcept
@@ -142,22 +144,22 @@ namespace Krys::Serialisation
 
     void WriteName()
     {
-      const auto &nodeType = _nodes.top().Type;
+      const auto &nodeType = _nodes.top().NodeType;
 
       // Start up either an object or an array, depending on state
-      if (nodeType == Node::StartArray)
+      if (nodeType == Node::Type::StartArray)
       {
         _writer.StartArray();
-        _nodes.top().Type = Node::InArray;
+        _nodes.top().NodeType = Node::Type::InArray;
       }
-      else if (nodeType == Node::StartObject)
+      else if (nodeType == Node::Type::StartObject)
       {
         _writer.StartObject();
-        _nodes.top().Type = Node::InObject;
+        _nodes.top().NodeType = Node::Type::InObject;
       }
 
       // Array types do not output names
-      if (nodeType == Node::InArray)
+      if (nodeType == Node::Type::InArray)
       {
         return;
       }
@@ -432,23 +434,22 @@ namespace Krys::Serialisation
     }
     else if constexpr (ArchiveContainerSize<T>)
     {
-      archive.StartArray(); // we don't need to store size, just start the array.
+      archive.SetCurrentNodeAsArray(); // we don't need to store size, just start the array.
     }
-    else if constexpr (ArchiveCustom<T>)
+    else if constexpr (ArchiveCustom<T> || ArchiveKeyValuePair<T>)
     {
-      archive.StartNode(); // enters {}. also calls WriteName().
+      archive.StartNode(JsonArchiveWriter::Node::Type::StartObject); // enters {}. also calls WriteName().
     }
     else if constexpr (IsArray<T>)
     {
-      archive.StartNode();  // enters {}
-      archive.StartArray(); // change to []
+      archive.StartNode(JsonArchiveWriter::Node::Type::StartArray); // enters []
     }
   }
 
   template <typename T>
   void AfterTransfer(JsonArchiveWriter &archive, const T &) noexcept
   {
-    if constexpr (ArchiveCustom<T>)
+    if constexpr (ArchiveCustom<T> || ArchiveKeyValuePair<T>)
     {
       archive.FinishNode(); // exits {} or [].
     }
@@ -465,7 +466,7 @@ namespace Krys::Serialisation
     {
       archive.SetNextName(value.Name);
     }
-    else if constexpr (ArchiveCustom<T>)
+    else if constexpr (ArchiveCustom<T> || ArchiveKeyValuePair<T>)
     {
       archive.StartNode(); // enter {} or [].
     }
@@ -478,7 +479,7 @@ namespace Krys::Serialisation
     {
       archive.Next(); // move to next value in {} or [].
     }
-    else if constexpr (ArchiveCustom<T>)
+    else if constexpr (ArchiveCustom<T> || ArchiveKeyValuePair<T>)
     {
       archive.FinishNode(); // exit {} or [].
     }

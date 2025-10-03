@@ -4,7 +4,7 @@
 
 namespace Krys::Serialisation
 {
-  /// @brief Saving for std-like pair associative containers
+  /// @brief Saving for std-like pair associative containers.
   template <typename Archive, template <typename...> typename TMap, typename... Args,
             typename = typename TMap<Args...>::mapped_type>
   void Save(Archive &archive, TMap<Args...> const &map) noexcept
@@ -17,7 +17,7 @@ namespace Krys::Serialisation
     }
   }
 
-  /// @brief Loading for std-like pair associative containers
+  /// @brief Loading for std-like pair associative containers.
   template <typename Archive, template <typename...> typename TMap, typename... Args,
             typename = typename TMap<Args...>::mapped_type>
   void Load(Archive &archive, TMap<Args...> &map) noexcept

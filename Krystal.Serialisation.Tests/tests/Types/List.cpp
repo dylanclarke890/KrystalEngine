@@ -13,7 +13,7 @@ namespace Krys::Tests
 #pragma region Setup
 
   template <typename ArchiveReader, typename ArchiveWriter>
-  void TestArchive()
+  void TestArchiveTypeList()
   {
     List<int> input {1, 2, 3, 4, 5, 6, 7, 8, 9};
     List<int> output {};
@@ -42,11 +42,11 @@ namespace Krys::Tests
 
   TEST_CASE("BinaryArchive Type: List", "[BinaryArchive][Types]")
   {
-    TestArchive<BinaryArchiveReader, BinaryArchiveWriter>();
+    TestArchiveTypeList<BinaryArchiveReader, BinaryArchiveWriter>();
   }
 
   TEST_CASE("JsonArchive Type: List", "[JsonArchive][Types]")
   {
-    TestArchive<JsonArchiveReader, JsonArchiveWriter>();
+    TestArchiveTypeList<JsonArchiveReader, JsonArchiveWriter>();
   }
 }

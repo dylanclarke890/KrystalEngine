@@ -76,7 +76,7 @@ namespace Krys::Tests
   };
 
   template <typename ArchiveReader, typename ArchiveWriter>
-  void TestArchive()
+  void TestArchiveAccess()
   {
     FreeTransfer inputFreeTransfer {69, 420.f};
     FreeSaveLoad inputFreeSaveLoad {69, 420.f};
@@ -117,13 +117,13 @@ namespace Krys::Tests
 
 #pragma endregion
 
-  TEST_CASE("BinaryArchive Access", "[BinaryArchive]")
+  TEST_CASE("BinaryArchive Access", "[BinaryArchive][Access]")
   {
-    TestArchive<BinaryArchiveReader, BinaryArchiveWriter>();
+    TestArchiveAccess<BinaryArchiveReader, BinaryArchiveWriter>();
   }
 
-  TEST_CASE("JsonArchive Access", "[JsonArchive]")
+  TEST_CASE("JsonArchive Access", "[JsonArchive][Access]")
   {
-    TestArchive<JsonArchiveReader, JsonArchiveWriter>();
+    TestArchiveAccess<JsonArchiveReader, JsonArchiveWriter>();
   }
 }

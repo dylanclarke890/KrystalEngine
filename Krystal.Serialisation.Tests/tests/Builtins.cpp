@@ -47,7 +47,7 @@ namespace Krys::Tests
   };
 
   template <typename ArchiveReader, typename ArchiveWriter>
-  void TestArchive()
+  void TestArchiveBuiltins()
   {
     BasicTypes input {
       .Bool = true,
@@ -71,6 +71,10 @@ namespace Krys::Tests
       ArchiveWriter archive(stream);
       archive(input);
     }
+
+    string json {};
+    for (auto &ch : data)
+      json += static_cast<char>(ch);
 
     {
       IO::MemoryStreamReader stream(data);
@@ -97,13 +101,13 @@ namespace Krys::Tests
 
 #pragma endregion
 
-  TEST_CASE("BinaryArchive Basic Types", "[BinaryArchive]")
+  TEST_CASE("BinaryArchive Builtins", "[BinaryArchive][Builtins]")
   {
-    TestArchive<BinaryArchiveReader, BinaryArchiveWriter>();
+    TestArchiveBuiltins<BinaryArchiveReader, BinaryArchiveWriter>();
   }
 
-  TEST_CASE("JsonArchive Basic Types", "[JsonArchive]")
+  TEST_CASE("JsonArchive Builtins", "[JsonArchive][Builtins]")
   {
-    TestArchive<JsonArchiveReader, JsonArchiveWriter>();
+    TestArchiveBuiltins<JsonArchiveReader, JsonArchiveWriter>();
   }
 }
