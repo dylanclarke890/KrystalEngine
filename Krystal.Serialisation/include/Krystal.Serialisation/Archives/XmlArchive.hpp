@@ -81,6 +81,18 @@ namespace Krys::Serialisation
       _document.clear();
     }
 
+    void SetNextFieldName(const string &name) noexcept
+    {
+      _nextFieldName = name;
+    }
+
+    void SetCurrentNodeVersion(const Version &version) noexcept
+    {
+      auto verStr = std::to_string(version.Value);
+      _nodes.top().Node->append_attribute(
+        _document.allocate_attribute("version", verStr.c_str(), verStr.length() + 1));
+    }
+
     template <ArchiveBuiltin T>
     XmlArchiveWriter &Write(const T &value)
     {
@@ -149,11 +161,6 @@ namespace Krys::Serialisation
     void FinishNode()
     {
       _nodes.pop();
-    }
-
-    void SetNextName(const string &name)
-    {
-      _nextFieldName = name;
     }
 
   private:
@@ -246,6 +253,29 @@ namespace Krys::Serialisation
         throw std::exception("Parsing failed: No root 'Krystal' node found.");
       }
       _nodes.emplace(root);
+    }
+
+    ~XmlArchiveReader() noexcept override
+    {
+      _document.clear();
+    }
+
+    void SetNextFieldName(const string &name) noexcept
+    {
+      _nodes.top().Name = name;
+    }
+
+    void GetCurrentNodeVersion(Version &version) noexcept
+    {
+      if (auto *attr = _nodes.top().Node->first_attribute("version"))
+      {
+        int32 ver = 0;
+        auto [_, ec] = std::from_chars(attr->value(), attr->value() + attr->value_size(), ver);
+        if (ec == std::errc {})
+        {
+          version.Value = static_cast<uint32>(ver);
+        }
+      }
     }
 
     template <ArchiveBuiltin T>
@@ -342,11 +372,6 @@ namespace Krys::Serialisation
       return _nodes.top().GetNextChildName();
     }
 
-    void SetNextName(const string &name) noexcept
-    {
-      _nodes.top().Name = name;
-    }
-
     NO_DISCARD static size_t GetNumberOfChildren(rapidxml::xml_node<> *node)
     {
       size_t size = 0;
@@ -381,10 +406,7 @@ namespace Krys::Serialisation
   };
 
   template <typename T>
-  void Transfer(XmlArchiveWriter &, ContainerSize<T> &) noexcept
-  {
-    // No-op
-  }
+  concept IsXmlArchive = OneOf<T, XmlArchiveWriter, XmlArchiveReader>;
 
   template <typename T>
   void Transfer(XmlArchiveReader &archive, ContainerSize<T> &value) noexcept
@@ -393,46 +415,43 @@ namespace Krys::Serialisation
   }
 
   template <typename T>
-  void BeforeTransfer(XmlArchiveWriter &archive, const T &value) noexcept
+  requires(!ArchiveNamedField<T> && !ArchiveContainerSize<T>)
+  void BeforeTransfer(XmlArchiveWriter &archive, const T &) noexcept
   {
-    if constexpr (ArchiveNamedField<T>)
-    {
-      archive.SetNextName(value.Name);
-    }
-    else if constexpr (!ArchiveContainerSize<T>)
-    {
-      archive.StartNode();
-    }
+    archive.StartNode();
   }
 
   template <typename T>
+  requires(!ArchiveNamedField<T> && !ArchiveContainerSize<T>)
   void AfterTransfer(XmlArchiveWriter &archive, const T &) noexcept
   {
-    if constexpr (!ArchiveNamedField<T> && !ArchiveContainerSize<T>)
-    {
-      archive.FinishNode(); // exits {} or [].
-    }
+    archive.FinishNode();
   }
 
   template <typename T>
-  void BeforeTransfer(XmlArchiveReader &archive, const T &value) noexcept
+  requires(!ArchiveNamedField<T> && !ArchiveContainerSize<T>)
+  void BeforeTransfer(XmlArchiveReader &archive, const T &) noexcept
   {
-    if constexpr (ArchiveNamedField<T>)
-    {
-      archive.SetNextName(value.Name);
-    }
-    else if constexpr (!ArchiveContainerSize<T>)
-    {
-      archive.StartNode(); // enter {} or [].
-    }
+    archive.StartNode();
   }
 
   template <typename T>
+  requires(!ArchiveNamedField<T> && !ArchiveContainerSize<T>)
   void AfterTransfer(XmlArchiveReader &archive, const T &) noexcept
   {
-    if constexpr (!ArchiveNamedField<T> && !ArchiveContainerSize<T>)
+    archive.FinishNode();
+  }
+
+  template <IsXmlArchive Archive>
+  void Transfer(Archive &archive, Version &version) noexcept
+  {
+    if constexpr (IsArchiveWriter<Archive>)
     {
-      archive.FinishNode(); // exit {} or [].
+      archive.SetCurrentNodeVersion(version);
+    }
+    else
+    {
+      archive.GetCurrentNodeVersion(version);
     }
   }
 }

@@ -56,6 +56,11 @@ namespace Krys::Serialisation
       FinishNode();
     }
 
+    void SetNextFieldName(const string &name) noexcept
+    {
+      _nextName = name;
+    }
+
     template <ArchiveBuiltin T>
     JsonArchiveWriter &Write(const T &value) noexcept
     {
@@ -130,11 +135,6 @@ namespace Krys::Serialisation
     void SetCurrentNodeAsArray() noexcept
     {
       _nodes.top().NodeType = Node::Type::StartArray;
-    }
-
-    void SetNextName(const string &name) noexcept
-    {
-      _nextName = name;
     }
 
     void WriteName()
@@ -289,6 +289,12 @@ namespace Krys::Serialisation
     {
     }
 
+    /// @brief Sets the name for the next node created with StartNode
+    void SetNextFieldName(const string &name)
+    {
+      _nextName = name;
+    }
+
     template <ArchiveBuiltin T>
     JsonArchiveReader &Read(T &value) noexcept
     {
@@ -387,12 +393,6 @@ namespace Krys::Serialisation
       }
     }
 
-    /// @brief Sets the name for the next node created with StartNode
-    void SetNextName(const string &name)
-    {
-      _nextName = name;
-    }
-
     /// @brief Advance to the next node in the current object or array.
     void Next()
     {
@@ -419,10 +419,7 @@ namespace Krys::Serialisation
   };
 
   template <typename T>
-  void Transfer(JsonArchiveWriter &, ContainerSize<T> &) noexcept
-  {
-    // No-op
-  }
+  concept IsJsonArchive = OneOf<T, JsonArchiveWriter, JsonArchiveReader>;
 
   template <typename T>
   void Transfer(JsonArchiveReader &archive, ContainerSize<T> &value) noexcept
@@ -431,15 +428,12 @@ namespace Krys::Serialisation
   }
 
   template <typename T>
-  void BeforeTransfer(JsonArchiveWriter &archive, const T &value) noexcept
+  requires(!ArchiveNamedField<T>)
+  void BeforeTransfer(JsonArchiveWriter &archive, const T &) noexcept
   {
     if constexpr (ArchiveBuiltin<T>)
     {
       archive.WriteName(); // we're still inside a {} or [].
-    }
-    else if constexpr (ArchiveNamedField<T>)
-    {
-      archive.SetNextName(value.Name); // Set the name for the next node.
     }
     else if constexpr (ArchiveContainerSize<T>)
     {
@@ -456,24 +450,19 @@ namespace Krys::Serialisation
   }
 
   template <typename T>
+  requires(ArchiveCustom<T> || ArchiveKeyValuePair<T>)
   void AfterTransfer(JsonArchiveWriter &archive, const T &) noexcept
   {
-    if constexpr (ArchiveCustom<T> || ArchiveKeyValuePair<T>)
-    {
-      archive.FinishNode(); // exits {} or [].
-    }
+    archive.FinishNode(); // exits {} or [].
   }
 
   template <typename T>
-  void BeforeTransfer(JsonArchiveReader &archive, const T &value) noexcept
+  requires(!ArchiveNamedField<T>)
+  void BeforeTransfer(JsonArchiveReader &archive, const T &) noexcept
   {
     if constexpr (ArchiveBuiltin<T>)
     {
       archive.Search(); // Ensure we're at the right node before reading a value.
-    }
-    else if constexpr (ArchiveNamedField<T>)
-    {
-      archive.SetNextName(value.Name);
     }
     else if constexpr (ArchiveCustom<T> || ArchiveKeyValuePair<T>)
     {
@@ -492,5 +481,11 @@ namespace Krys::Serialisation
     {
       archive.FinishNode(); // exit {} or [].
     }
+  }
+
+  template <IsJsonArchive Archive>
+  void Transfer(Archive &archive, Version &version) noexcept
+  {
+    archive(version.Value);
   }
 }

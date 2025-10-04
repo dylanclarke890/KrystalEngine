@@ -15,8 +15,28 @@
 ///   1.  void Transfer(Archive& ar, T& value) noexcept;
 ///   2a. void Save(Archive& ar, const T& value) noexcept
 ///   2b. void Load(Archive& ar, T& value) noexcept;
+/// NOTE: Versioned overloads are checked first and follow the same pattern, each taking an additional Version
+/// parameter.
 namespace Krys::Serialisation
 {
+  template <typename T>
+  NO_DISCARD constexpr Version GetVersion() noexcept
+  {
+    static_assert(
+      IsVersioned<T>,
+      "A versioned overload was provided for a type without versioning info "
+      "(you must declare a version via a static class property or by specialising VersionTrait).");
+
+    if constexpr (HasTraitVersion<T>)
+    {
+      return VersionTraits<T>::ClassVersion;
+    }
+    else // if constexpr (HasStaticVersion<T>)
+    {
+      return T::ClassVersion;
+    }
+  }
+
   /// @brief Hook called before serialisation or deserialisation of a value. No-op by default.
   template <typename Archive, typename T>
   void BeforeTransfer(Archive &, const T &) noexcept
@@ -54,7 +74,7 @@ namespace Krys::Serialisation
     NO_COPY_MOVE(BaseArchive)
 
   protected:
-    BaseArchive() = default;
+    BaseArchive() noexcept = default;
 
   public:
     virtual ~BaseArchive() noexcept = default;
@@ -71,49 +91,70 @@ namespace Krys::Serialisation
   public:
     BaseArchiveWriter() noexcept = default;
 
-    constexpr static bool IsWriter = true;
-    constexpr static bool IsReader = false;
-
     template <typename T>
-    Derived &operator()(T &&value) noexcept
+    Derived &operator()(T &&value)
     {
       TransferGuard guard(_self, value);
 
-      using RawType = RemoveCvRef<T>;
-
-      if constexpr (ArchiveBuiltin<RawType>)
+      if constexpr (HasVersionedTransferMember<Derived, T>)
       {
-        _self.Write(value);
+        constexpr Version version = GetVersion<T>();
+        (*this)(CreateNamedField("version", version));
+        Access::MemberTransfer(_self, const_cast<RemoveCvRef<T> &>(value), version);
       }
-      else if constexpr (HasTransferMember<Derived, RawType>)
+      else if constexpr (HasVersionedSaveMember<Derived, T>)
       {
-        // We need to cast away const-ness for these calls because Transfer requires a non-const reference.
-        Access::Transfer(_self, const_cast<RemoveConst<RawType> &>(value));
+        constexpr Version version = GetVersion<T>();
+        (*this)(CreateNamedField("version", version));
+        Access::MemberSave(_self, value, version);
       }
-      else if constexpr (HasSaveMember<Derived, RawType>)
+      else if constexpr (HasVersionedTransferNonMember<Derived, T>)
       {
-        Access::Save(_self, value);
+        constexpr Version version = GetVersion<T>();
+        (*this)(CreateNamedField("version", version));
+        Access::NonMemberTransfer(_self, const_cast<RemoveCvRef<T> &>(value), version);
       }
-      else if constexpr (HasTransferNonMember<Derived, RawType>)
+      else if constexpr (HasVersionedSaveNonMember<Derived, T>)
       {
-        // We need to cast away const-ness for these calls because Transfer requires a non-const reference.
-        Transfer(_self, const_cast<RawType &>(value));
+        constexpr Version version = GetVersion<T>();
+        (*this)(CreateNamedField("version", version));
+        Access::NonMemberSave(_self, value, version);
       }
-      else if constexpr (HasSaveNonMember<Derived, RawType>)
+      else if constexpr (HasNonVersionedTransferMember<Derived, T>)
       {
-        Save(_self, value);
+        Access::MemberTransfer(_self, const_cast<RemoveCvRef<T> &>(value));
+      }
+      else if constexpr (HasNonVersionedSaveMember<Derived, T>)
+      {
+        Access::MemberSave(_self, value);
+      }
+      else if constexpr (HasNonVersionedTransferNonMember<Derived, T>)
+      {
+        Access::NonMemberTransfer(_self, const_cast<RemoveCvRef<T> &>(value));
+      }
+      else if constexpr (HasNonVersionedSaveNonMember<Derived, T>)
+      {
+        Access::NonMemberSave(_self, value);
       }
       else
       {
-        static_assert(DependentFalse<RawType>, "Missing 'Save' or 'Transfer' specialisation for this type.");
+        static_assert(DependentFalse<T>, "Missing 'Save' or 'Transfer' specialisation for this type.");
       }
 
       return _self;
     }
 
+    template <ArchiveBuiltin T>
+    Derived &operator()(T &&value)
+    {
+      TransferGuard guard(_self, value);
+      _self.Write(value);
+      return _self;
+    }
+
     template <typename... Types>
     requires(sizeof...(Types) > 1)
-    Derived &operator()(Types &&...types) noexcept
+    Derived &operator()(Types &&...types)
     {
       ((void)(*this)(std::forward<Types>(types)), ...);
       return _self;
@@ -131,47 +172,70 @@ namespace Krys::Serialisation
   public:
     BaseArchiveReader() noexcept = default;
 
-    constexpr static bool IsReader = true;
-    constexpr static bool IsWriter = false;
-
     template <typename T>
-    Derived &operator()(T &&value) noexcept
+    Derived &operator()(T &&value)
     {
       TransferGuard guard(_self, value);
 
-      using RawType = RemoveCvRef<T>;
-
-      if constexpr (ArchiveBuiltin<RawType>)
+      if constexpr (HasVersionedTransferMember<Derived, T>)
       {
-        _self.Read(value);
+        Version version {};
+        (*this)(CreateNamedField("version", version));
+        Access::MemberTransfer(_self, value, version);
       }
-      else if constexpr (HasTransferMember<Derived, RawType>)
+      else if constexpr (HasVersionedLoadMember<Derived, T>)
       {
-        Access::Transfer(_self, value);
+        Version version {};
+        (*this)(CreateNamedField("version", version));
+        Access::MemberLoad(_self, value, version);
       }
-      else if constexpr (HasLoadMember<Derived, RawType>)
+      else if constexpr (HasVersionedTransferNonMember<Derived, T>)
       {
-        Access::Load(_self, value);
+        Version version {};
+        (*this)(CreateNamedField("version", version));
+        Access::NonMemberTransfer(_self, value, version);
       }
-      else if constexpr (HasTransferNonMember<Derived, RawType>)
+      else if constexpr (HasVersionedLoadNonMember<Derived, T>)
       {
-        Transfer(_self, value);
+        Version version {};
+        (*this)(CreateNamedField("version", version));
+        Access::NonMemberLoad(_self, value, version);
       }
-      else if constexpr (HasLoadNonMember<Derived, RawType>)
+      else if constexpr (HasNonVersionedTransferMember<Derived, T>)
       {
-        Load(_self, value);
+        Access::MemberTransfer(_self, value);
+      }
+      else if constexpr (HasNonVersionedLoadMember<Derived, T>)
+      {
+        Access::MemberLoad(_self, value);
+      }
+      else if constexpr (HasNonVersionedTransferNonMember<Derived, T>)
+      {
+        Access::NonMemberTransfer(_self, value);
+      }
+      else if constexpr (HasNonVersionedLoadNonMember<Derived, T>)
+      {
+        Access::NonMemberLoad(_self, value);
       }
       else
       {
-        static_assert(DependentFalse<RawType>, "Missing 'Load' or 'Transfer' specialisation for this type.");
+        static_assert(DependentFalse<T>, "Missing 'Load' or 'Transfer' specialisation for this type.");
       }
 
       return _self;
     }
 
+    template <ArchiveBuiltin T>
+    Derived &operator()(T &&value)
+    {
+      TransferGuard guard(_self, value);
+      _self.Read(value);
+      return _self;
+    }
+
     template <typename... Types>
     requires(sizeof...(Types) > 1)
-    Derived &operator()(Types &&...types) noexcept
+    Derived &operator()(Types &&...types)
     {
       ((void)(*this)(std::forward<Types>(types)), ...);
       return _self;
@@ -186,5 +250,35 @@ namespace Krys::Serialisation
     {
       archive(value[i]);
     }
+  }
+
+  template <IsTextArchive Archive, typename T>
+  void BeforeTransfer(Archive &archive, const NamedField<T> &field) noexcept
+  {
+    archive.SetNextFieldName(field.Name);
+  }
+
+  template <typename Archive, typename T>
+  void Transfer(Archive &archive, NamedField<T> &field) noexcept
+  {
+    archive(field.Value);
+  }
+
+  template <IsBinaryArchive Archive, typename T>
+  void Transfer(Archive &archive, ContainerSize<T> &container) noexcept
+  {
+    archive(container.Size);
+  }
+
+  template <IsTextArchive Archive, typename T>
+  void Transfer(Archive &, ContainerSize<T> &) noexcept
+  {
+    // No-op by default.
+  }
+
+  template <class Archive, typename TKey, typename TValue>
+  void Transfer(Archive &archive, KeyValuePair<TKey, TValue> &pair) noexcept
+  {
+    archive(CreateNamedField("key", pair.Key), CreateNamedField("value", pair.Value));
   }
 }

@@ -108,4 +108,10 @@ namespace Krys::Serialisation
     static constexpr bool IsBinary = true;
     static constexpr bool IsText = false;
   };
+
+  template <IsBinaryArchive Archive>
+  void Transfer(Archive &archive, Version &version) noexcept
+  {
+    archive(version.Value);
+  }
 }

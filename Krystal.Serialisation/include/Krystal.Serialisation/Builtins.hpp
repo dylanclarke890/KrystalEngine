@@ -3,6 +3,7 @@
 #include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/String.hpp"
+#include "Krystal.Lib/Types.hpp"
 
 namespace Krys::Serialisation
 {
@@ -51,14 +52,6 @@ namespace Krys::Serialisation
     return NamedField<T>(name, std::forward<T>(value));
   }
 
-  template <typename Archive, typename T>
-  void Transfer(Archive &archive, NamedField<T> &field) noexcept
-  {
-    // Every NamedField ultimately just serialises its value as normal for a given archive, its name is
-    // handled by the Before/AfterTransfer hooks, specialised by each Archive implementation.
-    archive(field.Value);
-  }
-
 #define KRYS_NAMED_FIELD(var) ::Krys::Serialisation::CreateNamedField(#var, var)
 
 #pragma endregion
@@ -100,13 +93,6 @@ namespace Krys::Serialisation
 
 #define KRYS_CONTAINER_SIZE(var) ::Krys::Serialisation::CreateContainerSize(var)
 
-  template <typename Archive, typename T>
-  void Transfer(Archive &archive, ContainerSize<T> &container) noexcept
-  {
-    // By default, just serialise the size as normal.
-    archive(container.Size);
-  }
-
 #pragma endregion
 
 #pragma region KeyValuePair
@@ -143,10 +129,50 @@ namespace Krys::Serialisation
 
 #define KRYS_KEY_VALUE_PAIR(key, value) ::Krys::Serialisation::CreateKeyValuePair(key, value)
 
-  template <class Archive, typename TKey, typename TValue>
-  void Transfer(Archive &archive, KeyValuePair<TKey, TValue> &pair) noexcept
+#pragma endregion
+
+#pragma region Version
+
+  struct Version
   {
-    archive(CreateNamedField("key", pair.Key), CreateNamedField("value", pair.Value));
+    NO_COPY(Version)
+
+    using ValueType = uint32;
+
+    constexpr explicit Version(ValueType version) noexcept : Value(version)
+    {
+    }
+
+    constexpr auto operator<=>(const Version &) const noexcept = default;
+
+    constexpr auto operator<=>(const ValueType value) const noexcept
+    {
+      return Value <=> value;
+    }
+
+    ValueType Value;
+  };
+
+  template <typename T>
+  struct VersionTraits
+  {
+    // Purposely empty - specialisations should define ClassVersion.
+  };
+
+  /// @brief Macro to define a class version inside a class definition.
+#define KRYS_CLASS_VERSION(version)                                                                          \
+  static constexpr Krys::Serialisation::Version ClassVersion = Krys::Serialisation::Version(version)
+
+  /// @brief Macro to define a trait for a class version outside of a class definition. Must be outside
+  /// of any namespace, and the type must be fully qualified.
+#define KRYS_CLASS_VERSION_TRAIT(type, version)                                                              \
+  namespace Krys::Serialisation                                                                              \
+  {                                                                                                          \
+    template <>                                                                                              \
+    struct VersionTraits<type>                                                                               \
+    {                                                                                                        \
+      static constexpr Version ClassVersion = Version(version);                                              \
+    };                                                                                                       \
   }
 
 #pragma endregion
