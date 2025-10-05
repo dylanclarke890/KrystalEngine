@@ -112,7 +112,7 @@ namespace Krys::Serialisation
       {
         Array<char, 128> buffer {};
         auto [ptr, ec] = std::to_chars(buffer.data(), buffer.data() + buffer.size(), value,
-                                       std::chars_format::fixed, std::numeric_limits<T>::max_digits10);
+                                       std::chars_format::general, std::numeric_limits<T>::max_digits10);
         if (ec != std::errc {})
         {
           throw std::runtime_error("Invalid numeric in XML");
@@ -290,10 +290,14 @@ namespace Krys::Serialisation
         stringview text(_nodes.top().Node->value(), _nodes.top().Node->value_size());
         value = (text == "true" || text == "1");
       }
-      else if constexpr (OneOf<T, int32, uint32, int64, uint64, char, uchar, short, ushort, ulong, long,
-                               long long, unsigned long long, float, double, long double>)
+      else if constexpr (OneOf<T, int32, int64, uint64, char, short, ulong, long, long long,
+                               unsigned long long, float, double, long double>)
       {
-        std::from_chars(node->value(), node->value() + node->value_size(), value);
+        auto [_, ec] = std::from_chars(node->value(), node->value() + node->value_size(), value);
+        if (ec != std::errc {})
+        {
+          throw std::runtime_error("Invalid numeric in XML");
+        }
       }
       else if constexpr (OneOf<T, byte, uchar, ushort, uint8, uint16, uint32>)
       {
