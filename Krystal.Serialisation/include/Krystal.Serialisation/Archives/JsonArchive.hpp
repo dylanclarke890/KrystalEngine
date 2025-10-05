@@ -447,6 +447,10 @@ namespace Krys::Serialisation
     {
       archive.StartNode(JsonArchiveWriter::Node::Type::StartArray); // enters []
     }
+    else if constexpr (ArchiveVersion<T>)
+    {
+      archive.SetNextFieldName(Version::FieldName);
+    }
   }
 
   template <typename T>
@@ -467,6 +471,10 @@ namespace Krys::Serialisation
     else if constexpr (ArchiveCustom<T> || ArchiveKeyValuePair<T>)
     {
       archive.StartNode(); // enter {} or [].
+    }
+    else if constexpr (ArchiveVersion<T>)
+    {
+      archive.SetNextFieldName(Version::FieldName);
     }
   }
 

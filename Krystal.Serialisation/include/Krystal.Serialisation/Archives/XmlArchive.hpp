@@ -88,9 +88,12 @@ namespace Krys::Serialisation
 
     void SetCurrentNodeVersion(const Version &version) noexcept
     {
-      auto verStr = std::to_string(version.Value);
-      _nodes.top().Node->append_attribute(
-        _document.allocate_attribute("version", verStr.c_str(), verStr.length() + 1));
+      // Allocate both name and value in the document's memory pool
+      const auto verStr = std::to_string(version.Value);
+      char *name = _document.allocate_string(Version::FieldName); // or "k_version"
+      char *value = _document.allocate_string(verStr.c_str());
+
+      _nodes.top().Node->append_attribute(_document.allocate_attribute(name, value));
     }
 
     template <ArchiveBuiltin T>
@@ -267,7 +270,7 @@ namespace Krys::Serialisation
 
     void GetCurrentNodeVersion(Version &version) noexcept
     {
-      if (auto *attr = _nodes.top().Node->first_attribute("version"))
+      if (auto *attr = _nodes.top().Node->first_attribute(Version::FieldName))
       {
         int32 ver = 0;
         auto [_, ec] = std::from_chars(attr->value(), attr->value() + attr->value_size(), ver);
@@ -415,28 +418,28 @@ namespace Krys::Serialisation
   }
 
   template <typename T>
-  requires(!ArchiveNamedField<T> && !ArchiveContainerSize<T>)
+  requires(!ArchiveNamedField<T> && !ArchiveContainerSize<T> && !ArchiveVersion<T>)
   void BeforeTransfer(XmlArchiveWriter &archive, const T &) noexcept
   {
     archive.StartNode();
   }
 
   template <typename T>
-  requires(!ArchiveNamedField<T> && !ArchiveContainerSize<T>)
+  requires(!ArchiveNamedField<T> && !ArchiveContainerSize<T> && !ArchiveVersion<T>)
   void AfterTransfer(XmlArchiveWriter &archive, const T &) noexcept
   {
     archive.FinishNode();
   }
 
   template <typename T>
-  requires(!ArchiveNamedField<T> && !ArchiveContainerSize<T>)
+  requires(!ArchiveNamedField<T> && !ArchiveContainerSize<T> && !ArchiveVersion<T>)
   void BeforeTransfer(XmlArchiveReader &archive, const T &) noexcept
   {
     archive.StartNode();
   }
 
   template <typename T>
-  requires(!ArchiveNamedField<T> && !ArchiveContainerSize<T>)
+  requires(!ArchiveNamedField<T> && !ArchiveContainerSize<T> && !ArchiveVersion<T>)
   void AfterTransfer(XmlArchiveReader &archive, const T &) noexcept
   {
     archive.FinishNode();

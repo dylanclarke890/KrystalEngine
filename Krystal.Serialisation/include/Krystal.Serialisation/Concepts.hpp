@@ -34,7 +34,7 @@ namespace Krys::Serialisation
     !ArchiveBuiltin<T> && !ArchiveNamedField<T> && !ArchiveContainerSize<T> && !ArchiveKeyValuePair<T>;
 
   template <typename T>
-  concept ArchiveVersion = SameType<T, Version>;
+  concept ArchiveVersion = SameType<RemoveCvRef<T>, Version>;
 
   template <typename T>
   concept HasTraitVersion = requires { VersionTraits<RemoveCvRef<T>>::ClassVersion; };
@@ -50,58 +50,61 @@ namespace Krys::Serialisation
 #pragma region Serialization Method Concepts
 
   template <typename Archive, typename T>
-  concept HasNonVersionedTransferMember =
-    requires(Archive &archive, T &value) { Access::MemberTransfer(archive, value); };
-
-  template <typename Archive, typename T>
-  concept HasNonVersionedSaveMember =
-    requires(Archive &archive, const T &value) { Access::MemberSave(archive, value); };
-
-  template <typename Archive, typename T>
-  concept HasNonVersionedLoadMember =
-    requires(Archive &archive, T &value) { Access::MemberLoad(archive, value); };
-
-  template <typename Archive, typename T>
-  concept HasNonVersionedTransferNonMember =
-    requires(Archive &archive, T &value) { Access::NonMemberTransfer(archive, value); };
-
-  template <typename Archive, typename T>
-  concept HasNonVersionedSaveNonMember =
-    requires(Archive &archive, const T &value) { Access::NonMemberSave(archive, value); };
-
-  template <typename Archive, typename T>
-  concept HasNonVersionedLoadNonMember =
-    requires(Archive &archive, T &value) { Access::NonMemberLoad(archive, value); };
-
-  template <typename Archive, typename T>
-  concept HasVersionedTransferMember = requires(Archive &archive, T &value, const Version version) {
-    Access::MemberTransfer(archive, value, version);
+  concept HasVersionedTransferMember = requires(Archive &archive, RemoveCvRef<T> &value) {
+    Access::MemberTransfer(archive, value, Version {0});
   };
 
   template <typename Archive, typename T>
-  concept HasVersionedSaveMember = requires(Archive &archive, const T &value, const Version version) {
-    Access::MemberSave(archive, value, version);
-  };
+  concept HasVersionedSaveMember =
+    requires(Archive &archive, const RemoveCvRef<T> &value, const Version version) {
+      Access::MemberSave(archive, value, version);
+    };
 
   template <typename Archive, typename T>
-  concept HasVersionedLoadMember = requires(Archive &archive, T &value, const Version version) {
+  concept HasVersionedLoadMember = requires(Archive &archive, RemoveCvRef<T> &value, const Version version) {
     Access::MemberLoad(archive, value, version);
   };
 
   template <typename Archive, typename T>
-  concept HasVersionedTransferNonMember = requires(Archive &archive, T &value, const Version version) {
-    Access::NonMemberTransfer(archive, value, version);
+  concept HasVersionedTransferNonMember = requires(Archive &archive, RemoveCvRef<T> &value) {
+    Access::NonMemberTransfer(archive, value, Version {0});
   };
 
   template <typename Archive, typename T>
-  concept HasVersionedSaveNonMember = requires(Archive &archive, const T &value, const Version version) {
-    Access::NonMemberSave(archive, value, version);
-  };
+  concept HasVersionedSaveNonMember =
+    requires(Archive &archive, const RemoveCvRef<T> &value, const Version version) {
+      Access::NonMemberSave(archive, value, version);
+    };
 
   template <typename Archive, typename T>
-  concept HasVersionedLoadNonMember = requires(Archive &archive, T &value, const Version version) {
-    Access::NonMemberLoad(archive, value, version);
-  };
+  concept HasVersionedLoadNonMember =
+    requires(Archive &archive, RemoveCvRef<T> &value, const Version version) {
+      Access::NonMemberLoad(archive, value, version);
+    };
+
+  template <typename Archive, typename T>
+  concept HasNonVersionedTransferMember =
+    requires(Archive &archive, RemoveCvRef<T> &value) { Access::MemberTransfer(archive, value); };
+
+  template <typename Archive, typename T>
+  concept HasNonVersionedSaveMember =
+    requires(Archive &archive, const RemoveCvRef<T> &value) { Access::MemberSave(archive, value); };
+
+  template <typename Archive, typename T>
+  concept HasNonVersionedLoadMember =
+    requires(Archive &archive, RemoveCvRef<T> &value) { Access::MemberLoad(archive, value); };
+
+  template <typename Archive, typename T>
+  concept HasNonVersionedTransferNonMember =
+    requires(Archive &archive, RemoveCvRef<T> &value) { Access::NonMemberTransfer(archive, value); };
+
+  template <typename Archive, typename T>
+  concept HasNonVersionedSaveNonMember =
+    requires(Archive &archive, const RemoveCvRef<T> &value) { Access::NonMemberSave(archive, value); };
+
+  template <typename Archive, typename T>
+  concept HasNonVersionedLoadNonMember =
+    requires(Archive &archive, RemoveCvRef<T> &value) { Access::NonMemberLoad(archive, value); };
 
 #pragma endregion
 
@@ -117,19 +120,19 @@ namespace Krys::Serialisation
   };
 
   template <typename Archive>
-  concept IsArchiveWriter = ArchiveTraits<Archive>::IsWriter;
+  concept IsArchiveWriter = ArchiveTraits<RemoveCvRef<Archive>>::IsWriter;
 
   template <typename Archive>
-  concept IsArchiveReader = ArchiveTraits<Archive>::IsReader;
+  concept IsArchiveReader = ArchiveTraits<RemoveCvRef<Archive>>::IsReader;
 
   template <typename Archive>
-  concept IsArchive = IsArchiveWriter<Archive> || IsArchiveReader<Archive>;
+  concept IsArchive = IsArchiveWriter<RemoveCvRef<Archive>> || IsArchiveReader<RemoveCvRef<Archive>>;
 
   template <typename Archive>
-  concept IsBinaryArchive = ArchiveTraits<Archive>::IsBinary;
+  concept IsBinaryArchive = ArchiveTraits<RemoveCvRef<Archive>>::IsBinary;
 
   template <typename Archive>
-  concept IsTextArchive = ArchiveTraits<Archive>::IsText;
+  concept IsTextArchive = ArchiveTraits<RemoveCvRef<Archive>>::IsText;
 
 #pragma endregion
 }

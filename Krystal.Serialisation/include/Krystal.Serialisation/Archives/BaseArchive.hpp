@@ -20,7 +20,7 @@
 namespace Krys::Serialisation
 {
   template <typename T>
-  NO_DISCARD constexpr Version GetVersion() noexcept
+  NO_DISCARD Version GetVersion() noexcept
   {
     static_assert(
       IsVersioned<T>,
@@ -96,49 +96,51 @@ namespace Krys::Serialisation
     {
       TransferGuard guard(_self, value);
 
-      if constexpr (HasVersionedTransferMember<Derived, T>)
+      using DecayedT = RemoveCvRef<T>;
+
+      if constexpr (HasVersionedTransferMember<Derived, DecayedT>)
       {
-        constexpr Version version = GetVersion<T>();
-        (*this)(CreateNamedField("version", version));
-        Access::MemberTransfer(_self, const_cast<RemoveCvRef<T> &>(value), version);
+        Version version = GetVersion<DecayedT>();
+        (*this)(version);
+        Access::MemberTransfer(_self, const_cast<DecayedT &>(value), version);
       }
-      else if constexpr (HasVersionedSaveMember<Derived, T>)
+      else if constexpr (HasVersionedSaveMember<Derived, DecayedT>)
       {
-        constexpr Version version = GetVersion<T>();
-        (*this)(CreateNamedField("version", version));
+        Version version = GetVersion<DecayedT>();
+        (*this)(version);
         Access::MemberSave(_self, value, version);
       }
-      else if constexpr (HasVersionedTransferNonMember<Derived, T>)
+      else if constexpr (HasVersionedTransferNonMember<Derived, DecayedT>)
       {
-        constexpr Version version = GetVersion<T>();
-        (*this)(CreateNamedField("version", version));
-        Access::NonMemberTransfer(_self, const_cast<RemoveCvRef<T> &>(value), version);
+        Version version = GetVersion<DecayedT>();
+        (*this)(version);
+        Access::NonMemberTransfer(_self, const_cast<DecayedT &>(value), version);
       }
-      else if constexpr (HasVersionedSaveNonMember<Derived, T>)
+      else if constexpr (HasVersionedSaveNonMember<Derived, DecayedT>)
       {
-        constexpr Version version = GetVersion<T>();
-        (*this)(CreateNamedField("version", version));
+        Version version = GetVersion<DecayedT>();
+        (*this)(version);
         Access::NonMemberSave(_self, value, version);
       }
-      else if constexpr (HasNonVersionedTransferMember<Derived, T>)
+      else if constexpr (HasNonVersionedTransferMember<Derived, DecayedT>)
       {
-        Access::MemberTransfer(_self, const_cast<RemoveCvRef<T> &>(value));
+        Access::MemberTransfer(_self, const_cast<DecayedT &>(value));
       }
-      else if constexpr (HasNonVersionedSaveMember<Derived, T>)
+      else if constexpr (HasNonVersionedSaveMember<Derived, DecayedT>)
       {
         Access::MemberSave(_self, value);
       }
-      else if constexpr (HasNonVersionedTransferNonMember<Derived, T>)
+      else if constexpr (HasNonVersionedTransferNonMember<Derived, DecayedT>)
       {
-        Access::NonMemberTransfer(_self, const_cast<RemoveCvRef<T> &>(value));
+        Access::NonMemberTransfer(_self, const_cast<DecayedT &>(value));
       }
-      else if constexpr (HasNonVersionedSaveNonMember<Derived, T>)
+      else if constexpr (HasNonVersionedSaveNonMember<Derived, DecayedT>)
       {
         Access::NonMemberSave(_self, value);
       }
       else
       {
-        static_assert(DependentFalse<T>, "Missing 'Save' or 'Transfer' specialisation for this type.");
+        static_assert(DependentFalse<DecayedT>, "Missing 'Save' or 'Transfer' specialisation for this type.");
       }
 
       return _self;
@@ -177,49 +179,51 @@ namespace Krys::Serialisation
     {
       TransferGuard guard(_self, value);
 
-      if constexpr (HasVersionedTransferMember<Derived, T>)
+      using DecayedT = RemoveCvRef<T>;
+
+      if constexpr (HasVersionedTransferMember<Derived, DecayedT>)
       {
-        Version version {};
-        (*this)(CreateNamedField("version", version));
+        Version version {0u};
+        (*this)(version);
         Access::MemberTransfer(_self, value, version);
       }
-      else if constexpr (HasVersionedLoadMember<Derived, T>)
+      else if constexpr (HasVersionedLoadMember<Derived, DecayedT>)
       {
-        Version version {};
-        (*this)(CreateNamedField("version", version));
+        Version version {0u};
+        (*this)(version);
         Access::MemberLoad(_self, value, version);
       }
-      else if constexpr (HasVersionedTransferNonMember<Derived, T>)
+      else if constexpr (HasVersionedTransferNonMember<Derived, DecayedT>)
       {
-        Version version {};
-        (*this)(CreateNamedField("version", version));
+        Version version {0u};
+        (*this)(version);
         Access::NonMemberTransfer(_self, value, version);
       }
-      else if constexpr (HasVersionedLoadNonMember<Derived, T>)
+      else if constexpr (HasVersionedLoadNonMember<Derived, DecayedT>)
       {
-        Version version {};
-        (*this)(CreateNamedField("version", version));
+        Version version {0u};
+        (*this)(version);
         Access::NonMemberLoad(_self, value, version);
       }
-      else if constexpr (HasNonVersionedTransferMember<Derived, T>)
+      else if constexpr (HasNonVersionedTransferMember<Derived, DecayedT>)
       {
         Access::MemberTransfer(_self, value);
       }
-      else if constexpr (HasNonVersionedLoadMember<Derived, T>)
+      else if constexpr (HasNonVersionedLoadMember<Derived, DecayedT>)
       {
         Access::MemberLoad(_self, value);
       }
-      else if constexpr (HasNonVersionedTransferNonMember<Derived, T>)
+      else if constexpr (HasNonVersionedTransferNonMember<Derived, DecayedT>)
       {
         Access::NonMemberTransfer(_self, value);
       }
-      else if constexpr (HasNonVersionedLoadNonMember<Derived, T>)
+      else if constexpr (HasNonVersionedLoadNonMember<Derived, DecayedT>)
       {
         Access::NonMemberLoad(_self, value);
       }
       else
       {
-        static_assert(DependentFalse<T>, "Missing 'Load' or 'Transfer' specialisation for this type.");
+        static_assert(DependentFalse<DecayedT>, "Missing 'Load' or 'Transfer' specialisation for this type.");
       }
 
       return _self;

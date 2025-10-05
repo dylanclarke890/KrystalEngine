@@ -135,9 +135,9 @@ namespace Krys::Serialisation
 
   struct Version
   {
-    NO_COPY(Version)
-
     using ValueType = uint32;
+
+    constexpr static const char *FieldName = "version";
 
     constexpr explicit Version(ValueType version) noexcept : Value(version)
     {
