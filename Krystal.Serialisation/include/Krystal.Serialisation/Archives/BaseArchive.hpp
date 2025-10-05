@@ -5,8 +5,26 @@
 #include "Krystal.Serialisation/Access.hpp"
 #include "Krystal.Serialisation/Concepts.hpp"
 
+/// This simplified implementation is *heavily* inspired by cereal (https://uscilab.github.io/cereal/).
+///
+/// The main differences are:
+/// - Deterministic overload resolution order (no SFINAE).
+/// - Unified API.
+/// - Versioning can be done via traits or static member, limited to compile-time constants.
+/// - Use of concepts instead of SFINAE.
+/// - Optimisations for built-in types.
+///
+/// Not supported:
+/// - Polymorphism.
+/// - Smart pointers.
+/// - Pointers.
+///
 /// Dispatch Resolution Order:
-/// T is an ArchiveBuiltin type -> serialised by archive directly, no need for overload.
+///
+/// T is an ArchiveBuiltin type -> serialised by archive directly, no need for dispatch.
+/// NOTE: ArchiveBuiltin types are always non-versioned.
+///
+/// Regardless of versioning:
 /// Is there a member function (public or private with Access friend class):
 ///   1.  void Transfer(Archive& ar) noexcept;
 ///   2a. void Save(Archive& ar) noexcept;
@@ -15,25 +33,24 @@
 ///   1.  void Transfer(Archive& ar, T& value) noexcept;
 ///   2a. void Save(Archive& ar, const T& value) noexcept
 ///   2b. void Load(Archive& ar, T& value) noexcept;
-/// NOTE: Versioned overloads are checked first and follow the same pattern, each taking an additional Version
-/// parameter.
+///
+/// NOTE: If T is versioned, the version is always passed as the last argument to the above methods.
 namespace Krys::Serialisation
 {
   template <typename T>
   NO_DISCARD Version GetVersion() noexcept
   {
-    static_assert(
-      IsVersioned<T>,
-      "A versioned overload was provided for a type without versioning info "
-      "(you must declare a version via a static class property or by specialising VersionTrait).");
-
     if constexpr (HasTraitVersion<T>)
     {
       return VersionTraits<T>::ClassVersion;
     }
-    else // if constexpr (HasStaticVersion<T>)
+    else if constexpr (HasStaticVersion<T>)
     {
       return T::ClassVersion;
+    }
+    else
+    {
+      static_assert(DependentFalse<T>, "Missing version info for this type.");
     }
   }
 
@@ -154,6 +171,12 @@ namespace Krys::Serialisation
       return _self;
     }
 
+    template <Pointer T>
+    Derived &operator()(T &&ptr)
+    {
+      static_assert(DependentFalse<T>, "Pointer types are not supported.");
+    }
+
     template <typename... Types>
     requires(sizeof...(Types) > 1)
     Derived &operator()(Types &&...types)
@@ -235,6 +258,12 @@ namespace Krys::Serialisation
       TransferGuard guard(_self, value);
       _self.Read(value);
       return _self;
+    }
+
+    template <Pointer T>
+    Derived &operator()(T &&ptr)
+    {
+      static_assert(DependentFalse<T>, "Pointer types are not supported.");
     }
 
     template <typename... Types>
