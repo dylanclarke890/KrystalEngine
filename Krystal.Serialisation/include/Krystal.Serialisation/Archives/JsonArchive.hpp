@@ -40,7 +40,7 @@ namespace Krys::Serialisation
   private:
     Stream _stream;
     Writer _writer;
-    string _nextName {}; // The next name, can be specified using a NamedField or generated automatically.
+    stringview _nextName {}; // The next name, can be specified using a NamedField or generated automatically.
     Stack<Node> _nodes {};
 
   public:
@@ -56,7 +56,7 @@ namespace Krys::Serialisation
       FinishNode();
     }
 
-    void SetNextFieldName(const string &name) noexcept
+    void SetNextFieldName(stringview name) noexcept
     {
       _nextName = name;
     }
@@ -161,11 +161,14 @@ namespace Krys::Serialisation
 
       if (_nextName.empty())
       {
-        _nextName = std::format("value{}", _nodes.top().NameCounter++);
+        auto nextName = std::format("value{}", _nodes.top().NameCounter++);
+        _writer.Key(nextName.data(), static_cast<rapidjson::SizeType>(nextName.size()));
       }
-
-      _writer.Key(_nextName.c_str(), static_cast<rapidjson::SizeType>(_nextName.size()));
-      _nextName.clear();
+      else
+      {
+        _writer.Key(_nextName.data(), static_cast<rapidjson::SizeType>(_nextName.size()));
+        _nextName = {};
+      }
     }
   };
 
@@ -264,7 +267,7 @@ namespace Krys::Serialisation
     };
 
   private:
-    string _nextName {};              /// @brief Next name set by NamedField
+    stringview _nextName {};              /// @brief Next name set by NamedField
     Stream _stream;                   /// @brief Rapidjson read stream
     List<Iterator> _iteratorStack {}; /// @brief 'Stack' of rapidJSON iterators
     rapidjson::Document _document;    /// @brief Rapidjson document
@@ -290,7 +293,7 @@ namespace Krys::Serialisation
     }
 
     /// @brief Sets the name for the next node created with StartNode
-    void SetNextFieldName(const string &name)
+    void SetNextFieldName(stringview name)
     {
       _nextName = name;
     }
@@ -383,13 +386,13 @@ namespace Krys::Serialisation
         return;
       }
 
-      string requiredFieldName = _nextName;
-      _nextName.clear();
+      stringview requiredFieldName = _nextName;
+      _nextName = {};
 
       string currentFieldName = _iteratorStack.back().Name();
       if (currentFieldName != requiredFieldName)
       {
-        _iteratorStack.back().Search(requiredFieldName.c_str());
+        _iteratorStack.back().Search(requiredFieldName.data());
       }
     }
 

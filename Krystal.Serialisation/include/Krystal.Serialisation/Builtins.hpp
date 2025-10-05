@@ -32,16 +32,16 @@ namespace Krys::Serialisation
       Conditional<IsArray<RemoveCvRef<T>>, RemoveCv<T>, Conditional<IsLValueRef<T>, T, Decay<T>>>;
 
   public:
-    constexpr NamedField(char const *name, T &&value) noexcept : Name(name), Value(std::forward<T>(value))
+    constexpr NamedField(stringview name, T &&value) noexcept : Name(name), Value(std::forward<T>(value))
     {
     }
 
-    char const *Name;
+    stringview Name;
     FieldType Value;
   };
 
   template <typename T>
-  auto CreateNamedField(const string &name, T &&value) noexcept
+  auto CreateNamedField(stringview name, T &&value) noexcept
   {
     return NamedField<T>(name, std::forward<T>(value));
   }

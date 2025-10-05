@@ -36,7 +36,7 @@ namespace Krys::Serialisation
     IO::IStreamWriter &_stream;
     rapidxml::xml_document<> _document;
     Stack<NodeMetadata> _nodes {};
-    string _nextFieldName {};
+    stringview _nextFieldName {};
 
   public:
     XmlArchiveWriter(IO::IStreamWriter &stream) noexcept : _stream(stream)
@@ -81,7 +81,7 @@ namespace Krys::Serialisation
       _document.clear();
     }
 
-    void SetNextFieldName(const string &name) noexcept
+    void SetNextFieldName(stringview name) noexcept
     {
       _nextFieldName = name;
     }
@@ -150,13 +150,25 @@ namespace Krys::Serialisation
 
     void StartNode()
     {
+      char *namePtr = nullptr;
+      size_t nameSize;
+
       // allocate strings for all of the data in the XML object
-      const string name = _nextFieldName.empty() ? _nodes.top().GetNextFieldName() : _nextFieldName;
-      auto *namePtr = _document.allocate_string(name.data(), name.length() + 1);
-      _nextFieldName.clear();
+      if (_nextFieldName.empty())
+      {
+        string name = _nodes.top().GetNextFieldName();
+        namePtr = _document.allocate_string(name.data(), name.length() + 1);
+      }
+      else
+      {
+        namePtr = _document.allocate_string(_nextFieldName.data(), _nextFieldName.length() + 1);
+        _nextFieldName = {};
+      }
+
+      nameSize = namePtr ? std::char_traits<char>::length(namePtr) : 0;
 
       // insert into the XML
-      auto node = _document.allocate_node(rapidxml::node_element, namePtr, nullptr, name.size());
+      auto node = _document.allocate_node(rapidxml::node_element, namePtr, nullptr, nameSize);
       _nodes.top().Node->append_node(node);
       _nodes.emplace(node);
     }
@@ -181,10 +193,10 @@ namespace Krys::Serialisation
 
     struct NodeMetadata
     {
-      NodeType *Node;   /// @brief A pointer to this node
-      NodeType *Child;  /// @brief A pointer to its current child
-      size_t Size {0u}; /// @brief The remaining number of children for this node
-      string Name {};   /// @brief The NVP name for next child node
+      NodeType *Node;     /// @brief A pointer to this node
+      NodeType *Child;    /// @brief A pointer to its current child
+      size_t Size {0u};   /// @brief The remaining number of children for this node
+      stringview Name {}; /// @brief The NVP name for next child node
 
       NodeMetadata(NodeType *node) noexcept
           : Node(node), Child(node->first_node()), Size(GetNumberOfChildren(node))
@@ -200,7 +212,7 @@ namespace Krys::Serialisation
         }
       }
 
-      NodeType *Search(const string &searchName) noexcept
+      NodeType *Search(stringview searchName) noexcept
       {
         if (searchName.empty())
         {
@@ -209,11 +221,11 @@ namespace Krys::Serialisation
 
         using namespace rapidxml::internal;
         size_t size = GetNumberOfChildren(Node);
-        const size_t len = measure(searchName.c_str());
+        const size_t len = measure(searchName.data());
 
         for (auto child = Node->first_node(); child != nullptr; child = child->next_sibling())
         {
-          if (compare(child->name(), child->name_size(), searchName.c_str(), len, true))
+          if (compare(child->name(), child->name_size(), searchName.data(), len, true))
           {
             Size = size;
             Child = child;
@@ -263,7 +275,7 @@ namespace Krys::Serialisation
       _document.clear();
     }
 
-    void SetNextFieldName(const string &name) noexcept
+    void SetNextFieldName(stringview name) noexcept
     {
       _nodes.top().Name = name;
     }
@@ -341,19 +353,19 @@ namespace Krys::Serialisation
 
     void StartNode()
     {
-      auto next = _nodes.top().Child;                // By default we would move to the next child node
-      const string expectedName = _nodes.top().Name; // expected name from the named field, if provided
+      auto next = _nodes.top().Child;              // By default we would move to the next child node
+      stringview expectedName = _nodes.top().Name; // expected name from the named field, if provided
 
       // If we were given an NVP name, look for it in the current level of the document.
       //    We only need to do this if either we have exhausted the siblings of the current level or
       //    the NVP name does not match the name of the node we would normally read next
-      if (!expectedName.empty() && (next == nullptr || std::strcmp(next->name(), expectedName.c_str()) != 0))
+      if (!expectedName.empty() && (next == nullptr || std::strcmp(next->name(), expectedName.data()) != 0))
       {
         next = _nodes.top().Search(expectedName);
 
         if (next == nullptr)
-          throw std::exception(
-            ("XML Parsing failed - provided NVP (" + std::string(expectedName) + ") not found").c_str());
+          throw std::runtime_error(
+            std::format("XML Parsing failed - provided NVP ({}) not found", expectedName));
       }
 
       if (next != nullptr)
@@ -371,7 +383,7 @@ namespace Krys::Serialisation
       // remove current, advance parent and clear its name
       _nodes.pop();
       _nodes.top().Advance();
-      _nodes.top().Name.clear();
+      _nodes.top().Name = "";
     }
 
     string GetNodeName() const noexcept
