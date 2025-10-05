@@ -68,22 +68,21 @@ namespace Krys::IO
   };
 
   /// @brief Checks if the image at the given path is a HDR image.
-  NO_DISCARD extern bool IsHDRImage(const Path &path) noexcept;
+  NO_DISCARD bool IsHDRImage(const Path &path) noexcept;
 
   /// @brief Checks if the image from the stream is a HDR image.
-  NO_DISCARD extern bool IsHDRImage(IStreamReader &stream) noexcept;
+  NO_DISCARD bool IsHDRImage(IStreamReader &stream) noexcept;
 
   /// @brief Reads an image from a stream.
   /// @param stream Source stream to read from.
   /// @return Image read from the stream.
-  NO_DISCARD extern Expected<Image> LoadImage(IStreamReader &stream, bool hdr,
-                                              const ImageLoadSettings &settings = {}) noexcept;
+  NO_DISCARD Expected<Image> LoadImage(IStreamReader &stream, bool hdr,
+                                       const ImageLoadSettings &settings = {});
 
   /// @brief Reads an image from a file.
   /// @param path Path to the image file.
   /// @return Image read from the file.
-  NO_DISCARD extern Expected<Image> LoadImage(const Path &path,
-                                              const ImageLoadSettings &settings = {}) noexcept;
+  NO_DISCARD Expected<Image> LoadImage(const Path &path, const ImageLoadSettings &settings = {});
 
   /// @brief Reads a cubemap image from 6 separate files.
   /// @param left Path to the left face image file.
@@ -94,8 +93,7 @@ namespace Krys::IO
   /// @param back Path to the back face image file.
   /// @param settings Settings for loading each image.
   /// @return Cubemap image read from the files.
-  NO_DISCARD extern Expected<CubeMapImage> LoadCubeMap(const Path &left, const Path &right, const Path &top,
-                                                       const Path &bottom, const Path &front,
-                                                       const Path &back,
-                                                       const ImageLoadSettings &settings = {}) noexcept;
+  NO_DISCARD Expected<CubeMapImage> LoadCubeMap(const Path &left, const Path &right, const Path &top,
+                                                const Path &bottom, const Path &front, const Path &back,
+                                                const ImageLoadSettings &settings = {});
 }

@@ -24,7 +24,7 @@ namespace Krys::Tests
     std::filesystem::create_directories(baseDir.ToString());
     std::filesystem::create_directories(dataDir.ToString());
     std::filesystem::create_directories(baseDir.ToString() + "/data");
-    std::ofstream(baseDir.ToString() + "/data" + "/fallback.txt");
+    std::ofstream(baseDir.ToString() + "/data/fallback.txt");
     std::filesystem::create_directories(imagesDir.ToString());
 
     VirtualFileSystemBuilder builder;

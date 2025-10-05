@@ -7,14 +7,19 @@ namespace Krys::IO
 {
 #pragma region Reader
 
-  NativeFileReader::NativeFileReader(const Path &path) noexcept : _path(path)
+  NativeFileReader::NativeFileReader(const Path &path) : _path(path)
   {
-    Open();
+    NativeFileReader::Open();
+  }
+
+  NativeFileReader::NativeFileReader(Path &&path) : _path(std::move(path))
+  {
+    NativeFileReader::Open();
   }
 
   NativeFileReader::~NativeFileReader() noexcept
   {
-    Close();
+    NativeFileReader::Close();
   }
 
   bool NativeFileReader::IsOpen() const noexcept
@@ -24,13 +29,21 @@ namespace Krys::IO
 
   bool NativeFileReader::Open() noexcept
   {
-    const auto path = _path.ToString();
-    if (!std::filesystem::exists(path) || !std::filesystem::is_regular_file(path))
+    try
     {
-      return false; // Cannot open a reader for a non-regular file
+      const auto path = _path.ToString();
+      if (!std::filesystem::exists(path) || !std::filesystem::is_regular_file(path))
+      {
+        return false; // Cannot open a reader for a non-regular file
+      }
+
+      _stream = std::ifstream(_path.ToString(), std::ios::in | std::ios::binary);
+    }
+    catch (...)
+    {
+      return false;
     }
 
-    _stream = std::ifstream(_path.ToString(), std::ios::in | std::ios::binary);
     return _stream.is_open() && !_stream.fail();
   }
 
@@ -49,7 +62,6 @@ namespace Krys::IO
     }
   }
 
-  // NOLINTNEXTLINE(readability-make-member-function-const)
   uint64 NativeFileReader::Read(byte *dest, uint64 count) noexcept
   {
     if (!IsOpen() || count == 0 || EndOfStream())
@@ -108,13 +120,18 @@ namespace Krys::IO
     }
     try
     {
-      next = static_cast<byte>(_stream.peek());
+      const int peeked = _stream.peek();
+      if (peeked == std::char_traits<char>::eof())
+      {
+        return false;
+      }
+      next = static_cast<byte>(peeked);
+      return true;
     }
     catch (...)
     {
       return false;
     }
-    return !_stream.fail();
   }
 
   uint64 NativeFileReader::Size() noexcept
@@ -158,14 +175,19 @@ namespace Krys::IO
 
 #pragma region Writer
 
-  NativeFileWriter::NativeFileWriter(const Path &path) noexcept : _path(path)
+  NativeFileWriter::NativeFileWriter(const Path &path) : _path(path)
   {
-    Open();
+    NativeFileWriter::Open();
+  }
+
+  NativeFileWriter::NativeFileWriter(Path &&path) : _path(std::move(path))
+  {
+    NativeFileWriter::Open();
   }
 
   NativeFileWriter::~NativeFileWriter() noexcept
   {
-    Close();
+    NativeFileWriter::Close();
   }
 
   bool NativeFileWriter::IsOpen() const noexcept
@@ -175,13 +197,20 @@ namespace Krys::IO
 
   bool NativeFileWriter::Open() noexcept
   {
-    const auto path = _path.ToString();
-    if (std::filesystem::exists(path) && !std::filesystem::is_regular_file(path))
+    try
     {
-      return false; // Cannot open a writer for a non-regular file
+      const auto path = _path.ToString();
+      if (std::filesystem::exists(path) && !std::filesystem::is_regular_file(path))
+      {
+        return false; // Cannot open a writer for a non-regular file
+      }
+      _stream = std::ofstream(_path.ToString(), std::ios::out | std::ios::binary);
+    }
+    catch (...)
+    {
+      return false;
     }
 
-    _stream = std::ofstream(_path.ToString(), std::ios::out | std::ios::binary);
     return _stream.is_open() && !_stream.fail();
   }
 
@@ -200,7 +229,6 @@ namespace Krys::IO
     }
   }
 
-  // NOLINTNEXTLINE(readability-make-member-function-const)
   bool NativeFileWriter::Write(const byte *src, uint64 size) noexcept
   {
     if (!IsOpen())

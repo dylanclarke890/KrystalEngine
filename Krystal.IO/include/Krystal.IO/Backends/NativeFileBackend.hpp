@@ -18,7 +18,9 @@ namespace Krys::IO
   public:
     NO_COPY_MOVE(NativeFileBackend)
 
-    explicit NativeFileBackend(const Path &root) noexcept;
+    explicit NativeFileBackend(const Path &root);
+
+    explicit NativeFileBackend(Path &&root);
 
     ~NativeFileBackend() noexcept override = default;
 
@@ -28,15 +30,15 @@ namespace Krys::IO
 
     NO_DISCARD bool IsFile(const Path &path) const noexcept override;
 
-    bool CreateFile(const Path &path, bool overwriteExisting) noexcept override;
+    bool CreateFile(const Path &path, bool overwriteExisting) override;
 
-    bool DeleteFile(const Path &path) noexcept override;
+    bool DeleteFile(const Path &path) override;
 
     NO_DISCARD List<VirtualDirectoryEntry>
       GetDirectoryEntries(const Path &directory, bool recursive = false) const noexcept override;
 
-    NO_DISCARD Unique<IStreamReader> GetReader(const Path &path) const noexcept override;
+    NO_DISCARD Unique<IStreamReader> GetReader(const Path &path) const override;
 
-    NO_DISCARD Unique<IStreamWriter> GetWriter(const Path &path) const noexcept override;
+    NO_DISCARD Unique<IStreamWriter> GetWriter(const Path &path) const override;
   };
 }

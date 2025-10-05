@@ -25,7 +25,7 @@ namespace Krys::IO
       size_t InsertionOrder = 0;
     };
 
-    List<FileBackend> _mounts {};
+    List<FileBackend> _mounts;
     size_t _insertionOrder = 0;
 
   public:
@@ -36,8 +36,7 @@ namespace Krys::IO
 
     /// @brief Adds a mount point to the virtual file system.
     template <DerivedFrom<IFileBackend> T, typename... Args>
-    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
-    VirtualFileSystemBuilder &Mount(const Path &path, Args &&...args) noexcept
+    VirtualFileSystemBuilder &Mount(const Path &path, Args &&...args)
     {
       auto backend = CreateUnique<T>(std::forward<Args>(args)...);
       _mounts.emplace_back(FileBackend {path, backend.release(), _insertionOrder++});
@@ -46,7 +45,7 @@ namespace Krys::IO
 
     /// @brief Adds a mount point to the virtual file system.
     template <DerivedFrom<IFileBackend> T>
-    VirtualFileSystemBuilder &Mount(const Path &path, T *backend) noexcept
+    VirtualFileSystemBuilder &Mount(const Path &path, T *backend)
     {
       _mounts.emplace_back(FileBackend {path, backend});
       return *this;
@@ -65,7 +64,7 @@ namespace Krys::IO
   /// or writing, even if earlier backends also match the path.
   class VirtualFileSystem
   {
-    List<Pair<Path, Unique<IFileBackend>>> _backends {};
+    List<Pair<Path, Unique<IFileBackend>>> _backends;
 
   public:
     NO_COPY_MOVE(VirtualFileSystem)
@@ -94,8 +93,8 @@ namespace Krys::IO
     /// @brief Gets a list of files from all backends that match the specified path.
     /// @param path The directory to search for files.
     /// @param recursive If true, searches recursively in subdirectories.
-    List<VirtualDirectoryEntry> GetDirectoryEntries(const Path &directory,
-                                                    bool recursive = false) const noexcept;
+    NO_DISCARD List<VirtualDirectoryEntry> GetDirectoryEntries(const Path &directory,
+                                                               bool recursive = false) const noexcept;
 
     /// @returns Gets a stream reader for the given path. If multiple backends match, the first one is used
     /// where the file exists. If no backend matches or the file doesn't exist, returns a null pointer.

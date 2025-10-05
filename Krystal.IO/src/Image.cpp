@@ -41,7 +41,6 @@ namespace Krys::IO
 {
   bool IsHDRImage(const Path &path) noexcept
   {
-    // NOLINTNEXTLINE(misc-const-correctness)
     NativeFileReader fileReader {path};
     return IsHDRImage(fileReader);
   }
@@ -56,8 +55,7 @@ namespace Krys::IO
     return stbi_is_hdr_from_callbacks(&callbacks, &stream) != 0;
   }
 
-  // NOLINTNEXTLINE(misc-use-internal-linkage)
-  Expected<Image> LoadImage(IStreamReader &stream, bool hdr, const ImageLoadSettings &settings) noexcept
+  Expected<Image> LoadImage(IStreamReader &stream, bool hdr, const ImageLoadSettings &settings)
   {
     stbi_set_flip_vertically_on_load(static_cast<int>(settings.FlipVertically));
     const stbi_io_callbacks callbacks = GetStbIOCallbacks();
@@ -100,23 +98,19 @@ namespace Krys::IO
     image.Width = width;
     image.Height = height;
     image.Channels = channels;
-    return Expected<Image>(std::move(image));
+    return std::move(image);
   }
 
-  // NOLINTNEXTLINE(misc-use-internal-linkage)
-  Expected<Image> LoadImage(const Path &path, const ImageLoadSettings &settings) noexcept
+  Expected<Image> LoadImage(const Path &path, const ImageLoadSettings &settings)
   {
-    // NOLINTNEXTLINE(misc-const-correctness)
     NativeFileReader fileReader {path};
-    bool hdr = IsHDRImage(fileReader);
+    const bool hdr = IsHDRImage(fileReader);
     fileReader.Seek(0, SeekOrigin::Begin);
     return LoadImage(fileReader, hdr, settings);
   }
 
-  // NOLINTNEXTLINE(misc-use-internal-linkage, bugprone-easily-swappable-parameters)
   Expected<CubeMapImage> LoadCubeMap(const Path &left, const Path &right, const Path &top, const Path &bottom,
-                                     const Path &front, const Path &back,
-                                     const ImageLoadSettings &settings) noexcept
+                                     const Path &front, const Path &back, const ImageLoadSettings &settings)
   {
     CubeMapImage cubeMapImage {};
 
@@ -195,6 +189,6 @@ namespace Krys::IO
     }
     cubeMapImage.Back = std::move(backFace->Data);
 
-    return Expected<CubeMapImage>(std::move(cubeMapImage));
+    return std::move(cubeMapImage);
   }
 }

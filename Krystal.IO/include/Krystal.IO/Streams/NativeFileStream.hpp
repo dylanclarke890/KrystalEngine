@@ -18,7 +18,9 @@ namespace Krys::IO
   public:
     NO_COPY_MOVE(NativeFileReader)
 
-    explicit NativeFileReader(const Path &path) noexcept;
+    explicit NativeFileReader(const Path &path);
+
+    explicit NativeFileReader(Path &&path);
 
     ~NativeFileReader() noexcept override;
 
@@ -51,7 +53,9 @@ namespace Krys::IO
   public:
     NO_COPY_MOVE(NativeFileWriter)
 
-    explicit NativeFileWriter(const Path &path) noexcept;
+    explicit NativeFileWriter(const Path &path);
+
+    explicit NativeFileWriter(Path &&path);
 
     ~NativeFileWriter() noexcept override;
 

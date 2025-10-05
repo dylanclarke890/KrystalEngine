@@ -5,28 +5,53 @@
 
 namespace Krys::IO
 {
-  NativeFileBackend::NativeFileBackend(const Path &root) noexcept : _root(root)
+  NativeFileBackend::NativeFileBackend(const Path &root) : _root(root)
+  {
+  }
+
+  NativeFileBackend::NativeFileBackend(Path &&root) : _root(std::move(root))
   {
   }
 
   bool NativeFileBackend::Exists(const Path &path) const noexcept
   {
-    return std::filesystem::exists((_root / path).LexicallyNormal().ToString());
+    try
+    {
+      return std::filesystem::exists((_root / path).LexicallyNormal().ToString());
+    }
+    catch (...)
+    {
+      return false;
+    }
   }
 
   bool NativeFileBackend::IsDirectory(const Path &path) const noexcept
   {
-    return std::filesystem::is_directory((_root / path).LexicallyNormal().ToString());
+    try
+    {
+      return std::filesystem::is_directory((_root / path).LexicallyNormal().ToString());
+    }
+    catch (...)
+    {
+      return false;
+    }
   }
 
   bool NativeFileBackend::IsFile(const Path &path) const noexcept
   {
-    return std::filesystem::is_regular_file((_root / path).LexicallyNormal().ToString());
+    try
+    {
+      return std::filesystem::is_regular_file((_root / path).LexicallyNormal().ToString());
+    }
+    catch (...)
+    {
+      return false;
+    }
   }
 
-  bool NativeFileBackend::CreateFile(const Path &path, bool overwriteExisting) noexcept
+  bool NativeFileBackend::CreateFile(const Path &path, bool overwriteExisting)
   {
-    std::filesystem::path fullPath = (_root / path).LexicallyNormal().ToString();
+    const std::filesystem::path fullPath = (_root / path).LexicallyNormal().ToString();
     if (!overwriteExisting && std::filesystem::exists(fullPath))
     {
       return false;
@@ -38,9 +63,9 @@ namespace Krys::IO
     return std::filesystem::exists(fullPath);
   }
 
-  bool NativeFileBackend::DeleteFile(const Path &path) noexcept
+  bool NativeFileBackend::DeleteFile(const Path &path)
   {
-    std::filesystem::path fullPath = (_root / path).ToString();
+    const std::filesystem::path fullPath = (_root / path).ToString();
     if (std::filesystem::exists(fullPath) && std::filesystem::is_regular_file(fullPath))
     {
       return std::filesystem::remove(fullPath);
@@ -52,40 +77,47 @@ namespace Krys::IO
                                                                      bool recursive) const noexcept
   {
     List<VirtualDirectoryEntry> entries;
-    std::filesystem::path fullPath = (_root / directory).ToString();
 
-    if (!std::filesystem::is_directory(fullPath))
+    try
     {
-      return entries; // Not a directory, return empty list
+      const std::filesystem::path fullPath = (_root / directory).ToString();
+      if (!std::filesystem::is_directory(fullPath))
+      {
+        return {};
+      }
+
+      const Path root(_root);
+      for (const auto &entry : std::filesystem::directory_iterator(fullPath))
+      {
+        if (!entry.is_directory() && !entry.is_regular_file())
+        {
+          continue;
+        }
+
+        const VirtualDirectoryEntry directoryEntry {Path(entry.path()).RelativePath(root),
+                                                    entry.is_regular_file() ? entry.file_size() : 0,
+                                                    entry.is_directory()};
+        if (entry.is_directory() && recursive)
+        {
+          List<VirtualDirectoryEntry> subEntries =
+            GetDirectoryEntries(directoryEntry.Path.RelativePath(root), true);
+          entries.insert(entries.end(), subEntries.begin(), subEntries.end());
+        }
+        else
+        {
+          entries.push_back(directoryEntry);
+        }
+      }
     }
-
-    Path root(_root);
-    for (const auto &entry : std::filesystem::directory_iterator(fullPath))
+    catch (...)
     {
-      if (!entry.is_directory() && !entry.is_regular_file())
-      {
-        continue;
-      }
-
-      VirtualDirectoryEntry directoryEntry {Path(entry.path()).RelativePath(root),
-                                            entry.is_regular_file() ? entry.file_size() : 0,
-                                            entry.is_directory()};
-      if (entry.is_directory() && recursive)
-      {
-        List<VirtualDirectoryEntry> subEntries =
-          GetDirectoryEntries(directoryEntry.Path.RelativePath(root), true);
-        entries.insert(entries.end(), subEntries.begin(), subEntries.end());
-      }
-      else
-      {
-        entries.push_back(directoryEntry);
-      }
+      return {};
     }
 
     return entries;
   }
 
-  Unique<IStreamReader> NativeFileBackend::GetReader(const Path &path) const noexcept
+  Unique<IStreamReader> NativeFileBackend::GetReader(const Path &path) const
   {
     if (Exists(path))
     {
@@ -95,7 +127,7 @@ namespace Krys::IO
     return nullptr; // Cannot create a reader for a non-existing or non-regular file
   }
 
-  Unique<IStreamWriter> NativeFileBackend::GetWriter(const Path &path) const noexcept
+  Unique<IStreamWriter> NativeFileBackend::GetWriter(const Path &path) const
   {
     return Unique<IStreamWriter>(static_cast<IStreamWriter *>(new NativeFileWriter(_root / path)));
   }

@@ -11,13 +11,17 @@ Checks: >
   -readability-uppercase-literal-suffix,
   bugprone-*,
   -bugprone-branch-clone,
+  -bugprone-casting-through-void,
+  -bugprone-easily-swappable-parameters,
   hicpp-*,
   -hicpp-member-init,
   -hicpp-uppercase-literal-suffix,
+  -hicpp-signed-bitwise,
   portability-*,
   misc-*,
   -misc-include-cleaner,
   -misc-non-private-member-variables-in-classes,
+  -misc-no-recursion,
   documentation-*
 
 WarningsAsErrors: >

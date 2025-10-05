@@ -28,10 +28,10 @@ namespace Krys::IO
     NO_DISCARD virtual bool IsFile(const Path &path) const noexcept = 0;
 
     /// @brief Creates a file at the specified path.
-    virtual bool CreateFile(const Path &path, bool overrideExisting) noexcept = 0;
+    virtual bool CreateFile(const Path &path, bool overrideExisting) = 0;
 
     /// @brief Deletes a file at the specified path.
-    virtual bool DeleteFile(const Path &path) noexcept = 0;
+    virtual bool DeleteFile(const Path &path) = 0;
 
     /// @brief Gets a list of files that match the specified path.
     /// @param directory The directory to search for files.
@@ -40,10 +40,10 @@ namespace Krys::IO
       GetDirectoryEntries(const Path &directory, bool recursive = false) const noexcept = 0;
 
     /// @brief Gets a stream reader for the specified path.
-    NO_DISCARD virtual Unique<IStreamReader> GetReader(const Path &path) const noexcept = 0;
+    NO_DISCARD virtual Unique<IStreamReader> GetReader(const Path &path) const = 0;
 
     /// @brief Gets a stream writer for the specified path.
-    NO_DISCARD virtual Unique<IStreamWriter> GetWriter(const Path &path) const noexcept = 0;
+    NO_DISCARD virtual Unique<IStreamWriter> GetWriter(const Path &path) const = 0;
 
   protected:
     IFileBackend() = default;

@@ -1,5 +1,5 @@
 #include "Krystal.IO/VirtualFileSystem.hpp"
-#include <algorithm>
+#include <ranges>
 
 namespace Krys::IO
 {
@@ -10,66 +10,66 @@ namespace Krys::IO
       return nullptr;
     }
 
-    std::sort(_mounts.begin(), _mounts.end(),
-              [](const FileBackend &a, const FileBackend &b)
-              {
-                // shortest prefix first (longest would be faster but exact matches may be missed that way)
-                if (a.Prefix.Length() != b.Prefix.Length())
-                  return a.Prefix.Length() < b.Prefix.Length();
-                // then by lexicographical order
-                if (a.Prefix != b.Prefix)
-                  return a.Prefix.ToString() < b.Prefix.ToString();
-                return a.InsertionOrder > b.InsertionOrder; // later entries take precedence
-              });
-
-    List<Pair<Path, Unique<IFileBackend>>> backends {};
-    backends.reserve(_mounts.size());
-
-    for (const auto &entry : _mounts)
+    try
     {
-      backends.emplace_back(entry.Prefix, entry.Backend);
+      std::ranges::sort(_mounts,
+                        [](const FileBackend &first, const FileBackend &second)
+                        {
+                          // shortest prefix first (longest would be faster but exact matches may be missed
+                          // that way)
+                          if (first.Prefix.Length() != second.Prefix.Length())
+                          {
+                            return first.Prefix.Length() < second.Prefix.Length();
+                          }
+
+                          // then by lexicographical order
+                          if (first.Prefix != second.Prefix)
+                          {
+                            return first.Prefix.ToString() < second.Prefix.ToString();
+                          }
+                          return first.InsertionOrder
+                                 > second.InsertionOrder; // later entries take precedence
+                        });
+
+      List<Pair<Path, Unique<IFileBackend>>> backends {};
+
+      backends.reserve(_mounts.size());
+
+      for (const auto &entry : _mounts)
+      {
+        backends.emplace_back(entry.Prefix, entry.Backend);
+      }
+
+      _mounts = {};        // Clear mounts after building to avoid dangling references.
+      _insertionOrder = 0; // Reset insertion order for the next build.
+
+      auto vfs = Unique<VirtualFileSystem>(new VirtualFileSystem());
+      vfs->_backends = std::move(backends);
+      return vfs;
     }
-
-    _mounts = {};        // Clear mounts after building to avoid dangling references.
-    _insertionOrder = 0; // Reset insertion order for the next build.
-
-    auto vfs = Unique<VirtualFileSystem>(new VirtualFileSystem());
-    vfs->_backends = std::move(backends);
-
-    return vfs;
+    catch (...)
+    {
+      return nullptr;
+    }
   }
 
   bool VirtualFileSystem::Exists(const Path &path) const noexcept
   {
     auto allBackends = GetBackends(path);
-    for (const auto &pair : allBackends)
-    {
-      if (pair.second->Exists(pair.first))
-        return true;
-    }
-    return false;
+    return std::ranges::any_of(allBackends, [](const auto &pair) { return pair.second->Exists(pair.first); });
   }
 
   bool VirtualFileSystem::IsDirectory(const Path &path) const noexcept
   {
     auto allBackends = GetBackends(path);
-    for (const auto &pair : allBackends)
-    {
-      if (pair.second->IsDirectory(pair.first))
-        return true;
-    }
-    return false;
+    return std::ranges::any_of(allBackends,
+                               [](const auto &pair) { return pair.second->IsDirectory(pair.first); });
   }
 
   bool VirtualFileSystem::IsFile(const Path &path) const noexcept
   {
     auto allBackends = GetBackends(path);
-    for (const auto &pair : allBackends)
-    {
-      if (pair.second->IsFile(pair.first))
-        return true;
-    }
-    return false;
+    return std::ranges::any_of(allBackends, [](const auto &pair) { return pair.second->IsFile(pair.first); });
   }
 
   bool VirtualFileSystem::CreateFile(const Path &path, bool overwriteExisting) noexcept
@@ -103,7 +103,14 @@ namespace Krys::IO
     {
       for (auto &entry : backend->GetDirectoryEntries(relativePath, recursive))
       {
-        result.emplace_back(std::move(entry));
+        try
+        {
+          result.emplace_back(std::move(entry));
+        }
+        catch (...)
+        {
+          continue;
+        }
       }
     }
     return result;
@@ -115,7 +122,9 @@ namespace Krys::IO
     for (const auto &pair : allBackends)
     {
       if (pair.second->Exists(pair.first))
+      {
         return pair.second->GetReader(pair.first);
+      }
     }
     return nullptr;
   }
@@ -138,7 +147,14 @@ namespace Krys::IO
     {
       if (path.StartsWith(root))
       {
-        result.emplace_back(path.RelativePath(root), backend.get());
+        try
+        {
+          result.emplace_back(path.RelativePath(root), backend.get());
+        }
+        catch (...)
+        {
+          continue;
+        }
       }
     }
     return result;

@@ -20,14 +20,14 @@ namespace Krys::IO
   public:
     NO_COPY_MOVE(MemoryStreamReader)
 
-    explicit MemoryStreamReader(List<byte> &buffer) noexcept : _buffer(buffer)
+    explicit MemoryStreamReader(List<byte> &buffer) noexcept : _buffer(buffer), _isOpen(true)
     {
-      Open();
     }
 
     ~MemoryStreamReader() noexcept override
     {
-      Close();
+      _isOpen = false;
+      _position = 0;
     }
 
     /// @brief Checks if the stream is open.
@@ -134,14 +134,14 @@ namespace Krys::IO
   public:
     NO_COPY_MOVE(MemoryStreamWriter)
 
-    explicit MemoryStreamWriter(List<byte> &buffer) noexcept : _buffer(buffer)
+    explicit MemoryStreamWriter(List<byte> &buffer) noexcept : _buffer(buffer), _isOpen(true)
     {
-      Open();
     }
 
     ~MemoryStreamWriter() noexcept override
     {
-      Close();
+      _isOpen = false;
+      _position = 0;
     }
 
     /// @brief Checks if the stream is open.
@@ -172,16 +172,23 @@ namespace Krys::IO
         return false;
       }
 
-      // ensure the buffer can accommodate the new data
-      if (_position + count > _buffer.size())
+      try
       {
-        _buffer.resize(_position + count);
+        // ensure the buffer can accommodate the new data
+        if (_position + count > _buffer.size())
+        {
+          _buffer.resize(_position + count);
+        }
+
+        std::memcpy(_buffer.data() + _position, src, count);
+        _position += count;
+
+        return true;
       }
-
-      std::memcpy(_buffer.data() + _position, src, count);
-      _position += count;
-
-      return true;
+      catch (...)
+      {
+        return false;
+      }
     }
 
     /// @brief Seeks to a specific position in the stream.

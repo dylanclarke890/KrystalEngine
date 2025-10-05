@@ -13,21 +13,21 @@ namespace Krys::IO
     std::filesystem::path _path;
 
   public:
-    explicit Path(std::filesystem::path path) noexcept;
+    explicit Path(const std::filesystem::path &path);
 
     ~Path() noexcept = default;
 
-    Path(const Path &other) noexcept;
+    Path(const Path &other) = default;
 
     Path(Path &&other) noexcept;
 
-    Path &operator=(const Path &other);
+    Path &operator=(const Path &other) = default;
 
     Path &operator=(Path &&other) noexcept;
 
-    NO_DISCARD Path operator/(const Path &other) const noexcept;
+    NO_DISCARD Path operator/(const Path &other) const;
 
-    Path &operator/=(const Path &other) noexcept;
+    Path &operator/=(const Path &other);
 
     NO_DISCARD bool operator==(const Path &other) const noexcept;
 
@@ -35,27 +35,27 @@ namespace Krys::IO
 
     NO_DISCARD explicit operator bool() const noexcept;
 
-    NO_DISCARD Path ParentPath() const noexcept;
+    NO_DISCARD Path ParentPath() const;
 
     NO_DISCARD bool HasFilename() const noexcept;
 
-    NO_DISCARD Path Filename() const noexcept;
+    NO_DISCARD Path Filename() const;
 
     NO_DISCARD bool HasExtension() const noexcept;
 
-    NO_DISCARD Path Extension() const noexcept;
+    NO_DISCARD Path Extension() const;
 
-    NO_DISCARD bool StartsWith(const Path &other) const noexcept;
+    NO_DISCARD bool StartsWith(const Path &other) const;
 
     NO_DISCARD bool IsRelative() const noexcept;
 
-    NO_DISCARD bool IsRelativeTo(const Path &other) const noexcept;
+    NO_DISCARD bool IsRelativeTo(const Path &other) const;
 
-    NO_DISCARD Path RelativePath(const Path &base) const noexcept;
+    NO_DISCARD Path RelativePath(const Path &base) const;
 
-    NO_DISCARD Path LexicallyNormal() const noexcept;
+    NO_DISCARD Path LexicallyNormal() const;
 
-    NO_DISCARD string ToString() const noexcept;
+    NO_DISCARD string ToString() const;
 
     NO_DISCARD size_t Length() const noexcept;
   };
