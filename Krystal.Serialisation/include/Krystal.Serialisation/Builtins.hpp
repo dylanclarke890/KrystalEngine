@@ -161,7 +161,11 @@ namespace Krys::Serialisation
 
   /// @brief Macro to define a class version inside a class definition.
 #define KRYS_CLASS_VERSION(version)                                                                          \
-  static constexpr Krys::Serialisation::Version ClassVersion = Krys::Serialisation::Version(version)
+  static constexpr Krys::Serialisation::Version ClassVersion = Krys::Serialisation::Version(version);        \
+  NO_DISCARD constexpr Version GetVersion() const noexcept                                                   \
+  {                                                                                                          \
+    return ClassVersion;                                                                                     \
+  }
 
   /// @brief Macro to define a trait for a class version outside of a class definition. Must be outside
   /// of any namespace, and the type must be fully qualified.
@@ -174,6 +178,9 @@ namespace Krys::Serialisation
       static constexpr Version ClassVersion = Version(version);                                              \
     };                                                                                                       \
   }
+
+  template <typename T>
+  concept HasTraitVersion = requires { VersionTraits<RemoveCvRef<T>>::ClassVersion; };
 
 #pragma endregion
 }

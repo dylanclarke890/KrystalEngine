@@ -15,6 +15,8 @@ namespace Krys::Tests
     int A {0};
     float B {0};
 
+  private:
+    KRYS_ACCESS_FRIEND();
     KRYS_CLASS_VERSION(1);
 
     template <typename Archive>
@@ -35,10 +37,14 @@ namespace Krys::Tests
     int A {0};
     float B {0};
     string C {};
-
-    KRYS_CLASS_VERSION(2);
   };
 
+}
+
+KRYS_CLASS_VERSION_TRAIT(Krys::Tests::VersionedType2, 2);
+
+namespace Krys::Tests
+{
   template <typename Archive>
   void Save(Archive &archive, const VersionedType2 &value, const Version version) noexcept
   {

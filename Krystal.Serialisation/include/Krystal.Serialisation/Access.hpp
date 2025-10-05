@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Serialisation/Builtins.hpp"
 
 namespace Krys::Serialisation
@@ -10,6 +11,23 @@ namespace Krys::Serialisation
   class Access
   {
   public:
+    template <typename T>
+    static auto GetVersion(T &&value) noexcept -> Version
+    {
+      if constexpr (HasTraitVersion<T>)
+      {
+        return VersionTraits<RemoveCvRef<T>>::ClassVersion;
+      }
+      else if constexpr (requires(RemoveCvRef<T> &value) { value.GetVersion(); })
+      {
+        return value.GetVersion();
+      }
+      else
+      {
+        static_assert(DependentFalse<T>, "Missing version information for type.");
+      }
+    }
+
 #pragma region Non-Versioned Member
 
     template <typename Archive, typename T>

@@ -37,23 +37,6 @@
 /// NOTE: If T is versioned, the version is always passed as the last argument to the above methods.
 namespace Krys::Serialisation
 {
-  template <typename T>
-  NO_DISCARD Version GetVersion() noexcept
-  {
-    if constexpr (HasTraitVersion<T>)
-    {
-      return VersionTraits<T>::ClassVersion;
-    }
-    else if constexpr (HasStaticVersion<T>)
-    {
-      return T::ClassVersion;
-    }
-    else
-    {
-      static_assert(DependentFalse<T>, "Missing version info for this type.");
-    }
-  }
-
   /// @brief Hook called before serialisation or deserialisation of a value. No-op by default.
   template <typename Archive, typename T>
   void BeforeTransfer(Archive &, const T &) noexcept
@@ -117,25 +100,25 @@ namespace Krys::Serialisation
 
       if constexpr (HasVersionedTransferMember<Derived, DecayedT>)
       {
-        Version version = GetVersion<DecayedT>();
+        Version version = Access::GetVersion<T>(value);
         (*this)(version);
         Access::MemberTransfer(_self, const_cast<DecayedT &>(value), version);
       }
       else if constexpr (HasVersionedSaveMember<Derived, DecayedT>)
       {
-        Version version = GetVersion<DecayedT>();
+        Version version = Access::GetVersion<T>(value);
         (*this)(version);
         Access::MemberSave(_self, value, version);
       }
       else if constexpr (HasVersionedTransferNonMember<Derived, DecayedT>)
       {
-        Version version = GetVersion<DecayedT>();
+        Version version = Access::GetVersion<T>(value);
         (*this)(version);
         Access::NonMemberTransfer(_self, const_cast<DecayedT &>(value), version);
       }
       else if constexpr (HasVersionedSaveNonMember<Derived, DecayedT>)
       {
-        Version version = GetVersion<DecayedT>();
+        Version version = Access::GetVersion<T>(value);
         (*this)(version);
         Access::NonMemberSave(_self, value, version);
       }

@@ -36,15 +36,6 @@ namespace Krys::Serialisation
   template <typename T>
   concept ArchiveVersion = SameType<RemoveCvRef<T>, Version>;
 
-  template <typename T>
-  concept HasTraitVersion = requires { VersionTraits<RemoveCvRef<T>>::ClassVersion; };
-
-  template <typename T>
-  concept HasStaticVersion = requires { RemoveCvRef<T>::ClassVersion; };
-
-  template <typename T>
-  concept IsVersioned = HasTraitVersion<T> || HasStaticVersion<T>;
-
 #pragma endregion
 
 #pragma region Serialisation Method Concepts
