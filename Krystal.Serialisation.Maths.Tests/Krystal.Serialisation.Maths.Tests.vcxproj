@@ -131,6 +131,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="catch_main.cpp" />
+    <ClCompile Include="tests\Quaternion.cpp" />
     <ClCompile Include="tests\Vector.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -23,5 +23,8 @@
     <ClInclude Include="include\Krystal.Serialisation.Maths\Vector.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Serialisation.Maths\Quaternion.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
