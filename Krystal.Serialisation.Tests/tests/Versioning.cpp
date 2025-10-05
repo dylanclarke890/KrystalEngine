@@ -16,13 +16,19 @@ namespace Krys::Tests
     float B {0};
 
     KRYS_CLASS_VERSION(1);
-  };
 
-  template <typename Archive>
-  void Transfer(Archive &archive, VersionedType1 &value, const Version) noexcept
-  {
-    archive(value.A, value.B);
-  }
+    template <typename Archive>
+    void Load(Archive &archive, const Version) noexcept
+    {
+      archive(A, B);
+    }
+
+    template <typename Archive>
+    void Save(Archive &archive, const Version) const noexcept
+    {
+      archive(A, B);
+    }
+  };
 
   struct VersionedType2
   {
@@ -31,18 +37,29 @@ namespace Krys::Tests
     string C {};
 
     KRYS_CLASS_VERSION(2);
-
-    template <typename Archive>
-    void Transfer(Archive &archive, const Version version) noexcept
-    {
-      archive(A, B);
-
-      if (version >= 2)
-      {
-        archive(C);
-      }
-    }
   };
+
+  template <typename Archive>
+  void Save(Archive &archive, const VersionedType2 &value, const Version version) noexcept
+  {
+    archive(value.A, value.B);
+
+    if (version >= 2)
+    {
+      archive(value.C);
+    }
+  }
+
+  template <typename Archive>
+  void Load(Archive &archive, VersionedType2 &value, const Version version) noexcept
+  {
+    archive(value.A, value.B);
+
+    if (version >= 2)
+    {
+      archive(value.C);
+    }
+  }
 
   template <typename ArchiveReader, typename ArchiveWriter>
   void TestArchiveVersioning()
@@ -50,12 +67,6 @@ namespace Krys::Tests
     VersionedType1 input1 {.A = 42, .B = 3.14f};
     VersionedType2 output {};
     List<byte> data;
-
-    // static_assert(IsVersioned<VersionedType1>);
-    // static_assert(HasVersionedTransferMember<ArchiveReader, VersionedType1>);
-    // static_assert(HasVersionedTransferMember<ArchiveWriter, VersionedType1>);
-    // static_assert(HasVersionedTransferMember<ArchiveReader, VersionedType2>);
-    // static_assert(HasVersionedTransferMember<ArchiveWriter, VersionedType2>);
 
     {
       IO::MemoryStreamWriter stream(data);

@@ -4,6 +4,8 @@
 
 namespace Krys::Serialisation
 {
+#define KRYS_ACCESS_FRIEND() friend class Krys::Serialisation::Access
+
   /// @brief Allows archives to use private Transfer/Save/Load methods of types by being a friend.
   class Access
   {
@@ -62,14 +64,14 @@ namespace Krys::Serialisation
     }
 
     template <typename Archive, typename T>
-    static auto MemberSave(Archive &archive, const T &value, const Version version) noexcept
+    static auto MemberSave(Archive &archive, const T &value, Version version) noexcept
       -> decltype(value.Save(archive, version))
     {
       return value.Save(archive, version);
     }
 
     template <typename Archive, typename T>
-    static auto MemberLoad(Archive &archive, T &value, const Version version) noexcept
+    static auto MemberLoad(Archive &archive, T &value, Version version) noexcept
       -> decltype(value.Load(archive, version))
     {
       return value.Load(archive, version);
@@ -80,21 +82,21 @@ namespace Krys::Serialisation
 #pragma region Versioned Non-Member
 
     template <typename Archive, typename T>
-    static auto NonMemberTransfer(Archive &archive, T &value, const Version version) noexcept
+    static auto NonMemberTransfer(Archive &archive, T &value, Version version) noexcept
       -> decltype(Transfer(archive, value, version))
     {
       return Transfer(archive, value, version);
     }
 
     template <typename Archive, typename T>
-    static auto NonMemberSave(Archive &archive, const T &value, const Version version) noexcept
+    static auto NonMemberSave(Archive &archive, const T &value, Version version) noexcept
       -> decltype(Save(archive, value, version))
     {
       return Save(archive, value, version);
     }
 
     template <typename Archive, typename T>
-    static auto NonMemberLoad(Archive &archive, T &value, const Version version) noexcept
+    static auto NonMemberLoad(Archive &archive, T &value, Version version) noexcept
       -> decltype(Load(archive, value, version))
     {
       return Load(archive, value, version);

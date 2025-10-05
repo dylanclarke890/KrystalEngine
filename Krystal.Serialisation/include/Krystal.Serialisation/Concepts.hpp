@@ -47,7 +47,7 @@ namespace Krys::Serialisation
 
 #pragma endregion
 
-#pragma region Serialization Method Concepts
+#pragma region Serialisation Method Concepts
 
   template <typename Archive, typename T>
   concept HasVersionedTransferMember = requires(Archive &archive, RemoveCvRef<T> &value) {
@@ -55,15 +55,13 @@ namespace Krys::Serialisation
   };
 
   template <typename Archive, typename T>
-  concept HasVersionedSaveMember =
-    requires(Archive &archive, const RemoveCvRef<T> &value, const Version version) {
-      Access::MemberSave(archive, value, version);
-    };
+  concept HasVersionedSaveMember = requires(Archive &archive, const RemoveCvRef<T> &value) {
+    Access::MemberSave(archive, value, Version {0});
+  };
 
   template <typename Archive, typename T>
-  concept HasVersionedLoadMember = requires(Archive &archive, RemoveCvRef<T> &value, const Version version) {
-    Access::MemberLoad(archive, value, version);
-  };
+  concept HasVersionedLoadMember =
+    requires(Archive &archive, RemoveCvRef<T> &value) { Access::MemberLoad(archive, value, Version {0}); };
 
   template <typename Archive, typename T>
   concept HasVersionedTransferNonMember = requires(Archive &archive, RemoveCvRef<T> &value) {
@@ -71,16 +69,13 @@ namespace Krys::Serialisation
   };
 
   template <typename Archive, typename T>
-  concept HasVersionedSaveNonMember =
-    requires(Archive &archive, const RemoveCvRef<T> &value, const Version version) {
-      Access::NonMemberSave(archive, value, version);
-    };
+  concept HasVersionedSaveNonMember = requires(Archive &archive, const RemoveCvRef<T> &value) {
+    Access::NonMemberSave(archive, value, Version {0});
+  };
 
   template <typename Archive, typename T>
   concept HasVersionedLoadNonMember =
-    requires(Archive &archive, RemoveCvRef<T> &value, const Version version) {
-      Access::NonMemberLoad(archive, value, version);
-    };
+    requires(Archive &archive, RemoveCvRef<T> &value) { Access::NonMemberLoad(archive, value, Version {0}); };
 
   template <typename Archive, typename T>
   concept HasNonVersionedTransferMember =
