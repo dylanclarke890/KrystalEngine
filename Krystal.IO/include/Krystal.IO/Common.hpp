@@ -15,6 +15,15 @@ namespace Krys::IO
     CreateNew,
   };
 
+  enum class FileMode : uint8
+  {
+    Read = (1u << 0u),
+    Write = (1u << 1u),
+    ReadWrite = Read | Write,
+    Append = (1u << 2u),
+    Truncate = (1u << 3u)
+  };
+
   /// @brief Specifies the reference point used to obtain the new position in a stream.
   enum class SeekOrigin : uint8
   {

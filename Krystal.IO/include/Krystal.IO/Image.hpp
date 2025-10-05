@@ -12,7 +12,7 @@ namespace Krys::IO
   struct Image
   {
     /// @brief Image data.
-    List<byte> Data {};
+    List<byte> Data;
 
     /// @brief Width of image (in pixels).
     int Width {};
@@ -31,22 +31,22 @@ namespace Krys::IO
   struct CubeMapImage
   {
     /// @brief Right face image data.
-    List<byte> Right {};
+    List<byte> Right;
 
     /// @brief Left face image data.
-    List<byte> Left {};
+    List<byte> Left;
 
     /// @brief Top face image data.
-    List<byte> Top {};
+    List<byte> Top;
 
     /// @brief Bottom face image data.
-    List<byte> Bottom {};
+    List<byte> Bottom;
 
     /// @brief Front face image data.
-    List<byte> Front {};
+    List<byte> Front;
 
     /// @brief Back face image data.
-    List<byte> Back {};
+    List<byte> Back;
 
     /// @brief Width of cubemap faces (in pixels).
     int Width {};
