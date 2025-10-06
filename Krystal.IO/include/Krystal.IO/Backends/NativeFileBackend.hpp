@@ -13,6 +13,7 @@ namespace Krys::IO
 {
   class NativeFileBackend : public IFileBackend
   {
+  private:
     Path _root;
 
   public:
@@ -37,8 +38,8 @@ namespace Krys::IO
     NO_DISCARD List<VirtualDirectoryEntry>
       GetDirectoryEntries(const Path &directory, bool recursive = false) const noexcept override;
 
-    NO_DISCARD Unique<IStreamReader> GetReader(const Path &path) const override;
+    NO_DISCARD Unique<IStreamReader> GetReader(const Path &path, ReadFlags flags) const override;
 
-    NO_DISCARD Unique<IStreamWriter> GetWriter(const Path &path) const override;
+    NO_DISCARD Unique<IStreamWriter> GetWriter(const Path &path, WriteFlags flags) const override;
   };
 }

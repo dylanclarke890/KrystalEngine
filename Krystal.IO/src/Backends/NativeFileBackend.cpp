@@ -117,18 +117,22 @@ namespace Krys::IO
     return entries;
   }
 
-  Unique<IStreamReader> NativeFileBackend::GetReader(const Path &path) const
+  Unique<IStreamReader> NativeFileBackend::GetReader(const Path &path,
+                                                     ReadFlags flags = ReadFlags::None) const
   {
     if (Exists(path))
     {
-      return Unique<IStreamReader>(static_cast<IStreamReader *>(new NativeFileReader(_root / path)));
+      IStreamReader *reader = new NativeFileReader(_root / path, flags);
+      return Unique<IStreamReader>(reader);
     }
 
-    return nullptr; // Cannot create a reader for a non-existing or non-regular file
+    return nullptr;
   }
 
-  Unique<IStreamWriter> NativeFileBackend::GetWriter(const Path &path) const
+  Unique<IStreamWriter> NativeFileBackend::GetWriter(const Path &path,
+                                                     WriteFlags flags = WriteFlags::None) const
   {
-    return Unique<IStreamWriter>(static_cast<IStreamWriter *>(new NativeFileWriter(_root / path)));
+    IStreamWriter *writer = new NativeFileWriter(_root / path, flags);
+    return Unique<IStreamWriter>(writer);
   }
 }

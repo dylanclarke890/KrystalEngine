@@ -74,11 +74,11 @@ namespace Krys::IO
 
     /// @returns Gets a stream reader for the given path. If multiple backends match, the first one is used
     /// where the file exists. If no backend matches or the file doesn't exist, returns a null pointer.
-    NO_DISCARD Unique<IStreamReader> GetReader(const Path &path) const noexcept;
+    NO_DISCARD Unique<IStreamReader> GetReader(const Path &path, ReadFlags flags) const noexcept;
 
     /// @returns Gets a stream writer for the given path. If multiple backends match, the first one is used.
     /// If no backend matches or the file doesn't exist, returns a null pointer.
-    NO_DISCARD Unique<IStreamWriter> GetWriter(const Path &path) const noexcept;
+    NO_DISCARD Unique<IStreamWriter> GetWriter(const Path &path, WriteFlags flags) const noexcept;
 
     /// @brief Creates a file at the specified path.
     /// @param path The path where the file should be created.

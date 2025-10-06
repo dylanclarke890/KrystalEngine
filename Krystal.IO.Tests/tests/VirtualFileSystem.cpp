@@ -55,12 +55,12 @@ namespace Krys::Tests
     {
       const char *testContent = "test content";
       {
-        auto writer = vfs->GetWriter(Path("/test_file.txt"));
+        auto writer = vfs->GetWriter(Path("/test_file.txt"), WriteFlags::None);
         REQUIRE(writer->Write(reinterpret_cast<const byte *>(testContent), strlen(testContent)));
       }
 
       {
-        auto reader = vfs->GetReader(Path("/test_file.txt"));
+        auto reader = vfs->GetReader(Path("/test_file.txt"), ReadFlags::None);
         char buffer[64] = {0};
         REQUIRE((size_t)reader->Read(reinterpret_cast<byte *>(buffer), sizeof(buffer))
                 == strlen(testContent));

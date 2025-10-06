@@ -13,6 +13,9 @@ namespace Krys::IO
   /// @brief Interface for file backend operations.
   class IFileBackend
   {
+  protected:
+    IFileBackend() = default;
+
   public:
     NO_COPY_MOVE(IFileBackend)
 
@@ -40,12 +43,9 @@ namespace Krys::IO
       GetDirectoryEntries(const Path &directory, bool recursive = false) const noexcept = 0;
 
     /// @brief Gets a stream reader for the specified path.
-    NO_DISCARD virtual Unique<IStreamReader> GetReader(const Path &path) const = 0;
+    NO_DISCARD virtual Unique<IStreamReader> GetReader(const Path &path, ReadFlags flags) const = 0;
 
     /// @brief Gets a stream writer for the specified path.
-    NO_DISCARD virtual Unique<IStreamWriter> GetWriter(const Path &path) const = 0;
-
-  protected:
-    IFileBackend() = default;
+    NO_DISCARD virtual Unique<IStreamWriter> GetWriter(const Path &path, WriteFlags flags) const = 0;
   };
 }

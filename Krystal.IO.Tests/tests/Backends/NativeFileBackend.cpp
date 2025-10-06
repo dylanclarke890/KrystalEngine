@@ -56,7 +56,7 @@ namespace Krys::Tests
       auto path = Path("data.bin");
       REQUIRE(backend.CreateFile(path, true));
 
-      auto writer = backend.GetWriter(path);
+      auto writer = backend.GetWriter(path, WriteFlags::None);
       REQUIRE(writer != nullptr);
       REQUIRE(writer->IsOpen());
 
@@ -64,7 +64,7 @@ namespace Krys::Tests
       REQUIRE(writer->Write(reinterpret_cast<const Krys::byte *>(data), sizeof(data)));
       writer->Close();
 
-      auto reader = backend.GetReader(path);
+      auto reader = backend.GetReader(path, ReadFlags::None);
       REQUIRE(reader != nullptr);
       REQUIRE(reader->IsOpen());
 

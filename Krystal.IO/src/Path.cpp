@@ -1,5 +1,4 @@
 #include "Krystal.IO/Path.hpp"
-#include <filesystem>
 #include <utility>
 
 namespace Krys::IO

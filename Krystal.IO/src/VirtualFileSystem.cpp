@@ -70,25 +70,25 @@ namespace Krys::IO
     return std::ranges::any_of(allBackends, [](const auto &pair) { return pair.second->IsFile(pair.first); });
   }
 
-  Unique<IStreamReader> VirtualFileSystem::GetReader(const Path &path) const noexcept
+  Unique<IStreamReader> VirtualFileSystem::GetReader(const Path &path, ReadFlags flags) const noexcept
   {
     auto allBackends = GetBackends(path);
     for (const auto &pair : allBackends)
     {
       if (pair.second->Exists(pair.first))
       {
-        return pair.second->GetReader(pair.first);
+        return pair.second->GetReader(pair.first, flags);
       }
     }
     return nullptr;
   }
 
-  Unique<IStreamWriter> VirtualFileSystem::GetWriter(const Path &path) const noexcept
+  Unique<IStreamWriter> VirtualFileSystem::GetWriter(const Path &path, WriteFlags flags) const noexcept
   {
     auto backend = GetBackend(path);
     if (backend.has_value() && backend->second->Exists(backend->first))
     {
-      return backend->second->GetWriter(backend->first);
+      return backend->second->GetWriter(backend->first, flags);
     }
 
     return nullptr;
