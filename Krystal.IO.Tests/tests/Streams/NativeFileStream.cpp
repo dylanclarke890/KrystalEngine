@@ -102,7 +102,7 @@ namespace Krys::Tests
 
     SECTION("Constructor and basic operations")
     {
-      NativeFileWriter writer(testFile);
+      NativeFileWriter writer(testFile, WriteFlags::Create | WriteFlags::OpenAtEnd);
 
       REQUIRE(writer.IsOpen()); // Should open in constructor
       REQUIRE(writer.Size() == 0);

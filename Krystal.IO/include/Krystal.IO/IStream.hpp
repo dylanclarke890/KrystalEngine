@@ -7,6 +7,22 @@
 
 namespace Krys::IO
 {
+  enum class ReadFlags : uint8
+  {
+    None = 0,
+    OpenAtEnd = 1 << 0 // Open the file and move the read position to the end
+  };
+  ENUM_BITWISE_OPERATORS(ReadFlags)
+
+  enum class WriteFlags : uint8
+  {
+    None = 0,
+    Create = 1 << 0,   // Create the file if it does not exist
+    Truncate = 1 << 1, // Truncate the file to zero length if it already exists
+    OpenAtEnd = 1 << 2 // Open the file and move the write position to the end
+  };
+  ENUM_BITWISE_OPERATORS(WriteFlags)
+
   /// @brief Interface for reading from a stream.
   class IStreamReader
   {
@@ -38,7 +54,7 @@ namespace Krys::IO
     NO_DISCARD virtual bool Peek(byte &next) noexcept = 0;
 
     /// @brief Gets the total size of the stream in bytes, or 0 if the size is unknown.
-    NO_DISCARD virtual uint64 Size() noexcept = 0;
+    NO_DISCARD virtual uint64 Size() const noexcept = 0;
 
     /// @brief Gets the current position in the stream.
     NO_DISCARD virtual uint64 Position() noexcept = 0;
@@ -75,7 +91,7 @@ namespace Krys::IO
     virtual bool Seek(int64 offset, SeekOrigin origin = SeekOrigin::Current) noexcept = 0;
 
     /// @brief Gets the size of the stream in bytes.
-    NO_DISCARD virtual uint64 Size() noexcept = 0;
+    NO_DISCARD virtual uint64 Size() const noexcept = 0;
 
     /// @brief Gets the current position in the stream.
     NO_DISCARD virtual uint64 Position() noexcept = 0;

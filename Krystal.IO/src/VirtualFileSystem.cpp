@@ -10,34 +10,32 @@ namespace Krys::IO
       return nullptr;
     }
 
+    constexpr auto sortFn = [](const FileBackend &first, const FileBackend &second)
+    {
+      // shortest prefix first (longest would be faster but exact matches may be missed
+      // that way)
+      if (first.Prefix.Length() != second.Prefix.Length())
+      {
+        return first.Prefix.Length() < second.Prefix.Length();
+      }
+
+      // then by lexicographical order
+      if (first.Prefix != second.Prefix)
+      {
+        return first.Prefix.ToString() < second.Prefix.ToString();
+      }
+      return first.InsertionOrder > second.InsertionOrder; // later entries take precedence
+    };
+
     try
     {
-      std::ranges::sort(_mounts,
-                        [](const FileBackend &first, const FileBackend &second)
-                        {
-                          // shortest prefix first (longest would be faster but exact matches may be missed
-                          // that way)
-                          if (first.Prefix.Length() != second.Prefix.Length())
-                          {
-                            return first.Prefix.Length() < second.Prefix.Length();
-                          }
-
-                          // then by lexicographical order
-                          if (first.Prefix != second.Prefix)
-                          {
-                            return first.Prefix.ToString() < second.Prefix.ToString();
-                          }
-                          return first.InsertionOrder
-                                 > second.InsertionOrder; // later entries take precedence
-                        });
+      std::ranges::sort(_mounts, sortFn);
 
       List<Pair<Path, Unique<IFileBackend>>> backends {};
-
       backends.reserve(_mounts.size());
-
       for (const auto &entry : _mounts)
       {
-        backends.emplace_back(entry.Prefix, entry.Backend);
+        backends.emplace_back(entry.Prefix, Unique<IFileBackend>(entry.Backend));
       }
 
       _mounts = {};        // Clear mounts after building to avoid dangling references.
@@ -70,6 +68,30 @@ namespace Krys::IO
   {
     auto allBackends = GetBackends(path);
     return std::ranges::any_of(allBackends, [](const auto &pair) { return pair.second->IsFile(pair.first); });
+  }
+
+  Unique<IStreamReader> VirtualFileSystem::GetReader(const Path &path) const noexcept
+  {
+    auto allBackends = GetBackends(path);
+    for (const auto &pair : allBackends)
+    {
+      if (pair.second->Exists(pair.first))
+      {
+        return pair.second->GetReader(pair.first);
+      }
+    }
+    return nullptr;
+  }
+
+  Unique<IStreamWriter> VirtualFileSystem::GetWriter(const Path &path) const noexcept
+  {
+    auto backend = GetBackend(path);
+    if (backend.has_value() && backend->second->Exists(backend->first))
+    {
+      return backend->second->GetWriter(backend->first);
+    }
+
+    return nullptr;
   }
 
   bool VirtualFileSystem::CreateFile(const Path &path, bool overwriteExisting) noexcept
@@ -114,30 +136,6 @@ namespace Krys::IO
       }
     }
     return result;
-  }
-
-  Unique<IStreamReader> VirtualFileSystem::GetReader(const Path &path) const noexcept
-  {
-    auto allBackends = GetBackends(path);
-    for (const auto &pair : allBackends)
-    {
-      if (pair.second->Exists(pair.first))
-      {
-        return pair.second->GetReader(pair.first);
-      }
-    }
-    return nullptr;
-  }
-
-  Unique<IStreamWriter> VirtualFileSystem::GetWriter(const Path &path) const noexcept
-  {
-    auto backend = GetBackend(path);
-    if (backend.has_value() && backend->second->Exists(backend->first))
-    {
-      return backend->second->GetWriter(backend->first);
-    }
-
-    return nullptr;
   }
 
   List<Pair<Path, Ptr<IFileBackend>>> VirtualFileSystem::GetBackends(const Path &path) const noexcept

@@ -21,33 +21,25 @@ namespace Krys::IO
     struct FileBackend
     {
       Path Prefix;
-      IFileBackend *Backend = nullptr;
-      size_t InsertionOrder = 0;
+      IFileBackend *Backend;
+      size_t InsertionOrder {0u};
     };
 
     List<FileBackend> _mounts;
-    size_t _insertionOrder = 0;
+    size_t _insertionOrder {0u};
 
   public:
     NO_COPY_MOVE(VirtualFileSystemBuilder)
 
     VirtualFileSystemBuilder() noexcept = default;
+
     ~VirtualFileSystemBuilder() noexcept = default;
 
     /// @brief Adds a mount point to the virtual file system.
     template <DerivedFrom<IFileBackend> T, typename... Args>
-    VirtualFileSystemBuilder &Mount(const Path &path, Args &&...args)
+    VirtualFileSystemBuilder &Mount(const Path &alias, Args &&...args)
     {
-      auto backend = CreateUnique<T>(std::forward<Args>(args)...);
-      _mounts.emplace_back(FileBackend {path, backend.release(), _insertionOrder++});
-      return *this;
-    }
-
-    /// @brief Adds a mount point to the virtual file system.
-    template <DerivedFrom<IFileBackend> T>
-    VirtualFileSystemBuilder &Mount(const Path &path, T *backend)
-    {
-      _mounts.emplace_back(FileBackend {path, backend});
+      _mounts.emplace_back(FileBackend {alias, new T(std::forward<Args>(args)...), _insertionOrder++});
       return *this;
     }
 
@@ -71,14 +63,22 @@ namespace Krys::IO
 
     ~VirtualFileSystem() noexcept = default;
 
-    /// @returns True if the path exists in any of the configured backends.
+    /// @brief Check if the path exists in any of the configured backends.
     NO_DISCARD bool Exists(const Path &path) const noexcept;
 
-    /// @returns True if the path exists in any of the configured backends and is a directory.
+    /// @brief Check if the path exists in any of the configured backends and is a directory.
     NO_DISCARD bool IsDirectory(const Path &path) const noexcept;
 
-    /// @returns True if the path exists in any of the configured backends and is a file.
+    /// @brief Check if the path exists in any of the configured backends and is a file.
     NO_DISCARD bool IsFile(const Path &path) const noexcept;
+
+    /// @returns Gets a stream reader for the given path. If multiple backends match, the first one is used
+    /// where the file exists. If no backend matches or the file doesn't exist, returns a null pointer.
+    NO_DISCARD Unique<IStreamReader> GetReader(const Path &path) const noexcept;
+
+    /// @returns Gets a stream writer for the given path. If multiple backends match, the first one is used.
+    /// If no backend matches or the file doesn't exist, returns a null pointer.
+    NO_DISCARD Unique<IStreamWriter> GetWriter(const Path &path) const noexcept;
 
     /// @brief Creates a file at the specified path.
     /// @param path The path where the file should be created.
@@ -88,6 +88,7 @@ namespace Krys::IO
 
     /// @brief Deletes a file at the specified path.
     /// @param path The path of the file to delete.
+    /// @returns True if the file was successfully deleted, false otherwise.
     bool DeleteFile(const Path &path) noexcept;
 
     /// @brief Gets a list of files from all backends that match the specified path.
@@ -95,14 +96,6 @@ namespace Krys::IO
     /// @param recursive If true, searches recursively in subdirectories.
     NO_DISCARD List<VirtualDirectoryEntry> GetDirectoryEntries(const Path &directory,
                                                                bool recursive = false) const noexcept;
-
-    /// @returns Gets a stream reader for the given path. If multiple backends match, the first one is used
-    /// where the file exists. If no backend matches or the file doesn't exist, returns a null pointer.
-    NO_DISCARD Unique<IStreamReader> GetReader(const Path &path) const noexcept;
-
-    /// @returns Gets a stream writer for the given path. If multiple backends match, the first one is used.
-    /// If no backend matches or the file doesn't exist, returns a null pointer.
-    NO_DISCARD Unique<IStreamWriter> GetWriter(const Path &path) const noexcept;
 
   private:
     friend class VirtualFileSystemBuilder;

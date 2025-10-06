@@ -11,16 +11,21 @@
 
 namespace Krys::IO
 {
+  /// @brief A stream that reads from a memory buffer.
   class MemoryStreamReader : public IStreamReader
   {
     List<byte> &_buffer;
     uint64 _position = 0;
     bool _isOpen = false;
+    ReadFlags _flags;
 
   public:
+    static constexpr ReadFlags DefaultReadFlags = ReadFlags::None;
+
     NO_COPY_MOVE(MemoryStreamReader)
 
-    explicit MemoryStreamReader(List<byte> &buffer) noexcept : _buffer(buffer)
+    explicit MemoryStreamReader(List<byte> &buffer, ReadFlags flags = DefaultReadFlags) noexcept
+        : _buffer(buffer), _flags(flags)
     {
       MemoryStreamReader::Open();
     }
@@ -54,13 +59,13 @@ namespace Krys::IO
     /// @return The number of bytes actually read from the stream.
     uint64 Read(byte *dst, uint64 count) noexcept override
     {
-      if (!_isOpen || count == 0 || EndOfStream())
+      if (dst == nullptr || count == 0 || !_isOpen || EndOfStream())
       {
         return 0;
       }
 
-      const auto remainingBytes = _buffer.size() - _position;
-      const auto &bytesRead = std::min(count, remainingBytes);
+      const uint64 remainingBytes = static_cast<uint64>(_buffer.size()) - _position;
+      const uint64 bytesRead = std::min(count, remainingBytes);
 
       std::memcpy(dst, &_buffer[_position], bytesRead);
       _position += bytesRead;
@@ -95,6 +100,7 @@ namespace Krys::IO
       return true;
     }
 
+    /// @brief Peeks at the next byte in the stream without advancing the position.
     NO_DISCARD bool Peek(byte &next) noexcept override
     {
       if (!_isOpen || _position >= _buffer.size())
@@ -106,9 +112,9 @@ namespace Krys::IO
     }
 
     /// @brief Gets the total size of the stream in bytes, or 0 if the size is unknown.
-    NO_DISCARD uint64 Size() noexcept override
+    NO_DISCARD uint64 Size() const noexcept override
     {
-      return _buffer.size();
+      return static_cast<uint64>(_buffer.size());
     }
 
     /// @brief Gets the current position in the stream.
@@ -121,27 +127,32 @@ namespace Krys::IO
     /// @return True if the end of the stream has been reached, false otherwise.
     NO_DISCARD bool EndOfStream() const noexcept override
     {
-      return _position >= _buffer.size();
+      return _position >= static_cast<uint64>(_buffer.size());
     }
   };
 
+  /// @brief A stream that writes to a memory buffer.
   class MemoryStreamWriter : public IStreamWriter
   {
     List<byte> &_buffer;
     uint64 _position = 0;
     bool _isOpen = false;
+    WriteFlags _flags;
 
   public:
+    static constexpr WriteFlags DefaultWriteFlags = WriteFlags::None;
+
     NO_COPY_MOVE(MemoryStreamWriter)
 
-    explicit MemoryStreamWriter(List<byte> &buffer) noexcept : _buffer(buffer), _isOpen(true)
+    explicit MemoryStreamWriter(List<byte> &buffer, WriteFlags flags = DefaultWriteFlags) noexcept
+        : _buffer(buffer), _flags(flags)
     {
+      MemoryStreamWriter::Open();
     }
 
     ~MemoryStreamWriter() noexcept override
     {
-      _isOpen = false;
-      _position = 0;
+      MemoryStreamWriter::Close();
     }
 
     /// @brief Checks if the stream is open.
@@ -153,7 +164,23 @@ namespace Krys::IO
     /// @brief Opens the stream. If the stream is already open, this function does nothing.
     bool Open() noexcept override
     {
+      if (_isOpen)
+      {
+        return true;
+      }
+
       _isOpen = true;
+
+      if ((_flags & WriteFlags::Truncate) == WriteFlags::Truncate)
+      {
+        _buffer.clear();
+      }
+
+      if ((_flags & WriteFlags::OpenAtEnd) == WriteFlags::OpenAtEnd)
+      {
+        _position = static_cast<uint64>(_buffer.size());
+      }
+
       return _isOpen;
     }
 
@@ -175,7 +202,7 @@ namespace Krys::IO
       try
       {
         // ensure the buffer can accommodate the new data
-        if (_position + count > _buffer.size())
+        if (_position + count > static_cast<uint64>(_buffer.size()))
         {
           _buffer.resize(_position + count);
         }
@@ -219,7 +246,7 @@ namespace Krys::IO
     }
 
     /// @brief Gets the total size of the stream in bytes, or 0 if the size is unknown.
-    NO_DISCARD uint64 Size() noexcept override
+    NO_DISCARD uint64 Size() const noexcept override
     {
       return static_cast<uint64>(_buffer.size());
     }

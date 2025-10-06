@@ -7,12 +7,14 @@ namespace Krys::IO
 {
 #pragma region Reader
 
-  NativeFileReader::NativeFileReader(const Path &path) : _path(path)
+  NativeFileReader::NativeFileReader(const Path &path, ReadFlags flags)
+      : _path(path), _size(0u), _flags(flags)
   {
     NativeFileReader::Open();
   }
 
-  NativeFileReader::NativeFileReader(Path &&path) : _path(std::move(path))
+  NativeFileReader::NativeFileReader(Path &&path, ReadFlags flags)
+      : _path(std::move(path)), _size(0u), _flags(flags)
   {
     NativeFileReader::Open();
   }
@@ -29,6 +31,11 @@ namespace Krys::IO
 
   bool NativeFileReader::Open() noexcept
   {
+    if (NativeFileReader::IsOpen())
+    {
+      return true;
+    }
+
     try
     {
       const auto path = _path.ToString();
@@ -38,6 +45,19 @@ namespace Krys::IO
       }
 
       _stream = std::ifstream(_path.ToString(), std::ios::in | std::ios::binary);
+
+      _stream.seekg(std::streamoff(0), std::ios_base::end);
+      const std::streampos end = _stream.tellg();
+
+      if (end != std::streampos(-1))
+      {
+        _size = static_cast<uint64>(end);
+      }
+
+      if ((_flags & ReadFlags::OpenAtEnd) != ReadFlags::OpenAtEnd)
+      {
+        _stream.seekg(std::streamoff(0), std::ios_base::beg);
+      }
     }
     catch (...)
     {
@@ -49,7 +69,7 @@ namespace Krys::IO
 
   void NativeFileReader::Close() noexcept
   {
-    if (_stream.is_open())
+    if (NativeFileReader::IsOpen())
     {
       try
       {
@@ -64,7 +84,7 @@ namespace Krys::IO
 
   uint64 NativeFileReader::Read(byte *dest, uint64 count) noexcept
   {
-    if (!IsOpen() || count == 0 || EndOfStream())
+    if (!NativeFileReader::IsOpen() || count == 0 || NativeFileReader::EndOfStream())
     {
       return 0;
     }
@@ -84,25 +104,25 @@ namespace Krys::IO
 
   bool NativeFileReader::Seek(int64 offset, SeekOrigin origin) noexcept
   {
-    if (!IsOpen())
+    if (!NativeFileReader::IsOpen())
     {
       return false;
     }
 
-    const std::ios_base::seekdir dir = [&]()
+    const std::ios_base::seekdir seekdir = [&]()
     {
       switch (origin)
       {
+        default:
         case SeekOrigin::Begin:   return std::ios_base::beg;
         case SeekOrigin::Current: return std::ios_base::cur;
         case SeekOrigin::End:     return std::ios_base::end;
       }
-      return std::ios_base::beg; // Default case, should not happen
     }();
 
     try
     {
-      _stream.seekg(offset, dir);
+      _stream.seekg(offset, seekdir);
     }
     catch (...)
     {
@@ -114,7 +134,7 @@ namespace Krys::IO
 
   bool NativeFileReader::Peek(byte &next) noexcept
   {
-    if (!IsOpen() || EndOfStream())
+    if (!NativeFileReader::IsOpen() || NativeFileReader::EndOfStream())
     {
       return false;
     }
@@ -134,36 +154,37 @@ namespace Krys::IO
     }
   }
 
-  uint64 NativeFileReader::Size() noexcept
+  uint64 NativeFileReader::Size() const noexcept
   {
-    if (!IsOpen())
+    if (!NativeFileReader::IsOpen())
     {
-      return 0;
+      return 0u;
     }
 
-    std::streampos size {0u};
+    return _size;
+  }
+
+  uint64 NativeFileReader::Position() noexcept
+  {
+    if (!NativeFileReader::IsOpen())
+    {
+      return 0u;
+    }
+
     try
     {
-      const std::streampos currentPos = _stream.tellg();
-      _stream.seekg(0, std::ios_base::end); // Move to the end to get size
-      size = _stream.tellg();               // Get the size
-      _stream.seekg(currentPos);            // Restore the original position
+      const std::streampos position = _stream.tellg();
+      if (position == std::streampos(-1))
+      {
+        return 0u;
+      }
+
+      return static_cast<uint64>(position);
     }
     catch (...)
     {
       return 0u;
     }
-
-    return static_cast<uint64>(size);
-  }
-
-  uint64 NativeFileReader::Position() noexcept
-  {
-    if (!IsOpen())
-    {
-      return 0;
-    }
-    return _stream.tellg();
   }
 
   bool NativeFileReader::EndOfStream() const noexcept
@@ -175,18 +196,22 @@ namespace Krys::IO
 
 #pragma region Writer
 
-  NativeFileWriter::NativeFileWriter(const Path &path) : _path(path)
+  // NOLINTNEXTLINE(modernize-pass-by-value)
+  NativeFileWriter::NativeFileWriter(const Path &path, WriteFlags flags)
+      : _path(path), _size(0u), _flags(flags)
   {
     NativeFileWriter::Open();
   }
 
-  NativeFileWriter::NativeFileWriter(Path &&path) : _path(std::move(path))
+  NativeFileWriter::NativeFileWriter(Path &&path, WriteFlags flags)
+      : _path(std::move(path)), _size(0u), _flags(flags)
   {
     NativeFileWriter::Open();
   }
 
   NativeFileWriter::~NativeFileWriter() noexcept
   {
+    NativeFileWriter::Flush();
     NativeFileWriter::Close();
   }
 
@@ -197,14 +222,49 @@ namespace Krys::IO
 
   bool NativeFileWriter::Open() noexcept
   {
-    try
+    if (NativeFileWriter::IsOpen())
     {
-      const auto path = _path.ToString();
-      if (std::filesystem::exists(path) && !std::filesystem::is_regular_file(path))
+      return true;
+    }
+
+    std::error_code ioError;
+
+    auto path = _path.ToString();
+    auto status = std::filesystem::status(path, ioError);
+
+    if (status.type() != std::filesystem::file_type::regular)
+    {
+      if (status.type() != std::filesystem::file_type::not_found)
       {
         return false; // Cannot open a writer for a non-regular file
       }
-      _stream = std::ofstream(_path.ToString(), std::ios::out | std::ios::binary);
+
+      if ((_flags & WriteFlags::Create) != WriteFlags::Create)
+      {
+        return false; // File does not exist and Create flag is not set
+      }
+    }
+
+    int32 openMode = std::ios::out | std::ios::binary;
+
+    if ((_flags & WriteFlags::Truncate) == WriteFlags::Truncate)
+    {
+      openMode |= std::ios::trunc;
+    }
+
+    if ((_flags & WriteFlags::OpenAtEnd) == WriteFlags::OpenAtEnd)
+    {
+      openMode |= std::ios::ate;
+    }
+
+    try
+    {
+      _stream = std::ofstream(_path.ToString(), openMode);
+
+      const std::streampos currentPosition = _stream.tellp();
+      _stream.seekp(0, std::ios_base::end); // Move to the end to get size
+      _size = _stream.tellp();
+      _stream.seekp(currentPosition); // Restore the original position
     }
     catch (...)
     {
@@ -222,16 +282,16 @@ namespace Krys::IO
       {
         _stream.close();
       }
-      // NOLINTNEXTLINE(bugprone-empty-catch)
       catch (...)
       {
+        return;
       }
     }
   }
 
   bool NativeFileWriter::Write(const byte *src, uint64 size) noexcept
   {
-    if (!IsOpen())
+    if (!NativeFileWriter::IsOpen())
     {
       return false;
     }
@@ -240,6 +300,7 @@ namespace Krys::IO
     {
       // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
       _stream.write(reinterpret_cast<const char *>(src), (int64)size);
+      _size = std::max(_size, static_cast<uint64>(_stream.tellp()));
     }
     catch (...)
     {
@@ -279,32 +340,14 @@ namespace Krys::IO
     return _stream.good();
   }
 
-  uint64 NativeFileWriter::Size() noexcept
+  uint64 NativeFileWriter::Size() const noexcept
   {
-    if (!IsOpen())
-    {
-      return 0u;
-    }
-
-    uint64 size {0u};
-    try
-    {
-      const std::streampos currentPos = _stream.tellp();
-      _stream.seekp(0, std::ios_base::end); // Move to the end to get size
-      size = _stream.tellp();
-      _stream.seekp(currentPos); // Restore the original position
-    }
-    catch (...)
-    {
-      return 0u;
-    }
-
-    return size;
+    return _size;
   }
 
   uint64 NativeFileWriter::Position() noexcept
   {
-    if (!IsOpen())
+    if (!NativeFileWriter::IsOpen())
     {
       return 0;
     }
@@ -313,7 +356,7 @@ namespace Krys::IO
 
   void NativeFileWriter::Flush() noexcept
   {
-    if (IsOpen())
+    if (NativeFileWriter::IsOpen())
     {
       try
       {

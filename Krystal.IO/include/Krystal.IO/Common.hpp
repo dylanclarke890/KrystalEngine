@@ -5,25 +5,6 @@
 
 namespace Krys::IO
 {
-  enum class WriteMode : uint8
-  {
-    /// @brief Append to the end of the file, creating it if it does not exist.
-    Append,
-    /// @brief Overwrite the file, creating it if it does not exist.
-    Overwrite,
-    /// @brief Create a new file, fail if it already exists.
-    CreateNew,
-  };
-
-  enum class FileMode : uint8
-  {
-    Read = (1u << 0u),
-    Write = (1u << 1u),
-    ReadWrite = Read | Write,
-    Append = (1u << 2u),
-    Truncate = (1u << 3u)
-  };
-
   /// @brief Specifies the reference point used to obtain the new position in a stream.
   enum class SeekOrigin : uint8
   {
