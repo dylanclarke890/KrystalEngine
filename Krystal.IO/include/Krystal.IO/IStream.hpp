@@ -82,9 +82,5 @@ namespace Krys::IO
 
     /// @brief Flushes any buffered data to the underlying storage, if applicable.
     virtual void Flush() noexcept = 0;
-
-    /// @brief Checks if the end of the stream has been reached.
-    /// @return True if the end of the stream has been reached, false otherwise.
-    NO_DISCARD virtual bool EndOfStream() const noexcept = 0;
   };
 }

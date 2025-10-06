@@ -55,9 +55,9 @@ namespace Krys::IO
       {
         _stream.close();
       }
-      // NOLINTNEXTLINE(bugprone-empty-catch)
       catch (...)
       {
+        return;
       }
     }
   }
@@ -72,7 +72,7 @@ namespace Krys::IO
     try
     {
       // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
-      _stream.read(reinterpret_cast<char *>(dest), (int64)count);
+      _stream.read(reinterpret_cast<char *>(dest), static_cast<std::streamsize>(count));
     }
     catch (...)
     {
@@ -141,7 +141,7 @@ namespace Krys::IO
       return 0;
     }
 
-    std::streampos size;
+    std::streampos size {0u};
     try
     {
       const std::streampos currentPos = _stream.tellg();
@@ -151,10 +151,10 @@ namespace Krys::IO
     }
     catch (...)
     {
-      return 0;
+      return 0u;
     }
 
-    return size;
+    return static_cast<uint64>(size);
   }
 
   uint64 NativeFileReader::Position() noexcept
@@ -283,10 +283,10 @@ namespace Krys::IO
   {
     if (!IsOpen())
     {
-      return 0;
+      return 0u;
     }
 
-    uint64 size {};
+    uint64 size {0u};
     try
     {
       const std::streampos currentPos = _stream.tellp();
@@ -296,7 +296,7 @@ namespace Krys::IO
     }
     catch (...)
     {
-      return 0;
+      return 0u;
     }
 
     return size;
@@ -319,16 +319,11 @@ namespace Krys::IO
       {
         _stream.flush();
       }
-      // NOLINTNEXTLINE(bugprone-empty-catch)
       catch (...)
       {
+        return;
       }
     }
-  }
-
-  bool NativeFileWriter::EndOfStream() const noexcept
-  {
-    return _stream.eof();
   }
 
 #pragma endregion

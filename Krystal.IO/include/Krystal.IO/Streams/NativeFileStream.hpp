@@ -40,8 +40,6 @@ namespace Krys::IO
 
     NO_DISCARD uint64 Position() noexcept override;
 
-    /// @brief Checks if the end of the stream has been reached.
-    /// @return True if the end of the stream has been reached, false otherwise.
     NO_DISCARD bool EndOfStream() const noexcept override;
   };
 
@@ -74,9 +72,5 @@ namespace Krys::IO
     NO_DISCARD uint64 Position() noexcept override;
 
     void Flush() noexcept override;
-
-    /// @brief Checks if the end of the stream has been reached.
-    /// @return True if the end of the stream has been reached, false otherwise.
-    NO_DISCARD bool EndOfStream() const noexcept override;
   };
 }

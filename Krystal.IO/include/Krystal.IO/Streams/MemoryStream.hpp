@@ -20,14 +20,14 @@ namespace Krys::IO
   public:
     NO_COPY_MOVE(MemoryStreamReader)
 
-    explicit MemoryStreamReader(List<byte> &buffer) noexcept : _buffer(buffer), _isOpen(true)
+    explicit MemoryStreamReader(List<byte> &buffer) noexcept : _buffer(buffer)
     {
+      MemoryStreamReader::Open();
     }
 
     ~MemoryStreamReader() noexcept override
     {
-      _isOpen = false;
-      _position = 0;
+      MemoryStreamReader::Close();
     }
 
     /// @brief Checks if the stream is open.
@@ -62,7 +62,7 @@ namespace Krys::IO
       const auto remainingBytes = _buffer.size() - _position;
       const auto &bytesRead = std::min(count, remainingBytes);
 
-      std::memcpy(dst, _buffer.data() + _position, bytesRead);
+      std::memcpy(dst, &_buffer[_position], bytesRead);
       _position += bytesRead;
 
       return bytesRead;
@@ -180,7 +180,7 @@ namespace Krys::IO
           _buffer.resize(_position + count);
         }
 
-        std::memcpy(_buffer.data() + _position, src, count);
+        std::memcpy(&_buffer[_position], src, count);
         _position += count;
 
         return true;
@@ -214,14 +214,14 @@ namespace Krys::IO
         return false;
       }
 
-      _position = newPosition;
+      _position = static_cast<uint64>(newPosition);
       return true;
     }
 
     /// @brief Gets the total size of the stream in bytes, or 0 if the size is unknown.
     NO_DISCARD uint64 Size() noexcept override
     {
-      return _buffer.size();
+      return static_cast<uint64>(_buffer.size());
     }
 
     /// @brief Gets the current position in the stream.
@@ -233,13 +233,6 @@ namespace Krys::IO
     void Flush() noexcept override
     {
       // No-op for memory stream
-    }
-
-    /// @brief Checks if the end of the stream has been reached.
-    /// @return True if the end of the stream has been reached, false otherwise.
-    NO_DISCARD bool EndOfStream() const noexcept override
-    {
-      return _position >= _buffer.size();
     }
   };
 }
