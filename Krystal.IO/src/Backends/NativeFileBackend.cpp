@@ -76,8 +76,6 @@ namespace Krys::IO
   List<VirtualDirectoryEntry> NativeFileBackend::GetDirectoryEntries(const Path &directory,
                                                                      bool recursive) const noexcept
   {
-    List<VirtualDirectoryEntry> entries;
-
     try
     {
       const std::filesystem::path fullPath = (_root / directory).ToString();
@@ -86,49 +84,11 @@ namespace Krys::IO
         return {};
       }
 
-      if (!recursive)
-      {
-        GetDirectoryEntries(fullPath, entries);
-      }
-      else
-      {
-        GetDirectoryEntriesRecursive(fullPath, entries);
-      }
+      return recursive ? GetDirectoryEntriesRecursive(fullPath) : GetDirectoryEntries(fullPath);
     }
     catch (...)
     {
       return {};
-    }
-
-    return entries;
-  }
-
-  void NativeFileBackend::GetDirectoryEntries(const std::filesystem::path &fullPath,
-                                              List<VirtualDirectoryEntry> &entries) const
-  {
-    for (const auto &entry : std::filesystem::directory_iterator(fullPath))
-    {
-      if (!entry.is_regular_file() && !entry.is_directory())
-      {
-        continue;
-      }
-
-      const uintmax_t fileSize = entry.is_regular_file() ? entry.file_size() : 0;
-      entries.emplace_back(Path(entry.path()).RelativePath(_root), fileSize, entry.is_directory());
-    }
-  }
-
-  void NativeFileBackend::GetDirectoryEntriesRecursive(const std::filesystem::path &fullPath,
-                                                       List<VirtualDirectoryEntry> &entries) const
-  {
-    for (const auto &entry : std::filesystem::recursive_directory_iterator(fullPath))
-    {
-      if (!entry.is_regular_file())
-      {
-        continue;
-      }
-
-      entries.emplace_back(Path(entry.path()).RelativePath(_root), entry.file_size(), false);
     }
   }
 
@@ -147,5 +107,38 @@ namespace Krys::IO
   {
     IStreamWriter *writer = new NativeFileWriter(_root / path, flags);
     return Unique<IStreamWriter>(writer);
+  }
+
+  List<VirtualDirectoryEntry>
+    NativeFileBackend::GetDirectoryEntries(const std::filesystem::path &fullPath) const
+  {
+    List<VirtualDirectoryEntry> entries;
+    for (const auto &entry : std::filesystem::directory_iterator(fullPath))
+    {
+      if (!entry.is_regular_file() && !entry.is_directory())
+      {
+        continue;
+      }
+
+      const uintmax_t fileSize = entry.is_regular_file() ? entry.file_size() : 0;
+      entries.emplace_back(Path(entry.path()).RelativePath(_root), fileSize, entry.is_directory());
+    }
+    return entries;
+  }
+
+  List<VirtualDirectoryEntry>
+    NativeFileBackend::GetDirectoryEntriesRecursive(const std::filesystem::path &fullPath) const
+  {
+    List<VirtualDirectoryEntry> entries;
+    for (const auto &entry : std::filesystem::recursive_directory_iterator(fullPath))
+    {
+      if (!entry.is_regular_file())
+      {
+        continue;
+      }
+
+      entries.emplace_back(Path(entry.path()).RelativePath(_root), entry.file_size(), false);
+    }
+    return entries;
   }
 }
