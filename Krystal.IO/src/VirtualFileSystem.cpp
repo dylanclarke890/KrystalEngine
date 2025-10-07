@@ -14,9 +14,9 @@ namespace Krys::IO
     {
       // shortest prefix first (longest would be faster but exact matches may be missed
       // that way)
-      if (first.Prefix.Length() != second.Prefix.Length())
+      if (first.Prefix.ToString().length() != second.Prefix.ToString().length())
       {
-        return first.Prefix.Length() < second.Prefix.Length();
+        return first.Prefix.ToString().length() < second.Prefix.ToString().length();
       }
 
       // then by lexicographical order
@@ -85,8 +85,7 @@ namespace Krys::IO
 
   Unique<IStreamWriter> VirtualFileSystem::GetWriter(const Path &path, WriteFlags flags) const noexcept
   {
-    auto backend = GetBackend(path);
-    if (backend.has_value() && backend->second->Exists(backend->first))
+    if (auto backend = GetBackend(path); backend.has_value())
     {
       return backend->second->GetWriter(backend->first, flags);
     }
@@ -96,8 +95,7 @@ namespace Krys::IO
 
   bool VirtualFileSystem::CreateFile(const Path &path, bool overwriteExisting) noexcept
   {
-    auto backend = GetBackend(path);
-    if (backend.has_value())
+    if (auto backend = GetBackend(path); backend.has_value())
     {
       return backend->second->CreateFile(backend->first, overwriteExisting);
     }
@@ -107,8 +105,7 @@ namespace Krys::IO
 
   bool VirtualFileSystem::DeleteFile(const Path &path) noexcept
   {
-    auto backend = GetBackend(path);
-    if (backend.has_value())
+    if (auto backend = GetBackend(path); backend.has_value())
     {
       return backend->second->DeleteFile(backend->first);
     }
