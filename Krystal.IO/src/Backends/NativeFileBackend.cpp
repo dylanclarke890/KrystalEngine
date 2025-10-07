@@ -86,27 +86,13 @@ namespace Krys::IO
         return {};
       }
 
-      const Path root(_root);
-      for (const auto &entry : std::filesystem::directory_iterator(fullPath))
+      if (!recursive)
       {
-        if (!entry.is_directory() && !entry.is_regular_file())
-        {
-          continue;
-        }
-
-        const VirtualDirectoryEntry directoryEntry {Path(entry.path()).RelativePath(root),
-                                                    entry.is_regular_file() ? entry.file_size() : 0,
-                                                    entry.is_directory()};
-        if (entry.is_directory() && recursive)
-        {
-          List<VirtualDirectoryEntry> subEntries =
-            GetDirectoryEntries(directoryEntry.Path.RelativePath(root), true);
-          entries.insert(entries.end(), subEntries.begin(), subEntries.end());
-        }
-        else
-        {
-          entries.push_back(directoryEntry);
-        }
+        GetDirectoryEntries(fullPath, entries);
+      }
+      else
+      {
+        GetDirectoryEntriesRecursive(fullPath, entries);
       }
     }
     catch (...)
@@ -115,6 +101,35 @@ namespace Krys::IO
     }
 
     return entries;
+  }
+
+  void NativeFileBackend::GetDirectoryEntries(const std::filesystem::path &fullPath,
+                                              List<VirtualDirectoryEntry> &entries) const
+  {
+    for (const auto &entry : std::filesystem::directory_iterator(fullPath))
+    {
+      if (!entry.is_regular_file() && !entry.is_directory())
+      {
+        continue;
+      }
+
+      const uintmax_t fileSize = entry.is_regular_file() ? entry.file_size() : 0;
+      entries.emplace_back(Path(entry.path()).RelativePath(_root), fileSize, entry.is_directory());
+    }
+  }
+
+  void NativeFileBackend::GetDirectoryEntriesRecursive(const std::filesystem::path &fullPath,
+                                                       List<VirtualDirectoryEntry> &entries) const
+  {
+    for (const auto &entry : std::filesystem::recursive_directory_iterator(fullPath))
+    {
+      if (!entry.is_regular_file())
+      {
+        continue;
+      }
+
+      entries.emplace_back(Path(entry.path()).RelativePath(_root), entry.file_size(), false);
+    }
   }
 
   Unique<IStreamReader> NativeFileBackend::GetReader(const Path &path, ReadFlags flags) const

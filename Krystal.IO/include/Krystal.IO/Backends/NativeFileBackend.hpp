@@ -41,5 +41,11 @@ namespace Krys::IO
     NO_DISCARD Unique<IStreamReader> GetReader(const Path &path, ReadFlags flags) const override;
 
     NO_DISCARD Unique<IStreamWriter> GetWriter(const Path &path, WriteFlags flags) const override;
+
+  private:
+    void GetDirectoryEntries(const std::filesystem::path &fullPath,
+                             List<VirtualDirectoryEntry> &entries) const;
+    void GetDirectoryEntriesRecursive(const std::filesystem::path &fullPath,
+                                      List<VirtualDirectoryEntry> &entries) const;
   };
 }
