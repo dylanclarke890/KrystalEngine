@@ -55,6 +55,8 @@ namespace Krys::IO
     /// @brief Returns the file extension of the path, including the leading dot.
     NO_DISCARD Path Extension() const;
 
+    /// @brief Checks if this path starts with another path. This is a lexically normalized comparison of the
+    /// components of the paths, not a simple string prefix check.
     NO_DISCARD bool StartsWith(const Path &other) const;
 
     /// @brief Checks if the path is relative.

@@ -70,7 +70,16 @@ namespace Krys::IO
 
   bool Path::StartsWith(const Path &other) const
   {
-    return _path.string().starts_with(other._path.string());
+    auto a = _path.lexically_normal();
+    auto b = other._path.lexically_normal();
+
+    auto itA = a.begin();
+    for (auto itB = b.begin(); itB != b.end(); ++itB, ++itA)
+    {
+      if (itA == a.end() || *itA != *itB)
+        return false;
+    }
+    return true;
   }
 
   bool Path::IsRelative() const noexcept
