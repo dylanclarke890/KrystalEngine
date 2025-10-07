@@ -3,7 +3,7 @@
 
 namespace Krys::IO
 {
-  Path::Path(const std::filesystem::path &path) : _path(path.lexically_normal())
+  Path::Path(const std::filesystem::path &path) : _path(path)
   {
   }
 
@@ -36,6 +36,11 @@ namespace Krys::IO
   bool Path::operator!=(const Path &other) const noexcept
   {
     return _path != other._path;
+  }
+
+  Path::operator bool() const noexcept
+  {
+    return !_path.empty();
   }
 
   Path Path::ParentPath() const
@@ -73,34 +78,34 @@ namespace Krys::IO
     return _path.is_relative();
   }
 
+  bool Path::IsAbsolute() const noexcept
+  {
+    return _path.is_absolute();
+  }
+
+  Path Path::RelativePath(const Path &base) const
+  {
+    return Path(_path.lexically_relative(base._path));
+  }
+
   bool Path::IsRelativeTo(const Path &other) const
   {
     return !_path.lexically_relative(other._path).empty();
   }
 
-  Path Path::RelativePath(const Path &base) const
-  {
-    if (!StartsWith(base))
-    {
-      return *this; // return the full path if base is not a parent
-    }
-
-    return Path(_path.lexically_relative(base._path).string());
-  }
-
-  Path Path::LexicallyNormal() const
+  Path Path::Normalise() const
   {
     return Path(_path.lexically_normal());
   }
 
-  string Path::ToString() const
+  string Path::ToPlatformString() const
   {
     return _path.string();
   }
 
-  Path::operator bool() const noexcept
+  string Path::ToString() const
   {
-    return !_path.empty();
+    return _path.generic_string();
   }
 
   size_t Path::Length() const noexcept
