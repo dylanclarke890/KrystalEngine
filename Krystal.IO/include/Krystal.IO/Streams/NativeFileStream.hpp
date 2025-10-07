@@ -33,7 +33,7 @@ namespace Krys::IO
     NO_DISCARD bool IsOpen() const noexcept override;
 
     /// @brief Opens the stream. If the stream is already open, this function does nothing.
-    bool Open() noexcept override;
+    bool Open() override;
 
     /// @brief Closes the stream. If the stream is already closed, this function does nothing.
     void Close() noexcept override;
@@ -87,7 +87,7 @@ namespace Krys::IO
     NO_DISCARD bool IsOpen() const noexcept override;
 
     /// @brief Opens the stream writer for writing. If the stream is already open, this function does nothing.
-    bool Open() noexcept override;
+    bool Open() override;
 
     /// @brief Closes the stream writer. If the stream is already closed, this function does nothing.
     void Close() noexcept override;

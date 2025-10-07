@@ -36,7 +36,7 @@ namespace Krys::IO
     NO_DISCARD virtual bool IsOpen() const noexcept = 0;
 
     /// @brief Opens the stream. If the stream is already open, this function does nothing.
-    virtual bool Open() noexcept = 0;
+    virtual bool Open() = 0;
 
     /// @brief Closes the stream. If the stream is already closed, this function does nothing.
     virtual void Close() noexcept = 0;
@@ -77,7 +77,7 @@ namespace Krys::IO
     NO_DISCARD virtual bool IsOpen() const noexcept = 0;
 
     /// @brief Opens the stream writer for writing. If the stream is already open, this function does nothing.
-    virtual bool Open() noexcept = 0;
+    virtual bool Open() = 0;
 
     /// @brief Closes the stream writer. If the stream is already closed, this function does nothing.
     virtual void Close() noexcept = 0;

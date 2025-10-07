@@ -29,7 +29,7 @@ namespace Krys::IO
     return _stream.is_open();
   }
 
-  bool NativeFileReader::Open() noexcept
+  bool NativeFileReader::Open()
   {
     if (NativeFileReader::IsOpen())
     {
@@ -220,21 +220,23 @@ namespace Krys::IO
     return _stream.is_open();
   }
 
-  bool NativeFileWriter::Open() noexcept
+  bool NativeFileWriter::Open()
   {
     if (NativeFileWriter::IsOpen())
     {
       return true;
     }
 
+    namespace fs = std::filesystem;
+
     std::error_code ioError;
 
     auto path = _path.ToString();
-    auto status = std::filesystem::status(path, ioError);
+    auto status = fs::status(path, ioError);
 
-    if (status.type() != std::filesystem::file_type::regular)
+    if (status.type() != fs::file_type::regular)
     {
-      if (status.type() != std::filesystem::file_type::not_found)
+      if (status.type() != fs::file_type::not_found)
       {
         return false; // Cannot open a writer for a non-regular file
       }
@@ -242,6 +244,16 @@ namespace Krys::IO
       if ((_flags & WriteFlags::Create) != WriteFlags::Create)
       {
         return false; // File does not exist and Create flag is not set
+      }
+
+      // Ensure parent directories exist
+      const Path parent = _path.ParentPath();
+      if (parent && !fs::exists(parent.ToString(), ioError))
+      {
+        if (!fs::create_directories(parent.ToString(), ioError) || ioError)
+        {
+          return false; // Failed to create parent directories
+        }
       }
     }
 

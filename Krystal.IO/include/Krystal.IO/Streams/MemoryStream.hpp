@@ -42,10 +42,20 @@ namespace Krys::IO
     }
 
     /// @brief Opens the stream. If the stream is already open, this function does nothing.
-    bool Open() noexcept override
+    bool Open() override
     {
+      if (_isOpen)
+      {
+        return true;
+      }
+
       _isOpen = true;
-      return _isOpen;
+      if ((_flags & ReadFlags::OpenAtEnd) == ReadFlags::OpenAtEnd)
+      {
+        _position = static_cast<uint64>(_buffer.size());
+      }
+
+      return true;
     }
 
     /// @brief Closes the stream. If the stream is already closed, this function does nothing.
@@ -162,7 +172,7 @@ namespace Krys::IO
     }
 
     /// @brief Opens the stream. If the stream is already open, this function does nothing.
-    bool Open() noexcept override
+    bool Open() override
     {
       if (_isOpen)
       {

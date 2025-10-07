@@ -168,7 +168,7 @@ namespace Krys::Tests
 
     SECTION("Invalid directory writing")
     {
-      NativeFileWriter writer(Path("/invalid/path/test.bin"));
+      NativeFileWriter writer(Path("/invalid-path/test.bin"), WriteFlags::None);
       REQUIRE_FALSE(writer.IsOpen());
       REQUIRE_FALSE(writer.Open());
     }
