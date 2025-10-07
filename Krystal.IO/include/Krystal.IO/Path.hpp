@@ -78,8 +78,6 @@ namespace Krys::IO
 
     /// @brief Converts the path to a platform-independent string (using '/' as separator).
     NO_DISCARD string ToString() const;
-
-    NO_DISCARD size_t Length() const noexcept;
   };
 }
 

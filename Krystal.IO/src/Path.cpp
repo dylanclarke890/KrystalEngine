@@ -107,9 +107,4 @@ namespace Krys::IO
   {
     return _path.generic_string();
   }
-
-  size_t Path::Length() const noexcept
-  {
-    return _path.string().size();
-  }
 }
