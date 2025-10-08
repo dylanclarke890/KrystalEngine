@@ -1,5 +1,7 @@
 #include "Krystal.IO/VirtualFileSystem.hpp"
+#include "Krystal.Lib/DebugBreak.hpp"
 #include "Krystal.Lib/Set.hpp"
+#include "Krystal.Log/ILogger.hpp"
 #include <ranges>
 
 namespace Krys::IO
@@ -167,9 +169,10 @@ namespace Krys::IO
           // strips the alias from the path to get path relative to the backend root
           result.emplace_back(path.RelativePath(alias), backend.get());
         }
-        catch (...)
+        catch (const std::exception &ex)
         {
-          // TODO: log error
+          KRYS_ERROR("Failed to get relative path for backend '{}': {}", alias.ToPlatformString(), ex.what());
+          KRYS_DEBUG_BREAK();
           continue;
         }
       }

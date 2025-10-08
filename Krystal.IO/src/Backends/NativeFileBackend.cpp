@@ -1,5 +1,7 @@
 #include "Krystal.IO/Backends/NativeFileBackend.hpp"
 #include "Krystal.IO/Streams/NativeFileStream.hpp"
+#include "Krystal.Lib/DebugBreak.hpp"
+#include "Krystal.Log/ILogger.hpp"
 #include <filesystem>
 #include <fstream>
 
@@ -91,9 +93,10 @@ namespace Krys::IO
 
       return SearchFiles<false>(fullPath, flags);
     }
-    catch (...)
+    catch (const std::exception &ex)
     {
-      // TODO: Log error
+      KRYS_ERROR("Failed to search files in '{}': {}", directory.ToPlatformString(), ex.what());
+      KRYS_DEBUG_BREAK();
       return {};
     }
   }
