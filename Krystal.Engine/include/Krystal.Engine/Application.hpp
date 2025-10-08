@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Krystal.Gfx/IContext.hpp"
+#include "Krystal.IO/VirtualFileSystem.hpp"
 #include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Lib/Events/EventManager.hpp"
 #include "Krystal.Lib/Expected.hpp"
@@ -65,6 +66,7 @@ namespace Krys
     Unique<EventManager> Events {};
     Unique<Platform::IWindow> Window {};
     Unique<Platform::Input> Input {};
+    Unique<IO::VirtualFileSystem> VFS {};
     Unique<Gfx::IContext> GraphicsContext {};
   };
 

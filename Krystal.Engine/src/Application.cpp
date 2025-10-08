@@ -1,8 +1,10 @@
 #include "Krystal.Engine/Application.hpp"
 #include "Krystal.Debug/ScopedProfiler.hpp"
+#include "Krystal.IO/Backends/NativeFileBackend.hpp"
 #include "Krystal.Platform/Input.hpp"
 #include "Krystal.Platform/Platform.hpp"
 #include <cassert>
+#include <filesystem>
 #include <thread>
 #include <utility>
 
@@ -38,7 +40,7 @@ namespace Krys
       double accumulatedMs = 0;
       while (_running)
       {
-        //auto profiler = Debug::ScopedProfiler("Frame");
+        // auto profiler = Debug::ScopedProfiler("Frame");
         const double startTime = Platform::GetTimeMilliseconds();
 
         _context->Input->BeginFrame();
@@ -101,28 +103,51 @@ namespace Krys
 
     auto logger = Log::CreateLogger(_context->Settings.GlobalLoggerSettings);
     if (!logger.has_value())
+    {
       throw new std::runtime_error("Failed to create logger: " + logger.error());
+    }
     _context->Logger = std::move(logger.value());
     Log::SetGlobalLogger(_context->Logger);
 
     _context->Events = CreateUnique<EventManager>();
     if (!_context->Events)
+    {
       throw new std::runtime_error("Failed to create event manager");
+    }
 
     _context->Input = CreateUnique<Platform::Input>(_context->Events.get());
     if (!_context->Input)
+    {
       throw new std::runtime_error("Failed to create input manager");
+    }
 
     auto window = Platform::CreateWindow(_context->Settings.WindowSettings);
     if (!window.has_value())
+    {
       throw new std::runtime_error("Failed to create window: " + window.error());
+    }
     _context->Window = std::move(window.value());
 
-    auto gfxContext =
-      Gfx::CreateContext(_context->Window->GetWindowHandle(), settings.WindowSettings.Size.Width,
-                         settings.WindowSettings.Size.Height);
+    auto cwd = std::filesystem::current_path();
+    _context->VFS = IO::VirtualFileSystemBuilder()
+                      .Mount<IO::NativeFileBackend>(IO::Path("/"), IO::Path(cwd.string()))
+                      .Build();
+    if (!_context->VFS)
+    {
+      throw new std::runtime_error("Failed to create virtual file system");
+    }
+
+    Gfx::ContextSettings contextSettings {
+      .WindowHandle = _context->Window->GetWindowHandle(),
+      .Width = _context->Settings.WindowSettings.Size.Width,
+      .Height = _context->Settings.WindowSettings.Size.Height,
+      .VFS = _context->VFS.get(),
+    };
+    auto gfxContext = Gfx::CreateContext(contextSettings);
     if (!gfxContext.has_value())
+    {
       throw new std::runtime_error("Failed to create graphics context: " + gfxContext.error());
+    }
     _context->GraphicsContext = std::move(gfxContext.value());
   }
 

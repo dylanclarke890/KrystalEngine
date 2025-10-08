@@ -3,6 +3,7 @@
 #include "Krystal.Gfx.Vulkan/Hooks/vulkan_hooks.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.IO/Image.hpp"
+#include "Krystal.IO/VirtualFileSystem.hpp"
 #include "Krystal.Lib/Nullable.hpp"
 
 namespace Krys::Gfx::Vulkan
@@ -24,6 +25,7 @@ namespace Krys::Gfx::Vulkan
   {
     NativeHandle _windowHandle = nullptr;
     uint32 _width = 0, _height = 0;
+    IO::VirtualFileSystem &_vfs;
 
     VkInstance _instance {VK_NULL_HANDLE};
     VkSurfaceKHR _surface = VK_NULL_HANDLE;
@@ -71,7 +73,7 @@ namespace Krys::Gfx::Vulkan
 
     NO_COPY_MOVE(VulkanContext)
   public:
-    VulkanContext(NativeHandle windowHandle, uint32 width, uint32 height);
+    VulkanContext(const ContextSettings &settings);
 
     ~VulkanContext() noexcept;
 

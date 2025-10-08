@@ -602,11 +602,11 @@ namespace
 
 namespace Krys::Gfx
 {
-  Expected<Unique<IContext>> CreateContext(NativeHandle windowHandle, uint32 width, uint32 height) noexcept
+  Expected<Unique<IContext>> CreateContext(const ContextSettings &settings) noexcept
   {
     try
     {
-      return Expected<Unique<IContext>>(CreateUnique<OpenGL::Context>(windowHandle, width, height));
+      return Expected<Unique<IContext>>(CreateUnique<OpenGL::Context>(settings));
     }
     catch (const std::exception &e)
     {
@@ -617,12 +617,12 @@ namespace Krys::Gfx
 
 namespace Krys::Gfx::OpenGL
 {
-  Context::Context(NativeHandle windowHandle, uint32 width, uint32 height)
-      : _windowHandle(windowHandle), _width(width), _height(height),
-        _dpi(Platform::GetDPIForWindow(_windowHandle)),
-        _platformImpl(CreateUnique<ContextPlatformImpl>(windowHandle)), _images(), _imageViews(_images),
-        _samplers(), _shaders(), _meshes(), _textures(_images, _imageViews, _samplers), _materials(_textures),
-        _fonts(_dpi), _text(_fonts, _shaders, _dpi)
+  Context::Context(const ContextSettings &settings)
+      : _windowHandle(settings.WindowHandle), _width(settings.Width), _height(settings.Height),
+        _vfs(*settings.VFS), _dpi(Platform::GetDPIForWindow(_windowHandle)),
+        _platformImpl(CreateUnique<ContextPlatformImpl>(settings.WindowHandle)), _images(),
+        _imageViews(_images), _samplers(), _shaders(), _meshes(), _textures(_images, _imageViews, _samplers),
+        _materials(_textures), _fonts(_dpi), _text(_fonts, _shaders, _dpi)
   {
   }
 

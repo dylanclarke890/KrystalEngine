@@ -34,29 +34,29 @@ namespace
 
 namespace Krys::Gfx
 {
-  //Expected<Unique<IContext>> CreateContext(NativeHandle windowHandle, uint32 width, uint32 height) noexcept
+  // Expected<Unique<IContext>> CreateContext(NativeHandle windowHandle, uint32 width, uint32 height) noexcept
   //{
-  //  try
-  //  {
-  //    return Expected<Unique<IContext>>(CreateUnique<D3D11::D3D11Context>(windowHandle, width, height));
-  //  }
-  //  catch (const std::exception &e)
-  //  {
-  //    return Unexpected(e.what());
-  //  }
-  //}
+  //   try
+  //   {
+  //     return Expected<Unique<IContext>>(CreateUnique<D3D11::D3D11Context>(windowHandle, width, height));
+  //   }
+  //   catch (const std::exception &e)
+  //   {
+  //     return Unexpected(e.what());
+  //   }
+  // }
 }
 
 namespace Krys::Gfx::D3D11
 {
-  D3D11Context::D3D11Context(NativeHandle windowHandle, uint32 width, uint32 height)
-      : _windowHandle(windowHandle.As<HWND>())
+  D3D11Context::D3D11Context(const ContextSettings &settings)
+      : _windowHandle(settings.WindowHandle.As<HWND>()), _vfs(*settings.VFS)
   {
     ::DXGI_SWAP_CHAIN_DESC scd {};
     scd.BufferCount = 1;                                // one back buffer
     scd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM; // use 32-bit color
-    scd.BufferDesc.Width = width;
-    scd.BufferDesc.Height = height;
+    scd.BufferDesc.Width = settings.Width;
+    scd.BufferDesc.Height = settings.Height;
     scd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;  // how swap chain is to be used
     scd.OutputWindow = _windowHandle;                   // the window to be used
     scd.SampleDesc.Count = 1;                           // how many multisamples
@@ -88,8 +88,8 @@ namespace Krys::Gfx::D3D11
 
     viewport.TopLeftX = 0;
     viewport.TopLeftY = 0;
-    viewport.Width = static_cast<FLOAT>(width);
-    viewport.Height = static_cast<FLOAT>(height);
+    viewport.Width = static_cast<FLOAT>(settings.Width);
+    viewport.Height = static_cast<FLOAT>(settings.Height);
 
     _context->RSSetViewports(1, &viewport);
   }

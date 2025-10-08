@@ -11,6 +11,7 @@
 #include "Krystal.Gfx.OpenGL/Textures/TextureRegistry.hpp"
 #include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/IContext.hpp"
+#include "Krystal.IO/VirtualFileSystem.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
@@ -23,6 +24,7 @@ namespace Krys::Gfx::OpenGL
     NativeHandle _windowHandle;
     uint32 _width;
     uint32 _height;
+    IO::VirtualFileSystem &_vfs;
     int _dpi;
     Unique<ContextPlatformImpl> _platformImpl;
 
@@ -37,7 +39,7 @@ namespace Krys::Gfx::OpenGL
     TextRenderer _text;
 
   public:
-    Context(NativeHandle windowHandle, uint32 width, uint32 height);
+    Context(const ContextSettings &settings);
 
     ~Context() noexcept override = default;
 

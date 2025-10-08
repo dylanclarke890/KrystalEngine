@@ -2,6 +2,7 @@
 
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.IO/Image.hpp"
+#include "Krystal.IO/VirtualFileSystem.hpp"
 
 #include <d3d11.h>
 
@@ -12,6 +13,7 @@ namespace Krys::Gfx::D3D11
   class D3D11Context final
   {
     HWND _windowHandle;
+    IO::VirtualFileSystem &_vfs;
     IDXGISwapChain *_swapchain;
     ID3D11Device *_device;
     ID3D11DeviceContext *_context;
@@ -19,7 +21,7 @@ namespace Krys::Gfx::D3D11
 
     NO_COPY_MOVE(D3D11Context)
   public:
-    D3D11Context(NativeHandle windowHandle, uint32 width, uint32 height);
+    D3D11Context(const ContextSettings &settings);
     ~D3D11Context() noexcept;
 
     void Setup() noexcept;

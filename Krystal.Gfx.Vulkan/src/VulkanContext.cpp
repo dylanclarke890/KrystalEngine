@@ -21,17 +21,17 @@
 
 namespace Krys::Gfx
 {
-  //Expected<Unique<IContext>> CreateContext(NativeHandle windowHandle, uint32 width, uint32 height) noexcept
+  // Expected<Unique<IContext>> CreateContext(NativeHandle windowHandle, uint32 width, uint32 height) noexcept
   //{
-  //  try
-  //  {
-  //    return Expected<Unique<IContext>>(CreateUnique<Vulkan::VulkanContext>(windowHandle, width, height));
-  //  }
-  //  catch (const std::exception &e)
-  //  {
-  //    return Unexpected(e.what());
-  //  }
-  //}
+  //   try
+  //   {
+  //     return Expected<Unique<IContext>>(CreateUnique<Vulkan::VulkanContext>(windowHandle, width, height));
+  //   }
+  //   catch (const std::exception &e)
+  //   {
+  //     return Unexpected(e.what());
+  //   }
+  // }
 }
 
 namespace
@@ -132,8 +132,9 @@ namespace
 
 namespace Krys::Gfx::Vulkan
 {
-  VulkanContext::VulkanContext(NativeHandle windowHandle, uint32 width, uint32 height)
-      : _windowHandle(windowHandle), _width(width), _height(height)
+  VulkanContext::VulkanContext(const ContextSettings &settings)
+      : _windowHandle(settings.WindowHandle), _width(settings.Width), _height(settings.Height),
+        _vfs(*settings.VFS)
   {
     CreateInstance();
     SetupDebugMessenger();

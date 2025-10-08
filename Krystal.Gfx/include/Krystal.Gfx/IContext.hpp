@@ -2,6 +2,7 @@
 
 #include "Krystal.Gfx/ICamera.hpp"
 #include "Krystal.IO/Image.hpp"
+#include "Krystal.IO/VirtualFileSystem.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/NativeHandle.hpp"
 #include "Krystal.Lib/SmartPointers.hpp"
@@ -19,7 +20,15 @@ namespace Krys::Gfx
   class IMaterialRegistry;
   class IFontRegistry;
 
-  Expected<Unique<IContext>> CreateContext(NativeHandle windowHandle, uint32 width, uint32 height) noexcept;
+  struct ContextSettings
+  {
+    NativeHandle WindowHandle {nullptr};
+    uint32 Width {0u};
+    uint32 Height {0u};
+    IO::VirtualFileSystem *VFS {nullptr};
+  };
+
+  Expected<Unique<IContext>> CreateContext(const ContextSettings& settings) noexcept;
 
   enum class API
   {
