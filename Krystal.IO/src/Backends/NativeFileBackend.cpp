@@ -21,8 +21,10 @@ namespace Krys::IO
     {
       return std::filesystem::exists((_root / path).Normalise().NativePath());
     }
-    catch (...)
+    catch (const std::exception &ex)
     {
+      KRYS_ERROR("Failed to check existence of '{}': {}", path.ToPlatformString(), ex.what());
+      KRYS_DEBUG_BREAK();
       return false;
     }
   }
@@ -33,8 +35,10 @@ namespace Krys::IO
     {
       return std::filesystem::is_directory((_root / path).Normalise().NativePath());
     }
-    catch (...)
+    catch (const std::exception &ex)
     {
+      KRYS_ERROR("Failed to check if '{}' is a directory: {}", path.ToPlatformString(), ex.what());
+      KRYS_DEBUG_BREAK();
       return false;
     }
   }
@@ -45,8 +49,10 @@ namespace Krys::IO
     {
       return std::filesystem::is_regular_file((_root / path).Normalise().NativePath());
     }
-    catch (...)
+    catch (const std::exception &ex)
     {
+      KRYS_ERROR("Failed to check if '{}' is a file: {}", path.ToPlatformString(), ex.what());
+      KRYS_DEBUG_BREAK();
       return false;
     }
   }

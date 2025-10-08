@@ -4,6 +4,7 @@ Checks: >
   clang-analyzer-*,
   cppcoreguidelines-*,
   -cppcoreguidelines-macro-usage
+  -cppcoreguidelines-avoid-do-while
   modernize-*,
   -modernize-use-trailing-return-type,
   performance-*,
