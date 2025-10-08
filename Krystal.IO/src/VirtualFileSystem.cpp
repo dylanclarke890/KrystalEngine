@@ -1,8 +1,24 @@
 #include "Krystal.IO/VirtualFileSystem.hpp"
+#include "Krystal.Lib/Set.hpp"
 #include <ranges>
 
 namespace Krys::IO
 {
+  VirtualFileSystemBuilder::~VirtualFileSystemBuilder() noexcept
+  {
+    for (const auto &mount : _mounts)
+    {
+      if (mount.Backend == nullptr)
+      {
+        continue;
+      }
+
+      // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
+      delete mount.Backend; // Clean up any allocated backends that were not used.
+    }
+    _mounts.clear();
+  }
+
   Unique<VirtualFileSystem> VirtualFileSystemBuilder::Build()
   {
     if (_mounts.empty())
@@ -10,7 +26,7 @@ namespace Krys::IO
       return nullptr;
     }
 
-    constexpr auto sortFn = [](const FileBackend &first, const FileBackend &second)
+    const auto sortFn = [](const FileBackend &first, const FileBackend &second)
     {
       const auto componentCount = [](const std::filesystem::path &p)
       {
@@ -39,12 +55,13 @@ namespace Krys::IO
 
     List<Pair<Path, Unique<IFileBackend>>> backends {};
     backends.reserve(_mounts.size());
-    for (const auto &entry : _mounts)
+    for (auto &entry : _mounts)
     {
       backends.emplace_back(entry.Prefix, Unique<IFileBackend>(entry.Backend));
+      entry.Backend = nullptr; // prevent double delete
     }
 
-    _mounts = {};        // Clear mounts after building to avoid dangling references.
+    _mounts.clear();     // Clear mounts after building to avoid dangling references.
     _insertionOrder = 0; // Reset insertion order for the next build.
 
     auto vfs = Unique<VirtualFileSystem>(new VirtualFileSystem());
@@ -119,27 +136,23 @@ namespace Krys::IO
     return false;
   }
 
-  List<VFSFileEntry> VirtualFileSystem::SearchFiles(const Path &directory,
-                                                    FileSearchFlags flags) const noexcept
+  List<VFSFileEntry> VirtualFileSystem::SearchFiles(const Path &directory, FileSearchFlags flags) const
   {
-    List<VFSFileEntry> result;
-    auto allBackends = GetBackends(directory);
-    for (const auto &[relativePath, backend] : allBackends)
+    Set<Path> seen; // key by RELATIVE path string (virtual)
+    List<VFSFileEntry> out;
+
+    // We get back the path relative to the backend's root
+    for (const auto &[relativeRoot, backend] : GetBackends(directory))
     {
-      for (auto &entry : backend->SearchFiles(relativePath, flags))
+      for (auto &entry : backend->SearchFiles(relativeRoot, flags))
       {
-        try
+        if (seen.insert(entry.RelativePath.RelativePath(relativeRoot)).second)
         {
-          result.emplace_back(std::move(entry));
-        }
-        catch (...)
-        {
-          // TODO: log error
-          continue;
+          out.emplace_back(std::move(entry)); // first in precedence order wins
         }
       }
     }
-    return result;
+    return out;
   }
 
   List<Pair<Path, Ptr<IFileBackend>>> VirtualFileSystem::GetBackends(const Path &path) const noexcept
@@ -151,7 +164,7 @@ namespace Krys::IO
       {
         try
         {
-          // strips the alias from the path to get the relative path for the backend
+          // strips the alias from the path to get path relative to the backend root
           result.emplace_back(path.RelativePath(alias), backend.get());
         }
         catch (...)

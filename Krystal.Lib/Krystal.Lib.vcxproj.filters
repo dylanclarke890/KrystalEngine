@@ -105,7 +105,7 @@
     <ClInclude Include="include\Krystal.Lib\Nullable.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Set.hpp">
+    <ClInclude Include="include\Krystal.Lib\OrderedSet.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Queue.hpp">
@@ -124,6 +124,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Stack.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Set.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

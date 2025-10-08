@@ -33,7 +33,7 @@ namespace Krys::IO
 
     VirtualFileSystemBuilder() noexcept = default;
 
-    ~VirtualFileSystemBuilder() noexcept = default;
+    ~VirtualFileSystemBuilder() noexcept;
 
     /// @brief Adds a mount point to the virtual file system.
     template <DerivedFrom<IFileBackend> T, typename... Args>
@@ -95,7 +95,7 @@ namespace Krys::IO
     /// @param directory The directory to search.
     /// @param flags Flags to control the search behavior.
     NO_DISCARD List<VFSFileEntry> SearchFiles(const Path &directory,
-                                              FileSearchFlags flags = FileSearchFlags::None) const noexcept;
+                                              FileSearchFlags flags = FileSearchFlags::None) const;
 
   private:
     friend class VirtualFileSystemBuilder;
