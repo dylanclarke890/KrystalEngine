@@ -22,6 +22,8 @@ namespace Krys::Gfx::OpenGL
     using ShaderManager = ResourceManager<Shader, ShaderHandle>;
     using ShaderHandleCache = ResourceHandleCache<string, ShaderHandle>;
 
+    const IO::Path BaseDirectory {"/shaders/"};
+
   private:
     IO::VirtualFileSystem &_vfs;
     ShaderManager _shaders;
@@ -134,7 +136,7 @@ namespace Krys::Gfx::OpenGL
 
     NO_DISCARD string ReadFile(const IO::Path &filepath) noexcept
     {
-      Unique<IO::IStreamReader> reader = _vfs.GetReader(filepath, IO::ReadFlags::None);
+      Unique<IO::IStreamReader> reader = _vfs.GetReader(BaseDirectory / filepath, IO::ReadFlags::None);
       auto result = IO::StreamUtils::ReadAllText(*reader);
       assert(result.has_value() && "Failed to read shader file.");
       return result.value();

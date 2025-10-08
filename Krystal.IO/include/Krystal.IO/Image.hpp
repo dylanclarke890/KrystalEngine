@@ -84,6 +84,8 @@ namespace Krys::IO
   /// @return Image read from the file.
   NO_DISCARD Expected<Image> LoadImage(const Path &path, const ImageLoadSettings &settings = {});
 
+  NO_DISCARD Expected<Image> LoadImage(IStreamReader &stream, const ImageLoadSettings &settings);
+
   /// @brief Reads a cubemap image from 6 separate files.
   /// @param left Path to the left face image file.
   /// @param right Path to the right face image file.

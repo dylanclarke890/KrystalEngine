@@ -9,6 +9,8 @@
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.IO/Image.hpp"
+#include "Krystal.IO/IStream.hpp"
+#include "Krystal.IO/VirtualFileSystem.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
 #include "Krystal.Lib/Pair.hpp"
@@ -24,7 +26,10 @@ namespace Krys::Gfx::OpenGL
     using TextureManager = ResourceManager<Texture, TextureHandle>;
     using TextureCache = ResourceHandleCache<string, TextureHandle>;
 
+    const IO::Path BaseDirectory {"/textures/"};
+
   private:
+    IO::VirtualFileSystem &_vfs;
     ImageRegistry &_images;
     ImageViewRegistry &_imageViews;
     SamplerRegistry &_samplers;
@@ -32,8 +37,9 @@ namespace Krys::Gfx::OpenGL
     TextureCache _cache;
 
   public:
-    TextureRegistry(ImageRegistry &images, ImageViewRegistry &imageViews, SamplerRegistry &samplers) noexcept
-        : _images(images), _imageViews(imageViews), _samplers(samplers)
+    TextureRegistry(IO::VirtualFileSystem &vfs, ImageRegistry &images, ImageViewRegistry &imageViews,
+                    SamplerRegistry &samplers) noexcept
+        : _vfs(vfs), _images(images), _imageViews(imageViews), _samplers(samplers)
     {
     }
 
@@ -56,7 +62,8 @@ namespace Krys::Gfx::OpenGL
         return existing;
       }
 
-      auto imageResult = IO::LoadImage(path, {.FlipVertically = true});
+      Unique<IO::IStreamReader> stream = _vfs.GetReader(BaseDirectory / path, IO::ReadFlags::None);
+      auto imageResult = IO::LoadImage(*stream, {.FlipVertically = true});
       assert(imageResult.has_value() && "Failed to load texture image.");
       auto &image = *imageResult;
 

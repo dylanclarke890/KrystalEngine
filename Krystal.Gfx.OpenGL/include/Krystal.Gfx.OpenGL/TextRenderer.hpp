@@ -79,8 +79,8 @@ namespace Krys::Gfx::OpenGL
         return _shaders.Get(it->second);
       }
 
-      const auto vertexShader = IO::Path("/shaders/text-shader.vert");
-      const auto fragmentShader = IO::Path("/shaders/text-shader.frag");
+      const auto vertexShader = IO::Path("text-shader.vert");
+      const auto fragmentShader = IO::Path("text-shader.frag");
       auto shader = _shaders.LoadTextShader(vertexShader, fragmentShader, desc);
 
       _fontShaders[desc] = shader;

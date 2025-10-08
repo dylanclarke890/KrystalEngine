@@ -109,6 +109,13 @@ namespace Krys::IO
     return LoadImage(fileReader, hdr, settings);
   }
 
+  Expected<Image> LoadImage(IStreamReader &stream, const ImageLoadSettings &settings)
+  {
+    const bool hdr = IsHDRImage(stream);
+    stream.Seek(0, SeekOrigin::Begin);
+    return LoadImage(stream, hdr, settings);
+  }
+
   Expected<CubeMapImage> LoadCubeMap(const Path &left, const Path &right, const Path &top, const Path &bottom,
                                      const Path &front, const Path &back, const ImageLoadSettings &settings)
   {

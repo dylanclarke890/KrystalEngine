@@ -130,10 +130,12 @@ namespace Krys
     _context->Window = std::move(window.value());
 
     auto cwd = std::filesystem::current_path();
-    auto shaderDir = cwd / "data/shaders/opengl";
+    auto shadersDirectory = cwd / "data/shaders/opengl";
+    auto texturesDirectory = cwd / "data/assets";
     _context->VFS = IO::VirtualFileSystemBuilder()
-                      .Mount<IO::NativeFileBackend>(IO::Path("/"), IO::Path(cwd.string()))
-                      .Mount<IO::NativeFileBackend>(IO::Path("/shaders"), IO::Path(shaderDir.string()))
+                      .Mount<IO::NativeFileBackend>(IO::Path("/"), IO::Path(cwd))
+                      .Mount<IO::NativeFileBackend>(IO::Path("/shaders"), IO::Path(shadersDirectory))
+                      .Mount<IO::NativeFileBackend>(IO::Path("/textures"), IO::Path(texturesDirectory))
                       .Build();
     if (!_context->VFS)
     {

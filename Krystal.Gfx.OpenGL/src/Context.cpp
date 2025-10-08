@@ -622,7 +622,7 @@ namespace Krys::Gfx::OpenGL
         _vfs(*settings.VFS), _dpi(Platform::GetDPIForWindow(_windowHandle)),
         _platformImpl(CreateUnique<ContextPlatformImpl>(settings.WindowHandle)), _images(),
         _imageViews(_images), _samplers(), _shaders(_vfs), _meshes(),
-        _textures(_images, _imageViews, _samplers), _materials(_textures), _fonts(_dpi),
+        _textures(_vfs, _images, _imageViews, _samplers), _materials(_textures), _fonts(_dpi),
         _text(_fonts, _shaders, _dpi)
   {
   }
@@ -634,76 +634,64 @@ namespace Krys::Gfx::OpenGL
     // Shaders
     {
       using namespace IO;
-      Path base = Path("/shaders/");
-
-      shaderHandles["model"] = _shaders.Load(base / Path("model.vert"), base / Path("model.frag"));
+      shaderHandles["model"] = _shaders.Load(Path("model.vert"), Path("model.frag"));
       shaderHandles["instanced-model"] =
-        _shaders.Load(base / Path("instanced-model.vert"), base / Path("instanced-model.frag"));
-      shaderHandles["visualise-normals"] =
-        _shaders.Load(base / Path("visualise-normals.vert"), base / Path("visualise-normals.geo"),
-                      base / Path("visualise-normals.frag"));
-      shaderHandles["skybox"] = _shaders.Load(base / Path("skybox.vert"), base / Path("skybox.frag"));
-      shaderHandles["light-source"] =
-        _shaders.Load(base / Path("lightsource.vert"), base / Path("lightsource.frag"));
-      shaderHandles["lighting"] = _shaders.Load(base / Path("basic.vert"), base / Path("lighting.frag"));
+        _shaders.Load(Path("instanced-model.vert"), Path("instanced-model.frag"));
+      shaderHandles["visualise-normals"] = _shaders.Load(
+        Path("visualise-normals.vert"), Path("visualise-normals.geo"), Path("visualise-normals.frag"));
+      shaderHandles["skybox"] = _shaders.Load(Path("skybox.vert"), Path("skybox.frag"));
+      shaderHandles["light-source"] = _shaders.Load(Path("lightsource.vert"), Path("lightsource.frag"));
+      shaderHandles["lighting"] = _shaders.Load(Path("basic.vert"), Path("lighting.frag"));
       shaderHandles["flat-colour-phong-material"] =
-        _shaders.Load(base / Path("basic.vert"), base / Path("flat-colour-phong-material.frag"));
-      shaderHandles["phong-material"] =
-        _shaders.Load(base / Path("basic.vert"), base / Path("phong-material.frag"));
+        _shaders.Load(Path("basic.vert"), Path("flat-colour-phong-material.frag"));
+      shaderHandles["phong-material"] = _shaders.Load(Path("basic.vert"), Path("phong-material.frag"));
       shaderHandles["directional-depth"] =
-        _shaders.Load(base / Path("directional-shadow-map.vert"), base / Path("empty.frag"));
+        _shaders.Load(Path("directional-shadow-map.vert"), Path("empty.frag"));
       shaderHandles["point-depth"] =
-        _shaders.Load(base / Path("point-shadows.vert"), base / Path("point-shadows.geo"),
-                      base / Path("point-shadows.frag"));
+        _shaders.Load(Path("point-shadows.vert"), Path("point-shadows.geo"), Path("point-shadows.frag"));
       shaderHandles["directional-shadow-mapping"] =
-        _shaders.Load(base / Path("shadow-mapping.vert"), base / Path("shadow-mapping.frag"));
+        _shaders.Load(Path("shadow-mapping.vert"), Path("shadow-mapping.frag"));
       shaderHandles["point-shadow-mapping"] =
-        _shaders.Load(base / Path("point-shadow-mapping.vert"), base / Path("point-shadow-mapping.frag"));
+        _shaders.Load(Path("point-shadow-mapping.vert"), Path("point-shadow-mapping.frag"));
       shaderHandles["debug-quad"] =
-        _shaders.Load(base / Path("debug-quad-shadow-map.vert"), base / Path("debug-quad-shadow-map.frag"));
+        _shaders.Load(Path("debug-quad-shadow-map.vert"), Path("debug-quad-shadow-map.frag"));
       shaderHandles["normal-mapping"] =
-        _shaders.Load(base / Path("normal-mapping.vert"), base / Path("normal-mapping.frag"));
+        _shaders.Load(Path("normal-mapping.vert"), Path("normal-mapping.frag"));
 
       shaderHandles["parallax-mapping"] =
-        _shaders.Load(base / Path("parallax-mapping.vert"), base / Path("parallax-mapping.frag"));
+        _shaders.Load(Path("parallax-mapping.vert"), Path("parallax-mapping.frag"));
 
-      shaderHandles["hdr"] = _shaders.Load(base / Path("hdr.vert"), base / Path("hdr.frag"));
+      shaderHandles["hdr"] = _shaders.Load(Path("hdr.vert"), Path("hdr.frag"));
       shaderHandles["hdr-lighting"] =
-        _shaders.Load(base / Path("hdr-test-lighting.vert"), base / Path("hdr-test-lighting.frag"));
+        _shaders.Load(Path("hdr-test-lighting.vert"), Path("hdr-test-lighting.frag"));
 
-      shaderHandles["bloom"] = _shaders.Load(base / Path("7/bloom.vert"), base / Path("7/bloom.frag"));
-      shaderHandles["bloom-light"] =
-        _shaders.Load(base / Path("7/bloom.vert"), base / Path("7/light-box.frag"));
-      shaderHandles["bloom-final"] =
-        _shaders.Load(base / Path("7/bloom-final.vert"), base / Path("7/bloom-final.frag"));
-      shaderHandles["blur"] = _shaders.Load(base / Path("7/blur.vert"), base / Path("7/blur.frag"));
+      shaderHandles["bloom"] = _shaders.Load(Path("7/bloom.vert"), Path("7/bloom.frag"));
+      shaderHandles["bloom-light"] = _shaders.Load(Path("7/bloom.vert"), Path("7/light-box.frag"));
+      shaderHandles["bloom-final"] = _shaders.Load(Path("7/bloom-final.vert"), Path("7/bloom-final.frag"));
+      shaderHandles["blur"] = _shaders.Load(Path("7/blur.vert"), Path("7/blur.frag"));
 
-      shaderHandles["g-buffer"] =
-        _shaders.Load(base / Path("8/g-buffer.vert"), base / Path("8/g-buffer.frag"));
+      shaderHandles["g-buffer"] = _shaders.Load(Path("8/g-buffer.vert"), Path("8/g-buffer.frag"));
       shaderHandles["deferred-shading"] =
-        _shaders.Load(base / Path("8/deferred-shading.vert"), base / Path("8/deferred-shading.frag"));
+        _shaders.Load(Path("8/deferred-shading.vert"), Path("8/deferred-shading.frag"));
       shaderHandles["deferred-light"] =
-        _shaders.Load(base / Path("8/deferred-light-box.vert"), base / Path("8/deferred-light-box.frag"));
+        _shaders.Load(Path("8/deferred-light-box.vert"), Path("8/deferred-light-box.frag"));
 
       shaderHandles["ssao-geometry"] =
-        _shaders.Load(base / Path("9/ssao-geometry.vert"), base / Path("9/ssao-geometry.frag"));
-      shaderHandles["ssao"] = _shaders.Load(base / Path("9/ssao.vert"), base / Path("9/ssao.frag"));
-      shaderHandles["ssao-blur"] = _shaders.Load(base / Path("9/ssao.vert"), base / Path("9/ssao-blur.frag"));
-      shaderHandles["ssao-lighting"] =
-        _shaders.Load(base / Path("9/ssao.vert"), base / Path("9/ssao-lighting.frag"));
+        _shaders.Load(Path("9/ssao-geometry.vert"), Path("9/ssao-geometry.frag"));
+      shaderHandles["ssao"] = _shaders.Load(Path("9/ssao.vert"), Path("9/ssao.frag"));
+      shaderHandles["ssao-blur"] = _shaders.Load(Path("9/ssao.vert"), Path("9/ssao-blur.frag"));
+      shaderHandles["ssao-lighting"] = _shaders.Load(Path("9/ssao.vert"), Path("9/ssao-lighting.frag"));
 
-      shaderHandles["pbr"] = _shaders.Load(base / Path("11/pbr.vert"), base / Path("11/pbr.frag"));
+      shaderHandles["pbr"] = _shaders.Load(Path("11/pbr.vert"), Path("11/pbr.frag"));
       shaderHandles["pbr-with-maps"] =
-        _shaders.Load(base / Path("11/pbr-with-maps.vert"), base / Path("11/pbr-with-maps.frag"));
+        _shaders.Load(Path("11/pbr-with-maps.vert"), Path("11/pbr-with-maps.frag"));
       shaderHandles["hdr-to-cubemap"] =
-        _shaders.Load(base / Path("11/cubemap.vert"), base / Path("11/equirectangular-to-cubemap.frag"));
+        _shaders.Load(Path("11/cubemap.vert"), Path("11/equirectangular-to-cubemap.frag"));
       shaderHandles["irradiance-convolution"] =
-        _shaders.Load(base / Path("11/cubemap.vert"), base / Path("11/irradiance-convolution.frag"));
-      shaderHandles["prefilter"] =
-        _shaders.Load(base / Path("11/cubemap.vert"), base / Path("11/prefilter.frag"));
-      shaderHandles["brdf"] = _shaders.Load(base / Path("11/brdf.vert"), base / Path("11/brdf.frag"));
-      shaderHandles["hdr-background"] =
-        _shaders.Load(base / Path("11/background.vert"), base / Path("11/background.frag"));
+        _shaders.Load(Path("11/cubemap.vert"), Path("11/irradiance-convolution.frag"));
+      shaderHandles["prefilter"] = _shaders.Load(Path("11/cubemap.vert"), Path("11/prefilter.frag"));
+      shaderHandles["brdf"] = _shaders.Load(Path("11/brdf.vert"), Path("11/brdf.frag"));
+      shaderHandles["hdr-background"] = _shaders.Load(Path("11/background.vert"), Path("11/background.frag"));
     }
 
     {
@@ -712,10 +700,7 @@ namespace Krys::Gfx::OpenGL
 
     // Textures
     {
-      using namespace IO;
-      Path base = Path("data/assets");
-
-      textureHandles["hdr-environment"] = _textures.Load(base / Path("newport-loft.hdr"));
+      textureHandles["hdr-environment"] = _textures.Load(IO::Path("newport-loft.hdr"));
     }
 
     // PBR textures
