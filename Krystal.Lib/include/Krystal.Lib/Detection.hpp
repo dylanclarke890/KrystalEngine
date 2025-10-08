@@ -1,9 +1,9 @@
 #pragma once
 
 #ifdef _DEBUG
-  #define KRYS_DEBUG
+  #define KRYS_BUILD_DEBUG
 #else
-  #define KRYS_RELEASE
+  #define KRYS_BUILD_RELEASE
 #endif
 
 #pragma region Compiler Detection

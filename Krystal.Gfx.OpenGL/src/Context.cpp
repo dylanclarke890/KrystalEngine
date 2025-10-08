@@ -630,8 +630,6 @@ namespace Krys::Gfx::OpenGL
   {
     EnableDebugOutput();
 
-    auto *logger = Log::GetGlobalLogger();
-
     // Shaders
     {
       using namespace IO;
@@ -764,7 +762,7 @@ namespace Krys::Gfx::OpenGL
     }
 
     glViewport(0, 0, _width, _height);
-    logger->Info("Viewport set to {}x{}", _width, _height);
+    KRYS_INFO("Viewport set to {}x{}", _width, _height);
 
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LEQUAL);

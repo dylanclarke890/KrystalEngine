@@ -2,7 +2,7 @@
 
 #include "Krystal.Lib/Detection.hpp"
 
-#ifdef KRYS_DEBUG
+#ifdef KRYS_BUILD_DEBUG
   #ifdef KRYS_PLATFORM_WINDOWS
     #define KRYS_DEBUG_BREAK() __debugbreak()
   #elif defined(KRYS_PLATFORM_LINUX)

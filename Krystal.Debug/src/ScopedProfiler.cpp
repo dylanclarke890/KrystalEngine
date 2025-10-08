@@ -13,9 +13,6 @@ namespace Krys::Debug
   {
     const auto end = Platform::GetTimeMilliseconds();
     const auto elapsedMs = end - _start;
-
-    auto *logger = Log::GetGlobalLogger();
-    if (logger != nullptr)
-      logger->Info("{} took {:.3f} ms.", _name, elapsedMs);
+    KRYS_INFO("{} took {:.3f} ms.", _name, elapsedMs);
   }
 }

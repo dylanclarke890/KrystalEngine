@@ -79,4 +79,72 @@ namespace Krys::Log
 
     virtual void LogImpl(Level level, const string &message) noexcept = 0;
   };
+
 }
+
+#ifdef KRYS_LOGGING_DISABLED
+
+  #define KRYS_TRACE(...)
+  #define KRYS_DEBUG(...)
+  #define KRYS_INFO(...)
+  #define KRYS_WARN(...)
+  #define KRYS_ERROR(...)
+  #define KRYS_CRITICAL(...)
+
+#else
+
+  #define KRYS_TRACE(...)                                                                                    \
+    do                                                                                                       \
+    {                                                                                                        \
+      if (auto logger = Krys::Log::GetGlobalLogger(); logger != nullptr)                                     \
+      {                                                                                                      \
+        logger->Trace(__VA_ARGS__);                                                                          \
+      }                                                                                                      \
+    } while (0)
+
+  #define KRYS_DEBUG(...)                                                                                    \
+    do                                                                                                       \
+    {                                                                                                        \
+      if (auto logger = Krys::Log::GetGlobalLogger(); logger != nullptr)                                     \
+      {                                                                                                      \
+        logger->Debug(__VA_ARGS__);                                                                          \
+      }                                                                                                      \
+    } while (0)
+
+  #define KRYS_INFO(...)                                                                                     \
+    do                                                                                                       \
+    {                                                                                                        \
+      if (auto logger = Krys::Log::GetGlobalLogger(); logger != nullptr)                                     \
+      {                                                                                                      \
+        logger->Info(__VA_ARGS__);                                                                           \
+      }                                                                                                      \
+    } while (0)
+
+  #define KRYS_WARN(...)                                                                                     \
+    do                                                                                                       \
+    {                                                                                                        \
+      if (auto logger = Krys::Log::GetGlobalLogger(); logger != nullptr)                                     \
+      {                                                                                                      \
+        logger->Warn(__VA_ARGS__);                                                                           \
+      }                                                                                                      \
+    } while (0)
+
+  #define KRYS_ERROR(...)                                                                                    \
+    do                                                                                                       \
+    {                                                                                                        \
+      if (auto logger = Krys::Log::GetGlobalLogger(); logger != nullptr)                                     \
+      {                                                                                                      \
+        logger->Error(__VA_ARGS__);                                                                          \
+      }                                                                                                      \
+    } while (0)
+
+  #define KRYS_CRITICAL(...)                                                                                 \
+    do                                                                                                       \
+    {                                                                                                        \
+      if (auto logger = Krys::Log::GetGlobalLogger(); logger != nullptr)                                     \
+      {                                                                                                      \
+        logger->Critical(__VA_ARGS__);                                                                       \
+      }                                                                                                      \
+    } while (0)
+
+#endif

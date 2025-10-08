@@ -96,8 +96,8 @@ namespace
 
         if (size.x > 4'096 || size.y > 4'096)
         {
-          if (auto *logger = Log::GetGlobalLogger(); logger != nullptr)
-            logger->Error("Font atlas exceeded 4096 size");
+          KRYS_ERROR("Font atlas exceeded 4096 size");
+          KRYS_DEBUG_BREAK();
           return false;
         }
       }
@@ -106,7 +106,7 @@ namespace
     return true;
   }
 
-  BitmapLoadResult LoadBitmapAtlas(const IO::Path &path, double sizeInPixels, Log::ILogger *logger)
+  BitmapLoadResult LoadBitmapAtlas(const IO::Path &path, double sizeInPixels)
   {
     const int padding = 2; // pixels of padding around each glyph
 
@@ -117,44 +117,31 @@ namespace
     FT_Library fontLibraryHandle = nullptr;
     if (FT_Init_FreeType(&fontLibraryHandle))
     {
-      if (logger)
-      {
-        logger->Error("FREETYPE: Could not init FreeType Library");
-      }
+      KRYS_ERROR("FREETYPE: Could not init FreeType Library");
+      KRYS_DEBUG_BREAK();
       return result;
     }
 
-    if (logger)
-    {
-      logger->Info("FREETYPE: Loading bitmap font from '{}'", path.ToString());
-    }
+    KRYS_INFO("FREETYPE: Loading bitmap font from '{}'", path.ToString());
     FT_Face face {};
     if (FT_New_Face(fontLibraryHandle, path.ToString().c_str(), 0, &face))
     {
       FT_Done_FreeType(fontLibraryHandle);
-      if (logger)
-      {
-        logger->Error("FREETYPE: Failed to load font '{}'", path.ToString());
-      }
+      KRYS_ERROR("FREETYPE: Failed to load font '{}'", path.ToString());
       return result;
     }
 
-    if (logger)
-    {
-      logger->Info("FREETYPE: Loaded font.", path.ToString());
-      logger->Info("FREETYPE:   Family: {}", face->family_name);
-      logger->Info("FREETYPE:   Style: {}", face->style_name);
-      logger->Info("FREETYPE:   {} face(s) in font", face->num_faces);
-      logger->Info("FREETYPE: Setting font size to {}px", (uint32)sizeInPixels);
-    }
+    KRYS_INFO("FREETYPE: Loaded font.", path.ToString());
+    KRYS_INFO("FREETYPE:   Family: {}", face->family_name);
+    KRYS_INFO("FREETYPE:   Style: {}", face->style_name);
+    KRYS_INFO("FREETYPE:   {} face(s) in font", face->num_faces);
+    KRYS_INFO("FREETYPE: Setting font size to {}px", (uint32)sizeInPixels);
     if (FT_Set_Pixel_Sizes(face, 0, (uint32)sizeInPixels))
     {
       FT_Done_Face(face);
       FT_Done_FreeType(fontLibraryHandle);
-      if (logger)
-      {
-        logger->Error("FREETYPE: Failed to set font size {}px", (uint32)sizeInPixels);
-      }
+      KRYS_ERROR("FREETYPE: Failed to set font size {}px", (uint32)sizeInPixels);
+      KRYS_DEBUG_BREAK();
       return result;
     }
 
@@ -162,19 +149,13 @@ namespace
     {
       if (FT_Load_Char(face, c, FT_LOAD_RENDER))
       {
-        if (logger)
-        {
-          logger->Warn("FREETYPE: Failed to load glyph {}", (int)c);
-        }
+        KRYS_WARN("FREETYPE: Failed to load glyph {}", (int)c);
         continue;
       }
 
       if (face->glyph->bitmap.pixel_mode != FT_PIXEL_MODE_GRAY)
       {
-        if (logger)
-        {
-          logger->Warn("FREETYPE: Glyph {} not grayscale; skipping", (int)c);
-        }
+        KRYS_WARN("FREETYPE: Glyph {} not grayscale; skipping", (int)c);
         continue;
       }
 
@@ -209,10 +190,7 @@ namespace
     result.AtlasSize = {512, 512};
     if (!TryPack(result.Glyphs, result.AtlasSize))
     {
-      if (logger)
-      {
-        logger->Error("FREETYPE: Failed to pack glyphs for font '{}'", path.ToString());
-      }
+      KRYS_ERROR("FREETYPE: Failed to pack glyphs for font '{}'", path.ToString());
       KRYS_DEBUG_BREAK();
       return {};
     }
@@ -263,8 +241,7 @@ namespace
     return pixels;
   }
 
-  MTSDFResult LoadMTSDFAtlas(const IO::Path &path, Log::ILogger *logger, Gfx::FontType fontType,
-                             const SDFParams &params)
+  MTSDFResult LoadMTSDFAtlas(const IO::Path &path, Gfx::FontType fontType, const SDFParams &params)
   {
     MTSDFResult result {};
 
@@ -415,7 +392,6 @@ namespace Krys::Gfx::OpenGL
 
   FontHandle FontRegistry::Load(const IO::Path &path, float ptSize, FontType fontType) noexcept
   {
-    auto *logger = Log::GetGlobalLogger();
     double sizeInPixels = PtSizeToPixels(ptSize, _dpi);
 
     FontHandle handle;
@@ -425,20 +401,14 @@ namespace Krys::Gfx::OpenGL
       string key = std::format("{0}-{1}", path.ToString(), ptSize);
       if (auto cached = _cache.Get(key); cached.IsValid())
       {
-        if (logger)
-        {
-          logger->Debug("Font cache hit for '{}'", key);
-        }
+        KRYS_DEBUG("Font cache hit for '{}'", key);
         return cached;
       }
 
-      BitmapLoadResult result = LoadBitmapAtlas(path, sizeInPixels, logger);
+      BitmapLoadResult result = LoadBitmapAtlas(path, sizeInPixels);
       if (!result.Success)
       {
-        if (logger)
-        {
-          logger->Error("Failed to load font '{}'", path.ToString());
-        }
+        KRYS_ERROR("Failed to load font '{}'", path.ToString());
         return {};
       }
 
@@ -459,22 +429,16 @@ namespace Krys::Gfx::OpenGL
       string key = std::format("{0}-{1}", path.ToString(), stringifiedFontType);
       if (auto cached = _cache.Get(key); cached.IsValid())
       {
-        if (logger)
-        {
-          logger->Debug("Font cache hit for '{}'", key);
-        }
+        KRYS_DEBUG("Font cache hit for '{}'", key);
         return cached;
       }
 
       SDFParams params {};
-      MTSDFResult result = LoadMTSDFAtlas(path, logger, fontType, params);
+      MTSDFResult result = LoadMTSDFAtlas(path, fontType, params);
 
       if (!result.Success)
       {
-        if (logger)
-        {
-          logger->Error("Failed to load font '{}'", path.ToString());
-        }
+        KRYS_ERROR("Failed to load font '{}'", path.ToString());
         return {};
       }
 
@@ -508,8 +472,6 @@ namespace Krys::Gfx::OpenGL
 
     _dpi = dpi;
 
-    auto *logger = Log::GetGlobalLogger();
-
     // We want to preserve the validity of existing FontHandles, so we need to reload
     // all bitmap fonts at the new DPI in-place.
     for (auto &[key, resource] : _cache)
@@ -523,13 +485,10 @@ namespace Krys::Gfx::OpenGL
       }
 
       auto sizeInPixels = PtSizeToPixels(font.PtSize(), _dpi);
-      BitmapLoadResult result = LoadBitmapAtlas(font.Path(), sizeInPixels, logger);
+      BitmapLoadResult result = LoadBitmapAtlas(font.Path(), sizeInPixels);
       if (!result.Success)
       {
-        if (logger)
-        {
-          logger->Error("Failed to load font '{}'", font.Path().ToString());
-        }
+        KRYS_ERROR("Failed to load font '{}'", font.Path().ToString());
         KRYS_DEBUG_BREAK();
         continue;
       }

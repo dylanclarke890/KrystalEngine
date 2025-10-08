@@ -85,7 +85,7 @@ namespace
 
   const Krys::List<Krys::uint16> indices = {0, 1, 2, 2, 3, 0};
 
-#ifdef KRYS_DEBUG
+#ifdef KRYS_BUILD_DEBUG
   bool EnableValidationLayers = false;
 #else
   bool EnableValidationLayers = true;
