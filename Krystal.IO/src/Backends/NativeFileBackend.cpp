@@ -17,7 +17,7 @@ namespace Krys::IO
   {
     try
     {
-      return std::filesystem::exists((_root / path).Normalise().ToString());
+      return std::filesystem::exists((_root / path).Normalise().NativePath());
     }
     catch (...)
     {
@@ -29,7 +29,7 @@ namespace Krys::IO
   {
     try
     {
-      return std::filesystem::is_directory((_root / path).Normalise().ToString());
+      return std::filesystem::is_directory((_root / path).Normalise().NativePath());
     }
     catch (...)
     {
@@ -41,7 +41,7 @@ namespace Krys::IO
   {
     try
     {
-      return std::filesystem::is_regular_file((_root / path).Normalise().ToString());
+      return std::filesystem::is_regular_file((_root / path).Normalise().NativePath());
     }
     catch (...)
     {
@@ -51,7 +51,7 @@ namespace Krys::IO
 
   bool NativeFileBackend::CreateFile(const Path &path, bool overwriteExisting)
   {
-    const std::filesystem::path fullPath = (_root / path).Normalise().ToString();
+    const std::filesystem::path fullPath = (_root / path).Normalise().NativePath();
     if (!overwriteExisting && std::filesystem::exists(fullPath))
     {
       return false;
@@ -65,7 +65,7 @@ namespace Krys::IO
 
   bool NativeFileBackend::DeleteFile(const Path &path)
   {
-    const std::filesystem::path fullPath = (_root / path).ToString();
+    const std::filesystem::path fullPath = (_root / path).Normalise().NativePath();
     if (std::filesystem::exists(fullPath) && std::filesystem::is_regular_file(fullPath))
     {
       return std::filesystem::remove(fullPath);
@@ -78,7 +78,7 @@ namespace Krys::IO
   {
     try
     {
-      const std::filesystem::path fullPath = (_root / directory).ToString();
+      const std::filesystem::path fullPath = (_root / directory).Normalise().NativePath();
       if (!std::filesystem::is_directory(fullPath))
       {
         return {};
@@ -88,7 +88,7 @@ namespace Krys::IO
       {
         return SearchFiles<true>(fullPath, flags);
       }
-     
+
       return SearchFiles<false>(fullPath, flags);
     }
     catch (...)
@@ -102,7 +102,7 @@ namespace Krys::IO
   {
     if (Exists(path))
     {
-      IStreamReader *reader = new NativeFileReader(_root / path, flags);
+      IStreamReader *reader = new NativeFileReader((_root / path).Normalise(), flags);
       return Unique<IStreamReader>(reader);
     }
 
@@ -111,7 +111,7 @@ namespace Krys::IO
 
   Unique<IStreamWriter> NativeFileBackend::GetWriter(const Path &path, WriteFlags flags) const
   {
-    IStreamWriter *writer = new NativeFileWriter(_root / path, flags);
+    IStreamWriter *writer = new NativeFileWriter((_root / path).Normalise(), flags);
     return Unique<IStreamWriter>(writer);
   }
 }
