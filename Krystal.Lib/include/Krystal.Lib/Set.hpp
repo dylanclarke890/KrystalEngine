@@ -1,9 +1,9 @@
 #pragma once
 
-#include <set>
+#include <unordered_set>
 
 namespace Krys
 {
-  template <typename T, typename TComparer = std::less<T>>
-  using Set = std::set<T, TComparer>;
+  template <typename T, typename Hash = std::hash<T>, typename KeyEqual = std::equal_to<T>>
+  using Set = std::unordered_set<T, Hash, KeyEqual>;
 }
