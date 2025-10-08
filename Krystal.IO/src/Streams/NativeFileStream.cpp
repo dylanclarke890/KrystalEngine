@@ -38,13 +38,13 @@ namespace Krys::IO
 
     try
     {
-      const auto path = _path.ToString();
+      const auto &path = _path.NativePath();
       if (!std::filesystem::exists(path) || !std::filesystem::is_regular_file(path))
       {
         return false; // Cannot open a reader for a non-regular file
       }
 
-      _stream = std::ifstream(_path.ToString(), std::ios::in | std::ios::binary);
+      _stream = std::ifstream(_path.NativePath(), std::ios::in | std::ios::binary);
 
       _stream.seekg(std::streamoff(0), std::ios_base::end);
       const std::streampos end = _stream.tellg();
@@ -231,7 +231,7 @@ namespace Krys::IO
 
     std::error_code ioError;
 
-    auto path = _path.ToString();
+    const auto &path = _path.NativePath();
     auto status = fs::status(path, ioError);
 
     if (status.type() != fs::file_type::regular)
@@ -248,9 +248,9 @@ namespace Krys::IO
 
       // Ensure parent directories exist
       const Path parent = _path.ParentPath();
-      if (parent && !fs::exists(parent.ToString(), ioError))
+      if (parent && !fs::exists(parent.NativePath(), ioError))
       {
-        if (!fs::create_directories(parent.ToString(), ioError) || ioError)
+        if (!fs::create_directories(parent.NativePath(), ioError) || ioError)
         {
           return false; // Failed to create parent directories
         }
@@ -271,7 +271,7 @@ namespace Krys::IO
 
     try
     {
-      _stream = std::ofstream(_path.ToString(), openMode);
+      _stream = std::ofstream(_path.NativePath(), openMode);
 
       const std::streampos currentPosition = _stream.tellp();
       _stream.seekp(0, std::ios_base::end); // Move to the end to get size
