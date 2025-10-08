@@ -22,8 +22,9 @@ namespace Krys
   {
     _context->Events.reset();
     _context->Input.reset();
-    _context->Window.reset();
     _context->GraphicsContext.reset();
+    _context->VFS.reset();
+    _context->Window.reset();
     _context->Logger.reset();
     _context.reset();
 
@@ -48,9 +49,9 @@ namespace Krys
         _context->Events->DispatchAll();
 
         // Fixed update loop.
+        const double physicsStepMs = 1'000.0 / _context->Settings.PhysicsFramerate;
+        const uint32 maxPhysicsSteps = _context->Settings.MaxPhysicsUpdatesPerFrame;
         {
-          const auto physicsStepMs = 1'000.0 / _context->Settings.PhysicsFramerate;
-          const uint32 maxPhysicsSteps = _context->Settings.MaxPhysicsUpdatesPerFrame;
           uint32 physicsSteps = 0;
           while (accumulatedMs >= physicsStepMs && physicsSteps < maxPhysicsSteps)
           {
@@ -66,10 +67,9 @@ namespace Krys
           if (!_isWindowMinimised)
           {
             OnRender();
+            _context->GraphicsContext->Present();
           }
         }
-
-        _context->GraphicsContext->Present();
 
         // We'll only manually cap the frame rate if vsync is disabled.
         if (!_context->Settings.WindowSettings.VSync)
@@ -79,7 +79,8 @@ namespace Krys
 
         // Calculate the elapsed time since the last frame.
         elapsedMs = Platform::GetTimeMilliseconds() - startTime;
-        accumulatedMs += elapsedMs;
+        accumulatedMs = std::min(accumulatedMs + elapsedMs,
+                                 physicsStepMs * maxPhysicsSteps); // Cap to avoid spiral of death.
       }
     }
     OnShutdown();
@@ -104,7 +105,7 @@ namespace Krys
     auto logger = Log::CreateLogger(_context->Settings.GlobalLoggerSettings);
     if (!logger.has_value())
     {
-      throw new std::runtime_error("Failed to create logger: " + logger.error());
+      throw std::runtime_error("Failed to create logger: " + logger.error());
     }
     _context->Logger = std::move(logger.value());
     Log::SetGlobalLogger(_context->Logger);
@@ -112,29 +113,31 @@ namespace Krys
     _context->Events = CreateUnique<EventManager>();
     if (!_context->Events)
     {
-      throw new std::runtime_error("Failed to create event manager");
+      throw std::runtime_error("Failed to create event manager");
     }
 
     _context->Input = CreateUnique<Platform::Input>(_context->Events.get());
     if (!_context->Input)
     {
-      throw new std::runtime_error("Failed to create input manager");
+      throw std::runtime_error("Failed to create input manager");
     }
 
     auto window = Platform::CreateWindow(_context->Settings.WindowSettings);
     if (!window.has_value())
     {
-      throw new std::runtime_error("Failed to create window: " + window.error());
+      throw std::runtime_error("Failed to create window: " + window.error());
     }
     _context->Window = std::move(window.value());
 
     auto cwd = std::filesystem::current_path();
+    auto shaderDir = cwd / "data/shaders/opengl";
     _context->VFS = IO::VirtualFileSystemBuilder()
                       .Mount<IO::NativeFileBackend>(IO::Path("/"), IO::Path(cwd.string()))
+                      .Mount<IO::NativeFileBackend>(IO::Path("/shaders"), IO::Path(shaderDir.string()))
                       .Build();
     if (!_context->VFS)
     {
-      throw new std::runtime_error("Failed to create virtual file system");
+      throw std::runtime_error("Failed to create virtual file system");
     }
 
     Gfx::ContextSettings contextSettings {
@@ -146,7 +149,7 @@ namespace Krys
     auto gfxContext = Gfx::CreateContext(contextSettings);
     if (!gfxContext.has_value())
     {
-      throw new std::runtime_error("Failed to create graphics context: " + gfxContext.error());
+      throw std::runtime_error("Failed to create graphics context: " + gfxContext.error());
     }
     _context->GraphicsContext = std::move(gfxContext.value());
   }
