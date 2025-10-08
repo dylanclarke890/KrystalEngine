@@ -74,10 +74,12 @@ namespace Krys::IO
     auto b = other._path.lexically_normal();
 
     auto itA = a.begin();
-    for (auto itB = b.begin(); itB != b.end(); ++itB, ++itA)
+    for (auto itB = b.begin(); itB != b.end(); itB++, itA++)
     {
       if (itA == a.end() || *itA != *itB)
+      {
         return false;
+      }
     }
     return true;
   }

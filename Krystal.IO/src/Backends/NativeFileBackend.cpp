@@ -73,8 +73,8 @@ namespace Krys::IO
     return false; // File does not exist or is not a regular file
   }
 
-  List<VirtualDirectoryEntry> NativeFileBackend::GetDirectoryEntries(const Path &directory,
-                                                                     bool recursive) const noexcept
+  List<VFSFileEntry> NativeFileBackend::SearchFiles(const Path &directory,
+                                                    FileSearchFlags flags) const noexcept
   {
     try
     {
@@ -84,10 +84,16 @@ namespace Krys::IO
         return {};
       }
 
-      return recursive ? GetDirectoryEntriesRecursive(fullPath) : GetDirectoryEntries(fullPath);
+      if (!!(flags & FileSearchFlags::Recursive))
+      {
+        return SearchFiles<true>(fullPath, flags);
+      }
+     
+      return SearchFiles<false>(fullPath, flags);
     }
     catch (...)
     {
+      // TODO: Log error
       return {};
     }
   }
@@ -107,38 +113,5 @@ namespace Krys::IO
   {
     IStreamWriter *writer = new NativeFileWriter(_root / path, flags);
     return Unique<IStreamWriter>(writer);
-  }
-
-  List<VirtualDirectoryEntry>
-    NativeFileBackend::GetDirectoryEntries(const std::filesystem::path &fullPath) const
-  {
-    List<VirtualDirectoryEntry> entries;
-    for (const auto &entry : std::filesystem::directory_iterator(fullPath))
-    {
-      if (!entry.is_regular_file() && !entry.is_directory())
-      {
-        continue;
-      }
-
-      const uintmax_t fileSize = entry.is_regular_file() ? entry.file_size() : 0;
-      entries.emplace_back(Path(entry.path()).RelativePath(_root), fileSize, entry.is_directory());
-    }
-    return entries;
-  }
-
-  List<VirtualDirectoryEntry>
-    NativeFileBackend::GetDirectoryEntriesRecursive(const std::filesystem::path &fullPath) const
-  {
-    List<VirtualDirectoryEntry> entries;
-    for (const auto &entry : std::filesystem::recursive_directory_iterator(fullPath))
-    {
-      if (!entry.is_regular_file())
-      {
-        continue;
-      }
-
-      entries.emplace_back(Path(entry.path()).RelativePath(_root), entry.file_size(), false);
-    }
-    return entries;
   }
 }

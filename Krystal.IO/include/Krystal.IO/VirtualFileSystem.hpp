@@ -39,12 +39,12 @@ namespace Krys::IO
     template <DerivedFrom<IFileBackend> T, typename... Args>
     VirtualFileSystemBuilder &Mount(const Path &alias, Args &&...args)
     {
-      _mounts.emplace_back(FileBackend {alias, new T(std::forward<Args>(args)...), _insertionOrder++});
+      _mounts.emplace_back(alias.Normalise(), new T(std::forward<Args>(args)...), _insertionOrder++);
       return *this;
     }
 
     /// @brief Finalizes the virtual file system and returns it.
-    NO_DISCARD Unique<VirtualFileSystem> Build() noexcept;
+    NO_DISCARD Unique<VirtualFileSystem> Build();
   };
 
   /// @brief A virtual file system that can contain multiple backends, providing unified access to files
@@ -92,10 +92,10 @@ namespace Krys::IO
     bool DeleteFile(const Path &path) noexcept;
 
     /// @brief Gets a list of files from all backends that match the specified path.
-    /// @param path The directory to search for files.
-    /// @param recursive If true, searches recursively in subdirectories.
-    NO_DISCARD List<VirtualDirectoryEntry> GetDirectoryEntries(const Path &directory,
-                                                               bool recursive = false) const noexcept;
+    /// @param directory The directory to search.
+    /// @param flags Flags to control the search behavior.
+    NO_DISCARD List<VFSFileEntry> SearchFiles(const Path &directory,
+                                              FileSearchFlags flags = FileSearchFlags::None) const noexcept;
 
   private:
     friend class VirtualFileSystemBuilder;

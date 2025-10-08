@@ -80,19 +80,18 @@ namespace Krys::Tests
       std::ofstream(testDir + "/subdir/file2.txt").close();
 
       {
-        auto entries = backend.GetDirectoryEntries(Path(""));
-        REQUIRE(entries.size() == 2); // file1.txt and subdir
-        REQUIRE(std::any_of(entries.begin(), entries.end(),
-                            [](const auto &e) { return e.Path.Filename().ToString() == "file1.txt"; }));
+        auto entries = backend.SearchFiles(Path(""), FileSearchFlags::None);
+        REQUIRE(entries.size() == 1); // file1.txt
+        REQUIRE(entries[0].RelativePath.Filename().ToString() == "file1.txt");
       }
 
       {
-        auto entries = backend.GetDirectoryEntries(Path(""), true);
+        auto entries = backend.SearchFiles(Path(""), FileSearchFlags::Recursive);
         REQUIRE(entries.size() == 2); // file1.txt and file2.txt
-        REQUIRE(std::any_of(entries.begin(), entries.end(),
-                            [](const auto &e) { return e.Path.Filename().ToString() == "file1.txt"; }));
-        REQUIRE(std::any_of(entries.begin(), entries.end(),
-                            [](const auto &e) { return e.Path.Filename().ToString() == "file2.txt"; }));
+        REQUIRE(std::any_of(entries.begin(), entries.end(), [](const auto &e)
+                            { return e.RelativePath.Filename().ToString() == "file1.txt"; }));
+        REQUIRE(std::any_of(entries.begin(), entries.end(), [](const auto &e)
+                            { return e.RelativePath.Filename().ToString() == "file2.txt"; }));
       }
     }
 

@@ -7,22 +7,6 @@
 
 namespace Krys::IO
 {
-  enum class ReadFlags : uint8
-  {
-    None = 0,
-    OpenAtEnd = 1 << 0 // Open the file and move the read position to the end
-  };
-  ENUM_BITWISE_OPERATORS(ReadFlags)
-
-  enum class WriteFlags : uint8
-  {
-    None = 0,
-    Create = 1 << 0,   // Create the file if it does not exist
-    Truncate = 1 << 1, // Truncate the file to zero length if it already exists
-    OpenAtEnd = 1 << 2 // Open the file and move the write position to the end
-  };
-  ENUM_BITWISE_OPERATORS(WriteFlags)
-
   /// @brief Interface for reading from a stream.
   class IStreamReader
   {

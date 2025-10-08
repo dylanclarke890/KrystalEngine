@@ -5,9 +5,11 @@
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/SmartPointers.hpp"
+#include "Krystal.Lib/Types.hpp"
 
 namespace Krys::IO
 {
@@ -35,16 +37,48 @@ namespace Krys::IO
 
     bool DeleteFile(const Path &path) override;
 
-    NO_DISCARD List<VirtualDirectoryEntry>
-      GetDirectoryEntries(const Path &directory, bool recursive = false) const noexcept override;
+    NO_DISCARD List<VFSFileEntry> SearchFiles(const Path &directory,
+                                              FileSearchFlags flags) const noexcept override;
 
     NO_DISCARD Unique<IStreamReader> GetReader(const Path &path, ReadFlags flags) const override;
 
     NO_DISCARD Unique<IStreamWriter> GetWriter(const Path &path, WriteFlags flags) const override;
 
-  private:
-    List<VirtualDirectoryEntry> GetDirectoryEntries(const std::filesystem::path &fullPath) const;
+    NO_DISCARD const Path &Root() const noexcept override
+    {
+      return _root;
+    }
 
-    List<VirtualDirectoryEntry> GetDirectoryEntriesRecursive(const std::filesystem::path &fullPath) const;
+  private:
+    template <bool Recursive>
+    List<VFSFileEntry> SearchFiles(const std::filesystem::path &path, FileSearchFlags flags) const
+    {
+      namespace fs = std::filesystem;
+      using DirectoryIterator =
+        Conditional<Recursive, fs::recursive_directory_iterator, fs::directory_iterator>;
+
+      List<VFSFileEntry> entries;
+      for (const auto &entry : DirectoryIterator(path))
+      {
+        if (!entry.is_regular_file())
+        {
+          continue;
+        }
+
+        fs::perms permissions = entry.status().permissions();
+        const bool isReadOnly = (permissions & fs::perms::owner_write) == fs::perms::none;
+        if (isReadOnly && !!(flags & FileSearchFlags::ExcludeReadOnly))
+        {
+          continue;
+        }
+
+        const Path absolutePath = Path(entry.path());
+        const Path relativePath = absolutePath.RelativePath(_root);
+        const auto size = static_cast<uint64>(entry.file_size());
+
+        entries.emplace_back(absolutePath, relativePath, size, isReadOnly);
+      }
+      return entries;
+    }
   };
 }

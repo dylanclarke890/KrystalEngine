@@ -45,7 +45,7 @@ namespace Krys::Tests
     REQUIRE_FALSE(vfs->CreateFile(Path("/new_file.txt"), false)); // Should fail
     REQUIRE(vfs->DeleteFile(Path("/new_file.txt")));
 
-    auto entries = vfs->GetDirectoryEntries(Path("/data"));
+    auto entries = vfs->SearchFiles(Path("/data"));
     REQUIRE_FALSE(entries.empty());
 
     vfs->CreateFile(Path("/test_file.txt"));

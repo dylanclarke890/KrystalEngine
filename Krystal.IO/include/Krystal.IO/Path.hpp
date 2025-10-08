@@ -80,6 +80,11 @@ namespace Krys::IO
 
     /// @brief Converts the path to a platform-independent string (using '/' as separator).
     NO_DISCARD string ToString() const;
+
+    NO_DISCARD const std::filesystem::path &NativePath() const noexcept
+    {
+      return _path;
+    }
   };
 }
 
