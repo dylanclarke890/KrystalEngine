@@ -1,17 +1,17 @@
 #pragma once
 
+#include "Krystal.Debug/ScopedProfiler.hpp"
 #include "Krystal.Gfx.OpenGL/Shaders/Shader.hpp"
 #include "Krystal.Gfx/Common.hpp"
 #include "Krystal.Gfx/Registries/IShaderRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Gfx/ShaderPreprocessorConfig.hpp"
-#include "Krystal.IO/Streams/NativeFileStream.hpp"
 #include "Krystal.IO/Streams/StreamUtils.hpp"
+#include "Krystal.IO/VirtualFileSystem.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
 #include "Krystal.Lib/String.hpp"
-#include "Krystal.Debug/ScopedProfiler.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
@@ -23,11 +23,15 @@ namespace Krys::Gfx::OpenGL
     using ShaderHandleCache = ResourceHandleCache<string, ShaderHandle>;
 
   private:
+    IO::VirtualFileSystem &_vfs;
     ShaderManager _shaders;
     ShaderHandleCache _cache;
 
   public:
-    ShaderRegistry() = default;
+    ShaderRegistry(IO::VirtualFileSystem &vfs) noexcept : _vfs(vfs), _shaders(), _cache()
+    {
+    }
+
     ~ShaderRegistry() noexcept override = default;
 
     void Startup() noexcept override
@@ -128,10 +132,10 @@ namespace Krys::Gfx::OpenGL
       return handle;
     }
 
-    NO_DISCARD static string ReadFile(const IO::Path &filepath) noexcept
+    NO_DISCARD string ReadFile(const IO::Path &filepath) noexcept
     {
-      IO::NativeFileReader reader {filepath};
-      auto result = IO::StreamUtils::ReadAllText(reader);
+      Unique<IO::IStreamReader> reader = _vfs.GetReader(filepath, IO::ReadFlags::None);
+      auto result = IO::StreamUtils::ReadAllText(*reader);
       assert(result.has_value() && "Failed to read shader file.");
       return result.value();
     }

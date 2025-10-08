@@ -621,8 +621,9 @@ namespace Krys::Gfx::OpenGL
       : _windowHandle(settings.WindowHandle), _width(settings.Width), _height(settings.Height),
         _vfs(*settings.VFS), _dpi(Platform::GetDPIForWindow(_windowHandle)),
         _platformImpl(CreateUnique<ContextPlatformImpl>(settings.WindowHandle)), _images(),
-        _imageViews(_images), _samplers(), _shaders(), _meshes(), _textures(_images, _imageViews, _samplers),
-        _materials(_textures), _fonts(_dpi), _text(_fonts, _shaders, _dpi)
+        _imageViews(_images), _samplers(), _shaders(_vfs), _meshes(),
+        _textures(_images, _imageViews, _samplers), _materials(_textures), _fonts(_dpi),
+        _text(_fonts, _shaders, _dpi)
   {
   }
 
@@ -633,7 +634,7 @@ namespace Krys::Gfx::OpenGL
     // Shaders
     {
       using namespace IO;
-      Path base = Path("data/shaders/opengl");
+      Path base = Path("/shaders/");
 
       shaderHandles["model"] = _shaders.Load(base / Path("model.vert"), base / Path("model.frag"));
       shaderHandles["instanced-model"] =
