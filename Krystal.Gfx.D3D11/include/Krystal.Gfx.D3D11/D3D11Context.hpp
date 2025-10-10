@@ -1,9 +1,7 @@
 #pragma once
 
 #include "Krystal.Gfx/IContext.hpp"
-#include "Krystal.IO/Image.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
-
 #include <d3d11.h>
 
 #pragma comment(lib, "d3d11.lib")

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Krystal.Gfx/ICamera.hpp"
-#include "Krystal.IO/Image.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/NativeHandle.hpp"

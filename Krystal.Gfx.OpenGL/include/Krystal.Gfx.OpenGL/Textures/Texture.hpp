@@ -2,7 +2,7 @@
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx/Handle.hpp"
-#include "Krystal.IO/Image.hpp"
+#include "Krystal.IO/ImageLoader.hpp"
 #include "Krystal.Lib/Pair.hpp"
 #include "Krystal.Lib/Span.hpp"
 #include "Krystal.Lib/StronglyTypedBool.hpp"

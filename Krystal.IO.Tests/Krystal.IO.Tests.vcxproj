@@ -157,7 +157,7 @@
   <ItemGroup>
     <ClCompile Include="catch_main.cpp" />
     <ClCompile Include="tests\Backends\NativeFileBackend.cpp" />
-    <ClCompile Include="tests\Image.cpp" />
+    <ClCompile Include="tests\ImageLoader.cpp" />
     <ClCompile Include="tests\Streams\MemoryStream.cpp" />
     <ClCompile Include="tests\Streams\NativeFileStream.cpp" />
     <ClCompile Include="tests\Path.cpp" />

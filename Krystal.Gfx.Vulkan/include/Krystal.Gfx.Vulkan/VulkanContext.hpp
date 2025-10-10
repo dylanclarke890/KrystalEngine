@@ -2,7 +2,7 @@
 
 #include "Krystal.Gfx.Vulkan/Hooks/vulkan_hooks.hpp"
 #include "Krystal.Gfx/IContext.hpp"
-#include "Krystal.IO/Image.hpp"
+#include "Krystal.IO/ImageLoader.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
 #include "Krystal.Lib/Nullable.hpp"
 

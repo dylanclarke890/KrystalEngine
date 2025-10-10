@@ -20,7 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="include\Krystal.IO\IFileBackend.hpp" />
-    <ClCompile Include="src\Image.cpp" />
+    <ClCompile Include="src\ImageLoader.cpp" />
     <ClCompile Include="src\Path.cpp" />
     <ClCompile Include="src\Backends\NativeFileBackend.cpp" />
     <ClCompile Include="src\Streams\NativeFileStream.cpp" />
@@ -30,6 +30,7 @@
   <ItemGroup>
     <ClInclude Include="include\Krystal.IO\Backends\NativeFileBackend.hpp" />
     <ClInclude Include="include\Krystal.IO\Image.hpp" />
+    <ClInclude Include="include\Krystal.IO\ImageLoader.hpp" />
     <ClInclude Include="include\Krystal.IO\Streams\MemoryStream.hpp" />
     <ClInclude Include="include\Krystal.IO\Streams\NativeFileStream.hpp" />
     <ClInclude Include="include\Krystal.IO\Common.hpp" />

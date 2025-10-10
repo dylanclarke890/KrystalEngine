@@ -2,7 +2,6 @@
 
 #include "Krystal.Engine/Application.hpp"
 #include "Krystal.Gfx/Cameras/FirstPersonCamera.hpp"
-#include "Krystal.IO/Image.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include "Krystal.Maths/Convert.hpp"
 #include "Krystal.Platform/Events.hpp"

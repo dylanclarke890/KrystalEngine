@@ -33,7 +33,7 @@
     <ClCompile Include="tests\Streams\MemoryStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Image.cpp">
+    <ClCompile Include="tests\ImageLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

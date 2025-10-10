@@ -8,7 +8,7 @@
 #include "Krystal.Gfx/Registries/ITextureRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
-#include "Krystal.IO/Image.hpp"
+#include "Krystal.IO/ImageLoader.hpp"
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
 #include "Krystal.Lib/Macros.hpp"
@@ -63,13 +63,12 @@ namespace Krys::Gfx::OpenGL
       }
 
       Unique<IO::IStreamReader> stream = _vfs.GetReader(BaseDirectory / path, IO::ReadFlags::None);
-      auto imageResult = IO::LoadImage(*stream, {.FlipVertically = true});
+      IO::ImageLoader loader;
+      auto imageResult = loader.Load(*stream, {.FlipVertically = true});
       assert(imageResult.has_value() && "Failed to load texture image.");
       auto &image = *imageResult;
 
-      auto [internalFormat, dataFormat] = image.IsHDR   ? GetFloatTextureFormat(image.Channels, true)
-                                          : desc.IsSRGB ? GetSRGBTextureFormat(image.Channels)
-                                                        : GetLinearTextureFormat(image.Channels);
+      auto [internalFormat, dataFormat] = GetTextureFormat(image, desc);
 
       uint32 maxMipLevels =
         (desc.GenerateMipmaps ? GetMipLevels(desc.MaxMipLevels, image.Width, image.Height) : 1u);
@@ -84,7 +83,7 @@ namespace Krys::Gfx::OpenGL
         .ArrayLayers = 1,
       });
 
-      GLenum dataType = image.IsHDR ? GL_FLOAT : GL_UNSIGNED_BYTE;
+      GLenum dataType = image.DataType == IO::ImageDataType::Float ? GL_FLOAT : GL_UNSIGNED_BYTE;
       Image &img = _images.Get(imageHandle);
       img.UpdateData(image.Data, dataFormat, dataType);
 
@@ -123,21 +122,35 @@ namespace Krys::Gfx::OpenGL
         return existing;
       }
 
-      auto cubeMapResult = IO::LoadCubeMap(left, right, top, bottom, front, back, {.FlipVertically = false});
-      assert(cubeMapResult.has_value() && "Failed to load cubemap image.");
-      auto &cubeMap = *cubeMapResult;
+      Array<IO::Path, 6> paths {right, left, top, bottom, front, back};
+      List<IO::Image> images {};
+      IO::ImageLoader loader;
 
-      auto [internalFormat, dataFormat] =
-        desc.IsSRGB ? GetSRGBTextureFormat(cubeMap.Channels) : GetLinearTextureFormat(cubeMap.Channels);
+      for (const auto &path : paths)
+      {
+        Unique<IO::IStreamReader> stream = _vfs.GetReader(BaseDirectory / path, IO::ReadFlags::None);
+        assert(stream != nullptr && "Failed to open cubemap face image.");
+
+        auto imageResult = loader.Load(*stream, {.FlipVertically = false});
+        assert(imageResult.has_value() && "Failed to load cubemap face image.");
+
+        auto &image = *imageResult;
+        assert(image.Width == image.Height && "Cubemap face image must be square.");
+        assert(image.Channels >= 3 && image.Channels <= 4 && "Cubemap face image must have 3 or 4 channels.");
+
+        images.push_back(std::move(image));
+      }
+
+      auto [internalFormat, dataFormat] = GetTextureFormat(images[0], desc);
 
       uint32 maxMipLevels =
-        (desc.GenerateMipmaps ? GetMipLevels(desc.MaxMipLevels, cubeMap.Width, cubeMap.Height) : 1u);
+        (desc.GenerateMipmaps ? GetMipLevels(desc.MaxMipLevels, images[0].Width, images[0].Height) : 1u);
 
       ImageHandle imageHandle = _images.Create({
         .Type = ImageType::ImageCube,
         .Format = internalFormat,
-        .Width = (uint32)cubeMap.Width,
-        .Height = (uint32)cubeMap.Height,
+        .Width = (uint32)images[0].Width,
+        .Height = (uint32)images[0].Height,
         .Depth = 1,
         .MipLevels = maxMipLevels,
         .ArrayLayers = 6,
@@ -145,12 +158,10 @@ namespace Krys::Gfx::OpenGL
 
       GLenum dataType = GL_UNSIGNED_BYTE;
       Image &img = _images.Get(imageHandle);
-      img.UpdateData(GL_TEXTURE_CUBE_MAP_POSITIVE_X, cubeMap.Right, dataFormat, dataType);
-      img.UpdateData(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, cubeMap.Left, dataFormat, dataType);
-      img.UpdateData(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, cubeMap.Top, dataFormat, dataType);
-      img.UpdateData(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, cubeMap.Bottom, dataFormat, dataType);
-      img.UpdateData(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, cubeMap.Front, dataFormat, dataType);
-      img.UpdateData(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, cubeMap.Back, dataFormat, dataType);
+      for (int i = 0; i < 6; ++i)
+      {
+        img.UpdateData(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, images[i].Data, dataFormat, dataType);
+      }
 
       if (desc.GenerateMipmaps)
       {
@@ -224,6 +235,23 @@ namespace Krys::Gfx::OpenGL
         return mipLevels;
       }
       return static_cast<uint32>(std::floor(std::log2(std::max(width, height)))) + 1u;
+    }
+
+    static Pair<ImageFormat, GLenum> GetTextureFormat(const IO::Image &image,
+                                                      const TextureDesc &desc) noexcept
+    {
+      if (image.DataType == IO::ImageDataType::Float)
+      {
+        return GetFloatTextureFormat(image.Channels, true);
+      }
+      else if (desc.IsSRGB)
+      {
+        return GetSRGBTextureFormat(image.Channels);
+      }
+      else
+      {
+        return GetLinearTextureFormat(image.Channels);
+      }
     }
 
     static Pair<ImageFormat, GLenum> GetLinearTextureFormat(int channels) noexcept
