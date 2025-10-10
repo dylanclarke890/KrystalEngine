@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
-#include "Krystal.Gfx.OpenGL/Shaders/Shader.hpp"
+#include "Krystal.Gfx.OpenGL/Resources/Shader.hpp"
 #include "Krystal.Gfx/Light.hpp"
 #include "Krystal.Gfx/VertexBufferLayout.hpp"
 

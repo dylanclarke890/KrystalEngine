@@ -7,8 +7,8 @@
   #error "Unsupported platform for OpenGL context creation."
 #endif
 
-#include "Krystal.Gfx.OpenGL/Buffer.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
+#include "Krystal.Gfx.OpenGL/Resources/Buffer.hpp"
 #include "Krystal.Gfx.OpenGL/Utils.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/Light.hpp"

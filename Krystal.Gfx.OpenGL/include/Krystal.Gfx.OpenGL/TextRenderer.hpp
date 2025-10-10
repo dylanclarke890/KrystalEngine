@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Krystal.Gfx.OpenGL/Fonts/FontRegistry.hpp"
-#include "Krystal.Gfx.OpenGL/Shaders/ShaderRegistry.hpp"
+#include "Krystal.Gfx.OpenGL/Registries/FontRegistry.hpp"
+#include "Krystal.Gfx.OpenGL/Registries/ShaderRegistry.hpp"
 #include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"

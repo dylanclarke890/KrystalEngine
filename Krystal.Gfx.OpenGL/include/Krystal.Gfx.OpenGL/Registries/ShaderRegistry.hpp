@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Krystal.Debug/ScopedProfiler.hpp"
-#include "Krystal.Gfx.OpenGL/Shaders/Shader.hpp"
+#include "Krystal.Gfx.OpenGL/Resources/Shader.hpp"
 #include "Krystal.Gfx/Common.hpp"
 #include "Krystal.Gfx/Registries/IShaderRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"

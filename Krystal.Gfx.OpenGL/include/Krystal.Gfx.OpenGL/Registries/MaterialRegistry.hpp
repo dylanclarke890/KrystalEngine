@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Krystal.Gfx.OpenGL/Materials/Material.hpp"
-#include "Krystal.Gfx.OpenGL/Textures/TextureRegistry.hpp"
+#include "Krystal.Gfx.OpenGL/Registries/TextureRegistry.hpp"
+#include "Krystal.Gfx.OpenGL/Resources/Material.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Registries/IMaterialRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"

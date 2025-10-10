@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Krystal.Gfx.OpenGL/Meshes/Mesh.hpp"
+#include "Krystal.Gfx.OpenGL/Resources/Mesh.hpp"
 #include "Krystal.Gfx/Registries/IMeshRegistry.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"

@@ -39,52 +39,49 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Official\glcorearb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Shaders\Shader.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Shader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Textures\Texture.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Model.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Model.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Utils.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Buffer.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Buffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Textures\TextureRegistry.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Registries\TextureRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\gl.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Shaders\ShaderRegistry.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Registries\ShaderRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Meshes\MeshRegistry.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Registries\MeshRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Meshes\Mesh.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Mesh.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Samplers\SamplerRegistry.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Registries\SamplerRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Samplers\Sampler.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Sampler.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Materials\MaterialRegistry.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Registries\MaterialRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Materials\Material.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Material.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Fonts\FontRegistry.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Registries\FontRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Fonts\Font.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Font.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="third-party\stb\stb_rect_pack.h">
@@ -93,19 +90,19 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\TextRenderer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Images\Image.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Image.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\ImageViews\ImageView.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\ImageView.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Images\ImageRegistry.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Registries\ImageRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\ImageViews\ImageViewRegistry.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Registries\ImageViewRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Shaders\ShaderReflector.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\ShaderReflector.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

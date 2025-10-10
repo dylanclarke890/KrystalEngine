@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
-#include "Krystal.Gfx.OpenGL/Images/Image.hpp"
+#include "Krystal.Gfx.OpenGL/Resources/Image.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Registries/IImageRegistry.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"

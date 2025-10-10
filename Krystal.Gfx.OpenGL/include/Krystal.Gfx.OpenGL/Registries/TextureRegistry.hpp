@@ -1,13 +1,13 @@
 #pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
-#include "Krystal.Gfx.OpenGL/Images/ImageRegistry.hpp"
-#include "Krystal.Gfx.OpenGL/ImageViews/ImageViewRegistry.hpp"
-#include "Krystal.Gfx.OpenGL/Samplers/SamplerRegistry.hpp"
-#include "Krystal.Gfx.OpenGL/Textures/Texture.hpp"
+#include "Krystal.Gfx.OpenGL/Registries/ImageRegistry.hpp"
+#include "Krystal.Gfx.OpenGL/Registries/ImageViewRegistry.hpp"
+#include "Krystal.Gfx.OpenGL/Registries/SamplerRegistry.hpp"
 #include "Krystal.Gfx/Registries/ITextureRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
+#include "Krystal.Gfx/Resources/Texture.hpp"
 #include "Krystal.IO/ImageLoader.hpp"
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"

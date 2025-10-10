@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
-#include "Krystal.Gfx.OpenGL/Shaders/ShaderReflector.hpp"
+#include "Krystal.Gfx.OpenGL/ShaderReflector.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/String.hpp"
