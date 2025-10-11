@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Concepts.hpp"
 
 namespace Krys::Maths
 {
@@ -13,6 +13,10 @@ namespace Krys::Maths
     T Left, Right, Bottom, Top;
 
     constexpr BoundingBox() noexcept : Left(T(0)), Right(T(0)), Bottom(T(0)), Top(T(0))
+    {
+    }
+
+    constexpr BoundingBox(T width, T height) noexcept : Left(T(0)), Right(width), Bottom(T(0)), Top(height)
     {
     }
 
