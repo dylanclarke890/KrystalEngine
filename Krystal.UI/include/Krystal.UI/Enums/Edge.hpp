@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Krystal.Lib/Enum.hpp"
 #include "Krystal.Lib/Types.hpp"
 
 namespace Krys::UI
@@ -16,4 +17,13 @@ namespace Krys::UI
     Vertical,
     All
   };
+}
+
+namespace Krys
+{
+  template <>
+  constexpr int32 OrdinalCount<UI::Edge>()
+  {
+    return 9;
+  }
 }

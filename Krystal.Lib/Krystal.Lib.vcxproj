@@ -139,6 +139,10 @@
     <ClInclude Include="include\Krystal.Lib\DebugBreak.hpp" />
     <ClInclude Include="include\Krystal.Lib\Detection.hpp" />
     <ClInclude Include="include\Krystal.Lib\Endian.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Enum.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Expected.hpp" />
     <ClInclude Include="include\Krystal.Lib\Flags.hpp" />
     <ClInclude Include="include\Krystal.Lib\Func.hpp" />

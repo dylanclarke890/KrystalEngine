@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Krystal.Lib/Enum.hpp"
 #include "Krystal.Lib/Types.hpp"
 
 namespace Krys::UI
@@ -26,4 +27,13 @@ namespace Krys::UI
     /// Otherwise, equal to the max-content size in that axis.
     FitContent,
   };
+}
+
+namespace Krys
+{
+  template <>
+  constexpr int32 OrdinalCount<UI::SizingMode>()
+  {
+    return 3;
+  }
 }

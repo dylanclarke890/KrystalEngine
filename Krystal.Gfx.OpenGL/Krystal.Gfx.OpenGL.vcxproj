@@ -44,6 +44,7 @@
   <ItemGroup>
     <ClCompile Include="src\Context.cpp" />
     <ClCompile Include="third-party\stb\stb_rect_pack.cpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Renderer.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Buffer.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Font.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Registries\FontRegistry.hpp" />

@@ -22,6 +22,7 @@
     <ClInclude Include="include\Krystal.Gfx\Common.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Registries\IImageRegistry.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Registries\IImageViewRegistry.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\IRenderer.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Resources\Texture.hpp" />
     <ClInclude Include="include\Krystal.Gfx\TextShaderDesc.hpp" />
     <ClInclude Include="include\Krystal.Gfx\ResourceHandleCache.hpp" />

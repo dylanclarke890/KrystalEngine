@@ -129,8 +129,30 @@
   <ItemGroup>
     <ClInclude Include="include\Krystal.UI\Document.hpp" />
     <ClInclude Include="include\Krystal.UI\Element.hpp" />
+    <ClInclude Include="include\Krystal.UI\ElementPool.hpp" />
+    <ClInclude Include="include\Krystal.UI\Enums\Align.hpp" />
+    <ClInclude Include="include\Krystal.UI\Enums\BoxSizing.hpp" />
+    <ClInclude Include="include\Krystal.UI\Enums\Dimension.hpp" />
+    <ClInclude Include="include\Krystal.UI\Enums\Direction.hpp" />
+    <ClInclude Include="include\Krystal.UI\Enums\DisplayType.hpp" />
+    <ClInclude Include="include\Krystal.UI\Enums\Edge.hpp" />
+    <ClInclude Include="include\Krystal.UI\Enums\FlexDirection.hpp" />
+    <ClInclude Include="include\Krystal.UI\Enums\Gutter.hpp" />
+    <ClInclude Include="include\Krystal.UI\Enums\Justify.hpp" />
+    <ClInclude Include="include\Krystal.UI\Enums\MeasureMode.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Enums\Overflow.hpp" />
+    <ClInclude Include="include\Krystal.UI\Enums\PhysicalEdge.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Enums\Position.hpp" />
+    <ClInclude Include="include\Krystal.UI\Enums\SizingMode.hpp" />
     <ClInclude Include="include\Krystal.UI\LayoutEngine.hpp" />
     <ClInclude Include="include\Krystal.UI\Properties.hpp" />
+    <ClInclude Include="include\Krystal.UI\Unit.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Krystal.Gfx\Krystal.Gfx.vcxproj">

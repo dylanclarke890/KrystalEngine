@@ -486,6 +486,9 @@
     <ClInclude Include="include\Krystal.Gfx\Resources\Texture.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\IRenderer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Cameras\FirstPersonCamera.cpp">

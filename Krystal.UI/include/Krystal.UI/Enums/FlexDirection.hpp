@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Krystal.Lib/Enum.hpp"
 #include "Krystal.Lib/Types.hpp"
 
 namespace Krys::UI
@@ -11,4 +12,13 @@ namespace Krys::UI
     Row,
     RowReverse
   };
+}
+
+namespace Krys
+{
+  template <>
+  constexpr int32 OrdinalCount<UI::FlexDirection>()
+  {
+    return 4;
+  }
 }

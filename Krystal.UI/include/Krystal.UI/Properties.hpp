@@ -2,10 +2,13 @@
 
 #include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/Handle.hpp"
+#include "Krystal.Lib/Nullable.hpp"
 #include "Krystal.Lib/Types.hpp"
+#include "Krystal.UI/Unit.hpp"
 
 namespace Krys::UI
 {
+
   struct BoundingBox
   {
     float X;
@@ -43,60 +46,25 @@ namespace Krys::UI
     }
   };
 
-  struct EdgeValues
-  {
-    float Left {0.f};
-    float Right {0.f};
-    float Top {0.f};
-    float Bottom {0.f};
-
-    constexpr float Horizontal() const noexcept
-    {
-      return Left + Right;
-    }
-
-    constexpr float Vertical() const noexcept
-    {
-      return Top + Bottom;
-    }
-  };
-
-  enum class SizeUnitType : uint8
-  {
-    Points,     // 1/72 of an inch
-    Pixels,     // Device pixels
-    Percentage, // Relative to a parent dimension
-  };
-
-  struct SizeUnit
-  {
-    float Value {0.f};
-    SizeUnitType Type {SizeUnitType::Pixels};
-
-    constexpr SizeUnit(float value, SizeUnitType type) noexcept : Value(value), Type(type)
-    {
-    }
-  };
-
   struct Margin
   {
-    SizeUnit Top {0.f, SizeUnitType::Pixels};
-    SizeUnit Right {0.f, SizeUnitType::Pixels};
-    SizeUnit Bottom {0.f, SizeUnitType::Pixels};
-    SizeUnit Left {0.f, SizeUnitType::Pixels};
+    Unit Top {0.f, Unit::Pixels};
+    Unit Right {0.f, Unit::Pixels};
+    Unit Bottom {0.f, Unit::Pixels};
+    Unit Left {0.f, Unit::Pixels};
 
     constexpr Margin() noexcept = default;
 
-    constexpr Margin(SizeUnit all) noexcept : Top(all), Right(all), Bottom(all), Left(all)
+    constexpr Margin(Unit all) noexcept : Top(all), Right(all), Bottom(all), Left(all)
     {
     }
 
-    constexpr Margin(SizeUnit vertical, SizeUnit horizontal) noexcept
+    constexpr Margin(Unit vertical, Unit horizontal) noexcept
         : Top(vertical), Right(horizontal), Bottom(vertical), Left(horizontal)
     {
     }
 
-    constexpr Margin(SizeUnit top, SizeUnit right, SizeUnit bottom, SizeUnit left) noexcept
+    constexpr Margin(Unit top, Unit right, Unit bottom, Unit left) noexcept
         : Top(top), Right(right), Bottom(bottom), Left(left)
     {
     }
@@ -104,21 +72,21 @@ namespace Krys::UI
 
   struct Padding
   {
-    SizeUnit Top {0.f, SizeUnitType::Pixels};
-    SizeUnit Right {0.f, SizeUnitType::Pixels};
-    SizeUnit Bottom {0.f, SizeUnitType::Pixels};
-    SizeUnit Left {0.f, SizeUnitType::Pixels};
+    Unit Top {0.f, Unit::Pixels};
+    Unit Right {0.f, Unit::Pixels};
+    Unit Bottom {0.f, Unit::Pixels};
+    Unit Left {0.f, Unit::Pixels};
 
     constexpr Padding() noexcept = default;
 
-    constexpr Padding(SizeUnit all) noexcept : Top(all), Right(all), Bottom(all), Left(all)
+    constexpr Padding(Unit all) noexcept : Top(all), Right(all), Bottom(all), Left(all)
     {
     }
-    constexpr Padding(SizeUnit vertical, SizeUnit horizontal) noexcept
+    constexpr Padding(Unit vertical, Unit horizontal) noexcept
         : Top(vertical), Right(horizontal), Bottom(vertical), Left(horizontal)
     {
     }
-    constexpr Padding(SizeUnit top, SizeUnit right, SizeUnit bottom, SizeUnit left) noexcept
+    constexpr Padding(Unit top, Unit right, Unit bottom, Unit left) noexcept
         : Top(top), Right(right), Bottom(bottom), Left(left)
     {
     }
@@ -127,11 +95,11 @@ namespace Krys::UI
   struct BorderProperties
   {
     Gfx::Colour Colour {Gfx::Colours::Black};
-    SizeUnit Width {0.f, SizeUnitType::Pixels};
+    Unit Width {0.f, Unit::Pixels};
 
     constexpr BorderProperties() noexcept = default;
 
-    constexpr BorderProperties(Gfx::Colour colour, SizeUnit width) noexcept : Colour(colour), Width(width)
+    constexpr BorderProperties(Gfx::Colour colour, Unit width) noexcept : Colour(colour), Width(width)
     {
     }
   };
@@ -146,76 +114,76 @@ namespace Krys::UI
     constexpr Border() noexcept = default;
   };
 
-  enum class Anchor
+  struct Offsets
   {
-    TopLeft,
-    TopCenter,
-    TopRight,
-    CenterLeft,
-    Center,
-    CenterRight,
-    BottomLeft,
-    BottomCenter,
-    BottomRight
+    Unit Top {0.f, Unit::Pixels};
+    Unit Right {0.f, Unit::Pixels};
+    Unit Bottom {0.f, Unit::Pixels};
+    Unit Left {0.f, Unit::Pixels};
   };
 
-  struct TextStyle
+  struct TextStyles
   {
     Gfx::FontHandle Font {};
-    SizeUnit FontSize {16.f, SizeUnitType::Points};
+    Unit FontSize {16.f, Unit::Points};
     Gfx::Colour Colour {Gfx::Colours::Black};
-    bool Bold {false};
-    bool Italic {false};
-    bool Underline {false};
   };
 
   struct Properties
   {
     bool Visible {true};
-    Gfx::Colour BackgroundColour {Gfx::Colours::Transparent};
+    DisplayType Display {DisplayType::Flex};
+
+    FlexDir FlexDirection {FlexDir::Row};
+    Justify JustifyContent {Justify::Start};
+    Align AlignItems {Align::Start};
+    Align AlignSelf {Align::Start};
+    Unit Gap {0.f, Unit::Pixels};
+
+    Unit Width = Auto;
+    Unit Height = Auto;
 
     Margin Margin {};
     Padding Padding {};
     Border Border {};
 
-    TextStyle Text {};
+    Positioning Position {Positioning::Relative};
+    Offsets Offsets {};
+    int32 ZIndex {0};
 
-    SizeUnit Width {0.f, SizeUnitType::Pixels};
-    SizeUnit Height {0.f, SizeUnitType::Pixels};
-
-    Anchor AnchorPoint {Anchor::TopLeft};
-    SizeUnit RelativeX {0.f, SizeUnitType::Pixels};
-    SizeUnit RelativeY {0.f, SizeUnitType::Pixels};
+    Gfx::Colour BackgroundColour {Gfx::Colours::Transparent};
+    TextStyles TextStyles {};
 
     constexpr Properties() noexcept = default;
   };
 
-  struct ComputedLayout
+  struct ComputedSize
   {
-    EdgeValues Margin {};
-    EdgeValues Padding {};
-    EdgeValues BorderWidth {};
-    float FontSizePx {0.f};
+    Unit IntrinsicWidth  = {0.f, Unit::Pixels};
+    Unit IntrinsicHeight = {0.f, Unit::Pixels};
+    Unit ActualWidth = {0.f, Unit::Pixels};
+    Unit ActualHeight = {0.f, Unit::Pixels};
 
-    // size/position of content, minus padding, border and margin
-    BoundingBox Content {};
-
-    // size/position including padding, border and margin
-    BoundingBox Bounds {};
   };
 
-  constexpr SizeUnit operator"" _pt(long double value) noexcept
+  struct ComputedLayout
   {
-    return SizeUnit(static_cast<float>(value), SizeUnitType::Points);
-  }
+    Unit IntrinsicWidth = {0.f, Unit::Pixels};
+    Unit IntrinsicHeight = {0.f, Unit::Pixels};
+    Unit ActualWidth = {0.f, Unit::Pixels};
+    Unit ActualHeight = {0.f, Unit::Pixels};
 
-  constexpr SizeUnit operator"" _px(long double value) noexcept
-  {
-    return SizeUnit(static_cast<float>(value), SizeUnitType::Pixels);
-  }
+    Margin Margin {};
+    Padding Padding {};
+    Border BorderWidth {};
+    Offsets Offsets {};
+    Unit Gap = {0.f, Unit::Pixels};
 
-  constexpr SizeUnit operator"" _pct(long double value) noexcept
-  {
-    return SizeUnit(static_cast<float>(value), SizeUnitType::Percentage);
-  }
+    Gfx::Colour BackgroundColour {};
+    Unit FontSize = {0.f, Unit::Pixels};
+
+    float X {0.f};
+    float Y {0.f};
+    int32 ZIndex {0};
+  };
 }

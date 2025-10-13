@@ -1,90 +1,108 @@
 #pragma once
 
 #include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Queue.hpp"
 #include "Krystal.Maths/Vector.hpp"
 #include "Krystal.UI/Element.hpp"
+#include "Krystal.UI/ElementPool.hpp"
 
 namespace Krys::UI
 {
-  struct LayoutContext
-  {
-    BoundingBox Viewport {};
-    Maths::Vec2 ParentSize {0.f, 0.f};
-  };
+  // NOTE: shouldn't allow percentage for border
+  // NOTE: margin and padding percentage is relative to the parent width, not height
 
   class LayoutEngine
   {
     NO_COPY_MOVE(LayoutEngine)
 
+  private:
+    ElementPool &_elementPool;
+
   public:
-    LayoutEngine() noexcept = default;
+    LayoutEngine(ElementPool &elementPool) noexcept : _elementPool(elementPool)
+    {
+    }
 
     ~LayoutEngine() noexcept = default;
 
-    void ComputeLayout(Body &body, const BoundingBox &viewport) const
+    void ComputeLayout(Body &body, const BoundingBox &viewport)
     {
-      ComputeElementLayout(body, viewport);
-    }
-
-    float ResolveSizeUnit(const SizeUnit &sizeUnit, float parentSize) const noexcept
-    {
-      switch (sizeUnit.Type)
-      {
-        case SizeUnitType::Points:
-          // Assuming 96 DPI TODO: get from window events
-          return sizeUnit.Value * (96.f / 72.f);
-        case SizeUnitType::Percentage: return (sizeUnit.Value / 100.f) * parentSize;
-        case SizeUnitType::Pixels:
-        default:                       return sizeUnit.Value;
-      }
+      Measure(body, Unit(viewport.Width, Unit::Pixels), Unit(viewport.Height, Unit::Pixels));
     }
 
   private:
-    void ComputeElementLayout(Element &element, const BoundingBox &parentContentBounds) const
+    constexpr Unit ConvertToPixels(const Unit &unit, float reference = 0.f) const noexcept
     {
-      const float parentWidth = parentContentBounds.GetWidth();
-      const float parentHeight = parentContentBounds.GetHeight();
+      switch (unit.Type)
+      {
+        // TODO: Assumes 96 DPI for conversion
+        case Unit::Points:     return Unit(unit.Value * (96.0f / 72.0f), Unit::Pixels);
+        case Unit::Pixels:     return Unit(unit.Value, Unit::Pixels);
+        case Unit::Percentage: return Unit((reference * unit.Value) / 100.f, Unit::Pixels);
+        case Unit::Auto:
+        default:               return Auto; // Auto cannot be directly converted
+      }
+    }
 
-      const auto &props = element._properties;
-      auto &layout = element._layout;
+    void Measure(Element &element, Unit parentWidth, Unit parentHeight)
+    {
+      const Properties &props = element.GetProperties();
+      ComputedLayout &layout = element.ComputedLayout();
 
-      layout.Padding.Left = ResolveSizeUnit(props.Padding.Left, parentWidth);
-      layout.Padding.Right = ResolveSizeUnit(props.Padding.Right, parentWidth);
-      layout.Padding.Top = ResolveSizeUnit(props.Padding.Top, parentHeight);
-      layout.Padding.Bottom = ResolveSizeUnit(props.Padding.Bottom, parentHeight);
+      // TODO:
+      // if (props.Display == DisplayType::None)
+      //{
+      //  layout.Width = Unit(0.f, Unit::Pixels);
+      //  layout.Height = Unit(0.f, Unit::Pixels);
+      //}
 
-      layout.BorderWidth.Left = ResolveSizeUnit(props.Border.Left.Width, parentWidth);
-      layout.BorderWidth.Right = ResolveSizeUnit(props.Border.Right.Width, parentWidth);
-      layout.BorderWidth.Top = ResolveSizeUnit(props.Border.Top.Width, parentHeight);
-      layout.BorderWidth.Bottom = ResolveSizeUnit(props.Border.Bottom.Width, parentHeight);
+      if (props.Width.IsPercentage())
+      {
+        if (parentWidth.IsFixed())
+        {
+          layout.IntrinsicWidth = ConvertToPixels(props.Width, ConvertToPixels(parentWidth).Value);
+        }
+        else
+        {
+          layout.IntrinsicWidth = Auto; // Cannot resolve percentage, treat as Auto.
+        }
+      }
+      else if (props.Width.IsFixed())
+      {
+        layout.IntrinsicWidth = ConvertToPixels(props.Width);
+      }
+      else if (props.Width.IsAuto())
+      {
+        layout.IntrinsicWidth = Auto; // Auto, will be calculated later.
+      }
 
-      layout.Margin.Left = ResolveSizeUnit(props.Margin.Left, parentWidth);
-      layout.Margin.Right = ResolveSizeUnit(props.Margin.Right, parentWidth);
-      layout.Margin.Top = ResolveSizeUnit(props.Margin.Top, parentHeight);
-      layout.Margin.Bottom = ResolveSizeUnit(props.Margin.Bottom, parentHeight);
+      if (props.Height.IsPercentage())
+      {
+        if (parentHeight.IsFixed())
+        {
+          layout.IntrinsicHeight = ConvertToPixels(props.Height, ConvertToPixels(parentHeight).Value);
+        }
+        else
+        {
+          layout.IntrinsicHeight = Auto; // Cannot resolve percentage, treat as Auto.
+        }
+      }
+      else if (props.Height.IsFixed())
+      {
+        layout.IntrinsicHeight = ConvertToPixels(props.Height);
+      }
+      else if (props.Height.IsAuto())
+      {
+        layout.IntrinsicHeight = Auto; // Auto, will be calculated later.
+      }
 
-      // width and height specify the border-box size, includes border and padding.
-      const float borderBoxWidth = ResolveSizeUnit(props.Width, parentWidth);
-      const float borderBoxHeight = ResolveSizeUnit(props.Height, parentHeight);
+      // ... Calculate margin, padding, border, gap, font size, etc.
 
-      // get the total bounds by adding margin
-      const float boundsWidth = borderBoxWidth + layout.Margin.Horizontal();
-      const float boundsHeight = borderBoxHeight + layout.Margin.Vertical();
-
-      // get the content size by removing padding and border
-      const float contentWidth =
-        borderBoxWidth - layout.Padding.Horizontal() - layout.BorderWidth.Horizontal();
-      const float contentHeight = borderBoxHeight - layout.Padding.Vertical() - layout.BorderWidth.Vertical();
-
-      const float relativeX = ResolveSizeUnit(props.RelativeX, parentWidth);
-      const float relativeY = ResolveSizeUnit(props.RelativeY, parentHeight);
-
-      // TODO: anchor point, assume top-left for now
-      const float x = parentContentBounds.X + layout.Margin.Left + relativeX;
-      const float y = parentContentBounds.Y + layout.Margin.Top + relativeY;
-
-      layout.Bounds = {x, y, x + boundsWidth, y + boundsHeight};
-      layout.FontSizePx = ResolveSizeUnit(props.Text.FontSize, parentHeight);
+      for (const ElementHandle &childHandle : element.GetChildren())
+      {
+        Element *child = _elementPool.TryGet<Element>(childHandle);
+        Measure(*child, layout.IntrinsicWidth, layout.IntrinsicHeight);
+      }
     }
   };
 }
