@@ -30,9 +30,6 @@
     <ClInclude Include="include\Krystal.UI\ElementPool.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.UI\Unit.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.UI\Enums\DisplayType.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -75,9 +72,21 @@
     <ClInclude Include="include\Krystal.UI\Enums\PhysicalEdge.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Enums\Unit.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\UnitValue.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\ComparisonHelpers.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\placeholder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UnitValue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

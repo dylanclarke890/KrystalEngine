@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.UI\ComparisonHelpers.hpp" />
     <ClInclude Include="include\Krystal.UI\Document.hpp" />
     <ClInclude Include="include\Krystal.UI\Element.hpp" />
     <ClInclude Include="include\Krystal.UI\ElementPool.hpp" />
@@ -150,9 +151,13 @@
     </ClInclude>
     <ClInclude Include="include\Krystal.UI\Enums\Position.hpp" />
     <ClInclude Include="include\Krystal.UI\Enums\SizingMode.hpp" />
+    <ClInclude Include="include\Krystal.UI\Enums\Unit.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Krystal.UI\LayoutEngine.hpp" />
     <ClInclude Include="include\Krystal.UI\Properties.hpp" />
-    <ClInclude Include="include\Krystal.UI\Unit.hpp" />
+    <ClInclude Include="include\Krystal.UI\UnitValue.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Krystal.Gfx\Krystal.Gfx.vcxproj">
@@ -170,6 +175,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\placeholder.cpp" />
+    <ClCompile Include="src\UnitValue.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
