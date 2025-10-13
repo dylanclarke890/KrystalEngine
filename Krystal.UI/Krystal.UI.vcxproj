@@ -128,6 +128,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.UI\ComparisonHelpers.hpp" />
+    <ClInclude Include="include\Krystal.UI\Config\Config.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Krystal.UI\Document.hpp" />
     <ClInclude Include="include\Krystal.UI\Element.hpp" />
     <ClInclude Include="include\Krystal.UI\ElementPool.hpp" />
@@ -137,10 +141,22 @@
     <ClInclude Include="include\Krystal.UI\Enums\Direction.hpp" />
     <ClInclude Include="include\Krystal.UI\Enums\DisplayType.hpp" />
     <ClInclude Include="include\Krystal.UI\Enums\Edge.hpp" />
+    <ClInclude Include="include\Krystal.UI\Enums\Errata.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Enums\ExperimentalFeature.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Krystal.UI\Enums\FlexDirection.hpp" />
     <ClInclude Include="include\Krystal.UI\Enums\Gutter.hpp" />
     <ClInclude Include="include\Krystal.UI\Enums\Justify.hpp" />
     <ClInclude Include="include\Krystal.UI\Enums\MeasureMode.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Enums\NodeType.hpp">
       <SubType>
       </SubType>
     </ClInclude>
@@ -156,6 +172,10 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="include\Krystal.UI\LayoutEngine.hpp" />
+    <ClInclude Include="include\Krystal.UI\Node\Node.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Krystal.UI\Properties.hpp" />
     <ClInclude Include="include\Krystal.UI\UnitValue.hpp" />
   </ItemGroup>
@@ -168,6 +188,9 @@
     </ProjectReference>
     <ProjectReference Include="..\Krystal.Lib\Krystal.Lib.vcxproj">
       <Project>{38f26636-5d57-4740-a8d2-df219340309a}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Krystal.Log\Krystal.Log.vcxproj">
+      <Project>{dfd59bfd-d1ba-4f1d-ab1a-ecd50440d091}</Project>
     </ProjectReference>
     <ProjectReference Include="..\Krystal.Maths\Krystal.Maths.vcxproj">
       <Project>{2c0a90e5-aa87-46b7-b599-e56a9dd5047b}</Project>
