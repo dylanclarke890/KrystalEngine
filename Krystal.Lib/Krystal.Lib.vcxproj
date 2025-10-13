@@ -164,6 +164,7 @@
     <ClInclude Include="include\Krystal.Lib\RangeUtils.hpp" />
     <ClInclude Include="include\Krystal.Lib\OrderedSet.hpp" />
     <ClInclude Include="include\Krystal.Lib\Set.hpp" />
+    <ClInclude Include="include\Krystal.Lib\SmallValueBuffer.hpp" />
     <ClInclude Include="include\Krystal.Lib\SmartPointers.hpp" />
     <ClInclude Include="include\Krystal.Lib\Span.hpp" />
     <ClInclude Include="include\Krystal.Lib\Stack.hpp" />
