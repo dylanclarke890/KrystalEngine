@@ -113,45 +113,45 @@ namespace Krys::Tests
 
     REQUIRE(0 == NodeLayoutGetLeft(root));
     REQUIRE(0 == NodeLayoutGetTop(root));
-    REQUIRE(513== NodeLayoutGetWidth(root));
-    REQUIRE(506== NodeLayoutGetHeight(root));
+    REQUIRE(513 == NodeLayoutGetWidth(root));
+    REQUIRE(506 == NodeLayoutGetHeight(root));
 
-    REQUIRE(4==NodeLayoutGetLeft(root_child0));
-    REQUIRE(5==NodeLayoutGetTop(root_child0));
-    REQUIRE(500== NodeLayoutGetWidth(root_child0));
-    REQUIRE(500== NodeLayoutGetHeight(root_child0));
+    REQUIRE(4 == NodeLayoutGetLeft(root_child0));
+    REQUIRE(5 == NodeLayoutGetTop(root_child0));
+    REQUIRE(500 == NodeLayoutGetWidth(root_child0));
+    REQUIRE(500 == NodeLayoutGetHeight(root_child0));
 
-    REQUIRE(15== NodeLayoutGetLeft(root_child0_child0));
-    REQUIRE(21== NodeLayoutGetTop(root_child0_child0));
-    REQUIRE(200== NodeLayoutGetWidth(root_child0_child0));
-    REQUIRE(200== NodeLayoutGetHeight(root_child0_child0));
+    REQUIRE(15 == NodeLayoutGetLeft(root_child0_child0));
+    REQUIRE(21 == NodeLayoutGetTop(root_child0_child0));
+    REQUIRE(200 == NodeLayoutGetWidth(root_child0_child0));
+    REQUIRE(200 == NodeLayoutGetHeight(root_child0_child0));
 
-    REQUIRE(1== NodeLayoutGetLeft(root_child0_child0_child0));
-    REQUIRE(29== NodeLayoutGetTop(root_child0_child0_child0));
-    REQUIRE(200== NodeLayoutGetWidth(root_child0_child0_child0));
-    REQUIRE(306== NodeLayoutGetHeight(root_child0_child0_child0));
+    REQUIRE(1 == NodeLayoutGetLeft(root_child0_child0_child0));
+    REQUIRE(29 == NodeLayoutGetTop(root_child0_child0_child0));
+    REQUIRE(200 == NodeLayoutGetWidth(root_child0_child0_child0));
+    REQUIRE(306 == NodeLayoutGetHeight(root_child0_child0_child0));
 
     NodeCalculateLayout(root, Undefined, Undefined, Direction::RTL);
 
-    REQUIRE(0== NodeLayoutGetLeft(root));
-    REQUIRE(0== NodeLayoutGetTop(root));
-    REQUIRE(513== NodeLayoutGetWidth(root));
-    REQUIRE(506== NodeLayoutGetHeight(root));
+    REQUIRE(0 == NodeLayoutGetLeft(root));
+    REQUIRE(0 == NodeLayoutGetTop(root));
+    REQUIRE(513 == NodeLayoutGetWidth(root));
+    REQUIRE(506 == NodeLayoutGetHeight(root));
 
-    REQUIRE(4== NodeLayoutGetLeft(root_child0));
-    REQUIRE(5== NodeLayoutGetTop(root_child0));
-    REQUIRE(500== NodeLayoutGetWidth(root_child0));
-    REQUIRE(500== NodeLayoutGetHeight(root_child0));
+    REQUIRE(4 == NodeLayoutGetLeft(root_child0));
+    REQUIRE(5 == NodeLayoutGetTop(root_child0));
+    REQUIRE(500 == NodeLayoutGetWidth(root_child0));
+    REQUIRE(500 == NodeLayoutGetHeight(root_child0));
 
-    REQUIRE(279== NodeLayoutGetLeft(root_child0_child0));
-    REQUIRE(21== NodeLayoutGetTop(root_child0_child0));
-    REQUIRE(200== NodeLayoutGetWidth(root_child0_child0));
-    REQUIRE(200== NodeLayoutGetHeight(root_child0_child0));
+    REQUIRE(279 == NodeLayoutGetLeft(root_child0_child0));
+    REQUIRE(21 == NodeLayoutGetTop(root_child0_child0));
+    REQUIRE(200 == NodeLayoutGetWidth(root_child0_child0));
+    REQUIRE(200 == NodeLayoutGetHeight(root_child0_child0));
 
-    REQUIRE(-2== NodeLayoutGetLeft(root_child0_child0_child0));
-    REQUIRE(29== NodeLayoutGetTop(root_child0_child0_child0));
-    REQUIRE(200== NodeLayoutGetWidth(root_child0_child0_child0));
-    REQUIRE(306== NodeLayoutGetHeight(root_child0_child0_child0));
+    REQUIRE(-2 == NodeLayoutGetLeft(root_child0_child0_child0));
+    REQUIRE(29 == NodeLayoutGetTop(root_child0_child0_child0));
+    REQUIRE(200 == NodeLayoutGetWidth(root_child0_child0_child0));
+    REQUIRE(306 == NodeLayoutGetHeight(root_child0_child0_child0));
 
     // Relayout starts here
     NodeStyleSetWidth(root_child0, 456);
@@ -159,47 +159,47 @@ namespace Krys::Tests
 
     NodeCalculateLayout(root, Undefined, Undefined, Direction::LTR);
 
-    REQUIRE(0== NodeLayoutGetLeft(root));
-    REQUIRE(0== NodeLayoutGetTop(root));
-    REQUIRE(469== NodeLayoutGetWidth(root));
-    REQUIRE(438== NodeLayoutGetHeight(root));
+    REQUIRE(0 == NodeLayoutGetLeft(root));
+    REQUIRE(0 == NodeLayoutGetTop(root));
+    REQUIRE(469 == NodeLayoutGetWidth(root));
+    REQUIRE(438 == NodeLayoutGetHeight(root));
 
-    REQUIRE(4==NodeLayoutGetLeft(root_child0));
-    REQUIRE(5==NodeLayoutGetTop(root_child0));
-    REQUIRE(456==NodeLayoutGetWidth(root_child0));
-    REQUIRE(432==NodeLayoutGetHeight(root_child0));
+    REQUIRE(4 == NodeLayoutGetLeft(root_child0));
+    REQUIRE(5 == NodeLayoutGetTop(root_child0));
+    REQUIRE(456 == NodeLayoutGetWidth(root_child0));
+    REQUIRE(432 == NodeLayoutGetHeight(root_child0));
 
-    REQUIRE(15==NodeLayoutGetLeft(root_child0_child0));
-    REQUIRE(21==NodeLayoutGetTop(root_child0_child0));
-    REQUIRE(200==NodeLayoutGetWidth(root_child0_child0));
-    REQUIRE(200==NodeLayoutGetHeight(root_child0_child0));
+    REQUIRE(15 == NodeLayoutGetLeft(root_child0_child0));
+    REQUIRE(21 == NodeLayoutGetTop(root_child0_child0));
+    REQUIRE(200 == NodeLayoutGetWidth(root_child0_child0));
+    REQUIRE(200 == NodeLayoutGetHeight(root_child0_child0));
 
-    REQUIRE(1==NodeLayoutGetLeft(root_child0_child0_child0));
-    REQUIRE(29==NodeLayoutGetTop(root_child0_child0_child0));
-    REQUIRE(182==NodeLayoutGetWidth(root_child0_child0_child0));
-    REQUIRE(263==NodeLayoutGetHeight(root_child0_child0_child0));
+    REQUIRE(1 == NodeLayoutGetLeft(root_child0_child0_child0));
+    REQUIRE(29 == NodeLayoutGetTop(root_child0_child0_child0));
+    REQUIRE(182 == NodeLayoutGetWidth(root_child0_child0_child0));
+    REQUIRE(263 == NodeLayoutGetHeight(root_child0_child0_child0));
 
     NodeCalculateLayout(root, Undefined, Undefined, Direction::RTL);
 
-    REQUIRE(0== NodeLayoutGetLeft(root));
-    REQUIRE(0== NodeLayoutGetTop(root));
-    REQUIRE(469== NodeLayoutGetWidth(root));
-    REQUIRE(438== NodeLayoutGetHeight(root));
+    REQUIRE(0 == NodeLayoutGetLeft(root));
+    REQUIRE(0 == NodeLayoutGetTop(root));
+    REQUIRE(469 == NodeLayoutGetWidth(root));
+    REQUIRE(438 == NodeLayoutGetHeight(root));
 
-    REQUIRE(4== NodeLayoutGetLeft(root_child0));
-    REQUIRE(5== NodeLayoutGetTop(root_child0));
-    REQUIRE(456== NodeLayoutGetWidth(root_child0));
-    REQUIRE(432== NodeLayoutGetHeight(root_child0));
+    REQUIRE(4 == NodeLayoutGetLeft(root_child0));
+    REQUIRE(5 == NodeLayoutGetTop(root_child0));
+    REQUIRE(456 == NodeLayoutGetWidth(root_child0));
+    REQUIRE(432 == NodeLayoutGetHeight(root_child0));
 
-    REQUIRE(235== NodeLayoutGetLeft(root_child0_child0));
-    REQUIRE(21== NodeLayoutGetTop(root_child0_child0));
-    REQUIRE(200== NodeLayoutGetWidth(root_child0_child0));
-    REQUIRE(200== NodeLayoutGetHeight(root_child0_child0));
+    REQUIRE(235 == NodeLayoutGetLeft(root_child0_child0));
+    REQUIRE(21 == NodeLayoutGetTop(root_child0_child0));
+    REQUIRE(200 == NodeLayoutGetWidth(root_child0_child0));
+    REQUIRE(200 == NodeLayoutGetHeight(root_child0_child0));
 
-    REQUIRE(16== NodeLayoutGetLeft(root_child0_child0_child0));
-    REQUIRE(29== NodeLayoutGetTop(root_child0_child0_child0));
-    REQUIRE(182== NodeLayoutGetWidth(root_child0_child0_child0));
-    REQUIRE(263== NodeLayoutGetHeight(root_child0_child0_child0));
+    REQUIRE(16 == NodeLayoutGetLeft(root_child0_child0_child0));
+    REQUIRE(29 == NodeLayoutGetTop(root_child0_child0_child0));
+    REQUIRE(182 == NodeLayoutGetWidth(root_child0_child0_child0));
+    REQUIRE(263 == NodeLayoutGetHeight(root_child0_child0_child0));
 
     NodeDestroyRecursive(root);
 
@@ -249,6 +249,42 @@ namespace Krys::Tests
     REQUIRE(NodeGetHasNewLayout(root_child0));
     REQUIRE(NodeGetHasNewLayout(root_child0_child0));
     REQUIRE(NodeGetHasNewLayout(root_child0_child0_child0));
+
+    NodeDestroyRecursive(root);
+  }
+
+  static Size _measureRecalc(NodeConstRef node, float width, MeasureMode widthMode, float height,
+                             MeasureMode heightMode)
+  {
+    return Size {0, 0};
+  }
+
+  TEST_CASE("LayoutEngine::recalculate_on_layout_values_change", "[LayoutEngine]")
+  {
+    SKIP();
+
+    const ConfigRef config = ConfigCreate();
+    ConfigSetExperimentalFeatureEnabled(config, ExperimentalFeature::WebFlexBasis, true);
+    ConfigSetPointScaleFactor(config, 3.f);
+
+    const NodeRef root = NodeCreate(config);
+    NodeStyleSetFlexDirection(root, FlexDirection::Row);
+    NodeStyleSetAlignItems(root, Align::FlexStart);
+    NodeStyleSetAlignContent(root, Align::FlexStart);
+
+    const NodeRef child = NodeCreate(config);
+    NodeStyleSetMinHeightPercent(child, 40.f);
+    NodeStyleSetMaxHeightPercent(child, 60.f);
+    NodeStyleSetHeight(child, 10.f);
+    NodeStyleSetWidth(child, 50.0f);
+    NodeSetMeasureFunc(child, _measureRecalc);
+    NodeInsertChild(root, child, 0);
+
+    NodeCalculateLayout(root, 50.0f, Undefined, Direction::LTR);
+    REQUIRE(10 == NodeLayoutGetHeight(child));
+
+    NodeCalculateLayout(root, 50.0f, 30.0f, Direction::LTR);
+    REQUIRE(12 == NodeLayoutGetHeight(child));
 
     NodeDestroyRecursive(root);
   }

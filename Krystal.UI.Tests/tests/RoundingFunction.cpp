@@ -112,6 +112,31 @@ namespace Krys::Tests
     ConfigDestroy(config);
   }
 
+  // Regression test for https://github.com/facebook/yoga/issues/1860
+  TEST_CASE("LayoutEngine::roundLayoutResultsToPixelGrid_height_rounding_up", "[LayoutEngine]")
+  {
+    ConfigRef config = ConfigCreate();
+    ConfigSetPointScaleFactor(config, 3);
+
+    NodeRef node = NodeCreate(config);
+    NodeStyleSetPositionType(node, PositionType::Absolute);
+
+    // These are values extracted from a debugging session in a real iOS app
+    NodeStyleSetPosition(node, Edge::Left, 38.333333969116211f);
+    NodeStyleSetPosition(node, Edge::Top, 1970.3333333432674f);
+    NodeStyleSetWidth(node, 339.66665649414063f);
+    NodeStyleSetHeight(node, 96);
+    NodeSetNodeType(node, NodeType::Text);
+
+    NodeCalculateLayout(node, Undefined, Undefined, Direction::LTR);
+
+    // If this value is anything less than 96, iOS will not wrap the text to a 4th line
+    REQUIRE(NodeLayoutGetHeight(node) == 96.0f);
+
+    NodeDestroyRecursive(node);
+    ConfigDestroy(config);
+  }
+
   TEST_CASE("LayoutEngine::per_node_point_scale_factor", "[LayoutEngine]")
   {
     ConfigRef config1 = ConfigCreate();

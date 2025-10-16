@@ -3,8 +3,8 @@
 
 namespace Krys::UI
 {
-  float RoundValueToPixelGrid(const double value, const double pointScaleFactor, const bool forceCeil,
-                              const bool forceFloor)
+  static inline double RoundValueToPixelGridExact(const double value, const double pointScaleFactor,
+                                                  const bool forceCeil, const bool forceFloor)
   {
     double scaledValue = value * pointScaleFactor;
     // We want to calculate `fractial` such that `floor(scaledValue) = scaledValue - fractial`.
@@ -55,8 +55,15 @@ namespace Krys::UI
         + (!std::isnan(fractial) && (fractial > 0.5 || Krys::InexactEquals(fractial, 0.5)) ? 1.0 : 0.0);
     }
     return (std::isnan(scaledValue) || std::isnan(pointScaleFactor))
-             ? std::numeric_limits<float>::quiet_NaN()
-             : (float)(scaledValue / pointScaleFactor);
+             ? std::numeric_limits<double>::quiet_NaN()
+             : (scaledValue / pointScaleFactor);
+  }
+
+  float RoundValueToPixelGrid(const double value, const double pointScaleFactor, const bool forceCeil,
+                              const bool forceFloor)
+  {
+    const double exact = RoundValueToPixelGridExact(value, pointScaleFactor, forceCeil, forceFloor);
+    return static_cast<float>(exact);
   }
 
   void RoundLayoutResultsToPixelGrid(Node *const node, const double absoluteLeft, const double absoluteTop)
@@ -81,10 +88,10 @@ namespace Krys::UI
       // size as this could lead to unwanted text truncation.
       const bool textRounding = node->GetNodeType() == NodeType::Text;
 
-      node->SetLayoutPosition(RoundValueToPixelGrid(nodeLeft, pointScaleFactor, false, textRounding),
+      node->SetLayoutPosition((float)RoundValueToPixelGrid(nodeLeft, pointScaleFactor, false, textRounding),
                               PhysicalEdge::Left);
 
-      node->SetLayoutPosition(RoundValueToPixelGrid(nodeTop, pointScaleFactor, false, textRounding),
+      node->SetLayoutPosition((float)RoundValueToPixelGrid(nodeTop, pointScaleFactor, false, textRounding),
                               PhysicalEdge::Top);
 
       // We multiply dimension by scale factor and if the result is close to the
@@ -99,15 +106,17 @@ namespace Krys::UI
 
       node->GetLayout().SetDimension(
         Dimension::Width,
-        RoundValueToPixelGrid(absoluteNodeRight, pointScaleFactor, (textRounding && hasFractionalWidth),
-                              (textRounding && !hasFractionalWidth))
-          - RoundValueToPixelGrid(absoluteNodeLeft, pointScaleFactor, false, textRounding));
+        (float)(RoundValueToPixelGridExact(absoluteNodeRight, pointScaleFactor,
+                                           (textRounding && hasFractionalWidth),
+                                           (textRounding && !hasFractionalWidth))
+                - RoundValueToPixelGridExact(absoluteNodeLeft, pointScaleFactor, false, textRounding)));
 
       node->GetLayout().SetDimension(
         Dimension::Height,
-        RoundValueToPixelGrid(absoluteNodeBottom, pointScaleFactor, (textRounding && hasFractionalHeight),
-                              (textRounding && !hasFractionalHeight))
-          - RoundValueToPixelGrid(absoluteNodeTop, pointScaleFactor, false, textRounding));
+        (float)(RoundValueToPixelGridExact(absoluteNodeBottom, pointScaleFactor,
+                                           (textRounding && hasFractionalHeight),
+                                           (textRounding && !hasFractionalHeight))
+                - RoundValueToPixelGridExact(absoluteNodeTop, pointScaleFactor, false, textRounding)));
     }
 
     for (Node *child : node->GetChildren())

@@ -48,7 +48,7 @@ namespace Krys
   {
     if (IsDefined(a) && IsDefined(b))
     {
-      return std::abs(a - b) < 0.0001f;
+      return std::abs(a - b) < 1e-4f;
     }
     return IsUndefined(a) && IsUndefined(b);
   }
@@ -57,7 +57,7 @@ namespace Krys
   {
     if (IsDefined(a) && IsDefined(b))
     {
-      return std::abs(a - b) < 0.0001;
+      return std::abs(a - b) < 1e-4;
     }
     return IsUndefined(a) && IsUndefined(b);
   }
