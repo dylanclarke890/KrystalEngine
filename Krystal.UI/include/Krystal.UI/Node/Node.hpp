@@ -1,15 +1,10 @@
-/*
- * Copyright (c) Meta Platforms, Inc. and affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-
 #pragma once
 
 #include "Krystal.Lib/Array.hpp"
+#include "Krystal.Lib/Enum.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/NullableFloat.hpp"
+#include "Krystal.UI/Api/Forward.hpp"
 #include "Krystal.UI/Config/Config.hpp"
 #include "Krystal.UI/Enums/Dimension.hpp"
 #include "Krystal.UI/Enums/Direction.hpp"
@@ -27,6 +22,10 @@ namespace Krys::UI
 {
   class Node
   {
+    // assignment means potential leaks of existing children, or alternatively freeing unowned memory, double
+    // free, or freeing stack memory.
+    Node &operator=(const Node &) = delete;
+
   private:
     bool _hasNewLayout : 1 = true;
     bool _isReferenceBaseline : 1 = false;
@@ -45,90 +44,23 @@ namespace Krys::UI
     List<Node *> _children;
     const Config *_config;
     Array<Style::SizeLength, 2> _processedDimensions {
-      {StyleSizeLength::undefined(), StyleSizeLength::undefined()}};
+      {StyleSizeLength::Undefined(), StyleSizeLength::Undefined()}};
+    uint32 _testid;
+
+    inline static uint32 _nextTestId = 0;
 
   public:
     using LayoutableChildren = LayoutableChildren<Node>;
 
-    Node() noexcept;
+    Node();
 
-    explicit Node(const Config *config) noexcept;
+    explicit Node(const Config *config);
 
-    Node(Node &&node) noexcept;
+    Node(Node &&node);
 
     // Does not expose true value semantics, as children are not cloned eagerly.
-    // Should we remove this?
     Node(const Node &node) = default;
 
-    // assignment means potential leaks of existing children, or alternatively
-    // freeing unowned memory, double free, or freeing stack memory.
-    Node &operator=(const Node &) = delete;
-
-    // Getters
-    void *GetContext() const
-    {
-      return _context;
-    }
-
-    bool AlwaysFormsContainingBlock() const
-    {
-      return _alwaysFormsContainingBlock;
-    }
-
-    bool GetHasNewLayout() const
-    {
-      return _hasNewLayout;
-    }
-
-    NodeType GetNodeType() const
-    {
-      return _nodeType;
-    }
-
-    bool HasMeasureFunc() const noexcept
-    {
-      return _measureFunc != nullptr;
-    }
-
-    Size Measure(float availableWidth, MeasureMode widthMode, float availableHeight, MeasureMode heightMode);
-
-    bool hasBaselineFunc() const noexcept
-    {
-      return _baselineFunc != nullptr;
-    }
-
-    float Baseline(float width, float height) const;
-
-    float DimensionWithMargin(FlexDirection axis, float widthSize);
-
-    bool IsLayoutDimensionDefined(FlexDirection axis);
-
-    /**
-     * Whether the node has a "definite length" along the given axis.
-     * https://www.w3.org/TR/css-sizing-3/#definite
-     */
-    bool HasDefiniteLength(Dimension dimension, float ownerSize)
-    {
-      auto usedValue = GetProcessedDimension(dimension).resolve(ownerSize);
-      return usedValue.isDefined() && usedValue.unwrap() >= 0.0f;
-    }
-
-    bool HasErrata(Errata errata) const
-    {
-      return _config->HasErrata(errata);
-    }
-
-    bool HasContentsChildren() const
-    {
-      return _contentsChildrenCount != 0;
-    }
-
-    DirtiedFunc GetDirtiedFunc() const
-    {
-      return _dirtiedFunc;
-    }
-
-    // For Performance reasons passing as reference.
     Style &GetStyle()
     {
       return _style;
@@ -139,7 +71,11 @@ namespace Krys::UI
       return _style;
     }
 
-    // For Performance reasons passing as reference.
+    void SetStyle(const Style &style)
+    {
+      _style = style;
+    }
+
     LayoutResults &GetLayout()
     {
       return _layout;
@@ -150,9 +86,101 @@ namespace Krys::UI
       return _layout;
     }
 
+    void SetLayout(const LayoutResults &layout)
+    {
+      _layout = layout;
+    }
+
+    void *GetContext() const
+    {
+      return _context;
+    }
+
+    /// @brief Sets extra data on the node which may be read from during callbacks.
+    void SetContext(void *context)
+    {
+      _context = context;
+    }
+
+    bool HasBaselineFunc() const noexcept
+    {
+      return _baselineFunc != nullptr;
+    }
+
+    /// @brief Set a custom function for determining the text baseline for use in baseline alignment.
+    void SetBaselineFunc(BaselineFunc baseLineFunc)
+    {
+      _baselineFunc = baseLineFunc;
+    }
+
+    DirtiedFunc GetDirtiedFunc() const
+    {
+      return _dirtiedFunc;
+    }
+
+    void SetDirtiedFunc(DirtiedFunc dirtiedFunc)
+    {
+      _dirtiedFunc = dirtiedFunc;
+    }
+
+    /// @brief Allows providing custom measurements for a leaf node (usually for measuring text).
+    /// NodeMarkDirty() must be set if content effecting the measurements of the node changes.
+    void SetMeasureFunc(MeasureFunc measureFunc);
+
+    bool HasMeasureFunc() const noexcept
+    {
+      return _measureFunc != nullptr;
+    }
+
+    Size Measure(float availableWidth, MeasureMode widthMode, float availableHeight, MeasureMode heightMode);
+
+    float Baseline(float width, float height) const;
+
+    /// @brief Whether the node will always form a containing block for any descendant. This can happen in
+    /// situation where the client implements something like a transform that can affect containing blocks but
+    /// is not handled by the layout engine directly.
+    bool AlwaysFormsContainingBlock() const
+    {
+      return _alwaysFormsContainingBlock;
+    }
+
+    /// @brief Make it so that this node will always form a containing block for any descendant nodes. This is
+    /// useful for when a node has a property outside of of the layout engine that will form a containing
+    /// block. For example, transforms or some of the others listed in
+    /// https://developer.mozilla.org/en-US/docs/Web/CSS/Containing_block
+    void SetAlwaysFormsContainingBlock(bool alwaysFormsContainingBlock)
+    {
+      _alwaysFormsContainingBlock = alwaysFormsContainingBlock;
+    }
+
+    NodeType GetNodeType() const
+    {
+      return _nodeType;
+    }
+
+    void SetNodeType(NodeType nodeType)
+    {
+      _nodeType = nodeType;
+    }
+
+    bool GetHasNewLayout() const
+    {
+      return _hasNewLayout;
+    }
+
+    void SetHasNewLayout(bool hasNewLayout)
+    {
+      _hasNewLayout = hasNewLayout;
+    }
+
     size_t GetLineIndex() const
     {
       return _lineIndex;
+    }
+
+    void SetLineIndex(size_t lineIndex)
+    {
+      _lineIndex = lineIndex;
     }
 
     bool IsReferenceBaseline() const
@@ -160,18 +188,65 @@ namespace Krys::UI
       return _isReferenceBaseline;
     }
 
-    // returns the Node that owns this Node. An owner is used to identify
-    // the YogaTree that a Node belongs to. This method will return the parent
-    // of the Node when a Node only belongs to one YogaTree or nullptr when
-    // the Node is shared between two or more YogaTrees.
+    void SetIsReferenceBaseline(bool isReferenceBaseline)
+    {
+      _isReferenceBaseline = isReferenceBaseline;
+    }
+
+    /// @brief Returns the Node that owns this Node. An owner is used to identify the Tree that a Node belongs
+    /// to. This method will return the parent of the Node when a Node only belongs to one Tree or nullptr
+    /// when the Node is shared between two or more Trees.
     Node *GetOwner() const
     {
       return _owner;
     }
 
+    void SetOwner(Node *owner)
+    {
+      _owner = owner;
+    }
+
+    bool IsDirty() const
+    {
+      return _isDirty;
+    }
+
+    void SetDirty(bool isDirty);
+
+    const Config *GetConfig() const
+    {
+      return _config;
+    }
+
+    void SetConfig(Config *config);
+
     const List<Node *> &GetChildren() const
     {
       return _children;
+    }
+
+    void SetChildren(const List<Node *> &children);
+
+    float DimensionWithMargin(FlexDirection axis, float widthSize);
+
+    bool IsLayoutDimensionDefined(FlexDirection axis);
+
+    /// @brief Whether the node has a "definite length" along the given axis.
+    /// https://www.w3.org/TR/css-sizing-3/#definite
+    bool HasDefiniteLength(Dimension dimension, float ownerSize) const
+    {
+      auto usedValue = GetProcessedDimension(dimension).Resolve(ownerSize);
+      return usedValue.HasValue() && usedValue.Value() >= 0.0f;
+    }
+
+    bool HasErrata(Errata errata) const
+    {
+      return _config->HasErrata(errata);
+    }
+
+    bool HasContentsChildren() const
+    {
+      return _contentsChildrenCount != 0;
     }
 
     Node *GetChild(size_t index) const
@@ -206,16 +281,6 @@ namespace Krys::UI
       }
     }
 
-    const Config *GetConfig() const
-    {
-      return _config;
-    }
-
-    bool IsDirty() const
-    {
-      return _isDirty;
-    }
-
     Style::SizeLength GetProcessedDimension(Dimension dimension) const
     {
       return _processedDimensions[static_cast<size_t>(dimension)];
@@ -224,86 +289,21 @@ namespace Krys::UI
     NullableFloat GetResolvedDimension(Direction direction, Dimension dimension, float referenceLength,
                                        float ownerWidth) const
     {
-      NullableFloat value = GetProcessedDimension(dimension).resolve(referenceLength);
-      if (_style.boxSizing() == BoxSizing::BorderBox)
+      NullableFloat value = GetProcessedDimension(dimension).Resolve(referenceLength);
+      if (_style.GetBoxSizing() == BoxSizing::BorderBox)
       {
         return value;
       }
 
       NullableFloat dimensionPaddingAndBorder =
-        NullableFloat {_style.computePaddingAndBorderForDimension(direction, dimension, ownerWidth)};
+        NullableFloat {_style.ComputePaddingAndBorderForDimension(direction, dimension, ownerWidth)};
 
       return value + (dimensionPaddingAndBorder.HasValue() ? dimensionPaddingAndBorder : NullableFloat {0.0});
     }
 
-    // Setters
-
-    void SetContext(void *context)
-    {
-      _context = context;
-    }
-
-    void SetAlwaysFormsContainingBlock(bool alwaysFormsContainingBlock)
-    {
-      _alwaysFormsContainingBlock = alwaysFormsContainingBlock;
-    }
-
-    void SetHasNewLayout(bool hasNewLayout)
-    {
-      _hasNewLayout = hasNewLayout;
-    }
-
-    void SetNodeType(NodeType nodeType)
-    {
-      _nodeType = nodeType;
-    }
-
-    void SetMeasureFunc(MeasureFunc measureFunc);
-
-    void SetBaselineFunc(BaselineFunc baseLineFunc)
-    {
-      _baselineFunc = baseLineFunc;
-    }
-
-    void SetDirtiedFunc(DirtiedFunc dirtiedFunc)
-    {
-      _dirtiedFunc = dirtiedFunc;
-    }
-
-    void SetStyle(const Style &style)
-    {
-      _style = style;
-    }
-
-    void SetLayout(const LayoutResults &layout)
-    {
-      _layout = layout;
-    }
-
-    void SetLineIndex(size_t lineIndex)
-    {
-      _lineIndex = lineIndex;
-    }
-
-    void SetIsReferenceBaseline(bool isReferenceBaseline)
-    {
-      _isReferenceBaseline = isReferenceBaseline;
-    }
-
-    void SetOwner(Node *owner)
-    {
-      _owner = owner;
-    }
-
-    // TODO: rvalue override for setChildren
-
-    void SetConfig(Config *config);
-
-    void SetDirty(bool isDirty);
-    void SetChildren(const std::vector<Node *> &children);
     void SetLayoutLastOwnerDirection(Direction direction);
-    void SetLayoutComputedFlexBasis(FloatOptional computedFlexBasis);
-    void SetLayoutComputedFlexBasisGeneration(uint32_t computedFlexBasisGeneration);
+    void SetLayoutComputedFlexBasis(NullableFloat computedFlexBasis);
+    void SetLayoutComputedFlexBasisGeneration(uint32 computedFlexBasisGeneration);
     void SetLayoutMeasuredDimension(float measuredDimension, Dimension dimension);
     void SetLayoutHadOverflow(bool hadOverflow);
     void SetLayoutDimension(float lengthValue, Dimension dimension);
@@ -345,8 +345,8 @@ namespace Krys::UI
 
     void UseWebDefaults()
     {
-      _style.setFlexDirection(FlexDirection::Row);
-      _style.setAlignContent(Align::Stretch);
+      _style.SetFlexDirection(FlexDirection::Row);
+      _style.SetAlignContent(Align::Stretch);
     }
   };
 }

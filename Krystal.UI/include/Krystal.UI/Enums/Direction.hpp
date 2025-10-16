@@ -5,7 +5,7 @@
 
 namespace Krys::UI
 {
-  enum class Direction
+  enum class Direction : uint8
   {
     Inherit,
     LTR,
@@ -16,7 +16,7 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  constexpr int32 OrdinalCount<UI::Direction>()
+  constexpr uint32 OrdinalCount<UI::Direction>()
   {
     return 3;
   }

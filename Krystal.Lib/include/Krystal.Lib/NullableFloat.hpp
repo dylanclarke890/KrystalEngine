@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Krystal.Lib/ComparisonHelpers.hpp"
 #include <limits>
 
 namespace Krys
@@ -35,7 +36,7 @@ namespace Krys
   {
     return lhs.Value() == rhs.Value() || (!lhs.HasValue() && !rhs.HasValue());
   }
-  
+
   constexpr bool operator!=(NullableFloat lhs, NullableFloat rhs)
   {
     return !(lhs == rhs);
@@ -84,5 +85,15 @@ namespace Krys
   constexpr bool operator<=(NullableFloat lhs, NullableFloat rhs)
   {
     return lhs < rhs || lhs == rhs;
+  }
+
+  constexpr NullableFloat MaxOrDefined(NullableFloat lhs, NullableFloat rhs)
+  {
+    return NullableFloat {MaxOrDefined(lhs.Value(), rhs.Value())};
+  }
+
+  inline bool InexactEquals(NullableFloat lhs, NullableFloat rhs)
+  {
+    return InexactEquals(lhs.Value(), rhs.Value());
   }
 }

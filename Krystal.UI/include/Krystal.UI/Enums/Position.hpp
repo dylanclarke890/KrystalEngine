@@ -5,7 +5,7 @@
 
 namespace Krys::UI
 {
-  enum class Position : uint8
+  enum class PositionType : uint8
   {
     Static,
     Relative,
@@ -16,7 +16,7 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  constexpr int32 OrdinalCount<UI::Position>()
+  constexpr uint32 OrdinalCount<UI::PositionType>()
   {
     return 3;
   }

@@ -7,14 +7,14 @@ namespace Krys::UI
 {
   /// @brief Corresponds to CSS auto box sizes. Missing "min-content".
   /// https://www.w3.org/TR/css-sizing-3/#auto-box-sizes & https://www.w3.org/TR/css-flexbox-1/#min-size-auto
-  enum class SizingMode
+  enum class SizingMode : uint8
   {
     /// @brief The size a box would take if its outer size filled the available space in
     /// the given axis; in other words, the stretch fit into the available space,
     /// if that is definite. Undefined if the available space is indefinite.
     StretchFit,
 
-    /// @brief A box’s “ideal” size in a given axis when given infinite available space.
+    /// @brief A box's 'ideal' size in a given axis when given infinite available space.
     /// Usually this is the smallest size the box could take in that axis while
     /// still fitting around its contents, i.e. minimizing unfilled space while
     /// avoiding overflow.
@@ -32,7 +32,7 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  constexpr int32 OrdinalCount<UI::SizingMode>()
+  constexpr uint32 OrdinalCount<UI::SizingMode>()
   {
     return 3;
   }

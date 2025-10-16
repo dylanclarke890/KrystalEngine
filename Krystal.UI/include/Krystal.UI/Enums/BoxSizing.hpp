@@ -15,7 +15,7 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  constexpr int32 OrdinalCount<UI::BoxSizing>()
+  constexpr uint32 OrdinalCount<UI::BoxSizing>()
   {
     return 2;
   }

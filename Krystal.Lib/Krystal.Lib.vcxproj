@@ -135,6 +135,7 @@
     <ClInclude Include="include\Krystal.Lib\Attributes.hpp" />
     <ClInclude Include="include\Krystal.Lib\BitUtils.hpp" />
     <ClInclude Include="include\Krystal.Lib\ByteUtils.hpp" />
+    <ClInclude Include="include\Krystal.Lib\ComparisonHelpers.hpp" />
     <ClInclude Include="include\Krystal.Lib\Concepts.hpp" />
     <ClInclude Include="include\Krystal.Lib\DebugBreak.hpp" />
     <ClInclude Include="include\Krystal.Lib\Detection.hpp" />

@@ -5,7 +5,7 @@
 
 namespace Krys::UI
 {
-  enum class NodeType
+  enum class NodeType : uint8
   {
     Default,
     Text
@@ -15,7 +15,7 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  constexpr int32 OrdinalCount<UI::NodeType>()
+  constexpr uint32 OrdinalCount<UI::NodeType>()
   {
     return 2;
   }

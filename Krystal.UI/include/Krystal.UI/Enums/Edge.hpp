@@ -5,7 +5,7 @@
 
 namespace Krys::UI
 {
-  enum class Edge
+  enum class Edge : uint8
   {
     Left,
     Top,
@@ -22,7 +22,7 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  constexpr int32 OrdinalCount<UI::Edge>()
+  constexpr uint32 OrdinalCount<UI::Edge>()
   {
     return 9;
   }

@@ -149,6 +149,8 @@
   <ItemGroup>
     <ClCompile Include="catch_main.cpp" />
     <ClCompile Include="tests\BitUtils.cpp" />
+    <ClCompile Include="tests\NullableFloat.cpp" />
+    <ClCompile Include="tests\SmallValueBuffer.cpp" />
     <ClCompile Include="tests\StringUtils.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

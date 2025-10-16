@@ -5,7 +5,7 @@
 
 namespace Krys::UI
 {
-  enum class Dimension
+  enum class Dimension : uint8
   {
     Width,
     Height
@@ -15,7 +15,7 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  constexpr int32 OrdinalCount<UI::Dimension>()
+  constexpr uint32 OrdinalCount<UI::Dimension>()
   {
     return 2;
   }

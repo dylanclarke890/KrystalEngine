@@ -22,7 +22,7 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  constexpr int32 OrdinalCount<UI::Align>()
+  constexpr uint32 OrdinalCount<UI::Align>()
   {
     return 9;
   }

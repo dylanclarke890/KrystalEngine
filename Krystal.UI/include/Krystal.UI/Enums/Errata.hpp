@@ -5,7 +5,7 @@
 
 namespace Krys::UI
 {
-  enum class Errata
+  enum class Errata : uint8
   {
     None,
     StretchFlexBasis,

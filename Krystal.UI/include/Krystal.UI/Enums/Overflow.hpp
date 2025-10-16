@@ -5,7 +5,7 @@
 
 namespace Krys::UI
 {
-  enum class Overflow
+  enum class Overflow : uint8
   {
     Visible,
     Hidden,
@@ -16,7 +16,7 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  constexpr int32 OrdinalCount<UI::Overflow>()
+  constexpr uint32 OrdinalCount<UI::Overflow>()
   {
     return 3;
   }

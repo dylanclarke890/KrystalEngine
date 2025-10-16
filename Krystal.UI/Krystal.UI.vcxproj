@@ -127,14 +127,70 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.UI\ComparisonHelpers.hpp" />
+    <ClInclude Include="include\Krystal.UI\Algorithm\AbsoluteLayout.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Algorithm\Align.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Algorithm\Baseline.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Algorithm\BoundAxis.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Algorithm\Cache.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Algorithm\CalculateLayout.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Algorithm\FlexDirection.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Algorithm\FlexLine.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Algorithm\PixelGrid.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Algorithm\SizingMode.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Algorithm\TrailingPosition.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Api\Config.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Api\Node.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Api\NodeLayout.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Api\NodeStyle.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Krystal.UI\Config\Config.hpp">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="include\Krystal.UI\Document.hpp" />
-    <ClInclude Include="include\Krystal.UI\Element.hpp" />
-    <ClInclude Include="include\Krystal.UI\ElementPool.hpp" />
     <ClInclude Include="include\Krystal.UI\Enums\Align.hpp" />
     <ClInclude Include="include\Krystal.UI\Enums\BoxSizing.hpp" />
     <ClInclude Include="include\Krystal.UI\Enums\Dimension.hpp" />
@@ -171,12 +227,58 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="include\Krystal.UI\LayoutEngine.hpp" />
+    <ClInclude Include="include\Krystal.UI\Enums\Wrap.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Event\Event.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\LayoutEngine.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Node\CachedMeasurement.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Api\Forward.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Node\LayoutableChildren.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Node\LayoutResults.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Krystal.UI\Node\Node.hpp">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="include\Krystal.UI\Properties.hpp" />
+    <ClInclude Include="include\Krystal.UI\Style\Style.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Style\StyleLength.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Style\StyleSizeLength.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Style\StyleValueHandle.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Style\StyleValuePool.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Krystal.UI\UnitValue.hpp" />
   </ItemGroup>
   <ItemGroup>
@@ -197,7 +299,20 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\placeholder.cpp" />
+    <ClCompile Include="src\Algorithm\AbsoluteLayout.cpp" />
+    <ClCompile Include="src\Algorithm\Baseline.cpp" />
+    <ClCompile Include="src\Algorithm\Cache.cpp" />
+    <ClCompile Include="src\Algorithm\CalculcateLayout.cpp" />
+    <ClCompile Include="src\Algorithm\FlexLine.cpp" />
+    <ClCompile Include="src\Algorithm\PixelGrid.cpp" />
+    <ClCompile Include="src\Api\ConfigApi.cpp" />
+    <ClCompile Include="src\Api\NodeLayout.cpp" />
+    <ClCompile Include="src\Api\NodeStyle.cpp" />
+    <ClCompile Include="src\Config\Config.cpp" />
+    <ClCompile Include="src\Event\Event.cpp" />
+    <ClCompile Include="src\Api\NodeApi.cpp" />
+    <ClCompile Include="src\Node\LayoutResults.cpp" />
+    <ClCompile Include="src\Node\Node.cpp" />
     <ClCompile Include="src\UnitValue.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

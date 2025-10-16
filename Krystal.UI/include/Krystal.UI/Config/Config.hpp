@@ -2,9 +2,9 @@
 
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Types.hpp"
-#include "Krystal.Log/ILogger.hpp"
 #include <bitset>
 
+#include "Krystal.UI/Api/Forward.hpp"
 #include "Krystal.UI/Enums/Errata.hpp"
 #include "Krystal.UI/Enums/ExperimentalFeature.hpp"
 
@@ -12,13 +12,10 @@ namespace Krys::UI
 {
   using ExperimentalFeatureSet = std::bitset<OrdinalCount<ExperimentalFeature>()>;
 
-  typedef NodeRef (*CloneNodeFunc)(NodeConstRef oldNode, NodeConstRef owner, size_t childIndex);
-
-  class Config
+  struct Config
   {
   private:
     CloneNodeFunc _cloneNodeCallback {nullptr};
-    Log::ILogger *_logger {};
 
     bool _useWebDefaults : 1 = false;
 
@@ -29,12 +26,10 @@ namespace Krys::UI
     void *_context = nullptr;
 
   public:
-    explicit Config(Log::ILogger *logger) noexcept : _logger(logger)
-    {
-    }
+    Config() = default;
 
-    void SetUseWebDefaults(bool useWebDefaults) noexcept;
-    bool UseWebDefaults() const noexcept;
+    void SetUseWebDefaults(bool useWebDefaults);
+    bool UseWebDefaults() const;
 
     void SetExperimentalFeatureEnabled(ExperimentalFeature feature, bool enabled);
     bool IsExperimentalFeatureEnabled(ExperimentalFeature feature) const;
@@ -58,4 +53,7 @@ namespace Krys::UI
     NodeRef CloneNode(NodeConstRef node, NodeConstRef owner, size_t childIndex) const;
 
     static const Config &Defaults();
-  }
+  };
+
+  bool ConfigUpdateInvalidatesLayout(const Config &oldConfig, const Config &newConfig);
+}

@@ -5,25 +5,25 @@
 #include <cmath>
 #include <concepts>
 
-namespace Krys::UI
+namespace Krys
 {
-  constexpr bool IsUndefined(std::floating_point auto value)
+  constexpr bool IsUndefined(std::floating_point auto value) noexcept
   {
     return value != value;
   }
 
-  constexpr bool IsDefined(std::floating_point auto value)
+  constexpr bool IsDefined(std::floating_point auto value) noexcept
   {
     return !IsUndefined(value);
   }
 
-  constexpr bool IsInf(auto value)
+  constexpr bool IsInf(auto value) noexcept
   {
     return value == +std::numeric_limits<decltype(value)>::infinity()
            || value == -std::numeric_limits<decltype(value)>::infinity();
   }
 
-  constexpr auto MaxOrDefined(std::floating_point auto a, std::floating_point auto b)
+  constexpr auto MaxOrDefined(std::floating_point auto a, std::floating_point auto b) noexcept
   {
     if (IsDefined(a) && IsDefined(b))
     {
@@ -32,7 +32,7 @@ namespace Krys::UI
     return IsUndefined(a) ? b : a;
   }
 
-  constexpr auto MinOrDefined(std::floating_point auto a, std::floating_point auto b)
+  constexpr auto MinOrDefined(std::floating_point auto a, std::floating_point auto b) noexcept
   {
     if (IsDefined(a) && IsDefined(b))
     {
@@ -44,7 +44,7 @@ namespace Krys::UI
 
   // Custom equality functions using a hardcoded epsilon of 0.0001f, or returning
   // true if both floats are NaN.
-  inline bool InexactEquals(float a, float b)
+  inline bool InexactEquals(float a, float b) noexcept
   {
     if (IsDefined(a) && IsDefined(b))
     {
@@ -53,7 +53,7 @@ namespace Krys::UI
     return IsUndefined(a) && IsUndefined(b);
   }
 
-  inline bool InexactEquals(double a, double b)
+  inline bool InexactEquals(double a, double b) noexcept
   {
     if (IsDefined(a) && IsDefined(b))
     {
@@ -63,14 +63,13 @@ namespace Krys::UI
   }
 
   template <std::size_t Size, typename ElementT>
-  bool InexactEquals(const std::array<ElementT, Size> &val1, const std::array<ElementT, Size> &val2)
+  bool InexactEquals(const std::array<ElementT, Size> &a, const std::array<ElementT, Size> &b) noexcept
   {
     bool areEqual = true;
     for (std::size_t i = 0; i < Size && areEqual; ++i)
     {
-      areEqual = InexactEquals(val1[i], val2[i]);
+      areEqual = InexactEquals(a[i], b[i]);
     }
     return areEqual;
   }
-
 }

@@ -145,7 +145,45 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="catch_main.cpp" />
-    <ClCompile Include="tests\LayoutEngine.cpp" />
+    <ClCompile Include="tests\AlignBaseline.cpp" />
+    <ClCompile Include="tests\AspectRatio.cpp" />
+    <ClCompile Include="tests\BaselineFunc.cpp" />
+    <ClCompile Include="tests\CloneNode.cpp" />
+    <ClCompile Include="tests\ComputedMargin.cpp" />
+    <ClCompile Include="tests\ComputedPadding.cpp" />
+    <ClCompile Include="tests\Config.cpp" />
+    <ClCompile Include="tests\DefaultValues.cpp" />
+    <ClCompile Include="tests\Dirtied.cpp" />
+    <ClCompile Include="tests\DirtyMarking.cpp" />
+    <ClCompile Include="tests\Edge.cpp" />
+    <ClCompile Include="tests\Events.cpp" />
+    <ClCompile Include="tests\FlexGap.cpp" />
+    <ClCompile Include="tests\HadOverflow.cpp" />
+    <ClCompile Include="tests\LayoutableChildren.cpp" />
+    <ClCompile Include="tests\Measure.cpp" />
+    <ClCompile Include="tests\MeasureCache.cpp" />
+    <ClCompile Include="tests\MeasureMode.cpp" />
+    <ClCompile Include="tests\NodeCallback.cpp" />
+    <ClCompile Include="tests\NodeChild.cpp" />
+    <ClCompile Include="tests\Ordinals.cpp" />
+    <ClCompile Include="tests\Persistence.cpp" />
+    <ClCompile Include="tests\PersistentNodeCloning.cpp" />
+    <ClCompile Include="tests\Relayout.cpp" />
+    <ClCompile Include="tests\RoundingFunction.cpp" />
+    <ClCompile Include="tests\RoundingMeasureFunc.cpp" />
+    <ClCompile Include="tests\ScaleChange.cpp" />
+    <ClCompile Include="tests\Style.cpp" />
+    <ClCompile Include="tests\StyleValuePool.cpp" />
+    <ClCompile Include="tests\TreeMutation.cpp" />
+    <ClCompile Include="tests\UnitValue.cpp" />
+    <ClCompile Include="tests\utils\TestUtil.cpp" />
+    <ClCompile Include="tests\ZeroOutLayoutRecursively.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="tests\utils\TestUtil.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

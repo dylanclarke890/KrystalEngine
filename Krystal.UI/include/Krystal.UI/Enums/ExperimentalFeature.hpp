@@ -5,7 +5,7 @@
 
 namespace Krys::UI
 {
-  enum class ExperimentalFeature
+  enum class ExperimentalFeature : uint8
   {
     WebFlexBasis,
   };
@@ -14,7 +14,7 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  constexpr int32 OrdinalCount<UI::ExperimentalFeature>()
+  constexpr uint32 OrdinalCount<UI::ExperimentalFeature>()
   {
     return 1;
   }

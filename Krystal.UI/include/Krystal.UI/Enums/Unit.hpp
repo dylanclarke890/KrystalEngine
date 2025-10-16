@@ -5,7 +5,7 @@
 
 namespace Krys::UI
 {
-  enum class Unit
+  enum class Unit : uint8
   {
     Undefined,
     Point,
@@ -20,7 +20,7 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  constexpr int32 OrdinalCount<UI::Unit>()
+  constexpr uint32 OrdinalCount<UI::Unit>()
   {
     return 7;
   }

@@ -16,7 +16,7 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  constexpr int32 OrdinalCount<UI::MeasureMode>()
+  constexpr uint32 OrdinalCount<UI::MeasureMode>()
   {
     return 3;
   }
