@@ -45,9 +45,6 @@ namespace Krys::UI
     const Config *_config;
     Array<Style::SizeLength, 2> _processedDimensions {
       {StyleSizeLength::Undefined(), StyleSizeLength::Undefined()}};
-    uint32 _testid;
-
-    inline static uint32 _nextTestId = 0;
 
   public:
     using LayoutableChildren = LayoutableChildren<Node>;

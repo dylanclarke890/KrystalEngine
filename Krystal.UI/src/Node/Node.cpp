@@ -14,7 +14,6 @@ namespace Krys::UI
 
   Node::Node(const Config *config) : _config(config)
   {
-    _testid = _nextTestId++;
     assert(config != nullptr && "Attempting to construct Node with null config");
 
     if (config->UseWebDefaults())
