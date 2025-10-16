@@ -53,7 +53,7 @@ namespace Krys::UI
 
     explicit Node(const Config *config);
 
-    Node(Node &&node);
+    Node(Node &&node) noexcept;
 
     // Does not expose true value semantics, as children are not cloned eagerly.
     Node(const Node &node) = default;

@@ -22,7 +22,7 @@ namespace Krys::UI
     }
   }
 
-  Node::Node(Node &&node)
+  Node::Node(Node &&node) noexcept
       : _hasNewLayout(node._hasNewLayout), _isReferenceBaseline(node._isReferenceBaseline),
         _isDirty(node._isDirty), _alwaysFormsContainingBlock(node._alwaysFormsContainingBlock),
         _nodeType(node._nodeType), _context(node._context), _measureFunc(node._measureFunc),
