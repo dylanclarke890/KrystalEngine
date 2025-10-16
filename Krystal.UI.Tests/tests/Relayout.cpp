@@ -27,7 +27,7 @@ namespace Krys::Tests
     ConfigDestroy(config);
   }
 
-  TEST_CASE("LayoutEngine::recalculate_resolvedDimonsion_onchange", "[LayoutEngine]")
+  TEST_CASE("LayoutEngine::recalculate_resolvedDimension_onchange", "[LayoutEngine]")
   {
     NodeRef root = NodeCreate();
 

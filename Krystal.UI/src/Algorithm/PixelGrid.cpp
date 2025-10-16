@@ -98,12 +98,8 @@ namespace Krys::UI
       // whole number, we don't have any fraction To verify if the result is close
       // to whole number we want to check both floor and ceil numbers
 
-      const double scaledNodeWith = nodeWidth * pointScaleFactor;
-      const bool hasFractionalWidth = !Krys::InexactEquals(round(scaledNodeWith), scaledNodeWith);
-
-      const double scaledNodeHeight = nodeHeight * pointScaleFactor;
-      const bool hasFractionalHeight = !Krys::InexactEquals(round(scaledNodeHeight), scaledNodeHeight);
-
+      const double scaledNodeWidth = nodeWidth * pointScaleFactor;
+      const bool hasFractionalWidth = !Krys::InexactEquals(round(scaledNodeWidth), scaledNodeWidth);
       node->GetLayout().SetDimension(
         Dimension::Width,
         (float)(RoundValueToPixelGridExact(absoluteNodeRight, pointScaleFactor,
@@ -111,6 +107,8 @@ namespace Krys::UI
                                            (textRounding && !hasFractionalWidth))
                 - RoundValueToPixelGridExact(absoluteNodeLeft, pointScaleFactor, false, textRounding)));
 
+      const double scaledNodeHeight = nodeHeight * pointScaleFactor;
+      const bool hasFractionalHeight = !Krys::InexactEquals(round(scaledNodeHeight), scaledNodeHeight);
       node->GetLayout().SetDimension(
         Dimension::Height,
         (float)(RoundValueToPixelGridExact(absoluteNodeBottom, pointScaleFactor,
