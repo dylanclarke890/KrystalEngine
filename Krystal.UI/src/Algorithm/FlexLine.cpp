@@ -8,7 +8,7 @@ namespace Krys::UI
   FlexLine CalculateFlexLine(Node *const node, const Direction ownerDirection, const float ownerWidth,
                              const float mainAxisOwnerSize, const float availableInnerWidth,
                              const float availableInnerMainDim, Node::LayoutableChildren::Iterator &iterator,
-                             const size_t lineCount)
+                             const uint16 lineCount)
   {
     std::vector<Node *> itemsInFlow;
     itemsInFlow.reserve(node->GetChildCount());
@@ -99,11 +99,12 @@ namespace Krys::UI
     }
 
     return FlexLine {.ItemsInFlow = std::move(itemsInFlow),
+                     .Layout =
+                       FlexLineRunningLayout {
+                         totalFlexGrowFactors,
+                         totalFlexShrinkScaledFactors,
+                       },
                      .SizeConsumed = sizeConsumed,
-                     .NumberOfAutoMargins = numberOfAutoMargins,
-                     .Layout = FlexLineRunningLayout {
-                       totalFlexGrowFactors,
-                       totalFlexShrinkScaledFactors,
-                     }};
+                     .NumberOfAutoMargins = numberOfAutoMargins};
   }
 }

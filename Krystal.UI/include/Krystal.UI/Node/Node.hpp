@@ -32,14 +32,14 @@ namespace Krys::UI
     bool _isDirty : 1 = true;
     bool _alwaysFormsContainingBlock : 1 = false;
     NodeType _nodeType : BitCount<NodeType>() = NodeType::Default;
+    uint16 _lineIndex = 0;
+    uint16 _contentsChildrenCount = 0;
     void *_context = nullptr;
     MeasureFunc _measureFunc = nullptr;
     BaselineFunc _baselineFunc = nullptr;
     DirtiedFunc _dirtiedFunc = nullptr;
     Style _style;
     LayoutResults _layout;
-    size_t _lineIndex = 0;
-    size_t _contentsChildrenCount = 0;
     Node *_owner = nullptr;
     List<Node *> _children;
     const Config *_config;
@@ -170,12 +170,12 @@ namespace Krys::UI
       _hasNewLayout = hasNewLayout;
     }
 
-    size_t GetLineIndex() const
+    uint16 GetLineIndex() const
     {
       return _lineIndex;
     }
 
-    void SetLineIndex(size_t lineIndex)
+    void SetLineIndex(uint16 lineIndex)
     {
       _lineIndex = lineIndex;
     }
@@ -300,7 +300,7 @@ namespace Krys::UI
 
     void SetLayoutLastOwnerDirection(Direction direction);
     void SetLayoutComputedFlexBasis(NullableFloat computedFlexBasis);
-    void SetLayoutComputedFlexBasisGeneration(uint32 computedFlexBasisGeneration);
+    void SetLayoutComputedFlexBasisGeneration(uint16 computedFlexBasisGeneration);
     void SetLayoutMeasuredDimension(float measuredDimension, Dimension dimension);
     void SetLayoutHadOverflow(bool hadOverflow);
     void SetLayoutDimension(float lengthValue, Dimension dimension);

@@ -10,19 +10,16 @@
 
 namespace Krys::UI
 {
-  using ExperimentalFeatureSet = std::bitset<OrdinalCount<ExperimentalFeature>()>;
 
   struct Config
   {
   private:
-    CloneNodeFunc _cloneNodeCallback {nullptr};
-
     bool _useWebDefaults : 1 = false;
-
-    uint32 _version = 0;
-    ExperimentalFeatureSet _experimentalFeatures {};
+    ExperimentalFeature _experimentalFeatures : BitCount<ExperimentalFeature>() = ExperimentalFeature::None;
     Errata _errata = Errata::None;
+    uint16 _version = 0;
     float _pointScaleFactor = 1.0f;
+    CloneNodeFunc _cloneNodeCallback {nullptr};
     void *_context = nullptr;
 
   public:
@@ -33,7 +30,7 @@ namespace Krys::UI
 
     void SetExperimentalFeatureEnabled(ExperimentalFeature feature, bool enabled);
     bool IsExperimentalFeatureEnabled(ExperimentalFeature feature) const;
-    ExperimentalFeatureSet GetEnabledExperiments() const;
+    ExperimentalFeature GetEnabledExperiments() const;
 
     void SetErrata(Errata errata);
     void AddErrata(Errata errata);
@@ -47,7 +44,7 @@ namespace Krys::UI
     void SetContext(void *context);
     void *GetContext() const;
 
-    uint32_t GetVersion() const noexcept;
+    uint16 GetVersion() const noexcept;
 
     void SetCloneNodeCallback(CloneNodeFunc cloneNode);
     NodeRef CloneNode(NodeConstRef node, NodeConstRef owner, size_t childIndex) const;

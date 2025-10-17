@@ -241,7 +241,7 @@ namespace Krys::UI
     _layout.SetPosition(edge, position);
   }
 
-  void Node::SetLayoutComputedFlexBasisGeneration(uint32 computedFlexBasisGeneration)
+  void Node::SetLayoutComputedFlexBasisGeneration(uint16 computedFlexBasisGeneration)
   {
     _layout.ComputedFlexBasisGeneration = computedFlexBasisGeneration;
   }

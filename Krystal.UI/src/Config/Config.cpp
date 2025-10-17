@@ -26,17 +26,24 @@ namespace Krys::UI
   {
     if (IsExperimentalFeatureEnabled(feature) != enabled)
     {
-      _experimentalFeatures.set(static_cast<size_t>(feature), enabled);
+      if (enabled)
+      {
+        _experimentalFeatures = _experimentalFeatures | feature;
+      }
+      else
+      {
+        _experimentalFeatures = _experimentalFeatures & (~feature);
+      }
       _version++;
     }
   }
 
   bool Config::IsExperimentalFeatureEnabled(ExperimentalFeature feature) const
   {
-    return _experimentalFeatures.test(static_cast<size_t>(feature));
+    return (_experimentalFeatures & feature) != ExperimentalFeature::None;
   }
 
-  ExperimentalFeatureSet Config::GetEnabledExperiments() const
+  ExperimentalFeature Config::GetEnabledExperiments() const
   {
     return _experimentalFeatures;
   }
@@ -102,7 +109,7 @@ namespace Krys::UI
     return _context;
   }
 
-  uint32_t Config::GetVersion() const noexcept
+  uint16 Config::GetVersion() const noexcept
   {
     return _version;
   }

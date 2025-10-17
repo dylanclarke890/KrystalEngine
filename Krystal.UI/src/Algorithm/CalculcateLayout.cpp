@@ -21,7 +21,7 @@
 
 namespace Krys::UI
 {
-  std::atomic<uint32> gCurrentGenerationCount(0);
+  std::atomic<uint16> gCurrentGenerationCount(0);
 
   static void ConstrainMaxSizeForMode(const Node *node, Direction direction, FlexDirection axis,
                                       float ownerAxisSize, float ownerWidth,
@@ -51,7 +51,7 @@ namespace Krys::UI
                                        const SizingMode widthMode, const float height, const float ownerWidth,
                                        const float ownerHeight, const SizingMode heightMode,
                                        const Direction direction, LayoutData &layoutMarkerData,
-                                       const uint32_t depth, const uint32_t generationCount)
+                                       const uint32_t depth, const uint16 generationCount)
   {
     const FlexDirection mainAxis = ResolveDirection(node->GetStyle().GetFlexDirection(), direction);
     const bool isMainAxisRow = IsRow(mainAxis);
@@ -420,7 +420,7 @@ namespace Krys::UI
                                            SizingMode heightSizingMode, Direction direction,
                                            FlexDirection mainAxis, bool performLayout,
                                            LayoutData &layoutMarkerData, const uint32_t depth,
-                                           const uint32_t generationCount)
+                                           const uint16 generationCount)
   {
     float totalOuterFlexBasis = 0.0f;
     NodeRef singleFlexChild = nullptr;
@@ -500,7 +500,7 @@ namespace Krys::UI
     const Direction direction, const float ownerWidth, const float mainAxisOwnerSize,
     const float availableInnerMainDim, const float availableInnerCrossDim, const float availableInnerWidth,
     const float availableInnerHeight, const bool mainAxisOverflows, const SizingMode sizingModeCrossDim,
-    const bool performLayout, LayoutData &layoutMarkerData, const uint32 depth, const uint32 generationCount)
+    const bool performLayout, LayoutData &layoutMarkerData, const uint32 depth, const uint16 generationCount)
   {
     float childFlexBasis = 0;
     float flexShrinkScaledFactor = 0;
@@ -744,7 +744,7 @@ namespace Krys::UI
                                     const float availableInnerWidth, const float availableInnerHeight,
                                     const bool mainAxisOverflows, const SizingMode sizingModeCrossDim,
                                     const bool performLayout, LayoutData &layoutMarkerData,
-                                    const uint32 depth, const uint32 generationCount)
+                                    const uint32 depth, const uint16 generationCount)
   {
     const float originalFreeSpace = flexLine.Layout.RemainingFreeSpace;
     // First pass: detect the flex items whose min/max constraints trigger
@@ -984,7 +984,7 @@ namespace Krys::UI
                                   const SizingMode heightSizingMode, const float ownerWidth,
                                   const float ownerHeight, const bool performLayout,
                                   const LayoutPassReason reason, LayoutData &layoutMarkerData,
-                                  const uint32 depth, const uint32 generationCount)
+                                  const uint32 depth, const uint16 generationCount)
   {
     if (Krys::IsUndefined(availableWidth) && widthSizingMode != SizingMode::MaxContent)
     {
@@ -1154,7 +1154,7 @@ namespace Krys::UI
     Node::LayoutableChildren::Iterator startOfLineIterator = node->GetLayoutChildren().begin();
 
     // Number of lines.
-    size_t lineCount = 0;
+    uint16 lineCount = 0;
 
     // Accumulated cross dimensions of all lines so far.
     float totalLineCrossDim = 0;
@@ -1444,7 +1444,7 @@ namespace Krys::UI
         case Align::Baseline:  break;
       }
       Node::LayoutableChildren::Iterator endIterator = node->GetLayoutChildren().begin();
-      for (size_t i = 0; i < lineCount; i++)
+      for (size_t i = 0; i < static_cast<size_t>(lineCount); i++)
       {
         const Node::LayoutableChildren::Iterator startIterator = endIterator;
         auto iterator = startIterator;
@@ -1713,7 +1713,7 @@ namespace Krys::UI
                                Direction ownerDirection, SizingMode widthSizingMode,
                                SizingMode heightSizingMode, float ownerWidth, float ownerHeight,
                                bool performLayout, LayoutPassReason reason, LayoutData &layoutMarkerData,
-                               uint32 depth, uint32 generationCount)
+                               uint32 depth, uint16 generationCount)
   {
     LayoutResults *layout = &node->GetLayout();
 

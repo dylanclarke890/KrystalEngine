@@ -12,5 +12,5 @@ namespace Krys::UI
                                Direction ownerDirection, SizingMode widthSizingMode,
                                SizingMode heightSizingMode, float ownerWidth, float ownerHeight,
                                bool performLayout, LayoutPassReason reason, LayoutData &layoutMarkerData,
-                               uint32 depth, uint32 generationCount);
+                               uint32 depth, uint16 generationCount);
 }

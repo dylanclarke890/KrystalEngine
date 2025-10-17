@@ -35,6 +35,9 @@ namespace Krys::UI
     /// absolutely, or with `display: "none"`, and do not overflow the available dimensions.
     const List<Node *> ItemsInFlow {};
 
+    /// @brief Layout information about the line computed in steps after line-breaking
+    FlexLineRunningLayout Layout {};
+
     /// @brief Accumulation of the dimensions and margin of all the children on the current line. This will be
     /// used in order to either set the dimensions of the node if none already exist or to compute the
     /// remaining space left for the flexible children.
@@ -42,9 +45,6 @@ namespace Krys::UI
 
     /// @brief Number of edges along the line flow with an auto margin.
     const size_t NumberOfAutoMargins {0};
-
-    /// @brief Layout information about the line computed in steps after line-breaking
-    FlexLineRunningLayout Layout {};
   };
 
   /// @brief Calculates where a line starting at a given index should break, returning information about the
@@ -52,5 +52,5 @@ namespace Krys::UI
   /// ComputedFlexBasis properly computed (to do this use `ComputeFlexBasisForChildren()`).
   FlexLine CalculateFlexLine(Node *node, Direction ownerDirection, float ownerWidth, float mainAxisOwnerSize,
                              float availableInnerWidth, float availableInnerMainDim,
-                             Node::LayoutableChildren::Iterator &iterator, size_t lineCount);
+                             Node::LayoutableChildren::Iterator &iterator, uint16 lineCount);
 }

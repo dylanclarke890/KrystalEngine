@@ -8,17 +8,24 @@
 #include "Krystal.UI/Enums/Edge.hpp"
 #include "Krystal.UI/Enums/PhysicalEdge.hpp"
 #include "Krystal.UI/Node/CachedMeasurement.hpp"
+#include "Krystal.UI/Api/Forward.hpp"
 
 namespace Krys::UI
 {
   struct LayoutResults
   {
-    static inline float Undefined = std::numeric_limits<float>::quiet_NaN();
-
   private:
     Direction _direction : BitCount<Direction>() = Direction::Inherit;
     bool _hadOverflow : 1 = false;
 
+  public:
+    Direction LastOwnerDirection : BitCount<Direction>() = Direction::Inherit;
+    uint8 NextCachedMeasurementsIndex = 0;
+    uint16 GenerationCount = 0;
+    uint16 ConfigVersion = 0;
+    uint16 ComputedFlexBasisGeneration = 0;
+
+  private:
     Array<float, 2> _dimensions = {{Undefined, Undefined}};
     Array<float, 2> _measuredDimensions = {{Undefined, Undefined}};
     Array<float, 2> _rawDimensions = {{Undefined, Undefined}};
@@ -32,18 +39,11 @@ namespace Krys::UI
     // 98% of analyzed layouts require less than 8 entries.
     static constexpr int32 MaxCachedMeasurements = 8;
 
-    uint32 ComputedFlexBasisGeneration = 0;
     NullableFloat ComputedFlexBasis = {};
-
     // Instead of recomputing the entire layout every single time, we cache some
     // information to break early when nothing changed
-    uint32 GenerationCount = 0;
-    uint32 ConfigVersion = 0;
-    Direction LastOwnerDirection = Direction::Inherit;
 
-    uint32 NextCachedMeasurementsIndex = 0;
     Array<CachedMeasurement, MaxCachedMeasurements> CachedMeasurements = {};
-
     CachedMeasurement CachedLayout {};
 
     Direction GetDirection() const
