@@ -6,7 +6,7 @@
 #include "Krystal.Gfx.OpenGL/Registries/SamplerRegistry.hpp"
 #include "Krystal.Gfx/Registries/ITextureRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
-#include "Krystal.Gfx/ResourceManager.hpp"
+#include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx/Resources/Texture.hpp"
 #include "Krystal.IO/ImageLoader.hpp"
 #include "Krystal.IO/IStream.hpp"

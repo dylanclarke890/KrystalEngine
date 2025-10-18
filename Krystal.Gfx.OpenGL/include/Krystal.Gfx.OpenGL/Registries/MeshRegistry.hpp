@@ -1,8 +1,8 @@
 #pragma once
 
+#include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Mesh.hpp"
 #include "Krystal.Gfx/Registries/IMeshRegistry.hpp"
-#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
@@ -194,6 +194,27 @@ namespace Krys::Gfx::OpenGL
       };
 
       return Create(ByteUtils::AsBytesView(vertices), layout, PrimitiveType::TriangleStrip);
+    }
+
+    MeshHandle CreateQuad() noexcept
+    {
+      List<float> vertices = {
+        // positions        // texture coords
+        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
+        0.5f,  -0.5f, 0.0f, 1.0f, 0.0f, // bottom right
+        0.5f,  0.5f,  0.0f, 1.0f, 1.0f, // top right
+        -0.5f, 0.5f,  0.0f, 0.0f, 1.0f  // top left
+      };
+      List<uint> indices = {
+        0, 1, 2, // first triangle
+        2, 3, 0  // second triangle
+      };
+      VertexBufferLayout layout = {
+        {VertexAttributeType::Float, 3}, // position
+        {VertexAttributeType::Float, 2}  // texcoord
+      };
+      return Create(ByteUtils::AsBytesView(vertices), ByteUtils::AsBytesView(indices), layout,
+                    PrimitiveType::Triangles);
     }
 
     void Unload(MeshHandle handle) noexcept override

@@ -1,34 +1,40 @@
 #pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
-#include "Krystal.Lib/ByteUtils.hpp"
-#include "Krystal.Lib/Types.hpp"
 #include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/ByteUtils.hpp"
+#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Types.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
   using BufferData = Span<const byte>;
 
-  template <GLenum BufferType>
   class Buffer
   {
+    NO_COPY(Buffer)
+
+  private:
     GLuint _handle;
+    GLenum _bufferType;
 
   public:
-    Buffer(const BufferData &data, GLenum bufferUsage = GL_STATIC_DRAW) noexcept : _handle(0u)
+    Buffer(GLenum bufferType, const BufferData &data, GLenum bufferUsage = GL_STATIC_DRAW) noexcept
+        : _handle(0u), _bufferType(bufferType)
     {
       glCreateBuffers(1, &_handle);
       glNamedBufferData(_handle, data.size(), data.data(), bufferUsage);
     }
 
     template <typename T>
-    Buffer(const List<T> &data, GLenum bufferUsage = GL_STATIC_DRAW) noexcept
-        : Buffer(ByteUtils::AsBytesView(data), bufferUsage)
+    Buffer(GLenum bufferType, const List<T> &data, GLenum bufferUsage = GL_STATIC_DRAW) noexcept
+        : Buffer(bufferType, ByteUtils::AsBytesView(data), bufferUsage)
     {
     }
 
-    Buffer(size_t size, GLenum bufferUsage = GL_DYNAMIC_DRAW) noexcept : _handle(0u)
+    Buffer(GLenum bufferType, size_t size, GLenum bufferUsage = GL_DYNAMIC_DRAW) noexcept
+        : _handle(0u), _bufferType(bufferType)
     {
       glCreateBuffers(1, &_handle);
       glNamedBufferData(_handle, size, nullptr, bufferUsage);
@@ -39,20 +45,35 @@ namespace Krys::Gfx::OpenGL
       glDeleteBuffers(1, &_handle);
     }
 
+    Buffer(Buffer &&other)
+    {
+      Swap(std::move(other));
+    }
+
+    Buffer &operator=(Buffer &&other)
+    {
+      if (this != &other)
+      {
+        Swap(std::move(other));
+      }
+      return *this;
+    }
+
     void Bind() const noexcept
     {
-      glBindBuffer(BufferType, _handle);
+      glBindBuffer(_bufferType, _handle);
     }
 
     void Bind(uint32 index) const noexcept
-    requires(BufferType == GL_UNIFORM_BUFFER || BufferType == GL_SHADER_STORAGE_BUFFER)
     {
-      glBindBufferBase(BufferType, index, _handle);
+      assert((_bufferType == GL_UNIFORM_BUFFER || _bufferType == GL_SHADER_STORAGE_BUFFER)
+             && "Invalid buffer type.");
+      glBindBufferBase(_bufferType, index, _handle);
     }
 
     void Unbind() const noexcept
     {
-      glBindBuffer(BufferType, 0);
+      glBindBuffer(_bufferType, 0);
     }
 
     void Update(const BufferData &data, size_t offset = 0u) const noexcept
@@ -70,10 +91,12 @@ namespace Krys::Gfx::OpenGL
     {
       return _handle;
     }
-  };
 
-  using VertexBuffer = Buffer<GL_ARRAY_BUFFER>;
-  using IndexBuffer = Buffer<GL_ELEMENT_ARRAY_BUFFER>;
-  using UniformBuffer = Buffer<GL_UNIFORM_BUFFER>;
-  using ShaderStorageBuffer = Buffer<GL_SHADER_STORAGE_BUFFER>;
+  private:
+    void Swap(Buffer &&other)
+    {
+      std::swap(_handle, other._handle);
+      std::swap(_bufferType, other._bufferType);
+    }
+  };
 }

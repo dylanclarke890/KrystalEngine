@@ -4,11 +4,17 @@
 #include "Krystal.Gfx/TextShaderDesc.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Macros.hpp"
 
 namespace Krys::Gfx
 {
   class IShaderRegistry
   {
+    NO_COPY_MOVE(IShaderRegistry)
+
+  protected:
+    IShaderRegistry() noexcept = default;
+
   public:
     virtual ~IShaderRegistry() = default;
 

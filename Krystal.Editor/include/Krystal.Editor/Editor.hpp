@@ -13,6 +13,7 @@ namespace Krys
   {
   private:
     Gfx::FirstPersonCamera _camera;
+    UI::Document _document;
 
   public:
     explicit Editor(int argc, char **argv, const ApplicationSettings &settings) noexcept
@@ -32,6 +33,8 @@ namespace Krys
 
       BindEvents();
       _context->GraphicsContext->Setup();
+
+      SetupUI();
     }
 
     void BindEvents() noexcept
@@ -50,6 +53,13 @@ namespace Krys
           {
             _context->Logger->Info("ESC key pressed, quitting application...");
             Stop();
+          }
+
+          if (event.Key() == Platform::Key::Space && event.State() == Platform::KeyState::Pressed)
+          {
+            auto current = _document.GetBody().GetFlexDirection();
+            _document.GetBody().SetFlexDirection(current == UI::FlexDirection::Row ? UI::FlexDirection::Column
+                                                                                   : UI::FlexDirection::Row);
           }
 
           return true;
@@ -72,9 +82,44 @@ namespace Krys
         });
     }
 
+    void SetupUI()
+    {
+      using namespace Krys::UI;
+
+      auto testBoxHandle = _document.CreateElement<Element>();
+      auto testBoxHandle2 = _document.CreateElement<Element>();
+      auto testBoxHandle3 = _document.CreateElement<Element>();
+      _document.Add(testBoxHandle);
+      _document.Add(testBoxHandle2);
+      _document.Add(testBoxHandle3);
+
+      _document.GetBody().SetBackgroundColour(Gfx::Colours::White);
+      _document.GetBody().SetPadding(5);
+      _document.GetBody().SetFlexWrap(UI::FlexWrap::Wrap);
+
+      auto &testBox = _document.GetByHandle<Element>(testBoxHandle);
+      testBox.SetWidth(200.f);
+      testBox.SetHeight(200.f);
+      testBox.SetMargin(10);
+      testBox.SetBackgroundColour(Gfx::Colours::Blue);
+
+      auto &testBox2 = _document.GetByHandle<Element>(testBoxHandle2);
+      testBox2.SetWidth(300.f);
+      testBox2.SetHeight(300.f);
+      testBox2.SetBackgroundColour(Gfx::Colours::Red);
+
+      auto &testBox3 = _document.GetByHandle<Element>(testBoxHandle3);
+      testBox3.SetWidth(300.f);
+      testBox3.SetHeight(300.f);
+      testBox3.SetBackgroundColour(Gfx::Colours::Green);
+    }
+
     void OnRender() noexcept override
     {
       _context->GraphicsContext->Render(_camera);
+
+      _document.Layout((float)_context->Window->GetSize().Width, (float)_context->Window->GetSize().Height);
+      _context->GraphicsContext->Render(_document);
     }
 
     void OnUpdate(double deltaTime) noexcept override

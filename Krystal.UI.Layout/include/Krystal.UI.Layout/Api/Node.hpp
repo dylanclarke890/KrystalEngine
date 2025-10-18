@@ -90,7 +90,7 @@ namespace Krys::UI::Layout
   /// @brief Get the config currently set on the node.
   ConfigConstRef NodeGetConfig(NodeRef node);
 
-  /// @brief Sets extra data on the Yoga node which may be read from during callbacks.
+  /// @brief Sets extra data on the node which may be read from during callbacks.
   void NodeSetContext(NodeRef node, void *context);
 
   /// @brief Returns the context or NULL if no context has been set.

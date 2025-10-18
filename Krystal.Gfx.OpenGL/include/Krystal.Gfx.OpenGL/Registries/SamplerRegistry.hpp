@@ -4,7 +4,7 @@
 #include "Krystal.Gfx.OpenGL/Resources/Sampler.hpp"
 #include "Krystal.Gfx/Registries/ISamplerRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
-#include "Krystal.Gfx/ResourceManager.hpp"
+#include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/HashUtils.hpp"
 #include "Krystal.Lib/Macros.hpp"

@@ -3,6 +3,7 @@
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Macros.hpp"
 
 namespace Krys::Gfx
 {
@@ -15,6 +16,11 @@ namespace Krys::Gfx
 
   class ITextureRegistry
   {
+    NO_COPY_MOVE(ITextureRegistry)
+
+  protected:
+    ITextureRegistry() noexcept = default;
+
   public:
     virtual ~ITextureRegistry() = default;
 

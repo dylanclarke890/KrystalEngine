@@ -20,6 +20,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.Gfx\Common.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Registries\IBufferRegistry.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Krystal.Gfx\Registries\IImageRegistry.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Registries\IImageViewRegistry.hpp" />
     <ClInclude Include="include\Krystal.Gfx\IRenderer.hpp" />
@@ -27,7 +31,6 @@
     <ClInclude Include="include\Krystal.Gfx\TextShaderDesc.hpp" />
     <ClInclude Include="include\Krystal.Gfx\ResourceHandleCache.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Cameras\FirstPersonCamera.hpp" />
-    <ClInclude Include="include\Krystal.Gfx\Colour.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Handle.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Registries\IFontRegistry.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Registries\IMaterialRegistry.hpp" />
@@ -38,7 +41,6 @@
     <ClInclude Include="include\Krystal.Gfx\Light.hpp" />
     <ClInclude Include="include\Krystal.Gfx\ICamera.hpp" />
     <ClInclude Include="include\Krystal.Gfx\IContext.hpp" />
-    <ClInclude Include="include\Krystal.Gfx\ResourceManager.hpp" />
     <ClInclude Include="include\Krystal.Gfx\ShaderPreprocessorConfig.hpp" />
     <ClInclude Include="include\Krystal.Gfx\VertexBufferLayout.hpp" />
     <ClInclude Include="third-party\freetype\include\freetype\config\ftconfig.h" />
@@ -180,6 +182,9 @@
     <ClInclude Include="third-party\msdfgen\resource.h" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Krystal.Gfx.Lib\Krystal.Gfx.Lib.vcxproj">
+      <Project>{9033b349-4104-46b5-af4d-3ddedfc44176}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Krystal.IO\Krystal.IO.vcxproj">
       <Project>{85cea139-a547-4747-b050-05c8de66d591}</Project>
     </ProjectReference>
@@ -191,6 +196,9 @@
     </ProjectReference>
     <ProjectReference Include="..\Krystal.Platform\Krystal.Platform.vcxproj">
       <Project>{42e8c0a6-1f92-456b-a8b7-0050bfdf97e2}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Krystal.UI\Krystal.UI.vcxproj">
+      <Project>{0ca51a50-7e1a-45c7-a23f-986b0cff5a35}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

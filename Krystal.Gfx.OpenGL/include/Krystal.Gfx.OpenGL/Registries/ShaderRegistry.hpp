@@ -5,7 +5,7 @@
 #include "Krystal.Gfx/Common.hpp"
 #include "Krystal.Gfx/Registries/IShaderRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
-#include "Krystal.Gfx/ResourceManager.hpp"
+#include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx/ShaderPreprocessorConfig.hpp"
 #include "Krystal.IO/Streams/StreamUtils.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"

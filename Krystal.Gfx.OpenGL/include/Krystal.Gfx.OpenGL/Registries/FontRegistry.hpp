@@ -4,7 +4,7 @@
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Registries/IFontRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
-#include "Krystal.Gfx/ResourceManager.hpp"
+#include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/String.hpp"

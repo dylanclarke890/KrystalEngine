@@ -143,6 +143,9 @@
     <ProjectReference Include="..\Krystal.Engine\Krystal.Engine.vcxproj">
       <Project>{1169be54-100b-4d6a-830f-50b29301e1cc}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\Krystal.Gfx.Lib\Krystal.Gfx.Lib.vcxproj">
+      <Project>{9033b349-4104-46b5-af4d-3ddedfc44176}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Krystal.Gfx.OpenGL\Krystal.Gfx.OpenGL.vcxproj">
       <Project>{70dcee10-579e-44e3-b6a9-8fa5505f42d4}</Project>
     </ProjectReference>
@@ -166,6 +169,15 @@
     </ProjectReference>
     <ProjectReference Include="..\Krystal.Platform\Krystal.Platform.vcxproj">
       <Project>{42e8c0a6-1f92-456b-a8b7-0050bfdf97e2}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Krystal.UI.Elements\Krystal.UI.Elements.vcxproj">
+      <Project>{10a095c9-3475-40b8-b00e-a28400d458ea}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Krystal.UI.Layout\Krystal.UI.Layout.vcxproj">
+      <Project>{04dce3b3-a253-4119-87d3-384f67d9dfc8}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Krystal.UI\Krystal.UI.vcxproj">
+      <Project>{0ca51a50-7e1a-45c7-a23f-986b0cff5a35}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -260,6 +272,8 @@
     <None Include="data\shaders\opengl\basic.vert" />
     <None Include="data\shaders\opengl\text-shader.frag" />
     <None Include="data\shaders\opengl\text-shader.vert" />
+    <None Include="data\shaders\opengl\ui.frag" />
+    <None Include="data\shaders\opengl\ui.vert" />
     <None Include="data\shaders\opengl\visualise-normals.frag" />
     <None Include="data\shaders\opengl\visualise-normals.geo" />
     <None Include="data\shaders\opengl\visualise-normals.vert" />

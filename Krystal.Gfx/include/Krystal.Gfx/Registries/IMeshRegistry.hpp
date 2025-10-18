@@ -4,6 +4,7 @@
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/VertexBufferLayout.hpp"
 #include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Span.hpp"
 #include "Krystal.Lib/Types.hpp"
 
@@ -11,6 +12,11 @@ namespace Krys::Gfx
 {
   class IMeshRegistry
   {
+    NO_COPY_MOVE(IMeshRegistry)
+
+  protected:
+    IMeshRegistry() noexcept = default;
+
   public:
     virtual ~IMeshRegistry() = default;
 

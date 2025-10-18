@@ -140,6 +140,8 @@ namespace
   Map<string, ShaderHandle> shaderHandles;
   Map<string, MaterialHandle> materialHandles;
   Map<string, MeshHandle> meshHandles;
+  Map<string, BufferHandle> bufferHandles;
+  Map<string, GLuint> VAOs;
 
   Mat4 ScreenOrthoProjection;
   FontHandle DefaultBitmapFont;
@@ -148,7 +150,6 @@ namespace
   FontHandle DefaultMTSDFFont;
 
   Map<string, FrameBufferData> shadowMaps;
-  Map<string, Unique<UniformBuffer>> ubos;
 
   FrameBufferData pingPongFBOs[2];
 
@@ -620,7 +621,7 @@ namespace Krys::Gfx::OpenGL
   Context::Context(const ContextSettings &settings)
       : _windowHandle(settings.WindowHandle), _width(settings.Width), _height(settings.Height),
         _vfs(*settings.VFS), _dpi(Platform::GetDPIForWindow(_windowHandle)),
-        _platformImpl(CreateUnique<ContextPlatformImpl>(settings.WindowHandle)), _images(),
+        _platformImpl(CreateUnique<ContextPlatformImpl>(settings.WindowHandle)), _buffers(), _images(),
         _imageViews(_images), _samplers(), _shaders(_vfs), _meshes(),
         _textures(_vfs, _images, _imageViews, _samplers), _materials(_textures), _fonts(_dpi),
         _text(_fonts, _shaders, _dpi)
@@ -692,6 +693,8 @@ namespace Krys::Gfx::OpenGL
       shaderHandles["prefilter"] = _shaders.Load(Path("11/cubemap.vert"), Path("11/prefilter.frag"));
       shaderHandles["brdf"] = _shaders.Load(Path("11/brdf.vert"), Path("11/brdf.frag"));
       shaderHandles["hdr-background"] = _shaders.Load(Path("11/background.vert"), Path("11/background.frag"));
+
+      shaderHandles["ui"] = _shaders.Load(Path("ui.vert"), Path("ui.frag"));
     }
 
     {
@@ -717,6 +720,7 @@ namespace Krys::Gfx::OpenGL
     meshHandles["cube"] = _meshes.CreateCube();
     meshHandles["sphere"] = _meshes.CreateSphere();
     meshHandles["screen-quad"] = _meshes.CreateScreenQuad();
+    meshHandles["quad"] = _meshes.CreateQuad();
 
     // Shadow maps
     CreateGFramebuffer(_width, _height);
@@ -725,8 +729,25 @@ namespace Krys::Gfx::OpenGL
 
     // Uniform buffers
     {
-      ubos["matrices"] = CreateUnique<UniformBuffer>(3 * sizeof(Mat4));
-      ubos.at("matrices")->Bind(0);
+      bufferHandles["matrices"] = _buffers.CreateUniformBuffer(3 * sizeof(Mat4));
+      _buffers.Get(bufferHandles.at("matrices")).Bind(0);
+    }
+
+    // UI VAO
+    {
+      GLuint vao;
+      glCreateVertexArrays(1, &vao);
+      glBindVertexArray(vao);
+      VAOs["ui"] = vao;
+
+      // 6 vertices * 4 Vec2s (pos + uv)
+      bufferHandles["ui-vertex"] = _buffers.CreateVertexBuffer(24 * sizeof(Vec2));
+      _buffers.Get(bufferHandles.at("ui-vertex")).Bind();
+
+      Utils::ApplyVertexBufferLayout({
+        {VertexAttributeType::Float, 2}, // position
+        {VertexAttributeType::Float, 2}  // texcoord
+      });
     }
 
     CreateEnvironmentAndIrradianceCubemaps(1'024, 1'024, _textures, _shaders, _meshes);
@@ -762,14 +783,14 @@ namespace Krys::Gfx::OpenGL
     DefaultMSDFFont = _fonts.Load(fontPath, fontSize, FontType::MSDF);
     DefaultMTSDFFont = _fonts.Load(fontPath, fontSize, FontType::MTSDF);
     ScreenOrthoProjection = Ortho(0.0f, static_cast<float>(_width), 0.0f, static_cast<float>(_height));
-    ubos.at("matrices")->Update(ScreenOrthoProjection, 2 * sizeof(Mat4));
+    _buffers.Get(bufferHandles.at("matrices")).Update(ScreenOrthoProjection, 2 * sizeof(Mat4));
   }
 
   void Context::Render(ICamera &camera) noexcept
   {
     auto view = camera.ViewMatrix();
     auto projection = camera.ProjectionMatrix();
-    ubos.at("matrices")->Update(List<Mat4> {view, projection});
+    _buffers.Get(bufferHandles.at("matrices")).Update(List<Mat4> {view, projection});
     _shaders.Get(shaderHandles.at("hdr-background")).SetUniform("projection", projection);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -863,6 +884,47 @@ namespace Krys::Gfx::OpenGL
     glDisable(GL_BLEND);
   }
 
+  void Context::Render(UI::Document &document) noexcept
+  {
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    auto &shader = _shaders.Get(shaderHandles.at("ui"));
+    shader.Bind();
+
+    GLuint vao = VAOs.at("ui");
+    glBindVertexArray(vao);
+    auto &buffer = _buffers.Get(bufferHandles.at("ui-vertex"));
+
+    auto DrawElement = [&](UI::Element &element)
+    {
+      UI::ComputedBounds bounds = element.GetComputedBounds();
+      bounds.Y = static_cast<float>(_height) - bounds.Y - bounds.Height;
+      shader.SetUniform("u_BackgroundColour", Colour::ToVec3(element.GetBackgroundColor()));
+
+      // 6 vertices per quad, pos + uv
+      List<Vec2> vertices = {
+        Vec2(bounds.MinX(), bounds.MinY()), Vec2(0.0f, 0.0f),
+        Vec2(bounds.MaxX(), bounds.MinY()), Vec2(1.0f, 0.0f),
+        Vec2(bounds.MaxX(), bounds.MaxY()), Vec2(1.0f, 1.0f),
+        Vec2(bounds.MinX(), bounds.MinY()), Vec2(1.0f, 1.0f),
+        Vec2(bounds.MaxX(), bounds.MaxY()), Vec2(0.0f, 1.0f),
+        Vec2(bounds.MinX(), bounds.MaxY()), Vec2(0.0f, 0.0f),
+      };
+
+      buffer.Update(vertices);
+      glDrawArrays(GL_TRIANGLES, 0, 6);
+    };
+
+    auto &root = document.GetBody();
+    DrawElement(root);
+
+    for (const auto &childHandle : root.GetChildren())
+    {
+      auto &child = document.GetByHandle(childHandle);
+      DrawElement(child);
+    }
+  }
+
   void Context::Present() noexcept
   {
     _platformImpl->Present();
@@ -874,7 +936,7 @@ namespace Krys::Gfx::OpenGL
     _height = height;
     glViewport(0, 0, _width, _height);
     ScreenOrthoProjection = Ortho(0.0f, static_cast<float>(_width), 0.0f, static_cast<float>(_height));
-    ubos.at("matrices")->Update(ScreenOrthoProjection, 2 * sizeof(Mat4));
+    _buffers.Get(bufferHandles.at("matrices")).Update(ScreenOrthoProjection, 2 * sizeof(Mat4));
   }
 
   void Context::DPIChanged(int dpi) noexcept
@@ -896,6 +958,11 @@ namespace Krys::Gfx::OpenGL
   ISamplerRegistry &Context::Samplers() noexcept
   {
     return _samplers;
+  }
+
+  IBufferRegistry &Context::Buffers() noexcept
+  {
+    return _buffers;
   }
 
   ITextureRegistry &Context::Textures() noexcept

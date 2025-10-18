@@ -27,6 +27,7 @@
 *.a
 *.lib
 !Krystal.Lib
+!Krystal.Gfx.Lib
 
 # Executables
 *.exe

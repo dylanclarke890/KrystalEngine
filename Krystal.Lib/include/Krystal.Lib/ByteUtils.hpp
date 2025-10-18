@@ -2,8 +2,11 @@
 
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/Endian.hpp"
+#include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Span.hpp"
+#include "Krystal.Lib/String.hpp"
+#include "Krystal.Lib/Types.hpp"
 #include <cassert>
 #include <cstring>
 

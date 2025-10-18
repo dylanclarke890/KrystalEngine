@@ -3,11 +3,17 @@
 #include "Krystal.Gfx/Common.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.IO/Path.hpp"
+#include "Krystal.Lib/Macros.hpp"
 
 namespace Krys::Gfx
 {
   class IFontRegistry
   {
+    NO_COPY_MOVE(IFontRegistry)
+
+  protected:
+    IFontRegistry() = default;
+
   public:
     virtual ~IFontRegistry() noexcept = default;
 

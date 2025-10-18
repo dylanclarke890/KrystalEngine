@@ -2,6 +2,7 @@
 
 #include "Krystal.Gfx/Common.hpp"
 #include "Krystal.Gfx/Handle.hpp"
+#include "Krystal.Lib/Macros.hpp"
 
 namespace Krys::Gfx
 {
@@ -15,6 +16,11 @@ namespace Krys::Gfx
 
   class IImageViewRegistry
   {
+    NO_COPY_MOVE(IImageViewRegistry)
+
+  protected:
+    IImageViewRegistry() noexcept = default;
+
   public:
     virtual ~IImageViewRegistry() noexcept = default;
 

@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Krystal.Gfx/Colour.hpp"
+#include "Krystal.Gfx.Lib/Colour.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/String.hpp"
 
 namespace Krys::Gfx
@@ -26,6 +27,11 @@ namespace Krys::Gfx
 
   class IMaterialRegistry
   {
+    NO_COPY_MOVE(IMaterialRegistry)
+
+  protected:
+    IMaterialRegistry() noexcept = default;
+
   public:
     virtual ~IMaterialRegistry() = default;
 

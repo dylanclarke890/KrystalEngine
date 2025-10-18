@@ -6,10 +6,12 @@
 #include "Krystal.Lib/NativeHandle.hpp"
 #include "Krystal.Lib/SmartPointers.hpp"
 #include "Krystal.Lib/Types.hpp"
+#include "Krystal.UI/Document.hpp"
 
 namespace Krys::Gfx
 {
   class IContext;
+  class IBufferRegistry;
   class IImageRegistry;
   class IImageViewRegistry;
   class ISamplerRegistry;
@@ -27,7 +29,7 @@ namespace Krys::Gfx
     IO::VirtualFileSystem *VFS {nullptr};
   };
 
-  Expected<Unique<IContext>> CreateContext(const ContextSettings& settings) noexcept;
+  Expected<Unique<IContext>> CreateContext(const ContextSettings &settings) noexcept;
 
   enum class API
   {
@@ -52,11 +54,15 @@ namespace Krys::Gfx
 
     virtual void Render(ICamera &camera) noexcept = 0;
 
+    virtual void Render(UI::Document &camera) noexcept = 0;
+
     virtual void Present() noexcept = 0;
 
     virtual void Resize(uint32 width, uint32 height) noexcept = 0;
 
     virtual void DPIChanged(int dpi) noexcept = 0;
+
+    NO_DISCARD virtual IBufferRegistry &Buffers() noexcept = 0;
 
     NO_DISCARD virtual IImageRegistry &Images() noexcept = 0;
 

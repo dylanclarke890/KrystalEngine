@@ -3,6 +3,7 @@
 #include "Krystal.Gfx/Common.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Macros.hpp"
 
 namespace Krys::Gfx
 {
@@ -18,6 +19,11 @@ namespace Krys::Gfx
 
   class ISamplerRegistry
   {
+    NO_COPY_MOVE(ISamplerRegistry)
+
+  protected:
+    ISamplerRegistry() noexcept = default;
+
   public:
     virtual ~ISamplerRegistry() = default;
 

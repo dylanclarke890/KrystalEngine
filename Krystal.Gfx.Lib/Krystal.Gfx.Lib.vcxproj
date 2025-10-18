@@ -18,58 +18,22 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="include\Krystal.Gfx.Vulkan\Hooks\vulkan_hooks.hpp" />
-    <ClInclude Include="include\Krystal.Gfx.Vulkan\Hooks\vulkan_win32_hooks.hpp" />
-    <ClInclude Include="include\Krystal.Gfx.Vulkan\VulkanContext.hpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Krystal.Gfx.Lib\Krystal.Gfx.Lib.vcxproj">
-      <Project>{9033b349-4104-46b5-af4d-3ddedfc44176}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Krystal.Gfx\Krystal.Gfx.vcxproj">
-      <Project>{f0f40133-75a2-4345-893f-f7e69e477155}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Krystal.IO\Krystal.IO.vcxproj">
-      <Project>{85cea139-a547-4747-b050-05c8de66d591}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Krystal.Lib\Krystal.Lib.vcxproj">
-      <Project>{38f26636-5d57-4740-a8d2-df219340309a}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Krystal.Maths\Krystal.Maths.vcxproj">
-      <Project>{2c0a90e5-aa87-46b7-b599-e56a9dd5047b}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Krystal.Platform\Krystal.Platform.vcxproj">
-      <Project>{42e8c0a6-1f92-456b-a8b7-0050bfdf97e2}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Krystal.UI.Layout\Krystal.UI.Layout.vcxproj">
-      <Project>{04dce3b3-a253-4119-87d3-384f67d9dfc8}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Krystal.UI\Krystal.UI.vcxproj">
-      <Project>{0ca51a50-7e1a-45c7-a23f-986b0cff5a35}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="src\Hooks\vulkan_hooks.cpp" />
-    <ClCompile Include="src\Hooks\vulkan_win32_hooks.cpp" />
-    <ClCompile Include="src\VulkanContext.cpp" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{86954901-acca-4400-b4f6-3c9a260be337}</ProjectGuid>
-    <RootNamespace>KrystalGfxVulkan</RootNamespace>
+    <ProjectGuid>{9033b349-4104-46b5-af4d-3ddedfc44176}</ProjectGuid>
+    <RootNamespace>KrystalGfxLib</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -82,7 +46,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -110,24 +74,15 @@
     <Import Project="..\KrystalEngine.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>C:\VulkanSDK\1.4.313.2\Include;$(IncludePath)</IncludePath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\VulkanSDK\1.4.321.1\Include;$(IncludePath)</IncludePath>
-  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>
-      </SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -137,14 +92,11 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>
-      </SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -152,14 +104,11 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>
-      </SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -169,17 +118,33 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>
-      </SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Krystal.Lib\Krystal.Lib.vcxproj">
+      <Project>{38f26636-5d57-4740-a8d2-df219340309a}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Krystal.Maths\Krystal.Maths.vcxproj">
+      <Project>{2c0a90e5-aa87-46b7-b599-e56a9dd5047b}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Krystal.Gfx.Lib\Colour.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.Lib\Handle.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx.Lib\ResourceManager.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\placeholder.cpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

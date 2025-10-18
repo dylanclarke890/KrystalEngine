@@ -197,6 +197,10 @@ namespace Krys::Gfx::D3D11
     _context->Draw(3, 0);
   }
 
+  void D3D11Context::Render(UI::Document &) noexcept
+  {
+  }
+
   void D3D11Context::Present() noexcept
   {
     _swapchain->Present(0, 0);

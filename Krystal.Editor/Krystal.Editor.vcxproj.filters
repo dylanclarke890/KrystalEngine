@@ -124,6 +124,8 @@
     <None Include="data\assets\newport-loft.hdr" />
     <None Include="data\shaders\opengl\text-shader.frag" />
     <None Include="data\shaders\opengl\text-shader.vert" />
+    <None Include="data\shaders\opengl\ui.frag" />
+    <None Include="data\shaders\opengl\ui.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">

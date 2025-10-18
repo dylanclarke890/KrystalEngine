@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Krystal.Gfx.Lib/Colour.hpp"
+#include "Krystal.Gfx.OpenGL/Registries/BufferRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/FontRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ImageRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ImageViewRegistry.hpp"
@@ -9,7 +11,6 @@
 #include "Krystal.Gfx.OpenGL/Registries/ShaderRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/TextureRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/TextRenderer.hpp"
-#include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
 
@@ -28,6 +29,7 @@ namespace Krys::Gfx::OpenGL
     int _dpi;
     Unique<ContextPlatformImpl> _platformImpl;
 
+    BufferRegistry _buffers;
     ImageRegistry _images;
     ImageViewRegistry _imageViews;
     SamplerRegistry _samplers;
@@ -47,11 +49,15 @@ namespace Krys::Gfx::OpenGL
 
     void Render(ICamera &camera) noexcept override;
 
+    void Render(UI::Document &document) noexcept override;
+
     void Present() noexcept override;
 
     void Resize(uint32 width, uint32 height) noexcept override;
 
     void DPIChanged(int dpi) noexcept override;
+
+    NO_DISCARD IBufferRegistry &Buffers() noexcept override;
 
     NO_DISCARD IImageRegistry &Images() noexcept override;
 
