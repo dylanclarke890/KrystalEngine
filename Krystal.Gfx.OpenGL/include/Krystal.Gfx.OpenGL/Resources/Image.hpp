@@ -92,6 +92,13 @@ namespace Krys::Gfx::OpenGL
     void Swap(Image &other) noexcept
     {
       std::swap(_id, other._id);
+      std::swap(_target, other._target);
+      std::swap(_internalFormat, other._internalFormat);
+      std::swap(_width, other._width);
+      std::swap(_height, other._height);
+      std::swap(_depth, other._depth);
+      std::swap(_mipLevels, other._mipLevels);
+      std::swap(_arrayLayers, other._arrayLayers);
     }
   };
 }
