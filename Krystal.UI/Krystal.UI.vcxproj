@@ -134,6 +134,7 @@
   <ItemGroup>
     <ClInclude Include="include\Krystal.UI\Document.hpp" />
     <ClInclude Include="include\Krystal.UI\Element.hpp" />
+    <ClInclude Include="include\Krystal.UI\UnitLiterals.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Krystal.Gfx.Lib\Krystal.Gfx.Lib.vcxproj">

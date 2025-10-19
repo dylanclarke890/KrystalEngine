@@ -6,6 +6,8 @@
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.UI.Layout/LayoutEngine.hpp"
+#include "Krystal.UI.Layout/UnitValue.hpp"
+#include "Krystal.UI/UnitLiterals.hpp"
 
 namespace Krys::UI
 {
@@ -75,18 +77,41 @@ namespace Krys::UI
     Element() = default;
     virtual ~Element();
 
-    void SetWidth(float width) const
+    void SetWidth(const Layout::UnitValue &value) const
     {
-      Layout::NodeStyleSetWidth(_layoutNode, width);
+      if (value.Type == Layout::Unit::Point)
+      {
+        Layout::NodeStyleSetWidth(_layoutNode, value.Value);
+      }
+      else if (value.Type == Layout::Unit::Percent)
+      {
+        Layout::NodeStyleSetWidthPercent(_layoutNode, value.Value);
+      }
+      else
+      {
+        throw std::invalid_argument("Only 'px' or 'pct' is supported for width.");
+      }
     }
 
     float GetWidth() const
     {
       return Layout::NodeStyleGetWidth(_layoutNode).Value;
     }
-    void SetHeight(float height) const
+
+    void SetHeight(const Layout::UnitValue &value) const
     {
-      Layout::NodeStyleSetHeight(_layoutNode, height);
+      if (value.Type == Layout::Unit::Point)
+      {
+        Layout::NodeStyleSetHeight(_layoutNode, value.Value);
+      }
+      else if (value.Type == Layout::Unit::Percent)
+      {
+        Layout::NodeStyleSetHeightPercent(_layoutNode, value.Value);
+      }
+      else
+      {
+        throw std::invalid_argument("Only 'px' or 'pct' is supported for height.");
+      }
     }
 
     float GetHeight() const
@@ -124,19 +149,48 @@ namespace Krys::UI
       return _borderColour;
     }
 
-    void SetPadding(uint32 p) const
+    void SetPadding(const Layout::UnitValue &value) const
     {
-      Layout::NodeStyleSetPadding(_layoutNode, Layout::Edge::All, static_cast<float>(p));
+      if (value.Type == Layout::Unit::Point)
+      {
+        Layout::NodeStyleSetPadding(_layoutNode, Layout::Edge::All, value.Value);
+      }
+      else if (value.Type == Layout::Unit::Percent)
+      {
+        Layout::NodeStyleSetPaddingPercent(_layoutNode, Layout::Edge::All, value.Value);
+      }
+      else
+      {
+        throw std::invalid_argument("Only 'px' or 'pct' is supported for padding.");
+      }
     }
 
-    void SetMargin(uint32 p) const
+    void SetMargin(const Layout::UnitValue &value) const
     {
-      Layout::NodeStyleSetMargin(_layoutNode, Layout::Edge::All, static_cast<float>(p));
+      if (value.Type == Layout::Unit::Point)
+      {
+        Layout::NodeStyleSetMargin(_layoutNode, Layout::Edge::All, value.Value);
+      }
+      else if (value.Type == Layout::Unit::Percent)
+      {
+        Layout::NodeStyleSetMarginPercent(_layoutNode, Layout::Edge::All, value.Value);
+      }
+      else
+      {
+        throw std::invalid_argument("Only 'px' or 'pct' is supported for margin.");
+      }
     }
 
-    void SetBorderWidth(uint32 p) const
+    void SetBorderWidth(const Layout::UnitValue &value) const
     {
-      Layout::NodeStyleSetBorder(_layoutNode, Layout::Edge::All, static_cast<float>(p));
+      if (value.Type == Layout::Unit::Point)
+      {
+        Layout::NodeStyleSetBorder(_layoutNode, Layout::Edge::All, value.Value);
+      }
+      else
+      {
+        throw std::invalid_argument("Only 'px' is supported for border width.");
+      }
     }
 
     float GetBorderWidth() const

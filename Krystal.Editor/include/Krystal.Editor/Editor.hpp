@@ -87,38 +87,17 @@ namespace Krys
       using namespace Krys::UI;
 
       _document.GetBody().SetBackgroundColour(Gfx::Colours::Black);
-      _document.GetBody().SetBorderColour(Gfx::Colours::Transparent);
-      _document.GetBody().SetBorderWidth(20);
-      _document.GetBody().SetPadding(5);
       _document.GetBody().SetWrap(Wrap::Wrap);
 
       auto testBoxHandle = _document.CreateElement<Element>();
+      _document.AddToBody(testBoxHandle);
       auto &testBox = _document.GetByHandle<Element>(testBoxHandle);
-      testBox.SetWidth(200.f);
-      testBox.SetHeight(200.f);
-      testBox.SetMargin(10);
+      testBox.SetWidth(200._px);
+      testBox.SetHeight(200._px);
+      testBox.SetMargin(10._px);
       testBox.SetBackgroundColour(Gfx::Colours::Blue);
       testBox.SetBorderColour(Gfx::Colours::Beige);
-      testBox.SetBorderWidth(2);
-      _document.AddToBody(testBoxHandle);
-
-      auto testBoxHandle2 = _document.CreateElement<Element>();
-      auto &testBox2 = _document.GetByHandle<Element>(testBoxHandle2);
-      testBox2.SetWidth(300.f);
-      testBox2.SetHeight(300.f);
-      testBox2.SetBackgroundColour(Gfx::Colours::Red);
-      testBox2.SetBorderColour(Gfx::Colours::Purple);
-      testBox2.SetBorderWidth(4);
-      _document.AddToBody(testBoxHandle2);
-
-      auto testBoxHandle3 = _document.CreateElement<Element>();
-      auto &testBox3 = _document.GetByHandle<Element>(testBoxHandle3);
-      testBox3.SetWidth(300.f);
-      testBox3.SetHeight(300.f);
-      testBox3.SetBackgroundColour(Gfx::Colours::Green);
-      testBox3.SetBorderColour(Gfx::Colours::Transparent);
-      testBox3.SetBorderWidth(10);
-      _document.AddToBody(testBoxHandle3);
+      testBox.SetBorderWidth(1._px);
     }
 
     void OnRender() noexcept override
