@@ -54,8 +54,6 @@ namespace Krys::Gfx
 
     virtual void Render(ICamera &camera) noexcept = 0;
 
-    virtual void Render(UI::Document &camera) noexcept = 0;
-
     virtual void Present() noexcept = 0;
 
     virtual void Resize(uint32 width, uint32 height) noexcept = 0;

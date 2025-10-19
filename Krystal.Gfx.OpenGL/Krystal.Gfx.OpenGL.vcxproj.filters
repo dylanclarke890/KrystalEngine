@@ -105,7 +105,7 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\ShaderReflector.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Renderer.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\UIRenderer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Registries\BufferRegistry.hpp">
@@ -125,10 +125,13 @@
     <ClCompile Include="src\Hooks\gl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Fonts\FontRegistry.cpp">
+    <ClCompile Include="src\Registries\FontRegistry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="third-party\stb\stb_rect_pack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UIRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

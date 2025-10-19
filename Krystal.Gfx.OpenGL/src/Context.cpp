@@ -882,50 +882,6 @@ namespace Krys::Gfx::OpenGL
     glDisable(GL_BLEND);
   }
 
-  void Context::Render(UI::Document &document) noexcept
-  {
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    auto &shader = _shaders.Get(shaderHandles.at("ui"));
-    shader.Bind();
-
-    GLuint vao = VAOs.at("ui");
-    glBindVertexArray(vao);
-    auto &buffer = _buffers.Get(bufferHandles.at("ui-vertex"));
-
-    auto DrawElement = [&](UI::Element &element)
-    {
-      UI::ComputedBounds bounds = element.GetComputedBounds();
-      bounds.Y = static_cast<float>(_height) - bounds.Y - bounds.Height;
-      shader.SetUniform("u_BackgroundColour", Colour::ToVec4(element.GetBackgroundColor()));
-
-      // 6 vertices per quad, pos + uv
-      List<Vec2> vertices = {
-        Vec2(bounds.MinX(), bounds.MinY()), Vec2(0.0f, 0.0f),
-        Vec2(bounds.MaxX(), bounds.MinY()), Vec2(1.0f, 0.0f),
-        Vec2(bounds.MaxX(), bounds.MaxY()), Vec2(1.0f, 1.0f),
-        Vec2(bounds.MinX(), bounds.MinY()), Vec2(1.0f, 1.0f),
-        Vec2(bounds.MaxX(), bounds.MaxY()), Vec2(0.0f, 1.0f),
-        Vec2(bounds.MinX(), bounds.MaxY()), Vec2(0.0f, 0.0f),
-      };
-
-      buffer.Update(vertices);
-      glDrawArrays(GL_TRIANGLES, 0, 6);
-    };
-
-    auto &root = document.GetBody();
-    DrawElement(root);
-
-    for (const auto &childHandle : root.GetChildren())
-    {
-      auto &child = document.GetByHandle(childHandle);
-      DrawElement(child);
-    }
-
-    glDisable(GL_BLEND);
-  }
-
   void Context::Present() noexcept
   {
     _platformImpl->Present();

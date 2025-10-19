@@ -49,8 +49,6 @@ namespace Krys::Gfx::OpenGL
 
     void Render(ICamera &camera) noexcept override;
 
-    void Render(UI::Document &document) noexcept override;
-
     void Present() noexcept override;
 
     void Resize(uint32 width, uint32 height) noexcept override;

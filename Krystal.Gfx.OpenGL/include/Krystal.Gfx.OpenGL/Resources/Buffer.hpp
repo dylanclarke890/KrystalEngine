@@ -45,12 +45,12 @@ namespace Krys::Gfx::OpenGL
       glDeleteBuffers(1, &_handle);
     }
 
-    Buffer(Buffer &&other)
+    Buffer(Buffer &&other) noexcept
     {
       Swap(std::move(other));
     }
 
-    Buffer &operator=(Buffer &&other)
+    Buffer &operator=(Buffer &&other) noexcept
     {
       if (this != &other)
       {

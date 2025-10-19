@@ -157,10 +157,8 @@ namespace Krys::UI
         return Wrap::WrapReverse;
       }
     }
-     
 
-    Gfx::Colour
-      GetBackgroundColor() const
+    Gfx::Colour GetBackgroundColor() const
     {
       return _backgroundColour;
     }

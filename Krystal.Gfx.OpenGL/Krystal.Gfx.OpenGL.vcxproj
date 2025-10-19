@@ -52,12 +52,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp" />
+    <ClCompile Include="src\UIRenderer.cpp" />
     <ClCompile Include="third-party\stb\stb_rect_pack.cpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Registries\BufferRegistry.hpp">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Renderer.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\UIRenderer.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Buffer.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Font.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Registries\FontRegistry.hpp" />
@@ -86,7 +87,7 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Model.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Shader.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Win32\ContextPlatformImpl.hpp" />
-    <ClCompile Include="src\Fonts\FontRegistry.cpp" />
+    <ClCompile Include="src\Registries\FontRegistry.cpp" />
     <ClCompile Include="src\Hooks\gl.cpp" />
     <ClCompile Include="src\Hooks\wgl.cpp" />
     <ClCompile Include="src\Win32\ContextPlatformImpl.cpp" />

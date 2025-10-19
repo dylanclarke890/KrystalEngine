@@ -45,7 +45,7 @@ namespace Krys::Gfx
 
     constexpr VertexBufferElement(VertexAttributeType type, uint32 count, IsEnabled enabled,
                                   VertexInputRate inputRate = VertexInputRate::PerVertex) noexcept
-        : Type(VertexAttributeType::Float), Count(count), Normalized(false), Enabled(enabled),
+        : Type(type), Count(count), Normalized(false), Enabled(enabled),
           InputRate(inputRate)
     {
     }

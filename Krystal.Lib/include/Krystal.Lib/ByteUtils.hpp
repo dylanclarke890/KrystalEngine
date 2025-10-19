@@ -80,6 +80,12 @@ namespace Krys
     }
 
     template <typename T>
+    NO_DISCARD static inline Span<const byte> AsBytesView(const Span<T> &span) noexcept
+    {
+      return Span<const byte>(reinterpret_cast<const byte *>(span.data()), span.size() * sizeof(T));
+    }
+
+    template <typename T>
     NO_DISCARD static inline Span<const byte> AsBytesView(const T &object) noexcept
     {
       return Span<const byte>(reinterpret_cast<const byte *>(&object), sizeof(T));

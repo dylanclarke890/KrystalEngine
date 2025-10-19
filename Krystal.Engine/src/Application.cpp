@@ -14,14 +14,20 @@ namespace Krys
       : _context(CreateUnique<ApplicationContext>()), _running(false), _isWindowMinimised(false)
   {
     Platform::Initialise();
+
     CreateServices(argc, argv, settings);
+
     _context->Window->SetCallbacks(CreateWindowCallbacks());
+    _context->UI->Startup();
   }
 
   Application::~Application() noexcept
   {
+    _context->UI->Shutdown();
+
     _context->Events.reset();
     _context->Input.reset();
+    _context->UI.reset();
     _context->GraphicsContext.reset();
     _context->VFS.reset();
     _context->Window.reset();
@@ -154,6 +160,13 @@ namespace Krys
       throw std::runtime_error("Failed to create graphics context: " + gfxContext.error());
     }
     _context->GraphicsContext = std::move(gfxContext.value());
+
+    auto uiRenderer = CreateUIRenderer(*_context->GraphicsContext);
+    if (!uiRenderer.has_value())
+    {
+      throw std::runtime_error("Failed to create UI renderer");
+    }
+    _context->UI = std::move(uiRenderer.value());
   }
 
   Platform::WindowCallbacks Application::CreateWindowCallbacks() noexcept
