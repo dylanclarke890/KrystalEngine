@@ -117,8 +117,8 @@ namespace Krys
     {
       _context->GraphicsContext->Render(_camera);
 
-      //_document.Layout((float)_context->Window->GetSize().Width, (float)_context->Window->GetSize().Height);
-      //_context->GraphicsContext->Render(_document);
+      _document.Layout((float)_context->Window->GetSize().Width, (float)_context->Window->GetSize().Height);
+      _context->GraphicsContext->Render(_document);
     }
 
     void OnUpdate(double deltaTime) noexcept override
