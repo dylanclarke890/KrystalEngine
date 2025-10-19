@@ -15,10 +15,11 @@ namespace Krys::UI
     Row,
   };
 
-  enum class FlexWrap
+  enum class Wrap
   {
-    Wrap,
     NoWrap,
+    Wrap,
+    WrapReverse,
   };
 
   struct ElementHandle : public Gfx::Handle<ElementHandle>
@@ -130,26 +131,30 @@ namespace Krys::UI
       }
     }
 
-    void SetFlexWrap(FlexWrap wrap) const
+    void SetWrap(Wrap wrap) const
     {
       Layout::Wrap layoutWrap = Layout::Wrap::NoWrap;
-      if (wrap == FlexWrap::Wrap)
+      if (wrap == Wrap::Wrap)
       {
         layoutWrap = Layout::Wrap::Wrap;
       }
       Layout::NodeStyleSetFlexWrap(_layoutNode, layoutWrap);
     }
 
-    FlexWrap GetFlexWrap() const
+    Wrap GetFlexWrap() const
     {
       Layout::Wrap layoutWrap = Layout::NodeStyleGetFlexWrap(_layoutNode);
-      if (layoutWrap == Layout::Wrap::Wrap)
+      if (layoutWrap == Layout::Wrap::NoWrap)
       {
-        return FlexWrap::Wrap;
+        return Wrap::NoWrap;
+      }
+      else if (layoutWrap == Layout::Wrap::Wrap)
+      {
+        return Wrap::Wrap;
       }
       else
       {
-        return FlexWrap::NoWrap;
+        return Wrap::WrapReverse;
       }
     }
      

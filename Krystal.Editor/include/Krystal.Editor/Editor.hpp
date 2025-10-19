@@ -88,7 +88,7 @@ namespace Krys
 
       _document.GetBody().SetBackgroundColour(Gfx::Colours::Transparent);
       _document.GetBody().SetPadding(5);
-      _document.GetBody().SetFlexWrap(UI::FlexWrap::Wrap);
+      _document.GetBody().SetWrap(Wrap::Wrap);
 
       auto testBoxHandle = _document.CreateElement<Element>();
       auto &testBox = _document.GetByHandle<Element>(testBoxHandle);
