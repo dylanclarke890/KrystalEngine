@@ -1,12 +1,12 @@
 #pragma once
 
+#include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ImageRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ImageViewRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/SamplerRegistry.hpp"
 #include "Krystal.Gfx/Registries/ITextureRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
-#include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx/Resources/Texture.hpp"
 #include "Krystal.IO/ImageLoader.hpp"
 #include "Krystal.IO/IStream.hpp"
@@ -106,6 +106,11 @@ namespace Krys::Gfx::OpenGL
                                  .WrapR = WrapMode::ClampToEdge,
                                  .AnisotropicLevel = 1.f};
       SamplerHandle samplerHandle = _samplers.Create(samplerDesc);
+
+
+      auto &imgView = _imageViews.Get(imageViewHandle);
+      glObjectLabel(GL_TEXTURE, img.Id(), -1, key.c_str());
+      glObjectLabel(GL_TEXTURE, imgView.Id(), -1, (key + "-view").c_str());
 
       Texture texture {imageViewHandle, samplerHandle};
       return AddTexture(key, std::move(texture));
