@@ -81,7 +81,7 @@ namespace Krys::Gfx::OpenGL
       }
 
       using namespace IO;
-      Path base = Path("/textures/pbr/") / Path(name);
+      Path base = Path("/textures/pbr") / Path(name);
 
       PBRMaterialDesc desc;
       desc.AlbedoMap = _textures.Load(base / Path("albedo.png"));

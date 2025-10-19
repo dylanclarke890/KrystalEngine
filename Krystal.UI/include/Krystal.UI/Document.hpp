@@ -77,7 +77,7 @@ namespace Krys::UI
     }
 
     /// @brief Adds the element to the document's body.
-    void Add(ElementHandle handle)
+    void AddToBody(ElementHandle handle)
     {
       assert(handle.IsValid() && "Invalid handle");
 

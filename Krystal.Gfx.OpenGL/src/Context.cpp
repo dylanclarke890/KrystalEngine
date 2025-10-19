@@ -867,8 +867,6 @@ namespace Krys::Gfx::OpenGL
       cube.Draw();
     }
 
-    glClear(GL_COLOR_BUFFER_BIT); // This is just to make the text easier to see
-
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -886,7 +884,8 @@ namespace Krys::Gfx::OpenGL
 
   void Context::Render(UI::Document &document) noexcept
   {
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     auto &shader = _shaders.Get(shaderHandles.at("ui"));
     shader.Bind();
@@ -899,7 +898,7 @@ namespace Krys::Gfx::OpenGL
     {
       UI::ComputedBounds bounds = element.GetComputedBounds();
       bounds.Y = static_cast<float>(_height) - bounds.Y - bounds.Height;
-      shader.SetUniform("u_BackgroundColour", Colour::ToVec3(element.GetBackgroundColor()));
+      shader.SetUniform("u_BackgroundColour", Colour::ToVec4(element.GetBackgroundColor()));
 
       // 6 vertices per quad, pos + uv
       List<Vec2> vertices = {
@@ -923,6 +922,8 @@ namespace Krys::Gfx::OpenGL
       auto &child = document.GetByHandle(childHandle);
       DrawElement(child);
     }
+
+    glDisable(GL_BLEND);
   }
 
   void Context::Present() noexcept

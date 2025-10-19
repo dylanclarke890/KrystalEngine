@@ -86,40 +86,39 @@ namespace Krys
     {
       using namespace Krys::UI;
 
-      auto testBoxHandle = _document.CreateElement<Element>();
-      auto testBoxHandle2 = _document.CreateElement<Element>();
-      auto testBoxHandle3 = _document.CreateElement<Element>();
-      _document.Add(testBoxHandle);
-      _document.Add(testBoxHandle2);
-      _document.Add(testBoxHandle3);
-
-      _document.GetBody().SetBackgroundColour(Gfx::Colours::White);
+      _document.GetBody().SetBackgroundColour(Gfx::Colours::Transparent);
       _document.GetBody().SetPadding(5);
       _document.GetBody().SetFlexWrap(UI::FlexWrap::Wrap);
 
+      auto testBoxHandle = _document.CreateElement<Element>();
       auto &testBox = _document.GetByHandle<Element>(testBoxHandle);
       testBox.SetWidth(200.f);
       testBox.SetHeight(200.f);
       testBox.SetMargin(10);
       testBox.SetBackgroundColour(Gfx::Colours::Blue);
+      _document.AddToBody(testBoxHandle);
 
+      auto testBoxHandle2 = _document.CreateElement<Element>();
       auto &testBox2 = _document.GetByHandle<Element>(testBoxHandle2);
       testBox2.SetWidth(300.f);
       testBox2.SetHeight(300.f);
       testBox2.SetBackgroundColour(Gfx::Colours::Red);
+      _document.AddToBody(testBoxHandle2);
 
+      auto testBoxHandle3 = _document.CreateElement<Element>();
       auto &testBox3 = _document.GetByHandle<Element>(testBoxHandle3);
       testBox3.SetWidth(300.f);
       testBox3.SetHeight(300.f);
       testBox3.SetBackgroundColour(Gfx::Colours::Green);
+      _document.AddToBody(testBoxHandle3);
     }
 
     void OnRender() noexcept override
     {
       _context->GraphicsContext->Render(_camera);
 
-      _document.Layout((float)_context->Window->GetSize().Width, (float)_context->Window->GetSize().Height);
-      _context->GraphicsContext->Render(_document);
+      //_document.Layout((float)_context->Window->GetSize().Width, (float)_context->Window->GetSize().Height);
+      //_context->GraphicsContext->Render(_document);
     }
 
     void OnUpdate(double deltaTime) noexcept override
