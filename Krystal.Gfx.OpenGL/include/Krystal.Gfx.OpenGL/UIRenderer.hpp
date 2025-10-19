@@ -4,6 +4,7 @@
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/BufferRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ShaderRegistry.hpp"
+#include "Krystal.Gfx.OpenGL/Utils.hpp"
 #include "Krystal.Gfx/IUIRenderer.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
@@ -16,14 +17,12 @@ namespace Krys::Gfx::OpenGL
 
   private:
     Context &_context;
-    List<UIElementVertex> _vertices;
-    List<UIElementUboData> _uboData;
+    List<UIElementInstanceData> _instanceData;
     ShaderHandle _shader;
     GLuint _vao {0u};
     BufferHandle _vbo;
     BufferHandle _ebo;
-    BufferHandle _ubo;
-    size_t _index {0u};
+    BufferHandle _instanceDataBuffer;
 
   public:
     UIRenderer(IContext &ctx) noexcept;
@@ -34,47 +33,46 @@ namespace Krys::Gfx::OpenGL
       _shader = _context.Shaders().Load(IO::Path("ui.vert"), IO::Path("ui.frag"));
 
       auto &buffers = static_cast<BufferRegistry &>(_context.Buffers());
-
       const size_t quadVertexCount = 4;
       const size_t quadIndexCount = 6;
       const size_t batchSize = 1'000;
 
-      _vbo = buffers.CreateVertexBuffer(quadVertexCount * batchSize * sizeof(UIElementVertex));
-      _ebo = buffers.CreateIndexBuffer(quadIndexCount * batchSize * sizeof(uint32));
-      _ubo = buffers.CreateUniformBuffer(batchSize * sizeof(UIElementUboData));
-
-      auto &vbo = buffers.Get(_vbo);
-      auto &ebo = buffers.Get(_ebo);
-      auto &ubo = buffers.Get(_ubo);
-
+      // Create VAO
       glCreateVertexArrays(1, &_vao);
       glBindVertexArray(_vao);
-      vbo.Bind();
-      Utils::ApplyVertexBufferLayout(UIElementVertex::Layout());
-      ebo.Bind();
-      ubo.Bind(5); // TODO: get from config/shader
 
-      // Precompute index buffer data
-      List<uint32> indices;
-      indices.reserve(quadIndexCount * batchSize);
-      for (uint32 i = 0; i < batchSize; ++i)
-      {
-        uint32 offset = i * quadVertexCount;
-        indices.push_back(offset + 0);
-        indices.push_back(offset + 1);
-        indices.push_back(offset + 2);
-        indices.push_back(offset + 2);
-        indices.push_back(offset + 3);
-        indices.push_back(offset + 0);
-      }
+      // Setup indices
+      _ebo = buffers.CreateIndexBuffer(quadIndexCount * sizeof(uint32));
+      auto &ebo = buffers.Get(_ebo);
+      ebo.Bind();
+      Array<uint32, 6> indices {0, 1, 2, 2, 3, 0};
       ebo.Update(indices);
 
-      _vertices.reserve(quadVertexCount * batchSize);
-      _uboData.reserve(batchSize);
+      // Setup vertices
+      _vbo = buffers.CreateVertexBuffer(quadVertexCount * sizeof(UIElementVertex));
+      auto &vbo = buffers.Get(_vbo);
+      vbo.Bind();
+      Array<UIElementVertex, quadVertexCount> vertices = {
+        UIElementVertex {{0.0f, 0.0f}, {0.0f, 0.0f}},
+        UIElementVertex {{1.0f, 0.0f}, {1.0f, 0.0f}},
+        UIElementVertex {{1.0f, 1.0f}, {1.0f, 1.0f}},
+        UIElementVertex {{0.0f, 1.0f}, {0.0f, 1.0f}},
+      };
+      vbo.Update(vertices);
+      Utils::ApplyVertexBufferLayout(UIElementVertex::Layout());
 
-      glObjectLabel(GL_BUFFER, vbo.GetHandle(), -1, "UI-VBO");
-      glObjectLabel(GL_BUFFER, ebo.GetHandle(), -1, "UI-EBO");
-      glObjectLabel(GL_BUFFER, ubo.GetHandle(), -1, "UI-UBO");
+      // Setup instance data
+      _instanceDataBuffer = buffers.CreateVertexBuffer(batchSize * sizeof(UIElementInstanceData));
+      auto &instanceDataBuffer = buffers.Get(_instanceDataBuffer);
+      instanceDataBuffer.Bind();
+      const size_t instanceDataAttributeOffset = UIElementVertex::Layout().size();
+      Utils::ApplyVertexBufferLayout(UIElementInstanceData::Layout(), instanceDataAttributeOffset);
+      _instanceData.reserve(batchSize); // Nothing to update yet, but allocate enough space
+
+      glObjectLabel(GL_VERTEX_ARRAY, _vao, -1, "UI_VAO");
+      glObjectLabel(GL_BUFFER, vbo.GetHandle(), -1, "UI_VBO");
+      glObjectLabel(GL_BUFFER, ebo.GetHandle(), -1, "UI_EBO");
+      glObjectLabel(GL_BUFFER, instanceDataBuffer.GetHandle(), -1, "UI_InstanceData");
     }
 
     void Shutdown() noexcept override
@@ -82,15 +80,13 @@ namespace Krys::Gfx::OpenGL
       _context.Shaders().Unload(_shader);
       _context.Buffers().Destroy(_vbo);
       _context.Buffers().Destroy(_ebo);
-      _context.Buffers().Destroy(_ubo);
+      _context.Buffers().Destroy(_instanceDataBuffer);
       glDeleteVertexArrays(1, &_vao);
     }
 
     void BeginFrame() override
     {
-      _index = 0u;
-      _vertices.clear();
-      _uboData.clear();
+      _instanceData.clear();
     }
 
     void EndFrame() override
@@ -98,17 +94,16 @@ namespace Krys::Gfx::OpenGL
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       {
-        auto &vbo = static_cast<BufferRegistry &>(_context.Buffers()).Get(_vbo);
-        auto &ubo = static_cast<BufferRegistry &>(_context.Buffers()).Get(_ubo);
-
         auto &shader = static_cast<ShaderRegistry &>(_context.Shaders()).Get(_shader);
         shader.Bind();
 
-        vbo.Update(_vertices);
-        ubo.Update(_uboData);
+        auto &buffer = static_cast<BufferRegistry &>(_context.Buffers()).Get(_instanceDataBuffer);
+        buffer.Update(_instanceData);
 
         glBindVertexArray(_vao);
-        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_index * 6), GL_UNSIGNED_INT, nullptr);
+        uint32 instanceCount = static_cast<GLsizei>(_instanceData.size());
+
+        glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr, instanceCount);
       }
 
       glDisable(GL_BLEND);
@@ -129,17 +124,13 @@ namespace Krys::Gfx::OpenGL
     {
       UI::ComputedBounds cb = element.GetComputedBounds();
       cb.Y = static_cast<float>(height) - cb.Y - cb.Height;
-      Gfx::Colour col = element.GetBackgroundColor();
 
-      _vertices.push_back({Maths::Vec2(cb.MinX(), cb.MinY()), Maths::Vec2(0.0f, 0.0f), col});
-      _vertices.push_back({Maths::Vec2(cb.MaxX(), cb.MinY()), Maths::Vec2(1.0f, 0.0f), col});
-      _vertices.push_back({Maths::Vec2(cb.MaxX(), cb.MaxY()), Maths::Vec2(1.0f, 1.0f), col});
-      _vertices.push_back({Maths::Vec2(cb.MinX(), cb.MaxY()), Maths::Vec2(0.0f, 1.0f), col});
-
-      _uboData.push_back(
-        {.RectSize = {cb.Width, cb.Height}, .BorderThicknessRadius = {0.f, 0.f}, .FillColour = col});
-
-      _index++;
+      _instanceData.push_back({
+        .BackgroundColour = element.GetBackgroundColor(),
+        .BorderColour = element.GetBorderColor(),
+        .PositionAndSize = {cb.X, cb.Y, cb.Width, cb.Height},
+        .BorderThicknessRadius = {element.GetBorderWidth(), 0.f},
+      });
 
       for (const auto &childHandle : element.GetChildren())
       {

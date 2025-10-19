@@ -2,10 +2,16 @@
 
 layout (location = 0) in vec2 v_Position;
 layout (location = 1) in vec2 v_TextureCoords;
-layout (location = 2) in vec4 v_Color;
+layout (location = 2) in vec4 i_BackgroundColour;
+layout (location = 3) in vec4 i_BorderColour;
+layout (location = 4) in vec4 i_PositionAndSize;
+layout (location = 5) in vec2 i_BorderThicknessAndRadius;
 
 out vec2 TextureCoords;
-out vec4 VertexColor;
+out vec4 BackgroundColour;
+out vec4 BorderColour;
+out vec2 Size;
+out vec2 BorderThicknessAndRadius;
 
 layout (std140, binding = 0) uniform Matrices
 {
@@ -16,7 +22,11 @@ layout (std140, binding = 0) uniform Matrices
 
 void main()
 {
-  gl_Position = screenOrthoProjection * vec4(v_Position, 0.0, 1.0);
   TextureCoords = v_TextureCoords;
-  VertexColor = v_Color;
+  BackgroundColour = i_BackgroundColour;
+  BorderColour = i_BorderColour;
+  Size = i_PositionAndSize.zw;
+  BorderThicknessAndRadius = i_BorderThicknessAndRadius;
+  vec2 worldPos = i_PositionAndSize.xy + v_Position * i_PositionAndSize.zw;
+  gl_Position = screenOrthoProjection * vec4(worldPos, 0.0, 1.0);
 }  

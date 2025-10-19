@@ -14,23 +14,32 @@ namespace Krys::Gfx
   {
     Maths::Vec2 Position;
     Maths::Vec2 UV;
-    Colour Colour = Colours::Transparent;
 
     constexpr static VertexBufferLayout Layout()
     {
       return {
         {VertexAttributeType::Float, 2}, // position
         {VertexAttributeType::Float, 2}, // texcoord
-        {VertexAttributeType::Float, 4}, // colour
       };
     }
   };
 
-  struct UIElementUboData
+  struct UIElementInstanceData
   {
-    Maths::Vec2 RectSize;
+    Colour BackgroundColour;
+    Colour BorderColour;
+    Maths::Vec4 PositionAndSize;       // xy: position, zw: size
     Maths::Vec2 BorderThicknessRadius; // x: border thickness, y: border radius
-    Colour FillColour;
+
+    constexpr static VertexBufferLayout Layout()
+    {
+      return {
+        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}, // background colour
+        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}, // border colour
+        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}, // quad position and size
+        {VertexAttributeType::Float, 2, VertexInputRate::PerInstance}, // border thickness and radius
+      };
+    }
   };
 
   class IUIRenderer

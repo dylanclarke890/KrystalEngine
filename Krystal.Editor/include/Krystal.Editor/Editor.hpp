@@ -86,7 +86,9 @@ namespace Krys
     {
       using namespace Krys::UI;
 
-      _document.GetBody().SetBackgroundColour(Gfx::Colours::Transparent);
+      _document.GetBody().SetBackgroundColour(Gfx::Colours::Black);
+      _document.GetBody().SetBorderColour(Gfx::Colours::Transparent);
+      _document.GetBody().SetBorderWidth(20);
       _document.GetBody().SetPadding(5);
       _document.GetBody().SetWrap(Wrap::Wrap);
 
@@ -96,6 +98,8 @@ namespace Krys
       testBox.SetHeight(200.f);
       testBox.SetMargin(10);
       testBox.SetBackgroundColour(Gfx::Colours::Blue);
+      testBox.SetBorderColour(Gfx::Colours::Beige);
+      testBox.SetBorderWidth(2);
       _document.AddToBody(testBoxHandle);
 
       auto testBoxHandle2 = _document.CreateElement<Element>();
@@ -103,6 +107,8 @@ namespace Krys
       testBox2.SetWidth(300.f);
       testBox2.SetHeight(300.f);
       testBox2.SetBackgroundColour(Gfx::Colours::Red);
+      testBox2.SetBorderColour(Gfx::Colours::Purple);
+      testBox2.SetBorderWidth(4);
       _document.AddToBody(testBoxHandle2);
 
       auto testBoxHandle3 = _document.CreateElement<Element>();
@@ -110,6 +116,8 @@ namespace Krys
       testBox3.SetWidth(300.f);
       testBox3.SetHeight(300.f);
       testBox3.SetBackgroundColour(Gfx::Colours::Green);
+      testBox3.SetBorderColour(Gfx::Colours::Transparent);
+      testBox3.SetBorderWidth(10);
       _document.AddToBody(testBoxHandle3);
     }
 

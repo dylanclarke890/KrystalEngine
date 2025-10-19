@@ -23,7 +23,7 @@ namespace Krys::Gfx::OpenGL
     }
 
     static uint32 ApplyVertexBufferLayout(const VertexBufferLayout &layout,
-                                          uint32 attributeIndexOffset = 0u) noexcept
+                                          size_t attributeIndexOffset = 0u) noexcept
     {
       uint32 stride = 0;
       for (const auto &element : layout)
@@ -37,7 +37,7 @@ namespace Krys::Gfx::OpenGL
         const auto &element = layout[i];
         if (element.Enabled)
         {
-          uint32 attributeIndex = i + attributeIndexOffset;
+          uint32 attributeIndex = i + static_cast<uint32>(attributeIndexOffset);
           glEnableVertexAttribArray(attributeIndex);
           switch (element.Type)
           {
@@ -59,6 +59,8 @@ namespace Krys::Gfx::OpenGL
 
           if (element.InputRate == VertexInputRate::PerInstance)
             glVertexAttribDivisor(attributeIndex, 1);
+          else
+            glVertexAttribDivisor(attributeIndex, 0);
         }
 
         offset += element.Count * VertexBufferElement::GetSizeOfType(element.Type);

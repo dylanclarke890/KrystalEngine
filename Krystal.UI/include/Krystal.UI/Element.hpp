@@ -69,6 +69,7 @@ namespace Krys::UI
     Layout::NodeRef _layoutNode {nullptr};
     Gfx::Colour _backgroundColour {Gfx::Colours::Transparent};
     Gfx::Colour _foregroundColour {Gfx::Colours::Black};
+    Gfx::Colour _borderColour {Gfx::Colours::Transparent};
 
   public:
     Element() = default;
@@ -98,6 +99,31 @@ namespace Krys::UI
       _backgroundColour = colour;
     }
 
+    Gfx::Colour GetBackgroundColor() const
+    {
+      return _backgroundColour;
+    }
+
+    void SetForegroundColour(const Gfx::Colour &colour)
+    {
+      _foregroundColour = colour;
+    }
+
+    Gfx::Colour GetForegroundColor() const
+    {
+      return _foregroundColour;
+    }
+
+    void SetBorderColour(const Gfx::Colour &colour)
+    {
+      _borderColour = colour;
+    }
+
+    Gfx::Colour GetBorderColor() const
+    {
+      return _borderColour;
+    }
+
     void SetPadding(uint32 p) const
     {
       Layout::NodeStyleSetPadding(_layoutNode, Layout::Edge::All, static_cast<float>(p));
@@ -106,6 +132,16 @@ namespace Krys::UI
     void SetMargin(uint32 p) const
     {
       Layout::NodeStyleSetMargin(_layoutNode, Layout::Edge::All, static_cast<float>(p));
+    }
+
+    void SetBorderWidth(uint32 p) const
+    {
+      Layout::NodeStyleSetBorder(_layoutNode, Layout::Edge::All, static_cast<float>(p));
+    }
+
+    float GetBorderWidth() const
+    {
+      return Layout::NodeStyleGetBorder(_layoutNode, Layout::Edge::All);
     }
 
     void SetFlexDirection(FlexDirection direction) const
@@ -156,21 +192,6 @@ namespace Krys::UI
       {
         return Wrap::WrapReverse;
       }
-    }
-
-    Gfx::Colour GetBackgroundColor() const
-    {
-      return _backgroundColour;
-    }
-
-    void SetForegroundColour(const Gfx::Colour &colour)
-    {
-      _foregroundColour = colour;
-    }
-
-    Gfx::Colour GetForegroundColor() const
-    {
-      return _foregroundColour;
     }
 
     ComputedBounds GetComputedBounds() const
