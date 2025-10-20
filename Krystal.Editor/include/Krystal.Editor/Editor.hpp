@@ -85,9 +85,7 @@ namespace Krys
     void SetupUI()
     {
       using namespace Krys::UI;
-
-      _document.GetBody().SetBackgroundColour(Gfx::Colours::Black);
-      _document.GetBody().SetWrap(Wrap::Wrap);
+      _document.GetBody().SetBackgroundColour(Gfx::Colour {.0706f});
 
       auto testBoxHandle = _document.CreateElement<Element>();
       _document.AddToBody(testBoxHandle);
@@ -95,8 +93,8 @@ namespace Krys
       testBox.SetWidth(200._px);
       testBox.SetHeight(200._px);
       testBox.SetMargin(10._px);
-      testBox.SetBackgroundColour(Gfx::Colours::Blue);
-      testBox.SetBorderColour(Gfx::Colours::Beige);
+      testBox.SetBackgroundColour(Gfx::Colour {.0706f});
+      testBox.SetBorderColour(Gfx::Colours::Gray25);
       testBox.SetBorderWidth(1._px);
     }
 
