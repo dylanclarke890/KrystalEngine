@@ -729,7 +729,11 @@ namespace Krys::Gfx::OpenGL
 
     // Uniform buffers
     {
-      bufferHandles["matrices"] = _buffers.CreateUniformBuffer(3 * sizeof(Mat4));
+      bufferHandles["matrices"] = _buffers.Create({
+        .Type = BufferType::Uniform,
+        .Usage = BufferUsage::Dynamic,
+        .Size = 3 * sizeof(Mat4),
+      });
       _buffers.Get(bufferHandles.at("matrices")).Bind(0);
     }
 
@@ -741,7 +745,11 @@ namespace Krys::Gfx::OpenGL
       VAOs["ui"] = vao;
 
       // 6 vertices * 4 Vec2s (pos + uv)
-      bufferHandles["ui-vertex"] = _buffers.CreateVertexBuffer(24 * sizeof(Vec2));
+      bufferHandles["ui-vertex"] = _buffers.Create({
+        .Type = BufferType::Vertex,
+        .Usage = BufferUsage::Static,
+        .Size = 24 * sizeof(Vec2),
+      });
       _buffers.Get(bufferHandles.at("ui-vertex")).Bind();
 
       Utils::ApplyVertexBufferLayout({

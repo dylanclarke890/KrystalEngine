@@ -43,14 +43,22 @@ namespace Krys::Gfx::OpenGL
       glBindVertexArray(_vao);
 
       // Setup indices
-      _ebo = buffers.CreateIndexBuffer(quadIndexCount * sizeof(uint32));
+      _ebo = buffers.Create({
+        .Type = BufferType::Index,
+        .Usage = BufferUsage::Static,
+        .Size = quadIndexCount * sizeof(uint32),
+      });
       auto &ebo = buffers.Get(_ebo);
       ebo.Bind();
       Array<uint32, 6> indices {0, 1, 2, 2, 3, 0};
       ebo.Update(indices);
 
       // Setup vertices
-      _vbo = buffers.CreateVertexBuffer(quadVertexCount * sizeof(UIElementVertex));
+      _vbo = buffers.Create({
+        .Type = BufferType::Vertex,
+        .Usage = BufferUsage::Dynamic,
+        .Size = quadVertexCount * sizeof(UIElementVertex),
+      });
       auto &vbo = buffers.Get(_vbo);
       vbo.Bind();
       Array<UIElementVertex, quadVertexCount> vertices = {
@@ -63,7 +71,11 @@ namespace Krys::Gfx::OpenGL
       Utils::ApplyVertexBufferLayout(UIElementVertex::Layout());
 
       // Setup instance data
-      _instanceDataBuffer = buffers.CreateVertexBuffer(batchSize * sizeof(UIElementInstanceData));
+      _instanceDataBuffer = buffers.Create({
+        .Type = BufferType::Vertex,
+        .Usage = BufferUsage::Dynamic,
+        .Size = batchSize * sizeof(UIElementInstanceData),
+      });
       auto &instanceDataBuffer = buffers.Get(_instanceDataBuffer);
       instanceDataBuffer.Bind();
       const size_t instanceDataAttributeOffset = UIElementVertex::Layout().size();

@@ -30,54 +30,27 @@ namespace Krys::Gfx::OpenGL
     {
     }
 
-    virtual BufferHandle CreateUniformBuffer(uint32 size) override
+    NO_DISCARD virtual BufferHandle Create(const BufferDesc &desc) override
     {
-      return CreateBuffer(GL_UNIFORM_BUFFER, size);
+      GLenum bufferType = MapBufferType(desc.Type);
+      GLenum bufferUsage = MapBufferUsage(desc.Usage);
+      Buffer buffer {bufferType, bufferUsage, desc.Size, desc.InitialData};
+      return _buffers.Add(std::move(buffer));
     }
 
-    virtual BufferHandle CreateUniformBuffer(Span<const byte> data) override
+    bool Destroy(BufferHandle handle) override
     {
-      return CreateBuffer(GL_UNIFORM_BUFFER, data);
+      return _buffers.Remove(handle);
     }
 
-    virtual BufferHandle CreateIndexBuffer(uint32 size) override
-    {
-      return CreateBuffer(GL_ELEMENT_ARRAY_BUFFER, size);
-    }
-
-    virtual BufferHandle CreateIndexBuffer(Span<const byte> data) override
-    {
-      return CreateBuffer(GL_ELEMENT_ARRAY_BUFFER, data);
-    }
-
-    virtual BufferHandle CreateVertexBuffer(uint32 size) override
-    {
-      return CreateBuffer(GL_ARRAY_BUFFER, size);
-    }
-
-    virtual BufferHandle CreateVertexBuffer(Span<const byte> data) override
-    {
-      return CreateBuffer(GL_ARRAY_BUFFER, data);
-    }
-
-    BufferHandle CreateBuffer(GLenum bufferType, const BufferData &data) noexcept
-    {
-      return _buffers.Add(Buffer(bufferType, data));
-    }
-
-    BufferHandle CreateBuffer(GLenum bufferType, uint32 size) noexcept
-    {
-      return _buffers.Add(Buffer(bufferType, size));
-    }
-
-    void Destroy(BufferHandle handle) override
-    {
-      _buffers.Remove(handle);
-    }
-
-    Buffer &Get(BufferHandle handle)
+    NO_DISCARD Buffer &Get(BufferHandle handle)
     {
       return _buffers.Get(handle);
+    }
+
+    NO_DISCARD Buffer *TryGet(BufferHandle handle)
+    {
+      return _buffers.TryGet(handle);
     }
   };
 }
