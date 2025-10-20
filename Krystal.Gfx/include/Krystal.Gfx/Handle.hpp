@@ -39,4 +39,8 @@ namespace Krys::Gfx
   struct FontHandle : Handle<MaterialHandle>
   {
   };
+
+  struct RenderTargetHandle : Handle<RenderTargetHandle>
+  {
+  };
 }

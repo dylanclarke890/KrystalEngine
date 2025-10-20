@@ -143,5 +143,4 @@ namespace Krys::UI::Layout
       return !(*this == layout);
     }
   };
-
 }

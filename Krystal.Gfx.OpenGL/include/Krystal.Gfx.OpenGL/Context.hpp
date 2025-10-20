@@ -10,6 +10,7 @@
 #include "Krystal.Gfx.OpenGL/Registries/SamplerRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ShaderRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/TextureRegistry.hpp"
+#include "Krystal.Gfx.OpenGL/Registries/RenderTargetRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/TextRenderer.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
@@ -36,6 +37,7 @@ namespace Krys::Gfx::OpenGL
     ShaderRegistry _shaders;
     MeshRegistry _meshes;
     TextureRegistry _textures;
+    RenderTargetRegistry _renderTargets;
     MaterialRegistry _materials;
     FontRegistry _fonts;
     TextRenderer _text;
@@ -64,6 +66,8 @@ namespace Krys::Gfx::OpenGL
     NO_DISCARD ISamplerRegistry &Samplers() noexcept override;
 
     NO_DISCARD ITextureRegistry &Textures() noexcept override;
+
+    NO_DISCARD IRenderTargetRegistry &RenderTargets() noexcept override;
 
     NO_DISCARD IShaderRegistry &Shaders() noexcept override;
 

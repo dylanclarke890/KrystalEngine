@@ -23,6 +23,7 @@ namespace Krys::Gfx::OpenGL
     BufferHandle _vbo;
     BufferHandle _ebo;
     BufferHandle _instanceDataBuffer;
+    RenderTargetHandle _currentRenderTarget {0u};
 
   public:
     UIRenderer(IContext &ctx) noexcept;

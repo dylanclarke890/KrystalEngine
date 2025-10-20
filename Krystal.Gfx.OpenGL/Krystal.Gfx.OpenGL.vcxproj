@@ -58,6 +58,14 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Registries\RenderTargetRegistry.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\RenderTarget.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\UIRenderer.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Buffer.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Font.hpp" />

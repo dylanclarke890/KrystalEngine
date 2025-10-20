@@ -623,8 +623,8 @@ namespace Krys::Gfx::OpenGL
         _vfs(*settings.VFS), _dpi(Platform::GetDPIForWindow(_windowHandle)),
         _platformImpl(CreateUnique<ContextPlatformImpl>(settings.WindowHandle)), _buffers(), _images(),
         _imageViews(_images), _samplers(), _shaders(_vfs), _meshes(),
-        _textures(_vfs, _images, _imageViews, _samplers), _materials(_textures), _fonts(_dpi),
-        _text(_fonts, _shaders, _dpi)
+        _textures(_vfs, _images, _imageViews, _samplers), _renderTargets(_images, _imageViews),
+        _materials(_textures), _fonts(_dpi), _text(_fonts, _shaders, _dpi)
   {
   }
 
@@ -925,6 +925,11 @@ namespace Krys::Gfx::OpenGL
   ITextureRegistry &Context::Textures() noexcept
   {
     return _textures;
+  }
+
+  IRenderTargetRegistry &Context::RenderTargets() noexcept
+  {
+    return _renderTargets;
   }
 
   IShaderRegistry &Context::Shaders() noexcept

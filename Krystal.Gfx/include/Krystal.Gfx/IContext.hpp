@@ -18,6 +18,7 @@ namespace Krys::Gfx
   class IShaderRegistry;
   class IMeshRegistry;
   class ITextureRegistry;
+  class IRenderTargetRegistry;
   class IMaterialRegistry;
   class IFontRegistry;
 
@@ -69,6 +70,8 @@ namespace Krys::Gfx
     NO_DISCARD virtual ISamplerRegistry &Samplers() noexcept = 0;
 
     NO_DISCARD virtual ITextureRegistry &Textures() noexcept = 0;
+
+    NO_DISCARD virtual IRenderTargetRegistry &RenderTargets() noexcept = 0;
 
     NO_DISCARD virtual IShaderRegistry &Shaders() noexcept = 0;
 
