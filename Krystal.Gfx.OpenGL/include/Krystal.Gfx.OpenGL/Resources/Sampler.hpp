@@ -20,6 +20,8 @@ namespace Krys::Gfx::OpenGL
     float _anisotropicLevel {1.0f};
 
   public:
+    MOVE_SWAP(Sampler)
+
     Sampler(GLenum minFilter, GLenum magFilter, GLenum wrapS, GLenum wrapT, GLenum wrapR,
             float anisotropicLevel) noexcept
         : _minFilter(minFilter), _magFilter(magFilter), _wrapS(wrapS), _wrapT(wrapT), _wrapR(wrapR),
@@ -43,20 +45,6 @@ namespace Krys::Gfx::OpenGL
       {
         glDeleteSamplers(1, &_id);
       }
-    }
-
-    Sampler(Sampler &&other) noexcept : _id(0u)
-    {
-      Swap(other);
-    }
-
-    Sampler &operator=(Sampler &&other) noexcept
-    {
-      if (this != &other)
-      {
-        Swap(other);
-      }
-      return *this;
     }
 
     GLuint Id() const noexcept

@@ -20,6 +20,8 @@ namespace Krys::Gfx::OpenGL
     SubResourceRange _subResourceRange {};
 
   public:
+    MOVE_SWAP(ImageView)
+
     ImageView(ImageHandle imageHandle, GLuint image, GLenum target, GLenum internalFormat,
               SubResourceRange subResourceRange) noexcept
         : _id(0u), _imageHandle(imageHandle), _image(image), _target(target), _internalFormat(internalFormat),
@@ -37,20 +39,6 @@ namespace Krys::Gfx::OpenGL
       {
         glDeleteTextures(1, &_id);
       }
-    }
-
-    ImageView(ImageView &&other) noexcept : _id(0u)
-    {
-      Swap(other);
-    }
-
-    ImageView &operator=(ImageView &&other) noexcept
-    {
-      if (this != &other)
-      {
-        Swap(other);
-      }
-      return *this;
     }
 
     void Bind(uint32 unit) const noexcept

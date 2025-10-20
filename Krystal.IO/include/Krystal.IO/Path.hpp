@@ -13,6 +13,8 @@ namespace Krys::IO
     std::filesystem::path _path;
 
   public:
+    Path() = default;
+
     explicit Path(const std::filesystem::path &path);
 
     ~Path() noexcept = default;

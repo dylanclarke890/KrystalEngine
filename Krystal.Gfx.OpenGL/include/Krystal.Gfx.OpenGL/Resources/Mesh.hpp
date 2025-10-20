@@ -21,6 +21,8 @@ namespace Krys::Gfx::OpenGL
     GLsizei _count {0};
 
   public:
+    MOVE_SWAP(Mesh)
+
     Mesh(const Span<const byte> &vertexBuffer, const VertexBufferLayout &layout,
          GLenum primitiveType = GL_TRIANGLES) noexcept
         : _primitiveType(primitiveType)
@@ -69,21 +71,6 @@ namespace Krys::Gfx::OpenGL
       {
         glDeleteVertexArrays(1, &_vao);
       }
-    }
-
-    Mesh(Mesh &&other) noexcept
-    {
-      Swap(other);
-    }
-
-    Mesh &operator=(Mesh &&other) noexcept
-    {
-      if (this != &other)
-      {
-        Swap(other);
-      }
-
-      return *this;
     }
 
     void Bind() const noexcept

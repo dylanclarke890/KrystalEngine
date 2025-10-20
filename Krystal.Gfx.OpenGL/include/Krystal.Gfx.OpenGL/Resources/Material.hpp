@@ -37,31 +37,24 @@ namespace Krys::Gfx::OpenGL
   struct Material
   {
     NO_COPY(Material)
+    MOVE_SWAP(Material)
 
     Material(const string &name, ShaderHandle shader, const List<MaterialParameter> &parameters) noexcept
         : Name(name), Shader(shader), Parameters(parameters)
     {
     }
 
-    Material(Material &&other) noexcept
-        : Name(std::move(other.Name)), Shader(other.Shader), Parameters(std::move(other.Parameters))
-    {
-    }
-
-    Material &operator=(Material &&other) noexcept
-    {
-      if (this != &other)
-      {
-        Name = std::move(other.Name);
-        Shader = other.Shader;
-        Parameters = std::move(other.Parameters);
-      }
-      return *this;
-    }
-
     string Name;
     ShaderHandle Shader;
     List<MaterialParameter> Parameters;
+
+  private:
+    void Swap(Material &other) noexcept
+    {
+      std::swap(Name, other.Name);
+      std::swap(Shader, other.Shader);
+      std::swap(Parameters, other.Parameters);
+    }
   };
 
   class FlatColourMaterial

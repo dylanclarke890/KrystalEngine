@@ -67,6 +67,8 @@ namespace Krys::Gfx::OpenGL
     uint32 _size;
 
   public:
+    MOVE_SWAP(Buffer)
+
     Buffer(GLenum type, GLenum usage, uint32 size, Span<const byte> initialData)
         : _handle(0u), _type(type), _usage(usage), _size(size)
     {
@@ -82,20 +84,6 @@ namespace Krys::Gfx::OpenGL
     ~Buffer() noexcept
     {
       glDeleteBuffers(1, &_handle);
-    }
-
-    Buffer(Buffer &&other) noexcept
-    {
-      Swap(std::move(other));
-    }
-
-    Buffer &operator=(Buffer &&other) noexcept
-    {
-      if (this != &other)
-      {
-        Swap(std::move(other));
-      }
-      return *this;
     }
 
     void Bind() const noexcept
@@ -131,7 +119,7 @@ namespace Krys::Gfx::OpenGL
     }
 
   private:
-    void Swap(Buffer &&other)
+    void Swap(Buffer &other)
     {
       std::swap(_handle, other._handle);
       std::swap(_type, other._type);

@@ -22,6 +22,8 @@ namespace Krys::Gfx::OpenGL
     uint32 _arrayLayers {1u};
 
   public:
+    MOVE_SWAP(Image)
+
     Image(GLenum target, GLenum internalFormat, uint32 width, uint32 height, uint32 depth, uint32 mipLevels,
           uint32 arrayLayers) noexcept
         : _target(target), _internalFormat(internalFormat), _width(width), _height(height), _depth(depth),
@@ -48,20 +50,6 @@ namespace Krys::Gfx::OpenGL
       {
         glDeleteTextures(1, &_id);
       }
-    }
-
-    Image(Image &&other) noexcept : _id(0u)
-    {
-      Swap(other);
-    }
-
-    Image &operator=(Image &&other) noexcept
-    {
-      if (this != &other)
-      {
-        Swap(other);
-      }
-      return *this;
     }
 
     NO_DISCARD GLuint Id() const noexcept

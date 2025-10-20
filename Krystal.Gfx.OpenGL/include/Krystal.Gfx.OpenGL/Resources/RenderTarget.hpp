@@ -29,6 +29,8 @@ namespace Krys::Gfx::OpenGL
     RenderTargetAttachment _depthStencilAttachment {};
 
   public:
+    MOVE_SWAP(RenderTarget)
+
     RenderTarget(uint32 width, uint32 height) noexcept : _width(width), _height(height)
     {
       glCreateFramebuffers(1, &_fbo);
@@ -37,20 +39,6 @@ namespace Krys::Gfx::OpenGL
     ~RenderTarget() noexcept
     {
       glDeleteFramebuffers(1, &_fbo);
-    }
-
-    RenderTarget(RenderTarget &&other)
-    {
-      Swap(other);
-    }
-
-    RenderTarget &operator=(RenderTarget &&other)
-    {
-      if (this != &other)
-      {
-        Swap(other);
-      }
-      return *this;
     }
 
     void AddColorAttachment(const RenderTargetAttachment &attachment) noexcept

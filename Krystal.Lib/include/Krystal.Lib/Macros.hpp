@@ -118,6 +118,21 @@ namespace Krys
   ~ClassName() = delete;                                                                                     \
   NO_COPY_MOVE(ClassName)
 
+#define MOVE_SWAP(ClassName)                                                                                 \
+  ClassName(ClassName &&other) noexcept                                                                      \
+  {                                                                                                          \
+    Swap(other);                                                                                             \
+  }                                                                                                          \
+                                                                                                             \
+  ClassName &operator=(ClassName &&other) noexcept                                                           \
+  {                                                                                                          \
+    if (this != &other)                                                                                      \
+    {                                                                                                        \
+      Swap(other);                                                                                           \
+    }                                                                                                        \
+    return *this;                                                                                            \
+  }
+
 #define CONCAT_IMPL(x, y) x##y
 #define CONCAT(x, y) CONCAT_IMPL(x, y)
 

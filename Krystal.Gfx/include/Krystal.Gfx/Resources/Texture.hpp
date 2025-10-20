@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Krystal.Gfx/Handle.hpp"
+#include "Krystal.Lib/Macros.hpp"
 #include <cassert>
 
 namespace Krys::Gfx::OpenGL
@@ -14,6 +15,8 @@ namespace Krys::Gfx::OpenGL
     SamplerHandle _sampler {};
 
   public:
+    MOVE_SWAP(Texture)
+
     Texture(ImageViewHandle imageView, SamplerHandle sampler) noexcept
         : _imageView(imageView), _sampler(sampler)
     {
@@ -22,20 +25,6 @@ namespace Krys::Gfx::OpenGL
     }
 
     ~Texture() noexcept = default;
-
-    Texture(Texture &&other) noexcept : _sampler {}, _imageView {}
-    {
-      Swap(other);
-    }
-
-    Texture &operator=(Texture &&other) noexcept
-    {
-      if (this != &other)
-      {
-        Swap(other);
-      }
-      return *this;
-    }
 
     NO_DISCARD SamplerHandle Sampler() const noexcept
     {

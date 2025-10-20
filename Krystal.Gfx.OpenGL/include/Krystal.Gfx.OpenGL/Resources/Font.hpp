@@ -69,6 +69,8 @@ namespace Krys::Gfx::OpenGL
     SDFParams _sdfParams {};
 
   public:
+    MOVE_SWAP(Font)
+
     Font(FontType type, float ptSize, const IO::Path &path, GLenum format) noexcept
         : _type(type), _ptSize(ptSize), _path(path)
     {
@@ -99,19 +101,6 @@ namespace Krys::Gfx::OpenGL
       }
     }
 
-    Font(Font &&other) noexcept : _path("")
-    {
-      Swap(other);
-    }
-
-    Font &operator=(Font &&other) noexcept
-    {
-      if (this != &other)
-      {
-        Swap(other);
-      }
-      return *this;
-    }
 
     void DrawText(const string &text, const Maths::Vec2 &position, float scale = 1.0f)
     {

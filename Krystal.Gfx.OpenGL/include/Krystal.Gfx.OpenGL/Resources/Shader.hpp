@@ -19,6 +19,8 @@ namespace Krys::Gfx::OpenGL
     ShaderLayout _layout {};
 
   public:
+    MOVE_SWAP(Shader)
+
     Shader(const string &vertex, const string &fragment) noexcept : _id(glCreateProgram())
     {
       auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -58,20 +60,6 @@ namespace Krys::Gfx::OpenGL
       glDeleteShader(vertexShader);
       glDeleteShader(geometryShader);
       glDeleteShader(fragmentShader);
-    }
-
-    Shader(Shader &&other) noexcept : _id(0u)
-    {
-      Swap(other);
-    }
-
-    Shader &operator=(Shader &&other) noexcept
-    {
-      if (this != &other)
-      {
-        Swap(other);
-      }
-      return *this;
     }
 
     ~Shader() noexcept
