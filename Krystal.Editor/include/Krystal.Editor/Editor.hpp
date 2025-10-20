@@ -12,17 +12,17 @@ namespace Krys
   class Editor : public Application
   {
   private:
-    Gfx::FirstPersonCamera _camera;
     UI::Document _document;
+    uint32 _width {0u};
+    uint32 _height {0u};
+    Gfx::FirstPersonCamera _camera;
 
   public:
     explicit Editor(int argc, char **argv, const ApplicationSettings &settings) noexcept
-        : Application(argc, argv, settings),
-          _camera(Maths::Vec3(0.0f, 0.0f, 5.0f), Maths::Vec3(0.0f, 0.0f, 0.0f), Maths::Vec3(0.0f, 1.0f, 0.0f),
-                  Maths::Radians(45.0f),
-                  static_cast<float>(settings.WindowSettings.Size.Width)
-                    / static_cast<float>(settings.WindowSettings.Size.Height),
-                  0.1f, 100.0f)
+        : Application(argc, argv, settings), _width(settings.WindowSettings.Size.Width),
+          _height(settings.WindowSettings.Size.Height),
+          _camera({0.f, 0.f, 5.f}, {0.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, Maths::Radians(45.f),
+                  (float)_width / (float)_height, 0.1f, 100.f)
     {
     }
 
@@ -68,8 +68,10 @@ namespace Krys
       _context->Events->On<WindowResizeEvent>(
         [&](const auto &event)
         {
-          _context->GraphicsContext->Resize(event.Width(), event.Height());
-          _camera.OnResize(event.Width(), event.Height());
+          _width = event.Width();
+          _height = event.Height();
+          _context->GraphicsContext->Resize(_width, _height);
+          _camera.OnResize(_width, _height);
           return true;
         });
 
@@ -105,10 +107,7 @@ namespace Krys
     void OnRender() noexcept override
     {
       _context->GraphicsContext->Render(_camera);
-
-      float width = static_cast<float>(_context->Settings.WindowSettings.Size.Width);
-      float height = static_cast<float>(_context->Settings.WindowSettings.Size.Height);
-      _context->UI->Render(_document, width, height);
+      _context->UI->Render(_document, (float)_width, (float)_height);
     }
 
     void OnUpdate(double deltaTime) noexcept override
