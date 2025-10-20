@@ -87,15 +87,19 @@ namespace Krys
       using namespace Krys::UI;
       _document.GetBody().SetBackgroundColour(Gfx::Colour {.0706f});
 
-      auto testBoxHandle = _document.CreateElement<Element>();
-      _document.AddToBody(testBoxHandle);
-      auto &testBox = _document.GetByHandle<Element>(testBoxHandle);
-      testBox.SetWidth(200._px);
-      testBox.SetHeight(200._px);
-      testBox.SetMargin(10._px);
-      testBox.SetBackgroundColour(Gfx::Colour {.0706f});
-      testBox.SetBorderColour(Gfx::Colours::Gray25);
-      testBox.SetBorderWidth(1._px);
+      for (uint i = 0; i < 5; i++)
+      {
+        auto testBoxHandle = _document.CreateElement<Element>();
+        _document.AddToBody(testBoxHandle);
+        auto &testBox = _document.GetByHandle<Element>(testBoxHandle);
+        testBox.SetWidth(200._px);
+        testBox.SetHeight(200._px);
+        testBox.SetMargin(10._px);
+        testBox.SetBackgroundColour(Gfx::Colours::Purple);
+        testBox.SetBorderColour(Gfx::Colours::Gray25);
+        testBox.SetBorderWidth(1._px);
+        testBox.SetBorderRadius(100._px);
+      }
     }
 
     void OnRender() noexcept override

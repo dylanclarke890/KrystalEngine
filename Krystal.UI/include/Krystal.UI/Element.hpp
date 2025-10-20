@@ -72,9 +72,10 @@ namespace Krys::UI
     Gfx::Colour _backgroundColour {Gfx::Colours::Transparent};
     Gfx::Colour _foregroundColour {Gfx::Colours::Black};
     Gfx::Colour _borderColour {Gfx::Colours::Transparent};
+    float _borderRadius {0.0f};
 
   public:
-    Element() = default;
+    Element(Layout::ConfigRef);
     virtual ~Element();
 
     void SetWidth(const Layout::UnitValue &value) const
@@ -196,6 +197,23 @@ namespace Krys::UI
     float GetBorderWidth() const
     {
       return Layout::NodeStyleGetBorder(_layoutNode, Layout::Edge::All);
+    }
+
+    void SetBorderRadius(const Layout::UnitValue &radius)
+    {
+      if (radius.Type == Layout::Unit::Point)
+      {
+        _borderRadius = radius.Value;
+      }
+      else
+      {
+        throw std::invalid_argument("Only 'px' is supported for border radius.");
+      }
+    }
+
+    float GetBorderRadius() const
+    {
+      return _borderRadius;
     }
 
     void SetFlexDirection(FlexDirection direction) const

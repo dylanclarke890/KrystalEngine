@@ -129,7 +129,7 @@ namespace Krys::Gfx::OpenGL
         .BackgroundColour = element.GetBackgroundColor(),
         .BorderColour = element.GetBorderColor(),
         .PositionAndSize = {cb.X, cb.Y, cb.Width, cb.Height},
-        .BorderThicknessRadius = {element.GetBorderWidth(), 0.f},
+        .BorderThicknessRadius = {element.GetBorderWidth(), element.GetBorderRadius()},
       });
 
       for (const auto &childHandle : element.GetChildren())

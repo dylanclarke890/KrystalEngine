@@ -31,9 +31,7 @@ namespace Krys::UI
     template <DerivedFrom<Element> TElement, typename... Args>
     NO_DISCARD ElementHandle CreateElement(Args &&...args)
     {
-      Unique<TElement> element = CreateUnique<TElement>(std::forward<Args>(args)...);
-      static_cast<Element *>(element.get())->CreateLayoutNode(_layoutConfig);
-
+      Unique<TElement> element = CreateUnique<TElement>(_layoutConfig, std::forward<Args>(args)...);
       auto handle = _elements.Add(std::move(element));
       return handle;
     }

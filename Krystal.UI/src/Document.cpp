@@ -9,8 +9,6 @@ namespace Krys::UI
     auto &body = GetBody();
     body.SetWidth(100.0_pct);
     body.SetHeight(100.0_pct);
-    body.SetBorderColour(Gfx::Colours::Transparent);
-    body.SetBorderWidth(Layout::UnitValue::Zero);
     body.SetWrap(Wrap::Wrap);
   }
 
