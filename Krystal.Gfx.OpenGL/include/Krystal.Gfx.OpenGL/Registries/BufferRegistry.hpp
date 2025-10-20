@@ -4,7 +4,6 @@
 #include "Krystal.Gfx.OpenGL/Resources/Buffer.hpp"
 #include "Krystal.Gfx/Registries/IBufferRegistry.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
 
 namespace Krys::Gfx::OpenGL
 {

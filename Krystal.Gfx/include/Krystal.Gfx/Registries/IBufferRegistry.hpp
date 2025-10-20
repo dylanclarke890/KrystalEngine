@@ -3,8 +3,6 @@
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Buffer.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Span.hpp"
-#include "Krystal.Lib/Types.hpp"
 
 namespace Krys::Gfx
 {
