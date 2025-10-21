@@ -102,23 +102,23 @@ namespace Krys::Gfx::OpenGL
       return _renderTargets.Add(std::move(rt));
     }
 
-    void Destroy(RenderTargetHandle handle) noexcept override
+    bool Destroy(RenderTargetHandle handle) noexcept override
     {
       assert(handle.IsValid() && "Invalid render target handle.");
       auto *rt = _renderTargets.TryGet(handle);
       if (rt == nullptr)
       {
         assert(false && "Invalid render target handle.");
-        return;
+        return false;
       }
 
       for (const auto &attachment : rt->GetAllAttachments())
       {
-        _imageViews.Unload(attachment.ImageView);
-        _images.Unload(attachment.Image);
+        _imageViews.Destroy(attachment.ImageView);
+        _images.Destroy(attachment.Image);
       }
 
-      _renderTargets.Remove(handle);
+      return _renderTargets.Remove(handle);
     }
 
     NO_DISCARD RenderTargetHandle GetScreenRenderTarget() const noexcept override

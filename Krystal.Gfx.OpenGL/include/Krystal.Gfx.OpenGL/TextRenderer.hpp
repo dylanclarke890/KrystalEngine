@@ -1,11 +1,11 @@
 #pragma once
 
+#include "Krystal.Gfx.Lib/Colour.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/FontRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ShaderRegistry.hpp"
-#include "Krystal.Gfx.Lib/Colour.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
-#include "Krystal.Gfx/TextShaderDesc.hpp"
+#include "Krystal.Gfx/Resources/Shader.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
 #include "Krystal.Lib/String.hpp"

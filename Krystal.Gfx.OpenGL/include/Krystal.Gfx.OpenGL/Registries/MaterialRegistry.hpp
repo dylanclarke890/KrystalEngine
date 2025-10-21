@@ -1,11 +1,12 @@
 #pragma once
 
+#include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/TextureRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Material.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Registries/IMaterialRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
-#include "Krystal.Gfx.Lib/ResourceManager.hpp"
+#include "Krystal.Gfx/Resources/Material.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
@@ -26,7 +27,7 @@ namespace Krys::Gfx::OpenGL
     MaterialCache _cache;
 
   public:
-    MaterialRegistry(TextureRegistry &textures) noexcept : _textures(textures)
+    MaterialRegistry(TextureRegistry &textures) : _textures(textures)
     {
     }
 
@@ -34,7 +35,7 @@ namespace Krys::Gfx::OpenGL
     {
     }
 
-    void Startup() noexcept override
+    void Startup() override
     {
     }
 
@@ -98,7 +99,12 @@ namespace Krys::Gfx::OpenGL
       return _materials.Get(handle);
     }
 
-    void Unload(MaterialHandle handle) noexcept override
+    NO_DISCARD Material *TryGet(MaterialHandle handle) noexcept
+    {
+      return _materials.TryGet(handle);
+    }
+
+    bool Unload(MaterialHandle handle) noexcept override
     {
       assert(handle.IsValid() && "Invalid handle.");
       assert(_materials.TryGet(handle) != nullptr && "Material not found in manager.");
@@ -117,8 +123,9 @@ namespace Krys::Gfx::OpenGL
             }
           }
         }
-        _materials.Remove(handle);
+        return _materials.Remove(handle);
       }
+      return false;
     }
   };
 }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
-#include "Krystal.Gfx/Common.hpp"
+#include "Krystal.Gfx/Resources/ImageView.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Types.hpp"
 
@@ -27,6 +27,8 @@ namespace Krys::Gfx::OpenGL
         : _id(0u), _imageHandle(imageHandle), _image(image), _target(target), _internalFormat(internalFormat),
           _subResourceRange(subResourceRange)
     {
+      // We use glGenTextures here instead of glCreateTextures because we need an uninitialized texture object
+      // for a texture view.
       glGenTextures(1, &_id);
       glTextureView(_id, _target, _image, _internalFormat, _subResourceRange.BaseMipLevel,
                     _subResourceRange.MipLevelCount, _subResourceRange.BaseArrayLayer,

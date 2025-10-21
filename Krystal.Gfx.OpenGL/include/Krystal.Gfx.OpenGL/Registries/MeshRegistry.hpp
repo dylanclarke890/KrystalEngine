@@ -24,7 +24,7 @@ namespace Krys::Gfx::OpenGL
 
     ~MeshRegistry() noexcept override = default;
 
-    void Startup() noexcept override
+    void Startup() override
     {
     }
 
@@ -217,13 +217,13 @@ namespace Krys::Gfx::OpenGL
                     PrimitiveType::Triangles);
     }
 
-    void Unload(MeshHandle handle) noexcept override
+    bool Destroy(MeshHandle handle) noexcept override
     {
       if (!handle.IsValid())
       {
-        return;
+        return false;
       }
-      _meshes.Remove(handle);
+      return _meshes.Remove(handle);
     }
 
     Mesh &Get(MeshHandle handle) noexcept

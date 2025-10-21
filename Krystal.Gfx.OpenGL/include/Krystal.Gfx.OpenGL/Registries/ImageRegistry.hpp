@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Krystal.Gfx.OpenGL/gl.hpp"
+#include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Image.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Registries/IImageRegistry.hpp"
-#include "Krystal.Gfx.Lib/ResourceManager.hpp"
+#include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/Macros.hpp"
 
 namespace Krys::Gfx::OpenGL
@@ -23,7 +23,7 @@ namespace Krys::Gfx::OpenGL
 
     ~ImageRegistry() noexcept override = default;
 
-    void Startup() noexcept override
+    void Startup() override
     {
     }
 
@@ -31,7 +31,7 @@ namespace Krys::Gfx::OpenGL
     {
     }
 
-    NO_DISCARD ImageHandle Create(const ImageDesc &desc) noexcept
+    NO_DISCARD ImageHandle Create(const ImageDesc &desc)
     {
       GLenum target = MapImageType(desc.Type);
       GLenum internalFormat = MapImageFormat(desc.Format);
@@ -41,9 +41,9 @@ namespace Krys::Gfx::OpenGL
       return _images.Add(std::move(image));
     }
 
-    void Unload(ImageHandle image) noexcept override
+    bool Destroy(ImageHandle image) noexcept override
     {
-      _images.Remove(image);
+      return _images.Remove(image);
     }
 
     NO_DISCARD Image &Get(ImageHandle handle)

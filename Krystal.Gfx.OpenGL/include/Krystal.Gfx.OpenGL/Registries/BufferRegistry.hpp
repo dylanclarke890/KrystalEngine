@@ -19,9 +19,9 @@ namespace Krys::Gfx::OpenGL
   public:
     BufferRegistry() noexcept = default;
 
-    virtual ~BufferRegistry() = default;
+    virtual ~BufferRegistry() noexcept = default;
 
-    void Startup() noexcept override
+    void Startup() override
     {
     }
 
@@ -47,7 +47,7 @@ namespace Krys::Gfx::OpenGL
       return _buffers.Get(handle);
     }
 
-    NO_DISCARD Buffer *TryGet(BufferHandle handle)
+    NO_DISCARD Buffer *TryGet(BufferHandle handle) noexcept
     {
       return _buffers.TryGet(handle);
     }

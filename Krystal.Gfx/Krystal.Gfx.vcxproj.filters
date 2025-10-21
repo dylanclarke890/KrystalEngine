@@ -465,12 +465,6 @@
     <ClInclude Include="include\Krystal.Gfx\ShaderPreprocessorConfig.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx\TextShaderDesc.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx\Common.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Gfx\Registries\IImageRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -490,6 +484,30 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Gfx\Resources\Buffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Resources\Image.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Resources\ImageView.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Resources\RenderTarget.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Resources\Sampler.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Resources\Shader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Resources\Font.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Resources\Mesh.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Resources\Material.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

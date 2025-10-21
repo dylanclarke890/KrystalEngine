@@ -1,11 +1,10 @@
 #pragma once
 
 #include "Krystal.Debug/ScopedProfiler.hpp"
+#include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Shader.hpp"
-#include "Krystal.Gfx/Common.hpp"
 #include "Krystal.Gfx/Registries/IShaderRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
-#include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx/ShaderPreprocessorConfig.hpp"
 #include "Krystal.IO/Streams/StreamUtils.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
@@ -36,7 +35,7 @@ namespace Krys::Gfx::OpenGL
 
     ~ShaderRegistry() noexcept override = default;
 
-    void Startup() noexcept override
+    void Startup() override
     {
     }
 
@@ -110,15 +109,16 @@ namespace Krys::Gfx::OpenGL
       return Load(vertex, fragment, cfg);
     }
 
-    void Unload(ShaderHandle handle) noexcept override
+    bool Unload(ShaderHandle handle) noexcept override
     {
       assert(handle.IsValid() && "Handle is invalid.");
       assert(_shaders.TryGet(handle) != nullptr && "Shader not found in resource manager.");
 
       if (_cache.Remove(handle))
       {
-        _shaders.Remove(handle);
+        return _shaders.Remove(handle);
       }
+      return false;
     }
 
     NO_DISCARD Shader &Get(ShaderHandle handle) noexcept

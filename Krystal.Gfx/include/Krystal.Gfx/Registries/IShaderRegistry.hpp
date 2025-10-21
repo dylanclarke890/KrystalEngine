@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Krystal.Gfx/Handle.hpp"
-#include "Krystal.Gfx/TextShaderDesc.hpp"
+#include "Krystal.Gfx/Resources/Shader.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/Macros.hpp"
@@ -16,9 +16,9 @@ namespace Krys::Gfx
     IShaderRegistry() noexcept = default;
 
   public:
-    virtual ~IShaderRegistry() = default;
+    virtual ~IShaderRegistry() noexcept = default;
 
-    virtual void Startup() noexcept = 0;
+    virtual void Startup() = 0;
 
     virtual void Shutdown() noexcept = 0;
 
@@ -30,6 +30,6 @@ namespace Krys::Gfx
     NO_DISCARD virtual ShaderHandle LoadTextShader(const IO::Path &vertex, const IO::Path &fragment,
                                                    const TextShaderDesc &desc) noexcept = 0;
 
-    virtual void Unload(ShaderHandle handle) noexcept = 0;
+    virtual bool Unload(ShaderHandle handle) noexcept = 0;
   };
 }

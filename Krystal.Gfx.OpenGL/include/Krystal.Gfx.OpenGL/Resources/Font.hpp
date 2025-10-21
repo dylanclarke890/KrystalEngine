@@ -1,9 +1,10 @@
 #pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
+#include "Krystal.Gfx.OpenGL/Resources/Font.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Shader.hpp"
 #include "Krystal.Gfx.OpenGL/Utils.hpp"
-#include "Krystal.Gfx/Common.hpp"
+#include "Krystal.Gfx/Resources/Font.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
@@ -100,7 +101,6 @@ namespace Krys::Gfx::OpenGL
         glDeleteVertexArrays(1, &_vao);
       }
     }
-
 
     void DrawText(const string &text, const Maths::Vec2 &position, float scale = 1.0f)
     {

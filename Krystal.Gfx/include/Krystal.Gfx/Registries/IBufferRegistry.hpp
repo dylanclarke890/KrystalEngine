@@ -2,6 +2,7 @@
 
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Buffer.hpp"
+#include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/Macros.hpp"
 
 namespace Krys::Gfx
@@ -14,9 +15,9 @@ namespace Krys::Gfx
     IBufferRegistry() noexcept = default;
 
   public:
-    virtual ~IBufferRegistry() = default;
+    virtual ~IBufferRegistry() noexcept = default;
 
-    virtual void Startup() noexcept = 0;
+    virtual void Startup() = 0;
 
     virtual void Shutdown() noexcept = 0;
 

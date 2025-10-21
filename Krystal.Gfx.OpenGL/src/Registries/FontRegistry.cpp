@@ -382,7 +382,7 @@ namespace Krys::Gfx::OpenGL
   {
   }
 
-  void FontRegistry::Startup() noexcept
+  void FontRegistry::Startup()
   {
   }
 
@@ -450,17 +450,24 @@ namespace Krys::Gfx::OpenGL
     return handle;
   }
 
-  void FontRegistry::Unload(FontHandle handle) noexcept
+  bool FontRegistry::Unload(FontHandle handle) noexcept
   {
     if (_cache.Remove(handle))
     {
-      _fonts.Remove(handle);
+      return _fonts.Remove(handle);
     }
+
+    return false;
   }
 
   Font &FontRegistry::Get(FontHandle handle)
   {
     return _fonts.Get(handle);
+  }
+
+  Font *FontRegistry::TryGet(FontHandle handle) noexcept
+  {
+    return _fonts.TryGet(handle);
   }
 
   void FontRegistry::DPIChanged(int dpi) noexcept

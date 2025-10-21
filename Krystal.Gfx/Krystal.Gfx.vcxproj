@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.Gfx\Common.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Registries\IBufferRegistry.hpp">
       <SubType>
       </SubType>
@@ -35,8 +34,39 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Resources\Font.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Resources\Image.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Resources\ImageView.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Resources\Material.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Resources\Mesh.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Resources\RenderTarget.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Resources\Sampler.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Resources\Shader.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Krystal.Gfx\Resources\Texture.hpp" />
-    <ClInclude Include="include\Krystal.Gfx\TextShaderDesc.hpp" />
     <ClInclude Include="include\Krystal.Gfx\ResourceHandleCache.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Cameras\FirstPersonCamera.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Handle.hpp" />

@@ -1,10 +1,10 @@
 #pragma once
 
+#include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Sampler.hpp"
 #include "Krystal.Gfx/Registries/ISamplerRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
-#include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/HashUtils.hpp"
 #include "Krystal.Lib/Macros.hpp"
@@ -28,7 +28,7 @@ namespace Krys::Gfx::OpenGL
 
     ~SamplerRegistry() noexcept override = default;
 
-    void Startup() noexcept override
+    void Startup() override
     {
     }
 
@@ -60,15 +60,16 @@ namespace Krys::Gfx::OpenGL
       return handle;
     }
 
-    void Unload(SamplerHandle handle) noexcept override
+    bool Unload(SamplerHandle handle) noexcept override
     {
       assert(handle.IsValid() && "Invalid handle.");
       assert(_samplers.TryGet(handle) != nullptr && "Sampler not found in resource manager.");
 
       if (_cache.Remove(handle))
       {
-        _samplers.Remove(handle);
+        return _samplers.Remove(handle);
       }
+      return false;
     }
 
   private:

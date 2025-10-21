@@ -1,10 +1,11 @@
 #pragma once
 
+#include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ImageRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/ImageView.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Registries/IImageViewRegistry.hpp"
-#include "Krystal.Gfx.Lib/ResourceManager.hpp"
+#include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/Macros.hpp"
 
 namespace Krys::Gfx::OpenGL
@@ -50,14 +51,19 @@ namespace Krys::Gfx::OpenGL
       return _imageViews.Add(std::move(imageView));
     }
 
-    void Unload(ImageViewHandle handle) noexcept override
+    bool Destroy(ImageViewHandle handle) noexcept override
     {
-      _imageViews.Remove(handle);
+      return _imageViews.Remove(handle);
     }
 
     NO_DISCARD ImageView &Get(ImageViewHandle handle)
     {
       return _imageViews.Get(handle);
+    }
+
+    NO_DISCARD ImageView *TryGet(ImageViewHandle handle)
+    {
+      return _imageViews.TryGet(handle);
     }
   };
 }

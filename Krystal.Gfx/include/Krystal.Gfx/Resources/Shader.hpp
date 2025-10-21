@@ -1,7 +1,9 @@
 #pragma once
 
-#include "Krystal.Gfx/Common.hpp"
+#include "Krystal.Gfx/Resources/Font.hpp"
 #include "Krystal.Lib/HashUtils.hpp"
+#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Types.hpp"
 #include <type_traits>
 
 namespace Krys::Gfx

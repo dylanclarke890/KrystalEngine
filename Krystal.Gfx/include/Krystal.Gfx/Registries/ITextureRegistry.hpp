@@ -22,9 +22,9 @@ namespace Krys::Gfx
     ITextureRegistry() noexcept = default;
 
   public:
-    virtual ~ITextureRegistry() = default;
+    virtual ~ITextureRegistry() noexcept = default;
 
-    virtual void Startup() noexcept = 0;
+    virtual void Startup() = 0;
 
     virtual void Shutdown() noexcept = 0;
 
@@ -35,6 +35,6 @@ namespace Krys::Gfx
                                                  const IO::Path &front, const IO::Path &back,
                                                  const TextureDesc &desc = {}) noexcept = 0;
 
-    virtual void Unload(TextureHandle handle) noexcept = 0;
+    virtual bool Unload(TextureHandle handle) noexcept = 0;
   };
 }

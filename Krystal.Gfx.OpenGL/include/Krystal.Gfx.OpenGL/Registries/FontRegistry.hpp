@@ -1,10 +1,10 @@
 #pragma once
 
+#include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Font.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Registries/IFontRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
-#include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/String.hpp"
@@ -27,15 +27,17 @@ namespace Krys::Gfx::OpenGL
 
     ~FontRegistry() noexcept override;
 
-    void Startup() noexcept override;
+    void Startup() override;
 
     void Shutdown() noexcept override;
 
     NO_DISCARD FontHandle Load(const IO::Path &path, float ptSize, FontType fontType) noexcept override;
 
-    void Unload(FontHandle handle) noexcept override;
+    bool Unload(FontHandle handle) noexcept override;
 
     NO_DISCARD Font &Get(FontHandle handle);
+
+    NO_DISCARD Font *TryGet(FontHandle handle) noexcept;
 
     void DPIChanged(int dpi) noexcept;
   };

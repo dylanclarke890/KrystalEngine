@@ -45,7 +45,7 @@ namespace Krys::Gfx::OpenGL
 
     ~TextureRegistry() override = default;
 
-    void Startup() noexcept override
+    void Startup() override
     {
     }
 
@@ -106,7 +106,6 @@ namespace Krys::Gfx::OpenGL
                                  .WrapR = WrapMode::ClampToEdge,
                                  .AnisotropicLevel = 1.f};
       SamplerHandle samplerHandle = _samplers.Create(samplerDesc);
-
 
       auto &imgView = _imageViews.Get(imageViewHandle);
       glObjectLabel(GL_TEXTURE, img.Id(), -1, key.c_str());
@@ -192,7 +191,7 @@ namespace Krys::Gfx::OpenGL
       return AddTexture(key, std::move(texture));
     }
 
-    void Unload(TextureHandle handle) noexcept override
+    bool Unload(TextureHandle handle) noexcept override
     {
       assert(handle.IsValid() && "Invalid handle.");
       assert(_textures.TryGet(handle) != nullptr && "Texture not found in resource manager.");
@@ -202,12 +201,13 @@ namespace Krys::Gfx::OpenGL
         Texture &texture = _textures.Get(handle);
         ImageView &imageView = _imageViews.Get(texture.ImageView());
 
-        _imageViews.Unload(texture.ImageView());
-        _images.Unload(imageView.Image());
+        _imageViews.Destroy(texture.ImageView());
+        _images.Destroy(imageView.Image());
         _samplers.Unload(texture.Sampler());
 
-        _textures.Remove(handle);
+        return _textures.Remove(handle);
       }
+      return false;
     }
 
     Texture &Get(TextureHandle handle) noexcept
