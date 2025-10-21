@@ -29,6 +29,7 @@ namespace Krys::Gfx
   {
     NO_COPY_MOVE(CommandArena)
 
+  public:
     constexpr static size_t Alignment = alignof(std::max_align_t);
 
   private:
