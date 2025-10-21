@@ -93,12 +93,13 @@ namespace Krys
       {
         auto testBoxHandle = _document.CreateElement<Element>();
         _document.AddToBody(testBoxHandle);
+
         auto &testBox = _document.GetByHandle<Element>(testBoxHandle);
         testBox.SetWidth(200._px);
         testBox.SetHeight(200._px);
         testBox.SetMargin(10._px);
         testBox.SetBackgroundColour(Gfx::Colours::Purple);
-        testBox.SetBorderColour(Gfx::Colours::Gray25);
+        testBox.SetBorderColour(Gfx::Colours::Yellow);
         testBox.SetBorderWidth(1._px);
         testBox.SetBorderRadius(100._px);
       }

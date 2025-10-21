@@ -90,5 +90,32 @@ namespace Krys
     {
       return Span<const byte>(reinterpret_cast<const byte *>(&object), sizeof(T));
     }
+
+    NO_DISCARD static constexpr size_t AlignNext(size_t size, size_t alignment) noexcept
+    {
+      assert(alignment != 0 && (alignment & (alignment - 1)) == 0); // alignment must be a power of two
+      return (size + alignment - 1) & ~(alignment - 1);
+    }
+
+    NO_DISCARD static constexpr size_t AlignPrev(size_t size, size_t alignment) noexcept
+    {
+      assert(alignment != 0 && (alignment & (alignment - 1)) == 0); // alignment must be a power of two
+      return size & ~(alignment - 1);
+    }
   };
+
+  NO_DISCARD constexpr size_t operator"" _KB(unsigned long long int value) noexcept
+  {
+    return static_cast<size_t>(value * 1'024u);
+  }
+
+  NO_DISCARD constexpr size_t operator"" _MB(unsigned long long int value) noexcept
+  {
+    return static_cast<size_t>(value * 1'024u * 1'024u);
+  }
+
+  NO_DISCARD constexpr size_t operator"" _GB(unsigned long long int value) noexcept
+  {
+    return static_cast<size_t>(value * 1'024u * 1'024u * 1'024u);
+  }
 }
