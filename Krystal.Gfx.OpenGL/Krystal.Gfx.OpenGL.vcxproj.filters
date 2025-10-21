@@ -18,7 +18,7 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Context.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Win32\ContextPlatformImpl.hpp">
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\ContextImpl\Win32.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Official\khrplatform.h">
@@ -122,7 +122,7 @@
     <ClCompile Include="src\Context.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Win32\ContextPlatformImpl.cpp">
+    <ClCompile Include="src\ContextImpl\Win32.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Hooks\wgl.cpp">

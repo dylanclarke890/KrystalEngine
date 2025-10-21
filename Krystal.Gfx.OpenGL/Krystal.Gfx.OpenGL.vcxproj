@@ -94,11 +94,11 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Official\wglext.h" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Model.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Shader.hpp" />
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Win32\ContextPlatformImpl.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\ContextImpl\Win32.hpp" />
     <ClCompile Include="src\Registries\FontRegistry.cpp" />
     <ClCompile Include="src\Hooks\gl.cpp" />
     <ClCompile Include="src\Hooks\wgl.cpp" />
-    <ClCompile Include="src\Win32\ContextPlatformImpl.cpp" />
+    <ClCompile Include="src\ContextImpl\Win32.cpp" />
     <ClInclude Include="third-party\stb\stb_rect_pack.h" />
   </ItemGroup>
   <ItemGroup>

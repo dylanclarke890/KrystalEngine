@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Krystal.Gfx.OpenGL/Context.hpp"
-#include "Krystal.Gfx.OpenGL/Hooks/wgl.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
 

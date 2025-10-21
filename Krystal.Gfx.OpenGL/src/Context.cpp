@@ -2,7 +2,7 @@
 #include "Krystal.Lib/Detection.hpp"
 
 #ifdef KRYS_PLATFORM_WINDOWS
-  #include "Krystal.Gfx.OpenGL/Win32/ContextPlatformImpl.hpp"
+  #include "Krystal.Gfx.OpenGL/ContextImpl/Win32.hpp"
 #else
   #error "Unsupported platform for OpenGL context creation."
 #endif
