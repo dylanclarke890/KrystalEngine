@@ -462,9 +462,6 @@
     <ClInclude Include="third-party\msdf-atlas-gen\Workload.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx\ShaderPreprocessorConfig.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Gfx\Registries\IImageRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

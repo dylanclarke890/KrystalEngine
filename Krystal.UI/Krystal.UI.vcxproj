@@ -129,7 +129,6 @@
   <ItemGroup>
     <ClCompile Include="src\Document.cpp" />
     <ClCompile Include="src\Element.cpp" />
-    <ClCompile Include="src\placeholder.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.UI\Document.hpp" />

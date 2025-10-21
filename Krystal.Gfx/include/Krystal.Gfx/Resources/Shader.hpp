@@ -3,6 +3,8 @@
 #include "Krystal.Gfx/Resources/Font.hpp"
 #include "Krystal.Lib/HashUtils.hpp"
 #include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Map.hpp"
+#include "Krystal.Lib/String.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include <type_traits>
 
@@ -16,6 +18,16 @@ namespace Krys::Gfx
     bool operator==(const TextShaderDesc &other) const noexcept
     {
       return FontType == other.FontType && EnableOutline == other.EnableOutline;
+    }
+  };
+
+  struct ShaderPreprocessorConfig
+  {
+    Map<string, string> Defines {};
+
+    void Define(const string &key, const string &value) noexcept
+    {
+      Defines[key] = value;
     }
   };
 }
