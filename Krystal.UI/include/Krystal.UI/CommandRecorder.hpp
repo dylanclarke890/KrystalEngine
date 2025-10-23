@@ -30,24 +30,29 @@ namespace Krys::UI
     }
 
   private:
-    void Record(Layer &layer, UI::Document &document, UI::Element &element, Gfx::CommandList &cmdList)
+    void Record(Layer &layer, UI::Document &document, UI::Element &element, Gfx::CommandList &cmdList,
+                const Maths::Vec2 &parentOffset = {0.f, 0.f})
     {
       UI::ComputedBounds cb = element.GetComputedBounds();
-      // TODO: this needs to be configurable per backend or handled elsewhere
-      cb.Y = document.GetByHandle(layer.RootElement).GetComputedBounds().Height - cb.Y - cb.Height;
+
+      // Compute absolute position in root space
+      float absX = parentOffset.x + cb.X;
+      float absY = parentOffset.y + cb.Y;
+
       cmdList.Push<Gfx::RectCommand>({
         .BackgroundColour = element.GetBackgroundColor(),
         .BorderColour = element.GetBorderColor(),
-        .Position = {cb.X, cb.Y},
+        .Position = {absX, absY},
         .Size = {cb.Width, cb.Height},
         .BorderThickness = element.GetBorderWidth(),
         .BorderRadius = element.GetBorderRadius(),
       });
 
+      // Recurse into children
       for (const auto &childHandle : element.GetChildren())
       {
         auto &childElement = document.GetByHandle(childHandle);
-        Record(layer, document, childElement, cmdList);
+        Record(layer, document, childElement, cmdList, {absX, absY});
       }
     }
   };

@@ -109,6 +109,11 @@ namespace Krys::UI
       return _handle;
     }
 
+    ElementHandle GetParent() const noexcept
+    {
+      return _parent;
+    }
+
     float GetWidth() const
     {
       return Layout::NodeStyleGetWidth(_layoutNode).Value;

@@ -7,10 +7,10 @@
 #include "Krystal.Gfx.OpenGL/Registries/ImageViewRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/MaterialRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/MeshRegistry.hpp"
+#include "Krystal.Gfx.OpenGL/Registries/RenderTargetRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/SamplerRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ShaderRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/TextureRegistry.hpp"
-#include "Krystal.Gfx.OpenGL/Registries/RenderTargetRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/TextRenderer.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
@@ -56,6 +56,10 @@ namespace Krys::Gfx::OpenGL
     void Resize(uint32 width, uint32 height) noexcept override;
 
     void DPIChanged(int dpi) noexcept override;
+
+    NO_DISCARD uint32 Width() const noexcept;
+
+    NO_DISCARD uint32 Height() const noexcept;
 
     NO_DISCARD IBufferRegistry &Buffers() noexcept override;
 

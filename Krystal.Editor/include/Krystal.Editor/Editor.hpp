@@ -95,32 +95,46 @@ namespace Krys
     {
       using namespace Krys::UI;
       using namespace Krys::Maths;
-      _document.GetBody().SetBackgroundColour(Gfx::Colour {.0706f});
 
-      const auto RandomPointUnit = [](float min, float max)
-      {
-        return Layout::UnitValue(Random::Float(min, max), Layout::Unit::Point);
-      };
+      _document.GetBody().SetBackgroundColour(Gfx::Colour {.0706f});
+      _document.GetBody().SetFlexDirection(FlexDirection::Column);
+      _document.GetBody().SetWrap(Wrap::NoWrap);
+      _document.GetBody().SetPadding(20._px);
 
       const auto RandomColour = []()
       {
         return Gfx::Colour {Random::Float(0.f, 1.f), Random::Float(0.f, 1.f), Random::Float(0.f, 1.f), 1.f};
       };
 
-      for (uint i = 0; i < 20; i++)
+      // === Parent box ===
+      auto parentHandle = _document.CreateElement<Element>();
+      _document.AddToBody(parentHandle);
+      auto &parent = _document.GetByHandle<Element>(parentHandle);
+
+      parent.SetWidth(600._px);
+      parent.SetHeight(400._px);
+      parent.SetMargin(20._px);
+      parent.SetPadding(10._px);
+      parent.SetBackgroundColour(Gfx::Colour {0.2f, 0.2f, 0.2f, 1.f});
+      parent.SetBorderColour(Gfx::Colours::White);
+      parent.SetBorderWidth(2._px);
+      parent.SetFlexDirection(FlexDirection::Row);
+      parent.SetWrap(Wrap::Wrap);
+
+      // === Children (will auto-wrap) ===
+      for (uint j = 0; j < 10; j++)
       {
-        auto testBoxHandle = _document.CreateElement<Element>();
-        _document.AddToBody(testBoxHandle);
+        auto childHandle = _document.CreateElement<Element>();
+        _document.AppendChild(parentHandle, childHandle);
+        auto &child = _document.GetByHandle<Element>(childHandle);
 
-        auto &testBox = _document.GetByHandle<Element>(testBoxHandle);
-        testBox.SetWidth(200._px);
-        testBox.SetHeight(200._px);
-        testBox.SetMargin(10._px);
-        testBox.SetBackgroundColour(RandomColour());
-        testBox.SetBorderColour(RandomColour());
-
-        testBox.SetBorderWidth(RandomPointUnit(1, 4));
-        testBox.SetBorderRadius(100._px);
+        child.SetWidth(80._px);
+        child.SetHeight(80._px);
+        child.SetMargin(10._px);
+        child.SetBackgroundColour(RandomColour());
+        child.SetBorderColour(Gfx::Colours::Black);
+        child.SetBorderWidth(1._px);
+        child.SetBorderRadius(6._px);
       }
     }
 

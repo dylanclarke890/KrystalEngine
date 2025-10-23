@@ -910,6 +910,16 @@ namespace Krys::Gfx::OpenGL
     _fonts.DPIChanged(dpi);
   }
 
+  uint32 Context::Width() const noexcept
+  {
+    return _width;
+  }
+
+  uint32 Context::Height() const noexcept
+  {
+    return _height;
+  }
+
   IImageRegistry &Context::Images() noexcept
   {
     return _images;

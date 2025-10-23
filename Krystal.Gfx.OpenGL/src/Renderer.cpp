@@ -89,10 +89,11 @@ namespace Krys::Gfx::OpenGL
         case KRYS_CMD_TYPE("RectCommand"):
         {
           const auto &cmd = reader.ReadCommand<RectCommand>();
+          float flippedY = _context.Height() - (cmd.Position.y + cmd.Size.y);
           _quadInstanceData.Data.push_back({
             .BackgroundColour = cmd.BackgroundColour,
             .BorderColour = cmd.BorderColour,
-            .PositionAndSize = {cmd.Position.x, cmd.Position.y, cmd.Size.x, cmd.Size.y},
+            .PositionAndSize = {cmd.Position.x, flippedY, cmd.Size.x, cmd.Size.y},
             .BorderThicknessRadius = {cmd.BorderThickness, cmd.BorderRadius},
           });
           break;
