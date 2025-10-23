@@ -24,6 +24,13 @@ namespace Krys::UI
     WrapReverse,
   };
 
+  enum class Position
+  {
+    Static,
+    Relative,
+    Absolute,
+  };
+
   struct ElementHandle : public Gfx::Handle<ElementHandle>
   {
   };
@@ -271,6 +278,37 @@ namespace Krys::UI
       else
       {
         return Wrap::WrapReverse;
+      }
+    }
+
+    void SetPosition(Position position) const
+    {
+      Layout::PositionType layoutPosition = Layout::PositionType::Static;
+      if (position == Position::Relative)
+      {
+        layoutPosition = Layout::PositionType::Relative;
+      }
+      else if (position == Position::Absolute)
+      {
+        layoutPosition = Layout::PositionType::Absolute;
+      }
+      Layout::NodeStyleSetPositionType(_layoutNode, layoutPosition);
+    }
+
+    Position GetPosition() const
+    {
+      Layout::PositionType layoutPosition = Layout::NodeStyleGetPositionType(_layoutNode);
+      if (layoutPosition == Layout::PositionType::Relative)
+      {
+        return Position::Relative;
+      }
+      else if (layoutPosition == Layout::PositionType::Absolute)
+      {
+        return Position::Absolute;
+      }
+      else
+      {
+        return Position::Static;
       }
     }
 

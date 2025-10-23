@@ -8,6 +8,7 @@ namespace Krys::UI
     SetBorderWidth(0._px);
     SetPadding(0._px);
     SetMargin(0._px);
+    SetPosition(Position::Static);
   }
 
   Element::~Element()
