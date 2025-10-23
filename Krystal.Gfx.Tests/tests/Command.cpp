@@ -25,7 +25,7 @@ namespace Krys::Tests
 
     CommandListReader reader(commandList);
     auto _ = reader.ReadHeader();
-    auto cmd = reader.ReadCommand<Command>();
+    const auto &cmd = reader.ReadCommand<Command>();
 
     REQUIRE(cmd.X == 10.f);
     REQUIRE(cmd.Y == 20.f);

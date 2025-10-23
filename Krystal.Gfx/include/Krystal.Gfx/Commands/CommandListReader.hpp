@@ -31,12 +31,18 @@ namespace Krys::Gfx
     }
 
     template <typename T>
-    NO_DISCARD const T& ReadCommand() noexcept
+    NO_DISCARD const T &ReadCommand() noexcept
     {
       auto *data = _list.GetSubSpan(_offset, sizeof(T)).data();
       _offset += sizeof(T);
       _offset = ByteUtils::AlignNext(_offset, CommandArena::Alignment);
       return *reinterpret_cast<const T *>(data);
+    }
+
+    void SkipBytes(size_t byteCount) noexcept
+    {
+      _offset += byteCount;
+      _offset = ByteUtils::AlignNext(_offset, CommandArena::Alignment);
     }
 
     NO_DISCARD bool HasMore() const noexcept

@@ -70,7 +70,6 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\UIRenderer.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Buffer.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Font.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Registries\FontRegistry.hpp" />

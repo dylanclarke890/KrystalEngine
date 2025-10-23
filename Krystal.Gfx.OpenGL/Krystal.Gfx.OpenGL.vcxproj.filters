@@ -105,9 +105,6 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\ShaderReflector.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\UIRenderer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Registries\BufferRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

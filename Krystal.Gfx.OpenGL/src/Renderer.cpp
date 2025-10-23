@@ -138,7 +138,12 @@ namespace Krys::Gfx::OpenGL
           });
           break;
         }
-        default: KRYS_WARN("Unknown command type submitted to OpenGL renderer: {}", header.Type); break;
+        default:
+        {
+          KRYS_WARN("Unknown command type submitted to OpenGL renderer, skipping: {}", header.Type);
+          reader.SkipBytes(header.SizeInBytes);
+          break;
+        }
       }
     }
   }

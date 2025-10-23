@@ -166,7 +166,7 @@ namespace Krys
     auto uiRenderer = CreateRenderer(*_context->GraphicsContext);
     if (!uiRenderer.has_value())
     {
-      throw std::runtime_error("Failed to create UI renderer");
+      throw std::runtime_error("Failed to create renderer");
     }
     _context->Renderer = std::move(uiRenderer.value());
   }
