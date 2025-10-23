@@ -1,0 +1,23 @@
+#pragma once
+
+#include "Krystal.Lib/Enum.hpp"
+#include "Krystal.Lib/Types.hpp"
+
+namespace Krys::UI::Styles
+{
+  enum class Gutter : uint8
+  {
+    Row,
+    Column,
+    All
+  };
+}
+
+namespace Krys
+{
+  template <>
+  constexpr uint32 OrdinalCount<UI::Styles::Gutter>()
+  {
+    return 3;
+  }
+}
