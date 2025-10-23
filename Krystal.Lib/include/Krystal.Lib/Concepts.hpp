@@ -120,4 +120,7 @@ namespace Krys
   struct IsSpecialisation<Ref<Args...>, Ref> : std::true_type
   {
   };
+
+  template <typename T>
+  concept HasStandardLayout = std::is_standard_layout_v<T>;
 }

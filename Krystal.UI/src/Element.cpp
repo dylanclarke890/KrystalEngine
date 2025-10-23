@@ -2,7 +2,7 @@
 
 namespace Krys::UI
 {
-  Element::Element(Layout::ConfigRef layoutConfig)
+  Element::Element(ElementHandle handle, Layout::ConfigRef layoutConfig) : _handle(handle)
   {
     _layoutNode = Layout::NodeCreate(layoutConfig);
     SetBorderWidth(0._px);

@@ -12,7 +12,7 @@
 #include "Krystal.Gfx.OpenGL/Utils.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/Light.hpp"
-#include "Krystal.Gfx/VertexBufferLayout.hpp"
+#include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.Lib/DebugBreak.hpp"
 #include "Krystal.Lib/Expected.hpp"
 #include "Krystal.Lib/List.hpp"

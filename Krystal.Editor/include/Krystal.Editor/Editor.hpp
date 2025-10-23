@@ -6,6 +6,7 @@
 #include "Krystal.Maths/Convert.hpp"
 #include "Krystal.Platform/Events.hpp"
 #include "Krystal.Platform/Keys.hpp"
+#include "Krystal.UI/Compositor.hpp"
 
 namespace Krys
 {
@@ -108,7 +109,8 @@ namespace Krys
     void OnRender() noexcept override
     {
       _context->GraphicsContext->Render(_camera);
-      _context->UI->Render(_document, (float)_width, (float)_height);
+      UI::Compositor compositor(*_context->Renderer);
+      compositor.Render(_document, (float)_width, (float)_height);
     }
 
     void OnUpdate(double deltaTime) noexcept override

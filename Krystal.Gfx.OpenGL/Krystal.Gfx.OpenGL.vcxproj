@@ -52,13 +52,17 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp" />
-    <ClCompile Include="src\UIRenderer.cpp" />
+    <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="third-party\stb\stb_rect_pack.cpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Registries\BufferRegistry.hpp">
       <SubType>
       </SubType>
     </ClInclude>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Registries\RenderTargetRegistry.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Renderer.hpp">
       <SubType>
       </SubType>
     </ClInclude>

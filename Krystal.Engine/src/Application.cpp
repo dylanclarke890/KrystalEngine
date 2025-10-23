@@ -18,16 +18,16 @@ namespace Krys
     CreateServices(argc, argv, settings);
 
     _context->Window->SetCallbacks(CreateWindowCallbacks());
-    _context->UI->Startup();
+    _context->Renderer->Startup();
   }
 
   Application::~Application() noexcept
   {
-    _context->UI->Shutdown();
+    _context->Renderer->Shutdown();
 
     _context->Events.reset();
     _context->Input.reset();
-    _context->UI.reset();
+    _context->Renderer.reset();
     _context->GraphicsContext.reset();
     _context->VFS.reset();
     _context->Window.reset();
@@ -72,7 +72,9 @@ namespace Krys
           OnUpdate(elapsedMs / 1'000.0);
           if (!_isWindowMinimised)
           {
+            _context->Renderer->BeginFrame();
             OnRender();
+            _context->Renderer->EndFrame();
             _context->GraphicsContext->Present();
           }
         }
@@ -161,12 +163,12 @@ namespace Krys
     }
     _context->GraphicsContext = std::move(gfxContext.value());
 
-    auto uiRenderer = CreateUIRenderer(*_context->GraphicsContext);
+    auto uiRenderer = CreateRenderer(*_context->GraphicsContext);
     if (!uiRenderer.has_value())
     {
       throw std::runtime_error("Failed to create UI renderer");
     }
-    _context->UI = std::move(uiRenderer.value());
+    _context->Renderer = std::move(uiRenderer.value());
   }
 
   Platform::WindowCallbacks Application::CreateWindowCallbacks() noexcept

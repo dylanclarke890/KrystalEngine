@@ -2,6 +2,7 @@
 
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Lib/StronglyTypedBool.hpp"
+#include "Krystal.Maths/Vector.hpp"
 
 namespace Krys::Gfx
 {
@@ -72,12 +73,36 @@ namespace Krys::Gfx
 
   using VertexBufferLayout = List<VertexBufferElement>;
 
-  namespace VertexLayouts
+  namespace Vertex
   {
-    static const VertexBufferLayout Basic({
-      {VertexAttributeType::Float, 3}, // Position
-      {VertexAttributeType::Float, 3}, // Normal
-      {VertexAttributeType::Float, 2}, // TexCoord
-    });
+    struct Position3DNormalUV
+    {
+      Maths::Vec3 Position;
+      Maths::Vec3 Normal;
+      Maths::Vec2 TexCoord;
+
+      constexpr static VertexBufferLayout Layout()
+      {
+        return {
+          {VertexAttributeType::Float, 3}, // Position
+          {VertexAttributeType::Float, 3}, // Normal
+          {VertexAttributeType::Float, 2}, // TexCoord
+        };
+      }
+    };
+
+    struct Position2DUV
+    {
+      Maths::Vec2 Position;
+      Maths::Vec2 TexCoord;
+
+      constexpr static VertexBufferLayout Layout()
+      {
+        return {
+          {VertexAttributeType::Float, 2}, // Position
+          {VertexAttributeType::Float, 2}, // TexCoord
+        };
+      }
+    };
   }
 }

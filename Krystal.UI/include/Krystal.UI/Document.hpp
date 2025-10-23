@@ -31,12 +31,19 @@ namespace Krys::UI
     template <DerivedFrom<Element> TElement, typename... Args>
     NO_DISCARD ElementHandle CreateElement(Args &&...args)
     {
-      Unique<TElement> element = CreateUnique<TElement>(_layoutConfig, std::forward<Args>(args)...);
-      auto handle = _elements.Add(std::move(element));
+      ElementHandle handle = _elements.NextHandle();
+      Unique<TElement> element = CreateUnique<TElement>(handle, _layoutConfig, std::forward<Args>(args)...);
+
+      _elements.Set(handle, std::move(element));
       return handle;
     }
 
     Element &GetBody()
+    {
+      return *_elements.Get(_body).get();
+    }
+
+    const Element &GetBody() const
     {
       return *_elements.Get(_body).get();
     }

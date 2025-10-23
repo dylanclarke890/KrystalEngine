@@ -2,7 +2,7 @@
 
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Mesh.hpp"
-#include "Krystal.Gfx/VertexBufferLayout.hpp"
+#include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Span.hpp"

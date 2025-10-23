@@ -24,7 +24,7 @@
     <ClInclude Include="include\Krystal.Gfx\Cameras\FirstPersonCamera.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx\VertexBufferLayout.hpp">
+    <ClInclude Include="include\Krystal.Gfx\Vertex.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Gfx\Light.hpp">
@@ -471,9 +471,6 @@
     <ClInclude Include="include\Krystal.Gfx\Resources\Texture.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx\IUIRenderer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Gfx\Registries\IBufferRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -510,7 +507,19 @@
     <ClInclude Include="include\Krystal.Gfx\IRenderer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx\Command.hpp">
+    <ClInclude Include="include\Krystal.Gfx\Commands\CommandListReader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Commands\CommandList.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Commands\CommandArena.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Commands\Commands.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Commands\CommandType.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

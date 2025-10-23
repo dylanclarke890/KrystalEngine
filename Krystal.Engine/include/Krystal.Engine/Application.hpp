@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Krystal.Gfx/IContext.hpp"
-#include "Krystal.Gfx/IUIRenderer.hpp"
+#include "Krystal.Gfx/IRenderer.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
 #include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Lib/Events/EventManager.hpp"
@@ -70,7 +70,7 @@ namespace Krys
     Unique<Platform::Input> Input {};
     Unique<IO::VirtualFileSystem> VFS {};
     Unique<Gfx::IContext> GraphicsContext {};
-    Unique<Gfx::IUIRenderer> UI {};
+    Unique<Gfx::IRenderer> Renderer {};
   };
 
   /// @brief Base class for a Krystal application.

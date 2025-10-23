@@ -3,7 +3,7 @@
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Shader.hpp"
 #include "Krystal.Gfx/Light.hpp"
-#include "Krystal.Gfx/VertexBufferLayout.hpp"
+#include "Krystal.Gfx/Vertex.hpp"
 
 namespace Krys::Gfx::OpenGL
 {

@@ -65,7 +65,10 @@ namespace Krys::UI
   {
     NO_COPY_MOVE(Element)
 
+    friend class Document;
+
   protected:
+    ElementHandle _handle;
     ElementHandle _parent;
     List<ElementHandle> _children;
     Layout::NodeRef _layoutNode {nullptr};
@@ -75,7 +78,7 @@ namespace Krys::UI
     float _borderRadius {0.0f};
 
   public:
-    Element(Layout::ConfigRef);
+    Element(ElementHandle handle, Layout::ConfigRef);
     virtual ~Element();
 
     void SetWidth(const Layout::UnitValue &value) const
@@ -92,6 +95,11 @@ namespace Krys::UI
       {
         throw std::invalid_argument("Only 'px' or 'pct' is supported for width.");
       }
+    }
+
+    ElementHandle GetHandle() const noexcept
+    {
+      return _handle;
     }
 
     float GetWidth() const
@@ -280,11 +288,6 @@ namespace Krys::UI
     {
       return _children;
     }
-
-  private:
-    friend class Document;
-
-    void CreateLayoutNode(Layout::ConfigRef layoutConfig);
   };
 
   class GroupElement : public Element

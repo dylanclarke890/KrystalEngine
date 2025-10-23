@@ -19,7 +19,23 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.Gfx\Command.hpp">
+    <ClInclude Include="include\Krystal.Gfx\Commands\CommandListReader.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Commands\CommandArena.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Commands\CommandList.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Commands\CommandType.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Commands\Commands.hpp">
       <SubType>
       </SubType>
     </ClInclude>
@@ -33,7 +49,6 @@
     </ClInclude>
     <ClInclude Include="include\Krystal.Gfx\Registries\IImageRegistry.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Registries\IImageViewRegistry.hpp" />
-    <ClInclude Include="include\Krystal.Gfx\IUIRenderer.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Registries\IRenderTargetRegistry.hpp">
       <SubType>
       </SubType>
@@ -87,7 +102,7 @@
     <ClInclude Include="include\Krystal.Gfx\Light.hpp" />
     <ClInclude Include="include\Krystal.Gfx\ICamera.hpp" />
     <ClInclude Include="include\Krystal.Gfx\IContext.hpp" />
-    <ClInclude Include="include\Krystal.Gfx\VertexBufferLayout.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Vertex.hpp" />
     <ClInclude Include="third-party\freetype\include\freetype\config\ftconfig.h" />
     <ClInclude Include="third-party\freetype\include\freetype\config\ftheader.h" />
     <ClInclude Include="third-party\freetype\include\freetype\config\ftmodule.h" />
@@ -241,9 +256,6 @@
     </ProjectReference>
     <ProjectReference Include="..\Krystal.Platform\Krystal.Platform.vcxproj">
       <Project>{42e8c0a6-1f92-456b-a8b7-0050bfdf97e2}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Krystal.UI\Krystal.UI.vcxproj">
-      <Project>{0ca51a50-7e1a-45c7-a23f-986b0cff5a35}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
