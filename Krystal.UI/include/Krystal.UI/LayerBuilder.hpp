@@ -22,7 +22,7 @@ namespace Krys::UI
       auto &body = document.GetBody();
       ComputedBounds cb = body.GetComputedBounds();
       auto &item = layers.emplace_back(
-        Layer {body.GetHandle(), cb.Width, cb.Height, Gfx::CommandArena {}, List<Gfx::CommandList> {}});
+        Layer {body.GetHandle(), Gfx::CommandArena {}, List<Gfx::CommandList> {}});
       return layers;
     }
   };

@@ -34,7 +34,7 @@ namespace Krys::UI
     {
       UI::ComputedBounds cb = element.GetComputedBounds();
       // TODO: this needs to be configurable per backend or handled elsewhere
-      cb.Y = static_cast<float>(layer.Height) - cb.Y - cb.Height;
+      cb.Y = document.GetByHandle(layer.RootElement).GetComputedBounds().Height - cb.Y - cb.Height;
       cmdList.Push<Gfx::RectCommand>({
         .BackgroundColour = element.GetBackgroundColor(),
         .BorderColour = element.GetBorderColor(),

@@ -322,6 +322,11 @@ namespace Krys::UI
       };
     }
 
+    NO_DISCARD bool CreatesStackingContext() const noexcept
+    {
+      return _backgroundColour.a < 1.0f || _borderColour.a > 0.0f;
+    }
+
     const List<ElementHandle> &GetChildren() const noexcept
     {
       return _children;

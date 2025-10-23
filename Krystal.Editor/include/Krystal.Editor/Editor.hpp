@@ -107,20 +107,20 @@ namespace Krys
         return Gfx::Colour {Random::Float(0.f, 1.f), Random::Float(0.f, 1.f), Random::Float(0.f, 1.f), 1.f};
       };
 
-      for (uint i = 0; i < 200; i++)
+      for (uint i = 0; i < 20; i++)
       {
         auto testBoxHandle = _document.CreateElement<Element>();
         _document.AddToBody(testBoxHandle);
 
         auto &testBox = _document.GetByHandle<Element>(testBoxHandle);
-        testBox.SetWidth(RandomPointUnit(25, 100));
-        testBox.SetHeight(RandomPointUnit(25, 100));
+        testBox.SetWidth(200._px);
+        testBox.SetHeight(200._px);
         testBox.SetMargin(10._px);
         testBox.SetBackgroundColour(RandomColour());
         testBox.SetBorderColour(RandomColour());
 
-        testBox.SetBorderWidth(RandomPointUnit(3, 10));
-        testBox.SetBorderRadius(RandomPointUnit(50, 100));
+        testBox.SetBorderWidth(RandomPointUnit(1, 4));
+        testBox.SetBorderRadius(100._px);
       }
     }
 
