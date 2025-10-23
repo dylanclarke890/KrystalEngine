@@ -55,6 +55,13 @@ namespace Krys::UI
       return static_cast<TElement &>(*_elements.Get(handle).get());
     }
 
+    template <DerivedFrom<Element> TElement = Element>
+    NO_DISCARD const TElement &GetByHandle(ElementHandle handle) const
+    {
+      assert(handle.IsValid() && "Invalid handle");
+      return static_cast<const TElement &>(*_elements.Get(handle).get());
+    }
+
     /// @brief Destroys the element and removes it from the document. Child elements are also destroyed
     /// recursively.
     void DestroyElement(ElementHandle handle)
