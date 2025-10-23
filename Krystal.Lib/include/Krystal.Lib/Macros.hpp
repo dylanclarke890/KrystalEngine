@@ -136,6 +136,9 @@ namespace Krys
 #define CONCAT_IMPL(x, y) x##y
 #define CONCAT(x, y) CONCAT_IMPL(x, y)
 
+#define KRYS_CONCAT_IMPL(x, y) x##y
+#define KRYS_CONCAT(x, y) KRYS_CONCAT_IMPL(x, y)
+
 #define STRINGIFY_IMPL(x) #x
 #define STRINGIFY(x) STRINGIFY_IMPL(x)
 

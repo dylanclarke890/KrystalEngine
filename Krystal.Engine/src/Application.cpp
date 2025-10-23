@@ -1,6 +1,7 @@
 #include "Krystal.Engine/Application.hpp"
 #include "Krystal.Debug/ScopedProfiler.hpp"
 #include "Krystal.IO/Backends/NativeFileBackend.hpp"
+#include "Krystal.Maths/Random.hpp"
 #include "Krystal.Platform/Input.hpp"
 #include "Krystal.Platform/Platform.hpp"
 #include <cassert>
@@ -14,6 +15,7 @@ namespace Krys
       : _context(CreateUnique<ApplicationContext>()), _running(false), _isWindowMinimised(false)
   {
     Platform::Initialise();
+    Maths::Random::Initialise();
 
     CreateServices(argc, argv, settings);
 

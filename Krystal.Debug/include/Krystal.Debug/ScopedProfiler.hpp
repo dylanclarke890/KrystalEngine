@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/String.hpp"
 
 namespace Krys::Debug
@@ -16,9 +17,8 @@ namespace Krys::Debug
   };
 
 #ifdef KRYS_ENABLE_PROFILING
-  #define UNIQUE_PROFILER_NAME(prefix) CONCATENATE(prefix, __LINE__)
-  #define KRYS_SCOPED_PROFILER(name) Krys::Debug::ScopedProfiler UNIQUE_PROFILER_NAME(profiler_)(name)
-  #undef UNIQUE_PROFILER_NAME
+  #define KRYS_SCOPED_PROFILER(name)                                                                         \
+    auto KRYS_CONCAT(scopedProfiler, __LINE__) = Krys::Debug::ScopedProfiler(name);
 #else
   #define KRYS_SCOPED_PROFILER(name)
 #endif

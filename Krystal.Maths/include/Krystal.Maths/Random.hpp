@@ -10,7 +10,7 @@ namespace Krys::Maths
   class Random
   {
   public:
-    static void Init()
+    static void Initialise()
     {
       _randomEngine.seed(std::random_device()());
     }

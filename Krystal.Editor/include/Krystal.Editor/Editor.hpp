@@ -1,9 +1,15 @@
 #pragma once
 
+#ifndef KRYS_ENABLE_PROFILING
+  #define KRYS_ENABLE_PROFILING
+#endif
+
+#include "Krystal.Debug/ScopedProfiler.hpp"
 #include "Krystal.Engine/Application.hpp"
 #include "Krystal.Gfx/Cameras/FirstPersonCamera.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include "Krystal.Maths/Convert.hpp"
+#include "Krystal.Maths/Random.hpp"
 #include "Krystal.Platform/Events.hpp"
 #include "Krystal.Platform/Keys.hpp"
 #include "Krystal.UI/Compositor.hpp"
@@ -88,21 +94,33 @@ namespace Krys
     void SetupUI()
     {
       using namespace Krys::UI;
+      using namespace Krys::Maths;
       _document.GetBody().SetBackgroundColour(Gfx::Colour {.0706f});
 
-      for (uint i = 0; i < 5; i++)
+      const auto RandomPointUnit = [](float min, float max)
+      {
+        return Layout::UnitValue(Random::Float(min, max), Layout::Unit::Point);
+      };
+
+      const auto RandomColour = []()
+      {
+        return Gfx::Colour {Random::Float(0.f, 1.f), Random::Float(0.f, 1.f), Random::Float(0.f, 1.f), 1.f};
+      };
+
+      for (uint i = 0; i < 200; i++)
       {
         auto testBoxHandle = _document.CreateElement<Element>();
         _document.AddToBody(testBoxHandle);
 
         auto &testBox = _document.GetByHandle<Element>(testBoxHandle);
-        testBox.SetWidth(200._px);
-        testBox.SetHeight(200._px);
+        testBox.SetWidth(RandomPointUnit(25, 100));
+        testBox.SetHeight(RandomPointUnit(25, 100));
         testBox.SetMargin(10._px);
-        testBox.SetBackgroundColour(Gfx::Colours::Purple);
-        testBox.SetBorderColour(Gfx::Colours::Yellow);
-        testBox.SetBorderWidth(1._px);
-        testBox.SetBorderRadius(100._px);
+        testBox.SetBackgroundColour(RandomColour());
+        testBox.SetBorderColour(RandomColour());
+
+        testBox.SetBorderWidth(RandomPointUnit(3, 10));
+        testBox.SetBorderRadius(RandomPointUnit(50, 100));
       }
     }
 

@@ -140,6 +140,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Krystal.Debug\Krystal.Debug.vcxproj">
+      <Project>{0d3fc524-252e-46af-977c-dc4eba9efac2}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Krystal.Engine\Krystal.Engine.vcxproj">
       <Project>{1169be54-100b-4d6a-830f-50b29301e1cc}</Project>
     </ProjectReference>
