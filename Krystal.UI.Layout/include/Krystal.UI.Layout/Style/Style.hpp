@@ -38,7 +38,7 @@ namespace Krys::UI::Layout
     Align _alignContent : BitCount<Align>() = Align::FlexStart;
     Align _alignItems : BitCount<Align>() = Align::Stretch;
     Align _alignSelf : BitCount<Align>() = Align::Auto;
-    PositionType _positionType : BitCount<PositionType>() = PositionType::Relative;
+    PositionType _positionType : BitCount<PositionType>() = PositionType::Static;
     Wrap _flexWrap : BitCount<Wrap>() = Wrap::NoWrap;
     Overflow _overflow : BitCount<Overflow>() = Overflow::Visible;
     DisplayType _display : BitCount<DisplayType>() = DisplayType::Flex;

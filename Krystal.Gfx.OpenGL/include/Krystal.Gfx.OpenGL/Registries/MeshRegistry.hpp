@@ -32,19 +32,17 @@ namespace Krys::Gfx::OpenGL
     {
     }
 
-    virtual MeshHandle Create(const Span<const byte> &vertexBuffer, const VertexBufferLayout &layout,
-                              PrimitiveType type) noexcept override
+    virtual MeshHandle Create(const MeshDesc &desc) noexcept override
     {
-      GLenum primitiveType = MapPrimitiveType(type);
-      Mesh mesh {vertexBuffer, layout, primitiveType};
-      return AddMesh(std::move(mesh));
-    }
+      GLenum primitiveType = MapPrimitiveType(desc.Primitive);
 
-    virtual MeshHandle Create(const Span<const byte> &vertexBuffer, const Span<const byte> &indexBuffer,
-                              const VertexBufferLayout &layout, PrimitiveType type) noexcept override
-    {
-      GLenum primitiveType = MapPrimitiveType(type);
-      Mesh mesh {vertexBuffer, indexBuffer, layout, primitiveType};
+      if (desc.IndexBuffer.size_bytes() > 0u)
+      {
+        Mesh mesh {desc.VertexBuffer, desc.IndexBuffer, desc.Layout, primitiveType, desc.Type};
+        return AddMesh(std::move(mesh));
+      }
+
+      Mesh mesh {desc.VertexBuffer, desc.Layout, primitiveType, desc.Type};
       return AddMesh(std::move(mesh));
     }
 
@@ -95,13 +93,14 @@ namespace Krys::Gfx::OpenGL
         -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f   // bottom-left
       };
 
-      VertexBufferLayout layout = {
-        {VertexAttributeType::Float, 3}, // position
-        {VertexAttributeType::Float, 3}, // normal
-        {VertexAttributeType::Float, 2}  // texcoord
-      };
+      VertexBufferLayout layout = Vertex::Position3DNormalUV::Layout();
 
-      return Create(ByteUtils::AsBytesView(vertices), layout, PrimitiveType::Triangles);
+      return Create({
+        .Type = MeshType::Static,
+        .Primitive = PrimitiveType::Triangles,
+        .Layout = layout,
+        .VertexBuffer = ByteUtils::AsBytesView(vertices),
+      });
     }
 
     MeshHandle CreateSphere() noexcept
@@ -171,14 +170,15 @@ namespace Krys::Gfx::OpenGL
         }
       }
 
-      VertexBufferLayout layout = {
-        {VertexAttributeType::Float, 3}, // position
-        {VertexAttributeType::Float, 3}, // normal
-        {VertexAttributeType::Float, 2}  // texcoord
-      };
+      VertexBufferLayout layout = Vertex::Position3DNormalUV::Layout();
 
-      return Create(ByteUtils::AsBytesView(vertices), ByteUtils::AsBytesView(indices), layout,
-                    PrimitiveType::TriangleStrip);
+      return Create({
+        .Type = MeshType::Static,
+        .Primitive = PrimitiveType::TriangleStrip,
+        .Layout = layout,
+        .VertexBuffer = ByteUtils::AsBytesView(vertices),
+        .IndexBuffer = ByteUtils::AsBytesView(indices),
+      });
     }
 
     MeshHandle CreateScreenQuad() noexcept
@@ -188,33 +188,33 @@ namespace Krys::Gfx::OpenGL
         -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 0.0f,
       };
 
-      VertexBufferLayout layout = {
-        {VertexAttributeType::Float, 2}, // position
-        {VertexAttributeType::Float, 2}  // texcoord
-      };
+      VertexBufferLayout layout = Vertex::Position2DUV::Layout();
 
-      return Create(ByteUtils::AsBytesView(vertices), layout, PrimitiveType::TriangleStrip);
+      return Create({.Type = MeshType::Static,
+                     .Primitive = PrimitiveType::TriangleStrip,
+                     .Layout = layout,
+                     .VertexBuffer = ByteUtils::AsBytesView(vertices)});
     }
 
     MeshHandle CreateQuad() noexcept
     {
-      List<float> vertices = {
-        // positions        // texture coords
-        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // bottom left
-        0.5f,  -0.5f, 0.0f, 1.0f, 0.0f, // bottom right
-        0.5f,  0.5f,  0.0f, 1.0f, 1.0f, // top right
-        -0.5f, 0.5f,  0.0f, 0.0f, 1.0f  // top left
+      using QuadVertex = Vertex::Position2DUV;
+      Array<QuadVertex, 4> vertices = {
+        QuadVertex {{0.0f, 0.0f}, {0.0f, 0.0f}},
+        QuadVertex {{1.0f, 0.0f}, {1.0f, 0.0f}},
+        QuadVertex {{1.0f, 1.0f}, {1.0f, 1.0f}},
+        QuadVertex {{0.0f, 1.0f}, {0.0f, 1.0f}},
       };
-      List<uint> indices = {
-        0, 1, 2, // first triangle
-        2, 3, 0  // second triangle
-      };
-      VertexBufferLayout layout = {
-        {VertexAttributeType::Float, 3}, // position
-        {VertexAttributeType::Float, 2}  // texcoord
-      };
-      return Create(ByteUtils::AsBytesView(vertices), ByteUtils::AsBytesView(indices), layout,
-                    PrimitiveType::Triangles);
+
+      Array<uint32, 6> indices {0, 1, 2, 2, 3, 0};
+
+      return Create({
+        .Type = MeshType::Static,
+        .Primitive = PrimitiveType::Triangles,
+        .Layout = QuadVertex::Layout(),
+        .VertexBuffer = ByteUtils::AsBytesView(vertices),
+        .IndexBuffer = ByteUtils::AsBytesView(indices),
+      });
     }
 
     bool Destroy(MeshHandle handle) noexcept override

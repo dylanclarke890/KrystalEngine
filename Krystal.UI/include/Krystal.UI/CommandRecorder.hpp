@@ -4,7 +4,6 @@
 #include "Krystal.Gfx/Commands/Commands.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
 #include "Krystal.UI/Document.hpp"
 #include "Krystal.UI/Element.hpp"
 #include "Krystal.UI/Layer.hpp"

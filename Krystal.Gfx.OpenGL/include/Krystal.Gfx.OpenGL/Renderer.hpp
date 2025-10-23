@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Krystal.Gfx.OpenGL/Context.hpp"
+#include "Krystal.Gfx/Handle.hpp"
+#include "Krystal.Gfx/InstanceData.hpp"
 #include "Krystal.Gfx/IRenderer.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
@@ -8,7 +10,7 @@
 
 namespace Krys::Gfx::OpenGL
 {
-  struct UIElementInstanceData
+  struct QuadInstanceData
   {
     Colour BackgroundColour;
     Colour BorderColour;
@@ -26,24 +28,15 @@ namespace Krys::Gfx::OpenGL
     }
   };
 
-  struct UIData
-  {
-    ShaderHandle Shader;
-    GLuint Vao {0u};
-    BufferHandle Vbo;
-    BufferHandle Ebo;
-    List<UIElementInstanceData> InstanceData;
-    BufferHandle InstanceDataBuffer;
-    RenderTargetHandle CurrentRenderTarget {0u};
-  };
-
   class Renderer : public IRenderer
   {
     NO_COPY_MOVE(Renderer)
 
   private:
     Context &_context;
-    UIData _uiData;
+    ShaderHandle _quadShader;
+    MeshHandle _quadMesh;
+    InstanceData<QuadInstanceData> _quadInstanceData;
 
   public:
     Renderer(IContext &context) noexcept;

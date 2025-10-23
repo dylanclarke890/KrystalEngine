@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Krystal.Lib/Types.hpp"
 #include "Krystal.Lib/StronglyTypedBool.hpp"
+#include "Krystal.Lib/Types.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
 namespace Krys::Gfx
@@ -46,8 +46,7 @@ namespace Krys::Gfx
 
     constexpr VertexBufferElement(VertexAttributeType type, uint32 count, IsEnabled enabled,
                                   VertexInputRate inputRate = VertexInputRate::PerVertex) noexcept
-        : Type(type), Count(count), Normalized(false), Enabled(enabled),
-          InputRate(inputRate)
+        : Type(type), Count(count), Normalized(false), Enabled(enabled), InputRate(inputRate)
     {
     }
 
@@ -75,6 +74,34 @@ namespace Krys::Gfx
 
   namespace Vertex
   {
+    struct Position2DUV
+    {
+      Maths::Vec2 Position;
+      Maths::Vec2 TexCoord;
+
+      constexpr static VertexBufferLayout Layout()
+      {
+        return {
+          {VertexAttributeType::Float, 2}, // Position
+          {VertexAttributeType::Float, 2}, // TexCoord
+        };
+      }
+    };
+
+    struct Position3DUV
+    {
+      Maths::Vec3 Position;
+      Maths::Vec2 TexCoord;
+
+      constexpr static VertexBufferLayout Layout()
+      {
+        return {
+          {VertexAttributeType::Float, 3}, // Position
+          {VertexAttributeType::Float, 2}, // TexCoord
+        };
+      }
+    };
+
     struct Position3DNormalUV
     {
       Maths::Vec3 Position;
@@ -86,20 +113,6 @@ namespace Krys::Gfx
         return {
           {VertexAttributeType::Float, 3}, // Position
           {VertexAttributeType::Float, 3}, // Normal
-          {VertexAttributeType::Float, 2}, // TexCoord
-        };
-      }
-    };
-
-    struct Position2DUV
-    {
-      Maths::Vec2 Position;
-      Maths::Vec2 TexCoord;
-
-      constexpr static VertexBufferLayout Layout()
-      {
-        return {
-          {VertexAttributeType::Float, 2}, // Position
           {VertexAttributeType::Float, 2}, // TexCoord
         };
       }

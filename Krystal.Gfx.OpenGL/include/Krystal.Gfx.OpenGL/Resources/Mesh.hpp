@@ -46,43 +46,48 @@ namespace Krys::Gfx::OpenGL
     GLuint _vbo {0u};
     GLuint _ebo {0u};
 
+    VertexBufferLayout _layout {};
     GLenum _primitiveType {GL_TRIANGLES};
+    MeshType _type {MeshType::Static};
     GLsizei _count {0};
 
   public:
     MOVE_SWAP(Mesh)
 
-    Mesh(const Span<const byte> &vertexBuffer, const VertexBufferLayout &layout,
-         GLenum primitiveType = GL_TRIANGLES) noexcept
-        : _primitiveType(primitiveType)
+    Mesh(const Span<const byte> &vertexBuffer, const VertexBufferLayout &layout, GLenum primitiveType,
+         MeshType meshType) noexcept
+        : _layout(layout), _primitiveType(primitiveType), _type(meshType)
     {
       glCreateVertexArrays(1, &_vao);
       glBindVertexArray(_vao);
 
       glCreateBuffers(1, &_vbo);
-      glNamedBufferData(_vbo, vertexBuffer.size_bytes(), vertexBuffer.data(), GL_STATIC_DRAW);
+      glNamedBufferData(_vbo, vertexBuffer.size_bytes(), vertexBuffer.data(),
+                        _type == MeshType::Static ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
       glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-      auto vertexSize = Utils::ApplyVertexBufferLayout(layout);
+      auto vertexSize = Utils::ApplyVertexBufferLayout(_layout);
       _count = static_cast<GLsizei>(vertexBuffer.size_bytes() / vertexSize);
     }
 
     Mesh(const Span<const byte> &vertexBuffer, const Span<const byte> &indexBuffer,
-         const VertexBufferLayout &layout, GLenum primitiveType = GL_TRIANGLES) noexcept
-        : _primitiveType(primitiveType)
+         const VertexBufferLayout &layout, GLenum primitiveType, MeshType meshType) noexcept
+        : _layout(layout), _primitiveType(primitiveType), _type(meshType)
     {
       glCreateVertexArrays(1, &_vao);
       glBindVertexArray(_vao);
 
       glCreateBuffers(1, &_vbo);
-      glNamedBufferData(_vbo, vertexBuffer.size_bytes(), vertexBuffer.data(), GL_STATIC_DRAW);
+      glNamedBufferData(_vbo, vertexBuffer.size_bytes(), vertexBuffer.data(),
+                        _type == MeshType::Static ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
       glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
       glCreateBuffers(1, &_ebo);
-      glNamedBufferData(_ebo, indexBuffer.size_bytes(), indexBuffer.data(), GL_STATIC_DRAW);
+      glNamedBufferData(_ebo, indexBuffer.size_bytes(), indexBuffer.data(),
+                        _type == MeshType::Static ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW);
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _ebo);
 
-      Utils::ApplyVertexBufferLayout(layout);
+      Utils::ApplyVertexBufferLayout(_layout);
       _count = static_cast<GLsizei>(indexBuffer.size_bytes() / sizeof(uint32));
     }
 
@@ -131,13 +136,24 @@ namespace Krys::Gfx::OpenGL
       }
     }
 
+    void ApplyInstanceDataLayout(Buffer &instanceDataBuffer, const VertexBufferLayout &instanceLayout,
+                                 size_t attributeIndexOffset = 0u) noexcept
+    {
+      Bind();
+      instanceDataBuffer.Bind();
+      const size_t totalAttributeOffset = _layout.size() + attributeIndexOffset;
+      Utils::ApplyVertexBufferLayout(instanceLayout, totalAttributeOffset);
+    }
+
   private:
     void Swap(Mesh &other) noexcept
     {
       std::swap(_vao, other._vao);
       std::swap(_vbo, other._vbo);
       std::swap(_ebo, other._ebo);
+      std::swap(_layout, other._layout);
       std::swap(_primitiveType, other._primitiveType);
+      std::swap(_type, other._type);
       std::swap(_count, other._count);
     }
   };

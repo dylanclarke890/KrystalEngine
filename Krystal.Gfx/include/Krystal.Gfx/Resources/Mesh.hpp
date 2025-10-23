@@ -13,4 +13,19 @@ namespace Krys::Gfx
     TriangleStrip,
     TriangleFan,
   };
+
+  enum class MeshType : uint8
+  {
+    Static,
+    Dynamic,
+  };
+
+  struct MeshDesc
+  {
+    MeshType Type {MeshType::Static};
+    PrimitiveType Primitive {PrimitiveType::Triangles};
+    VertexBufferLayout Layout {};
+    Span<const byte> VertexBuffer {};
+    Span<const byte> IndexBuffer {};
+  };
 }
