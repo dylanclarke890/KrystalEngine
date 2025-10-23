@@ -30,11 +30,12 @@ namespace Krys::Gfx::OpenGL
     _quadShader = _context.Shaders().Load(IO::Path("ui.vert"), IO::Path("ui.frag"));
 
     auto &buffers = static_cast<BufferRegistry &>(_context.Buffers());
+    auto &meshes = static_cast<MeshRegistry &>(_context.Meshes());
+
+    _quadMesh = meshes.CreateQuad();
+    auto &quadMesh = meshes.Get(_quadMesh);
+
     const size_t batchSize = 1'000;
-
-    _quadMesh = static_cast<MeshRegistry &>(_context.Meshes()).CreateQuad();
-    auto &quadMesh = static_cast<MeshRegistry &>(_context.Meshes()).Get(_quadMesh);
-
     _quadInstanceData.Buffer = buffers.Create({
       .Type = BufferType::Vertex,
       .Usage = BufferUsage::Dynamic,
@@ -42,9 +43,9 @@ namespace Krys::Gfx::OpenGL
     });
     _quadInstanceData.Data.reserve(batchSize);
 
-    auto &instanceDataBuffer = buffers.Get(_quadInstanceData.Buffer);
-    quadMesh.ApplyInstanceDataLayout(instanceDataBuffer, QuadInstanceData::Layout());
-    glObjectLabel(GL_BUFFER, instanceDataBuffer.GetHandle(), -1, "RectInstanceData");
+    auto &quadInstanceBuffer = buffers.Get(_quadInstanceData.Buffer);
+    quadMesh.ApplyInstanceDataLayout(quadInstanceBuffer, QuadInstanceData::Layout());
+    glObjectLabel(GL_BUFFER, quadInstanceBuffer.GetHandle(), -1, "QuadInstanceData");
   }
 
   void Renderer::Shutdown() noexcept
