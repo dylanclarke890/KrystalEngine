@@ -50,7 +50,7 @@ namespace Krys::UI::Layout
   /// @brief Calculates where a line starting at a given index should break, returning information about the
   /// collective children on the liune. This function assumes that all the children of node have their
   /// ComputedFlexBasis properly computed (to do this use `ComputeFlexBasisForChildren()`).
-  FlexLine CalculateFlexLine(Node *node, Direction ownerDirection, float ownerWidth, float mainAxisOwnerSize,
-                             float availableInnerWidth, float availableInnerMainDim,
+  FlexLine CalculateFlexLine(Node *node, Styles::Direction ownerDirection, float ownerWidth,
+                             float mainAxisOwnerSize, float availableInnerWidth, float availableInnerMainDim,
                              Node::LayoutableChildren::Iterator &iterator, uint16 lineCount);
 }

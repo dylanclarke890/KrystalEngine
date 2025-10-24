@@ -40,7 +40,7 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -127,7 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\placeholder.cpp" />
+    <ClCompile Include="src\Values\UnitValue.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.UI.Styles\Enums\Align.hpp" />
@@ -149,6 +149,13 @@
     <ClInclude Include="include\Krystal.UI.Styles\Enums\SizingMode.hpp" />
     <ClInclude Include="include\Krystal.UI.Styles\Enums\Unit.hpp" />
     <ClInclude Include="include\Krystal.UI.Styles\Enums\Wrap.hpp" />
+    <ClInclude Include="include\Krystal.UI.Styles\Helpers\FlexDirection.hpp" />
+    <ClInclude Include="include\Krystal.UI.Styles\Style.hpp" />
+    <ClInclude Include="include\Krystal.UI.Styles\Values\StyleLength.hpp" />
+    <ClInclude Include="include\Krystal.UI.Styles\Values\StyleSizeLength.hpp" />
+    <ClInclude Include="include\Krystal.UI.Styles\Values\StyleValueHandle.hpp" />
+    <ClInclude Include="include\Krystal.UI.Styles\Values\StyleValuePool.hpp" />
+    <ClInclude Include="include\Krystal.UI.Styles\Values\UnitValue.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Krystal.Lib\Krystal.Lib.vcxproj">

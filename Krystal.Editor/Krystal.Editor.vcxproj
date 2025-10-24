@@ -179,6 +179,9 @@
     <ProjectReference Include="..\Krystal.UI.Layout\Krystal.UI.Layout.vcxproj">
       <Project>{04dce3b3-a253-4119-87d3-384f67d9dfc8}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\Krystal.UI.Styles\Krystal.UI.Styles.vcxproj">
+      <Project>{b9a98447-c8c2-4ae1-8d48-69366c93110a}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Krystal.UI\Krystal.UI.vcxproj">
       <Project>{0ca51a50-7e1a-45c7-a23f-986b0cff5a35}</Project>
     </ProjectReference>

@@ -1,12 +1,14 @@
-#include "Krystal.UI.Layout/Api/Node.hpp"
 #include "Krystal.UI.Layout/Algorithm/Cache.hpp"
 #include "Krystal.UI.Layout/Algorithm/CalculateLayout.hpp"
-#include "Krystal.UI.Layout/Event/Event.hpp"
 #include "Krystal.UI.Layout/Api/Forward.hpp"
+#include "Krystal.UI.Layout/Api/Node.hpp"
+#include "Krystal.UI.Layout/Event/Event.hpp"
 #include "Krystal.UI.Layout/Node/Node.hpp"
 
 namespace Krys::UI::Layout
 {
+  using namespace Styles;
+
   NodeRef NodeCreate()
   {
     return NodeCreate(&Config::Defaults());

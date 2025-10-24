@@ -1,56 +1,57 @@
 #pragma once
 
-#include "Krystal.UI.Layout/Enums/Align.hpp"
+#include "Krystal.UI.Styles/Enums/Align.hpp"
 #include "Krystal.UI.Layout/Node/Node.hpp"
 
 namespace Krys::UI::Layout
 {
-  inline Align ResolveChildAlignment(const Node *node, const Node *child)
+  inline Styles::Align ResolveChildAlignment(const Node *node, const Node *child)
   {
-    const Align align = child->GetStyle().GetAlignSelf() == Align::Auto ? node->GetStyle().GetAlignItems()
-                                                                        : child->GetStyle().GetAlignSelf();
-    if (align == Align::Baseline && IsColumn(node->GetStyle().GetFlexDirection()))
+    const Styles::Align align = child->GetStyle().GetAlignSelf() == Styles::Align::Auto
+                                  ? node->GetStyle().GetAlignItems()
+                                  : child->GetStyle().GetAlignSelf();
+    if (align == Styles::Align::Baseline && IsColumn(node->GetStyle().GetFlexDirection()))
     {
-      return Align::FlexStart;
+      return Styles::Align::FlexStart;
     }
     return align;
   }
 
   /// @brief Fallback alignment to use on overflow
   /// https://www.w3.org/TR/css-align-3/#distribution-values
-  constexpr Align FallbackAlignment(Align align)
+  constexpr Styles::Align FallbackAlignment(Styles::Align align)
   {
     switch (align)
     {
         // Fallback to flex-start
-      case Align::SpaceBetween:
-      case Align::Stretch:      return Align::FlexStart;
+      case Styles::Align::SpaceBetween:
+      case Styles::Align::Stretch:      return Styles::Align::FlexStart;
 
       // Fallback to safe center. TODO (T208209388): This should be aligned to
       // Start instead of FlexStart (for row-reverse containers)
-      case Align::SpaceAround:
-      case Align::SpaceEvenly:  return Align::FlexStart;
-      default:                  return align;
+      case Styles::Align::SpaceAround:
+      case Styles::Align::SpaceEvenly:  return Styles::Align::FlexStart;
+      default:                          return align;
     }
   }
 
   /// @brief Fallback alignment to use on overflow
   /// https://www.w3.org/TR/css-align-3/#distribution-values
-  constexpr Justify FallbackAlignment(Justify align)
+  constexpr Styles::Justify FallbackAlignment(Styles::Justify align)
   {
     switch (align)
     {
         // Fallback to flex-start
-      case Justify::SpaceBetween:
+      case Styles::Justify::SpaceBetween:
         // TODO: Support `justify-content: stretch`
         // case Justify::Stretch:
-        return Justify::FlexStart;
+        return Styles::Justify::FlexStart;
 
       // Fallback to safe center. TODO (T208209388): This should be aligned to
       // Start instead of FlexStart (for row-reverse containers)
-      case Justify::SpaceAround:
-      case Justify::SpaceEvenly: return Justify::FlexStart;
-      default:                   return align;
+      case Styles::Justify::SpaceAround:
+      case Styles::Justify::SpaceEvenly: return Styles::Justify::FlexStart;
+      default:                           return align;
     }
   }
 }

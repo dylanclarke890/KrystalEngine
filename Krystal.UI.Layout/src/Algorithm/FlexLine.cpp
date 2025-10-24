@@ -1,9 +1,10 @@
 #include "Krystal.UI.Layout/Algorithm/FlexLine.hpp"
 #include "Krystal.UI.Layout/Algorithm/BoundAxis.hpp"
-#include "Krystal.UI.Layout/Algorithm/FlexDirection.hpp"
+#include "Krystal.UI.Styles/Helpers/FlexDirection.hpp"
 
 namespace Krys::UI::Layout
 {
+  using namespace Styles;
 
   FlexLine CalculateFlexLine(Node *const node, const Direction ownerDirection, const float ownerWidth,
                              const float mainAxisOwnerSize, const float availableInnerWidth,
@@ -30,7 +31,7 @@ namespace Krys::UI::Layout
     for (; iterator != childrenEnd; iterator++)
     {
       auto child = *iterator;
-      if (child->GetStyle().GetDisplay() == DisplayType::None
+      if (child->GetStyle().GetDisplay() == Display::None
           || child->GetStyle().GetPositionType() == PositionType::Absolute)
       {
         continue;
@@ -41,11 +42,11 @@ namespace Krys::UI::Layout
         firstElementInLine = child;
       }
 
-      if (child->GetStyle().FlexStartMarginIsAuto(mainAxis, ownerDirection))
+      if (child->GetStyle().IsFlexStartMarginAuto(mainAxis, ownerDirection))
       {
         numberOfAutoMargins++;
       }
-      if (child->GetStyle().FlexEndMarginIsAuto(mainAxis, ownerDirection))
+      if (child->GetStyle().IsFlexEndMarginAuto(mainAxis, ownerDirection))
       {
         numberOfAutoMargins++;
       }

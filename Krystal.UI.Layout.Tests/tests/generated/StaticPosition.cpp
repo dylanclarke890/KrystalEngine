@@ -5,6 +5,7 @@
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
 
   TEST_CASE("LayoutEngine::static_position_insets_have_no_effect_left_top", "[LayoutEngine]")
   {

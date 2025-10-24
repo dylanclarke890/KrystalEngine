@@ -80,7 +80,6 @@ namespace Krys::Gfx::Vulkan
     void Setup() noexcept;
 
     void Render(ICamera &camera) noexcept;
-    void Render(UI::Document &camera) noexcept;
 
     void Present() noexcept;
 

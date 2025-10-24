@@ -5,6 +5,7 @@
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
   TEST_CASE("LayoutEngine::computed_layout_margin", "[LayoutEngine]")
   {
     NodeRef root = NodeCreate();

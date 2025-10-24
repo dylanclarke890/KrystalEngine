@@ -5,6 +5,7 @@
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
 
   TEST_CASE("LayoutEngine::absolute_layout_width_height_start_top", "[LayoutEngine]")
   {

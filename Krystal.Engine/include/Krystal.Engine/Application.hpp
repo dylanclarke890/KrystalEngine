@@ -14,7 +14,6 @@
 #include "Krystal.Platform/Input.hpp"
 #include "Krystal.Platform/IWindow.hpp"
 #include "Krystal.Platform/Platform.hpp"
-#include "Krystal.UI/Document.hpp"
 #include <algorithm>
 #include <exception>
 #include <utility>

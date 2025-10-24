@@ -5,6 +5,7 @@
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
 
   TEST_CASE("LayoutEngine::rounding_flex_basis_flex_grow_row_width_of_100", "[LayoutEngine]")
   {

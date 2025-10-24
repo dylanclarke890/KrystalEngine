@@ -6,7 +6,7 @@
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.UI.Layout/LayoutEngine.hpp"
-#include "Krystal.UI.Layout/UnitValue.hpp"
+#include "Krystal.UI.Styles/Values/UnitValue.hpp"
 #include "Krystal.UI/UnitLiterals.hpp"
 
 namespace Krys::UI
@@ -88,13 +88,13 @@ namespace Krys::UI
     Element(ElementHandle handle, Layout::ConfigRef);
     virtual ~Element();
 
-    void SetWidth(const Layout::UnitValue &value) const
+    void SetWidth(const Styles::UnitValue &value) const
     {
-      if (value.Type == Layout::Unit::Point)
+      if (value.Type == Styles::Unit::Point)
       {
         Layout::NodeStyleSetWidth(_layoutNode, value.Value);
       }
-      else if (value.Type == Layout::Unit::Percent)
+      else if (value.Type == Styles::Unit::Percent)
       {
         Layout::NodeStyleSetWidthPercent(_layoutNode, value.Value);
       }
@@ -119,13 +119,13 @@ namespace Krys::UI
       return Layout::NodeStyleGetWidth(_layoutNode).Value;
     }
 
-    void SetHeight(const Layout::UnitValue &value) const
+    void SetHeight(const Styles::UnitValue &value) const
     {
-      if (value.Type == Layout::Unit::Point)
+      if (value.Type == Styles::Unit::Point)
       {
         Layout::NodeStyleSetHeight(_layoutNode, value.Value);
       }
-      else if (value.Type == Layout::Unit::Percent)
+      else if (value.Type == Styles::Unit::Percent)
       {
         Layout::NodeStyleSetHeightPercent(_layoutNode, value.Value);
       }
@@ -170,15 +170,15 @@ namespace Krys::UI
       return _borderColour;
     }
 
-    void SetPadding(const Layout::UnitValue &value) const
+    void SetPadding(const Styles::UnitValue &value) const
     {
-      if (value.Type == Layout::Unit::Point)
+      if (value.Type == Styles::Unit::Point)
       {
-        Layout::NodeStyleSetPadding(_layoutNode, Layout::Edge::All, value.Value);
+        Layout::NodeStyleSetPadding(_layoutNode, Styles::Edge::All, value.Value);
       }
-      else if (value.Type == Layout::Unit::Percent)
+      else if (value.Type == Styles::Unit::Percent)
       {
-        Layout::NodeStyleSetPaddingPercent(_layoutNode, Layout::Edge::All, value.Value);
+        Layout::NodeStyleSetPaddingPercent(_layoutNode, Styles::Edge::All, value.Value);
       }
       else
       {
@@ -186,15 +186,15 @@ namespace Krys::UI
       }
     }
 
-    void SetMargin(const Layout::UnitValue &value) const
+    void SetMargin(const Styles::UnitValue &value) const
     {
-      if (value.Type == Layout::Unit::Point)
+      if (value.Type == Styles::Unit::Point)
       {
-        Layout::NodeStyleSetMargin(_layoutNode, Layout::Edge::All, value.Value);
+        Layout::NodeStyleSetMargin(_layoutNode, Styles::Edge::All, value.Value);
       }
-      else if (value.Type == Layout::Unit::Percent)
+      else if (value.Type == Styles::Unit::Percent)
       {
-        Layout::NodeStyleSetMarginPercent(_layoutNode, Layout::Edge::All, value.Value);
+        Layout::NodeStyleSetMarginPercent(_layoutNode, Styles::Edge::All, value.Value);
       }
       else
       {
@@ -202,11 +202,11 @@ namespace Krys::UI
       }
     }
 
-    void SetBorderWidth(const Layout::UnitValue &value) const
+    void SetBorderWidth(const Styles::UnitValue &value) const
     {
-      if (value.Type == Layout::Unit::Point)
+      if (value.Type == Styles::Unit::Point)
       {
-        Layout::NodeStyleSetBorder(_layoutNode, Layout::Edge::All, value.Value);
+        Layout::NodeStyleSetBorder(_layoutNode, Styles::Edge::All, value.Value);
       }
       else
       {
@@ -216,12 +216,12 @@ namespace Krys::UI
 
     float GetBorderWidth() const
     {
-      return Layout::NodeStyleGetBorder(_layoutNode, Layout::Edge::All);
+      return Layout::NodeStyleGetBorder(_layoutNode, Styles::Edge::All);
     }
 
-    void SetBorderRadius(const Layout::UnitValue &radius)
+    void SetBorderRadius(const Styles::UnitValue &radius)
     {
-      if (radius.Type == Layout::Unit::Point)
+      if (radius.Type == Styles::Unit::Point)
       {
         _borderRadius = radius.Value;
       }
@@ -238,18 +238,18 @@ namespace Krys::UI
 
     void SetFlexDirection(FlexDirection direction) const
     {
-      Layout::FlexDirection layoutDirection = Layout::FlexDirection::Column;
+      Styles::FlexDirection layoutDirection = Styles::FlexDirection::Column;
       if (direction == FlexDirection::Row)
       {
-        layoutDirection = Layout::FlexDirection::Row;
+        layoutDirection = Styles::FlexDirection::Row;
       }
       Layout::NodeStyleSetFlexDirection(_layoutNode, layoutDirection);
     }
 
     FlexDirection GetFlexDirection() const
     {
-      Layout::FlexDirection layoutDirection = Layout::NodeStyleGetFlexDirection(_layoutNode);
-      if (layoutDirection == Layout::FlexDirection::Row)
+      Styles::FlexDirection layoutDirection = Layout::NodeStyleGetFlexDirection(_layoutNode);
+      if (layoutDirection == Styles::FlexDirection::Row)
       {
         return FlexDirection::Row;
       }
@@ -261,22 +261,22 @@ namespace Krys::UI
 
     void SetWrap(Wrap wrap) const
     {
-      Layout::Wrap layoutWrap = Layout::Wrap::NoWrap;
+      Styles::Wrap layoutWrap = Styles::Wrap::NoWrap;
       if (wrap == Wrap::Wrap)
       {
-        layoutWrap = Layout::Wrap::Wrap;
+        layoutWrap = Styles::Wrap::Wrap;
       }
       Layout::NodeStyleSetFlexWrap(_layoutNode, layoutWrap);
     }
 
     Wrap GetFlexWrap() const
     {
-      Layout::Wrap layoutWrap = Layout::NodeStyleGetFlexWrap(_layoutNode);
-      if (layoutWrap == Layout::Wrap::NoWrap)
+      Styles::Wrap layoutWrap = Layout::NodeStyleGetFlexWrap(_layoutNode);
+      if (layoutWrap == Styles::Wrap::NoWrap)
       {
         return Wrap::NoWrap;
       }
-      else if (layoutWrap == Layout::Wrap::Wrap)
+      else if (layoutWrap == Styles::Wrap::Wrap)
       {
         return Wrap::Wrap;
       }
@@ -288,26 +288,26 @@ namespace Krys::UI
 
     void SetPosition(Position position) const
     {
-      Layout::PositionType layoutPosition = Layout::PositionType::Static;
+      Styles::PositionType layoutPosition = Styles::PositionType::Static;
       if (position == Position::Relative)
       {
-        layoutPosition = Layout::PositionType::Relative;
+        layoutPosition = Styles::PositionType::Relative;
       }
       else if (position == Position::Absolute)
       {
-        layoutPosition = Layout::PositionType::Absolute;
+        layoutPosition = Styles::PositionType::Absolute;
       }
       Layout::NodeStyleSetPositionType(_layoutNode, layoutPosition);
     }
 
     Position GetPosition() const
     {
-      Layout::PositionType layoutPosition = Layout::NodeStyleGetPositionType(_layoutNode);
-      if (layoutPosition == Layout::PositionType::Relative)
+      Styles::PositionType layoutPosition = Layout::NodeStyleGetPositionType(_layoutNode);
+      if (layoutPosition == Styles::PositionType::Relative)
       {
         return Position::Relative;
       }
-      else if (layoutPosition == Layout::PositionType::Absolute)
+      else if (layoutPosition == Styles::PositionType::Absolute)
       {
         return Position::Absolute;
       }

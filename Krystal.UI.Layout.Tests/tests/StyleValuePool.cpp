@@ -1,10 +1,11 @@
+#include "Krystal.UI.Styles/Values/StyleValuePool.hpp"
 #include "Krystal.UI.Layout/LayoutEngine.hpp"
-#include "Krystal.UI.Layout/Style/StyleValuePool.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
 
   TEST_CASE("StyleValuePool::undefined_at_init", "[StyleValuePool]")
   {

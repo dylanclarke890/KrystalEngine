@@ -4,7 +4,7 @@
 
 #include "Krystal.Lib/ComparisonHelpers.hpp"
 #include "Krystal.UI.Layout/Algorithm/SizingMode.hpp"
-#include "Krystal.UI.Layout/Enums/SizingMode.hpp"
+#include "Krystal.UI.Styles/Enums/SizingMode.hpp"
 
 namespace Krys::UI::Layout
 {
@@ -12,8 +12,8 @@ namespace Krys::UI::Layout
   {
     float AvailableWidth {-1};
     float AvailableHeight {-1};
-    SizingMode WidthSizingMode {SizingMode::MaxContent};
-    SizingMode HeightSizingMode {SizingMode::MaxContent};
+    Styles::SizingMode WidthSizingMode {Styles::SizingMode::MaxContent};
+    Styles::SizingMode HeightSizingMode {Styles::SizingMode::MaxContent};
 
     float ComputedWidth {-1};
     float ComputedHeight {-1};

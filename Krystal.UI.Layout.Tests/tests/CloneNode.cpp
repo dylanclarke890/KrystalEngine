@@ -4,6 +4,7 @@
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
   static void RecursivelyAssertProperNodeOwnership(NodeRef node)
   {
     for (size_t i = 0; i < NodeGetChildCount(node); ++i)

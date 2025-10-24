@@ -5,6 +5,7 @@
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
 
   TEST_CASE("LayoutEngine::align_content_flex_start_nowrap", "[LayoutEngine]")
   {

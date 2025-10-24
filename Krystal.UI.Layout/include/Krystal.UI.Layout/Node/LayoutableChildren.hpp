@@ -1,10 +1,9 @@
 #pragma once
 
+#include "Krystal.UI.Styles/Enums/Display.hpp"
 #include <cstdint>
 #include <forward_list>
 #include <utility>
-
-#include "Krystal.UI.Layout/Enums/DisplayType.hpp"
 
 namespace Krys::UI::Layout
 {
@@ -98,7 +97,7 @@ namespace Krys::UI::Layout
           ++_childIndex;
 
           // skip all display: contents nodes, possibly going deeper into the tree
-          if (_iterNode->GetChild(_childIndex)->GetStyle().GetDisplay() == DisplayType::Contents)
+          if (_iterNode->GetChild(_childIndex)->GetStyle().GetDisplay() == Styles::Display::Contents)
             [[unlikely]]
           {
             SkipContentsNodes();
@@ -110,7 +109,7 @@ namespace Krys::UI::Layout
       {
         // get the node that would be returned from the iterator
         auto currentNode = _iterNode->GetChild(_childIndex);
-        while (currentNode->GetStyle().GetDisplay() == DisplayType::Contents
+        while (currentNode->GetStyle().GetDisplay() == Styles::Display::Contents
                && currentNode->GetChildCount() > 0)
         {
           // if it has display: contents set, it shouldn't be returned but its
@@ -127,7 +126,7 @@ namespace Krys::UI::Layout
         }
 
         // if no node without display: contents was found, try to backtrack
-        if (currentNode->GetStyle().GetDisplay() == DisplayType::Contents)
+        if (currentNode->GetStyle().GetDisplay() == Styles::Display::Contents)
         {
           Next();
         }
@@ -146,7 +145,7 @@ namespace Krys::UI::Layout
       if (_node->GetChildCount() > 0)
       {
         auto result = Iterator(_node, 0);
-        if (_node->GetChild(0)->GetStyle().GetDisplay() == DisplayType ::Contents) [[unlikely]]
+        if (_node->GetChild(0)->GetStyle().GetDisplay() == Styles::Display::Contents) [[unlikely]]
         {
           result.SkipContentsNodes();
         }

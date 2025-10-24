@@ -5,6 +5,7 @@
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
 
   TEST_CASE("LayoutEngine::aspect_ratio_does_not_stretch_cross_axis_dim", "[LayoutEngine]")
   {

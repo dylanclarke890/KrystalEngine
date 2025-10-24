@@ -2,9 +2,9 @@
 
 #include "Krystal.Lib/NullableFloat.hpp"
 #include "Krystal.Lib/Types.hpp"
-#include "Krystal.UI.Layout/Style/StyleLength.hpp"
+#include "Krystal.UI.Styles/Values/StyleLength.hpp"
 
-namespace Krys::UI::Layout
+namespace Krys::UI::Styles
 {
 #pragma pack(push)
 #pragma pack(1)

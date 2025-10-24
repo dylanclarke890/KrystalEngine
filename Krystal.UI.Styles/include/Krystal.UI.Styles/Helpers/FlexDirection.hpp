@@ -1,24 +1,15 @@
 #pragma once
 
-#include "Krystal.UI.Layout/Enums/Dimension.hpp"
-#include "Krystal.UI.Layout/Enums/Direction.hpp"
-#include "Krystal.UI.Layout/Enums/Edge.hpp"
-#include "Krystal.UI.Layout/Enums/FlexDirection.hpp"
-#include "Krystal.UI.Layout/Enums/PhysicalEdge.hpp"
+#include "Krystal.UI.Styles/Enums/Dimension.hpp"
+#include "Krystal.UI.Styles/Enums/Direction.hpp"
+#include "Krystal.UI.Styles/Enums/Edge.hpp"
+#include "Krystal.UI.Styles/Enums/FlexDirection.hpp"
+#include "Krystal.UI.Styles/Enums/PhysicalEdge.hpp"
 
-namespace Krys::UI::Layout
+namespace Krys::UI::Styles
 {
-  inline bool IsRow(const FlexDirection flexDirection) noexcept
-  {
-    return flexDirection == FlexDirection::Row || flexDirection == FlexDirection::RowReverse;
-  }
-
-  inline bool IsColumn(const FlexDirection flexDirection) noexcept
-  {
-    return flexDirection == FlexDirection::Column || flexDirection == FlexDirection::ColumnReverse;
-  }
-
-  inline FlexDirection ResolveDirection(const FlexDirection flexDirection, const Direction direction) noexcept
+  NO_DISCARD inline FlexDirection ResolveDirection(const FlexDirection flexDirection,
+                                                   const Direction direction) noexcept
   {
     if (direction == Direction::RTL)
     {
@@ -35,13 +26,13 @@ namespace Krys::UI::Layout
     return flexDirection;
   }
 
-  inline FlexDirection ResolveCrossDirection(const FlexDirection flexDirection,
-                                             const Direction direction) noexcept
+  NO_DISCARD inline FlexDirection ResolveCrossDirection(const FlexDirection flexDirection,
+                                                        const Direction direction) noexcept
   {
     return IsColumn(flexDirection) ? ResolveDirection(FlexDirection::Row, direction) : FlexDirection::Column;
   }
 
-  inline PhysicalEdge FlexStartEdge(FlexDirection flexDirection) noexcept
+  NO_DISCARD inline PhysicalEdge FlexStartEdge(FlexDirection flexDirection) noexcept
   {
     switch (flexDirection)
     {
@@ -51,10 +42,10 @@ namespace Krys::UI::Layout
       case FlexDirection::RowReverse:    return PhysicalEdge::Right;
     }
 
-    return PhysicalEdge::Right; // should never reach here
+    std::unreachable();
   }
 
-  inline PhysicalEdge FlexEndEdge(FlexDirection flexDirection) noexcept
+  NO_DISCARD inline PhysicalEdge FlexEndEdge(FlexDirection flexDirection) noexcept
   {
     switch (flexDirection)
     {
@@ -64,10 +55,10 @@ namespace Krys::UI::Layout
       case FlexDirection::RowReverse:    return PhysicalEdge::Left;
     }
 
-    return PhysicalEdge::Right; // should never reach here
+    std::unreachable();
   }
 
-  inline PhysicalEdge InlineStartEdge(FlexDirection flexDirection, Direction direction) noexcept
+  NO_DISCARD inline PhysicalEdge InlineStartEdge(FlexDirection flexDirection, Direction direction) noexcept
   {
     if (IsRow(flexDirection))
     {
@@ -77,7 +68,7 @@ namespace Krys::UI::Layout
     return PhysicalEdge::Top;
   }
 
-  inline PhysicalEdge InlineEndEdge(FlexDirection flexDirection, Direction direction) noexcept
+  NO_DISCARD inline PhysicalEdge InlineEndEdge(FlexDirection flexDirection, Direction direction) noexcept
   {
     if (IsRow(flexDirection))
     {
@@ -87,7 +78,7 @@ namespace Krys::UI::Layout
     return PhysicalEdge::Bottom;
   }
 
-  inline Dimension ToDimension(FlexDirection flexDirection) noexcept
+  NO_DISCARD inline Dimension ToDimension(FlexDirection flexDirection) noexcept
   {
     switch (flexDirection)
     {
@@ -97,6 +88,6 @@ namespace Krys::UI::Layout
       case FlexDirection::RowReverse:    return Dimension::Width;
     }
 
-    return Dimension::Width; // should never reach here
+    std::unreachable();
   }
 }

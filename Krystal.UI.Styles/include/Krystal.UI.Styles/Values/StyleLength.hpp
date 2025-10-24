@@ -2,10 +2,10 @@
 
 #include "Krystal.Lib/NullableFloat.hpp"
 #include "Krystal.Lib/Types.hpp"
-#include "Krystal.UI.Layout/Enums/Unit.hpp"
-#include "Krystal.UI.Layout/UnitValue.hpp"
+#include "Krystal.UI.Styles/Enums/Unit.hpp"
+#include "Krystal.UI.Styles/Values/UnitValue.hpp"
 
-namespace Krys::UI::Layout
+namespace Krys::UI::Styles
 {
   /// @brief Represents a CSS Value which may be one of:
   /// 1. Undefined

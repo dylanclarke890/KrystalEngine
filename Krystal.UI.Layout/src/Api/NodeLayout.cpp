@@ -1,9 +1,10 @@
 #include "Krystal.UI.Layout/Api/NodeLayout.hpp"
-#include "Krystal.UI.Layout/Enums/Edge.hpp"
 #include "Krystal.UI.Layout/Node/Node.hpp"
+#include "Krystal.UI.Styles/Enums/Edge.hpp"
 
 namespace
 {
+  using namespace Krys::UI::Styles;
   using namespace Krys::UI::Layout;
 
   template <auto LayoutMember>
@@ -42,6 +43,8 @@ namespace
 
 namespace Krys::UI::Layout
 {
+  using namespace Styles;
+
   float NodeLayoutGetLeft(NodeConstRef node)
   {
     return node->GetLayout().GetPosition(PhysicalEdge::Left);

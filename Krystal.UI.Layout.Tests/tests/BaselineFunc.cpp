@@ -4,6 +4,7 @@
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
   static float _baseline(NodeConstRef node, const float /*width*/, const float /*height*/)
   {
     auto *baseline = (float *)NodeGetContext(node);

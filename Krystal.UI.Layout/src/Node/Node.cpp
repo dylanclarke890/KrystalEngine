@@ -2,12 +2,14 @@
 #include <cstddef>
 #include <iostream>
 
-#include "Krystal.UI.Layout/Algorithm/FlexDirection.hpp"
 #include "Krystal.UI.Layout/Config/Config.hpp"
 #include "Krystal.UI.Layout/Node/Node.hpp"
+#include "Krystal.UI.Styles/Helpers/FlexDirection.hpp"
 
 namespace Krys::UI::Layout
 {
+  using namespace Styles;
+
   Node::Node() : Node {&Config::Defaults()}
   {
   }
@@ -90,13 +92,13 @@ namespace Krys::UI::Layout
   void Node::ReplaceChild(Node *child, size_t index)
   {
     auto previousChild = _children[index];
-    if (previousChild->GetStyle().GetDisplay() == DisplayType::Contents
-        && child->GetStyle().GetDisplay() != DisplayType::Contents)
+    if (previousChild->GetStyle().GetDisplay() == Display::Contents
+        && child->GetStyle().GetDisplay() != Display::Contents)
     {
       _contentsChildrenCount--;
     }
-    else if (previousChild->GetStyle().GetDisplay() != DisplayType::Contents
-             && child->GetStyle().GetDisplay() == DisplayType::Contents)
+    else if (previousChild->GetStyle().GetDisplay() != Display::Contents
+             && child->GetStyle().GetDisplay() == Display::Contents)
     {
       _contentsChildrenCount++;
     }
@@ -106,13 +108,13 @@ namespace Krys::UI::Layout
 
   void Node::ReplaceChild(Node *oldChild, Node *newChild)
   {
-    if (oldChild->GetStyle().GetDisplay() == DisplayType::Contents
-        && newChild->GetStyle().GetDisplay() != DisplayType::Contents)
+    if (oldChild->GetStyle().GetDisplay() == Display::Contents
+        && newChild->GetStyle().GetDisplay() != Display::Contents)
     {
       _contentsChildrenCount--;
     }
-    else if (oldChild->GetStyle().GetDisplay() != DisplayType::Contents
-             && newChild->GetStyle().GetDisplay() == DisplayType::Contents)
+    else if (oldChild->GetStyle().GetDisplay() != Display::Contents
+             && newChild->GetStyle().GetDisplay() == Display::Contents)
     {
       _contentsChildrenCount++;
     }
@@ -122,7 +124,7 @@ namespace Krys::UI::Layout
 
   void Node::InsertChild(Node *child, size_t index)
   {
-    if (child->GetStyle().GetDisplay() == DisplayType::Contents)
+    if (child->GetStyle().GetDisplay() == Display::Contents)
     {
       _contentsChildrenCount++;
     }
@@ -173,7 +175,7 @@ namespace Krys::UI::Layout
     _contentsChildrenCount = 0;
     for (const auto &child : children)
     {
-      if (child->GetStyle().GetDisplay() == DisplayType::Contents)
+      if (child->GetStyle().GetDisplay() == Display::Contents)
       {
         _contentsChildrenCount++;
       }
@@ -185,7 +187,7 @@ namespace Krys::UI::Layout
     auto p = std::find(_children.begin(), _children.end(), child);
     if (p != _children.end())
     {
-      if (child->GetStyle().GetDisplay() == DisplayType::Contents)
+      if (child->GetStyle().GetDisplay() == Display::Contents)
       {
         _contentsChildrenCount--;
       }
@@ -198,7 +200,7 @@ namespace Krys::UI::Layout
 
   void Node::RemoveChild(size_t index)
   {
-    if (_children[index]->GetStyle().GetDisplay() == DisplayType::Contents)
+    if (_children[index]->GetStyle().GetDisplay() == Display::Contents)
     {
       _contentsChildrenCount--;
     }
@@ -404,7 +406,7 @@ namespace Krys::UI::Layout
     size_t i = 0;
     for (Node *&child : _children)
     {
-      if (child->GetStyle().GetDisplay() == DisplayType::Contents && child->GetOwner() != this)
+      if (child->GetStyle().GetDisplay() == Display::Contents && child->GetOwner() != this)
       {
         child = _config->CloneNode(child, this, i);
         child->SetOwner(this);

@@ -4,6 +4,7 @@
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
 
   static float _baselineFunc(NodeConstRef /*node*/, const float /*width*/, const float height)
   {

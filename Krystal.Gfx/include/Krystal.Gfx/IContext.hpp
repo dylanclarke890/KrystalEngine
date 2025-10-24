@@ -6,7 +6,6 @@
 #include "Krystal.Lib/NativeHandle.hpp"
 #include "Krystal.Lib/SmartPointers.hpp"
 #include "Krystal.Lib/Types.hpp"
-#include "Krystal.UI/Document.hpp"
 
 namespace Krys::Gfx
 {

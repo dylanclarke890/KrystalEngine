@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Krystal.UI.Layout/Api/Forward.hpp"
-#include "Krystal.UI.Layout/Enums/Errata.hpp"
-#include "Krystal.UI.Layout/Enums/ExperimentalFeature.hpp"
+#include "Krystal.UI.Styles/Enums/Errata.hpp"
+#include "Krystal.UI.Styles/Enums/ExperimentalFeature.hpp"
 
 namespace Krys::UI::Layout
 {
@@ -42,10 +42,10 @@ namespace Krys::UI::Layout
   /// 1. Errata::None: No errata
   /// 2. Errata::Classic: Match layout behaviors of Yoga 1.x
   /// 3. Errata::All: Match layout behaviors of Yoga 1.x, including `UseLegacyStretchBehaviour`
-  void ConfigSetErrata(ConfigRef config, Errata errata);
+  void ConfigSetErrata(ConfigRef config, Styles::Errata errata);
 
   /// @brief Get the currently set errata.
-  Errata ConfigGetErrata(ConfigConstRef config);
+  Styles::Errata ConfigGetErrata(ConfigConstRef config);
 
   /// @brief Sets an arbitrary context pointer on the config which may be read from during callbacks.
   void ConfigSetContext(ConfigRef config, void *context);
@@ -54,10 +54,11 @@ namespace Krys::UI::Layout
   void *ConfigGetContext(ConfigConstRef config);
 
   /// @brief Enable an experimental/unsupported feature in Yoga.
-  void ConfigSetExperimentalFeatureEnabled(ConfigRef config, ExperimentalFeature feature, bool enabled);
+  void ConfigSetExperimentalFeatureEnabled(ConfigRef config, Styles::ExperimentalFeature feature,
+                                           bool enabled);
 
   /// @brief Whether an experimental feature is set.
-  bool ConfigIsExperimentalFeatureEnabled(ConfigConstRef config, ExperimentalFeature feature);
+  bool ConfigIsExperimentalFeatureEnabled(ConfigConstRef config, Styles::ExperimentalFeature feature);
 
   /// @brief Sets a callback, called during layout, to create a new mutable node if the engine must write to
   /// it and its owner is not its parent observed during layout.

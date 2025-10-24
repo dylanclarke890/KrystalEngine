@@ -6,6 +6,7 @@
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
 
   static List<NodeRef> GetChildren(NodeRef const node)
   {

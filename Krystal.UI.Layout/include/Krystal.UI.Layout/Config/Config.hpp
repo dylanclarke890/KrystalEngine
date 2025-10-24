@@ -5,8 +5,8 @@
 #include <bitset>
 
 #include "Krystal.UI.Layout/Api/Forward.hpp"
-#include "Krystal.UI.Layout/Enums/Errata.hpp"
-#include "Krystal.UI.Layout/Enums/ExperimentalFeature.hpp"
+#include "Krystal.UI.Styles/Enums/Errata.hpp"
+#include "Krystal.UI.Styles/Enums/ExperimentalFeature.hpp"
 
 namespace Krys::UI::Layout
 {
@@ -15,8 +15,9 @@ namespace Krys::UI::Layout
   {
   private:
     bool _useWebDefaults : 1 = false;
-    ExperimentalFeature _experimentalFeatures : BitCount<ExperimentalFeature>() = ExperimentalFeature::None;
-    Errata _errata = Errata::None;
+    Styles::ExperimentalFeature _experimentalFeatures
+        : BitCount<Styles::ExperimentalFeature>() = Styles::ExperimentalFeature::None;
+    Styles::Errata _errata = Styles::Errata::None;
     uint16 _version = 0;
     float _pointScaleFactor = 1.0f;
     CloneNodeFunc _cloneNodeCallback {nullptr};
@@ -28,15 +29,15 @@ namespace Krys::UI::Layout
     void SetUseWebDefaults(bool useWebDefaults);
     bool UseWebDefaults() const;
 
-    void SetExperimentalFeatureEnabled(ExperimentalFeature feature, bool enabled);
-    bool IsExperimentalFeatureEnabled(ExperimentalFeature feature) const;
-    ExperimentalFeature GetEnabledExperiments() const;
+    void SetExperimentalFeatureEnabled(Styles::ExperimentalFeature feature, bool enabled);
+    bool IsExperimentalFeatureEnabled(Styles::ExperimentalFeature feature) const;
+    Styles::ExperimentalFeature GetEnabledExperiments() const;
 
-    void SetErrata(Errata errata);
-    void AddErrata(Errata errata);
-    void RemoveErrata(Errata errata);
-    Errata GetErrata() const;
-    bool HasErrata(Errata errata) const;
+    void SetErrata(Styles::Errata errata);
+    void AddErrata(Styles::Errata errata);
+    void RemoveErrata(Styles::Errata errata);
+    Styles::Errata GetErrata() const;
+    bool HasErrata(Styles::Errata errata) const;
 
     void SetPointScaleFactor(float pointScaleFactor);
     float GetPointScaleFactor() const;

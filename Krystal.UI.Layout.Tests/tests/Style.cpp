@@ -1,10 +1,11 @@
 #include "Krystal.UI.Layout/LayoutEngine.hpp"
-#include "Krystal.UI.Layout/Style/Style.hpp"
+#include "Krystal.UI.Styles/Style.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
 
   TEST_CASE("Style - Computed Padding Is Floored", "[Style]")
   {

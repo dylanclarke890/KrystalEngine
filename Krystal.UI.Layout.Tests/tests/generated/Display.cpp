@@ -5,6 +5,7 @@
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
 
 TEST_CASE("LayoutEngine::display_none", "[LayoutEngine]") {
   ConfigRef config = ConfigCreate();
@@ -21,7 +22,7 @@ TEST_CASE("LayoutEngine::display_none", "[LayoutEngine]") {
 
   NodeRef root_child1 = NodeCreate(config);
   NodeStyleSetFlexGrow(root_child1, 1);
-  NodeStyleSetDisplay(root_child1, DisplayType::None);
+  NodeStyleSetDisplay(root_child1, Display::None);
   NodeInsertChild(root, root_child1, 1);
   NodeCalculateLayout(root, Undefined, Undefined, Direction::LTR);
 
@@ -78,7 +79,7 @@ TEST_CASE("LayoutEngine::display_none_fixed_size", "[LayoutEngine]") {
   NodeRef root_child1 = NodeCreate(config);
   NodeStyleSetWidth(root_child1, 20);
   NodeStyleSetHeight(root_child1, 20);
-  NodeStyleSetDisplay(root_child1, DisplayType::None);
+  NodeStyleSetDisplay(root_child1, Display::None);
   NodeInsertChild(root, root_child1, 1);
   NodeCalculateLayout(root, Undefined, Undefined, Direction::LTR);
 
@@ -135,7 +136,7 @@ TEST_CASE("LayoutEngine::display_none_with_margin", "[LayoutEngine]") {
   NodeStyleSetMargin(root_child0, Edge::Bottom, 10);
   NodeStyleSetWidth(root_child0, 20);
   NodeStyleSetHeight(root_child0, 20);
-  NodeStyleSetDisplay(root_child0, DisplayType::None);
+  NodeStyleSetDisplay(root_child0, Display::None);
   NodeInsertChild(root, root_child0, 0);
 
   NodeRef root_child1 = NodeCreate(config);
@@ -199,7 +200,7 @@ TEST_CASE("LayoutEngine::display_none_with_child", "[LayoutEngine]") {
   NodeStyleSetFlexGrow(root_child1, 1);
   NodeStyleSetFlexShrink(root_child1, 1);
   NodeStyleSetFlexBasisPercent(root_child1, 0);
-  NodeStyleSetDisplay(root_child1, DisplayType::None);
+  NodeStyleSetDisplay(root_child1, Display::None);
   NodeInsertChild(root, root_child1, 1);
 
   NodeRef root_child1_child0 = NodeCreate(config);
@@ -289,7 +290,7 @@ TEST_CASE("LayoutEngine::display_none_with_position", "[LayoutEngine]") {
   NodeRef root_child1 = NodeCreate(config);
   NodeStyleSetFlexGrow(root_child1, 1);
   NodeStyleSetPosition(root_child1, Edge::Top, 10);
-  NodeStyleSetDisplay(root_child1, DisplayType::None);
+  NodeStyleSetDisplay(root_child1, Display::None);
   NodeInsertChild(root, root_child1, 1);
   NodeCalculateLayout(root, Undefined, Undefined, Direction::LTR);
 
@@ -342,7 +343,7 @@ TEST_CASE("LayoutEngine::display_none_with_position_absolute", "[LayoutEngine]")
   NodeStyleSetPositionType(root_child0, PositionType::Absolute);
   NodeStyleSetWidth(root_child0, 100);
   NodeStyleSetHeight(root_child0, 100);
-  NodeStyleSetDisplay(root_child0, DisplayType::None);
+  NodeStyleSetDisplay(root_child0, Display::None);
   NodeInsertChild(root, root_child0, 0);
   NodeCalculateLayout(root, Undefined, Undefined, Direction::LTR);
 
@@ -383,7 +384,7 @@ TEST_CASE("LayoutEngine::display_contents", "[LayoutEngine]") {
   NodeStyleSetHeight(root, 100);
 
   NodeRef root_child0 = NodeCreate(config);
-  NodeStyleSetDisplay(root_child0, DisplayType::Contents);
+  NodeStyleSetDisplay(root_child0, Display::Contents);
   NodeInsertChild(root, root_child0, 0);
 
   NodeRef root_child0_child0 = NodeCreate(config);
@@ -460,7 +461,7 @@ TEST_CASE("LayoutEngine::display_contents_fixed_size", "[LayoutEngine]") {
   NodeRef root_child0 = NodeCreate(config);
   NodeStyleSetWidth(root_child0, 50);
   NodeStyleSetHeight(root_child0, 50);
-  NodeStyleSetDisplay(root_child0, DisplayType::Contents);
+  NodeStyleSetDisplay(root_child0, Display::Contents);
   NodeInsertChild(root, root_child0, 0);
 
   NodeRef root_child0_child0 = NodeCreate(config);
@@ -541,7 +542,7 @@ TEST_CASE("LayoutEngine::display_contents_with_margin", "[LayoutEngine]") {
   NodeStyleSetMargin(root_child0, Edge::Bottom, 10);
   NodeStyleSetWidth(root_child0, 20);
   NodeStyleSetHeight(root_child0, 20);
-  NodeStyleSetDisplay(root_child0, DisplayType::Contents);
+  NodeStyleSetDisplay(root_child0, Display::Contents);
   NodeInsertChild(root, root_child0, 0);
 
   NodeRef root_child1 = NodeCreate(config);
@@ -600,7 +601,7 @@ TEST_CASE("LayoutEngine::display_contents_with_padding", "[LayoutEngine]") {
   NodeStyleSetPadding(root_child0, Edge::Top, 10);
   NodeStyleSetPadding(root_child0, Edge::Right, 10);
   NodeStyleSetPadding(root_child0, Edge::Bottom, 10);
-  NodeStyleSetDisplay(root_child0, DisplayType::Contents);
+  NodeStyleSetDisplay(root_child0, Display::Contents);
   NodeInsertChild(root, root_child0, 0);
 
   NodeRef root_child0_child0 = NodeCreate(config);
@@ -676,7 +677,7 @@ TEST_CASE("LayoutEngine::display_contents_with_position", "[LayoutEngine]") {
 
   NodeRef root_child0 = NodeCreate(config);
   NodeStyleSetPosition(root_child0, Edge::Top, 10);
-  NodeStyleSetDisplay(root_child0, DisplayType::Contents);
+  NodeStyleSetDisplay(root_child0, Display::Contents);
   NodeInsertChild(root, root_child0, 0);
 
   NodeRef root_child0_child0 = NodeCreate(config);
@@ -754,7 +755,7 @@ TEST_CASE("LayoutEngine::display_contents_with_position_absolute", "[LayoutEngin
   NodeStyleSetPositionType(root_child0, PositionType::Absolute);
   NodeStyleSetWidth(root_child0, 50);
   NodeStyleSetHeight(root_child0, 50);
-  NodeStyleSetDisplay(root_child0, DisplayType::Contents);
+  NodeStyleSetDisplay(root_child0, Display::Contents);
   NodeInsertChild(root, root_child0, 0);
 
   NodeRef root_child0_child0 = NodeCreate(config);
@@ -829,11 +830,11 @@ TEST_CASE("LayoutEngine::display_contents_nested", "[LayoutEngine]") {
   NodeStyleSetHeight(root, 100);
 
   NodeRef root_child0 = NodeCreate(config);
-  NodeStyleSetDisplay(root_child0, DisplayType::Contents);
+  NodeStyleSetDisplay(root_child0, Display::Contents);
   NodeInsertChild(root, root_child0, 0);
 
   NodeRef root_child0_child0 = NodeCreate(config);
-  NodeStyleSetDisplay(root_child0_child0, DisplayType::Contents);
+  NodeStyleSetDisplay(root_child0_child0, Display::Contents);
   NodeInsertChild(root_child0, root_child0_child0, 0);
 
   NodeRef root_child0_child0_child0 = NodeCreate(config);
@@ -925,7 +926,7 @@ TEST_CASE("LayoutEngine::display_contents_with_siblings", "[LayoutEngine]") {
   NodeInsertChild(root, root_child0, 0);
 
   NodeRef root_child1 = NodeCreate(config);
-  NodeStyleSetDisplay(root_child1, DisplayType::Contents);
+  NodeStyleSetDisplay(root_child1, Display::Contents);
   NodeInsertChild(root, root_child1, 1);
 
   NodeRef root_child1_child0 = NodeCreate(config);

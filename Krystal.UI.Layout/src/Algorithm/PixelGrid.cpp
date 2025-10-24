@@ -3,6 +3,8 @@
 
 namespace Krys::UI::Layout
 {
+  using namespace Styles;
+
   static inline double RoundValueToPixelGridExact(const double value, const double pointScaleFactor,
                                                   const bool forceCeil, const bool forceFloor)
   {

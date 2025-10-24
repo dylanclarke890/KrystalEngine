@@ -4,6 +4,8 @@
 
 namespace Krys::UI::Layout
 {
+  using namespace Styles;
+
   float CalculateBaseline(const Node *node)
   {
     if (node->HasBaselineFunc())

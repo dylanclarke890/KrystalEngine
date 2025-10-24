@@ -4,6 +4,7 @@
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
   TEST_CASE("LayoutEngine::start_overrides", "[LayoutEngine]")
   {
     NodeRef root = NodeCreate();

@@ -5,6 +5,7 @@
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
 
   TEST_CASE("LayoutEngine::layoutable_children_single_contents_node", "[LayoutEngine]")
   {
@@ -24,7 +25,7 @@ namespace Krys::Tests
     NodeInsertChild(root_child1, root_grandchild0, 0);
     NodeInsertChild(root_child1, root_grandchild1, 1);
 
-    NodeStyleSetDisplay(root_child1, DisplayType::Contents);
+    NodeStyleSetDisplay(root_child1, Display::Contents);
 
     std::vector<NodeRef> order = {
       root_child0,
@@ -69,9 +70,9 @@ namespace Krys::Tests
     NodeInsertChild(root_child2, root_grandchild4, 0);
     NodeInsertChild(root_child2, root_grandchild5, 1);
 
-    NodeStyleSetDisplay(root_child0, DisplayType::Contents);
-    NodeStyleSetDisplay(root_child1, DisplayType::Contents);
-    NodeStyleSetDisplay(root_child2, DisplayType::Contents);
+    NodeStyleSetDisplay(root_child0, Display::Contents);
+    NodeStyleSetDisplay(root_child1, Display::Contents);
+    NodeStyleSetDisplay(root_child2, Display::Contents);
 
     std::vector<NodeRef> order = {
       root_grandchild0, root_grandchild1, root_grandchild2,
@@ -112,8 +113,8 @@ namespace Krys::Tests
     NodeInsertChild(root_grandchild1, root_great_grandchild0, 0);
     NodeInsertChild(root_grandchild1, root_great_grandchild1, 1);
 
-    NodeStyleSetDisplay(root_child1, DisplayType::Contents);
-    NodeStyleSetDisplay(root_grandchild1, DisplayType::Contents);
+    NodeStyleSetDisplay(root_child1, Display::Contents);
+    NodeStyleSetDisplay(root_grandchild1, Display::Contents);
 
     std::vector<NodeRef> order = {
       root_child0, root_grandchild0, root_great_grandchild0, root_great_grandchild1, root_child2,
@@ -141,7 +142,7 @@ namespace Krys::Tests
     NodeInsertChild(root, root_child1, 1);
     NodeInsertChild(root, root_child2, 2);
 
-    NodeStyleSetDisplay(root_child1, DisplayType::Contents);
+    NodeStyleSetDisplay(root_child1, Display::Contents);
 
     std::vector<NodeRef> order = {
       root_child0,
@@ -170,7 +171,7 @@ namespace Krys::Tests
     NodeInsertChild(root, root_child1, 1);
     NodeInsertChild(root, root_child2, 2);
 
-    NodeStyleSetDisplay(root, DisplayType::Contents);
+    NodeStyleSetDisplay(root, Display::Contents);
 
     std::vector<NodeRef> order = {
       root_child0,

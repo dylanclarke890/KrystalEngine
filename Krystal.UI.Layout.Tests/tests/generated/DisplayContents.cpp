@@ -5,6 +5,7 @@
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
 
   TEST_CASE("LayoutEngine::test1", "[LayoutEngine]")
   {
@@ -17,7 +18,7 @@ namespace Krys::Tests
     NodeStyleSetHeight(root, 100);
 
     NodeRef root_child0 = NodeCreate(config);
-    NodeStyleSetDisplay(root_child0, DisplayType::Contents);
+    NodeStyleSetDisplay(root_child0, Display::Contents);
     NodeInsertChild(root, root_child0, 0);
 
     NodeRef root_child0_child0 = NodeCreate(config);

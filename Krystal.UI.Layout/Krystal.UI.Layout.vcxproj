@@ -33,7 +33,6 @@
     <ClCompile Include="src\Event\Event.cpp" />
     <ClCompile Include="src\Node\LayoutResults.cpp" />
     <ClCompile Include="src\Node\Node.cpp" />
-    <ClCompile Include="src\UnitValue.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.UI.Layout\Algorithm\AbsoluteLayout.hpp" />
@@ -42,7 +41,6 @@
     <ClInclude Include="include\Krystal.UI.Layout\Algorithm\BoundAxis.hpp" />
     <ClInclude Include="include\Krystal.UI.Layout\Algorithm\Cache.hpp" />
     <ClInclude Include="include\Krystal.UI.Layout\Algorithm\CalculateLayout.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Algorithm\FlexDirection.hpp" />
     <ClInclude Include="include\Krystal.UI.Layout\Algorithm\FlexLine.hpp" />
     <ClInclude Include="include\Krystal.UI.Layout\Algorithm\PixelGrid.hpp" />
     <ClInclude Include="include\Krystal.UI.Layout\Algorithm\SizingMode.hpp" />
@@ -53,41 +51,19 @@
     <ClInclude Include="include\Krystal.UI.Layout\Api\NodeLayout.hpp" />
     <ClInclude Include="include\Krystal.UI.Layout\Api\NodeStyle.hpp" />
     <ClInclude Include="include\Krystal.UI.Layout\Config\Config.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Enums\Align.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Enums\BoxSizing.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Enums\Dimension.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Enums\Direction.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Enums\DisplayType.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Enums\Edge.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Enums\Errata.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Enums\ExperimentalFeature.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Enums\FlexDirection.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Enums\Gutter.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Enums\Justify.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Enums\MeasureMode.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Enums\NodeType.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Enums\Overflow.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Enums\PhysicalEdge.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Enums\Position.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Enums\SizingMode.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Enums\Unit.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Enums\Wrap.hpp" />
     <ClInclude Include="include\Krystal.UI.Layout\Event\Event.hpp" />
     <ClInclude Include="include\Krystal.UI.Layout\LayoutEngine.hpp" />
     <ClInclude Include="include\Krystal.UI.Layout\Node\CachedMeasurement.hpp" />
     <ClInclude Include="include\Krystal.UI.Layout\Node\LayoutableChildren.hpp" />
     <ClInclude Include="include\Krystal.UI.Layout\Node\LayoutResults.hpp" />
     <ClInclude Include="include\Krystal.UI.Layout\Node\Node.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Style\Style.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Style\StyleLength.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Style\StyleSizeLength.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Style\StyleValueHandle.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\Style\StyleValuePool.hpp" />
-    <ClInclude Include="include\Krystal.UI.Layout\UnitValue.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Krystal.Lib\Krystal.Lib.vcxproj">
       <Project>{38f26636-5d57-4740-a8d2-df219340309a}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Krystal.UI.Styles\Krystal.UI.Styles.vcxproj">
+      <Project>{b9a98447-c8c2-4ae1-8d48-69366c93110a}</Project>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">

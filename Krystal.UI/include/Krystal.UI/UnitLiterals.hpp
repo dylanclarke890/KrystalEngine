@@ -1,16 +1,16 @@
 #pragma once
 
-#include "Krystal.UI.Layout/UnitValue.hpp"
+#include "Krystal.UI.Styles/Values/UnitValue.hpp"
 
 namespace Krys::UI
 {
-  constexpr Layout::UnitValue operator"" _px(long double value)
+  constexpr Styles::UnitValue operator"" _px(long double value)
   {
-    return Layout::UnitValue {(float)value, Layout::Unit::Point};
+    return Styles::UnitValue {(float)value, Styles::Unit::Point};
   }
 
-  constexpr Layout::UnitValue operator"" _pct(long double value)
+  constexpr Styles::UnitValue operator"" _pct(long double value)
   {
-    return Layout::UnitValue {(float)value, Layout::Unit::Percent};
+    return Styles::UnitValue {(float)value, Styles::Unit::Percent};
   }
 }

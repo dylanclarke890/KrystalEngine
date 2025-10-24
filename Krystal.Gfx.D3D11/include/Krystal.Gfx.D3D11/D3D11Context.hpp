@@ -25,7 +25,6 @@ namespace Krys::Gfx::D3D11
     void Setup() noexcept;
 
     void Render(ICamera &camera) noexcept;
-    void Render(UI::Document &camera) noexcept;
 
     void Present() noexcept;
 

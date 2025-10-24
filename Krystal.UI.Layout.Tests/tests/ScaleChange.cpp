@@ -4,6 +4,7 @@
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
   TEST_CASE("LayoutEngine::scale_change_invalidates_layout", "[LayoutEngine]")
   {
     ConfigRef config = ConfigCreate();

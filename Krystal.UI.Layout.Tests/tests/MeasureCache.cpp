@@ -4,6 +4,7 @@
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
   static Size _measureMax(NodeConstRef node, float width, MeasureMode widthMode, float height,
                           MeasureMode heightMode)
   {

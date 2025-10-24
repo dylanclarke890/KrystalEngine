@@ -198,6 +198,9 @@
     <ProjectReference Include="..\Krystal.UI.Layout\Krystal.UI.Layout.vcxproj">
       <Project>{04dce3b3-a253-4119-87d3-384f67d9dfc8}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\Krystal.UI.Styles\Krystal.UI.Styles.vcxproj">
+      <Project>{b9a98447-c8c2-4ae1-8d48-69366c93110a}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

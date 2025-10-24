@@ -4,6 +4,8 @@
 
 namespace Krys::UI::Layout
 {
+  using namespace Styles;
+
   bool ConfigUpdateInvalidatesLayout(const Config &oldConfig, const Config &newConfig)
   {
     return oldConfig.GetErrata() != newConfig.GetErrata()

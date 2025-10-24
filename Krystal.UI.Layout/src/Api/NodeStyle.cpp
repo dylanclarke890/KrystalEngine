@@ -1,10 +1,11 @@
 #include "Krystal.UI.Layout/Api/NodeStyle.hpp"
 #include "Krystal.UI.Layout/Node/Node.hpp"
-#include "Krystal.UI.Layout/Style/Style.hpp"
+#include "Krystal.UI.Styles/Style.hpp"
 
 namespace
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
 
   template <auto GetterT, auto SetterT, typename ValueT>
   void UpdateStyle(NodeRef node, ValueT value)
@@ -31,6 +32,8 @@ namespace
 
 namespace Krys::UI::Layout
 {
+  using namespace Styles;
+
   void NodeCopyStyle(NodeRef dstNode, NodeConstRef srcNode)
   {
     if (dstNode->GetStyle() != srcNode->GetStyle())
@@ -130,12 +133,12 @@ namespace Krys::UI::Layout
     return node->GetStyle().GetOverflow();
   }
 
-  void NodeStyleSetDisplay(NodeRef node, DisplayType display)
+  void NodeStyleSetDisplay(NodeRef node, Display display)
   {
     UpdateStyle<&Style::GetDisplay, &Style::SetDisplay>(node, display);
   }
 
-  DisplayType NodeStyleGetDisplay(NodeConstRef node)
+  Display NodeStyleGetDisplay(NodeConstRef node)
   {
     return node->GetStyle().GetDisplay();
   }

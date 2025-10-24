@@ -4,6 +4,7 @@
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
 
   TEST_CASE("LayoutEngine::dirty_propagation", "[LayoutEngine]")
   {
@@ -179,26 +180,26 @@ namespace Krys::Tests
     NodeInsertChild(root, child0, 0);
     NodeInsertChild(root, child1, 0);
 
-    NodeStyleSetDisplay(child0, DisplayType::Flex);
-    NodeStyleSetDisplay(child1, DisplayType::None);
+    NodeStyleSetDisplay(child0, Display::Flex);
+    NodeStyleSetDisplay(child1, Display::None);
     NodeCalculateLayout(root, Undefined, Undefined, Direction::LTR);
     REQUIRE(0 == NodeLayoutGetWidth(child1_child0_child0));
     REQUIRE(0 == NodeLayoutGetHeight(child1_child0_child0));
 
-    NodeStyleSetDisplay(child0, DisplayType::None);
-    NodeStyleSetDisplay(child1, DisplayType::Flex);
+    NodeStyleSetDisplay(child0, Display::None);
+    NodeStyleSetDisplay(child1, Display::Flex);
     NodeCalculateLayout(root, Undefined, Undefined, Direction::LTR);
     REQUIRE(8 == NodeLayoutGetWidth(child1_child0_child0));
     REQUIRE(16 == NodeLayoutGetHeight(child1_child0_child0));
 
-    NodeStyleSetDisplay(child0, DisplayType::Flex);
-    NodeStyleSetDisplay(child1, DisplayType::None);
+    NodeStyleSetDisplay(child0, Display::Flex);
+    NodeStyleSetDisplay(child1, Display::None);
     NodeCalculateLayout(root, Undefined, Undefined, Direction::LTR);
     REQUIRE(0 == NodeLayoutGetWidth(child1_child0_child0));
     REQUIRE(0 == NodeLayoutGetHeight(child1_child0_child0));
 
-    NodeStyleSetDisplay(child0, DisplayType::None);
-    NodeStyleSetDisplay(child1, DisplayType::Flex);
+    NodeStyleSetDisplay(child0, Display::None);
+    NodeStyleSetDisplay(child1, Display::Flex);
     NodeCalculateLayout(root, Undefined, Undefined, Direction::LTR);
     REQUIRE(8 == NodeLayoutGetWidth(child1_child0_child0));
     REQUIRE(16 == NodeLayoutGetHeight(child1_child0_child0));

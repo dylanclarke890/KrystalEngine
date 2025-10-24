@@ -4,31 +4,34 @@
 
 namespace Krys::UI::Layout
 {
-  static inline bool SizeIsExactAndMatchesOldMeasuredSize(SizingMode sizeMode, float size,
+  using namespace Styles;
+
+  static inline bool SizeIsExactAndMatchesOldMeasuredSize(Styles::SizingMode sizeMode, float size,
                                                           float lastComputedSize)
   {
     return sizeMode == SizingMode::StretchFit && Krys::InexactEquals(size, lastComputedSize);
   }
 
-  static inline bool OldSizeIsMaxContentAndStillFits(SizingMode sizeMode, float size, SizingMode lastSizeMode,
-                                                     float lastComputedSize)
+  static inline bool OldSizeIsMaxContentAndStillFits(Styles::SizingMode sizeMode, float size,
+                                                     Styles::SizingMode lastSizeMode, float lastComputedSize)
   {
     return sizeMode == SizingMode::FitContent && lastSizeMode == SizingMode::MaxContent
            && (size >= lastComputedSize || Krys::InexactEquals(size, lastComputedSize));
   }
 
-  static inline bool NewSizeIsStricterAndStillValid(SizingMode sizeMode, float size, SizingMode lastSizeMode,
-                                                    float lastSize, float lastComputedSize)
+  static inline bool NewSizeIsStricterAndStillValid(Styles::SizingMode sizeMode, float size,
+                                                    Styles::SizingMode lastSizeMode, float lastSize,
+                                                    float lastComputedSize)
   {
     return lastSizeMode == SizingMode::FitContent && sizeMode == SizingMode::FitContent
            && Krys::IsDefined(lastSize) && Krys::IsDefined(size) && Krys::IsDefined(lastComputedSize)
            && lastSize > size && (lastComputedSize <= size || Krys::InexactEquals(size, lastComputedSize));
   }
 
-  bool CanUseCachedMeasurement(const SizingMode widthMode, const float availableWidth,
-                               const SizingMode heightMode, const float availableHeight,
-                               const SizingMode lastWidthMode, const float lastAvailableWidth,
-                               const SizingMode lastHeightMode, const float lastAvailableHeight,
+  bool CanUseCachedMeasurement(const Styles::SizingMode widthMode, const float availableWidth,
+                               const Styles::SizingMode heightMode, const float availableHeight,
+                               const Styles::SizingMode lastWidthMode, const float lastAvailableWidth,
+                               const Styles::SizingMode lastHeightMode, const float lastAvailableHeight,
                                const float lastComputedWidth, const float lastComputedHeight,
                                const float marginRow, const float marginColumn, const Config *const config)
   {

@@ -118,9 +118,9 @@ namespace Krys::UI::Layout
   struct Event::TypedData<Event::MeasureCallbackEnd>
   {
     float Width;
-    MeasureMode WidthMeasureMode;
+    Styles::MeasureMode WidthMeasureMode;
     float Height;
-    MeasureMode HeightMeasureMode;
+    Styles::MeasureMode HeightMeasureMode;
     float MeasuredWidth;
     float MeasuredHeight;
     const LayoutPassReason Reason;

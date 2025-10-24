@@ -10,6 +10,7 @@
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
 
   template <Event::Type E>
   struct TypedEventTestData

@@ -3,8 +3,8 @@
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.UI.Layout/Api/Forward.hpp"
-#include "Krystal.UI.Layout/Enums/Direction.hpp"
-#include "Krystal.UI.Layout/Enums/NodeType.hpp"
+#include "Krystal.UI.Styles/Enums/Direction.hpp"
+#include "Krystal.UI.Styles/Enums/NodeType.hpp"
 
 namespace Krys::UI::Layout
 {
@@ -36,7 +36,7 @@ namespace Krys::UI::Layout
   /// NodeLayoutGetTop(), etc. NodeGetHasNewLayout() may be read to know if the layout of the node or its
   /// subtrees may have changed since the last time NodeCalculate() was called.
   void NodeCalculateLayout(NodeRef node, float availableWidth, float availableHeight,
-                           Direction ownerDirection);
+                           Styles::Direction ownerDirection);
 
   /// @brief Whether the given node may have new layout results. Must be reset by calling
   /// NodeSetHasNewLayout().
@@ -116,10 +116,10 @@ namespace Krys::UI::Layout
   bool NodeIsReferenceBaseline(NodeConstRef node);
 
   /// @brief Sets whether a leaf node's layout results may be truncated during layout rounding.
-  void NodeSetNodeType(NodeRef node, NodeType nodeType);
+  void NodeSetNodeType(NodeRef node, Styles::NodeType nodeType);
 
   /// @brief Whether a leaf node's layout results may be truncated during layout rounding.
-  NodeType NodeGetNodeType(NodeConstRef node);
+  Styles::NodeType NodeGetNodeType(NodeConstRef node);
 
   /// @brief Make it so that this node will always form a containing block for any descendant nodes. This is
   /// useful for when a node has a property outside of the engine that will form a containing block. For

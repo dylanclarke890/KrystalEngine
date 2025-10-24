@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Krystal.Lib/Types.hpp"
-#include "Krystal.UI.Layout/Enums/MeasureMode.hpp"
+#include "Krystal.UI.Styles/Enums/MeasureMode.hpp"
 #include <limits>
 
 namespace Krys::UI::Layout
@@ -22,8 +22,8 @@ namespace Krys::UI::Layout
   /// - Exactly: The parent has determined an exact size for the child. The child is going to be given those
   /// bounds regardless of how big it wants to be.
   /// @returns the size of the leaf node, measured under the given constraints.
-  typedef Size (*MeasureFunc)(NodeConstRef node, float width, MeasureMode widthMode, float height,
-                              MeasureMode heightMode);
+  typedef Size (*MeasureFunc)(NodeConstRef node, float width, Styles::MeasureMode widthMode, float height,
+                              Styles::MeasureMode heightMode);
 
   /// @returns a defined offset to baseline (ascent).
   typedef float (*BaselineFunc)(NodeConstRef node, float width, float height);

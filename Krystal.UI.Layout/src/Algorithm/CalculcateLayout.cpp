@@ -6,13 +6,13 @@
 #include "Krystal.UI.Layout/Algorithm/BoundAxis.hpp"
 #include "Krystal.UI.Layout/Algorithm/Cache.hpp"
 #include "Krystal.UI.Layout/Algorithm/CalculateLayout.hpp"
-#include "Krystal.UI.Layout/Algorithm/FlexDirection.hpp"
 #include "Krystal.UI.Layout/Algorithm/FlexLine.hpp"
 #include "Krystal.UI.Layout/Algorithm/PixelGrid.hpp"
 #include "Krystal.UI.Layout/Algorithm/SizingMode.hpp"
 #include "Krystal.UI.Layout/Algorithm/TrailingPosition.hpp"
 #include "Krystal.UI.Layout/Event/Event.hpp"
 #include "Krystal.UI.Layout/Node/Node.hpp"
+#include "Krystal.UI.Styles/Helpers/FlexDirection.hpp"
 #include <algorithm>
 #include <atomic>
 #include <cfloat>
@@ -21,11 +21,13 @@
 
 namespace Krys::UI::Layout
 {
+  using namespace Styles;
+
   std::atomic<uint16> gCurrentGenerationCount(0);
 
   static void ConstrainMaxSizeForMode(const Node *node, Direction direction, FlexDirection axis,
                                       float ownerAxisSize, float ownerWidth,
-                                      /*in_out*/ SizingMode *mode,
+                                      /*in_out*/ Styles::SizingMode *mode,
                                       /*in_out*/ float *size)
   {
     const NullableFloat maxSize =
@@ -48,10 +50,11 @@ namespace Krys::UI::Layout
   }
 
   static void ComputeFlexBasisForChild(const Node *const node, Node *const child, const float width,
-                                       const SizingMode widthMode, const float height, const float ownerWidth,
-                                       const float ownerHeight, const SizingMode heightMode,
-                                       const Direction direction, LayoutData &layoutMarkerData,
-                                       const uint32_t depth, const uint16 generationCount)
+                                       const Styles::SizingMode widthMode, const float height,
+                                       const float ownerWidth, const float ownerHeight,
+                                       const Styles::SizingMode heightMode, const Direction direction,
+                                       LayoutData &layoutMarkerData, const uint32_t depth,
+                                       const uint16 generationCount)
   {
     const FlexDirection mainAxis = ResolveDirection(node->GetStyle().GetFlexDirection(), direction);
     const bool isMainAxisRow = IsRow(mainAxis);
@@ -60,8 +63,8 @@ namespace Krys::UI::Layout
 
     float childWidth = std::numeric_limits<float>::quiet_NaN();
     float childHeight = std::numeric_limits<float>::quiet_NaN();
-    SizingMode childWidthSizingMode;
-    SizingMode childHeightSizingMode;
+    Styles::SizingMode childWidthSizingMode;
+    Styles::SizingMode childHeightSizingMode;
 
     const NullableFloat resolvedFlexBasis =
       child->ResolveFlexBasis(direction, mainAxis, mainAxisOwnerSize, ownerWidth);
@@ -209,8 +212,8 @@ namespace Krys::UI::Layout
   }
 
   static void MeasureNodeWithMeasureFunc(Node *const node, const Direction direction, float availableWidth,
-                                         float availableHeight, const SizingMode widthSizingMode,
-                                         const SizingMode heightSizingMode, const float ownerWidth,
+                                         float availableHeight, const Styles::SizingMode widthSizingMode,
+                                         const Styles::SizingMode heightSizingMode, const float ownerWidth,
                                          const float ownerHeight, LayoutData &layoutMarkerData,
                                          const LayoutPassReason reason)
   {
@@ -291,8 +294,9 @@ namespace Krys::UI::Layout
   // or the minimum size as indicated by the GetPadding and GetBorder sizes.
   static void MeasureNodeWithoutChildren(Node *const node, const Direction direction,
                                          const float availableWidth, const float availableHeight,
-                                         const SizingMode widthSizingMode, const SizingMode heightSizingMode,
-                                         const float ownerWidth, const float ownerHeight)
+                                         const Styles::SizingMode widthSizingMode,
+                                         const Styles::SizingMode heightSizingMode, const float ownerWidth,
+                                         const float ownerHeight)
   {
     const auto &layout = node->GetLayout();
 
@@ -315,7 +319,7 @@ namespace Krys::UI::Layout
       BoundAxis(node, FlexDirection::Column, direction, height, ownerHeight, ownerWidth), Dimension::Height);
   }
 
-  static bool IsFixedSize(float dim, SizingMode sizingMode)
+  static bool IsFixedSize(float dim, Styles::SizingMode sizingMode)
   {
     return sizingMode == SizingMode::StretchFit
            || (Krys::IsDefined(dim) && sizingMode == SizingMode::FitContent && dim <= 0.0);
@@ -323,8 +327,9 @@ namespace Krys::UI::Layout
 
   static bool MeasureNodeWithFixedSize(Node *const node, const Direction direction,
                                        const float availableWidth, const float availableHeight,
-                                       const SizingMode widthSizingMode, const SizingMode heightSizingMode,
-                                       const float ownerWidth, const float ownerHeight)
+                                       const Styles::SizingMode widthSizingMode,
+                                       const Styles::SizingMode heightSizingMode, const float ownerWidth,
+                                       const float ownerHeight)
   {
     if (IsFixedSize(availableWidth, widthSizingMode) && IsFixedSize(availableHeight, heightSizingMode))
     {
@@ -372,7 +377,7 @@ namespace Krys::UI::Layout
       node->CloneContentsChildrenIfNeeded();
       for (auto child : node->GetChildren())
       {
-        if (child->GetStyle().GetDisplay() == DisplayType::Contents)
+        if (child->GetStyle().GetDisplay() == Display::Contents)
         {
           child->GetLayout() = {};
           child->SetLayoutDimension(0, Dimension::Width);
@@ -416,8 +421,9 @@ namespace Krys::UI::Layout
   }
 
   static float ComputeFlexBasisForChildren(Node *const node, const float availableInnerWidth,
-                                           const float availableInnerHeight, SizingMode widthSizingMode,
-                                           SizingMode heightSizingMode, Direction direction,
+                                           const float availableInnerHeight,
+                                           Styles::SizingMode widthSizingMode,
+                                           Styles::SizingMode heightSizingMode, Direction direction,
                                            FlexDirection mainAxis, bool performLayout,
                                            LayoutData &layoutMarkerData, const uint32_t depth,
                                            const uint16 generationCount)
@@ -425,7 +431,7 @@ namespace Krys::UI::Layout
     float totalOuterFlexBasis = 0.0f;
     NodeRef singleFlexChild = nullptr;
     auto children = node->GetLayoutChildren();
-    SizingMode sizingModeMainDim = IsRow(mainAxis) ? widthSizingMode : heightSizingMode;
+    Styles::SizingMode sizingModeMainDim = IsRow(mainAxis) ? widthSizingMode : heightSizingMode;
     // If there is only one child with flexGrow + flexShrink it means we can set
     // the ComputedFlexBasis to 0 instead of measuring and shrinking / flexing the
     // child to exactly match the remaining space
@@ -454,7 +460,7 @@ namespace Krys::UI::Layout
     for (auto child : children)
     {
       child->ProcessDimensions();
-      if (child->GetStyle().GetDisplay() == DisplayType::None)
+      if (child->GetStyle().GetDisplay() == Display::None)
       {
         ZeroOutLayoutRecursively(child);
         child->SetHasNewLayout(true);
@@ -499,8 +505,9 @@ namespace Krys::UI::Layout
     FlexLine &flexLine, Node *const node, const FlexDirection mainAxis, const FlexDirection crossAxis,
     const Direction direction, const float ownerWidth, const float mainAxisOwnerSize,
     const float availableInnerMainDim, const float availableInnerCrossDim, const float availableInnerWidth,
-    const float availableInnerHeight, const bool mainAxisOverflows, const SizingMode sizingModeCrossDim,
-    const bool performLayout, LayoutData &layoutMarkerData, const uint32 depth, const uint16 generationCount)
+    const float availableInnerHeight, const bool mainAxisOverflows,
+    const Styles::SizingMode sizingModeCrossDim, const bool performLayout, LayoutData &layoutMarkerData,
+    const uint32 depth, const uint16 generationCount)
   {
     float childFlexBasis = 0;
     float flexShrinkScaledFactor = 0;
@@ -565,8 +572,8 @@ namespace Krys::UI::Layout
 
       float childCrossSize = std::numeric_limits<float>::quiet_NaN();
       float childMainSize = updatedMainSize + marginMain;
-      SizingMode childCrossSizingMode;
-      SizingMode childMainSizingMode = SizingMode::StretchFit;
+      Styles::SizingMode childCrossSizingMode;
+      Styles::SizingMode childMainSizingMode = SizingMode::StretchFit;
 
       const auto &childStyle = currentLineChild->GetStyle();
       if (childStyle.GetAspectRatio().HasValue())
@@ -581,8 +588,8 @@ namespace Krys::UI::Layout
                && !currentLineChild->HasDefiniteLength(ToDimension(crossAxis), availableInnerCrossDim)
                && sizingModeCrossDim == SizingMode::StretchFit && !(isNodeFlexWrap && mainAxisOverflows)
                && ResolveChildAlignment(node, currentLineChild) == Align::Stretch
-               && !currentLineChild->GetStyle().FlexStartMarginIsAuto(crossAxis, direction)
-               && !currentLineChild->GetStyle().FlexEndMarginIsAuto(crossAxis, direction))
+               && !currentLineChild->GetStyle().IsFlexStartMarginAuto(crossAxis, direction)
+               && !currentLineChild->GetStyle().IsFlexEndMarginAuto(crossAxis, direction))
       {
         childCrossSize = availableInnerCrossDim;
         childCrossSizingMode = SizingMode::StretchFit;
@@ -616,14 +623,16 @@ namespace Krys::UI::Layout
       const bool requiresStretchLayout =
         !currentLineChild->HasDefiniteLength(ToDimension(crossAxis), availableInnerCrossDim)
         && ResolveChildAlignment(node, currentLineChild) == Align::Stretch
-        && !currentLineChild->GetStyle().FlexStartMarginIsAuto(crossAxis, direction)
-        && !currentLineChild->GetStyle().FlexEndMarginIsAuto(crossAxis, direction);
+        && !currentLineChild->GetStyle().IsFlexStartMarginAuto(crossAxis, direction)
+        && !currentLineChild->GetStyle().IsFlexEndMarginAuto(crossAxis, direction);
 
       const float childWidth = isMainAxisRow ? childMainSize : childCrossSize;
       const float childHeight = !isMainAxisRow ? childMainSize : childCrossSize;
 
-      const SizingMode childWidthSizingMode = isMainAxisRow ? childMainSizingMode : childCrossSizingMode;
-      const SizingMode childHeightSizingMode = !isMainAxisRow ? childMainSizingMode : childCrossSizingMode;
+      const Styles::SizingMode childWidthSizingMode =
+        isMainAxisRow ? childMainSizingMode : childCrossSizingMode;
+      const Styles::SizingMode childHeightSizingMode =
+        !isMainAxisRow ? childMainSizingMode : childCrossSizingMode;
 
       const bool isLayoutPass = performLayout && !requiresStretchLayout;
       // Recursively call the layout algorithm for this child with the updated
@@ -742,7 +751,7 @@ namespace Krys::UI::Layout
                                     const float ownerWidth, const float mainAxisOwnerSize,
                                     const float availableInnerMainDim, const float availableInnerCrossDim,
                                     const float availableInnerWidth, const float availableInnerHeight,
-                                    const bool mainAxisOverflows, const SizingMode sizingModeCrossDim,
+                                    const bool mainAxisOverflows, const Styles::SizingMode sizingModeCrossDim,
                                     const bool performLayout, LayoutData &layoutMarkerData,
                                     const uint32 depth, const uint16 generationCount)
   {
@@ -762,10 +771,11 @@ namespace Krys::UI::Layout
 
   static void JustifyMainAxis(Node *const node, FlexLine &flexLine, const FlexDirection mainAxis,
                               const FlexDirection crossAxis, const Direction direction,
-                              const SizingMode sizingModeMainDim, const SizingMode sizingModeCrossDim,
-                              const float mainAxisOwnerSize, const float ownerWidth,
-                              const float availableInnerMainDim, const float availableInnerCrossDim,
-                              const float availableInnerWidth, const bool performLayout)
+                              const Styles::SizingMode sizingModeMainDim,
+                              const Styles::SizingMode sizingModeCrossDim, const float mainAxisOwnerSize,
+                              const float ownerWidth, const float availableInnerMainDim,
+                              const float availableInnerCrossDim, const float availableInnerWidth,
+                              const bool performLayout)
   {
     const auto &GetStyle = node->GetStyle();
 
@@ -851,7 +861,7 @@ namespace Krys::UI::Layout
     for (auto child : flexLine.ItemsInFlow)
     {
       const LayoutResults &childLayout = child->GetLayout();
-      if (child->GetStyle().FlexStartMarginIsAuto(mainAxis, direction)
+      if (child->GetStyle().IsFlexStartMarginAuto(mainAxis, direction)
           && flexLine.Layout.RemainingFreeSpace > 0.0f)
       {
         flexLine.Layout.MainDim +=
@@ -869,7 +879,7 @@ namespace Krys::UI::Layout
         flexLine.Layout.MainDim += betweenMainDim;
       }
 
-      if (child->GetStyle().FlexEndMarginIsAuto(mainAxis, direction)
+      if (child->GetStyle().IsFlexEndMarginAuto(mainAxis, direction)
           && flexLine.Layout.RemainingFreeSpace > 0.0f)
       {
         flexLine.Layout.MainDim +=
@@ -980,8 +990,8 @@ namespace Krys::UI::Layout
   //    measure mode of SizingMode::MaxContent in that dimension.
   //
   static void CalculateLayoutImpl(Node *const node, const float availableWidth, const float availableHeight,
-                                  const Direction ownerDirection, const SizingMode widthSizingMode,
-                                  const SizingMode heightSizingMode, const float ownerWidth,
+                                  const Direction ownerDirection, const Styles::SizingMode widthSizingMode,
+                                  const Styles::SizingMode heightSizingMode, const float ownerWidth,
                                   const float ownerHeight, const bool performLayout,
                                   const LayoutPassReason reason, LayoutData &layoutMarkerData,
                                   const uint32 depth, const uint16 generationCount)
@@ -1107,8 +1117,8 @@ namespace Krys::UI::Layout
     const float leadingPaddingAndBorderCross =
       node->GetStyle().ComputeFlexStartPaddingAndBorder(crossAxis, direction, ownerWidth);
 
-    SizingMode sizingModeMainDim = isMainAxisRow ? widthSizingMode : heightSizingMode;
-    SizingMode sizingModeCrossDim = isMainAxisRow ? heightSizingMode : widthSizingMode;
+    Styles::SizingMode sizingModeMainDim = isMainAxisRow ? widthSizingMode : heightSizingMode;
+    Styles::SizingMode sizingModeCrossDim = isMainAxisRow ? heightSizingMode : widthSizingMode;
 
     const float GetPaddingAndBorderAxisRow =
       isMainAxisRow ? GetPaddingAndBorderAxisMain : GetPaddingAndBorderAxisCross;
@@ -1306,8 +1316,8 @@ namespace Krys::UI::Layout
           // If the child uses align stretch, we need to lay it out one more
           // time, this time forcing the cross-axis size to be the computed
           // cross size for the current line.
-          if (alignItem == Align::Stretch && !child->GetStyle().FlexStartMarginIsAuto(crossAxis, direction)
-              && !child->GetStyle().FlexEndMarginIsAuto(crossAxis, direction))
+          if (alignItem == Align::Stretch && !child->GetStyle().IsFlexStartMarginAuto(crossAxis, direction)
+              && !child->GetStyle().IsFlexEndMarginAuto(crossAxis, direction))
           {
             // If the child defines a definite size for its cross axis, there's
             // no need to stretch.
@@ -1324,8 +1334,8 @@ namespace Krys::UI::Layout
 
               childMainSize += child->GetStyle().ComputeMarginForAxis(mainAxis, availableInnerWidth);
 
-              SizingMode childMainSizingMode = SizingMode::StretchFit;
-              SizingMode childCrossSizingMode = SizingMode::StretchFit;
+              Styles::SizingMode childMainSizingMode = SizingMode::StretchFit;
+              Styles::SizingMode childCrossSizingMode = SizingMode::StretchFit;
               ConstrainMaxSizeForMode(child, direction, mainAxis, availableInnerMainDim, availableInnerWidth,
                                       &childMainSizingMode, &childMainSize);
               ConstrainMaxSizeForMode(child, direction, crossAxis, availableInnerCrossDim,
@@ -1336,11 +1346,11 @@ namespace Krys::UI::Layout
 
               auto alignContent = node->GetStyle().GetAlignContent();
               auto crossAxisDoesNotGrow = alignContent != Align::Stretch && isNodeFlexWrap;
-              const SizingMode childWidthSizingMode =
+              const Styles::SizingMode childWidthSizingMode =
                 Krys::IsUndefined(childWidth) || (!isMainAxisRow && crossAxisDoesNotGrow)
                   ? SizingMode::MaxContent
                   : SizingMode::StretchFit;
-              const SizingMode childHeightSizingMode =
+              const Styles::SizingMode childHeightSizingMode =
                 Krys::IsUndefined(childHeight) || (isMainAxisRow && crossAxisDoesNotGrow)
                   ? SizingMode::MaxContent
                   : SizingMode::StretchFit;
@@ -1355,16 +1365,16 @@ namespace Krys::UI::Layout
             const float remainingCrossDim =
               containerCrossAxis - child->DimensionWithMargin(crossAxis, availableInnerWidth);
 
-            if (child->GetStyle().FlexStartMarginIsAuto(crossAxis, direction)
-                && child->GetStyle().FlexEndMarginIsAuto(crossAxis, direction))
+            if (child->GetStyle().IsFlexStartMarginAuto(crossAxis, direction)
+                && child->GetStyle().IsFlexEndMarginAuto(crossAxis, direction))
             {
               leadingCrossDim += Krys::MaxOrDefined(0.0f, remainingCrossDim / 2);
             }
-            else if (child->GetStyle().FlexEndMarginIsAuto(crossAxis, direction))
+            else if (child->GetStyle().IsFlexEndMarginAuto(crossAxis, direction))
             {
               // No-Op
             }
-            else if (child->GetStyle().FlexStartMarginIsAuto(crossAxis, direction))
+            else if (child->GetStyle().IsFlexStartMarginAuto(crossAxis, direction))
             {
               leadingCrossDim += Krys::MaxOrDefined(0.0f, remainingCrossDim);
             }
@@ -1456,7 +1466,7 @@ namespace Krys::UI::Layout
         for (; iterator != node->GetLayoutChildren().end(); iterator++)
         {
           const auto child = *iterator;
-          if (child->GetStyle().GetDisplay() == DisplayType::None)
+          if (child->GetStyle().GetDisplay() == Display::None)
           {
             continue;
           }
@@ -1493,7 +1503,7 @@ namespace Krys::UI::Layout
         for (iterator = startIterator; iterator != endIterator; iterator++)
         {
           const auto child = *iterator;
-          if (child->GetStyle().GetDisplay() == DisplayType::None)
+          if (child->GetStyle().GetDisplay() == Display::None)
           {
             continue;
           }
@@ -1672,7 +1682,7 @@ namespace Krys::UI::Layout
           // Absolute children will be handled by their containing block since we
           // cannot guarantee that their positions are set when their parents are
           // done with layout.
-          if (child->GetStyle().GetDisplay() == DisplayType::None
+          if (child->GetStyle().GetDisplay() == Display::None
               || child->GetStyle().GetPositionType() == PositionType::Absolute)
           {
             continue;
@@ -1710,8 +1720,8 @@ namespace Krys::UI::Layout
   //  Return parameter is true if layout was performed, false if skipped
   //
   bool CalculateLayoutInternal(Node *node, float availableWidth, float availableHeight,
-                               Direction ownerDirection, SizingMode widthSizingMode,
-                               SizingMode heightSizingMode, float ownerWidth, float ownerHeight,
+                               Direction ownerDirection, Styles::SizingMode widthSizingMode,
+                               Styles::SizingMode heightSizingMode, float ownerWidth, float ownerHeight,
                                bool performLayout, LayoutPassReason reason, LayoutData &layoutMarkerData,
                                uint32 depth, uint16 generationCount)
   {
@@ -1889,7 +1899,7 @@ namespace Krys::UI::Layout
     node->ProcessDimensions();
     const Direction direction = node->ResolveDirection(ownerDirection);
     float width = std::numeric_limits<float>::quiet_NaN();
-    SizingMode widthSizingMode = SizingMode::MaxContent;
+    Styles::SizingMode widthSizingMode = SizingMode::MaxContent;
     const auto &GetStyle = node->GetStyle();
     if (node->HasDefiniteLength(Dimension::Width, ownerWidth))
     {
@@ -1910,7 +1920,7 @@ namespace Krys::UI::Layout
     }
 
     float height = std::numeric_limits<float>::quiet_NaN();
-    SizingMode heightSizingMode = SizingMode::MaxContent;
+    Styles::SizingMode heightSizingMode = SizingMode::MaxContent;
     if (node->HasDefiniteLength(Dimension::Height, ownerHeight))
     {
       height =

@@ -1,11 +1,12 @@
 #include "Krystal.UI.Layout/LayoutEngine.hpp"
-#include "Krystal.UI.Layout/Enums/Edge.hpp"
+#include "Krystal.UI.Styles/Enums/Edge.hpp"
 #include <catch_all.hpp>
 #include <deque>
 
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
 
   TEST_CASE("Ordinals::iteration", "[Ordinals]")
   {

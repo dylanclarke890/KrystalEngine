@@ -4,6 +4,8 @@
 
 namespace Krys::UI::Layout
 {
+  using namespace Styles;
+
   ConfigRef ConfigCreate()
   {
     return new Config();

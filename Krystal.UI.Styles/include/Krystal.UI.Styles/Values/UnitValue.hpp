@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Krystal.Lib/Types.hpp"
-#include "Krystal.UI.Layout/Enums/Unit.hpp"
+#include "Krystal.UI.Styles/Enums/Unit.hpp"
 
-namespace Krys::UI::Layout
+namespace Krys::UI::Styles
 {
   struct UnitValue
   {

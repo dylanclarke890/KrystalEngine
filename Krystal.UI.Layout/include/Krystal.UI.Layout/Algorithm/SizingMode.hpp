@@ -1,30 +1,30 @@
 #pragma once
 
-#include "Krystal.UI.Layout/Enums/MeasureMode.hpp"
-#include "Krystal.UI.Layout/Enums/SizingMode.hpp"
+#include "Krystal.UI.Styles/Enums/MeasureMode.hpp"
+#include "Krystal.UI.Styles/Enums/SizingMode.hpp"
 #include <stdexcept>
 
 namespace Krys::UI::Layout
 {
-  inline MeasureMode ToMeasureMode(SizingMode mode)
+  inline Styles::MeasureMode ToMeasureMode(Styles::SizingMode mode)
   {
     switch (mode)
     {
-      case SizingMode::StretchFit: return MeasureMode::Exactly;
-      case SizingMode::MaxContent: return MeasureMode::Undefined;
-      case SizingMode::FitContent: return MeasureMode::AtMost;
+      case Styles::SizingMode::StretchFit: return Styles::MeasureMode::Exactly;
+      case Styles::SizingMode::MaxContent: return Styles::MeasureMode::Undefined;
+      case Styles::SizingMode::FitContent: return Styles::MeasureMode::AtMost;
     }
 
     throw std::logic_error("Invalid SizingMode");
   }
 
-  inline SizingMode ToSizingMode(MeasureMode mode)
+  inline Styles::SizingMode ToSizingMode(Styles::MeasureMode mode)
   {
     switch (mode)
     {
-      case MeasureMode::Exactly:   return SizingMode::StretchFit;
-      case MeasureMode::Undefined: return SizingMode::MaxContent;
-      case MeasureMode::AtMost:    return SizingMode::FitContent;
+      case Styles::MeasureMode::Exactly:   return Styles::SizingMode::StretchFit;
+      case Styles::MeasureMode::Undefined: return Styles::SizingMode::MaxContent;
+      case Styles::MeasureMode::AtMost:    return Styles::SizingMode::FitContent;
     }
 
     throw std::logic_error("Invalid MeasureMode");

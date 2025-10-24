@@ -4,6 +4,7 @@
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
   TEST_CASE("LayoutEngine::dont_cache_computed_flex_basis_between_layouts", "[LayoutEngine]")
   {
     ConfigRef config = ConfigCreate();

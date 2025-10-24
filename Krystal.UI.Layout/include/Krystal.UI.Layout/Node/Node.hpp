@@ -6,17 +6,17 @@
 #include "Krystal.Lib/NullableFloat.hpp"
 #include "Krystal.UI.Layout/Api/Forward.hpp"
 #include "Krystal.UI.Layout/Config/Config.hpp"
-#include "Krystal.UI.Layout/Enums/Dimension.hpp"
-#include "Krystal.UI.Layout/Enums/Direction.hpp"
-#include "Krystal.UI.Layout/Enums/Edge.hpp"
-#include "Krystal.UI.Layout/Enums/Errata.hpp"
-#include "Krystal.UI.Layout/Enums/FlexDirection.hpp"
-#include "Krystal.UI.Layout/Enums/MeasureMode.hpp"
-#include "Krystal.UI.Layout/Enums/NodeType.hpp"
-#include "Krystal.UI.Layout/Enums/PhysicalEdge.hpp"
 #include "Krystal.UI.Layout/Node/LayoutableChildren.hpp"
 #include "Krystal.UI.Layout/Node/LayoutResults.hpp"
-#include "Krystal.UI.Layout/Style/Style.hpp"
+#include "Krystal.UI.Styles/Enums/Dimension.hpp"
+#include "Krystal.UI.Styles/Enums/Direction.hpp"
+#include "Krystal.UI.Styles/Enums/Edge.hpp"
+#include "Krystal.UI.Styles/Enums/Errata.hpp"
+#include "Krystal.UI.Styles/Enums/FlexDirection.hpp"
+#include "Krystal.UI.Styles/Enums/MeasureMode.hpp"
+#include "Krystal.UI.Styles/Enums/NodeType.hpp"
+#include "Krystal.UI.Styles/Enums/PhysicalEdge.hpp"
+#include "Krystal.UI.Styles/Style.hpp"
 
 namespace Krys::UI::Layout
 {
@@ -31,20 +31,20 @@ namespace Krys::UI::Layout
     bool _isReferenceBaseline : 1 = false;
     bool _isDirty : 1 = true;
     bool _alwaysFormsContainingBlock : 1 = false;
-    NodeType _nodeType : BitCount<NodeType>() = NodeType::Default;
+    Styles::NodeType _nodeType : BitCount<Styles::NodeType>() = Styles::NodeType::Default;
     uint16 _lineIndex = 0;
     uint16 _contentsChildrenCount = 0;
     void *_context = nullptr;
     MeasureFunc _measureFunc = nullptr;
     BaselineFunc _baselineFunc = nullptr;
     DirtiedFunc _dirtiedFunc = nullptr;
-    Style _style;
+    Styles::Style _style;
     LayoutResults _layout;
     Node *_owner = nullptr;
     List<Node *> _children;
     const Config *_config;
-    Array<Style::SizeLength, 2> _processedDimensions {
-      {StyleSizeLength::Undefined(), StyleSizeLength::Undefined()}};
+    Array<Styles::Style::SizeLength, 2> _processedDimensions {
+      {Styles::StyleSizeLength::Undefined(), Styles::StyleSizeLength::Undefined()}};
 
   public:
     using LayoutableChildren = LayoutableChildren<Node>;
@@ -58,17 +58,17 @@ namespace Krys::UI::Layout
     // Does not expose true value semantics, as children are not cloned eagerly.
     Node(const Node &node) = default;
 
-    Style &GetStyle()
+    Styles::Style &GetStyle()
     {
       return _style;
     }
 
-    const Style &GetStyle() const
+    const Styles::Style &GetStyle() const
     {
       return _style;
     }
 
-    void SetStyle(const Style &style)
+    void SetStyle(const Styles::Style &style)
     {
       _style = style;
     }
@@ -129,7 +129,8 @@ namespace Krys::UI::Layout
       return _measureFunc != nullptr;
     }
 
-    Size Measure(float availableWidth, MeasureMode widthMode, float availableHeight, MeasureMode heightMode);
+    Size Measure(float availableWidth, Styles::MeasureMode widthMode, float availableHeight,
+                 Styles::MeasureMode heightMode);
 
     float Baseline(float width, float height) const;
 
@@ -150,12 +151,12 @@ namespace Krys::UI::Layout
       _alwaysFormsContainingBlock = alwaysFormsContainingBlock;
     }
 
-    NodeType GetNodeType() const
+    Styles::NodeType GetNodeType() const
     {
       return _nodeType;
     }
 
-    void SetNodeType(NodeType nodeType)
+    void SetNodeType(Styles::NodeType nodeType)
     {
       _nodeType = nodeType;
     }
@@ -224,19 +225,19 @@ namespace Krys::UI::Layout
 
     void SetChildren(const List<Node *> &children);
 
-    float DimensionWithMargin(FlexDirection axis, float widthSize);
+    float DimensionWithMargin(Styles::FlexDirection axis, float widthSize);
 
-    bool IsLayoutDimensionDefined(FlexDirection axis);
+    bool IsLayoutDimensionDefined(Styles::FlexDirection axis);
 
     /// @brief Whether the node has a "definite length" along the given axis.
     /// https://www.w3.org/TR/css-sizing-3/#definite
-    bool HasDefiniteLength(Dimension dimension, float ownerSize) const
+    bool HasDefiniteLength(Styles::Dimension dimension, float ownerSize) const
     {
       auto usedValue = GetProcessedDimension(dimension).Resolve(ownerSize);
       return usedValue.HasValue() && usedValue.Value() >= 0.0f;
     }
 
-    bool HasErrata(Errata errata) const
+    bool HasErrata(Styles::Errata errata) const
     {
       return _config->HasErrata(errata);
     }
@@ -278,16 +279,16 @@ namespace Krys::UI::Layout
       }
     }
 
-    Style::SizeLength GetProcessedDimension(Dimension dimension) const
+    Styles::Style::SizeLength GetProcessedDimension(Styles::Dimension dimension) const
     {
       return _processedDimensions[static_cast<size_t>(dimension)];
     }
 
-    NullableFloat GetResolvedDimension(Direction direction, Dimension dimension, float referenceLength,
-                                       float ownerWidth) const
+    NullableFloat GetResolvedDimension(Styles::Direction direction, Styles::Dimension dimension,
+                                       float referenceLength, float ownerWidth) const
     {
       NullableFloat value = GetProcessedDimension(dimension).Resolve(referenceLength);
-      if (_style.GetBoxSizing() == BoxSizing::BorderBox)
+      if (_style.GetBoxSizing() == Styles::BoxSizing::BorderBox)
       {
         return value;
       }
@@ -298,25 +299,25 @@ namespace Krys::UI::Layout
       return value + (dimensionPaddingAndBorder.HasValue() ? dimensionPaddingAndBorder : NullableFloat {0.0});
     }
 
-    void SetLayoutLastOwnerDirection(Direction direction);
+    void SetLayoutLastOwnerDirection(Styles::Direction direction);
     void SetLayoutComputedFlexBasis(NullableFloat computedFlexBasis);
     void SetLayoutComputedFlexBasisGeneration(uint16 computedFlexBasisGeneration);
-    void SetLayoutMeasuredDimension(float measuredDimension, Dimension dimension);
+    void SetLayoutMeasuredDimension(float measuredDimension, Styles::Dimension dimension);
     void SetLayoutHadOverflow(bool hadOverflow);
-    void SetLayoutDimension(float lengthValue, Dimension dimension);
-    void SetLayoutDirection(Direction direction);
-    void SetLayoutMargin(float margin, PhysicalEdge edge);
-    void SetLayoutBorder(float border, PhysicalEdge edge);
-    void SetLayoutPadding(float padding, PhysicalEdge edge);
-    void SetLayoutPosition(float position, PhysicalEdge edge);
-    void SetPosition(Direction direction, float ownerWidth, float ownerHeight);
+    void SetLayoutDimension(float lengthValue, Styles::Dimension dimension);
+    void SetLayoutDirection(Styles::Direction direction);
+    void SetLayoutMargin(float margin, Styles::PhysicalEdge edge);
+    void SetLayoutBorder(float border, Styles::PhysicalEdge edge);
+    void SetLayoutPadding(float padding, Styles::PhysicalEdge edge);
+    void SetLayoutPosition(float position, Styles::PhysicalEdge edge);
+    void SetPosition(Styles::Direction direction, float ownerWidth, float ownerHeight);
 
     // Other methods
-    Style::SizeLength ProcessFlexBasis() const;
-    NullableFloat ResolveFlexBasis(Direction direction, FlexDirection flexDirection, float referenceLength,
-                                   float ownerWidth) const;
+    Styles::Style::SizeLength ProcessFlexBasis() const;
+    NullableFloat ResolveFlexBasis(Styles::Direction direction, Styles::FlexDirection flexDirection,
+                                   float referenceLength, float ownerWidth) const;
     void ProcessDimensions();
-    Direction ResolveDirection(Direction ownerDirection);
+    Styles::Direction ResolveDirection(Styles::Direction ownerDirection);
     void ClearChildren();
     /// Replaces the occurrences of oldChild with newChild
     void ReplaceChild(Node *oldChild, Node *newChild);
@@ -338,12 +339,12 @@ namespace Krys::UI::Layout
     // Used to allow resetting the node
     Node &operator=(Node &&) noexcept = default;
 
-    float RelativePosition(FlexDirection axis, Direction direction, float axisSize) const;
+    float RelativePosition(Styles::FlexDirection axis, Styles::Direction direction, float axisSize) const;
 
     void UseWebDefaults()
     {
-      _style.SetFlexDirection(FlexDirection::Row);
-      _style.SetAlignContent(Align::Stretch);
+      _style.SetFlexDirection(Styles::FlexDirection::Row);
+      _style.SetAlignContent(Styles::Align::Stretch);
     }
   };
 }

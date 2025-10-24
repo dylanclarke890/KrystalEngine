@@ -12,6 +12,16 @@ namespace Krys::UI::Styles
     Row,
     RowReverse
   };
+
+  NO_DISCARD inline bool IsRow(const FlexDirection flexDirection) noexcept
+  {
+    return flexDirection == FlexDirection::Row || flexDirection == FlexDirection::RowReverse;
+  }
+
+  NO_DISCARD inline bool IsColumn(const FlexDirection flexDirection) noexcept
+  {
+    return flexDirection == FlexDirection::Column || flexDirection == FlexDirection::ColumnReverse;
+  }
 }
 
 namespace Krys

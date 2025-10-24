@@ -1,29 +1,30 @@
 #pragma once
 
 #include "Krystal.Lib/Array.hpp"
+#include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/NullableFloat.hpp"
-#include "Krystal.UI.Layout/Algorithm/FlexDirection.hpp"
-#include "Krystal.UI.Layout/Enums/Align.hpp"
-#include "Krystal.UI.Layout/Enums/BoxSizing.hpp"
-#include "Krystal.UI.Layout/Enums/Dimension.hpp"
-#include "Krystal.UI.Layout/Enums/Direction.hpp"
-#include "Krystal.UI.Layout/Enums/DisplayType.hpp"
-#include "Krystal.UI.Layout/Enums/Edge.hpp"
-#include "Krystal.UI.Layout/Enums/FlexDirection.hpp"
-#include "Krystal.UI.Layout/Enums/Gutter.hpp"
-#include "Krystal.UI.Layout/Enums/Justify.hpp"
-#include "Krystal.UI.Layout/Enums/Overflow.hpp"
-#include "Krystal.UI.Layout/Enums/PhysicalEdge.hpp"
-#include "Krystal.UI.Layout/Enums/Position.hpp"
-#include "Krystal.UI.Layout/Enums/Unit.hpp"
-#include "Krystal.UI.Layout/Enums/Wrap.hpp"
-#include "Krystal.UI.Layout/Style/StyleLength.hpp"
-#include "Krystal.UI.Layout/Style/StyleSizeLength.hpp"
-#include "Krystal.UI.Layout/Style/StyleValueHandle.hpp"
-#include "Krystal.UI.Layout/Style/StyleValuePool.hpp"
+#include "Krystal.UI.Styles/Enums/Align.hpp"
+#include "Krystal.UI.Styles/Enums/BoxSizing.hpp"
+#include "Krystal.UI.Styles/Enums/Dimension.hpp"
+#include "Krystal.UI.Styles/Enums/Direction.hpp"
+#include "Krystal.UI.Styles/Enums/Display.hpp"
+#include "Krystal.UI.Styles/Enums/Edge.hpp"
+#include "Krystal.UI.Styles/Enums/FlexDirection.hpp"
+#include "Krystal.UI.Styles/Enums/Gutter.hpp"
+#include "Krystal.UI.Styles/Enums/Justify.hpp"
+#include "Krystal.UI.Styles/Enums/Overflow.hpp"
+#include "Krystal.UI.Styles/Enums/PhysicalEdge.hpp"
+#include "Krystal.UI.Styles/Enums/Position.hpp"
+#include "Krystal.UI.Styles/Enums/Unit.hpp"
+#include "Krystal.UI.Styles/Enums/Wrap.hpp"
+#include "Krystal.UI.Styles/Helpers/FlexDirection.hpp"
+#include "Krystal.UI.Styles/Values/StyleLength.hpp"
+#include "Krystal.UI.Styles/Values/StyleSizeLength.hpp"
+#include "Krystal.UI.Styles/Values/StyleValueHandle.hpp"
+#include "Krystal.UI.Styles/Values/StyleValuePool.hpp"
 #include <stdexcept>
 
-namespace Krys::UI::Layout
+namespace Krys::UI::Styles
 {
   class Style
   {
@@ -41,18 +42,20 @@ namespace Krys::UI::Layout
     PositionType _positionType : BitCount<PositionType>() = PositionType::Relative;
     Wrap _flexWrap : BitCount<Wrap>() = Wrap::NoWrap;
     Overflow _overflow : BitCount<Overflow>() = Overflow::Visible;
-    DisplayType _display : BitCount<DisplayType>() = DisplayType::Flex;
+    Display _display : BitCount<Display>() = Display::Flex;
     BoxSizing _boxSizing : BitCount<BoxSizing>() = BoxSizing::BorderBox;
 
     StyleValueHandle _flex {};
     StyleValueHandle _flexGrow {};
     StyleValueHandle _flexShrink {};
     StyleValueHandle _flexBasis {StyleValueHandle::Auto()};
+    Gutters _gap {};
+
     Edges _margin {};
     Edges _position {};
     Edges _padding {};
     Edges _border {};
-    Gutters _gap {};
+
     Dimensions _dimensions {StyleValueHandle::Auto(), StyleValueHandle::Auto()};
     Dimensions _minDimensions {};
     Dimensions _maxDimensions {};
@@ -68,218 +71,242 @@ namespace Krys::UI::Layout
     static constexpr float DefaultFlexShrink = 0.0f;
     static constexpr float WebDefaultFlexShrink = 1.0f;
 
-    Direction GetDirection() const
+#pragma region Enums
+
+    NO_DISCARD Direction GetDirection() const noexcept
     {
       return _direction;
     }
 
-    void SetDirection(Direction value)
+    void SetDirection(Direction value) noexcept
     {
       _direction = value;
     }
 
-    FlexDirection GetFlexDirection() const
+    NO_DISCARD FlexDirection GetFlexDirection() const noexcept
     {
       return _flexDirection;
     }
 
-    void SetFlexDirection(FlexDirection value)
+    void SetFlexDirection(FlexDirection value) noexcept
     {
       _flexDirection = value;
     }
 
-    Justify GetJustifyContent() const
+    NO_DISCARD Justify GetJustifyContent() const noexcept
     {
       return _justifyContent;
     }
 
-    void SetJustifyContent(Justify value)
+    void SetJustifyContent(Justify value) noexcept
     {
       _justifyContent = value;
     }
 
-    Align GetAlignContent() const
+    NO_DISCARD Align GetAlignContent() const noexcept
     {
       return _alignContent;
     }
 
-    void SetAlignContent(Align value)
+    void SetAlignContent(Align value) noexcept
     {
       _alignContent = value;
     }
 
-    Align GetAlignItems() const
+    NO_DISCARD Align GetAlignItems() const noexcept
     {
       return _alignItems;
     }
 
-    void SetAlignItems(Align value)
+    void SetAlignItems(Align value) noexcept
     {
       _alignItems = value;
     }
 
-    Align GetAlignSelf() const
+    NO_DISCARD Align GetAlignSelf() const noexcept
     {
       return _alignSelf;
     }
 
-    void SetAlignSelf(Align value)
+    void SetAlignSelf(Align value) noexcept
     {
       _alignSelf = value;
     }
 
-    PositionType GetPositionType() const
+    NO_DISCARD PositionType GetPositionType() const noexcept
     {
       return _positionType;
     }
 
-    void SetPositionType(PositionType value)
+    void SetPositionType(PositionType value) noexcept
     {
       _positionType = value;
     }
 
-    Wrap GetFlexWrap() const
+    NO_DISCARD Wrap GetFlexWrap() const noexcept
     {
       return _flexWrap;
     }
 
-    void SetFlexWrap(Wrap value)
+    void SetFlexWrap(Wrap value) noexcept
     {
       _flexWrap = value;
     }
 
-    Overflow GetOverflow() const
+    NO_DISCARD Overflow GetOverflow() const noexcept
     {
       return _overflow;
     }
 
-    void SetOverflow(Overflow value)
+    void SetOverflow(Overflow value) noexcept
     {
       _overflow = value;
     }
 
-    DisplayType GetDisplay() const
+    NO_DISCARD Display GetDisplay() const noexcept
     {
       return _display;
     }
 
-    void SetDisplay(DisplayType value)
+    void SetDisplay(Display value)
     {
       _display = value;
     }
 
-    NullableFloat GetFlex() const
+    NO_DISCARD BoxSizing GetBoxSizing() const noexcept
+    {
+      return _boxSizing;
+    }
+
+    void SetBoxSizing(BoxSizing value) noexcept
+    {
+      _boxSizing = value;
+    }
+
+#pragma endregion
+
+#pragma region Flex
+
+    NO_DISCARD NullableFloat GetFlex() const noexcept
     {
       return _pool.GetNumber(_flex);
     }
 
-    void SetFlex(NullableFloat value)
+    void SetFlex(NullableFloat value) noexcept
     {
       _pool.Store(_flex, value);
     }
 
-    NullableFloat GetFlexGrow() const
+    NO_DISCARD NullableFloat GetFlexGrow() const noexcept
     {
       return _pool.GetNumber(_flexGrow);
     }
 
-    void SetFlexGrow(NullableFloat value)
+    void SetFlexGrow(NullableFloat value) noexcept
     {
       _pool.Store(_flexGrow, value);
     }
 
-    NullableFloat GetFlexShrink() const
+    NO_DISCARD NullableFloat GetFlexShrink() const noexcept
     {
       return _pool.GetNumber(_flexShrink);
     }
 
-    void SetFlexShrink(NullableFloat value)
+    void SetFlexShrink(NullableFloat value) noexcept
     {
       _pool.Store(_flexShrink, value);
     }
 
-    Style::SizeLength GetFlexBasis() const
+    NO_DISCARD Style::SizeLength GetFlexBasis() const noexcept
     {
       return _pool.GetSize(_flexBasis);
     }
 
-    void SetFlexBasis(Style::SizeLength value)
+    void SetFlexBasis(Style::SizeLength value) noexcept
     {
       _pool.Store(_flexBasis, value);
     }
 
-    Style::Length GetMargin(Edge edge) const
-    {
-      return _pool.GetLength(_margin[ToUnderlying(edge)]);
-    }
-
-    void SetMargin(Edge edge, Style::Length value)
-    {
-      _pool.Store(_margin[ToUnderlying(edge)], value);
-    }
-
-    Style::Length GetPosition(Edge edge) const
-    {
-      return _pool.GetLength(_position[ToUnderlying(edge)]);
-    }
-
-    void SetPosition(Edge edge, Style::Length value)
-    {
-      _pool.Store(_position[ToUnderlying(edge)], value);
-    }
-
-    Style::Length GetPadding(Edge edge) const
-    {
-      return _pool.GetLength(_padding[ToUnderlying(edge)]);
-    }
-
-    void SetPadding(Edge edge, Style::Length value)
-    {
-      _pool.Store(_padding[ToUnderlying(edge)], value);
-    }
-
-    Style::Length GetBorder(Edge edge) const
-    {
-      return _pool.GetLength(_border[ToUnderlying(edge)]);
-    }
-
-    void SetBorder(Edge edge, Style::Length value)
-    {
-      _pool.Store(_border[ToUnderlying(edge)], value);
-    }
-
-    Style::Length GetGap(Gutter gutter) const
+    NO_DISCARD Style::Length GetGap(Gutter gutter) const noexcept
     {
       return _pool.GetLength(_gap[ToUnderlying(gutter)]);
     }
 
-    void SetGap(Gutter gutter, Style::Length value)
+    void SetGap(Gutter gutter, Style::Length value) noexcept
     {
       _pool.Store(_gap[ToUnderlying(gutter)], value);
     }
 
-    Style::SizeLength GetDimension(Dimension axis) const
+#pragma endregion
+
+#pragma region Edges
+
+    NO_DISCARD Style::Length GetMargin(Edge edge) const noexcept
+    {
+      return _pool.GetLength(_margin[ToUnderlying(edge)]);
+    }
+
+    void SetMargin(Edge edge, Style::Length value) noexcept
+    {
+      _pool.Store(_margin[ToUnderlying(edge)], value);
+    }
+
+    NO_DISCARD Style::Length GetPosition(Edge edge) const noexcept
+    {
+      return _pool.GetLength(_position[ToUnderlying(edge)]);
+    }
+
+    void SetPosition(Edge edge, Style::Length value) noexcept
+    {
+      _pool.Store(_position[ToUnderlying(edge)], value);
+    }
+
+    NO_DISCARD Style::Length GetPadding(Edge edge) const noexcept
+    {
+      return _pool.GetLength(_padding[ToUnderlying(edge)]);
+    }
+
+    void SetPadding(Edge edge, Style::Length value) noexcept
+    {
+      _pool.Store(_padding[ToUnderlying(edge)], value);
+    }
+
+    NO_DISCARD Style::Length GetBorder(Edge edge) const noexcept
+    {
+      return _pool.GetLength(_border[ToUnderlying(edge)]);
+    }
+
+    void SetBorder(Edge edge, Style::Length value) noexcept
+    {
+      _pool.Store(_border[ToUnderlying(edge)], value);
+    }
+
+#pragma endregion
+
+#pragma region Dimensions
+
+    NO_DISCARD Style::SizeLength GetDimension(Dimension axis) const noexcept
     {
       return _pool.GetSize(_dimensions[ToUnderlying(axis)]);
     }
 
-    void SetDimension(Dimension axis, Style::SizeLength value)
+    void SetDimension(Dimension axis, Style::SizeLength value) noexcept
     {
       _pool.Store(_dimensions[ToUnderlying(axis)], value);
     }
 
-    Style::SizeLength GetMinDimension(Dimension axis) const
+    NO_DISCARD Style::SizeLength GetMinDimension(Dimension axis) const noexcept
     {
       return _pool.GetSize(_minDimensions[ToUnderlying(axis)]);
     }
 
-    void SetMinDimension(Dimension axis, Style::SizeLength value)
+    void SetMinDimension(Dimension axis, Style::SizeLength value) noexcept
     {
       _pool.Store(_minDimensions[ToUnderlying(axis)], value);
     }
 
-    NullableFloat ResolvedMinDimension(Direction direction, Dimension axis, float referenceLength,
-                                       float ownerWidth) const
+    NO_DISCARD NullableFloat ResolvedMinDimension(Direction direction, Dimension axis, float referenceLength,
+                                                  float ownerWidth) const noexcept
     {
       NullableFloat value = GetMinDimension(axis).Resolve(referenceLength);
       if (GetBoxSizing() == BoxSizing::BorderBox)
@@ -293,18 +320,18 @@ namespace Krys::UI::Layout
       return value + (dimensionPaddingAndBorder.HasValue() ? dimensionPaddingAndBorder : NullableFloat {0.0});
     }
 
-    Style::SizeLength GetMaxDimension(Dimension axis) const
+    NO_DISCARD Style::SizeLength GetMaxDimension(Dimension axis) const noexcept
     {
       return _pool.GetSize(_maxDimensions[ToUnderlying(axis)]);
     }
 
-    void SetMaxDimension(Dimension axis, Style::SizeLength value)
+    void SetMaxDimension(Dimension axis, Style::SizeLength value) noexcept
     {
       _pool.Store(_maxDimensions[ToUnderlying(axis)], value);
     }
 
     NullableFloat ResolvedMaxDimension(Direction direction, Dimension axis, float referenceLength,
-                                       float ownerWidth) const
+                                       float ownerWidth) const noexcept
     {
       NullableFloat value = GetMaxDimension(axis).Resolve(referenceLength);
       if (GetBoxSizing() == BoxSizing::BorderBox)
@@ -318,29 +345,23 @@ namespace Krys::UI::Layout
       return value + (dimensionPaddingAndBorder.HasValue() ? dimensionPaddingAndBorder : NullableFloat {0.0});
     }
 
-    NullableFloat GetAspectRatio() const
+    NO_DISCARD NullableFloat GetAspectRatio() const noexcept
     {
       return _pool.GetNumber(_aspectRatio);
     }
 
-    void SetAspectRatio(NullableFloat value)
+    void SetAspectRatio(NullableFloat value) noexcept
     {
       // degenerate aspect ratios act as auto, see:
       // https://drafts.csswg.org/css-sizing-4/#valdef-aspect-ratio-ratio.
       _pool.Store(_aspectRatio, value == 0.0f || IsInf(value.Value()) ? NullableFloat {} : value);
     }
 
-    BoxSizing GetBoxSizing() const
-    {
-      return _boxSizing;
-    }
+#pragma endregion
 
-    void SetBoxSizing(BoxSizing value)
-    {
-      _boxSizing = value;
-    }
+#pragma region Queries
 
-    bool HorizontalInsetsDefined() const
+    NO_DISCARD bool HorizontalInsetsDefined() const noexcept
     {
       return _position[ToUnderlying(Edge::Left)].IsDefined()
              || _position[ToUnderlying(Edge::Right)].IsDefined()
@@ -350,7 +371,7 @@ namespace Krys::UI::Layout
              || _position[ToUnderlying(Edge::End)].IsDefined();
     }
 
-    bool VerticalInsetsDefined() const
+    NO_DISCARD bool VerticalInsetsDefined() const noexcept
     {
       return _position[ToUnderlying(Edge::Top)].IsDefined()
              || _position[ToUnderlying(Edge::Bottom)].IsDefined()
@@ -358,158 +379,189 @@ namespace Krys::UI::Layout
              || _position[ToUnderlying(Edge::Vertical)].IsDefined();
     }
 
-    bool IsFlexStartPositionDefined(FlexDirection axis, Direction direction) const
+    NO_DISCARD bool IsFlexStartPositionDefined(FlexDirection axis, Direction direction) const noexcept
     {
       return ComputePosition(FlexStartEdge(axis), direction).IsDefined();
     }
 
-    bool IsFlexStartPositionAuto(FlexDirection axis, Direction direction) const
+    NO_DISCARD bool IsFlexStartPositionAuto(FlexDirection axis, Direction direction) const noexcept
     {
       return ComputePosition(FlexStartEdge(axis), direction).IsAuto();
     }
 
-    bool IsInlineStartPositionDefined(FlexDirection axis, Direction direction) const
+    NO_DISCARD bool IsInlineStartPositionDefined(FlexDirection axis, Direction direction) const noexcept
     {
       return ComputePosition(InlineStartEdge(axis, direction), direction).IsDefined();
     }
 
-    bool IsInlineStartPositionAuto(FlexDirection axis, Direction direction) const
+    NO_DISCARD bool IsInlineStartPositionAuto(FlexDirection axis, Direction direction) const noexcept
     {
       return ComputePosition(InlineStartEdge(axis, direction), direction).IsAuto();
     }
 
-    bool IsFlexEndPositionDefined(FlexDirection axis, Direction direction) const
+    NO_DISCARD bool IsFlexEndPositionDefined(FlexDirection axis, Direction direction) const noexcept
     {
       return ComputePosition(FlexEndEdge(axis), direction).IsDefined();
     }
 
-    bool IsFlexEndPositionAuto(FlexDirection axis, Direction direction) const
+    NO_DISCARD bool IsFlexEndPositionAuto(FlexDirection axis, Direction direction) const noexcept
     {
       return ComputePosition(FlexEndEdge(axis), direction).IsAuto();
     }
 
-    bool IsInlineEndPositionDefined(FlexDirection axis, Direction direction) const
+    NO_DISCARD bool IsInlineEndPositionDefined(FlexDirection axis, Direction direction) const noexcept
     {
       return ComputePosition(InlineEndEdge(axis, direction), direction).IsDefined();
     }
 
-    bool IsInlineEndPositionAuto(FlexDirection axis, Direction direction) const
+    NO_DISCARD bool IsInlineEndPositionAuto(FlexDirection axis, Direction direction) const noexcept
     {
       return ComputePosition(InlineEndEdge(axis, direction), direction).IsAuto();
     }
 
-    float ComputeFlexStartPosition(FlexDirection axis, Direction direction, float axisSize) const
+    NO_DISCARD bool IsFlexStartMarginAuto(FlexDirection axis, Direction direction) const noexcept
+    {
+      return ComputeMargin(FlexStartEdge(axis), direction).IsAuto();
+    }
+
+    NO_DISCARD bool IsFlexEndMarginAuto(FlexDirection axis, Direction direction) const noexcept
+    {
+      return ComputeMargin(FlexEndEdge(axis), direction).IsAuto();
+    }
+
+#pragma endregion
+
+#pragma region Computations
+
+    NO_DISCARD float ComputeFlexStartPosition(FlexDirection axis, Direction direction,
+                                              float axisSize) const noexcept
     {
       return ComputePosition(FlexStartEdge(axis), direction).Resolve(axisSize).ValueOrDefault(0.0f);
     }
 
-    float ComputeInlineStartPosition(FlexDirection axis, Direction direction, float axisSize) const
+    NO_DISCARD float ComputeInlineStartPosition(FlexDirection axis, Direction direction,
+                                                float axisSize) const noexcept
     {
       return ComputePosition(InlineStartEdge(axis, direction), direction)
         .Resolve(axisSize)
         .ValueOrDefault(0.0f);
     }
 
-    float ComputeFlexEndPosition(FlexDirection axis, Direction direction, float axisSize) const
+    NO_DISCARD float ComputeFlexEndPosition(FlexDirection axis, Direction direction,
+                                            float axisSize) const noexcept
     {
       return ComputePosition(FlexEndEdge(axis), direction).Resolve(axisSize).ValueOrDefault(0.0f);
     }
 
-    float ComputeInlineEndPosition(FlexDirection axis, Direction direction, float axisSize) const
+    NO_DISCARD float ComputeInlineEndPosition(FlexDirection axis, Direction direction,
+                                              float axisSize) const noexcept
     {
       return ComputePosition(InlineEndEdge(axis, direction), direction)
         .Resolve(axisSize)
         .ValueOrDefault(0.0f);
     }
 
-    float ComputeFlexStartMargin(FlexDirection axis, Direction direction, float widthSize) const
+    NO_DISCARD float ComputeFlexStartMargin(FlexDirection axis, Direction direction,
+                                            float widthSize) const noexcept
     {
       return ComputeMargin(FlexStartEdge(axis), direction).Resolve(widthSize).ValueOrDefault(0.0f);
     }
 
-    float ComputeInlineStartMargin(FlexDirection axis, Direction direction, float widthSize) const
+    NO_DISCARD float ComputeInlineStartMargin(FlexDirection axis, Direction direction,
+                                              float widthSize) const noexcept
     {
       return ComputeMargin(InlineStartEdge(axis, direction), direction)
         .Resolve(widthSize)
         .ValueOrDefault(0.0f);
     }
 
-    float ComputeFlexEndMargin(FlexDirection axis, Direction direction, float widthSize) const
+    NO_DISCARD float ComputeFlexEndMargin(FlexDirection axis, Direction direction,
+                                          float widthSize) const noexcept
     {
       return ComputeMargin(FlexEndEdge(axis), direction).Resolve(widthSize).ValueOrDefault(0.0f);
     }
 
-    float ComputeInlineEndMargin(FlexDirection axis, Direction direction, float widthSize) const
+    NO_DISCARD float ComputeInlineEndMargin(FlexDirection axis, Direction direction,
+                                            float widthSize) const noexcept
     {
       return ComputeMargin(InlineEndEdge(axis, direction), direction).Resolve(widthSize).ValueOrDefault(0.0f);
     }
 
-    float ComputeFlexStartBorder(FlexDirection axis, Direction direction) const
+    NO_DISCARD float ComputeFlexStartBorder(FlexDirection axis, Direction direction) const noexcept
     {
       return MaxOrDefined(ComputeBorder(FlexStartEdge(axis), direction).Resolve(0.0f).Value(), 0.0f);
     }
 
-    float ComputeInlineStartBorder(FlexDirection axis, Direction direction) const
+    NO_DISCARD float ComputeInlineStartBorder(FlexDirection axis, Direction direction) const noexcept
     {
       return MaxOrDefined(ComputeBorder(InlineStartEdge(axis, direction), direction).Resolve(0.0f).Value(),
                           0.0f);
     }
 
-    float ComputeFlexEndBorder(FlexDirection axis, Direction direction) const
+    NO_DISCARD float ComputeFlexEndBorder(FlexDirection axis, Direction direction) const noexcept
     {
       return MaxOrDefined(ComputeBorder(FlexEndEdge(axis), direction).Resolve(0.0f).Value(), 0.0f);
     }
 
-    float ComputeInlineEndBorder(FlexDirection axis, Direction direction) const
+    NO_DISCARD float ComputeInlineEndBorder(FlexDirection axis, Direction direction) const noexcept
     {
       return MaxOrDefined(ComputeBorder(InlineEndEdge(axis, direction), direction).Resolve(0.0f).Value(),
                           0.0f);
     }
 
-    float ComputeFlexStartPadding(FlexDirection axis, Direction direction, float widthSize) const
+    NO_DISCARD float ComputeFlexStartPadding(FlexDirection axis, Direction direction,
+                                             float widthSize) const noexcept
     {
       return MaxOrDefined(ComputePadding(FlexStartEdge(axis), direction).Resolve(widthSize).Value(), 0.0f);
     }
 
-    float ComputeInlineStartPadding(FlexDirection axis, Direction direction, float widthSize) const
+    NO_DISCARD float ComputeInlineStartPadding(FlexDirection axis, Direction direction,
+                                               float widthSize) const noexcept
     {
       return MaxOrDefined(
         ComputePadding(InlineStartEdge(axis, direction), direction).Resolve(widthSize).Value(), 0.0f);
     }
 
-    float ComputeFlexEndPadding(FlexDirection axis, Direction direction, float widthSize) const
+    NO_DISCARD float ComputeFlexEndPadding(FlexDirection axis, Direction direction,
+                                           float widthSize) const noexcept
     {
       return MaxOrDefined(ComputePadding(FlexEndEdge(axis), direction).Resolve(widthSize).Value(), 0.0f);
     }
 
-    float ComputeInlineEndPadding(FlexDirection axis, Direction direction, float widthSize) const
+    NO_DISCARD float ComputeInlineEndPadding(FlexDirection axis, Direction direction,
+                                             float widthSize) const noexcept
     {
       return MaxOrDefined(
         ComputePadding(InlineEndEdge(axis, direction), direction).Resolve(widthSize).Value(), 0.0f);
     }
 
-    float ComputeInlineStartPaddingAndBorder(FlexDirection axis, Direction direction, float widthSize) const
+    NO_DISCARD float ComputeInlineStartPaddingAndBorder(FlexDirection axis, Direction direction,
+                                                        float widthSize) const noexcept
     {
       return ComputeInlineStartPadding(axis, direction, widthSize)
              + ComputeInlineStartBorder(axis, direction);
     }
 
-    float ComputeFlexStartPaddingAndBorder(FlexDirection axis, Direction direction, float widthSize) const
+    NO_DISCARD float ComputeFlexStartPaddingAndBorder(FlexDirection axis, Direction direction,
+                                                      float widthSize) const noexcept
     {
       return ComputeFlexStartPadding(axis, direction, widthSize) + ComputeFlexStartBorder(axis, direction);
     }
 
-    float ComputeInlineEndPaddingAndBorder(FlexDirection axis, Direction direction, float widthSize) const
+    NO_DISCARD float ComputeInlineEndPaddingAndBorder(FlexDirection axis, Direction direction,
+                                                      float widthSize) const noexcept
     {
       return ComputeInlineEndPadding(axis, direction, widthSize) + ComputeInlineEndBorder(axis, direction);
     }
 
-    float ComputeFlexEndPaddingAndBorder(FlexDirection axis, Direction direction, float widthSize) const
+    NO_DISCARD float ComputeFlexEndPaddingAndBorder(FlexDirection axis, Direction direction,
+                                                    float widthSize) const noexcept
     {
       return ComputeFlexEndPadding(axis, direction, widthSize) + ComputeFlexEndBorder(axis, direction);
     }
 
-    float ComputePaddingAndBorderForDimension(Direction direction, Dimension dimension, float widthSize) const
+    NO_DISCARD float ComputePaddingAndBorderForDimension(Direction direction, Dimension dimension,
+                                                         float widthSize) const noexcept
     {
       FlexDirection flexDirectionForDimension =
         dimension == Dimension::Width ? FlexDirection::Row : FlexDirection::Column;
@@ -518,12 +570,12 @@ namespace Krys::UI::Layout
              + ComputeFlexEndPaddingAndBorder(flexDirectionForDimension, direction, widthSize);
     }
 
-    float ComputeBorderForAxis(FlexDirection axis) const
+    NO_DISCARD float ComputeBorderForAxis(FlexDirection axis) const noexcept
     {
       return ComputeInlineStartBorder(axis, Direction::LTR) + ComputeInlineEndBorder(axis, Direction::LTR);
     }
 
-    float ComputeMarginForAxis(FlexDirection axis, float widthSize) const
+    NO_DISCARD float ComputeMarginForAxis(FlexDirection axis, float widthSize) const noexcept
     {
       // The total margin for a given axis does not depend on the direction
       // so hardcoding LTR here to avoid piping direction to this function
@@ -531,23 +583,17 @@ namespace Krys::UI::Layout
              + ComputeInlineEndMargin(axis, Direction::LTR, widthSize);
     }
 
-    float ComputeGapForAxis(FlexDirection axis, float ownerSize) const
+    NO_DISCARD float ComputeGapForAxis(FlexDirection axis, float ownerSize) const noexcept
     {
       auto gap = IsRow(axis) ? ComputeColumnGap() : ComputeRowGap();
       return MaxOrDefined(gap.Resolve(ownerSize).Value(), 0.0f);
     }
 
-    bool FlexStartMarginIsAuto(FlexDirection axis, Direction direction) const
-    {
-      return ComputeMargin(FlexStartEdge(axis), direction).IsAuto();
-    }
+#pragma endregion
 
-    bool FlexEndMarginIsAuto(FlexDirection axis, Direction direction) const
-    {
-      return ComputeMargin(FlexEndEdge(axis), direction).IsAuto();
-    }
+#pragma region Equality
 
-    bool operator==(const Style &other) const
+    NO_DISCARD bool operator==(const Style &other) const noexcept
     {
       return _direction == other._direction && _flexDirection == other._flexDirection
              && _justifyContent == other._justifyContent && _alignContent == other._alignContent
@@ -569,35 +615,48 @@ namespace Krys::UI::Layout
              && NumbersEqual(_aspectRatio, _pool, other._aspectRatio, other._pool);
     }
 
-    bool operator!=(const Style &other) const
+    NO_DISCARD bool operator!=(const Style &other) const noexcept
     {
       return !(*this == other);
     }
 
+#pragma endregion
+
   private:
-    static inline bool NumbersEqual(const StyleValueHandle &lhsHandle, const StyleValuePool &lhsPool,
-                                    const StyleValueHandle &rhsHandle, const StyleValuePool &rhsPool)
+#pragma region EqualityHelpers
+
+    NO_DISCARD static inline bool NumbersEqual(const StyleValueHandle &lhsHandle,
+                                               const StyleValuePool &lhsPool,
+                                               const StyleValueHandle &rhsHandle,
+                                               const StyleValuePool &rhsPool) noexcept
     {
       return (lhsHandle.IsUndefined() && rhsHandle.IsUndefined())
              || (lhsPool.GetNumber(lhsHandle) == rhsPool.GetNumber(rhsHandle));
     }
 
-    static inline bool LengthsEqual(const StyleValueHandle &lhsHandle, const StyleValuePool &lhsPool,
-                                    const StyleValueHandle &rhsHandle, const StyleValuePool &rhsPool)
+    NO_DISCARD static inline bool LengthsEqual(const StyleValueHandle &lhsHandle,
+                                               const StyleValuePool &lhsPool,
+                                               const StyleValueHandle &rhsHandle,
+                                               const StyleValuePool &rhsPool) noexcept
     {
       return (lhsHandle.IsUndefined() && rhsHandle.IsUndefined())
              || (lhsPool.GetLength(lhsHandle) == rhsPool.GetLength(rhsHandle));
     }
 
     template <size_t N>
-    static inline bool LengthsEqual(const std::array<StyleValueHandle, N> &lhs, const StyleValuePool &lhsPool,
-                                    const std::array<StyleValueHandle, N> &rhs, const StyleValuePool &rhsPool)
+    NO_DISCARD static inline bool
+      LengthsEqual(const std::array<StyleValueHandle, N> &lhs, const StyleValuePool &lhsPool,
+                   const std::array<StyleValueHandle, N> &rhs, const StyleValuePool &rhsPool) noexcept
     {
       return std::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end(), [&](const auto &lhs, const auto &rhs)
                         { return LengthsEqual(lhs, lhsPool, rhs, rhsPool); });
     }
 
-    Style::Length ComputeColumnGap() const
+#pragma endregion
+
+#pragma region ComputationHelpers
+
+    NO_DISCARD Style::Length ComputeColumnGap() const noexcept
     {
       if (_gap[ToUnderlying(Gutter::Column)].IsDefined())
       {
@@ -609,7 +668,7 @@ namespace Krys::UI::Layout
       }
     }
 
-    Style::Length ComputeRowGap() const
+    NO_DISCARD Style::Length ComputeRowGap() const noexcept
     {
       if (_gap[ToUnderlying(Gutter::Row)].IsDefined())
       {
@@ -621,7 +680,7 @@ namespace Krys::UI::Layout
       }
     }
 
-    Style::Length ComputeLeftEdge(const Edges &edges, Direction layoutDirection) const
+    NO_DISCARD Style::Length ComputeLeftEdge(const Edges &edges, Direction layoutDirection) const noexcept
     {
       if (layoutDirection == Direction::LTR && edges[ToUnderlying(Edge::Start)].IsDefined())
       {
@@ -645,7 +704,7 @@ namespace Krys::UI::Layout
       }
     }
 
-    Style::Length ComputeTopEdge(const Edges &edges) const
+    NO_DISCARD Style::Length ComputeTopEdge(const Edges &edges) const noexcept
     {
       if (edges[ToUnderlying(Edge::Top)].IsDefined())
       {
@@ -661,7 +720,7 @@ namespace Krys::UI::Layout
       }
     }
 
-    Style::Length ComputeRightEdge(const Edges &edges, Direction layoutDirection) const
+    NO_DISCARD Style::Length ComputeRightEdge(const Edges &edges, Direction layoutDirection) const noexcept
     {
       if (layoutDirection == Direction::LTR && edges[ToUnderlying(Edge::End)].IsDefined())
       {
@@ -685,7 +744,7 @@ namespace Krys::UI::Layout
       }
     }
 
-    Style::Length ComputeBottomEdge(const Edges &edges) const
+    NO_DISCARD Style::Length ComputeBottomEdge(const Edges &edges) const noexcept
     {
       if (edges[ToUnderlying(Edge::Bottom)].IsDefined())
       {
@@ -701,7 +760,7 @@ namespace Krys::UI::Layout
       }
     }
 
-    Style::Length ComputePosition(PhysicalEdge edge, Direction direction) const
+    NO_DISCARD Style::Length ComputePosition(PhysicalEdge edge, Direction direction) const noexcept
     {
       switch (edge)
       {
@@ -711,10 +770,10 @@ namespace Krys::UI::Layout
         case PhysicalEdge::Bottom: return ComputeBottomEdge(_position);
       }
 
-      throw std::logic_error("invalid physical edge");
+      std::unreachable();
     }
 
-    Style::Length ComputeMargin(PhysicalEdge edge, Direction direction) const
+    NO_DISCARD Style::Length ComputeMargin(PhysicalEdge edge, Direction direction) const noexcept
     {
       switch (edge)
       {
@@ -724,10 +783,10 @@ namespace Krys::UI::Layout
         case PhysicalEdge::Bottom: return ComputeBottomEdge(_margin);
       }
 
-      throw std::logic_error("invalid physical edge");
+      std::unreachable();
     }
 
-    Style::Length ComputePadding(PhysicalEdge edge, Direction direction) const
+    NO_DISCARD Style::Length ComputePadding(PhysicalEdge edge, Direction direction) const noexcept
     {
       switch (edge)
       {
@@ -737,10 +796,10 @@ namespace Krys::UI::Layout
         case PhysicalEdge::Bottom: return ComputeBottomEdge(_padding);
       }
 
-      throw std::logic_error("invalid physical edge");
+      std::unreachable();
     }
 
-    Style::Length ComputeBorder(PhysicalEdge edge, Direction direction) const
+    NO_DISCARD Style::Length ComputeBorder(PhysicalEdge edge, Direction direction) const noexcept
     {
       switch (edge)
       {
@@ -750,7 +809,9 @@ namespace Krys::UI::Layout
         case PhysicalEdge::Bottom: return ComputeBottomEdge(_border);
       }
 
-      throw std::logic_error("invalid physical edge");
+      std::unreachable();
     }
+
+#pragma endregion
   };
 }

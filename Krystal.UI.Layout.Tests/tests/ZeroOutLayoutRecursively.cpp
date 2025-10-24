@@ -5,6 +5,7 @@
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
   TEST_CASE("LayoutEngine::zero_out_layout", "[LayoutEngine]")
   {
     NodeRef root = NodeCreate();
@@ -24,7 +25,7 @@ namespace Krys::Tests
     REQUIRE(10 == NodeLayoutGetMargin(child, Edge::Top));
     REQUIRE(10 == NodeLayoutGetPadding(child, Edge::Top));
 
-    NodeStyleSetDisplay(child, DisplayType::None);
+    NodeStyleSetDisplay(child, Display::None);
 
     NodeCalculateLayout(root, 100, 100, Direction::LTR);
 

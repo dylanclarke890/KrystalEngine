@@ -6,6 +6,8 @@
 
 namespace Krys::UI::Layout
 {
+  using namespace Styles;
+
   static inline void SetFlexStartLayoutPosition(const Node *const parent, Node *child,
                                                 const Direction direction, const FlexDirection axis,
                                                 const float containingBlockWidth)
@@ -193,7 +195,7 @@ namespace Krys::UI::Layout
   }
 
   void LayoutAbsoluteChild(const Node *containingNode, const Node *node, Node *child,
-                           float containingBlockWidth, float containingBlockHeight, SizingMode widthMode,
+                           float containingBlockWidth, float containingBlockHeight, Styles::SizingMode widthMode,
                            Direction direction, LayoutData &layoutMarkerData, uint32 depth,
                            uint32 generationCount)
   {
@@ -203,8 +205,8 @@ namespace Krys::UI::Layout
 
     float childWidth = std::numeric_limits<float>::quiet_NaN();
     float childHeight = std::numeric_limits<float>::quiet_NaN();
-    SizingMode childWidthSizingMode = SizingMode::MaxContent;
-    SizingMode childHeightSizingMode = SizingMode::MaxContent;
+    Styles::SizingMode childWidthSizingMode = SizingMode::MaxContent;
+    Styles::SizingMode childHeightSizingMode = SizingMode::MaxContent;
 
     auto marginRow = child->GetStyle().ComputeMarginForAxis(FlexDirection::Row, containingBlockWidth);
     auto marginColumn = child->GetStyle().ComputeMarginForAxis(FlexDirection::Column, containingBlockWidth);
@@ -320,7 +322,7 @@ namespace Krys::UI::Layout
                           containingBlockWidth, containingBlockHeight);
   }
 
-  bool LayoutAbsoluteDescendants(Node *containingNode, Node *currentNode, SizingMode widthSizingMode,
+  bool LayoutAbsoluteDescendants(Node *containingNode, Node *currentNode, Styles::SizingMode widthSizingMode,
                                  Direction currentNodeDirection, LayoutData &layoutMarkerData,
                                  uint32 currentDepth, uint32 generationCount,
                                  float currentNodeLeftOffsetFromContainingBlock,
@@ -331,7 +333,7 @@ namespace Krys::UI::Layout
     bool hasNewLayout = false;
     for (auto child : currentNode->GetLayoutChildren())
     {
-      if (child->GetStyle().GetDisplay() == DisplayType::None)
+      if (child->GetStyle().GetDisplay() == Display::None)
       {
         continue;
       }

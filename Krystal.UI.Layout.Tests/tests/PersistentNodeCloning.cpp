@@ -8,6 +8,7 @@
 namespace Krys::Tests
 {
   using namespace Krys::UI::Layout;
+  using namespace Krys::UI::Styles;
 
   struct YGPersistentNodeCloningTest
   {
@@ -183,7 +184,7 @@ namespace Krys::Tests
 
     auto b = std::make_shared<NodeWrapper>(config);
     auto a = std::make_shared<NodeWrapper>(config, std::vector {b});
-    NodeStyleSetDisplay(b->node, DisplayType::Contents);
+    NodeStyleSetDisplay(b->node, Display::Contents);
 
     // We don't expect any cloning during the first layout
     onClone = [](...)

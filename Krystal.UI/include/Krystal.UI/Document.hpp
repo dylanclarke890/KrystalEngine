@@ -171,7 +171,7 @@ namespace Krys::UI
 
     void Layout(float width, float height) noexcept
     {
-      Layout::NodeCalculateLayout(_elements.Get(_body)->_layoutNode, width, height, Layout::Direction::LTR);
+      Layout::NodeCalculateLayout(_elements.Get(_body)->_layoutNode, width, height, Styles::Direction::LTR);
     }
   };
 }

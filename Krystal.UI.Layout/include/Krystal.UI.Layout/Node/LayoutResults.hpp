@@ -3,10 +3,10 @@
 #include "Krystal.Lib/Array.hpp"
 #include "Krystal.Lib/NullableFloat.hpp"
 #include "Krystal.Lib/Types.hpp"
-#include "Krystal.UI.Layout/Enums/Dimension.hpp"
-#include "Krystal.UI.Layout/Enums/Direction.hpp"
-#include "Krystal.UI.Layout/Enums/Edge.hpp"
-#include "Krystal.UI.Layout/Enums/PhysicalEdge.hpp"
+#include "Krystal.UI.Styles/Enums/Dimension.hpp"
+#include "Krystal.UI.Styles/Enums/Direction.hpp"
+#include "Krystal.UI.Styles/Enums/Edge.hpp"
+#include "Krystal.UI.Styles/Enums/PhysicalEdge.hpp"
 #include "Krystal.UI.Layout/Node/CachedMeasurement.hpp"
 #include "Krystal.UI.Layout/Api/Forward.hpp"
 
@@ -15,11 +15,11 @@ namespace Krys::UI::Layout
   struct LayoutResults
   {
   private:
-    Direction _direction : BitCount<Direction>() = Direction::Inherit;
+    Styles::Direction _direction : BitCount<Styles::Direction>() = Styles::Direction::Inherit;
     bool _hadOverflow : 1 = false;
 
   public:
-    Direction LastOwnerDirection : BitCount<Direction>() = Direction::Inherit;
+    Styles::Direction LastOwnerDirection : BitCount<Styles::Direction>() = Styles::Direction::Inherit;
     uint8 NextCachedMeasurementsIndex = 0;
     uint16 GenerationCount = 0;
     uint16 ConfigVersion = 0;
@@ -46,12 +46,12 @@ namespace Krys::UI::Layout
     Array<CachedMeasurement, MaxCachedMeasurements> CachedMeasurements = {};
     CachedMeasurement CachedLayout {};
 
-    Direction GetDirection() const
+    Styles::Direction GetDirection() const
     {
       return _direction;
     }
 
-    void SetDirection(Direction direction)
+    void SetDirection(Styles::Direction direction)
     {
       _direction = direction;
     }
@@ -66,72 +66,72 @@ namespace Krys::UI::Layout
       _hadOverflow = hadOverflow;
     }
 
-    float GetDimension(Dimension axis) const
+    float GetDimension(Styles::Dimension axis) const
     {
       return _dimensions[ToUnderlying(axis)];
     }
 
-    void SetDimension(Dimension axis, float dimension)
+    void SetDimension(Styles::Dimension axis, float dimension)
     {
       _dimensions[ToUnderlying(axis)] = dimension;
     }
 
-    float GetMeasuredDimension(Dimension axis) const
+    float GetMeasuredDimension(Styles::Dimension axis) const
     {
       return _measuredDimensions[ToUnderlying(axis)];
     }
 
-    void SetMeasuredDimension(Dimension axis, float dimension)
+    void SetMeasuredDimension(Styles::Dimension axis, float dimension)
     {
       _measuredDimensions[ToUnderlying(axis)] = dimension;
     }
 
-    float GetRawDimension(Dimension axis) const
+    float GetRawDimension(Styles::Dimension axis) const
     {
       return _rawDimensions[ToUnderlying(axis)];
     }
 
-    void SetRawDimension(Dimension axis, float dimension)
+    void SetRawDimension(Styles::Dimension axis, float dimension)
     {
       _rawDimensions[ToUnderlying(axis)] = dimension;
     }
 
-    float GetPosition(PhysicalEdge physicalEdge) const
+    float GetPosition(Styles::PhysicalEdge physicalEdge) const
     {
       return _position[ToUnderlying(physicalEdge)];
     }
 
-    void SetPosition(PhysicalEdge physicalEdge, float dimension)
+    void SetPosition(Styles::PhysicalEdge physicalEdge, float dimension)
     {
       _position[ToUnderlying(physicalEdge)] = dimension;
     }
 
-    float GetMargin(PhysicalEdge physicalEdge) const
+    float GetMargin(Styles::PhysicalEdge physicalEdge) const
     {
       return _margin[ToUnderlying(physicalEdge)];
     }
 
-    void SetMargin(PhysicalEdge physicalEdge, float dimension)
+    void SetMargin(Styles::PhysicalEdge physicalEdge, float dimension)
     {
       _margin[ToUnderlying(physicalEdge)] = dimension;
     }
 
-    float GetBorder(PhysicalEdge physicalEdge) const
+    float GetBorder(Styles::PhysicalEdge physicalEdge) const
     {
       return _border[ToUnderlying(physicalEdge)];
     }
 
-    void SetBorder(PhysicalEdge physicalEdge, float dimension)
+    void SetBorder(Styles::PhysicalEdge physicalEdge, float dimension)
     {
       _border[ToUnderlying(physicalEdge)] = dimension;
     }
 
-    float GetPadding(PhysicalEdge physicalEdge) const
+    float GetPadding(Styles::PhysicalEdge physicalEdge) const
     {
       return _padding[ToUnderlying(physicalEdge)];
     }
 
-    void SetPadding(PhysicalEdge physicalEdge, float dimension)
+    void SetPadding(Styles::PhysicalEdge physicalEdge, float dimension)
     {
       _padding[ToUnderlying(physicalEdge)] = dimension;
     }
