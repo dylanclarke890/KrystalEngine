@@ -173,9 +173,6 @@
     <ProjectReference Include="..\Krystal.Platform\Krystal.Platform.vcxproj">
       <Project>{42e8c0a6-1f92-456b-a8b7-0050bfdf97e2}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\Krystal.UI.Elements\Krystal.UI.Elements.vcxproj">
-      <Project>{10a095c9-3475-40b8-b00e-a28400d458ea}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\Krystal.UI.Layout\Krystal.UI.Layout.vcxproj">
       <Project>{04dce3b3-a253-4119-87d3-384f67d9dfc8}</Project>
     </ProjectReference>
