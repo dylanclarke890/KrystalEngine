@@ -144,6 +144,15 @@ namespace Krys::Gfx
       return _resources.end();
     }
 
+    void Clear() noexcept
+    {
+      _resources.clear();
+      while (!_freeIndices.empty())
+      {
+        _freeIndices.pop();
+      }
+    }
+
   private:
     NO_DISCARD THandle CreateHandle(uint16 index, uint16 generation) const noexcept
     {

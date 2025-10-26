@@ -127,29 +127,59 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Document.cpp" />
-    <ClCompile Include="src\Element.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="include\Krystal.UI\CommandRecorder.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.UI\Layer.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.UI\LayerBuilder.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.UI\Compositor.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
     <ClInclude Include="include\Krystal.UI\Document.hpp" />
-    <ClInclude Include="include\Krystal.UI\Element.hpp" />
-    <ClInclude Include="include\Krystal.UI\UnitLiterals.hpp" />
+    <ClInclude Include="include\Krystal.UI\Elements\Element.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Layout\Algorithm\AbsoluteLayout.hpp" />
+    <ClInclude Include="include\Krystal.UI\Layout\Algorithm\Align.hpp" />
+    <ClInclude Include="include\Krystal.UI\Layout\Algorithm\Baseline.hpp" />
+    <ClInclude Include="include\Krystal.UI\Layout\Algorithm\BoundAxis.hpp" />
+    <ClInclude Include="include\Krystal.UI\Layout\Algorithm\Cache.hpp" />
+    <ClInclude Include="include\Krystal.UI\Layout\Algorithm\CalculateLayout.hpp" />
+    <ClInclude Include="include\Krystal.UI\Layout\Algorithm\FlexLine.hpp" />
+    <ClInclude Include="include\Krystal.UI\Layout\Algorithm\PixelGrid.hpp" />
+    <ClInclude Include="include\Krystal.UI\Layout\Algorithm\SizingMode.hpp" />
+    <ClInclude Include="include\Krystal.UI\Layout\Algorithm\TrailingPosition.hpp" />
+    <ClInclude Include="include\Krystal.UI\Layout\Api\Config.hpp" />
+    <ClInclude Include="include\Krystal.UI\Layout\Api\Forward.hpp" />
+    <ClInclude Include="include\Krystal.UI\Layout\Api\Node.hpp" />
+    <ClInclude Include="include\Krystal.UI\Layout\Api\NodeLayout.hpp" />
+    <ClInclude Include="include\Krystal.UI\Layout\Api\NodeStyle.hpp" />
+    <ClInclude Include="include\Krystal.UI\Layout\Config\Config.hpp" />
+    <ClInclude Include="include\Krystal.UI\Layout\Event\Event.hpp" />
+    <ClInclude Include="include\Krystal.UI\Layout\LayoutEngine.hpp" />
+    <ClInclude Include="include\Krystal.UI\Layout\Node\CachedMeasurement.hpp" />
+    <ClInclude Include="include\Krystal.UI\Layout\Node\LayoutableChildren.hpp" />
+    <ClInclude Include="include\Krystal.UI\Layout\Node\LayoutResults.hpp" />
+    <ClInclude Include="include\Krystal.UI\Layout\Node\Node.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Enums\Align.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Enums\BoxSizing.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Enums\Dimension.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Enums\Direction.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Enums\Display.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Enums\Edge.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Enums\Errata.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Enums\ExperimentalFeature.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Enums\FlexDirection.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Enums\Gutter.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Enums\Justify.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Enums\MeasureMode.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Enums\NodeType.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Enums\Overflow.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Enums\PhysicalEdge.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Enums\Position.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Enums\SizingMode.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Enums\Unit.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Enums\Wrap.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Helpers\FlexDirection.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Style.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Values\StyleLength.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Values\StyleSizeLength.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Values\StyleValueHandle.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Values\StyleValuePool.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Values\UnitValue.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Krystal.Gfx.Lib\Krystal.Gfx.Lib.vcxproj">
@@ -164,12 +194,24 @@
     <ProjectReference Include="..\Krystal.Maths\Krystal.Maths.vcxproj">
       <Project>{2c0a90e5-aa87-46b7-b599-e56a9dd5047b}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\Krystal.UI.Layout\Krystal.UI.Layout.vcxproj">
-      <Project>{04dce3b3-a253-4119-87d3-384f67d9dfc8}</Project>
-    </ProjectReference>
-    <ProjectReference Include="..\Krystal.UI.Styles\Krystal.UI.Styles.vcxproj">
-      <Project>{b9a98447-c8c2-4ae1-8d48-69366c93110a}</Project>
-    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Document.cpp" />
+    <ClCompile Include="src\Layout\Algorithm\AbsoluteLayout.cpp" />
+    <ClCompile Include="src\Layout\Algorithm\Baseline.cpp" />
+    <ClCompile Include="src\Layout\Algorithm\Cache.cpp" />
+    <ClCompile Include="src\Layout\Algorithm\CalculcateLayout.cpp" />
+    <ClCompile Include="src\Layout\Algorithm\FlexLine.cpp" />
+    <ClCompile Include="src\Layout\Algorithm\PixelGrid.cpp" />
+    <ClCompile Include="src\Layout\Api\ConfigApi.cpp" />
+    <ClCompile Include="src\Layout\Api\NodeApi.cpp" />
+    <ClCompile Include="src\Layout\Api\NodeLayout.cpp" />
+    <ClCompile Include="src\Layout\Api\NodeStyle.cpp" />
+    <ClCompile Include="src\Layout\Config\Config.cpp" />
+    <ClCompile Include="src\Layout\Event\Event.cpp" />
+    <ClCompile Include="src\Layout\Node\LayoutResults.cpp" />
+    <ClCompile Include="src\Layout\Node\Node.cpp" />
+    <ClCompile Include="src\Styles\Values\UnitValue.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

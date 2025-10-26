@@ -2,18 +2,13 @@
 
 namespace Krys::UI
 {
-  Document::Document() : _layoutConfig(Layout::ConfigCreate())
+  Document::Document() : _layoutConfig(ConfigCreate())
   {
     _body = CreateElement<Element>();
-
-    auto &body = GetBody();
-    body.SetWidth(100.0_pct);
-    body.SetHeight(100.0_pct);
-    body.SetWrap(Wrap::Wrap);
   }
 
   Document::~Document()
   {
-    Layout::ConfigDestroy(_layoutConfig);
+    ConfigDestroy(_layoutConfig);
   }
 }

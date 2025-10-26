@@ -6,8 +6,8 @@
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/SmartPointers.hpp"
 #include "Krystal.Lib/Types.hpp"
-#include "Krystal.UI.Layout/LayoutEngine.hpp"
-#include "Krystal.UI/Element.hpp"
+#include "Krystal.UI/Elements/Element.hpp"
+#include "Krystal.UI/Layout/LayoutEngine.hpp"
 #include <cassert>
 
 namespace Krys::UI
@@ -19,7 +19,7 @@ namespace Krys::UI
     using ElementManager = Gfx::ResourceManager<Unique<Element>, ElementHandle>;
 
   private:
-    Layout::ConfigRef _layoutConfig;
+    ConfigRef _layoutConfig;
     ElementManager _elements;
     ElementHandle _body;
 
@@ -69,19 +69,19 @@ namespace Krys::UI
       assert(handle.IsValid() && "Invalid handle");
 
       auto &element = _elements.Get(handle);
-      for (const auto &childHandle : element->_children)
+      for (const auto &childHandle : element->Children)
       {
         DestroyElement(childHandle);
       }
 
-      if (element->_parent.IsValid())
+      if (element->Parent.IsValid())
       {
-        auto &parentElement = _elements.Get(element->_parent);
-        auto it = std::find(parentElement->_children.begin(), parentElement->_children.end(), handle);
-        if (it != parentElement->_children.end())
+        auto &parentElement = _elements.Get(element->Parent);
+        auto it = std::find(parentElement->Children.begin(), parentElement->Children.end(), handle);
+        if (it != parentElement->Children.end())
         {
-          Layout::NodeRemoveChild(parentElement->_layoutNode, element->_layoutNode);
-          parentElement->_children.erase(it);
+          NodeRemoveChild(parentElement->LayoutNode, element->LayoutNode);
+          parentElement->Children.erase(it);
         }
       }
 
@@ -94,12 +94,12 @@ namespace Krys::UI
       assert(handle.IsValid() && "Invalid handle");
 
       auto &body = _elements.Get(_body);
-      body->_children.push_back(handle);
+      body->Children.push_back(handle);
 
       auto &element = _elements.Get(handle);
-      element->_parent = _body;
+      element->Parent = _body;
 
-      Layout::NodeInsertChild(body->_layoutNode, element->_layoutNode, body->_children.size() - 1);
+      NodeInsertChild(body->LayoutNode, element->LayoutNode, body->Children.size() - 1);
     }
 
     /// @brief Detaches the element from it's parent but does not destroy it. Child elements remain intact.
@@ -107,18 +107,18 @@ namespace Krys::UI
     {
       assert(handle.IsValid() && "Invalid handle");
       auto &element = _elements.Get(handle);
-      if (!element->_parent.IsValid())
+      if (!element->Parent.IsValid())
       {
         return;
       }
-      auto &parentElement = _elements.Get(element->_parent);
-      auto it = std::find(parentElement->_children.begin(), parentElement->_children.end(), handle);
-      if (it != parentElement->_children.end())
+      auto &parentElement = _elements.Get(element->Parent);
+      auto it = std::find(parentElement->Children.begin(), parentElement->Children.end(), handle);
+      if (it != parentElement->Children.end())
       {
-        parentElement->_children.erase(it);
-        Layout::NodeRemoveChild(parentElement->_layoutNode, element->_layoutNode);
+        parentElement->Children.erase(it);
+        NodeRemoveChild(parentElement->LayoutNode, element->LayoutNode);
       }
-      element->_parent = ElementHandle {};
+      element->Parent = ElementHandle {};
     }
 
     /// @brief Inserts a child element at the specified index under the given parent element.
@@ -128,12 +128,12 @@ namespace Krys::UI
       assert(child.IsValid() && "Invalid child handle");
 
       auto &parentElement = _elements.Get(parent);
-      parentElement->_children.insert(parentElement->_children.begin() + index, child);
+      parentElement->Children.insert(parentElement->Children.begin() + index, child);
 
       auto &childElement = _elements.Get(child);
-      childElement->_parent = parent;
+      childElement->Parent = parent;
 
-      Layout::NodeInsertChild(parentElement->_layoutNode, childElement->_layoutNode, index);
+      NodeInsertChild(parentElement->LayoutNode, childElement->LayoutNode, index);
     }
 
     /// @brief Appends a child element under the given parent element.
@@ -143,13 +143,13 @@ namespace Krys::UI
       assert(child.IsValid() && "Invalid child handle");
 
       auto &parentElement = _elements.Get(parent);
-      parentElement->_children.push_back(child);
+      parentElement->Children.push_back(child);
 
       auto &childElement = _elements.Get(child);
-      childElement->_parent = parent;
+      childElement->Parent = parent;
 
-      Layout::NodeInsertChild(parentElement->_layoutNode, childElement->_layoutNode,
-                              parentElement->_children.size() - 1);
+      NodeInsertChild(parentElement->LayoutNode, childElement->LayoutNode,
+                      parentElement->Children.size() - 1);
     }
 
     /// @brief Removes the child element at the specified index from the given parent element.
@@ -158,20 +158,20 @@ namespace Krys::UI
       assert(parent.IsValid() && "Invalid parent handle");
 
       auto &parentElement = _elements.Get(parent);
-      assert(index < parentElement->_children.size() && "Index out of bounds");
+      assert(index < parentElement->Children.size() && "Index out of bounds");
 
-      ElementHandle childHandle = parentElement->_children[index];
-      parentElement->_children.erase(parentElement->_children.begin() + index);
+      ElementHandle childHandle = parentElement->Children[index];
+      parentElement->Children.erase(parentElement->Children.begin() + index);
 
       auto &childElement = _elements.Get(childHandle);
-      childElement->_parent = ElementHandle {};
+      childElement->Parent = ElementHandle {};
 
-      Layout::NodeRemoveChild(parentElement->_layoutNode, childElement->_layoutNode);
+      NodeRemoveChild(parentElement->LayoutNode, childElement->LayoutNode);
     }
 
     void Layout(float width, float height) noexcept
     {
-      Layout::NodeCalculateLayout(_elements.Get(_body)->_layoutNode, width, height, Styles::Direction::LTR);
+      NodeCalculateLayout(_elements.Get(_body)->LayoutNode, width, height, Direction::LTR);
     }
   };
 }
