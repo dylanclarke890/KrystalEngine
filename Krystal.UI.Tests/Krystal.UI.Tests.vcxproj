@@ -127,6 +127,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Krystal.Gfx.Lib\Krystal.Gfx.Lib.vcxproj">
+      <Project>{9033b349-4104-46b5-af4d-3ddedfc44176}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Krystal.Gfx\Krystal.Gfx.vcxproj">
       <Project>{f0f40133-75a2-4345-893f-f7e69e477155}</Project>
     </ProjectReference>
@@ -145,67 +148,67 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="catch_main.cpp" />
-    <ClCompile Include="tests\AlignBaseline.cpp" />
-    <ClCompile Include="tests\AspectRatioGeneral.cpp" />
-    <ClCompile Include="tests\BaselineFunc.cpp" />
-    <ClCompile Include="tests\CloneNode.cpp" />
-    <ClCompile Include="tests\ComputedMargin.cpp" />
-    <ClCompile Include="tests\ComputedPadding.cpp" />
-    <ClCompile Include="tests\Config.cpp" />
-    <ClCompile Include="tests\DefaultValues.cpp" />
-    <ClCompile Include="tests\Dirtied.cpp" />
-    <ClCompile Include="tests\DirtyMarking.cpp" />
-    <ClCompile Include="tests\Edge.cpp" />
-    <ClCompile Include="tests\Events.cpp" />
-    <ClCompile Include="tests\FlexGap.cpp" />
-    <ClCompile Include="tests\generated\AbsolutePosition.cpp" />
-    <ClCompile Include="tests\generated\AlignContent.cpp" />
-    <ClCompile Include="tests\generated\AlignItems.cpp" />
-    <ClCompile Include="tests\generated\AlignSelf.cpp" />
-    <ClCompile Include="tests\generated\AndroidNewsFeed.cpp" />
-    <ClCompile Include="tests\generated\AspectRatio.cpp" />
-    <ClCompile Include="tests\generated\Auto.cpp" />
-    <ClCompile Include="tests\generated\Border.cpp" />
-    <ClCompile Include="tests\generated\BoxSizing.cpp" />
-    <ClCompile Include="tests\generated\Dimension.cpp" />
-    <ClCompile Include="tests\generated\Display.cpp" />
-    <ClCompile Include="tests\generated\DisplayContents.cpp" />
-    <ClCompile Include="tests\generated\Flex.cpp" />
-    <ClCompile Include="tests\generated\FlexDirection.cpp" />
-    <ClCompile Include="tests\generated\FlexWrap.cpp" />
-    <ClCompile Include="tests\generated\Gap.cpp" />
-    <ClCompile Include="tests\generated\IntrinsicSize.cpp" />
-    <ClCompile Include="tests\generated\JustifyContent.cpp" />
-    <ClCompile Include="tests\generated\Margin.cpp" />
-    <ClCompile Include="tests\generated\MinMaxDimension.cpp" />
-    <ClCompile Include="tests\generated\Padding.cpp" />
-    <ClCompile Include="tests\generated\Percentage.cpp" />
-    <ClCompile Include="tests\generated\Rounding.cpp" />
-    <ClCompile Include="tests\generated\SizeOverflow.cpp" />
-    <ClCompile Include="tests\generated\StaticPosition.cpp" />
-    <ClCompile Include="tests\HadOverflow.cpp" />
-    <ClCompile Include="tests\LayoutableChildren.cpp" />
-    <ClCompile Include="tests\Measure.cpp" />
-    <ClCompile Include="tests\MeasureCache.cpp" />
-    <ClCompile Include="tests\MeasureMode.cpp" />
-    <ClCompile Include="tests\NodeCallback.cpp" />
-    <ClCompile Include="tests\NodeChild.cpp" />
-    <ClCompile Include="tests\Ordinals.cpp" />
-    <ClCompile Include="tests\Persistence.cpp" />
-    <ClCompile Include="tests\PersistentNodeCloning.cpp" />
-    <ClCompile Include="tests\Relayout.cpp" />
-    <ClCompile Include="tests\RoundingFunction.cpp" />
-    <ClCompile Include="tests\RoundingMeasureFunc.cpp" />
-    <ClCompile Include="tests\ScaleChange.cpp" />
-    <ClCompile Include="tests\Style.cpp" />
-    <ClCompile Include="tests\StyleValuePool.cpp" />
-    <ClCompile Include="tests\TreeMutation.cpp" />
-    <ClCompile Include="tests\UnitValue.cpp" />
-    <ClCompile Include="tests\utils\TestUtil.cpp" />
-    <ClCompile Include="tests\ZeroOutLayoutRecursively.cpp" />
+    <ClCompile Include="tests\Layout\AlignBaseline.cpp" />
+    <ClCompile Include="tests\Layout\AspectRatioGeneral.cpp" />
+    <ClCompile Include="tests\Layout\BaselineFunc.cpp" />
+    <ClCompile Include="tests\Layout\CloneNode.cpp" />
+    <ClCompile Include="tests\Layout\ComputedMargin.cpp" />
+    <ClCompile Include="tests\Layout\ComputedPadding.cpp" />
+    <ClCompile Include="tests\Layout\Config.cpp" />
+    <ClCompile Include="tests\Layout\DefaultValues.cpp" />
+    <ClCompile Include="tests\Layout\Dirtied.cpp" />
+    <ClCompile Include="tests\Layout\DirtyMarking.cpp" />
+    <ClCompile Include="tests\Layout\Edge.cpp" />
+    <ClCompile Include="tests\Layout\Events.cpp" />
+    <ClCompile Include="tests\Layout\FlexGap.cpp" />
+    <ClCompile Include="tests\Layout\generated\AbsolutePosition.cpp" />
+    <ClCompile Include="tests\Layout\generated\AlignContent.cpp" />
+    <ClCompile Include="tests\Layout\generated\AlignItems.cpp" />
+    <ClCompile Include="tests\Layout\generated\AlignSelf.cpp" />
+    <ClCompile Include="tests\Layout\generated\AndroidNewsFeed.cpp" />
+    <ClCompile Include="tests\Layout\generated\AspectRatio.cpp" />
+    <ClCompile Include="tests\Layout\generated\Auto.cpp" />
+    <ClCompile Include="tests\Layout\generated\Border.cpp" />
+    <ClCompile Include="tests\Layout\generated\BoxSizing.cpp" />
+    <ClCompile Include="tests\Layout\generated\Dimension.cpp" />
+    <ClCompile Include="tests\Layout\generated\Display.cpp" />
+    <ClCompile Include="tests\Layout\generated\DisplayContents.cpp" />
+    <ClCompile Include="tests\Layout\generated\Flex.cpp" />
+    <ClCompile Include="tests\Layout\generated\FlexDirection.cpp" />
+    <ClCompile Include="tests\Layout\generated\FlexWrap.cpp" />
+    <ClCompile Include="tests\Layout\generated\Gap.cpp" />
+    <ClCompile Include="tests\Layout\generated\IntrinsicSize.cpp" />
+    <ClCompile Include="tests\Layout\generated\JustifyContent.cpp" />
+    <ClCompile Include="tests\Layout\generated\Margin.cpp" />
+    <ClCompile Include="tests\Layout\generated\MinMaxDimension.cpp" />
+    <ClCompile Include="tests\Layout\generated\Padding.cpp" />
+    <ClCompile Include="tests\Layout\generated\Percentage.cpp" />
+    <ClCompile Include="tests\Layout\generated\Rounding.cpp" />
+    <ClCompile Include="tests\Layout\generated\SizeOverflow.cpp" />
+    <ClCompile Include="tests\Layout\generated\StaticPosition.cpp" />
+    <ClCompile Include="tests\Layout\HadOverflow.cpp" />
+    <ClCompile Include="tests\Layout\LayoutableChildren.cpp" />
+    <ClCompile Include="tests\Layout\Measure.cpp" />
+    <ClCompile Include="tests\Layout\MeasureCache.cpp" />
+    <ClCompile Include="tests\Layout\MeasureMode.cpp" />
+    <ClCompile Include="tests\Layout\NodeCallback.cpp" />
+    <ClCompile Include="tests\Layout\NodeChild.cpp" />
+    <ClCompile Include="tests\Layout\Ordinals.cpp" />
+    <ClCompile Include="tests\Layout\Persistence.cpp" />
+    <ClCompile Include="tests\Layout\PersistentNodeCloning.cpp" />
+    <ClCompile Include="tests\Layout\Relayout.cpp" />
+    <ClCompile Include="tests\Layout\RoundingFunction.cpp" />
+    <ClCompile Include="tests\Layout\RoundingMeasureFunc.cpp" />
+    <ClCompile Include="tests\Layout\ScaleChange.cpp" />
+    <ClCompile Include="tests\Layout\Style.cpp" />
+    <ClCompile Include="tests\Layout\StyleValuePool.cpp" />
+    <ClCompile Include="tests\Layout\TreeMutation.cpp" />
+    <ClCompile Include="tests\Layout\UnitValue.cpp" />
+    <ClCompile Include="tests\Layout\utils\TestUtil.cpp" />
+    <ClCompile Include="tests\Layout\ZeroOutLayoutRecursively.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="tests\utils\TestUtil.hpp" />
+    <ClInclude Include="tests\Layout\utils\TestUtil.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

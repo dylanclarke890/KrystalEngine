@@ -18,183 +18,183 @@
     <ClCompile Include="catch_main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\AbsolutePosition.cpp">
+    <ClCompile Include="tests\Layout\generated\AbsolutePosition.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\AlignContent.cpp">
+    <ClCompile Include="tests\Layout\generated\AlignContent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\AlignItems.cpp">
+    <ClCompile Include="tests\Layout\generated\AlignItems.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\AlignSelf.cpp">
+    <ClCompile Include="tests\Layout\generated\AlignSelf.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\AndroidNewsFeed.cpp">
+    <ClCompile Include="tests\Layout\generated\AndroidNewsFeed.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\AspectRatio.cpp">
+    <ClCompile Include="tests\Layout\generated\AspectRatio.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\Auto.cpp">
+    <ClCompile Include="tests\Layout\generated\Auto.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\Border.cpp">
+    <ClCompile Include="tests\Layout\generated\Border.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\BoxSizing.cpp">
+    <ClCompile Include="tests\Layout\generated\BoxSizing.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\Dimension.cpp">
+    <ClCompile Include="tests\Layout\generated\Dimension.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\Display.cpp">
+    <ClCompile Include="tests\Layout\generated\Display.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\DisplayContents.cpp">
+    <ClCompile Include="tests\Layout\generated\DisplayContents.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\Flex.cpp">
+    <ClCompile Include="tests\Layout\generated\Flex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\FlexDirection.cpp">
+    <ClCompile Include="tests\Layout\generated\FlexDirection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\FlexWrap.cpp">
+    <ClCompile Include="tests\Layout\generated\FlexWrap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\Gap.cpp">
+    <ClCompile Include="tests\Layout\generated\Gap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\IntrinsicSize.cpp">
+    <ClCompile Include="tests\Layout\generated\IntrinsicSize.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\JustifyContent.cpp">
+    <ClCompile Include="tests\Layout\generated\JustifyContent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\Margin.cpp">
+    <ClCompile Include="tests\Layout\generated\Margin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\MinMaxDimension.cpp">
+    <ClCompile Include="tests\Layout\generated\MinMaxDimension.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\Padding.cpp">
+    <ClCompile Include="tests\Layout\generated\Padding.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\Percentage.cpp">
+    <ClCompile Include="tests\Layout\generated\Percentage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\Rounding.cpp">
+    <ClCompile Include="tests\Layout\generated\Rounding.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\SizeOverflow.cpp">
+    <ClCompile Include="tests\Layout\generated\SizeOverflow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\generated\StaticPosition.cpp">
+    <ClCompile Include="tests\Layout\generated\StaticPosition.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\utils\TestUtil.cpp">
+    <ClCompile Include="tests\Layout\utils\TestUtil.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\AlignBaseline.cpp">
+    <ClCompile Include="tests\Layout\AlignBaseline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\AspectRatioGeneral.cpp">
+    <ClCompile Include="tests\Layout\AspectRatioGeneral.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\BaselineFunc.cpp">
+    <ClCompile Include="tests\Layout\BaselineFunc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\CloneNode.cpp">
+    <ClCompile Include="tests\Layout\CloneNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\ComputedMargin.cpp">
+    <ClCompile Include="tests\Layout\ComputedMargin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\ComputedPadding.cpp">
+    <ClCompile Include="tests\Layout\ComputedPadding.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Config.cpp">
+    <ClCompile Include="tests\Layout\Config.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\DefaultValues.cpp">
+    <ClCompile Include="tests\Layout\DefaultValues.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Dirtied.cpp">
+    <ClCompile Include="tests\Layout\Dirtied.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\DirtyMarking.cpp">
+    <ClCompile Include="tests\Layout\DirtyMarking.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Edge.cpp">
+    <ClCompile Include="tests\Layout\Edge.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Events.cpp">
+    <ClCompile Include="tests\Layout\Events.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\FlexGap.cpp">
+    <ClCompile Include="tests\Layout\FlexGap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\HadOverflow.cpp">
+    <ClCompile Include="tests\Layout\HadOverflow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\LayoutableChildren.cpp">
+    <ClCompile Include="tests\Layout\LayoutableChildren.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Measure.cpp">
+    <ClCompile Include="tests\Layout\Measure.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\MeasureCache.cpp">
+    <ClCompile Include="tests\Layout\MeasureCache.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\MeasureMode.cpp">
+    <ClCompile Include="tests\Layout\MeasureMode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\NodeCallback.cpp">
+    <ClCompile Include="tests\Layout\NodeCallback.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\NodeChild.cpp">
+    <ClCompile Include="tests\Layout\NodeChild.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Ordinals.cpp">
+    <ClCompile Include="tests\Layout\Ordinals.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Persistence.cpp">
+    <ClCompile Include="tests\Layout\Persistence.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\PersistentNodeCloning.cpp">
+    <ClCompile Include="tests\Layout\PersistentNodeCloning.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Relayout.cpp">
+    <ClCompile Include="tests\Layout\Relayout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\RoundingFunction.cpp">
+    <ClCompile Include="tests\Layout\RoundingFunction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\RoundingMeasureFunc.cpp">
+    <ClCompile Include="tests\Layout\RoundingMeasureFunc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\ScaleChange.cpp">
+    <ClCompile Include="tests\Layout\ScaleChange.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Style.cpp">
+    <ClCompile Include="tests\Layout\Style.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\StyleValuePool.cpp">
+    <ClCompile Include="tests\Layout\StyleValuePool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\TreeMutation.cpp">
+    <ClCompile Include="tests\Layout\TreeMutation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\UnitValue.cpp">
+    <ClCompile Include="tests\Layout\UnitValue.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\ZeroOutLayoutRecursively.cpp">
+    <ClCompile Include="tests\Layout\ZeroOutLayoutRecursively.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="tests\utils\TestUtil.hpp">
+    <ClInclude Include="tests\Layout\utils\TestUtil.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
