@@ -2,6 +2,7 @@
 
 #include "Krystal.Gfx/ICamera.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
+#include "Krystal.Lib/Expected.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/NativeHandle.hpp"
 #include "Krystal.Lib/SmartPointers.hpp"

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Krystal.Gfx.Lib/Handle.hpp"
 #include "Krystal.Lib/Array.hpp"
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/NullableFloat.hpp"
@@ -26,6 +27,10 @@
 
 namespace Krys::UI
 {
+  struct StyleHandle : public Gfx::Handle<StyleHandle>
+  {
+  };
+
   class Style
   {
     using Dimensions = Array<StyleValueHandle, OrdinalCount<Dimension>()>;

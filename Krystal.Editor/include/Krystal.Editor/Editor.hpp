@@ -90,14 +90,32 @@ namespace Krys
 
     void SetupUI()
     {
-      using namespace Krys::Maths;
+      using namespace Krys::UI;
+
+      auto leftBox = _document.Create<Element>();
+      _document.AppendChild(_document.Body(), leftBox);
+      _document.SetStyle(leftBox,
+                         [](auto node)
+                         {
+                           NodeStyleSetWidthPercent(node, 45.f);
+                           NodeStyleSetMargin(node, Edge::Right, 5.f);
+                           NodeStyleSetHeightPercent(node, 100.f);
+                         });
+
+      auto rightBox = _document.Create<Element>();
+      _document.AppendChild(_document.Body(), rightBox);
+      _document.SetStyle(rightBox,
+                         [](auto node)
+                         {
+                           NodeStyleSetWidthPercent(node, 50.f);
+                           NodeStyleSetMargin(node, Edge::Left, 5.f);
+                           NodeStyleSetHeightPercent(node, 100.f);
+                         });
     }
 
     void OnRender() noexcept override
     {
       _context->GraphicsContext->Render(_camera);
-      // UI::Compositor compositor(*_context->Renderer);
-      // compositor.Render(_document, (float)_width, (float)_height);
     }
 
     void OnUpdate(double deltaTime) noexcept override

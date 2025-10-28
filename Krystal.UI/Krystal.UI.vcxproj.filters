@@ -165,6 +165,9 @@
     <ClInclude Include="include\Krystal.UI\Document.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Compositor.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Layout\Algorithm\AbsoluteLayout.cpp">
@@ -210,9 +213,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Layout\Api\NodeStyle.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Document.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

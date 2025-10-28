@@ -37,9 +37,10 @@ namespace Krys::UI
     void Swap(Element &other) noexcept
     {
       std::swap(Handle, other.Handle);
-      std::swap(Children, other.Children);
       std::swap(Parent, other.Parent);
+      std::swap(Children, other.Children);
       std::swap(LayoutNode, other.LayoutNode);
+      std::swap(LayoutConfig, other.LayoutConfig);
     }
   };
 }
