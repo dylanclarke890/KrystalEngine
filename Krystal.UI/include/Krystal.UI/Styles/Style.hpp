@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Krystal.Gfx.Lib/Colour.hpp"
 #include "Krystal.Gfx.Lib/Handle.hpp"
 #include "Krystal.Lib/Array.hpp"
 #include "Krystal.Lib/Attributes.hpp"
@@ -27,10 +28,6 @@
 
 namespace Krys::UI
 {
-  struct StyleHandle : public Gfx::Handle<StyleHandle>
-  {
-  };
-
   class Style
   {
     using Dimensions = Array<StyleValueHandle, OrdinalCount<Dimension>()>;
@@ -65,8 +62,11 @@ namespace Krys::UI
     Dimensions _minDimensions {};
     Dimensions _maxDimensions {};
     StyleValueHandle _aspectRatio {};
-
     StyleValuePool _pool;
+
+    Gfx::Colour _backgroundColour {Gfx::Colours::Transparent};
+    Gfx::Colour _borderColour {Gfx::Colours::Black};
+    Gfx::Colour _textColour {Gfx::Colours::Black};
 
   public:
     using Length = StyleLength;
@@ -360,6 +360,40 @@ namespace Krys::UI
       // degenerate aspect ratios act as auto, see:
       // https://drafts.csswg.org/css-sizing-4/#valdef-aspect-ratio-ratio.
       _pool.Store(_aspectRatio, value == 0.0f || IsInf(value.Value()) ? NullableFloat {} : value);
+    }
+
+#pragma endregion
+
+#pragma region Colours
+
+    NO_DISCARD Gfx::Colour GetBackgroundColour() const noexcept
+    {
+      return _backgroundColour;
+    }
+
+    void SetBackgroundColour(Gfx::Colour colour) noexcept
+    {
+      _backgroundColour = colour;
+    }
+
+    NO_DISCARD Gfx::Colour GetBorderColour() const noexcept
+    {
+      return _borderColour;
+    }
+
+    void SetBorderColour(Gfx::Colour colour) noexcept
+    {
+      _borderColour = colour;
+    }
+
+    NO_DISCARD Gfx::Colour GetTextColour() const noexcept
+    {
+      return _textColour;
+    }
+
+    void SetTextColour(Gfx::Colour colour) noexcept
+    {
+      _textColour = colour;
     }
 
 #pragma endregion

@@ -148,7 +148,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="catch_main.cpp" />
-    <ClCompile Include="tests\Document.cpp" />
     <ClCompile Include="tests\Layout\AlignBaseline.cpp" />
     <ClCompile Include="tests\Layout\AspectRatioGeneral.cpp" />
     <ClCompile Include="tests\Layout\BaselineFunc.cpp" />

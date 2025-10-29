@@ -192,9 +192,6 @@
     <ClCompile Include="tests\Layout\ZeroOutLayoutRecursively.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Document.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tests\Layout\utils\TestUtil.hpp">

@@ -531,4 +531,34 @@ namespace Krys::UI
   {
     return static_cast<UnitValue>(node->GetStyle().GetMaxDimension(Dimension::Height));
   }
+
+  void NodeStyleSetBackgroundColour(NodeRef node, const Gfx::Colour &colour)
+  {
+    node->GetStyle().SetBackgroundColour(colour);
+  }
+
+  Gfx::Colour NodeStyleGetBackgroundColour(NodeConstRef node)
+  {
+    return node->GetStyle().GetBackgroundColour();
+  }
+
+  void NodeStyleSetBorderColour(NodeRef node, const Gfx::Colour &colour)
+  {
+    node->GetStyle().SetBorderColour(colour);
+  }
+
+  Gfx::Colour NodeStyleGetBorderColour(NodeConstRef node)
+  {
+    return node->GetStyle().GetBorderColour();
+  }
+
+  void NodeStyleSetTextColour(NodeRef node, const Gfx::Colour &colour)
+  {
+    node->GetStyle().SetTextColour(colour);
+  }
+
+  Gfx::Colour NodeStyleGetTextColour(NodeConstRef node)
+  {
+    return node->GetStyle().GetTextColour();
+  }
 }

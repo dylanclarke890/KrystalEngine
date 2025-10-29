@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Krystal.Gfx.Lib/Colour.hpp"
 #include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Lib/List.hpp"
@@ -56,12 +57,10 @@ namespace Krys::UI
       return handle;
     }
 
-    template <typename Fn>
-    void SetStyle(ElementHandle handle, Fn &&setter)
+    NO_DISCARD Element &Get(ElementHandle element)
     {
-      assert(handle.IsValid() && "Invalid handle");
-      auto &element = _elements.Get(handle);
-      setter(element.LayoutNode);
+      assert(element.IsValid() && "Invalid handle");
+      return _elements.Get(element);
     }
 
     /// @brief Detaches the element from it's parent but does not destroy it. Child elements remain intact.
@@ -308,5 +307,533 @@ namespace Krys::UI
     {
       return BreadthFirstIterator(this, ElementHandle {});
     }
+
+#pragma region Styles
+
+    void ElementCopyStyle(ElementHandle dstElement, ElementHandle srcElement)
+    {
+      assert(dstElement.IsValid() && "Invalid destination element handle");
+      assert(srcElement.IsValid() && "Invalid source element handle");
+      auto &dstElem = _elements.Get(dstElement);
+      auto &srcElem = _elements.Get(srcElement);
+      NodeCopyStyle(dstElem.LayoutNode, srcElem.LayoutNode);
+    }
+
+    void ElementStyleSetDirection(ElementHandle element, Direction direction)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetDirection(_elements.Get(element).LayoutNode, direction);
+    }
+    Direction ElementStyleGetDirection(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetDirection(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetFlexDirection(ElementHandle element, FlexDirection flexDirection)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetFlexDirection(_elements.Get(element).LayoutNode, flexDirection);
+    }
+    FlexDirection ElementStyleGetFlexDirection(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetFlexDirection(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetJustifyContent(ElementHandle element, Justify justifyContent)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetJustifyContent(_elements.Get(element).LayoutNode, justifyContent);
+    }
+    Justify ElementStyleGetJustifyContent(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetJustifyContent(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetAlignContent(ElementHandle element, Align alignContent)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetAlignContent(_elements.Get(element).LayoutNode, alignContent);
+    }
+    Align ElementStyleGetAlignContent(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetAlignContent(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetAlignItems(ElementHandle element, Align alignItems)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetAlignItems(_elements.Get(element).LayoutNode, alignItems);
+    }
+    Align ElementStyleGetAlignItems(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetAlignItems(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetAlignSelf(ElementHandle element, Align alignSelf)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetAlignSelf(_elements.Get(element).LayoutNode, alignSelf);
+    }
+    Align ElementStyleGetAlignSelf(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetAlignSelf(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetPositionType(ElementHandle element, PositionType positionType)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetPositionType(_elements.Get(element).LayoutNode, positionType);
+    }
+    PositionType ElementStyleGetPositionType(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetPositionType(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetFlexWrap(ElementHandle element, Wrap flexWrap)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetFlexWrap(_elements.Get(element).LayoutNode, flexWrap);
+    }
+    Wrap ElementStyleGetFlexWrap(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetFlexWrap(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetOverflow(ElementHandle element, Overflow overflow)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetOverflow(_elements.Get(element).LayoutNode, overflow);
+    }
+    Overflow ElementStyleGetOverflow(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetOverflow(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetDisplay(ElementHandle element, Display display)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetDisplay(_elements.Get(element).LayoutNode, display);
+    }
+    Display ElementStyleGetDisplay(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetDisplay(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetFlex(ElementHandle element, float flex)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetFlex(_elements.Get(element).LayoutNode, flex);
+    }
+    float ElementStyleGetFlex(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetFlex(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetFlexGrow(ElementHandle element, float flexGrow)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetFlexGrow(_elements.Get(element).LayoutNode, flexGrow);
+    }
+    float ElementStyleGetFlexGrow(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetFlexGrow(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetFlexShrink(ElementHandle element, float flexShrink)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetFlexShrink(_elements.Get(element).LayoutNode, flexShrink);
+    }
+    float ElementStyleGetFlexShrink(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetFlexShrink(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetFlexBasis(ElementHandle element, float flexBasis)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetFlexBasis(_elements.Get(element).LayoutNode, flexBasis);
+    }
+    void ElementStyleSetFlexBasisPercent(ElementHandle element, float flexBasis)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetFlexBasisPercent(_elements.Get(element).LayoutNode, flexBasis);
+    }
+    void ElementStyleSetFlexBasisAuto(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetFlexBasisAuto(_elements.Get(element).LayoutNode);
+    }
+    void ElementStyleSetFlexBasisMaxContent(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetFlexBasisMaxContent(_elements.Get(element).LayoutNode);
+    }
+    void ElementStyleSetFlexBasisFitContent(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetFlexBasisFitContent(_elements.Get(element).LayoutNode);
+    }
+    void ElementStyleSetFlexBasisStretch(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetFlexBasisStretch(_elements.Get(element).LayoutNode);
+    }
+    UnitValue ElementStyleGetFlexBasis(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetFlexBasis(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetPosition(ElementHandle element, Edge edge, float position)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetPosition(_elements.Get(element).LayoutNode, edge, position);
+    }
+    void ElementStyleSetPositionPercent(ElementHandle element, Edge edge, float position)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetPositionPercent(_elements.Get(element).LayoutNode, edge, position);
+    }
+    UnitValue ElementStyleGetPosition(ElementHandle element, Edge edge)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetPosition(_elements.Get(element).LayoutNode, edge);
+    }
+    void ElementStyleSetPositionAuto(ElementHandle element, Edge edge)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetPositionAuto(_elements.Get(element).LayoutNode, edge);
+    }
+
+    void ElementStyleSetMargin(ElementHandle element, Edge edge, float margin)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMargin(_elements.Get(element).LayoutNode, edge, margin);
+    }
+    void ElementStyleSetMarginPercent(ElementHandle element, Edge edge, float margin)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMarginPercent(_elements.Get(element).LayoutNode, edge, margin);
+    }
+    void ElementStyleSetMarginAuto(ElementHandle element, Edge edge)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMarginAuto(_elements.Get(element).LayoutNode, edge);
+    }
+    UnitValue ElementStyleGetMargin(ElementHandle element, Edge edge)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetMargin(_elements.Get(element).LayoutNode, edge);
+    }
+
+    void ElementStyleSetPadding(ElementHandle element, Edge edge, float padding)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetPadding(_elements.Get(element).LayoutNode, edge, padding);
+    }
+    void ElementStyleSetPaddingPercent(ElementHandle element, Edge edge, float padding)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetPaddingPercent(_elements.Get(element).LayoutNode, edge, padding);
+    }
+    UnitValue ElementStyleGetPadding(ElementHandle element, Edge edge)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetPadding(_elements.Get(element).LayoutNode, edge);
+    }
+
+    void ElementStyleSetBorder(ElementHandle element, Edge edge, float border)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetBorder(_elements.Get(element).LayoutNode, edge, border);
+    }
+    float ElementStyleGetBorder(ElementHandle element, Edge edge)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetBorder(_elements.Get(element).LayoutNode, edge);
+    }
+
+    void ElementStyleSetGap(ElementHandle element, Gutter gutter, float gapLength)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetGap(_elements.Get(element).LayoutNode, gutter, gapLength);
+    }
+    void ElementStyleSetGapPercent(ElementHandle element, Gutter gutter, float gapLength)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetGapPercent(_elements.Get(element).LayoutNode, gutter, gapLength);
+    }
+    UnitValue ElementStyleGetGap(ElementHandle element, Gutter gutter)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetGap(_elements.Get(element).LayoutNode, gutter);
+    }
+
+    void ElementStyleSetBoxSizing(ElementHandle element, BoxSizing boxSizing)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetBoxSizing(_elements.Get(element).LayoutNode, boxSizing);
+    }
+    BoxSizing ElementStyleGetBoxSizing(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetBoxSizing(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetWidth(ElementHandle element, float width)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetWidth(_elements.Get(element).LayoutNode, width);
+    }
+    void ElementStyleSetWidthPercent(ElementHandle element, float width)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetWidthPercent(_elements.Get(element).LayoutNode, width);
+    }
+    void ElementStyleSetWidthAuto(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetWidthAuto(_elements.Get(element).LayoutNode);
+    }
+    void ElementStyleSetWidthMaxContent(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetWidthMaxContent(_elements.Get(element).LayoutNode);
+    }
+    void ElementStyleSetWidthFitContent(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetWidthFitContent(_elements.Get(element).LayoutNode);
+    }
+    void ElementStyleSetWidthStretch(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetWidthStretch(_elements.Get(element).LayoutNode);
+    }
+    UnitValue ElementStyleGetWidth(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetWidth(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetHeight(ElementHandle element, float height)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetHeight(_elements.Get(element).LayoutNode, height);
+    }
+    void ElementStyleSetHeightPercent(ElementHandle element, float height)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetHeightPercent(_elements.Get(element).LayoutNode, height);
+    }
+    void ElementStyleSetHeightAuto(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetHeightAuto(_elements.Get(element).LayoutNode);
+    }
+    void ElementStyleSetHeightMaxContent(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetHeightMaxContent(_elements.Get(element).LayoutNode);
+    }
+    void ElementStyleSetHeightFitContent(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetHeightFitContent(_elements.Get(element).LayoutNode);
+    }
+    void ElementStyleSetHeightStretch(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetHeightStretch(_elements.Get(element).LayoutNode);
+    }
+    UnitValue ElementStyleGetHeight(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetHeight(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetMinWidth(ElementHandle element, float minWidth)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMinWidth(_elements.Get(element).LayoutNode, minWidth);
+    }
+    void ElementStyleSetMinWidthPercent(ElementHandle element, float minWidth)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMinWidthPercent(_elements.Get(element).LayoutNode, minWidth);
+    }
+    void ElementStyleSetMinWidthMaxContent(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMinWidthMaxContent(_elements.Get(element).LayoutNode);
+    }
+    void ElementStyleSetMinWidthFitContent(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMinWidthFitContent(_elements.Get(element).LayoutNode);
+    }
+    void ElementStyleSetMinWidthStretch(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMinWidthStretch(_elements.Get(element).LayoutNode);
+    }
+    UnitValue ElementStyleGetMinWidth(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetMinWidth(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetMinHeight(ElementHandle element, float minHeight)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMinHeight(_elements.Get(element).LayoutNode, minHeight);
+    }
+    void ElementStyleSetMinHeightPercent(ElementHandle element, float minHeight)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMinHeightPercent(_elements.Get(element).LayoutNode, minHeight);
+    }
+    void ElementStyleSetMinHeightMaxContent(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMinHeightMaxContent(_elements.Get(element).LayoutNode);
+    }
+    void ElementStyleSetMinHeightFitContent(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMinHeightFitContent(_elements.Get(element).LayoutNode);
+    }
+    void ElementStyleSetMinHeightStretch(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMinHeightStretch(_elements.Get(element).LayoutNode);
+    }
+    UnitValue ElementStyleGetMinHeight(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetMinHeight(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetMaxWidth(ElementHandle element, float maxWidth)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMaxWidth(_elements.Get(element).LayoutNode, maxWidth);
+    }
+    void ElementStyleSetMaxWidthPercent(ElementHandle element, float maxWidth)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMaxWidthPercent(_elements.Get(element).LayoutNode, maxWidth);
+    }
+    void ElementStyleSetMaxWidthMaxContent(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMaxWidthMaxContent(_elements.Get(element).LayoutNode);
+    }
+    void ElementStyleSetMaxWidthFitContent(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMaxWidthFitContent(_elements.Get(element).LayoutNode);
+    }
+    void ElementStyleSetMaxWidthStretch(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMaxWidthStretch(_elements.Get(element).LayoutNode);
+    }
+    UnitValue ElementStyleGetMaxWidth(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetMaxWidth(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetMaxHeight(ElementHandle element, float maxHeight)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMaxHeight(_elements.Get(element).LayoutNode, maxHeight);
+    }
+    void ElementStyleSetMaxHeightPercent(ElementHandle element, float maxHeight)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMaxHeightPercent(_elements.Get(element).LayoutNode, maxHeight);
+    }
+    void ElementStyleSetMaxHeightMaxContent(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMaxHeightMaxContent(_elements.Get(element).LayoutNode);
+    }
+    void ElementStyleSetMaxHeightFitContent(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMaxHeightFitContent(_elements.Get(element).LayoutNode);
+    }
+    void ElementStyleSetMaxHeightStretch(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetMaxHeightStretch(_elements.Get(element).LayoutNode);
+    }
+    UnitValue ElementStyleGetMaxHeight(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetMaxHeight(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetAspectRatio(ElementHandle element, float aspectRatio)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetAspectRatio(_elements.Get(element).LayoutNode, aspectRatio);
+    }
+    float ElementStyleGetAspectRatio(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetAspectRatio(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetBackgroundColour(ElementHandle element, const Gfx::Colour &colour)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetBackgroundColour(_elements.Get(element).LayoutNode, colour);
+    }
+    Gfx::Colour ElementStyleGetBackgroundColour(ElementHandle element, const Gfx::Colour &colour)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetBackgroundColour(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetBorderColour(ElementHandle element, const Gfx::Colour &colour)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetBorderColour(_elements.Get(element).LayoutNode, colour);
+    }
+    Gfx::Colour ElementStyleGetBorderColour(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetBorderColour(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetTextColour(ElementHandle element, const Gfx::Colour &color)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetTextColour(_elements.Get(element).LayoutNode, color);
+    }
+    Gfx::Colour ElementStyleGetTextColour(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetTextColour(_elements.Get(element).LayoutNode);
+    }
+
+#pragma endregion
   };
 }

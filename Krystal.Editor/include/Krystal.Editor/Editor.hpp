@@ -12,6 +12,7 @@
 #include "Krystal.Maths/Random.hpp"
 #include "Krystal.Platform/Events.hpp"
 #include "Krystal.Platform/Keys.hpp"
+#include "Krystal.UI/Compositor.hpp"
 #include "Krystal.UI/Document.hpp"
 
 namespace Krys
@@ -19,17 +20,19 @@ namespace Krys
   class Editor : public Application
   {
   private:
-    UI::Document _document;
     uint32 _width {0u};
     uint32 _height {0u};
     Gfx::FirstPersonCamera _camera;
+    UI::Document _document;
+    UI::Compositor _compositor;
 
   public:
     explicit Editor(int argc, char **argv, const ApplicationSettings &settings) noexcept
         : Application(argc, argv, settings), _width(settings.WindowSettings.Size.Width),
           _height(settings.WindowSettings.Size.Height),
           _camera({0.f, 0.f, 5.f}, {0.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, Maths::Radians(45.f),
-                  (float)_width / (float)_height, 0.1f, 100.f)
+                  (float)_width / (float)_height, 0.1f, 100.f),
+          _document(), _compositor(*_context->GraphicsContext, *_context->Renderer)
     {
     }
 
@@ -92,30 +95,27 @@ namespace Krys
     {
       using namespace Krys::UI;
 
+      _document.ElementStyleSetBackgroundColour(_document.Body(), Gfx::Colours::Green);
+      _document.ElementStyleSetFlexDirection(_document.Body(), FlexDirection::Row);
+      _document.ElementStyleSetJustifyContent(_document.Body(), Justify::SpaceBetween);
+
       auto leftBox = _document.Create<Element>();
       _document.AppendChild(_document.Body(), leftBox);
-      _document.SetStyle(leftBox,
-                         [](auto node)
-                         {
-                           NodeStyleSetWidthPercent(node, 45.f);
-                           NodeStyleSetMargin(node, Edge::Right, 5.f);
-                           NodeStyleSetHeightPercent(node, 100.f);
-                         });
+      _document.ElementStyleSetWidthPercent(leftBox, 45.f);
+      _document.ElementStyleSetHeightPercent(leftBox, 100.f);
+      _document.ElementStyleSetBackgroundColour(leftBox, Gfx::Colours::Blue);
 
       auto rightBox = _document.Create<Element>();
       _document.AppendChild(_document.Body(), rightBox);
-      _document.SetStyle(rightBox,
-                         [](auto node)
-                         {
-                           NodeStyleSetWidthPercent(node, 50.f);
-                           NodeStyleSetMargin(node, Edge::Left, 5.f);
-                           NodeStyleSetHeightPercent(node, 100.f);
-                         });
+      _document.ElementStyleSetWidthPercent(rightBox, 45.f);
+      _document.ElementStyleSetHeightPercent(rightBox, 100.f);
+      _document.ElementStyleSetBackgroundColour(rightBox, Gfx::Colours::Red);
     }
 
     void OnRender() noexcept override
     {
       _context->GraphicsContext->Render(_camera);
+      _compositor.Render(_document, (float)_width, (float)_height);
     }
 
     void OnUpdate(double deltaTime) noexcept override
