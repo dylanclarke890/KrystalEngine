@@ -42,8 +42,6 @@ namespace Krys
       _context->Logger->Info("Initialising Krystal Editor...");
 
       BindEvents();
-      _context->GraphicsContext->Setup();
-
       SetupUI();
     }
 

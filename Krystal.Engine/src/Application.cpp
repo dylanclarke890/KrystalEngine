@@ -20,12 +20,14 @@ namespace Krys
     CreateServices(argc, argv, settings);
 
     _context->Window->SetCallbacks(CreateWindowCallbacks());
+    _context->GraphicsContext->Startup();
     _context->Renderer->Startup();
   }
 
   Application::~Application() noexcept
   {
     _context->Renderer->Shutdown();
+    _context->GraphicsContext->Shutdown();
 
     _context->Events.reset();
     _context->Input.reset();
