@@ -86,7 +86,16 @@ namespace Krys::Gfx::OpenGL
       CommandHeader header = reader.ReadHeader();
       switch (header.Type)
       {
-        case KRYS_CMD_TYPE("RectCommand"):
+        case Commands::BindRenderTarget:
+        {
+          const auto &cmd = reader.ReadCommand<BindRenderTargetCommand>();
+          auto &rtRegistry = static_cast<RenderTargetRegistry &>(_context.RenderTargets());
+          auto &rt = rtRegistry.Get(cmd.RenderTarget);
+          rtRegistry.Bind(cmd.RenderTarget);
+          glViewport(0, 0, rt.Width(), rt.Height());
+          break;
+        }
+        case Commands::Rect:
         {
           const auto &cmd = reader.ReadCommand<RectCommand>();
           float flippedY = _context.Height() - (cmd.Position.y + cmd.Size.y);

@@ -7,6 +7,7 @@
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/SmartPointers.hpp"
 #include "Krystal.Lib/Stack.hpp"
+#include "Krystal.Lib/String.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.UI/Elements/Element.hpp"
 #include "Krystal.UI/Layout/LayoutEngine.hpp"
@@ -155,157 +156,6 @@ namespace Krys::UI
       }
 
       _elements.Remove(handle);
-    }
-
-    /// @brief Depth-first iterator for element traversal
-    class DepthFirstIterator
-    {
-    private:
-      Document *_doc;
-      Stack<ElementHandle> _stack;
-
-    public:
-      using iterator_category = std::forward_iterator_tag;
-      using value_type = ElementHandle;
-      using reference = ElementHandle &;
-      using pointer = ElementHandle *;
-      using difference_type = std::ptrdiff_t;
-
-      DepthFirstIterator(Document *doc, ElementHandle start) : _doc(doc)
-      {
-        if (start.IsValid())
-        {
-          _stack.push(start);
-        }
-      }
-
-      ElementHandle operator*() const
-      {
-        return _stack.top();
-      }
-
-      DepthFirstIterator &operator++()
-      {
-        if (_stack.empty())
-        {
-          return *this;
-        }
-
-        ElementHandle current = _stack.top();
-        _stack.pop();
-
-        auto &element = _doc->_elements.Get(current);
-        // Push children in reverse order so leftmost child is processed first
-        for (auto it = element.Children.rbegin(); it != element.Children.rend(); ++it)
-        {
-          _stack.push(*it);
-        }
-
-        return *this;
-      }
-
-      bool operator==(const DepthFirstIterator &other) const
-      {
-        if (_stack.empty() && other._stack.empty())
-        {
-          return true;
-        }
-        if (_stack.empty() || other._stack.empty())
-        {
-          return false;
-        }
-        return _stack.top() == other._stack.top();
-      }
-
-      bool operator!=(const DepthFirstIterator &other) const
-      {
-        return !(*this == other);
-      }
-    };
-
-    DepthFirstIterator BeginDepthFirst()
-    {
-      return DepthFirstIterator(this, _body);
-    }
-
-    DepthFirstIterator EndDepthFirst()
-    {
-      return DepthFirstIterator(this, ElementHandle {});
-    }
-
-    /// @brief Breadth-first iterator for element traversal
-    class BreadthFirstIterator
-    {
-    private:
-      Document *_doc;
-      Queue<ElementHandle> _queue;
-
-    public:
-      using iterator_category = std::forward_iterator_tag;
-      using value_type = ElementHandle;
-      using reference = ElementHandle &;
-      using pointer = ElementHandle *;
-      using difference_type = std::ptrdiff_t;
-
-      BreadthFirstIterator(Document *doc, ElementHandle start) : _doc(doc)
-      {
-        if (start.IsValid())
-        {
-          _queue.push(start);
-        }
-      }
-
-      ElementHandle operator*() const
-      {
-        return _queue.front();
-      }
-
-      BreadthFirstIterator &operator++()
-      {
-        if (_queue.empty())
-        {
-          return *this;
-        }
-
-        ElementHandle current = _queue.front();
-        _queue.pop();
-
-        auto &element = _doc->_elements.Get(current);
-        for (auto &child : element.Children)
-        {
-          _queue.push(child);
-        }
-
-        return *this;
-      }
-
-      bool operator==(const BreadthFirstIterator &other) const
-      {
-        if (_queue.empty() && other._queue.empty())
-        {
-          return true;
-        }
-        if (_queue.empty() || other._queue.empty())
-        {
-          return false;
-        }
-        return _queue.front() == other._queue.front();
-      }
-
-      bool operator!=(const BreadthFirstIterator &other) const
-      {
-        return !(*this == other);
-      }
-    };
-
-    BreadthFirstIterator BeginBreadthFirst()
-    {
-      return BreadthFirstIterator(this, _body);
-    }
-
-    BreadthFirstIterator EndBreadthFirst()
-    {
-      return BreadthFirstIterator(this, ElementHandle {});
     }
 
 #pragma region Styles
@@ -835,5 +685,11 @@ namespace Krys::UI
     }
 
 #pragma endregion
+
+    void ElementSetTextContent(ElementHandle element, const string &text)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+
+    }
   };
 }

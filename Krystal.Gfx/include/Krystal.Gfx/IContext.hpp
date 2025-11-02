@@ -7,21 +7,19 @@
 #include "Krystal.Lib/NativeHandle.hpp"
 #include "Krystal.Lib/SmartPointers.hpp"
 #include "Krystal.Lib/Types.hpp"
+#include "Krystal.Gfx/Registries/IBufferRegistry.hpp"
+#include "Krystal.Gfx/Registries/IImageRegistry.hpp"
+#include "Krystal.Gfx/Registries/IImageViewRegistry.hpp"
+#include "Krystal.Gfx/Registries/ISamplerRegistry.hpp"
+#include "Krystal.Gfx/Registries/IShaderRegistry.hpp"
+#include "Krystal.Gfx/Registries/IMeshRegistry.hpp"
+#include "Krystal.Gfx/Registries/ITextureRegistry.hpp"
+#include "Krystal.Gfx/Registries/IRenderTargetRegistry.hpp"
+#include "Krystal.Gfx/Registries/IMaterialRegistry.hpp"
+#include "Krystal.Gfx/Registries/IFontRegistry.hpp"
 
 namespace Krys::Gfx
 {
-  class IContext;
-  class IBufferRegistry;
-  class IImageRegistry;
-  class IImageViewRegistry;
-  class ISamplerRegistry;
-  class IShaderRegistry;
-  class IMeshRegistry;
-  class ITextureRegistry;
-  class IRenderTargetRegistry;
-  class IMaterialRegistry;
-  class IFontRegistry;
-
   struct ContextSettings
   {
     NativeHandle WindowHandle {nullptr};
@@ -30,7 +28,7 @@ namespace Krys::Gfx
     IO::VirtualFileSystem *VFS {nullptr};
   };
 
-  Expected<Unique<IContext>> CreateContext(const ContextSettings &settings) noexcept;
+  Expected<Unique<class IContext>> CreateContext(const ContextSettings &settings) noexcept;
 
   enum class API
   {
@@ -51,7 +49,9 @@ namespace Krys::Gfx
   public:
     virtual ~IContext() noexcept = default;
 
-    virtual void Setup() noexcept = 0;
+    virtual void Startup() noexcept = 0;
+    
+    virtual void Shutdown() noexcept = 0;
 
     virtual void Render(ICamera &camera) noexcept = 0;
 

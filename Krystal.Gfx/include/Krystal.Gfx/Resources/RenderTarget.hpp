@@ -82,7 +82,7 @@ namespace Krys::Gfx
   struct AttachmentDesc
   {
     AttachmentType Type;
-    ImageFormat Format;
+    PixelFormat Format;
     AttachmentLoadOp OnLoad = AttachmentLoadOp::DontCare;
     AttachmentStoreOp OnStore = AttachmentStoreOp::DontCare;
     AttachmentClearValue ClearValue;

@@ -29,6 +29,8 @@ namespace Krys::Gfx::OpenGL
     RenderTargetAttachment _stencilAttachment {};
     RenderTargetAttachment _depthStencilAttachment {};
 
+    RenderTarget() = default;
+
   public:
     MOVE_SWAP(RenderTarget)
 
@@ -40,6 +42,13 @@ namespace Krys::Gfx::OpenGL
     ~RenderTarget() noexcept
     {
       glDeleteFramebuffers(1, &_fbo);
+    }
+
+    NO_DISCARD static RenderTarget CreateScreenFramebuffer(uint32 width, uint32 height) noexcept
+    {
+      RenderTarget rt;
+      rt.SetDimensions(width, height);
+      return rt;
     }
 
     void AddColorAttachment(const RenderTargetAttachment &attachment) noexcept
@@ -145,12 +154,12 @@ namespace Krys::Gfx::OpenGL
       return _fbo;
     }
 
-    NO_DISCARD uint32 GetWidth() const noexcept
+    NO_DISCARD uint32 Width() const noexcept
     {
       return _width;
     }
 
-    NO_DISCARD uint32 GetHeight() const noexcept
+    NO_DISCARD uint32 Height() const noexcept
     {
       return _height;
     }
@@ -177,6 +186,13 @@ namespace Krys::Gfx::OpenGL
     NO_DISCARD const RenderTargetAttachment &GetDepthStencilAttachment() const noexcept
     {
       return _depthStencilAttachment;
+    }
+
+    /// @brief Sets the dimensions of the render target. NOTE: Does not resize attachments.
+    void SetDimensions(uint32 width, uint32 height) noexcept
+    {
+      _width = width;
+      _height = height;
     }
 
   private:

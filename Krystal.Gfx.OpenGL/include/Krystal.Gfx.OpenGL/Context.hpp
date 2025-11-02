@@ -47,7 +47,9 @@ namespace Krys::Gfx::OpenGL
 
     ~Context() noexcept override = default;
 
-    void Setup() noexcept override;
+    void Startup() noexcept override;
+    
+    void Shutdown() noexcept override;
 
     void Render(ICamera &camera) noexcept override;
 

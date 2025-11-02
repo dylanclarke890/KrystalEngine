@@ -628,9 +628,22 @@ namespace Krys::Gfx::OpenGL
   {
   }
 
-  void Context::Setup() noexcept
+  void Context::Startup() noexcept
   {
     EnableDebugOutput();
+
+    _buffers.Startup();
+    _images.Startup();
+    _imageViews.Startup();
+    _samplers.Startup();
+    _shaders.Startup();
+    _meshes.Startup();
+    _textures.Startup();
+    _renderTargets.Startup();
+    _materials.Startup();
+    _fonts.Startup();
+
+    _renderTargets.OnWindowResize(_width, _height);
 
     // Shaders
     {
@@ -792,6 +805,20 @@ namespace Krys::Gfx::OpenGL
     DefaultMTSDFFont = _fonts.Load(fontPath, fontSize, FontType::MTSDF);
     ScreenOrthoProjection = Ortho(0.0f, static_cast<float>(_width), 0.0f, static_cast<float>(_height));
     _buffers.Get(bufferHandles.at("matrices")).Update(ScreenOrthoProjection, 2 * sizeof(Mat4));
+  }
+
+  void Context::Shutdown() noexcept
+  {
+    _fonts.Shutdown();
+    _materials.Shutdown();
+    _renderTargets.Shutdown();
+    _textures.Shutdown();
+    _meshes.Shutdown();
+    _shaders.Shutdown();
+    _samplers.Shutdown();
+    _imageViews.Shutdown();
+    _images.Shutdown();
+    _buffers.Shutdown();
   }
 
   void Context::Render(ICamera &camera) noexcept

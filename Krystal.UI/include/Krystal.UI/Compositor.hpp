@@ -2,6 +2,7 @@
 
 #include "Krystal.Gfx/Commands/CommandList.hpp"
 #include "Krystal.Gfx/Commands/Commands.hpp"
+#include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/IRenderer.hpp"
 #include "Krystal.Lib/Macros.hpp"
@@ -19,6 +20,13 @@ namespace Krys::UI
     Gfx::IRenderer &_renderer;
     Gfx::CommandArena _commandArena;
 
+    struct State
+    {
+      ElementHandle CurrentElement;
+      float ParentX;
+      float ParentY;
+    };
+
   public:
     Compositor(Gfx::IContext &context, Gfx::IRenderer &renderer) noexcept
         : _context(context), _renderer(renderer)
@@ -27,35 +35,44 @@ namespace Krys::UI
 
     ~Compositor() = default;
 
-    void Render(Document &document, float maxWidth, float maxHeight) noexcept
+    void Render(Document &document, Gfx::RenderTargetHandle renderTarget = {}) noexcept
     {
-      _commandArena.Reset();
-      document.Reflow(maxWidth, maxHeight);
-      Gfx::CommandList commandList(_commandArena);
-
-      for (auto it = document.BeginBreadthFirst(); it != document.EndBreadthFirst(); ++it)
+      if (!renderTarget.IsValid())
       {
-        auto &element = document.Get(*it);
-
-        auto node = element.LayoutNode;
-        float x = NodeLayoutGetLeft(node);
-        float y = NodeLayoutGetTop(node);
-        float width = NodeLayoutGetWidth(node);
-        float height = NodeLayoutGetHeight(node);
-
-        Gfx::RectCommand rectCmd;
-        rectCmd.Position = {x, y};
-        rectCmd.Size = {width, height};
-        rectCmd.BackgroundColour = NodeStyleGetBackgroundColour(node);
-        rectCmd.BorderColour = NodeStyleGetBorderColour(node);
-        rectCmd.BorderThickness = NodeLayoutGetBorder(node, Edge::Left);
-        rectCmd.BorderRadius = 0.0f;
-        commandList.Push(rectCmd);
+        renderTarget = _context.RenderTargets().GetScreenRenderTarget();
       }
 
+      _commandArena.Reset();
+      auto renderTargetDimensions = _context.RenderTargets().GetDimensions(renderTarget);
+      document.Reflow(renderTargetDimensions.x, renderTargetDimensions.y);
+      Gfx::CommandList commandList(_commandArena);
+      commandList.Push(Gfx::BindRenderTargetCommand {renderTarget});
+      RenderElement(commandList, document, {document.Body(), 0.f, 0.f});
       _renderer.Submit(commandList);
     }
 
   private:
+    void RenderElement(Gfx::CommandList &list, Document &document, const State &state)
+    {
+      auto &element = document.Get(state.CurrentElement);
+      auto node = element.LayoutNode;
+
+      float x = state.ParentX + NodeLayoutGetLeft(node);
+      float y = state.ParentY + NodeLayoutGetTop(node);
+      float w = NodeLayoutGetWidth(node);
+      float h = NodeLayoutGetHeight(node);
+
+      Gfx::RectCommand command;
+      command.Position = {x, y};
+      command.Size = {w, h};
+      command.BackgroundColour = NodeStyleGetBackgroundColour(node);
+      command.BorderColour = NodeStyleGetBorderColour(node);
+      list.Push(command);
+
+      for (auto &child : element.Children)
+      {
+        RenderElement(list, document, {child, x, y});
+      }
+    }
   };
 }

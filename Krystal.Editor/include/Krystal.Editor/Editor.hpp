@@ -103,17 +103,29 @@ namespace Krys
       _document.ElementStyleSetHeightPercent(leftBox, 100.f);
       _document.ElementStyleSetBackgroundColour(leftBox, Gfx::Colours::Blue);
 
+      auto leftInnerBox = _document.Create<Element>();
+      _document.AppendChild(leftBox, leftInnerBox);
+      _document.ElementStyleSetWidthPercent(leftInnerBox, 50.f);
+      _document.ElementStyleSetHeightPercent(leftInnerBox, 50.f);
+      _document.ElementStyleSetBackgroundColour(leftInnerBox, Gfx::Colours::Yellow);
+
       auto rightBox = _document.Create<Element>();
       _document.AppendChild(_document.Body(), rightBox);
       _document.ElementStyleSetWidthPercent(rightBox, 45.f);
       _document.ElementStyleSetHeightPercent(rightBox, 100.f);
       _document.ElementStyleSetBackgroundColour(rightBox, Gfx::Colours::Red);
+
+      auto rightInnerBox = _document.Create<Element>();
+      _document.AppendChild(rightBox, rightInnerBox);
+      _document.ElementStyleSetWidthPercent(rightInnerBox, 50.f);
+      _document.ElementStyleSetHeightPercent(rightInnerBox, 50.f);
+      _document.ElementStyleSetBackgroundColour(rightInnerBox, Gfx::Colours::Cyan);
     }
 
     void OnRender() noexcept override
     {
       _context->GraphicsContext->Render(_camera);
-      _compositor.Render(_document, (float)_width, (float)_height);
+      _compositor.Render(_document);
     }
 
     void OnUpdate(double deltaTime) noexcept override
