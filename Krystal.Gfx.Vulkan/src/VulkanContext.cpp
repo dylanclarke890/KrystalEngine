@@ -43,7 +43,7 @@ namespace
 
   Krys::List<const char *> ValidationLayers {"VK_LAYER_KHRONOS_validation"};
 
-  struct Vertex
+  struct TestVertex
   {
     Krys::Maths::Vec2 Position;
     Krys::Maths::Vec3 Color;
@@ -51,7 +51,7 @@ namespace
     static VkVertexInputBindingDescription GetBindingDescription()
     {
       return VkVertexInputBindingDescription {
-        .binding = 0, .stride = sizeof(Vertex), .inputRate = VK_VERTEX_INPUT_RATE_VERTEX};
+        .binding = 0, .stride = sizeof(TestVertex), .inputRate = VK_VERTEX_INPUT_RATE_VERTEX};
     }
 
     static Krys::Array<VkVertexInputAttributeDescription, 2> GetAttributeDescriptions()
@@ -60,13 +60,13 @@ namespace
                                                                   .location = 0,
                                                                   .binding = 0,
                                                                   .format = VK_FORMAT_R32G32_SFLOAT,
-                                                                  .offset = offsetof(Vertex, Position),
+                                                                  .offset = offsetof(TestVertex, Position),
                                                                 },
                                                                 VkVertexInputAttributeDescription {
                                                                   .location = 1,
                                                                   .binding = 0,
                                                                   .format = VK_FORMAT_R32G32B32_SFLOAT,
-                                                                  .offset = offsetof(Vertex, Color),
+                                                                  .offset = offsetof(TestVertex, Color),
                                                                 }};
     }
   };
@@ -78,10 +78,10 @@ namespace
     alignas(16) Krys::Maths::Mat4 proj;
   };
 
-  const Krys::List<Vertex> vertices = {{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-                                       {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-                                       {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-                                       {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}};
+  const Krys::List<TestVertex> vertices = {{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+                                           {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+                                           {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+                                           {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}};
 
   const Krys::List<Krys::uint16> indices = {0, 1, 2, 2, 3, 0};
 
@@ -781,8 +781,8 @@ namespace Krys::Gfx::Vulkan
       .pScissors = nullptr,
     };
 
-    auto vertexBindingDescription = Vertex::GetBindingDescription();
-    auto vertexAttributeDescriptions = Vertex::GetAttributeDescriptions();
+    auto vertexBindingDescription = TestVertex::GetBindingDescription();
+    auto vertexAttributeDescriptions = TestVertex::GetAttributeDescriptions();
 
     VkPipelineVertexInputStateCreateInfo vertexInputState {
       .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
