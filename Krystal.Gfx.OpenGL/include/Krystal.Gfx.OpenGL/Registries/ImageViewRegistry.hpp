@@ -46,7 +46,7 @@ namespace Krys::Gfx::OpenGL
       }
 
       GLenum target = MapImageType(desc.Target);
-      GLenum internalFormat = MapImageFormat(desc.Format);
+      GLenum internalFormat = MapPixelFormat(desc.Format);
       ImageView imageView {desc.Image, image->Id(), target, internalFormat, desc.SubResourceRange};
       return _imageViews.Add(std::move(imageView));
     }

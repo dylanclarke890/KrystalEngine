@@ -34,7 +34,7 @@ namespace Krys::Gfx::OpenGL
     NO_DISCARD ImageHandle Create(const ImageDesc &desc)
     {
       GLenum target = MapImageType(desc.Type);
-      GLenum internalFormat = MapImageFormat(desc.Format);
+      GLenum internalFormat = MapPixelFormat(desc.Format);
       Image image {
         target, internalFormat, desc.Width, desc.Height, desc.Depth, desc.MipLevels, desc.ArrayLayers,
       };

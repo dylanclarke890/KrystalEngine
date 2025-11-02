@@ -15,7 +15,7 @@ namespace Krys::Gfx
     ImageCubeArray
   };
 
-  enum class ImageFormat : uint8
+  enum class PixelFormat : uint8
   {
     R8,
     R8G8,
@@ -38,7 +38,7 @@ namespace Krys::Gfx
   struct ImageDesc
   {
     ImageType Type;
-    ImageFormat Format;
+    PixelFormat Format;
     uint32 Width;
     uint32 Height;
     uint32 Depth;

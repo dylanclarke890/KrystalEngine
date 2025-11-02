@@ -18,7 +18,7 @@ namespace Krys::Gfx
   {
     ImageHandle Image {};
     ImageType Target {ImageType::Image2D};
-    ImageFormat Format {ImageFormat::R8};
+    PixelFormat Format {PixelFormat::R8};
     SubResourceRange SubResourceRange {};
   };
 }

@@ -37,51 +37,51 @@ namespace Krys::Gfx::OpenGL
     }
   }
 
-  NO_DISCARD constexpr GLenum MapImageFormat(ImageFormat format) noexcept
+  NO_DISCARD constexpr GLenum MapPixelFormat(PixelFormat format) noexcept
   {
     switch (format)
     {
-      case ImageFormat::R8:              return GL_R8;
-      case ImageFormat::R8G8:            return GL_RG8;
-      case ImageFormat::R8G8B8:          return GL_RGB8;
-      case ImageFormat::R8G8B8A8:        return GL_RGBA8;
-      case ImageFormat::SRGB8:           return GL_SRGB8;
-      case ImageFormat::SRGB8A8:         return GL_SRGB8_ALPHA8;
-      case ImageFormat::R16F:            return GL_R16F;
-      case ImageFormat::R16G16F:         return GL_RG16F;
-      case ImageFormat::R16G16B16F:      return GL_RGB16F;
-      case ImageFormat::R16G16B16A16F:   return GL_RGBA16F;
-      case ImageFormat::R32F:            return GL_R32F;
-      case ImageFormat::R32G32F:         return GL_RG32F;
-      case ImageFormat::R32G32B32F:      return GL_RGB32F;
-      case ImageFormat::R32G32B32A32F:   return GL_RGBA32F;
-      case ImageFormat::DEPTH24STENCIL8: return GL_DEPTH24_STENCIL8;
-      case ImageFormat::DEPTH32F:        return GL_DEPTH_COMPONENT32F;
-      default:                           assert(false && "Unknown enum value: ImageFormat"); return GL_INVALID_ENUM;
+      case PixelFormat::R8:              return GL_R8;
+      case PixelFormat::R8G8:            return GL_RG8;
+      case PixelFormat::R8G8B8:          return GL_RGB8;
+      case PixelFormat::R8G8B8A8:        return GL_RGBA8;
+      case PixelFormat::SRGB8:           return GL_SRGB8;
+      case PixelFormat::SRGB8A8:         return GL_SRGB8_ALPHA8;
+      case PixelFormat::R16F:            return GL_R16F;
+      case PixelFormat::R16G16F:         return GL_RG16F;
+      case PixelFormat::R16G16B16F:      return GL_RGB16F;
+      case PixelFormat::R16G16B16A16F:   return GL_RGBA16F;
+      case PixelFormat::R32F:            return GL_R32F;
+      case PixelFormat::R32G32F:         return GL_RG32F;
+      case PixelFormat::R32G32B32F:      return GL_RGB32F;
+      case PixelFormat::R32G32B32A32F:   return GL_RGBA32F;
+      case PixelFormat::DEPTH24STENCIL8: return GL_DEPTH24_STENCIL8;
+      case PixelFormat::DEPTH32F:        return GL_DEPTH_COMPONENT32F;
+      default:                           assert(false && "Unknown enum value: PixelFormat"); return GL_INVALID_ENUM;
     }
   }
 
-  NO_DISCARD constexpr ImageFormat MapImageFormat(GLenum internalFormat) noexcept
+  NO_DISCARD constexpr PixelFormat MapPixelFormat(GLenum internalFormat) noexcept
   {
     switch (internalFormat)
     {
-      case GL_R8:                 return ImageFormat::R8;
-      case GL_RG8:                return ImageFormat::R8G8;
-      case GL_RGB8:               return ImageFormat::R8G8B8;
-      case GL_RGBA8:              return ImageFormat::R8G8B8A8;
-      case GL_SRGB8:              return ImageFormat::SRGB8;
-      case GL_SRGB8_ALPHA8:       return ImageFormat::SRGB8A8;
-      case GL_R16F:               return ImageFormat::R16F;
-      case GL_RG16F:              return ImageFormat::R16G16F;
-      case GL_RGB16F:             return ImageFormat::R16G16B16F;
-      case GL_RGBA16F:            return ImageFormat::R16G16B16A16F;
-      case GL_R32F:               return ImageFormat::R32F;
-      case GL_RG32F:              return ImageFormat::R32G32F;
-      case GL_RGB32F:             return ImageFormat::R32G32B32F;
-      case GL_RGBA32F:            return ImageFormat::R32G32B32A32F;
-      case GL_DEPTH24_STENCIL8:   return ImageFormat::DEPTH24STENCIL8;
-      case GL_DEPTH_COMPONENT32F: return ImageFormat::DEPTH32F;
-      default:                    assert(false && "Unknown GLenum value for image format"); return ImageFormat::R8G8B8A8;
+      case GL_R8:                 return PixelFormat::R8;
+      case GL_RG8:                return PixelFormat::R8G8;
+      case GL_RGB8:               return PixelFormat::R8G8B8;
+      case GL_RGBA8:              return PixelFormat::R8G8B8A8;
+      case GL_SRGB8:              return PixelFormat::SRGB8;
+      case GL_SRGB8_ALPHA8:       return PixelFormat::SRGB8A8;
+      case GL_R16F:               return PixelFormat::R16F;
+      case GL_RG16F:              return PixelFormat::R16G16F;
+      case GL_RGB16F:             return PixelFormat::R16G16B16F;
+      case GL_RGBA16F:            return PixelFormat::R16G16B16A16F;
+      case GL_R32F:               return PixelFormat::R32F;
+      case GL_RG32F:              return PixelFormat::R32G32F;
+      case GL_RGB32F:             return PixelFormat::R32G32B32F;
+      case GL_RGBA32F:            return PixelFormat::R32G32B32A32F;
+      case GL_DEPTH24_STENCIL8:   return PixelFormat::DEPTH24STENCIL8;
+      case GL_DEPTH_COMPONENT32F: return PixelFormat::DEPTH32F;
+      default:                    assert(false && "Unknown GLenum value for image format"); return PixelFormat::R8G8B8A8;
     }
   }
 

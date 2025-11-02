@@ -242,7 +242,7 @@ namespace Krys::Gfx::OpenGL
       return static_cast<uint32>(std::floor(std::log2(std::max(width, height)))) + 1u;
     }
 
-    static Pair<ImageFormat, GLenum> GetTextureFormat(const IO::Image &image,
+    static Pair<PixelFormat, GLenum> GetTextureFormat(const IO::Image &image,
                                                       const TextureDesc &desc) noexcept
     {
       if (image.DataType == IO::ImageDataType::Float)
@@ -259,41 +259,41 @@ namespace Krys::Gfx::OpenGL
       }
     }
 
-    static Pair<ImageFormat, GLenum> GetLinearTextureFormat(int channels) noexcept
+    static Pair<PixelFormat, GLenum> GetLinearTextureFormat(int channels) noexcept
     {
       assert(channels >= 1 && channels <= 4 && "Invalid number of channels.");
       switch (channels)
       {
-        case 1: return {ImageFormat::R8, GL_RED};
-        case 2: return {ImageFormat::R8G8, GL_RG};
-        case 3: return {ImageFormat::R8G8B8, GL_RGB};
-        case 4: return {ImageFormat::R8G8B8A8, GL_RGBA};
+        case 1: return {PixelFormat::R8, GL_RED};
+        case 2: return {PixelFormat::R8G8, GL_RG};
+        case 3: return {PixelFormat::R8G8B8, GL_RGB};
+        case 4: return {PixelFormat::R8G8B8A8, GL_RGBA};
       }
-      return {ImageFormat::R8G8B8A8, GL_RGBA};
+      return {PixelFormat::R8G8B8A8, GL_RGBA};
     }
 
-    static Pair<ImageFormat, GLenum> GetSRGBTextureFormat(int channels) noexcept
+    static Pair<PixelFormat, GLenum> GetSRGBTextureFormat(int channels) noexcept
     {
       assert((channels == 3 || channels == 4) && "Invalid number of channels.");
       switch (channels)
       {
-        case 3: return {ImageFormat::SRGB8, GL_RGB};
-        case 4: return {ImageFormat::SRGB8A8, GL_RGBA};
+        case 3: return {PixelFormat::SRGB8, GL_RGB};
+        case 4: return {PixelFormat::SRGB8A8, GL_RGBA};
       }
-      return {ImageFormat::SRGB8A8, GL_RGB};
+      return {PixelFormat::SRGB8A8, GL_RGB};
     }
 
-    static Pair<ImageFormat, GLenum> GetFloatTextureFormat(int channels, bool isHalfFloat) noexcept
+    static Pair<PixelFormat, GLenum> GetFloatTextureFormat(int channels, bool isHalfFloat) noexcept
     {
       assert(channels >= 1 && channels <= 4 && "Invalid number of channels.");
       switch (channels)
       {
-        case 1: return {isHalfFloat ? ImageFormat::R16F : ImageFormat::R32F, GL_RED};
-        case 2: return {isHalfFloat ? ImageFormat::R16G16F : ImageFormat::R32G32F, GL_RG};
-        case 3: return {isHalfFloat ? ImageFormat::R16G16B16F : ImageFormat::R32G32B32F, GL_RGB};
-        case 4: return {isHalfFloat ? ImageFormat::R16G16B16A16F : ImageFormat::R32G32B32A32F, GL_RGBA};
+        case 1: return {isHalfFloat ? PixelFormat::R16F : PixelFormat::R32F, GL_RED};
+        case 2: return {isHalfFloat ? PixelFormat::R16G16F : PixelFormat::R32G32F, GL_RG};
+        case 3: return {isHalfFloat ? PixelFormat::R16G16B16F : PixelFormat::R32G32B32F, GL_RGB};
+        case 4: return {isHalfFloat ? PixelFormat::R16G16B16A16F : PixelFormat::R32G32B32A32F, GL_RGBA};
       }
-      return {isHalfFloat ? ImageFormat::R16G16B16A16F : ImageFormat::R32G32B32A32F, GL_RGB};
+      return {isHalfFloat ? PixelFormat::R16G16B16A16F : PixelFormat::R32G32B32A32F, GL_RGB};
     }
   };
 }

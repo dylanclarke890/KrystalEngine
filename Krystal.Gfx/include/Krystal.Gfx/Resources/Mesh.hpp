@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Krystal.Lib/Types.hpp"
+#include "Krystal.Gfx/Vertex.hpp"
 
 namespace Krys::Gfx
 {
