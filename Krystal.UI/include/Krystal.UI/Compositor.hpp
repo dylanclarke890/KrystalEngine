@@ -63,7 +63,7 @@ namespace Krys::UI
       _commandLists.emplace_back();
       _layerStack.push({renderTarget, _commandLists.back(), 0.f, 0.f});
 
-      _layerStack.top().Commands.Push(Gfx::BindRenderTargetCommand {renderTarget});
+      _layerStack.top().Commands.Push(Gfx::Commands::BindRenderTarget {renderTarget});
       RenderElement(document, {document.Body(), 0.f, 0.f});
 
       // Submit child command lists first, since parents composite from their results.
@@ -102,9 +102,9 @@ namespace Krys::UI
 
         _commandLists.emplace_back();
         _layerStack.push({layerRT, _commandLists.back(), x, y});
-        _layerStack.top().Commands.Push(Gfx::BindRenderTargetCommand {layerRT});
+        _layerStack.top().Commands.Push(Gfx::Commands::BindRenderTarget {layerRT});
 
-        Gfx::RectCommand command;
+        Gfx::Commands::DrawRect command;
         command.Position = {0.f, 0.f};
         command.Size = {w, h};
         command.BackgroundColour = NodeStyleGetBackgroundColour(node);
@@ -119,7 +119,7 @@ namespace Krys::UI
         auto &layerContext = _layerStack.top();
         _layerStack.pop();
 
-        Gfx::DrawRenderTargetColourAttachmentCommand img;
+        Gfx::Commands::DrawRenderTargetColourAttachment img;
         img.Source = layerRT;
         img.ColourAttachmentIndex = 0u;
         img.Position = {x, y};
@@ -129,7 +129,7 @@ namespace Krys::UI
       }
       else
       {
-        Gfx::RectCommand command;
+        Gfx::Commands::DrawRect command;
         command.Position = {x, y};
         command.Size = {w, h};
         command.BackgroundColour = NodeStyleGetBackgroundColour(node);

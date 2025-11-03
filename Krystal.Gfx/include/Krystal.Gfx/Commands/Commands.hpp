@@ -7,39 +7,42 @@
 
 namespace Krys::Gfx
 {
-  struct RectCommand
-  {
-    constexpr static CommandType Type = KRYS_CMD_TYPE("RectCommand");
-
-    Gfx::Colour BackgroundColour;
-    Gfx::Colour BorderColour;
-    Maths::Vec2 Position;
-    Maths::Vec2 Size;
-    float BorderThickness {0.f};
-    float BorderRadius {0.f};
-  };
-
-  struct BindRenderTargetCommand
-  {
-    constexpr static CommandType Type = KRYS_CMD_TYPE("BindRenderTargetCommand");
-    RenderTargetHandle RenderTarget;
-  };
-
-  struct DrawRenderTargetColourAttachmentCommand
-  {
-    constexpr static CommandType Type = KRYS_CMD_TYPE("DrawRenderTargetColourAttachment");
-
-    RenderTargetHandle Source;
-    uint32 ColourAttachmentIndex {0u};
-    Maths::Vec2 Position;
-    Maths::Vec2 Size;
-    float Opacity {1.f};
-  };
-
   namespace Commands
   {
-    constexpr CommandType BindRenderTarget = BindRenderTargetCommand::Type;
-    constexpr CommandType Rect = RectCommand::Type;
-    constexpr CommandType DrawRenderTargetColourAttachment = DrawRenderTargetColourAttachmentCommand::Type;
+    struct DrawRect
+    {
+      constexpr static CommandType Type = KRYS_CMD_TYPE("DrawRect");
+
+      Gfx::Colour BackgroundColour;
+      Gfx::Colour BorderColour;
+      Maths::Vec2 Position;
+      Maths::Vec2 Size;
+      float BorderThickness {0.f};
+      float BorderRadius {0.f};
+    };
+
+    struct BindRenderTarget
+    {
+      constexpr static CommandType Type = KRYS_CMD_TYPE("BindRenderTarget");
+      RenderTargetHandle RenderTarget;
+    };
+
+    struct DrawRenderTargetColourAttachment
+    {
+      constexpr static CommandType Type = KRYS_CMD_TYPE("DrawRenderTargetColourAttachment");
+
+      RenderTargetHandle Source;
+      uint32 ColourAttachmentIndex {0u};
+      Maths::Vec2 Position;
+      Maths::Vec2 Size;
+      float Opacity {1.f};
+    };
+  }
+
+  namespace CommandTypes
+  {
+    constexpr CommandType BindRenderTarget = Commands::BindRenderTarget::Type;
+    constexpr CommandType DrawRect = Commands::DrawRect::Type;
+    constexpr CommandType DrawRenderTargetColourAttachment = Commands::DrawRenderTargetColourAttachment::Type;
   }
 }

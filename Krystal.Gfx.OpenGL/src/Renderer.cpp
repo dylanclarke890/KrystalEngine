@@ -84,27 +84,10 @@ namespace Krys::Gfx::OpenGL
       CommandHeader header = reader.ReadHeader();
       switch (header.Type)
       {
-        case Commands::Rect:
+        case CommandTypes::BindRenderTarget:
         {
-          const auto &cmd = reader.ReadCommand<RectCommand>();
-          auto &rt = renderTargets.Get(_currentRenderTarget);
-          float posY = static_cast<float>(rt.Height()) - (cmd.Position.y + cmd.Size.y);
-          _quadInstanceData.Data.push_back({
-            .BackgroundColour = cmd.BackgroundColour,
-            .BorderColour = cmd.BorderColour,
-            .PositionAndSize = {cmd.Position.x, posY, cmd.Size.x, cmd.Size.y},
-            .BorderThicknessRadius = {cmd.BorderThickness, cmd.BorderRadius},
-          });
-          if (_quadInstanceData.Data.size() >= QuadInstanceData::BatchSize)
-          {
-            FlushQuadInstances();
-          }
-          break;
-        }
-        case Commands::BindRenderTarget:
-        {
-          const auto &cmd = reader.ReadCommand<BindRenderTargetCommand>();
-          assert(cmd.RenderTarget.IsValid() && "Invalid render target handle in BindRenderTargetCommand.");
+          const auto &cmd = reader.ReadCommand<Commands::BindRenderTarget>();
+          assert(cmd.RenderTarget.IsValid() && "Invalid render target handle in BindRenderTarget.");
           if (cmd.RenderTarget == _currentRenderTarget)
           {
             break;
@@ -119,11 +102,29 @@ namespace Krys::Gfx::OpenGL
           shaders.Get(_singleTextureShader).SetUniform("u_Projection", rt.GetProjectionMatrix());
           break;
         }
-        case Commands::DrawRenderTargetColourAttachment:
+        case CommandTypes::DrawRect:
+        {
+          const auto &cmd = reader.ReadCommand<Commands::DrawRect>();
+          auto &rt = renderTargets.Get(_currentRenderTarget);
+          float posY = static_cast<float>(rt.Height()) - (cmd.Position.y + cmd.Size.y);
+          _quadInstanceData.Data.push_back({
+            .BackgroundColour = cmd.BackgroundColour,
+            .BorderColour = cmd.BorderColour,
+            .PositionAndSize = {cmd.Position.x, posY, cmd.Size.x, cmd.Size.y},
+            .BorderThicknessRadius = {cmd.BorderThickness, cmd.BorderRadius},
+          });
+
+          if (_quadInstanceData.Data.size() >= QuadInstanceData::BatchSize)
+          {
+            FlushQuadInstances();
+          }
+          break;
+        }
+        case CommandTypes::DrawRenderTargetColourAttachment:
         {
           FlushQuadInstances();
 
-          const auto &cmd = reader.ReadCommand<DrawRenderTargetColourAttachmentCommand>();
+          const auto &cmd = reader.ReadCommand<Commands::DrawRenderTargetColourAttachment>();
           auto &sourceRT = renderTargets.Get(cmd.Source);
           const auto &attachment = sourceRT.GetColourAttachment(cmd.ColourAttachmentIndex);
           const auto &imageView =

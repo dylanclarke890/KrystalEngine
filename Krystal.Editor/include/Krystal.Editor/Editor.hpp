@@ -96,12 +96,14 @@ namespace Krys
       _document.ElementStyleSetBackgroundColour(_document.Body(), Gfx::Colours::Green);
       _document.ElementStyleSetFlexDirection(_document.Body(), FlexDirection::Row);
       _document.ElementStyleSetJustifyContent(_document.Body(), Justify::SpaceBetween);
+      _document.ElementStyleSetOpacity(_document.Body(), 0.8f);
 
       auto leftBox = _document.Create<Element>();
       _document.AppendChild(_document.Body(), leftBox);
       _document.ElementStyleSetWidthPercent(leftBox, 45.f);
       _document.ElementStyleSetHeightPercent(leftBox, 100.f);
       _document.ElementStyleSetBackgroundColour(leftBox, Gfx::Colours::Blue);
+      _document.ElementStyleSetOpacity(leftBox, 0.8f);
 
       auto leftInnerBox = _document.Create<Element>();
       _document.AppendChild(leftBox, leftInnerBox);
