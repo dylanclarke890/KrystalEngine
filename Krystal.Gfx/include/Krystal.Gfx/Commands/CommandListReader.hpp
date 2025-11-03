@@ -25,7 +25,7 @@ namespace Krys::Gfx
 
     NO_DISCARD CommandHeader ReadHeader() noexcept
     {
-      auto *data = _list.GetSubSpan(_offset, sizeof(CommandHeader)).data();
+      const auto *data = _list.GetSubSpan(_offset, sizeof(CommandHeader)).data();
       _offset += sizeof(CommandHeader);
       return *reinterpret_cast<const CommandHeader *>(data);
     }
@@ -33,7 +33,7 @@ namespace Krys::Gfx
     template <typename T>
     NO_DISCARD const T &ReadCommand() noexcept
     {
-      auto *data = _list.GetSubSpan(_offset, sizeof(T)).data();
+      const auto *data = _list.GetSubSpan(_offset, sizeof(T)).data();
       _offset += sizeof(T);
       _offset = ByteUtils::AlignNext(_offset, CommandArena::Alignment);
       return *reinterpret_cast<const T *>(data);

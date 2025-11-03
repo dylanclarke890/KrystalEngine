@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Krystal.Gfx.Lib/Colour.hpp"
 #include "Krystal.UI/Layout/Api/Node.hpp"
 #include "Krystal.UI/Styles/Enums/Align.hpp"
 #include "Krystal.UI/Styles/Enums/BoxSizing.hpp"
@@ -13,7 +14,6 @@
 #include "Krystal.UI/Styles/Enums/Position.hpp"
 #include "Krystal.UI/Styles/Enums/Wrap.hpp"
 #include "Krystal.UI/Styles/Values/UnitValue.hpp"
-#include "Krystal.Gfx.Lib/Colour.hpp"
 
 namespace Krys::UI
 {
@@ -137,7 +137,7 @@ namespace Krys::UI
   void NodeStyleSetAspectRatio(NodeRef node, float aspectRatio);
   float NodeStyleGetAspectRatio(NodeConstRef node);
 
-  void NodeStyleSetBackgroundColour(NodeRef node, const Gfx::Colour& colour);
+  void NodeStyleSetBackgroundColour(NodeRef node, const Gfx::Colour &colour);
   Gfx::Colour NodeStyleGetBackgroundColour(NodeConstRef node);
 
   void NodeStyleSetBorderColour(NodeRef node, const Gfx::Colour &colour);
@@ -145,4 +145,7 @@ namespace Krys::UI
 
   void NodeStyleSetTextColour(NodeRef node, const Gfx::Colour &colour);
   Gfx::Colour NodeStyleGetTextColour(NodeConstRef node);
+
+  void NodeStyleSetOpacity(NodeRef node, float opacity);
+  float NodeStyleGetOpacity(NodeConstRef node);
 }

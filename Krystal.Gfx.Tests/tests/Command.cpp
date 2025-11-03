@@ -16,11 +16,9 @@ namespace Krys::Tests
 
   TEST_CASE("Command - Read and write single command", "[Gfx][Command]")
   {
-    CommandArena arena;
-    CommandList commandList(arena);
+    CommandList commandList(100);
     commandList.Push<Command>({10.f, 20.f});
 
-    REQUIRE(arena.Size() == 16u);
     REQUIRE(commandList.SizeInBytes() == 16u);
 
     CommandListReader reader(commandList);

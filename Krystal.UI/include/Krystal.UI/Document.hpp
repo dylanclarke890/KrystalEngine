@@ -132,6 +132,14 @@ namespace Krys::UI
       NodeRemoveChild(parentElement.LayoutNode, childElement.LayoutNode);
     }
 
+    bool ElementRequiresLayer(ElementHandle handle) const
+    {
+      assert(handle.IsValid() && "Invalid handle");
+      //return false;
+      return true;
+      // return NodeStyleGetOpacity(_elements.Get(handle).LayoutNode) < 1.f;
+    }
+
     /// @brief Destroys the element and removes it from the document. Child elements are also destroyed
     /// recursively.
     void Destroy(ElementHandle handle)
@@ -684,12 +692,23 @@ namespace Krys::UI
       return NodeStyleGetTextColour(_elements.Get(element).LayoutNode);
     }
 
+    void ElementStyleSetOpacity(ElementHandle element, float opacity)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetOpacity(_elements.Get(element).LayoutNode, opacity);
+    }
+
+    float ElementStyleGetOpacity(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetOpacity(_elements.Get(element).LayoutNode);
+    }
+
 #pragma endregion
 
     void ElementSetTextContent(ElementHandle element, const string &text)
     {
       assert(element.IsValid() && "Invalid element handle");
-
     }
   };
 }

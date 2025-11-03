@@ -263,6 +263,8 @@
     <None Include="data\shaders\opengl\shadow-mapping.frag" />
     <None Include="data\shaders\opengl\shadow-mapping.vert" />
     <None Include="data\shaders\opengl\single-colour.frag" />
+    <None Include="data\shaders\opengl\single-texture.frag" />
+    <None Include="data\shaders\opengl\single-texture.vert" />
     <None Include="data\shaders\opengl\skybox.frag" />
     <None Include="data\shaders\opengl\skybox.vert" />
     <None Include="data\shaders\opengl\basic.frag" />

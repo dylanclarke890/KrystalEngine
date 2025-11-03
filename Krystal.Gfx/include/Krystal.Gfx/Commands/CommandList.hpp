@@ -11,16 +11,19 @@ namespace Krys::Gfx
   /// @brief A list of commands allocated in a CommandArena.
   class CommandList
   {
+    NO_COPY(CommandList)
+
   private:
-    CommandArena &_arena;
+    CommandArena _arena;
     size_t _startOffset {0u};
     size_t _endOffset {0u};
 
   public:
-    explicit CommandList(CommandArena &arena) noexcept
-        : _arena(arena), _startOffset(arena.Size()), _endOffset(arena.Size())
+    explicit CommandList(size_t initialCapacity = 32_KB) : _arena(initialCapacity)
     {
     }
+
+    MOVE_SWAP(CommandList)
 
     template <typename T>
     void Push(const T &command)
@@ -29,7 +32,7 @@ namespace Krys::Gfx
       _endOffset = _arena.Size();
     }
 
-    Span<byte> GetSubSpan(size_t offset, size_t size) const noexcept
+    Span<const byte> GetSubSpan(size_t offset, size_t size) const noexcept
     {
       size_t spanStart = _startOffset + offset;
       assert(spanStart + size <= _endOffset && "Invalid span range");
@@ -39,6 +42,13 @@ namespace Krys::Gfx
     NO_DISCARD size_t SizeInBytes() const noexcept
     {
       return _endOffset - _startOffset;
+    }
+
+    void Swap(CommandList &other) noexcept
+    {
+      _arena.Swap(other._arena);
+      std::swap(_startOffset, other._startOffset);
+      std::swap(_endOffset, other._endOffset);
     }
   };
 }

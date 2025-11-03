@@ -6,6 +6,7 @@
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/IRenderer.hpp"
 #include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Stack.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.UI/Document.hpp"
 
@@ -15,17 +16,27 @@ namespace Krys::UI
   {
     NO_COPY_MOVE(Compositor)
 
-  private:
-    Gfx::IContext &_context;
-    Gfx::IRenderer &_renderer;
-    Gfx::CommandArena _commandArena;
-
     struct State
     {
       ElementHandle CurrentElement;
       float ParentX;
       float ParentY;
     };
+
+    struct LayerContext
+    {
+      Gfx::RenderTargetHandle Target;
+      Gfx::CommandList &Commands;
+      float OffsetX;
+      float OffsetY;
+    };
+
+  private:
+    Gfx::IContext &_context;
+    Gfx::IRenderer &_renderer;
+    List<Gfx::CommandList> _commandLists;
+    Stack<LayerContext> _layerStack;
+    List<Gfx::RenderTargetHandle> _usedTempRenderTargets;
 
   public:
     Compositor(Gfx::IContext &context, Gfx::IRenderer &renderer) noexcept
@@ -42,17 +53,34 @@ namespace Krys::UI
         renderTarget = _context.RenderTargets().GetScreenRenderTarget();
       }
 
-      _commandArena.Reset();
-      auto renderTargetDimensions = _context.RenderTargets().GetDimensions(renderTarget);
-      document.Reflow(renderTargetDimensions.x, renderTargetDimensions.y);
-      Gfx::CommandList commandList(_commandArena);
-      commandList.Push(Gfx::BindRenderTargetCommand {renderTarget});
-      RenderElement(commandList, document, {document.Body(), 0.f, 0.f});
-      _renderer.Submit(commandList);
+      auto targetDimensions = _context.RenderTargets().GetDimensions(renderTarget);
+      document.Reflow(targetDimensions.x, targetDimensions.y);
+
+      _layerStack = {};
+      _commandLists.clear();
+      _commandLists.reserve(16u);
+
+      _commandLists.emplace_back();
+      _layerStack.push({renderTarget, _commandLists.back(), 0.f, 0.f});
+
+      _layerStack.top().Commands.Push(Gfx::BindRenderTargetCommand {renderTarget});
+      RenderElement(document, {document.Body(), 0.f, 0.f});
+
+      // Submit child command lists first, since parents composite from their results.
+      for (auto it = _commandLists.rbegin(); it != _commandLists.rend(); ++it)
+      {
+        _renderer.Submit(*it);
+      }
+
+      for (Gfx::RenderTargetHandle rt : _usedTempRenderTargets)
+      {
+        _context.RenderTargets().Release(rt);
+      }
+      _usedTempRenderTargets.clear();
     }
 
   private:
-    void RenderElement(Gfx::CommandList &list, Document &document, const State &state)
+    void RenderElement(Document &document, const State &state)
     {
       auto &element = document.Get(state.CurrentElement);
       auto node = element.LayoutNode;
@@ -62,16 +90,56 @@ namespace Krys::UI
       float w = NodeLayoutGetWidth(node);
       float h = NodeLayoutGetHeight(node);
 
-      Gfx::RectCommand command;
-      command.Position = {x, y};
-      command.Size = {w, h};
-      command.BackgroundColour = NodeStyleGetBackgroundColour(node);
-      command.BorderColour = NodeStyleGetBorderColour(node);
-      list.Push(command);
-
-      for (auto &child : element.Children)
+      if (document.ElementRequiresLayer(state.CurrentElement))
       {
-        RenderElement(list, document, {child, x, y});
+        Gfx::RenderTargetDesc desc {
+          .Width = static_cast<uint32>(w),
+          .Height = static_cast<uint32>(h),
+          .Attachments = {{Gfx::AttachmentType::Colour, Gfx::PixelFormat::R8G8B8A8}},
+        };
+        auto layerRT = _context.RenderTargets().Acquire(desc);
+        _usedTempRenderTargets.push_back(layerRT);
+
+        _commandLists.emplace_back();
+        _layerStack.push({layerRT, _commandLists.back(), x, y});
+        _layerStack.top().Commands.Push(Gfx::BindRenderTargetCommand {layerRT});
+
+        Gfx::RectCommand command;
+        command.Position = {0.f, 0.f};
+        command.Size = {w, h};
+        command.BackgroundColour = NodeStyleGetBackgroundColour(node);
+        command.BorderColour = NodeStyleGetBorderColour(node);
+        _layerStack.top().Commands.Push(command);
+
+        for (auto &child : element.Children)
+        {
+          RenderElement(document, {child, 0.f, 0.f});
+        }
+
+        auto &layerContext = _layerStack.top();
+        _layerStack.pop();
+
+        Gfx::DrawRenderTargetColourAttachmentCommand img;
+        img.Source = layerRT;
+        img.ColourAttachmentIndex = 0u;
+        img.Position = {x, y};
+        img.Size = {w, h};
+        img.Opacity = document.ElementStyleGetOpacity(state.CurrentElement);
+        _layerStack.top().Commands.Push(img);
+      }
+      else
+      {
+        Gfx::RectCommand command;
+        command.Position = {x, y};
+        command.Size = {w, h};
+        command.BackgroundColour = NodeStyleGetBackgroundColour(node);
+        command.BorderColour = NodeStyleGetBorderColour(node);
+        _layerStack.top().Commands.Push(command);
+
+        for (auto &child : element.Children)
+        {
+          RenderElement(document, {child, x, y});
+        }
       }
     }
   };

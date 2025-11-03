@@ -24,4 +24,4 @@ void main()
   BorderThicknessAndRadius = i_BorderThicknessAndRadius;
   vec2 worldPos = i_PositionAndSize.xy + v_Position * i_PositionAndSize.zw;
   gl_Position = u_Projection * vec4(worldPos, 0.0, 1.0);
-}
+}  

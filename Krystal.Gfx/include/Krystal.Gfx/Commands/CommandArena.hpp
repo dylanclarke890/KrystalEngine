@@ -69,9 +69,9 @@ namespace Krys::Gfx
       return _arena.size();
     }
 
-    NO_DISCARD Span<byte> GetSpan(size_t start, size_t end) noexcept
+    NO_DISCARD Span<const byte> GetSpan(size_t start, size_t end) const noexcept
     {
-      return Span<byte>(_arena.data() + start, end - start);
+      return Span<const byte>(_arena.data() + start, end - start);
     }
 
     void Reset() noexcept
@@ -79,7 +79,6 @@ namespace Krys::Gfx
       _arena.clear();
     }
 
-  private:
     void Swap(CommandArena &other) noexcept
     {
       _arena.swap(other._arena);

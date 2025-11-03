@@ -26,6 +26,8 @@ namespace Krys::Gfx::OpenGL
         {VertexAttributeType::Float, 2, VertexInputRate::PerInstance}, // border thickness and radius
       };
     }
+
+    constexpr static size_t BatchSize = 200u;
   };
 
   class Renderer : public IRenderer
@@ -35,8 +37,10 @@ namespace Krys::Gfx::OpenGL
   private:
     Context &_context;
     ShaderHandle _quadShader;
+    ShaderHandle _singleTextureShader;
     MeshHandle _quadMesh;
     InstanceData<QuadInstanceData> _quadInstanceData;
+    RenderTargetHandle _currentRenderTarget;
 
   public:
     Renderer(IContext &context) noexcept;
@@ -52,5 +56,9 @@ namespace Krys::Gfx::OpenGL
     void EndFrame() override;
 
     void Submit(const CommandList &commandList) override;
+
+  private:
+    void FlushQuadInstances();
+    void DrawTexturedQuad(GLuint texture, const Maths::Vec2 &position, const Maths::Vec2 &size, float opacity);
   };
 }

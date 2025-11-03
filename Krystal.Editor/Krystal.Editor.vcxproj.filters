@@ -126,6 +126,8 @@
     <None Include="data\shaders\opengl\text-shader.vert" />
     <None Include="data\shaders\opengl\ui.frag" />
     <None Include="data\shaders\opengl\ui.vert" />
+    <None Include="data\shaders\opengl\single-texture.frag" />
+    <None Include="data\shaders\opengl\single-texture.vert" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="data\assets\skyboxes\sky\back.jpg">

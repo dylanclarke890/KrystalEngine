@@ -5,6 +5,8 @@
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Types.hpp"
+#include "Krystal.Maths/Clipspace.hpp"
+#include "Krystal.Maths/Matrix.hpp"
 #include <cassert>
 
 namespace Krys::Gfx::OpenGL
@@ -164,7 +166,7 @@ namespace Krys::Gfx::OpenGL
       return _height;
     }
 
-    NO_DISCARD const RenderTargetAttachment &GetColorAttachment(size_t index) const
+    NO_DISCARD const RenderTargetAttachment &GetColourAttachment(size_t index) const
     {
       if (index >= _colorAttachments.size())
       {
@@ -186,6 +188,11 @@ namespace Krys::Gfx::OpenGL
     NO_DISCARD const RenderTargetAttachment &GetDepthStencilAttachment() const noexcept
     {
       return _depthStencilAttachment;
+    }
+
+    NO_DISCARD Maths::Mat4 GetProjectionMatrix() const noexcept
+    {
+      return Maths::Ortho(0.f, static_cast<float>(_width), 0.f, static_cast<float>(_height));
     }
 
     /// @brief Sets the dimensions of the render target. NOTE: Does not resize attachments.

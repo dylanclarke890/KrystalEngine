@@ -67,6 +67,7 @@ namespace Krys::UI
     Gfx::Colour _backgroundColour {Gfx::Colours::Transparent};
     Gfx::Colour _borderColour {Gfx::Colours::Black};
     Gfx::Colour _textColour {Gfx::Colours::Black};
+    float _opacity {1.0f};
 
   public:
     using Length = StyleLength;
@@ -397,6 +398,17 @@ namespace Krys::UI
     }
 
 #pragma endregion
+
+    void SetOpacity(float opacity) noexcept
+    {
+      assert((opacity >= 0.0f && opacity <= 1.0f) && "Opacity must be between 0 and 1.");
+      _opacity = opacity;
+    }
+
+    NO_DISCARD float GetOpacity() const noexcept
+    {
+      return _opacity;
+    }
 
 #pragma region Queries
 

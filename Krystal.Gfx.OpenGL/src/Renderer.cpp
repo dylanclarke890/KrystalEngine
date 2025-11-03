@@ -28,6 +28,8 @@ namespace Krys::Gfx::OpenGL
   void Renderer::Startup()
   {
     _quadShader = _context.Shaders().Load(IO::Path("ui.vert"), IO::Path("ui.frag"));
+    _singleTextureShader =
+      _context.Shaders().Load(IO::Path("single-texture.vert"), IO::Path("single-texture.frag"));
 
     auto &buffers = static_cast<BufferRegistry &>(_context.Buffers());
     auto &meshes = static_cast<MeshRegistry &>(_context.Meshes());
@@ -35,17 +37,18 @@ namespace Krys::Gfx::OpenGL
     _quadMesh = meshes.CreateQuad();
     auto &quadMesh = meshes.Get(_quadMesh);
 
-    const size_t batchSize = 1'000;
     _quadInstanceData.Buffer = buffers.Create({
       .Type = BufferType::Vertex,
       .Usage = BufferUsage::Dynamic,
-      .Size = batchSize * sizeof(QuadInstanceData),
+      .Size = QuadInstanceData::BatchSize * sizeof(QuadInstanceData),
     });
-    _quadInstanceData.Data.reserve(batchSize);
+    _quadInstanceData.Data.reserve(QuadInstanceData::BatchSize);
 
     auto &quadInstanceBuffer = buffers.Get(_quadInstanceData.Buffer);
     quadMesh.ApplyInstanceDataLayout(quadInstanceBuffer, QuadInstanceData::Layout());
     glObjectLabel(GL_BUFFER, quadInstanceBuffer.GetHandle(), -1, "QuadInstanceData");
+
+    _currentRenderTarget = _context.RenderTargets().GetScreenRenderTarget();
   }
 
   void Renderer::Shutdown() noexcept
@@ -57,11 +60,92 @@ namespace Krys::Gfx::OpenGL
 
   void Renderer::BeginFrame()
   {
-    _quadInstanceData.Data.clear();
   }
 
   void Renderer::EndFrame()
   {
+  }
+
+  void Renderer::Submit(const CommandList &commandList)
+  {
+    CommandListReader reader(commandList);
+
+    auto &shaders = static_cast<ShaderRegistry &>(_context.Shaders());
+    auto &renderTargets = static_cast<RenderTargetRegistry &>(_context.RenderTargets());
+    while (reader.HasMore())
+    {
+      CommandHeader header = reader.ReadHeader();
+      switch (header.Type)
+      {
+        case Commands::Rect:
+        {
+          const auto &cmd = reader.ReadCommand<RectCommand>();
+          auto &rt = renderTargets.Get(_currentRenderTarget);
+          float posY = static_cast<float>(rt.Height()) - (cmd.Position.y + cmd.Size.y);
+          _quadInstanceData.Data.push_back({
+            .BackgroundColour = cmd.BackgroundColour,
+            .BorderColour = cmd.BorderColour,
+            .PositionAndSize = {cmd.Position.x, posY, cmd.Size.x, cmd.Size.y},
+            .BorderThicknessRadius = {cmd.BorderThickness, cmd.BorderRadius},
+          });
+          if (_quadInstanceData.Data.size() >= QuadInstanceData::BatchSize)
+          {
+            FlushQuadInstances();
+          }
+          break;
+        }
+        case Commands::BindRenderTarget:
+        {
+          const auto &cmd = reader.ReadCommand<BindRenderTargetCommand>();
+          assert(cmd.RenderTarget.IsValid() && "Invalid render target handle in BindRenderTargetCommand.");
+          if (cmd.RenderTarget == _currentRenderTarget)
+          {
+            break;
+          }
+          FlushQuadInstances();
+
+          auto &rt = renderTargets.Get(cmd.RenderTarget);
+          renderTargets.Bind(cmd.RenderTarget);
+          glViewport(0, 0, rt.Width(), rt.Height());
+          _currentRenderTarget = cmd.RenderTarget;
+          shaders.Get(_quadShader).SetUniform("u_Projection", rt.GetProjectionMatrix());
+          shaders.Get(_singleTextureShader).SetUniform("u_Projection", rt.GetProjectionMatrix());
+          break;
+        }
+        case Commands::DrawRenderTargetColourAttachment:
+        {
+          FlushQuadInstances();
+
+          const auto &cmd = reader.ReadCommand<DrawRenderTargetColourAttachmentCommand>();
+          auto &sourceRT = renderTargets.Get(cmd.Source);
+          const auto &attachment = sourceRT.GetColourAttachment(cmd.ColourAttachmentIndex);
+          const auto &imageView =
+            static_cast<ImageViewRegistry &>(_context.ImageViews()).Get(attachment.ImageView);
+          auto &dstRT = renderTargets.Get(_currentRenderTarget);
+
+          float posY = static_cast<float>(dstRT.Height()) - (cmd.Position.y + cmd.Size.y);
+          DrawTexturedQuad(imageView.Id(), {cmd.Position.x, posY}, cmd.Size, cmd.Opacity);
+          break;
+        }
+        default:
+        {
+          KRYS_WARN("Unknown command type submitted to OpenGL renderer, skipping: {}", header.Type);
+          reader.SkipBytes(header.SizeInBytes);
+          break;
+        }
+      }
+    }
+
+    FlushQuadInstances();
+  }
+
+  void Renderer::FlushQuadInstances()
+  {
+    if (_quadInstanceData.Data.empty())
+    {
+      return;
+    }
+
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     {
@@ -76,44 +160,36 @@ namespace Krys::Gfx::OpenGL
       mesh.DrawInstanced(static_cast<GLsizei>(_quadInstanceData.Data.size()));
     }
     glDisable(GL_BLEND);
+    _quadInstanceData.Data.clear();
   }
 
-  void Renderer::Submit(const CommandList &commandList)
+  void Renderer::DrawTexturedQuad(GLuint texture, const Maths::Vec2 &position, const Maths::Vec2 &size,
+                                  float opacity)
   {
-    CommandListReader reader(commandList);
-    while (reader.HasMore())
-    {
-      CommandHeader header = reader.ReadHeader();
-      switch (header.Type)
-      {
-        case Commands::BindRenderTarget:
-        {
-          const auto &cmd = reader.ReadCommand<BindRenderTargetCommand>();
-          auto &rtRegistry = static_cast<RenderTargetRegistry &>(_context.RenderTargets());
-          auto &rt = rtRegistry.Get(cmd.RenderTarget);
-          rtRegistry.Bind(cmd.RenderTarget);
-          glViewport(0, 0, rt.Width(), rt.Height());
-          break;
-        }
-        case Commands::Rect:
-        {
-          const auto &cmd = reader.ReadCommand<RectCommand>();
-          float flippedY = _context.Height() - (cmd.Position.y + cmd.Size.y);
-          _quadInstanceData.Data.push_back({
-            .BackgroundColour = cmd.BackgroundColour,
-            .BorderColour = cmd.BorderColour,
-            .PositionAndSize = {cmd.Position.x, flippedY, cmd.Size.x, cmd.Size.y},
-            .BorderThicknessRadius = {cmd.BorderThickness, cmd.BorderRadius},
-          });
-          break;
-        }
-        default:
-        {
-          KRYS_WARN("Unknown command type submitted to OpenGL renderer, skipping: {}", header.Type);
-          reader.SkipBytes(header.SizeInBytes);
-          break;
-        }
-      }
-    }
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    auto &shader = static_cast<ShaderRegistry &>(_context.Shaders()).Get(_singleTextureShader);
+    shader.Bind();
+    shader.SetUniform("u_Texture", 0);
+    shader.SetUniform("u_Opacity", opacity);
+
+    glBindTextureUnit(0, texture);
+
+    // Setup instance data for just one quad
+    Array<QuadInstanceData, 1> instance;
+    instance[0].BackgroundColour = Gfx::Colours::Black;
+    instance[0].BorderColour = Gfx::Colours::Transparent;
+    instance[0].PositionAndSize = {position.x, position.y, size.x, size.y};
+    instance[0].BorderThicknessRadius = {0, 0};
+
+    auto &buffer = static_cast<BufferRegistry &>(_context.Buffers()).Get(_quadInstanceData.Buffer);
+    buffer.Update(instance);
+
+    auto &mesh = static_cast<MeshRegistry &>(_context.Meshes()).Get(_quadMesh);
+    mesh.Bind();
+    mesh.DrawInstanced(1);
+
+    glDisable(GL_BLEND);
   }
 }

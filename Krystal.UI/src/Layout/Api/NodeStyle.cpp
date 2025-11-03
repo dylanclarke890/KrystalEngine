@@ -561,4 +561,14 @@ namespace Krys::UI
   {
     return node->GetStyle().GetTextColour();
   }
+
+  void NodeStyleSetOpacity(NodeRef node, float opacity)
+  {
+    node->GetStyle().SetOpacity(opacity);
+  }
+
+  float NodeStyleGetOpacity(NodeConstRef node)
+  {
+    return node->GetStyle().GetOpacity();
+  }
 }

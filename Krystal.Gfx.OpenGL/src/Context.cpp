@@ -803,7 +803,7 @@ namespace Krys::Gfx::OpenGL
     DefaultSDFFont = _fonts.Load(fontPath, fontSize, FontType::SDF);
     DefaultMSDFFont = _fonts.Load(fontPath, fontSize, FontType::MSDF);
     DefaultMTSDFFont = _fonts.Load(fontPath, fontSize, FontType::MTSDF);
-    ScreenOrthoProjection = Ortho(0.0f, static_cast<float>(_width), 0.0f, static_cast<float>(_height));
+    ScreenOrthoProjection = Ortho(0.f, static_cast<float>(_width), 0.f, static_cast<float>(_height));
     _buffers.Get(bufferHandles.at("matrices")).Update(ScreenOrthoProjection, 2 * sizeof(Mat4));
   }
 
