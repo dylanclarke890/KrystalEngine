@@ -135,6 +135,14 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Allocators\Block.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Allocators\StringInterner.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Array.hpp" />
     <ClInclude Include="include\Krystal.Lib\Attributes.hpp" />
     <ClInclude Include="include\Krystal.Lib\BitUtils.hpp" />
