@@ -131,6 +131,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.Lib\Allocators\Arena.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Array.hpp" />
     <ClInclude Include="include\Krystal.Lib\Attributes.hpp" />
     <ClInclude Include="include\Krystal.Lib\BitUtils.hpp" />

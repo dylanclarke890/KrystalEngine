@@ -74,7 +74,7 @@ namespace Krys::Gfx
       return Span<const byte>(_arena.data() + start, end - start);
     }
 
-    void Reset() noexcept
+    void Clear() noexcept
     {
       _arena.clear();
     }
