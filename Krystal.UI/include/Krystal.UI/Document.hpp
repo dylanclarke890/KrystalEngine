@@ -135,9 +135,7 @@ namespace Krys::UI
     bool ElementRequiresLayer(ElementHandle handle) const
     {
       assert(handle.IsValid() && "Invalid handle");
-      //return false;
-      return true;
-      // return NodeStyleGetOpacity(_elements.Get(handle).LayoutNode) < 1.f;
+      return NodeStyleGetOpacity(_elements.Get(handle).LayoutNode) < 1.f;
     }
 
     /// @brief Destroys the element and removes it from the document. Child elements are also destroyed

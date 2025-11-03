@@ -49,6 +49,13 @@ namespace Krys::Gfx::OpenGL
     glObjectLabel(GL_BUFFER, quadInstanceBuffer.GetHandle(), -1, "QuadInstanceData");
 
     _currentRenderTarget = _context.RenderTargets().GetScreenRenderTarget();
+
+    auto &renderTargets = static_cast<RenderTargetRegistry &>(_context.RenderTargets());
+    auto &rt = renderTargets.Get(_currentRenderTarget);
+
+    auto &shaders = static_cast<ShaderRegistry &>(_context.Shaders());
+    shaders.Get(_quadShader).SetUniform("u_Projection", rt.GetProjectionMatrix());
+    shaders.Get(_singleTextureShader).SetUniform("u_Projection", rt.GetProjectionMatrix());
   }
 
   void Renderer::Shutdown() noexcept
