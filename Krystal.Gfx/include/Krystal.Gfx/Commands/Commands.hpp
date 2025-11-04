@@ -2,6 +2,8 @@
 
 #include "Krystal.Gfx.Lib/Colour.hpp"
 #include "Krystal.Gfx/Commands/CommandType.hpp"
+#include "Krystal.Gfx/Handle.hpp"
+#include "Krystal.Lib/Allocators/StringRef.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
@@ -37,12 +39,16 @@ namespace Krys::Gfx
       Maths::Vec2 Size;
       float Opacity {1.f};
     };
-  }
 
-  namespace CommandTypes
-  {
-    constexpr CommandType BindRenderTarget = Commands::BindRenderTarget::Type;
-    constexpr CommandType DrawRect = Commands::DrawRect::Type;
-    constexpr CommandType DrawRenderTargetColourAttachment = Commands::DrawRenderTargetColourAttachment::Type;
+    struct DrawText
+    {
+      constexpr static CommandType Type = KRYS_CMD_TYPE("DrawText");
+
+      StringRef Text;
+      Maths::Vec2 Position;
+      FontFamilyHandle FontFamily;
+      float FontSize {16.f};
+      Gfx::Colour Colour {Gfx::Colours::Black};
+    };
   }
 }

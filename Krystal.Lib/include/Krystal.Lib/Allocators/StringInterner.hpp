@@ -1,4 +1,5 @@
 #pragma once
+#include "Krystal.Lib/Allocators/StringRef.hpp"
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
@@ -6,20 +7,9 @@
 #include "Krystal.Lib/String.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include <cassert>
-#include <compare>
-#include <cstdint>
-#include <cstring>
-#include <memory>
 
 namespace Krys
 {
-  struct StringRef
-  {
-    size_t Index {0u};
-
-    constexpr auto operator<=>(const StringRef &other) const noexcept = default;
-  };
-
   class StringInterner
   {
     NO_COPY_MOVE(StringInterner)

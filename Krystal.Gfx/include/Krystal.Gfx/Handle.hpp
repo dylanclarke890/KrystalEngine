@@ -36,7 +36,11 @@ namespace Krys::Gfx
   {
   };
 
-  struct FontHandle : Handle<MaterialHandle>
+  struct FontHandle : Handle<FontHandle>
+  {
+  };
+
+  struct FontFamilyHandle : Handle<FontFamilyHandle>
   {
   };
 

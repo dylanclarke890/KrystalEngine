@@ -84,7 +84,7 @@ namespace Krys::Gfx::OpenGL
       CommandHeader header = reader.ReadHeader();
       switch (header.Type)
       {
-        case CommandTypes::BindRenderTarget:
+        case Commands::BindRenderTarget::Type:
         {
           const auto &cmd = reader.ReadCommand<Commands::BindRenderTarget>();
           assert(cmd.RenderTarget.IsValid() && "Invalid render target handle in BindRenderTarget.");
@@ -102,7 +102,7 @@ namespace Krys::Gfx::OpenGL
           shaders.Get(_singleTextureShader).SetUniform("u_Projection", rt.GetProjectionMatrix());
           break;
         }
-        case CommandTypes::DrawRect:
+        case Commands::DrawRect::Type:
         {
           const auto &cmd = reader.ReadCommand<Commands::DrawRect>();
           auto &rt = renderTargets.Get(_currentRenderTarget);
@@ -120,7 +120,7 @@ namespace Krys::Gfx::OpenGL
           }
           break;
         }
-        case CommandTypes::DrawRenderTargetColourAttachment:
+        case Commands::DrawRenderTargetColourAttachment::Type:
         {
           FlushQuadInstances();
 
