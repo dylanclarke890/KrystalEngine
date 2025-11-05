@@ -23,6 +23,8 @@ namespace Krys::Platform
   /// @brief Gets dpi of the given window.
   NO_DISCARD int GetDPIForWindow(NativeHandle windowHandle) noexcept;
 
+  NO_DISCARD NativeHandle GetActiveWindow() noexcept;
+
   /// @brief Sets the timer precision for the application.
   /// @param min The requested precision. nullopt can be passed to request the lowest possible
   /// precision.

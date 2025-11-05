@@ -36,11 +36,12 @@ namespace Krys::Gfx::OpenGL
 
   private:
     Context &_context;
+    TextRenderer _textRenderer;
     ShaderHandle _quadShader;
     ShaderHandle _singleTextureShader;
     MeshHandle _quadMesh;
-    InstanceData<QuadInstanceData> _quadInstanceData;
     RenderTargetHandle _currentRenderTarget;
+    InstanceData<QuadInstanceData> _quadInstanceData;
 
   public:
     Renderer(IContext &context) noexcept;

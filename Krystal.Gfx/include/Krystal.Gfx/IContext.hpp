@@ -1,22 +1,23 @@
 #pragma once
 
 #include "Krystal.Gfx/ICamera.hpp"
+#include "Krystal.Gfx/Registries/IBufferRegistry.hpp"
+#include "Krystal.Gfx/Registries/IFontRegistry.hpp"
+#include "Krystal.Gfx/Registries/IImageRegistry.hpp"
+#include "Krystal.Gfx/Registries/IImageViewRegistry.hpp"
+#include "Krystal.Gfx/Registries/IMaterialRegistry.hpp"
+#include "Krystal.Gfx/Registries/IMeshRegistry.hpp"
+#include "Krystal.Gfx/Registries/IRenderTargetRegistry.hpp"
+#include "Krystal.Gfx/Registries/ISamplerRegistry.hpp"
+#include "Krystal.Gfx/Registries/IShaderRegistry.hpp"
+#include "Krystal.Gfx/Registries/ITextureRegistry.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
+#include "Krystal.Lib/Allocators/StringInterner.hpp"
 #include "Krystal.Lib/Expected.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/NativeHandle.hpp"
 #include "Krystal.Lib/SmartPointers.hpp"
 #include "Krystal.Lib/Types.hpp"
-#include "Krystal.Gfx/Registries/IBufferRegistry.hpp"
-#include "Krystal.Gfx/Registries/IImageRegistry.hpp"
-#include "Krystal.Gfx/Registries/IImageViewRegistry.hpp"
-#include "Krystal.Gfx/Registries/ISamplerRegistry.hpp"
-#include "Krystal.Gfx/Registries/IShaderRegistry.hpp"
-#include "Krystal.Gfx/Registries/IMeshRegistry.hpp"
-#include "Krystal.Gfx/Registries/ITextureRegistry.hpp"
-#include "Krystal.Gfx/Registries/IRenderTargetRegistry.hpp"
-#include "Krystal.Gfx/Registries/IMaterialRegistry.hpp"
-#include "Krystal.Gfx/Registries/IFontRegistry.hpp"
 
 namespace Krys::Gfx
 {
@@ -26,6 +27,7 @@ namespace Krys::Gfx
     uint32 Width {0u};
     uint32 Height {0u};
     IO::VirtualFileSystem *VFS {nullptr};
+    StringInterner *Strings {nullptr};
   };
 
   Expected<Unique<class IContext>> CreateContext(const ContextSettings &settings) noexcept;
@@ -50,7 +52,7 @@ namespace Krys::Gfx
     virtual ~IContext() noexcept = default;
 
     virtual void Startup() noexcept = 0;
-    
+
     virtual void Shutdown() noexcept = 0;
 
     virtual void Render(ICamera &camera) noexcept = 0;
@@ -80,6 +82,8 @@ namespace Krys::Gfx
     NO_DISCARD virtual IMaterialRegistry &Materials() noexcept = 0;
 
     NO_DISCARD virtual IFontRegistry &Fonts() noexcept = 0;
+
+    NO_DISCARD virtual StringInterner &Strings() noexcept = 0;
 
     NO_DISCARD virtual API GetAPI() const noexcept = 0;
   };

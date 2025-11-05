@@ -4,12 +4,14 @@
 #include "Krystal.Gfx.OpenGL/Registries/FontRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ShaderRegistry.hpp"
 #include "Krystal.Gfx/Handle.hpp"
+#include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
 #include "Krystal.Gfx/Resources/Shader.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
 #include "Krystal.Lib/String.hpp"
 #include "Krystal.Maths/Vector.hpp"
+#include "Krystal.Platform/Platform.hpp"
 #include <cassert>
 
 namespace Krys::Gfx::OpenGL
@@ -25,8 +27,10 @@ namespace Krys::Gfx::OpenGL
     Map<TextShaderDesc, ShaderHandle> _fontShaders;
 
   public:
-    TextRenderer(FontRegistry &fonts, ShaderRegistry &shaders, int dpi) noexcept
-        : _fonts(fonts), _shaders(shaders), _dpi(dpi)
+    TextRenderer(IContext &context) noexcept
+        : _fonts(static_cast<FontRegistry &>(context.Fonts())),
+          _shaders(static_cast<ShaderRegistry &>(context.Shaders())),
+          _dpi(Platform::GetDPIForWindow(Platform::GetActiveWindow()))
     {
     }
 

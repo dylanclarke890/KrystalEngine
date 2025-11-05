@@ -571,4 +571,34 @@ namespace Krys::UI
   {
     return node->GetStyle().GetOpacity();
   }
+
+  void NodeStyleSetFont(NodeRef node, Gfx::FontHandle font)
+  {
+    node->GetStyle().SetFont(font);
+  }
+
+  Gfx::FontHandle NodeStyleGetFont(NodeConstRef node)
+  {
+    return node->GetStyle().GetFont();
+  }
+
+  void NodeStyleSetFontSize(NodeRef node, float fontSize)
+  {
+    UpdateStyle<&Style::GetFontSize, &Style::SetFontSize>(node, fontSize);
+  }
+
+  float NodeStyleGetFontSize(NodeConstRef node)
+  {
+    return node->GetStyle().GetFontSize();
+  }
+
+  void NodeStyleSetTextAlign(NodeRef node, TextAlign textAlign)
+  {
+    UpdateStyle<&Style::GetTextAlign, &Style::SetTextAlign>(node, textAlign);
+  }
+
+  TextAlign NodeStyleGetTextAlign(NodeConstRef node)
+  {
+    return node->GetStyle().GetTextAlign();
+  }
 }

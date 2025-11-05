@@ -175,6 +175,10 @@
     <ClInclude Include="include\Krystal.UI\Styles\Enums\PhysicalEdge.hpp" />
     <ClInclude Include="include\Krystal.UI\Styles\Enums\Position.hpp" />
     <ClInclude Include="include\Krystal.UI\Styles\Enums\SizingMode.hpp" />
+    <ClInclude Include="include\Krystal.UI\Styles\Enums\TextAlign.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Krystal.UI\Styles\Enums\Unit.hpp" />
     <ClInclude Include="include\Krystal.UI\Styles\Enums\Wrap.hpp" />
     <ClInclude Include="include\Krystal.UI\Styles\Helpers\FlexDirection.hpp" />

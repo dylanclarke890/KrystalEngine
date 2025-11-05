@@ -159,6 +159,7 @@ namespace Krys
       .Width = _context->Settings.WindowSettings.Size.Width,
       .Height = _context->Settings.WindowSettings.Size.Height,
       .VFS = _context->VFS.get(),
+      .Strings = &_context->Strings,
     };
     auto gfxContext = Gfx::CreateContext(contextSettings);
     if (!gfxContext.has_value())

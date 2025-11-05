@@ -46,7 +46,7 @@ namespace Krys::Gfx
 
       StringRef Text;
       Maths::Vec2 Position;
-      FontFamilyHandle FontFamily;
+      FontHandle Font;
       float FontSize {16.f};
       Gfx::Colour Colour {Gfx::Colours::Black};
     };

@@ -21,7 +21,8 @@ namespace Krys::Gfx
 
 namespace Krys::Gfx::OpenGL
 {
-  Renderer::Renderer(IContext &context) noexcept : _context(static_cast<Context &>(context))
+  Renderer::Renderer(IContext &context) noexcept
+      : _context(static_cast<Context &>(context)), _textRenderer(context)
   {
   }
 
@@ -133,6 +134,16 @@ namespace Krys::Gfx::OpenGL
 
           float posY = static_cast<float>(dstRT.Height()) - (cmd.Position.y + cmd.Size.y);
           DrawTexturedQuad(imageView.Id(), {cmd.Position.x, posY}, cmd.Size, cmd.Opacity);
+          break;
+        }
+        case Commands::DrawText::Type:
+        {
+          FlushQuadInstances();
+          const auto &cmd = reader.ReadCommand<Commands::DrawText>();
+          auto &rt = renderTargets.Get(_currentRenderTarget);
+
+          float posY = static_cast<float>(rt.Height()) - (cmd.Position.y + (cmd.FontSize / 2.f));
+          _textRenderer.Draw(_context.Strings().Get(cmd.Text), cmd.Font, {cmd.Position.x, posY}, cmd.Colour);
           break;
         }
         default:

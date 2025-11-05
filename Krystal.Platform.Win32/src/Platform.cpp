@@ -10,11 +10,16 @@
 
 #pragma comment(lib, "Shcore.lib")
 
-namespace Krys::Platform
+namespace
 {
+  using namespace Krys;
+
   int64 StartTicks = 0;
   int64 TickFrequency = 0;
+}
 
+namespace Krys::Platform
+{
   void Initialise() noexcept
   {
     SetTimerPrecision();
@@ -74,6 +79,11 @@ namespace Krys::Platform
     if (result != S_OK)
       return 96;
     return static_cast<int>(dpiX);
+  }
+
+  NativeHandle GetActiveWindow() noexcept
+  {
+    return NativeHandle(::GetActiveWindow());
   }
 
   uint SetTimerPrecision(Nullable<uint> min) noexcept

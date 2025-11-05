@@ -168,6 +168,9 @@
     <ClInclude Include="include\Krystal.UI\Compositor.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Styles\Enums\TextAlign.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Layout\Algorithm\AbsoluteLayout.cpp">

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Krystal.Gfx.Lib/Colour.hpp"
-#include "Krystal.Gfx.Lib/Handle.hpp"
+#include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Lib/Array.hpp"
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/NullableFloat.hpp"
@@ -17,6 +17,7 @@
 #include "Krystal.UI/Styles/Enums/Overflow.hpp"
 #include "Krystal.UI/Styles/Enums/PhysicalEdge.hpp"
 #include "Krystal.UI/Styles/Enums/Position.hpp"
+#include "Krystal.UI/Styles/Enums/TextAlign.hpp"
 #include "Krystal.UI/Styles/Enums/Unit.hpp"
 #include "Krystal.UI/Styles/Enums/Wrap.hpp"
 #include "Krystal.UI/Styles/Helpers/FlexDirection.hpp"
@@ -46,6 +47,7 @@ namespace Krys::UI
     Overflow _overflow : BitCount<Overflow>() = Overflow::Visible;
     Display _display : BitCount<Display>() = Display::Flex;
     BoxSizing _boxSizing : BitCount<BoxSizing>() = BoxSizing::BorderBox;
+    TextAlign _textAlign : BitCount<TextAlign>() = {TextAlign::Left};
 
     StyleValueHandle _flex {};
     StyleValueHandle _flexGrow {};
@@ -69,6 +71,9 @@ namespace Krys::UI
     Gfx::Colour _textColour {Gfx::Colours::Black};
     float _opacity {1.0f};
 
+    Gfx::FontHandle _font {};
+    float _fontSize {16.0f};
+
   public:
     using Length = StyleLength;
     using SizeLength = StyleSizeLength;
@@ -76,6 +81,17 @@ namespace Krys::UI
     static constexpr float DefaultFlexGrow = 0.0f;
     static constexpr float DefaultFlexShrink = 0.0f;
     static constexpr float WebDefaultFlexShrink = 1.0f;
+
+    void SetOpacity(float opacity) noexcept
+    {
+      assert((opacity >= 0.0f && opacity <= 1.0f) && "Opacity must be between 0 and 1.");
+      _opacity = opacity;
+    }
+
+    NO_DISCARD float GetOpacity() const noexcept
+    {
+      return _opacity;
+    }
 
 #pragma region Enums
 
@@ -399,16 +415,40 @@ namespace Krys::UI
 
 #pragma endregion
 
-    void SetOpacity(float opacity) noexcept
+#pragma region Text
+
+    void SetFont(Gfx::FontHandle font) noexcept
     {
-      assert((opacity >= 0.0f && opacity <= 1.0f) && "Opacity must be between 0 and 1.");
-      _opacity = opacity;
+      _font = font;
     }
 
-    NO_DISCARD float GetOpacity() const noexcept
+    NO_DISCARD Gfx::FontHandle GetFont() const noexcept
     {
-      return _opacity;
+      return _font;
     }
+
+    void SetFontSize(float size) noexcept
+    {
+      assert(size > 0.0f && "Font size must be greater than 0.");
+      _fontSize = size;
+    }
+
+    NO_DISCARD float GetFontSize() const noexcept
+    {
+      return _fontSize;
+    }
+
+    void SetTextAlign(TextAlign align)
+    {
+      _textAlign = align;
+    }
+
+    NO_DISCARD TextAlign GetTextAlign() const noexcept
+    {
+      return _textAlign;
+    }
+
+#pragma endregion
 
 #pragma region Queries
 

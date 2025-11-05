@@ -111,6 +111,18 @@ namespace Krys::UI
         command.BorderColour = NodeStyleGetBorderColour(node);
         _layerStack.top().Commands.Push(command);
 
+        if (element.TextContent.Text.IsValid())
+        {
+          Gfx::Commands::DrawText textCommand;
+          textCommand.Text = element.TextContent.Text;
+          textCommand.Position = {x + NodeLayoutGetPadding(node, Edge::Left),
+                                  y + NodeLayoutGetPadding(node, Edge::Top)};
+          textCommand.Font = NodeStyleGetFont(node);
+          textCommand.FontSize = NodeStyleGetFontSize(node);
+          textCommand.Colour = NodeStyleGetTextColour(node);
+          _layerStack.top().Commands.Push(textCommand);
+        }
+
         for (auto &child : element.Children)
         {
           RenderElement(document, {child, 0.f, 0.f});
@@ -135,6 +147,18 @@ namespace Krys::UI
         command.BackgroundColour = NodeStyleGetBackgroundColour(node);
         command.BorderColour = NodeStyleGetBorderColour(node);
         _layerStack.top().Commands.Push(command);
+
+        if (element.TextContent.Text.IsValid())
+        {
+          Gfx::Commands::DrawText textCommand;
+          textCommand.Text = element.TextContent.Text;
+          textCommand.Position = {x + NodeLayoutGetPadding(node, Edge::Left),
+                                  y + NodeLayoutGetPadding(node, Edge::Top)};
+          textCommand.Font = NodeStyleGetFont(node);
+          textCommand.FontSize = NodeStyleGetFontSize(node);
+          textCommand.Colour = NodeStyleGetTextColour(node);
+          _layerStack.top().Commands.Push(textCommand);
+        }
 
         for (auto &child : element.Children)
         {

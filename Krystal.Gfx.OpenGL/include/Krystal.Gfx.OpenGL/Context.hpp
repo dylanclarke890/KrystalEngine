@@ -27,6 +27,7 @@ namespace Krys::Gfx::OpenGL
     uint32 _width;
     uint32 _height;
     IO::VirtualFileSystem &_vfs;
+    StringInterner& _strings;
     int _dpi;
     Unique<ContextPlatformImpl> _platformImpl;
 
@@ -48,7 +49,7 @@ namespace Krys::Gfx::OpenGL
     ~Context() noexcept override = default;
 
     void Startup() noexcept override;
-    
+
     void Shutdown() noexcept override;
 
     void Render(ICamera &camera) noexcept override;
@@ -82,6 +83,8 @@ namespace Krys::Gfx::OpenGL
     NO_DISCARD IMaterialRegistry &Materials() noexcept override;
 
     NO_DISCARD IFontRegistry &Fonts() noexcept override;
+    
+    NO_DISCARD StringInterner &Strings() noexcept override;
 
     NO_DISCARD API GetAPI() const noexcept override;
   };

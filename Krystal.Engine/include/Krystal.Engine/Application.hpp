@@ -20,17 +20,15 @@
 
 namespace Krys
 {
-  struct ApplicationSettings;
-  class Application;
-
   /// @brief Create a new `Application`.
   /// @tparam TApplication The derived `Application` type.
   /// @param argc Command line argument count.
   /// @param argv Command line arguments.
   /// @param settings Application settings.
   template <DerivedFrom<Application> TApplication, typename... Args>
-  static Expected<Unique<TApplication>>
-    CreateApplication(int argc, char **argv, const ApplicationSettings &settings, Args &&...args) noexcept
+  static Expected<Unique<TApplication>> CreateApplication(int argc, char **argv,
+                                                          const struct ApplicationSettings &settings,
+                                                          Args &&...args) noexcept
   {
     try
     {
@@ -70,6 +68,7 @@ namespace Krys
     Unique<IO::VirtualFileSystem> VFS {};
     Unique<Gfx::IContext> GraphicsContext {};
     Unique<Gfx::IRenderer> Renderer {};
+    StringInterner Strings {};
   };
 
   /// @brief Base class for a Krystal application.

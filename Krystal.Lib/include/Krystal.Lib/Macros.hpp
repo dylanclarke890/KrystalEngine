@@ -131,6 +131,10 @@ namespace Krys
       Swap(other);                                                                                           \
     }                                                                                                        \
     return *this;                                                                                            \
+  }                                                                                                          \
+  void swap(ClassName &other) noexcept                                                                       \
+  {                                                                                                          \
+    Swap(other);                                                                                             \
   }
 
 #define CONCAT_IMPL(x, y) x##y

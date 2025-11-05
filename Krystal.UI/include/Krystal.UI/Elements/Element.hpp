@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Krystal.Gfx.Lib/Handle.hpp"
+#include "Krystal.Lib/Allocators/StringRef.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
@@ -13,25 +14,57 @@ namespace Krys::UI
   {
   };
 
+  Size TextMeasureFunc(NodeConstRef node, float width, MeasureMode widthMode, float height,
+                       MeasureMode heightMode)
+  {
+    // auto *text = static_cast<TextNode *>(NodeGetContext(node));
+    // auto &font = context.Fonts().Get(text->Font);
+
+    // Maths::Vec2 size = font.MeasureText(text->Text, widthMode == MeasureMode::Undefined ? FLT_MAX : width);
+    // return {size.x, size.y};
+
+    return {0, 0};
+  }
+
+  struct TextNode
+  {
+    NodeRef LayoutNode {nullptr};
+    StringRef Text;
+  };
+
   class Element
   {
     NO_COPY(Element)
 
   public:
-    Element(ElementHandle handle, ConfigRef config) noexcept : Handle(handle), LayoutConfig(config)
-    {
-      LayoutNode = NodeCreate(LayoutConfig);
-    }
-
-    ~Element() = default;
-
-    MOVE_SWAP(Element)
-
     ElementHandle Handle;
     ElementHandle Parent;
     List<ElementHandle> Children;
-    NodeRef LayoutNode;
-    ConfigRef LayoutConfig;
+    NodeRef LayoutNode {nullptr};
+    ConfigRef LayoutConfig {nullptr};
+    TextNode TextContent;
+
+    Element(ElementHandle handle, ConfigRef config) noexcept : Handle(handle), LayoutConfig(config)
+    {
+      LayoutNode = NodeCreate(LayoutConfig);
+
+      TextContent.LayoutNode = NodeCreate(LayoutConfig);
+      NodeSetNodeType(TextContent.LayoutNode, NodeType::Text);
+      NodeSetMeasureFunc(TextContent.LayoutNode, &TextMeasureFunc);
+      NodeSetContext(TextContent.LayoutNode, this);
+      NodeInsertChild(LayoutNode, TextContent.LayoutNode, 0);
+    }
+
+    ~Element()
+    {
+      if (LayoutNode != nullptr)
+      {
+        NodeDestroy(TextContent.LayoutNode);
+        NodeDestroy(LayoutNode);
+      }
+    }
+
+    MOVE_SWAP(Element)
 
   private:
     void Swap(Element &other) noexcept
@@ -41,6 +74,7 @@ namespace Krys::UI
       std::swap(Children, other.Children);
       std::swap(LayoutNode, other.LayoutNode);
       std::swap(LayoutConfig, other.LayoutConfig);
+      std::swap(TextContent, other.TextContent);
     }
   };
 }
