@@ -113,14 +113,7 @@ namespace Krys::UI
 
         if (element.TextContent.Text.IsValid())
         {
-          Gfx::Commands::DrawText textCommand;
-          textCommand.Text = element.TextContent.Text;
-          textCommand.Position = {x + NodeLayoutGetPadding(node, Edge::Left),
-                                  y + NodeLayoutGetPadding(node, Edge::Top)};
-          textCommand.Font = NodeStyleGetFont(node);
-          textCommand.FontSize = NodeStyleGetFontSize(node);
-          textCommand.Colour = NodeStyleGetTextColour(node);
-          _layerStack.top().Commands.Push(textCommand);
+          DrawTextCommand(element, 0.f, 0.f);
         }
 
         for (auto &child : element.Children)
@@ -150,14 +143,7 @@ namespace Krys::UI
 
         if (element.TextContent.Text.IsValid())
         {
-          Gfx::Commands::DrawText textCommand;
-          textCommand.Text = element.TextContent.Text;
-          textCommand.Position = {x + NodeLayoutGetPadding(node, Edge::Left),
-                                  y + NodeLayoutGetPadding(node, Edge::Top)};
-          textCommand.Font = NodeStyleGetFont(node);
-          textCommand.FontSize = NodeStyleGetFontSize(node);
-          textCommand.Colour = NodeStyleGetTextColour(node);
-          _layerStack.top().Commands.Push(textCommand);
+          DrawTextCommand(element, state.ParentX, state.ParentY);
         }
 
         for (auto &child : element.Children)
@@ -165,6 +151,21 @@ namespace Krys::UI
           RenderElement(document, {child, x, y});
         }
       }
+    }
+
+    void DrawTextCommand(Element &element, float parentX, float parentY)
+    {
+      Gfx::Commands::DrawText textCommand;
+      textCommand.Text = element.TextContent.Text;
+
+      float posX = parentX + NodeLayoutGetLeft(element.TextContent.LayoutNode);
+      float posY = parentY + NodeLayoutGetTop(element.TextContent.LayoutNode);
+      textCommand.Position = {posX + NodeLayoutGetPadding(element.LayoutNode, Edge::Left),
+                              posY + NodeLayoutGetPadding(element.LayoutNode, Edge::Top)};
+      textCommand.Font = NodeStyleGetFont(element.LayoutNode);
+      textCommand.FontSize = NodeStyleGetFontSize(element.LayoutNode);
+      textCommand.Colour = NodeStyleGetTextColour(element.LayoutNode);
+      _layerStack.top().Commands.Push(textCommand);
     }
   };
 }

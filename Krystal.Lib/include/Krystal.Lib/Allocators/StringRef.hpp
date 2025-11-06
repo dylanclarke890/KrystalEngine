@@ -8,13 +8,13 @@ namespace Krys
 {
   struct StringRef
   {
-    size_t Index {0u};
+    size_t Id {0u};
 
     constexpr auto operator<=>(const StringRef &other) const noexcept = default;
 
     constexpr bool IsValid() const noexcept
     {
-      return Index != 0u;
+      return Id != 0u;
     }
   };
 }

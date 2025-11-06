@@ -114,6 +114,9 @@ namespace Krys::Gfx::OpenGL
         scale = (scale * _ptSize) / _sdfParams.EMSizeInPixels;
       }
 
+      glEnable(GL_BLEND);
+      glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
       auto count = text.size();
       while (count > 0)
       {
@@ -144,6 +147,8 @@ namespace Krys::Gfx::OpenGL
                              _vertexBuffer.data());
         glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(_vertexBuffer.size()));
       }
+
+      glDisable(GL_BLEND);
     }
 
     FontType Type() const noexcept

@@ -384,6 +384,14 @@ namespace Krys::Gfx::OpenGL
 
   void FontRegistry::Startup()
   {
+    // Load default font
+    IO::Path defaultFontPath = IO::Path("data/assets/fonts/Antonio-Bold.ttf");
+    _defaultFont = Load(defaultFontPath, 16.0f, FontType::Bitmap);
+    if (!_defaultFont.IsValid())
+    {
+      KRYS_ERROR("Failed to load default font '{}'", defaultFontPath.ToString());
+      KRYS_DEBUG_BREAK();
+    }
   }
 
   void FontRegistry::Shutdown() noexcept
@@ -504,5 +512,10 @@ namespace Krys::Gfx::OpenGL
       auto characters = CreateBitmapCharacters(result.Glyphs, result.Padding, result.AtlasSize);
       font.SetAtlasData(atlas, result.AtlasSize, characters);
     }
+  }
+
+  FontHandle FontRegistry::GetDefault() noexcept
+  {
+    return _defaultFont;
   }
 }

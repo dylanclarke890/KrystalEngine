@@ -29,15 +29,15 @@ namespace Krys
       if (it != _map.end())
         return {it->second};
       _strings.emplace_back(str);
-      size_t id = _strings.size() - 1;
+      size_t id = _strings.size();
       _map.emplace(_strings.back(), id);
       return {id};
     }
 
     NO_DISCARD const string &Get(StringRef ref) const
     {
-      assert(ref.Index < _strings.size());
-      return _strings[ref.Index];
+      assert(ref.Id - 1u < _strings.size());
+      return _strings[ref.Id - 1u];
     }
   };
 }

@@ -26,5 +26,7 @@ namespace Krys::Gfx
     virtual bool Unload(FontHandle handle) noexcept = 0;
 
     virtual void DPIChanged(int dpi) noexcept = 0;
+
+    NO_DISCARD virtual FontHandle GetDefault() noexcept = 0;
   };
 }

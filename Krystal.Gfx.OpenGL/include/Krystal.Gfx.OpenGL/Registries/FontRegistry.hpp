@@ -19,6 +19,7 @@ namespace Krys::Gfx::OpenGL
     using FontCache = ResourceHandleCache<string, FontHandle>;
 
     FontManager _fonts;
+    FontHandle _defaultFont;
     FontCache _cache;
     int _dpi;
 
@@ -40,5 +41,7 @@ namespace Krys::Gfx::OpenGL
     NO_DISCARD Font *TryGet(FontHandle handle) noexcept;
 
     void DPIChanged(int dpi) noexcept;
+
+    NO_DISCARD FontHandle GetDefault() noexcept override;
   };
 }
