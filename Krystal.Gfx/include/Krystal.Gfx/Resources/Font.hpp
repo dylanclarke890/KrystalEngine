@@ -2,6 +2,8 @@
 
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.IO/Path.hpp"
+#include "Krystal.Lib/Allocators/StringRef.hpp"
+#include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
 #include "Krystal.Lib/Types.hpp"
@@ -49,10 +51,11 @@ namespace Krys::Gfx
     NO_COPY(FontFamily)
 
   private:
+    StringRef _name;
     IO::Path _path;
 
   public:
-    explicit FontFamily(const IO::Path &path) noexcept : _path(path)
+    explicit FontFamily(StringRef name, const IO::Path &path) noexcept : _name(name), _path(path)
     {
     }
 
@@ -60,7 +63,12 @@ namespace Krys::Gfx
 
     MOVE_SWAP(FontFamily)
 
-    const IO::Path &Path() const noexcept
+    NO_DISCARD StringRef Name() const noexcept
+    {
+      return _name;
+    }
+
+    NO_DISCARD const IO::Path &Path() const noexcept
     {
       return _path;
     }

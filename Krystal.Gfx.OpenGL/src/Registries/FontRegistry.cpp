@@ -404,7 +404,7 @@ namespace Krys::Gfx::OpenGL
 
   FontFamilyHandle FontRegistry::Register(StringRef name, const IO::Path &path) noexcept
   {
-    FontFamily fontFamily {path};
+    FontFamily fontFamily {name, path};
     FontFamilyHandle handle = _fontFamilies.Add(std::move(fontFamily));
     return handle;
   }
