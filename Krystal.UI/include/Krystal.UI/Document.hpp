@@ -743,7 +743,7 @@ namespace Krys::UI
     void ElementSetTextContent(ElementHandle element, StringRef text)
     {
       assert(element.IsValid() && "Invalid element handle");
-      _elements.Get(element).TextContent.Text = text;
+      _elements.Get(element).SetText(text);
     }
 
     StringRef ElementGetTextContent(ElementHandle element)

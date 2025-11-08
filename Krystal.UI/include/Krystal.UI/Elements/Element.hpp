@@ -47,24 +47,40 @@ namespace Krys::UI
     Element(ElementHandle handle, ConfigRef config) noexcept : Handle(handle), LayoutConfig(config)
     {
       LayoutNode = NodeCreate(LayoutConfig);
-
-      TextContent.LayoutNode = NodeCreate(LayoutConfig);
-      NodeSetNodeType(TextContent.LayoutNode, NodeType::Text);
-      NodeSetMeasureFunc(TextContent.LayoutNode, &TextMeasureFunc);
-      NodeSetContext(TextContent.LayoutNode, this);
-      NodeInsertChild(LayoutNode, TextContent.LayoutNode, 0);
     }
 
     ~Element()
     {
-      if (LayoutNode != nullptr)
+      if (TextContent.LayoutNode != nullptr)
       {
         NodeDestroy(TextContent.LayoutNode);
+      }
+      if (LayoutNode != nullptr)
+      {
         NodeDestroy(LayoutNode);
       }
     }
 
     MOVE_SWAP(Element)
+
+    void SetText(StringRef text) noexcept
+    {
+      TextContent.Text = text;
+      if (TextContent.Text.IsValid() && TextContent.LayoutNode == nullptr)
+      {
+        TextContent.LayoutNode = NodeCreate(LayoutConfig);
+        NodeSetNodeType(TextContent.LayoutNode, NodeType::Text);
+        NodeSetMeasureFunc(TextContent.LayoutNode, &TextMeasureFunc);
+        NodeSetContext(TextContent.LayoutNode, this);
+        NodeInsertChild(LayoutNode, TextContent.LayoutNode, 0);
+      }
+      else if (!TextContent.Text.IsValid() && TextContent.LayoutNode != nullptr)
+      {
+        NodeRemoveChild(LayoutNode, TextContent.LayoutNode);
+        NodeDestroy(TextContent.LayoutNode);
+        TextContent.LayoutNode = nullptr;
+      }
+    }
 
   private:
     void Swap(Element &other) noexcept

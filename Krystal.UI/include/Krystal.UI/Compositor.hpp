@@ -5,9 +5,11 @@
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/IRenderer.hpp"
+#include "Krystal.Lib/DebugBreak.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Stack.hpp"
 #include "Krystal.Lib/Types.hpp"
+#include "Krystal.Log/ILogger.hpp"
 #include "Krystal.UI/Document.hpp"
 
 namespace Krys::UI
@@ -27,8 +29,6 @@ namespace Krys::UI
     {
       Gfx::RenderTargetHandle Target;
       Gfx::CommandList &Commands;
-      float OffsetX;
-      float OffsetY;
     };
 
   private:
@@ -61,7 +61,7 @@ namespace Krys::UI
       _commandLists.reserve(16u);
 
       _commandLists.emplace_back();
-      _layerStack.push({renderTarget, _commandLists.back(), 0.f, 0.f});
+      _layerStack.push({renderTarget, _commandLists.back()});
 
       _layerStack.top().Commands.Push(Gfx::Commands::BindRenderTarget {renderTarget});
       RenderElement(document, {document.Body(), 0.f, 0.f});
@@ -85,11 +85,12 @@ namespace Krys::UI
       auto &element = document.Get(state.CurrentElement);
       auto node = element.LayoutNode;
 
-      float x = state.ParentX + NodeLayoutGetLeft(node);
-      float y = state.ParentY + NodeLayoutGetTop(node);
+      float x = NodeLayoutGetLeft(node);
+      float y = NodeLayoutGetTop(node);
       float w = NodeLayoutGetWidth(node);
       float h = NodeLayoutGetHeight(node);
 
+      KRYS_INFO("Rendering element at ({}, {}) size ({}, {})", x, y, w, h);
       if (document.ElementRequiresLayer(state.CurrentElement))
       {
         Gfx::RenderTargetDesc desc {
@@ -97,80 +98,84 @@ namespace Krys::UI
           .Height = static_cast<uint32>(h),
           .Attachments = {{Gfx::AttachmentType::Colour, Gfx::PixelFormat::R8G8B8A8}},
         };
-        auto layerRT = _context.RenderTargets().Acquire(desc);
-        _usedTempRenderTargets.push_back(layerRT);
+        auto layerRenderTarget = _context.RenderTargets().Acquire(desc);
+        _usedTempRenderTargets.push_back(layerRenderTarget);
 
         _commandLists.emplace_back();
-        _layerStack.push({layerRT, _commandLists.back(), x, y});
-        _layerStack.top().Commands.Push(Gfx::Commands::BindRenderTarget {layerRT});
+        _layerStack.push({layerRenderTarget, _commandLists.back()});
 
-        Gfx::Commands::DrawRect command;
-        command.Position = {0.f, 0.f};
-        command.Size = {w, h};
-        command.BackgroundColour = NodeStyleGetBackgroundColour(node);
-        command.BorderColour = NodeStyleGetBorderColour(node);
-        _layerStack.top().Commands.Push(command);
+        Gfx::Commands::BindRenderTarget bindRTCmd;
+        bindRTCmd.RenderTarget = layerRenderTarget;
+        _layerStack.top().Commands.Push(bindRTCmd);
 
-        if (element.TextContent.Text.IsValid())
-        {
-          DrawTextCommand(element, 0.f, 0.f);
-        }
-
-        for (auto &child : element.Children)
-        {
-          RenderElement(document, {child, 0.f, 0.f});
-        }
-
-        auto &layerContext = _layerStack.top();
-        _layerStack.pop();
-
-        Gfx::Commands::DrawRenderTargetColourAttachment img;
-        img.Source = layerRT;
-        img.ColourAttachmentIndex = 0u;
-        img.Position = {x, y};
-        img.Size = {w, h};
-        img.Opacity = document.ElementStyleGetOpacity(state.CurrentElement);
-        _layerStack.top().Commands.Push(img);
-      }
-      else
-      {
-        Gfx::Commands::DrawRect command;
-        command.Position = {x, y};
-        command.Size = {w, h};
-        command.BackgroundColour = NodeStyleGetBackgroundColour(node);
-        command.BorderColour = NodeStyleGetBorderColour(node);
-        _layerStack.top().Commands.Push(command);
+        Gfx::Commands::DrawRect drawRectCmd;
+        drawRectCmd.Position = {x, y};
+        drawRectCmd.Size = {w, h};
+        drawRectCmd.BackgroundColour = NodeStyleGetBackgroundColour(node);
+        drawRectCmd.BorderColour = NodeStyleGetBorderColour(node);
+        _layerStack.top().Commands.Push(drawRectCmd);
 
         if (element.TextContent.Text.IsValid())
         {
-          DrawTextCommand(element, state.ParentX, state.ParentY);
+          DrawTextCommand(element, x, y);
         }
 
         for (auto &child : element.Children)
         {
           RenderElement(document, {child, x, y});
         }
+
+        auto &layerContext = _layerStack.top();
+        _layerStack.pop();
+
+        Gfx::Commands::DrawRenderTargetColourAttachment drawRenderTargetCmd;
+        drawRenderTargetCmd.Source = layerRenderTarget;
+        drawRenderTargetCmd.ColourAttachmentIndex = 0u;
+        drawRenderTargetCmd.Position = {state.ParentX + x, state.ParentY + y};
+        drawRenderTargetCmd.Size = {w, h};
+        drawRenderTargetCmd.Opacity = document.ElementStyleGetOpacity(state.CurrentElement);
+        _layerStack.top().Commands.Push(drawRenderTargetCmd);
+      }
+      else
+      {
+        Gfx::Commands::DrawRect command;
+        command.Position = {state.ParentX + x, state.ParentY + y};
+        command.Size = {w, h};
+        command.BackgroundColour = NodeStyleGetBackgroundColour(node);
+        command.BorderColour = NodeStyleGetBorderColour(node);
+        _layerStack.top().Commands.Push(command);
+
+        if (element.TextContent.Text.IsValid())
+        {
+          DrawTextCommand(element, state.ParentX + x, state.ParentY + y);
+        }
+
+        for (auto &child : element.Children)
+        {
+          RenderElement(document, {child, state.ParentX + x, state.ParentY + y});
+        }
       }
     }
 
     void DrawTextCommand(Element &element, float parentX, float parentY)
     {
-      Gfx::Commands::DrawText textCommand;
-      textCommand.Text = element.TextContent.Text;
-
       float posX = parentX + NodeLayoutGetLeft(element.TextContent.LayoutNode);
       float posY = parentY + NodeLayoutGetTop(element.TextContent.LayoutNode);
-      textCommand.Position = {posX + NodeLayoutGetPadding(element.LayoutNode, Edge::Left),
-                              posY + NodeLayoutGetPadding(element.LayoutNode, Edge::Top)};
-      auto family = NodeStyleGetFontFamily(element.LayoutNode);
+
+      Gfx::FontFamilyHandle family = NodeStyleGetFontFamily(element.LayoutNode);
       if (!family.IsValid())
       {
         family = _context.Fonts().GetDefaultFontFamily();
       }
-      textCommand.FontFamily = family;
-      textCommand.FontSize = NodeStyleGetFontSize(element.LayoutNode);
-      textCommand.Colour = NodeStyleGetTextColour(element.LayoutNode);
-      _layerStack.top().Commands.Push(textCommand);
+
+      Gfx::Commands::DrawText drawTextCmd;
+      drawTextCmd.Text = element.TextContent.Text;
+      drawTextCmd.Position = {posX + NodeLayoutGetPadding(element.LayoutNode, Edge::Left),
+                              posY + NodeLayoutGetPadding(element.LayoutNode, Edge::Top)};
+      drawTextCmd.FontFamily = family;
+      drawTextCmd.FontSize = NodeStyleGetFontSize(element.LayoutNode);
+      drawTextCmd.Colour = NodeStyleGetTextColour(element.LayoutNode);
+      _layerStack.top().Commands.Push(drawTextCmd);
     }
   };
 }
