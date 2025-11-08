@@ -151,8 +151,8 @@ namespace Krys::UI
   void NodeStyleSetOpacity(NodeRef node, float opacity);
   float NodeStyleGetOpacity(NodeConstRef node);
 
-  void NodeStyleSetFont(NodeRef node, Gfx::FontHandle font);
-  Gfx::FontHandle NodeStyleGetFont(NodeConstRef node);
+  void NodeStyleSetFontFamily(NodeRef node, Gfx::FontFamilyHandle family);
+  Gfx::FontFamilyHandle NodeStyleGetFontFamily(NodeConstRef node);
 
   void NodeStyleSetFontSize(NodeRef node, float fontSize);
   float NodeStyleGetFontSize(NodeConstRef node);

@@ -572,14 +572,14 @@ namespace Krys::UI
     return node->GetStyle().GetOpacity();
   }
 
-  void NodeStyleSetFont(NodeRef node, Gfx::FontHandle font)
+  void NodeStyleSetFontFamily(NodeRef node, Gfx::FontFamilyHandle family)
   {
-    node->GetStyle().SetFont(font);
+    node->GetStyle().SetFontFamily(family);
   }
 
-  Gfx::FontHandle NodeStyleGetFont(NodeConstRef node)
+  Gfx::FontFamilyHandle NodeStyleGetFontFamily(NodeConstRef node)
   {
-    return node->GetStyle().GetFont();
+    return node->GetStyle().GetFontFamily();
   }
 
   void NodeStyleSetFontSize(NodeRef node, float fontSize)

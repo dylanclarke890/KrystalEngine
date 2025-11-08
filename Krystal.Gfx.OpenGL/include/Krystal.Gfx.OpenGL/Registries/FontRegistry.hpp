@@ -3,6 +3,7 @@
 #include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Font.hpp"
 #include "Krystal.Gfx/Handle.hpp"
+#include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/Registries/IFontRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
 #include "Krystal.IO/Path.hpp"
@@ -15,16 +16,19 @@ namespace Krys::Gfx::OpenGL
   {
     NO_COPY_MOVE(FontRegistry)
 
+    using FontFamilyManager = ResourceManager<FontFamily, FontFamilyHandle>;
     using FontManager = ResourceManager<Font, FontHandle>;
-    using FontCache = ResourceHandleCache<string, FontHandle>;
+    using FontCache = ResourceHandleCache<FontDesc, FontHandle>;
 
-    FontManager _fonts;
-    FontHandle _defaultFont;
-    FontCache _cache;
+    class Context &_context;
     int _dpi;
+    FontFamilyManager _fontFamilies;
+    FontManager _fonts;
+    FontFamilyHandle _defaultFontFamily;
+    FontCache _cache;
 
   public:
-    FontRegistry(int dpi) noexcept;
+    FontRegistry(IContext &context) noexcept;
 
     ~FontRegistry() noexcept override;
 
@@ -32,9 +36,13 @@ namespace Krys::Gfx::OpenGL
 
     void Shutdown() noexcept override;
 
-    NO_DISCARD FontHandle Load(const IO::Path &path, float ptSize, FontType fontType) noexcept override;
+    NO_DISCARD FontFamilyHandle Register(StringRef name, const IO::Path &path) noexcept override;
+
+    NO_DISCARD virtual FontHandle Get(const FontDesc &desc) noexcept override;
 
     bool Unload(FontHandle handle) noexcept override;
+
+    bool Unload(FontFamilyHandle handle) noexcept override;
 
     NO_DISCARD Font &Get(FontHandle handle);
 
@@ -42,6 +50,6 @@ namespace Krys::Gfx::OpenGL
 
     void DPIChanged(int dpi) noexcept;
 
-    NO_DISCARD FontHandle GetDefault() noexcept override;
+    NO_DISCARD FontFamilyHandle GetDefaultFontFamily() noexcept override;
   };
 }

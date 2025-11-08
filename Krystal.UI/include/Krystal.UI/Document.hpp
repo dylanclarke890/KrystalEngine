@@ -702,16 +702,16 @@ namespace Krys::UI
       return NodeStyleGetOpacity(_elements.Get(element).LayoutNode);
     }
 
-    void ElementStyleSetFont(ElementHandle element, Gfx::FontHandle font)
+    void ElementStyleSetFontFamily(ElementHandle element, Gfx::FontFamilyHandle family)
     {
       assert(element.IsValid() && "Invalid element handle");
-      NodeStyleSetFont(_elements.Get(element).LayoutNode, font);
+      NodeStyleSetFontFamily(_elements.Get(element).LayoutNode, family);
     }
 
-    Gfx::FontHandle ElementStyleGetFont(ElementHandle element)
+    Gfx::FontHandle ElementStyleGetFontFamily(ElementHandle element)
     {
       assert(element.IsValid() && "Invalid element handle");
-      NodeStyleGetFont(_elements.Get(element).LayoutNode);
+      NodeStyleGetFontFamily(_elements.Get(element).LayoutNode);
     }
 
     void ElementStyleSetFontSize(ElementHandle element, float fontSize)

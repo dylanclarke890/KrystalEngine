@@ -71,7 +71,7 @@ namespace Krys::UI
     Gfx::Colour _textColour {Gfx::Colours::Black};
     float _opacity {1.0f};
 
-    Gfx::FontHandle _font {};
+    Gfx::FontFamilyHandle _family {};
     float _fontSize {16.0f};
 
   public:
@@ -417,14 +417,14 @@ namespace Krys::UI
 
 #pragma region Text
 
-    void SetFont(Gfx::FontHandle font) noexcept
+    void SetFontFamily(Gfx::FontFamilyHandle family) noexcept
     {
-      _font = font;
+      _family = family;
     }
 
-    NO_DISCARD Gfx::FontHandle GetFont() const noexcept
+    NO_DISCARD Gfx::FontFamilyHandle GetFontFamily() const noexcept
     {
-      return _font;
+      return _family;
     }
 
     void SetFontSize(float size) noexcept

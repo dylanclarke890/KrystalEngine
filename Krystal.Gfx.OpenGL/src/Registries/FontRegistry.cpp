@@ -1,11 +1,13 @@
 ﻿#pragma once
 
 #include "Krystal.Gfx.OpenGL/Registries/FontRegistry.hpp"
+#include "Krystal.Gfx.OpenGL/Context.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Font.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Lib/DebugBreak.hpp"
 #include "Krystal.Lib/Map.hpp"
 #include "Krystal.Log/ILogger.hpp"
+#include "Krystal.Platform/Platform.hpp"
 #include <ft2build.h>
 #include <msdf-atlas-gen.h>
 #include <msdfgen-ext.h>
@@ -374,7 +376,9 @@ namespace
 
 namespace Krys::Gfx::OpenGL
 {
-  FontRegistry::FontRegistry(int dpi) noexcept : _dpi(dpi)
+  FontRegistry::FontRegistry(IContext &context) noexcept
+      : _context(static_cast<Context &>(context)),
+        _dpi(Platform::GetDPIForWindow(Platform::GetActiveWindow()))
   {
   }
 
@@ -384,73 +388,81 @@ namespace Krys::Gfx::OpenGL
 
   void FontRegistry::Startup()
   {
-    // Load default font
-    IO::Path defaultFontPath = IO::Path("data/assets/fonts/Antonio-Bold.ttf");
-    _defaultFont = Load(defaultFontPath, 16.0f, FontType::Bitmap);
-    if (!_defaultFont.IsValid())
+    IO::Path defaultFontPath("data/assets/fonts/Antonio-Bold.ttf");
+    _defaultFontFamily = Register(_context.Strings().Intern("Antonio"), defaultFontPath);
+    if (!_defaultFontFamily.IsValid())
     {
-      KRYS_ERROR("Failed to load default font '{}'", defaultFontPath.ToString());
+      KRYS_ERROR("Failed to register default font '{}'", defaultFontPath.ToString());
       KRYS_DEBUG_BREAK();
     }
   }
 
   void FontRegistry::Shutdown() noexcept
   {
+    // TODO: Unload all fonts and font families
   }
 
-  FontHandle FontRegistry::Load(const IO::Path &path, float ptSize, FontType fontType) noexcept
+  FontFamilyHandle FontRegistry::Register(StringRef name, const IO::Path &path) noexcept
   {
-    double sizeInPixels = PtSizeToPixels(ptSize, _dpi);
+    FontFamily fontFamily {path};
+    FontFamilyHandle handle = _fontFamilies.Add(std::move(fontFamily));
+    return handle;
+  }
+
+  FontHandle FontRegistry::Get(const FontDesc &desc) noexcept
+  {
+    double sizeInPixels = PtSizeToPixels(desc.Size, _dpi);
 
     FontHandle handle;
-    if (fontType == FontType::Bitmap)
+    if (desc.Type == FontType::Bitmap)
     {
-      // We cache bitmap fonts by path+target pt size as they need to be reloaded on DPI change.
-      string key = std::format("{0}-{1}", path.ToString(), ptSize);
+      FontDesc key = desc;
       if (auto cached = _cache.Get(key); cached.IsValid())
       {
-        KRYS_DEBUG("Font cache hit for '{}'", key);
+        KRYS_DEBUG("Font cache hit.");
         return cached;
       }
 
-      BitmapLoadResult result = LoadBitmapAtlas(path, sizeInPixels);
+      FontFamily &fontFamily = _fontFamilies.Get(desc.Family);
+      BitmapLoadResult result = LoadBitmapAtlas(fontFamily.Path(), sizeInPixels);
       if (!result.Success)
       {
-        KRYS_ERROR("Failed to load font '{}'", path.ToString());
+        KRYS_ERROR("Failed to load font '{}'", fontFamily.Path().ToString());
         return {};
       }
 
       List<uint8> atlas = CreateBitmapAtlasPixels(result.Glyphs, result.AtlasSize);
       auto characters = CreateBitmapCharacters(result.Glyphs, result.Padding, result.AtlasSize);
 
-      Font font {fontType, ptSize, path, GL_RED};
+      Font font {desc.Type, desc.Size, fontFamily.Path(), GL_RED};
       font.SetAtlasData(atlas, result.AtlasSize, characters);
       handle = _fonts.Add(std::move(font));
       _cache.Add(key, handle);
     }
-    else
+    else if (desc.Type == FontType::SDF || desc.Type == FontType::MSDF || desc.Type == FontType::MTSDF)
     {
-      // We cache sdf fonts by path+fontType as they are resolution-independent.
-      string stringifiedFontType = (fontType == FontType::SDF)    ? "sdf"
-                                   : (fontType == FontType::MSDF) ? "msdf"
-                                                                  : "mtsdf";
-      string key = std::format("{0}-{1}", path.ToString(), stringifiedFontType);
+      FontDesc key = {desc.Family, desc.Type, 0.f}; // size-independent cache key
       if (auto cached = _cache.Get(key); cached.IsValid())
       {
-        KRYS_DEBUG("Font cache hit for '{}'", key);
+        KRYS_DEBUG("Font cache hit.");
         return cached;
       }
 
+      FontFamily &fontFamily = _fontFamilies.Get(desc.Family);
       SDFParams params {};
-      MTSDFResult result = LoadMTSDFAtlas(path, fontType, params);
+      MTSDFResult result = LoadMTSDFAtlas(fontFamily.Path(), desc.Type, params);
 
       if (!result.Success)
       {
-        KRYS_ERROR("Failed to load font '{}'", path.ToString());
+        KRYS_ERROR("Failed to load font '{}'", fontFamily.Path().ToString());
         return {};
       }
 
-      Font font {fontType, ptSize, path, {result.Texture, result.Characters, result.AtlasSize}, params};
+      Font font {desc.Type,
+                 desc.Size,
+                 fontFamily.Path(),
+                 {result.Texture, result.Characters, result.AtlasSize},
+                 params};
       handle = _fonts.Add(std::move(font));
       _cache.Add(key, handle);
     }
@@ -466,6 +478,12 @@ namespace Krys::Gfx::OpenGL
     }
 
     return false;
+  }
+
+  bool FontRegistry::Unload(FontFamilyHandle handle) noexcept
+  {
+    // TODO: Unload all fonts associated with this family
+    return _fontFamilies.Remove(handle);
   }
 
   Font &FontRegistry::Get(FontHandle handle)
@@ -514,8 +532,8 @@ namespace Krys::Gfx::OpenGL
     }
   }
 
-  FontHandle FontRegistry::GetDefault() noexcept
+  FontFamilyHandle FontRegistry::GetDefaultFontFamily() noexcept
   {
-    return _defaultFont;
+    return _defaultFontFamily;
   }
 }

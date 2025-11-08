@@ -162,7 +162,12 @@ namespace Krys::UI
       float posY = parentY + NodeLayoutGetTop(element.TextContent.LayoutNode);
       textCommand.Position = {posX + NodeLayoutGetPadding(element.LayoutNode, Edge::Left),
                               posY + NodeLayoutGetPadding(element.LayoutNode, Edge::Top)};
-      textCommand.Font = NodeStyleGetFont(element.LayoutNode);
+      auto family = NodeStyleGetFontFamily(element.LayoutNode);
+      if (!family.IsValid())
+      {
+        family = _context.Fonts().GetDefaultFontFamily();
+      }
+      textCommand.FontFamily = family;
       textCommand.FontSize = NodeStyleGetFontSize(element.LayoutNode);
       textCommand.Colour = NodeStyleGetTextColour(element.LayoutNode);
       _layerStack.top().Commands.Push(textCommand);

@@ -3,6 +3,7 @@
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Font.hpp"
 #include "Krystal.IO/Path.hpp"
+#include "Krystal.Lib/Allocators/StringRef.hpp"
 #include "Krystal.Lib/Macros.hpp"
 
 namespace Krys::Gfx
@@ -21,12 +22,16 @@ namespace Krys::Gfx
 
     virtual void Shutdown() noexcept = 0;
 
-    NO_DISCARD virtual FontHandle Load(const IO::Path &path, float size, FontType fontType) noexcept = 0;
+    NO_DISCARD virtual FontFamilyHandle Register(StringRef name, const IO::Path &path) noexcept = 0;
+
+    NO_DISCARD virtual FontHandle Get(const FontDesc &desc) noexcept = 0;
 
     virtual bool Unload(FontHandle handle) noexcept = 0;
 
+    virtual bool Unload(FontFamilyHandle handle) noexcept = 0;
+
     virtual void DPIChanged(int dpi) noexcept = 0;
 
-    NO_DISCARD virtual FontHandle GetDefault() noexcept = 0;
+    NO_DISCARD virtual FontFamilyHandle GetDefaultFontFamily() noexcept = 0;
   };
 }

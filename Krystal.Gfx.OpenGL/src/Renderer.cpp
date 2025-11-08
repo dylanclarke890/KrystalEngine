@@ -143,7 +143,13 @@ namespace Krys::Gfx::OpenGL
           auto &rt = renderTargets.Get(_currentRenderTarget);
 
           float posY = static_cast<float>(rt.Height()) - (cmd.Position.y + (cmd.FontSize / 2.f));
-          _textRenderer.Draw(_context.Strings().Get(cmd.Text), cmd.Font, {cmd.Position.x, posY}, cmd.Colour);
+          FontDesc fontDesc = {
+            .Family = cmd.FontFamily,
+            .Type = FontType::SDF,
+            .Size = cmd.FontSize,
+          };
+          _textRenderer.Draw(_context.Strings().Get(cmd.Text), _context.Fonts().Get(fontDesc),
+                             {cmd.Position.x, posY}, cmd.Colour);
           break;
         }
         default:

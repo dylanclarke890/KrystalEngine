@@ -124,9 +124,6 @@ namespace Krys
       _document.ElementStyleSetWidthPercent(rightInnerBox, 50.f);
       _document.ElementStyleSetHeightPercent(rightInnerBox, 50.f);
       _document.ElementStyleSetBackgroundColour(rightInnerBox, Gfx::Colours::Cyan);
-
-      auto font = _context->GraphicsContext->Fonts().GetDefault();
-      _document.ElementStyleSetFont(rightInnerBox, font);
       _document.ElementSetTextContent(rightInnerBox, textRef);
     }
 

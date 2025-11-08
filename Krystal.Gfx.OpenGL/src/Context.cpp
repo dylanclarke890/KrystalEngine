@@ -624,7 +624,7 @@ namespace Krys::Gfx::OpenGL
         _platformImpl(CreateUnique<ContextPlatformImpl>(settings.WindowHandle)), _buffers(), _images(),
         _imageViews(_images), _samplers(), _shaders(_vfs), _meshes(),
         _textures(_vfs, _images, _imageViews, _samplers), _renderTargets(_images, _imageViews),
-        _materials(_textures), _fonts(_dpi), _text(*this)
+        _materials(_textures), _fonts(*this), _text(*this)
   {
   }
 
@@ -798,11 +798,24 @@ namespace Krys::Gfx::OpenGL
     glClearColor(0.1f, 0.1f, 0.1f, 1.f);
 
     const auto fontPath = IO::Path("data/assets/fonts/Antonio-Bold.ttf");
+    const auto family = _fonts.Register(Strings().Intern("Antonio"), fontPath);
     const auto fontSize = 32;
-    DefaultBitmapFont = _fonts.Load(fontPath, fontSize, FontType::Bitmap);
-    DefaultSDFFont = _fonts.Load(fontPath, fontSize, FontType::SDF);
-    DefaultMSDFFont = _fonts.Load(fontPath, fontSize, FontType::MSDF);
-    DefaultMTSDFFont = _fonts.Load(fontPath, fontSize, FontType::MTSDF);
+    FontDesc desc = {
+      .Family = family,
+      .Type = FontType::Bitmap,
+      .Size = fontSize,
+    };
+    DefaultBitmapFont = _fonts.Get(desc);
+
+    desc.Type = FontType::SDF;
+    DefaultSDFFont = _fonts.Get(desc);
+
+    desc.Type = FontType::MSDF;
+    DefaultMSDFFont = _fonts.Get(desc);
+
+    desc.Type = FontType::MTSDF;
+    DefaultMTSDFFont = _fonts.Get(desc);
+
     ScreenOrthoProjection = Ortho(0.f, static_cast<float>(_width), 0.f, static_cast<float>(_height));
     _buffers.Get(bufferHandles.at("matrices")).Update(ScreenOrthoProjection, 2 * sizeof(Mat4));
   }
