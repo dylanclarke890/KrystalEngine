@@ -142,7 +142,7 @@ namespace Krys::Gfx::OpenGL
           const auto &cmd = reader.ReadCommand<Commands::DrawText>();
           auto &rt = renderTargets.Get(_currentRenderTarget);
 
-          float posY = static_cast<float>(rt.Height()) - (cmd.Position.y + (cmd.FontSize / 2.f));
+          float posY = static_cast<float>(rt.Height()) - (cmd.Position.y + cmd.FontSize);
           FontDesc fontDesc = {
             .Family = cmd.FontFamily,
             .Type = FontType::SDF,
