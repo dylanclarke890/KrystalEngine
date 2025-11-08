@@ -66,6 +66,8 @@ namespace Krys::UI
     void SetText(StringRef text) noexcept
     {
       TextContent.Text = text;
+      // TODO: we only need to do this because the layout engine treats empty text nodes as part of the flex
+      // layout
       if (TextContent.Text.IsValid() && TextContent.LayoutNode == nullptr)
       {
         TextContent.LayoutNode = NodeCreate(LayoutConfig);
