@@ -90,7 +90,7 @@ namespace Krys::Gfx
     List<FontHandle> _fonts;
 
   public:
-    explicit FontFamily(StringRef name, const IO::Path &path) noexcept : _name(name), _path(path)
+    FontFamily(StringRef name, const IO::Path &path) noexcept : _name(name), _path(path)
     {
     }
 
