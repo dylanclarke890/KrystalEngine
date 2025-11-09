@@ -76,6 +76,13 @@ namespace Krys::Gfx::OpenGL
       font.DrawText(text, position, scale);
     }
 
+  private:
+    void SetSDFParams(Shader &shader, Font &font) noexcept
+    {
+      auto unitRange = Maths::Vec2(font.SDFParams().PixelRange) / Maths::Vec2(font.AtlasSize());
+      shader.SetUniform("u_UnitRange", unitRange);
+    }
+
     Shader &GetOrAdd(const TextShaderDesc &desc) noexcept
     {
       if (const auto it = _fontShaders.find(desc); it != _fontShaders.end())
@@ -89,13 +96,6 @@ namespace Krys::Gfx::OpenGL
 
       _fontShaders[desc] = shader;
       return _shaders.Get(shader);
-    }
-
-  private:
-    void SetSDFParams(Shader &shader, Font &font) noexcept
-    {
-      auto unitRange = Maths::Vec2(font.SDFParams().PixelRange) / Maths::Vec2(font.AtlasSize());
-      shader.SetUniform("u_UnitRange", unitRange);
     }
   };
 }
