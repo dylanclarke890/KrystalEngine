@@ -177,7 +177,7 @@ namespace Krys::Gfx::OpenGL
       return _ptSize;
     }
 
-    FontFamilyHandle FontFamily() const noexcept
+    FontFamilyHandle Family() const noexcept
     {
       return _fontFamily;
     }

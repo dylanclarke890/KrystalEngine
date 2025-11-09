@@ -105,7 +105,7 @@ namespace Krys::Gfx::OpenGL
     if (_cache.Remove(handle))
     {
       auto &font = _fonts.Get(handle);
-      auto &fontFamily = _fontFamilies.Get(font.FontFamily());
+      auto &fontFamily = _fontFamilies.Get(font.Family());
       fontFamily.RemoveFont(handle);
       return _fonts.Remove(handle);
     }
@@ -141,7 +141,7 @@ namespace Krys::Gfx::OpenGL
         continue; // non-bitmap font types resolution-independent
       }
 
-      auto &fontFamily = _fontFamilies.Get(font.FontFamily());
+      auto &fontFamily = _fontFamilies.Get(font.Family());
       auto expected = _loader.LoadBitmap(fontFamily.Path(), PtSizeToPixels(font.PtSize()));
       if (!expected.has_value())
       {
