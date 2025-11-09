@@ -170,8 +170,7 @@ namespace Krys::UI
 
       Gfx::Commands::DrawText drawTextCmd;
       drawTextCmd.Text = element.TextContent.Text;
-      drawTextCmd.Position = {posX + NodeLayoutGetPadding(element.LayoutNode, Edge::Left),
-                              posY + NodeLayoutGetPadding(element.LayoutNode, Edge::Top)};
+      drawTextCmd.Position = {posX, posY};
       drawTextCmd.FontFamily = family;
       drawTextCmd.FontSize = NodeStyleGetFontSize(element.LayoutNode);
       drawTextCmd.Colour = NodeStyleGetTextColour(element.LayoutNode);
