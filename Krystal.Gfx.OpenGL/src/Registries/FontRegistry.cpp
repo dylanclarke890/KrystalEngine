@@ -12,7 +12,6 @@
 #include <msdf-atlas-gen.h>
 #include <msdfgen-ext.h>
 #include <msdfgen.h>
-#include <stb_rect_pack.h>
 #include FT_FREETYPE_H
 #include <algorithm>
 
@@ -156,9 +155,10 @@ namespace
     return result;
   }
 
-  double PtSizeToPixels(float ptSize, int dpi)
+  uint32 PtSizeToPixels(float ptSize, int dpi)
   {
-    return (ptSize * dpi) / 72.0;
+    auto pixelSize = (ptSize * dpi) / 72.0;
+    return static_cast<uint32>(pixelSize);
   }
 }
 
@@ -176,7 +176,7 @@ namespace Krys::Gfx::OpenGL
 
   void FontRegistry::Startup()
   {
-    IO::Path defaultFontPath("data/assets/fonts/Antonio-Bold.ttf");
+    const IO::Path defaultFontPath("data/assets/fonts/Antonio-Bold.ttf");
     _defaultFontFamily = Register(_context.Strings().Intern("Antonio"), defaultFontPath);
     if (!_defaultFontFamily.IsValid())
     {
@@ -199,7 +199,7 @@ namespace Krys::Gfx::OpenGL
 
   FontHandle FontRegistry::Get(const FontDesc &desc) noexcept
   {
-    double sizeInPixels = PtSizeToPixels(desc.Size, _dpi);
+    uint32 sizeInPixels = PtSizeToPixels(desc.Size, _dpi);
 
     FontHandle handle;
     if (desc.Type == FontType::Bitmap)
@@ -303,8 +303,7 @@ namespace Krys::Gfx::OpenGL
         continue; // the rest of the font types are resolution-independent
       }
 
-      auto sizeInPixels = PtSizeToPixels(font.PtSize(), _dpi);
-      auto expected = _loader.LoadBitmap(font.Path(), sizeInPixels);
+      auto expected = _loader.LoadBitmap(font.Path(), PtSizeToPixels(font.PtSize(), _dpi));
       if (!expected.has_value())
       {
         KRYS_ERROR("Failed to load font '{}'", font.Path().ToString());

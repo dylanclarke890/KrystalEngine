@@ -34,7 +34,7 @@ namespace Krys::Gfx
   {
     Maths::Vec2u Size {};    // Size of glyph
     Maths::Vec2i Bearing {}; // Offset from baseline to left/top of glyph
-    uint32 Advance {0u};     // Offset to advance to next glyph
+    int32 Advance {0u};      // Offset to advance to next glyph
     Maths::Vec2 UVMin;       // (u0, v0)
     Maths::Vec2 UVMax;       // (u1, v1)
   };

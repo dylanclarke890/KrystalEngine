@@ -84,9 +84,6 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Font.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="third-party\stb\stb_rect_pack.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\TextRenderer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -132,9 +129,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Registries\FontRegistry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="third-party\stb\stb_rect_pack.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Renderer.cpp">

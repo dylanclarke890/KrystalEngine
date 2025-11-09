@@ -47,7 +47,6 @@
   <ItemGroup>
     <ClCompile Include="src\Context.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
-    <ClCompile Include="third-party\stb\stb_rect_pack.cpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Registries\BufferRegistry.hpp">
       <SubType>
       </SubType>
@@ -96,7 +95,6 @@
     <ClCompile Include="src\Hooks\gl.cpp" />
     <ClCompile Include="src\Hooks\wgl.cpp" />
     <ClCompile Include="src\ContextImpl\Win32.cpp" />
-    <ClInclude Include="third-party\stb\stb_rect_pack.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Context.hpp" />
@@ -161,7 +159,7 @@
     <IncludePath>$(KrysProjectInclude);$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(KrysProjectInclude);$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Program Files\Assimp\include;$(SolutionDir)Krystal.Gfx\third-party\freetype\include;$(ProjectDir)third-party\stb;$(SolutionDir)Krystal.Gfx\third-party\msdf-atlas-gen;$(SolutionDir)Krystal.Gfx\third-party\msdfgen</IncludePath>
+    <IncludePath>$(KrysProjectInclude);$(SolutionDir)Krystal.Gfx\third-party\stb;$(VC_IncludePath);$(WindowsSDK_IncludePath);C:\Program Files\Assimp\include;$(SolutionDir)Krystal.Gfx\third-party\freetype\include;$(SolutionDir)Krystal.Gfx\third-party\msdf-atlas-gen;$(SolutionDir)Krystal.Gfx\third-party\msdfgen</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
