@@ -144,10 +144,6 @@ namespace
   Map<string, GLuint> VAOs;
 
   Mat4 ScreenOrthoProjection;
-  FontHandle DefaultBitmapFont;
-  FontHandle DefaultSDFFont;
-  FontHandle DefaultMSDFFont;
-  FontHandle DefaultMTSDFFont;
 
   Map<string, FrameBufferData> shadowMaps;
 
@@ -624,7 +620,7 @@ namespace Krys::Gfx::OpenGL
         _platformImpl(CreateUnique<ContextPlatformImpl>(settings.WindowHandle)), _buffers(), _images(),
         _imageViews(_images), _samplers(), _shaders(_vfs), _meshes(),
         _textures(_vfs, _images, _imageViews, _samplers), _renderTargets(_images, _imageViews),
-        _materials(_textures), _fonts(*this), _text(*this)
+        _materials(_textures), _fonts(*this)
   {
   }
 
@@ -797,25 +793,6 @@ namespace Krys::Gfx::OpenGL
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     glClearColor(0.1f, 0.1f, 0.1f, 1.f);
 
-    const auto fontPath = IO::Path("data/assets/fonts/Antonio-Bold.ttf");
-    const auto family = _fonts.Register(Strings().Intern("Antonio"), fontPath);
-    const auto fontSize = 32;
-    FontDesc desc = {
-      .Family = family,
-      .Type = FontType::Bitmap,
-      .Size = fontSize,
-    };
-    DefaultBitmapFont = _fonts.Get(desc);
-
-    desc.Type = FontType::SDF;
-    DefaultSDFFont = _fonts.Get(desc);
-
-    desc.Type = FontType::MSDF;
-    DefaultMSDFFont = _fonts.Get(desc);
-
-    desc.Type = FontType::MTSDF;
-    DefaultMTSDFFont = _fonts.Get(desc);
-
     ScreenOrthoProjection = Ortho(0.f, static_cast<float>(_width), 0.f, static_cast<float>(_height));
     _buffers.Get(bufferHandles.at("matrices")).Update(ScreenOrthoProjection, 2 * sizeof(Mat4));
   }
@@ -914,20 +891,6 @@ namespace Krys::Gfx::OpenGL
       cube.Bind();
       cube.Draw();
     }
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
-    const float xPos = 25.f;
-    const auto height = static_cast<float>(_height);
-
-    _text.Draw("Font Rendering - Bitmap", DefaultBitmapFont, {xPos, height - 150.f}, Colours::Black);
-    _text.DrawOutlined("Font Rendering - SDF", DefaultSDFFont, {xPos, height - 300.f}, Colours::Black);
-    _text.DrawOutlined("Font Rendering - MSDF", DefaultMSDFFont, {xPos, height - 450.f}, Colours::Purple,
-                       Colours::Green);
-    _text.DrawOutlined("Font Rendering - MTSDF", DefaultMTSDFFont, {xPos, height - 600.f}, Colours::Black);
-
-    glDisable(GL_BLEND);
   }
 
   void Context::Present() noexcept

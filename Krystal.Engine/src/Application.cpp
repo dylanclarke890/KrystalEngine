@@ -181,46 +181,48 @@ namespace Krys
     using namespace Platform;
     using namespace Events;
 
-    return {.OnMouseMove =
-              [&](WindowHandle window, float deltaX, float deltaY, float clientX, float clientY) noexcept
-            { _context->Input->OnMouseMoveEvent(window, deltaX, deltaY, clientX, clientY); },
+    return {
+      .OnMouseMove =
+        [&](WindowHandle window, float deltaX, float deltaY, float clientX, float clientY) noexcept
+      { _context->Input->OnMouseMoveEvent(window, deltaX, deltaY, clientX, clientY); },
 
-            .OnMouseButton = [&](WindowHandle window, MouseButton button, MouseButtonState state) noexcept
-            { _context->Input->OnMouseButtonEvent(window, button, state); },
+      .OnMouseButton = [&](WindowHandle window, MouseButton button, MouseButtonState state) noexcept
+      { _context->Input->OnMouseButtonEvent(window, button, state); },
 
-            .OnMouseScroll = [&](WindowHandle window, float delta) noexcept
-            { _context->Input->OnMouseScrollEvent(window, delta); },
+      .OnMouseScroll = [&](WindowHandle window, float delta) noexcept
+      { _context->Input->OnMouseScrollEvent(window, delta); },
 
-            .OnKey = [&](WindowHandle window, Key key, KeyState state) noexcept
-            { _context->Input->OnKeyboardEvent(window, key, state); },
+      .OnKey = [&](WindowHandle window, Key key, KeyState state) noexcept
+      { _context->Input->OnKeyboardEvent(window, key, state); },
 
-            .OnClose = [&](WindowHandle window) noexcept
-            { _context->Events->Enqueue(CreateUnique<WindowCloseEvent>(window)); },
+      .OnClose = [&](WindowHandle window) noexcept
+      { _context->Events->Enqueue(CreateUnique<WindowCloseEvent>(window)); },
 
-            .OnResize =
-              [&](WindowHandle window, uint32 width, uint32 height) noexcept
-            {
-              _context->Events->Enqueue(CreateUnique<WindowResizeEvent>(window, width, height));
-              _context->GraphicsContext->Resize(width, height);
-            },
-            .OnMinimise =
-              [&](WindowHandle window) noexcept
-            {
-              _context->Events->Enqueue(CreateUnique<WindowMinimiseEvent>(window));
-              _isWindowMinimised = true;
-            },
-            .OnRestore =
-              [&](WindowHandle window) noexcept
-            {
-              _context->Events->Enqueue(CreateUnique<WindowRestoreEvent>(window));
-              _isWindowMinimised = false;
-            },
-            .OnDPIChange =
-              [&](WindowHandle window, int dpi) noexcept
-            {
-              _context->Events->Enqueue(CreateUnique<WindowDPIChangeEvent>(window, dpi));
-              _context->GraphicsContext->DPIChanged(dpi);
-            }};
+      .OnResize =
+        [&](WindowHandle window, uint32 width, uint32 height) noexcept
+      {
+        _context->Events->Enqueue(CreateUnique<WindowResizeEvent>(window, width, height));
+        _context->GraphicsContext->Resize(width, height);
+      },
+      .OnMinimise =
+        [&](WindowHandle window) noexcept
+      {
+        _context->Events->Enqueue(CreateUnique<WindowMinimiseEvent>(window));
+        _isWindowMinimised = true;
+      },
+      .OnRestore =
+        [&](WindowHandle window) noexcept
+      {
+        _context->Events->Enqueue(CreateUnique<WindowRestoreEvent>(window));
+        _isWindowMinimised = false;
+      },
+      .OnDPIChange =
+        [&](WindowHandle window, int dpi) noexcept
+      {
+        _context->Events->Enqueue(CreateUnique<WindowDPIChangeEvent>(window, dpi));
+        _context->GraphicsContext->DPIChanged(dpi);
+      },
+    };
   }
 
   void Application::ClampFramerate(double &elapsedMs, const double startTime)

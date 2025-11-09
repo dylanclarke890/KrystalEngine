@@ -41,7 +41,6 @@ namespace Krys::Gfx::OpenGL
     RenderTargetRegistry _renderTargets;
     MaterialRegistry _materials;
     FontRegistry _fonts;
-    TextRenderer _text;
 
   public:
     Context(const ContextSettings &settings);
