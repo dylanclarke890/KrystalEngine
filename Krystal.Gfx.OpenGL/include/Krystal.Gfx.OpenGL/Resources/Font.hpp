@@ -86,12 +86,12 @@ namespace Krys::Gfx::OpenGL
 
     MOVE_SWAP(Font)
 
-    static Font Bitmap(float ptSize, FontFamilyHandle fontFamily, const FontAtlasData &data) noexcept
+    static Font BitmapAtlas(float ptSize, FontFamilyHandle fontFamily, const FontAtlasData &data) noexcept
     {
       return Font(FontType::Bitmap, ptSize, fontFamily, GL_RED, data);
     }
 
-    static Font SDF(float ptSize, FontFamilyHandle fontFamily, const FontAtlasData &data,
+    static Font SDFAtlas(float ptSize, FontFamilyHandle fontFamily, const FontAtlasData &data,
                     const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
     {
       auto font = Font(FontType::SDF, ptSize, fontFamily, GL_RED, data);
@@ -99,7 +99,7 @@ namespace Krys::Gfx::OpenGL
       return font;
     }
 
-    static Font MSDF(float ptSize, FontFamilyHandle fontFamily, const FontAtlasData &data,
+    static Font MSDFAtlas(float ptSize, FontFamilyHandle fontFamily, const FontAtlasData &data,
                      const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
     {
       auto font = Font(FontType::MSDF, ptSize, fontFamily, GL_RGB, data);
@@ -107,7 +107,7 @@ namespace Krys::Gfx::OpenGL
       return font;
     }
 
-    static Font MTSDF(float ptSize, FontFamilyHandle fontFamily, const FontAtlasData &data,
+    static Font MTSDFAtlas(float ptSize, FontFamilyHandle fontFamily, const FontAtlasData &data,
                       const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
     {
       auto font = Font(FontType::MTSDF, ptSize, fontFamily, GL_RGBA, data);

@@ -89,10 +89,10 @@ namespace Krys::Gfx::OpenGL
     FontHandle font;
     switch (desc.Type)
     {
-      case FontType::Bitmap: font = Add(Font::Bitmap(desc.Size, desc.Family, data), key); break;
-      case FontType::SDF:    font = Add(Font::SDF(desc.Size, desc.Family, data), key); break;
-      case FontType::MSDF:   font = Add(Font::MSDF(desc.Size, desc.Family, data), key); break;
-      case FontType::MTSDF:  font = Add(Font::MTSDF(desc.Size, desc.Family, data), key); break;
+      case FontType::Bitmap: font = Add(Font::BitmapAtlas(desc.Size, desc.Family, data), key); break;
+      case FontType::SDF:    font = Add(Font::SDFAtlas(desc.Size, desc.Family, data), key); break;
+      case FontType::MSDF:   font = Add(Font::MSDFAtlas(desc.Size, desc.Family, data), key); break;
+      case FontType::MTSDF:  font = Add(Font::MTSDFAtlas(desc.Size, desc.Family, data), key); break;
       default:               std::unreachable();
     }
 
@@ -148,7 +148,7 @@ namespace Krys::Gfx::OpenGL
         continue;
       }
 
-      _fonts.Set(resource.Handle, Font::Bitmap(font.PtSize(), font.Family(), expected.value()));
+      _fonts.Set(resource.Handle, Font::BitmapAtlas(font.PtSize(), font.Family(), expected.value()));
     }
   }
 
