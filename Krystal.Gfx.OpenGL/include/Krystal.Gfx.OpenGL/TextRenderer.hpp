@@ -91,9 +91,10 @@ namespace Krys::Gfx::OpenGL
       return _shaders.Get(shader);
     }
 
+  private:
     void SetSDFParams(Shader &shader, Font &font) noexcept
     {
-      Maths::Vec2 unitRange = Maths::Vec2(font.SDFParams().PixelRange) / Maths::Vec2(font.Atlas().AtlasSize);
+      auto unitRange = Maths::Vec2(font.SDFParams().PixelRange) / Maths::Vec2(font.AtlasSize());
       shader.SetUniform("u_UnitRange", unitRange);
     }
   };

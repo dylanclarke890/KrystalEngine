@@ -131,8 +131,6 @@ namespace Krys::Gfx::OpenGL
     }
     _dpi = dpi;
 
-    // We want to preserve the validity of existing FontHandles, so we need to reload
-    // all bitmap fonts at the new DPI in-place.
     for (auto &[key, resource] : _cache)
     {
       Font &font = _fonts.Get(resource.Handle);
@@ -150,7 +148,7 @@ namespace Krys::Gfx::OpenGL
         continue;
       }
 
-      font.SetAtlasData(expected.value());
+      _fonts.Set(resource.Handle, Font::Bitmap(font.PtSize(), font.Family(), expected.value()));
     }
   }
 
