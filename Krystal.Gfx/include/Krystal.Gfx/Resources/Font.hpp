@@ -7,6 +7,7 @@
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
 #include "Krystal.Lib/Types.hpp"
+#include "Krystal.Maths/Vector.hpp"
 #include <compare>
 #include <type_traits>
 
@@ -27,6 +28,15 @@ namespace Krys::Gfx
     float Size {16.0f};
 
     NO_DISCARD auto operator<=>(const FontDesc &other) const noexcept = default;
+  };
+
+  struct Character
+  {
+    Maths::Vec2u Size {};    // Size of glyph
+    Maths::Vec2i Bearing {}; // Offset from baseline to left/top of glyph
+    uint32 Advance {0u};     // Offset to advance to next glyph
+    Maths::Vec2 UVMin;       // (u0, v0)
+    Maths::Vec2 UVMax;       // (u1, v1)
   };
 }
 

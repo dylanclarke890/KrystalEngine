@@ -39,6 +39,10 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\FontAtlasLoader.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Krystal.Gfx\InstanceData.hpp">
       <SubType>
       </SubType>
@@ -217,6 +221,7 @@
     <ClInclude Include="third-party\msdfgen\core\generator-config.h" />
     <ClInclude Include="third-party\msdfgen\core\msdf-error-correction.h" />
     <ClInclude Include="third-party\msdfgen\core\MSDFErrorCorrection.h" />
+    <ClInclude Include="third-party\stb\stb_rect_pack.h" />
     <None Include="third-party\msdfgen\core\msdfgen-config.h" />
     <ClInclude Include="third-party\msdfgen\core\pixel-conversion.hpp" />
     <ClInclude Include="third-party\msdfgen\core\Projection.h" />
@@ -255,6 +260,9 @@
     <ProjectReference Include="..\Krystal.Lib\Krystal.Lib.vcxproj">
       <Project>{38f26636-5d57-4740-a8d2-df219340309a}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\Krystal.Log\Krystal.Log.vcxproj">
+      <Project>{dfd59bfd-d1ba-4f1d-ab1a-ecd50440d091}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Krystal.Maths\Krystal.Maths.vcxproj">
       <Project>{2c0a90e5-aa87-46b7-b599-e56a9dd5047b}</Project>
     </ProjectReference>
@@ -264,6 +272,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Cameras\FirstPersonCamera.cpp" />
+    <ClCompile Include="src\FontAtlasLoader.cpp" />
     <ClCompile Include="third-party\msdf-atlas-gen\artery-font-export.cpp" />
     <ClCompile Include="third-party\msdf-atlas-gen\bitmap-blit.cpp" />
     <ClCompile Include="third-party\msdf-atlas-gen\charset-parser.cpp" />
@@ -310,6 +319,7 @@
     <ClCompile Include="third-party\msdfgen\ext\import-svg.cpp" />
     <ClCompile Include="third-party\msdfgen\ext\resolve-shape-geometry.cpp" />
     <ClCompile Include="third-party\msdfgen\ext\save-png.cpp" />
+    <ClCompile Include="third-party\stb\stb_rect_pack.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Library Include="third-party\freetype\freetype.lib" />
@@ -374,7 +384,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)third-party\msdfgen\;$(ProjectDir)third-party\freetype\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)third-party\stb\;$(ProjectDir)third-party\msdfgen\;$(ProjectDir)third-party\freetype\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

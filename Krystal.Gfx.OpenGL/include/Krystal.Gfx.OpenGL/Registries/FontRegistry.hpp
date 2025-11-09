@@ -2,6 +2,7 @@
 
 #include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Font.hpp"
+#include "Krystal.Gfx/FontAtlasLoader.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/Registries/IFontRegistry.hpp"
@@ -26,6 +27,7 @@ namespace Krys::Gfx::OpenGL
     FontManager _fonts;
     FontFamilyHandle _defaultFontFamily;
     FontCache _cache;
+    FontAtlasLoader _loader;
 
   public:
     FontRegistry(IContext &context) noexcept;

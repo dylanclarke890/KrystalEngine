@@ -525,6 +525,12 @@
     <ClInclude Include="include\Krystal.Gfx\InstanceData.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\FontAtlasLoader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="third-party\stb\stb_rect_pack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Cameras\FirstPersonCamera.cpp">
@@ -666,6 +672,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="third-party\msdf-atlas-gen\Workload.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="third-party\stb\stb_rect_pack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FontAtlasLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

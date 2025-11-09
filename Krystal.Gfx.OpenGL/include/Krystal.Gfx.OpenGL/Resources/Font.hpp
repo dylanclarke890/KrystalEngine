@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
-#include "Krystal.Gfx.OpenGL/Resources/Font.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Shader.hpp"
 #include "Krystal.Gfx.OpenGL/Utils.hpp"
 #include "Krystal.Gfx/Resources/Font.hpp"
@@ -26,16 +25,6 @@ namespace Krys::Gfx::OpenGL
         {VertexAttributeType::Float, 2}  // UV
       };
     }
-  };
-
-  struct Character
-  {
-    Maths::Vec2u Size {};    // Size of glyph
-    Maths::Vec2i Bearing {}; // Offset from baseline to left/top of glyph
-    uint32 Advance {0u};     // Offset to advance to next glyph
-
-    Maths::Vec2 UVMin; // (u0, v0)
-    Maths::Vec2 UVMax; // (u1, v1)
   };
 
   struct FontAtlas

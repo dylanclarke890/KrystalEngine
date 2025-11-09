@@ -124,7 +124,6 @@ namespace Krys
       _document.ElementStyleSetWidthPercent(rightInnerBox, 50.f);
       _document.ElementStyleSetHeightPercent(rightInnerBox, 50.f);
       _document.ElementStyleSetBackgroundColour(rightInnerBox, Gfx::Colours::Cyan);
-      _document.ElementStyleSetPadding(rightInnerBox, Edge::All, 10.f);
       _document.ElementSetTextContent(rightInnerBox, textRef);
     }
 
