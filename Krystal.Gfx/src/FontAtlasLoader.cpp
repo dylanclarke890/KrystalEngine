@@ -6,19 +6,14 @@
 
 namespace Krys::Gfx
 {
-  struct BitmapLoadResult
-  {
-    List<GlyphToPack> Glyphs;
-  };
-
   Expected<FontAtlasResult> FontAtlasLoader::LoadBitmap(const IO::Path &path, double fontSizeInPixels,
                                                         Nullable<uint8> padding)
   {
     FontAtlasResult atlasResult {};
     atlasResult.PaddingPerGlyph = padding.has_value() ? padding.value() : 2u;
 
-    BitmapLoadResult result {};
-    result.Glyphs.reserve(95);
+    List<GlyphToPack> glyphs;
+    glyphs.reserve(95);
 
     FT_Library fontLibraryHandle = nullptr;
     if (FT_Init_FreeType(&fontLibraryHandle))
@@ -86,23 +81,23 @@ namespace Krys::Gfx
 
       glyph.PackedSize = {glyph.BitmapSize.x + atlasResult.PaddingPerGlyph * 2,
                           glyph.BitmapSize.y + atlasResult.PaddingPerGlyph * 2};
-      result.Glyphs.push_back(std::move(glyph));
+      glyphs.push_back(std::move(glyph));
     }
 
     FT_Done_Face(face);
     FT_Done_FreeType(fontLibraryHandle);
 
     atlasResult.AtlasSize = {512, 512};
-    if (!TryPack(result.Glyphs, atlasResult.AtlasSize))
+    if (!TryPack(glyphs, atlasResult.AtlasSize))
     {
       KRYS_ERROR("FREETYPE: Failed to pack glyphs for font '{}'", path.ToString());
       KRYS_DEBUG_BREAK();
       return {};
     }
 
-    atlasResult.AtlasPixels = CreateBitmapAtlasPixels(result.Glyphs, atlasResult.AtlasSize);
+    atlasResult.AtlasPixels = CreateBitmapAtlasPixels(glyphs, atlasResult.AtlasSize);
     atlasResult.Characters =
-      CreateBitmapCharacters(result.Glyphs, atlasResult.PaddingPerGlyph, atlasResult.AtlasSize);
+      CreateBitmapCharacters(glyphs, atlasResult.PaddingPerGlyph, atlasResult.AtlasSize);
 
     return atlasResult;
   }
