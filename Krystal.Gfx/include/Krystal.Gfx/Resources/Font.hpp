@@ -87,6 +87,7 @@ namespace Krys::Gfx
   private:
     StringRef _name;
     IO::Path _path;
+    List<FontHandle> _fonts;
 
   public:
     explicit FontFamily(StringRef name, const IO::Path &path) noexcept : _name(name), _path(path)
@@ -105,6 +106,21 @@ namespace Krys::Gfx
     NO_DISCARD const IO::Path &Path() const noexcept
     {
       return _path;
+    }
+
+    void AddFont(FontHandle font)
+    {
+      _fonts.push_back(font);
+    }
+
+    void RemoveFont(FontHandle font)
+    {
+      std::erase(_fonts, font);
+    }
+
+    NO_DISCARD const List<FontHandle> &Fonts() const noexcept
+    {
+      return _fonts;
     }
 
   private:

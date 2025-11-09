@@ -44,10 +44,21 @@ namespace Krys::Gfx::OpenGL
     return handle;
   }
 
+  bool FontRegistry::Unload(FontFamilyHandle handle) noexcept
+  {
+    auto &fontFamily = _fontFamilies.Get(handle);
+    for (const auto &fontHandle : fontFamily.Fonts())
+    {
+      Unload(fontHandle);
+    }
+    return _fontFamilies.Remove(handle);
+  }
+
   FontHandle FontRegistry::Get(const FontDesc &desc) noexcept
   {
     assert(desc.Family.IsValid() && "Invalid font family handle.");
-    const auto &path = _fontFamilies.Get(desc.Family).Path();
+    auto &fontFamily = _fontFamilies.Get(desc.Family);
+    const auto &path = fontFamily.Path();
 
     // non-bitmap fonts are resolution-independent, so we can cache them without size
     auto key = desc.Type == FontType::Bitmap ? desc : FontDesc {desc.Family, desc.Type, 0.f};
@@ -75,30 +86,31 @@ namespace Krys::Gfx::OpenGL
     }
 
     FontAtlasData &data = expected.value();
+    FontHandle font;
     switch (desc.Type)
     {
-      case FontType::Bitmap: return Add(Font::Bitmap(desc.Size, desc.Family, data), key);
-      case FontType::SDF:    return Add(Font::SDF(desc.Size, desc.Family, data), key);
-      case FontType::MSDF:   return Add(Font::MSDF(desc.Size, desc.Family, data), key);
-      case FontType::MTSDF:  return Add(Font::MTSDF(desc.Size, desc.Family, data), key);
+      case FontType::Bitmap: font = Add(Font::Bitmap(desc.Size, desc.Family, data), key); break;
+      case FontType::SDF:    font = Add(Font::SDF(desc.Size, desc.Family, data), key); break;
+      case FontType::MSDF:   font = Add(Font::MSDF(desc.Size, desc.Family, data), key); break;
+      case FontType::MTSDF:  font = Add(Font::MTSDF(desc.Size, desc.Family, data), key); break;
       default:               std::unreachable();
     }
+
+    fontFamily.AddFont(font);
+    return font;
   }
 
   bool FontRegistry::Unload(FontHandle handle) noexcept
   {
     if (_cache.Remove(handle))
     {
+      auto &font = _fonts.Get(handle);
+      auto &fontFamily = _fontFamilies.Get(font.FontFamily());
+      fontFamily.RemoveFont(handle);
       return _fonts.Remove(handle);
     }
 
     return false;
-  }
-
-  bool FontRegistry::Unload(FontFamilyHandle handle) noexcept
-  {
-    // TODO: Unload all fonts associated with this family
-    return _fontFamilies.Remove(handle);
   }
 
   Font &FontRegistry::Get(FontHandle handle)

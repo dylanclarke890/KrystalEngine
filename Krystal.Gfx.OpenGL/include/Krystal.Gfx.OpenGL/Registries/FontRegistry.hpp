@@ -40,11 +40,11 @@ namespace Krys::Gfx::OpenGL
 
     NO_DISCARD FontFamilyHandle Register(StringRef name, const IO::Path &path) noexcept override;
 
+    bool Unload(FontFamilyHandle handle) noexcept override;
+
     NO_DISCARD virtual FontHandle Get(const FontDesc &desc) noexcept override;
 
     bool Unload(FontHandle handle) noexcept override;
-
-    bool Unload(FontFamilyHandle handle) noexcept override;
 
     NO_DISCARD Font &Get(FontHandle handle);
 

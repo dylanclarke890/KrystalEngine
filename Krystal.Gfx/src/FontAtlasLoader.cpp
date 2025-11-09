@@ -269,10 +269,9 @@ namespace Krys::Gfx
   Expected<FontAtlasData> FontAtlasLoader::LoadMTSDF(const IO::Path &path, Gfx::FontType fontType,
                                                      const SDFParams &params)
   {
-    FontAtlasData result {};
-
     using namespace msdf_atlas;
 
+    FontAtlasData result {};
     if (msdfgen::FreetypeHandle *ft = msdfgen::initializeFreetype())
     {
       if (msdfgen::FontHandle *font = msdfgen::loadFont(ft, path.ToString().c_str()))
