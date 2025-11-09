@@ -746,27 +746,6 @@ namespace Krys::Gfx::OpenGL
       _buffers.Get(bufferHandles.at("matrices")).Bind(0);
     }
 
-    // UI VAO
-    {
-      GLuint vao;
-      glCreateVertexArrays(1, &vao);
-      glBindVertexArray(vao);
-      VAOs["ui"] = vao;
-
-      // 6 vertices * 4 Vec2s (pos + uv)
-      bufferHandles["ui-vertex"] = _buffers.Create({
-        .Type = BufferType::Vertex,
-        .Usage = BufferUsage::Static,
-        .Size = 24 * sizeof(Vec2),
-      });
-      _buffers.Get(bufferHandles.at("ui-vertex")).Bind();
-
-      Utils::ApplyVertexBufferLayout({
-        {VertexAttributeType::Float, 2}, // position
-        {VertexAttributeType::Float, 2}  // texcoord
-      });
-    }
-
     CreateEnvironmentAndIrradianceCubemaps(1'024, 1'024, _textures, _shaders, _meshes);
 
     {
