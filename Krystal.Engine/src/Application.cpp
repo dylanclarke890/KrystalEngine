@@ -220,6 +220,7 @@ namespace Krys
       {
         _context->Events->Enqueue(CreateUnique<WindowDPIChangeEvent>(window, dpi));
         _context->GraphicsContext->DPIChanged(dpi);
+        _context->Renderer->DPIChanged(dpi);
       },
     };
   }

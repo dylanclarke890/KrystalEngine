@@ -58,6 +58,8 @@ namespace Krys::Gfx::OpenGL
 
     void Submit(const CommandList &commandList) override;
 
+    void DPIChanged(int dpi) noexcept override;
+
   private:
     void FlushQuadInstances();
 

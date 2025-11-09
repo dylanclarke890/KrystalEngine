@@ -274,4 +274,9 @@ namespace Krys::Gfx::OpenGL
     auto unitRange = Maths::Vec2(font.SDFParams().PixelRange) / Maths::Vec2(font.AtlasSize());
     shader.SetUniform("u_UnitRange", unitRange);
   }
+
+  void Renderer::DPIChanged(int dpi) noexcept
+  {
+    _dpi = dpi;
+  }
 }
