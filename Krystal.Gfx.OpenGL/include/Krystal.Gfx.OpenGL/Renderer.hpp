@@ -36,12 +36,12 @@ namespace Krys::Gfx::OpenGL
 
   private:
     Context &_context;
-    TextRenderer _textRenderer;
     ShaderHandle _quadShader;
     ShaderHandle _singleTextureShader;
     MeshHandle _quadMesh;
     RenderTargetHandle _currentRenderTarget;
     InstanceData<QuadInstanceData> _quadInstanceData;
+    int _dpi;
 
   public:
     Renderer(IContext &context) noexcept;
@@ -60,6 +60,17 @@ namespace Krys::Gfx::OpenGL
 
   private:
     void FlushQuadInstances();
-    void DrawTexturedQuad(GLuint texture, const Maths::Vec2 &position, const Maths::Vec2 &size, float opacity);
+
+    void DrawTexturedQuad(GLuint texture, const Maths::Vec2 &position, const Maths::Vec2 &size,
+                          float opacity);
+
+    void DrawText(const string &text, FontHandle fontHandle, const Maths::Vec2 &position,
+                  const Colour &colour = Colours::Black) noexcept;
+
+    void DrawTextOutlined(const string &text, FontHandle fontHandle, const Maths::Vec2 &position,
+                          const Colour &textColour = Colours::Black,
+                          const Colour &outlineColour = Colours::White, float outlineWidth = 3.f) noexcept;
+
+    void SetSDFParams(Shader &shader, Font &font) noexcept;
   };
 }

@@ -11,7 +11,6 @@
 #include "Krystal.Gfx.OpenGL/Registries/SamplerRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ShaderRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/TextureRegistry.hpp"
-#include "Krystal.Gfx.OpenGL/TextRenderer.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
 

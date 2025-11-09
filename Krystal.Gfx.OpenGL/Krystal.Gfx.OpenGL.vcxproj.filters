@@ -84,9 +84,6 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Font.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\TextRenderer.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Image.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

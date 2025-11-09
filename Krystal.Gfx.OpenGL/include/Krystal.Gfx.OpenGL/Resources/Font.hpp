@@ -215,6 +215,7 @@ namespace Krys::Gfx::OpenGL
         case GL_RG:   internalFormat = GL_RG8; break;
         case GL_RGB:  internalFormat = GL_RGB8; break;
         case GL_RGBA: internalFormat = GL_RGBA8; break;
+        default:      std::unreachable();
       }
 
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

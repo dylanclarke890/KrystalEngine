@@ -26,6 +26,7 @@ namespace Krys::Gfx::OpenGL
     IO::VirtualFileSystem &_vfs;
     ShaderManager _shaders;
     ShaderHandleCache _cache;
+    Map<TextShaderDesc, ShaderHandle> _fontShaders;
 
   public:
     ShaderRegistry(IO::VirtualFileSystem &vfs) noexcept : _vfs(vfs), _shaders(), _cache()
@@ -123,6 +124,21 @@ namespace Krys::Gfx::OpenGL
     NO_DISCARD Shader &Get(ShaderHandle handle) noexcept
     {
       return _shaders.Get(handle);
+    }
+
+    Shader &GetOrAdd(const TextShaderDesc &desc) noexcept
+    {
+      if (const auto it = _fontShaders.find(desc); it != _fontShaders.end())
+      {
+        return Get(it->second);
+      }
+
+      const auto vertexShader = IO::Path("text-shader.vert");
+      const auto fragmentShader = IO::Path("text-shader.frag");
+      auto shader = LoadTextShader(vertexShader, fragmentShader, desc);
+
+      _fontShaders[desc] = shader;
+      return Get(shader);
     }
 
   private:
