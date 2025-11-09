@@ -21,7 +21,13 @@ namespace Krys::Gfx
     NO_DISCARD Expected<FontAtlasData> LoadBitmap(const IO::Path &path, uint32 fontSizeInPixels,
                                                   uint8 paddingPerGlyph = 2u) noexcept;
 
-    NO_DISCARD Expected<FontAtlasData> LoadMTSDF(const IO::Path &path, Gfx::FontType fontType,
-                                                 const SDFParams &params = SDFParams::Defaults());
+    NO_DISCARD Expected<FontAtlasData> LoadSDF(const IO::Path &path,
+                                               const SDFParams &params = SDFParams::Defaults()) noexcept;
+
+    NO_DISCARD Expected<FontAtlasData> LoadMSDF(const IO::Path &path,
+                                                const SDFParams &params = SDFParams::Defaults()) noexcept;
+
+    NO_DISCARD Expected<FontAtlasData> LoadMTSDF(const IO::Path &path,
+                                                 const SDFParams &params = SDFParams::Defaults()) noexcept;
   };
 }

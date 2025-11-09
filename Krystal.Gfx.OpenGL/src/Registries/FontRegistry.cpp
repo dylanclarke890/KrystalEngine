@@ -72,9 +72,9 @@ namespace Krys::Gfx::OpenGL
     switch (desc.Type)
     {
       case FontType::Bitmap: expected = _loader.LoadBitmap(path, PtSizeToPixels(desc.Size)); break;
-      case FontType::SDF:    expected = _loader.LoadMTSDF(path, desc.Type); break;
-      case FontType::MSDF:   expected = _loader.LoadMTSDF(path, desc.Type); break;
-      case FontType::MTSDF:  expected = _loader.LoadMTSDF(path, desc.Type); break;
+      case FontType::SDF:    expected = _loader.LoadSDF(path); break;
+      case FontType::MSDF:   expected = _loader.LoadMSDF(path); break;
+      case FontType::MTSDF:  expected = _loader.LoadMTSDF(path); break;
       default:               std::unreachable();
     }
 
