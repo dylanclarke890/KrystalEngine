@@ -4,7 +4,6 @@
 #include "Krystal.Gfx.OpenGL/Resources/Shader.hpp"
 #include "Krystal.Gfx.OpenGL/Utils.hpp"
 #include "Krystal.Gfx/Resources/Font.hpp"
-#include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
 #include "Krystal.Lib/Span.hpp"
@@ -30,7 +29,7 @@ namespace Krys::Gfx::OpenGL
   struct FontAtlas
   {
     GLuint Texture {0u};
-    Map<char, Character> Characters;
+    Map<uchar, Character> Characters;
     Maths::Vec2u AtlasSize {0u};
     GLenum Format;
   };
@@ -51,7 +50,7 @@ namespace Krys::Gfx::OpenGL
 
     FontType _type {FontType::Bitmap};
     float _ptSize {};
-    IO::Path _path;
+    FontFamilyHandle _fontFamily;
     FontAtlas _atlas {};
     GLuint _vao {};
     GLuint _vbo {};
@@ -61,16 +60,16 @@ namespace Krys::Gfx::OpenGL
   public:
     MOVE_SWAP(Font)
 
-    Font(FontType type, float ptSize, const IO::Path &path, GLenum format) noexcept
-        : _type(type), _ptSize(ptSize), _path(path)
+    Font(FontType type, float ptSize, FontFamilyHandle fontFamily, GLenum format) noexcept
+        : _type(type), _ptSize(ptSize), _fontFamily(fontFamily)
     {
       _atlas.Format = format;
       CreateVertexArray();
     }
 
-    Font(FontType type, float ptSize, const IO::Path &path, const FontAtlas &bitmapAtlas,
+    Font(FontType type, float ptSize, FontFamilyHandle fontFamily, const FontAtlas &atlas,
          const SDFParams &sdfParams) noexcept
-        : _type(type), _ptSize(ptSize), _path(path), _atlas(bitmapAtlas), _sdfParams(sdfParams)
+        : _type(type), _ptSize(ptSize), _fontFamily(fontFamily), _atlas(atlas), _sdfParams(sdfParams)
     {
       CreateVertexArray();
     }
@@ -150,13 +149,13 @@ namespace Krys::Gfx::OpenGL
       return _ptSize;
     }
 
-    const IO::Path &Path() const noexcept
+    FontFamilyHandle FontFamily() const noexcept
     {
-      return _path;
+      return _fontFamily;
     }
 
     void SetAtlasData(const List<uint8> &data, const Maths::Vec2u &atlasSize,
-                      const Map<char, Character> &characters) noexcept
+                      const Map<uchar, Character> &characters) noexcept
     {
       if (_atlas.Texture != 0u)
       {
@@ -209,7 +208,7 @@ namespace Krys::Gfx::OpenGL
     {
       std::swap(other._type, _type);
       std::swap(other._ptSize, _ptSize);
-      std::swap(other._path, _path);
+      std::swap(other._fontFamily, _fontFamily);
       std::swap(other._atlas, _atlas);
       std::swap(other._vao, _vao);
       std::swap(other._vbo, _vbo);

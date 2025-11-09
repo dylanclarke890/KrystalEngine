@@ -15,10 +15,9 @@ namespace Krys::Gfx
 {
   struct FontAtlasResult
   {
-    List<uint8> AtlasPixels;
-    Maths::Vec2u AtlasSize;
-    Map<char, Character> Characters;
-    uint32 PaddingPerGlyph {};
+    Maths::Vec2u Size;
+    List<uint8> Pixels;
+    Map<uchar, Character> Characters;
   };
 
   class FontAtlasLoader
@@ -31,6 +30,6 @@ namespace Krys::Gfx
     ~FontAtlasLoader() = default;
 
     NO_DISCARD Expected<FontAtlasResult> LoadBitmap(const IO::Path &path, uint32 fontSizeInPixels,
-                                                    Nullable<uint8> padding = std::nullopt) noexcept;
+                                                    uint8 paddingPerGlyph = 2u) noexcept;
   };
 }

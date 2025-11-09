@@ -25,7 +25,7 @@ namespace
   struct MTSDFResult
   {
     GLuint Texture {0u};
-    Map<char, Character> Characters {};
+    Map<uchar, Character> Characters {};
     Vec2u AtlasSize {};
     bool Success {false};
   };
@@ -199,31 +199,31 @@ namespace Krys::Gfx::OpenGL
 
   FontHandle FontRegistry::Get(const FontDesc &desc) noexcept
   {
-    uint32 sizeInPixels = PtSizeToPixels(desc.Size, _dpi);
+    assert(desc.Family.IsValid() && "Invalid font family handle.");
+    FontFamily &fontFamily = _fontFamilies.Get(desc.Family);
 
-    FontHandle handle;
     if (desc.Type == FontType::Bitmap)
     {
-      FontDesc key = desc;
-      if (auto cached = _cache.Get(key); cached.IsValid())
+      if (auto cached = _cache.Get(desc); cached.IsValid())
       {
         KRYS_DEBUG("Font cache hit.");
         return cached;
       }
 
-      FontFamily &fontFamily = _fontFamilies.Get(desc.Family);
-      auto expected = _loader.LoadBitmap(_fontFamilies.Get(desc.Family).Path(), sizeInPixels);
+      auto expected = _loader.LoadBitmap(fontFamily.Path(), PtSizeToPixels(desc.Size, _dpi));
       if (!expected.has_value())
       {
         KRYS_ERROR("Failed to load font '{}'", _fontFamilies.Get(desc.Family).Path().ToString());
         return {};
       }
-      FontAtlasResult &result = expected.value();
 
-      Font font {desc.Type, desc.Size, fontFamily.Path(), GL_RED};
+      FontAtlasResult &result = expected.value();
+      Font font {desc.Type, desc.Size, desc.Family, GL_RED};
       font.SetAtlasData(result.AtlasPixels, result.AtlasSize, result.Characters);
-      handle = _fonts.Add(std::move(font));
-      _cache.Add(key, handle);
+
+      FontHandle handle = _fonts.Add(std::move(font));
+      _cache.Add(desc, handle);
+      return handle;
     }
     else if (desc.Type == FontType::SDF || desc.Type == FontType::MSDF || desc.Type == FontType::MTSDF)
     {
@@ -234,7 +234,6 @@ namespace Krys::Gfx::OpenGL
         return cached;
       }
 
-      FontFamily &fontFamily = _fontFamilies.Get(desc.Family);
       SDFParams params {};
       MTSDFResult result = LoadMTSDFAtlas(fontFamily.Path(), desc.Type, params);
 
@@ -244,16 +243,15 @@ namespace Krys::Gfx::OpenGL
         return {};
       }
 
-      Font font {desc.Type,
-                 desc.Size,
-                 fontFamily.Path(),
-                 {result.Texture, result.Characters, result.AtlasSize},
-                 params};
-      handle = _fonts.Add(std::move(font));
+      Font font {
+        desc.Type, desc.Size, desc.Family, {result.Texture, result.Characters, result.AtlasSize}, params};
+
+      FontHandle handle = _fonts.Add(std::move(font));
       _cache.Add(key, handle);
+      return handle;
     }
 
-    return handle;
+    std::unreachable();
   }
 
   bool FontRegistry::Unload(FontHandle handle) noexcept
@@ -303,10 +301,11 @@ namespace Krys::Gfx::OpenGL
         continue; // the rest of the font types are resolution-independent
       }
 
-      auto expected = _loader.LoadBitmap(font.Path(), PtSizeToPixels(font.PtSize(), _dpi));
+      auto &fontFamily = _fontFamilies.Get(font.FontFamily());
+      auto expected = _loader.LoadBitmap(fontFamily.Path(), PtSizeToPixels(font.PtSize(), _dpi));
       if (!expected.has_value())
       {
-        KRYS_ERROR("Failed to load font '{}'", font.Path().ToString());
+        KRYS_ERROR("Failed to load font '{}'", fontFamily.Path().ToString());
         KRYS_DEBUG_BREAK();
         continue;
       }
