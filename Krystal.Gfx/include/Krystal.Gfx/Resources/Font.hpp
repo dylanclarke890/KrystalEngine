@@ -26,9 +26,25 @@ namespace Krys::Gfx
   {
     FontFamilyHandle Family;
     FontType Type {FontType::Bitmap};
-    float Size {16.0f};
+    float Size {16.f};
 
     NO_DISCARD auto operator<=>(const FontDesc &other) const noexcept = default;
+  };
+
+  struct SDFParams
+  {
+    float EMSizeInPixels {0.f};
+    float PixelRange {0.f};
+    float MiterLimit {0.f};
+
+    constexpr static SDFParams Defaults() noexcept
+    {
+      return {
+        .EMSizeInPixels = 64.f,
+        .PixelRange = 12.5f,
+        .MiterLimit = 1.f,
+      };
+    }
   };
 
   struct Character

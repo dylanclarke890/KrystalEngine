@@ -384,7 +384,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(ProjectDir)third-party\stb\;$(ProjectDir)third-party\msdfgen\;$(ProjectDir)third-party\freetype\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)third-party\stb\;$(ProjectDir)third-party\msdfgen\;$(ProjectDir)third-party\freetype\include;$(projectDir)third-party\msdf-atlas-gen;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

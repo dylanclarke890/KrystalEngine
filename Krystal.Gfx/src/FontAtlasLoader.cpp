@@ -2,7 +2,11 @@
 #include "Krystal.Lib/DebugBreak.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Log/ILogger.hpp"
+#include <algorithm>
 #include <ft2build.h>
+#include <msdf-atlas-gen.h>
+#include <msdfgen-ext.h>
+#include <msdfgen.h>
 #include <stb_rect_pack.h>
 #include FT_FREETYPE_H
 
@@ -62,7 +66,7 @@ namespace
         return false;
       }
 
-      KRYS_INFO("FREETYPE: Loaded font.", path.ToString());
+      KRYS_INFO("FREETYPE: Loaded font: {}.", path.ToString());
       KRYS_INFO("FREETYPE:   Family: {}", _face->family_name);
       KRYS_INFO("FREETYPE:   Style: {}", _face->style_name);
       KRYS_INFO("FREETYPE:   {} face(s) in font", _face->num_faces);
@@ -259,6 +263,115 @@ namespace Krys::Gfx
     result.Size = atlasSize;
     result.Pixels = ToPixels(glyphs, atlasSize);
     result.Characters = ToCodepointsMap(glyphs, paddingPerGlyph, atlasSize);
+    return result;
+  }
+
+  Expected<FontAtlasData> FontAtlasLoader::LoadMTSDF(const IO::Path &path, Gfx::FontType fontType,
+                                                     const SDFParams &params)
+  {
+    FontAtlasData result {};
+
+    using namespace msdf_atlas;
+
+    if (msdfgen::FreetypeHandle *ft = msdfgen::initializeFreetype())
+    {
+      if (msdfgen::FontHandle *font = msdfgen::loadFont(ft, path.ToString().c_str()))
+      {
+        // FontGeometry is a helper class that loads a set of glyphs from a single font.
+        // It can also be used to get additional font metrics, kerning information, etc.
+        List<GlyphGeometry> glyphs;
+        FontGeometry fontGeometry(&glyphs);
+        fontGeometry.loadCharset(font, 1.0, Charset::ASCII);
+
+        const double maxCornerAngle = 3.0; // Apply MSDF edge coloring. edge-coloring.h for other strategies.
+        for (GlyphGeometry &glyph : glyphs)
+        {
+          glyph.edgeColoring(&msdfgen::edgeColoringInkTrap, maxCornerAngle, 0);
+        }
+
+        int width = 0, height = 0;
+        TightAtlasPacker packer;
+        packer.setDimensionsConstraint(DimensionsConstraint::SQUARE);
+        packer.setScale(params.EMSizeInPixels);
+        packer.setPixelRange(params.PixelRange);
+        packer.setMiterLimit(params.MiterLimit);
+        packer.pack(glyphs.data(), (int)glyphs.size());
+        packer.getDimensions(width, height); // final atlas dimensions
+
+        GeneratorAttributes attributes {};
+        attributes.scanlinePass = true;
+
+        if (fontType == Gfx::FontType::SDF)
+        {
+          using SDFAtlasData = const msdfgen::BitmapConstRef<msdfgen::byte, 1> &;
+          using SDFGenerator =
+            ImmediateAtlasGenerator<float, 1, sdfGenerator, BitmapAtlasStorage<msdfgen::byte, 1>>;
+
+          SDFGenerator generator(width, height);
+          generator.setAttributes(attributes);
+          generator.setThreadCount(4);
+          generator.generate(glyphs.data(), (int)glyphs.size());
+          SDFAtlasData atlas = generator.atlasStorage();
+
+          size_t pixelCount = static_cast<size_t>(atlas.width) * atlas.height * 1;
+          result.Pixels = List<uint8>(atlas.pixels, atlas.pixels + pixelCount);
+          result.Size = {uint32(atlas.width), uint32(atlas.height)};
+        }
+        else if (fontType == Gfx::FontType::MSDF)
+        {
+          using MSDFAtlasData = const msdfgen::BitmapConstRef<msdfgen::byte, 3> &;
+          using MSDFGenerator =
+            ImmediateAtlasGenerator<float, 3, msdfGenerator, BitmapAtlasStorage<msdfgen::byte, 3>>;
+
+          MSDFGenerator generator(width, height);
+          generator.setAttributes(attributes);
+          generator.setThreadCount(4);
+          generator.generate(glyphs.data(), (int)glyphs.size());
+          MSDFAtlasData atlas = generator.atlasStorage();
+
+          size_t pixelCount = static_cast<size_t>(atlas.width) * atlas.height * 3;
+          result.Pixels = List<uint8>(atlas.pixels, atlas.pixels + pixelCount);
+          result.Size = {uint32(atlas.width), uint32(atlas.height)};
+        }
+        else
+        {
+          using MTSDFAtlasData = const msdfgen::BitmapConstRef<msdfgen::byte, 4> &;
+          using MTSDFGenerator =
+            ImmediateAtlasGenerator<float, 4, mtsdfGenerator, BitmapAtlasStorage<msdfgen::byte, 4>>;
+
+          MTSDFGenerator generator(width, height);
+          generator.setAttributes(attributes);
+          generator.setThreadCount(4);
+          generator.generate(glyphs.data(), (int)glyphs.size());
+          MTSDFAtlasData atlas = generator.atlasStorage();
+
+          size_t pixelCount = static_cast<size_t>(atlas.width) * atlas.height * 4;
+          result.Pixels = List<uint8>(atlas.pixels, atlas.pixels + pixelCount);
+          result.Size = {uint32(atlas.width), uint32(atlas.height)};
+        }
+
+        double emScale = packer.getScale();
+        for (const GlyphGeometry &glyph : glyphs)
+        {
+          Character ch {};
+          double b, t, l, r;
+          glyph.getQuadAtlasBounds(l, b, r, t);
+
+          double pl, pb, pr, pt;
+          glyph.getQuadPlaneBounds(pl, pb, pr, pt);
+
+          ch.Size = {(uint32)std::round((pr - pl) * emScale), (uint32)std::round((pt - pb) * emScale)};
+          ch.Bearing = {(int)std::round(pl * emScale), (int)std::round(pt * emScale)};
+          ch.Advance = (uint32)std::round(glyph.getAdvance() * emScale);
+          ch.UVMin = {float(l / result.Size.x), float(t / result.Size.y)};
+          ch.UVMax = {float(r / result.Size.x), float(b / result.Size.y)};
+          result.Characters.emplace((char)glyph.getCodepoint(), ch);
+        }
+
+        msdfgen::destroyFont(font);
+      }
+      msdfgen::deinitializeFreetype(ft);
+    }
     return result;
   }
 }

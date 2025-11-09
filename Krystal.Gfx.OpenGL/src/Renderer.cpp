@@ -145,7 +145,7 @@ namespace Krys::Gfx::OpenGL
           float posY = static_cast<float>(rt.Height()) - (cmd.Position.y + cmd.FontSize);
           FontDesc fontDesc = {
             .Family = cmd.FontFamily,
-            .Type = FontType::SDF,
+            .Type = FontType::Bitmap,
             .Size = cmd.FontSize,
           };
           _textRenderer.Draw(_context.Strings().Get(cmd.Text), _context.Fonts().Get(fontDesc),

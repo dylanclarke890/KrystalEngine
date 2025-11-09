@@ -31,49 +31,41 @@ namespace Krys::Gfx::OpenGL
     GLuint Texture {0u};
     Map<uchar, Character> Characters;
     Maths::Vec2u AtlasSize {0u};
-    GLenum Format;
-  };
-
-  struct SDFParams
-  {
-    float EMSizeInPixels {64.f};
-    float PixelRange {12.5f};
-    float MiterLimit {1.f};
   };
 
   class Font
   {
     NO_COPY(Font)
 
-    constexpr static int MaxGlyphsPerDrawCall = 4'096;
-    constexpr static int VerticesPerGlyph = 6; // 2 triangles per glyph
+    constexpr static size_t MaxGlyphsPerDrawCall = 4'096;
+    constexpr static size_t VerticesPerGlyph = 6; // 2 triangles per glyph
 
     FontType _type {FontType::Bitmap};
     float _ptSize {};
     FontFamilyHandle _fontFamily;
+    GLenum _format;
     FontAtlas _atlas {};
     GLuint _vao {};
     GLuint _vbo {};
     List<TextVertex> _vertexBuffer {};
     SDFParams _sdfParams {};
 
-  public:
-    MOVE_SWAP(Font)
-
     Font(FontType type, float ptSize, FontFamilyHandle fontFamily, GLenum format) noexcept
-        : _type(type), _ptSize(ptSize), _fontFamily(fontFamily)
+        : _type(type), _ptSize(ptSize), _fontFamily(fontFamily), _format(format)
     {
-      _atlas.Format = format;
-      CreateVertexArray();
+      glCreateVertexArrays(1, &_vao);
+      glCreateBuffers(1, &_vbo);
+
+      glBindVertexArray(_vao);
+      glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+      Utils::ApplyVertexBufferLayout(TextVertex::Layout());
+
+      auto bufferSize = sizeof(TextVertex) * VerticesPerGlyph * MaxGlyphsPerDrawCall;
+      glNamedBufferStorage(_vbo, bufferSize, 0, GL_DYNAMIC_STORAGE_BIT);
+      _vertexBuffer.reserve(VerticesPerGlyph * MaxGlyphsPerDrawCall);
     }
 
-    Font(FontType type, float ptSize, FontFamilyHandle fontFamily, const FontAtlas &atlas,
-         const SDFParams &sdfParams) noexcept
-        : _type(type), _ptSize(ptSize), _fontFamily(fontFamily), _atlas(atlas), _sdfParams(sdfParams)
-    {
-      CreateVertexArray();
-    }
-
+  public:
     ~Font() noexcept
     {
       if (_atlas.Texture != 0u)
@@ -88,6 +80,42 @@ namespace Krys::Gfx::OpenGL
       {
         glDeleteVertexArrays(1, &_vao);
       }
+    }
+
+    MOVE_SWAP(Font)
+
+    static Font Bitmap(float ptSize, FontFamilyHandle fontFamily, const FontAtlasData &data) noexcept
+    {
+      auto font = Font(FontType::Bitmap, ptSize, fontFamily, GL_RED);
+      font.SetAtlasData(data);
+      return font;
+    }
+
+    static Font SDF(float ptSize, FontFamilyHandle fontFamily, const FontAtlasData &data,
+                    const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
+    {
+      auto font = Font(FontType::SDF, ptSize, fontFamily, GL_RED);
+      font._sdfParams = sdfParams;
+      font.SetAtlasData(data);
+      return font;
+    }
+
+    static Font MSDF(float ptSize, FontFamilyHandle fontFamily, const FontAtlasData &data,
+                     const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
+    {
+      auto font = Font(FontType::MSDF, ptSize, fontFamily, GL_RGB);
+      font._sdfParams = sdfParams;
+      font.SetAtlasData(data);
+      return font;
+    }
+
+    static Font MTSDF(float ptSize, FontFamilyHandle fontFamily, const FontAtlasData &data,
+                      const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
+    {
+      auto font = Font(FontType::MTSDF, ptSize, fontFamily, GL_RGBA);
+      font._sdfParams = sdfParams;
+      font.SetAtlasData(data);
+      return font;
     }
 
     void DrawText(const string &text, const Maths::Vec2 &position, float scale = 1.0f)
@@ -154,6 +182,16 @@ namespace Krys::Gfx::OpenGL
       return _fontFamily;
     }
 
+    const SDFParams &SDFParams() const noexcept
+    {
+      return _sdfParams;
+    }
+
+    const FontAtlas &Atlas() const noexcept
+    {
+      return _atlas;
+    }
+
     void SetAtlasData(const FontAtlasData &result) noexcept
     {
       if (_atlas.Texture != 0u)
@@ -163,7 +201,7 @@ namespace Krys::Gfx::OpenGL
 
       glCreateTextures(GL_TEXTURE_2D, 1, &_atlas.Texture);
 
-      GLenum format = _atlas.Format;
+      GLenum format = _format;
       GLenum internalFormat;
       switch (format)
       {
@@ -192,40 +230,18 @@ namespace Krys::Gfx::OpenGL
       _atlas.Characters = result.Characters;
     }
 
-    const SDFParams &SDFParams() const noexcept
-    {
-      return _sdfParams;
-    }
-
-    const FontAtlas &Atlas() const noexcept
-    {
-      return _atlas;
-    }
-
   private:
     void Swap(Font &other) noexcept
     {
       std::swap(other._type, _type);
       std::swap(other._ptSize, _ptSize);
       std::swap(other._fontFamily, _fontFamily);
+      std::swap(other._format, _format);
       std::swap(other._atlas, _atlas);
       std::swap(other._vao, _vao);
       std::swap(other._vbo, _vbo);
       std::swap(other._vertexBuffer, _vertexBuffer);
-    }
-
-    void CreateVertexArray() noexcept
-    {
-      glCreateVertexArrays(1, &_vao);
-      glCreateBuffers(1, &_vbo);
-
-      glBindVertexArray(_vao);
-      glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-      Utils::ApplyVertexBufferLayout(TextVertex::Layout());
-
-      auto bufferSize = sizeof(TextVertex) * VerticesPerGlyph * MaxGlyphsPerDrawCall;
-      glNamedBufferStorage(_vbo, bufferSize, 0, GL_DYNAMIC_STORAGE_BIT);
-      _vertexBuffer.reserve(VerticesPerGlyph * MaxGlyphsPerDrawCall);
+      std::swap(other._sdfParams, _sdfParams);
     }
   };
 }
