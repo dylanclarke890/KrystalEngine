@@ -923,6 +923,11 @@ namespace Krys::Gfx::OpenGL
     return _height;
   }
 
+  IBufferRegistry &Context::Buffers() noexcept
+  {
+    return _buffers;
+  }
+
   IImageRegistry &Context::Images() noexcept
   {
     return _images;
@@ -936,11 +941,6 @@ namespace Krys::Gfx::OpenGL
   ISamplerRegistry &Context::Samplers() noexcept
   {
     return _samplers;
-  }
-
-  IBufferRegistry &Context::Buffers() noexcept
-  {
-    return _buffers;
   }
 
   ITextureRegistry &Context::Textures() noexcept

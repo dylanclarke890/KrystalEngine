@@ -5,7 +5,6 @@
 #include "Krystal.Platform/Input.hpp"
 #include "Krystal.Platform/Platform.hpp"
 #include <cassert>
-#include <filesystem>
 #include <thread>
 #include <utility>
 
