@@ -1,5 +1,6 @@
 #include "Krystal.Gfx/FontAtlasLoader.hpp"
 #include "Krystal.Lib/DebugBreak.hpp"
+#include "Krystal.Lib/List.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include <ft2build.h>
 #include <stb_rect_pack.h>
@@ -126,6 +127,8 @@ namespace
 
         glyphs.push_back(std::move(glyph));
       }
+
+      return glyphs;
     }
   };
 
@@ -137,18 +140,18 @@ namespace
     for (const auto &glyph : glyphs)
     {
       const float u0 = float(glyph.Rect.x + padding) / float(atlasSize.x);
-      const float v0 = float(glyph.Rect.y + padding) / float(atlasSize.y);
       const float u1 = float(glyph.Rect.x + padding + glyph.ActualSize.x) / float(atlasSize.x);
+
+      const float v0 = float(glyph.Rect.y + padding) / float(atlasSize.y);
       const float v1 = float(glyph.Rect.y + padding + glyph.ActualSize.y) / float(atlasSize.y);
 
-      Character ch = {
+      characters[glyph.Char] = Character {
         .Size = glyph.ActualSize,
         .Bearing = glyph.Bearing,
         .Advance = glyph.Advance,
         .UVMin = {u0, v0},
         .UVMax = {u1, v1},
       };
-      characters[glyph.Char] = ch;
     }
 
     return characters;
@@ -168,6 +171,7 @@ namespace
         std::memcpy(dst, src, glyph.ActualSize.x);
       }
     }
+
     return pixels;
   }
 
@@ -226,7 +230,7 @@ namespace
 namespace Krys::Gfx
 {
   Expected<FontAtlasData> FontAtlasLoader::LoadBitmap(const IO::Path &path, uint32 fontSizeInPixels,
-                                                        uint8 paddingPerGlyph) noexcept
+                                                      uint8 paddingPerGlyph) noexcept
   {
     FreeTypeBitmapLoader ft {};
     if (!ft.Load(path))
@@ -242,23 +246,19 @@ namespace Krys::Gfx
     List<BitmapGlyph> glyphs = ft.LoadGlyphs(paddingPerGlyph);
     if (glyphs.empty())
     {
-      KRYS_ERROR("FREETYPE: No glyphs loaded for font '{}'", path.ToString());
-      KRYS_DEBUG_BREAK();
       return Unexpected("No glyphs loaded");
     }
 
     auto atlasSize = Maths::Vec2u {512u, 512u}; // Will be resized as needed.
     if (!TryPackGlyphs(glyphs, atlasSize))
     {
-      KRYS_ERROR("FREETYPE: Failed to pack glyphs for font '{}'", path.ToString());
-      KRYS_DEBUG_BREAK();
       return Unexpected("Unable to pack glyphs");
     }
 
     FontAtlasData result {};
     result.Size = atlasSize;
-    result.Pixels = ToPixels(glyphs, result.Size);
-    result.Characters = ToCodepointsMap(glyphs, paddingPerGlyph, result.Size);
+    result.Pixels = ToPixels(glyphs, atlasSize);
+    result.Characters = ToCodepointsMap(glyphs, paddingPerGlyph, atlasSize);
     return result;
   }
 }

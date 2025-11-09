@@ -53,5 +53,10 @@ namespace Krys::Gfx::OpenGL
     void DPIChanged(int dpi) noexcept;
 
     NO_DISCARD FontFamilyHandle GetDefaultFontFamily() noexcept override;
+
+  private:
+    NO_DISCARD FontHandle Add(Font &font, const FontDesc &cacheKey);
+
+    NO_DISCARD uint32 PtSizeToPixels(float ptSize) const noexcept;
   };
 }

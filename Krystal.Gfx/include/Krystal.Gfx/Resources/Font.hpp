@@ -4,6 +4,7 @@
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Allocators/StringRef.hpp"
 #include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
 #include "Krystal.Lib/Types.hpp"
@@ -37,6 +38,13 @@ namespace Krys::Gfx
     int32 Advance {0u};      // Offset to advance to next glyph
     Maths::Vec2 UVMin;       // (u0, v0)
     Maths::Vec2 UVMax;       // (u1, v1)
+  };
+
+  struct FontAtlasData
+  {
+    Maths::Vec2u Size;
+    List<uint8> Pixels;
+    Map<uchar, Character> Characters;
   };
 }
 
