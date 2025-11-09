@@ -154,8 +154,7 @@ namespace Krys::Gfx::OpenGL
       return _fontFamily;
     }
 
-    void SetAtlasData(const List<uint8> &data, const Maths::Vec2u &atlasSize,
-                      const Map<uchar, Character> &characters) noexcept
+    void SetAtlasData(const FontAtlasData &result) noexcept
     {
       if (_atlas.Texture != 0u)
       {
@@ -179,9 +178,9 @@ namespace Krys::Gfx::OpenGL
       }
 
       glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-      glTextureStorage2D(_atlas.Texture, 1, internalFormat, atlasSize.x, atlasSize.y);
-      glTextureSubImage2D(_atlas.Texture, 0, 0, 0, atlasSize.x, atlasSize.y, format, GL_UNSIGNED_BYTE,
-                          data.data());
+      glTextureStorage2D(_atlas.Texture, 1, internalFormat, result.Size.x, result.Size.y);
+      glTextureSubImage2D(_atlas.Texture, 0, 0, 0, result.Size.x, result.Size.y, format, GL_UNSIGNED_BYTE,
+                          result.Pixels.data());
       glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
       glTextureParameteri(_atlas.Texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -189,8 +188,8 @@ namespace Krys::Gfx::OpenGL
       glTextureParameteri(_atlas.Texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
       glTextureParameteri(_atlas.Texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-      _atlas.AtlasSize = atlasSize;
-      _atlas.Characters = characters;
+      _atlas.AtlasSize = result.Size;
+      _atlas.Characters = result.Characters;
     }
 
     const SDFParams &SDFParams() const noexcept

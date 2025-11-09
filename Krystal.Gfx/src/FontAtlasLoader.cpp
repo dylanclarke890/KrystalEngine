@@ -225,7 +225,7 @@ namespace
 
 namespace Krys::Gfx
 {
-  Expected<FontAtlasResult> FontAtlasLoader::LoadBitmap(const IO::Path &path, uint32 fontSizeInPixels,
+  Expected<FontAtlasData> FontAtlasLoader::LoadBitmap(const IO::Path &path, uint32 fontSizeInPixels,
                                                         uint8 paddingPerGlyph) noexcept
   {
     FreeTypeBitmapLoader ft {};
@@ -255,7 +255,7 @@ namespace Krys::Gfx
       return Unexpected("Unable to pack glyphs");
     }
 
-    FontAtlasResult result {};
+    FontAtlasData result {};
     result.Size = atlasSize;
     result.Pixels = ToPixels(glyphs, result.Size);
     result.Characters = ToCodepointsMap(glyphs, paddingPerGlyph, result.Size);

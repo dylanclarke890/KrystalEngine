@@ -204,7 +204,7 @@ namespace Krys::Gfx::OpenGL
 
     if (desc.Type == FontType::Bitmap)
     {
-      if (auto cached = _cache.Get(desc); cached.IsValid())
+      if (FontHandle cached = _cache.Get(desc); cached.IsValid())
       {
         KRYS_DEBUG("Font cache hit.");
         return cached;
@@ -217,9 +217,8 @@ namespace Krys::Gfx::OpenGL
         return {};
       }
 
-      FontAtlasResult &result = expected.value();
       Font font {desc.Type, desc.Size, desc.Family, GL_RED};
-      font.SetAtlasData(result.AtlasPixels, result.AtlasSize, result.Characters);
+      font.SetAtlasData(expected.value());
 
       FontHandle handle = _fonts.Add(std::move(font));
       _cache.Add(desc, handle);
@@ -228,7 +227,7 @@ namespace Krys::Gfx::OpenGL
     else if (desc.Type == FontType::SDF || desc.Type == FontType::MSDF || desc.Type == FontType::MTSDF)
     {
       FontDesc key = {desc.Family, desc.Type, 0.f}; // size-independent cache key
-      if (auto cached = _cache.Get(key); cached.IsValid())
+      if (FontHandle cached = _cache.Get(key); cached.IsValid())
       {
         KRYS_DEBUG("Font cache hit.");
         return cached;
@@ -310,8 +309,7 @@ namespace Krys::Gfx::OpenGL
         continue;
       }
 
-      FontAtlasResult &result = expected.value();
-      font.SetAtlasData(result.AtlasPixels, result.AtlasSize, result.Characters);
+      font.SetAtlasData(expected.value());
     }
   }
 
