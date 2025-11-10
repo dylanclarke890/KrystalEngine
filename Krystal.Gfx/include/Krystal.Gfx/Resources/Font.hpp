@@ -56,11 +56,29 @@ namespace Krys::Gfx
     Maths::Vec2 UVMax;       // (u1, v1)
   };
 
+  using CharacterMap = Map<uchar, Character>;
+
+  struct FontMetrics
+  {
+    /// @brief The distance from the baseline to the highest ascender.
+    float Ascender {0.f};
+
+    /// @brief The distance from the baseline to the lowest descender (usually negative).
+    float Descender {0.f};
+
+    /// @brief The smallest distance between lines of text.
+    float Height {0.f};
+
+    /// @brief The typographical distance between baselines of consecutive lines of text.
+    float LineHeight {0.f};
+  };
+
   struct FontAtlasData
   {
     Maths::Vec2u Size;
     List<uint8> Pixels;
-    Map<uchar, Character> Characters;
+    CharacterMap Characters;
+    FontMetrics Metrics;
   };
 }
 

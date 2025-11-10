@@ -136,11 +136,21 @@ namespace
 
       return glyphs;
     }
+
+    FontMetrics GetMetrics() const noexcept
+    {
+      auto ascender = static_cast<float>(_face->size->metrics.ascender >> 6);
+      auto descender = static_cast<float>(_face->size->metrics.descender >> 6);
+      auto height = static_cast<float>(_face->size->metrics.height >> 6); // typographic
+      auto lineHeight = ascender - descender;                             // pixel-tight
+
+      return {.Ascender = ascender, .Descender = descender, .Height = height, .LineHeight = lineHeight};
+    }
   };
 
-  Map<uchar, Character> ToCodepointsMap(List<BitmapGlyph> &glyphs, int padding, const Maths::Vec2u &atlasSize)
+  CharacterMap ToCodepointsMap(List<BitmapGlyph> &glyphs, int padding, const Maths::Vec2u &atlasSize)
   {
-    Map<uchar, Character> characters;
+    CharacterMap characters;
     characters.reserve(glyphs.size());
 
     for (const auto &glyph : glyphs)
@@ -257,10 +267,10 @@ namespace
     return MSDFPackResult {static_cast<uint32>(width), static_cast<uint32>(height), emScale};
   }
 
-  Map<uchar, Character> ToCodepointsMap(Krys::List<msdf_atlas::GlyphGeometry> &glyphs,
-                                        MSDFPackResult &packedAtlas, const Maths::Vec2u &atlasSize)
+  CharacterMap ToCodepointsMap(Krys::List<msdf_atlas::GlyphGeometry> &glyphs, MSDFPackResult &packedAtlas,
+                               const Maths::Vec2u &atlasSize)
   {
-    Map<uchar, Character> characters;
+    CharacterMap characters;
     characters.reserve(glyphs.size());
 
     for (const msdf_atlas::GlyphGeometry &glyph : glyphs)
@@ -347,6 +357,19 @@ namespace
 
       return glyphs;
     }
+
+    FontMetrics GetMetrics() const noexcept
+    {
+      msdfgen::FontMetrics metrics;
+      msdfgen::getFontMetrics(metrics, _font);
+
+      auto ascender = static_cast<float>(metrics.ascenderY);
+      auto descender = static_cast<float>(metrics.descenderY);
+      auto height = static_cast<float>(metrics.lineHeight);
+      auto lineHeight = static_cast<float>(metrics.ascenderY - metrics.descenderY);
+
+      return {.Ascender = ascender, .Descender = descender, .Height = height, .LineHeight = lineHeight};
+    }
   };
 
 #pragma endregion
@@ -384,6 +407,7 @@ namespace Krys::Gfx
     result.Size = atlasSize;
     result.Pixels = ToPixels(glyphs, atlasSize);
     result.Characters = ToCodepointsMap(glyphs, paddingPerGlyph, atlasSize);
+    result.Metrics = ft.GetMetrics();
     return result;
   }
 
@@ -410,6 +434,7 @@ namespace Krys::Gfx
     result.Size = {uint32(atlas.width), uint32(atlas.height)};
     result.Pixels = List<uint8>(atlas.pixels, atlas.pixels + pixelCount);
     result.Characters = ToCodepointsMap(glyphs, packedAtlas, result.Size);
+    result.Metrics = loader.GetMetrics();
 
     return result;
   }
@@ -437,6 +462,7 @@ namespace Krys::Gfx
     result.Pixels = List<uint8>(atlas.pixels, atlas.pixels + pixelCount);
     result.Size = {uint32(atlas.width), uint32(atlas.height)};
     result.Characters = ToCodepointsMap(glyphs, packedAtlas, result.Size);
+    result.Metrics = loader.GetMetrics();
 
     return result;
   }
@@ -464,6 +490,7 @@ namespace Krys::Gfx
     result.Pixels = List<uint8>(atlas.pixels, atlas.pixels + pixelCount);
     result.Size = {uint32(atlas.width), uint32(atlas.height)};
     result.Characters = ToCodepointsMap(glyphs, packedAtlas, result.Size);
+    result.Metrics = loader.GetMetrics();
 
     return result;
   }

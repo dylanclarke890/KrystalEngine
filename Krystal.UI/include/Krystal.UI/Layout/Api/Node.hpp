@@ -88,7 +88,7 @@ namespace Krys::UI
   void NodeSetConfig(NodeRef node, ConfigRef config);
 
   /// @brief Get the config currently set on the node.
-  ConfigConstRef NodeGetConfig(NodeRef node);
+  ConfigConstRef NodeGetConfig(NodeConstRef node);
 
   /// @brief Sets extra data on the node which may be read from during callbacks.
   void NodeSetContext(NodeRef node, void *context);

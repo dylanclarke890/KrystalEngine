@@ -48,11 +48,10 @@ namespace Krys::UI
   }
 
   static void ComputeFlexBasisForChild(const Node *const node, Node *const child, const float width,
-                                       const SizingMode widthMode, const float height,
-                                       const float ownerWidth, const float ownerHeight,
-                                       const SizingMode heightMode, const Direction direction,
-                                       LayoutData &layoutMarkerData, const uint32_t depth,
-                                       const uint16 generationCount)
+                                       const SizingMode widthMode, const float height, const float ownerWidth,
+                                       const float ownerHeight, const SizingMode heightMode,
+                                       const Direction direction, LayoutData &layoutMarkerData,
+                                       const uint32_t depth, const uint16 generationCount)
   {
     const FlexDirection mainAxis = ResolveDirection(node->GetStyle().GetFlexDirection(), direction);
     const bool isMainAxisRow = IsRow(mainAxis);
@@ -268,12 +267,12 @@ namespace Krys::UI
 
       Event::Publish<Event::MeasureCallbackEnd>(node, {innerWidth, ToMeasureMode(widthSizingMode),
                                                        innerHeight, ToMeasureMode(heightSizingMode),
-                                                       measuredSize.Width, measuredSize.Height, reason});
+                                                       measuredSize.x, measuredSize.y, reason});
 
       node->SetLayoutMeasuredDimension(
         BoundAxis(node, FlexDirection::Row, direction,
                   (widthSizingMode == SizingMode::MaxContent || widthSizingMode == SizingMode::FitContent)
-                    ? measuredSize.Width + GetPaddingAndBorderAxisRow
+                    ? measuredSize.x + GetPaddingAndBorderAxisRow
                     : availableWidth,
                   ownerWidth, ownerWidth),
         Dimension::Width);
@@ -281,7 +280,7 @@ namespace Krys::UI
       node->SetLayoutMeasuredDimension(
         BoundAxis(node, FlexDirection::Column, direction,
                   (heightSizingMode == SizingMode::MaxContent || heightSizingMode == SizingMode::FitContent)
-                    ? measuredSize.Height + GetPaddingAndBorderAxisColumn
+                    ? measuredSize.y + GetPaddingAndBorderAxisColumn
                     : availableHeight,
                   ownerHeight, ownerWidth),
         Dimension::Height);
@@ -292,9 +291,8 @@ namespace Krys::UI
   // or the minimum size as indicated by the GetPadding and GetBorder sizes.
   static void MeasureNodeWithoutChildren(Node *const node, const Direction direction,
                                          const float availableWidth, const float availableHeight,
-                                         const SizingMode widthSizingMode,
-                                         const SizingMode heightSizingMode, const float ownerWidth,
-                                         const float ownerHeight)
+                                         const SizingMode widthSizingMode, const SizingMode heightSizingMode,
+                                         const float ownerWidth, const float ownerHeight)
   {
     const auto &layout = node->GetLayout();
 
@@ -325,9 +323,8 @@ namespace Krys::UI
 
   static bool MeasureNodeWithFixedSize(Node *const node, const Direction direction,
                                        const float availableWidth, const float availableHeight,
-                                       const SizingMode widthSizingMode,
-                                       const SizingMode heightSizingMode, const float ownerWidth,
-                                       const float ownerHeight)
+                                       const SizingMode widthSizingMode, const SizingMode heightSizingMode,
+                                       const float ownerWidth, const float ownerHeight)
   {
     if (IsFixedSize(availableWidth, widthSizingMode) && IsFixedSize(availableHeight, heightSizingMode))
     {
@@ -419,8 +416,7 @@ namespace Krys::UI
   }
 
   static float ComputeFlexBasisForChildren(Node *const node, const float availableInnerWidth,
-                                           const float availableInnerHeight,
-                                           SizingMode widthSizingMode,
+                                           const float availableInnerHeight, SizingMode widthSizingMode,
                                            SizingMode heightSizingMode, Direction direction,
                                            FlexDirection mainAxis, bool performLayout,
                                            LayoutData &layoutMarkerData, const uint32_t depth,
@@ -503,9 +499,8 @@ namespace Krys::UI
     FlexLine &flexLine, Node *const node, const FlexDirection mainAxis, const FlexDirection crossAxis,
     const Direction direction, const float ownerWidth, const float mainAxisOwnerSize,
     const float availableInnerMainDim, const float availableInnerCrossDim, const float availableInnerWidth,
-    const float availableInnerHeight, const bool mainAxisOverflows,
-    const SizingMode sizingModeCrossDim, const bool performLayout, LayoutData &layoutMarkerData,
-    const uint32 depth, const uint16 generationCount)
+    const float availableInnerHeight, const bool mainAxisOverflows, const SizingMode sizingModeCrossDim,
+    const bool performLayout, LayoutData &layoutMarkerData, const uint32 depth, const uint16 generationCount)
   {
     float childFlexBasis = 0;
     float flexShrinkScaledFactor = 0;
@@ -627,10 +622,8 @@ namespace Krys::UI
       const float childWidth = isMainAxisRow ? childMainSize : childCrossSize;
       const float childHeight = !isMainAxisRow ? childMainSize : childCrossSize;
 
-      const SizingMode childWidthSizingMode =
-        isMainAxisRow ? childMainSizingMode : childCrossSizingMode;
-      const SizingMode childHeightSizingMode =
-        !isMainAxisRow ? childMainSizingMode : childCrossSizingMode;
+      const SizingMode childWidthSizingMode = isMainAxisRow ? childMainSizingMode : childCrossSizingMode;
+      const SizingMode childHeightSizingMode = !isMainAxisRow ? childMainSizingMode : childCrossSizingMode;
 
       const bool isLayoutPass = performLayout && !requiresStretchLayout;
       // Recursively call the layout algorithm for this child with the updated
@@ -769,11 +762,10 @@ namespace Krys::UI
 
   static void JustifyMainAxis(Node *const node, FlexLine &flexLine, const FlexDirection mainAxis,
                               const FlexDirection crossAxis, const Direction direction,
-                              const SizingMode sizingModeMainDim,
-                              const SizingMode sizingModeCrossDim, const float mainAxisOwnerSize,
-                              const float ownerWidth, const float availableInnerMainDim,
-                              const float availableInnerCrossDim, const float availableInnerWidth,
-                              const bool performLayout)
+                              const SizingMode sizingModeMainDim, const SizingMode sizingModeCrossDim,
+                              const float mainAxisOwnerSize, const float ownerWidth,
+                              const float availableInnerMainDim, const float availableInnerCrossDim,
+                              const float availableInnerWidth, const bool performLayout)
   {
     const auto &GetStyle = node->GetStyle();
 

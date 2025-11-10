@@ -80,6 +80,7 @@ namespace Krys::Gfx::OpenGL
   {
     CommandListReader reader(commandList);
 
+    auto &fonts = static_cast<FontRegistry &>(_context.Fonts());
     auto &shaders = static_cast<ShaderRegistry &>(_context.Shaders());
     auto &renderTargets = static_cast<RenderTargetRegistry &>(_context.RenderTargets());
     while (reader.HasMore())
@@ -145,13 +146,12 @@ namespace Krys::Gfx::OpenGL
           const auto &cmd = reader.ReadCommand<Commands::DrawText>();
           auto &rt = renderTargets.Get(_currentRenderTarget);
 
-          FontHandle font = _context.Fonts().Get({
-            .Family = cmd.FontFamily,
-            .Type = FontType::Bitmap,
-            .Size = cmd.FontSize,
-          });
+          FontHandle font =
+            fonts.Get({.Family = cmd.FontFamily, .Type = FontType::Bitmap, .Size = cmd.FontSize});
 
-          float posY = static_cast<float>(rt.Height()) - (cmd.Position.y + cmd.FontSize);
+          const auto &metrics = fonts.GetMetrics(font);
+
+          float posY = static_cast<float>(rt.Height()) - (cmd.Position.y + metrics.Ascender);
           DrawText(_context.Strings().Get(cmd.Text), font, {cmd.Position.x, posY}, cmd.Colour);
           break;
         }

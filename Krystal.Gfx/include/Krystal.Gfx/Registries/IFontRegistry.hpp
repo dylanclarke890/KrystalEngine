@@ -32,6 +32,10 @@ namespace Krys::Gfx
 
     virtual void DPIChanged(int dpi) noexcept = 0;
 
+    NO_DISCARD virtual const CharacterMap &GetCharacterMap(FontHandle handle) const = 0;
+
+    NO_DISCARD virtual const FontMetrics &GetMetrics(FontHandle handle) const = 0;
+
     NO_DISCARD virtual FontFamilyHandle GetDefaultFontFamily() const noexcept = 0;
   };
 }

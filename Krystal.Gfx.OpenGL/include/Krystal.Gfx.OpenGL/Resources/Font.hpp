@@ -42,12 +42,13 @@ namespace Krys::Gfx::OpenGL
     List<TextVertex> _vertexBuffer {};
     SDFParams _sdfParams {};
     GLuint _texture {0u};
-    Map<uchar, Character> _characters;
+    CharacterMap _characters;
     Maths::Vec2u _atlasSize {0u};
+    FontMetrics _metrics {};
 
     Font(FontType type, float ptSize, FontFamilyHandle fontFamily, GLenum format,
          const FontAtlasData &data) noexcept
-        : _type(type), _ptSize(ptSize), _fontFamily(fontFamily), _format(format)
+        : _type(type), _ptSize(ptSize), _fontFamily(fontFamily), _format(format), _metrics(data.Metrics)
     {
       glCreateTextures(GL_TEXTURE_2D, 1, &_texture);
 
@@ -92,7 +93,7 @@ namespace Krys::Gfx::OpenGL
     }
 
     static Font SDFAtlas(float ptSize, FontFamilyHandle fontFamily, const FontAtlasData &data,
-                    const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
+                         const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
     {
       auto font = Font(FontType::SDF, ptSize, fontFamily, GL_RED, data);
       font._sdfParams = sdfParams;
@@ -100,7 +101,7 @@ namespace Krys::Gfx::OpenGL
     }
 
     static Font MSDFAtlas(float ptSize, FontFamilyHandle fontFamily, const FontAtlasData &data,
-                     const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
+                          const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
     {
       auto font = Font(FontType::MSDF, ptSize, fontFamily, GL_RGB, data);
       font._sdfParams = sdfParams;
@@ -108,7 +109,7 @@ namespace Krys::Gfx::OpenGL
     }
 
     static Font MTSDFAtlas(float ptSize, FontFamilyHandle fontFamily, const FontAtlasData &data,
-                      const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
+                           const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
     {
       auto font = Font(FontType::MTSDF, ptSize, fontFamily, GL_RGBA, data);
       font._sdfParams = sdfParams;
@@ -189,6 +190,16 @@ namespace Krys::Gfx::OpenGL
       return _atlasSize;
     }
 
+    const CharacterMap &Characters() const noexcept
+    {
+      return _characters;
+    }
+
+    const FontMetrics &Metrics() const noexcept
+    {
+      return _metrics;
+    }
+
   private:
     void Swap(Font &other) noexcept
     {
@@ -203,6 +214,7 @@ namespace Krys::Gfx::OpenGL
       std::swap(other._texture, _texture);
       std::swap(other._characters, _characters);
       std::swap(other._atlasSize, _atlasSize);
+      std::swap(other._metrics, _metrics);
     }
 
     void SetAtlasData(const FontAtlasData &data) noexcept

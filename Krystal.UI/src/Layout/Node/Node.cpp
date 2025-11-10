@@ -43,9 +43,9 @@ namespace Krys::UI
   {
     const auto size = _measureFunc(this, availableWidth, widthMode, availableHeight, heightMode);
 
-    if (Krys::IsUndefined(size.Height) || size.Height < 0 || Krys::IsUndefined(size.Width) || size.Width < 0)
+    if (Krys::IsUndefined(size.y) || size.y < 0 || Krys::IsUndefined(size.x) || size.x < 0)
     {
-      return {.Width = MaxOrDefined(0.0f, size.Width), .Height = MaxOrDefined(0.0f, size.Height)};
+      return {MaxOrDefined(0.0f, size.x), MaxOrDefined(0.0f, size.y)};
     }
 
     return size;

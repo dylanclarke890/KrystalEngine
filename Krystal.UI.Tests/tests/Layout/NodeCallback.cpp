@@ -9,7 +9,7 @@ namespace Krys::Tests
 
   static bool Equal(const Size &lhs, const Size &rhs)
   {
-    return lhs.Width == rhs.Width && lhs.Height == rhs.Height;
+    return lhs.x == rhs.x && lhs.y == rhs.y;
   }
 
   TEST_CASE("LayoutEngine::hasMeasureFunc_initial", "[LayoutEngine]")

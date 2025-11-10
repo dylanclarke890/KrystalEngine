@@ -54,6 +54,10 @@ namespace Krys::Gfx::OpenGL
 
     NO_DISCARD FontFamilyHandle GetDefaultFontFamily() const noexcept override;
 
+    NO_DISCARD const CharacterMap &GetCharacterMap(FontHandle handle) const override;
+
+    NO_DISCARD const FontMetrics &GetMetrics(FontHandle handle) const override;
+
   private:
     NO_DISCARD FontHandle Add(Font &&font, const FontDesc &cacheKey);
 

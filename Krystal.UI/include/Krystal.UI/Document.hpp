@@ -2,6 +2,7 @@
 
 #include "Krystal.Gfx.Lib/Colour.hpp"
 #include "Krystal.Gfx.Lib/ResourceManager.hpp"
+#include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Lib/Allocators/StringRef.hpp"
 #include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Lib/List.hpp"
@@ -11,6 +12,7 @@
 #include "Krystal.Lib/String.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.UI/Elements/Element.hpp"
+#include "Krystal.UI/Layout/Algorithm/MeasureText.hpp"
 #include "Krystal.UI/Layout/LayoutEngine.hpp"
 #include <cassert>
 
@@ -23,14 +25,16 @@ namespace Krys::UI
     using ElementManager = Gfx::ResourceManager<Element, ElementHandle>;
 
   private:
+    Gfx::IContext &_context;
     ConfigRef _layoutConfig;
     ElementManager _elements;
     ElementHandle _body;
 
   public:
-    Document() : _layoutConfig(ConfigCreate())
+    Document(Gfx::IContext &context) : _context(context), _layoutConfig(ConfigCreate())
     {
       _body = Create<Element>();
+      ConfigSetContext(_layoutConfig, &_context);
     }
 
     ~Document()
@@ -53,8 +57,10 @@ namespace Krys::UI
     NO_DISCARD ElementHandle Create(Args &&...args)
     {
       ElementHandle handle = _elements.NextHandle();
-      TElement element = TElement(handle, _layoutConfig, std::forward<Args>(args)...);
-      _elements.Set(handle, std::move(element));
+      _elements.Set(handle, TElement(handle, _layoutConfig, std::forward<Args>(args)...));
+      auto &element = _elements.Get(handle);
+      NodeSetContext(element.LayoutNode, this);
+      NodeSetContext(element.TextContent.LayoutNode, &element);
       return handle;
     }
 
@@ -708,10 +714,10 @@ namespace Krys::UI
       NodeStyleSetFontFamily(_elements.Get(element).LayoutNode, family);
     }
 
-    Gfx::FontHandle ElementStyleGetFontFamily(ElementHandle element)
+    Gfx::FontFamilyHandle ElementStyleGetFontFamily(ElementHandle element)
     {
       assert(element.IsValid() && "Invalid element handle");
-      NodeStyleGetFontFamily(_elements.Get(element).LayoutNode);
+      return NodeStyleGetFontFamily(_elements.Get(element).LayoutNode);
     }
 
     void ElementStyleSetFontSize(ElementHandle element, float fontSize)
@@ -738,6 +744,23 @@ namespace Krys::UI
       NodeStyleGetTextAlign(_elements.Get(element).LayoutNode);
     }
 
+    Gfx::FontDesc ElementGetFontDesc(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+
+      Gfx::FontDesc desc;
+      desc.Family = NodeStyleGetFontFamily(_elements.Get(element).LayoutNode);
+      if (!desc.Family.IsValid())
+      {
+        desc.Family = _context.Fonts().GetDefaultFontFamily();
+      }
+
+      desc.Size = NodeStyleGetFontSize(_elements.Get(element).LayoutNode);
+      desc.Type = Gfx::FontType::Bitmap;
+
+      return desc;
+    }
+
 #pragma endregion
 
     void ElementSetTextContent(ElementHandle element, StringRef text)
@@ -749,7 +772,7 @@ namespace Krys::UI
     StringRef ElementGetTextContent(ElementHandle element)
     {
       assert(element.IsValid() && "Invalid element handle");
-      return _elements.Get(element).TextContent.Text;
+      return _elements.Get(element).GetText();
     }
   };
 }

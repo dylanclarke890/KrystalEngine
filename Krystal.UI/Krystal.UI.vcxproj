@@ -139,6 +139,10 @@
     <ClInclude Include="include\Krystal.UI\Layout\Algorithm\Cache.hpp" />
     <ClInclude Include="include\Krystal.UI\Layout\Algorithm\CalculateLayout.hpp" />
     <ClInclude Include="include\Krystal.UI\Layout\Algorithm\FlexLine.hpp" />
+    <ClInclude Include="include\Krystal.UI\Layout\Algorithm\MeasureText.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Krystal.UI\Layout\Algorithm\PixelGrid.hpp" />
     <ClInclude Include="include\Krystal.UI\Layout\Algorithm\SizingMode.hpp" />
     <ClInclude Include="include\Krystal.UI\Layout\Algorithm\TrailingPosition.hpp" />
@@ -205,6 +209,9 @@
     <ProjectReference Include="..\Krystal.Maths\Krystal.Maths.vcxproj">
       <Project>{2c0a90e5-aa87-46b7-b599-e56a9dd5047b}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\Krystal.Platform\Krystal.Platform.vcxproj">
+      <Project>{42e8c0a6-1f92-456b-a8b7-0050bfdf97e2}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Layout\Algorithm\AbsoluteLayout.cpp" />
@@ -212,6 +219,7 @@
     <ClCompile Include="src\Layout\Algorithm\Cache.cpp" />
     <ClCompile Include="src\Layout\Algorithm\CalculcateLayout.cpp" />
     <ClCompile Include="src\Layout\Algorithm\FlexLine.cpp" />
+    <ClCompile Include="src\Layout\Algorithm\MeasureText.cpp" />
     <ClCompile Include="src\Layout\Algorithm\PixelGrid.cpp" />
     <ClCompile Include="src\Layout\Api\ConfigApi.cpp" />
     <ClCompile Include="src\Layout\Api\NodeApi.cpp" />

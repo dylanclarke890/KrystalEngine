@@ -116,13 +116,10 @@ namespace Krys::Tests
   {
     static uint32_t measureCallCount = 0;
     auto measureCustom = [](NodeConstRef /*node*/, float /*width*/, MeasureMode /*widthMode*/,
-                            float /*height*/, MeasureMode /*heightMode*/)
+                            float /*height*/, MeasureMode /*heightMode*/) -> Size
     {
       measureCallCount++;
-      return Size {
-        .Width = 25.0f,
-        .Height = 25.0f,
-      };
+      return Size {25.0f, 25.0f};
     };
 
     ConfigRef config = ConfigCreate();

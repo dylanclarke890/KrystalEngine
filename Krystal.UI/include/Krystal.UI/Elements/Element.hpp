@@ -6,6 +6,7 @@
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
 #include "Krystal.Lib/String.hpp"
+#include "Krystal.UI/Layout/Algorithm/MeasureText.hpp"
 #include "Krystal.UI/Layout/LayoutEngine.hpp"
 
 namespace Krys::UI
@@ -13,18 +14,6 @@ namespace Krys::UI
   struct ElementHandle : public Gfx::Handle<ElementHandle>
   {
   };
-
-  Size TextMeasureFunc(NodeConstRef node, float width, MeasureMode widthMode, float height,
-                       MeasureMode heightMode)
-  {
-    // auto *text = static_cast<TextNode *>(NodeGetContext(node));
-    // auto &font = context.Fonts().Get(text->Font);
-
-    // Maths::Vec2 size = font.MeasureText(text->Text, widthMode == MeasureMode::Undefined ? FLT_MAX : width);
-    // return {size.x, size.y};
-
-    return {0, 0};
-  }
 
   struct TextNode
   {
@@ -47,6 +36,10 @@ namespace Krys::UI
     Element(ElementHandle handle, ConfigRef config) noexcept : Handle(handle), LayoutConfig(config)
     {
       LayoutNode = NodeCreate(LayoutConfig);
+
+      TextContent.LayoutNode = NodeCreate(LayoutConfig);
+      NodeSetNodeType(TextContent.LayoutNode, NodeType::Text);
+      NodeSetMeasureFunc(TextContent.LayoutNode, &TextMeasureFunc);
     }
 
     ~Element()
@@ -55,6 +48,7 @@ namespace Krys::UI
       {
         NodeDestroy(TextContent.LayoutNode);
       }
+
       if (LayoutNode != nullptr)
       {
         NodeDestroy(LayoutNode);
@@ -65,23 +59,21 @@ namespace Krys::UI
 
     void SetText(StringRef text) noexcept
     {
-      TextContent.Text = text;
-      // TODO: we only need to do this because the layout engine treats empty text nodes as part of the flex
-      // layout
-      if (TextContent.Text.IsValid() && TextContent.LayoutNode == nullptr)
+      if (text.IsValid() && !TextContent.Text.IsValid())
       {
-        TextContent.LayoutNode = NodeCreate(LayoutConfig);
-        NodeSetNodeType(TextContent.LayoutNode, NodeType::Text);
-        NodeSetMeasureFunc(TextContent.LayoutNode, &TextMeasureFunc);
-        NodeSetContext(TextContent.LayoutNode, this);
         NodeInsertChild(LayoutNode, TextContent.LayoutNode, 0);
       }
-      else if (!TextContent.Text.IsValid() && TextContent.LayoutNode != nullptr)
+      else if (!text.IsValid() && TextContent.Text.IsValid())
       {
         NodeRemoveChild(LayoutNode, TextContent.LayoutNode);
-        NodeDestroy(TextContent.LayoutNode);
-        TextContent.LayoutNode = nullptr;
       }
+
+      TextContent.Text = text;
+    }
+
+    NO_DISCARD StringRef GetText() const noexcept
+    {
+      return TextContent.Text;
     }
 
   private:

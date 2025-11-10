@@ -264,7 +264,7 @@ namespace Krys::UI
     node->SetConfig(config);
   }
 
-  ConfigConstRef NodeGetConfig(NodeRef node)
+  ConfigConstRef NodeGetConfig(NodeConstRef node)
   {
     return node->GetConfig();
   }

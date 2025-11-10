@@ -171,6 +171,9 @@
     <ClInclude Include="include\Krystal.UI\Styles\Enums\TextAlign.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Layout\Algorithm\MeasureText.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Layout\Algorithm\AbsoluteLayout.cpp">
@@ -216,6 +219,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Layout\Api\NodeStyle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Layout\Algorithm\MeasureText.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

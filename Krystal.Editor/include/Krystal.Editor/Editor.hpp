@@ -32,7 +32,7 @@ namespace Krys
           _height(settings.WindowSettings.Size.Height),
           _camera({0.f, 0.f, 5.f}, {0.f, 0.f, 0.f}, {0.f, 1.f, 0.f}, Maths::Radians(45.f),
                   (float)_width / (float)_height, 0.1f, 100.f),
-          _document(), _compositor(*_context->GraphicsContext, *_context->Renderer)
+          _document(*_context->GraphicsContext), _compositor(*_context->GraphicsContext, *_context->Renderer)
     {
     }
 

@@ -157,6 +157,18 @@ namespace Krys::Gfx::OpenGL
     return _defaultFontFamily;
   }
 
+  const CharacterMap &FontRegistry::GetCharacterMap(FontHandle handle) const
+  {
+    const Font &font = _fonts.Get(handle);
+    return font.Characters();
+  }
+
+  NO_DISCARD const FontMetrics &FontRegistry::GetMetrics(FontHandle handle) const
+  {
+    const Font &font = _fonts.Get(handle);
+    return font.Metrics();
+  }
+
   uint32 FontRegistry::PtSizeToPixels(float ptSize) const noexcept
   {
     auto pixelSize = (ptSize * _dpi) / 72.0;
