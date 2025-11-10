@@ -54,6 +54,14 @@ namespace Krys::Gfx::OpenGL
       _cache.Clear();
     }
 
+    NO_DISCARD virtual TextureHandle Create(ImageViewHandle imageView,
+                                            SamplerHandle sampler) noexcept override
+    {
+      static uint32 unnamedTextureCounter = 0u;
+      Texture texture {imageView, sampler};
+      return AddTexture(std::format("{}", unnamedTextureCounter++), std::move(texture));
+    }
+
     NO_DISCARD TextureHandle Load(const IO::Path &path, const TextureDesc &desc = {}) noexcept override
     {
       auto key = path.ToString();

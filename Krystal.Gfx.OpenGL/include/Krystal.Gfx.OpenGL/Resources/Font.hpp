@@ -34,24 +34,21 @@ namespace Krys::Gfx::OpenGL
     constexpr static size_t VerticesPerGlyph = 6; // 2 triangles per glyph
 
     FontType _type {FontType::Bitmap};
-    float _ptSize {};
     FontFamilyHandle _fontFamily;
-    GLenum _format;
+    TextureHandle _texture;
+    float _ptSize {0.f};
     GLuint _vao {};
     GLuint _vbo {};
     List<TextVertex> _vertexBuffer {};
     SDFParams _sdfParams {};
-    GLuint _texture {0u};
     CharacterMap _characters;
     Maths::Vec2u _atlasSize {0u};
     FontMetrics _metrics {};
 
-    Font(FontType type, float ptSize, FontFamilyHandle fontFamily, GLenum format,
+    Font(FontType type, FontFamilyHandle fontFamily, TextureHandle texture,
          const FontAtlasData &data) noexcept
-        : _type(type), _ptSize(ptSize), _fontFamily(fontFamily), _format(format), _metrics(data.Metrics)
+        : _type(type), _fontFamily(fontFamily), _texture(texture), _metrics(data.Metrics)
     {
-      glCreateTextures(GL_TEXTURE_2D, 1, &_texture);
-
       glCreateVertexArrays(1, &_vao);
       glCreateBuffers(1, &_vbo);
 
@@ -62,18 +59,13 @@ namespace Krys::Gfx::OpenGL
       auto bufferSize = sizeof(TextVertex) * VerticesPerGlyph * MaxGlyphsPerDrawCall;
       glNamedBufferStorage(_vbo, bufferSize, 0, GL_DYNAMIC_STORAGE_BIT);
       _vertexBuffer.reserve(VerticesPerGlyph * MaxGlyphsPerDrawCall);
-
-      SetAtlasData(data);
+      _atlasSize = data.Size;
+      _characters = data.Characters;
     }
 
   public:
     ~Font() noexcept
     {
-      if (_texture != 0u)
-      {
-        glDeleteTextures(1, &_texture);
-      }
-
       if (_vbo != 0u)
       {
         glDeleteBuffers(1, &_vbo);
@@ -87,31 +79,34 @@ namespace Krys::Gfx::OpenGL
 
     MOVE_SWAP(Font)
 
-    static Font BitmapAtlas(float ptSize, FontFamilyHandle fontFamily, const FontAtlasData &data) noexcept
+    static Font BitmapAtlas(FontFamilyHandle fontFamily, TextureHandle texture, const FontAtlasData &data,
+                            float ptSize) noexcept
     {
-      return Font(FontType::Bitmap, ptSize, fontFamily, GL_RED, data);
+      auto font = Font(FontType::Bitmap, fontFamily, texture, data);
+      font._ptSize = ptSize;
+      return font;
     }
 
-    static Font SDFAtlas(float ptSize, FontFamilyHandle fontFamily, const FontAtlasData &data,
+    static Font SDFAtlas(FontFamilyHandle fontFamily, TextureHandle texture, const FontAtlasData &data,
                          const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
     {
-      auto font = Font(FontType::SDF, ptSize, fontFamily, GL_RED, data);
+      auto font = Font(FontType::SDF, fontFamily, texture, data);
       font._sdfParams = sdfParams;
       return font;
     }
 
-    static Font MSDFAtlas(float ptSize, FontFamilyHandle fontFamily, const FontAtlasData &data,
+    static Font MSDFAtlas(FontFamilyHandle fontFamily, TextureHandle texture, const FontAtlasData &data,
                           const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
     {
-      auto font = Font(FontType::MSDF, ptSize, fontFamily, GL_RGB, data);
+      auto font = Font(FontType::MSDF, fontFamily, texture, data);
       font._sdfParams = sdfParams;
       return font;
     }
 
-    static Font MTSDFAtlas(float ptSize, FontFamilyHandle fontFamily, const FontAtlasData &data,
+    static Font MTSDFAtlas(FontFamilyHandle fontFamily, TextureHandle texture, const FontAtlasData &data,
                            const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
     {
-      auto font = Font(FontType::MTSDF, ptSize, fontFamily, GL_RGBA, data);
+      auto font = Font(FontType::MTSDF, fontFamily, texture, data);
       font._sdfParams = sdfParams;
       return font;
     }
@@ -119,9 +114,6 @@ namespace Krys::Gfx::OpenGL
     void DrawText(const string &text, const Maths::Vec2 &position, float scale = 1.0f)
     {
       glBindVertexArray(_vao);
-      glBindTextureUnit(0, _texture);
-
-      Maths::Vec2 pos = position;
 
       if (_type != FontType::Bitmap)
       {
@@ -131,6 +123,7 @@ namespace Krys::Gfx::OpenGL
       glEnable(GL_BLEND);
       glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
+      Maths::Vec2 pos = position;
       auto count = text.size();
       while (count > 0)
       {
@@ -180,6 +173,11 @@ namespace Krys::Gfx::OpenGL
       return _fontFamily;
     }
 
+    TextureHandle AtlasTexture() const noexcept
+    {
+      return _texture;
+    }
+
     const SDFParams &SDFParams() const noexcept
     {
       return _sdfParams;
@@ -206,43 +204,14 @@ namespace Krys::Gfx::OpenGL
       std::swap(other._type, _type);
       std::swap(other._ptSize, _ptSize);
       std::swap(other._fontFamily, _fontFamily);
-      std::swap(other._format, _format);
+      std::swap(other._texture, _texture);
       std::swap(other._vao, _vao);
       std::swap(other._vbo, _vbo);
       std::swap(other._vertexBuffer, _vertexBuffer);
       std::swap(other._sdfParams, _sdfParams);
-      std::swap(other._texture, _texture);
       std::swap(other._characters, _characters);
       std::swap(other._atlasSize, _atlasSize);
       std::swap(other._metrics, _metrics);
-    }
-
-    void SetAtlasData(const FontAtlasData &data) noexcept
-    {
-      GLenum format = _format;
-      GLenum internalFormat;
-      switch (format)
-      {
-        case GL_RED:  internalFormat = GL_R8; break;
-        case GL_RG:   internalFormat = GL_RG8; break;
-        case GL_RGB:  internalFormat = GL_RGB8; break;
-        case GL_RGBA: internalFormat = GL_RGBA8; break;
-        default:      std::unreachable();
-      }
-
-      glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-      glTextureStorage2D(_texture, 1, internalFormat, data.Size.x, data.Size.y);
-      glTextureSubImage2D(_texture, 0, 0, 0, data.Size.x, data.Size.y, format, GL_UNSIGNED_BYTE,
-                          data.Pixels.data());
-      glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-
-      glTextureParameteri(_texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTextureParameteri(_texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-      glTextureParameteri(_texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTextureParameteri(_texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-      _atlasSize = data.Size;
-      _characters = data.Characters;
     }
   };
 }

@@ -28,6 +28,8 @@ namespace Krys::Gfx
 
     virtual void Shutdown() noexcept = 0;
 
+    NO_DISCARD virtual TextureHandle Create(ImageViewHandle imageView, SamplerHandle sampler) noexcept = 0;
+
     NO_DISCARD virtual TextureHandle Load(const IO::Path &path, const TextureDesc &desc) noexcept = 0;
 
     NO_DISCARD virtual TextureHandle LoadCubemap(const IO::Path &left, const IO::Path &right,

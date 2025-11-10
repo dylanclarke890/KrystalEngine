@@ -226,10 +226,15 @@ namespace Krys::Gfx::OpenGL
   {
     auto &fonts = static_cast<FontRegistry &>(_context.Fonts());
     auto &shaders = static_cast<ShaderRegistry &>(_context.Shaders());
+    auto &textures = static_cast<TextureRegistry &>(_context.Textures());
+    auto &imageViews = static_cast<ImageViewRegistry&>(_context.ImageViews());
 
     Font &font = fonts.Get(fontHandle);
     Shader &shader = shaders.GetOrAdd({.FontType = font.Type()});
+    Texture &texture = textures.Get(font.AtlasTexture());
+    ImageView &imageView = imageViews.Get(texture.ImageView());
 
+    imageView.Bind(0);
     shader.Bind();
     shader.SetUniform("u_TextColor", colour.ToVec3());
 

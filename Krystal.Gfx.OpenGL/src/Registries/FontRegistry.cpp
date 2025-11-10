@@ -4,6 +4,7 @@
 #include "Krystal.Gfx.OpenGL/Context.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Font.hpp"
+#include "Krystal.Lib/ByteUtils.hpp"
 #include "Krystal.Lib/DebugBreak.hpp"
 #include "Krystal.Lib/Map.hpp"
 #include "Krystal.Log/ILogger.hpp"
@@ -86,13 +87,15 @@ namespace Krys::Gfx::OpenGL
     }
 
     FontAtlasData &data = expected.value();
+    TextureHandle texture = CreateFontAtlasTexture(desc, data);
+
     FontHandle font;
     switch (desc.Type)
     {
-      case FontType::Bitmap: font = Add(Font::BitmapAtlas(desc.Size, desc.Family, data), key); break;
-      case FontType::SDF:    font = Add(Font::SDFAtlas(desc.Size, desc.Family, data), key); break;
-      case FontType::MSDF:   font = Add(Font::MSDFAtlas(desc.Size, desc.Family, data), key); break;
-      case FontType::MTSDF:  font = Add(Font::MTSDFAtlas(desc.Size, desc.Family, data), key); break;
+      case FontType::Bitmap: font = Add(Font::BitmapAtlas(desc.Family, texture, data, desc.Size), key); break;
+      case FontType::SDF:    font = Add(Font::SDFAtlas(desc.Family, texture, data), key); break;
+      case FontType::MSDF:   font = Add(Font::MSDFAtlas(desc.Family, texture, data), key); break;
+      case FontType::MTSDF:  font = Add(Font::MTSDFAtlas(desc.Family, texture, data), key); break;
       default:               std::unreachable();
     }
 
@@ -136,7 +139,7 @@ namespace Krys::Gfx::OpenGL
       Font &font = _fonts.Get(resource.Handle);
       if (font.Type() != FontType::Bitmap)
       {
-        continue; // non-bitmap font types resolution-independent
+        continue; // non-bitmap font types are resolution-independent
       }
 
       auto &fontFamily = _fontFamilies.Get(font.Family());
@@ -148,8 +151,71 @@ namespace Krys::Gfx::OpenGL
         continue;
       }
 
-      _fonts.Set(resource.Handle, Font::BitmapAtlas(font.PtSize(), font.Family(), expected.value()));
+      _context.Textures().Unload(font.AtlasTexture());
+
+      FontAtlasData &data = expected.value();
+      TextureHandle texture = CreateFontAtlasTexture(
+        {.Family = font.Family(), .Type = FontType::Bitmap, .Size = font.PtSize()}, data);
+
+      _fonts.Set(resource.Handle, Font::BitmapAtlas(font.Family(), texture, data, font.PtSize()));
     }
+  }
+
+  TextureHandle FontRegistry::CreateFontAtlasTexture(const FontDesc &desc, const FontAtlasData &data)
+  {
+    auto &images = static_cast<ImageRegistry &>(_context.Images());
+    auto &imageViews = static_cast<ImageViewRegistry &>(_context.ImageViews());
+    auto &samplers = static_cast<SamplerRegistry &>(_context.Samplers());
+    auto &textures = static_cast<TextureRegistry &>(_context.Textures());
+
+    PixelFormat format;
+    GLenum glFormat;
+    switch (desc.Type)
+    {
+      case FontType::Bitmap:
+        format = PixelFormat::R8;
+        glFormat = GL_RED;
+        break;
+      case FontType::SDF:
+        format = PixelFormat::R8;
+        glFormat = GL_RED;
+        break;
+      case FontType::MSDF:
+        format = PixelFormat::R8G8B8;
+        glFormat = GL_RGB;
+        break;
+      case FontType::MTSDF:
+        format = PixelFormat::R8G8B8A8;
+        glFormat = GL_RGBA;
+        break;
+      default: std::unreachable();
+    }
+
+    ImageHandle image = images.Create({
+      .Type = ImageType::Image2D,
+      .Format = format,
+      .Width = data.Size.x,
+      .Height = data.Size.y,
+      .Depth = 1,
+      .MipLevels = 1,
+      .ArrayLayers = 1,
+    });
+
+    ImageViewHandle imageView = imageViews.Create({
+      .Image = image,
+      .Target = ImageType::Image2D,
+      .Format = format,
+      .SubResourceRange = {},
+    });
+
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    images.Get(image).UpdateData(ByteUtils::AsBytesView(data.Pixels), glFormat, GL_UNSIGNED_BYTE);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+    SamplerHandle sampler = samplers.Create(SamplerDesc::LinearClampToEdge(1.f));
+    TextureHandle texture = textures.Create(imageView, sampler);
+
+    return texture;
   }
 
   FontFamilyHandle FontRegistry::GetDefaultFontFamily() const noexcept
@@ -163,7 +229,7 @@ namespace Krys::Gfx::OpenGL
     return font.Characters();
   }
 
-  NO_DISCARD const FontMetrics &FontRegistry::GetMetrics(FontHandle handle) const
+  const FontMetrics &FontRegistry::GetMetrics(FontHandle handle) const
   {
     const Font &font = _fonts.Get(handle);
     return font.Metrics();
