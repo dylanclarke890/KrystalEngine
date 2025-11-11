@@ -17,7 +17,7 @@ namespace Krys::Gfx::OpenGL
     Maths::Vec4 PositionAndSize;       // xy: position, zw: size
     Maths::Vec2 BorderThicknessRadius; // x: border thickness, y: border radius
 
-    constexpr static size_t BatchSize = 200u;
+    constexpr static uint32 BatchSize = 200u;
 
     constexpr static VertexBufferLayout Layout()
     {
@@ -30,10 +30,13 @@ namespace Krys::Gfx::OpenGL
     }
   };
 
-  struct TextVertex
+  struct GlyphVertex
   {
     Maths::Vec2 Position {};
     Maths::Vec2 UV {};
+
+    constexpr static uint32 BatchSize = 4'096;
+    constexpr static uint32 VerticesPerGlyph = 6; // 2 triangles per glyph
 
     static VertexBufferLayout Layout() noexcept
     {
@@ -55,9 +58,9 @@ namespace Krys::Gfx::OpenGL
     MeshHandle _quadMesh;
     RenderTargetHandle _currentRenderTarget;
     InstanceData<QuadInstanceData> _quadInstanceData;
-    List<TextVertex> _textVertexBuffer {};
+    List<GlyphVertex> _glyphVertices {};
+    BufferHandle _glyphBuffer {};
     GLuint _textVao {};
-    GLuint _textVbo {};
     int _dpi;
 
   public:

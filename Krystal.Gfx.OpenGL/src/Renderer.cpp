@@ -23,9 +23,6 @@ namespace Krys::Gfx
 
 namespace Krys::Gfx::OpenGL
 {
-  constexpr static size_t MaxGlyphsPerDrawCall = 4'096;
-  constexpr static size_t VerticesPerGlyph = 6; // 2 triangles per glyph
-
   Renderer::Renderer(IContext &context) noexcept
       : _context(static_cast<Context &>(context)),
         _dpi(Platform::GetDPIForWindow(Platform::GetActiveWindow()))
@@ -64,16 +61,20 @@ namespace Krys::Gfx::OpenGL
     shaders.Get(_quadShader).SetUniform("u_Projection", rt.GetProjectionMatrix());
     shaders.Get(_singleTextureShader).SetUniform("u_Projection", rt.GetProjectionMatrix());
 
+    uint32 maxGlyphVertices = GlyphVertex::VerticesPerGlyph * GlyphVertex::BatchSize;
+    _glyphBuffer = buffers.Create({
+      .Type = BufferType::Vertex,
+      .Usage = BufferUsage::Dynamic,
+      .Size = static_cast<uint32>(sizeof(GlyphVertex)) * maxGlyphVertices,
+      .InitialData = {},
+    });
+    _glyphVertices.reserve(maxGlyphVertices);
+
     glCreateVertexArrays(1, &_textVao);
-    glCreateBuffers(1, &_textVbo);
-
     glBindVertexArray(_textVao);
-    glBindBuffer(GL_ARRAY_BUFFER, _textVbo);
-    Utils::ApplyVertexBufferLayout(TextVertex::Layout());
-
-    auto bufferSize = sizeof(TextVertex) * VerticesPerGlyph * MaxGlyphsPerDrawCall;
-    glNamedBufferStorage(_textVbo, bufferSize, 0, GL_DYNAMIC_STORAGE_BIT);
-    _textVertexBuffer.reserve(VerticesPerGlyph * MaxGlyphsPerDrawCall);
+    buffers.Get(_glyphBuffer).Bind();
+    Utils::ApplyVertexBufferLayout(GlyphVertex::Layout());
+    glObjectLabel(GL_BUFFER, buffers.Get(_glyphBuffer).GetHandle(), -1, "GlyphVertexData");
   }
 
   void Renderer::Shutdown() noexcept
@@ -296,25 +297,26 @@ namespace Krys::Gfx::OpenGL
 
   void Renderer::DrawText(Font &font, const string &text, const Maths::Vec2 &position, float scale)
   {
-    glBindVertexArray(_textVao);
-
     if (font.Type() != FontType::Bitmap)
     {
       scale = (scale * font.PtSize()) / font.SDFParams().EMSizeInPixels;
     }
 
+    glBindVertexArray(_textVao);
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     Maths::Vec2 pos = position;
+    auto &buffer = static_cast<BufferRegistry &>(_context.Buffers()).Get(_glyphBuffer);
+
     auto count = text.size();
     while (count > 0)
     {
-      auto batchSize = Maths::Min(count, static_cast<size_t>(MaxGlyphsPerDrawCall));
+      auto batchSize = Maths::Min(count, static_cast<size_t>(GlyphVertex::BatchSize));
       Span<const char> batch(text.data() + (text.size() - count), batchSize);
       count -= batchSize;
 
-      _textVertexBuffer.clear();
+      _glyphVertices.clear();
       const auto &characters = font.Characters();
       for (const char c : batch)
       {
@@ -325,20 +327,18 @@ namespace Krys::Gfx::OpenGL
         float w = ch.Size.x * scale;
         float h = ch.Size.y * scale;
 
-        _textVertexBuffer.push_back({{posX, posY + h}, {ch.UVMin.x, ch.UVMin.y}});
-        _textVertexBuffer.push_back({{posX, posY}, {ch.UVMin.x, ch.UVMax.y}});
-        _textVertexBuffer.push_back({{posX + w, posY}, {ch.UVMax.x, ch.UVMax.y}});
-        _textVertexBuffer.push_back({{posX, posY + h}, {ch.UVMin.x, ch.UVMin.y}});
-        _textVertexBuffer.push_back({{posX + w, posY}, {ch.UVMax.x, ch.UVMax.y}});
-        _textVertexBuffer.push_back({{posX + w, posY + h}, {ch.UVMax.x, ch.UVMin.y}});
+        _glyphVertices.push_back({{posX, posY + h}, {ch.UVMin.x, ch.UVMin.y}});
+        _glyphVertices.push_back({{posX, posY}, {ch.UVMin.x, ch.UVMax.y}});
+        _glyphVertices.push_back({{posX + w, posY}, {ch.UVMax.x, ch.UVMax.y}});
+        _glyphVertices.push_back({{posX, posY + h}, {ch.UVMin.x, ch.UVMin.y}});
+        _glyphVertices.push_back({{posX + w, posY}, {ch.UVMax.x, ch.UVMax.y}});
+        _glyphVertices.push_back({{posX + w, posY + h}, {ch.UVMax.x, ch.UVMin.y}});
 
         pos.x += ch.Advance * scale;
       }
 
-      glNamedBufferSubData(_textVbo, 0,
-                           static_cast<GLsizeiptr>(sizeof(TextVertex) * _textVertexBuffer.size()),
-                           _textVertexBuffer.data());
-      glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(_textVertexBuffer.size()));
+      buffer.Update(_glyphVertices);
+      glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(_glyphVertices.size()));
     }
 
     glDisable(GL_BLEND);
