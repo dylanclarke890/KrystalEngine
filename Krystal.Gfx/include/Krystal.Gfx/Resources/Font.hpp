@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Krystal.Gfx/Handle.hpp"
+#include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Allocators/StringRef.hpp"
 #include "Krystal.Lib/Attributes.hpp"

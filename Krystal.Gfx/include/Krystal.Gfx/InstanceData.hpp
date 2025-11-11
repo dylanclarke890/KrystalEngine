@@ -12,5 +12,8 @@ namespace Krys::Gfx
     BufferHandle Buffer;
     List<T> Data;
     VertexBufferLayout Layout {};
+
+    constexpr static uint32 BatchSize = static_cast<uint32>(T::BatchSize);
+    constexpr static uint32 BufferSize = static_cast<uint32>(T::BatchSize * sizeof(T));
   };
 }

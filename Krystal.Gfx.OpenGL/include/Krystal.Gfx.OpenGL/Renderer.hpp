@@ -17,6 +17,8 @@ namespace Krys::Gfx::OpenGL
     Maths::Vec4 PositionAndSize;       // xy: position, zw: size
     Maths::Vec2 BorderThicknessRadius; // x: border thickness, y: border radius
 
+    constexpr static size_t BatchSize = 200u;
+
     constexpr static VertexBufferLayout Layout()
     {
       return {
@@ -26,8 +28,20 @@ namespace Krys::Gfx::OpenGL
         {VertexAttributeType::Float, 2, VertexInputRate::PerInstance}, // border thickness and radius
       };
     }
+  };
 
-    constexpr static size_t BatchSize = 200u;
+  struct TextVertex
+  {
+    Maths::Vec2 Position {};
+    Maths::Vec2 UV {};
+
+    static VertexBufferLayout Layout() noexcept
+    {
+      return {
+        {VertexAttributeType::Float, 2}, // Position
+        {VertexAttributeType::Float, 2}  // UV
+      };
+    }
   };
 
   class Renderer : public IRenderer
@@ -41,6 +55,9 @@ namespace Krys::Gfx::OpenGL
     MeshHandle _quadMesh;
     RenderTargetHandle _currentRenderTarget;
     InstanceData<QuadInstanceData> _quadInstanceData;
+    List<TextVertex> _textVertexBuffer {};
+    GLuint _textVao {};
+    GLuint _textVbo {};
     int _dpi;
 
   public:
@@ -72,6 +89,8 @@ namespace Krys::Gfx::OpenGL
     void DrawTextOutlined(const string &text, FontHandle fontHandle, const Maths::Vec2 &position,
                           const Colour &textColour = Colours::Black,
                           const Colour &outlineColour = Colours::White, float outlineWidth = 3.f) noexcept;
+
+    void DrawText(Font &font, const string &text, const Maths::Vec2 &position, float scale = 1.0f);
 
     void SetSDFParams(Shader &shader, Font &font) noexcept;
   };

@@ -3,6 +3,7 @@
 #include "Krystal.Gfx/Commands/Commands.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.Lib/Expected.hpp"
+#include "Krystal.Maths/Clamp.hpp"
 #include "Krystal.Platform/Platform.hpp"
 
 namespace Krys::Gfx
@@ -22,6 +23,9 @@ namespace Krys::Gfx
 
 namespace Krys::Gfx::OpenGL
 {
+  constexpr static size_t MaxGlyphsPerDrawCall = 4'096;
+  constexpr static size_t VerticesPerGlyph = 6; // 2 triangles per glyph
+
   Renderer::Renderer(IContext &context) noexcept
       : _context(static_cast<Context &>(context)),
         _dpi(Platform::GetDPIForWindow(Platform::GetActiveWindow()))
@@ -30,35 +34,46 @@ namespace Krys::Gfx::OpenGL
 
   void Renderer::Startup()
   {
-    _quadShader = _context.Shaders().Load(IO::Path("ui.vert"), IO::Path("ui.frag"));
-    _singleTextureShader =
-      _context.Shaders().Load(IO::Path("single-texture.vert"), IO::Path("single-texture.frag"));
-
     auto &buffers = static_cast<BufferRegistry &>(_context.Buffers());
     auto &meshes = static_cast<MeshRegistry &>(_context.Meshes());
-
-    _quadMesh = meshes.CreateQuad();
-    auto &quadMesh = meshes.Get(_quadMesh);
-
-    _quadInstanceData.Buffer = buffers.Create({
-      .Type = BufferType::Vertex,
-      .Usage = BufferUsage::Dynamic,
-      .Size = QuadInstanceData::BatchSize * sizeof(QuadInstanceData),
-    });
-    _quadInstanceData.Data.reserve(QuadInstanceData::BatchSize);
-
-    auto &quadInstanceBuffer = buffers.Get(_quadInstanceData.Buffer);
-    quadMesh.ApplyInstanceDataLayout(quadInstanceBuffer, QuadInstanceData::Layout());
-    glObjectLabel(GL_BUFFER, quadInstanceBuffer.GetHandle(), -1, "QuadInstanceData");
-
     auto &renderTargets = static_cast<RenderTargetRegistry &>(_context.RenderTargets());
     auto &shaders = static_cast<ShaderRegistry &>(_context.Shaders());
+
+    _quadShader = shaders.Load(IO::Path("ui.vert"), IO::Path("ui.frag"));
+    _singleTextureShader = shaders.Load(IO::Path("single-texture.vert"), IO::Path("single-texture.frag"));
+
+    {
+      _quadMesh = meshes.CreateQuad();
+      auto &quadMesh = meshes.Get(_quadMesh);
+
+      _quadInstanceData.Buffer = buffers.Create({
+        .Type = BufferType::Vertex,
+        .Usage = BufferUsage::Dynamic,
+        .Size = _quadInstanceData.BufferSize,
+      });
+      _quadInstanceData.Data.reserve(_quadInstanceData.BatchSize);
+
+      auto &quadInstanceBuffer = buffers.Get(_quadInstanceData.Buffer);
+      quadMesh.ApplyInstanceDataLayout(quadInstanceBuffer, QuadInstanceData::Layout());
+      glObjectLabel(GL_BUFFER, quadInstanceBuffer.GetHandle(), -1, "QuadInstanceData");
+    }
 
     _currentRenderTarget = _context.RenderTargets().GetScreenRenderTarget();
     auto &rt = renderTargets.Get(_currentRenderTarget);
 
     shaders.Get(_quadShader).SetUniform("u_Projection", rt.GetProjectionMatrix());
     shaders.Get(_singleTextureShader).SetUniform("u_Projection", rt.GetProjectionMatrix());
+
+    glCreateVertexArrays(1, &_textVao);
+    glCreateBuffers(1, &_textVbo);
+
+    glBindVertexArray(_textVao);
+    glBindBuffer(GL_ARRAY_BUFFER, _textVbo);
+    Utils::ApplyVertexBufferLayout(TextVertex::Layout());
+
+    auto bufferSize = sizeof(TextVertex) * VerticesPerGlyph * MaxGlyphsPerDrawCall;
+    glNamedBufferStorage(_textVbo, bufferSize, 0, GL_DYNAMIC_STORAGE_BIT);
+    _textVertexBuffer.reserve(VerticesPerGlyph * MaxGlyphsPerDrawCall);
   }
 
   void Renderer::Shutdown() noexcept
@@ -227,7 +242,7 @@ namespace Krys::Gfx::OpenGL
     auto &fonts = static_cast<FontRegistry &>(_context.Fonts());
     auto &shaders = static_cast<ShaderRegistry &>(_context.Shaders());
     auto &textures = static_cast<TextureRegistry &>(_context.Textures());
-    auto &imageViews = static_cast<ImageViewRegistry&>(_context.ImageViews());
+    auto &imageViews = static_cast<ImageViewRegistry &>(_context.ImageViews());
 
     Font &font = fonts.Get(fontHandle);
     Shader &shader = shaders.GetOrAdd({.FontType = font.Type()});
@@ -245,7 +260,7 @@ namespace Krys::Gfx::OpenGL
       SetSDFParams(shader, font);
     }
 
-    font.DrawText(text, position, scale);
+    DrawText(font, text, position, scale);
   }
 
   void Renderer::DrawTextOutlined(const string &text, FontHandle fontHandle, const Maths::Vec2 &position,
@@ -254,12 +269,17 @@ namespace Krys::Gfx::OpenGL
   {
     auto &fonts = static_cast<FontRegistry &>(_context.Fonts());
     auto &shaders = static_cast<ShaderRegistry &>(_context.Shaders());
+    auto &textures = static_cast<TextureRegistry &>(_context.Textures());
+    auto &imageViews = static_cast<ImageViewRegistry &>(_context.ImageViews());
 
     Font &font = fonts.Get(fontHandle);
     Shader &shader = shaders.GetOrAdd({.FontType = font.Type(), .EnableOutline = true});
+    Texture &texture = textures.Get(font.AtlasTexture());
+    ImageView &imageView = imageViews.Get(texture.ImageView());
 
     assert(font.Type() != FontType::Bitmap && "Outlined text is not supported for bitmap fonts.");
 
+    imageView.Bind(0);
     shader.Bind();
     shader.SetUniform("u_TextColor", textColour.ToVec3());
 
@@ -271,7 +291,57 @@ namespace Krys::Gfx::OpenGL
     shader.SetUniform("u_OutlineWidthRelative", outlineWidth / 20.f);
     shader.SetUniform("u_Threshold", 0.5f);
 
-    font.DrawText(text, position, scale);
+    DrawText(font, text, position, scale);
+  }
+
+  void Renderer::DrawText(Font &font, const string &text, const Maths::Vec2 &position, float scale)
+  {
+    glBindVertexArray(_textVao);
+
+    if (font.Type() != FontType::Bitmap)
+    {
+      scale = (scale * font.PtSize()) / font.SDFParams().EMSizeInPixels;
+    }
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+    Maths::Vec2 pos = position;
+    auto count = text.size();
+    while (count > 0)
+    {
+      auto batchSize = Maths::Min(count, static_cast<size_t>(MaxGlyphsPerDrawCall));
+      Span<const char> batch(text.data() + (text.size() - count), batchSize);
+      count -= batchSize;
+
+      _textVertexBuffer.clear();
+      const auto &characters = font.Characters();
+      for (const char c : batch)
+      {
+        // TODO: better checks for whether the character exists before accessing it
+        const Character &ch = characters.at(c);
+        float posX = pos.x + ch.Bearing.x * scale;
+        float posY = pos.y - (ch.Size.y - ch.Bearing.y) * scale;
+        float w = ch.Size.x * scale;
+        float h = ch.Size.y * scale;
+
+        _textVertexBuffer.push_back({{posX, posY + h}, {ch.UVMin.x, ch.UVMin.y}});
+        _textVertexBuffer.push_back({{posX, posY}, {ch.UVMin.x, ch.UVMax.y}});
+        _textVertexBuffer.push_back({{posX + w, posY}, {ch.UVMax.x, ch.UVMax.y}});
+        _textVertexBuffer.push_back({{posX, posY + h}, {ch.UVMin.x, ch.UVMin.y}});
+        _textVertexBuffer.push_back({{posX + w, posY}, {ch.UVMax.x, ch.UVMax.y}});
+        _textVertexBuffer.push_back({{posX + w, posY + h}, {ch.UVMax.x, ch.UVMin.y}});
+
+        pos.x += ch.Advance * scale;
+      }
+
+      glNamedBufferSubData(_textVbo, 0,
+                           static_cast<GLsizeiptr>(sizeof(TextVertex) * _textVertexBuffer.size()),
+                           _textVertexBuffer.data());
+      glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(_textVertexBuffer.size()));
+    }
+
+    glDisable(GL_BLEND);
   }
 
   void Renderer::SetSDFParams(Shader &shader, Font &font) noexcept
