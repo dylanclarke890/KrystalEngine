@@ -93,8 +93,7 @@ namespace Krys::Gfx::OpenGL
                           const Colour &textColour = Colours::Black,
                           const Colour &outlineColour = Colours::White, float outlineWidth = 3.f) noexcept;
 
-    void DrawText(Font &font, const string &text, const Maths::Vec2 &position, float scale = 1.0f);
-
-    void SetSDFParams(Shader &shader, Font &font) noexcept;
+    void DrawText(Font &font, Shader &shader, const string &text, const Colour &textColour,
+                  const Maths::Vec2 &position);
   };
 }

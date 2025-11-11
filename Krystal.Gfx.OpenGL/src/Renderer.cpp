@@ -240,74 +240,55 @@ namespace Krys::Gfx::OpenGL
   void Renderer::DrawText(const string &text, FontHandle fontHandle, const Maths::Vec2 &position,
                           const Colour &colour) noexcept
   {
-    auto &fonts = static_cast<FontRegistry &>(_context.Fonts());
-    auto &shaders = static_cast<ShaderRegistry &>(_context.Shaders());
-    auto &textures = static_cast<TextureRegistry &>(_context.Textures());
-    auto &imageViews = static_cast<ImageViewRegistry &>(_context.ImageViews());
+    Font &font = static_cast<FontRegistry &>(_context.Fonts()).Get(fontHandle);
+    TextShaderDesc shaderDesc = {.FontType = font.Type()};
+    Shader &shader = static_cast<ShaderRegistry &>(_context.Shaders()).GetOrAdd(shaderDesc);
 
-    Font &font = fonts.Get(fontHandle);
-    Shader &shader = shaders.GetOrAdd({.FontType = font.Type()});
-    Texture &texture = textures.Get(font.AtlasTexture());
-    ImageView &imageView = imageViews.Get(texture.ImageView());
-
-    imageView.Bind(0);
-    shader.Bind();
-    shader.SetUniform("u_TextColor", colour.ToVec3());
-
-    float scale = 1.0f;
-    if (font.Type() != FontType::Bitmap)
-    {
-      scale = _dpi / 72.0f;
-      SetSDFParams(shader, font);
-    }
-
-    DrawText(font, text, position, scale);
+    DrawText(font, shader, text, colour, position);
   }
 
   void Renderer::DrawTextOutlined(const string &text, FontHandle fontHandle, const Maths::Vec2 &position,
                                   const Colour &textColour, const Colour &outlineColour,
                                   float outlineWidth) noexcept
   {
-    auto &fonts = static_cast<FontRegistry &>(_context.Fonts());
-    auto &shaders = static_cast<ShaderRegistry &>(_context.Shaders());
-    auto &textures = static_cast<TextureRegistry &>(_context.Textures());
-    auto &imageViews = static_cast<ImageViewRegistry &>(_context.ImageViews());
-
-    Font &font = fonts.Get(fontHandle);
-    Shader &shader = shaders.GetOrAdd({.FontType = font.Type(), .EnableOutline = true});
-    Texture &texture = textures.Get(font.AtlasTexture());
-    ImageView &imageView = imageViews.Get(texture.ImageView());
-
+    Font &font = static_cast<FontRegistry &>(_context.Fonts()).Get(fontHandle);
     assert(font.Type() != FontType::Bitmap && "Outlined text is not supported for bitmap fonts.");
-
-    imageView.Bind(0);
-    shader.Bind();
-    shader.SetUniform("u_TextColor", textColour.ToVec3());
-
-    float scale = _dpi / 72.0f;
-    SetSDFParams(shader, font);
+    TextShaderDesc shaderDesc = {.FontType = font.Type(), .EnableOutline = true};
+    Shader &shader = static_cast<ShaderRegistry &>(_context.Shaders()).GetOrAdd(shaderDesc);
 
     shader.SetUniform("u_OutlineColor", outlineColour.ToVec3());
     shader.SetUniform("u_OutlineWidthAbsolute", outlineWidth / 3.f);
     shader.SetUniform("u_OutlineWidthRelative", outlineWidth / 20.f);
     shader.SetUniform("u_Threshold", 0.5f);
 
-    DrawText(font, text, position, scale);
+    DrawText(font, shader, text, textColour, position);
   }
 
-  void Renderer::DrawText(Font &font, const string &text, const Maths::Vec2 &position, float scale)
+  void Renderer::DrawText(Font &font, Shader &shader, const string &text, const Colour &textColour,
+                          const Maths::Vec2 &position)
   {
-    if (font.Type() != FontType::Bitmap)
-    {
-      scale = (scale * font.PtSize()) / font.SDFParams().EMSizeInPixels;
-    }
-
     glBindVertexArray(_textVao);
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     Maths::Vec2 pos = position;
-    auto &buffer = static_cast<BufferRegistry &>(_context.Buffers()).Get(_glyphBuffer);
+    Buffer &buffer = static_cast<BufferRegistry &>(_context.Buffers()).Get(_glyphBuffer);
+
+    Texture &texture = static_cast<TextureRegistry &>(_context.Textures()).Get(font.AtlasTexture());
+    ImageView &imageView = static_cast<ImageViewRegistry &>(_context.ImageViews()).Get(texture.ImageView());
+    imageView.Bind(0);
+
+    shader.Bind();
+    shader.SetUniform("u_TextColor", textColour.ToVec3());
+
+    float scale = 1.f;
+    if (font.Type() != FontType::Bitmap)
+    {
+      scale = _dpi / 72.0f;
+      scale = (scale * font.PtSize()) / font.SDFParams().EMSizeInPixels;
+      auto unitRange = Maths::Vec2(font.SDFParams().PixelRange) / Maths::Vec2(font.AtlasSize());
+      shader.SetUniform("u_UnitRange", unitRange);
+    }
 
     auto count = text.size();
     while (count > 0)
@@ -342,12 +323,6 @@ namespace Krys::Gfx::OpenGL
     }
 
     glDisable(GL_BLEND);
-  }
-
-  void Renderer::SetSDFParams(Shader &shader, Font &font) noexcept
-  {
-    auto unitRange = Maths::Vec2(font.SDFParams().PixelRange) / Maths::Vec2(font.AtlasSize());
-    shader.SetUniform("u_UnitRange", unitRange);
   }
 
   void Renderer::DPIChanged(int dpi) noexcept
