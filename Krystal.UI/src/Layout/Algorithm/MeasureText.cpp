@@ -1,5 +1,6 @@
 #include "Krystal.UI/Layout/Algorithm/MeasureText.hpp"
 #include "Krystal.Gfx/IContext.hpp"
+#include "Krystal.Gfx/Resources/Font.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.UI/Document.hpp"
@@ -18,7 +19,7 @@ namespace Krys::UI
     auto fontDesc = document.ElementGetFontDesc(element.Handle);
     auto font = context.Fonts().Get(fontDesc);
     const auto &characters = context.Fonts().GetCharacterMap(font);
-    const auto& metrics = context.Fonts().GetMetrics(font);
+    const auto &metrics = context.Fonts().GetMetrics(font);
     float lineHeight = metrics.Height;
 
     float maxWidth = 0.0f;
@@ -35,7 +36,7 @@ namespace Krys::UI
         continue;
       }
 
-      const auto &ch = characters.at(c);
+      const auto &ch = characters.at(Gfx::Codepoint(c));
 
       // Wrap if constrained and over width
       if (widthMode != MeasureMode::Undefined && currentLineWidth + ch.Advance > width)

@@ -4,11 +4,13 @@
 #include "Krystal.Log/ILogger.hpp"
 #include <algorithm>
 #include <ft2build.h>
+#include <stb_rect_pack.h>
+#include FT_FREETYPE_H
+
+#include <ext/import-font.h>
 #include <msdf-atlas-gen.h>
 #include <msdfgen-ext.h>
 #include <msdfgen.h>
-#include <stb_rect_pack.h>
-#include FT_FREETYPE_H
 
 namespace
 {
@@ -19,7 +21,7 @@ namespace
 
   struct BitmapGlyph
   {
-    uchar Char {};
+    Codepoint Char {};
     Maths::Vec2u ActualSize {}; // actual glyph bitmap size (tight)
     Maths::Vec2u PaddedSize {}; // size including padding
     Maths::Vec2i Bearing {};    // slot->bitmap_left/top
@@ -92,31 +94,31 @@ namespace
     List<BitmapGlyph> LoadGlyphs(uint8 paddingPerGlyph) const noexcept
     {
       List<BitmapGlyph> glyphs;
-      glyphs.reserve(95);
 
-      for (uchar c = 32; c < 127; c++)
+      FT_UInt gindex;
+      uint32 charcode = FT_Get_First_Char(_face, &gindex);
+      while (gindex != 0)
       {
-        if (FT_Load_Char(_face, c, FT_LOAD_RENDER))
+        if (FT_Load_Char(_face, charcode, FT_LOAD_RENDER))
         {
-          KRYS_WARN("FREETYPE: Failed to load glyph {}", (int)c);
+          KRYS_WARN("FREETYPE: Failed to load glyph {}", charcode);
           continue;
         }
 
         if (_face->glyph->bitmap.pixel_mode != FT_PIXEL_MODE_GRAY)
         {
-          KRYS_WARN("FREETYPE: Glyph {} not grayscale; skipping", (int)c);
+          KRYS_WARN("FREETYPE: Glyph {} not grayscale; skipping", charcode);
           continue;
         }
 
         const FT_GlyphSlot slot = _face->glyph;
         const FT_Bitmap &bm = slot->bitmap;
-
         BitmapGlyph glyph {
-          .Char = c,
+          .Char = Codepoint(charcode),
           .ActualSize = {bm.width, bm.rows},
           .PaddedSize = glyph.ActualSize + (paddingPerGlyph * 2u),
           .Bearing = {slot->bitmap_left, slot->bitmap_top},
-          .Advance = static_cast<int32>(slot->advance.x >> 6),
+          .Advance = (int32)(slot->advance.x >> 6),
           .Pixels = {},
           .Rect = {},
         };
@@ -132,6 +134,8 @@ namespace
         }
 
         glyphs.push_back(std::move(glyph));
+
+        charcode = FT_Get_Next_Char(_face, charcode, &gindex);
       }
 
       return glyphs;
@@ -246,56 +250,10 @@ namespace
 
 #pragma region SDF
 
-  struct MSDFPackResult
-  {
-    uint32 Width;
-    uint32 Height;
-    double EmScale;
-  };
-
-  MSDFPackResult PackMTSDFAtlas(const SDFParams &params, List<msdf_atlas::GlyphGeometry> &glyphs)
-  {
-    msdf_atlas::TightAtlasPacker packer;
-    packer.setDimensionsConstraint(msdf_atlas::DimensionsConstraint::SQUARE);
-    packer.setScale(params.EMSizeInPixels);
-    packer.setPixelRange(params.PixelRange);
-    packer.setMiterLimit(params.MiterLimit);
-    packer.pack(glyphs.data(), static_cast<int>(glyphs.size()));
-    int width = 0, height = 0;
-    packer.getDimensions(width, height);
-    double emScale = packer.getScale();
-    return MSDFPackResult {static_cast<uint32>(width), static_cast<uint32>(height), emScale};
-  }
-
-  CharacterMap ToCodepointsMap(Krys::List<msdf_atlas::GlyphGeometry> &glyphs, MSDFPackResult &packedAtlas,
-                               const Maths::Vec2u &atlasSize)
-  {
-    CharacterMap characters;
-    characters.reserve(glyphs.size());
-
-    for (const msdf_atlas::GlyphGeometry &glyph : glyphs)
-    {
-      Character ch {};
-      double b, t, l, r;
-      glyph.getQuadAtlasBounds(l, b, r, t);
-
-      double pl, pb, pr, pt;
-      glyph.getQuadPlaneBounds(pl, pb, pr, pt);
-
-      ch.Size = {(uint32)std::round((pr - pl) * packedAtlas.EmScale),
-                 (uint32)std::round((pt - pb) * packedAtlas.EmScale)};
-      ch.Bearing = {(int)std::round(pl * packedAtlas.EmScale), (int)std::round(pt * packedAtlas.EmScale)};
-      ch.Advance = (uint32)std::round(glyph.getAdvance() * packedAtlas.EmScale);
-      ch.UVMin = {float(l / atlasSize.x), float(t / atlasSize.y)};
-      ch.UVMax = {float(r / atlasSize.x), float(b / atlasSize.y)};
-      characters.emplace((char)glyph.getCodepoint(), ch);
-    }
-
-    return characters;
-  }
-
   class msdfLoader
   {
+    FT_Library _library = nullptr;
+    FT_Face _face = nullptr;
     msdfgen::FreetypeHandle *_ft = nullptr;
     msdfgen::FontHandle *_font = nullptr;
 
@@ -308,6 +266,9 @@ namespace
       {
         msdfgen::destroyFont(_font);
       }
+
+      FT_Done_Face(_face);
+
       if (_ft != nullptr)
       {
         msdfgen::deinitializeFreetype(_ft);
@@ -316,17 +277,25 @@ namespace
 
     bool Load(const IO::Path &path)
     {
-      _ft = msdfgen::initializeFreetype();
-      if (_ft == nullptr)
+      if (FT_Init_FreeType(&_library) != 0)
       {
-        KRYS_ERROR("MSDFGEN: Could not init FreeType Library");
+        KRYS_ERROR("FREETYPE: Could not init FreeType Library");
+        KRYS_DEBUG_BREAK();
+        return false;
+      }
+
+      KRYS_INFO("FREETYPE: Loading bitmap font from '{}'", path.ToString());
+      if (FT_New_Face(_library, path.ToString().c_str(), 0, &_face) != 0)
+      {
+        FT_Done_FreeType(_library);
+        _library = nullptr;
+        KRYS_ERROR("FREETYPE: Failed to load font '{}'", path.ToString());
         KRYS_DEBUG_BREAK();
         return false;
       }
 
       KRYS_INFO("MSDFGEN: Loading font from '{}'", path.ToString());
-      _font = msdfgen::loadFont(_ft, path.ToString().c_str());
-
+      _font = msdfgen::adoptFreetypeFont(_face);
       if (_font == nullptr)
       {
         msdfgen::deinitializeFreetype(_ft);
@@ -347,7 +316,17 @@ namespace
     {
       List<msdf_atlas::GlyphGeometry> glyphs;
       msdf_atlas::FontGeometry fontGeometry(&glyphs);
-      fontGeometry.loadCharset(_font, 1.0, msdf_atlas::Charset::ASCII);
+
+      FT_UInt gindex;
+      uint32 charcode = FT_Get_First_Char(_face, &gindex);
+      msdf_atlas::Charset charset;
+      while (gindex != 0)
+      {
+        charset.add(charcode);
+        charcode = FT_Get_Next_Char(_face, charcode, &gindex);
+      }
+
+      fontGeometry.loadCharset(_font, 1.0, charset, true, true);
 
       const double maxCornerAngle = 3.0; // Apply MSDF edge coloring. edge-coloring.h for other strategies.
       for (msdf_atlas::GlyphGeometry &glyph : glyphs)
@@ -371,6 +350,54 @@ namespace
       return {.Ascender = ascender, .Descender = descender, .Height = height, .LineHeight = lineHeight};
     }
   };
+
+  struct msdfPackResult
+  {
+    uint32 Width;
+    uint32 Height;
+    double EmScale;
+  };
+
+  msdfPackResult PackMTSDFAtlas(const SDFParams &params, List<msdf_atlas::GlyphGeometry> &glyphs)
+  {
+    msdf_atlas::TightAtlasPacker packer;
+    packer.setDimensionsConstraint(msdf_atlas::DimensionsConstraint::SQUARE);
+    packer.setScale(params.EMSizeInPixels);
+    packer.setPixelRange(params.PixelRange);
+    packer.setMiterLimit(params.MiterLimit);
+    packer.pack(glyphs.data(), static_cast<int>(glyphs.size()));
+    int width = 0, height = 0;
+    packer.getDimensions(width, height);
+    double emScale = packer.getScale();
+    return {static_cast<uint32>(width), static_cast<uint32>(height), emScale};
+  }
+
+  CharacterMap ToCodepointsMap(Krys::List<msdf_atlas::GlyphGeometry> &glyphs, msdfPackResult &packedAtlas,
+                               const Maths::Vec2u &atlasSize)
+  {
+    CharacterMap characters;
+    characters.reserve(glyphs.size());
+
+    for (const msdf_atlas::GlyphGeometry &glyph : glyphs)
+    {
+      double b, t, l, r;
+      glyph.getQuadAtlasBounds(l, b, r, t);
+
+      double pl, pb, pr, pt;
+      glyph.getQuadPlaneBounds(pl, pb, pr, pt);
+
+      characters[Codepoint(glyph.getCodepoint())] = Character {
+        .Size = {(uint32)std::round((pr - pl) * packedAtlas.EmScale),
+                 (uint32)std::round((pt - pb) * packedAtlas.EmScale)},
+        .Bearing = {(int32)std::round(pl * packedAtlas.EmScale), (int32)std::round(pt * packedAtlas.EmScale)},
+        .Advance = (int32)std::round(glyph.getAdvance() * packedAtlas.EmScale),
+        .UVMin = {float(l / atlasSize.x), float(t / atlasSize.y)},
+        .UVMax = {float(r / atlasSize.x), float(b / atlasSize.y)},
+      };
+    }
+
+    return characters;
+  }
 
 #pragma endregion
 }

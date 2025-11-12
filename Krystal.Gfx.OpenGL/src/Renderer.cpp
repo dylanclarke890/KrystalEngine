@@ -163,7 +163,7 @@ namespace Krys::Gfx::OpenGL
           auto &rt = renderTargets.Get(_currentRenderTarget);
 
           FontHandle font =
-            fonts.Get({.Family = cmd.FontFamily, .Type = FontType::Bitmap, .Size = cmd.FontSize});
+            fonts.Get({.Family = cmd.FontFamily, .Type = FontType::SDF, .Size = cmd.FontSize});
 
           const auto &metrics = fonts.GetMetrics(font);
 
@@ -301,8 +301,9 @@ namespace Krys::Gfx::OpenGL
       const auto &characters = font.Characters();
       for (const char c : batch)
       {
+        Codepoint charcode {c};
         // TODO: better checks for whether the character exists before accessing it
-        const Character &ch = characters.at(c);
+        const Character &ch = characters.at(charcode);
         float posX = pos.x + ch.Bearing.x * scale;
         float posY = pos.y - (ch.Size.y - ch.Bearing.y) * scale;
         float w = ch.Size.x * scale;

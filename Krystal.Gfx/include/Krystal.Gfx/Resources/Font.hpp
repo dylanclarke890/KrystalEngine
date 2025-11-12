@@ -8,6 +8,7 @@
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
+#include "Krystal.Lib/StronglyTypedValue.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Maths/Vector.hpp"
 #include <compare>
@@ -48,6 +49,16 @@ namespace Krys::Gfx
     }
   };
 
+  /// @brief Unicode codepoint.
+  struct Codepoint : public StronglyTypedNumber<Codepoint, uint32>
+  {
+    using StronglyTypedNumber<Codepoint, uint32>::StronglyTypedNumber;
+
+    constexpr explicit Codepoint(char value) noexcept : StronglyTypedNumber<Codepoint, uint32>(value)
+    {
+    }
+  };
+
   struct Character
   {
     Maths::Vec2u Size {};    // Size of glyph
@@ -57,7 +68,7 @@ namespace Krys::Gfx
     Maths::Vec2 UVMax;       // (u1, v1)
   };
 
-  using CharacterMap = Map<uchar, Character>;
+  using CharacterMap = Map<Codepoint, Character, StronglyTypedNumberHasher<Codepoint>>;
 
   struct FontMetrics
   {

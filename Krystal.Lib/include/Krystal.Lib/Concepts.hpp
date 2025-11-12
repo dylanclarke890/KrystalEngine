@@ -18,6 +18,9 @@ namespace Krys
   concept UnsignedIntegral = std::is_unsigned_v<T> && Integral<T>;
 
   template <typename T>
+  concept Number = Integral<T> || FloatingPoint<T>;
+
+  template <typename T>
   concept Arithmetic = std::is_arithmetic_v<T>;
 
   template <typename T>
