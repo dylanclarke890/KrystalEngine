@@ -18,8 +18,6 @@ namespace
   using namespace Krys;
   using namespace Krys::Gfx;
 
-#pragma region Bitmap
-
   struct BitmapGlyph
   {
     Codepoint Char {};
@@ -151,105 +149,101 @@ namespace
 
       return {.Ascender = ascender, .Descender = descender, .Height = height, .LineHeight = lineHeight};
     }
-  };
 
-  CharacterMap ToCodepointsMap(List<BitmapGlyph> &glyphs, int padding, const Maths::Vec2u &atlasSize)
-  {
-    CharacterMap characters;
-    characters.reserve(glyphs.size());
-
-    for (const auto &glyph : glyphs)
+    CharacterMap ToCodepointsMap(List<BitmapGlyph> &glyphs, int padding, const Maths::Vec2u &atlasSize)
     {
-      const float u0 = float(glyph.Rect.x + padding) / float(atlasSize.x);
-      const float v0 = float(glyph.Rect.y + padding) / float(atlasSize.y);
+      CharacterMap characters;
+      characters.reserve(glyphs.size());
 
-      const float u1 = float(glyph.Rect.x + padding + glyph.ActualSize.x) / float(atlasSize.x);
-      const float v1 = float(glyph.Rect.y + padding + glyph.ActualSize.y) / float(atlasSize.y);
-
-      characters[glyph.Char] = Character {
-        .Size = glyph.ActualSize,
-        .Bearing = glyph.Bearing,
-        .Advance = glyph.Advance,
-        .UVMin = {u0, v0},
-        .UVMax = {u1, v1},
-      };
-    }
-
-    return characters;
-  }
-
-  List<uint8> ToPixels(const List<BitmapGlyph> &glyphs, const Maths::Vec2u &atlasSize)
-  {
-    List<uint8> pixels(size_t(atlasSize.x) * atlasSize.y);
-    std::fill(pixels.begin(), pixels.end(), 0);
-
-    for (const auto &glyph : glyphs)
-    {
-      for (uint row = 0; row < glyph.ActualSize.y; row++)
+      for (const auto &glyph : glyphs)
       {
-        uint8 *dst = pixels.data() + (glyph.Rect.y + row + 2) * atlasSize.x + (glyph.Rect.x + 2);
-        const uint8 *src = glyph.Pixels.data() + row * glyph.ActualSize.x;
-        std::memcpy(dst, src, glyph.ActualSize.x);
-      }
-    }
+        const float u0 = float(glyph.Rect.x + padding) / float(atlasSize.x);
+        const float v0 = float(glyph.Rect.y + padding) / float(atlasSize.y);
 
-    return pixels;
-  }
+        const float u1 = float(glyph.Rect.x + padding + glyph.ActualSize.x) / float(atlasSize.x);
+        const float v1 = float(glyph.Rect.y + padding + glyph.ActualSize.y) / float(atlasSize.y);
 
-  bool TryPackGlyphs(List<BitmapGlyph> &glyphs, Maths::Vec2u &size)
-  {
-    while (true)
-    {
-      List<stbrp_rect> rects;
-      rects.reserve(glyphs.size());
-
-      for (size_t i = 0; i < glyphs.size(); i++)
-      {
-        glyphs[i].Rect.id = static_cast<int>(i);
-        glyphs[i].Rect.w = glyphs[i].PaddedSize.x;
-        glyphs[i].Rect.h = glyphs[i].PaddedSize.y;
-        rects.push_back(glyphs[i].Rect);
+        characters[glyph.Char] = Character {
+          .Size = glyph.ActualSize,
+          .Bearing = glyph.Bearing,
+          .Advance = glyph.Advance,
+          .UVMin = {u0, v0},
+          .UVMax = {u1, v1},
+        };
       }
 
-      stbrp_context ctx {};
-      List<stbrp_node> nodes;
-      nodes.resize(size.x);
+      return characters;
+    }
 
-      stbrp_init_target(&ctx, size.x, size.y, nodes.data(), (int)nodes.size());
-      stbrp_pack_rects(&ctx, rects.data(), (int)rects.size());
+    List<uint8> ToPixels(const List<BitmapGlyph> &glyphs, const Maths::Vec2u &atlasSize)
+    {
+      List<uint8> pixels(size_t(atlasSize.x) * atlasSize.y);
+      std::fill(pixels.begin(), pixels.end(), 0);
 
-      if (std::all_of(rects.begin(), rects.end(), [](const auto &r) { return r.was_packed; }))
+      for (const auto &glyph : glyphs)
       {
-        for (const auto &r : rects) // write back positions
+        for (uint row = 0; row < glyph.ActualSize.y; row++)
         {
-          glyphs[r.id].Rect = r;
+          uint8 *dst = pixels.data() + (glyph.Rect.y + row + 2) * atlasSize.x + (glyph.Rect.x + 2);
+          const uint8 *src = glyph.Pixels.data() + row * glyph.ActualSize.x;
+          std::memcpy(dst, src, glyph.ActualSize.x);
         }
-        break;
       }
 
-      if (size.x <= size.y)
-      {
-        size.x *= 2;
-      }
-      else
-      {
-        size.y *= 2;
-      }
-
-      if (size.x > 4'096 || size.y > 4'096)
-      {
-        KRYS_ERROR("Font atlas exceeded 4096x4096!");
-        KRYS_DEBUG_BREAK();
-        return false;
-      }
+      return pixels;
     }
 
-    return true;
-  }
+    bool TryPackGlyphs(List<BitmapGlyph> &glyphs, Maths::Vec2u &size)
+    {
+      while (true)
+      {
+        List<stbrp_rect> rects;
+        rects.reserve(glyphs.size());
 
-#pragma endregion
+        for (size_t i = 0; i < glyphs.size(); i++)
+        {
+          glyphs[i].Rect.id = static_cast<int>(i);
+          glyphs[i].Rect.w = glyphs[i].PaddedSize.x;
+          glyphs[i].Rect.h = glyphs[i].PaddedSize.y;
+          rects.push_back(glyphs[i].Rect);
+        }
 
-#pragma region SDF
+        stbrp_context ctx {};
+        List<stbrp_node> nodes;
+        nodes.resize(size.x);
+
+        stbrp_init_target(&ctx, size.x, size.y, nodes.data(), (int)nodes.size());
+        stbrp_pack_rects(&ctx, rects.data(), (int)rects.size());
+
+        if (std::all_of(rects.begin(), rects.end(), [](const auto &r) { return r.was_packed; }))
+        {
+          for (const auto &r : rects) // write back positions
+          {
+            glyphs[r.id].Rect = r;
+          }
+          break;
+        }
+
+        if (size.x <= size.y)
+        {
+          size.x *= 2;
+        }
+        else
+        {
+          size.y *= 2;
+        }
+
+        if (size.x > 4'096 || size.y > 4'096)
+        {
+          KRYS_ERROR("Font atlas exceeded 4096x4096!");
+          KRYS_DEBUG_BREAK();
+          return false;
+        }
+      }
+
+      return true;
+    }
+  };
 
   class msdfLoader
   {
@@ -257,9 +251,41 @@ namespace
     FT_Face _face = nullptr;
     msdfgen::FreetypeHandle *_ft = nullptr;
     msdfgen::FontHandle *_font = nullptr;
+    const SDFParams &_params;
 
   public:
-    msdfLoader() = default;
+    msdfLoader(const IO::Path &path, const SDFParams &params) : _params(params)
+    {
+      if (FT_Init_FreeType(&_library) != 0)
+      {
+        KRYS_ERROR("FREETYPE: Could not init FreeType Library");
+        KRYS_DEBUG_BREAK();
+        return;
+      }
+
+      KRYS_INFO("FREETYPE: Loading sdf-based font from '{}'", path.ToString());
+      if (FT_New_Face(_library, path.ToString().c_str(), 0, &_face) != 0)
+      {
+        FT_Done_FreeType(_library);
+        _library = nullptr;
+        KRYS_ERROR("FREETYPE: Failed to load font '{}'", path.ToString());
+        KRYS_DEBUG_BREAK();
+        return;
+      }
+
+      KRYS_INFO("MSDFGEN: Loading font from '{}'", path.ToString());
+      _font = msdfgen::adoptFreetypeFont(_face);
+      if (_font == nullptr)
+      {
+        msdfgen::deinitializeFreetype(_ft);
+        _ft = nullptr;
+        KRYS_ERROR("MSDFGEN: Failed to load font '{}'", path.ToString());
+        KRYS_DEBUG_BREAK();
+        return;
+      }
+
+      KRYS_INFO("MSDFGEN: Loaded font: {}.", path.ToString());
+    }
 
     ~msdfLoader()
     {
@@ -276,43 +302,6 @@ namespace
       }
     }
 
-    bool Load(const IO::Path &path)
-    {
-      if (FT_Init_FreeType(&_library) != 0)
-      {
-        KRYS_ERROR("FREETYPE: Could not init FreeType Library");
-        KRYS_DEBUG_BREAK();
-        return false;
-      }
-
-      KRYS_INFO("FREETYPE: Loading sdf-based font from '{}'", path.ToString());
-      if (FT_New_Face(_library, path.ToString().c_str(), 0, &_face) != 0)
-      {
-        FT_Done_FreeType(_library);
-        _library = nullptr;
-        KRYS_ERROR("FREETYPE: Failed to load font '{}'", path.ToString());
-        KRYS_DEBUG_BREAK();
-        return false;
-      }
-
-      KRYS_INFO("MSDFGEN: Loading font from '{}'", path.ToString());
-      _font = msdfgen::adoptFreetypeFont(_face);
-      if (_font == nullptr)
-      {
-        msdfgen::deinitializeFreetype(_ft);
-        _ft = nullptr;
-        KRYS_ERROR("MSDFGEN: Failed to load font '{}'", path.ToString());
-        KRYS_DEBUG_BREAK();
-        return false;
-      }
-
-      KRYS_INFO("MSDFGEN: Loaded font: {}.", path.ToString());
-      return true;
-    }
-
-    /// @brief FontGeometry is a helper class that loads a set of glyphs from a single font. It can also be
-    /// used
-    /// to get additional font metrics, kerning information, etc.
     List<msdf_atlas::GlyphGeometry> LoadGlyphs()
     {
       List<msdf_atlas::GlyphGeometry> glyphs;
@@ -338,12 +327,12 @@ namespace
       return glyphs;
     }
 
-    FontMetrics GetMetrics(const SDFParams &params) const noexcept
+    FontMetrics GetMetrics() const noexcept
     {
       msdfgen::FontMetrics metrics;
       msdfgen::getFontMetrics(metrics, _font, msdfgen::FONT_SCALING_EM_NORMALIZED);
 
-      float scale = params.EMSizeInPixels;
+      float scale = _params.EMSizeInPixels;
       auto ascender = static_cast<float>(metrics.ascenderY * scale);
       auto descender = static_cast<float>(metrics.descenderY * scale);
       auto height = static_cast<float>(metrics.lineHeight * scale);
@@ -351,57 +340,48 @@ namespace
 
       return {.Ascender = ascender, .Descender = descender, .Height = height, .LineHeight = lineHeight};
     }
-  };
 
-  struct msdfPackResult
-  {
-    uint32 Width;
-    uint32 Height;
-  };
-
-  msdfPackResult PackMTSDFAtlas(const SDFParams &params, List<msdf_atlas::GlyphGeometry> &glyphs)
-  {
-    msdf_atlas::TightAtlasPacker packer;
-    packer.setDimensionsConstraint(msdf_atlas::DimensionsConstraint::SQUARE);
-    packer.setScale(params.EMSizeInPixels);
-    packer.setPixelRange(params.PixelRange);
-    packer.setMiterLimit(params.MiterLimit);
-    packer.pack(glyphs.data(), static_cast<int>(glyphs.size()));
-    int width = 0, height = 0;
-    packer.getDimensions(width, height);
-    return {static_cast<uint32>(width), static_cast<uint32>(height)};
-  }
-
-  CharacterMap ToCodepointsMap(Krys::List<msdf_atlas::GlyphGeometry> &glyphs, msdfPackResult &packedAtlas,
-                               const Maths::Vec2 &atlasSize, const SDFParams &params)
-  {
-    CharacterMap characters;
-    characters.reserve(glyphs.size());
-
-    for (const msdf_atlas::GlyphGeometry &glyph : glyphs)
+    Maths::Vec2u PackAtlas(List<msdf_atlas::GlyphGeometry> &glyphs)
     {
-      double b, t, l, r;
-      glyph.getQuadAtlasBounds(l, b, r, t);
-
-      double pl, pb, pr, pt;
-      glyph.getQuadPlaneBounds(pl, pb, pr, pt);
-
-      double scale = params.EMSizeInPixels;
-
-      using namespace Krys::Maths;
-      characters[Codepoint(glyph.getCodepoint())] = Character {
-        .Size = Vec2u(Round(Vec2d(pr - pl, pt - pb) * scale)),
-        .Bearing = Vec2i(Round(Vec2d(pl, pt) * scale)),
-        .Advance = static_cast<int32>(Round(glyph.getAdvance() * scale)),
-        .UVMin = Vec2((float)l, (float)t) / atlasSize,
-        .UVMax = Vec2((float)r, (float)b) / atlasSize,
-      };
+      msdf_atlas::TightAtlasPacker packer;
+      packer.setDimensionsConstraint(msdf_atlas::DimensionsConstraint::SQUARE);
+      packer.setScale(_params.EMSizeInPixels);
+      packer.setPixelRange(_params.PixelRange);
+      packer.setMiterLimit(_params.MiterLimit);
+      packer.pack(glyphs.data(), static_cast<int>(glyphs.size()));
+      int width = 0, height = 0;
+      packer.getDimensions(width, height);
+      return {static_cast<uint32>(width), static_cast<uint32>(height)};
     }
 
-    return characters;
-  }
+    CharacterMap ToCodepointsMap(Krys::List<msdf_atlas::GlyphGeometry> &glyphs, const Maths::Vec2 &atlasSize)
+    {
+      CharacterMap characters;
+      characters.reserve(glyphs.size());
 
-#pragma endregion
+      for (const msdf_atlas::GlyphGeometry &glyph : glyphs)
+      {
+        double b, t, l, r;
+        glyph.getQuadAtlasBounds(l, b, r, t);
+
+        double pl, pb, pr, pt;
+        glyph.getQuadPlaneBounds(pl, pb, pr, pt);
+
+        double scale = _params.EMSizeInPixels;
+
+        using namespace Krys::Maths;
+        characters[Codepoint(glyph.getCodepoint())] = Character {
+          .Size = Vec2u(Round(Vec2d(pr - pl, pt - pb) * scale)),
+          .Bearing = Vec2i(Round(Vec2d(pl, pt) * scale)),
+          .Advance = static_cast<int32>(Round(glyph.getAdvance() * scale)),
+          .UVMin = Vec2((float)l, (float)t) / atlasSize,
+          .UVMax = Vec2((float)r, (float)b) / atlasSize,
+        };
+      }
+
+      return characters;
+    }
+  };
 }
 
 namespace Krys::Gfx
@@ -409,34 +389,34 @@ namespace Krys::Gfx
   Expected<FontAtlasData> FontAtlasLoader::LoadBitmap(const IO::Path &path, uint32 fontSizeInPixels,
                                                       uint8 paddingPerGlyph) noexcept
   {
-    FreeTypeBitmapLoader ft {};
-    if (!ft.Load(path))
+    FreeTypeBitmapLoader loader {};
+    if (!loader.Load(path))
     {
       return Unexpected("Failed to load font");
     }
 
-    if (!ft.SetPixelSize(fontSizeInPixels))
+    if (!loader.SetPixelSize(fontSizeInPixels))
     {
       return Unexpected("Failed to set font size");
     }
 
-    List<BitmapGlyph> glyphs = ft.LoadGlyphs(paddingPerGlyph);
+    List<BitmapGlyph> glyphs = loader.LoadGlyphs(paddingPerGlyph);
     if (glyphs.empty())
     {
       return Unexpected("No glyphs loaded");
     }
 
     auto atlasSize = Maths::Vec2u {512u, 512u}; // Will be resized as needed.
-    if (!TryPackGlyphs(glyphs, atlasSize))
+    if (!loader.TryPackGlyphs(glyphs, atlasSize))
     {
       return Unexpected("Unable to pack glyphs");
     }
 
     FontAtlasData result {};
     result.Size = atlasSize;
-    result.Pixels = ToPixels(glyphs, atlasSize);
-    result.Characters = ToCodepointsMap(glyphs, paddingPerGlyph, atlasSize);
-    result.Metrics = ft.GetMetrics();
+    result.Pixels = loader.ToPixels(glyphs, atlasSize);
+    result.Characters = loader.ToCodepointsMap(glyphs, paddingPerGlyph, atlasSize);
+    result.Metrics = loader.GetMetrics();
     return result;
   }
 
@@ -447,23 +427,21 @@ namespace Krys::Gfx
     using SDFGenerator =
       ImmediateAtlasGenerator<float, 1, sdfGenerator, BitmapAtlasStorage<msdfgen::byte, 1>>;
 
-    msdfLoader loader;
-    loader.Load(path);
+    msdfLoader loader {path, params};
     auto glyphs = loader.LoadGlyphs();
-    auto packedAtlas = PackMTSDFAtlas(params, glyphs);
+    auto packedAtlas = loader.PackAtlas(glyphs);
 
-    SDFGenerator generator(packedAtlas.Width, packedAtlas.Height);
+    SDFGenerator generator(packedAtlas.x, packedAtlas.y);
     generator.setAttributes({.scanlinePass = true});
-    generator.setThreadCount(4);
     generator.generate(glyphs.data(), (int)glyphs.size());
     SDFAtlasData atlas = generator.atlasStorage();
 
     size_t pixelCount = static_cast<size_t>(atlas.width) * atlas.height * 1;
     FontAtlasData result {};
-    result.Size = {uint32(atlas.width), uint32(atlas.height)};
+    result.Size = {(uint32)atlas.width, (uint32)atlas.height};
     result.Pixels = List<uint8>(atlas.pixels, atlas.pixels + pixelCount);
-    result.Characters = ToCodepointsMap(glyphs, packedAtlas, result.Size, params);
-    result.Metrics = loader.GetMetrics(params);
+    result.Characters = loader.ToCodepointsMap(glyphs, result.Size);
+    result.Metrics = loader.GetMetrics();
 
     return result;
   }
@@ -475,23 +453,21 @@ namespace Krys::Gfx
     using MSDFGenerator =
       ImmediateAtlasGenerator<float, 3, msdfGenerator, BitmapAtlasStorage<msdfgen::byte, 3>>;
 
-    msdfLoader loader;
-    loader.Load(path);
+    msdfLoader loader {path, params};
     auto glyphs = loader.LoadGlyphs();
-    auto packedAtlas = PackMTSDFAtlas(params, glyphs);
+    auto packedAtlas = loader.PackAtlas(glyphs);
 
-    MSDFGenerator generator(packedAtlas.Width, packedAtlas.Height);
+    MSDFGenerator generator(packedAtlas.x, packedAtlas.y);
     generator.setAttributes({.scanlinePass = true});
-    generator.setThreadCount(4);
     generator.generate(glyphs.data(), (int)glyphs.size());
     MSDFAtlasData atlas = generator.atlasStorage();
 
     size_t pixelCount = static_cast<size_t>(atlas.width) * atlas.height * 3;
     FontAtlasData result {};
     result.Pixels = List<uint8>(atlas.pixels, atlas.pixels + pixelCount);
-    result.Size = {uint32(atlas.width), uint32(atlas.height)};
-    result.Characters = ToCodepointsMap(glyphs, packedAtlas, result.Size, params);
-    result.Metrics = loader.GetMetrics(params);
+    result.Size = {(uint32)atlas.width, (uint32)atlas.height};
+    result.Characters = loader.ToCodepointsMap(glyphs, result.Size);
+    result.Metrics = loader.GetMetrics();
 
     return result;
   }
@@ -503,23 +479,21 @@ namespace Krys::Gfx
     using MTSDFGenerator =
       ImmediateAtlasGenerator<float, 4, mtsdfGenerator, BitmapAtlasStorage<msdfgen::byte, 4>>;
 
-    msdfLoader loader;
-    loader.Load(path);
+    msdfLoader loader {path, params};
     auto glyphs = loader.LoadGlyphs();
-    auto packedAtlas = PackMTSDFAtlas(params, glyphs);
+    auto packedAtlas = loader.PackAtlas(glyphs);
 
-    MTSDFGenerator generator(packedAtlas.Width, packedAtlas.Height);
+    MTSDFGenerator generator(packedAtlas.x, packedAtlas.y);
     generator.setAttributes({.scanlinePass = true});
-    generator.setThreadCount(4);
     generator.generate(glyphs.data(), (int)glyphs.size());
     MTSDFAtlasData atlas = generator.atlasStorage();
 
     size_t pixelCount = static_cast<size_t>(atlas.width) * atlas.height * 4;
     FontAtlasData result {};
     result.Pixels = List<uint8>(atlas.pixels, atlas.pixels + pixelCount);
-    result.Size = {uint32(atlas.width), uint32(atlas.height)};
-    result.Characters = ToCodepointsMap(glyphs, packedAtlas, result.Size, params);
-    result.Metrics = loader.GetMetrics(params);
+    result.Size = {(uint32)atlas.width, (uint32)atlas.height};
+    result.Characters = loader.ToCodepointsMap(glyphs, result.Size);
+    result.Metrics = loader.GetMetrics();
 
     return result;
   }
