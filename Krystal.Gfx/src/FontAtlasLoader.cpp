@@ -2,6 +2,7 @@
 #include "Krystal.Lib/DebugBreak.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Log/ILogger.hpp"
+#include "Krystal.Maths/Round.hpp"
 #include <algorithm>
 #include <ft2build.h>
 #include <stb_rect_pack.h>
@@ -160,9 +161,9 @@ namespace
     for (const auto &glyph : glyphs)
     {
       const float u0 = float(glyph.Rect.x + padding) / float(atlasSize.x);
-      const float u1 = float(glyph.Rect.x + padding + glyph.ActualSize.x) / float(atlasSize.x);
-
       const float v0 = float(glyph.Rect.y + padding) / float(atlasSize.y);
+
+      const float u1 = float(glyph.Rect.x + padding + glyph.ActualSize.x) / float(atlasSize.x);
       const float v1 = float(glyph.Rect.y + padding + glyph.ActualSize.y) / float(atlasSize.y);
 
       characters[glyph.Char] = Character {
@@ -284,7 +285,7 @@ namespace
         return false;
       }
 
-      KRYS_INFO("FREETYPE: Loading bitmap font from '{}'", path.ToString());
+      KRYS_INFO("FREETYPE: Loading sdf-based font from '{}'", path.ToString());
       if (FT_New_Face(_library, path.ToString().c_str(), 0, &_face) != 0)
       {
         FT_Done_FreeType(_library);
@@ -316,10 +317,10 @@ namespace
     {
       List<msdf_atlas::GlyphGeometry> glyphs;
       msdf_atlas::FontGeometry fontGeometry(&glyphs);
+      msdf_atlas::Charset charset;
 
       FT_UInt gindex;
       uint32 charcode = FT_Get_First_Char(_face, &gindex);
-      msdf_atlas::Charset charset;
       while (gindex != 0)
       {
         charset.add(charcode);
@@ -337,15 +338,16 @@ namespace
       return glyphs;
     }
 
-    FontMetrics GetMetrics() const noexcept
+    FontMetrics GetMetrics(const SDFParams &params) const noexcept
     {
       msdfgen::FontMetrics metrics;
-      msdfgen::getFontMetrics(metrics, _font);
+      msdfgen::getFontMetrics(metrics, _font, msdfgen::FONT_SCALING_EM_NORMALIZED);
 
-      auto ascender = static_cast<float>(metrics.ascenderY);
-      auto descender = static_cast<float>(metrics.descenderY);
-      auto height = static_cast<float>(metrics.lineHeight);
-      auto lineHeight = static_cast<float>(metrics.ascenderY - metrics.descenderY);
+      float scale = params.EMSizeInPixels;
+      auto ascender = static_cast<float>(metrics.ascenderY * scale);
+      auto descender = static_cast<float>(metrics.descenderY * scale);
+      auto height = static_cast<float>(metrics.lineHeight * scale);
+      auto lineHeight = static_cast<float>((metrics.ascenderY - metrics.descenderY) * scale);
 
       return {.Ascender = ascender, .Descender = descender, .Height = height, .LineHeight = lineHeight};
     }
@@ -355,7 +357,6 @@ namespace
   {
     uint32 Width;
     uint32 Height;
-    double EmScale;
   };
 
   msdfPackResult PackMTSDFAtlas(const SDFParams &params, List<msdf_atlas::GlyphGeometry> &glyphs)
@@ -368,12 +369,11 @@ namespace
     packer.pack(glyphs.data(), static_cast<int>(glyphs.size()));
     int width = 0, height = 0;
     packer.getDimensions(width, height);
-    double emScale = packer.getScale();
-    return {static_cast<uint32>(width), static_cast<uint32>(height), emScale};
+    return {static_cast<uint32>(width), static_cast<uint32>(height)};
   }
 
   CharacterMap ToCodepointsMap(Krys::List<msdf_atlas::GlyphGeometry> &glyphs, msdfPackResult &packedAtlas,
-                               const Maths::Vec2u &atlasSize)
+                               const Maths::Vec2 &atlasSize, const SDFParams &params)
   {
     CharacterMap characters;
     characters.reserve(glyphs.size());
@@ -386,13 +386,15 @@ namespace
       double pl, pb, pr, pt;
       glyph.getQuadPlaneBounds(pl, pb, pr, pt);
 
+      double scale = params.EMSizeInPixels;
+
+      using namespace Krys::Maths;
       characters[Codepoint(glyph.getCodepoint())] = Character {
-        .Size = {(uint32)std::round((pr - pl) * packedAtlas.EmScale),
-                 (uint32)std::round((pt - pb) * packedAtlas.EmScale)},
-        .Bearing = {(int32)std::round(pl * packedAtlas.EmScale), (int32)std::round(pt * packedAtlas.EmScale)},
-        .Advance = (int32)std::round(glyph.getAdvance() * packedAtlas.EmScale),
-        .UVMin = {float(l / atlasSize.x), float(t / atlasSize.y)},
-        .UVMax = {float(r / atlasSize.x), float(b / atlasSize.y)},
+        .Size = Vec2u(Round(Vec2d(pr - pl, pt - pb) * scale)),
+        .Bearing = Vec2i(Round(Vec2d(pl, pt) * scale)),
+        .Advance = static_cast<int32>(Round(glyph.getAdvance() * scale)),
+        .UVMin = Vec2((float)l, (float)t) / atlasSize,
+        .UVMax = Vec2((float)r, (float)b) / atlasSize,
       };
     }
 
@@ -460,8 +462,8 @@ namespace Krys::Gfx
     FontAtlasData result {};
     result.Size = {uint32(atlas.width), uint32(atlas.height)};
     result.Pixels = List<uint8>(atlas.pixels, atlas.pixels + pixelCount);
-    result.Characters = ToCodepointsMap(glyphs, packedAtlas, result.Size);
-    result.Metrics = loader.GetMetrics();
+    result.Characters = ToCodepointsMap(glyphs, packedAtlas, result.Size, params);
+    result.Metrics = loader.GetMetrics(params);
 
     return result;
   }
@@ -488,8 +490,8 @@ namespace Krys::Gfx
     FontAtlasData result {};
     result.Pixels = List<uint8>(atlas.pixels, atlas.pixels + pixelCount);
     result.Size = {uint32(atlas.width), uint32(atlas.height)};
-    result.Characters = ToCodepointsMap(glyphs, packedAtlas, result.Size);
-    result.Metrics = loader.GetMetrics();
+    result.Characters = ToCodepointsMap(glyphs, packedAtlas, result.Size, params);
+    result.Metrics = loader.GetMetrics(params);
 
     return result;
   }
@@ -516,8 +518,8 @@ namespace Krys::Gfx
     FontAtlasData result {};
     result.Pixels = List<uint8>(atlas.pixels, atlas.pixels + pixelCount);
     result.Size = {uint32(atlas.width), uint32(atlas.height)};
-    result.Characters = ToCodepointsMap(glyphs, packedAtlas, result.Size);
-    result.Metrics = loader.GetMetrics();
+    result.Characters = ToCodepointsMap(glyphs, packedAtlas, result.Size, params);
+    result.Metrics = loader.GetMetrics(params);
 
     return result;
   }

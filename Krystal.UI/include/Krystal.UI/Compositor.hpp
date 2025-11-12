@@ -90,7 +90,6 @@ namespace Krys::UI
       float w = NodeLayoutGetWidth(node);
       float h = NodeLayoutGetHeight(node);
 
-      KRYS_INFO("Rendering element at ({}, {}) size ({}, {})", x, y, w, h);
       if (document.ElementRequiresLayer(state.CurrentElement))
       {
         Gfx::RenderTargetDesc desc {

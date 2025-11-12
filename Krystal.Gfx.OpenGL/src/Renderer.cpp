@@ -162,13 +162,26 @@ namespace Krys::Gfx::OpenGL
           const auto &cmd = reader.ReadCommand<Commands::DrawText>();
           auto &rt = renderTargets.Get(_currentRenderTarget);
 
-          FontHandle font =
-            fonts.Get({.Family = cmd.FontFamily, .Type = FontType::SDF, .Size = cmd.FontSize});
+          {
+            FontHandle font =
+              fonts.Get({.Family = cmd.FontFamily, .Type = FontType::Bitmap, .Size = cmd.FontSize});
+            const auto &metrics = fonts.GetMetrics(font);
+            float posY = static_cast<float>(rt.Height()) - (cmd.Position.y + metrics.Ascender);
+            DrawText(_context.Strings().Get(cmd.Text), font, cmd.FontSize, {cmd.Position.x, posY},
+                     Colours::Red);
+          }
 
-          const auto &metrics = fonts.GetMetrics(font);
+          {
+            FontHandle font =
+              fonts.Get({.Family = cmd.FontFamily, .Type = FontType::SDF, .Size = cmd.FontSize});
+            float scale = ((_dpi / 72.f) * cmd.FontSize) / fonts.Get(font).SDFParams().EMSizeInPixels;
 
-          float posY = static_cast<float>(rt.Height()) - (cmd.Position.y + metrics.Ascender);
-          DrawText(_context.Strings().Get(cmd.Text), font, {cmd.Position.x, posY}, cmd.Colour);
+            const auto &metrics = fonts.GetMetrics(font);
+            float posY = static_cast<float>(rt.Height()) - (cmd.Position.y + (metrics.Ascender * scale));
+            DrawText(_context.Strings().Get(cmd.Text), font, cmd.FontSize, {cmd.Position.x, posY},
+                     Colours::Blue);
+          }
+
           break;
         }
         default:
@@ -237,19 +250,19 @@ namespace Krys::Gfx::OpenGL
     glDisable(GL_BLEND);
   }
 
-  void Renderer::DrawText(const string &text, FontHandle fontHandle, const Maths::Vec2 &position,
-                          const Colour &colour) noexcept
+  void Renderer::DrawText(const string &text, FontHandle fontHandle, float ptSize,
+                          const Maths::Vec2 &position, const Colour &colour) noexcept
   {
     Font &font = static_cast<FontRegistry &>(_context.Fonts()).Get(fontHandle);
     TextShaderDesc shaderDesc = {.FontType = font.Type()};
     Shader &shader = static_cast<ShaderRegistry &>(_context.Shaders()).GetOrAdd(shaderDesc);
 
-    DrawText(font, shader, text, colour, position);
+    DrawText(font, shader, text, colour, position, ptSize);
   }
 
-  void Renderer::DrawTextOutlined(const string &text, FontHandle fontHandle, const Maths::Vec2 &position,
-                                  const Colour &textColour, const Colour &outlineColour,
-                                  float outlineWidth) noexcept
+  void Renderer::DrawTextOutlined(const string &text, FontHandle fontHandle, float ptSize,
+                                  const Maths::Vec2 &position, const Colour &textColour,
+                                  const Colour &outlineColour, float outlineWidth) noexcept
   {
     Font &font = static_cast<FontRegistry &>(_context.Fonts()).Get(fontHandle);
     assert(font.Type() != FontType::Bitmap && "Outlined text is not supported for bitmap fonts.");
@@ -261,11 +274,11 @@ namespace Krys::Gfx::OpenGL
     shader.SetUniform("u_OutlineWidthRelative", outlineWidth / 20.f);
     shader.SetUniform("u_Threshold", 0.5f);
 
-    DrawText(font, shader, text, textColour, position);
+    DrawText(font, shader, text, textColour, position, ptSize);
   }
 
   void Renderer::DrawText(Font &font, Shader &shader, const string &text, const Colour &textColour,
-                          const Maths::Vec2 &position)
+                          const Maths::Vec2 &position, float ptSize)
   {
     glBindVertexArray(_textVao);
     glEnable(GL_BLEND);
@@ -284,8 +297,7 @@ namespace Krys::Gfx::OpenGL
     float scale = 1.f;
     if (font.Type() != FontType::Bitmap)
     {
-      scale = _dpi / 72.0f;
-      scale = (scale * font.PtSize()) / font.SDFParams().EMSizeInPixels;
+      scale = ((_dpi / 72.f) * ptSize) / font.SDFParams().EMSizeInPixels;
       auto unitRange = Maths::Vec2(font.SDFParams().PixelRange) / Maths::Vec2(font.AtlasSize());
       shader.SetUniform("u_UnitRange", unitRange);
     }
@@ -301,9 +313,8 @@ namespace Krys::Gfx::OpenGL
       const auto &characters = font.Characters();
       for (const char c : batch)
       {
-        Codepoint charcode {c};
         // TODO: better checks for whether the character exists before accessing it
-        const Character &ch = characters.at(charcode);
+        const Character &ch = characters.at(Codepoint(c));
         float posX = pos.x + ch.Bearing.x * scale;
         float posY = pos.y - (ch.Size.y - ch.Bearing.y) * scale;
         float w = ch.Size.x * scale;

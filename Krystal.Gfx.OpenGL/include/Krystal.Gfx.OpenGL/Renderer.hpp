@@ -86,14 +86,15 @@ namespace Krys::Gfx::OpenGL
     void DrawTexturedQuad(GLuint texture, const Maths::Vec2 &position, const Maths::Vec2 &size,
                           float opacity);
 
-    void DrawText(const string &text, FontHandle fontHandle, const Maths::Vec2 &position,
+    void DrawText(const string &text, FontHandle fontHandle, float ptSize, const Maths::Vec2 &position,
                   const Colour &colour = Colours::Black) noexcept;
 
-    void DrawTextOutlined(const string &text, FontHandle fontHandle, const Maths::Vec2 &position,
+    void DrawTextOutlined(const string &text, FontHandle fontHandle, float ptSize,
+                          const Maths::Vec2 &position,
                           const Colour &textColour = Colours::Black,
                           const Colour &outlineColour = Colours::White, float outlineWidth = 3.f) noexcept;
 
     void DrawText(Font &font, Shader &shader, const string &text, const Colour &textColour,
-                  const Maths::Vec2 &position);
+                  const Maths::Vec2 &position, float ptSize);
   };
 }
