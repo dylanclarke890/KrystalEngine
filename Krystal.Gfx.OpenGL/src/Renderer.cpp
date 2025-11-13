@@ -314,8 +314,15 @@ namespace Krys::Gfx::OpenGL
       const auto &characters = font.Characters();
       for (const char c : batch)
       {
-        // TODO: better checks for whether the character exists before accessing it
-        const Character &ch = characters.at(Codepoint(c));
+        const auto &glyph = characters.find(Codepoint(c));
+        if (glyph == characters.end())
+        {
+          // TODO: this check is better but we should default to using a missing glyph character instead
+          KRYS_WARN("Font '{}' does not contain glyph for character '{}'", font.Family().Id, c);
+          continue;
+        }
+
+        const Character &ch = glyph->second;
         float posX = pos.x + ch.Bearing.x * scale;
         float posY = pos.y - (ch.Size.y - ch.Bearing.y) * scale;
         float w = ch.Size.x * scale;
