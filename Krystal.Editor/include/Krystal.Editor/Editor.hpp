@@ -122,6 +122,7 @@ namespace Krys
       auto rightInnerBox = _document.Create<Element>();
       _document.AppendChild(rightBox, rightInnerBox);
       _document.ElementStyleSetWidthPercent(rightInnerBox, 50.f);
+      _document.ElementStyleSetFontSize(rightInnerBox, 16.f);
       _document.ElementStyleSetHeightPercent(rightInnerBox, 50.f);
       _document.ElementStyleSetBackgroundColour(rightInnerBox, Gfx::Colours::Cyan);
       _document.ElementSetTextContent(rightInnerBox, textRef);

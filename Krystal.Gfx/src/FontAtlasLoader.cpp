@@ -33,9 +33,35 @@ namespace
   {
     FT_Library _library = nullptr;
     FT_Face _face = nullptr;
+    bool _loaded = true;
 
   public:
-    FreeTypeBitmapLoader() = default;
+    FreeTypeBitmapLoader(const IO::Path &path)
+    {
+      if (FT_Init_FreeType(&_library) != 0)
+      {
+        KRYS_ERROR("FREETYPE: Could not init FreeType Library");
+        KRYS_DEBUG_BREAK();
+        _loaded = false;
+        return;
+      }
+
+      KRYS_INFO("FREETYPE: Loading bitmap font from '{}'", path.ToString());
+      if (FT_New_Face(_library, path.ToString().c_str(), 0, &_face) != 0)
+      {
+        FT_Done_FreeType(_library);
+        _library = nullptr;
+        KRYS_ERROR("FREETYPE: Failed to load font '{}'", path.ToString());
+        KRYS_DEBUG_BREAK();
+        _loaded = false;
+        return;
+      }
+
+      KRYS_INFO("FREETYPE: Loaded font: {}.", path.ToString());
+      KRYS_INFO("FREETYPE:   Family: {}", _face->family_name);
+      KRYS_INFO("FREETYPE:   Style: {}", _face->style_name);
+      KRYS_INFO("FREETYPE:   {} face(s) in font", _face->num_faces);
+    }
 
     ~FreeTypeBitmapLoader()
     {
@@ -50,34 +76,12 @@ namespace
       }
     }
 
-    bool Load(const IO::Path &path)
+    NO_DISCARD bool IsLoaded() const noexcept
     {
-      if (FT_Init_FreeType(&_library) != 0)
-      {
-        KRYS_ERROR("FREETYPE: Could not init FreeType Library");
-        KRYS_DEBUG_BREAK();
-        return false;
-      }
-
-      KRYS_INFO("FREETYPE: Loading bitmap font from '{}'", path.ToString());
-      if (FT_New_Face(_library, path.ToString().c_str(), 0, &_face) != 0)
-      {
-        FT_Done_FreeType(_library);
-        _library = nullptr;
-        KRYS_ERROR("FREETYPE: Failed to load font '{}'", path.ToString());
-        KRYS_DEBUG_BREAK();
-        return false;
-      }
-
-      KRYS_INFO("FREETYPE: Loaded font: {}.", path.ToString());
-      KRYS_INFO("FREETYPE:   Family: {}", _face->family_name);
-      KRYS_INFO("FREETYPE:   Style: {}", _face->style_name);
-      KRYS_INFO("FREETYPE:   {} face(s) in font", _face->num_faces);
-
-      return true;
+      return _loaded;
     }
 
-    bool SetPixelSize(uint32 height) const noexcept
+    NO_DISCARD bool SetPixelSize(uint32 height) const noexcept
     {
       KRYS_INFO("FREETYPE: Setting font size to {}px", height);
       if (FT_Set_Pixel_Sizes(_face, 0, height) != 0)
@@ -90,7 +94,7 @@ namespace
       return true;
     }
 
-    List<BitmapGlyph> LoadGlyphs(uint8 paddingPerGlyph) const noexcept
+    NO_DISCARD List<BitmapGlyph> LoadGlyphs(uint8 paddingPerGlyph) const noexcept
     {
       List<BitmapGlyph> glyphs;
 
@@ -140,7 +144,7 @@ namespace
       return glyphs;
     }
 
-    FontMetrics GetMetrics() const noexcept
+    NO_DISCARD FontMetrics GetMetrics() const noexcept
     {
       auto ascender = static_cast<float>(_face->size->metrics.ascender >> 6);
       auto descender = static_cast<float>(_face->size->metrics.descender >> 6);
@@ -150,7 +154,8 @@ namespace
       return {.Ascender = ascender, .Descender = descender, .Height = height, .LineHeight = lineHeight};
     }
 
-    CharacterMap ToCodepointsMap(List<BitmapGlyph> &glyphs, int padding, const Maths::Vec2u &atlasSize)
+    NO_DISCARD CharacterMap ToCodepointsMap(List<BitmapGlyph> &glyphs, int padding,
+                                            const Maths::Vec2u &atlasSize)
     {
       CharacterMap characters;
       characters.reserve(glyphs.size());
@@ -175,7 +180,7 @@ namespace
       return characters;
     }
 
-    List<uint8> ToPixels(const List<BitmapGlyph> &glyphs, const Maths::Vec2u &atlasSize)
+    NO_DISCARD List<uint8> ToPixels(const List<BitmapGlyph> &glyphs, const Maths::Vec2u &atlasSize)
     {
       List<uint8> pixels(size_t(atlasSize.x) * atlasSize.y);
       std::fill(pixels.begin(), pixels.end(), 0);
@@ -193,7 +198,7 @@ namespace
       return pixels;
     }
 
-    bool TryPackGlyphs(List<BitmapGlyph> &glyphs, Maths::Vec2u &size)
+    NO_DISCARD bool TryPackGlyphs(List<BitmapGlyph> &glyphs, Maths::Vec2u &size)
     {
       while (true)
       {
@@ -252,6 +257,7 @@ namespace
     msdfgen::FreetypeHandle *_ft = nullptr;
     msdfgen::FontHandle *_font = nullptr;
     const SDFParams &_params;
+    bool _loaded = true;
 
   public:
     msdfLoader(const IO::Path &path, const SDFParams &params) : _params(params)
@@ -260,6 +266,7 @@ namespace
       {
         KRYS_ERROR("FREETYPE: Could not init FreeType Library");
         KRYS_DEBUG_BREAK();
+        _loaded = false;
         return;
       }
 
@@ -270,6 +277,7 @@ namespace
         _library = nullptr;
         KRYS_ERROR("FREETYPE: Failed to load font '{}'", path.ToString());
         KRYS_DEBUG_BREAK();
+        _loaded = false;
         return;
       }
 
@@ -281,6 +289,7 @@ namespace
         _ft = nullptr;
         KRYS_ERROR("MSDFGEN: Failed to load font '{}'", path.ToString());
         KRYS_DEBUG_BREAK();
+        _loaded = false;
         return;
       }
 
@@ -300,6 +309,11 @@ namespace
       {
         msdfgen::deinitializeFreetype(_ft);
       }
+    }
+
+    bool IsLoaded() const noexcept
+    {
+      return _loaded;
     }
 
     List<msdf_atlas::GlyphGeometry> LoadGlyphs()
@@ -370,10 +384,11 @@ namespace
         double scale = _params.EMSizeInPixels;
 
         using namespace Krys::Maths;
-        characters[Codepoint(glyph.getCodepoint())] = Character {
+        characters[Codepoint(glyph.getCodepoint())] = Character
+        {
           .Size = Vec2u(Round(Vec2d(pr - pl, pt - pb) * scale)),
           .Bearing = Vec2i(Round(Vec2d(pl, pt) * scale)),
-          .Advance = static_cast<int32>(Floor(glyph.getAdvance() * scale)),
+          .Advance = static_cast<int32>(Round(glyph.getAdvance() * scale)),
           .UVMin = Vec2((float)l, (float)t) / atlasSize,
           .UVMax = Vec2((float)r, (float)b) / atlasSize,
         };
@@ -389,8 +404,8 @@ namespace Krys::Gfx
   Expected<FontAtlasData> FontAtlasLoader::LoadBitmap(const IO::Path &path, uint32 fontSizeInPixels,
                                                       uint8 paddingPerGlyph) noexcept
   {
-    FreeTypeBitmapLoader loader {};
-    if (!loader.Load(path))
+    FreeTypeBitmapLoader loader {path};
+    if (!loader.IsLoaded())
     {
       return Unexpected("Failed to load font");
     }
@@ -428,6 +443,11 @@ namespace Krys::Gfx
       ImmediateAtlasGenerator<float, 1, sdfGenerator, BitmapAtlasStorage<msdfgen::byte, 1>>;
 
     msdfLoader loader {path, params};
+    if (!loader.IsLoaded())
+    {
+      return Unexpected("Failed to load font");
+    }
+
     auto glyphs = loader.LoadGlyphs();
     auto packedAtlas = loader.PackAtlas(glyphs);
 
@@ -454,6 +474,10 @@ namespace Krys::Gfx
       ImmediateAtlasGenerator<float, 3, msdfGenerator, BitmapAtlasStorage<msdfgen::byte, 3>>;
 
     msdfLoader loader {path, params};
+    if (!loader.IsLoaded())
+    {
+      return Unexpected("Failed to load font");
+    }
     auto glyphs = loader.LoadGlyphs();
     auto packedAtlas = loader.PackAtlas(glyphs);
 
@@ -480,6 +504,10 @@ namespace Krys::Gfx
       ImmediateAtlasGenerator<float, 4, mtsdfGenerator, BitmapAtlasStorage<msdfgen::byte, 4>>;
 
     msdfLoader loader {path, params};
+    if (!loader.IsLoaded())
+    {
+      return Unexpected("Failed to load font");
+    }
     auto glyphs = loader.LoadGlyphs();
     auto packedAtlas = loader.PackAtlas(glyphs);
 
