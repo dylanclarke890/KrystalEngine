@@ -237,7 +237,7 @@ namespace Krys::Gfx::OpenGL
 
   uint32 FontRegistry::PtSizeToPixels(float ptSize) const noexcept
   {
-    auto pixelSize = (ptSize * _dpi) / 72.0;
+    auto pixelSize = (ptSize * _dpi) / 72.f;
     return static_cast<uint32>(pixelSize);
   }
 

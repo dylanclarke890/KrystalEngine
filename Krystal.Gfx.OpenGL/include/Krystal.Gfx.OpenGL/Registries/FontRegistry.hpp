@@ -58,10 +58,10 @@ namespace Krys::Gfx::OpenGL
 
     NO_DISCARD const FontMetrics &GetMetrics(FontHandle handle) const override;
 
+    NO_DISCARD uint32 PtSizeToPixels(float ptSize) const noexcept;
+
   private:
     NO_DISCARD FontHandle Add(Font &&font, const FontDesc &cacheKey);
-
-    NO_DISCARD uint32 PtSizeToPixels(float ptSize) const noexcept;
 
     NO_DISCARD TextureHandle CreateFontAtlasTexture(const FontDesc &desc, const FontAtlasData &data);
   };

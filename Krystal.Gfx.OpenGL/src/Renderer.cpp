@@ -286,6 +286,7 @@ namespace Krys::Gfx::OpenGL
 
     Maths::Vec2 pos = position;
     Buffer &buffer = static_cast<BufferRegistry &>(_context.Buffers()).Get(_glyphBuffer);
+    auto &fonts = static_cast<FontRegistry &>(_context.Fonts());
 
     Texture &texture = static_cast<TextureRegistry &>(_context.Textures()).Get(font.AtlasTexture());
     ImageView &imageView = static_cast<ImageViewRegistry &>(_context.ImageViews()).Get(texture.ImageView());
@@ -297,7 +298,7 @@ namespace Krys::Gfx::OpenGL
     float scale = 1.f;
     if (font.Type() != FontType::Bitmap)
     {
-      scale = ((_dpi / 72.f) * ptSize) / font.SDFParams().EMSizeInPixels;
+      scale = fonts.PtSizeToPixels(ptSize) / font.SDFParams().EMSizeInPixels;
       auto unitRange = Maths::Vec2(font.SDFParams().PixelRange) / Maths::Vec2(font.AtlasSize());
       shader.SetUniform("u_UnitRange", unitRange);
     }
@@ -327,7 +328,14 @@ namespace Krys::Gfx::OpenGL
         _glyphVertices.push_back({{posX + w, posY}, {ch.UVMax.x, ch.UVMax.y}});
         _glyphVertices.push_back({{posX + w, posY + h}, {ch.UVMax.x, ch.UVMin.y}});
 
-        pos.x += ch.Advance * scale;
+        if (font.Type() != FontType::Bitmap && ptSize < 24.f)
+        {
+          pos.x += std::floor(ch.Advance + 0.5f) * scale;
+        }
+        else
+        {
+          pos.x += ch.Advance * scale;
+        }
       }
 
       buffer.Update(_glyphVertices);
