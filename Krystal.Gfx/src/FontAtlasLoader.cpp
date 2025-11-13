@@ -373,7 +373,7 @@ namespace
         characters[Codepoint(glyph.getCodepoint())] = Character {
           .Size = Vec2u(Round(Vec2d(pr - pl, pt - pb) * scale)),
           .Bearing = Vec2i(Round(Vec2d(pl, pt) * scale)),
-          .Advance = static_cast<int32>(Round(glyph.getAdvance() * scale)),
+          .Advance = static_cast<int32>(Floor(glyph.getAdvance() * scale)),
           .UVMin = Vec2((float)l, (float)t) / atlasSize,
           .UVMax = Vec2((float)r, (float)b) / atlasSize,
         };

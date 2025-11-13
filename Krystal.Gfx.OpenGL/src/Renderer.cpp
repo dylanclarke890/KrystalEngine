@@ -282,7 +282,7 @@ namespace Krys::Gfx::OpenGL
   {
     glBindVertexArray(_textVao);
     glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     Maths::Vec2 pos = position;
     Buffer &buffer = static_cast<BufferRegistry &>(_context.Buffers()).Get(_glyphBuffer);
