@@ -17,7 +17,7 @@ namespace Krys::Gfx::OpenGL
     NO_COPY_MOVE(SamplerRegistry)
 
     using SamplerManager = ResourceManager<Sampler, SamplerHandle>;
-    using SamplerCache = ResourceHandleCache<size_t, SamplerHandle>;
+    using SamplerCache = ResourceHandleCache<SamplerDesc, SamplerHandle>;
 
   private:
     SamplerManager _samplers;
@@ -38,26 +38,24 @@ namespace Krys::Gfx::OpenGL
 
     NO_DISCARD SamplerHandle Create(const SamplerDesc &desc) noexcept override
     {
-      GLenum min = MapFilterMode(desc.MinFilter);
-      GLenum mag = MapFilterMode(desc.MagFilter);
-      assert(mag != GL_NEAREST_MIPMAP_NEAREST && mag != GL_LINEAR_MIPMAP_NEAREST
-             && mag != GL_NEAREST_MIPMAP_LINEAR && mag != GL_LINEAR_MIPMAP_LINEAR
-             && "Mag filter cannot be a mipmap filter.");
-      GLenum wrapS = MapWrapMode(desc.WrapS);
-      GLenum wrapT = MapWrapMode(desc.WrapT);
-      GLenum wrapR = MapWrapMode(desc.WrapR);
-
-      size_t key = HashUtils::HashCombine(min, mag, wrapS, wrapT, wrapR, desc.AnisotropicLevel);
-      if (auto cached = _cache.Get(key); cached.IsValid())
+      if (auto cached = _cache.Get(desc); cached.IsValid())
       {
         return cached;
       }
 
-      Sampler sampler {min, mag, wrapS, wrapT, wrapR, desc.AnisotropicLevel};
-      SamplerHandle handle = _samplers.Add(std::move(sampler));
-      _cache.Add(key, handle);
+      GLenum mag = MapFilterMode(desc.MagFilter);
+      assert(mag != GL_NEAREST_MIPMAP_NEAREST && mag != GL_LINEAR_MIPMAP_NEAREST
+             && mag != GL_NEAREST_MIPMAP_LINEAR && mag != GL_LINEAR_MIPMAP_LINEAR
+             && "Mag filter cannot be a mipmap filter.");
 
-      return handle;
+      GLenum min = MapFilterMode(desc.MinFilter);
+
+      GLenum wrapS = MapWrapMode(desc.WrapS);
+      GLenum wrapT = MapWrapMode(desc.WrapT);
+      GLenum wrapR = MapWrapMode(desc.WrapR);
+
+      Sampler sampler {min, mag, wrapS, wrapT, wrapR, desc.AnisotropicLevel};
+      return Add(std::move(sampler), desc);
     }
 
     bool Unload(SamplerHandle handle) noexcept override
@@ -78,7 +76,14 @@ namespace Krys::Gfx::OpenGL
     }
 
   private:
-    static GLenum MapFilterMode(FilterMode mode) noexcept
+    NO_DISCARD SamplerHandle Add(Sampler &&sampler, const SamplerDesc &cacheKey) noexcept
+    {
+      auto handle = _samplers.Add(std::move(sampler));
+      _cache.Add(cacheKey, handle);
+      return handle;
+    }
+
+    NO_DISCARD static GLenum MapFilterMode(FilterMode mode) noexcept
     {
       switch (mode)
       {
@@ -92,7 +97,7 @@ namespace Krys::Gfx::OpenGL
       }
     }
 
-    static GLenum MapWrapMode(WrapMode mode) noexcept
+    NO_DISCARD static GLenum MapWrapMode(WrapMode mode) noexcept
     {
       switch (mode)
       {

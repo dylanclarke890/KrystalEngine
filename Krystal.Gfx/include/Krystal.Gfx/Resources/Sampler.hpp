@@ -1,6 +1,9 @@
 #pragma once
 
+#include "Krystal.Lib/HashUtils.hpp"
 #include "Krystal.Lib/Types.hpp"
+#include <compare>
+#include <type_traits>
 
 namespace Krys::Gfx
 {
@@ -29,6 +32,8 @@ namespace Krys::Gfx
     WrapMode WrapT {WrapMode::Repeat};
     WrapMode WrapR {WrapMode::Repeat};
     float AnisotropicLevel {1.0f};
+
+    NO_DISCARD auto operator<=>(const SamplerDesc &other) const noexcept = default;
 
     constexpr static float DefaultAnisotropicLevel = 4.0f;
 
@@ -126,6 +131,19 @@ namespace Krys::Gfx
         .WrapR = WrapMode::ClampToEdge,
         .AnisotropicLevel = anisotropy,
       };
+    }
+  };
+}
+
+namespace std
+{
+  template <>
+  struct hash<Krys::Gfx::SamplerDesc>
+  {
+    size_t operator()(const Krys::Gfx::SamplerDesc &desc) const noexcept
+    {
+      return Krys::HashUtils::HashCombine(desc.MinFilter, desc.MagFilter, desc.WrapS, desc.WrapT, desc.WrapR,
+                                    desc.AnisotropicLevel);
     }
   };
 }
