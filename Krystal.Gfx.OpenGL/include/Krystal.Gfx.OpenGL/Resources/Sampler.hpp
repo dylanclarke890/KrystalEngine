@@ -102,6 +102,11 @@ namespace Krys::Gfx::OpenGL
       return _id;
     }
 
+    void Bind(GLuint unit) const noexcept
+    {
+      glBindSampler(unit, _id);
+    }
+
   private:
     void Swap(Sampler &other) noexcept
     {

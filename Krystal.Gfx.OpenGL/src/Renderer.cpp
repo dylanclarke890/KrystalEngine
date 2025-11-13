@@ -162,26 +162,20 @@ namespace Krys::Gfx::OpenGL
           const auto &cmd = reader.ReadCommand<Commands::DrawText>();
           auto &rt = renderTargets.Get(_currentRenderTarget);
 
+          FontHandle fontHandle =
+            fonts.Get({.Family = cmd.FontFamily, .Type = FontType::Bitmap, .Size = cmd.FontSize});
+          Font &font = fonts.Get(fontHandle);
+          const auto &fontMetrics = fonts.GetMetrics(fontHandle);
+
+          float scale = 1.f;
+          if (font.Type() != FontType::Bitmap)
           {
-            FontHandle font =
-              fonts.Get({.Family = cmd.FontFamily, .Type = FontType::Bitmap, .Size = cmd.FontSize});
-            const auto &metrics = fonts.GetMetrics(font);
-            float posY = static_cast<float>(rt.Height()) - (cmd.Position.y + metrics.Ascender);
-            DrawText(_context.Strings().Get(cmd.Text), font, cmd.FontSize, {cmd.Position.x, posY},
-                     Colours::Red);
+            scale = fonts.PtSizeToPixels(cmd.FontSize) / font.SDFParams().EMSizeInPixels;
           }
 
-          {
-            FontHandle font =
-              fonts.Get({.Family = cmd.FontFamily, .Type = FontType::SDF, .Size = cmd.FontSize});
-            float scale = ((_dpi / 72.f) * cmd.FontSize) / fonts.Get(font).SDFParams().EMSizeInPixels;
-
-            const auto &metrics = fonts.GetMetrics(font);
-            float posY = static_cast<float>(rt.Height()) - (cmd.Position.y + (metrics.Ascender * scale));
-            DrawText(_context.Strings().Get(cmd.Text), font, cmd.FontSize, {cmd.Position.x, posY},
-                     Colours::Blue);
-          }
-
+          float posY = static_cast<float>(rt.Height()) - (cmd.Position.y + (fontMetrics.Ascender * scale));
+          DrawText(_context.Strings().Get(cmd.Text), fontHandle, cmd.FontSize, {cmd.Position.x, posY},
+                   Colours::Red);
           break;
         }
         default:
@@ -288,9 +282,7 @@ namespace Krys::Gfx::OpenGL
     Buffer &buffer = static_cast<BufferRegistry &>(_context.Buffers()).Get(_glyphBuffer);
     auto &fonts = static_cast<FontRegistry &>(_context.Fonts());
 
-    Texture &texture = static_cast<TextureRegistry &>(_context.Textures()).Get(font.AtlasTexture());
-    ImageView &imageView = static_cast<ImageViewRegistry &>(_context.ImageViews()).Get(texture.ImageView());
-    imageView.Bind(0);
+    static_cast<TextureRegistry &>(_context.Textures()).Bind(font.AtlasTexture(), 0u);
 
     shader.Bind();
     shader.SetUniform("u_TextColor", textColour.ToVec3());

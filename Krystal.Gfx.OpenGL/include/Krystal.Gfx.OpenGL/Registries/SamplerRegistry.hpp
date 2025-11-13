@@ -72,6 +72,11 @@ namespace Krys::Gfx::OpenGL
       return false;
     }
 
+    NO_DISCARD Sampler &Get(SamplerHandle handle)
+    {
+      return _samplers.Get(handle);
+    }
+
   private:
     static GLenum MapFilterMode(FilterMode mode) noexcept
     {

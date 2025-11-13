@@ -233,6 +233,21 @@ namespace Krys::Gfx::OpenGL
       return _imageViews.Get(texture.ImageView());
     }
 
+    void Bind(TextureHandle handle, uint32 unit) noexcept
+    {
+      assert(handle.IsValid() && "Invalid texture handle.");
+      
+      Texture &texture = Get(handle);
+      assert(texture.ImageView().IsValid() && "Texture has an invalid image view.");
+      assert(texture.Sampler().IsValid() && "Texture has an invalid sampler.");
+
+      ImageView &imageView = _imageViews.Get(texture.ImageView());
+      imageView.Bind(unit);
+
+      Sampler &sampler = _samplers.Get(texture.Sampler());
+      sampler.Bind(unit);
+    }
+
   private:
     TextureHandle AddTexture(const string &key, Texture &&texture) noexcept
     {
