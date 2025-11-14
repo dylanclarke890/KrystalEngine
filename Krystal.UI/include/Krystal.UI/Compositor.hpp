@@ -6,6 +6,7 @@
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/IRenderer.hpp"
 #include "Krystal.Lib/DebugBreak.hpp"
+#include "Krystal.Lib/HashUtils.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Stack.hpp"
 #include "Krystal.Lib/Types.hpp"
@@ -21,14 +22,21 @@ namespace Krys::UI
     struct State
     {
       ElementHandle CurrentElement;
-      float ParentX;
-      float ParentY;
+      Maths::Vec2 ParentOffset;
     };
 
     struct LayerContext
     {
       Gfx::RenderTargetHandle Target;
+      // TODO: use index into _commandLists instead of holding reference? Dangles when vector resizes.
       Gfx::CommandList &Commands;
+    };
+
+    struct CachedLayer
+    {
+      Gfx::RenderTargetHandle Target;
+      Maths::Vec2 Size;
+      uint64 Hash;
     };
 
   private:
@@ -37,6 +45,9 @@ namespace Krys::UI
     List<Gfx::CommandList> _commandLists;
     Stack<LayerContext> _layerStack;
     List<Gfx::RenderTargetHandle> _usedTempRenderTargets;
+    uint32 _lastDrawnElementCount {0u};
+    uint32 _drawnElementCount {0u};
+    Map<ElementHandle, CachedLayer> _cachedLayers;
 
   public:
     Compositor(Gfx::IContext &context, Gfx::IRenderer &renderer) noexcept
@@ -48,6 +59,7 @@ namespace Krys::UI
 
     void Render(Document &document, Gfx::RenderTargetHandle renderTarget = {}) noexcept
     {
+      _drawnElementCount = 0u;
       if (!renderTarget.IsValid())
       {
         renderTarget = _context.RenderTargets().GetScreenRenderTarget();
@@ -58,13 +70,14 @@ namespace Krys::UI
 
       _layerStack = {};
       _commandLists.clear();
+      // TODO: we do this to avoid reallocations during rendering (it breaks things), but we should have a better strategy.
       _commandLists.reserve(16u);
 
       _commandLists.emplace_back();
       _layerStack.push({renderTarget, _commandLists.back()});
 
       _layerStack.top().Commands.Push(Gfx::Commands::BindRenderTarget {renderTarget});
-      RenderElement(document, {document.Body(), 0.f, 0.f});
+      RenderElement(document, {document.Body(), {0.f, 0.f}});
 
       // Submit child command lists first, since parents composite from their results.
       for (auto it = _commandLists.rbegin(); it != _commandLists.rend(); ++it)
@@ -77,21 +90,50 @@ namespace Krys::UI
         _context.RenderTargets().Release(rt);
       }
       _usedTempRenderTargets.clear();
+
+      if (_lastDrawnElementCount != _drawnElementCount)
+      {
+        KRYS_DEBUG("Compositor rendered {} elements (previously {})", _drawnElementCount,
+                   _lastDrawnElementCount);
+        _lastDrawnElementCount = _drawnElementCount;
+      }
     }
 
   private:
     void RenderElement(Document &document, const State &state)
     {
+      _drawnElementCount++;
       auto &element = document.Get(state.CurrentElement);
       auto node = element.LayoutNode;
 
-      float x = NodeLayoutGetLeft(node);
-      float y = NodeLayoutGetTop(node);
+      // if (!NodeGetHasNewLayout(node))
+      //{
+      //   return;
+      // }
+
+      // NodeSetHasNewLayout(node, false);
+      Maths::Vec2 position = {NodeLayoutGetLeft(node), NodeLayoutGetTop(node)};
       float w = NodeLayoutGetWidth(node);
       float h = NodeLayoutGetHeight(node);
 
       if (document.ElementRequiresLayer(state.CurrentElement))
       {
+        //if (auto existing = _cachedLayers.find(state.CurrentElement); existing != _cachedLayers.end())
+        //{
+        //  uint64 hash = ComputeLayerHash(element);
+        //  auto &cachedLayer = existing->second;
+        //  bool isValid = cachedLayer.Target.IsValid() && cachedLayer.Size == Maths::Vec2 {w, h}
+        //                 && cachedLayer.Hash == hash;
+
+        //  if (isValid)
+        //  {
+        //    float opacity = document.ElementStyleGetOpacity(state.CurrentElement);
+        //    DrawRenderTargetColourAttachmentCommand(cachedLayer.Target, state.ParentOffset + position, {w, h},
+        //                                            opacity);
+        //    return;
+        //  }
+        //}
+
         Gfx::RenderTargetDesc desc {
           .Width = static_cast<uint32>(w),
           .Height = static_cast<uint32>(h),
@@ -108,7 +150,7 @@ namespace Krys::UI
         _layerStack.top().Commands.Push(bindRTCmd);
 
         Gfx::Commands::DrawRect drawRectCmd;
-        drawRectCmd.Position = {x, y};
+        drawRectCmd.Position = position;
         drawRectCmd.Size = {w, h};
         drawRectCmd.BackgroundColour = NodeStyleGetBackgroundColour(node);
         drawRectCmd.BorderColour = NodeStyleGetBorderColour(node);
@@ -116,29 +158,25 @@ namespace Krys::UI
 
         if (element.TextContent.Text.IsValid())
         {
-          DrawTextCommand(element, x, y);
+          DrawTextCommand(element, position);
         }
 
         for (auto &child : element.Children)
         {
-          RenderElement(document, {child, x, y});
+          RenderElement(document, {child, position});
         }
 
         auto &layerContext = _layerStack.top();
         _layerStack.pop();
 
-        Gfx::Commands::DrawRenderTargetColourAttachment drawRenderTargetCmd;
-        drawRenderTargetCmd.Source = layerRenderTarget;
-        drawRenderTargetCmd.ColourAttachmentIndex = 0u;
-        drawRenderTargetCmd.Position = {state.ParentX + x, state.ParentY + y};
-        drawRenderTargetCmd.Size = {w, h};
-        drawRenderTargetCmd.Opacity = document.ElementStyleGetOpacity(state.CurrentElement);
-        _layerStack.top().Commands.Push(drawRenderTargetCmd);
+        float opacity = document.ElementStyleGetOpacity(state.CurrentElement);
+        DrawRenderTargetColourAttachmentCommand(layerRenderTarget, state.ParentOffset + position, {w, h},
+                                                opacity);
       }
       else
       {
         Gfx::Commands::DrawRect command;
-        command.Position = {state.ParentX + x, state.ParentY + y};
+        command.Position = state.ParentOffset + position;
         command.Size = {w, h};
         command.BackgroundColour = NodeStyleGetBackgroundColour(node);
         command.BorderColour = NodeStyleGetBorderColour(node);
@@ -146,34 +184,61 @@ namespace Krys::UI
 
         if (element.TextContent.Text.IsValid())
         {
-          DrawTextCommand(element, state.ParentX + x, state.ParentY + y);
+          DrawTextCommand(element, state.ParentOffset + position);
         }
 
         for (auto &child : element.Children)
         {
-          RenderElement(document, {child, state.ParentX + x, state.ParentY + y});
+          RenderElement(document, {child, state.ParentOffset + position});
         }
       }
     }
 
-    void DrawTextCommand(Element &element, float parentX, float parentY)
+    void DrawTextCommand(Element &element, const Maths::Vec2 &offset)
     {
-      float posX = parentX + NodeLayoutGetLeft(element.TextContent.LayoutNode);
-      float posY = parentY + NodeLayoutGetTop(element.TextContent.LayoutNode);
-
       Gfx::FontFamilyHandle family = NodeStyleGetFontFamily(element.LayoutNode);
       if (!family.IsValid())
       {
         family = _context.Fonts().GetDefaultFontFamily();
       }
 
-      Gfx::Commands::DrawText drawTextCmd;
-      drawTextCmd.Text = element.TextContent.Text;
-      drawTextCmd.Position = {posX, posY};
-      drawTextCmd.FontFamily = family;
-      drawTextCmd.FontSize = NodeStyleGetFontSize(element.LayoutNode);
-      drawTextCmd.Colour = NodeStyleGetTextColour(element.LayoutNode);
-      _layerStack.top().Commands.Push(drawTextCmd);
+      float left = NodeLayoutGetLeft(element.TextContent.LayoutNode);
+      float top = NodeLayoutGetTop(element.TextContent.LayoutNode);
+
+      _layerStack.top().Commands.Push(Gfx::Commands::DrawText {
+        .Text = element.TextContent.Text,
+        .Position = offset + Maths::Vec2(left, top),
+        .FontFamily = family,
+        .FontSize = NodeStyleGetFontSize(element.LayoutNode),
+        .Colour = NodeStyleGetTextColour(element.LayoutNode),
+      });
+    }
+
+    void DrawRenderTargetColourAttachmentCommand(Gfx::RenderTargetHandle source, const Maths::Vec2 &position,
+                                                 const Maths::Vec2 &size, float opacity)
+    {
+      _layerStack.top().Commands.Push(Gfx::Commands::DrawRenderTargetColourAttachment {
+        .Source = source,
+        .ColourAttachmentIndex = 0u,
+        .Position = position,
+        .Size = size,
+        .Opacity = opacity,
+      });
+    }
+
+    uint64 ComputeLayerHash(const Element &e)
+    {
+      auto node = e.LayoutNode;
+      uint64 h = HashUtils::HashCombine(NodeLayoutGetLeft(node), NodeLayoutGetTop(node));
+      h = HashUtils::HashCombine(h, NodeLayoutGetWidth(node), NodeLayoutGetHeight(node));
+      h = HashUtils::HashCombine(h, NodeStyleGetBackgroundColour(node), NodeStyleGetBorderColour(node));
+      h = HashUtils::HashCombine(h, NodeStyleGetTextColour(node));
+      if (e.TextContent.Text.IsValid())
+      {
+        h = HashUtils::HashCombine(h, _context.Strings().Get(e.TextContent.Text));
+      }
+
+      return h;
     }
   };
 }

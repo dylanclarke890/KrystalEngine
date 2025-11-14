@@ -1,13 +1,14 @@
 #pragma once
 
 #include "Krystal.Gfx.Lib/Handle.hpp"
-#include "Krystal.Lib/String/StringRef.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/String/StringRef.hpp"
 #include "Krystal.UI/Layout/Algorithm/MeasureText.hpp"
 #include "Krystal.UI/Layout/LayoutEngine.hpp"
+#include <type_traits>
 
 namespace Krys::UI
 {
@@ -85,6 +86,18 @@ namespace Krys::UI
       std::swap(LayoutNode, other.LayoutNode);
       std::swap(LayoutConfig, other.LayoutConfig);
       std::swap(TextContent, other.TextContent);
+    }
+  };
+}
+
+namespace std
+{
+  template <>
+  struct hash<Krys::UI::ElementHandle>
+  {
+    NO_DISCARD size_t operator()(const Krys::UI::ElementHandle &handle) const noexcept
+    {
+      return std::hash<Krys::uint32>()(handle.Id);
     }
   };
 }

@@ -188,7 +188,7 @@ namespace Krys::Gfx::OpenGL
     {
       ShaderReflector reflector {};
       _layout = reflector.Reflect(_id);
-      reflector.LogReflectionInfo(_layout);
+      //reflector.LogReflectionInfo(_layout);
 
       SetSamplerUniforms();
     }
