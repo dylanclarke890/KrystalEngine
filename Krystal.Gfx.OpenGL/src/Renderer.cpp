@@ -308,6 +308,14 @@ namespace Krys::Gfx::OpenGL
       const auto &characters = font.Characters();
       for (const Codepoint &c : batch)
       {
+        // Check for newline character
+        if (c.Value == '\n')
+        {
+          pos.x = position.x;
+          pos.y -= font.Metrics().Height * scale;
+          continue;
+        }
+
         const auto &glyph = characters.find(c);
         if (glyph == characters.end())
         {

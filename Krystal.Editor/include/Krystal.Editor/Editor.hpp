@@ -93,7 +93,7 @@ namespace Krys
     {
       using namespace Krys::UI;
 
-      StringRef textRef = _context->Strings.Intern("Hello, Krystal UI!");
+      StringRef textRef = _context->Strings.Intern(u8"Hello, Krystal UI!\nThis text should be on a newline!");
 
       _document.ElementStyleSetBackgroundColour(_document.Body(), Gfx::Colours::Green);
       _document.ElementStyleSetFlexDirection(_document.Body(), FlexDirection::Row);
