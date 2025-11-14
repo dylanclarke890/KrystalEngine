@@ -1583,6 +1583,7 @@ namespace Krys::Gfx::OpenGL
 
   bool IsGLExtensionSupported(const char *extension) noexcept
   {
+    // TODO: Implement extension checking
     return false;
   }
 }
