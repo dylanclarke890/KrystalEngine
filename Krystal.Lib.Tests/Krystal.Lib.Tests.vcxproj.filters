@@ -21,7 +21,7 @@
     <ClCompile Include="tests\BitUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\StringUtils.cpp">
+    <ClCompile Include="tests\String\StringUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tests\NullableFloat.cpp">
@@ -30,10 +30,10 @@
     <ClCompile Include="tests\SmallValueBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\StringInterner.cpp">
+    <ClCompile Include="tests\String\StringInterner.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\UTF8.cpp">
+    <ClCompile Include="tests\String\UTF8.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

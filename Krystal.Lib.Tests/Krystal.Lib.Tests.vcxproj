@@ -152,11 +152,11 @@
     <ClCompile Include="tests\BitUtils.cpp" />
     <ClCompile Include="tests\NullableFloat.cpp" />
     <ClCompile Include="tests\SmallValueBuffer.cpp" />
-    <ClCompile Include="tests\StringUtils.cpp" />
-    <ClCompile Include="tests\UTF8.cpp" />
+    <ClCompile Include="tests\String\StringUtils.cpp" />
+    <ClCompile Include="tests\String\UTF8.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="tests\StringInterner.cpp" />
+    <ClCompile Include="tests\String\StringInterner.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
