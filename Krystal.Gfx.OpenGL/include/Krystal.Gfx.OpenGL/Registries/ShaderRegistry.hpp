@@ -9,7 +9,7 @@
 #include "Krystal.IO/VirtualFileSystem.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
-#include "Krystal.Lib/String.hpp"
+#include "Krystal.Lib/String/String.hpp"
 
 namespace Krys::Gfx::OpenGL
 {

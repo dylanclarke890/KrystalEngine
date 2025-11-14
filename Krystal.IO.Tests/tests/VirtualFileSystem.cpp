@@ -193,7 +193,7 @@ TEST_CASE("VirtualFileSystem", "[IO][VFS]")
 
   SECTION("Delete and re-create file")
   {
-    // Create under root, then delete, then ensure it’s gone, then create again and read.
+    // Create under root, then delete, then ensure it's gone, then create again and read.
     const Path p("/temp_delete.txt");
 
     {

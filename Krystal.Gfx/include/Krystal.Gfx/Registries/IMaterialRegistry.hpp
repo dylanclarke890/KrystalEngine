@@ -5,7 +5,7 @@
 #include "Krystal.Gfx/Resources/Material.hpp"
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/String.hpp"
+#include "Krystal.Lib/String/String.hpp"
 
 namespace Krys::Gfx
 {

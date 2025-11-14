@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Krystal.Lib/Concepts.hpp"
-#include "Krystal.Lib/String.hpp"
+#include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Serialisation/Access.hpp"
 #include "Krystal.Serialisation/Builtins.hpp"

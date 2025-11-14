@@ -60,7 +60,7 @@
     <ClInclude Include="include\Krystal.Lib\Flags.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\StringUtils.hpp">
+    <ClInclude Include="include\Krystal.Lib\String\StringUtils.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\RangeUtils.hpp">
@@ -87,7 +87,7 @@
     <ClInclude Include="include\Krystal.Lib\Expected.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\String.hpp">
+    <ClInclude Include="include\Krystal.Lib\String\String.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\List.hpp">
@@ -147,15 +147,24 @@
     <ClInclude Include="include\Krystal.Lib\Allocators\Block.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Allocators\StringInterner.hpp">
+    <ClInclude Include="include\Krystal.Lib\String\StringInterner.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Allocators\StringRef.hpp">
+    <ClInclude Include="include\Krystal.Lib\String\StringRef.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\String\UTF8.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\String\Codepoint.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Events\EventManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\String\UTF8.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

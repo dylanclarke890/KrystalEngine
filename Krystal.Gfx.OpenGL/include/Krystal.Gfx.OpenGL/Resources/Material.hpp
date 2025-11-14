@@ -4,7 +4,7 @@
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/String.hpp"
+#include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Maths/Vector.hpp"
 #include <variant>

@@ -3,7 +3,7 @@
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Font.hpp"
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Allocators/StringRef.hpp"
+#include "Krystal.Lib/String/StringRef.hpp"
 #include "Krystal.Lib/Macros.hpp"
 
 namespace Krys::Gfx

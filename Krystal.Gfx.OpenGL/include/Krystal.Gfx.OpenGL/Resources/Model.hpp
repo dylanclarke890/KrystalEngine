@@ -7,7 +7,7 @@
 #include "Krystal.Gfx.OpenGL/VertexArray.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/String.hpp"
+#include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Maths/Vector.hpp"
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>

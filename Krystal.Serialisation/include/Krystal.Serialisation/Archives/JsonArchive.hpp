@@ -3,7 +3,7 @@
 #include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Stack.hpp"
-#include "Krystal.Lib/String.hpp"
+#include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Serialisation/Archives/Adapters/RapidJsonStreamAdapters.hpp"
 #include "Krystal.Serialisation/Archives/BaseArchive.hpp"

@@ -1,4 +1,4 @@
-#include "Krystal.Lib/StringUtils.hpp"
+#include "Krystal.Lib/String/StringUtils.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

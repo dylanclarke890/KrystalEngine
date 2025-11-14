@@ -1,10 +1,10 @@
 #pragma once
-#include "Krystal.Lib/Allocators/StringRef.hpp"
+#include "Krystal.Lib/String/StringRef.hpp"
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
-#include "Krystal.Lib/String.hpp"
+#include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include <cassert>
 
@@ -15,26 +15,35 @@ namespace Krys
     NO_COPY_MOVE(StringInterner)
 
   private:
-    List<string> _strings;
-    Map<stringview, size_t> _map;
+    List<utf8_string> _strings;
+    Map<utf8_stringview, size_t> _map;
 
   public:
     StringInterner() = default;
 
     ~StringInterner() = default;
 
-    NO_DISCARD StringRef Intern(const char *str)
+    NO_DISCARD StringRef Intern(const char8_t *str)
     {
       auto it = _map.find(str);
       if (it != _map.end())
+      {
         return {it->second};
+      }
+
       _strings.emplace_back(str);
       size_t id = _strings.size();
       _map.emplace(_strings.back(), id);
+
       return {id};
     }
 
-    NO_DISCARD const string &Get(StringRef ref) const
+    NO_DISCARD StringRef Intern(const char *str)
+    {
+      return Intern(reinterpret_cast<const char8_t *>(str));
+    }
+
+    NO_DISCARD const utf8_string &Get(StringRef ref) const
     {
       assert(ref.Id - 1u < _strings.size());
       return _strings[ref.Id - 1u];

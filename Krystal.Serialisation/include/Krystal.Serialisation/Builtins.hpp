@@ -2,7 +2,7 @@
 
 #include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/String.hpp"
+#include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types.hpp"
 
 namespace Krys::Serialisation

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Krystal.Lib/String.hpp"
+#include "Krystal.Lib/String/String.hpp"
 
 namespace Krys::Platform::Win32
 {

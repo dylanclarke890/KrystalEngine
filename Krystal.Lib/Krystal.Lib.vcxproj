@@ -110,6 +110,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp23</LanguageStandard>
+      <AdditionalOptions>/utf-8 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,11 +140,15 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Allocators\StringInterner.hpp">
+    <ClInclude Include="include\Krystal.Lib\String\Codepoint.hpp">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Allocators\StringRef.hpp">
+    <ClInclude Include="include\Krystal.Lib\String\StringInterner.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\String\StringRef.hpp">
       <SubType>
       </SubType>
     </ClInclude>
@@ -185,9 +190,13 @@
     <ClInclude Include="include\Krystal.Lib\SmartPointers.hpp" />
     <ClInclude Include="include\Krystal.Lib\Span.hpp" />
     <ClInclude Include="include\Krystal.Lib\Stack.hpp" />
-    <ClInclude Include="include\Krystal.Lib\String.hpp" />
+    <ClInclude Include="include\Krystal.Lib\String\String.hpp" />
     <ClInclude Include="include\Krystal.Lib\StringId.hpp" />
-    <ClInclude Include="include\Krystal.Lib\StringUtils.hpp" />
+    <ClInclude Include="include\Krystal.Lib\String\StringUtils.hpp" />
+    <ClInclude Include="include\Krystal.Lib\String\UTF8.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\StronglyTypedValue.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types.hpp" />
     <ClInclude Include="include\Krystal.Lib\TypeName.hpp" />
@@ -195,6 +204,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Events\EventManager.cpp" />
+    <ClCompile Include="src\String\UTF8.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

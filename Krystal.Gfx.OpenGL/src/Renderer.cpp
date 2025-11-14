@@ -3,6 +3,7 @@
 #include "Krystal.Gfx/Commands/Commands.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.Lib/Expected.hpp"
+#include "Krystal.Lib/String/UTF8.hpp"
 #include "Krystal.Maths/Clamp.hpp"
 #include "Krystal.Platform/Platform.hpp"
 
@@ -244,7 +245,7 @@ namespace Krys::Gfx::OpenGL
     glDisable(GL_BLEND);
   }
 
-  void Renderer::DrawText(const string &text, FontHandle fontHandle, float ptSize,
+  void Renderer::DrawText(const utf8_string &text, FontHandle fontHandle, float ptSize,
                           const Maths::Vec2 &position, const Colour &colour) noexcept
   {
     Font &font = static_cast<FontRegistry &>(_context.Fonts()).Get(fontHandle);
@@ -254,7 +255,7 @@ namespace Krys::Gfx::OpenGL
     DrawText(font, shader, text, colour, position, ptSize);
   }
 
-  void Renderer::DrawTextOutlined(const string &text, FontHandle fontHandle, float ptSize,
+  void Renderer::DrawTextOutlined(const utf8_string &text, FontHandle fontHandle, float ptSize,
                                   const Maths::Vec2 &position, const Colour &textColour,
                                   const Colour &outlineColour, float outlineWidth) noexcept
   {
@@ -271,7 +272,7 @@ namespace Krys::Gfx::OpenGL
     DrawText(font, shader, text, textColour, position, ptSize);
   }
 
-  void Renderer::DrawText(Font &font, Shader &shader, const string &text, const Colour &textColour,
+  void Renderer::DrawText(Font &font, Shader &shader, const utf8_string &text, const Colour &textColour,
                           const Maths::Vec2 &position, float ptSize)
   {
     glBindVertexArray(_textVao);
@@ -295,22 +296,23 @@ namespace Krys::Gfx::OpenGL
       shader.SetUniform("u_UnitRange", unitRange);
     }
 
-    auto count = text.size();
+    List<Codepoint> codepoints = UTF8::Decode(text);
+    auto count = codepoints.size();
     while (count > 0)
     {
       auto batchSize = Maths::Min(count, static_cast<size_t>(GlyphVertex::BatchSize));
-      Span<const char> batch(text.data() + (text.size() - count), batchSize);
+      Span<const Codepoint> batch(codepoints.data() + (codepoints.size() - count), batchSize);
       count -= batchSize;
 
       _glyphVertices.clear();
       const auto &characters = font.Characters();
-      for (const char c : batch)
+      for (const Codepoint &c : batch)
       {
-        const auto &glyph = characters.find(Codepoint(c));
+        const auto &glyph = characters.find(c);
         if (glyph == characters.end())
         {
-          // TODO: this check is better but we should default to using a missing glyph character instead
-          KRYS_WARN("Font '{}' does not contain glyph for character '{}'", font.Family().Id, c);
+          // TODO: this check is better than before but we should default to using a missing glyph character
+          KRYS_WARN("Font '{}' does not contain glyph for character '{}'", font.Family().Id, c.Value);
           continue;
         }
 

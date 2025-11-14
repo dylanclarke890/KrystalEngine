@@ -3,7 +3,7 @@
 #include "Krystal.Gfx.Lib/Colour.hpp"
 #include "Krystal.Gfx/Commands/CommandType.hpp"
 #include "Krystal.Gfx/Handle.hpp"
-#include "Krystal.Lib/Allocators/StringRef.hpp"
+#include "Krystal.Lib/String/StringRef.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Maths/Vector.hpp"
 

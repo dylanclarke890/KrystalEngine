@@ -1,6 +1,6 @@
 #include "Krystal.Gfx.D3D11/D3D11Context.hpp"
 #include "Krystal.Lib/Expected.hpp"
-#include "Krystal.Lib/String.hpp"
+#include "Krystal.Lib/String/String.hpp"
 
 #pragma comment(lib, "d3dcompiler.lib")
 #include <d3d11.h>

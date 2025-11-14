@@ -2,7 +2,7 @@
 
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.Lib/Concepts.hpp"
-#include "Krystal.Lib/String.hpp"
+#include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Serialisation/Archives/BaseArchive.hpp"
 #include "Krystal.Serialisation/Builtins.hpp"

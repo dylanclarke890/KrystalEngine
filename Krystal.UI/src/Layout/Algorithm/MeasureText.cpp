@@ -2,6 +2,7 @@
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/Resources/Font.hpp"
 #include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/String/Codepoint.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.UI/Document.hpp"
 #include "Krystal.UI/Elements/Element.hpp"
@@ -36,7 +37,7 @@ namespace Krys::UI
         continue;
       }
 
-      const auto &ch = characters.at(Gfx::Codepoint(c));
+      const auto &ch = characters.at(Codepoint(c));
 
       // Wrap if constrained and over width
       if (widthMode != MeasureMode::Undefined && currentLineWidth + ch.Advance > width)

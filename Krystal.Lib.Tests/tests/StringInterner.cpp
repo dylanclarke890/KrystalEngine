@@ -1,4 +1,4 @@
-#include "Krystal.Lib/Allocators/StringInterner.hpp"
+#include "Krystal.Lib/String/StringInterner.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
@@ -15,6 +15,6 @@ namespace Krys::Tests
 
     REQUIRE(helloId == againId);
     REQUIRE(helloId != worldId);
-    REQUIRE(interner.Get(worldId) == "world");
+    REQUIRE(interner.Get(worldId) == u8"world");
   }
 }

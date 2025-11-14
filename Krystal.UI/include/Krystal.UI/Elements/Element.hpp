@@ -1,11 +1,11 @@
 #pragma once
 
 #include "Krystal.Gfx.Lib/Handle.hpp"
-#include "Krystal.Lib/Allocators/StringRef.hpp"
+#include "Krystal.Lib/String/StringRef.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
-#include "Krystal.Lib/String.hpp"
+#include "Krystal.Lib/String/String.hpp"
 #include "Krystal.UI/Layout/Algorithm/MeasureText.hpp"
 #include "Krystal.UI/Layout/LayoutEngine.hpp"
 

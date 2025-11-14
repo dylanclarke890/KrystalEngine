@@ -3,11 +3,12 @@
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Allocators/StringRef.hpp"
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
+#include "Krystal.Lib/String/Codepoint.hpp"
+#include "Krystal.Lib/String/StringRef.hpp"
 #include "Krystal.Lib/StronglyTypedValue.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Maths/Vector.hpp"
@@ -46,16 +47,6 @@ namespace Krys::Gfx
         .PixelRange = 12.5f,
         .MiterLimit = 1.f,
       };
-    }
-  };
-
-  /// @brief Unicode codepoint.
-  struct Codepoint : public StronglyTypedNumber<Codepoint, uint32>
-  {
-    using StronglyTypedNumber<Codepoint, uint32>::StronglyTypedNumber;
-
-    constexpr explicit Codepoint(char value) noexcept : StronglyTypedNumber<Codepoint, uint32>(value)
-    {
     }
   };
 

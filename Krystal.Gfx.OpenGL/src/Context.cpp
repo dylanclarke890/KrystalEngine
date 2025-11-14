@@ -17,7 +17,7 @@
 #include "Krystal.Lib/Expected.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Map.hpp"
-#include "Krystal.Lib/String.hpp"
+#include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include "Krystal.Maths/Clipspace.hpp"
 #include "Krystal.Maths/Convert.hpp"

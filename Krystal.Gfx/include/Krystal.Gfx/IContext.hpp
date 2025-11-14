@@ -12,11 +12,11 @@
 #include "Krystal.Gfx/Registries/IShaderRegistry.hpp"
 #include "Krystal.Gfx/Registries/ITextureRegistry.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
-#include "Krystal.Lib/Allocators/StringInterner.hpp"
 #include "Krystal.Lib/Expected.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/NativeHandle.hpp"
 #include "Krystal.Lib/SmartPointers.hpp"
+#include "Krystal.Lib/String/StringInterner.hpp"
 #include "Krystal.Lib/Types.hpp"
 
 namespace Krys::Gfx

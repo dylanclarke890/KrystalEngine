@@ -2,7 +2,7 @@
 
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/Nullable.hpp"
-#include "Krystal.Lib/String.hpp"
+#include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Lib/NativeHandle.hpp"
 
