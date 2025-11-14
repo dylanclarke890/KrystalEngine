@@ -1,6 +1,6 @@
 #define KRYS_WGL_OVERRIDE_FUNCTIONS 0
 #include "Krystal.Gfx.OpenGL/Hooks/wgl.hpp"
-#include "Krystal.Lib/StringUtils.hpp"
+#include "Krystal.Lib/String/StringUtils.hpp"
 #include <algorithm>
 #include <cassert>
 
@@ -122,7 +122,7 @@ namespace
 
   static void LoadExtension_ARB_swap_control() noexcept
   {
-    LoadWGLFunc(SwapIntervalEXT, PFNWGLSWAPINTERVALEXTPROC);
+    wgl.SwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)GetFunctionAddress(STRINGIFY(CONCAT(wgl, SwapIntervalEXT)));
     LoadWGLFunc(GetSwapIntervalEXT, PFNWGLGETSWAPINTERVALEXTPROC);
   }
 }
