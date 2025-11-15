@@ -44,6 +44,7 @@ namespace Krys::UI
     List<Gfx::CommandList> _commandLists;
     Map<ElementHandle, CachedLayer> _cachedLayers;
     Stack<LayerContext> _layerStack;
+    List<Gfx::RenderTargetHandle> _pendingDestruction;
 
   public:
     Compositor(Gfx::IContext &context, Gfx::IRenderer &renderer) noexcept
@@ -55,8 +56,6 @@ namespace Krys::UI
 
     void Render(Document &document, Gfx::RenderTargetHandle renderTarget = {}) noexcept
     {
-      _commandLists.clear();
-
       if (!renderTarget.IsValid())
       {
         renderTarget = _context.RenderTargets().GetScreenRenderTarget();
@@ -75,8 +74,15 @@ namespace Krys::UI
       {
         _renderer.Submit(*it);
       }
+      _commandLists.clear();
 
-      // TODO: delete unused cached layers
+      for (auto &handle : _pendingDestruction)
+      {
+        _context.RenderTargets().Destroy(handle);
+      }
+      _pendingDestruction.clear();
+
+      // TODO: Cleanup unused cached layers
     }
 
   private:
@@ -106,8 +112,8 @@ namespace Krys::UI
       auto node = element.LayoutNode;
 
       Vec2 position = {NodeLayoutGetLeft(node), NodeLayoutGetTop(node)};
-      Vec2 size = {NodeLayoutGetWidth(node), NodeLayoutGetHeight(node)};
       Vec2 relativePosition = parentOffset + position;
+      Vec2 size = {NodeLayoutGetWidth(node), NodeLayoutGetHeight(node)};
 
       if (!document.ElementRequiresLayer(handle))
       {
@@ -127,8 +133,7 @@ namespace Krys::UI
         }
         else
         {
-          // TODO: defer deletion until end of frame
-          _context.RenderTargets().Destroy(cachedLayer.Target);
+          _pendingDestruction.push_back(cachedLayer.Target);
           _cachedLayers.erase(existing);
         }
       }
