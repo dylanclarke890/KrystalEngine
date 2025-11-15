@@ -93,7 +93,6 @@ namespace Krys::UI
     Gfx::CommandList &CurrentCommandList() noexcept
     {
       assert(!_layerStack.empty() && "No active layer");
-      _commandLists.emplace_back();
       return _commandLists.at(_layerStack.top().CommandListIndex);
     }
 
