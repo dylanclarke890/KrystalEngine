@@ -68,8 +68,10 @@ namespace Krys::UI
       document.Reflow(targetDimensions.x, targetDimensions.y);
 
       PushLayer(document.Body(), renderTarget);
-      BindRenderTargetCommand(renderTarget);
-      RenderElement(document, document.Body(), {0.f, 0.f});
+      {
+        BindRenderTargetCommand(renderTarget);
+        RenderElement(document, document.Body(), {0.f, 0.f});
+      }
       PopLayer();
 
       // Submit child command lists first, since parents composite from their results.
@@ -158,13 +160,16 @@ namespace Krys::UI
       auto layerRenderTarget = _context.RenderTargets().Create({
         .Width = static_cast<uint32>(size.x),
         .Height = static_cast<uint32>(size.y),
+        .Samples = 1u,
         .Attachments = {{AttachmentType::Colour, PixelFormat::R8G8B8A8}},
       });
 
       PushLayer(handle, layerRenderTarget);
-      _cachedLayers[handle] = {.Target = layerRenderTarget, .Size = size, .Hash = hash};
-      BindRenderTargetCommand(layerRenderTarget);
-      RenderElementContents(node, relativePosition, size, element, document);
+      {
+        _cachedLayers[handle] = {.Target = layerRenderTarget, .Size = size, .Hash = hash};
+        BindRenderTargetCommand(layerRenderTarget);
+        RenderElementContents(node, relativePosition, size, element, document);
+      }
       PopLayer();
 
       float opacity = document.ElementStyleGetOpacity(handle);
