@@ -111,13 +111,13 @@ namespace Krys::UI
       auto &element = document.Get(handle);
       auto node = element.LayoutNode;
 
-      Vec2 position = {NodeLayoutGetLeft(node), NodeLayoutGetTop(node)};
-      Vec2 relativePosition = parentOffset + position;
+      Vec2 relativePosition = {NodeLayoutGetLeft(node), NodeLayoutGetTop(node)};
+      Vec2 absolutePosition = parentOffset + relativePosition;
       Vec2 size = {NodeLayoutGetWidth(node), NodeLayoutGetHeight(node)};
 
       if (!document.ElementRequiresLayer(handle))
       {
-        RenderElementContents(node, relativePosition, size, element, document);
+        RenderElementContents(node, absolutePosition, size, element, document);
         return;
       }
 
@@ -129,7 +129,7 @@ namespace Krys::UI
         if (cachedLayer.Target.IsValid() && cachedLayer.Size == size && cachedLayer.Hash == hash)
         {
           float opacity = document.ElementStyleGetOpacity(handle);
-          DrawRenderTargetColourAttachmentCommand(cachedLayer.Target, relativePosition, size, opacity);
+          DrawRenderTargetColourAttachmentCommand(cachedLayer.Target, absolutePosition, size, opacity);
           return;
         }
         else
@@ -148,11 +148,11 @@ namespace Krys::UI
       PushLayer(layerRenderTarget);
       _cachedLayers[handle] = {.Target = layerRenderTarget, .Size = size, .Hash = hash};
       BindRenderTargetCommand(layerRenderTarget);
-      RenderElementContents(node, position, size, element, document);
+      RenderElementContents(node, relativePosition, size, element, document);
       PopLayer();
 
       float opacity = document.ElementStyleGetOpacity(handle);
-      DrawRenderTargetColourAttachmentCommand(layerRenderTarget, relativePosition, size, opacity);
+      DrawRenderTargetColourAttachmentCommand(layerRenderTarget, absolutePosition, size, opacity);
     }
 
     void RenderElementContents(NodeRef node, const Maths::Vec2 &position, const Maths::Vec2 &size,
