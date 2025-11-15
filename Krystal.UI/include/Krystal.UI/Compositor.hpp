@@ -122,6 +122,7 @@ namespace Krys::UI
       }
 
       uint64 hash = ComputeLayerHash(element);
+      // TODO: we need to handle when child elements change and invalidate the cache
       if (auto existing = _cachedLayers.find(handle); existing != _cachedLayers.end())
       {
         auto &cachedLayer = existing->second;
