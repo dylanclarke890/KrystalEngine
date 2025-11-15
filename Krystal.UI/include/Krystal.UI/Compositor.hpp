@@ -44,8 +44,6 @@ namespace Krys::UI
     List<Gfx::CommandList> _commandLists;
     Map<ElementHandle, CachedLayer> _cachedLayers;
     Stack<LayerContext> _layerStack;
-    uint32 _lastDrawnElementCount {0u};
-    uint32 _drawnElementCount {0u};
 
   public:
     Compositor(Gfx::IContext &context, Gfx::IRenderer &renderer) noexcept
@@ -57,7 +55,6 @@ namespace Krys::UI
 
     void Render(Document &document, Gfx::RenderTargetHandle renderTarget = {}) noexcept
     {
-      _drawnElementCount = 0u;
       _commandLists.clear();
 
       if (!renderTarget.IsValid())
@@ -80,13 +77,6 @@ namespace Krys::UI
       }
 
       // TODO: delete unused cached layers
-
-      if (_lastDrawnElementCount != _drawnElementCount)
-      {
-        KRYS_INFO("Compositor rendered {} elements (previously {})", _drawnElementCount,
-                   _lastDrawnElementCount);
-        _lastDrawnElementCount = _drawnElementCount;
-      }
     }
 
   private:
@@ -112,7 +102,6 @@ namespace Krys::UI
       using namespace Maths;
       using namespace Gfx;
 
-      _drawnElementCount++;
       auto &element = document.Get(handle);
       auto node = element.LayoutNode;
 
