@@ -8,10 +8,12 @@
 #include "Krystal.Lib/DebugBreak.hpp"
 #include "Krystal.Lib/HashUtils.hpp"
 #include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Set.hpp"
 #include "Krystal.Lib/Stack.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include "Krystal.UI/Document.hpp"
+#include <cassert>
 
 namespace Krys::UI
 {
@@ -44,6 +46,7 @@ namespace Krys::UI
     List<Gfx::CommandList> _commandLists;
     Map<ElementHandle, CachedLayer> _cachedLayers;
     Stack<LayerContext> _layerStack;
+    Set<ElementHandle> _usedLayers;
     List<Gfx::RenderTargetHandle> _pendingDestruction;
 
   public:
@@ -64,7 +67,7 @@ namespace Krys::UI
       auto targetDimensions = _context.RenderTargets().GetDimensions(renderTarget);
       document.Reflow(targetDimensions.x, targetDimensions.y);
 
-      PushLayer(renderTarget);
+      PushLayer(document.Body(), renderTarget);
       BindRenderTargetCommand(renderTarget);
       RenderElement(document, document.Body(), {0.f, 0.f});
       PopLayer();
@@ -76,13 +79,25 @@ namespace Krys::UI
       }
       _commandLists.clear();
 
+      for (auto it = _cachedLayers.begin(); it != _cachedLayers.end();)
+      {
+        if (_usedLayers.find(it->first) == _usedLayers.end())
+        {
+          _pendingDestruction.push_back(it->second.Target);
+          it = _cachedLayers.erase(it);
+        }
+        else
+        {
+          ++it;
+        }
+      }
+      _usedLayers.clear();
+
       for (auto &handle : _pendingDestruction)
       {
         _context.RenderTargets().Destroy(handle);
       }
       _pendingDestruction.clear();
-
-      // TODO: Cleanup unused cached layers
     }
 
   private:
@@ -92,8 +107,9 @@ namespace Krys::UI
       return _commandLists.at(_layerStack.top().CommandListIndex);
     }
 
-    void PushLayer(Gfx::RenderTargetHandle renderTarget) noexcept
+    void PushLayer(ElementHandle owner, Gfx::RenderTargetHandle renderTarget) noexcept
     {
+      _usedLayers.insert(owner);
       _commandLists.emplace_back();
       _layerStack.push({renderTarget, _commandLists.size() - 1u});
     }
@@ -145,7 +161,7 @@ namespace Krys::UI
         .Attachments = {{AttachmentType::Colour, PixelFormat::R8G8B8A8}},
       });
 
-      PushLayer(layerRenderTarget);
+      PushLayer(handle, layerRenderTarget);
       _cachedLayers[handle] = {.Target = layerRenderTarget, .Size = size, .Hash = hash};
       BindRenderTargetCommand(layerRenderTarget);
       RenderElementContents(node, relativePosition, size, element, document);
