@@ -28,8 +28,7 @@ namespace Krys::UI
     struct LayerContext
     {
       Gfx::RenderTargetHandle Target;
-      // TODO: use index into _commandLists instead of holding reference? Dangles when vector resizes.
-      Gfx::CommandList &Commands;
+      size_t CommandListIndex {0u};
     };
 
     struct CachedLayer
@@ -43,11 +42,10 @@ namespace Krys::UI
     Gfx::IContext &_context;
     Gfx::IRenderer &_renderer;
     List<Gfx::CommandList> _commandLists;
+    Map<ElementHandle, CachedLayer> _cachedLayers;
     Stack<LayerContext> _layerStack;
-    List<Gfx::RenderTargetHandle> _usedTempRenderTargets;
     uint32 _lastDrawnElementCount {0u};
     uint32 _drawnElementCount {0u};
-    Map<ElementHandle, CachedLayer> _cachedLayers;
 
   public:
     Compositor(Gfx::IContext &context, Gfx::IRenderer &renderer) noexcept
@@ -60,6 +58,8 @@ namespace Krys::UI
     void Render(Document &document, Gfx::RenderTargetHandle renderTarget = {}) noexcept
     {
       _drawnElementCount = 0u;
+      _commandLists.clear();
+
       if (!renderTarget.IsValid())
       {
         renderTarget = _context.RenderTargets().GetScreenRenderTarget();
@@ -68,16 +68,10 @@ namespace Krys::UI
       auto targetDimensions = _context.RenderTargets().GetDimensions(renderTarget);
       document.Reflow(targetDimensions.x, targetDimensions.y);
 
-      _layerStack = {};
-      _commandLists.clear();
-      // TODO: we do this to avoid reallocations during rendering (it breaks things), but we should have a better strategy.
-      _commandLists.reserve(16u);
-
-      _commandLists.emplace_back();
-      _layerStack.push({renderTarget, _commandLists.back()});
-
-      _layerStack.top().Commands.Push(Gfx::Commands::BindRenderTarget {renderTarget});
-      RenderElement(document, {document.Body(), {0.f, 0.f}});
+      PushLayer(renderTarget);
+      BindRenderTargetCommand(renderTarget);
+      RenderElement(document, document.Body(), {0.f, 0.f});
+      PopLayer();
 
       // Submit child command lists first, since parents composite from their results.
       for (auto it = _commandLists.rbegin(); it != _commandLists.rend(); ++it)
@@ -85,139 +79,135 @@ namespace Krys::UI
         _renderer.Submit(*it);
       }
 
-      for (Gfx::RenderTargetHandle rt : _usedTempRenderTargets)
-      {
-        _context.RenderTargets().Release(rt);
-      }
-      _usedTempRenderTargets.clear();
+      // TODO: delete unused cached layers
 
       if (_lastDrawnElementCount != _drawnElementCount)
       {
-        KRYS_DEBUG("Compositor rendered {} elements (previously {})", _drawnElementCount,
+        KRYS_INFO("Compositor rendered {} elements (previously {})", _drawnElementCount,
                    _lastDrawnElementCount);
         _lastDrawnElementCount = _drawnElementCount;
       }
     }
 
   private:
-    void RenderElement(Document &document, const State &state)
+    Gfx::CommandList &CurrentCommandList() noexcept
     {
+      assert(!_layerStack.empty() && "No active layer");
+      _commandLists.emplace_back();
+      return _commandLists.at(_layerStack.top().CommandListIndex);
+    }
+
+    void PushLayer(Gfx::RenderTargetHandle renderTarget) noexcept
+    {
+      _commandLists.emplace_back();
+      _layerStack.push({renderTarget, _commandLists.size() - 1u});
+    }
+
+    void PopLayer() noexcept
+    {
+      _layerStack.pop();
+    }
+
+    void RenderElement(Document &document, ElementHandle handle, const Maths::Vec2 &parentOffset)
+    {
+      using namespace Maths;
+      using namespace Gfx;
+
       _drawnElementCount++;
-      auto &element = document.Get(state.CurrentElement);
+      auto &element = document.Get(handle);
       auto node = element.LayoutNode;
 
-      // if (!NodeGetHasNewLayout(node))
-      //{
-      //   return;
-      // }
+      Vec2 position = {NodeLayoutGetLeft(node), NodeLayoutGetTop(node)};
+      Vec2 size = {NodeLayoutGetWidth(node), NodeLayoutGetHeight(node)};
+      Vec2 relativePosition = parentOffset + position;
 
-      // NodeSetHasNewLayout(node, false);
-      Maths::Vec2 position = {NodeLayoutGetLeft(node), NodeLayoutGetTop(node)};
-      float w = NodeLayoutGetWidth(node);
-      float h = NodeLayoutGetHeight(node);
-
-      if (document.ElementRequiresLayer(state.CurrentElement))
+      if (!document.ElementRequiresLayer(handle))
       {
-        //if (auto existing = _cachedLayers.find(state.CurrentElement); existing != _cachedLayers.end())
-        //{
-        //  uint64 hash = ComputeLayerHash(element);
-        //  auto &cachedLayer = existing->second;
-        //  bool isValid = cachedLayer.Target.IsValid() && cachedLayer.Size == Maths::Vec2 {w, h}
-        //                 && cachedLayer.Hash == hash;
-
-        //  if (isValid)
-        //  {
-        //    float opacity = document.ElementStyleGetOpacity(state.CurrentElement);
-        //    DrawRenderTargetColourAttachmentCommand(cachedLayer.Target, state.ParentOffset + position, {w, h},
-        //                                            opacity);
-        //    return;
-        //  }
-        //}
-
-        Gfx::RenderTargetDesc desc {
-          .Width = static_cast<uint32>(w),
-          .Height = static_cast<uint32>(h),
-          .Attachments = {{Gfx::AttachmentType::Colour, Gfx::PixelFormat::R8G8B8A8}},
-        };
-        auto layerRenderTarget = _context.RenderTargets().Acquire(desc);
-        _usedTempRenderTargets.push_back(layerRenderTarget);
-
-        _commandLists.emplace_back();
-        _layerStack.push({layerRenderTarget, _commandLists.back()});
-
-        Gfx::Commands::BindRenderTarget bindRTCmd;
-        bindRTCmd.RenderTarget = layerRenderTarget;
-        _layerStack.top().Commands.Push(bindRTCmd);
-
-        Gfx::Commands::DrawRect drawRectCmd;
-        drawRectCmd.Position = position;
-        drawRectCmd.Size = {w, h};
-        drawRectCmd.BackgroundColour = NodeStyleGetBackgroundColour(node);
-        drawRectCmd.BorderColour = NodeStyleGetBorderColour(node);
-        _layerStack.top().Commands.Push(drawRectCmd);
-
-        if (element.TextContent.Text.IsValid())
-        {
-          DrawTextCommand(element, position);
-        }
-
-        for (auto &child : element.Children)
-        {
-          RenderElement(document, {child, position});
-        }
-
-        auto &layerContext = _layerStack.top();
-        _layerStack.pop();
-
-        float opacity = document.ElementStyleGetOpacity(state.CurrentElement);
-        DrawRenderTargetColourAttachmentCommand(layerRenderTarget, state.ParentOffset + position, {w, h},
-                                                opacity);
+        RenderElementContents(node, relativePosition, size, element, document);
+        return;
       }
-      else
+
+      uint64 hash = ComputeLayerHash(element);
+      if (auto existing = _cachedLayers.find(handle); existing != _cachedLayers.end())
       {
-        Gfx::Commands::DrawRect command;
-        command.Position = state.ParentOffset + position;
-        command.Size = {w, h};
-        command.BackgroundColour = NodeStyleGetBackgroundColour(node);
-        command.BorderColour = NodeStyleGetBorderColour(node);
-        _layerStack.top().Commands.Push(command);
-
-        if (element.TextContent.Text.IsValid())
+        auto &cachedLayer = existing->second;
+        if (cachedLayer.Target.IsValid() && cachedLayer.Size == size && cachedLayer.Hash == hash)
         {
-          DrawTextCommand(element, state.ParentOffset + position);
+          float opacity = document.ElementStyleGetOpacity(handle);
+          DrawRenderTargetColourAttachmentCommand(cachedLayer.Target, relativePosition, size, opacity);
+          return;
+        }
+        else
+        {
+          // TODO: defer deletion until end of frame
+          _context.RenderTargets().Destroy(cachedLayer.Target);
+          _cachedLayers.erase(existing);
+        }
+      }
+
+      auto layerRenderTarget = _context.RenderTargets().Create({
+        .Width = static_cast<uint32>(size.x),
+        .Height = static_cast<uint32>(size.y),
+        .Attachments = {{AttachmentType::Colour, PixelFormat::R8G8B8A8}},
+      });
+
+      PushLayer(layerRenderTarget);
+      _cachedLayers[handle] = {.Target = layerRenderTarget, .Size = size, .Hash = hash};
+      BindRenderTargetCommand(layerRenderTarget);
+      RenderElementContents(node, position, size, element, document);
+      PopLayer();
+
+      float opacity = document.ElementStyleGetOpacity(handle);
+      DrawRenderTargetColourAttachmentCommand(layerRenderTarget, relativePosition, size, opacity);
+    }
+
+    void RenderElementContents(NodeRef node, const Maths::Vec2 &position, const Maths::Vec2 &size,
+                               Element &element, Document &document)
+    {
+      CurrentCommandList().Push(Gfx::Commands::DrawRect {
+        .BackgroundColour = NodeStyleGetBackgroundColour(node),
+        .BorderColour = NodeStyleGetBorderColour(node),
+        .Position = position,
+        .Size = size,
+      });
+
+      if (element.TextContent.Text.IsValid())
+      {
+        Gfx::FontFamilyHandle family = NodeStyleGetFontFamily(element.LayoutNode);
+        if (!family.IsValid())
+        {
+          family = _context.Fonts().GetDefaultFontFamily();
         }
 
-        for (auto &child : element.Children)
-        {
-          RenderElement(document, {child, state.ParentOffset + position});
-        }
+        float textLeft = NodeLayoutGetLeft(element.TextContent.LayoutNode);
+        float textTop = NodeLayoutGetTop(element.TextContent.LayoutNode);
+
+        CurrentCommandList().Push(Gfx::Commands::DrawText {
+          .Text = element.TextContent.Text,
+          .Position = position + Maths::Vec2 {textLeft, textTop},
+          .FontFamily = family,
+          .FontSize = NodeStyleGetFontSize(element.LayoutNode),
+          .Colour = NodeStyleGetTextColour(element.LayoutNode),
+        });
+      }
+
+      for (auto &child : element.Children)
+      {
+        RenderElement(document, child, position);
       }
     }
 
-    void DrawTextCommand(Element &element, const Maths::Vec2 &offset)
+    void BindRenderTargetCommand(Gfx::RenderTargetHandle target)
     {
-      Gfx::FontFamilyHandle family = NodeStyleGetFontFamily(element.LayoutNode);
-      if (!family.IsValid())
-      {
-        family = _context.Fonts().GetDefaultFontFamily();
-      }
-
-      float left = NodeLayoutGetLeft(element.TextContent.LayoutNode);
-      float top = NodeLayoutGetTop(element.TextContent.LayoutNode);
-
-      _layerStack.top().Commands.Push(Gfx::Commands::DrawText {
-        .Text = element.TextContent.Text,
-        .Position = offset + Maths::Vec2(left, top),
-        .FontFamily = family,
-        .FontSize = NodeStyleGetFontSize(element.LayoutNode),
-        .Colour = NodeStyleGetTextColour(element.LayoutNode),
+      CurrentCommandList().Push(Gfx::Commands::BindRenderTarget {
+        .RenderTarget = target,
       });
     }
 
     void DrawRenderTargetColourAttachmentCommand(Gfx::RenderTargetHandle source, const Maths::Vec2 &position,
                                                  const Maths::Vec2 &size, float opacity)
     {
-      _layerStack.top().Commands.Push(Gfx::Commands::DrawRenderTargetColourAttachment {
+      CurrentCommandList().Push(Gfx::Commands::DrawRenderTargetColourAttachment {
         .Source = source,
         .ColourAttachmentIndex = 0u,
         .Position = position,
