@@ -1,30 +1,60 @@
 #include "Krystal.UI/Layout/Api/NodeStyle.hpp"
+#include "Krystal.Lib/StronglyTypedValue.hpp"
 #include "Krystal.UI/Layout/Node/Node.hpp"
 #include "Krystal.UI/Styles/Style.hpp"
 
 namespace
 {
+  using namespace Krys;
   using namespace Krys::UI;
 
-  template <auto GetterT, auto SetterT, typename ValueT>
-  void UpdateStyle(NodeRef node, ValueT value)
+  struct DirtiesLayout : public StronglyTypedBool<DirtiesLayout>
+  {
+    using StronglyTypedBool<DirtiesLayout>::StronglyTypedBool;
+  };
+
+  struct DirtiesStyle : public StronglyTypedBool<DirtiesStyle>
+  {
+    using StronglyTypedBool<DirtiesStyle>::StronglyTypedBool;
+  };
+
+  template <auto GetterT, auto SetterT, DirtiesLayout dirtiesLayout, DirtiesStyle dirtiesStyle,
+            typename ValueT>
+  void UpdateProperty(NodeRef node, ValueT value)
   {
     auto &style = node->GetStyle();
     if ((style.*GetterT)() != value)
     {
       (style.*SetterT)(value);
-      node->MarkDirtyAndPropagate();
+      if constexpr (dirtiesLayout)
+      {
+        node->MarkLayoutDirtyAndPropagate();
+      }
+
+      if constexpr (dirtiesStyle)
+      {
+        node->MarkStyleDirtyAndPropagate();
+      }
     }
   }
 
-  template <auto GetterT, auto SetterT, typename IdxT, typename ValueT>
-  void UpdateStyle(NodeRef node, IdxT idx, ValueT value)
+  template <auto GetterT, auto SetterT, DirtiesLayout dirtiesLayout, DirtiesStyle dirtiesStyle, typename IdxT,
+            typename ValueT>
+  void UpdateProperty(NodeRef node, IdxT idx, ValueT value)
   {
     auto &style = node->GetStyle();
     if ((style.*GetterT)(idx) != value)
     {
       (style.*SetterT)(idx, value);
-      node->MarkDirtyAndPropagate();
+      if constexpr (dirtiesLayout)
+      {
+        node->MarkLayoutDirtyAndPropagate();
+      }
+
+      if constexpr (dirtiesStyle)
+      {
+        node->MarkStyleDirtyAndPropagate();
+      }
     }
   }
 }
@@ -36,13 +66,16 @@ namespace Krys::UI
     if (dstNode->GetStyle() != srcNode->GetStyle())
     {
       dstNode->SetStyle(srcNode->GetStyle());
-      dstNode->MarkDirtyAndPropagate();
+      // TODO: Optimize by only marking dirty if properties that affect layout/style have changed.
+      dstNode->MarkLayoutDirtyAndPropagate();
+      dstNode->MarkStyleDirtyAndPropagate();
     }
   }
 
   void NodeStyleSetDirection(NodeRef node, Direction direction)
   {
-    UpdateStyle<&Style::GetDirection, &Style::SetDirection>(node, direction);
+    UpdateProperty<&Style::GetDirection, &Style::SetDirection, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, direction);
   }
 
   Direction NodeStyleGetDirection(NodeConstRef node)
@@ -52,7 +85,8 @@ namespace Krys::UI
 
   void NodeStyleSetFlexDirection(NodeRef node, FlexDirection flexDirection)
   {
-    UpdateStyle<&Style::GetFlexDirection, &Style::SetFlexDirection>(node, flexDirection);
+    UpdateProperty<&Style::GetFlexDirection, &Style::SetFlexDirection, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, flexDirection);
   }
 
   FlexDirection NodeStyleGetFlexDirection(NodeConstRef node)
@@ -62,7 +96,8 @@ namespace Krys::UI
 
   void NodeStyleSetJustifyContent(NodeRef node, Justify justifyContent)
   {
-    UpdateStyle<&Style::GetJustifyContent, &Style::SetJustifyContent>(node, justifyContent);
+    UpdateProperty<&Style::GetJustifyContent, &Style::SetJustifyContent, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, justifyContent);
   }
 
   Justify NodeStyleGetJustifyContent(NodeConstRef node)
@@ -72,7 +107,8 @@ namespace Krys::UI
 
   void NodeStyleSetAlignContent(NodeRef node, Align alignContent)
   {
-    UpdateStyle<&Style::GetAlignContent, &Style::SetAlignContent>(node, alignContent);
+    UpdateProperty<&Style::GetAlignContent, &Style::SetAlignContent, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, alignContent);
   }
 
   Align NodeStyleGetAlignContent(NodeConstRef node)
@@ -82,7 +118,8 @@ namespace Krys::UI
 
   void NodeStyleSetAlignItems(NodeRef node, Align alignItems)
   {
-    UpdateStyle<&Style::GetAlignItems, &Style::SetAlignItems>(node, alignItems);
+    UpdateProperty<&Style::GetAlignItems, &Style::SetAlignItems, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, alignItems);
   }
 
   Align NodeStyleGetAlignItems(NodeConstRef node)
@@ -92,7 +129,8 @@ namespace Krys::UI
 
   void NodeStyleSetAlignSelf(NodeRef node, Align alignSelf)
   {
-    UpdateStyle<&Style::GetAlignSelf, &Style::SetAlignSelf>(node, alignSelf);
+    UpdateProperty<&Style::GetAlignSelf, &Style::SetAlignSelf, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, alignSelf);
   }
 
   Align NodeStyleGetAlignSelf(NodeConstRef node)
@@ -102,7 +140,8 @@ namespace Krys::UI
 
   void NodeStyleSetPositionType(NodeRef node, PositionType positionType)
   {
-    UpdateStyle<&Style::GetPositionType, &Style::SetPositionType>(node, positionType);
+    UpdateProperty<&Style::GetPositionType, &Style::SetPositionType, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, positionType);
   }
 
   PositionType NodeStyleGetPositionType(NodeConstRef node)
@@ -112,7 +151,8 @@ namespace Krys::UI
 
   void NodeStyleSetFlexWrap(NodeRef node, Wrap flexWrap)
   {
-    UpdateStyle<&Style::GetFlexWrap, &Style::SetFlexWrap>(node, flexWrap);
+    UpdateProperty<&Style::GetFlexWrap, &Style::SetFlexWrap, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, flexWrap);
   }
 
   Wrap NodeStyleGetFlexWrap(NodeConstRef node)
@@ -122,7 +162,8 @@ namespace Krys::UI
 
   void NodeStyleSetOverflow(NodeRef node, Overflow overflow)
   {
-    UpdateStyle<&Style::GetOverflow, &Style::SetOverflow>(node, overflow);
+    UpdateProperty<&Style::GetOverflow, &Style::SetOverflow, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, overflow);
   }
 
   Overflow NodeStyleGetOverflow(NodeConstRef node)
@@ -132,7 +173,8 @@ namespace Krys::UI
 
   void NodeStyleSetDisplay(NodeRef node, Display display)
   {
-    UpdateStyle<&Style::GetDisplay, &Style::SetDisplay>(node, display);
+    UpdateProperty<&Style::GetDisplay, &Style::SetDisplay, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, display);
   }
 
   Display NodeStyleGetDisplay(NodeConstRef node)
@@ -142,7 +184,8 @@ namespace Krys::UI
 
   void NodeStyleSetFlex(NodeRef node, float flex)
   {
-    UpdateStyle<&Style::GetFlex, &Style::SetFlex>(node, NullableFloat {flex});
+    UpdateProperty<&Style::GetFlex, &Style::SetFlex, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, NullableFloat {flex});
   }
 
   float NodeStyleGetFlex(NodeConstRef node)
@@ -152,7 +195,8 @@ namespace Krys::UI
 
   void NodeStyleSetFlexGrow(NodeRef node, float flexGrow)
   {
-    UpdateStyle<&Style::GetFlexGrow, &Style::SetFlexGrow>(node, NullableFloat {flexGrow});
+    UpdateProperty<&Style::GetFlexGrow, &Style::SetFlexGrow, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, NullableFloat {flexGrow});
   }
 
   float NodeStyleGetFlexGrow(NodeConstRef node)
@@ -162,7 +206,8 @@ namespace Krys::UI
 
   void NodeStyleSetFlexShrink(NodeRef node, float flexShrink)
   {
-    UpdateStyle<&Style::GetFlexShrink, &Style::SetFlexShrink>(node, NullableFloat {flexShrink});
+    UpdateProperty<&Style::GetFlexShrink, &Style::SetFlexShrink, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, NullableFloat {flexShrink});
   }
 
   float NodeStyleGetFlexShrink(NodeConstRef node)
@@ -173,32 +218,38 @@ namespace Krys::UI
 
   void NodeStyleSetFlexBasis(NodeRef node, float flexBasis)
   {
-    UpdateStyle<&Style::GetFlexBasis, &Style::SetFlexBasis>(node, StyleSizeLength::Points(flexBasis));
+    UpdateProperty<&Style::GetFlexBasis, &Style::SetFlexBasis, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, StyleSizeLength::Points(flexBasis));
   }
 
   void NodeStyleSetFlexBasisPercent(NodeRef node, float flexBasis)
   {
-    UpdateStyle<&Style::GetFlexBasis, &Style::SetFlexBasis>(node, StyleSizeLength::Percent(flexBasis));
+    UpdateProperty<&Style::GetFlexBasis, &Style::SetFlexBasis, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, StyleSizeLength::Percent(flexBasis));
   }
 
   void NodeStyleSetFlexBasisAuto(NodeRef node)
   {
-    UpdateStyle<&Style::GetFlexBasis, &Style::SetFlexBasis>(node, StyleSizeLength::Auto());
+    UpdateProperty<&Style::GetFlexBasis, &Style::SetFlexBasis, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, StyleSizeLength::Auto());
   }
 
   void NodeStyleSetFlexBasisMaxContent(NodeRef node)
   {
-    UpdateStyle<&Style::GetFlexBasis, &Style::SetFlexBasis>(node, StyleSizeLength::MaxContent());
+    UpdateProperty<&Style::GetFlexBasis, &Style::SetFlexBasis, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, StyleSizeLength::MaxContent());
   }
 
   void NodeStyleSetFlexBasisFitContent(NodeRef node)
   {
-    UpdateStyle<&Style::GetFlexBasis, &Style::SetFlexBasis>(node, StyleSizeLength::FitContent());
+    UpdateProperty<&Style::GetFlexBasis, &Style::SetFlexBasis, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, StyleSizeLength::FitContent());
   }
 
   void NodeStyleSetFlexBasisStretch(NodeRef node)
   {
-    UpdateStyle<&Style::GetFlexBasis, &Style::SetFlexBasis>(node, StyleSizeLength::Stretch());
+    UpdateProperty<&Style::GetFlexBasis, &Style::SetFlexBasis, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, StyleSizeLength::Stretch());
   }
 
   UnitValue NodeStyleGetFlexBasis(NodeConstRef node)
@@ -208,12 +259,14 @@ namespace Krys::UI
 
   void NodeStyleSetPosition(NodeRef node, Edge edge, float position)
   {
-    UpdateStyle<&Style::GetPosition, &Style::SetPosition>(node, edge, StyleLength::Points(position));
+    UpdateProperty<&Style::GetPosition, &Style::SetPosition, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, edge, StyleLength::Points(position));
   }
 
   void NodeStyleSetPositionPercent(NodeRef node, Edge edge, float position)
   {
-    UpdateStyle<&Style::GetPosition, &Style::SetPosition>(node, edge, StyleLength::Percent(position));
+    UpdateProperty<&Style::GetPosition, &Style::SetPosition, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, edge, StyleLength::Percent(position));
   }
 
   UnitValue NodeStyleGetPosition(NodeConstRef node, Edge edge)
@@ -223,22 +276,26 @@ namespace Krys::UI
 
   void NodeStyleSetPositionAuto(NodeRef node, Edge edge)
   {
-    UpdateStyle<&Style::GetPosition, &Style::SetPosition>(node, edge, StyleLength::Auto());
+    UpdateProperty<&Style::GetPosition, &Style::SetPosition, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, edge, StyleLength::Auto());
   }
 
   void NodeStyleSetMargin(NodeRef node, Edge edge, float margin)
   {
-    UpdateStyle<&Style::GetMargin, &Style::SetMargin>(node, edge, StyleLength::Points(margin));
+    UpdateProperty<&Style::GetMargin, &Style::SetMargin, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, edge, StyleLength::Points(margin));
   }
 
   void NodeStyleSetMarginPercent(NodeRef node, Edge edge, float margin)
   {
-    UpdateStyle<&Style::GetMargin, &Style::SetMargin>(node, edge, StyleLength::Percent(margin));
+    UpdateProperty<&Style::GetMargin, &Style::SetMargin, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, edge, StyleLength::Percent(margin));
   }
 
   void NodeStyleSetMarginAuto(NodeRef node, Edge edge)
   {
-    UpdateStyle<&Style::GetMargin, &Style::SetMargin>(node, edge, StyleLength::Auto());
+    UpdateProperty<&Style::GetMargin, &Style::SetMargin, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, edge, StyleLength::Auto());
   }
 
   UnitValue NodeStyleGetMargin(NodeConstRef node, Edge edge)
@@ -248,12 +305,14 @@ namespace Krys::UI
 
   void NodeStyleSetPadding(NodeRef node, Edge edge, float padding)
   {
-    UpdateStyle<&Style::GetPadding, &Style::SetPadding>(node, edge, StyleLength::Points(padding));
+    UpdateProperty<&Style::GetPadding, &Style::SetPadding, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, edge, StyleLength::Points(padding));
   }
 
   void NodeStyleSetPaddingPercent(NodeRef node, Edge edge, float padding)
   {
-    UpdateStyle<&Style::GetPadding, &Style::SetPadding>(node, edge, StyleLength::Percent(padding));
+    UpdateProperty<&Style::GetPadding, &Style::SetPadding, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, edge, StyleLength::Percent(padding));
   }
 
   UnitValue NodeStyleGetPadding(NodeConstRef node, Edge edge)
@@ -263,7 +322,8 @@ namespace Krys::UI
 
   void NodeStyleSetBorder(NodeRef node, Edge edge, float border)
   {
-    UpdateStyle<&Style::GetBorder, &Style::SetBorder>(node, edge, StyleLength::Points(border));
+    UpdateProperty<&Style::GetBorder, &Style::SetBorder, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, edge, StyleLength::Points(border));
   }
 
   float NodeStyleGetBorder(NodeConstRef node, Edge edge)
@@ -279,12 +339,14 @@ namespace Krys::UI
 
   void NodeStyleSetGap(NodeRef node, Gutter gutter, float gapLength)
   {
-    UpdateStyle<&Style::GetGap, &Style::SetGap>(node, gutter, StyleLength::Points(gapLength));
+    UpdateProperty<&Style::GetGap, &Style::SetGap, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, gutter, StyleLength::Points(gapLength));
   }
 
   void NodeStyleSetGapPercent(NodeRef node, Gutter gutter, float gapLength)
   {
-    UpdateStyle<&Style::GetGap, &Style::SetGap>(node, gutter, StyleLength::Percent(gapLength));
+    UpdateProperty<&Style::GetGap, &Style::SetGap, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, gutter, StyleLength::Percent(gapLength));
   }
 
   UnitValue NodeStyleGetGap(NodeConstRef node, Gutter gutter)
@@ -294,7 +356,8 @@ namespace Krys::UI
 
   void NodeStyleSetAspectRatio(NodeRef node, float aspectRatio)
   {
-    UpdateStyle<&Style::GetAspectRatio, &Style::SetAspectRatio>(node, NullableFloat(aspectRatio));
+    UpdateProperty<&Style::GetAspectRatio, &Style::SetAspectRatio, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, NullableFloat(aspectRatio));
   }
 
   float NodeStyleGetAspectRatio(NodeConstRef node)
@@ -304,7 +367,8 @@ namespace Krys::UI
 
   void NodeStyleSetBoxSizing(NodeRef node, BoxSizing boxSizing)
   {
-    UpdateStyle<&Style::GetBoxSizing, &Style::SetBoxSizing>(node, boxSizing);
+    UpdateProperty<&Style::GetBoxSizing, &Style::SetBoxSizing, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, boxSizing);
   }
 
   BoxSizing NodeStyleGetBoxSizing(NodeConstRef node)
@@ -314,37 +378,38 @@ namespace Krys::UI
 
   void NodeStyleSetWidth(NodeRef node, float width)
   {
-    UpdateStyle<&Style::GetDimension, &Style::SetDimension>(node, Dimension::Width,
-                                                            StyleSizeLength::Points(width));
+    UpdateProperty<&Style::GetDimension, &Style::SetDimension, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, Dimension::Width, StyleSizeLength::Points(width));
   }
 
   void NodeStyleSetWidthPercent(NodeRef node, float width)
   {
-    UpdateStyle<&Style::GetDimension, &Style::SetDimension>(node, Dimension::Width,
-                                                            StyleSizeLength::Percent(width));
+    UpdateProperty<&Style::GetDimension, &Style::SetDimension, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, Dimension::Width, StyleSizeLength::Percent(width));
   }
 
   void NodeStyleSetWidthAuto(NodeRef node)
   {
-    UpdateStyle<&Style::GetDimension, &Style::SetDimension>(node, Dimension::Width, StyleSizeLength::Auto());
+    UpdateProperty<&Style::GetDimension, &Style::SetDimension, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, Dimension::Width, StyleSizeLength::Auto());
   }
 
   void NodeStyleSetWidthMaxContent(NodeRef node)
   {
-    UpdateStyle<&Style::GetDimension, &Style::SetDimension>(node, Dimension::Width,
-                                                            StyleSizeLength::MaxContent());
+    UpdateProperty<&Style::GetDimension, &Style::SetDimension, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, Dimension::Width, StyleSizeLength::MaxContent());
   }
 
   void NodeStyleSetWidthFitContent(NodeRef node)
   {
-    UpdateStyle<&Style::GetDimension, &Style::SetDimension>(node, Dimension::Width,
-                                                            StyleSizeLength::FitContent());
+    UpdateProperty<&Style::GetDimension, &Style::SetDimension, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, Dimension::Width, StyleSizeLength::FitContent());
   }
 
   void NodeStyleSetWidthStretch(NodeRef node)
   {
-    UpdateStyle<&Style::GetDimension, &Style::SetDimension>(node, Dimension::Width,
-                                                            StyleSizeLength::Stretch());
+    UpdateProperty<&Style::GetDimension, &Style::SetDimension, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, Dimension::Width, StyleSizeLength::Stretch());
   }
 
   UnitValue NodeStyleGetWidth(NodeConstRef node)
@@ -354,37 +419,38 @@ namespace Krys::UI
 
   void NodeStyleSetHeight(NodeRef node, float height)
   {
-    UpdateStyle<&Style::GetDimension, &Style::SetDimension>(node, Dimension::Height,
-                                                            StyleSizeLength::Points(height));
+    UpdateProperty<&Style::GetDimension, &Style::SetDimension, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, Dimension::Height, StyleSizeLength::Points(height));
   }
 
   void NodeStyleSetHeightPercent(NodeRef node, float height)
   {
-    UpdateStyle<&Style::GetDimension, &Style::SetDimension>(node, Dimension::Height,
-                                                            StyleSizeLength::Percent(height));
+    UpdateProperty<&Style::GetDimension, &Style::SetDimension, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, Dimension::Height, StyleSizeLength::Percent(height));
   }
 
   void NodeStyleSetHeightAuto(NodeRef node)
   {
-    UpdateStyle<&Style::GetDimension, &Style::SetDimension>(node, Dimension::Height, StyleSizeLength::Auto());
+    UpdateProperty<&Style::GetDimension, &Style::SetDimension, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, Dimension::Height, StyleSizeLength::Auto());
   }
 
   void NodeStyleSetHeightMaxContent(NodeRef node)
   {
-    UpdateStyle<&Style::GetDimension, &Style::SetDimension>(node, Dimension::Height,
-                                                            StyleSizeLength::MaxContent());
+    UpdateProperty<&Style::GetDimension, &Style::SetDimension, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, Dimension::Height, StyleSizeLength::MaxContent());
   }
 
   void NodeStyleSetHeightFitContent(NodeRef node)
   {
-    UpdateStyle<&Style::GetDimension, &Style::SetDimension>(node, Dimension::Height,
-                                                            StyleSizeLength::FitContent());
+    UpdateProperty<&Style::GetDimension, &Style::SetDimension, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, Dimension::Height, StyleSizeLength::FitContent());
   }
 
   void NodeStyleSetHeightStretch(NodeRef node)
   {
-    UpdateStyle<&Style::GetDimension, &Style::SetDimension>(node, Dimension::Height,
-                                                            StyleSizeLength::Stretch());
+    UpdateProperty<&Style::GetDimension, &Style::SetDimension, DirtiesLayout {true}, DirtiesStyle {false}>(
+      node, Dimension::Height, StyleSizeLength::Stretch());
   }
 
   UnitValue NodeStyleGetHeight(NodeConstRef node)
@@ -394,32 +460,32 @@ namespace Krys::UI
 
   void NodeStyleSetMinWidth(NodeRef node, float minWidth)
   {
-    UpdateStyle<&Style::GetMinDimension, &Style::SetMinDimension>(node, Dimension::Width,
-                                                                  StyleSizeLength::Points(minWidth));
+    UpdateProperty<&Style::GetMinDimension, &Style::SetMinDimension, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, Dimension::Width, StyleSizeLength::Points(minWidth));
   }
 
   void NodeStyleSetMinWidthPercent(NodeRef node, float minWidth)
   {
-    UpdateStyle<&Style::GetMinDimension, &Style::SetMinDimension>(node, Dimension::Width,
-                                                                  StyleSizeLength::Percent(minWidth));
+    UpdateProperty<&Style::GetMinDimension, &Style::SetMinDimension, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, Dimension::Width, StyleSizeLength::Percent(minWidth));
   }
 
   void NodeStyleSetMinWidthMaxContent(NodeRef node)
   {
-    UpdateStyle<&Style::GetMinDimension, &Style::SetMinDimension>(node, Dimension::Width,
-                                                                  StyleSizeLength::MaxContent());
+    UpdateProperty<&Style::GetMinDimension, &Style::SetMinDimension, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, Dimension::Width, StyleSizeLength::MaxContent());
   }
 
   void NodeStyleSetMinWidthFitContent(NodeRef node)
   {
-    UpdateStyle<&Style::GetMinDimension, &Style::SetMinDimension>(node, Dimension::Width,
-                                                                  StyleSizeLength::FitContent());
+    UpdateProperty<&Style::GetMinDimension, &Style::SetMinDimension, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, Dimension::Width, StyleSizeLength::FitContent());
   }
 
   void NodeStyleSetMinWidthStretch(NodeRef node)
   {
-    UpdateStyle<&Style::GetMinDimension, &Style::SetMinDimension>(node, Dimension::Width,
-                                                                  StyleSizeLength::Stretch());
+    UpdateProperty<&Style::GetMinDimension, &Style::SetMinDimension, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, Dimension::Width, StyleSizeLength::Stretch());
   }
 
   UnitValue NodeStyleGetMinWidth(NodeConstRef node)
@@ -429,32 +495,32 @@ namespace Krys::UI
 
   void NodeStyleSetMinHeight(NodeRef node, float minHeight)
   {
-    UpdateStyle<&Style::GetMinDimension, &Style::SetMinDimension>(node, Dimension::Height,
-                                                                  StyleSizeLength::Points(minHeight));
+    UpdateProperty<&Style::GetMinDimension, &Style::SetMinDimension, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, Dimension::Height, StyleSizeLength::Points(minHeight));
   }
 
   void NodeStyleSetMinHeightPercent(NodeRef node, float minHeight)
   {
-    UpdateStyle<&Style::GetMinDimension, &Style::SetMinDimension>(node, Dimension::Height,
-                                                                  StyleSizeLength::Percent(minHeight));
+    UpdateProperty<&Style::GetMinDimension, &Style::SetMinDimension, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, Dimension::Height, StyleSizeLength::Percent(minHeight));
   }
 
   void NodeStyleSetMinHeightMaxContent(NodeRef node)
   {
-    UpdateStyle<&Style::GetMinDimension, &Style::SetMinDimension>(node, Dimension::Height,
-                                                                  StyleSizeLength::MaxContent());
+    UpdateProperty<&Style::GetMinDimension, &Style::SetMinDimension, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, Dimension::Height, StyleSizeLength::MaxContent());
   }
 
   void NodeStyleSetMinHeightFitContent(NodeRef node)
   {
-    UpdateStyle<&Style::GetMinDimension, &Style::SetMinDimension>(node, Dimension::Height,
-                                                                  StyleSizeLength::FitContent());
+    UpdateProperty<&Style::GetMinDimension, &Style::SetMinDimension, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, Dimension::Height, StyleSizeLength::FitContent());
   }
 
   void NodeStyleSetMinHeightStretch(NodeRef node)
   {
-    UpdateStyle<&Style::GetMinDimension, &Style::SetMinDimension>(node, Dimension::Height,
-                                                                  StyleSizeLength::Stretch());
+    UpdateProperty<&Style::GetMinDimension, &Style::SetMinDimension, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, Dimension::Height, StyleSizeLength::Stretch());
   }
 
   UnitValue NodeStyleGetMinHeight(NodeConstRef node)
@@ -464,32 +530,32 @@ namespace Krys::UI
 
   void NodeStyleSetMaxWidth(NodeRef node, float maxWidth)
   {
-    UpdateStyle<&Style::GetMaxDimension, &Style::SetMaxDimension>(node, Dimension::Width,
-                                                                  StyleSizeLength::Points(maxWidth));
+    UpdateProperty<&Style::GetMaxDimension, &Style::SetMaxDimension, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, Dimension::Width, StyleSizeLength::Points(maxWidth));
   }
 
   void NodeStyleSetMaxWidthPercent(NodeRef node, float maxWidth)
   {
-    UpdateStyle<&Style::GetMaxDimension, &Style::SetMaxDimension>(node, Dimension::Width,
-                                                                  StyleSizeLength::Percent(maxWidth));
+    UpdateProperty<&Style::GetMaxDimension, &Style::SetMaxDimension, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, Dimension::Width, StyleSizeLength::Percent(maxWidth));
   }
 
   void NodeStyleSetMaxWidthMaxContent(NodeRef node)
   {
-    UpdateStyle<&Style::GetMaxDimension, &Style::SetMaxDimension>(node, Dimension::Width,
-                                                                  StyleSizeLength::MaxContent());
+    UpdateProperty<&Style::GetMaxDimension, &Style::SetMaxDimension, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, Dimension::Width, StyleSizeLength::MaxContent());
   }
 
   void NodeStyleSetMaxWidthFitContent(NodeRef node)
   {
-    UpdateStyle<&Style::GetMaxDimension, &Style::SetMaxDimension>(node, Dimension::Width,
-                                                                  StyleSizeLength::FitContent());
+    UpdateProperty<&Style::GetMaxDimension, &Style::SetMaxDimension, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, Dimension::Width, StyleSizeLength::FitContent());
   }
 
   void NodeStyleSetMaxWidthStretch(NodeRef node)
   {
-    UpdateStyle<&Style::GetMaxDimension, &Style::SetMaxDimension>(node, Dimension::Width,
-                                                                  StyleSizeLength::Stretch());
+    UpdateProperty<&Style::GetMaxDimension, &Style::SetMaxDimension, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, Dimension::Width, StyleSizeLength::Stretch());
   }
 
   UnitValue NodeStyleGetMaxWidth(NodeConstRef node)
@@ -499,32 +565,32 @@ namespace Krys::UI
 
   void NodeStyleSetMaxHeight(NodeRef node, float maxHeight)
   {
-    UpdateStyle<&Style::GetMaxDimension, &Style::SetMaxDimension>(node, Dimension::Height,
-                                                                  StyleSizeLength::Points(maxHeight));
+    UpdateProperty<&Style::GetMaxDimension, &Style::SetMaxDimension, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, Dimension::Height, StyleSizeLength::Points(maxHeight));
   }
 
   void NodeStyleSetMaxHeightPercent(NodeRef node, float maxHeight)
   {
-    UpdateStyle<&Style::GetMaxDimension, &Style::SetMaxDimension>(node, Dimension::Height,
-                                                                  StyleSizeLength::Percent(maxHeight));
+    UpdateProperty<&Style::GetMaxDimension, &Style::SetMaxDimension, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, Dimension::Height, StyleSizeLength::Percent(maxHeight));
   }
 
   void NodeStyleSetMaxHeightMaxContent(NodeRef node)
   {
-    UpdateStyle<&Style::GetMaxDimension, &Style::SetMaxDimension>(node, Dimension::Height,
-                                                                  StyleSizeLength::MaxContent());
+    UpdateProperty<&Style::GetMaxDimension, &Style::SetMaxDimension, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, Dimension::Height, StyleSizeLength::MaxContent());
   }
 
   void NodeStyleSetMaxHeightFitContent(NodeRef node)
   {
-    UpdateStyle<&Style::GetMaxDimension, &Style::SetMaxDimension>(node, Dimension::Height,
-                                                                  StyleSizeLength::FitContent());
+    UpdateProperty<&Style::GetMaxDimension, &Style::SetMaxDimension, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, Dimension::Height, StyleSizeLength::FitContent());
   }
 
   void NodeStyleSetMaxHeightStretch(NodeRef node)
   {
-    UpdateStyle<&Style::GetMaxDimension, &Style::SetMaxDimension>(node, Dimension::Height,
-                                                                  StyleSizeLength::Stretch());
+    UpdateProperty<&Style::GetMaxDimension, &Style::SetMaxDimension, DirtiesLayout {true},
+                   DirtiesStyle {false}>(node, Dimension::Height, StyleSizeLength::Stretch());
   }
 
   UnitValue NodeStyleGetMaxHeight(NodeConstRef node)
@@ -534,7 +600,8 @@ namespace Krys::UI
 
   void NodeStyleSetBackgroundColour(NodeRef node, const Gfx::Colour &colour)
   {
-    node->GetStyle().SetBackgroundColour(colour);
+    UpdateProperty<&Style::GetBackgroundColour, &Style::SetBackgroundColour, DirtiesLayout {false},
+                   DirtiesStyle {true}>(node, colour);
   }
 
   Gfx::Colour NodeStyleGetBackgroundColour(NodeConstRef node)
@@ -544,7 +611,8 @@ namespace Krys::UI
 
   void NodeStyleSetBorderColour(NodeRef node, const Gfx::Colour &colour)
   {
-    node->GetStyle().SetBorderColour(colour);
+    UpdateProperty<&Style::GetBorderColour, &Style::SetBorderColour, DirtiesLayout {false},
+                   DirtiesStyle {true}>(node, colour);
   }
 
   Gfx::Colour NodeStyleGetBorderColour(NodeConstRef node)
@@ -554,7 +622,8 @@ namespace Krys::UI
 
   void NodeStyleSetTextColour(NodeRef node, const Gfx::Colour &colour)
   {
-    node->GetStyle().SetTextColour(colour);
+    UpdateProperty<&Style::GetTextColour, &Style::SetTextColour, DirtiesLayout {false}, DirtiesStyle {true}>(
+      node, colour);
   }
 
   Gfx::Colour NodeStyleGetTextColour(NodeConstRef node)
@@ -564,7 +633,8 @@ namespace Krys::UI
 
   void NodeStyleSetOpacity(NodeRef node, float opacity)
   {
-    node->GetStyle().SetOpacity(opacity);
+    UpdateProperty<&Style::GetOpacity, &Style::SetOpacity, DirtiesLayout {false}, DirtiesStyle {true}>(
+      node, opacity);
   }
 
   float NodeStyleGetOpacity(NodeConstRef node)
@@ -574,7 +644,8 @@ namespace Krys::UI
 
   void NodeStyleSetFontFamily(NodeRef node, Gfx::FontFamilyHandle family)
   {
-    node->GetStyle().SetFontFamily(family);
+    UpdateProperty<&Style::GetFontFamily, &Style::SetFontFamily, DirtiesLayout {true}, DirtiesStyle {true}>(
+      node, family);
   }
 
   Gfx::FontFamilyHandle NodeStyleGetFontFamily(NodeConstRef node)
@@ -584,7 +655,8 @@ namespace Krys::UI
 
   void NodeStyleSetFontSize(NodeRef node, float fontSize)
   {
-    UpdateStyle<&Style::GetFontSize, &Style::SetFontSize>(node, fontSize);
+    UpdateProperty<&Style::GetFontSize, &Style::SetFontSize, DirtiesLayout {true}, DirtiesStyle {true}>(
+      node, fontSize);
   }
 
   float NodeStyleGetFontSize(NodeConstRef node)
@@ -594,7 +666,8 @@ namespace Krys::UI
 
   void NodeStyleSetTextAlign(NodeRef node, TextAlign textAlign)
   {
-    UpdateStyle<&Style::GetTextAlign, &Style::SetTextAlign>(node, textAlign);
+    UpdateProperty<&Style::GetTextAlign, &Style::SetTextAlign, DirtiesLayout {true}, DirtiesStyle {true}>(
+      node, textAlign);
   }
 
   TextAlign NodeStyleGetTextAlign(NodeConstRef node)

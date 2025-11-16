@@ -46,16 +46,28 @@ namespace Krys::UI
   void NodeSetHasNewLayout(NodeRef node, bool hasNewLayout);
 
   /// @brief Whether the node's layout results are dirty due to it or its children changing.
-  bool NodeIsDirty(NodeConstRef node);
+  bool NodeIsLayoutDirty(NodeConstRef node);
 
   /// @brief Marks a node with custom measure function as dirty.
-  void NodeMarkDirty(NodeRef node);
+  void NodeMarkLayoutDirty(NodeRef node);
 
-  /// @brief Called when a change is made to the Yoga tree which dirties this node.
-  void NodeSetDirtiedFunc(NodeRef node, DirtiedFunc dirtiedFunc);
+  /// @brief Called when a change is made to the tree which dirties the layout of a node.
+  void NodeSetLayoutDirtiedFunc(NodeRef node, DirtiedFunc dirtiedFunc);
 
-  /// @brief Returns a dirtied func if set.
-  DirtiedFunc NodeGetDirtiedFunc(NodeConstRef node);
+  /// @brief Returns a layout dirtied func if set.
+  DirtiedFunc NodeGetLayoutDirtiedFunc(NodeConstRef node);
+
+  /// @brief Whether the node's styles are dirty due to it or its children changing.
+  bool NodeIsStyleDirty(NodeConstRef node);
+
+  /// @brief Sets whether the node's styles are dirty. Does not propagate the dirtying to children or parents.
+  void NodeSetStyleDirty(const NodeRef node, bool isDirty);
+
+  /// @brief Called when a change is made to the tree which dirties the style of a node.
+  void NodeSetStyleDirtiedFunc(NodeRef node, DirtiedFunc dirtiedFunc);
+
+  /// @brief Returns a style dirtied func if set.
+  DirtiedFunc NodeGetStyleDirtiedFunc(NodeConstRef node);
 
   /// @brief Inserts a child node at the given index.
   void NodeInsertChild(NodeRef node, NodeRef child, size_t index);

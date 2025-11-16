@@ -26,15 +26,15 @@ namespace Krys::Tests
 
     NodeStyleSetWidth(root_child0, 20);
 
-    REQUIRE(NodeIsDirty(root_child0));
-    REQUIRE(!NodeIsDirty(root_child1));
-    REQUIRE(NodeIsDirty(root));
+    REQUIRE(NodeIsLayoutDirty(root_child0));
+    REQUIRE(!NodeIsLayoutDirty(root_child1));
+    REQUIRE(NodeIsLayoutDirty(root));
 
     NodeCalculateLayout(root, Undefined, Undefined, Direction::LTR);
 
-    REQUIRE(!NodeIsDirty(root_child0));
-    REQUIRE(!NodeIsDirty(root_child1));
-    REQUIRE(!NodeIsDirty(root));
+    REQUIRE(!NodeIsLayoutDirty(root_child0));
+    REQUIRE(!NodeIsLayoutDirty(root_child1));
+    REQUIRE(!NodeIsLayoutDirty(root));
 
     NodeDestroyRecursive(root);
   }
@@ -60,9 +60,9 @@ namespace Krys::Tests
 
     NodeStyleSetWidth(root_child0, 50);
 
-    REQUIRE(!NodeIsDirty(root_child0));
-    REQUIRE(!NodeIsDirty(root_child1));
-    REQUIRE(!NodeIsDirty(root));
+    REQUIRE(!NodeIsLayoutDirty(root_child0));
+    REQUIRE(!NodeIsLayoutDirty(root_child1));
+    REQUIRE(!NodeIsLayoutDirty(root));
 
     NodeDestroyRecursive(root);
   }
@@ -91,26 +91,26 @@ namespace Krys::Tests
 
     NodeCalculateLayout(root, Undefined, Undefined, Direction::LTR);
 
-    REQUIRE(!NodeIsDirty(root));
-    REQUIRE(!NodeIsDirty(root_child0));
-    REQUIRE(!NodeIsDirty(root_child1));
-    REQUIRE(!NodeIsDirty(root_child0_child0));
+    REQUIRE(!NodeIsLayoutDirty(root));
+    REQUIRE(!NodeIsLayoutDirty(root_child0));
+    REQUIRE(!NodeIsLayoutDirty(root_child1));
+    REQUIRE(!NodeIsLayoutDirty(root_child0_child0));
 
     ConfigRef newConfig = ConfigCreate();
     ConfigSetErrata(newConfig, Errata::StretchFlexBasis);
     NodeSetConfig(root_child0, newConfig);
 
-    REQUIRE(NodeIsDirty(root));
-    REQUIRE(NodeIsDirty(root_child0));
-    REQUIRE(!NodeIsDirty(root_child1));
-    REQUIRE(!NodeIsDirty(root_child0_child0));
+    REQUIRE(NodeIsLayoutDirty(root));
+    REQUIRE(NodeIsLayoutDirty(root_child0));
+    REQUIRE(!NodeIsLayoutDirty(root_child1));
+    REQUIRE(!NodeIsLayoutDirty(root_child0_child0));
 
     NodeCalculateLayout(root, Undefined, Undefined, Direction::LTR);
 
-    REQUIRE(!NodeIsDirty(root));
-    REQUIRE(!NodeIsDirty(root_child0));
-    REQUIRE(!NodeIsDirty(root_child1));
-    REQUIRE(!NodeIsDirty(root_child0_child0));
+    REQUIRE(!NodeIsLayoutDirty(root));
+    REQUIRE(!NodeIsLayoutDirty(root_child0));
+    REQUIRE(!NodeIsLayoutDirty(root_child1));
+    REQUIRE(!NodeIsLayoutDirty(root_child0_child0));
 
     ConfigDestroy(newConfig);
     NodeDestroyRecursive(root);
@@ -140,18 +140,18 @@ namespace Krys::Tests
 
     NodeCalculateLayout(root, Undefined, Undefined, Direction::LTR);
 
-    REQUIRE(!NodeIsDirty(root));
-    REQUIRE(!NodeIsDirty(root_child0));
-    REQUIRE(!NodeIsDirty(root_child1));
-    REQUIRE(!NodeIsDirty(root_child0_child0));
+    REQUIRE(!NodeIsLayoutDirty(root));
+    REQUIRE(!NodeIsLayoutDirty(root_child0));
+    REQUIRE(!NodeIsLayoutDirty(root_child1));
+    REQUIRE(!NodeIsLayoutDirty(root_child0_child0));
 
     ConfigRef newConfig = ConfigCreate();
     NodeSetConfig(root_child0, newConfig);
 
-    REQUIRE(!NodeIsDirty(root));
-    REQUIRE(!NodeIsDirty(root_child0));
-    REQUIRE(!NodeIsDirty(root_child1));
-    REQUIRE(!NodeIsDirty(root_child0_child0));
+    REQUIRE(!NodeIsLayoutDirty(root));
+    REQUIRE(!NodeIsLayoutDirty(root_child0));
+    REQUIRE(!NodeIsLayoutDirty(root_child1));
+    REQUIRE(!NodeIsLayoutDirty(root_child0_child0));
 
     ConfigDestroy(newConfig);
     NodeDestroyRecursive(root);
@@ -222,11 +222,11 @@ namespace Krys::Tests
 
     NodeRef child1 = NodeCreate();
     NodeRemoveChild(root, child1);
-    REQUIRE(!NodeIsDirty(root));
+    REQUIRE(!NodeIsLayoutDirty(root));
     NodeDestroy(child1);
 
     NodeRemoveChild(root, child0);
-    REQUIRE(NodeIsDirty(root));
+    REQUIRE(NodeIsLayoutDirty(root));
     NodeDestroy(child0);
 
     NodeDestroyRecursive(root);
@@ -240,11 +240,11 @@ namespace Krys::Tests
     NodeStyleSetMinWidth(root, Undefined);
 
     NodeCalculateLayout(root, Undefined, Undefined, Direction::LTR);
-    REQUIRE(!NodeIsDirty(root));
+    REQUIRE(!NodeIsLayoutDirty(root));
 
     NodeStyleSetMinWidth(root, Undefined);
 
-    REQUIRE(!NodeIsDirty(root));
+    REQUIRE(!NodeIsLayoutDirty(root));
 
     NodeDestroyRecursive(root);
   }

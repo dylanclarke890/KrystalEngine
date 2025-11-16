@@ -24,10 +24,11 @@ namespace Krys::UI
 
   Node::Node(Node &&node) noexcept
       : _hasNewLayout(node._hasNewLayout), _isReferenceBaseline(node._isReferenceBaseline),
-        _isDirty(node._isDirty), _alwaysFormsContainingBlock(node._alwaysFormsContainingBlock),
-        _nodeType(node._nodeType), _context(node._context), _measureFunc(node._measureFunc),
-        _baselineFunc(node._baselineFunc), _dirtiedFunc(node._dirtiedFunc), _style(std::move(node._style)),
-        _layout(node._layout), _lineIndex(node._lineIndex),
+        _isLayoutDirty(node._isLayoutDirty), _isStyleDirty(node._isStyleDirty),
+        _alwaysFormsContainingBlock(node._alwaysFormsContainingBlock), _nodeType(node._nodeType),
+        _context(node._context), _measureFunc(node._measureFunc), _baselineFunc(node._baselineFunc),
+        _layoutDirtiedFunc(node._layoutDirtiedFunc), _styleDirtiedFunc(node._styleDirtiedFunc),
+        _style(std::move(node._style)), _layout(node._layout), _lineIndex(node._lineIndex),
         _contentsChildrenCount(node._contentsChildrenCount), _owner(node._owner),
         _children(std::move(node._children)), _config(node._config),
         _processedDimensions(node._processedDimensions)
@@ -138,7 +139,7 @@ namespace Krys::UI
 
     if (ConfigUpdateInvalidatesLayout(*_config, *config))
     {
-      MarkDirtyAndPropagate();
+      MarkLayoutDirtyAndPropagate();
       _layout.ConfigVersion = 0;
     }
     else
@@ -151,18 +152,33 @@ namespace Krys::UI
     _config = config;
   }
 
-  void Node::SetDirty(bool isDirty)
+  void Node::SetLayoutDirty(bool isDirty)
   {
-    if (static_cast<int>(isDirty) == _isDirty)
+    if (static_cast<int>(isDirty) == _isLayoutDirty)
     {
       return;
     }
 
-    _isDirty = isDirty;
+    _isLayoutDirty = isDirty;
 
-    if (isDirty && (_dirtiedFunc != nullptr))
+    if (isDirty && (_layoutDirtiedFunc != nullptr))
     {
-      _dirtiedFunc(this);
+      _layoutDirtiedFunc(this);
+    }
+  }
+
+  void Node::SetStyleDirty(bool isDirty)
+  {
+    if (static_cast<int>(isDirty) == _isStyleDirty)
+    {
+      return;
+    }
+
+    _isStyleDirty = isDirty;
+
+    if (isDirty && (_styleDirtiedFunc != nullptr))
+    {
+      _styleDirtiedFunc(this);
     }
   }
 
@@ -413,15 +429,27 @@ namespace Krys::UI
     }
   }
 
-  void Node::MarkDirtyAndPropagate()
+  void Node::MarkLayoutDirtyAndPropagate()
   {
-    if (!_isDirty)
+    if (!_isLayoutDirty)
     {
-      SetDirty(true);
+      SetLayoutDirty(true);
       SetLayoutComputedFlexBasis(NullableFloat {});
       if (_owner != nullptr)
       {
-        _owner->MarkDirtyAndPropagate();
+        _owner->MarkLayoutDirtyAndPropagate();
+      }
+    }
+  }
+
+  void Node::MarkStyleDirtyAndPropagate()
+  {
+    if (!_isStyleDirty)
+    {
+      SetStyleDirty(true);
+      if (_owner != nullptr)
+      {
+        _owner->MarkStyleDirtyAndPropagate();
       }
     }
   }

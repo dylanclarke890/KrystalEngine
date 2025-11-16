@@ -378,7 +378,7 @@ namespace Krys::UI
           child->SetLayoutDimension(0, Dimension::Width);
           child->SetLayoutDimension(0, Dimension::Height);
           child->SetHasNewLayout(true);
-          child->SetDirty(false);
+          child->SetLayoutDirty(false);
           child->CloneChildrenIfNeeded();
 
           CleanupContentsNodesRecursively(child);
@@ -458,7 +458,7 @@ namespace Krys::UI
       {
         ZeroOutLayoutRecursively(child);
         child->SetHasNewLayout(true);
-        child->SetDirty(false);
+        child->SetLayoutDirty(false);
         continue;
       }
       if (performLayout)
@@ -1719,7 +1719,7 @@ namespace Krys::UI
 
     depth++;
 
-    const bool needToVisitNode = (node->IsDirty() && layout->GenerationCount != generationCount)
+    const bool needToVisitNode = (node->IsLayoutDirty() && layout->GenerationCount != generationCount)
                                  || layout->ConfigVersion != node->GetConfig()->GetVersion()
                                  || layout->LastOwnerDirection != ownerDirection;
 
@@ -1856,7 +1856,7 @@ namespace Krys::UI
       node->SetLayoutDimension(node->GetLayout().GetMeasuredDimension(Dimension::Height), Dimension::Height);
 
       node->SetHasNewLayout(true);
-      node->SetDirty(false);
+      node->SetLayoutDirty(false);
     }
 
     layout->GenerationCount = generationCount;

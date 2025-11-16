@@ -97,27 +97,47 @@ namespace Krys::UI
     node->SetHasNewLayout(hasNewLayout);
   }
 
-  bool NodeIsDirty(NodeConstRef node)
+  bool NodeIsLayoutDirty(NodeConstRef node)
   {
-    return node->IsDirty();
+    return node->IsLayoutDirty();
   }
 
-  void NodeMarkDirty(const NodeRef node)
+  bool NodeIsStyleDirty(NodeConstRef node)
+  {
+    return node->IsStyleDirty();
+  }
+
+  void NodeMarkLayoutDirty(const NodeRef node)
   {
     assert(node->HasMeasureFunc()
            && "Only leaf nodes with custom measure functions should manually mark themselves as dirty");
 
-    node->MarkDirtyAndPropagate();
+    node->MarkLayoutDirtyAndPropagate();
   }
 
-  void NodeSetDirtiedFunc(NodeRef node, DirtiedFunc dirtiedFunc)
+  void NodeSetStyleDirty(const NodeRef node, bool isDirty)
   {
-    node->SetDirtiedFunc(dirtiedFunc);
+    node->SetStyleDirty(isDirty);
   }
 
-  DirtiedFunc NodeGetDirtiedFunc(NodeConstRef node)
+  void NodeSetLayoutDirtiedFunc(NodeRef node, DirtiedFunc dirtiedFunc)
   {
-    return node->GetDirtiedFunc();
+    node->SetLayoutDirtiedFunc(dirtiedFunc);
+  }
+
+  DirtiedFunc NodeGetLayoutDirtiedFunc(NodeConstRef node)
+  {
+    return node->GetLayoutDirtiedFunc();
+  }
+
+  void NodeSetStyleDirtiedFunc(NodeRef node, DirtiedFunc dirtiedFunc)
+  {
+    node->SetStyleDirtiedFunc(dirtiedFunc);
+  }
+
+  DirtiedFunc NodeGetStyleDirtiedFunc(NodeConstRef node)
+  {
+    return node->GetStyleDirtiedFunc();
   }
 
   void NodeInsertChild(const NodeRef owner, const NodeRef child, const size_t index)
@@ -129,7 +149,7 @@ namespace Krys::UI
 
     owner->InsertChild(child, index);
     child->SetOwner(owner);
-    owner->MarkDirtyAndPropagate();
+    owner->MarkLayoutDirtyAndPropagate();
   }
 
   void NodeSwapChild(const NodeRef owner, const NodeRef child, const size_t index)
@@ -155,7 +175,7 @@ namespace Krys::UI
         excludedChild->SetLayout({}); // layout is no longer valid
         excludedChild->SetOwner(nullptr);
       }
-      owner->MarkDirtyAndPropagate();
+      owner->MarkLayoutDirtyAndPropagate();
     }
   }
 
@@ -179,14 +199,14 @@ namespace Krys::UI
         oldChild->SetOwner(nullptr);
       }
       owner->ClearChildren();
-      owner->MarkDirtyAndPropagate();
+      owner->MarkLayoutDirtyAndPropagate();
     }
     else
     {
       // Otherwise, we are not the owner of the child set. We don't have to do
       // anything to clear it.
       owner->SetChildren({});
-      owner->MarkDirtyAndPropagate();
+      owner->MarkLayoutDirtyAndPropagate();
     }
   }
 
@@ -208,7 +228,7 @@ namespace Krys::UI
           child->SetOwner(nullptr);
         }
         owner->SetChildren({});
-        owner->MarkDirtyAndPropagate();
+        owner->MarkLayoutDirtyAndPropagate();
       }
     }
     else
@@ -231,7 +251,7 @@ namespace Krys::UI
       {
         child->SetOwner(owner);
       }
-      owner->MarkDirtyAndPropagate();
+      owner->MarkLayoutDirtyAndPropagate();
     }
   }
 
@@ -304,7 +324,7 @@ namespace Krys::UI
     if (node->IsReferenceBaseline() != isReferenceBaseline)
     {
       node->SetIsReferenceBaseline(isReferenceBaseline);
-      node->MarkDirtyAndPropagate();
+      node->MarkLayoutDirtyAndPropagate();
     }
   }
 

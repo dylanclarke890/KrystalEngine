@@ -58,7 +58,7 @@ int main(int argc, char **argv)
   settings.WindowSettings.Title = "Krystal Editor";
   settings.WindowSettings.VSync = false;
   settings.WindowSettings.Size = {1'280, 720};
-  settings.WindowSettings.SizeBounds = {.Resizable = true, .Min = {500, 500}, .Max = {1'520, 1'080}};
+  settings.WindowSettings.SizeBounds = {.Resizable = true};
 
   auto result = CreateApplication<Editor>(argc, argv, settings);
   if (!result.has_value())
@@ -69,6 +69,8 @@ int main(int argc, char **argv)
     return -1;
   }
 
-  Unique<Editor> editor = std::move(result.value());
+  Editor *editor = (*result).get();
   editor->Run();
+
+  return 0;
 }

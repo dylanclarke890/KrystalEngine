@@ -29,7 +29,8 @@ namespace Krys::UI
   private:
     bool _hasNewLayout : 1 = true;
     bool _isReferenceBaseline : 1 = false;
-    bool _isDirty : 1 = true;
+    bool _isLayoutDirty : 1 = true;
+    bool _isStyleDirty : 1 = true;
     bool _alwaysFormsContainingBlock : 1 = false;
     NodeType _nodeType : BitCount<NodeType>() = NodeType::Default;
     uint16 _lineIndex = 0;
@@ -37,7 +38,8 @@ namespace Krys::UI
     void *_context = nullptr;
     MeasureFunc _measureFunc = nullptr;
     BaselineFunc _baselineFunc = nullptr;
-    DirtiedFunc _dirtiedFunc = nullptr;
+    DirtiedFunc _layoutDirtiedFunc = nullptr;
+    DirtiedFunc _styleDirtiedFunc = nullptr;
     Style _style;
     LayoutResults _layout;
     Node *_owner = nullptr;
@@ -110,14 +112,24 @@ namespace Krys::UI
       _baselineFunc = baseLineFunc;
     }
 
-    DirtiedFunc GetDirtiedFunc() const
+    DirtiedFunc GetLayoutDirtiedFunc() const
     {
-      return _dirtiedFunc;
+      return _layoutDirtiedFunc;
     }
 
-    void SetDirtiedFunc(DirtiedFunc dirtiedFunc)
+    void SetLayoutDirtiedFunc(DirtiedFunc dirtiedFunc)
     {
-      _dirtiedFunc = dirtiedFunc;
+      _layoutDirtiedFunc = dirtiedFunc;
+    }
+
+    DirtiedFunc GetStyleDirtiedFunc() const
+    {
+      return _styleDirtiedFunc;
+    }
+
+    void SetStyleDirtiedFunc(DirtiedFunc dirtiedFunc)
+    {
+      _styleDirtiedFunc = dirtiedFunc;
     }
 
     /// @brief Allows providing custom measurements for a leaf node (usually for measuring text).
@@ -129,8 +141,7 @@ namespace Krys::UI
       return _measureFunc != nullptr;
     }
 
-    Size Measure(float availableWidth, MeasureMode widthMode, float availableHeight,
-                 MeasureMode heightMode);
+    Size Measure(float availableWidth, MeasureMode widthMode, float availableHeight, MeasureMode heightMode);
 
     float Baseline(float width, float height) const;
 
@@ -204,12 +215,19 @@ namespace Krys::UI
       _owner = owner;
     }
 
-    bool IsDirty() const
+    bool IsLayoutDirty() const
     {
-      return _isDirty;
+      return _isLayoutDirty;
     }
 
-    void SetDirty(bool isDirty);
+    bool IsStyleDirty() const
+    {
+      return _isStyleDirty;
+    }
+
+    void SetLayoutDirty(bool isDirty);
+
+    void SetStyleDirty(bool isDirty);
 
     const Config *GetConfig() const
     {
@@ -284,8 +302,8 @@ namespace Krys::UI
       return _processedDimensions[static_cast<size_t>(dimension)];
     }
 
-    NullableFloat GetResolvedDimension(Direction direction, Dimension dimension,
-                                       float referenceLength, float ownerWidth) const
+    NullableFloat GetResolvedDimension(Direction direction, Dimension dimension, float referenceLength,
+                                       float ownerWidth) const
     {
       NullableFloat value = GetProcessedDimension(dimension).Resolve(referenceLength);
       if (_style.GetBoxSizing() == BoxSizing::BorderBox)
@@ -314,8 +332,8 @@ namespace Krys::UI
 
     // Other methods
     Style::SizeLength ProcessFlexBasis() const;
-    NullableFloat ResolveFlexBasis(Direction direction, FlexDirection flexDirection,
-                                   float referenceLength, float ownerWidth) const;
+    NullableFloat ResolveFlexBasis(Direction direction, FlexDirection flexDirection, float referenceLength,
+                                   float ownerWidth) const;
     void ProcessDimensions();
     Direction ResolveDirection(Direction ownerDirection);
     void ClearChildren();
@@ -329,7 +347,8 @@ namespace Krys::UI
 
     void CloneChildrenIfNeeded();
     void CloneContentsChildrenIfNeeded();
-    void MarkDirtyAndPropagate();
+    void MarkLayoutDirtyAndPropagate();
+    void MarkStyleDirtyAndPropagate();
     float ResolveFlexGrow() const;
     float ResolveFlexShrink() const;
     bool IsNodeFlexible();

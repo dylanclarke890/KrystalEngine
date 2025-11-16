@@ -37,7 +37,6 @@ namespace Krys::UI
     {
       Gfx::RenderTargetHandle Target;
       Maths::Vec2 Size;
-      uint64 Hash;
     };
 
   private:
@@ -69,18 +68,45 @@ namespace Krys::UI
 
       PushLayer(document.Body(), renderTarget);
       {
-        BindRenderTargetCommand(renderTarget);
-        RenderElement(document, document.Body(), {0.f, 0.f});
+        constexpr auto origin = Maths::Vec2 {0.f, 0.f};
+        RenderElement(document, document.Body(), origin);
       }
       PopLayer();
 
+      SubmitCommmandLists();
+      EndFrame();
+    }
+
+    void BeginFrame()
+    {
+      // No-op for now
+    }
+
+    void EndFrame()
+    {
+      CleanupUnusedLayers();
+
+      // Destroy pending render targets.
+      for (auto &handle : _pendingDestruction)
+      {
+        _context.RenderTargets().Destroy(handle);
+      }
+      _pendingDestruction.clear();
+    }
+
+  private:
+    void SubmitCommmandLists()
+    {
       // Submit child command lists first, since parents composite from their results.
       for (auto it = _commandLists.rbegin(); it != _commandLists.rend(); ++it)
       {
         _renderer.Submit(*it);
       }
       _commandLists.clear();
+    }
 
+    void CleanupUnusedLayers()
+    {
       for (auto it = _cachedLayers.begin(); it != _cachedLayers.end();)
       {
         if (_usedLayers.find(it->first) == _usedLayers.end())
@@ -94,15 +120,8 @@ namespace Krys::UI
         }
       }
       _usedLayers.clear();
-
-      for (auto &handle : _pendingDestruction)
-      {
-        _context.RenderTargets().Destroy(handle);
-      }
-      _pendingDestruction.clear();
     }
 
-  private:
     Gfx::CommandList &CurrentCommandList() noexcept
     {
       assert(!_layerStack.empty() && "No active layer");
@@ -114,6 +133,9 @@ namespace Krys::UI
       _usedLayers.insert(owner);
       _commandLists.emplace_back();
       _layerStack.push({renderTarget, _commandLists.size() - 1u});
+      CurrentCommandList().Push(Gfx::Commands::BindRenderTarget {
+        .RenderTarget = renderTarget,
+      });
     }
 
     void PopLayer() noexcept
@@ -139,35 +161,42 @@ namespace Krys::UI
         return;
       }
 
-      uint64 hash = ComputeLayerHash(element);
-      // TODO: we need to handle when child elements change and invalidate the cache
+      RenderTargetHandle layerRenderTarget;
       if (auto existing = _cachedLayers.find(handle); existing != _cachedLayers.end())
       {
         auto &cachedLayer = existing->second;
-        if (cachedLayer.Target.IsValid() && cachedLayer.Size == size && cachedLayer.Hash == hash)
+
+        if (cachedLayer.Size == size && !NodeGetHasNewLayout(node) && !NodeIsStyleDirty(node))
         {
+          NodeSetHasNewLayout(node, false);
+          NodeSetStyleDirty(node, false);
           float opacity = document.ElementStyleGetOpacity(handle);
           DrawRenderTargetColourAttachmentCommand(cachedLayer.Target, absolutePosition, size, opacity);
           return;
         }
-        else
+        else if (cachedLayer.Size != size)
         {
           _pendingDestruction.push_back(cachedLayer.Target);
-          _cachedLayers.erase(existing);
+        }
+        else
+        {
+          layerRenderTarget = cachedLayer.Target;
         }
       }
 
-      auto layerRenderTarget = _context.RenderTargets().Create({
-        .Width = static_cast<uint32>(size.x),
-        .Height = static_cast<uint32>(size.y),
-        .Samples = 1u,
-        .Attachments = {{AttachmentType::Colour, PixelFormat::R8G8B8A8}},
-      });
+      if (!layerRenderTarget.IsValid())
+      {
+        layerRenderTarget = _context.RenderTargets().Create({
+          .Width = static_cast<uint32>(size.x),
+          .Height = static_cast<uint32>(size.y),
+          .Samples = 1u,
+          .Attachments = {{AttachmentType::Colour, PixelFormat::R8G8B8A8}},
+        });
+        _cachedLayers[handle] = {.Target = layerRenderTarget, .Size = size};
+      }
 
       PushLayer(handle, layerRenderTarget);
       {
-        _cachedLayers[handle] = {.Target = layerRenderTarget, .Size = size, .Hash = hash};
-        BindRenderTargetCommand(layerRenderTarget);
         RenderElementContents(node, relativePosition, size, element, document);
       }
       PopLayer();
@@ -206,17 +235,13 @@ namespace Krys::UI
         });
       }
 
+      NodeSetHasNewLayout(node, false);
+      NodeSetStyleDirty(node, false);
+
       for (auto &child : element.Children)
       {
         RenderElement(document, child, position);
       }
-    }
-
-    void BindRenderTargetCommand(Gfx::RenderTargetHandle target)
-    {
-      CurrentCommandList().Push(Gfx::Commands::BindRenderTarget {
-        .RenderTarget = target,
-      });
     }
 
     void DrawRenderTargetColourAttachmentCommand(Gfx::RenderTargetHandle source, const Maths::Vec2 &position,
@@ -229,21 +254,6 @@ namespace Krys::UI
         .Size = size,
         .Opacity = opacity,
       });
-    }
-
-    uint64 ComputeLayerHash(const Element &e)
-    {
-      auto node = e.LayoutNode;
-      uint64 h = HashUtils::HashCombine(NodeLayoutGetLeft(node), NodeLayoutGetTop(node));
-      h = HashUtils::HashCombine(h, NodeLayoutGetWidth(node), NodeLayoutGetHeight(node));
-      h = HashUtils::HashCombine(h, NodeStyleGetBackgroundColour(node), NodeStyleGetBorderColour(node));
-      h = HashUtils::HashCombine(h, NodeStyleGetTextColour(node));
-      if (e.TextContent.Text.IsValid())
-      {
-        h = HashUtils::HashCombine(h, _context.Strings().Get(e.TextContent.Text));
-      }
-
-      return h;
     }
   };
 }

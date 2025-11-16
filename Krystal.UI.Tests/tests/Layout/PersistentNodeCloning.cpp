@@ -50,7 +50,7 @@ namespace Krys::Tests
         auto privateNode = node;
         privateNode->SetOwner(nullptr);
         privateNode->SetChildren({});
-        privateNode->SetDirty(true);
+        privateNode->SetLayoutDirty(true);
 
         for (const auto &child : this->children)
         {

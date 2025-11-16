@@ -23,16 +23,16 @@ namespace Krys::Tests
 
     int dirtiedCount = 0;
     NodeSetContext(root, &dirtiedCount);
-    NodeSetDirtiedFunc(root, _dirtied);
+    NodeSetLayoutDirtiedFunc(root, _dirtied);
 
     REQUIRE(0 == dirtiedCount);
 
     // `_dirtied` MUST be called in case of explicit dirtying.
-    static_cast<NodeRef>(root)->SetDirty(true);
+    static_cast<NodeRef>(root)->SetLayoutDirty(true);
     REQUIRE(1 == dirtiedCount);
 
     // `_dirtied` MUST be called ONCE.
-    static_cast<NodeRef>(root)->SetDirty(true);
+    static_cast<NodeRef>(root)->SetLayoutDirty(true);
     REQUIRE(1 == dirtiedCount);
   }
 
@@ -57,16 +57,16 @@ namespace Krys::Tests
 
     int dirtiedCount = 0;
     NodeSetContext(root, &dirtiedCount);
-    NodeSetDirtiedFunc(root, _dirtied);
+    NodeSetLayoutDirtiedFunc(root, _dirtied);
 
     REQUIRE(0 == dirtiedCount);
 
     // `_dirtied` MUST be called for the first time.
-    static_cast<NodeRef>(root_child0)->MarkDirtyAndPropagate();
+    static_cast<NodeRef>(root_child0)->MarkLayoutDirtyAndPropagate();
     REQUIRE(1 == dirtiedCount);
 
     // `_dirtied` must NOT be called for the second time.
-    static_cast<NodeRef>(root_child0)->MarkDirtyAndPropagate();
+    static_cast<NodeRef>(root_child0)->MarkLayoutDirtyAndPropagate();
     REQUIRE(1 == dirtiedCount);
   }
 
@@ -91,20 +91,20 @@ namespace Krys::Tests
 
     int dirtiedCount = 0;
     NodeSetContext(root_child0, &dirtiedCount);
-    NodeSetDirtiedFunc(root_child0, _dirtied);
+    NodeSetLayoutDirtiedFunc(root_child0, _dirtied);
 
     REQUIRE(0 == dirtiedCount);
 
     // `_dirtied` must NOT be called for descendants.
-    static_cast<NodeRef>(root)->MarkDirtyAndPropagate();
+    static_cast<NodeRef>(root)->MarkLayoutDirtyAndPropagate();
     REQUIRE(0 == dirtiedCount);
 
     // `_dirtied` must NOT be called for the sibling node.
-    static_cast<NodeRef>(root_child1)->MarkDirtyAndPropagate();
+    static_cast<NodeRef>(root_child1)->MarkLayoutDirtyAndPropagate();
     REQUIRE(0 == dirtiedCount);
 
     // `_dirtied` MUST be called in case of explicit dirtying.
-    static_cast<NodeRef>(root_child0)->MarkDirtyAndPropagate();
+    static_cast<NodeRef>(root_child0)->MarkLayoutDirtyAndPropagate();
     REQUIRE(1 == dirtiedCount);
   }
 }
