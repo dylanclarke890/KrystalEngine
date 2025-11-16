@@ -17,6 +17,8 @@
 
 namespace Krys
 {
+  static UI::ElementHandle _test;
+
   class Editor : public Application
   {
   private:
@@ -65,6 +67,10 @@ namespace Krys
 
           if (event.Key() == Platform::Key::Space && event.State() == Platform::KeyState::Pressed)
           {
+            _document.ElementStyleSetBackgroundColour(
+              _test, Maths::Random::Choice<Gfx::Colour>({Gfx::Colours::Red, Gfx::Colours::Green,
+                                                         Gfx::Colours::Blue, Gfx::Colours::Cyan,
+                                                         Gfx::Colours::Magenta, Gfx::Colours::Yellow}));
           }
 
           return true;
@@ -118,6 +124,7 @@ namespace Krys
       _document.ElementStyleSetWidthPercent(rightBox, 45.f);
       _document.ElementStyleSetHeightPercent(rightBox, 100.f);
       _document.ElementStyleSetBackgroundColour(rightBox, Gfx::Colours::Red);
+      _test = rightBox;
 
       auto rightInnerBox = _document.Create<Element>();
       _document.AppendChild(rightBox, rightInnerBox);

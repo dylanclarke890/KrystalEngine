@@ -2,6 +2,7 @@
 
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Maths/Vector.hpp"
+#include <initializer_list>
 #include <limits>
 #include <random>
 
@@ -74,6 +75,14 @@ namespace Krys::Maths
       VECTOR_TYPE vec;
       vec = MapEach(vec, [&min, &max](auto) { return T(Float(min, max)); });
       return vec;
+    }
+
+    template <typename T>
+    static T Choice(const std::initializer_list<T> &options)
+    {
+      auto it = options.begin();
+      std::advance(it, UInt(static_cast<uint32>(options.size() - 1)));
+      return *it;
     }
 
   private:
