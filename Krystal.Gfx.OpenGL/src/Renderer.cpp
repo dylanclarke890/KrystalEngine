@@ -133,7 +133,7 @@ namespace Krys::Gfx::OpenGL
             .BackgroundColour = cmd.BackgroundColour,
             .BorderColour = cmd.BorderColour,
             .PositionAndSize = {cmd.Position.x, posY, cmd.Size.x, cmd.Size.y},
-            .BorderThicknessRadius = {cmd.BorderThickness, cmd.BorderRadius},
+            .BorderThicknessRadius = {cmd.BorderWidth, cmd.BorderRadius},
           });
 
           if (_quadInstanceData.Data.size() >= QuadInstanceData::BatchSize)

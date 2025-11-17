@@ -69,10 +69,12 @@ namespace Krys::UI
     Gfx::Colour _backgroundColour {Gfx::Colours::Transparent};
     Gfx::Colour _borderColour {Gfx::Colours::Black};
     Gfx::Colour _textColour {Gfx::Colours::Black};
-    float _opacity {1.0f};
+    float _opacity {1.f};
+    float _borderRadius {0.f};
+    float _borderWidth {0.f};
 
     Gfx::FontFamilyHandle _family {};
-    float _fontSize {16.0f};
+    float _fontSize {16.f};
 
   public:
     using Length = StyleLength;
@@ -393,15 +395,9 @@ namespace Krys::UI
       _backgroundColour = colour;
     }
 
-    NO_DISCARD Gfx::Colour GetBorderColour() const noexcept
-    {
-      return _borderColour;
-    }
+#pragma endregion
 
-    void SetBorderColour(Gfx::Colour colour) noexcept
-    {
-      _borderColour = colour;
-    }
+#pragma region Text
 
     NO_DISCARD Gfx::Colour GetTextColour() const noexcept
     {
@@ -412,10 +408,6 @@ namespace Krys::UI
     {
       _textColour = colour;
     }
-
-#pragma endregion
-
-#pragma region Text
 
     void SetFontFamily(Gfx::FontFamilyHandle family) noexcept
     {
@@ -446,6 +438,40 @@ namespace Krys::UI
     NO_DISCARD TextAlign GetTextAlign() const noexcept
     {
       return _textAlign;
+    }
+
+#pragma endregion
+
+#pragma region Border
+
+    NO_DISCARD Gfx::Colour GetBorderColour() const noexcept
+    {
+      return _borderColour;
+    }
+
+    void SetBorderColour(Gfx::Colour colour) noexcept
+    {
+      _borderColour = colour;
+    }
+
+    void SetBorderRadius(float radius)
+    {
+      _borderRadius = radius;
+    }
+
+    NO_DISCARD float GetBorderRadius() const noexcept
+    {
+      return _borderRadius;
+    }
+
+    void SetBorderWidth(float width)
+    {
+      _borderWidth = width;
+    }
+
+    NO_DISCARD float GetBorderWidth() const noexcept
+    {
+      return _borderWidth;
     }
 
 #pragma endregion

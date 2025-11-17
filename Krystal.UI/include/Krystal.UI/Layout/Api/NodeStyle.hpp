@@ -145,6 +145,14 @@ namespace Krys::UI
   void NodeStyleSetBorderColour(NodeRef node, const Gfx::Colour &colour);
   Gfx::Colour NodeStyleGetBorderColour(NodeConstRef node);
 
+  // TODO: needs to be set per edge
+  void NodeStyleSetBorderRadius(NodeRef node, float radius);
+  float NodeStyleGetBorderRadius(NodeConstRef node);
+
+  // TODO: needs to be set per edge
+  void NodeStyleSetBorderWidth(NodeRef node, float width);
+  float NodeStyleGetBorderWidth(NodeConstRef node);
+
   void NodeStyleSetTextColour(NodeRef node, const Gfx::Colour &colour);
   Gfx::Colour NodeStyleGetTextColour(NodeConstRef node);
 

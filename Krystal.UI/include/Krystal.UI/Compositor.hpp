@@ -203,6 +203,8 @@ namespace Krys::UI
         .BorderColour = NodeStyleGetBorderColour(node),
         .Position = position,
         .Size = size,
+        .BorderWidth = NodeStyleGetBorderWidth(node),
+        .BorderRadius = NodeStyleGetBorderRadius(node),
       });
 
       if (element.TextContent.Text.IsValid())

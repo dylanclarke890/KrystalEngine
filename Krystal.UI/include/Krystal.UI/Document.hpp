@@ -3,13 +3,13 @@
 #include "Krystal.Gfx.Lib/Colour.hpp"
 #include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx/IContext.hpp"
-#include "Krystal.Lib/String/StringRef.hpp"
 #include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/SmartPointers.hpp"
 #include "Krystal.Lib/Stack.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/String/StringRef.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.UI/Elements/Element.hpp"
 #include "Krystal.UI/Layout/Algorithm/MeasureText.hpp"
@@ -683,6 +683,28 @@ namespace Krys::UI
     {
       assert(element.IsValid() && "Invalid element handle");
       return NodeStyleGetBorderColour(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetBorderRadius(ElementHandle element, float radius)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetBorderRadius(_elements.Get(element).LayoutNode, radius);
+    }
+    float ElementStyleGetBorderRadius(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetBorderRadius(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetBorderWidth(ElementHandle element, float width)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetBorderWidth(_elements.Get(element).LayoutNode, width);
+    }
+    float ElementStyleGetBorderWidth(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetBorderWidth(_elements.Get(element).LayoutNode);
     }
 
     void ElementStyleSetTextColour(ElementHandle element, const Gfx::Colour &color)

@@ -119,6 +119,13 @@ namespace Krys
       _document.ElementStyleSetHeightPercent(leftInnerBox, 50.f);
       _document.ElementStyleSetBackgroundColour(leftInnerBox, Gfx::Colours::Yellow);
 
+      auto leftInnerInnerBox = _document.Create<Element>();
+      _document.AppendChild(leftBox, leftInnerInnerBox);
+      _document.ElementStyleSetWidth(leftInnerInnerBox, 150.f);
+      _document.ElementStyleSetHeight(leftInnerInnerBox, 200.f);
+      _document.ElementStyleSetBorderRadius(leftInnerInnerBox, 75.f);
+      _document.ElementStyleSetBackgroundColour(leftInnerInnerBox, Gfx::Colours::Maroon);
+
       auto rightBox = _document.Create<Element>();
       _document.AppendChild(_document.Body(), rightBox);
       _document.ElementStyleSetWidthPercent(rightBox, 45.f);

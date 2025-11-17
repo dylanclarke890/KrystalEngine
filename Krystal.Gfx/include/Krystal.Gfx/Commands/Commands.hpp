@@ -19,7 +19,7 @@ namespace Krys::Gfx
       Gfx::Colour BorderColour;
       Maths::Vec2 Position;
       Maths::Vec2 Size;
-      float BorderThickness {0.f};
+      float BorderWidth {0.f};
       float BorderRadius {0.f};
     };
 

@@ -620,6 +620,28 @@ namespace Krys::UI
     return node->GetStyle().GetBorderColour();
   }
 
+  void NodeStyleSetBorderRadius(NodeRef node, float radius)
+  {
+    UpdateProperty<&Style::GetBorderRadius, &Style::SetBorderRadius, DirtiesLayout {false},
+                   DirtiesStyle {true}>(node, radius);
+  }
+
+  float NodeStyleGetBorderRadius(NodeConstRef node)
+  {
+    return node->GetStyle().GetBorderRadius();
+  }
+
+  void NodeStyleSetBorderWidth(NodeRef node, float radius)
+  {
+    UpdateProperty<&Style::GetBorderWidth, &Style::SetBorderWidth, DirtiesLayout {true},
+                   DirtiesStyle {true}>(node, radius);
+  }
+
+  float NodeStyleGetBorderWidth(NodeConstRef node)
+  {
+    return node->GetStyle().GetBorderWidth();
+  }
+
   void NodeStyleSetTextColour(NodeRef node, const Gfx::Colour &colour)
   {
     UpdateProperty<&Style::GetTextColour, &Style::SetTextColour, DirtiesLayout {false}, DirtiesStyle {true}>(
