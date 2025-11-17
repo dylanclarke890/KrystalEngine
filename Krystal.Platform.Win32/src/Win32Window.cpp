@@ -463,38 +463,26 @@ namespace Krys::Platform
         }
         case WM_GETMINMAXINFO:
         {
-          //MINMAXINFO *info = reinterpret_cast<MINMAXINFO *>(lParam);
+          if (::IsZoomed(_handle))
+          {
+            break;
+          }
 
-          //UINT dpi = GetDpiForWindow(window);
-          //float scale = dpi / 96.0f;
+          MINMAXINFO *info = reinterpret_cast<MINMAXINFO *>(lParam);
 
-          //HMONITOR monitor = MonitorFromWindow(window, MONITOR_DEFAULTTONEAREST);
-          //MONITORINFO monitorInfo = {sizeof(MONITORINFO)};
-          //if (GetMonitorInfoW(monitor, &monitorInfo))
-          //{
-          //  RECT rcWork = monitorInfo.rcWork;
-          //  RECT rcMonitor = monitorInfo.rcMonitor;
+          // Query the DPI for the window's current monitor
+          UINT dpi = GetDpiForWindow(window);
+          float scale = dpi / 96.0f;
 
-          //  float workLeft = rcWork.left / scale;
-          //  float workTop = rcWork.top / scale;
-          //  float workRight = rcWork.right / scale;
-          //  float workBottom = rcWork.bottom / scale;
-          //  float monLeft = rcMonitor.left / scale;
-          //  float monTop = rcMonitor.top / scale;
+          // Scale to current monitor DPI
+          info->ptMinTrackSize.x = static_cast<LONG>(_settings.SizeBounds.Min.Width * scale);
+          info->ptMinTrackSize.y = static_cast<LONG>(_settings.SizeBounds.Min.Height * scale);
+          info->ptMaxTrackSize.x = static_cast<LONG>(_settings.SizeBounds.Max.Width * scale);
+          info->ptMaxTrackSize.y = static_cast<LONG>(_settings.SizeBounds.Max.Height * scale);
 
-          //  info->ptMaxPosition.x = static_cast<LONG>(workLeft - monLeft);
-          //  info->ptMaxPosition.y = static_cast<LONG>(workTop - monTop);
-          //  info->ptMaxSize.x = static_cast<LONG>(workRight - workLeft);
-          //  info->ptMaxSize.y = static_cast<LONG>(workBottom - workTop);
-          //}
-
-          //info->ptMinTrackSize.x = static_cast<LONG>(_settings.SizeBounds.Min.Width * scale);
-          //info->ptMinTrackSize.y = static_cast<LONG>(_settings.SizeBounds.Min.Height * scale);
-          //info->ptMaxTrackSize.x = static_cast<LONG>(_settings.SizeBounds.Max.Width * scale);
-          //info->ptMaxTrackSize.y = static_cast<LONG>(_settings.SizeBounds.Max.Height * scale);
-
-          break;
+          return 0;
         }
+
         case WM_DPICHANGED:
         {
           RECT *rect = reinterpret_cast<RECT *>(lParam);
