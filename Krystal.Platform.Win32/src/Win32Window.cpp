@@ -465,16 +465,15 @@ namespace Krys::Platform
         {
           if (::IsZoomed(_handle))
           {
-            break;
+            break; // let default proc handle maximized window
           }
 
           MINMAXINFO *info = reinterpret_cast<MINMAXINFO *>(lParam);
 
-          // Query the DPI for the window's current monitor
           UINT dpi = GetDpiForWindow(window);
           float scale = dpi / 96.0f;
 
-          // Scale to current monitor DPI
+          // Scale bounds to match current DPI
           info->ptMinTrackSize.x = static_cast<LONG>(_settings.SizeBounds.Min.Width * scale);
           info->ptMinTrackSize.y = static_cast<LONG>(_settings.SizeBounds.Min.Height * scale);
           info->ptMaxTrackSize.x = static_cast<LONG>(_settings.SizeBounds.Max.Width * scale);
