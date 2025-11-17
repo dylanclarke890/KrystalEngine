@@ -882,6 +882,7 @@ namespace Krys::Gfx::OpenGL
     _width = width;
     _height = height;
     glViewport(0, 0, _width, _height);
+    _renderTargets.OnWindowResize(_width, _height);
     ScreenOrthoProjection = Ortho(0.0f, static_cast<float>(_width), 0.0f, static_cast<float>(_height));
     _buffers.Get(bufferHandles.at("matrices")).Update(ScreenOrthoProjection, 2 * sizeof(Mat4));
   }
