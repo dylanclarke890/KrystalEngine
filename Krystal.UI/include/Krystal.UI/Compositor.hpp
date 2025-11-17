@@ -56,6 +56,23 @@ namespace Krys::UI
 
     ~Compositor() = default;
 
+    void BeginFrame()
+    {
+      _commandLists.clear();
+    }
+
+    void EndFrame()
+    {
+      CleanupUnusedLayers();
+
+      // Destroy pending render targets.
+      for (auto &handle : _pendingDestruction)
+      {
+        _context.RenderTargets().Destroy(handle);
+      }
+      _pendingDestruction.clear();
+    }
+
     void Render(Document &document, Gfx::RenderTargetHandle renderTarget = {}) noexcept
     {
       if (!renderTarget.IsValid())
@@ -77,23 +94,6 @@ namespace Krys::UI
       EndFrame();
     }
 
-    void BeginFrame()
-    {
-      // No-op for now
-    }
-
-    void EndFrame()
-    {
-      CleanupUnusedLayers();
-
-      // Destroy pending render targets.
-      for (auto &handle : _pendingDestruction)
-      {
-        _context.RenderTargets().Destroy(handle);
-      }
-      _pendingDestruction.clear();
-    }
-
   private:
     void SubmitCommmandLists()
     {
@@ -102,7 +102,6 @@ namespace Krys::UI
       {
         _renderer.Submit(*it);
       }
-      _commandLists.clear();
     }
 
     void CleanupUnusedLayers()
@@ -165,11 +164,8 @@ namespace Krys::UI
       if (auto existing = _cachedLayers.find(handle); existing != _cachedLayers.end())
       {
         auto &cachedLayer = existing->second;
-
         if (cachedLayer.Size == size && !NodeGetHasNewLayout(node) && !NodeIsStyleDirty(node))
         {
-          NodeSetHasNewLayout(node, false);
-          NodeSetStyleDirty(node, false);
           float opacity = document.ElementStyleGetOpacity(handle);
           DrawRenderTargetColourAttachmentCommand(cachedLayer.Target, absolutePosition, size, opacity);
           return;
@@ -198,6 +194,8 @@ namespace Krys::UI
       PushLayer(handle, layerRenderTarget);
       {
         RenderElementContents(node, relativePosition, size, element, document);
+        NodeSetHasNewLayout(node, false);
+        NodeSetStyleDirty(node, false);
       }
       PopLayer();
 
@@ -234,9 +232,6 @@ namespace Krys::UI
           .Colour = NodeStyleGetTextColour(element.LayoutNode),
         });
       }
-
-      NodeSetHasNewLayout(node, false);
-      NodeSetStyleDirty(node, false);
 
       for (auto &child : element.Children)
       {
