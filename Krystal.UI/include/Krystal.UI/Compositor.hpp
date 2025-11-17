@@ -21,6 +21,8 @@ namespace Krys::UI
   {
     NO_COPY_MOVE(Compositor)
 
+    static constexpr auto TopLeftOrigin = Maths::Vec2 {0.f, 0.f};
+
     struct State
     {
       ElementHandle CurrentElement;
@@ -59,52 +61,11 @@ namespace Krys::UI
     void BeginFrame()
     {
       _commandLists.clear();
-    }
-
-    void EndFrame()
-    {
-      CleanupUnusedLayers();
-
-      // Destroy pending render targets.
-      for (auto &handle : _pendingDestruction)
-      {
-        _context.RenderTargets().Destroy(handle);
-      }
+      _usedLayers.clear();
       _pendingDestruction.clear();
     }
 
-    void Render(Document &document, Gfx::RenderTargetHandle renderTarget = {}) noexcept
-    {
-      if (!renderTarget.IsValid())
-      {
-        renderTarget = _context.RenderTargets().GetScreenRenderTarget();
-      }
-
-      auto targetDimensions = _context.RenderTargets().GetDimensions(renderTarget);
-      document.Reflow(targetDimensions.x, targetDimensions.y);
-
-      PushLayer(document.Body(), renderTarget);
-      {
-        constexpr auto origin = Maths::Vec2 {0.f, 0.f};
-        RenderElement(document, document.Body(), origin);
-      }
-      PopLayer();
-
-      SubmitCommmandLists();
-      EndFrame();
-    }
-
-  private:
-    void SubmitCommmandLists()
-    {
-      // Submit child command lists first, since parents composite from their results.
-      for (auto it = _commandLists.rbegin(); it != _commandLists.rend(); ++it)
-      {
-        _renderer.Submit(*it);
-      }
-    }
-
-    void CleanupUnusedLayers()
+    void EndFrame()
     {
       for (auto it = _cachedLayers.begin(); it != _cachedLayers.end();)
       {
@@ -118,9 +79,41 @@ namespace Krys::UI
           ++it;
         }
       }
-      _usedLayers.clear();
+
+      for (auto &handle : _pendingDestruction)
+      {
+        _context.RenderTargets().Destroy(handle);
+      }
     }
 
+    void Render(Document &document, Gfx::RenderTargetHandle renderTarget = {}) noexcept
+    {
+      BeginFrame();
+
+      if (!renderTarget.IsValid())
+      {
+        renderTarget = _context.RenderTargets().GetScreenRenderTarget();
+      }
+
+      auto targetDimensions = _context.RenderTargets().GetDimensions(renderTarget);
+      document.Reflow(targetDimensions.x, targetDimensions.y);
+
+      PushLayer(document.Body(), renderTarget);
+      {
+        RenderElement(document, document.Body(), TopLeftOrigin);
+      }
+      PopLayer();
+
+      // Submit child command lists first, since parents composite from their results.
+      for (auto it = _commandLists.rbegin(); it != _commandLists.rend(); ++it)
+      {
+        _renderer.Submit(*it);
+      }
+
+      EndFrame();
+    }
+
+  private:
     Gfx::CommandList &CurrentCommandList() noexcept
     {
       assert(!_layerStack.empty() && "No active layer");
@@ -129,6 +122,7 @@ namespace Krys::UI
 
     void PushLayer(ElementHandle owner, Gfx::RenderTargetHandle renderTarget) noexcept
     {
+      // TODO: reuse command lists?
       _usedLayers.insert(owner);
       _commandLists.emplace_back();
       _layerStack.push({renderTarget, _commandLists.size() - 1u});
@@ -193,9 +187,7 @@ namespace Krys::UI
 
       PushLayer(handle, layerRenderTarget);
       {
-        RenderElementContents(node, relativePosition, size, element, document);
-        NodeSetHasNewLayout(node, false);
-        NodeSetStyleDirty(node, false);
+        RenderElementContents(node, TopLeftOrigin, size, element, document);
       }
       PopLayer();
 
@@ -232,6 +224,9 @@ namespace Krys::UI
           .Colour = NodeStyleGetTextColour(element.LayoutNode),
         });
       }
+
+      NodeSetHasNewLayout(node, false);
+      NodeSetStyleDirty(node, false);
 
       for (auto &child : element.Children)
       {
