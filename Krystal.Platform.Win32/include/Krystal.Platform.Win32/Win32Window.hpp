@@ -14,7 +14,7 @@ namespace Krys::Platform::Win32
   {
     WindowSettings _settings;
     WindowCallbacks _callbacks;
-    WNDCLASS _class;
+    WNDCLASSW _class;
     HWND _handle;
 
   public:

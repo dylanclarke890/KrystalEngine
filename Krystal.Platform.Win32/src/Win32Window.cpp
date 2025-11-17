@@ -18,10 +18,10 @@ namespace
   {
     using namespace Krys::Platform::Win32;
 
-    Win32Window *window = nullptr;
+    Win32Window *window {nullptr};
     if (message == WM_NCCREATE)
     {
-      CREATESTRUCT *pCreate = reinterpret_cast<CREATESTRUCT *>(lParam);
+      auto pCreate = reinterpret_cast<CREATESTRUCT *>(lParam);
       window = static_cast<Win32Window *>(pCreate->lpCreateParams);
       ::SetWindowLongPtrA(handle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(window));
     }
@@ -31,8 +31,11 @@ namespace
     }
 
     if (window)
+    {
       return window->HandleMessage(handle, message, wParam, lParam);
-    return ::DefWindowProc(handle, message, wParam, lParam);
+    }
+
+    return ::DefWindowProcW(handle, message, wParam, lParam);
   }
 
   static Krys::Platform::Key KeyCodeToEngineKey(const WPARAM keyCode) noexcept
@@ -152,9 +155,11 @@ namespace Krys::Platform
     Win32Window::Win32Window(const WindowSettings &settings)
         : _settings(settings), _callbacks(), _handle(nullptr)
     {
-      const auto instance = ::GetModuleHandle(NULL);
+      const auto instance = ::GetModuleHandleW(NULL);
       if (!instance)
+      {
         throw std::runtime_error("Failed to get module handle: " + Win32::GetLastErrorAsString());
+      }
 
       ::SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
@@ -174,19 +179,22 @@ namespace Krys::Platform
 
     void Win32Window::CreateWindowClass(HMODULE instance)
     {
-      _class = {};
-      _class.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-      _class.hInstance = instance;
-      _class.lpfnWndProc = &WindowProc;
-      _class.lpszMenuName = NULL;
-      _class.hbrBackground = NULL;
-      _class.hCursor = ::LoadCursor(instance, IDC_ARROW);
-      _class.cbWndExtra = sizeof(Win32Window *);
-      _class.lpszClassName = L"KrystalWindowClass";
+      _class = WNDCLASSW {
+        .style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC,
+        .lpfnWndProc = &WindowProc,
+        .cbWndExtra = sizeof(Win32Window *),
+        .hInstance = instance,
+        .hCursor = ::LoadCursorW(instance, IDC_ARROW),
+        .hbrBackground = NULL,
+        .lpszMenuName = NULL,
+        .lpszClassName = L"KrystalWindowClass",
+      };
 
-      auto result = ::RegisterClass(&_class);
+      auto result = ::RegisterClassW(&_class);
       if (!result && ::GetLastError() != ERROR_CLASS_ALREADY_EXISTS)
+      {
         throw std::runtime_error("Failed to register window class: " + Win32::GetLastErrorAsString());
+      }
     }
 
     void Win32Window::CreateWindowHandle(HMODULE instance)
@@ -206,7 +214,7 @@ namespace Krys::Platform
       int width = dimensions.right - dimensions.left;
       int height = dimensions.bottom - dimensions.top;
 
-      _handle = ::CreateWindowEx(0, _class.lpszClassName, ToWideString(_settings.Title).c_str(), styles,
+      _handle = ::CreateWindowExW(0, _class.lpszClassName, ToWideString(_settings.Title).c_str(), styles,
                                  CW_USEDEFAULT, CW_USEDEFAULT, width, height, 0, 0, instance, this);
       if (!_handle)
         throw std::runtime_error("Failed to create window: " + Win32::GetLastErrorAsString());
@@ -229,10 +237,10 @@ namespace Krys::Platform
     void Win32Window::ProcessMessages() noexcept
     {
       MSG message {};
-      while (::PeekMessage(&message, _handle, 0, 0, PM_REMOVE) != 0)
+      while (::PeekMessageW(&message, _handle, 0, 0, PM_REMOVE) != 0)
       {
         ::TranslateMessage(&message);
-        ::DispatchMessage(&message);
+        ::DispatchMessageW(&message);
       }
     }
 
@@ -246,7 +254,7 @@ namespace Krys::Platform
         {
           if (LOWORD(lParam) == HTCLIENT)
           {
-            ::SetCursor(::LoadCursor(NULL, IDC_ARROW));
+            ::SetCursor(::LoadCursorW(NULL, IDC_ARROW));
             return TRUE;
           }
           break;
@@ -464,7 +472,7 @@ namespace Krys::Platform
         }
         case WM_DPICHANGED:
         {
-          RECT* rect = reinterpret_cast<RECT *>(lParam);
+          RECT *rect = reinterpret_cast<RECT *>(lParam);
           ::SetWindowPos(window, NULL, rect->left, rect->top, rect->right - rect->left,
                          rect->bottom - rect->top, SWP_NOZORDER);
           if (_callbacks.OnDPIChange)
@@ -476,15 +484,17 @@ namespace Krys::Platform
         }
       }
 
-      return ::DefWindowProc(window, message, wParam, lParam);
+      return ::DefWindowProcW(window, message, wParam, lParam);
     }
 
     void Win32Window::SetTitle(const string &title) noexcept
     {
-      auto result = ::SetWindowText(_handle, ToWideString(title).c_str());
+      auto result = ::SetWindowTextW(_handle, ToWideString(title).c_str());
       assert(result);
       if (result)
+      {
         _settings.Title = title;
+      }
     }
 
     const string &Win32Window::GetTitle() const noexcept
