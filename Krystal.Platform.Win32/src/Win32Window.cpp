@@ -155,13 +155,13 @@ namespace Krys::Platform
     Win32Window::Win32Window(const WindowSettings &settings)
         : _settings(settings), _callbacks(), _handle(nullptr)
     {
+      ::SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
+
       const auto instance = ::GetModuleHandleW(NULL);
       if (!instance)
       {
         throw std::runtime_error("Failed to get module handle: " + Win32::GetLastErrorAsString());
       }
-
-      ::SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
       CreateWindowClass(instance);
       CreateWindowHandle(instance);
@@ -215,7 +215,7 @@ namespace Krys::Platform
       int height = dimensions.bottom - dimensions.top;
 
       _handle = ::CreateWindowExW(0, _class.lpszClassName, ToWideString(_settings.Title).c_str(), styles,
-                                 CW_USEDEFAULT, CW_USEDEFAULT, width, height, 0, 0, instance, this);
+                                  CW_USEDEFAULT, CW_USEDEFAULT, width, height, 0, 0, instance, this);
       if (!_handle)
         throw std::runtime_error("Failed to create window: " + Win32::GetLastErrorAsString());
     }
@@ -463,11 +463,36 @@ namespace Krys::Platform
         }
         case WM_GETMINMAXINFO:
         {
-          MINMAXINFO &info = *reinterpret_cast<MINMAXINFO *>(lParam);
-          info.ptMaxTrackSize.x = _settings.SizeBounds.Max.Width;
-          info.ptMaxTrackSize.y = _settings.SizeBounds.Max.Height;
-          info.ptMinTrackSize.x = _settings.SizeBounds.Min.Width;
-          info.ptMinTrackSize.y = _settings.SizeBounds.Min.Height;
+          //MINMAXINFO *info = reinterpret_cast<MINMAXINFO *>(lParam);
+
+          //UINT dpi = GetDpiForWindow(window);
+          //float scale = dpi / 96.0f;
+
+          //HMONITOR monitor = MonitorFromWindow(window, MONITOR_DEFAULTTONEAREST);
+          //MONITORINFO monitorInfo = {sizeof(MONITORINFO)};
+          //if (GetMonitorInfoW(monitor, &monitorInfo))
+          //{
+          //  RECT rcWork = monitorInfo.rcWork;
+          //  RECT rcMonitor = monitorInfo.rcMonitor;
+
+          //  float workLeft = rcWork.left / scale;
+          //  float workTop = rcWork.top / scale;
+          //  float workRight = rcWork.right / scale;
+          //  float workBottom = rcWork.bottom / scale;
+          //  float monLeft = rcMonitor.left / scale;
+          //  float monTop = rcMonitor.top / scale;
+
+          //  info->ptMaxPosition.x = static_cast<LONG>(workLeft - monLeft);
+          //  info->ptMaxPosition.y = static_cast<LONG>(workTop - monTop);
+          //  info->ptMaxSize.x = static_cast<LONG>(workRight - workLeft);
+          //  info->ptMaxSize.y = static_cast<LONG>(workBottom - workTop);
+          //}
+
+          //info->ptMinTrackSize.x = static_cast<LONG>(_settings.SizeBounds.Min.Width * scale);
+          //info->ptMinTrackSize.y = static_cast<LONG>(_settings.SizeBounds.Min.Height * scale);
+          //info->ptMaxTrackSize.x = static_cast<LONG>(_settings.SizeBounds.Max.Width * scale);
+          //info->ptMaxTrackSize.y = static_cast<LONG>(_settings.SizeBounds.Max.Height * scale);
+
           break;
         }
         case WM_DPICHANGED:

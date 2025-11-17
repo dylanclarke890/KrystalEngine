@@ -73,12 +73,8 @@ namespace Krys::Platform
 
   int GetDPIForWindow(NativeHandle windowHandle) noexcept
   {
-    HMONITOR monitor = ::MonitorFromWindow(windowHandle.As<HWND>(), MONITOR_DEFAULTTONEAREST);
-    UINT dpiX = 96, dpiY = 96;
-    auto result = ::GetDpiForMonitor(monitor, MDT_EFFECTIVE_DPI, &dpiX, &dpiY);
-    if (result != S_OK)
-      return 96;
-    return static_cast<int>(dpiX);
+    auto window = windowHandle.As<HWND>();
+    return static_cast<int>(::GetDpiForWindow(window));
   }
 
   NativeHandle GetActiveWindow() noexcept
