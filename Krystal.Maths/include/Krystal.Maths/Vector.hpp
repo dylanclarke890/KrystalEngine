@@ -244,6 +244,11 @@ namespace Krys::Maths
     {
     }
 
+    constexpr Vector(const Vector<T, 2> &vec2a, const Vector<T, 2> &vec2b) noexcept
+        : x(vec2a.x), y(vec2a.y), z(vec2b.x), w(vec2b.y)
+    {
+    }
+
     template <ConvertibleTo<T> U>
     constexpr Vector(const Vector<U, 4> &other) noexcept
         : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), z(static_cast<T>(other.z)),

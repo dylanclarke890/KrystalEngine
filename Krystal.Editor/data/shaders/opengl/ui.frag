@@ -20,10 +20,17 @@ void main()
   float borderThickness = BorderThicknessAndRadius.x;
   float radius = BorderThicknessAndRadius.y;
   
-  vec2 pos = rectSize * TextureCoords;
-  float dist = RectSDF(pos - rectSize / 2.0, rectSize / 2.0 - borderThickness / 2.0 - 1.0, radius);
-  float blendAmount = smoothstep(-1.0, 1.0, abs(dist) - borderThickness / 2.0);
+  if (borderThickness <= 0.0)
+  {
+    FragmentColour = BackgroundColour;
+  }
+  else
+  {
+    vec2 pos = rectSize * TextureCoords;
+    float dist = RectSDF(pos - rectSize / 2.0, rectSize / 2.0 - borderThickness / 2.0 - 1.0, radius);
+    float blendAmount = smoothstep(-1.0, 1.0, abs(dist) - borderThickness / 2.0);
 
-  vec4 v4ToColor = (dist < 0.0) ? BackgroundColour : vec4(0.0);
-  FragmentColour = mix(BorderColour, v4ToColor, blendAmount);
+    vec4 v4ToColor = (dist < 0.0) ? BackgroundColour : vec4(0.0);
+    FragmentColour = mix(BorderColour, v4ToColor, blendAmount);
+  }
 }

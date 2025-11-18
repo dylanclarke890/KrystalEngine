@@ -67,11 +67,13 @@ namespace Krys::UI
     StyleValuePool _pool;
 
     Gfx::Colour _backgroundColour {Gfx::Colours::Transparent};
-    Gfx::Colour _borderColour {Gfx::Colours::Black};
     Gfx::Colour _textColour {Gfx::Colours::Black};
     float _opacity {1.f};
-    float _borderRadius {0.f};
-    float _borderWidth {0.f};
+    Array<Gfx::Colour, 4> _borderColours {Gfx::Colours::Black, Gfx::Colours::Black, Gfx::Colours::Black,
+                                          Gfx::Colours::Black};
+    Array<float, 4> _borderWidths {0.f, 0.f, 0.f, 0.f};
+    Array<Maths::Vec2, 4> _borderRadii {Maths::Vec2 {0.f, 0.f}, Maths::Vec2 {0.f, 0.f},
+                                        Maths::Vec2 {0.f, 0.f}, Maths::Vec2 {0.f, 0.f}};
 
     Gfx::FontFamilyHandle _family {};
     float _fontSize {16.f};
@@ -383,7 +385,7 @@ namespace Krys::UI
 
 #pragma endregion
 
-#pragma region Colours
+#pragma region Background
 
     NO_DISCARD Gfx::Colour GetBackgroundColour() const noexcept
     {
@@ -444,34 +446,34 @@ namespace Krys::UI
 
 #pragma region Border
 
-    NO_DISCARD Gfx::Colour GetBorderColour() const noexcept
+    NO_DISCARD const Array<Gfx::Colour, 4> &GetBorderColours() const noexcept
     {
-      return _borderColour;
+      return _borderColours;
     }
 
-    void SetBorderColour(Gfx::Colour colour) noexcept
+    void SetBorderColours(const Array<Gfx::Colour, 4> &colours) noexcept
     {
-      _borderColour = colour;
+      _borderColours = colours;
     }
 
-    void SetBorderRadius(float radius)
+    NO_DISCARD const Array<Maths::Vec2, 4> &GetBorderRadii() const noexcept
     {
-      _borderRadius = radius;
+      return _borderRadii;
     }
 
-    NO_DISCARD float GetBorderRadius() const noexcept
+    void SetBorderRadii(const Array<Maths::Vec2, 4> &radii)
     {
-      return _borderRadius;
+      _borderRadii = radii;
     }
 
-    void SetBorderWidth(float width)
+    NO_DISCARD const Array<float, 4> &GetBorderWidths() const noexcept
     {
-      _borderWidth = width;
+      return _borderWidths;
     }
 
-    NO_DISCARD float GetBorderWidth() const noexcept
+    void SetBorderWidths(const Array<float, 4> &width)
     {
-      return _borderWidth;
+      _borderWidths = width;
     }
 
 #pragma endregion

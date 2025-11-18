@@ -609,37 +609,37 @@ namespace Krys::UI
     return node->GetStyle().GetBackgroundColour();
   }
 
-  void NodeStyleSetBorderColour(NodeRef node, const Gfx::Colour &colour)
+  void NodeStyleSetBorderColours(NodeRef node, const Array<Gfx::Colour, 4> &colours)
   {
-    UpdateProperty<&Style::GetBorderColour, &Style::SetBorderColour, DirtiesLayout {false},
-                   DirtiesStyle {true}>(node, colour);
+    UpdateProperty<&Style::GetBorderColours, &Style::SetBorderColours, DirtiesLayout {false},
+                   DirtiesStyle {true}>(node, colours);
   }
 
-  Gfx::Colour NodeStyleGetBorderColour(NodeConstRef node)
+  const Array<Gfx::Colour, 4> &NodeStyleGetBorderColours(NodeConstRef node)
   {
-    return node->GetStyle().GetBorderColour();
+    return node->GetStyle().GetBorderColours();
   }
 
-  void NodeStyleSetBorderRadius(NodeRef node, float radius)
+  void NodeStyleSetBorderRadii(NodeRef node, const Array<Maths::Vec2, 4> &radii)
   {
-    UpdateProperty<&Style::GetBorderRadius, &Style::SetBorderRadius, DirtiesLayout {false},
-                   DirtiesStyle {true}>(node, radius);
+    UpdateProperty<&Style::GetBorderRadii, &Style::SetBorderRadii, DirtiesLayout {false},
+                   DirtiesStyle {true}>(node, radii);
   }
 
-  float NodeStyleGetBorderRadius(NodeConstRef node)
+  const Array<Maths::Vec2, 4> &NodeStyleGetBorderRadii(NodeConstRef node)
   {
-    return node->GetStyle().GetBorderRadius();
+    return node->GetStyle().GetBorderRadii();
   }
 
-  void NodeStyleSetBorderWidth(NodeRef node, float radius)
+  void NodeStyleSetBorderWidths(NodeRef node, const Array<float, 4> &widths)
   {
-    UpdateProperty<&Style::GetBorderWidth, &Style::SetBorderWidth, DirtiesLayout {true},
-                   DirtiesStyle {true}>(node, radius);
+    UpdateProperty<&Style::GetBorderWidths, &Style::SetBorderWidths, DirtiesLayout {true},
+                   DirtiesStyle {true}>(node, widths);
   }
 
-  float NodeStyleGetBorderWidth(NodeConstRef node)
+  const Array<float, 4> &NodeStyleGetBorderWidths(NodeConstRef node)
   {
-    return node->GetStyle().GetBorderWidth();
+    return node->GetStyle().GetBorderWidths();
   }
 
   void NodeStyleSetTextColour(NodeRef node, const Gfx::Colour &colour)

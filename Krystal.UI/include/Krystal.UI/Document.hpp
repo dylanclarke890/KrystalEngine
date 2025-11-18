@@ -674,37 +674,37 @@ namespace Krys::UI
       return NodeStyleGetBackgroundColour(_elements.Get(element).LayoutNode);
     }
 
-    void ElementStyleSetBorderColour(ElementHandle element, const Gfx::Colour &colour)
+    void ElementStyleSetBorderColours(ElementHandle element, const Array<Gfx::Colour, 4> &colours)
     {
       assert(element.IsValid() && "Invalid element handle");
-      NodeStyleSetBorderColour(_elements.Get(element).LayoutNode, colour);
+      NodeStyleSetBorderColours(_elements.Get(element).LayoutNode, colours);
     }
-    Gfx::Colour ElementStyleGetBorderColour(ElementHandle element)
+    const Array<Gfx::Colour, 4> &ElementStyleGetBorderColours(ElementHandle element)
     {
       assert(element.IsValid() && "Invalid element handle");
-      return NodeStyleGetBorderColour(_elements.Get(element).LayoutNode);
-    }
-
-    void ElementStyleSetBorderRadius(ElementHandle element, float radius)
-    {
-      assert(element.IsValid() && "Invalid element handle");
-      NodeStyleSetBorderRadius(_elements.Get(element).LayoutNode, radius);
-    }
-    float ElementStyleGetBorderRadius(ElementHandle element)
-    {
-      assert(element.IsValid() && "Invalid element handle");
-      return NodeStyleGetBorderRadius(_elements.Get(element).LayoutNode);
+      return NodeStyleGetBorderColours(_elements.Get(element).LayoutNode);
     }
 
-    void ElementStyleSetBorderWidth(ElementHandle element, float width)
+    void ElementStyleSetBorderRadii(ElementHandle element, const Array<Maths::Vec2, 4> &radii)
     {
       assert(element.IsValid() && "Invalid element handle");
-      NodeStyleSetBorderWidth(_elements.Get(element).LayoutNode, width);
+      NodeStyleSetBorderRadii(_elements.Get(element).LayoutNode, radii);
     }
-    float ElementStyleGetBorderWidth(ElementHandle element)
+    const Array<Maths::Vec2, 4> &ElementStyleGetBorderRadii(ElementHandle element)
     {
       assert(element.IsValid() && "Invalid element handle");
-      return NodeStyleGetBorderWidth(_elements.Get(element).LayoutNode);
+      return NodeStyleGetBorderRadii(_elements.Get(element).LayoutNode);
+    }
+
+    void ElementStyleSetBorderWidths(ElementHandle element, const Array<float, 4> &widths)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      NodeStyleSetBorderWidths(_elements.Get(element).LayoutNode, widths);
+    }
+    const Array<float, 4> &ElementStyleGetBorderWidths(ElementHandle element)
+    {
+      assert(element.IsValid() && "Invalid element handle");
+      return NodeStyleGetBorderWidths(_elements.Get(element).LayoutNode);
     }
 
     void ElementStyleSetTextColour(ElementHandle element, const Gfx::Colour &color)

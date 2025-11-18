@@ -200,11 +200,11 @@ namespace Krys::UI
     {
       CurrentCommandList().Push(Gfx::Commands::DrawRect {
         .BackgroundColour = NodeStyleGetBackgroundColour(node),
-        .BorderColour = NodeStyleGetBorderColour(node),
+        .BorderColour = NodeStyleGetBorderColours(node)[0],
         .Position = position,
         .Size = size,
-        .BorderWidth = NodeStyleGetBorderWidth(node),
-        .BorderRadius = NodeStyleGetBorderRadius(node),
+        .BorderWidth = NodeStyleGetBorderWidths(node)[0],
+        .BorderRadius = NodeStyleGetBorderRadii(node)[0].x,
       });
 
       if (element.TextContent.Text.IsValid())

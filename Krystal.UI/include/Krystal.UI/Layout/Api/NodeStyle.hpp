@@ -2,6 +2,7 @@
 
 #include "Krystal.Gfx.Lib/Colour.hpp"
 #include "Krystal.Gfx/Handle.hpp"
+#include "Krystal.Lib/Array.hpp"
 #include "Krystal.UI/Layout/Api/Node.hpp"
 #include "Krystal.UI/Styles/Enums/Align.hpp"
 #include "Krystal.UI/Styles/Enums/BoxSizing.hpp"
@@ -142,16 +143,14 @@ namespace Krys::UI
   void NodeStyleSetBackgroundColour(NodeRef node, const Gfx::Colour &colour);
   Gfx::Colour NodeStyleGetBackgroundColour(NodeConstRef node);
 
-  void NodeStyleSetBorderColour(NodeRef node, const Gfx::Colour &colour);
-  Gfx::Colour NodeStyleGetBorderColour(NodeConstRef node);
+  void NodeStyleSetBorderColours(NodeRef node, const Array<Gfx::Colour, 4> &colour);
+  const Array<Gfx::Colour, 4> &NodeStyleGetBorderColours(NodeConstRef node);
 
-  // TODO: needs to be set per edge
-  void NodeStyleSetBorderRadius(NodeRef node, float radius);
-  float NodeStyleGetBorderRadius(NodeConstRef node);
+  void NodeStyleSetBorderRadii(NodeRef node, const Array<Maths::Vec2, 4> &radii);
+  const Array<Maths::Vec2, 4> &NodeStyleGetBorderRadii(NodeConstRef node);
 
-  // TODO: needs to be set per edge
-  void NodeStyleSetBorderWidth(NodeRef node, float width);
-  float NodeStyleGetBorderWidth(NodeConstRef node);
+  void NodeStyleSetBorderWidths(NodeRef node, const Array<float, 4> &widths);
+  const Array<float, 4> &NodeStyleGetBorderWidths(NodeConstRef node);
 
   void NodeStyleSetTextColour(NodeRef node, const Gfx::Colour &colour);
   Gfx::Colour NodeStyleGetTextColour(NodeConstRef node);
