@@ -131,9 +131,13 @@ namespace Krys::Gfx::OpenGL
           float posY = static_cast<float>(rt.Height()) - (cmd.Position.y + cmd.Size.y);
           _quadInstanceData.Data.push_back({
             .BackgroundColour = cmd.BackgroundColour,
-            .BorderColour = cmd.BorderColour,
             .PositionAndSize = {cmd.Position.x, posY, cmd.Size.x, cmd.Size.y},
-            .BorderThicknessRadius = {cmd.BorderWidth, cmd.BorderRadius},
+            .BorderColourLeft = cmd.BorderColour,
+            .BorderColourRight = cmd.BorderColour,
+            .BorderColourTop = cmd.BorderColour,
+            .BorderColourBottom = cmd.BorderColour,
+            .BorderWidths = Maths::Vec4 {cmd.BorderWidth},
+            .BorderRadii = Maths::Vec4 {cmd.BorderRadius},
           });
 
           if (_quadInstanceData.Data.size() >= QuadInstanceData::BatchSize)
@@ -229,11 +233,16 @@ namespace Krys::Gfx::OpenGL
     glBindTextureUnit(0, texture);
 
     // Setup instance data for just one quad
-    Array<QuadInstanceData, 1> instance;
-    instance[0].BackgroundColour = Gfx::Colours::Black;
-    instance[0].BorderColour = Gfx::Colours::Transparent;
-    instance[0].PositionAndSize = {position.x, position.y, size.x, size.y};
-    instance[0].BorderThicknessRadius = {0, 0};
+    Array<QuadInstanceData, 1> instance = {QuadInstanceData {
+      .BackgroundColour = Gfx::Colours::Transparent,
+      .PositionAndSize = {position.x, position.y, size.x, size.y},
+      .BorderColourLeft = Gfx::Colours::Transparent,
+      .BorderColourRight = Gfx::Colours::Transparent,
+      .BorderColourTop = Gfx::Colours::Transparent,
+      .BorderColourBottom = Gfx::Colours::Transparent,
+      .BorderWidths = Maths::Vec4 {0.f},
+      .BorderRadii = Maths::Vec4 {0.f},
+    }};
 
     auto &buffer = static_cast<BufferRegistry &>(_context.Buffers()).Get(_quadInstanceData.Buffer);
     buffer.Update(instance);

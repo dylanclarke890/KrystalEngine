@@ -2,9 +2,14 @@
 
 in vec2 TextureCoords;
 in vec4 BackgroundColour;
-in vec4 BorderColour;
+in vec4 BorderColourLeft;
+in vec4 BorderColourRight;
+in vec4 BorderColourTop;
+in vec4 BorderColourBottom;
 in vec2 Size;
-in vec2 BorderThicknessAndRadius;
+in vec4 BorderWidths;
+in vec4 BorderRadiiTop;
+in vec4 BorderRadiiBottom;
 
 out vec4 FragmentColour;
 
@@ -17,8 +22,8 @@ float RectSDF(vec2 p, vec2 b, float r)
 void main()
 {
   vec2 rectSize = Size;
-  float borderThickness = BorderThicknessAndRadius.x;
-  float radius = BorderThicknessAndRadius.y;
+  float borderThickness = BorderWidths.x;
+  float radius = BorderRadiiTop.y;
   
   if (borderThickness <= 0.0)
   {
@@ -31,6 +36,6 @@ void main()
     float blendAmount = smoothstep(-1.0, 1.0, abs(dist) - borderThickness / 2.0);
 
     vec4 v4ToColor = (dist < 0.0) ? BackgroundColour : vec4(0.0);
-    FragmentColour = mix(BorderColour, v4ToColor, blendAmount);
+    FragmentColour = mix(BorderColourLeft, v4ToColor, blendAmount);
   }
 }

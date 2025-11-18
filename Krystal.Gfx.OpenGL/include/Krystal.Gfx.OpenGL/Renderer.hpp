@@ -13,9 +13,13 @@ namespace Krys::Gfx::OpenGL
   struct QuadInstanceData
   {
     Colour BackgroundColour;
-    Colour BorderColour;
-    Maths::Vec4 PositionAndSize;       // xy: position, zw: size
-    Maths::Vec2 BorderThicknessRadius; // x: border thickness, y: border radius
+    Maths::Vec4 PositionAndSize; // xy: position, zw: size
+    Colour BorderColourLeft;
+    Colour BorderColourRight;
+    Colour BorderColourTop;
+    Colour BorderColourBottom;
+    Maths::Vec4 BorderWidths;
+    Maths::Vec4 BorderRadii;
 
     constexpr static uint32 BatchSize = 200u;
 
@@ -23,9 +27,13 @@ namespace Krys::Gfx::OpenGL
     {
       return {
         {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}, // background colour
-        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}, // border colour
         {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}, // quad position and size
-        {VertexAttributeType::Float, 2, VertexInputRate::PerInstance}, // border thickness and radius
+        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}, // border colour left
+        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}, // border colour right
+        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}, // border colour top
+        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}, // border colour bottom
+        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}, // border widths
+        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}  // border radii
       };
     }
   };
