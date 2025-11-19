@@ -200,7 +200,10 @@ namespace Krys::UI
     {
       CurrentCommandList().Push(Gfx::Commands::DrawRect {
         .BackgroundColour = NodeStyleGetBackgroundColour(node),
-        .BorderColour = NodeStyleGetBorderColours(node)[0],
+        .BorderColourLeft = NodeStyleGetBorderColours(node)[0],
+        .BorderColourRight = NodeStyleGetBorderColours(node)[1],
+        .BorderColourTop = NodeStyleGetBorderColours(node)[2],
+        .BorderColourBottom = NodeStyleGetBorderColours(node)[3],
         .Position = position,
         .Size = size,
         .BorderWidth = NodeStyleGetBorderWidths(node)[0],

@@ -132,10 +132,10 @@ namespace Krys::Gfx::OpenGL
           _quadInstanceData.Data.push_back({
             .BackgroundColour = cmd.BackgroundColour,
             .PositionAndSize = {cmd.Position.x, posY, cmd.Size.x, cmd.Size.y},
-            .BorderColourLeft = cmd.BorderColour,
-            .BorderColourRight = cmd.BorderColour,
-            .BorderColourTop = cmd.BorderColour,
-            .BorderColourBottom = cmd.BorderColour,
+            .BorderColourLeft = cmd.BorderColourLeft,
+            .BorderColourRight = cmd.BorderColourRight,
+            .BorderColourTop = cmd.BorderColourTop,
+            .BorderColourBottom = cmd.BorderColourBottom,
             .BorderWidths = Maths::Vec4 {cmd.BorderWidth},
             .BorderRadii = Maths::Vec4 {cmd.BorderRadius},
           });

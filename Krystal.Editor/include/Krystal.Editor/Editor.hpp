@@ -99,6 +99,7 @@ namespace Krys
     {
       using namespace Krys::UI;
       using namespace Krys::Maths;
+      using namespace Krys::Gfx::Colours;
 
       StringRef textRef = _context->Strings.Intern(u8"Hello, Krystal UI!\nThis text should be on a newline!");
 
@@ -125,6 +126,8 @@ namespace Krys
       _document.ElementStyleSetWidth(leftInnerInnerBox, 150.f);
       _document.ElementStyleSetHeight(leftInnerInnerBox, 200.f);
       _document.ElementStyleSetBorderRadii(leftInnerInnerBox, {{Vec2 {75.f}}});
+      _document.ElementStyleSetBorderWidths(leftInnerInnerBox, {5.f, 5.f, 5.f, 5.f});
+      _document.ElementStyleSetBorderColours(leftInnerInnerBox, {Green, Red, White, Yellow});
       _document.ElementStyleSetBackgroundColour(leftInnerInnerBox, Gfx::Colours::Maroon);
 
       auto rightBox = _document.Create<Element>();

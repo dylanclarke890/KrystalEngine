@@ -16,7 +16,10 @@ namespace Krys::Gfx
       constexpr static CommandType Type = KRYS_CMD_TYPE("DrawRect");
 
       Gfx::Colour BackgroundColour;
-      Gfx::Colour BorderColour;
+      Gfx::Colour BorderColourLeft;
+      Gfx::Colour BorderColourRight;
+      Gfx::Colour BorderColourTop;
+      Gfx::Colour BorderColourBottom;
       Maths::Vec2 Position;
       Maths::Vec2 Size;
       float BorderWidth {0.f};

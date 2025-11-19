@@ -8,34 +8,33 @@ in vec4 BorderColourTop;
 in vec4 BorderColourBottom;
 in vec2 Size;
 in vec4 BorderWidths;
-in vec4 BorderRadiiTop;
-in vec4 BorderRadiiBottom;
+in vec4 BorderRadiiTop; // TR, TL
+in vec4 BorderRadiiBottom; // BR, BL
 
 out vec4 FragmentColour;
 
-float RectSDF(vec2 p, vec2 b, float r)
-{
-  vec2 d = abs(p) - b + vec2(r);
-  return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - r;
-}
-
 void main()
 {
-  vec2 rectSize = Size;
-  float borderThickness = BorderWidths.x;
-  float radius = BorderRadiiTop.y;
-  
-  if (borderThickness <= 0.0)
-  {
-    FragmentColour = BackgroundColour;
-  }
-  else
-  {
-    vec2 pos = rectSize * TextureCoords;
-    float dist = RectSDF(pos - rectSize / 2.0, rectSize / 2.0 - borderThickness / 2.0 - 1.0, radius);
-    float blendAmount = smoothstep(-1.0, 1.0, abs(dist) - borderThickness / 2.0);
+  float rx = TextureCoords.x * Size.x;
+  float ry = TextureCoords.y * Size.y;
+  float left = BorderWidths.x;
+  float right = Size.x - BorderWidths.y;
+  float top = Size.y - BorderWidths.z;
+  float bottom = BorderWidths.w;
 
-    vec4 v4ToColor = (dist < 0.0) ? BackgroundColour : vec4(0.0);
-    FragmentColour = mix(BorderColourLeft, v4ToColor, blendAmount);
-  }
+  vec4 colour = BackgroundColour;
+  // Left border
+  if (rx < left)
+    colour = BorderColourLeft;
+  // Right border
+  else if (rx > right)
+    colour = BorderColourRight;
+  // Top border
+  else if (ry > top)
+    colour = BorderColourTop;
+  // Bottom border
+  else if (ry < bottom)
+    colour = BorderColourBottom;
+
+  FragmentColour = colour;
 }
