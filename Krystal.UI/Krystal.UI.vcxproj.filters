@@ -174,9 +174,6 @@
     <ClInclude Include="include\Krystal.UI\Layout\Algorithm\MeasureText.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.UI\Element.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Layout\Algorithm\AbsoluteLayout.cpp">

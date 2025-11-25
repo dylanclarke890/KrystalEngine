@@ -23,12 +23,6 @@ namespace Krys::UI
 
     static constexpr auto TopLeftOrigin = Maths::Vec2 {0.f, 0.f};
 
-    struct State
-    {
-      ElementHandle CurrentElement;
-      Maths::Vec2 ParentOffset;
-    };
-
     struct LayerContext
     {
       Gfx::RenderTargetHandle Target;
@@ -45,8 +39,8 @@ namespace Krys::UI
     Gfx::IContext &_context;
     Gfx::IRenderer &_renderer;
     List<Gfx::CommandList> _commandLists;
-    Map<ElementHandle, CachedLayer> _cachedLayers;
     Stack<LayerContext> _layerStack;
+    Map<ElementHandle, CachedLayer> _cachedLayers;
     Set<ElementHandle> _usedLayers;
     List<Gfx::RenderTargetHandle> _pendingDestruction;
 

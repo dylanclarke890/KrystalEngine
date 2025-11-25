@@ -23,10 +23,10 @@ namespace Krys::Gfx
 
   struct MeshDesc
   {
-    MeshType Type {MeshType::Static};
-    PrimitiveType Primitive {PrimitiveType::Triangles};
-    VertexBufferLayout Layout {};
     Span<const byte> VertexBuffer {};
     Span<const byte> IndexBuffer {};
+    VertexBufferLayout Layout {};
+    PrimitiveType Primitive {PrimitiveType::Triangles};
+    MeshType Type {MeshType::Static};
   };
 }

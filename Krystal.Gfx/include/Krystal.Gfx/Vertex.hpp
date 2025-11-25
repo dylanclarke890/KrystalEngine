@@ -75,7 +75,7 @@ namespace Krys::Gfx
 
   namespace Vertex
   {
-    struct Position2DUV
+    struct Position2D_UV
     {
       Maths::Vec2 Position;
       Maths::Vec2 TexCoord;
@@ -89,7 +89,23 @@ namespace Krys::Gfx
       }
     };
 
-    struct Position3DUV
+    struct Position2D_RGBA_UV
+    {
+      Maths::Vec2 Position;
+      Maths::Vec4 Colour;
+      Maths::Vec2 TexCoord;
+
+      constexpr static VertexBufferLayout Layout()
+      {
+        return {
+          {VertexAttributeType::Float, 2}, // Position
+          {VertexAttributeType::Float, 4}, // Colour
+          {VertexAttributeType::Float, 2}, // TexCoord
+        };
+      }
+    };
+
+    struct Position3D_UV
     {
       Maths::Vec3 Position;
       Maths::Vec2 TexCoord;
@@ -103,7 +119,37 @@ namespace Krys::Gfx
       }
     };
 
-    struct Position3DNormalUV
+    struct Position3D_Normal
+    {
+      Maths::Vec3 Position;
+      Maths::Vec3 Normal;
+
+      constexpr static VertexBufferLayout Layout()
+      {
+        return {
+          {VertexAttributeType::Float, 3}, // Position
+          {VertexAttributeType::Float, 3}, // Normal
+        };
+      }
+    };
+
+    struct Position3D_Color_UV
+    {
+      Maths::Vec3 Position;
+      Maths::Vec4 Colour;
+      Maths::Vec2 TexCoord;
+
+      constexpr static VertexBufferLayout Layout()
+      {
+        return {
+          {VertexAttributeType::Float, 3}, // Position
+          {VertexAttributeType::Float, 4}, // Colour
+          {VertexAttributeType::Float, 2}, // TexCoord
+        };
+      }
+    };
+
+    struct Position3D_Normal_UV
     {
       Maths::Vec3 Position;
       Maths::Vec3 Normal;

@@ -133,10 +133,6 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="include\Krystal.UI\Element.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
     <ClInclude Include="include\Krystal.UI\Layout\Algorithm\AbsoluteLayout.hpp" />
     <ClInclude Include="include\Krystal.UI\Layout\Algorithm\Align.hpp" />
     <ClInclude Include="include\Krystal.UI\Layout\Algorithm\Baseline.hpp" />

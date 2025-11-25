@@ -93,13 +93,11 @@ namespace Krys::Gfx::OpenGL
         -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f   // bottom-left
       };
 
-      VertexBufferLayout layout = Vertex::Position3DNormalUV::Layout();
-
       return Create({
-        .Type = MeshType::Static,
-        .Primitive = PrimitiveType::Triangles,
-        .Layout = layout,
         .VertexBuffer = ByteUtils::AsBytesView(vertices),
+        .Layout = Vertex::Position3D_Normal_UV::Layout(),
+        .Primitive = PrimitiveType::Triangles,
+        .Type = MeshType::Static,
       });
     }
 
@@ -170,14 +168,12 @@ namespace Krys::Gfx::OpenGL
         }
       }
 
-      VertexBufferLayout layout = Vertex::Position3DNormalUV::Layout();
-
       return Create({
-        .Type = MeshType::Static,
-        .Primitive = PrimitiveType::TriangleStrip,
-        .Layout = layout,
         .VertexBuffer = ByteUtils::AsBytesView(vertices),
         .IndexBuffer = ByteUtils::AsBytesView(indices),
+        .Layout = Vertex::Position3D_Normal_UV::Layout(),
+        .Primitive = PrimitiveType::TriangleStrip,
+        .Type = MeshType::Static,
       });
     }
 
@@ -188,17 +184,19 @@ namespace Krys::Gfx::OpenGL
         -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, -1.0f, 1.0f, 0.0f,
       };
 
-      VertexBufferLayout layout = Vertex::Position2DUV::Layout();
+      VertexBufferLayout layout = Vertex::Position2D_UV::Layout();
 
-      return Create({.Type = MeshType::Static,
-                     .Primitive = PrimitiveType::TriangleStrip,
-                     .Layout = layout,
-                     .VertexBuffer = ByteUtils::AsBytesView(vertices)});
+      return Create({
+        .VertexBuffer = ByteUtils::AsBytesView(vertices),
+        .Layout = layout,
+        .Primitive = PrimitiveType::TriangleStrip,
+        .Type = MeshType::Static,
+      });
     }
 
     MeshHandle CreateQuad() noexcept
     {
-      using QuadVertex = Vertex::Position2DUV;
+      using QuadVertex = Vertex::Position2D_UV;
       Array<QuadVertex, 4> vertices = {
         QuadVertex {{0.0f, 0.0f}, {0.0f, 0.0f}},
         QuadVertex {{1.0f, 0.0f}, {1.0f, 0.0f}},
@@ -209,11 +207,11 @@ namespace Krys::Gfx::OpenGL
       Array<uint32, 6> indices {0, 1, 2, 2, 3, 0};
 
       return Create({
-        .Type = MeshType::Static,
-        .Primitive = PrimitiveType::Triangles,
-        .Layout = QuadVertex::Layout(),
         .VertexBuffer = ByteUtils::AsBytesView(vertices),
         .IndexBuffer = ByteUtils::AsBytesView(indices),
+        .Layout = QuadVertex::Layout(),
+        .Primitive = PrimitiveType::Triangles,
+        .Type = MeshType::Static,
       });
     }
 
