@@ -26,12 +26,6 @@ namespace Krys::Gfx
       float BorderRadius {0.f};
     };
 
-    struct BindRenderTarget
-    {
-      constexpr static CommandType Type = KRYS_CMD_TYPE("BindRenderTarget");
-      RenderTargetHandle RenderTarget;
-    };
-
     struct DrawRenderTargetColourAttachment
     {
       constexpr static CommandType Type = KRYS_CMD_TYPE("DrawRenderTargetColourAttachment");
@@ -64,6 +58,19 @@ namespace Krys::Gfx
     struct ClearScissor
     {
       constexpr static CommandType Type = KRYS_CMD_TYPE("ClearScissor");
+    };
+
+    struct SetViewport
+    {
+      constexpr static CommandType Type = KRYS_CMD_TYPE("SetViewport");
+      Maths::Vec2 Position;
+      Maths::Vec2 Size;
+    };
+
+    struct BindRenderTarget
+    {
+      constexpr static CommandType Type = KRYS_CMD_TYPE("BindRenderTarget");
+      RenderTargetHandle RenderTarget;
     };
   }
 }

@@ -130,6 +130,17 @@ namespace Krys::Gfx::OpenGL
           glDisable(GL_SCISSOR_TEST);
           break;
         }
+        case Commands::SetViewport::Type:
+        {
+          const auto &cmd = reader.ReadCommand<Commands::SetViewport>();
+          auto &rt = renderTargets.Get(_currentRenderTarget);
+          GLint viewportX = static_cast<GLint>(cmd.Position.x);
+          GLint viewportY = static_cast<GLint>(rt.Height() - (cmd.Position.y + cmd.Size.y));
+          GLsizei viewportWidth = static_cast<GLsizei>(cmd.Size.x);
+          GLsizei viewportHeight = static_cast<GLsizei>(cmd.Size.y);
+          glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
+          break;
+        }
         case Commands::BindRenderTarget::Type:
         {
           const auto &cmd = reader.ReadCommand<Commands::BindRenderTarget>();
@@ -142,7 +153,10 @@ namespace Krys::Gfx::OpenGL
 
           auto &rt = renderTargets.Get(cmd.RenderTarget);
           renderTargets.Bind(cmd.RenderTarget);
+
           glViewport(0, 0, rt.Width(), rt.Height());
+          glDisable(GL_SCISSOR_TEST);
+
           _currentRenderTarget = cmd.RenderTarget;
           shaders.Get(_quadShader).SetUniform("u_Projection", rt.GetProjectionMatrix());
           shaders.Get(_singleTextureShader).SetUniform("u_Projection", rt.GetProjectionMatrix());
