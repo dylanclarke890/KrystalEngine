@@ -26,7 +26,7 @@ namespace Krys::Gfx::OpenGL
     IO::VirtualFileSystem &_vfs;
     ShaderManager _shaders;
     ShaderHandleCache _cache;
-    Map<TextShaderDesc, ShaderHandle> _fontShaders;
+    Map<BuiltinShader, ShaderHandle> _builtins;
 
   public:
     ShaderRegistry(IO::VirtualFileSystem &vfs) noexcept : _vfs(vfs), _shaders(), _cache()
@@ -87,26 +87,34 @@ namespace Krys::Gfx::OpenGL
       return AddShader(key, std::move(shader));
     }
 
-    NO_DISCARD ShaderHandle LoadTextShader(const IO::Path &vertex, const IO::Path &fragment,
-                                           const TextShaderDesc &desc) noexcept override
+    NO_DISCARD ShaderHandle GetBuiltin(BuiltinShader builtin) noexcept override
     {
-      auto profiler = Debug::ScopedProfiler("LoadTextShader");
-      ShaderPreprocessorConfig cfg {};
+      auto profiler = Debug::ScopedProfiler("GetBuiltin");
 
-      switch (desc.FontType)
+      if (auto it = _builtins.find(builtin); it != _builtins.end())
       {
-        case FontType::Bitmap: cfg.Define("FONT_BITMAP", "1"); break;
-        case FontType::SDF:    cfg.Define("FONT_SDF", "1"); break;
-        case FontType::MSDF:   cfg.Define("FONT_MSDF", "1"); break;
-        case FontType::MTSDF:  cfg.Define("FONT_MTSDF", "1"); break;
+        return it->second;
       }
 
-      if (desc.EnableOutline)
+      auto shader = [&]()
       {
-        cfg.Define("FEATURE_OUTLINE", "1");
-      }
+        switch (builtin)
+        {
+          case BuiltinShader::Shape2D_Colour:     return GetBuiltinShape2DColourShader();
+          case BuiltinShader::Shape2D_Texture:    return GetBuiltinShape2DTextureShader();
+          case BuiltinShader::Font_Bitmap:        return GetBuiltinTextShader(FontType::Bitmap, false);
+          case BuiltinShader::Font_SDF:           return GetBuiltinTextShader(FontType::SDF, false);
+          case BuiltinShader::Font_SDF_Outline:   return GetBuiltinTextShader(FontType::SDF, true);
+          case BuiltinShader::Font_MSDF:          return GetBuiltinTextShader(FontType::MSDF, false);
+          case BuiltinShader::Font_MSDF_Outline:  return GetBuiltinTextShader(FontType::MSDF, true);
+          case BuiltinShader::Font_MTSDF:         return GetBuiltinTextShader(FontType::MTSDF, false);
+          case BuiltinShader::Font_MTSDF_Outline: return GetBuiltinTextShader(FontType::MTSDF, true);
+        }
+        std::unreachable();
+      }();
 
-      return Load(vertex, fragment, cfg);
+      _builtins[builtin] = shader;
+      return shader;
     }
 
     bool Unload(ShaderHandle handle) noexcept override
@@ -124,21 +132,6 @@ namespace Krys::Gfx::OpenGL
     NO_DISCARD Shader &Get(ShaderHandle handle) noexcept
     {
       return _shaders.Get(handle);
-    }
-
-    Shader &GetOrAdd(const TextShaderDesc &desc) noexcept
-    {
-      if (const auto it = _fontShaders.find(desc); it != _fontShaders.end())
-      {
-        return Get(it->second);
-      }
-
-      const auto vertexShader = IO::Path("text-shader.vert");
-      const auto fragmentShader = IO::Path("text-shader.frag");
-      auto shader = LoadTextShader(vertexShader, fragmentShader, desc);
-
-      _fontShaders[desc] = shader;
-      return Get(shader);
     }
 
   private:
@@ -162,6 +155,41 @@ namespace Krys::Gfx::OpenGL
       const string lineDirective = "#line 1\n";
       string versionLine = source.substr(0, source.find('\n') + 1);
       return versionLine + defines + lineDirective + source.substr(versionLine.size());
+    }
+
+    NO_DISCARD ShaderHandle GetBuiltinTextShader(FontType fontType, bool outlined)
+    {
+      ShaderPreprocessorConfig cfg {};
+      switch (fontType)
+      {
+        case FontType::Bitmap: cfg.Define("FONT_BITMAP", "1"); break;
+        case FontType::SDF:    cfg.Define("FONT_SDF", "1"); break;
+        case FontType::MSDF:   cfg.Define("FONT_MSDF", "1"); break;
+        case FontType::MTSDF:  cfg.Define("FONT_MTSDF", "1"); break;
+      }
+
+      if (outlined)
+      {
+        cfg.Define("FEATURE_OUTLINE", "1");
+      }
+
+      const auto vertexShader = IO::Path("text-shader.vert");
+      const auto fragmentShader = IO::Path("text-shader.frag");
+      return Load(vertexShader, fragmentShader, cfg);
+    }
+
+    NO_DISCARD ShaderHandle GetBuiltinShape2DColourShader()
+    {
+      const auto vertexShader = IO::Path("2d-shape.vert");
+      const auto fragmentShader = IO::Path("2d-shape-colour.frag");
+      return Load(vertexShader, fragmentShader);
+    }
+
+    NO_DISCARD ShaderHandle GetBuiltinShape2DTextureShader()
+    {
+      const auto vertexShader = IO::Path("2d-shape.vert");
+      const auto fragmentShader = IO::Path("2d-shape-texture.frag");
+      return Load(vertexShader, fragmentShader);
     }
   };
 }

@@ -197,6 +197,7 @@
     <None Include="data\shaders\opengl\10\pbr.vert" />
     <None Include="data\shaders\opengl\11\background.frag" />
     <None Include="data\shaders\opengl\11\background.vert" />
+    <None Include="data\shaders\opengl\2d-shape-colour.frag" />
     <None Include="data\shaders\opengl\11\brdf.frag" />
     <None Include="data\shaders\opengl\11\brdf.vert" />
     <None Include="data\shaders\opengl\11\cubemap.vert" />
@@ -268,8 +269,8 @@
     <None Include="data\shaders\opengl\single-texture.vert" />
     <None Include="data\shaders\opengl\skybox.frag" />
     <None Include="data\shaders\opengl\skybox.vert" />
-    <None Include="data\shaders\opengl\basic.frag" />
-    <None Include="data\shaders\opengl\basic.vert" />
+    <None Include="data\shaders\opengl\2d-shape-texture.frag" />
+    <None Include="data\shaders\opengl\2d-shape.vert" />
     <None Include="data\shaders\opengl\text-shader.frag" />
     <None Include="data\shaders\opengl\text-shader.vert" />
     <None Include="data\shaders\opengl\ui.frag" />

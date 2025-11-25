@@ -8,6 +8,19 @@
 
 namespace Krys::Gfx
 {
+  enum class BuiltinShader
+  {
+    Shape2D_Colour,
+    Shape2D_Texture,
+    Font_Bitmap,
+    Font_SDF,
+    Font_SDF_Outline,
+    Font_MSDF,
+    Font_MSDF_Outline, // TODO: check if outlines are suitable for MSDF
+    Font_MTSDF,
+    Font_MTSDF_Outline,
+  };
+
   class IShaderRegistry
   {
     NO_COPY_MOVE(IShaderRegistry)
@@ -27,8 +40,7 @@ namespace Krys::Gfx
     NO_DISCARD virtual ShaderHandle Load(const IO::Path &vertex, const IO::Path &geometry,
                                          const IO::Path &fragment) noexcept = 0;
 
-    NO_DISCARD virtual ShaderHandle LoadTextShader(const IO::Path &vertex, const IO::Path &fragment,
-                                                   const TextShaderDesc &desc) noexcept = 0;
+    NO_DISCARD virtual ShaderHandle GetBuiltin(BuiltinShader shader) noexcept = 0;
 
     virtual bool Unload(ShaderHandle handle) noexcept = 0;
   };

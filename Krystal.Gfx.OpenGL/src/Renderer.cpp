@@ -295,10 +295,23 @@ namespace Krys::Gfx::OpenGL
                           const Maths::Vec2 &position, const ColourbPremultiplied &colour) noexcept
   {
     Font &font = static_cast<FontRegistry &>(_context.Fonts()).Get(fontHandle);
-    TextShaderDesc shaderDesc = {.FontType = font.Type()};
-    Shader &shader = static_cast<ShaderRegistry &>(_context.Shaders()).GetOrAdd(shaderDesc);
 
-    DrawText(font, shader, text, colour, position, ptSize);
+    BuiltinShader builtin = [&]()
+    {
+      switch (font.Type())
+      {
+        case FontType::Bitmap: return BuiltinShader::Font_Bitmap;
+        case FontType::SDF:    return BuiltinShader::Font_SDF;
+        case FontType::MSDF:   return BuiltinShader::Font_MSDF;
+        case FontType::MTSDF:  return BuiltinShader::Font_MTSDF;
+      }
+      std::unreachable();
+    }();
+
+    auto &shaders = static_cast<ShaderRegistry &>(_context.Shaders());
+
+    ShaderHandle handle = shaders.GetBuiltin(builtin);
+    DrawText(font, shaders.Get(handle), text, colour, position, ptSize);
   }
 
   void Renderer::DrawTextOutlined(const utf8_string &text, FontHandle fontHandle, float ptSize,
@@ -307,8 +320,21 @@ namespace Krys::Gfx::OpenGL
   {
     Font &font = static_cast<FontRegistry &>(_context.Fonts()).Get(fontHandle);
     assert(font.Type() != FontType::Bitmap && "Outlined text is not supported for bitmap fonts.");
-    TextShaderDesc shaderDesc = {.FontType = font.Type(), .EnableOutline = true};
-    Shader &shader = static_cast<ShaderRegistry &>(_context.Shaders()).GetOrAdd(shaderDesc);
+
+    BuiltinShader builtin = [&]()
+    {
+      switch (font.Type())
+      {
+        case FontType::SDF:   return BuiltinShader::Font_SDF_Outline;
+        case FontType::MSDF:  return BuiltinShader::Font_MSDF_Outline;
+        case FontType::MTSDF: return BuiltinShader::Font_MTSDF_Outline;
+      }
+      std::unreachable();
+    }();
+
+    auto &shaders = static_cast<ShaderRegistry &>(_context.Shaders());
+    ShaderHandle handle = shaders.GetBuiltin(builtin);
+    Shader &shader = shaders.Get(handle);
 
     shader.SetUniform("u_OutlineColor", outlineColour.ToVec3());
     shader.SetUniform("u_OutlineWidthAbsolute", outlineWidth / 3.f);

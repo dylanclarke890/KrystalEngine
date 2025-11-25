@@ -651,10 +651,6 @@ namespace Krys::Gfx::OpenGL
         Path("visualise-normals.vert"), Path("visualise-normals.geo"), Path("visualise-normals.frag"));
       shaderHandles["skybox"] = _shaders.Load(Path("skybox.vert"), Path("skybox.frag"));
       shaderHandles["light-source"] = _shaders.Load(Path("lightsource.vert"), Path("lightsource.frag"));
-      shaderHandles["lighting"] = _shaders.Load(Path("basic.vert"), Path("lighting.frag"));
-      shaderHandles["flat-colour-phong-material"] =
-        _shaders.Load(Path("basic.vert"), Path("flat-colour-phong-material.frag"));
-      shaderHandles["phong-material"] = _shaders.Load(Path("basic.vert"), Path("phong-material.frag"));
       shaderHandles["directional-depth"] =
         _shaders.Load(Path("directional-shadow-map.vert"), Path("empty.frag"));
       shaderHandles["point-depth"] =
