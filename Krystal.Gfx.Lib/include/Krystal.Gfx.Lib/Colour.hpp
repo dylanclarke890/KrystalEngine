@@ -5,7 +5,6 @@
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Maths/Vector.hpp"
-
 #include <format>
 
 namespace Krys::Gfx
@@ -146,7 +145,7 @@ namespace Krys::Gfx
 
     /// @brief Convert color to premultiplied alpha.
     constexpr Colour<ColourType, AlphaDefault, true> ToPremultiplied() const noexcept
-    requires(!PremultipliedAlpha && SameType<ColourType, byte>)
+    requires(!PremultipliedAlpha && SameType<ColourType, uchar>)
     {
       return {
         ColourType((red * alpha) / 255),
@@ -158,7 +157,7 @@ namespace Krys::Gfx
 
     /// @brief Convert color to premultiplied alpha, after multiplying alpha by opacity.
     constexpr Colour<ColourType, AlphaDefault, true> ToPremultiplied(float opacity) const noexcept
-    requires(!PremultipliedAlpha && SameType<ColourType, byte>)
+    requires(!PremultipliedAlpha && SameType<ColourType, uchar>)
     {
       const float new_alpha = alpha * opacity;
       return {
@@ -171,9 +170,8 @@ namespace Krys::Gfx
 
     /// @brief Convert color to non-premultiplied alpha.
     constexpr Colour<ColourType, AlphaDefault, false> ToNonPremultiplied() const noexcept
-    requires(PremultipliedAlpha && SameType<ColourType, byte>)
+    requires(PremultipliedAlpha && SameType<ColourType, uchar>)
     {
-      // TODO: fix this error due to using std::byte instead of unsigned char
       return {
         ColourType(alpha > 0 ? (red * 255) / alpha : 0),
         ColourType(alpha > 0 ? (green * 255) / alpha : 0),
@@ -188,7 +186,7 @@ namespace Krys::Gfx
       {
         return Maths::Vec3 {red, green, blue};
       }
-      else if constexpr (SameType<ColourType, byte>)
+      else if constexpr (SameType<ColourType, uchar>)
       {
         return Maths::Vec3 {(float)red / 255.f, (float)green / 255.f, (float)blue / 255.f};
       }
@@ -200,7 +198,7 @@ namespace Krys::Gfx
       {
         return Maths::Vec4 {red, green, blue, alpha};
       }
-      else if constexpr (SameType<ColourType, byte>)
+      else if constexpr (SameType<ColourType, uchar>)
       {
         return Maths::Vec4 {(float)red / 255.f, (float)green / 255.f, (float)blue / 255.f,
                             (float)alpha / 255.f};
@@ -209,8 +207,8 @@ namespace Krys::Gfx
   };
 
   using Colourf = Colour<float, 1.f, false>;
-  using Colourb = Colour<byte, byte {255}, false>;
-  using ColourbPremultiplied = Colour<byte, byte {255}, true>;
+  using Colourb = Colour<uchar, uchar {255}, false>;
+  using ColourbPremultiplied = Colour<uchar, uchar {255}, true>;
 
   namespace Colours
   {
