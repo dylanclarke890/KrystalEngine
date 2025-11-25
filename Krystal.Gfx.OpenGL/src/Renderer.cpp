@@ -105,6 +105,31 @@ namespace Krys::Gfx::OpenGL
       CommandHeader header = reader.ReadHeader();
       switch (header.Type)
       {
+        case Commands::SetScissor::Type:
+        {
+          FlushQuadInstances();
+
+          const auto &cmd = reader.ReadCommand<Commands::SetScissor>();
+          auto &rt = renderTargets.Get(_currentRenderTarget);
+
+          GLint scissorX = static_cast<GLint>(cmd.Position.x);
+          GLint scissorY = static_cast<GLint>(rt.Height() - (cmd.Position.y + cmd.Size.y));
+
+          GLsizei scissorWidth = static_cast<GLsizei>(cmd.Size.x);
+          GLsizei scissorHeight = static_cast<GLsizei>(cmd.Size.y);
+
+          glEnable(GL_SCISSOR_TEST);
+          glScissor(scissorX, scissorY, scissorWidth, scissorHeight);
+          break;
+        }
+        case Commands::ClearScissor::Type:
+        {
+          FlushQuadInstances();
+          const auto &cmd = reader.ReadCommand<Commands::ClearScissor>();
+          KRYS_UNUSED(cmd);
+          glDisable(GL_SCISSOR_TEST);
+          break;
+        }
         case Commands::BindRenderTarget::Type:
         {
           const auto &cmd = reader.ReadCommand<Commands::BindRenderTarget>();

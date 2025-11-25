@@ -53,5 +53,17 @@ namespace Krys::Gfx
       float FontSize {16.f};
       Gfx::Colour Colour {Gfx::Colours::Black};
     };
+
+    struct SetScissor
+    {
+      constexpr static CommandType Type = KRYS_CMD_TYPE("SetScissor");
+      Maths::Vec2 Position;
+      Maths::Vec2 Size;
+    };
+
+    struct ClearScissor
+    {
+      constexpr static CommandType Type = KRYS_CMD_TYPE("ClearScissor");
+    };
   }
 }
