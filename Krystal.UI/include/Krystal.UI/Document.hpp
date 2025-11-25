@@ -47,11 +47,6 @@ namespace Krys::UI
       return _body;
     }
 
-    void Reflow(float width, float height)
-    {
-      NodeCalculateLayout(_elements.Get(_body).LayoutNode, width, height, Direction::LTR);
-    }
-
     /// @brief Create a new element.
     template <DerivedFrom<Element> TElement, typename... Args>
     NO_DISCARD ElementHandle Create(Args &&...args)

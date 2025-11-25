@@ -5,3 +5,15 @@
 #include "Krystal.UI/Layout/Api/Node.hpp"
 #include "Krystal.UI/Layout/Api/NodeLayout.hpp"
 #include "Krystal.UI/Layout/Api/NodeStyle.hpp"
+#include <cassert>
+
+namespace Krys::UI
+{
+  class LayoutEngine
+  {
+    NO_COPY_MOVE(LayoutEngine)
+
+  public:
+    static void Reflow(class Element &element, Maths::Vec2 containingBlock);
+  };
+}

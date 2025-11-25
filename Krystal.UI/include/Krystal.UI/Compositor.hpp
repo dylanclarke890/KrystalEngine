@@ -96,7 +96,7 @@ namespace Krys::UI
       }
 
       auto targetDimensions = _context.RenderTargets().GetDimensions(renderTarget);
-      document.Reflow(targetDimensions.x, targetDimensions.y);
+      LayoutEngine::Reflow(document.Get(document.Body()), targetDimensions);
 
       PushLayer(document.Body(), renderTarget);
       {
