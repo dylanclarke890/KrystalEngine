@@ -26,17 +26,6 @@ namespace Krys::Gfx
       float BorderRadius {0.f};
     };
 
-    struct DrawRenderTargetColourAttachment
-    {
-      constexpr static CommandType Type = KRYS_CMD_TYPE("DrawRenderTargetColourAttachment");
-
-      RenderTargetHandle Source;
-      uint32 ColourAttachmentIndex {0u};
-      Maths::Vec2 Position;
-      Maths::Vec2 Size;
-      float Opacity {1.f};
-    };
-
     struct DrawText
     {
       constexpr static CommandType Type = KRYS_CMD_TYPE("DrawText");
@@ -71,6 +60,17 @@ namespace Krys::Gfx
     {
       constexpr static CommandType Type = KRYS_CMD_TYPE("BindRenderTarget");
       RenderTargetHandle RenderTarget;
+    };
+
+    struct DrawRenderTargetColourAttachment
+    {
+      constexpr static CommandType Type = KRYS_CMD_TYPE("DrawRenderTargetColourAttachment");
+
+      RenderTargetHandle Source;
+      uint32 ColourAttachmentIndex {0u};
+      Maths::Vec2 Position;
+      Maths::Vec2 Size;
+      float Opacity {1.f};
     };
   }
 }

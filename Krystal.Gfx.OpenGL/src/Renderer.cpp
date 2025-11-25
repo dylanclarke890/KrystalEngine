@@ -162,6 +162,21 @@ namespace Krys::Gfx::OpenGL
           shaders.Get(_singleTextureShader).SetUniform("u_Projection", rt.GetProjectionMatrix());
           break;
         }
+        case Commands::DrawRenderTargetColourAttachment::Type:
+        {
+          FlushQuadInstances();
+
+          const auto &cmd = reader.ReadCommand<Commands::DrawRenderTargetColourAttachment>();
+          auto &sourceRT = renderTargets.Get(cmd.Source);
+          const auto &attachment = sourceRT.GetColourAttachment(cmd.ColourAttachmentIndex);
+          const auto &imageView =
+            static_cast<ImageViewRegistry &>(_context.ImageViews()).Get(attachment.ImageView);
+          auto &dstRT = renderTargets.Get(_currentRenderTarget);
+
+          float posY = static_cast<float>(dstRT.Height()) - (cmd.Position.y + cmd.Size.y);
+          DrawTexturedQuad(imageView.Id(), {cmd.Position.x, posY}, cmd.Size, cmd.Opacity);
+          break;
+        }
         case Commands::DrawRect::Type:
         {
           const auto &cmd = reader.ReadCommand<Commands::DrawRect>();
@@ -183,21 +198,6 @@ namespace Krys::Gfx::OpenGL
           {
             FlushQuadInstances();
           }
-          break;
-        }
-        case Commands::DrawRenderTargetColourAttachment::Type:
-        {
-          FlushQuadInstances();
-
-          const auto &cmd = reader.ReadCommand<Commands::DrawRenderTargetColourAttachment>();
-          auto &sourceRT = renderTargets.Get(cmd.Source);
-          const auto &attachment = sourceRT.GetColourAttachment(cmd.ColourAttachmentIndex);
-          const auto &imageView =
-            static_cast<ImageViewRegistry &>(_context.ImageViews()).Get(attachment.ImageView);
-          auto &dstRT = renderTargets.Get(_currentRenderTarget);
-
-          float posY = static_cast<float>(dstRT.Height()) - (cmd.Position.y + cmd.Size.y);
-          DrawTexturedQuad(imageView.Id(), {cmd.Position.x, posY}, cmd.Size, cmd.Opacity);
           break;
         }
         case Commands::DrawText::Type:
