@@ -66,11 +66,11 @@ namespace Krys::UI
     StyleValueHandle _aspectRatio {};
     StyleValuePool _pool;
 
-    Gfx::Colour _backgroundColour {Gfx::Colours::Transparent};
-    Gfx::Colour _textColour {Gfx::Colours::Black};
+    Gfx::ColourbPremultiplied _backgroundColour {Gfx::Colours::Transparent};
+    Gfx::ColourbPremultiplied _textColour {Gfx::Colours::Black};
     float _opacity {1.f};
-    Array<Gfx::Colour, 4> _borderColours {Gfx::Colours::Black, Gfx::Colours::Black, Gfx::Colours::Black,
-                                          Gfx::Colours::Black};
+    Array<Gfx::ColourbPremultiplied, 4> _borderColours {Gfx::Colours::Black, Gfx::Colours::Black,
+                                                        Gfx::Colours::Black, Gfx::Colours::Black};
     Array<float, 4> _borderWidths {0.f, 0.f, 0.f, 0.f};
     Array<Maths::Vec2, 4> _borderRadii {Maths::Vec2 {0.f, 0.f}, Maths::Vec2 {0.f, 0.f},
                                         Maths::Vec2 {0.f, 0.f}, Maths::Vec2 {0.f, 0.f}};
@@ -387,12 +387,12 @@ namespace Krys::UI
 
 #pragma region Background
 
-    NO_DISCARD Gfx::Colour GetBackgroundColour() const noexcept
+    NO_DISCARD Gfx::ColourbPremultiplied GetBackgroundColour() const noexcept
     {
       return _backgroundColour;
     }
 
-    void SetBackgroundColour(Gfx::Colour colour) noexcept
+    void SetBackgroundColour(Gfx::ColourbPremultiplied colour) noexcept
     {
       _backgroundColour = colour;
     }
@@ -401,12 +401,12 @@ namespace Krys::UI
 
 #pragma region Text
 
-    NO_DISCARD Gfx::Colour GetTextColour() const noexcept
+    NO_DISCARD Gfx::ColourbPremultiplied GetTextColour() const noexcept
     {
       return _textColour;
     }
 
-    void SetTextColour(Gfx::Colour colour) noexcept
+    void SetTextColour(Gfx::ColourbPremultiplied colour) noexcept
     {
       _textColour = colour;
     }
@@ -446,12 +446,12 @@ namespace Krys::UI
 
 #pragma region Border
 
-    NO_DISCARD const Array<Gfx::Colour, 4> &GetBorderColours() const noexcept
+    NO_DISCARD const Array<Gfx::ColourbPremultiplied, 4> &GetBorderColours() const noexcept
     {
       return _borderColours;
     }
 
-    void SetBorderColours(const Array<Gfx::Colour, 4> &colours) noexcept
+    void SetBorderColours(const Array<Gfx::ColourbPremultiplied, 4> &colours) noexcept
     {
       _borderColours = colours;
     }

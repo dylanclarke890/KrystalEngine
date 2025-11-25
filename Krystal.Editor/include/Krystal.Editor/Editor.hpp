@@ -68,7 +68,7 @@ namespace Krys
           if (event.Key() == Platform::Key::Space && event.State() == Platform::KeyState::Pressed)
           {
             _document.ElementStyleSetBackgroundColour(
-              _test, Maths::Random::Choice<Gfx::Colour>({Gfx::Colours::Red, Gfx::Colours::Green,
+              _test, Maths::Random::Choice<Gfx::ColourbPremultiplied>({Gfx::Colours::Red, Gfx::Colours::Green,
                                                          Gfx::Colours::Blue, Gfx::Colours::Cyan,
                                                          Gfx::Colours::Magenta, Gfx::Colours::Yellow}));
           }

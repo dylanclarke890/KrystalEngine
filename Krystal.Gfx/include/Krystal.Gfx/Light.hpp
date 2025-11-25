@@ -7,16 +7,16 @@ namespace Krys::Gfx
 {
   struct LightColour
   {
-    Colour Ambient;
-    Colour Diffuse;
-    Colour Specular;
+    Colourf Ambient;
+    Colourf Diffuse;
+    Colourf Specular;
 
     constexpr LightColour() noexcept
-        : Ambient(Colour(0.2f, 0.2f, 0.2f)), Diffuse(Colour(0.5f, 0.5f, 0.5f)), Specular(Colour(1.0f, 1.0f, 1.0f))
+        : Ambient(Colourf(0.2f, 0.2f, 0.2f)), Diffuse(Colourf(0.5f, 0.5f, 0.5f)), Specular(Colourf(1.0f, 1.0f, 1.0f))
     {
     }
 
-    constexpr LightColour(const Colour &ambient, const Colour &diffuse, const Colour &specular) noexcept
+    constexpr LightColour(const Colourf &ambient, const Colourf &diffuse, const Colourf &specular) noexcept
         : Ambient(ambient), Diffuse(diffuse), Specular(specular)
     {
     }

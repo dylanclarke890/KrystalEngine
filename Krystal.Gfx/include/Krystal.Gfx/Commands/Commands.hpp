@@ -15,11 +15,11 @@ namespace Krys::Gfx
     {
       constexpr static CommandType Type = KRYS_CMD_TYPE("DrawRect");
 
-      Gfx::Colour BackgroundColour;
-      Gfx::Colour BorderColourLeft;
-      Gfx::Colour BorderColourRight;
-      Gfx::Colour BorderColourTop;
-      Gfx::Colour BorderColourBottom;
+      Gfx::ColourbPremultiplied BackgroundColour;
+      Gfx::ColourbPremultiplied BorderColourLeft;
+      Gfx::ColourbPremultiplied BorderColourRight;
+      Gfx::ColourbPremultiplied BorderColourTop;
+      Gfx::ColourbPremultiplied BorderColourBottom;
       Maths::Vec2 Position;
       Maths::Vec2 Size;
       float BorderWidth {0.f};
@@ -34,7 +34,7 @@ namespace Krys::Gfx
       Maths::Vec2 Position;
       FontFamilyHandle FontFamily;
       float FontSize {16.f};
-      Gfx::Colour Colour {Gfx::Colours::Black};
+      Gfx::ColourbPremultiplied Colour {Gfx::Colours::Black};
     };
 
     struct SetScissor

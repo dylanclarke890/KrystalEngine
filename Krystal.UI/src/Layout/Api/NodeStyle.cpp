@@ -598,24 +598,24 @@ namespace Krys::UI
     return static_cast<UnitValue>(node->GetStyle().GetMaxDimension(Dimension::Height));
   }
 
-  void NodeStyleSetBackgroundColour(NodeRef node, const Gfx::Colour &colour)
+  void NodeStyleSetBackgroundColour(NodeRef node, const Gfx::ColourbPremultiplied &colour)
   {
     UpdateProperty<&Style::GetBackgroundColour, &Style::SetBackgroundColour, DirtiesLayout {false},
                    DirtiesStyle {true}>(node, colour);
   }
 
-  Gfx::Colour NodeStyleGetBackgroundColour(NodeConstRef node)
+  Gfx::ColourbPremultiplied NodeStyleGetBackgroundColour(NodeConstRef node)
   {
     return node->GetStyle().GetBackgroundColour();
   }
 
-  void NodeStyleSetBorderColours(NodeRef node, const Array<Gfx::Colour, 4> &colours)
+  void NodeStyleSetBorderColours(NodeRef node, const Array<Gfx::ColourbPremultiplied, 4> &colours)
   {
     UpdateProperty<&Style::GetBorderColours, &Style::SetBorderColours, DirtiesLayout {false},
                    DirtiesStyle {true}>(node, colours);
   }
 
-  const Array<Gfx::Colour, 4> &NodeStyleGetBorderColours(NodeConstRef node)
+  const Array<Gfx::ColourbPremultiplied, 4> &NodeStyleGetBorderColours(NodeConstRef node)
   {
     return node->GetStyle().GetBorderColours();
   }
@@ -642,13 +642,13 @@ namespace Krys::UI
     return node->GetStyle().GetBorderWidths();
   }
 
-  void NodeStyleSetTextColour(NodeRef node, const Gfx::Colour &colour)
+  void NodeStyleSetTextColour(NodeRef node, const Gfx::ColourbPremultiplied &colour)
   {
     UpdateProperty<&Style::GetTextColour, &Style::SetTextColour, DirtiesLayout {false}, DirtiesStyle {true}>(
       node, colour);
   }
 
-  Gfx::Colour NodeStyleGetTextColour(NodeConstRef node)
+  Gfx::ColourbPremultiplied NodeStyleGetTextColour(NodeConstRef node)
   {
     return node->GetStyle().GetTextColour();
   }

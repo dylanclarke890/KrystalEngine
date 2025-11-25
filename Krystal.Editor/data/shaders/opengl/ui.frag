@@ -1,15 +1,15 @@
 ﻿#version 420 core
 
 in vec2 TextureCoords;
+
+in vec2 Size;
+in vec4 BorderWidths;
+
 in vec4 BackgroundColour;
 in vec4 BorderColourLeft;
 in vec4 BorderColourRight;
 in vec4 BorderColourTop;
 in vec4 BorderColourBottom;
-in vec2 Size;
-in vec4 BorderWidths;
-in vec4 BorderRadiiTop; // TR, TL
-in vec4 BorderRadiiBottom; // BR, BL
 
 out vec4 FragmentColour;
 

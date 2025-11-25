@@ -14,11 +14,12 @@ namespace Krys::Gfx::OpenGL
     {
       switch (type)
       {
-        case VertexAttributeType::Int32:  return GL_INT;
-        case VertexAttributeType::UInt32: return GL_UNSIGNED_INT;
-        case VertexAttributeType::Float:  return GL_FLOAT;
-        case VertexAttributeType::Double: return GL_DOUBLE;
-        default:                          return 0;
+        case VertexAttributeType::Int32:        return GL_INT;
+        case VertexAttributeType::UInt32:       return GL_UNSIGNED_INT;
+        case VertexAttributeType::Float:        return GL_FLOAT;
+        case VertexAttributeType::Double:       return GL_DOUBLE;
+        case VertexAttributeType::UnsignedByte: return GL_UNSIGNED_BYTE;
+        default:                                return 0;
       }
     }
 
@@ -54,6 +55,12 @@ namespace Krys::Gfx::OpenGL
               glVertexAttribPointer(attributeIndex, element.Count, MapVertexAttributeType(element.Type),
                                     element.Normalized ? GL_TRUE : GL_FALSE, stride,
                                     (const void *)(uintptr_t)offset);
+              break;
+            case VertexAttributeType::UnsignedByte:
+              glVertexAttribPointer(attributeIndex, element.Count, GL_UNSIGNED_BYTE,
+                                    element.Normalized ? GL_TRUE : GL_FALSE, stride,
+                                    (const void *)(uintptr_t)offset);
+              break;
             default: break;
           }
 

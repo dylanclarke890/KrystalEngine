@@ -10,251 +10,251 @@
 
 namespace Krys::Gfx
 {
-  /// @brief A colour class with red, green, blue and alpha components.
+  template <typename ColourType, ColourType AlphaDefault, bool PremultipliedAlpha>
   class Colour
   {
+    using Type = Colour<ColourType, AlphaDefault, PremultipliedAlpha>;
+
   public:
-    /// @brief Red component.
-    float r;
+    ColourType red, green, blue, alpha;
 
-    /// @brief Green component.
-    float g;
-
-    /// @brief Blue component.
-    float b;
-
-    /// @brief Alpha component.
-    float a;
-
-    /// @brief Default constructor, creates a black colour.
-    constexpr Colour() noexcept : Colour(0.0f, 0.0f, 0.0f, 1.0f)
+  public:
+    /// @param rgb Initial red, green and blue value of the colour.
+    /// @param alpha Initial alpha value of the colour.
+    constexpr Colour(ColourType rgb, ColourType alpha = AlphaDefault) noexcept
+        : red(rgb), green(rgb), blue(rgb), alpha(alpha)
     {
     }
 
-    explicit constexpr Colour(float value) noexcept : Colour(value, value, value, 1.0f)
+    /// @param red Initial red value of the colour.
+    /// @param green Initial green value of the colour.
+    /// @param blue Initial blue value of the colour.
+    /// @param alpha Initial alpha value of the colour.
+    constexpr Colour(ColourType red, ColourType green, ColourType blue,
+                     ColourType alpha = AlphaDefault) noexcept
+        : red(red), green(green), blue(blue), alpha(alpha)
     {
     }
 
-    /// @brief Create a new colour with the specified components.
-    /// @param r Red component.
-    /// @param g Green component.
-    /// @param b Blue component.
-    /// @param a Alpha component.
-    constexpr Colour(float r, float g, float b, float a = 1.0f) noexcept : r(r), g(g), b(b), a(a)
+    constexpr Colour(uchar red, uchar green, uchar blue, uchar alpha) noexcept
+    requires SameType<ColourType, byte>
+        : red(static_cast<ColourType>(red)), green(static_cast<ColourType>(green)),
+          blue(static_cast<ColourType>(blue)), alpha(static_cast<ColourType>(alpha))
     {
     }
 
-    /// @brief Create a new colour from another colour with a different alpha component.
-    /// @param rgb Colour to copy the red, green and blue components from.
-    /// @param a Alpha component.
-    constexpr Colour(const Colour &rgb, float a) noexcept : r(rgb.r), g(rgb.g), b(rgb.b), a(a)
+    /// @brief Returns the sum of this colour and another. This does not saturate the channels.
+    /// @param rhs The colour to add this to.
+    /// @return The sum of the two colours.
+    constexpr Type operator+(const Type &rhs) const noexcept
     {
+      return Type(red + rhs.red, green + rhs.green, blue + rhs.blue, alpha + rhs.alpha);
     }
 
-    /// @brief Create a new colour with integer components.
-    /// @param r Red.
-    /// @param g Green.
-    /// @param b Blue.
-    /// @param a Alpha.
-    constexpr Colour(uint32 r, uint32 g, uint32 b, uint32 a) noexcept
-        : Colour(static_cast<float>(r) / 255.0f, static_cast<float>(g) / 255.0f,
-                 static_cast<float>(b) / 255.0f, static_cast<float>(a) / 255.0f)
+    /// @brief Returns the result of subtracting another colour from this colour.
+    /// @param rhs The colour to subtract from this colour.
+    /// @return The result of the subtraction.
+    constexpr Type operator-(const Type &rhs) const noexcept
     {
+      return Type(red - rhs.red, green - rhs.green, blue - rhs.blue, alpha - rhs.alpha);
     }
 
-    /// @brief Create a new colour from a Vec3.
-    /// @param vec Vec3 to copy the red, green and blue components from.
-    /// @param a Alpha component.
-    constexpr Colour(const Maths::Vec3 &vec, float a) noexcept : Colour(vec.x, vec.y, vec.z, a)
+    /// @brief Returns the result of multiplying this colour component-wise by a scalar.
+    /// @param rhs The scalar value to multiply by.
+    /// @return The result of the scale.
+    constexpr Type operator*(float rhs) const noexcept
     {
+      return Type((ColourType)(red * rhs), (ColourType)(green * rhs), (ColourType)(blue * rhs),
+                  (ColourType)(alpha * rhs));
     }
 
-    /// @brief Create a new colour from a Vec4.
-    /// @param vec Vec4 to copy the red, green, blue and alpha components from.
-    constexpr Colour(const Maths::Vec4 &vec) noexcept : Colour(vec.x, vec.y, vec.z, vec.w)
+    /// @brief Returns the result of dividing this colour component-wise by a scalar.
+    /// @param rhs The scalar value to divide by.
+    /// @return The result of the scale.
+    constexpr Type operator/(float rhs) const noexcept
     {
+      return Type((ColourType)(red / rhs), (ColourType)(green / rhs), (ColourType)(blue / rhs),
+                  (ColourType)(alpha / rhs));
     }
 
-    /// @brief Multiply each component of this colour by a scalar value.
-    /// @param scale Scalar value.
-    constexpr Colour &operator*=(float scale) noexcept
+    /// @brief Adds another colour to this in-place. This does not saturate the channels.
+    /// @param rhs The colour to add.
+    constexpr void operator+=(const Colour rhs) noexcept
     {
-      r *= scale;
-      g *= scale;
-      b *= scale;
-      a *= scale;
-
-      return *this;
+      red += rhs.red;
+      green += rhs.green;
+      blue += rhs.blue;
+      alpha += rhs.alpha;
     }
 
-    /// @brief Create a new colour which is this colour multiplied by a scalar value.
-    /// @param scale Scalar value.
-    NO_DISCARD constexpr Colour operator*(float scale) const noexcept
+    /// @brief Subtracts another colour from this in-place.
+    /// @param rhs The colour to subtract.
+    constexpr void operator-=(const Colour rhs) noexcept
     {
-      return Colour(*this) *= scale;
+      red -= rhs.red;
+      green -= rhs.green;
+      blue -= rhs.blue;
+      alpha -= rhs.alpha;
     }
 
-    /// @brief Add a colour to this colour.
-    /// @param colour Colour to add.
-    constexpr Colour &operator+=(const Colour &colour) noexcept
+    /// @brief Scales this colour component-wise in-place.
+    /// @param rhs The value to scale this colour's components by.
+    constexpr void operator*=(float rhs) noexcept
     {
-      r += colour.r;
-      g += colour.g;
-      b += colour.b;
-      a += colour.a;
-
-      return *this;
+      red = (ColourType)(red * rhs);
+      green = (ColourType)(green * rhs);
+      blue = (ColourType)(blue * rhs);
+      alpha = (ColourType)(alpha * rhs);
     }
 
-    /// @brief Create a new colour which is this colour added to another colour.
-    /// @param colour Colour to add.
-    NO_DISCARD constexpr Colour operator+(const Colour &colour) const noexcept
+    /// @brief Scales this colour component-wise in-place by the inverse of a value.
+    /// @param rhs The value to divide this colour's components by.
+    constexpr void operator/=(float rhs) noexcept
     {
-      return Colour(*this) += colour;
+      *this *= (1.0f / rhs);
     }
 
-    /// @brief Subtract a colour from this colour.
-    /// @param colour Colour to subtract.
-    constexpr Colour &operator-=(const Colour &colour) noexcept
+    /// @brief Equality operator.
+    /// @param rhs The colour to compare this against.
+    /// @return True if the two colours are equal, false otherwise.
+    constexpr bool operator==(Colour rhs) const noexcept
     {
-      r -= colour.r;
-      g -= colour.g;
-      b -= colour.b;
-      a -= colour.a;
-
-      return *this;
+      return red == rhs.red && green == rhs.green && blue == rhs.blue && alpha == rhs.alpha;
     }
 
-    /// @brief Create a new colour which is this colour subtracted from another colour.
-    /// @param colour Colour to subtract.
-    NO_DISCARD constexpr Colour operator-(const Colour &colour) const noexcept
+    /// @brief Inequality operator.
+    /// @param rhs The colour to compare this against.
+    /// @return True if the two colours are not equal, false otherwise.
+    constexpr bool operator!=(Colour rhs) const noexcept
     {
-      return Colour(*this) -= colour;
+      return !(*this == rhs);
     }
 
-    /// @brief Multiply each component of this colour by the corresponding component of another colour.
-    /// @param colour Colour to multiply with.
-    constexpr Colour &operator*=(const Colour &colour) noexcept
+    /// @brief Auto-cast operator.
+    /// @return A pointer to the first value.
+    constexpr operator const ColourType *() const noexcept
     {
-      r *= colour.r;
-      g *= colour.g;
-      b *= colour.b;
-      a *= colour.a;
-
-      return *this;
+      return &red;
     }
 
-    /// @brief Create a new colour which is this colour multiplied by another colour.
-    /// @param colour Colour to multiply with.
-    NO_DISCARD constexpr Colour operator*(const Colour &colour) const noexcept
+    /// @brief Constant auto-cast operator.
+    /// @return A constant pointer to the first value.
+    constexpr operator ColourType *() noexcept
     {
-      return Colour {*this} *= colour;
+      return &red;
     }
 
-    /// @brief Check if this colour is equal to another.
-    /// @param colour Colour to divide by.
-    NO_DISCARD bool operator==(const Colour &other) const noexcept
+    /// @brief Convert color to premultiplied alpha.
+    constexpr Colour<ColourType, AlphaDefault, true> ToPremultiplied() const noexcept
+    requires(!PremultipliedAlpha && SameType<ColourType, byte>)
     {
-      return r == other.r && g == other.g && b == other.b && a == other.a;
+      return {
+        ColourType((red * alpha) / 255),
+        ColourType((green * alpha) / 255),
+        ColourType((blue * alpha) / 255),
+        alpha,
+      };
     }
 
-    /// @brief Check if this colour is not equal to another colour.
-    /// @param other Colour to compare with.
-    NO_DISCARD bool operator!=(const Colour &other) const noexcept
+    /// @brief Convert color to premultiplied alpha, after multiplying alpha by opacity.
+    constexpr Colour<ColourType, AlphaDefault, true> ToPremultiplied(float opacity) const noexcept
+    requires(!PremultipliedAlpha && SameType<ColourType, byte>)
     {
-      return !(other == *this);
+      const float new_alpha = alpha * opacity;
+      return {
+        ColourType(red * (new_alpha / 255.f)),
+        ColourType(green * (new_alpha / 255.f)),
+        ColourType(blue * (new_alpha / 255.f)),
+        ColourType(new_alpha),
+      };
     }
 
-    /// @brief Linear interpolate between this and another colour.
-    /// @param other Colour to interpolate to.
-    /// @param amount Interpolation amount, must be in range [0.0, 1.0].
-    constexpr void Lerp(const Colour &other, float amount) noexcept
+    /// @brief Convert color to non-premultiplied alpha.
+    constexpr Colour<ColourType, AlphaDefault, false> ToNonPremultiplied() const noexcept
+    requires(PremultipliedAlpha && SameType<ColourType, byte>)
     {
-      *this *= (1.0f - amount);
-      *this += (other * amount);
+      // TODO: fix this error due to using std::byte instead of unsigned char
+      return {
+        ColourType(alpha > 0 ? (red * 255) / alpha : 0),
+        ColourType(alpha > 0 ? (green * 255) / alpha : 0),
+        ColourType(alpha > 0 ? (blue * 255) / alpha : 0),
+        ColourType(alpha),
+      };
     }
 
     constexpr Maths::Vec3 ToVec3() const noexcept
     {
-      return Maths::Vec3 {r, g, b};
-    }
-
-    /// @brief Linear interpolate between two colours.
-    /// @param start Colour to start from.
-    /// @param end Colour to lerp towards.
-    /// @param amount Interpolation amount, must be in range [0.0, 1.0].
-    constexpr static Colour Lerp(const Colour &start, const Colour &end, float amount) noexcept
-    {
-      Colour tmp = start;
-      tmp.Lerp(end, amount);
-      return tmp;
-    }
-
-    NO_DISCARD constexpr static List<byte> AsBytes(const Colour &colour) noexcept
-    {
-      constexpr auto AsByte = [](float v) -> byte
+      if constexpr (SameType<ColourType, float>)
       {
-        return static_cast<byte>(v * 255.0f);
-      };
-
-      return {byte {AsByte(colour.r)}, byte {AsByte(colour.g)}, byte {AsByte(colour.b)},
-              byte {AsByte(colour.a)}};
+        return Maths::Vec3 {red, green, blue};
+      }
+      else if constexpr (SameType<ColourType, byte>)
+      {
+        return Maths::Vec3 {(float)red / 255.f, (float)green / 255.f, (float)blue / 255.f};
+      }
     }
 
-    NO_DISCARD constexpr static Maths::Vec3 ToVec3(const Colour &colour) noexcept
+    constexpr Maths::Vec4 ToVec4() const noexcept
     {
-      return Maths::Vec3 {colour.r, colour.g, colour.b};
-    }
-
-    NO_DISCARD constexpr static Maths::Vec4 ToVec4(const Colour &colour) noexcept
-    {
-      return Maths::Vec4 {colour.r, colour.g, colour.b, colour.a};
+      if constexpr (SameType<ColourType, float>)
+      {
+        return Maths::Vec4 {red, green, blue, alpha};
+      }
+      else if constexpr (SameType<ColourType, byte>)
+      {
+        return Maths::Vec4 {(float)red / 255.f, (float)green / 255.f, (float)blue / 255.f,
+                            (float)alpha / 255.f};
+      }
     }
   };
 
+  using Colourf = Colour<float, 1.f, false>;
+  using Colourb = Colour<byte, byte {255}, false>;
+  using ColourbPremultiplied = Colour<byte, byte {255}, true>;
+
   namespace Colours
   {
-    static constexpr Colour White {1.0f, 1.0f, 1.0f, 1.0f};
-    static constexpr Colour Black {0.0f, 0.0f, 0.0f, 1.0f};
-    static constexpr Colour Transparent {0.0f, 0.0f, 0.0f, 0.0f};
-    static constexpr Colour Red {1.0f, 0.0f, 0.0f, 1.0f};
-    static constexpr Colour Green {0.0f, 1.0f, 0.0f, 1.0f};
-    static constexpr Colour Blue {0.0f, 0.0f, 1.0f, 1.0f};
-    static constexpr Colour Gray25 {0.25f, 0.25f, 0.25f, 1.0f};
-    static constexpr Colour Gray50 {0.5f, 0.5f, 0.5f, 1.0f};
-    static constexpr Colour Gray75 {0.75f, 0.75f, 0.75f, 1.0f};
-    static constexpr Colour Coral {1.0f, 0.5f, 0.31f, 1.0f};
-    static constexpr Colour Yellow {1.0f, 1.0f, 0.0f, 1.0f};
-    static constexpr Colour Orange {1.0f, 0.647f, 0.0f, 1.0f};
-    static constexpr Colour Purple {0.5f, 0.0f, 0.5f, 1.0f};
-    static constexpr Colour Pink {1.0f, 0.75f, 0.8f, 1.0f};
-    static constexpr Colour Brown {0.647f, 0.164f, 0.164f, 1.0f};
-    static constexpr Colour Cyan {0.0f, 1.0f, 1.0f, 1.0f};
-    static constexpr Colour Magenta {1.0f, 0.0f, 1.0f, 1.0f};
-    static constexpr Colour Lime {0.0f, 1.0f, 0.0f, 1.0f};
-    static constexpr Colour Teal {0.0f, 0.5f, 0.5f, 1.0f};
-    static constexpr Colour Indigo {0.29f, 0.0f, 0.51f, 1.0f};
-    static constexpr Colour Maroon {0.5f, 0.0f, 0.0f, 1.0f};
-    static constexpr Colour Olive {0.5f, 0.5f, 0.0f, 1.0f};
-    static constexpr Colour Navy {0.0f, 0.0f, 0.5f, 1.0f};
-    static constexpr Colour Beige {0.96f, 0.96f, 0.86f, 1.0f};
-    static constexpr Colour Ivory {1.0f, 1.0f, 0.94f, 1.0f};
+    static constexpr ColourbPremultiplied White {255, 255, 255, 255};
+    static constexpr ColourbPremultiplied Black {0, 0, 0, 255};
+    static constexpr ColourbPremultiplied Transparent {0, 0, 0, 0};
+    static constexpr ColourbPremultiplied Red {255, 0, 0, 255};
+    static constexpr ColourbPremultiplied Green {0, 255, 0, 255};
+    static constexpr ColourbPremultiplied Blue {0, 0, 255, 255};
+    static constexpr ColourbPremultiplied Gray25 {64, 64, 64, 255};
+    static constexpr ColourbPremultiplied Gray50 {128, 128, 128, 255};
+    static constexpr ColourbPremultiplied Gray75 {192, 192, 192, 255};
+    static constexpr ColourbPremultiplied Coral {255, 127, 79, 255};
+    static constexpr ColourbPremultiplied Yellow {255, 255, 0, 255};
+    static constexpr ColourbPremultiplied Orange {255, 165, 0, 255};
+    static constexpr ColourbPremultiplied Purple {128, 0, 128, 255};
+    static constexpr ColourbPremultiplied Pink {255, 191, 204, 255};
+    static constexpr ColourbPremultiplied Brown {165, 42, 42, 255};
+    static constexpr ColourbPremultiplied Cyan {0, 255, 255, 255};
+    static constexpr ColourbPremultiplied Magenta {255, 0, 255, 255};
+    static constexpr ColourbPremultiplied Lime {0, 255, 0, 255};
+    static constexpr ColourbPremultiplied Teal {0, 128, 128, 255};
+    static constexpr ColourbPremultiplied Indigo {74, 0, 130, 255};
+    static constexpr ColourbPremultiplied Maroon {128, 0, 0, 255};
+    static constexpr ColourbPremultiplied Olive {128, 128, 0, 255};
+    static constexpr ColourbPremultiplied Navy {0, 0, 128, 255};
+    static constexpr ColourbPremultiplied Beige {245, 245, 220, 255};
+    static constexpr ColourbPremultiplied Ivory {255, 255, 240, 255};
   }
 }
 
 namespace std
 {
   template <>
-  struct hash<Krys::Gfx::Colour>
+  struct hash<Krys::Gfx::Colourf>
   {
-    size_t operator()(const Krys::Gfx::Colour &colour) const
+    size_t operator()(const Krys::Gfx::Colourf &colour) const
     {
-      return Krys::HashUtils::HashCombine(colour.r, colour.g, colour.b, colour.a);
+      return Krys::HashUtils::HashCombine(colour.red, colour.green, colour.blue, colour.alpha);
     }
   };
 
   template <>
-  struct formatter<Krys::Gfx::Colour>
+  struct formatter<Krys::Gfx::Colourf>
   {
     constexpr auto parse(format_parse_context &ctx)
     {
@@ -262,10 +262,60 @@ namespace std
     }
 
     template <typename FormatContext>
-    auto format(const Krys::Gfx::Colour &colour, FormatContext &ctx)
+    auto format(const Krys::Gfx::Colourf &colour, FormatContext &ctx)
     {
-      return format_to(ctx.out(), "Colour(r: {}, g: {}, b: {}, a: {})", colour.r, colour.g, colour.b,
-                       colour.a);
+      return format_to(ctx.out(), "Colour(r: {}, g: {}, b: {}, a: {})", colour.red, colour.green, colour.blue,
+                       colour.alpha);
+    }
+  };
+
+  template <>
+  struct hash<Krys::Gfx::Colourb>
+  {
+    size_t operator()(const Krys::Gfx::Colourb &colour) const
+    {
+      return Krys::HashUtils::HashCombine(colour.red, colour.green, colour.blue, colour.alpha);
+    }
+  };
+
+  template <>
+  struct formatter<Krys::Gfx::Colourb>
+  {
+    constexpr auto parse(format_parse_context &ctx)
+    {
+      return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const Krys::Gfx::Colourb &colour, FormatContext &ctx)
+    {
+      return format_to(ctx.out(), "Colour(r: {}, g: {}, b: {}, a: {})", colour.red, colour.green, colour.blue,
+                       colour.alpha);
+    }
+  };
+
+  template <>
+  struct hash<Krys::Gfx::ColourbPremultiplied>
+  {
+    size_t operator()(const Krys::Gfx::ColourbPremultiplied &colour) const
+    {
+      return Krys::HashUtils::HashCombine(colour.red, colour.green, colour.blue, colour.alpha);
+    }
+  };
+
+  template <>
+  struct formatter<Krys::Gfx::ColourbPremultiplied>
+  {
+    constexpr auto parse(format_parse_context &ctx)
+    {
+      return ctx.begin();
+    }
+
+    template <typename FormatContext>
+    auto format(const Krys::Gfx::ColourbPremultiplied &colour, FormatContext &ctx)
+    {
+      return format_to(ctx.out(), "Colour(r: {}, g: {}, b: {}, a: {})", colour.red, colour.green, colour.blue,
+                       colour.alpha);
     }
   };
 }

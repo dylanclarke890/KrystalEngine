@@ -54,12 +54,12 @@ namespace Krys::Gfx::OpenGL
       List<MaterialParameter> params;
       using MPT = MaterialParameterType;
 
-      params.push_back({"u_AlbedoFactor", MPT::Vec4, Colour::ToVec4(desc.AlbedoFactor)});
+      params.push_back({"u_AlbedoFactor", MPT::Vec4, desc.AlbedoFactor.ToVec4()});
       params.push_back({"u_MetallicFactor", MPT::Float, desc.MetallicFactor});
       params.push_back({"u_RoughnessFactor", MPT::Float, desc.RoughnessFactor});
       params.push_back({"u_AmbientOcclusionFactor", MPT::Float, desc.AmbientOcclusionFactor});
       params.push_back({"u_NormalScale", MPT::Float, desc.NormalScale});
-      params.push_back({"u_EmissiveFactor", MPT::Vec4, Colour::ToVec4(desc.EmissiveFactor)});
+      params.push_back({"u_EmissiveFactor", MPT::Vec4, desc.EmissiveFactor.ToVec4()});
       params.push_back({"u_AlbedoMap", MPT::Texture, desc.AlbedoMap});
       params.push_back({"u_MetallicMap", MPT::Texture, desc.MetallicMap});
       params.push_back({"u_RoughnessMap", MPT::Texture, desc.RoughnessMap});

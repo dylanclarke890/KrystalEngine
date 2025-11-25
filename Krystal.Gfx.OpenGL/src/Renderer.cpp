@@ -184,14 +184,13 @@ namespace Krys::Gfx::OpenGL
 
           float posY = static_cast<float>(rt.Height()) - (cmd.Position.y + cmd.Size.y);
           _quadInstanceData.Data.push_back({
-            .BackgroundColour = cmd.BackgroundColour,
             .PositionAndSize = {cmd.Position.x, posY, cmd.Size.x, cmd.Size.y},
+            .BorderWidths = Maths::Vec4 {cmd.BorderWidth},
+            .BackgroundColour = cmd.BackgroundColour,
             .BorderColourLeft = cmd.BorderColourLeft,
             .BorderColourRight = cmd.BorderColourRight,
             .BorderColourTop = cmd.BorderColourTop,
             .BorderColourBottom = cmd.BorderColourBottom,
-            .BorderWidths = Maths::Vec4 {cmd.BorderWidth},
-            .BorderRadii = Maths::Vec4 {cmd.BorderRadius},
           });
 
           if (_quadInstanceData.Data.size() >= QuadInstanceData::BatchSize)
@@ -242,7 +241,7 @@ namespace Krys::Gfx::OpenGL
     }
 
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
     {
       auto &shader = static_cast<ShaderRegistry &>(_context.Shaders()).Get(_quadShader);
       shader.Bind();
@@ -262,7 +261,7 @@ namespace Krys::Gfx::OpenGL
                                   float opacity)
   {
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     auto &shader = static_cast<ShaderRegistry &>(_context.Shaders()).Get(_singleTextureShader);
     shader.Bind();
@@ -273,14 +272,13 @@ namespace Krys::Gfx::OpenGL
 
     // Setup instance data for just one quad
     Array<QuadInstanceData, 1> instance = {QuadInstanceData {
-      .BackgroundColour = Gfx::Colours::Transparent,
       .PositionAndSize = {position.x, position.y, size.x, size.y},
+      .BorderWidths = Maths::Vec4 {0.f},
+      .BackgroundColour = Gfx::Colours::Transparent,
       .BorderColourLeft = Gfx::Colours::Transparent,
       .BorderColourRight = Gfx::Colours::Transparent,
       .BorderColourTop = Gfx::Colours::Transparent,
       .BorderColourBottom = Gfx::Colours::Transparent,
-      .BorderWidths = Maths::Vec4 {0.f},
-      .BorderRadii = Maths::Vec4 {0.f},
     }};
 
     auto &buffer = static_cast<BufferRegistry &>(_context.Buffers()).Get(_quadInstanceData.Buffer);
@@ -294,7 +292,7 @@ namespace Krys::Gfx::OpenGL
   }
 
   void Renderer::DrawText(const utf8_string &text, FontHandle fontHandle, float ptSize,
-                          const Maths::Vec2 &position, const Colour &colour) noexcept
+                          const Maths::Vec2 &position, const ColourbPremultiplied &colour) noexcept
   {
     Font &font = static_cast<FontRegistry &>(_context.Fonts()).Get(fontHandle);
     TextShaderDesc shaderDesc = {.FontType = font.Type()};
@@ -304,8 +302,8 @@ namespace Krys::Gfx::OpenGL
   }
 
   void Renderer::DrawTextOutlined(const utf8_string &text, FontHandle fontHandle, float ptSize,
-                                  const Maths::Vec2 &position, const Colour &textColour,
-                                  const Colour &outlineColour, float outlineWidth) noexcept
+                                  const Maths::Vec2 &position, const ColourbPremultiplied &textColour,
+                                  const ColourbPremultiplied &outlineColour, float outlineWidth) noexcept
   {
     Font &font = static_cast<FontRegistry &>(_context.Fonts()).Get(fontHandle);
     assert(font.Type() != FontType::Bitmap && "Outlined text is not supported for bitmap fonts.");
@@ -320,8 +318,8 @@ namespace Krys::Gfx::OpenGL
     DrawText(font, shader, text, textColour, position, ptSize);
   }
 
-  void Renderer::DrawText(Font &font, Shader &shader, const utf8_string &text, const Colour &textColour,
-                          const Maths::Vec2 &position, float ptSize)
+  void Renderer::DrawText(Font &font, Shader &shader, const utf8_string &text,
+                          const ColourbPremultiplied &textColour, const Maths::Vec2 &position, float ptSize)
   {
     glBindVertexArray(_textVao);
     glEnable(GL_BLEND);

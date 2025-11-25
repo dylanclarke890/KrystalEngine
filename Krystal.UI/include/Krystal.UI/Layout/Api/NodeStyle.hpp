@@ -140,11 +140,11 @@ namespace Krys::UI
   void NodeStyleSetAspectRatio(NodeRef node, float aspectRatio);
   float NodeStyleGetAspectRatio(NodeConstRef node);
 
-  void NodeStyleSetBackgroundColour(NodeRef node, const Gfx::Colour &colour);
-  Gfx::Colour NodeStyleGetBackgroundColour(NodeConstRef node);
+  void NodeStyleSetBackgroundColour(NodeRef node, const Gfx::ColourbPremultiplied &colour);
+  Gfx::ColourbPremultiplied NodeStyleGetBackgroundColour(NodeConstRef node);
 
-  void NodeStyleSetBorderColours(NodeRef node, const Array<Gfx::Colour, 4> &colour);
-  const Array<Gfx::Colour, 4> &NodeStyleGetBorderColours(NodeConstRef node);
+  void NodeStyleSetBorderColours(NodeRef node, const Array<Gfx::ColourbPremultiplied, 4> &colour);
+  const Array<Gfx::ColourbPremultiplied, 4> &NodeStyleGetBorderColours(NodeConstRef node);
 
   void NodeStyleSetBorderRadii(NodeRef node, const Array<Maths::Vec2, 4> &radii);
   const Array<Maths::Vec2, 4> &NodeStyleGetBorderRadii(NodeConstRef node);
@@ -152,8 +152,8 @@ namespace Krys::UI
   void NodeStyleSetBorderWidths(NodeRef node, const Array<float, 4> &widths);
   const Array<float, 4> &NodeStyleGetBorderWidths(NodeConstRef node);
 
-  void NodeStyleSetTextColour(NodeRef node, const Gfx::Colour &colour);
-  Gfx::Colour NodeStyleGetTextColour(NodeConstRef node);
+  void NodeStyleSetTextColour(NodeRef node, const Gfx::ColourbPremultiplied &colour);
+  Gfx::ColourbPremultiplied NodeStyleGetTextColour(NodeConstRef node);
 
   void NodeStyleSetOpacity(NodeRef node, float opacity);
   float NodeStyleGetOpacity(NodeConstRef node);

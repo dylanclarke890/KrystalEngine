@@ -13,28 +13,39 @@ namespace Krys::Gfx::OpenGL
 {
   struct QuadInstanceData
   {
-    Colour BackgroundColour;
     Maths::Vec4 PositionAndSize; // xy: position, zw: size
-    Colour BorderColourLeft;
-    Colour BorderColourRight;
-    Colour BorderColourTop;
-    Colour BorderColourBottom;
     Maths::Vec4 BorderWidths;
-    Maths::Vec4 BorderRadii;
+    ColourbPremultiplied BackgroundColour;
+    ColourbPremultiplied BorderColourLeft;
+    ColourbPremultiplied BorderColourRight;
+    ColourbPremultiplied BorderColourTop;
+    ColourbPremultiplied BorderColourBottom;
 
     constexpr static uint32 BatchSize = 200u;
 
     constexpr static VertexBufferLayout Layout()
     {
       return {
-        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}, // background colour
-        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}, // quad position and size
-        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}, // border colour left
-        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}, // border colour right
-        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}, // border colour top
-        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}, // border colour bottom
-        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}, // border widths
-        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance}  // border radii
+        // quad position and size
+        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance},
+
+        // border widths
+        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance},
+
+        // background colour
+        {VertexAttributeType::UnsignedByte, 4, IsNormalized(true), VertexInputRate::PerInstance},
+
+        // border colour left
+        {VertexAttributeType::UnsignedByte, 4, IsNormalized(true), VertexInputRate::PerInstance},
+
+        // border colour right
+        {VertexAttributeType::UnsignedByte, 4, IsNormalized(true), VertexInputRate::PerInstance},
+
+        // border colour top
+        {VertexAttributeType::UnsignedByte, 4, IsNormalized(true), VertexInputRate::PerInstance},
+
+        // border colour bottom
+        {VertexAttributeType::UnsignedByte, 4, IsNormalized(true), VertexInputRate::PerInstance},
       };
     }
   };
@@ -96,13 +107,15 @@ namespace Krys::Gfx::OpenGL
                           float opacity);
 
     void DrawText(const utf8_string &text, FontHandle fontHandle, float ptSize, const Maths::Vec2 &position,
-                  const Colour &colour = Colours::Black) noexcept;
+                  const ColourbPremultiplied &colour = Colours::Black) noexcept;
 
     void DrawTextOutlined(const utf8_string &text, FontHandle fontHandle, float ptSize,
-                          const Maths::Vec2 &position, const Colour &textColour = Colours::Black,
-                          const Colour &outlineColour = Colours::White, float outlineWidth = 3.f) noexcept;
+                          const Maths::Vec2 &position,
+                          const ColourbPremultiplied &textColour = Colours::Black,
+                          const ColourbPremultiplied &outlineColour = Colours::White,
+                          float outlineWidth = 3.f) noexcept;
 
-    void DrawText(Font &font, Shader &shader, const utf8_string &text, const Colour &textColour,
+    void DrawText(Font &font, Shader &shader, const utf8_string &text, const ColourbPremultiplied &textColour,
                   const Maths::Vec2 &position, float ptSize);
   };
 }

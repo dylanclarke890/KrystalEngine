@@ -658,23 +658,25 @@ namespace Krys::UI
       return NodeStyleGetAspectRatio(_elements.Get(element).LayoutNode);
     }
 
-    void ElementStyleSetBackgroundColour(ElementHandle element, const Gfx::Colour &colour)
+    void ElementStyleSetBackgroundColour(ElementHandle element, const Gfx::ColourbPremultiplied &colour)
     {
       assert(element.IsValid() && "Invalid element handle");
       NodeStyleSetBackgroundColour(_elements.Get(element).LayoutNode, colour);
     }
-    Gfx::Colour ElementStyleGetBackgroundColour(ElementHandle element, const Gfx::Colour &colour)
+    Gfx::ColourbPremultiplied ElementStyleGetBackgroundColour(ElementHandle element,
+                                                              const Gfx::ColourbPremultiplied &colour)
     {
       assert(element.IsValid() && "Invalid element handle");
       return NodeStyleGetBackgroundColour(_elements.Get(element).LayoutNode);
     }
 
-    void ElementStyleSetBorderColours(ElementHandle element, const Array<Gfx::Colour, 4> &colours)
+    void ElementStyleSetBorderColours(ElementHandle element,
+                                      const Array<Gfx::ColourbPremultiplied, 4> &colours)
     {
       assert(element.IsValid() && "Invalid element handle");
       NodeStyleSetBorderColours(_elements.Get(element).LayoutNode, colours);
     }
-    const Array<Gfx::Colour, 4> &ElementStyleGetBorderColours(ElementHandle element)
+    const Array<Gfx::ColourbPremultiplied, 4> &ElementStyleGetBorderColours(ElementHandle element)
     {
       assert(element.IsValid() && "Invalid element handle");
       return NodeStyleGetBorderColours(_elements.Get(element).LayoutNode);
@@ -702,12 +704,12 @@ namespace Krys::UI
       return NodeStyleGetBorderWidths(_elements.Get(element).LayoutNode);
     }
 
-    void ElementStyleSetTextColour(ElementHandle element, const Gfx::Colour &color)
+    void ElementStyleSetTextColour(ElementHandle element, const Gfx::ColourbPremultiplied &color)
     {
       assert(element.IsValid() && "Invalid element handle");
       NodeStyleSetTextColour(_elements.Get(element).LayoutNode, color);
     }
-    Gfx::Colour ElementStyleGetTextColour(ElementHandle element)
+    Gfx::ColourbPremultiplied ElementStyleGetTextColour(ElementHandle element)
     {
       assert(element.IsValid() && "Invalid element handle");
       return NodeStyleGetTextColour(_elements.Get(element).LayoutNode);

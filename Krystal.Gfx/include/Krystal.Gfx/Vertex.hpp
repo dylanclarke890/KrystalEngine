@@ -12,7 +12,8 @@ namespace Krys::Gfx
     Float,
     Int32,
     UInt32,
-    Double
+    Double,
+    UnsignedByte,
   };
 
   enum class VertexInputRate
@@ -23,6 +24,7 @@ namespace Krys::Gfx
 
   struct IsNormalized : public StronglyTypedBool<IsNormalized>
   {
+    using StronglyTypedBool<IsNormalized>::StronglyTypedBool;
   };
 
   struct VertexBufferElement
@@ -62,11 +64,12 @@ namespace Krys::Gfx
     {
       switch (type)
       {
-        case VertexAttributeType::Int32:  return sizeof(int32);
-        case VertexAttributeType::UInt32: return sizeof(uint32);
-        case VertexAttributeType::Float:  return sizeof(float);
-        case VertexAttributeType::Double: return sizeof(double);
-        default:                          return 0;
+        case VertexAttributeType::Int32:        return sizeof(int32);
+        case VertexAttributeType::UInt32:       return sizeof(uint32);
+        case VertexAttributeType::Float:        return sizeof(float);
+        case VertexAttributeType::Double:       return sizeof(double);
+        case VertexAttributeType::UnsignedByte: return sizeof(byte);
+        default:                                return 0;
       }
     }
   };
