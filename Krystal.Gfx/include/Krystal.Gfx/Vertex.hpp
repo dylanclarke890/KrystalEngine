@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Krystal.Gfx.Lib/Colour.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/StronglyTypedValue.hpp"
 #include "Krystal.Lib/Types.hpp"
@@ -92,10 +93,10 @@ namespace Krys::Gfx
       }
     };
 
-    struct Position2D_RGBA_UV
+    struct Position2D_Colourf_UV
     {
       Maths::Vec2 Position;
-      Maths::Vec4 Colour;
+      Colourf Colour;
       Maths::Vec2 TexCoord;
 
       constexpr static VertexBufferLayout Layout()
@@ -104,6 +105,22 @@ namespace Krys::Gfx
           {VertexAttributeType::Float, 2}, // Position
           {VertexAttributeType::Float, 4}, // Colour
           {VertexAttributeType::Float, 2}, // TexCoord
+        };
+      }
+    };
+
+    struct Position2D_ColourbPremultiplied_UV
+    {
+      Maths::Vec2 Position;
+      ColourbPremultiplied Colour;
+      Maths::Vec2 TexCoord;
+
+      constexpr static VertexBufferLayout Layout()
+      {
+        return {
+          {VertexAttributeType::Float, 2},                            // Position
+          {VertexAttributeType::UnsignedByte, 4, IsNormalized(true)}, // Colour
+          {VertexAttributeType::Float, 2},                            // TexCoord
         };
       }
     };
@@ -136,10 +153,10 @@ namespace Krys::Gfx
       }
     };
 
-    struct Position3D_Color_UV
+    struct Position3D_Colourf_UV
     {
       Maths::Vec3 Position;
-      Maths::Vec4 Colour;
+      Colourf Colour;
       Maths::Vec2 TexCoord;
 
       constexpr static VertexBufferLayout Layout()

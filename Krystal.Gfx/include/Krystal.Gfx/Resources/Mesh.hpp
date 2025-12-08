@@ -1,7 +1,9 @@
 #pragma once
 
-#include "Krystal.Lib/Types.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
+#include "Krystal.Lib/List.hpp"
+#include "Krystal.Lib/Span.hpp"
+#include "Krystal.Lib/Types.hpp"
 
 namespace Krys::Gfx
 {
@@ -21,10 +23,16 @@ namespace Krys::Gfx
     Dynamic,
   };
 
+  struct MeshData
+  {
+    List<byte> Vertices {};
+    List<byte> Indices {};
+  };
+
   struct MeshDesc
   {
-    Span<const byte> VertexBuffer {};
-    Span<const byte> IndexBuffer {};
+    Span<const byte> Vertices {};
+    Span<const byte> Indices {};
     VertexBufferLayout Layout {};
     PrimitiveType Primitive {PrimitiveType::Triangles};
     MeshType Type {MeshType::Static};

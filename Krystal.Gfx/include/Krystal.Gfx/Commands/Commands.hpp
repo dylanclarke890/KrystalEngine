@@ -7,70 +7,78 @@
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
-namespace Krys::Gfx
+namespace Krys::Gfx::Commands
 {
-  namespace Commands
+  struct SetScissor
   {
-    struct DrawRect
-    {
-      constexpr static CommandType Type = KRYS_CMD_TYPE("DrawRect");
+    constexpr static CommandType Type = KRYS_CMD_TYPE("SetScissor");
+    Maths::Vec2 Position;
+    Maths::Vec2 Size;
+  };
 
-      Gfx::ColourbPremultiplied BackgroundColour;
-      Gfx::ColourbPremultiplied BorderColourLeft;
-      Gfx::ColourbPremultiplied BorderColourRight;
-      Gfx::ColourbPremultiplied BorderColourTop;
-      Gfx::ColourbPremultiplied BorderColourBottom;
-      Maths::Vec2 Position;
-      Maths::Vec2 Size;
-      float BorderWidth {0.f};
-      float BorderRadius {0.f};
-    };
+  struct ClearScissor
+  {
+    constexpr static CommandType Type = KRYS_CMD_TYPE("ClearScissor");
+  };
 
-    struct DrawText
-    {
-      constexpr static CommandType Type = KRYS_CMD_TYPE("DrawText");
+  struct SetViewport
+  {
+    constexpr static CommandType Type = KRYS_CMD_TYPE("SetViewport");
+    Maths::Vec2 Position;
+    Maths::Vec2 Size;
+  };
 
-      StringRef Text;
-      Maths::Vec2 Position;
-      FontFamilyHandle FontFamily;
-      float FontSize {16.f};
-      Gfx::ColourbPremultiplied Colour {Gfx::Colours::Black};
-    };
+  struct BindRenderTarget
+  {
+    constexpr static CommandType Type = KRYS_CMD_TYPE("BindRenderTarget");
+    RenderTargetHandle RenderTarget;
+  };
 
-    struct SetScissor
-    {
-      constexpr static CommandType Type = KRYS_CMD_TYPE("SetScissor");
-      Maths::Vec2 Position;
-      Maths::Vec2 Size;
-    };
+  struct DrawRenderTargetColourAttachment
+  {
+    constexpr static CommandType Type = KRYS_CMD_TYPE("DrawRenderTargetColourAttachment");
 
-    struct ClearScissor
-    {
-      constexpr static CommandType Type = KRYS_CMD_TYPE("ClearScissor");
-    };
+    RenderTargetHandle Source;
+    uint32 ColourAttachmentIndex {0u};
+    Maths::Vec2 Position;
+    Maths::Vec2 Size;
+    float Opacity {1.f};
+  };
 
-    struct SetViewport
-    {
-      constexpr static CommandType Type = KRYS_CMD_TYPE("SetViewport");
-      Maths::Vec2 Position;
-      Maths::Vec2 Size;
-    };
+  struct DrawShape2D
+  {
+    constexpr static CommandType Type = KRYS_CMD_TYPE("DrawShape2D");
 
-    struct BindRenderTarget
-    {
-      constexpr static CommandType Type = KRYS_CMD_TYPE("BindRenderTarget");
-      RenderTargetHandle RenderTarget;
-    };
+    MeshHandle Mesh;
+    Gfx::TextureHandle Texture;
+    Maths::Mat4 Transform;
+    Maths::Vec2 Translation;
+    uint32 InstanceCount {1u};
+  };
 
-    struct DrawRenderTargetColourAttachment
-    {
-      constexpr static CommandType Type = KRYS_CMD_TYPE("DrawRenderTargetColourAttachment");
+  struct DrawText
+  {
+    constexpr static CommandType Type = KRYS_CMD_TYPE("DrawText");
 
-      RenderTargetHandle Source;
-      uint32 ColourAttachmentIndex {0u};
-      Maths::Vec2 Position;
-      Maths::Vec2 Size;
-      float Opacity {1.f};
-    };
-  }
+    StringRef Text;
+    Maths::Vec2 Position;
+    FontFamilyHandle FontFamily;
+    float FontSize {16.f};
+    Gfx::ColourbPremultiplied Colour {Gfx::Colours::Black};
+  };
+
+  struct DrawRect
+  {
+    constexpr static CommandType Type = KRYS_CMD_TYPE("DrawRect");
+
+    Gfx::ColourbPremultiplied BackgroundColour;
+    Gfx::ColourbPremultiplied BorderColourLeft;
+    Gfx::ColourbPremultiplied BorderColourRight;
+    Gfx::ColourbPremultiplied BorderColourTop;
+    Gfx::ColourbPremultiplied BorderColourBottom;
+    Maths::Vec2 Position;
+    Maths::Vec2 Size;
+    float BorderWidth {0.f};
+    float BorderRadius {0.f};
+  };
 }

@@ -110,6 +110,10 @@
     <ClInclude Include="include\Krystal.Gfx\Light.hpp" />
     <ClInclude Include="include\Krystal.Gfx\ICamera.hpp" />
     <ClInclude Include="include\Krystal.Gfx\IContext.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Utils\MeshDataUtils.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Krystal.Gfx\Vertex.hpp" />
     <ClInclude Include="third-party\freetype\include\freetype\config\ftconfig.h" />
     <ClInclude Include="third-party\freetype\include\freetype\config\ftheader.h" />

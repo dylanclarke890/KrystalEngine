@@ -18,6 +18,8 @@ namespace Krys::Gfx
     ColourType red, green, blue, alpha;
 
   public:
+    constexpr Colour() noexcept = default;
+
     /// @param rgb Initial red, green and blue value of the colour.
     /// @param alpha Initial alpha value of the colour.
     constexpr Colour(ColourType rgb, ColourType alpha = AlphaDefault) noexcept

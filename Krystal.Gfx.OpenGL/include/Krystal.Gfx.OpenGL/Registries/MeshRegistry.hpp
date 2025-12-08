@@ -32,17 +32,17 @@ namespace Krys::Gfx::OpenGL
     {
     }
 
-    virtual MeshHandle Create(const MeshDesc &desc) noexcept override
+    NO_DISCARD virtual MeshHandle Create(const MeshDesc &desc) noexcept override
     {
       GLenum primitiveType = MapPrimitiveType(desc.Primitive);
 
-      if (desc.IndexBuffer.size_bytes() > 0u)
+      if (desc.Indices.size_bytes() > 0u)
       {
-        Mesh mesh {desc.VertexBuffer, desc.IndexBuffer, desc.Layout, primitiveType, desc.Type};
+        Mesh mesh {desc.Vertices, desc.Indices, desc.Layout, primitiveType, desc.Type};
         return AddMesh(std::move(mesh));
       }
 
-      Mesh mesh {desc.VertexBuffer, desc.Layout, primitiveType, desc.Type};
+      Mesh mesh {desc.Vertices, desc.Layout, primitiveType, desc.Type};
       return AddMesh(std::move(mesh));
     }
 
@@ -94,7 +94,7 @@ namespace Krys::Gfx::OpenGL
       };
 
       return Create({
-        .VertexBuffer = ByteUtils::AsBytesView(vertices),
+        .Vertices = ByteUtils::AsBytesView(vertices),
         .Layout = Vertex::Position3D_Normal_UV::Layout(),
         .Primitive = PrimitiveType::Triangles,
         .Type = MeshType::Static,
@@ -169,8 +169,8 @@ namespace Krys::Gfx::OpenGL
       }
 
       return Create({
-        .VertexBuffer = ByteUtils::AsBytesView(vertices),
-        .IndexBuffer = ByteUtils::AsBytesView(indices),
+        .Vertices = ByteUtils::AsBytesView(vertices),
+        .Indices = ByteUtils::AsBytesView(indices),
         .Layout = Vertex::Position3D_Normal_UV::Layout(),
         .Primitive = PrimitiveType::TriangleStrip,
         .Type = MeshType::Static,
@@ -187,7 +187,7 @@ namespace Krys::Gfx::OpenGL
       VertexBufferLayout layout = Vertex::Position2D_UV::Layout();
 
       return Create({
-        .VertexBuffer = ByteUtils::AsBytesView(vertices),
+        .Vertices = ByteUtils::AsBytesView(vertices),
         .Layout = layout,
         .Primitive = PrimitiveType::TriangleStrip,
         .Type = MeshType::Static,
@@ -207,8 +207,8 @@ namespace Krys::Gfx::OpenGL
       Array<uint32, 6> indices {0, 1, 2, 2, 3, 0};
 
       return Create({
-        .VertexBuffer = ByteUtils::AsBytesView(vertices),
-        .IndexBuffer = ByteUtils::AsBytesView(indices),
+        .Vertices = ByteUtils::AsBytesView(vertices),
+        .Indices = ByteUtils::AsBytesView(indices),
         .Layout = QuadVertex::Layout(),
         .Primitive = PrimitiveType::Triangles,
         .Type = MeshType::Static,

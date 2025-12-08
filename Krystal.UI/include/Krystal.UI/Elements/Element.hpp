@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Krystal.Gfx.Lib/Handle.hpp"
+#include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
@@ -22,6 +23,14 @@ namespace Krys::UI
     StringRef Text;
   };
 
+  struct Geometry
+  {
+    using Vertex = Gfx::Vertex::Position2D_ColourbPremultiplied_UV;
+
+    Gfx::MeshHandle Mesh;
+    Maths::Vec2 Translation;
+  };
+
   class Element
   {
     NO_COPY(Element)
@@ -33,6 +42,7 @@ namespace Krys::UI
     NodeRef LayoutNode {nullptr};
     ConfigRef LayoutConfig {nullptr};
     TextNode TextContent;
+    List<Geometry> Geometries;
 
     Element(ElementHandle handle, ConfigRef config) noexcept : Handle(handle), LayoutConfig(config)
     {
@@ -86,6 +96,7 @@ namespace Krys::UI
       std::swap(LayoutNode, other.LayoutNode);
       std::swap(LayoutConfig, other.LayoutConfig);
       std::swap(TextContent, other.TextContent);
+      std::swap(Geometries, other.Geometries);
     }
   };
 }

@@ -13,7 +13,7 @@ uniform mat4 u_Transform;
 void main()
 {
 	vec2 translatedPosition = v_Position + u_Translate;
-  gl_Position = u_Transform * vec4(translatedPos, 0.0, 1.0);
+  gl_Position = u_Transform * vec4(translatedPosition, 0.0, 1.0);
 
 	Colour = v_Colour0;
 	TextureCoord = v_TextureCoord0;
