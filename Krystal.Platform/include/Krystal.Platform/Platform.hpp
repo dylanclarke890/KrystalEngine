@@ -21,7 +21,7 @@ namespace Krys::Platform
   NO_DISCARD double GetTimeMilliseconds() noexcept;
 
   /// @brief Gets dpi of the given window.
-  NO_DISCARD int GetDPIForWindow(NativeHandle windowHandle) noexcept;
+  NO_DISCARD int GetDPIForWindow(NativeHandle windowHandle = {nullptr}) noexcept;
 
   NO_DISCARD NativeHandle GetActiveWindow() noexcept;
 

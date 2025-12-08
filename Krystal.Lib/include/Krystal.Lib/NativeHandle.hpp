@@ -22,5 +22,10 @@ namespace Krys
     {
       return static_cast<T>(_handle);
     }
+
+    NO_DISCARD constexpr bool IsValid() const noexcept
+    {
+      return _handle != nullptr;
+    }
   };
 }

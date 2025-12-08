@@ -73,6 +73,10 @@ namespace Krys::Platform
 
   int GetDPIForWindow(NativeHandle windowHandle) noexcept
   {
+    if (!windowHandle.IsValid())
+    {
+      windowHandle = GetActiveWindow();
+    }
     auto window = windowHandle.As<HWND>();
     return static_cast<int>(::GetDpiForWindow(window));
   }

@@ -25,8 +25,7 @@ namespace Krys::Gfx
 namespace Krys::Gfx::OpenGL
 {
   Renderer::Renderer(IContext &context) noexcept
-      : _context(static_cast<Context &>(context)),
-        _dpi(Platform::GetDPIForWindow(Platform::GetActiveWindow()))
+      : _context(static_cast<Context &>(context)), _dpi(Platform::GetDPIForWindow())
   {
   }
 
