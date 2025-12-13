@@ -37,33 +37,8 @@ namespace Krys::Gfx::OpenGL
     auto &renderTargets = static_cast<RenderTargetRegistry &>(_context.RenderTargets());
     auto &shaders = static_cast<ShaderRegistry &>(_context.Shaders());
 
-    _quadShader = shaders.Load(IO::Path("ui.vert"), IO::Path("ui.frag"));
-    Debug::SetName(shaders.Get(_quadShader), "UIQuadShader");
-
-    _singleTextureShader = shaders.Load(IO::Path("single-texture.vert"), IO::Path("single-texture.frag"));
-    Debug::SetName(shaders.Get(_singleTextureShader), "SingleTextureShader");
-
-    {
-      _quadMesh = meshes.CreateQuad();
-      auto &quadMesh = meshes.Get(_quadMesh);
-
-      _quadInstanceData.Buffer = buffers.Create({
-        .Type = BufferType::Vertex,
-        .Usage = BufferUsage::Dynamic,
-        .Size = _quadInstanceData.BufferSize,
-      });
-      _quadInstanceData.Data.reserve(_quadInstanceData.BatchSize);
-
-      auto &quadInstanceBuffer = buffers.Get(_quadInstanceData.Buffer);
-      quadMesh.ApplyInstanceDataLayout(quadInstanceBuffer, QuadInstanceData::Layout());
-      Debug::SetName(quadInstanceBuffer, "QuadInstanceData");
-    }
-
     _currentRenderTarget = _context.RenderTargets().GetScreenRenderTarget();
     auto &rt = renderTargets.Get(_currentRenderTarget);
-
-    shaders.Get(_quadShader).SetUniform("u_Projection", rt.GetProjectionMatrix());
-    shaders.Get(_singleTextureShader).SetUniform("u_Projection", rt.GetProjectionMatrix());
 
     uint32 maxGlyphVertices = GlyphVertex::VerticesPerGlyph * GlyphVertex::BatchSize;
     _glyphBuffer = buffers.Create({
@@ -83,9 +58,6 @@ namespace Krys::Gfx::OpenGL
 
   void Renderer::Shutdown() noexcept
   {
-    _context.Shaders().Unload(_quadShader);
-    _context.Buffers().Destroy(_quadInstanceData.Buffer);
-    _context.Meshes().Destroy(_quadMesh);
   }
 
   void Renderer::BeginFrame()
@@ -146,21 +118,17 @@ namespace Krys::Gfx::OpenGL
         {
           const auto &cmd = reader.ReadCommand<Commands::BindRenderTarget>();
           assert(cmd.RenderTarget.IsValid() && "Invalid render target handle in BindRenderTarget.");
-
           if (cmd.RenderTarget == _currentRenderTarget)
           {
             break;
           }
 
-          auto &rt = renderTargets.Get(cmd.RenderTarget);
           renderTargets.Bind(cmd.RenderTarget);
-
+          auto &rt = renderTargets.Get(cmd.RenderTarget);
           glViewport(0, 0, rt.Width(), rt.Height());
           glDisable(GL_SCISSOR_TEST);
 
           _currentRenderTarget = cmd.RenderTarget;
-          shaders.Get(_quadShader).SetUniform("u_Projection", rt.GetProjectionMatrix());
-          shaders.Get(_singleTextureShader).SetUniform("u_Projection", rt.GetProjectionMatrix());
           break;
         }
         case Commands::DrawText::Type:
@@ -209,7 +177,7 @@ namespace Krys::Gfx::OpenGL
           const Maths::Vec2 translation = {cmd.Translation.x, cmd.Translation.y};
           shader.SetUniform("u_Translate", translation);
           mesh.Bind();
-          mesh.DrawInstanced(static_cast<GLsizei>(cmd.InstanceCount));
+          mesh.Draw(static_cast<GLsizei>(cmd.InstanceCount));
           break;
         }
         default:
@@ -220,40 +188,6 @@ namespace Krys::Gfx::OpenGL
         }
       }
     }
-  }
-
-  void Renderer::DrawTexturedQuad(GLuint texture, const Maths::Vec2 &position, const Maths::Vec2 &size,
-                                  float opacity)
-  {
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
-    auto &shader = static_cast<ShaderRegistry &>(_context.Shaders()).Get(_singleTextureShader);
-    shader.Bind();
-    shader.SetUniform("u_Texture", 0);
-    shader.SetUniform("u_Opacity", opacity);
-
-    glBindTextureUnit(0, texture);
-
-    // Setup instance data for just one quad
-    Array<QuadInstanceData, 1> instance = {QuadInstanceData {
-      .PositionAndSize = {position.x, position.y, size.x, size.y},
-      .BorderWidths = Maths::Vec4 {0.f},
-      .BackgroundColour = Gfx::Colours::Transparent,
-      .BorderColourLeft = Gfx::Colours::Transparent,
-      .BorderColourRight = Gfx::Colours::Transparent,
-      .BorderColourTop = Gfx::Colours::Transparent,
-      .BorderColourBottom = Gfx::Colours::Transparent,
-    }};
-
-    auto &buffer = static_cast<BufferRegistry &>(_context.Buffers()).Get(_quadInstanceData.Buffer);
-    buffer.Update(instance);
-
-    auto &mesh = static_cast<MeshRegistry &>(_context.Meshes()).Get(_quadMesh);
-    mesh.Bind();
-    mesh.DrawInstanced(1);
-
-    glDisable(GL_BLEND);
   }
 
   void Renderer::DrawText(const utf8_string &text, FontHandle fontHandle, float ptSize,

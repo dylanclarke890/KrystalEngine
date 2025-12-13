@@ -112,27 +112,29 @@ namespace Krys::Gfx::OpenGL
       glBindVertexArray(_vao);
     }
 
-    void Draw() const noexcept
+    void Draw(GLsizei instanceCount = 1u) const noexcept
     {
       if (_ebo != 0u)
       {
-        glDrawElements(_primitiveType, _count, GL_UNSIGNED_INT, nullptr);
+        if (instanceCount > 1u)
+        {
+          glDrawElementsInstanced(_primitiveType, _count, GL_UNSIGNED_INT, nullptr, instanceCount);
+        }
+        else
+        {
+          glDrawElements(_primitiveType, _count, GL_UNSIGNED_INT, nullptr);
+        }
       }
       else
       {
-        glDrawArrays(_primitiveType, 0, _count);
-      }
-    }
-
-    void DrawInstanced(GLsizei instanceCount) const noexcept
-    {
-      if (_ebo != 0u)
-      {
-        glDrawElementsInstanced(_primitiveType, _count, GL_UNSIGNED_INT, nullptr, instanceCount);
-      }
-      else
-      {
-        glDrawArraysInstanced(_primitiveType, 0, _count, instanceCount);
+        if (instanceCount > 1u)
+        {
+          glDrawArraysInstanced(_primitiveType, 0, _count, instanceCount);
+        }
+        else
+        {
+          glDrawArrays(_primitiveType, 0, _count);
+        }
       }
     }
 

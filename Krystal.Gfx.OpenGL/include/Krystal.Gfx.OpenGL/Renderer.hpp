@@ -11,45 +11,6 @@
 
 namespace Krys::Gfx::OpenGL
 {
-  struct QuadInstanceData
-  {
-    Maths::Vec4 PositionAndSize; // xy: position, zw: size
-    Maths::Vec4 BorderWidths;
-    ColourbPremultiplied BackgroundColour;
-    ColourbPremultiplied BorderColourLeft;
-    ColourbPremultiplied BorderColourRight;
-    ColourbPremultiplied BorderColourTop;
-    ColourbPremultiplied BorderColourBottom;
-
-    constexpr static uint32 BatchSize = 200u;
-
-    constexpr static VertexBufferLayout Layout()
-    {
-      return {
-        // quad position and size
-        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance},
-
-        // border widths
-        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance},
-
-        // background colour
-        {VertexAttributeType::UnsignedByte, 4, IsNormalized(true), VertexInputRate::PerInstance},
-
-        // border colour left
-        {VertexAttributeType::UnsignedByte, 4, IsNormalized(true), VertexInputRate::PerInstance},
-
-        // border colour right
-        {VertexAttributeType::UnsignedByte, 4, IsNormalized(true), VertexInputRate::PerInstance},
-
-        // border colour top
-        {VertexAttributeType::UnsignedByte, 4, IsNormalized(true), VertexInputRate::PerInstance},
-
-        // border colour bottom
-        {VertexAttributeType::UnsignedByte, 4, IsNormalized(true), VertexInputRate::PerInstance},
-      };
-    }
-  };
-
   struct GlyphVertex
   {
     Maths::Vec2 Position {};
@@ -73,11 +34,7 @@ namespace Krys::Gfx::OpenGL
 
   private:
     Context &_context;
-    ShaderHandle _quadShader;
-    ShaderHandle _singleTextureShader;
-    MeshHandle _quadMesh;
     RenderTargetHandle _currentRenderTarget;
-    InstanceData<QuadInstanceData> _quadInstanceData;
     List<GlyphVertex> _glyphVertices {};
     BufferHandle _glyphBuffer {};
     GLuint _textVao {};
@@ -101,9 +58,6 @@ namespace Krys::Gfx::OpenGL
     void DPIChanged(int dpi) noexcept override;
 
   private:
-    void DrawTexturedQuad(GLuint texture, const Maths::Vec2 &position, const Maths::Vec2 &size,
-                          float opacity);
-
     void DrawText(const utf8_string &text, FontHandle fontHandle, float ptSize, const Maths::Vec2 &position,
                   const ColourbPremultiplied &colour = Colours::Black) noexcept;
 
