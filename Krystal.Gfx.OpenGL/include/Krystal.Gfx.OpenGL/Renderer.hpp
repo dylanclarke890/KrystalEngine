@@ -58,16 +58,13 @@ namespace Krys::Gfx::OpenGL
     void DPIChanged(int dpi) noexcept override;
 
   private:
-    void DrawText(const utf8_string &text, FontHandle fontHandle, float ptSize, const Maths::Vec2 &position,
-                  const ColourbPremultiplied &colour = Colours::Black) noexcept;
+    void DrawText(Font &font, Shader &shader, const utf8_string &text, const ColourbPremultiplied &textColour,
+                  const Maths::Vec2 &position, float ptSize);
 
     void DrawTextOutlined(const utf8_string &text, FontHandle fontHandle, float ptSize,
                           const Maths::Vec2 &position,
                           const ColourbPremultiplied &textColour = Colours::Black,
                           const ColourbPremultiplied &outlineColour = Colours::White,
                           float outlineWidth = 3.f) noexcept;
-
-    void DrawText(Font &font, Shader &shader, const utf8_string &text, const ColourbPremultiplied &textColour,
-                  const Maths::Vec2 &position, float ptSize);
   };
 }

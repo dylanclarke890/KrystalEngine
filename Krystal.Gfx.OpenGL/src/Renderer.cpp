@@ -76,6 +76,7 @@ namespace Krys::Gfx::OpenGL
     auto &shaders = static_cast<ShaderRegistry &>(_context.Shaders());
     auto &textures = static_cast<TextureRegistry &>(_context.Textures());
     auto &renderTargets = static_cast<RenderTargetRegistry &>(_context.RenderTargets());
+
     while (reader.HasMore())
     {
       CommandHeader header = reader.ReadHeader();
@@ -131,25 +132,6 @@ namespace Krys::Gfx::OpenGL
           _currentRenderTarget = cmd.RenderTarget;
           break;
         }
-        case Commands::DrawText::Type:
-        {
-          const auto &cmd = reader.ReadCommand<Commands::DrawText>();
-          auto &rt = renderTargets.Get(_currentRenderTarget);
-
-          FontHandle fontHandle =
-            fonts.Get({.Family = cmd.FontFamily, .Type = FontType::Bitmap, .Size = cmd.FontSize});
-          Font &font = fonts.Get(fontHandle);
-          const auto &fontMetrics = fonts.GetMetrics(fontHandle);
-
-          float scale = 1.f;
-          if (font.Type() != FontType::Bitmap)
-          {
-            scale = fonts.PtSizeToPixels(cmd.FontSize) / font.SDFParams().EMSizeInPixels;
-          }
-
-          DrawText(_context.Strings().Get(cmd.Text), fontHandle, cmd.FontSize, cmd.Position, cmd.Colour);
-          break;
-        }
         case Commands::DrawShape2D::Type:
         {
           const auto &cmd = reader.ReadCommand<Commands::DrawShape2D>();
@@ -174,9 +156,37 @@ namespace Krys::Gfx::OpenGL
           shader.Bind();
           shader.SetUniform("u_Transform", projection * cmd.Transform);
           shader.SetUniform("u_Translate", cmd.Translation);
-          
+
           mesh.Bind();
           mesh.Draw(static_cast<GLsizei>(cmd.InstanceCount));
+          break;
+        }
+        case Commands::DrawText::Type:
+        {
+          const auto &cmd = reader.ReadCommand<Commands::DrawText>();
+          auto &rt = renderTargets.Get(_currentRenderTarget);
+
+          FontHandle fontHandle =
+            fonts.Get({.Family = cmd.FontFamily, .Type = FontType::Bitmap, .Size = cmd.FontSize});
+          Font &font = fonts.Get(fontHandle);
+
+          BuiltinShader builtin = [&]()
+          {
+            switch (font.Type())
+            {
+              case FontType::Bitmap: return BuiltinShader::Font_Bitmap;
+              case FontType::SDF:    return BuiltinShader::Font_SDF;
+              case FontType::MSDF:   return BuiltinShader::Font_MSDF;
+              case FontType::MTSDF:  return BuiltinShader::Font_MTSDF;
+            }
+            std::unreachable();
+          }();
+
+          auto &shaders = static_cast<ShaderRegistry &>(_context.Shaders());
+
+          ShaderHandle handle = shaders.GetBuiltin(builtin);
+          DrawText(font, shaders.Get(handle), _context.Strings().Get(cmd.Text), cmd.Colour, cmd.Position,
+                   cmd.FontSize);
           break;
         }
         default:
@@ -187,29 +197,6 @@ namespace Krys::Gfx::OpenGL
         }
       }
     }
-  }
-
-  void Renderer::DrawText(const utf8_string &text, FontHandle fontHandle, float ptSize,
-                          const Maths::Vec2 &position, const ColourbPremultiplied &colour) noexcept
-  {
-    Font &font = static_cast<FontRegistry &>(_context.Fonts()).Get(fontHandle);
-
-    BuiltinShader builtin = [&]()
-    {
-      switch (font.Type())
-      {
-        case FontType::Bitmap: return BuiltinShader::Font_Bitmap;
-        case FontType::SDF:    return BuiltinShader::Font_SDF;
-        case FontType::MSDF:   return BuiltinShader::Font_MSDF;
-        case FontType::MTSDF:  return BuiltinShader::Font_MTSDF;
-      }
-      std::unreachable();
-    }();
-
-    auto &shaders = static_cast<ShaderRegistry &>(_context.Shaders());
-
-    ShaderHandle handle = shaders.GetBuiltin(builtin);
-    DrawText(font, shaders.Get(handle), text, colour, position, ptSize);
   }
 
   void Renderer::DrawTextOutlined(const utf8_string &text, FontHandle fontHandle, float ptSize,
