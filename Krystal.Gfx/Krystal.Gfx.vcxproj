@@ -61,6 +61,10 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Registries\IResourceRegistry.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Krystal.Gfx\Resources\Buffer.hpp">
       <SubType>
       </SubType>

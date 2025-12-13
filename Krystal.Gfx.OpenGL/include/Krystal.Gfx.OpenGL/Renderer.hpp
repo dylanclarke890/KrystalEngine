@@ -101,8 +101,6 @@ namespace Krys::Gfx::OpenGL
     void DPIChanged(int dpi) noexcept override;
 
   private:
-    void FlushQuadInstances();
-
     void DrawTexturedQuad(GLuint texture, const Maths::Vec2 &position, const Maths::Vec2 &size,
                           float opacity);
 

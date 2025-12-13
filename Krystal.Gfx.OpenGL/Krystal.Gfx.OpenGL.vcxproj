@@ -47,6 +47,10 @@
   <ItemGroup>
     <ClCompile Include="src\Context.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Debug.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Registries\BufferRegistry.hpp">
       <SubType>
       </SubType>

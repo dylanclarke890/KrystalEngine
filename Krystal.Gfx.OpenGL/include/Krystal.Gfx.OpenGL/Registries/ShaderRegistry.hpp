@@ -2,6 +2,7 @@
 
 #include "Krystal.Debug/ScopedProfiler.hpp"
 #include "Krystal.Gfx.Lib/ResourceManager.hpp"
+#include "Krystal.Gfx.OpenGL/Debug.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Shader.hpp"
 #include "Krystal.Gfx/Registries/IShaderRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
@@ -89,7 +90,7 @@ namespace Krys::Gfx::OpenGL
 
     NO_DISCARD ShaderHandle GetBuiltin(BuiltinShader builtin) noexcept override
     {
-      auto profiler = Debug::ScopedProfiler("GetBuiltin");
+      auto profiler = Krys::Debug::ScopedProfiler("GetBuiltin");
 
       if (auto it = _builtins.find(builtin); it != _builtins.end())
       {
@@ -114,7 +115,28 @@ namespace Krys::Gfx::OpenGL
       }();
 
       _builtins[builtin] = shader;
+      SetBuiltinShaderDebugName(shader, builtin);
       return shader;
+    }
+
+    void SetBuiltinShaderDebugName(ShaderHandle handle, BuiltinShader builtin) noexcept
+    {
+      assert(handle.IsValid() && "Handle is invalid.");
+      assert(_shaders.TryGet(handle) != nullptr && "Shader not found in resource manager.");
+      string name;
+      switch (builtin)
+      {
+        case BuiltinShader::Shape2D_Colour:     name = "BuiltinShape2DColourShader"; break;
+        case BuiltinShader::Shape2D_Texture:    name = "BuiltinShape2DTextureShader"; break;
+        case BuiltinShader::Font_Bitmap:        name = "BuiltinFontBitmapShader"; break;
+        case BuiltinShader::Font_SDF:           name = "BuiltinFontSDFShader"; break;
+        case BuiltinShader::Font_SDF_Outline:   name = "BuiltinFontSDFOutlineShader"; break;
+        case BuiltinShader::Font_MSDF:          name = "BuiltinFontMSDFShader"; break;
+        case BuiltinShader::Font_MSDF_Outline:  name = "BuiltinFontMSDFOutlineShader"; break;
+        case BuiltinShader::Font_MTSDF:         name = "BuiltinFontMTSDFShader"; break;
+        case BuiltinShader::Font_MTSDF_Outline: name = "BuiltinFontMTSDFOutlineShader"; break;
+      }
+      Debug::SetName(_shaders.Get(handle), name);
     }
 
     bool Unload(ShaderHandle handle) noexcept override

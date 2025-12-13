@@ -1,4 +1,5 @@
 #include "Krystal.Gfx.OpenGL/Renderer.hpp"
+#include "Krystal.Gfx.OpenGL/Debug.hpp"
 #include "Krystal.Gfx/Commands/CommandListReader.hpp"
 #include "Krystal.Gfx/Commands/Commands.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
@@ -37,7 +38,10 @@ namespace Krys::Gfx::OpenGL
     auto &shaders = static_cast<ShaderRegistry &>(_context.Shaders());
 
     _quadShader = shaders.Load(IO::Path("ui.vert"), IO::Path("ui.frag"));
+    Debug::SetName(shaders.Get(_quadShader), "UIQuadShader");
+
     _singleTextureShader = shaders.Load(IO::Path("single-texture.vert"), IO::Path("single-texture.frag"));
+    Debug::SetName(shaders.Get(_singleTextureShader), "SingleTextureShader");
 
     {
       _quadMesh = meshes.CreateQuad();
@@ -52,7 +56,7 @@ namespace Krys::Gfx::OpenGL
 
       auto &quadInstanceBuffer = buffers.Get(_quadInstanceData.Buffer);
       quadMesh.ApplyInstanceDataLayout(quadInstanceBuffer, QuadInstanceData::Layout());
-      glObjectLabel(GL_BUFFER, quadInstanceBuffer.GetHandle(), -1, "QuadInstanceData");
+      Debug::SetName(quadInstanceBuffer, "QuadInstanceData");
     }
 
     _currentRenderTarget = _context.RenderTargets().GetScreenRenderTarget();
@@ -74,7 +78,7 @@ namespace Krys::Gfx::OpenGL
     glBindVertexArray(_textVao);
     buffers.Get(_glyphBuffer).Bind();
     Utils::ApplyVertexBufferLayout(GlyphVertex::Layout());
-    glObjectLabel(GL_BUFFER, buffers.Get(_glyphBuffer).GetHandle(), -1, "GlyphVertexData");
+    Debug::SetName(buffers.Get(_glyphBuffer), "GlyphVertexData");
   }
 
   void Renderer::Shutdown() noexcept
@@ -98,6 +102,7 @@ namespace Krys::Gfx::OpenGL
 
     auto &fonts = static_cast<FontRegistry &>(_context.Fonts());
     auto &shaders = static_cast<ShaderRegistry &>(_context.Shaders());
+    auto &textures = static_cast<TextureRegistry &>(_context.Textures());
     auto &renderTargets = static_cast<RenderTargetRegistry &>(_context.RenderTargets());
     while (reader.HasMore())
     {
@@ -106,14 +111,11 @@ namespace Krys::Gfx::OpenGL
       {
         case Commands::SetScissor::Type:
         {
-          FlushQuadInstances();
-
           const auto &cmd = reader.ReadCommand<Commands::SetScissor>();
           auto &rt = renderTargets.Get(_currentRenderTarget);
 
           GLint scissorX = static_cast<GLint>(cmd.Position.x);
           GLint scissorY = static_cast<GLint>(rt.Height() - (cmd.Position.y + cmd.Size.y));
-
           GLsizei scissorWidth = static_cast<GLsizei>(cmd.Size.x);
           GLsizei scissorHeight = static_cast<GLsizei>(cmd.Size.y);
 
@@ -123,9 +125,9 @@ namespace Krys::Gfx::OpenGL
         }
         case Commands::ClearScissor::Type:
         {
-          FlushQuadInstances();
           const auto &cmd = reader.ReadCommand<Commands::ClearScissor>();
           KRYS_UNUSED(cmd);
+
           glDisable(GL_SCISSOR_TEST);
           break;
         }
@@ -144,11 +146,11 @@ namespace Krys::Gfx::OpenGL
         {
           const auto &cmd = reader.ReadCommand<Commands::BindRenderTarget>();
           assert(cmd.RenderTarget.IsValid() && "Invalid render target handle in BindRenderTarget.");
+
           if (cmd.RenderTarget == _currentRenderTarget)
           {
             break;
           }
-          FlushQuadInstances();
 
           auto &rt = renderTargets.Get(cmd.RenderTarget);
           renderTargets.Bind(cmd.RenderTarget);
@@ -163,8 +165,6 @@ namespace Krys::Gfx::OpenGL
         }
         case Commands::DrawRenderTargetColourAttachment::Type:
         {
-          FlushQuadInstances();
-
           const auto &cmd = reader.ReadCommand<Commands::DrawRenderTargetColourAttachment>();
           auto &sourceRT = renderTargets.Get(cmd.Source);
           const auto &attachment = sourceRT.GetColourAttachment(cmd.ColourAttachmentIndex);
@@ -176,31 +176,8 @@ namespace Krys::Gfx::OpenGL
           DrawTexturedQuad(imageView.Id(), {cmd.Position.x, posY}, cmd.Size, cmd.Opacity);
           break;
         }
-        case Commands::DrawRect::Type:
-        {
-          const auto &cmd = reader.ReadCommand<Commands::DrawRect>();
-          auto &rt = renderTargets.Get(_currentRenderTarget);
-
-          float posY = static_cast<float>(rt.Height()) - (cmd.Position.y + cmd.Size.y);
-          _quadInstanceData.Data.push_back({
-            .PositionAndSize = {cmd.Position.x, posY, cmd.Size.x, cmd.Size.y},
-            .BorderWidths = Maths::Vec4 {cmd.BorderWidth},
-            .BackgroundColour = cmd.BackgroundColour,
-            .BorderColourLeft = cmd.BorderColourLeft,
-            .BorderColourRight = cmd.BorderColourRight,
-            .BorderColourTop = cmd.BorderColourTop,
-            .BorderColourBottom = cmd.BorderColourBottom,
-          });
-
-          if (_quadInstanceData.Data.size() >= QuadInstanceData::BatchSize)
-          {
-            FlushQuadInstances();
-          }
-          break;
-        }
         case Commands::DrawText::Type:
         {
-          FlushQuadInstances();
           const auto &cmd = reader.ReadCommand<Commands::DrawText>();
           auto &rt = renderTargets.Get(_currentRenderTarget);
 
@@ -220,6 +197,36 @@ namespace Krys::Gfx::OpenGL
                    Colours::Red);
           break;
         }
+        case Commands::DrawShape2D::Type:
+        {
+          const auto &cmd = reader.ReadCommand<Commands::DrawShape2D>();
+
+          auto &mesh = static_cast<MeshRegistry &>(_context.Meshes()).Get(cmd.Mesh);
+          auto &rt = renderTargets.Get(_currentRenderTarget);
+          Maths::Mat4 projection = rt.GetProjectionMatrix();
+
+          ShaderHandle shaderHandle;
+          if (cmd.Texture.IsValid())
+          {
+            shaderHandle = shaders.GetBuiltin(BuiltinShader::Shape2D_Texture);
+            textures.Bind(cmd.Texture, 0);
+            shaders.Get(shaderHandle).SetUniform("u_Texture", 0);
+          }
+          else
+          {
+            shaderHandle = shaders.GetBuiltin(BuiltinShader::Shape2D_Colour);
+          }
+
+          auto &shader = shaders.Get(shaderHandle);
+          shader.Bind();
+          shader.SetUniform("u_Transform", projection * cmd.Transform);
+
+          const Maths::Vec2 translation = {cmd.Translation.x, cmd.Translation.y};
+          shader.SetUniform("u_Translate", translation);
+          mesh.Bind();
+          mesh.DrawInstanced(static_cast<GLsizei>(cmd.InstanceCount));
+          break;
+        }
         default:
         {
           KRYS_WARN("Unknown command type submitted to OpenGL renderer, skipping: {}", header.Type);
@@ -228,32 +235,6 @@ namespace Krys::Gfx::OpenGL
         }
       }
     }
-
-    FlushQuadInstances();
-  }
-
-  void Renderer::FlushQuadInstances()
-  {
-    if (_quadInstanceData.Data.empty())
-    {
-      return;
-    }
-
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-    {
-      auto &shader = static_cast<ShaderRegistry &>(_context.Shaders()).Get(_quadShader);
-      shader.Bind();
-
-      auto &buffer = static_cast<BufferRegistry &>(_context.Buffers()).Get(_quadInstanceData.Buffer);
-      buffer.Update(_quadInstanceData.Data);
-
-      auto &mesh = static_cast<MeshRegistry &>(_context.Meshes()).Get(_quadMesh);
-      mesh.Bind();
-      mesh.DrawInstanced(static_cast<GLsizei>(_quadInstanceData.Data.size()));
-    }
-    glDisable(GL_BLEND);
-    _quadInstanceData.Data.clear();
   }
 
   void Renderer::DrawTexturedQuad(GLuint texture, const Maths::Vec2 &position, const Maths::Vec2 &size,

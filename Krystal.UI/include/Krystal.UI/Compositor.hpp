@@ -5,6 +5,7 @@
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/IRenderer.hpp"
+#include "Krystal.Gfx/Utils/MeshDataUtils.hpp"
 #include "Krystal.Lib/DebugBreak.hpp"
 #include "Krystal.Lib/HashUtils.hpp"
 #include "Krystal.Lib/Macros.hpp"
@@ -54,6 +55,7 @@ namespace Krys::UI
 
     void BeginFrame()
     {
+      // TODO: reuse command lists?
       _commandLists.clear();
       _usedLayers.clear();
       _pendingDestruction.clear();
@@ -116,13 +118,12 @@ namespace Krys::UI
 
     void PushLayer(ElementHandle owner, Gfx::RenderTargetHandle renderTarget) noexcept
     {
-      // TODO: reuse command lists?
+      assert(renderTarget.IsValid() && "Invalid render target");
+
       _usedLayers.insert(owner);
       _commandLists.emplace_back();
       _layerStack.push({renderTarget, _commandLists.size() - 1u});
-      CurrentCommandList().Push(Gfx::Commands::BindRenderTarget {
-        .RenderTarget = renderTarget,
-      });
+      CurrentCommandList().Push(Gfx::Commands::BindRenderTarget {.RenderTarget = renderTarget});
     }
 
     void PopLayer() noexcept
@@ -141,7 +142,6 @@ namespace Krys::UI
       Vec2 relativePosition = {NodeLayoutGetLeft(node), NodeLayoutGetTop(node)};
       Vec2 absolutePosition = parentOffset + relativePosition;
       Vec2 size = {NodeLayoutGetWidth(node), NodeLayoutGetHeight(node)};
-
       if (!document.ElementRequiresLayer(handle))
       {
         RenderElementContents(node, absolutePosition, size, element, document);
@@ -161,6 +161,11 @@ namespace Krys::UI
         else if (cachedLayer.Size != size)
         {
           _pendingDestruction.push_back(cachedLayer.Target);
+          for (auto &Geometry : element.Geometries)
+          {
+            _context.Meshes().Destroy(Geometry.Mesh);
+          }
+          element.Geometries.clear();
         }
         else
         {
@@ -190,19 +195,37 @@ namespace Krys::UI
     }
 
     void RenderElementContents(NodeRef node, const Maths::Vec2 &position, const Maths::Vec2 &size,
-                               Element &element, Document &document)
+                               Element &element, Document &document,
+                               const Maths::Mat4 &transform = Maths::Identity<Maths::Mat4>())
     {
-      CurrentCommandList().Push(Gfx::Commands::DrawRect {
-        .BackgroundColour = NodeStyleGetBackgroundColour(node),
-        .BorderColourLeft = NodeStyleGetBorderColours(node)[0],
-        .BorderColourRight = NodeStyleGetBorderColours(node)[1],
-        .BorderColourTop = NodeStyleGetBorderColours(node)[2],
-        .BorderColourBottom = NodeStyleGetBorderColours(node)[3],
-        .Position = position,
-        .Size = size,
-        .BorderWidth = NodeStyleGetBorderWidths(node)[0],
-        .BorderRadius = NodeStyleGetBorderRadii(node)[0].x,
-      });
+      if (element.Geometries.empty())
+      {
+        Gfx::MeshData data;
+        Gfx::MeshDataUtils::GenerateQuad(data, TopLeftOrigin, size, NodeStyleGetBackgroundColour(node));
+        Gfx::MeshDesc desc {
+          .Vertices = data.Vertices,
+          .Indices = data.Indices,
+          .Layout = Gfx::Vertex::Position2D_ColourbPremultiplied_UV::Layout(),
+          .Primitive = Gfx::PrimitiveType::Triangles,
+          .Type = Gfx::MeshType::Static,
+        };
+
+        element.Geometries.push_back(Geometry {
+          .Mesh = _context.Meshes().Create(desc),
+          .Translation = position,
+        });
+      }
+
+      for (const auto &geometry : element.Geometries)
+      {
+        CurrentCommandList().Push(Gfx::Commands::DrawShape2D {
+          .Mesh = geometry.Mesh,
+          .Texture = {},
+          .Transform = transform,
+          .Translation = geometry.Translation,
+          .InstanceCount = 1u,
+        });
+      }
 
       if (element.TextContent.Text.IsValid())
       {
