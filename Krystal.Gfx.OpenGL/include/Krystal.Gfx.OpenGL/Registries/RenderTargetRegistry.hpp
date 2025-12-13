@@ -18,25 +18,14 @@ namespace Krys::Gfx::OpenGL
     using RenderTargetManager = Gfx::ResourceManager<RenderTarget, RenderTargetHandle>;
 
   private:
-    struct CachedTarget
-    {
-      RenderTargetHandle Handle;
-      uint32 Width;
-      uint32 Height;
-      PixelFormat Format;
-      bool InUse;
-    };
-
     RenderTargetManager _renderTargets;
     ImageRegistry &_images;
     ImageViewRegistry &_imageViews;
-    TextureRegistry &_textures;
     RenderTargetHandle _screenRenderTarget {0u};
 
   public:
-    RenderTargetRegistry(ImageRegistry &images, ImageViewRegistry &imageViews,
-                         TextureRegistry &textures) noexcept
-        : _images(images), _imageViews(imageViews), _textures(textures)
+    RenderTargetRegistry(ImageRegistry &images, ImageViewRegistry &imageViews) noexcept
+        : _images(images), _imageViews(imageViews)
     {
     }
 
@@ -147,12 +136,13 @@ namespace Krys::Gfx::OpenGL
       return {static_cast<float>(rt->Width()), static_cast<float>(rt->Height())};
     }
 
-    NO_DISCARD ImageViewHandle GetColourAttachmentImageView(RenderTargetHandle handle, uint32 index) noexcept override
+    NO_DISCARD ImageViewHandle GetColourAttachmentImageView(RenderTargetHandle handle,
+                                                            uint32 index) noexcept override
     {
       assert(handle.IsValid() && "Invalid render target handle.");
       assert(_renderTargets.TryGet(handle) != nullptr && "Render target not found in resource manager.");
 
-      auto& rt = _renderTargets.Get(handle);
+      auto &rt = _renderTargets.Get(handle);
       const RenderTargetAttachment &attachment = rt.GetColourAttachment(index);
       return attachment.ImageView;
     }
