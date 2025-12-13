@@ -8,7 +8,6 @@
 
 namespace Krys::Gfx
 {
-
   enum class AttachmentType
   {
     Colour,

@@ -192,7 +192,7 @@ namespace Krys::Gfx::OpenGL
 
     NO_DISCARD Maths::Mat4 GetProjectionMatrix() const noexcept
     {
-      return Maths::Ortho(0.f, static_cast<float>(_width), 0.f, static_cast<float>(_height));
+      return Maths::Ortho(0.f, static_cast<float>(_width), static_cast<float>(_height), 0.f);
     }
 
     /// @brief Sets the dimensions of the render target. NOTE: Does not resize attachments.
