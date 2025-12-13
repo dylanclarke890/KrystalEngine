@@ -55,19 +55,4 @@ namespace Krys::Gfx::Commands
     float FontSize {16.f};
     Gfx::ColourbPremultiplied Colour {Gfx::Colours::Black};
   };
-
-  struct DrawRect
-  {
-    constexpr static CommandType Type = KRYS_CMD_TYPE("DrawRect");
-
-    Gfx::ColourbPremultiplied BackgroundColour;
-    Gfx::ColourbPremultiplied BorderColourLeft;
-    Gfx::ColourbPremultiplied BorderColourRight;
-    Gfx::ColourbPremultiplied BorderColourTop;
-    Gfx::ColourbPremultiplied BorderColourBottom;
-    Maths::Vec2 Position;
-    Maths::Vec2 Size;
-    float BorderWidth {0.f};
-    float BorderRadius {0.f};
-  };
 }
