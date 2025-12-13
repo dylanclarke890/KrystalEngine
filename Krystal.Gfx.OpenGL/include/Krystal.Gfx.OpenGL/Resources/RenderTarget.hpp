@@ -190,6 +190,7 @@ namespace Krys::Gfx::OpenGL
       return _depthStencilAttachment;
     }
 
+    /// @brief Get an ortho projection matrix that has the origin at the top-left corner.
     NO_DISCARD Maths::Mat4 GetProjectionMatrix() const noexcept
     {
       return Maths::Ortho(0.f, static_cast<float>(_width), static_cast<float>(_height), 0.f);
