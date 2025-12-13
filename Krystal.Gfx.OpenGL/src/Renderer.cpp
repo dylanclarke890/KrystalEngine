@@ -194,7 +194,7 @@ namespace Krys::Gfx::OpenGL
 
           float posY = static_cast<float>(rt.Height()) - (cmd.Position.y + (fontMetrics.Ascender * scale));
           DrawText(_context.Strings().Get(cmd.Text), fontHandle, cmd.FontSize, {cmd.Position.x, posY},
-                   Colours::Red);
+                   cmd.Colour);
           break;
         }
         case Commands::DrawShape2D::Type:
