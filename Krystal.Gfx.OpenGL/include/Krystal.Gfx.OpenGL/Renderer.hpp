@@ -38,7 +38,6 @@ namespace Krys::Gfx::OpenGL
     List<GlyphVertex> _glyphVertices {};
     BufferHandle _glyphBuffer {};
     GLuint _textVao {};
-    int _dpi;
 
   public:
     Renderer(IContext &context) noexcept;
@@ -54,8 +53,6 @@ namespace Krys::Gfx::OpenGL
     void EndFrame() override;
 
     void Submit(const CommandList &commandList) override;
-
-    void DPIChanged(int dpi) noexcept override;
 
   private:
     void DrawText(Font &font, Shader &shader, const utf8_string &text, const ColourbPremultiplied &textColour,

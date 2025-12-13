@@ -27,8 +27,6 @@ namespace Krys::Gfx
     virtual void EndFrame() = 0;
 
     virtual void Submit(const CommandList &commandList) = 0;
-
-    virtual void DPIChanged(int dpi) noexcept = 0;
   };
 
   Expected<Unique<IRenderer>> CreateRenderer(IContext &ctx) noexcept;

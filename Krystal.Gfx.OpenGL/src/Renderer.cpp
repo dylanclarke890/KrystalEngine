@@ -6,7 +6,6 @@
 #include "Krystal.Lib/Expected.hpp"
 #include "Krystal.Lib/String/UTF8.hpp"
 #include "Krystal.Maths/Clamp.hpp"
-#include "Krystal.Platform/Platform.hpp"
 
 namespace Krys::Gfx
 {
@@ -26,7 +25,7 @@ namespace Krys::Gfx
 namespace Krys::Gfx::OpenGL
 {
   Renderer::Renderer(IContext &context) noexcept
-      : _context(static_cast<Context &>(context)), _dpi(Platform::GetDPIForWindow())
+      : _context(static_cast<Context &>(context))
   {
   }
 
@@ -73,6 +72,7 @@ namespace Krys::Gfx::OpenGL
     CommandListReader reader(commandList);
 
     auto &fonts = static_cast<FontRegistry &>(_context.Fonts());
+    auto &meshes = static_cast<MeshRegistry &>(_context.Meshes());
     auto &shaders = static_cast<ShaderRegistry &>(_context.Shaders());
     auto &textures = static_cast<TextureRegistry &>(_context.Textures());
     auto &renderTargets = static_cast<RenderTargetRegistry &>(_context.RenderTargets());
@@ -136,10 +136,6 @@ namespace Krys::Gfx::OpenGL
         {
           const auto &cmd = reader.ReadCommand<Commands::DrawShape2D>();
 
-          auto &mesh = static_cast<MeshRegistry &>(_context.Meshes()).Get(cmd.Mesh);
-          auto &rt = renderTargets.Get(_currentRenderTarget);
-          Maths::Mat4 projection = rt.GetProjectionMatrix();
-
           ShaderHandle shaderHandle;
           if (cmd.Texture.IsValid())
           {
@@ -152,9 +148,12 @@ namespace Krys::Gfx::OpenGL
             shaderHandle = shaders.GetBuiltin(BuiltinShader::Shape2D_Colour);
           }
 
+          auto &rt = renderTargets.Get(_currentRenderTarget);
           auto &shader = shaders.Get(shaderHandle);
+          auto &mesh = meshes.Get(cmd.Mesh);
+
           shader.Bind();
-          shader.SetUniform("u_Transform", projection * cmd.Transform);
+          shader.SetUniform("u_Transform", rt.GetProjectionMatrix() * cmd.Transform);
           shader.SetUniform("u_Translate", cmd.Translation);
 
           mesh.Bind();
@@ -164,12 +163,10 @@ namespace Krys::Gfx::OpenGL
         case Commands::DrawText::Type:
         {
           const auto &cmd = reader.ReadCommand<Commands::DrawText>();
-          auto &rt = renderTargets.Get(_currentRenderTarget);
 
           FontHandle fontHandle =
             fonts.Get({.Family = cmd.FontFamily, .Type = FontType::Bitmap, .Size = cmd.FontSize});
           Font &font = fonts.Get(fontHandle);
-
           BuiltinShader builtin = [&]()
           {
             switch (font.Type())
@@ -182,11 +179,8 @@ namespace Krys::Gfx::OpenGL
             std::unreachable();
           }();
 
-          auto &shaders = static_cast<ShaderRegistry &>(_context.Shaders());
-
-          ShaderHandle handle = shaders.GetBuiltin(builtin);
-          DrawText(font, shaders.Get(handle), _context.Strings().Get(cmd.Text), cmd.Colour, cmd.Position,
-                   cmd.FontSize);
+          Shader &shader = shaders.Get(shaders.GetBuiltin(builtin));
+          DrawText(font, shader, _context.Strings().Get(cmd.Text), cmd.Colour, cmd.Position, cmd.FontSize);
           break;
         }
         default:
@@ -236,7 +230,7 @@ namespace Krys::Gfx::OpenGL
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    Maths::Vec2 pos = position;
+    Maths::Vec2 cursor = position;
     Buffer &buffer = static_cast<BufferRegistry &>(_context.Buffers()).Get(_glyphBuffer);
     auto &fonts = static_cast<FontRegistry &>(_context.Fonts());
 
@@ -268,8 +262,8 @@ namespace Krys::Gfx::OpenGL
         // Check for newline character
         if (c.Value == '\n')
         {
-          pos.x = position.x;
-          pos.y += font.Metrics().Height * scale;
+          cursor.x = position.x;
+          cursor.y += font.Metrics().Height * scale;
           continue;
         }
 
@@ -282,8 +276,8 @@ namespace Krys::Gfx::OpenGL
         }
 
         const Character &ch = glyph->second;
-        float posX = pos.x + ch.Bearing.x * scale;
-        float posY = pos.y + (ch.Size.y - ch.Bearing.y) * scale;
+        float posX = cursor.x + ch.Bearing.x * scale;
+        float posY = cursor.y + (ch.Size.y - ch.Bearing.y) * scale;
         float w = ch.Size.x * scale;
         float h = ch.Size.y * scale;
 
@@ -296,11 +290,11 @@ namespace Krys::Gfx::OpenGL
 
         if (font.Type() != FontType::Bitmap && ptSize < 24.f)
         {
-          pos.x += std::floor(ch.Advance + 0.5f) * scale;
+          cursor.x += std::floor(ch.Advance + 0.5f) * scale;
         }
         else
         {
-          pos.x += ch.Advance * scale;
+          cursor.x += ch.Advance * scale;
         }
       }
 
@@ -309,10 +303,5 @@ namespace Krys::Gfx::OpenGL
     }
 
     glDisable(GL_BLEND);
-  }
-
-  void Renderer::DPIChanged(int dpi) noexcept
-  {
-    _dpi = dpi;
   }
 }
