@@ -95,7 +95,8 @@ namespace Krys::UI
       {
         _context.RenderTargets().Destroy(layer.RenderTarget);
         // _context.Textures().Unload(layer.Texture);
-        // FIXME: the above results in double free, texture is owned by render target but we need to unload sampler
+        // FIXME: the above results in double free, texture is owned by render target but we need to unload
+        // sampler
       }
     }
 
@@ -172,8 +173,7 @@ namespace Krys::UI
         if (cachedLayer.Size == size && !NodeGetHasNewLayout(node) && !NodeIsStyleDirty(node))
         {
           float opacity = document.ElementStyleGetOpacity(handle);
-          DrawRenderTargetColourAttachmentCommand(cachedLayer.RenderTarget, absolutePosition, size, opacity,
-                                                  cachedLayer.Texture);
+          RenderLayerContents(cachedLayer.RenderTarget, absolutePosition, size, opacity, cachedLayer.Texture);
           return;
         }
         else if (cachedLayer.Size != size)
@@ -216,8 +216,7 @@ namespace Krys::UI
       PopLayer();
 
       float opacity = document.ElementStyleGetOpacity(handle);
-      DrawRenderTargetColourAttachmentCommand(layerRenderTarget, absolutePosition, size, opacity,
-                                              _cachedLayers[handle].Texture);
+      RenderLayerContents(layerRenderTarget, absolutePosition, size, opacity, _cachedLayers[handle].Texture);
     }
 
     void RenderElementContents(NodeRef node, const Maths::Vec2 &position, const Maths::Vec2 &size,
@@ -282,9 +281,8 @@ namespace Krys::UI
       }
     }
 
-    void DrawRenderTargetColourAttachmentCommand(Gfx::RenderTargetHandle source, const Maths::Vec2 &position,
-                                                 const Maths::Vec2 &size, float opacity,
-                                                 Gfx::TextureHandle texture)
+    void RenderLayerContents(Gfx::RenderTargetHandle source, const Maths::Vec2 &position,
+                             const Maths::Vec2 &size, float opacity, Gfx::TextureHandle texture)
     {
       CurrentCommandList().Push(Gfx::Commands::DrawShape2D {
         .Mesh = _quadMesh,

@@ -24,8 +24,7 @@ namespace Krys::Gfx
 
 namespace Krys::Gfx::OpenGL
 {
-  Renderer::Renderer(IContext &context) noexcept
-      : _context(static_cast<Context &>(context))
+  Renderer::Renderer(IContext &context) noexcept : _context(static_cast<Context &>(context))
   {
   }
 
@@ -164,8 +163,7 @@ namespace Krys::Gfx::OpenGL
         {
           const auto &cmd = reader.ReadCommand<Commands::DrawText>();
 
-          FontHandle fontHandle =
-            fonts.Get({.Family = cmd.FontFamily, .Type = FontType::Bitmap, .Size = cmd.FontSize});
+          FontHandle fontHandle = fonts.Get({cmd.FontFamily, FontType::Bitmap, cmd.FontSize});
           Font &font = fonts.Get(fontHandle);
           BuiltinShader builtin = [&]()
           {
@@ -226,18 +224,10 @@ namespace Krys::Gfx::OpenGL
   void Renderer::DrawText(Font &font, Shader &shader, const utf8_string &text,
                           const ColourbPremultiplied &textColour, const Maths::Vec2 &position, float ptSize)
   {
-    glBindVertexArray(_textVao);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    Maths::Vec2 cursor = position;
-    Buffer &buffer = static_cast<BufferRegistry &>(_context.Buffers()).Get(_glyphBuffer);
     auto &fonts = static_cast<FontRegistry &>(_context.Fonts());
-
-    static_cast<TextureRegistry &>(_context.Textures()).Bind(font.AtlasTexture(), 0u);
-
-    shader.Bind();
-    shader.SetUniform("u_TextColor", textColour.ToVec3());
+    auto &textures = static_cast<TextureRegistry &>(_context.Textures());
+    auto &renderTargets = static_cast<RenderTargetRegistry &>(_context.RenderTargets());
+    auto &buffers = static_cast<BufferRegistry &>(_context.Buffers());
 
     float scale = 1.f;
     if (font.Type() != FontType::Bitmap)
@@ -247,6 +237,17 @@ namespace Krys::Gfx::OpenGL
       shader.SetUniform("u_UnitRange", unitRange);
     }
 
+    glBindVertexArray(_textVao);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    shader.Bind();
+    shader.SetUniform("u_TextColor", textColour.ToVec3());
+    shader.SetUniform("u_Transform", renderTargets.Get(_currentRenderTarget).GetProjectionMatrix());
+    textures.Bind(font.AtlasTexture(), 0u);
+
+    Buffer &buffer = buffers.Get(_glyphBuffer);
+    Maths::Vec2 cursor = position + Maths::Vec2 {0.f, font.Metrics().Ascender * scale};
     List<Codepoint> codepoints = UTF8::Decode(text);
     auto count = codepoints.size();
     while (count > 0)
@@ -276,17 +277,17 @@ namespace Krys::Gfx::OpenGL
         }
 
         const Character &ch = glyph->second;
-        float posX = cursor.x + ch.Bearing.x * scale;
-        float posY = cursor.y + (ch.Size.y - ch.Bearing.y) * scale;
+        float posX = cursor.x + (ch.Bearing.x * scale);
+        float posY = cursor.y - (ch.Bearing.y * scale);
         float w = ch.Size.x * scale;
         float h = ch.Size.y * scale;
 
-        _glyphVertices.push_back({{posX, posY + h}, {ch.UVMin.x, ch.UVMin.y}});
-        _glyphVertices.push_back({{posX, posY}, {ch.UVMin.x, ch.UVMax.y}});
-        _glyphVertices.push_back({{posX + w, posY}, {ch.UVMax.x, ch.UVMax.y}});
-        _glyphVertices.push_back({{posX, posY + h}, {ch.UVMin.x, ch.UVMin.y}});
-        _glyphVertices.push_back({{posX + w, posY}, {ch.UVMax.x, ch.UVMax.y}});
-        _glyphVertices.push_back({{posX + w, posY + h}, {ch.UVMax.x, ch.UVMin.y}});
+        _glyphVertices.push_back({{posX, posY + h}, {ch.UVMin.x, ch.UVMax.y}});
+        _glyphVertices.push_back({{posX, posY}, {ch.UVMin.x, ch.UVMin.y}});
+        _glyphVertices.push_back({{posX + w, posY}, {ch.UVMax.x, ch.UVMin.y}});
+        _glyphVertices.push_back({{posX, posY + h}, {ch.UVMin.x, ch.UVMax.y}});
+        _glyphVertices.push_back({{posX + w, posY}, {ch.UVMax.x, ch.UVMin.y}});
+        _glyphVertices.push_back({{posX + w, posY + h}, {ch.UVMax.x, ch.UVMax.y}});
 
         if (font.Type() != FontType::Bitmap && ptSize < 24.f)
         {
