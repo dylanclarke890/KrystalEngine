@@ -66,20 +66,12 @@ namespace Krys::Gfx::OpenGL
           .MipLevels = 1,
           .ArrayLayers = 1,
         });
+        Image &image = _images.Get(imageHandle);
 
-        ImageViewHandle imageViewHandle = _imageViews.Create({
-          .Image = imageHandle,
-          .Target = ImageType::Image2D,
-          .Format = attachmentDesc.Format,
-          .SubResourceRange = {.BaseMipLevel = 0, .MipLevelCount = 1, .BaseArrayLayer = 0, .LayerCount = 1},
-        });
-
-        auto &imageView = _imageViews.Get(imageViewHandle);
         RenderTargetAttachment rta {
           .Type = attachmentDesc.Type,
           .Image = imageHandle,
-          .ImageView = imageViewHandle,
-          .Texture = imageView.Id(),
+          .Texture = image.Id(),
         };
 
         switch (attachmentDesc.Type)
@@ -117,7 +109,6 @@ namespace Krys::Gfx::OpenGL
 
       for (const auto &attachment : rt->GetAllAttachments())
       {
-        _imageViews.Destroy(attachment.ImageView);
         _images.Destroy(attachment.Image);
       }
 
@@ -136,7 +127,7 @@ namespace Krys::Gfx::OpenGL
       return {static_cast<float>(rt->Width()), static_cast<float>(rt->Height())};
     }
 
-    NO_DISCARD ImageViewHandle GetColourAttachmentImageView(RenderTargetHandle handle,
+    NO_DISCARD ImageHandle GetColourAttachmentImage(RenderTargetHandle handle,
                                                             uint32 index) noexcept override
     {
       assert(handle.IsValid() && "Invalid render target handle.");
@@ -144,7 +135,7 @@ namespace Krys::Gfx::OpenGL
 
       auto &rt = _renderTargets.Get(handle);
       const RenderTargetAttachment &attachment = rt.GetColourAttachment(index);
-      return attachment.ImageView;
+      return attachment.Image;
     }
 
     NO_DISCARD RenderTargetHandle GetScreenRenderTarget() const noexcept override

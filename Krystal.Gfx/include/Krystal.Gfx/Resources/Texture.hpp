@@ -6,6 +6,12 @@
 
 namespace Krys::Gfx::OpenGL
 {
+  enum class TextureOwner : uint8
+  {
+    TextureRegistry,
+    Other
+  };
+
   class Texture
   {
     NO_COPY(Texture)
@@ -13,12 +19,13 @@ namespace Krys::Gfx::OpenGL
   private:
     ImageViewHandle _imageView {};
     SamplerHandle _sampler {};
+    TextureOwner _owner {TextureOwner::Other};
 
   public:
     MOVE_SWAP(Texture)
 
-    Texture(ImageViewHandle imageView, SamplerHandle sampler) noexcept
-        : _imageView(imageView), _sampler(sampler)
+    Texture(ImageViewHandle imageView, SamplerHandle sampler, TextureOwner owner) noexcept
+        : _imageView(imageView), _sampler(sampler), _owner(owner)
     {
       assert(_imageView.IsValid() && "Image view handle must be valid.");
       assert(_sampler.IsValid() && "Sampler handle must be valid.");
@@ -36,11 +43,17 @@ namespace Krys::Gfx::OpenGL
       return _imageView;
     }
 
+    NO_DISCARD TextureOwner Owner() const noexcept
+    {
+      return _owner;
+    }
+
   private:
     void Swap(Texture &other) noexcept
     {
       std::swap(_imageView, other._imageView);
       std::swap(_sampler, other._sampler);
+      std::swap(_owner, other._owner);
     }
   };
 }

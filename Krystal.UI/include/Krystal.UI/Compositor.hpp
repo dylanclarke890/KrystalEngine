@@ -66,7 +66,10 @@ namespace Krys::UI
       _quadMesh = _context.Meshes().Create(desc);
     }
 
-    ~Compositor() = default;
+    ~Compositor() noexcept
+    {
+      _context.Meshes().Destroy(_quadMesh);
+    }
 
     void BeginFrame()
     {
@@ -93,10 +96,8 @@ namespace Krys::UI
 
       for (auto &layer : _pendingDestruction)
       {
+        _context.Textures().Unload(layer.Texture);
         _context.RenderTargets().Destroy(layer.RenderTarget);
-        // _context.Textures().Unload(layer.Texture);
-        // FIXME: the above results in double free, texture is owned by render target but we need to unload
-        // sampler
       }
     }
 
@@ -202,8 +203,13 @@ namespace Krys::UI
 
         SamplerDesc samplerDesc = SamplerDesc::LinearClampToEdge();
         SamplerHandle sampler = _context.Samplers().Create(samplerDesc);
-        ImageViewHandle imageView =
-          _context.RenderTargets().GetColourAttachmentImageView(layerRenderTarget, 0u);
+        ImageHandle image = _context.RenderTargets().GetColourAttachmentImage(layerRenderTarget, 0u);
+        ImageViewHandle imageView = _context.ImageViews().Create({
+          .Image = image,
+          .Target = ImageType::Image2D,
+          .Format = PixelFormat::R8G8B8A8,
+          .SubResourceRange = {.BaseMipLevel = 0, .MipLevelCount = 1},
+        });
 
         Gfx::TextureHandle layerTexture = _context.Textures().Create(imageView, sampler);
         _cachedLayers[handle] = {.RenderTarget = layerRenderTarget, .Texture = layerTexture, .Size = size};

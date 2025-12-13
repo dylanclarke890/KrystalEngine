@@ -15,7 +15,6 @@ namespace Krys::Gfx::OpenGL
   {
     AttachmentType Type {};
     ImageHandle Image {0u};
-    ImageViewHandle ImageView {0u};
     GLuint Texture {0u};
   };
 
