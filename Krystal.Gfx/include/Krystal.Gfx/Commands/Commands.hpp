@@ -12,6 +12,7 @@ namespace Krys::Gfx::Commands
   struct SetScissor
   {
     constexpr static CommandType Type = KRYS_CMD_TYPE("SetScissor");
+
     Maths::Vec2 Position;
     Maths::Vec2 Size;
   };
@@ -24,6 +25,7 @@ namespace Krys::Gfx::Commands
   struct SetViewport
   {
     constexpr static CommandType Type = KRYS_CMD_TYPE("SetViewport");
+
     Maths::Vec2 Position;
     Maths::Vec2 Size;
   };
@@ -31,6 +33,7 @@ namespace Krys::Gfx::Commands
   struct BindRenderTarget
   {
     constexpr static CommandType Type = KRYS_CMD_TYPE("BindRenderTarget");
+
     RenderTargetHandle RenderTarget;
   };
 
