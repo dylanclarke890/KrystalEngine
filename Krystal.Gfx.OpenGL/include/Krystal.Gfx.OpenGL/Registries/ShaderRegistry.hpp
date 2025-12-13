@@ -90,7 +90,7 @@ namespace Krys::Gfx::OpenGL
 
     NO_DISCARD ShaderHandle GetBuiltin(BuiltinShader builtin) noexcept override
     {
-      auto profiler = Krys::Debug::ScopedProfiler("GetBuiltin");
+      //auto profiler = Krys::Debug::ScopedProfiler("GetBuiltin");
 
       if (auto it = _builtins.find(builtin); it != _builtins.end())
       {

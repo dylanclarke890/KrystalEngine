@@ -162,7 +162,7 @@ namespace Krys::Gfx::OpenGL
           if (cmd.Texture.IsValid())
           {
             shaderHandle = shaders.GetBuiltin(BuiltinShader::Shape2D_Texture);
-            textures.Bind(cmd.Texture, 0);
+            textures.Bind(cmd.Texture, 0u);
             shaders.Get(shaderHandle).SetUniform("u_Texture", 0);
           }
           else
@@ -173,9 +173,8 @@ namespace Krys::Gfx::OpenGL
           auto &shader = shaders.Get(shaderHandle);
           shader.Bind();
           shader.SetUniform("u_Transform", projection * cmd.Transform);
-
-          const Maths::Vec2 translation = {cmd.Translation.x, cmd.Translation.y};
-          shader.SetUniform("u_Translate", translation);
+          shader.SetUniform("u_Translate", cmd.Translation);
+          
           mesh.Bind();
           mesh.Draw(static_cast<GLsizei>(cmd.InstanceCount));
           break;
