@@ -26,13 +26,14 @@ namespace Krys::UI
 
     struct LayerContext
     {
-      Gfx::RenderTargetHandle Target;
+      Gfx::RenderTargetHandle RenderTarget;
       size_t CommandListIndex {0u};
     };
 
     struct CachedLayer
     {
-      Gfx::RenderTargetHandle Target;
+      Gfx::RenderTargetHandle RenderTarget;
+      Gfx::TextureHandle Texture;
       Maths::Vec2 Size;
     };
 
@@ -43,12 +44,26 @@ namespace Krys::UI
     Stack<LayerContext> _layerStack;
     Map<ElementHandle, CachedLayer> _cachedLayers;
     Set<ElementHandle> _usedLayers;
-    List<Gfx::RenderTargetHandle> _pendingDestruction;
+    List<CachedLayer> _pendingDestruction;
+    Gfx::MeshHandle _quadMesh;
 
   public:
     Compositor(Gfx::IContext &context, Gfx::IRenderer &renderer) noexcept
         : _context(context), _renderer(renderer)
     {
+      // Create a quad mesh for compositing layers.
+      Gfx::MeshData data;
+      Gfx::MeshDataUtils::GenerateQuad(data, TopLeftOrigin, Maths::Vec2 {1.f, 1.f},
+                                       Gfx::ColourbPremultiplied {255, 255, 255, 255}, Maths::Vec2 {0.f, 1.f},
+                                       Maths::Vec2 {1.f, 0.f});
+      Gfx::MeshDesc desc {
+        .Vertices = data.Vertices,
+        .Indices = data.Indices,
+        .Layout = Gfx::Vertex::Position2D_ColourbPremultiplied_UV::Layout(),
+        .Primitive = Gfx::PrimitiveType::Triangles,
+        .Type = Gfx::MeshType::Static,
+      };
+      _quadMesh = _context.Meshes().Create(desc);
     }
 
     ~Compositor() = default;
@@ -67,7 +82,7 @@ namespace Krys::UI
       {
         if (_usedLayers.find(it->first) == _usedLayers.end())
         {
-          _pendingDestruction.push_back(it->second.Target);
+          _pendingDestruction.push_back(it->second);
           it = _cachedLayers.erase(it);
         }
         else
@@ -76,9 +91,11 @@ namespace Krys::UI
         }
       }
 
-      for (auto &handle : _pendingDestruction)
+      for (auto &layer : _pendingDestruction)
       {
-        _context.RenderTargets().Destroy(handle);
+        _context.RenderTargets().Destroy(layer.RenderTarget);
+        // _context.Textures().Unload(layer.Texture);
+        // FIXME: the above results in double free, texture is owned by render target but we need to unload sampler
       }
     }
 
@@ -155,12 +172,13 @@ namespace Krys::UI
         if (cachedLayer.Size == size && !NodeGetHasNewLayout(node) && !NodeIsStyleDirty(node))
         {
           float opacity = document.ElementStyleGetOpacity(handle);
-          DrawRenderTargetColourAttachmentCommand(cachedLayer.Target, absolutePosition, size, opacity);
+          DrawRenderTargetColourAttachmentCommand(cachedLayer.RenderTarget, absolutePosition, size, opacity,
+                                                  cachedLayer.Texture);
           return;
         }
         else if (cachedLayer.Size != size)
         {
-          _pendingDestruction.push_back(cachedLayer.Target);
+          _pendingDestruction.push_back(cachedLayer);
           for (auto &Geometry : element.Geometries)
           {
             _context.Meshes().Destroy(Geometry.Mesh);
@@ -169,7 +187,7 @@ namespace Krys::UI
         }
         else
         {
-          layerRenderTarget = cachedLayer.Target;
+          layerRenderTarget = cachedLayer.RenderTarget;
         }
       }
 
@@ -181,7 +199,14 @@ namespace Krys::UI
           .Samples = 1u,
           .Attachments = {{AttachmentType::Colour, PixelFormat::R8G8B8A8}},
         });
-        _cachedLayers[handle] = {.Target = layerRenderTarget, .Size = size};
+
+        SamplerDesc samplerDesc = SamplerDesc::LinearClampToEdge();
+        SamplerHandle sampler = _context.Samplers().Create(samplerDesc);
+        ImageViewHandle imageView =
+          _context.RenderTargets().GetColourAttachmentImageView(layerRenderTarget, 0u);
+
+        Gfx::TextureHandle layerTexture = _context.Textures().Create(imageView, sampler);
+        _cachedLayers[handle] = {.RenderTarget = layerRenderTarget, .Texture = layerTexture, .Size = size};
       }
 
       PushLayer(handle, layerRenderTarget);
@@ -191,7 +216,8 @@ namespace Krys::UI
       PopLayer();
 
       float opacity = document.ElementStyleGetOpacity(handle);
-      DrawRenderTargetColourAttachmentCommand(layerRenderTarget, absolutePosition, size, opacity);
+      DrawRenderTargetColourAttachmentCommand(layerRenderTarget, absolutePosition, size, opacity,
+                                              _cachedLayers[handle].Texture);
     }
 
     void RenderElementContents(NodeRef node, const Maths::Vec2 &position, const Maths::Vec2 &size,
@@ -257,14 +283,15 @@ namespace Krys::UI
     }
 
     void DrawRenderTargetColourAttachmentCommand(Gfx::RenderTargetHandle source, const Maths::Vec2 &position,
-                                                 const Maths::Vec2 &size, float opacity)
+                                                 const Maths::Vec2 &size, float opacity,
+                                                 Gfx::TextureHandle texture)
     {
-      CurrentCommandList().Push(Gfx::Commands::DrawRenderTargetColourAttachment {
-        .Source = source,
-        .ColourAttachmentIndex = 0u,
-        .Position = position,
-        .Size = size,
-        .Opacity = opacity,
+      CurrentCommandList().Push(Gfx::Commands::DrawShape2D {
+        .Mesh = _quadMesh,
+        .Texture = texture,
+        .Transform = Maths::Scale(Maths::Vec3 {size, 1.f}),
+        .Translation = position,
+        .InstanceCount = 1u,
       });
     }
   };

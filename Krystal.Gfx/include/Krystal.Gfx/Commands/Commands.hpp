@@ -34,17 +34,6 @@ namespace Krys::Gfx::Commands
     RenderTargetHandle RenderTarget;
   };
 
-  struct DrawRenderTargetColourAttachment
-  {
-    constexpr static CommandType Type = KRYS_CMD_TYPE("DrawRenderTargetColourAttachment");
-
-    RenderTargetHandle Source;
-    uint32 ColourAttachmentIndex {0u};
-    Maths::Vec2 Position;
-    Maths::Vec2 Size;
-    float Opacity {1.f};
-  };
-
   struct DrawShape2D
   {
     constexpr static CommandType Type = KRYS_CMD_TYPE("DrawShape2D");

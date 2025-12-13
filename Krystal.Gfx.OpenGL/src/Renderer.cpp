@@ -163,19 +163,6 @@ namespace Krys::Gfx::OpenGL
           shaders.Get(_singleTextureShader).SetUniform("u_Projection", rt.GetProjectionMatrix());
           break;
         }
-        case Commands::DrawRenderTargetColourAttachment::Type:
-        {
-          const auto &cmd = reader.ReadCommand<Commands::DrawRenderTargetColourAttachment>();
-          auto &sourceRT = renderTargets.Get(cmd.Source);
-          const auto &attachment = sourceRT.GetColourAttachment(cmd.ColourAttachmentIndex);
-          const auto &imageView =
-            static_cast<ImageViewRegistry &>(_context.ImageViews()).Get(attachment.ImageView);
-          auto &dstRT = renderTargets.Get(_currentRenderTarget);
-
-          float posY = static_cast<float>(dstRT.Height()) - (cmd.Position.y + cmd.Size.y);
-          DrawTexturedQuad(imageView.Id(), {cmd.Position.x, posY}, cmd.Size, cmd.Opacity);
-          break;
-        }
         case Commands::DrawText::Type:
         {
           const auto &cmd = reader.ReadCommand<Commands::DrawText>();
@@ -192,9 +179,7 @@ namespace Krys::Gfx::OpenGL
             scale = fonts.PtSizeToPixels(cmd.FontSize) / font.SDFParams().EMSizeInPixels;
           }
 
-          float posY = static_cast<float>(rt.Height()) - (cmd.Position.y + (fontMetrics.Ascender * scale));
-          DrawText(_context.Strings().Get(cmd.Text), fontHandle, cmd.FontSize, {cmd.Position.x, posY},
-                   cmd.Colour);
+          DrawText(_context.Strings().Get(cmd.Text), fontHandle, cmd.FontSize, cmd.Position, cmd.Colour);
           break;
         }
         case Commands::DrawShape2D::Type:
@@ -364,7 +349,7 @@ namespace Krys::Gfx::OpenGL
         if (c.Value == '\n')
         {
           pos.x = position.x;
-          pos.y -= font.Metrics().Height * scale;
+          pos.y += font.Metrics().Height * scale;
           continue;
         }
 
@@ -378,7 +363,7 @@ namespace Krys::Gfx::OpenGL
 
         const Character &ch = glyph->second;
         float posX = pos.x + ch.Bearing.x * scale;
-        float posY = pos.y - (ch.Size.y - ch.Bearing.y) * scale;
+        float posY = pos.y + (ch.Size.y - ch.Bearing.y) * scale;
         float w = ch.Size.x * scale;
         float h = ch.Size.y * scale;
 
