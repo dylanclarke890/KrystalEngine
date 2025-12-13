@@ -30,12 +30,13 @@ namespace Krys::Gfx::OpenGL
     RenderTargetManager _renderTargets;
     ImageRegistry &_images;
     ImageViewRegistry &_imageViews;
+    TextureRegistry &_textures;
     RenderTargetHandle _screenRenderTarget {0u};
-    List<CachedTarget> _cachedTargets; // TODO: use a better structure for caching
 
   public:
-    RenderTargetRegistry(ImageRegistry &images, ImageViewRegistry &imageViews) noexcept
-        : _images(images), _imageViews(imageViews)
+    RenderTargetRegistry(ImageRegistry &images, ImageViewRegistry &imageViews,
+                         TextureRegistry &textures) noexcept
+        : _images(images), _imageViews(imageViews), _textures(textures)
     {
     }
 
@@ -115,52 +116,6 @@ namespace Krys::Gfx::OpenGL
       return _renderTargets.Add(std::move(rt));
     }
 
-    NO_DISCARD RenderTargetHandle Acquire(const RenderTargetDesc &desc) override
-    {
-      for (auto &cachedTarget : _cachedTargets)
-      {
-        if (!cachedTarget.InUse && cachedTarget.Width == desc.Width && cachedTarget.Height == desc.Height
-            && cachedTarget.Format == desc.Attachments[0].Format)
-        {
-          cachedTarget.InUse = true;
-          return cachedTarget.Handle;
-        }
-      }
-
-      RenderTargetHandle handle = Create(desc);
-      _cachedTargets.push_back(CachedTarget {
-        .Handle = handle,
-        .Width = desc.Width,
-        .Height = desc.Height,
-        .Format = desc.Attachments[0].Format,
-        .InUse = true,
-      });
-
-      return handle;
-    }
-
-    void Release(RenderTargetHandle handle) noexcept override
-    {
-      for (auto &cachedTarget : _cachedTargets)
-      {
-        if (cachedTarget.Handle == handle)
-        {
-          cachedTarget.InUse = false;
-          return;
-        }
-      }
-      assert(false && "Attempted to release a render target that was not acquired.");
-    }
-
-    void ClearCache() noexcept override
-    {
-      for (auto &cachedTarget : _cachedTargets)
-      {
-        Destroy(cachedTarget.Handle);
-      }
-      _cachedTargets.clear();
-    }
-
     bool Destroy(RenderTargetHandle handle) noexcept override
     {
       assert(handle.IsValid() && "Invalid render target handle.");
@@ -180,7 +135,7 @@ namespace Krys::Gfx::OpenGL
       return _renderTargets.Remove(handle);
     }
 
-    Maths::Vec2 GetDimensions(RenderTargetHandle handle) noexcept override
+    NO_DISCARD Maths::Vec2 GetDimensions(RenderTargetHandle handle) noexcept override
     {
       assert(handle.IsValid() && "Invalid render target handle.");
       auto *rt = _renderTargets.TryGet(handle);
@@ -190,6 +145,16 @@ namespace Krys::Gfx::OpenGL
         return {0.f, 0.f};
       }
       return {static_cast<float>(rt->Width()), static_cast<float>(rt->Height())};
+    }
+
+    NO_DISCARD ImageViewHandle GetColourAttachmentImageView(RenderTargetHandle handle, uint32 index) noexcept override
+    {
+      assert(handle.IsValid() && "Invalid render target handle.");
+      assert(_renderTargets.TryGet(handle) != nullptr && "Render target not found in resource manager.");
+
+      auto& rt = _renderTargets.Get(handle);
+      const RenderTargetAttachment &attachment = rt.GetColourAttachment(index);
+      return attachment.ImageView;
     }
 
     NO_DISCARD RenderTargetHandle GetScreenRenderTarget() const noexcept override
