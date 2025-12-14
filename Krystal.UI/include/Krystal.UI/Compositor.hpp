@@ -22,299 +22,122 @@ namespace Krys::UI
   {
     NO_COPY_MOVE(Compositor)
 
-    static constexpr auto TopLeftOrigin = Maths::Vec2 {0.f, 0.f};
-
-    struct LayerContext
-    {
-      Gfx::RenderTargetHandle RenderTarget;
-      size_t CommandListIndex {0u};
-    };
-
-    struct CachedLayer
-    {
-      Gfx::RenderTargetHandle RenderTarget;
-      Gfx::TextureHandle Texture;
-      Maths::Vec2 Size;
-    };
-
   private:
     Gfx::IContext &_context;
     Gfx::IRenderer &_renderer;
-    List<Gfx::CommandList> _commandLists;
-    Stack<LayerContext> _layerStack;
-    Map<ElementHandle, CachedLayer> _cachedLayers;
-    Set<ElementHandle> _usedLayers;
-    List<CachedLayer> _pendingDestruction;
+    Gfx::CommandList _commands;
     Gfx::MeshHandle _quadMesh;
 
   public:
-    Compositor(Gfx::IContext &context, Gfx::IRenderer &renderer) noexcept
-        : _context(context), _renderer(renderer)
+    Compositor(Gfx::IContext &context, Gfx::IRenderer &renderer) : _context(context), _renderer(renderer)
     {
-      // Create a quad mesh for compositing layers.
-      Gfx::MeshData data;
-      Gfx::MeshDataUtils::GenerateQuad(data, TopLeftOrigin, Maths::Vec2 {1.f, 1.f}, Gfx::Colours::White);
+      using namespace Gfx;
+
+      MeshData data;
+      MeshDataUtils::GenerateQuad(data, {0.f, 0.f}, {1.f, 1.f}, Colours::White);
+
       _quadMesh = _context.Meshes().Create({
         .Vertices = data.Vertices,
         .Indices = data.Indices,
-        .Layout = Gfx::Vertex::Position2D_ColourbPremultiplied_UV::Layout(),
-        .Primitive = Gfx::PrimitiveType::Triangles,
-        .Type = Gfx::MeshType::Static,
+        .Layout = Vertex::Position2D_ColourbPremultiplied_UV::Layout(),
+        .Primitive = PrimitiveType::Triangles,
+        .Type = MeshType::Static,
       });
     }
 
-    ~Compositor() noexcept
+    void Render(Document &document, Gfx::RenderTargetHandle target = {})
     {
-      _context.Meshes().Destroy(_quadMesh);
-    }
+      using namespace Gfx;
 
-    void BeginFrame()
-    {
-      // TODO: reuse command lists?
-      _commandLists.clear();
-      _usedLayers.clear();
-      _pendingDestruction.clear();
-    }
-
-    void EndFrame()
-    {
-      for (auto it = _cachedLayers.begin(); it != _cachedLayers.end();)
+      if (!target.IsValid())
       {
-        if (_usedLayers.find(it->first) == _usedLayers.end())
-        {
-          _pendingDestruction.push_back(it->second);
-          it = _cachedLayers.erase(it);
-        }
-        else
-        {
-          ++it;
-        }
+        target = _context.RenderTargets().GetScreenRenderTarget();
       }
 
-      for (auto &layer : _pendingDestruction)
-      {
-        _context.Textures().Unload(layer.Texture);
-        _context.RenderTargets().Destroy(layer.RenderTarget);
-      }
-    }
+      _commands = CommandList {};
+      _commands.Push(Commands::BindRenderTarget {.RenderTarget = target});
 
-    void Render(Document &document, Gfx::RenderTargetHandle renderTarget = {}) noexcept
-    {
-      BeginFrame();
+      // Layout pass
+      auto dimensions = _context.RenderTargets().GetDimensions(target);
+      LayoutEngine::Reflow(document.Get(document.Body()), dimensions);
 
-      if (!renderTarget.IsValid())
-      {
-        renderTarget = _context.RenderTargets().GetScreenRenderTarget();
-      }
+      // Recursive traversal from root
+      RenderElement(document, document.Body(), {0.f, 0.f});
 
-      auto targetDimensions = _context.RenderTargets().GetDimensions(renderTarget);
-      LayoutEngine::Reflow(document.Get(document.Body()), targetDimensions);
-
-      PushLayer(document.Body(), renderTarget);
-      {
-        RenderElement(document, document.Body(), TopLeftOrigin);
-      }
-      PopLayer();
-
-      // Submit child command lists first, since parents composite from their results.
-      for (auto it = _commandLists.rbegin(); it != _commandLists.rend(); ++it)
-      {
-        _renderer.Submit(*it);
-      }
-
-      EndFrame();
+      // Submit command list
+      _renderer.Submit(_commands);
     }
 
   private:
-    Gfx::CommandList &CurrentCommandList() noexcept
+    void RenderElement(Document &document, ElementHandle handle, const Maths::Vec2 &origin)
     {
-      assert(!_layerStack.empty() && "No active layer");
-      return _commandLists.at(_layerStack.top().CommandListIndex);
-    }
-
-    void PushLayer(ElementHandle owner, Gfx::RenderTargetHandle renderTarget) noexcept
-    {
-      assert(renderTarget.IsValid() && "Invalid render target");
-
-      _usedLayers.insert(owner);
-      _commandLists.emplace_back();
-      _layerStack.push({renderTarget, _commandLists.size() - 1u});
-      CurrentCommandList().Push(Gfx::Commands::BindRenderTarget {.RenderTarget = renderTarget});
-    }
-
-    void PopLayer() noexcept
-    {
-      assert(!_layerStack.empty() && "No active layer to pop");
-
-      _layerStack.pop();
-    }
-
-    void RenderElement(Document &document, ElementHandle handle, const Maths::Vec2 &parentOffset)
-    {
-      using namespace Krys::Maths;
-      using namespace Krys::Gfx;
+      using namespace Maths;
 
       auto &element = document.Get(handle);
-      auto node = element.LayoutNode;
+      NodeRef node = element.LayoutNode;
 
-      Vec2 relativePosition = {NodeLayoutGetLeft(node), NodeLayoutGetTop(node)};
-      Vec2 absolutePosition = parentOffset + relativePosition;
-      Vec2 size = {NodeLayoutGetWidth(node), NodeLayoutGetHeight(node)};
-      if (!document.ElementRequiresLayer(handle))
-      {
-        RenderElementContents(node, absolutePosition, size, element, document);
-        return;
-      }
+      Vec2 position = origin + Vec2 {NodeLayoutGetLeft(node), NodeLayoutGetTop(node)};
+      Vec2 size = Vec2 {NodeLayoutGetWidth(node), NodeLayoutGetHeight(node)};
 
-      if (NodeGetHasNewLayout(node) || NodeIsStyleDirty(node))
-      {
-        for (auto &geometry : element.Geometries)
-        {
-          _context.Meshes().Destroy(geometry.Mesh);
-        }
-        element.Geometries.clear();
-      }
+      PaintElement(element, node, position, size);
 
-      RenderTargetHandle layerRenderTarget;
-      if (auto existing = _cachedLayers.find(handle); existing != _cachedLayers.end())
-      {
-        auto &cachedLayer = existing->second;
-        if (cachedLayer.Size == size && !NodeGetHasNewLayout(node) && !NodeIsStyleDirty(node))
-        {
-          float opacity = document.ElementStyleGetOpacity(handle);
-          RenderLayerContents(absolutePosition, size, opacity, cachedLayer.Texture);
-          return;
-        }
-
-        if (cachedLayer.Size != size)
-        {
-          _pendingDestruction.push_back(cachedLayer);
-        }
-        else
-        {
-          layerRenderTarget = cachedLayer.RenderTarget;
-        }
-      }
-
-      if (!layerRenderTarget.IsValid())
-      {
-        layerRenderTarget = CreateLayerRenderTarget(size, handle);
-      }
-
-      PushLayer(handle, layerRenderTarget);
-      {
-        RenderElementContents(node, TopLeftOrigin, size, element, document);
-      }
-      PopLayer();
-
-      float opacity = document.ElementStyleGetOpacity(handle);
-      RenderLayerContents(absolutePosition, size, opacity, _cachedLayers[handle].Texture);
-    }
-
-    Gfx::RenderTargetHandle CreateLayerRenderTarget(Krys::Maths::Vec2 &size, Krys::UI::ElementHandle &handle)
-    {
-      using namespace Krys::Gfx;
-
-      auto layerRenderTarget = _context.RenderTargets().Create({
-        .Width = static_cast<uint32>(size.x),
-        .Height = static_cast<uint32>(size.y),
-        .Samples = 1u,
-        .Attachments = {{AttachmentType::Colour, PixelFormat::R8G8B8A8}},
-      });
-
-      SamplerHandle sampler = _context.Samplers().Create(SamplerDesc::LinearClampToEdge());
-      ImageHandle image = _context.RenderTargets().GetColourAttachmentImage(layerRenderTarget, 0u);
-      ImageViewHandle imageView = _context.ImageViews().Create({
-        .Image = image,
-        .Target = ImageType::Image2D,
-        .Format = PixelFormat::R8G8B8A8,
-        .SubResourceRange = {.BaseMipLevel = 0, .MipLevelCount = 1},
-      });
-
-      Gfx::TextureHandle layerTexture = _context.Textures().Create(imageView, sampler);
-      _cachedLayers[handle] = {.RenderTarget = layerRenderTarget, .Texture = layerTexture, .Size = size};
-      return layerRenderTarget;
-    }
-
-    void RenderElementContents(NodeRef node, const Maths::Vec2 &position, const Maths::Vec2 &size,
-                               Element &element, Document &document,
-                               const Maths::Mat4 &transform = Maths::Identity<Maths::Mat4>())
-    {
-      if (element.Geometries.empty())
-      {
-        GenerateBackgroundBorderGeometry(size, node, element, position);
-      }
-
-      for (const auto &geometry : element.Geometries)
-      {
-        auto geometryTransform = Maths::Translate(transform, Maths::Vec3 {geometry.Translation, 0.f});
-        CurrentCommandList().Push(Gfx::Commands::DrawShape2D {
-          .Mesh = geometry.Mesh,
-          .Texture = {},
-          .Transform = geometryTransform,
-          .InstanceCount = 1u,
-        });
-      }
-
-      if (element.TextContent.Text.IsValid())
-      {
-        Gfx::FontFamilyHandle family = NodeStyleGetFontFamily(element.LayoutNode);
-        if (!family.IsValid())
-        {
-          family = _context.Fonts().GetDefaultFontFamily();
-        }
-
-        float textLeft = NodeLayoutGetLeft(element.TextContent.LayoutNode);
-        float textTop = NodeLayoutGetTop(element.TextContent.LayoutNode);
-
-        CurrentCommandList().Push(Gfx::Commands::DrawText {
-          .Text = element.TextContent.Text,
-          .Position = position + Maths::Vec2 {textLeft, textTop},
-          .FontFamily = family,
-          .FontSize = NodeStyleGetFontSize(element.LayoutNode),
-          .Colour = NodeStyleGetTextColour(element.LayoutNode),
-        });
-      }
-
-      NodeSetHasNewLayout(node, false);
-      NodeSetStyleDirty(node, false);
-
-      for (auto &child : element.Children)
+      for (ElementHandle child : element.Children)
       {
         RenderElement(document, child, position);
       }
     }
 
-    void GenerateBackgroundBorderGeometry(const Krys::Maths::Vec2 &size, Krys::UI::NodeRef node,
-                                          Krys::UI::Element &element, const Krys::Maths::Vec2 &position)
+    void PaintElement(Element &elem, NodeRef node, const Maths::Vec2 &absPos, const Maths::Vec2 &size)
     {
-      Gfx::MeshData data;
-      Gfx::MeshDataUtils::GenerateQuad(data, TopLeftOrigin, size, NodeStyleGetBackgroundColour(node));
-      Gfx::MeshDesc desc {
-        .Vertices = data.Vertices,
-        .Indices = data.Indices,
-        .Layout = Gfx::Vertex::Position2D_ColourbPremultiplied_UV::Layout(),
-        .Primitive = Gfx::PrimitiveType::Triangles,
-        .Type = Gfx::MeshType::Static,
-      };
+      using namespace Gfx;
+      using namespace Maths;
 
-      element.Geometries.push_back(Geometry {
-        .Mesh = _context.Meshes().Create(desc),
-        .Translation = position,
-      });
-    }
+      // Build background geometry on-demand
+      if (elem.Geometries.empty())
+      {
+        MeshData data;
+        MeshDataUtils::GenerateQuad(data, {0.f, 0.f}, size, NodeStyleGetBackgroundColour(node));
 
-    void RenderLayerContents(const Maths::Vec2 &position, const Maths::Vec2 &size, float opacity,
-                             Gfx::TextureHandle texture)
-    {
-      Maths::Mat4 transform = Maths::Scale(Maths::Vec3 {size, 1.f});
-      transform = Maths::Translate(transform, Maths::Vec3 {position, 0.f});
-      CurrentCommandList().Push(Gfx::Commands::DrawShape2D {
-        .Mesh = _quadMesh,
-        .Texture = texture,
-        .Transform = transform,
-        .InstanceCount = 1u,
-      });
+        MeshDesc desc {.Vertices = data.Vertices,
+                       .Indices = data.Indices,
+                       .Layout = Vertex::Position2D_ColourbPremultiplied_UV::Layout(),
+                       .Primitive = PrimitiveType::Triangles,
+                       .Type = MeshType::Static};
+
+        elem.Geometries.push_back({.Mesh = _context.Meshes().Create(desc), .Translation = {}});
+      }
+
+      // Emit draw commands for geometry
+      for (auto &geometry : elem.Geometries)
+      {
+        Mat4 transform = Maths::Translate(Vec3 {absPos + geometry.Translation, 0.f});
+        _commands.Push(Commands::DrawShape2D {
+          .Mesh = geometry.Mesh,
+          .Texture = {},
+          .Transform = transform,
+          .InstanceCount = 1,
+        });
+      }
+
+      // Emit text if present
+      if (elem.TextContent.Text.IsValid())
+      {
+        Vec2 textPosition = absPos
+                            + Vec2 {NodeLayoutGetLeft(elem.TextContent.LayoutNode),
+                                    NodeLayoutGetTop(elem.TextContent.LayoutNode)};
+
+        auto fontFamily = NodeStyleGetFontFamily(node);
+        if (!fontFamily.IsValid())
+        {
+          fontFamily = _context.Fonts().GetDefaultFontFamily();
+        }
+
+        _commands.Push(Commands::DrawText {.Text = elem.TextContent.Text,
+                                           .Position = textPosition,
+                                           .FontFamily = fontFamily,
+                                           .FontSize = NodeStyleGetFontSize(node),
+                                           .Colour = NodeStyleGetTextColour(node)});
+      }
     }
   };
 }
