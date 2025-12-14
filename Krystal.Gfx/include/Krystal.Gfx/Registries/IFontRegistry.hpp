@@ -3,8 +3,8 @@
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Font.hpp"
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/String/StringRef.hpp"
 #include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/String/StringRef.hpp"
 
 namespace Krys::Gfx
 {
@@ -35,6 +35,8 @@ namespace Krys::Gfx
     NO_DISCARD virtual const CharacterMap &GetCharacterMap(FontHandle handle) const = 0;
 
     NO_DISCARD virtual const FontMetrics &GetMetrics(FontHandle handle) const = 0;
+
+    NO_DISCARD virtual TextureHandle GetFontAtlas(FontHandle handle) const = 0;
 
     NO_DISCARD virtual FontFamilyHandle GetDefaultFontFamily() const noexcept = 0;
   };

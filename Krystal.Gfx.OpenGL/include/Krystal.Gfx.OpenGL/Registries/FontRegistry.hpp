@@ -56,6 +56,8 @@ namespace Krys::Gfx::OpenGL
 
     NO_DISCARD const CharacterMap &GetCharacterMap(FontHandle handle) const override;
 
+    NO_DISCARD TextureHandle GetFontAtlas(FontHandle handle) const override;
+
     NO_DISCARD const FontMetrics &GetMetrics(FontHandle handle) const override;
 
     NO_DISCARD uint32 PtSizeToPixels(float ptSize) const noexcept;
