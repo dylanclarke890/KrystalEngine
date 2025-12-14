@@ -54,14 +54,13 @@ namespace Krys::UI
       // Create a quad mesh for compositing layers.
       Gfx::MeshData data;
       Gfx::MeshDataUtils::GenerateQuad(data, TopLeftOrigin, Maths::Vec2 {1.f, 1.f}, Gfx::Colours::White);
-      Gfx::MeshDesc desc {
+      _quadMesh = _context.Meshes().Create({
         .Vertices = data.Vertices,
         .Indices = data.Indices,
         .Layout = Gfx::Vertex::Position2D_ColourbPremultiplied_UV::Layout(),
         .Primitive = Gfx::PrimitiveType::Triangles,
         .Type = Gfx::MeshType::Static,
-      };
-      _quadMesh = _context.Meshes().Create(desc);
+      });
     }
 
     ~Compositor() noexcept
@@ -145,13 +144,15 @@ namespace Krys::UI
 
     void PopLayer() noexcept
     {
+      assert(!_layerStack.empty() && "No active layer to pop");
+
       _layerStack.pop();
     }
 
     void RenderElement(Document &document, ElementHandle handle, const Maths::Vec2 &parentOffset)
     {
-      using namespace Maths;
-      using namespace Gfx;
+      using namespace Krys::Maths;
+      using namespace Krys::Gfx;
 
       auto &element = document.Get(handle);
       auto node = element.LayoutNode;
@@ -179,9 +180,9 @@ namespace Krys::UI
         if (cachedLayer.Size != size)
         {
           _pendingDestruction.push_back(cachedLayer);
-          for (auto &Geometry : element.Geometries)
+          for (auto &geometry : element.Geometries)
           {
-            _context.Meshes().Destroy(Geometry.Mesh);
+            _context.Meshes().Destroy(geometry.Mesh);
           }
           element.Geometries.clear();
         }
@@ -193,25 +194,7 @@ namespace Krys::UI
 
       if (!layerRenderTarget.IsValid())
       {
-        layerRenderTarget = _context.RenderTargets().Create({
-          .Width = static_cast<uint32>(size.x),
-          .Height = static_cast<uint32>(size.y),
-          .Samples = 1u,
-          .Attachments = {{AttachmentType::Colour, PixelFormat::R8G8B8A8}},
-        });
-
-        SamplerDesc samplerDesc = SamplerDesc::LinearClampToEdge();
-        SamplerHandle sampler = _context.Samplers().Create(samplerDesc);
-        ImageHandle image = _context.RenderTargets().GetColourAttachmentImage(layerRenderTarget, 0u);
-        ImageViewHandle imageView = _context.ImageViews().Create({
-          .Image = image,
-          .Target = ImageType::Image2D,
-          .Format = PixelFormat::R8G8B8A8,
-          .SubResourceRange = {.BaseMipLevel = 0, .MipLevelCount = 1},
-        });
-
-        Gfx::TextureHandle layerTexture = _context.Textures().Create(imageView, sampler);
-        _cachedLayers[handle] = {.RenderTarget = layerRenderTarget, .Texture = layerTexture, .Size = size};
+        layerRenderTarget = CreateLayerRenderTarget(size, handle);
       }
 
       PushLayer(handle, layerRenderTarget);
@@ -224,26 +207,38 @@ namespace Krys::UI
       RenderLayerContents(absolutePosition, size, opacity, _cachedLayers[handle].Texture);
     }
 
+    Gfx::RenderTargetHandle CreateLayerRenderTarget(Krys::Maths::Vec2 &size, Krys::UI::ElementHandle &handle)
+    {
+      using namespace Krys::Gfx;
+
+      auto layerRenderTarget = _context.RenderTargets().Create({
+        .Width = static_cast<uint32>(size.x),
+        .Height = static_cast<uint32>(size.y),
+        .Samples = 1u,
+        .Attachments = {{AttachmentType::Colour, PixelFormat::R8G8B8A8}},
+      });
+
+      SamplerHandle sampler = _context.Samplers().Create(SamplerDesc::LinearClampToEdge());
+      ImageHandle image = _context.RenderTargets().GetColourAttachmentImage(layerRenderTarget, 0u);
+      ImageViewHandle imageView = _context.ImageViews().Create({
+        .Image = image,
+        .Target = ImageType::Image2D,
+        .Format = PixelFormat::R8G8B8A8,
+        .SubResourceRange = {.BaseMipLevel = 0, .MipLevelCount = 1},
+      });
+
+      Gfx::TextureHandle layerTexture = _context.Textures().Create(imageView, sampler);
+      _cachedLayers[handle] = {.RenderTarget = layerRenderTarget, .Texture = layerTexture, .Size = size};
+      return layerRenderTarget;
+    }
+
     void RenderElementContents(NodeRef node, const Maths::Vec2 &position, const Maths::Vec2 &size,
                                Element &element, Document &document,
                                const Maths::Mat4 &transform = Maths::Identity<Maths::Mat4>())
     {
       if (element.Geometries.empty())
       {
-        Gfx::MeshData data;
-        Gfx::MeshDataUtils::GenerateQuad(data, TopLeftOrigin, size, NodeStyleGetBackgroundColour(node));
-        Gfx::MeshDesc desc {
-          .Vertices = data.Vertices,
-          .Indices = data.Indices,
-          .Layout = Gfx::Vertex::Position2D_ColourbPremultiplied_UV::Layout(),
-          .Primitive = Gfx::PrimitiveType::Triangles,
-          .Type = Gfx::MeshType::Static,
-        };
-
-        element.Geometries.push_back(Geometry {
-          .Mesh = _context.Meshes().Create(desc),
-          .Translation = position,
-        });
+        GenerateBackgroundBorderGeometry(size, node, element, position);
       }
 
       for (const auto &geometry : element.Geometries)
@@ -284,6 +279,25 @@ namespace Krys::UI
       {
         RenderElement(document, child, position);
       }
+    }
+
+    void GenerateBackgroundBorderGeometry(const Krys::Maths::Vec2 &size, Krys::UI::NodeRef node,
+                                          Krys::UI::Element &element, const Krys::Maths::Vec2 &position)
+    {
+      Gfx::MeshData data;
+      Gfx::MeshDataUtils::GenerateQuad(data, TopLeftOrigin, size, NodeStyleGetBackgroundColour(node));
+      Gfx::MeshDesc desc {
+        .Vertices = data.Vertices,
+        .Indices = data.Indices,
+        .Layout = Gfx::Vertex::Position2D_ColourbPremultiplied_UV::Layout(),
+        .Primitive = Gfx::PrimitiveType::Triangles,
+        .Type = Gfx::MeshType::Static,
+      };
+
+      element.Geometries.push_back(Geometry {
+        .Mesh = _context.Meshes().Create(desc),
+        .Translation = position,
+      });
     }
 
     void RenderLayerContents(const Maths::Vec2 &position, const Maths::Vec2 &size, float opacity,
