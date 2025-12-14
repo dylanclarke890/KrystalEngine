@@ -238,7 +238,7 @@ namespace Krys::Gfx::OpenGL
 
     glBindVertexArray(_textVao);
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     shader.Bind();
     shader.SetUniform("u_TextColor", textColour.ToVec3());
