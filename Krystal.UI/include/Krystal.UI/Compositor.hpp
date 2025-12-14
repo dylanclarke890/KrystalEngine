@@ -247,11 +247,11 @@ namespace Krys::UI
 
       for (const auto &geometry : element.Geometries)
       {
+        auto geometryTransform = Maths::Translate(transform, Maths::Vec3 {geometry.Translation, 0.f});
         CurrentCommandList().Push(Gfx::Commands::DrawShape2D {
           .Mesh = geometry.Mesh,
           .Texture = {},
-          .Transform = transform,
-          .Translation = geometry.Translation,
+          .Transform = geometryTransform,
           .InstanceCount = 1u,
         });
       }
@@ -307,11 +307,12 @@ namespace Krys::UI
     void RenderLayerContents(const Maths::Vec2 &position, const Maths::Vec2 &size, float opacity,
                              Gfx::TextureHandle texture)
     {
+      Maths::Mat4 transform = Maths::Scale(Maths::Vec3 {size, 1.f});
+      transform = Maths::Translate(transform, Maths::Vec3 {position, 0.f});
       CurrentCommandList().Push(Gfx::Commands::DrawShape2D {
         .Mesh = _quadMesh,
         .Texture = texture,
-        .Transform = Maths::Scale(Maths::Vec3 {size, 1.f}),
-        .Translation = position,
+        .Transform = transform,
         .InstanceCount = 1u,
       });
     }

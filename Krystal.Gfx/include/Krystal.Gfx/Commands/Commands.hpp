@@ -44,7 +44,6 @@ namespace Krys::Gfx::Commands
     MeshHandle Mesh;
     Gfx::TextureHandle Texture;
     Maths::Mat4 Transform;
-    Maths::Vec2 Translation;
     uint32 InstanceCount {1u};
   };
 

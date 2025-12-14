@@ -153,7 +153,6 @@ namespace Krys::Gfx::OpenGL
 
           shader.Bind();
           shader.SetUniform("u_Transform", rt.GetProjectionMatrix() * cmd.Transform);
-          shader.SetUniform("u_Translate", cmd.Translation);
 
           mesh.Bind();
           mesh.Draw(static_cast<GLsizei>(cmd.InstanceCount));
