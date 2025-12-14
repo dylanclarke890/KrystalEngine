@@ -28,13 +28,18 @@ namespace Krys::Gfx::OpenGL
     }
   };
 
+  struct RendererState
+  {
+    RenderTargetHandle CurrentRenderTarget {0u};
+  };
+
   class Renderer : public IRenderer
   {
     NO_COPY_MOVE(Renderer)
 
   private:
     Context &_context;
-    RenderTargetHandle _currentRenderTarget;
+    RendererState _state;
     List<GlyphVertex> _glyphVertices {};
     BufferHandle _glyphBuffer {};
     GLuint _textVao {};

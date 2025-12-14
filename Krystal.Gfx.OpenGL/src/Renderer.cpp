@@ -35,8 +35,8 @@ namespace Krys::Gfx::OpenGL
     auto &renderTargets = static_cast<RenderTargetRegistry &>(_context.RenderTargets());
     auto &shaders = static_cast<ShaderRegistry &>(_context.Shaders());
 
-    _currentRenderTarget = _context.RenderTargets().GetScreenRenderTarget();
-    auto &rt = renderTargets.Get(_currentRenderTarget);
+    _state.CurrentRenderTarget = _context.RenderTargets().GetScreenRenderTarget();
+    auto &rt = renderTargets.Get(_state.CurrentRenderTarget);
 
     uint32 maxGlyphVertices = GlyphVertex::VerticesPerGlyph * GlyphVertex::BatchSize;
     _glyphBuffer = buffers.Create({
@@ -84,7 +84,7 @@ namespace Krys::Gfx::OpenGL
         case Commands::SetScissor::Type:
         {
           const auto &cmd = reader.ReadCommand<Commands::SetScissor>();
-          auto &rt = renderTargets.Get(_currentRenderTarget);
+          auto &rt = renderTargets.Get(_state.CurrentRenderTarget);
 
           GLint scissorX = static_cast<GLint>(cmd.Position.x);
           GLint scissorY = static_cast<GLint>(rt.Height() - (cmd.Position.y + cmd.Size.y));
@@ -106,7 +106,7 @@ namespace Krys::Gfx::OpenGL
         case Commands::SetViewport::Type:
         {
           const auto &cmd = reader.ReadCommand<Commands::SetViewport>();
-          auto &rt = renderTargets.Get(_currentRenderTarget);
+          auto &rt = renderTargets.Get(_state.CurrentRenderTarget);
           GLint viewportX = static_cast<GLint>(cmd.Position.x);
           GLint viewportY = static_cast<GLint>(rt.Height() - (cmd.Position.y + cmd.Size.y));
           GLsizei viewportWidth = static_cast<GLsizei>(cmd.Size.x);
@@ -118,7 +118,7 @@ namespace Krys::Gfx::OpenGL
         {
           const auto &cmd = reader.ReadCommand<Commands::BindRenderTarget>();
           assert(cmd.RenderTarget.IsValid() && "Invalid render target handle in BindRenderTarget.");
-          if (cmd.RenderTarget == _currentRenderTarget)
+          if (cmd.RenderTarget == _state.CurrentRenderTarget)
           {
             break;
           }
@@ -128,7 +128,7 @@ namespace Krys::Gfx::OpenGL
           glViewport(0, 0, rt.Width(), rt.Height());
           glDisable(GL_SCISSOR_TEST);
 
-          _currentRenderTarget = cmd.RenderTarget;
+          _state.CurrentRenderTarget = cmd.RenderTarget;
           break;
         }
         case Commands::DrawShape2D::Type:
@@ -147,7 +147,7 @@ namespace Krys::Gfx::OpenGL
             shaderHandle = shaders.GetBuiltin(BuiltinShader::Shape2D_Colour);
           }
 
-          auto &rt = renderTargets.Get(_currentRenderTarget);
+          auto &rt = renderTargets.Get(_state.CurrentRenderTarget);
           auto &shader = shaders.Get(shaderHandle);
           auto &mesh = meshes.Get(cmd.Mesh);
 
@@ -243,7 +243,7 @@ namespace Krys::Gfx::OpenGL
 
     shader.Bind();
     shader.SetUniform("u_TextColor", textColour.ToVec3());
-    shader.SetUniform("u_Transform", renderTargets.Get(_currentRenderTarget).GetProjectionMatrix());
+    shader.SetUniform("u_Transform", renderTargets.Get(_state.CurrentRenderTarget).GetProjectionMatrix());
     textures.Bind(font.AtlasTexture(), 0u);
 
     Buffer &buffer = buffers.Get(_glyphBuffer);
