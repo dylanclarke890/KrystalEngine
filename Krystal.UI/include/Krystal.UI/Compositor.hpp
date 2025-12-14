@@ -166,6 +166,15 @@ namespace Krys::UI
         return;
       }
 
+      if (NodeGetHasNewLayout(node) || NodeIsStyleDirty(node))
+      {
+        for (auto &geometry : element.Geometries)
+        {
+          _context.Meshes().Destroy(geometry.Mesh);
+        }
+        element.Geometries.clear();
+      }
+
       RenderTargetHandle layerRenderTarget;
       if (auto existing = _cachedLayers.find(handle); existing != _cachedLayers.end())
       {
@@ -180,11 +189,6 @@ namespace Krys::UI
         if (cachedLayer.Size != size)
         {
           _pendingDestruction.push_back(cachedLayer);
-          for (auto &geometry : element.Geometries)
-          {
-            _context.Meshes().Destroy(geometry.Mesh);
-          }
-          element.Geometries.clear();
         }
         else
         {
