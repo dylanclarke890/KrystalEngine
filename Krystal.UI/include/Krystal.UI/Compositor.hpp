@@ -172,10 +172,11 @@ namespace Krys::UI
         if (cachedLayer.Size == size && !NodeGetHasNewLayout(node) && !NodeIsStyleDirty(node))
         {
           float opacity = document.ElementStyleGetOpacity(handle);
-          RenderLayerContents(cachedLayer.RenderTarget, absolutePosition, size, opacity, cachedLayer.Texture);
+          RenderLayerContents(absolutePosition, size, opacity, cachedLayer.Texture);
           return;
         }
-        else if (cachedLayer.Size != size)
+
+        if (cachedLayer.Size != size)
         {
           _pendingDestruction.push_back(cachedLayer);
           for (auto &Geometry : element.Geometries)
@@ -220,7 +221,7 @@ namespace Krys::UI
       PopLayer();
 
       float opacity = document.ElementStyleGetOpacity(handle);
-      RenderLayerContents(layerRenderTarget, absolutePosition, size, opacity, _cachedLayers[handle].Texture);
+      RenderLayerContents(absolutePosition, size, opacity, _cachedLayers[handle].Texture);
     }
 
     void RenderElementContents(NodeRef node, const Maths::Vec2 &position, const Maths::Vec2 &size,
@@ -285,8 +286,8 @@ namespace Krys::UI
       }
     }
 
-    void RenderLayerContents(Gfx::RenderTargetHandle source, const Maths::Vec2 &position,
-                             const Maths::Vec2 &size, float opacity, Gfx::TextureHandle texture)
+    void RenderLayerContents(const Maths::Vec2 &position, const Maths::Vec2 &size, float opacity,
+                             Gfx::TextureHandle texture)
     {
       CurrentCommandList().Push(Gfx::Commands::DrawShape2D {
         .Mesh = _quadMesh,
