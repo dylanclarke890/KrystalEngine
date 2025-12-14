@@ -76,6 +76,9 @@ namespace Krys::Gfx::OpenGL
     auto &textures = static_cast<TextureRegistry &>(_context.Textures());
     auto &renderTargets = static_cast<RenderTargetRegistry &>(_context.RenderTargets());
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
     while (reader.HasMore())
     {
       CommandHeader header = reader.ReadHeader();
@@ -188,6 +191,8 @@ namespace Krys::Gfx::OpenGL
         }
       }
     }
+
+    glDisable(GL_BLEND);
   }
 
   void Renderer::DrawTextOutlined(const utf8_string &text, FontHandle fontHandle, float ptSize,
@@ -237,8 +242,6 @@ namespace Krys::Gfx::OpenGL
     }
 
     glBindVertexArray(_textVao);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     shader.Bind();
     shader.SetUniform("u_TextColor", textColour.ToVec3());
@@ -301,7 +304,5 @@ namespace Krys::Gfx::OpenGL
       buffer.Update(_glyphVertices);
       glDrawArrays(GL_TRIANGLES, 0, static_cast<GLsizei>(_glyphVertices.size()));
     }
-
-    glDisable(GL_BLEND);
   }
 }
