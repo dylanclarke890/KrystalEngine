@@ -53,9 +53,7 @@ namespace Krys::UI
     {
       // Create a quad mesh for compositing layers.
       Gfx::MeshData data;
-      Gfx::MeshDataUtils::GenerateQuad(data, TopLeftOrigin, Maths::Vec2 {1.f, 1.f},
-                                       Gfx::ColourbPremultiplied {255, 255, 255, 255}, Maths::Vec2 {0.f, 1.f},
-                                       Maths::Vec2 {1.f, 0.f});
+      Gfx::MeshDataUtils::GenerateQuad(data, TopLeftOrigin, Maths::Vec2 {1.f, 1.f}, Gfx::Colours::White);
       Gfx::MeshDesc desc {
         .Vertices = data.Vertices,
         .Indices = data.Indices,

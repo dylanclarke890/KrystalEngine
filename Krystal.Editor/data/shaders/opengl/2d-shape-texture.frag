@@ -9,5 +9,7 @@ uniform sampler2D u_Texture;
 
 void main()
 {
-	FragmentColour = Colour * texture(u_Texture, TextureCoord);
+	vec2 uv = TextureCoord;
+  uv.y = 1.0 - uv.y; // Flip Y coordinate for texture
+	FragmentColour = Colour * texture(u_Texture, uv);
 }
