@@ -127,7 +127,7 @@ namespace Krys
       _document.ElementStyleSetHeight(leftInnerInnerBox, 200.f);
       _document.ElementStyleSetBorderRadii(leftInnerInnerBox, {{Vec2 {75.f}}});
       _document.ElementStyleSetBorderWidths(leftInnerInnerBox, {5.f, 5.f, 5.f, 5.f});
-      _document.ElementStyleSetBorderColours(leftInnerInnerBox, {Green, Red, White, Yellow});
+      _document.ElementStyleSetBorderColours(leftInnerInnerBox, {White, Red, Yellow, Green});
       _document.ElementStyleSetBackgroundColour(leftInnerInnerBox, Gfx::Colours::Maroon);
 
       auto rightBox = _document.Create<Element>();

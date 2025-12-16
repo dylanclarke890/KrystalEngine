@@ -3,13 +3,17 @@
 #include "Krystal.Lib/Array.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
-namespace Krys
+namespace Krys::UI
 {
   /// @brief Ordered by top, right, bottom, left.
   using EdgeSizes = Array<float, 4>;
+  constexpr static size_t TopEdge = 0u;
+  constexpr static size_t RightEdge = 1u;
+  constexpr static size_t BottomEdge = 2u;
+  constexpr static size_t LeftEdge = 3u;
 
   /// @brief Ordered by top-left, top-right, bottom-right, bottom-left.
-  using CornerSizes = Array<float, 4>;
+  using CornerSizes = Array<Maths::Vec2, 4>;
 
   /// @brief Provides the data needed to generate a mesh for a given element's box.
   class RenderBox

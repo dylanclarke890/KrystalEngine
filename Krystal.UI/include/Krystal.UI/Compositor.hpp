@@ -14,6 +14,7 @@
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include "Krystal.UI/Document.hpp"
+#include "Krystal.UI/RenderBox.hpp"
 #include <cassert>
 
 namespace Krys::UI
@@ -21,6 +22,13 @@ namespace Krys::UI
   class Compositor
   {
     NO_COPY_MOVE(Compositor)
+
+    struct RenderContext
+    {
+      Maths::Vec2 Origin;
+    };
+
+    constexpr static Maths::Vec2 OriginZero = {0.f, 0.f};
 
   private:
     Gfx::IContext &_context;
@@ -62,41 +70,75 @@ namespace Krys::UI
       LayoutEngine::Reflow(document.Get(document.Body()), dimensions);
 
       // Recursive traversal from root
-      RenderElement(document, document.Body(), {0.f, 0.f});
+      RenderElement(document, document.Body(), {OriginZero});
 
       // Submit command list
       _renderer.Submit(_commands);
     }
 
   private:
-    void RenderElement(Document &document, ElementHandle handle, const Maths::Vec2 &origin)
+    void RenderElement(Document &document, ElementHandle handle, const RenderContext &ctx)
     {
       using namespace Maths;
 
       auto &element = document.Get(handle);
       NodeRef node = element.LayoutNode;
 
-      Vec2 position = origin + Vec2 {NodeLayoutGetLeft(node), NodeLayoutGetTop(node)};
+      Vec2 position = ctx.Origin + Vec2 {NodeLayoutGetLeft(node), NodeLayoutGetTop(node)};
       Vec2 size = Vec2 {NodeLayoutGetWidth(node), NodeLayoutGetHeight(node)};
 
-      PaintElement(element, node, position, size);
+      RenderContext childCtx {position};
+      RenderBox box = BuildRenderBox(node);
+
+      PaintElement(element, node, childCtx, box);
 
       for (ElementHandle child : element.Children)
       {
-        RenderElement(document, child, position);
+        RenderElement(document, child, childCtx);
       }
     }
 
-    void PaintElement(Element &elem, NodeRef node, const Maths::Vec2 &absPos, const Maths::Vec2 &size)
+    void PaintElement(Element &element, NodeRef node, const RenderContext &ctx, const RenderBox &renderBox)
     {
       using namespace Gfx;
       using namespace Maths;
 
-      // Build background geometry on-demand
-      if (elem.Geometries.empty())
+      if (element.Geometries.empty())
       {
         MeshData data;
-        MeshDataUtils::GenerateQuad(data, {0.f, 0.f}, size, NodeStyleGetBackgroundColour(node));
+
+        auto &bwidths = renderBox.GetBorderWidths();
+        auto &bcolours = NodeStyleGetBorderColours(node);
+
+        MeshDataUtils::GenerateQuad(data, renderBox.GetFillOffset(), renderBox.GetFillSize(),
+                                    NodeStyleGetBackgroundColour(node));
+
+        if (bwidths[TopEdge] > 0.f && bcolours[TopEdge].alpha > 0.f)
+        {
+          Vec2 size = {renderBox.GetFillSize().x, bwidths[TopEdge]};
+          MeshDataUtils::GenerateQuad(data, {bwidths[LeftEdge], 0.f}, size, bcolours[TopEdge]);
+        }
+
+        if (bwidths[LeftEdge] > 0.f && bcolours[LeftEdge].alpha > 0.f)
+        {
+          Vec2 size = {bwidths[LeftEdge], renderBox.GetFillSize().y + bwidths[TopEdge] + bwidths[BottomEdge]};
+          MeshDataUtils::GenerateQuad(data, {0.f, 0.f}, size, bcolours[LeftEdge]);
+        }
+
+        if (bwidths[BottomEdge] > 0.f && bcolours[BottomEdge].alpha > 0.f)
+        {
+          Vec2 size = {renderBox.GetFillSize().x, bwidths[BottomEdge]};
+          MeshDataUtils::GenerateQuad(data, {bwidths[LeftEdge], renderBox.GetFillSize().y + bwidths[TopEdge]},
+                                      size, bcolours[BottomEdge]);
+        }
+
+        if (bwidths[RightEdge] > 0.f && bcolours[RightEdge].alpha > 0.f)
+        {
+          Vec2 size = {bwidths[RightEdge],
+                       renderBox.GetFillSize().y + bwidths[TopEdge] + bwidths[BottomEdge]};
+          MeshDataUtils::GenerateQuad(data, {renderBox.GetFillSize().x + bwidths[LeftEdge], 0.f}, size,
+                                      bcolours[RightEdge]);
+        }
 
         MeshDesc desc {.Vertices = data.Vertices,
                        .Indices = data.Indices,
@@ -104,13 +146,13 @@ namespace Krys::UI
                        .Primitive = PrimitiveType::Triangles,
                        .Type = MeshType::Static};
 
-        elem.Geometries.push_back({.Mesh = _context.Meshes().Create(desc), .Translation = {}});
+        element.Geometries.push_back({.Mesh = _context.Meshes().Create(desc), .Translation = {}});
       }
 
       // Emit draw commands for geometry
-      for (auto &geometry : elem.Geometries)
+      for (auto &geometry : element.Geometries)
       {
-        Mat4 transform = Maths::Translate(Vec3 {absPos + geometry.Translation, 0.f});
+        Mat4 transform = Maths::Translate(Vec3 {ctx.Origin + geometry.Translation, 0.f});
         _commands.Push(Commands::DrawShape2D {
           .Mesh = geometry.Mesh,
           .Texture = {},
@@ -120,11 +162,11 @@ namespace Krys::UI
       }
 
       // Emit text if present
-      if (elem.TextContent.Text.IsValid())
+      if (element.TextContent.Text.IsValid())
       {
-        Vec2 textPosition = absPos
-                            + Vec2 {NodeLayoutGetLeft(elem.TextContent.LayoutNode),
-                                    NodeLayoutGetTop(elem.TextContent.LayoutNode)};
+        Vec2 textPosition = ctx.Origin
+                            + Vec2 {NodeLayoutGetLeft(element.TextContent.LayoutNode),
+                                    NodeLayoutGetTop(element.TextContent.LayoutNode)};
 
         auto fontFamily = NodeStyleGetFontFamily(node);
         if (!fontFamily.IsValid())
@@ -132,12 +174,36 @@ namespace Krys::UI
           fontFamily = _context.Fonts().GetDefaultFontFamily();
         }
 
-        _commands.Push(Commands::DrawText {.Text = elem.TextContent.Text,
+        _commands.Push(Commands::DrawText {.Text = element.TextContent.Text,
                                            .Position = textPosition,
                                            .FontFamily = fontFamily,
                                            .FontSize = NodeStyleGetFontSize(node),
                                            .Colour = NodeStyleGetTextColour(node)});
       }
+    }
+
+    RenderBox BuildRenderBox(NodeRef node)
+    {
+      using namespace Maths;
+
+      float width = NodeLayoutGetWidth(node);
+      float height = NodeLayoutGetHeight(node);
+      Vec2 borderBoxSize = {width, height};
+
+      EdgeSizes borderWidths = {NodeLayoutGetBorder(node, Edge::Top), NodeLayoutGetBorder(node, Edge::Right),
+                                NodeLayoutGetBorder(node, Edge::Bottom),
+                                NodeLayoutGetBorder(node, Edge::Left)};
+
+      CornerSizes borderRadii = NodeStyleGetBorderRadii(node);
+
+      Vec2 fillSize = {borderBoxSize.x - (borderWidths[LeftEdge] + borderWidths[RightEdge]),
+                       borderBoxSize.y - (borderWidths[TopEdge] + borderWidths[BottomEdge])};
+      fillSize.x = std::max(0.f, fillSize.x);
+      fillSize.y = std::max(0.f, fillSize.y);
+
+      Vec2 borderOffset = {NodeLayoutGetPadding(node, Edge::Left), NodeLayoutGetPadding(node, Edge::Top)};
+
+      return RenderBox(fillSize, borderOffset, borderWidths, borderRadii);
     }
   };
 }

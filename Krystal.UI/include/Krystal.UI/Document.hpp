@@ -696,7 +696,11 @@ namespace Krys::UI
     void ElementStyleSetBorderWidths(ElementHandle element, const Array<float, 4> &widths)
     {
       assert(element.IsValid() && "Invalid element handle");
-      NodeStyleSetBorderWidths(_elements.Get(element).LayoutNode, widths);
+      auto node = _elements.Get(element).LayoutNode;
+      NodeStyleSetBorder(node, Edge::Top, widths[0]);
+      NodeStyleSetBorder(node, Edge::Right, widths[1]);
+      NodeStyleSetBorder(node, Edge::Bottom, widths[2]);
+      NodeStyleSetBorder(node, Edge::Left, widths[3]);
     }
     const Array<float, 4> &ElementStyleGetBorderWidths(ElementHandle element)
     {

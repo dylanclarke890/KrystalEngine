@@ -63,12 +63,14 @@ namespace Krys::Gfx
       {
         Array<uint32, 6> indices {};
 
-        indices[0] = static_cast<uint32>(v0 + 0u);
-        indices[1] = static_cast<uint32>(v0 + 1u);
-        indices[2] = static_cast<uint32>(v0 + 2u);
-        indices[3] = static_cast<uint32>(v0 + 2u);
-        indices[4] = static_cast<uint32>(v0 + 3u);
-        indices[5] = static_cast<uint32>(v0 + 0u);
+        const size_t vertexStart = v0 / sizeof(Vertex);
+
+        indices[0] = static_cast<uint32>(vertexStart + 0u);
+        indices[1] = static_cast<uint32>(vertexStart + 1u);
+        indices[2] = static_cast<uint32>(vertexStart + 2u);
+        indices[3] = static_cast<uint32>(vertexStart + 2u);
+        indices[4] = static_cast<uint32>(vertexStart + 3u);
+        indices[5] = static_cast<uint32>(vertexStart + 0u);
 
         data.Indices.resize(data.Indices.size() + TotalIndicesSizeInBytes);
         std::memcpy(&data.Indices[i0], indices.data(), TotalIndicesSizeInBytes);
