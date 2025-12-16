@@ -133,6 +133,14 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Geometry\BorderMetrics.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Geometry\Common.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
     <ClInclude Include="include\Krystal.UI\Layout\Algorithm\AbsoluteLayout.hpp" />
     <ClInclude Include="include\Krystal.UI\Layout\Algorithm\Align.hpp" />
     <ClInclude Include="include\Krystal.UI\Layout\Algorithm\Baseline.hpp" />
@@ -163,7 +171,7 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="include\Krystal.UI\RenderBox.hpp">
+    <ClInclude Include="include\Krystal.UI\Geometry\RenderBox.hpp">
       <SubType>
       </SubType>
     </ClInclude>
@@ -197,6 +205,10 @@
     <ClInclude Include="include\Krystal.UI\Styles\Values\StyleValueHandle.hpp" />
     <ClInclude Include="include\Krystal.UI\Styles\Values\StyleValuePool.hpp" />
     <ClInclude Include="include\Krystal.UI\Styles\Values\UnitValue.hpp" />
+    <ClInclude Include="include\Krystal.UI\Geometry\GeometryUtils.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Krystal.Gfx.Lib\Krystal.Gfx.Lib.vcxproj">

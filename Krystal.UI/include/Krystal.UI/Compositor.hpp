@@ -14,7 +14,8 @@
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include "Krystal.UI/Document.hpp"
-#include "Krystal.UI/RenderBox.hpp"
+#include "Krystal.UI/Geometry/GeometryUtils.hpp"
+#include "Krystal.UI/Geometry/RenderBox.hpp"
 #include <cassert>
 
 namespace Krys::UI
@@ -107,38 +108,8 @@ namespace Krys::UI
       {
         MeshData data;
 
-        auto &bwidths = renderBox.GetBorderWidths();
-        auto &bcolours = NodeStyleGetBorderColours(node);
-
-        MeshDataUtils::GenerateQuad(data, renderBox.GetFillOffset(), renderBox.GetFillSize(),
-                                    NodeStyleGetBackgroundColour(node));
-
-        if (bwidths[TopEdge] > 0.f && bcolours[TopEdge].alpha > 0.f)
-        {
-          Vec2 size = {renderBox.GetFillSize().x, bwidths[TopEdge]};
-          MeshDataUtils::GenerateQuad(data, {bwidths[LeftEdge], 0.f}, size, bcolours[TopEdge]);
-        }
-
-        if (bwidths[LeftEdge] > 0.f && bcolours[LeftEdge].alpha > 0.f)
-        {
-          Vec2 size = {bwidths[LeftEdge], renderBox.GetFillSize().y + bwidths[TopEdge] + bwidths[BottomEdge]};
-          MeshDataUtils::GenerateQuad(data, {0.f, 0.f}, size, bcolours[LeftEdge]);
-        }
-
-        if (bwidths[BottomEdge] > 0.f && bcolours[BottomEdge].alpha > 0.f)
-        {
-          Vec2 size = {renderBox.GetFillSize().x, bwidths[BottomEdge]};
-          MeshDataUtils::GenerateQuad(data, {bwidths[LeftEdge], renderBox.GetFillSize().y + bwidths[TopEdge]},
-                                      size, bcolours[BottomEdge]);
-        }
-
-        if (bwidths[RightEdge] > 0.f && bcolours[RightEdge].alpha > 0.f)
-        {
-          Vec2 size = {bwidths[RightEdge],
-                       renderBox.GetFillSize().y + bwidths[TopEdge] + bwidths[BottomEdge]};
-          MeshDataUtils::GenerateQuad(data, {renderBox.GetFillSize().x + bwidths[LeftEdge], 0.f}, size,
-                                      bcolours[RightEdge]);
-        }
+        GeometryUtils::GenerateBorderBackground(data, renderBox, NodeStyleGetBackgroundColour(node),
+                                                NodeStyleGetBorderColours(node));
 
         MeshDesc desc {.Vertices = data.Vertices,
                        .Indices = data.Indices,
@@ -194,7 +165,7 @@ namespace Krys::UI
                                 NodeLayoutGetBorder(node, Edge::Bottom),
                                 NodeLayoutGetBorder(node, Edge::Left)};
 
-      CornerSizes borderRadii = NodeStyleGetBorderRadii(node);
+      CornerSizes borderRadii = {0.f, 0.f, 0.f, 0.f};
 
       Vec2 fillSize = {borderBoxSize.x - (borderWidths[LeftEdge] + borderWidths[RightEdge]),
                        borderBoxSize.y - (borderWidths[TopEdge] + borderWidths[BottomEdge])};

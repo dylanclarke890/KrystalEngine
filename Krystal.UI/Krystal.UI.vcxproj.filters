@@ -174,7 +174,16 @@
     <ClInclude Include="include\Krystal.UI\Layout\Algorithm\MeasureText.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.UI\RenderBox.hpp">
+    <ClInclude Include="include\Krystal.UI\Geometry\RenderBox.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Geometry\GeometryUtils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Geometry\Common.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Geometry\BorderMetrics.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
