@@ -89,9 +89,8 @@ namespace Krys::UI
       Vec2 size = Vec2 {NodeLayoutGetWidth(node), NodeLayoutGetHeight(node)};
 
       RenderContext childCtx {position};
-      RenderBox box = BuildRenderBox(node);
 
-      PaintElement(element, node, childCtx, box);
+      PaintElement(element, node, childCtx);
 
       for (ElementHandle child : element.Children)
       {
@@ -99,13 +98,15 @@ namespace Krys::UI
       }
     }
 
-    void PaintElement(Element &element, NodeRef node, const RenderContext &ctx, const RenderBox &renderBox)
+    void PaintElement(Element &element, NodeRef node, const RenderContext &ctx)
     {
       using namespace Gfx;
       using namespace Maths;
 
       if (element.Geometries.empty())
       {
+        RenderBox renderBox = BuildRenderBox(node);
+
         MeshData data;
 
         GeometryUtils::GenerateBorderBackground(data, renderBox, NodeStyleGetBackgroundColour(node),
@@ -167,8 +168,8 @@ namespace Krys::UI
 
       CornerSizes borderRadii = {0.f, 0.f, 0.f, 0.f};
 
-      Vec2 fillSize = {borderBoxSize.x - (borderWidths[LeftEdge] + borderWidths[RightEdge]),
-                       borderBoxSize.y - (borderWidths[TopEdge] + borderWidths[BottomEdge])};
+      Vec2 fillSize = {borderBoxSize.x - (borderWidths[+BoxEdge::Left] + borderWidths[+BoxEdge::Right]),
+                       borderBoxSize.y - (borderWidths[+BoxEdge::Top] + borderWidths[+BoxEdge::Bottom])};
       fillSize.x = std::max(0.f, fillSize.x);
       fillSize.y = std::max(0.f, fillSize.y);
 

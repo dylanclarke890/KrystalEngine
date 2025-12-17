@@ -186,6 +186,9 @@
     <ClInclude Include="include\Krystal.UI\Geometry\BorderMetrics.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.UI\Geometry\GeometryBackgroundBorder.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Layout\Algorithm\AbsoluteLayout.cpp">

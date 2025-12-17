@@ -46,33 +46,34 @@ namespace Krys::UI
 
       MeshDataUtils::GenerateQuad(data, renderBox.GetFillOffset(), renderBox.GetFillSize(), backgroundColour);
 
-      if (borderWidths[TopEdge] > 0.f && borderColors[TopEdge].alpha > 0.f)
+      if (borderWidths[+BoxEdge::Top] > 0.f && borderColors[+BoxEdge::Top].alpha > 0.f)
       {
-        Vec2 size = {renderBox.GetFillSize().x, borderWidths[TopEdge]};
-        MeshDataUtils::GenerateQuad(data, {borderWidths[LeftEdge], 0.f}, size, borderColors[TopEdge]);
+        Vec2 size = {renderBox.GetFillSize().x, borderWidths[+BoxEdge::Top]};
+        MeshDataUtils::GenerateQuad(data, {borderWidths[+BoxEdge::Left], 0.f}, size,
+                                    borderColors[+BoxEdge::Top]);
       }
 
-      if (borderWidths[LeftEdge] > 0.f && borderColors[LeftEdge].alpha > 0.f)
+      if (borderWidths[+BoxEdge::Left] > 0.f && borderColors[+BoxEdge::Left].alpha > 0.f)
       {
-        Vec2 size = {borderWidths[LeftEdge],
-                     renderBox.GetFillSize().y + borderWidths[TopEdge] + borderWidths[BottomEdge]};
-        MeshDataUtils::GenerateQuad(data, {0.f, 0.f}, size, borderColors[LeftEdge]);
+        Vec2 size = {borderWidths[+BoxEdge::Left], renderBox.GetFillSize().y + borderWidths[+BoxEdge::Top]
+                                                     + borderWidths[+BoxEdge::Bottom]};
+        MeshDataUtils::GenerateQuad(data, {0.f, 0.f}, size, borderColors[+BoxEdge::Left]);
       }
 
-      if (borderWidths[BottomEdge] > 0.f && borderColors[BottomEdge].alpha > 0.f)
+      if (borderWidths[+BoxEdge::Bottom] > 0.f && borderColors[+BoxEdge::Bottom].alpha > 0.f)
       {
-        Vec2 size = {renderBox.GetFillSize().x, borderWidths[BottomEdge]};
+        Vec2 size = {renderBox.GetFillSize().x, borderWidths[+BoxEdge::Bottom]};
         MeshDataUtils::GenerateQuad(
-          data, {borderWidths[LeftEdge], renderBox.GetFillSize().y + borderWidths[TopEdge]}, size,
-          borderColors[BottomEdge]);
+          data, {borderWidths[+BoxEdge::Left], renderBox.GetFillSize().y + borderWidths[+BoxEdge::Top]}, size,
+          borderColors[+BoxEdge::Bottom]);
       }
 
-      if (borderWidths[RightEdge] > 0.f && borderColors[RightEdge].alpha > 0.f)
+      if (borderWidths[+BoxEdge::Right] > 0.f && borderColors[+BoxEdge::Right].alpha > 0.f)
       {
-        Vec2 size = {borderWidths[RightEdge],
-                     renderBox.GetFillSize().y + borderWidths[TopEdge] + borderWidths[BottomEdge]};
-        MeshDataUtils::GenerateQuad(data, {renderBox.GetFillSize().x + borderWidths[LeftEdge], 0.f}, size,
-                                    borderColors[RightEdge]);
+        Vec2 size = {borderWidths[+BoxEdge::Right], renderBox.GetFillSize().y + borderWidths[+BoxEdge::Top]
+                                                      + borderWidths[+BoxEdge::Bottom]};
+        MeshDataUtils::GenerateQuad(data, {renderBox.GetFillSize().x + borderWidths[+BoxEdge::Left], 0.f},
+                                    size, borderColors[+BoxEdge::Right]);
       }
     }
 
@@ -85,10 +86,10 @@ namespace Krys::UI
 
       // -- Find the corner positions --
 
-      const Vec2 innerPosition = outerPosition + Vec2(edgeSizes[LeftEdge], edgeSizes[TopEdge]);
-      const Vec2 outerSize =
-        innerSize
-        + Vec2(edgeSizes[LeftEdge] + edgeSizes[RightEdge], edgeSizes[TopEdge] + edgeSizes[BottomEdge]);
+      const Vec2 innerPosition = outerPosition + Vec2(edgeSizes[+BoxEdge::Left], edgeSizes[+BoxEdge::Top]);
+      const Vec2 outerSize = innerSize
+                             + Vec2(edgeSizes[+BoxEdge::Left] + edgeSizes[+BoxEdge::Right],
+                                    edgeSizes[+BoxEdge::Top] + edgeSizes[+BoxEdge::Bottom]);
 
       metrics.OuterPositions = {
         outerPosition,
@@ -107,8 +108,9 @@ namespace Krys::UI
       // -- For curved borders, find the positions to draw ellipses around, and the scaled outer and inner
       // radii --
 
-      const float sumOfRadii = (initialOuterRadii[TopLeftCorner] + initialOuterRadii[TopRightCorner]
-                                + initialOuterRadii[BottomRightCorner] + initialOuterRadii[BottomLeftCorner]);
+      const float sumOfRadii =
+        (initialOuterRadii[+BoxCorner::TopLeft] + initialOuterRadii[+BoxCorner::TopRight]
+         + initialOuterRadii[+BoxCorner::BottomRight] + initialOuterRadii[+BoxCorner::BottomLeft]);
       const bool hasRadius = (sumOfRadii > 1.f);
 
       if (hasRadius)
@@ -119,16 +121,20 @@ namespace Krys::UI
         // Scale the radii such that we have no overlapping curves.
         float scale = FLT_MAX;
         // Top
-        scale = Min(scale, innerSize.x / (outerRadii[TopLeftCorner] + outerRadii[TopRightCorner]));
+        scale =
+          Min(scale, innerSize.x / (outerRadii[+BoxCorner::TopLeft] + outerRadii[+BoxCorner::TopRight]));
 
         // Right
-        scale = Min(scale, innerSize.y / (outerRadii[TopRightCorner] + outerRadii[BottomRightCorner]));
+        scale =
+          Min(scale, innerSize.y / (outerRadii[+BoxCorner::TopRight] + outerRadii[+BoxCorner::BottomRight]));
 
         // Bottom
-        scale = Min(scale, innerSize.x / (outerRadii[BottomRightCorner] + outerRadii[BottomLeftCorner]));
+        scale = Min(scale,
+                    innerSize.x / (outerRadii[+BoxCorner::BottomRight] + outerRadii[+BoxCorner::BottomLeft]));
 
         // Left
-        scale = Min(scale, innerSize.y / (outerRadii[BottomLeftCorner] + outerRadii[TopLeftCorner]));
+        scale =
+          Min(scale, innerSize.y / (outerRadii[+BoxCorner::BottomLeft] + outerRadii[+BoxCorner::TopLeft]));
 
         scale = Min(1.0f, scale);
 
@@ -139,17 +145,19 @@ namespace Krys::UI
 
         // Place the circle/ellipse centers
         metrics.CircleCenterPositions = {
-          metrics.OuterPositions[TopLeftCorner] + Vec2(1, 1) * outerRadii[TopLeftCorner],
-          metrics.OuterPositions[TopRightCorner] + Vec2(-1, 1) * outerRadii[TopRightCorner],
-          metrics.OuterPositions[BottomRightCorner] + Vec2(-1, -1) * outerRadii[BottomRightCorner],
-          metrics.OuterPositions[BottomLeftCorner] + Vec2(1, -1) * outerRadii[BottomLeftCorner],
+          metrics.OuterPositions[+BoxCorner::TopLeft] + Vec2(1, 1) * outerRadii[+BoxCorner::TopLeft],
+          metrics.OuterPositions[+BoxCorner::TopRight] + Vec2(-1, 1) * outerRadii[+BoxCorner::TopRight],
+          metrics.OuterPositions[+BoxCorner::BottomRight] + Vec2(-1, -1) * outerRadii[+BoxCorner::BottomRight],
+          metrics.OuterPositions[+BoxCorner::BottomLeft] + Vec2(1, -1) * outerRadii[+BoxCorner::BottomLeft],
         };
 
         metrics.InnerRadii = {
-          Vec2(outerRadii[TopLeftCorner]) - Vec2(edgeSizes[LeftEdge], edgeSizes[TopEdge]),
-          Vec2(outerRadii[TopRightCorner]) - Vec2(edgeSizes[RightEdge], edgeSizes[TopEdge]),
-          Vec2(outerRadii[BottomRightCorner]) - Vec2(edgeSizes[RightEdge], edgeSizes[BottomEdge]),
-          Vec2(outerRadii[BottomLeftCorner]) - Vec2(edgeSizes[LeftEdge], edgeSizes[BottomEdge]),
+          Vec2(outerRadii[+BoxCorner::TopLeft]) - Vec2(edgeSizes[+BoxEdge::Left], edgeSizes[+BoxEdge::Top]),
+          Vec2(outerRadii[+BoxCorner::TopRight]) - Vec2(edgeSizes[+BoxEdge::Right], edgeSizes[+BoxEdge::Top]),
+          Vec2(outerRadii[+BoxCorner::BottomRight])
+            - Vec2(edgeSizes[+BoxEdge::Right], edgeSizes[+BoxEdge::Bottom]),
+          Vec2(outerRadii[+BoxCorner::BottomLeft])
+            - Vec2(edgeSizes[+BoxEdge::Left], edgeSizes[+BoxEdge::Bottom]),
         };
       }
 
