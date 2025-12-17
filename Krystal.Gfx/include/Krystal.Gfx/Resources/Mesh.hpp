@@ -27,6 +27,18 @@ namespace Krys::Gfx
   {
     List<byte> Vertices {};
     List<byte> Indices {};
+
+    template <typename TVertex>
+    constexpr size_t TotalVertices()
+    {
+      return Vertices.size() / sizeof(TVertex);
+    }
+
+    template <typename TIndex = uint32>
+    constexpr size_t TotalIndices()
+    {
+      return Indices.size() / sizeof(TIndex);
+    }
   };
 
   struct MeshDesc
