@@ -127,7 +127,7 @@ namespace Krys::UI
       {
         const float t = float(i) / float(numberOfPoints - 1);
 
-        const float a = Maths::Lerp(t, a0, a1);
+        const float a = Maths::Lerp(a0, a1, t);
 
         const Maths::Vec2 unitVector(Maths::Cos(a), Maths::Sin(a));
 
@@ -215,6 +215,7 @@ namespace Krys::UI
 
       _data.Vertices.resize((vertexOffset + 2u * (size_t)numberOfPoints) * sizeof(Vertex));
       Vertex *vertices = reinterpret_cast<Vertex *>(_data.Vertices.data());
+
       _data.Indices.resize((indexOffset + 3u * numberOfTriangles) * sizeof(Index));
       Index *indices = reinterpret_cast<Index *>(_data.Indices.data());
 
@@ -222,7 +223,7 @@ namespace Krys::UI
       {
         const float t = float(i) / float(numberOfPoints - 1);
 
-        const float a = Maths::Lerp(t, a0, a1);
+        const float a = Maths::Lerp(a0, a1, t);
         const Gfx::ColourbPremultiplied color = RoundedLerp(t, color0, color1);
         const Maths::Vec2 unit_vector(Maths::Cos(a), Maths::Sin(a));
 
@@ -252,7 +253,6 @@ namespace Krys::UI
 
       const size_t vertexOffset = _data.TotalVertices<Vertex>();
       _data.Vertices.reserve((vertexOffset + numberOfPoints + 2) * sizeof(Vertex));
-      Vertex *vertices = reinterpret_cast<Vertex *>(_data.Vertices.data());
 
       // Generate the vertices. We could also split the arc mid-way to create a sharp color transition.
       DrawPoint(innerPosition, colour0);
@@ -261,16 +261,17 @@ namespace Krys::UI
 
       assert(_data.TotalVertices<Vertex>() - vertexOffset == numberOfPoints + 2);
 
+      Vertex *vertices = reinterpret_cast<Vertex *>(_data.Vertices.data());
       // Swap the last two vertices such that the outer edge vertex is last, see the comment for the border
       // drawing functions. Their colors should already be the same.
-      const int lastVertex = (int)_data.TotalVertices<Vertex>() - 1u;
+      const size_t lastVertex = _data.TotalVertices<Vertex>() - 1u;
       std::swap(vertices[lastVertex - 1u].Position, vertices[lastVertex].Position);
 
       // Generate the indices
       const size_t numberOfTriangles = ((size_t)numberOfPoints - 1u);
 
       const size_t i_vertex_inner0 = vertexOffset;
-      const size_t i_vertex_inner1 = (size_t)lastVertex - 1u;
+      const size_t i_vertex_inner1 = lastVertex - 1u;
 
       const size_t indexOffset = _data.TotalIndices<Index>();
       _data.Indices.resize((indexOffset + 3u * numberOfTriangles) * sizeof(Index));
@@ -285,7 +286,7 @@ namespace Krys::UI
       }
 
       // Since we swapped the last two vertices we also need to change the last triangle.
-      indices[indexOffset + 3u * (numberOfTriangles - 1u) + 1u] = lastVertex;
+      indices[indexOffset + 3u * (numberOfTriangles - 1u) + 1u] = Index(lastVertex);
     }
 
     void FillEdge(int nextCornerIndex)

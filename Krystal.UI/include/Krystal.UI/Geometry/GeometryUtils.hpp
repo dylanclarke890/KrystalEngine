@@ -25,9 +25,6 @@ namespace Krys::UI
       using namespace Gfx;
       using namespace Maths;
 
-      using Vertex = Gfx::Vertex::Position2D_ColourbPremultiplied_UV;
-      using Index = uint32;
-
       auto &borderWidths = renderBox.GetBorderWidths();
 
       int numberOfBorders = 0;
@@ -48,12 +45,15 @@ namespace Krys::UI
         return;
       }
 
+      using Vertex = Gfx::Vertex::Position2D_ColourbPremultiplied_UV;
+      using Index = uint32;
+
       // Reserve geometry. A conservative estimate, does not take border-radii into account and assumes
       // same-colored borders.
       const size_t estimatedVertexCount = 4 * size_t(hasBackground) + 2 * (size_t)numberOfBorders;
       const size_t estimatedTriangleCount = 2 * size_t(hasBackground) + 2 * (size_t)numberOfBorders;
-      data.Vertices.reserve(data.TotalVertices<Vertex>() + estimatedVertexCount);
-      data.Indices.reserve(data.TotalIndices<Index>() + 3 * estimatedTriangleCount);
+      data.Vertices.reserve((data.TotalVertices<Vertex>() + estimatedVertexCount) * sizeof(Vertex));
+      data.Indices.reserve((data.TotalIndices<Index>() + 3 * estimatedTriangleCount) * sizeof(Index));
 
       // Generate the geometry.
       GeometryBackgroundBorder geometry(data);
@@ -72,7 +72,7 @@ namespace Krys::UI
 
 #ifdef _DEBUG
       const size_t numberOfVertices = data.TotalVertices<Vertex>();
-      const size_t indexCount = data.TotalVertices<Vertex>();
+      const size_t indexCount = data.TotalIndices<Index>();
       Index *indices = reinterpret_cast<Index *>(data.Indices.data());
 
       for (size_t i = 0; i < indexCount; i++)

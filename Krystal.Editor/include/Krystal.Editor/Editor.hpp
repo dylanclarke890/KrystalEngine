@@ -127,13 +127,13 @@ namespace Krys
       _document.ElementStyleSetHeight(leftInnerInnerBox, 200.f);
       _document.ElementStyleSetBorderRadii(leftInnerInnerBox, {{Vec2 {75.f}}});
       _document.ElementStyleSetBorderWidths(leftInnerInnerBox, {5.f, 5.f, 5.f, 5.f});
-      _document.ElementStyleSetBorderColours(leftInnerInnerBox, {White, Red, Yellow, Green});
-      _document.ElementStyleSetBackgroundColour(leftInnerInnerBox, Gfx::Colours::Maroon);
+      _document.ElementStyleSetBorderColours(leftInnerInnerBox, {Lime, Green, Purple, Green});
+      _document.ElementStyleSetBackgroundColour(leftInnerInnerBox, Gfx::Colours::Orange);
 
       auto rightBox = _document.Create<Element>();
       _document.AppendChild(_document.Body(), rightBox);
-      _document.ElementStyleSetWidthPercent(rightBox, 45.f);
-      _document.ElementStyleSetHeightPercent(rightBox, 100.f);
+      _document.ElementStyleSetWidth(rightBox, 200.f);
+      _document.ElementStyleSetHeight(rightBox, 200.f);
       _document.ElementStyleSetBackgroundColour(rightBox, Gfx::Colours::Red);
       _test = rightBox;
 

@@ -49,18 +49,15 @@ namespace Krys::UI
     return int(value - 0.5f);
   }
 
-  constexpr Gfx::ColourbPremultiplied RoundedLerp(float t, Gfx::ColourbPremultiplied v0,
-                                                  Gfx::ColourbPremultiplied v1) noexcept
+  constexpr Gfx::ColourbPremultiplied RoundedLerp(float t, const Gfx::ColourbPremultiplied v0,
+                                                  const Gfx::ColourbPremultiplied v1) noexcept
   {
+    using namespace Maths;
     return Gfx::ColourbPremultiplied {
-      static_cast<unsigned char>(
-        RoundToInteger(Maths::Lerp(t, static_cast<float>(v0[0]), static_cast<float>(v1[0])))),
-      static_cast<unsigned char>(
-        RoundToInteger(Maths::Lerp(t, static_cast<float>(v0[1]), static_cast<float>(v1[1])))),
-      static_cast<unsigned char>(
-        RoundToInteger(Maths::Lerp(t, static_cast<float>(v0[2]), static_cast<float>(v1[2])))),
-      static_cast<unsigned char>(
-        RoundToInteger(Maths::Lerp(t, static_cast<float>(v0[3]), static_cast<float>(v1[3])))),
+      uchar(RoundToInteger(Lerp(float(v0[0]), float(v1[0]), t))),
+      uchar(RoundToInteger(Lerp(float(v0[1]), float(v1[1]), t))),
+      uchar(RoundToInteger(Lerp(float(v0[2]), float(v1[2]), t))),
+      uchar(RoundToInteger(Lerp(float(v0[3]), float(v1[3]), t))),
     };
   }
 }
