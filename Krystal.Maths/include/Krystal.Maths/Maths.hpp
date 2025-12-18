@@ -318,7 +318,7 @@ namespace Krys::Maths
     return std::cos(angle);
   }
 
-  NO_DISCARD float ACos(float value) noexcept
+  NO_DISCARD inline float ACos(float value) noexcept
   {
     return std::acos(value);
   }

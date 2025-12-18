@@ -8,6 +8,7 @@
 #include "Krystal.Maths/Round.hpp"
 #include "Krystal.Maths/Vector.hpp"
 #include "Krystal.UI/Geometry/BorderMetrics.hpp"
+#include "Krystal.UI/Geometry/GeometryBackgroundBorder.hpp"
 #include "Krystal.UI/Geometry/RenderBox.hpp"
 
 namespace Krys::UI
@@ -19,24 +20,27 @@ namespace Krys::UI
   public:
     static void GenerateBorderBackground(Gfx::MeshData &data, const RenderBox &renderBox,
                                          Gfx::ColourbPremultiplied backgroundColour,
-                                         const Array<Gfx::ColourbPremultiplied, 4> &borderColors)
+                                         const Array<Gfx::ColourbPremultiplied, 4> &borderColours)
     {
       using namespace Gfx;
       using namespace Maths;
+
+      using Vertex = Gfx::Vertex::Position2D_ColourbPremultiplied_UV;
+      using Index = uint32;
 
       auto &borderWidths = renderBox.GetBorderWidths();
 
       int numberOfBorders = 0;
       for (int i = 0; i < 4; i++)
       {
-        if (borderColors[i].alpha > 0 && borderWidths[i] > 0)
+        if (borderColours[i].alpha > 0 && borderWidths[i] > 0)
         {
           numberOfBorders++;
         }
       }
 
-      const Vec2 &fill_size = renderBox.GetFillSize();
-      const bool hasBackground = (backgroundColour.alpha > 0 && fill_size.x > 0 && fill_size.y > 0);
+      const Vec2 &fillSize = renderBox.GetFillSize();
+      const bool hasBackground = (backgroundColour.alpha > 0 && fillSize.x > 0 && fillSize.y > 0);
       const bool hasBorder = numberOfBorders > 0;
 
       if (!hasBackground && !hasBorder)
@@ -44,37 +48,38 @@ namespace Krys::UI
         return;
       }
 
-      MeshDataUtils::GenerateQuad(data, renderBox.GetFillOffset(), renderBox.GetFillSize(), backgroundColour);
+      // Reserve geometry. A conservative estimate, does not take border-radii into account and assumes
+      // same-colored borders.
+      const size_t estimatedVertexCount = 4 * size_t(hasBackground) + 2 * (size_t)numberOfBorders;
+      const size_t estimatedTriangleCount = 2 * size_t(hasBackground) + 2 * (size_t)numberOfBorders;
+      data.Vertices.reserve(data.TotalVertices<Vertex>() + estimatedVertexCount);
+      data.Indices.reserve(data.TotalIndices<Index>() + 3 * estimatedTriangleCount);
 
-      if (borderWidths[+BoxEdge::Top] > 0.f && borderColors[+BoxEdge::Top].alpha > 0.f)
+      // Generate the geometry.
+      GeometryBackgroundBorder geometry(data);
+      const BorderMetrics metrics = ComputeBorderMetrics(renderBox.GetBorderOffset(), borderWidths, fillSize,
+                                                         renderBox.GetBorderRadius());
+
+      if (hasBackground)
       {
-        Vec2 size = {renderBox.GetFillSize().x, borderWidths[+BoxEdge::Top]};
-        MeshDataUtils::GenerateQuad(data, {borderWidths[+BoxEdge::Left], 0.f}, size,
-                                    borderColors[+BoxEdge::Top]);
+        geometry.DrawBackground(metrics, backgroundColour);
       }
 
-      if (borderWidths[+BoxEdge::Left] > 0.f && borderColors[+BoxEdge::Left].alpha > 0.f)
+      if (hasBorder)
       {
-        Vec2 size = {borderWidths[+BoxEdge::Left], renderBox.GetFillSize().y + borderWidths[+BoxEdge::Top]
-                                                     + borderWidths[+BoxEdge::Bottom]};
-        MeshDataUtils::GenerateQuad(data, {0.f, 0.f}, size, borderColors[+BoxEdge::Left]);
+        geometry.DrawBorder(metrics, borderWidths, borderColours);
       }
 
-      if (borderWidths[+BoxEdge::Bottom] > 0.f && borderColors[+BoxEdge::Bottom].alpha > 0.f)
-      {
-        Vec2 size = {renderBox.GetFillSize().x, borderWidths[+BoxEdge::Bottom]};
-        MeshDataUtils::GenerateQuad(
-          data, {borderWidths[+BoxEdge::Left], renderBox.GetFillSize().y + borderWidths[+BoxEdge::Top]}, size,
-          borderColors[+BoxEdge::Bottom]);
-      }
+#ifdef _DEBUG
+      const size_t numberOfVertices = data.TotalVertices<Vertex>();
+      const size_t indexCount = data.TotalVertices<Vertex>();
+      Index *indices = reinterpret_cast<Index *>(data.Indices.data());
 
-      if (borderWidths[+BoxEdge::Right] > 0.f && borderColors[+BoxEdge::Right].alpha > 0.f)
+      for (size_t i = 0; i < indexCount; i++)
       {
-        Vec2 size = {borderWidths[+BoxEdge::Right], renderBox.GetFillSize().y + borderWidths[+BoxEdge::Top]
-                                                      + borderWidths[+BoxEdge::Bottom]};
-        MeshDataUtils::GenerateQuad(data, {renderBox.GetFillSize().x + borderWidths[+BoxEdge::Left], 0.f},
-                                    size, borderColors[+BoxEdge::Right]);
+        assert(indices[i] < numberOfVertices);
       }
+#endif
     }
 
     static BorderMetrics ComputeBorderMetrics(Maths::Vec2 outerPosition, EdgeSizes edgeSizes,
@@ -147,7 +152,8 @@ namespace Krys::UI
         metrics.CircleCenterPositions = {
           metrics.OuterPositions[+BoxCorner::TopLeft] + Vec2(1, 1) * outerRadii[+BoxCorner::TopLeft],
           metrics.OuterPositions[+BoxCorner::TopRight] + Vec2(-1, 1) * outerRadii[+BoxCorner::TopRight],
-          metrics.OuterPositions[+BoxCorner::BottomRight] + Vec2(-1, -1) * outerRadii[+BoxCorner::BottomRight],
+          metrics.OuterPositions[+BoxCorner::BottomRight]
+            + Vec2(-1, -1) * outerRadii[+BoxCorner::BottomRight],
           metrics.OuterPositions[+BoxCorner::BottomLeft] + Vec2(1, -1) * outerRadii[+BoxCorner::BottomLeft],
         };
 

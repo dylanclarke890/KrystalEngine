@@ -166,7 +166,7 @@ namespace Krys::UI
                                 NodeLayoutGetBorder(node, Edge::Bottom),
                                 NodeLayoutGetBorder(node, Edge::Left)};
 
-      CornerSizes borderRadii = {0.f, 0.f, 0.f, 0.f};
+      CornerSizes borderRadii = {20.f, 20.f, 20.f, 20.f};
 
       Vec2 fillSize = {borderBoxSize.x - (borderWidths[+BoxEdge::Left] + borderWidths[+BoxEdge::Right]),
                        borderBoxSize.y - (borderWidths[+BoxEdge::Top] + borderWidths[+BoxEdge::Bottom])};
