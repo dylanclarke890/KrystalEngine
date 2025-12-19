@@ -682,12 +682,12 @@ namespace Krys::UI
       return NodeStyleGetBorderColours(_elements.Get(element).LayoutNode);
     }
 
-    void ElementStyleSetBorderRadii(ElementHandle element, const Array<Maths::Vec2, 4> &radii)
+    void ElementStyleSetBorderRadii(ElementHandle element, const Array<float, 4> &radii)
     {
       assert(element.IsValid() && "Invalid element handle");
       NodeStyleSetBorderRadii(_elements.Get(element).LayoutNode, radii);
     }
-    const Array<Maths::Vec2, 4> &ElementStyleGetBorderRadii(ElementHandle element)
+    const Array<float, 4> &ElementStyleGetBorderRadii(ElementHandle element)
     {
       assert(element.IsValid() && "Invalid element handle");
       return NodeStyleGetBorderRadii(_elements.Get(element).LayoutNode);

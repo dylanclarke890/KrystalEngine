@@ -28,18 +28,18 @@ namespace Krys::UI
 
       auto &borderWidths = renderBox.GetBorderWidths();
 
-      int numberOfBorders = 0;
-      for (int i = 0; i < 4; i++)
+      size_t numberOfBorders = 0u;
+      for (size_t i = 0u; i < 4u; i++)
       {
-        if (borderColours[i].alpha > 0 && borderWidths[i] > 0)
+        if (borderColours[i].alpha > 0u && borderWidths[i] > 0u)
         {
           numberOfBorders++;
         }
       }
 
       const Vec2 &fillSize = renderBox.GetFillSize();
-      const bool hasBackground = (backgroundColour.alpha > 0 && fillSize.x > 0 && fillSize.y > 0);
-      const bool hasBorder = numberOfBorders > 0;
+      const bool hasBackground = (backgroundColour.alpha > 0u && fillSize.x > 0u && fillSize.y > 0u);
+      const bool hasBorder = numberOfBorders > 0u;
 
       if (!hasBackground && !hasBorder)
       {
@@ -51,11 +51,11 @@ namespace Krys::UI
 
       // Reserve geometry. A conservative estimate, does not take border-radii into account and assumes
       // same-colored borders.
-      const size_t estimatedVertexCount = 4 * size_t(hasBackground) + 2 * (size_t)numberOfBorders;
-      const size_t estimatedTriangleCount = 2 * size_t(hasBackground) + 2 * (size_t)numberOfBorders;
+      const size_t estimatedVertexCount = 4u * size_t(hasBackground) + 2u * numberOfBorders;
+      const size_t estimatedTriangleCount = 2u * size_t(hasBackground) + 2u * numberOfBorders;
       GeometryMeshWriter geometryWriter(data);
       geometryWriter.ReserveVertices(geometryWriter.TotalVertices() + estimatedVertexCount);
-      geometryWriter.ReserveIndices(geometryWriter.TotalIndices() + 3 * estimatedTriangleCount);
+      geometryWriter.ReserveIndices(geometryWriter.TotalIndices() + 3u * estimatedTriangleCount);
 
       GeometryBackgroundBorder geometry(geometryWriter);
       if (hasBackground)

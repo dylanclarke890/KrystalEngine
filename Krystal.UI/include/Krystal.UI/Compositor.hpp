@@ -66,14 +66,11 @@ namespace Krys::UI
       _commands = CommandList {};
       _commands.Push(Commands::BindRenderTarget {.RenderTarget = target});
 
-      // Layout pass
       auto dimensions = _context.RenderTargets().GetDimensions(target);
       LayoutEngine::Reflow(document.Get(document.Body()), dimensions);
 
-      // Recursive traversal from root
       RenderElement(document, document.Body(), {OriginZero});
 
-      // Submit command list
       _renderer.Submit(_commands);
     }
 
@@ -86,11 +83,9 @@ namespace Krys::UI
       NodeRef node = element.LayoutNode;
 
       Vec2 position = ctx.Origin + Vec2 {NodeLayoutGetLeft(node), NodeLayoutGetTop(node)};
-      Vec2 size = Vec2 {NodeLayoutGetWidth(node), NodeLayoutGetHeight(node)};
-
       RenderContext childCtx {position};
 
-      PaintElement(element, node, childCtx);
+      PaintElement(element, childCtx);
 
       for (ElementHandle child : element.Children)
       {
@@ -98,11 +93,12 @@ namespace Krys::UI
       }
     }
 
-    void PaintElement(Element &element, NodeRef node, const RenderContext &ctx)
+    void PaintElement(Element &element, const RenderContext &ctx)
     {
       using namespace Gfx;
       using namespace Maths;
 
+      NodeRef node = element.LayoutNode;
       if (element.Geometries.empty())
       {
         RenderBox renderBox = BuildRenderBox(node);
@@ -166,7 +162,7 @@ namespace Krys::UI
                                 NodeLayoutGetBorder(node, Edge::Bottom),
                                 NodeLayoutGetBorder(node, Edge::Left)};
 
-      CornerSizes borderRadii = {2000.f, 2000.f, 2000.f, 2000.f};
+      CornerSizes borderRadii = NodeStyleGetBorderRadii(node);
 
       Vec2 fillSize = {borderBoxSize.x - (borderWidths[+BoxEdge::Left] + borderWidths[+BoxEdge::Right]),
                        borderBoxSize.y - (borderWidths[+BoxEdge::Top] + borderWidths[+BoxEdge::Bottom])};

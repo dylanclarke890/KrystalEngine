@@ -72,8 +72,7 @@ namespace Krys::UI
     Array<Gfx::ColourbPremultiplied, 4> _borderColours {Gfx::Colours::Black, Gfx::Colours::Black,
                                                         Gfx::Colours::Black, Gfx::Colours::Black};
     Array<float, 4> _borderWidths {0.f, 0.f, 0.f, 0.f};
-    Array<Maths::Vec2, 4> _borderRadii {Maths::Vec2 {0.f, 0.f}, Maths::Vec2 {0.f, 0.f},
-                                        Maths::Vec2 {0.f, 0.f}, Maths::Vec2 {0.f, 0.f}};
+    Array<float, 4> _borderRadii {0.f, 0.f, 0.f, 0.f};
 
     Gfx::FontFamilyHandle _family {};
     float _fontSize {16.f};
@@ -456,12 +455,12 @@ namespace Krys::UI
       _borderColours = colours;
     }
 
-    NO_DISCARD const Array<Maths::Vec2, 4> &GetBorderRadii() const noexcept
+    NO_DISCARD const Array<float, 4> &GetBorderRadii() const noexcept
     {
       return _borderRadii;
     }
 
-    void SetBorderRadii(const Array<Maths::Vec2, 4> &radii)
+    void SetBorderRadii(const Array<float, 4> &radii)
     {
       _borderRadii = radii;
     }
