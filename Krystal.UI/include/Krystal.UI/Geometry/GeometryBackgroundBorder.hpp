@@ -29,7 +29,7 @@ namespace Krys::UI
     {
       const size_t initialVertexCount = _writer.TotalVertices();
 
-      for (int corner = 0; corner < 4; corner++)
+      for (size_t corner = 0u; corner < 4u; corner++)
       {
         DrawBackgroundCorner(BoxCorner(corner), metrics.InnerPositions[corner],
                              metrics.CircleCenterPositions[corner], metrics.OuterRadii[corner],
@@ -49,10 +49,10 @@ namespace Krys::UI
       const size_t initialVertexCount = _writer.TotalVertices();
 
       const bool shouldDrawEdge[4] = {
-        edgeSizes[+BoxEdge::Top] > 0 && borderColours[+BoxEdge::Top].alpha > 0,
-        edgeSizes[+BoxEdge::Right] > 0 && borderColours[+BoxEdge::Right].alpha > 0,
-        edgeSizes[+BoxEdge::Bottom] > 0 && borderColours[+BoxEdge::Bottom].alpha > 0,
-        edgeSizes[+BoxEdge::Left] > 0 && borderColours[+BoxEdge::Left].alpha > 0,
+        edgeSizes[+BoxEdge::Top] > 0u && borderColours[+BoxEdge::Top].alpha > 0u,
+        edgeSizes[+BoxEdge::Right] > 0u && borderColours[+BoxEdge::Right].alpha > 0u,
+        edgeSizes[+BoxEdge::Bottom] > 0u && borderColours[+BoxEdge::Bottom].alpha > 0u,
+        edgeSizes[+BoxEdge::Left] > 0u && borderColours[+BoxEdge::Left].alpha > 0u,
       };
 
       const bool shouldDrawCorner[4] = {
@@ -62,9 +62,9 @@ namespace Krys::UI
         shouldDrawEdge[+BoxEdge::Bottom] || shouldDrawEdge[+BoxEdge::Left],
       };
 
-      for (int corner = 0; corner < 4; corner++)
+      for (size_t corner = 0u; corner < 4u; corner++)
       {
-        const BoxEdge edge0 = BoxEdge((corner + 3) % 4);
+        const BoxEdge edge0 = BoxEdge((corner + 3u) % 4u);
         const BoxEdge edge1 = BoxEdge(corner);
 
         if (shouldDrawCorner[corner])
@@ -76,10 +76,10 @@ namespace Krys::UI
 
         if (shouldDrawEdge[+edge1])
         {
-          assert(shouldDrawCorner[corner] && shouldDrawCorner[(corner + 1) % 4]
+          assert(shouldDrawCorner[corner] && shouldDrawCorner[(corner + 1u) % 4u]
                  && "Border edges can only be drawn if both of its connected corners are drawn.");
 
-          FillEdge(edge1 == BoxEdge::Left ? (int)initialVertexCount : (int)_writer.TotalVertices());
+          FillEdge(edge1 == BoxEdge::Left ? initialVertexCount : _writer.TotalVertices());
         }
       }
     }
@@ -90,14 +90,14 @@ namespace Krys::UI
     void DrawBackgroundCorner(BoxCorner corner, Maths::Vec2 innerPosition, Maths::Vec2 circleCenterPosition,
                               float R, Maths::Vec2 r, Gfx::ColourbPremultiplied colour)
     {
-      if (R == 0 || r.x <= 0 || r.y <= 0)
+      if (R == 0u || r.x <= 0u || r.y <= 0u)
       {
         DrawPoint(innerPosition, colour);
       }
-      else if (r.x > 0 && r.y > 0)
+      else if (r.x > 0u && r.y > 0u)
       {
-        const float a0 = float((int)corner + 2) * 0.5f * Maths::Pi<float>();
-        const float a1 = float((int)corner + 3) * 0.5f * Maths::Pi<float>();
+        const float a0 = float(+corner + 2u) * 0.5f * Maths::Pi<float>();
+        const float a1 = float(+corner + 3u) * 0.5f * Maths::Pi<float>();
         DrawArc(circleCenterPosition, r, a0, a1, colour, colour, GetNumPoints(R));
       }
     }
@@ -113,7 +113,7 @@ namespace Krys::UI
     }
 
     void DrawArc(Maths::Vec2 centerPosition, Maths::Vec2 r, float a0, float a1,
-                 Gfx::ColourbPremultiplied colour0, Gfx::ColourbPremultiplied colour1, int numberOfPoints)
+                 Gfx::ColourbPremultiplied colour0, Gfx::ColourbPremultiplied colour1, size_t numberOfPoints)
     {
       assert(numberOfPoints >= 2 && r.x > 0 && r.y > 0);
 
@@ -121,16 +121,14 @@ namespace Krys::UI
       _writer.ResizeVertices(vertexOffset + numberOfPoints);
 
       auto *vertices = _writer.Vertices();
-      for (int i = 0; i < numberOfPoints; i++)
+      for (size_t i = 0u; i < numberOfPoints; i++)
       {
-        const float t = float(i) / float(numberOfPoints - 1);
-
+        const float t = float(i) / float(numberOfPoints - 1u);
         const float a = Maths::Lerp(a0, a1, t);
-
         const Maths::Vec2 unitVector(Maths::Cos(a), Maths::Sin(a));
 
         vertices[vertexOffset + i].Position = unitVector * r + centerPosition;
-        vertices[vertexOffset + i].Colour = RoundedLerp(t, colour0, colour1);
+        vertices[vertexOffset + i].Colour = RoundedLerp(colour0, colour1, t);
       }
     }
 
@@ -165,14 +163,14 @@ namespace Krys::UI
                           Maths::Vec2 circleCenterPosition, float R, Maths::Vec2 r,
                           Gfx::ColourbPremultiplied colour0, Gfx::ColourbPremultiplied colour1)
     {
-      const float a0 = float((int)corner + 2) * 0.5f * Maths::Pi<float>();
-      const float a1 = float((int)corner + 3) * 0.5f * Maths::Pi<float>();
+      const float a0 = float(+corner + 2u) * 0.5f * Maths::Pi<float>();
+      const float a1 = float(+corner + 3u) * 0.5f * Maths::Pi<float>();
 
-      if (R == 0)
+      if (R == 0u)
       {
         DrawPointPoint(outerPosition, innerPosition, colour0, colour1);
       }
-      else if (r.x > 0 && r.y > 0)
+      else if (r.x > 0u && r.y > 0u)
       {
         DrawArcArc(circleCenterPosition, R, r, a0, a1, colour0, colour1, GetNumPoints(R));
       }
@@ -199,10 +197,11 @@ namespace Krys::UI
       }
     }
 
-    void DrawArcArc(Maths::Vec2 pos_center, float R, Maths::Vec2 r, float a0, float a1,
-                    Gfx::ColourbPremultiplied color0, Gfx::ColourbPremultiplied color1, int numberOfPoints)
+    void DrawArcArc(Maths::Vec2 centerPosition, float R, Maths::Vec2 r, float a0, float a1,
+                    Gfx::ColourbPremultiplied colour0, Gfx::ColourbPremultiplied colour1,
+                    size_t numberOfPoints)
     {
-      assert(numberOfPoints >= 2 && R > 0 && r.x > 0 && r.y > 0);
+      assert(numberOfPoints >= 2u && R > 0u && r.x > 0u && r.y > 0u);
 
       const size_t vertexOffset = _writer.TotalVertices();
       _writer.ResizeVertices(vertexOffset + 2u * (size_t)numberOfPoints);
@@ -213,18 +212,18 @@ namespace Krys::UI
       _writer.ResizeIndices(indexOffset + 3u * numberOfTriangles);
       auto *indices = _writer.Indices();
 
-      for (size_t i = 0; i < numberOfPoints; i++)
+      for (size_t i = 0u; i < numberOfPoints; i++)
       {
         const float t = float(i) / float(numberOfPoints - 1);
-
         const float a = Maths::Lerp(a0, a1, t);
-        const Gfx::ColourbPremultiplied color = RoundedLerp(t, color0, color1);
-        const Maths::Vec2 unit_vector(Maths::Cos(a), Maths::Sin(a));
 
-        vertices[vertexOffset + 2u * i].Position = unit_vector * r + pos_center;
-        vertices[vertexOffset + 2u * i].Colour = color;
-        vertices[vertexOffset + 2u * i + 1].Position = unit_vector * R + pos_center;
-        vertices[vertexOffset + 2u * i + 1].Colour = color;
+        const Gfx::ColourbPremultiplied colour = RoundedLerp(colour0, colour1, t);
+        const Maths::Vec2 unitVector(Maths::Cos(a), Maths::Sin(a));
+
+        vertices[vertexOffset + 2u * i].Position = unitVector * r + centerPosition;
+        vertices[vertexOffset + 2u * i].Colour = colour;
+        vertices[vertexOffset + 2u * i + 1].Position = unitVector * R + centerPosition;
+        vertices[vertexOffset + 2u * i + 1].Colour = colour;
       }
 
       for (size_t i = 0u; i < numberOfTriangles; i += 2u)
@@ -241,9 +240,9 @@ namespace Krys::UI
 
     void DrawArcPoint(Maths::Vec2 centerPosition, Maths::Vec2 innerPosition, float R, float a0, float a1,
                       Gfx::ColourbPremultiplied colour0, Gfx::ColourbPremultiplied colour1,
-                      int numberOfPoints)
+                      size_t numberOfPoints)
     {
-      assert(R > 0 && numberOfPoints >= 2);
+      assert(R > 0u && numberOfPoints >= 2u);
 
       const size_t vertexOffset = _writer.TotalVertices();
       _writer.ReserveVertices(vertexOffset + numberOfPoints + 2u);
@@ -271,7 +270,7 @@ namespace Krys::UI
       _writer.ResizeIndices(indexOffset + 3u * numberOfTriangles);
       auto *indices = _writer.Indices();
 
-      for (size_t i = 0; i < numberOfTriangles; i++)
+      for (size_t i = 0u; i < numberOfTriangles; i++)
       {
         indices[indexOffset + 3u * i + 0u] =
           Index(i > numberOfTriangles / 2u ? i_vertex_inner1 : i_vertex_inner0);
@@ -283,7 +282,7 @@ namespace Krys::UI
       indices[indexOffset + 3u * (numberOfTriangles - 1u) + 1u] = Index(lastVertex);
     }
 
-    void FillEdge(int nextCornerIndex)
+    void FillEdge(size_t nextCornerIndex)
     {
       const size_t indexOffset = _writer.TotalIndices();
       const size_t numberOfVertices = _writer.TotalVertices();
@@ -303,9 +302,9 @@ namespace Krys::UI
 
 #pragma endregion
 
-    int GetNumPoints(float R) const
+    size_t GetNumPoints(float R) const
     {
-      return Maths::Clamp(3 + RoundToInteger(R / 6.f), 2, 100);
+      return Maths::Clamp(3uz + RoundTo<size_t>(R / 6.f), 2uz, 100uz);
     }
   };
 }
