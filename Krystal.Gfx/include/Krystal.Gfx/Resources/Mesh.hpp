@@ -49,42 +49,42 @@ namespace Krys::Gfx
     {
     }
 
-    constexpr size_t TotalVertices()
+    NO_DISCARD constexpr size_t TotalVertices() const noexcept
     {
       return _data.Vertices.size() / sizeof(Vertex);
     }
 
-    constexpr void ReserveVertices(size_t count)
+    constexpr void ReserveVertices(size_t count) noexcept
     {
       _data.Vertices.reserve(count * sizeof(Vertex));
     }
 
-    constexpr void ResizeVertices(size_t count)
+    constexpr void ResizeVertices(size_t count) noexcept
     {
       _data.Vertices.resize(count * sizeof(Vertex));
     }
 
-    constexpr Vertex *Vertices()
+    NO_DISCARD constexpr Vertex *Vertices() noexcept
     {
       return reinterpret_cast<Vertex *>(_data.Vertices.data());
     }
 
-    constexpr size_t TotalIndices()
+    NO_DISCARD constexpr size_t TotalIndices() const noexcept
     {
       return _data.Indices.size() / sizeof(Index);
     }
 
-    constexpr void ReserveIndices(size_t count)
+    constexpr void ReserveIndices(size_t count) noexcept
     {
       _data.Indices.reserve(count * sizeof(Index));
     }
 
-    constexpr void ResizeIndices(size_t count)
+    constexpr void ResizeIndices(size_t count) noexcept
     {
       _data.Indices.resize(count * sizeof(Index));
     }
 
-    constexpr Index *Indices()
+    NO_DISCARD constexpr Index *Indices() noexcept
     {
       return reinterpret_cast<Index *>(_data.Indices.data());
     }
