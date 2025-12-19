@@ -1,11 +1,11 @@
 #pragma once
 
+#include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.Lib/Array.hpp"
-#include "Krystal.Lib/Types.hpp"
 #include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Types.hpp"
 #include "Krystal.Maths/Interpolate.hpp"
 #include "Krystal.Maths/Vector.hpp"
-#include "Krystal.Gfx/Vertex.hpp"
 
 namespace Krys::UI
 {
@@ -47,23 +47,26 @@ namespace Krys::UI
     return static_cast<std::underlying_type_t<BoxCorner>>(c);
   }
 
-  constexpr int RoundToInteger(float value) noexcept
+  template <std::integral T>
+  constexpr T RoundTo(float value) noexcept
   {
-    if (value > 0.0f)
-      return int(value + 0.5f);
-
-    return int(value - 0.5f);
+    return T(value + (value >= 0.0f ? 0.5f : -0.5f));
   }
 
-  constexpr Gfx::ColourbPremultiplied RoundedLerp(float t, const Gfx::ColourbPremultiplied v0,
-                                                  const Gfx::ColourbPremultiplied v1) noexcept
+  constexpr Gfx::ColourbPremultiplied RoundedLerp(const Gfx::ColourbPremultiplied from,
+                                                  const Gfx::ColourbPremultiplied to, float factor) noexcept
   {
+    const auto Float = [](uchar value) noexcept -> float
+    {
+      return static_cast<float>(value);
+    };
+
     using namespace Maths;
     return Gfx::ColourbPremultiplied {
-      uchar(RoundToInteger(Lerp(float(v0[0]), float(v1[0]), t))),
-      uchar(RoundToInteger(Lerp(float(v0[1]), float(v1[1]), t))),
-      uchar(RoundToInteger(Lerp(float(v0[2]), float(v1[2]), t))),
-      uchar(RoundToInteger(Lerp(float(v0[3]), float(v1[3]), t))),
+      RoundTo<uchar>(Lerp(Float(from[0]), Float(to[0]), factor)),
+      RoundTo<uchar>(Lerp(Float(from[1]), Float(to[1]), factor)),
+      RoundTo<uchar>(Lerp(Float(from[2]), Float(to[2]), factor)),
+      RoundTo<uchar>(Lerp(Float(from[3]), Float(to[3]), factor)),
     };
   }
 }
