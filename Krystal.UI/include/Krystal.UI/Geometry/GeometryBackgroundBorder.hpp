@@ -8,6 +8,7 @@
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Maths/Maths.hpp"
 #include "Krystal.UI/Geometry/BorderMetrics.hpp"
+#include "Krystal.UI/Geometry/Common.hpp"
 
 namespace Krys::UI
 {
@@ -15,21 +16,18 @@ namespace Krys::UI
   {
     NO_COPY_MOVE(GeometryBackgroundBorder)
 
-    using Vertex = Gfx::Vertex::Position2D_ColourbPremultiplied_UV;
-    using Index = uint32;
-
   private:
-    Gfx::MeshData &_data;
+    GeometryMeshWriter &_writer;
 
   public:
-    GeometryBackgroundBorder(Gfx::MeshData &data) noexcept : _data(data)
+    GeometryBackgroundBorder(GeometryMeshWriter &writer) noexcept : _writer(writer)
     {
     }
 
     /// @brief Generate geometry for the background, defined by the inner area of the border metrics.
     void DrawBackground(const BorderMetrics &metrics, Gfx::ColourbPremultiplied colour)
     {
-      const size_t initialVertexCount = _data.TotalVertices<Vertex>();
+      const size_t initialVertexCount = _writer.TotalVertices();
 
       for (int corner = 0; corner < 4; corner++)
       {
@@ -48,7 +46,7 @@ namespace Krys::UI
     {
       assert(!borderColours.empty());
 
-      const size_t initialVertexCount = _data.TotalVertices<Vertex>();
+      const size_t initialVertexCount = _writer.TotalVertices();
 
       const bool shouldDrawEdge[4] = {
         edgeSizes[+BoxEdge::Top] > 0 && borderColours[+BoxEdge::Top].alpha > 0,
@@ -81,7 +79,7 @@ namespace Krys::UI
           assert(shouldDrawCorner[corner] && shouldDrawCorner[(corner + 1) % 4]
                  && "Border edges can only be drawn if both of its connected corners are drawn.");
 
-          FillEdge(edge1 == BoxEdge::Left ? (int)initialVertexCount : (int)_data.TotalVertices<Vertex>());
+          FillEdge(edge1 == BoxEdge::Left ? (int)initialVertexCount : (int)_writer.TotalVertices());
         }
       }
     }
@@ -106,10 +104,10 @@ namespace Krys::UI
 
     void DrawPoint(Maths::Vec2 position, Gfx::ColourbPremultiplied colour)
     {
-      const size_t vertexOffset = _data.TotalVertices<Vertex>();
-      _data.Vertices.resize((vertexOffset + 1u) * sizeof(Vertex));
+      const size_t vertexOffset = _writer.TotalVertices();
+      _writer.ResizeVertices(vertexOffset + 1u);
 
-      Vertex *vertices = reinterpret_cast<Vertex *>(_data.Vertices.data());
+      auto *vertices = _writer.Vertices();
       vertices[vertexOffset].Position = position;
       vertices[vertexOffset].Colour = colour;
     }
@@ -119,10 +117,10 @@ namespace Krys::UI
     {
       assert(numberOfPoints >= 2 && r.x > 0 && r.y > 0);
 
-      const size_t vertexOffset = _data.TotalVertices<Vertex>();
-      _data.Vertices.resize((vertexOffset + numberOfPoints) * sizeof(Vertex));
+      const size_t vertexOffset = _writer.TotalVertices();
+      _writer.ResizeVertices(vertexOffset + numberOfPoints);
 
-      Vertex *vertices = reinterpret_cast<Vertex *>(_data.Vertices.data());
+      auto *vertices = _writer.Vertices();
       for (int i = 0; i < numberOfPoints; i++)
       {
         const float t = float(i) / float(numberOfPoints - 1);
@@ -138,26 +136,24 @@ namespace Krys::UI
 
     void FillBackground(size_t indexStart)
     {
-      const size_t addedVertexCount = _data.TotalVertices<Vertex>() - indexStart;
+      const size_t addedVertexCount = _writer.TotalVertices() - indexStart;
       if (addedVertexCount < 3)
       {
         return; // can't form triangles
       }
-      const size_t newTriangleCount = addedVertexCount - 2;
+      const size_t newTriangleCount = addedVertexCount - 2u;
 
-      const size_t indexCount = _data.TotalIndices<Index>();
-      const size_t newIndexCount = indexCount + (3 * newTriangleCount);
-      const size_t newIndexBytes = newIndexCount * sizeof(Index);
-      _data.Indices.resize(newIndexBytes);
-      Index *indices = reinterpret_cast<Index *>(_data.Indices.data());
+      const size_t indexOffset = _writer.TotalIndices();
+      _writer.ResizeIndices(indexOffset + (3 * newTriangleCount));
 
       // Fill triangle fan indexing
+      Index *indices = _writer.Indices();
       for (size_t i = 0; i < newTriangleCount; i++)
       {
-        size_t idx = indexCount + 3 * i;
-        indices[idx + 0] = static_cast<Index>(indexStart);
-        indices[idx + 1] = static_cast<Index>(indexStart + i + 2);
-        indices[idx + 2] = static_cast<Index>(indexStart + i + 1);
+        size_t index = indexOffset + 3u * i;
+        indices[index + 0u] = Index(indexStart);
+        indices[index + 1u] = Index(indexStart + i + 2u);
+        indices[index + 2u] = Index(indexStart + i + 1u);
       }
     }
 
@@ -191,7 +187,7 @@ namespace Krys::UI
     {
       const bool isColourDifferent = (colour0 != colour1);
 
-      _data.Vertices.reserve((_data.TotalVertices<Vertex>() + (isColourDifferent ? 4 : 2)) * sizeof(Vertex));
+      _writer.ReserveVertices(_writer.TotalVertices() + (isColourDifferent ? 4u : 2u));
 
       DrawPoint(innerPosition, colour0);
       DrawPoint(outerPosition, colour0);
@@ -208,16 +204,14 @@ namespace Krys::UI
     {
       assert(numberOfPoints >= 2 && R > 0 && r.x > 0 && r.y > 0);
 
+      const size_t vertexOffset = _writer.TotalVertices();
+      _writer.ResizeVertices(vertexOffset + 2u * (size_t)numberOfPoints);
+      auto *vertices = _writer.Vertices();
+
       const size_t numberOfTriangles = 2u * ((size_t)numberOfPoints - 1u);
-
-      const size_t vertexOffset = _data.TotalVertices<Vertex>();
-      const size_t indexOffset = _data.TotalIndices<Index>();
-
-      _data.Vertices.resize((vertexOffset + 2u * (size_t)numberOfPoints) * sizeof(Vertex));
-      Vertex *vertices = reinterpret_cast<Vertex *>(_data.Vertices.data());
-
-      _data.Indices.resize((indexOffset + 3u * numberOfTriangles) * sizeof(Index));
-      Index *indices = reinterpret_cast<Index *>(_data.Indices.data());
+      const size_t indexOffset = _writer.TotalIndices();
+      _writer.ResizeIndices(indexOffset + 3u * numberOfTriangles);
+      auto *indices = _writer.Indices();
 
       for (size_t i = 0; i < numberOfPoints; i++)
       {
@@ -251,20 +245,20 @@ namespace Krys::UI
     {
       assert(R > 0 && numberOfPoints >= 2);
 
-      const size_t vertexOffset = _data.TotalVertices<Vertex>();
-      _data.Vertices.reserve((vertexOffset + numberOfPoints + 2) * sizeof(Vertex));
+      const size_t vertexOffset = _writer.TotalVertices();
+      _writer.ReserveVertices(vertexOffset + numberOfPoints + 2u);
 
       // Generate the vertices. We could also split the arc mid-way to create a sharp color transition.
       DrawPoint(innerPosition, colour0);
       DrawArc(centerPosition, Maths::Vec2(R), a0, a1, colour0, colour1, numberOfPoints);
       DrawPoint(innerPosition, colour1);
 
-      assert(_data.TotalVertices<Vertex>() - vertexOffset == numberOfPoints + 2);
+      assert(_writer.TotalVertices() - vertexOffset == numberOfPoints + 2);
 
-      Vertex *vertices = reinterpret_cast<Vertex *>(_data.Vertices.data());
+      auto *vertices = _writer.Vertices();
       // Swap the last two vertices such that the outer edge vertex is last, see the comment for the border
       // drawing functions. Their colors should already be the same.
-      const size_t lastVertex = _data.TotalVertices<Vertex>() - 1u;
+      const size_t lastVertex = _writer.TotalVertices() - 1u;
       std::swap(vertices[lastVertex - 1u].Position, vertices[lastVertex].Position);
 
       // Generate the indices
@@ -273,9 +267,9 @@ namespace Krys::UI
       const size_t i_vertex_inner0 = vertexOffset;
       const size_t i_vertex_inner1 = lastVertex - 1u;
 
-      const size_t indexOffset = _data.TotalIndices<Index>();
-      _data.Indices.resize((indexOffset + 3u * numberOfTriangles) * sizeof(Index));
-      Index *indices = reinterpret_cast<Index *>(_data.Indices.data());
+      const size_t indexOffset = _writer.TotalIndices();
+      _writer.ResizeIndices(indexOffset + 3u * numberOfTriangles);
+      auto *indices = _writer.Indices();
 
       for (size_t i = 0; i < numberOfTriangles; i++)
       {
@@ -291,12 +285,12 @@ namespace Krys::UI
 
     void FillEdge(int nextCornerIndex)
     {
-      const size_t indexOffset = _data.TotalIndices<Index>();
-      const size_t numberOfVertices = _data.TotalVertices<Vertex>();
+      const size_t indexOffset = _writer.TotalIndices();
+      const size_t numberOfVertices = _writer.TotalVertices();
       assert(numberOfVertices >= 2u);
 
-      _data.Indices.resize((indexOffset + 6u) * sizeof(Index));
-      Index *indices = reinterpret_cast<Index *>(_data.Indices.data());
+      _writer.ResizeIndices(indexOffset + 6u);
+      auto *indices = _writer.Indices();
 
       indices[indexOffset + 0u] = Index(numberOfVertices - 2u);
       indices[indexOffset + 1u] = Index(nextCornerIndex);

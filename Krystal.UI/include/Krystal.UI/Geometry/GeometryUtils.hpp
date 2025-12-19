@@ -8,6 +8,7 @@
 #include "Krystal.Maths/Round.hpp"
 #include "Krystal.Maths/Vector.hpp"
 #include "Krystal.UI/Geometry/BorderMetrics.hpp"
+#include "Krystal.UI/Geometry/Common.hpp"
 #include "Krystal.UI/Geometry/GeometryBackgroundBorder.hpp"
 #include "Krystal.UI/Geometry/RenderBox.hpp"
 
@@ -45,21 +46,18 @@ namespace Krys::UI
         return;
       }
 
-      using Vertex = Gfx::Vertex::Position2D_ColourbPremultiplied_UV;
-      using Index = uint32;
+      const BorderMetrics metrics = ComputeBorderMetrics(renderBox.GetBorderOffset(), borderWidths, fillSize,
+                                                         renderBox.GetBorderRadius());
 
       // Reserve geometry. A conservative estimate, does not take border-radii into account and assumes
       // same-colored borders.
       const size_t estimatedVertexCount = 4 * size_t(hasBackground) + 2 * (size_t)numberOfBorders;
       const size_t estimatedTriangleCount = 2 * size_t(hasBackground) + 2 * (size_t)numberOfBorders;
-      data.Vertices.reserve((data.TotalVertices<Vertex>() + estimatedVertexCount) * sizeof(Vertex));
-      data.Indices.reserve((data.TotalIndices<Index>() + 3 * estimatedTriangleCount) * sizeof(Index));
+      GeometryMeshWriter geometryWriter(data);
+      geometryWriter.ReserveVertices(geometryWriter.TotalVertices() + estimatedVertexCount);
+      geometryWriter.ReserveIndices(geometryWriter.TotalIndices() + 3 * estimatedTriangleCount);
 
-      // Generate the geometry.
-      GeometryBackgroundBorder geometry(data);
-      const BorderMetrics metrics = ComputeBorderMetrics(renderBox.GetBorderOffset(), borderWidths, fillSize,
-                                                         renderBox.GetBorderRadius());
-
+      GeometryBackgroundBorder geometry(geometryWriter);
       if (hasBackground)
       {
         geometry.DrawBackground(metrics, backgroundColour);
@@ -71,9 +69,9 @@ namespace Krys::UI
       }
 
 #ifdef _DEBUG
-      const size_t numberOfVertices = data.TotalVertices<Vertex>();
-      const size_t indexCount = data.TotalIndices<Index>();
-      Index *indices = reinterpret_cast<Index *>(data.Indices.data());
+      const size_t numberOfVertices = geometryWriter.TotalVertices();
+      const size_t indexCount = geometryWriter.TotalIndices();
+      auto *indices = geometryWriter.Indices();
 
       for (size_t i = 0; i < indexCount; i++)
       {

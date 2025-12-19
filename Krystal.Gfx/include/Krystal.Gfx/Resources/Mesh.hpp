@@ -27,17 +27,66 @@ namespace Krys::Gfx
   {
     List<byte> Vertices {};
     List<byte> Indices {};
+  };
 
-    template <typename TVertex>
-    constexpr size_t TotalVertices()
+  template <typename T>
+  concept HasVertexLayout = requires() { T::Layout(); };
+
+  template <typename T>
+  concept IsMeshIndex = std::is_integral_v<T>;
+
+  template <HasVertexLayout TVertex, IsMeshIndex TIndex>
+  class MeshDataWriter
+  {
+    using Vertex = TVertex;
+    using Index = TIndex;
+
+  private:
+    MeshData &_data;
+
+  public:
+    constexpr MeshDataWriter(MeshData &data) noexcept : _data(data)
     {
-      return Vertices.size() / sizeof(TVertex);
     }
 
-    template <typename TIndex = uint32>
+    constexpr size_t TotalVertices()
+    {
+      return _data.Vertices.size() / sizeof(Vertex);
+    }
+
+    constexpr void ReserveVertices(size_t count)
+    {
+      _data.Vertices.reserve(count * sizeof(Vertex));
+    }
+
+    constexpr void ResizeVertices(size_t count)
+    {
+      _data.Vertices.resize(count * sizeof(Vertex));
+    }
+
+    constexpr Vertex *Vertices()
+    {
+      return reinterpret_cast<Vertex *>(_data.Vertices.data());
+    }
+
     constexpr size_t TotalIndices()
     {
-      return Indices.size() / sizeof(TIndex);
+      return _data.Indices.size() / sizeof(Index);
+    }
+
+    constexpr void ReserveIndices(size_t count)
+    {
+      _data.Indices.reserve(count * sizeof(Index));
+    }
+
+    constexpr void ResizeIndices(size_t count)
+    {
+      _data.Indices.resize(count * sizeof(Index));
+    }
+
+    constexpr Index *Indices()
+    {
+      return reinterpret_cast<Index *>(_data.Indices.data());
     }
   };
 

@@ -114,7 +114,7 @@ namespace Krys::UI
 
         MeshDesc desc {.Vertices = data.Vertices,
                        .Indices = data.Indices,
-                       .Layout = Vertex::Position2D_ColourbPremultiplied_UV::Layout(),
+                       .Layout = Vertex::Layout(),
                        .Primitive = PrimitiveType::Triangles,
                        .Type = MeshType::Static};
 

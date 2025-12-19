@@ -1,12 +1,18 @@
 #pragma once
 
 #include "Krystal.Lib/Array.hpp"
+#include "Krystal.Lib/Types.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Maths/Interpolate.hpp"
 #include "Krystal.Maths/Vector.hpp"
+#include "Krystal.Gfx/Vertex.hpp"
 
 namespace Krys::UI
 {
+  using Vertex = Gfx::Vertex::Position2D_ColourbPremultiplied_UV;
+  using Index = uint32;
+  using GeometryMeshWriter = Gfx::MeshDataWriter<Vertex, Index>;
+
   /// @brief Ordered by top, right, bottom, left.
   using EdgeSizes = Array<float, 4>;
 
