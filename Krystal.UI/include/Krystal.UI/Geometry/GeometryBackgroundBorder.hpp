@@ -76,27 +76,12 @@ namespace Krys::UI
 
         if (shouldDrawCorner[corner])
         {
-          if (hasEdge[+edge0] && hasEdge[+edge1])
-          {
-            DrawBorderCorner(BoxCorner(corner), metrics.OuterPositions[corner],
-                             metrics.InnerPositions[corner], metrics.CircleCenterPositions[corner],
-                             metrics.OuterRadii[corner], metrics.InnerRadii[corner], borderColours[+edge0],
-                             borderColours[+edge1]);
-          }
-          else if (hasEdge[+edge0])
-          {
-            DrawBorderCorner(BoxCorner(corner), metrics.OuterPositions[corner],
-                             metrics.InnerPositions[corner], metrics.CircleCenterPositions[corner],
-                             metrics.OuterRadii[corner], metrics.InnerRadii[corner], borderColours[+edge0],
-                             borderColours[+edge0]);
-          }
-          else if (hasEdge[+edge1])
-          {
-            DrawBorderCorner(BoxCorner(corner), metrics.OuterPositions[corner],
-                             metrics.InnerPositions[corner], metrics.CircleCenterPositions[corner],
-                             metrics.OuterRadii[corner], metrics.InnerRadii[corner], borderColours[+edge1],
-                             borderColours[+edge1]);
-          }
+          const auto &c0 = hasEdge[+edge0] ? borderColours[+edge0] : borderColours[+edge1];
+          const auto &c1 = hasEdge[+edge1] ? borderColours[+edge1] : borderColours[+edge0];
+
+          DrawBorderCorner(BoxCorner(corner), metrics.OuterPositions[corner], metrics.InnerPositions[corner],
+                           metrics.CircleCenterPositions[corner], metrics.OuterRadii[corner],
+                           metrics.InnerRadii[corner], c0, c1);
         }
 
         if (shouldDrawEdge[+edge1])
