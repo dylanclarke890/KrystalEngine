@@ -134,19 +134,19 @@ namespace Krys::UI
         float scale = FLT_MAX;
         // Top
         scale =
-          Min(scale, innerSize.x / (outerRadii[+BoxCorner::TopLeft] + outerRadii[+BoxCorner::TopRight]));
+          Min(scale, outerSize.x / (outerRadii[+BoxCorner::TopLeft] + outerRadii[+BoxCorner::TopRight]));
 
         // Right
         scale =
-          Min(scale, innerSize.y / (outerRadii[+BoxCorner::TopRight] + outerRadii[+BoxCorner::BottomRight]));
+          Min(scale, outerSize.y / (outerRadii[+BoxCorner::TopRight] + outerRadii[+BoxCorner::BottomRight]));
 
         // Bottom
         scale = Min(scale,
-                    innerSize.x / (outerRadii[+BoxCorner::BottomRight] + outerRadii[+BoxCorner::BottomLeft]));
+                    outerSize.x / (outerRadii[+BoxCorner::BottomRight] + outerRadii[+BoxCorner::BottomLeft]));
 
         // Left
         scale =
-          Min(scale, innerSize.y / (outerRadii[+BoxCorner::BottomLeft] + outerRadii[+BoxCorner::TopLeft]));
+          Min(scale, outerSize.y / (outerRadii[+BoxCorner::BottomLeft] + outerRadii[+BoxCorner::TopLeft]));
 
         scale = Min(1.0f, scale);
 

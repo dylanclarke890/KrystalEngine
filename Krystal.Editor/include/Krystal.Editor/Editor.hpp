@@ -113,7 +113,7 @@ namespace Krys
       _document.AppendChild(_document.Body(), leftBox);
       _document.ElementStyleSetWidth(leftBox, 600.f);
       _document.ElementStyleSetHeight(leftBox, 600.f);
-      _document.ElementStyleSetBorderRadii(leftBox, {0.f, 0.f, 0.f, 0.f});
+      _document.ElementStyleSetBorderRadii(leftBox, {3000.f, 3000.f, 3000.f, 3000.f});
       _document.ElementStyleSetBorderWidths(leftBox, {20.f, 20.f, 20.f, 20.f});
       _document.ElementStyleSetBorderColours(leftBox, {Blue, Red, Orange, Black});
       _document.ElementStyleSetBackgroundColour(leftBox, Green);
