@@ -220,7 +220,7 @@ namespace Krys::Gfx
     static constexpr ColourbPremultiplied Black {0, 0, 0, 255};
     static constexpr ColourbPremultiplied Transparent {0, 0, 0, 0};
     static constexpr ColourbPremultiplied Red {255, 0, 0, 255};
-    static constexpr ColourbPremultiplied Green {0, 255, 0, 255};
+    static constexpr ColourbPremultiplied Green {0, 128, 0, 255};
     static constexpr ColourbPremultiplied Blue {0, 0, 255, 255};
     static constexpr ColourbPremultiplied Gray25 {64, 64, 64, 255};
     static constexpr ColourbPremultiplied Gray50 {128, 128, 128, 255};

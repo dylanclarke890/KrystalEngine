@@ -72,10 +72,19 @@ namespace Krys::UI
       const size_t numberOfVertices = geometryWriter.TotalVertices();
       const size_t indexCount = geometryWriter.TotalIndices();
       auto *indices = geometryWriter.Indices();
+      auto *vertices = geometryWriter.Vertices();
 
-      for (size_t i = 0; i < indexCount; i++)
+      for (size_t i = 0u; i < indexCount; i++)
       {
         assert(indices[i] < numberOfVertices);
+      }
+
+      for (size_t i = 0u; i < indexCount; i += 3u)
+      {
+        const auto &c0 = vertices[indices[i + 0u]].Colour;
+        const auto &c1 = vertices[indices[i + 1u]].Colour;
+        const auto &c2 = vertices[indices[i + 2u]].Colour;
+        //assert(c0 == c1 && c1 == c2);
       }
 #endif
     }

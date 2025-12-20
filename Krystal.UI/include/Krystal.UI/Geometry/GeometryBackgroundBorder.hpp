@@ -139,8 +139,8 @@ namespace Krys::UI
       {
         return; // can't form triangles
       }
-      const size_t newTriangleCount = addedVertexCount - 2u;
 
+      const size_t newTriangleCount = addedVertexCount - 2u;
       const size_t indexOffset = _writer.TotalIndices();
       _writer.ResizeIndices(indexOffset + (3 * newTriangleCount));
 
@@ -198,35 +198,31 @@ namespace Krys::UI
     }
 
     void DrawArcArc(Maths::Vec2 centerPosition, float R, Maths::Vec2 r, float a0, float a1,
-                    Gfx::ColourbPremultiplied colour0, Gfx::ColourbPremultiplied colour1,
-                    size_t numberOfPoints)
+                    Gfx::ColourbPremultiplied colour, size_t numberOfPoints)
     {
-      assert(numberOfPoints >= 2u && R > 0u && r.x > 0u && r.y > 0u);
-
       const size_t vertexOffset = _writer.TotalVertices();
-      _writer.ResizeVertices(vertexOffset + 2u * (size_t)numberOfPoints);
+      _writer.ResizeVertices(vertexOffset + 2u * numberOfPoints);
       auto *vertices = _writer.Vertices();
 
-      const size_t numberOfTriangles = 2u * ((size_t)numberOfPoints - 1u);
+      const size_t numberOfTriangles = 2u * (numberOfPoints - 1u);
       const size_t indexOffset = _writer.TotalIndices();
       _writer.ResizeIndices(indexOffset + 3u * numberOfTriangles);
       auto *indices = _writer.Indices();
 
-      for (size_t i = 0u; i < numberOfPoints; i++)
+      for (size_t i = 0; i < numberOfPoints; i++)
       {
-        const float t = float(i) / float(numberOfPoints - 1);
+        const float t = float(i) / float(numberOfPoints - 1u);
         const float a = Maths::Lerp(a0, a1, t);
+        const Maths::Vec2 u(Maths::Cos(a), Maths::Sin(a));
 
-        const Gfx::ColourbPremultiplied colour = RoundedLerp(colour0, colour1, t);
-        const Maths::Vec2 unitVector(Maths::Cos(a), Maths::Sin(a));
+        vertices[vertexOffset + 2u * i + 0u].Position = u * r + centerPosition; // inner
+        vertices[vertexOffset + 2u * i + 0u].Colour = colour;
 
-        vertices[vertexOffset + 2u * i].Position = unitVector * r + centerPosition;
-        vertices[vertexOffset + 2u * i].Colour = colour;
-        vertices[vertexOffset + 2u * i + 1].Position = unitVector * R + centerPosition;
-        vertices[vertexOffset + 2u * i + 1].Colour = colour;
+        vertices[vertexOffset + 2u * i + 1u].Position = u * R + centerPosition; // outer
+        vertices[vertexOffset + 2u * i + 1u].Colour = colour;
       }
 
-      for (size_t i = 0u; i < numberOfTriangles; i += 2u)
+      for (size_t i = 0; i < numberOfTriangles; i += 2u)
       {
         indices[indexOffset + 3u * i + 0u] = Index(vertexOffset + i + 0u);
         indices[indexOffset + 3u * i + 1u] = Index(vertexOffset + i + 2u);
@@ -238,48 +234,66 @@ namespace Krys::UI
       }
     }
 
+    void DrawArcArc(Maths::Vec2 centerPosition, float R, Maths::Vec2 r, float a0, float a1,
+                    Gfx::ColourbPremultiplied colour0, Gfx::ColourbPremultiplied colour1,
+                    size_t numberOfPoints)
+    {
+      const float am = 0.5f * (a0 + a1);
+
+      // Half 0 includes a0..am
+      const size_t n0 = (numberOfPoints / 2u) + 1u; // e.g. 9 -> 5 points
+      // Half 1 includes am..a1
+      const size_t n1 = numberOfPoints - (n0 - 1u); // overlap seam logically, but vertices duplicated
+
+      DrawArcArc(centerPosition, R, r, a0, am, colour0, n0);
+      DrawArcArc(centerPosition, R, r, am, a1, colour1, n1);
+    }
+
+    void DrawArcPoint(Maths::Vec2 centerPosition, Maths::Vec2 innerPosition, float R, float a0, float a1,
+                      Gfx::ColourbPremultiplied colour, size_t numberOfPoints)
+    {
+      // vertices: [inner] + [arc points]
+      const size_t vertexOffset = _writer.TotalVertices();
+      _writer.ResizeVertices(vertexOffset + 1u + numberOfPoints);
+      auto *vertices = _writer.Vertices();
+
+      vertices[vertexOffset].Position = innerPosition;
+      vertices[vertexOffset].Colour = colour;
+
+      for (size_t i = 0; i < numberOfPoints; i++)
+      {
+        const float t = float(i) / float(numberOfPoints - 1u);
+        const float a = Maths::Lerp(a0, a1, t);
+        const Maths::Vec2 u(Maths::Cos(a), Maths::Sin(a));
+
+        vertices[vertexOffset + 1u + i].Position = u * R + centerPosition;
+        vertices[vertexOffset + 1u + i].Colour = colour;
+      }
+
+      // fan triangles
+      const size_t triCount = numberOfPoints - 1u;
+      const size_t indexOffset = _writer.TotalIndices();
+      _writer.ResizeIndices(indexOffset + 3u * triCount);
+      auto *indices = _writer.Indices();
+
+      for (size_t i = 0; i < triCount; i++)
+      {
+        indices[indexOffset + 3u * i + 0u] = Index(vertexOffset); // inner
+        indices[indexOffset + 3u * i + 1u] = Index(vertexOffset + 1u + i);
+        indices[indexOffset + 3u * i + 2u] = Index(vertexOffset + 1u + i + 1u);
+      }
+    }
+
     void DrawArcPoint(Maths::Vec2 centerPosition, Maths::Vec2 innerPosition, float R, float a0, float a1,
                       Gfx::ColourbPremultiplied colour0, Gfx::ColourbPremultiplied colour1,
                       size_t numberOfPoints)
     {
-      assert(R > 0u && numberOfPoints >= 2u);
+      const float am = 0.5f * (a0 + a1);
+      const size_t n0 = (numberOfPoints / 2u) + 1u;
+      const size_t n1 = numberOfPoints - (n0 - 1u);
 
-      const size_t vertexOffset = _writer.TotalVertices();
-      _writer.ReserveVertices(vertexOffset + numberOfPoints + 2u);
-
-      // Generate the vertices. We could also split the arc mid-way to create a sharp color transition.
-      DrawPoint(innerPosition, colour0);
-      DrawArc(centerPosition, Maths::Vec2(R), a0, a1, colour0, colour1, numberOfPoints);
-      DrawPoint(innerPosition, colour1);
-
-      assert(_writer.TotalVertices() - vertexOffset == numberOfPoints + 2);
-
-      auto *vertices = _writer.Vertices();
-      // Swap the last two vertices such that the outer edge vertex is last, see the comment for the border
-      // drawing functions. Their colors should already be the same.
-      const size_t lastVertex = _writer.TotalVertices() - 1u;
-      std::swap(vertices[lastVertex - 1u].Position, vertices[lastVertex].Position);
-
-      // Generate the indices
-      const size_t numberOfTriangles = ((size_t)numberOfPoints - 1u);
-
-      const size_t i_vertex_inner0 = vertexOffset;
-      const size_t i_vertex_inner1 = lastVertex - 1u;
-
-      const size_t indexOffset = _writer.TotalIndices();
-      _writer.ResizeIndices(indexOffset + 3u * numberOfTriangles);
-      auto *indices = _writer.Indices();
-
-      for (size_t i = 0u; i < numberOfTriangles; i++)
-      {
-        indices[indexOffset + 3u * i + 0u] =
-          Index(i > numberOfTriangles / 2u ? i_vertex_inner1 : i_vertex_inner0);
-        indices[indexOffset + 3u * i + 1u] = Index(vertexOffset + i + 2u);
-        indices[indexOffset + 3u * i + 2u] = Index(vertexOffset + i + 1u);
-      }
-
-      // Since we swapped the last two vertices we also need to change the last triangle.
-      indices[indexOffset + 3u * (numberOfTriangles - 1u) + 1u] = Index(lastVertex);
+      DrawArcPoint(centerPosition, innerPosition, R, a0, am, colour0, n0);
+      DrawArcPoint(centerPosition, innerPosition, R, am, a1, colour1, n1);
     }
 
     void FillEdge(size_t nextCornerIndex)
@@ -304,7 +318,7 @@ namespace Krys::UI
 
     size_t GetNumPoints(float R) const
     {
-      return Maths::Clamp(3uz + RoundTo<size_t>(R / 6.f), 2uz, 100uz);
+      return Maths::Clamp(RoundTo<size_t>(R / 6.f) + 3uz, 2uz, 100uz);
     }
   };
 }

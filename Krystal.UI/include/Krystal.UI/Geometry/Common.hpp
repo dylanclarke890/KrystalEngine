@@ -47,6 +47,7 @@ namespace Krys::UI
     return static_cast<std::underlying_type_t<BoxCorner>>(c);
   }
 
+  // TODO: consider moving to Maths
   template <std::integral T>
   constexpr T RoundTo(float value) noexcept
   {

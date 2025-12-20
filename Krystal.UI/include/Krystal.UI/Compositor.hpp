@@ -120,7 +120,9 @@ namespace Krys::UI
       // Emit draw commands for geometry
       for (auto &geometry : element.Geometries)
       {
-        Mat4 transform = Maths::Translate(Vec3 {ctx.Origin + geometry.Translation, 0.f});
+        Mat4 transform = Identity<Mat4>();
+        transform = Maths::Translate(transform, Vec3 {ctx.Origin + geometry.Translation, 0.f});
+
         _commands.Push(Commands::DrawShape2D {
           .Mesh = geometry.Mesh,
           .Texture = {},
