@@ -51,10 +51,12 @@ namespace Krys::UI
 
       // Reserve geometry. A conservative estimate, does not take border-radii into account and assumes
       // same-colored borders.
-      const size_t estimatedVertexCount = 4u * size_t(hasBackground) + 2u * numberOfBorders;
-      const size_t estimatedTriangleCount = 2u * size_t(hasBackground) + 2u * numberOfBorders;
       GeometryMeshWriter geometryWriter(data);
+
+      const size_t estimatedVertexCount = 4u * size_t(hasBackground) + 2u * numberOfBorders;
       geometryWriter.ReserveVertices(geometryWriter.TotalVertices() + estimatedVertexCount);
+
+      const size_t estimatedTriangleCount = 2u * size_t(hasBackground) + 2u * numberOfBorders;
       geometryWriter.ReserveIndices(geometryWriter.TotalIndices() + 3u * estimatedTriangleCount);
 
       GeometryBackgroundBorder geometry(geometryWriter);
@@ -78,14 +80,6 @@ namespace Krys::UI
       {
         assert(indices[i] < numberOfVertices);
       }
-
-      for (size_t i = 0u; i < indexCount; i += 3u)
-      {
-        const auto &c0 = vertices[indices[i + 0u]].Colour;
-        const auto &c1 = vertices[indices[i + 1u]].Colour;
-        const auto &c2 = vertices[indices[i + 2u]].Colour;
-        //assert(c0 == c1 && c1 == c2);
-      }
 #endif
     }
 
@@ -96,7 +90,7 @@ namespace Krys::UI
 
       BorderMetrics metrics = {};
 
-      // -- Find the corner positions --
+      // Find the corner positions
 
       const Vec2 innerPosition = outerPosition + Vec2(edgeSizes[+BoxEdge::Left], edgeSizes[+BoxEdge::Top]);
       const Vec2 outerSize = innerSize
@@ -117,7 +111,7 @@ namespace Krys::UI
         innerPosition + Vec2(0, innerSize.y),
       };
 
-      // -- For curved borders, find the positions to draw ellipses around, and the scaled outer and inner
+      // For curved borders, find the positions to draw ellipses around, and the scaled outer and inner
       // radii --
 
       const float sumOfRadii =
@@ -131,23 +125,18 @@ namespace Krys::UI
         outerRadii = initialOuterRadii;
 
         // Scale the radii such that we have no overlapping curves.
+        float radiiScale[4] = {
+          outerSize.x / (outerRadii[+BoxCorner::TopLeft] + outerRadii[+BoxCorner::TopRight]),
+          outerSize.y / (outerRadii[+BoxCorner::TopRight] + outerRadii[+BoxCorner::BottomRight]),
+          outerSize.x / (outerRadii[+BoxCorner::BottomRight] + outerRadii[+BoxCorner::BottomLeft]),
+          outerSize.y / (outerRadii[+BoxCorner::BottomLeft] + outerRadii[+BoxCorner::TopLeft]),
+        };
+
         float scale = FLT_MAX;
-        // Top
-        scale =
-          Min(scale, outerSize.x / (outerRadii[+BoxCorner::TopLeft] + outerRadii[+BoxCorner::TopRight]));
-
-        // Right
-        scale =
-          Min(scale, outerSize.y / (outerRadii[+BoxCorner::TopRight] + outerRadii[+BoxCorner::BottomRight]));
-
-        // Bottom
-        scale = Min(scale,
-                    outerSize.x / (outerRadii[+BoxCorner::BottomRight] + outerRadii[+BoxCorner::BottomLeft]));
-
-        // Left
-        scale =
-          Min(scale, outerSize.y / (outerRadii[+BoxCorner::BottomLeft] + outerRadii[+BoxCorner::TopLeft]));
-
+        for (size_t i = 0u; i < 4u; i++)
+        {
+          scale = Min(scale, radiiScale[i]);
+        }
         scale = Min(1.0f, scale);
 
         for (float &radius : outerRadii)

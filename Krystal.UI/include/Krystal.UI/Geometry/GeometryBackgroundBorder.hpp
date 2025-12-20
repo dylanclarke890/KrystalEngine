@@ -48,11 +48,18 @@ namespace Krys::UI
 
       const size_t initialVertexCount = _writer.TotalVertices();
 
+      const bool hasEdge[4] = {
+        edgeSizes[+BoxEdge::Top] > 0u,
+        edgeSizes[+BoxEdge::Right] > 0u,
+        edgeSizes[+BoxEdge::Bottom] > 0u,
+        edgeSizes[+BoxEdge::Left] > 0u,
+      };
+
       const bool shouldDrawEdge[4] = {
-        edgeSizes[+BoxEdge::Top] > 0u && borderColours[+BoxEdge::Top].alpha > 0u,
-        edgeSizes[+BoxEdge::Right] > 0u && borderColours[+BoxEdge::Right].alpha > 0u,
-        edgeSizes[+BoxEdge::Bottom] > 0u && borderColours[+BoxEdge::Bottom].alpha > 0u,
-        edgeSizes[+BoxEdge::Left] > 0u && borderColours[+BoxEdge::Left].alpha > 0u,
+        hasEdge[+BoxEdge::Top] && borderColours[+BoxEdge::Top].alpha > 0u,
+        hasEdge[+BoxEdge::Right] && borderColours[+BoxEdge::Right].alpha > 0u,
+        hasEdge[+BoxEdge::Bottom] && borderColours[+BoxEdge::Bottom].alpha > 0u,
+        hasEdge[+BoxEdge::Left] && borderColours[+BoxEdge::Left].alpha > 0u,
       };
 
       const bool shouldDrawCorner[4] = {
@@ -69,9 +76,27 @@ namespace Krys::UI
 
         if (shouldDrawCorner[corner])
         {
-          DrawBorderCorner(BoxCorner(corner), metrics.OuterPositions[corner], metrics.InnerPositions[corner],
-                           metrics.CircleCenterPositions[corner], metrics.OuterRadii[corner],
-                           metrics.InnerRadii[corner], borderColours[+edge0], borderColours[+edge1]);
+          if (hasEdge[+edge0] && hasEdge[+edge1])
+          {
+            DrawBorderCorner(BoxCorner(corner), metrics.OuterPositions[corner],
+                             metrics.InnerPositions[corner], metrics.CircleCenterPositions[corner],
+                             metrics.OuterRadii[corner], metrics.InnerRadii[corner], borderColours[+edge0],
+                             borderColours[+edge1]);
+          }
+          else if (hasEdge[+edge0])
+          {
+            DrawBorderCorner(BoxCorner(corner), metrics.OuterPositions[corner],
+                             metrics.InnerPositions[corner], metrics.CircleCenterPositions[corner],
+                             metrics.OuterRadii[corner], metrics.InnerRadii[corner], borderColours[+edge0],
+                             borderColours[+edge0]);
+          }
+          else if (hasEdge[+edge1])
+          {
+            DrawBorderCorner(BoxCorner(corner), metrics.OuterPositions[corner],
+                             metrics.InnerPositions[corner], metrics.CircleCenterPositions[corner],
+                             metrics.OuterRadii[corner], metrics.InnerRadii[corner], borderColours[+edge1],
+                             borderColours[+edge1]);
+          }
         }
 
         if (shouldDrawEdge[+edge1])
