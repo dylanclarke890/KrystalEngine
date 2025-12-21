@@ -78,21 +78,21 @@ namespace Krys
     return static_cast<EnumType>(~static_cast<std::underlying_type_t<EnumType>>(a));                         \
   }                                                                                                          \
                                                                                                              \
-  inline EnumType &operator|=(EnumType &a, EnumType b)                                                       \
+  inline constexpr EnumType &operator|=(EnumType &a, EnumType b)                                             \
   {                                                                                                          \
     return a = a | b;                                                                                        \
   }                                                                                                          \
                                                                                                              \
-  inline EnumType &operator&=(EnumType &a, EnumType b)                                                       \
+  inline constexpr EnumType &operator&=(EnumType &a, EnumType b)                                             \
   {                                                                                                          \
     return a = a & b;                                                                                        \
   }                                                                                                          \
                                                                                                              \
-  inline EnumType &operator^=(EnumType &a, EnumType b)                                                       \
+  inline constexpr EnumType &operator^=(EnumType &a, EnumType b)                                             \
   {                                                                                                          \
     return a = a ^ b;                                                                                        \
   }                                                                                                          \
-  inline bool operator!(EnumType a)                                                                          \
+  inline constexpr bool operator!(EnumType a)                                                                \
   {                                                                                                          \
     return static_cast<std::underlying_type_t<EnumType>>(a) == 0;                                            \
   }

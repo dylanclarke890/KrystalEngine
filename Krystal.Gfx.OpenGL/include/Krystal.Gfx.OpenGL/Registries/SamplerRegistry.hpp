@@ -3,6 +3,8 @@
 #include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Sampler.hpp"
+#include "Krystal.Gfx.OpenGL/Mappers/Enums/WrapMode.hpp"
+#include "Krystal.Gfx.OpenGL/Mappers/Enums/FilterMode.hpp"
 #include "Krystal.Gfx/Registries/ISamplerRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
 #include "Krystal.Lib/Attributes.hpp"
@@ -81,31 +83,6 @@ namespace Krys::Gfx::OpenGL
       auto handle = _samplers.Add(std::move(sampler));
       _cache.Add(cacheKey, handle);
       return handle;
-    }
-
-    NO_DISCARD static GLenum MapFilterMode(FilterMode mode) noexcept
-    {
-      switch (mode)
-      {
-        case FilterMode::Nearest:              return GL_NEAREST;
-        case FilterMode::Linear:               return GL_LINEAR;
-        case FilterMode::NearestMipmapNearest: return GL_NEAREST_MIPMAP_NEAREST;
-        case FilterMode::LinearMipmapNearest:  return GL_LINEAR_MIPMAP_NEAREST;
-        case FilterMode::NearestMipmapLinear:  return GL_NEAREST_MIPMAP_LINEAR;
-        case FilterMode::LinearMipmapLinear:   return GL_LINEAR_MIPMAP_LINEAR;
-        default:                               return GL_LINEAR;
-      }
-    }
-
-    NO_DISCARD static GLenum MapWrapMode(WrapMode mode) noexcept
-    {
-      switch (mode)
-      {
-        case WrapMode::Repeat:        return GL_REPEAT;
-        case WrapMode::ClampToEdge:   return GL_CLAMP_TO_EDGE;
-        case WrapMode::ClampToBorder: return GL_CLAMP_TO_BORDER;
-        default:                      return GL_REPEAT;
-      }
     }
   };
 }

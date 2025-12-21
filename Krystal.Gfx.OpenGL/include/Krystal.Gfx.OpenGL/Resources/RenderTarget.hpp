@@ -54,6 +54,7 @@ namespace Krys::Gfx::OpenGL
 
     void AddColorAttachment(const RenderTargetAttachment &attachment) noexcept
     {
+      assert(attachment.Texture != 0 && "Attachment texture cannot be zero.");
       glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0 + static_cast<GLenum>(_colorAttachments.size()),
                                 attachment.Texture, 0);
       _colorAttachments.push_back(attachment);

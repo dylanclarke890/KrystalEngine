@@ -70,7 +70,7 @@ namespace Krys::UI
         geometry.DrawBorder(metrics, borderWidths, borderColours);
       }
 
-#ifdef _DEBUG
+#ifdef KRYS_BUILD_DEBUG
       const size_t numberOfVertices = geometryWriter.TotalVertices();
       const size_t indexCount = geometryWriter.TotalIndices();
       auto *indices = geometryWriter.Indices();
