@@ -38,7 +38,7 @@ namespace Krys::UI
     List<Entry> _entries;
 
   public:
-    explicit LayerPool(Gfx::IContext &context) : _context(context), _entries()
+    explicit LayerPool(Gfx::IContext &context) noexcept : _context(context), _entries()
     {
     }
 
@@ -50,8 +50,10 @@ namespace Krys::UI
       }
     }
 
-    Gfx::RenderTargetHandle Acquire(Maths::Vec2 size)
+    NO_DISCARD Gfx::RenderTargetHandle Acquire(Maths::Vec2 size)
     {
+      const uint32 Samples = 2u;
+
       using namespace Gfx;
 
       for (auto &e : _entries)
@@ -63,18 +65,27 @@ namespace Krys::UI
         }
       }
 
-      // Allocate new full-size render target
+      AttachmentDesc colourDesc {
+        .Type = AttachmentType::Colour,
+        .Format = PixelFormat::R8G8B8A8,
+        .OnLoad = AttachmentLoadOp::Clear,
+        .OnStore = AttachmentStoreOp::Store,
+        .ClearValue = AttachmentClearValue::Colour(Colours::Transparent.ToVec4()),
+      };
+
+      AttachmentDesc depthStencilDesc {
+        .Type = AttachmentType::DepthStencil,
+        .Format = PixelFormat::DEPTH24STENCIL8,
+        .OnLoad = AttachmentLoadOp::Clear,
+        .OnStore = AttachmentStoreOp::Store,
+        .ClearValue = AttachmentClearValue::DepthStencil(1.f, 0u),
+      };
+
       RenderTargetHandle target = _context.RenderTargets().Create({
-        .Width = (uint32)size.x,
-        .Height = (uint32)size.y,
+        .Width = static_cast<uint32>(size.x),
+        .Height = static_cast<uint32>(size.y),
         .Samples = 2u,
-        .Attachments = {{
-          .Type = AttachmentType::Colour,
-          .Format = PixelFormat::R8G8B8A8,
-          .OnLoad = AttachmentLoadOp::Clear,
-          .OnStore = AttachmentStoreOp::Store,
-          .ClearValue = AttachmentClearValue::Colour(Colours::Transparent.ToVec4()),
-        }},
+        .Attachments = {colourDesc, depthStencilDesc},
       });
 
       _entries.push_back({target, true});

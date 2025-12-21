@@ -80,6 +80,7 @@ namespace Krys::Gfx::OpenGL
     auto &textures = static_cast<TextureRegistry &>(_context.Textures());
     auto &renderTargets = static_cast<RenderTargetRegistry &>(_context.RenderTargets());
 
+    glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -281,6 +282,7 @@ namespace Krys::Gfx::OpenGL
     }
 
     glDisable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
   }
 
   void Renderer::DrawTextOutlined(const utf8_string &text, FontHandle fontHandle, float ptSize,

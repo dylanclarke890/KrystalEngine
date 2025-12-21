@@ -41,6 +41,8 @@
     </ClInclude>
     <ClInclude Include="include\Krystal.Gfx\Enums\BufferBitFlags.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Enums\FilterMode.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Enums\ImageType.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Enums\PixelFormat.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Enums\VertexAttributeType.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Enums\WrapMode.hpp" />
     <ClInclude Include="include\Krystal.Gfx\FontAtlasLoader.hpp">

@@ -200,6 +200,7 @@
     <ClInclude Include="include\Krystal.Lib\StronglyTypedValue.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types.hpp" />
     <ClInclude Include="include\Krystal.Lib\TypeName.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Variant.hpp" />
     <ClInclude Include="include\Krystal.Lib\Version.hpp" />
   </ItemGroup>
   <ItemGroup>

@@ -53,6 +53,8 @@
     </ClInclude>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Mappers\Enums\BufferBitFlags.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Mappers\Enums\FilterMode.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Mappers\Enums\ImageType.hpp" />
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Mappers\Enums\PixelFormat.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Mappers\Enums\VertexAttributeType.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Mappers\Enums\WrapMode.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Registries\BufferRegistry.hpp">
