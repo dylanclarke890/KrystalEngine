@@ -6,12 +6,12 @@
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/IRenderer.hpp"
 #include "Krystal.Gfx/Utils/MeshDataUtils.hpp"
+#include "Krystal.Lib/Array.hpp"
 #include "Krystal.Lib/DebugBreak.hpp"
 #include "Krystal.Lib/HashUtils.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Stack.hpp"
 #include "Krystal.Lib/Types.hpp"
-#include "Krystal.Log/ILogger.hpp"
 #include "Krystal.UI/Document.hpp"
 #include "Krystal.UI/Geometry/GeometryUtils.hpp"
 #include "Krystal.UI/Geometry/RenderBox.hpp"
@@ -36,32 +36,21 @@ namespace Krys::UI
 
     Gfx::IContext &_context;
     List<Entry> _entries;
-    Maths::Vec2 _size;
 
   public:
-    explicit LayerPool(Gfx::IContext &context) : _context(context), _entries(), _size({0.f, 0.f})
+    explicit LayerPool(Gfx::IContext &context) : _context(context), _entries()
     {
     }
 
-    void BeginFrame(Maths::Vec2 size)
+    void BeginFrame()
     {
-      if (_size == size)
-      {
-        for (auto &e : _entries)
-        {
-          _context.RenderTargets().Destroy(e.Target);
-        }
-        _entries.clear();
-      }
-
-      _size = size;
       for (auto &e : _entries)
       {
         e.InUse = false;
       }
     }
 
-    Gfx::RenderTargetHandle Acquire()
+    Gfx::RenderTargetHandle Acquire(Maths::Vec2 size)
     {
       using namespace Gfx;
 
@@ -76,8 +65,9 @@ namespace Krys::UI
 
       // Allocate new full-size render target
       RenderTargetHandle target = _context.RenderTargets().Create({
-        .Width = (uint32)_size.x,
-        .Height = (uint32)_size.y,
+        .Width = (uint32)size.x,
+        .Height = (uint32)size.y,
+        .Samples = 2u,
         .Attachments = {{
           .Type = AttachmentType::Colour,
           .Format = PixelFormat::R8G8B8A8,
@@ -90,6 +80,15 @@ namespace Krys::UI
       _entries.push_back({target, true});
       return target;
     }
+
+    void Clear()
+    {
+      for (auto &e : _entries)
+      {
+        _context.RenderTargets().Destroy(e.Target);
+      }
+      _entries.clear();
+    }
   };
 
   class Compositor
@@ -101,12 +100,22 @@ namespace Krys::UI
       Maths::Vec2 Origin;
     };
 
+    struct PostProcessTargets
+    {
+      /// @brief The primary post-process render target. Resolve MSAA into this target.
+      Gfx::RenderTargetHandle Primary;
+      /// @brief The secondary post-process render target. Used for ping-ponging effects.
+      Gfx::RenderTargetHandle Secondary;
+    };
+
   private:
     Gfx::IContext &_context;
     Gfx::IRenderer &_renderer;
     LayerPool _layerPool;
     Gfx::CommandList _commands;
     Stack<Layer> _layerStack;
+    Maths::Vec2 _viewportSize;
+    PostProcessTargets _post;
 
   public:
     Compositor(Gfx::IContext &context, Gfx::IRenderer &renderer)
@@ -123,22 +132,72 @@ namespace Krys::UI
         target = _context.RenderTargets().GetScreenRenderTarget();
       }
 
-      _commands = CommandList {};
+      Maths::Vec2 dimensions = _context.RenderTargets().GetDimensions(target);
+      if (_viewportSize != dimensions)
+      {
+        _viewportSize = dimensions;
+        _layerPool.Clear();
+        LayoutEngine::Reflow(document.Get(document.Body()), _viewportSize);
+        RebuildPostProcessTargets();
+      }
 
-      auto dimensions = _context.RenderTargets().GetDimensions(target);
-      LayoutEngine::Reflow(document.Get(document.Body()), dimensions);
-      _layerPool.BeginFrame(dimensions);
-
+      _commands.Clear();
       _layerStack.push({.Target = target});
-      _commands.Push(Commands::BindRenderTarget {.RenderTarget = target});
 
-      RenderElement(document, document.Body(), {});
+      // We don't clear the root target here as we may be compositing to the screen
+      BindCurrentLayerRenderTarget(false);
+      _layerPool.BeginFrame();
+
+      RenderElement(document, document.Body(), {{0.f, 0.f}});
       _layerStack.pop();
 
       _renderer.Submit(_commands);
     }
 
   private:
+    void RebuildPostProcessTargets()
+    {
+      using namespace Gfx;
+
+      if (_post.Primary.IsValid())
+      {
+        _context.RenderTargets().Destroy(_post.Primary);
+      }
+      if (_post.Secondary.IsValid())
+      {
+        _context.RenderTargets().Destroy(_post.Secondary);
+      }
+
+      const RenderTargetDesc desc {
+        .Width = static_cast<uint32>(_viewportSize.x),
+        .Height = static_cast<uint32>(_viewportSize.y),
+        .Samples = 1u,
+        .Attachments = {{
+          .Type = AttachmentType::Colour,
+          .Format = PixelFormat::R8G8B8A8,
+          .OnLoad = AttachmentLoadOp::Clear,
+          .OnStore = AttachmentStoreOp::Store,
+          .ClearValue = AttachmentClearValue::Colour(Colours::Transparent.ToVec4()),
+        }},
+      };
+
+      _post.Primary = _context.RenderTargets().Create(desc);
+      _post.Secondary = _context.RenderTargets().Create(desc);
+    }
+
+    /// @brief Pushes a command to bind the current layer's render target and optionally clears it.
+    void BindCurrentLayerRenderTarget(bool clear)
+    {
+      using namespace Gfx;
+      using namespace Gfx::Commands;
+
+      _commands.Push(BindRenderTarget {.RenderTarget = GetCurrentRenderTarget()});
+      if (clear)
+      {
+        _commands.Push(ClearRenderTarget {.Clear = BufferBitFlags::Colour, .Colour = Colours::Transparent});
+      }
+    }
+
     void RenderElement(Document &document, ElementHandle handle, const RenderContext &ctx)
     {
       using namespace Maths;
@@ -272,11 +331,12 @@ namespace Krys::UI
     {
       using namespace Gfx;
 
-      RenderTargetHandle renderTarget = _layerPool.Acquire();
+      RenderTargetHandle renderTarget = _layerPool.Acquire(_viewportSize);
       Layer layer {.Target = renderTarget, .Opacity = NodeStyleGetOpacity(element.LayoutNode)};
 
-      _commands.Push(Commands::BindRenderTarget {.RenderTarget = renderTarget});
       _layerStack.push(layer);
+      // We clear the layer as it's a new render target
+      BindCurrentLayerRenderTarget(true);
 
       return layer;
     }
@@ -287,9 +347,9 @@ namespace Krys::UI
       using namespace Maths;
 
       _layerStack.pop();
+      // We don't clear here as we're in the process of compositing
+      BindCurrentLayerRenderTarget(false);
 
-      // Rebind parent target
-      _commands.Push(Commands::BindRenderTarget {.RenderTarget = GetCurrentRenderTarget()});
       _commands.Push(Commands::ComposeRenderTargets {
         .Source = layer.Target,
         .Destination = GetCurrentRenderTarget(),

@@ -1,7 +1,10 @@
 #include "Krystal.Gfx.OpenGL/Renderer.hpp"
 #include "Krystal.Gfx.OpenGL/Debug.hpp"
+#include "Krystal.Gfx.OpenGL/Mappers/Enums/BufferBitFlags.hpp"
+#include "Krystal.Gfx.OpenGL/Mappers/Enums/FilterMode.hpp"
 #include "Krystal.Gfx/Commands/CommandListReader.hpp"
 #include "Krystal.Gfx/Commands/Commands.hpp"
+#include "Krystal.Gfx/Enums/BufferBitFlags.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.Lib/Expected.hpp"
 #include "Krystal.Lib/String/UTF8.hpp"
@@ -111,12 +114,13 @@ namespace Krys::Gfx::OpenGL
         case Commands::SetViewport::Type:
         {
           const auto &cmd = reader.ReadCommand<Commands::SetViewport>();
-          auto &rt = renderTargets.Get(_state.CurrentRenderTarget);
-          GLint viewportX = static_cast<GLint>(cmd.Position.x);
-          GLint viewportY = static_cast<GLint>(rt.Height() - (cmd.Position.y + cmd.Size.y));
-          GLsizei viewportWidth = static_cast<GLsizei>(cmd.Size.x);
-          GLsizei viewportHeight = static_cast<GLsizei>(cmd.Size.y);
-          glViewport(viewportX, viewportY, viewportWidth, viewportHeight);
+          const auto &rt = renderTargets.Get(_state.CurrentRenderTarget);
+
+          GLint vx = static_cast<GLint>(cmd.Position.x);
+          GLint vy = static_cast<GLint>(rt.Height() - (cmd.Position.y + cmd.Size.y));
+          GLsizei vw = static_cast<GLsizei>(cmd.Size.x);
+          GLsizei vh = static_cast<GLsizei>(cmd.Size.y);
+          glViewport(vx, vy, vw, vh);
           break;
         }
         case Commands::BindRenderTarget::Type:
@@ -127,13 +131,24 @@ namespace Krys::Gfx::OpenGL
           {
             break;
           }
+          _state.CurrentRenderTarget = cmd.RenderTarget;
 
           renderTargets.Bind(cmd.RenderTarget);
           auto &rt = renderTargets.Get(cmd.RenderTarget);
           glViewport(0, 0, rt.Width(), rt.Height());
-          glDisable(GL_SCISSOR_TEST);
 
-          _state.CurrentRenderTarget = cmd.RenderTarget;
+          break;
+        }
+        case Commands::ClearRenderTarget::Type:
+        {
+          const auto &cmd = reader.ReadCommand<Commands::ClearRenderTarget>();
+
+          GLbitfield clearMask = MapBufferBitFlags(cmd.Clear);
+          if (clearMask != 0)
+          {
+            glClear(clearMask);
+          }
+
           break;
         }
         case Commands::DrawShape2D::Type:
@@ -170,8 +185,11 @@ namespace Krys::Gfx::OpenGL
           const auto &cmd = reader.ReadCommand<Commands::ComposeRenderTargets>();
 
           auto &destRenderTarget = renderTargets.Get(cmd.Destination);
-          renderTargets.Bind(cmd.Destination);
-          glViewport(0, 0, destRenderTarget.Width(), destRenderTarget.Height());
+          if (cmd.Destination != _state.CurrentRenderTarget)
+          {
+            renderTargets.Bind(cmd.Destination);
+            glViewport(0, 0, destRenderTarget.Width(), destRenderTarget.Height());
+          }
 
           ShaderHandle shaderHandle = shaders.GetBuiltin(BuiltinShader::Shape2D_Texture);
           auto &shader = shaders.Get(shaderHandle);
@@ -201,6 +219,34 @@ namespace Krys::Gfx::OpenGL
           }
 
           glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+          break;
+        }
+        case Commands::BlitRenderTarget::Type:
+        {
+          const auto &cmd = reader.ReadCommand<Commands::BlitRenderTarget>();
+
+          auto &srcRT = renderTargets.Get(cmd.Src);
+          glBindFramebuffer(GL_READ_FRAMEBUFFER, srcRT.GetHandle());
+
+          GLint srcX0 = static_cast<GLint>(cmd.SrcPosition.x);
+          GLint srcY0 = static_cast<GLint>(srcRT.Height() - (cmd.SrcPosition.y + cmd.SrcSize.y));
+          GLint srcX1 = static_cast<GLint>(cmd.SrcPosition.x + cmd.SrcSize.x);
+          GLint srcY1 = static_cast<GLint>(srcRT.Height() - cmd.SrcPosition.y);
+
+          auto &dstRT = renderTargets.Get(cmd.Dst);
+          glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dstRT.GetHandle());
+
+          GLint dstX0 = static_cast<GLint>(cmd.DstPosition.x);
+          GLint dstY0 = static_cast<GLint>(dstRT.Height() - (cmd.DstPosition.y + cmd.DstSize.y));
+          GLint dstX1 = static_cast<GLint>(cmd.DstPosition.x + cmd.DstSize.x);
+          GLint dstY1 = static_cast<GLint>(dstRT.Height() - cmd.DstPosition.y);
+
+          GLbitfield blitMask = MapBufferBitFlags(cmd.Mask);
+          GLenum filter = MapFilterMode(cmd.Filter);
+          glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, blitMask, filter);
+
+          // Restore previous framebuffer
+          renderTargets.Bind(_state.CurrentRenderTarget);
           break;
         }
         case Commands::DrawText::Type:

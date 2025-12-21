@@ -50,5 +50,12 @@ namespace Krys::Gfx
       std::swap(_startOffset, other._startOffset);
       std::swap(_endOffset, other._endOffset);
     }
+
+    void Clear() noexcept
+    {
+      _arena.Clear();
+      _startOffset = 0u;
+      _endOffset = 0u;
+    }
   };
 }

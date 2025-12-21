@@ -115,7 +115,7 @@ namespace Krys
       _document.ElementStyleSetBorderColours(leftBox, {Blue, Red, Orange, Black});
       _document.ElementStyleSetBackgroundColour(leftBox, Green);
       _document.ElementSetTextContent(leftBox, textRef);
-      _document.ElementStyleSetOpacity(_document.Body(), 0.8f);
+      _document.ElementStyleSetOpacity(leftBox, 0.8f);
     }
 
     void OnRender() noexcept override

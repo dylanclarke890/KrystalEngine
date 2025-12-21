@@ -49,6 +49,7 @@ namespace Krys::Gfx::OpenGL
     NO_DISCARD RenderTargetHandle Create(const RenderTargetDesc &desc) override
     {
       // TODO: support for cubemaps and texture arrays as attachments
+      // TODO!: support for multi-sampling
       assert(desc.Width > 0 && desc.Height > 0 && "Invalid width and height.");
       assert(desc.Attachments.size() > 0 && "Must specify at least one attachment.");
 
