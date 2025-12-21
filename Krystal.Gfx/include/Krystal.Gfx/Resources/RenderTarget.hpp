@@ -16,6 +16,7 @@ namespace Krys::Gfx
     DepthStencil
   };
 
+  /// @brief Defines how an attachment should be handled when a render pass begins.
   enum class AttachmentLoadOp : uint8
   {
     Load,
@@ -23,6 +24,7 @@ namespace Krys::Gfx
     DontCare
   };
 
+  /// @brief Defines how an attachment should be handled when a render pass ends.
   enum class AttachmentStoreOp : uint8
   {
     Store,

@@ -7,5 +7,5 @@ out vec4 FragmentColour;
 
 void main()
 {
-	FragmentColour = Colour;
+  FragmentColour = Colour;
 }

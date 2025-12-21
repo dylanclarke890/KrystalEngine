@@ -6,6 +6,7 @@
 #include "Krystal.Lib/Expected.hpp"
 #include "Krystal.Lib/String/UTF8.hpp"
 #include "Krystal.Maths/Clamp.hpp"
+#include "Krystal.Maths/Transform.hpp"
 
 namespace Krys::Gfx
 {
@@ -77,6 +78,7 @@ namespace Krys::Gfx::OpenGL
     auto &renderTargets = static_cast<RenderTargetRegistry &>(_context.RenderTargets());
 
     glEnable(GL_BLEND);
+    glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
     while (reader.HasMore())
@@ -159,6 +161,46 @@ namespace Krys::Gfx::OpenGL
 
           mesh.Bind();
           mesh.Draw(static_cast<GLsizei>(cmd.InstanceCount));
+          break;
+        }
+        case Commands::ComposeRenderTargets::Type:
+        {
+          using namespace Maths;
+
+          const auto &cmd = reader.ReadCommand<Commands::ComposeRenderTargets>();
+
+          auto &destRenderTarget = renderTargets.Get(cmd.Destination);
+          renderTargets.Bind(cmd.Destination);
+          glViewport(0, 0, destRenderTarget.Width(), destRenderTarget.Height());
+
+          ShaderHandle shaderHandle = shaders.GetBuiltin(BuiltinShader::Shape2D_Texture);
+          auto &shader = shaders.Get(shaderHandle);
+          shader.Bind();
+
+          auto &srcRenderTarget = renderTargets.Get(cmd.Source);
+          glBindTextureUnit(0u, srcRenderTarget.GetColourAttachment(0u).Texture);
+          shader.SetUniform("u_Texture", 0);
+
+          Mat4 transform = Scale(Vec3 {(float)srcRenderTarget.Width(), (float)srcRenderTarget.Height(), 1.f});
+          Mat4 projection = destRenderTarget.GetProjectionMatrix();
+          shader.SetUniform("u_Transform", projection * transform);
+
+          glBlendFunc(GL_CONSTANT_COLOR, GL_ZERO);
+          glBlendColor(cmd.Opacity, cmd.Opacity, cmd.Opacity, cmd.Opacity);
+
+          auto &mesh = meshes.Get(meshes.GetFullScreenQuad());
+          mesh.Bind();
+          mesh.Draw();
+
+          if (_state.CurrentRenderTarget != cmd.Destination)
+          {
+            // Restore previous render target
+            renderTargets.Bind(_state.CurrentRenderTarget);
+            glViewport(0, 0, renderTargets.Get(_state.CurrentRenderTarget).Width(),
+                       renderTargets.Get(_state.CurrentRenderTarget).Height());
+          }
+
+          glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
           break;
         }
         case Commands::DrawText::Type:

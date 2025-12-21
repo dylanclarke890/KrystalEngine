@@ -9,7 +9,6 @@
 #include "Krystal.Lib/DebugBreak.hpp"
 #include "Krystal.Lib/HashUtils.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Set.hpp"
 #include "Krystal.Lib/Stack.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Log/ILogger.hpp"
@@ -17,9 +16,82 @@
 #include "Krystal.UI/Geometry/GeometryUtils.hpp"
 #include "Krystal.UI/Geometry/RenderBox.hpp"
 #include <cassert>
+#include <compare>
 
 namespace Krys::UI
 {
+  struct Layer
+  {
+    Gfx::RenderTargetHandle Target;
+    float Opacity {1.0f};
+  };
+
+  class LayerPool
+  {
+    struct Entry
+    {
+      Gfx::RenderTargetHandle Target;
+      bool InUse = false;
+    };
+
+    Gfx::IContext &_context;
+    List<Entry> _entries;
+    Maths::Vec2 _size;
+
+  public:
+    explicit LayerPool(Gfx::IContext &context) : _context(context), _entries(), _size({0.f, 0.f})
+    {
+    }
+
+    void BeginFrame(Maths::Vec2 size)
+    {
+      if (_size == size)
+      {
+        for (auto &e : _entries)
+        {
+          _context.RenderTargets().Destroy(e.Target);
+        }
+        _entries.clear();
+      }
+
+      _size = size;
+      for (auto &e : _entries)
+      {
+        e.InUse = false;
+      }
+    }
+
+    Gfx::RenderTargetHandle Acquire()
+    {
+      using namespace Gfx;
+
+      for (auto &e : _entries)
+      {
+        if (!e.InUse)
+        {
+          e.InUse = true;
+          return e.Target;
+        }
+      }
+
+      // Allocate new full-size render target
+      RenderTargetHandle target = _context.RenderTargets().Create({
+        .Width = (uint32)_size.x,
+        .Height = (uint32)_size.y,
+        .Attachments = {{
+          .Type = AttachmentType::Colour,
+          .Format = PixelFormat::R8G8B8A8,
+          .OnLoad = AttachmentLoadOp::Clear,
+          .OnStore = AttachmentStoreOp::Store,
+          .ClearValue = AttachmentClearValue::Colour(Colours::Transparent.ToVec4()),
+        }},
+      });
+
+      _entries.push_back({target, true});
+      return target;
+    }
+  };
+
   class Compositor
   {
     NO_COPY_MOVE(Compositor)
@@ -29,29 +101,17 @@ namespace Krys::UI
       Maths::Vec2 Origin;
     };
 
-    constexpr static Maths::Vec2 OriginZero = {0.f, 0.f};
-
   private:
     Gfx::IContext &_context;
     Gfx::IRenderer &_renderer;
+    LayerPool _layerPool;
     Gfx::CommandList _commands;
-    Gfx::MeshHandle _quadMesh;
+    Stack<Layer> _layerStack;
 
   public:
-    Compositor(Gfx::IContext &context, Gfx::IRenderer &renderer) : _context(context), _renderer(renderer)
+    Compositor(Gfx::IContext &context, Gfx::IRenderer &renderer)
+        : _context(context), _renderer(renderer), _layerPool(context)
     {
-      using namespace Gfx;
-
-      MeshData data;
-      MeshDataUtils::GenerateQuad(data, {0.f, 0.f}, {1.f, 1.f}, Colours::White);
-
-      _quadMesh = _context.Meshes().Create({
-        .Vertices = data.Vertices,
-        .Indices = data.Indices,
-        .Layout = Vertex::Position2D_ColourbPremultiplied_UV::Layout(),
-        .Primitive = PrimitiveType::Triangles,
-        .Type = MeshType::Static,
-      });
     }
 
     void Render(Document &document, Gfx::RenderTargetHandle target = {})
@@ -64,12 +124,16 @@ namespace Krys::UI
       }
 
       _commands = CommandList {};
-      _commands.Push(Commands::BindRenderTarget {.RenderTarget = target});
 
       auto dimensions = _context.RenderTargets().GetDimensions(target);
       LayoutEngine::Reflow(document.Get(document.Body()), dimensions);
+      _layerPool.BeginFrame(dimensions);
 
-      RenderElement(document, document.Body(), {OriginZero});
+      _layerStack.push({.Target = target});
+      _commands.Push(Commands::BindRenderTarget {.RenderTarget = target});
+
+      RenderElement(document, document.Body(), {});
+      _layerStack.pop();
 
       _renderer.Submit(_commands);
     }
@@ -82,14 +146,31 @@ namespace Krys::UI
       auto &element = document.Get(handle);
       NodeRef node = element.LayoutNode;
 
-      Vec2 position = ctx.Origin + Vec2 {NodeLayoutGetLeft(node), NodeLayoutGetTop(node)};
-      RenderContext childCtx {position};
+      const bool createsLayer = CreatesLayer(element);
 
+      Layer layer;
+      if (createsLayer)
+      {
+        layer = BeginLayer(element);
+      }
+
+      Vec2 position = Vec2 {NodeLayoutGetLeft(node), NodeLayoutGetTop(node)};
+      if (!createsLayer)
+      {
+        position += ctx.Origin;
+      }
+
+      RenderContext childCtx {position};
       PaintElement(element, childCtx);
 
       for (ElementHandle child : element.Children)
       {
         RenderElement(document, child, childCtx);
+      }
+
+      if (createsLayer)
+      {
+        EndLayer(layer, ctx);
       }
     }
 
@@ -174,6 +255,46 @@ namespace Krys::UI
       Vec2 borderOffset = {NodeLayoutGetPadding(node, Edge::Left), NodeLayoutGetPadding(node, Edge::Top)};
 
       return RenderBox(fillSize, borderOffset, borderWidths, borderRadii);
+    }
+
+    Gfx::RenderTargetHandle GetCurrentRenderTarget() const
+    {
+      assert(!_layerStack.empty() && "Layer stack is empty");
+      return _layerStack.top().Target;
+    }
+
+    bool CreatesLayer(const Element &element)
+    {
+      return NodeStyleGetOpacity(element.LayoutNode) < 1.0f;
+    }
+
+    Layer BeginLayer(const Element &element)
+    {
+      using namespace Gfx;
+
+      RenderTargetHandle renderTarget = _layerPool.Acquire();
+      Layer layer {.Target = renderTarget, .Opacity = NodeStyleGetOpacity(element.LayoutNode)};
+
+      _commands.Push(Commands::BindRenderTarget {.RenderTarget = renderTarget});
+      _layerStack.push(layer);
+
+      return layer;
+    }
+
+    void EndLayer(const Layer &layer, const RenderContext &ctx)
+    {
+      using namespace Gfx;
+      using namespace Maths;
+
+      _layerStack.pop();
+
+      // Rebind parent target
+      _commands.Push(Commands::BindRenderTarget {.RenderTarget = GetCurrentRenderTarget()});
+      _commands.Push(Commands::ComposeRenderTargets {
+        .Source = layer.Target,
+        .Destination = GetCurrentRenderTarget(),
+        .Opacity = layer.Opacity,
+      });
     }
   };
 }

@@ -47,6 +47,15 @@ namespace Krys::Gfx::Commands
     uint32 InstanceCount {1u};
   };
 
+  struct ComposeRenderTargets
+  {
+    constexpr static CommandType Type = KRYS_CMD_TYPE("ComposeRenderTarget");
+
+    RenderTargetHandle Source;
+    RenderTargetHandle Destination;
+    float Opacity {1.f};
+  };
+
   struct DrawText
   {
     constexpr static CommandType Type = KRYS_CMD_TYPE("DrawText");

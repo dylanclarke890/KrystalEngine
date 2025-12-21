@@ -105,7 +105,6 @@ namespace Krys
 
       _document.ElementStyleSetBackgroundColour(_document.Body(), Maroon);
       _document.ElementStyleSetFlexDirection(_document.Body(), FlexDirection::Row);
-      _document.ElementStyleSetOpacity(_document.Body(), 0.8f);
 
       auto leftBox = _document.Create<Element>();
       _document.AppendChild(_document.Body(), leftBox);
@@ -116,6 +115,7 @@ namespace Krys
       _document.ElementStyleSetBorderColours(leftBox, {Blue, Red, Orange, Black});
       _document.ElementStyleSetBackgroundColour(leftBox, Green);
       _document.ElementSetTextContent(leftBox, textRef);
+      _document.ElementStyleSetOpacity(_document.Body(), 0.8f);
     }
 
     void OnRender() noexcept override

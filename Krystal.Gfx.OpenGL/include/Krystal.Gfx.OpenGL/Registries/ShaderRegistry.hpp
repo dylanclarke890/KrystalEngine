@@ -90,7 +90,7 @@ namespace Krys::Gfx::OpenGL
 
     NO_DISCARD ShaderHandle GetBuiltin(BuiltinShader builtin) noexcept override
     {
-      //auto profiler = Krys::Debug::ScopedProfiler("GetBuiltin");
+      // auto profiler = Krys::Debug::ScopedProfiler("GetBuiltin");
 
       if (auto it = _builtins.find(builtin); it != _builtins.end())
       {
@@ -101,8 +101,8 @@ namespace Krys::Gfx::OpenGL
       {
         switch (builtin)
         {
-          case BuiltinShader::Shape2D_Colour:     return GetBuiltinShape2DColourShader();
-          case BuiltinShader::Shape2D_Texture:    return GetBuiltinShape2DTextureShader();
+          case BuiltinShader::Shape2D_Colour:  return GetBuiltinShape2DColourShader();
+          case BuiltinShader::Shape2D_Texture: return GetBuiltinShape2DTextureShader();
           case BuiltinShader::Font_Bitmap:        return GetBuiltinTextShader(FontType::Bitmap, false);
           case BuiltinShader::Font_SDF:           return GetBuiltinTextShader(FontType::SDF, false);
           case BuiltinShader::Font_SDF_Outline:   return GetBuiltinTextShader(FontType::SDF, true);

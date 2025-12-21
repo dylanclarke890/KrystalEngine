@@ -3,6 +3,7 @@
 #include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Mesh.hpp"
 #include "Krystal.Gfx/Registries/IMeshRegistry.hpp"
+#include "Krystal.Gfx/Utils/MeshDataUtils.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
@@ -18,6 +19,7 @@ namespace Krys::Gfx::OpenGL
 
   private:
     MeshManager _meshes;
+    MeshHandle _fullScreenQuadHandle;
 
   public:
     MeshRegistry() = default;
@@ -26,24 +28,38 @@ namespace Krys::Gfx::OpenGL
 
     void Startup() override
     {
+      MeshData data;
+      MeshDataUtils::GenerateQuad(data, {0.f, 0.f}, {1.f, 1.f}, Colours::White);
+
+      _fullScreenQuadHandle = Create({
+        .Vertices = data.Vertices,
+        .Indices = data.Indices,
+        .Layout = Vertex::Position2D_ColourbPremultiplied_UV::Layout(),
+        .Primitive = PrimitiveType::Triangles,
+        .Type = MeshType::Static,
+      });
     }
 
     void Shutdown() noexcept override
     {
+      _meshes.Remove(_fullScreenQuadHandle);
     }
 
-    NO_DISCARD virtual MeshHandle Create(const MeshDesc &desc) noexcept override
+    NO_DISCARD MeshHandle Create(const MeshDesc &desc) noexcept override
     {
       GLenum primitiveType = MapPrimitiveType(desc.Primitive);
 
       if (desc.Indices.size_bytes() > 0u)
       {
-        Mesh mesh {desc.Vertices, desc.Indices, desc.Layout, primitiveType, desc.Type};
-        return AddMesh(std::move(mesh));
+        return AddMesh(Mesh {desc.Vertices, desc.Indices, desc.Layout, primitiveType, desc.Type});
       }
 
-      Mesh mesh {desc.Vertices, desc.Layout, primitiveType, desc.Type};
-      return AddMesh(std::move(mesh));
+      return AddMesh(Mesh {desc.Vertices, desc.Layout, primitiveType, desc.Type});
+    }
+
+    NO_DISCARD MeshHandle GetFullScreenQuad() const noexcept override
+    {
+      return _fullScreenQuadHandle;
     }
 
     MeshHandle CreateCube() noexcept

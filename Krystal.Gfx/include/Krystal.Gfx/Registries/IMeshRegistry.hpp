@@ -24,7 +24,9 @@ namespace Krys::Gfx
 
     virtual void Shutdown() noexcept = 0;
 
-    NO_DISCARD virtual MeshHandle Create(const MeshDesc &desc) = 0;
+    NO_DISCARD virtual MeshHandle Create(const MeshDesc &desc) noexcept = 0;
+
+    NO_DISCARD virtual MeshHandle GetFullScreenQuad() const noexcept = 0;
 
     virtual bool Destroy(MeshHandle handle) noexcept = 0;
   };
