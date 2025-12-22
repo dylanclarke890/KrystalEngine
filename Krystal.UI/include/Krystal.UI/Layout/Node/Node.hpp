@@ -4,6 +4,7 @@
 #include "Krystal.Lib/Enum.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/NullableFloat.hpp"
+#include "Krystal.Lib/StronglyTypedValue.hpp"
 #include "Krystal.UI/Layout/Api/Forward.hpp"
 #include "Krystal.UI/Layout/Config/Config.hpp"
 #include "Krystal.UI/Layout/Node/LayoutableChildren.hpp"
@@ -20,6 +21,16 @@
 
 namespace Krys::UI
 {
+  struct DirtyLayout : public StronglyTypedBool<DirtyLayout>
+  {
+    using StronglyTypedBool<DirtyLayout>::StronglyTypedBool;
+  };
+
+  struct DirtyStyle : public StronglyTypedBool<DirtyStyle>
+  {
+    using StronglyTypedBool<DirtyStyle>::StronglyTypedBool;
+  };
+
   class Node
   {
     // assignment means potential leaks of existing children, or alternatively freeing unowned memory, double
@@ -353,6 +364,45 @@ namespace Krys::UI
     float ResolveFlexShrink() const;
     bool IsNodeFlexible();
     void Reset();
+
+    template <auto TGet, auto TSet, DirtyLayout dirtyLayout, DirtyStyle dirtyStyle, typename TValue>
+    void UpdateProperty(TValue value)
+    {
+      auto &style = GetStyle();
+      if ((style.*TGet)() != value)
+      {
+        (style.*TSet)(value);
+        if constexpr (dirtyLayout)
+        {
+          MarkLayoutDirtyAndPropagate();
+        }
+
+        if constexpr (dirtyStyle)
+        {
+          MarkStyleDirtyAndPropagate();
+        }
+      }
+    }
+
+    template <auto TGet, auto TSet, DirtyLayout dirtyLayout, DirtyStyle dirtyStyle, class TIndex,
+              class TValue>
+    void UpdateProperty(TIndex idx, TValue value)
+    {
+      auto &style = GetStyle();
+      if ((style.*TGet)(idx) != value)
+      {
+        (style.*TSet)(idx, value);
+        if constexpr (dirtyLayout)
+        {
+          MarkLayoutDirtyAndPropagate();
+        }
+
+        if constexpr (dirtyStyle)
+        {
+          MarkStyleDirtyAndPropagate();
+        }
+      }
+    }
 
   private:
     // Used to allow resetting the node
