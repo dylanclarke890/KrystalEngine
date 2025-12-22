@@ -66,9 +66,9 @@ namespace Krys::Gfx::Commands
     BufferBitFlags Mask {BufferBitFlags::Colour};
   };
 
-  struct ApplyOpacityToRenderTarget
+  struct CompositeRenderTargetWithOpacity
   {
-    constexpr static CommandType Type = KRYS_CMD_TYPE("ApplyOpacityToRenderTarget");
+    constexpr static CommandType Type = KRYS_CMD_TYPE("CompositeRenderTargetWithOpacity");
     RenderTargetHandle Source;
     RenderTargetHandle Destination;
     float Opacity {1.f};

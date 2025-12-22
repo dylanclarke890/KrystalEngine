@@ -373,7 +373,7 @@ namespace Krys::UI
           .DestinationSize = _viewportSize,
         });
 
-        _commands.Push(Commands::ApplyOpacityToRenderTarget {
+        _commands.Push(Commands::CompositeRenderTargetWithOpacity {
           .Source = _post.Primary,
           .Destination = _post.Secondary,
           .Opacity = layer.Opacity,

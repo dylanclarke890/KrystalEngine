@@ -195,9 +195,29 @@ namespace Krys::Gfx::OpenGL
           renderTargets.Bind(_state.CurrentRenderTarget);
           break;
         }
-        case Commands::ApplyOpacityToRenderTarget::Type:
+        case Commands::CompositeRenderTarget::Type:
         {
-          const auto &cmd = reader.ReadCommand<Commands::ApplyOpacityToRenderTarget>();
+          const auto &cmd = reader.ReadCommand<Commands::CompositeRenderTarget>();
+          const auto &dstRT = renderTargets.Get(cmd.Destination);
+          const auto &srcRT = renderTargets.Get(cmd.Source);
+
+          renderTargets.Bind(cmd.Destination);
+          glViewport(0, 0, dstRT.Width(), dstRT.Height());
+
+          const auto &shader = shaders.Get(shaders.GetBuiltin(BuiltinShader::PostProcess_Passthrough));
+          shader.Bind();
+          shader.SetUniform("u_Texture", 0);
+          glBindTextureUnit(0, srcRT.GetColourAttachment(0).Texture);
+
+          auto &quad = meshes.Get(meshes.GetFullScreenQuad());
+          quad.Bind();
+          quad.Draw();
+
+          break;
+        }
+        case Commands::CompositeRenderTargetWithOpacity::Type:
+        {
+          const auto &cmd = reader.ReadCommand<Commands::CompositeRenderTargetWithOpacity>();
           const auto &dstRT = renderTargets.Get(cmd.Destination);
           const auto &srcRT = renderTargets.Get(cmd.Source);
 
@@ -217,26 +237,6 @@ namespace Krys::Gfx::OpenGL
           quad.Draw();
 
           glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-
-          break;
-        }
-        case Commands::CompositeRenderTarget::Type:
-        {
-          const auto &cmd = reader.ReadCommand<Commands::CompositeRenderTarget>();
-          const auto &dstRT = renderTargets.Get(cmd.Destination);
-          const auto &srcRT = renderTargets.Get(cmd.Source);
-
-          renderTargets.Bind(cmd.Destination);
-          glViewport(0, 0, dstRT.Width(), dstRT.Height());
-
-          const auto &shader = shaders.Get(shaders.GetBuiltin(BuiltinShader::PostProcess_Passthrough));
-          shader.Bind();
-          shader.SetUniform("u_Texture", 0);
-          glBindTextureUnit(0, srcRT.GetColourAttachment(0).Texture);
-
-          auto &quad = meshes.Get(meshes.GetFullScreenQuad());
-          quad.Bind();
-          quad.Draw();
 
           break;
         }
