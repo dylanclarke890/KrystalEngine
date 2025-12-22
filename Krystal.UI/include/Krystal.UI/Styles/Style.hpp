@@ -87,7 +87,6 @@ namespace Krys::UI
 
     void SetOpacity(float opacity) noexcept
     {
-      assert((opacity >= 0.0f && opacity <= 1.0f) && "Opacity must be between 0 and 1.");
       _opacity = opacity;
     }
 
