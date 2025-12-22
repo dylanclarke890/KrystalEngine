@@ -1,8 +1,11 @@
 #pragma once
 
 #include "Krystal.Gfx.Lib/ResourceManager.hpp"
+#include "Krystal.Gfx.OpenGL/Debug.hpp"
+#include "Krystal.Gfx.OpenGL/Mappers/Enums/PrimitiveType.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Mesh.hpp"
 #include "Krystal.Gfx/Registries/IMeshRegistry.hpp"
+#include "Krystal.Gfx/Utils/MeshDataUtils.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
@@ -18,6 +21,7 @@ namespace Krys::Gfx::OpenGL
 
   private:
     MeshManager _meshes;
+    MeshHandle _fullScreenQuadHandle;
 
   public:
     MeshRegistry() = default;
@@ -26,24 +30,42 @@ namespace Krys::Gfx::OpenGL
 
     void Startup() override
     {
+      using namespace Maths;
+
+      MeshData data {};
+      MeshDataUtils::GenerateQuad(data, Vec2 {-1.f}, Vec2 {2.f}, Colours::Transparent);
+
+      _fullScreenQuadHandle = Create({
+        .Vertices = data.Vertices,
+        .Indices = data.Indices,
+        .Layout = Vertex::Position2D_ColourbPremultiplied_UV::Layout(),
+        .Primitive = PrimitiveType::Triangles,
+        .Type = MeshType::Static,
+      });
+
+      Debug::SetName(_meshes.Get(_fullScreenQuadHandle), "FullScreenQuad");
     }
 
     void Shutdown() noexcept override
     {
+      _meshes.Remove(_fullScreenQuadHandle);
     }
 
-    NO_DISCARD virtual MeshHandle Create(const MeshDesc &desc) noexcept override
+    NO_DISCARD MeshHandle Create(const MeshDesc &desc) noexcept override
     {
       GLenum primitiveType = MapPrimitiveType(desc.Primitive);
 
       if (desc.Indices.size_bytes() > 0u)
       {
-        Mesh mesh {desc.Vertices, desc.Indices, desc.Layout, primitiveType, desc.Type};
-        return AddMesh(std::move(mesh));
+        return AddMesh(Mesh {desc.Vertices, desc.Indices, desc.Layout, primitiveType, desc.Type});
       }
 
-      Mesh mesh {desc.Vertices, desc.Layout, primitiveType, desc.Type};
-      return AddMesh(std::move(mesh));
+      return AddMesh(Mesh {desc.Vertices, desc.Layout, primitiveType, desc.Type});
+    }
+
+    NO_DISCARD MeshHandle GetFullScreenQuad() const noexcept override
+    {
+      return _fullScreenQuadHandle;
     }
 
     MeshHandle CreateCube() noexcept
@@ -230,20 +252,6 @@ namespace Krys::Gfx::OpenGL
     }
 
   private:
-    static GLenum MapPrimitiveType(PrimitiveType type) noexcept
-    {
-      switch (type)
-      {
-        case PrimitiveType::Points:        return GL_POINTS;
-        case PrimitiveType::Lines:         return GL_LINES;
-        case PrimitiveType::LineStrip:     return GL_LINE_STRIP;
-        case PrimitiveType::Triangles:     return GL_TRIANGLES;
-        case PrimitiveType::TriangleStrip: return GL_TRIANGLE_STRIP;
-        case PrimitiveType::TriangleFan:   return GL_TRIANGLE_FAN;
-        default:                           return GL_TRIANGLES;
-      }
-    }
-
     NO_DISCARD MeshHandle AddMesh(Mesh &&mesh) noexcept
     {
       auto handle = _meshes.Add(std::move(mesh));

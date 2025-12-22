@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Krystal.Gfx/Enums/FilterMode.hpp"
+#include "Krystal.Gfx/Enums/WrapMode.hpp"
 #include "Krystal.Lib/HashUtils.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include <compare>
@@ -7,23 +9,6 @@
 
 namespace Krys::Gfx
 {
-  enum class FilterMode : uint8
-  {
-    Nearest = 0,
-    Linear,
-    NearestMipmapNearest,
-    LinearMipmapNearest,
-    NearestMipmapLinear,
-    LinearMipmapLinear,
-  };
-
-  enum class WrapMode : uint8
-  {
-    Repeat = 0,
-    ClampToEdge,
-    ClampToBorder,
-  };
-
   struct SamplerDesc
   {
     FilterMode MinFilter {FilterMode::Linear};
@@ -143,7 +128,7 @@ namespace std
     size_t operator()(const Krys::Gfx::SamplerDesc &desc) const noexcept
     {
       return Krys::HashUtils::HashCombine(desc.MinFilter, desc.MagFilter, desc.WrapS, desc.WrapT, desc.WrapR,
-                                    desc.AnisotropicLevel);
+                                          desc.AnisotropicLevel);
     }
   };
 }

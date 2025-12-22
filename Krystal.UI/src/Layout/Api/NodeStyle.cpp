@@ -620,13 +620,13 @@ namespace Krys::UI
     return node->GetStyle().GetBorderColours();
   }
 
-  void NodeStyleSetBorderRadii(NodeRef node, const Array<Maths::Vec2, 4> &radii)
+  void NodeStyleSetBorderRadii(NodeRef node, const Array<float, 4> &radii)
   {
     UpdateProperty<&Style::GetBorderRadii, &Style::SetBorderRadii, DirtiesLayout {false},
                    DirtiesStyle {true}>(node, radii);
   }
 
-  const Array<Maths::Vec2, 4> &NodeStyleGetBorderRadii(NodeConstRef node)
+  const Array<float, 4> &NodeStyleGetBorderRadii(NodeConstRef node)
   {
     return node->GetStyle().GetBorderRadii();
   }

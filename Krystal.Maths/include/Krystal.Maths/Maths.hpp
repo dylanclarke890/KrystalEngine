@@ -310,4 +310,43 @@ namespace Krys::Maths
   }
 
 #pragma endregion
+
+#pragma region Trig
+
+  NO_DISCARD inline float Cos(float angle) noexcept
+  {
+    return std::cos(angle);
+  }
+
+  NO_DISCARD inline float ACos(float value) noexcept
+  {
+    return std::acos(value);
+  }
+
+  NO_DISCARD inline float Sin(float angle) noexcept
+  {
+    return std::sin(angle);
+  }
+
+  NO_DISCARD inline float ASin(float value) noexcept
+  {
+    return std::asin(value);
+  }
+
+  NO_DISCARD inline float Tan(float angle) noexcept
+  {
+    return std::tan(angle);
+  }
+
+  NO_DISCARD inline float ATan2(float y, float x) noexcept
+  {
+    return std::atan2(y, x);
+  }
+
+  NO_DISCARD inline float Exp(float value) noexcept
+  {
+    return std::exp(value);
+  }
+
+#pragma endregion
 }

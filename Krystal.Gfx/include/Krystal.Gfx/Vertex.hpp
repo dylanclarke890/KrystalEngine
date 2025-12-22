@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Krystal.Gfx.Lib/Colour.hpp"
+#include "Krystal.Gfx/Enums/VertexAttributeType.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/StronglyTypedValue.hpp"
 #include "Krystal.Lib/Types.hpp"
@@ -8,15 +9,7 @@
 
 namespace Krys::Gfx
 {
-  enum class VertexAttributeType
-  {
-    Float,
-    Int32,
-    UInt32,
-    Double,
-    UnsignedByte,
-  };
-
+  // TODO: move to enums directory
   enum class VertexInputRate
   {
     PerVertex,

@@ -104,17 +104,17 @@ namespace Krys
     }
   };
 
-  NO_DISCARD constexpr size_t operator"" _KB(unsigned long long int value) noexcept
+  NO_DISCARD constexpr size_t operator""_KB(unsigned long long int value) noexcept
   {
     return static_cast<size_t>(value * 1'024u);
   }
 
-  NO_DISCARD constexpr size_t operator"" _MB(unsigned long long int value) noexcept
+  NO_DISCARD constexpr size_t operator""_MB(unsigned long long int value) noexcept
   {
     return static_cast<size_t>(value * 1'024u * 1'024u);
   }
 
-  NO_DISCARD constexpr size_t operator"" _GB(unsigned long long int value) noexcept
+  NO_DISCARD constexpr size_t operator""_GB(unsigned long long int value) noexcept
   {
     return static_cast<size_t>(value * 1'024u * 1'024u * 1'024u);
   }

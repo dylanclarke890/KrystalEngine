@@ -54,7 +54,8 @@ out vec4 FragmentColor;
 
   void main() {
     float alpha = texture(u_Atlas, TextureCoords).r;
-    FragmentColor = vec4(u_TextColor, alpha);
+    // Pre-multiplied alpha
+    FragmentColor = vec4(u_TextColor * alpha, alpha);
   }
 
 #else

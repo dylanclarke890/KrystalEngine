@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
+#include "Krystal.Gfx.OpenGL/Mappers/Enums/VertexAttributeType.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Shader.hpp"
 #include "Krystal.Gfx/Light.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
@@ -10,19 +11,6 @@ namespace Krys::Gfx::OpenGL
   class Utils
   {
   public:
-    static GLenum MapVertexAttributeType(VertexAttributeType type) noexcept
-    {
-      switch (type)
-      {
-        case VertexAttributeType::Int32:        return GL_INT;
-        case VertexAttributeType::UInt32:       return GL_UNSIGNED_INT;
-        case VertexAttributeType::Float:        return GL_FLOAT;
-        case VertexAttributeType::Double:       return GL_DOUBLE;
-        case VertexAttributeType::UnsignedByte: return GL_UNSIGNED_BYTE;
-        default:                                return 0;
-      }
-    }
-
     static uint32 ApplyVertexBufferLayout(const VertexBufferLayout &layout,
                                           size_t attributeIndexOffset = 0u) noexcept
     {

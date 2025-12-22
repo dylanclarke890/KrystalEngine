@@ -58,7 +58,7 @@ namespace Krys::Gfx::OpenGL
                                             SamplerHandle sampler) noexcept override
     {
       static uint32 unnamedTextureCounter = 0u;
-      Texture texture {imageView, sampler};
+      Texture texture {imageView, sampler, TextureOwner::Other};
       return AddTexture(std::format("{}", unnamedTextureCounter++), std::move(texture));
     }
 
@@ -119,7 +119,7 @@ namespace Krys::Gfx::OpenGL
       glObjectLabel(GL_TEXTURE, img.Id(), -1, key.c_str());
       glObjectLabel(GL_TEXTURE, imgView.Id(), -1, (key + "-view").c_str());
 
-      Texture texture {imageViewHandle, samplerHandle};
+      Texture texture {imageViewHandle, samplerHandle, TextureOwner::TextureRegistry};
       return AddTexture(key, std::move(texture));
     }
 
@@ -195,7 +195,7 @@ namespace Krys::Gfx::OpenGL
                                  .AnisotropicLevel = 1.f};
       SamplerHandle samplerHandle = _samplers.Create(samplerDesc);
 
-      Texture texture {imageViewHandle, samplerHandle};
+      Texture texture {imageViewHandle, samplerHandle, TextureOwner::TextureRegistry};
       return AddTexture(key, std::move(texture));
     }
 
@@ -210,21 +210,24 @@ namespace Krys::Gfx::OpenGL
         ImageView &imageView = _imageViews.Get(texture.ImageView());
 
         _imageViews.Destroy(texture.ImageView());
-        _images.Destroy(imageView.Image());
         _samplers.Unload(texture.Sampler());
+        if (texture.Owner() == TextureOwner::TextureRegistry)
+        {
+          _images.Destroy(imageView.Image());
+        }
 
         return _textures.Remove(handle);
       }
       return false;
     }
 
-    Texture &Get(TextureHandle handle) noexcept
+    NO_DISCARD Texture &Get(TextureHandle handle) noexcept
     {
       assert(handle.IsValid() && "Invalid texture handle.");
       return _textures.Get(handle);
     }
 
-    ImageView &GetView(TextureHandle handle) noexcept
+    NO_DISCARD ImageView &GetView(TextureHandle handle) noexcept
     {
       assert(handle.IsValid() && "Invalid texture handle.");
       Texture &texture = Get(handle);
@@ -236,7 +239,7 @@ namespace Krys::Gfx::OpenGL
     void Bind(TextureHandle handle, uint32 unit) noexcept
     {
       assert(handle.IsValid() && "Invalid texture handle.");
-      
+
       Texture &texture = Get(handle);
       assert(texture.ImageView().IsValid() && "Texture has an invalid image view.");
       assert(texture.Sampler().IsValid() && "Texture has an invalid sampler.");

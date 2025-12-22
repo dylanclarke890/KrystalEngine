@@ -39,6 +39,16 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Enums\BufferBitFlags.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Enums\BufferType.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Enums\BufferUsage.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Enums\FilterMode.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Enums\ImageType.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Enums\MeshType.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Enums\PixelFormat.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Enums\PrimitiveType.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Enums\VertexAttributeType.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Enums\WrapMode.hpp" />
     <ClInclude Include="include\Krystal.Gfx\FontAtlasLoader.hpp">
       <SubType>
       </SubType>
@@ -58,6 +68,10 @@
     <ClInclude Include="include\Krystal.Gfx\Registries\IImageRegistry.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Registries\IImageViewRegistry.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Registries\IRenderTargetRegistry.hpp">
+      <SubType>
+      </SubType>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\Registries\IResourceRegistry.hpp">
       <SubType>
       </SubType>
     </ClInclude>
@@ -342,26 +356,26 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>

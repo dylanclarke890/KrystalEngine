@@ -3,9 +3,11 @@
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
+#include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Lib/Expected.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types.hpp"
 
 namespace Krys::IO

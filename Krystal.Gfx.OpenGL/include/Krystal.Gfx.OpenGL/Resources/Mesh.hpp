@@ -10,34 +10,6 @@
 
 namespace Krys::Gfx::OpenGL
 {
-  NO_DISCARD constexpr GLenum MapPrimitiveType(PrimitiveType type) noexcept
-  {
-    switch (type)
-    {
-      case PrimitiveType::Points:        return GL_POINTS;
-      case PrimitiveType::Lines:         return GL_LINES;
-      case PrimitiveType::LineStrip:     return GL_LINE_STRIP;
-      case PrimitiveType::Triangles:     return GL_TRIANGLES;
-      case PrimitiveType::TriangleStrip: return GL_TRIANGLE_STRIP;
-      case PrimitiveType::TriangleFan:   return GL_TRIANGLE_FAN;
-      default:                           assert(false && "Unknown enum value: PrimitiveType"); return GL_INVALID_ENUM;
-    }
-  }
-
-  NO_DISCARD constexpr PrimitiveType MapPrimitiveType(GLenum type) noexcept
-  {
-    switch (type)
-    {
-      case GL_POINTS:         return PrimitiveType::Points;
-      case GL_LINES:          return PrimitiveType::Lines;
-      case GL_LINE_STRIP:     return PrimitiveType::LineStrip;
-      case GL_TRIANGLES:      return PrimitiveType::Triangles;
-      case GL_TRIANGLE_STRIP: return PrimitiveType::TriangleStrip;
-      case GL_TRIANGLE_FAN:   return PrimitiveType::TriangleFan;
-      default:                assert(false && "Unknown GLenum value for PrimitiveType"); return PrimitiveType::Triangles;
-    }
-  }
-
   class Mesh
   {
     NO_COPY(Mesh)
@@ -112,27 +84,29 @@ namespace Krys::Gfx::OpenGL
       glBindVertexArray(_vao);
     }
 
-    void Draw() const noexcept
+    void Draw(GLsizei instanceCount = 1u) const noexcept
     {
       if (_ebo != 0u)
       {
-        glDrawElements(_primitiveType, _count, GL_UNSIGNED_INT, nullptr);
+        if (instanceCount > 1u)
+        {
+          glDrawElementsInstanced(_primitiveType, _count, GL_UNSIGNED_INT, nullptr, instanceCount);
+        }
+        else
+        {
+          glDrawElements(_primitiveType, _count, GL_UNSIGNED_INT, nullptr);
+        }
       }
       else
       {
-        glDrawArrays(_primitiveType, 0, _count);
-      }
-    }
-
-    void DrawInstanced(GLsizei instanceCount) const noexcept
-    {
-      if (_ebo != 0u)
-      {
-        glDrawElementsInstanced(_primitiveType, _count, GL_UNSIGNED_INT, nullptr, instanceCount);
-      }
-      else
-      {
-        glDrawArraysInstanced(_primitiveType, 0, _count, instanceCount);
+        if (instanceCount > 1u)
+        {
+          glDrawArraysInstanced(_primitiveType, 0, _count, instanceCount);
+        }
+        else
+        {
+          glDrawArrays(_primitiveType, 0, _count);
+        }
       }
     }
 
@@ -143,6 +117,11 @@ namespace Krys::Gfx::OpenGL
       instanceDataBuffer.Bind();
       const size_t totalAttributeOffset = _layout.size() + attributeIndexOffset;
       Utils::ApplyVertexBufferLayout(instanceLayout, totalAttributeOffset);
+    }
+
+    NO_DISCARD GLuint Id() const noexcept
+    {
+      return _vao;
     }
 
   private:

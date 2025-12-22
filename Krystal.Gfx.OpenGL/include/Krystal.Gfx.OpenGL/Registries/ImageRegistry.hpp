@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Krystal.Gfx.Lib/ResourceManager.hpp"
+#include "Krystal.Gfx.OpenGL/Mappers/Enums/ImageType.hpp"
+#include "Krystal.Gfx.OpenGL/Mappers/Enums/PixelFormat.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Image.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Registries/IImageRegistry.hpp"

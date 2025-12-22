@@ -11,45 +11,6 @@
 
 namespace Krys::Gfx::OpenGL
 {
-  struct QuadInstanceData
-  {
-    Maths::Vec4 PositionAndSize; // xy: position, zw: size
-    Maths::Vec4 BorderWidths;
-    ColourbPremultiplied BackgroundColour;
-    ColourbPremultiplied BorderColourLeft;
-    ColourbPremultiplied BorderColourRight;
-    ColourbPremultiplied BorderColourTop;
-    ColourbPremultiplied BorderColourBottom;
-
-    constexpr static uint32 BatchSize = 200u;
-
-    constexpr static VertexBufferLayout Layout()
-    {
-      return {
-        // quad position and size
-        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance},
-
-        // border widths
-        {VertexAttributeType::Float, 4, VertexInputRate::PerInstance},
-
-        // background colour
-        {VertexAttributeType::UnsignedByte, 4, IsNormalized(true), VertexInputRate::PerInstance},
-
-        // border colour left
-        {VertexAttributeType::UnsignedByte, 4, IsNormalized(true), VertexInputRate::PerInstance},
-
-        // border colour right
-        {VertexAttributeType::UnsignedByte, 4, IsNormalized(true), VertexInputRate::PerInstance},
-
-        // border colour top
-        {VertexAttributeType::UnsignedByte, 4, IsNormalized(true), VertexInputRate::PerInstance},
-
-        // border colour bottom
-        {VertexAttributeType::UnsignedByte, 4, IsNormalized(true), VertexInputRate::PerInstance},
-      };
-    }
-  };
-
   struct GlyphVertex
   {
     Maths::Vec2 Position {};
@@ -67,21 +28,21 @@ namespace Krys::Gfx::OpenGL
     }
   };
 
+  struct RendererState
+  {
+    RenderTargetHandle CurrentRenderTarget {0u};
+  };
+
   class Renderer : public IRenderer
   {
     NO_COPY_MOVE(Renderer)
 
   private:
     Context &_context;
-    ShaderHandle _quadShader;
-    ShaderHandle _singleTextureShader;
-    MeshHandle _quadMesh;
-    RenderTargetHandle _currentRenderTarget;
-    InstanceData<QuadInstanceData> _quadInstanceData;
+    RendererState _state;
     List<GlyphVertex> _glyphVertices {};
     BufferHandle _glyphBuffer {};
     GLuint _textVao {};
-    int _dpi;
 
   public:
     Renderer(IContext &context) noexcept;
@@ -98,24 +59,14 @@ namespace Krys::Gfx::OpenGL
 
     void Submit(const CommandList &commandList) override;
 
-    void DPIChanged(int dpi) noexcept override;
-
   private:
-    void FlushQuadInstances();
-
-    void DrawTexturedQuad(GLuint texture, const Maths::Vec2 &position, const Maths::Vec2 &size,
-                          float opacity);
-
-    void DrawText(const utf8_string &text, FontHandle fontHandle, float ptSize, const Maths::Vec2 &position,
-                  const ColourbPremultiplied &colour = Colours::Black) noexcept;
+    void DrawText(Font &font, Shader &shader, const utf8_string &text, const ColourbPremultiplied &textColour,
+                  const Maths::Vec2 &position, float ptSize);
 
     void DrawTextOutlined(const utf8_string &text, FontHandle fontHandle, float ptSize,
                           const Maths::Vec2 &position,
                           const ColourbPremultiplied &textColour = Colours::Black,
                           const ColourbPremultiplied &outlineColour = Colours::White,
                           float outlineWidth = 3.f) noexcept;
-
-    void DrawText(Font &font, Shader &shader, const utf8_string &text, const ColourbPremultiplied &textColour,
-                  const Maths::Vec2 &position, float ptSize);
   };
 }

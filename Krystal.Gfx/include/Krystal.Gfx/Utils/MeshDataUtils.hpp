@@ -28,10 +28,14 @@ namespace Krys::Gfx
     {
       using Vertex = Vertex::Position2D_ColourbPremultiplied_UV;
 
+      const size_t TotalVerticesToAdd = 4;
+      const size_t TotalVerticesSizeInBytes = TotalVerticesToAdd * sizeof(Vertex);
+
+      const size_t TotalIndicesToAdd = 6;
+      const size_t TotalIndicesSizeInBytes = TotalIndicesToAdd * sizeof(uint32);
+
       const size_t v0 = data.Vertices.size();
       const size_t i0 = data.Indices.size();
-      const size_t verticesSize = 4 * sizeof(Vertex);
-      const size_t indicesSize = 6 * sizeof(uint32);
 
       {
         Array<Vertex, 4> vertices = {};
@@ -52,22 +56,24 @@ namespace Krys::Gfx
         vertices[3].Colour = colour;
         vertices[3].TexCoord = Maths::Vec2(topLeftTexCoord.x, bottomRightTexCoord.y);
 
-        data.Vertices.resize(data.Vertices.size() + verticesSize);
-        std::memcpy(data.Vertices.data() + v0, &vertices[0], verticesSize);
+        data.Vertices.resize(data.Vertices.size() + TotalVerticesSizeInBytes);
+        std::memcpy(&data.Vertices[v0], vertices.data(), TotalVerticesSizeInBytes);
       }
 
       {
         Array<uint32, 6> indices {};
 
-        indices[0] = static_cast<uint32>(v0 + 0u);
-        indices[1] = static_cast<uint32>(v0 + 1u);
-        indices[2] = static_cast<uint32>(v0 + 2u);
-        indices[3] = static_cast<uint32>(v0 + 2u);
-        indices[4] = static_cast<uint32>(v0 + 3u);
-        indices[5] = static_cast<uint32>(v0 + 0u);
+        const size_t vertexStart = v0 / sizeof(Vertex);
 
-        data.Indices.resize(data.Indices.size() + indicesSize);
-        std::memcpy(data.Indices.data() + i0, &indices[0], indicesSize);
+        indices[0] = static_cast<uint32>(vertexStart + 0u);
+        indices[1] = static_cast<uint32>(vertexStart + 1u);
+        indices[2] = static_cast<uint32>(vertexStart + 2u);
+        indices[3] = static_cast<uint32>(vertexStart + 2u);
+        indices[4] = static_cast<uint32>(vertexStart + 3u);
+        indices[5] = static_cast<uint32>(vertexStart + 0u);
+
+        data.Indices.resize(data.Indices.size() + TotalIndicesSizeInBytes);
+        std::memcpy(&data.Indices[i0], indices.data(), TotalIndicesSizeInBytes);
       }
     }
   };

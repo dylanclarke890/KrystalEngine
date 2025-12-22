@@ -682,12 +682,12 @@ namespace Krys::UI
       return NodeStyleGetBorderColours(_elements.Get(element).LayoutNode);
     }
 
-    void ElementStyleSetBorderRadii(ElementHandle element, const Array<Maths::Vec2, 4> &radii)
+    void ElementStyleSetBorderRadii(ElementHandle element, const Array<float, 4> &radii)
     {
       assert(element.IsValid() && "Invalid element handle");
       NodeStyleSetBorderRadii(_elements.Get(element).LayoutNode, radii);
     }
-    const Array<Maths::Vec2, 4> &ElementStyleGetBorderRadii(ElementHandle element)
+    const Array<float, 4> &ElementStyleGetBorderRadii(ElementHandle element)
     {
       assert(element.IsValid() && "Invalid element handle");
       return NodeStyleGetBorderRadii(_elements.Get(element).LayoutNode);
@@ -696,7 +696,11 @@ namespace Krys::UI
     void ElementStyleSetBorderWidths(ElementHandle element, const Array<float, 4> &widths)
     {
       assert(element.IsValid() && "Invalid element handle");
-      NodeStyleSetBorderWidths(_elements.Get(element).LayoutNode, widths);
+      auto node = _elements.Get(element).LayoutNode;
+      NodeStyleSetBorder(node, Edge::Top, widths[0]);
+      NodeStyleSetBorder(node, Edge::Right, widths[1]);
+      NodeStyleSetBorder(node, Edge::Bottom, widths[2]);
+      NodeStyleSetBorder(node, Edge::Left, widths[3]);
     }
     const Array<float, 4> &ElementStyleGetBorderWidths(ElementHandle element)
     {

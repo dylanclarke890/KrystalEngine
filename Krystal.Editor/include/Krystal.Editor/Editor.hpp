@@ -103,47 +103,21 @@ namespace Krys
 
       StringRef textRef = _context->Strings.Intern(u8"Hello, Krystal UI!\nThis text should be on a newline!");
 
-      _document.ElementStyleSetBackgroundColour(_document.Body(), Gfx::Colours::Green);
+      _document.ElementStyleSetBackgroundColour(_document.Body(), Maroon);
       _document.ElementStyleSetFlexDirection(_document.Body(), FlexDirection::Row);
-      _document.ElementStyleSetJustifyContent(_document.Body(), Justify::SpaceBetween);
       _document.ElementStyleSetOpacity(_document.Body(), 0.8f);
 
       auto leftBox = _document.Create<Element>();
       _document.AppendChild(_document.Body(), leftBox);
-      _document.ElementStyleSetWidthPercent(leftBox, 45.f);
-      _document.ElementStyleSetHeightPercent(leftBox, 100.f);
-      _document.ElementStyleSetBackgroundColour(leftBox, Gfx::Colours::Blue);
+      _document.ElementStyleSetWidth(leftBox, 600.f);
+      _document.ElementStyleSetHeight(leftBox, 600.f);
+      _document.ElementStyleSetBorderRadii(leftBox, {300.f, 300.f, 300.f, 300.f});
+      _document.ElementStyleSetBorderWidths(leftBox, {0.f, 20.f, 20.f, 0.f});
+      _document.ElementStyleSetBorderColours(leftBox, {Blue, Red, Orange, Black});
+      _document.ElementStyleSetBackgroundColour(leftBox, Green);
+      _document.ElementSetTextContent(leftBox, textRef);
+      _document.ElementStyleSetTextColour(leftBox, Black);
       _document.ElementStyleSetOpacity(leftBox, 0.8f);
-
-      auto leftInnerBox = _document.Create<Element>();
-      _document.AppendChild(leftBox, leftInnerBox);
-      _document.ElementStyleSetWidthPercent(leftInnerBox, 50.f);
-      _document.ElementStyleSetHeightPercent(leftInnerBox, 50.f);
-      _document.ElementStyleSetBackgroundColour(leftInnerBox, Gfx::Colours::Yellow);
-
-      auto leftInnerInnerBox = _document.Create<Element>();
-      _document.AppendChild(leftBox, leftInnerInnerBox);
-      _document.ElementStyleSetWidth(leftInnerInnerBox, 150.f);
-      _document.ElementStyleSetHeight(leftInnerInnerBox, 200.f);
-      _document.ElementStyleSetBorderRadii(leftInnerInnerBox, {{Vec2 {75.f}}});
-      _document.ElementStyleSetBorderWidths(leftInnerInnerBox, {5.f, 5.f, 5.f, 5.f});
-      _document.ElementStyleSetBorderColours(leftInnerInnerBox, {Green, Red, White, Yellow});
-      _document.ElementStyleSetBackgroundColour(leftInnerInnerBox, Gfx::Colours::Maroon);
-
-      auto rightBox = _document.Create<Element>();
-      _document.AppendChild(_document.Body(), rightBox);
-      _document.ElementStyleSetWidthPercent(rightBox, 45.f);
-      _document.ElementStyleSetHeightPercent(rightBox, 100.f);
-      _document.ElementStyleSetBackgroundColour(rightBox, Gfx::Colours::Red);
-      _test = rightBox;
-
-      auto rightInnerBox = _document.Create<Element>();
-      _document.AppendChild(rightBox, rightInnerBox);
-      _document.ElementStyleSetWidthPercent(rightInnerBox, 50.f);
-      _document.ElementStyleSetFontSize(rightInnerBox, 16.f);
-      _document.ElementStyleSetHeightPercent(rightInnerBox, 50.f);
-      _document.ElementStyleSetBackgroundColour(rightInnerBox, Gfx::Colours::Cyan);
-      _document.ElementSetTextContent(rightInnerBox, textRef);
     }
 
     void OnRender() noexcept override

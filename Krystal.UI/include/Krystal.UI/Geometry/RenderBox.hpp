@@ -2,15 +2,10 @@
 
 #include "Krystal.Lib/Array.hpp"
 #include "Krystal.Maths/Vector.hpp"
+#include "Krystal.UI/Geometry/Common.hpp"
 
-namespace Krys
+namespace Krys::UI
 {
-  /// @brief Ordered by top, right, bottom, left.
-  using EdgeSizes = Array<float, 4>;
-
-  /// @brief Ordered by top-left, top-right, bottom-right, bottom-left.
-  using CornerSizes = Array<float, 4>;
-
   /// @brief Provides the data needed to generate a mesh for a given element's box.
   class RenderBox
   {
@@ -80,16 +75,16 @@ namespace Krys
     {
       _borderRadii = value;
     }
+
+    bool operator==(const RenderBox &b) noexcept
+    {
+      return GetFillSize() == b.GetFillSize() && GetBorderOffset() == b.GetBorderOffset()
+             && GetBorderWidths() == b.GetBorderWidths() && GetBorderRadius() == b.GetBorderRadius();
+    }
+
+    bool operator!=(const RenderBox &b) noexcept
+    {
+      return !(*this == b);
+    }
   };
-
-  inline bool operator==(const RenderBox &a, const RenderBox &b)
-  {
-    return a.GetFillSize() == b.GetFillSize() && a.GetBorderOffset() == b.GetBorderOffset()
-           && a.GetBorderWidths() == b.GetBorderWidths() && a.GetBorderRadius() == b.GetBorderRadius();
-  }
-
-  inline bool operator!=(const RenderBox &a, const RenderBox &b)
-  {
-    return !(a == b);
-  }
 }

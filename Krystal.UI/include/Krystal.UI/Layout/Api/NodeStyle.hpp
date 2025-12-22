@@ -146,8 +146,8 @@ namespace Krys::UI
   void NodeStyleSetBorderColours(NodeRef node, const Array<Gfx::ColourbPremultiplied, 4> &colour);
   const Array<Gfx::ColourbPremultiplied, 4> &NodeStyleGetBorderColours(NodeConstRef node);
 
-  void NodeStyleSetBorderRadii(NodeRef node, const Array<Maths::Vec2, 4> &radii);
-  const Array<Maths::Vec2, 4> &NodeStyleGetBorderRadii(NodeConstRef node);
+  void NodeStyleSetBorderRadii(NodeRef node, const Array<float, 4> &radii);
+  const Array<float, 4> &NodeStyleGetBorderRadii(NodeConstRef node);
 
   void NodeStyleSetBorderWidths(NodeRef node, const Array<float, 4> &widths);
   const Array<float, 4> &NodeStyleGetBorderWidths(NodeConstRef node);

@@ -207,6 +207,7 @@ namespace Krys::Gfx::OpenGL
     void Swap(Shader &other) noexcept
     {
       std::swap(_id, other._id);
+      std::swap(_layout, other._layout);
     }
   };
 }

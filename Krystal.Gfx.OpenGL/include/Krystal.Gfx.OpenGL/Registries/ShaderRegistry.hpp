@@ -2,6 +2,7 @@
 
 #include "Krystal.Debug/ScopedProfiler.hpp"
 #include "Krystal.Gfx.Lib/ResourceManager.hpp"
+#include "Krystal.Gfx.OpenGL/Debug.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Shader.hpp"
 #include "Krystal.Gfx/Registries/IShaderRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
@@ -89,31 +90,55 @@ namespace Krys::Gfx::OpenGL
 
     NO_DISCARD ShaderHandle GetBuiltin(BuiltinShader builtin) noexcept override
     {
-      auto profiler = Debug::ScopedProfiler("GetBuiltin");
+      // auto profiler = Krys::Debug::ScopedProfiler("GetBuiltin");
 
       if (auto it = _builtins.find(builtin); it != _builtins.end())
       {
         return it->second;
       }
 
+      string name;
       auto shader = [&]()
       {
         switch (builtin)
         {
-          case BuiltinShader::Shape2D_Colour:     return GetBuiltinShape2DColourShader();
-          case BuiltinShader::Shape2D_Texture:    return GetBuiltinShape2DTextureShader();
-          case BuiltinShader::Font_Bitmap:        return GetBuiltinTextShader(FontType::Bitmap, false);
-          case BuiltinShader::Font_SDF:           return GetBuiltinTextShader(FontType::SDF, false);
-          case BuiltinShader::Font_SDF_Outline:   return GetBuiltinTextShader(FontType::SDF, true);
-          case BuiltinShader::Font_MSDF:          return GetBuiltinTextShader(FontType::MSDF, false);
-          case BuiltinShader::Font_MSDF_Outline:  return GetBuiltinTextShader(FontType::MSDF, true);
-          case BuiltinShader::Font_MTSDF:         return GetBuiltinTextShader(FontType::MTSDF, false);
-          case BuiltinShader::Font_MTSDF_Outline: return GetBuiltinTextShader(FontType::MTSDF, true);
+          case BuiltinShader::Shape2D_Colour:
+            name = "Builtin_Shape2DColour";
+            return GetBuiltin_Shape2DColour();
+          case BuiltinShader::Shape2D_Texture:
+            name = "Builtin_Shape2DTexture";
+            return GetBuiltin_Shape2DTexture();
+          case BuiltinShader::PostProcess_Passthrough:
+            name = "Builtin_PostProcessPassthrough";
+            return GetBuiltin_PostProcessPassthrough();
+          case BuiltinShader::Font_Bitmap:
+            name = "Builtin_FontBitmap";
+            return GetBuiltin_Text(FontType::Bitmap, false);
+          case BuiltinShader::Font_SDF:
+            name = "Builtin_FontSDF";
+            return GetBuiltin_Text(FontType::SDF, false);
+          case BuiltinShader::Font_SDF_Outline:
+            name = "Builtin_FontSDFOutline";
+            return GetBuiltin_Text(FontType::SDF, true);
+          case BuiltinShader::Font_MSDF:
+            name = "Builtin_FontMSDF";
+            return GetBuiltin_Text(FontType::MSDF, false);
+          case BuiltinShader::Font_MSDF_Outline:
+            name = "Builtin_FontMSDFOutline";
+            return GetBuiltin_Text(FontType::MSDF, true);
+          case BuiltinShader::Font_MTSDF:
+            name = "Builtin_FontMTSDF";
+            return GetBuiltin_Text(FontType::MTSDF, false);
+          case BuiltinShader::Font_MTSDF_Outline:
+            name = "Builtin_FontMTSDFOutline";
+            return GetBuiltin_Text(FontType::MTSDF, true);
         }
         std::unreachable();
       }();
 
       _builtins[builtin] = shader;
+      Debug::SetName(_shaders.Get(shader), name);
+
       return shader;
     }
 
@@ -145,8 +170,11 @@ namespace Krys::Gfx::OpenGL
     NO_DISCARD string ReadFile(const IO::Path &filepath) noexcept
     {
       Unique<IO::IStreamReader> reader = _vfs.GetReader(BaseDirectory / filepath, IO::ReadFlags::None);
+      assert(reader != nullptr && "Failed to create stream reader for shader file.");
+
       auto result = IO::StreamUtils::ReadAllText(*reader);
       assert(result.has_value() && "Failed to read shader file.");
+
       return result.value();
     }
 
@@ -157,7 +185,7 @@ namespace Krys::Gfx::OpenGL
       return versionLine + defines + lineDirective + source.substr(versionLine.size());
     }
 
-    NO_DISCARD ShaderHandle GetBuiltinTextShader(FontType fontType, bool outlined)
+    NO_DISCARD ShaderHandle GetBuiltin_Text(FontType fontType, bool outlined)
     {
       ShaderPreprocessorConfig cfg {};
       switch (fontType)
@@ -178,17 +206,24 @@ namespace Krys::Gfx::OpenGL
       return Load(vertexShader, fragmentShader, cfg);
     }
 
-    NO_DISCARD ShaderHandle GetBuiltinShape2DColourShader()
+    NO_DISCARD ShaderHandle GetBuiltin_Shape2DColour()
     {
       const auto vertexShader = IO::Path("2d-shape.vert");
       const auto fragmentShader = IO::Path("2d-shape-colour.frag");
       return Load(vertexShader, fragmentShader);
     }
 
-    NO_DISCARD ShaderHandle GetBuiltinShape2DTextureShader()
+    NO_DISCARD ShaderHandle GetBuiltin_Shape2DTexture()
     {
       const auto vertexShader = IO::Path("2d-shape.vert");
       const auto fragmentShader = IO::Path("2d-shape-texture.frag");
+      return Load(vertexShader, fragmentShader);
+    }
+
+    NO_DISCARD ShaderHandle GetBuiltin_PostProcessPassthrough()
+    {
+      const auto vertexShader = IO::Path("post-process.vert");
+      const auto fragmentShader = IO::Path("post-process-passthrough.frag");
       return Load(vertexShader, fragmentShader);
     }
   };

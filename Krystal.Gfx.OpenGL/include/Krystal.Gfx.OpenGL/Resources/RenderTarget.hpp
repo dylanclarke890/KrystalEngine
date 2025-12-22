@@ -15,7 +15,6 @@ namespace Krys::Gfx::OpenGL
   {
     AttachmentType Type {};
     ImageHandle Image {0u};
-    ImageViewHandle ImageView {0u};
     GLuint Texture {0u};
   };
 
@@ -55,6 +54,7 @@ namespace Krys::Gfx::OpenGL
 
     void AddColorAttachment(const RenderTargetAttachment &attachment) noexcept
     {
+      assert(attachment.Texture != 0 && "Attachment texture cannot be zero.");
       glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0 + static_cast<GLenum>(_colorAttachments.size()),
                                 attachment.Texture, 0);
       _colorAttachments.push_back(attachment);
@@ -190,9 +190,10 @@ namespace Krys::Gfx::OpenGL
       return _depthStencilAttachment;
     }
 
+    /// @brief Get an ortho projection matrix that has the origin at the top-left corner.
     NO_DISCARD Maths::Mat4 GetProjectionMatrix() const noexcept
     {
-      return Maths::Ortho(0.f, static_cast<float>(_width), 0.f, static_cast<float>(_height));
+      return Maths::Ortho(0.f, static_cast<float>(_width), static_cast<float>(_height), 0.f);
     }
 
     /// @brief Sets the dimensions of the render target. NOTE: Does not resize attachments.

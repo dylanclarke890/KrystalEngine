@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Maths/Conventions.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Quaternion.hpp"
@@ -17,6 +17,13 @@ namespace Krys::Maths
     Matrix<T, 4, 4> result {m};
     result[3] = m[0] * v[0] + m[1] * v[1] + m[2] * v[2] + m[3];
     return result;
+  }
+
+  /// @brief Create a matrix with the given translation applied.
+  template <FloatingPoint T>
+  NO_DISCARD constexpr auto Translate(const Vector3<T> &v) noexcept
+  {
+    return Translate(Identity<Matrix4x4<T>>(), v);
   }
 
   /// @brief Apply a rotation to a matrix around axis `v`.
@@ -51,6 +58,13 @@ namespace Krys::Maths
     return result;
   }
 
+  /// @brief Create a matrix with the given rotation applied.
+  template <FloatingPoint T>
+  NO_DISCARD constexpr auto Rotate(T angle, const Vector3<T> &v) noexcept
+  {
+    return Rotate(Identity<Matrix4x4<T>>(), angle, v);
+  }
+
   /// @brief Apply a scale vector to a matrix.
   template <FloatingPoint T>
   NO_DISCARD constexpr auto Scale(const Matrix4x4<T> &m, const Vector3<T> &v) noexcept
@@ -62,6 +76,13 @@ namespace Krys::Maths
     result[3] = m[3];
 
     return result;
+  }
+
+  /// @brief Create a matrix with the given scale applied.
+  template <FloatingPoint T>
+  NO_DISCARD constexpr auto Scale(const Vector3<T> &v) noexcept
+  {
+    return Scale(Identity<Matrix4x4<T>>(), v);
   }
 
   /// @brief Constructs a right handed look at matrix.
