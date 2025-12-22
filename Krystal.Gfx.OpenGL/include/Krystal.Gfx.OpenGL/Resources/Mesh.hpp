@@ -147,6 +147,11 @@ namespace Krys::Gfx::OpenGL
       Utils::ApplyVertexBufferLayout(instanceLayout, totalAttributeOffset);
     }
 
+    NO_DISCARD GLuint Id() const noexcept
+    {
+      return _vao;
+    }
+
   private:
     void Swap(Mesh &other) noexcept
     {

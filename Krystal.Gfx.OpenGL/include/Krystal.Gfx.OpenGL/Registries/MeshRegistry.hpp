@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Krystal.Gfx.Lib/ResourceManager.hpp"
+#include "Krystal.Gfx.OpenGL/Debug.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Mesh.hpp"
 #include "Krystal.Gfx/Registries/IMeshRegistry.hpp"
 #include "Krystal.Gfx/Utils/MeshDataUtils.hpp"
@@ -28,8 +29,10 @@ namespace Krys::Gfx::OpenGL
 
     void Startup() override
     {
-      MeshData data;
-      MeshDataUtils::GenerateQuad(data, {0.f, 0.f}, {1.f, 1.f}, Colours::White);
+      using namespace Maths;
+
+      MeshData data {};
+      MeshDataUtils::GenerateQuad(data, Vec2 {-1.f}, Vec2 {2.f}, Colours::Transparent);
 
       _fullScreenQuadHandle = Create({
         .Vertices = data.Vertices,
@@ -38,6 +41,8 @@ namespace Krys::Gfx::OpenGL
         .Primitive = PrimitiveType::Triangles,
         .Type = MeshType::Static,
       });
+
+      Debug::SetName(_meshes.Get(_fullScreenQuadHandle), "FullScreenQuad");
     }
 
     void Shutdown() noexcept override

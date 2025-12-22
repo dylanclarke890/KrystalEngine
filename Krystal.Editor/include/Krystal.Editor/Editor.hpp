@@ -103,7 +103,7 @@ namespace Krys
 
       StringRef textRef = _context->Strings.Intern(u8"Hello, Krystal UI!\nThis text should be on a newline!");
 
-      _document.ElementStyleSetBackgroundColour(_document.Body(), Maroon);
+      _document.ElementStyleSetBackgroundColour(_document.Body(), Transparent);
       _document.ElementStyleSetFlexDirection(_document.Body(), FlexDirection::Row);
 
       auto leftBox = _document.Create<Element>();

@@ -260,6 +260,8 @@
     <None Include="data\shaders\opengl\points.frag" />
     <None Include="data\shaders\opengl\points.geo" />
     <None Include="data\shaders\opengl\points.vert" />
+    <None Include="data\shaders\opengl\post-process-passthrough.frag" />
+    <None Include="data\shaders\opengl\post-process.vert" />
     <None Include="data\shaders\opengl\reflection.frag" />
     <None Include="data\shaders\opengl\reflection.vert" />
     <None Include="data\shaders\opengl\shadow-mapping.frag" />

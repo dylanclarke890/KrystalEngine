@@ -127,14 +127,15 @@ namespace Krys::Gfx::OpenGL
         case Commands::BindRenderTarget::Type:
         {
           const auto &cmd = reader.ReadCommand<Commands::BindRenderTarget>();
-          assert(cmd.RenderTarget.IsValid() && "Invalid render target handle in BindRenderTarget.");
           if (cmd.RenderTarget == _state.CurrentRenderTarget)
           {
             break;
           }
+
+          assert(cmd.RenderTarget.IsValid() && "Invalid render target handle in BindRenderTarget.");
+          renderTargets.Bind(cmd.RenderTarget);
           _state.CurrentRenderTarget = cmd.RenderTarget;
 
-          renderTargets.Bind(cmd.RenderTarget);
           auto &rt = renderTargets.Get(cmd.RenderTarget);
           glViewport(0, 0, rt.Width(), rt.Height());
 
@@ -145,10 +146,97 @@ namespace Krys::Gfx::OpenGL
           const auto &cmd = reader.ReadCommand<Commands::ClearRenderTarget>();
 
           GLbitfield clearMask = MapBufferBitFlags(cmd.Clear);
+          if (!!(cmd.Clear & BufferBitFlags::Colour))
+          {
+            const auto &colour = cmd.Colour.ToVec4();
+            glClearColor(colour.x, colour.y, colour.z, colour.w);
+          }
+          if (!!(cmd.Clear & BufferBitFlags::Depth))
+          {
+            glClearDepthf(Maths::Clamp(cmd.Depth, 0.f, 1.f));
+          }
+          if (!!(cmd.Clear & BufferBitFlags::Stencil))
+          {
+            glClearStencil(static_cast<GLint>(cmd.Stencil));
+          }
           if (clearMask != 0)
           {
             glClear(clearMask);
           }
+
+          break;
+        }
+        case Commands::BlitRenderTarget::Type:
+        {
+          const auto &cmd = reader.ReadCommand<Commands::BlitRenderTarget>();
+
+          auto &srcRT = renderTargets.Get(cmd.Source);
+          glBindFramebuffer(GL_READ_FRAMEBUFFER, srcRT.GetHandle());
+
+          GLint srcX0 = static_cast<GLint>(cmd.SourcePosition.x);
+          GLint srcY0 = static_cast<GLint>(srcRT.Height() - (cmd.SourcePosition.y + cmd.SourceSize.y));
+          GLint srcX1 = static_cast<GLint>(cmd.SourcePosition.x + cmd.SourceSize.x);
+          GLint srcY1 = static_cast<GLint>(srcRT.Height() - cmd.SourcePosition.y);
+
+          auto &dstRT = renderTargets.Get(cmd.Destination);
+          glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dstRT.GetHandle());
+
+          GLint dstX0 = static_cast<GLint>(cmd.DestinationPosition.x);
+          GLint dstY0 =
+            static_cast<GLint>(dstRT.Height() - (cmd.DestinationPosition.y + cmd.DestinationSize.y));
+          GLint dstX1 = static_cast<GLint>(cmd.DestinationPosition.x + cmd.DestinationSize.x);
+          GLint dstY1 = static_cast<GLint>(dstRT.Height() - cmd.DestinationPosition.y);
+
+          GLbitfield blitMask = MapBufferBitFlags(cmd.Mask);
+          GLenum filter = MapFilterMode(cmd.Filter);
+          glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, blitMask, filter);
+
+          // Restore previous framebuffer
+          renderTargets.Bind(_state.CurrentRenderTarget);
+          break;
+        }
+        case Commands::ApplyOpacityToRenderTarget::Type:
+        {
+          const auto &cmd = reader.ReadCommand<Commands::ApplyOpacityToRenderTarget>();
+          const auto &dstRT = renderTargets.Get(cmd.Destination);
+          const auto &srcRT = renderTargets.Get(cmd.Source);
+
+          renderTargets.Bind(cmd.Destination);
+          glViewport(0, 0, dstRT.Width(), dstRT.Height());
+
+          const auto &shader = shaders.Get(shaders.GetBuiltin(BuiltinShader::PostProcess_Passthrough));
+          shader.Bind();
+          shader.SetUniform("u_Texture", 0);
+          glBindTextureUnit(0, srcRT.GetColourAttachment(0).Texture);
+
+          glBlendFunc(GL_CONSTANT_COLOR, GL_ZERO);
+          glBlendColor(cmd.Opacity, cmd.Opacity, cmd.Opacity, cmd.Opacity);
+
+          auto &quad = meshes.Get(meshes.GetFullScreenQuad());
+          quad.Bind();
+          quad.Draw();
+
+          glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+
+          break;
+        }
+        case Commands::CompositeRenderTarget::Type:
+        {
+          const auto &cmd = reader.ReadCommand<Commands::CompositeRenderTarget>();
+          const auto &dstRT = renderTargets.Get(cmd.Destination);
+          const auto &srcRT = renderTargets.Get(cmd.Source);
+
+          renderTargets.Bind(cmd.Destination);
+          glViewport(0, 0, dstRT.Width(), dstRT.Height());
+
+          const auto &shader = shaders.Get(shaders.GetBuiltin(BuiltinShader::PostProcess_Passthrough));
+          shader.Bind();
+          shader.SetUniform("u_Texture", 0);
+          glBindTextureUnit(0, srcRT.GetColourAttachment(0).Texture);
+
+          auto &quad = meshes.Get(meshes.GetFullScreenQuad());
+          quad.Bind();
+          quad.Draw();
 
           break;
         }
@@ -177,77 +265,6 @@ namespace Krys::Gfx::OpenGL
 
           mesh.Bind();
           mesh.Draw(static_cast<GLsizei>(cmd.InstanceCount));
-          break;
-        }
-        case Commands::ComposeRenderTargets::Type:
-        {
-          using namespace Maths;
-
-          const auto &cmd = reader.ReadCommand<Commands::ComposeRenderTargets>();
-
-          auto &destRenderTarget = renderTargets.Get(cmd.Destination);
-          if (cmd.Destination != _state.CurrentRenderTarget)
-          {
-            renderTargets.Bind(cmd.Destination);
-            glViewport(0, 0, destRenderTarget.Width(), destRenderTarget.Height());
-          }
-
-          ShaderHandle shaderHandle = shaders.GetBuiltin(BuiltinShader::Shape2D_Texture);
-          auto &shader = shaders.Get(shaderHandle);
-          shader.Bind();
-
-          auto &srcRenderTarget = renderTargets.Get(cmd.Source);
-          glBindTextureUnit(0u, srcRenderTarget.GetColourAttachment(0u).Texture);
-          shader.SetUniform("u_Texture", 0);
-
-          Mat4 transform = Scale(Vec3 {(float)srcRenderTarget.Width(), (float)srcRenderTarget.Height(), 1.f});
-          Mat4 projection = destRenderTarget.GetProjectionMatrix();
-          shader.SetUniform("u_Transform", projection * transform);
-
-          glBlendFunc(GL_CONSTANT_COLOR, GL_ZERO);
-          glBlendColor(cmd.Opacity, cmd.Opacity, cmd.Opacity, cmd.Opacity);
-
-          auto &mesh = meshes.Get(meshes.GetFullScreenQuad());
-          mesh.Bind();
-          mesh.Draw();
-
-          if (_state.CurrentRenderTarget != cmd.Destination)
-          {
-            // Restore previous render target
-            renderTargets.Bind(_state.CurrentRenderTarget);
-            glViewport(0, 0, renderTargets.Get(_state.CurrentRenderTarget).Width(),
-                       renderTargets.Get(_state.CurrentRenderTarget).Height());
-          }
-
-          glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-          break;
-        }
-        case Commands::BlitRenderTarget::Type:
-        {
-          const auto &cmd = reader.ReadCommand<Commands::BlitRenderTarget>();
-
-          auto &srcRT = renderTargets.Get(cmd.Src);
-          glBindFramebuffer(GL_READ_FRAMEBUFFER, srcRT.GetHandle());
-
-          GLint srcX0 = static_cast<GLint>(cmd.SrcPosition.x);
-          GLint srcY0 = static_cast<GLint>(srcRT.Height() - (cmd.SrcPosition.y + cmd.SrcSize.y));
-          GLint srcX1 = static_cast<GLint>(cmd.SrcPosition.x + cmd.SrcSize.x);
-          GLint srcY1 = static_cast<GLint>(srcRT.Height() - cmd.SrcPosition.y);
-
-          auto &dstRT = renderTargets.Get(cmd.Dst);
-          glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dstRT.GetHandle());
-
-          GLint dstX0 = static_cast<GLint>(cmd.DstPosition.x);
-          GLint dstY0 = static_cast<GLint>(dstRT.Height() - (cmd.DstPosition.y + cmd.DstSize.y));
-          GLint dstX1 = static_cast<GLint>(cmd.DstPosition.x + cmd.DstSize.x);
-          GLint dstY1 = static_cast<GLint>(dstRT.Height() - cmd.DstPosition.y);
-
-          GLbitfield blitMask = MapBufferBitFlags(cmd.Mask);
-          GLenum filter = MapFilterMode(cmd.Filter);
-          glBlitFramebuffer(srcX0, srcY0, srcX1, srcY1, dstX0, dstY0, dstX1, dstY1, blitMask, filter);
-
-          // Restore previous framebuffer
-          renderTargets.Bind(_state.CurrentRenderTarget);
           break;
         }
         case Commands::DrawText::Type:

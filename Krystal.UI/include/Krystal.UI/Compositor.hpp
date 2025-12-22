@@ -361,11 +361,41 @@ namespace Krys::UI
       // We don't clear here as we're in the process of compositing
       BindCurrentLayerRenderTarget(false);
 
-      _commands.Push(Commands::ComposeRenderTargets {
-        .Source = layer.Target,
-        .Destination = GetCurrentRenderTarget(),
-        .Opacity = layer.Opacity,
-      });
+      if (layer.Opacity < 1.0f)
+      {
+        // Resolve MSAA into primary post-process target
+        _commands.Push(Commands::BlitRenderTarget {
+          .Source = layer.Target,
+          .SourcePosition = {0.f, 0.f},
+          .SourceSize = _viewportSize,
+          .Destination = _post.Primary,
+          .DestinationPosition = {0.f, 0.f},
+          .DestinationSize = _viewportSize,
+        });
+
+        _commands.Push(Commands::ApplyOpacityToRenderTarget {
+          .Source = _post.Primary,
+          .Destination = _post.Secondary,
+          .Opacity = layer.Opacity,
+        });
+        std::swap(_post.Primary, _post.Secondary);
+
+        _commands.Push(Commands::CompositeRenderTarget {
+          .Source = _post.Primary,
+          .Destination = GetCurrentRenderTarget(),
+        });
+      }
+      else
+      {
+        _commands.Push(Commands::BlitRenderTarget {
+          .Source = layer.Target,
+          .SourcePosition = {0.f, 0.f},
+          .SourceSize = _viewportSize,
+          .Destination = GetCurrentRenderTarget(),
+          .DestinationPosition = {0.f, 0.f},
+          .DestinationSize = _viewportSize,
+        });
+      }
     }
   };
 }

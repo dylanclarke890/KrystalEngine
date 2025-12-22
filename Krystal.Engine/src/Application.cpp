@@ -140,6 +140,7 @@ namespace Krys
     }
     _context->Window = std::move(window.value());
 
+    // TODO: this needs to be configurable on startup.
     auto cwd = std::filesystem::current_path();
     auto shadersDirectory = cwd / "data/shaders/opengl";
     auto texturesDirectory = cwd / "data/assets";

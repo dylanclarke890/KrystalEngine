@@ -50,6 +50,37 @@ namespace Krys::Gfx::Commands
     uint32 Stencil {0u};
   };
 
+  struct BlitRenderTarget
+  {
+    constexpr static CommandType Type = KRYS_CMD_TYPE("BlitRenderTarget");
+
+    RenderTargetHandle Source;
+    Maths::Vec2 SourcePosition;
+    Maths::Vec2 SourceSize;
+
+    RenderTargetHandle Destination;
+    Maths::Vec2 DestinationPosition;
+    Maths::Vec2 DestinationSize;
+
+    FilterMode Filter {FilterMode::Linear};
+    BufferBitFlags Mask {BufferBitFlags::Colour};
+  };
+
+  struct ApplyOpacityToRenderTarget
+  {
+    constexpr static CommandType Type = KRYS_CMD_TYPE("ApplyOpacityToRenderTarget");
+    RenderTargetHandle Source;
+    RenderTargetHandle Destination;
+    float Opacity {1.f};
+  };
+
+  struct CompositeRenderTarget
+  {
+    constexpr static CommandType Type = KRYS_CMD_TYPE("CompositeRenderTarget");
+    RenderTargetHandle Source;
+    RenderTargetHandle Destination;
+  };
+
   struct DrawShape2D
   {
     constexpr static CommandType Type = KRYS_CMD_TYPE("DrawShape2D");
@@ -58,31 +89,6 @@ namespace Krys::Gfx::Commands
     Gfx::TextureHandle Texture;
     Maths::Mat4 Transform;
     uint32 InstanceCount {1u};
-  };
-
-  struct BlitRenderTarget
-  {
-    constexpr static CommandType Type = KRYS_CMD_TYPE("BlitRenderTarget");
-    
-    RenderTargetHandle Src;
-    Maths::Vec2 SrcPosition;
-    Maths::Vec2 SrcSize;
-    
-    RenderTargetHandle Dst;
-    Maths::Vec2 DstPosition;
-    Maths::Vec2 DstSize;
-
-    FilterMode Filter {FilterMode::Linear};
-    BufferBitFlags Mask {BufferBitFlags::Colour};
-  };
-
-  struct ComposeRenderTargets
-  {
-    constexpr static CommandType Type = KRYS_CMD_TYPE("ComposeRenderTarget");
-
-    RenderTargetHandle Source;
-    RenderTargetHandle Destination;
-    float Opacity {1.f};
   };
 
   struct DrawText

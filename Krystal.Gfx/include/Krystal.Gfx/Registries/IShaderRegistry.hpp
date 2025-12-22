@@ -12,6 +12,7 @@ namespace Krys::Gfx
   {
     Shape2D_Colour,
     Shape2D_Texture,
+    PostProcess_Passthrough,
     Font_Bitmap,
     Font_SDF,
     Font_SDF_Outline,
