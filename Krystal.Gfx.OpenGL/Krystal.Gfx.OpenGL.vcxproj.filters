@@ -135,6 +135,15 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Mappers\Enums\PixelFormat.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Mappers\Enums\PrimitiveType.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Mappers\Enums\BufferType.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx.OpenGL\Mappers\Enums\BufferUsage.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">

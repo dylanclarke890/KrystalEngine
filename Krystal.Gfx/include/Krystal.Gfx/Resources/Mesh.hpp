@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Krystal.Gfx/Enums/MeshType.hpp"
+#include "Krystal.Gfx/Enums/PrimitiveType.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Span.hpp"
@@ -7,22 +9,6 @@
 
 namespace Krys::Gfx
 {
-  enum class PrimitiveType : uint8
-  {
-    Points = 0,
-    Lines,
-    LineStrip,
-    Triangles,
-    TriangleStrip,
-    TriangleFan,
-  };
-
-  enum class MeshType : uint8
-  {
-    Static,
-    Dynamic,
-  };
-
   struct MeshData
   {
     List<byte> Vertices {};

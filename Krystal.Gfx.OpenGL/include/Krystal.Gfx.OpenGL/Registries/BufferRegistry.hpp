@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Krystal.Gfx.Lib/ResourceManager.hpp"
+#include "Krystal.Gfx.OpenGL/Mappers/Enums/BufferType.hpp"
+#include "Krystal.Gfx.OpenGL/Mappers/Enums/BufferUsage.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Buffer.hpp"
 #include "Krystal.Gfx/Registries/IBufferRegistry.hpp"
 #include "Krystal.Lib/Macros.hpp"

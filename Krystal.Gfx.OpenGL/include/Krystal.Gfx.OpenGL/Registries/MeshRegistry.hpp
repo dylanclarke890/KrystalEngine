@@ -2,6 +2,7 @@
 
 #include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Debug.hpp"
+#include "Krystal.Gfx.OpenGL/Mappers/Enums/PrimitiveType.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Mesh.hpp"
 #include "Krystal.Gfx/Registries/IMeshRegistry.hpp"
 #include "Krystal.Gfx/Utils/MeshDataUtils.hpp"
@@ -251,20 +252,6 @@ namespace Krys::Gfx::OpenGL
     }
 
   private:
-    static GLenum MapPrimitiveType(PrimitiveType type) noexcept
-    {
-      switch (type)
-      {
-        case PrimitiveType::Points:        return GL_POINTS;
-        case PrimitiveType::Lines:         return GL_LINES;
-        case PrimitiveType::LineStrip:     return GL_LINE_STRIP;
-        case PrimitiveType::Triangles:     return GL_TRIANGLES;
-        case PrimitiveType::TriangleStrip: return GL_TRIANGLE_STRIP;
-        case PrimitiveType::TriangleFan:   return GL_TRIANGLE_FAN;
-        default:                           return GL_TRIANGLES;
-      }
-    }
-
     NO_DISCARD MeshHandle AddMesh(Mesh &&mesh) noexcept
     {
       auto handle = _meshes.Add(std::move(mesh));

@@ -6,7 +6,7 @@
 
 namespace Krys::Gfx::OpenGL
 {
-  NO_DISCARD constexpr GLenum MapPixelFormat(PixelFormat format) noexcept
+  NO_DISCARD constexpr inline GLenum MapPixelFormat(PixelFormat format) noexcept
   {
     switch (format)
     {
@@ -30,7 +30,7 @@ namespace Krys::Gfx::OpenGL
     }
   }
 
-  NO_DISCARD constexpr PixelFormat MapPixelFormat(GLenum internalFormat) noexcept
+  NO_DISCARD constexpr inline PixelFormat MapPixelFormat(GLenum internalFormat) noexcept
   {
     switch (internalFormat)
     {
@@ -50,7 +50,7 @@ namespace Krys::Gfx::OpenGL
       case GL_RGBA32F:            return PixelFormat::R32G32B32A32F;
       case GL_DEPTH24_STENCIL8:   return PixelFormat::DEPTH24STENCIL8;
       case GL_DEPTH_COMPONENT32F: return PixelFormat::DEPTH32F;
-      default:                    assert(false && "Unknown GLenum value for image format"); return PixelFormat::R8G8B8A8;
+      default:                    assert(false && "Unknown enum value: PixelFormat"); return PixelFormat::R8G8B8A8;
     }
   }
 }

@@ -6,7 +6,7 @@
 
 namespace Krys::Gfx::OpenGL
 {
-  NO_DISCARD constexpr GLenum MapImageType(ImageType type) noexcept
+  NO_DISCARD constexpr inline GLenum MapImageType(ImageType type) noexcept
   {
     switch (type)
     {
@@ -21,7 +21,7 @@ namespace Krys::Gfx::OpenGL
     }
   }
 
-  NO_DISCARD constexpr ImageType MapImageType(GLenum target) noexcept
+  NO_DISCARD constexpr inline ImageType MapImageType(GLenum target) noexcept
   {
     switch (target)
     {
@@ -32,7 +32,7 @@ namespace Krys::Gfx::OpenGL
       case GL_TEXTURE_1D_ARRAY:       return ImageType::Image1DArray;
       case GL_TEXTURE_2D_ARRAY:       return ImageType::Image2DArray;
       case GL_TEXTURE_CUBE_MAP_ARRAY: return ImageType::ImageCubeArray;
-      default:                        assert(false && "Unknown GLenum value for image type"); return ImageType::Image2D;
+      default:                        assert(false && "Unknown enum value: ImageType"); return ImageType::Image2D;
     }
   }
 

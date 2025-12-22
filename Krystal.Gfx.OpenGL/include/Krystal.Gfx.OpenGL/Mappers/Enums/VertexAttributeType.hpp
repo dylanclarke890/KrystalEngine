@@ -14,7 +14,7 @@ namespace Krys::Gfx::OpenGL
       case VertexAttributeType::Float:        return GL_FLOAT;
       case VertexAttributeType::Double:       return GL_DOUBLE;
       case VertexAttributeType::UnsignedByte: return GL_UNSIGNED_BYTE;
-      default:                                return GL_INT;
+      default:                                assert(false && "Unknown enum value: VertexAttributeType"); return GL_INT;
     }
   }
 
@@ -27,7 +27,7 @@ namespace Krys::Gfx::OpenGL
       case GL_FLOAT:         return VertexAttributeType::Float;
       case GL_DOUBLE:        return VertexAttributeType::Double;
       case GL_UNSIGNED_BYTE: return VertexAttributeType::UnsignedByte;
-      default:               return VertexAttributeType::Int32;
+      default:               assert(false && "Unknown enum value: VertexAttributeType"); return VertexAttributeType::Int32;
     }
   }
 }

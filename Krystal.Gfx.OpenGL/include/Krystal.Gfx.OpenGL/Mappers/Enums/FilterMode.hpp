@@ -6,7 +6,7 @@
 
 namespace Krys::Gfx::OpenGL
 {
-  NO_DISCARD constexpr static GLenum MapFilterMode(FilterMode mode) noexcept
+  NO_DISCARD constexpr inline GLenum MapFilterMode(FilterMode mode) noexcept
   {
     switch (mode)
     {
@@ -16,11 +16,11 @@ namespace Krys::Gfx::OpenGL
       case FilterMode::LinearMipmapNearest:  return GL_LINEAR_MIPMAP_NEAREST;
       case FilterMode::NearestMipmapLinear:  return GL_NEAREST_MIPMAP_LINEAR;
       case FilterMode::LinearMipmapLinear:   return GL_LINEAR_MIPMAP_LINEAR;
-      default:                               return GL_LINEAR;
+      default:                               assert(false && "Unknown enum value: FilterMode"); return GL_LINEAR;
     }
   }
 
-  NO_DISCARD constexpr static FilterMode MapFilterMode(GLenum mode) noexcept
+  NO_DISCARD constexpr inline FilterMode MapFilterMode(GLenum mode) noexcept
   {
     switch (mode)
     {
@@ -30,7 +30,7 @@ namespace Krys::Gfx::OpenGL
       case GL_LINEAR_MIPMAP_NEAREST:  FilterMode::LinearMipmapNearest;
       case GL_NEAREST_MIPMAP_LINEAR:  FilterMode::NearestMipmapLinear;
       case GL_LINEAR_MIPMAP_LINEAR:   FilterMode::LinearMipmapLinear;
-      default:                        return FilterMode::Linear;
+      default:                        assert(false && "Unknown enum value: FilterMode"); return FilterMode::Linear;
     }
   }
 }
