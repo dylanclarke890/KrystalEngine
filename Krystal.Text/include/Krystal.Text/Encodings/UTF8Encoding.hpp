@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/List.hpp"
@@ -12,36 +12,44 @@ namespace Krys::Text
   class UTF8Encoding : public Encoding
   {
   public:
-    constexpr UTF8Encoding() : Encoding {"UTF-8"}
+    UTF8Encoding() noexcept : Encoding {"UTF-8"}
     {
     }
 
-    virtual ~UTF8Encoding() = default;
+    virtual ~UTF8Encoding() noexcept = default;
 
-    NO_DISCARD constexpr List<byte> GetPreamble() const noexcept override
+    NO_DISCARD List<byte> GetPreamble() const noexcept override
     {
       return {byte {0xEF}, byte {0xBB}, byte {0xBF}};
     }
 
-    NO_DISCARD constexpr bool IsSingleByte() const noexcept override
+    NO_DISCARD bool IsSingleByte() const noexcept override
     {
       return true;
     }
 
-    NO_DISCARD constexpr size_t GetMaxByteCount(size_t charCount) const noexcept override
+    NO_DISCARD List<byte> Encode(utf8_stringview characters) const noexcept override
     {
+      List<byte> bytes;
+      bytes.reserve(characters.size());
+      for (char8_t ch : characters)
+      {
+        byte b = static_cast<byte>(ch);
+        bytes.push_back(b);
+      }
+      return bytes;
     }
 
-    NO_DISCARD constexpr List<byte> GetBytes(const string &characters) const noexcept override
+    NO_DISCARD utf8_string Decode(Span<const byte> bytes) const noexcept override
     {
-    }
-
-    NO_DISCARD constexpr size_t GetMaxCharCount(size_t byteCount) const noexcept override
-    {
-    }
-
-    NO_DISCARD constexpr string GetString(const List<byte> &bytes) const noexcept override
-    {
+      utf8_string characters;
+      characters.reserve(bytes.size());
+      for (byte b : bytes)
+      {
+        char8_t ch = static_cast<char8_t>(b);
+        characters.push_back(ch);
+      }
+      return characters;
     }
   };
 }

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/List.hpp"
@@ -12,39 +12,63 @@ namespace Krys::Text
   class ASCIIEncoding : public Encoding
   {
   public:
-    constexpr ASCIIEncoding() : Encoding {"US-ASCII"}
+    ASCIIEncoding() noexcept
+        : Encoding {"US-ASCII", EncoderFallback(EncodingReplacementCharacters::ASCII),
+                    DecoderFallback(EncodingReplacementCharacters::UTF)}
     {
     }
 
-    virtual ~ASCIIEncoding() = default;
+    virtual ~ASCIIEncoding() noexcept = default;
 
-    NO_DISCARD constexpr List<byte> GetPreamble() const noexcept override
-    {
-      return {};
-    }
-
-    NO_DISCARD constexpr bool IsSingleByte() const noexcept override
+    NO_DISCARD bool IsSingleByte() const noexcept override
     {
       return true;
     }
 
-    NO_DISCARD constexpr size_t GetMaxByteCount(size_t charCount) const noexcept override
+    NO_DISCARD List<byte> Encode(utf8_stringview characters) const noexcept override
     {
-      return charCount;
+      List<byte> bytes;
+      bytes.reserve(characters.size());
+
+      const auto encodeASCII = [&](UnicodeScalar ch) noexcept
+      {
+        if (ch.Value > 127u)
+        {
+          // Use the encoder fallback replacement character
+          for (char8_t rc : _encoderFallback.GetReplacementCharacter())
+          {
+            bytes.push_back(static_cast<byte>(rc));
+          }
+        }
+        else
+        {
+          bytes.push_back(static_cast<byte>(ch.Value));
+        }
+      };
+
+      ForEachUnicodeScalar(characters, encodeASCII);
+      return bytes;
     }
 
-    NO_DISCARD constexpr List<byte> GetBytes(const string &characters) const noexcept override
+    NO_DISCARD utf8_string Decode(Span<const byte> bytes) const noexcept override
     {
+      utf8_string characters;
+      characters.reserve(bytes.size());
 
-    }
+      for (byte b : bytes)
+      {
+        uchar ch = static_cast<uchar>(b);
+        if (ch > 127u)
+        {
+          characters += _decoderFallback.GetReplacementCharacter();
+        }
+        else
+        {
+          characters.push_back(ch);
+        }
+      }
 
-    NO_DISCARD constexpr size_t GetMaxCharCount(size_t byteCount) const noexcept override
-    {
-      return byteCount;
-    }
-
-    NO_DISCARD constexpr string GetString(const List<byte> &bytes) const noexcept override
-    {
+      return characters;
     }
   };
 }
