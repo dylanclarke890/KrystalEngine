@@ -38,5 +38,11 @@
     <ClInclude Include="include\Krystal.Text\UnicodeScalar.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingFallback.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingReplacementCharacters.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

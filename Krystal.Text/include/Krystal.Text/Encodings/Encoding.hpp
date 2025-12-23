@@ -7,130 +7,12 @@
 #include "Krystal.Lib/Span.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types.hpp"
+#include "Krystal.Text/Encodings/EncodingFallback.hpp"
+#include "Krystal.Text/Encodings/EncodingReplacementCharacters.hpp"
 #include "Krystal.Text/UnicodeScalar.hpp"
 
 namespace Krys::Text
 {
-  struct EncodingReplacementCharacters
-  {
-    static inline utf8_string ASCII = u8"?";
-    static inline utf8_string UTF = u8"�";
-  };
-
-  template <typename TFunc>
-  void ForEachUnicodeScalar(utf8_stringview utf8, TFunc &&func) noexcept
-  {
-    const auto ASCII_MAX = 0x7F;
-    const auto REPLACEMENT_CHARACTER = UnicodeScalar(0xFFFD);
-
-    auto it = utf8.begin();
-    const auto end = utf8.end();
-    while (it != end)
-    {
-      uint8 first = static_cast<uint8>(*it++);
-      uint32 codepoint = 0;
-      size_t needed = 0;
-
-      // Single-byte (ASCII)
-      if (first <= ASCII_MAX)
-      {
-        func(UnicodeScalar(first));
-        continue;
-      }
-      // Multi-byte sequence
-      else if ((first & 0xE0) == 0xC0)
-      {
-        codepoint = first & 0x1F;
-        needed = 1;
-      }
-      else if ((first & 0xF0) == 0xE0)
-      {
-        codepoint = first & 0x0F;
-        needed = 2;
-      }
-      else if ((first & 0xF8) == 0xF0)
-      {
-        codepoint = first & 0x07;
-        needed = 3;
-      }
-      // Invalid leading byte
-      else
-      {
-        func(REPLACEMENT_CHARACTER);
-        continue;
-      }
-
-      if (static_cast<size_t>(end - it) < needed)
-      {
-        func(REPLACEMENT_CHARACTER);
-        break;
-      }
-
-      // Process continuation bytes
-      for (size_t i = 0; i < needed; i++)
-      {
-        uint8 b = static_cast<uint8>(*it);
-        if ((b & 0xC0) != 0x80)
-        {
-          func(REPLACEMENT_CHARACTER);
-          continue;
-        }
-
-        // Append bits
-        codepoint = (codepoint << 6) | (b & 0x3F);
-        it++;
-      }
-
-      // Reject overlong encodings
-      bool invalidTwoByte = (needed == 1 && codepoint < 0x80);
-      bool invalidThreeByte = (needed == 2 && codepoint < 0x800);
-      bool invalidFourByte = (needed == 3 && codepoint < 0x10000);
-      bool invalidCodepoint = (codepoint > 0x10FFFF);
-      bool invalidSurrogate = (codepoint >= 0xD800 && codepoint <= 0xDFFF);
-      if (invalidTwoByte || invalidThreeByte || invalidFourByte || invalidCodepoint || invalidSurrogate)
-      {
-        func(REPLACEMENT_CHARACTER);
-        continue;
-      }
-
-      // Valid codepoint
-      func(UnicodeScalar(codepoint));
-    }
-  }
-
-  class EncodingFallback
-  {
-  protected:
-    utf8_stringview _replacementCharacter;
-
-  public:
-    EncodingFallback(utf8_stringview replacementCharacter) noexcept
-        : _replacementCharacter(replacementCharacter)
-    {
-    }
-
-    NO_DISCARD utf8_stringview GetReplacementCharacter() const noexcept
-    {
-      return _replacementCharacter;
-    }
-  };
-
-  class EncoderFallback : public EncodingFallback
-  {
-  public:
-    EncoderFallback(utf8_stringview replacementCharacter) noexcept : EncodingFallback(replacementCharacter)
-    {
-    }
-  };
-
-  class DecoderFallback : public EncodingFallback
-  {
-  public:
-    DecoderFallback(utf8_stringview replacementCharacter) noexcept : EncodingFallback(replacementCharacter)
-    {
-    }
-  };
-
   /// @brief Represents a character encoding.
   class Encoding
   {
@@ -189,4 +71,87 @@ namespace Krys::Text
     /// @brief Decodes a sequence of bytes into a utf-8 string.
     NO_DISCARD virtual utf8_string Decode(Span<const byte> bytes) const noexcept = 0;
   };
+
+  template <typename TFunc>
+  void ForEachUnicodeScalar(utf8_stringview utf8, TFunc &&func) noexcept
+  {
+    const auto ASCII_MAX = 0x7F;
+    const auto REPLACEMENT_CHARACTER = UnicodeScalar(0xFFFD);
+
+    auto it = utf8.begin();
+    const auto end = utf8.end();
+    while (it != end)
+    {
+      uint8 first = static_cast<uint8>(*it++);
+      uint32 codepoint = 0;
+      size_t needed = 0;
+
+      // Single-byte (ASCII)
+      if (first <= ASCII_MAX)
+      {
+        func(UnicodeScalar(first));
+        continue;
+      }
+      // Multi-byte sequence
+      else if ((first & 0xE0) == 0xC0)
+      {
+        codepoint = first & 0x1F;
+        needed = 1;
+      }
+      else if ((first & 0xF0) == 0xE0)
+      {
+        codepoint = first & 0x0F;
+        needed = 2;
+      }
+      else if ((first & 0xF8) == 0xF0)
+      {
+        codepoint = first & 0x07;
+        needed = 3;
+      }
+      // Invalid leading byte
+      else
+      {
+        func(REPLACEMENT_CHARACTER);
+        continue;
+      }
+
+      if (static_cast<size_t>(end - it) < needed)
+      {
+        func(REPLACEMENT_CHARACTER);
+        break;
+      }
+
+      // Process continuation bytes
+      for (size_t i = 0; i < needed; i++)
+      {
+        uint8 b = static_cast<uint8>(*it);
+        if ((b & 0xC0) != 0x80)
+        {
+          func(REPLACEMENT_CHARACTER);
+          // TODO: test this case
+          it++; // sync to next byte
+          continue;
+        }
+
+        // Append bits
+        codepoint = (codepoint << 6) | (b & 0x3F);
+        it++;
+      }
+
+      // Reject overlong encodings
+      bool invalidTwoByte = (needed == 1 && codepoint < 0x80);
+      bool invalidThreeByte = (needed == 2 && codepoint < 0x800);
+      bool invalidFourByte = (needed == 3 && codepoint < 0x10000);
+      bool invalidCodepoint = (codepoint > 0x10FFFF);
+      bool invalidSurrogate = (codepoint >= 0xD800 && codepoint <= 0xDFFF);
+      if (invalidTwoByte || invalidThreeByte || invalidFourByte || invalidCodepoint || invalidSurrogate)
+      {
+        func(REPLACEMENT_CHARACTER);
+        continue;
+      }
+
+      // Valid codepoint
+      func(UnicodeScalar(codepoint));
+    }
+  }
 }
