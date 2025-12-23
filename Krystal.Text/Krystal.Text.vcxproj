@@ -146,7 +146,6 @@
     <ClCompile Include="placeholder.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.Text\Encodings.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\ASCIIEncoding.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\Encoding.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\UTF16BigEndianEncoding.hpp" />

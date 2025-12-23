@@ -41,8 +41,5 @@
     <ClInclude Include="include\Krystal.Text\Encodings\UTF32LittleEndianEncoding.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>
