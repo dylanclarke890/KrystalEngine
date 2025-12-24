@@ -40,6 +40,8 @@ namespace Krys::Text
       return bytes;
     }
 
+
+
     NO_DISCARD utf8_string Decode(Span<const byte> bytes) const noexcept override
     {
       utf8_string characters;

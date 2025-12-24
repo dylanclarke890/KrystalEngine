@@ -34,7 +34,6 @@ namespace Krys::Text
       {
         if (ch.Value > 127u)
         {
-          // Use the encoder fallback replacement character
           for (char8_t rc : _encoderFallback.GetReplacementCharacter())
           {
             bytes.push_back(static_cast<byte>(rc));
