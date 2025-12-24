@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
@@ -7,11 +7,11 @@
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Map.hpp"
-#include "Krystal.Lib/String/Codepoint.hpp"
 #include "Krystal.Lib/String/StringRef.hpp"
 #include "Krystal.Lib/StronglyTypedValue.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Maths/Vector.hpp"
+#include "Krystal.Text/Unicode.hpp"
 #include <compare>
 #include <type_traits>
 
@@ -59,7 +59,8 @@ namespace Krys::Gfx
     Maths::Vec2 UVMax;       // (u1, v1)
   };
 
-  using CharacterMap = Map<Codepoint, Character, StronglyTypedNumberHasher<Codepoint>>;
+  using CharacterMap =
+    Map<Text::UnicodeCodepoint, Character, StronglyTypedNumberHasher<Text::UnicodeCodepoint>>;
 
   struct FontMetrics
   {

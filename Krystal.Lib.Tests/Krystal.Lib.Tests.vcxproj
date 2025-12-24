@@ -153,7 +153,6 @@
     <ClCompile Include="tests\NullableFloat.cpp" />
     <ClCompile Include="tests\SmallValueBuffer.cpp" />
     <ClCompile Include="tests\String\StringUtils.cpp" />
-    <ClCompile Include="tests\String\UTF8.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="tests\String\StringInterner.cpp" />

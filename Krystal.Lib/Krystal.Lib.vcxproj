@@ -193,10 +193,6 @@
     <ClInclude Include="include\Krystal.Lib\String\String.hpp" />
     <ClInclude Include="include\Krystal.Lib\StringId.hpp" />
     <ClInclude Include="include\Krystal.Lib\String\StringUtils.hpp" />
-    <ClInclude Include="include\Krystal.Lib\String\UTF8.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\StronglyTypedValue.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types.hpp" />
     <ClInclude Include="include\Krystal.Lib\TypeName.hpp" />
@@ -205,7 +201,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Events\EventManager.cpp" />
-    <ClCompile Include="src\String\UTF8.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

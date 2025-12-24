@@ -5,69 +5,76 @@
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Text/Encodings/Encoding.hpp"
+#include "Krystal.Text/Unicode.hpp"
 
 namespace Krys::Text
 {
   /// @brief Represents an ASCII character encoding.
   class ASCIIEncoding : public Encoding
   {
+    static constexpr EncodingInfo Info {IANAName_ASCII};
+
   public:
-    ASCIIEncoding() noexcept
-        : Encoding {"US-ASCII", EncoderFallback(EncodingReplacementCharacters::ASCII),
-                    DecoderFallback(EncodingReplacementCharacters::UTF)}
+    constexpr ASCIIEncoding() noexcept
+        : Encoding(Info, EncoderFallback(EncodingReplacement_ASCII), DecoderFallback(EncodingReplacement_UTF))
     {
     }
 
-    virtual ~ASCIIEncoding() noexcept = default;
+    constexpr virtual ~ASCIIEncoding() noexcept = default;
 
-    NO_DISCARD bool IsSingleByte() const noexcept override
+    NO_DISCARD constexpr bool IsSingleByte() const noexcept override
     {
       return true;
     }
 
-    NO_DISCARD List<byte> Encode(utf8_stringview characters) const noexcept override
+    NO_DISCARD constexpr List<byte> Encode(utf8_stringview characters) const noexcept override
     {
       List<byte> bytes;
-      bytes.reserve(characters.size());
-
-      const auto encodeASCII = [&](UnicodeScalar ch) noexcept
-      {
-        if (ch.Value > 127u)
-        {
-          for (char8_t rc : _encoderFallback.GetReplacementCharacter())
-          {
-            bytes.push_back(static_cast<byte>(rc));
-          }
-        }
-        else
-        {
-          bytes.push_back(static_cast<byte>(ch.Value));
-        }
-      };
-
-      ForEachUnicodeScalar(characters, encodeASCII);
+      Encode(characters, bytes);
       return bytes;
     }
 
-    NO_DISCARD utf8_string Decode(Span<const byte> bytes) const noexcept override
+    constexpr void Encode(utf8_stringview characters, List<byte> &out) const noexcept override
     {
-      utf8_string characters;
-      characters.reserve(bytes.size());
+      Reserve(out, characters.size());
 
-      for (byte b : bytes)
+      const auto EncodeASCII = [&](UnicodeCodepoint ch) noexcept
       {
-        uchar ch = static_cast<uchar>(b);
-        if (ch > 127u)
+        if (Unicode::IsACIICharacter(ch))
         {
-          characters += _decoderFallback.GetReplacementCharacter();
+          out.push_back(static_cast<byte>(ch.Value));
         }
         else
         {
-          characters.push_back(ch);
+          Encode(_encoderFallback.GetReplacementCharacter(), out);
+        }
+      };
+
+      Unicode::ForEachCodepoint(characters, EncodeASCII);
+    }
+
+    NO_DISCARD constexpr utf8_string Decode(Span<const byte> bytes) const noexcept override
+    {
+      utf8_string characters;
+      Decode(bytes, characters);
+      return characters;
+    }
+
+    constexpr void Decode(Span<const byte> bytes, utf8_string &out) const noexcept override
+    {
+      Reserve(out, bytes.size());
+
+      for (byte b : bytes)
+      {
+        if (Unicode::IsACIICharacter(b))
+        {
+          out.push_back(static_cast<char8_t>(b));
+        }
+        else
+        {
+          out += _decoderFallback.GetReplacementCharacter();
         }
       }
-
-      return characters;
     }
   };
 }

@@ -5,7 +5,7 @@ namespace Krys::Tests
 {
   using namespace Krys::Text;
 
-  TEST_CASE("ASCIIEncoding - Valid ASCII", "[Text][Encodings][ASCII]")
+  TEST_CASE("ASCIIEncoding(Valid)", "[Text][Encodings][ASCII]")
   {
     ASCIIEncoding asciiEncoding;
 
@@ -15,13 +15,13 @@ namespace Krys::Tests
     REQUIRE(decoded == text);
   }
 
-  TEST_CASE("ASCIIEncoding - Invalid ASCII", "[Text][Encodings][ASCII]")
+  TEST_CASE("ASCIIEncoding(Invalid)", "[Text][Encodings][ASCII]")
   {
     ASCIIEncoding asciiEncoding;
 
     utf8_string text = u8"Hello, 世界!";
-    List<byte> encodedWithFallback = asciiEncoding.Encode(text);
-    utf8_string decodedWithFallback = asciiEncoding.Decode(encodedWithFallback);
-    REQUIRE(decodedWithFallback == u8"Hello, ??!");
+    List<byte> encoded = asciiEncoding.Encode(text);
+    utf8_string decoded = asciiEncoding.Decode(encoded);
+    REQUIRE(decoded == u8"Hello, ??!");
   }
 }

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/Endian.hpp"
@@ -16,77 +16,107 @@ namespace Krys
   {
     STATIC_CLASS(ByteUtils)
 
-    template <Arithmetic T, Endian::Type Src = Endian::Type::System, Endian::Type Dst = Endian::Type::System>
+    /// @brief Enumerates chunks of bytes from the given byte span, invoking the provided callable for each
+    /// chunk.
+    template <typename TFunc, size_t N>
+    requires Callable<TFunc, Span<const byte, N>>
+    constexpr static void ForEachByteSpan(Span<const byte> bytes, TFunc &&func) noexcept
+    {
+      size_t totalBytes = bytes.size();
+      size_t offset = 0;
+      while (offset < totalBytes)
+      {
+        size_t chunkSize = std::min(N, totalBytes - offset);
+        func(bytes.subspan(offset, chunkSize));
+        offset += chunkSize;
+      }
+    }
+
+    template <Endian::Type Src, Endian::Type Dst, Number T>
     NO_DISCARD static constexpr T AsNumeric(const byte *bytes) noexcept
     {
       T value {};
       std::memcpy(&value, bytes, sizeof(T));
-      return Endian::Convert<T, Src, Dst>(value);
+      return Endian::Convert<Src, Dst, T>(value);
     }
 
-    template <Arithmetic T, Endian::Type Src = Endian::Type::System, Endian::Type Dst = Endian::Type::System>
+    template <Endian::Type Src, Endian::Type Dst, Number T>
     NO_DISCARD static constexpr T AsNumeric(const List<byte> &bytes) noexcept
     {
-      return AsNumeric<T, Src, Dst>(bytes.data());
+      return AsNumeric<Src, Dst, T>(bytes.data());
     }
 
-    template <Arithmetic T, Endian::Type Src = Endian::Type::System, Endian::Type Dst = Endian::Type::System>
+    template <Endian::Type Src, Endian::Type Dst, Number T>
     NO_DISCARD static constexpr T AsNumeric(const byte *bytes, size_t offset) noexcept
     {
       assert(offset + sizeof(T) <= sizeof(bytes));
-      return AsNumeric<T, Src, Dst>(bytes + offset);
+      return AsNumeric<Src, Dst, T>(bytes + offset);
     }
 
-    template <Arithmetic T, Endian::Type Src = Endian::Type::System, Endian::Type Dst = Endian::Type::System>
+    template <Endian::Type Src, Endian::Type Dst, Number T>
     NO_DISCARD static constexpr List<T> AsNumericArray(const List<byte> &bytes) noexcept
     {
       assert(bytes.size() % sizeof(T) == 0);
-      size_t elementCount = bytes.size() / sizeof(T);
 
-      List<T> elements;
-      elements.resize(elementCount);
+      size_t elementCount = bytes.size() / sizeof(T);
+      List<T> elements(elementCount);
 
       for (size_t i = 0; i < elementCount; i++)
-        elements[i] = AsNumeric<T, Src, Dst>(&bytes[i * sizeof(T)]);
+      {
+        elements[i] = AsNumeric<Src, Dst, T>(&bytes[i * sizeof(T)]);
+      }
 
       return elements;
     }
 
-    template <Arithmetic T, Endian::Type Src = Endian::System, Endian::Type Dst = Endian::System>
-    NO_DISCARD static constexpr List<byte> From(T value) noexcept
+    template <Endian::Type Src, Endian::Type Dst, Number T>
+    NO_DISCARD static constexpr List<byte> ToBytes(T value) noexcept
     {
-      value = Endian::Convert<T, Src, Dst>(value);
-
       List<byte> bytes(sizeof(T));
+
+      value = Endian::Convert<Src, Dst, T>(value);
       std::memcpy(bytes.data(), &value, sizeof(T));
 
       return bytes;
     }
 
-    NO_DISCARD static inline string AsString(const List<byte> &bytes, const size_t length) noexcept
+    template <Endian::Type Src, Endian::Type Dst, Number T>
+    NO_DISCARD static constexpr void ToBytes(T value, List<byte> &out) noexcept
+    {
+      assert(out.size() % sizeof(T) == 0);
+      if (out.capacity() < out.size() + sizeof(T))
+      {
+        out.reserve(out.size() + sizeof(T));
+      }
+
+      value = Endian::Convert<Src, Dst, T>(value);
+      std::memcpy(out.data(), &value, sizeof(T));
+    }
+
+    NO_DISCARD static string AsString(const List<byte> &bytes, const size_t length) noexcept
     {
       return string(reinterpret_cast<const char *>(bytes.data()), length);
     }
 
-    NO_DISCARD static inline Span<const byte> AsBytesView(const string &str) noexcept
+    NO_DISCARD static Span<const byte> AsBytesView(const string &str) noexcept
     {
       return Span<const byte>(reinterpret_cast<const byte *>(str.data()), str.size());
     }
 
     template <typename T>
-    NO_DISCARD static inline Span<const byte> AsBytesView(const List<T> &list) noexcept
+    NO_DISCARD static Span<const byte> AsBytesView(const List<T> &list) noexcept
     {
       return Span<const byte>(reinterpret_cast<const byte *>(list.data()), list.size() * sizeof(T));
     }
 
     template <typename T>
-    NO_DISCARD static inline Span<const byte> AsBytesView(const Span<T> &span) noexcept
+    NO_DISCARD static Span<const byte> AsBytesView(const Span<T> &span) noexcept
     {
       return Span<const byte>(reinterpret_cast<const byte *>(span.data()), span.size() * sizeof(T));
     }
 
     template <typename T>
-    NO_DISCARD static inline Span<const byte> AsBytesView(const T &object) noexcept
+    NO_DISCARD static Span<const byte> AsBytesView(const T &object) noexcept
     {
       return Span<const byte>(reinterpret_cast<const byte *>(&object), sizeof(T));
     }

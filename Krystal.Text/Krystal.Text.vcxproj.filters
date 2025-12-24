@@ -35,13 +35,13 @@
     <ClInclude Include="include\Krystal.Text\Encodings\UTF32Encoding.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\UnicodeScalar.hpp">
+    <ClInclude Include="include\Krystal.Text\Unicode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\Encodings\EncodingFallback.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingReplacementCharacters.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingConstants.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

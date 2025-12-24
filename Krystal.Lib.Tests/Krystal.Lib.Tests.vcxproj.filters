@@ -33,8 +33,5 @@
     <ClCompile Include="tests\String\StringInterner.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\String\UTF8.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
 </Project>

@@ -11,47 +11,57 @@ namespace Krys::Text
   /// @brief Represents a UTF-8 character encoding.
   class UTF8Encoding : public Encoding
   {
+    static constexpr EncodingInfo EncodingInformation {IANAName_UTF8};
+
   public:
-    UTF8Encoding() noexcept : Encoding {"UTF-8"}
+    constexpr UTF8Encoding() noexcept : Encoding(EncodingInformation)
     {
     }
 
-    virtual ~UTF8Encoding() noexcept = default;
+    constexpr virtual ~UTF8Encoding() noexcept = default;
 
-    NO_DISCARD List<byte> GetPreamble() const noexcept override
+    NO_DISCARD constexpr List<byte> GetPreamble() const noexcept override
     {
       return {byte {0xEF}, byte {0xBB}, byte {0xBF}};
     }
 
-    NO_DISCARD bool IsSingleByte() const noexcept override
+    NO_DISCARD constexpr bool IsSingleByte() const noexcept override
     {
       return true;
     }
 
-    NO_DISCARD List<byte> Encode(utf8_stringview characters) const noexcept override
+    NO_DISCARD constexpr List<byte> Encode(utf8_stringview characters) const noexcept override
     {
       List<byte> bytes;
-      bytes.reserve(characters.size());
-      for (char8_t ch : characters)
-      {
-        byte b = static_cast<byte>(ch);
-        bytes.push_back(b);
-      }
+      Encode(characters, bytes);
       return bytes;
     }
 
+    constexpr void Encode(utf8_stringview characters, List<byte> &out) const noexcept override
+    {
+      Reserve(out, characters.size());
 
+      for (char8_t ch : characters)
+      {
+        out.push_back(static_cast<byte>(ch));
+      }
+    }
 
-    NO_DISCARD utf8_string Decode(Span<const byte> bytes) const noexcept override
+    NO_DISCARD constexpr utf8_string Decode(Span<const byte> bytes) const noexcept override
     {
       utf8_string characters;
-      characters.reserve(bytes.size());
+      Decode(bytes, characters);
+      return characters;
+    }
+
+    void constexpr Decode(Span<const byte> bytes, utf8_string& out) const noexcept override
+    {
+      Reserve(out, bytes.size());
+
       for (byte b : bytes)
       {
-        char8_t ch = static_cast<char8_t>(b);
-        characters.push_back(ch);
+        out.push_back(static_cast<char8_t>(b));
       }
-      return characters;
     }
   };
 }

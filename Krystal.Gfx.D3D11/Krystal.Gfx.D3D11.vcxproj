@@ -40,6 +40,9 @@
     <ProjectReference Include="..\Krystal.Platform\Krystal.Platform.vcxproj">
       <Project>{42e8c0a6-1f92-456b-a8b7-0050bfdf97e2}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\Krystal.Text\Krystal.Text.vcxproj">
+      <Project>{55855c03-499d-4fda-a184-ace486fda228}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\Krystal.UI\Krystal.UI.vcxproj">
       <Project>{0ca51a50-7e1a-45c7-a23f-986b0cff5a35}</Project>
     </ProjectReference>

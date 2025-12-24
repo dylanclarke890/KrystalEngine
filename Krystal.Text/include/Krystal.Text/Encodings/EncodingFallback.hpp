@@ -11,12 +11,12 @@ namespace Krys::Text
     utf8_stringview _replacementCharacter;
 
   public:
-    EncodingFallback(utf8_stringview replacementCharacter) noexcept
+    constexpr EncodingFallback(utf8_stringview replacementCharacter) noexcept
         : _replacementCharacter(replacementCharacter)
     {
     }
 
-    NO_DISCARD utf8_stringview GetReplacementCharacter() const noexcept
+    NO_DISCARD constexpr utf8_stringview GetReplacementCharacter() const noexcept
     {
       return _replacementCharacter;
     }
@@ -25,7 +25,8 @@ namespace Krys::Text
   class EncoderFallback : public EncodingFallback
   {
   public:
-    EncoderFallback(utf8_stringview replacementCharacter) noexcept : EncodingFallback(replacementCharacter)
+    constexpr EncoderFallback(utf8_stringview replacementCharacter) noexcept
+        : EncodingFallback(replacementCharacter)
     {
     }
   };
@@ -33,7 +34,8 @@ namespace Krys::Text
   class DecoderFallback : public EncodingFallback
   {
   public:
-    DecoderFallback(utf8_stringview replacementCharacter) noexcept : EncodingFallback(replacementCharacter)
+    constexpr DecoderFallback(utf8_stringview replacementCharacter) noexcept
+        : EncodingFallback(replacementCharacter)
     {
     }
   };

@@ -147,8 +147,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.Text\Encodings\EncodingFallback.hpp" />
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingReplacementCharacters.hpp" />
-    <ClInclude Include="include\Krystal.Text\UnicodeScalar.hpp" />
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingConstants.hpp" />
+    <ClInclude Include="include\Krystal.Text\Unicode.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\ASCIIEncoding.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\Encoding.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\UTF16Encoding.hpp" />

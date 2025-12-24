@@ -1,4 +1,4 @@
-#include "Krystal.Gfx/FontAtlasLoader.hpp"
+﻿#include "Krystal.Gfx/FontAtlasLoader.hpp"
 #include "Krystal.Lib/DebugBreak.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Log/ILogger.hpp"
@@ -20,7 +20,7 @@ namespace
 
   struct BitmapGlyph
   {
-    Codepoint Char {};
+    Text::UnicodeCodepoint Char {};
     Maths::Vec2u ActualSize {}; // actual glyph bitmap size (tight)
     Maths::Vec2u PaddedSize {}; // size including padding
     Maths::Vec2i Bearing {};    // slot->bitmap_left/top
@@ -117,7 +117,7 @@ namespace
         const FT_GlyphSlot slot = _face->glyph;
         const FT_Bitmap &bm = slot->bitmap;
         BitmapGlyph glyph {
-          .Char = Codepoint(charcode),
+          .Char = Text::UnicodeCodepoint(charcode),
           .ActualSize = {bm.width, bm.rows},
           .PaddedSize = glyph.ActualSize + (paddingPerGlyph * 2u),
           .Bearing = {slot->bitmap_left, slot->bitmap_top},
@@ -384,8 +384,7 @@ namespace
         double scale = _params.EMSizeInPixels;
 
         using namespace Krys::Maths;
-        characters[Codepoint(glyph.getCodepoint())] = Character
-        {
+        characters[Text::UnicodeCodepoint(glyph.getCodepoint())] = Character {
           .Size = Vec2u(Round(Vec2d(pr - pl, pt - pb) * scale)),
           .Bearing = Vec2i(Round(Vec2d(pl, pt) * scale)),
           .Advance = static_cast<int32>(Round(glyph.getAdvance() * scale)),
