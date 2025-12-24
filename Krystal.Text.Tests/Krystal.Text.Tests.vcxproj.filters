@@ -21,5 +21,8 @@
     <ClCompile Include="tests\Encodings\ASCIIEncoding.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tests\Encodings\UTF8Encoding.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
