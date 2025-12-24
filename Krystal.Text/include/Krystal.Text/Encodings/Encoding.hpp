@@ -73,6 +73,7 @@ namespace Krys::Text
   };
 
   template <typename TFunc>
+  requires Callable<TFunc, UnicodeScalar>
   void ForEachUnicodeScalar(utf8_stringview utf8, TFunc &&func) noexcept
   {
     const auto ASCII_MAX = 0x7F;
