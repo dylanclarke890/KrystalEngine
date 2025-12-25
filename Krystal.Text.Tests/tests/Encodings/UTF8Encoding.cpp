@@ -15,10 +15,15 @@ namespace Krys::Tests
     REQUIRE(decoded == text);
   }
 
-  TEST_CASE("UTF8Encoding(Preamble)", "[Text][Encodings][ASCII]")
+  TEST_CASE("UTF8Encoding(GetBOM)", "[Text][Encodings][ASCII]")
   {
     UTF8Encoding encoding;
-    REQUIRE(encoding.GetPreamble() == List<byte>{byte {0xEF}, byte {0xBB}, byte {0xBF}});
+    auto bom = encoding.GetBOM();
+
+    REQUIRE(bom.size() == 3u);
+    REQUIRE(bom[0] == byte {0xEF});
+    REQUIRE(bom[1] == byte {0xBB});
+    REQUIRE(bom[2] == byte {0xBF});
   }
 
   TEST_CASE("UTF8Encoding(IsSingleByte)", "[Text][Encodings][ASCII]")

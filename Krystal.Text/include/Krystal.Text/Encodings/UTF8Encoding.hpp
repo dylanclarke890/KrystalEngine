@@ -12,6 +12,7 @@ namespace Krys::Text
   class UTF8Encoding : public Encoding
   {
     static constexpr EncodingInfo EncodingInformation {IANAName_UTF8};
+    static constexpr Array<byte, 3u> BOM = {byte {0xEF}, byte {0xBB}, byte {0xBF}};
 
   public:
     constexpr UTF8Encoding() noexcept : Encoding(EncodingInformation)
@@ -20,9 +21,9 @@ namespace Krys::Text
 
     constexpr virtual ~UTF8Encoding() noexcept = default;
 
-    NO_DISCARD constexpr List<byte> GetPreamble() const noexcept override
+    NO_DISCARD constexpr Span<const byte> GetBOM() const noexcept override
     {
-      return {byte {0xEF}, byte {0xBB}, byte {0xBF}};
+      return Span<const byte> {BOM.data(), BOM.size()};
     }
 
     NO_DISCARD constexpr bool IsSingleByte() const noexcept override

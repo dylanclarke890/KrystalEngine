@@ -16,6 +16,8 @@ namespace Krys::Text
   {
     static constexpr EncodingInfo EncodingInformation {IsBigEndian ? IANAName_UTF32_BE : IANAName_UTF32_LE};
     static constexpr Endian::Type Endianness {IsBigEndian ? Endian::Big : Endian::Little};
+    static constexpr Array<byte, 4u> BOM_BE = {byte {0x00}, byte {0x00}, byte {0xFF}, byte {0xFE}};
+    static constexpr Array<byte, 4u> BOM_LE = {byte {0xFE}, byte {0xFF}, byte {0x00}, byte {0x00}};
 
   public:
     constexpr UTF32Encoding() noexcept : Encoding(EncodingInformation)
@@ -24,10 +26,10 @@ namespace Krys::Text
 
     constexpr virtual ~UTF32Encoding() noexcept = default;
 
-    NO_DISCARD constexpr List<byte> GetPreamble() const noexcept override
+    NO_DISCARD constexpr Span<const byte> GetBOM() const noexcept override
     {
-      return IsBigEndian ? List<byte> {byte {0x00}, byte {0x00}, byte {0xFF}, byte {0xFE}}
-                         : List<byte> {byte {0xFE}, byte {0xFF}, byte {0x00}, byte {0x00}};
+      return IsBigEndian ? Span<const byte> {BOM_BE.data(), BOM_BE.size()}
+                         : Span<const byte> {BOM_LE.data(), BOM_LE.size()};
     }
 
     NO_DISCARD constexpr bool IsSingleByte() const noexcept override

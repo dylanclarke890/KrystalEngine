@@ -25,10 +25,10 @@ namespace Krys::Tests
     REQUIRE(decoded == u8"Hello, ??!");
   }
 
-  TEST_CASE("ASCIIEncoding(Preamble)", "[Text][Encodings][ASCII]")
+  TEST_CASE("ASCIIEncoding(GetBOM)", "[Text][Encodings][ASCII]")
   {
     ASCIIEncoding encoding;
-    REQUIRE(encoding.GetPreamble().empty());
+    REQUIRE(encoding.GetBOM().empty());
   }
 
   TEST_CASE("ASCIIEncoding(IsSingleByte)", "[Text][Encodings][ASCII]")

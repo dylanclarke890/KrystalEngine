@@ -57,8 +57,7 @@ namespace Krys::Text
       return _decoderFallback;
     }
 
-    /// @brief Returns a sequence of bytes that specifies the encoding used.
-    NO_DISCARD constexpr virtual List<byte> GetPreamble() const noexcept
+    NO_DISCARD constexpr virtual Span<const byte> GetBOM() const noexcept
     {
       return {};
     }
