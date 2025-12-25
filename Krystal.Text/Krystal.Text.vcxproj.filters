@@ -74,5 +74,8 @@
     <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows874Encoding.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Text\Encodings\SingleByteEncoding.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

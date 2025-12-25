@@ -13,12 +13,12 @@ namespace Krys::Text
   {
   public:
     static constexpr utf8_stringview IANA = u8"US-ASCII";
-
-    static constexpr EncodingInfo Info {IANA, 20'127u};
+    static constexpr EncodingInfo EncodingInformation {IANA, 20'127u};
 
   public:
     constexpr ASCIIEncoding() noexcept
-        : Encoding(Info, EncoderFallback(EncodingReplacement_ASCII), DecoderFallback(EncodingReplacement_UTF))
+        : Encoding(EncodingInformation, EncoderFallback(EncodingReplacement_ASCII),
+                   DecoderFallback(EncodingReplacement_UTF))
     {
     }
 
@@ -27,13 +27,6 @@ namespace Krys::Text
     NO_DISCARD constexpr bool IsSingleByte() const noexcept override
     {
       return true;
-    }
-
-    NO_DISCARD constexpr List<byte> Encode(utf8_stringview characters) const noexcept override
-    {
-      List<byte> bytes;
-      Encode(characters, bytes);
-      return bytes;
     }
 
     constexpr void Encode(utf8_stringview characters, List<byte> &out) const noexcept override
@@ -53,13 +46,6 @@ namespace Krys::Text
       };
 
       Unicode::ForEachCodepoint(characters, EncodeASCII);
-    }
-
-    NO_DISCARD constexpr utf8_string Decode(Span<const byte> bytes) const noexcept override
-    {
-      utf8_string characters;
-      Decode(bytes, characters);
-      return characters;
     }
 
     constexpr void Decode(Span<const byte> bytes, utf8_string &out) const noexcept override

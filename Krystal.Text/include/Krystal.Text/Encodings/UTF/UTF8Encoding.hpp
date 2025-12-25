@@ -30,14 +30,7 @@ namespace Krys::Text
 
     NO_DISCARD constexpr bool IsSingleByte() const noexcept override
     {
-      return true;
-    }
-
-    NO_DISCARD constexpr List<byte> Encode(utf8_stringview characters) const noexcept override
-    {
-      List<byte> bytes;
-      Encode(characters, bytes);
-      return bytes;
+      return false;
     }
 
     constexpr void Encode(utf8_stringview characters, List<byte> &out) const noexcept override
@@ -48,13 +41,6 @@ namespace Krys::Text
       {
         out.push_back(static_cast<byte>(ch));
       }
-    }
-
-    NO_DISCARD constexpr utf8_string Decode(Span<const byte> bytes) const noexcept override
-    {
-      utf8_string characters;
-      Decode(bytes, characters);
-      return characters;
     }
 
     void constexpr Decode(Span<const byte> bytes, utf8_string &out) const noexcept override

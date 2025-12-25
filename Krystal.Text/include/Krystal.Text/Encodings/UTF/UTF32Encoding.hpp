@@ -42,13 +42,6 @@ namespace Krys::Text
       return false;
     }
 
-    NO_DISCARD constexpr List<byte> Encode(utf8_stringview characters) const noexcept override
-    {
-      List<byte> bytes;
-      Encode(characters, bytes);
-      return bytes;
-    }
-
     constexpr void Encode(utf8_stringview characters, List<byte> &out) const noexcept
     {
       Reserve(out, characters.size() * 4u);
@@ -66,13 +59,6 @@ namespace Krys::Text
       };
 
       Unicode::ForEachCodepoint(characters, EncodeUTF32);
-    }
-
-    NO_DISCARD constexpr utf8_string Decode(Span<const byte> bytes) const noexcept override
-    {
-      utf8_string characters;
-      Decode(bytes, characters);
-      return characters;
     }
 
     constexpr void Decode(Span<const byte> bytes, utf8_string &out) const noexcept override

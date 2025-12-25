@@ -40,6 +40,28 @@ namespace Krys::Text
   public:
     constexpr virtual ~Encoding() noexcept = default;
 
+    /// @brief Encodes a UTF-8 string into a sequence of bytes in the target encoding.
+    constexpr virtual void Encode(utf8_stringview characters, List<byte> &out) const noexcept = 0;
+
+    /// @brief Decodes a sequence of bytes into a UTF-8 string.
+    constexpr virtual void Decode(Span<const byte> bytes, utf8_string &out) const noexcept = 0;
+
+    /// @brief Encodes a UTF-8 string into a sequence of bytes in the target encoding.
+    NO_DISCARD constexpr virtual List<byte> Encode(utf8_stringview characters) const noexcept
+    {
+      List<byte> bytes;
+      Encode(characters, bytes);
+      return bytes;
+    }
+
+    /// @brief Decodes a sequence of bytes into a UTF-8 string.
+    NO_DISCARD constexpr virtual utf8_string Decode(Span<const byte> bytes) const noexcept
+    {
+      utf8_string characters;
+      Decode(bytes, characters);
+      return characters;
+    }
+
     /// @brief Get information about the current encoding.
     NO_DISCARD constexpr const EncodingInfo &GetEncodingInfo() const noexcept
     {
@@ -68,18 +90,6 @@ namespace Krys::Text
     {
       return false;
     }
-
-    /// @brief Encodes a UTF-8 string into a sequence of bytes in the target encoding.
-    NO_DISCARD constexpr virtual List<byte> Encode(utf8_stringview characters) const noexcept = 0;
-
-    /// @brief Encodes a UTF-8 string into a sequence of bytes in the target encoding.
-    constexpr virtual void Encode(utf8_stringview characters, List<byte> &out) const noexcept = 0;
-
-    /// @brief Decodes a sequence of bytes into a UTF-8 string.
-    NO_DISCARD constexpr virtual utf8_string Decode(Span<const byte> bytes) const noexcept = 0;
-
-    /// @brief Decodes a sequence of bytes into a UTF-8 string.
-    constexpr virtual void Decode(Span<const byte> bytes, utf8_string &out) const noexcept = 0;
 
   protected:
     constexpr void Reserve(List<byte> &container, size_t minimumRequiredBytes) const noexcept
