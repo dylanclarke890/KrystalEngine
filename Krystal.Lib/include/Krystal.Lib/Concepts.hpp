@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <concepts>
 #include <type_traits>
@@ -126,4 +126,24 @@ namespace Krys
 
   template <typename T>
   concept HasStandardLayout = std::is_standard_layout_v<T>;
+
+  template <typename T>
+  concept EqualityComparable = requires(T a, T b) {
+    { a == b } -> std::convertible_to<bool>;
+  };
+
+  template <typename T>
+  concept InEqualityComparable = requires(T a, T b) {
+    { a == b } -> std::convertible_to<bool>;
+  };
+
+  template <typename T>
+  concept LessThanComparable = requires(T a, T b) {
+    { a < b } -> std::convertible_to<bool>;
+  };
+  
+  template <typename T>
+  concept GreaterThanComparable = requires(T a, T b) {
+    { a > b } -> std::convertible_to<bool>;
+  };
 }
