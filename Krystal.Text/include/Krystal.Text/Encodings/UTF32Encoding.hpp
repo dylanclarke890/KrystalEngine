@@ -26,8 +26,8 @@ namespace Krys::Text
 
     NO_DISCARD constexpr List<byte> GetPreamble() const noexcept override
     {
-      return IsBigEndian ? List<byte> {byte {0xFE}, byte {0xFF}, byte {0x00}, byte {0x00}}
-                         : List<byte> {byte {0x00}, byte {0x00}, byte {0xFF}, byte {0xFE}};
+      return IsBigEndian ? List<byte> {byte {0x00}, byte {0x00}, byte {0xFF}, byte {0xFE}}
+                         : List<byte> {byte {0xFE}, byte {0xFF}, byte {0x00}, byte {0x00}};
     }
 
     NO_DISCARD constexpr bool IsSingleByte() const noexcept override
