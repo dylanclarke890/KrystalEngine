@@ -12,7 +12,10 @@ namespace Krys::Text
   /// @brief Represents an ASCII character encoding.
   class ASCIIEncoding : public Encoding
   {
-    static constexpr EncodingInfo Info {IANAName_ASCII};
+  public:
+    static constexpr utf8_stringview IANA = u8"US-ASCII";
+
+    static constexpr EncodingInfo Info {IANA, 20'127u};
 
   public:
     constexpr ASCIIEncoding() noexcept

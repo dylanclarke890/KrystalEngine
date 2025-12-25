@@ -11,8 +11,11 @@ namespace Krys::Text
   /// @brief Represents a UTF-8 character encoding.
   class UTF8Encoding : public Encoding
   {
-    static constexpr EncodingInfo EncodingInformation {IANAName_UTF8};
+  public:
     static constexpr Array<byte, 3u> BOM = {byte {0xEF}, byte {0xBB}, byte {0xBF}};
+    static constexpr utf8_stringview IANA = u8"UTF-8";
+
+    static constexpr EncodingInfo EncodingInformation {IANA, 65'001u};
 
   public:
     constexpr UTF8Encoding() noexcept : Encoding(EncodingInformation)
@@ -55,7 +58,7 @@ namespace Krys::Text
       return characters;
     }
 
-    void constexpr Decode(Span<const byte> bytes, utf8_string& out) const noexcept override
+    void constexpr Decode(Span<const byte> bytes, utf8_string &out) const noexcept override
     {
       Reserve(out, bytes.size());
 

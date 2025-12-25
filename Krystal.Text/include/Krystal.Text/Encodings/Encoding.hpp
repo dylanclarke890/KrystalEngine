@@ -15,6 +15,7 @@ namespace Krys::Text
   struct EncodingInfo
   {
     utf8_stringview IANAName;
+    uint32 CodePage;
   };
 
   /// @brief Represents a character encoding.

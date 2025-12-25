@@ -14,10 +14,16 @@ namespace Krys::Text
   template <bool IsBigEndian>
   class UTF16Encoding : public Encoding
   {
-    static constexpr EncodingInfo EncodingInformation {IsBigEndian ? IANAName_UTF16_BE : IANAName_UTF16_LE};
-    static constexpr Endian::Type Endianness {IsBigEndian ? Endian::Big : Endian::Little};
+  public:
     static constexpr Array<byte, 2u> BOM_BE = {byte {0xFE}, byte {0xFF}};
+    static constexpr utf8_stringview IANA_BE = u8"UTF-16BE";
+
     static constexpr Array<byte, 2u> BOM_LE = {byte {0xFF}, byte {0xFE}};
+    static constexpr utf8_stringview IANA_LE = u8"UTF-16LE";
+
+    static constexpr Endian::Type Endianness {IsBigEndian ? Endian::Big : Endian::Little};
+    static constexpr EncodingInfo EncodingInformation =
+      IsBigEndian ? EncodingInfo {IANA_BE, 1'201u} : EncodingInfo {IANA_LE, 1'200u};
 
   public:
     constexpr UTF16Encoding() noexcept : Encoding(EncodingInformation)
