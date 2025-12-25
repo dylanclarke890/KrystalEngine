@@ -1,4 +1,4 @@
-﻿#include "Krystal.Text/Encodings/UTF32Encoding.hpp"
+﻿#include "Krystal.Text/Encodings/UTF32/UTFEncoding.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

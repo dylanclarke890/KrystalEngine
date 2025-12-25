@@ -148,12 +148,21 @@
   <ItemGroup>
     <ClInclude Include="include\Krystal.Text\Encodings\EncodingFallback.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\EncodingConstants.hpp" />
+    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1250Encoding.hpp" />
+    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1251Encoding.hpp" />
+    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1252Encoding.hpp" />
+    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1253Encoding.hpp" />
+    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1254Encoding.hpp" />
+    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1255Encoding.hpp" />
+    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1256Encoding.hpp" />
+    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1257Encoding.hpp" />
+    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1258Encoding.hpp" />
     <ClInclude Include="include\Krystal.Text\Unicode.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\ASCIIEncoding.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\Encoding.hpp" />
-    <ClInclude Include="include\Krystal.Text\Encodings\UTF16Encoding.hpp" />
-    <ClInclude Include="include\Krystal.Text\Encodings\UTF32Encoding.hpp" />
-    <ClInclude Include="include\Krystal.Text\Encodings\UTF8Encoding.hpp" />
+    <ClInclude Include="include\Krystal.Text\Encodings\UTF\UTF16Encoding.hpp" />
+    <ClInclude Include="include\Krystal.Text\Encodings\UTF\UTF32Encoding.hpp" />
+    <ClInclude Include="include\Krystal.Text\Encodings\UTF\UTF8Encoding.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Krystal.Lib\Krystal.Lib.vcxproj">
