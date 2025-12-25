@@ -157,6 +157,7 @@
     <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1256Encoding.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1257Encoding.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1258Encoding.hpp" />
+    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows874Encoding.hpp" />
     <ClInclude Include="include\Krystal.Text\Unicode.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\ASCIIEncoding.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\Encoding.hpp" />
