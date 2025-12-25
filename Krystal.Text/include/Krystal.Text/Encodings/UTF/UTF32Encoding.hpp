@@ -10,7 +10,6 @@
 
 namespace Krys::Text
 {
-  /// @brief Represents a UTF-32 character encoding.
   template <bool IsBigEndian>
   class UTF32Encoding : public Encoding
   {

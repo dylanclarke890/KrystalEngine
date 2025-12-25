@@ -8,7 +8,6 @@
 
 namespace Krys::Text
 {
-  /// @brief Represents a UTF-8 character encoding.
   class UTF8Encoding : public Encoding
   {
   public:

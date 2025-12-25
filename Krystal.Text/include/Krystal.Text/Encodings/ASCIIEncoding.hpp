@@ -9,7 +9,6 @@
 
 namespace Krys::Text
 {
-  /// @brief Represents an ASCII character encoding.
   class ASCIIEncoding : public Encoding
   {
   public:
