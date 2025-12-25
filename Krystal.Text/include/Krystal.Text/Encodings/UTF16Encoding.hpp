@@ -114,14 +114,12 @@ namespace Krys::Text
           }
 
           uint16 second = ByteUtils::AsNumeric<Endianness, Endian::System, uint16>(current + 2u);
-          it += 2u;
-
           if (Unicode::IsLowSurrogate(UnicodeCodepoint(second)))
           {
             uint32 codepoint = 0x10000u + ((first.Value - Unicode::SurrogateHighStart) << 10u)
                                + (second - Unicode::SurrogateLowStart);
-
             Unicode::CodepointToUTF8(UnicodeCodepoint(codepoint), out);
+            it += 2u;
           }
           else
           {
