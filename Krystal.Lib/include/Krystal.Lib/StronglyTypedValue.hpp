@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Lib/Concepts.hpp"
 #include <compare>
@@ -78,7 +78,7 @@ namespace Krys
   template <typename Derived>
   struct StronglyTypedBoolHasher
   {
-    std::size_t operator()(const StronglyTypedBool<Derived> &value) const noexcept
+    std::size_t operator()(const StronglyTypedBool<Derived> value) const noexcept
     {
       return std::hash<bool> {}(value.Value);
     }
@@ -87,7 +87,7 @@ namespace Krys
   template <typename Derived>
   struct StronglyTypedNumberHasher
   {
-    std::size_t operator()(const Derived::Base &value) const noexcept
+    std::size_t operator()(const Derived::Base value) const noexcept
     {
       return std::hash<bool> {}(value.Value);
     }

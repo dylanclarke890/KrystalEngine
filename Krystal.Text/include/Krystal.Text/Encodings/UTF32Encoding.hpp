@@ -2,6 +2,7 @@
 
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
+#include "Krystal.Lib/Endian.hpp"
 #include "Krystal.Lib/List.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types.hpp"
@@ -9,7 +10,7 @@
 
 namespace Krys::Text
 {
-  /// @brief Represents a UTF-32 little-endian character encoding.
+  /// @brief Represents a UTF-32 character encoding.
   template <bool IsBigEndian>
   class UTF32Encoding : public Encoding
   {
@@ -45,47 +46,54 @@ namespace Krys::Text
     {
       Reserve(out, characters.size() * 4u);
 
-      const auto EncodeUTF32 = [&](UnicodeCodepoint codepoint) noexcept
+      const auto EncodeUTF32 = [&](UnicodeCodepoint codepoint, bool wasInvalid) noexcept
       {
-        if (Unicode::IsValidCodepoint(codepoint))
-        {
-          ByteUtils::ToBytes<Endian::System, Endianness>(codepoint.Value, out);
-        }
-        else
+        if (wasInvalid)
         {
           Encode(_encoderFallback.GetReplacementCharacter(), out);
         }
+        else
+        {
+          ByteUtils::ToBytes<Endian::System, Endianness>(codepoint.Value, out);
+        }
       };
+
       Unicode::ForEachCodepoint(characters, EncodeUTF32);
     }
-    
+
     NO_DISCARD constexpr utf8_string Decode(Span<const byte> bytes) const noexcept override
     {
       utf8_string characters;
       Decode(bytes, characters);
       return characters;
     }
-    
+
     constexpr void Decode(Span<const byte> bytes, utf8_string &out) const noexcept override
     {
       Reserve(out, bytes.size() / 4u);
 
-      const auto DecodeUTF32 = [&](Span<const byte, 4u> byteSpan) noexcept
+      const auto DecodeUTF32 = [&](FixedSpan<const byte, 4u> byteSpan) noexcept
       {
-        UnicodeCodepoint codepoint =
-          ByteUtils::AsNumeric<Endianness, Endian::System, uint32>(byteSpan.data());
+        auto codepoint =
+          UnicodeCodepoint(ByteUtils::AsNumeric<Endianness, Endian::System, uint32>(byteSpan.data()));
 
         if (Unicode::IsValidCodepoint(codepoint))
         {
-          Unicode::CodepointToUTF8(codepoint, str);
+          Unicode::CodepointToUTF8(codepoint, out);
         }
         else
         {
-          str.append(_decoderFallback.GetReplacementString());
+          out += _decoderFallback.GetReplacementCharacter();
         }
       };
 
-      ByteUtils::ForEachByteSpan<DecodeUTF32, 4u>(bytes, DecodeUTF32);
+      ByteUtils::ForEachNBytes<4u>(bytes, DecodeUTF32);
     }
   };
+
+  /// @brief Represents a UTF-32 little-endian character encoding.
+  using UTF32EncodingLE = UTF32Encoding<false>;
+
+  /// @brief Represents a UTF-32 big-endian character encoding.
+  using UTF32EncodingBE = UTF32Encoding<true>;
 }

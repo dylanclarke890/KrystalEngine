@@ -17,216 +17,82 @@ namespace Krys::Text
     using StronglyTypedNumber<UnicodeCodepoint, uint32>::StronglyTypedNumber;
   };
 
+  template <typename T>
+  concept UnicodeCodepointCallable = Callable<T, UnicodeCodepoint> || Callable<T, UnicodeCodepoint, bool>;
+
   struct Unicode
   {
     STATIC_CLASS(Unicode)
 
-    constexpr static uint8 MaxASCIIValue = 0x7Fu;
-    constexpr static uint32 MaxCodepointValue = 0x10FFFFu;
     constexpr static uint32 DefaultReplacementCodepoint = 0xFFFDu;
+
+    constexpr static uint8 MaxASCIIValue = 0x7Fu;
+    constexpr static uint32 MaxSupplementaryPlaneValue = 0x10FFFFu;
+    constexpr static uint32 MaxBasicMultilingualPlaneValue = 0xFFFFu;
 
     constexpr static uint32 SurrogateHighStart = 0xD800u;
     constexpr static uint32 SurrogateHighEnd = 0xDBFFu;
     constexpr static uint32 SurrogateLowStart = 0xDC00u;
     constexpr static uint32 SurrogateLowEnd = 0xDFFFu;
 
-    // TODO: there's a lot of overlap in the two ForEachCodepoint methods; refactor to reduce duplication
-
-    /// @brief Enumerates each Unicode codepoint in the given UTF-8 string, invoking the provided callable for
-    /// each codepoint.
-    template <typename TFunc>
-    requires Callable<TFunc, UnicodeCodepoint>
-    constexpr static void ForEachCodepoint(utf8_stringview str, TFunc &&func) noexcept
+    /// @brief Determines whether the given codepoint is an ASCII character.
+    NO_DISCARD constexpr static bool IsASCIICharacter(UnicodeCodepoint ch) noexcept
     {
-      constexpr UnicodeCodepoint REPLACEMENT_CHARACTER(DefaultReplacementCodepoint);
-
-      auto it = str.begin();
-      const auto end = str.end();
-      while (it != end)
-      {
-        uint32 codepoint = 0;
-        uint8 needed = 0;
-
-        uint8 first = static_cast<uint8>(*it++);
-        // Single-byte (ASCII)
-        if (first <= MaxASCIIValue)
-        {
-          func(UnicodeCodepoint(first));
-          continue;
-        }
-        // Multi-byte sequence
-        else if ((first & 0xE0) == 0xC0)
-        {
-          codepoint = first & 0x1F;
-          needed = 1;
-        }
-        else if ((first & 0xF0) == 0xE0)
-        {
-          codepoint = first & 0x0F;
-          needed = 2;
-        }
-        else if ((first & 0xF8) == 0xF0)
-        {
-          codepoint = first & 0x07;
-          needed = 3;
-        }
-        // Invalid leading byte
-        else
-        {
-          func(REPLACEMENT_CHARACTER);
-          continue;
-        }
-
-        if (static_cast<size_t>(end - it) < needed)
-        {
-          func(REPLACEMENT_CHARACTER);
-          break;
-        }
-
-        // Process continuation bytes
-        for (uint8 i = 0; i < needed; i++)
-        {
-          uint8 b = static_cast<uint8>(*it);
-          if ((b & 0xC0) != 0x80)
-          {
-            func(REPLACEMENT_CHARACTER);
-            // TODO: test this case
-            it++; // sync to next byte
-            continue;
-          }
-
-          // Append bits
-          codepoint = (codepoint << 6) | (b & 0x3F);
-          it++;
-        }
-
-        // Reject overlong encodings
-        bool invalidTwoByte = (needed == 1 && codepoint < 0x80);
-        bool invalidThreeByte = (needed == 2 && codepoint < 0x800);
-        bool invalidFourByte = (needed == 3 && codepoint < 0x10000);
-        bool invalidCodepoint = (codepoint > 0x10FFFF);
-        bool invalidSurrogate = (codepoint >= 0xD800 && codepoint <= 0xDFFF);
-        if (invalidTwoByte || invalidThreeByte || invalidFourByte || invalidCodepoint || invalidSurrogate)
-        {
-          func(REPLACEMENT_CHARACTER);
-          continue;
-        }
-
-        // Valid codepoint
-        func(UnicodeCodepoint(codepoint));
-      }
+      return ch <= MaxASCIIValue;
     }
 
-    /// @brief Enumerates each Unicode codepoint in the given UTF-8 string, invoking the provided callable for
-    /// each codepoint.
-    template <typename TFunc>
-    requires Callable<TFunc, UnicodeCodepoint>
-    constexpr static void ForEachCodepoint(Span<const byte> bytes, TFunc &&func) noexcept
+    /// @brief Determines whether the given char is an ASCII character.
+    NO_DISCARD constexpr static bool IsASCIICharacter(uint8 ch) noexcept
     {
-      constexpr UnicodeCodepoint REPLACEMENT_CHARACTER(DefaultReplacementCodepoint);
-
-      auto it = bytes.begin();
-      const auto end = bytes.end();
-      while (it != end)
-      {
-        uint32 codepoint = 0;
-        uint8 needed = 0;
-
-        uint8 first = static_cast<uint8>(*it++);
-        // Single-byte (ASCII)
-        if (first <= MaxASCIIValue)
-        {
-          func(UnicodeCodepoint(first));
-          continue;
-        }
-        // Multi-byte sequence
-        else if ((first & 0xE0) == 0xC0)
-        {
-          codepoint = first & 0x1F;
-          needed = 1;
-        }
-        else if ((first & 0xF0) == 0xE0)
-        {
-          codepoint = first & 0x0F;
-          needed = 2;
-        }
-        else if ((first & 0xF8) == 0xF0)
-        {
-          codepoint = first & 0x07;
-          needed = 3;
-        }
-        // Invalid leading byte
-        else
-        {
-          func(REPLACEMENT_CHARACTER);
-          continue;
-        }
-
-        if (static_cast<size_t>(end - it) < needed)
-        {
-          func(REPLACEMENT_CHARACTER);
-          break;
-        }
-
-        bool malformed = false;
-        for (uint8 i = 0; i < needed; i++)
-        {
-          uint8 b = static_cast<uint8>(*it);
-          if ((b & 0xC0) != 0x80)
-          {
-            func(REPLACEMENT_CHARACTER);
-            malformed = true;
-            break;
-          }
-
-          // Append bits
-          codepoint = (codepoint << 6) | (b & 0x3F);
-          it++;
-        }
-
-        if (malformed)
-        {
-          continue; // abort this UTF-8 sequence
-        }
-
-        // Reject overlong encodings
-        bool invalidTwoByte = (needed == 1 && codepoint < 0x80);
-        bool invalidThreeByte = (needed == 2 && codepoint < 0x800);
-        bool invalidFourByte = (needed == 3 && codepoint < 0x10000);
-        bool invalidCodepoint = (codepoint > 0x10FFFF);
-        bool invalidSurrogate = (codepoint >= 0xD800 && codepoint <= 0xDFFF);
-        if (invalidTwoByte || invalidThreeByte || invalidFourByte || invalidCodepoint || invalidSurrogate)
-        {
-          func(REPLACEMENT_CHARACTER);
-          continue;
-        }
-
-        // Valid codepoint
-        func(UnicodeCodepoint(codepoint));
-      }
+      return IsASCIICharacter(UnicodeCodepoint(ch));
     }
 
-    /// @brief Decodes a UTF-8 string into a list of Unicode codepoints.
-    NO_DISCARD constexpr static List<UnicodeCodepoint> GetCodepoints(utf8_stringview str) noexcept
+    /// @brief Determines whether the given byte is an ASCII character.
+    NO_DISCARD constexpr static bool IsASCIICharacter(byte ch) noexcept
     {
-      List<UnicodeCodepoint> codepoints;
-      GetCodepoints(str, codepoints);
-      return codepoints;
+      return IsASCIICharacter(UnicodeCodepoint(static_cast<uint8>(ch)));
     }
 
-    /// @brief Appends the Unicode codepoints from the given UTF-8 string to the output list.
-    constexpr static void GetCodepoints(utf8_stringview str, List<UnicodeCodepoint> &out) noexcept
+    /// @brief Determines whether the given UTF-8 string consists entirely of ASCII characters.
+    NO_DISCARD constexpr static bool IsASCIIString(utf8_stringview str) noexcept
     {
-      if (out.capacity() < out.size() + str.size())
+      for (char8_t ch : str)
       {
-        out.reserve(out.size() + str.size()); // Conservative estimate, may be larger than actual
+        if (!IsASCIICharacter(static_cast<uint8>(ch)))
+        {
+          return false;
+        }
       }
+      return true;
+    }
 
-      const auto appendScalar = [&](UnicodeCodepoint cp) noexcept
-      {
-        out.push_back(cp);
-      };
-      ForEachCodepoint(str, appendScalar);
+    /// @brief Determines whether the given codepoint is a valid Unicode scalar value.
+    NO_DISCARD constexpr static bool IsValidCodepoint(UnicodeCodepoint codepoint) noexcept
+    {
+      return (codepoint <= MaxSupplementaryPlaneValue) && !IsSurrogateCodepoint(codepoint);
+    }
+
+    NO_DISCARD constexpr static bool IsBasicMultilingualPlaneCodepoint(UnicodeCodepoint codepoint) noexcept
+    {
+      return codepoint <= MaxBasicMultilingualPlaneValue;
+    }
+
+    /// @brief Determines whether the given codepoint is a surrogate codepoint.
+    NO_DISCARD constexpr static bool IsSurrogateCodepoint(UnicodeCodepoint codepoint) noexcept
+    {
+      return (codepoint >= SurrogateHighStart && codepoint <= SurrogateLowEnd);
+    }
+
+    /// @brief Determines whether the given codepoint is a high surrogate.
+    NO_DISCARD constexpr static bool IsHighSurrogate(UnicodeCodepoint codepoint) noexcept
+    {
+      return (codepoint >= SurrogateHighStart && codepoint <= SurrogateHighEnd);
+    }
+
+    /// @brief Determines whether the given codepoint is a low surrogate.
+    NO_DISCARD constexpr static bool IsLowSurrogate(UnicodeCodepoint codepoint) noexcept
+    {
+      return (codepoint >= SurrogateLowStart && codepoint <= SurrogateLowEnd);
     }
 
     /// @brief Encodes a single Unicode codepoint into its UTF-8 representation and appends it to the output
@@ -257,6 +123,50 @@ namespace Krys::Text
       }
     }
 
+    /// @brief Enumerates each Unicode codepoint in the given UTF-8 string, invoking the provided callable for
+    /// each codepoint.
+    template <UnicodeCodepointCallable TFunc>
+    constexpr static void ForEachCodepoint(utf8_stringview str, TFunc &&func) noexcept
+    {
+      auto begin = str.begin();
+      const auto end = str.end();
+      ForEachCodepointImpl(std::forward<TFunc>(func), begin, end);
+    }
+
+    /// @brief Enumerates each Unicode codepoint in the given UTF-8 byte stream, invoking the provided
+    /// callable for each codepoint.
+    template <UnicodeCodepointCallable TFunc>
+    constexpr static void ForEachCodepoint(Span<const byte> bytes, TFunc &&func) noexcept
+    {
+      auto begin = bytes.begin();
+      const auto end = bytes.end();
+      ForEachCodepointImpl(std::forward<TFunc>(func), begin, end);
+    }
+
+    /// @brief Decodes a UTF-8 string into a list of Unicode codepoints.
+    NO_DISCARD constexpr static List<UnicodeCodepoint> GetCodepoints(utf8_stringview str) noexcept
+    {
+      List<UnicodeCodepoint> codepoints;
+      GetCodepoints(str, codepoints);
+      return codepoints;
+    }
+
+    /// @brief Appends the Unicode codepoints from the given UTF-8 string to the output list.
+    constexpr static void GetCodepoints(utf8_stringview str, List<UnicodeCodepoint> &out) noexcept
+    {
+      if (out.capacity() < out.size() + str.size())
+      {
+        out.reserve(out.size() + str.size());
+      }
+
+      const auto appendScalar = [&](UnicodeCodepoint codepoint) noexcept
+      {
+        out.push_back(codepoint);
+      };
+
+      ForEachCodepoint(str, appendScalar);
+    }
+
     /// @brief Encodes a list of Unicode codepoints into a UTF-8 string.
     NO_DISCARD constexpr static utf8_string CodepointsToUTF8(Span<UnicodeCodepoint> codepoints) noexcept
     {
@@ -270,75 +180,106 @@ namespace Krys::Text
     {
       if (out.capacity() < out.size() + codepoints.size())
       {
-        out.reserve(out.size() + codepoints.size()); // Conservative estimate, may be larger than actual
+        out.reserve(out.size() + codepoints.size());
       }
 
-      for (UnicodeCodepoint cp : codepoints)
+      for (UnicodeCodepoint codepoint : codepoints)
       {
-        CodepointToUTF8(cp, out);
+        CodepointToUTF8(codepoint, out);
       }
     }
 
-    /// @brief Determines whether the given codepoint is a valid Unicode scalar value.
-    NO_DISCARD constexpr static bool IsValidCodepoint(UnicodeCodepoint codepoint) noexcept
+  private:
+    template <UnicodeCodepointCallable TFunc, typename TIteratorStart, typename TIteratorEnd>
+    constexpr static void ForEachCodepointImpl(TFunc &&func, TIteratorStart begin, TIteratorEnd end) noexcept
     {
-      if (codepoint > MaxCodepointValue)
+      constexpr UnicodeCodepoint REPLACEMENT_CHARACTER(DefaultReplacementCodepoint);
+
+      constexpr auto InvokeFunc = []<typename F>(F &&f, UnicodeCodepoint codepoint, bool wasInvalid)
       {
-        return false;
-      }
-      if (codepoint >= SurrogateHighStart && codepoint <= SurrogateLowEnd)
-      {
-        return false;
-      }
-      return true;
-    }
-
-    /// @brief Determines whether the given codepoint is a surrogate codepoint.
-    NO_DISCARD constexpr static bool IsSurrogateCodepoint(UnicodeCodepoint codepoint) noexcept
-    {
-      return (codepoint >= SurrogateHighStart && codepoint <= SurrogateLowEnd);
-    }
-
-    /// @brief Determines whether the given codepoint is a high surrogate.
-    NO_DISCARD constexpr static bool IsHighSurrogate(UnicodeCodepoint codepoint) noexcept
-    {
-      return (codepoint >= SurrogateHighStart && codepoint <= SurrogateHighEnd);
-    }
-
-    /// @brief Determines whether the given codepoint is a low surrogate.
-    NO_DISCARD constexpr static bool IsLowSurrogate(UnicodeCodepoint codepoint) noexcept
-    {
-      return (codepoint >= SurrogateLowStart && codepoint <= SurrogateLowEnd);
-    }
-
-    /// @brief Determines whether the given codepoint is an ASCII character.
-    NO_DISCARD constexpr static bool IsACIICharacter(UnicodeCodepoint ch) noexcept
-    {
-      return ch <= MaxASCIIValue;
-    }
-
-    /// @brief Determines whether the given byte is an ASCII character.
-    NO_DISCARD constexpr static bool IsACIICharacter(byte b) noexcept
-    {
-      return static_cast<uint8>(b) <= MaxASCIIValue;
-    }
-
-    /// @brief Determines whether the given UTF-8 string consists entirely of ASCII characters.
-    NO_DISCARD constexpr static bool IsASCII(utf8_stringview str) noexcept
-    {
-      bool isASCII = true;
-
-      const auto CheckASCII = [&](UnicodeCodepoint ch) noexcept
-      {
-        if (!IsACIICharacter(ch))
+        if constexpr (Callable<F, UnicodeCodepoint, bool>)
         {
-          isASCII = false;
+          f(codepoint, wasInvalid);
+        }
+        else
+        {
+          f(codepoint);
         }
       };
 
-      ForEachCodepoint(str, CheckASCII);
+      auto it = begin;
+      while (it != end)
+      {
+        uint32 codepoint = 0;
+        uint8 needed = 0;
 
-      return isASCII;
+        uint8 first = static_cast<uint8>(*it++);
+        if (IsASCIICharacter(first))
+        {
+          InvokeFunc(func, UnicodeCodepoint(first), false);
+          continue;
+        }
+        else if ((first & 0xE0) == 0xC0)
+        {
+          codepoint = first & 0x1F;
+          needed = 1;
+        }
+        else if ((first & 0xF0) == 0xE0)
+        {
+          codepoint = first & 0x0F;
+          needed = 2;
+        }
+        else if ((first & 0xF8) == 0xF0)
+        {
+          codepoint = first & 0x07;
+          needed = 3;
+        }
+        else
+        {
+          InvokeFunc(func, REPLACEMENT_CHARACTER, true);
+          continue;
+        }
+
+        if (static_cast<size_t>(end - it) < needed)
+        {
+          InvokeFunc(func, REPLACEMENT_CHARACTER, true);
+          break;
+        }
+
+        bool malformed = false;
+        for (uint8 i = 0; i < needed; i++)
+        {
+          uint8 b = static_cast<uint8>(*it);
+          if ((b & 0xC0) != 0x80)
+          {
+            InvokeFunc(func, REPLACEMENT_CHARACTER, true);
+            malformed = true;
+            break;
+          }
+
+          codepoint = (codepoint << 6) | (b & 0x3F);
+          it++;
+        }
+
+        if (malformed)
+        {
+          continue;
+        }
+
+        // Invalid encodings
+        bool invalidTwoByte = needed == 1u && codepoint < 0x80u;
+        bool invalidThreeByte = needed == 2u && codepoint < 0x800u;
+        bool invalidFourByte = needed == 3u && codepoint < 0x10000u;
+        bool invalidCodepoint = codepoint > MaxSupplementaryPlaneValue;
+        bool invalidSurrogate = IsSurrogateCodepoint(UnicodeCodepoint(codepoint));
+        if (invalidTwoByte || invalidThreeByte || invalidFourByte || invalidCodepoint || invalidSurrogate)
+        {
+          InvokeFunc(func, REPLACEMENT_CHARACTER, true);
+          continue;
+        }
+
+        InvokeFunc(func, UnicodeCodepoint(codepoint), false);
+      }
     }
   };
 }

@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Array.hpp"
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/Endian.hpp"
 #include "Krystal.Lib/List.hpp"
@@ -18,16 +19,17 @@ namespace Krys
 
     /// @brief Enumerates chunks of bytes from the given byte span, invoking the provided callable for each
     /// chunk.
-    template <typename TFunc, size_t N>
-    requires Callable<TFunc, Span<const byte, N>>
-    constexpr static void ForEachByteSpan(Span<const byte> bytes, TFunc &&func) noexcept
+    template <size_t N, typename TFunc>
+    requires Callable<TFunc, FixedSpan<const byte, N>>
+    constexpr static void ForEachNBytes(Span<const byte> bytes, TFunc &&func) noexcept
     {
       size_t totalBytes = bytes.size();
       size_t offset = 0;
       while (offset < totalBytes)
       {
         size_t chunkSize = std::min(N, totalBytes - offset);
-        func(bytes.subspan(offset, chunkSize));
+        FixedSpan<const byte, N> chunk {bytes.data() + offset, N};
+        func(chunk);
         offset += chunkSize;
       }
     }
@@ -70,9 +72,9 @@ namespace Krys
     }
 
     template <Endian::Type Src, Endian::Type Dst, Number T>
-    NO_DISCARD static constexpr List<byte> ToBytes(T value) noexcept
+    NO_DISCARD static constexpr Array<byte, sizeof(T)> ToBytes(T value) noexcept
     {
-      List<byte> bytes(sizeof(T));
+      Array<byte, sizeof(T)> bytes;
 
       value = Endian::Convert<Src, Dst, T>(value);
       std::memcpy(bytes.data(), &value, sizeof(T));
@@ -90,7 +92,11 @@ namespace Krys
       }
 
       value = Endian::Convert<Src, Dst, T>(value);
-      std::memcpy(out.data(), &value, sizeof(T));
+      const byte *bytePtr = reinterpret_cast<const byte *>(&value);
+      for (size_t i = 0; i < sizeof(T); i++)
+      {
+        out.push_back(bytePtr[i]);
+      }
     }
 
     NO_DISCARD static string AsString(const List<byte> &bytes, const size_t length) noexcept

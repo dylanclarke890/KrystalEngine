@@ -4,6 +4,9 @@
 
 namespace Krys
 {
-  template <typename T, size_t Extent = std::dynamic_extent>
-  using Span = std::span<T, Extent>;
+  template <typename T>
+  using Span = std::span<T>;
+
+  template <typename T, size_t Extent>
+  using FixedSpan = std::span<T, Extent>;
 }

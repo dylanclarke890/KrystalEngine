@@ -38,15 +38,15 @@ namespace Krys::Text
     {
       Reserve(out, characters.size());
 
-      const auto EncodeASCII = [&](UnicodeCodepoint ch) noexcept
+      const auto EncodeASCII = [&](UnicodeCodepoint ch, bool wasInvalid) noexcept
       {
-        if (Unicode::IsACIICharacter(ch))
+        if (wasInvalid || !Unicode::IsASCIICharacter(ch))
         {
-          out.push_back(static_cast<byte>(ch.Value));
+          Encode(_encoderFallback.GetReplacementCharacter(), out);
         }
         else
         {
-          Encode(_encoderFallback.GetReplacementCharacter(), out);
+          out.push_back(static_cast<byte>(ch.Value));
         }
       };
 
@@ -66,7 +66,7 @@ namespace Krys::Text
 
       for (byte b : bytes)
       {
-        if (Unicode::IsACIICharacter(b))
+        if (Unicode::IsASCIICharacter(b))
         {
           out.push_back(static_cast<char8_t>(b));
         }
