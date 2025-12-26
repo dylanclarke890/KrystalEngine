@@ -12,12 +12,13 @@ namespace Krys::Text
   class ASCIIEncoding : public Encoding
   {
   public:
-    static constexpr utf8_stringview IANA = u8"US-ASCII";
-    static constexpr EncodingInfo EncodingInformation {IANA, 20'127u};
+    static constexpr utf8_stringview Name = u8"US-ASCII";
+    static constexpr uint32 MIBenum = 3u;
+    static constexpr uint32 WindowsCodePage = 20'127u;
 
   public:
     constexpr ASCIIEncoding() noexcept
-        : Encoding(EncodingInformation, EncoderFallback(EncodingReplacement_ASCII),
+        : Encoding({Name, MIBenum, WindowsCodePage}, EncoderFallback(EncodingReplacement_ASCII),
                    DecoderFallback(EncodingReplacement_UTF))
     {
     }

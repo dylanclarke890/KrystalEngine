@@ -10,8 +10,9 @@ namespace Krys::Text
     using MapItem = LookupTable::MapItem;
 
   public:
-    static constexpr utf8_stringview IANA = u8"windows-1258";
-    static constexpr EncodingInfo EncodingInformation = EncodingInfo {IANA, 1'258u};
+    static constexpr utf8_stringview Name = u8"windows-1258";
+    static constexpr uint32 MIBenum = 2'258u;
+    static constexpr uint32 WindowsCodePage = 1'258u;
 
     static constexpr Mapping LookupMapping = {
       MapItem {0x82u, UnicodeCodepoint(0x201Au)}, // SINGLE LOW-9 QUOTATION MARK
@@ -135,7 +136,7 @@ namespace Krys::Text
     };
 
   public:
-    Windows1258Encoding() noexcept : SingleByteEncoding(EncodingInformation, LookupTable(LookupMapping))
+    Windows1258Encoding() noexcept : SingleByteEncoding({ Name, MIBenum, WindowsCodePage }, LookupTable(LookupMapping))
     {
     }
 

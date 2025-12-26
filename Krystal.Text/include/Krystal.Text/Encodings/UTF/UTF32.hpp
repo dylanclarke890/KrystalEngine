@@ -14,18 +14,22 @@ namespace Krys::Text
   class UTF32Encoding : public Encoding
   {
   public:
+    static constexpr utf8_stringview Name_BE = u8"UTF-32BE";
+    static constexpr uint32 MIBenum_BE = 1'018u;
+    static constexpr uint32 WindowsCodePage_BE = 12'001u;
     static constexpr Array<byte, 4u> BOM_BE = {byte {0x00}, byte {0x00}, byte {0xFF}, byte {0xFE}};
-    static constexpr utf8_stringview IANA_BE = u8"UTF-32BE";
 
+    static constexpr utf8_stringview Name_LE = u8"UTF-32LE";
+    static constexpr uint32 MIBenum_LE = 1'019u;
+    static constexpr uint32 WindowsCodePage_LE = 12'000u;
     static constexpr Array<byte, 4u> BOM_LE = {byte {0xFE}, byte {0xFF}, byte {0x00}, byte {0x00}};
-    static constexpr utf8_stringview IANA_LE = u8"UTF-32LE";
 
     static constexpr Endian::Type Endianness {IsBigEndian ? Endian::Big : Endian::Little};
-    static constexpr EncodingInfo EncodingInformation =
-      IsBigEndian ? EncodingInfo {IANA_BE, 12'001u} : EncodingInfo {IANA_LE, 12'000u};
 
   public:
-    constexpr UTF32Encoding() noexcept : Encoding(EncodingInformation)
+    constexpr UTF32Encoding() noexcept
+        : Encoding(IsBigEndian ? EncodingInfo {Name_BE, MIBenum_BE, WindowsCodePage_BE}
+                               : EncodingInfo {Name_LE, MIBenum_LE, WindowsCodePage_LE})
     {
     }
 

@@ -10,8 +10,9 @@ namespace Krys::Text
     using MapItem = LookupTable::MapItem;
 
   public:
-    static constexpr utf8_stringview IANA = u8"KOI8-U";
-    static constexpr EncodingInfo EncodingInformation = EncodingInfo {IANA, 21'866u};
+    static constexpr utf8_stringview Name = u8"KOI8-U";
+    static constexpr uint32 MIBenum = 2'088u;
+    static constexpr uint32 WindowsCodePage = 21'866u;
 
     static constexpr Mapping LookupMapping = {
       MapItem {0x80u, UnicodeCodepoint(0x2500u)}, //	BOX DRAWINGS LIGHT HORIZONTAL
@@ -145,7 +146,8 @@ namespace Krys::Text
     };
 
   public:
-    KOI8_U_Encoding() noexcept : SingleByteEncoding(EncodingInformation, LookupTable(LookupMapping))
+    KOI8_U_Encoding() noexcept
+        : SingleByteEncoding({Name, MIBenum, WindowsCodePage}, LookupTable(LookupMapping))
     {
     }
 

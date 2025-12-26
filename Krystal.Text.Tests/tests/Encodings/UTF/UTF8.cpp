@@ -29,6 +29,6 @@ namespace Krys::Tests
   TEST_CASE("UTF8Encoding(IsSingleByte)", "[Text][Encodings][ASCII]")
   {
     UTF8Encoding encoding;
-    REQUIRE(encoding.IsSingleByte());
+    REQUIRE(!encoding.IsSingleByte());
   }
 }

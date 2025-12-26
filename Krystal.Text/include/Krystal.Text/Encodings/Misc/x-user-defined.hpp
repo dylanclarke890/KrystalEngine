@@ -12,15 +12,16 @@ namespace Krys::Text
   class XUserDefinedEncoding : public Encoding
   {
   public:
-    static constexpr utf8_stringview IANA = u8"x-user-defined";
-    static constexpr EncodingInfo EncodingInformation {IANA, CodePageUnknown};
+    static constexpr utf8_stringview Name = u8"x-user-defined";
+    static constexpr uint32 MIBenum = MIBenumUnknown;
+    static constexpr uint32 WindowsCodePage = WindowsCodePageUnknown;
 
     static constexpr uint32 XUserDefinedStart = 0xF780u;
     static constexpr uint32 XUserDefinedEnd = 0xF7FFu;
 
   public:
     constexpr XUserDefinedEncoding() noexcept
-        : Encoding(EncodingInformation, EncoderFallback(EncodingReplacement_ASCII),
+        : Encoding({Name, MIBenum, WindowsCodePage}, EncoderFallback(EncodingReplacement_ASCII),
                    DecoderFallback(EncodingReplacement_UTF))
     {
     }

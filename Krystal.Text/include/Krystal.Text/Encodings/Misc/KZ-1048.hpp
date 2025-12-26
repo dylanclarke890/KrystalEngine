@@ -10,8 +10,9 @@ namespace Krys::Text
     using MapItem = LookupTable::MapItem;
 
   public:
-    static constexpr utf8_stringview IANA = u8"KZ-1048";
-    static constexpr EncodingInfo EncodingInformation = EncodingInfo {IANA, CodePageUnknown};
+    static constexpr utf8_stringview Name = u8"KZ-1048";
+    static constexpr uint32 MIBenum = 119u;
+    static constexpr uint32 WindowsCodePage = WindowsCodePageUnknown;
 
     static constexpr Mapping LookupMapping = {
       MapItem {0x80u, UnicodeCodepoint(0x2500u)}, //	BOX DRAWINGS LIGHT HORIZONTAL
@@ -145,7 +146,8 @@ namespace Krys::Text
     };
 
   public:
-    KZ1048_Encoding() noexcept : SingleByteEncoding(EncodingInformation, LookupTable(LookupMapping))
+    KZ1048_Encoding() noexcept 
+              : SingleByteEncoding({Name, MIBenum, WindowsCodePage}, LookupTable(LookupMapping))
     {
     }
 

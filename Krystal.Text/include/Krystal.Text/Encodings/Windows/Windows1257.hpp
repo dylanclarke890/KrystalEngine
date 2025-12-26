@@ -10,8 +10,9 @@ namespace Krys::Text
     using MapItem = LookupTable::MapItem;
 
   public:
-    static constexpr utf8_stringview IANA = u8"windows-1257";
-    static constexpr EncodingInfo EncodingInformation = EncodingInfo {IANA, 1'257u};
+    static constexpr utf8_stringview Name = u8"windows-1257";
+    static constexpr uint32 MIBenum = 2'257u;
+    static constexpr uint32 WindowsCodePage = 1'257u;
 
     static constexpr Mapping LookupMapping = {
       MapItem {0x80u, UnicodeCodepoint(0x20ACu)}, // EURO SIGN
@@ -133,7 +134,7 @@ namespace Krys::Text
     };
 
   public:
-    Windows1257Encoding() noexcept : SingleByteEncoding(EncodingInformation, LookupTable(LookupMapping))
+    Windows1257Encoding() noexcept : SingleByteEncoding({ Name, MIBenum, WindowsCodePage }, LookupTable(LookupMapping))
     {
     }
 

@@ -10,8 +10,9 @@ namespace Krys::Text
     using MapItem = LookupTable::MapItem;
 
   public:
-    static constexpr utf8_stringview IANA = u8"ISO-8859-4";
-    static constexpr EncodingInfo EncodingInformation = EncodingInfo {IANA, 28'594u};
+    static constexpr utf8_stringview Name = u8"ISO-8859-4";
+    static constexpr uint32 MIBenum = 7u;
+    static constexpr uint32 WindowsCodePage = 28'594u;
 
     static constexpr Mapping LookupMapping = {
       MapItem {0x80u, UnicodeCodepoint(0x0080u)}, //	<control>
@@ -145,7 +146,8 @@ namespace Krys::Text
     };
 
   public:
-    ISO_8859_4_Encoding() noexcept : SingleByteEncoding(EncodingInformation, LookupTable(LookupMapping))
+    ISO_8859_4_Encoding() noexcept
+        : SingleByteEncoding({Name, MIBenum, WindowsCodePage}, LookupTable(LookupMapping))
     {
     }
 

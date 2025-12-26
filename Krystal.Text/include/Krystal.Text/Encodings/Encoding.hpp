@@ -12,12 +12,19 @@
 
 namespace Krys::Text
 {
-  constexpr static uint32 CodePageUnknown = 0u;
+  constexpr static uint32 MIBenumUnknown = 0u;
+  constexpr static uint32 WindowsCodePageUnknown = 0u;
 
   struct EncodingInfo
   {
-    utf8_stringview IANAName;
-    uint32 CodePage;
+    /// @brief The IANA name of the encoding.
+    utf8_stringview Name;
+
+    /// @brief The MIB enum identifier of the encoding, or MIBenumUnknown if not applicable.
+    uint32 MIBenum;
+
+    /// @brief The code page identifier of the encoding, or WindowsCodePageUnknown if not applicable.
+    uint32 WindowsCodePage;
   };
 
   /// @brief Represents a character encoding.

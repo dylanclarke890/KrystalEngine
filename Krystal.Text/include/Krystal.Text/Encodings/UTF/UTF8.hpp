@@ -11,13 +11,14 @@ namespace Krys::Text
   class UTF8Encoding : public Encoding
   {
   public:
-    static constexpr Array<byte, 3u> BOM = {byte {0xEF}, byte {0xBB}, byte {0xBF}};
-    static constexpr utf8_stringview IANA = u8"UTF-8";
+    static constexpr utf8_stringview Name = u8"UTF-8";
+    static constexpr uint32 MIBenum = 106u;
+    static constexpr uint32 WindowsCodePage = 65'001u;
 
-    static constexpr EncodingInfo EncodingInformation {IANA, 65'001u};
+    static constexpr Array<byte, 3u> BOM = {byte {0xEF}, byte {0xBB}, byte {0xBF}};
 
   public:
-    constexpr UTF8Encoding() noexcept : Encoding(EncodingInformation)
+    constexpr UTF8Encoding() noexcept : Encoding({Name, MIBenum, WindowsCodePage})
     {
     }
 
