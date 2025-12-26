@@ -47,25 +47,42 @@ namespace Krys::Text
       return characters;
     }
 
-    // TODO: need to handle this better.
     constexpr void Encode(utf8_stringview characters, List<byte> &out) const noexcept override
     {
       Reserve(out, characters.size());
 
-      for (char8_t ch : characters)
+      const auto EncodeCodepoint = [&](UnicodeCodepoint ch, bool wasInvalid) noexcept
       {
-        out.push_back(static_cast<byte>(ch));
-      }
+        if (wasInvalid)
+        {
+          Encode(_encoderFallback.GetReplacementCharacter(), out);
+        }
+        else
+        {
+          Unicode::CodepointToUTF8(ch, out);
+        }
+      };
+
+      Unicode::ForEachCodepoint(characters, EncodeCodepoint);
     }
 
     void constexpr Decode(Span<const byte> bytes, utf8_string &out) const noexcept override
     {
       Reserve(out, bytes.size());
 
-      for (byte b : bytes)
+      const auto DecodeCodepoint = [&](UnicodeCodepoint ch, bool wasInvalid) noexcept
       {
-        out.push_back(static_cast<char8_t>(b));
-      }
+        if (wasInvalid)
+        {
+          out += _decoderFallback.GetReplacementCharacter();
+        }
+        else
+        {
+          Unicode::CodepointToUTF8(ch, out);
+        }
+      };
+
+      Unicode::ForEachCodepoint(bytes, DecodeCodepoint);
     }
   };
 }

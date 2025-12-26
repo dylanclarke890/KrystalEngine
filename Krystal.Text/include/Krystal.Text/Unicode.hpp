@@ -100,27 +100,59 @@ namespace Krys::Text
     /// string.
     constexpr static void CodepointToUTF8(UnicodeCodepoint codepoint, utf8_string &out) noexcept
     {
-      if (codepoint <= 0x7F)
+      constexpr uint32 MaxTwoByteValue = 0x7FFu;
+
+      if (codepoint <= MaxASCIIValue)
       {
         out.push_back(static_cast<char8_t>(codepoint));
       }
-      else if (codepoint <= 0x7FF)
+      else if (codepoint <= MaxTwoByteValue)
       {
         out.push_back(static_cast<char8_t>(0xC0 | (codepoint >> 6)));
         out.push_back(static_cast<char8_t>(0x80 | (codepoint & 0x3F)));
       }
-      else if (codepoint <= 0xFFFF)
+      else if (codepoint <= MaxBasicMultilingualPlaneValue)
       {
         out.push_back(static_cast<char8_t>(0xE0 | (codepoint >> 12)));
         out.push_back(static_cast<char8_t>(0x80 | ((codepoint >> 6) & 0x3F)));
         out.push_back(static_cast<char8_t>(0x80 | (codepoint & 0x3F)));
       }
-      else if (codepoint <= 0x10FFFF)
+      else if (codepoint <= MaxSupplementaryPlaneValue)
       {
         out.push_back(static_cast<char8_t>(0xF0 | (codepoint >> 18)));
         out.push_back(static_cast<char8_t>(0x80 | ((codepoint >> 12) & 0x3F)));
         out.push_back(static_cast<char8_t>(0x80 | ((codepoint >> 6) & 0x3F)));
         out.push_back(static_cast<char8_t>(0x80 | (codepoint & 0x3F)));
+      }
+    }
+
+    /// @brief Encodes a single Unicode codepoint into its UTF-8 representation and appends it to the output
+    /// bytes.
+    constexpr static void CodepointToUTF8(UnicodeCodepoint codepoint, List<byte> &out) noexcept
+    {
+      constexpr uint32 MaxTwoByteValue = 0x7FFu;
+
+      if (codepoint <= MaxASCIIValue)
+      {
+        out.push_back(static_cast<byte>(codepoint.Value));
+      }
+      else if (codepoint <= MaxTwoByteValue)
+      {
+        out.push_back(static_cast<byte>(0xC0 | (codepoint >> 6)));
+        out.push_back(static_cast<byte>(0x80 | (codepoint & 0x3F)));
+      }
+      else if (codepoint <= MaxBasicMultilingualPlaneValue)
+      {
+        out.push_back(static_cast<byte>(0xE0 | (codepoint >> 12)));
+        out.push_back(static_cast<byte>(0x80 | ((codepoint >> 6) & 0x3F)));
+        out.push_back(static_cast<byte>(0x80 | (codepoint & 0x3F)));
+      }
+      else if (codepoint <= MaxSupplementaryPlaneValue)
+      {
+        out.push_back(static_cast<byte>(0xF0 | (codepoint >> 18)));
+        out.push_back(static_cast<byte>(0x80 | ((codepoint >> 12) & 0x3F)));
+        out.push_back(static_cast<byte>(0x80 | ((codepoint >> 6) & 0x3F)));
+        out.push_back(static_cast<byte>(0x80 | (codepoint & 0x3F)));
       }
     }
 
