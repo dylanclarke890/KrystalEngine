@@ -9,20 +9,23 @@
 
 namespace Krys::Text
 {
-  class ASCIIEncoding : public Encoding
+  class XUserDefinedEncoding : public Encoding
   {
   public:
-    static constexpr utf8_stringview IANA = u8"US-ASCII";
-    static constexpr EncodingInfo EncodingInformation {IANA, 20'127u};
+    static constexpr utf8_stringview IANA = u8"x-user-defined";
+    static constexpr EncodingInfo EncodingInformation {IANA, CodePageUnknown};
+
+    static constexpr uint32 XUserDefinedStart = 0xF780u;
+    static constexpr uint32 XUserDefinedEnd = 0xF7FFu;
 
   public:
-    constexpr ASCIIEncoding() noexcept
+    constexpr XUserDefinedEncoding() noexcept
         : Encoding(EncodingInformation, EncoderFallback(EncodingReplacement_ASCII),
                    DecoderFallback(EncodingReplacement_UTF))
     {
     }
 
-    constexpr virtual ~ASCIIEncoding() noexcept = default;
+    constexpr virtual ~XUserDefinedEncoding() noexcept = default;
 
     NO_DISCARD constexpr bool IsSingleByte() const noexcept override
     {
@@ -49,13 +52,17 @@ namespace Krys::Text
 
       const auto EncodeCodepoint = [&](UnicodeCodepoint ch, bool wasInvalid) noexcept
       {
-        if (wasInvalid || !Unicode::IsASCIICharacter(ch))
+        if (wasInvalid || ch < XUserDefinedStart || ch > XUserDefinedEnd)
         {
           Encode(_encoderFallback.GetReplacementCharacter(), out);
         }
-        else
+        else if (Unicode::IsASCIICharacter(ch))
         {
           out.push_back(static_cast<byte>(ch.Value));
+        }
+        else
+        {
+          out.push_back(byte {ch.Value - XUserDefinedStart + Unicode::ExtendedASCIIStart});
         }
       };
 
@@ -74,7 +81,8 @@ namespace Krys::Text
         }
         else
         {
-          out += _decoderFallback.GetReplacementCharacter();
+          UnicodeCodepoint codepoint {XUserDefinedStart
+                                      + (static_cast<uint8>(b) - Unicode::ExtendedASCIIStart)};
         }
       }
     }

@@ -60,7 +60,7 @@ namespace Krys::Text
     {
       Reserve(out, characters.size() * 2u);
 
-      const auto EncodeUTF16 = [&](UnicodeCodepoint codepoint, bool wasInvalid) noexcept
+      const auto EncodeCodepoint = [&](UnicodeCodepoint codepoint, bool wasInvalid) noexcept
       {
         if (wasInvalid || Unicode::IsSurrogateCodepoint(codepoint))
         {
@@ -84,7 +84,7 @@ namespace Krys::Text
         ByteUtils::ToBytes<Endian::System, Endianness>(low, out);
       };
 
-      Unicode::ForEachCodepoint(characters, EncodeUTF16);
+      Unicode::ForEachCodepoint(characters, EncodeCodepoint);
     }
 
     constexpr void Decode(Span<const byte> bytes, utf8_string &out) const noexcept

@@ -79,7 +79,7 @@ namespace Krys::Text
     {
       Reserve(out, bytes.size() / 4u);
 
-      const auto DecodeUTF32 = [&](FixedSpan<const byte, 4u> byteSpan) noexcept
+      const auto EncodeCodepoint = [&](FixedSpan<const byte, 4u> byteSpan) noexcept
       {
         auto codepoint =
           UnicodeCodepoint(ByteUtils::AsNumeric<Endianness, Endian::System, uint32>(byteSpan.data()));
@@ -94,7 +94,7 @@ namespace Krys::Text
         }
       };
 
-      ByteUtils::ForEachNBytes<4u>(bytes, DecodeUTF32);
+      ByteUtils::ForEachNBytes<4u>(bytes, EncodeCodepoint);
     }
   };
 

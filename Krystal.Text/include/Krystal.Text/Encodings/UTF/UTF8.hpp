@@ -47,6 +47,7 @@ namespace Krys::Text
       return characters;
     }
 
+    // TODO: need to handle this better.
     constexpr void Encode(utf8_stringview characters, List<byte> &out) const noexcept override
     {
       Reserve(out, characters.size());
