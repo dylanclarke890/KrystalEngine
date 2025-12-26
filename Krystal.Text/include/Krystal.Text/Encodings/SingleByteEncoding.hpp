@@ -11,8 +11,6 @@ namespace Krys::Text
 {
   class SingleByteEncoding : public Encoding
   {
-    constexpr static uint8 ASCIIOffset = Unicode::MaxASCIIValue + 1u;
-
   protected:
     class LookupTable
     {
@@ -32,7 +30,7 @@ namespace Krys::Text
       {
         for (const auto [ch, codepoint] : mappings)
         {
-          const auto index = ch - ASCIIOffset;
+          const auto index = ch - Unicode::ExtendedASCIIStart;
           _table[index] = codepoint;
           _reverseTable[codepoint] = ch;
         }
@@ -64,7 +62,7 @@ namespace Krys::Text
           return true;
         }
 
-        const auto index = ch - ASCIIOffset;
+        const auto index = ch - Unicode::ExtendedASCIIStart;
         if (index >= _table.size() || _table[index] == 0u)
         {
           return false;

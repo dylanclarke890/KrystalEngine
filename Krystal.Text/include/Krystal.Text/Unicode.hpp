@@ -29,6 +29,7 @@ namespace Krys::Text
     constexpr static uint8 MaxASCIIValue = 0x7Fu;
     constexpr static uint32 MaxSupplementaryPlaneValue = 0x10FFFFu;
     constexpr static uint32 MaxBasicMultilingualPlaneValue = 0xFFFFu;
+    constexpr static uint8 ExtendedASCIIStart = Unicode::MaxASCIIValue + 1u;
 
     constexpr static uint32 SurrogateHighStart = 0xD800u;
     constexpr static uint32 SurrogateHighEnd = 0xDBFFu;
