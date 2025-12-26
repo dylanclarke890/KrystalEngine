@@ -12,6 +12,8 @@
 
 namespace Krys::Text
 {
+  constexpr static uint32 CodePageUnknown = 0u;
+
   struct EncodingInfo
   {
     utf8_stringview IANAName;

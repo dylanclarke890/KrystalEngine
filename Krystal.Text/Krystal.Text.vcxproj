@@ -166,6 +166,7 @@
     <ClInclude Include="include\Krystal.Text\Encodings\ISO8859\ISO-8859-1.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\KOI8\KOI8-R.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\KOI8\KOI8-U.hpp" />
+    <ClInclude Include="include\Krystal.Text\Encodings\Misc\KZ-1048.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\SingleByteEncoding.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1250.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1251.hpp" />

@@ -131,5 +131,8 @@
     <ClInclude Include="include\Krystal.Text\Encodings\KOI8\KOI8-U.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Text\Encodings\Misc\KZ-1048.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
