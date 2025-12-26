@@ -1,4 +1,4 @@
-#include "Krystal.Gfx.OpenGL/Renderer.hpp"
+﻿#include "Krystal.Gfx.OpenGL/Renderer.hpp"
 #include "Krystal.Gfx.OpenGL/Debug.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/BufferBitFlags.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/FilterMode.hpp"
@@ -7,9 +7,9 @@
 #include "Krystal.Gfx/Enums/BufferBitFlags.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.Lib/Expected.hpp"
-#include "Krystal.Lib/String/UTF8.hpp"
 #include "Krystal.Maths/Clamp.hpp"
 #include "Krystal.Maths/Transform.hpp"
+#include "Krystal.Text/Unicode.hpp"
 
 namespace Krys::Gfx
 {
@@ -357,17 +357,19 @@ namespace Krys::Gfx::OpenGL
 
     Buffer &buffer = buffers.Get(_glyphBuffer);
     Maths::Vec2 cursor = position + Maths::Vec2 {0.f, font.Metrics().Ascender * scale};
-    List<Codepoint> codepoints = UTF8::Decode(text);
+
+    using namespace Text;
+    List<UnicodeCodepoint> codepoints = Unicode::GetCodepoints(text);
     auto count = codepoints.size();
     while (count > 0)
     {
       auto batchSize = Maths::Min(count, static_cast<size_t>(GlyphVertex::BatchSize));
-      Span<const Codepoint> batch(codepoints.data() + (codepoints.size() - count), batchSize);
+      Span<const UnicodeCodepoint> batch(codepoints.data() + (codepoints.size() - count), batchSize);
       count -= batchSize;
 
       _glyphVertices.clear();
       const auto &characters = font.Characters();
-      for (const Codepoint &c : batch)
+      for (const UnicodeCodepoint &c : batch)
       {
         // Check for newline character
         if (c.Value == '\n')
