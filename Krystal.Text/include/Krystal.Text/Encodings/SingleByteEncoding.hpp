@@ -85,14 +85,29 @@ namespace Krys::Text
     {
     }
 
-    virtual ~SingleByteEncoding() noexcept override = default;
+  public:
+    ~SingleByteEncoding() noexcept override = default;
 
-    NO_DISCARD virtual bool IsSingleByte() const noexcept override final
+    NO_DISCARD bool IsSingleByte() const noexcept override final
     {
       return true;
     }
 
-    virtual void Encode(utf8_stringview characters, List<byte> &out) const noexcept override
+    NO_DISCARD constexpr List<byte> Encode(utf8_stringview characters) const noexcept override
+    {
+      List<byte> bytes;
+      Encode(characters, bytes);
+      return bytes;
+    }
+
+    NO_DISCARD constexpr utf8_string Decode(Span<const byte> bytes) const noexcept override
+    {
+      utf8_string characters;
+      Decode(bytes, characters);
+      return characters;
+    }
+
+    void Encode(utf8_stringview characters, List<byte> &out) const noexcept override
     {
       Reserve(out, characters.size());
 
@@ -118,7 +133,7 @@ namespace Krys::Text
       Unicode::ForEachCodepoint(characters, EncodeCodepoint);
     }
 
-    virtual void Decode(Span<const byte> bytes, utf8_string &out) const noexcept override
+    void Decode(Span<const byte> bytes, utf8_string &out) const noexcept override
     {
       Reserve(out, bytes.size());
 

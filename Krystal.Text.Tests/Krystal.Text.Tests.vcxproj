@@ -31,10 +31,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="catch_main.cpp" />
-    <ClCompile Include="tests\Encodings\ASCIIEncoding.cpp" />
-    <ClCompile Include="tests\Encodings\UTF16Encoding.cpp" />
-    <ClCompile Include="tests\Encodings\UTF32Encoding.cpp" />
-    <ClCompile Include="tests\Encodings\UTF8Encoding.cpp" />
+    <ClCompile Include="tests\Encodings\ASCII.cpp" />
+    <ClCompile Include="tests\Encodings\UTF\UTF16.cpp" />
+    <ClCompile Include="tests\Encodings\UTF\UTF32.cpp" />
+    <ClCompile Include="tests\Encodings\UTF\UTF8.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

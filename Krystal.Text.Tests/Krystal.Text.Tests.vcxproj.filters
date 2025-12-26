@@ -18,16 +18,16 @@
     <ClCompile Include="catch_main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Encodings\ASCIIEncoding.cpp">
+    <ClCompile Include="tests\Encodings\ASCII.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Encodings\UTF8Encoding.cpp">
+    <ClCompile Include="tests\Encodings\UTF\UTF8.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Encodings\UTF16Encoding.cpp">
+    <ClCompile Include="tests\Encodings\UTF\UTF16.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Encodings\UTF32Encoding.cpp">
+    <ClCompile Include="tests\Encodings\UTF\UTF32.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

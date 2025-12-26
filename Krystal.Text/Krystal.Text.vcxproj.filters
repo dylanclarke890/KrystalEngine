@@ -23,16 +23,16 @@
     <ClInclude Include="include\Krystal.Text\Encodings\Encoding.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\ASCIIEncoding.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\ASCII.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\UTF\UTF8Encoding.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\UTF\UTF8.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\UTF\UTF16Encoding.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\UTF\UTF16.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\UTF\UTF32Encoding.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\UTF\UTF32.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\Unicode.hpp">
@@ -44,37 +44,40 @@
     <ClInclude Include="include\Krystal.Text\Encodings\EncodingConstants.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1252Encoding.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1252.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1250Encoding.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1250.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1251Encoding.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1251.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1253Encoding.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1253.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1254Encoding.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1254.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1255Encoding.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1255.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1256Encoding.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1256.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1257Encoding.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1257.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1258Encoding.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1258.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows874Encoding.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows874.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\Encodings\SingleByteEncoding.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Text\Encodings\ISO8859\ISO-8859-1.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -33,6 +33,20 @@ namespace Krys::Text
       return false;
     }
 
+    NO_DISCARD constexpr List<byte> Encode(utf8_stringview characters) const noexcept override
+    {
+      List<byte> bytes;
+      Encode(characters, bytes);
+      return bytes;
+    }
+
+    NO_DISCARD constexpr utf8_string Decode(Span<const byte> bytes) const noexcept override
+    {
+      utf8_string characters;
+      Decode(bytes, characters);
+      return characters;
+    }
+
     constexpr void Encode(utf8_stringview characters, List<byte> &out) const noexcept override
     {
       Reserve(out, characters.size());
