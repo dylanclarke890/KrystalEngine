@@ -148,6 +148,7 @@
   <ItemGroup>
     <ClInclude Include="include\Krystal.Text\Encodings\EncodingFallback.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\EncodingConstants.hpp" />
+    <ClInclude Include="include\Krystal.Text\Encodings\ISO-8859\ISO-8859-1.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\ISO8859\ISO-8859-1.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\SingleByteEncoding.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1250.hpp" />

@@ -80,5 +80,8 @@
     <ClInclude Include="include\Krystal.Text\Encodings\ISO8859\ISO-8859-1.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Text\Encodings\ISO-8859\ISO-8859-1.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
