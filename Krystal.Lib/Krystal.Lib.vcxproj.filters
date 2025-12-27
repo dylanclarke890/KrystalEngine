@@ -48,13 +48,7 @@
     <ClInclude Include="include\Krystal.Lib\Types\Lazy.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\EnumFlags.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\String\StringUtils.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\RangeUtils.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Core\Detection.hpp">
@@ -63,7 +57,7 @@
     <ClInclude Include="include\Krystal.Lib\Core\DebugBreak.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\BitUtils.hpp">
+    <ClInclude Include="include\Krystal.Lib\Core\Bit.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\ByteUtils.hpp">

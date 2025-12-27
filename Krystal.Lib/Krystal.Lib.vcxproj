@@ -158,7 +158,7 @@
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Types\Array.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Attributes.hpp" />
-    <ClInclude Include="include\Krystal.Lib\BitUtils.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\Bit.hpp" />
     <ClInclude Include="include\Krystal.Lib\ByteUtils.hpp" />
     <ClInclude Include="include\Krystal.Lib\ComparisonHelpers.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Concepts.hpp" />
@@ -170,7 +170,6 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Types\Expected.hpp" />
-    <ClInclude Include="include\Krystal.Lib\EnumFlags.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Func.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Lazy.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\LinkedList.hpp" />
@@ -185,7 +184,6 @@
     <ClInclude Include="include\Krystal.Lib\Types\OrderedMap.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Pair.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Queue.hpp" />
-    <ClInclude Include="include\Krystal.Lib\RangeUtils.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\OrderedSet.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Set.hpp" />
     <ClInclude Include="include\Krystal.Lib\SmallValueBuffer.hpp" />

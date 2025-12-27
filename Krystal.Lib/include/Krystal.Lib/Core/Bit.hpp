@@ -7,9 +7,9 @@
 
 namespace Krys
 {
-  struct BitUtils
+  struct Bit
   {
-    STATIC_CLASS(BitUtils)
+    STATIC_CLASS(Bit)
 
     template <Integral T>
     NO_DISCARD static constexpr T Mask(T bits) noexcept

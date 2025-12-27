@@ -1,86 +1,86 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/BitUtils.hpp"
+#include "Krystal.Lib/Bit.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
 {
   using namespace Krys;
 
-  TEST_CASE("BitUtils::Mask", "[BitUtils]")
+  TEST_CASE("Bit::Mask", "[Bit]")
   {
-    REQUIRE(BitUtils::Mask(0) == 0);
-    REQUIRE(BitUtils::Mask(1) == 1);
-    REQUIRE(BitUtils::Mask(2) == 3);
-    REQUIRE(BitUtils::Mask(3) == 7);
-    REQUIRE(BitUtils::Mask(4) == 15);
-    REQUIRE(BitUtils::Mask(5) == 31);
-    REQUIRE(BitUtils::Mask(6) == 63);
-    REQUIRE(BitUtils::Mask(7) == 127);
-    REQUIRE(BitUtils::Mask(8) == 255);
+    REQUIRE(Bit::Mask(0) == 0);
+    REQUIRE(Bit::Mask(1) == 1);
+    REQUIRE(Bit::Mask(2) == 3);
+    REQUIRE(Bit::Mask(3) == 7);
+    REQUIRE(Bit::Mask(4) == 15);
+    REQUIRE(Bit::Mask(5) == 31);
+    REQUIRE(Bit::Mask(6) == 63);
+    REQUIRE(Bit::Mask(7) == 127);
+    REQUIRE(Bit::Mask(8) == 255);
   }
 
-  TEST_CASE("BitUtils::Set", "[BitUtils]")
+  TEST_CASE("Bit::Set", "[Bit]")
   {
-    REQUIRE(BitUtils::Set(0, 0) == 1);
-    REQUIRE(BitUtils::Set(0, 1) == 2);
-    REQUIRE(BitUtils::Set(0, 2) == 4);
-    REQUIRE(BitUtils::Set(0, 3) == 8);
-    REQUIRE(BitUtils::Set(0, 4) == 16);
-    REQUIRE(BitUtils::Set(0, 5) == 32);
-    REQUIRE(BitUtils::Set(0, 6) == 64);
-    REQUIRE(BitUtils::Set(0, 7) == 128);
-    REQUIRE(BitUtils::Set(0, 8) == 256);
+    REQUIRE(Bit::Set(0, 0) == 1);
+    REQUIRE(Bit::Set(0, 1) == 2);
+    REQUIRE(Bit::Set(0, 2) == 4);
+    REQUIRE(Bit::Set(0, 3) == 8);
+    REQUIRE(Bit::Set(0, 4) == 16);
+    REQUIRE(Bit::Set(0, 5) == 32);
+    REQUIRE(Bit::Set(0, 6) == 64);
+    REQUIRE(Bit::Set(0, 7) == 128);
+    REQUIRE(Bit::Set(0, 8) == 256);
   }
 
-  TEST_CASE("BitUtils::Unset", "[BitUtils]")
+  TEST_CASE("Bit::Unset", "[Bit]")
   {
-    REQUIRE(BitUtils::Unset(1, 0) == 0);
-    REQUIRE(BitUtils::Unset(2, 1) == 0);
-    REQUIRE(BitUtils::Unset(4, 2) == 0);
-    REQUIRE(BitUtils::Unset(8, 3) == 0);
-    REQUIRE(BitUtils::Unset(16, 4) == 0);
-    REQUIRE(BitUtils::Unset(32, 5) == 0);
-    REQUIRE(BitUtils::Unset(64, 6) == 0);
-    REQUIRE(BitUtils::Unset(128, 7) == 0);
-    REQUIRE(BitUtils::Unset(256, 8) == 0);
-    REQUIRE(BitUtils::Unset(255, 8) == 255);
+    REQUIRE(Bit::Unset(1, 0) == 0);
+    REQUIRE(Bit::Unset(2, 1) == 0);
+    REQUIRE(Bit::Unset(4, 2) == 0);
+    REQUIRE(Bit::Unset(8, 3) == 0);
+    REQUIRE(Bit::Unset(16, 4) == 0);
+    REQUIRE(Bit::Unset(32, 5) == 0);
+    REQUIRE(Bit::Unset(64, 6) == 0);
+    REQUIRE(Bit::Unset(128, 7) == 0);
+    REQUIRE(Bit::Unset(256, 8) == 0);
+    REQUIRE(Bit::Unset(255, 8) == 255);
   }
 
-  TEST_CASE("BitUtils::Count", "[BitUtils]")
+  TEST_CASE("Bit::Count", "[Bit]")
   {
-    REQUIRE(BitUtils::Count(0) == 0);
-    REQUIRE(BitUtils::Count(1) == 1);
-    REQUIRE(BitUtils::Count(2) == 1);
-    REQUIRE(BitUtils::Count(3) == 2);
-    REQUIRE(BitUtils::Count(4) == 1);
-    REQUIRE(BitUtils::Count(15) == 4);
-    REQUIRE(BitUtils::Count(16) == 1);
-    REQUIRE(BitUtils::Count(255) == 8);
-    REQUIRE(BitUtils::Count(256) == 1);
+    REQUIRE(Bit::Count(0) == 0);
+    REQUIRE(Bit::Count(1) == 1);
+    REQUIRE(Bit::Count(2) == 1);
+    REQUIRE(Bit::Count(3) == 2);
+    REQUIRE(Bit::Count(4) == 1);
+    REQUIRE(Bit::Count(15) == 4);
+    REQUIRE(Bit::Count(16) == 1);
+    REQUIRE(Bit::Count(255) == 8);
+    REQUIRE(Bit::Count(256) == 1);
   }
 
-  TEST_CASE("BitUtils::RotateRight", "[BitUtils]")
+  TEST_CASE("Bit::RotateRight", "[Bit]")
   {
-    REQUIRE(BitUtils::RotateRight<uint8>(0b10'000'000U, 1) == 0b01'000'000U);
-    REQUIRE(BitUtils::RotateRight<uint8>(0b10'000'000U, 2) == 0b00'100'000U);
-    REQUIRE(BitUtils::RotateRight<uint8>(0b10'000'000U, 3) == 0b00'010'000U);
-    REQUIRE(BitUtils::RotateRight<uint8>(0b10'000'000U, 4) == 0b00'001'000U);
-    REQUIRE(BitUtils::RotateRight<uint8>(0b10'000'000U, 5) == 0b00'000'100U);
-    REQUIRE(BitUtils::RotateRight<uint8>(0b10'000'000U, 6) == 0b00'000'010U);
-    REQUIRE(BitUtils::RotateRight<uint8>(0b10'000'000U, 7) == 0b00'000'001U);
-    REQUIRE(BitUtils::RotateRight<uint8>(0b10'000'000U, 8) == 0b10'000'000U);
+    REQUIRE(Bit::RotateRight<uint8>(0b10'000'000U, 1) == 0b01'000'000U);
+    REQUIRE(Bit::RotateRight<uint8>(0b10'000'000U, 2) == 0b00'100'000U);
+    REQUIRE(Bit::RotateRight<uint8>(0b10'000'000U, 3) == 0b00'010'000U);
+    REQUIRE(Bit::RotateRight<uint8>(0b10'000'000U, 4) == 0b00'001'000U);
+    REQUIRE(Bit::RotateRight<uint8>(0b10'000'000U, 5) == 0b00'000'100U);
+    REQUIRE(Bit::RotateRight<uint8>(0b10'000'000U, 6) == 0b00'000'010U);
+    REQUIRE(Bit::RotateRight<uint8>(0b10'000'000U, 7) == 0b00'000'001U);
+    REQUIRE(Bit::RotateRight<uint8>(0b10'000'000U, 8) == 0b10'000'000U);
   }
 
-  TEST_CASE("BitUtils::RotateLeft", "[BitUtils]")
+  TEST_CASE("Bit::RotateLeft", "[Bit]")
   {
-    REQUIRE(BitUtils::RotateLeft<uint8>(0b10'000'000U, 1) == 0b00'000'001U);
-    REQUIRE(BitUtils::RotateLeft<uint8>(0b10'000'000U, 2) == 0b00'000'010U);
-    REQUIRE(BitUtils::RotateLeft<uint8>(0b10'000'000U, 3) == 0b00'000'100U);
-    REQUIRE(BitUtils::RotateLeft<uint8>(0b10'000'000U, 4) == 0b00'001'000U);
-    REQUIRE(BitUtils::RotateLeft<uint8>(0b10'000'000U, 5) == 0b00'010'000U);
-    REQUIRE(BitUtils::RotateLeft<uint8>(0b10'000'000U, 6) == 0b00'100'000U);
-    REQUIRE(BitUtils::RotateLeft<uint8>(0b10'000'000U, 7) == 0b01'000'000U);
-    REQUIRE(BitUtils::RotateLeft<uint8>(0b10'000'000U, 8) == 0b10'000'000U);
+    REQUIRE(Bit::RotateLeft<uint8>(0b10'000'000U, 1) == 0b00'000'001U);
+    REQUIRE(Bit::RotateLeft<uint8>(0b10'000'000U, 2) == 0b00'000'010U);
+    REQUIRE(Bit::RotateLeft<uint8>(0b10'000'000U, 3) == 0b00'000'100U);
+    REQUIRE(Bit::RotateLeft<uint8>(0b10'000'000U, 4) == 0b00'001'000U);
+    REQUIRE(Bit::RotateLeft<uint8>(0b10'000'000U, 5) == 0b00'010'000U);
+    REQUIRE(Bit::RotateLeft<uint8>(0b10'000'000U, 6) == 0b00'100'000U);
+    REQUIRE(Bit::RotateLeft<uint8>(0b10'000'000U, 7) == 0b01'000'000U);
+    REQUIRE(Bit::RotateLeft<uint8>(0b10'000'000U, 8) == 0b10'000'000U);
   }
 }
