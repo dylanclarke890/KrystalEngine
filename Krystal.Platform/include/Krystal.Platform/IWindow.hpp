@@ -3,7 +3,7 @@
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Types/Func.hpp"
 #include "Krystal.Lib/NativeHandle.hpp"
-#include "Krystal.Lib/SmartPointers.hpp"
+#include "Krystal.Lib/Types/SmartPointers.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Platform/Keys.hpp"
 #include "Krystal.Platform/MouseButtons.hpp"

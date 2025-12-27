@@ -8,7 +8,7 @@
 #include "Krystal.Gfx/Utils/MeshDataUtils.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Core/DebugBreak.hpp"
-#include "Krystal.Lib/HashUtils.hpp"
+#include "Krystal.Lib/Core/Hash.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Stack.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"

@@ -2,7 +2,7 @@
 
 #include "Krystal.Gfx/Enums/FilterMode.hpp"
 #include "Krystal.Gfx/Enums/WrapMode.hpp"
-#include "Krystal.Lib/HashUtils.hpp"
+#include "Krystal.Lib/Core/Hash.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <compare>
 #include <type_traits>
@@ -127,7 +127,7 @@ namespace std
   {
     size_t operator()(const Krys::Gfx::SamplerDesc &desc) const noexcept
     {
-      return Krys::HashUtils::HashCombine(desc.MinFilter, desc.MagFilter, desc.WrapS, desc.WrapT, desc.WrapR,
+      return Krys::Hash::Combine(desc.MinFilter, desc.MagFilter, desc.WrapS, desc.WrapT, desc.WrapR,
                                           desc.AnisotropicLevel);
     }
   };

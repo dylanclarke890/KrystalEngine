@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Enum.hpp"
+#include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::UI

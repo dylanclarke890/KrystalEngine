@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Gfx/Resources/Font.hpp"
-#include "Krystal.Lib/HashUtils.hpp"
+#include "Krystal.Lib/Core/Hash.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/String/String.hpp"
@@ -39,7 +39,7 @@ namespace std
   {
     size_t operator()(const Krys::Gfx::TextShaderDesc &desc) const noexcept
     {
-      return Krys::HashUtils::HashCombine(desc.FontType, desc.EnableOutline);
+      return Krys::Hash::Combine(desc.FontType, desc.EnableOutline);
     }
   };
 }

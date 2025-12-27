@@ -6,7 +6,7 @@
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Events/EventManager.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
-#include "Krystal.Lib/SmartPointers.hpp"
+#include "Krystal.Lib/Types/SmartPointers.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Log/ILogger.hpp"

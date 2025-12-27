@@ -3,7 +3,7 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
-#include "Krystal.Lib/SmartPointers.hpp"
+#include "Krystal.Lib/Types/SmartPointers.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <format>

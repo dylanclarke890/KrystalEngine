@@ -158,7 +158,7 @@
     <ClInclude Include="include\Krystal.Lib\Core\DebugBreak.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Detection.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Endian.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Enum.hpp">
+    <ClInclude Include="include\Krystal.Lib\Core\Enum.hpp">
       <SubType>
       </SubType>
     </ClInclude>
@@ -172,7 +172,7 @@
     <ClInclude Include="include\Krystal.Lib\Core\Macros.hpp" />
     <ClInclude Include="include\Krystal.Lib\Events\Event.hpp" />
     <ClInclude Include="include\Krystal.Lib\Events\EventManager.hpp" />
-    <ClInclude Include="include\Krystal.Lib\HashUtils.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\Hash.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Map.hpp" />
     <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Nullable.hpp" />
@@ -184,17 +184,15 @@
     <ClInclude Include="include\Krystal.Lib\Types\OrderedSet.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Set.hpp" />
     <ClInclude Include="include\Krystal.Lib\SmallValueBuffer.hpp" />
-    <ClInclude Include="include\Krystal.Lib\SmartPointers.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\SmartPointers.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Span.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Stack.hpp" />
     <ClInclude Include="include\Krystal.Lib\String\String.hpp" />
-    <ClInclude Include="include\Krystal.Lib\StringId.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\StringId.hpp" />
     <ClInclude Include="include\Krystal.Lib\String\StringUtils.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\StronglyTypedValue.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Numeric.hpp" />
-    <ClInclude Include="include\Krystal.Lib\TypeName.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Variant.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Version.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Events\EventManager.cpp" />

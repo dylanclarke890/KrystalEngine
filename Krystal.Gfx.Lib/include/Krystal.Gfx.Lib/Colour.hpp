@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/HashUtils.hpp"
+#include "Krystal.Lib/Core/Hash.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Vector.hpp"
@@ -251,7 +251,7 @@ namespace std
   {
     size_t operator()(const Krys::Gfx::Colourf &colour) const
     {
-      return Krys::HashUtils::HashCombine(colour.red, colour.green, colour.blue, colour.alpha);
+      return Krys::Hash::Combine(colour.red, colour.green, colour.blue, colour.alpha);
     }
   };
 
@@ -276,7 +276,7 @@ namespace std
   {
     size_t operator()(const Krys::Gfx::Colourb &colour) const
     {
-      return Krys::HashUtils::HashCombine(colour.red, colour.green, colour.blue, colour.alpha);
+      return Krys::Hash::Combine(colour.red, colour.green, colour.blue, colour.alpha);
     }
   };
 
@@ -301,7 +301,7 @@ namespace std
   {
     size_t operator()(const Krys::Gfx::ColourbPremultiplied &colour) const
     {
-      return Krys::HashUtils::HashCombine(colour.red, colour.green, colour.blue, colour.alpha);
+      return Krys::Hash::Combine(colour.red, colour.green, colour.blue, colour.alpha);
     }
   };
 

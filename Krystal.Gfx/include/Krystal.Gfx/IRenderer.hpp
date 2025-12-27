@@ -4,7 +4,7 @@
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
-#include "Krystal.Lib/SmartPointers.hpp"
+#include "Krystal.Lib/Types/SmartPointers.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::Gfx

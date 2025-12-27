@@ -120,11 +120,17 @@ namespace Krys
       else if constexpr (Src == System)
       {
         if constexpr (Dst == Little)
+        {
           return ToLittleEndian(value);
+        }
         else if constexpr (Dst == Big)
+        {
           return ToBigEndian(value);
+        }
         else
+        {
           return value;
+        }
       }
       else
       {

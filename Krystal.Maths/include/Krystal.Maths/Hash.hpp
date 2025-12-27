@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/HashUtils.hpp"
+#include "Krystal.Lib/Core/Hash.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Vector.hpp"
 #include <functional>
@@ -18,15 +18,15 @@ namespace std
       }
       else if constexpr (N == 2)
       {
-        return Krys::HashUtils::HashCombine(v.x, v.y);
+        return Krys::Hash::Combine(v.x, v.y);
       }
       else if constexpr (N == 3)
       {
-        return Krys::HashUtils::HashCombine(v.x, v.y, v.z);
+        return Krys::Hash::Combine(v.x, v.y, v.z);
       }
       else if constexpr (N == 4)
       {
-        return Krys::HashUtils::HashCombine(v.x, v.y, v.z, v.w);
+        return Krys::Hash::Combine(v.x, v.y, v.z, v.w);
       }
     };
   };
@@ -39,7 +39,7 @@ namespace std
       size_t hash = 0;
       for (size_t i = 0; i < R; i++)
         for (size_t j = 0; j < C; j++)
-          hash = Krys::HashUtils::HashCombine(hash, m[i][j]);
+          hash = Krys::Hash::Combine(hash, m[i][j]);
 
       return hash;
     };

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Enum.hpp"
+#include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/NullableFloat.hpp"
 #include "Krystal.Lib/Types/StronglyTypedValue.hpp"

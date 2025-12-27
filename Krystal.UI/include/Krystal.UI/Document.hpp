@@ -6,7 +6,7 @@
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
-#include "Krystal.Lib/SmartPointers.hpp"
+#include "Krystal.Lib/Types/SmartPointers.hpp"
 #include "Krystal.Lib/Types/Stack.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/String/StringRef.hpp"

@@ -30,16 +30,16 @@
     <ClInclude Include="include\Krystal.Lib\Types\Numeric.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\StringId.hpp">
+    <ClInclude Include="include\Krystal.Lib\Core\StringId.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\HashUtils.hpp">
+    <ClInclude Include="include\Krystal.Lib\Core\Hash.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Core\Macros.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\SmartPointers.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\SmartPointers.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\TypeTraits\FuncPtrTraits.hpp">
@@ -52,9 +52,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Types\Lazy.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Version.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\EnumFlags.hpp">
@@ -120,9 +117,6 @@
     <ClInclude Include="include\Krystal.Lib\Types\Func.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\TypeName.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Types\Stack.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -132,7 +126,7 @@
     <ClInclude Include="include\Krystal.Lib\Types\NullableFloat.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Enum.hpp">
+    <ClInclude Include="include\Krystal.Lib\Core\Enum.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\SmallValueBuffer.hpp">

@@ -6,7 +6,7 @@
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/Types/Queue.hpp"
-#include "Krystal.Lib/SmartPointers.hpp"
+#include "Krystal.Lib/Types/SmartPointers.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys
