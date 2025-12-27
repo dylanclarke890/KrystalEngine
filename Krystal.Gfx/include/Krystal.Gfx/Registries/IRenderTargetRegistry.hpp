@@ -3,15 +3,13 @@
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/RenderTarget.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
 namespace Krys::Gfx
 {
-  class IRenderTargetRegistry
+  class IRenderTargetRegistry : NonCopyMovable<IRenderTargetRegistry>
   {
-    NO_COPY_MOVE(IRenderTargetRegistry)
-
   public:
     IRenderTargetRegistry() = default;
 
@@ -32,7 +30,7 @@ namespace Krys::Gfx
 
     /// @brief Gets the image handle for a specific colour attachment of a render target.
     virtual KRYS_NODISCARD ImageHandle GetColourAttachmentImage(RenderTargetHandle handle,
-                                                            uint32 index) noexcept = 0;
+                                                                uint32 index) noexcept = 0;
 
     /// @brief Gets the current frame's screen render target.
     virtual KRYS_NODISCARD RenderTargetHandle GetScreenRenderTarget() const noexcept = 0;

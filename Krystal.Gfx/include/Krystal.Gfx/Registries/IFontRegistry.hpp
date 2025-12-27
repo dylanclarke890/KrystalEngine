@@ -3,15 +3,13 @@
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Font.hpp"
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/String/StringRef.hpp"
 
 namespace Krys::Gfx
 {
-  class IFontRegistry
+  class IFontRegistry : NonCopyMovable<IFontRegistry>
   {
-    NO_COPY_MOVE(IFontRegistry)
-
   protected:
     IFontRegistry() noexcept = default;
 

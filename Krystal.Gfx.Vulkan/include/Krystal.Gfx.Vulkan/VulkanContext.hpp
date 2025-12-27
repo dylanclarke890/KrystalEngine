@@ -21,7 +21,7 @@ namespace Krys::Gfx::Vulkan
     List<VkPresentModeKHR> PresentModes {};
   };
 
-  class VulkanContext
+  class VulkanContext : public IContext
   {
     NativeHandle _windowHandle = nullptr;
     uint32 _width = 0, _height = 0;
@@ -71,7 +71,6 @@ namespace Krys::Gfx::Vulkan
     uint32 _currentFrame = 0;
     bool _framebufferResized = false;
 
-    NO_COPY_MOVE(VulkanContext)
   public:
     VulkanContext(const ContextSettings &settings);
 

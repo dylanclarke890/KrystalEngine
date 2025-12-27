@@ -2,8 +2,9 @@
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx/Resources/RenderTarget.hpp"
-#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Clipspace.hpp"
 #include "Krystal.Maths/Matrix.hpp"
@@ -18,10 +19,8 @@ namespace Krys::Gfx::OpenGL
     GLuint Texture {0u};
   };
 
-  class RenderTarget
+  class RenderTarget : NonCopyable<RenderTarget>
   {
-    NO_COPY(RenderTarget)
-
     uint32 _width {0u};
     uint32 _height {0u};
     GLuint _fbo {0u};

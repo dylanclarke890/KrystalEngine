@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Concepts.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Serialisation/Access.hpp"
 #include "Krystal.Serialisation/Concepts.hpp"
 
@@ -69,10 +69,9 @@ namespace Krys::Serialisation
     }
   };
 
-  class BaseArchive
+  /// @brief Base class for all archives.
+  class BaseArchive : NonCopyMovable<BaseArchive> // TODO: should we allow moving?
   {
-    NO_COPY_MOVE(BaseArchive)
-
   protected:
     BaseArchive() noexcept = default;
 
@@ -83,8 +82,6 @@ namespace Krys::Serialisation
   template <typename Derived>
   class BaseArchiveWriter : public BaseArchive
   {
-    NO_COPY_MOVE(BaseArchiveWriter)
-
   private:
     Derived &_self {*static_cast<Derived *>(this)};
 
@@ -172,8 +169,6 @@ namespace Krys::Serialisation
   template <typename Derived>
   class BaseArchiveReader : public BaseArchive
   {
-    NO_COPY_MOVE(BaseArchiveReader)
-
   private:
     Derived &_self {*static_cast<Derived *>(this)};
 

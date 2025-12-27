@@ -4,12 +4,12 @@
 #include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
-#include "Krystal.Lib/Types/Map.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/String/StringRef.hpp"
-#include "Krystal.Lib/Types/StronglyTypedValue.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 #include "Krystal.Maths/Vector.hpp"
 #include "Krystal.Text/Unicode.hpp"
 #include <compare>
@@ -102,10 +102,8 @@ namespace std
 
 namespace Krys::Gfx
 {
-  class FontFamily
+  class FontFamily : NonCopyable<FontFamily>
   {
-    NO_COPY(FontFamily)
-
   private:
     StringRef _name;
     IO::Path _path;

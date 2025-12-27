@@ -3,14 +3,13 @@
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx/Resources/ImageView.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
-  class ImageView
+  class ImageView : NonCopyable<ImageView>
   {
-    NO_COPY(ImageView)
-
   private:
     GLuint _id {0u};
     ImageHandle _imageHandle;

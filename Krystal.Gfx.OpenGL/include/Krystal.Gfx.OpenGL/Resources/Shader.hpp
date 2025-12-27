@@ -2,19 +2,18 @@
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/ShaderReflector.hpp"
-#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Vector.hpp"
 #include <cassert>
 
 namespace Krys::Gfx::OpenGL
 {
-  class Shader
+  class Shader : NonCopyable<Shader>
   {
-    NO_COPY(Shader)
-
     GLuint _id {0u};
     ShaderLayout _layout {};
 
@@ -188,7 +187,7 @@ namespace Krys::Gfx::OpenGL
     {
       ShaderReflector reflector {};
       _layout = reflector.Reflect(_id);
-      //reflector.LogReflectionInfo(_layout);
+      // reflector.LogReflectionInfo(_layout);
 
       SetSamplerUniforms();
     }

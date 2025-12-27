@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Events/EventManager.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/Types/SmartPointers.hpp"
 #include "Krystal.Platform/Events.hpp"
 #include "Krystal.Platform/IWindow.hpp"
@@ -14,7 +15,7 @@ namespace Krys
 
 namespace Krys::Platform
 {
-  class Input
+  class Input : NonCopyMovable<Input>
   {
     Keyboard _keyboard;
     Mouse _mouse;
@@ -23,8 +24,6 @@ namespace Krys::Platform
     friend class Application;
 
   public:
-    NO_COPY_MOVE(Input)
-
     Input(Ptr<EventManager> events) noexcept;
 
     ~Input() noexcept = default;

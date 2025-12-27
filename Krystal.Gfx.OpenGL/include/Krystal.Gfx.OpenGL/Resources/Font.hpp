@@ -5,16 +5,15 @@
 #include "Krystal.Gfx.OpenGL/Utils.hpp"
 #include "Krystal.Gfx/Resources/Font.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
-  class Font
+  class Font : NonCopyable<Font>
   {
-    NO_COPY(Font)
-
     FontType _type {FontType::Bitmap};
     FontFamilyHandle _fontFamily;
     TextureHandle _atlasTexture;
@@ -37,7 +36,7 @@ namespace Krys::Gfx::OpenGL
     MOVE_SWAP(Font)
 
     KRYS_NODISCARD static Font BitmapAtlas(FontFamilyHandle fontFamily, TextureHandle texture,
-                                       const FontAtlasData &data, float ptSize) noexcept
+                                           const FontAtlasData &data, float ptSize) noexcept
     {
       auto font = Font(FontType::Bitmap, fontFamily, texture, data);
       font._ptSize = ptSize;
@@ -45,8 +44,8 @@ namespace Krys::Gfx::OpenGL
     }
 
     KRYS_NODISCARD static Font SDFAtlas(FontFamilyHandle fontFamily, TextureHandle texture,
-                                    const FontAtlasData &data,
-                                    const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
+                                        const FontAtlasData &data,
+                                        const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
     {
       auto font = Font(FontType::SDF, fontFamily, texture, data);
       font._sdfParams = sdfParams;
@@ -54,8 +53,8 @@ namespace Krys::Gfx::OpenGL
     }
 
     KRYS_NODISCARD static Font MSDFAtlas(FontFamilyHandle fontFamily, TextureHandle texture,
-                                     const FontAtlasData &data,
-                                     const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
+                                         const FontAtlasData &data,
+                                         const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
     {
       auto font = Font(FontType::MSDF, fontFamily, texture, data);
       font._sdfParams = sdfParams;
@@ -63,8 +62,8 @@ namespace Krys::Gfx::OpenGL
     }
 
     KRYS_NODISCARD static Font MTSDFAtlas(FontFamilyHandle fontFamily, TextureHandle texture,
-                                      const FontAtlasData &data,
-                                      const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
+                                          const FontAtlasData &data,
+                                          const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
     {
       auto font = Font(FontType::MTSDF, fontFamily, texture, data);
       font._sdfParams = sdfParams;

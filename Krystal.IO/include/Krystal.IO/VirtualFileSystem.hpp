@@ -6,17 +6,17 @@
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Nullable.hpp"
 #include "Krystal.Lib/Types/Pair.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::IO
 {
   class VirtualFileSystem;
 
   /// @brief A builder for creating a virtual file system with multiple backends.
-  class VirtualFileSystemBuilder
+  class VirtualFileSystemBuilder : NonCopyMovable<VirtualFileSystemBuilder>
   {
     struct FileBackend
     {
@@ -29,8 +29,6 @@ namespace Krys::IO
     size_t _insertionOrder {0u};
 
   public:
-    NO_COPY_MOVE(VirtualFileSystemBuilder)
-
     VirtualFileSystemBuilder() noexcept = default;
 
     ~VirtualFileSystemBuilder() noexcept;
@@ -54,13 +52,12 @@ namespace Krys::IO
   /// @note The last backend added will take precedence over previous ones if multiple backends match the same
   /// path. This means that if a file exists in multiple backends, the one added last will be used for reading
   /// or writing, even if earlier backends also match the path.
-  class VirtualFileSystem
+  class VirtualFileSystem : NonCopyMovable<VirtualFileSystem>
   {
+  private:
     List<Pair<Path, Unique<IFileBackend>>> _backends;
 
   public:
-    NO_COPY_MOVE(VirtualFileSystem)
-
     ~VirtualFileSystem() noexcept = default;
 
     /// @brief Check if the path exists in any of the configured backends.
@@ -95,7 +92,7 @@ namespace Krys::IO
     /// @param directory The directory to search.
     /// @param flags Flags to control the search behavior.
     KRYS_NODISCARD List<VFSFileEntry> SearchFiles(const Path &directory,
-                                              FileSearchFlags flags = FileSearchFlags::None) const;
+                                                  FileSearchFlags flags = FileSearchFlags::None) const;
 
   private:
     friend class VirtualFileSystemBuilder;

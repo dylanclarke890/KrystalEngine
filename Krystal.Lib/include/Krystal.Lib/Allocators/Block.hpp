@@ -1,10 +1,11 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
-#include "Krystal.Lib/Types/SmartPointers.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/SmartPointers.hpp"
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
@@ -14,10 +15,8 @@
 
 namespace Krys
 {
-  class Page
+  class Page : NonCopyable<Page>
   {
-    NO_COPY(Page)
-
   private:
     void *_data {nullptr};
 
@@ -67,10 +66,8 @@ namespace Krys
     size_t Offset {0};
   };
 
-  class Block
+  class Block : NonCopyMovable<Block>
   {
-    NO_COPY_MOVE(Block)
-
   private:
     size_t _pageSize;
     List<Unique<Page>> _pages;

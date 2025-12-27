@@ -3,14 +3,12 @@
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Buffer.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 
 namespace Krys::Gfx
 {
-  class IBufferRegistry
+  class IBufferRegistry : NonCopyMovable<IBufferRegistry>
   {
-    NO_COPY_MOVE(IBufferRegistry)
-
   protected:
     IBufferRegistry() noexcept = default;
 

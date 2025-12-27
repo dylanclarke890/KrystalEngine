@@ -1,17 +1,18 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 
 namespace Krys
 {
-  struct StringUtils
+  struct StringUtils : NonCopyMovable<StringUtils>
   {
-    STATIC_CLASS(StringUtils)
+    StringUtils() = delete;
+    ~StringUtils() = delete;
 
-    KRYS_NODISCARD static bool StartsWith(const string &fullString, const string &starting)
+    KRYS_NODISCARD static bool StartsWith(const string &fullString, const string &starting) noexcept
     {
       if (fullString.length() >= starting.length())
       {
@@ -21,7 +22,7 @@ namespace Krys
       return false;
     }
 
-    KRYS_NODISCARD static bool EndsWith(const string &fullString, const string &ending)
+    KRYS_NODISCARD static bool EndsWith(const string &fullString, const string &ending) noexcept
     {
       if (fullString.length() >= ending.length())
       {

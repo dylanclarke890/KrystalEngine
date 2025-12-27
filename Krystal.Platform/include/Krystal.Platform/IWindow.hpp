@@ -1,10 +1,11 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
+#include "Krystal.Lib/NativeHandle.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Types/Func.hpp"
-#include "Krystal.Lib/NativeHandle.hpp"
-#include "Krystal.Lib/Types/SmartPointers.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/SmartPointers.hpp"
 #include "Krystal.Platform/Keys.hpp"
 #include "Krystal.Platform/MouseButtons.hpp"
 
@@ -75,11 +76,9 @@ namespace Krys::Platform
     DPIChangeHandler OnDPIChange = nullptr;
   };
 
-  class IWindow
+  class IWindow : NonCopyMovable<IWindow>
   {
   public:
-    NO_COPY_MOVE(IWindow)
-
     virtual ~IWindow() noexcept = default;
 
     KRYS_NODISCARD virtual WindowHandle GetWindowHandle() const noexcept = 0;

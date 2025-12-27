@@ -5,7 +5,6 @@
 #include "Krystal.Gfx/InstanceData.hpp"
 #include "Krystal.Gfx/IRenderer.hpp"
 #include "Krystal.Lib/Commands/CommandList.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
@@ -35,8 +34,6 @@ namespace Krys::Gfx::OpenGL
 
   class Renderer : public IRenderer
   {
-    NO_COPY_MOVE(Renderer)
-
   private:
     Context &_context;
     RendererState _state;

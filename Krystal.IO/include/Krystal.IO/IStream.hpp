@@ -2,17 +2,15 @@
 
 #include "Krystal.IO/Common.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::IO
 {
   /// @brief Interface for reading from a stream.
-  class IStreamReader
+  class IStreamReader : NonCopyMovable<IStreamReader>
   {
   public:
-    NO_COPY_MOVE(IStreamReader)
-
     IStreamReader() = default;
     virtual ~IStreamReader() = default;
 
@@ -49,11 +47,9 @@ namespace Krys::IO
   };
 
   /// @brief Interface for writing to a stream.
-  class IStreamWriter
+  class IStreamWriter : NonCopyMovable<IStreamWriter>
   {
   public:
-    NO_COPY_MOVE(IStreamWriter)
-
     IStreamWriter() = default;
     virtual ~IStreamWriter() = default;
 

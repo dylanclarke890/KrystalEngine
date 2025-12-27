@@ -1,20 +1,17 @@
 ﻿#pragma once
 
-#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/ImageType.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/PixelFormat.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Image.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Registries/IImageRegistry.hpp"
+#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
   class ImageRegistry : public IImageRegistry
   {
-    NO_COPY_MOVE(ImageRegistry)
-
     using ImageManager = ResourceManager<Image, ImageHandle>;
 
   private:

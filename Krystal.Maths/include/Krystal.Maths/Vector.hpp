@@ -17,7 +17,7 @@
 #define VECTOR_TYPE Krys::Maths::Vector<VECTOR_TEMPLATE_ARGS>
 
 #define VECTOR_TYPE_ALIASES(length)                                                                          \
-  template <Number T>                                                                                    \
+  template <Number T>                                                                                        \
   using Vector##length = Vector<T, length>;                                                                  \
   using Vec##length = Vector<float, length>;                                                                 \
   using Vec##length##b = Vector<bool, length>;                                                               \
@@ -33,30 +33,31 @@
 
 #define VECTOR_BINARY_OPERATOR(OP)                                                                           \
   template <VECTOR_TEMPLATE_PARAMS>                                                                          \
-  KRYS_NODISCARD constexpr auto CONCAT(operator, OP)(const Vector<T, N> &lhs, const Vector<T, N> &rhs) noexcept  \
+  KRYS_NODISCARD constexpr auto KRYS_CONCAT(operator, OP)(const Vector<T, N> &lhs,                           \
+                                                          const Vector<T, N> &rhs) noexcept                  \
   {                                                                                                          \
     return Zip(lhs, rhs, [](auto l, auto r) { return l OP r; });                                             \
   }                                                                                                          \
   template <VECTOR_TEMPLATE_PARAMS>                                                                          \
-  KRYS_NODISCARD constexpr auto CONCAT(operator, OP)(const Vector<T, N> &lhs, T scalar) noexcept                 \
+  KRYS_NODISCARD constexpr auto KRYS_CONCAT(operator, OP)(const Vector<T, N> &lhs, T scalar) noexcept        \
   {                                                                                                          \
     return MapEach(lhs, [&](auto v) { return v OP scalar; });                                                \
   }
 
 #define VECTOR_UNARY_OPERATOR(OP)                                                                            \
   template <VECTOR_TEMPLATE_PARAMS>                                                                          \
-  KRYS_NODISCARD constexpr auto CONCAT(operator, OP)(const Vector<T, N> &rhs) noexcept                           \
+  KRYS_NODISCARD constexpr auto KRYS_CONCAT(operator, OP)(const Vector<T, N> &rhs) noexcept                  \
   {                                                                                                          \
     return MapEach(rhs, [](auto v) { return OP v; });                                                        \
   }
 
 #define VECTOR_OPERATOR_ASSIGNMENT(OP)                                                                       \
-  constexpr auto &CONCAT(operator, CONCAT(OP, =))(const Vector &other) noexcept                              \
+  constexpr auto &KRYS_CONCAT(operator, KRYS_CONCAT(OP, =))(const Vector &other) noexcept                    \
   {                                                                                                          \
     *this = *this OP other;                                                                                  \
     return *this;                                                                                            \
   }                                                                                                          \
-  constexpr auto &CONCAT(operator, CONCAT(OP, =))(T scalar) noexcept                                         \
+  constexpr auto &KRYS_CONCAT(operator, KRYS_CONCAT(OP, =))(T scalar) noexcept                               \
   {                                                                                                          \
     *this = *this OP scalar;                                                                                 \
     return *this;                                                                                            \
@@ -424,7 +425,7 @@ namespace Krys::Maths
   /// @brief Zip three vectors together using the provided function.
   template <VECTOR_TEMPLATE_PARAMS, RegularCallable<T, T, T> F>
   KRYS_NODISCARD constexpr auto Zip(const VECTOR_TYPE &a, const VECTOR_TYPE &b, const VECTOR_TYPE &c,
-                                const F &func) noexcept
+                                    const F &func) noexcept
   {
     static_assert(N > 0 && N < 5, "Unsupported vector length");
 
@@ -646,7 +647,7 @@ namespace Krys::Maths
   /// @brief Compute the normal of a triangle.
   template <FloatingPoint T>
   KRYS_NODISCARD constexpr auto TriangleNormal(const Vector3<T> &p1, const Vector3<T> &p2,
-                                           const Vector3<T> &p3) noexcept
+                                               const Vector3<T> &p3) noexcept
   {
     return Normalize(Cross(p1 - p2, p1 - p3));
   }

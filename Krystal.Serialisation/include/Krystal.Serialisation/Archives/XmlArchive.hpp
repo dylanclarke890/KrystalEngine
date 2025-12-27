@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.IO/IStream.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Stack.hpp"
@@ -15,8 +16,6 @@ namespace Krys::Serialisation
 {
   class XmlArchiveWriter : public BaseArchiveWriter<XmlArchiveWriter>
   {
-    NO_COPY_MOVE(XmlArchiveWriter)
-
     struct NodeMetadata
     {
       rapidxml::xml_node<> *Node;
@@ -187,8 +186,6 @@ namespace Krys::Serialisation
 
   class XmlArchiveReader : public BaseArchiveReader<XmlArchiveReader>
   {
-    NO_COPY_MOVE(XmlArchiveReader)
-
     using NodeType = rapidxml::xml_node<>;
 
     struct NodeMetadata

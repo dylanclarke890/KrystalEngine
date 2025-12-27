@@ -2,16 +2,17 @@
 
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Vector.hpp"
 #include <bit>
 
 namespace Krys::Maths
 {
-  struct Morton
+  struct Morton : NonCopyMovable<Morton>
   {
-    STATIC_CLASS(Morton)
+    Morton() = delete;
+    ~Morton() = delete;
 
 #pragma region uint8
 

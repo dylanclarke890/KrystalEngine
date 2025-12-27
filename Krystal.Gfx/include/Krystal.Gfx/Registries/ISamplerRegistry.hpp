@@ -3,14 +3,12 @@
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Sampler.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 
 namespace Krys::Gfx
 {
-  class ISamplerRegistry
+  class ISamplerRegistry : NonCopyMovable<ISamplerRegistry>
   {
-    NO_COPY_MOVE(ISamplerRegistry)
-
   protected:
     ISamplerRegistry() noexcept = default;
 

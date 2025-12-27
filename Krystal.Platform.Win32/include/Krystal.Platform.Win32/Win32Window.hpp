@@ -5,8 +5,8 @@
 
 #ifndef WIN32_LEAN_AND_MEAN
   #define WIN32_LEAN_AND_MEAN
+  #include <windows.h>
 #endif
-#include <windows.h>
 
 namespace Krys::Platform::Win32
 {
@@ -18,8 +18,6 @@ namespace Krys::Platform::Win32
     HWND _handle;
 
   public:
-    NO_COPY_MOVE(Win32Window)
-
     Win32Window(const WindowSettings &settings);
 
     ~Win32Window() noexcept override;

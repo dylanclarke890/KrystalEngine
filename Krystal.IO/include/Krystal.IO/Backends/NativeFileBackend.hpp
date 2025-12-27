@@ -5,7 +5,6 @@
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
@@ -19,8 +18,6 @@ namespace Krys::IO
     Path _root;
 
   public:
-    NO_COPY_MOVE(NativeFileBackend)
-
     explicit NativeFileBackend(const Path &root);
 
     explicit NativeFileBackend(Path &&root);
@@ -38,7 +35,7 @@ namespace Krys::IO
     bool DeleteFile(const Path &path) override;
 
     KRYS_NODISCARD List<VFSFileEntry> SearchFiles(const Path &directory,
-                                              FileSearchFlags flags) const noexcept override;
+                                                  FileSearchFlags flags) const noexcept override;
 
     KRYS_NODISCARD Unique<IStreamReader> GetReader(const Path &path, ReadFlags flags) const override;
 

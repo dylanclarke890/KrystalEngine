@@ -1,16 +1,16 @@
 ﻿#pragma once
 
 #include "Krystal.Gfx/Colour.hpp"
-#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Gfx/IContext.hpp"
+#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
-#include "Krystal.Lib/Types/SmartPointers.hpp"
-#include "Krystal.Lib/Types/Stack.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/String/StringRef.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/SmartPointers.hpp"
+#include "Krystal.Lib/Types/Stack.hpp"
 #include "Krystal.UI/Elements/Element.hpp"
 #include "Krystal.UI/Layout/Algorithm/MeasureText.hpp"
 #include "Krystal.UI/Layout/LayoutEngine.hpp"
@@ -18,10 +18,8 @@
 
 namespace Krys::UI
 {
-  class Document
+  class Document : NonCopyMovable<Document>
   {
-    NO_COPY_MOVE(Document)
-
     using ElementManager = Gfx::ResourceManager<Element, ElementHandle>;
 
   private:

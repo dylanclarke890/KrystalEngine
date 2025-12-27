@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
-#include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 #include <new>
 #include <utility>
 
@@ -14,10 +14,8 @@ namespace Krys
   /// @brief A memory arena for fast allocations for a particular type.
   /// @tparam T The type of object to allocate.
   template <typename T>
-  class Arena
+  class Arena : NonCopyable<Page>
   {
-    NO_COPY(Arena)
-
     constexpr static size_t Alignment = alignof(T);
 
   private:
@@ -46,7 +44,7 @@ namespace Krys
 
     MOVE_SWAP(Arena)
 
-    T &Emplace(Args &&...args)
+    KRYS_NODISCARD T &Emplace(Args &&...args)
     {
       // Ensure there’s enough room
       size_t alignedOffset = ByteUtils::AlignNext(_offset, Alignment);

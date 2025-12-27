@@ -1,19 +1,19 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Detection.hpp"
+#include "Krystal.Lib/Detection/OS.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <cassert>
 
 namespace Krys::Text
 {
-  class LineEndings
+  struct LineEndings : NonCopyMovable<LineEndings>
   {
-    STATIC_CLASS(LineEndings)
+    LineEndings() = delete;
+    ~LineEndings() = delete;
 
-  public:
     constexpr static byte LF = byte {'\n'};
     constexpr static byte CR = byte {'\r'};
 

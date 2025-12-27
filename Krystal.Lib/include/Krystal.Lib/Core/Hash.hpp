@@ -1,15 +1,16 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <functional>
 
 namespace Krys
 {
-  struct Hash
+  struct Hash : NonCopyMovable<Hash>
   {
-    STATIC_CLASS(Hash)
+    Hash() = delete;
+    ~Hash() = delete;
 
     template <class... Args>
     KRYS_NODISCARD constexpr static size_t Combine(Args... args) noexcept

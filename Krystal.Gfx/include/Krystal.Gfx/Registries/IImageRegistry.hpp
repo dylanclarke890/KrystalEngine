@@ -3,14 +3,12 @@
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Image.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 
 namespace Krys::Gfx
 {
-  class IImageRegistry
+  class IImageRegistry : NonCopyMovable<IImageRegistry>
   {
-    NO_COPY_MOVE(IImageRegistry)
-
   protected:
     IImageRegistry() noexcept = default;
 

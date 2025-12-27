@@ -4,16 +4,14 @@
 #include "Krystal.Gfx/Resources/Mesh.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
-#include "Krystal.Lib/Types/Span.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 
 namespace Krys::Gfx
 {
-  class IMeshRegistry
+  class IMeshRegistry : NonCopyMovable<IMeshRegistry>
   {
-    NO_COPY_MOVE(IMeshRegistry)
-
   protected:
     IMeshRegistry() noexcept = default;
 

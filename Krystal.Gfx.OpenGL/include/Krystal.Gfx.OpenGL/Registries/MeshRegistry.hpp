@@ -1,22 +1,19 @@
 ﻿#pragma once
 
-#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Debug.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/PrimitiveType.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Mesh.hpp"
 #include "Krystal.Gfx/Registries/IMeshRegistry.hpp"
+#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Gfx/Utils/MeshDataUtils.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
 #include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
   class MeshRegistry final : public IMeshRegistry
   {
-    NO_COPY_MOVE(MeshRegistry)
-
     using MeshManager = ResourceManager<Mesh, MeshHandle>;
 
   private:

@@ -5,6 +5,7 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
@@ -29,10 +30,8 @@ namespace Krys
   ///   Maths::Vec4 Data {};
   /// };
   /// @endcode
-  class CommandArena
+  class CommandArena : NonCopyable<CommandArena>
   {
-    NO_COPY(CommandArena)
-
   public:
     constexpr static size_t Alignment = alignof(std::max_align_t);
 

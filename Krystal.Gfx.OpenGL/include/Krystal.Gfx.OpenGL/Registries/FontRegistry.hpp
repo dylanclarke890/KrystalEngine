@@ -1,22 +1,19 @@
 ﻿#pragma once
 
-#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Font.hpp"
 #include "Krystal.Gfx/FontAtlasLoader.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/Registries/IFontRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
+#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/String/String.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
   class FontRegistry final : public IFontRegistry
   {
-    NO_COPY_MOVE(FontRegistry)
-
     using FontFamilyManager = ResourceManager<FontFamily, FontFamilyHandle>;
     using FontManager = ResourceManager<Font, FontHandle>;
     using FontCache = ResourceHandleCache<FontDesc, FontHandle>;

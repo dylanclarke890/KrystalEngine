@@ -1,12 +1,12 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Handle.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
-#include "Krystal.Lib/Types/Map.hpp"
+#include "Krystal.Lib/Handle.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/String/StringRef.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.UI/Layout/Algorithm/MeasureText.hpp"
 #include "Krystal.UI/Layout/LayoutEngine.hpp"
 #include <type_traits>
@@ -31,10 +31,8 @@ namespace Krys::UI
     Maths::Vec2 Translation;
   };
 
-  class Element
+  class Element : NonCopyable<Element>
   {
-    NO_COPY(Element)
-
   public:
     ElementHandle Handle;
     ElementHandle Parent;

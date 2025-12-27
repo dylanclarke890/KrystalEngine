@@ -1,16 +1,14 @@
 ﻿#pragma once
 
 #include "Krystal.IO/IStream.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include <cassert>
 
 namespace Krys::Serialisation
 {
-  class RapidJsonStreamWriterAdapter
+  class RapidJsonStreamWriterAdapter : NonCopyMovable<RapidJsonStreamWriterAdapter>
   {
   private:
-    NO_COPY_MOVE(RapidJsonStreamWriterAdapter)
-
     IO::IStreamWriter &_stream;
 
   public:
@@ -44,11 +42,9 @@ namespace Krys::Serialisation
     }
   };
 
-  class RapidJsonStreamReaderAdapter
+  class RapidJsonStreamReaderAdapter : NonCopyMovable<RapidJsonStreamReaderAdapter>
   {
   private:
-    NO_COPY_MOVE(RapidJsonStreamReaderAdapter)
-
     IO::IStreamReader &_stream;
 
   public:

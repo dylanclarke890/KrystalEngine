@@ -1,23 +1,20 @@
 ﻿#pragma once
 
-#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/TextureRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Material.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Registries/IMaterialRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
+#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Gfx/Resources/Material.hpp"
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
-#include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Types/Map.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
   class MaterialRegistry final : public IMaterialRegistry
   {
-    NO_COPY_MOVE(MaterialRegistry)
-
     using MaterialManager = ResourceManager<Material, MaterialHandle>;
     using MaterialCache = ResourceHandleCache<string, MaterialHandle>;
 
@@ -44,7 +41,7 @@ namespace Krys::Gfx::OpenGL
     }
 
     KRYS_NODISCARD MaterialHandle Create(const string &name, ShaderHandle shader,
-                                     const PBRMaterialDesc &desc) noexcept override
+                                         const PBRMaterialDesc &desc) noexcept override
     {
       if (auto cached = _cache.Get(name); cached.IsValid())
       {

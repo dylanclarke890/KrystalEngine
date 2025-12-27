@@ -1,4 +1,4 @@
-#include "Krystal.Maths/Vector.hpp"
+﻿#include "Krystal.Maths/Vector.hpp"
 #include "Krystal.Maths/Maths.hpp"
 #include <catch_all.hpp>
 
@@ -115,7 +115,7 @@ namespace Krys::Tests
   TEST_CASE("ForEach(Vector)", "[Vector][ForEach]")
   {
 #define DO_TEST(VecType, length)                                                                             \
-  SECTION(STRINGIFY(VecType))                                                                                \
+  SECTION(KRYS_STRINGIFY(VecType))                                                                                \
   {                                                                                                          \
     constexpr VecType vec(1);                                                                                \
     VecType result(0);                                                                                       \
@@ -134,7 +134,7 @@ namespace Krys::Tests
   TEST_CASE("MapEach(Vector)", "[Vector][MapEach]")
   {
 #define DO_TEST(VecType)                                                                                     \
-  SECTION(STRINGIFY(VecType))                                                                                \
+  SECTION(KRYS_STRINGIFY(VecType))                                                                                \
   {                                                                                                          \
     constexpr VecType vec(1);                                                                                \
     VecType result = MapEach(vec, [](auto v) { return v + 1; });                                             \
@@ -152,7 +152,7 @@ namespace Krys::Tests
   TEST_CASE("ZipTwo(Vector)", "[Vector][Zip]")
   {
 #define DO_TEST(VecType)                                                                                     \
-  SECTION(STRINGIFY(VecType))                                                                                \
+  SECTION(KRYS_STRINGIFY(VecType))                                                                                \
   {                                                                                                          \
     constexpr VecType a(1);                                                                                  \
     constexpr VecType b(1);                                                                                  \
@@ -171,7 +171,7 @@ namespace Krys::Tests
   TEST_CASE("ZipThree(Vector)", "[Vector][Zip]")
   {
 #define DO_TEST(VecType)                                                                                     \
-  SECTION(STRINGIFY(VecType))                                                                                \
+  SECTION(KRYS_STRINGIFY(VecType))                                                                                \
   {                                                                                                          \
     constexpr VecType a(1);                                                                                  \
     constexpr VecType b(1);                                                                                  \

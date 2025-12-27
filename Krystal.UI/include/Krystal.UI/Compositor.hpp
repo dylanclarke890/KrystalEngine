@@ -8,7 +8,7 @@
 #include "Krystal.Lib/Commands/CommandList.hpp"
 #include "Krystal.Lib/Core/DebugBreak.hpp"
 #include "Krystal.Lib/Core/Hash.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Stack.hpp"
@@ -102,10 +102,8 @@ namespace Krys::UI
     }
   };
 
-  class Compositor
+  class Compositor : NonCopyMovable<Compositor>
   {
-    NO_COPY_MOVE(Compositor)
-
     struct RenderContext
     {
       Maths::Vec2 Origin;

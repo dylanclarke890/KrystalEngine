@@ -1,11 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ImageRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ImageViewRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/RenderTarget.hpp"
 #include "Krystal.Gfx/Registries/IRenderTargetRegistry.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <cassert>
 
@@ -13,8 +12,6 @@ namespace Krys::Gfx::OpenGL
 {
   class RenderTargetRegistry : public IRenderTargetRegistry
   {
-    NO_COPY_MOVE(RenderTargetRegistry)
-
     using RenderTargetManager = Gfx::ResourceManager<RenderTarget, RenderTargetHandle>;
 
   private:
@@ -129,7 +126,7 @@ namespace Krys::Gfx::OpenGL
     }
 
     KRYS_NODISCARD ImageHandle GetColourAttachmentImage(RenderTargetHandle handle,
-                                                            uint32 index) noexcept override
+                                                        uint32 index) noexcept override
     {
       assert(handle.IsValid() && "Invalid render target handle.");
       assert(_renderTargets.TryGet(handle) != nullptr && "Render target not found in resource manager.");

@@ -4,7 +4,6 @@
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <fstream>
 
@@ -20,8 +19,6 @@ namespace Krys::IO
 
   public:
     static constexpr ReadFlags DefaultReadFlags = ReadFlags::None;
-
-    NO_COPY_MOVE(NativeFileReader)
 
     explicit NativeFileReader(const Path &path, ReadFlags flags = DefaultReadFlags);
 
@@ -74,8 +71,6 @@ namespace Krys::IO
 
   public:
     static constexpr WriteFlags DefaultWriteFlags = WriteFlags::Create | WriteFlags::OpenAtEnd;
-
-    NO_COPY_MOVE(NativeFileWriter)
 
     explicit NativeFileWriter(const Path &path, WriteFlags flags = DefaultWriteFlags);
 

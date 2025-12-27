@@ -1,18 +1,15 @@
 ﻿#pragma once
 
-#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/BufferType.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/BufferUsage.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Buffer.hpp"
 #include "Krystal.Gfx/Registries/IBufferRegistry.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Gfx/ResourceManager.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
   class BufferRegistry : public IBufferRegistry
   {
-    NO_COPY_MOVE(BufferRegistry)
-
     using BufferManager = ResourceManager<Buffer, BufferHandle>;
 
   private:

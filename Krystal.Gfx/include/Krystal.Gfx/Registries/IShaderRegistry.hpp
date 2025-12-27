@@ -4,7 +4,7 @@
 #include "Krystal.Gfx/Resources/Shader.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 
 namespace Krys::Gfx
 {
@@ -22,10 +22,8 @@ namespace Krys::Gfx
     Font_MTSDF_Outline,
   };
 
-  class IShaderRegistry
+  class IShaderRegistry : NonCopyMovable<ISamplerRegistry>
   {
-    NO_COPY_MOVE(IShaderRegistry)
-
   protected:
     IShaderRegistry() noexcept = default;
 
@@ -39,7 +37,7 @@ namespace Krys::Gfx
     KRYS_NODISCARD virtual ShaderHandle Load(const IO::Path &vertex, const IO::Path &fragment) noexcept = 0;
 
     KRYS_NODISCARD virtual ShaderHandle Load(const IO::Path &vertex, const IO::Path &geometry,
-                                         const IO::Path &fragment) noexcept = 0;
+                                             const IO::Path &fragment) noexcept = 0;
 
     KRYS_NODISCARD virtual ShaderHandle GetBuiltin(BuiltinShader shader) noexcept = 0;
 

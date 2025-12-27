@@ -2,12 +2,12 @@
 
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
-#include "Krystal.Lib/Types/Span.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types/StronglyTypedValue.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
+#include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 
 namespace Krys::Text
 {
@@ -20,9 +20,10 @@ namespace Krys::Text
   template <typename T>
   concept UnicodeCodepointCallable = Callable<T, UnicodeCodepoint> || Callable<T, UnicodeCodepoint, bool>;
 
-  struct Unicode
+  struct Unicode : NonCopyMovable<Unicode>
   {
-    STATIC_CLASS(Unicode)
+    Unicode() = delete;
+    ~Unicode() = delete;
 
     constexpr static uint32 DefaultReplacementCodepoint = 0xFFFDu;
 
@@ -73,7 +74,8 @@ namespace Krys::Text
       return (codepoint <= MaxSupplementaryPlaneValue) && !IsSurrogateCodepoint(codepoint);
     }
 
-    KRYS_NODISCARD constexpr static bool IsBasicMultilingualPlaneCodepoint(UnicodeCodepoint codepoint) noexcept
+    KRYS_NODISCARD constexpr static bool
+      IsBasicMultilingualPlaneCodepoint(UnicodeCodepoint codepoint) noexcept
     {
       return codepoint <= MaxBasicMultilingualPlaneValue;
     }

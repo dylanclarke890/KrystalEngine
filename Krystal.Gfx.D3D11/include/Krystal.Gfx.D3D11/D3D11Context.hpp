@@ -1,14 +1,15 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include <d3d11.h>
 
 #pragma comment(lib, "d3d11.lib")
 
 namespace Krys::Gfx::D3D11
 {
-  class D3D11Context final
+  class D3D11Context : public IContext, NonCopyMovable<D3D11Context>
   {
     HWND _windowHandle;
     IO::VirtualFileSystem &_vfs;
@@ -17,7 +18,6 @@ namespace Krys::Gfx::D3D11
     ID3D11DeviceContext *_context;
     ID3D11RenderTargetView *_backbuffer;
 
-    NO_COPY_MOVE(D3D11Context)
   public:
     D3D11Context(const ContextSettings &settings);
     ~D3D11Context() noexcept;

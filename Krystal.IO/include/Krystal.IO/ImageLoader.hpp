@@ -4,7 +4,7 @@
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 
 namespace Krys::IO
 {
@@ -17,10 +17,8 @@ namespace Krys::IO
     int DesiredComponents = 0;
   };
 
-  class ImageLoader
+  class ImageLoader : NonCopyMovable<ImageLoader>
   {
-    NO_COPY_MOVE(ImageLoader)
-
   public:
     ImageLoader() = default;
 

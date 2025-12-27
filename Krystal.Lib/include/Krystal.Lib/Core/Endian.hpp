@@ -2,15 +2,16 @@
 
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <bit>
 
 namespace Krys
 {
-  struct Endian
+  struct Endian : NonCopyMovable<Endian>
   {
-    STATIC_CLASS(Endian)
+    Endian() = delete;
+    ~Endian() = delete;
 
     /// @brief Represents the endianness of a system or value.
     enum Type : uint8

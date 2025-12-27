@@ -2,9 +2,6 @@
 
 #include "Krystal.Lib/Detection/Compiler.hpp"
 
-/// @brief Mark a parameter as unused to suppress compiler warnings.
-#define KRYS_UNUSED_PARAM(x) (void)(x)
-
 #if !defined(KRYS_NODISCARD) && KRYS_COMPILER_CPP_ATTRIBUTE(nodiscard)
   /// @brief Indicate that the return value of a function should not be discarded.
   #define KRYS_NODISCARD [[nodiscard]]

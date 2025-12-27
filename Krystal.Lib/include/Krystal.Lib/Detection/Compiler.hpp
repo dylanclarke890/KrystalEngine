@@ -90,3 +90,33 @@
 #if !KRYS_COMPILER(CLANG)
   #define KRYS_COMPILER_QUIRK_CONSIDERS_UNREACHABLE_CODE 1
 #endif
+
+#if KRYS_COMPILER(MSVC)
+  #define KRYS_FUNCTION_SIGNATURE __FUNCSIG__
+#elif KRYS_COMPILER(GCC) || KRYS_COMPILER(CLANG)
+  #define KRYS_FUNCTION_SIGNATURE __PRETTY_FUNCTION__
+#else
+  #warning "KRYS_FUNCTION_SIGNATURE unknown!"
+  #define KRYS_FUNCTION_SIGNATURE "Unknown Function Signature"
+#endif
+
+#if KRYS_COMPILER(MSVC)
+  #define KRYS_DISABLE_WARNING_PUSH() __pragma(warning(push))
+  #define KRYS_DISABLE_WARNING_POP() __pragma(warning(pop))
+  #define KRYS_DISABLE_WARNING(msvcWarningCode, gccWarningName) __pragma(warning(disable : msvcWarningCode))
+#elif KRYS_COMPILER(GCC) || KRYS_COMPILER(CLANG) // GCC or Clang
+  #define KRYS_DISABLE_WARNING_PUSH() _Pragma("GCC diagnostic push")
+  #define KRYS_DISABLE_WARNING_POP() _Pragma("GCC diagnostic pop")
+  #if KRYS_COMPILER(CLANG)
+    #define KRYS_DISABLE_WARNING(msvcWarningCode, gccWarningName)                                            \
+      _Pragma("clang diagnostic ignored \"" gccWarningName "\"")
+  #else
+    #define KRYS_DISABLE_WARNING(msvcWarningCode, gccWarningName)                                            \
+      _Pragma("GCC diagnostic ignored \"" gccWarningName "\"")
+  #endif
+#else
+  #warning "Compiler not supported for warning suppression macros."
+  #define KRYS_DISABLE_WARNING_PUSH()
+  #define KRYS_DISABLE_WARNING_POP()
+  #define KRYS_DISABLE_WARNING(msvcWarningCode, gccWarningName)
+#endif

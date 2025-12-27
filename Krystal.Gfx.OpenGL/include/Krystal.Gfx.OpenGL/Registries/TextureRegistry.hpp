@@ -1,28 +1,25 @@
 ﻿#pragma once
 
-#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ImageRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ImageViewRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/SamplerRegistry.hpp"
 #include "Krystal.Gfx/Registries/ITextureRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
+#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Gfx/Resources/Texture.hpp"
 #include "Krystal.IO/ImageLoader.hpp"
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/Types/Pair.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
-#include "Krystal.Lib/String/String.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
   class TextureRegistry final : public ITextureRegistry
   {
-    NO_COPY_MOVE(TextureRegistry)
-
     using TextureManager = ResourceManager<Texture, TextureHandle>;
     using TextureCache = ResourceHandleCache<string, TextureHandle>;
 
@@ -55,7 +52,7 @@ namespace Krys::Gfx::OpenGL
     }
 
     KRYS_NODISCARD virtual TextureHandle Create(ImageViewHandle imageView,
-                                            SamplerHandle sampler) noexcept override
+                                                SamplerHandle sampler) noexcept override
     {
       static uint32 unnamedTextureCounter = 0u;
       Texture texture {imageView, sampler, TextureOwner::Other};
@@ -124,8 +121,9 @@ namespace Krys::Gfx::OpenGL
     }
 
     KRYS_NODISCARD TextureHandle LoadCubemap(const IO::Path &left, const IO::Path &right, const IO::Path &top,
-                                         const IO::Path &bottom, const IO::Path &front, const IO::Path &back,
-                                         const TextureDesc &desc = {}) noexcept override
+                                             const IO::Path &bottom, const IO::Path &front,
+                                             const IO::Path &back,
+                                             const TextureDesc &desc = {}) noexcept override
     {
       auto key = left.ToString() + "|" + right.ToString() + "|" + top.ToString() + "|" + bottom.ToString()
                  + "|" + front.ToString() + "|" + back.ToString();

@@ -1,21 +1,22 @@
 ﻿#pragma once
 
 #include "Krystal.IO/IStream.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/Endian.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
+#include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
-#include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::IO
 {
-  struct StreamUtils final
+  struct StreamUtils : NonCopyMovable<StreamUtils>
   {
-    STATIC_CLASS(StreamUtils)
+    StreamUtils() = delete;
+    ~StreamUtils() = delete;
 
     template <UnsignedIntegral T, DerivedFrom<IStreamReader> TReader>
     KRYS_NODISCARD static Expected<List<T>> ReadAllAs(TReader &stream) noexcept

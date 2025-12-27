@@ -2,17 +2,15 @@
 
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Lib/Commands/CommandList.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/SmartPointers.hpp"
 
 namespace Krys::Gfx
 {
-  class IRenderer
+  class IRenderer : NonCopyMovable<IRenderer>
   {
-    NO_COPY_MOVE(IRenderer)
-
   public:
     IRenderer() noexcept = default;
 

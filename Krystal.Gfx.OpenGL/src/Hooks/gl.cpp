@@ -791,10 +791,10 @@ namespace
 namespace
 {
 #define LoadGLFunc(name, funcPtrTypedef)                                                                     \
-  gl.name = (funcPtrTypedef)GetFunctionAddress(STRINGIFY(CONCAT(gl, name)))
+  gl.name = (funcPtrTypedef)GetFunctionAddress(KRYS_STRINGIFY(KRYS_CONCAT(gl, name)))
 
 #define LoadGLVersion(majorVersion, minorVersion)                                                            \
-  CONCAT(LoadVersion_, CONCAT(CONCAT(majorVersion, _), minorVersion))()
+  KRYS_CONCAT(LoadVersion_, KRYS_CONCAT(KRYS_CONCAT(majorVersion, _), minorVersion))()
 
   static void LoadVersion_1_0() noexcept
   {

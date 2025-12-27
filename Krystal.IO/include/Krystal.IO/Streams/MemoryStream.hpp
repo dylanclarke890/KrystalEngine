@@ -4,7 +4,6 @@
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <algorithm>
 #include <cstring>
@@ -21,8 +20,6 @@ namespace Krys::IO
 
   public:
     static constexpr ReadFlags DefaultReadFlags = ReadFlags::None;
-
-    NO_COPY_MOVE(MemoryStreamReader)
 
     explicit MemoryStreamReader(List<byte> &buffer, ReadFlags flags = DefaultReadFlags) noexcept
         : _buffer(buffer), _flags(flags)
@@ -151,8 +148,6 @@ namespace Krys::IO
 
   public:
     static constexpr WriteFlags DefaultWriteFlags = WriteFlags::None;
-
-    NO_COPY_MOVE(MemoryStreamWriter)
 
     explicit MemoryStreamWriter(List<byte> &buffer, WriteFlags flags = DefaultWriteFlags) noexcept
         : _buffer(buffer), _flags(flags)

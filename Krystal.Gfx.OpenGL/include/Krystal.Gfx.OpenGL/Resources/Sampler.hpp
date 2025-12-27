@@ -5,13 +5,12 @@
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/WrapMode.hpp"
 #include "Krystal.Gfx/Resources/Sampler.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
-  class Sampler
+  class Sampler : NonCopyable<Sampler>
   {
-    NO_COPY(Sampler)
-
   private:
     GLuint _id {0u};
     GLenum _minFilter {GL_LINEAR};

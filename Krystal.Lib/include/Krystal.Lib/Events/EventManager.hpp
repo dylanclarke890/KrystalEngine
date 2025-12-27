@@ -2,17 +2,18 @@
 
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Events/Event.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/Types/Func.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Queue.hpp"
 #include "Krystal.Lib/Types/SmartPointers.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys
 {
   /// @brief Provides basic event queuing and dispatch functionality.
-  class EventManager
+  class EventManager : NonCopyMovable<EventManager>
   {
     Queue<Unique<Event>> _pendingEvents;
     Queue<Unique<Event>> _dispatchEvents;
@@ -21,8 +22,6 @@ namespace Krys
     Map<EventType, List<Func<bool(const Event &)>>> _listeners;
 
   public:
-    NO_COPY(EventManager)
-
     /// @brief Constructs an `EventManager`.
     EventManager() noexcept = default;
 

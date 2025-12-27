@@ -5,15 +5,15 @@
 #include "Krystal.Gfx/Resources/Mesh.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
-#include "Krystal.Lib/Types/Span.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
-  class Mesh
+  class Mesh : NonCopyable<Mesh>
   {
-    NO_COPY(Mesh)
-
+  private:
     GLuint _vao {0u};
     GLuint _vbo {0u};
     GLuint _ebo {0u};

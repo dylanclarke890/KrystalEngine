@@ -6,14 +6,11 @@
 #include "Krystal.Gfx/Registries/IImageViewRegistry.hpp"
 #include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
   class ImageViewRegistry : public IImageViewRegistry
   {
-    NO_COPY_MOVE(ImageViewRegistry)
-
     using ImageViewManager = ResourceManager<ImageView, ImageViewHandle>;
 
   private:

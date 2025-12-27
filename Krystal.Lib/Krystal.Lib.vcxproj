@@ -137,6 +137,7 @@
     <ClInclude Include="include\Krystal.Lib\Commands\CommandListReader.hpp" />
     <ClInclude Include="include\Krystal.Lib\Commands\CommandType.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Attributes.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Mixins\NonCopyable.hpp" />
     <ClInclude Include="include\Krystal.Lib\Detection\ByteOrder.hpp" />
     <ClInclude Include="include\Krystal.Lib\Detection\Compiler.hpp" />
     <ClInclude Include="include\Krystal.Lib\Detection\CPU.hpp" />
@@ -144,6 +145,8 @@
     <ClInclude Include="include\Krystal.Lib\Core\TypeTraits.hpp" />
     <ClInclude Include="include\Krystal.Lib\Detection\Sanitizers.hpp" />
     <ClInclude Include="include\Krystal.Lib\Handle.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Mixins\NonCopyMovable.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Mixins\NonMovable.hpp" />
     <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\ImmutableBimap.hpp" />
     <ClInclude Include="include\Krystal.Lib\Allocators\Arena.hpp">

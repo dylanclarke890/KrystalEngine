@@ -1,21 +1,22 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Endian.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
-#include "Krystal.Lib/Types/Span.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 #include <cassert>
 #include <cstring>
 
 namespace Krys
 {
-  struct ByteUtils
+  struct ByteUtils : NonCopyMovable<ByteUtils>
   {
-    STATIC_CLASS(ByteUtils)
+    ByteUtils() = delete;
+    ~ByteUtils() = delete;
 
     /// @brief Enumerates chunks of bytes from the given byte span, invoking the provided callable for each
     /// chunk.

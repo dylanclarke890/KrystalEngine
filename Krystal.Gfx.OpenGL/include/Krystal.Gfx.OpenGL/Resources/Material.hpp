@@ -2,9 +2,10 @@
 
 #include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/Handle.hpp"
-#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Vector.hpp"
 #include <variant>
@@ -34,9 +35,8 @@ namespace Krys::Gfx::OpenGL
     MaterialParameterValue Value;
   };
 
-  struct Material
+  struct Material : NonCopyable<Material>
   {
-    NO_COPY(Material)
     MOVE_SWAP(Material)
 
     Material(const string &name, ShaderHandle shader, const List<MaterialParameter> &parameters) noexcept

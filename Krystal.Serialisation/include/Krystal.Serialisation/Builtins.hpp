@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Concepts.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
@@ -20,10 +20,8 @@ namespace Krys::Serialisation
   /// @brief A wrapper around a field to be serialised, to provide a more readable name for the appropriate
   /// archives to display. Use CreateNamedField() or the KRYS_NAMED_FIELD() macro for convenience.
   template <typename T>
-  class NamedField : public Impl::NamedField
+  class NamedField : public Impl::NamedField, NonCopyable<NamedField<T>>
   {
-    NO_COPY(NamedField)
-
     static_assert(!DerivedFrom<T, Impl::NamedField>, "T must not derive from NamedField");
 
     // If array   - store as is so we preserve the array type/size.
@@ -71,10 +69,8 @@ namespace Krys::Serialisation
   /// internal state as needed (e.g. start a JSON array) by utilising the
   /// BeforeTransfer/Transfer/AfterTransfer hooks.
   template <typename T>
-  class ContainerSize : public Impl::ContainerSize
+  class ContainerSize : public Impl::ContainerSize, NonCopyable<ContainerSize<T>>
   {
-    NO_COPY(ContainerSize)
-
   public:
     // Stores a reference if passed an lvalue reference, otherwise makes a copy of the data.
     using SizeType = Conditional<IsLValueRef<T>, T, Decay<T>>;
@@ -106,10 +102,8 @@ namespace Krys::Serialisation
   }
 
   template <typename TKey, typename TValue>
-  struct KeyValuePair : public Impl::KeyValuePair
+  struct KeyValuePair : public Impl::KeyValuePair, NonCopyable<KeyValuePair<TKey, TValue>>
   {
-    NO_COPY(KeyValuePair)
-
     using KeyType = Conditional<IsLValueRef<TKey>, TKey, Decay<TKey>>;
     using ValueType = Conditional<IsLValueRef<TValue>, TValue, Decay<TValue>>;
 
@@ -163,7 +157,7 @@ namespace Krys::Serialisation
   /// @brief Macro to define a class version inside a class definition.
 #define KRYS_CLASS_VERSION(version)                                                                          \
   static constexpr Krys::Serialisation::Version ClassVersion = Krys::Serialisation::Version(version);        \
-  KRYS_NODISCARD constexpr Version GetVersion() const noexcept                                                   \
+  KRYS_NODISCARD constexpr Version GetVersion() const noexcept                                               \
   {                                                                                                          \
     return ClassVersion;                                                                                     \
   }

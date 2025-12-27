@@ -106,8 +106,7 @@ namespace Krys::Gfx::OpenGL
         }
         case Commands::ClearScissor::Type:
         {
-          const auto &cmd = reader.ReadCommand<Commands::ClearScissor>();
-          KRYS_UNUSED(cmd);
+          KRYS_MAYBE_UNUSED const auto &cmd = reader.ReadCommand<Commands::ClearScissor>();
 
           glDisable(GL_SCISSOR_TEST);
           break;

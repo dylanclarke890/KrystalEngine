@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Log/ILogger.hpp"
-
 #define SPDLOG_HEADER_ONLY
 #include <cassert>
 #include <chrono>
@@ -8,6 +7,7 @@
 #include <spdlog/logger.h>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
+
 namespace
 {
   spdlog::level::level_enum ToSpdLogLevel(Krys::Log::Level level) noexcept
@@ -36,8 +36,6 @@ namespace Krys::Log
     logger _logger;
 
   public:
-    NO_COPY_MOVE(SpdlogLogger)
-
     SpdlogLogger(const LoggerSettings &settings) : _settings(settings), _logger(settings.Name)
     {
       if (_settings.OutputToConsole)

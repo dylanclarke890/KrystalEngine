@@ -1,23 +1,20 @@
 ﻿#pragma once
 
 #include "Krystal.Debug/ScopedProfiler.hpp"
-#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Debug.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Shader.hpp"
 #include "Krystal.Gfx/Registries/IShaderRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
+#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.IO/Streams/StreamUtils.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
-#include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Types/Map.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
   class ShaderRegistry final : public IShaderRegistry
   {
-    NO_COPY_MOVE(ShaderRegistry)
-
     using ShaderManager = ResourceManager<Shader, ShaderHandle>;
     using ShaderHandleCache = ResourceHandleCache<string, ShaderHandle>;
 
@@ -57,7 +54,7 @@ namespace Krys::Gfx::OpenGL
     }
 
     KRYS_NODISCARD ShaderHandle Load(const IO::Path &vertex, const IO::Path &geometry,
-                                 const IO::Path &fragment) noexcept override
+                                     const IO::Path &fragment) noexcept override
     {
       auto key = vertex.ToString() + "|" + geometry.ToString() + "|" + fragment.ToString();
       if (auto cached = _cache.Get(key); cached.IsValid())
@@ -70,7 +67,7 @@ namespace Krys::Gfx::OpenGL
     }
 
     KRYS_NODISCARD ShaderHandle Load(const IO::Path &vertex, const IO::Path &fragment,
-                                 const ShaderPreprocessorConfig &config) noexcept
+                                     const ShaderPreprocessorConfig &config) noexcept
     {
       string defines {};
       for (const auto &[key, value] : config.Defines)

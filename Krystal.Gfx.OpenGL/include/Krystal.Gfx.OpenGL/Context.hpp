@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/BufferRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/FontRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ImageRegistry.hpp"
@@ -11,22 +10,22 @@
 #include "Krystal.Gfx.OpenGL/Registries/SamplerRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ShaderRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/TextureRegistry.hpp"
+#include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
-  class Context final : public IContext
+  class Context final : public IContext, NonCopyMovable<Context>
   {
     class ContextPlatformImpl;
-
-    NO_COPY_MOVE(Context)
 
     NativeHandle _windowHandle;
     uint32 _width;
     uint32 _height;
     IO::VirtualFileSystem &_vfs;
-    StringInterner& _strings;
+    StringInterner &_strings;
     int _dpi;
     Unique<ContextPlatformImpl> _platformImpl;
 
@@ -81,7 +80,7 @@ namespace Krys::Gfx::OpenGL
     KRYS_NODISCARD IMaterialRegistry &Materials() noexcept override;
 
     KRYS_NODISCARD IFontRegistry &Fonts() noexcept override;
-    
+
     KRYS_NODISCARD StringInterner &Strings() noexcept override;
 
     KRYS_NODISCARD API GetAPI() const noexcept override;

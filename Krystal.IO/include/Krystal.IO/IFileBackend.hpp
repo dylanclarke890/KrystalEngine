@@ -5,7 +5,7 @@
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/SmartPointers.hpp"
@@ -22,14 +22,12 @@ namespace Krys::IO
   KRYS_ENUM_FLAG_OPERATORS(FileSearchFlags)
 
   /// @brief Interface for file backend operations.
-  class IFileBackend
+  class IFileBackend : NonCopyMovable<IFileBackend>
   {
   protected:
     IFileBackend() = default;
 
   public:
-    NO_COPY_MOVE(IFileBackend)
-
     virtual ~IFileBackend() = default;
 
     /// @brief Checks if a file or directory exists at the specified path.
@@ -51,7 +49,7 @@ namespace Krys::IO
     /// @param directory The directory to search for files.
     /// @param flags Flags to control the search behavior.
     KRYS_NODISCARD virtual List<VFSFileEntry> SearchFiles(const Path &directory,
-                                                      FileSearchFlags flags) const noexcept = 0;
+                                                          FileSearchFlags flags) const noexcept = 0;
 
     /// @brief Gets a stream reader for the specified path.
     KRYS_NODISCARD virtual Unique<IStreamReader> GetReader(const Path &path, ReadFlags flags) const = 0;

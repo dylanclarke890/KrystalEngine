@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Gfx/Handle.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include <cassert>
 
 namespace Krys::Gfx::OpenGL
@@ -12,10 +12,8 @@ namespace Krys::Gfx::OpenGL
     Other
   };
 
-  class Texture
+  class Texture : NonCopyable<Texture>
   {
-    NO_COPY(Texture)
-
   private:
     ImageViewHandle _imageView {};
     SamplerHandle _sampler {};

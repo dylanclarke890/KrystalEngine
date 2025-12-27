@@ -3,14 +3,13 @@
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx/Resources/Image.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
-  class Image
+  class Image : NonCopyable<Image>
   {
-    NO_COPY(Image)
-
   private:
     GLuint _id {0u};
     GLenum _target {GL_TEXTURE_2D};

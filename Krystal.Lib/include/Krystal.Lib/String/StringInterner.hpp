@@ -1,19 +1,17 @@
 ﻿#pragma once
-#include "Krystal.Lib/String/StringRef.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
-#include "Krystal.Lib/Types/Map.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/String/StringRef.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <cassert>
 
 namespace Krys
 {
-  class StringInterner
+  class StringInterner : NonCopyMovable<StringInterner>
   {
-    NO_COPY_MOVE(StringInterner)
-
   private:
     List<utf8_string> _strings;
     Map<utf8_stringview, size_t> _map;

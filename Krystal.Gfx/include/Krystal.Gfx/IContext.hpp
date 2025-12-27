@@ -12,12 +12,12 @@
 #include "Krystal.Gfx/Registries/IShaderRegistry.hpp"
 #include "Krystal.Gfx/Registries/ITextureRegistry.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
-#include "Krystal.Lib/Types/Expected.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/NativeHandle.hpp"
-#include "Krystal.Lib/Types/SmartPointers.hpp"
 #include "Krystal.Lib/String/StringInterner.hpp"
+#include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/SmartPointers.hpp"
 
 namespace Krys::Gfx
 {
@@ -41,10 +41,8 @@ namespace Krys::Gfx
     Vulkan,
   };
 
-  class IContext
+  class IContext : NonCopyMovable<IContext>
   {
-    NO_COPY_MOVE(IContext)
-
   protected:
     IContext() noexcept = default;
 

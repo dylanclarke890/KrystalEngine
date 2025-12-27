@@ -5,10 +5,11 @@
 #include "Krystal.IO/VirtualFileSystem.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Events/EventManager.hpp"
-#include "Krystal.Lib/Types/Expected.hpp"
-#include "Krystal.Lib/Types/SmartPointers.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/SmartPointers.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include "Krystal.Platform/Events.hpp"
 #include "Krystal.Platform/Input.hpp"
@@ -72,12 +73,11 @@ namespace Krys
   };
 
   /// @brief Base class for a Krystal application.
-  class Application
+  class Application : NonCopyMovable<Application>
   {
-    NO_COPY_MOVE(Application)
-
   protected:
-    bool _running, _isWindowMinimised;
+    bool _running;
+    bool _isWindowMinimised;
     Unique<ApplicationContext> _context;
 
   public:

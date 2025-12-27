@@ -1,4 +1,4 @@
-#include "Krystal.Maths/Matrix.hpp"
+﻿#include "Krystal.Maths/Matrix.hpp"
 #include <catch_all.hpp>
 
 using namespace Krys::Maths;
@@ -374,7 +374,7 @@ namespace Krys::Tests
   TEST_CASE("ForEach(Matrix)", "[Matrix][ForEach]")
   {
 #define DO_TEST(MatType, rows, cols)                                                                         \
-  SECTION(STRINGIFY(MatType))                                                                                \
+  SECTION(KRYS_STRINGIFY(MatType))                                                                           \
   {                                                                                                          \
     constexpr MatType mat(1);                                                                                \
     MatType result(0);                                                                                       \
@@ -398,7 +398,7 @@ namespace Krys::Tests
   TEST_CASE("MapEach(Matrix)", "[Matrix][MapEach]")
   {
 #define DO_TEST(MatType)                                                                                     \
-  SECTION(STRINGIFY(MatType))                                                                                \
+  SECTION(KRYS_STRINGIFY(MatType))                                                                                \
   {                                                                                                          \
     constexpr MatType mat(1);                                                                                \
     MatType result = MapEach(mat, [](auto v) { return v + 1; });                                             \
@@ -420,7 +420,7 @@ namespace Krys::Tests
   TEST_CASE("ZipTwo(Matrix)", "[Matrix][Zip]")
   {
 #define DO_TEST(MatType)                                                                                     \
-  SECTION(STRINGIFY(MatType))                                                                                \
+  SECTION(KRYS_STRINGIFY(MatType))                                                                                \
   {                                                                                                          \
     constexpr MatType a(1);                                                                                  \
     constexpr MatType b(1);                                                                                  \
@@ -443,7 +443,7 @@ namespace Krys::Tests
   TEST_CASE("ZipThree(Matrix)", "[Matrix][Zip]")
   {
 #define DO_TEST(MatType)                                                                                     \
-  SECTION(STRINGIFY(MatType))                                                                                \
+  SECTION(KRYS_STRINGIFY(MatType))                                                                                \
   {                                                                                                          \
     constexpr MatType a(1);                                                                                  \
     constexpr MatType b(1);                                                                                  \

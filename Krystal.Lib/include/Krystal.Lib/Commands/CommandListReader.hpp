@@ -3,17 +3,15 @@
 #include "Krystal.Lib/ByteUtils.hpp"
 #include "Krystal.Lib/Commands/CommandArena.hpp"
 #include "Krystal.Lib/Commands/CommandList.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 
 namespace Krys
 {
   /// @brief Reads commands from a CommandList sequentially.
-  class CommandListReader
+  class CommandListReader : NonCopyMovable<CommandListReader>
   {
-    NO_COPY_MOVE(CommandListReader)
-
   private:
     const CommandList &_list;
     size_t _offset {0u};

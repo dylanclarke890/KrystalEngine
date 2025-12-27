@@ -1,11 +1,11 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Types/Expected.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
-#include "Krystal.Lib/Types/SmartPointers.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/SmartPointers.hpp"
 #include <format>
 
 namespace Krys::Log
@@ -38,11 +38,9 @@ namespace Krys::Log
     Level Level {Level::Info};
   };
 
-  class ILogger
+  class ILogger : NonCopyMovable<ILogger>
   {
   public:
-    NO_COPY_MOVE(ILogger)
-
     virtual ~ILogger() noexcept = default;
 
     template <typename... Args>

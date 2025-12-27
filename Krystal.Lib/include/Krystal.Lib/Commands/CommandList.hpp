@@ -2,6 +2,7 @@
 
 #include "Krystal.Lib/Commands/CommandArena.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include <cassert>
@@ -9,10 +10,8 @@
 namespace Krys
 {
   /// @brief A list of commands allocated in a CommandArena.
-  class CommandList
+  class CommandList : NonCopyable<CommandList>
   {
-    NO_COPY(CommandList)
-
   private:
     CommandArena _arena;
     size_t _startOffset {0u};
