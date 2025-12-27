@@ -12,19 +12,19 @@ namespace Krys::Maths
 {
 #pragma region Min
 
-  template <Arithmetic T>
+  template <Number T>
   NO_DISCARD constexpr T Min(T a, T b) noexcept
   {
     return a < b ? a : b;
   }
 
-  template <Arithmetic T>
+  template <Number T>
   NO_DISCARD constexpr T Min(T a, T b, T c) noexcept
   {
     return Min(Min(a, b), c);
   }
 
-  template <Arithmetic T>
+  template <Number T>
   NO_DISCARD constexpr T Min(T a, T b, T c, T d) noexcept
   {
     return Min(Min(a, b), Min(c, d));
@@ -86,19 +86,19 @@ namespace Krys::Maths
 
 #pragma region Max
 
-  template <Arithmetic T>
+  template <Number T>
   NO_DISCARD constexpr T Max(T a, T b) noexcept
   {
     return a > b ? a : b;
   }
 
-  template <Arithmetic T>
+  template <Number T>
   NO_DISCARD constexpr T Max(T a, T b, T c) noexcept
   {
     return Max(Max(a, b), c);
   }
 
-  template <Arithmetic T>
+  template <Number T>
   NO_DISCARD constexpr T Max(T a, T b, T c, T d) noexcept
   {
     return Max(Max(a, b), Max(c, d));
@@ -346,7 +346,7 @@ namespace Krys::Maths
 
 #pragma region Clamp
 
-  template <Arithmetic T>
+  template <Number T>
   NO_DISCARD constexpr T Clamp(T value, T min, T max) noexcept
   {
     return std::clamp(value, min, max);

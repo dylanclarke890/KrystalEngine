@@ -10,7 +10,7 @@
 
 #pragma region Helper Macros
 
-#define MATRIX_TEMPLATE_PARAMS Krys::Arithmetic T, int C, int R
+#define MATRIX_TEMPLATE_PARAMS Krys::Number T, int C, int R
 #define MATRIX_TEMPLATE_ARGS T, C, R
 #define MATRIX_TYPE Krys::Maths::Matrix<MATRIX_TEMPLATE_ARGS>
 
@@ -19,7 +19,7 @@
 #define MATRIX_VALID_LENGTH_CONDITION(C, R) (C > 1 && C < 5 && R > 1 && R < 5)
 
 #define MATRIX_TYPE_ALIASES(Columns, Rows)                                                                   \
-  template <Arithmetic T>                                                                                    \
+  template <Number T>                                                                                        \
   using Matrix##Columns##x##Rows = Matrix<T, Columns, Rows>;                                                 \
   using Mat##Columns##x##Rows = Matrix<float, Columns, Rows>;                                                \
   using Mat##Columns##x##Rows##b = Matrix<bool, Columns, Rows>;                                              \
@@ -106,7 +106,7 @@ namespace Krys::Maths
   template <MATRIX_TEMPLATE_PARAMS>
   struct Matrix;
 
-  template <Arithmetic T>
+  template <Number T>
   struct Matrix<T, 2, 2>
   {
     MATRIX_INTROSPECTION(2, 2)
@@ -128,7 +128,7 @@ namespace Krys::Maths
     MATRIX_COMMON_MEMBER_FUNCTIONS()
   };
 
-  template <Arithmetic T>
+  template <Number T>
   struct Matrix<T, 2, 3>
   {
     MATRIX_INTROSPECTION(2, 3)
@@ -151,7 +151,7 @@ namespace Krys::Maths
     MATRIX_COMMON_MEMBER_FUNCTIONS()
   };
 
-  template <Arithmetic T>
+  template <Number T>
   struct Matrix<T, 2, 4>
   {
     MATRIX_INTROSPECTION(2, 4)
@@ -174,7 +174,7 @@ namespace Krys::Maths
     MATRIX_COMMON_MEMBER_FUNCTIONS()
   };
 
-  template <Arithmetic T>
+  template <Number T>
   struct Matrix<T, 3, 2>
   {
     MATRIX_INTROSPECTION(3, 2)
@@ -199,7 +199,7 @@ namespace Krys::Maths
     MATRIX_COMMON_MEMBER_FUNCTIONS()
   };
 
-  template <Arithmetic T>
+  template <Number T>
   struct Matrix<T, 3, 3>
   {
     MATRIX_INTROSPECTION(3, 3)
@@ -229,7 +229,7 @@ namespace Krys::Maths
     MATRIX_COMMON_MEMBER_FUNCTIONS()
   };
 
-  template <Arithmetic T>
+  template <Number T>
   struct Matrix<T, 3, 4>
   {
     MATRIX_INTROSPECTION(3, 4)
@@ -256,7 +256,7 @@ namespace Krys::Maths
     MATRIX_COMMON_MEMBER_FUNCTIONS()
   };
 
-  template <Arithmetic T>
+  template <Number T>
   struct Matrix<T, 4, 2>
   {
     MATRIX_INTROSPECTION(4, 2)
@@ -282,7 +282,7 @@ namespace Krys::Maths
     MATRIX_COMMON_MEMBER_FUNCTIONS()
   };
 
-  template <Arithmetic T>
+  template <Number T>
   struct Matrix<T, 4, 3>
   {
     MATRIX_INTROSPECTION(4, 3)
@@ -310,7 +310,7 @@ namespace Krys::Maths
     MATRIX_COMMON_MEMBER_FUNCTIONS()
   };
 
-  template <Arithmetic T>
+  template <Number T>
   struct Matrix<T, 4, 4>
   {
     MATRIX_INTROSPECTION(4, 4)
@@ -342,7 +342,6 @@ namespace Krys::Maths
   struct Traits<MATRIX_TYPE>
   {
     using ComponentType = T;
-    static constexpr bool IsArithmetic = true;
     static constexpr bool IsVector = false;
     static constexpr bool IsMatrix = true;
 

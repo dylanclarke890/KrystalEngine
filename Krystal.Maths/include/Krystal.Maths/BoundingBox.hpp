@@ -5,7 +5,7 @@
 
 namespace Krys::Maths
 {
-  template <Arithmetic T>
+  template <Number T>
   struct BoundingBox
   {
     using Type = T;

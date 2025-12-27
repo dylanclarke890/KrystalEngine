@@ -132,6 +132,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.Lib\Core\TypeTraits.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\ImmutableBimap.hpp" />
     <ClInclude Include="include\Krystal.Lib\Allocators\Arena.hpp">
       <SubType>
@@ -165,7 +166,6 @@
     <ClInclude Include="include\Krystal.Lib\Types\Expected.hpp" />
     <ClInclude Include="include\Krystal.Lib\EnumFlags.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Func.hpp" />
-    <ClInclude Include="include\Krystal.Lib\TypeTraits\FuncPtrTraits.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Lazy.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\LinkedList.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\List.hpp" />

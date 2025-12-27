@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 namespace Krys
 {
@@ -19,4 +19,7 @@ namespace Krys
 
 /// @brief Convenience macro for the attribute equivalent.
 #define MAYBE_UNUSED [[maybe_unused]]
+
+/// @brief Convenience macro for the attribute equivalent.
+#define DEPRECATED(msg) [[deprecated(msg)]]
 }

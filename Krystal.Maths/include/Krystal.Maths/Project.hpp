@@ -9,7 +9,7 @@ namespace Krys::Maths
 {
   /// Map the specified object coordinates (obj.x, obj.y, obj.z) into window coordinates.
   /// The near and far clip planes correspond to z normalized device coordinates of 0 and +1 respectively.
-  template <FloatingPoint T, Arithmetic U>
+  template <FloatingPoint T, Number U>
   NO_DISCARD constexpr auto Project_ZO(const Vector<T, 3> &obj, const Matrix<T, 4, 4> &model,
                                        const Matrix<T, 4, 4> &proj, const Vector<U, 4> &viewport) noexcept
   {
@@ -29,7 +29,7 @@ namespace Krys::Maths
 
   /// Map the specified object coordinates (obj.x, obj.y, obj.z) into window coordinates.
   /// The near and far clip planes correspond to z normalized device coordinates of -1 and +1 respectively.
-  template <FloatingPoint T, Arithmetic U>
+  template <FloatingPoint T, Number U>
   NO_DISCARD constexpr auto Project_NO(const Vector<T, 3> &obj, const Matrix<T, 4, 4> &model,
                                        const Matrix<T, 4, 4> &proj, const Vector<U, 4> &viewport)
   {
@@ -47,7 +47,7 @@ namespace Krys::Maths
 
   // TODO: use policy based design to select between ZO and NO at compile time
   /// Map the specified object coordinates (obj.x, obj.y, obj.z) into window coordinates.
-  template <FloatingPoint T, Arithmetic U>
+  template <FloatingPoint T, Number U>
   NO_DISCARD constexpr Vector<T, 3> Project(const Vector<T, 3> &obj, const Matrix<T, 4, 4> &model,
                                             const Matrix<T, 4, 4> &proj, const Vector<U, 4> &viewport)
   {

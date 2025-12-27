@@ -10,7 +10,7 @@
 
 namespace Krys::Maths
 {
-  template <Arithmetic T, FloatingPoint U>
+  template <Number T, FloatingPoint U>
   NO_DISCARD constexpr T Lerp(T x, T y, U t) noexcept
   {
     t = Clamp(t, Zero<U>(), One<U>());
@@ -18,7 +18,7 @@ namespace Krys::Maths
     return static_cast<T>(result);
   }
 
-  template <Arithmetic T, FloatingPoint U>
+  template <Number T, FloatingPoint U>
   NO_DISCARD constexpr T Smoothstep(T x, T y, U t) noexcept
   {
     t = Clamp((t - static_cast<U>(x)) / static_cast<U>(y - x), Zero<U>(), One<U>());
@@ -26,7 +26,7 @@ namespace Krys::Maths
     return static_cast<T>(result);
   }
 
-  template <Arithmetic T, FloatingPoint U>
+  template <Number T, FloatingPoint U>
   NO_DISCARD constexpr T Step(T x, T y, U t) noexcept
   {
     if (t < Half<U>())
@@ -34,7 +34,7 @@ namespace Krys::Maths
     return y;
   }
 
-  template <Arithmetic T, Arithmetic U>
+  template <Number T, Number U>
   NO_DISCARD constexpr T Step(T edge, U x) noexcept
   {
     if (x < static_cast<U>(edge))
@@ -71,7 +71,7 @@ namespace Krys::Maths
   }
 
   /// @brief Spherically interpolates between two quaternions.
-  template <Arithmetic T>
+  template <FloatingPoint T>
   NO_DISCARD constexpr auto Slerp(const Quaternion<T> &a, const Quaternion<T> &b, T t) noexcept
   {
     auto q1 = a;

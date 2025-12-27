@@ -7,7 +7,7 @@
 
 namespace Krys::Maths
 {
-  template <Arithmetic T, size_t MaxSamples>
+  template <Number T, size_t MaxSamples>
   class MovingAverage
   {
     using Type = T;

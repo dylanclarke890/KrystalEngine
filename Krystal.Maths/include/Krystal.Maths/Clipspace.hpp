@@ -14,8 +14,8 @@ namespace Krys::Maths
 {
 #pragma region Ortho
 
-  template <Arithmetic T>
-  NO_DISCARD constexpr auto Ortho_LH_ZO(T left, T right, T bottom, T top, T zNear, T zFar)
+  template <Number T>
+  NO_DISCARD constexpr auto Ortho_LH_ZO(T left, T right, T bottom, T top, T zNear, T zFar) noexcept
   {
     auto result = Identity<Matrix4x4<T>>();
 
@@ -29,8 +29,8 @@ namespace Krys::Maths
     return result;
   }
 
-  template <Arithmetic T>
-  NO_DISCARD constexpr Matrix4x4<T> Ortho_LH_NO(T left, T right, T bottom, T top, T zNear, T zFar)
+  template <Number T>
+  NO_DISCARD constexpr Matrix4x4<T> Ortho_LH_NO(T left, T right, T bottom, T top, T zNear, T zFar) noexcept
   {
     auto result = Identity<Matrix4x4<T>>();
 
@@ -44,8 +44,8 @@ namespace Krys::Maths
     return result;
   }
 
-  template <Arithmetic T>
-  NO_DISCARD constexpr Matrix4x4<T> Ortho_RH_ZO(T left, T right, T bottom, T top, T zNear, T zFar)
+  template <Number T>
+  NO_DISCARD constexpr Matrix4x4<T> Ortho_RH_ZO(T left, T right, T bottom, T top, T zNear, T zFar) noexcept
   {
     auto result = Identity<Matrix4x4<T>>();
 
@@ -59,8 +59,8 @@ namespace Krys::Maths
     return result;
   }
 
-  template <Arithmetic T>
-  NO_DISCARD constexpr Matrix4x4<T> Ortho_RH_NO(T left, T right, T bottom, T top, T zNear, T zFar)
+  template <Number T>
+  NO_DISCARD constexpr Matrix4x4<T> Ortho_RH_NO(T left, T right, T bottom, T top, T zNear, T zFar) noexcept
   {
     auto result = Identity<Matrix4x4<T>>();
 
@@ -74,8 +74,8 @@ namespace Krys::Maths
     return result;
   }
 
-  template <Arithmetic T, Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
-  NO_DISCARD constexpr Matrix4x4<T> Ortho_LH(T left, T right, T bottom, T top, T zNear, T zFar)
+  template <Number T, Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
+  NO_DISCARD constexpr Matrix4x4<T> Ortho_LH(T left, T right, T bottom, T top, T zNear, T zFar) noexcept
   {
     if constexpr (DepthRange == Conventions::DepthRange::ZeroToOne)
     {
@@ -87,8 +87,8 @@ namespace Krys::Maths
     }
   }
 
-  template <Arithmetic T, Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
-  NO_DISCARD constexpr Matrix4x4<T> Ortho_RH(T left, T right, T bottom, T top, T zNear, T zFar)
+  template <Number T, Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
+  NO_DISCARD constexpr Matrix4x4<T> Ortho_RH(T left, T right, T bottom, T top, T zNear, T zFar) noexcept
   {
     if constexpr (DepthRange == Conventions::DepthRange::ZeroToOne)
     {
@@ -100,8 +100,8 @@ namespace Krys::Maths
     }
   }
 
-  template <Arithmetic T, Conventions::Handedness Handedness = Conventions::DefaultHandedness>
-  NO_DISCARD constexpr Matrix4x4<T> Ortho_NO(T left, T right, T bottom, T top, T zNear, T zFar)
+  template <Number T, Conventions::Handedness Handedness = Conventions::DefaultHandedness>
+  NO_DISCARD constexpr Matrix4x4<T> Ortho_NO(T left, T right, T bottom, T top, T zNear, T zFar) noexcept
   {
     if constexpr (Handedness == Conventions::Handedness::Left)
     {
@@ -113,8 +113,8 @@ namespace Krys::Maths
     }
   }
 
-  template <Arithmetic T, Conventions::Handedness Handedness = Conventions::DefaultHandedness>
-  NO_DISCARD constexpr Matrix4x4<T> Ortho_ZO(T left, T right, T bottom, T top, T zNear, T zFar)
+  template <Number T, Conventions::Handedness Handedness = Conventions::DefaultHandedness>
+  NO_DISCARD constexpr Matrix4x4<T> Ortho_ZO(T left, T right, T bottom, T top, T zNear, T zFar) noexcept
   {
     if constexpr (Handedness == Conventions::Handedness::Left)
     {
@@ -126,9 +126,9 @@ namespace Krys::Maths
     }
   }
 
-  template <Arithmetic T, Conventions::Handedness Handedness = Conventions::DefaultHandedness,
+  template <Number T, Conventions::Handedness Handedness = Conventions::DefaultHandedness,
             Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
-  NO_DISCARD constexpr Matrix4x4<T> Ortho(T left, T right, T bottom, T top, T zNear, T zFar)
+  NO_DISCARD constexpr Matrix4x4<T> Ortho(T left, T right, T bottom, T top, T zNear, T zFar) noexcept
   {
     if constexpr (Handedness == Conventions::Handedness::Left)
     {
@@ -140,9 +140,9 @@ namespace Krys::Maths
     }
   }
 
-  template <Arithmetic T, Conventions::Handedness Handedness = Conventions::DefaultHandedness,
+  template <Number T, Conventions::Handedness Handedness = Conventions::DefaultHandedness,
             Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
-  NO_DISCARD constexpr Matrix4x4<T> Ortho(T width, T height, T depth)
+  NO_DISCARD constexpr Matrix4x4<T> Ortho(T width, T height, T depth) noexcept
   {
     const auto right = width;
     const auto left = -right;
@@ -154,8 +154,8 @@ namespace Krys::Maths
     return Ortho<T, Handedness, DepthRange>(left, right, bottom, top, nearPlane, farPlane);
   }
 
-  template <Arithmetic T>
-  NO_DISCARD constexpr Matrix4x4<T> Ortho(T left, T right, T bottom, T top)
+  template <Number T>
+  NO_DISCARD constexpr Matrix4x4<T> Ortho(T left, T right, T bottom, T top) noexcept
   {
     auto result = Identity<Matrix4x4<T>>();
 
@@ -172,8 +172,9 @@ namespace Krys::Maths
 
 #pragma region Frustum
 
-  template <typename T>
-  NO_DISCARD constexpr Matrix4x4<T> Frustum_LH_ZO(T left, T right, T bottom, T top, T nearVal, T farVal)
+  template <Number T>
+  NO_DISCARD constexpr Matrix4x4<T> Frustum_LH_ZO(T left, T right, T bottom, T top, T nearVal,
+                                                  T farVal) noexcept
   {
     Matrix4x4<T> result(0);
     result[0][0] = (T(2) * nearVal) / (right - left);
@@ -186,8 +187,9 @@ namespace Krys::Maths
     return result;
   }
 
-  template <typename T>
-  NO_DISCARD constexpr Matrix4x4<T> Frustum_LH_NO(T left, T right, T bottom, T top, T nearVal, T farVal)
+  template <Number T>
+  NO_DISCARD constexpr Matrix4x4<T> Frustum_LH_NO(T left, T right, T bottom, T top, T nearVal,
+                                                  T farVal) noexcept
   {
     Matrix4x4<T> result(0);
     result[0][0] = (T(2) * nearVal) / (right - left);
@@ -200,8 +202,9 @@ namespace Krys::Maths
     return result;
   }
 
-  template <typename T>
-  NO_DISCARD constexpr Matrix4x4<T> Frustum_RH_ZO(T left, T right, T bottom, T top, T nearVal, T farVal)
+  template <Number T>
+  NO_DISCARD constexpr Matrix4x4<T> Frustum_RH_ZO(T left, T right, T bottom, T top, T nearVal,
+                                                  T farVal) noexcept
   {
     Matrix4x4<T> result(0);
     result[0][0] = (T(2) * nearVal) / (right - left);
@@ -214,8 +217,9 @@ namespace Krys::Maths
     return result;
   }
 
-  template <typename T>
-  NO_DISCARD constexpr Matrix4x4<T> Frustum_RH_NO(T left, T right, T bottom, T top, T nearVal, T farVal)
+  template <Number T>
+  NO_DISCARD constexpr Matrix4x4<T> Frustum_RH_NO(T left, T right, T bottom, T top, T nearVal,
+                                                  T farVal) noexcept
   {
     Matrix4x4<T> result(0);
     result[0][0] = (T(2) * nearVal) / (right - left);
@@ -228,8 +232,8 @@ namespace Krys::Maths
     return result;
   }
 
-  template <typename T, Conventions::Handedness Handedness = Conventions::DefaultHandedness>
-  NO_DISCARD constexpr Matrix4x4<T> Frustum_ZO(T left, T right, T bottom, T top, T nearVal, T farVal)
+  template <Number T, Conventions::Handedness Handedness = Conventions::DefaultHandedness>
+  NO_DISCARD constexpr Matrix4x4<T> Frustum_ZO(T left, T right, T bottom, T top, T nearVal, T farVal) noexcept
   {
     if constexpr (Handedness == Conventions::Handedness::Left)
     {
@@ -241,8 +245,8 @@ namespace Krys::Maths
     }
   }
 
-  template <typename T, Conventions::Handedness Handedness = Conventions::DefaultHandedness>
-  NO_DISCARD constexpr Matrix4x4<T> Frustum_NO(T left, T right, T bottom, T top, T nearVal, T farVal)
+  template <Number T, Conventions::Handedness Handedness = Conventions::DefaultHandedness>
+  NO_DISCARD constexpr Matrix4x4<T> Frustum_NO(T left, T right, T bottom, T top, T nearVal, T farVal) noexcept
   {
     if constexpr (Handedness == Conventions::Handedness::Left)
     {
@@ -254,8 +258,8 @@ namespace Krys::Maths
     }
   }
 
-  template <typename T, Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
-  NO_DISCARD constexpr Matrix4x4<T> Frustum_LH(T left, T right, T bottom, T top, T nearVal, T farVal)
+  template <Number T, Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
+  NO_DISCARD constexpr Matrix4x4<T> Frustum_LH(T left, T right, T bottom, T top, T nearVal, T farVal) noexcept
   {
     if constexpr (DepthRange == Conventions::DepthRange::ZeroToOne)
     {
@@ -267,8 +271,8 @@ namespace Krys::Maths
     }
   }
 
-  template <typename T, Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
-  NO_DISCARD constexpr Matrix4x4<T> Frustum_RH(T left, T right, T bottom, T top, T nearVal, T farVal)
+  template <Number T, Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
+  NO_DISCARD constexpr Matrix4x4<T> Frustum_RH(T left, T right, T bottom, T top, T nearVal, T farVal) noexcept
   {
     if constexpr (DepthRange == Conventions::DepthRange::ZeroToOne)
     {
@@ -280,9 +284,9 @@ namespace Krys::Maths
     }
   }
 
-  template <typename T, Conventions::Handedness Handedness = Conventions::DefaultHandedness,
+  template <Number T, Conventions::Handedness Handedness = Conventions::DefaultHandedness,
             Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
-  NO_DISCARD constexpr Matrix4x4<T> Frustum(T left, T right, T bottom, T top, T nearVal, T farVal)
+  NO_DISCARD constexpr Matrix4x4<T> Frustum(T left, T right, T bottom, T top, T nearVal, T farVal) noexcept
   {
     if constexpr (Handedness == Conventions::Handedness::Left)
     {
@@ -298,8 +302,8 @@ namespace Krys::Maths
 
 #pragma region Perspective
 
-  template <typename T>
-  NO_DISCARD constexpr Matrix4x4<T> Perspective_RH_ZO(T fovy, T aspect, T zNear, T zFar)
+  template <Number T>
+  NO_DISCARD constexpr Matrix4x4<T> Perspective_RH_ZO(T fovy, T aspect, T zNear, T zFar) noexcept
   {
     assert(Abs(aspect - std::numeric_limits<T>::epsilon()) > Zero<T>());
 
@@ -314,8 +318,8 @@ namespace Krys::Maths
     return result;
   }
 
-  template <typename T>
-  NO_DISCARD constexpr Matrix4x4<T> Perspective_RH_NO(T fovy, T aspect, T zNear, T zFar)
+  template <Number T>
+  NO_DISCARD constexpr Matrix4x4<T> Perspective_RH_NO(T fovy, T aspect, T zNear, T zFar) noexcept
   {
     assert(Abs(aspect - std::numeric_limits<T>::epsilon()) > Zero<T>());
 
@@ -330,8 +334,8 @@ namespace Krys::Maths
     return result;
   }
 
-  template <typename T>
-  NO_DISCARD constexpr Matrix4x4<T> Perspective_LH_ZO(T fovy, T aspect, T zNear, T zFar)
+  template <Number T>
+  NO_DISCARD constexpr Matrix4x4<T> Perspective_LH_ZO(T fovy, T aspect, T zNear, T zFar) noexcept
   {
     assert(Abs(aspect - std::numeric_limits<T>::epsilon()) > Zero<T>());
 
@@ -346,8 +350,8 @@ namespace Krys::Maths
     return result;
   }
 
-  template <typename T>
-  NO_DISCARD constexpr Matrix4x4<T> Perspective_LH_NO(T fovy, T aspect, T zNear, T zFar)
+  template <Number T>
+  NO_DISCARD constexpr Matrix4x4<T> Perspective_LH_NO(T fovy, T aspect, T zNear, T zFar) noexcept
   {
     assert(Abs(aspect - std::numeric_limits<T>::epsilon()) > Zero<T>());
 
@@ -362,8 +366,8 @@ namespace Krys::Maths
     return result;
   }
 
-  template <typename T, Conventions::Handedness Handedness = Conventions::DefaultHandedness>
-  NO_DISCARD constexpr Matrix4x4<T> Perspective_ZO(T fovy, T aspect, T zNear, T zFar)
+  template <Number T, Conventions::Handedness Handedness = Conventions::DefaultHandedness>
+  NO_DISCARD constexpr Matrix4x4<T> Perspective_ZO(T fovy, T aspect, T zNear, T zFar) noexcept
   {
     if constexpr (Handedness == Conventions::Handedness::Left)
     {
@@ -375,8 +379,8 @@ namespace Krys::Maths
     }
   }
 
-  template <typename T, Conventions::Handedness Handedness = Conventions::DefaultHandedness>
-  NO_DISCARD constexpr Matrix4x4<T> Perspective_NO(T fovy, T aspect, T zNear, T zFar)
+  template <Number T, Conventions::Handedness Handedness = Conventions::DefaultHandedness>
+  NO_DISCARD constexpr Matrix4x4<T> Perspective_NO(T fovy, T aspect, T zNear, T zFar) noexcept
   {
     if constexpr (Handedness == Conventions::Handedness::Left)
     {
@@ -388,8 +392,8 @@ namespace Krys::Maths
     }
   }
 
-  template <typename T, Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
-  NO_DISCARD constexpr Matrix4x4<T> Perspective_LH(T fovy, T aspect, T zNear, T zFar)
+  template <Number T, Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
+  NO_DISCARD constexpr Matrix4x4<T> Perspective_LH(T fovy, T aspect, T zNear, T zFar) noexcept
   {
     if constexpr (DepthRange == Conventions::DepthRange::ZeroToOne)
     {
@@ -401,8 +405,8 @@ namespace Krys::Maths
     }
   }
 
-  template <typename T, Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
-  NO_DISCARD constexpr Matrix4x4<T> Perspective_RH(T fovy, T aspect, T zNear, T zFar)
+  template <Number T, Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
+  NO_DISCARD constexpr Matrix4x4<T> Perspective_RH(T fovy, T aspect, T zNear, T zFar) noexcept
   {
     if constexpr (DepthRange == Conventions::DepthRange::ZeroToOne)
     {
@@ -414,9 +418,9 @@ namespace Krys::Maths
     }
   }
 
-  template <typename T, Conventions::Handedness Handedness = Conventions::DefaultHandedness,
+  template <Number T, Conventions::Handedness Handedness = Conventions::DefaultHandedness,
             Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
-  NO_DISCARD constexpr Matrix4x4<T> Perspective(T fovy, T aspect, T zNear, T zFar)
+  NO_DISCARD constexpr Matrix4x4<T> Perspective(T fovy, T aspect, T zNear, T zFar) noexcept
   {
     if constexpr (Handedness == Conventions::Handedness::Left)
     {
@@ -428,9 +432,9 @@ namespace Krys::Maths
     }
   }
 
-  template <typename T, Conventions::Handedness Handedness = Conventions::DefaultHandedness,
+  template <Number T, Conventions::Handedness Handedness = Conventions::DefaultHandedness,
             Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
-  NO_DISCARD constexpr Matrix4x4<T> Perspective(T fovy, T width, T height, T zNear, T zFar)
+  NO_DISCARD constexpr Matrix4x4<T> Perspective(T fovy, T width, T height, T zNear, T zFar) noexcept
   {
     return Perspective<T, Handedness, DepthRange>(fovy, width / height, zNear, zFar);
   }
@@ -439,8 +443,8 @@ namespace Krys::Maths
 
 #pragma region PerspectiveFov
 
-  template <typename T>
-  NO_DISCARD constexpr Matrix4x4<T> PerspectiveFov_RH_ZO(T fov, T width, T height, T zNear, T zFar)
+  template <Number T>
+  NO_DISCARD constexpr Matrix4x4<T> PerspectiveFov_RH_ZO(T fov, T width, T height, T zNear, T zFar) noexcept
   {
     assert(width > Zero<T>());
     assert(height > Zero<T>());
@@ -461,8 +465,8 @@ namespace Krys::Maths
     return result;
   }
 
-  template <typename T>
-  NO_DISCARD constexpr Matrix4x4<T> PerspectiveFov_RH_NO(T fov, T width, T height, T zNear, T zFar)
+  template <Number T>
+  NO_DISCARD constexpr Matrix4x4<T> PerspectiveFov_RH_NO(T fov, T width, T height, T zNear, T zFar) noexcept
   {
     assert(width > Zero<T>());
     assert(height > Zero<T>());
@@ -483,8 +487,8 @@ namespace Krys::Maths
     return result;
   }
 
-  template <typename T>
-  NO_DISCARD constexpr Matrix4x4<T> PerspectiveFov_LH_ZO(T fov, T width, T height, T zNear, T zFar)
+  template <Number T>
+  NO_DISCARD constexpr Matrix4x4<T> PerspectiveFov_LH_ZO(T fov, T width, T height, T zNear, T zFar) noexcept
   {
     assert(width > Zero<T>());
     assert(height > Zero<T>());
@@ -505,8 +509,8 @@ namespace Krys::Maths
     return result;
   }
 
-  template <typename T>
-  NO_DISCARD constexpr Matrix4x4<T> PerspectiveFov_LH_NO(T fov, T width, T height, T zNear, T zFar)
+  template <Number T>
+  NO_DISCARD constexpr Matrix4x4<T> PerspectiveFov_LH_NO(T fov, T width, T height, T zNear, T zFar) noexcept
   {
     assert(width > Zero<T>());
     assert(height > Zero<T>());
@@ -527,8 +531,8 @@ namespace Krys::Maths
     return result;
   }
 
-  template <typename T, Conventions::Handedness Handedness = Conventions::DefaultHandedness>
-  NO_DISCARD constexpr Matrix4x4<T> PerspectiveFov_ZO(T fov, T width, T height, T zNear, T zFar)
+  template <Number T, Conventions::Handedness Handedness = Conventions::DefaultHandedness>
+  NO_DISCARD constexpr Matrix4x4<T> PerspectiveFov_ZO(T fov, T width, T height, T zNear, T zFar) noexcept
   {
     if constexpr (Handedness == Conventions::Handedness::Left)
     {
@@ -540,8 +544,8 @@ namespace Krys::Maths
     }
   }
 
-  template <typename T, Conventions::Handedness Handedness = Conventions::DefaultHandedness>
-  NO_DISCARD constexpr Matrix4x4<T> PerspectiveFov_NO(T fov, T width, T height, T zNear, T zFar)
+  template <Number T, Conventions::Handedness Handedness = Conventions::DefaultHandedness>
+  NO_DISCARD constexpr Matrix4x4<T> PerspectiveFov_NO(T fov, T width, T height, T zNear, T zFar) noexcept
   {
     if constexpr (Handedness == Conventions::Handedness::Left)
     {
@@ -553,8 +557,8 @@ namespace Krys::Maths
     }
   }
 
-  template <typename T, Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
-  NO_DISCARD constexpr Matrix4x4<T> PerspectiveFov_LH(T fov, T width, T height, T zNear, T zFar)
+  template <Number T, Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
+  NO_DISCARD constexpr Matrix4x4<T> PerspectiveFov_LH(T fov, T width, T height, T zNear, T zFar) noexcept
   {
     if constexpr (DepthRange == Conventions::DepthRange::ZeroToOne)
     {
@@ -566,8 +570,8 @@ namespace Krys::Maths
     }
   }
 
-  template <typename T, Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
-  NO_DISCARD constexpr Matrix4x4<T> PerspectiveFov_RH(T fov, T width, T height, T zNear, T zFar)
+  template <Number T, Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
+  NO_DISCARD constexpr Matrix4x4<T> PerspectiveFov_RH(T fov, T width, T height, T zNear, T zFar) noexcept
   {
     if constexpr (DepthRange == Conventions::DepthRange::ZeroToOne)
     {
@@ -579,9 +583,9 @@ namespace Krys::Maths
     }
   }
 
-  template <typename T, Conventions::Handedness Handedness = Conventions::DefaultHandedness,
+  template <Number T, Conventions::Handedness Handedness = Conventions::DefaultHandedness,
             Conventions::DepthRange DepthRange = Conventions::DefaultDepthRange>
-  NO_DISCARD constexpr Matrix4x4<T> PerspectiveFov(T fov, T width, T height, T zNear, T zFar)
+  NO_DISCARD constexpr Matrix4x4<T> PerspectiveFov(T fov, T width, T height, T zNear, T zFar) noexcept
   {
     if constexpr (Handedness == Conventions::Handedness::Left)
     {
@@ -597,8 +601,8 @@ namespace Krys::Maths
 
 #pragma region InfinitePerspective
 
-  template <typename T>
-  NO_DISCARD constexpr Matrix4x4<T> InfinitePerspective_RH_NO(T fovy, T aspect, T zNear)
+  template <Number T>
+  NO_DISCARD constexpr Matrix4x4<T> InfinitePerspective_RH_NO(T fovy, T aspect, T zNear) noexcept
   {
     const T range = std::tan(fovy / T(2)) * zNear;
     const T left = -range * aspect;
@@ -617,8 +621,8 @@ namespace Krys::Maths
     return result;
   }
 
-  template <typename T>
-  NO_DISCARD constexpr Matrix4x4<T> InfinitePerspective_RH_ZO(T fovy, T aspect, T zNear)
+  template <Number T>
+  NO_DISCARD constexpr Matrix4x4<T> InfinitePerspective_RH_ZO(T fovy, T aspect, T zNear) noexcept
   {
     const T range = std::tan(fovy / T(2)) * zNear;
     const T left = -range * aspect;
@@ -637,8 +641,8 @@ namespace Krys::Maths
     return result;
   }
 
-  template <typename T>
-  NO_DISCARD constexpr Matrix4x4<T> InfinitePerspective_LH_NO(T fovy, T aspect, T zNear)
+  template <Number T>
+  NO_DISCARD constexpr Matrix4x4<T> InfinitePerspective_LH_NO(T fovy, T aspect, T zNear) noexcept
   {
     const T range = std::tan(fovy / T(2)) * zNear;
     const T left = -range * aspect;
@@ -657,8 +661,8 @@ namespace Krys::Maths
     return result;
   }
 
-  template <typename T>
-  NO_DISCARD constexpr Matrix4x4<T> InfinitePerspective_LH_ZO(T fovy, T aspect, T zNear)
+  template <Number T>
+  NO_DISCARD constexpr Matrix4x4<T> InfinitePerspective_LH_ZO(T fovy, T aspect, T zNear) noexcept
   {
     const T range = std::tan(fovy / T(2)) * zNear;
     const T left = -range * aspect;

@@ -11,7 +11,7 @@ namespace Krys
 {
   namespace Maths
   {
-    template <Arithmetic T>
+    template <Number T>
     struct Quaternion;
   }
 
@@ -19,7 +19,7 @@ namespace Krys
   {
     using namespace Krys::Maths;
 
-    template <Arithmetic T, typename TMatrix>
+    template <Number T, typename TMatrix>
     constexpr void SetQuatFrom(Quaternion<T> &q, const TMatrix &m) noexcept
     {
       // The rotation matrix is of form: (Eric Lengyel's Mathematics for 3D Game Programming and Computer
@@ -81,14 +81,14 @@ namespace Krys::Maths
 {
 #pragma region Helper Macros
 
-#define QUATERNION_TEMPLATE_PARAMS Krys::Arithmetic T
+#define QUATERNION_TEMPLATE_PARAMS Krys::Number T
 #define QUATERNION_TEMPLATE_ARGS T
 #define QUATERNION_TYPE Krys::Maths::Quaternion<T>
 
 #pragma endregion
 
   /// @brief Represents an axis-angle pair, which is a rotation around a 3D axis.
-  template <Arithmetic T>
+  template <Number T>
   struct AxisAngle final
   {
     /// @brief The axis of rotation.
@@ -100,7 +100,7 @@ namespace Krys::Maths
 
   /// @brief Represents a quaternion, which is a rotation around a 3D axis.
   /// @tparam T the underlying type of the quaternion components.
-  template <Arithmetic T>
+  template <Number T>
   struct Quaternion
   {
     T w, x, y, z;

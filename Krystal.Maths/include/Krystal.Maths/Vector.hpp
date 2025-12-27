@@ -12,12 +12,12 @@
 
 #pragma region Helper Macros
 
-#define VECTOR_TEMPLATE_PARAMS Krys::Arithmetic T, int N
+#define VECTOR_TEMPLATE_PARAMS Krys::Number T, int N
 #define VECTOR_TEMPLATE_ARGS T, N
 #define VECTOR_TYPE Krys::Maths::Vector<VECTOR_TEMPLATE_ARGS>
 
 #define VECTOR_TYPE_ALIASES(length)                                                                          \
-  template <Arithmetic T>                                                                                    \
+  template <Number T>                                                                                    \
   using Vector##length = Vector<T, length>;                                                                  \
   using Vec##length = Vector<float, length>;                                                                 \
   using Vec##length##b = Vector<bool, length>;                                                               \
@@ -86,7 +86,7 @@ namespace Krys::Maths
   template <VECTOR_TEMPLATE_PARAMS>
   struct Vector;
 
-  template <Arithmetic T>
+  template <Number T>
   struct Vector<T, 1>
   {
     T x;
@@ -119,7 +119,7 @@ namespace Krys::Maths
     VECTOR_COMMON_MEMBER_FUNCTIONS()
   };
 
-  template <Arithmetic T>
+  template <Number T>
   struct Vector<T, 2>
   {
     T x, y;
@@ -162,7 +162,7 @@ namespace Krys::Maths
     VECTOR_COMMON_MEMBER_FUNCTIONS()
   };
 
-  template <Arithmetic T>
+  template <Number T>
   struct Vector<T, 3>
   {
     T x, y, z;
@@ -189,7 +189,7 @@ namespace Krys::Maths
     {
     }
 
-    template <ConvertibleTo<T> U>
+    template <Number<T> U>
     constexpr Vector(const Vector<U, 3> &other) noexcept
         : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), z(static_cast<T>(other.z))
     {
@@ -220,7 +220,7 @@ namespace Krys::Maths
     VECTOR_COMMON_MEMBER_FUNCTIONS()
   };
 
-  template <Arithmetic T>
+  template <Number T>
   struct Vector<T, 4>
   {
     T x, y, z, w;
@@ -289,7 +289,6 @@ namespace Krys::Maths
   struct Traits<VECTOR_TYPE>
   {
     using ComponentType = T;
-    static constexpr bool IsArithmetic = true;
     static constexpr bool IsVector = true;
     static constexpr bool IsMatrix = false;
 

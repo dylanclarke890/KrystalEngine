@@ -151,7 +151,7 @@ namespace Krys::Maths
   }
 
   /// @brief Rotates the given vector by the given quaternion.
-  template <Arithmetic T>
+  template <Number T>
   NO_DISCARD constexpr Vector3<T> Rotate(const Quaternion<T> &q, const Vector3<T> &v) noexcept
   {
     // Convert the vector to a quaternion with w = 0
@@ -166,56 +166,56 @@ namespace Krys::Maths
   }
 
   /// @brief Rotates the given vector by the given quaternion.
-  template <Arithmetic T>
+  template <Number T>
   NO_DISCARD constexpr Vector3<T> Rotate(const Quaternion<T> &q, T x, T y, T z) noexcept
   {
     return Rotate(q, Vector3<T>(x, y, z));
   }
 
   /// @brief Creates a new quaternion that rotates about the positive X axis by the given angle.
-  template <Arithmetic T>
+  template <Number T>
   NO_DISCARD Quaternion<T> RotateX(T angle) noexcept
   {
     return Quaternion<T>(Vector3<T>(1, 0, 0), angle);
   }
 
   /// @brief Creates a new quaternion that rotates about the positive Y axis by the given angle.
-  template <Arithmetic T>
+  template <Number T>
   NO_DISCARD Quaternion<T> RotateY(T angle) noexcept
   {
     return Quaternion<T>(Vector3<T>(0, 1, 0), angle);
   }
 
   /// @brief Creates a new quaternion that rotates about the positive Z axis by the given angle.
-  template <Arithmetic T>
+  template <Number T>
   NO_DISCARD Quaternion<T> RotateZ(T angle) noexcept
   {
     return Quaternion<T>(Vector3<T>(0, 0, 1), angle);
   }
 
   /// @brief Creates a new quaternion that rotates about the given axis by the given angle.
-  template <Arithmetic T>
+  template <Number T>
   NO_DISCARD Quaternion<T> RotateAxisAngle(const Vector3<T> &axis, T angle) noexcept
   {
     return Quaternion<T>(axis, angle);
   }
 
   /// @brief Get the world X axis from the given quaternion.
-  template <Arithmetic T>
+  template <Number T>
   NO_DISCARD constexpr Vector3<T> GetWorldX(const Quaternion<T> &q) noexcept
   {
     return Rotate(q, Vector3<T>(1, 0, 0));
   }
 
   /// @brief Get the world Y axis from the given quaternion.
-  template <Arithmetic T>
+  template <Number T>
   NO_DISCARD constexpr Vector3<T> GetWorldY(const Quaternion<T> &q) noexcept
   {
     return Rotate(q, Vector3<T>(0, 1, 0));
   }
 
   /// @brief Get the world Z axis from the given quaternion.
-  template <Arithmetic T>
+  template <Number T>
   NO_DISCARD constexpr Vector3<T> GetWorldZ(const Quaternion<T> &q) noexcept
   {
     return Rotate(q, Vector3<T>(0, 0, 1));

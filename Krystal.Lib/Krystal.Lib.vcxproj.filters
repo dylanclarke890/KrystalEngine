@@ -42,9 +42,6 @@
     <ClInclude Include="include\Krystal.Lib\Types\SmartPointers.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\TypeTraits\FuncPtrTraits.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -151,6 +148,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Types\ImmutableBimap.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Core\TypeTraits.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
