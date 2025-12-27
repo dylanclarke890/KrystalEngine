@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/FilterMode.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/WrapMode.hpp"
 #include "Krystal.Gfx/Resources/Sampler.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Core/Macros.hpp"
 
 namespace Krys::Gfx::OpenGL
 {

@@ -4,7 +4,7 @@
 #include "Krystal.Gfx/Resources/Shader.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Core/Macros.hpp"
 
 namespace Krys::Gfx
 {

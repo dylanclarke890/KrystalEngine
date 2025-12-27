@@ -1,6 +1,6 @@
-#define KRYS_GL_OVERRIDE_FUNCTIONS 0
+﻿#define KRYS_GL_OVERRIDE_FUNCTIONS 0
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Core/Macros.hpp"
 #include <cassert>
 
 #ifdef MemoryBarrier

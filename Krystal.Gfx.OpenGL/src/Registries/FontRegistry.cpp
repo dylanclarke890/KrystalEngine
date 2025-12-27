@@ -5,7 +5,7 @@
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Font.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
-#include "Krystal.Lib/DebugBreak.hpp"
+#include "Krystal.Lib/Core/DebugBreak.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include "Krystal.Platform/Platform.hpp"

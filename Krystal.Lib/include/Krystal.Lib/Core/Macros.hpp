@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 namespace Krys
 {
@@ -20,7 +20,8 @@ namespace Krys
 #elif defined(__cplusplus) && (__cplusplus >= 201'103)
   #define KRYS_FUNC_SIG __func__
 #else
-  #error "KRYS_FUNC_SIG unknown!"
+  #warning "KRYS_FUNC_SIG unknown!"
+  #define KRYS_FUNC_SIG "Unknown Function Signature"
 #endif
 
 #pragma endregion
@@ -43,6 +44,7 @@ namespace Krys
       _Pragma("GCC diagnostic ignored \"" gccWarningName "\"")
   #endif
 #else
+  #warning "Compiler not supported for warning suppression macros."
   #define KRYS_DISABLE_WARNING_PUSH()
   #define KRYS_DISABLE_WARNING_POP()
   #define KRYS_DISABLE_WARNING(msvcWarningCode, gccWarningName)

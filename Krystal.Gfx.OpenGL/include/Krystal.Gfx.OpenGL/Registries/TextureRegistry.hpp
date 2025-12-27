@@ -11,7 +11,7 @@
 #include "Krystal.IO/ImageLoader.hpp"
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/Types/Pair.hpp"
 #include "Krystal.Lib/Types/Span.hpp"

@@ -36,7 +36,7 @@
     <ClInclude Include="include\Krystal.Lib\HashUtils.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Macros.hpp">
+    <ClInclude Include="include\Krystal.Lib\Core\Macros.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\SmartPointers.hpp">
@@ -69,7 +69,7 @@
     <ClInclude Include="include\Krystal.Lib\Core\Detection.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\DebugBreak.hpp">
+    <ClInclude Include="include\Krystal.Lib\Core\DebugBreak.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\BitUtils.hpp">
@@ -78,7 +78,7 @@
     <ClInclude Include="include\Krystal.Lib\ByteUtils.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Endian.hpp">
+    <ClInclude Include="include\Krystal.Lib\Core\Endian.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Types\Map.hpp">

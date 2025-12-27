@@ -8,7 +8,7 @@
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
 #include "Krystal.IO/Streams/StreamUtils.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/String/String.hpp"
 

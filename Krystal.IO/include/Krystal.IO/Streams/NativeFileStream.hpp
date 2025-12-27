@@ -4,7 +4,7 @@
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <fstream>
 

@@ -2,7 +2,7 @@
 
 #include "Krystal.Gfx/Utils/MeshDataUtils.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Clamp.hpp"
 #include "Krystal.Maths/Round.hpp"

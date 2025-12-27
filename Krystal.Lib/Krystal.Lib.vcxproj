@@ -155,9 +155,9 @@
     <ClInclude Include="include\Krystal.Lib\ByteUtils.hpp" />
     <ClInclude Include="include\Krystal.Lib\ComparisonHelpers.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Concepts.hpp" />
-    <ClInclude Include="include\Krystal.Lib\DebugBreak.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\DebugBreak.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Detection.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Endian.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\Endian.hpp" />
     <ClInclude Include="include\Krystal.Lib\Enum.hpp">
       <SubType>
       </SubType>
@@ -169,7 +169,7 @@
     <ClInclude Include="include\Krystal.Lib\Types\Lazy.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\LinkedList.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\List.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Macros.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\Macros.hpp" />
     <ClInclude Include="include\Krystal.Lib\Events\Event.hpp" />
     <ClInclude Include="include\Krystal.Lib\Events\EventManager.hpp" />
     <ClInclude Include="include\Krystal.Lib\HashUtils.hpp" />

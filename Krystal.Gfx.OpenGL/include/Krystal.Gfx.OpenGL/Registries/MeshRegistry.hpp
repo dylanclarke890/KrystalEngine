@@ -8,7 +8,7 @@
 #include "Krystal.Gfx/Utils/MeshDataUtils.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
 #include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
 namespace Krys::Gfx::OpenGL

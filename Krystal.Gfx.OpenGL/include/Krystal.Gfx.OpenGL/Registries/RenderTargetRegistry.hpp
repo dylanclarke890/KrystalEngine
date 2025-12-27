@@ -5,7 +5,7 @@
 #include "Krystal.Gfx.OpenGL/Registries/ImageViewRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/RenderTarget.hpp"
 #include "Krystal.Gfx/Registries/IRenderTargetRegistry.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <cassert>
 

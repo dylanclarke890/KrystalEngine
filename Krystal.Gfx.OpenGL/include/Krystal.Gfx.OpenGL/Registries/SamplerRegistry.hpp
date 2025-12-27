@@ -9,7 +9,7 @@
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/HashUtils.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
 
 namespace Krys::Gfx::OpenGL

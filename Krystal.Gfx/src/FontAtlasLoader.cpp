@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Gfx/FontAtlasLoader.hpp"
-#include "Krystal.Lib/DebugBreak.hpp"
+#include "Krystal.Lib/Core/DebugBreak.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include "Krystal.Maths/Round.hpp"

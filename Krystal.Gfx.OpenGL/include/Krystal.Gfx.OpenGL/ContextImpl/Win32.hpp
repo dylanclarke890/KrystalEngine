@@ -2,7 +2,7 @@
 
 #include "Krystal.Gfx.OpenGL/Context.hpp"
 #include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Core/Macros.hpp"
 
 #pragma comment(lib, "opengl32.lib")
 

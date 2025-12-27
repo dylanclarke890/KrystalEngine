@@ -7,7 +7,7 @@
 #include "Krystal.Gfx/Enums/FilterMode.hpp"
 #include "Krystal.Lib/String/StringRef.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
 namespace Krys::Gfx::Commands

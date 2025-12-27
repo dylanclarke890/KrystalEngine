@@ -1,6 +1,6 @@
-#include "Krystal.IO/Backends/NativeFileBackend.hpp"
+﻿#include "Krystal.IO/Backends/NativeFileBackend.hpp"
 #include "Krystal.IO/Streams/NativeFileStream.hpp"
-#include "Krystal.Lib/DebugBreak.hpp"
+#include "Krystal.Lib/Core/DebugBreak.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include <filesystem>
 #include <fstream>
