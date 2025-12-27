@@ -19,26 +19,6 @@
 
 #pragma endregion
 
-#pragma region Compiler
-
-#if defined(__clang__)
-  #define KRYS_COMPILER_CLANG 1
-#endif
-
-#if defined(__GNUC__)
-  #define KRYS_COMPILER_GCC_COMPATIBLE 1
-#endif
-
-#if KRYS_COMPILER(GCC_COMPATIBLE) && !KRYS_COMPILER(CLANG)
-  #define KRYS_COMPILER_GCC 1
-#endif
-
-#if defined(_MSC_VER)
-  #define KRYS_COMPILER_MSVC 1
-#endif
-
-#pragma endregion
-
 #pragma region Endianness
 
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
