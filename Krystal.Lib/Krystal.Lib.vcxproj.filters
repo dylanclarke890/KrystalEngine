@@ -42,9 +42,6 @@
     <ClInclude Include="include\Krystal.Lib\Types\SmartPointers.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Types\StronglyTypedValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -163,6 +160,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Commands\CommandType.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Handle.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Gfx.Lib/ResourceManager.hpp"
+#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Sampler.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/WrapMode.hpp"

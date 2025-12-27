@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Gfx.Lib/Handle.hpp"
+#include "Krystal.Lib/Handle.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"

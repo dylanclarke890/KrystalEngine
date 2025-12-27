@@ -136,14 +136,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.Gfx.Lib\Colour.hpp" />
-    <ClInclude Include="include\Krystal.Gfx.Lib\Handle.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.Lib\ResourceManager.hpp" />
-  </ItemGroup>
-  <ItemGroup>
     <ClCompile Include="src\placeholder.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

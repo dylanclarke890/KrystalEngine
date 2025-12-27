@@ -137,6 +137,8 @@
     <ClInclude Include="include\Krystal.Lib\Commands\CommandListReader.hpp" />
     <ClInclude Include="include\Krystal.Lib\Commands\CommandType.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\TypeTraits.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Handle.hpp" />
+    <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\ImmutableBimap.hpp" />
     <ClInclude Include="include\Krystal.Lib\Allocators\Arena.hpp">
       <SubType>
@@ -178,7 +180,6 @@
     <ClInclude Include="include\Krystal.Lib\Events\EventManager.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Hash.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Map.hpp" />
-    <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Nullable.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\NullableFloat.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\OrderedMap.hpp" />

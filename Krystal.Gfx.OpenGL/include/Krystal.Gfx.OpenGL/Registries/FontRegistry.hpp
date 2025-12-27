@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Gfx.Lib/ResourceManager.hpp"
+#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Font.hpp"
 #include "Krystal.Gfx/FontAtlasLoader.hpp"
 #include "Krystal.Gfx/Handle.hpp"

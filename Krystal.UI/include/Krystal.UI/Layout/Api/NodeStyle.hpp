@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Gfx.Lib/Colour.hpp"
+#include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.UI/Layout/Api/Node.hpp"
