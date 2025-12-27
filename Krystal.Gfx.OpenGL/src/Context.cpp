@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Gfx.OpenGL/Context.hpp"
 #include "Krystal.Lib/Core/Detection.hpp"
 
-#if KRYS_PLATFORM(WINDOWS)
+#if KRYS_OS(WINDOWS)
   #include "Krystal.Gfx.OpenGL/ContextImpl/Win32.hpp"
 #else
   #error "Unsupported platform for OpenGL context creation."

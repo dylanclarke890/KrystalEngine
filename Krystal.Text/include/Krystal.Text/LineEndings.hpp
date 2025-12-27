@@ -107,7 +107,7 @@ namespace Krys::Text
     /// @brief Normalizes line endings in the given byte stream to the native format.
     NO_DISCARD constexpr static List<byte> NormalizeToNative(List<byte> &&from) noexcept
     {
-#if KRYS_PLATFORM(WINDOWS)
+#if KRYS_OS(WINDOWS)
       return NormalizeToCRLF(std::forward<List<byte>>(from));
 #else
       return NormalizeToLF(std::forward<List<byte>>(from));

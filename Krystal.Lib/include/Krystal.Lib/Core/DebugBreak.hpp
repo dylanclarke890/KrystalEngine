@@ -3,9 +3,9 @@
 #include "Krystal.Lib/Core/Detection.hpp"
 
 #if KRYS_ENV(DEV)
-  #if KRYS_PLATFORM(WINDOWS)
+  #if KRYS_OS(WINDOWS)
     #define KRYS_DEBUG_BREAK() __debugbreak()
-  #elif KRYS_PLATFORM(LINUX)
+  #elif KRYS_OS(LINUX)
     #include <signal.h>
     #define KRYS_DEBUG_BREAK() raise(SIGTRAP)
   #else
