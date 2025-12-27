@@ -38,33 +38,33 @@ namespace Krys::Gfx::OpenGL
 
     void Shutdown() noexcept override;
 
-    NO_DISCARD FontFamilyHandle Register(StringRef name, const IO::Path &path) noexcept override;
+    KRYS_NODISCARD FontFamilyHandle Register(StringRef name, const IO::Path &path) noexcept override;
 
     bool Unload(FontFamilyHandle handle) noexcept override;
 
-    NO_DISCARD virtual FontHandle Get(const FontDesc &desc) noexcept override;
+    KRYS_NODISCARD virtual FontHandle Get(const FontDesc &desc) noexcept override;
 
     bool Unload(FontHandle handle) noexcept override;
 
-    NO_DISCARD Font &Get(FontHandle handle);
+    KRYS_NODISCARD Font &Get(FontHandle handle);
 
-    NO_DISCARD Font *TryGet(FontHandle handle) noexcept;
+    KRYS_NODISCARD Font *TryGet(FontHandle handle) noexcept;
 
     void DPIChanged(int dpi) noexcept;
 
-    NO_DISCARD FontFamilyHandle GetDefaultFontFamily() const noexcept override;
+    KRYS_NODISCARD FontFamilyHandle GetDefaultFontFamily() const noexcept override;
 
-    NO_DISCARD const CharacterMap &GetCharacterMap(FontHandle handle) const override;
+    KRYS_NODISCARD const CharacterMap &GetCharacterMap(FontHandle handle) const override;
 
-    NO_DISCARD TextureHandle GetFontAtlas(FontHandle handle) const override;
+    KRYS_NODISCARD TextureHandle GetFontAtlas(FontHandle handle) const override;
 
-    NO_DISCARD const FontMetrics &GetMetrics(FontHandle handle) const override;
+    KRYS_NODISCARD const FontMetrics &GetMetrics(FontHandle handle) const override;
 
-    NO_DISCARD uint32 PtSizeToPixels(float ptSize) const noexcept;
+    KRYS_NODISCARD uint32 PtSizeToPixels(float ptSize) const noexcept;
 
   private:
-    NO_DISCARD FontHandle Add(Font &&font, const FontDesc &cacheKey);
+    KRYS_NODISCARD FontHandle Add(Font &&font, const FontDesc &cacheKey);
 
-    NO_DISCARD TextureHandle CreateFontAtlasTexture(const FontDesc &desc, const FontAtlasData &data);
+    KRYS_NODISCARD TextureHandle CreateFontAtlasTexture(const FontDesc &desc, const FontAtlasData &data);
   };
 }

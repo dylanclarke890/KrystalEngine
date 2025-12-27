@@ -2,11 +2,11 @@
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx/Enums/WrapMode.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
-  NO_DISCARD constexpr inline GLenum MapWrapMode(WrapMode mode) noexcept
+  KRYS_NODISCARD constexpr inline GLenum MapWrapMode(WrapMode mode) noexcept
   {
     switch (mode)
     {
@@ -17,7 +17,7 @@ namespace Krys::Gfx::OpenGL
     }
   }
 
-  NO_DISCARD constexpr inline WrapMode MapWrapMode(GLenum mode) noexcept
+  KRYS_NODISCARD constexpr inline WrapMode MapWrapMode(GLenum mode) noexcept
   {
     switch (mode)
     {

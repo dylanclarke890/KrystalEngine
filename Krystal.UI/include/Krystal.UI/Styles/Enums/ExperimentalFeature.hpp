@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
@@ -18,7 +18,7 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  NO_DISCARD constexpr uint32 OrdinalCount<UI::ExperimentalFeature>() noexcept
+  KRYS_NODISCARD constexpr uint32 OrdinalCount<UI::ExperimentalFeature>() noexcept
   {
     return 2;
   }

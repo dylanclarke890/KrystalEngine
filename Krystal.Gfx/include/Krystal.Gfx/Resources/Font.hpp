@@ -3,7 +3,7 @@
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
@@ -31,7 +31,7 @@ namespace Krys::Gfx
     FontType Type {FontType::Bitmap};
     float Size {16.f};
 
-    NO_DISCARD auto operator<=>(const FontDesc &other) const noexcept = default;
+    KRYS_NODISCARD auto operator<=>(const FontDesc &other) const noexcept = default;
   };
 
   struct SDFParams
@@ -120,12 +120,12 @@ namespace Krys::Gfx
 
     MOVE_SWAP(FontFamily)
 
-    NO_DISCARD StringRef Name() const noexcept
+    KRYS_NODISCARD StringRef Name() const noexcept
     {
       return _name;
     }
 
-    NO_DISCARD const IO::Path &Path() const noexcept
+    KRYS_NODISCARD const IO::Path &Path() const noexcept
     {
       return _path;
     }
@@ -140,7 +140,7 @@ namespace Krys::Gfx
       std::erase(_fonts, font);
     }
 
-    NO_DISCARD const List<FontHandle> &Fonts() const noexcept
+    KRYS_NODISCARD const List<FontHandle> &Fonts() const noexcept
     {
       return _fonts;
     }

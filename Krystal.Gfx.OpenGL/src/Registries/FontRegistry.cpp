@@ -229,7 +229,7 @@ namespace Krys::Gfx::OpenGL
     return font.Characters();
   }
 
-  NO_DISCARD TextureHandle FontRegistry::GetFontAtlas(FontHandle handle) const
+  KRYS_NODISCARD TextureHandle FontRegistry::GetFontAtlas(FontHandle handle) const
   {
     const Font &font = _fonts.Get(handle);
     return font.AtlasTexture();

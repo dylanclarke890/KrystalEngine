@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
@@ -21,13 +21,13 @@ namespace Krys
     };
 
     /// @brief Checks if the system is big endian.
-    NO_DISCARD static constexpr bool IsSystemBigEndian() noexcept
+    KRYS_NODISCARD static constexpr bool IsSystemBigEndian() noexcept
     {
       return std::endian::native == std::endian::big;
     }
 
     /// @brief Checks if the system is little endian.
-    NO_DISCARD static constexpr bool IsSystemLittleEndian() noexcept
+    KRYS_NODISCARD static constexpr bool IsSystemLittleEndian() noexcept
     {
       return std::endian::native == std::endian::little;
     }
@@ -37,7 +37,7 @@ namespace Krys
     /// @param value The value whose byte order is to be swapped.
     /// @return The value with its byte order swapped.
     template <Number T>
-    NO_DISCARD static constexpr T SwapEndian(T value)
+    KRYS_NODISCARD static constexpr T SwapEndian(T value)
     {
       if constexpr (Integral<T>)
       {
@@ -56,7 +56,7 @@ namespace Krys
     /// @brief Converts a value to big endian. If the underlying system is big endian, the value is assumed to
     /// already be represented as big endian and is returned unchanged.
     template <Number T>
-    NO_DISCARD static constexpr T ToBigEndian(T value) noexcept
+    KRYS_NODISCARD static constexpr T ToBigEndian(T value) noexcept
     {
       if constexpr (IsSystemBigEndian())
       {
@@ -71,7 +71,7 @@ namespace Krys
     /// @brief Converts a value to little endian. If the underlying system is little endian, the value is
     /// assumed to already be represented as little endian and is returned unchanged.
     template <Number T>
-    NO_DISCARD static constexpr T ToLittleEndian(T value) noexcept
+    KRYS_NODISCARD static constexpr T ToLittleEndian(T value) noexcept
     {
       if constexpr (IsSystemLittleEndian())
       {
@@ -89,7 +89,7 @@ namespace Krys
     /// @param from The endian type the value is currently in (either Little or Big).
     /// @return The value converted to the system's native endianness.
     template <Endian::Type Src, Number T>
-    NO_DISCARD static constexpr T ToSystemEndian(T value) noexcept
+    KRYS_NODISCARD static constexpr T ToSystemEndian(T value) noexcept
     {
       if constexpr (Src == Little)
       {
@@ -107,7 +107,7 @@ namespace Krys
 
     /// @brief Convert a value from one endian representation to another.
     template <Endian::Type Src, Endian::Type Dst, Number T>
-    NO_DISCARD static constexpr T Convert(T value) noexcept
+    KRYS_NODISCARD static constexpr T Convert(T value) noexcept
     {
       if constexpr (Src == Dst)
       {

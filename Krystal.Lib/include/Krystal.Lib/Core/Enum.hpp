@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <bit>
@@ -9,20 +9,20 @@
 namespace Krys
 {
   template <IsEnum TEnum>
-  NO_DISCARD constexpr uint32 OrdinalCount() noexcept;
+  KRYS_NODISCARD constexpr uint32 OrdinalCount() noexcept;
 
   template <typename TEnum>
   concept HasOrdinality = (OrdinalCount<TEnum>() > 0);
 
   template <typename T>
-  NO_DISCARD constexpr auto ToUnderlying(T value) noexcept
+  KRYS_NODISCARD constexpr auto ToUnderlying(T value) noexcept
   {
     return std::to_underlying<T>(value);
   }
 
   /// @brief Count of bits needed to represent every ordinal.
   template <HasOrdinality TEnum>
-  NO_DISCARD constexpr uint32 BitCount() noexcept
+  KRYS_NODISCARD constexpr uint32 BitCount() noexcept
   {
     return std::bit_width(static_cast<std::underlying_type_t<TEnum>>(OrdinalCount<TEnum>() - 1));
   }
@@ -30,13 +30,13 @@ namespace Krys
   /// @brief Convenience function to iterate through every value in a Krys enum as part of
   /// a range-based for loop.
   template <HasOrdinality TEnum>
-  NO_DISCARD constexpr auto Ordinals() noexcept
+  KRYS_NODISCARD constexpr auto Ordinals() noexcept
   {
     struct Iterator
     {
       TEnum e {};
 
-      NO_DISCARD constexpr TEnum operator*() const noexcept
+      KRYS_NODISCARD constexpr TEnum operator*() const noexcept
       {
         return e;
       }
@@ -53,11 +53,11 @@ namespace Krys
 
     struct Range
     {
-      NO_DISCARD constexpr Iterator begin() const noexcept
+      KRYS_NODISCARD constexpr Iterator begin() const noexcept
       {
         return Iterator {};
       }
-      NO_DISCARD constexpr Iterator end() const noexcept
+      KRYS_NODISCARD constexpr Iterator end() const noexcept
       {
         return Iterator {static_cast<TEnum>(OrdinalCount<TEnum>())};
       }
@@ -69,22 +69,22 @@ namespace Krys
 /// @brief Defines bitwise operators for an enum class.
 /// @param EnumType The enum class to define the operators for.
 #define KRYS_ENUM_FLAG_OPERATORS(EnumType)                                                                   \
-  NO_DISCARD constexpr inline EnumType operator|(EnumType a, EnumType b) noexcept                            \
+  KRYS_NODISCARD constexpr inline EnumType operator|(EnumType a, EnumType b) noexcept                            \
   {                                                                                                          \
     return static_cast<EnumType>(ToUnderlying(a) | ToUnderlying(b));                                         \
   }                                                                                                          \
                                                                                                              \
-  NO_DISCARD constexpr inline EnumType operator&(EnumType a, EnumType b) noexcept                            \
+  KRYS_NODISCARD constexpr inline EnumType operator&(EnumType a, EnumType b) noexcept                            \
   {                                                                                                          \
     return static_cast<EnumType>(ToUnderlying(a) & ToUnderlying(b));                                         \
   }                                                                                                          \
                                                                                                              \
-  NO_DISCARD constexpr inline EnumType operator^(EnumType a, EnumType b) noexcept                            \
+  KRYS_NODISCARD constexpr inline EnumType operator^(EnumType a, EnumType b) noexcept                            \
   {                                                                                                          \
     return static_cast<EnumType>(ToUnderlying(a) ^ ToUnderlying(b));                                         \
   }                                                                                                          \
                                                                                                              \
-  NO_DISCARD constexpr inline EnumType operator~(EnumType a) noexcept                                        \
+  KRYS_NODISCARD constexpr inline EnumType operator~(EnumType a) noexcept                                        \
   {                                                                                                          \
     return static_cast<EnumType>(~ToUnderlying(a));                                                          \
   }                                                                                                          \
@@ -104,7 +104,7 @@ namespace Krys
     return a = a ^ b;                                                                                        \
   }                                                                                                          \
                                                                                                              \
-  NO_DISCARD constexpr inline bool operator!(EnumType a) noexcept                                            \
+  KRYS_NODISCARD constexpr inline bool operator!(EnumType a) noexcept                                            \
   {                                                                                                          \
     return ToUnderlying(a) == 0;                                                                             \
   }

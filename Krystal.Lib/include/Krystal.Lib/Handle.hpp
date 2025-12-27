@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <compare>
 
@@ -11,7 +11,7 @@ namespace Krys::Gfx
   {
     uint32 Id {0u};
 
-    NO_DISCARD bool IsValid() const noexcept
+    KRYS_NODISCARD bool IsValid() const noexcept
     {
       return Id != 0u;
     }

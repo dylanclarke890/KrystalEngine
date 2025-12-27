@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/String/String.hpp"
 
 namespace Krys::Text
@@ -16,7 +16,7 @@ namespace Krys::Text
     {
     }
 
-    NO_DISCARD constexpr utf8_stringview GetReplacementCharacter() const noexcept
+    KRYS_NODISCARD constexpr utf8_stringview GetReplacementCharacter() const noexcept
     {
       return _replacementCharacter;
     }

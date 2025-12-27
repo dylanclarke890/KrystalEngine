@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.IO/IStream.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/Endian.hpp"
@@ -18,7 +18,7 @@ namespace Krys::IO
     STATIC_CLASS(StreamUtils)
 
     template <UnsignedIntegral T, DerivedFrom<IStreamReader> TReader>
-    NO_DISCARD static Expected<List<T>> ReadAllAs(TReader &stream) noexcept
+    KRYS_NODISCARD static Expected<List<T>> ReadAllAs(TReader &stream) noexcept
     {
       stream.Open();
       if (!stream.IsOpen())
@@ -51,7 +51,7 @@ namespace Krys::IO
     }
 
     template <DerivedFrom<IStreamReader> TReader>
-    NO_DISCARD static Expected<List<byte>> ReadAll(TReader &stream) noexcept
+    KRYS_NODISCARD static Expected<List<byte>> ReadAll(TReader &stream) noexcept
     {
       stream.Open();
       if (!stream.IsOpen())
@@ -79,7 +79,7 @@ namespace Krys::IO
     }
 
     template <DerivedFrom<IStreamReader> TReader>
-    NO_DISCARD static Expected<string> ReadAllText(TReader &stream) noexcept
+    KRYS_NODISCARD static Expected<string> ReadAllText(TReader &stream) noexcept
     {
       return ReadAll(stream).and_then(
         [](List<byte> &&bytes) -> Expected<string>

@@ -1,5 +1,6 @@
-#pragma once
+﻿#pragma once
 
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.UI/Styles/Enums/Display.hpp"
 #include <cstdint>
 #include <forward_list>
@@ -73,7 +74,7 @@ namespace Krys::UI
         {
           // if the current node has no more children, try to backtrack and
           // visit its successor
-          if (_backtrack.empty()) [[likely]]
+          if (_backtrack.empty()) KRYS_LIKELY
           {
             // if there are no nodes to backtrack to, the last node has been
             // visited
@@ -97,8 +98,7 @@ namespace Krys::UI
           ++_childIndex;
 
           // skip all display: contents nodes, possibly going deeper into the tree
-          if (_iterNode->GetChild(_childIndex)->GetStyle().GetDisplay() == Display::Contents)
-            [[unlikely]]
+          if (_iterNode->GetChild(_childIndex)->GetStyle().GetDisplay() == Display::Contents) KRYS_UNLIKELY
           {
             SkipContentsNodes();
           }
@@ -109,8 +109,7 @@ namespace Krys::UI
       {
         // get the node that would be returned from the iterator
         auto currentNode = _iterNode->GetChild(_childIndex);
-        while (currentNode->GetStyle().GetDisplay() == Display::Contents
-               && currentNode->GetChildCount() > 0)
+        while (currentNode->GetStyle().GetDisplay() == Display::Contents && currentNode->GetChildCount() > 0)
         {
           // if it has display: contents set, it shouldn't be returned but its
           // children should in its place push the current node and child index
@@ -145,7 +144,7 @@ namespace Krys::UI
       if (_node->GetChildCount() > 0)
       {
         auto result = Iterator(_node, 0);
-        if (_node->GetChild(0)->GetStyle().GetDisplay() == Display::Contents) [[unlikely]]
+        if (_node->GetChild(0)->GetStyle().GetDisplay() == Display::Contents) KRYS_UNLIKELY
         {
           result.SkipContentsNodes();
         }

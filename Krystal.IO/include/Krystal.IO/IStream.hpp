@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.IO/Common.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
@@ -17,7 +17,7 @@ namespace Krys::IO
     virtual ~IStreamReader() = default;
 
     /// @brief Checks if the stream is open.
-    NO_DISCARD virtual bool IsOpen() const noexcept = 0;
+    KRYS_NODISCARD virtual bool IsOpen() const noexcept = 0;
 
     /// @brief Opens the stream. If the stream is already open, this function does nothing.
     virtual bool Open() = 0;
@@ -35,17 +35,17 @@ namespace Krys::IO
 
     /// @brief Peeks at the next byte in the stream without advancing the position.
     /// @return True if a byte was successfully peeked, false if the end of the stream was reached.
-    NO_DISCARD virtual bool Peek(byte &next) noexcept = 0;
+    KRYS_NODISCARD virtual bool Peek(byte &next) noexcept = 0;
 
     /// @brief Gets the total size of the stream in bytes, or 0 if the size is unknown.
-    NO_DISCARD virtual uint64 Size() const noexcept = 0;
+    KRYS_NODISCARD virtual uint64 Size() const noexcept = 0;
 
     /// @brief Gets the current position in the stream.
-    NO_DISCARD virtual uint64 Position() noexcept = 0;
+    KRYS_NODISCARD virtual uint64 Position() noexcept = 0;
 
     /// @brief Checks if the end of the stream has been reached.
     /// @return True if the end of the stream has been reached, false otherwise.
-    NO_DISCARD virtual bool EndOfStream() const noexcept = 0;
+    KRYS_NODISCARD virtual bool EndOfStream() const noexcept = 0;
   };
 
   /// @brief Interface for writing to a stream.
@@ -58,7 +58,7 @@ namespace Krys::IO
     virtual ~IStreamWriter() = default;
 
     /// @brief Checks if the stream is open.
-    NO_DISCARD virtual bool IsOpen() const noexcept = 0;
+    KRYS_NODISCARD virtual bool IsOpen() const noexcept = 0;
 
     /// @brief Opens the stream writer for writing. If the stream is already open, this function does nothing.
     virtual bool Open() = 0;
@@ -75,10 +75,10 @@ namespace Krys::IO
     virtual bool Seek(int64 offset, SeekOrigin origin = SeekOrigin::Current) noexcept = 0;
 
     /// @brief Gets the size of the stream in bytes.
-    NO_DISCARD virtual uint64 Size() const noexcept = 0;
+    KRYS_NODISCARD virtual uint64 Size() const noexcept = 0;
 
     /// @brief Gets the current position in the stream.
-    NO_DISCARD virtual uint64 Position() noexcept = 0;
+    KRYS_NODISCARD virtual uint64 Position() noexcept = 0;
 
     /// @brief Flushes any buffered data to the underlying storage, if applicable.
     virtual void Flush() noexcept = 0;

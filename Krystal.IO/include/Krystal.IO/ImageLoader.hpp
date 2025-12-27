@@ -2,7 +2,7 @@
 
 #include "Krystal.IO/Image.hpp"
 #include "Krystal.IO/IStream.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 
@@ -27,9 +27,9 @@ namespace Krys::IO
     ~ImageLoader() = default;
 
     /// @brief Checks if the image from the stream is a HDR image.
-    NO_DISCARD bool IsHDRImage(IStreamReader &stream);
+    KRYS_NODISCARD bool IsHDRImage(IStreamReader &stream);
 
     /// @brief Loads an image from the given stream.
-    NO_DISCARD Expected<Image> Load(IStreamReader &stream, const ImageLoadSettings &settings = {});
+    KRYS_NODISCARD Expected<Image> Load(IStreamReader &stream, const ImageLoadSettings &settings = {});
   };
 }

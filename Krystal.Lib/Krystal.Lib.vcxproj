@@ -136,6 +136,7 @@
     <ClInclude Include="include\Krystal.Lib\Commands\CommandList.hpp" />
     <ClInclude Include="include\Krystal.Lib\Commands\CommandListReader.hpp" />
     <ClInclude Include="include\Krystal.Lib\Commands\CommandType.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\Compiler.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\TypeTraits.hpp" />
     <ClInclude Include="include\Krystal.Lib\Handle.hpp" />
     <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp" />
@@ -157,7 +158,6 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Types\Array.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Core\Attributes.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Bit.hpp" />
     <ClInclude Include="include\Krystal.Lib\ByteUtils.hpp" />
     <ClInclude Include="include\Krystal.Lib\ComparisonHelpers.hpp" />

@@ -50,7 +50,7 @@ namespace Krys::UI
       }
     }
 
-    NO_DISCARD Gfx::RenderTargetHandle Acquire(Maths::Vec2 size)
+    KRYS_NODISCARD Gfx::RenderTargetHandle Acquire(Maths::Vec2 size)
     {
       const uint32 Samples = 2u;
 

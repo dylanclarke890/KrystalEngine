@@ -4,7 +4,7 @@
 #include "Krystal.IO/IFileBackend.hpp"
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Nullable.hpp"
@@ -44,7 +44,7 @@ namespace Krys::IO
     }
 
     /// @brief Finalizes the virtual file system and returns it.
-    NO_DISCARD Unique<VirtualFileSystem> Build();
+    KRYS_NODISCARD Unique<VirtualFileSystem> Build();
   };
 
   /// @brief A virtual file system that can contain multiple backends, providing unified access to files
@@ -64,21 +64,21 @@ namespace Krys::IO
     ~VirtualFileSystem() noexcept = default;
 
     /// @brief Check if the path exists in any of the configured backends.
-    NO_DISCARD bool Exists(const Path &path) const noexcept;
+    KRYS_NODISCARD bool Exists(const Path &path) const noexcept;
 
     /// @brief Check if the path exists in any of the configured backends and is a directory.
-    NO_DISCARD bool IsDirectory(const Path &path) const noexcept;
+    KRYS_NODISCARD bool IsDirectory(const Path &path) const noexcept;
 
     /// @brief Check if the path exists in any of the configured backends and is a file.
-    NO_DISCARD bool IsFile(const Path &path) const noexcept;
+    KRYS_NODISCARD bool IsFile(const Path &path) const noexcept;
 
     /// @returns Gets a stream reader for the given path. If multiple backends match, the first one is used
     /// where the file exists. If no backend matches or the file doesn't exist, returns a null pointer.
-    NO_DISCARD Unique<IStreamReader> GetReader(const Path &path, ReadFlags flags) const noexcept;
+    KRYS_NODISCARD Unique<IStreamReader> GetReader(const Path &path, ReadFlags flags) const noexcept;
 
     /// @returns Gets a stream writer for the given path. If multiple backends match, the first one is used.
     /// If no backend matches or the file doesn't exist, returns a null pointer.
-    NO_DISCARD Unique<IStreamWriter> GetWriter(const Path &path, WriteFlags flags) const noexcept;
+    KRYS_NODISCARD Unique<IStreamWriter> GetWriter(const Path &path, WriteFlags flags) const noexcept;
 
     /// @brief Creates a file at the specified path.
     /// @param path The path where the file should be created.
@@ -94,7 +94,7 @@ namespace Krys::IO
     /// @brief Gets a list of files from all backends that match the specified path.
     /// @param directory The directory to search.
     /// @param flags Flags to control the search behavior.
-    NO_DISCARD List<VFSFileEntry> SearchFiles(const Path &directory,
+    KRYS_NODISCARD List<VFSFileEntry> SearchFiles(const Path &directory,
                                               FileSearchFlags flags = FileSearchFlags::None) const;
 
   private:
@@ -103,9 +103,9 @@ namespace Krys::IO
     VirtualFileSystem() = default;
 
     /// @returns The first backend that matches the given path.
-    NO_DISCARD Nullable<Pair<Path, Ptr<IFileBackend>>> GetBackend(const Path &path) const noexcept;
+    KRYS_NODISCARD Nullable<Pair<Path, Ptr<IFileBackend>>> GetBackend(const Path &path) const noexcept;
 
     /// @returns A list of all backends that match the given path.
-    NO_DISCARD List<Pair<Path, Ptr<IFileBackend>>> GetBackends(const Path &path) const noexcept;
+    KRYS_NODISCARD List<Pair<Path, Ptr<IFileBackend>>> GetBackends(const Path &path) const noexcept;
   };
 }

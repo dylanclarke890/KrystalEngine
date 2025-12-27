@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/Detection.hpp"
 #include "Krystal.Lib/Types/Pair.hpp"
@@ -45,7 +45,7 @@ namespace Krys
 
   public:
     /// @brief return the value of a given key (O(log2(index of n))) using exponential search
-    NO_DISCARD constexpr TValue GetValueOfKey(const TKey key) noexcept
+    KRYS_NODISCARD constexpr TValue GetValueOfKey(const TKey key) noexcept
     {
       if (_map[0].first == key)
       {
@@ -65,7 +65,7 @@ namespace Krys
 
     /// @brief return the key of a given value (O(n)) if there are several identical value's, return the key
     /// of the first value according to dictionary construction order
-    NO_DISCARD constexpr TKey GetKeyOfValue(const TValue value) noexcept
+    KRYS_NODISCARD constexpr TKey GetKeyOfValue(const TValue value) noexcept
     {
       bool found {false};
       size_t i = 0u;

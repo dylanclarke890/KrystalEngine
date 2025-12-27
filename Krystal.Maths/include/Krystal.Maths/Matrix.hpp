@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Traits.hpp"
@@ -42,12 +42,12 @@ private:                                                                        
 
 #define MATRIX_BINARY_OPERATOR(OP)                                                                           \
   template <MATRIX_TEMPLATE_PARAMS>                                                                          \
-  NO_DISCARD constexpr auto CONCAT(operator, OP)(const MATRIX_TYPE &lhs, const MATRIX_TYPE &rhs) noexcept    \
+  KRYS_NODISCARD constexpr auto CONCAT(operator, OP)(const MATRIX_TYPE &lhs, const MATRIX_TYPE &rhs) noexcept    \
   {                                                                                                          \
     return Zip(lhs, rhs, [](auto l, auto r) { return l OP r; });                                             \
   }                                                                                                          \
   template <MATRIX_TEMPLATE_PARAMS>                                                                          \
-  NO_DISCARD constexpr auto CONCAT(operator, OP)(const MATRIX_TYPE &lhs, T scalar) noexcept                  \
+  KRYS_NODISCARD constexpr auto CONCAT(operator, OP)(const MATRIX_TYPE &lhs, T scalar) noexcept                  \
   {                                                                                                          \
     return MapEach(lhs, [&](auto v) { return v OP scalar; });                                                \
   }
@@ -66,7 +66,7 @@ private:                                                                        
 
 #define MATRIX_UNARY_OPERATOR(OP)                                                                            \
   template <MATRIX_TEMPLATE_PARAMS>                                                                          \
-  NO_DISCARD constexpr auto CONCAT(operator, OP)(const MATRIX_TYPE &rhs) noexcept                            \
+  KRYS_NODISCARD constexpr auto CONCAT(operator, OP)(const MATRIX_TYPE &rhs) noexcept                            \
   {                                                                                                          \
     return MapEach(rhs, [](auto v) { return OP v; });                                                        \
   }
@@ -79,12 +79,12 @@ private:                                                                        
   constexpr Matrix &operator=(const Matrix &) noexcept = default;                                            \
   constexpr Matrix &operator=(Matrix &&) noexcept = default;                                                 \
   constexpr auto operator<=>(const Matrix &) const noexcept = default;                                       \
-  NO_DISCARD constexpr ColumnType &operator[](int column) noexcept                                           \
+  KRYS_NODISCARD constexpr ColumnType &operator[](int column) noexcept                                           \
   {                                                                                                          \
     assert(column >= 0 && column < Columns);                                                                 \
     return _data[column];                                                                                    \
   }                                                                                                          \
-  NO_DISCARD constexpr ColumnType const &operator[](int column) const noexcept                               \
+  KRYS_NODISCARD constexpr ColumnType const &operator[](int column) const noexcept                               \
   {                                                                                                          \
     assert(column >= 0 && column < Columns);                                                                 \
     return _data[column];                                                                                    \
@@ -368,7 +368,7 @@ namespace Krys::Maths
 
   /// @brief Creates an identity matrix of the specified size.
   template <MatrixType Mat>
-  NO_DISCARD constexpr auto Identity() noexcept
+  KRYS_NODISCARD constexpr auto Identity() noexcept
   {
     constexpr int C = Traits<Mat>::Columns;
     constexpr int R = Traits<Mat>::Rows;
@@ -394,7 +394,7 @@ namespace Krys::Maths
 
   /// @brief Map each component of the matrix using the provided function.
   template <MATRIX_TEMPLATE_PARAMS, RegularCallable<T> F>
-  NO_DISCARD constexpr auto MapEach(const MATRIX_TYPE &mat, const F &func) noexcept
+  KRYS_NODISCARD constexpr auto MapEach(const MATRIX_TYPE &mat, const F &func) noexcept
   {
     MATRIX_STATIC_ASSERT(MATRIX_VALID_LENGTH_CONDITION(C, R));
 
@@ -430,7 +430,7 @@ namespace Krys::Maths
 
   /// @brief Apply a function to each component of the matrix.
   template <MATRIX_TEMPLATE_PARAMS, RegularCallable<T> F>
-  NO_DISCARD constexpr void ForEach(const MATRIX_TYPE &mat, const F &func) noexcept
+  KRYS_NODISCARD constexpr void ForEach(const MATRIX_TYPE &mat, const F &func) noexcept
   {
     MATRIX_STATIC_ASSERT(MATRIX_VALID_LENGTH_CONDITION(C, R));
 
@@ -460,7 +460,7 @@ namespace Krys::Maths
 
   /// @brief Zip two matrices together using the provided function.
   template <MATRIX_TEMPLATE_PARAMS, RegularCallable<T, T> F>
-  NO_DISCARD constexpr auto Zip(const MATRIX_TYPE &lhs, const MATRIX_TYPE &rhs, const F &func) noexcept
+  KRYS_NODISCARD constexpr auto Zip(const MATRIX_TYPE &lhs, const MATRIX_TYPE &rhs, const F &func) noexcept
   {
     MATRIX_STATIC_ASSERT(MATRIX_VALID_LENGTH_CONDITION(C, R));
 
@@ -496,7 +496,7 @@ namespace Krys::Maths
 
   /// @brief Zip three matrices together using the provided function.
   template <MATRIX_TEMPLATE_PARAMS, RegularCallable<T, T, T> F>
-  NO_DISCARD constexpr auto Zip(const MATRIX_TYPE &a, const MATRIX_TYPE &b, const MATRIX_TYPE &c,
+  KRYS_NODISCARD constexpr auto Zip(const MATRIX_TYPE &a, const MATRIX_TYPE &b, const MATRIX_TYPE &c,
                                 const F &func) noexcept
   {
     MATRIX_STATIC_ASSERT(MATRIX_VALID_LENGTH_CONDITION(C, R));
@@ -533,7 +533,7 @@ namespace Krys::Maths
 
   /// @brief Computes the sum of all components of the matrix.
   template <MATRIX_TEMPLATE_PARAMS>
-  NO_DISCARD constexpr T Sum(const MATRIX_TYPE &m) noexcept
+  KRYS_NODISCARD constexpr T Sum(const MATRIX_TYPE &m) noexcept
   {
     T sum = T(0);
     ForEach(m, [&sum](auto val) { sum += val; });
@@ -542,7 +542,7 @@ namespace Krys::Maths
 
   /// @brief Computes the sum of all components of the matrix after applying a function to each component.
   template <MATRIX_TEMPLATE_PARAMS, RegularCallable<T> F>
-  NO_DISCARD constexpr auto Sum(const MATRIX_TYPE &m, const F &func) noexcept
+  KRYS_NODISCARD constexpr auto Sum(const MATRIX_TYPE &m, const F &func) noexcept
   {
     using U = std::invoke_result_t<F, T>;
 
@@ -736,13 +736,13 @@ namespace Krys::Maths
   MATRIX_UNARY_OPERATOR(~);
 
   template <MATRIX_TEMPLATE_PARAMS>
-  NO_DISCARD constexpr auto operator+(T scalar, const MATRIX_TYPE &mat) noexcept
+  KRYS_NODISCARD constexpr auto operator+(T scalar, const MATRIX_TYPE &mat) noexcept
   {
     return mat + scalar;
   }
 
   template <MATRIX_TEMPLATE_PARAMS>
-  NO_DISCARD constexpr auto operator*(T scalar, const MATRIX_TYPE &mat) noexcept
+  KRYS_NODISCARD constexpr auto operator*(T scalar, const MATRIX_TYPE &mat) noexcept
   {
     return mat * scalar;
   }
@@ -770,7 +770,7 @@ namespace Krys::Maths
 
   /// @brief Matrix multiplication with a vector.
   template <MATRIX_TEMPLATE_PARAMS>
-  NO_DISCARD constexpr auto operator*(const Matrix<T, C, R> &lhs, const Vector<T, C> &rhs) noexcept
+  KRYS_NODISCARD constexpr auto operator*(const Matrix<T, C, R> &lhs, const Vector<T, C> &rhs) noexcept
   {
     Vector<T, R> result {T(0)};
     for (int row = 0; row < R; ++row)
@@ -781,14 +781,14 @@ namespace Krys::Maths
 
   /// @brief Component-wise multiplication (Hadamard product) of two matrices.
   template <MATRIX_TEMPLATE_PARAMS>
-  NO_DISCARD constexpr auto Hadamard(const MATRIX_TYPE &lhs, const MATRIX_TYPE &rhs) noexcept
+  KRYS_NODISCARD constexpr auto Hadamard(const MATRIX_TYPE &lhs, const MATRIX_TYPE &rhs) noexcept
   {
     return Zip(lhs, rhs, [](auto x, auto y) { return x * y; });
   }
 
   /// @brief Computes the transpose of `m`.
   template <MATRIX_TEMPLATE_PARAMS>
-  NO_DISCARD constexpr auto Transpose(const MATRIX_TYPE &m) noexcept
+  KRYS_NODISCARD constexpr auto Transpose(const MATRIX_TYPE &m) noexcept
   {
     MATRIX_STATIC_ASSERT(MATRIX_VALID_LENGTH_CONDITION(C, R));
 
@@ -840,7 +840,7 @@ namespace Krys::Maths
 
   /// @brief Computes the determinant of `m`. `m` must be a square matrix.
   template <MATRIX_TEMPLATE_PARAMS>
-  NO_DISCARD constexpr T Determinant(const MATRIX_TYPE &m) noexcept
+  KRYS_NODISCARD constexpr T Determinant(const MATRIX_TYPE &m) noexcept
   {
     MATRIX_STATIC_ASSERT(C == R);
 
@@ -872,7 +872,7 @@ namespace Krys::Maths
 
   /// @brief Computes the inverse of `m`.
   template <MATRIX_TEMPLATE_PARAMS>
-  NO_DISCARD constexpr auto Inverse(const MATRIX_TYPE &m) noexcept
+  KRYS_NODISCARD constexpr auto Inverse(const MATRIX_TYPE &m) noexcept
   {
     MATRIX_STATIC_ASSERT(R == C);
 

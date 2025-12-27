@@ -36,7 +36,7 @@ namespace Krys::Gfx::OpenGL
 
     MOVE_SWAP(Font)
 
-    NO_DISCARD static Font BitmapAtlas(FontFamilyHandle fontFamily, TextureHandle texture,
+    KRYS_NODISCARD static Font BitmapAtlas(FontFamilyHandle fontFamily, TextureHandle texture,
                                        const FontAtlasData &data, float ptSize) noexcept
     {
       auto font = Font(FontType::Bitmap, fontFamily, texture, data);
@@ -44,7 +44,7 @@ namespace Krys::Gfx::OpenGL
       return font;
     }
 
-    NO_DISCARD static Font SDFAtlas(FontFamilyHandle fontFamily, TextureHandle texture,
+    KRYS_NODISCARD static Font SDFAtlas(FontFamilyHandle fontFamily, TextureHandle texture,
                                     const FontAtlasData &data,
                                     const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
     {
@@ -53,7 +53,7 @@ namespace Krys::Gfx::OpenGL
       return font;
     }
 
-    NO_DISCARD static Font MSDFAtlas(FontFamilyHandle fontFamily, TextureHandle texture,
+    KRYS_NODISCARD static Font MSDFAtlas(FontFamilyHandle fontFamily, TextureHandle texture,
                                      const FontAtlasData &data,
                                      const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
     {
@@ -62,7 +62,7 @@ namespace Krys::Gfx::OpenGL
       return font;
     }
 
-    NO_DISCARD static Font MTSDFAtlas(FontFamilyHandle fontFamily, TextureHandle texture,
+    KRYS_NODISCARD static Font MTSDFAtlas(FontFamilyHandle fontFamily, TextureHandle texture,
                                       const FontAtlasData &data,
                                       const SDFParams &sdfParams = SDFParams::Defaults()) noexcept
     {
@@ -71,42 +71,42 @@ namespace Krys::Gfx::OpenGL
       return font;
     }
 
-    NO_DISCARD FontType Type() const noexcept
+    KRYS_NODISCARD FontType Type() const noexcept
     {
       return _type;
     }
 
-    NO_DISCARD FontFamilyHandle Family() const noexcept
+    KRYS_NODISCARD FontFamilyHandle Family() const noexcept
     {
       return _fontFamily;
     }
 
-    NO_DISCARD TextureHandle AtlasTexture() const noexcept
+    KRYS_NODISCARD TextureHandle AtlasTexture() const noexcept
     {
       return _atlasTexture;
     }
 
-    NO_DISCARD float PtSize() const noexcept
+    KRYS_NODISCARD float PtSize() const noexcept
     {
       return _ptSize;
     }
 
-    NO_DISCARD const SDFParams &SDFParams() const noexcept
+    KRYS_NODISCARD const SDFParams &SDFParams() const noexcept
     {
       return _sdfParams;
     }
 
-    NO_DISCARD const CharacterMap &Characters() const noexcept
+    KRYS_NODISCARD const CharacterMap &Characters() const noexcept
     {
       return _characters;
     }
 
-    NO_DISCARD const Maths::Vec2u &AtlasSize() const noexcept
+    KRYS_NODISCARD const Maths::Vec2u &AtlasSize() const noexcept
     {
       return _atlasSize;
     }
 
-    NO_DISCARD const FontMetrics &Metrics() const noexcept
+    KRYS_NODISCARD const FontMetrics &Metrics() const noexcept
     {
       return _metrics;
     }

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
 #include "Krystal.Lib/Core/Endian.hpp"
 #include "Krystal.Lib/Types/List.hpp"
@@ -35,25 +35,25 @@ namespace Krys::Text
 
     constexpr virtual ~UTF32Encoding() noexcept = default;
 
-    NO_DISCARD constexpr Span<const byte> GetBOM() const noexcept override
+    KRYS_NODISCARD constexpr Span<const byte> GetBOM() const noexcept override
     {
       return IsBigEndian ? Span<const byte> {BOM_BE.data(), BOM_BE.size()}
                          : Span<const byte> {BOM_LE.data(), BOM_LE.size()};
     }
 
-    NO_DISCARD constexpr bool IsSingleByte() const noexcept override
+    KRYS_NODISCARD constexpr bool IsSingleByte() const noexcept override
     {
       return false;
     }
 
-    NO_DISCARD constexpr List<byte> Encode(utf8_stringview characters) const noexcept override
+    KRYS_NODISCARD constexpr List<byte> Encode(utf8_stringview characters) const noexcept override
     {
       List<byte> bytes;
       Encode(characters, bytes);
       return bytes;
     }
 
-    NO_DISCARD constexpr utf8_string Decode(Span<const byte> bytes) const noexcept override
+    KRYS_NODISCARD constexpr utf8_string Decode(Span<const byte> bytes) const noexcept override
     {
       utf8_string characters;
       Decode(bytes, characters);

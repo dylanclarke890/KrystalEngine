@@ -32,7 +32,7 @@ namespace Krys::Gfx
       }
     }
 
-    NO_DISCARD ResourceHandle Get(const CacheKey &key) noexcept
+    KRYS_NODISCARD ResourceHandle Get(const CacheKey &key) noexcept
     {
       auto it = _cache.find(key);
       if (it != _cache.end())

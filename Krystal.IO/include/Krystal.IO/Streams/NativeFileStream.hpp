@@ -3,7 +3,7 @@
 #include "Krystal.IO/Common.hpp"
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <fstream>
@@ -30,7 +30,7 @@ namespace Krys::IO
     ~NativeFileReader() noexcept override;
 
     /// @brief Checks if the stream is open.
-    NO_DISCARD bool IsOpen() const noexcept override;
+    KRYS_NODISCARD bool IsOpen() const noexcept override;
 
     /// @brief Opens the stream. If the stream is already open, this function does nothing.
     bool Open() override;
@@ -52,16 +52,16 @@ namespace Krys::IO
     /// @brief Peeks at the next byte in the stream without advancing the position.
     /// @param next A reference to a byte where the peeked value will be stored.
     /// @returns True if a byte was successfully peeked, false if the end of the stream was reached.
-    NO_DISCARD bool Peek(byte &next) noexcept override;
+    KRYS_NODISCARD bool Peek(byte &next) noexcept override;
 
     /// @brief Gets the total size of the stream in bytes, or 0 if the size is unknown.
-    NO_DISCARD uint64 Size() const noexcept override;
+    KRYS_NODISCARD uint64 Size() const noexcept override;
 
     /// @brief Gets the current position in the stream.
-    NO_DISCARD uint64 Position() noexcept override;
+    KRYS_NODISCARD uint64 Position() noexcept override;
 
     /// @brief Checks if the end of the stream has been reached.
-    NO_DISCARD bool EndOfStream() const noexcept override;
+    KRYS_NODISCARD bool EndOfStream() const noexcept override;
   };
 
   /// @brief A stream writer that writes to a native file on the filesystem.
@@ -84,7 +84,7 @@ namespace Krys::IO
     ~NativeFileWriter() noexcept override;
 
     /// @brief Checks if the stream is open.
-    NO_DISCARD bool IsOpen() const noexcept override;
+    KRYS_NODISCARD bool IsOpen() const noexcept override;
 
     /// @brief Opens the stream writer for writing. If the stream is already open, this function does nothing.
     bool Open() override;
@@ -105,10 +105,10 @@ namespace Krys::IO
     bool Seek(int64 offset, SeekOrigin origin) noexcept override;
 
     /// @brief Gets the total size of the stream in bytes, or 0 if the size is unknown.
-    NO_DISCARD uint64 Size() const noexcept override;
+    KRYS_NODISCARD uint64 Size() const noexcept override;
 
     /// @brief Gets the current position in the stream.
-    NO_DISCARD uint64 Position() noexcept override;
+    KRYS_NODISCARD uint64 Position() noexcept override;
 
     /// @brief Flushes the stream, ensuring all buffered data is written to the file.
     void Flush() noexcept override;

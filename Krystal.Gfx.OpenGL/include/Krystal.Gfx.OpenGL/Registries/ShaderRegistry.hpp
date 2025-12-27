@@ -44,7 +44,7 @@ namespace Krys::Gfx::OpenGL
     {
     }
 
-    NO_DISCARD ShaderHandle Load(const IO::Path &vertex, const IO::Path &fragment) noexcept override
+    KRYS_NODISCARD ShaderHandle Load(const IO::Path &vertex, const IO::Path &fragment) noexcept override
     {
       auto key = vertex.ToString() + "|" + fragment.ToString();
       if (auto cached = _cache.Get(key); cached.IsValid())
@@ -56,7 +56,7 @@ namespace Krys::Gfx::OpenGL
       return AddShader(key, std::move(shader));
     }
 
-    NO_DISCARD ShaderHandle Load(const IO::Path &vertex, const IO::Path &geometry,
+    KRYS_NODISCARD ShaderHandle Load(const IO::Path &vertex, const IO::Path &geometry,
                                  const IO::Path &fragment) noexcept override
     {
       auto key = vertex.ToString() + "|" + geometry.ToString() + "|" + fragment.ToString();
@@ -69,7 +69,7 @@ namespace Krys::Gfx::OpenGL
       return AddShader(key, std::move(shader));
     }
 
-    NO_DISCARD ShaderHandle Load(const IO::Path &vertex, const IO::Path &fragment,
+    KRYS_NODISCARD ShaderHandle Load(const IO::Path &vertex, const IO::Path &fragment,
                                  const ShaderPreprocessorConfig &config) noexcept
     {
       string defines {};
@@ -88,7 +88,7 @@ namespace Krys::Gfx::OpenGL
       return AddShader(key, std::move(shader));
     }
 
-    NO_DISCARD ShaderHandle GetBuiltin(BuiltinShader builtin) noexcept override
+    KRYS_NODISCARD ShaderHandle GetBuiltin(BuiltinShader builtin) noexcept override
     {
       // auto profiler = Krys::Debug::ScopedProfiler("GetBuiltin");
 
@@ -154,20 +154,20 @@ namespace Krys::Gfx::OpenGL
       return false;
     }
 
-    NO_DISCARD Shader &Get(ShaderHandle handle) noexcept
+    KRYS_NODISCARD Shader &Get(ShaderHandle handle) noexcept
     {
       return _shaders.Get(handle);
     }
 
   private:
-    NO_DISCARD ShaderHandle AddShader(const string &key, Shader &&shader) noexcept
+    KRYS_NODISCARD ShaderHandle AddShader(const string &key, Shader &&shader) noexcept
     {
       auto handle = _shaders.Add(std::move(shader));
       _cache.Add(key, handle);
       return handle;
     }
 
-    NO_DISCARD string ReadFile(const IO::Path &filepath) noexcept
+    KRYS_NODISCARD string ReadFile(const IO::Path &filepath) noexcept
     {
       Unique<IO::IStreamReader> reader = _vfs.GetReader(BaseDirectory / filepath, IO::ReadFlags::None);
       assert(reader != nullptr && "Failed to create stream reader for shader file.");
@@ -178,14 +178,14 @@ namespace Krys::Gfx::OpenGL
       return result.value();
     }
 
-    NO_DISCARD static string AddDefines(const string &source, const string &defines) noexcept
+    KRYS_NODISCARD static string AddDefines(const string &source, const string &defines) noexcept
     {
       const string lineDirective = "#line 1\n";
       string versionLine = source.substr(0, source.find('\n') + 1);
       return versionLine + defines + lineDirective + source.substr(versionLine.size());
     }
 
-    NO_DISCARD ShaderHandle GetBuiltin_Text(FontType fontType, bool outlined)
+    KRYS_NODISCARD ShaderHandle GetBuiltin_Text(FontType fontType, bool outlined)
     {
       ShaderPreprocessorConfig cfg {};
       switch (fontType)
@@ -206,21 +206,21 @@ namespace Krys::Gfx::OpenGL
       return Load(vertexShader, fragmentShader, cfg);
     }
 
-    NO_DISCARD ShaderHandle GetBuiltin_Shape2DColour()
+    KRYS_NODISCARD ShaderHandle GetBuiltin_Shape2DColour()
     {
       const auto vertexShader = IO::Path("2d-shape.vert");
       const auto fragmentShader = IO::Path("2d-shape-colour.frag");
       return Load(vertexShader, fragmentShader);
     }
 
-    NO_DISCARD ShaderHandle GetBuiltin_Shape2DTexture()
+    KRYS_NODISCARD ShaderHandle GetBuiltin_Shape2DTexture()
     {
       const auto vertexShader = IO::Path("2d-shape.vert");
       const auto fragmentShader = IO::Path("2d-shape-texture.frag");
       return Load(vertexShader, fragmentShader);
     }
 
-    NO_DISCARD ShaderHandle GetBuiltin_PostProcessPassthrough()
+    KRYS_NODISCARD ShaderHandle GetBuiltin_PostProcessPassthrough()
     {
       const auto vertexShader = IO::Path("post-process.vert");
       const auto fragmentShader = IO::Path("post-process-passthrough.frag");

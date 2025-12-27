@@ -52,7 +52,7 @@ namespace Krys::Gfx::OpenGL
       }
     }
 
-    NO_DISCARD GLuint Id() const noexcept
+    KRYS_NODISCARD GLuint Id() const noexcept
     {
       return _id;
     }

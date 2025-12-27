@@ -49,7 +49,7 @@ namespace Krys::UI
 
     /// @brief Create a new element.
     template <DerivedFrom<Element> TElement, typename... Args>
-    NO_DISCARD ElementHandle Create(Args &&...args)
+    KRYS_NODISCARD ElementHandle Create(Args &&...args)
     {
       ElementHandle handle = _elements.NextHandle();
       _elements.Set(handle, TElement(handle, _layoutConfig, std::forward<Args>(args)...));
@@ -59,7 +59,7 @@ namespace Krys::UI
       return handle;
     }
 
-    NO_DISCARD Element &Get(ElementHandle element)
+    KRYS_NODISCARD Element &Get(ElementHandle element)
     {
       assert(element.IsValid() && "Invalid handle");
       return _elements.Get(element);

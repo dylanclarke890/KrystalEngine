@@ -136,12 +136,12 @@ namespace Krys::Gfx::OpenGL
 #undef IsUniformType
     }
 
-    NO_DISCARD GLuint Id() const noexcept
+    KRYS_NODISCARD GLuint Id() const noexcept
     {
       return _id;
     }
 
-    NO_DISCARD GLuint GetSamplerUnit(const string &samplerName) const noexcept
+    KRYS_NODISCARD GLuint GetSamplerUnit(const string &samplerName) const noexcept
     {
       auto it = _layout.Samplers.find(samplerName);
       if (it != _layout.Samplers.end())

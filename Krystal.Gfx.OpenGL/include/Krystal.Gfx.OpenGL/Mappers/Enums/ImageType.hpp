@@ -2,11 +2,11 @@
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx/Enums/ImageType.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
-  NO_DISCARD constexpr inline GLenum MapImageType(ImageType type) noexcept
+  KRYS_NODISCARD constexpr inline GLenum MapImageType(ImageType type) noexcept
   {
     switch (type)
     {
@@ -21,7 +21,7 @@ namespace Krys::Gfx::OpenGL
     }
   }
 
-  NO_DISCARD constexpr inline ImageType MapImageType(GLenum target) noexcept
+  KRYS_NODISCARD constexpr inline ImageType MapImageType(GLenum target) noexcept
   {
     switch (target)
     {

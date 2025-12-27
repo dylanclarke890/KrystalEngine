@@ -1,4 +1,4 @@
-#include "Krystal.Log/ILogger.hpp"
+﻿#include "Krystal.Log/ILogger.hpp"
 
 #define SPDLOG_HEADER_ONLY
 #include <cassert>
@@ -56,7 +56,7 @@ namespace Krys::Log
       _settings.Level = level;
     }
 
-    NO_DISCARD Level GetLevel() const noexcept
+    KRYS_NODISCARD Level GetLevel() const noexcept
     {
       return _settings.Level;
     }

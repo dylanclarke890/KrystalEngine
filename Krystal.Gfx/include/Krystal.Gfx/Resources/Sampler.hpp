@@ -18,7 +18,7 @@ namespace Krys::Gfx
     WrapMode WrapR {WrapMode::Repeat};
     float AnisotropicLevel {1.0f};
 
-    NO_DISCARD auto operator<=>(const SamplerDesc &other) const noexcept = default;
+    KRYS_NODISCARD auto operator<=>(const SamplerDesc &other) const noexcept = default;
 
     constexpr static float DefaultAnisotropicLevel = 4.0f;
 

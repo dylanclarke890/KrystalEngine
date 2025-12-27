@@ -98,6 +98,4 @@ namespace Krys
 
 #define STRINGIFY_IMPL(x) #x
 #define STRINGIFY(x) STRINGIFY_IMPL(x)
-
-#define IS_COMPILE_TIME std::is_constant_evaluated()
 }

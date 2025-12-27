@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Core/Hash.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include <xhash>
@@ -37,26 +37,26 @@ namespace Krys
     }
 
     /// @brief Compares this `StringId` with another for equality.
-    NO_DISCARD constexpr bool operator==(const StringId &other) const noexcept
+    KRYS_NODISCARD constexpr bool operator==(const StringId &other) const noexcept
     {
       return _hash == other._hash;
     }
 
     /// @brief Compares this `StringId` with another for inequality.
-    NO_DISCARD constexpr bool operator!=(const StringId &other) const noexcept
+    KRYS_NODISCARD constexpr bool operator!=(const StringId &other) const noexcept
     {
       return !(*this == other);
     }
 
     /// @brief Returns the hash value of the string id.
-    NO_DISCARD constexpr operator uint32() const noexcept
+    KRYS_NODISCARD constexpr operator uint32() const noexcept
     {
       return _hash;
     }
   };
 
   /// @brief Hashes a string literal at compile time.
-  NO_DISCARD constexpr uint32 operator""_sid(char const *s, size_t count) noexcept
+  KRYS_NODISCARD constexpr uint32 operator""_sid(char const *s, size_t count) noexcept
   {
     return StringId(s, count);
   }
@@ -71,7 +71,7 @@ namespace std
     /// @brief Computes the hash of a `Krys::StringId`.
     /// @param id The `Krys::StringId` to hash.
     /// @return The hash value.
-    NO_DISCARD size_t operator()(const Krys::StringId &id) const noexcept
+    KRYS_NODISCARD size_t operator()(const Krys::StringId &id) const noexcept
     {
       return static_cast<size_t>(id);
     }

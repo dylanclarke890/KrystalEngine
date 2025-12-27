@@ -31,7 +31,7 @@ namespace Krys::Gfx::OpenGL
     {
     }
 
-    NO_DISCARD virtual BufferHandle Create(const BufferDesc &desc) override
+    KRYS_NODISCARD virtual BufferHandle Create(const BufferDesc &desc) override
     {
       GLenum bufferType = MapBufferType(desc.Type);
       GLenum bufferUsage = MapBufferUsage(desc.Usage);
@@ -44,12 +44,12 @@ namespace Krys::Gfx::OpenGL
       return _buffers.Remove(handle);
     }
 
-    NO_DISCARD Buffer &Get(BufferHandle handle)
+    KRYS_NODISCARD Buffer &Get(BufferHandle handle)
     {
       return _buffers.Get(handle);
     }
 
-    NO_DISCARD Buffer *TryGet(BufferHandle handle) noexcept
+    KRYS_NODISCARD Buffer *TryGet(BufferHandle handle) noexcept
     {
       return _buffers.TryGet(handle);
     }

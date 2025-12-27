@@ -46,7 +46,7 @@ namespace Krys::Gfx::OpenGL
       // resources.
     }
 
-    NO_DISCARD RenderTargetHandle Create(const RenderTargetDesc &desc) override
+    KRYS_NODISCARD RenderTargetHandle Create(const RenderTargetDesc &desc) override
     {
       // TODO: support for cubemaps and texture arrays as attachments
       // TODO!: support for multi-sampling
@@ -116,7 +116,7 @@ namespace Krys::Gfx::OpenGL
       return _renderTargets.Remove(handle);
     }
 
-    NO_DISCARD Maths::Vec2 GetDimensions(RenderTargetHandle handle) noexcept override
+    KRYS_NODISCARD Maths::Vec2 GetDimensions(RenderTargetHandle handle) noexcept override
     {
       assert(handle.IsValid() && "Invalid render target handle.");
       auto *rt = _renderTargets.TryGet(handle);
@@ -128,7 +128,7 @@ namespace Krys::Gfx::OpenGL
       return {static_cast<float>(rt->Width()), static_cast<float>(rt->Height())};
     }
 
-    NO_DISCARD ImageHandle GetColourAttachmentImage(RenderTargetHandle handle,
+    KRYS_NODISCARD ImageHandle GetColourAttachmentImage(RenderTargetHandle handle,
                                                             uint32 index) noexcept override
     {
       assert(handle.IsValid() && "Invalid render target handle.");
@@ -139,7 +139,7 @@ namespace Krys::Gfx::OpenGL
       return attachment.Image;
     }
 
-    NO_DISCARD RenderTargetHandle GetScreenRenderTarget() const noexcept override
+    KRYS_NODISCARD RenderTargetHandle GetScreenRenderTarget() const noexcept override
     {
       return _screenRenderTarget;
     }
@@ -149,7 +149,7 @@ namespace Krys::Gfx::OpenGL
       _renderTargets.Get(_screenRenderTarget).SetDimensions(width, height);
     }
 
-    NO_DISCARD RenderTarget &Get(RenderTargetHandle handle)
+    KRYS_NODISCARD RenderTarget &Get(RenderTargetHandle handle)
     {
       assert(handle.IsValid() && "Invalid render target handle.");
       return _renderTargets.Get(handle);

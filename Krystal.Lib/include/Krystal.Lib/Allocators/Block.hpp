@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/SmartPointers.hpp"
@@ -112,17 +112,17 @@ namespace Krys
       return static_cast<T *>(AllocateBytes(sizeof(T) * count));
     }
 
-    NO_DISCARD size_t PageSize() const noexcept
+    KRYS_NODISCARD size_t PageSize() const noexcept
     {
       return _pageSize;
     }
 
-    NO_DISCARD size_t PageCount() const noexcept
+    KRYS_NODISCARD size_t PageCount() const noexcept
     {
       return _pages.size();
     }
 
-    NO_DISCARD size_t AllocatedBytes() const noexcept
+    KRYS_NODISCARD size_t AllocatedBytes() const noexcept
     {
       return _pages.size() * _pageSize + _offsets.capacity() * sizeof(size_t)
              + _pages.capacity() * sizeof(std::unique_ptr<Page>) + sizeof(*this);
@@ -164,19 +164,19 @@ namespace Krys
       _offsets.push_back(0);
     }
 
-    NO_DISCARD void *PageData(size_t pageIndex) noexcept
+    KRYS_NODISCARD void *PageData(size_t pageIndex) noexcept
     {
       assert(pageIndex < _pages.size());
       return _pages[pageIndex]->Data();
     }
 
-    NO_DISCARD const void *PageData(size_t pageIndex) const noexcept
+    KRYS_NODISCARD const void *PageData(size_t pageIndex) const noexcept
     {
       assert(pageIndex < _pages.size());
       return _pages[pageIndex]->Data();
     }
 
-    NO_DISCARD size_t PageUsed(size_t pageIndex) const noexcept
+    KRYS_NODISCARD size_t PageUsed(size_t pageIndex) const noexcept
     {
       assert(pageIndex < _offsets.size());
       return _offsets[pageIndex];

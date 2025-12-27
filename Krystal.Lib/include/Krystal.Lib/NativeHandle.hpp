@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 
 namespace Krys
 {
@@ -18,12 +18,12 @@ namespace Krys
     }
 
     template <typename T>
-    NO_DISCARD constexpr T As() const noexcept
+    KRYS_NODISCARD constexpr T As() const noexcept
     {
       return static_cast<T>(_handle);
     }
 
-    NO_DISCARD constexpr bool IsValid() const noexcept
+    KRYS_NODISCARD constexpr bool IsValid() const noexcept
     {
       return _handle != nullptr;
     }

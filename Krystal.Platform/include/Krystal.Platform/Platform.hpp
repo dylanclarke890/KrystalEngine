@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Types/Nullable.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
@@ -15,15 +15,15 @@ namespace Krys::Platform
   void Shutdown() noexcept;
 
   /// @brief Gets the time in seconds since the application started.
-  NO_DISCARD double GetTime() noexcept;
+  KRYS_NODISCARD double GetTime() noexcept;
 
   /// @brief Gets the time in milliseconds since the application started.
-  NO_DISCARD double GetTimeMilliseconds() noexcept;
+  KRYS_NODISCARD double GetTimeMilliseconds() noexcept;
 
   /// @brief Gets dpi of the given window.
-  NO_DISCARD int GetDPIForWindow(NativeHandle windowHandle = {nullptr}) noexcept;
+  KRYS_NODISCARD int GetDPIForWindow(NativeHandle windowHandle = {nullptr}) noexcept;
 
-  NO_DISCARD NativeHandle GetActiveWindow() noexcept;
+  KRYS_NODISCARD NativeHandle GetActiveWindow() noexcept;
 
   /// @brief Sets the timer precision for the application.
   /// @param min The requested precision. nullopt can be passed to request the lowest possible
@@ -35,5 +35,5 @@ namespace Krys::Platform
   void Sleep(uint32 milliseconds) noexcept;
 
   /// @brief Converts a UTF-8 string to a wide string.
-  NO_DISCARD wstring ToWideString(const string &utf8String) noexcept;
+  KRYS_NODISCARD wstring ToWideString(const string &utf8String) noexcept;
 }

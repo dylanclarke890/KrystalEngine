@@ -54,7 +54,7 @@ namespace Krys::Gfx::OpenGL
       _cache.Clear();
     }
 
-    NO_DISCARD virtual TextureHandle Create(ImageViewHandle imageView,
+    KRYS_NODISCARD virtual TextureHandle Create(ImageViewHandle imageView,
                                             SamplerHandle sampler) noexcept override
     {
       static uint32 unnamedTextureCounter = 0u;
@@ -62,7 +62,7 @@ namespace Krys::Gfx::OpenGL
       return AddTexture(std::format("{}", unnamedTextureCounter++), std::move(texture));
     }
 
-    NO_DISCARD TextureHandle Load(const IO::Path &path, const TextureDesc &desc = {}) noexcept override
+    KRYS_NODISCARD TextureHandle Load(const IO::Path &path, const TextureDesc &desc = {}) noexcept override
     {
       auto key = path.ToString();
       if (auto existing = _cache.Get(key); existing.IsValid())
@@ -123,7 +123,7 @@ namespace Krys::Gfx::OpenGL
       return AddTexture(key, std::move(texture));
     }
 
-    NO_DISCARD TextureHandle LoadCubemap(const IO::Path &left, const IO::Path &right, const IO::Path &top,
+    KRYS_NODISCARD TextureHandle LoadCubemap(const IO::Path &left, const IO::Path &right, const IO::Path &top,
                                          const IO::Path &bottom, const IO::Path &front, const IO::Path &back,
                                          const TextureDesc &desc = {}) noexcept override
     {
@@ -221,13 +221,13 @@ namespace Krys::Gfx::OpenGL
       return false;
     }
 
-    NO_DISCARD Texture &Get(TextureHandle handle) noexcept
+    KRYS_NODISCARD Texture &Get(TextureHandle handle) noexcept
     {
       assert(handle.IsValid() && "Invalid texture handle.");
       return _textures.Get(handle);
     }
 
-    NO_DISCARD ImageView &GetView(TextureHandle handle) noexcept
+    KRYS_NODISCARD ImageView &GetView(TextureHandle handle) noexcept
     {
       assert(handle.IsValid() && "Invalid texture handle.");
       Texture &texture = Get(handle);

@@ -51,7 +51,7 @@ namespace Krys::Gfx::OpenGL
       _meshes.Remove(_fullScreenQuadHandle);
     }
 
-    NO_DISCARD MeshHandle Create(const MeshDesc &desc) noexcept override
+    KRYS_NODISCARD MeshHandle Create(const MeshDesc &desc) noexcept override
     {
       GLenum primitiveType = MapPrimitiveType(desc.Primitive);
 
@@ -63,7 +63,7 @@ namespace Krys::Gfx::OpenGL
       return AddMesh(Mesh {desc.Vertices, desc.Layout, primitiveType, desc.Type});
     }
 
-    NO_DISCARD MeshHandle GetFullScreenQuad() const noexcept override
+    KRYS_NODISCARD MeshHandle GetFullScreenQuad() const noexcept override
     {
       return _fullScreenQuadHandle;
     }
@@ -252,7 +252,7 @@ namespace Krys::Gfx::OpenGL
     }
 
   private:
-    NO_DISCARD MeshHandle AddMesh(Mesh &&mesh) noexcept
+    KRYS_NODISCARD MeshHandle AddMesh(Mesh &&mesh) noexcept
     {
       auto handle = _meshes.Add(std::move(mesh));
       if (!handle.IsValid())

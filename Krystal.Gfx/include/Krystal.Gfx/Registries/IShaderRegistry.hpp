@@ -3,7 +3,7 @@
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Shader.hpp"
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 
 namespace Krys::Gfx
@@ -36,12 +36,12 @@ namespace Krys::Gfx
 
     virtual void Shutdown() noexcept = 0;
 
-    NO_DISCARD virtual ShaderHandle Load(const IO::Path &vertex, const IO::Path &fragment) noexcept = 0;
+    KRYS_NODISCARD virtual ShaderHandle Load(const IO::Path &vertex, const IO::Path &fragment) noexcept = 0;
 
-    NO_DISCARD virtual ShaderHandle Load(const IO::Path &vertex, const IO::Path &geometry,
+    KRYS_NODISCARD virtual ShaderHandle Load(const IO::Path &vertex, const IO::Path &geometry,
                                          const IO::Path &fragment) noexcept = 0;
 
-    NO_DISCARD virtual ShaderHandle GetBuiltin(BuiltinShader shader) noexcept = 0;
+    KRYS_NODISCARD virtual ShaderHandle GetBuiltin(BuiltinShader shader) noexcept = 0;
 
     virtual bool Unload(ShaderHandle handle) noexcept = 0;
   };

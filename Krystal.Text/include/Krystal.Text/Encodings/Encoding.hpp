@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Lib/String/String.hpp"
@@ -56,36 +56,36 @@ namespace Krys::Text
     constexpr virtual void Decode(Span<const byte> bytes, utf8_string &out) const noexcept = 0;
 
     /// @brief Encodes a UTF-8 string into a sequence of bytes in the target encoding.
-    NO_DISCARD constexpr virtual List<byte> Encode(utf8_stringview characters) const noexcept = 0;
+    KRYS_NODISCARD constexpr virtual List<byte> Encode(utf8_stringview characters) const noexcept = 0;
 
     /// @brief Decodes a sequence of bytes into a UTF-8 string.
-    NO_DISCARD constexpr virtual utf8_string Decode(Span<const byte> bytes) const noexcept = 0;
+    KRYS_NODISCARD constexpr virtual utf8_string Decode(Span<const byte> bytes) const noexcept = 0;
 
     /// @brief Get information about the current encoding.
-    NO_DISCARD constexpr const EncodingInfo &GetEncodingInfo() const noexcept
+    KRYS_NODISCARD constexpr const EncodingInfo &GetEncodingInfo() const noexcept
     {
       return _encodingInfo;
     }
 
     /// @brief Returns the encoder fallback that should be used to replace invalid byte sequences.
-    NO_DISCARD constexpr EncoderFallback GetEncoderReplacementFallback() const noexcept
+    KRYS_NODISCARD constexpr EncoderFallback GetEncoderReplacementFallback() const noexcept
     {
       return _encoderFallback;
     }
 
     /// @brief Returns a span of bytes that should be used to replace invalid character sequences.
-    NO_DISCARD constexpr DecoderFallback GetDecoderReplacementFallback() const noexcept
+    KRYS_NODISCARD constexpr DecoderFallback GetDecoderReplacementFallback() const noexcept
     {
       return _decoderFallback;
     }
 
-    NO_DISCARD constexpr virtual Span<const byte> GetBOM() const noexcept
+    KRYS_NODISCARD constexpr virtual Span<const byte> GetBOM() const noexcept
     {
       return {};
     }
 
     /// @brief Indicates whether the encoding uses single-byte characters.
-    NO_DISCARD constexpr virtual bool IsSingleByte() const noexcept
+    KRYS_NODISCARD constexpr virtual bool IsSingleByte() const noexcept
     {
       return false;
     }

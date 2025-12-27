@@ -1,6 +1,6 @@
 ﻿#pragma once
 #include "Krystal.Lib/String/StringRef.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
@@ -23,7 +23,7 @@ namespace Krys
 
     ~StringInterner() = default;
 
-    NO_DISCARD StringRef Intern(const char8_t *str)
+    KRYS_NODISCARD StringRef Intern(const char8_t *str)
     {
       auto it = _map.find(str);
       if (it != _map.end())
@@ -38,12 +38,12 @@ namespace Krys
       return {id};
     }
 
-    NO_DISCARD StringRef Intern(const char *str)
+    KRYS_NODISCARD StringRef Intern(const char *str)
     {
       return Intern(reinterpret_cast<const char8_t *>(str));
     }
 
-    NO_DISCARD const utf8_string &Get(StringRef ref) const
+    KRYS_NODISCARD const utf8_string &Get(StringRef ref) const
     {
       assert(ref.Id - 1u < _strings.size());
       return _strings[ref.Id - 1u];

@@ -1,4 +1,4 @@
-#include "Krystal.IO/ImageLoader.hpp"
+﻿#include "Krystal.IO/ImageLoader.hpp"
 #include <stb_image.h>
 
 namespace
@@ -34,7 +34,7 @@ namespace
 
 namespace Krys::IO
 {
-  NO_DISCARD bool ImageLoader::IsHDRImage(IStreamReader &stream)
+  KRYS_NODISCARD bool ImageLoader::IsHDRImage(IStreamReader &stream)
   {
     if (!stream.IsOpen() && !stream.Open())
     {
@@ -48,7 +48,7 @@ namespace Krys::IO
     return result;
   }
 
-  NO_DISCARD Expected<Image> ImageLoader::Load(IStreamReader &stream, const ImageLoadSettings &settings)
+  KRYS_NODISCARD Expected<Image> ImageLoader::Load(IStreamReader &stream, const ImageLoadSettings &settings)
   {
     Image image {};
     image.DataType = IsHDRImage(stream) ? ImageDataType::Float : ImageDataType::UnsignedByte;

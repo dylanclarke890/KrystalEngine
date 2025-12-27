@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Core/Detection.hpp"
 
 #ifndef KRYS_GL_OVERRIDE_FUNCTIONS
@@ -31,10 +31,10 @@
 namespace Krys::Gfx::OpenGL
 {
   /// @brief Initializes OpenGL hooks.
-  NO_DISCARD bool InitialiseGLHooks() noexcept;
+  KRYS_NODISCARD bool InitialiseGLHooks() noexcept;
 
   /// @brief Checks if a specific OpenGL extension is supported.
-  NO_DISCARD bool IsGLExtensionSupported(const char *extension) noexcept;
+  KRYS_NODISCARD bool IsGLExtensionSupported(const char *extension) noexcept;
 }
 
 // OpenGL hook declarations
@@ -119,13 +119,13 @@ namespace Krys::Gfx::OpenGL
 
   void glGetDoublev(GLenum pname, GLdouble *data) noexcept;
 
-  NO_DISCARD GLenum glGetError() noexcept;
+  KRYS_NODISCARD GLenum glGetError() noexcept;
 
   void glGetFloatv(GLenum pname, GLfloat *data) noexcept;
 
   void glGetIntegerv(GLenum pname, GLint *data) noexcept;
 
-  NO_DISCARD const GLubyte *glGetString(GLenum name) noexcept;
+  KRYS_NODISCARD const GLubyte *glGetString(GLenum name) noexcept;
 
   void glGetTexImage(GLenum target, GLint level, GLenum format, GLenum type, void *pixels) noexcept;
 
@@ -137,7 +137,7 @@ namespace Krys::Gfx::OpenGL
 
   void glGetTexLevelParameteriv(GLenum target, GLint level, GLenum pname, GLint *params) noexcept;
 
-  NO_DISCARD GLboolean glIsEnabled(GLenum cap) noexcept;
+  KRYS_NODISCARD GLboolean glIsEnabled(GLenum cap) noexcept;
 
   void glDepthRange(GLdouble n, GLdouble f) noexcept;
 
@@ -230,7 +230,7 @@ namespace Krys::Gfx::OpenGL
 
   void glGenTextures(GLsizei n, GLuint *textures) noexcept;
 
-  NO_DISCARD GLboolean glIsTexture(GLuint texture) noexcept;
+  KRYS_NODISCARD GLboolean glIsTexture(GLuint texture) noexcept;
 
 #if KRYS_GL_OVERRIDE_FUNCTIONS
   #define glDrawArrays ::Krys::Gfx::OpenGL::glDrawArrays
@@ -358,7 +358,7 @@ namespace Krys::Gfx::OpenGL
 
   void glDeleteQueries(GLsizei n, const GLuint *ids) noexcept;
 
-  NO_DISCARD GLboolean glIsQuery(GLuint id) noexcept;
+  KRYS_NODISCARD GLboolean glIsQuery(GLuint id) noexcept;
 
   void glBeginQuery(GLenum target, GLuint id) noexcept;
 
@@ -376,7 +376,7 @@ namespace Krys::Gfx::OpenGL
 
   void glGenBuffers(GLsizei n, GLuint *buffers) noexcept;
 
-  NO_DISCARD GLboolean glIsBuffer(GLuint buffer) noexcept;
+  KRYS_NODISCARD GLboolean glIsBuffer(GLuint buffer) noexcept;
 
   void glBufferData(GLenum target, GLsizeiptr size, const void *data, GLenum usage) noexcept;
 
@@ -386,7 +386,7 @@ namespace Krys::Gfx::OpenGL
 
   void *glMapBuffer(GLenum target, GLenum access) noexcept;
 
-  NO_DISCARD GLboolean glUnmapBuffer(GLenum target) noexcept;
+  KRYS_NODISCARD GLboolean glUnmapBuffer(GLenum target) noexcept;
 
   void glGetBufferParameteriv(GLenum target, GLenum pname, GLint *params) noexcept;
 
@@ -434,9 +434,9 @@ namespace Krys::Gfx::OpenGL
 
   void glCompileShader(GLuint shader) noexcept;
 
-  NO_DISCARD GLuint glCreateProgram() noexcept;
+  KRYS_NODISCARD GLuint glCreateProgram() noexcept;
 
-  NO_DISCARD GLuint glCreateShader(GLenum type) noexcept;
+  KRYS_NODISCARD GLuint glCreateShader(GLenum type) noexcept;
 
   void glDeleteProgram(GLuint program) noexcept;
 
@@ -456,7 +456,7 @@ namespace Krys::Gfx::OpenGL
 
   void glGetAttachedShaders(GLuint program, GLsizei maxCount, GLsizei *count, GLuint *shaders) noexcept;
 
-  NO_DISCARD GLint glGetAttribLocation(GLuint program, const GLchar *name) noexcept;
+  KRYS_NODISCARD GLint glGetAttribLocation(GLuint program, const GLchar *name) noexcept;
 
   void glGetProgramiv(GLuint program, GLenum pname, GLint *params) noexcept;
 
@@ -468,7 +468,7 @@ namespace Krys::Gfx::OpenGL
 
   void glGetShaderSource(GLuint shader, GLsizei bufSize, GLsizei *length, GLchar *source) noexcept;
 
-  NO_DISCARD GLint glGetUniformLocation(GLuint program, const GLchar *name) noexcept;
+  KRYS_NODISCARD GLint glGetUniformLocation(GLuint program, const GLchar *name) noexcept;
 
   void glGetUniformfv(GLuint program, GLint location, GLfloat *params) noexcept;
 
@@ -482,9 +482,9 @@ namespace Krys::Gfx::OpenGL
 
   void glGetVertexAttribPointerv(GLuint index, GLenum pname, void **pointer) noexcept;
 
-  NO_DISCARD GLboolean glIsProgram(GLuint program) noexcept;
+  KRYS_NODISCARD GLboolean glIsProgram(GLuint program) noexcept;
 
-  NO_DISCARD GLboolean glIsShader(GLuint shader) noexcept;
+  KRYS_NODISCARD GLboolean glIsShader(GLuint shader) noexcept;
 
   void glLinkProgram(GLuint program) noexcept;
 
@@ -749,7 +749,7 @@ namespace Krys::Gfx::OpenGL
 
   void glDisablei(GLenum target, GLuint index) noexcept;
 
-  NO_DISCARD GLboolean glIsEnabledi(GLenum target, GLuint index) noexcept;
+  KRYS_NODISCARD GLboolean glIsEnabledi(GLenum target, GLuint index) noexcept;
 
   void glBeginTransformFeedback(GLenum primitiveMode) noexcept;
 
@@ -823,7 +823,7 @@ namespace Krys::Gfx::OpenGL
 
   void glBindFragDataLocation(GLuint program, GLuint color, const GLchar *name) noexcept;
 
-  NO_DISCARD GLint glGetFragDataLocation(GLuint program, const GLchar *name) noexcept;
+  KRYS_NODISCARD GLint glGetFragDataLocation(GLuint program, const GLchar *name) noexcept;
 
   void glUniform1ui(GLint location, GLuint v0) noexcept;
 
@@ -857,9 +857,9 @@ namespace Krys::Gfx::OpenGL
 
   void glClearBufferfi(GLenum buffer, GLint drawbuffer, GLfloat depth, GLint stencil) noexcept;
 
-  NO_DISCARD const GLubyte *glGetStringi(GLenum name, GLuint index) noexcept;
+  KRYS_NODISCARD const GLubyte *glGetStringi(GLenum name, GLuint index) noexcept;
 
-  NO_DISCARD GLboolean glIsRenderbuffer(GLuint renderbuffer) noexcept;
+  KRYS_NODISCARD GLboolean glIsRenderbuffer(GLuint renderbuffer) noexcept;
 
   void glBindRenderbuffer(GLenum target, GLuint renderbuffer) noexcept;
 
@@ -871,7 +871,7 @@ namespace Krys::Gfx::OpenGL
 
   void glGetRenderbufferParameteriv(GLenum target, GLenum pname, GLint *params) noexcept;
 
-  NO_DISCARD GLboolean glIsFramebuffer(GLuint framebuffer) noexcept;
+  KRYS_NODISCARD GLboolean glIsFramebuffer(GLuint framebuffer) noexcept;
 
   void glBindFramebuffer(GLenum target, GLuint framebuffer) noexcept;
 
@@ -879,7 +879,7 @@ namespace Krys::Gfx::OpenGL
 
   void glGenFramebuffers(GLsizei n, GLuint *framebuffers) noexcept;
 
-  NO_DISCARD GLenum glCheckFramebufferStatus(GLenum target) noexcept;
+  KRYS_NODISCARD GLenum glCheckFramebufferStatus(GLenum target) noexcept;
 
   void glFramebufferTexture1D(GLenum target, GLenum attachment, GLenum textarget, GLuint texture,
                               GLint level) noexcept;
@@ -907,7 +907,7 @@ namespace Krys::Gfx::OpenGL
   void glFramebufferTextureLayer(GLenum target, GLenum attachment, GLuint texture, GLint level,
                                  GLint layer) noexcept;
 
-  NO_DISCARD void *glMapBufferRange(GLenum target, GLintptr offset, GLsizeiptr length,
+  KRYS_NODISCARD void *glMapBufferRange(GLenum target, GLintptr offset, GLsizeiptr length,
                                     GLbitfield access) noexcept;
 
   void glFlushMappedBufferRange(GLenum target, GLintptr offset, GLsizeiptr length) noexcept;
@@ -918,7 +918,7 @@ namespace Krys::Gfx::OpenGL
 
   void glGenVertexArrays(GLsizei n, GLuint *arrays) noexcept;
 
-  NO_DISCARD GLboolean glIsVertexArray(GLuint array) noexcept;
+  KRYS_NODISCARD GLboolean glIsVertexArray(GLuint array) noexcept;
 
 #if KRYS_GL_OVERRIDE_FUNCTIONS
   #define glColorMaski ::Krys::Gfx::OpenGL::glColorMaski
@@ -1032,7 +1032,7 @@ namespace Krys::Gfx::OpenGL
   void glGetActiveUniformName(GLuint program, GLuint uniformIndex, GLsizei bufSize, GLsizei *length,
                               GLchar *uniformName) noexcept;
 
-  NO_DISCARD GLuint glGetUniformBlockIndex(GLuint program, const GLchar *uniformBlockName) noexcept;
+  KRYS_NODISCARD GLuint glGetUniformBlockIndex(GLuint program, const GLchar *uniformBlockName) noexcept;
 
   void glGetActiveUniformBlockiv(GLuint program, GLuint uniformBlockIndex, GLenum pname,
                                  GLint *params) noexcept;
@@ -1076,13 +1076,13 @@ namespace Krys::Gfx::OpenGL
 
   void glProvokingVertex(GLenum mode) noexcept;
 
-  NO_DISCARD GLsync glFenceSync(GLenum condition, GLbitfield flags) noexcept;
+  KRYS_NODISCARD GLsync glFenceSync(GLenum condition, GLbitfield flags) noexcept;
 
-  NO_DISCARD GLboolean glIsSync(GLsync sync) noexcept;
+  KRYS_NODISCARD GLboolean glIsSync(GLsync sync) noexcept;
 
   void glDeleteSync(GLsync sync) noexcept;
 
-  NO_DISCARD GLenum glClientWaitSync(GLsync sync, GLbitfield flags, GLuint64 timeout) noexcept;
+  KRYS_NODISCARD GLenum glClientWaitSync(GLsync sync, GLbitfield flags, GLuint64 timeout) noexcept;
 
   void glWaitSync(GLsync sync, GLbitfield flags, GLuint64 timeout) noexcept;
 
@@ -1135,13 +1135,13 @@ namespace Krys::Gfx::OpenGL
   void glBindFragDataLocationIndexed(GLuint program, GLuint colorNumber, GLuint index,
                                      const GLchar *name) noexcept;
 
-  NO_DISCARD GLint glGetFragDataIndex(GLuint program, const GLchar *name) noexcept;
+  KRYS_NODISCARD GLint glGetFragDataIndex(GLuint program, const GLchar *name) noexcept;
 
   void glGenSamplers(GLsizei count, GLuint *samplers) noexcept;
 
   void glDeleteSamplers(GLsizei count, const GLuint *samplers) noexcept;
 
-  NO_DISCARD GLboolean glIsSampler(GLuint sampler) noexcept;
+  KRYS_NODISCARD GLboolean glIsSampler(GLuint sampler) noexcept;
 
   void glBindSampler(GLuint unit, GLuint sampler) noexcept;
 
@@ -1281,10 +1281,10 @@ namespace Krys::Gfx::OpenGL
 
   void glGetUniformdv(GLuint program, GLint location, GLdouble *params) noexcept;
 
-  NO_DISCARD GLint glGetSubroutineUniformLocation(GLuint program, GLenum shadertype,
+  KRYS_NODISCARD GLint glGetSubroutineUniformLocation(GLuint program, GLenum shadertype,
                                                   const GLchar *name) noexcept;
 
-  NO_DISCARD GLuint glGetSubroutineIndex(GLuint program, GLenum shadertype, const GLchar *name) noexcept;
+  KRYS_NODISCARD GLuint glGetSubroutineIndex(GLuint program, GLenum shadertype, const GLchar *name) noexcept;
 
   void glGetActiveSubroutineUniformiv(GLuint program, GLenum shadertype, GLuint index, GLenum pname,
                                       GLint *values) noexcept;
@@ -1311,7 +1311,7 @@ namespace Krys::Gfx::OpenGL
 
   void glGenTransformFeedbacks(GLsizei n, GLuint *ids) noexcept;
 
-  NO_DISCARD GLboolean glIsTransformFeedback(GLuint id) noexcept;
+  KRYS_NODISCARD GLboolean glIsTransformFeedback(GLuint id) noexcept;
 
   void glPauseTransformFeedback() noexcept;
 
@@ -1403,7 +1403,7 @@ namespace Krys::Gfx::OpenGL
 
   void glActiveShaderProgram(GLuint pipeline, GLuint program) noexcept;
 
-  NO_DISCARD GLuint glCreateShaderProgramv(GLenum type, GLsizei count, const GLchar *const *strings) noexcept;
+  KRYS_NODISCARD GLuint glCreateShaderProgramv(GLenum type, GLsizei count, const GLchar *const *strings) noexcept;
 
   void glBindProgramPipeline(GLuint pipeline) noexcept;
 
@@ -1411,7 +1411,7 @@ namespace Krys::Gfx::OpenGL
 
   void glGenProgramPipelines(GLsizei n, GLuint *pipelines) noexcept;
 
-  NO_DISCARD GLboolean glIsProgramPipeline(GLuint pipeline) noexcept;
+  KRYS_NODISCARD GLboolean glIsProgramPipeline(GLuint pipeline) noexcept;
 
   void glGetProgramPipelineiv(GLuint pipeline, GLenum pname, GLint *params) noexcept;
 
@@ -1775,7 +1775,7 @@ namespace Krys::Gfx::OpenGL
 
   void glGetProgramInterfaceiv(GLuint program, GLenum programInterface, GLenum pname, GLint *params) noexcept;
 
-  NO_DISCARD GLuint glGetProgramResourceIndex(GLuint program, GLenum programInterface,
+  KRYS_NODISCARD GLuint glGetProgramResourceIndex(GLuint program, GLenum programInterface,
                                               const GLchar *name) noexcept;
 
   void glGetProgramResourceName(GLuint program, GLenum programInterface, GLuint index, GLsizei bufSize,
@@ -1784,10 +1784,10 @@ namespace Krys::Gfx::OpenGL
   void glGetProgramResourceiv(GLuint program, GLenum programInterface, GLuint index, GLsizei propCount,
                               const GLenum *props, GLsizei count, GLsizei *length, GLint *params) noexcept;
 
-  NO_DISCARD GLint glGetProgramResourceLocation(GLuint program, GLenum programInterface,
+  KRYS_NODISCARD GLint glGetProgramResourceLocation(GLuint program, GLenum programInterface,
                                                 const GLchar *name) noexcept;
 
-  NO_DISCARD GLint glGetProgramResourceLocationIndex(GLuint program, GLenum programInterface,
+  KRYS_NODISCARD GLint glGetProgramResourceLocationIndex(GLuint program, GLenum programInterface,
                                                      const GLchar *name) noexcept;
 
   void glShaderStorageBlockBinding(GLuint program, GLuint storageBlockIndex,
@@ -1826,7 +1826,7 @@ namespace Krys::Gfx::OpenGL
 
   void glDebugMessageCallback(GLDEBUGPROC callback, const void *userParam) noexcept;
 
-  NO_DISCARD GLuint glGetDebugMessageLog(GLuint count, GLsizei bufSize, GLenum *sources, GLenum *types,
+  KRYS_NODISCARD GLuint glGetDebugMessageLog(GLuint count, GLsizei bufSize, GLenum *sources, GLenum *types,
                                          GLuint *ids, GLenum *severities, GLsizei *lengths,
                                          GLchar *messageLog) noexcept;
 
@@ -1963,9 +1963,9 @@ namespace Krys::Gfx::OpenGL
   void glClearNamedBufferSubData(GLuint buffer, GLenum internalformat, GLintptr offset, GLsizeiptr size,
                                  GLenum format, GLenum type, const void *data) noexcept;
 
-  NO_DISCARD void *glMapNamedBuffer(GLuint buffer, GLenum access) noexcept;
+  KRYS_NODISCARD void *glMapNamedBuffer(GLuint buffer, GLenum access) noexcept;
 
-  NO_DISCARD void *glMapNamedBufferRange(GLuint buffer, GLintptr offset, GLsizeiptr length,
+  KRYS_NODISCARD void *glMapNamedBufferRange(GLuint buffer, GLintptr offset, GLsizeiptr length,
                                          GLbitfield access) noexcept;
 
   GLboolean glUnmapNamedBuffer(GLuint buffer) noexcept;
@@ -2021,7 +2021,7 @@ namespace Krys::Gfx::OpenGL
                               GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1,
                               GLbitfield mask, GLenum filter) noexcept;
 
-  NO_DISCARD GLenum glCheckNamedFramebufferStatus(GLuint framebuffer, GLenum target) noexcept;
+  KRYS_NODISCARD GLenum glCheckNamedFramebufferStatus(GLuint framebuffer, GLenum target) noexcept;
 
   void glGetNamedFramebufferParameteriv(GLuint framebuffer, GLenum pname, GLint *param) noexcept;
 
@@ -2179,7 +2179,7 @@ namespace Krys::Gfx::OpenGL
                                       GLint zoffset, GLsizei width, GLsizei height, GLsizei depth,
                                       GLsizei bufSize, void *pixels) noexcept;
 
-  NO_DISCARD GLenum glGetGraphicsResetStatus() noexcept;
+  KRYS_NODISCARD GLenum glGetGraphicsResetStatus() noexcept;
 
   void glGetnCompressedTexImage(GLenum target, GLint lod, GLsizei bufSize, void *pixels) noexcept;
 

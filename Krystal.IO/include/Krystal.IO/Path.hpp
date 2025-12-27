@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <filesystem>
@@ -28,62 +28,62 @@ namespace Krys::IO
     Path &operator=(Path &&other) noexcept;
 
     /// @brief Combines two paths using the appropriate platform-specific separator.
-    NO_DISCARD Path operator/(const Path &other) const;
+    KRYS_NODISCARD Path operator/(const Path &other) const;
 
     /// @brief Appends another path to this path using the appropriate platform-specific separator.
     Path &operator/=(const Path &other);
 
     /// @brief Compares two paths for equality.
-    NO_DISCARD bool operator==(const Path &other) const noexcept;
+    KRYS_NODISCARD bool operator==(const Path &other) const noexcept;
 
     /// @brief Compares two paths for inequality.
-    NO_DISCARD bool operator!=(const Path &other) const noexcept;
+    KRYS_NODISCARD bool operator!=(const Path &other) const noexcept;
 
     /// @brief Checks if the path is non-empty.
-    NO_DISCARD explicit operator bool() const noexcept;
+    KRYS_NODISCARD explicit operator bool() const noexcept;
 
     /// @brief Returns the parent directory of the path.
-    NO_DISCARD Path ParentPath() const;
+    KRYS_NODISCARD Path ParentPath() const;
 
     /// @brief Checks if the path has a filename component.
-    NO_DISCARD bool HasFilename() const noexcept;
+    KRYS_NODISCARD bool HasFilename() const noexcept;
 
     /// @brief Returns the filename component of the path.
-    NO_DISCARD Path Filename() const;
+    KRYS_NODISCARD Path Filename() const;
 
     /// @brief Checks if the path has a file extension.
-    NO_DISCARD bool HasExtension() const noexcept;
+    KRYS_NODISCARD bool HasExtension() const noexcept;
 
     /// @brief Returns the file extension of the path, including the leading dot.
-    NO_DISCARD Path Extension() const;
+    KRYS_NODISCARD Path Extension() const;
 
     /// @brief Checks if this path starts with another path. This is a lexically normalized comparison of the
     /// components of the paths, not a simple string prefix check.
-    NO_DISCARD bool StartsWith(const Path &other) const;
+    KRYS_NODISCARD bool StartsWith(const Path &other) const;
 
     /// @brief Checks if the path is relative.
-    NO_DISCARD bool IsRelative() const noexcept;
+    KRYS_NODISCARD bool IsRelative() const noexcept;
 
     /// @brief Checks if the path is absolute.
-    NO_DISCARD bool IsAbsolute() const noexcept;
+    KRYS_NODISCARD bool IsAbsolute() const noexcept;
 
     /// @brief Returns the path relative to the specified base path.
-    NO_DISCARD Path RelativePath(const Path &base) const;
+    KRYS_NODISCARD Path RelativePath(const Path &base) const;
 
     /// @brief Checks if this path is relative to another path.
-    NO_DISCARD bool IsRelativeTo(const Path &other) const;
+    KRYS_NODISCARD bool IsRelativeTo(const Path &other) const;
 
     /// @brief Returns a normalized version of the path, resolving any '.' or '..' components and removing
     /// redundant separators.
-    NO_DISCARD Path Normalise() const;
+    KRYS_NODISCARD Path Normalise() const;
 
     /// @brief Converts the path to a string formatted for the current platform.
-    NO_DISCARD string ToPlatformString() const;
+    KRYS_NODISCARD string ToPlatformString() const;
 
     /// @brief Converts the path to a platform-independent string (using '/' as separator).
-    NO_DISCARD string ToString() const;
+    KRYS_NODISCARD string ToString() const;
 
-    NO_DISCARD const std::filesystem::path &NativePath() const noexcept
+    KRYS_NODISCARD const std::filesystem::path &NativePath() const noexcept
     {
       return _path;
     }

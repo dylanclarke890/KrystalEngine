@@ -76,12 +76,12 @@ namespace
       }
     }
 
-    NO_DISCARD bool IsLoaded() const noexcept
+    KRYS_NODISCARD bool IsLoaded() const noexcept
     {
       return _loaded;
     }
 
-    NO_DISCARD bool SetPixelSize(uint32 height) const noexcept
+    KRYS_NODISCARD bool SetPixelSize(uint32 height) const noexcept
     {
       KRYS_INFO("FREETYPE: Setting font size to {}px", height);
       if (FT_Set_Pixel_Sizes(_face, 0, height) != 0)
@@ -94,7 +94,7 @@ namespace
       return true;
     }
 
-    NO_DISCARD List<BitmapGlyph> LoadGlyphs(uint8 paddingPerGlyph) const noexcept
+    KRYS_NODISCARD List<BitmapGlyph> LoadGlyphs(uint8 paddingPerGlyph) const noexcept
     {
       List<BitmapGlyph> glyphs;
 
@@ -144,7 +144,7 @@ namespace
       return glyphs;
     }
 
-    NO_DISCARD FontMetrics GetMetrics() const noexcept
+    KRYS_NODISCARD FontMetrics GetMetrics() const noexcept
     {
       auto ascender = static_cast<float>(_face->size->metrics.ascender >> 6);
       auto descender = static_cast<float>(_face->size->metrics.descender >> 6);
@@ -154,7 +154,7 @@ namespace
       return {.Ascender = ascender, .Descender = descender, .Height = height, .LineHeight = lineHeight};
     }
 
-    NO_DISCARD CharacterMap ToCodepointsMap(List<BitmapGlyph> &glyphs, int padding,
+    KRYS_NODISCARD CharacterMap ToCodepointsMap(List<BitmapGlyph> &glyphs, int padding,
                                             const Maths::Vec2u &atlasSize)
     {
       CharacterMap characters;
@@ -180,7 +180,7 @@ namespace
       return characters;
     }
 
-    NO_DISCARD List<uint8> ToPixels(const List<BitmapGlyph> &glyphs, const Maths::Vec2u &atlasSize)
+    KRYS_NODISCARD List<uint8> ToPixels(const List<BitmapGlyph> &glyphs, const Maths::Vec2u &atlasSize)
     {
       List<uint8> pixels(size_t(atlasSize.x) * atlasSize.y);
       std::fill(pixels.begin(), pixels.end(), 0);
@@ -198,7 +198,7 @@ namespace
       return pixels;
     }
 
-    NO_DISCARD bool TryPackGlyphs(List<BitmapGlyph> &glyphs, Maths::Vec2u &size)
+    KRYS_NODISCARD bool TryPackGlyphs(List<BitmapGlyph> &glyphs, Maths::Vec2u &size)
     {
       while (true)
       {

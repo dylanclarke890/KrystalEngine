@@ -2,11 +2,11 @@
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx/Enums/FilterMode.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
-  NO_DISCARD constexpr inline GLenum MapFilterMode(FilterMode mode) noexcept
+  KRYS_NODISCARD constexpr inline GLenum MapFilterMode(FilterMode mode) noexcept
   {
     switch (mode)
     {
@@ -20,7 +20,7 @@ namespace Krys::Gfx::OpenGL
     }
   }
 
-  NO_DISCARD constexpr inline FilterMode MapFilterMode(GLenum mode) noexcept
+  KRYS_NODISCARD constexpr inline FilterMode MapFilterMode(GLenum mode) noexcept
   {
     switch (mode)
     {

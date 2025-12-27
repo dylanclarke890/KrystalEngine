@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx/Enums/BufferUsage.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
-  NO_DISCARD constexpr inline GLenum MapBufferUsage(BufferUsage usage) noexcept
+  KRYS_NODISCARD constexpr inline GLenum MapBufferUsage(BufferUsage usage) noexcept
   {
     switch (usage)
     {
@@ -16,7 +16,7 @@ namespace Krys::Gfx::OpenGL
     }
   }
 
-  NO_DISCARD constexpr inline BufferUsage MapBufferUsage(GLenum usage) noexcept
+  KRYS_NODISCARD constexpr inline BufferUsage MapBufferUsage(GLenum usage) noexcept
   {
     switch (usage)
     {

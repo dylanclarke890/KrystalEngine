@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <functional>
@@ -12,7 +12,7 @@ namespace Krys
     STATIC_CLASS(Hash)
 
     template <class... Args>
-    NO_DISCARD constexpr static size_t Combine(Args... args) noexcept
+    KRYS_NODISCARD constexpr static size_t Combine(Args... args) noexcept
     {
       size_t seed = 0u;
       Combine(seed, args...);
@@ -20,7 +20,7 @@ namespace Krys
     }
 
     /// @brief FNV-1a 32bit hashing algorithm.
-    NO_DISCARD static constexpr uint32 fnv1a_32(char const *s, size_t count) noexcept
+    KRYS_NODISCARD static constexpr uint32 fnv1a_32(char const *s, size_t count) noexcept
     {
       return ((count ? fnv1a_32(s, count - 1) : 2'166'136'261u) ^ s[count]) * 16'777'619u;
     }

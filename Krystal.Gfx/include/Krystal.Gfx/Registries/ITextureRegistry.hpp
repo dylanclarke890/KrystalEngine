@@ -2,7 +2,7 @@
 
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 
 namespace Krys::Gfx
@@ -28,11 +28,11 @@ namespace Krys::Gfx
 
     virtual void Shutdown() noexcept = 0;
 
-    NO_DISCARD virtual TextureHandle Create(ImageViewHandle imageView, SamplerHandle sampler) noexcept = 0;
+    KRYS_NODISCARD virtual TextureHandle Create(ImageViewHandle imageView, SamplerHandle sampler) noexcept = 0;
 
-    NO_DISCARD virtual TextureHandle Load(const IO::Path &path, const TextureDesc &desc) noexcept = 0;
+    KRYS_NODISCARD virtual TextureHandle Load(const IO::Path &path, const TextureDesc &desc) noexcept = 0;
 
-    NO_DISCARD virtual TextureHandle LoadCubemap(const IO::Path &left, const IO::Path &right,
+    KRYS_NODISCARD virtual TextureHandle LoadCubemap(const IO::Path &left, const IO::Path &right,
                                                  const IO::Path &top, const IO::Path &bottom,
                                                  const IO::Path &front, const IO::Path &back,
                                                  const TextureDesc &desc = {}) noexcept = 0;

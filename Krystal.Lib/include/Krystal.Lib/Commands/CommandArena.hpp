@@ -2,7 +2,7 @@
 
 #include "Krystal.Lib/ByteUtils.hpp"
 #include "Krystal.Lib/Commands/CommandType.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/List.hpp"
@@ -64,12 +64,12 @@ namespace Krys
       }
     }
 
-    NO_DISCARD size_t Size() const noexcept
+    KRYS_NODISCARD size_t Size() const noexcept
     {
       return _arena.size();
     }
 
-    NO_DISCARD Span<const byte> GetSpan(size_t start, size_t end) const noexcept
+    KRYS_NODISCARD Span<const byte> GetSpan(size_t start, size_t end) const noexcept
     {
       return Span<const byte>(_arena.data() + start, end - start);
     }

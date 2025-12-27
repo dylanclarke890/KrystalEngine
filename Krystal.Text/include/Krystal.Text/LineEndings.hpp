@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Core/Detection.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
@@ -18,7 +18,7 @@ namespace Krys::Text
     constexpr static byte CR = byte {'\r'};
 
     /// @brief Normalizes line endings in the given byte stream to LF.
-    NO_DISCARD constexpr static List<byte> NormalizeToLF(List<byte> &&bytes) noexcept
+    KRYS_NODISCARD constexpr static List<byte> NormalizeToLF(List<byte> &&bytes) noexcept
     {
       size_t inputIndex = 0;
       size_t outputIndex = 0;
@@ -44,7 +44,7 @@ namespace Krys::Text
     }
 
     /// @brief Normalizes line endings in the given byte stream to CRLF.
-    NO_DISCARD constexpr static List<byte> NormalizeToCRLF(List<byte> &&bytes) noexcept
+    KRYS_NODISCARD constexpr static List<byte> NormalizeToCRLF(List<byte> &&bytes) noexcept
     {
       size_t sourceIndex = 0;
       size_t resultLength = 0;
@@ -105,7 +105,7 @@ namespace Krys::Text
     }
 
     /// @brief Normalizes line endings in the given byte stream to the native format.
-    NO_DISCARD constexpr static List<byte> NormalizeToNative(List<byte> &&from) noexcept
+    KRYS_NODISCARD constexpr static List<byte> NormalizeToNative(List<byte> &&from) noexcept
     {
 #if KRYS_OS(WINDOWS)
       return NormalizeToCRLF(std::forward<List<byte>>(from));

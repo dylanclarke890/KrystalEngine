@@ -82,7 +82,7 @@ namespace Krys::UI
       TextContent.Text = text;
     }
 
-    NO_DISCARD StringRef GetText() const noexcept
+    KRYS_NODISCARD StringRef GetText() const noexcept
     {
       return TextContent.Text;
     }
@@ -106,7 +106,7 @@ namespace std
   template <>
   struct hash<Krys::UI::ElementHandle>
   {
-    NO_DISCARD size_t operator()(const Krys::UI::ElementHandle &handle) const noexcept
+    KRYS_NODISCARD size_t operator()(const Krys::UI::ElementHandle &handle) const noexcept
     {
       return std::hash<Krys::uint32>()(handle.Id);
     }

@@ -36,7 +36,7 @@ namespace Krys::Text
         }
       }
 
-      NO_DISCARD bool TryEncode(UnicodeCodepoint codepoint, uint8 &out) const noexcept
+      KRYS_NODISCARD bool TryEncode(UnicodeCodepoint codepoint, uint8 &out) const noexcept
       {
         if (Unicode::IsASCIICharacter(codepoint))
         {
@@ -54,7 +54,7 @@ namespace Krys::Text
         return false;
       }
 
-      NO_DISCARD bool TryDecode(uint8 ch, UnicodeCodepoint &out) const noexcept
+      KRYS_NODISCARD bool TryDecode(uint8 ch, UnicodeCodepoint &out) const noexcept
       {
         if (Unicode::IsASCIICharacter(ch))
         {
@@ -86,19 +86,19 @@ namespace Krys::Text
   public:
     ~SingleByteEncoding() noexcept override = default;
 
-    NO_DISCARD bool IsSingleByte() const noexcept override final
+    KRYS_NODISCARD bool IsSingleByte() const noexcept override final
     {
       return true;
     }
 
-    NO_DISCARD constexpr List<byte> Encode(utf8_stringview characters) const noexcept override
+    KRYS_NODISCARD constexpr List<byte> Encode(utf8_stringview characters) const noexcept override
     {
       List<byte> bytes;
       Encode(characters, bytes);
       return bytes;
     }
 
-    NO_DISCARD constexpr utf8_string Decode(Span<const byte> bytes) const noexcept override
+    KRYS_NODISCARD constexpr utf8_string Decode(Span<const byte> bytes) const noexcept override
     {
       utf8_string characters;
       Decode(bytes, characters);

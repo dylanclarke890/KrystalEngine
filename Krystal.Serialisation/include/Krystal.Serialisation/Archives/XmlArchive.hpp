@@ -26,7 +26,7 @@ namespace Krys::Serialisation
       {
       }
 
-      NO_DISCARD string GetNextFieldName() noexcept
+      KRYS_NODISCARD string GetNextFieldName() noexcept
       {
         return std::format("Field{}", NameCounter++);
       }
@@ -179,7 +179,7 @@ namespace Krys::Serialisation
     }
 
   private:
-    NO_DISCARD bool IsWhitespace(char c) noexcept
+    KRYS_NODISCARD bool IsWhitespace(char c) noexcept
     {
       return c == ' ' || c == '\t' || c == '\n' || c == '\r';
     }
@@ -391,7 +391,7 @@ namespace Krys::Serialisation
       return _nodes.top().GetNextChildName();
     }
 
-    NO_DISCARD static size_t GetNumberOfChildren(rapidxml::xml_node<> *node)
+    KRYS_NODISCARD static size_t GetNumberOfChildren(rapidxml::xml_node<> *node)
     {
       size_t size = 0;
       node = node->first_node(); // get first child

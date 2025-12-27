@@ -2,7 +2,7 @@
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
@@ -75,7 +75,7 @@ namespace Krys::Gfx::OpenGL
     mutable ShaderLayout _info;
 
   public:
-    NO_DISCARD ShaderLayout Reflect(GLuint programId) const noexcept
+    KRYS_NODISCARD ShaderLayout Reflect(GLuint programId) const noexcept
     {
       _info = ShaderLayout {};
       ReflectUniforms(programId);

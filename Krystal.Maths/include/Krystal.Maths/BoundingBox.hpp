@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 
 namespace Krys::Maths
@@ -25,12 +25,12 @@ namespace Krys::Maths
     {
     }
 
-    NO_DISCARD constexpr T GetWidth() const noexcept
+    KRYS_NODISCARD constexpr T GetWidth() const noexcept
     {
       return Right - Left;
     }
 
-    NO_DISCARD constexpr T GetHeight() const noexcept
+    KRYS_NODISCARD constexpr T GetHeight() const noexcept
     {
       return Top - Bottom;
     }

@@ -33,17 +33,17 @@ namespace Krys::Gfx::OpenGL
 
     ~Texture() noexcept = default;
 
-    NO_DISCARD SamplerHandle Sampler() const noexcept
+    KRYS_NODISCARD SamplerHandle Sampler() const noexcept
     {
       return _sampler;
     }
 
-    NO_DISCARD ImageViewHandle ImageView() const noexcept
+    KRYS_NODISCARD ImageViewHandle ImageView() const noexcept
     {
       return _imageView;
     }
 
-    NO_DISCARD TextureOwner Owner() const noexcept
+    KRYS_NODISCARD TextureOwner Owner() const noexcept
     {
       return _owner;
     }

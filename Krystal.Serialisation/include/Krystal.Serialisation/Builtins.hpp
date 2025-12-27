@@ -163,7 +163,7 @@ namespace Krys::Serialisation
   /// @brief Macro to define a class version inside a class definition.
 #define KRYS_CLASS_VERSION(version)                                                                          \
   static constexpr Krys::Serialisation::Version ClassVersion = Krys::Serialisation::Version(version);        \
-  NO_DISCARD constexpr Version GetVersion() const noexcept                                                   \
+  KRYS_NODISCARD constexpr Version GetVersion() const noexcept                                                   \
   {                                                                                                          \
     return ClassVersion;                                                                                     \
   }

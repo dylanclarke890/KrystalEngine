@@ -45,7 +45,7 @@ namespace Krys::Gfx::OpenGL
       glDeleteFramebuffers(1, &_fbo);
     }
 
-    NO_DISCARD static RenderTarget CreateScreenFramebuffer(uint32 width, uint32 height) noexcept
+    KRYS_NODISCARD static RenderTarget CreateScreenFramebuffer(uint32 width, uint32 height) noexcept
     {
       RenderTarget rt;
       rt.SetDimensions(width, height);
@@ -151,22 +151,22 @@ namespace Krys::Gfx::OpenGL
       return attachments;
     }
 
-    NO_DISCARD GLuint GetHandle() const noexcept
+    KRYS_NODISCARD GLuint GetHandle() const noexcept
     {
       return _fbo;
     }
 
-    NO_DISCARD uint32 Width() const noexcept
+    KRYS_NODISCARD uint32 Width() const noexcept
     {
       return _width;
     }
 
-    NO_DISCARD uint32 Height() const noexcept
+    KRYS_NODISCARD uint32 Height() const noexcept
     {
       return _height;
     }
 
-    NO_DISCARD const RenderTargetAttachment &GetColourAttachment(size_t index) const
+    KRYS_NODISCARD const RenderTargetAttachment &GetColourAttachment(size_t index) const
     {
       if (index >= _colorAttachments.size())
       {
@@ -175,23 +175,23 @@ namespace Krys::Gfx::OpenGL
       return _colorAttachments[index];
     }
 
-    NO_DISCARD const RenderTargetAttachment &GetDepthAttachment() const noexcept
+    KRYS_NODISCARD const RenderTargetAttachment &GetDepthAttachment() const noexcept
     {
       return _depthAttachment;
     }
 
-    NO_DISCARD const RenderTargetAttachment &GetStencilAttachment() const noexcept
+    KRYS_NODISCARD const RenderTargetAttachment &GetStencilAttachment() const noexcept
     {
       return _stencilAttachment;
     }
 
-    NO_DISCARD const RenderTargetAttachment &GetDepthStencilAttachment() const noexcept
+    KRYS_NODISCARD const RenderTargetAttachment &GetDepthStencilAttachment() const noexcept
     {
       return _depthStencilAttachment;
     }
 
     /// @brief Get an ortho projection matrix that has the origin at the top-left corner.
-    NO_DISCARD Maths::Mat4 GetProjectionMatrix() const noexcept
+    KRYS_NODISCARD Maths::Mat4 GetProjectionMatrix() const noexcept
     {
       return Maths::Ortho(0.f, static_cast<float>(_width), static_cast<float>(_height), 0.f);
     }

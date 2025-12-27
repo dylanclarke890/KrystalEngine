@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Maths/Conventions.hpp"
 #include "Krystal.Maths/Matrix.hpp"
@@ -12,7 +12,7 @@ namespace Krys::Maths
 {
   /// @brief Apply a translation vector to a matrix.
   template <FloatingPoint T>
-  NO_DISCARD constexpr auto Translate(const Matrix4x4<T> &m, const Vector3<T> &v) noexcept
+  KRYS_NODISCARD constexpr auto Translate(const Matrix4x4<T> &m, const Vector3<T> &v) noexcept
   {
     Matrix<T, 4, 4> result {m};
     result[3] = m[0] * v[0] + m[1] * v[1] + m[2] * v[2] + m[3];
@@ -21,14 +21,14 @@ namespace Krys::Maths
 
   /// @brief Create a matrix with the given translation applied.
   template <FloatingPoint T>
-  NO_DISCARD constexpr auto Translate(const Vector3<T> &v) noexcept
+  KRYS_NODISCARD constexpr auto Translate(const Vector3<T> &v) noexcept
   {
     return Translate(Identity<Matrix4x4<T>>(), v);
   }
 
   /// @brief Apply a rotation to a matrix around axis `v`.
   template <FloatingPoint T>
-  NO_DISCARD constexpr auto Rotate(const Matrix4x4<T> &m, T angle, const Vector3<T> &v) noexcept
+  KRYS_NODISCARD constexpr auto Rotate(const Matrix4x4<T> &m, T angle, const Vector3<T> &v) noexcept
   {
     const T c = std::cos(angle);
     const T s = std::sin(angle);
@@ -60,14 +60,14 @@ namespace Krys::Maths
 
   /// @brief Create a matrix with the given rotation applied.
   template <FloatingPoint T>
-  NO_DISCARD constexpr auto Rotate(T angle, const Vector3<T> &v) noexcept
+  KRYS_NODISCARD constexpr auto Rotate(T angle, const Vector3<T> &v) noexcept
   {
     return Rotate(Identity<Matrix4x4<T>>(), angle, v);
   }
 
   /// @brief Apply a scale vector to a matrix.
   template <FloatingPoint T>
-  NO_DISCARD constexpr auto Scale(const Matrix4x4<T> &m, const Vector3<T> &v) noexcept
+  KRYS_NODISCARD constexpr auto Scale(const Matrix4x4<T> &m, const Vector3<T> &v) noexcept
   {
     Matrix4x4<T> result;
     result[0] = m[0] * v[0];
@@ -80,14 +80,14 @@ namespace Krys::Maths
 
   /// @brief Create a matrix with the given scale applied.
   template <FloatingPoint T>
-  NO_DISCARD constexpr auto Scale(const Vector3<T> &v) noexcept
+  KRYS_NODISCARD constexpr auto Scale(const Vector3<T> &v) noexcept
   {
     return Scale(Identity<Matrix4x4<T>>(), v);
   }
 
   /// @brief Constructs a right handed look at matrix.
   template <FloatingPoint T>
-  NO_DISCARD constexpr auto LookAt_RH(const Vector3<T> &eye, const Vector3<T> &center,
+  KRYS_NODISCARD constexpr auto LookAt_RH(const Vector3<T> &eye, const Vector3<T> &center,
                                       const Vector3<T> &up) noexcept -> Matrix4x4<T>
   {
     const Vector3<T> f(Normalize(center - eye));
@@ -112,7 +112,7 @@ namespace Krys::Maths
 
   /// @brief Constructs a left handed look at matrix.
   template <FloatingPoint T>
-  NO_DISCARD constexpr auto LookAt_LH(const Vector3<T> &eye, const Vector3<T> &center,
+  KRYS_NODISCARD constexpr auto LookAt_LH(const Vector3<T> &eye, const Vector3<T> &center,
                                       const Vector3<T> &up) noexcept -> Matrix4x4<T>
   {
     const Vector3<T> f(Normalize(center - eye));
@@ -137,7 +137,7 @@ namespace Krys::Maths
 
   /// @brief Constructs a look at matrix.
   template <FloatingPoint T, Conventions::Handedness Handedness = Conventions::DefaultHandedness>
-  NO_DISCARD constexpr auto LookAt(const Vector3<T> &eye, const Vector3<T> &center,
+  KRYS_NODISCARD constexpr auto LookAt(const Vector3<T> &eye, const Vector3<T> &center,
                                    const Vector3<T> &up) noexcept -> Matrix4x4<T>
   {
     if constexpr (Handedness == Conventions::Handedness::Left)
@@ -152,7 +152,7 @@ namespace Krys::Maths
 
   /// @brief Rotates the given vector by the given quaternion.
   template <Number T>
-  NO_DISCARD constexpr Vector3<T> Rotate(const Quaternion<T> &q, const Vector3<T> &v) noexcept
+  KRYS_NODISCARD constexpr Vector3<T> Rotate(const Quaternion<T> &q, const Vector3<T> &v) noexcept
   {
     // Convert the vector to a quaternion with w = 0
     Quaternion<T> quat(0.0f, v.x, v.y, v.z);
@@ -167,56 +167,56 @@ namespace Krys::Maths
 
   /// @brief Rotates the given vector by the given quaternion.
   template <Number T>
-  NO_DISCARD constexpr Vector3<T> Rotate(const Quaternion<T> &q, T x, T y, T z) noexcept
+  KRYS_NODISCARD constexpr Vector3<T> Rotate(const Quaternion<T> &q, T x, T y, T z) noexcept
   {
     return Rotate(q, Vector3<T>(x, y, z));
   }
 
   /// @brief Creates a new quaternion that rotates about the positive X axis by the given angle.
   template <Number T>
-  NO_DISCARD Quaternion<T> RotateX(T angle) noexcept
+  KRYS_NODISCARD Quaternion<T> RotateX(T angle) noexcept
   {
     return Quaternion<T>(Vector3<T>(1, 0, 0), angle);
   }
 
   /// @brief Creates a new quaternion that rotates about the positive Y axis by the given angle.
   template <Number T>
-  NO_DISCARD Quaternion<T> RotateY(T angle) noexcept
+  KRYS_NODISCARD Quaternion<T> RotateY(T angle) noexcept
   {
     return Quaternion<T>(Vector3<T>(0, 1, 0), angle);
   }
 
   /// @brief Creates a new quaternion that rotates about the positive Z axis by the given angle.
   template <Number T>
-  NO_DISCARD Quaternion<T> RotateZ(T angle) noexcept
+  KRYS_NODISCARD Quaternion<T> RotateZ(T angle) noexcept
   {
     return Quaternion<T>(Vector3<T>(0, 0, 1), angle);
   }
 
   /// @brief Creates a new quaternion that rotates about the given axis by the given angle.
   template <Number T>
-  NO_DISCARD Quaternion<T> RotateAxisAngle(const Vector3<T> &axis, T angle) noexcept
+  KRYS_NODISCARD Quaternion<T> RotateAxisAngle(const Vector3<T> &axis, T angle) noexcept
   {
     return Quaternion<T>(axis, angle);
   }
 
   /// @brief Get the world X axis from the given quaternion.
   template <Number T>
-  NO_DISCARD constexpr Vector3<T> GetWorldX(const Quaternion<T> &q) noexcept
+  KRYS_NODISCARD constexpr Vector3<T> GetWorldX(const Quaternion<T> &q) noexcept
   {
     return Rotate(q, Vector3<T>(1, 0, 0));
   }
 
   /// @brief Get the world Y axis from the given quaternion.
   template <Number T>
-  NO_DISCARD constexpr Vector3<T> GetWorldY(const Quaternion<T> &q) noexcept
+  KRYS_NODISCARD constexpr Vector3<T> GetWorldY(const Quaternion<T> &q) noexcept
   {
     return Rotate(q, Vector3<T>(0, 1, 0));
   }
 
   /// @brief Get the world Z axis from the given quaternion.
   template <Number T>
-  NO_DISCARD constexpr Vector3<T> GetWorldZ(const Quaternion<T> &q) noexcept
+  KRYS_NODISCARD constexpr Vector3<T> GetWorldZ(const Quaternion<T> &q) noexcept
   {
     return Rotate(q, Vector3<T>(0, 0, 1));
   }
@@ -228,7 +228,7 @@ namespace Krys::Maths
   /// (when decomposed to axis-angle notation).
   /// @return the quaternion that rotates sourceDirection to targetDirection.
   template <FloatingPoint T>
-  NO_DISCARD Quaternion<T> RotateFromTo(const Vector3<T> &sourceDirection,
+  KRYS_NODISCARD Quaternion<T> RotateFromTo(const Vector3<T> &sourceDirection,
                                         const Vector3<T> &targetDirection) noexcept
   {
     // If sourceDirection == targetDirection, the cross product comes out zero, and normalization would fail.

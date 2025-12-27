@@ -3,9 +3,6 @@
 /// @brief Check if a particular environment is being used.
 #define KRYS_ENV(ENV) (defined KRYS_ENV_##ENV && KRYS_ENV_##ENV)
 
-/// @brief Check if a particular compiler is being used.
-#define KRYS_COMPILER(COMPILER) (defined KRYS_COMPILER_##COMPILER && KRYS_COMPILER_##COMPILER)
-
 /// @brief Check if a particular CPU is supported. KRYS_CPU(KNOWN) will be false if the CPU is unknown.
 #define KRYS_CPU(CPU) (defined KRYS_CPU_##CPU && KRYS_CPU_##CPU)
 

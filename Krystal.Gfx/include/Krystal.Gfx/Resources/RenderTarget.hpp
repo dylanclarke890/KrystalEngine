@@ -54,35 +54,35 @@ namespace Krys::Gfx
     AttachmentClearValueType Type;
     Variant<ClearColourValue, DepthValue, StencilValue, DepthStencilValue> Value;
 
-    NO_DISCARD constexpr static AttachmentClearValue Colour(const Maths::Vec4f &colour) noexcept
+    KRYS_NODISCARD constexpr static AttachmentClearValue Colour(const Maths::Vec4f &colour) noexcept
     {
       return AttachmentClearValue {.Type = AttachmentClearValueType::Colour,
                                    .Value = ClearColourValue {colour}};
     }
 
-    NO_DISCARD constexpr static AttachmentClearValue Colour(const Maths::Vec4i &colour) noexcept
+    KRYS_NODISCARD constexpr static AttachmentClearValue Colour(const Maths::Vec4i &colour) noexcept
     {
       return AttachmentClearValue {.Type = AttachmentClearValueType::Colour,
                                    .Value = ClearColourValue {colour}};
     }
 
-    NO_DISCARD constexpr static AttachmentClearValue Colour(const Maths::Vec4u &colour) noexcept
+    KRYS_NODISCARD constexpr static AttachmentClearValue Colour(const Maths::Vec4u &colour) noexcept
     {
       return AttachmentClearValue {.Type = AttachmentClearValueType::Colour,
                                    .Value = ClearColourValue {colour}};
     }
 
-    NO_DISCARD constexpr static AttachmentClearValue Depth(float depth) noexcept
+    KRYS_NODISCARD constexpr static AttachmentClearValue Depth(float depth) noexcept
     {
       return AttachmentClearValue {.Type = AttachmentClearValueType::Depth, .Value = depth};
     }
 
-    NO_DISCARD constexpr static AttachmentClearValue Stencil(uint32 stencil) noexcept
+    KRYS_NODISCARD constexpr static AttachmentClearValue Stencil(uint32 stencil) noexcept
     {
       return AttachmentClearValue {.Type = AttachmentClearValueType::Stencil, .Value = stencil};
     }
 
-    NO_DISCARD constexpr static AttachmentClearValue DepthStencil(float depth, uint32 stencil) noexcept
+    KRYS_NODISCARD constexpr static AttachmentClearValue DepthStencil(float depth, uint32 stencil) noexcept
     {
       return AttachmentClearValue {.Type = AttachmentClearValueType::DepthStencil,
                                    .Value = DepthStencilValue {depth, stencil}};

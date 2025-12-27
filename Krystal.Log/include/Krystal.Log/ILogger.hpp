@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/SmartPointers.hpp"
@@ -13,11 +13,11 @@ namespace Krys::Log
   struct LoggerSettings;
   class ILogger;
 
-  NO_DISCARD Expected<Unique<ILogger>> CreateLogger(const LoggerSettings &settings) noexcept;
+  KRYS_NODISCARD Expected<Unique<ILogger>> CreateLogger(const LoggerSettings &settings) noexcept;
 
   void SetGlobalLogger(const Unique<ILogger> &logger) noexcept;
 
-  NO_DISCARD ILogger *GetGlobalLogger() noexcept;
+  KRYS_NODISCARD ILogger *GetGlobalLogger() noexcept;
 
   enum class Level : uint8
   {
@@ -70,7 +70,7 @@ namespace Krys::Log
 
     virtual void SetLevel(Level level) noexcept = 0;
 
-    NO_DISCARD virtual Level GetLevel() const noexcept = 0;
+    KRYS_NODISCARD virtual Level GetLevel() const noexcept = 0;
 
     virtual void Flush() noexcept = 0;
 

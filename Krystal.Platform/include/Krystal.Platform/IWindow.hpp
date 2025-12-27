@@ -82,15 +82,15 @@ namespace Krys::Platform
 
     virtual ~IWindow() noexcept = default;
 
-    NO_DISCARD virtual WindowHandle GetWindowHandle() const noexcept = 0;
+    KRYS_NODISCARD virtual WindowHandle GetWindowHandle() const noexcept = 0;
 
     virtual void ProcessMessages() noexcept = 0;
 
     virtual void SetTitle(const string &title) noexcept = 0;
 
-    NO_DISCARD virtual const string &GetTitle() const noexcept = 0;
+    KRYS_NODISCARD virtual const string &GetTitle() const noexcept = 0;
 
-    NO_DISCARD virtual WindowSize GetSize() const noexcept = 0;
+    KRYS_NODISCARD virtual WindowSize GetSize() const noexcept = 0;
 
     virtual void Show() noexcept = 0;
 

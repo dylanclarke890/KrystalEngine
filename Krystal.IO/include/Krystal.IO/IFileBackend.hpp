@@ -3,7 +3,7 @@
 #include "Krystal.IO/Common.hpp"
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/List.hpp"
@@ -33,13 +33,13 @@ namespace Krys::IO
     virtual ~IFileBackend() = default;
 
     /// @brief Checks if a file or directory exists at the specified path.
-    NO_DISCARD virtual bool Exists(const Path &path) const noexcept = 0;
+    KRYS_NODISCARD virtual bool Exists(const Path &path) const noexcept = 0;
 
     /// @brief Checks if the specified path is a directory.
-    NO_DISCARD virtual bool IsDirectory(const Path &path) const noexcept = 0;
+    KRYS_NODISCARD virtual bool IsDirectory(const Path &path) const noexcept = 0;
 
     /// @brief Checks if the specified path is a file.
-    NO_DISCARD virtual bool IsFile(const Path &path) const noexcept = 0;
+    KRYS_NODISCARD virtual bool IsFile(const Path &path) const noexcept = 0;
 
     /// @brief Creates a file at the specified path.
     virtual bool CreateFile(const Path &path, bool overrideExisting) = 0;
@@ -50,15 +50,15 @@ namespace Krys::IO
     /// @brief Gets a list of files that match the specified path.
     /// @param directory The directory to search for files.
     /// @param flags Flags to control the search behavior.
-    NO_DISCARD virtual List<VFSFileEntry> SearchFiles(const Path &directory,
+    KRYS_NODISCARD virtual List<VFSFileEntry> SearchFiles(const Path &directory,
                                                       FileSearchFlags flags) const noexcept = 0;
 
     /// @brief Gets a stream reader for the specified path.
-    NO_DISCARD virtual Unique<IStreamReader> GetReader(const Path &path, ReadFlags flags) const = 0;
+    KRYS_NODISCARD virtual Unique<IStreamReader> GetReader(const Path &path, ReadFlags flags) const = 0;
 
     /// @brief Gets a stream writer for the specified path.
-    NO_DISCARD virtual Unique<IStreamWriter> GetWriter(const Path &path, WriteFlags flags) const = 0;
+    KRYS_NODISCARD virtual Unique<IStreamWriter> GetWriter(const Path &path, WriteFlags flags) const = 0;
 
-    NO_DISCARD virtual const Path &Root() const noexcept = 0;
+    KRYS_NODISCARD virtual const Path &Root() const noexcept = 0;
   };
 }

@@ -23,7 +23,7 @@ namespace Krys
     {
     }
 
-    NO_DISCARD CommandHeader ReadHeader() noexcept
+    KRYS_NODISCARD CommandHeader ReadHeader() noexcept
     {
       const auto *data = _list.GetSubSpan(_offset, sizeof(CommandHeader)).data();
       _offset += sizeof(CommandHeader);
@@ -31,7 +31,7 @@ namespace Krys
     }
 
     template <typename T>
-    NO_DISCARD const T &ReadCommand() noexcept
+    KRYS_NODISCARD const T &ReadCommand() noexcept
     {
       const auto *data = _list.GetSubSpan(_offset, sizeof(T)).data();
       _offset += sizeof(T);
@@ -45,7 +45,7 @@ namespace Krys
       _offset = ByteUtils::AlignNext(_offset, CommandArena::Alignment);
     }
 
-    NO_DISCARD bool HasMore() const noexcept
+    KRYS_NODISCARD bool HasMore() const noexcept
     {
       return _offset < _list.SizeInBytes();
     }

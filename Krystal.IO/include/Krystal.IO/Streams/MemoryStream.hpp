@@ -2,7 +2,7 @@
 
 #include "Krystal.IO/Common.hpp"
 #include "Krystal.IO/IStream.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
@@ -36,7 +36,7 @@ namespace Krys::IO
     }
 
     /// @brief Checks if the stream is open.
-    NO_DISCARD bool IsOpen() const noexcept override
+    KRYS_NODISCARD bool IsOpen() const noexcept override
     {
       return _isOpen;
     }
@@ -111,7 +111,7 @@ namespace Krys::IO
     }
 
     /// @brief Peeks at the next byte in the stream without advancing the position.
-    NO_DISCARD bool Peek(byte &next) noexcept override
+    KRYS_NODISCARD bool Peek(byte &next) noexcept override
     {
       if (!_isOpen || _position >= _buffer.size())
       {
@@ -122,20 +122,20 @@ namespace Krys::IO
     }
 
     /// @brief Gets the total size of the stream in bytes, or 0 if the size is unknown.
-    NO_DISCARD uint64 Size() const noexcept override
+    KRYS_NODISCARD uint64 Size() const noexcept override
     {
       return static_cast<uint64>(_buffer.size());
     }
 
     /// @brief Gets the current position in the stream.
-    NO_DISCARD uint64 Position() noexcept override
+    KRYS_NODISCARD uint64 Position() noexcept override
     {
       return _position;
     }
 
     /// @brief Checks if the end of the stream has been reached.
     /// @return True if the end of the stream has been reached, false otherwise.
-    NO_DISCARD bool EndOfStream() const noexcept override
+    KRYS_NODISCARD bool EndOfStream() const noexcept override
     {
       return _position >= static_cast<uint64>(_buffer.size());
     }
@@ -166,7 +166,7 @@ namespace Krys::IO
     }
 
     /// @brief Checks if the stream is open.
-    NO_DISCARD bool IsOpen() const noexcept override
+    KRYS_NODISCARD bool IsOpen() const noexcept override
     {
       return _isOpen;
     }
@@ -256,13 +256,13 @@ namespace Krys::IO
     }
 
     /// @brief Gets the total size of the stream in bytes, or 0 if the size is unknown.
-    NO_DISCARD uint64 Size() const noexcept override
+    KRYS_NODISCARD uint64 Size() const noexcept override
     {
       return static_cast<uint64>(_buffer.size());
     }
 
     /// @brief Gets the current position in the stream.
-    NO_DISCARD uint64 Position() noexcept override
+    KRYS_NODISCARD uint64 Position() noexcept override
     {
       return _position;
     }

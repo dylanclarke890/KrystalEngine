@@ -2,7 +2,7 @@
 
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/ImageView.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 
 namespace Krys::Gfx
@@ -21,7 +21,7 @@ namespace Krys::Gfx
 
     virtual void Shutdown() noexcept = 0;
 
-    NO_DISCARD virtual ImageViewHandle Create(const ImageViewDesc &desc) noexcept = 0;
+    KRYS_NODISCARD virtual ImageViewHandle Create(const ImageViewDesc &desc) noexcept = 0;
 
     virtual bool Destroy(ImageViewHandle handle) noexcept = 0;
   };

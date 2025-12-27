@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Commands/CommandArena.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include <cassert>
@@ -39,7 +39,7 @@ namespace Krys
       return _arena.GetSpan(spanStart, spanStart + size);
     }
 
-    NO_DISCARD size_t SizeInBytes() const noexcept
+    KRYS_NODISCARD size_t SizeInBytes() const noexcept
     {
       return _endOffset - _startOffset;
     }

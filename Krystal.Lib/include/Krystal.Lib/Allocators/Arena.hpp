@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
@@ -64,7 +64,7 @@ namespace Krys
       return *obj;
     }
 
-    NO_DISCARD size_t SizeInBytes() const noexcept
+    KRYS_NODISCARD size_t SizeInBytes() const noexcept
     {
       return _memoryPool.size();
     }

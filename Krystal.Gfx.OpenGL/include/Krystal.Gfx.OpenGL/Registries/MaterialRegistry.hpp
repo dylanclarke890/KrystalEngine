@@ -43,7 +43,7 @@ namespace Krys::Gfx::OpenGL
     {
     }
 
-    NO_DISCARD MaterialHandle Create(const string &name, ShaderHandle shader,
+    KRYS_NODISCARD MaterialHandle Create(const string &name, ShaderHandle shader,
                                      const PBRMaterialDesc &desc) noexcept override
     {
       if (auto cached = _cache.Get(name); cached.IsValid())
@@ -74,7 +74,7 @@ namespace Krys::Gfx::OpenGL
       return handle;
     }
 
-    NO_DISCARD MaterialHandle LoadPBRMaterial(const string &name, ShaderHandle shader) noexcept
+    KRYS_NODISCARD MaterialHandle LoadPBRMaterial(const string &name, ShaderHandle shader) noexcept
     {
       if (auto cached = _cache.Get(name); cached.IsValid())
       {
@@ -94,12 +94,12 @@ namespace Krys::Gfx::OpenGL
       return Create(name, shader, desc);
     }
 
-    NO_DISCARD Material &Get(MaterialHandle handle) noexcept
+    KRYS_NODISCARD Material &Get(MaterialHandle handle) noexcept
     {
       return _materials.Get(handle);
     }
 
-    NO_DISCARD Material *TryGet(MaterialHandle handle) noexcept
+    KRYS_NODISCARD Material *TryGet(MaterialHandle handle) noexcept
     {
       return _materials.TryGet(handle);
     }

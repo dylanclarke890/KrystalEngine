@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
@@ -37,25 +37,25 @@ namespace Krys::Text
     constexpr static uint32 SurrogateLowEnd = 0xDFFFu;
 
     /// @brief Determines whether the given codepoint is an ASCII character.
-    NO_DISCARD constexpr static bool IsASCIICharacter(UnicodeCodepoint ch) noexcept
+    KRYS_NODISCARD constexpr static bool IsASCIICharacter(UnicodeCodepoint ch) noexcept
     {
       return ch <= MaxASCIIValue;
     }
 
     /// @brief Determines whether the given char is an ASCII character.
-    NO_DISCARD constexpr static bool IsASCIICharacter(uint8 ch) noexcept
+    KRYS_NODISCARD constexpr static bool IsASCIICharacter(uint8 ch) noexcept
     {
       return IsASCIICharacter(UnicodeCodepoint(ch));
     }
 
     /// @brief Determines whether the given byte is an ASCII character.
-    NO_DISCARD constexpr static bool IsASCIICharacter(byte ch) noexcept
+    KRYS_NODISCARD constexpr static bool IsASCIICharacter(byte ch) noexcept
     {
       return IsASCIICharacter(UnicodeCodepoint(static_cast<uint8>(ch)));
     }
 
     /// @brief Determines whether the given UTF-8 string consists entirely of ASCII characters.
-    NO_DISCARD constexpr static bool IsASCIIString(utf8_stringview str) noexcept
+    KRYS_NODISCARD constexpr static bool IsASCIIString(utf8_stringview str) noexcept
     {
       for (char8_t ch : str)
       {
@@ -68,30 +68,30 @@ namespace Krys::Text
     }
 
     /// @brief Determines whether the given codepoint is a valid Unicode scalar value.
-    NO_DISCARD constexpr static bool IsValidCodepoint(UnicodeCodepoint codepoint) noexcept
+    KRYS_NODISCARD constexpr static bool IsValidCodepoint(UnicodeCodepoint codepoint) noexcept
     {
       return (codepoint <= MaxSupplementaryPlaneValue) && !IsSurrogateCodepoint(codepoint);
     }
 
-    NO_DISCARD constexpr static bool IsBasicMultilingualPlaneCodepoint(UnicodeCodepoint codepoint) noexcept
+    KRYS_NODISCARD constexpr static bool IsBasicMultilingualPlaneCodepoint(UnicodeCodepoint codepoint) noexcept
     {
       return codepoint <= MaxBasicMultilingualPlaneValue;
     }
 
     /// @brief Determines whether the given codepoint is a surrogate codepoint.
-    NO_DISCARD constexpr static bool IsSurrogateCodepoint(UnicodeCodepoint codepoint) noexcept
+    KRYS_NODISCARD constexpr static bool IsSurrogateCodepoint(UnicodeCodepoint codepoint) noexcept
     {
       return (codepoint >= SurrogateHighStart && codepoint <= SurrogateLowEnd);
     }
 
     /// @brief Determines whether the given codepoint is a high surrogate.
-    NO_DISCARD constexpr static bool IsHighSurrogate(UnicodeCodepoint codepoint) noexcept
+    KRYS_NODISCARD constexpr static bool IsHighSurrogate(UnicodeCodepoint codepoint) noexcept
     {
       return (codepoint >= SurrogateHighStart && codepoint <= SurrogateHighEnd);
     }
 
     /// @brief Determines whether the given codepoint is a low surrogate.
-    NO_DISCARD constexpr static bool IsLowSurrogate(UnicodeCodepoint codepoint) noexcept
+    KRYS_NODISCARD constexpr static bool IsLowSurrogate(UnicodeCodepoint codepoint) noexcept
     {
       return (codepoint >= SurrogateLowStart && codepoint <= SurrogateLowEnd);
     }
@@ -177,7 +177,7 @@ namespace Krys::Text
     }
 
     /// @brief Decodes a UTF-8 string into a list of Unicode codepoints.
-    NO_DISCARD constexpr static List<UnicodeCodepoint> GetCodepoints(utf8_stringview str) noexcept
+    KRYS_NODISCARD constexpr static List<UnicodeCodepoint> GetCodepoints(utf8_stringview str) noexcept
     {
       List<UnicodeCodepoint> codepoints;
       GetCodepoints(str, codepoints);
@@ -201,7 +201,7 @@ namespace Krys::Text
     }
 
     /// @brief Encodes a list of Unicode codepoints into a UTF-8 string.
-    NO_DISCARD constexpr static utf8_string CodepointsToUTF8(Span<UnicodeCodepoint> codepoints) noexcept
+    KRYS_NODISCARD constexpr static utf8_string CodepointsToUTF8(Span<UnicodeCodepoint> codepoints) noexcept
     {
       utf8_string str;
       CodepointsToUTF8(codepoints, str);

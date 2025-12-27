@@ -4,7 +4,7 @@
 #include "Krystal.IO/IFileBackend.hpp"
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Types/List.hpp"
@@ -27,24 +27,24 @@ namespace Krys::IO
 
     ~NativeFileBackend() noexcept override = default;
 
-    NO_DISCARD bool Exists(const Path &path) const noexcept override;
+    KRYS_NODISCARD bool Exists(const Path &path) const noexcept override;
 
-    NO_DISCARD bool IsDirectory(const Path &path) const noexcept override;
+    KRYS_NODISCARD bool IsDirectory(const Path &path) const noexcept override;
 
-    NO_DISCARD bool IsFile(const Path &path) const noexcept override;
+    KRYS_NODISCARD bool IsFile(const Path &path) const noexcept override;
 
     bool CreateFile(const Path &path, bool overwriteExisting) override;
 
     bool DeleteFile(const Path &path) override;
 
-    NO_DISCARD List<VFSFileEntry> SearchFiles(const Path &directory,
+    KRYS_NODISCARD List<VFSFileEntry> SearchFiles(const Path &directory,
                                               FileSearchFlags flags) const noexcept override;
 
-    NO_DISCARD Unique<IStreamReader> GetReader(const Path &path, ReadFlags flags) const override;
+    KRYS_NODISCARD Unique<IStreamReader> GetReader(const Path &path, ReadFlags flags) const override;
 
-    NO_DISCARD Unique<IStreamWriter> GetWriter(const Path &path, WriteFlags flags) const override;
+    KRYS_NODISCARD Unique<IStreamWriter> GetWriter(const Path &path, WriteFlags flags) const override;
 
-    NO_DISCARD const Path &Root() const noexcept override
+    KRYS_NODISCARD const Path &Root() const noexcept override
     {
       return _root;
     }

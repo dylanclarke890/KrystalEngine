@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx/Enums/BufferType.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
-  NO_DISCARD constexpr inline GLenum MapBufferType(BufferType type) noexcept
+  KRYS_NODISCARD constexpr inline GLenum MapBufferType(BufferType type) noexcept
   {
     switch (type)
     {
@@ -17,7 +17,7 @@ namespace Krys::Gfx::OpenGL
     }
   }
 
-  NO_DISCARD constexpr inline BufferType MapBufferType(GLenum type) noexcept
+  KRYS_NODISCARD constexpr inline BufferType MapBufferType(GLenum type) noexcept
   {
     switch (type)
     {

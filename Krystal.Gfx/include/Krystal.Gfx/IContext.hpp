@@ -63,28 +63,28 @@ namespace Krys::Gfx
 
     virtual void DPIChanged(int dpi) noexcept = 0;
 
-    NO_DISCARD virtual IBufferRegistry &Buffers() noexcept = 0;
+    KRYS_NODISCARD virtual IBufferRegistry &Buffers() noexcept = 0;
 
-    NO_DISCARD virtual IImageRegistry &Images() noexcept = 0;
+    KRYS_NODISCARD virtual IImageRegistry &Images() noexcept = 0;
 
-    NO_DISCARD virtual IImageViewRegistry &ImageViews() noexcept = 0;
+    KRYS_NODISCARD virtual IImageViewRegistry &ImageViews() noexcept = 0;
 
-    NO_DISCARD virtual ISamplerRegistry &Samplers() noexcept = 0;
+    KRYS_NODISCARD virtual ISamplerRegistry &Samplers() noexcept = 0;
 
-    NO_DISCARD virtual ITextureRegistry &Textures() noexcept = 0;
+    KRYS_NODISCARD virtual ITextureRegistry &Textures() noexcept = 0;
 
-    NO_DISCARD virtual IRenderTargetRegistry &RenderTargets() noexcept = 0;
+    KRYS_NODISCARD virtual IRenderTargetRegistry &RenderTargets() noexcept = 0;
 
-    NO_DISCARD virtual IShaderRegistry &Shaders() noexcept = 0;
+    KRYS_NODISCARD virtual IShaderRegistry &Shaders() noexcept = 0;
 
-    NO_DISCARD virtual IMeshRegistry &Meshes() noexcept = 0;
+    KRYS_NODISCARD virtual IMeshRegistry &Meshes() noexcept = 0;
 
-    NO_DISCARD virtual IMaterialRegistry &Materials() noexcept = 0;
+    KRYS_NODISCARD virtual IMaterialRegistry &Materials() noexcept = 0;
 
-    NO_DISCARD virtual IFontRegistry &Fonts() noexcept = 0;
+    KRYS_NODISCARD virtual IFontRegistry &Fonts() noexcept = 0;
 
-    NO_DISCARD virtual StringInterner &Strings() noexcept = 0;
+    KRYS_NODISCARD virtual StringInterner &Strings() noexcept = 0;
 
-    NO_DISCARD virtual API GetAPI() const noexcept = 0;
+    KRYS_NODISCARD virtual API GetAPI() const noexcept = 0;
   };
 }

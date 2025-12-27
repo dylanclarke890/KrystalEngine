@@ -47,27 +47,27 @@ namespace Krys::Gfx::OpenGL
       glBindTextureUnit(unit, _id);
     }
 
-    NO_DISCARD GLuint Id() const noexcept
+    KRYS_NODISCARD GLuint Id() const noexcept
     {
       return _id;
     }
 
-    NO_DISCARD ImageHandle Image() const noexcept
+    KRYS_NODISCARD ImageHandle Image() const noexcept
     {
       return _imageHandle;
     }
 
-    NO_DISCARD GLenum Target() const noexcept
+    KRYS_NODISCARD GLenum Target() const noexcept
     {
       return _target;
     }
 
-    NO_DISCARD GLenum InternalFormat() const noexcept
+    KRYS_NODISCARD GLenum InternalFormat() const noexcept
     {
       return _internalFormat;
     }
 
-    NO_DISCARD const SubResourceRange &GetSubResourceRange() const noexcept
+    KRYS_NODISCARD const SubResourceRange &GetSubResourceRange() const noexcept
     {
       return _subResourceRange;
     }

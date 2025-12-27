@@ -15,9 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.Lib\Core\Attributes.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Events\Event.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -160,6 +157,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Core\Compiler.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

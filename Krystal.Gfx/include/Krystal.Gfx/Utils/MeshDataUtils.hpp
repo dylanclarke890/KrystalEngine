@@ -4,7 +4,7 @@
 #include "Krystal.Gfx/Resources/Mesh.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Compiler.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Vector.hpp"

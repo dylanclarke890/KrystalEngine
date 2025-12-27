@@ -58,32 +58,32 @@ namespace Krys::Gfx::OpenGL
 
     void DPIChanged(int dpi) noexcept override;
 
-    NO_DISCARD uint32 Width() const noexcept;
+    KRYS_NODISCARD uint32 Width() const noexcept;
 
-    NO_DISCARD uint32 Height() const noexcept;
+    KRYS_NODISCARD uint32 Height() const noexcept;
 
-    NO_DISCARD IBufferRegistry &Buffers() noexcept override;
+    KRYS_NODISCARD IBufferRegistry &Buffers() noexcept override;
 
-    NO_DISCARD IImageRegistry &Images() noexcept override;
+    KRYS_NODISCARD IImageRegistry &Images() noexcept override;
 
-    NO_DISCARD IImageViewRegistry &ImageViews() noexcept override;
+    KRYS_NODISCARD IImageViewRegistry &ImageViews() noexcept override;
 
-    NO_DISCARD ISamplerRegistry &Samplers() noexcept override;
+    KRYS_NODISCARD ISamplerRegistry &Samplers() noexcept override;
 
-    NO_DISCARD ITextureRegistry &Textures() noexcept override;
+    KRYS_NODISCARD ITextureRegistry &Textures() noexcept override;
 
-    NO_DISCARD IRenderTargetRegistry &RenderTargets() noexcept override;
+    KRYS_NODISCARD IRenderTargetRegistry &RenderTargets() noexcept override;
 
-    NO_DISCARD IShaderRegistry &Shaders() noexcept override;
+    KRYS_NODISCARD IShaderRegistry &Shaders() noexcept override;
 
-    NO_DISCARD IMeshRegistry &Meshes() noexcept override;
+    KRYS_NODISCARD IMeshRegistry &Meshes() noexcept override;
 
-    NO_DISCARD IMaterialRegistry &Materials() noexcept override;
+    KRYS_NODISCARD IMaterialRegistry &Materials() noexcept override;
 
-    NO_DISCARD IFontRegistry &Fonts() noexcept override;
+    KRYS_NODISCARD IFontRegistry &Fonts() noexcept override;
     
-    NO_DISCARD StringInterner &Strings() noexcept override;
+    KRYS_NODISCARD StringInterner &Strings() noexcept override;
 
-    NO_DISCARD API GetAPI() const noexcept override;
+    KRYS_NODISCARD API GetAPI() const noexcept override;
   };
 }
