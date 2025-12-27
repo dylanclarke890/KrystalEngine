@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Gfx/Commands/CommandArena.hpp"
-#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include <cassert>
 
 namespace Krys::Gfx

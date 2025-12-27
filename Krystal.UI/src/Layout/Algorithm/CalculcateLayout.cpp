@@ -1,5 +1,5 @@
-#include "Krystal.Lib/ComparisonHelpers.hpp"
-#include "Krystal.Lib/NullableFloat.hpp"
+﻿#include "Krystal.Lib/ComparisonHelpers.hpp"
+#include "Krystal.Lib/Types/NullableFloat.hpp"
 #include "Krystal.UI/Layout/Algorithm/AbsoluteLayout.hpp"
 #include "Krystal.UI/Layout/Algorithm/Align.hpp"
 #include "Krystal.UI/Layout/Algorithm/Baseline.hpp"

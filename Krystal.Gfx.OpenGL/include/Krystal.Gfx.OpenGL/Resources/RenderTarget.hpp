@@ -4,7 +4,7 @@
 #include "Krystal.Gfx/Resources/RenderTarget.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Clipspace.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include <cassert>

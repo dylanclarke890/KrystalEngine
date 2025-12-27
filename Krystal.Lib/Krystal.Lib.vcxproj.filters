@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.Lib\Attributes.hpp">
+    <ClInclude Include="include\Krystal.Lib\Core\Attributes.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Events\Event.hpp">
@@ -24,10 +24,10 @@
     <ClInclude Include="include\Krystal.Lib\Events\EventManager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Concepts.hpp">
+    <ClInclude Include="include\Krystal.Lib\Core\Concepts.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Types.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\Numeric.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\StringId.hpp">
@@ -42,7 +42,7 @@
     <ClInclude Include="include\Krystal.Lib\SmartPointers.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\FuncPtrTraits.hpp">
+    <ClInclude Include="include\Krystal.Lib\TypeTraits\FuncPtrTraits.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp">
@@ -66,7 +66,7 @@
     <ClInclude Include="include\Krystal.Lib\RangeUtils.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Detection.hpp">
+    <ClInclude Include="include\Krystal.Lib\Core\Detection.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\DebugBreak.hpp">
@@ -129,7 +129,7 @@
     <ClInclude Include="include\Krystal.Lib\Types\Set.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\NullableFloat.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\NullableFloat.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Enum.hpp">

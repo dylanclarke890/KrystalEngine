@@ -11,7 +11,7 @@
 #include "Krystal.Lib/HashUtils.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Types/Stack.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.UI/Document.hpp"
 #include "Krystal.UI/Geometry/GeometryUtils.hpp"
 #include "Krystal.UI/Geometry/RenderBox.hpp"

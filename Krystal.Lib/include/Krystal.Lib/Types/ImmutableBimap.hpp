@@ -3,9 +3,9 @@
 #pragma once
 
 #include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/Concepts.hpp"
-#include "Krystal.Lib/Detection.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Core/Detection.hpp"
 #include "Krystal.Lib/Types/Pair.hpp"
 #include <algorithm>
 #include <assert.h>

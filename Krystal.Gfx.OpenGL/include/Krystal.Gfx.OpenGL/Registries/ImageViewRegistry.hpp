@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ImageRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/ImageView.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Registries/IImageViewRegistry.hpp"
-#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Macros.hpp"
 
 namespace Krys::Gfx::OpenGL

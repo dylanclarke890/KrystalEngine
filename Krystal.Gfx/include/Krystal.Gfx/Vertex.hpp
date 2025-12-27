@@ -4,7 +4,7 @@
 #include "Krystal.Gfx/Enums/VertexAttributeType.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/StronglyTypedValue.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
 namespace Krys::Gfx

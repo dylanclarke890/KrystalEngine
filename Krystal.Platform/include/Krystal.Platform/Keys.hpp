@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include <cassert>
 #include <format>

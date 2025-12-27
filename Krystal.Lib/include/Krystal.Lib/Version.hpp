@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include <compare>
 
 namespace Krys

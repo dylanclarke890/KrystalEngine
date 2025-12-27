@@ -3,7 +3,7 @@
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/Func.hpp"
 #include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.UI/Layout/Api/Forward.hpp"
 
 namespace Krys::UI

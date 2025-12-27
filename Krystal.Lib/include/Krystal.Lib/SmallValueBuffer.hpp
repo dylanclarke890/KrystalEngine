@@ -6,10 +6,10 @@
 #include <memory>
 
 #include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/SmartPointers.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys
 {

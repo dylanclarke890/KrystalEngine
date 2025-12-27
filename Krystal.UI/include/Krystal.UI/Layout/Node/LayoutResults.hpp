@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/NullableFloat.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/NullableFloat.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.UI/Styles/Enums/Dimension.hpp"
 #include "Krystal.UI/Styles/Enums/Direction.hpp"
 #include "Krystal.UI/Styles/Enums/Edge.hpp"

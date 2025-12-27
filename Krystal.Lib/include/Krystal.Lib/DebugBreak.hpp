@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Detection.hpp"
+#include "Krystal.Lib/Core/Detection.hpp"
 
 #ifdef KRYS_BUILD_DEBUG
   #ifdef KRYS_PLATFORM_WINDOWS

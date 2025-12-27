@@ -7,7 +7,7 @@
 #include "Krystal.Gfx/IRenderer.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::Gfx::OpenGL
 {

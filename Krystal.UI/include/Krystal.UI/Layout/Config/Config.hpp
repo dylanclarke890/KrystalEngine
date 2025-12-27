@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include <bitset>
 
 #include "Krystal.UI/Layout/Api/Forward.hpp"

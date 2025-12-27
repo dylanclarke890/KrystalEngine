@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/Concepts.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
 #include <cassert>
 
 namespace Krys::Maths

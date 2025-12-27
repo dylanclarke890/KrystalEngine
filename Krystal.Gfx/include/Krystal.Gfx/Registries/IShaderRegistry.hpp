@@ -1,9 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Shader.hpp"
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Macros.hpp"
 
 namespace Krys::Gfx

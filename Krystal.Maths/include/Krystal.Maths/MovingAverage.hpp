@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/Concepts.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::Maths
 {

@@ -1,9 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx/Resources/ImageView.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::Gfx::OpenGL
 {

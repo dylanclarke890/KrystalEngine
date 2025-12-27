@@ -1,8 +1,8 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx/Enums/WrapMode.hpp"
-#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 
 namespace Krys::Gfx::OpenGL
 {

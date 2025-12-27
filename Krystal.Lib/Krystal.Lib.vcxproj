@@ -150,13 +150,13 @@
       </SubType>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Types\Array.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Attributes.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\Attributes.hpp" />
     <ClInclude Include="include\Krystal.Lib\BitUtils.hpp" />
     <ClInclude Include="include\Krystal.Lib\ByteUtils.hpp" />
     <ClInclude Include="include\Krystal.Lib\ComparisonHelpers.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Concepts.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\Concepts.hpp" />
     <ClInclude Include="include\Krystal.Lib\DebugBreak.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Detection.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\Detection.hpp" />
     <ClInclude Include="include\Krystal.Lib\Endian.hpp" />
     <ClInclude Include="include\Krystal.Lib\Enum.hpp">
       <SubType>
@@ -165,7 +165,7 @@
     <ClInclude Include="include\Krystal.Lib\Types\Expected.hpp" />
     <ClInclude Include="include\Krystal.Lib\EnumFlags.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Func.hpp" />
-    <ClInclude Include="include\Krystal.Lib\FuncPtrTraits.hpp" />
+    <ClInclude Include="include\Krystal.Lib\TypeTraits\FuncPtrTraits.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Lazy.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\LinkedList.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\List.hpp" />
@@ -176,7 +176,7 @@
     <ClInclude Include="include\Krystal.Lib\Types\Map.hpp" />
     <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Nullable.hpp" />
-    <ClInclude Include="include\Krystal.Lib\NullableFloat.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\NullableFloat.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\OrderedMap.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Pair.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Queue.hpp" />
@@ -191,7 +191,7 @@
     <ClInclude Include="include\Krystal.Lib\StringId.hpp" />
     <ClInclude Include="include\Krystal.Lib\String\StringUtils.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\StronglyTypedValue.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Types.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\Numeric.hpp" />
     <ClInclude Include="include\Krystal.Lib\TypeName.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Variant.hpp" />
     <ClInclude Include="include\Krystal.Lib\Version.hpp" />

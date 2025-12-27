@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include <cmath>
 #include <limits>
 
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/Concepts.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Vector.hpp"
 

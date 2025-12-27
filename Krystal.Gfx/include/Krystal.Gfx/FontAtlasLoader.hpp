@@ -2,10 +2,10 @@
 
 #include "Krystal.Gfx/Resources/Font.hpp"
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::Gfx
 {

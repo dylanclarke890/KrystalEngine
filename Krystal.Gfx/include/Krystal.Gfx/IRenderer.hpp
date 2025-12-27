@@ -5,7 +5,7 @@
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/SmartPointers.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::Gfx
 {

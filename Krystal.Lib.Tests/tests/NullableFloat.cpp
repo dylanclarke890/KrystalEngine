@@ -1,11 +1,11 @@
-/*
+﻿/*
  * Copyright (c) Meta Platforms, Inc. and affiliates.
  *
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
 
-#include "Krystal.Lib/NullableFloat.hpp"
+#include "Krystal.Lib/Types/NullableFloat.hpp"
 #include "Krystal.Lib/ComparisonHelpers.hpp"
 #include <catch_all.hpp>
 #include <cmath>

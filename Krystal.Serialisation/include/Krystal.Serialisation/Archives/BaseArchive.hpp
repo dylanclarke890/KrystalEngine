@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Concepts.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Serialisation/Access.hpp"
 #include "Krystal.Serialisation/Concepts.hpp"

@@ -5,7 +5,7 @@
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include <type_traits>
 
 namespace Krys::Gfx

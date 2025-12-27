@@ -2,7 +2,7 @@
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/Resources/Font.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.UI/Document.hpp"
 #include "Krystal.UI/Elements/Element.hpp"
 #include "Krystal.UI/Layout/LayoutEngine.hpp"

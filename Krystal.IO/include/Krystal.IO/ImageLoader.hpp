@@ -2,7 +2,7 @@
 
 #include "Krystal.IO/Image.hpp"
 #include "Krystal.IO/IStream.hpp"
-#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Macros.hpp"
 

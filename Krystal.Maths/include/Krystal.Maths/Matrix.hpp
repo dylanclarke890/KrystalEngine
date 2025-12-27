@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/Concepts.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Traits.hpp"
 #include "Krystal.Maths/Vector.hpp"
 #include <cassert>

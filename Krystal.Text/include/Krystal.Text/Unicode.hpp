@@ -1,13 +1,13 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/Concepts.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/StronglyTypedValue.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::Text
 {

@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx.Vulkan/Hooks/vulkan_hooks.hpp"
-#include "Krystal.Lib/Detection.hpp"
+#include "Krystal.Lib/Core/Detection.hpp"
 
 #ifndef WIN32_LEAN_AND_MEAN
   #define NOMINMAX

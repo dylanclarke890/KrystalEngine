@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Gfx.OpenGL/Context.hpp"
-#include "Krystal.Lib/Detection.hpp"
+#include "Krystal.Lib/Core/Detection.hpp"
 
 #ifdef KRYS_PLATFORM_WINDOWS
   #include "Krystal.Gfx.OpenGL/ContextImpl/Win32.hpp"

@@ -1,9 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx/Enums/FilterMode.hpp"
 #include "Krystal.Gfx/Enums/WrapMode.hpp"
 #include "Krystal.Lib/HashUtils.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include <compare>
 #include <type_traits>
 

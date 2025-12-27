@@ -2,7 +2,7 @@
 
 #include "Krystal.Gfx/Resources/Image.hpp"
 #include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Pair.hpp"
 #include "Krystal.Lib/Types/Variant.hpp"
 #include "Krystal.Maths/Vector.hpp"

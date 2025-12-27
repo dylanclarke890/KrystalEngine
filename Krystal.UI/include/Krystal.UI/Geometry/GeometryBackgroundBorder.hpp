@@ -5,7 +5,7 @@
 #include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Maths.hpp"
 #include "Krystal.UI/Geometry/BorderMetrics.hpp"
 #include "Krystal.UI/Geometry/Common.hpp"

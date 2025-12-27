@@ -17,7 +17,7 @@
 #include "Krystal.Lib/NativeHandle.hpp"
 #include "Krystal.Lib/SmartPointers.hpp"
 #include "Krystal.Lib/String/StringInterner.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::Gfx
 {

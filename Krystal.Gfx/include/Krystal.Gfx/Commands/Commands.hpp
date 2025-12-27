@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx.Lib/Colour.hpp"
 #include "Krystal.Gfx/Commands/CommandType.hpp"
@@ -6,7 +6,7 @@
 #include "Krystal.Gfx/Enums/BufferBitFlags.hpp"
 #include "Krystal.Gfx/Enums/FilterMode.hpp"
 #include "Krystal.Lib/String/StringRef.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Maths/Vector.hpp"
 

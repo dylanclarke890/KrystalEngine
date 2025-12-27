@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Text/Encodings/Encoding.hpp"
 
 namespace Krys::Text

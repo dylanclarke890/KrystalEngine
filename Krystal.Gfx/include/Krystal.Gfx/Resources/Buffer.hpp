@@ -3,7 +3,7 @@
 #include "Krystal.Gfx/Enums/BufferType.hpp"
 #include "Krystal.Gfx/Enums/BufferUsage.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::Gfx
 {

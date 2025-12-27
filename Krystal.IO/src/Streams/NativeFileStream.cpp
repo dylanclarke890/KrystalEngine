@@ -1,5 +1,5 @@
-#include "Krystal.IO/Streams/NativeFileStream.hpp"
-#include "Krystal.Lib/Types.hpp"
+﻿#include "Krystal.IO/Streams/NativeFileStream.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include <filesystem>
 #include <ios>
 

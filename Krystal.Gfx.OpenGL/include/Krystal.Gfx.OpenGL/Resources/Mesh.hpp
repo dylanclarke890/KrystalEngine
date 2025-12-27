@@ -6,7 +6,7 @@
 #include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::Gfx::OpenGL
 {

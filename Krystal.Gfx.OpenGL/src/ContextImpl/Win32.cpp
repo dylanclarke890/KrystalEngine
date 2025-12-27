@@ -1,4 +1,4 @@
-#include <cassert>
+﻿#include <cassert>
 #ifndef WIN32_LEAN_AND_MEAN
   #define WIN32_LEAN_AND_MEAN
   #include <windows.h>
@@ -113,7 +113,7 @@ namespace
 #include "Krystal.Gfx.OpenGL/ContextImpl/Win32.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Hooks/wgl.hpp"
-#include "Krystal.Lib/Detection.hpp"
+#include "Krystal.Lib/Core/Detection.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
