@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Array.hpp"
-#include "Krystal.Lib/Map.hpp"
-#include "Krystal.Lib/Pair.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Lib/Types/Map.hpp"
+#include "Krystal.Lib/Types/Pair.hpp"
 #include "Krystal.Text/Encodings/Encoding.hpp"
 #include "Krystal.Text/Encodings/EncodingConstants.hpp"
 #include "Krystal.Text/Unicode.hpp"

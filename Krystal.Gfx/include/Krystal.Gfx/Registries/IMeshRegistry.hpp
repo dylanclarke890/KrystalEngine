@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Mesh.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Span.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Lib/Types.hpp"
 
 namespace Krys::Gfx

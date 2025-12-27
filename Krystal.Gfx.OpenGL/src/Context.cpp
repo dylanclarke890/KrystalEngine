@@ -1,4 +1,4 @@
-#include "Krystal.Gfx.OpenGL/Context.hpp"
+﻿#include "Krystal.Gfx.OpenGL/Context.hpp"
 #include "Krystal.Lib/Detection.hpp"
 
 #ifdef KRYS_PLATFORM_WINDOWS
@@ -14,9 +14,9 @@
 #include "Krystal.Gfx/Light.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.Lib/DebugBreak.hpp"
-#include "Krystal.Lib/Expected.hpp"
-#include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/Map.hpp"
+#include "Krystal.Lib/Types/Expected.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include "Krystal.Maths/Clipspace.hpp"

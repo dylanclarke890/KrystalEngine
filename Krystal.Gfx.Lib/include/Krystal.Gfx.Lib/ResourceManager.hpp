@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/Concepts.hpp"
-#include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/Nullable.hpp"
-#include "Krystal.Lib/Queue.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Nullable.hpp"
+#include "Krystal.Lib/Types/Queue.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include <cassert>
 

@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Pair.hpp"
+#include "Krystal.Lib/Types/Pair.hpp"
 
 namespace Krys::Serialisation
 {

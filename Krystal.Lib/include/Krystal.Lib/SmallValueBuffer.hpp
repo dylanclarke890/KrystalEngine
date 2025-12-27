@@ -1,13 +1,13 @@
-#pragma once
+﻿#pragma once
 
 #include <bitset>
 #include <cassert>
 #include <cstdint>
 #include <memory>
 
-#include "Krystal.Lib/Array.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/List.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/SmartPointers.hpp"
 #include "Krystal.Lib/Types.hpp"
 

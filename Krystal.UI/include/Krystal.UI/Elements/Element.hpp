@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx.Lib/Handle.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/List.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Map.hpp"
+#include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/String/StringRef.hpp"
 #include "Krystal.UI/Layout/Algorithm/MeasureText.hpp"

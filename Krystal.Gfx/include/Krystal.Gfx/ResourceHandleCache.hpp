@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx/Handle.hpp"
-#include "Krystal.Lib/Map.hpp"
+#include "Krystal.Lib/Types/Map.hpp"
 #include <cassert>
 
 namespace Krys::Gfx

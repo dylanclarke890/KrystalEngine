@@ -1,12 +1,12 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Shader.hpp"
 #include "Krystal.Gfx.OpenGL/Utils.hpp"
 #include "Krystal.Gfx/Resources/Font.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Map.hpp"
-#include "Krystal.Lib/Span.hpp"
+#include "Krystal.Lib/Types/Map.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
 namespace Krys::Gfx::OpenGL

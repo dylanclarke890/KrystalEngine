@@ -1,6 +1,6 @@
-#include "Krystal.IO/VirtualFileSystem.hpp"
+﻿#include "Krystal.IO/VirtualFileSystem.hpp"
 #include "Krystal.Lib/DebugBreak.hpp"
-#include "Krystal.Lib/Set.hpp"
+#include "Krystal.Lib/Types/Set.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include <ranges>
 

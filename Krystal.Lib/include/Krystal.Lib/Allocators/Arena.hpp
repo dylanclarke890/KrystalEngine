@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
-#include "Krystal.Lib/List.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Span.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include <new>
 #include <utility>
@@ -48,7 +48,7 @@ namespace Krys
 
     T &Emplace(Args &&...args)
     {
-      // Ensure there�s enough room
+      // Ensure there’s enough room
       size_t alignedOffset = ByteUtils::AlignNext(_offset, Alignment);
       size_t requiredSize = alignedOffset + sizeof(T);
       if (requiredSize > _memoryPool.size())

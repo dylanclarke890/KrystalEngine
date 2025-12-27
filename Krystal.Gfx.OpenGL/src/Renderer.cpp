@@ -6,7 +6,7 @@
 #include "Krystal.Gfx/Commands/Commands.hpp"
 #include "Krystal.Gfx/Enums/BufferBitFlags.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/Expected.hpp"
+#include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Maths/Clamp.hpp"
 #include "Krystal.Maths/Transform.hpp"
 #include "Krystal.Text/Unicode.hpp"

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx/Commands/CommandList.hpp"
 #include "Krystal.Gfx/Commands/Commands.hpp"
@@ -6,11 +6,11 @@
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/IRenderer.hpp"
 #include "Krystal.Gfx/Utils/MeshDataUtils.hpp"
-#include "Krystal.Lib/Array.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/DebugBreak.hpp"
 #include "Krystal.Lib/HashUtils.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Stack.hpp"
+#include "Krystal.Lib/Types/Stack.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.UI/Document.hpp"
 #include "Krystal.UI/Geometry/GeometryUtils.hpp"

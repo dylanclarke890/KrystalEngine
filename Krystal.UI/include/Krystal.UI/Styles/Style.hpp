@@ -1,8 +1,8 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx.Lib/Colour.hpp"
 #include "Krystal.Gfx/Handle.hpp"
-#include "Krystal.Lib/Array.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/NullableFloat.hpp"
 #include "Krystal.UI/Styles/Enums/Align.hpp"

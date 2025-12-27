@@ -1,11 +1,11 @@
 ﻿#pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
-#include "Krystal.Lib/Array.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/List.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Map.hpp"
+#include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Log/ILogger.hpp"
 

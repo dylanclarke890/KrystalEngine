@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/Expected.hpp"
+#include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/SmartPointers.hpp"
 #include "Krystal.Lib/String/String.hpp"

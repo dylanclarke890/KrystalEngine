@@ -1,9 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx/Resources/Font.hpp"
 #include "Krystal.Lib/HashUtils.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Map.hpp"
+#include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include <type_traits>

@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Array.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Maths/Vector.hpp"
 #include "Krystal.UI/Geometry/Common.hpp"
 

@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Lib/Events/Event.hpp"
-#include "Krystal.Lib/Func.hpp"
-#include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/Map.hpp"
-#include "Krystal.Lib/Queue.hpp"
+#include "Krystal.Lib/Types/Func.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Map.hpp"
+#include "Krystal.Lib/Types/Queue.hpp"
 #include "Krystal.Lib/SmartPointers.hpp"
 #include "Krystal.Lib/Types.hpp"
 

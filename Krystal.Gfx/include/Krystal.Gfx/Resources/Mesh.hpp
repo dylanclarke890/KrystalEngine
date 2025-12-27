@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx/Enums/MeshType.hpp"
 #include "Krystal.Gfx/Enums/PrimitiveType.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/Span.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Lib/Types.hpp"
 
 namespace Krys::Gfx

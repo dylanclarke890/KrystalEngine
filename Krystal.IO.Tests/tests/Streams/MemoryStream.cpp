@@ -1,6 +1,6 @@
-#include "Krystal.IO/Streams/MemoryStream.hpp"
+﻿#include "Krystal.IO/Streams/MemoryStream.hpp"
 #include "Krystal.IO/Common.hpp"
-#include "Krystal.Lib/List.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

@@ -1,8 +1,8 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx/Commands/CommandList.hpp"
 #include "Krystal.Gfx/IContext.hpp"
-#include "Krystal.Lib/Expected.hpp"
+#include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/SmartPointers.hpp"
 #include "Krystal.Lib/Types.hpp"

@@ -2,11 +2,11 @@
 /// https://github.com/DanIsraelMalta/BiDirectional-Map/blob/master/BiDirectionalMap.h
 #pragma once
 
-#include "Krystal.Lib/Array.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Lib/Detection.hpp"
-#include "Krystal.Lib/Pair.hpp"
+#include "Krystal.Lib/Types/Pair.hpp"
 #include <algorithm>
 #include <assert.h>
 #include <utility>

@@ -1,6 +1,7 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Lib/Types.hpp"
+#include <compare>
 
 namespace Krys
 {

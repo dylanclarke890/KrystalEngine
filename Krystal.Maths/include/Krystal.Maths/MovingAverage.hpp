@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Array.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/Concepts.hpp"
 #include "Krystal.Lib/Types.hpp"

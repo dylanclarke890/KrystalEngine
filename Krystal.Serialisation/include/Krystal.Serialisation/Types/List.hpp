@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/List.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Serialisation/Builtins.hpp"
 
 namespace Krys::Serialisation

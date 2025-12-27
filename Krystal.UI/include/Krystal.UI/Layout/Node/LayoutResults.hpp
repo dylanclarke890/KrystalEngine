@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Array.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/NullableFloat.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.UI/Styles/Enums/Dimension.hpp"

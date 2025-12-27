@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Types.hpp"

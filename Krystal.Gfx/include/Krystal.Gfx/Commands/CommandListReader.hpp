@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx/Commands/CommandArena.hpp"
 #include "Krystal.Gfx/Commands/CommandList.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Span.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Lib/Types.hpp"
 
 namespace Krys::Gfx

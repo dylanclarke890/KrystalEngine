@@ -48,10 +48,10 @@
     <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\StronglyTypedValue.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\StronglyTypedValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Lazy.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\Lazy.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Version.hpp">
@@ -81,52 +81,52 @@
     <ClInclude Include="include\Krystal.Lib\Endian.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Map.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\Map.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Expected.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\Expected.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\String\String.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\List.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\List.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\LinkedList.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\LinkedList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\OrderedMap.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\OrderedMap.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Array.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\Array.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Nullable.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\Nullable.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\OrderedSet.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\OrderedSet.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Queue.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\Queue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Span.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\Span.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pair.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\Pair.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Func.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\Func.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\TypeName.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Stack.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\Stack.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Set.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\Set.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\NullableFloat.hpp">
@@ -153,10 +153,10 @@
     <ClInclude Include="include\Krystal.Lib\String\StringRef.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Variant.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\Variant.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\ImmutableBimap.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\ImmutableBimap.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

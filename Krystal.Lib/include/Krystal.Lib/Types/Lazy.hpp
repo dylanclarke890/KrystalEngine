@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Nullable.hpp"
+#include "Krystal.Lib/Types/Nullable.hpp"
 
 namespace Krys
 {

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Debug/ScopedProfiler.hpp"
 #include "Krystal.Gfx.Lib/ResourceManager.hpp"
@@ -9,7 +9,7 @@
 #include "Krystal.IO/Streams/StreamUtils.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
 #include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Map.hpp"
+#include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/String/String.hpp"
 
 namespace Krys::Gfx::OpenGL

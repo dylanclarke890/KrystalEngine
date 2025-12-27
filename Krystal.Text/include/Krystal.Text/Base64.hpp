@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Span.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Lib/Types.hpp"
 
 namespace Krys::Text

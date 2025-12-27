@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx/ICamera.hpp"
 #include "Krystal.Gfx/Registries/IBufferRegistry.hpp"
@@ -12,7 +12,7 @@
 #include "Krystal.Gfx/Registries/IShaderRegistry.hpp"
 #include "Krystal.Gfx/Registries/ITextureRegistry.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
-#include "Krystal.Lib/Expected.hpp"
+#include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/NativeHandle.hpp"
 #include "Krystal.Lib/SmartPointers.hpp"

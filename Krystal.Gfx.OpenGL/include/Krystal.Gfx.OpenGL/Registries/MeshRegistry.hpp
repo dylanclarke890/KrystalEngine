@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Debug.hpp"
@@ -7,7 +7,7 @@
 #include "Krystal.Gfx/Registries/IMeshRegistry.hpp"
 #include "Krystal.Gfx/Utils/MeshDataUtils.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
-#include "Krystal.Lib/List.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Maths/Vector.hpp"
 

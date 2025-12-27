@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx/Utils/MeshDataUtils.hpp"
-#include "Krystal.Lib/Array.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Lib/Types.hpp"
 #include "Krystal.Maths/Clamp.hpp"

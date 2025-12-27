@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx.OpenGL/Context.hpp"
-#include "Krystal.Lib/List.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Macros.hpp"
 
 #pragma comment(lib, "opengl32.lib")

@@ -1,4 +1,4 @@
-#include "Krystal.Gfx.Vulkan/VulkanContext.hpp"
+﻿#include "Krystal.Gfx.Vulkan/VulkanContext.hpp"
 
 #include "Krystal.Lib/Detection.hpp"
 
@@ -9,7 +9,7 @@
 
 #include "Krystal.IO/Streams/NativeFileStream.hpp"
 #include "Krystal.IO/Streams/StreamUtils.hpp"
-#include "Krystal.Lib/Array.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Maths/Clipspace.hpp"
 #include "Krystal.Maths/Convert.hpp"
 #include "Krystal.Maths/Matrix.hpp"

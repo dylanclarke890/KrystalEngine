@@ -1,9 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.IO/IStream.hpp"
-#include "Krystal.Lib/Array.hpp"
-#include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/Stack.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Stack.hpp"
 #include "Krystal.Serialisation/Archives/BaseArchive.hpp"
 #include "Krystal.Serialisation/Builtins.hpp"
 #include "Krystal.Serialisation/Concepts.hpp"
