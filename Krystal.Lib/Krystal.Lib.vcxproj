@@ -148,6 +148,9 @@
     <ClInclude Include="include\Krystal.Lib\Mixins\NonCopyMovable.hpp" />
     <ClInclude Include="include\Krystal.Lib\Mixins\NonMovable.hpp" />
     <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\SharedPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\UniquePtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\ImmutableBimap.hpp" />
     <ClInclude Include="include\Krystal.Lib\Allocators\Arena.hpp">
       <SubType>
@@ -195,7 +198,6 @@
     <ClInclude Include="include\Krystal.Lib\Types\OrderedSet.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Set.hpp" />
     <ClInclude Include="include\Krystal.Lib\SmallValueBuffer.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Types\SmartPointers.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Span.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Stack.hpp" />
     <ClInclude Include="include\Krystal.Lib\String\String.hpp" />

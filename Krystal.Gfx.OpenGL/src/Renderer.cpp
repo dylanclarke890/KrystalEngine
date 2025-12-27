@@ -13,7 +13,7 @@
 
 namespace Krys::Gfx
 {
-  Expected<Unique<IRenderer>> CreateRenderer(IContext &context) noexcept
+  Expected<UniquePtr<IRenderer>> CreateRenderer(IContext &context) noexcept
   {
     try
     {

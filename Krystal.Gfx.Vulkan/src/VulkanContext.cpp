@@ -21,7 +21,7 @@
 
 namespace Krys::Gfx
 {
-  // Expected<Unique<IContext>> CreateContext(NativeHandle windowHandle, uint32 width, uint32 height) noexcept
+  // Expected<UniquePtr<IContext>> CreateContext(NativeHandle windowHandle, uint32 width, uint32 height) noexcept
   //{
   //   try
   //   {

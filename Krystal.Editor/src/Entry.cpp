@@ -69,7 +69,7 @@ int main(int argc, char **argv)
     return -1;
   }
 
-  Unique<Editor> editor = std::move(result.value());
+  UniquePtr<Editor> editor = std::move(result.value());
   editor->Run();
 
   return 0;

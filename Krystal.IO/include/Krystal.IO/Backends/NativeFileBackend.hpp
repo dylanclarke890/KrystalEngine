@@ -8,7 +8,7 @@
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Types/SmartPointers.hpp"
+#include "Krystal.Lib/Pointers/UniquePtr.hpp"
 
 namespace Krys::IO
 {
@@ -37,9 +37,9 @@ namespace Krys::IO
     KRYS_NODISCARD List<VFSFileEntry> SearchFiles(const Path &directory,
                                                   FileSearchFlags flags) const noexcept override;
 
-    KRYS_NODISCARD Unique<IStreamReader> GetReader(const Path &path, ReadFlags flags) const override;
+    KRYS_NODISCARD UniquePtr<IStreamReader> GetReader(const Path &path, ReadFlags flags) const override;
 
-    KRYS_NODISCARD Unique<IStreamWriter> GetWriter(const Path &path, WriteFlags flags) const override;
+    KRYS_NODISCARD UniquePtr<IStreamWriter> GetWriter(const Path &path, WriteFlags flags) const override;
 
     KRYS_NODISCARD const Path &Root() const noexcept override
     {

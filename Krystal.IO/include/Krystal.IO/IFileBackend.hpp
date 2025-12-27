@@ -6,9 +6,9 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
+#include "Krystal.Lib/Pointers/UniquePtr.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Types/SmartPointers.hpp"
 
 namespace Krys::IO
 {
@@ -52,10 +52,10 @@ namespace Krys::IO
                                                           FileSearchFlags flags) const noexcept = 0;
 
     /// @brief Gets a stream reader for the specified path.
-    KRYS_NODISCARD virtual Unique<IStreamReader> GetReader(const Path &path, ReadFlags flags) const = 0;
+    KRYS_NODISCARD virtual UniquePtr<IStreamReader> GetReader(const Path &path, ReadFlags flags) const = 0;
 
     /// @brief Gets a stream writer for the specified path.
-    KRYS_NODISCARD virtual Unique<IStreamWriter> GetWriter(const Path &path, WriteFlags flags) const = 0;
+    KRYS_NODISCARD virtual UniquePtr<IStreamWriter> GetWriter(const Path &path, WriteFlags flags) const = 0;
 
     KRYS_NODISCARD virtual const Path &Root() const noexcept = 0;
   };

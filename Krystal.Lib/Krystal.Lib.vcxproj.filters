@@ -36,9 +36,6 @@
     <ClInclude Include="include\Krystal.Lib\Core\Macros.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Types\SmartPointers.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Types\StronglyTypedValue.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -184,6 +181,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Mixins\NonCopyMovable.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Pointers\UniquePtr.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Pointers\SharedPtr.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

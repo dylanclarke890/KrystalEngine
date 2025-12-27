@@ -2,10 +2,10 @@
 
 #include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/NativeHandle.hpp"
+#include "Krystal.Lib/Pointers/UniquePtr.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Types/Func.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Types/SmartPointers.hpp"
 #include "Krystal.Platform/Keys.hpp"
 #include "Krystal.Platform/MouseButtons.hpp"
 
@@ -15,7 +15,7 @@ namespace Krys::Platform
   struct WindowCallbacks;
   class IWindow;
 
-  Expected<Unique<IWindow>> CreateWindow(const WindowSettings &settings) noexcept;
+  Expected<UniquePtr<IWindow>> CreateWindow(const WindowSettings &settings) noexcept;
 
   struct WindowSize
   {

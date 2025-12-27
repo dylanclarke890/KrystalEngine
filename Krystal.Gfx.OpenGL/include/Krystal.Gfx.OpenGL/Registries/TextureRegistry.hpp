@@ -67,7 +67,7 @@ namespace Krys::Gfx::OpenGL
         return existing;
       }
 
-      Unique<IO::IStreamReader> stream = _vfs.GetReader(BaseDirectory / path, IO::ReadFlags::None);
+      UniquePtr<IO::IStreamReader> stream = _vfs.GetReader(BaseDirectory / path, IO::ReadFlags::None);
       IO::ImageLoader loader;
       auto imageResult = loader.Load(*stream, {.FlipVertically = true});
       assert(imageResult.has_value() && "Failed to load texture image.");
@@ -138,7 +138,7 @@ namespace Krys::Gfx::OpenGL
 
       for (const auto &path : paths)
       {
-        Unique<IO::IStreamReader> stream = _vfs.GetReader(BaseDirectory / path, IO::ReadFlags::None);
+        UniquePtr<IO::IStreamReader> stream = _vfs.GetReader(BaseDirectory / path, IO::ReadFlags::None);
         assert(stream != nullptr && "Failed to open cubemap face image.");
 
         auto imageResult = loader.Load(*stream, {.FlipVertically = false});

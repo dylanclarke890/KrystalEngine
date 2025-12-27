@@ -1,8 +1,8 @@
-#include "Krystal.Platform/Input.hpp"
+﻿#include "Krystal.Platform/Input.hpp"
 
 namespace Krys::Platform
 {
-  Input::Input(Ptr<EventManager> events) noexcept : _mouse(), _keyboard(), _events(events)
+  Input::Input(EventManager *events) noexcept : _mouse(), _keyboard(), _events(events)
   {
   }
 
@@ -36,8 +36,7 @@ namespace Krys::Platform
     _keyboard._released.clear();
   }
 
-  void Input::OnKeyboardEvent(WindowHandle window, Key key,
-                              KeyState state) noexcept
+  void Input::OnKeyboardEvent(WindowHandle window, Key key, KeyState state) noexcept
   {
     switch (state)
     {
@@ -49,8 +48,7 @@ namespace Krys::Platform
     _events->Enqueue(CreateUnique<Events::KeyboardEvent>(window, key, state));
   }
 
-  void Input::OnMouseButtonEvent(WindowHandle window, MouseButton btn,
-                                 MouseButtonState state) noexcept
+  void Input::OnMouseButtonEvent(WindowHandle window, MouseButton btn, MouseButtonState state) noexcept
   {
     switch (state)
     {
@@ -61,8 +59,7 @@ namespace Krys::Platform
     _events->Enqueue(CreateUnique<Events::MouseButtonEvent>(window, btn, state));
   }
 
-  void Input::OnMouseMoveEvent(WindowHandle window, float dx, float dy, float clientX,
-                               float clientY) noexcept
+  void Input::OnMouseMoveEvent(WindowHandle window, float dx, float dy, float clientX, float clientY) noexcept
   {
     _mouse._deltaX += dx;
     _mouse._deltaY += dy;

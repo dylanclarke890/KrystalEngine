@@ -138,11 +138,11 @@ namespace
 
 namespace Krys::Platform
 {
-  Expected<Unique<IWindow>> CreateWindow(const WindowSettings &settings) noexcept
+  Expected<UniquePtr<IWindow>> CreateWindow(const WindowSettings &settings) noexcept
   {
     try
     {
-      return Expected<Unique<IWindow>>(CreateUnique<Win32::Win32Window>(settings));
+      return Expected<UniquePtr<IWindow>>(CreateUnique<Win32::Win32Window>(settings));
     }
     catch (const std::exception &e)
     {

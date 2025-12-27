@@ -599,11 +599,11 @@ namespace
 
 namespace Krys::Gfx
 {
-  Expected<Unique<IContext>> CreateContext(const ContextSettings &settings) noexcept
+  Expected<UniquePtr<IContext>> CreateContext(const ContextSettings &settings) noexcept
   {
     try
     {
-      return Expected<Unique<IContext>>(CreateUnique<OpenGL::Context>(settings));
+      return Expected<UniquePtr<IContext>>(CreateUnique<OpenGL::Context>(settings));
     }
     catch (const std::exception &e)
     {

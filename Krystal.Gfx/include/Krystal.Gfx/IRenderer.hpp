@@ -5,10 +5,12 @@
 #include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Types/SmartPointers.hpp"
+#include "Krystal.Lib/Pointers/UniquePtr.hpp"
 
 namespace Krys::Gfx
 {
+  Expected<UniquePtr<class IRenderer>> CreateRenderer(IContext &ctx) noexcept;
+
   class IRenderer : NonCopyMovable<IRenderer>
   {
   public:
@@ -26,6 +28,4 @@ namespace Krys::Gfx
 
     virtual void Submit(const CommandList &commandList) = 0;
   };
-
-  Expected<Unique<IRenderer>> CreateRenderer(IContext &ctx) noexcept;
 }

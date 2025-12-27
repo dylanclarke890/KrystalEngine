@@ -5,7 +5,7 @@
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Types/SmartPointers.hpp"
+#include "Krystal.Lib/Pointers/UniquePtr.hpp"
 #include <format>
 
 namespace Krys::Log
@@ -13,9 +13,9 @@ namespace Krys::Log
   struct LoggerSettings;
   class ILogger;
 
-  KRYS_NODISCARD Expected<Unique<ILogger>> CreateLogger(const LoggerSettings &settings) noexcept;
+  KRYS_NODISCARD Expected<UniquePtr<ILogger>> CreateLogger(const LoggerSettings &settings) noexcept;
 
-  void SetGlobalLogger(const Unique<ILogger> &logger) noexcept;
+  void SetGlobalLogger(const UniquePtr<ILogger> &logger) noexcept;
 
   KRYS_NODISCARD ILogger *GetGlobalLogger() noexcept;
 
@@ -42,6 +42,11 @@ namespace Krys::Log
   {
   public:
     virtual ~ILogger() noexcept = default;
+
+    ILogger(ILogger &) = default;
+    ILogger &operator=(ILogger &) = default;
+    ILogger(ILogger &&) = default;
+    ILogger &operator=(ILogger &&) = default;
 
     template <typename... Args>
     void Log(Level level, stringview fmt, Args &&...args)

@@ -166,7 +166,7 @@ namespace Krys::Gfx::OpenGL
 
     KRYS_NODISCARD string ReadFile(const IO::Path &filepath) noexcept
     {
-      Unique<IO::IStreamReader> reader = _vfs.GetReader(BaseDirectory / filepath, IO::ReadFlags::None);
+      UniquePtr<IO::IStreamReader> reader = _vfs.GetReader(BaseDirectory / filepath, IO::ReadFlags::None);
       assert(reader != nullptr && "Failed to create stream reader for shader file.");
 
       auto result = IO::StreamUtils::ReadAllText(*reader);

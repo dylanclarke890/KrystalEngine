@@ -9,7 +9,7 @@
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Types/SmartPointers.hpp"
+#include "Krystal.Lib/Pointers/UniquePtr.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include "Krystal.Platform/Events.hpp"
 #include "Krystal.Platform/Input.hpp"
@@ -27,9 +27,9 @@ namespace Krys
   /// @param argv Command line arguments.
   /// @param settings Application settings.
   template <DerivedFrom<Application> TApplication, typename... Args>
-  static Expected<Unique<TApplication>> CreateApplication(int argc, char **argv,
-                                                          const struct ApplicationSettings &settings,
-                                                          Args &&...args) noexcept
+  static Expected<UniquePtr<TApplication>> CreateApplication(int argc, char **argv,
+                                                             const struct ApplicationSettings &settings,
+                                                             Args &&...args) noexcept
   {
     try
     {
@@ -62,13 +62,13 @@ namespace Krys
   {
     List<string> CommandLineArgs {};
     ApplicationSettings Settings {};
-    Unique<Log::ILogger> Logger {};
-    Unique<EventManager> Events {};
-    Unique<Platform::IWindow> Window {};
-    Unique<Platform::Input> Input {};
-    Unique<IO::VirtualFileSystem> VFS {};
-    Unique<Gfx::IContext> GraphicsContext {};
-    Unique<Gfx::IRenderer> Renderer {};
+    UniquePtr<Log::ILogger> Logger {};
+    UniquePtr<EventManager> Events {};
+    UniquePtr<Platform::IWindow> Window {};
+    UniquePtr<Platform::Input> Input {};
+    UniquePtr<IO::VirtualFileSystem> VFS {};
+    UniquePtr<Gfx::IContext> GraphicsContext {};
+    UniquePtr<Gfx::IRenderer> Renderer {};
     StringInterner Strings {};
   };
 
@@ -78,7 +78,7 @@ namespace Krys
   protected:
     bool _running;
     bool _isWindowMinimised;
-    Unique<ApplicationContext> _context;
+    UniquePtr<ApplicationContext> _context;
 
   public:
     /// @brief Constructs an `Application`.

@@ -2,7 +2,6 @@
 
 #include "Krystal.Lib/Events/EventManager.hpp"
 #include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
-#include "Krystal.Lib/Types/SmartPointers.hpp"
 #include "Krystal.Platform/Events.hpp"
 #include "Krystal.Platform/IWindow.hpp"
 #include "Krystal.Platform/Keyboard.hpp"
@@ -19,12 +18,12 @@ namespace Krys::Platform
   {
     Keyboard _keyboard;
     Mouse _mouse;
-    Ptr<EventManager> _events;
+    EventManager *_events;
 
     friend class Application;
 
   public:
-    Input(Ptr<EventManager> events) noexcept;
+    Input(EventManager *events) noexcept;
 
     ~Input() noexcept = default;
 

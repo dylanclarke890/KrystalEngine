@@ -27,7 +27,7 @@ namespace Krys::Gfx::OpenGL
     IO::VirtualFileSystem &_vfs;
     StringInterner &_strings;
     int _dpi;
-    Unique<ContextPlatformImpl> _platformImpl;
+    UniquePtr<ContextPlatformImpl> _platformImpl;
 
     BufferRegistry _buffers;
     ImageRegistry _images;

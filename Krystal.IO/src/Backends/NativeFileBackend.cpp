@@ -107,20 +107,20 @@ namespace Krys::IO
     }
   }
 
-  Unique<IStreamReader> NativeFileBackend::GetReader(const Path &path, ReadFlags flags) const
+  UniquePtr<IStreamReader> NativeFileBackend::GetReader(const Path &path, ReadFlags flags) const
   {
     if (Exists(path))
     {
       IStreamReader *reader = new NativeFileReader((_root / path).Normalise(), flags);
-      return Unique<IStreamReader>(reader);
+      return UniquePtr<IStreamReader>(reader);
     }
 
     return nullptr;
   }
 
-  Unique<IStreamWriter> NativeFileBackend::GetWriter(const Path &path, WriteFlags flags) const
+  UniquePtr<IStreamWriter> NativeFileBackend::GetWriter(const Path &path, WriteFlags flags) const
   {
     IStreamWriter *writer = new NativeFileWriter((_root / path).Normalise(), flags);
-    return Unique<IStreamWriter>(writer);
+    return UniquePtr<IStreamWriter>(writer);
   }
 }

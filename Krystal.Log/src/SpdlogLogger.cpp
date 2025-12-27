@@ -89,7 +89,7 @@ namespace Krys::Log
     }
   };
 
-  Expected<Unique<ILogger>> CreateLogger(const LoggerSettings &settings) noexcept
+  Expected<UniquePtr<ILogger>> CreateLogger(const LoggerSettings &settings) noexcept
   {
     if (settings.Name.empty())
       return Unexpected("Logger name cannot be empty.");
@@ -99,7 +99,7 @@ namespace Krys::Log
 
     try
     {
-      return Expected<Unique<ILogger>>(CreateUnique<SpdlogLogger>(settings));
+      return Expected<UniquePtr<ILogger>>(CreateUnique<SpdlogLogger>(settings));
     }
     catch (const std::exception &e)
     {
@@ -109,7 +109,7 @@ namespace Krys::Log
 
   static ILogger *GlobalLogger = nullptr;
 
-  void SetGlobalLogger(const Unique<ILogger> &logger) noexcept
+  void SetGlobalLogger(const UniquePtr<ILogger> &logger) noexcept
   {
     GlobalLogger = logger.get();
   }

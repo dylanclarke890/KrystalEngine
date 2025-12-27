@@ -14,10 +14,10 @@
 #include "Krystal.IO/VirtualFileSystem.hpp"
 #include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/NativeHandle.hpp"
+#include "Krystal.Lib/Pointers/UniquePtr.hpp"
 #include "Krystal.Lib/String/StringInterner.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Types/SmartPointers.hpp"
 
 namespace Krys::Gfx
 {
@@ -30,7 +30,7 @@ namespace Krys::Gfx
     StringInterner *Strings {nullptr};
   };
 
-  Expected<Unique<class IContext>> CreateContext(const ContextSettings &settings) noexcept;
+  Expected<UniquePtr<class IContext>> CreateContext(const ContextSettings &settings) noexcept;
 
   enum class API
   {

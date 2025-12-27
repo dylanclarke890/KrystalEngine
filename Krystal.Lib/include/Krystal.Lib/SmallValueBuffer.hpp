@@ -6,10 +6,10 @@
 #include <memory>
 
 #include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Pointers/UniquePtr.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Types/SmartPointers.hpp"
 
 namespace Krys
 {
@@ -29,7 +29,7 @@ namespace Krys
     uint16 _count {0};
     Array<uint32, BufferSize> _buffer {};
     std::bitset<BufferSize> _wideElements;
-    Unique<Overflow> _overflow;
+    UniquePtr<Overflow> _overflow;
 
   public:
     SmallValueBuffer() noexcept = default;

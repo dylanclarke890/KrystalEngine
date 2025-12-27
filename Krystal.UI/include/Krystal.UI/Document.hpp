@@ -9,7 +9,6 @@
 #include "Krystal.Lib/String/StringRef.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Types/SmartPointers.hpp"
 #include "Krystal.Lib/Types/Stack.hpp"
 #include "Krystal.UI/Elements/Element.hpp"
 #include "Krystal.UI/Layout/Algorithm/MeasureText.hpp"
