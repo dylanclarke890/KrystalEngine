@@ -1,13 +1,12 @@
 ﻿#pragma once
 
-/// @brief Check if a particular environment is being used KRYS_ENV_(DEV|STAGE|PROD).
+/// @brief Check if a particular environment is being used.
 #define KRYS_ENV(ENV) (defined KRYS_ENV_##ENV && KRYS_ENV_##ENV)
 
 /// @brief Check if a particular compiler is being used.
 #define KRYS_COMPILER(COMPILER) (defined KRYS_COMPILER_##COMPILER && KRYS_COMPILER_##COMPILER)
 
-/// @brief Check if a particular CPU is supported. KRYS_CPU(KNOWN) is true if we explicitly support a target
-/// CPU.
+/// @brief Check if a particular CPU is supported. KRYS_CPU(KNOWN) will be false if the CPU is unknown.
 #define KRYS_CPU(CPU) (defined KRYS_CPU_##CPU && KRYS_CPU_##CPU)
 
 /// @brief Check the underlying operating system.
@@ -34,7 +33,7 @@
 #endif
 
 #if KRYS_COMPILER(GCC_COMPATIBLE) && !KRYS_COMPILER(CLANG)
-  #define COMPILER_GCC 1
+  #define KRYS_COMPILER_GCC 1
 #endif
 
 #if defined(_MSC_VER)
