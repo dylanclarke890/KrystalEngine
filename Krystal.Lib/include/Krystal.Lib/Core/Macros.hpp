@@ -1,35 +1,19 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Detection/Compiler.hpp"
+
 namespace Krys
 {
-#pragma region Function Signature
-
-#if defined(__GNUC__) || (defined(__MWERKS__) && (__MWERKS__ >= 0x3000))                                     \
-  || (defined(__ICC) && (__ICC >= 600)) || defined(__ghs__)
-  #define KRYS_FUNC_SIG __PRETTY_FUNCTION__
-#elif defined(__DMC__) && (__DMC__ >= 0x810)
-  #define KRYS_FUNC_SIG __PRETTY_FUNCTION__
-#elif defined(__FUNCSIG__) || defined(_MSC_VER)
+#if KRYS_COMPILER(MSVC)
   #define KRYS_FUNC_SIG __FUNCSIG__
-#elif (defined(__INTEL_COMPILER) && (__INTEL_COMPILER >= 600)) || (defined(__IBMCPP__) && (__IBMCPP__ >= 500))
-  #define KRYS_FUNC_SIG __FUNCTION__
-#elif defined(__BORLANDC__) && (__BORLANDC__ >= 0x550)
-  #define KRYS_FUNC_SIG __FUNC__
-#elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199'901)
-  #define KRYS_FUNC_SIG __func__
-#elif defined(__cplusplus) && (__cplusplus >= 201'103)
-  #define KRYS_FUNC_SIG __func__
+#elif KRYS_COMPILER(GCC) || KRYS_COMPILER(CLANG)
+  #define KRYS_FUNC_SIG __PRETTY_FUNCTION__
 #else
   #warning "KRYS_FUNC_SIG unknown!"
   #define KRYS_FUNC_SIG "Unknown Function Signature"
 #endif
 
-#pragma endregion
-
-#pragma region Compiler Warnings
-
-  // Compiler-specific macros for disabling and restoring warnings
-#if defined(_MSC_VER) // Microsoft Visual C++
+#if KRYS_COMPILER(MSVC)
   #define KRYS_DISABLE_WARNING_PUSH() __pragma(warning(push))
   #define KRYS_DISABLE_WARNING_POP() __pragma(warning(pop))
   #define KRYS_DISABLE_WARNING(msvcWarningCode, gccWarningName) __pragma(warning(disable : msvcWarningCode))
@@ -49,10 +33,6 @@ namespace Krys
   #define KRYS_DISABLE_WARNING_POP()
   #define KRYS_DISABLE_WARNING(msvcWarningCode, gccWarningName)
 #endif
-
-#pragma endregion
-
-#define KRYS_UNUSED(x) (void)(x) // Suppress unused variable warnings
 
 #define NO_COPY(ClassName)                                                                                   \
   ClassName(const ClassName &) = delete;                                                                     \

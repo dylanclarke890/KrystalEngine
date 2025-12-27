@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Core/Compiler.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/Detection.hpp"
 #include "Krystal.Lib/Types/Pair.hpp"

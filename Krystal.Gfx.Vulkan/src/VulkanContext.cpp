@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Gfx.Vulkan/VulkanContext.hpp"
 
-#include "Krystal.Lib/Core/Detection.hpp"
+#include "Krystal.Lib/Detection/OS.hpp"
 
 #if KRYS_OS(WINDOWS)
   #include "Krystal.Gfx.Vulkan/Hooks/vulkan_win32_hooks.hpp"

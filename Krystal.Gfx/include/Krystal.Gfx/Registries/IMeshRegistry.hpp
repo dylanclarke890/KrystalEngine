@@ -3,7 +3,7 @@
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Mesh.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/Core/Compiler.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"

@@ -2,7 +2,7 @@
 
 #include "Krystal.Gfx/Resources/Font.hpp"
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Core/Compiler.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"

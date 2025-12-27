@@ -136,8 +136,13 @@
     <ClInclude Include="include\Krystal.Lib\Commands\CommandList.hpp" />
     <ClInclude Include="include\Krystal.Lib\Commands\CommandListReader.hpp" />
     <ClInclude Include="include\Krystal.Lib\Commands\CommandType.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Core\Compiler.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\Attributes.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Detection\ByteOrder.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Detection\Compiler.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Detection\CPU.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Detection\OS.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\TypeTraits.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Detection\Sanitizers.hpp" />
     <ClInclude Include="include\Krystal.Lib\Handle.hpp" />
     <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\ImmutableBimap.hpp" />
@@ -163,7 +168,7 @@
     <ClInclude Include="include\Krystal.Lib\ComparisonHelpers.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Concepts.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\DebugBreak.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Core\Detection.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Detection\Environment.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Endian.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Enum.hpp">
       <SubType>

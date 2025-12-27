@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Compiler.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.UI/Styles/Enums/Display.hpp"
 #include <cstdint>
 #include <forward_list>

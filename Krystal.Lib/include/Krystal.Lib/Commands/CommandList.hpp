@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Commands/CommandArena.hpp"
-#include "Krystal.Lib/Core/Compiler.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include <cassert>

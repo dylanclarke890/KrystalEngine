@@ -2,7 +2,7 @@
 
 #include "Krystal.Lib/ByteUtils.hpp"
 #include "Krystal.Lib/Commands/CommandType.hpp"
-#include "Krystal.Lib/Core/Compiler.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/List.hpp"

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Compiler.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Hash.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include <xhash>

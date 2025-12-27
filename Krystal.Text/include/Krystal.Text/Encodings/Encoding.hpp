@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Core/Compiler.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Lib/String/String.hpp"

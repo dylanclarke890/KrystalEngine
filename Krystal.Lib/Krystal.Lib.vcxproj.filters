@@ -48,7 +48,7 @@
     <ClInclude Include="include\Krystal.Lib\String\StringUtils.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Core\Detection.hpp">
+    <ClInclude Include="include\Krystal.Lib\Detection\Environment.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Core\DebugBreak.hpp">
@@ -159,7 +159,22 @@
     <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Core\Compiler.hpp">
+    <ClInclude Include="include\Krystal.Lib\Detection\Compiler.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Detection\CPU.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Detection\OS.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Detection\ByteOrder.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Detection\Sanitizers.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Core\Attributes.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -4,7 +4,7 @@
 #include "Krystal.IO/IFileBackend.hpp"
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Core/Compiler.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Types/List.hpp"

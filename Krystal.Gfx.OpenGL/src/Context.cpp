@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Gfx.OpenGL/Context.hpp"
-#include "Krystal.Lib/Core/Detection.hpp"
+#include "Krystal.Lib/Detection/OS.hpp"
 
 #if KRYS_OS(WINDOWS)
   #include "Krystal.Gfx.OpenGL/ContextImpl/Win32.hpp"
@@ -14,10 +14,10 @@
 #include "Krystal.Gfx/Light.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.Lib/Core/DebugBreak.hpp"
+#include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
-#include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include "Krystal.Maths/Clipspace.hpp"
 #include "Krystal.Maths/Convert.hpp"

@@ -1,6 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Detection.hpp"
+#include "Krystal.Lib/Detection/Environment.hpp"
+#include "Krystal.Lib/Detection/OS.hpp"
 
 #if KRYS_ENV(DEV)
   #if KRYS_OS(WINDOWS)

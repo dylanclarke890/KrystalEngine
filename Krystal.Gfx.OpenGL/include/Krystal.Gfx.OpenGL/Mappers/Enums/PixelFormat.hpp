@@ -2,7 +2,7 @@
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx/Enums/PixelFormat.hpp"
-#include "Krystal.Lib/Core/Compiler.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 
 namespace Krys::Gfx::OpenGL
 {

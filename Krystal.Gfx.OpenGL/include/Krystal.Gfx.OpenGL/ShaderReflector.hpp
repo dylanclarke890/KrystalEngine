@@ -2,7 +2,7 @@
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Core/Compiler.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Map.hpp"

@@ -1,0 +1,62 @@
+﻿#pragma once
+
+#include "Krystal.Lib/Detection/Compiler.hpp"
+
+/// @brief Mark a parameter as unused to suppress compiler warnings.
+#define KRYS_UNUSED_PARAM(x) (void)(x)
+
+#if !defined(KRYS_NODISCARD) && KRYS_COMPILER_CPP_ATTRIBUTE(nodiscard)
+  /// @brief Indicate that the return value of a function should not be discarded.
+  #define KRYS_NODISCARD [[nodiscard]]
+#elif !defined(KRYS_NODISCARD)
+  #define KRYS_NODISCARD
+#endif
+
+#if !defined(KRYS_NORETURN) && KRYS_COMPILER_CPP_ATTRIBUTE(noreturn)
+  /// @brief Indicate that a function does not return to its caller.
+  #define KRYS_NORETURN [[noreturn]]
+#elif !defined(KRYS_NORETURN)
+  #define KRYS_NORETURN
+#endif
+
+#if !defined(KRYS_FALLTHROUGH) && KRYS_COMPILER_CPP_ATTRIBUTE(fallthrough)
+  /// @brief Indicate that a case in a switch statement intentionally falls through to the next case.
+  #define KRYS_FALLTHROUGH [[fallthrough]]
+#elif !defined(KRYS_FALLTHROUGH)
+  #define KRYS_FALLTHROUGH
+#endif
+
+#if !defined(KRYS_LIKELY) && KRYS_COMPILER_CPP_ATTRIBUTE(likely)
+  /// @brief Indicate that a condition is likely to be true.
+  #define KRYS_LIKELY [[likely]]
+#elif !defined(KRYS_LIKELY)
+  #define KRYS_LIKELY
+#endif
+
+#if !defined(KRYS_UNLIKELY) && KRYS_COMPILER_CPP_ATTRIBUTE(unlikely)
+  /// @brief Indicate that a condition is unlikely to be true.
+  #define KRYS_UNLIKELY [[unlikely]]
+#elif !defined(KRYS_UNLIKELY)
+  #define KRYS_UNLIKELY
+#endif
+
+#if !defined(KRYS_MAYBE_UNUSED) && KRYS_COMPILER_CPP_ATTRIBUTE(maybe_unused)
+  /// @brief Indicate that a variable, function, or parameter may be unused.
+  #define KRYS_MAYBE_UNUSED [[maybe_unused]]
+#elif !defined(KRYS_MAYBE_UNUSED)
+  #define KRYS_MAYBE_UNUSED
+#endif
+
+#if !defined(KRYS_DEPRECATED) && KRYS_COMPILER_CPP_ATTRIBUTE(deprecated)
+  /// @brief Mark a function or variable as deprecated with an optional message.
+  #define KRYS_DEPRECATED(msg) [[deprecated(msg)]]
+#elif !defined(KRYS_DEPRECATED)
+  #define KRYS_DEPRECATED(msg)
+#endif
+
+#if !defined(KRYS_NO_UNIQUE_ADDRESS) && KRYS_COMPILER_CPP_ATTRIBUTE(no_unique_address)
+  /// @brief Indicate that a non-static data member does not need to have a unique address.
+  #define KRYS_NO_UNIQUE_ADDRESS [[no_unique_address]]
+#elif !defined(KRYS_NO_UNIQUE_ADDRESS)
+  #define KRYS_NO_UNIQUE_ADDRESS
+#endif

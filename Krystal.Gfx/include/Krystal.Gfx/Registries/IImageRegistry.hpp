@@ -2,7 +2,7 @@
 
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Image.hpp"
-#include "Krystal.Lib/Core/Compiler.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 
 namespace Krys::Gfx

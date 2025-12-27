@@ -2,7 +2,7 @@
 
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/RenderTarget.hpp"
-#include "Krystal.Lib/Core/Compiler.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Maths/Vector.hpp"
 

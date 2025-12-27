@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.IO/IStream.hpp"
-#include "Krystal.Lib/Core/Compiler.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/Endian.hpp"

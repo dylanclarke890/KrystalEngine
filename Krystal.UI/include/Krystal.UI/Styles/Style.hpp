@@ -3,7 +3,7 @@
 #include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Core/Compiler.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/NullableFloat.hpp"
 #include "Krystal.UI/Styles/Enums/Align.hpp"
 #include "Krystal.UI/Styles/Enums/BoxSizing.hpp"

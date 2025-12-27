@@ -7,7 +7,7 @@
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/FilterMode.hpp"
 #include "Krystal.Gfx/Registries/ISamplerRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
-#include "Krystal.Lib/Core/Compiler.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Hash.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Map.hpp"

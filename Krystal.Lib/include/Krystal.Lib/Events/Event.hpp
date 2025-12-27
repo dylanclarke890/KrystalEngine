@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Compiler.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/StringId.hpp"
 
 namespace Krys
@@ -10,15 +10,15 @@ namespace Krys
 /// @brief Convenience macro for setting up the event type for a derived `Event`.
 /// @param eventTypeName Must be a string literal. Must be unique across events.
 #define KRYS_EVENT_CLASS_TYPE(eventTypeName)                                                                 \
-  KRYS_NODISCARD static EventType GetStaticType() noexcept                                                       \
+  KRYS_NODISCARD static EventType GetStaticType() noexcept                                                   \
   {                                                                                                          \
     return KRYS_SID(eventTypeName);                                                                          \
   }                                                                                                          \
-  KRYS_NODISCARD virtual EventType GetEventType() const noexcept override                                        \
+  KRYS_NODISCARD virtual EventType GetEventType() const noexcept override                                    \
   {                                                                                                          \
     return GetStaticType();                                                                                  \
   }                                                                                                          \
-  KRYS_NODISCARD virtual string GetEventTypeName() const noexcept override                                       \
+  KRYS_NODISCARD virtual string GetEventTypeName() const noexcept override                                   \
   {                                                                                                          \
     return eventTypeName;                                                                                    \
   }

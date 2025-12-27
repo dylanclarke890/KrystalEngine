@@ -6,7 +6,7 @@
 #include "Krystal.Gfx.OpenGL/Resources/Image.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Registries/IImageRegistry.hpp"
-#include "Krystal.Lib/Core/Compiler.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
 
 namespace Krys::Gfx::OpenGL

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.Editor/Editor.hpp"
 #include "Krystal.Engine/Application.hpp"
-#include "Krystal.Lib/Core/Detection.hpp"
+#include "Krystal.Lib/Detection/OS.hpp"
 
 #if KRYS_OS(WINDOWS)
   #define WIN32_LEAN_AND_MEAN

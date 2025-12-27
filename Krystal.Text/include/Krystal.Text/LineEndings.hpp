@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Compiler.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Detection.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
