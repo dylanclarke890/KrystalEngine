@@ -132,6 +132,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.Lib\Commands\CommandArena.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Commands\CommandList.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Commands\CommandListReader.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Commands\CommandType.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\TypeTraits.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\ImmutableBimap.hpp" />
     <ClInclude Include="include\Krystal.Lib\Allocators\Arena.hpp">

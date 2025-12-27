@@ -24,7 +24,7 @@
     <ClCompile Include="tests\String\StringUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\NullableFloat.cpp">
+    <ClCompile Include="tests\Types\NullableFloat.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tests\SmallValueBuffer.cpp">
@@ -32,6 +32,9 @@
     </ClCompile>
     <ClCompile Include="tests\String\StringInterner.cpp">
       <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\Commands\Command.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

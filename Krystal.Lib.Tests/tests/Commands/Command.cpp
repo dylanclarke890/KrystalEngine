@@ -1,11 +1,11 @@
-#include "Krystal.Gfx/Commands/CommandArena.hpp"
-#include "Krystal.Gfx/Commands/CommandList.hpp"
-#include "Krystal.Gfx/Commands/CommandListReader.hpp"
+﻿#include "Krystal.Lib/Commands/CommandArena.hpp"
+#include "Krystal.Lib/Commands/CommandList.hpp"
+#include "Krystal.Lib/Commands/CommandListReader.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
 {
-  using namespace Krys::Gfx;
+  using namespace Krys;
 
   struct Command
   {

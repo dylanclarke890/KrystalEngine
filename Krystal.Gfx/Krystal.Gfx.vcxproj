@@ -19,23 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.Gfx\Commands\CommandListReader.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx\Commands\CommandArena.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx\Commands\CommandList.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx\Commands\CommandType.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx\Commands\Commands.hpp">
+    <ClInclude Include="include\Krystal.Gfx\Commands.hpp">
       <SubType>
       </SubType>
     </ClInclude>

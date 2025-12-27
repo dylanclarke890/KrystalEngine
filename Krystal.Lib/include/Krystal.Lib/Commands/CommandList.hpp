@@ -1,12 +1,12 @@
 ﻿#pragma once
 
-#include "Krystal.Gfx/Commands/CommandArena.hpp"
+#include "Krystal.Lib/Commands/CommandArena.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 #include <cassert>
 
-namespace Krys::Gfx
+namespace Krys
 {
   /// @brief A list of commands allocated in a CommandArena.
   class CommandList

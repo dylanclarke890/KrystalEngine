@@ -1,17 +1,17 @@
 ﻿#pragma once
 
-#include "Krystal.Gfx/Commands/CommandList.hpp"
-#include "Krystal.Gfx/Commands/Commands.hpp"
+#include "Krystal.Gfx/Commands.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/IRenderer.hpp"
 #include "Krystal.Gfx/Utils/MeshDataUtils.hpp"
-#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Lib/Commands/CommandList.hpp"
 #include "Krystal.Lib/Core/DebugBreak.hpp"
 #include "Krystal.Lib/Core/Hash.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
-#include "Krystal.Lib/Types/Stack.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/Stack.hpp"
 #include "Krystal.UI/Document.hpp"
 #include "Krystal.UI/Geometry/GeometryUtils.hpp"
 #include "Krystal.UI/Geometry/RenderBox.hpp"
@@ -123,7 +123,7 @@ namespace Krys::UI
     Gfx::IContext &_context;
     Gfx::IRenderer &_renderer;
     LayerPool _layerPool;
-    Gfx::CommandList _commands;
+    CommandList _commands;
     Stack<Layer> _layerStack;
     Maths::Vec2 _viewportSize;
     PostProcessTargets _post;
