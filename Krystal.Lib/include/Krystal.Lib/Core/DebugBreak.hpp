@@ -10,7 +10,8 @@
     #include <signal.h>
     #define KRYS_DEBUG_BREAK() raise(SIGTRAP)
   #else
-    #error "KRYS_DEBUG_BREAK is not supported for your platform!"
+    #warning "KRYS_DEBUG_BREAK is not supported for your platform!"
+    #define KRYS_DEBUG_BREAK()
   #endif
 #else
   #define KRYS_DEBUG_BREAK()

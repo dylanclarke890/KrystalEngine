@@ -5,7 +5,6 @@
 #include "Krystal.Gfx/Enums/FilterMode.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Lib/Commands/CommandType.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/String/StringRef.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Vector.hpp"

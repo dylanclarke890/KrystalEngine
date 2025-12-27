@@ -1,7 +1,6 @@
 ﻿#include "Krystal.UI/Layout/Algorithm/MeasureText.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/Resources/Font.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.UI/Document.hpp"
 #include "Krystal.UI/Elements/Element.hpp"

@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Serialisation/Builtins.hpp"
 
 namespace Krys::Serialisation

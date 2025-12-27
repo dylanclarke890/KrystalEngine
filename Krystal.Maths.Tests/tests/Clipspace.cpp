@@ -1,4 +1,5 @@
-#include "Krystal.Maths/Clipspace.hpp"
+﻿#include "Krystal.Maths/Clipspace.hpp"
+#include "Krystal.Lib/Detection/Compiler.hpp"
 #include "Krystal.Maths/Convert.hpp"
 #include <catch_all.hpp>
 

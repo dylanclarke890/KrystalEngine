@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <compare>
 
@@ -12,7 +12,7 @@ namespace Krys
 
     constexpr auto operator<=>(const StringRef &other) const noexcept = default;
 
-    constexpr bool IsValid() const noexcept
+    KRYS_NODISCARD constexpr bool IsValid() const noexcept
     {
       return Id != 0u;
     }

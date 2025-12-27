@@ -1,9 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Detection/Compiler.hpp"
-
-namespace Krys
-{
 #define MOVE_SWAP(ClassName)                                                                                 \
   ClassName(ClassName &&other) noexcept                                                                      \
   {                                                                                                          \
@@ -28,4 +24,3 @@ namespace Krys
 
 #define KRYS_STRINGIFY_IMPL(x) #x
 #define KRYS_STRINGIFY(x) KRYS_STRINGIFY_IMPL(x)
-}

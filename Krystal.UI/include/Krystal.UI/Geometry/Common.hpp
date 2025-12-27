@@ -2,7 +2,6 @@
 
 #include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Interpolate.hpp"
 #include "Krystal.Maths/Vector.hpp"

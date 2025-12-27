@@ -2,9 +2,8 @@
 
 #include "Krystal.Gfx/Resources/Font.hpp"
 #include "Krystal.Lib/Core/Hash.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
-#include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <type_traits>
 
