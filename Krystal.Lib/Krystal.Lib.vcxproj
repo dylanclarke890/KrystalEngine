@@ -141,10 +141,6 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\String\Codepoint.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\String\StringInterner.hpp">
       <SubType>
       </SubType>
