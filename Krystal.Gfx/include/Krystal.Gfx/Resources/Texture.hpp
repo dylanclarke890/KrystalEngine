@@ -20,8 +20,6 @@ namespace Krys::Gfx::OpenGL
     TextureOwner _owner {TextureOwner::Other};
 
   public:
-    MOVE_SWAP(Texture)
-
     Texture(ImageViewHandle imageView, SamplerHandle sampler, TextureOwner owner) noexcept
         : _imageView(imageView), _sampler(sampler), _owner(owner)
     {
@@ -30,6 +28,24 @@ namespace Krys::Gfx::OpenGL
     }
 
     ~Texture() noexcept = default;
+
+    Texture(Texture &&other) noexcept
+        : _imageView(std::exchange(other._imageView, ImageViewHandle {0u})),
+          _sampler(std::exchange(other._sampler, SamplerHandle {0u})),
+          _owner(std::exchange(other._owner, TextureOwner::Other))
+    {
+    }
+
+    Texture &operator=(Texture &&other) noexcept
+    {
+      if (this != &other)
+      {
+        _imageView = std::exchange(other._imageView, ImageViewHandle {0u});
+        _sampler = std::exchange(other._sampler, SamplerHandle {0u});
+        _owner = std::exchange(other._owner, TextureOwner::Other);
+      }
+      return *this;
+    }
 
     KRYS_NODISCARD SamplerHandle Sampler() const noexcept
     {
@@ -44,14 +60,6 @@ namespace Krys::Gfx::OpenGL
     KRYS_NODISCARD TextureOwner Owner() const noexcept
     {
       return _owner;
-    }
-
-  private:
-    void Swap(Texture &other) noexcept
-    {
-      std::swap(_imageView, other._imageView);
-      std::swap(_sampler, other._sampler);
-      std::swap(_owner, other._owner);
     }
   };
 }

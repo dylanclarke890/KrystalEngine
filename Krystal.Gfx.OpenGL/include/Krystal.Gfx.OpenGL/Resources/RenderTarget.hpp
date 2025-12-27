@@ -2,7 +2,6 @@
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx/Resources/RenderTarget.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
@@ -32,8 +31,6 @@ namespace Krys::Gfx::OpenGL
     RenderTarget() = default;
 
   public:
-    MOVE_SWAP(RenderTarget)
-
     RenderTarget(uint32 width, uint32 height) noexcept : _width(width), _height(height)
     {
       glCreateFramebuffers(1, &_fbo);
@@ -42,6 +39,32 @@ namespace Krys::Gfx::OpenGL
     ~RenderTarget() noexcept
     {
       glDeleteFramebuffers(1, &_fbo);
+    }
+
+    RenderTarget(RenderTarget &&other) noexcept
+        : _width(std::exchange(other._width, 0u)), _height(std::exchange(other._height, 0u)),
+          _fbo(std::exchange(other._fbo, 0u)), _colorAttachments(std::move(other._colorAttachments)),
+          _depthAttachment(std::exchange(other._depthAttachment, {})),
+          _stencilAttachment(std::exchange(other._stencilAttachment, {})),
+          _depthStencilAttachment(std::exchange(other._depthStencilAttachment, {}))
+    {
+    }
+
+    RenderTarget &operator=(RenderTarget &&other) noexcept
+    {
+      if (this != &other)
+      {
+        glDeleteFramebuffers(1, &_fbo);
+
+        _width = std::exchange(other._width, 0u);
+        _height = std::exchange(other._height, 0u);
+        _fbo = std::exchange(other._fbo, 0u);
+        _colorAttachments = std::move(other._colorAttachments);
+        _depthAttachment = std::exchange(other._depthAttachment, {});
+        _stencilAttachment = std::exchange(other._stencilAttachment, {});
+        _depthStencilAttachment = std::exchange(other._depthStencilAttachment, {});
+      }
+      return *this;
     }
 
     KRYS_NODISCARD static RenderTarget CreateScreenFramebuffer(uint32 width, uint32 height) noexcept
@@ -200,18 +223,6 @@ namespace Krys::Gfx::OpenGL
     {
       _width = width;
       _height = height;
-    }
-
-  private:
-    void Swap(RenderTarget &other)
-    {
-      std::swap(_width, other._width);
-      std::swap(_height, other._height);
-      std::swap(_fbo, other._fbo);
-      std::swap(_colorAttachments, other._colorAttachments);
-      std::swap(_depthAttachment, other._depthAttachment);
-      std::swap(_stencilAttachment, other._stencilAttachment);
-      std::swap(_depthStencilAttachment, other._depthStencilAttachment);
     }
   };
 }

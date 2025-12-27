@@ -42,8 +42,6 @@ namespace Krys
       }
     }
 
-    MOVE_SWAP(Arena)
-
     KRYS_NODISCARD T &Emplace(Args &&...args)
     {
       // Ensure there’s enough room
@@ -80,13 +78,6 @@ namespace Krys
       }
       _offset = 0;
       _constructedCount = 0;
-    }
-
-    void Swap(Arena &other) noexcept
-    {
-      _memoryPool.swap(other._memoryPool);
-      std::swap(_offset, other._offset);
-      std::swap(_constructedCount, other._constructedCount);
     }
   };
 }

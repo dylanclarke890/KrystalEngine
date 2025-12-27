@@ -4,7 +4,6 @@
 #include "Krystal.Gfx.OpenGL/Utils.hpp"
 #include "Krystal.Gfx/Resources/Mesh.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
@@ -17,15 +16,12 @@ namespace Krys::Gfx::OpenGL
     GLuint _vao {0u};
     GLuint _vbo {0u};
     GLuint _ebo {0u};
-
     VertexBufferLayout _layout {};
     GLenum _primitiveType {GL_TRIANGLES};
     MeshType _type {MeshType::Static};
     GLsizei _count {0};
 
   public:
-    MOVE_SWAP(Mesh)
-
     Mesh(const Span<const byte> &vertexBuffer, const VertexBufferLayout &layout, GLenum primitiveType,
          MeshType meshType) noexcept
         : _layout(layout), _primitiveType(primitiveType), _type(meshType)
@@ -65,18 +61,36 @@ namespace Krys::Gfx::OpenGL
 
     ~Mesh() noexcept
     {
-      if (_ebo != 0u)
+      glDeleteBuffers(1, &_ebo);
+      glDeleteBuffers(1, &_vbo);
+      glDeleteVertexArrays(1, &_vao);
+    }
+
+    Mesh(Mesh &&other) noexcept
+        : _vao(std::exchange(other._vao, 0u)), _vbo(std::exchange(other._vbo, 0u)),
+          _ebo(std::exchange(other._ebo, 0u)), _layout(std::move(other._layout)),
+          _primitiveType(std::exchange(other._primitiveType, GL_TRIANGLES)),
+          _type(std::exchange(other._type, MeshType::Static)), _count(std::exchange(other._count, 0u))
+    {
+    }
+
+    Mesh &operator=(Mesh &&other) noexcept
+    {
+      if (this != &other)
       {
         glDeleteBuffers(1, &_ebo);
-      }
-      if (_vbo != 0u)
-      {
         glDeleteBuffers(1, &_vbo);
-      }
-      if (_vao != 0u)
-      {
         glDeleteVertexArrays(1, &_vao);
+
+        _vao = std::exchange(other._vao, 0u);
+        _vbo = std::exchange(other._vbo, 0u);
+        _ebo = std::exchange(other._ebo, 0u);
+        _layout = std::move(other._layout);
+        _primitiveType = std::exchange(other._primitiveType, GL_TRIANGLES);
+        _type = std::exchange(other._type, MeshType::Static);
+        _count = std::exchange(other._count, 0u);
       }
+      return *this;
     }
 
     void Bind() const noexcept
@@ -122,18 +136,6 @@ namespace Krys::Gfx::OpenGL
     KRYS_NODISCARD GLuint Id() const noexcept
     {
       return _vao;
-    }
-
-  private:
-    void Swap(Mesh &other) noexcept
-    {
-      std::swap(_vao, other._vao);
-      std::swap(_vbo, other._vbo);
-      std::swap(_ebo, other._ebo);
-      std::swap(_layout, other._layout);
-      std::swap(_primitiveType, other._primitiveType);
-      std::swap(_type, other._type);
-      std::swap(_count, other._count);
     }
   };
 }

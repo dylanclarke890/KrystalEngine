@@ -2,7 +2,6 @@
 
 #include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/Handle.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/List.hpp"
@@ -37,23 +36,30 @@ namespace Krys::Gfx::OpenGL
 
   struct Material : NonCopyable<Material>
   {
-    MOVE_SWAP(Material)
+    string Name;
+    ShaderHandle Shader;
+    List<MaterialParameter> Parameters;
 
     Material(const string &name, ShaderHandle shader, const List<MaterialParameter> &parameters) noexcept
         : Name(name), Shader(shader), Parameters(parameters)
     {
     }
 
-    string Name;
-    ShaderHandle Shader;
-    List<MaterialParameter> Parameters;
-
-  private:
-    void Swap(Material &other) noexcept
+    Material(Material &&other) noexcept
+        : Name(std::move(other.Name)), Shader(std::exchange(other.Shader, {})),
+          Parameters(std::move(other.Parameters))
     {
-      std::swap(Name, other.Name);
-      std::swap(Shader, other.Shader);
-      std::swap(Parameters, other.Parameters);
+    }
+
+    Material &operator=(Material &&other) noexcept
+    {
+      if (this != &other)
+      {
+        Name = std::move(other.Name);
+        Shader = std::exchange(other.Shader, {});
+        Parameters = std::move(other.Parameters);
+      }
+      return *this;
     }
   };
 }

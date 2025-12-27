@@ -2,7 +2,6 @@
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/ShaderReflector.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/List.hpp"
@@ -18,8 +17,6 @@ namespace Krys::Gfx::OpenGL
     ShaderLayout _layout {};
 
   public:
-    MOVE_SWAP(Shader)
-
     Shader(const string &vertex, const string &fragment) noexcept : _id(glCreateProgram())
     {
       auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -67,6 +64,23 @@ namespace Krys::Gfx::OpenGL
       {
         glDeleteProgram(_id);
       }
+    }
+
+    Shader(Shader &&other) noexcept : _id(std::exchange(other._id, 0u)), _layout(std::move(other._layout))
+    {
+    }
+
+    Shader &operator=(Shader &&other) noexcept
+    {
+      if (this != &other)
+      {
+        glDeleteProgram(_id);
+
+        _id = std::exchange(other._id, 0u);
+        _layout = std::move(other._layout);
+      }
+
+      return *this;
     }
 
     void Bind() const noexcept
@@ -201,12 +215,6 @@ namespace Krys::Gfx::OpenGL
         sampler.FirstUnit = textureUnit;
         textureUnit += sampler.ArraySize;
       }
-    }
-
-    void Swap(Shader &other) noexcept
-    {
-      std::swap(_id, other._id);
-      std::swap(_layout, other._layout);
     }
   };
 }

@@ -4,7 +4,6 @@
 #include "Krystal.Gfx.OpenGL/Resources/Shader.hpp"
 #include "Krystal.Gfx.OpenGL/Utils.hpp"
 #include "Krystal.Gfx/Resources/Font.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
@@ -33,7 +32,31 @@ namespace Krys::Gfx::OpenGL
   public:
     ~Font() noexcept = default;
 
-    MOVE_SWAP(Font)
+    Font(Font &&other) noexcept
+        : _type(std::exchange(other._type, FontType::Bitmap)),
+          _fontFamily(std::exchange(other._fontFamily, {})),
+          _atlasTexture(std::exchange(other._atlasTexture, {})), _characters(std::move(other._characters)),
+          _atlasSize(std::exchange(other._atlasSize, {})), _metrics(std::exchange(other._metrics, {})),
+          _ptSize(std::exchange(other._ptSize, 0.f)),
+          _sdfParams(std::exchange(other._sdfParams, SDFParams::Defaults()))
+    {
+    }
+
+    Font &operator=(Font &&other) noexcept
+    {
+      if (this != &other)
+      {
+        _type = std::exchange(other._type, FontType::Bitmap);
+        _fontFamily = std::exchange(other._fontFamily, {});
+        _atlasTexture = std::exchange(other._atlasTexture, {});
+        _characters = std::move(other._characters);
+        _atlasSize = std::exchange(other._atlasSize, {});
+        _metrics = std::exchange(other._metrics, {});
+        _ptSize = std::exchange(other._ptSize, 0.f);
+        _sdfParams = std::exchange(other._sdfParams, SDFParams::Defaults());
+      }
+      return *this;
+    }
 
     KRYS_NODISCARD static Font BitmapAtlas(FontFamilyHandle fontFamily, TextureHandle texture,
                                            const FontAtlasData &data, float ptSize) noexcept
@@ -108,19 +131,6 @@ namespace Krys::Gfx::OpenGL
     KRYS_NODISCARD const FontMetrics &Metrics() const noexcept
     {
       return _metrics;
-    }
-
-  private:
-    void Swap(Font &other) noexcept
-    {
-      std::swap(other._type, _type);
-      std::swap(other._fontFamily, _fontFamily);
-      std::swap(other._atlasTexture, _atlasTexture);
-      std::swap(other._ptSize, _ptSize);
-      std::swap(other._sdfParams, _sdfParams);
-      std::swap(other._characters, _characters);
-      std::swap(other._atlasSize, _atlasSize);
-      std::swap(other._metrics, _metrics);
     }
   };
 }

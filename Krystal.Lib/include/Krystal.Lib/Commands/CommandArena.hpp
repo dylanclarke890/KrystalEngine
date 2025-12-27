@@ -4,7 +4,6 @@
 #include "Krystal.Lib/Commands/CommandType.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
@@ -44,8 +43,6 @@ namespace Krys
       _arena.reserve(initialCapacity);
     }
 
-    MOVE_SWAP(CommandArena)
-
     template <HasStandardLayout T>
     void Allocate(const T &command)
     {
@@ -76,11 +73,6 @@ namespace Krys
     void Clear() noexcept
     {
       _arena.clear();
-    }
-
-    void Swap(CommandArena &other) noexcept
-    {
-      _arena.swap(other._arena);
     }
   };
 }

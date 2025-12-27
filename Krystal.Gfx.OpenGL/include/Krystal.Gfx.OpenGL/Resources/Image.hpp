@@ -2,7 +2,6 @@
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx/Resources/Image.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
@@ -21,8 +20,6 @@ namespace Krys::Gfx::OpenGL
     uint32 _arrayLayers {1u};
 
   public:
-    MOVE_SWAP(Image)
-
     Image(GLenum target, GLenum internalFormat, uint32 width, uint32 height, uint32 depth, uint32 mipLevels,
           uint32 arrayLayers) noexcept
         : _target(target), _internalFormat(internalFormat), _width(width), _height(height), _depth(depth),
@@ -45,10 +42,34 @@ namespace Krys::Gfx::OpenGL
 
     ~Image() noexcept
     {
-      if (_id != 0u)
+      glDeleteTextures(1, &_id);
+    }
+
+    Image(Image &&other) noexcept
+        : _id(std::exchange(other._id, 0u)), _target(std::exchange(other._target, GL_TEXTURE_2D)),
+          _internalFormat(std::exchange(other._internalFormat, GL_RGBA8)),
+          _width(std::exchange(other._width, 0u)), _height(std::exchange(other._height, 0u)),
+          _depth(std::exchange(other._depth, 0u)), _mipLevels(std::exchange(other._mipLevels, 1u)),
+          _arrayLayers(std::exchange(other._arrayLayers, 1u))
+    {
+    }
+
+    Image &operator=(Image &&other) noexcept
+    {
+      if (this != &other)
       {
         glDeleteTextures(1, &_id);
+
+        _id = std::exchange(other._id, 0u);
+        _target = std::exchange(other._target, GL_TEXTURE_2D);
+        _internalFormat = std::exchange(other._internalFormat, GL_RGBA8);
+        _width = std::exchange(other._width, 0u);
+        _height = std::exchange(other._height, 0u);
+        _depth = std::exchange(other._depth, 0u);
+        _mipLevels = std::exchange(other._mipLevels, 1u);
+        _arrayLayers = std::exchange(other._arrayLayers, 1u);
       }
+      return *this;
     }
 
     KRYS_NODISCARD GLuint Id() const noexcept
@@ -73,19 +94,6 @@ namespace Krys::Gfx::OpenGL
       {
         glGenerateTextureMipmap(_id);
       }
-    }
-
-  private:
-    void Swap(Image &other) noexcept
-    {
-      std::swap(_id, other._id);
-      std::swap(_target, other._target);
-      std::swap(_internalFormat, other._internalFormat);
-      std::swap(_width, other._width);
-      std::swap(_height, other._height);
-      std::swap(_depth, other._depth);
-      std::swap(_mipLevels, other._mipLevels);
-      std::swap(_arrayLayers, other._arrayLayers);
     }
   };
 }

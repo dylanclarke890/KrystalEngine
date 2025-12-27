@@ -4,7 +4,6 @@
 #include "Krystal.Gfx/Resources/Buffer.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
@@ -19,8 +18,6 @@ namespace Krys::Gfx::OpenGL
     uint32 _size;
 
   public:
-    MOVE_SWAP(Buffer)
-
     Buffer(GLenum type, GLenum usage, uint32 size, Span<const byte> initialData)
         : _handle(0u), _type(type), _usage(usage), _size(size)
     {
@@ -35,7 +32,27 @@ namespace Krys::Gfx::OpenGL
 
     ~Buffer() noexcept
     {
-      glDeleteBuffers(1, &_handle);
+      glDeleteBuffers(1u, &_handle);
+    }
+
+    Buffer(Buffer &&other) noexcept
+        : _handle(std::exchange(other._handle, 0u)), _type(std::exchange(other._type, 0u)),
+          _usage(std::exchange(other._usage, 0u)), _size(std::exchange(other._size, 0u))
+    {
+    }
+
+    Buffer &operator=(Buffer &&other) noexcept
+    {
+      if (this != &other)
+      {
+        glDeleteBuffers(1u, &_handle);
+
+        _handle = std::exchange(other._handle, 0u);
+        _type = std::exchange(other._type, 0u);
+        _usage = std::exchange(other._usage, 0u);
+        _size = std::exchange(other._size, 0u);
+      }
+      return *this;
     }
 
     void Bind() const noexcept
@@ -51,7 +68,7 @@ namespace Krys::Gfx::OpenGL
 
     void Unbind() const noexcept
     {
-      glBindBuffer(_type, 0);
+      glBindBuffer(_type, 0u);
     }
 
     void Update(const Span<const byte> &data, size_t offset = 0u) const noexcept
@@ -68,15 +85,6 @@ namespace Krys::Gfx::OpenGL
     KRYS_NODISCARD GLuint GetHandle() const noexcept
     {
       return _handle;
-    }
-
-  private:
-    void Swap(Buffer &other)
-    {
-      std::swap(_handle, other._handle);
-      std::swap(_type, other._type);
-      std::swap(_usage, other._usage);
-      std::swap(_size, other._size);
     }
   };
 }

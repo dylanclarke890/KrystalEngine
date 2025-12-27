@@ -64,7 +64,29 @@ namespace Krys::UI
       }
     }
 
-    MOVE_SWAP(Element)
+    Element(Element &&other) noexcept
+        : Handle(std::exchange(other.Handle, ElementHandle {})),
+          Parent(std::exchange(other.Parent, ElementHandle {})), Children(std::move(other.Children)),
+          LayoutNode(std::exchange(other.LayoutNode, nullptr)),
+          LayoutConfig(std::exchange(other.LayoutConfig, nullptr)),
+          TextContent(std::exchange(other.TextContent, TextNode {})), Geometries(std::move(other.Geometries))
+    {
+    }
+
+    Element &operator=(Element &&other) noexcept
+    {
+      if (this != &other)
+      {
+        Handle = std::exchange(other.Handle, ElementHandle {});
+        Parent = std::exchange(other.Parent, ElementHandle {});
+        Children = std::move(other.Children);
+        LayoutNode = std::exchange(other.LayoutNode, nullptr);
+        LayoutConfig = std::exchange(other.LayoutConfig, nullptr);
+        TextContent = std::exchange(other.TextContent, TextNode {});
+        Geometries = std::move(other.Geometries);
+      }
+      return *this;
+    }
 
     void SetText(StringRef text) noexcept
     {
@@ -83,18 +105,6 @@ namespace Krys::UI
     KRYS_NODISCARD StringRef GetText() const noexcept
     {
       return TextContent.Text;
-    }
-
-  private:
-    void Swap(Element &other) noexcept
-    {
-      std::swap(Handle, other.Handle);
-      std::swap(Parent, other.Parent);
-      std::swap(Children, other.Children);
-      std::swap(LayoutNode, other.LayoutNode);
-      std::swap(LayoutConfig, other.LayoutConfig);
-      std::swap(TextContent, other.TextContent);
-      std::swap(Geometries, other.Geometries);
     }
   };
 }

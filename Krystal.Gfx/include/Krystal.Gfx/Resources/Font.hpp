@@ -116,7 +116,23 @@ namespace Krys::Gfx
 
     ~FontFamily() = default;
 
-    MOVE_SWAP(FontFamily)
+    FontFamily(FontFamily &&other) noexcept
+        : _name(std::exchange(other._name, StringRef {0u})),
+          _path(std::exchange(other._path, IO::Path {})),
+          _fonts(std::move(other._fonts))
+    {
+    }
+
+    FontFamily &operator=(FontFamily &&other) noexcept
+    {
+      if (this != &other)
+      {
+        _name = std::exchange(other._name, StringRef {0u});
+        _path = std::exchange(other._path, IO::Path {});
+        _fonts = std::move(other._fonts);
+      }
+      return *this;
+    }
 
     KRYS_NODISCARD StringRef Name() const noexcept
     {
@@ -141,12 +157,6 @@ namespace Krys::Gfx
     KRYS_NODISCARD const List<FontHandle> &Fonts() const noexcept
     {
       return _fonts;
-    }
-
-  private:
-    void Swap(FontFamily &other) noexcept
-    {
-      _path = std::move(other._path);
     }
   };
 }

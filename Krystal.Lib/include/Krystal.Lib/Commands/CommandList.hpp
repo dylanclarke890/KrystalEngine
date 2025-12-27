@@ -22,8 +22,6 @@ namespace Krys
     {
     }
 
-    MOVE_SWAP(CommandList)
-
     template <typename T>
     void Push(const T &command)
     {
@@ -31,7 +29,7 @@ namespace Krys
       _endOffset = _arena.Size();
     }
 
-    Span<const byte> GetSubSpan(size_t offset, size_t size) const noexcept
+    KRYS_NODISCARD Span<const byte> GetSubSpan(size_t offset, size_t size) const noexcept
     {
       size_t spanStart = _startOffset + offset;
       assert(spanStart + size <= _endOffset && "Invalid span range");
@@ -41,13 +39,6 @@ namespace Krys
     KRYS_NODISCARD size_t SizeInBytes() const noexcept
     {
       return _endOffset - _startOffset;
-    }
-
-    void Swap(CommandList &other) noexcept
-    {
-      _arena.Swap(other._arena);
-      std::swap(_startOffset, other._startOffset);
-      std::swap(_endOffset, other._endOffset);
     }
 
     void Clear() noexcept
