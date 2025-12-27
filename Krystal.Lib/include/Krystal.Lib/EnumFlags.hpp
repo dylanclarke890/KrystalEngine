@@ -1,17 +1,17 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Lib/Concepts.hpp"
 
 namespace Krys
 {
-  template <IsEnum T>
+  template <IsEnum TEnum>
   class Flags
   {
   private:
     T value;
 
   public:
-    using UnderlyingType = std::underlying_type_t<T>;
+    using UnderlyingType = std::underlying_type_t<TEnum>;
 
     constexpr Flags() noexcept : value(0)
     {

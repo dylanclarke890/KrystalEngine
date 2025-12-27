@@ -57,7 +57,7 @@
     <ClInclude Include="include\Krystal.Lib\Version.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Flags.hpp">
+    <ClInclude Include="include\Krystal.Lib\EnumFlags.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\String\StringUtils.hpp">

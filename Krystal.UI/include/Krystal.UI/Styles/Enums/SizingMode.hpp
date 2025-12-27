@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Lib/Enum.hpp"
 #include "Krystal.Lib/Types.hpp"
@@ -32,7 +32,7 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  constexpr uint32 OrdinalCount<UI::SizingMode>()
+  NO_DISCARD constexpr uint32 OrdinalCount<UI::SizingMode>() noexcept
   {
     return 3;
   }
