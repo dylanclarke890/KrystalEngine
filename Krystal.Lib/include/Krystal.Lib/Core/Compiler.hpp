@@ -9,6 +9,9 @@
 /// @brief Check if the current compiler requires a given quirk.
 #define KRYS_COMPILER_QUIRK(QUIRK) (defined KRYS_COMPILER_QUIRK_##QUIRK && KRYS_COMPILER_QUIRK_##QUIRK)
 
+/// @brief Check if the current compiler supports a particular language (C|CPP).
+#define KRYS_COMPILER_LANG(LANG) (defined KRYS_COMPILER_LANG_##LANG && KRYS_COMPILER_LANG_##LANG)
+
 #ifdef __has_attribute
   /// @brief Check if the current compiler supports a particular attribute.
   #define KRYS_COMPILER_ATTRIBUTE(x) __has_attribute(x)
@@ -45,15 +48,15 @@
 #endif
 
 #ifdef __cplusplus
-  #define KRYS_COMPILER_C 0
-  #define KRYS_COMPILER_CPP 1
+  #define KRYS_COMPILER_LANG_C 0
+  #define KRYS_COMPILER_LANG_CPP 1
   #define KRYS_EXTERN_C_BEGIN                                                                                \
     extern "C"                                                                                               \
     {
   #define KRYS_EXTERN_C_END }
 #else
-  #define KRYS_COMPILER_C 1
-  #define KRYS_COMPILER_CPP 0
+  #define KRYS_COMPILER_LANG_C 1
+  #define KRYS_COMPILER_LANG_CPP 0
   #define KRYS_EXTERN_C_BEGIN
   #define KRYS_EXTERN_C_END
 #endif
@@ -78,13 +81,12 @@
   #define KRYS_COMPILER_MSVC 1
 #endif
 
-/// KRYS_COMPILER_SUPPORTS(EABI) - Compiler supports the Embedded ABI
+/// KRYS_COMPILER_SUPPORTS(EABI) - Supports the Embedded ABI
 #if defined(__ARM_EABI__) || defined(__EABI__)
   #define KRYS_COMPILER_SUPPORTS_EABI 1
 #endif
 
-/// KRYS_COMPILER_QUIRK(CONSIDERS_UNREACHABLE_CODE) - Compiler considers code after certain constructs as
-/// unreachable
+/// KRYS_COMPILER_QUIRK(CONSIDERS_UNREACHABLE_CODE) - Code after certain constructs is considered unreachable
 #if !KRYS_COMPILER(CLANG)
   #define KRYS_COMPILER_QUIRK_CONSIDERS_UNREACHABLE_CODE 1
 #endif
@@ -119,49 +121,60 @@
 
 #pragma region Attributes
 
+/// @brief Mark a parameter as unused to suppress compiler warnings.
+#define KRYS_UNUSED_PARAM(x) (void)(x)
+
 #if !defined(KRYS_NODISCARD) && KRYS_COMPILER_CPP_ATTRIBUTE(nodiscard)
+  /// @brief Indicate that the return value of a function should not be discarded.
   #define KRYS_NODISCARD [[nodiscard]]
 #elif !defined(KRYS_NODISCARD)
   #define KRYS_NODISCARD
 #endif
 
 #if !defined(KRYS_NORETURN) && KRYS_COMPILER_CPP_ATTRIBUTE(noreturn)
+  /// @brief Indicate that a function does not return to its caller.
   #define KRYS_NORETURN [[noreturn]]
 #elif !defined(KRYS_NORETURN)
   #define KRYS_NORETURN
 #endif
 
 #if !defined(KRYS_FALLTHROUGH) && KRYS_COMPILER_CPP_ATTRIBUTE(fallthrough)
+  /// @brief Indicate that a case in a switch statement intentionally falls through to the next case.
   #define KRYS_FALLTHROUGH [[fallthrough]]
 #elif !defined(KRYS_FALLTHROUGH)
   #define KRYS_FALLTHROUGH
 #endif
 
 #if !defined(KRYS_LIKELY) && KRYS_COMPILER_CPP_ATTRIBUTE(likely)
+  /// @brief Indicate that a condition is likely to be true.
   #define KRYS_LIKELY [[likely]]
 #elif !defined(KRYS_LIKELY)
   #define KRYS_LIKELY
 #endif
 
 #if !defined(KRYS_UNLIKELY) && KRYS_COMPILER_CPP_ATTRIBUTE(unlikely)
+  /// @brief Indicate that a condition is unlikely to be true.
   #define KRYS_UNLIKELY [[unlikely]]
 #elif !defined(KRYS_UNLIKELY)
   #define KRYS_UNLIKELY
 #endif
 
 #if !defined(KRYS_MAYBE_UNUSED) && KRYS_COMPILER_CPP_ATTRIBUTE(maybe_unused)
+  /// @brief Indicate that a variable, function, or parameter may be unused.
   #define KRYS_MAYBE_UNUSED [[maybe_unused]]
 #elif !defined(KRYS_MAYBE_UNUSED)
   #define KRYS_MAYBE_UNUSED
 #endif
 
 #if !defined(KRYS_DEPRECATED) && KRYS_COMPILER_CPP_ATTRIBUTE(deprecated)
+  /// @brief Mark a function or variable as deprecated with an optional message.
   #define KRYS_DEPRECATED(msg) [[deprecated(msg)]]
 #elif !defined(KRYS_DEPRECATED)
   #define KRYS_DEPRECATED(msg)
 #endif
 
 #if !defined(KRYS_NO_UNIQUE_ADDRESS) && KRYS_COMPILER_CPP_ATTRIBUTE(no_unique_address)
+  /// @brief Indicate that a non-static data member does not need to have a unique address.
   #define KRYS_NO_UNIQUE_ADDRESS [[no_unique_address]]
 #elif !defined(KRYS_NO_UNIQUE_ADDRESS)
   #define KRYS_NO_UNIQUE_ADDRESS
