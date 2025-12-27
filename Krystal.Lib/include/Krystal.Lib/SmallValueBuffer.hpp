@@ -5,11 +5,11 @@
 #include <cstdint>
 #include <memory>
 
-#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/SmartPointers.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/SmartPointers.hpp"
 
 namespace Krys
 {
@@ -39,7 +39,19 @@ namespace Krys
       *this = other;
     }
 
+    SmallValueBuffer &operator=(const SmallValueBuffer &other)
+    {
+      _count = other._count;
+      _buffer = other._buffer;
+      _wideElements = other._wideElements;
+      _overflow = other._overflow ? CreateUnique<Overflow>(*other._overflow) : nullptr;
+
+      return *this;
+    }
+
     SmallValueBuffer(SmallValueBuffer &&other) noexcept = default;
+
+    SmallValueBuffer &operator=(SmallValueBuffer &&other) noexcept = default;
 
     /// @brief Add a new element to the buffer, returning the index of the element.
     uint16 Push(uint32 value)
@@ -140,16 +152,5 @@ namespace Krys
       const auto msb = GetU32(index + 1);
       return (static_cast<uint64_t>(msb) << 32) | lsb;
     }
-
-    SmallValueBuffer &operator=(const SmallValueBuffer &other)
-    {
-      _count = other._count;
-      _buffer = other._buffer;
-      _wideElements = other._wideElements;
-      _overflow = other._overflow ? CreateUnique<Overflow>(*other._overflow) : nullptr;
-      return *this;
-    }
-
-    SmallValueBuffer &operator=(SmallValueBuffer &&other) noexcept = default;
   };
 }
