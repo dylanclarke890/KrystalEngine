@@ -52,55 +52,6 @@ namespace Krys
 
 #pragma endregion
 
-#pragma region Bitwise Operators for Enum Class
-
-/// @brief Defines bitwise operators for an enum class.
-/// @param EnumType The enum class to define the operators for.
-#define ENUM_BITWISE_OPERATORS(EnumType)                                                                     \
-  inline constexpr EnumType operator|(EnumType a, EnumType b)                                                \
-  {                                                                                                          \
-    return static_cast<EnumType>(static_cast<std::underlying_type_t<EnumType>>(a)                            \
-                                 | static_cast<std::underlying_type_t<EnumType>>(b));                        \
-  }                                                                                                          \
-                                                                                                             \
-  inline constexpr EnumType operator&(EnumType a, EnumType b)                                                \
-  {                                                                                                          \
-    return static_cast<EnumType>(static_cast<std::underlying_type_t<EnumType>>(a)                            \
-                                 & static_cast<std::underlying_type_t<EnumType>>(b));                        \
-  }                                                                                                          \
-                                                                                                             \
-  inline constexpr EnumType operator^(EnumType a, EnumType b)                                                \
-  {                                                                                                          \
-    return static_cast<EnumType>(static_cast<std::underlying_type_t<EnumType>>(a)                            \
-                                 ^ static_cast<std::underlying_type_t<EnumType>>(b));                        \
-  }                                                                                                          \
-                                                                                                             \
-  inline constexpr EnumType operator~(EnumType a)                                                            \
-  {                                                                                                          \
-    return static_cast<EnumType>(~static_cast<std::underlying_type_t<EnumType>>(a));                         \
-  }                                                                                                          \
-                                                                                                             \
-  inline constexpr EnumType &operator|=(EnumType &a, EnumType b)                                             \
-  {                                                                                                          \
-    return a = a | b;                                                                                        \
-  }                                                                                                          \
-                                                                                                             \
-  inline constexpr EnumType &operator&=(EnumType &a, EnumType b)                                             \
-  {                                                                                                          \
-    return a = a & b;                                                                                        \
-  }                                                                                                          \
-                                                                                                             \
-  inline constexpr EnumType &operator^=(EnumType &a, EnumType b)                                             \
-  {                                                                                                          \
-    return a = a ^ b;                                                                                        \
-  }                                                                                                          \
-  inline constexpr bool operator!(EnumType a)                                                                \
-  {                                                                                                          \
-    return static_cast<std::underlying_type_t<EnumType>>(a) == 0;                                            \
-  }
-
-#pragma endregion
-
 #define KRYS_UNUSED(x) (void)(x) // Suppress unused variable warnings
 
 #define NO_COPY(ClassName)                                                                                   \

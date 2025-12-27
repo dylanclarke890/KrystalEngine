@@ -1,7 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::UI
@@ -12,7 +12,7 @@ namespace Krys::UI
     WebFlexBasis,
   };
 
-  ENUM_BITWISE_OPERATORS(ExperimentalFeature)
+  KRYS_ENUM_FLAG_OPERATORS(ExperimentalFeature)
 }
 
 namespace Krys

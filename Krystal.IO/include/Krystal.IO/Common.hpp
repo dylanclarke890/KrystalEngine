@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::IO
@@ -12,7 +12,7 @@ namespace Krys::IO
     OpenAtEnd = 1 << 0 // Open the file and move the read position to the end
   };
 
-  ENUM_BITWISE_OPERATORS(ReadFlags)
+  KRYS_ENUM_FLAG_OPERATORS(ReadFlags)
 
   enum class WriteFlags : uint8
   {
@@ -22,7 +22,7 @@ namespace Krys::IO
     OpenAtEnd = 1 << 2 // Open the file and move the write position to the end
   };
 
-  ENUM_BITWISE_OPERATORS(WriteFlags)
+  KRYS_ENUM_FLAG_OPERATORS(WriteFlags)
 
   /// @brief Specifies the reference point used to obtain the new position in a stream.
   enum class SeekOrigin : uint8

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Core/Enum.hpp"
 
 namespace Krys::Gfx
 {
@@ -14,5 +14,5 @@ namespace Krys::Gfx
     All = Colour | Depth | Stencil,
   };
 
-  ENUM_BITWISE_OPERATORS(BufferBitFlags)
+  KRYS_ENUM_FLAG_OPERATORS(BufferBitFlags)
 }

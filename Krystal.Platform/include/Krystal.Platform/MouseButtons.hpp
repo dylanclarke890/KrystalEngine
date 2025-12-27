@@ -1,7 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Core/Macros.hpp"
 
 namespace Krys::Platform
 {
@@ -25,5 +25,5 @@ namespace Krys::Platform
     UNKNOWN = 32
   };
 
-  ENUM_BITWISE_OPERATORS(MouseButton)
+  KRYS_ENUM_FLAG_OPERATORS(MouseButton)
 }

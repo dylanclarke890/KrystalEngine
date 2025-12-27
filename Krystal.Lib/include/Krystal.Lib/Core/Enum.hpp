@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include <bit>
 #include <utility>
 
@@ -64,5 +64,48 @@ namespace Krys
     };
 
     return Range {};
+  }
+
+/// @brief Defines bitwise operators for an enum class.
+/// @param EnumType The enum class to define the operators for.
+#define KRYS_ENUM_FLAG_OPERATORS(EnumType)                                                                   \
+  NO_DISCARD constexpr inline EnumType operator|(EnumType a, EnumType b) noexcept                            \
+  {                                                                                                          \
+    return static_cast<EnumType>(ToUnderlying(a) | ToUnderlying(b));                                         \
+  }                                                                                                          \
+                                                                                                             \
+  NO_DISCARD constexpr inline EnumType operator&(EnumType a, EnumType b) noexcept                            \
+  {                                                                                                          \
+    return static_cast<EnumType>(ToUnderlying(a) & ToUnderlying(b));                                         \
+  }                                                                                                          \
+                                                                                                             \
+  NO_DISCARD constexpr inline EnumType operator^(EnumType a, EnumType b) noexcept                            \
+  {                                                                                                          \
+    return static_cast<EnumType>(ToUnderlying(a) ^ ToUnderlying(b));                                         \
+  }                                                                                                          \
+                                                                                                             \
+  NO_DISCARD constexpr inline EnumType operator~(EnumType a) noexcept                                        \
+  {                                                                                                          \
+    return static_cast<EnumType>(~ToUnderlying(a));                                                          \
+  }                                                                                                          \
+                                                                                                             \
+  constexpr inline EnumType &operator|=(EnumType &a, EnumType b) noexcept                                    \
+  {                                                                                                          \
+    return a = a | b;                                                                                        \
+  }                                                                                                          \
+                                                                                                             \
+  constexpr inline EnumType &operator&=(EnumType &a, EnumType b) noexcept                                    \
+  {                                                                                                          \
+    return a = a & b;                                                                                        \
+  }                                                                                                          \
+                                                                                                             \
+  constexpr inline EnumType &operator^=(EnumType &a, EnumType b) noexcept                                    \
+  {                                                                                                          \
+    return a = a ^ b;                                                                                        \
+  }                                                                                                          \
+                                                                                                             \
+  NO_DISCARD constexpr inline bool operator!(EnumType a) noexcept                                            \
+  {                                                                                                          \
+    return ToUnderlying(a) == 0;                                                                             \
   }
 }

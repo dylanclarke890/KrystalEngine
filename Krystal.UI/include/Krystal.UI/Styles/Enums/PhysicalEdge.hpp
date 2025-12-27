@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.UI/Styles/Enums/Edge.hpp"
 #include <utility>
@@ -8,9 +10,9 @@ namespace Krys::UI
 {
   enum class PhysicalEdge : uint32
   {
-    Left = std::to_underlying(Edge::Left),
-    Top = std::to_underlying(Edge::Top),
-    Right = std::to_underlying(Edge::Right),
-    Bottom = std::to_underlying(Edge::Bottom),
+    Left = ToUnderlying(Edge::Left),
+    Top = ToUnderlying(Edge::Top),
+    Right = ToUnderlying(Edge::Right),
+    Bottom = ToUnderlying(Edge::Bottom),
   };
 }

@@ -4,8 +4,10 @@
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/SmartPointers.hpp"
 
 namespace Krys::IO
@@ -13,11 +15,11 @@ namespace Krys::IO
   enum class FileSearchFlags : uint8
   {
     None = 0,
-    Recursive = 1 << 0,        // Search recursively in subdirectories
-    ExcludeReadOnly = 1 << 1   // Filter out read-only files
+    Recursive = 1 << 0,      // Search recursively in subdirectories
+    ExcludeReadOnly = 1 << 1 // Filter out read-only files
   };
 
-  ENUM_BITWISE_OPERATORS(FileSearchFlags)
+  KRYS_ENUM_FLAG_OPERATORS(FileSearchFlags)
 
   /// @brief Interface for file backend operations.
   class IFileBackend
@@ -57,6 +59,6 @@ namespace Krys::IO
     /// @brief Gets a stream writer for the specified path.
     NO_DISCARD virtual Unique<IStreamWriter> GetWriter(const Path &path, WriteFlags flags) const = 0;
 
-    NO_DISCARD virtual const Path& Root() const noexcept = 0;
+    NO_DISCARD virtual const Path &Root() const noexcept = 0;
   };
 }

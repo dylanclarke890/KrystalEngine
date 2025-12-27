@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::UI
@@ -15,5 +15,5 @@ namespace Krys::UI
     Classic,
   };
 
-  ENUM_BITWISE_OPERATORS(Errata)
+  KRYS_ENUM_FLAG_OPERATORS(Errata)
 }
