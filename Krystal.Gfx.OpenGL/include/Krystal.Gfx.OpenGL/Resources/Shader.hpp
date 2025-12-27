@@ -95,7 +95,7 @@ namespace Krys::Gfx::OpenGL
         glProgramUniform1i(_id, location, value);
       else if IsUniformType (uint32)
         glProgramUniform1ui(_id, location, value);
-      else if IsUniformType (float32)
+      else if IsUniformType (float)
         glProgramUniform1f(_id, location, value);
       else if IsUniformType (Vec2)
         glProgramUniform2f(_id, location, value.x, value.y);
@@ -113,7 +113,7 @@ namespace Krys::Gfx::OpenGL
         glProgramUniform1iv(_id, location, static_cast<GLsizei>(value.size()), value.data());
       else if IsUniformType (List<uint32>)
         glProgramUniform1uiv(_id, location, static_cast<GLsizei>(value.size()), value.data());
-      else if IsUniformType (List<float32>)
+      else if IsUniformType (List<float>)
         glProgramUniform1fv(_id, location, static_cast<GLsizei>(value.size()), value.data());
       else if IsUniformType (List<Vec2>)
         glProgramUniform2fv(_id, location, static_cast<GLsizei>(value.size()), &value[0].x);

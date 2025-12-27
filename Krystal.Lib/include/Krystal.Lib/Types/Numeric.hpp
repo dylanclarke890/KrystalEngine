@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #include <cstddef>
 #include <cstdint>
-#include <type_traits>
 
 namespace Krys
 {
+  using byte = std::byte;
   using uchar = unsigned char;
   using ushort = unsigned short;
   using uint = unsigned int;
@@ -28,10 +28,4 @@ namespace Krys
   using fast_uint16 = uint_fast16_t;
   using fast_uint32 = uint_fast32_t;
   using fast_uint64 = uint_fast64_t;
-
-  using byte = std::byte;
-  using float32 = float;
-  using float64 = double;
-
-  using std::declval;
 }
