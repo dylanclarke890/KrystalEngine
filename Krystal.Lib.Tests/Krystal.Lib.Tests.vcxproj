@@ -150,7 +150,7 @@
   <ItemGroup>
     <ClCompile Include="catch_main.cpp" />
     <ClCompile Include="tests\Commands\Command.cpp" />
-    <ClCompile Include="tests\BitUtils.cpp" />
+    <ClCompile Include="tests\Core\Bit.cpp" />
     <ClCompile Include="tests\Types\NullableFloat.cpp" />
     <ClCompile Include="tests\SmallValueBuffer.cpp" />
     <ClCompile Include="tests\String\StringUtils.cpp" />

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Bit.hpp"
+#include "Krystal.Lib/Core/Bit.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

@@ -2,7 +2,7 @@
 #include "Krystal.Engine/Application.hpp"
 #include "Krystal.Lib/Core/Detection.hpp"
 
-#ifdef KRYS_PLATFORM_WINDOWS
+#if KRYS_PLATFORM(WINDOWS)
   #define WIN32_LEAN_AND_MEAN
   #define NOGDICAPMASKS
   #define NOVIRTUALKEYCODES
@@ -63,7 +63,7 @@ int main(int argc, char **argv)
   auto result = CreateApplication<Editor>(argc, argv, settings);
   if (!result.has_value())
   {
-#ifdef KRYS_PLATFORM_WINDOWS
+#if KRYS_PLATFORM(WINDOWS)
     ::MessageBoxA(nullptr, result.error().c_str(), NULL, MB_OK | MB_ICONERROR | MB_DEFAULT_DESKTOP_ONLY);
 #endif
     return -1;

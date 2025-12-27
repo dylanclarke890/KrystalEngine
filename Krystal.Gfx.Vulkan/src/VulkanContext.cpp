@@ -2,7 +2,7 @@
 
 #include "Krystal.Lib/Core/Detection.hpp"
 
-#ifdef KRYS_PLATFORM_WINDOWS
+#if KRYS_PLATFORM(WINDOWS)
   #include "Krystal.Gfx.Vulkan/Hooks/vulkan_win32_hooks.hpp"
   #define KRYS_SURFACE_EXTENSION_NAME VK_KHR_WIN32_SURFACE_EXTENSION_NAME
 #endif

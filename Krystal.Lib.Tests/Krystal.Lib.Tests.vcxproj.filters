@@ -18,7 +18,7 @@
     <ClCompile Include="catch_main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\BitUtils.cpp">
+    <ClCompile Include="tests\Core\Bit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tests\String\StringUtils.cpp">
