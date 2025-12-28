@@ -3,7 +3,7 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/String/String.hpp"
 
-namespace Krys::Text
+namespace Krys
 {
   class EncodingFallback
   {

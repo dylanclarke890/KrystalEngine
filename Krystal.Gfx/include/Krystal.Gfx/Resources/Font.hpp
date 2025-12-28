@@ -59,8 +59,7 @@ namespace Krys::Gfx
     Maths::Vec2 UVMax;       // (u1, v1)
   };
 
-  using CharacterMap =
-    Map<Text::UnicodeCodepoint, Character, StronglyTypedNumberHasher<Text::UnicodeCodepoint>>;
+  using CharacterMap = Map<UnicodeCodepoint, Character, StronglyTypedNumberHasher<UnicodeCodepoint>>;
 
   struct FontMetrics
   {
@@ -117,8 +116,7 @@ namespace Krys::Gfx
     ~FontFamily() = default;
 
     FontFamily(FontFamily &&other) noexcept
-        : _name(std::exchange(other._name, StringRef {0u})),
-          _path(std::exchange(other._path, IO::Path {})),
+        : _name(std::exchange(other._name, StringRef {0u})), _path(std::exchange(other._path, IO::Path {})),
           _fonts(std::move(other._fonts))
     {
     }

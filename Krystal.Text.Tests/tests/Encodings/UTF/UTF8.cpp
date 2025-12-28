@@ -3,7 +3,7 @@
 
 namespace Krys::Tests
 {
-  using namespace Krys::Text;
+  using namespace Krys;
 
   TEST_CASE("UTF8Encoding(Valid)", "[Text][Encodings][ASCII]")
   {

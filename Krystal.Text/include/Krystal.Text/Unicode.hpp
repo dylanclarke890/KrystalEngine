@@ -9,7 +9,7 @@
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 
-namespace Krys::Text
+namespace Krys
 {
   /// @brief Represents a Unicode codepoint.
   struct UnicodeCodepoint : public StronglyTypedNumber<UnicodeCodepoint, uint32>

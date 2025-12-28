@@ -6,7 +6,7 @@
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Text/Encodings/Encoding.hpp"
 
-namespace Krys::Text
+namespace Krys
 {
   class UTF8Encoding : public Encoding
   {

@@ -7,7 +7,7 @@
 #include "Krystal.Text/Encodings/Encoding.hpp"
 #include "Krystal.Text/Unicode.hpp"
 
-namespace Krys::Text
+namespace Krys
 {
   class ASCIIEncoding : public Encoding
   {

@@ -21,6 +21,17 @@
   <ItemGroup>
     <Text Include="include\Krystal.HTML\DOM\HTMLEntityNames.in" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Krystal.HTML\DOM\EncodingSniffer.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Krystal.Lib\Krystal.Lib.vcxproj">
+      <Project>{38f26636-5d57-4740-a8d2-df219340309a}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\Krystal.Text\Krystal.Text.vcxproj">
+      <Project>{55855c03-499d-4fda-a184-ace486fda228}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

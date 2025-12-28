@@ -2,7 +2,7 @@
 
 #include "Krystal.Text/Encodings/SingleByteEncoding.hpp"
 
-namespace Krys::Text
+namespace Krys
 {
   class Windows874Encoding : public SingleByteEncoding
   {

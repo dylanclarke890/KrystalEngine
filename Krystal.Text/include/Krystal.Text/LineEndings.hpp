@@ -7,7 +7,7 @@
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <cassert>
 
-namespace Krys::Text
+namespace Krys
 {
   struct LineEndings : NonCopyMovable<LineEndings>
   {

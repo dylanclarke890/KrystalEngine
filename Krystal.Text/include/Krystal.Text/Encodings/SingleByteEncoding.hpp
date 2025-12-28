@@ -7,7 +7,7 @@
 #include "Krystal.Text/Encodings/EncodingConstants.hpp"
 #include "Krystal.Text/Unicode.hpp"
 
-namespace Krys::Text
+namespace Krys
 {
   class SingleByteEncoding : public Encoding
   {

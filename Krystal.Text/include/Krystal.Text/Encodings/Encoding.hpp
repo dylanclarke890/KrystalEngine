@@ -10,7 +10,7 @@
 #include "Krystal.Text/Encodings/EncodingFallback.hpp"
 #include "Krystal.Text/Unicode.hpp"
 
-namespace Krys::Text
+namespace Krys
 {
   constexpr static uint32 MIBenumUnknown = 0u;
   constexpr static uint32 WindowsCodePageUnknown = 0u;

@@ -357,7 +357,6 @@ namespace Krys::Gfx::OpenGL
     Buffer &buffer = buffers.Get(_glyphBuffer);
     Maths::Vec2 cursor = position + Maths::Vec2 {0.f, font.Metrics().Ascender * scale};
 
-    using namespace Text;
     List<UnicodeCodepoint> codepoints = Unicode::GetCodepoints(text);
     auto count = codepoints.size();
     while (count > 0)

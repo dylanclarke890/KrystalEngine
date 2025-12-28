@@ -8,7 +8,7 @@
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Text/Encodings/Encoding.hpp"
 
-namespace Krys::Text
+namespace Krys
 {
   template <bool IsBigEndian>
   class UTF32Encoding : public Encoding

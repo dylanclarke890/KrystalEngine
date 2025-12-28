@@ -3,7 +3,7 @@
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
-namespace Krys::Text
+namespace Krys
 {
   enum class Base64EncodeFlags : uint8
   {

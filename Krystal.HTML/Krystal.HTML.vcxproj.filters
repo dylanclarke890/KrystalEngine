@@ -17,4 +17,9 @@
   <ItemGroup>
     <Text Include="include\Krystal.HTML\DOM\HTMLEntityNames.in" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Krystal.HTML\DOM\EncodingSniffer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
 </Project>
