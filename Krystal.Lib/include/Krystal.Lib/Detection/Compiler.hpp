@@ -91,6 +91,7 @@
   #define KRYS_COMPILER_QUIRK_CONSIDERS_UNREACHABLE_CODE 1
 #endif
 
+/// KRYS_FUNCTION_SIGNATURE - Macro that expands to the current function signature as a string
 #if KRYS_COMPILER(MSVC)
   #define KRYS_FUNCTION_SIGNATURE __FUNCSIG__
 #elif KRYS_COMPILER(GCC) || KRYS_COMPILER(CLANG)
@@ -100,23 +101,56 @@
   #define KRYS_FUNCTION_SIGNATURE "Unknown Function Signature"
 #endif
 
+/// KRYS_COMPILER_PRAGMA - Macro to emit a compiler pragma
 #if KRYS_COMPILER(MSVC)
-  #define KRYS_DISABLE_WARNING_PUSH() __pragma(warning(push))
-  #define KRYS_DISABLE_WARNING_POP() __pragma(warning(pop))
-  #define KRYS_DISABLE_WARNING(msvcWarningCode, gccWarningName) __pragma(warning(disable : msvcWarningCode))
-#elif KRYS_COMPILER(GCC) || KRYS_COMPILER(CLANG) // GCC or Clang
-  #define KRYS_DISABLE_WARNING_PUSH() _Pragma("GCC diagnostic push")
-  #define KRYS_DISABLE_WARNING_POP() _Pragma("GCC diagnostic pop")
-  #if KRYS_COMPILER(CLANG)
-    #define KRYS_DISABLE_WARNING(msvcWarningCode, gccWarningName)                                            \
-      _Pragma("clang diagnostic ignored \"" gccWarningName "\"")
-  #else
-    #define KRYS_DISABLE_WARNING(msvcWarningCode, gccWarningName)                                            \
-      _Pragma("GCC diagnostic ignored \"" gccWarningName "\"")
-  #endif
+  #define KRYS_COMPILER_PRAGMA(PRAGMA) __pragma(PRAGMA)
+#elif KRYS_COMPILER(GCC)
+  #define KRYS_COMPILER_PRAGMA(PRAGMA) _Pragma(#PRAGMA)
+#else
+  #warning "KRYS_FUNCTION_SIGNATURE unknown!"
+  #define KRYS_COMPILER_PRAGMA "Unknown Function Signature"
+#endif
+
+/// @brief Macros to disable compiler warnings for a section of code.
+#if KRYS_COMPILER(MSVC)
+  #define KRYS_DISABLE_WARNING_PUSH() KRYS_COMPILER_PRAGMA(warning(push))
+  #define KRYS_DISABLE_WARNING_POP() KRYS_COMPILER_PRAGMA(warning(pop))
+  #define KRYS_DISABLE_WARNING(WARNING_CODE) KRYS_COMPILER_PRAGMA(warning(disable : WARNING_CODE))
+#elif KRYS_COMPILER(GCC)
+  #define KRYS_DISABLE_WARNING_PUSH() KRYS_COMPILER_PRAGMA(GCC diagnostic push)
+  #define KRYS_DISABLE_WARNING_POP() KRYS_COMPILER_PRAGMA(GCC diagnostic pop)
+  #define KRYS_DISABLE_WARNING(WARNING_NAME) _Pragma(GCC diagnostic ignored #WARNING_NAME)
+#elif KRYS_COMPILER(CLANG)
+  #define KRYS_DISABLE_WARNING_PUSH() KRYS_COMPILER_PRAGMA(clang diagnostic push)
+  #define KRYS_DISABLE_WARNING_POP() KRYS_COMPILER_PRAGMA(clang diagnostic pop)
+  #define KRYS_DISABLE_WARNING(WARNING_NAME) _Pragma(clang diagnostic ignored #WARNING_NAME)
 #else
   #warning "Compiler not supported for warning suppression macros."
   #define KRYS_DISABLE_WARNING_PUSH()
   #define KRYS_DISABLE_WARNING_POP()
-  #define KRYS_DISABLE_WARNING(msvcWarningCode, gccWarningName)
+  #define KRYS_DISABLE_WARNING(WARNING)
+#endif
+
+// Now we define specific warning disable macros for common warnings.
+#if KRYS_COMPILER(MSVC)
+  #define KRYS_DISABLE_WARNING_UNUSED_VARIABLE() KRYS_DISABLE_WARNING(4'101)
+  #define KRYS_DISABLE_WARNING_UNREFERENCED_FORMAL_PARAMETER() KRYS_DISABLE_WARNING(4'100)
+  #define KRYS_DISABLE_WARNING_SIGN_CONVERSION() KRYS_DISABLE_WARNING(4'244)
+  #define KRYS_DISABLE_WARNING_DEPRECATED_DECLARATIONS() KRYS_DISABLE_WARNING(4'996)
+  #define KRYS_DISABLE_WARNING_FALLTHROUGH() KRYS_DISABLE_WARNING(4'762)
+  #define KRYS_DISABLE_WARNING_SHADOWED_VARIABLE() KRYS_DISABLE_WARNING(44'456)
+#elif KRYS_COMPILER(GCC) || KRYS_COMPILER(CLANG) // clang-format off
+  #define KRYS_DISABLE_WARNING_UNUSED_VARIABLE() KRYS_DISABLE_WARNING(-Wunused-variable)
+  #define KRYS_DISABLE_WARNING_UNREFERENCED_FORMAL_PARAMETER() KRYS_DISABLE_WARNING(-Wunused-parameter)
+  #define KRYS_DISABLE_WARNING_SIGN_CONVERSION() KRYS_DISABLE_WARNING(-Wsign-conversion)
+  #define KRYS_DISABLE_WARNING_DEPRECATED_DECLARATIONS() KRYS_DISABLE_WARNING(-Wdeprecated-declarations)
+  #define KRYS_DISABLE_WARNING_FALLTHROUGH() KRYS_DISABLE_WARNING(-Wimplicit-fallthrough)
+  #define KRYS_DISABLE_WARNING_SHADOWED_VARIABLE() KRYS_DISABLE_WARNING(-Wshadow)
+#else // clang-format on
+  #define KRYS_DISABLE_WARNING_UNUSED_VARIABLE()
+  #define KRYS_DISABLE_WARNING_UNREFERENCED_FORMAL_PARAMETER()
+  #define KRYS_DISABLE_WARNING_SIGN_CONVERSION()
+  #define KRYS_DISABLE_WARNING_DEPRECATED_DECLARATIONS()
+  #define KRYS_DISABLE_WARNING_FALLTHROUGH()
+  #define KRYS_DISABLE_WARNING_SHADOWED_VARIABLE()
 #endif

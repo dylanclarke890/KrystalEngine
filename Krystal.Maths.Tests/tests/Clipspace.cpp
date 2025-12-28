@@ -7,24 +7,17 @@ namespace Krys::Tests
 {
   using namespace Krys::Maths;
 
-  constexpr float left = -1.0f;
-  constexpr float right = 1.0f;
-  constexpr float bottom = -1.0f;
-  constexpr float top = 1.0f;
-  constexpr float zNear = 0.1f;
-  constexpr float zFar = 100.0f;
-
-  constexpr float fovy = Radians(45.0f);
-  constexpr float aspect = 16.0f / 9.0f;
-
-  constexpr float fov = Radians(45.0f);
-  constexpr float width = 1920.0f;
-  constexpr float height = 1080.0f;
-
 #pragma region Ortho
 
   TEST_CASE("Ortho_LH_ZO", "[Clipspace]")
   {
+    constexpr float left = -1.0f;
+    constexpr float right = 1.0f;
+    constexpr float bottom = -1.0f;
+    constexpr float top = 1.0f;
+    constexpr float zNear = 0.1f;
+    constexpr float zFar = 100.0f;
+
     constexpr Mat4 expected {
       1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1.0f / (zFar - zNear), 0, 0, 0, -zNear / (zFar - zNear), 1};
     REQUIRE(Ortho_LH_ZO(left, right, bottom, top, zNear, zFar) == expected);
@@ -32,6 +25,13 @@ namespace Krys::Tests
 
   TEST_CASE("Ortho_LH_NO", "[Clipspace]")
   {
+    constexpr float left = -1.0f;
+    constexpr float right = 1.0f;
+    constexpr float bottom = -1.0f;
+    constexpr float top = 1.0f;
+    constexpr float zNear = 0.1f;
+    constexpr float zFar = 100.0f;
+
     constexpr Mat4 expected {
       1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 2.0f / (zFar - zNear), 0, 0, 0, -(zFar + zNear) / (zFar - zNear), 1};
     REQUIRE(Ortho_LH_NO(left, right, bottom, top, zNear, zFar) == expected);
@@ -39,6 +39,13 @@ namespace Krys::Tests
 
   TEST_CASE("Ortho_RH_ZO", "[Clipspace]")
   {
+    constexpr float left = -1.0f;
+    constexpr float right = 1.0f;
+    constexpr float bottom = -1.0f;
+    constexpr float top = 1.0f;
+    constexpr float zNear = 0.1f;
+    constexpr float zFar = 100.0f;
+
     constexpr Mat4 expected {
       1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -1.0f / (zFar - zNear), 0, 0, 0, -zNear / (zFar - zNear), 1};
     REQUIRE(Ortho_RH_ZO(left, right, bottom, top, zNear, zFar) == expected);
@@ -46,6 +53,13 @@ namespace Krys::Tests
 
   TEST_CASE("Ortho_RH_NO", "[Clipspace]")
   {
+    constexpr float left = -1.0f;
+    constexpr float right = 1.0f;
+    constexpr float bottom = -1.0f;
+    constexpr float top = 1.0f;
+    constexpr float zNear = 0.1f;
+    constexpr float zFar = 100.0f;
+
     constexpr Mat4 expected {
       1, 0, 0, 0, 0, 1, 0, 0, 0, 0, -2.0f / (zFar - zNear), 0, 0, 0, -(zFar + zNear) / (zFar - zNear), 1};
     REQUIRE(Ortho_RH_NO(left, right, bottom, top, zNear, zFar) == expected);
@@ -53,6 +67,11 @@ namespace Krys::Tests
 
   TEST_CASE("Ortho", "[Clipspace]")
   {
+    constexpr float left = -1.0f;
+    constexpr float right = 1.0f;
+    constexpr float bottom = -1.0f;
+    constexpr float top = 1.0f;
+
     constexpr Mat4 expected {1.0f, 0.0f, 0.0f,  0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
                              0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f};
 
@@ -65,6 +84,13 @@ namespace Krys::Tests
 
   TEST_CASE("Frustum_LH_ZO", "[Clipspace]")
   {
+    constexpr float left = -1.0f;
+    constexpr float right = 1.0f;
+    constexpr float bottom = -1.0f;
+    constexpr float top = 1.0f;
+    constexpr float zNear = 0.1f;
+    constexpr float zFar = 100.0f;
+
     constexpr Mat4 expected {0.1f, 0.0f, 0.0f,      0.0f, 0.0f, 0.1f, 0.0f,        0.0f,
                              0.0f, 0.0f, 1.001001f, 1.0f, 0.0f, 0.0f, -0.1001001f, 0.0f};
 
@@ -73,6 +99,13 @@ namespace Krys::Tests
 
   TEST_CASE("Frustum_LH_NO", "[Clipspace]")
   {
+    constexpr float left = -1.0f;
+    constexpr float right = 1.0f;
+    constexpr float bottom = -1.0f;
+    constexpr float top = 1.0f;
+    constexpr float zNear = 0.1f;
+    constexpr float zFar = 100.0f;
+
     constexpr Mat4 expected {0.1f, 0.0f, 0.0f,      0.0f, 0.0f, 0.1f, 0.0f,        0.0f,
                              0.0f, 0.0f, 1.002002f, 1.0f, 0.0f, 0.0f, -0.2002002f, 0.0f};
 
@@ -81,6 +114,13 @@ namespace Krys::Tests
 
   TEST_CASE("Frustum_RH_ZO", "[Clipspace]")
   {
+    constexpr float left = -1.0f;
+    constexpr float right = 1.0f;
+    constexpr float bottom = -1.0f;
+    constexpr float top = 1.0f;
+    constexpr float zNear = 0.1f;
+    constexpr float zFar = 100.0f;
+
     constexpr Mat4 expected {0.1f, 0.0f, 0.0f,       0.0f,  0.0f, 0.1f, 0.0f,        0.0f,
                              0.0f, 0.0f, -1.001001f, -1.0f, 0.0f, 0.0f, -0.1001001f, 0.0f};
 
@@ -89,6 +129,13 @@ namespace Krys::Tests
 
   TEST_CASE("Frustum_RH_NO", "[Clipspace]")
   {
+    constexpr float left = -1.0f;
+    constexpr float right = 1.0f;
+    constexpr float bottom = -1.0f;
+    constexpr float top = 1.0f;
+    constexpr float zNear = 0.1f;
+    constexpr float zFar = 100.0f;
+
     constexpr Mat4 expected {0.1f, 0.0f, 0.0f,       0.0f,  0.0f, 0.1f, 0.0f,        0.0f,
                              0.0f, 0.0f, -1.002002f, -1.0f, 0.0f, 0.0f, -0.2002002f, 0.0f};
     REQUIRE(Frustum_RH_NO(left, right, bottom, top, zNear, zFar) == expected);
@@ -100,6 +147,11 @@ namespace Krys::Tests
 
   TEST_CASE("Perspective_RH_ZO", "[Clipspace]")
   {
+    constexpr float zNear = 0.1f;
+    constexpr float zFar = 100.0f;
+    constexpr float fovy = Radians(45.0f);
+    constexpr float aspect = 16.0f / 9.0f;
+
     float tanHalfFovy = std::tan(fovy / 2.0f);
     Mat4 expected {1 / (aspect * tanHalfFovy),
                    0,
@@ -123,6 +175,11 @@ namespace Krys::Tests
 
   TEST_CASE("Perspective_RH_NO", "[Clipspace]")
   {
+    constexpr float zNear = 0.1f;
+    constexpr float zFar = 100.0f;
+    constexpr float fovy = Radians(45.0f);
+    constexpr float aspect = 16.0f / 9.0f;
+
     float tanHalfFovy = std::tan(fovy / 2.0f);
     Mat4 expected {1.0f / (aspect * tanHalfFovy),
                    0,
@@ -146,6 +203,11 @@ namespace Krys::Tests
 
   TEST_CASE("Perspective_LH_ZO", "[Clipspace]")
   {
+    constexpr float zNear = 0.1f;
+    constexpr float zFar = 100.0f;
+    constexpr float fovy = Radians(45.0f);
+    constexpr float aspect = 16.0f / 9.0f;
+
     float tanHalfFovy = std::tan(fovy / 2.0f);
     Mat4 expected {1.0f / (aspect * tanHalfFovy),
                    0.0f,
@@ -169,6 +231,11 @@ namespace Krys::Tests
 
   TEST_CASE("Perspective_LH_NO", "[Clipspace]")
   {
+    constexpr float zNear = 0.1f;
+    constexpr float zFar = 100.0f;
+    constexpr float fovy = Radians(45.0f);
+    constexpr float aspect = 16.0f / 9.0f;
+
     float tanHalfFovy = std::tan(fovy / 2.0f);
     Mat4 expected {1.0f / (aspect * tanHalfFovy),
                    0.0f,
@@ -196,6 +263,12 @@ namespace Krys::Tests
 
   TEST_CASE("PerspectiveFov_RH_ZO", "[Clipspace]")
   {
+    constexpr float zNear = 0.1f;
+    constexpr float zFar = 100.0f;
+    constexpr float fov = Radians(45.0f);
+    constexpr float width = 1920.0f;
+    constexpr float height = 1080.0f;
+
     float h = std::cos(fov / 2.0f) / std::sin(fov / 2.0f);
     float w = h * height / width;
 
@@ -207,6 +280,12 @@ namespace Krys::Tests
 
   TEST_CASE("PerspectiveFov_RH_NO", "[Clipspace]")
   {
+    constexpr float zNear = 0.1f;
+    constexpr float zFar = 100.0f;
+    constexpr float fov = Radians(45.0f);
+    constexpr float width = 1920.0f;
+    constexpr float height = 1080.0f;
+
     float h = std::cos(fov / 2.0f) / std::sin(fov / 2.0f);
     float w = h * height / width;
     float zDiff = zFar - zNear;
@@ -219,6 +298,12 @@ namespace Krys::Tests
 
   TEST_CASE("PerspectiveFov_LH_ZO", "[Clipspace]")
   {
+    constexpr float zNear = 0.1f;
+    constexpr float zFar = 100.0f;
+    constexpr float fov = Radians(45.0f);
+    constexpr float width = 1920.0f;
+    constexpr float height = 1080.0f;
+
     float h = std::cos(fov / 2.0f) / std::sin(fov / 2.0f);
     float w = h * height / width;
 
@@ -230,6 +315,12 @@ namespace Krys::Tests
 
   TEST_CASE("PerspectiveFov_LH_NO", "[Clipspace]")
   {
+    constexpr float zNear = 0.1f;
+    constexpr float zFar = 100.0f;
+    constexpr float fov = Radians(45.0f);
+    constexpr float width = 1920.0f;
+    constexpr float height = 1080.0f;
+
     float h = std::cos(fov / 2.0f) / std::sin(fov / 2.0f);
     float w = h * height / width;
     float zDiff = zFar - zNear;
@@ -244,11 +335,12 @@ namespace Krys::Tests
 
 #pragma region InfinitePerspective
 
-  KRYS_DISABLE_WARNING_PUSH()
-  KRYS_DISABLE_WARNING(4'459, "-WShadow")
-
   TEST_CASE("InfinitePerspective_RH_ZO", "[Clipspace]")
   {
+    constexpr float zNear = 0.1f;
+    constexpr float fovy = Radians(45.0f);
+    constexpr float aspect = 16.0f / 9.0f;
+
     float range = std::tan(fovy / 2.0f) * zNear;
     float left = -range * aspect;
     float right = range * aspect;
@@ -264,6 +356,10 @@ namespace Krys::Tests
 
   TEST_CASE("InfinitePerspective_RH_NO", "[Clipspace]")
   {
+    constexpr float zNear = 0.1f;
+    constexpr float fovy = Radians(45.0f);
+    constexpr float aspect = 16.0f / 9.0f;
+
     float range = std::tan(fovy / 2.0f) * zNear;
     float left = -range * aspect;
     float right = range * aspect;
@@ -279,6 +375,10 @@ namespace Krys::Tests
 
   TEST_CASE("InfinitePerspective_LH_ZO", "[Clipspace]")
   {
+    constexpr float zNear = 0.1f;
+    constexpr float fovy = Radians(45.0f);
+    constexpr float aspect = 16.0f / 9.0f;
+
     float range = std::tan(fovy / 2.0f) * zNear;
     float left = -range * aspect;
     float right = range * aspect;
@@ -294,6 +394,10 @@ namespace Krys::Tests
 
   TEST_CASE("InfinitePerspective_LH_NO", "[Clipspace]")
   {
+    constexpr float zNear = 0.1f;
+    constexpr float fovy = Radians(45.0f);
+    constexpr float aspect = 16.0f / 9.0f;
+
     float range = std::tan(fovy / 2.0f) * zNear;
     float left = -range * aspect;
     float right = range * aspect;
@@ -306,8 +410,6 @@ namespace Krys::Tests
 
     REQUIRE(InfinitePerspective_LH_NO(fovy, aspect, zNear) == expected);
   }
-
-  KRYS_DISABLE_WARNING_POP()
 
 #pragma endregion InfinitePerspective
 }
