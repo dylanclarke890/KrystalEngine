@@ -6,14 +6,26 @@ namespace Krys
 {
   class ISO_8859_6_Encoding : public SingleByteEncoding
   {
+  private:
+    KRYS_NODISCARD static EncodingInfo GetEncodingInfo() noexcept
+    {
+      static EncodingInfo info {
+        .Name = u8"ISO-8859-6",
+        .Aliases = {u8"iso-8859-6", u8"arabic", u8"asmo-708", u8"csiso88596e", u8"csiso88596i",
+                    u8"csisolatinarabic", u8"ecma-114", u8"iso-8859-6-e", u8"iso-8859-6-i", u8"iso-ir-127",
+                    u8"iso8859-6", u8"iso88596", u8"iso_8859-6", u8"iso_8859-6:1987"},
+        .MIBenum = MIBenum {9u},
+        .Win32CodePage = Win32CodePage {28'596u},
+        .IsSingleByte = IsSingleByteEncoding {true},
+      };
+
+      return info;
+    }
+
     using Mapping = LookupTable::Mapping;
     using MapItem = LookupTable::MapItem;
 
   public:
-    static constexpr utf8_stringview Name = u8"ISO-8859-6";
-    static constexpr uint32 MIBenum = 9u;
-    static constexpr uint32 WindowsCodePage = 28'596u;
-
     static constexpr Mapping LookupMapping = {
       MapItem {0x80u, UnicodeCodepoint(0x0080u)}, //	<control>
       MapItem {0x81u, UnicodeCodepoint(0x0081u)}, //	<control>
@@ -101,8 +113,7 @@ namespace Krys
     };
 
   public:
-    ISO_8859_6_Encoding() noexcept
-        : SingleByteEncoding({Name, MIBenum, WindowsCodePage}, LookupTable(LookupMapping))
+    ISO_8859_6_Encoding() noexcept : SingleByteEncoding(GetEncodingInfo(), LookupTable(LookupMapping))
     {
     }
 

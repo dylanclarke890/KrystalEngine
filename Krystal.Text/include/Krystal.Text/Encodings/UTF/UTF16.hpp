@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Endian.hpp"
-#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Text/Encodings/Encoding.hpp"
 
@@ -13,54 +13,65 @@ namespace Krys
   template <bool IsBigEndian>
   class UTF16Encoding : public Encoding
   {
+  private:
+    KRYS_NODISCARD static EncodingInfo GetEncodingInfo() noexcept
+    {
+      if constexpr (IsBigEndian)
+      {
+        static EncodingInfo info {
+          .Name = u8"UTF-16BE",
+          .Aliases = {u8"utf-16be", u8"unicodefffe"},
+          .MIBenum = MIBenum {1'013u},
+          .Win32CodePage = Win32CodePage {1'201u},
+          .IsSingleByte = IsSingleByteEncoding {false},
+          .ByteOrderMark = {UnicodeCodepoint(0xFE'FF'00'00u), 2u},
+        };
+
+        return info;
+      }
+      else
+      {
+        static EncodingInfo info {
+          .Name = u8"UTF-16LE",
+          .Aliases = {u8"utf-16le", u8"csunicode", u8"iso-10646-ucs-2", u8"ucs-2", u8"unicode",
+                      u8"unicodefeff", u8"utf-16"},
+          .MIBenum = MIBenum {1'014u},
+          .Win32CodePage = Win32CodePage {1'200u},
+          .IsSingleByte = IsSingleByteEncoding {false},
+          .ByteOrderMark = {UnicodeCodepoint(0xFF'FE'00'00u), 2u},
+        };
+
+        return info;
+      }
+    }
+
   public:
-    static constexpr utf8_stringview Name_BE = u8"UTF-16BE";
-    static constexpr uint32 MIBenum_BE = 1'013u;
-    static constexpr uint32 WindowsCodePage_BE = 1'201u;
-    static constexpr Array<byte, 2u> BOM_BE = {byte {0xFE}, byte {0xFF}};
-
-    static constexpr utf8_stringview Name_LE = u8"UTF-16LE";
-    static constexpr uint32 MIBenum_LE = 1'014u;
-    static constexpr uint32 WindowsCodePage_LE = 1'200u;
-    static constexpr Array<byte, 2u> BOM_LE = {byte {0xFF}, byte {0xFE}};
-
     static constexpr Endian::Type Endianness {IsBigEndian ? Endian::Big : Endian::Little};
 
   public:
-    constexpr UTF16Encoding() noexcept
-        : Encoding(IsBigEndian ? EncodingInfo {Name_BE, MIBenum_BE, WindowsCodePage_BE}
-                               : EncodingInfo {Name_LE, MIBenum_LE, WindowsCodePage_LE})
+    UTF16Encoding() noexcept
+        : Encoding(GetEncodingInfo(), EncoderFallback(EncodingReplacement_UTF),
+                   DecoderFallback(EncodingReplacement_UTF))
     {
     }
 
-    constexpr virtual ~UTF16Encoding() noexcept = default;
+    virtual ~UTF16Encoding() noexcept = default;
 
-    KRYS_NODISCARD constexpr Span<const byte> GetBOM() const noexcept override
-    {
-      return IsBigEndian ? Span<const byte> {BOM_BE.data(), BOM_BE.size()}
-                         : Span<const byte> {BOM_LE.data(), BOM_LE.size()};
-    }
-
-    KRYS_NODISCARD constexpr bool IsSingleByte() const noexcept override
-    {
-      return false;
-    }
-
-    KRYS_NODISCARD constexpr List<byte> Encode(utf8_stringview characters) const noexcept override
+    KRYS_NODISCARD List<byte> Encode(utf8_stringview characters) const noexcept override
     {
       List<byte> bytes;
       Encode(characters, bytes);
       return bytes;
     }
 
-    KRYS_NODISCARD constexpr utf8_string Decode(Span<const byte> bytes) const noexcept override
+    KRYS_NODISCARD utf8_string Decode(Span<const byte> bytes) const noexcept override
     {
       utf8_string characters;
       Decode(bytes, characters);
       return characters;
     }
 
-    constexpr void Encode(utf8_stringview characters, List<byte> &out) const noexcept override
+    void Encode(utf8_stringview characters, List<byte> &out) const noexcept override
     {
       Reserve(out, characters.size() * 2u);
 
@@ -91,7 +102,7 @@ namespace Krys
       Unicode::ForEachCodepoint(characters, EncodeCodepoint);
     }
 
-    constexpr void Decode(Span<const byte> bytes, utf8_string &out) const noexcept
+    void Decode(Span<const byte> bytes, utf8_string &out) const noexcept
     {
       Reserve(out, bytes.size() / 2u);
 

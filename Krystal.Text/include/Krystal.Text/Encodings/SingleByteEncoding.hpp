@@ -86,19 +86,14 @@ namespace Krys
   public:
     ~SingleByteEncoding() noexcept override = default;
 
-    KRYS_NODISCARD bool IsSingleByte() const noexcept override final
-    {
-      return true;
-    }
-
-    KRYS_NODISCARD constexpr List<byte> Encode(utf8_stringview characters) const noexcept override
+    KRYS_NODISCARD List<byte> Encode(utf8_stringview characters) const noexcept override
     {
       List<byte> bytes;
       Encode(characters, bytes);
       return bytes;
     }
 
-    KRYS_NODISCARD constexpr utf8_string Decode(Span<const byte> bytes) const noexcept override
+    KRYS_NODISCARD utf8_string Decode(Span<const byte> bytes) const noexcept override
     {
       utf8_string characters;
       Decode(bytes, characters);

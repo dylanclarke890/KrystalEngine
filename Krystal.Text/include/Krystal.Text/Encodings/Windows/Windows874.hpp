@@ -6,14 +6,25 @@ namespace Krys
 {
   class Windows874Encoding : public SingleByteEncoding
   {
+  private:
+    KRYS_NODISCARD static EncodingInfo GetEncodingInfo() noexcept
+    {
+      static EncodingInfo info {
+        .Name = u8"windows-874",
+        .Aliases = {u8"windows-874", u8"dos-874", u8"iso-8859-11", u8"iso8859-11", u8"iso885911",
+                    u8"tis-620"},
+        .MIBenum = MIBenum {2'109u},
+        .Win32CodePage = Win32CodePage {874u},
+        .IsSingleByte = IsSingleByteEncoding {true},
+      };
+
+      return info;
+    }
+
     using Mapping = LookupTable::Mapping;
     using MapItem = LookupTable::MapItem;
 
   public:
-    static constexpr utf8_stringview Name = u8"windows-874";
-    static constexpr uint32 MIBenum = 2'109u;
-    static constexpr uint32 WindowsCodePage = 874u;
-
     static constexpr Mapping LookupMapping = {
       MapItem {0x80u, UnicodeCodepoint(0x20ACu)}, // EURO SIGN
       MapItem {0x85u, UnicodeCodepoint(0x2026u)}, // HORIZONTAL ELLIPSIS
@@ -115,8 +126,7 @@ namespace Krys
     };
 
   public:
-    Windows874Encoding() noexcept
-        : SingleByteEncoding({Name, MIBenum, WindowsCodePage}, LookupTable(LookupMapping))
+    Windows874Encoding() noexcept : SingleByteEncoding(GetEncodingInfo(), LookupTable(LookupMapping))
     {
     }
 

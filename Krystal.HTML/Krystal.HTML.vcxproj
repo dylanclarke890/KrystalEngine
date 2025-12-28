@@ -19,10 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="include\Krystal.HTML\DOM\HTMLEntityNames.in" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="include\Krystal.HTML\DOM\EncodingSniffer.hpp" />
+    <Text Include="include\Krystal.HTML\DOM\Parser\HTMLEntityNames.in" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Krystal.Lib\Krystal.Lib.vcxproj">
@@ -31,6 +28,9 @@
     <ProjectReference Include="..\Krystal.Text\Krystal.Text.vcxproj">
       <Project>{55855c03-499d-4fda-a184-ace486fda228}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Krystal.HTML\DOM\Parser\EncodingSniffer.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

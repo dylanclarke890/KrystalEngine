@@ -6,14 +6,23 @@ namespace Krys
 {
   class KZ1048_Encoding : public SingleByteEncoding
   {
+  private:
+    KRYS_NODISCARD static EncodingInfo GetEncodingInfo() noexcept
+    {
+      static EncodingInfo info {
+        .Name = u8"KZ-1048",
+        .Aliases = {u8"kz-1048"},
+        .MIBenum = MIBenum {119u},
+        .IsSingleByte = IsSingleByteEncoding {true},
+      };
+
+      return info;
+    }
+
     using Mapping = LookupTable::Mapping;
     using MapItem = LookupTable::MapItem;
 
   public:
-    static constexpr utf8_stringview Name = u8"KZ-1048";
-    static constexpr uint32 MIBenum = 119u;
-    static constexpr uint32 WindowsCodePage = WindowsCodePageUnknown;
-
     static constexpr Mapping LookupMapping = {
       MapItem {0x80u, UnicodeCodepoint(0x2500u)}, //	BOX DRAWINGS LIGHT HORIZONTAL
       MapItem {0x81u, UnicodeCodepoint(0x2502u)}, //	BOX DRAWINGS LIGHT VERTICAL
@@ -146,8 +155,7 @@ namespace Krys
     };
 
   public:
-    KZ1048_Encoding() noexcept 
-              : SingleByteEncoding({Name, MIBenum, WindowsCodePage}, LookupTable(LookupMapping))
+    KZ1048_Encoding() noexcept : SingleByteEncoding(GetEncodingInfo(), LookupTable(LookupMapping))
     {
     }
 

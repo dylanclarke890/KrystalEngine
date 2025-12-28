@@ -317,4 +317,16 @@ namespace Krys
       }
     }
   };
+
+  namespace UnicodeCharacter
+  {
+    constexpr UnicodeCodepoint Null(0x0000u);
+    constexpr UnicodeCodepoint LF(0x000Au);
+    constexpr UnicodeCodepoint CR(0x000Du);
+    constexpr UnicodeCodepoint Space(0x0020u);
+    constexpr UnicodeCodepoint Tab(0x0009u);
+    constexpr UnicodeCodepoint NonBreakingSpaceCharacter(0x00A0u);
+    constexpr UnicodeCodepoint ZeroWidthSpaceCharacter(0x200Bu);
+    constexpr UnicodeCodepoint ReplacementCharacter(Unicode::DefaultReplacementCodepoint);
+  }
 }

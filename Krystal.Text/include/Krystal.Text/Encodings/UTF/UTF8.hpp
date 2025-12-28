@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Text/Encodings/Encoding.hpp"
 
@@ -10,45 +10,46 @@ namespace Krys
 {
   class UTF8Encoding : public Encoding
   {
+  private:
+    KRYS_NODISCARD static EncodingInfo GetEncodingInfo() noexcept
+    {
+      static EncodingInfo info {
+        .Name = u8"UTF-8",
+        .Aliases = {u8"utf-8", u8"unicode-1-1-utf-8", u8"unicode11utf8", u8"unicode20utf8", u8"utf8",
+                    u8"x-unicode20utf8"},
+        .MIBenum = MIBenum {106u},
+        .Win32CodePage = Win32CodePage {65'001u},
+        .IsSingleByte = IsSingleByteEncoding {false},
+        .ByteOrderMark = {UnicodeCodepoint(0xEF'BB'BF'00u), 3u},
+      };
+
+      return info;
+    }
+
   public:
-    static constexpr utf8_stringview Name = u8"UTF-8";
-    static constexpr uint32 MIBenum = 106u;
-    static constexpr uint32 WindowsCodePage = 65'001u;
-
-    static constexpr Array<byte, 3u> BOM = {byte {0xEF}, byte {0xBB}, byte {0xBF}};
-
-  public:
-    constexpr UTF8Encoding() noexcept : Encoding({Name, MIBenum, WindowsCodePage})
+    UTF8Encoding() noexcept
+        : Encoding(GetEncodingInfo(), EncoderFallback(EncodingReplacement_UTF),
+                   DecoderFallback(EncodingReplacement_UTF))
     {
     }
 
-    constexpr virtual ~UTF8Encoding() noexcept = default;
+    virtual ~UTF8Encoding() noexcept = default;
 
-    KRYS_NODISCARD constexpr Span<const byte> GetBOM() const noexcept override
-    {
-      return Span<const byte> {BOM.data(), BOM.size()};
-    }
-
-    KRYS_NODISCARD constexpr bool IsSingleByte() const noexcept override
-    {
-      return false;
-    }
-
-    KRYS_NODISCARD constexpr List<byte> Encode(utf8_stringview characters) const noexcept override
+    KRYS_NODISCARD List<byte> Encode(utf8_stringview characters) const noexcept override
     {
       List<byte> bytes;
       Encode(characters, bytes);
       return bytes;
     }
 
-    KRYS_NODISCARD constexpr utf8_string Decode(Span<const byte> bytes) const noexcept override
+    KRYS_NODISCARD utf8_string Decode(Span<const byte> bytes) const noexcept override
     {
       utf8_string characters;
       Decode(bytes, characters);
       return characters;
     }
 
-    constexpr void Encode(utf8_stringview characters, List<byte> &out) const noexcept override
+    void Encode(utf8_stringview characters, List<byte> &out) const noexcept override
     {
       Reserve(out, characters.size());
 
@@ -67,7 +68,7 @@ namespace Krys
       Unicode::ForEachCodepoint(characters, EncodeCodepoint);
     }
 
-    void constexpr Decode(Span<const byte> bytes, utf8_string &out) const noexcept override
+    void Decode(Span<const byte> bytes, utf8_string &out) const noexcept override
     {
       Reserve(out, bytes.size());
 

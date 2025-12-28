@@ -6,14 +6,23 @@ namespace Krys
 {
   class Windows1251Encoding : public SingleByteEncoding
   {
+  private:
+    KRYS_NODISCARD static EncodingInfo GetEncodingInfo() noexcept
+    {
+      static EncodingInfo info {
+        .Name = u8"windows-1251",
+        .Aliases = {u8"windows-1251"},
+        .MIBenum = MIBenum {2'251u},
+        .Win32CodePage = Win32CodePage {1'251u},
+        .IsSingleByte = IsSingleByteEncoding {true},
+      };
+
+      return info;
+    }
     using Mapping = LookupTable::Mapping;
     using MapItem = LookupTable::MapItem;
 
   public:
-    static constexpr utf8_stringview Name = u8"windows-1251";
-    static constexpr uint32 MIBenum = 2'251u;
-    static constexpr uint32 WindowsCodePage = 1'251u;
-
     static constexpr Mapping LookupMapping = {
       MapItem {0x80u, UnicodeCodepoint(0x0402u)}, // CYRILLIC CAPITAL LETTER DJE
       MapItem {0x81u, UnicodeCodepoint(0x0403u)}, // CYRILLIC CAPITAL LETTER GJE
@@ -145,8 +154,7 @@ namespace Krys
     };
 
   public:
-    Windows1251Encoding() noexcept
-        : SingleByteEncoding({Name, MIBenum, WindowsCodePage}, LookupTable(LookupMapping))
+    Windows1251Encoding() noexcept : SingleByteEncoding(GetEncodingInfo(), LookupTable(LookupMapping))
     {
     }
 

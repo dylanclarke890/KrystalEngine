@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="include\Krystal.HTML\DOM\HTMLEntityNames.in" />
+    <Text Include="include\Krystal.HTML\DOM\Parser\HTMLEntityNames.in" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.HTML\DOM\EncodingSniffer.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Parser\EncodingSniffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

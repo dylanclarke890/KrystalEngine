@@ -6,14 +6,24 @@ namespace Krys
 {
   class KOI8_R_Encoding : public SingleByteEncoding
   {
+  private:
+    KRYS_NODISCARD static EncodingInfo GetEncodingInfo() noexcept
+    {
+      static EncodingInfo info {
+        .Name = u8"KOI8-R",
+        .Aliases = {u8"cskoi8r", u8"koi", u8"koi8", u8"koi8_r", u8"koi8-r"},
+        .MIBenum = MIBenum {2'084u},
+        .Win32CodePage = Win32CodePage {20'866u},
+        .IsSingleByte = IsSingleByteEncoding {true},
+      };
+
+      return info;
+    }
+
     using Mapping = LookupTable::Mapping;
     using MapItem = LookupTable::MapItem;
 
   public:
-    static constexpr utf8_stringview Name = u8"KOI8-R";
-    static constexpr uint32 MIBenum = 2'084u;
-    static constexpr uint32 WindowsCodePage = 20'866u;
-
     static constexpr Mapping LookupMapping = {
       MapItem {0x80u, UnicodeCodepoint(0x2500u)}, //	BOX DRAWINGS LIGHT HORIZONTAL
       MapItem {0x81u, UnicodeCodepoint(0x2502u)}, //	BOX DRAWINGS LIGHT VERTICAL
@@ -146,7 +156,7 @@ namespace Krys
     };
 
   public:
-    KOI8_R_Encoding() noexcept : SingleByteEncoding({Name, MIBenum, WindowsCodePage}, LookupTable(LookupMapping))
+    KOI8_R_Encoding() noexcept : SingleByteEncoding(GetEncodingInfo(), LookupTable(LookupMapping))
     {
     }
 

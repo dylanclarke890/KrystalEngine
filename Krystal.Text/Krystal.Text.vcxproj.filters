@@ -143,5 +143,11 @@
     <ClInclude Include="include\Krystal.Text\Base64.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Text\Encodings\ByteOrderMark.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingRegistry.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

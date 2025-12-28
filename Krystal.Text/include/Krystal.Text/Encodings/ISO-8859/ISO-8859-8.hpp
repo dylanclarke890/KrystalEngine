@@ -6,14 +6,26 @@ namespace Krys
 {
   class ISO_8859_8_Encoding : public SingleByteEncoding
   {
+  private:
+    KRYS_NODISCARD static EncodingInfo GetEncodingInfo() noexcept
+    {
+      static EncodingInfo info {
+        .Name = u8"ISO-8859-8",
+        .Aliases = {u8"iso-8859-8", u8"csiso88598e", u8"csisolatinhebrew", u8"hebrew", u8"iso-8859-8-e",
+                    u8"iso-ir-138", u8"iso8859-8", u8"iso88598", u8"iso_8859-8", u8"iso_8859-8:1988",
+                    u8"visual"},
+        .MIBenum = MIBenum {11u},
+        .Win32CodePage = Win32CodePage {28'598u},
+        .IsSingleByte = IsSingleByteEncoding {true},
+      };
+
+      return info;
+    }
+
     using Mapping = LookupTable::Mapping;
     using MapItem = LookupTable::MapItem;
 
   public:
-    static constexpr utf8_stringview Name = u8"ISO-8859-8";
-    static constexpr uint32 MIBenum = 11u;
-    static constexpr uint32 WindowsCodePage = 28'598u;
-
     static constexpr Mapping LookupMapping = {
       MapItem {0x80u, UnicodeCodepoint(0x0080u)}, //	<control>
       MapItem {0x81u, UnicodeCodepoint(0x0081u)}, //	<control>
@@ -110,8 +122,7 @@ namespace Krys
     };
 
   public:
-    ISO_8859_8_Encoding() noexcept
-        : SingleByteEncoding({Name, MIBenum, WindowsCodePage}, LookupTable(LookupMapping))
+    ISO_8859_8_Encoding() noexcept : SingleByteEncoding(GetEncodingInfo(), LookupTable(LookupMapping))
     {
     }
 

@@ -24,16 +24,4 @@ namespace Krys::Tests
     utf8_string decoded = encoding.Decode(encoded);
     REQUIRE(decoded == u8"Hello, ??!");
   }
-
-  TEST_CASE("ASCIIEncoding(GetBOM)", "[Text][Encodings][ASCII]")
-  {
-    ASCIIEncoding encoding;
-    REQUIRE(encoding.GetBOM().empty());
-  }
-
-  TEST_CASE("ASCIIEncoding(IsSingleByte)", "[Text][Encodings][ASCII]")
-  {
-    ASCIIEncoding encoding;
-    REQUIRE(encoding.IsSingleByte());
-  }
 }
