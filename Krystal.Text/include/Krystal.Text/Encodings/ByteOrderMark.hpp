@@ -29,30 +29,32 @@ namespace Krys
 
     KRYS_NODISCARD constexpr static ByteOrderMark Detect(Span<const byte> bytes) noexcept
     {
-      if (CompareBytes(bytes, UTF8))
+      if (CompareBytes(bytes, FixedSpan<const byte, 3u>(UTF8.data(), 3u)))
       {
         return ByteOrderMark::UTF8;
       }
-      else if (CompareBytes(bytes, UTF16BE))
-      {
-        return ByteOrderMark::UTF16BE;
-      }
-      else if (CompareBytes(bytes, UTF16LE))
-      {
-        return ByteOrderMark::UTF16LE;
-      }
-      else if (CompareBytes(bytes, UTF32BE))
+
+      if (CompareBytes(bytes, FixedSpan<const byte, 4u>(UTF32BE.data(), 4u)))
       {
         return ByteOrderMark::UTF32BE;
       }
-      else if (CompareBytes(bytes, UTF32LE))
+
+      if (CompareBytes(bytes, FixedSpan<const byte, 4u>(UTF32LE.data(), 4u)))
       {
         return ByteOrderMark::UTF32LE;
       }
-      else
+
+      if (CompareBytes(bytes, FixedSpan<const byte, 2u>(UTF16BE.data(), 2u)))
       {
-        return ByteOrderMark::None;
+        return ByteOrderMark::UTF16BE;
       }
+
+      if (CompareBytes(bytes, FixedSpan<const byte, 2u>(UTF16LE.data(), 2u)))
+      {
+        return ByteOrderMark::UTF16LE;
+      }
+
+      return ByteOrderMark::None;
     }
 
     KRYS_NODISCARD constexpr static utf8_string GetEncodingName(ByteOrderMark bom) noexcept
@@ -82,14 +84,16 @@ namespace Krys
     }
 
   private:
-    KRYS_NODISCARD constexpr static bool CompareBytes(Span<const byte> bytes, Span<const byte> bom) noexcept
+    template <size_t N>
+    KRYS_NODISCARD constexpr static bool CompareBytes(Span<const byte> bytes,
+                                                      FixedSpan<const byte, N> bom) noexcept
     {
-      if (bytes.size() < bom.size())
+      if (bytes.size() < N)
       {
         return false;
       }
 
-      for (size_t i = 0; i < bom.size(); ++i)
+      for (size_t i = 0; i < N; ++i)
       {
         if (bytes[i] != bom[i])
         {

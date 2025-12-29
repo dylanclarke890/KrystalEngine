@@ -1,10 +1,12 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
+#include "Krystal.Lib/Pointers/UniquePtr.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Text/Encodings/Encoding.hpp"
 #include "Krystal.Text/Unicode.hpp"
+#include <typeindex>
 
 namespace Krys
 {
@@ -15,23 +17,28 @@ namespace Krys
 
   private:
     LabelToEncodingMap _labelToEncodingMap;
+    Map<std::type_index, UniquePtr<Encoding>> _encodings;
 
   public:
-    template <typename T>
+    /// @brief Registers a new encoding type in the registry. Previously registered encodings of the same type
+    /// will be overwritten.
+    template <DerivedFrom<Encoding> T>
     void Register() noexcept
     {
-      static T encodingInstance;
-      const EncodingInfo &info = encodingInstance.GetInfo();
+      std::type_index key = typeid(T);
+      _encodings[key] = CreateUnique<T>();
 
-      _labelToEncodingMap[info.Name] = &encodingInstance;
+      auto *encoding = _encodings.at(key).get();
+      const EncodingInfo &info = encoding->GetInfo();
 
+      _labelToEncodingMap[info.Name] = encoding;
       for (const utf8_string &alias : info.Aliases)
       {
-        _labelToEncodingMap[alias] = &encodingInstance;
+        _labelToEncodingMap[alias] = encoding;
       }
     }
 
-    KRYS_NODISCARD const Encoding *GetByLabel(const utf8_string &label) const noexcept
+    KRYS_NODISCARD Encoding *GetByLabel(const utf8_string &label) const noexcept
     {
       if (label.empty())
       {
