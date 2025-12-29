@@ -1,4 +1,4 @@
-#include "Krystal.Engine/Application.hpp"
+﻿#include "Krystal.Engine/Application.hpp"
 #include "Krystal.Debug/ScopedProfiler.hpp"
 #include "Krystal.IO/Backends/NativeFileBackend.hpp"
 #include "Krystal.Maths/Random.hpp"

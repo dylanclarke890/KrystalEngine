@@ -1,4 +1,4 @@
-#include "Krystal.IO/Streams/NativeFileStream.hpp"
+﻿#include "Krystal.IO/Streams/NativeFileStream.hpp"
 #include "Krystal.IO/Common.hpp"
 #include "Krystal.IO/Path.hpp"
 #include <catch_all.hpp>

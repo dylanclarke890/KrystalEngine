@@ -1,4 +1,4 @@
-#include "Krystal.Maths/Transform.hpp"
+﻿#include "Krystal.Maths/Transform.hpp"
 #include "Krystal.Maths/Convert.hpp"
 #include "Krystal.Maths/Maths.hpp"
 #include "Krystal.Maths/Quaternion.hpp"

@@ -1,4 +1,4 @@
-#include "Krystal.IO/VirtualFileSystem.hpp"
+﻿#include "Krystal.IO/VirtualFileSystem.hpp"
 #include "Krystal.IO/Backends/NativeFileBackend.hpp"
 #include "Krystal.IO/IStream.hpp"
 #include "Krystal.IO/Path.hpp"

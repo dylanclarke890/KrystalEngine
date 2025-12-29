@@ -1,4 +1,4 @@
-#include "Krystal.UI/Layout/Api/NodeStyle.hpp"
+﻿#include "Krystal.UI/Layout/Api/NodeStyle.hpp"
 #include "Krystal.UI/Layout/Node/Node.hpp"
 #include "Krystal.UI/Styles/Style.hpp"
 

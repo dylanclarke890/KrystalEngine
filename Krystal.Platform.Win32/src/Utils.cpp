@@ -1,4 +1,4 @@
-#include "Krystal.Platform.Win32/Utils.hpp"
+﻿#include "Krystal.Platform.Win32/Utils.hpp"
 
 #ifndef WIN32_LEAN_AND_MEAN
   #define WIN32_LEAN_AND_MEAN

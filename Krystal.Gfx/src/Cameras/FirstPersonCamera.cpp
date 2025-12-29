@@ -1,4 +1,4 @@
-#include "Krystal.Gfx/Cameras/FirstPersonCamera.hpp"
+﻿#include "Krystal.Gfx/Cameras/FirstPersonCamera.hpp"
 
 #include "Krystal.Maths/Clamp.hpp"
 #include "Krystal.Maths/Convert.hpp"

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #ifndef KRYS_ENABLE_PROFILING
   #define KRYS_ENABLE_PROFILING

@@ -1,4 +1,4 @@
-#include <cmath>
+﻿#include <cmath>
 
 #include "Krystal.Lib/ComparisonHelpers.hpp"
 #include "Krystal.UI/Layout/Node/LayoutResults.hpp"

@@ -1,4 +1,4 @@
-#include "Krystal.Maths/MortonCodes.hpp"
+﻿#include "Krystal.Maths/MortonCodes.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

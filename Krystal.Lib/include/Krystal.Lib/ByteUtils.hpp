@@ -25,7 +25,7 @@ namespace Krys
     constexpr static void ForEachNBytes(Span<const byte> bytes, TFunc &&func) noexcept
     {
       size_t totalBytes = bytes.size();
-      size_t offset = 0;
+      size_t offset = 0uz;
       while (offset < totalBytes)
       {
         size_t chunkSize = std::min(N, totalBytes - offset);

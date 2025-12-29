@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Maths/Vector.hpp"
 #include "Krystal.Serialisation/Builtins.hpp"

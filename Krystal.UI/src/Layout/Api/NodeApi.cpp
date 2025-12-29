@@ -1,4 +1,4 @@
-#include "Krystal.UI/Layout/Algorithm/Cache.hpp"
+﻿#include "Krystal.UI/Layout/Algorithm/Cache.hpp"
 #include "Krystal.UI/Layout/Algorithm/CalculateLayout.hpp"
 #include "Krystal.UI/Layout/Api/Forward.hpp"
 #include "Krystal.UI/Layout/Api/Node.hpp"

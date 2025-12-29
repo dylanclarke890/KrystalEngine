@@ -1,4 +1,4 @@
-#include "Krystal.UI/Layout/Api/Config.hpp"
+﻿#include "Krystal.UI/Layout/Api/Config.hpp"
 #include "Krystal.UI/Layout/Config/Config.hpp"
 #include <cassert>
 

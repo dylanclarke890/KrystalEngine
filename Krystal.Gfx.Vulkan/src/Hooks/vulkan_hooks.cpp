@@ -1,4 +1,4 @@
-#include "Krystal.Gfx.Vulkan/Hooks/vulkan_hooks.hpp"
+﻿#include "Krystal.Gfx.Vulkan/Hooks/vulkan_hooks.hpp"
 
 namespace Krys::Gfx::Vulkan::Hooks
 {

@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Lib/ComparisonHelpers.hpp"
 #include <limits>

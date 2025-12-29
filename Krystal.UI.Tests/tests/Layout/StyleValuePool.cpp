@@ -1,4 +1,4 @@
-#include "Krystal.UI/Styles/Values/StyleValuePool.hpp"
+﻿#include "Krystal.UI/Styles/Values/StyleValuePool.hpp"
 #include "Krystal.UI/Layout/LayoutEngine.hpp"
 #include <catch_all.hpp>
 

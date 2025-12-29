@@ -1,4 +1,4 @@
-#include "Krystal.UI/Layout/Algorithm/PixelGrid.hpp"
+﻿#include "Krystal.UI/Layout/Algorithm/PixelGrid.hpp"
 #include "Krystal.Lib/ComparisonHelpers.hpp"
 
 namespace Krys::UI

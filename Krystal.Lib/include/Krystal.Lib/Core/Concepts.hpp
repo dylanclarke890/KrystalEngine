@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include <concepts>
+#include <type_traits>
 
 namespace Krys
 {
@@ -69,9 +70,6 @@ namespace Krys
   concept IsEnum = std::is_enum_v<T>;
 
   template <typename T>
-  concept IsScopedEnum = std::is_scoped_enum_v<T>;
-
-  template <typename T>
   concept IsArray = std::is_array_v<T>;
 
   template <typename T>
@@ -91,7 +89,7 @@ namespace Krys
   concept LessThanComparable = requires(T a, T b) {
     { a < b } -> std::convertible_to<bool>;
   };
-  
+
   template <typename T>
   concept GreaterThanComparable = requires(T a, T b) {
     { a > b } -> std::convertible_to<bool>;

@@ -1,4 +1,4 @@
-#include <catch_all.hpp>
+﻿#include <catch_all.hpp>
 
 int main(int argc, char* argv[])
 {

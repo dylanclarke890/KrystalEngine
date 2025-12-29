@@ -1,4 +1,4 @@
-#include "Krystal.Maths/Swizzle.hpp"
+﻿#include "Krystal.Maths/Swizzle.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

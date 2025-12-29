@@ -1,4 +1,4 @@
-#include "Krystal.Platform/Platform.hpp"
+﻿#include "Krystal.Platform/Platform.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include <algorithm>
 #include <cassert>

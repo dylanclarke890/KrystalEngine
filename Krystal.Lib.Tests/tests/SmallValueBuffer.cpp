@@ -1,4 +1,4 @@
-#include "Krystal.Lib/SmallValueBuffer.hpp"
+﻿#include "Krystal.Lib/SmallValueBuffer.hpp"
 #include <array>
 #include <catch_all.hpp>
 

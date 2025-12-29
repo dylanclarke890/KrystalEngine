@@ -1,8 +1,10 @@
 ﻿#include "Krystal.Text/Unicode.hpp"
 #include <catch_all.hpp>
+#include <bit>
 
 namespace Krys::Tests
 {
+
   TEST_CASE("Unicode(IsValidCodepoint)", "[Unicode]")
   {
     REQUIRE(Unicode::IsValidCodepoint(0x0000u) == true);    // Valid BMP codepoint

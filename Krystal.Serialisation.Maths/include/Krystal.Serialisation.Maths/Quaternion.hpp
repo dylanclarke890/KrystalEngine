@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Maths/Quaternion.hpp"
 #include "Krystal.Serialisation/Builtins.hpp"

@@ -33,6 +33,9 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Parser\EncodingSniffer.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Parser\ParserUtils.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\placeholder.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

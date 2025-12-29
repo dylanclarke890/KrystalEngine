@@ -1,4 +1,4 @@
-#include "Krystal.Maths/Interpolate.hpp"
+﻿#include "Krystal.Maths/Interpolate.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

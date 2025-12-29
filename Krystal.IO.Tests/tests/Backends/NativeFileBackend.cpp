@@ -1,4 +1,4 @@
-#include "Krystal.IO/Backends/NativeFileBackend.hpp"
+﻿#include "Krystal.IO/Backends/NativeFileBackend.hpp"
 #include "Krystal.IO/Common.hpp"
 #include "Krystal.IO/Path.hpp"
 #include <catch_all.hpp>

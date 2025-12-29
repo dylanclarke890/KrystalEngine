@@ -1,4 +1,4 @@
-#include "Krystal.Maths/Convert.hpp"
+﻿#include "Krystal.Maths/Convert.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

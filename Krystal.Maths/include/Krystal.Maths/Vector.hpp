@@ -190,7 +190,7 @@ namespace Krys::Maths
     {
     }
 
-    template <Number<T> U>
+    template <Number U>
     constexpr Vector(const Vector<U, 3> &other) noexcept
         : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), z(static_cast<T>(other.z))
     {

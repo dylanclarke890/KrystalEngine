@@ -1,4 +1,4 @@
-#include "Krystal.UI/Layout/Algorithm/Cache.hpp"
+﻿#include "Krystal.UI/Layout/Algorithm/Cache.hpp"
 #include "Krystal.Lib/ComparisonHelpers.hpp"
 #include "Krystal.UI/Layout/Algorithm/PixelGrid.hpp"
 
