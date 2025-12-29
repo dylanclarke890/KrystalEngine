@@ -87,8 +87,8 @@ namespace Krys::HTML::DOM
     {
       // case-insensitive "meta" + space or /
       return bytes[i + 0] == byte {'<'} && ASCII::ToLower(bytes[i + 1]) == byte {'m'}
-             && ASCII::ToLower(bytes[i + 1]) == byte {'e'} && ASCII::ToLower(bytes[i + 1]) == byte {'t'}
-             && ASCII::ToLower(bytes[i + 1]) == byte {'a'}
+             && ASCII::ToLower(bytes[i + 2]) == byte {'e'} && ASCII::ToLower(bytes[i + 3]) == byte {'t'}
+             && ASCII::ToLower(bytes[i + 4]) == byte {'a'}
              && (ASCII::IsWhiteSpace(bytes[i + 5]) || bytes[i + 5] == byte {'/'});
     }
 
@@ -213,8 +213,7 @@ namespace Krys::HTML::DOM
       utf8_string name;
       utf8_string value;
 
-      // skip to the start of the name
-      while (!ASCII::IsAlpha(bytes[i]))
+      for (; i < bytes.size() && !ASCII::IsAlpha(bytes[i]); i++)
       {
         // Tag closed before we saw name
         if (bytes[i] == byte {'>'})
@@ -222,8 +221,11 @@ namespace Krys::HTML::DOM
           i++;
           return {name, value};
         }
+      }
 
-        i++; // skip whitespace or other characters
+      if (i >= bytes.size())
+      {
+        return {name, value};
       }
 
       // build up the name
@@ -231,9 +233,13 @@ namespace Krys::HTML::DOM
       {
         name += static_cast<char8>(ASCII::ToLower(bytes[i]));
         i++;
-      } while (ASCII::IsAlpha(bytes[i]));
+      } while (i < bytes.size() && ASCII::IsAlpha(bytes[i]));
 
       ASCII::SkipWhiteSpace(bytes, i);
+      if (i >= bytes.size())
+      {
+        return {name, value};
+      }
 
       // return early if no '=' follows or tag closed
       if (bytes[i] != byte {'='} || bytes[i] == byte {'/'} || bytes[i] == byte {'>'})
@@ -243,28 +249,31 @@ namespace Krys::HTML::DOM
       i++;
 
       ASCII::SkipWhiteSpace(bytes, i);
+      if (i >= bytes.size() || bytes[i] == byte {'>'})
+      {
+        return {name, value};
+      }
 
       if (ASCII::IsQuote(bytes[i]))
       {
         byte closeQuote = bytes[i];
-        for (i++; i < bytes.size(); i++)
-        {
-          if (bytes[i] == closeQuote)
-          {
-            i++;
-            return {name, value};
-          }
 
-          if (ASCII::IsAlpha(bytes[i]))
-          {
-            value += static_cast<char8>(ASCII::ToLower(bytes[i]));
-          }
+        for (i++; i < bytes.size() && (ASCII::IsAlphaNumeric(bytes[i]) || bytes[i] == byte {'-'}); i++)
+        {
+          value += static_cast<char8>(ASCII::ToLower(bytes[i]));
         }
+
+        if (i < bytes.size() && bytes[i] == closeQuote)
+        {
+          i++;
+        }
+
+        return {name, value};
       }
 
       for (; i < bytes.size(); i++)
       {
-        if (bytes[i] == byte {'>'})
+        if (ASCII::IsWhiteSpace(bytes[i]) || bytes[i] == byte {'>'})
         {
           return {name, value};
         }
@@ -273,21 +282,9 @@ namespace Krys::HTML::DOM
         {
           value += static_cast<char8>(ASCII::ToLower(bytes[i]));
         }
-
-        for (i++; i < bytes.size(); i++)
-        {
-          if (ASCII::IsWhiteSpace(bytes[i]) || bytes[i] == byte {'>'})
-          {
-            return {name, value};
-          }
-
-          if (ASCII::IsAlpha(bytes[i]))
-          {
-            value += static_cast<char8>(ASCII::ToLower(bytes[i]));
-          }
-        }
       }
-      return {u8"", u8""};
+
+      return {name, value};
     }
 
     KRYS_NODISCARD static utf8_string

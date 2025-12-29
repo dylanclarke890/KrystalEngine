@@ -32,6 +32,15 @@ namespace Krys::Tests
     }
   }
 
+  TEST_CASE("ASCII(IsAlphaNumeric)", "[ASCII]")
+  {
+    for (char8 ch = 0; ch < 128; ch++)
+    {
+      bool expected = (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9');
+      REQUIRE(ASCII::IsAlphaNumeric(ch) == expected);
+    }
+  }
+
   TEST_CASE("ASCII(IsQuote)", "[ASCII]")
   {
     REQUIRE(ASCII::IsQuote('\'') == true);

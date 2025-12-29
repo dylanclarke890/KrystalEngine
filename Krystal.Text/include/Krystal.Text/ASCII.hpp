@@ -41,6 +41,14 @@ namespace Krys
       return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
     }
 
+    /// @brief Determines whether 'ch' is a alphanumeric character.
+    template <IsCharacter T>
+    KRYS_NODISCARD constexpr static bool IsAlphaNumeric(T ch) noexcept
+    {
+      uint32 c = static_cast<uint32>(ch);
+      return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9');
+    }
+
     /// @brief Determines whether 'ch' is a single or double quote character.
     template <IsCharacter T>
     KRYS_NODISCARD constexpr static bool IsQuote(T ch) noexcept
