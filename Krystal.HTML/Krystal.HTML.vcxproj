@@ -31,7 +31,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML\DOM\Parser\EncodingSniffer.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Parser\InsertionMode.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Parser\ParserUtils.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Parser\Tokenizer.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Parser\TokenizerState.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\placeholder.cpp" />
