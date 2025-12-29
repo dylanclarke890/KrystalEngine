@@ -36,5 +36,11 @@
     <ClCompile Include="tests\Unicode.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
+    <ClCompile Include="tests\LineEndings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\Encodings\ByteOrderMark.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

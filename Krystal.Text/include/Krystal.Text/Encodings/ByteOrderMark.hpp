@@ -2,6 +2,7 @@
 
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
+#include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
@@ -81,7 +82,7 @@ namespace Krys
     }
 
   private:
-    KRYS_NODISCARD static bool CompareBytes(Span<const byte> bytes, Span<const byte> bom) noexcept
+    KRYS_NODISCARD constexpr static bool CompareBytes(Span<const byte> bytes, Span<const byte> bom) noexcept
     {
       if (bytes.size() < bom.size())
       {

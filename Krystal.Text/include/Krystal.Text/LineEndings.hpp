@@ -41,6 +41,7 @@ namespace Krys
       }
 
       bytes.resize(outputIndex);
+      return bytes;
     }
 
     /// @brief Normalizes line endings in the given byte stream to CRLF.
