@@ -59,7 +59,7 @@ namespace Krys::Gfx
     Maths::Vec2 UVMax;       // (u1, v1)
   };
 
-  using CharacterMap = Map<UnicodeCodepoint, Character, StronglyTypedNumberHasher<UnicodeCodepoint>>;
+  using CharacterMap = Map<Rune, Character, StronglyTypedNumberHasher<Rune>>;
 
   struct FontMetrics
   {

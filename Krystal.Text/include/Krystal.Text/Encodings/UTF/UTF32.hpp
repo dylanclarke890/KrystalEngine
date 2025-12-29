@@ -24,7 +24,7 @@ namespace Krys
           .MIBenum = MIBenum {1'018u},
           .Win32CodePage = Win32CodePage {12'001u},
           .IsSingleByte = IsSingleByteEncoding {false},
-          .ByteOrderMark = {UnicodeCodepoint(0x00'00'FF'FEu), 4u},
+          .ByteOrderMark = {Rune(0x00'00'FF'FEu), 4u},
         };
 
         return info;
@@ -37,7 +37,7 @@ namespace Krys
           .MIBenum = MIBenum {1'019u},
           .Win32CodePage = Win32CodePage {12'000u},
           .IsSingleByte = IsSingleByteEncoding {false},
-          .ByteOrderMark = {UnicodeCodepoint(0xFE'FF'00'00u), 4u},
+          .ByteOrderMark = {Rune(0xFE'FF'00'00u), 4u},
         };
 
         return info;
@@ -74,7 +74,7 @@ namespace Krys
     {
       Reserve(out, characters.size() * 4u);
 
-      const auto EncodeUTF32 = [&](UnicodeCodepoint codepoint, bool wasInvalid) noexcept
+      const auto EncodeUTF32 = [&](Rune codepoint, bool wasInvalid) noexcept
       {
         if (wasInvalid)
         {
@@ -95,12 +95,10 @@ namespace Krys
 
       const auto EncodeCodepoint = [&](FixedSpan<const byte, 4u> byteSpan) noexcept
       {
-        auto codepoint =
-          UnicodeCodepoint(ByteUtils::AsNumeric<Endianness, Endian::System, uint32>(byteSpan.data()));
-
+        uint32 codepoint = ByteUtils::AsNumeric<Endianness, Endian::System, uint32>(byteSpan.data());
         if (Unicode::IsValidCodepoint(codepoint))
         {
-          Unicode::CodepointToUTF8(codepoint, out);
+          Unicode::ToUTF8(Rune(codepoint), out);
         }
         else
         {

@@ -50,8 +50,8 @@ namespace Krys
     IsSingleByteEncoding IsSingleByte = IsSingleByteEncoding {false};
 
     /// @brief The byte order mark of the encoding, if any. The first element is the byte order mark as a
-    /// UnicodeCodepoint. The second element is the length of the byte order mark in bytes.
-    Pair<UnicodeCodepoint, uint8> ByteOrderMark = {UnicodeCodepoint(0u), 0u};
+    /// Rune. The second element is the length of the byte order mark in bytes.
+    Pair<Rune, uint8> ByteOrderMark = {Rune(0u), 0u};
   };
 
   /// @brief Represents a character encoding.
@@ -107,6 +107,7 @@ namespace Krys
       size_t size = container.size();
       if (container.capacity() < size + required)
       {
+        size = std::max(1uz, size);
         while (size < required)
         {
           size *= 2;
@@ -120,6 +121,7 @@ namespace Krys
       size_t size = container.size();
       if (container.capacity() < size + required)
       {
+        size = std::max(1uz, size);
         while (size < required)
         {
           size *= 2;

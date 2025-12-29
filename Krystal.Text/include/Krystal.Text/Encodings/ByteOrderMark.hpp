@@ -26,7 +26,7 @@ namespace Krys
     static constexpr Array<byte, 4u> UTF32BE = {byte {0x00}, byte {0x00}, byte {0xFF}, byte {0xFE}};
     static constexpr Array<byte, 4u> UTF32LE = {byte {0xFE}, byte {0xFF}, byte {0x00}, byte {0x00}};
 
-    KRYS_NODISCARD static ByteOrderMark Detect(Span<const byte> bytes) noexcept
+    KRYS_NODISCARD constexpr static ByteOrderMark Detect(Span<const byte> bytes) noexcept
     {
       if (CompareBytes(bytes, UTF8))
       {
@@ -54,7 +54,7 @@ namespace Krys
       }
     }
 
-    KRYS_NODISCARD static utf8_string GetEncodingName(ByteOrderMark bom) noexcept
+    KRYS_NODISCARD constexpr static utf8_string GetEncodingName(ByteOrderMark bom) noexcept
     {
       switch (bom)
       {
@@ -67,7 +67,7 @@ namespace Krys
       }
     }
 
-    KRYS_NODISCARD static Span<const byte> GetBOMBytes(ByteOrderMark bom) noexcept
+    KRYS_NODISCARD constexpr static Span<const byte> GetBytes(ByteOrderMark bom) noexcept
     {
       switch (bom)
       {

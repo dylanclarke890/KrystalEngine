@@ -146,7 +146,9 @@
     <ClCompile Include="placeholder.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.Text\ASCII.hpp" />
     <ClInclude Include="include\Krystal.Text\Base64.hpp" />
+    <ClInclude Include="include\Krystal.Text\Concepts.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\EncodingFallback.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\EncodingConstants.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\ByteOrderMark.hpp" />
@@ -183,6 +185,7 @@
     <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1258.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows874.hpp" />
     <ClInclude Include="include\Krystal.Text\LineEndings.hpp" />
+    <ClInclude Include="include\Krystal.Text\Rune.hpp" />
     <ClInclude Include="include\Krystal.Text\Unicode.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\ASCII.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\Encoding.hpp" />

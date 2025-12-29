@@ -3,6 +3,7 @@
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/Types/Pair.hpp"
+#include "Krystal.Text/ASCII.hpp"
 #include "Krystal.Text/Encodings/Encoding.hpp"
 #include "Krystal.Text/Encodings/EncodingConstants.hpp"
 #include "Krystal.Text/Unicode.hpp"
@@ -15,10 +16,10 @@ namespace Krys
     class LookupTable
     {
     public:
-      using ASCIIToCodepointTable = Array<UnicodeCodepoint, 128u>;
-      using CodepointToASCIITable = Map<UnicodeCodepoint, uint8, StronglyTypedNumberHasher<UnicodeCodepoint>>;
+      using ASCIIToCodepointTable = Array<Rune, 128u>;
+      using CodepointToASCIITable = Map<Rune, uint8, StronglyTypedNumberHasher<Rune>>;
 
-      using MapItem = Pair<uint8, UnicodeCodepoint>;
+      using MapItem = Pair<uint8, Rune>;
       using Mapping = Array<MapItem, 128u>;
 
     private:
@@ -30,15 +31,15 @@ namespace Krys
       {
         for (const auto [ch, codepoint] : mappings)
         {
-          const auto index = ch - Unicode::ExtendedASCIIStart;
+          const auto index = ch - ASCII::ExtendedASCIIStart;
           _table[index] = codepoint;
           _reverseTable[codepoint] = ch;
         }
       }
 
-      KRYS_NODISCARD bool TryEncode(UnicodeCodepoint codepoint, uint8 &out) const noexcept
+      KRYS_NODISCARD bool TryEncode(Rune codepoint, uint8 &out) const noexcept
       {
-        if (Unicode::IsASCIICharacter(codepoint))
+        if (ASCII::IsASCII(codepoint))
         {
           out = static_cast<uint8>(codepoint);
           return true;
@@ -54,15 +55,15 @@ namespace Krys
         return false;
       }
 
-      KRYS_NODISCARD bool TryDecode(uint8 ch, UnicodeCodepoint &out) const noexcept
+      KRYS_NODISCARD bool TryDecode(uint8 ch, Rune &out) const noexcept
       {
-        if (Unicode::IsASCIICharacter(ch))
+        if (ASCII::IsASCII(ch))
         {
-          out = UnicodeCodepoint(ch);
+          out = Rune(ch);
           return true;
         }
 
-        const auto index = ch - Unicode::ExtendedASCIIStart;
+        const auto index = ch - ASCII::ExtendedASCIIStart;
         if (index >= _table.size() || _table[index] == 0u)
         {
           return false;
@@ -105,7 +106,7 @@ namespace Krys
       Reserve(out, characters.size());
 
       uint8 ch {0u};
-      const auto EncodeCodepoint = [&](UnicodeCodepoint codepoint, bool wasInvalid) noexcept
+      const auto EncodeCodepoint = [&](Rune codepoint, bool wasInvalid) noexcept
       {
         if (wasInvalid)
         {
@@ -130,7 +131,7 @@ namespace Krys
     {
       Reserve(out, bytes.size());
 
-      UnicodeCodepoint codepoint {0u};
+      Rune codepoint {0u};
       for (byte b : bytes)
       {
         if (_lookupTable.TryDecode(static_cast<uint8>(b), codepoint))

@@ -9,7 +9,7 @@ namespace Krys::Tests
   {
     UTF16EncodingLE encoding;
 
-    utf8_string text = u8"Hello, World! 123";
+    utf8_string text = u8"Hello, World! 世界";
     List<byte> encoded = encoding.Encode(text);
     utf8_string decoded = encoding.Decode(encoded);
     REQUIRE(decoded == text);
@@ -19,7 +19,7 @@ namespace Krys::Tests
   {
     UTF16EncodingLE encoding;
 
-    utf8_string text = u8"Hello, World! 123";
+    utf8_string text = u8"Hello, World! 世界";
     List<byte> encoded = encoding.Encode(text);
     utf8_string decoded = encoding.Decode(encoded);
     REQUIRE(decoded == text);

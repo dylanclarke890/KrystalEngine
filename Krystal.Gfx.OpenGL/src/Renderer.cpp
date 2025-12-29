@@ -357,17 +357,17 @@ namespace Krys::Gfx::OpenGL
     Buffer &buffer = buffers.Get(_glyphBuffer);
     Maths::Vec2 cursor = position + Maths::Vec2 {0.f, font.Metrics().Ascender * scale};
 
-    List<UnicodeCodepoint> codepoints = Unicode::GetCodepoints(text);
+    List<Rune> codepoints = Unicode::GetCodepoints(text);
     auto count = codepoints.size();
     while (count > 0)
     {
       auto batchSize = Maths::Min(count, static_cast<size_t>(GlyphVertex::BatchSize));
-      Span<const UnicodeCodepoint> batch(codepoints.data() + (codepoints.size() - count), batchSize);
+      Span<const Rune> batch(codepoints.data() + (codepoints.size() - count), batchSize);
       count -= batchSize;
 
       _glyphVertices.clear();
       const auto &characters = font.Characters();
-      for (const UnicodeCodepoint &c : batch)
+      for (const Rune &c : batch)
       {
         // Check for newline character
         if (c.Value == '\n')

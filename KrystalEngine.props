@@ -23,6 +23,7 @@
       <LanguageStandard>stdcpp23</LanguageStandard>
       <LanguageStandard_C>stdc17</LanguageStandard_C>
       <AdditionalOptions>/utf-8 /DKRYS_ENV_DEV=1 %(AdditionalOptions)</AdditionalOptions>
+      <ObjectFileName>$(IntDir)%(RelativeDir)%(Filename).obj</ObjectFileName>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>

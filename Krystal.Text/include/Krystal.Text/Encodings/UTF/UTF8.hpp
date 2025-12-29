@@ -20,7 +20,7 @@ namespace Krys
         .MIBenum = MIBenum {106u},
         .Win32CodePage = Win32CodePage {65'001u},
         .IsSingleByte = IsSingleByteEncoding {false},
-        .ByteOrderMark = {UnicodeCodepoint(0xEF'BB'BF'00u), 3u},
+        .ByteOrderMark = {Rune(0xEF'BB'BF'00u), 3u},
       };
 
       return info;
@@ -53,7 +53,7 @@ namespace Krys
     {
       Reserve(out, characters.size());
 
-      const auto EncodeCodepoint = [&](UnicodeCodepoint ch, bool wasInvalid) noexcept
+      const auto EncodeCodepoint = [&](Rune ch, bool wasInvalid) noexcept
       {
         if (wasInvalid)
         {
@@ -61,7 +61,7 @@ namespace Krys
         }
         else
         {
-          Unicode::CodepointToUTF8(ch, out);
+          Unicode::ToUTF8(ch, out);
         }
       };
 
@@ -72,7 +72,7 @@ namespace Krys
     {
       Reserve(out, bytes.size());
 
-      const auto DecodeCodepoint = [&](UnicodeCodepoint ch, bool wasInvalid) noexcept
+      const auto DecodeCodepoint = [&](Rune ch, bool wasInvalid) noexcept
       {
         if (wasInvalid)
         {
@@ -80,7 +80,7 @@ namespace Krys
         }
         else
         {
-          Unicode::CodepointToUTF8(ch, out);
+          Unicode::ToUTF8(ch, out);
         }
       };
 

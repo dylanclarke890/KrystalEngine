@@ -24,7 +24,7 @@ namespace Krys
           .MIBenum = MIBenum {1'013u},
           .Win32CodePage = Win32CodePage {1'201u},
           .IsSingleByte = IsSingleByteEncoding {false},
-          .ByteOrderMark = {UnicodeCodepoint(0xFE'FF'00'00u), 2u},
+          .ByteOrderMark = {Rune(0xFE'FF'00'00u), 2u},
         };
 
         return info;
@@ -38,7 +38,7 @@ namespace Krys
           .MIBenum = MIBenum {1'014u},
           .Win32CodePage = Win32CodePage {1'200u},
           .IsSingleByte = IsSingleByteEncoding {false},
-          .ByteOrderMark = {UnicodeCodepoint(0xFF'FE'00'00u), 2u},
+          .ByteOrderMark = {Rune(0xFF'FE'00'00u), 2u},
         };
 
         return info;
@@ -75,7 +75,7 @@ namespace Krys
     {
       Reserve(out, characters.size() * 2u);
 
-      const auto EncodeCodepoint = [&](UnicodeCodepoint codepoint, bool wasInvalid) noexcept
+      const auto EncodeCodepoint = [&](Rune codepoint, bool wasInvalid) noexcept
       {
         if (wasInvalid || Unicode::IsSurrogateCodepoint(codepoint))
         {
@@ -119,12 +119,12 @@ namespace Krys
         }
 
         auto *current = bytes.data() + static_cast<size_t>(it - bytes.begin());
-        UnicodeCodepoint first {ByteUtils::AsNumeric<Endianness, Endian::System, uint16>(current)};
+        uint16 first = ByteUtils::AsNumeric<Endianness, Endian::System, uint16>(current);
         it += 2u;
 
         if (!Unicode::IsSurrogateCodepoint(first))
         {
-          Unicode::CodepointToUTF8(first, out);
+          Unicode::ToUTF8(Rune(first), out);
           continue;
         }
 
@@ -132,17 +132,16 @@ namespace Krys
         {
           if (static_cast<size_t>(end - it) < 2u)
           {
+            // High surrogate not followed by low surrogate
             out += _decoderFallback.GetReplacementCharacter();
             break;
           }
 
-          uint16 second = ByteUtils::AsNumeric<Endianness, Endian::System, uint16>(current + 2u);
-          if (Unicode::IsLowSurrogate(UnicodeCodepoint(second)))
+          uint16 second = ByteUtils::AsNumeric<Endianness, Endian::System, uint16>(current);
+          if (Unicode::IsLowSurrogate(second))
           {
-            uint32 codepoint = 0x10000u + ((first.Value - Unicode::SurrogateHighStart) << 10u)
-                               + (second - Unicode::SurrogateLowStart);
-            Unicode::CodepointToUTF8(UnicodeCodepoint(codepoint), out);
-            it += 2u;
+            Unicode::ToUTF8(Unicode::ConvertSurrogatePair(first, second), out);
+            it += 2u; // Only advance if we consumed the low surrogate
           }
           else
           {

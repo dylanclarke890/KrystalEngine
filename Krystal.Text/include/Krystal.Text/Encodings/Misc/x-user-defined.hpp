@@ -4,6 +4,7 @@
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Text/ASCII.hpp"
 #include "Krystal.Text/Encodings/Encoding.hpp"
 #include "Krystal.Text/Unicode.hpp"
 
@@ -54,19 +55,19 @@ namespace Krys
     {
       Reserve(out, characters.size());
 
-      const auto EncodeCodepoint = [&](UnicodeCodepoint ch, bool wasInvalid) noexcept
+      const auto EncodeCodepoint = [&](Rune ch, bool wasInvalid) noexcept
       {
         if (wasInvalid || ch < XUserDefinedStart || ch > XUserDefinedEnd)
         {
           Encode(_encoderFallback.GetReplacementCharacter(), out);
         }
-        else if (Unicode::IsASCIICharacter(ch))
+        else if (ASCII::IsASCII(ch))
         {
           out.push_back(static_cast<byte>(ch.Value));
         }
         else
         {
-          out.push_back(byte {ch.Value - XUserDefinedStart + Unicode::ExtendedASCIIStart});
+          out.push_back(byte {ch.Value - XUserDefinedStart + ASCII::ExtendedASCIIStart});
         }
       };
 
@@ -79,14 +80,13 @@ namespace Krys
 
       for (byte b : bytes)
       {
-        if (Unicode::IsASCIICharacter(b))
+        if (ASCII::IsASCII(b))
         {
-          out.push_back(static_cast<char8_t>(b));
+          out.push_back(static_cast<char8>(b));
         }
         else
         {
-          UnicodeCodepoint codepoint {XUserDefinedStart
-                                      + (static_cast<uint8>(b) - Unicode::ExtendedASCIIStart)};
+          Rune codepoint {XUserDefinedStart + (static_cast<uint8>(b) - ASCII::ExtendedASCIIStart)};
         }
       }
     }

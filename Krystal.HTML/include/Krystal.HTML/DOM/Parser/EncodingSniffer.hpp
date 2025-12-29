@@ -1,11 +1,16 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/DOM/Parser/ParserUtils.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
+#include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
+#include "Krystal.Lib/Types/Nullable.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/Set.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
+#include "Krystal.Text/ASCII.hpp"
 #include "Krystal.Text/Encodings/ByteOrderMark.hpp"
 #include "Krystal.Text/Encodings/EncodingRegistry.hpp"
 #include "Krystal.Text/Unicode.hpp"
@@ -17,36 +22,313 @@ namespace Krys::HTML::DOM
     EncodingSniffer() = delete;
     ~EncodingSniffer() = delete;
 
-    using EncodingLabelMap = Map<utf8_string, List<utf8_string>>;
-
-    KRYS_NODISCARD static utf8_string Detect(Span<const byte> bytes, const utf8_string &transportEncoding,
-                                             const utf8_string &fallbackEncoding) noexcept
+    KRYS_NODISCARD static const Encoding *Detect(Span<const byte> bytes,
+                                                 const EncodingRegistry &encodingRegistry,
+                                                 const utf8_string &transportEncoding,
+                                                 const utf8_string &fallbackEncoding) noexcept
     {
-      utf8_string label = GetBOMEncoding(bytes);
-      if (!label.empty())
+      if (auto encoding = GetBOMEncoding(bytes, encodingRegistry); encoding != nullptr)
       {
-        return label;
+        return encoding;
       }
+
+      if (!transportEncoding.empty())
+      {
+        if (auto encoding = encodingRegistry.GetByLabel(transportEncoding); encoding != nullptr)
+        {
+          return encoding;
+        }
+      }
+
+      if (auto encoding = PrescanMetaCharset(bytes, encodingRegistry); encoding != nullptr)
+      {
+        return encoding;
+      }
+
+      return encodingRegistry.GetByLabel(fallbackEncoding);
     }
 
   private:
-    KRYS_NODISCARD constexpr static utf8_string GetBOMEncoding(Span<const byte> bytes) noexcept
+    struct AttributeResult
+    {
+      utf8_string Name;
+      utf8_string Value;
+    };
+
+    KRYS_NODISCARD static const Encoding *GetBOMEncoding(Span<const byte> bytes,
+                                                         const EncodingRegistry &encodingRegistry) noexcept
     {
       auto bom = ByteOrderMarkScanner::Detect(bytes);
       switch (bom)
       {
-        case ByteOrderMark::UTF8:
-        case ByteOrderMark::UTF16BE:
-        case ByteOrderMark::UTF16LE: return ByteOrderMarkScanner::GetEncodingName(bom);
+        case ByteOrderMark::UTF8:    return encodingRegistry.GetByLabel(u8"utf-8");
+        case ByteOrderMark::UTF16BE: return encodingRegistry.GetByLabel(u8"utf-16be");
+        case ByteOrderMark::UTF16LE: return encodingRegistry.GetByLabel(u8"utf-16le");
+      }
+
+      return nullptr;
+    }
+
+    /// @brief Checks if 'bytes' is the start of a comment ('<!--'), using 'i' as an offset.
+    KRYS_NODISCARD static bool IsCommentStart(Span<const byte> bytes, size_t i) noexcept
+    {
+      return bytes[i + 0] == byte {'<'} && bytes[i + 1] == byte {'!'} && bytes[i + 2] == byte {'-'}
+             && bytes[i + 3] == byte {'-'};
+    }
+
+    /// @brief Checks if 'bytes' is the end of a comment ('-->'), using 'i' as an offset.
+    KRYS_NODISCARD static bool IsCommentEnd(Span<const byte> bytes, size_t i) noexcept
+    {
+      return bytes[i - 2] == byte {'-'} && bytes[i - 1] == byte {'-'} && bytes[i - 0] == byte {'>'};
+    }
+
+    /// @brief Checks if 'bytes' is the end of a meta tag ('<meta( |/)'), using 'i' as an offset.
+    KRYS_NODISCARD static bool IsMetaTagStart(Span<const byte> bytes, size_t i) noexcept
+    {
+      // case-insensitive "meta" + space or /
+      return bytes[i + 0] == byte {'<'} && ASCII::ToLower(bytes[i + 1]) == byte {'m'}
+             && ASCII::ToLower(bytes[i + 1]) == byte {'e'} && ASCII::ToLower(bytes[i + 1]) == byte {'t'}
+             && ASCII::ToLower(bytes[i + 1]) == byte {'a'}
+             && (ASCII::IsWhiteSpace(bytes[i + 5]) || bytes[i + 5] == byte {'/'});
+    }
+
+    KRYS_NODISCARD static const Encoding *
+      PrescanMetaCharset(Span<const byte> bytes, const EncodingRegistry &encodingRegistry) noexcept
+    {
+      for (size_t i = 0; i < bytes.size(); i++)
+      {
+        // Skip comments
+        if (IsCommentStart(bytes, i))
+        {
+          i += 4;
+
+          while (i < bytes.size() && !IsCommentEnd(bytes, i))
+          {
+            i++;
+          }
+          i += 1; // Move past '>'
+          continue;
+        }
+
+        // Try and parse encoding from meta tag.
+        if (IsMetaTagStart(bytes, i))
+        {
+          i += 6;
+
+          bool gotPragma = false;
+          Nullable<bool> needPragma;
+          utf8_string charset;
+
+          AttributeResult attribute;
+          Set<utf8_string> attributeList;
+          do
+          {
+            attribute = GetAttribute(bytes, i);
+            if (attribute.Name.empty() || attributeList.contains(attribute.Name))
+            {
+              continue;
+            }
+
+            attributeList.insert(attribute.Name);
+            if (attribute.Name == u8"http-equiv")
+            {
+              if (!gotPragma)
+              {
+                gotPragma = attribute.Value == u8"content-type";
+              }
+            }
+            else if (attribute.Name == u8"content")
+            {
+              if (!charset.empty())
+              {
+                charset = ExtractCharacterEncodingFromMeta(attribute.Value, encodingRegistry);
+                if (!charset.empty())
+                {
+                  needPragma = true;
+                }
+              }
+            }
+            else if (attribute.Name == u8"charset")
+            {
+              charset = attribute.Value;
+              needPragma = false;
+            }
+
+          } while (!attribute.Name.empty());
+
+          if (!needPragma.has_value() || charset.empty() || (needPragma.value() && !gotPragma))
+          {
+            continue;
+          }
+
+          utf8_string canonicalName = encodingRegistry.LabelToName(charset);
+          if (canonicalName == u8"UTF-16LE" || canonicalName == u8"UTF-16BE")
+          {
+            canonicalName = u8"UTF-8";
+          }
+          else if (canonicalName == u8"x-user-defined")
+          {
+            canonicalName = u8"windows-1252";
+          }
+
+          return encodingRegistry.GetByLabel(canonicalName);
+        }
+
+        // We're reading some other element that's not a meta tag, skip it.
+        if (bytes[i] == byte {'<'})
+        {
+          if (ASCII::IsAlpha(bytes[i + 1]))
+          {
+            for (i += 2; i < bytes.size(); i++)
+            {
+              if (ASCII::IsWhiteSpace(bytes[i]) || bytes[i] == byte {'>'})
+              {
+                break;
+              }
+            }
+
+            AttributeResult attribute;
+            do
+            {
+              attribute = GetAttribute(bytes, i);
+            } while (!attribute.Name.empty());
+          }
+          else if (bytes[i + 1] == byte {'!'} || bytes[i + 1] == byte {'/'} || bytes[i + 1] == byte {'?'})
+          {
+            for (i += 2; i < bytes.size(); i++)
+            {
+              if (bytes[i] == byte {'>'})
+              {
+                break;
+              }
+            }
+          }
+        }
+      }
+      return nullptr;
+    }
+
+    KRYS_NODISCARD static AttributeResult GetAttribute(Span<const byte> bytes, size_t &i)
+    {
+      utf8_string name;
+      utf8_string value;
+
+      // skip to the start of the name
+      while (!ASCII::IsAlpha(bytes[i]))
+      {
+        // Tag closed before we saw name
+        if (bytes[i] == byte {'>'})
+        {
+          i++;
+          return {name, value};
+        }
+
+        i++; // skip whitespace or other characters
+      }
+
+      // build up the name
+      do
+      {
+        name += static_cast<char8>(ASCII::ToLower(bytes[i]));
+        i++;
+      } while (ASCII::IsAlpha(bytes[i]));
+
+      ASCII::SkipWhiteSpace(bytes, i);
+
+      // return early if no '=' follows or tag closed
+      if (bytes[i] != byte {'='} || bytes[i] == byte {'/'} || bytes[i] == byte {'>'})
+      {
+        return {name, value};
+      }
+      i++;
+
+      ASCII::SkipWhiteSpace(bytes, i);
+
+      if (ASCII::IsQuote(bytes[i]))
+      {
+        byte closeQuote = bytes[i];
+        for (i++; i < bytes.size(); i++)
+        {
+          if (bytes[i] == closeQuote)
+          {
+            i++;
+            return {name, value};
+          }
+
+          if (ASCII::IsAlpha(bytes[i]))
+          {
+            value += static_cast<char8>(ASCII::ToLower(bytes[i]));
+          }
+        }
+      }
+
+      for (; i < bytes.size(); i++)
+      {
+        if (bytes[i] == byte {'>'})
+        {
+          return {name, value};
+        }
+
+        if (ASCII::IsAlpha(bytes[i]))
+        {
+          value += static_cast<char8>(ASCII::ToLower(bytes[i]));
+        }
+
+        for (i++; i < bytes.size(); i++)
+        {
+          if (ASCII::IsWhiteSpace(bytes[i]) || bytes[i] == byte {'>'})
+          {
+            return {name, value};
+          }
+
+          if (ASCII::IsAlpha(bytes[i]))
+          {
+            value += static_cast<char8>(ASCII::ToLower(bytes[i]));
+          }
+        }
+      }
+      return {u8"", u8""};
+    }
+
+    KRYS_NODISCARD static utf8_string
+      ExtractCharacterEncodingFromMeta(const utf8_string &meta, const EncodingRegistry &encodingRegistry)
+    {
+      utf8_string data = ASCII::ToLower(meta);
+      const utf8_string charset = u8"charset";
+
+      size_t position = 0uz;
+      while (true)
+      {
+        size_t indexOfCharset = data.find(charset, position);
+        if (indexOfCharset == utf8_string::npos)
+        {
+          return u8"";
+        }
+
+        position += indexOfCharset + charset.size();
+        ASCII::SkipWhiteSpace(data, position);
+
+        if (data[position] != '=')
+        {
+          position--;
+          continue;
+        }
+
+        position++;
+        ASCII::SkipWhiteSpace(data, position);
+        break;
+      }
+
+      if (data[position] == '"' || data[position] == '\'')
+      {
+        const size_t closeQuote = data.find(data[position], position + 1);
+        if (closeQuote != utf8_string::npos)
+        {
+          return data.substr(position + 1, closeQuote);
+        }
       }
 
       return u8"";
-    }
-
-    KRYS_NODISCARD constexpr static bool IsWhitespace(UnicodeCodepoint ch) noexcept
-    {
-      return ch == UnicodeCharacter::Space || ch == UnicodeCharacter::Tab || ch == UnicodeCharacter::LF
-             || ch == UnicodeCharacter::CR;
     }
   };
 }

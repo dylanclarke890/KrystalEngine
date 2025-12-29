@@ -1,11 +1,13 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Detection/CPU.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Text/Encodings/Encoding.hpp"
 #include "Krystal.Text/Unicode.hpp"
+#include "Krystal.Text/ASCII.hpp"
 
 namespace Krys
 {
@@ -53,9 +55,9 @@ namespace Krys
     {
       Reserve(out, characters.size());
 
-      const auto EncodeCodepoint = [&](UnicodeCodepoint ch, bool wasInvalid) noexcept
+      const auto EncodeCodepoint = [&](Rune ch, bool wasInvalid) noexcept
       {
-        if (wasInvalid || !Unicode::IsASCIICharacter(ch))
+        if (wasInvalid || !ASCII::IsASCII(ch))
         {
           Encode(_encoderFallback.GetReplacementCharacter(), out);
         }
@@ -74,9 +76,9 @@ namespace Krys
 
       for (byte b : bytes)
       {
-        if (Unicode::IsASCIICharacter(b))
+        if (ASCII::IsASCII(b))
         {
-          out.push_back(static_cast<char8_t>(b));
+          out.push_back(static_cast<char8>(b));
         }
         else
         {

@@ -21,5 +21,8 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Parser\EncodingSniffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\Parser\ParserUtils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
