@@ -38,12 +38,6 @@
     <ClInclude Include="include\Krystal.Text\Unicode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingFallback.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingConstants.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows1252.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

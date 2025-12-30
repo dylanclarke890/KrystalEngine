@@ -29,9 +29,7 @@ namespace Krys
     static constexpr uint32 XUserDefinedEnd = 0xF7FFu;
 
   public:
-    XUserDefinedEncoding() noexcept
-        : Encoding(GetEncodingInfo(), EncoderFallback(EncodingReplacement_ASCII),
-                   DecoderFallback(EncodingReplacement_UTF))
+    XUserDefinedEncoding() noexcept : Encoding(GetEncodingInfo())
     {
     }
 
@@ -44,13 +42,6 @@ namespace Krys
       return bytes;
     }
 
-    KRYS_NODISCARD utf8_string Decode(Span<const byte> bytes) const noexcept override
-    {
-      utf8_string characters;
-      Decode(bytes, characters);
-      return characters;
-    }
-
     void Encode(utf8_stringview characters, List<byte> &out) const noexcept override
     {
       Reserve(out, characters.size());
@@ -59,7 +50,7 @@ namespace Krys
       {
         if (wasInvalid || ch < XUserDefinedStart || ch > XUserDefinedEnd)
         {
-          Encode(_encoderFallback.GetReplacementCharacter(), out);
+          out.push_back(static_cast<byte>(ASCII::ReplacementCharacter));
         }
         else if (ASCII::IsASCII(ch))
         {
@@ -72,6 +63,13 @@ namespace Krys
       };
 
       Unicode::ForEachCodepoint(characters, EncodeCodepoint);
+    }
+
+    KRYS_NODISCARD utf8_string Decode(Span<const byte> bytes) const noexcept override
+    {
+      utf8_string characters;
+      Decode(bytes, characters);
+      return characters;
     }
 
     void Decode(Span<const byte> bytes, utf8_string &out) const noexcept override

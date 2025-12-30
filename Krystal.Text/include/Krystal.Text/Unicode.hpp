@@ -27,6 +27,8 @@ namespace Krys
     constexpr static uint32 SurrogateLowStart = 0xDC00u;
     constexpr static uint32 SurrogateLowEnd = 0xDFFFu;
 
+    constexpr static Rune ReplacementCharacter = Rune(0xFFFDu);
+
     /// @brief Determines whether 'codepoint' is a valid Unicode scalar value.
     KRYS_NODISCARD constexpr static bool IsValidCodepoint(uint32 codepoint) noexcept
     {
@@ -199,19 +201,17 @@ namespace Krys
     template <typename T, ForEachCodepointCallable TFunc>
     constexpr static void ForEachCodepoint(T input, TFunc &&func) noexcept
     {
-      constexpr auto InvokeFunc = []<typename F>(F &&f, Rune codepoint, bool wasInvalid)
+      constexpr auto InvokeFunc = []<typename F>(F &&f, Rune codepoint, bool replaced)
       {
         if constexpr (Callable<F, Rune, bool>)
         {
-          f(codepoint, wasInvalid);
+          f(codepoint, replaced);
         }
         else
         {
           f(codepoint);
         }
       };
-
-      constexpr Rune ReplacementCharacter(0xFFFDu);
 
       auto it = input.begin();
       while (it != input.end())
@@ -242,13 +242,13 @@ namespace Krys
         }
         else
         {
-          InvokeFunc(func, ReplacementCharacter, true);
+          InvokeFunc(func, Rune(ReplacementCharacter), true);
           continue;
         }
 
         if (static_cast<size_t>(input.end() - it) < needed)
         {
-          InvokeFunc(func, ReplacementCharacter, true);
+          InvokeFunc(func, Rune(ReplacementCharacter), true);
           break;
         }
 
@@ -257,7 +257,7 @@ namespace Krys
           uint8 b = static_cast<uint8>(*it);
           if ((b & 0xC0) != 0x80)
           {
-            InvokeFunc(func, ReplacementCharacter, true);
+            InvokeFunc(func, Rune(ReplacementCharacter), true);
             it++; // Advance past the malformed byte
             continue;
           }
@@ -272,7 +272,7 @@ namespace Krys
         bool invalidFourByte = needed == 3u && codepoint < 0x10000u;
         if (!IsValidCodepoint(codepoint) || invalidTwoByte || invalidThreeByte || invalidFourByte)
         {
-          InvokeFunc(func, ReplacementCharacter, true);
+          InvokeFunc(func, Rune(ReplacementCharacter), true);
           continue;
         }
 

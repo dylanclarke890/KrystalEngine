@@ -4,6 +4,7 @@
 #include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Lib/Types/Stack.hpp"
 #include "Krystal.Serialisation/Archives/BaseArchive.hpp"
 #include "Krystal.Serialisation/Builtins.hpp"
@@ -57,10 +58,13 @@ namespace Krys::Serialisation
       struct StreamOutIt
       {
         IO::IStreamWriter *s;
+
         using iterator_category = std::output_iterator_tag;
+
         StreamOutIt &operator=(char c)
         {
-          s->Write(reinterpret_cast<const byte *>(&c), 1);
+          Array<byte, 1u> data {static_cast<byte>(c)};
+          s->Write(data);
           return *this;
         }
         StreamOutIt &operator*()
@@ -243,7 +247,7 @@ namespace Krys::Serialisation
 
   private:
     IO::IStreamReader &_stream;
-    List<char> _data;
+    List<byte> _data;
     rapidxml::xml_document<> _document;
     Stack<NodeMetadata> _nodes {};
 
@@ -253,11 +257,12 @@ namespace Krys::Serialisation
       // Read the entire stream into memory
       const auto size = static_cast<size_t>(_stream.Size());
       _data.resize(size + 1); // +1 for null terminator
-      _stream.Read(reinterpret_cast<byte *>(_data.data()), size);
-      _data[size] = '\0'; // Null-terminate the data
+
+      _stream.Read(Span(_data.data(), _data.size() - 1));
+      _data[size] = byte {'\0'}; // Null-terminate the data
 
       // Parse the XML data
-      _document.parse<0>(_data.data());
+      _document.parse<0>(reinterpret_cast<char *>(_data.data()));
       // Move to the root node
       auto *root = _document.first_node("Krystal");
       if (root == nullptr)

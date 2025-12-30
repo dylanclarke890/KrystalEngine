@@ -2,6 +2,8 @@
 
 #include "Krystal.IO/Streams/Stream.hpp"
 #include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 #include <cassert>
 
 namespace Krys::Serialisation
@@ -20,8 +22,8 @@ namespace Krys::Serialisation
 
     void Put(Ch c)
     {
-      byte b = static_cast<byte>(c);
-      _stream.Write(&b, 1);
+      Array<byte, 1> data = {static_cast<byte>(c)};
+      _stream.Write(data);
     }
 
     Ch *PutBegin()
@@ -65,10 +67,10 @@ namespace Krys::Serialisation
 
     Ch Take()
     {
-      byte next {};
-      if (_stream.Read(&next, 1) == 1)
+      Array<byte, 1> next {};
+      if (_stream.Read(next) == 1)
       {
-        return (Ch)next;
+        return static_cast<Ch>(next[0]);
       }
       return '\0';
     }

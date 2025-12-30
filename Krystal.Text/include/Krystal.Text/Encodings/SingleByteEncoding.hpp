@@ -5,7 +5,6 @@
 #include "Krystal.Lib/Types/Pair.hpp"
 #include "Krystal.Text/ASCII.hpp"
 #include "Krystal.Text/Encodings/Encoding.hpp"
-#include "Krystal.Text/Encodings/EncodingConstants.hpp"
 #include "Krystal.Text/Unicode.hpp"
 
 namespace Krys
@@ -78,49 +77,25 @@ namespace Krys
     LookupTable _lookupTable;
 
     SingleByteEncoding(const EncodingInfo &encodingInfo, const LookupTable &lookupTable) noexcept
-        : Encoding(encodingInfo, EncoderFallback(EncodingReplacement_ASCII),
-                   DecoderFallback(EncodingReplacement_UTF)),
-          _lookupTable(lookupTable)
+        : Encoding(encodingInfo), _lookupTable(lookupTable)
     {
     }
 
   public:
     ~SingleByteEncoding() noexcept override = default;
 
-    KRYS_NODISCARD List<byte> Encode(utf8_stringview characters) const noexcept override
-    {
-      List<byte> bytes;
-      Encode(characters, bytes);
-      return bytes;
-    }
-
-    KRYS_NODISCARD utf8_string Decode(Span<const byte> bytes) const noexcept override
-    {
-      utf8_string characters;
-      Decode(bytes, characters);
-      return characters;
-    }
-
     void Encode(utf8_stringview characters, List<byte> &out) const noexcept override
     {
-      Reserve(out, characters.size());
-
       uint8 ch {0u};
       const auto EncodeCodepoint = [&](Rune codepoint, bool wasInvalid) noexcept
       {
-        if (wasInvalid)
-        {
-          Encode(_encoderFallback.GetReplacementCharacter(), out);
-          return;
-        }
-
-        if (_lookupTable.TryEncode(codepoint, ch))
+        if (!wasInvalid && _lookupTable.TryEncode(codepoint, ch))
         {
           out.push_back(static_cast<byte>(ch));
         }
         else
         {
-          Encode(_encoderFallback.GetReplacementCharacter(), out);
+          out.push_back(static_cast<byte>(ASCII::ReplacementCharacter));
         }
       };
 
@@ -129,18 +104,16 @@ namespace Krys
 
     void Decode(Span<const byte> bytes, utf8_string &out) const noexcept override
     {
-      Reserve(out, bytes.size());
-
       Rune codepoint {0u};
       for (byte b : bytes)
       {
         if (_lookupTable.TryDecode(static_cast<uint8>(b), codepoint))
         {
-          Unicode::CodepointToUTF8(codepoint, out);
+          Unicode::ToUTF8(codepoint, out);
         }
         else
         {
-          out += _decoderFallback.GetReplacementCharacter();
+          Unicode::ToUTF8(Unicode::ReplacementCharacter, out);
         }
       }
     }

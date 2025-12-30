@@ -17,6 +17,10 @@ namespace Krys
 
     constexpr static uint8 MaxASCIIValue = 0x7Fu;
     constexpr static uint8 ExtendedASCIIStart = MaxASCIIValue + 1u;
+    constexpr static uint8 ExtendedASCIIEnd = 0xFFu;
+    constexpr static uint8 ControlCharacterEnd = 0x1Fu;
+
+    constexpr static uint8 ReplacementCharacter = '?';
 
     /// @brief Determines whether 'ch' is a valid ASCII character.
     template <IsCharacter T>

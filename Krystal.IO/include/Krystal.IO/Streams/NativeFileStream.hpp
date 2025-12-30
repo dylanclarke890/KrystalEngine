@@ -14,7 +14,7 @@ namespace Krys::IO
   {
     Path _path;
     std::ifstream _stream;
-    uint64 _size;
+    size_t _size;
     ReadFlags _flags;
 
   public:
@@ -39,7 +39,7 @@ namespace Krys::IO
     /// @param dst The destination buffer to read into.
     /// @param count The number of bytes to read.
     /// @return The number of bytes actually read from the stream.
-    uint64 Read(byte *dst, uint64 count) noexcept override;
+    size_t Read(Span<byte> destination) noexcept override;
 
     /// @brief Seeks to a specific position in the stream.
     /// @param offset The offset to seek to, relative to the origin.
@@ -52,10 +52,10 @@ namespace Krys::IO
     KRYS_NODISCARD bool Peek(byte &next) noexcept override;
 
     /// @brief Gets the total size of the stream in bytes, or 0 if the size is unknown.
-    KRYS_NODISCARD uint64 Size() const noexcept override;
+    KRYS_NODISCARD size_t Size() const noexcept override;
 
     /// @brief Gets the current position in the stream.
-    KRYS_NODISCARD uint64 Position() noexcept override;
+    KRYS_NODISCARD size_t Position() noexcept override;
 
     /// @brief Checks if the end of the stream has been reached.
     KRYS_NODISCARD bool EndOfStream() const noexcept override;
@@ -66,7 +66,7 @@ namespace Krys::IO
   {
     Path _path;
     std::ofstream _stream;
-    uint64 _size;
+    size_t _size;
     WriteFlags _flags;
 
   public:
@@ -91,7 +91,7 @@ namespace Krys::IO
     /// @param src The source buffer to write from.
     /// @param count The number of bytes to write.
     /// @returns True if the write operation was successful, false otherwise.
-    bool Write(const byte *src, uint64 count) noexcept override;
+    bool Write(Span<const byte> source) noexcept override;
 
     /// @brief Seeks to a specific position in the stream.
     /// @param offset The offset to seek to, relative to the origin.
@@ -100,10 +100,10 @@ namespace Krys::IO
     bool Seek(int64 offset, SeekOrigin origin) noexcept override;
 
     /// @brief Gets the total size of the stream in bytes, or 0 if the size is unknown.
-    KRYS_NODISCARD uint64 Size() const noexcept override;
+    KRYS_NODISCARD size_t Size() const noexcept override;
 
     /// @brief Gets the current position in the stream.
-    KRYS_NODISCARD uint64 Position() noexcept override;
+    KRYS_NODISCARD size_t Position() noexcept override;
 
     /// @brief Flushes the stream, ensuring all buffered data is written to the file.
     void Flush() noexcept override;

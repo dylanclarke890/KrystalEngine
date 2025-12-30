@@ -39,7 +39,7 @@ namespace Krys::IO
       }
 
       List<byte> buffer(size);
-      auto bytesRead = stream.Read(buffer.data(), size);
+      auto bytesRead = stream.Read(buffer);
 
       if (bytesRead != size)
       {
@@ -67,7 +67,7 @@ namespace Krys::IO
       }
 
       List<byte> buffer(size);
-      auto bytesRead = stream.Read(buffer.data(), size);
+      auto bytesRead = stream.Read(buffer);
 
       if (bytesRead != size)
       {

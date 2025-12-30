@@ -4,6 +4,7 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 
 namespace Krys::IO
 {
@@ -25,7 +26,7 @@ namespace Krys::IO
 
     /// @brief Reads 'count' bytes from the stream.
     /// @return The number of bytes actually read from the stream.
-    virtual uint64 Read(byte *dst, uint64 count) noexcept = 0;
+    virtual size_t Read(Span<byte> destination) noexcept = 0;
 
     /// @brief Seeks to a specific position in the stream.
     /// @return True if the seek operation was successful, false otherwise.
@@ -36,10 +37,10 @@ namespace Krys::IO
     KRYS_NODISCARD virtual bool Peek(byte &next) noexcept = 0;
 
     /// @brief Gets the total size of the stream in bytes, or 0 if the size is unknown.
-    KRYS_NODISCARD virtual uint64 Size() const noexcept = 0;
+    KRYS_NODISCARD virtual size_t Size() const noexcept = 0;
 
     /// @brief Gets the current position in the stream.
-    KRYS_NODISCARD virtual uint64 Position() noexcept = 0;
+    KRYS_NODISCARD virtual size_t Position() noexcept = 0;
 
     /// @brief Checks if the end of the stream has been reached.
     /// @return True if the end of the stream has been reached, false otherwise.
@@ -64,17 +65,17 @@ namespace Krys::IO
 
     /// @brief Writes bytes to the stream.
     /// @return True if the write operation was successful, false otherwise.
-    virtual bool Write(const byte *src, uint64 count) noexcept = 0;
+    virtual bool Write(Span<const byte> source) noexcept = 0;
 
     /// @brief Seeks to a specific position in the stream.
     /// @return True if the seek operation was successful, false otherwise.
     virtual bool Seek(int64 offset, SeekOrigin origin = SeekOrigin::Current) noexcept = 0;
 
     /// @brief Gets the size of the stream in bytes.
-    KRYS_NODISCARD virtual uint64 Size() const noexcept = 0;
+    KRYS_NODISCARD virtual size_t Size() const noexcept = 0;
 
     /// @brief Gets the current position in the stream.
-    KRYS_NODISCARD virtual uint64 Position() noexcept = 0;
+    KRYS_NODISCARD virtual size_t Position() noexcept = 0;
 
     /// @brief Flushes any buffered data to the underlying storage, if applicable.
     virtual void Flush() noexcept = 0;

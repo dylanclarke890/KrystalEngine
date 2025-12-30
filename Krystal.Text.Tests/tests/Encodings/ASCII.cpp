@@ -10,8 +10,13 @@ namespace Krys::Tests
     ASCIIEncoding encoding;
 
     utf8_string text = u8"Hello, World! 123";
-    List<byte> encoded = encoding.Encode(text);
-    utf8_string decoded = encoding.Decode(encoded);
+    
+    List<byte> encoded;
+    encoding.Encode(text, encoded);
+    
+    utf8_string decoded;
+    encoding.Decode(encoded, decoded);
+
     REQUIRE(decoded == text);
   }
 
@@ -20,8 +25,13 @@ namespace Krys::Tests
     ASCIIEncoding encoding;
 
     utf8_string text = u8"Hello, 世界!";
-    List<byte> encoded = encoding.Encode(text);
-    utf8_string decoded = encoding.Decode(encoded);
+
+    List<byte> encoded;
+    encoding.Encode(text, encoded);
+
+    utf8_string decoded;
+    encoding.Decode(encoded, decoded);
+
     REQUIRE(decoded == u8"Hello, ??!");
   }
 }

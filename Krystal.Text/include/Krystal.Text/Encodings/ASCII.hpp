@@ -5,9 +5,9 @@
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Text/ASCII.hpp"
 #include "Krystal.Text/Encodings/Encoding.hpp"
 #include "Krystal.Text/Unicode.hpp"
-#include "Krystal.Text/ASCII.hpp"
 
 namespace Krys
 {
@@ -29,37 +29,19 @@ namespace Krys
     }
 
   public:
-    ASCIIEncoding() noexcept
-        : Encoding(GetEncodingInfo(), EncoderFallback(EncodingReplacement_ASCII),
-                   DecoderFallback(EncodingReplacement_UTF))
+    ASCIIEncoding() noexcept : Encoding(GetEncodingInfo())
     {
     }
 
     virtual ~ASCIIEncoding() noexcept = default;
 
-    KRYS_NODISCARD List<byte> Encode(utf8_stringview characters) const noexcept override
-    {
-      List<byte> bytes;
-      Encode(characters, bytes);
-      return bytes;
-    }
-
-    KRYS_NODISCARD utf8_string Decode(Span<const byte> bytes) const noexcept override
-    {
-      utf8_string characters;
-      Decode(bytes, characters);
-      return characters;
-    }
-
     void Encode(utf8_stringview characters, List<byte> &out) const noexcept override
     {
-      Reserve(out, characters.size());
-
-      const auto EncodeCodepoint = [&](Rune ch, bool wasInvalid) noexcept
+      const auto EncodeCodepoint = [&](Rune ch, bool replaced) noexcept
       {
-        if (wasInvalid || !ASCII::IsASCII(ch))
+        if (replaced || !ASCII::IsASCII(ch))
         {
-          Encode(_encoderFallback.GetReplacementCharacter(), out);
+          out.push_back(static_cast<byte>(ASCII::ReplacementCharacter));
         }
         else
         {
@@ -72,8 +54,6 @@ namespace Krys
 
     void Decode(Span<const byte> bytes, utf8_string &out) const noexcept override
     {
-      Reserve(out, bytes.size());
-
       for (byte b : bytes)
       {
         if (ASCII::IsASCII(b))
@@ -82,7 +62,7 @@ namespace Krys
         }
         else
         {
-          out += _decoderFallback.GetReplacementCharacter();
+          out.push_back(static_cast<char8>(ASCII::ReplacementCharacter));
         }
       }
     }

@@ -1,4 +1,7 @@
 ﻿#include "Krystal.IO/ImageLoader.hpp"
+#include "Krystal.IO/Streams/Stream.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 #include <stb_image.h>
 
 namespace
@@ -7,7 +10,7 @@ namespace
   {
     auto *stream = static_cast<Krys::IO::IStreamReader *>(user);
     auto *byteData = static_cast<Krys::byte *>(static_cast<void *>(data));
-    return static_cast<int>(stream->Read(byteData, size));
+    return static_cast<int>(stream->Read(Krys::Span<Krys::byte>(byteData, size)));
   }
 
   void stbi_stream_skip(void *user, int n)

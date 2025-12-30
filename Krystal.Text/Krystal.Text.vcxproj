@@ -149,8 +149,6 @@
     <ClInclude Include="include\Krystal.Text\ASCII.hpp" />
     <ClInclude Include="include\Krystal.Text\Base64.hpp" />
     <ClInclude Include="include\Krystal.Text\Concepts.hpp" />
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingFallback.hpp" />
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingConstants.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\ByteOrderMark.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\EncodingRegistry.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\ISO-8859\ISO-8859-1.hpp" />
