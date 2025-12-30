@@ -12,8 +12,6 @@ namespace Krys::IO
     OpenAtEnd = 1 << 0 // Open the file and move the read position to the end
   };
 
-  KRYS_ENUM_FLAG_OPERATORS(ReadFlags)
-
   enum class WriteFlags : uint8
   {
     None = 0,
@@ -21,8 +19,6 @@ namespace Krys::IO
     Truncate = 1 << 1, // Truncate the file to zero length if it already exists
     OpenAtEnd = 1 << 2 // Open the file and move the write position to the end
   };
-
-  KRYS_ENUM_FLAG_OPERATORS(WriteFlags)
 
   /// @brief Specifies the reference point used to obtain the new position in a stream.
   enum class SeekOrigin : uint8
@@ -49,4 +45,13 @@ namespace Krys::IO
     /// @brief True if the entry is not writable.
     bool IsReadOnly = false;
   };
+}
+
+namespace Krys
+{
+  template <>
+  inline constexpr bool EnableEnumFlags<IO::ReadFlags> = true;
+
+  template <>
+  inline constexpr bool EnableEnumFlags<IO::WriteFlags> = true;
 }

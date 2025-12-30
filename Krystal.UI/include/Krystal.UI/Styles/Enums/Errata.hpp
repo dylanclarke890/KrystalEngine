@@ -8,12 +8,18 @@ namespace Krys::UI
   enum class Errata : uint8
   {
     None,
-    StretchFlexBasis,
-    AbsolutePositionWithoutInsetsExcludesPadding,
-    AbsolutePercentAgainstInnerSize,
-    All,
-    Classic,
+    StretchFlexBasis = 1 << 0,
+    AbsolutePositionWithoutInsetsExcludesPadding = 1 << 1,
+    AbsolutePercentAgainstInnerSize = 1 << 2,
+    All = StretchFlexBasis | AbsolutePositionWithoutInsetsExcludesPadding | AbsolutePercentAgainstInnerSize,
   };
+}
 
-  KRYS_ENUM_FLAG_OPERATORS(Errata)
+namespace Krys
+{
+  template <>
+  constexpr UnderlyingType<UI::Errata> OrdinalCount<UI::Errata> = 4;
+
+  template <>
+  inline constexpr bool EnableEnumFlags<UI::Errata> = true;
 }

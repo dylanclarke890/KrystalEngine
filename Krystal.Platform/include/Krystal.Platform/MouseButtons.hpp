@@ -24,6 +24,10 @@ namespace Krys::Platform
     Thumb2 = 16,
     UNKNOWN = 32
   };
+}
 
-  KRYS_ENUM_FLAG_OPERATORS(MouseButton)
+namespace Krys
+{
+  template <>
+  inline constexpr bool EnableEnumFlags<Platform::MouseButton> = true;
 }

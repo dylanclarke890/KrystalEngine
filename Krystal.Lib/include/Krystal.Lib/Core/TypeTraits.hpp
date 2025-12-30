@@ -1,6 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include <type_traits>
+#include <utility>
 
 namespace Krys
 {
@@ -23,6 +25,9 @@ namespace Krys
   using RemoveExtent = typename std::remove_extent<T>::type;
 
   template <typename T>
+  using UnderlyingType = typename std::underlying_type<T>::type;
+
+  template <typename T>
   constexpr auto Extent = std::extent<T>::value;
 
   template <typename T>
@@ -42,4 +47,10 @@ namespace Krys
 
   template <typename T>
   constexpr bool IsLValueRef = std::is_lvalue_reference<T>::value;
+
+  template <typename T>
+  KRYS_NODISCARD constexpr auto ToUnderlying(T value) noexcept
+  {
+    return std::to_underlying<T>(value);
+  }
 }

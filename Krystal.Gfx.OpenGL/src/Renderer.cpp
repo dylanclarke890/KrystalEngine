@@ -145,16 +145,16 @@ namespace Krys::Gfx::OpenGL
           const auto &cmd = reader.ReadCommand<Commands::ClearRenderTarget>();
 
           GLbitfield clearMask = MapBufferBitFlags(cmd.Clear);
-          if (!!(cmd.Clear & BufferBitFlags::Colour))
+          if (HasFlag(cmd.Clear, BufferBitFlags::Colour))
           {
             const auto &colour = cmd.Colour.ToVec4();
             glClearColor(colour.x, colour.y, colour.z, colour.w);
           }
-          if (!!(cmd.Clear & BufferBitFlags::Depth))
+          if (HasFlag(cmd.Clear, BufferBitFlags::Depth))
           {
             glClearDepthf(Maths::Clamp(cmd.Depth, 0.f, 1.f));
           }
-          if (!!(cmd.Clear & BufferBitFlags::Stencil))
+          if (HasFlag(cmd.Clear, BufferBitFlags::Stencil))
           {
             glClearStencil(static_cast<GLint>(cmd.Stencil));
           }

@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
@@ -9,17 +8,15 @@ namespace Krys::UI
   enum class ExperimentalFeature : uint8
   {
     None,
-    WebFlexBasis,
+    WebFlexBasis = 1 << 0,
   };
-
-  KRYS_ENUM_FLAG_OPERATORS(ExperimentalFeature)
 }
 
 namespace Krys
 {
   template <>
-  KRYS_NODISCARD constexpr uint32 OrdinalCount<UI::ExperimentalFeature>() noexcept
-  {
-    return 2;
-  }
+  constexpr UnderlyingType<UI::ExperimentalFeature> OrdinalCount<UI::ExperimentalFeature> = 2;
+
+  template <>
+  inline constexpr bool EnableEnumFlags<UI::ExperimentalFeature> = true;
 }

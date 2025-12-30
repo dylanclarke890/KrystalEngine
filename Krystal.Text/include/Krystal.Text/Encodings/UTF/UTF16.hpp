@@ -7,6 +7,7 @@
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Text/Encodings/Encoding.hpp"
+#include "Krystal.Text/Unicode.hpp"
 
 namespace Krys
 {
@@ -26,7 +27,7 @@ namespace Krys
           .MIBenum = MIBenum {1'013u},
           .Win32CodePage = Win32CodePage {1'201u},
           .IsSingleByte = IsSingleByteEncoding {false},
-          .ByteOrderMark = {{byte{0xFE},byte{0xFF}}, 2u},
+          .ByteOrderMark = {{byte {0xFE}, byte {0xFF}}, 2u},
         };
 
         return info;
@@ -40,7 +41,7 @@ namespace Krys
           .MIBenum = MIBenum {1'014u},
           .Win32CodePage = Win32CodePage {1'200u},
           .IsSingleByte = IsSingleByteEncoding {false},
-          .ByteOrderMark = {{byte{0xFF},byte{0xFE}}, 2u},
+          .ByteOrderMark = {{byte {0xFF}, byte {0xFE}}, 2u},
         };
 
         return info;
@@ -59,7 +60,6 @@ namespace Krys
 
     void Encode(utf8_stringview characters, List<byte> &out) const noexcept override
     {
-
       const auto EncodeCodepoint = [&](Rune codepoint, bool wasInvalid) noexcept
       {
         if (wasInvalid || Unicode::IsSurrogateCodepoint(codepoint))

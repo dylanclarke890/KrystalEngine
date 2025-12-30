@@ -8,7 +8,6 @@
 #include "Krystal.Lib/Types/Pair.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Lib/Types/StronglyTypedValue.hpp"
-#include "Krystal.Text/Unicode.hpp"
 
 namespace Krys
 {

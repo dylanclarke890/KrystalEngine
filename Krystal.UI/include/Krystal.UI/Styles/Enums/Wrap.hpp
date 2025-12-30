@@ -17,8 +17,5 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  KRYS_NODISCARD constexpr uint32 OrdinalCount<UI::Wrap>() noexcept
-  {
-    return 3;
-  }
+  constexpr UnderlyingType<UI::Wrap> OrdinalCount<UI::Wrap> = 3;
 }

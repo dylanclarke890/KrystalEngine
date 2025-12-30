@@ -2,30 +2,24 @@
 
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <bit>
 #include <utility>
 
 namespace Krys
 {
-  template <IsEnum TEnum>
-  KRYS_NODISCARD constexpr uint32 OrdinalCount() noexcept;
+  template <IsEnum E>
+  inline constexpr UnderlyingType<E> OrdinalCount = 0u;
 
   template <typename TEnum>
-  concept HasOrdinality = (OrdinalCount<TEnum>() > 0);
+  concept HasOrdinality = (OrdinalCount<TEnum> > 0u);
 
-  template <typename T>
-  KRYS_NODISCARD constexpr auto ToUnderlying(T value) noexcept
-  {
-    return std::to_underlying<T>(value);
-  }
+  template <typename E>
+  inline constexpr bool EnableEnumFlags = false;
 
-  /// @brief Count of bits needed to represent every ordinal.
-  template <HasOrdinality TEnum>
-  KRYS_NODISCARD constexpr uint32 BitCount() noexcept
-  {
-    return std::bit_width(static_cast<std::underlying_type_t<TEnum>>(OrdinalCount<TEnum>() - 1));
-  }
+  template <typename E>
+  concept IsFlagsEnum = IsEnum<E> && EnableEnumFlags<E>;
 
   /// @brief Convenience function to iterate through every value in a Krys enum as part of
   /// a range-based for loop.
@@ -34,16 +28,31 @@ namespace Krys
   {
     struct Iterator
     {
-      TEnum e {};
+      TEnum Value {};
 
       KRYS_NODISCARD constexpr TEnum operator*() const noexcept
       {
-        return e;
+        return Value;
       }
 
       constexpr Iterator &operator++() noexcept
       {
-        e = static_cast<TEnum>(std::to_underlying(e) + 1);
+        if constexpr (EnableEnumFlags<TEnum>)
+        {
+          if (ToUnderlying<TEnum>(Value) == 0u)
+          {
+            Value = static_cast<TEnum>(1u);
+          }
+          else
+          {
+            Value = static_cast<TEnum>(ToUnderlying<TEnum>(Value) << 1);
+          }
+        }
+        else
+        {
+          Value = static_cast<TEnum>(ToUnderlying<TEnum>(Value) + 1);
+        }
+
         return *this;
       }
 
@@ -59,53 +68,79 @@ namespace Krys
       }
       KRYS_NODISCARD constexpr Iterator end() const noexcept
       {
-        return Iterator {static_cast<TEnum>(OrdinalCount<TEnum>())};
+        return Iterator {static_cast<TEnum>(OrdinalCount<TEnum>)};
       }
     };
 
     return Range {};
   }
 
-/// @brief Defines bitwise operators for an enum class.
-/// @param EnumType The enum class to define the operators for.
-#define KRYS_ENUM_FLAG_OPERATORS(EnumType)                                                                   \
-  KRYS_NODISCARD constexpr inline EnumType operator|(EnumType a, EnumType b) noexcept                        \
-  {                                                                                                          \
-    return static_cast<EnumType>(ToUnderlying(a) | ToUnderlying(b));                                         \
-  }                                                                                                          \
-                                                                                                             \
-  KRYS_NODISCARD constexpr inline EnumType operator&(EnumType a, EnumType b) noexcept                        \
-  {                                                                                                          \
-    return static_cast<EnumType>(ToUnderlying(a) & ToUnderlying(b));                                         \
-  }                                                                                                          \
-                                                                                                             \
-  KRYS_NODISCARD constexpr inline EnumType operator^(EnumType a, EnumType b) noexcept                        \
-  {                                                                                                          \
-    return static_cast<EnumType>(ToUnderlying(a) ^ ToUnderlying(b));                                         \
-  }                                                                                                          \
-                                                                                                             \
-  KRYS_NODISCARD constexpr inline EnumType operator~(EnumType a) noexcept                                    \
-  {                                                                                                          \
-    return static_cast<EnumType>(~ToUnderlying(a));                                                          \
-  }                                                                                                          \
-                                                                                                             \
-  constexpr inline EnumType &operator|=(EnumType &a, EnumType b) noexcept                                    \
-  {                                                                                                          \
-    return a = a | b;                                                                                        \
-  }                                                                                                          \
-                                                                                                             \
-  constexpr inline EnumType &operator&=(EnumType &a, EnumType b) noexcept                                    \
-  {                                                                                                          \
-    return a = a & b;                                                                                        \
-  }                                                                                                          \
-                                                                                                             \
-  constexpr inline EnumType &operator^=(EnumType &a, EnumType b) noexcept                                    \
-  {                                                                                                          \
-    return a = a ^ b;                                                                                        \
-  }                                                                                                          \
-                                                                                                             \
-  KRYS_NODISCARD constexpr inline bool operator!(EnumType a) noexcept                                        \
-  {                                                                                                          \
-    return ToUnderlying(a) == 0;                                                                             \
+  /// @brief Count of bits needed to represent every ordinal.
+  template <HasOrdinality TEnum>
+  KRYS_NODISCARD constexpr uint32 BitCount() noexcept
+  {
+    return std::bit_width(static_cast<UnderlyingType<TEnum>>(OrdinalCount<TEnum> - 1u));
+  }
+
+  template <IsFlagsEnum TEnum>
+  constexpr TEnum operator|(TEnum lhs, TEnum rhs)
+  {
+    using U = UnderlyingType<TEnum>;
+    return static_cast<TEnum>(static_cast<U>(lhs) | static_cast<U>(rhs));
+  }
+
+  template <IsFlagsEnum TEnum>
+  constexpr TEnum &operator|=(TEnum &lhs, TEnum rhs)
+  {
+    lhs = lhs | rhs;
+    return lhs;
+  }
+
+  template <IsFlagsEnum TEnum>
+  constexpr TEnum operator&(TEnum lhs, TEnum rhs)
+  {
+    using U = UnderlyingType<TEnum>;
+    return static_cast<TEnum>(static_cast<U>(lhs) & static_cast<U>(rhs));
+  }
+
+  template <IsFlagsEnum TEnum>
+  constexpr TEnum &operator&=(TEnum &lhs, TEnum rhs)
+  {
+    lhs = lhs & rhs;
+    return lhs;
+  }
+
+  template <IsFlagsEnum TEnum>
+  constexpr TEnum operator~(TEnum value)
+  {
+    using U = UnderlyingType<TEnum>;
+    return static_cast<TEnum>(~static_cast<U>(value));
+  }
+
+  template <IsFlagsEnum TEnum>
+  constexpr TEnum operator^(TEnum lhs, TEnum rhs)
+  {
+    using U = UnderlyingType<TEnum>;
+    return static_cast<TEnum>(static_cast<U>(lhs) ^ static_cast<U>(rhs));
+  }
+
+  template <IsFlagsEnum TEnum>
+  constexpr TEnum &operator^=(TEnum &lhs, TEnum rhs)
+  {
+    lhs = lhs ^ rhs;
+    return lhs;
+  }
+
+  template <IsFlagsEnum TEnum>
+  KRYS_NODISCARD constexpr bool operator!(TEnum value) noexcept
+  {
+    return ToUnderlying<TEnum>(value) == 0;
+  }
+
+  template <IsFlagsEnum TEnum>
+  KRYS_NODISCARD constexpr bool HasFlag(TEnum value, TEnum flag) noexcept
+  {
+    using U = UnderlyingType<TEnum>;
+    return (static_cast<U>(value) & static_cast<U>(flag)) == static_cast<U>(flag);
   }
 }

@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.IO/Common.hpp"
-#include "Krystal.IO/Streams/Stream.hpp"
 #include "Krystal.IO/Path.hpp"
+#include "Krystal.IO/Streams/Stream.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
@@ -18,8 +18,6 @@ namespace Krys::IO
     Recursive = 1 << 0,      // Search recursively in subdirectories
     ExcludeReadOnly = 1 << 1 // Filter out read-only files
   };
-
-  KRYS_ENUM_FLAG_OPERATORS(FileSearchFlags)
 
   /// @brief Interface for file backend operations.
   class IFileBackend : NonCopyMovable<IFileBackend>
@@ -59,4 +57,10 @@ namespace Krys::IO
 
     KRYS_NODISCARD virtual const Path &Root() const noexcept = 0;
   };
+}
+
+namespace Krys
+{
+  template <>
+  inline constexpr bool EnableEnumFlags<IO::FileSearchFlags> = true;
 }

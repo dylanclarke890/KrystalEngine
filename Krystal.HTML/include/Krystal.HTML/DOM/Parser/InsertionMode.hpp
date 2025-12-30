@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
@@ -37,8 +36,5 @@ namespace Krys::HTML::DOM
 namespace Krys
 {
   template <>
-  KRYS_NODISCARD constexpr uint32 OrdinalCount<HTML::DOM::InsertionMode>() noexcept
-  {
-    return 23;
-  }
+  constexpr UnderlyingType<HTML::DOM::InsertionMode> OrdinalCount<HTML::DOM::InsertionMode> = 23;
 }

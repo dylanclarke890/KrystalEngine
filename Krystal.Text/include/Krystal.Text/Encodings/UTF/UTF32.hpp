@@ -7,6 +7,7 @@
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Text/Encodings/Encoding.hpp"
+#include "Krystal.Text/Unicode.hpp"
 
 namespace Krys
 {
