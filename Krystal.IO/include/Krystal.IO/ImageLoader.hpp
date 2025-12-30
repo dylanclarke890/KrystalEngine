@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.IO/Image.hpp"
-#include "Krystal.IO/IStream.hpp"
+#include "Krystal.IO/Streams/Stream.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Mixins/NonCopyMovable.hpp"

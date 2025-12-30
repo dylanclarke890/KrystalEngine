@@ -42,6 +42,12 @@ namespace Krys
   template <typename T>
   concept DefaultConstructible = std::is_default_constructible_v<T>;
 
+  template <typename T, class... Args>
+  concept ConstructibleFrom = std::constructible_from<T, Args...>;
+
+  template <typename T, class... Args>
+  concept NoThrowContructibleFrom = std::is_nothrow_constructible_v<T, Args...>;
+
   template <typename T>
   concept Destructible = std::is_destructible_v<T>;
 

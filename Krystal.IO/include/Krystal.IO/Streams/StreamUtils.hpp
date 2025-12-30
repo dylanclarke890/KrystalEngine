@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.IO/IStream.hpp"
+#include "Krystal.IO/Streams/Stream.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"

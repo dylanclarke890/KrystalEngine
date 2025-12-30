@@ -1,6 +1,6 @@
 ﻿#include "Krystal.IO/VirtualFileSystem.hpp"
 #include "Krystal.IO/IFileBackend.hpp"
-#include "Krystal.IO/IStream.hpp"
+#include "Krystal.IO/Streams/Stream.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Core/DebugBreak.hpp"
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"
