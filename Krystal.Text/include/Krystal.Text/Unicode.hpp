@@ -60,40 +60,18 @@ namespace Krys
     }
 
     /// @brief Converts a pair of UTF-16 surrogate code units to a Unicode codepoint.
-    KRYS_NODISCARD constexpr static Rune ConvertSurrogatePair(uint16 high, uint16 low) noexcept
+    KRYS_NODISCARD constexpr static void EncodeSurrogatePair(Rune character, uint16 &high,
+                                                             uint16 &low) noexcept
     {
-      return Rune(0x10000u + ((high - Unicode::SurrogateHighStart) << 10u)
-                  + (low - Unicode::SurrogateLowStart));
+      uint32 surrogate = character.Value - 0x10000;
+      high = static_cast<uint16>(SurrogateHighStart + (surrogate >> 10));
+      low = static_cast<uint16>(SurrogateLowStart + (surrogate & 0x3FF));
     }
 
-    /// @brief Encodes 'rune' into its UTF-8 representation and appends it to 'out'.
-    template <typename T>
-    constexpr static void ToUTF8(Rune rune, T &out) noexcept
+    /// @brief Converts a pair of UTF-16 surrogate code units to a Unicode codepoint.
+    KRYS_NODISCARD constexpr static Rune DecodeSurrogatePair(uint16 high, uint16 low) noexcept
     {
-      using ValueType = typename T::value_type;
-
-      if (ASCII::IsASCII(rune))
-      {
-        out.push_back(static_cast<ValueType>(rune.Value));
-      }
-      else if (rune <= 0x7FFu)
-      {
-        out.push_back(static_cast<ValueType>(0xC0 | (rune >> 6)));
-        out.push_back(static_cast<ValueType>(0x80 | (rune & 0x3F)));
-      }
-      else if (rune <= MaxBasicMultilingualPlaneValue)
-      {
-        out.push_back(static_cast<ValueType>(0xE0 | (rune >> 12)));
-        out.push_back(static_cast<ValueType>(0x80 | ((rune >> 6) & 0x3F)));
-        out.push_back(static_cast<ValueType>(0x80 | (rune & 0x3F)));
-      }
-      else if (rune <= MaxSupplementaryPlaneValue)
-      {
-        out.push_back(static_cast<ValueType>(0xF0 | (rune >> 18)));
-        out.push_back(static_cast<ValueType>(0x80 | ((rune >> 12) & 0x3F)));
-        out.push_back(static_cast<ValueType>(0x80 | ((rune >> 6) & 0x3F)));
-        out.push_back(static_cast<ValueType>(0x80 | (rune & 0x3F)));
-      }
+      return Rune(0x10000u + ((high - SurrogateHighStart) << 10u) + (low - SurrogateLowStart));
     }
 
     /// @brief Determines the number of bytes required to encode the given codepoint in UTF-8.
@@ -178,15 +156,6 @@ namespace Krys
       offset += needed + 1;
       out = Rune(codepoint);
       return true;
-    }
-
-    /// @brief Decodes a UTF-8 stream into a list of Unicode codepoints.
-    template <typename T>
-    KRYS_NODISCARD constexpr static List<Rune> GetCodepoints(T input) noexcept
-    {
-      List<Rune> codepoints;
-      GetCodepoints(input, codepoints);
-      return codepoints;
     }
 
     /// @brief Appends the Unicode codepoints from the given UTF-8 stream to the output list.

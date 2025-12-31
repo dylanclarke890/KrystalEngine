@@ -33,7 +33,4 @@ namespace Krys::Platform
 
   /// @brief Sleep for the specified number of milliseconds.
   void Sleep(uint32 milliseconds) noexcept;
-
-  /// @brief Converts a UTF-8 string to a wide string.
-  KRYS_NODISCARD wstring ToWideString(const string &utf8String) noexcept;
 }

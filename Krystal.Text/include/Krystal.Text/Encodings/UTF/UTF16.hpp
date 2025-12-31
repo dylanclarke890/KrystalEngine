@@ -15,8 +15,6 @@ namespace Krys
   class UTF16Encoding : public Encoding
   {
   private:
-    constexpr static utf8_stringview ReplacementCharacterStr = u8"\xFF\xFD";
-
     KRYS_NODISCARD static EncodingInfo GetEncodingInfo() noexcept
     {
       if constexpr (IsBigEndian)
@@ -58,36 +56,39 @@ namespace Krys
 
     virtual ~UTF16Encoding() noexcept = default;
 
-    void Encode(utf8_stringview characters, List<byte> &out) const noexcept override
+    void Encode(Span<const Rune> characters, List<byte> &out) const noexcept override
     {
-      const auto EncodeCodepoint = [&](Rune codepoint, bool wasInvalid) noexcept
+      for (Rune ch : characters)
       {
-        if (wasInvalid || Unicode::IsSurrogateCodepoint(codepoint))
+        if (Unicode::IsSurrogateCodepoint(static_cast<uint16>(ch)))
         {
-          Encode(ReplacementCharacterStr, out);
-          return;
-        }
-
-        if (Unicode::IsBasicMultilingualPlaneCodepoint(codepoint))
-        {
-          uint16 cu = static_cast<uint16>(codepoint.Value);
+          // Invalid codepoint, encode replacement character
+          uint16 cu = static_cast<uint16>(Unicode::ReplacementCharacter);
           ByteUtils::ToBytes<Endian::System, Endianness>(cu, out);
-          return;
+          continue;
         }
 
-        uint32 surrogate = codepoint.Value - 0x10000;
+        if (Unicode::IsBasicMultilingualPlaneCodepoint(ch))
+        {
+          uint16 cu = static_cast<uint16>(ch);
+          ByteUtils::ToBytes<Endian::System, Endianness>(cu, out);
+          continue;
+        }
 
-        uint16 high = Unicode::SurrogateHighStart + (surrogate >> 10);
+        uint16 high, low;
+        Unicode::EncodeSurrogatePair(ch, high, low);
+
         ByteUtils::ToBytes<Endian::System, Endianness>(high, out);
-
-        uint16 low = Unicode::SurrogateLowStart + (surrogate & 0x3FF);
         ByteUtils::ToBytes<Endian::System, Endianness>(low, out);
-      };
-
-      Unicode::ForEachCodepoint(characters, EncodeCodepoint);
+      }
     }
 
-    void Decode(Span<const byte> bytes, utf8_string &out) const noexcept
+    KRYS_NODISCARD virtual size_t GetMaxByteCount(size_t charCount) const noexcept
+    {
+      return charCount * 4u; // Up to 4 bytes per character in UTF-16
+    }
+
+    void Decode(Span<const byte> bytes, List<Rune> &out) const noexcept
     {
       auto it = bytes.begin();
       const auto end = bytes.end();
@@ -97,7 +98,7 @@ namespace Krys
         // Need at least one code unit
         if (static_cast<size_t>(end - it) < 2u)
         {
-          out += ReplacementCharacterStr;
+          out.push_back(Unicode::ReplacementCharacter);
           break;
         }
 
@@ -105,39 +106,42 @@ namespace Krys
         uint16 first = ByteUtils::AsNumeric<Endianness, Endian::System, uint16>(current);
         it += 2u;
 
-        if (!Unicode::IsSurrogateCodepoint(first))
+        if (Unicode::IsValidCodepoint(first))
         {
-          Unicode::ToUTF8(Rune(first), out);
+          out.push_back(Rune(first));
           continue;
         }
 
-        if (Unicode::IsHighSurrogate(first))
+        if (!Unicode::IsHighSurrogate(first)) // Lone low surrogate
         {
-          if (static_cast<size_t>(end - it) < 2u)
-          {
-            // High surrogate not followed by low surrogate
-            out += ReplacementCharacterStr;
-            break;
-          }
-
-          uint16 second = ByteUtils::AsNumeric<Endianness, Endian::System, uint16>(current);
-          if (Unicode::IsLowSurrogate(second))
-          {
-            Unicode::ToUTF8(Unicode::ConvertSurrogatePair(first, second), out);
-            it += 2u; // Only advance if we consumed the low surrogate
-          }
-          else
-          {
-            // High surrogate not followed by low surrogate
-            out += ReplacementCharacterStr;
-          }
-
+          out.push_back(Unicode::ReplacementCharacter);
           continue;
         }
 
-        // Lone low surrogate
-        out += ReplacementCharacterStr;
+        if (static_cast<size_t>(end - it) < 2u) // High surrogate not followed by low surrogate
+        {
+          out.push_back(Unicode::ReplacementCharacter); 
+          break;
+        }
+
+        uint16 second = ByteUtils::AsNumeric<Endianness, Endian::System, uint16>(current);
+        if (Unicode::IsLowSurrogate(second))
+        {
+          out.push_back(Unicode::DecodeSurrogatePair(first, second));
+          it += 2u; // Only advance now we've consumed the low surrogate
+        }
+        else
+        {
+          out.push_back(Unicode::ReplacementCharacter);
+        }
       }
+
+
+    }
+  
+    KRYS_NODISCARD size_t GetMaxCharCount(size_t byteCount) const noexcept override
+    {
+      return byteCount / 2u; // At least 2 bytes per character in UTF-16
     }
   };
 

@@ -1,58 +1,54 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Types/Pair.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
-#include "Krystal.Lib/Types/StronglyTypedValue.hpp"
+#include "Krystal.Text/Encodings/EncodingInfo.hpp"
 
 namespace Krys
 {
-  struct MIBenum : public StronglyTypedNumber<MIBenum, uint32>
+  enum class EncodingStatus
   {
-    using StronglyTypedNumber::StronglyTypedNumber;
+    Ok,
+    NeedMoreInput,
   };
 
-  struct Win32CodePage : public StronglyTypedNumber<Win32CodePage, uint32>
+  enum class EncodingErrorAction
   {
-    using StronglyTypedNumber::StronglyTypedNumber;
+    /// @brief Replace the invalid input with a replacement character.
+    Replace,
+
+    /// @brief Skip the invalid input without producing any output.
+    Skip,
   };
 
-  struct IsSingleByteEncoding : public StronglyTypedBool<IsSingleByteEncoding>
+  struct DecoderSettings
   {
-    using StronglyTypedBool::StronglyTypedBool;
+    /// @brief Action to take when an invalid byte sequence is encountered.
+    EncodingErrorAction InvalidByteSequence = EncodingErrorAction::Replace;
+
+    /// @brief Action to take when a surrogate codepoint is encountered.
+    EncodingErrorAction SurrogateCodepoint = EncodingErrorAction::Replace;
+
+    /// @brief Whether the input byte sequence may be prefixed with a byte order mark (BOM).
+    bool AllowByteOrderMark = true;
   };
 
-  /// @brief Contains information about an encoding.
-  struct EncodingInfo
+  struct EncoderSettings
   {
-    constexpr static MIBenum MIBenumUnknown = MIBenum {0u};
-    constexpr static Win32CodePage Win32CodePageUnknown = Win32CodePage {0u};
+    /// @brief Whether to emit a byte order mark (BOM) at the start of the encoded byte sequence.
+    bool EmitByteOrderMark = false;
 
-    /// @brief The IANA name of the encoding.
-    utf8_string Name;
-
-    /// @brief A list of aliases for the encoding.
-    List<utf8_string> Aliases;
-
-    /// @brief The MIB enum identifier of the encoding, or MIBenumUnknown if not applicable.
-    MIBenum MIBenum = MIBenumUnknown;
-
-    /// @brief The code page identifier of the encoding, or Win32CodePageUnknown if not applicable.
-    Win32CodePage Win32CodePage = Win32CodePageUnknown;
-
-    /// @brief Indicates whether the encoding uses single-byte characters.
-    IsSingleByteEncoding IsSingleByte = IsSingleByteEncoding {false};
-
-    /// @brief The byte order mark of the encoding, if any. The first element is the byte order mark as a
-    /// Rune. The second element is the length of the byte order mark in bytes.
-    Pair<Array<byte, 4u>, uint8> ByteOrderMark {{}, 0u};
+    /// @brief Action to take when a character cannot be represented in the target encoding.
+    EncodingErrorAction UnrepresentableCharacter = EncodingErrorAction::Replace;
   };
 
-  /// @brief Represents a character encoding.
+  /// @brief Represents a character encoding. Each encoding must implement methods for encoding and decoding
+  /// runes (Unicode codepoints) to and from byte sequences, as well as methods for determining the maximum
+  /// byte and character counts for encoding and decoding operations.
   class Encoding
   {
   protected:
@@ -65,16 +61,22 @@ namespace Krys
   public:
     virtual ~Encoding() noexcept = default;
 
-    /// @brief Encodes a UTF-8 string into a sequence of bytes in the target encoding.
-    virtual void Encode(utf8_stringview characters, List<byte> &out) const noexcept = 0;
-
-    /// @brief Decodes a sequence of bytes into a UTF-8 string.
-    virtual void Decode(Span<const byte> bytes, utf8_string &out) const noexcept = 0;
-
     /// @brief Get information about the current encoding.
     KRYS_NODISCARD const EncodingInfo &GetInfo() const noexcept
     {
       return _encodingInfo;
     }
+
+    /// @brief Encodes a series of characters into a sequence of bytes in the target character encoding.
+    virtual void Encode(Span<const Rune> characters, List<byte> &out) const noexcept = 0;
+
+    /// @brief Returns the maximum number of bytes required to encode a series of characters.
+    KRYS_NODISCARD virtual size_t GetMaxByteCount(size_t charCount) const noexcept = 0;
+
+    /// @brief Decodes a sequence of bytes in the target character encoding into a series of characters.
+    virtual void Decode(Span<const byte> bytes, List<Rune> &out) const noexcept = 0;
+
+    /// @brief Returns the maximum number of characters that can result from decoding a sequence of bytes.
+    KRYS_NODISCARD virtual size_t GetMaxCharCount(size_t byteCount) const noexcept = 0;
   };
 }

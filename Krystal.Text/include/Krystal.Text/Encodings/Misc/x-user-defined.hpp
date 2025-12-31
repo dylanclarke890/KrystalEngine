@@ -35,58 +35,49 @@ namespace Krys
 
     virtual ~XUserDefinedEncoding() noexcept = default;
 
-    KRYS_NODISCARD List<byte> Encode(utf8_stringview characters) const noexcept override
+    void Encode(Span<const Rune> characters, List<byte> &out) const noexcept override
     {
-      List<byte> bytes;
-      Encode(characters, bytes);
-      return bytes;
-    }
-
-    void Encode(utf8_stringview characters, List<byte> &out) const noexcept override
-    {
-      Reserve(out, characters.size());
-
-      const auto EncodeCodepoint = [&](Rune ch, bool wasInvalid) noexcept
+      for (Rune ch : characters)
       {
-        if (wasInvalid || ch < XUserDefinedStart || ch > XUserDefinedEnd)
-        {
-          out.push_back(static_cast<byte>(ASCII::ReplacementCharacter));
-        }
-        else if (ASCII::IsASCII(ch))
+        if (ASCII::IsASCII(ch))
         {
           out.push_back(static_cast<byte>(ch.Value));
         }
-        else
+        else if (ch >= XUserDefinedStart && ch <= XUserDefinedEnd)
         {
           out.push_back(byte {ch.Value - XUserDefinedStart + ASCII::ExtendedASCIIStart});
         }
-      };
-
-      Unicode::ForEachCodepoint(characters, EncodeCodepoint);
+        else
+        {
+          out.push_back(ASCII::ReplacementCharacter.ToByte());
+        }
+      }
     }
 
-    KRYS_NODISCARD utf8_string Decode(Span<const byte> bytes) const noexcept override
+    KRYS_NODISCARD size_t GetMaxByteCount(size_t charCount) const noexcept override
     {
-      utf8_string characters;
-      Decode(bytes, characters);
-      return characters;
+      return charCount; // 1 byte per character in x-user-defined
     }
 
-    void Decode(Span<const byte> bytes, utf8_string &out) const noexcept override
+    void Decode(Span<const byte> bytes, List<Rune> &out) const noexcept override
     {
-      Reserve(out, bytes.size());
-
       for (byte b : bytes)
       {
         if (ASCII::IsASCII(b))
         {
-          out.push_back(static_cast<char8>(b));
+          out.push_back(Rune(b));
         }
         else
         {
-          Rune codepoint {XUserDefinedStart + (static_cast<uint8>(b) - ASCII::ExtendedASCIIStart)};
+          uint8 ub = static_cast<uint8>(b);
+          out.push_back(Rune(XUserDefinedStart + (ub - ASCII::ExtendedASCIIStart)));
         }
       }
+    }
+
+    KRYS_NODISCARD size_t GetMaxCharCount(size_t byteCount) const noexcept override
+    {
+      return byteCount; // 1 character per byte in x-user-defined
     }
   };
 }

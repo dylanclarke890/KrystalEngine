@@ -1,7 +1,9 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/StronglyTypedValue.hpp"
+#include <cassert>
 
 namespace Krys
 {
@@ -16,5 +18,11 @@ namespace Krys
     }
 
     // TODO: Add validation to ensure only valid codepoints are created.
+
+    KRYS_NODISCARD constexpr byte ToByte() const noexcept
+    {
+      assert(this->Value <= static_cast<uint32>(std::numeric_limits<byte>::max()));
+      return static_cast<byte>(this->Value);
+    }
   };
 }

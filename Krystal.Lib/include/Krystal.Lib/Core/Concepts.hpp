@@ -1,10 +1,22 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Core/TypeTraits.hpp"
 #include <concepts>
-#include <type_traits>
 
 namespace Krys
 {
+  namespace Impl
+  {
+    template <typename T, template <typename...> class Templ>
+    struct IsSpecializationOf : ::std::false_type
+    {
+    };
+    template <typename... T, template <typename...> class Templ>
+    struct IsSpecializationOf<Templ<T...>, Templ> : ::std::true_type
+    {
+    };
+  }
+
   template <typename T>
   concept Integral = std::is_integral_v<T>;
 
@@ -41,6 +53,9 @@ namespace Krys
 
   template <typename T>
   concept DefaultConstructible = std::is_default_constructible_v<T>;
+
+  template <typename T, class... Args>
+  concept IsConstructible = std::is_constructible_v<T, Args...>;
 
   template <typename T, class... Args>
   concept ConstructibleFrom = std::constructible_from<T, Args...>;
@@ -83,21 +98,26 @@ namespace Krys
 
   template <typename T>
   concept EqualityComparable = requires(T a, T b) {
-    { a == b } -> std::convertible_to<bool>;
+    { a == b } -> ConvertibleTo<bool>;
   };
 
   template <typename T>
   concept InEqualityComparable = requires(T a, T b) {
-    { a == b } -> std::convertible_to<bool>;
+    { a == b } -> ConvertibleTo<bool>;
   };
 
   template <typename T>
   concept LessThanComparable = requires(T a, T b) {
-    { a < b } -> std::convertible_to<bool>;
+    { a < b } -> ConvertibleTo<bool>;
   };
 
   template <typename T>
   concept GreaterThanComparable = requires(T a, T b) {
-    { a > b } -> std::convertible_to<bool>;
+    { a > b } -> ConvertibleTo<bool>;
   };
+
+  /// @brief Checks whether the given full, complete type from the first argument is related to the raw
+  /// template name provided in the second.
+  template <typename T, template <typename...> class Templ>
+  using IsSpecializationOf = Impl::IsSpecializationOf<RemoveCvRef<T>, Templ>;
 }

@@ -57,28 +57,42 @@ namespace Krys
 
     virtual ~UTF32Encoding() noexcept = default;
 
-    void Encode(utf8_stringview characters, List<byte> &out) const noexcept
+    void Encode(Span<const Rune> characters, List<byte> &out) const noexcept override
     {
-      Unicode::ForEachCodepoint(characters, [&](Rune codepoint, bool wasInvalid) noexcept
-                                { ByteUtils::ToBytes<Endian::System, Endianness>(codepoint.Value, out); });
+      for (Rune ch : characters)
+      {
+        uint32 codepoint = ch.Value;
+        ByteUtils::ToBytes<Endian::System, Endianness, uint32>(codepoint,
+                                                               Span<byte> {out}.subspan(out.size(), 4u));
+      }
     }
 
-    void Decode(Span<const byte> bytes, utf8_string &out) const noexcept override
+    KRYS_NODISCARD virtual size_t GetMaxByteCount(size_t charCount) const noexcept
+    {
+      return charCount * 4u; // 4 bytes per character in UTF-32
+    }
+
+    void Decode(Span<const byte> bytes, List<Rune> &out) const noexcept override
     {
       const auto EncodeCodepoint = [&](FixedSpan<const byte, 4u> byteSpan) noexcept
       {
         uint32 codepoint = ByteUtils::AsNumeric<Endianness, Endian::System, uint32>(byteSpan.data());
         if (Unicode::IsValidCodepoint(codepoint))
         {
-          Unicode::ToUTF8(Rune(codepoint), out);
+          out.push_back(Rune(codepoint));
         }
         else
         {
-          Unicode::ToUTF8(Unicode::ReplacementCharacter, out);
+          out.push_back(Unicode::ReplacementCharacter);
         }
       };
 
       ByteUtils::ForEachNBytes<4u>(bytes, EncodeCodepoint);
+    }
+
+    KRYS_NODISCARD virtual size_t GetMaxCharCount(size_t byteCount) const noexcept
+    {
+      return byteCount / 4u; // 1 character per 4 bytes in UTF-32
     }
   };
 

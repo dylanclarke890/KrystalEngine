@@ -4,7 +4,7 @@
 
 namespace Krys::Serialisation
 {
-#define KRYS_ACCESS_FRIEND() friend class Krys::Serialisation::Access
+#define KRYS_ACCESS_FRIEND() friend class ::Krys::Serialisation::Access
 
   /// @brief Allows archives to use private Transfer/Save/Load methods of types by being a friend.
   class Access

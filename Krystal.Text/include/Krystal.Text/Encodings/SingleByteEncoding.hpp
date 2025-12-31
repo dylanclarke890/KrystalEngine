@@ -84,38 +84,46 @@ namespace Krys
   public:
     ~SingleByteEncoding() noexcept override = default;
 
-    void Encode(utf8_stringview characters, List<byte> &out) const noexcept override
+    void Encode(Span<const Rune> characters, List<byte>& out) const noexcept final
     {
-      uint8 ch {0u};
-      const auto EncodeCodepoint = [&](Rune codepoint, bool wasInvalid) noexcept
+      uint8 encodedChar {0u};
+      for (Rune ch : characters)
       {
-        if (!wasInvalid && _lookupTable.TryEncode(codepoint, ch))
+        if (_lookupTable.TryEncode(ch, encodedChar))
         {
-          out.push_back(static_cast<byte>(ch));
+          out.push_back(static_cast<byte>(encodedChar));
         }
         else
         {
-          out.push_back(static_cast<byte>(ASCII::ReplacementCharacter));
+          out.push_back(ASCII::ReplacementCharacter.ToByte());
         }
-      };
-
-      Unicode::ForEachCodepoint(characters, EncodeCodepoint);
+      }
     }
 
-    void Decode(Span<const byte> bytes, utf8_string &out) const noexcept override
+    KRYS_NODISCARD size_t GetMaxByteCount(size_t charCount) const noexcept final
+    {
+      return charCount; // 1 byte per character in ASCII
+    }
+
+    void Decode(Span<const byte> bytes, List<Rune>& out) const noexcept final
     {
       Rune codepoint {0u};
       for (byte b : bytes)
       {
         if (_lookupTable.TryDecode(static_cast<uint8>(b), codepoint))
         {
-          Unicode::ToUTF8(codepoint, out);
+          out.push_back(codepoint);
         }
         else
         {
-          Unicode::ToUTF8(Unicode::ReplacementCharacter, out);
+          out.push_back(ASCII::ReplacementCharacter);
         }
       }
+    }
+
+    KRYS_NODISCARD size_t GetMaxCharCount(size_t byteCount) const noexcept final
+    {
+      return byteCount; // 1 character per byte in ASCII
     }
   };
 }

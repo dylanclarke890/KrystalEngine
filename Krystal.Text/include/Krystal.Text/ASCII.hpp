@@ -20,7 +20,7 @@ namespace Krys
     constexpr static uint8 ExtendedASCIIEnd = 0xFFu;
     constexpr static uint8 ControlCharacterEnd = 0x1Fu;
 
-    constexpr static uint8 ReplacementCharacter = '?';
+    constexpr static Rune ReplacementCharacter = Rune('?');
 
     /// @brief Determines whether 'ch' is a valid ASCII character.
     template <IsCharacter T>

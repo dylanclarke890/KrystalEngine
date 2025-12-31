@@ -54,37 +54,13 @@ namespace Krys::Tests
             == false); // End of valid Unicode range
   }
 
-  TEST_CASE("Unicode(ConvertSurrogatePair)", "[Unicode]")
+  TEST_CASE("Unicode(DecodeSurrogatePair)", "[Unicode]")
   {
     constexpr uint16 high = 0xD83D; // High surrogate for U+1F600 (GRINNING FACE)
     constexpr uint16 low = 0xDE00;  // Low surrogate for U+1F600
     constexpr Rune expected(0x1F600u);
 
-    REQUIRE(Unicode::ConvertSurrogatePair(high, low) == expected);
-  }
-
-  TEST_CASE("Unicode(ToUTF8)", "[Unicode]")
-  {
-    utf8_string result;
-
-    // U+0041 LATIN CAPITAL LETTER A
-    Unicode::ToUTF8(Rune(0x0041u), result);
-    REQUIRE(result == u8"A");
-    result.clear();
-
-    // U+00A9 COPYRIGHT SIGN
-    Unicode::ToUTF8(Rune(0x00A9u), result);
-    REQUIRE(result == u8"©");
-    result.clear();
-
-    // U+20AC EURO SIGN
-    Unicode::ToUTF8(Rune(0x20ACu), result);
-    REQUIRE(result == u8"€");
-    result.clear();
-
-    // U+1F600 GRINNING FACE
-    Unicode::ToUTF8(Rune(0x1F600u), result);
-    REQUIRE(result == u8"😀");
+    REQUIRE(Unicode::DecodeSurrogatePair(high, low) == expected);
   }
 
   TEST_CASE("Unicode(ByteCount)", "[Unicode]")
@@ -120,20 +96,5 @@ namespace Krys::Tests
 
     // No more codepoints
     REQUIRE(Unicode::TryGetNextCodepoint(input, offset, codepoint) == false);
-  }
-
-  TEST_CASE("Unicode(ForEachCodepoint)", "[Unicode]")
-  {
-    utf8_string input = u8"A©€😀";
-
-    utf8_string output;
-    const auto Append = [&](Rune rune)
-    {
-      Unicode::ToUTF8(rune, output);
-    };
-
-    Unicode::ForEachCodepoint(input, Append);
-
-    REQUIRE(input == output);
   }
 }

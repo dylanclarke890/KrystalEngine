@@ -35,6 +35,26 @@ namespace Krys
       }
     }
 
+    template <size_t N>
+    KRYS_NODISCARD constexpr static bool Compare(Span<const byte> bytes,
+                                                 FixedSpan<const byte, N> bom) noexcept
+    {
+      if (bytes.size() < N)
+      {
+        return false;
+      }
+
+      for (size_t i = 0; i < N; ++i)
+      {
+        if (bytes[i] != bom[i])
+        {
+          return false;
+        }
+      }
+
+      return true;
+    }
+
     template <Endian::Type Src, Endian::Type Dst, Number T>
     KRYS_NODISCARD static constexpr T AsNumeric(const byte *bytes) noexcept
     {
@@ -84,19 +104,15 @@ namespace Krys
     }
 
     template <Endian::Type Src, Endian::Type Dst, Number T>
-    KRYS_NODISCARD static constexpr void ToBytes(T value, List<byte> &out) noexcept
+    KRYS_NODISCARD static constexpr void ToBytes(T value, Span<byte> out) noexcept
     {
-      assert(out.size() % sizeof(T) == 0);
-      if (out.capacity() < out.size() + sizeof(T))
-      {
-        out.reserve(out.size() + sizeof(T));
-      }
+      assert(out.size() >= sizeof(T));
 
       value = Endian::Convert<Src, Dst, T>(value);
       const byte *bytePtr = reinterpret_cast<const byte *>(&value);
       for (size_t i = 0; i < sizeof(T); i++)
       {
-        out.push_back(bytePtr[i]);
+        out[i] = bytePtr[i];
       }
     }
 

@@ -149,7 +149,9 @@
     <ClInclude Include="include\Krystal.Text\ASCII.hpp" />
     <ClInclude Include="include\Krystal.Text\Base64.hpp" />
     <ClInclude Include="include\Krystal.Text\Concepts.hpp" />
+    <ClInclude Include="include\Krystal.Text\Decode.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\ByteOrderMark.hpp" />
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingInfo.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\EncodingRegistry.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\ISO-8859\ISO-8859-1.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\ISO-8859\ISO-8859-10.hpp" />
@@ -184,6 +186,7 @@
     <ClInclude Include="include\Krystal.Text\Encodings\Windows\Windows874.hpp" />
     <ClInclude Include="include\Krystal.Text\LineEndings.hpp" />
     <ClInclude Include="include\Krystal.Text\Rune.hpp" />
+    <ClInclude Include="include\Krystal.Text\State.hpp" />
     <ClInclude Include="include\Krystal.Text\Unicode.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\ASCII.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\Encoding.hpp" />
