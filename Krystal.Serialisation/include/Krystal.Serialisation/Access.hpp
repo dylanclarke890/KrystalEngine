@@ -15,9 +15,9 @@ namespace Krys::Serialisation
     {
       if constexpr (HasTraitVersion<T>)
       {
-        return VersionTraits<RemoveCvRef<T>>::ClassVersion;
+        return VersionTraits<remove_cvref_t<T>>::ClassVersion;
       }
-      else if constexpr (requires(RemoveCvRef<T> &value) { value.GetVersion(); })
+      else if constexpr (requires(remove_cvref_t<T> &value) { value.GetVersion(); })
       {
         return value.GetVersion();
       }

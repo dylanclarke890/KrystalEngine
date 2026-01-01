@@ -27,5 +27,5 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  constexpr UnderlyingType<UI::FlexDirection> OrdinalCount<UI::FlexDirection> = 4;
+  constexpr underlying_t<UI::FlexDirection> OrdinalCount<UI::FlexDirection> = 4;
 }

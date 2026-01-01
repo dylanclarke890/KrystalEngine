@@ -21,8 +21,21 @@ namespace Krys
   using char16 = char16_t;
   using char32 = char32_t;
 
+  using uchar8 = char8_t;
+  using uchar16 = char16_t;
+  using uchar32 = char32_t;
+
+  using wchar = wchar_t;
+
   using uchar = unsigned char;
   using ushort = unsigned short;
   using uint = unsigned int;
   using ulong = unsigned long;
+  using ullong = unsigned long long;
+
+  using schar = signed char;
+  using sshort = signed short;
+  using sint = signed int;
+  using slong = signed long;
+  using sllong = signed long long;
 }

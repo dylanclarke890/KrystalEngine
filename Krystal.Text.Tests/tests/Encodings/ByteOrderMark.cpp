@@ -1,4 +1,4 @@
-﻿#include "Krystal.Text/Encodings/ByteOrderMark.hpp"
+﻿#include "Krystal.Text/Old/Encodings/ByteOrderMark.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

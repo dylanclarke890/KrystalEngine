@@ -34,7 +34,19 @@ namespace Krys
   /// constructed.
   /// @remarks This value tells users at compile time whether or not they need to be careful with the state.
   template <typename TEncoding, typename TState>
-  concept IsStateIndependant = !IsConstructible<TState, TEncoding> && DefaultConstructible<TState>;
+  concept IsStateIndependant = !Constructible<TState, TEncoding> && DefaultConstructible<TState>;
+
+  /// @brief Retrieves the `DecodeState` of an encoding type if it exists; otherwise, retrieves the general
+  /// `State` type.
+  template <typename TEncoding>
+  using DecodeState = typename conditional_t<TEncoding::DecodeState, typename TEncoding::DecodeState,
+                                             typename TEncoding::State>;
+
+  /// @brief Retrieves the `EncodeState` of an encoding type if it exists; otherwise, retrieves the general
+  /// `State` type.
+  template <typename TEncoding>
+  using EncodeState = typename conditional_t<TEncoding::EncodeState, typename TEncoding::EncodeState,
+                                             typename TEncoding::State>;
 
   /// @brief Whether or not the encoding's `DecodeState` can be constructed without information from the
   /// encoding itself.
@@ -45,18 +57,6 @@ namespace Krys
   /// encoding itself.
   template <typename TEncoding>
   concept IsEncodeStateIndependant = IsStateIndependant<TEncoding, EncodeState<TEncoding>>;
-
-  /// @brief Retrieves the `DecodeState` of an encoding type if it exists; otherwise, retrieves the general
-  /// `State` type.
-  template <typename TEncoding>
-  using DecodeState =
-    typename Conditional<TEncoding::DecodeState, typename TEncoding::DecodeState, typename TEncoding::State>;
-
-  /// @brief Retrieves the `EncodeState` of an encoding type if it exists; otherwise, retrieves the general
-  /// `State` type.
-  template <typename TEncoding>
-  using EncodeState =
-    typename Conditional<TEncoding::EncodeState, typename TEncoding::EncodeState, typename TEncoding::State>;
 
   struct EmptyState
   {
@@ -105,7 +105,7 @@ namespace Krys
   template <typename TEncoding>
   KRYS_NODISCARD constexpr auto CreateDecodeState(KRYS_MAYBE_UNUSED TEncoding &encoding) noexcept
   {
-    using encoding_t = RemoveCvRef<TEncoding>;
+    using encoding_t = remove_cvref_t<TEncoding>;
     using state_t = DecodeState<encoding_t>;
 
     if constexpr (IsDecodeStateIndependant<encoding_t>)
@@ -126,32 +126,32 @@ namespace Krys
   template <typename TEncoding>
   KRYS_NODISCARD constexpr auto
     CreateDecodeStateWith(KRYS_MAYBE_UNUSED TEncoding &encoding,
-                          KRYS_MAYBE_UNUSED const EncodeState<RemoveCvRef<TEncoding>> &encodeState) noexcept
+                          KRYS_MAYBE_UNUSED const EncodeState<remove_cvref_t<TEncoding>> &encodeState) noexcept
   {
-    using encoding_t = RemoveCvRef<TEncoding>;
-    using decode_state_t = DecodeState<encoding_t>;
-    using encode_state_t = EncodeState<encoding_t>;
+    using encoding_t = remove_cvref_t<TEncoding>;
+    using DecodeState = DecodeState<encoding_t>;
+    using EncodeState = EncodeState<encoding_t>;
 
     if constexpr (IsDecodeStateIndependant<encoding_t>)
     {
-      if constexpr (IsConstructible<decode_state_t, const encode_state_t &>)
+      if constexpr (Constructible<DecodeState, const EncodeState &>)
       {
-        return decode_state_t {encodeState};
+        return DecodeState {encodeState};
       }
       else
       {
-        return decode_state_t {};
+        return DecodeState {};
       }
     }
     else
     {
-      if constexpr (IsConstructible<decode_state_t, const encoding_t &, const encode_state_t &>)
+      if constexpr (Constructible<DecodeState, const encoding_t &, const EncodeState &>)
       {
-        return decode_state_t {encoding, encodeState};
+        return DecodeState {encoding, encodeState};
       }
       else
       {
-        return decode_state_t {encoding};
+        return DecodeState {encoding};
       }
     }
   }
@@ -164,31 +164,31 @@ namespace Krys
   template <typename TEncoding>
   KRYS_NODISCARD constexpr auto
     CopyDecodeStateWith(KRYS_MAYBE_UNUSED TEncoding &encoding,
-                        KRYS_MAYBE_UNUSED const DecodeState<RemoveCvRef<TEncoding>> &decodeState) noexcept
+                        KRYS_MAYBE_UNUSED const DecodeState<remove_cvref_t<TEncoding>> &decodeState) noexcept
   {
-    using encoding_t = RemoveCvRef<TEncoding>;
-    using decode_state_t = DecodeState<encoding_t>;
+    using encoding_t = remove_cvref_t<TEncoding>;
+    using DecodeState = DecodeState<encoding_t>;
 
     if constexpr (IsDecodeStateIndependant<encoding_t>)
     {
-      if constexpr (IsConstructible<decode_state_t, const decode_state_t &>)
+      if constexpr (Constructible<DecodeState, const DecodeState &>)
       {
-        return decode_state_t {decodeState};
+        return DecodeState {decodeState};
       }
       else
       {
-        return decode_state_t {};
+        return DecodeState {};
       }
     }
     else
     {
-      if constexpr (IsConstructible<decode_state_t, const encoding_t &, const decode_state_t &>)
+      if constexpr (Constructible<DecodeState, const encoding_t &, const DecodeState &>)
       {
-        return decode_state_t {encoding, decodeState};
+        return DecodeState {encoding, decodeState};
       }
       else
       {
-        return decode_state_t {encoding};
+        return DecodeState {encoding};
       }
     }
   }
@@ -199,7 +199,7 @@ namespace Krys
   template <typename TEncoding>
   KRYS_NODISCARD constexpr auto CreateEncodeState(KRYS_MAYBE_UNUSED TEncoding &encoding) noexcept
   {
-    using encoding_t = RemoveCvRef<TEncoding>;
+    using encoding_t = remove_cvref_t<TEncoding>;
     using state_t = EncodeState<encoding_t>;
 
     if constexpr (IsEncodeStateIndependant<encoding_t>)
@@ -220,32 +220,32 @@ namespace Krys
   template <typename TEncoding>
   KRYS_NODISCARD constexpr auto
     CreateEncodeStateWith(KRYS_MAYBE_UNUSED TEncoding &encoding,
-                          KRYS_MAYBE_UNUSED const DecodeState<RemoveCvRef<TEncoding>> &decodeState) noexcept
+                          KRYS_MAYBE_UNUSED const DecodeState<remove_cvref_t<TEncoding>> &decodeState) noexcept
   {
-    using encoding_t = RemoveCvRef<TEncoding>;
-    using decode_state_t = DecodeState<encoding_t>;
-    using encode_state_t = EncodeState<encoding_t>;
+    using encoding_t = remove_cvref_t<TEncoding>;
+    using DecodeState = DecodeState<encoding_t>;
+    using EncodeState = EncodeState<encoding_t>;
 
     if constexpr (IsEncodeStateIndependant<encoding_t>)
     {
-      if constexpr (IsConstructible<encode_state_t, const decode_state_t &>)
+      if constexpr (Constructible<EncodeState, const DecodeState &>)
       {
-        return encode_state_t {decodeState};
+        return EncodeState {decodeState};
       }
       else
       {
-        return encode_state_t {};
+        return EncodeState {};
       }
     }
     else
     {
-      if constexpr (IsConstructible<encode_state_t, const encoding_t &, const decode_state_t &>)
+      if constexpr (Constructible<EncodeState, const encoding_t &, const DecodeState &>)
       {
-        return encode_state_t {encoding, decodeState};
+        return EncodeState {encoding, decodeState};
       }
       else
       {
-        return encode_state_t {encoding};
+        return EncodeState {encoding};
       }
     }
   }
@@ -258,31 +258,31 @@ namespace Krys
   template <typename TEncoding>
   KRYS_NODISCARD constexpr auto
     CopyEncodeStateWith(KRYS_MAYBE_UNUSED TEncoding &encoding,
-                        KRYS_MAYBE_UNUSED const EncodeState<RemoveCvRef<TEncoding>> &encodeState) noexcept
+                        KRYS_MAYBE_UNUSED const EncodeState<remove_cvref_t<TEncoding>> &encodeState) noexcept
   {
-    using encoding_t = RemoveCvRef<TEncoding>;
-    using encode_state_t = EncodeState<encoding_t>;
+    using encoding_t = remove_cvref_t<TEncoding>;
+    using EncodeState = EncodeState<encoding_t>;
 
     if constexpr (IsEncodeStateIndependant<encoding_t>)
     {
-      if constexpr (IsConstructible<encode_state_t, const encode_state_t &>)
+      if constexpr (Constructible<EncodeState, const EncodeState &>)
       {
-        return encode_state_t {encodeState};
+        return EncodeState {encodeState};
       }
       else
       {
-        return encode_state_t {};
+        return EncodeState {};
       }
     }
     else
     {
-      if constexpr (IsConstructible<encode_state_t, const encoding_t &, const encode_state_t &>)
+      if constexpr (Constructible<EncodeState, const encoding_t &, const EncodeState &>)
       {
-        return encode_state_t {encoding, encodeState};
+        return EncodeState {encoding, encodeState};
       }
       else
       {
-        return encode_state_t {encoding};
+        return EncodeState {encoding};
       }
     }
   }

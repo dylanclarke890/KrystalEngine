@@ -10,10 +10,10 @@
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Set.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
-#include "Krystal.Text/ASCII.hpp"
-#include "Krystal.Text/Encodings/ByteOrderMark.hpp"
-#include "Krystal.Text/Encodings/EncodingRegistry.hpp"
-#include "Krystal.Text/Unicode.hpp"
+#include "Krystal.Text/Old/ASCII.hpp"
+#include "Krystal.Text/Old/Encodings/ByteOrderMark.hpp"
+#include "Krystal.Text/Old/Encodings/EncodingRegistry.hpp"
+#include "Krystal.Text/Old/Unicode.hpp"
 
 namespace Krys::HTML::DOM
 {

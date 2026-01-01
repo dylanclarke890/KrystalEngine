@@ -52,7 +52,7 @@ namespace Krys::IO
     {
       namespace fs = std::filesystem;
       using DirectoryIterator =
-        Conditional<Recursive, fs::recursive_directory_iterator, fs::directory_iterator>;
+        conditional_t<Recursive, fs::recursive_directory_iterator, fs::directory_iterator>;
 
       List<VFSFileEntry> entries;
       for (const auto &entry : DirectoryIterator(path))

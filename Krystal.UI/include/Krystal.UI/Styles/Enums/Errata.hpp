@@ -18,7 +18,7 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  constexpr UnderlyingType<UI::Errata> OrdinalCount<UI::Errata> = 4;
+  constexpr underlying_t<UI::Errata> OrdinalCount<UI::Errata> = 4;
 
   template <>
   inline constexpr bool EnableEnumFlags<UI::Errata> = true;

@@ -1,4 +1,4 @@
-﻿#include "Krystal.Text/LineEndings.hpp"
+﻿#include "Krystal.Text/Old/LineEndings.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

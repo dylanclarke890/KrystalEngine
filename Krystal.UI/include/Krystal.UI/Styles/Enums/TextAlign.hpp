@@ -17,5 +17,5 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  constexpr UnderlyingType<UI::TextAlign> OrdinalCount<UI::TextAlign> = 4;
+  constexpr underlying_t<UI::TextAlign> OrdinalCount<UI::TextAlign> = 4;
 }

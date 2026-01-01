@@ -93,7 +93,7 @@ namespace Krys::Serialisation
     {
       TransferGuard guard(_self, value);
 
-      using DecayedT = RemoveCvRef<T>;
+      using DecayedT = remove_cvref_t<T>;
 
       if constexpr (HasVersionedTransferMember<Derived, DecayedT>)
       {
@@ -151,7 +151,7 @@ namespace Krys::Serialisation
       return _self;
     }
 
-    template <Pointer T>
+    template <IsPointer T>
     Derived &operator()(T &&ptr)
     {
       static_assert(DependentFalse<T>, "Pointer types are not supported.");
@@ -180,7 +180,7 @@ namespace Krys::Serialisation
     {
       TransferGuard guard(_self, value);
 
-      using DecayedT = RemoveCvRef<T>;
+      using DecayedT = remove_cvref_t<T>;
 
       if constexpr (HasVersionedTransferMember<Derived, DecayedT>)
       {
@@ -238,7 +238,7 @@ namespace Krys::Serialisation
       return _self;
     }
 
-    template <Pointer T>
+    template <IsPointer T>
     Derived &operator()(T &&ptr)
     {
       static_assert(DependentFalse<T>, "Pointer types are not supported.");
@@ -256,7 +256,7 @@ namespace Krys::Serialisation
   template <typename Archive, IsArray T>
   void Transfer(Archive &archive, T &value) noexcept
   {
-    using ElementType = RemoveCvRef<RemoveExtent<T>>;
+    using ElementType = remove_cvref_t<remove_extent_t<T>>;
     for (size_t i = 0; i < Extent<T>; i++)
     {
       archive(value[i]);

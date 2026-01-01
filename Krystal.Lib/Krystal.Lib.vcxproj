@@ -137,6 +137,7 @@
     <ClInclude Include="include\Krystal.Lib\Commands\CommandListReader.hpp" />
     <ClInclude Include="include\Krystal.Lib\Commands\CommandType.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Attributes.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\Config.hpp" />
     <ClInclude Include="include\Krystal.Lib\Mixins\NonCopyable.hpp" />
     <ClInclude Include="include\Krystal.Lib\Detection\ByteOrder.hpp" />
     <ClInclude Include="include\Krystal.Lib\Detection\Compiler.hpp" />
@@ -151,6 +152,19 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\SharedPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\UniquePtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Ranges\ADL.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Ranges\Algorithm.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Ranges\BlackHoleIterator.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Ranges\CountedIterator.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Ranges\DefaultSentinel.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Ranges\Impl\ContiguousIterator.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Ranges\Iterator.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Ranges\Range.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Ranges\Reconstruct.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Ranges\Subrange.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Ranges\Unbounded.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Ranges\UnreachableSentinel.hpp" />
+    <ClInclude Include="include\Krystal.Lib\String\EmptyString.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\ImmutableBimap.hpp" />
     <ClInclude Include="include\Krystal.Lib\Allocators\Arena.hpp">
       <SubType>
@@ -206,6 +220,15 @@
     <ClInclude Include="include\Krystal.Lib\Types\StronglyTypedValue.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Numeric.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Variant.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Utils\ContiguousIteratorTag.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Utils\EBCO.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Utils\Hijack.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Utils\ReferenceWrapper.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Utils\Size.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Utils\Tag.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Utils\ToAddress.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Utils\ToUnderlying.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Utils\Unwrap.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Events\EventManager.cpp" />

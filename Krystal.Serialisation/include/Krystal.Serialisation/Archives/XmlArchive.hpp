@@ -348,7 +348,7 @@ namespace Krys::Serialisation
     template <typename T>
     void Read(ContainerSize<T> &value) noexcept
     {
-      using Size = RemoveRef<typename ContainerSize<T>::SizeType>;
+      using Size = remove_ref_t<typename ContainerSize<T>::SizeType>;
       Size size = GetNumberOfChildren(_nodes.top().Node);
       value.Size = size;
     }

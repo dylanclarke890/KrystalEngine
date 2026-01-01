@@ -2,9 +2,10 @@
 
 #include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/Handle.hpp"
-#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/NullableFloat.hpp"
+#include "Krystal.Lib/Utils/ToUnderlying.hpp"
 #include "Krystal.UI/Styles/Enums/Align.hpp"
 #include "Krystal.UI/Styles/Enums/BoxSizing.hpp"
 #include "Krystal.UI/Styles/Enums/Dimension.hpp"
@@ -329,8 +330,8 @@ namespace Krys::UI
       _pool.Store(_minDimensions[ToUnderlying(axis)], value);
     }
 
-    KRYS_NODISCARD NullableFloat ResolvedMinDimension(Direction direction, Dimension axis, float referenceLength,
-                                                  float ownerWidth) const noexcept
+    KRYS_NODISCARD NullableFloat ResolvedMinDimension(Direction direction, Dimension axis,
+                                                      float referenceLength, float ownerWidth) const noexcept
     {
       NullableFloat value = GetMinDimension(axis).Resolve(referenceLength);
       if (GetBoxSizing() == BoxSizing::BorderBox)
@@ -551,13 +552,13 @@ namespace Krys::UI
 #pragma region Computations
 
     KRYS_NODISCARD float ComputeFlexStartPosition(FlexDirection axis, Direction direction,
-                                              float axisSize) const noexcept
+                                                  float axisSize) const noexcept
     {
       return ComputePosition(FlexStartEdge(axis), direction).Resolve(axisSize).ValueOrDefault(0.0f);
     }
 
     KRYS_NODISCARD float ComputeInlineStartPosition(FlexDirection axis, Direction direction,
-                                                float axisSize) const noexcept
+                                                    float axisSize) const noexcept
     {
       return ComputePosition(InlineStartEdge(axis, direction), direction)
         .Resolve(axisSize)
@@ -565,13 +566,13 @@ namespace Krys::UI
     }
 
     KRYS_NODISCARD float ComputeFlexEndPosition(FlexDirection axis, Direction direction,
-                                            float axisSize) const noexcept
+                                                float axisSize) const noexcept
     {
       return ComputePosition(FlexEndEdge(axis), direction).Resolve(axisSize).ValueOrDefault(0.0f);
     }
 
     KRYS_NODISCARD float ComputeInlineEndPosition(FlexDirection axis, Direction direction,
-                                              float axisSize) const noexcept
+                                                  float axisSize) const noexcept
     {
       return ComputePosition(InlineEndEdge(axis, direction), direction)
         .Resolve(axisSize)
@@ -579,13 +580,13 @@ namespace Krys::UI
     }
 
     KRYS_NODISCARD float ComputeFlexStartMargin(FlexDirection axis, Direction direction,
-                                            float widthSize) const noexcept
+                                                float widthSize) const noexcept
     {
       return ComputeMargin(FlexStartEdge(axis), direction).Resolve(widthSize).ValueOrDefault(0.0f);
     }
 
     KRYS_NODISCARD float ComputeInlineStartMargin(FlexDirection axis, Direction direction,
-                                              float widthSize) const noexcept
+                                                  float widthSize) const noexcept
     {
       return ComputeMargin(InlineStartEdge(axis, direction), direction)
         .Resolve(widthSize)
@@ -593,13 +594,13 @@ namespace Krys::UI
     }
 
     KRYS_NODISCARD float ComputeFlexEndMargin(FlexDirection axis, Direction direction,
-                                          float widthSize) const noexcept
+                                              float widthSize) const noexcept
     {
       return ComputeMargin(FlexEndEdge(axis), direction).Resolve(widthSize).ValueOrDefault(0.0f);
     }
 
     KRYS_NODISCARD float ComputeInlineEndMargin(FlexDirection axis, Direction direction,
-                                            float widthSize) const noexcept
+                                                float widthSize) const noexcept
     {
       return ComputeMargin(InlineEndEdge(axis, direction), direction).Resolve(widthSize).ValueOrDefault(0.0f);
     }
@@ -627,58 +628,58 @@ namespace Krys::UI
     }
 
     KRYS_NODISCARD float ComputeFlexStartPadding(FlexDirection axis, Direction direction,
-                                             float widthSize) const noexcept
+                                                 float widthSize) const noexcept
     {
       return MaxOrDefined(ComputePadding(FlexStartEdge(axis), direction).Resolve(widthSize).Value(), 0.0f);
     }
 
     KRYS_NODISCARD float ComputeInlineStartPadding(FlexDirection axis, Direction direction,
-                                               float widthSize) const noexcept
+                                                   float widthSize) const noexcept
     {
       return MaxOrDefined(
         ComputePadding(InlineStartEdge(axis, direction), direction).Resolve(widthSize).Value(), 0.0f);
     }
 
     KRYS_NODISCARD float ComputeFlexEndPadding(FlexDirection axis, Direction direction,
-                                           float widthSize) const noexcept
+                                               float widthSize) const noexcept
     {
       return MaxOrDefined(ComputePadding(FlexEndEdge(axis), direction).Resolve(widthSize).Value(), 0.0f);
     }
 
     KRYS_NODISCARD float ComputeInlineEndPadding(FlexDirection axis, Direction direction,
-                                             float widthSize) const noexcept
+                                                 float widthSize) const noexcept
     {
       return MaxOrDefined(
         ComputePadding(InlineEndEdge(axis, direction), direction).Resolve(widthSize).Value(), 0.0f);
     }
 
     KRYS_NODISCARD float ComputeInlineStartPaddingAndBorder(FlexDirection axis, Direction direction,
-                                                        float widthSize) const noexcept
+                                                            float widthSize) const noexcept
     {
       return ComputeInlineStartPadding(axis, direction, widthSize)
              + ComputeInlineStartBorder(axis, direction);
     }
 
     KRYS_NODISCARD float ComputeFlexStartPaddingAndBorder(FlexDirection axis, Direction direction,
-                                                      float widthSize) const noexcept
+                                                          float widthSize) const noexcept
     {
       return ComputeFlexStartPadding(axis, direction, widthSize) + ComputeFlexStartBorder(axis, direction);
     }
 
     KRYS_NODISCARD float ComputeInlineEndPaddingAndBorder(FlexDirection axis, Direction direction,
-                                                      float widthSize) const noexcept
+                                                          float widthSize) const noexcept
     {
       return ComputeInlineEndPadding(axis, direction, widthSize) + ComputeInlineEndBorder(axis, direction);
     }
 
     KRYS_NODISCARD float ComputeFlexEndPaddingAndBorder(FlexDirection axis, Direction direction,
-                                                    float widthSize) const noexcept
+                                                        float widthSize) const noexcept
     {
       return ComputeFlexEndPadding(axis, direction, widthSize) + ComputeFlexEndBorder(axis, direction);
     }
 
     KRYS_NODISCARD float ComputePaddingAndBorderForDimension(Direction direction, Dimension dimension,
-                                                         float widthSize) const noexcept
+                                                             float widthSize) const noexcept
     {
       FlexDirection flexDirectionForDimension =
         dimension == Dimension::Width ? FlexDirection::Row : FlexDirection::Column;
@@ -743,18 +744,18 @@ namespace Krys::UI
 #pragma region EqualityHelpers
 
     KRYS_NODISCARD static inline bool NumbersEqual(const StyleValueHandle &lhsHandle,
-                                               const StyleValuePool &lhsPool,
-                                               const StyleValueHandle &rhsHandle,
-                                               const StyleValuePool &rhsPool) noexcept
+                                                   const StyleValuePool &lhsPool,
+                                                   const StyleValueHandle &rhsHandle,
+                                                   const StyleValuePool &rhsPool) noexcept
     {
       return (lhsHandle.IsUndefined() && rhsHandle.IsUndefined())
              || (lhsPool.GetNumber(lhsHandle) == rhsPool.GetNumber(rhsHandle));
     }
 
     KRYS_NODISCARD static inline bool LengthsEqual(const StyleValueHandle &lhsHandle,
-                                               const StyleValuePool &lhsPool,
-                                               const StyleValueHandle &rhsHandle,
-                                               const StyleValuePool &rhsPool) noexcept
+                                                   const StyleValuePool &lhsPool,
+                                                   const StyleValueHandle &rhsHandle,
+                                                   const StyleValuePool &rhsPool) noexcept
     {
       return (lhsHandle.IsUndefined() && rhsHandle.IsUndefined())
              || (lhsPool.GetLength(lhsHandle) == rhsPool.GetLength(rhsHandle));
@@ -837,7 +838,8 @@ namespace Krys::UI
       }
     }
 
-    KRYS_NODISCARD Style::Length ComputeRightEdge(const Edges &edges, Direction layoutDirection) const noexcept
+    KRYS_NODISCARD Style::Length ComputeRightEdge(const Edges &edges,
+                                                  Direction layoutDirection) const noexcept
     {
       if (layoutDirection == Direction::LTR && edges[ToUnderlying(Edge::End)].IsDefined())
       {

@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <version>
+
 /// @brief Check if a particular compiler is being used.
 #define KRYS_COMPILER(COMPILER) (defined KRYS_COMPILER_##COMPILER && KRYS_COMPILER_##COMPILER)
 
@@ -10,7 +12,9 @@
 #define KRYS_COMPILER_QUIRK(QUIRK) (defined KRYS_COMPILER_QUIRK_##QUIRK && KRYS_COMPILER_QUIRK_##QUIRK)
 
 /// @brief Check if the current compiler supports a particular language (C|CPP).
-#define KRYS_COMPILER_LANG(LANG) (defined KRYS_COMPILER_LANG_##LANG && KRYS_COMPILER_LANG_##LANG)
+#define KRYS_COMPILER_LANGUAGE(LANG) (defined KRYS_COMPILER_LANGUAGE_##LANG && KRYS_COMPILER_LANGUAGE_##LANG)
+
+#define KRYS_COMPILER_STL(STL) (defined KRYS_COMPILER_STL_##STL && KRYS_COMPILER_STL_##STL)
 
 #ifdef __has_attribute
   /// @brief Check if the current compiler supports a particular attribute.
@@ -50,13 +54,15 @@
 #ifdef __cplusplus
   #define KRYS_COMPILER_LANG_C 0
   #define KRYS_COMPILER_LANG_CPP 1
+  #define KRYS_EXTERN_C extern "C"
   #define KRYS_EXTERN_C_BEGIN                                                                                \
-    extern "C"                                                                                               \
+    KRYS_EXTERN_C                                                                                            \
     {
   #define KRYS_EXTERN_C_END }
 #else
   #define KRYS_COMPILER_LANG_C 1
   #define KRYS_COMPILER_LANG_CPP 0
+  #define KRYS_EXTERN_C
   #define KRYS_EXTERN_C_BEGIN
   #define KRYS_EXTERN_C_END
 #endif
@@ -89,6 +95,21 @@
 /// KRYS_COMPILER_QUIRK(CONSIDERS_UNREACHABLE_CODE) - Code after certain constructs is considered unreachable
 #if !KRYS_COMPILER(CLANG)
   #define KRYS_COMPILER_QUIRK_CONSIDERS_UNREACHABLE_CODE 1
+#endif
+
+/// KRYS_COMPILER_STL(MSVC) - Using the Microsoft STL implementation
+#if defined(_MSVC_STL_VERSION)
+  #define KRYS_COMPILER_STL_MSVC 1
+#endif
+
+/// KRYS_COMPILER_STL(GCC) - Using the GNU STL implementation
+#if defined(__GLIBCXX__)
+  #define KRYS_COMPILER_STL_GCC 1
+#endif
+
+/// KRYS_COMPILER_STL(CLANG) - Using the LLVM STL implementation
+#if defined(_LIBCPP_VERSION)
+  #define KRYS_COMPILER_STL_CLANG 1
 #endif
 
 /// KRYS_FUNCTION_SIGNATURE - Macro that expands to the current function signature as a string

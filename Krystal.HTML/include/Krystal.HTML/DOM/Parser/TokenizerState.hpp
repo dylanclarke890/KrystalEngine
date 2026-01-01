@@ -43,5 +43,5 @@ namespace Krys::HTML::DOM
 namespace Krys
 {
   template <>
-  constexpr UnderlyingType<HTML::DOM::TokenizerState> OrdinalCount<HTML::DOM::TokenizerState> = 30;
+  constexpr underlying_t<HTML::DOM::TokenizerState> OrdinalCount<HTML::DOM::TokenizerState> = 30;
 }

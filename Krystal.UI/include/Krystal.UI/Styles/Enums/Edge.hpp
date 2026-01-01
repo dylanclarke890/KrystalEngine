@@ -22,5 +22,5 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  constexpr UnderlyingType<UI::Edge> OrdinalCount<UI::Edge> = 9;
+  constexpr underlying_t<UI::Edge> OrdinalCount<UI::Edge> = 9;
 }

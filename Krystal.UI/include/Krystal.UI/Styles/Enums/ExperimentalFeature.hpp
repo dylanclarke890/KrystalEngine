@@ -15,7 +15,7 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  constexpr UnderlyingType<UI::ExperimentalFeature> OrdinalCount<UI::ExperimentalFeature> = 2;
+  constexpr underlying_t<UI::ExperimentalFeature> OrdinalCount<UI::ExperimentalFeature> = 2;
 
   template <>
   inline constexpr bool EnableEnumFlags<UI::ExperimentalFeature> = true;

@@ -32,5 +32,5 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  constexpr UnderlyingType<UI::SizingMode> OrdinalCount<UI::SizingMode> = 3;
+  constexpr underlying_t<UI::SizingMode> OrdinalCount<UI::SizingMode> = 3;
 }

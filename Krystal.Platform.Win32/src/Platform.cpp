@@ -109,12 +109,4 @@ namespace Krys::Platform
   {
     ::Sleep(milliseconds);
   }
-
-  wstring ToWideString(const string &utf8String) noexcept
-  {
-    int len = ::MultiByteToWideChar(CP_UTF8, 0, utf8String.c_str(), -1, nullptr, 0);
-    wstring wstr(len, 0);
-    ::MultiByteToWideChar(CP_UTF8, 0, utf8String.c_str(), -1, &wstr[0], len);
-    return wstr;
-  }
 }

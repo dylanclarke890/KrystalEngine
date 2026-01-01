@@ -1,4 +1,4 @@
-﻿#include "Krystal.Text/ASCII.hpp"
+﻿#include "Krystal.Text/Old/ASCII.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

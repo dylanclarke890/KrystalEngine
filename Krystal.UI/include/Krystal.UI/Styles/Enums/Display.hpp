@@ -16,5 +16,5 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  constexpr UnderlyingType<UI::Display> OrdinalCount<UI::Display> = 3;
+  constexpr underlying_t<UI::Display> OrdinalCount<UI::Display> = 3;
 }

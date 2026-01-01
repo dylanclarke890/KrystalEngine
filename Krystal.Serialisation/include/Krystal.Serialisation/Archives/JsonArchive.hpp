@@ -346,7 +346,7 @@ namespace Krys::Serialisation
     template <typename T>
     void Read(ContainerSize<T> &value) noexcept
     {
-      using Size = RemoveRef<typename ContainerSize<T>::SizeType>;
+      using Size = remove_ref_t<typename ContainerSize<T>::SizeType>;
       Size size = _iteratorStack.size() == 1
                     ? static_cast<Size>(_document.Size())
                     : static_cast<Size>((_iteratorStack.rbegin() + 1)->Value().Size());

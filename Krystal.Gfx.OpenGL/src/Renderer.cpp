@@ -9,7 +9,7 @@
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Maths/Clamp.hpp"
 #include "Krystal.Maths/Transform.hpp"
-#include "Krystal.Text/Unicode.hpp"
+#include "Krystal.Text/Old/Unicode.hpp"
 
 namespace Krys::Gfx
 {

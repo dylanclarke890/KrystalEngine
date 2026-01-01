@@ -16,5 +16,5 @@ namespace Krys::UI
 namespace Krys
 {
   template <>
-  constexpr UnderlyingType<UI::MeasureMode> OrdinalCount<UI::MeasureMode> = 3;
+  constexpr underlying_t<UI::MeasureMode> OrdinalCount<UI::MeasureMode> = 3;
 }

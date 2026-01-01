@@ -3,6 +3,7 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Utils/ToUnderlying.hpp"
 #include "Krystal.UI/Styles/Enums/Edge.hpp"
 #include <utility>
 

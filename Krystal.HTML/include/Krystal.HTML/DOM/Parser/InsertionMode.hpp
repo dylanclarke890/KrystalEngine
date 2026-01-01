@@ -36,5 +36,5 @@ namespace Krys::HTML::DOM
 namespace Krys
 {
   template <>
-  constexpr UnderlyingType<HTML::DOM::InsertionMode> OrdinalCount<HTML::DOM::InsertionMode> = 23;
+  constexpr underlying_t<HTML::DOM::InsertionMode> OrdinalCount<HTML::DOM::InsertionMode> = 23;
 }

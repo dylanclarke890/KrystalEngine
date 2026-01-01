@@ -4,13 +4,14 @@
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Utils/ToUnderlying.hpp"
 #include <bit>
 #include <utility>
 
 namespace Krys
 {
   template <IsEnum E>
-  inline constexpr UnderlyingType<E> OrdinalCount = 0u;
+  inline constexpr underlying_t<E> OrdinalCount = 0u;
 
   template <typename TEnum>
   concept HasOrdinality = (OrdinalCount<TEnum> > 0u);
@@ -79,13 +80,13 @@ namespace Krys
   template <HasOrdinality TEnum>
   KRYS_NODISCARD constexpr uint32 BitCount() noexcept
   {
-    return std::bit_width(static_cast<UnderlyingType<TEnum>>(OrdinalCount<TEnum> - 1u));
+    return std::bit_width(static_cast<underlying_t<TEnum>>(OrdinalCount<TEnum> - 1u));
   }
 
   template <IsFlagsEnum TEnum>
   constexpr TEnum operator|(TEnum lhs, TEnum rhs)
   {
-    using U = UnderlyingType<TEnum>;
+    using U = underlying_t<TEnum>;
     return static_cast<TEnum>(static_cast<U>(lhs) | static_cast<U>(rhs));
   }
 
@@ -99,7 +100,7 @@ namespace Krys
   template <IsFlagsEnum TEnum>
   constexpr TEnum operator&(TEnum lhs, TEnum rhs)
   {
-    using U = UnderlyingType<TEnum>;
+    using U = underlying_t<TEnum>;
     return static_cast<TEnum>(static_cast<U>(lhs) & static_cast<U>(rhs));
   }
 
@@ -113,14 +114,14 @@ namespace Krys
   template <IsFlagsEnum TEnum>
   constexpr TEnum operator~(TEnum value)
   {
-    using U = UnderlyingType<TEnum>;
+    using U = underlying_t<TEnum>;
     return static_cast<TEnum>(~static_cast<U>(value));
   }
 
   template <IsFlagsEnum TEnum>
   constexpr TEnum operator^(TEnum lhs, TEnum rhs)
   {
-    using U = UnderlyingType<TEnum>;
+    using U = underlying_t<TEnum>;
     return static_cast<TEnum>(static_cast<U>(lhs) ^ static_cast<U>(rhs));
   }
 
@@ -140,7 +141,7 @@ namespace Krys
   template <IsFlagsEnum TEnum>
   KRYS_NODISCARD constexpr bool HasFlag(TEnum value, TEnum flag) noexcept
   {
-    using U = UnderlyingType<TEnum>;
+    using U = underlying_t<TEnum>;
     return (static_cast<U>(value) & static_cast<U>(flag)) == static_cast<U>(flag);
   }
 }

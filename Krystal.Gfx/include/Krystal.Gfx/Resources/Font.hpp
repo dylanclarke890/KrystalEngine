@@ -11,7 +11,7 @@
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 #include "Krystal.Maths/Vector.hpp"
-#include "Krystal.Text/Unicode.hpp"
+#include "Krystal.Text/Old/Unicode.hpp"
 #include <compare>
 #include <type_traits>
 

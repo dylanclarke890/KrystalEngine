@@ -1,5 +1,6 @@
 ﻿#include "Krystal.UI/Layout/Node/Node.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Utils/ToUnderlying.hpp"
 #include "Krystal.UI/Layout/Config/Config.hpp"
 #include "Krystal.UI/Styles/Helpers/FlexDirection.hpp"
 #include <algorithm>

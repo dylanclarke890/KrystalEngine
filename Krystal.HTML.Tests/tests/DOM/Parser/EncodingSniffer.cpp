@@ -1,9 +1,9 @@
 ﻿#include "Krystal.HTML/DOM/Parser/EncodingSniffer.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Text/Encodings/ASCII.hpp"
-#include "Krystal.Text/Encodings/UTF/UTF16.hpp"
-#include "Krystal.Text/Encodings/UTF/UTF8.hpp"
+#include "Krystal.Text/Old/Encodings/ASCII.hpp"
+#include "Krystal.Text/Old/Encodings/UTF/UTF16.hpp"
+#include "Krystal.Text/Old/Encodings/UTF/UTF8.hpp"
 #include <catch_all.hpp>
 
 namespace

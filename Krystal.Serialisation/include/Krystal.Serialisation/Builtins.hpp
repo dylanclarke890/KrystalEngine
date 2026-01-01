@@ -28,7 +28,7 @@ namespace Krys::Serialisation
     // if l-value - take l-value reference.
     // else       - make a copy of the data (not ideal).
     using FieldType =
-      Conditional<IsArray<RemoveCvRef<T>>, RemoveCv<T>, Conditional<IsLValueRef<T>, T, Decay<T>>>;
+      conditional_t<IsArray<remove_cvref_t<T>>, remove_cv_t<T>, conditional_t<LValueRef<T>, T, decay_t<T>>>;
 
   public:
     constexpr NamedField(stringview name, T &&value) noexcept : Name(name), Value(std::forward<T>(value))
@@ -73,7 +73,7 @@ namespace Krys::Serialisation
   {
   public:
     // Stores a reference if passed an lvalue reference, otherwise makes a copy of the data.
-    using SizeType = Conditional<IsLValueRef<T>, T, Decay<T>>;
+    using SizeType = conditional_t<LValueRef<T>, T, decay_t<T>>;
 
     ContainerSize(T &&value) noexcept : Size(std::forward<T>(value))
     {
@@ -104,8 +104,8 @@ namespace Krys::Serialisation
   template <typename TKey, typename TValue>
   struct KeyValuePair : public Impl::KeyValuePair, NonCopyable<KeyValuePair<TKey, TValue>>
   {
-    using KeyType = Conditional<IsLValueRef<TKey>, TKey, Decay<TKey>>;
-    using ValueType = Conditional<IsLValueRef<TValue>, TValue, Decay<TValue>>;
+    using KeyType = conditional_t<LValueRef<TKey>, TKey, decay_t<TKey>>;
+    using ValueType = conditional_t<LValueRef<TValue>, TValue, decay_t<TValue>>;
 
     KeyValuePair(TKey &&key, TValue &&value) noexcept
         : Key(std::forward<TKey>(key)), Value(std::forward<TValue>(value))
@@ -175,7 +175,7 @@ namespace Krys::Serialisation
   }
 
   template <typename T>
-  concept HasTraitVersion = requires { VersionTraits<RemoveCvRef<T>>::ClassVersion; };
+  concept HasTraitVersion = requires { VersionTraits<remove_cvref_t<T>>::ClassVersion; };
 
 #pragma endregion
 }

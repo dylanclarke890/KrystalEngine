@@ -32,12 +32,7 @@
   <ItemGroup>
     <ClCompile Include="catch_main.cpp" />
     <ClCompile Include="tests\ASCII.cpp" />
-    <ClCompile Include="tests\Encodings\ASCII.cpp" />
     <ClCompile Include="tests\Encodings\ByteOrderMark.cpp" />
-    <ClCompile Include="tests\Encodings\EncodingRegistry.cpp" />
-    <ClCompile Include="tests\Encodings\UTF\UTF16.cpp" />
-    <ClCompile Include="tests\Encodings\UTF\UTF32.cpp" />
-    <ClCompile Include="tests\Encodings\UTF\UTF8.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="tests\LineEndings.cpp" />

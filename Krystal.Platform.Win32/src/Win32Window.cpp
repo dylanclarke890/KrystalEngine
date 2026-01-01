@@ -134,6 +134,15 @@ namespace
       default:             return Key::UNKNOWN;
     }
   }
+
+  static std::wstring ToWideString(const Krys::string &str)
+  {
+    const int sizeNeeded =
+      ::MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()), NULL, 0);
+    std::wstring wideStr(sizeNeeded, 0);
+    ::MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()), wideStr.data(), sizeNeeded);
+    return wideStr;
+  }
 }
 
 namespace Krys::Platform
