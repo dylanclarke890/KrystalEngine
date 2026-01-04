@@ -58,7 +58,7 @@ namespace Krys
     /// incremented even if an error occurs due to the semantics of any view that models an input_range.
     template <typename TInput, typename TOutput, typename TErrorHandler>
     static constexpr auto DecodeOne(TInput &&input, TOutput &&output, TErrorHandler &&errorHandler,
-                                    state &state) noexcept
+                                    state &s) noexcept
     {
       using TUErrorHandler = remove_cvref_t<TErrorHandler>;
       using TSubInput = Krys::Ranges::csubrange_for_t<remove_ref_t<TInput>>;
@@ -73,7 +73,7 @@ namespace Krys
       if (inIt == inLast)
       {
         // we don't need more, so we can just say the emptiness is a-okay.
-        return TResult(std::move(input), std::move(output), state, EncodingError::OK);
+        return TResult(std::move(input), std::move(output), s, EncodingError::OK);
       }
 
       code_unit units[MaxCodeUnits] = {static_cast<code_unit>(*inIt)};
@@ -93,7 +93,7 @@ namespace Krys
             return std::forward<TErrorHandler>(errorHandler)(
               self,
               TResult(TSubInput(std::move(inIt), std::move(inLast)),
-                      TSubOutput(std::move(outIt), std::move(outLast)), state,
+                      TSubOutput(std::move(outIt), std::move(outLast)), s,
                       EncodingError::InsufficientOutputSpace),
               Span<const code_unit, 0>(), Span<const code_point, 0>());
           }
@@ -102,7 +102,7 @@ namespace Krys
         ++inIt;
         ++outIt;
         return TResult(TSubInput(std::move(inIt), std::move(inLast)),
-                       TSubOutput(std::move(outIt), std::move(outLast)), state, EncodingError::OK);
+                       TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);
       }
       else if ((unit0 <= 0xFE && unit0 >= 0x81))
       {
@@ -113,7 +113,7 @@ namespace Krys
           {
             basic_euc_kr_uhc self {};
             return std::forward<TErrorHandler>(errorHandler)(
-              self, TResult(std::move(input), std::move(output), state, EncodingError::IncompleteSequence),
+              self, TResult(std::move(input), std::move(output), s, EncodingError::IncompleteSequence),
               Span<const code_unit, 1>(std::addressof(units[0]), 1), Span<const code_point, 0>());
           }
         }
@@ -135,7 +135,7 @@ namespace Krys
                 return std::forward<TErrorHandler>(errorHandler)(
                   self,
                   TResult(TSubInput(std::move(inIt), std::move(inLast)),
-                          TSubOutput(std::move(outIt), std::move(outLast)), state,
+                          TSubOutput(std::move(outIt), std::move(outLast)), s,
                           EncodingError::InsufficientOutputSpace),
                   Span<const code_unit, 1>(std::addressof(units[0]), 1), Span<const code_point, 0>());
               }
@@ -145,7 +145,7 @@ namespace Krys
             ++inIt;
             ++outIt;
             return TResult(TSubInput(std::move(inIt), std::move(inLast)),
-                           TSubOutput(std::move(outIt), std::move(outLast)), state, EncodingError::OK);
+                           TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);
           }
         }
       }
@@ -155,7 +155,7 @@ namespace Krys
       return std::forward<TErrorHandler>(errorHandler)(
         self,
         TResult(TSubInput(std::move(inIt), std::move(inLast)),
-                TSubOutput(std::move(outIt), std::move(outLast)), state, EncodingError::InvalidSequence),
+                TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::InvalidSequence),
         Span<const code_unit, 1>(std::addressof(units[0]), 1), Span<const code_point, 0>());
     }
 
@@ -174,7 +174,7 @@ namespace Krys
     /// incremented even if an error occurs due to the semantics of any view that models an input_range.
     template <typename TInput, typename TOutput, typename TErrorHandler>
     static constexpr auto EncodeOne(TInput &&input, TOutput &&output, TErrorHandler &&errorHandler,
-                                    state &state) noexcept
+                                    state &s) noexcept
     {
       using TUErrorHandler = remove_cvref_t<TErrorHandler>;
       using TSubInput = Krys::Ranges::csubrange_for_t<remove_ref_t<TInput>>;
@@ -188,7 +188,7 @@ namespace Krys
       if (inIt == inLast)
       {
         // we don't need more, so we can just say the emptiness is a-okay.
-        return TResult(std::move(input), std::move(output), state, EncodingError::OK);
+        return TResult(std::move(input), std::move(output), s, EncodingError::OK);
       }
 
       char32_t codePoint32 = static_cast<char32_t>(*inIt);
@@ -205,8 +205,7 @@ namespace Krys
             // output is empty :(
             basic_euc_kr_uhc self {};
             return std::forward<TErrorHandler>(errorHandler)(
-              self,
-              TResult(std::move(input), std::move(output), state, EncodingError::InsufficientOutputSpace),
+              self, TResult(std::move(input), std::move(output), s, EncodingError::InsufficientOutputSpace),
               Span<const code_point, 0>(), Span<const code_unit, 0>());
           }
         }
@@ -214,7 +213,7 @@ namespace Krys
         *outIt = static_cast<code_unit>(codePoint);
         ++outIt;
         return TResult(TSubInput(std::move(inIt), std::move(inLast)),
-                       TSubOutput(std::move(outIt), std::move(outLast)), state, EncodingError::OK);
+                       TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);
       }
 
       std::optional<std::size_t> maybeIndex =
@@ -234,7 +233,7 @@ namespace Krys
             return std::forward<TErrorHandler>(errorHandler)(
               self,
               TResult(TSubInput(std::move(inIt), std::move(inLast)),
-                      TSubOutput(std::move(outIt), std::move(outLast)), state,
+                      TSubOutput(std::move(outIt), std::move(outLast)), s,
                       EncodingError::InsufficientOutputSpace),
               Span<const code_point, 0>(), Span<const code_unit, 0>());
           }
@@ -250,7 +249,7 @@ namespace Krys
             return std::forward<TErrorHandler>(errorHandler)(
               self,
               TResult(TSubInput(std::move(inIt), std::move(inLast)),
-                      TSubOutput(std::move(outIt), std::move(outLast)), state,
+                      TSubOutput(std::move(outIt), std::move(outLast)), s,
                       EncodingError::InsufficientOutputSpace),
               Span<const code_point, 0>(), Span<const code_unit, 1>(std::addressof(unit), 1));
           }
@@ -260,18 +259,18 @@ namespace Krys
         *outIt = static_cast<code_unit>(second);
         ++outIt;
         return TResult(TSubInput(std::move(inIt), std::move(inLast)),
-                       TSubOutput(std::move(outIt), std::move(outLast)), state, EncodingError::OK);
+                       TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);
       }
 
       basic_euc_kr_uhc self {};
       return std::forward<TErrorHandler>(errorHandler)(
         self,
         TResult(TSubInput(std::move(inIt), std::move(inLast)),
-                TSubOutput(std::move(outIt), std::move(outLast)), state, EncodingError::InvalidSequence),
+                TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::InvalidSequence),
         Span<const code_point, 0>(), Span<const code_unit, 0>());
     }
   };
 
   /// @brief An instance of euc_kr_uhc for ease of use.
-  inline constexpr basic_euc_kr_uhc<char> euc_kr_uhc = {};
+  constexpr inline basic_euc_kr_uhc<char> euc_kr_uhc = {};
 }

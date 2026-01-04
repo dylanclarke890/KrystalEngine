@@ -24,7 +24,7 @@ namespace Krys::Ranges
     {
       using TIteratorElement = remove_ref_t<iterator_reference_t<TIterator>>;
       constexpr const bool check = NonDerivedCompatiblePointer<TIteratorElement, T> // cf
-                                   && ContiguousIterator<TIterator>                 // cf
+                                   && IsContiguousIterator<TIterator>               // cf
                                    && ((Const<TIteratorElement>) ? Const<T> : true);
       if constexpr (check)
       {
@@ -46,7 +46,7 @@ namespace Krys::Ranges
     template <typename T, typename TIterator, typename TSentinel>
     constexpr bool IsStringViewReconstructible() noexcept
     {
-      if constexpr (!ContiguousIterator<TIterator>)
+      if constexpr (!IsContiguousIterator<TIterator>)
       {
         return false;
       }
@@ -65,12 +65,12 @@ namespace Krys::Ranges
 
     template <typename T, std::size_t TExtent, typename TIterator, typename TSentinel,
               enable_if_t<Impl::IsSpanReconstructible<T, TIterator, TSentinel>()> * = nullptr>
-    constexpr Span<T> Reconstruct(std::in_place_type_t<Span<T, TExtent>>, TIterator iterator,
+    constexpr Span<T> reconstruct(std::in_place_type_t<Span<T, TExtent>>, TIterator iterator,
                                   TSentinel sentinel) noexcept
     {
       if constexpr (SizedSentinelFor<TIterator, TSentinel>)
       {
-        if constexpr (ContiguousRange<TSentinel>)
+        if constexpr (IsContiguousIterator<TSentinel>)
         {
           auto iteratorAddress = to_address(iterator);
           auto sentinelAddress = to_address(sentinel);
@@ -92,7 +92,7 @@ namespace Krys::Ranges
     template <typename T, typename TTraits, typename TIterator, typename TSentinel,
               enable_if_t<Impl::IsStringViewReconstructible<T, TIterator, TSentinel>()> * = nullptr>
     constexpr std::basic_string_view<T, TTraits>
-      Reconstruct(std::in_place_type_t<std::basic_string_view<T, TTraits>>, TIterator iterator,
+      reconstruct(std::in_place_type_t<std::basic_string_view<T, TTraits>>, TIterator iterator,
                   TSentinel sentinel) noexcept
     {
       using TSize = typename std::basic_string_view<T, TTraits>::size_type;
@@ -129,18 +129,18 @@ namespace Krys::Ranges
 
     template <typename TIterator, typename TSentinel>
     concept has_tagless_iterator_sentinel_reconstruct =
-      requires { Reconstruct(std::declval<TIterator>(), std::declval<TSentinel>()); };
+      requires { reconstruct(std::declval<TIterator>(), std::declval<TSentinel>()); };
 
     template <typename TTag, typename TRange>
     concept has_range_reconstruct = has_tagless_iterator_sentinel_reconstruct<TTag, TRange>;
 
     template <typename TTag, typename TIterator, typename TSentinel>
     concept has_iterator_sentinel_reconstruct =
-      requires { Reconstruct(std::declval<TTag>(), std::declval<TIterator>(), std::declval<TSentinel>()); };
+      requires { reconstruct(std::declval<TTag>(), std::declval<TIterator>(), std::declval<TSentinel>()); };
 
     template <typename TTag, typename TRange, typename TIterator, typename TSentinel>
     concept has_range_iterator_reconstruct = requires {
-      Reconstruct(std::declval<TTag>(), std::declval<TRange>(), std::declval<TIterator>(),
+      reconstruct(std::declval<TTag>(), std::declval<TRange>(), std::declval<TIterator>(),
                   std::declval<TSentinel>());
     };
 
@@ -151,7 +151,7 @@ namespace Krys::Ranges
       {
         if constexpr (has_tagless_iterator_sentinel_reconstruct<TIterator, TSentinel>)
         {
-          return noexcept(Reconstruct(std::declval<TIterator>(), std::declval<TSentinel>()));
+          return noexcept(reconstruct(std::declval<TIterator>(), std::declval<TSentinel>()));
         }
         else
         {
@@ -172,7 +172,7 @@ namespace Krys::Ranges
       if constexpr (has_iterator_sentinel_reconstruct<TInPlace, TIterator, TSentinel>)
       {
         return noexcept(
-          Reconstruct(std::declval<TInPlace>(), std::declval<TIterator>(), std::declval<TSentinel>()));
+          reconstruct(std::declval<TInPlace>(), std::declval<TIterator>(), std::declval<TSentinel>()));
       }
       else
       {
@@ -183,9 +183,9 @@ namespace Krys::Ranges
     template <typename TInPlace, typename TRange, typename TIterator, typename TSentinel>
     constexpr bool IsRangeIteratorReconstructNoexcept() noexcept
     {
-      if constexpr (has_range_iterator_reconstruct<TInPlace, TIterator, TSentinel>)
+      if constexpr (has_range_iterator_reconstruct<TInPlace, TRange, TIterator, TSentinel>)
       {
-        return noexcept(Reconstruct(std::declval<TInPlace>(), std::declval<TRange>(),
+        return noexcept(reconstruct(std::declval<TInPlace>(), std::declval<TRange>(),
                                     std::declval<TIterator>(), std::declval<TSentinel>()));
       }
       else
@@ -212,7 +212,7 @@ namespace Krys::Ranges
     template <bool IsMutable, typename TInPlaceOrIterator, typename TRangeOrSentinel>
     constexpr bool IsRangeReconstructOrTaglessIteratorReconstructNoexcept() noexcept
     {
-      if constexpr (IsSpecializationOf<remove_cvref_t<TInPlaceOrIterator>, std::in_place_type_t>)
+      if constexpr (Krys::IsSpecializationOf<remove_cvref_t<TInPlaceOrIterator>, std::in_place_type_t>)
       {
         return IsRangeReconstructNoexcept<IsMutable, TInPlaceOrIterator, TRangeOrSentinel>();
       }
@@ -227,7 +227,7 @@ namespace Krys::Ranges
     {
       if constexpr (sizeof...(TArgs) == 0)
       {
-        if constexpr (IsSpecializationOf<remove_cvref_t<TInPlaceOrIterator>, std::in_place_type_t>)
+        if constexpr (Krys::IsSpecializationOf<remove_cvref_t<TInPlaceOrIterator>, std::in_place_type_t>)
         {
           if constexpr (has_range_reconstruct<TInPlaceOrIterator, TRangeOrSentinel>)
           {
@@ -299,7 +299,7 @@ namespace Krys::Ranges
         }
         else
         {
-          return IsTaglessIteratorReconstructNoexcept<IsMutable, TInPlaceOrIterator, TRangeOrSentinel>();
+          return IsTaglessIteratorReconstructNoexcept<TInPlaceOrIterator, TRangeOrSentinel>();
         }
       }
       else if constexpr (sizeof...(TArgs) == 1)
@@ -308,8 +308,7 @@ namespace Krys::Ranges
       }
       else if constexpr (sizeof...(TArgs) == 2)
       {
-        return IsRangeIteratorReconstructNoexcept<IsMutable, TInPlaceOrIterator, TRangeOrSentinel,
-                                                  TArgs...>();
+        return IsRangeIteratorReconstructNoexcept<TInPlaceOrIterator, TRangeOrSentinel, TArgs...>();
       }
       else
       {
@@ -330,7 +329,7 @@ namespace Krys::Ranges
         if constexpr (has_iterator_sentinel_reconstruct<std::in_place_type_t<TInPlaceTag>,
                                                         remove_cvref_t<TIterator>, remove_cvref_t<TSentinel>>)
         {
-          return Reconstruct(inplace, std::forward<TIterator>(iterator), std::forward<TSentinel>(sentinel));
+          return reconstruct(inplace, std::forward<TIterator>(iterator), std::forward<TSentinel>(sentinel));
         }
         else
         {
@@ -347,7 +346,7 @@ namespace Krys::Ranges
         if constexpr (has_range_iterator_reconstruct<std::in_place_type_t<TInPlaceTag>, TRange, TIterator,
                                                      TSentinel>)
         {
-          return Reconstruct(inplace, std::forward<TRange>(range), std::forward<TIterator>(it),
+          return reconstruct(inplace, std::forward<TRange>(range), std::forward<TIterator>(it),
                              std::forward<TSentinel>(sen));
         }
         else
@@ -366,7 +365,7 @@ namespace Krys::Ranges
         {
           if constexpr (has_range_reconstruct<TInPlaceOrIterator, TRangeOrSentinel>)
           {
-            return Reconstruct(std::forward<TInPlaceOrIterator>(inplaceOrIterator),
+            return reconstruct(std::forward<TInPlaceOrIterator>(inplaceOrIterator),
                                std::forward<TRangeOrSentinel>(rangeOrSentinel));
           }
           else
@@ -389,7 +388,7 @@ namespace Krys::Ranges
                             || (Class<TRangeOrSentinel> || IsEnum<TRangeOrSentinel>))
                            && has_tagless_iterator_sentinel_reconstruct<TInPlaceOrIterator, TRangeOrSentinel>)
         {
-          return Reconstruct(std::forward<TInPlaceOrIterator>(inplaceOrIterator),
+          return reconstruct(std::forward<TInPlaceOrIterator>(inplaceOrIterator),
                              std::forward<TRangeOrSentinel>(rangeOrSentinel));
         }
         else
@@ -402,21 +401,24 @@ namespace Krys::Ranges
     };
   }
 
-  /// @brief An implementation of the P1664 (https://wg21.link/p1664 |
-  /// https://thephd.dev/_vendor/future_cxx/papers/d1664.html) reconstructible ranges extension point. It
-  /// is derived from Krys::Hijack::token in order for outside implementations to have a common place to
-  /// put reconstruction for things outside of their control, without needing to place it in the global
-  /// namespace or the immediate ztd::ranges namespace, where there are too many other types that could
-  /// force asking more questions about what is in the list for ADL and drive up compile-times.
-  inline constexpr Impl::ReconstructFn<true> reconstruct = {};
+  inline namespace fn
+  {
+    /// @brief An implementation of the P1664 (https://wg21.link/p1664 |
+    /// https://thephd.dev/_vendor/future_cxx/papers/d1664.html) reconstructible ranges extension point. It
+    /// is derived from Krys::Hijack::token in order for outside implementations to have a common place to
+    /// put reconstruction for things outside of their control, without needing to place it in the global
+    /// namespace or the immediate ztd::ranges namespace, where there are too many other types that could
+    /// force asking more questions about what is in the list for ADL and drive up compile-times.
+    inline constexpr Impl::ReconstructFn<true> reconstruct = {};
 
-  /// @brief An implementation of the P1664 (https://wg21.link/p1664 |
-  /// https://thephd.dev/_vendor/future_cxx/papers/d1664.html) reconstructible ranges extension point. It
-  /// is derives from Krys::Hijack::token in order for outside implementations to have a common place to
-  /// put reconstruction for things outside of their control, without needing to place it in the global
-  /// namespace or the immediate ztd::ranges namespace, where there are too many other types that could
-  /// force asking more questions about what is in the list for ADL and drive up compile-times.
-  inline constexpr Impl::ReconstructFn<false> const_reconstruct = {};
+    /// @brief An implementation of the P1664 (https://wg21.link/p1664 |
+    /// https://thephd.dev/_vendor/future_cxx/papers/d1664.html) reconstructible ranges extension point. It
+    /// is derives from Krys::Hijack::token in order for outside implementations to have a common place to
+    /// put reconstruction for things outside of their control, without needing to place it in the global
+    /// namespace or the immediate ztd::ranges namespace, where there are too many other types that could
+    /// force asking more questions about what is in the list for ADL and drive up compile-times.
+    inline constexpr Impl::ReconstructFn<false> const_reconstruct = {};
+  }
 
   namespace Impl
   {
@@ -494,12 +496,12 @@ namespace Krys::Ranges
     };
   }
 
-  /// @brief A Reconstruct that attempts multiple versions of Reconstruct, and if none of them works then
+  /// @brief A reconstruct that attempts multiple versions of reconstruct, and if none of them works then
   /// fallsback to the default subrange return value.
   template <typename... TArgs>
   inline constexpr Impl::CascadingReconstructFn<true, TArgs...> cascading_reconstruct = {};
 
-  /// @brief A Reconstruct that attempts multiple versions of Reconstruct, and if none of them works then
+  /// @brief A reconstruct that attempts multiple versions of reconstruct, and if none of them works then
   /// fallsback to the default subrange return value.
   template <typename... TArgs>
   inline constexpr Impl::CascadingReconstructFn<false, TArgs...> const_cascading_reconstruct = {};
@@ -603,7 +605,7 @@ namespace Krys::Ranges
     std::in_place_type<unwrap_remove_cvref_t<TRange>>, std::declval<TIterator>(), std::declval<TSentinel>()));
 
   template <typename TRange>
-  using const_range_reconstruct_t = decltype(Krys::Ranges::reconstruct(
+  using const_range_reconstruct_t = decltype(Krys::Ranges::const_reconstruct(
     std::in_place_type<unwrap_remove_cvref_t<TRange>>, std::declval<TRange>()));
 
   template <typename TTag, typename TRange = TTag>

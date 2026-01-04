@@ -100,7 +100,7 @@ namespace Krys
       requires(!IsPointer<TPointer>)
       constexpr auto operator()(TPointer &p) const noexcept
       {
-        if constexpr (Krys::Ranges::ContiguousIterator<TPointer>)
+        if constexpr (Krys::Ranges::IsContiguousIterator<TPointer>)
         {
   #if KRYS_COMPILER_STL(MSVC)
           return (*this)(p._Unwrapped());

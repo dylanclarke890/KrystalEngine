@@ -19,5 +19,5 @@ namespace Krys
   };
 
   /// @brief An instance of basic_ibm_1006_urdu for ease of use.
-  inline constexpr basic_ibm_1006_urdu<char> ibm_1006_urdu = {};
+  constexpr inline basic_ibm_1006_urdu<char> ibm_1006_urdu = {};
 }

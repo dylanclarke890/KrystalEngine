@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Text/UnicodeCodePoint.hpp"
 #include "Krystal.Text/Impl/GBK_or_GB18030.hpp"
+#include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys
 {
@@ -16,5 +16,5 @@ namespace Krys
   };
 
   /// @brief An instance of basic_gb18030 for ease of use.
-  inline constexpr basic_gb18030<char> gb18030 = {};
+  constexpr inline basic_gb18030<char> gb18030 = {};
 }

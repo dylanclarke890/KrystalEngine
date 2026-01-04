@@ -19,5 +19,5 @@ namespace Krys
   };
 
   /// @brief An instance of basic_mac_cyrillic for ease of use.
-  inline constexpr basic_mac_cyrillic<char> mac_cyrillic = {};
+  constexpr inline basic_mac_cyrillic<char> mac_cyrillic = {};
 }

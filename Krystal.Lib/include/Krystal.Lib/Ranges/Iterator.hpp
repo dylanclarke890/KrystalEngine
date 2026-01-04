@@ -87,7 +87,7 @@ namespace Krys::Ranges
   concept OutputIteratorExact = SameType<std::output_iterator_tag, iterator_concept_t<TIterator>>;
 
   template <typename TIterator>
-  concept is_iterator_input_or_output_iterator_exactly_v =
+  concept InputOrOutputIteratorExact =
     InputIteratorExact<TIterator> || OutputIteratorExact<TIterator>;
 
   template <typename TIterator>

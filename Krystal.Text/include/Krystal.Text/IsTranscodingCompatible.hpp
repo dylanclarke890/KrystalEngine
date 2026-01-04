@@ -6,8 +6,6 @@
 #include "Krystal.Text/Encodings/ASCII.hpp"
 #include "Krystal.Text/Encodings/UTF8.hpp"
 #include "Krystal.Text/IsUnicodeCodePoint.hpp"
-#include "Krystal.Text/UnicodeCodePoint.hpp"
-#include "Krystal.Text/UnicodeScalarValue.hpp"
 
 namespace Krys
 {

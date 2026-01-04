@@ -38,7 +38,7 @@ namespace Krys::Handlers
 
   public:
     /// @brief The underlying error handler type.
-    using error_handler = TErrorHandler;
+    using ErrorHandler = TErrorHandler;
 
     /// @brief Constructs a BasicIncompleteHandler with a default-constructed internal error handler.
     constexpr BasicIncompleteHandler() noexcept(NoThrowDefaultConstructible<TErrorHandlerBase>)

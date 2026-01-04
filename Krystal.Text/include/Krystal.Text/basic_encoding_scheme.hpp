@@ -1,4 +1,4 @@
-﻿// =============================================================================
+// =============================================================================
 //
 // ztd.text
 // Copyright © JeanHeyd "ThePhD" Meneide and Shepherd's Oasis, LLC
@@ -33,363 +33,365 @@
 #ifndef ZTD_TEXT_BASIC_ENCODING_SCHEME_HPP
 #define ZTD_TEXT_BASIC_ENCODING_SCHEME_HPP
 
+#include <ztd/text/version.hpp>
 
-
-#include "Krystal.Text/State.hpp"
-#include "Krystal.Text/CodePoint.hpp"
-#include "Krystal.Text/CodeUnit.hpp"
-#include "Krystal.Text/SkipInputError.hpp"
-#include "Krystal.Text/Impl/ConstantEncodingTraits.hpp"
+#include <ztd/text/state.hpp>
+#include <ztd/text/code_point.hpp>
+#include <ztd/text/code_unit.hpp>
+#include <ztd/text/skip_input_error.hpp>
+#include <ztd/text/detail/constant_encoding_traits.hpp>
 #include <ztd/text/detail/basic_encoding_scheme_includes.hpp>
-#include "Krystal.Lib/Utils/Unwrap.hpp"
+
+#include <ztd/idk/unwrap.hpp>
+
 #include <optional>
 #include <cstddef>
 
+#include <ztd/prologue.hpp>
 
+namespace ztd { namespace text {
+	ZTD_TEXT_INLINE_ABI_NAMESPACE_OPEN_I_
 
-namespace Krys {
-	
-
-	
-	/// @addtogroup ztd_text_encoding_scheme encoding_scheme
+	//////
+	/// @addtogroup ztd_text_encoding_scheme ztd::text::encoding_scheme
 	/// @{
 
-	
+	//////
 	/// @brief Decomposes the provided Encoding type into a specific endianness (big, little, or native) to allow
 	/// for a single encoding type to be viewed in different ways.
 	///
-	/// @tparam TEncoding The encoding type.
+	/// @tparam _Encoding The encoding type.
 	/// @tparam _Endian The endianess to use. Defaults to ztd::endian::native.
 	/// @tparam _Byte The byte type to use. Defaults to ``std::byte``.
 	///
 	/// @remarks For example, this can be used to construct a Big Endian UTF-16 by using
-	/// ``encoding_scheme<utf16_t, ztd::endian::big>``. It can be made interopable with ``unsigned
+	/// ``encoding_scheme<ztd::text::utf16_t, ztd::endian::big>``. It can be made interopable with ``unsigned
 	/// char`` buffers rather than ``std::byte`` buffers by doing:
-	/// ``encoding_scheme<utf32_t, ztd::endian::native, uchar>``.
-	template <typename TEncoding, endian _Endian = endian::native, typename _Byte = std::byte>
-	class encoding_scheme : public Impl::IsUnicodeEncodingES<encoding_scheme<TEncoding, _Endian, _Byte>,
-		                        unwrap_remove_cvref_t<TEncoding>>,
-		                   private EBCO<TEncoding> {
+	/// ``ztd::text::encoding_scheme<ztd::text::utf32_t, ztd::endian::native, unsigned char>``.
+	template <typename _Encoding, endian _Endian = endian::native, typename _Byte = ::std::byte>
+	class encoding_scheme : public __txt_detail::__is_unicode_encoding_es<encoding_scheme<_Encoding, _Endian, _Byte>,
+		                        unwrap_remove_cvref_t<_Encoding>>,
+		                   private ebco<_Encoding> {
 	private:
-		using TBase       = EBCO<TEncoding>;
-		using _UBaseEncoding = unwrap_remove_cvref_t<TEncoding>;
+		using __base_t       = ebco<_Encoding>;
+		using _UBaseEncoding = unwrap_remove_cvref_t<_Encoding>;
 		using _BaseCodeUnit  = code_unit_t<_UBaseEncoding>;
 
 	public:
-		
+		//////
 		/// @brief The encoding type.
-		
+		//////
 		/// @brief The encoding type that this scheme wraps.
-		using encoding_type = TEncoding;
-		
+		using encoding_type = _Encoding;
+		//////
 		/// @brief The individual units that result from a decode operation or as used as input to an encode
 		/// operation. For most encodings, this is going to be a Unicode Code Point or a Unicode Scalar Value.
 		using code_point = code_point_t<_UBaseEncoding>;
-		/
+		///////
 		/// @brief The individual units that result from an encode operation or are used as input to a decode
 		/// operation.
 		///
-		/// @remarks Typically, this type is usually always some kind of byte type (uchar or std::byte or
+		/// @remarks Typically, this type is usually always some kind of byte type (unsigned char or std::byte or
 		/// other ``sizeof(obj) == 1`` type)./
 		using code_unit = _Byte;
-		
+		//////
 		/// @brief The state that can be used between calls to the decode function.
 		///
 		/// @remarks Even if the underlying encoding only has a single `state` type, we need to separate the two
 		/// out in order to generically handle all encodings. Therefore, the encoding_scheme will always have
-		/// both `EncodeState` and `DecodeState.`
-		using DecodeState = DecodeState<_UBaseEncoding>;
-		
+		/// both `encode_state` and `decode_state.`
+		using decode_state = decode_state_t<_UBaseEncoding>;
+		//////
 		/// @brief The state that can be used between calls to the encode function.
 		///
 		/// @remarks Even if the underlying encoding only has a single `state` type, we need to separate the two
 		/// out in order to generically handle all encodings. Therefore, the encoding_scheme will always have
-		/// both `EncodeState` and `DecodeState.`
-		using EncodeState = EncodeState<_UBaseEncoding>;
-		
+		/// both `encode_state` and `decode_state.`
+		using encode_state = encode_state_t<_UBaseEncoding>;
+		//////
 		/// @brief Whether or not the encode operation can process all forms of input into code point values.
 		///
 		/// @remarks Defers to what the underlying `encoding_type` does.
-		using is_encode_injective = IntegralConstant<bool, IsEncodeInjective<_UBaseEncoding>>;
-		
+		using is_encode_injective = ::std::integral_constant<bool, is_encode_injective_v<_UBaseEncoding>>;
+		//////
 		/// @brief Whether or not the decode operation can process all forms of input into code point values.
 		///
 		/// @remarks Defers to what the underlying `encoding_type` does.
-		using is_decode_injective = IntegralConstant<bool, IsDecodeInjective<_UBaseEncoding>>;
-		
+		using is_decode_injective = ::std::integral_constant<bool, is_decode_injective_v<_UBaseEncoding>>;
+		//////
 		/// @brief The maximum number of code points a single complete operation of decoding can produce. This is
 		/// 1 for all Unicode Transformation Format (UTF) encodings.
-		inline static constexpr const std::size_t MaxCodePoints = MaxCodePoints<_UBaseEncoding>;
-		
+		inline static constexpr const ::std::size_t max_code_points = max_code_points_v<_UBaseEncoding>;
+		//////
 		/// @brief The maximum code units a single complete operation of encoding can produce.
-		inline static constexpr const std::size_t MaxCodeUnits
-			= (MaxCodeUnits<_UBaseEncoding> * sizeof(_BaseCodeUnit)) / (sizeof(_Byte));
-		
+		inline static constexpr const ::std::size_t max_code_units
+			= (max_code_units_v<_UBaseEncoding> * sizeof(_BaseCodeUnit)) / (sizeof(_Byte));
+		//////
 		/// @brief The id representing the decoded text.
-		inline static constexpr const Krys::TextEncodingId DecodedId = decoded_id_v<_UBaseEncoding>;
-		
+		inline static constexpr const ::ztd::text_encoding_id decoded_id = decoded_id_v<_UBaseEncoding>;
+		//////
 		/// @brief The id representing the encoded text.
-		inline static constexpr const Krys::TextEncodingId EncodedId = ::ztd::to_byte_text_encoding_id(
+		inline static constexpr const ::ztd::text_encoding_id encoded_id = ::ztd::to_byte_text_encoding_id(
 			encoded_id_v<_UBaseEncoding>, _Endian, sizeof(code_unit_t<_UBaseEncoding>));
 
-		
-		/// @brief Default constructs a encoding_scheme.
+		//////
+		/// @brief Default constructs a ztd::text::encoding_scheme.
 		encoding_scheme() = default;
 
-		
-		/// @brief Constructs a encoding_scheme with the encoding object and any additional arguments.
+		//////
+		/// @brief Constructs a ztd::text::encoding_scheme with the encoding object and any additional arguments.
 		///
 		/// @param[in] __arg0 The first argument used to construct the stored encoding.
-		/// @param[in] args Any additional arguments used to construct the stored encoding.
-		template <typename _Arg0, typename... TArgs,
-			enable_if_t<!SameType<remove_cvref_t<_Arg0>, encoding_scheme> // cf
-			     && !SameType<remove_cvref_t<_Arg0>, std::in_place_t>>* = nullptr>
-		constexpr encoding_scheme(_Arg0&& __arg0, TArgs&&... args) noexcept(
-			NoThrowConstructible<_UBaseEncoding, _Arg0, TArgs...>)
-		: TBase(std::forward<_Arg0>(__arg0), std::forward<TArgs>(args)...) {
+		/// @param[in] __args Any additional arguments used to construct the stored encoding.
+		template <typename _Arg0, typename... _Args,
+			::std::enable_if_t<!::std::is_same_v<remove_cvref_t<_Arg0>, encoding_scheme> // cf
+			     && !::std::is_same_v<remove_cvref_t<_Arg0>, ::std::in_place_t>>* = nullptr>
+		constexpr encoding_scheme(_Arg0&& __arg0, _Args&&... __args) noexcept(
+			::std::is_nothrow_constructible_v<_UBaseEncoding, _Arg0, _Args...>)
+		: __base_t(::std::forward<_Arg0>(__arg0), ::std::forward<_Args>(__args)...) {
 		}
 
-		
-		/// @brief Constructs a encoding_scheme with the encoding object and any additional arguments.
+		//////
+		/// @brief Constructs a ztd::text::encoding_scheme with the encoding object and any additional arguments.
 		///
-		/// @param[in] args Any additional arguments used to construct the encoding in the erased storage.
+		/// @param[in] __args Any additional arguments used to construct the encoding in the erased storage.
 		///
 		/// @remarks If the provided encoding does not have a byte code_unit type, it is wrapped in an
-		/// encoding_scheme first.
-		template <typename... TArgs>
-		constexpr encoding_scheme(std::in_place_t, TArgs&&... args) noexcept(
-			NoThrowConstructible<_UBaseEncoding, TArgs...>)
-		: TBase(std::forward<TArgs>(args)...) {
+		/// ztd::text::encoding_scheme first.
+		template <typename... _Args>
+		constexpr encoding_scheme(::std::in_place_t, _Args&&... __args) noexcept(
+			::std::is_nothrow_constructible_v<_UBaseEncoding, _Args...>)
+		: __base_t(::std::forward<_Args>(__args)...) {
 		}
 
-		
-		/// @brief Cannot copy-construct a encoding_scheme object.
+		//////
+		/// @brief Cannot copy-construct a ztd::text::encoding_scheme object.
 		encoding_scheme(const encoding_scheme&) = default;
 
-		
-		/// @brief Cannot copy-assign a encoding_scheme object.
+		//////
+		/// @brief Cannot copy-assign a ztd::text::encoding_scheme object.
 		encoding_scheme& operator=(const encoding_scheme&) = default;
 
-		
-		/// @brief Move-constructs a encoding_scheme from the provided r-value reference.
+		//////
+		/// @brief Move-constructs a ztd::text::encoding_scheme from the provided r-value reference.
 		///
 		/// @remarks This leaves the passed-in r-value reference without an encoding object. Calling any function
-		/// on a moved-fron encoding_scheme, except for destruction, is a violation and invokes
+		/// on a moved-fron ztd::text::encoding_scheme, except for destruction, is a violation and invokes
 		/// Undefined Behavior (generally, a crash).
 		encoding_scheme(encoding_scheme&&) = default;
 
-		
-		/// @brief Move-assigns a encoding_scheme from the provided r-value reference.
+		//////
+		/// @brief Move-assigns a ztd::text::encoding_scheme from the provided r-value reference.
 		///
 		/// @remarks This leaves the passed-in r-value reference without an encoding object. Calling any function
-		/// on a moved-fron encoding_scheme, except for destruction, is a violation and may invoke
+		/// on a moved-fron ztd::text::encoding_scheme, except for destruction, is a violation and may invoke
 		/// Undefined Behavior (generally, a crash).
 		encoding_scheme& operator=(encoding_scheme&&) = default;
 
-		
+		//////
 		/// @brief Retrives the underlying encoding object.
 		///
 		/// @returns An l-value reference to the encoding object.
 		constexpr encoding_type& base() & noexcept {
-			return this->TBase::GetValue();
+			return this->__base_t::get_value();
 		}
 
-		
+		//////
 		/// @brief Retrives the underlying encoding object.
 		///
 		/// @returns An l-value reference to the encoding object.
 		constexpr const encoding_type& base() const& noexcept {
-			return this->TBase::GetValue();
+			return this->__base_t::get_value();
 		}
 
-		
+		//////
 		/// @brief Retrives the underlying encoding object.
 		///
 		/// @returns An l-value reference to the encoding object.
 		constexpr encoding_type&& base() && noexcept {
-			return this->TBase::GetValue();
+			return this->__base_t::get_value();
 		}
 
-		
+		//////
 		/// @brief Returns, the desired replacement code units to use.
 		///
 		/// @remarks This is only callable if the function call exists on the wrapped encoding. It is broken down
 		/// into a contiguous view type formulated from bytes if the wrapped code unit types do not match.
 		template <typename _Unused                                     = encoding_type,
-			enable_if_t<HasReplacementCodeUnits<_Unused>>* = nullptr>
-		constexpr decltype(auto) ReplacementCodeUnits() const noexcept {
-			using TOriginalCodeUnit = code_unit_t<encoding_type>;
+			::std::enable_if_t<is_code_units_replaceable_v<_Unused>>* = nullptr>
+		constexpr decltype(auto) replacement_code_units() const noexcept {
+			using _OriginalCodeUnit = code_unit_t<encoding_type>;
 
-			decltype(auto) original = this->base().ReplacementCodeUnits();
-			if constexpr (SameType<TOriginalCodeUnit, code_unit>) {
-				return original;
+			decltype(auto) __original = this->base().replacement_code_units();
+			if constexpr (::std::is_same_v<_OriginalCodeUnit, code_unit>) {
+				return __original;
 			}
 			else {
-				using TOriginalSpan    = Span<const TOriginalCodeUnit>;
-				using TTransformedSpan = Span<const code_unit>;
-				TOriginalSpan guaranteedCodeUnitView(original);
+				using _OriginalSpan    = ::ztd::span<const _OriginalCodeUnit>;
+				using _TransformedSpan = ::ztd::span<const code_unit>;
+				_OriginalSpan __guaranteed_code_unit_view(__original);
 				// transform into proper type...
-				auto transformedPtr = reinterpret_cast<const code_unit*>(guaranteedCodeUnitView.data());
-				auto transformedSize
-					= (guaranteedCodeUnitView.size() * sizeof(TOriginalCodeUnit)) / sizeof(const code_unit);
-				return TTransformedSpan(transformedPtr, transformedSize);
+				auto __transformed_ptr = reinterpret_cast<const code_unit*>(__guaranteed_code_unit_view.data());
+				auto __transformed_size
+					= (__guaranteed_code_unit_view.size() * sizeof(_OriginalCodeUnit)) / sizeof(const code_unit);
+				return _TransformedSpan(__transformed_ptr, __transformed_size);
 			}
 		}
 
-		
+		//////
 		/// @brief Returns the desired replacement code points to use.
 		///
 		/// @remarks Is only callable if the function call exists on the wrapped encoding.
 		template <typename _Unused                                      = encoding_type,
-			enable_if_t<HasReplacementCodePoints<_Unused>>* = nullptr>
-		constexpr decltype(auto) ReplacementCodePoints() const noexcept {
-			return this->base().ReplacementCodePoints();
+			::std::enable_if_t<is_code_points_replaceable_v<_Unused>>* = nullptr>
+		constexpr decltype(auto) replacement_code_points() const noexcept {
+			return this->base().replacement_code_points();
 		}
 
-		
+		//////
 		/// @brief Returns the desired replacement code units to use, or an empty optional-like type if there is
 		/// nothing present.
 		///
 		/// @remarks This is only callable if the function call exists on the wrapped encoding. It is broken down
 		/// into a contiguous view type formulated from bytes if the wrapped code unit types do not match.
 		template <typename _Unused                                           = encoding_type,
-			enable_if_t<HasMaybeReplacementCodeUnits<_Unused>>* = nullptr>
-		constexpr decltype(auto) MaybeReplacementCodeUnits() const noexcept {
-			using TOriginalCodeUnit = code_unit_t<encoding_type>;
+			::std::enable_if_t<is_code_units_maybe_replaceable_v<_Unused>>* = nullptr>
+		constexpr decltype(auto) maybe_replacement_code_units() const noexcept {
+			using _OriginalCodeUnit = code_unit_t<encoding_type>;
 
-			decltype(auto) maybeOriginal = this->base().MaybeReplacementCodeUnits();
-			if constexpr (SameType<TOriginalCodeUnit, code_unit>) {
-				return maybeOriginal;
+			decltype(auto) __maybe_original = this->base().maybe_replacement_code_units();
+			if constexpr (::std::is_same_v<_OriginalCodeUnit, code_unit>) {
+				return __maybe_original;
 			}
 			else {
-				using TOriginalSpan    = Span<const TOriginalCodeUnit>;
-				using TTransformedSpan = Span<const code_unit>;
-				if (!maybeOriginal) {
-					return std::optional<TTransformedSpan>(std::nullopt);
+				using _OriginalSpan    = ::ztd::span<const _OriginalCodeUnit>;
+				using _TransformedSpan = ::ztd::span<const code_unit>;
+				if (!__maybe_original) {
+					return ::std::optional<_TransformedSpan>(::std::nullopt);
 				}
-				decltype(auto) original = *maybeOriginal;
-				TOriginalSpan guaranteedCodeUnitView(original);
+				decltype(auto) __original = *__maybe_original;
+				_OriginalSpan __guaranteed_code_unit_view(__original);
 				// transform into proper type...
-				auto transformedPtr = reinterpret_cast<const code_unit*>(guaranteedCodeUnitView.data());
-				auto transformedSize
-					= (guaranteedCodeUnitView.size() * sizeof(TOriginalCodeUnit)) / sizeof(const code_unit);
-				return TTransformedSpan(transformedPtr, transformedSize);
+				auto __transformed_ptr = reinterpret_cast<const code_unit*>(__guaranteed_code_unit_view.data());
+				auto __transformed_size
+					= (__guaranteed_code_unit_view.size() * sizeof(_OriginalCodeUnit)) / sizeof(const code_unit);
+				return _TransformedSpan(__transformed_ptr, __transformed_size);
 			}
 		}
 
-		
+		//////
 		/// @brief Returns the desired replacement code units to use.
 		///
 		/// @remarks This Is only callable if the function call exists on the wrapped encoding.
 		template <typename _Unused                                            = encoding_type,
-			enable_if_t<HasMaybeReplacementCodePoints<_Unused>>* = nullptr>
-		constexpr decltype(auto) MaybeReplacementCodePoints() const noexcept {
-			return this->base().MaybeReplacementCodePoints();
+			::std::enable_if_t<is_code_points_maybe_replaceable_v<_Unused>>* = nullptr>
+		constexpr decltype(auto) maybe_replacement_code_points() const noexcept {
+			return this->base().maybe_replacement_code_points();
 		}
 
-		
+		//////
 		/// @brief Whether or not this encoding is some form of Unicode encoding.
-		constexpr bool ContainsUnicodeEncoding() const noexcept {
-			return ::ContainsUnicodeEncoding(this->base());
+		constexpr bool contains_unicode_encoding() const noexcept {
+			return ::ztd::text::contains_unicode_encoding(this->base());
 		}
 
-		
+		//////
 		/// @brief Skips any consecutive input errors in the encoded input, where possible.
 		///
 		/// @remarks This Is only callable if the function call exists on the wrapped encoding.
-		template <typename TResult, typename TInputProgress, typename TOutputProgress,
-			enable_if_t<is_input_error_skippable_v<const encoding_type&, TResult, const TInputProgress&,
-			     const TOutputProgress&>>* = nullptr>
-		constexpr decltype(auto) SkipInputError(TResult&& result) const
-			noexcept(::is_nothrow_skip_input_error_v<const encoding_type&, TResult, const TInputProgress&,
-			     const TOutputProgress&>) {
-			return ::SkipInputError(this->base(), std::forward<TResult>(result));
+		template <typename _Result, typename _InputProgress, typename _OutputProgress,
+			::std::enable_if_t<is_input_error_skippable_v<const encoding_type&, _Result, const _InputProgress&,
+			     const _OutputProgress&>>* = nullptr>
+		constexpr decltype(auto) skip_input_error(_Result&& __result) const
+			noexcept(::ztd::text::is_nothrow_skip_input_error_v<const encoding_type&, _Result, const _InputProgress&,
+			     const _OutputProgress&>) {
+			return ::ztd::text::skip_input_error(this->base(), ::std::forward<_Result>(__result));
 		}
 
-		
+		//////
 		/// @brief Decodes a single complete unit of information as code points and produces a result with the
 		/// input and output ranges moved past what was successfully read and written; or, produces an error and
 		/// returns the input and output ranges untouched.
 		///
-		/// @param[in] input The input view to read code uunits from.
-		/// @param[in] output The output view to write code points into.
-		/// @param[in] errorHandler The error handler to invoke if encoding fails.
-		/// @param[in, out] s The necessary state information. For this encoding, the state is empty and means
+		/// @param[in] __input The input view to read code uunits from.
+		/// @param[in] __output The output view to write code points into.
+		/// @param[in] __error_handler The error handler to invoke if encoding fails.
+		/// @param[in, out] __s The necessary state information. For this encoding, the state is empty and means
 		/// very little.
 		///
-		/// @returns A DecodeResult object that contains the input range, output range, error handler, and
+		/// @returns A ztd::text::decode_result object that contains the input range, output range, error handler, and
 		/// a reference to the passed-in state\.
 		///
 		/// @remarks To the best ability of the implementation, the iterators will be returned untouched (e.g.,
 		/// the input models at least a view and a forward_range). If it is not possible, returned ranges may be
 		/// incremented even if an error occurs due to the semantics of any view that models an input_range.
-		template <typename TInput, typename TOutput, typename TErrorHandler>
-		constexpr auto DecodeOne(
-			TInput&& input, TOutput&& output, TErrorHandler&& errorHandler, DecodeState& s) const {
-			using _UOutputRange   = remove_cvref_t<TOutput>;
-			using _CVErrorHandler = remove_ref_t<TErrorHandler>;
-			using TSubInput       = Krys::Ranges::csubrange_for_t<remove_ref_t<TInput>>;
-			using TSubOutput      = Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
-			using TResult         = DecodeResult<TSubInput, TSubOutput, DecodeState>;
+		template <typename _Input, typename _Output, typename _ErrorHandler>
+		constexpr auto decode_one(
+			_Input&& __input, _Output&& __output, _ErrorHandler&& __error_handler, decode_state& __s) const {
+			using _UOutputRange   = remove_cvref_t<_Output>;
+			using _CVErrorHandler = ::std::remove_reference_t<_ErrorHandler>;
+			using _SubInput       = ztd::ranges::csubrange_for_t<::std::remove_reference_t<_Input>>;
+			using _SubOutput      = ztd::ranges::subrange_for_t<::std::remove_reference_t<_Output>>;
+			using _Result         = decode_result<_SubInput, _SubOutput, decode_state>;
 
-			using _InByteIt  = ranges::word_iterator<_BaseCodeUnit, TSubInput, _Endian>;
+			using _InByteIt  = ranges::word_iterator<_BaseCodeUnit, _SubInput, _Endian>;
 			using _InByteSen = ranges::word_sentinel;
-			Krys::Ranges::subrange<_InByteIt, _InByteSen> __inbytes(
-				_InByteIt(std::in_place, std::forward<TInput>(input)), _InByteSen());
-			Impl::__scheme_handler<_Byte, TSubInput, _UOutputRange, _CVErrorHandler> intermediateHandler(
-				errorHandler);
-			auto result = this->base().DecodeOne(
-				std::move(__inbytes), std::forward<TOutput>(output), intermediateHandler, s);
-			return TResult(::ztd::unwrap_iterator(std::move(result.Input).begin()).range(),
-				std::move(result.Output), s, result.ErrorCode, result.ErrorCount);
+			::ztd::ranges::subrange<_InByteIt, _InByteSen> __inbytes(
+				_InByteIt(::std::in_place, ::std::forward<_Input>(__input)), _InByteSen());
+			__txt_detail::__scheme_handler<_Byte, _SubInput, _UOutputRange, _CVErrorHandler> __intermediate_handler(
+				__error_handler);
+			auto __result = this->base().decode_one(
+				::std::move(__inbytes), ::std::forward<_Output>(__output), __intermediate_handler, __s);
+			return _Result(::ztd::unwrap_iterator(::std::move(__result.input).begin()).range(),
+				::std::move(__result.output), __s, __result.error_code, __result.error_count);
 		}
 
-		
+		//////
 		/// @brief Encodes a single complete unit of information as code units and produces a result with the
 		/// input and output ranges moved past what was successfully read and written; or, produces an error and
 		/// returns the input and output ranges untouched.
 		///
-		/// @param[in] input The input view to read code points from.
-		/// @param[in] output The output view to write code units into.
-		/// @param[in] errorHandler The error handler to invoke if encoding fails.
-		/// @param[in, out] s The necessary state information. For this encoding, the state is empty and means
+		/// @param[in] __input The input view to read code points from.
+		/// @param[in] __output The output view to write code units into.
+		/// @param[in] __error_handler The error handler to invoke if encoding fails.
+		/// @param[in, out] __s The necessary state information. For this encoding, the state is empty and means
 		/// very little.
 		///
-		/// @returns A EncodeResult object that contains the input range, output range, error handler, and
+		/// @returns A ztd::text::encode_result object that contains the input range, output range, error handler, and
 		/// a reference to the passed-in state\.
 		///
 		/// @remarks To the best ability of the implementation, the iterators will be returned untouched (e.g.,
 		/// the input models at least a view and a forward_range). If it is not possible, returned ranges may be
 		/// incremented even if an error occurs due to the semantics of any view that models an input_range.
-		template <typename TInput, typename TOutput, typename TErrorHandler>
-		constexpr auto EncodeOne(
-			TInput&& input, TOutput&& output, TErrorHandler&& errorHandler, EncodeState& s) const {
-			using TSubInput       = Krys::Ranges::csubrange_for_t<remove_ref_t<TInput>>;
-			using TSubOutput      = Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
-			using _OutByteIt      = ranges::word_iterator<_BaseCodeUnit, TSubOutput, _Endian>;
+		template <typename _Input, typename _Output, typename _ErrorHandler>
+		constexpr auto encode_one(
+			_Input&& __input, _Output&& __output, _ErrorHandler&& __error_handler, encode_state& __s) const {
+			using _SubInput       = ztd::ranges::csubrange_for_t<::std::remove_reference_t<_Input>>;
+			using _SubOutput      = ztd::ranges::subrange_for_t<::std::remove_reference_t<_Output>>;
+			using _OutByteIt      = ranges::word_iterator<_BaseCodeUnit, _SubOutput, _Endian>;
 			using _OutByteSen     = ranges::word_sentinel;
-			using _CVErrorHandler = remove_ref_t<TErrorHandler>;
-			using TResult         = EncodeResult<TSubInput, TSubOutput, EncodeState>;
+			using _CVErrorHandler = ::std::remove_reference_t<_ErrorHandler>;
+			using _Result         = encode_result<_SubInput, _SubOutput, encode_state>;
 
-			TSubOutput __outwords_output(std::forward<TOutput>(output));
+			_SubOutput __outwords_output(::std::forward<_Output>(__output));
 			ranges::subrange<_OutByteIt, _OutByteSen> __outwords(
-				_OutByteIt(std::move(__outwords_output)), _OutByteSen());
-			Impl::__scheme_handler<_Byte, TSubInput, TSubOutput, _CVErrorHandler> intermediateHandler(
-				errorHandler);
-			auto result
-				= this->base().EncodeOne(std::forward<TInput>(input), __outwords, intermediateHandler, s);
-			TSubOutput __result_output(::ztd::unwrap_iterator(std::move(result.Output).begin()).range());
-			return TResult(std::move(result.Input), std::move(__result_output), s, result.ErrorCode,
-				result.ErrorCount);
+				_OutByteIt(::std::move(__outwords_output)), _OutByteSen());
+			__txt_detail::__scheme_handler<_Byte, _SubInput, _SubOutput, _CVErrorHandler> __intermediate_handler(
+				__error_handler);
+			auto __result
+				= this->base().encode_one(::std::forward<_Input>(__input), __outwords, __intermediate_handler, __s);
+			_SubOutput __result_output(::ztd::unwrap_iterator(::std::move(__result.output).begin()).range());
+			return _Result(::std::move(__result.input), ::std::move(__result_output), __s, __result.error_code,
+				__result.error_count);
 		}
 	};
 
-	
+	//////
 	/// @}
 
-	
-}
+	ZTD_TEXT_INLINE_ABI_NAMESPACE_CLOSE_I_
+}} // namespace ztd::text
 
-
+#include <ztd/epilogue.hpp>
 
 #endif

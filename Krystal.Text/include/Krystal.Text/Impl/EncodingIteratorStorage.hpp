@@ -7,6 +7,7 @@
 #include "Krystal.Lib/Utils/ToUnderlying.hpp"
 #include "Krystal.Lib/Utils/Unwrap.hpp"
 #include "Krystal.Text/EncodingError.hpp"
+#include "Krystal.Lib/Utils/ipow.hpp"
 #include "Krystal.Text/Impl/SpanReconstruct.hpp"
 #include "Krystal.Text/State.hpp"
 #include <climits>
@@ -16,18 +17,7 @@ namespace Krys
 {
   namespace Impl
   {
-    // TODO: move this to Krys::Maths at some point
-    constexpr uint_least64_t ipow_impl(uint_least64_t base, uint_least64_t exp, uint_least64_t result)
-    {
-      return exp < 1u ? result : ipow_impl(base * base, exp / 2, (exp % 2) ? result * base : result);
-    }
-
-    constexpr uint_least64_t ipow(uint_least64_t base, uint_least64_t exp)
-    {
-      return ipow_impl(base, exp, 1);
-    }
-
-    inline constexpr std::size_t CursorlessSizeSentinel = 1;
+    constexpr inline std::size_t CursorlessSizeSentinel = 1;
 
     template <typename TEncoding, typename TEncodingState, std::size_t TId = 0>
     class StateStorage : private EBCO<unwrap_remove_cvref_t<TEncodingState>, TId>
@@ -107,11 +97,11 @@ namespace Krys
       constexpr IteratorStorage &operator=(const IteratorStorage &) = default;
       constexpr IteratorStorage &operator=(IteratorStorage &&) = default;
 
-      template <typename _ArgRange,
-                enable_if_t<!SameType<remove_cvref_t<_ArgRange>, IteratorStorage>> * = nullptr>
-      constexpr IteratorStorage(_ArgRange &&range) noexcept(noexcept(IteratorStorage(
+      template <typename TArgRange>
+      requires(!SameType<remove_cvref_t<TArgRange>, IteratorStorage>)
+      constexpr IteratorStorage(TArgRange &&range) noexcept(noexcept(IteratorStorage(
         std::declval<range_type>(), std::declval<encoding_type>(), std::declval<error_handler_type>())))
-          : IteratorStorage(std::forward<_ArgRange>(range), encoding_type {}, error_handler_type {})
+          : IteratorStorage(std::forward<TArgRange>(range), encoding_type {}, error_handler_type {})
       {
       }
 
@@ -263,17 +253,17 @@ namespace Krys
 
       const TUErrorHandler &GetErrorHandler() const & noexcept
       {
-        return this->GetRef()->error_handler();
+        return this->GetRef()->ErrorHandler();
       }
 
       TUErrorHandler &GetErrorHandler() & noexcept
       {
-        return this->GetRef()->error_handler();
+        return this->GetRef()->ErrorHandler();
       }
 
       TUErrorHandler &&GetErrorHandler() && noexcept
       {
-        return this->GetRef()->error_handler();
+        return this->GetRef()->ErrorHandler();
       }
 
       const TURange &GetRange() const & noexcept

@@ -18,12 +18,12 @@ namespace Krys
 
   /// @brief Determines whether or not a given type is a @c span of some kind.
   template <typename T>
-  class is_span : public ::std::false_type
+  class is_span : public std::false_type
   {
   };
 
   template <typename T, decltype(std::dynamic_extent) N>
-  class is_span<Span<T, N>> : public ::std::true_type
+  class is_span<Span<T, N>> : public std::true_type
   {
   };
 
@@ -33,9 +33,9 @@ namespace Krys
   namespace Ranges
   {
     template <typename T, decltype(std::dynamic_extent) Extent>
-    inline constexpr bool EnableView<Krys::Span<T, Extent>> = true;
+    inline constexpr bool enable_view<Krys::Span<T, Extent>> = true;
 
     template <typename T, decltype(std::dynamic_extent) Extent>
-    inline constexpr bool EnableBorrowedRange<Krys::Span<T, Extent>> = true;
+    inline constexpr bool enable_borrowed_range<Krys::Span<T, Extent>> = true;
   }
 }

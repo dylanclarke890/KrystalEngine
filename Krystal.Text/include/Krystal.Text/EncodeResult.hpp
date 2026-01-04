@@ -9,7 +9,6 @@
 #include "Krystal.Text/EncodingError.hpp"
 #include "Krystal.Text/Impl/ResultTypeConstraints.hpp"
 #include "Krystal.Text/State.hpp"
-#include "Krystal.Text/UnicodeCodePoint.hpp"
 #include <array>
 #include <cstddef>
 #include <functional>
@@ -42,9 +41,9 @@ namespace Krys
     /// not an error was handled.
     /// @param[in] other A different but related result type.
     template <typename TArgInput, typename TArgOutput>
-    requires(Impl::ResultTypeCopyConstraint<StatelessEncodeResult, TInput, TArgInput, TOutput, TArgOutput>())
-    constexpr StatelessEncodeResult(const StatelessEncodeResult<TArgInput, TArgOutput> &other) noexcept(
-      Impl::ResultTypeCopyNoexcept<StatelessEncodeResult, TInput, TArgInput, TOutput, TArgOutput>())
+    requires CopyableResultType<StatelessEncodeResult, TInput, TArgInput, TOutput, TArgOutput>
+    constexpr StatelessEncodeResult(const StatelessEncodeResult<TArgInput, TArgOutput> &other) // cf
+      noexcept(NoThrowCopyableResultType<StatelessEncodeResult, TInput, TArgInput, TOutput, TArgOutput>)
         : Input(other.Input), Output(other.Output), ErrorCode(other.ErrorCode), ErrorCount(other.ErrorCount)
     {
     }
@@ -53,9 +52,9 @@ namespace Krys
     /// including whether or not an error was handled.
     /// @param[in] other A different but related result type.
     template <typename TArgInput, typename TArgOutput>
-    requires(Impl::ResultTypeMoveConstraint<StatelessEncodeResult, TInput, TArgInput, TOutput, TArgOutput>())
-    constexpr StatelessEncodeResult(StatelessEncodeResult<TArgInput, TArgOutput> &&other) noexcept(
-      Impl::ResultTypeMoveNoexcept<StatelessEncodeResult, TInput, TArgInput, TOutput, TArgOutput>())
+    requires MovableResultType<StatelessEncodeResult, TInput, TArgInput, TOutput, TArgOutput>
+    constexpr StatelessEncodeResult(StatelessEncodeResult<TArgInput, TArgOutput> &&other) // cf
+      noexcept(NoThrowMovableResultType<StatelessEncodeResult, TInput, TArgInput, TOutput, TArgOutput>)
         : Input(std::move(other.Input)), Output(std::move(other.Output)), ErrorCode(other.ErrorCode),
           ErrorCount(other.ErrorCount)
     {
@@ -118,10 +117,10 @@ namespace Krys
     /// @brief Constructs a EncodeResult from a previous EncodeResult.
     /// @param[in] other A different but related result type.
     template <typename TArgInput, typename TArgOutput, typename TArgState>
-    requires(Impl::ResultTypeCopyConstraint<EncodeResult, TInput, TArgInput, TOutput, TArgOutput, TState,
-                                            TArgState>())
-    constexpr EncodeResult(const EncodeResult<TArgInput, TArgOutput, TArgState> &other) noexcept(
-      Impl::ResultTypeCopyNoexcept<EncodeResult, TInput, TArgInput, TOutput, TArgOutput, TState, TArgState>())
+    requires CopyableResultType<EncodeResult, TInput, TArgInput, TOutput, TArgOutput, TState, TArgState>
+    constexpr EncodeResult(const EncodeResult<TArgInput, TArgOutput, TArgState> &other) // cf
+      noexcept(
+        NoThrowCopyableResultType<EncodeResult, TInput, TArgInput, TOutput, TArgOutput, TState, TArgState>)
         : Base(other.Input, other.Output, other.ErrorCode, other.ErrorCount), State(other.State)
     {
     }
@@ -129,10 +128,10 @@ namespace Krys
     /// @brief Constructs a EncodeResult from a previous EncodeResult.
     /// @param[in] other A different but related result type.
     template <typename TArgInput, typename TArgOutput, typename TArgState>
-    requires(Impl::ResultTypeMoveConstraint<EncodeResult, TInput, TArgInput, TOutput, TArgOutput, TState,
-                                            TArgState>())
-    constexpr EncodeResult(EncodeResult<TArgInput, TArgOutput, TArgState> &&other) noexcept(
-      Impl::ResultTypeMoveNoexcept<EncodeResult, TInput, TArgInput, TOutput, TArgOutput, TState, TArgState>())
+    requires MovableResultType<EncodeResult, TInput, TArgInput, TOutput, TArgOutput, TState, TArgState>
+    constexpr EncodeResult(EncodeResult<TArgInput, TArgOutput, TArgState> &&other) // cf
+      noexcept(
+        NoThrowCopyableResultType<EncodeResult, TInput, TArgInput, TOutput, TArgOutput, TState, TArgState>)
         : Base(std::move(other.Input), std::move(other.Output), other.ErrorCode, other.ErrorCount),
           State(other.State)
     {
@@ -172,8 +171,8 @@ namespace Krys
   /// @brief A type alias to produce a span-containing encode result type. Useful for end-users with fairly
   /// standard, pointer-based buffer usages.
   template <typename TEncoding>
-  using SpanEncodeResultFor =
-    EncodeResult<Span<const code_point_t<TEncoding>>, Span<code_unit_t<TEncoding>>, EncodeState<TEncoding>>;
+  using SpanEncodeResultFor = EncodeResult<Span<const code_point_t<TEncoding>>, Span<code_unit_t<TEncoding>>,
+                                           encode_state_t<TEncoding>>;
 
   /// @brief A type alias to produce a concrete error handler for the encoding result of the specified
   /// `TEncoding` type.

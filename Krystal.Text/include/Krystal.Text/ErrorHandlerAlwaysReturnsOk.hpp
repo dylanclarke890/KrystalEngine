@@ -43,7 +43,7 @@ namespace Krys
     struct DecodeErrorHandlerAlwaysReturnsOK<TEncoding,
                                              Handlers::BasicIncompleteHandler<TEncoding, TErrorHandler>>
         : public DecodeErrorHandlerAlwaysReturnsOK<
-            TEncoding, typename Handlers::BasicIncompleteHandler<TEncoding, TErrorHandler>::error_handler>
+            TEncoding, typename Handlers::BasicIncompleteHandler<TEncoding, TErrorHandler>::ErrorHandler>
     {
     };
 
@@ -55,13 +55,13 @@ namespace Krys
 
     template <typename TEncoding>
     struct DecodeErrorHandlerAlwaysReturnsOK<TEncoding, Handlers::DefaultHandler>
-        : public DecodeErrorHandlerAlwaysReturnsOK<TEncoding, Handlers::DefaultHandler::error_handler>
+        : public DecodeErrorHandlerAlwaysReturnsOK<TEncoding, Handlers::DefaultHandler::ErrorHandler>
     {
     };
 
     template <typename TEncoding>
     struct DecodeErrorHandlerAlwaysReturnsOK<TEncoding, Handlers::UncheckedDefaultHandler>
-        : public DecodeErrorHandlerAlwaysReturnsOK<TEncoding, Handlers::DefaultHandler::error_handler>
+        : public DecodeErrorHandlerAlwaysReturnsOK<TEncoding, Handlers::DefaultHandler::ErrorHandler>
     {
     };
 
@@ -87,7 +87,7 @@ namespace Krys
     struct EncodeErrorHandlerAlwaysReturnsOK<TEncoding,
                                              Handlers::BasicIncompleteHandler<TEncoding, TErrorHandler>>
         : public EncodeErrorHandlerAlwaysReturnsOK<
-            TEncoding, typename Handlers::BasicIncompleteHandler<TEncoding, TErrorHandler>::error_handler>
+            TEncoding, typename Handlers::BasicIncompleteHandler<TEncoding, TErrorHandler>::ErrorHandler>
     {
     };
 
@@ -98,13 +98,13 @@ namespace Krys
 
     template <typename TEncoding>
     struct EncodeErrorHandlerAlwaysReturnsOK<TEncoding, Handlers::DefaultHandler>
-        : public EncodeErrorHandlerAlwaysReturnsOK<TEncoding, Handlers::DefaultHandler::error_handler>
+        : public EncodeErrorHandlerAlwaysReturnsOK<TEncoding, Handlers::DefaultHandler::ErrorHandler>
     {
     };
 
     template <typename TEncoding>
     struct EncodeErrorHandlerAlwaysReturnsOK<TEncoding, Handlers::UncheckedDefaultHandler>
-        : public EncodeErrorHandlerAlwaysReturnsOK<TEncoding, Handlers::DefaultHandler::error_handler>
+        : public EncodeErrorHandlerAlwaysReturnsOK<TEncoding, Handlers::DefaultHandler::ErrorHandler>
     {
     };
   }

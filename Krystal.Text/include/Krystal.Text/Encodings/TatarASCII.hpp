@@ -20,5 +20,5 @@ namespace Krys
   };
 
   /// @brief An instance of basic_tatar_ascii for ease of use.
-  inline constexpr basic_tatar_ascii<char> tatar_ascii = {};
+  constexpr inline basic_tatar_ascii<char> tatar_ascii = {};
 }

@@ -4,7 +4,6 @@
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Utils/ReferenceWrapper.hpp"
 #include "Krystal.Text/EncodingError.hpp"
-#include "Krystal.Text/UnicodeCodePoint.hpp"
 #include <array>
 #include <cstddef>
 #include <system_error>

@@ -19,5 +19,5 @@ namespace Krys
   };
 
   /// @brief An instance of basic_ibm_856_hebrew for ease of use.
-  inline constexpr basic_ibm_856_hebrew<char> ibm_856_hebrew = {};
+  constexpr inline basic_ibm_856_hebrew<char> ibm_856_hebrew = {};
 }

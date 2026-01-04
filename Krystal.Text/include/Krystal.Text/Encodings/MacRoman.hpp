@@ -18,5 +18,5 @@ namespace Krys
   };
 
   /// @brief An instance of basic_mac_roman for ease of use.
-  inline constexpr basic_mac_roman<char> mac_roman = {};
+  constexpr inline basic_mac_roman<char> mac_roman = {};
 }

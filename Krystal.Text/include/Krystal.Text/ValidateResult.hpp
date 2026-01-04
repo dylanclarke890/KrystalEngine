@@ -101,7 +101,7 @@ namespace Krys
     /// @brief The range used to hold the intermediate pivot transcoding units.
     TPivot Pivot;
 
-    /// @brief Constructs a pivotTValidate_result.
+    /// @brief Constructs a pivot_validate_result.
     /// @param[in] input The input range to store.
     /// @param[in] isValid Whether or not the validation succeeded.
     /// @param[in] fromState The state related to the encoding that was used to do validation.
@@ -148,6 +148,6 @@ namespace Krys
     }
 
     template <typename TInputRange, typename TState>
-    using reconstructTValidate_result_t = ValidateResult<Krys::Ranges::range_reconstruct_t<TInputRange>, TState>;
+    using reconstruct_validate_result_t = ValidateResult<Krys::Ranges::range_reconstruct_t<TInputRange>, TState>;
   }
 }

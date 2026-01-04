@@ -17,7 +17,7 @@ namespace Krys::Handlers
 
   public:
     ///@brief The underlying error handler type.
-    using error_handler = TErrorHandlerBase;
+    using ErrorHandler = TErrorHandlerBase;
 
     using TErrorHandlerBase::TErrorHandlerBase;
 
@@ -33,7 +33,7 @@ namespace Krys::Handlers
 
   public:
     ///@brief The underlying error handler type.
-    using error_handler = TErrorHandlerBase;
+    using ErrorHandler = TErrorHandlerBase;
 
     using TErrorHandlerBase::TErrorHandlerBase;
 

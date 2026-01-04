@@ -18,17 +18,37 @@
     <ClCompile Include="catch_main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\ASCII.cpp">
+    <ClCompile Include="tests\Old\Encodings\ASCII.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Unicode.cpp">
+    <ClCompile Include="tests\Old\Encodings\Unicode.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\LineEndings.cpp">
+    <ClCompile Include="tests\Old\Encodings\LineEndings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Encodings\ByteOrderMark.cpp">
+    <ClCompile Include="tests\Old\Encodings\ByteOrderMark.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tests\DecodeOne.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\EncodeOne.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\Decode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\Encode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TranscodeOne.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Krystal.Text.Tests\BasicUnicodeStrings.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

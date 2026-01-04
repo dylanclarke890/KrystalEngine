@@ -10,27 +10,27 @@ namespace Krys
   namespace Impl
   {
     template <typename TFromEncoding, typename TToEncoding>
-    inline constexpr bool DecodeSameAsEncode =
+    constexpr inline bool DecodeSameAsEncode =
       decoded_id_v<TFromEncoding> == encoded_id_v<TToEncoding>        // cf
       && decoded_id_v<TFromEncoding> == decoded_id_v<TToEncoding>     // cf
       && decoded_id_v<TFromEncoding> != Krys::TextEncodingId::unknown // cf
       && encoded_id_v<TToEncoding> != Krys::TextEncodingId::unknown;
 
     template <typename TFromEncoding, typename TToEncoding>
-    inline constexpr bool AlreadyDecoded =
+    constexpr inline bool AlreadyDecoded =
       encoded_id_v<TFromEncoding> == decoded_id_v<TToEncoding>        // cf
       && decoded_id_v<TFromEncoding> != Krys::TextEncodingId::unknown // cf
       && encoded_id_v<TToEncoding> != Krys::TextEncodingId::unknown;
 
     template <typename TFromEncoding, typename TToEncoding>
-    inline constexpr bool EncodeSameAsDecode =
+    constexpr inline bool EncodeSameAsDecode =
       encoded_id_v<TFromEncoding> == decoded_id_v<TToEncoding>        // cf
       && encoded_id_v<TFromEncoding> == encoded_id_v<TToEncoding>     // cf
       && encoded_id_v<TFromEncoding> != Krys::TextEncodingId::unknown // cf
       && decoded_id_v<TToEncoding> != Krys::TextEncodingId::unknown;
 
     template <typename TFromEncoding, typename TToEncoding>
-    inline constexpr bool AlreadyEncoded =
+    constexpr inline bool AlreadyEncoded =
       decoded_id_v<TFromEncoding> == encoded_id_v<TToEncoding>        // cf
       && encoded_id_v<TFromEncoding> != Krys::TextEncodingId::unknown // cf
       && decoded_id_v<TToEncoding> != Krys::TextEncodingId::unknown;

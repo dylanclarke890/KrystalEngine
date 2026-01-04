@@ -17,7 +17,7 @@ namespace Krys
     concept HasContainsUnicodeEncoding = requires { std::declval<const T &>().ContainsUnicodeEncoding(); };
 
     template <typename T>
-    concept HasIsUnicodeEncoding = T::IsUnicodeEncoding::value;
+    concept HasIsUnicodeEncoding = T::is_unicode_encoding::value;
 
     template <typename, typename = void>
     struct IsUnicodeEncodingSfinae : std::false_type
@@ -26,7 +26,7 @@ namespace Krys
 
     template <typename T>
     struct IsUnicodeEncodingSfinae<T, enable_if_t<HasIsUnicodeEncoding<T>>>
-        : IntegralConstant<bool, T::IsUnicodeEncoding::value>
+        : IntegralConstant<bool, T::is_unicode_encoding::value>
     {
     };
   }
@@ -101,7 +101,7 @@ namespace Krys
   /// @tparam T The encoding type to retrieve the ID from.
   /// @remarks If the encoding type does not have a `static constexpr TextEncodingId` member with the name
   /// `DecodedId`, it will assume it decodes to UTF-32 code points if the code_point_t type
-  /// matches IsUnicodeCodePoint. Otherwise, it will return ztd::TextEncodingId::unknown.
+  /// matches IsUnicodeCodePoint. Otherwise, it will return TextEncodingId::unknown.
   template <typename T>
   class DecodedId : public Impl::DecodedIdSfinae<T>
   {
@@ -109,13 +109,13 @@ namespace Krys
 
   /// @brief An alias of the inner `value` for IsUnicodeEncoding.
   template <typename T>
-  inline constexpr TextEncodingId decoded_id_v = DecodedId<T>::value;
+  constexpr inline TextEncodingId decoded_id_v = DecodedId<T>::value;
 
   /// @brief Returns the ID of what an encoding encodes into.
   /// @tparam T The encoding type to retrieve the ID from.
   /// @remarks If the encoding type does not have a `static constexpr TextEncodingId` member with the name
   /// `EncodedId`, it will assume it decodes to UTF-32 code points if the code_unit_t type
-  /// matches IsUnicodeCodePoint. Otherwise, it will return ztd::TextEncodingId::unknown.
+  /// matches IsUnicodeCodePoint. Otherwise, it will return TextEncodingId::unknown.
   template <typename T>
   class EncodedId : public Impl::EncodedIdSfinae<remove_cvref_t<T>>
   {
@@ -123,5 +123,5 @@ namespace Krys
 
   /// @brief An alias of the inner `value` for IsUnicodeEncoding.
   template <typename T>
-  inline constexpr TextEncodingId encoded_id_v = EncodedId<remove_cvref_t<T>>::value;
+  constexpr inline TextEncodingId encoded_id_v = EncodedId<remove_cvref_t<T>>::value;
 }

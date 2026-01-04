@@ -7,6 +7,7 @@
 #include "Krystal.Text/EncodeResult.hpp"
 #include "Krystal.Text/IsIgnorableErrorHandler.hpp"
 #include "Krystal.Text/State.hpp"
+#include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys
 {
@@ -170,11 +171,11 @@ namespace Krys
   using no_encoding_t = basic_no_encoding<char, UnicodeCodePoint>;
 
   /// @brief An object for the no_encoding_t type.
-  inline constexpr no_encoding_t no_encoding = {};
+  constexpr inline no_encoding_t no_encoding = {};
 
   /// @brief A do-nothing encoding for UnicodeCodePoint types of input.
   using no_codepoint_encoding_t = basic_no_encoding<UnicodeCodePoint, UnicodeCodePoint>;
 
   /// @brief An object for the no_codepoint_encoding_t type.
-  inline constexpr no_codepoint_encoding_t no_codepoint_encoding = {};
+  constexpr inline no_codepoint_encoding_t no_codepoint_encoding = {};
 }

@@ -96,9 +96,9 @@ namespace Krys
     }
   };
 
-  /// @brief Represents a UTF-32 little-endian character encoding.
+  /// @brief Represents a UTF-32 little-Endian::Type character encoding.
   using UTF32EncodingLE = UTF32Encoding<false>;
 
-  /// @brief Represents a UTF-32 big-endian character encoding.
+  /// @brief Represents a UTF-32 big-Endian::Type character encoding.
   using UTF32EncodingBE = UTF32Encoding<true>;
 }

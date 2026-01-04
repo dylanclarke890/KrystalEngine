@@ -19,5 +19,5 @@ namespace Krys
   };
 
   /// @brief An instance of basic_windows_1254 for ease of use.
-  inline constexpr basic_windows_1254<char> windows_1254 = {};
+  constexpr inline basic_windows_1254<char> windows_1254 = {};
 }

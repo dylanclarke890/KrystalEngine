@@ -145,9 +145,9 @@ namespace Krys
     }
   };
 
-  /// @brief Represents a UTF-16 little-endian character encoding.
+  /// @brief Represents a UTF-16 little-Endian::Type character encoding.
   using UTF16EncodingLE = UTF16Encoding<false>;
 
-  /// @brief Represents a UTF-16 big-endian character encoding.
+  /// @brief Represents a UTF-16 big-Endian::Type character encoding.
   using UTF16EncodingBE = UTF16Encoding<true>;
 }

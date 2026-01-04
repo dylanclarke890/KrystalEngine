@@ -1,13 +1,13 @@
 ﻿#pragma once
 
-/// @brief Check the underlying operating system.
-#define KRYS_OS(OS) (defined KRYS_OS_##OS && KRYS_OS_##OS)
-
 #if defined(__APPLE__)
   #include <Availability.h>
   #include <AvailabilityMacros.h>
   #include <TargetConditionals.h>
 #endif
+
+/// @brief Check the underlying operating system.
+#define KRYS_OS(OS) (defined KRYS_OS_##OS && KRYS_OS_##OS)
 
 // KRYS_OS(AIX) - AIX
 #if defined(_AIX)

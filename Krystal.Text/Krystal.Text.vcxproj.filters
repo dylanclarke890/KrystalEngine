@@ -21,6 +21,9 @@
     <ClCompile Include="src\Impl\WindowCodePage.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\EncodingDetection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.Text\Old\Encodings\Encoding.hpp">
@@ -503,9 +506,6 @@
     <ClInclude Include="include\Krystal.Text\Encodings\ISO_8859_1.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Literal.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Text\Encodings\MacCyrillic.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -590,7 +590,7 @@
     <ClInclude Include="include\Krystal.Text\Impl\EncodingIteratorStorage.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Impl\encoding_name.hpp">
+    <ClInclude Include="include\Krystal.Text\Impl\EncodingName.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\Impl\EncodingRange.hpp">
@@ -602,13 +602,10 @@
     <ClInclude Include="include\Krystal.Text\Impl\GBK_or_GB18030.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Impl\is_lossless.hpp">
+    <ClInclude Include="include\Krystal.Text\Impl\IsLossless.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\Impl\ProgressHandler.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Impl\recode_extension_points.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\Impl\ReplacementUnits.hpp">
@@ -623,115 +620,97 @@
     <ClInclude Include="include\Krystal.Text\Impl\SpanReconstruct.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Impl\transcode_extension_points.hpp">
+    <ClInclude Include="include\Krystal.Text\Impl\TranscodeRoutines.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Impl\transcode_routines.hpp">
+    <ClInclude Include="include\Krystal.Text\Impl\UpdateInput.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Impl\update_input.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Text\basic_encoding_scheme.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Text\basic_text.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Text\basic_text_view.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Text\basic_text_view_iterator.hpp">
+    <ClInclude Include="include\Krystal.Text\BasicEncodingScheme.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\CharPredicates.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\count_as_decoded.hpp">
+    <ClInclude Include="include\Krystal.Text\CountAsDecoded.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\count_as_encoded.hpp">
+    <ClInclude Include="include\Krystal.Text\CountAsEncoded.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\count_as_transcoded.hpp">
+    <ClInclude Include="include\Krystal.Text\CountAsTranscoded.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\CountResult.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\decode.hpp">
+    <ClInclude Include="include\Krystal.Text\Decode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\decode_iterator.hpp">
+    <ClInclude Include="include\Krystal.Text\DecodeIterator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\decode_one.hpp">
+    <ClInclude Include="include\Krystal.Text\DecodeOne.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\decode_view.hpp">
+    <ClInclude Include="include\Krystal.Text\DecodeView.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\encode.hpp">
+    <ClInclude Include="include\Krystal.Text\Encode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\encode_iterator.hpp">
+    <ClInclude Include="include\Krystal.Text\EncodeIterator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\encode_one.hpp">
+    <ClInclude Include="include\Krystal.Text\EncodeOne.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\encode_view.hpp">
+    <ClInclude Include="include\Krystal.Text\EncodeView.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\encoding_scheme.hpp">
+    <ClInclude Include="include\Krystal.Text\EncodingScheme.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\recode.hpp">
+    <ClInclude Include="include\Krystal.Text\Recode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\recode_iterator.hpp">
+    <ClInclude Include="include\Krystal.Text\RecodeIterator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\recode_one.hpp">
+    <ClInclude Include="include\Krystal.Text\RecodeOne.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\RecodeResult.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\recode_view.hpp">
+    <ClInclude Include="include\Krystal.Text\RecodeView.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\text.hpp">
+    <ClInclude Include="include\Krystal.Text\Transcode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\text_view.hpp">
+    <ClInclude Include="include\Krystal.Text\TranscodeIterator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\transcode.hpp">
+    <ClInclude Include="include\Krystal.Text\TranscodeOne.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\transcode_iterator.hpp">
+    <ClInclude Include="include\Krystal.Text\TranscodeResult.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\transcode_one.hpp">
+    <ClInclude Include="include\Krystal.Text\TranscodeView.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\transcode_result.hpp">
+    <ClInclude Include="include\Krystal.Text\ValidateDecodableAs.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\transcode_view.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Text\validate_decodable_as.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Text\validate_encodable_as.hpp">
+    <ClInclude Include="include\Krystal.Text\ValidateEncodableAs.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\ValidateResult.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\validate_transcodable_as.hpp">
+    <ClInclude Include="include\Krystal.Text\ValidateTranscodableAs.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\Impl\ConstantEncodingTraits.hpp">
@@ -762,6 +741,36 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\Impl\Windows.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Text\DefaultEncoding.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Text\InlineContainers\detail\Storage.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Text\InlineContainers\Concepts.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Text\InlineContainers\Forward.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Text\InlineContainers\InlineBasicString.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Text\InlineContainers\InlineString.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Text\InlineContainers\InlineVector.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Text\Encodings\Execution.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Text\Encodings\Impl\ExecutionCuChar.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Text\EncodingDetection.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

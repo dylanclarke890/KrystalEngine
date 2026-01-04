@@ -18,52 +18,47 @@ namespace Krys
   class UnicodeCodePoint
   {
   private:
-    char32 TValue;
+    char32 _value;
 
   public:
-    /// @brief Constructs a code point value of indeterminate value (if no parentheses/brackets are
-    /// provided) or with the value 0 (if parentheses/brackets are provided for intentional value
-    /// initialization).
     UnicodeCodePoint() noexcept = default;
 
-    /// @brief Constructs a code point value with the given code point value.
-    constexpr UnicodeCodePoint(char32 codePoint) noexcept : TValue(codePoint)
+    constexpr UnicodeCodePoint(char32 codePoint) noexcept : _value(codePoint)
     {
-      assert((Impl::Unicode::IsSurrogate(this->TValue))
-             || (this->TValue <= Impl::Unicode::LastUnicodeCodePoint)
-                  && "The code point value must be a valid code point.");
+      bool isValid = Impl::Unicode::IsSurrogate(_value) || (_value <= Impl::Unicode::LastUnicodeCodePoint);
+      assert(isValid && "The code point value must be a valid code point.");
     }
 
     /// @brief An explicit conversion to a typical char32 value, bit-compatible with a normal code point
     /// value.
     constexpr explicit operator char32() const noexcept
     {
-      return this->TValue;
+      return this->_value;
     }
 
     /// @brief Retrieves the underlying value.
     constexpr const char32 &value() const & noexcept
     {
-      return this->TValue;
+      return this->_value;
     }
 
     /// @brief Retrieves the underlying value.
     constexpr char32 &value() & noexcept
     {
-      return this->TValue;
+      return this->_value;
     }
 
     /// @brief Retrieves the underlying value.
     constexpr char32 &&value() && noexcept
     {
-      return std::move(this->TValue);
+      return std::move(this->_value);
     }
   };
 
   /// @brief Check if two unicode code points are equal.
   /// @param[in] left Left hand value of equality operator.
   /// @param[in] right Right hand value of equality operator.
-  constexpr bool operator==(const UnicodeCodePoint &left, const UnicodeCodePoint &right)
+  constexpr bool operator==(const UnicodeCodePoint &left, const UnicodeCodePoint &right) noexcept
   {
     return left.value() == right.value();
   }
@@ -71,7 +66,7 @@ namespace Krys
   /// @brief Check if two unicode code points are not equal.
   /// @param[in] left Left hand value of inequality operator.
   /// @param[in] right Right hand value of inequality operator.
-  constexpr bool operator!=(const UnicodeCodePoint &left, const UnicodeCodePoint &right)
+  constexpr bool operator!=(const UnicodeCodePoint &left, const UnicodeCodePoint &right) noexcept
   {
     return left.value() != right.value();
   }
@@ -79,7 +74,7 @@ namespace Krys
   /// @brief Check if one unicode code point is less than the other.
   /// @param[in] left Left hand value of less than operator.
   /// @param[in] right Right hand value of less than operator.
-  constexpr bool operator<(const UnicodeCodePoint &left, const UnicodeCodePoint &right)
+  constexpr bool operator<(const UnicodeCodePoint &left, const UnicodeCodePoint &right) noexcept
   {
     return left.value() < right.value();
   }
@@ -117,7 +112,8 @@ namespace std
       {
         return 0;
       }
-      return Krys::Ranges::Impl::LexicographicalCompareThreeWayBasic(left, left + count, right, right + count);
+      return Krys::Ranges::Impl::LexicographicalCompareThreeWayBasic(left, left + count, right,
+                                                                     right + count);
     }
 
     KRYS_NODISCARD constexpr static size_t length(const char_type *it) noexcept

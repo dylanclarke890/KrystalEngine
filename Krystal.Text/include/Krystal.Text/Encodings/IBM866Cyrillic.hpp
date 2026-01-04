@@ -20,5 +20,5 @@ namespace Krys
   };
 
   /// @brief An instance of basic_ibm_866_cyrillic for ease of use.
-  inline constexpr basic_ibm_866_cyrillic<char> ibm_866_cyrillic = {};
+  constexpr inline basic_ibm_866_cyrillic<char> ibm_866_cyrillic = {};
 }

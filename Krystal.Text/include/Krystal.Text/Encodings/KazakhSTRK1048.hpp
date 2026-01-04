@@ -19,5 +19,5 @@ namespace Krys
   };
 
   /// @brief An instance of basic_kazakh_strk1048 for ease of use.
-  inline constexpr basic_kazakh_strk1048<char> kazakh_strk1048 = {};
+  constexpr inline basic_kazakh_strk1048<char> kazakh_strk1048 = {};
 }

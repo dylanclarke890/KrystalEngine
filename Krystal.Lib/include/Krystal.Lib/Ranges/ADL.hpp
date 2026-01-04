@@ -1042,16 +1042,16 @@ namespace Krys::Ranges
 #endif
 
   template <typename TRange>
-  concept has_adl_size = requires { Krys::Ranges::size(std::declval<add_lvalue_ref_t<TRange>>()); };
+  concept has_adl_size = requires { size(std::declval<add_lvalue_ref_t<TRange>>()); };
 
   template <typename TRange>
-  concept has_adl_empty = requires { Krys::Ranges::empty(std::declval<add_lvalue_ref_t<TRange>>()); };
+  concept has_adl_empty = requires { empty(std::declval<add_lvalue_ref_t<TRange>>()); };
 
   template <typename TRange>
-  concept has_adl_begin = requires { Krys::Ranges::begin(std::declval<TRange>()); };
+  concept has_adl_begin = requires { begin(std::declval<TRange>()); };
 
   template <typename TRange>
-  concept has_adl_end = requires { Krys::Ranges::end(std::declval<TRange>()); };
+  concept has_adl_end = requires { end(std::declval<TRange>()); };
 
   template <typename T>
   concept IsRange = has_adl_begin<T> && has_adl_end<T>;
@@ -1320,7 +1320,7 @@ namespace Krys::Ranges
   /// @brief A trait specialized by downstream classes to determine whether or not the type is a view.
   /// @tparam TRange The range type that may or may not be a view.
   template <typename TRange>
-  inline constexpr bool EnableView
+  inline constexpr bool enable_view
 #if KRYS_CONFIG(STD_LIBRARY_RANGES)
     = std::ranges::enable_view<TRange>;
 #else
@@ -1331,19 +1331,19 @@ namespace Krys::Ranges
   /// range.
   /// @tparam TRange The range type that may or may not be a borrowed range.
   template <typename TRange>
-  inline constexpr bool EnableBorrowedRange
-#if KRYS_CONFIG(STD_LIBRARY_RANGES)
+  inline constexpr bool enable_borrowed_range
+#if KRYS_CONFIG(STD_LIBRARY_BORROWED_RANGE)
     = std::ranges::enable_borrowed_range<TRange>;
 #else
     = false;
 #endif
 
-  /// @brief Checks whether or not the provided type is a view. This means that `EnableView` has been
+  /// @brief Checks whether or not the provided type is a view. This means that `enable_view` has been
   /// turned on, and it meets a few other criteria.
   /// @tparam T The type to check if it is a view or not.
   template <typename T>
   concept IsView =
-    EnableView<T> && IsRange<T>
+    enable_view<T> && IsRange<T>
     && ((MoveConstructible<T> && MoveAssignable<T>) || (IsRange<T> && !Const<T> && LValueRef<T>));
 
   /// @brief Whether or not a given type is a borrowed range or not. Used as a proxy over the standard's
@@ -1357,6 +1357,6 @@ namespace Krys::Ranges
     std::ranges::borrowed_range<TRange>;
 #else
     IsRange<TRange> // must have begin/end, at least!
-    && (LValueRef<TRange> || EnableBorrowedRange<remove_cvref_t<TRange>>);
+    && (LValueRef<TRange> || enable_borrowed_range<remove_cvref_t<TRange>>);
 #endif
 }

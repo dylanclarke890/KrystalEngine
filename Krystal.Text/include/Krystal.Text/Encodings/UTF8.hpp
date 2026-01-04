@@ -31,7 +31,7 @@ namespace Krys
     /// @remarks Relies on CRTP.
     template <typename TDerived = void, typename TCodeUnit = uchar8, typename TCodePoint = UnicodeCodePoint,
               typename TDecodeState = EmptyState, typename TEncodeState = EmptyState,
-              bool overlongAllowed = false, bool surrogatesAllowed = false, bool useOverlongNullOnly = false>
+              bool AllowOverlong = false, bool AllowSurrogates = false, bool UseOverlongNullOnly = false>
     class UTF8With : public utf8_tag
     {
     private:
@@ -39,7 +39,7 @@ namespace Krys
 
     public:
       /// @brief Whether or not this encoding that can encode all of Unicode.
-      using IsUnicodeEncoding = std::true_type;
+      using is_unicode_encoding = std::true_type;
 
       /// @brief The start of a sequence can be found unambiguously when dropped into the middle of a
       /// sequence or after an error in reading as occurred for encoded text.
@@ -52,12 +52,12 @@ namespace Krys
       /// @brief The state that can be used between calls to the encoder and decoder. It is normally an
       /// empty struct because there is no shift state to preserve between complete units of encoded
       /// information.
-      using DecodeState = TDecodeState;
+      using decode_state = TDecodeState;
 
       /// @brief The state that can be used between calls to the encoder and decoder. It is normally an
       /// empty struct because there is no shift state to preserve between complete units of encoded
       /// information.
-      using EncodeState = TEncodeState;
+      using encode_state = TEncodeState;
 
       /// @brief The individual units that result from an encode operation or are used as input to a
       /// decode operation. For UTF-8 formats, this is usually char8_t, but this can change (see
@@ -85,16 +85,16 @@ namespace Krys
 
       /// @brief The maximum code units a single complete operation of encoding can produce. If overlong
       /// sequence allowed, this is 6: otherwise, this is 4.
-      inline static constexpr std::size_t MaxCodeUnits = overlongAllowed ? 6 : 4;
+      inline static constexpr std::size_t MaxCodeUnits = AllowOverlong ? 6 : 4;
 
       ///@brief The encoding ID for this type. Used for optimization purposes.
       inline static constexpr Krys::TextEncodingId EncodedId =
-        surrogatesAllowed ? Krys::TextEncodingId::wtf8
-                          : (useOverlongNullOnly ? Krys::TextEncodingId::mutf8 : Krys::TextEncodingId::utf8);
+        AllowSurrogates ? Krys::TextEncodingId::wtf8
+                        : (UseOverlongNullOnly ? Krys::TextEncodingId::mutf8 : Krys::TextEncodingId::utf8);
 
       ///@brief The encoding ID for this type. Used for optimization purposes.
       inline static constexpr Krys::TextEncodingId DecodedId =
-        surrogatesAllowed ? Krys::TextEncodingId::ucs4 : Krys::TextEncodingId::utf32;
+        AllowSurrogates ? Krys::TextEncodingId::ucs4 : Krys::TextEncodingId::utf32;
 
       /// @brief Returns the replacement code units to use for the replacement_handler_t error
       /// handler.
@@ -134,10 +134,10 @@ namespace Krys
           for (; it != last; ++it)
           {
             const bool foundGoodUTF8Stop =
-              (useOverlongNullOnly
+              (UseOverlongNullOnly
                  ? Krys::Impl::Unicode::IsLeadMUTF8(static_cast<char8>(*it))
-                 : (overlongAllowed ? Krys::Impl::Unicode::IsLeadOverlongUTF8(static_cast<char8>(*it))
-                                    : Krys::Impl::Unicode::IsLeadUTF8(static_cast<char8>(*it))));
+                 : (AllowOverlong ? Krys::Impl::Unicode::IsLeadOverlongUTF8(static_cast<char8>(*it))
+                                  : Krys::Impl::Unicode::IsLeadUTF8(static_cast<char8>(*it))));
             if (foundGoodUTF8Stop)
             {
               break;
@@ -160,13 +160,13 @@ namespace Krys
                                            const TInputProgress &inputProgress,
                                            const TOutputProgress &outputProgress) noexcept
       {
-        if constexpr (surrogatesAllowed)
+        if constexpr (AllowSurrogates)
         {
-          return SkipUTF32WithSurrogatesInputError(std::move(result), inputProgress, outputProgress);
+          return Krys::SkipUTF32WithSurrogatesInputError(std::move(result), inputProgress, outputProgress);
         }
         else
         {
-          return SkipUTF32InputError(std::move(result), inputProgress, outputProgress);
+          return Krys::SkipUTF32InputError(std::move(result), inputProgress, outputProgress);
         }
       }
 
@@ -186,13 +186,13 @@ namespace Krys
       /// an input_range.
       template <typename TInput, typename TOutput, typename TErrorHandler>
       static constexpr auto EncodeOne(TInput &&input, TOutput &&output, TErrorHandler &&errorHandler,
-                                      EncodeState &s)
+                                      encode_state &s)
       {
         using TUErrorHandler = remove_cvref_t<TErrorHandler>;
         using TSubInput = Krys::Ranges::csubrange_for_t<remove_ref_t<TInput>>;
         using TSubOutput = Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
-        using TResult = EncodeResult<TSubInput, TSubOutput, EncodeState>;
-        consteval bool CallErrorHandler = !IsIgnorableErrorHandler<TUErrorHandler>;
+        using TResult = EncodeResult<TSubInput, TSubOutput, encode_state>;
+        constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TUErrorHandler>;
 
         auto inIt = ::Krys::Ranges::cbegin(input);
         auto inLast = ::Krys::Ranges::cend(input);
@@ -220,7 +220,7 @@ namespace Krys
                       TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::InvalidSequence),
               Span<code_point>(), Span<code_unit>());
           }
-          if constexpr (!surrogatesAllowed)
+          if constexpr (!AllowSurrogates)
           {
             if (Krys::Impl::Unicode::IsSurrogate(point32))
             {
@@ -234,7 +234,7 @@ namespace Krys
           }
         }
 
-        if constexpr (useOverlongNullOnly)
+        if constexpr (UseOverlongNullOnly)
         {
           if (point32 == U'\0')
           {
@@ -275,7 +275,7 @@ namespace Krys
           {0b00'000'001, Krys::Impl::Unicode::Start6ByteContinuation},
         };
 
-        std::size_t length = Krys::Impl::Unicode::UTF8DecodeLength<overlongAllowed>(point32);
+        std::size_t length = Krys::Impl::Unicode::UTF8DecodeLength<AllowOverlong>(point32);
         std::size_t lengthIndex = static_cast<std::size_t>(length - 1);
         const auto &firstMaskContinuation = firstMaskContinuationValues[lengthIndex];
         const uchar8 &firstMask = firstMaskContinuation[0];
@@ -358,12 +358,12 @@ namespace Krys
       /// an input_range.
       template <typename TInput, typename TOutput, typename TErrorHandler>
       static constexpr auto DecodeOne(TInput &&input, TOutput &&output, TErrorHandler &&errorHandler,
-                                      DecodeState &s)
+                                      decode_state &s)
       {
         using TUErrorHandler = remove_cvref_t<TErrorHandler>;
         using TSubInput = Krys::Ranges::csubrange_for_t<remove_ref_t<TInput>>;
         using TSubOutput = Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
-        using TResult = DecodeResult<TSubInput, TSubOutput, DecodeState>;
+        using TResult = DecodeResult<TSubInput, TSubOutput, decode_state>;
         constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TUErrorHandler>;
 
         auto inIt = ::Krys::Ranges::cbegin(input);
@@ -420,7 +420,7 @@ namespace Krys
 
         if constexpr (CallErrorHandler)
         {
-          if constexpr (useOverlongNullOnly)
+          if constexpr (UseOverlongNullOnly)
           {
             if (static_cast<uchar8>(unit0) != static_cast<uchar8>(0xC0))
             {
@@ -499,7 +499,7 @@ namespace Krys
                                               static_cast<uchar8>(units[2]), static_cast<uchar8>(units[3]));
             break;
           case 5:
-            if constexpr (overlongAllowed)
+            if constexpr (AllowOverlong)
             {
               decoded = Krys::Impl::Unicode::UTF8Decode(
                 static_cast<uchar8>(units[0]), static_cast<uchar8>(units[1]), static_cast<uchar8>(units[2]),
@@ -511,7 +511,7 @@ namespace Krys
               KRYS_FALLTHROUGH;
             }
           case 6:
-            if constexpr (overlongAllowed)
+            if constexpr (AllowOverlong)
             {
               decoded = Krys::Impl::Unicode::UTF8Decode(
                 static_cast<uchar8>(units[0]), static_cast<uchar8>(units[1]), static_cast<uchar8>(units[2]),
@@ -549,10 +549,11 @@ namespace Krys
                       TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::InvalidSequence),
               Span<code_unit>(units, length), Span<code_point>());
           }
-          if constexpr (!overlongAllowed)
+          if constexpr (!AllowOverlong)
           {
-            const bool isAllowedOverlongNull = useOverlongNullOnly ? decoded == U'\0' && length == 2 : false;
-            if (isAllowedOverlongNull || Krys::Impl::Unicode::UTF8IsOverlong(decoded, length))
+            const bool isAllowedOverlongNull = UseOverlongNullOnly ? decoded == U'\0' && length == 2 : false;
+            if (isAllowedOverlongNull
+                || Krys::Impl::Unicode::UTF8IsOverlong(static_cast<char32>(decoded), length))
             {
               TSelf self {};
               return std::forward<TErrorHandler>(errorHandler)(
@@ -562,9 +563,9 @@ namespace Krys
                 Span<code_unit>(units, length), Span<code_point>());
             }
           }
-          if constexpr (!surrogatesAllowed)
+          if constexpr (!AllowSurrogates)
           {
-            if (Krys::Impl::Unicode::IsSurrogate(decoded))
+            if (Krys::Impl::Unicode::IsSurrogate(static_cast<char32>(decoded)))
             {
               TSelf self {};
               return std::forward<TErrorHandler>(errorHandler)(
@@ -620,14 +621,14 @@ namespace Krys
   using utf8_t = basic_utf8<uchar8>;
 
   /// @brief An instance of the UTF-8 encoding for ease of use.
-  inline constexpr utf8_t utf8 = {};
+  constexpr inline utf8_t utf8 = {};
 
   /// @brief A UTF-8 Encoding that traffics in char, for compatibility purposes with older codebases. See
   /// basic_utf8 for more details.
   using compat_utf8_t = basic_utf8<char>;
 
   /// @brief An instance of the compatibility UTF-8 encoding for ease of use.
-  inline constexpr compat_utf8_t compat_utf8 = {};
+  constexpr inline compat_utf8_t compat_utf8 = {};
 
   /// @brief A "Wobbly Transformation Format 8" (WTF-8) Encoding that traffics in, specifically, the desired
   /// code unit type provided as a template argument.
@@ -648,14 +649,14 @@ namespace Krys
   using wtf8_t = basic_wtf8<uchar8>;
 
   /// @brief An instance of the WTF-8 type for ease of use.
-  inline constexpr wtf8_t wtf8 = {};
+  constexpr inline wtf8_t wtf8 = {};
 
   /// @brief A "Wobbly Transformation Format 8" (WTF-8) Encoding that traffics in `char` for compatibility
   /// purposes. See basic_wtf8 for more details.
   using compat_wtf8_t = basic_wtf8<char>;
 
   /// @brief An instance of the Compatibility WTF-8 type for ease of use.
-  inline constexpr compat_wtf8_t compat_wtf8 = {};
+  constexpr inline compat_wtf8_t compat_wtf8 = {};
 
   /// @brief A Modified UTF-8 Encoding that traffics in, specifically, the desired code unit type provided
   /// as a template argument.
@@ -676,12 +677,12 @@ namespace Krys
   using mutf8_t = basic_mutf8<uchar8>;
 
   /// @brief An instance of the MUTF-8 type for ease of use.
-  inline constexpr mutf8_t mutf8 = {};
+  constexpr inline mutf8_t mutf8 = {};
 
   /// @brief A Modified UTF-8 Encoding that traffics in char8_t. See basic_mutf8 for more
   /// details.
   using compat_mutf8_t = basic_mutf8<char>;
 
   /// @brief An instance of the MUTF-8 type for ease of use.
-  inline constexpr compat_mutf8_t compat_mutf8 = {};
+  constexpr inline compat_mutf8_t compat_mutf8 = {};
 }

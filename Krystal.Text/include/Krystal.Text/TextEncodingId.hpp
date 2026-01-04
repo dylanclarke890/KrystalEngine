@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Endian.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <cstddef>
@@ -29,7 +30,7 @@ namespace Krys
     ucs4
   };
 
-  inline constexpr bool is_unicode_encoding_id(TextEncodingId id) noexcept
+  KRYS_NODISCARD constexpr inline bool is_unicode_encoding_id(TextEncodingId id) noexcept
   {
     switch (id)
     {
@@ -54,8 +55,8 @@ namespace Krys
     }
   }
 
-  inline constexpr TextEncodingId to_byte_text_encoding_id(TextEncodingId id, Endian::Type endianness,
-                                                           std::size_t characterSize) noexcept
+  KRYS_NODISCARD constexpr inline TextEncodingId
+    to_byte_text_encoding_id(TextEncodingId id, Endian::Type endianness, std::size_t characterSize) noexcept
   {
     if (characterSize == sizeof(uchar))
     {

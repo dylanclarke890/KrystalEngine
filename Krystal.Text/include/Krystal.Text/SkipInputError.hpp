@@ -58,7 +58,7 @@ namespace Krys
     using TOutput = decltype(result.Output);
     using TState = remove_ref_t<unwrap_t<remove_cvref_t<decltype(result.State)>>>;
     using TReconstructedInput = Krys::Ranges::reconstruct_t<TUInput, decltype(it) &&, decltype(last) &&>;
-    using TResultType = conditional_t<IsSpecializationOf<TResult, DecodeResult>,
+    using TResultType = conditional_t<Krys::IsSpecializationOf<TResult, DecodeResult>,
                                       DecodeResult<TReconstructedInput, TOutput, TState>,
                                       EncodeResult<TReconstructedInput, TOutput, TState>>;
     if (it != last)
@@ -79,8 +79,8 @@ namespace Krys
         }
       }
     }
-    return TResultType(Krys::Ranges::reconstruct(std::in_place_type<TUInput>, std::move(it), std::move(last)),
-                       std::move(result.Output), result.State, result.ErrorCode, result.ErrorCount);
+    return TResult(Krys::Ranges::reconstruct(std::in_place_type<TUInput>, std::move(it), std::move(last)),
+                   std::move(result.Output), result.State, result.ErrorCode, result.ErrorCount);
   }
 
   /// @brief Attempts to skip over an input error in the text.
@@ -104,9 +104,10 @@ namespace Krys
     using TOutput = decltype(result.Output);
     using TState = remove_ref_t<unwrap_t<remove_cvref_t<decltype(result.State)>>>;
     using TReconstructedInput = Krys::Ranges::reconstruct_t<TUInput, decltype(it) &&, decltype(last) &&>;
-    using TResultType = conditional_t<IsSpecializationOf<TResult, DecodeResult>,
+    using TResultType = conditional_t<Krys::IsSpecializationOf<remove_cvref_t<TResult>, DecodeResult>,
                                       DecodeResult<TReconstructedInput, TOutput, TState>,
                                       EncodeResult<TReconstructedInput, TOutput, TState>>;
+
     if (it != last)
     {
       // if there is already some items in the input progress (things irreversibly read), then
@@ -124,8 +125,8 @@ namespace Krys
         }
       }
     }
-    return TResultType(Krys::Ranges::reconstruct(std::in_place_type<TUInput>, std::move(it), std::move(last)),
-                       std::move(result.Output), result.State, result.ErrorCode, result.ErrorCount);
+    return TResult(Krys::Ranges::reconstruct(std::in_place_type<TUInput>, std::move(it), std::move(last)),
+                   std::move(result.Output), result.State, result.ErrorCode, result.ErrorCount);
   }
 
   /// @brief Attempts to skip over an input error in the text.
@@ -166,9 +167,10 @@ namespace Krys
       using TOutput = decltype(result.Output);
       using TState = remove_ref_t<unwrap_t<remove_cvref_t<decltype(result.State)>>>;
       using TReconstructedInput = Krys::Ranges::reconstruct_t<TUInput, decltype(it) &&, decltype(last) &&>;
-      using TResultType = conditional_t<IsSpecializationOf<TResult, DecodeResult>,
+      using TResultType = conditional_t<Krys::IsSpecializationOf<remove_cvref_t<TResult>, DecodeResult>,
                                         DecodeResult<TReconstructedInput, TOutput, TState>,
                                         EncodeResult<TReconstructedInput, TOutput, TState>>;
+
       if (it != last)
       {
         // if there is already some items in the input progress (things irreversibly read), then

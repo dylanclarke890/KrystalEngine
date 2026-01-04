@@ -11,6 +11,7 @@
 #include "Krystal.Text/SkipInputError.hpp"
 #include "Krystal.Text/State.hpp"
 #include "Krystal.Text/TextEncodingId.hpp"
+#include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys
 {
@@ -23,7 +24,7 @@ namespace Krys
     /// @brief An internal type meant to provide the bulk of the UTF-16 functionality.
     /// @remarks Relies on CRTP.
     template <typename TDerived = void, typename TCodeUnit = char16_t, typename TCodePoint = UnicodeCodePoint,
-              bool surrogatesAllowed = false>
+              bool AllowSurrogates = false>
     class UTF16With : public UTF16Tag
     {
     private:
@@ -31,7 +32,7 @@ namespace Krys
 
     public:
       /// @brief Whether or not this encoding that can encode all of Unicode.
-      using IsUnicodeEncoding = std::true_type;
+      using is_unicode_encoding = std::true_type;
 
       /// @brief The start of a sequence can be found unambiguously when dropped into the middle of a
       /// sequence or after an error in reading as occurred for encoded text.
@@ -71,11 +72,11 @@ namespace Krys
 
       ///@brief The encoding ID for this type. Used for optimization purposes.
       inline static constexpr Krys::TextEncodingId EncodedId =
-        surrogatesAllowed ? Krys::TextEncodingId::ucs2 : Krys::TextEncodingId::utf16;
+        AllowSurrogates ? Krys::TextEncodingId::ucs2 : Krys::TextEncodingId::utf16;
 
       ///@brief The encoding ID for this type. Used for optimization purposes.
       inline static constexpr Krys::TextEncodingId DecodedId =
-        surrogatesAllowed ? Krys::TextEncodingId::ucs4 : Krys::TextEncodingId::utf32;
+        AllowSurrogates ? Krys::TextEncodingId::ucs4 : Krys::TextEncodingId::utf32;
 
       /// @brief Returns the replacement code units to use for the replacement_handler_t error
       /// handler.
@@ -99,8 +100,9 @@ namespace Krys
       /// error.
       /// @remarks This will skip every input value until a proper UTF-16 starting byte (single or leading
       /// surrogate).
-      template <bool TStrawman = surrogatesAllowed, typename TInput, typename TOutput, typename TState,
-                typename TInputProgress, typename TOutputProgress, enable_if_t<!TStrawman> * = nullptr>
+      template <bool TStrawman = AllowSurrogates, typename TInput, typename TOutput, typename TState,
+                typename TInputProgress, typename TOutputProgress>
+      requires(!TStrawman)
       static constexpr auto SkipInputError(DecodeResult<TInput, TOutput, TState> result,
                                            const TInputProgress &inputProgress,
                                            const TOutputProgress &outputProgress) noexcept
@@ -168,13 +170,13 @@ namespace Krys
                                            const TInputProgress &inputProgress,
                                            const TOutputProgress &outputProgress) noexcept
       {
-        if constexpr (surrogatesAllowed)
+        if constexpr (AllowSurrogates)
         {
-          return Krys::SkipUTF32InputError(std::move(result), inputProgress, outputProgress);
+          return Krys::SkipUTF32WithSurrogatesInputError(std::move(result), inputProgress, outputProgress);
         }
         else
         {
-          return Krys::SkipUTF32WithSurrogatesInputError(std::move(result), inputProgress, outputProgress);
+          return Krys::SkipUTF32InputError(std::move(result), inputProgress, outputProgress);
         }
       }
 
@@ -221,7 +223,7 @@ namespace Krys
         const char16_t lead16 = static_cast<char16_t>(*inIt);
         units[0] = static_cast<code_unit>(lead16);
 
-        if constexpr (surrogatesAllowed)
+        if constexpr (AllowSurrogates)
         {
           // if this is a singular trailing surrogate, serialize and leave.
           if (Krys::Impl::Unicode::IsSingleUTF16(lead16) || Krys::Impl::Unicode::IsTrailSurrogate(lead16))
@@ -301,7 +303,7 @@ namespace Krys
         ::Krys::Ranges::iter_advance(inIt);
         const char16_t trail16 = static_cast<char16_t>(*inIt);
         units[1] = static_cast<code_unit>(trail16);
-        if constexpr (surrogatesAllowed)
+        if constexpr (AllowSurrogates)
         {
           // if this is a single surrogate followed by a not-proper value, just serialize it as-is and
           // leave it alone
@@ -405,7 +407,7 @@ namespace Krys
 
         if constexpr (CallErrorHandler)
         {
-          if (point > Krys::Impl::Unicode::LastUnicodeCodePoint)
+          if (static_cast<char32>(point) > Krys::Impl::Unicode::LastUnicodeCodePoint)
           {
             TSelf self {};
             return std::forward<TErrorHandler>(errorHandler)(
@@ -416,7 +418,7 @@ namespace Krys
           }
         }
 
-        if constexpr (surrogatesAllowed)
+        if constexpr (AllowSurrogates)
         {
           if (Krys::Impl::Unicode::IsSurrogate(static_cast<char32>(point)))
           {
@@ -434,7 +436,7 @@ namespace Krys
               }
             }
 
-            *outIt = static_cast<code_unit>(static_cast<char16_t>(point));
+            *outIt = static_cast<code_unit>(static_cast<char16>(static_cast<char32>(point)));
             ::Krys::Ranges::iter_advance(outIt);
             ::Krys::Ranges::iter_advance(inIt);
 
@@ -458,7 +460,7 @@ namespace Krys
           }
         }
 
-        if (point <= Krys::Impl::Unicode::LastBMPValue)
+        if (static_cast<char32>(point) <= Krys::Impl::Unicode::LastBMPValue)
         {
           if constexpr (CallErrorHandler)
           {
@@ -474,14 +476,14 @@ namespace Krys
             }
           }
 
-          *outIt = static_cast<code_unit>(static_cast<char16_t>(point));
+          *outIt = static_cast<code_unit>(static_cast<char16>(static_cast<char32>(point)));
           ::Krys::Ranges::iter_advance(outIt);
           ::Krys::Ranges::iter_advance(inIt);
           return TResult(TSubInput(std::move(inIt), std::move(inLast)),
                          TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);
         }
 
-        auto normal = point - Krys::Impl::Unicode::NormalizingValue;
+        auto normal = static_cast<char32>(point) - Krys::Impl::Unicode::NormalizingValue;
         auto lead16 =
           Krys::Impl::Unicode::FirstLeadSurrogate
           + ((normal & Krys::Impl::Unicode::LeadSurrogateBitmask) >> Krys::Impl::Unicode::LeadShiftedBits);
@@ -550,11 +552,11 @@ namespace Krys
   using utf16_t = basic_utf16<char16_t>;
 
   /// @brief An instance of the UTF-16 encoding for ease of use.
-  inline constexpr utf16_t utf16 = {};
+  constexpr inline utf16_t utf16 = {};
 
   /// @brief A UTF-16 Encoding that traffics in wchar_t. See basic_utf16 for more details.
   using wide_utf16_t = basic_utf16<wchar_t>;
 
   /// @brief An instance of the UTF-16 that traffics in wchar_t for ease of use.
-  inline constexpr wide_utf16_t wide_utf16 = {};
+  constexpr inline wide_utf16_t wide_utf16 = {};
 }

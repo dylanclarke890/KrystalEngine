@@ -44,6 +44,13 @@
   #define KRYS_COMPILER_FEATURE(x) 0
 #endif
 
+#ifdef __has_include
+  /// @brief Check if the current compiler supports a particular include file.
+  #define KRYS_COMPILER_INCLUDE(x) __has_include(x))
+#else
+  #define KRYS_COMPILER_INCLUDE(x) 0
+#endif
+
 #ifdef __has_declspec_attribute
   /// @brief Check if the current compiler supports a Microsoft style __declspec attribute.
   #define KRYS_COMPILER_DECLSPEC(x) __has_declspec_attribute(x))

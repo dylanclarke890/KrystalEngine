@@ -19,5 +19,5 @@ namespace Krys
   };
 
   /// @brief An instance of basic_windows_865_dos_nordic for ease of use.
-  inline constexpr basic_windows_865_dos_nordic<char> windows_865_dos_nordic = {};
+  constexpr inline basic_windows_865_dos_nordic<char> windows_865_dos_nordic = {};
 }

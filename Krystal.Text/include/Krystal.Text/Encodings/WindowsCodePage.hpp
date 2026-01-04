@@ -22,10 +22,10 @@ namespace Krys
 {
   namespace Impl
   {
-    inline constexpr int32_t CodePageActive = 0;
-    inline constexpr int32_t CodePageOEM = 1;
-    inline constexpr int32_t CodePageMac = 2;
-    inline constexpr int32_t CodePageActiveThread = 3;
+    constexpr inline int32_t CodePageActive = 0;
+    constexpr inline int32_t CodePageOEM = 1;
+    constexpr inline int32_t CodePageMac = 2;
+    constexpr inline int32_t CodePageActiveThread = 3;
   }
 
   template <typename TCodeUnit, typename TCodePoint>
@@ -50,38 +50,39 @@ namespace Krys
     using code_unit = TCodeUnit;
 
     /// @brief The associated state for decode operations.
-    struct DecodeState
+    struct decode_state
     {
       std::optional<code_point> MaybeReplacementCodePoint;
 
-      constexpr DecodeState() : MaybeReplacementCodePoint()
+      constexpr decode_state() : MaybeReplacementCodePoint()
       {
       }
 
-      constexpr DecodeState(code_point replacementCodePoint) : MaybeReplacementCodePoint(replacementCodePoint)
+      constexpr decode_state(code_point replacementCodePoint)
+          : MaybeReplacementCodePoint(replacementCodePoint)
       {
       }
 
-      constexpr DecodeState(const basic_windows_code_page &encoding)
+      constexpr decode_state(const basic_windows_code_page &encoding)
           : MaybeReplacementCodePoint(encoding._replacementCodePoint)
       {
       }
     };
 
     /// @brief The associated state for encode operations.
-    struct EncodeState
+    struct encode_state
     {
       std::optional<code_unit> MaybeReplacementCodeUnit;
 
-      constexpr EncodeState() : MaybeReplacementCodeUnit()
+      constexpr encode_state() : MaybeReplacementCodeUnit()
       {
       }
 
-      constexpr EncodeState(code_point replacementCodeUnit) : MaybeReplacementCodeUnit(replacementCodeUnit)
+      constexpr encode_state(code_unit replacementCodeUnit) : MaybeReplacementCodeUnit(replacementCodeUnit)
       {
       }
 
-      constexpr EncodeState(const basic_windows_code_page &encoding)
+      constexpr encode_state(const basic_windows_code_page &encoding)
           : MaybeReplacementCodeUnit(encoding._replacementCodeUnit)
       {
       }
@@ -94,9 +95,9 @@ namespace Krys
     /// the state for the conversion was initialized with, and it defaults to what was stored in the actual
     /// encoding object.
     constexpr std::optional<Span<const code_point>>
-      MaybeReplacementCodePoints(const DecodeState &state) noexcept
+      MaybeReplacementCodePoints(const decode_state &state) noexcept
     {
-      if (state.MaybeReplacementCodePoint.hasTValue())
+      if (state.MaybeReplacementCodePoint.has_value())
       {
         return std::optional<Span<const code_point>>(
           std::in_place, std::addressof(state.MaybeReplacementCodePoint.value()), 1);
@@ -111,11 +112,11 @@ namespace Krys
     /// the state for the conversion was initialized with, and it defaults to what was stored in the actual
     /// encoding object.
     constexpr std::optional<Span<const code_unit>>
-      MaybeReplacementCodeUnits(const EncodeState &state) noexcept
+      MaybeReplacementCodeUnits(const encode_state &state) noexcept
     {
-      if (state.MaybeReplacementCodeUnit.hasTValue())
+      if (state.MaybeReplacementCodeUnit.has_value())
       {
-        return std::optional<Span<const code_point>>(
+        return std::optional<Span<const code_unit>>(
           std::in_place, std::addressof(state.MaybeReplacementCodeUnit.value()), 1);
       }
       return std::nullopt;
@@ -183,13 +184,13 @@ namespace Krys
     /// @returns A DecodeResult object that contains the reconstructed input range,
     /// reconstructed output range, error handler, and a reference to the passed-in state.
     template <typename TInput, typename TOutput, typename TErrorHandler>
-    auto DecodeOne(TInput &&input, TOutput &&output, TErrorHandler &&errorHandler, DecodeState &s) const
+    auto DecodeOne(TInput &&input, TOutput &&output, TErrorHandler &&errorHandler, decode_state &s) const
     {
 #if KRYS_OS(WINDOWS)
       using TUErrorHandler = remove_cvref_t<TErrorHandler>;
       using TSubInput = Krys::Ranges::csubrange_for_t<remove_ref_t<TInput>>;
       using TSubOutput = Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
-      using TResult = EncodeResult<TSubInput, TSubOutput, EncodeState>;
+      using TResult = DecodeResult<TSubInput, TSubOutput, decode_state>;
       constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TUErrorHandler>;
 
       auto inIt = ::Krys::Ranges::cbegin(input);
@@ -263,7 +264,7 @@ namespace Krys
       }
 
       using wutf16 = Impl::UTF16With<void, WCHAR, code_point, false>;
-      using TIntermediateState = DecodeState<wutf16>;
+      using TIntermediateState = decode_state_t<wutf16>;
 
       wutf16 intermediateEncoding {};
       TIntermediateState intermediateState {};
@@ -342,13 +343,13 @@ namespace Krys
     /// @returns A EncodeResult object that contains the reconstructed input range,
     /// reconstructed output range, error handler, and a reference to the passed-in state.
     template <typename TInput, typename TOutput, typename TErrorHandler>
-    auto EncodeOne(TInput &&input, TOutput &&output, TErrorHandler &&errorHandler, EncodeState &s) const
+    auto EncodeOne(TInput &&input, TOutput &&output, TErrorHandler &&errorHandler, encode_state &s) const
     {
 #if KRYS_OS(WINDOWS)
       using TUErrorHandler = remove_cvref_t<TErrorHandler>;
       using TSubInput = Krys::Ranges::csubrange_for_t<remove_ref_t<TInput>>;
       using TSubOutput = Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
-      using TResult = EncodeResult<TSubInput, TSubOutput, EncodeState>;
+      using TResult = EncodeResult<TSubInput, TSubOutput, encode_state>;
       constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TUErrorHandler>;
 
       auto inIt = ::Krys::Ranges::cbegin(input);
@@ -364,7 +365,7 @@ namespace Krys
       auto outLast = ::Krys::Ranges::end(output);
 
       using wutf16 = Impl::UTF16With<void, wchar_t, code_point, false>;
-      using TIntermediateState = EncodeState<wutf16>;
+      using TIntermediateState = encode_state_t<wutf16>;
 
       wutf16 intermediateEncoding {};
       TIntermediateState intermediateState {};
@@ -479,7 +480,7 @@ namespace Krys
     std::optional<code_point> _replacementCodePoint;
     std::optional<code_unit> _replacementCodeUnit;
     void *_codepageInfo;
-    uint32_t _codePage;
+    uint32 _codePage;
   };
 
   using windows_code_page = basic_windows_code_page<char, UnicodeCodePoint>;

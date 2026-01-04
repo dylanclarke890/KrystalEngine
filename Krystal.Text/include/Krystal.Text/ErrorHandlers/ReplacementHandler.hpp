@@ -397,8 +397,8 @@ namespace Krys::Handlers
 
         const Span<const TInputCodePoint> replacementRange(replacement, replacementSize);
 
-        Impl::PassThroughHandler handler {};
-        EncodeState<TEncoding> state = CopyEncodeStateWith(encoding, result.State);
+        Krys::Impl::PassThroughHandler handler {};
+        encode_state_t<TEncoding> state = Krys::CopyEncodeStateWith(encoding, result.State);
 
         auto encodingResult = encoding.EncodeOne(replacementRange, std::move(result.Output), handler, state);
         result.Output = std::move(encodingResult.Output);
@@ -484,7 +484,7 @@ namespace Krys::Handlers
         }
 
         const Span<const TInputCodeUnit> replacementRange(replacement, replacementSize);
-        DecodeState<TEncoding> state = CopyDecodeStateWith(encoding, result.State);
+        decode_state_t<TEncoding> state = Krys::CopyDecodeStateWith(encoding, result.State);
 
         Krys::Impl::PassThroughHandler handler {};
         auto decodingResult =
@@ -524,7 +524,7 @@ namespace Krys::Handlers
         return result;
       }
 
-      return SkipInputError(encoding, this->EncodeReplace(encoding, std::move(result)), inputProgress,
+      return Krys::SkipInputError(encoding, this->EncodeReplace(encoding, std::move(result)), inputProgress,
                             outputProgress);
     }
 
@@ -550,7 +550,7 @@ namespace Krys::Handlers
         return result; // BAIL
       }
 
-      return SkipInputError(encoding, this->DecodeReplace(encoding, std::move(result)), inputProgress,
+      return Krys::SkipInputError(encoding, this->DecodeReplace(encoding, std::move(result)), inputProgress,
                             outputProgress);
     }
   };
@@ -605,9 +605,9 @@ namespace Krys::Handlers
       {
         return result; // BAIL
       }
-      auto copyResult = Impl::Copy(CodeUnitReplacement, std::move(result.Output));
+      auto copyResult = Krys::Ranges::Impl::Copy(CodeUnitReplacement, std::move(result.Output));
       result.Output = std::move(copyResult.Out);
-      return SkipInputError(encoding, std::move(result), inputProgress, outputProgress);
+      return Krys::SkipInputError(encoding, std::move(result), inputProgress, outputProgress);
     }
 
     /// @brief The function call for inserting replacement code points at the point of failure, before
@@ -631,9 +631,9 @@ namespace Krys::Handlers
         return result; // BAIL
       }
 
-      auto copyResult = Impl::Copy(CodePointReplacement, std::move(result.Output));
+      auto copyResult = Krys::Ranges::Impl::Copy(CodePointReplacement, std::move(result.Output));
       result.Output = std::move(copyResult.Out);
-      return SkipInputError(encoding, std::move(result), inputProgress, outputProgress);
+      return Krys::SkipInputError(encoding, std::move(result), inputProgress, outputProgress);
     }
   };
 

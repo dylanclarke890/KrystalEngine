@@ -10,6 +10,7 @@
 #include "Krystal.Text/SkipInputError.hpp"
 #include "Krystal.Text/State.hpp"
 #include "Krystal.Text/TextEncodingId.hpp"
+#include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys
 {
@@ -22,7 +23,7 @@ namespace Krys
     /// @brief An internal type meant to provide the bulk of the UTF-32 functionality.
     /// @remarks Relies on CRTP.
     template <typename TDerived = void, typename TCodeUnit = char32, typename TCodePoint = UnicodeCodePoint,
-              bool TValidateDecodableAs = true, bool surrogatesAllowed = false>
+              bool ValidateDecodableAs = true, bool AllowSurrogates = false>
     class UTF32With : public UTF32Tag
     {
     private:
@@ -30,7 +31,7 @@ namespace Krys
 
     public:
       /// @brief Whether or not this encoding that can encode all of Unicode.
-      using IsUnicodeEncoding = std::true_type;
+      using is_unicode_encoding = std::true_type;
 
       /// @brief The start of a sequence can be found unambiguously when dropped into the middle of a
       /// sequence or after an error in reading as occurred for encoded text.
@@ -69,12 +70,12 @@ namespace Krys
       inline static constexpr std::size_t MaxCodeUnits = 1;
 
       ///@brief The encoding ID for this type. Used for optimization purposes.
-      inline static constexpr Krys::TextEncodingId EncodedId =
-        surrogatesAllowed ? Krys::TextEncodingId::ucs4 : Krys::TextEncodingId::utf32;
+      inline static constexpr ::Krys::TextEncodingId EncodedId =
+        AllowSurrogates ? ::Krys::TextEncodingId::ucs4 : ::Krys::TextEncodingId::utf32;
 
       ///@brief The encoding ID for this type. Used for optimization purposes.
-      inline static constexpr Krys::TextEncodingId DecodedId =
-        surrogatesAllowed ? Krys::TextEncodingId::ucs4 : Krys::TextEncodingId::utf32;
+      inline static constexpr ::Krys::TextEncodingId DecodedId =
+        AllowSurrogates ? ::Krys::TextEncodingId::ucs4 : ::Krys::TextEncodingId::utf32;
 
       /// @brief Allows an encoding to discard input characters if an error occurs, taking in both the
       /// state and the input sequence (by reference) to modify.
@@ -84,14 +85,14 @@ namespace Krys
       static constexpr auto SkipInputError(TResult &&result, const TInputProgress &inputProgress,
                                            const TOutputProgress &outputProgress) noexcept
       {
-        if constexpr (surrogatesAllowed)
-        {
-          return Krys::SkipUTF32InputError(std::forward<TResult>(result), inputProgress, outputProgress);
-        }
-        else
+        if constexpr (AllowSurrogates)
         {
           return Krys::SkipUTF32WithSurrogatesInputError(std::forward<TResult>(result), inputProgress,
                                                          outputProgress);
+        }
+        else
+        {
+          return Krys::SkipUTF32InputError(std::forward<TResult>(result), inputProgress, outputProgress);
         }
       }
 
@@ -129,14 +130,14 @@ namespace Krys
         }
 
         auto outIt = ::Krys::Ranges::begin(output);
-        KRYS_MAYBE_USED auto outLast = ::Krys::Ranges::end(output);
+        KRYS_MAYBE_UNUSED auto outLast = ::Krys::Ranges::end(output);
 
         if constexpr (CallErrorHandler)
         {
           if (outIt == outLast)
           {
             TSelf self {};
-            return std::forward<TErrorHandler>(errorHandler)(
+            std::forward<TErrorHandler>(errorHandler)(
               self,
               TResult(TSubInput(std::move(inIt), std::move(inLast)),
                       TSubOutput(std::move(outIt), std::move(outLast)), s,
@@ -147,10 +148,10 @@ namespace Krys
 
         code_unit unit = static_cast<code_unit>(*inIt);
         char32 unit32 = static_cast<char32>(unit);
-        if constexpr (TValidateDecodableAs && CallErrorHandler)
+        if constexpr (ValidateDecodableAs && CallErrorHandler)
         {
-          if (unit32 > Krys::Impl::Unicode::LastUnicodeCodePoint
-              || (!surrogatesAllowed && Krys::Impl::Unicode::IsSurrogate(static_cast<char32>(unit))))
+          if (unit32 > ::Krys::Impl::Unicode::LastUnicodeCodePoint
+              || (!AllowSurrogates && ::Krys::Impl::Unicode::IsSurrogate(static_cast<char32>(unit))))
           {
             TSelf self {};
             return std::forward<TErrorHandler>(errorHandler)(
@@ -188,8 +189,8 @@ namespace Krys
                                       state &s)
       {
         using TUErrorHandler = remove_cvref_t<TErrorHandler>;
-        using TSubInput = Krys::Ranges::csubrange_for_t<remove_ref_t<TInput>>;
-        using TSubOutput = Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
+        using TSubInput = ::Krys::Ranges::csubrange_for_t<remove_ref_t<TInput>>;
+        using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
         using TResult = EncodeResult<TSubInput, TSubOutput, state>;
         constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TUErrorHandler>;
 
@@ -198,8 +199,8 @@ namespace Krys
         if (inIt == inLast)
         {
           // an exhausted sequence is fine
-          return TResult(TSubInput(std::move(inIt), std::move(inLast)), std::forward<TOutput>(output), s,
-                         EncodingError::OK);
+          return TResult(TSubInput(::std::move(inIt), ::std::move(inLast)), ::std::forward<TOutput>(output),
+                         s, EncodingError::OK);
         }
 
         auto outIt = ::Krys::Ranges::begin(output);
@@ -209,8 +210,8 @@ namespace Krys
 
         if constexpr (CallErrorHandler)
         {
-          if (point32 > Krys::Impl::Unicode::LastUnicodeCodePoint
-              || (!surrogatesAllowed && Krys::Impl::Unicode::IsSurrogate(point32)))
+          if (point32 > ::Krys::Impl::Unicode::LastUnicodeCodePoint
+              || (!AllowSurrogates && ::Krys::Impl::Unicode::IsSurrogate(point32)))
           {
             TSelf self {};
             return std::forward<TErrorHandler>(errorHandler)(
@@ -232,7 +233,7 @@ namespace Krys
           }
         }
 
-        *outIt = static_cast<code_point>(point32);
+        *outIt = static_cast<code_unit>(point32);
         ::Krys::Ranges::iter_advance(outIt);
         ::Krys::Ranges::iter_advance(inIt);
 
@@ -261,11 +262,11 @@ namespace Krys
   using utf32_t = basic_utf32<char32>;
 
   /// @brief An instance of the UTF-32 encoding for ease of use.
-  inline constexpr utf32_t utf32 = {};
+  constexpr inline utf32_t utf32 = {};
 
   /// @brief A UTF-32 Encoding that traffics in wchar_t. See basic_utf32 for more details.
   using wide_utf32_t = basic_utf32<wchar_t>;
 
   /// @brief An instance of the UTF-32 that traffics in wchar_t for ease of use.
-  inline constexpr wide_utf32_t wide_utf32 = {};
+  constexpr inline wide_utf32_t wide_utf32 = {};
 }

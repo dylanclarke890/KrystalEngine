@@ -77,7 +77,7 @@ namespace Krys::Ranges
 
     template <typename TRange>
     class IsContiguousRange<TRange, true>
-        : public IntegralConstant<bool, ContiguousIterator<range_iterator_t<TRange>>>
+        : public IntegralConstant<bool, IsContiguousIterator<range_iterator_t<TRange>>>
     {
     };
 
@@ -225,7 +225,7 @@ namespace Krys::Ranges
 
   template <typename TRange, typename TIteratorFirst, typename TIteratorLast = TIteratorFirst>
   concept has_insert_bulk = requires {
-    std::declval<TRange>().insert(Krys::Ranges::begin(std::declval<TRange>()), std::declval<TIteratorFirst>(),
+    std::declval<TRange>().insert(begin(std::declval<TRange>()), std::declval<TIteratorFirst>(),
                                   std::declval<TIteratorLast>());
   };
 }

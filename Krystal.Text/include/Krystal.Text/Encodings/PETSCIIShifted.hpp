@@ -20,5 +20,5 @@ namespace Krys
   };
 
   /// @brief An instance of basic_petscii_shifted for ease of use.
-  inline constexpr basic_petscii_shifted<char> petscii_shifted = {};
+  constexpr inline basic_petscii_shifted<char> petscii_shifted = {};
 }

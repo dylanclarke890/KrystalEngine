@@ -20,7 +20,7 @@ namespace Krys
   /// @brief Checks whether or not the decoding step for `T` is injective (cannot possibly lose
   /// information regardless of whatever valid input is put in).
   /// @tparam T The encoding type to check.
-  /// @remarks If the encoding object does not define is_decode_injective, it is assumed to be false (the
+  /// @remarks If the encoding object does not define IsDecodeInjective, it is assumed to be false (the
   /// safest default).
   template <typename T>
   concept IsDecodeInjective =
@@ -29,7 +29,7 @@ namespace Krys
   /// @brief Checks whether or not the encoding step for `T` is injective (cannot possibly lose
   /// information regardless of whatever valid input is put in).
   /// @tparam T The encoding type to check.
-  /// @remarks If the encoding object does not define is_encode_injective, it is assumed to be false (the
+  /// @remarks If the encoding object does not define IsEncodeInjective, it is assumed to be false (the
   /// safest default).
   template <typename T>
   concept IsEncodeInjective =

@@ -32,13 +32,13 @@ namespace Krys
 
     /// @brief The state that can be used between calls to the encoder and decoder.
     /// @remarks It is an empty struct because there is no shift state to preserve between complete units of
-    /// encoded information. It is also only `state` and not separately `DecodeState` and `EncodeState`
+    /// encoded information. It is also only `state` and not separately `decode_state` and `encode_state`
     /// because one type suffices for both.
     using state = EmptyState;
 
     /// @brief Whether or not the decode operation can process all forms of input into code point values.
     /// @remarks ASCII can decode from its 7-bit (unpacked) code units to Unicode Code Points. Since the
-    /// converion is lossless, this property is true.
+    /// conversion is lossless, this property is true.
     using is_decode_injective = std::true_type;
 
     /// @brief Whether or not the encode operation can process all forms of input into code unit values.
@@ -98,7 +98,7 @@ namespace Krys
       {
         if (outIt == outLast)
         {
-          ascii_t self {};
+          basic_ascii self {};
           return std::forward<TErrorHandler>(errorHandler)(
             self,
             TResult(TSubInput(std::move(inIt), std::move(inLast)),
@@ -116,7 +116,7 @@ namespace Krys
       {
         if (static_cast<schar>(unit) < static_cast<schar>(0))
         {
-          ascii_t self {};
+          basic_ascii self {};
           return std::forward<TErrorHandler>(errorHandler)(
             self,
             TResult(TSubInput(std::move(inIt), std::move(inLast)),
@@ -172,7 +172,7 @@ namespace Krys
       {
         if (outIt == outLast)
         {
-          ascii_t self {};
+          basic_ascii self {};
           return TResult(std::forward<TErrorHandler>(errorHandler)(
             self,
             TResult(TSubInput(std::move(inIt), std::move(inLast)),
@@ -190,7 +190,7 @@ namespace Krys
       {
         if (point > Krys::Impl::Unicode::LastASCIIValue)
         {
-          ascii_t self {};
+          basic_ascii self {};
           return TResult(std::forward<TErrorHandler>(errorHandler)(
             self,
             TResult(TSubInput(std::move(inIt), std::move(inLast)),

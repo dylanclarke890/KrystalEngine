@@ -28,7 +28,7 @@ namespace Krys::Handlers
   public:
     /// @brief A type that is true when calling code can not call this function and ignore it, and false when
     /// it cannot ignore it.
-    using assumeTValid = IntegralConstant<bool, TrapsOnInvocation>;
+    using assume_valid = IntegralConstant<bool, TrapsOnInvocation>;
 
     /// @brief A handler for either decode or encode results that simply passes the result type back through
     /// with no changes made.

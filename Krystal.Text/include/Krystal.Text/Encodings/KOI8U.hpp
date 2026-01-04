@@ -18,5 +18,5 @@ namespace Krys
   };
 
   /// @brief An instance of basic_koi8_ufor ease of use.
-  inline constexpr basic_koi8_u<char> koi8_u = {};
+  constexpr inline basic_koi8_u<char> koi8_u = {};
 }

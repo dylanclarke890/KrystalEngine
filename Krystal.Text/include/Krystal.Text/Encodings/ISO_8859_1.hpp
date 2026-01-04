@@ -68,7 +68,8 @@ namespace Krys
     /// the input models at least a view and a forward_range). If it is not possible, returned ranges may be
     /// incremented even if an error occurs due to the semantics of any view that models an input_range.
     template <typename TInput, typename TOutput, typename TErrorHandler>
-    static constexpr auto DecodeOne(TInput &&input, TOutput &&output, TErrorHandler &&errorHandler, state &s)
+    static constexpr auto DecodeOne(TInput &&input, TOutput &&output, TErrorHandler &&errorHandler,
+                                    state &s)
     {
       using TUErrorHandler = remove_cvref_t<TErrorHandler>;
       using TSubInput = Krys::Ranges::csubrange_for_t<remove_ref_t<TInput>>;
@@ -149,7 +150,8 @@ namespace Krys
     /// the input models at least a view and a forward_range). If it is not possible, returned ranges may be
     /// incremented even if an error occurs due to the semantics of any view that models an input_range.
     template <typename TInput, typename TOutput, typename TErrorHandler>
-    static constexpr auto EncodeOne(TInput &&input, TOutput &&output, TErrorHandler &&errorHandler, state &s)
+    static constexpr auto EncodeOne(TInput &&input, TOutput &&output, TErrorHandler &&errorHandler,
+                                    state &s)
     {
       using TUErrorHandler = remove_cvref_t<TErrorHandler>;
       using TSubInput = Krys::Ranges::csubrange_for_t<remove_ref_t<TInput>>;
@@ -211,5 +213,5 @@ namespace Krys
   };
 
   /// @brief An instance of the basic_iso_8859_1 type for ease of use.
-  inline constexpr basic_iso_8859_1<char> iso_8859_1 = {};
+  constexpr inline basic_iso_8859_1<char> iso_8859_1 = {};
 }

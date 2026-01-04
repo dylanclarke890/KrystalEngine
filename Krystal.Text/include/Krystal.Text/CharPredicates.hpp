@@ -49,7 +49,7 @@ namespace Krys
 
   /// @brief A heterogenous binary equals to comparison predicate each other and makes sure their signedness
   /// does not ruin the comparison. This object can be passed as a parameter, even to templated functions.
-  inline constexpr const EqualToCharFn equal_to_char = {};
+  constexpr inline const EqualToCharFn equal_to_char = {};
 
   /// @brief Internal comparison structure.
   struct NotEqualToCharFn
@@ -93,5 +93,5 @@ namespace Krys
 
   /// @brief A heterogenous binary equals to comparison predicate each other and makes sure their signedness
   /// does not ruin the comparison. This object can be passed as a parameter, even to templated functions.
-  inline constexpr const NotEqualToCharFn not_equal_to_char = {};
+  constexpr inline const NotEqualToCharFn not_equal_to_char = {};
 }

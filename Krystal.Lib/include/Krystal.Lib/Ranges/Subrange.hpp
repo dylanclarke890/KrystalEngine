@@ -89,11 +89,11 @@ namespace Krys::Ranges
 
       /// @brief The iterator category. Same as the iterator category for `TIterator`.
       using iterator_category =
-        conditional_t<ContiguousIterator<iterator>, contiguous_iterator_tag, iterator_category_t<iterator>>;
+        conditional_t<IsContiguousIterator<iterator>, contiguous_iterator_tag, iterator_category_t<iterator>>;
 
       /// @brief The iterator concept. Same as the iterator concept for `TIterator`.
       using iterator_concept =
-        conditional_t<ContiguousIterator<iterator>, contiguous_iterator_tag, iterator_concept_t<iterator>>;
+        conditional_t<IsContiguousIterator<iterator>, contiguous_iterator_tag, iterator_concept_t<iterator>>;
 
       /// @brief The `pointer` type. Same as the `pointer` type for `TIterator`.
       using pointer = iterator_pointer_t<iterator>;
@@ -257,7 +257,7 @@ namespace Krys::Ranges
       /// @remarks This function call only works if the `iterator_concept` is a `contiguous_iterator_tag` or
       /// better.
       template <typename TStrawman = TIterator>
-      requires ContiguousIterator<TStrawman>
+      requires IsContiguousIterator<TStrawman>
       constexpr pointer data() const noexcept
       {
         return to_address(this->_it);
@@ -268,7 +268,7 @@ namespace Krys::Ranges
       /// @remarks This function call only works if the `iterator_concept` is a `contiguous_iterator_tag` or
       /// better.
       template <typename TStrawman = TIterator>
-      requires ContiguousIterator<TStrawman>
+      requires IsContiguousIterator<TStrawman>
       constexpr reference operator[](size_type index) const noexcept
       {
         return this->_it[index];
@@ -413,19 +413,27 @@ namespace Krys::Ranges
   template <typename TIterator, typename TSentinel>
   constexpr subrange<remove_cvref_t<TIterator>, remove_cvref_t<TSentinel>>
     CreateSubrange(TIterator &&it, TSentinel &&sen) noexcept(
-      NoThrowConstructible<Impl::Subrange<remove_cvref_t<TIterator>, remove_cvref_t<TSentinel>>, TIterator,
+      NoThrowConstructible<subrange<remove_cvref_t<TIterator>, remove_cvref_t<TSentinel>>, TIterator,
                            TSentinel>)
   {
-    return Impl::Subrange<remove_cvref_t<TIterator>, remove_cvref_t<TSentinel>>(std::forward<TIterator>(it),
-                                                                                std::forward<TSentinel>(sen));
+    return subrange<remove_cvref_t<TIterator>, remove_cvref_t<TSentinel>>(std::forward<TIterator>(it),
+                                                                          std::forward<TSentinel>(sen));
   }
 }
 
+#if KRYS_CONFIG(STD_LIBRARY_BORROWED_RANGE)
+namespace std::ranges
+{
+
+  template <typename TIterator, typename TSentinel, Krys::Ranges::Impl::SubrangeKind TKind>
+  inline constexpr bool enable_borrowed_range<Krys::Ranges::Impl::Subrange<TIterator, TSentinel, TKind>> =
+    true;
+}
+#endif
+
 namespace Krys::Ranges
 {
-  // NOTE: specializations do not need the inline ABI namespace
-
   /// @brief Mark subranges as appropriately borrowed ranges.
-  template <typename TIterator, typename TSentinel, Impl::SubrangeKind TKind>
-  inline constexpr bool EnableBorrowedRange<Impl::Subrange<TIterator, TSentinel, TKind>> = true;
+  template <typename TIterator, typename TSentinel, Krys::Ranges::Impl::SubrangeKind TKind>
+  inline constexpr bool enable_borrowed_range<Impl::Subrange<TIterator, TSentinel, TKind>> = true;
 }

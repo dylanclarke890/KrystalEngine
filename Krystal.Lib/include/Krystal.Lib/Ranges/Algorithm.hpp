@@ -162,17 +162,13 @@ namespace Krys::Ranges
       using TOutRange = UnboundedView<TOutFirst>;
       using TResult = InOutResult<TInRange, TOutRange>;
 
-#if KRYS_CONFIG(STD_LIBRARY_IS_CONSTANT_EVALUATED)
       if (!std::is_constant_evaluated())
-#else
-      if (false)
-#endif
       {
         using TValue = iterator_value_type_t<TFirst>;
         using TOutValue = iterator_value_type_t<TOutFirst>;
 
-        if constexpr (ContiguousIterator<TFirst> && HasUniqueObjectRepresentations<TValue>
-                      && ContiguousIterator<TOutFirst> && HasUniqueObjectRepresentations<TOutValue>)
+        if constexpr (IsContiguousIterator<TFirst> && HasUniqueObjectRepresentations<TValue>
+                      && IsContiguousIterator<TOutFirst> && HasUniqueObjectRepresentations<TOutValue>)
         {
           auto first_ptr = to_address(first);
           auto distance = size;
@@ -200,16 +196,12 @@ namespace Krys::Ranges
       using TOutRange = UnboundedView<TOutFirst>;
       using TResult = InOutResult<TInRange, TOutRange>;
 
-#if KRYS_CONFIG(STD_LIBRARY_IS_CONSTANT_EVALUATED)
       if (!std::is_constant_evaluated())
-#else
-      if (false)
-#endif
       {
         using TValue = iterator_value_type_t<TFirst>;
         using TOutValue = iterator_value_type_t<TOutFirst>;
-        if constexpr (ContiguousIterator<TFirst> && HasUniqueObjectRepresentations<TValue>
-                      && ContiguousIterator<TOutFirst> && HasUniqueObjectRepresentations<TOutValue>)
+        if constexpr (IsContiguousIterator<TFirst> && HasUniqueObjectRepresentations<TValue>
+                      && IsContiguousIterator<TOutFirst> && HasUniqueObjectRepresentations<TOutValue>)
         {
           auto first_ptr = to_address(first);
           auto distance = last - first;
@@ -236,11 +228,7 @@ namespace Krys::Ranges
       using TInRange = subrange<CountedIterator<TFirst>, DefaultSentinel>;
       using TOutRange = subrange<CountedIterator<TOutFirst>, DefaultSentinel>;
       using TResult = InOutResult<TInRange, TOutRange>;
-#if KRYS_CONFIG(STD_LIBRARY_IS_CONSTANT_EVALUATED)
       if (!std::is_constant_evaluated())
-#else
-      if (false)
-#endif
       {
         if constexpr (IsIteratorConceptOrBetter<std::random_access_iterator_tag, TOutFirst>)
         {
@@ -286,11 +274,7 @@ namespace Krys::Ranges
       using TOutRange = subrange<TOutFirst, TOutLast>;
       using TResult = InOutResult<TInRange, TOutRange>;
 
-#if KRYS_CONFIG(STD_LIBRARY_IS_CONSTANT_EVALUATED)
       if (!std::is_constant_evaluated())
-#else
-      if (false)
-#endif
       {
         if constexpr (SizedSentinelFor<TOutFirst, TOutLast>)
         {

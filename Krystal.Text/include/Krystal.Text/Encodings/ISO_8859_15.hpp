@@ -19,5 +19,5 @@ namespace Krys
   };
 
   /// @brief An instance of basic_iso_8859_15 for ease of use.
-  inline constexpr basic_iso_8859_15<char> iso_8859_15 = {};
+  constexpr inline basic_iso_8859_15<char> iso_8859_15 = {};
 }

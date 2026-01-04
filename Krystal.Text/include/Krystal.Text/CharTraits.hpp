@@ -147,6 +147,4 @@ namespace Krys
   class is_char_traitable<uchar8> : public std::true_type
   {
   };
-
-
 }

@@ -19,5 +19,5 @@ namespace Krys
   };
 
   /// @brief An instance of basic_windows_437_dos_latin_us for ease of use.
-  inline constexpr basic_windows_437_dos_latin_us<char> windows_437_dos_latin_us = {};
+  constexpr inline basic_windows_437_dos_latin_us<char> windows_437_dos_latin_us = {};
 }

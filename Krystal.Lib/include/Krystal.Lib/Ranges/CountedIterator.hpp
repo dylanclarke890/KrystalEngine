@@ -238,15 +238,15 @@ namespace Krys::Ranges
         return left._count != static_cast<TIteratorDiff>(0);
       }
 
-      friend constexpr iterator_rvalue_reference_t<TIterator> Krys::Ranges::iter_move(
-        const CountedIterator &it) noexcept(noexcept(Krys::Ranges::iter_move(it.base())))
+      friend constexpr iterator_rvalue_reference_t<TIterator>
+        iter_move(const CountedIterator &it) noexcept(noexcept(Krys::Ranges::iter_move(it.base())))
       {
         return Krys::Ranges::iter_move(it.base());
       }
 
       template <typename TRightIterator>
-      friend constexpr void iter_swap(
-        const CountedIterator &left, const CountedIterator<TRightIterator> &right) noexcept(
+      friend constexpr void
+        iter_swap(const CountedIterator &left, const CountedIterator<TRightIterator> &right) noexcept(
           noexcept(Krys::Ranges::iter_swap(left.base(), right.base())))
       {
         Krys::Ranges::iter_swap(left.base(), right.base());

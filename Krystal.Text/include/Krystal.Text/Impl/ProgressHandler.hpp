@@ -57,7 +57,7 @@ namespace Krys
       using TCodeUnit = code_unit_t<_DesiredEncoding>;
 
     public:
-      using assumeTValid = IntegralConstant<bool, TAssumeValid>;
+      using assume_valid = IntegralConstant<bool, TAssumeValid>;
 
       constexpr ProgressHandler() noexcept : _codePoints(), _codePointsSize(), _codeUnits(), _codeUnitsSize()
       {
@@ -114,7 +114,7 @@ namespace Krys
       constexpr auto operator()(const TEncoding &, TResult result, const TInputProgress &inputProgress,
                                 const TOutputProgress &outputProgress) noexcept
       {
-        if constexpr (IsSpecializationOf<remove_cvref_t<TResult>, DecodeResult>)
+        if constexpr (Krys::IsSpecializationOf<remove_cvref_t<TResult>, DecodeResult>)
         {
           this->_codeUnitsSize = Krys::Ranges::size(inputProgress);
           Krys::Ranges::Impl::CopyNUnsafe(Krys::Ranges::cbegin(inputProgress), this->_codeUnitsSize,
@@ -161,7 +161,7 @@ namespace Krys
         || IsForwardingProgressHandler<remove_cvref_t<TErrorHandler>>;
 
     public:
-      using assumeTValid = IntegralConstant<bool, TAssumeValid>;
+      using assume_valid = IntegralConstant<bool, TAssumeValid>;
 
       constexpr ForwardingProgressHandler(TEncoding &encoding, TErrorHandler &errorHandler) noexcept
           : TEncodingBase(encoding), TErrorHandlerBase(errorHandler), _codePoints(), _codePointsSize(),
@@ -252,7 +252,7 @@ namespace Krys
         if constexpr (TIsProgressHandler)
         {
           ForwardingProgressHandler &nonConstSelf = *this;
-          if constexpr (IsSpecializationOf<remove_cvref_t<TResult>, DecodeResult>)
+          if constexpr (Krys::IsSpecializationOf<remove_cvref_t<TResult>, DecodeResult>)
           {
             nonConstSelf._codeUnitsSize = Krys::Ranges::size(inputProgress);
             Krys::Ranges::Impl::CopyNUnsafe(Krys::Ranges::cbegin(inputProgress), nonConstSelf._codeUnitsSize,
@@ -287,7 +287,7 @@ namespace Krys
         if constexpr (TIsProgressHandler)
         {
           ForwardingProgressHandler &nonConstSelf = const_cast<ForwardingProgressHandler &>(*this);
-          if constexpr (IsSpecializationOf<remove_cvref_t<TResult>, DecodeResult>)
+          if constexpr (Krys::IsSpecializationOf<remove_cvref_t<TResult>, DecodeResult>)
           {
             nonConstSelf._codeUnitsSize = Krys::Ranges::size(inputProgress);
             Krys::Ranges::Impl::CopyNUnsafe(Krys::Ranges::cbegin(inputProgress), nonConstSelf._codeUnitsSize,
@@ -322,7 +322,7 @@ namespace Krys
         if constexpr (TIsProgressHandler)
         {
           ForwardingProgressHandler &nonConstSelf = *this;
-          if constexpr (IsSpecializationOf<remove_cvref_t<TResult>, DecodeResult>)
+          if constexpr (Krys::IsSpecializationOf<remove_cvref_t<TResult>, DecodeResult>)
           {
             nonConstSelf._codeUnitsSize = Krys::Ranges::size(inputProgress);
             Krys::Ranges::Impl::CopyNUnsafe(Krys::Ranges::cbegin(inputProgress), nonConstSelf._codeUnitsSize,

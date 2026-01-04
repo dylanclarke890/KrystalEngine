@@ -207,6 +207,6 @@ namespace Krys::Ranges
 {
   /// @brief Mark subranges as appropriately borrowed ranges.
   template <typename TIterator>
-  inline constexpr bool EnableBorrowedRange<UnboundedView<TIterator>> = true;
+  inline constexpr bool enable_borrowed_range<UnboundedView<TIterator>> = true;
 }
 #endif

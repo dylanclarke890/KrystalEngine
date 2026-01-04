@@ -19,5 +19,5 @@ namespace Krys
   };
 
   /// @brief An instance of basic_ibm_8_424ebrew for ease of use.
-  inline constexpr basic_ibm_424_hebrew_bulletin<char> ibm_424_hebrew_bulletin = {};
+  constexpr inline basic_ibm_424_hebrew_bulletin<char> ibm_424_hebrew_bulletin = {};
 }

@@ -40,9 +40,9 @@ namespace Krys
     /// including whether or not an error was handled.
     /// @param[in] other A different but related result type.
     template <typename TArgInput, typename TArgOutput>
-    requires(Impl::ResultTypeCopyConstraint<StatelessRecodeResult, TInput, TArgInput, TOutput, TArgOutput>())
-    constexpr StatelessRecodeResult(const StatelessRecodeResult<TArgInput, TArgOutput> &other) noexcept(
-      Impl::ResultTypeCopyNoexcept<StatelessRecodeResult, TInput, TArgInput, TOutput, TArgOutput>())
+    requires CopyableResultType<StatelessRecodeResult, TInput, TArgInput, TOutput, TArgOutput>
+    constexpr StatelessRecodeResult(const StatelessRecodeResult<TArgInput, TArgOutput> &other) // cf
+      noexcept(NoThrowCopyableResultType<StatelessRecodeResult, TInput, TArgInput, TOutput, TArgOutput>)
         : Input(other.Input), Output(other.Output), ErrorCode(other.ErrorCode), ErrorCount(other.ErrorCount)
     {
     }
@@ -51,9 +51,9 @@ namespace Krys
     /// including whether or not an error was handled.
     /// @param[in] other A different but related result type.
     template <typename TArgInput, typename TArgOutput>
-    requires(Impl::ResultTypeMoveConstraint<StatelessRecodeResult, TInput, TArgInput, TOutput, TArgOutput>())
-    constexpr StatelessRecodeResult(StatelessRecodeResult<TArgInput, TArgOutput> &&other) noexcept(
-      Impl::ResultTypeMoveNoexcept<StatelessRecodeResult, TInput, TArgInput, TOutput, TArgOutput>)
+    requires MovableResultType<StatelessRecodeResult, TInput, TArgInput, TOutput, TArgOutput>
+    constexpr StatelessRecodeResult(StatelessRecodeResult<TArgInput, TArgOutput> &&other) // cf
+      noexcept(NoThrowMovableResultType<StatelessRecodeResult, TInput, TArgInput, TOutput, TArgOutput>)
         : Input(std::move(other.Input)), Output(std::move(other.Output)), ErrorCode(other.ErrorCode),
           ErrorCount(other.ErrorCount)
     {
@@ -122,16 +122,14 @@ namespace Krys
     ReferenceWrapper<TToState> ToState;
 
     /// @brief Constructs a PivotlessRecodeResult from a previous PivotlessRecodeResult.
-    ///
     /// @param[in] other A different but related result type.
     template <typename TArgInput, typename TArgOutput, typename TArgFromState, typename TArgToState>
-    requires(Impl::ResultTypeCopyConstraint<PivotlessRecodeResult, TInput, TArgInput, TOutput, TArgOutput,
-                                            TFromState, TArgFromState, TToState, TArgToState>())
+    requires CopyableResultType<PivotlessRecodeResult, TInput, TArgInput, TOutput, TArgOutput, TFromState,
+                                TArgFromState, TToState, TArgToState>
     constexpr PivotlessRecodeResult(
-      const PivotlessRecodeResult<TArgInput, TArgOutput, TArgFromState, TArgToState>
-        &other) noexcept(Impl::ResultTypeCopyNoexcept<PivotlessRecodeResult, TInput, TArgInput, TOutput,
-                                                      TArgOutput, TFromState, TArgFromState, TToState,
-                                                      TArgToState>())
+      const PivotlessRecodeResult<TArgInput, TArgOutput, TArgFromState, TArgToState> &other) // cf
+      noexcept(NoThrowCopyableResultType<PivotlessRecodeResult, TInput, TArgInput, TOutput, TArgOutput,
+                                         TFromState, TArgFromState, TToState, TArgToState>)
         : TBase(other.Input, other.Output, other.ErrorCode, other.ErrorCount), FromState(other.FromState),
           ToState(other.ToState)
     {
@@ -140,13 +138,12 @@ namespace Krys
     /// @brief Constructs a PivotlessRecodeResult from a previous PivotlessRecodeResult.
     /// @param[in] other A different but related result type.
     template <typename TArgInput, typename TArgOutput, typename TArgFromState, typename TArgToState>
-    requires(Impl::ResultTypeMoveConstraint<PivotlessRecodeResult, TInput, TArgInput, TOutput, TArgOutput,
-                                            TFromState, TArgFromState, TToState, TArgToState>())
+    requires MovableResultType<PivotlessRecodeResult, TInput, TArgInput, TOutput, TArgOutput, TFromState,
+                               TArgFromState, TToState, TArgToState>
     constexpr PivotlessRecodeResult(
-      PivotlessRecodeResult<TArgInput, TArgOutput, TArgFromState, TArgToState>
-        &&other) noexcept(Impl::ResultTypeMoveNoexcept<PivotlessRecodeResult, TInput, TArgInput, TOutput,
-                                                       TArgOutput, TFromState, TArgFromState, TToState,
-                                                       TArgToState>())
+      PivotlessRecodeResult<TArgInput, TArgOutput, TArgFromState, TArgToState> &&other) // cf
+      noexcept(NoThrowMovableResultType<PivotlessRecodeResult, TInput, TArgInput, TOutput, TArgOutput,
+                                        TFromState, TArgFromState, TToState, TArgToState>)
         : TBase(std::move(other.Input), std::move(other.Output), other.ErrorCode, other.ErrorCount),
           FromState(other.FromState), ToState(other.ToState)
     {
@@ -194,7 +191,7 @@ namespace Krys
     }
   };
 
-  /// @brief The result of low-level transcoding operations (such as recode_into with the pivot
+  /// @brief The result of low-level transcoding operations (such as RecodeInto with the pivot
   /// provided as an argument).
   template <typename TInput, typename TOutput, typename TFromState, typename TToState, typename TPivot>
   class RecodeResult : public PivotlessRecodeResult<TInput, TOutput, TFromState, TToState>
@@ -217,13 +214,12 @@ namespace Krys
     /// @param[in] other A different but related result type.
     template <typename TArgInput, typename TArgOutput, typename TArgFromState, typename TArgToState,
               typename TArgPivot>
-    requires(Impl::ResultTypeCopyConstraint<RecodeResult, TInput, TArgInput, TOutput, TArgOutput, TFromState,
-                                            TArgFromState, TToState, TArgToState, TPivot, TArgPivot>())
+    requires CopyableResultType<RecodeResult, TInput, TArgInput, TOutput, TArgOutput, TFromState,
+                                TArgFromState, TToState, TArgToState, TPivot, TArgPivot>
     constexpr RecodeResult(
-      const RecodeResult<TArgInput, TArgOutput, TArgFromState, TArgToState, TArgPivot>
-        &other) noexcept(Impl::ResultTypeCopyNoexcept<RecodeResult, TInput, TArgInput, TOutput, TArgOutput,
-                                                      TFromState, TArgFromState, TToState, TArgToState,
-                                                      TPivot, TArgPivot>())
+      const RecodeResult<TArgInput, TArgOutput, TArgFromState, TArgToState, TArgPivot> &other) // cf
+      noexcept(NoThrowCopyableResultType<RecodeResult, TInput, TArgInput, TOutput, TArgOutput, TFromState,
+                                            TArgFromState, TToState, TArgToState, TPivot, TArgPivot>)
         : TBase(other.Input, other.Output, other.ErrorCode, other.ErrorCount, other.FromState, other.ToState),
           Pivot(other.Pivot), PivotErrorCode(other.PivotErrorCode), PivotErrorCount(other.PivotErrorCount)
     {
@@ -233,13 +229,12 @@ namespace Krys
     /// @param[in] other A different but related result type.
     template <typename TArgInput, typename TArgOutput, typename TArgFromState, typename TArgToState,
               typename TArgPivot>
-    requires(Impl::ResultTypeMoveConstraint<RecodeResult, TInput, TArgInput, TOutput, TArgOutput, TFromState,
-                                            TArgFromState, TToState, TArgToState, TPivot, TArgPivot>())
+    requires MovableResultType<RecodeResult, TInput, TArgInput, TOutput, TArgOutput, TFromState,
+                               TArgFromState, TToState, TArgToState, TPivot, TArgPivot>
     constexpr RecodeResult(
-      RecodeResult<TArgInput, TArgOutput, TArgFromState, TArgToState, TArgPivot>
-        &&other) noexcept(Impl::ResultTypeMoveNoexcept<RecodeResult, TInput, TArgInput, TOutput, TArgOutput,
-                                                       TFromState, TArgFromState, TToState, TArgToState,
-                                                       TPivot, TArgPivot>())
+      RecodeResult<TArgInput, TArgOutput, TArgFromState, TArgToState, TArgPivot> &&other) // cf
+      noexcept(NoThrowMovableResultType<RecodeResult, TInput, TArgInput, TOutput, TArgOutput, TFromState,
+                                            TArgFromState, TToState, TArgToState, TPivot, TArgPivot>)
         : TBase(std::move(other.Input), std::move(other.Output), other.ErrorCode, other.ErrorCount,
                 other.FromState, other.ToState),
           Pivot(std::move(other.Pivot)), PivotErrorCode(std::move(other.PivotErrorCode)),

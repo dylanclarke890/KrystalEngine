@@ -18,5 +18,5 @@ namespace Krys
   };
 
   /// @brief An instance of basic_kamenicky for ease of use.
-  inline constexpr basic_kamenicky<char> kamenicky = {};
+  constexpr inline basic_kamenicky<char> kamenicky = {};
 }
