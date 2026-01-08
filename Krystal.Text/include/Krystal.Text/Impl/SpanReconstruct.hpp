@@ -100,13 +100,13 @@ namespace Krys::Impl
     }
 
     template <typename TInputTag, typename TInput>
-    constexpr auto SpanReconstruct(TInput &&input) noexcept
+    constexpr decltype(auto) SpanReconstruct(TInput &&input) noexcept
     {
       return SpanReconstructAs<TInputTag, false>(std::forward<TInput>(input));
     }
 
     template <typename TInputTag, typename TInput>
-    constexpr auto SpanReconstructMutable(TInput &&input) noexcept
+    constexpr decltype(auto) SpanReconstructMutable(TInput &&input) noexcept
     {
       return SpanReconstructAs<TInputTag, true>(std::forward<TInput>(input));
     }
