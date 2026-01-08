@@ -4,8 +4,8 @@
 #include "Krystal.Lib/Utils/ReferenceWrapper.hpp"
 #include "Krystal.Text/CodePoint.hpp"
 #include "Krystal.Text/CodeUnit.hpp"
+#include "Krystal.Text/detail/ResultTypeConcepts.hpp"
 #include "Krystal.Text/EncodingError.hpp"
-#include "Krystal.Text/Impl/ResultTypeConstraints.hpp"
 #include "Krystal.Text/Impl/SpanReconstruct.hpp"
 #include "Krystal.Text/State.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
@@ -219,7 +219,7 @@ namespace Krys
     constexpr RecodeResult(
       const RecodeResult<TArgInput, TArgOutput, TArgFromState, TArgToState, TArgPivot> &other) // cf
       noexcept(NoThrowCopyableResultType<RecodeResult, TInput, TArgInput, TOutput, TArgOutput, TFromState,
-                                            TArgFromState, TToState, TArgToState, TPivot, TArgPivot>)
+                                         TArgFromState, TToState, TArgToState, TPivot, TArgPivot>)
         : TBase(other.Input, other.Output, other.ErrorCode, other.ErrorCount, other.FromState, other.ToState),
           Pivot(other.Pivot), PivotErrorCode(other.PivotErrorCode), PivotErrorCount(other.PivotErrorCount)
     {
@@ -234,7 +234,7 @@ namespace Krys
     constexpr RecodeResult(
       RecodeResult<TArgInput, TArgOutput, TArgFromState, TArgToState, TArgPivot> &&other) // cf
       noexcept(NoThrowMovableResultType<RecodeResult, TInput, TArgInput, TOutput, TArgOutput, TFromState,
-                                            TArgFromState, TToState, TArgToState, TPivot, TArgPivot>)
+                                        TArgFromState, TToState, TArgToState, TPivot, TArgPivot>)
         : TBase(std::move(other.Input), std::move(other.Output), other.ErrorCode, other.ErrorCount,
                 other.FromState, other.ToState),
           Pivot(std::move(other.Pivot)), PivotErrorCode(std::move(other.PivotErrorCode)),
@@ -331,16 +331,16 @@ namespace Krys
                      result.ToState, result.ErrorCode, result.ErrorCount);
     }
 
-    template <typename TInputRange, typename _OutputRange, typename TFromState, typename TToState>
+    template <typename TInputRange, typename TOutputRange, typename TFromState, typename TToState>
     using reconstruct_recode_result_t =
       PivotlessRecodeResult<Krys::Ranges::range_reconstruct_t<TInputRange>,
-                            Krys::Ranges::range_reconstruct_t<_OutputRange>, TFromState, TToState>;
+                            Krys::Ranges::range_reconstruct_t<TOutputRange>, TFromState, TToState>;
 
-    template <typename TInputRange, typename _OutputRange, typename TFromState, typename TToState,
+    template <typename TInputRange, typename TOutputRange, typename TFromState, typename TToState,
               typename TPivot>
     using reconstruct_pivot_recode_result_t =
       RecodeResult<Krys::Ranges::range_reconstruct_t<TInputRange>,
-                   Krys::Ranges::range_reconstruct_t<_OutputRange>, TFromState, TToState,
+                   Krys::Ranges::range_reconstruct_t<TOutputRange>, TFromState, TToState,
                    Krys::Ranges::range_reconstruct_t<TPivot>>;
   }
 }

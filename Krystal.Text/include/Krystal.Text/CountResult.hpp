@@ -195,7 +195,7 @@ namespace Krys
                                                              std::size_t count, TArgState &&state,
                                                              EncodingError errorCode, std::size_t errorCount)
     {
-      decltype(auto) inRange = Krys::Ranges::Reconstruct(
+      decltype(auto) inRange = Krys::Ranges::reconstruct(
         std::in_place_type<TInputRange>, std::forward<TInFirst>(inFirst), std::forward<TInLast>(inLast));
       return CountResult<TInputRange, TState>(std::forward<decltype(inRange)>(inRange), count,
                                               std::forward<TArgState>(state), errorCode, errorCount);

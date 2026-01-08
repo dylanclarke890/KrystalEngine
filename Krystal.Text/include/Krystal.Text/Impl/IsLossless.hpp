@@ -48,7 +48,8 @@ namespace Krys::Impl
   };
 
   template <typename TEncoding, typename TErrorHandler>
-  concept DecodeLosslessOrDeliberate = IsDecodeLosslessOrDeliberate<TEncoding, TErrorHandler>::value;
+  concept DecodeLosslessOrDeliberate =
+    IsDecodeLosslessOrDeliberate<remove_cvref_t<TEncoding>, remove_cvref_t<TErrorHandler>>::value;
 
   template <typename TFromEncoding, typename TToEncoding, typename TFromErrorHandler,
             typename TToErrorHandler>
@@ -67,21 +68,15 @@ namespace Krys::Impl
   concept TranscodeLosslessOrDeliberate =
     IsTranscodeLosslessOrDeliberate<TFromEncoding, TToEncoding, TFromErrorHandler, TToErrorHandler>::value;
 
-#define ZTD_TEXT_LOSSY_DECODE_MESSAGE_I_                                                                     \
+#define KRYS_TEXT_LOSSY_DECODE_MESSAGE                                                                       \
   "This decode is a lossy, non-injective operation. This means you may lose data that you did not intend "   \
-  "to lose; "                                                                                                \
-  "specify a 'handler' error handler parameter to decode(in, encoding, handler, ...) or "                    \
-  "decode_into_raw(in, "                                                                                     \
-  "encoding, "                                                                                               \
-  "out, handler, ...) explicitly in order to bypass this."
+  "to lose; specify a 'handler' error handler parameter to Decode(input, encoding, handler, ...) or "        \
+  "DecodeIntoRaw(input, encoding, output, handler, ...) explicitly in order to bypass this."
 
 #define ZTD_TEXT_LOSSY_ENCODE_MESSAGE_I_                                                                     \
   "This encode is a lossy, non-injective operation. This means you may lose data that you did not intend "   \
-  "to lose; "                                                                                                \
-  "specify a 'handler' error handler parameter to encode(in, encoding, handler, ...) or "                    \
-  "encode_into_raw(in, "                                                                                     \
-  "encoding, "                                                                                               \
-  "out, handler, ...) explicitly in order to bypass this."
+  "to lose; specify a 'handler' error handler parameter to Encode(input, encoding, handler, ...) or "        \
+  "EncodeIntoRaw(input, encoding, output, handler, ...) explicitly in order to bypass this."
 
 #define ZTD_TEXT_LOSSY_TRANSCODE_DECODE_MESSAGE_I_                                                           \
   "The decode (input) portion of this transcode is a lossy, non-injective operation. This means you may "    \

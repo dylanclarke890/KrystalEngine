@@ -49,12 +49,12 @@ namespace Krys
     template <typename THandler>
     concept IsForwardingProgressHandler = IsForwardingProgressHandlerSpecialization<THandler>::value;
 
-    template <bool TAssumeValid, typename _DesiredEncoding>
+    template <bool TAssumeValid, typename TDesiredEncoding>
     class ProgressHandler
     {
     private:
-      using TCodePoint = code_point_t<_DesiredEncoding>;
-      using TCodeUnit = code_unit_t<_DesiredEncoding>;
+      using TCodePoint = code_point_t<TDesiredEncoding>;
+      using TCodeUnit = code_unit_t<TDesiredEncoding>;
 
     public:
       using assume_valid = IntegralConstant<bool, TAssumeValid>;
@@ -142,9 +142,9 @@ namespace Krys
       }
 
     private:
-      std::array<TCodePoint, MaxCodePoints<_DesiredEncoding>> _codePoints;
+      std::array<TCodePoint, MaxCodePoints<TDesiredEncoding>> _codePoints;
       std::size_t _codePointsSize;
-      std::array<TCodeUnit, MaxCodeUnits<_DesiredEncoding>> _codeUnits;
+      std::array<TCodeUnit, MaxCodeUnits<TDesiredEncoding>> _codeUnits;
       std::size_t _codeUnitsSize;
     };
 

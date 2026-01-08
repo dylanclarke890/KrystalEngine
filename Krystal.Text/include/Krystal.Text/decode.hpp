@@ -47,11 +47,7 @@ namespace Krys
   constexpr auto BasicDecodeIntoRaw(TInput &&input, TEncoding &&encoding, TOutput &&output,
                                     TErrorHandler &&errorHandler, TState &state)
   {
-    using TUEncoding = remove_cvref_t<TEncoding>;
-    using TUErrorHandler = remove_cvref_t<TErrorHandler>;
-
-    static_assert(Impl::DecodeLosslessOrDeliberate<TUEncoding, TUErrorHandler>,
-                  ZTD_TEXT_LOSSY_DECODE_MESSAGE_I_);
+    static_assert(Impl::DecodeLosslessOrDeliberate<TEncoding, TErrorHandler>, KRYS_TEXT_LOSSY_DECODE_MESSAGE);
 
     std::size_t errorCount = 0;
 
@@ -152,7 +148,7 @@ namespace Krys
   /// intermediate code units.
   /// @param[in] errorHandler The error handlers for the from and to encodings,
   /// respectively.
-  /// @result A stateless_decode_result object that contains references to `state`.
+  /// @result A StatelessDecodeResult object that contains references to `state`.
   /// @remarks Creates a default `state` using CreateDecodeState.
   template <typename TInput, typename TEncoding, typename TOutput, typename TErrorHandler>
   constexpr auto DecodeIntoRaw(TInput &&input, TEncoding &&encoding, TOutput &&output,
@@ -165,7 +161,7 @@ namespace Krys
     auto statefulResult =
       Krys::DecodeIntoRaw(std::forward<TInput>(input), std::forward<TEncoding>(encoding),
                           std::forward<TOutput>(output), std::forward<TErrorHandler>(errorHandler), state);
-    return Impl::SliceToStatelessDecode(std::move(statefulResult));
+    return ::Krys::Text::detail_result::SliceToStatelessDecode(std::move(statefulResult));
   }
 
   /// @brief Converts from the code units of the given `input` view through the encoding to code points into
@@ -176,7 +172,7 @@ namespace Krys
   /// output code units.
   /// @param[in] output An output_view to write code points to as the result of the decode operation from the
   /// intermediate code units.
-  /// @result A stateless_decode_result object that contains references to `state`.
+  /// @result A StatelessDecodeResult object that contains references to `state`.
   /// @remarks Creates a default `ErrorHandler` that is similar to Handlers::DefaultHandler, but marked as
   /// careless.
   template <typename TInput, typename TEncoding, typename TOutput>
@@ -193,7 +189,7 @@ namespace Krys
   /// produce code points.
   /// @param[in] output An output_view to write code points to as the result of the decode operation from the
   /// intermediate code units.
-  /// @result A stateless_decode_result object that contains references to `state`.
+  /// @result A StatelessDecodeResult object that contains references to `state`.
   /// @remarks Creates a default `encoding` by figuring out the `value_type` of the `input`, then passing that
   /// type into default_code_point_encoding_t. That encoding is that used to decode the input code units,
   /// by default.
@@ -226,11 +222,9 @@ namespace Krys
     {
       // Well, SHIT. Write into temporary, then serialize one-by-one/bulk to output.
       // I'll admit, this is HELLA work to support...
-      using TUEncoding = remove_cvref_t<TEncoding>;
-      using TUErrorHandler = remove_cvref_t<TErrorHandler>;
-      constexpr std::size_t maxUnits = MaxDecodeCodePoints<TUEncoding>;
+      constexpr std::size_t maxUnits = MaxDecodeCodePoints<TEncoding>;
       constexpr std::size_t intermediateBufferMax = maxUnits;
-      using TIntermediateValue = code_point_t<TUEncoding>;
+      using TIntermediateValue = code_point_t<TEncoding>;
       using TIntermediateInput = Impl::span_reconstruct_t<TInput, TInput>;
       using TInitialOutput = Span<TIntermediateValue, intermediateBufferMax>;
       using TOutput = Span<TIntermediateValue>;
@@ -240,11 +234,11 @@ namespace Krys
       using TWorkingInput = span_reconstruct_t<TResultInput, TResultInput>;
 
       static_assert(Impl::DecodeLosslessOrDeliberate<TEncoding, TErrorHandler>,
-                    ZTD_TEXT_LOSSY_DECODE_MESSAGE_I_);
+                    KRYS_TEXT_LOSSY_DECODE_MESSAGE);
 
       // We MUST use a temporary error handler
       // as well as a pass-throuugh handler if we end up with lots of intermediary input
-      Impl::ProgressHandler<IsIgnorableErrorHandler<TUErrorHandler>, TUEncoding> intermediateHandler {};
+      Impl::ProgressHandler<IsIgnorableErrorHandler<TErrorHandler>, TEncoding> intermediateHandler {};
 
       TIntermediateInput intermediateInput = Impl::SpanReconstruct<TInput>(std::forward<TInput>(input));
       TWorkingInput workingInput(std::move(intermediateInput));
@@ -345,27 +339,24 @@ namespace Krys
       }
       else if constexpr (NoState)
       {
-        return Impl::ReplaceDecodeResultOutputNoState(std::move(statefulResult), std::move(output));
+        return ::Krys::Text::detail_result::ReplaceStatelessDecodeResultOutput(std::move(statefulResult),
+                                                                               std::move(output));
       }
       else
       {
-        return Impl::ReplaceDecodeResultOutput(std::move(statefulResult), std::move(output));
+        return ::Krys::Text::detail_result::ReplaceDecodeResultOutput(std::move(statefulResult),
+                                                                      std::move(output));
       }
     }
 
   }
 
-  /// @brief Converts from the code units of the given `input` view through the encoding to code points into
-  /// the `output` view.
-  /// @param[in] input An input_view to read code units from and use in the decode operation that will
-  /// produce code points.
-  /// @param[in] encoding The encoding that will be used to decode the input's code points into
-  /// output code units.
-  /// @param[in] output An output_view to write code points to as the result of the decode operation from
-  /// the intermediate code units.
-  /// @param[in] errorHandler The error handlers for the from and to encodings,
-  /// respectively.
-  /// @param[in,out] state A reference to the associated state for the `encoding` 's decode step.
+  /// @brief Converts code units of the given `input` view into code points in the `output` view.
+  /// @param[in] input An input view to read code units from.
+  /// @param[in] encoding The encoding for decoding the `input`'s code points into `output` code units.
+  /// @param[in] output An output view to write code points to.
+  /// @param[in] errorHandler The error handlers for the from and to encodings, respectively.
+  /// @param[in,out] state A reference to the associated state for the `encoding`'s decode step.
   /// @result A DecodeResult object that contains references to `state`.
   /// @remarks This function performs the bog-standard, basic loop for decoding. It talks to no ADL extension
   /// points.
@@ -383,17 +374,12 @@ namespace Krys
                    Impl::SpanReconstructMutable<TOutput>(std::move(result.Output)), result.State);
   }
 
-  /// @brief Converts from the code units of the given `input` view through the encoding to code points into
-  /// the `output` view.
-  /// @param[in] input An input_view to read code units from and use in the decode operation that will
-  /// produce code points.
-  /// @param[in] encoding The encoding that will be used to decode the input's code points into
-  /// output code units.
-  /// @param[in] output An output_view to write code points to as the result of the decode operation from
-  /// the intermediate code units.
-  /// @param[in] errorHandler The error handlers for the from and to encodings,
-  /// respectively.
-  /// @param[in,out] state A reference to the associated state for the `encoding` 's decode step.
+  /// @brief Converts code units of the given `input` view into code points in the `output` view.
+  /// @param[in] input An input view to read code units from.
+  /// @param[in] encoding The encoding for decoding the `input`'s code points into `output` code units.
+  /// @param[in] output An output view to write code points to.
+  /// @param[in] errorHandler The error handlers for the from and to encodings, respectively.
+  /// @param[in,out] state A reference to the associated state for the `encoding`'s decode step.
   /// @result A DecodeResult object that contains references to `state`.
   /// @remarks This function performs the bog-standard, basic loop for decoding. It talks to no ADL extension
   /// points.
@@ -411,17 +397,12 @@ namespace Krys
                    Impl::SpanReconstructMutable<TOutput>(std::move(result.Output)), result.State);
   }
 
-  /// @brief Converts from the code units of the given `input` view through the encoding to code points into
-  /// the `output` view.
-  /// @param[in] input An input_view to read code units from and use in the decode operation that will
-  /// produce code points.
-  /// @param[in] encoding The encoding that will be used to decode the input's code points into
-  /// output code units.
-  /// @param[in] output An output_view to write code points to as the result of the decode operation from the
-  /// intermediate code units.
-  /// @param[in] errorHandler The error handlers for the from and to encodings,
-  /// respectively.
-  /// @result A stateless_decode_result object that contains references to `state`.
+  /// @brief Converts code units of the given `input` view into code points in the `output` view.
+  /// @param[in] input An input view to read code units from.
+  /// @param[in] encoding The encoding for decoding the `input`'s code points into `output` code units.
+  /// @param[in] output An output view to write code points to.
+  /// @param[in] errorHandler The error handlers for the from and to encodings, respectively.
+  /// @result A StatelessDecodeResult object that contains references to `state`.
   /// @remarks Creates a default `state` using CreateDecodeState.
   template <typename TInput, typename TEncoding, typename TOutput, typename TErrorHandler>
   constexpr auto DecodeInto(TInput &&input, TEncoding &&encoding, TOutput &&output,
@@ -434,20 +415,14 @@ namespace Krys
     auto statefulResult =
       Krys::DecodeInto(std::forward<TInput>(input), std::forward<TEncoding>(encoding),
                        std::forward<TOutput>(output), std::forward<TErrorHandler>(errorHandler), state);
-    return Impl::SliceToStatelessDecode(std::move(statefulResult));
+    return ::Krys::Text::detail_result::SliceToStatelessDecode(std::move(statefulResult));
   }
 
-  /// @brief Converts from the code units of the given `input` view through the encoding to code points into
-  /// the `output` view.
-  ///
-  /// @param[in] input An input_view to read code units from and use in the decode operation that will
-  /// produce code points.
-  /// @param[in] encoding The encoding that will be used to decode the input's code points into
-  /// output code units.
-  /// @param[in] output An output_view to write code points to as the result of the decode operation from the
-  /// intermediate code units.
-  ///
-  /// @result A stateless_decode_result object that contains references to `state`.
+  /// @brief Converts code units of the given `input` view into code points in the `output` view.
+  /// @param[in] input An input view to read code units from.
+  /// @param[in] encoding The encoding for decoding the `input`'s code points into `output` code units.
+  /// @param[in] output An output view to write code points to.
+  /// @result A StatelessDecodeResult object that contains references to `state`.
   ///
   /// @remarks Creates a default `ErrorHandler` that is similar to Handlers::DefaultHandler, but marked as
   /// careless.
@@ -465,7 +440,7 @@ namespace Krys
   /// produce code points.
   /// @param[in] output An output_view to write code points to as the result of the decode operation from the
   /// intermediate code units.
-  /// @result A stateless_decode_result object that contains references to `state`.
+  /// @result A StatelessDecodeResult object that contains references to `state`.
   /// @remarks Creates a default `encoding` by figuring out the `value_type` of the `input`, then passing that
   /// type into default_code_point_encoding_t. That encoding is that used to decode the input code units,
   /// by default.
@@ -540,7 +515,7 @@ namespace Krys
   /// output code units.
   /// @param[in] errorHandler The error handlers for the from and to encodings,
   /// respectively.
-  /// @result A stateless_decode_result object whose output is of type `TOutputContainer`.
+  /// @result A StatelessDecodeResult object whose output is of type `TOutputContainer`.
   /// @remarks This function creates a `state` using CreateDecodeState.
   template <typename TOutputContainer = void, typename TInput, typename TEncoding, typename TErrorHandler>
   constexpr auto DecodeTo(TInput &&input, TEncoding &&encoding, TErrorHandler &&errorHandler)
@@ -577,7 +552,7 @@ namespace Krys
   /// produce code points.
   /// @param[in] encoding The encoding that will be used to decode the input's code points into
   /// output code units.
-  /// @result A stateless_decode_result object whose output is of type `TOutputContainer`.
+  /// @result A StatelessDecodeResult object whose output is of type `TOutputContainer`.
   /// @remarks This function creates a `handler` using Handlers::DefaultHandler, but marks it as careless.
   template <typename TOutputContainer = void, typename TInput, typename TEncoding>
   constexpr auto DecodeTo(TInput &&input, TEncoding &&encoding)
@@ -592,7 +567,7 @@ namespace Krys
   /// @tparam TOutputContainer The container type to serialize data into.
   /// @param[in] input An input_view to read code units from and use in the decode operation that will produce
   /// code points.
-  /// @result A stateless_decode_result object whose output is of type `TOutputContainer`.
+  /// @result A StatelessDecodeResult object whose output is of type `TOutputContainer`.
   /// @remarks This function creates an `encoding` by using the `value_type` of the `input` which is then
   /// passed through the DefaultCodePointEncoding type to get the default desired encoding.
   template <typename TOutputContainer = void, typename TInput>

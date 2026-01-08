@@ -21,63 +21,45 @@
 #include "Krystal.Text/MaxUnits.hpp"
 #include "Krystal.Text/State.hpp"
 
-namespace Krys
+namespace Krys::Text
 {
+  /// @brief Converts one code unit from the given `input` view into code points in the `output` view.
   /// @brief These functions convert from a view of input into a view of output using either the inferred or
-  /// specified encodings. If no error handler is provided, the equivalent of the Handlers::DefaultHandler is
-  /// used by default. If no associated state is provided for either the "to" or "from" encodings, one will be
-  /// created with automatic storage duration (as a "stack" variable) for the provided encoding.
-  /// @brief Converts one indivisible unit of information from the code units of the given `input` view
-  /// through the encoding to code points into the `output` view.
-  /// @param[in] input An input_view to read code units from and use in the DecodeOne operation that will
-  /// produce code points.
-  /// @param[in] encoding The encoding that will be used to DecodeOne the input's code points into
-  /// output code units.
-  /// @param[in] output An output_view to write code points to as the result of the DecodeOne operation from
-  /// the intermediate code units.
-  /// @param[in] errorHandler The error handlers for the from and to encodings,
-  /// respectively.
-  /// @param[in,out] state A reference to the associated state for the `encoding` 's DecodeOne step.
-  /// @result A decode_one_result object that contains references to `state`.
+  /// specified encodings. If no error handler is provided, Handlers::DefaultHandler is used by default. If no
+  /// state is provided for either the "to" or "from" encodings, it will created automatically as needed.
+  /// @param[in] input An input view to read code units from.
+  /// @param[in] encoding The encoding for decoding the `input`'s code points into `output` code units.
+  /// @param[in] output An output view to write code points to.
+  /// @param[in] errorHandler The error handlers for the from and to encodings.
+  /// @param[in,out] state A reference to the associated state for the `encoding`'s decode step.
+  /// @result A DecodeResult object that contains references to `state`.
   /// @remarks This function is simply a small wrapper for calling DecodeOne on the `encoding` object.
   template <typename TInput, typename TEncoding, typename TOutput, typename TErrorHandler, typename TState>
   constexpr auto DecodeOneIntoRaw(TInput &&input, TEncoding &&encoding, TOutput &&output,
                                   TErrorHandler &&errorHandler, TState &state)
   {
-    using TUEncoding = remove_cvref_t<TEncoding>;
-    using TUErrorHandler = remove_cvref_t<TErrorHandler>;
-
-    static_assert(Impl::DecodeLosslessOrDeliberate<TUEncoding, TUErrorHandler>,
-                  ZTD_TEXT_LOSSY_DECODE_MESSAGE_I_);
+    static_assert(Impl::DecodeLosslessOrDeliberate<TEncoding, TErrorHandler>, KRYS_TEXT_LOSSY_DECODE_MESSAGE);
 
     return encoding.DecodeOne(std::forward<TInput>(input), std::forward<TOutput>(output), errorHandler,
                               state);
   }
 
-  /// @brief Converts one indivisible unit of information from the code units of the given `input` view
-  /// through the encoding to code points into the `output` view.
-  /// @param[in] input An input_view to read code units from and use in the DecodeOne operation that will
-  /// produce code points.
-  /// @param[in] encoding The encoding that will be used to DecodeOne the input's code points into
-  /// output code units.
-  /// @param[in] output An output_view to write code points to as the result of the DecodeOne operation from
-  /// the intermediate code units.
-  /// @param[in] errorHandler The error handlers for the from and to encodings,
-  /// respectively.
-  /// @result A stateless_decode_one_result object that contains references to `state`.
+  /// @brief Converts one code unit from the given `input` view into code points in the `output` view.
+  /// @param[in] input An input view to read code units from.
+  /// @param[in] encoding The encoding for decoding the `input`'s code points into `output` code units.
+  /// @param[in] output An output view to write code points to.
+  /// @param[in] errorHandler The error handlers for the from and to encodings.
+  /// @result A StatelessDecoderesult object that contains references to `state`.
   /// @remarks Creates a default `state` using CreateDecodeState.
   template <typename TInput, typename TEncoding, typename TOutput, typename TErrorHandler>
   constexpr auto DecodeOneIntoRaw(TInput &&input, TEncoding &&encoding, TOutput &&output,
                                   TErrorHandler &&errorHandler)
   {
-    using TUEncoding = remove_cvref_t<TEncoding>;
-    using TState = decode_state_t<TUEncoding>;
-
-    TState state = Krys::CreateDecodeState(encoding);
-    auto statefulResult =
-      Krys::DecodeOneIntoRaw(std::forward<TInput>(input), std::forward<TEncoding>(encoding),
-                             std::forward<TOutput>(output), std::forward<TErrorHandler>(errorHandler), state);
-    return Impl::SliceToStatelessDecode(std::move(statefulResult));
+    auto state = Krys::CreateDecodeState(encoding);
+    auto statefulResult = ::Krys::Text::DecodeOneIntoRaw(
+      std::forward<TInput>(input), std::forward<TEncoding>(encoding), std::forward<TOutput>(output),
+      std::forward<TErrorHandler>(errorHandler), state);
+    return ::Krys::Text::detail_result::SliceToStatelessDecode(std::move(statefulResult));
   }
 
   /// @brief Converts one indivisible unit of information from the code units of the given `input` view
@@ -95,8 +77,8 @@ namespace Krys
   constexpr auto DecodeOneIntoRaw(TInput &&input, TEncoding &&encoding, TOutput &&output)
   {
     Handlers::DefaultHandler handler {};
-    return Krys::DecodeOneIntoRaw(std::forward<TInput>(input), std::forward<TEncoding>(encoding),
-                                  std::forward<TOutput>(output), handler);
+    return ::Krys::Text::DecodeOneIntoRaw(std::forward<TInput>(input), std::forward<TEncoding>(encoding),
+                                          std::forward<TOutput>(output), handler);
   }
 
   /// @brief Converts one indivisible unit of information from the code units of the given `input` view
@@ -119,82 +101,81 @@ namespace Krys
       // Use literal encoding instead, if we meet the right criteria
       using TEncoding = default_consteval_code_unit_encoding_t<TCodeUnit>;
       TEncoding encoding {};
-      return Krys::DecodeOneIntoRaw(std::forward<TInput>(input), encoding, std::forward<TOutput>(output));
+      return ::Krys::Text::DecodeOneIntoRaw(std::forward<TInput>(input), encoding,
+                                            std::forward<TOutput>(output));
     }
     else
     {
       using TEncoding = default_code_unit_encoding_t<TCodeUnit>;
       TEncoding encoding {};
-      return Krys::DecodeOneIntoRaw(std::forward<TInput>(input), encoding, std::forward<TOutput>(output));
+      return ::Krys::Text::DecodeOneIntoRaw(std::forward<TInput>(input), encoding,
+                                            std::forward<TOutput>(output));
     }
   }
+}
 
-  namespace Impl
+namespace Krys::Text::detail_decode
+{
+  template <typename TInput, typename TEncoding, typename TOutputContainer, typename TErrorHandler,
+            typename TState>
+  constexpr auto IntermediateDecodeOneToStorage(TInput &&input, TEncoding &&encoding,
+                                                TOutputContainer &output, TErrorHandler &&errorHandler,
+                                                TState &state)
   {
-    template <typename TInput, typename TEncoding, typename TOutputContainer, typename TErrorHandler,
-              typename TState>
-    constexpr auto IntermediateDecodeOneToStorage(TInput &&input, TEncoding &&encoding,
-                                                  TOutputContainer &output, TErrorHandler &&errorHandler,
-                                                  TState &state)
-    {
-      using TUEncoding = remove_cvref_t<TEncoding>;
-      constexpr std::size_t maxUnits = MaxCodePoints<TUEncoding> * 2;
-      constexpr std::size_t intermediateBufferMax = maxUnits;
-      using TIntermediateValue = code_point_t<TUEncoding>;
-      using TInitialOutput = Span<TIntermediateValue, intermediateBufferMax>;
-      using TOutput = Span<TIntermediateValue>;
+    static_assert(::Krys::Impl::DecodeLosslessOrDeliberate<TEncoding, TErrorHandler>,
+                  KRYS_TEXT_LOSSY_DECODE_MESSAGE);
 
-      static_assert(Impl::DecodeLosslessOrDeliberate<TEncoding, TErrorHandler>,
-                    ZTD_TEXT_LOSSY_DECODE_MESSAGE_I_);
-
-      TIntermediateValue intermediateTranslationBuffer[intermediateBufferMax] {};
-      TInitialOutput intermediateInitialOutput(intermediateTranslationBuffer);
-      auto result = Krys::DecodeOneIntoRaw(std::forward<TInput>(input), encoding, intermediateInitialOutput,
-                                     errorHandler, state);
-      TOutput intermediateOutput(intermediateInitialOutput.data(), result.Output.data());
-      Krys::Ranges::Impl::ContainerInsertBulk(output, intermediateOutput);
-      return result;
-    }
-
-    template <bool OutputOnly, bool NoState, typename TOutputContainer, typename TInput, typename TEncoding,
-              typename TErrorHandler, typename TState>
-    constexpr auto DecodeOneDispatch(TInput &&input, TEncoding &&encoding, TErrorHandler &&errorHandler,
-                                     TState &state)
-    {
-      using TUEncoding = remove_cvref_t<TEncoding>;
-      constexpr std::size_t maxUnits = MaxDecodeCodePoints<TUEncoding>;
-
-      TOutputContainer output {};
-      if constexpr (Krys::Ranges::has_adl_size<TInput>)
-      {
-        using TSize = decltype(Krys::Ranges::size(input));
-        if constexpr (Krys::Ranges::has_reserve_with_size<TOutputContainer, TSize>)
-        {
-          auto outputSizeHint = Krys::Ranges::size(input);
-          outputSizeHint *= (maxUnits / 2);
-          output.reserve(outputSizeHint);
-        }
-      }
-      auto statefulResult =
-        Impl::IntermediateDecodeOneToStorage(std::forward<TInput>(input), std::forward<TEncoding>(encoding),
-                                             output, std::forward<TErrorHandler>(errorHandler), state);
-      if constexpr (OutputOnly)
-      {
-        // We are explicitly discarding this information with this function call.
-        (void)statefulResult;
-        return output;
-      }
-      else if constexpr (NoState)
-      {
-        return Impl::ReplaceDecodeResultOutputNoState(std::move(statefulResult), std::move(output));
-      }
-      else
-      {
-        return Impl::ReplaceDecodeResultOutput(std::move(statefulResult), std::move(output));
-      }
-    }
+    constexpr std::size_t MaxSize = MaxCodePoints<TEncoding> * 2;
+    using TIntermediateValue = code_point_t<TEncoding>;
+    TIntermediateValue intermediateTranslationBuffer[MaxSize] {};
+    Span<TIntermediateValue, MaxSize> intermediateInitialOutput(intermediateTranslationBuffer);
+    auto result = ::Krys::Text::DecodeOneIntoRaw(std::forward<TInput>(input), encoding,
+                                                 intermediateInitialOutput, errorHandler, state);
+    Span<TIntermediateValue> intermediateOutput(intermediateInitialOutput.data(), result.Output.data());
+    Krys::Ranges::Impl::ContainerInsertBulk(output, intermediateOutput);
+    return result;
   }
 
+  template <bool OutputOnly, bool NoState, typename TOutputContainer, typename TInput, typename TEncoding,
+            typename TErrorHandler, typename TState>
+  constexpr auto DecodeOneDispatch(TInput &&input, TEncoding &&encoding, TErrorHandler &&errorHandler,
+                                   TState &state)
+  {
+    TOutputContainer output {};
+    if constexpr (Krys::Ranges::has_adl_size<TInput>)
+    {
+      using TSize = decltype(Krys::Ranges::size(input));
+      if constexpr (Krys::Ranges::has_reserve_with_size<TOutputContainer, TSize>)
+      {
+        auto outputSizeHint = Krys::Ranges::size(input);
+        outputSizeHint *= (MaxDecodeCodePoints<TEncoding> / 2);
+        output.reserve(outputSizeHint);
+      }
+    }
+    auto statefulResult = Krys::Text::detail_decode::IntermediateDecodeOneToStorage(
+      std::forward<TInput>(input), std::forward<TEncoding>(encoding), output,
+      std::forward<TErrorHandler>(errorHandler), state);
+
+    if constexpr (OutputOnly)
+    {
+      (void)statefulResult;
+      return output;
+    }
+    else if constexpr (NoState)
+    {
+      return ::Krys::Text::detail_result::ReplaceStatelessDecodeResultOutput(std::move(statefulResult),
+                                                                             std::move(output));
+    }
+    else
+    {
+      return ::Krys::Text::detail_result::ReplaceDecodeResultOutput(std::move(statefulResult),
+                                                                    std::move(output));
+    }
+  }
+}
+
+namespace Krys
+{
   /// @brief Converts one indivisible unit of information from the code units of the given `input` view
   /// through the encoding to code points into the `output` view.
   /// @param[in] input An input_view to read code units from and use in the DecodeOne operation that will
@@ -213,8 +194,9 @@ namespace Krys
                                TErrorHandler &&errorHandler, TState &state)
   {
     auto reconstructedInput = Impl::SpanReconstruct<TInput>(std::forward<TInput>(input));
-    auto result = Krys::DecodeOneIntoRaw(std::move(reconstructedInput), std::forward<TEncoding>(encoding),
-                                         std::forward<TOutput>(output), errorHandler, state);
+    auto result =
+      ::Krys::Text::DecodeOneIntoRaw(std::move(reconstructedInput), std::forward<TEncoding>(encoding),
+                                     std::forward<TOutput>(output), errorHandler, state);
     using TReconstructedResultInput = Impl::span_reconstruct_t<TInput, TInput>;
     using TReconstructedResultOutput = Impl::span_reconstruct_mutable_t<TOutput, TOutput>;
     return DecodeResult<TReconstructedResultInput, TReconstructedResultOutput, TState>(
@@ -244,8 +226,8 @@ namespace Krys
     TState state = Krys::CreateDecodeState(encoding);
     auto statefulResult =
       Krys::DecodeOneInto(std::forward<TInput>(input), std::forward<TEncoding>(encoding),
-                    std::forward<TOutput>(output), std::forward<TErrorHandler>(errorHandler), state);
-    return Impl::SliceToStatelessDecode(std::move(statefulResult));
+                          std::forward<TOutput>(output), std::forward<TErrorHandler>(errorHandler), state);
+    return ::Krys::Text::detail_result::SliceToStatelessDecode(std::move(statefulResult));
   }
 
   /// @brief Converts one indivisible unit of information from the code units of the given `input` view
@@ -264,7 +246,7 @@ namespace Krys
   {
     Handlers::DefaultHandler handler {};
     return Krys::DecodeOneInto(std::forward<TInput>(input), std::forward<TEncoding>(encoding),
-                         std::forward<TOutput>(output), handler);
+                               std::forward<TOutput>(output), handler);
   }
 
   /// @brief Converts one indivisible unit of information from the code units of the given `input` view
@@ -327,7 +309,7 @@ namespace Krys
     {
       // prevent instantiation errors with basic_string by boxing it inside of an "if constexpr"
       using TRealOutputContainer = InlineBasicString<TOutputCodePoint, maxUnits>;
-      return Impl::DecodeOneDispatch<false, false, TRealOutputContainer>(
+      return ::Krys::Text::detail_decode::DecodeOneDispatch<false, false, TRealOutputContainer>(
         std::forward<TInput>(input), std::forward<TEncoding>(encoding),
         std::forward<TErrorHandler>(errorHandler), state);
     }
@@ -335,7 +317,7 @@ namespace Krys
     {
       using TRealOutputContainer =
         conditional_t<IsVoidContainer, InlineVector<TOutputCodePoint, maxUnits>, TOutputContainer>;
-      return Impl::DecodeOneDispatch<false, false, TRealOutputContainer>(
+      return ::Krys::Text::detail_decode::DecodeOneDispatch<false, false, TRealOutputContainer>(
         std::forward<TInput>(input), std::forward<TEncoding>(encoding),
         std::forward<TErrorHandler>(errorHandler), state);
     }

@@ -357,7 +357,7 @@
     <ClInclude Include="include\Krystal.Text\ErrorHandlers\ThrowHandler.hpp" />
     <ClInclude Include="include\Krystal.Text\Impl\ForwardingHandler.hpp" />
     <ClInclude Include="include\Krystal.Text\Impl\PassThroughHandler.hpp" />
-    <ClInclude Include="include\Krystal.Text\Impl\ResultTypeConstraints.hpp" />
+    <ClInclude Include="include\Krystal.Text\detail\ResultTypeConcepts.hpp" />
     <ClInclude Include="include\Krystal.Text\Impl\Unicode.hpp" />
     <ClInclude Include="include\Krystal.Text\IsCodePointsReplaceable.hpp" />
     <ClInclude Include="include\Krystal.Text\IsCodeUnitsReplaceable.hpp" />

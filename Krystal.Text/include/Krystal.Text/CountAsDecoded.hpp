@@ -101,7 +101,7 @@ namespace Krys
       for (;;)
       {
         auto result =
-          Krys::DecodeOneIntoRaw(std::move(workingInput), encoding, intermediate, errorHandler, state);
+          ::Krys::Text::DecodeOneIntoRaw(std::move(workingInput), encoding, intermediate, errorHandler, state);
         errorCount += result.ErrorCount;
         if (result.ErrorCode != EncodingError::OK)
         {

@@ -179,7 +179,7 @@
     <ClInclude Include="include\Krystal.Text\DecodeResult.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Impl\ResultTypeConstraints.hpp">
+    <ClInclude Include="include\Krystal.Text\detail\ResultTypeConcepts.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\CodeUnit.hpp">

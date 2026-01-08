@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Core/TypeTraits.hpp"
 
 namespace Krys
 {
@@ -15,5 +16,5 @@ namespace Krys
   /// and the encoder object using it encounters an error, then it is Undefined Behavior what occurs
   /// afterwards.
   template <typename T>
-  concept IsIgnorableErrorHandler = T::assume_valid::value == true;
+  concept IsIgnorableErrorHandler = remove_cvref_t<T>::assume_valid::value == true;
 }

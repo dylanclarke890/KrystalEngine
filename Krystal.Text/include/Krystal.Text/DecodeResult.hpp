@@ -7,8 +7,8 @@
 #include "Krystal.Lib/Utils/ReferenceWrapper.hpp"
 #include "Krystal.Text/CodePoint.hpp"
 #include "Krystal.Text/CodeUnit.hpp"
+#include "Krystal.Text/detail/ResultTypeConcepts.hpp"
 #include "Krystal.Text/EncodingError.hpp"
-#include "Krystal.Text/Impl/ResultTypeConstraints.hpp"
 #include "Krystal.Text/State.hpp"
 #include <array>
 #include <cstddef>
@@ -37,8 +37,37 @@ namespace Krys
     /// @brief The number of times an error occurred in the processed Input text.
     size_t ErrorCount;
 
-    /// @brief Constructs a DecodeResult with the provided parameters and information, including whether or
-    /// not an error was handled.
+    /// @brief Constructs a DecodeResult with the provided parameters and information,
+    /// including whether or not an error was handled.
+    /// @param[in] input The Input range to store.
+    /// @param[in] output The Output range to store.
+    /// @param[in] errorCode The error code for the decode operation.
+    /// @param[in] errorCount Whether or not an error was handled. Some error handlers are corrective (see
+    /// Handlers::ReplacementHandler), and so the error code is not enough to determine if the handler was
+    /// invoked. This allows the value to be provided directly when constructing this result type.
+    template <typename TArgInput, typename TArgOutput>
+    constexpr StatelessDecodeResult(TArgInput &&input, TArgOutput &&output, EncodingError errorCode,
+                                    std::size_t errorCount) // cf
+      noexcept(NoThrowConstructible<TInput, TArgInput> && NoThrowConstructible<TOutput, TArgOutput>)
+        : Input(std::forward<TArgInput>(input)), Output(std::forward<TArgOutput>(output)),
+          ErrorCode(errorCode), ErrorCount(errorCount)
+    {
+    }
+
+    /// @brief Constructs a DecodeResult, defaulting the error code to EncodingError::OK if not provided.
+    /// @param[in] input The Input range to store.
+    /// @param[in] output The Output range to store.
+    /// @param[in] errorCode The error code for the decoding opertion, if any.
+    template <typename TArgInput, typename TArgOutput>
+    constexpr StatelessDecodeResult(TArgInput &&input, TArgOutput &&output,
+                                    EncodingError errorCode = EncodingError::OK) // cf
+      noexcept(NoThrowConstructible<StatelessDecodeResult, TArgInput, TArgOutput, EncodingError, std::size_t>)
+        : StatelessDecodeResult(std::forward<TArgInput>(input), std::forward<TArgOutput>(output), errorCode,
+                                errorCode != EncodingError::OK ? 1uz : 0uz)
+    {
+    }
+
+    /// @brief Copy constructor.
     /// @param[in] other A different but related result type.
     template <typename TArgInput, typename TArgOutput>
     requires CopyableResultType<StatelessDecodeResult, TInput, TArgInput, TOutput, TArgOutput>
@@ -48,8 +77,7 @@ namespace Krys
     {
     }
 
-    /// @brief Constructs a DecodeResult with the provided parameters and information, including whether or
-    /// not an error was handled.
+    /// @brief Move constructor.
     /// @param[in] other A different but related result type.
     template <typename TArgInput, typename TArgOutput>
     requires MovableResultType<StatelessDecodeResult, TInput, TArgInput, TOutput, TArgOutput>
@@ -57,43 +85,6 @@ namespace Krys
       noexcept(NoThrowMovableResultType<StatelessDecodeResult, TInput, TArgInput, TOutput, TArgOutput>)
         : Input(std::move(other.Input)), Output(std::move(other.Output)), ErrorCode(other.ErrorCode),
           ErrorCount(other.ErrorCount)
-    {
-    }
-
-    /// @brief Constructs a DecodeResult, defaulting the error code to EncodingError::OK if not provided.
-    /// @param[in] input The Input range to store.
-    /// @param[in] output The Output range to store.
-    /// @param[in] errorCode The error code for the decoding opertion, if any.
-    template <typename TArgInput, typename TArgOutput, typename TArgState>
-    constexpr StatelessDecodeResult(
-      TArgInput &&input, TArgOutput &&output,
-      EncodingError errorCode =
-        EncodingError::OK) noexcept(noexcept(StatelessDecodeResult(std::forward<TArgInput>(input),
-                                                                   std::forward<TArgOutput>(output),
-                                                                   errorCode,
-                                                                   static_cast<size_t>(
-                                                                     errorCode != EncodingError::OK))))
-        : StatelessDecodeResult(std::forward<TArgInput>(input), std::forward<TArgOutput>(output), errorCode,
-                                errorCode != EncodingError::OK ? 1uz : 0uz)
-    {
-    }
-
-    /// @brief Constructs a DecodeResult with the provided parameters and information,
-    /// including whether or not an error was handled.
-    /// @param[in] input The Input range to store.
-    /// @param[in] output The Output range to store.
-    /// @param[in] errorCode The error code for the decode operation, taken as the first of either the
-    /// decode operation that failed.
-    /// @param[in] errorCode Whether or not an error was handled. Some error handlers are corrective (see
-    /// Handlers::ReplacementHandler), and so the error code is not enough to determine if the handler was
-    /// invoked. This allows the value to be provided directly when constructing this result type.
-    template <typename TArgInput, typename TArgOutput>
-    constexpr StatelessDecodeResult(
-      TArgInput &&input, TArgOutput &&output, EncodingError errorCode,
-      std::size_t errorCount) noexcept(NoThrowConstructible<TInput, TArgInput>
-                                       && NoThrowConstructible<TOutput, TArgOutput>)
-        : Input(std::forward<TArgInput>(input)), Output(std::forward<TArgOutput>(output)),
-          ErrorCode(errorCode), ErrorCount(errorCount)
     {
     }
 
@@ -185,71 +176,71 @@ namespace Krys
   template <typename TEncoding, template <class...> class TFunction = std::function>
   using BasicDecodeErrorHandlerFor = TFunction<SpanDecodeResultFor<TEncoding>(
     const TEncoding &, SpanDecodeResultFor<TEncoding>, Span<const code_unit_t<TEncoding>>)>;
+}
 
-  namespace Impl
+namespace Krys::Text::detail_result
+{
+  template <typename TInput, typename TOutput, typename TState>
+  constexpr StatelessDecodeResult<TInput, TOutput>
+    SliceToStatelessDecode(DecodeResult<TInput, TOutput, TState> &&result) noexcept(
+      NoThrowConstructible<StatelessDecodeResult<TInput, TOutput>, StatelessDecodeResult<TInput, TOutput>>)
   {
-    template <typename TInput, typename TOutput, typename TState>
-    constexpr StatelessDecodeResult<TInput, TOutput>
-      SliceToStatelessDecode(DecodeResult<TInput, TOutput, TState> &&result) noexcept(
-        NoThrowConstructible<StatelessDecodeResult<TInput, TOutput>, StatelessDecodeResult<TInput, TOutput>>)
-    {
-      return std::move(result);
-    }
+    return std::move(result);
+  }
 
-    template <typename TInput, typename TOutput, typename TDesiredOutput>
-    constexpr StatelessDecodeResult<TInput, remove_cvref_t<TDesiredOutput>> ReplaceDecodeResultOutputNoState(
-      StatelessDecodeResult<TInput, TOutput> &&result,
-      TDesiredOutput
-        &&desiredOutput) noexcept(NoThrowConstructible<StatelessDecodeResult<TInput, TOutput>, TInput &&,
-                                                       TDesiredOutput, EncodingError, std::size_t>)
-    {
-      using TResult = StatelessDecodeResult<TInput, remove_cvref_t<TDesiredOutput>>;
-      return TResult(std::move(result.Input), std::forward<TDesiredOutput>(desiredOutput), result.ErrorCode,
-                     result.ErrorCount);
-    }
+  template <typename TInput, typename TOutput, typename TDesiredOutput>
+  constexpr StatelessDecodeResult<TInput, remove_cvref_t<TDesiredOutput>>
+    ReplaceStatelessDecodeResultOutput(StatelessDecodeResult<TInput, TOutput> &&result,
+                                       TDesiredOutput &&desiredOutput) // cf
+    noexcept(NoThrowConstructible<StatelessDecodeResult<TInput, TOutput>, TInput &&, TDesiredOutput,
+                                  EncodingError, std::size_t>)
+  {
+    using TResult = StatelessDecodeResult<TInput, remove_cvref_t<TDesiredOutput>>;
+    return TResult(std::move(result.Input), std::forward<TDesiredOutput>(desiredOutput), result.ErrorCode,
+                   result.ErrorCount);
+  }
 
-    template <typename TInput, typename TOutput, typename TState, typename TDesiredOutput>
-    constexpr DecodeResult<TInput, remove_cvref_t<TDesiredOutput>, TState> ReplaceDecodeResultOutput(
-      DecodeResult<TInput, TOutput, TState> &&result,
-      TDesiredOutput
-        &&desiredOutput) noexcept(NoThrowConstructible<DecodeResult<TInput, TOutput, TState>, TInput &&,
-                                                       TDesiredOutput, TState &, EncodingError, std::size_t>)
-    {
-      using TResult = DecodeResult<TInput, remove_cvref_t<TDesiredOutput>, TState>;
-      return TResult(std::move(result.Input), std::forward<TDesiredOutput>(desiredOutput), result.State,
-                     result.ErrorCode, result.ErrorCount);
-    }
+  template <typename TInput, typename TOutput, typename TState, typename TDesiredOutput>
+  constexpr DecodeResult<TInput, remove_cvref_t<TDesiredOutput>, TState>
+    ReplaceDecodeResultOutput(DecodeResult<TInput, TOutput, TState> &&result,
+                              TDesiredOutput &&desiredOutput) // cf
+    noexcept(NoThrowConstructible<DecodeResult<TInput, TOutput, TState>, TInput &&, TDesiredOutput, TState &,
+                                  EncodingError, std::size_t>)
+  {
+    using TResult = DecodeResult<TInput, remove_cvref_t<TDesiredOutput>, TState>;
+    return TResult(std::move(result.Input), std::forward<TDesiredOutput>(desiredOutput), result.State,
+                   result.ErrorCode, result.ErrorCount);
+  }
 
-    template <typename TInputRange, typename TOutputRange, typename TState>
-    using reconstruct_decode_result_t = DecodeResult<Krys::Ranges::range_reconstruct_t<TInputRange>,
-                                                     Krys::Ranges::range_reconstruct_t<TOutputRange>, TState>;
+  template <typename TInputRange, typename TOutputRange, typename TState>
+  using reconstruct_decode_result_t = DecodeResult<Krys::Ranges::range_reconstruct_t<TInputRange>,
+                                                   Krys::Ranges::range_reconstruct_t<TOutputRange>, TState>;
 
-    template <typename TInputRange, typename TOutputRange, typename TState, typename TInFirst,
-              typename TInLast, typename TOutFirst, typename TOutLast, typename TArgState>
-    constexpr decltype(auto) ReconstructStatelessDecodeResult(TInFirst &&inFirst, TInLast &&inLast,
-                                                              TOutFirst &&outFirst, TOutLast &&outLast,
-                                                              TArgState &&state, EncodingError errorCode,
-                                                              std::size_t errorCount)
-    {
-      decltype(auto) inRange = Krys::Ranges::reconstruct(
-        std::in_place_type<TInputRange>, std::forward<TInFirst>(inFirst), std::forward<TInLast>(inLast));
-      decltype(auto) outRange = Krys::Ranges::reconstruct(
-        std::in_place_type<TOutputRange>, std::forward<TOutFirst>(outFirst), std::forward<TOutLast>(outLast));
-      return DecodeResult<TInputRange, TOutputRange, TState>(
-        std::forward<decltype(inRange)>(inRange), std::forward<decltype(outRange)>(outRange),
-        std::forward<TArgState>(state), errorCode, errorCount);
-    }
+  template <typename TInputRange, typename TOutputRange, typename TState, typename TInFirst, typename TInLast,
+            typename TOutFirst, typename TOutLast, typename TArgState>
+  constexpr decltype(auto) ReconstructStatelessDecodeResult(TInFirst &&inFirst, TInLast &&inLast,
+                                                            TOutFirst &&outFirst, TOutLast &&outLast,
+                                                            TArgState &&state, EncodingError errorCode,
+                                                            std::size_t errorCount)
+  {
+    decltype(auto) inRange = Krys::Ranges::reconstruct(
+      std::in_place_type<TInputRange>, std::forward<TInFirst>(inFirst), std::forward<TInLast>(inLast));
+    decltype(auto) outRange = Krys::Ranges::reconstruct(
+      std::in_place_type<TOutputRange>, std::forward<TOutFirst>(outFirst), std::forward<TOutLast>(outLast));
+    return DecodeResult<TInputRange, TOutputRange, TState>(
+      std::forward<decltype(inRange)>(inRange), std::forward<decltype(outRange)>(outRange),
+      std::forward<TArgState>(state), errorCode, errorCount);
+  }
 
-    template <typename TInputRange, typename TOutputRange, typename TState, typename TInFirst,
-              typename TInLast, typename TOutFirst, typename TOutLast, typename TArgState>
-    constexpr decltype(auto) ReconstructStatelessDecodeResult(TInFirst &&inFirst, TInLast &&inLast,
-                                                              TOutFirst &&outFirst, TOutLast &&outLast,
-                                                              TArgState &&state,
-                                                              EncodingError errorCode = EncodingError::OK)
-    {
-      return reconstruct_decode_result_t<TInputRange, TOutputRange, TState>(
-        std::forward<TInFirst>(inFirst), std::forward<TInLast>(inLast), std::forward<TOutFirst>(outFirst),
-        std::forward<TOutLast>(outLast), std::forward<TArgState>(state), errorCode);
-    }
+  template <typename TInputRange, typename TOutputRange, typename TState, typename TInFirst, typename TInLast,
+            typename TOutFirst, typename TOutLast, typename TArgState>
+  constexpr decltype(auto) ReconstructStatelessDecodeResult(TInFirst &&inFirst, TInLast &&inLast,
+                                                            TOutFirst &&outFirst, TOutLast &&outLast,
+                                                            TArgState &&state,
+                                                            EncodingError errorCode = EncodingError::OK)
+  {
+    return reconstruct_decode_result_t<TInputRange, TOutputRange, TState>(
+      std::forward<TInFirst>(inFirst), std::forward<TInLast>(inLast), std::forward<TOutFirst>(outFirst),
+      std::forward<TOutLast>(outLast), std::forward<TArgState>(state), errorCode);
   }
 }

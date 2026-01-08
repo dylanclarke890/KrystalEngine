@@ -21,5 +21,5 @@ namespace Krys
   /// @brief Gets the maximum number of code points that can be produced by an encoding during a decode
   /// operation, suitable for initializing a automatic storage duration ("stack-allocated") buffer.
   template <typename T>
-  inline static constexpr std::size_t MaxCodePoints = T::MaxCodePoints;
+  inline static constexpr std::size_t MaxCodePoints = remove_cvref_t<T>::MaxCodePoints;
 }
