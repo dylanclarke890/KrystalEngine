@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/TypeTraits.hpp"
-#include "Krystal.Lib/Utils/ContiguousIteratorTag.hpp"
 #include "Krystal.Lib/Utils/Hijack.hpp"
 #include "Krystal.Lib/Utils/ReferenceWrapper.hpp"
 #include "Krystal.Lib/Utils/ToAddress.hpp"
@@ -52,14 +51,12 @@ namespace Krys
       template <typename T>
       constexpr decltype(auto) operator()(T &&value) const noexcept
       {
-#if KRYS_CONFIG(STD_LIBRARY_RANGES_BASIC_CONST_ITERATOR)
         if constexpr (::Krys::IsSpecializationOf<remove_cvref_t<T>, std::basic_const_iterator>)
         {
           // peel off the const iterator where possible
           return std::forward<T>(value).base();
         }
         else
-#endif
         {
           return std::forward<T>(value);
         }

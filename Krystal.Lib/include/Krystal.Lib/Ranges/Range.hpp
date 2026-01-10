@@ -1,16 +1,12 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Config.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Ranges/ADL.hpp"
 #include "Krystal.Lib/Ranges/Iterator.hpp"
 #include <iterator>
+#include <ranges>
 #include <type_traits>
 #include <utility>
-
-#if KRYS_CONFIG(STD_LIBRARY_RANGES)
-  #include <ranges>
-#endif
 
 namespace Krys::Ranges
 {
@@ -184,7 +180,7 @@ namespace Krys::Ranges
   concept ForwardRange = Impl::IsForwardRange<TRange>::value;
 
   template <typename TRange>
-  concept BidirectionalRange = Impl::IsBidirectionalRange<TRange>::value;
+  concept BidirectionalRange = Impl::IsBidirectionalRange<TRange>::value || std::ranges::bidirectional_range<TRange>;
 
   template <typename TRange>
   concept RandomAccessRange = Impl::IsRandomAccessRange<TRange>::value;

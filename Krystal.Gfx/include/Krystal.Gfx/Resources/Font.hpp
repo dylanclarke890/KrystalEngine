@@ -11,7 +11,7 @@
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 #include "Krystal.Maths/Vector.hpp"
-#include "Krystal.Text/Old/Unicode.hpp"
+#include "Krystal.Text/UnicodeCodePoint.hpp"
 #include <compare>
 #include <type_traits>
 
@@ -59,7 +59,7 @@ namespace Krys::Gfx
     Maths::Vec2 UVMax;       // (u1, v1)
   };
 
-  using CharacterMap = Map<Rune, Character, StronglyTypedNumberHasher<Rune>>;
+  using CharacterMap = Map<Text::UnicodeCodePoint, Character>;
 
   struct FontMetrics
   {

@@ -2,12 +2,12 @@
 
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Text/CharTraits.hpp"
-#include "Krystal.Text/TextEncodingId.hpp"
+#include "Krystal.Text/TypeTraits.hpp"
+#include "Krystal.Text/EncodingId.hpp"
 
 #include <string_view>
 
-namespace Krys
+namespace Krys::Text
 {
   namespace Impl
   {
@@ -17,21 +17,25 @@ namespace Krys
       'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
       'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
       'w', 'x', 'y', 'z', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '\0'};
+
+    template <typename TChar, typename TView = std::basic_string_view<TChar, char_traits_for<TChar>>>
+    constexpr inline TView ReadableCharacters {ReadableCharactersStorage<TChar>.data(),
+                                               ReadableCharactersStorage<TChar>.size() - 1};
+
     template <typename TChar>
     constexpr inline Array<TChar, 27> UncasedCharactersStorage = {
       'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
       'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '\0'};
+
+    template <typename TChar, typename TView = std::basic_string_view<TChar, char_traits_for<TChar>>>
+    constexpr inline TView UncasedCharacters {UncasedCharactersStorage<TChar>.data(),
+                                              UncasedCharactersStorage<TChar>.size() - 1};
+
     template <typename TChar>
     constexpr inline Array<TChar, 27> CasedCharactersStorage = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I',
                                                                 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R',
                                                                 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '\0'};
 
-    template <typename TChar, typename TView = std::basic_string_view<TChar, char_traits_for<TChar>>>
-    constexpr inline TView ReadableCharacters {ReadableCharactersStorage<TChar>.data(),
-                                               ReadableCharactersStorage<TChar>.size() - 1};
-    template <typename TChar, typename TView = std::basic_string_view<TChar, char_traits_for<TChar>>>
-    constexpr inline TView UncasedCharacters {UncasedCharactersStorage<TChar>.data(),
-                                              UncasedCharactersStorage<TChar>.size() - 1};
     template <typename TChar, typename TView = std::basic_string_view<TChar, char_traits_for<TChar>>>
     constexpr inline TView CasedCharacters {CasedCharactersStorage<TChar>.data(),
                                             CasedCharactersStorage<TChar>.size() - 1};
@@ -40,27 +44,27 @@ namespace Krys
       "UTF-7",    "UTF-7-IMAP", "UTF-8",        "UTF-16", "UTF-32", "UTF-16LE", "UTF-16BE", "UTF-32LE",
       "UTF-32BE", "UTF-EBCDIC", "UTF-8-EBCDIC", "MUTF-8", "WTF-8",  "GB18030",  "CESU-8",   "UTF-1"};
 
-    constexpr inline std::string_view ToName(TextEncodingId id) noexcept
+    constexpr inline std::string_view ToName(EncodingId id) noexcept
     {
       switch (id)
       {
-        case TextEncodingId::unknown:   return "unknown";
-        case TextEncodingId::utf7imap:  return "utf7imap";
-        case TextEncodingId::utf7:      return "utf7";
-        case TextEncodingId::utfebcdic: return "utfebcdic";
-        case TextEncodingId::utf8:      return "utf8";
-        case TextEncodingId::mutf8:     return "mutf8";
-        case TextEncodingId::wtf8:      return "wtf8";
-        case TextEncodingId::utf16:     return "utf16";
-        case TextEncodingId::utf16le:   return "utf16le";
-        case TextEncodingId::utf16be:   return "utf16be";
-        case TextEncodingId::utf32:     return "utf32";
-        case TextEncodingId::utf32le:   return "utf32le";
-        case TextEncodingId::utf32be:   return "utf32be";
-        case TextEncodingId::gb18030:   return "gb18030";
-        case TextEncodingId::utf1:      return "utf1";
-        case TextEncodingId::cesu8:     return "cesu8";
-        case TextEncodingId::ascii:     return "ascii";
+        case EncodingId::unknown:   return "unknown";
+        case EncodingId::utf7imap:  return "utf7imap";
+        case EncodingId::utf7:      return "utf7";
+        case EncodingId::utfebcdic: return "utfebcdic";
+        case EncodingId::utf8:      return "utf8";
+        case EncodingId::mutf8:     return "mutf8";
+        case EncodingId::wtf8:      return "wtf8";
+        case EncodingId::utf16:     return "utf16";
+        case EncodingId::utf16le:   return "utf16le";
+        case EncodingId::utf16be:   return "utf16be";
+        case EncodingId::utf32:     return "utf32";
+        case EncodingId::utf32le:   return "utf32le";
+        case EncodingId::utf32be:   return "utf32be";
+        case EncodingId::gb18030:   return "gb18030";
+        case EncodingId::utf1:      return "utf1";
+        case EncodingId::cesu8:     return "cesu8";
+        case EncodingId::ascii:     return "ascii";
         default:                        return "unknown";
       }
     }
@@ -71,7 +75,7 @@ namespace Krys
       {
         // A is equivalent to a, etc. etc.
         // ASCII character, make sure lowercase
-        // add to 5th bit (0-based) to get lowercase
+        // add to 5th bit (0-Based) to get lowercase
         c0 &= static_cast<char8>(0x20);
       }
       return c0;
@@ -80,10 +84,6 @@ namespace Krys
     template <typename _Target>
     void InplaceIdNormalize(_Target &target)
     {
-      // FIXME: full unicode case folding at some point in my short,
-      // miserable existence
-      // FIXME: full normalization form D case folding at some point in my
-      // pathetic mortality
       size_t targetSize = target.size();
       for (size_t i = 0; i < targetSize;)
       {
@@ -174,9 +174,9 @@ namespace Krys
 
   constexpr inline bool IsUnicodeEncodingName(std::string_view encodingName) noexcept
   {
-    for (std::size_t i = 0; i < Impl::UnicodeNames.size(); ++i)
+    for (std::size_t i = 0; i < ::Krys::Text::Impl::UnicodeNames.size(); ++i)
     {
-      std::string_view unicodeName = Impl::UnicodeNames[i];
+      std::string_view unicodeName = ::Krys::Text::Impl::UnicodeNames[i];
       if (IsEncodingNameEqual(encodingName, unicodeName))
       {
         return true;
@@ -187,9 +187,9 @@ namespace Krys
 
   constexpr inline bool IsUnicodeEncodingName(std::basic_string_view<char8> encodingName) noexcept
   {
-    for (std::size_t i = 0; i < Impl::UnicodeNames.size(); ++i)
+    for (std::size_t i = 0; i < ::Krys::Text::Impl::UnicodeNames.size(); ++i)
     {
-      std::string_view unicodeName = Impl::UnicodeNames[i];
+      std::string_view unicodeName = ::Krys::Text::Impl::UnicodeNames[i];
       if (IsEncodingNameEqualFor(encodingName, unicodeName))
       {
         return true;
@@ -201,91 +201,94 @@ namespace Krys
   namespace Impl
   {
 
-    constexpr inline TextEncodingId ToEncodingId(std::string_view name)
+    constexpr inline EncodingId ToEncodingId(std::string_view name)
     {
-      if (Krys::IsEncodingNameEqual(name, "UTF-8"))
+      if (Krys::Text::IsEncodingNameEqual(name, "UTF-8"))
       {
-        return TextEncodingId::utf8;
+        return EncodingId::utf8;
       }
-      else if (Krys::IsEncodingNameEqual(name, "UTF-16") || Krys::IsEncodingNameEqual(name, "UCS-2-INTERNAL")
-               || Krys::IsEncodingNameEqual(name, "UCS-2"))
+      else if (Krys::Text::IsEncodingNameEqual(name, "UTF-16")
+               || Krys::Text::IsEncodingNameEqual(name, "UCS-2-INTERNAL")
+               || Krys::Text::IsEncodingNameEqual(name, "UCS-2"))
       {
-        return TextEncodingId::utf16;
+        return EncodingId::utf16;
       }
-      else if (Krys::IsEncodingNameEqual(name, "UTF-16LE")
-               || Krys::IsEncodingNameEqual(name, "UCS-2LE-INTERNAL")
-               || Krys::IsEncodingNameEqual(name, "UCS-2LE"))
+      else if (Krys::Text::IsEncodingNameEqual(name, "UTF-16LE")
+               || Krys::Text::IsEncodingNameEqual(name, "UCS-2LE-INTERNAL")
+               || Krys::Text::IsEncodingNameEqual(name, "UCS-2LE"))
       {
-        return TextEncodingId::utf16le;
+        return EncodingId::utf16le;
       }
-      else if (Krys::IsEncodingNameEqual(name, "UTF-16BE")
-               || Krys::IsEncodingNameEqual(name, "UCS-2BE-INTERNAL")
-               || Krys::IsEncodingNameEqual(name, "UCS-2BE"))
+      else if (Krys::Text::IsEncodingNameEqual(name, "UTF-16BE")
+               || Krys::Text::IsEncodingNameEqual(name, "UCS-2BE-INTERNAL")
+               || Krys::Text::IsEncodingNameEqual(name, "UCS-2BE"))
       {
-        return TextEncodingId::utf16be;
+        return EncodingId::utf16be;
       }
-      else if (Krys::IsEncodingNameEqual(name, "UTF-32") || Krys::IsEncodingNameEqual(name, "UCS-4-INTERNAL")
-               || Krys::IsEncodingNameEqual(name, "UCS-4"))
+      else if (Krys::Text::IsEncodingNameEqual(name, "UTF-32")
+               || Krys::Text::IsEncodingNameEqual(name, "UCS-4-INTERNAL")
+               || Krys::Text::IsEncodingNameEqual(name, "UCS-4"))
       {
-        return TextEncodingId::utf32;
+        return EncodingId::utf32;
       }
-      else if (Krys::IsEncodingNameEqual(name, "UTF-32LE")
-               || Krys::IsEncodingNameEqual(name, "UCS-4LE-INTERNAL")
-               || Krys::IsEncodingNameEqual(name, "UCS-4LE"))
+      else if (Krys::Text::IsEncodingNameEqual(name, "UTF-32LE")
+               || Krys::Text::IsEncodingNameEqual(name, "UCS-4LE-INTERNAL")
+               || Krys::Text::IsEncodingNameEqual(name, "UCS-4LE"))
       {
-        return TextEncodingId::utf32le;
+        return EncodingId::utf32le;
       }
-      else if (Krys::IsEncodingNameEqual(name, "UTF-32BE")
-               || Krys::IsEncodingNameEqual(name, "UCS-4BE-INTERNAL")
-               || Krys::IsEncodingNameEqual(name, "UCS-4BE"))
+      else if (Krys::Text::IsEncodingNameEqual(name, "UTF-32BE")
+               || Krys::Text::IsEncodingNameEqual(name, "UCS-4BE-INTERNAL")
+               || Krys::Text::IsEncodingNameEqual(name, "UCS-4BE"))
       {
-        return TextEncodingId::utf32be;
+        return EncodingId::utf32be;
       }
-      else if (Krys::IsEncodingNameEqual(name, "ASCII") || Krys::IsEncodingNameEqual(name, "ANSI_X3.4-1968")
-               || Krys::IsEncodingNameEqual(name, "US-ASCII"))
+      else if (Krys::Text::IsEncodingNameEqual(name, "ASCII")
+               || Krys::Text::IsEncodingNameEqual(name, "ANSI_X3.4-1968")
+               || Krys::Text::IsEncodingNameEqual(name, "US-ASCII"))
       {
-        return TextEncodingId::ascii;
+        return EncodingId::ascii;
       }
-      else if (Krys::IsEncodingNameEqual(name, "UTF-EBCDIC")
-               || Krys::IsEncodingNameEqual(name, "UTF-8-EBCDIC"))
+      else if (Krys::Text::IsEncodingNameEqual(name, "UTF-EBCDIC")
+               || Krys::Text::IsEncodingNameEqual(name, "UTF-8-EBCDIC"))
       {
-        return TextEncodingId::utfebcdic;
+        return EncodingId::utfebcdic;
       }
-      else if (Krys::IsEncodingNameEqual(name, "WTF-8"))
+      else if (Krys::Text::IsEncodingNameEqual(name, "WTF-8"))
       {
-        return TextEncodingId::wtf8;
+        return EncodingId::wtf8;
       }
-      else if (Krys::IsEncodingNameEqual(name, "MUTF-8"))
+      else if (Krys::Text::IsEncodingNameEqual(name, "MUTF-8"))
       {
-        return TextEncodingId::mutf8;
+        return EncodingId::mutf8;
       }
-      else if (Krys::IsEncodingNameEqual(name, "UTF-7"))
+      else if (Krys::Text::IsEncodingNameEqual(name, "UTF-7"))
       {
-        return TextEncodingId::utf7;
+        return EncodingId::utf7;
       }
-      else if (Krys::IsEncodingNameEqual(name, "UTF-7-IMAP"))
+      else if (Krys::Text::IsEncodingNameEqual(name, "UTF-7-IMAP"))
       {
-        return TextEncodingId::utf7imap;
+        return EncodingId::utf7imap;
       }
       else
       {
-        return TextEncodingId::unknown;
+        return EncodingId::unknown;
       }
     }
 
-    constexpr inline TextEncodingId ToNormalizedUnicodeEncodingId(std::string_view name)
+    constexpr inline EncodingId ToNormalizedUnicodeEncodingId(std::string_view name)
     {
-      const TextEncodingId id = ToEncodingId(name);
+      const EncodingId id = ToEncodingId(name);
       switch (id)
       {
-        case TextEncodingId::utf8:    return TextEncodingId::utf8;
-        case TextEncodingId::utf16:
-        case TextEncodingId::utf16le:
-        case TextEncodingId::utf16be: return TextEncodingId::utf16;
-        case TextEncodingId::utf32:
-        case TextEncodingId::utf32le:
-        case TextEncodingId::utf32be: return TextEncodingId::utf32;
-        default:                      return TextEncodingId::unknown;
+        case EncodingId::utf8:    return EncodingId::utf8;
+        case EncodingId::utf16:
+        case EncodingId::utf16le:
+        case EncodingId::utf16be: return EncodingId::utf16;
+        case EncodingId::utf32:
+        case EncodingId::utf32le:
+        case EncodingId::utf32be: return EncodingId::utf32;
+        default:                      return EncodingId::unknown;
       }
     }
 

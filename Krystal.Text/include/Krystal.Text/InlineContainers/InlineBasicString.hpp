@@ -1,13 +1,13 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/String/EmptyString.hpp"
-#include "Krystal.Text/CharTraits.hpp"
 #include "Krystal.Text/InlineContainers/InlineVector.hpp"
+#include "Krystal.Text/TypeTraits.hpp"
 #include <algorithm>
 #include <functional>
 #include <string_view>
 
-namespace Krys
+namespace Krys::Text
 {
   namespace Impl
   {
@@ -31,7 +31,7 @@ namespace Krys
 
   template <typename T, std::size_t MaxLength>
   class InlineBasicString : private InlineVector<T, MaxLength + 1>,
-                              public Impl::SVConversion<T, InlineBasicString<T, MaxLength>>
+                            public Impl::SVConversion<T, InlineBasicString<T, MaxLength>>
   {
   private:
     using TBase = InlineVector<T, MaxLength + 1>;
@@ -54,7 +54,7 @@ namespace Krys
     using const_reverse_iterator = typename TBase::const_reverse_iterator;
     using size_type = typename TBase::size_type;
     using difference_type = typename TBase::difference_type;
-    inline static constexpr const std::size_t inline_capacity = MaxLength;
+    constexpr inline static const std::size_t inline_capacity = MaxLength;
 
     constexpr InlineBasicString() noexcept : TBase()
     {
@@ -78,8 +78,7 @@ namespace Krys
 
     template <typename TFirst, typename TLast>
     requires(!Integral<TFirst> && !SameType<remove_cvref_t<TLast>, value_type>)
-    constexpr InlineBasicString(TFirst first, TLast last) noexcept
-        : TBase(std::move(first), std::move(last))
+    constexpr InlineBasicString(TFirst first, TLast last) noexcept : TBase(std::move(first), std::move(last))
     {
       this->SetNullTerminator();
     }
@@ -233,7 +232,7 @@ namespace Krys
     using const_iterator = Krys::Ranges::WrappedPointer<const T>;
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
-    inline static constexpr const std::size_t inline_capacity = 0;
+    constexpr inline static const std::size_t inline_capacity = 0;
 
     constexpr InlineBasicString() noexcept
     {

@@ -1,11 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Concepts.hpp"
-#include "Krystal.Lib/Core/Config.hpp"
 #include "Krystal.Lib/Ranges/ADL.hpp"
-#if KRYS_CONFIG(STD_LIBRARY_BORROWED_RANGE)
-  #include <ranges>
-#endif
+#include <ranges>
 #include <span>
 
 namespace Krys

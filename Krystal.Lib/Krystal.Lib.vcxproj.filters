@@ -213,12 +213,6 @@
     <ClInclude Include="include\Krystal.Lib\Utils\ToUnderlying.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Core\Config.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Utils\ContiguousIteratorTag.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Utils\Tag.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -292,6 +286,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Utils\WhatIsThis.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Utils\EqualToChar.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Utils\LosslessStaticCast.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

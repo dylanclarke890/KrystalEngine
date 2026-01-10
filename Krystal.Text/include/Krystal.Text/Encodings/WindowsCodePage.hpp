@@ -1,24 +1,23 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Config.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Detection/Compiler.hpp"
 #include "Krystal.Lib/Detection/OS.hpp"
 #include "Krystal.Lib/Ranges/Range.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
-#include "Krystal.Text/DecodeResult.hpp"
-#include "Krystal.Text/EncodeResult.hpp"
+#include "Krystal.Text/Concepts.hpp"
+#include "Krystal.Text/Decode/DecodeResult.hpp"
+#include "Krystal.Text/Encode/EncodeResult.hpp"
+#include "Krystal.Text/Encodings/detail/Windows.hpp"
 #include "Krystal.Text/Encodings/UTF16.hpp"
-#include "Krystal.Text/Impl/ProgressHandler.hpp"
-#include "Krystal.Text/Impl/Windows.hpp"
-#include "Krystal.Text/IsIgnorableErrorHandler.hpp"
+#include "Krystal.Text/Handlers/ProgressHandler.hpp"
 #include "Krystal.Text/State.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 #include <optional>
 #include <utility>
 #include <xutility>
 
-namespace Krys
+namespace Krys::Text
 {
   namespace Impl
   {
@@ -122,15 +121,14 @@ namespace Krys
       return std::nullopt;
     }
 
-    /// @brief The maximum code units a single complete operation of encoding can produce.
-    inline static constexpr const std::size_t MaxCodeUnits = 8;
+    constexpr inline static const std::size_t MaxCodeUnits = 8;
 
-    /// @brief The maximum number of code points a single complete operation of decoding can produce.
-    inline static constexpr const std::size_t MaxCodePoints = 8;
+    constexpr inline static const std::size_t MaxCodePoints = 8;
 
     /// @brief Default constructor: assumes the code page is the default (thread) code page with the value
     /// `CP_THREAD_ACP`.
-    constexpr basic_windows_code_page() noexcept : basic_windows_code_page(Impl::CodePageActiveThread)
+    constexpr basic_windows_code_page() noexcept
+        : basic_windows_code_page(::Krys::Text::Windows::CodePageActiveThread)
     {
     }
 
@@ -143,7 +141,7 @@ namespace Krys
     {
 #if KRYS_OS(WINDOWS)
       CPINFOEXW *codepageInfo = nullptr;
-      if (Krys::Windows::GetCodepageDescriptor(this->_codePage, &codepageInfo))
+      if (::Krys::Text::Windows::GetCodepageDescriptor(this->_codePage, &codepageInfo))
       {
         this->_codepageInfo = static_cast<void *>(codepageInfo);
       }
@@ -166,7 +164,7 @@ namespace Krys
     {
 #if KRYS_OS(WINDOWS)
       CPINFOEXW *codepageInfo = nullptr;
-      if (Krys::Windows::GetCodepageDescriptor(this->_codePage, &codepageInfo))
+      if (::Krys::Text::Windows::GetCodepageDescriptor(this->_codePage, &codepageInfo))
       {
         this->_codepageInfo = static_cast<void *>(codepageInfo);
       }
@@ -176,7 +174,7 @@ namespace Krys
     /// @brief Decodes a single complete unit of information as code points and produces a result with the
     /// input and output ranges moved past what was successfully read and written; or, produces an error and
     /// returns the input and output ranges untouched.
-    /// @param[in] input The input view to read code uunits from.
+    /// @param[in] input The input view to read code units from.
     /// @param[in] output The output view to write code points into.
     /// @param[in] errorHandler The error handler to invoke if encoding fails.
     /// @param[in, out] s The necessary state information. Most encodings have no state, but because this
@@ -187,11 +185,9 @@ namespace Krys
     auto DecodeOne(TInput &&input, TOutput &&output, TErrorHandler &&errorHandler, decode_state &s) const
     {
 #if KRYS_OS(WINDOWS)
-      using TUErrorHandler = remove_cvref_t<TErrorHandler>;
-      using TSubInput = Krys::Ranges::csubrange_for_t<remove_ref_t<TInput>>;
-      using TSubOutput = Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
+      using TSubInput = ::Krys::Ranges::csubrange_for_t<remove_ref_t<TInput>>;
+      using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = DecodeResult<TSubInput, TSubOutput, decode_state>;
-      constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TUErrorHandler>;
 
       auto inIt = ::Krys::Ranges::cbegin(input);
       auto inLast = ::Krys::Ranges::cend(input);
@@ -211,8 +207,10 @@ namespace Krys
       size_t inputReadSize = 1;
       const size_t initialInputReadDataSize = ::Krys::Ranges::size(inputReadData);
       std::uint32_t codePageId = this->CodePage();
-      auto Flags = Krys::Windows::MultiByteToWidecharFlags(codePageId);
+      auto Flags = ::Krys::Text::Windows::MultiByteToWidecharFlags(codePageId);
       size_t intermediateInputSize = 0;
+
+      constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TErrorHandler>;
       for (; inIt != inLast; ++inputReadSize, ::Krys::Ranges::iter_advance(inIt))
       {
         if constexpr (CallErrorHandler)
@@ -246,8 +244,8 @@ namespace Krys
           else
           {
             CPINFOEXW *info = static_cast<CPINFOEXW *>(this->_codepageInfo);
-            if (Krys::Windows::MultiByteToWidecharConversionFailed(inputReadSize, inputReadData,
-                                                                   intermediateData, info))
+            if (::Krys::Text::Windows::MultiByteToWidecharConversionFailed(inputReadSize, inputReadData,
+                                                                           intermediateData, info))
             {
               return std::forward<TErrorHandler>(errorHandler)(
                 *this,
@@ -263,12 +261,12 @@ namespace Krys
         inputReadData[inputReadSize] = static_cast<CHAR>(*inIt);
       }
 
-      using wutf16 = Impl::UTF16With<void, WCHAR, code_point, false>;
+      using wutf16 = ::Krys::Text::Impl::UTF16With<void, WCHAR, code_point, false>;
       using TIntermediateState = decode_state_t<wutf16>;
 
       wutf16 intermediateEncoding {};
       TIntermediateState intermediateState {};
-      Impl::ProgressHandler<!CallErrorHandler, wutf16> intermediateHandler {};
+      ::Krys::Text::Handlers::ProgressHandler<!CallErrorHandler, wutf16> intermediateHandler {};
       code_point intermediateOutput[17] {};
       Span<code_point> outputBuffer(intermediateOutput);
       Span<const WCHAR> intermediateInputBuffer(intermediateData, intermediateInputSize);
@@ -335,7 +333,7 @@ namespace Krys
     /// @brief Encodes a single complete unit of information as code units and produces a result with the
     /// input and output ranges moved past what was successfully read and written; or, produces an error and
     /// returns the input and output ranges untouched.
-    /// @param[in] input The input view to read code uunits from.
+    /// @param[in] input The input view to read code units from.
     /// @param[in] output The output view to write code points into.
     /// @param[in] errorHandler The error handler to invoke if encoding fails.
     /// @param[in, out] s The necessary state information. Most encodings have no state, but because this
@@ -346,11 +344,9 @@ namespace Krys
     auto EncodeOne(TInput &&input, TOutput &&output, TErrorHandler &&errorHandler, encode_state &s) const
     {
 #if KRYS_OS(WINDOWS)
-      using TUErrorHandler = remove_cvref_t<TErrorHandler>;
-      using TSubInput = Krys::Ranges::csubrange_for_t<remove_ref_t<TInput>>;
-      using TSubOutput = Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
+      using TSubInput = ::Krys::Ranges::csubrange_for_t<remove_ref_t<TInput>>;
+      using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = EncodeResult<TSubInput, TSubOutput, encode_state>;
-      constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TUErrorHandler>;
 
       auto inIt = ::Krys::Ranges::cbegin(input);
       auto inLast = ::Krys::Ranges::cend(input);
@@ -364,17 +360,18 @@ namespace Krys
       auto outIt = ::Krys::Ranges::begin(output);
       auto outLast = ::Krys::Ranges::end(output);
 
-      using wutf16 = Impl::UTF16With<void, wchar_t, code_point, false>;
+      using wutf16 = ::Krys::Text::Impl::UTF16With<void, wchar_t, code_point, false>;
       using TIntermediateState = encode_state_t<wutf16>;
 
       wutf16 intermediateEncoding {};
       TIntermediateState intermediateState {};
-      Impl::ProgressHandler<!CallErrorHandler, wutf16> intermediateHandler {};
+      ::Krys::Text::Handlers::ProgressHandler<!CallErrorHandler, wutf16> intermediateHandler {};
       wchar_t wideIntermediate[8] {};
       Span<wchar_t> wideWriteBuffer(wideIntermediate);
       auto intermediateResult =
         intermediateEncoding.EncodeOne(TSubInput(std::move(inIt), std::move(inLast)), wideWriteBuffer,
                                        intermediateHandler, intermediateState);
+      constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TErrorHandler>;
       if constexpr (CallErrorHandler)
       {
         if (intermediateResult.ErrorCode != EncodingError::OK)
@@ -393,7 +390,7 @@ namespace Krys
       Span<const wchar_t> wideReadBuffer(wideIntermediate, intermediateResult.Output.data());
       std::uint32_t codePageId = this->CodePage();
       auto usedDefaults =
-        Krys::Windows::WidecharToMultiByteUsedChar(codePageId, &defaultChar, &defaultCharUsed);
+        ::Krys::Text::Windows::WidecharToMultiByteUsedChar(codePageId, &defaultChar, &defaultCharUsed);
       int win32Error =
         ::WideCharToMultiByte(static_cast<UINT>(codePageId), usedDefaults.Flags, wideReadBuffer.data(),
                               static_cast<int>(wideReadBuffer.size()), intermediateOutput, stateCountMax,
@@ -416,7 +413,7 @@ namespace Krys
         else
         {
           CPINFOEXW *info = static_cast<CPINFOEXW *>(this->_codepageInfo);
-          if (Krys::Windows::WidecharToMultiByteConversionFailed(
+          if (::Krys::Text::Windows::WidecharToMultiByteConversionFailed(
                 wideIntermediate, static_cast<size_t>(win32Error), intermediateOutput, info))
           {
             return std::forward<TErrorHandler>(errorHandler)(
@@ -483,5 +480,13 @@ namespace Krys
     uint32 _codePage;
   };
 
+  /// @brief The encoding representing a Windows conversion using WideCharToMultiByte (encode) and
+  /// MultiByteToWideChar (decode) conversion sequences.
+  /// @remarks This is slow due to the bad design of WideCharToMultiByte/MultiByteToWideChar, but it does
+  /// guarantee access to all of the wide variety of legacy encodings Windows supports. If possible, a
+  /// different named encoding type should be used to avoid the performance penalties that comes from API
+  /// limitations of this encoding object. Occasionally, for correct text, this API limitations can be
+  /// mitigated when using the bulk APIs: for the single-conversion APIs that do not perform bulk
+  /// conversion, the performance penalty is endemic.
   using windows_code_page = basic_windows_code_page<char, UnicodeCodePoint>;
 }

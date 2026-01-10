@@ -9,7 +9,7 @@
 #include <system_error>
 #include <xhash>
 
-namespace Krys
+namespace Krys::Text
 {
   /// @brief Describes a failure to encode, decode, transcode, or count, for four core various reasons.
   /// @remarks This does not cover specific failures, like if a sequence was overlong (e.g., UTF-8) or if an
@@ -64,9 +64,9 @@ namespace Krys
         return "EncodingError";
       }
 
-      virtual string message(int __untyped_error_code) const override
+      virtual string message(int untypedErrorCode) const override
       {
-        EncodingError errorCode = static_cast<EncodingError>(__untyped_error_code);
+        EncodingError errorCode = static_cast<EncodingError>(untypedErrorCode);
         switch (errorCode)
         {
           case EncodingError::OK:
@@ -74,7 +74,7 @@ namespace Krys
           case EncodingError::InsufficientOutputSpace:
           case EncodingError::InvalidSequence:
           {
-            stringview name = Krys::ToString(errorCode);
+            stringview name = ::Krys::Text::ToString(errorCode);
             return string(name.data(), name.size());
           }
         }
@@ -99,18 +99,18 @@ namespace Krys
 namespace std
 {
   template <>
-  struct is_error_condition_enum<::Krys::EncodingError> : public std::true_type
+  struct is_error_condition_enum<::Krys::Text::EncodingError> : public std::true_type
   {
   };
 
   template <>
-  class hash<::Krys::EncodingError>
+  class hash<::Krys::Text::EncodingError>
   {
   private:
-    using UnderlyingErrorType = ::Krys::underlying_t<::Krys::EncodingError>;
+    using UnderlyingErrorType = ::Krys::underlying_t<::Krys::Text::EncodingError>;
 
   public:
-    std::size_t operator()(::Krys::EncodingError errorCode) const
+    std::size_t operator()(::Krys::Text::EncodingError errorCode) const
       noexcept(noexcept(std::hash<UnderlyingErrorType> {}(static_cast<UnderlyingErrorType>(errorCode))))
     {
       std::hash<UnderlyingErrorType> hasher {};

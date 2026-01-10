@@ -1,18 +1,13 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Config.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Ranges/ADL.hpp"
 #include "Krystal.Lib/Ranges/Impl/ContiguousIterator.hpp"
-#include "Krystal.Lib/Utils/ContiguousIteratorTag.hpp"
 #include "Krystal.Lib/Utils/ToAddress.hpp"
 #include <iterator>
+#include <ranges>
 #include <type_traits>
 #include <utility>
-
-#if KRYS_CONFIG(STD_LIBRARY_RANGES)
-  #include <ranges>
-#endif
 
 namespace Krys::Ranges
 {
@@ -73,11 +68,7 @@ namespace Krys::Ranges
   concept ContiguousIterator =
     Impl::IsContiguousIterator<TIterator>
     || (
-#if KRYS_CONFIG(STD_LIBRARY_CONTIGUOUS_ITERATOR_TAG)
-      IsIteratorConceptOrBetter<contiguous_iterator_tag, TIterator> &&
-#else
-      IsPointer<TIterator> &&
-#endif
+      IsIteratorConceptOrBetter<std::contiguous_iterator_tag, TIterator> &&
       ToAddressable<TIterator> && LValueRef<iterator_reference_t<remove_ref_t<TIterator>>>);
 
   template <typename TIterator>
@@ -87,8 +78,7 @@ namespace Krys::Ranges
   concept OutputIteratorExact = SameType<std::output_iterator_tag, iterator_concept_t<TIterator>>;
 
   template <typename TIterator>
-  concept InputOrOutputIteratorExact =
-    InputIteratorExact<TIterator> || OutputIteratorExact<TIterator>;
+  concept InputOrOutputIteratorExact = InputIteratorExact<TIterator> || OutputIteratorExact<TIterator>;
 
   template <typename TIterator>
   concept ForwardIteratorExact = SameType<std::forward_iterator_tag, iterator_concept_t<TIterator>>;
@@ -102,7 +92,7 @@ namespace Krys::Ranges
     SameType<std::random_access_iterator_tag, iterator_concept_t<TIterator>>;
 
   template <typename TIterator>
-  concept ContiguousIteratorExact = SameType<contiguous_iterator_tag, iterator_concept_t<TIterator>>;
+  concept ContiguousIteratorExact = SameType<std::contiguous_iterator_tag, iterator_concept_t<TIterator>>;
 
   template <typename TIterator, typename TSentinel>
   concept SizedSentinelFor = Impl::DistanceOperable<TIterator, TSentinel>;

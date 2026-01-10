@@ -2,7 +2,6 @@
 
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
-#include "Krystal.Lib/Utils/ContiguousIteratorTag.hpp"
 #include "Krystal.Lib/Utils/ToAddress.hpp"
 #include "Krystal.Lib/Utils/Unwrap.hpp"
 #include <iterator>
@@ -17,10 +16,10 @@ namespace Krys::Ranges
     template <typename>
     friend class ::Krys::Ranges::WrappedPointer;
 
-    using TUnwrapped = decltype(Krys::Unwrap(std::declval<T &>()));
+    using TUnwrapped = decltype(::Krys::Unwrap(std::declval<T &>()));
 
   public:
-    using iterator_category = Krys::contiguous_iterator_tag;
+    using iterator_category = std::contiguous_iterator_tag;
     using value_type = remove_cvref_t<TUnwrapped>;
     using element_type = remove_ref_t<TUnwrapped>;
     using reference = add_lvalue_ref_t<TUnwrapped>;

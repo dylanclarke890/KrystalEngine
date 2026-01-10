@@ -138,7 +138,7 @@ namespace Krys::Text::detail_result
   }
 }
 
-namespace Krys
+namespace Krys::Text
 {
   template <template <typename...> class TResult, typename TInput, typename TArgInput, typename TOutput,
             typename TArgOutput, typename TState = void, typename TArgState = void, typename TState2 = void,

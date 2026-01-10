@@ -7,7 +7,6 @@
 #include "Krystal.Lib/Utils/ToAddress.hpp"
 #include "Krystal.Lib/Utils/ToMutableIter.hpp"
 #include "Krystal.Text/InlineContainers/detail/Storage.hpp"
-#include "Krystal.Text/InlineContainers/Forward.hpp"
 #include <cassert>
 #include <cstddef>
 #include <initializer_list>
@@ -15,16 +14,19 @@
 #include <memory>
 #include <type_traits>
 
-namespace Krys
+namespace Krys::Text
 {
+  template <typename, std::size_t>
+  class InlineBasicString;
+
   template <typename T, std::size_t Capacity>
-  class InlineVector : private detail::Storage<T, Capacity>
+  class InlineVector : private ::Krys::Text::detail::Storage<T, Capacity>
   {
   private:
     template <typename, std::size_t>
     friend class InlineBasicString;
 
-    using TBaseStorage = detail::Storage<T, Capacity>;
+    using TBaseStorage = ::Krys::Text::detail::Storage<T, Capacity>;
 
   public:
     using value_type = T;
@@ -38,11 +40,11 @@ namespace Krys
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
-    inline static constexpr const std::size_t inline_capacity = Capacity;
+    constexpr inline static const std::size_t inline_capacity = Capacity;
 
   private:
     template <typename... TArgs>
-    static constexpr bool IsEmplaceNoexcept() noexcept
+    constexpr static bool IsEmplaceNoexcept() noexcept
     {
       return NoThrowConstructible<value_type, TArgs...> // cf
              && (NoThrowMoveAssignable<value_type>      // cf
@@ -151,7 +153,7 @@ namespace Krys
     {
       if (count == 0)
       {
-        return iterator(const_cast<pointer>(where.base()));
+        return iterator(const_cast<pointer>(where.Base()));
       }
       assert(inline_capacity > this->size());
       difference_type whereDist = where - this->begin();
@@ -491,8 +493,8 @@ namespace Krys
     constexpr iterator UncheckedMultiErase(const_iterator first, const_iterator last,
                                            difference_type whereDiff) noexcept
     {
-      iterator whereFirst(const_cast<pointer>(first.base()));
-      iterator whereLast(const_cast<pointer>(last.base()));
+      iterator whereFirst(const_cast<pointer>(first.Base()));
+      iterator whereLast(const_cast<pointer>(last.Base()));
       iterator whereDiffLast = whereLast - whereDiff;
       if constexpr (NoThrowMoveAssignable<value_type>)
       {
@@ -554,7 +556,7 @@ namespace Krys
     using const_iterator = Krys::Ranges::WrappedPointer<T>;
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
-    inline static constexpr const std::size_t inline_capacity = 0;
+    constexpr inline static const std::size_t inline_capacity = 0;
 
     constexpr InlineVector() noexcept
     {

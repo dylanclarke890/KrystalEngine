@@ -4,7 +4,7 @@
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 
-namespace Krys::detail::state
+namespace Krys::Text::detail::state
 {
   template <typename TEncoding, typename = void>
   struct decode_state
@@ -31,7 +31,7 @@ namespace Krys::detail::state
   };
 }
 
-namespace Krys
+namespace Krys::Text
 {
   /// @brief A default empty state type for encodings that do not require any state information.
   struct EmptyState
@@ -41,12 +41,12 @@ namespace Krys
   /// @brief Retrieves the `decode_state` of an encoding type if it exists; otherwise, retrieves the general
   /// `state` type.
   template <typename TEncoding>
-  using decode_state_t = ::Krys::detail::state::decode_state<remove_cvref_t<TEncoding>>::type;
+  using decode_state_t = ::Krys::Text::detail::state::decode_state<remove_cvref_t<TEncoding>>::type;
 
   /// @brief Retrieves the `encode_state` of an encoding type if it exists; otherwise, retrieves the general
   /// `state` type.
   template <typename TEncoding>
-  using encode_state_t = ::Krys::detail::state::encode_state<remove_cvref_t<TEncoding>>::type;
+  using encode_state_t = ::Krys::Text::detail::state::encode_state<remove_cvref_t<TEncoding>>::type;
 
   template <typename TState>
   concept StateHasIsCompleteMethod = requires(TState &state) {
@@ -90,7 +90,7 @@ namespace Krys
     }
     else
     {
-      return ::Krys::IsStateComplete(state);
+      return ::Krys::Text::IsStateComplete(state);
     }
   }
 
@@ -113,7 +113,7 @@ namespace Krys
   template <typename TEncoding>
   concept IsEncodeStateIndependant = IsStateIndependant<TEncoding, encode_state_t<TEncoding>>;
 
-  /// @brief Constructs the `decode_state` of the given encoding, based on whether or not the encoding and
+  /// @brief Constructs the `decode_state` of the given encoding, Based on whether or not the encoding and
   /// state meet the criteria of IsDecodeStateIndependant.
   /// @param[in] encoding The encoding object to use, if applicable, for the construction of the state.
   template <typename TEncoding>
@@ -130,7 +130,7 @@ namespace Krys
     }
   }
 
-  /// @brief Constructs the `decode_state` of the given encoding, based on whether or not the encoding and
+  /// @brief Constructs the `decode_state` of the given encoding, Based on whether or not the encoding and
   /// state meet the criteria of IsDecodeStateIndependant or whether it can be created by copy
   /// construction from the given `state`.
   /// @param[in] encoding The encoding object to use, if applicable, for the construction of the state.
@@ -167,7 +167,7 @@ namespace Krys
     }
   }
 
-  /// @brief Constructs the `decode_state` of the given encoding, based on whether or not the encoding and
+  /// @brief Constructs the `decode_state` of the given encoding, Based on whether or not the encoding and
   /// state meet the criteria of IsDecodeStateIndependant or whether it can be created by copy
   /// construction from the given `state`.
   /// @param[in] encoding The encoding object to use, if applicable, for the construction of the state.
@@ -202,7 +202,7 @@ namespace Krys
     }
   }
 
-  /// @brief Constructs the `encode_state` of the given encoding, based on whether or not the encoding and
+  /// @brief Constructs the `encode_state` of the given encoding, Based on whether or not the encoding and
   /// state meet the criteria of IsEncodeStateIndependant.
   /// @param[in] encoding The encoding object to use, if applicable, for the construction of the state.
   template <typename TEncoding>
@@ -219,7 +219,7 @@ namespace Krys
     }
   }
 
-  /// @brief Constructs the `encode_state` of the given encoding, based on whether or not the encoding and
+  /// @brief Constructs the `encode_state` of the given encoding, Based on whether or not the encoding and
   /// state meet the criteria of IsEncodeStateIndependant or whether it can be created by copy
   /// construction from the given `decodeState`.
   /// @param[in] encoding The encoding object to use, if applicable, for the construction of the state.
@@ -255,7 +255,7 @@ namespace Krys
     }
   }
 
-  /// @brief Constructs the `encode_state` of the given encoding, based on whether or not the encoding and
+  /// @brief Constructs the `encode_state` of the given encoding, Based on whether or not the encoding and
   /// state meet the criteria of IsEncodeStateIndependant or whether it can be created by copy
   /// construction from the given `state`.
   /// @param[in] encoding The encoding object to use, if applicable, for the construction of the state.

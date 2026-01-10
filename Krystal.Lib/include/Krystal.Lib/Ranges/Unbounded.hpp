@@ -196,17 +196,8 @@ namespace Krys::Ranges
   };
 }
 
-#if KRYS_CONFIG(STD_LIBRARY_BORROWED_RANGE)
 namespace std::ranges
 {
   template <typename TIterator>
   inline constexpr bool enable_borrowed_range<Krys::Ranges::UnboundedView<TIterator>> = true;
 }
-#else
-namespace Krys::Ranges
-{
-  /// @brief Mark subranges as appropriately borrowed ranges.
-  template <typename TIterator>
-  inline constexpr bool enable_borrowed_range<UnboundedView<TIterator>> = true;
-}
-#endif

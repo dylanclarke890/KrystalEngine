@@ -1,20 +1,19 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Concepts.hpp"
-#include "Krystal.Lib/Core/Config.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
+
+namespace Krys::detail
+{
+  using uchar_one_t = unsigned char[1];
+  inline constexpr const uchar_one_t u_shim = {};
+
+  using schar_one_t = signed char[1];
+  inline constexpr const schar_one_t s_shim = {};
+}
 
 namespace Krys
 {
-  namespace Impl
-  {
-    using uchar_one_t = unsigned char[1];
-    inline constexpr const uchar_one_t u_shim = {};
-
-    using schar_one_t = signed char[1];
-    inline constexpr const schar_one_t s_shim = {};
-  }
-
   /// @brief Returns an array representing an empty c-style string
   /// @tparam TChar The character type.
   /// @return An empty c-string.
@@ -38,7 +37,7 @@ namespace Krys
   template <>
   inline constexpr decltype(auto) EmptyString<unsigned char>() noexcept
   {
-    return (Impl::u_shim);
+    return (::Krys::detail::u_shim);
   }
 
   /// @brief Returns an array representing an empty c-style string
@@ -46,7 +45,7 @@ namespace Krys
   template <>
   inline constexpr decltype(auto) EmptyString<signed char>() noexcept
   {
-    return (Impl::s_shim);
+    return (::Krys::detail::s_shim);
   }
 
   /// @brief Returns an array representing an empty c-style string
@@ -57,7 +56,6 @@ namespace Krys
     return L"";
   }
 
-#if KRYS_CONFIG(NATIVE_CHAR8_T)
   /// @brief Returns an array representing an empty c-style string
   /// @return An empty c-string.
   template <>
@@ -65,7 +63,6 @@ namespace Krys
   {
     return u8"";
   }
-#endif
 
   /// @brief Returns an array representing an empty c-style string
   /// @return An empty c-string.

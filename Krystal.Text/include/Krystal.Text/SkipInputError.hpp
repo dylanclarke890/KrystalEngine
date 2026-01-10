@@ -3,38 +3,52 @@
 #include "Krystal.Lib/Ranges/Range.hpp"
 #include "Krystal.Lib/Ranges/Reconstruct.hpp"
 #include "Krystal.Lib/Utils/Unwrap.hpp"
-#include "Krystal.Text/DecodeResult.hpp"
-#include "Krystal.Text/EncodeResult.hpp"
-#include "Krystal.Text/IsInputErrorSkippable.hpp"
+#include "Krystal.Text/Decode/DecodeResult.hpp"
+#include "Krystal.Text/Encode/EncodeResult.hpp"
 
-namespace Krys
+namespace Krys::Text
 {
-  namespace Impl
+  /// @brief Whether or not the given `TEncoding` has a function called `SkipInputError` that takes the
+  /// given `TResult` type with the given `TInputProgress` and `TOutputProgress` types.
+  /// @tparam TEncoding The encoding that may contain the SkipInputError function.
+  /// @tparam TResult The result type to check if the input is callable.
+  /// @tparam TInputProgress The input progress type passed in to the error handler to be forwarded to the
+  /// skip input error.
+  /// @tparam TOutputProgress The output progress type passed in to the error handler to be forwarded to the
+  /// skip input error.
+  /// @remarks Used by ReplacementHandler and SkipHandler to pass over malformed input when it happens.
+  template <typename TEncoding, typename TResult, typename TInputProgress, typename TOutputProgress>
+  concept HasSkipInputError = requires {
+    std::declval<TEncoding>().SkipInputError(std::declval<TResult>(), std::declval<TInputProgress>(),
+                                             std::declval<TOutputProgress>());
+  };
+}
+
+namespace Krys::Text::detail
+{
+  /// @brief Checks whether calling SkipInputError is an exceptionless operation.
+  template <typename TEncoding, typename TResult, typename TInputProgress, typename TOutputProgress>
+  consteval bool IsSkipInputErrorNoexcept() noexcept
   {
-    template <typename TEncoding, typename TResult, typename TInputProgress, typename TOutputProgress>
-    constexpr bool IsSkipInputErrorNoexcept() noexcept
+    if (HasSkipInputError<TEncoding, TResult, TInputProgress, TOutputProgress>)
     {
-      if constexpr (HasSkipInputError<TEncoding, TResult, TInputProgress, TOutputProgress>)
-      {
-        return noexcept(std::declval<TEncoding>().SkipInputError(
-          std::declval<TResult>(), std::declval<TInputProgress>(), std::declval<TOutputProgress>()));
-      }
-      else
-      {
-        return true;
-      }
+      return noexcept(std::declval<TEncoding>().SkipInputError(
+        std::declval<TResult>(), std::declval<TInputProgress>(), std::declval<TOutputProgress>()));
+    }
+    else
+    {
+      return true;
     }
   }
+}
 
+namespace Krys::Text
+{
   /// @brief Checks whether calling SkipInputError is an exceptionless operation.
-  /// @tparam TEncoding The encoding type.
-  /// @tparam TResult  The result type; a DecodeResult or EncodeResult -typed object.
-  /// @tparam TInputProgress A type representing the input progress type.
-  /// @tparam TOutputProgress  A type representing the output progress type.
   template <typename TEncoding, typename TResult, typename TInputProgress, typename TOutputProgress>
   concept NoThrowSkipInputError =
-    Impl::IsSkipInputErrorNoexcept<const TEncoding &, TResult, const TInputProgress &,
-                                   const TOutputProgress &>();
+    ::Krys::Text::detail::IsSkipInputErrorNoexcept<const TEncoding &, TResult, const TInputProgress &,
+                                                   const TOutputProgress &>();
 
   /// @brief Attempts to skip over an input error in the text.
   /// @param[in] result The current result state of the encode or decode operation.
@@ -50,15 +64,15 @@ namespace Krys
                                      const TOutputProgress &outputProgress) noexcept
   {
     // we can only advance one character at a time.
-    auto it = Krys::Ranges::begin(std::forward<TResult>(result).Input);
-    auto last = Krys::Ranges::end(result.Input);
+    auto it = ::Krys::Ranges::begin(std::forward<TResult>(result).Input);
+    auto last = ::Krys::Ranges::end(result.Input);
 
     using TInput = decltype(result.Input);
     using TUInput = remove_cvref_t<TInput>;
     using TOutput = decltype(result.Output);
     using TState = remove_ref_t<unwrap_t<remove_cvref_t<decltype(result.State)>>>;
-    using TReconstructedInput = Krys::Ranges::reconstruct_t<TUInput, decltype(it) &&, decltype(last) &&>;
-    using TResultType = conditional_t<Krys::IsSpecializationOf<TResult, DecodeResult>,
+    using TReconstructedInput = ::Krys::Ranges::reconstruct_t<TUInput, decltype(it) &&, decltype(last) &&>;
+    using TResultType = conditional_t<::Krys::IsSpecializationOf<TResult, DecodeResult>,
                                       DecodeResult<TReconstructedInput, TOutput, TState>,
                                       EncodeResult<TReconstructedInput, TOutput, TState>>;
     if (it != last)
@@ -66,20 +80,20 @@ namespace Krys
       // if there is already some items in the input progress (things irreversibly read), then
       // we are not obligated to do "at least" one skip; barrier it behind an empty check for
       // progress.
-      if (Krys::Ranges::empty(inputProgress) && Krys::Ranges::empty(outputProgress))
+      if (::Krys::Ranges::empty(inputProgress) && Krys::Ranges::empty(outputProgress))
       {
         ++it;
       }
       for (; it != last; ++it)
       {
         char32 ch32 = static_cast<char32>(*it);
-        if (ch32 < Impl::Unicode::LastUnicodeCodePoint && !Impl::Unicode::IsSurrogate(ch32))
+        if (ch32 < ::Krys::Text::Unicode::LastUnicodeCodePoint && !::Krys::Text::Unicode::IsSurrogate(ch32))
         {
           break;
         }
       }
     }
-    return TResult(Krys::Ranges::reconstruct(std::in_place_type<TUInput>, std::move(it), std::move(last)),
+    return TResult(::Krys::Ranges::reconstruct(std::in_place_type<TUInput>, std::move(it), std::move(last)),
                    std::move(result.Output), result.State, result.ErrorCode, result.ErrorCount);
   }
 
@@ -96,15 +110,15 @@ namespace Krys
                                                    const TOutputProgress &outputProgress) noexcept
   {
     // we can only advance one character at a time.
-    auto it = Krys::Ranges::begin(std::forward<TResult>(result).Input);
-    auto last = Krys::Ranges::end(result.Input);
+    auto it = ::Krys::Ranges::begin(std::forward<TResult>(result).Input);
+    auto last = ::Krys::Ranges::end(result.Input);
 
     using TInput = decltype(result.Input);
     using TUInput = remove_cvref_t<TInput>;
     using TOutput = decltype(result.Output);
     using TState = remove_ref_t<unwrap_t<remove_cvref_t<decltype(result.State)>>>;
-    using TReconstructedInput = Krys::Ranges::reconstruct_t<TUInput, decltype(it) &&, decltype(last) &&>;
-    using TResultType = conditional_t<Krys::IsSpecializationOf<remove_cvref_t<TResult>, DecodeResult>,
+    using TReconstructedInput = ::Krys::Ranges::reconstruct_t<TUInput, decltype(it) &&, decltype(last) &&>;
+    using TResultType = conditional_t<::Krys::IsSpecializationOf<remove_cvref_t<TResult>, DecodeResult>,
                                       DecodeResult<TReconstructedInput, TOutput, TState>,
                                       EncodeResult<TReconstructedInput, TOutput, TState>>;
 
@@ -113,19 +127,19 @@ namespace Krys
       // if there is already some items in the input progress (things irreversibly read), then
       // we are not obligated to do "at least" one skip; barrier it behind an empty check for
       // progress.
-      if (Krys::Ranges::empty(inputProgress) && Krys::Ranges::empty(outputProgress))
+      if (::Krys::Ranges::empty(inputProgress) && ::Krys::Ranges::empty(outputProgress))
       {
         ++it;
       }
       for (; it != last; ++it)
       {
-        if (static_cast<char32>(*it) < Impl::Unicode::LastUnicodeCodePoint)
+        if (static_cast<char32>(*it) < ::Krys::Text::Unicode::LastUnicodeCodePoint)
         {
           break;
         }
       }
     }
-    return TResult(Krys::Ranges::reconstruct(std::in_place_type<TUInput>, std::move(it), std::move(last)),
+    return TResult(::Krys::Ranges::reconstruct(std::in_place_type<TUInput>, std::move(it), std::move(last)),
                    std::move(result.Output), result.State, result.ErrorCode, result.ErrorCount);
   }
 
@@ -160,14 +174,14 @@ namespace Krys
     else
     {
       // we can only advance one input unit after a failure occurs...
-      auto it = Krys::Ranges::begin(std::forward<TResult>(result).Input);
-      auto last = Krys::Ranges::end(result.Input);
+      auto it = ::Krys::Ranges::begin(std::forward<TResult>(result).Input);
+      auto last = ::Krys::Ranges::end(result.Input);
       using TInput = decltype(result.Input);
       using TUInput = remove_cvref_t<TInput>;
       using TOutput = decltype(result.Output);
       using TState = remove_ref_t<unwrap_t<remove_cvref_t<decltype(result.State)>>>;
-      using TReconstructedInput = Krys::Ranges::reconstruct_t<TUInput, decltype(it) &&, decltype(last) &&>;
-      using TResultType = conditional_t<Krys::IsSpecializationOf<remove_cvref_t<TResult>, DecodeResult>,
+      using TReconstructedInput = ::Krys::Ranges::reconstruct_t<TUInput, decltype(it) &&, decltype(last) &&>;
+      using TResultType = conditional_t<::Krys::IsSpecializationOf<remove_cvref_t<TResult>, DecodeResult>,
                                         DecodeResult<TReconstructedInput, TOutput, TState>,
                                         EncodeResult<TReconstructedInput, TOutput, TState>>;
 
@@ -176,13 +190,13 @@ namespace Krys
         // if there is already some items in the input progress (things irreversibly read), then
         // we are not obligated to do "at least" one skip; barrier it behind an empty check before making
         // progress.
-        if (Krys::Ranges::empty(inputProgress) && Krys::Ranges::empty(outputProgress))
+        if (::Krys::Ranges::empty(inputProgress) && ::Krys::Ranges::empty(outputProgress))
         {
           ++it;
         }
       }
       return TResultType(
-        Krys::Ranges::reconstruct(std::in_place_type<TUInput>, std::move(it), std::move(last)),
+        ::Krys::Ranges::reconstruct(std::in_place_type<TUInput>, std::move(it), std::move(last)),
         std::move(result.Output), result.State, result.ErrorCode, result.ErrorCount);
     }
   }

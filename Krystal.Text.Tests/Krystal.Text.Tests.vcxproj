@@ -31,17 +31,20 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="catch_main.cpp" />
-    <ClCompile Include="tests\Decode.cpp" />
-    <ClCompile Include="tests\DecodeOne.cpp" />
-    <ClCompile Include="tests\Encode.cpp" />
-    <ClCompile Include="tests\EncodeOne.cpp" />
-    <ClCompile Include="tests\Old\Encodings\ASCII.cpp" />
-    <ClCompile Include="tests\Old\Encodings\ByteOrderMark.cpp" />
-    <ClCompile Include="tests\TranscodeOne.cpp" />
+    <ClCompile Include="tests\Count\CountAsDecoded.cpp" />
+    <ClCompile Include="tests\Count\CountAsEncoded.cpp" />
+    <ClCompile Include="tests\Count\CountAsTranscoded.cpp" />
+    <ClCompile Include="tests\Decode\Decode.cpp" />
+    <ClCompile Include="tests\Decode\DecodeOne.cpp" />
+    <ClCompile Include="tests\Encode\Encode.cpp" />
+    <ClCompile Include="tests\Encode\EncodeOne.cpp" />
+    <ClCompile Include="tests\ByteOrderMark.cpp" />
+    <ClCompile Include="tests\Transcode\Transcode.cpp" />
+    <ClCompile Include="tests\Transcode\TranscodeOne.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="tests\Old\Encodings\LineEndings.cpp" />
-    <ClCompile Include="tests\Old\Encodings\Unicode.cpp" />
+    <ClCompile Include="tests\LineEndings.cpp" />
+    <ClCompile Include="tests\Unicode.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.Text.Tests\BasicUnicodeStrings.hpp" />

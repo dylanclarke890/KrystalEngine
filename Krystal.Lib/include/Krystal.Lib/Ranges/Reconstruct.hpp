@@ -99,24 +99,20 @@ namespace Krys::Ranges
       if constexpr (SizedSentinelFor<TIterator, TSentinel>)
       {
         TSize ptrSize = static_cast<TSize>(sentinel - iterator);
-#if KRYS_CONFIG(STD_LIBRARY_DEBUG_ITERATORS)
         if (ptrSize == static_cast<TSize>(0))
         {
           const auto &emptyStr = EmptyString<T>();
           return std::basic_string_view<T, TTraits>(emptyStr + 0, 0);
         }
-#endif
         return std::basic_string_view<T, TTraits>(to_address(iterator), ptrSize);
+      }
+      else if (static_cast<TSize>(sentinel) == static_cast<TSize>(0))
+      {
+        const auto &emptyStr = EmptyString<T>();
+        return std::basic_string_view<T, TTraits>(emptyStr + 0, 0);
       }
       else
       {
-#if KRYS_CONFIG(STD_LIBRARY_DEBUG_ITERATORS)
-        if (static_cast<TSize>(sentinel) == static_cast<TSize>(0))
-        {
-          const auto &emptyStr = EmptyString<T>();
-          return std::basic_string_view<T, TTraits>(emptyStr + 0, 0);
-        }
-#endif
         return std::basic_string_view<T, TTraits>(to_address(iterator), static_cast<TSize>(sentinel));
       }
     }

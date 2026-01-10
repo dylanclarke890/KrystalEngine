@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Concepts.hpp"
-#include "Krystal.Lib/Core/Config.hpp"
 #include "Krystal.Lib/Ranges/ADL.hpp"
 #include "Krystal.Lib/Ranges/CountedIterator.hpp"
 #include "Krystal.Lib/Ranges/Iterator.hpp"
@@ -79,13 +78,8 @@ namespace Krys::Ranges
     };
   }
 
-#if KRYS_CONFIG(STD_LIBRARY_RANGES)
   template <typename TInIteratorOrRange, typename TOutIteratorOrRange>
   using InOutResult = std::ranges::in_out_result<TInIteratorOrRange, TOutIteratorOrRange>;
-#else
-  template <typename TInIteratorOrRange, typename TOutIteratorOrRange>
-  using InOutResult = Impl::InOutResult<TInIteratorOrRange, TOutIteratorOrRange>;
-#endif
 
   template <typename TInIteratorOrRange, typename TOutIteratorOrRange>
   using CurrentLastResult = Impl::CurrentLastResult<TInIteratorOrRange, TOutIteratorOrRange>;
@@ -95,41 +89,7 @@ namespace Krys::Ranges
     template <typename TIterator0, typename TIterator1>
     constexpr TIterator0 ReverseRange(TIterator0 first, TIterator1 last) noexcept
     {
-#if KRYS_CONFIG(STD_LIBRARY_CONSTEXPR_ALGORITHMS) && KRYS_CONFIG(STD_LIBRARY_RANGES)
       return std::ranges::reverse(std::move(first), std::move(last));
-#else
-      if (first == last)
-      {
-        return first;
-      }
-
-      --last;
-      if (first == last)
-      {
-        return first;
-      }
-
-      // we have to start bringing them closer
-      for (;;)
-      {
-        // we know these are different, so do a swap
-        iter_swap(first, last);
-
-        --last;
-        if (first == last)
-        {
-          break;
-        }
-
-        ++first;
-        if (first == last)
-        {
-          break;
-        }
-        // otherwise, keep going
-      }
-      return first;
-#endif
     }
 
     template <typename TFirst, typename, typename TOutFirst>
@@ -343,29 +303,8 @@ namespace Krys::Ranges
     template <typename TFirst0, typename TLast0, typename TFirst1, typename TLast1>
     constexpr bool LexicographicalCompare(TFirst0 first0, TLast0 last0, TFirst1 first1, TLast1 last1) noexcept
     {
-#if KRYS_CONFIG(STD_LIBRARY_CONSTEXPR_ALGORITHMS) && KRYS_CONFIG(STD_LIBRARY_RANGES)
       return std::ranges::lexicographical_compare(std::move(first0), std::move(last0), std::move(first1),
                                                   std::move(last1));
-#else
-  #if KRYS_CONFIG(STD_LIBRARY_CONSTEXPR_ALGORITHMS)
-      if constexpr (SameType<TFirst0, TLast0> && SameType<TFirst1, TLast1>)
-      {
-        return std::lexicographical_compare(std::move(first0), std::move(last0), std::move(first1),
-                                            std::move(last1));
-      }
-      else
-  #endif
-      {
-        for (; (first0 != last0) && (first1 != last1); ++first0, (void)++first1)
-        {
-          if (*first0 < *first1)
-            return true;
-          if (*first1 < *first0)
-            return false;
-        }
-        return (first0 == last0) && (first1 != last1);
-      }
-#endif
     }
 
   }
@@ -392,14 +331,6 @@ namespace Krys::Ranges
   constexpr CurrentLastResult<TIterator, TLast> find_if(TIterator first, TLast last,
                                                         TPredicate predicate) noexcept
   {
-#if KRYS_CONFIG(STD_LIBRARY_IS_CONSTANT_EVALUATED)
-    if (!std::is_constant_evaluated())
-#else
-    if (false)
-#endif
-    {
-      // TODO: constexpr-unfriendly implementation when possible
-    }
     for (; first != last; ++first)
     {
       if (predicate(*first))
@@ -415,11 +346,7 @@ namespace Krys::Ranges
                                                             TCompare compare) noexcept
   {
     using TDiff = iterator_difference_type_t<TIterator>;
-#if KRYS_CONFIG(STD_LIBRARY_IS_CONSTANT_EVALUATED)
     if (!std::is_constant_evaluated())
-#else
-    if (false)
-#endif
     {
       if constexpr (SameType<TIterator, TLast>)
       {
@@ -451,44 +378,14 @@ namespace Krys::Ranges
   template <typename TIteratorLast, typename T, typename TCompare>
   constexpr auto lower_bound(TIteratorLast &&it_last, T &&targetValue, TCompare compare) noexcept
   {
-#if KRYS_CONFIG(STD_LIBRARY_CONSTEXPR_ALGORITHMS) && KRYS_CONFIG(STD_LIBRARY_RANGES)
     return std::ranges::lower_bound(cbegin(std::forward<TIteratorLast>(it_last)), cend(it_last),
                                     std::forward<T>(targetValue), std::forward<TCompare>(compare));
-#else
-    return Krys::Ranges::lower_bound(cbegin(std::forward<TIteratorLast>(it_last)), cend(it_last),
-                                     std::forward<T>(targetValue), std::forward<TCompare>(compare));
-#endif
   }
 
   template <typename TIterator0, typename TSentinel0, typename TIterator1, typename TSentinel1>
   constexpr bool equal(TIterator0 first0, TSentinel0 last0, TIterator1 first1, TSentinel1 last1)
   {
-    // std lib does not take differing sentinels, which is kind of shitty tbh
-#if KRYS_CONFIG(STD_LIBRARY_CONSTEXPR_ALGORITHMS) && KRYS_CONFIG(STD_LIBRARY_RANGES)
     return std::ranges::equal(std::move(first0), std::move(last0), std::move(first1), std::move(last1));
-#else
-    if (first0 == last0)
-    {
-      if (first1 == last1)
-      {
-        return true;
-      }
-      return false;
-    }
-    for (; first0 != last0; (void)++first0, ++first1)
-    {
-      if (first1 == last1)
-      {
-        return false;
-      }
-      if (*first0 != *first1)
-      {
-        return false;
-      }
-    }
-
-    return first1 == last1;
-#endif
   }
 
   template <typename TIterator0, typename TSentinel0, typename TIterator1, typename TSentinel1,
@@ -496,60 +393,20 @@ namespace Krys::Ranges
   constexpr bool equal(TIterator0 first0, TSentinel0 last0, TIterator1 first1, TSentinel1 last1,
                        TPredicate &&predicate)
   {
-    // std lib does not take differing sentinels, which is kind of shitty tbh
-#if KRYS_CONFIG(STD_LIBRARY_CONSTEXPR_ALGORITHMS) && KRYS_CONFIG(STD_LIBRARY_RANGES)
     return std::ranges::equal(std::move(first0), std::move(last0), std::move(first1), std::move(last1),
                               std::forward<TPredicate>(predicate));
-#else
-    if (first0 == last0)
-    {
-      if (first1 == last1)
-      {
-        return true;
-      }
-      return false;
-    }
-    for (; first0 != last0; (void)++first0, ++first1)
-    {
-      if (first1 == last1)
-      {
-        return false;
-      }
-      if (!std::forward<TPredicate>(predicate)(*first0, *first1))
-      {
-        return false;
-      }
-    }
-
-    return first1 == last1;
-#endif
   }
 
   template <typename TFirstLast0, typename TFirstLast1>
   constexpr bool equal(TFirstLast0 &&first_last0, TFirstLast1 &&first_last1)
   {
-    // std lib does not take differing sentinels, which is kind of shitty tbh
-#if KRYS_CONFIG(STD_LIBRARY_CONSTEXPR_ALGORITHMS) && KRYS_CONFIG(STD_LIBRARY_RANGES)
     return std::ranges::equal(std::forward<TFirstLast0>(first_last0), std::forward<TFirstLast1>(first_last1));
-#else
-    return Krys::Ranges::equal(
-      Krys::Ranges::cbegin(std::forward<TFirstLast0>(first_last0)), Krys::Ranges::cend(first_last0),
-      Krys::Ranges::cbegin(std::forward<TFirstLast1>(first_last1)), Krys::Ranges::cend(first_last1));
-#endif
   }
 
   template <typename TFirstLast0, typename TFirstLast1, typename TPredicate>
   constexpr bool equal(TFirstLast0 &&first_last0, TFirstLast1 &&first_last1, TPredicate &&predicate)
   {
-    // std lib does not take differing sentinels, which is kind of shitty tbh
-#if KRYS_CONFIG(STD_LIBRARY_CONSTEXPR_ALGORITHMS) && KRYS_CONFIG(STD_LIBRARY_RANGES)
     return std::ranges::equal(std::forward<TFirstLast0>(first_last0), std::forward<TFirstLast1>(first_last1),
                               std::forward<TPredicate>(predicate));
-#else
-    return Krys::Ranges::equal(Krys::Ranges::cbegin(std::forward<TFirstLast0>(first_last0)),
-                               Krys::Ranges::cend(first_last0),
-                               Krys::Ranges::cbegin(std::forward<TFirstLast1>(first_last1)),
-                               Krys::Ranges::cend(first_last1), std::forward<TPredicate>(predicate));
-#endif
   }
 }

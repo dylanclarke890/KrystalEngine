@@ -6,7 +6,7 @@
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 #include "Krystal.Text/UnicodeScalarValue.hpp"
 
-namespace Krys
+namespace Krys::Text
 {
   template <typename T>
   concept IsUnicodeScalarValue = SameType<remove_cvref_t<T>, UnicodeScalarValue>;

@@ -3,11 +3,19 @@
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Utils/Uninit.hpp"
-#include "Krystal.Text/InlineContainers/Forward.hpp"
 #include <climits>
 #include <cstddef>
 
-namespace Krys::detail
+namespace Krys::Text
+{
+  template <typename, std::size_t>
+  class InlineBasicString;
+
+  template <typename, std::size_t>
+  class InlineVector;
+}
+
+namespace Krys::Text::detail
 {
   template <std::size_t Capacity>
   struct OptimalStorageType

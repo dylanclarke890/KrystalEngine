@@ -6,6 +6,7 @@
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Text/EncodingName.hpp"
+#include "Krystal.Text/Encodings/EncodingScheme.hpp"
 #include "Krystal.Text/IsUnicodeEncoding.hpp"
 
 #if KRYS_COMPILER(MSVC)
@@ -15,11 +16,11 @@
 
 namespace Krys::Tests
 {
-  inline constexpr Krys::TextEncodingId wide_encoding = Krys::Impl::ToNormalizedUnicodeEncodingId("UTF-8");
-
-  inline constexpr bool wide_is_utf32 = wide_encoding == Krys::TextEncodingId::utf32;
-  inline constexpr bool wide_is_utf16 = wide_encoding == Krys::TextEncodingId::utf16;
-  inline constexpr bool wide_is_utf8 = wide_encoding == Krys::TextEncodingId::utf8;
+  inline constexpr Krys::Text::EncodingId wide_encoding =
+    Krys::Text::Impl::ToNormalizedUnicodeEncodingId("UTF-8");
+  inline constexpr bool wide_is_utf32 = wide_encoding == Krys::Text::EncodingId::utf32;
+  inline constexpr bool wide_is_utf16 = wide_encoding == Krys::Text::EncodingId::utf16;
+  inline constexpr bool wide_is_utf8 = wide_encoding == Krys::Text::EncodingId::utf8;
 
   template <typename Container>
   inline Span<const byte> RangeToBytes(Container &c)
@@ -2030,6 +2031,8 @@ namespace Krys::Tests
 
 namespace Krys::Tests
 {
+  using namespace Krys::Text;
+
   template <typename TEncoding>
   constexpr auto BasicSourceCharacterSetFor()
   {

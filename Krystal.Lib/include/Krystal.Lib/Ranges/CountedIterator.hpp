@@ -1,16 +1,12 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Config.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Ranges/ADL.hpp"
 #include "Krystal.Lib/Ranges/DefaultSentinel.hpp"
 #include "Krystal.Lib/Ranges/Iterator.hpp"
 #include <iterator>
+#include <ranges>
 #include <utility>
-
-#if KRYS_CONFIG(STD_LIBRARY_RANGES)
-  #include <ranges>
-#endif
 
 namespace Krys::Ranges
 {
@@ -49,12 +45,7 @@ namespace Krys::Ranges
 
       template <typename TIterator2, std::enable_if_t<ConvertibleTo<TIterator2, iterator_type>> * = nullptr>
       constexpr CountedIterator(const CountedIterator<TIterator2> &from) noexcept(
-#if KRYS_CONFIG(STD_LIBRARY_IS_NOTHROW_CONVERTIBLE)
-        NoThrowConvertibleTo<const TIterator2 &, iterator_type>
-#else
-        noexcept(static_cast<iterator_type>(std::declval<const TIterator2 &>()))
-#endif
-        )
+        NoThrowConvertibleTo<const TIterator2 &, iterator_type>)
           : _count(from._count), _iterator(from._iterator)
       {
       }
@@ -62,12 +53,7 @@ namespace Krys::Ranges
       template <typename TIterator2>
       requires(ConvertibleTo<TIterator2, iterator_type>)
       constexpr CountedIterator(CountedIterator<TIterator2> &&from) noexcept(
-#if KRYS_CONFIG(STD_LIBRARY_IS_NOTHROW_CONVERTIBLE)
-        NoThrowConvertibleTo<TIterator2 &&, iterator_type>
-#else
-        noexcept(static_cast<iterator_type>(std::declval<TIterator2 &&>()))
-#endif
-        )
+        NoThrowConvertibleTo<TIterator2 &&, iterator_type>)
           : _count(std::move(from._count)), _iterator(std::move(from._iterator))
       {
       }
@@ -264,12 +250,7 @@ namespace Krys::Ranges
   /// @tparam TIterator The Iterator to wrap. The count is a `difference_type` that is associated with the
   /// Iterator. (The `difference_type` is usually a signed type such as the `ptrdiff_t` type.)
   template <typename TIterator>
-  using CountedIterator =
-#if KRYS_CONFIG(STD_LIBRARY_RANGES)
-    std::counted_iterator<TIterator>;
-#else
-    Impl::CountedIterator<TIterator>;
-#endif
+  using CountedIterator = std::counted_iterator<TIterator>;
 }
 
 namespace std

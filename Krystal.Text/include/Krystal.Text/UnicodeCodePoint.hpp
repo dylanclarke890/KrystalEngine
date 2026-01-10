@@ -3,15 +3,17 @@
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Ranges/Algorithm.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Text/Impl/Unicode.hpp"
 #include "Krystal.Text/TypeTraits.hpp"
+#include "Krystal.Text/Unicode.hpp"
 #include <cassert>
+#include <compare>
 #include <cstdint>
 #include <cuchar>
 #include <string>
 #include <utility>
 
-namespace Krys
+#if 0
+namespace Krys::Text
 {
   /// @brief A 32-bit value that is within the allowed 21 bits of Unicode. Can be one of the surrogate
   /// values.
@@ -25,7 +27,7 @@ namespace Krys
 
     constexpr UnicodeCodePoint(char32 codePoint) noexcept : _value(codePoint)
     {
-      bool isValid = Impl::Unicode::IsSurrogate(_value) || (_value <= Impl::Unicode::LastUnicodeCodePoint);
+      bool isValid = ::Krys::Text::Unicode::IsSurrogate(_value) || (_value <= ::Krys::Text::Unicode::LastUnicodeCodePoint);
       assert(isValid && "The code point value must be a valid code point.");
     }
 
@@ -53,39 +55,17 @@ namespace Krys
     {
       return std::move(this->_value);
     }
+
+    constexpr auto operator<=>(const UnicodeCodePoint &other) const noexcept = default;
   };
-
-  /// @brief Check if two unicode code points are equal.
-  /// @param[in] left Left hand value of equality operator.
-  /// @param[in] right Right hand value of equality operator.
-  constexpr bool operator==(const UnicodeCodePoint &left, const UnicodeCodePoint &right) noexcept
-  {
-    return left.value() == right.value();
-  }
-
-  /// @brief Check if two unicode code points are not equal.
-  /// @param[in] left Left hand value of inequality operator.
-  /// @param[in] right Right hand value of inequality operator.
-  constexpr bool operator!=(const UnicodeCodePoint &left, const UnicodeCodePoint &right) noexcept
-  {
-    return left.value() != right.value();
-  }
-
-  /// @brief Check if one unicode code point is less than the other.
-  /// @param[in] left Left hand value of less than operator.
-  /// @param[in] right Right hand value of less than operator.
-  constexpr bool operator<(const UnicodeCodePoint &left, const UnicodeCodePoint &right) noexcept
-  {
-    return left.value() < right.value();
-  }
 }
 
 namespace std
 {
   template <>
-  class char_traits<Krys::UnicodeCodePoint>
+  class char_traits<::Krys::UnicodeCodePoint>
   {
-    using char_type = Krys::UnicodeCodePoint;
+    using char_type = ::Krys::UnicodeCodePoint;
     using int_type = std::int_least32_t;
     using pos_type = std::streampos;
     using off_type = std::streamoff;
@@ -94,14 +74,14 @@ namespace std
     constexpr static char_type *copy(char_type *destination, const char_type *source,
                                      std::size_t count) noexcept
     {
-      (void)Krys::Ranges::Impl::CopyNUnsafe(source, count, destination);
+      (void)::Krys::Ranges::Impl::CopyNUnsafe(source, count, destination);
       return destination;
     }
 
     constexpr static char_type *move(char_type *destination, const char_type *source,
                                      std::size_t count) noexcept
     {
-      (void)Krys::Ranges::Impl::CopyNUnsafe(source, count, destination);
+      (void)::Krys::Ranges::Impl::CopyNUnsafe(source, count, destination);
       return destination;
     }
 
@@ -112,8 +92,8 @@ namespace std
       {
         return 0;
       }
-      return Krys::Ranges::Impl::LexicographicalCompareThreeWayBasic(left, left + count, right,
-                                                                     right + count);
+      return ::Krys::Ranges::Impl::LexicographicalCompareThreeWayBasic(left, left + count, right,
+                                                                       right + count);
     }
 
     KRYS_NODISCARD constexpr static size_t length(const char_type *it) noexcept
@@ -191,16 +171,9 @@ namespace std
     }
   };
 }
-
-namespace Krys
+#else
+namespace Krys::Text
 {
-  template <>
-  class is_character<Krys::UnicodeCodePoint> : public std::true_type
-  {
-  };
-
-  template <>
-  class is_char_traitable<Krys::UnicodeCodePoint> : public std::true_type
-  {
-  };
+  using UnicodeCodePoint = char32;
 }
+#endif

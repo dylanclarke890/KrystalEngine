@@ -4,7 +4,7 @@
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Ranges/Algorithm.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Text/Impl/Unicode.hpp"
+#include "Krystal.Text/Unicode.hpp"
 #include "Krystal.Text/TypeTraits.hpp"
 #include <cassert>
 #include <cstdint>
@@ -12,7 +12,7 @@
 #include <string>
 #include <utility>
 
-namespace Krys
+namespace Krys::Text
 {
   /// @brief A 32-bit value that is within the allowed 21 bits of Unicode and is not one of the Surrogate
   /// values.
@@ -27,8 +27,8 @@ namespace Krys
     /// @brief Constructs a scalar value with the given code point value.
     constexpr UnicodeScalarValue(char32 codePoint) noexcept : _scalar(codePoint)
     {
-      assert(!Impl::Unicode::IsSurrogate(this->_scalar)
-             && (this->_scalar <= Impl::Unicode::LastUnicodeCodePoint)
+      assert(!::Krys::Text::Unicode::IsSurrogate(this->_scalar)
+             && (this->_scalar <= ::Krys::Text::Unicode::LastUnicodeCodePoint)
              && "The code point value must be a valid code point and must not be a surrogate value.");
     }
 
@@ -86,29 +86,29 @@ namespace Krys
 namespace std
 {
   template <>
-  class char_traits<Krys::UnicodeScalarValue>
+  class char_traits<Krys::Text::UnicodeScalarValue>
   {
-    using char_type = Krys::UnicodeScalarValue;
+    using char_type = Krys::Text::UnicodeScalarValue;
     using int_type = std::int_least32_t;
     using pos_type = std::streampos;
     using off_type = std::streamoff;
     using state_type = mbstate_t;
 
-    static constexpr char_type *copy(char_type *destination, const char_type *source,
+    constexpr static char_type *copy(char_type *destination, const char_type *source,
                                      std::size_t count) noexcept
     {
       (void)Krys::Ranges::Impl::CopyNUnsafe(source, count, destination);
       return destination;
     }
 
-    static constexpr char_type *move(char_type *destination, const char_type *source,
+    constexpr static char_type *move(char_type *destination, const char_type *source,
                                      std::size_t count) noexcept
     {
       (void)Krys::Ranges::Impl::CopyNUnsafe(source, count, destination);
       return destination;
     }
 
-    KRYS_NODISCARD static constexpr int compare(const char_type *left, const char_type *right,
+    KRYS_NODISCARD constexpr static int compare(const char_type *left, const char_type *right,
                                                 std::size_t count) noexcept
     {
       if (count == 0)
@@ -119,7 +119,7 @@ namespace std
                                                                      right + count);
     }
 
-    KRYS_NODISCARD static constexpr size_t length(const char_type *it) noexcept
+    KRYS_NODISCARD constexpr static size_t length(const char_type *it) noexcept
     {
       size_t count = 0;
       const char_type nullValue {};
@@ -131,7 +131,7 @@ namespace std
       return count;
     }
 
-    KRYS_NODISCARD static constexpr const char_type *find(const char_type *it, size_t count,
+    KRYS_NODISCARD constexpr static const char_type *find(const char_type *it, size_t count,
                                                           const char_type &ch) noexcept
     {
       for (; 0 < count; --count, (void)++it)
@@ -144,7 +144,7 @@ namespace std
       return nullptr;
     }
 
-    static constexpr char_type *assign(char_type *first, size_t count, const char_type ch) noexcept
+    constexpr static char_type *assign(char_type *first, size_t count, const char_type ch) noexcept
     {
       for (char_type *it = first; count > 0; --count, (void)++it)
       {
@@ -153,57 +153,44 @@ namespace std
       return first;
     }
 
-    static constexpr void assign(char_type &left, const char_type &right) noexcept
+    constexpr static void assign(char_type &left, const char_type &right) noexcept
     {
       left = right;
     }
 
-    KRYS_NODISCARD static constexpr bool eq(const char_type &left, const char_type &right) noexcept
+    KRYS_NODISCARD constexpr static bool eq(const char_type &left, const char_type &right) noexcept
     {
       return left == right;
     }
 
-    KRYS_NODISCARD static constexpr bool lt(const char_type &left, const char_type &right) noexcept
+    KRYS_NODISCARD constexpr static bool lt(const char_type &left, const char_type &right) noexcept
     {
       return left < right;
     }
 
-    KRYS_NODISCARD static constexpr char_type to_char_type(const int_type &chAsInt) noexcept
+    KRYS_NODISCARD constexpr static char_type to_char_type(const int_type &chAsInt) noexcept
     {
       return char_type(static_cast<Krys::char32>(chAsInt));
     }
 
-    KRYS_NODISCARD static constexpr int_type to_int_type(const char_type &ch) noexcept
+    KRYS_NODISCARD constexpr static int_type to_int_type(const char_type &ch) noexcept
     {
       return static_cast<int_type>(ch.value());
     }
 
-    KRYS_NODISCARD static constexpr bool eq_int_type(const int_type &left, const int_type &right) noexcept
+    KRYS_NODISCARD constexpr static bool eq_int_type(const int_type &left, const int_type &right) noexcept
     {
       return left == right;
     }
 
-    KRYS_NODISCARD static constexpr int_type not_eof(const int_type &chAsInt) noexcept
+    KRYS_NODISCARD constexpr static int_type not_eof(const int_type &chAsInt) noexcept
     {
       return (chAsInt == eof()) ? int_type {} : chAsInt;
     }
 
-    KRYS_NODISCARD static constexpr int_type eof() noexcept
+    KRYS_NODISCARD constexpr static int_type eof() noexcept
     {
       return static_cast<int_type>(EOF);
     }
-  };
-}
-
-namespace Krys
-{
-  template <>
-  class is_character<UnicodeScalarValue> : public std::true_type
-  {
-  };
-
-  template <>
-  class is_char_traitable<UnicodeScalarValue> : public std::true_type
-  {
   };
 }

@@ -9,7 +9,9 @@
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Maths/Clamp.hpp"
 #include "Krystal.Maths/Transform.hpp"
-#include "Krystal.Text/Old/Unicode.hpp"
+#include "Krystal.Text/Decode/Decode.hpp"
+#include "Krystal.Text/Encodings/UTF8.hpp"
+#include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys::Gfx
 {
@@ -357,22 +359,21 @@ namespace Krys::Gfx::OpenGL
     Buffer &buffer = buffers.Get(_glyphBuffer);
     Maths::Vec2 cursor = position + Maths::Vec2 {0.f, font.Metrics().Ascender * scale};
 
-    List<Rune> codepoints;
-    Unicode::GetCodepoints(text, codepoints);
+    utf32_string result = Text::Decode(text, Text::utf8);
+    auto count = result.size();
 
-    auto count = codepoints.size();
     while (count > 0)
     {
       auto batchSize = Maths::Min(count, static_cast<size_t>(GlyphVertex::BatchSize));
-      Span<const Rune> batch(codepoints.data() + (codepoints.size() - count), batchSize);
+      utf32_stringview batch(result.data() + (result.size() - count), batchSize);
       count -= batchSize;
 
       _glyphVertices.clear();
       const auto &characters = font.Characters();
-      for (const Rune &c : batch)
+      for (const auto c : batch)
       {
         // Check for newline character
-        if (c.Value == '\n')
+        if (c == '\n')
         {
           cursor.x = position.x;
           cursor.y += font.Metrics().Height * scale;
@@ -383,7 +384,7 @@ namespace Krys::Gfx::OpenGL
         if (glyph == characters.end())
         {
           // TODO: this check is better than before but we should default to using a missing glyph character
-          KRYS_WARN("Font '{}' does not contain glyph for character '{}'", font.Family().Id, c.Value);
+          //KRYS_WARN("Font '{}' does not contain glyph for character '{}'", font.Family().Id, c);
           continue;
         }
 

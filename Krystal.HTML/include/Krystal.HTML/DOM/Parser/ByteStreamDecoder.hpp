@@ -3,7 +3,7 @@
 #include "Krystal.IO/Streams/Stream.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
-#include "Krystal.Text/Encodings/Encoding.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
 
 namespace Krys::HTML::DOM
 {
@@ -11,11 +11,9 @@ namespace Krys::HTML::DOM
   {
   private:
     IO::IStreamReader *_byteStream;
-    Encoding *_encoding;
 
   public:
-    ByteStreamDecoder(Encoding *encoding, IO::IStreamReader *byteStream) noexcept
-        : _encoding(encoding), _byteStream(byteStream)
+    ByteStreamDecoder(IO::IStreamReader *byteStream) noexcept : _byteStream(byteStream)
     {
     }
 
@@ -29,18 +27,7 @@ namespace Krys::HTML::DOM
       size_t charsRead = 0;
       while (charsRead < maxChars && !_byteStream->EndOfStream())
       {
-        // Read a chunk of bytes from the stream
-        Array<byte, 4u> buffer {};
-        size_t bytesRead = _byteStream->Read(buffer.data(), buffer.size());
-        if (bytesRead == 0)
-        {
-          break; // End of stream reached
-        }
-        // Decode the bytes into characters
-        Span<const byte> byteSpan(buffer.data(), bytesRead);
-        utf8_string decodedChars = _encoding->Decode(byteSpan);
-        result.append(decodedChars);
-        charsRead += decodedChars.size();
+
       }
       return result;
     }

@@ -639,7 +639,7 @@ namespace Krys::Ranges
 
     constexpr bool BaseIsEmpty() const noexcept
     {
-      if constexpr (Krys::Ranges::has_adl_empty<range_type>)
+      if constexpr (Krys::Ranges::HasEmptyADL<range_type>)
       {
         return Krys::Ranges::empty(this->TBaseStorage::GetValue());
       }

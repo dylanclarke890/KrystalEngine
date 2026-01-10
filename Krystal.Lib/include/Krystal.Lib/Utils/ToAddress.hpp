@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Concepts.hpp"
-#include "Krystal.Lib/Core/Config.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Detection/Compiler.hpp"
 #include "Krystal.Lib/Ranges/Impl/ContiguousIterator.hpp"
@@ -72,11 +71,10 @@ namespace Krys
                               && (Impl::HasStdPointerTraitsToAddress<T>
                                   || (!IsFunction<remove_ref_t<T>> && OperatorArrowable<remove_ref_t<T>>)));
 
-  namespace Impl
+  namespace detail
   {
     struct ToAddressFn
     {
-#if KRYS_CONFIG(STD_LIBRARY_TO_ADDRESS)
       template <typename T>
       constexpr auto operator()(T &&ptrLike) const
         noexcept(noexcept(std::to_address(std::forward<T>(ptrLike))))
@@ -84,48 +82,11 @@ namespace Krys
       {
         return std::to_address(std::forward<T>(ptrLike));
       }
-#else
-
-      /// @brief Identity: returns the pointer value that was passed in.
-      template <typename T>
-      constexpr T *operator()(T *ptr) const noexcept
-      {
-        static_assert(!IsFunction<T>, "the pointer shall not be function pointer type");
-        return ptr;
-      }
-
-      /// @brief Calls to_address if it's available, or falls back to other means for pointers and other
-      /// potentially-contiguous types.
-      template <typename TPointer>
-      requires(!IsPointer<TPointer>)
-      constexpr auto operator()(TPointer &p) const noexcept
-      {
-        if constexpr (Krys::Ranges::IsContiguousIterator<TPointer>)
-        {
-  #if KRYS_COMPILER_STL(MSVC)
-          return (*this)(p._Unwrapped());
-  #else
-          return (*this)(p.operator->());
-  #endif
-        }
-        else
-        {
-          if constexpr (Impl::HasStdPointerTraitsToAddress<TPointer>)
-          {
-            return std::pointer_traits<TPointer>::to_address(p);
-          }
-          else
-          {
-            return (*this)(p.operator->());
-          }
-        }
-      }
-#endif
     };
   }
 
   /// @brief Calls to_address if it's available, or falls back to other means for pointers and other
   /// potentially-contiguous types. This is an identity function for pointer types.
   /// @returns A pointer type representing the pointer or iterator passed in, if at all possible.
-  inline constexpr Impl::ToAddressFn to_address = {};
+  inline constexpr ::Krys::detail::ToAddressFn to_address = {};
 }

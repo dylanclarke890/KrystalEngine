@@ -18,31 +18,40 @@
     <ClCompile Include="catch_main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Old\Encodings\ASCII.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\Old\Encodings\Unicode.cpp">
+    <ClCompile Include="tests\Unicode.cpp">
       <Filter>Header Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Old\Encodings\LineEndings.cpp">
+    <ClCompile Include="tests\LineEndings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Old\Encodings\ByteOrderMark.cpp">
+    <ClCompile Include="tests\ByteOrderMark.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\DecodeOne.cpp">
+    <ClCompile Include="tests\Decode\DecodeOne.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\EncodeOne.cpp">
+    <ClCompile Include="tests\Encode\EncodeOne.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Decode.cpp">
+    <ClCompile Include="tests\Decode\Decode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Encode.cpp">
+    <ClCompile Include="tests\Encode\Encode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\TranscodeOne.cpp">
+    <ClCompile Include="tests\Transcode\TranscodeOne.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\Transcode\Transcode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\Count\CountAsDecoded.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\Count\CountAsEncoded.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\Count\CountAsTranscoded.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

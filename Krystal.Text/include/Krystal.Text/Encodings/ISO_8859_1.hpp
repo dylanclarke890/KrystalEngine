@@ -1,14 +1,14 @@
 ﻿#pragma once
 
-#include "Krystal.Text/DecodeResult.hpp"
-#include "Krystal.Text/EncodeResult.hpp"
-#include "Krystal.Text/Impl/ReplacementUnits.hpp"
-#include "Krystal.Text/IsIgnorableErrorHandler.hpp"
-#include "Krystal.Text/State.hpp"
 #include "Krystal.Lib/Ranges/ADL.hpp"
+#include "Krystal.Text/Concepts.hpp"
+#include "Krystal.Text/Decode/DecodeResult.hpp"
+#include "Krystal.Text/Encode/EncodeResult.hpp"
+#include "Krystal.Text/Unicode.hpp"
+#include "Krystal.Text/State.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 
-namespace Krys
+namespace Krys::Text
 {
   /// @brief The ISO/IEC 8859-1 encoding, occasionally referred to as Latin-1 (erroneously). Matches
   /// Unicode's encoding of the first 256 bytes one-to-one.
@@ -42,22 +42,22 @@ namespace Krys
     using is_encode_injective = std::false_type;
 
     /// @brief The maximum code units a single complete operation of encoding can produce.
-    inline static constexpr const std::size_t MaxCodeUnits = 1;
+    constexpr inline static const std::size_t MaxCodeUnits = 1;
 
     /// @brief The maximum number of code points a single complete operation of decoding can produce.
-    inline static constexpr const std::size_t MaxCodePoints = 1;
+    constexpr inline static const std::size_t MaxCodePoints = 1;
 
     /// @brief A range of code units representing the values to use when a replacement happen. For ISO/IEC
     /// 8859-1, this must be '?' instead of the usual Unicode Replacement Character U'�'.
-    static constexpr Span<const code_unit, 1> ReplacementCodeUnits() noexcept
+    constexpr static Span<const code_unit, 1> ReplacementCodeUnits() noexcept
     {
-      return Impl::QuestionMarkReplacementUnits<code_unit>;
+      return ::Krys::Text::Unicode::ASCIIReplacement<code_unit>;
     }
 
     /// @brief Decodes a single complete unit of information as code points and produces a result with the
     /// input and output ranges moved past what was successfully read and written; or, produces an error and
     /// returns the input and output ranges untouched.
-    /// @param[in] input The input view to read code uunits from.
+    /// @param[in] input The input view to read code units from.
     /// @param[in] output The output view to write code points into.
     /// @param[in] errorHandler The error handler to invoke if encoding fails.
     /// @param[in, out] s The necessary state information. For this encoding, the state is empty and means
@@ -68,8 +68,7 @@ namespace Krys
     /// the input models at least a view and a forward_range). If it is not possible, returned ranges may be
     /// incremented even if an error occurs due to the semantics of any view that models an input_range.
     template <typename TInput, typename TOutput, typename TErrorHandler>
-    static constexpr auto DecodeOne(TInput &&input, TOutput &&output, TErrorHandler &&errorHandler,
-                                    state &s)
+    constexpr static auto DecodeOne(TInput &&input, TOutput &&output, TErrorHandler &&errorHandler, state &s)
     {
       using TUErrorHandler = remove_cvref_t<TErrorHandler>;
       using TSubInput = Krys::Ranges::csubrange_for_t<remove_ref_t<TInput>>;
@@ -150,8 +149,7 @@ namespace Krys
     /// the input models at least a view and a forward_range). If it is not possible, returned ranges may be
     /// incremented even if an error occurs due to the semantics of any view that models an input_range.
     template <typename TInput, typename TOutput, typename TErrorHandler>
-    static constexpr auto EncodeOne(TInput &&input, TOutput &&output, TErrorHandler &&errorHandler,
-                                    state &s)
+    constexpr static auto EncodeOne(TInput &&input, TOutput &&output, TErrorHandler &&errorHandler, state &s)
     {
       using TUErrorHandler = remove_cvref_t<TErrorHandler>;
       using TSubInput = Krys::Ranges::csubrange_for_t<remove_ref_t<TInput>>;

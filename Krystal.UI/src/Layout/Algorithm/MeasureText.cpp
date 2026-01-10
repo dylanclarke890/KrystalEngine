@@ -35,7 +35,7 @@ namespace Krys::UI
         continue;
       }
 
-      const auto &ch = characters.at(Rune(c));
+      const auto &ch = characters.at(Text::UnicodeCodePoint(c));
 
       // Wrap if constrained and over width
       if (widthMode != MeasureMode::Undefined && currentLineWidth + ch.Advance > width)

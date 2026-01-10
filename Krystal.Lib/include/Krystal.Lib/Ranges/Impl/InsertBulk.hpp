@@ -9,11 +9,11 @@ namespace Krys::Ranges::Impl
   template <typename TOutputContainer, typename TInsertion>
   constexpr void ContainerInsertBulk(TOutputContainer &output, TInsertion &&insertion) noexcept
   {
-    using TIterator = Ranges::range_iterator_t<remove_cvref_t<TInsertion>>;
+    using TIterator = ::Krys::Ranges::range_iterator_t<remove_cvref_t<TInsertion>>;
     if constexpr (has_insert_bulk<TOutputContainer, TIterator, TIterator>)
     {
       // inserting in bulk can be faster, more performant, save us some coding too
-      output.insert(output.cend(), Krys::Ranges::cbegin(insertion), Krys::Ranges::cend(insertion));
+      output.insert(output.cend(), ::Krys::Ranges::cbegin(insertion), ::Krys::Ranges::cend(insertion));
     }
     else
     {

@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include "Krystal.Text/Encodings/EncodingTables/IBM866Cyrillic.tables.hpp"
-#include "Krystal.Text/Impl/SingleASCIIByteHighBitLookupEncoding.hpp"
+#include "Krystal.Text/Encodings/Impl/SingleASCIIByteHighBitLookupEncoding.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 
-namespace Krys
+namespace Krys::Text
 {
   /// @brief The Cyrillic encoding that matches IBM's Codepage 866.
   ///
@@ -12,7 +12,7 @@ namespace Krys
   /// @tparam TCodePoint The code point type to use when outputting decoded units.
   template <typename TCodeUnit = char, typename TCodePoint = UnicodeCodePoint>
   class basic_ibm_866_cyrillic
-      : public Impl::SingleASCIIByteHighBitLookupEncoding<
+      : public ::Krys::Text::Impl::SingleASCIIByteHighBitLookupEncoding<
           basic_ibm_866_cyrillic<TCodeUnit, TCodePoint>,
           &::Krys::Text::EncodingTable::ibm_866_cyrillic_index_to_code_point,
           &::Krys::Text::EncodingTable::ibm_866_cyrillic_code_point_to_index, TCodeUnit, TCodePoint>

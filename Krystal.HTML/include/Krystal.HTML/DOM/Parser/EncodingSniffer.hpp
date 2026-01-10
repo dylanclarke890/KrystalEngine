@@ -22,8 +22,8 @@ namespace Krys::HTML::DOM
     EncodingSniffer() = delete;
     ~EncodingSniffer() = delete;
 
-    KRYS_NODISCARD static const Encoding *Detect(Span<const byte> bytes,
-                                                 const EncodingRegistry &encodingRegistry,
+    KRYS_NODISCARD static const Text::Encoding *Detect(Span<const byte> bytes,
+                                                       const Text::EncodingRegistry &encodingRegistry,
                                                  const utf8_string &transportEncoding,
                                                  const utf8_string &fallbackEncoding) noexcept
     {
@@ -55,15 +55,15 @@ namespace Krys::HTML::DOM
       utf8_string Value;
     };
 
-    KRYS_NODISCARD static const Encoding *GetBOMEncoding(Span<const byte> bytes,
-                                                         const EncodingRegistry &encodingRegistry) noexcept
+    KRYS_NODISCARD static const Text::Encoding *
+      GetBOMEncoding(Span<const byte> bytes, const Text::EncodingRegistry &encodingRegistry) noexcept
     {
-      auto bom = ByteOrderMarkScanner::Detect(bytes);
+      auto bom = Text::ByteOrderMarkScanner::Detect(bytes);
       switch (bom)
       {
-        case ByteOrderMark::UTF8:    return encodingRegistry.GetByLabel(u8"utf-8");
-        case ByteOrderMark::UTF16BE: return encodingRegistry.GetByLabel(u8"utf-16be");
-        case ByteOrderMark::UTF16LE: return encodingRegistry.GetByLabel(u8"utf-16le");
+        case Text::ByteOrderMark::UTF8: return encodingRegistry.GetByLabel(u8"utf-8");
+        case Text::ByteOrderMark::UTF16BE: return encodingRegistry.GetByLabel(u8"utf-16be");
+        case Text::ByteOrderMark::UTF16LE: return encodingRegistry.GetByLabel(u8"utf-16le");
       }
 
       return nullptr;
@@ -86,14 +86,15 @@ namespace Krys::HTML::DOM
     KRYS_NODISCARD static bool IsMetaTagStart(Span<const byte> bytes, size_t i) noexcept
     {
       // case-insensitive "meta" + space or /
-      return bytes[i + 0] == byte {'<'} && ASCII::ToLower(bytes[i + 1]) == byte {'m'}
-             && ASCII::ToLower(bytes[i + 2]) == byte {'e'} && ASCII::ToLower(bytes[i + 3]) == byte {'t'}
-             && ASCII::ToLower(bytes[i + 4]) == byte {'a'}
-             && (ASCII::IsWhiteSpace(bytes[i + 5]) || bytes[i + 5] == byte {'/'});
+      return bytes[i + 0] == byte {'<'} && Text::ASCII::ToLower(bytes[i + 1]) == byte {'m'}
+             && Text::ASCII::ToLower(bytes[i + 2]) == byte {'e'}
+             && Text::ASCII::ToLower(bytes[i + 3]) == byte {'t'}
+             && Text::ASCII::ToLower(bytes[i + 4]) == byte {'a'}
+             && (Text::ASCII::IsWhiteSpace(bytes[i + 5]) || bytes[i + 5] == byte {'/'});
     }
 
-    KRYS_NODISCARD static const Encoding *
-      PrescanMetaCharset(Span<const byte> bytes, const EncodingRegistry &encodingRegistry) noexcept
+    KRYS_NODISCARD static const Text::Encoding *
+      PrescanMetaCharset(Span<const byte> bytes, const Text::EncodingRegistry &encodingRegistry) noexcept
     {
       for (size_t i = 0; i < bytes.size(); i++)
       {
@@ -177,11 +178,11 @@ namespace Krys::HTML::DOM
         // We're reading some other element that's not a meta tag, skip it.
         if (bytes[i] == byte {'<'})
         {
-          if (ASCII::IsAlpha(bytes[i + 1]))
+          if (Text::ASCII::IsAlpha(bytes[i + 1]))
           {
             for (i += 2; i < bytes.size(); i++)
             {
-              if (ASCII::IsWhiteSpace(bytes[i]) || bytes[i] == byte {'>'})
+              if (Text::ASCII::IsWhiteSpace(bytes[i]) || bytes[i] == byte {'>'})
               {
                 break;
               }
@@ -213,7 +214,7 @@ namespace Krys::HTML::DOM
       utf8_string name;
       utf8_string value;
 
-      for (; i < bytes.size() && !ASCII::IsAlpha(bytes[i]); i++)
+      for (; i < bytes.size() && !Text::ASCII::IsAlpha(bytes[i]); i++)
       {
         // Tag closed before we saw name
         if (bytes[i] == byte {'>'})
@@ -231,11 +232,11 @@ namespace Krys::HTML::DOM
       // build up the name
       do
       {
-        name += static_cast<char8>(ASCII::ToLower(bytes[i]));
+        name += static_cast<char8>(Text::ASCII::ToLower(bytes[i]));
         i++;
-      } while (i < bytes.size() && ASCII::IsAlpha(bytes[i]));
+      } while (i < bytes.size() && Text::ASCII::IsAlpha(bytes[i]));
 
-      ASCII::SkipWhiteSpace(bytes, i);
+      Text::ASCII::SkipWhiteSpace(bytes, i);
       if (i >= bytes.size())
       {
         return {name, value};
@@ -248,19 +249,19 @@ namespace Krys::HTML::DOM
       }
       i++;
 
-      ASCII::SkipWhiteSpace(bytes, i);
+      Text::ASCII::SkipWhiteSpace(bytes, i);
       if (i >= bytes.size() || bytes[i] == byte {'>'})
       {
         return {name, value};
       }
 
-      if (ASCII::IsQuote(bytes[i]))
+      if (Text::ASCII::IsQuote(bytes[i]))
       {
         byte closeQuote = bytes[i];
 
-        for (i++; i < bytes.size() && (ASCII::IsAlphaNumeric(bytes[i]) || bytes[i] == byte {'-'}); i++)
+        for (i++; i < bytes.size() && (Text::ASCII::IsAlphaNumeric(bytes[i]) || bytes[i] == byte {'-'}); i++)
         {
-          value += static_cast<char8>(ASCII::ToLower(bytes[i]));
+          value += static_cast<char8>(Text::ASCII::ToLower(bytes[i]));
         }
 
         if (i < bytes.size() && bytes[i] == closeQuote)
@@ -273,14 +274,14 @@ namespace Krys::HTML::DOM
 
       for (; i < bytes.size(); i++)
       {
-        if (ASCII::IsWhiteSpace(bytes[i]) || bytes[i] == byte {'>'})
+        if (Text::ASCII::IsWhiteSpace(bytes[i]) || bytes[i] == byte {'>'})
         {
           return {name, value};
         }
 
-        if (ASCII::IsAlpha(bytes[i]))
+        if (Text::ASCII::IsAlpha(bytes[i]))
         {
-          value += static_cast<char8>(ASCII::ToLower(bytes[i]));
+          value += static_cast<char8>(Text::ASCII::ToLower(bytes[i]));
         }
       }
 
@@ -288,9 +289,10 @@ namespace Krys::HTML::DOM
     }
 
     KRYS_NODISCARD static utf8_string
-      ExtractCharacterEncodingFromMeta(const utf8_string &meta, const EncodingRegistry &encodingRegistry)
+      ExtractCharacterEncodingFromMeta(const utf8_string &meta,
+                                       const Text::EncodingRegistry &encodingRegistry)
     {
-      utf8_string data = ASCII::ToLower(meta);
+      utf8_string data = Text::ASCII::ToLower(meta);
       const utf8_string charset = u8"charset";
 
       size_t position = 0uz;
@@ -303,7 +305,7 @@ namespace Krys::HTML::DOM
         }
 
         position += indexOfCharset + charset.size();
-        ASCII::SkipWhiteSpace(data, position);
+        Text::ASCII::SkipWhiteSpace(data, position);
 
         if (data[position] != '=')
         {
@@ -312,7 +314,7 @@ namespace Krys::HTML::DOM
         }
 
         position++;
-        ASCII::SkipWhiteSpace(data, position);
+        Text::ASCII::SkipWhiteSpace(data, position);
         break;
       }
 
