@@ -139,7 +139,6 @@
     <ClInclude Include="include\Krystal.Lib\Core\Attributes.hpp" />
     <ClInclude Include="include\Krystal.Lib\InlineContainers\Forward.hpp" />
     <ClInclude Include="include\Krystal.Lib\Mixins\NonCopyable.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Detection\ByteOrder.hpp" />
     <ClInclude Include="include\Krystal.Lib\Detection\Compiler.hpp" />
     <ClInclude Include="include\Krystal.Lib\Detection\CPU.hpp" />
     <ClInclude Include="include\Krystal.Lib\Detection\OS.hpp" />

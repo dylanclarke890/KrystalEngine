@@ -165,9 +165,6 @@
     <ClInclude Include="include\Krystal.Lib\Detection\OS.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Detection\ByteOrder.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Detection\Sanitizers.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
