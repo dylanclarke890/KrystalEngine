@@ -4,7 +4,6 @@
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Text/TypeTraits.hpp"
 #include "Krystal.Text/EncodingId.hpp"
-
 #include <string_view>
 
 namespace Krys::Text
@@ -73,37 +72,11 @@ namespace Krys::Text
     {
       if (c0 <= 'Z' && c0 >= 'A')
       {
-        // A is equivalent to a, etc. etc.
-        // ASCII character, make sure lowercase
-        // add to 5th bit (0-Based) to get lowercase
+        // A is equivalent to a, etc. etc. 
+        // ASCII character, make sure lowercase - add to 5th bit (0-Based)
         c0 &= static_cast<char8>(0x20);
       }
       return c0;
-    }
-
-    template <typename _Target>
-    void InplaceIdNormalize(_Target &target)
-    {
-      size_t targetSize = target.size();
-      for (size_t i = 0; i < targetSize;)
-      {
-        char8 c0 = target[i];
-        bool isASCII = ((c0 & 0x7F) == 0);
-        if (isASCII)
-        {
-          if (c0 == '-' || c0 == '_' || c0 == ' ' || c0 == '\r' || c0 == '\n' || c0 == '\t')
-          {
-            // skip dash, underscore, related whitespace
-            target.erase(target.begin() + i);
-            continue;
-          }
-          target[i] = NormalizeASCIILetter(c0);
-          ++i;
-          continue;
-        }
-
-        i += 1;
-      }
     }
   }
 

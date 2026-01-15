@@ -512,5 +512,8 @@
     <ClInclude Include="include\Krystal.Text\Concepts.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Text\Codec.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

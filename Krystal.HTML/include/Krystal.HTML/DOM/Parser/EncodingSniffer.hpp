@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/DOM/Parser/ParserUtils.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/String/String.hpp"
@@ -10,10 +9,9 @@
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Set.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
-#include "Krystal.Text/Old/ASCII.hpp"
-#include "Krystal.Text/Old/Encodings/ByteOrderMark.hpp"
-#include "Krystal.Text/Old/Encodings/EncodingRegistry.hpp"
-#include "Krystal.Text/Old/Unicode.hpp"
+#include "Krystal.Text/ByteOrderMark.hpp"
+#include "Krystal.Text/EncodingId.hpp"
+#include "Krystal.Text/Unicode.hpp"
 
 namespace Krys::HTML::DOM
 {
@@ -22,7 +20,7 @@ namespace Krys::HTML::DOM
     EncodingSniffer() = delete;
     ~EncodingSniffer() = delete;
 
-    KRYS_NODISCARD static const Text::Encoding *Detect(Span<const byte> bytes,
+    KRYS_NODISCARD static const Text::EncodingId Detect(Span<const byte> bytes,
                                                        const Text::EncodingRegistry &encodingRegistry,
                                                  const utf8_string &transportEncoding,
                                                  const utf8_string &fallbackEncoding) noexcept

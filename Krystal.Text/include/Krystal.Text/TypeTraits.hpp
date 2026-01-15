@@ -5,6 +5,7 @@
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Ranges/Algorithm.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/String/String.hpp"
 
 namespace Krys::Text::detail_traits
 {
@@ -149,6 +150,9 @@ namespace Krys::Text
 
   template <typename T>
   concept IsCharTraitable = ::Krys::Text::detail_traits::is_char_traitable<T>::value;
+
+  template <typename T>
+  constexpr inline List<stringview> EncodingAliases = {};
 }
 
 namespace std

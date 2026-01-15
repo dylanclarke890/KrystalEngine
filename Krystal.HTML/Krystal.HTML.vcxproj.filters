@@ -21,19 +21,13 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Parser\EncodingSniffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\DOM\Parser\ParserUtils.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\Parser\InsertionMode.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\DOM\Parser\Tokenizer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\Parser\TokenizerState.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\DOM\Parser\ByteStreamDecoder.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Loader\ByteStreamDecoder.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

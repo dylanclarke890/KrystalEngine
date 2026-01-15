@@ -147,6 +147,7 @@
     <ClCompile Include="src\Encodings\detail\Windows.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.Text\Codec.hpp" />
     <ClInclude Include="include\Krystal.Text\Concepts.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\BasicEncodingScheme.hpp" />
     <ClInclude Include="include\Krystal.Text\Count\CountAsDecoded.hpp" />
