@@ -18,7 +18,7 @@
     <Text Include="include\Krystal.HTML\DOM\Parser\HTMLEntityNames.in" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.HTML\DOM\Parser\EncodingSniffer.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Loader\EncodingSniffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\Parser\InsertionMode.hpp">

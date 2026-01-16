@@ -16,9 +16,9 @@ namespace Krys
     /// @brief Represents the endianness of a system or value.
     enum Type : uint8
     {
-      Little = 0,
-      Big = 1,
-      System = 2
+      Little = std::endian::little,
+      Big = std::endian::big,
+      System = std::endian::native
     };
 
     /// @brief Checks if the system is big endian.

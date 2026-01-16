@@ -30,7 +30,8 @@ namespace Krys::Text::detail
   template <typename TEncoding, typename TResult, typename TInputProgress, typename TOutputProgress>
   consteval bool IsSkipInputErrorNoexcept() noexcept
   {
-    if (HasSkipInputError<TEncoding, TResult, TInputProgress, TOutputProgress>)
+    if constexpr (HasSkipInputError<const TEncoding &, TResult, const TInputProgress &,
+                                    const TOutputProgress &>)
     {
       return noexcept(std::declval<TEncoding>().SkipInputError(
         std::declval<TResult>(), std::declval<TInputProgress>(), std::declval<TOutputProgress>()));
@@ -80,7 +81,7 @@ namespace Krys::Text
       // if there is already some items in the input progress (things irreversibly read), then
       // we are not obligated to do "at least" one skip; barrier it behind an empty check for
       // progress.
-      if (::Krys::Ranges::empty(inputProgress) && Krys::Ranges::empty(outputProgress))
+      if (::Krys::Ranges::empty(inputProgress) && ::Krys::Ranges::empty(outputProgress))
       {
         ++it;
       }
@@ -173,31 +174,22 @@ namespace Krys::Text
     }
     else
     {
-      // we can only advance one input unit after a failure occurs...
-      auto it = ::Krys::Ranges::begin(std::forward<TResult>(result).Input);
-      auto last = ::Krys::Ranges::end(result.Input);
-      using TInput = decltype(result.Input);
-      using TUInput = remove_cvref_t<TInput>;
-      using TOutput = decltype(result.Output);
-      using TState = remove_ref_t<unwrap_t<remove_cvref_t<decltype(result.State)>>>;
-      using TReconstructedInput = ::Krys::Ranges::reconstruct_t<TUInput, decltype(it) &&, decltype(last) &&>;
-      using TResultType = conditional_t<::Krys::IsSpecializationOf<remove_cvref_t<TResult>, DecodeResult>,
-                                        DecodeResult<TReconstructedInput, TOutput, TState>,
-                                        EncodeResult<TReconstructedInput, TOutput, TState>>;
+      auto input = std::forward<TResult>(result).Input;
+      auto it = ::Krys::Ranges::begin(input);
+      auto last = ::Krys::Ranges::end(input);
 
       if (it != last)
       {
-        // if there is already some items in the input progress (things irreversibly read), then
-        // we are not obligated to do "at least" one skip; barrier it behind an empty check before making
-        // progress.
         if (::Krys::Ranges::empty(inputProgress) && ::Krys::Ranges::empty(outputProgress))
         {
           ++it;
         }
       }
-      return TResultType(
-        ::Krys::Ranges::reconstruct(std::in_place_type<TUInput>, std::move(it), std::move(last)),
-        std::move(result.Output), result.State, result.ErrorCode, result.ErrorCount);
+
+      result.Input = ::Krys::Ranges::reconstruct(std::in_place_type<remove_cvref_t<decltype(result.Input)>>,
+                                                 std::move(it), std::move(last));
+
+      return std::forward<TResult>(result);
     }
   }
 }

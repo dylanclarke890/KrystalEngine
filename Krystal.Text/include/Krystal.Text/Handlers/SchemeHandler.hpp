@@ -22,7 +22,7 @@ namespace Krys::Text::Handlers
     {
       if constexpr (ConvertibleTo<::Krys::Ranges::range_value_type_t<TInputProgress>, TByte>)
       {
-        if constexpr (Callable<TErrorHandler &, const TEncoding, DecodeResult<TInput, TOutput, TState>,
+        if constexpr (Callable<TErrorHandler &, const TEncoding &, DecodeResult<TInput, TOutput, TState>,
                                const TInputProgress &, const TOutputProgress &>)
         {
           return NoThrowInvocable<TErrorHandler &, const TEncoding &, DecodeResult<TInput, TOutput, TState>,
@@ -47,7 +47,7 @@ namespace Krys::Text::Handlers
     {
       if constexpr (ConvertibleTo<::Krys::Ranges::range_value_type_t<TOutputProgress>, TByte>)
       {
-        if constexpr (Callable<TErrorHandler &, const TEncoding, EncodeResult<TInput, TOutput, TState>,
+        if constexpr (Callable<TErrorHandler &, const TEncoding &, EncodeResult<TInput, TOutput, TState>,
                                const TInputProgress &, const TOutputProgress &>)
         {
           return NoThrowInvocable<TErrorHandler &, const TEncoding &, EncodeResult<TInput, TOutput, TState>,
@@ -115,7 +115,7 @@ namespace Krys::Text::Handlers
     {
       if constexpr (ConvertibleTo<::Krys::Ranges::range_value_type_t<TInputProgress>, TByte>)
       {
-        if constexpr (Callable<TErrorHandler &, const TEncoding, DecodeResult<TInput, TOutput, TState>,
+        if constexpr (Callable<TErrorHandler &, const TEncoding &, DecodeResult<TInput, TOutput, TState>,
                                const TInputProgress &, const TOutputProgress &>)
         {
           return this->_handler.get()(encoding, std::move(result), inputProgress, outputProgress);
@@ -141,7 +141,7 @@ namespace Krys::Text::Handlers
     {
       if constexpr (ConvertibleTo<::Krys::Ranges::range_value_type_t<TInputProgress>, TByte>)
       {
-        if constexpr (Callable<TErrorHandler &, const TEncoding, EncodeResult<TInput, TOutput, TState>,
+        if constexpr (Callable<TErrorHandler &, const TEncoding &, EncodeResult<TInput, TOutput, TState>,
                                const TInputProgress &, const TOutputProgress &>)
         {
           return this->_handler.get()(encoding, std::move(result), inputProgress, outputProgress);

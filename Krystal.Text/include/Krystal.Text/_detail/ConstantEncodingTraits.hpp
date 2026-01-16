@@ -121,6 +121,6 @@ namespace Krys::Text::detail
   class IsUnicodeEncodingES<TSuper, TEncoding, enable_if_t<HasIsUnicodeEncoding<TEncoding>>>
   {
   public:
-    using IsUnicodeEncoding = IntegralConstant<bool, UnicodeEncoding<TEncoding>>;
+    using is_unicode_encoding = IntegralConstant<bool, UnicodeEncoding<TEncoding>>;
   };
 }

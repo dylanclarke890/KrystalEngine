@@ -3,6 +3,7 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Hash.hpp"
 #include "Krystal.Lib/Detection/Environment.hpp"
+#include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Text/ASCII.hpp"
 #include <compare>
@@ -58,6 +59,11 @@ namespace Krys::Text
     KRYS_NODISCARD constexpr Span<const char> SpanWithNullTerminator() const noexcept
     {
       return _characters;
+    }
+
+    KRYS_NODISCARD constexpr stringview ToStringView() const noexcept
+    {
+      return stringview(Characters(), Length());
     }
 
     KRYS_NODISCARD constexpr size_t IsEmpty() const

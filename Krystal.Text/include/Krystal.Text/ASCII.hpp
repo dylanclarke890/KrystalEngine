@@ -30,24 +30,27 @@ namespace Krys::Text
     0xffu};
 
   template <typename T>
-  concept ASCIIChar = NoThrowConvertibleTo<remove_cv_t<T>, char>;
+  concept ASCIIChar = ConvertibleTo<remove_cv_t<T>, char> || SameType<T, byte>;
 
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr bool IsASCII(TChar character) noexcept
   {
-    return !(character & ~0x7F);
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    return !(ch & ~0x7F);
   }
 
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr bool IsASCIILower(TChar character) noexcept
   {
-    return character >= 'a' && character <= 'z';
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    return ch >= 'a' && ch <= 'z';
   }
 
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr bool IsASCIIUpper(TChar character) noexcept
   {
-    return character >= 'A' && character <= 'Z';
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    return ch >= 'A' && ch <= 'Z';
   }
 
   // Can be used for comparing any input character to a lowercase English character. The
@@ -56,13 +59,15 @@ namespace Krys::Text
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr TChar ToASCIILowerUnchecked(TChar character) noexcept
   {
-    return character | 0x20;
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    return static_cast<TChar>(ch | 0x20);
   }
 
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr TChar ToASCIILower(TChar character) noexcept
   {
-    return character | (IsASCIIUpper(character) << 5);
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    return static_cast<TChar>(ch | (IsASCIIUpper(ch) << 5));
   }
 
   template <>
@@ -74,89 +79,105 @@ namespace Krys::Text
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr TChar ToASCIIUpper(TChar character) noexcept
   {
-    return character & ~(IsASCIILower(character) << 5);
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    return static_cast<TChar>(ch & ~(IsASCIILower(ch) << 5));
   }
 
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr bool IsASCIIAlpha(TChar character) noexcept
   {
-    return IsASCIILower(ToASCIILowerUnchecked(character));
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    return IsASCIILower(ToASCIILowerUnchecked(ch));
   }
 
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr bool IsASCIIDigit(TChar character) noexcept
   {
-    return character >= '0' && character <= '9';
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    return ch >= '0' && ch <= '9';
   }
 
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr bool IsASCIIAlphanumeric(TChar character) noexcept
   {
-    return IsASCIIDigit(character) || IsASCIIAlpha(character);
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    return IsASCIIDigit(ch) || IsASCIIAlpha(ch);
   }
 
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr bool IsASCIIHexDigit(TChar character) noexcept
   {
-    return IsASCIIDigit(character)
-           || (ToASCIILowerUnchecked(character) >= 'a' && ToASCIILowerUnchecked(character) <= 'f');
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    return IsASCIIDigit(ch) || (ToASCIILowerUnchecked(ch) >= 'a' && ToASCIILowerUnchecked(ch) <= 'f');
   }
 
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr uint8 ToASCIIHexValue(TChar character) noexcept
   {
-    assert(IsASCIIHexDigit(character));
-    return character < 'A' ? character - '0' : (character - 'A' + 10) & 0xF;
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    assert(IsASCIIHexDigit(ch));
+    return ch < 'A' ? ch - '0' : (ch - 'A' + 10) & 0xF;
   }
 
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr uint8 ToASCIIHexValue(TChar first, TChar second) noexcept
   {
-    return ToASCIIHexValue(first) << 4 | ToASCIIHexValue(second);
+    using T = conditional_t<SameType<TChar, byte>, char, TChar>;
+
+    auto a = static_cast<T>(first);
+    auto b = static_cast<T>(second);
+
+    return ToASCIIHexValue(a) << 4 | ToASCIIHexValue(b);
   }
 
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr bool IsASCIIBinaryDigit(TChar character) noexcept
   {
-    return character == '0' || character == '1';
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    return ch == '0' || ch == '1';
   }
 
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr bool IsASCIIOctalDigit(TChar character) noexcept
   {
-    return character >= '0' && character <= '7';
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    return ch >= '0' && ch <= '7';
   }
 
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr bool IsASCIIPrintable(TChar character) noexcept
   {
-    return character >= ' ' && character <= '~';
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    return ch >= ' ' && ch <= '~';
   }
 
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr bool IsASCIIGraphic(TChar character) noexcept
   {
-    return character >= '!' && character <= '~';
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    return ch >= '!' && ch <= '~';
   }
 
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr bool IsTabOrSpace(TChar character) noexcept
   {
-    return character == ' ' || character == '\t';
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    return ch == ' ' || ch == '\t';
   }
 
   /// @brief Infra's "ASCII whitespace" <https://infra.spec.whatwg.org/#ascii-whitespace>
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr bool IsASCIIWhitespace(TChar character) noexcept
   {
-    return character == ' ' || character == '\n' || character == '\t' || character == '\r'
-           || character == '\f';
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    return ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r' || ch == '\f';
   }
 
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr bool IsNotASCIIWhitespace(TChar character) noexcept
   {
-    return !IsASCIIWhitespace(character);
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    return !IsASCIIWhitespace(ch);
   }
 
   /// @brief Different from IsASCIIWhitespace; JSON/HTTP/XML do not accept '\f' as a whitespace.
@@ -172,20 +193,33 @@ namespace Krys::Text
     //
     // And XML whitespace:
     // https://www.w3.org/TR/2008/REC-xml-20081126/#NT-S
-    return character == ' ' || character == '\n' || character == '\t' || character == '\r';
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    return ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r';
+  }
+
+  /// @brief Skips whitespace characters in the given input stream, updating 'position' to the first
+  /// non-whitespace character, or the end of the stream.
+  template <ASCIIChar TChar>
+  constexpr static void SkipASCIIWhitespace(Span<const TChar> input, size_t &position) noexcept
+  {
+    while (position < input.size() && IsASCIIWhitespace(input[position]))
+    {
+      position++;
+    }
   }
 
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr bool IsUnicodeCompatibleASCIIWhitespace(TChar character) noexcept
   {
-    return IsASCIIWhitespace(character) || character == '\v';
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    return IsASCIIWhitespace(ch) || ch == '\v';
   }
 
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr bool IsASCIIDigitOrPunctuation(TChar character) noexcept
   {
-    return (character >= '!' && character <= '@') || (character >= '[' && character <= '`')
-           || (character >= '{' && character <= '~');
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    return (ch >= '!' && ch <= '@') || (ch >= '[' && ch <= '`') || (ch >= '{' && ch <= '~');
   }
 
   /// @brief Checks whether an ASCII character matches a pre-normalized ASCII literal,
@@ -193,8 +227,9 @@ namespace Krys::Text
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr bool MatchesASCIINormalizedLiteral(TChar character, char expected) noexcept
   {
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
     assert(ToASCIILowerUnchecked(expected) == expected);
-    return ToASCIILowerUnchecked(character) == static_cast<TChar>(expected);
+    return ToASCIILowerUnchecked(ch) == static_cast<TChar>(expected);
   }
 
   KRYS_NODISCARD constexpr char LowerNibbleToASCIIHexDigit(uint8 value) noexcept

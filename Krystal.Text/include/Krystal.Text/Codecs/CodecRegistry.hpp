@@ -15,7 +15,7 @@ namespace Krys::Text
   class CodecRegistry
   {
   public:
-    using LabelToCodecMap = Map<ASCIILiteral, ICodec *>;
+    using LabelToCodecMap = Map<stringview, ICodec *>;
 
   private:
     LabelToCodecMap _labelToCodecMap;
@@ -26,23 +26,23 @@ namespace Krys::Text
     requires(IsSpecializationOf<T, BasicCodec>)
     void Register() noexcept
     {
-      constexpr ASCIILiteral name = GetEncodingName<basic_codec_encoding_t<T>>();
+      constexpr auto name = GetEncodingName<basic_codec_encoding_t<T>>();
       assert(!name.IsNull() && !name.IsEmpty() && "Missing encoding name.");
 
       std::type_index key = typeid(T);
       _codecs[key] = CreateUnique<T>();
 
       auto *codec = _codecs.at(key).get();
-      _labelToCodecMap[name] = codec;
+      _labelToCodecMap[name.ToStringView()] = codec;
 
       constexpr auto aliases = GetEncodingAliases<basic_codec_encoding_t<T>>();
       for (auto alias : aliases)
       {
-        _labelToCodecMap[alias] = codec;
+        _labelToCodecMap[alias.ToStringView()] = codec;
       }
     }
 
-    KRYS_NODISCARD ICodec *Find(ASCIILiteral label) const noexcept
+    KRYS_NODISCARD ICodec *Find(stringview label) const noexcept
     {
       auto it = _labelToCodecMap.find(label);
       if (it != _labelToCodecMap.end())
@@ -53,7 +53,12 @@ namespace Krys::Text
       return nullptr;
     }
 
-    KRYS_NODISCARD ASCIILiteral LabelToName(ASCIILiteral label) const noexcept
+    KRYS_NODISCARD ICodec *Find(ASCIILiteral label) const noexcept
+    {
+      return Find(label.ToStringView());
+    }
+
+    KRYS_NODISCARD ASCIILiteral LabelToName(string label) const noexcept
     {
       auto *codec = Find(label);
       if (codec != nullptr)

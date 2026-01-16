@@ -169,13 +169,13 @@ namespace Krys::Ranges
         {
           if constexpr (TEndian == Endian::Big)
           {
-            Reverse(writeStorageFirst, writeStorageLast);
+            ::Krys::Ranges::Impl::ReverseRange(writeStorageFirst, writeStorageLast);
           }
           else
           {
             // What about middle endian or some such??
             // No way to detect in "constexpr" properly: just cry.
-            static_assert(DependentFalse<TEndian>);
+            static_assert(DependentFalse<TValue>);
           }
         }
         auto &baseRange = this->BaseRange();
@@ -199,7 +199,7 @@ namespace Krys::Ranges
         if constexpr (TEndian == Endian::System
                       && (Endian::System != Endian::Big && Endian::System != Endian::Little))
         {
-          static_assert(DependentFalse<TEndian>,
+          static_assert(DependentFalse<TValue>,
                         "read value from byte stream to native endianness that is neither little nor big "
                         "(byte order is impossible to infer from the standard)");
         }
@@ -232,7 +232,7 @@ namespace Krys::Ranges
           if constexpr ((sizeof(value_type) * CHAR_BIT) > 8)
           {
             TBaseValueType *readStorageLast = readStorage + BaseValuesPerWord;
-            Reverse(readStorageFirst, readStorageLast);
+            ::Krys::Ranges::Impl::ReverseRange(readStorageFirst, readStorageLast);
           }
         }
         if (!std::is_constant_evaluated())

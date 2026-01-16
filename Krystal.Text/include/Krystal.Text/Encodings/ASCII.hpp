@@ -43,7 +43,8 @@ namespace Krys::Text
 
     constexpr static Span<const code_unit, 1> ReplacementCodeUnits() noexcept
     {
-      return ::Krys::Text::Unicode::ASCIIReplacement<code_unit>;
+      constexpr auto replacement = ::Krys::Text::Unicode::ASCIIReplacement<code_unit>;
+      return Span<const code_unit, 1>(std::addressof(replacement), 1);
     }
 
     template <typename TInput, typename TOutput, typename TErrorHandler>
@@ -99,7 +100,7 @@ namespace Krys::Text
 
       ::Krys::Ranges::iter_advance(inIt);
 
-      *outIt = unit;
+      *outIt = static_cast<code_point>(unit);
       ::Krys::Ranges::iter_advance(outIt);
 
       return TResult(TSubInput(std::move(inIt), std::move(inLast)),

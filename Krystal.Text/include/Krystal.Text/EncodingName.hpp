@@ -8,6 +8,14 @@
 #include "Krystal.Text/TypeTraits.hpp"
 #include <string_view>
 
+namespace Krys::Text
+{
+  template <typename TEncoding, Endian::Type TEndian>
+  struct EncodingSchemeTraits
+  {
+  };
+}
+
 namespace Krys::Text::detail
 {
   template <typename TEncoding>
@@ -19,17 +27,24 @@ namespace Krys::Text::detail
   concept HasAliases = requires {
     { TEncoding::Aliases };
   };
+
+  template <typename TEncoding>
+  concept HasEncodingSchemeTraits =
+    requires { typename EncodingSchemeTraits<TEncoding, Endian::Type::System>::type; };
 }
 
 namespace Krys::Text
 {
-
   template <typename TEncoding>
   constexpr ASCIILiteral GetEncodingName() noexcept
   {
     if constexpr (::Krys::Text::detail::HasName<TEncoding>)
     {
       return TEncoding::Name;
+    }
+    else if constexpr (::Krys::Text::detail::HasEncodingSchemeTraits<TEncoding>)
+    {
+      return EncodingSchemeTraits<typename TEncoding::encoding_type, TEncoding::Endianness>::Name;
     }
     else
     {
@@ -43,6 +58,11 @@ namespace Krys::Text
     if constexpr (::Krys::Text::detail::HasAliases<TEncoding>)
     {
       return Span<const ASCIILiteral>(TEncoding::Aliases);
+    }
+    else if constexpr (::Krys::Text::detail::HasEncodingSchemeTraits<TEncoding>)
+    {
+      return Span<const ASCIILiteral>(
+        EncodingSchemeTraits<typename TEncoding::encoding_type, TEncoding::Endianness>::Aliases);
     }
     else
     {

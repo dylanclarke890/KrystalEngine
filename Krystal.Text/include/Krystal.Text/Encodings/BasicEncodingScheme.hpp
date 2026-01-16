@@ -31,6 +31,8 @@ namespace Krys::Text
   public:
     using encoding_type = TEncoding;
 
+    constexpr inline static Endian::Type Endianness = TEndian;
+
     using code_point = code_point_t<TBaseEncoding>;
 
     using code_unit = TByte;

@@ -34,7 +34,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML\DOM\Loader\ByteStreamDecoder.hpp" />
-    <ClInclude Include="include\Krystal.HTML\DOM\Parser\EncodingSniffer.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Loader\EncodingSniffer.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Parser\InsertionMode.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Parser\TokenizerState.hpp" />
   </ItemGroup>
