@@ -5,7 +5,7 @@
 #include "Krystal.Lib/Utils/Unwrap.hpp"
 #include "Krystal.Text/CodePoint.hpp"
 #include "Krystal.Text/CodeUnit.hpp"
-#include "Krystal.Text/detail/ConstantEncodingTraits.hpp"
+#include "Krystal.Text/_detail/ConstantEncodingTraits.hpp"
 #include "Krystal.Text/Handlers/SchemeHandler.hpp"
 #include "Krystal.Text/SkipInputError.hpp"
 #include "Krystal.Text/State.hpp"

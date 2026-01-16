@@ -6,7 +6,7 @@
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Text/CodePoint.hpp"
 #include "Krystal.Text/CodeUnit.hpp"
-#include "Krystal.Text/detail/ResultTypeConcepts.hpp"
+#include "Krystal.Text/_detail/ResultTypeConcepts.hpp"
 #include "Krystal.Text/EncodingError.hpp"
 #include "Krystal.Text/State.hpp"
 #include <array>

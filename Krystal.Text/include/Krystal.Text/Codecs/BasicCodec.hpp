@@ -1,38 +1,20 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/String/ASCIILiteral.hpp"
 #include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
+#include "Krystal.Text/Codecs/ICodec.hpp"
 #include "Krystal.Text/CodePoint.hpp"
 #include "Krystal.Text/CodeUnit.hpp"
 #include "Krystal.Text/Decode/Decode.hpp"
-#include "Krystal.Text/Decode/DecodeOne.hpp"
 #include "Krystal.Text/Encode/Encode.hpp"
-#include "Krystal.Text/Encode/EncodeOne.hpp"
 #include "Krystal.Text/Handlers/DefaultHandler.hpp"
 #include "Krystal.Text/Handlers/IncompleteHandler.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys::Text
 {
-  // A codec class wraps a compile time encoding and provides methods for decoding to unicode code points and
-  // encoding to bytes.
-  class ICodec
-  {
-  public:
-    virtual ~ICodec() = default;
-
-    /// @brief Decodes a span of bytes to a list of unicode code points.
-    /// @param bytes The input bytes to decode.
-    /// @return A list of decoded unicode code points.
-    KRYS_NODISCARD virtual List<UnicodeCodePoint> Decode(Span<const byte> bytes) const = 0;
-
-    /// @brief Encodes a span of unicode code points to a list of bytes.
-    /// @param codePoints The input unicode code points to encode.
-    /// @return A list of encoded bytes.
-    KRYS_NODISCARD virtual List<byte> Encode(Span<const UnicodeCodePoint> codePoints) const = 0;
-  };
-
   template <typename TEncoding, typename TErrorHandler = ::Krys::Text::Handlers::DefaultHandler>
   class Codec : public ICodec
   {

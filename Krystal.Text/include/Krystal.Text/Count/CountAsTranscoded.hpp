@@ -7,7 +7,7 @@
 #include "Krystal.Text/CodePoint.hpp"
 #include "Krystal.Text/CodeUnit.hpp"
 #include "Krystal.Text/Count/CountResult.hpp"
-#include "Krystal.Text/detail/SpanReconstruct.hpp"
+#include "Krystal.Text/_detail/SpanReconstruct.hpp"
 #include "Krystal.Text/Encodings/DefaultEncoding.hpp"
 #include "Krystal.Text/Handlers/DefaultHandler.hpp"
 #include "Krystal.Text/MaxUnits.hpp"
