@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Text/ASCIILiteral.hpp"
 #include "Krystal.Text/Encodings/EncodingTables/Windows437DOSLatinUS.tables.hpp"
 #include "Krystal.Text/Encodings/Impl/SingleByteLookupEncoding.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
@@ -14,6 +16,10 @@ namespace Krys::Text
           &::Krys::Text::EncodingTable::windows_437_dos_latin_us_index_to_code_point,
           &::Krys::Text::EncodingTable::windows_437_dos_latin_us_code_point_to_index, TCodeUnit, TCodePoint>
   {
+  public:
+    constexpr static inline ::Krys::Text::ASCIILiteral Name = {"windows-437"_s};
+    constexpr static inline ::Krys::Array<::Krys::Text::ASCIILiteral, 3> Aliases = {"cp437"_s, "cp-437"_s,
+                                                                                    "ibm437"_s};
   };
 
   /// @brief The encoding that matches Microsoft Windows's Codepage 437 (DOS Latin, US).

@@ -2,6 +2,10 @@
 
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Text/ASCIILiteral.hpp"
+#include "Krystal.Text/EncodingId.hpp"
 #include "Krystal.Text/EncodingName.hpp"
 #include "Krystal.Text/Encodings/ASCII.hpp"
 #include "Krystal.Text/Encodings/BasicEncodingScheme.hpp"
@@ -10,65 +14,54 @@
 #include "Krystal.Text/Encodings/UTF16.hpp"
 #include "Krystal.Text/Encodings/UTF32.hpp"
 #include "Krystal.Text/Encodings/UTF8.hpp"
-#include "Krystal.Text/EncodingId.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 #include <string_view>
 
 namespace Krys::Text
 {
   /// @brief A UTF-16 encoding, in Little Endian format, with inputs as a sequence of bytes.
-  ///
-  /// @tparam TByte The byte type to use. Typically, this is `std::byte` or `uchar.`
+  /// @tparam TByte The byte type to use. Typically, this is `byte` or `uchar.`
   template <typename TByte>
-  using basic_utf16_le = EncodingScheme<utf16_t, Endian::Type::Little, TByte>;
-
-  /// @brief A UTF-16 encoding, in Big Endian format, with inputs as a sequence of bytes.
-  ///
-  /// @tparam TByte The byte type to use. Typically, this is `std::byte` or <tt>uchar</tt>.
-  template <typename TByte>
-  using basic_utf16_be = EncodingScheme<utf16_t, Endian::Type::Big, TByte>;
-
-  /// @brief A UTF-16 encoding, in Native Endian format, with inputs as a sequence of bytes.
-  ///
-  /// @tparam TByte The byte type to use. Typically, this is `std::byte` or <tt>uchar</tt>.
-  template <typename TByte>
-  using basic_utf16_ne = EncodingScheme<utf16_t, Endian::Type::System, TByte>;
+  class basic_utf16_le : public EncodingScheme<utf16_t, Endian::Type::Little, TByte>
+  {
+  public:
+    constexpr static inline ::Krys::Text::ASCIILiteral Name = {"UTF-16LE"_s};
+    constexpr static inline ::Krys::Array<::Krys::Text::ASCIILiteral, 7> Aliases = {
+      "csunicode"_s, "iso-10646-ucs-2"_s, "ucs-2"_s, "unicode"_s, "unicodefeff"_s, "utf-16"_s, "utf-16le"_s};
+  };
 
   /// @brief A UTF-16 encoding, in Little Endian format, with inputs as a sequence of bytes.
-  using utf16_le_t = basic_utf16_le<std::byte>;
+  using utf16_le_t = basic_utf16_le<byte>;
 
   /// @brief A UTF-16 encoding, in Big Endian format, with inputs as a sequence of bytes.
-  using utf16_be_t = basic_utf16_be<std::byte>;
+  /// @tparam TByte The byte type to use. Typically, this is `byte` or `uchar.`
+  template <typename TByte>
+  class basic_utf16_be : public EncodingScheme<utf16_t, Endian::Type::Big, TByte>
+  {
+  public:
+    constexpr static inline ::Krys::Text::ASCIILiteral Name = {"UTF-16BE"_s};
+    constexpr static inline ::Krys::Array<::Krys::Text::ASCIILiteral, 2> Aliases = {"unicodefffe"_s,
+                                                                                    "utf-16be"_s};
+  };
 
-  /// @brief A UTF-16 encoding, in Native Endian format, with inputs as a sequence of bytes.
-  using utf16_ne_t = basic_utf16_ne<std::byte>;
+  /// @brief A UTF-16 encoding, in Big Endian format, with inputs as a sequence of bytes.
+  using utf16_be_t = basic_utf16_be<byte>;
 
   /// @brief A UTF-32 encoding, in Little Endian format, with inputs as a sequence of bytes.
-  ///
-  /// @tparam TByte The byte type to use. Typically, this is `std::byte` or <tt>uchar</tt> .
+  /// @tparam TByte The byte type to use. Typically, this is `byte` or <tt>uchar</tt> .
   template <typename TByte>
   using basic_utf32_le = EncodingScheme<utf32_t, Endian::Type::Little, TByte>;
+  
+  /// @brief A UTF-32 encoding, in Little Endian format, with inputs as a sequence of bytes.
+  using utf32_le_t = basic_utf32_le<byte>;
 
   /// @brief A UTF-32 encoding, in Big Endian format, with inputs as a sequence of bytes.
-  ///
-  /// @tparam TByte The byte type to use. Typically, this is `std::byte` or <tt>uchar</tt> .
+  /// @tparam TByte The byte type to use. Typically, this is `byte` or <tt>uchar</tt> .
   template <typename TByte>
   using basic_utf32_be = EncodingScheme<utf32_t, Endian::Type::Big, TByte>;
 
-  /// @brief A UTF-32 encoding, in Native Endian format, with inputs as a sequence of bytes.
-  ///
-  /// @tparam TByte The byte type to use. Typically, this is `std::byte` or <tt>uchar</tt> .
-  template <typename TByte>
-  using basic_utf32_ne = EncodingScheme<utf32_t, Endian::Type::System, TByte>;
-
-  /// @brief A UTF-32 encoding, in Little Endian format, with inputs as a sequence of bytes.
-  using utf32_le_t = basic_utf32_le<std::byte>;
-
   /// @brief A UTF-32 encoding, in Big Endian format, with inputs as a sequence of bytes.
-  using utf32_be_t = basic_utf32_be<std::byte>;
-
-  /// @brief A UTF-32 encoding, in Big Endian format, with inputs as a sequence of bytes.
-  using utf32_ne_t = basic_utf32_ne<std::byte>;
+  using utf32_be_t = basic_utf32_be<byte>;
 
   /// @brief An instance of the utf16_le_t type for ease of use.
   constexpr inline utf16_le_t utf16_le = {};
@@ -76,17 +69,11 @@ namespace Krys::Text
   /// @brief An instance of the utf16_be_t type for ease of use.
   constexpr inline utf16_be_t utf16_be = {};
 
-  /// @brief An instance of the utf16_ne_t type for ease of use.
-  constexpr inline utf16_ne_t utf16_ne = {};
-
   /// @brief An instance of the utf32_le_t type for ease of use.
   constexpr inline utf32_le_t utf32_le = {};
 
   /// @brief An instance of the utf32_ne_t type for ease of use.
   constexpr inline utf32_be_t utf32_be = {};
-
-  /// @brief An instance of the utf32_ne_t type for ease of use.
-  constexpr inline utf32_ne_t utf32_ne = {};
 
   template <typename TChar, EncodingId Id>
   KRYS_NODISCARD constexpr auto SelectCompileTimeEncoding()

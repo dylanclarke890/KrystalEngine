@@ -2087,10 +2087,6 @@ namespace Krys::Tests
     {
       return Krys::Tests::u16_unicode_sequence_truth_big_endian;
     }
-    else if constexpr (SameType<TEncoding, utf16_ne_t>)
-    {
-      return Krys::Tests::u16_unicode_sequence_truth_native_endian;
-    }
     else if constexpr (SameType<TEncoding, utf32_le_t>)
     {
       return Krys::Tests::u32_unicode_sequence_truth_little_endian;
@@ -2098,10 +2094,6 @@ namespace Krys::Tests
     else if constexpr (SameType<TEncoding, utf32_be_t>)
     {
       return Krys::Tests::u32_unicode_sequence_truth_big_endian;
-    }
-    else if constexpr (SameType<TEncoding, utf32_ne_t>)
-    {
-      return Krys::Tests::u32_unicode_sequence_truth_native_endian;
     }
     else
     {

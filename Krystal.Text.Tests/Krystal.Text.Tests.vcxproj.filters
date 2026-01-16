@@ -54,6 +54,9 @@
     <ClCompile Include="tests\Count\CountAsTranscoded.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tests\CodecRegistry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.Text.Tests\BasicUnicodeStrings.hpp">

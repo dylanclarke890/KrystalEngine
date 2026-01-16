@@ -3,13 +3,13 @@
 #include "Krystal.Lib/Core/Endian.hpp"
 #include "Krystal.Lib/Ranges/WordIterator.hpp"
 #include "Krystal.Lib/Utils/Unwrap.hpp"
+#include "Krystal.Text/_detail/ConstantEncodingTraits.hpp"
 #include "Krystal.Text/CodePoint.hpp"
 #include "Krystal.Text/CodeUnit.hpp"
-#include "Krystal.Text/_detail/ConstantEncodingTraits.hpp"
+#include "Krystal.Text/EncodingId.hpp"
 #include "Krystal.Text/Handlers/SchemeHandler.hpp"
 #include "Krystal.Text/SkipInputError.hpp"
 #include "Krystal.Text/State.hpp"
-#include "Krystal.Text/EncodingId.hpp"
 #include <cstddef>
 #include <optional>
 
@@ -48,8 +48,7 @@ namespace Krys::Text
     constexpr inline static const std::size_t MaxCodeUnits =
       (::Krys::Text::MaxCodeUnits<TBaseEncoding> * sizeof(TBaseCodeUnit)) / (sizeof(TByte));
 
-    constexpr inline static const ::Krys::Text::EncodingId DecodedId =
-      ::Krys::Text::DecodeId<TBaseEncoding>;
+    constexpr inline static const ::Krys::Text::EncodingId DecodedId = ::Krys::Text::DecodeId<TBaseEncoding>;
 
     constexpr inline static const ::Krys::Text::EncodingId EncodedId = ::Krys::Text::ToByteEncoding(
       ::Krys::Text::EncodeId<TBaseEncoding>, TEndian, sizeof(code_unit_t<TBaseEncoding>));

@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Text/ASCIILiteral.hpp"
 #include "Krystal.Text/Encodings/EncodingTables/KazakhSTRK1048.tables.hpp"
 #include "Krystal.Text/Encodings/Impl/SingleByteLookupEncoding.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
@@ -14,6 +16,8 @@ namespace Krys::Text
           &::Krys::Text::EncodingTable::kazakh_strk1048_index_to_code_point,
           &::Krys::Text::EncodingTable::kazakh_strk1048_code_point_to_index, TCodeUnit, TCodePoint>
   {
+  public:
+    constexpr static inline ::Krys::Text::ASCIILiteral Name = "KZ1048"_s;
   };
 
   /// @brief The encoding that matches the KZ1048 / Kazakh STRK-1048 encoding specification.

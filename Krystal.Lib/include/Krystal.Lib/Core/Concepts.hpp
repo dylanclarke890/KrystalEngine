@@ -3,6 +3,25 @@
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include <concepts>
 
+namespace Krys::detail_concepts
+{
+  template <typename T, template <typename...> class Templ>
+  struct IsSpecializationOf : std::false_type
+  {
+  };
+
+  template <typename... T, template <typename...> class Templ>
+  struct IsSpecializationOf<Templ<T...>, Templ> : std::true_type
+  {
+  };
+
+  template <typename T>
+  struct TypeIdentity
+  {
+    using type = T;
+  };
+}
+
 namespace Krys
 {
   template <typename T>
@@ -164,33 +183,14 @@ namespace Krys
   template <typename T>
   concept HasStandardLayout = std::is_standard_layout_v<T>;
 
-  namespace Impl
-  {
-    template <typename T, template <typename...> class Templ>
-    struct IsSpecializationOf : std::false_type
-    {
-    };
-
-    template <typename... T, template <typename...> class Templ>
-    struct IsSpecializationOf<Templ<T...>, Templ> : std::true_type
-    {
-    };
-
-    template <typename T>
-    struct TypeIdentity
-    {
-      using type = T;
-    };
-  }
-
   /// @brief Checks whether the given full, complete type from the first argument is related to the raw
   /// template name provided in the second.
   template <typename T, template <typename...> class Templ>
-  concept IsSpecializationOf = Impl::IsSpecializationOf<remove_cvref_t<T>, Templ>::value;
+  concept IsSpecializationOf = ::Krys::detail_concepts::IsSpecializationOf<remove_cvref_t<T>, Templ>::value;
 
   /// @brief A type trait that yields the type passed to it unchanged.
   template <typename T>
-  using TypeIdentity = typename Impl::TypeIdentity<T>::type;
+  using TypeIdentity = typename ::Krys::detail_concepts::TypeIdentity<T>::type;
 
   template <typename TFrom, typename TTo>
   concept NonDerivedCompatiblePointer = ConvertibleTo<TFrom (*)[], TTo (*)[]>;

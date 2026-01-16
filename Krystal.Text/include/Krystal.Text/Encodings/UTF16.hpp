@@ -6,10 +6,10 @@
 #include "Krystal.Text/Concepts.hpp"
 #include "Krystal.Text/Decode/DecodeResult.hpp"
 #include "Krystal.Text/Encode/EncodeResult.hpp"
-#include "Krystal.Text/Unicode.hpp"
+#include "Krystal.Text/EncodingId.hpp"
 #include "Krystal.Text/SkipInputError.hpp"
 #include "Krystal.Text/State.hpp"
-#include "Krystal.Text/EncodingId.hpp"
+#include "Krystal.Text/Unicode.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys::Text::Impl

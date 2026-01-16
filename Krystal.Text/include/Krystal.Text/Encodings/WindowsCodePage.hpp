@@ -4,7 +4,9 @@
 #include "Krystal.Lib/Detection/Compiler.hpp"
 #include "Krystal.Lib/Detection/OS.hpp"
 #include "Krystal.Lib/Ranges/Range.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
+#include "Krystal.Text/ASCIILiteral.hpp"
 #include "Krystal.Text/Concepts.hpp"
 #include "Krystal.Text/Decode/DecodeResult.hpp"
 #include "Krystal.Text/Encode/EncodeResult.hpp"
@@ -42,6 +44,9 @@ namespace Krys::Text
   class basic_windows_code_page
   {
   public:
+    constexpr static inline ::Krys::Text::ASCIILiteral Name = {"Unknown"_s};
+    constexpr static inline ::Krys::Array<::Krys::Text::ASCIILiteral, 0> Aliases = {};
+
     /// @brief The code point type that is decoded to, and encoded from.
     using code_point = TCodePoint;
 

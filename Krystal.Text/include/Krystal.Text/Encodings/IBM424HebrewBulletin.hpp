@@ -3,7 +3,8 @@
 #include "Krystal.Text/Encodings/EncodingTables/IBM424HebrewBulletin.tables.hpp"
 #include "Krystal.Text/Encodings/Impl/SingleByteLookupEncoding.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
-
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Text/ASCIILiteral.hpp"
 namespace Krys::Text
 {
   /// @brief The Hebrew encoding that matches IBM's Codepage 424.
@@ -14,6 +15,8 @@ namespace Krys::Text
           &::Krys::Text::EncodingTable::ibm_424_hebrew_bulletin_index_to_code_point,
           &::Krys::Text::EncodingTable::ibm_424_hebrew_bulletin_code_point_to_index, TCodeUnit, TCodePoint>
   {
+  public:
+    constexpr static inline ::Krys::Text::ASCIILiteral Name = "IBM-424";
   };
 
   /// @brief The Hebrew encoding that matches IBM's Codepage 424.

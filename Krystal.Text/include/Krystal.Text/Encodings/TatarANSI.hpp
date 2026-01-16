@@ -3,6 +3,7 @@
 #include "Krystal.Text/Encodings/EncodingTables/TatarANSI.tables.hpp"
 #include "Krystal.Text/Encodings/Impl/SingleASCIIByteHighBitLookupEncoding.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
+#include "Krystal.Text/ASCIILiteral.hpp"
 
 namespace Krys::Text
 {
@@ -14,6 +15,8 @@ namespace Krys::Text
           &::Krys::Text::EncodingTable::tatar_ansi_index_to_code_point,
           &::Krys::Text::EncodingTable::tatar_ansi_code_point_to_index, TCodeUnit, TCodePoint>
   {
+  public:
+    constexpr static inline ASCIILiteral Name = "TATAR-ANSI";
   };
 
   /// @brief The encoding that matches the TATAR encoding (ANSI variant, Based on Windows Code Page 1252.)

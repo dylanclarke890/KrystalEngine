@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Text/ASCIILiteral.hpp"
 #include "Krystal.Text/Encodings/EncodingTables/iso_8859_10.tables.hpp"
 #include "Krystal.Text/Encodings/Impl/SingleASCIIByteHighBitLookupEncoding.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
@@ -14,6 +16,10 @@ namespace Krys::Text
           &::Krys::Text::EncodingTable::iso_8859_10_index_to_code_point,
           &::Krys::Text::EncodingTable::iso_8859_10_code_point_to_index, TCodeUnit, TCodePoint>
   {
+  public:
+    constexpr static inline ::Krys::Text::ASCIILiteral Name = "ISO-8859-10"_s;
+    constexpr static inline ::Krys::Array<::Krys::Text::ASCIILiteral, 7> Aliases = {
+      "csisolatin6"_s, "iso-8859-10"_s, "iso-ir-157"_s, "iso8859-10"_s, "iso885910"_s, "l6"_s, "latin6"_s};
   };
 
   /// @brief The encoding that matches the ISO/IEC 8859-10 encoding specification.

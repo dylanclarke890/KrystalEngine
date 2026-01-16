@@ -8,13 +8,14 @@
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Utils/LosslessStaticCast.hpp"
 #include "Krystal.Lib/Utils/Size.hpp"
+#include "Krystal.Text/ASCIILiteral.hpp"
 #include "Krystal.Text/Concepts.hpp"
 #include "Krystal.Text/Decode/DecodeResult.hpp"
 #include "Krystal.Text/Encode/EncodeResult.hpp"
-#include "Krystal.Text/Unicode.hpp"
+#include "Krystal.Text/EncodingId.hpp"
 #include "Krystal.Text/SkipInputError.hpp"
 #include "Krystal.Text/State.hpp"
-#include "Krystal.Text/EncodingId.hpp"
+#include "Krystal.Text/Unicode.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys::Text::Impl
@@ -548,6 +549,10 @@ namespace Krys::Text
   class basic_utf8
       : public ::Krys::Text::Impl::UTF8With<basic_utf8<TCodeUnit, TCodePoint>, TCodeUnit, TCodePoint>
   {
+  public:
+    constexpr static inline ::Krys::Text::ASCIILiteral Name = "UTF-8"_s;
+    constexpr static inline ::Krys::Array<::Krys::Text::ASCIILiteral, 6> Aliases = {
+      "unicode-1-1-utf-8"_s, "unicode11utf8"_s, "unicode20utf8"_s, "utf-8"_s, "utf8"_s, "x-unicode20utf8"_s};
   };
 
   /// @brief A UTF-8 Encoding.

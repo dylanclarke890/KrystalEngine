@@ -3,7 +3,8 @@
 #include "Krystal.Text/Encodings/EncodingTables/iso_8859_1_1985.tables.hpp"
 #include "Krystal.Text/Encodings/Impl/SingleByteLookupEncoding.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
-
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Text/ASCIILiteral.hpp"
 namespace Krys::Text
 {
   /// @brief The encoding that matches ISO/IEC 8859-1 specification published in 1985.
@@ -17,6 +18,9 @@ namespace Krys::Text
   private:
     static_assert(((sizeof(TCodePoint) * CHAR_BIT) > 15),
                   "The code point type for ISO 8859-1 (1985) must be at least 16 bits wide");
+
+  public:
+    constexpr static ::Krys::Text::ASCIILiteral Name = "ISO-8859-1-1985"_s;
   };
 
   /// @brief The encoding that matches ISO/IEC 8859-1 specification published in 1985.

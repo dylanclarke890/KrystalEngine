@@ -2,12 +2,54 @@
 
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Text/TypeTraits.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
+#include "Krystal.Text/ASCIILiteral.hpp"
 #include "Krystal.Text/EncodingId.hpp"
+#include "Krystal.Text/TypeTraits.hpp"
 #include <string_view>
+
+namespace Krys::Text::detail
+{
+  template <typename TEncoding>
+  concept HasName = requires {
+    { TEncoding::Name };
+  };
+
+  template <typename TEncoding>
+  concept HasAliases = requires {
+    { TEncoding::Aliases };
+  };
+}
 
 namespace Krys::Text
 {
+
+  template <typename TEncoding>
+  constexpr ASCIILiteral GetEncodingName() noexcept
+  {
+    if constexpr (::Krys::Text::detail::HasName<TEncoding>)
+    {
+      return TEncoding::Name;
+    }
+    else
+    {
+      return ""_s;
+    }
+  }
+
+  template <typename TEncoding>
+  constexpr Span<const ASCIILiteral> GetEncodingAliases() noexcept
+  {
+    if constexpr (::Krys::Text::detail::HasAliases<TEncoding>)
+    {
+      return Span<const ASCIILiteral>(TEncoding::Aliases);
+    }
+    else
+    {
+      return Span<const ASCIILiteral>();
+    }
+  }
+
   namespace Impl
   {
     template <typename TChar>
@@ -64,7 +106,7 @@ namespace Krys::Text
         case EncodingId::utf1:      return "utf1";
         case EncodingId::cesu8:     return "cesu8";
         case EncodingId::ascii:     return "ascii";
-        default:                        return "unknown";
+        default:                    return "unknown";
       }
     }
 
@@ -72,7 +114,7 @@ namespace Krys::Text
     {
       if (c0 <= 'Z' && c0 >= 'A')
       {
-        // A is equivalent to a, etc. etc. 
+        // A is equivalent to a, etc. etc.
         // ASCII character, make sure lowercase - add to 5th bit (0-Based)
         c0 &= static_cast<char8>(0x20);
       }
@@ -261,7 +303,7 @@ namespace Krys::Text
         case EncodingId::utf32:
         case EncodingId::utf32le:
         case EncodingId::utf32be: return EncodingId::utf32;
-        default:                      return EncodingId::unknown;
+        default:                  return EncodingId::unknown;
       }
     }
 

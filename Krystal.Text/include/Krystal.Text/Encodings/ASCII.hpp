@@ -3,12 +3,14 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Ranges/ADL.hpp"
 #include "Krystal.Lib/Ranges/Subrange.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Text/ASCIILiteral.hpp"
 #include "Krystal.Text/Concepts.hpp"
 #include "Krystal.Text/Decode/DecodeResult.hpp"
 #include "Krystal.Text/Encode/EncodeResult.hpp"
 #include "Krystal.Text/EncodingError.hpp"
-#include "Krystal.Text/Unicode.hpp"
 #include "Krystal.Text/State.hpp"
+#include "Krystal.Text/Unicode.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys::Text
@@ -18,6 +20,13 @@ namespace Krys::Text
   class basic_ascii
   {
   public:
+    constexpr static inline ::Krys::Text::ASCIILiteral Name = {"US-ASCII"_s};
+
+    constexpr static inline ::Krys::Array<::Krys::Text::ASCIILiteral, 11> Aliases = {
+      "ASCII"_s, "US-ASCII"_s, "ANSI_X3.4-1968"_s, "ANSI_X3.4-1986"_s, "ISO_646.irv:1991"_s, "ISO646-US"_s,
+      "us"_s,    "iso-ir-6"_s, "IBM367"_s,         "cp367"_s,          "csASCII"_s,
+    };
+
     using code_unit = TCodeUnit;
 
     using code_point = TCodePoint;

@@ -7,9 +7,9 @@
 #include "Krystal.Text/Concepts.hpp"
 #include "Krystal.Text/Decode/DecodeResult.hpp"
 #include "Krystal.Text/Encode/EncodeResult.hpp"
+#include "Krystal.Text/EncodingId.hpp"
 #include "Krystal.Text/SkipInputError.hpp"
 #include "Krystal.Text/State.hpp"
-#include "Krystal.Text/EncodingId.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys::Text::Impl
@@ -96,11 +96,12 @@ namespace Krys::Text::Impl
         if (outIt == outLast)
         {
           TSelf self {};
-          return std::forward<TErrorHandler>(errorHandler)(self,
-                                                    TResult(TSubInput(std::move(inIt), std::move(inLast)),
-                                                            TSubOutput(std::move(outIt), std::move(outLast)),
-                                                            s, EncodingError::InsufficientOutputSpace),
-                                                    Span<code_unit>(), Span<code_point>());
+          return std::forward<TErrorHandler>(errorHandler)(
+            self,
+            TResult(TSubInput(std::move(inIt), std::move(inLast)),
+                    TSubOutput(std::move(outIt), std::move(outLast)), s,
+                    EncodingError::InsufficientOutputSpace),
+            Span<code_unit>(), Span<code_point>());
         }
       }
 

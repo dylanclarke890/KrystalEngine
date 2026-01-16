@@ -15,7 +15,7 @@
 
 namespace Krys::Text::Handlers
 {
-  /// @brief This handler detects if the error code is an incomplete sequence, and sets the error code to
+  /// @brief This handler detects if the error code is an incomplete seqence, and sets the error code to
   /// being okay before returning.
   /// @tparam TEncoding The encoding type which dictates the `CodeUnit` and `CodePoint` buffers to store
   /// in the handler to catch unused input from the last parameter of error handler invocations by the
@@ -101,10 +101,28 @@ namespace Krys::Text::Handlers
     {
       if (result.ErrorCode == EncodingError::IncompleteSequence)
       {
-        SaveProgress(inputProgress, outputProgress);
+        // it's incomplete and we are okay with that
+        if constexpr (IsSpecializationOf<TResult, DecodeResult>)
+        {
+          this->_codeUnitsSize = ::Krys::Ranges::size(inputProgress);
+          ::Krys::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(inputProgress), this->_codeUnitsSize,
+                                            this->_codeUnits.data());
+          this->_codePointsSize = Krys::Ranges::size(outputProgress);
+          ::Krys::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(outputProgress), this->_codePointsSize,
+                                            this->_codePoints.data());
+        }
+        else
+        {
+          this->_codeUnitsSize = ::Krys::Ranges::size(outputProgress);
+          ::Krys::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(outputProgress), this->_codeUnitsSize,
+                                            this->_codeUnits.data());
+          this->_codePointsSize = ::Krys::Ranges::size(inputProgress);
+          ::Krys::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(inputProgress), this->_codePointsSize,
+                                            this->_codePoints.data());
+        }
         return result;
       }
-      return this->Base()(encoding, std::move(result), inputProgress, outputProgress);
+      return this->GetValue()(encoding, std::move(result), inputProgress, outputProgress);
     }
 
     /// @brief Checks if the result.ErrorCode is EncodingError::IncompleteSequence, it saves
@@ -124,10 +142,28 @@ namespace Krys::Text::Handlers
     {
       if (result.ErrorCode == EncodingError::IncompleteSequence)
       {
-        SaveProgress(inputProgress, outputProgress);
+        // it's incomplete and we are okay with that
+        if constexpr (IsSpecializationOf<TResult, DecodeResult>)
+        {
+          this->_codeUnitsSize = ::Krys::Ranges::size(inputProgress);
+          ::Krys::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(inputProgress), this->_codeUnitsSize,
+                                            this->_codeUnits.data());
+          this->_codePointsSize = ::Krys::Ranges::size(outputProgress);
+          ::Krys::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(outputProgress), this->_codePointsSize,
+                                            this->_codePoints.data());
+        }
+        else
+        {
+          this->_codeUnitsSize = ::Krys::Ranges::size(outputProgress);
+          ::Krys::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(outputProgress), this->_codeUnitsSize,
+                                            this->_codeUnits.data());
+          this->_codePointsSize = ::Krys::Ranges::size(inputProgress);
+          ::Krys::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(inputProgress), this->_codePointsSize,
+                                            this->_codePoints.data());
+        }
         return result;
       }
-      return this->Base()(encoding, std::move(result), inputProgress, outputProgress);
+      return this->GetValue()(encoding, std::move(result), inputProgress, outputProgress);
     }
 
     /// @brief Checks if the result.ErrorCode is EncodingError::IncompleteSequence, it saves
@@ -147,47 +183,40 @@ namespace Krys::Text::Handlers
     {
       if (result.ErrorCode == EncodingError::IncompleteSequence)
       {
-        SaveProgress(inputProgress, outputProgress);
+        // it's incomplete and we are okay with that
+        if constexpr (IsSpecializationOf<TResult, DecodeResult>)
+        {
+          this->_codeUnitsSize = ::Krys::Ranges::size(inputProgress);
+          ::Krys::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(inputProgress), this->_codeUnitsSize,
+                                            this->_codeUnits.data());
+          this->_codePointsSize = ::Krys::Ranges::size(outputProgress);
+          ::Krys::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(outputProgress), this->_codePointsSize,
+                                            this->_codePoints.data());
+        }
+        else
+        {
+          this->_codeUnitsSize = ::Krys::Ranges::size(outputProgress);
+          ::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(outputProgress), this->_codeUnitsSize,
+                                      this->_codeUnits.data());
+          this->_codePointsSize = ::Krys::Ranges::size(inputProgress);
+          ::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(inputProgress), this->_codePointsSize,
+                                      this->_codePoints.data());
+        }
         return result;
       }
-      return this->Base()(encoding, std::move(result), inputProgress, outputProgress);
+      return this->GetValue()(encoding, std::move(result), inputProgress, outputProgress);
     }
 
     /// @brief Returns the code units from the last incomplete decode operations.
     Span<TCodeUnit> CodeUnits() const noexcept
     {
-      return Span<TCodeUnit>(this->_codeUnits.data(), this->_codeUnitsSize);
+      return Span(this->_codeUnits.data(), this->_codeUnitsSize);
     }
 
     /// @brief Returns the code points from the last incomplete encode operations.
     Span<TCodePoint> CodePoints() const noexcept
     {
-      return Span<TCodePoint>(this->_codeUnits.data(), this->_codeUnitsSize);
-    }
-
-  private:
-    template <typename TResult, typename TInputProgress, typename TOutputProgress>
-    constexpr void SaveProgress(const TInputProgress &inputProgress, const TOutputProgress &outputProgress)
-    {
-      // it's incomplete and we are okay with that
-      if constexpr (IsSpecializationOf<TResult, DecodeResult>)
-      {
-        this->_codeUnitsSize = ::Krys::Ranges::size(inputProgress);
-        ::Krys::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(inputProgress), this->_codeUnitsSize,
-                                          this->_codeUnits.data());
-        this->_codePointsSize = ::Krys::Ranges::size(outputProgress);
-        ::Krys::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(outputProgress), this->_codePointsSize,
-                                          this->_codePoints.data());
-      }
-      else
-      {
-        this->_codeUnitsSize = ::Krys::Ranges::size(outputProgress);
-        ::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(outputProgress), this->_codeUnitsSize,
-                                    this->_codeUnits.data());
-        this->_codePointsSize = ::Krys::Ranges::size(inputProgress);
-        ::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(inputProgress), this->_codePointsSize,
-                                    this->_codePoints.data());
-      }
+      return Span(this->_codePoints.data(), this->_codePointsSize);
     }
   };
 }

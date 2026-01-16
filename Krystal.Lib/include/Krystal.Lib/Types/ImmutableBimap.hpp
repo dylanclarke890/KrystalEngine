@@ -1,16 +1,16 @@
-﻿/// NOTE: Credit to Dan Israel Malta:
-/// https://github.com/DanIsraelMalta/BiDirectional-Map/blob/master/BiDirectionalMap.h
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
-#include "Krystal.Lib/Core/Detection.hpp"
+#include "Krystal.Lib/Detection/Environment.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/Pair.hpp"
 #include <algorithm>
 #include <assert.h>
 #include <utility>
 
+/// NOTE: Credit to Dan Israel Malta:
+/// https://github.com/DanIsraelMalta/BiDirectional-Map/blob/master/BiDirectionalMap.h
 namespace Krys
 {
   template <typename T>
@@ -91,7 +91,7 @@ namespace Krys
       std::sort(_map.begin(), _map.end(),
                 [](const Item &left, const Item &right) { return (left.first < right.first); });
 
-#ifdef KRYS_BUILD_DEBUG
+#ifdef KRYS_ENV(DEV)
       // alert for duplicate keys
       auto it = std::adjacent_find(_map.begin(), _map.end(), [](const Item &left, const Item &right)
                                    { return (left.first == right.first); });

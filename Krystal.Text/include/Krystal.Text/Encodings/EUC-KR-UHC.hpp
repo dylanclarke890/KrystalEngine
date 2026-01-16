@@ -1,12 +1,14 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Ranges/ADL.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Text/ASCIILiteral.hpp"
 #include "Krystal.Text/Concepts.hpp"
 #include "Krystal.Text/Decode/DecodeResult.hpp"
 #include "Krystal.Text/Encode/EncodeResult.hpp"
 #include "Krystal.Text/Encodings/EncodingTables/EUC-KR-UHC.hpp"
-#include "Krystal.Text/Unicode.hpp"
 #include "Krystal.Text/State.hpp"
+#include "Krystal.Text/Unicode.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys::Text
@@ -16,6 +18,11 @@ namespace Krys::Text
   class basic_euc_kr_uhc
   {
   public:
+    constexpr static inline ::Krys::Text::ASCIILiteral Name = {"EUC-KR"_s};
+    constexpr static inline ::Krys::Array<::Krys::Text::ASCIILiteral, 10> Aliases = {
+      "cseuckr"_s,        "csksc56011987"_s,  "euc-kr"_s,  "iso-ir-149"_s, "korean"_s,
+      "ks_c_5601-1987"_s, "ks_c_5601-1989"_s, "ksc5601"_s, "ksc_5601"_s,   "windows-949"_s};
+
     using code_unit = TCodeUnit;
 
     using code_point = TCodePoint;

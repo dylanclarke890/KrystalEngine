@@ -5,8 +5,6 @@
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Ranges/Algorithm.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Text/ASCIILiteral.hpp"
 
 namespace Krys::Text::detail_traits
 {
@@ -151,14 +149,6 @@ namespace Krys::Text
 
   template <typename T>
   concept IsCharTraitable = ::Krys::Text::detail_traits::is_char_traitable<T>::value;
-
-  /// Gets the name of the encoding type.
-  template <typename TEncoding>
-  constexpr inline ::Krys::Text::ASCIILiteral CodecName = {};
-
-  /// Gets the aliases of the encoding type.
-  template <typename TEncoding>
-  constexpr inline List<::Krys::Text::ASCIILiteral> CodecAliases = {};
 }
 
 namespace std

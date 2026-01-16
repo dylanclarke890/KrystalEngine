@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Text/ASCIILiteral.hpp"
 #include "Krystal.Text/Encodings/EncodingTables/TatarASCII.tables.hpp"
 #include "Krystal.Text/Encodings/Impl/SingleASCIIByteHighBitLookupEncoding.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
@@ -14,6 +15,8 @@ namespace Krys::Text
           &::Krys::Text::EncodingTable::tatar_ascii_index_to_code_point,
           &::Krys::Text::EncodingTable::tatar_ascii_code_point_to_index, TCodeUnit, TCodePoint>
   {
+  public:
+    constexpr static inline ASCIILiteral Name = "TATAR-ASCII";
   };
 
   /// @brief The encoding that matches the TATAR encoding specification ("ASCII" variant, IBM Code Page 866).

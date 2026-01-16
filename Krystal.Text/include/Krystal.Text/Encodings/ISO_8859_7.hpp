@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Text/ASCIILiteral.hpp"
 #include "Krystal.Text/Encodings/EncodingTables/iso_8859_7.tables.hpp"
 #include "Krystal.Text/Encodings/Impl/SingleASCIIByteHighBitLookupEncoding.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
@@ -14,6 +16,12 @@ namespace Krys::Text
           &::Krys::Text::EncodingTable::iso_8859_7_index_to_code_point,
           &::Krys::Text::EncodingTable::iso_8859_7_code_point_to_index, TCodeUnit, TCodePoint>
   {
+  public:
+    constexpr static inline ::Krys::Text::ASCIILiteral Name = "ISO-8859-7"_s;
+    constexpr static inline ::Krys::Array<::Krys::Text::ASCIILiteral, 13> Aliases = {
+      "csisolatingreek"_s, "ecma-118"_s,   "elot_928"_s,        "greek"_s,
+      "greek8"_s,          "iso-8859-7"_s, "iso-ir-126"_s,      "iso8859-7"_s,
+      "iso88597"_s,        "iso_8859-7"_s, "iso_8859-7:1987"_s, "sun_eu_greek"_s};
   };
 
   /// @brief The encoding that matches the ISO/IEC 8859-7 encoding specification.

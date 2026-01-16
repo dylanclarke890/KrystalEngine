@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Text/ASCIILiteral.hpp"
 #include "Krystal.Text/Encodings/EncodingTables/IBM866Cyrillic.tables.hpp"
 #include "Krystal.Text/Encodings/Impl/SingleASCIIByteHighBitLookupEncoding.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
@@ -17,6 +19,10 @@ namespace Krys::Text
           &::Krys::Text::EncodingTable::ibm_866_cyrillic_index_to_code_point,
           &::Krys::Text::EncodingTable::ibm_866_cyrillic_code_point_to_index, TCodeUnit, TCodePoint>
   {
+  public:
+    constexpr static inline ::Krys::Text::ASCIILiteral Name = "IBM866"_s;
+    constexpr static inline ::Krys::Array<::Krys::Text::ASCIILiteral, 4> Aliases = {"cp866"_s, "ibm866"_s,
+                                                                                    "866"_s, "csibm866"_s};
   };
 
   /// @brief An instance of basic_ibm_866_cyrillic for ease of use.

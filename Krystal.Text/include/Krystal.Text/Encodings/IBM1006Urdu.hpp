@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Text/ASCIILiteral.hpp"
 #include "Krystal.Text/Encodings/EncodingTables/IBM1006Urdu.tables.hpp"
 #include "Krystal.Text/Encodings/Impl/SingleByteLookupEncoding.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
@@ -14,6 +15,8 @@ namespace Krys::Text
           &::Krys::Text::EncodingTable::ibm_1006_urdu_index_to_code_point,
           &::Krys::Text::EncodingTable::ibm_1006_urdu_code_point_to_index, TCodeUnit, TCodePoint>
   {
+  public:
+    constexpr static inline ::Krys::Text::ASCIILiteral Name = "IBM-1006_Urdu"_s;
   };
 
   /// @brief The Urdu encoding that matches IBM's Codepage 1006.

@@ -1,9 +1,10 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
-#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
+#include "Krystal.Text/ASCIILiteral.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys::Text
@@ -24,5 +25,8 @@ namespace Krys::Text
     /// @param codePoints The input unicode code points to encode.
     /// @return A list of encoded bytes.
     KRYS_NODISCARD virtual List<byte> Encode(Span<const UnicodeCodePoint> codePoints) const = 0;
+
+    /// @brief Gets the name of the encoding used by this codec.
+    KRYS_NODISCARD virtual ASCIILiteral Name() const noexcept = 0;
   };
 }

@@ -1,10 +1,12 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Hash.hpp"
 #include "Krystal.Lib/Detection/Environment.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Text/ASCII.hpp"
 #include <compare>
+#include <xhash>
 
 namespace Krys::Text
 {
@@ -15,20 +17,20 @@ namespace Krys::Text
     Span<const char> _characters;
 
   public:
-    constexpr ASCIILiteral() noexcept = default;
-    constexpr ASCIILiteral(std::nullptr_t) noexcept : ASCIILiteral()
-    {
-    }
-
-    static constexpr ASCIILiteral FromLiteral(const char *string)
+    static constexpr ASCIILiteral FromLiteral(const char *string) noexcept
     {
       return ASCIILiteral {Span(string, std::char_traits<char>::length(string) + 1)};
+    }
+
+    constexpr ASCIILiteral() noexcept = default;
+
+    constexpr ASCIILiteral(std::nullptr_t) noexcept : ASCIILiteral()
+    {
     }
 
     template <size_t Length>
     consteval ASCIILiteral(const char (&literal)[Length]) : _characters(literal, Length)
     {
-      static_assert(_characters[Length - 1] == '\0');
     }
 
     /// @brief Gets the characters in the literal, including the null terminator.
@@ -73,7 +75,20 @@ namespace Krys::Text
       return _characters[index];
     }
 
-    KRYS_NODISCARD constexpr auto operator<=>(const ASCIILiteral &other) const noexcept = default;
+    KRYS_NODISCARD constexpr bool operator==(const ASCIILiteral &other) const noexcept
+    {
+      if (Length() != other.Length())
+        return false;
+
+      for (size_t i = 0; i < Length(); ++i)
+      {
+        if (CharacterAt(i) != other.CharacterAt(i))
+        {
+          return false;
+        }
+      }
+      return true;
+    }
 
   private:
     constexpr explicit ASCIILiteral(Span<const char> spanWithNullTerminator) noexcept
@@ -92,4 +107,16 @@ namespace Krys::Text
   {
     return ASCIILiteral::FromLiteral(str);
   }
+}
+
+namespace std
+{
+  template <>
+  struct hash<::Krys::Text::ASCIILiteral>
+  {
+    size_t operator()(const ::Krys::Text::ASCIILiteral &literal) const noexcept
+    {
+      return ::Krys::Hash::fnv1a_32(literal.Characters(), literal.Length());
+    }
+  };
 }

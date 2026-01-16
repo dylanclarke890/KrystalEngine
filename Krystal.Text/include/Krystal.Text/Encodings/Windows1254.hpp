@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Text/ASCIILiteral.hpp"
 #include "Krystal.Text/Encodings/EncodingTables/Windows1254.tables.hpp"
 #include "Krystal.Text/Encodings/Impl/SingleASCIIByteHighBitLookupEncoding.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
@@ -14,6 +16,12 @@ namespace Krys::Text
           &::Krys::Text::EncodingTable::windows_1254_index_to_code_point,
           &::Krys::Text::EncodingTable::windows_1254_code_point_to_index, TCodeUnit, TCodePoint>
   {
+  public:
+    constexpr static inline ::Krys::Text::ASCIILiteral Name = {"windows-1254"_s};
+    constexpr static inline ::Krys::Array<::Krys::Text::ASCIILiteral, 12> Aliases = {
+      "x-cp1254"_s, "windows-1254"_s, "csisolatin5"_s,     "iso-8859-9"_s, "iso-ir-148"_s, "iso8859-9"_s,
+      "iso88599"_s, "iso_8859-9"_s,   "iso_8859-9:1989"_s, "l5"_s,         "latin5"_s,     "cp1254"_s,
+    };
   };
 
   /// @brief The encoding that matches Microsoft Windows's Codepage 1254.

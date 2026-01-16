@@ -1,11 +1,12 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Ranges/ADL.hpp"
+#include "Krystal.Text/ASCIILiteral.hpp"
 #include "Krystal.Text/Concepts.hpp"
 #include "Krystal.Text/Decode/DecodeResult.hpp"
 #include "Krystal.Text/Encode/EncodeResult.hpp"
-#include "Krystal.Text/Unicode.hpp"
 #include "Krystal.Text/State.hpp"
+#include "Krystal.Text/Unicode.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys::Text
@@ -18,6 +19,8 @@ namespace Krys::Text
   class basic_iso_8859_1
   {
   public:
+    constexpr static inline ::Krys::Text::ASCIILiteral Name = "ISO-8859-1"_s;
+
     /// @brief The individual units that result from an encode operation or are used as input to a decode
     /// operation.
     using code_unit = TCodeUnit;

@@ -1,12 +1,14 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Ranges/ADL.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Text/ASCIILiteral.hpp"
 #include "Krystal.Text/Concepts.hpp"
 #include "Krystal.Text/Decode/DecodeResult.hpp"
 #include "Krystal.Text/Encode/EncodeResult.hpp"
 #include "Krystal.Text/Encodings/EncodingTables/Big5-HKSCS.hpp"
-#include "Krystal.Text/Unicode.hpp"
 #include "Krystal.Text/State.hpp"
+#include "Krystal.Text/Unicode.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys::Text
@@ -16,6 +18,10 @@ namespace Krys::Text
   class basic_big5_hkscs
   {
   public:
+    constexpr static inline ::Krys::Text::ASCIILiteral Name = {"Big5"_s};
+    constexpr static inline ::Krys::Array<::Krys::Text::ASCIILiteral, 5> Aliases = {
+      "big5"_s, "big5-hkscs"_s, "cn-big5"_s, "csbig5"_s, "x-x-big5"_s};
+
     using code_unit = TCodeUnit;
 
     using code_point = TCodePoint;
