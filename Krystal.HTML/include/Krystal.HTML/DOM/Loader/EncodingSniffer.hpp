@@ -76,31 +76,46 @@ namespace Krys::HTML::DOM
     /// @brief Checks if 'bytes' is the start of a comment ('<!--'), using 'i' as an offset.
     KRYS_NODISCARD static bool IsCommentStart(Span<const byte> bytes, size_t i) noexcept
     {
-      return bytes[i + 0] == byte {'<'} && bytes[i + 1] == byte {'!'} && bytes[i + 2] == byte {'-'}
-             && bytes[i + 3] == byte {'-'};
+      if ((i + 3uz) >= bytes.size())
+      {
+        return false;
+      }
+
+      return bytes[i + 0uz] == byte {'<'} && bytes[i + 1uz] == byte {'!'} && bytes[i + 2uz] == byte {'-'}
+             && bytes[i + 3uz] == byte {'-'};
     }
 
     /// @brief Checks if 'bytes' is the end of a comment ('-->'), using 'i' as an offset.
     KRYS_NODISCARD static bool IsCommentEnd(Span<const byte> bytes, size_t i) noexcept
     {
-      return bytes[i - 2] == byte {'-'} && bytes[i - 1] == byte {'-'} && bytes[i - 0] == byte {'>'};
+      if (i < 2uz || i >= bytes.size())
+      {
+        return false;
+      }
+
+      return bytes[i - 2uz] == byte {'-'} && bytes[i - 1uz] == byte {'-'} && bytes[i - 0uz] == byte {'>'};
     }
 
     /// @brief Checks if 'bytes' is the end of a meta tag ('<meta( |/)'), using 'i' as an offset.
     KRYS_NODISCARD static bool IsMetaTagStart(Span<const byte> bytes, size_t i) noexcept
     {
-      // case-insensitive "meta" + space or /
-      return bytes[i + 0] == byte {'<'} && Text::ToASCIILower(bytes[i + 1]) == byte {'m'}
-             && Text::ToASCIILower(bytes[i + 2]) == byte {'e'}
-             && Text::ToASCIILower(bytes[i + 3]) == byte {'t'}
-             && Text::ToASCIILower(bytes[i + 4]) == byte {'a'}
-             && (Text::IsASCIIWhitespace(bytes[i + 5]) || bytes[i + 5] == byte {'/'});
+      if ((i + 5uz) >= bytes.size())
+      {
+        return false;
+      }
+
+      // case-insensitive "<meta" + space or /
+      return bytes[i + 0uz] == byte {'<'} && Text::ToASCIILower(bytes[i + 1uz]) == byte {'m'}
+             && Text::ToASCIILower(bytes[i + 2uz]) == byte {'e'}
+             && Text::ToASCIILower(bytes[i + 3uz]) == byte {'t'}
+             && Text::ToASCIILower(bytes[i + 4uz]) == byte {'a'}
+             && (Text::IsASCIIWhitespace(bytes[i + 5uz]) || bytes[i + 5uz] == byte {'/'});
     }
 
     KRYS_NODISCARD static Text::ICodec *PrescanMetaCharset(Span<const byte> bytes,
                                                            const Text::CodecRegistry &codecRegistry) noexcept
     {
-      for (size_t i = 0; i < bytes.size(); i++)
+      for (size_t i = 0uz; i < bytes.size(); i++)
       {
         // Skip comments
         if (IsCommentStart(bytes, i))
@@ -184,9 +199,14 @@ namespace Krys::HTML::DOM
         // We're reading some other element that's not a meta tag, skip it.
         if (bytes[i] == byte {'<'})
         {
-          if (Text::IsASCIIAlpha(bytes[i + 1]))
+          if (i + 1uz >= bytes.size())
           {
-            for (i += 2; i < bytes.size(); i++)
+            break;
+          }
+
+          if (Text::IsASCIIAlpha(bytes[i + 1uz]))
+          {
+            for (i += 2uz; i < bytes.size(); i++)
             {
               if (Text::IsASCIIWhitespace(bytes[i]) || bytes[i] == byte {'>'})
               {
@@ -249,14 +269,14 @@ namespace Krys::HTML::DOM
       }
 
       // return early if no '=' follows or tag closed
-      if (bytes[i] != byte {'='} || bytes[i] == byte {'/'} || bytes[i] == byte {'>'})
+      if (bytes[i] != byte {'='})
       {
         return {name, value};
       }
       i++;
 
       Text::SkipASCIIWhitespace(bytes, i);
-      if (i >= bytes.size() || bytes[i] == byte {'>'})
+      if (i >= bytes.size() || bytes[i] == byte {'/'} || bytes[i] == byte {'>'})
       {
         return {name, value};
       }
@@ -307,13 +327,17 @@ namespace Krys::HTML::DOM
       while (true)
       {
         size_t indexOfCharset = meta.find(charset, position);
-        if (indexOfCharset == utf8_string::npos)
+        if (indexOfCharset == string::npos)
         {
           return "";
         }
 
         position += indexOfCharset + charset.size();
         Text::SkipASCIIWhitespace(Span<const char>(meta), position);
+        if (position >= meta.size())
+        {
+          return "";
+        }
 
         if (meta[position] != '=')
         {
@@ -326,10 +350,15 @@ namespace Krys::HTML::DOM
         break;
       }
 
+      if (position >= meta.size())
+      {
+        return "";
+      }
+
       if (meta[position] == '"' || meta[position] == '\'')
       {
         const size_t closeQuote = meta.find(meta[position], position + 1);
-        if (closeQuote != utf8_string::npos)
+        if (closeQuote != string::npos)
         {
           return meta.substr(position + 1, closeQuote);
         }
