@@ -13,6 +13,7 @@ namespace Krys::Text
   template <typename TEncoding, Endian::Type TEndian>
   struct EncodingSchemeTraits
   {
+    using type = void;
   };
 }
 
@@ -28,9 +29,15 @@ namespace Krys::Text::detail
     { TEncoding::Aliases };
   };
 
+  
   template <typename TEncoding>
-  concept HasEncodingSchemeTraits =
-    requires { typename EncodingSchemeTraits<TEncoding, Endian::Type::System>::type; };
+  concept HasEndianness = requires {
+    { TEncoding::Endianness };
+  };
+
+  template <typename TEncoding>
+  concept HasEncodingSchemeTraits = HasEndianness<TEncoding> &&
+    requires { EncodingSchemeTraits<typename TEncoding::encoding_type, TEncoding::Endianness>::Name; };
 }
 
 namespace Krys::Text
