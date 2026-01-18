@@ -34,7 +34,7 @@ namespace Krys::Tests
   TEST_CASE("TextResourceDecoder decodes basic UTF-8", "[HTML][TextResourceDecoder]")
   {
     auto registry = MakeRegistry();
-    auto decoder = TextResourceDecoder::Create(registry, ContentType::PlainText, "");
+    auto decoder = TextResourceDecoder(registry, ContentType::PlainText, "");
 
     auto bytes = ToBytes("hello world");
     utf32_string out = decoder.Decode(bytes, TextResourceDecoder::IsFinalChunk(true));
@@ -45,7 +45,7 @@ namespace Krys::Tests
   TEST_CASE("TextResourceDecoder strips UTF-8 BOM", "[HTML][TextResourceDecoder]")
   {
     auto registry = MakeRegistry();
-    auto decoder = TextResourceDecoder::Create(registry, ContentType::PlainText, "");
+    auto decoder = TextResourceDecoder(registry, ContentType::PlainText, "");
 
     List<byte> bytes = {byte {0xEF}, byte {0xBB}, byte {0xBF}, byte {'h'}, byte {'i'}};
 
@@ -56,7 +56,7 @@ namespace Krys::Tests
   TEST_CASE("TextResourceDecoder waits for BOM when chunk too small", "[HTML][TextResourceDecoder]")
   {
     auto registry = MakeRegistry();
-    auto decoder = TextResourceDecoder::Create(registry, ContentType::PlainText, "");
+    auto decoder = TextResourceDecoder(registry, ContentType::PlainText, "");
 
     // Only first byte of BOM
     List<byte> part1 = {byte {0xEF}};
@@ -74,7 +74,7 @@ namespace Krys::Tests
             "[HTML][TextResourceDecoder]")
   {
     auto registry = MakeRegistry();
-    auto decoder = TextResourceDecoder::Create(registry, ContentType::PlainText, "");
+    auto decoder = TextResourceDecoder(registry, ContentType::PlainText, "");
 
     // U+20AC (€) = E2 82 AC
     List<byte> part1 = {byte {0xE2}, byte {0x82}};
@@ -91,7 +91,7 @@ namespace Krys::Tests
             "[HTML][TextResourceDecoder]")
   {
     auto registry = MakeRegistry();
-    auto decoder = TextResourceDecoder::Create(registry, ContentType::PlainText, "");
+    auto decoder = TextResourceDecoder(registry, ContentType::PlainText, "");
 
     utf8_string test = u8"€";
     List<byte> bytes = {static_cast<byte>(test[0]), static_cast<byte>(test[1])}; // missing last byte
@@ -104,7 +104,7 @@ namespace Krys::Tests
   TEST_CASE("TextResourceDecoder detects HTML meta charset after buffering", "[HTML][TextResourceDecoder]")
   {
     auto registry = MakeRegistry();
-    auto decoder = TextResourceDecoder::Create(registry, ContentType::HTML, "");
+    auto decoder = TextResourceDecoder(registry, ContentType::HTML, "");
 
     string html = "<html><head>"
                   "<meta charset=\"UTF-8\">"
@@ -120,7 +120,7 @@ namespace Krys::Tests
             "[HTML][TextResourceDecoder]")
   {
     auto registry = MakeRegistry();
-    auto decoder = TextResourceDecoder::Create(registry, ContentType::HTML, "");
+    auto decoder = TextResourceDecoder(registry, ContentType::HTML, "");
 
     string partial = "<meta charset=\"UTF-8\">";
     auto bytes = ToBytes(partial);
@@ -135,7 +135,7 @@ namespace Krys::Tests
   TEST_CASE("TextResourceDecoder freezes encoding after decoding starts", "[HTML][TextResourceDecoder]")
   {
     auto registry = MakeRegistry();
-    auto decoder = TextResourceDecoder::Create(registry, ContentType::HTML, "");
+    auto decoder = TextResourceDecoder(registry, ContentType::HTML, "");
 
     auto first = ToBytes("hello ");
     auto second = ToBytes("<meta charset=\"UTF-16\">world");

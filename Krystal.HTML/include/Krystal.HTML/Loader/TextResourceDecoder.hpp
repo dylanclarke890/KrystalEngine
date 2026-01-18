@@ -45,36 +45,31 @@ namespace Krys::HTML
     List<byte> _buffer;
 
   public:
-    KRYS_NODISCARD static TextResourceDecoder Create(Text::CodecRegistry &registry, ContentType contentType,
-                                      const string &charset) noexcept
+    TextResourceDecoder(Text::CodecRegistry &registry, ContentType contentType,
+                        const string &charset) noexcept
+        : TextResourceDecoder(registry, contentType)
     {
-      TextResourceDecoder decoder(registry, contentType);
-
       if (!charset.empty())
       {
         if (auto *codec = registry.Find(charset))
         {
-          decoder._decoder = codec;
-          decoder._source = EncodingSource::Transport;
-          decoder._confidence = Confidence::Certain;
+          _decoder = codec;
+          _source = EncodingSource::Transport;
+          _confidence = Confidence::Certain;
         }
       }
-
-      return decoder;
     }
 
-    KRYS_NODISCARD static TextResourceDecoder Create(Text::CodecRegistry &registry, const string &mimeType,
-                                      const string &charset) noexcept
+    TextResourceDecoder(Text::CodecRegistry &registry, const string &mimeType, const string &charset) noexcept
+        : TextResourceDecoder(registry, DetermineContentType(mimeType), charset)
     {
-      ContentType contentType = DetermineContentType(mimeType);
-      return TextResourceDecoder::Create(registry, contentType, charset);
     }
 
     /// @see https://encoding.spec.whatwg.org/#utf-8-decode
     KRYS_NODISCARD static utf32_string TextFromUTF8(Text::CodecRegistry &registry, Span<const byte> data)
     {
       constexpr Array<byte, 3> byteOrderMarkUTF8 = {byte {0xEF}, byte {0xBB}, byte {0xBF}};
-      auto decoder = TextResourceDecoder::Create(registry, "text/plain", "UTF-8");
+      auto decoder = TextResourceDecoder(registry, "text/plain", "UTF-8");
       if (!ByteUtils::Compare<3>(data, byteOrderMarkUTF8))
       {
         (void)decoder.Decode(byteOrderMarkUTF8);
