@@ -34,7 +34,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML\HTMLDocument.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Utils\IsFinalChunk.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLDocumentParser.hpp" />
     <ClInclude Include="include\Krystal.HTML\Loader\ContentType.hpp" />
     <ClInclude Include="include\Krystal.HTML\Loader\EncodingSource.hpp" />

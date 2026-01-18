@@ -3,9 +3,9 @@
 #include "Krystal.HTML/Loader/ContentType.hpp"
 #include "Krystal.HTML/Loader/EncodingSource.hpp"
 #include "Krystal.HTML/Loader/HTMLEncodingSniffer.hpp"
-#include "Krystal.HTML/Utils/IsFinalChunk.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 #include "Krystal.Lib/Utils/ReferenceWrapper.hpp"
 #include "Krystal.Text/ASCII.hpp"
 #include "Krystal.Text/Codecs/ICodec.hpp"
@@ -15,6 +15,11 @@
 
 namespace Krys::HTML
 {
+  struct IsFinalChunk : StronglyTypedBool<IsFinalChunk>
+  {
+    using StronglyTypedBool::StronglyTypedBool;
+  };
+
   class TextResourceDecoder
   {
   public:
