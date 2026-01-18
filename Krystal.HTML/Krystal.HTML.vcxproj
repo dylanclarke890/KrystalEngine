@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="include\Krystal.HTML\Parser\HTMLEntityNames.in" />
+    <Text Include="data\HTMLEntityNames.in" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Krystal.IO\Krystal.IO.vcxproj">
@@ -33,21 +33,36 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.HTML\ContainerNode.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Document.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Element.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLDocument.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Parser\AtomHTMLToken.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Parser\HTMLActiveFormattingElementList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLDocumentParser.hpp" />
     <ClInclude Include="include\Krystal.HTML\Loader\ContentType.hpp" />
     <ClInclude Include="include\Krystal.HTML\Loader\EncodingSource.hpp" />
     <ClInclude Include="include\Krystal.HTML\Loader\TextResourceDecoder.hpp" />
     <ClInclude Include="include\Krystal.HTML\Loader\HTMLEncodingSniffer.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Parser\HTMLElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLInputStream.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Parser\HTMLOpenElementStack.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Parser\HTMLElementStackItem.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Parser\HTMLToken.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLTokenizer.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLTreeBuilder.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Parser\HTMLConstructionSite.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\InsertionMode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\TokenizerState.hpp" />
     <ClInclude Include="include\Krystal.HTML\Context.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp" />
+    <ClCompile Include="src\Node.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\HTMLTagNames.in" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

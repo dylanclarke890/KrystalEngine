@@ -3,7 +3,7 @@
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
-namespace Krys::HTML::Parser
+namespace Krys::HTML
 {
   enum class TokenizerState : uint8
   {
@@ -43,5 +43,5 @@ namespace Krys::HTML::Parser
 namespace Krys
 {
   template <>
-  constexpr underlying_t<HTML::Parser::TokenizerState> OrdinalCount<HTML::Parser::TokenizerState> = 30;
+  constexpr underlying_t<HTML::TokenizerState> OrdinalCount<HTML::TokenizerState> = 30;
 }

@@ -86,6 +86,7 @@ namespace Krys::HTML
         return true;
       }
 
+      /// @see https://html.spec.whatwg.org/#preprocessing-the-input-stream
       while (true)
       {
         if (_nextInputCharacter == '\n' && _skipNextNewLine)

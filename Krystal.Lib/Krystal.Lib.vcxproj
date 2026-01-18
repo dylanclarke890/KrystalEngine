@@ -148,6 +148,7 @@
     <ClInclude Include="include\Krystal.Lib\Mixins\NonCopyMovable.hpp" />
     <ClInclude Include="include\Krystal.Lib\Mixins\NonMovable.hpp" />
     <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RawPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\SharedPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\UniquePtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtr.hpp" />

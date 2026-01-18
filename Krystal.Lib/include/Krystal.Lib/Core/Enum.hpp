@@ -80,7 +80,14 @@ namespace Krys
   template <HasOrdinality TEnum>
   KRYS_NODISCARD constexpr uint32 BitCount() noexcept
   {
-    return std::bit_width(static_cast<underlying_t<TEnum>>(OrdinalCount<TEnum> - 1u));
+    if constexpr (EnableEnumFlags<TEnum>)
+    {
+      return std::bit_width(static_cast<underlying_t<TEnum>>(OrdinalCount<TEnum>));
+    }
+    else
+    {
+      return std::bit_width(static_cast<underlying_t<TEnum>>(OrdinalCount<TEnum> - 1u));
+    }
   }
 
   template <IsFlagsEnum TEnum>
