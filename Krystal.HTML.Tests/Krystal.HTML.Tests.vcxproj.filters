@@ -24,5 +24,8 @@
     <ClCompile Include="tests\DOM\Loader\TextResourceDecoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tests\DOM\Parser\HTMLInputStream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
