@@ -32,8 +32,7 @@ namespace Krys::Text::Impl
 
     constexpr Span<const code_unit, 1> ReplacementCodeUnits() const noexcept
     {
-      return Span<const code_unit, 1>(::Krys::Text::Unicode::ASCIIReplacement<code_unit>.data(),
-                                      ::Krys::Text::Unicode::ASCIIReplacement<code_unit>.size());
+      return Span<const code_unit, 1>(&::Krys::Text::Unicode::ASCIIReplacement<code_unit>, 1);
     }
 
     template <typename TInput, typename TOutput, typename TErrorHandler>

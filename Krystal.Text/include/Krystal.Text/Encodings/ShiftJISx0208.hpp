@@ -35,8 +35,7 @@ namespace Krys::Text
 
     constexpr Span<const code_unit, 1> ReplacementCodeUnits() const noexcept
     {
-      return Span<const code_unit, 1>(::Krys::Text::Unicode::ASCIIReplacement<code_unit>.data(),
-                                      ::Krys::Text::Unicode::ASCIIReplacement<code_unit>.size());
+      return Span<const code_unit, 1>(&::Krys::Text::Unicode::ASCIIReplacement<code_unit>, 1);
     }
 
     using is_decode_injective = std::true_type;
@@ -47,7 +46,7 @@ namespace Krys::Text
     {
       using TSubInput = ::Krys::Ranges::csubrange_for_t<remove_ref_t<TInput>>;
       using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
-      using TResult = DecodeResult<TSubInput, TSubOutput, s>;
+      using TResult = DecodeResult<TSubInput, TSubOutput, state>;
       ;
 
       auto inIt = ::Krys::Ranges::cbegin(input);

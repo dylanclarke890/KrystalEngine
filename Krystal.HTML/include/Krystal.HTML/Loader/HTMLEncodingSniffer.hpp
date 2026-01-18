@@ -16,104 +16,15 @@
 #include "Krystal.Text/EncodingId.hpp"
 #include "Krystal.Text/Unicode.hpp"
 
-namespace Krys::HTML::DOM
+namespace Krys::HTML
 {
-  struct EncodingSniffer : NonCopyMovable<EncodingSniffer>
+  struct HTMLEncodingSniffer : NonCopyMovable<HTMLEncodingSniffer>
   {
-    EncodingSniffer() = delete;
-    ~EncodingSniffer() = delete;
+    HTMLEncodingSniffer() = delete;
+    ~HTMLEncodingSniffer() = delete;
 
     KRYS_NODISCARD static Text::ICodec *Detect(Span<const byte> bytes,
-                                               const Text::CodecRegistry &codecRegistry,
-                                               Text::ASCIILiteral transportEncoding,
-                                               Text::ASCIILiteral fallbackEncoding) noexcept
-    {
-      if (auto encoding = GetBOMEncoding(bytes, codecRegistry); encoding != nullptr)
-      {
-        return encoding;
-      }
-
-      if (!transportEncoding.IsEmpty())
-      {
-        if (auto encoding = codecRegistry.Find(transportEncoding); encoding != nullptr)
-        {
-          return encoding;
-        }
-      }
-
-      if (auto encoding = PrescanMetaCharset(bytes, codecRegistry); encoding != nullptr)
-      {
-        return encoding;
-      }
-
-      return codecRegistry.Find(fallbackEncoding);
-    }
-
-  private:
-    struct AttributeResult
-    {
-      string Name;
-      string Value;
-    };
-
-    KRYS_NODISCARD static Text::ICodec *GetBOMEncoding(Span<const byte> bytes,
-                                                       const Text::CodecRegistry &codecRegistry) noexcept
-    {
-      auto bom = Text::BOM::DetectByteOrderMark(bytes);
-
-      using namespace Krys::Text;
-
-      switch (bom)
-      {
-        case Text::EncodingId::utf8:    return codecRegistry.Find("utf-8"_s);
-        case Text::EncodingId::utf16be: return codecRegistry.Find("utf-16be"_s);
-        case Text::EncodingId::utf16le: return codecRegistry.Find("utf-16le"_s);
-      }
-
-      return nullptr;
-    }
-
-    /// @brief Checks if 'bytes' is the start of a comment ('<!--'), using 'i' as an offset.
-    KRYS_NODISCARD static bool IsCommentStart(Span<const byte> bytes, size_t i) noexcept
-    {
-      if ((i + 3uz) >= bytes.size())
-      {
-        return false;
-      }
-
-      return bytes[i + 0uz] == byte {'<'} && bytes[i + 1uz] == byte {'!'} && bytes[i + 2uz] == byte {'-'}
-             && bytes[i + 3uz] == byte {'-'};
-    }
-
-    /// @brief Checks if 'bytes' is the end of a comment ('-->'), using 'i' as an offset.
-    KRYS_NODISCARD static bool IsCommentEnd(Span<const byte> bytes, size_t i) noexcept
-    {
-      if (i < 2uz || i >= bytes.size())
-      {
-        return false;
-      }
-
-      return bytes[i - 2uz] == byte {'-'} && bytes[i - 1uz] == byte {'-'} && bytes[i - 0uz] == byte {'>'};
-    }
-
-    /// @brief Checks if 'bytes' is the end of a meta tag ('<meta( |/)'), using 'i' as an offset.
-    KRYS_NODISCARD static bool IsMetaTagStart(Span<const byte> bytes, size_t i) noexcept
-    {
-      if ((i + 5uz) >= bytes.size())
-      {
-        return false;
-      }
-
-      // case-insensitive "<meta" + space or /
-      return bytes[i + 0uz] == byte {'<'} && Text::ToASCIILower(bytes[i + 1uz]) == byte {'m'}
-             && Text::ToASCIILower(bytes[i + 2uz]) == byte {'e'}
-             && Text::ToASCIILower(bytes[i + 3uz]) == byte {'t'}
-             && Text::ToASCIILower(bytes[i + 4uz]) == byte {'a'}
-             && (Text::IsASCIIWhitespace(bytes[i + 5uz]) || bytes[i + 5uz] == byte {'/'});
-    }
-
-    KRYS_NODISCARD static Text::ICodec *PrescanMetaCharset(Span<const byte> bytes,
-                                                           const Text::CodecRegistry &codecRegistry) noexcept
+                                               const Text::CodecRegistry &codecRegistry) noexcept
     {
       for (size_t i = 0uz; i < bytes.size(); i++)
       {
@@ -159,7 +70,7 @@ namespace Krys::HTML::DOM
             }
             else if (attribute.Name == "content")
             {
-              if (!charset.empty())
+              if (charset.empty())
               {
                 charset = ExtractCharacterEncodingFromMeta(attribute.Value, codecRegistry);
                 if (!charset.empty())
@@ -233,6 +144,52 @@ namespace Krys::HTML::DOM
         }
       }
       return nullptr;
+    }
+
+  private:
+    struct AttributeResult
+    {
+      string Name;
+      string Value;
+    };
+
+    /// @brief Checks if 'bytes' is the start of a comment ('<!--'), using 'i' as an offset.
+    KRYS_NODISCARD static bool IsCommentStart(Span<const byte> bytes, size_t i) noexcept
+    {
+      if ((i + 3uz) >= bytes.size())
+      {
+        return false;
+      }
+
+      return bytes[i + 0uz] == byte {'<'} && bytes[i + 1uz] == byte {'!'} && bytes[i + 2uz] == byte {'-'}
+             && bytes[i + 3uz] == byte {'-'};
+    }
+
+    /// @brief Checks if 'bytes' is the end of a comment ('-->'), using 'i' as an offset.
+    KRYS_NODISCARD static bool IsCommentEnd(Span<const byte> bytes, size_t i) noexcept
+    {
+      if (i < 2uz || i >= bytes.size())
+      {
+        return false;
+      }
+
+      return bytes[i - 2uz] == byte {'-'} && bytes[i - 1uz] == byte {'-'} && bytes[i - 0uz] == byte {'>'};
+    }
+
+    /// @brief Checks if 'bytes' is the end of a meta tag ('<meta( |/)'), using 'i' as an offset.
+    KRYS_NODISCARD static bool IsMetaTagStart(Span<const byte> bytes, size_t i) noexcept
+    {
+      if ((i + 5uz) >= bytes.size())
+      {
+        return false;
+      }
+
+      // case-insensitive "<meta" + space or /
+      return bytes[i + 0uz] == byte {'<'} && Text::ToASCIILower(bytes[i + 1uz]) == byte {'m'}
+             && Text::ToASCIILower(bytes[i + 2uz]) == byte {'e'}
+             && Text::ToASCIILower(bytes[i + 3uz]) == byte {'t'}
+             && Text::ToASCIILower(bytes[i + 4uz]) == byte {'a'}
+             && (Text::IsASCIIWhitespace(bytes[i + 5uz]) || bytes[i + 5uz] == byte {'/'});
     }
 
     KRYS_NODISCARD static AttributeResult GetAttribute(Span<const byte> bytes, size_t &i)
@@ -341,7 +298,7 @@ namespace Krys::HTML::DOM
 
         if (meta[position] != '=')
         {
-          position--;
+          position = indexOfCharset + 1;
           continue;
         }
 

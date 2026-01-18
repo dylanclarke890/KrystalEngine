@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Ranges/Range.hpp"
 #include "Krystal.Lib/Ranges/Reconstruct.hpp"
@@ -11,10 +12,10 @@
 #include "Krystal.Text/Encode/EncodeResult.hpp"
 #include "Krystal.Text/EncodingError.hpp"
 #include "Krystal.Text/Handlers/PassThroughHandler.hpp"
-#include "Krystal.Text/Unicode.hpp"
 #include "Krystal.Text/IsUnicodeCodePoint.hpp"
 #include "Krystal.Text/SkipInputError.hpp"
 #include "Krystal.Text/State.hpp"
+#include "Krystal.Text/Unicode.hpp"
 #include <climits>
 #include <cstddef>
 #include <utility>
@@ -304,6 +305,21 @@ namespace Krys::Text::Handlers
     }
   }
 
+  enum class ReplacementPolicy
+  {
+    Invalid = 1 << 0,
+    Incomplete = 1 << 1,
+  };
+}
+
+namespace Krys
+{
+  template <>
+  inline constexpr bool EnableEnumFlags<::Krys::Text::Handlers::ReplacementPolicy> = true;
+}
+
+namespace Krys::Text::Handlers
+{
   /// @brief An error handler that replaces bad code points and code units with a chosen code point / code
   /// unit sequence.
   /// @remarks This class hooks into the encodings passed as the first parameter to the error handling
@@ -315,6 +331,7 @@ namespace Krys::Text::Handlers
   /// `std::optional` is filled) it will be used. Otherwise, if it is not engaged, then it will explicitly
   /// fall back to attempt to insert the default replacement character `U`+FFFD (<tt>U'�'</tt>) or <tt>?</tt>
   /// character. If the output is out of room for the desired object, then nothing will be inserted at all.
+  template <ReplacementPolicy Policy = ReplacementPolicy::Invalid | ReplacementPolicy::Incomplete>
   class ReplacementHandler
   {
   private:
@@ -516,6 +533,22 @@ namespace Krys::Text::Handlers
         return result;
       }
 
+      if constexpr (!HasFlag(Policy, ReplacementPolicy::Invalid))
+      {
+        if (result.ErrorCode == EncodingError::InvalidSequence)
+        {
+          return result; // BAIL
+        }
+      }
+
+      if constexpr (!HasFlag(Policy, ReplacementPolicy::Incomplete))
+      {
+        if (result.ErrorCode == EncodingError::IncompleteSequence)
+        {
+          return result; // BAIL
+        }
+      }
+
       return ::Krys::Text::SkipInputError(encoding, this->EncodeReplace(encoding, std::move(result)),
                                           inputProgress, outputProgress);
     }
@@ -540,6 +573,22 @@ namespace Krys::Text::Handlers
       if (result.ErrorCode == EncodingError::InsufficientOutputSpace)
       {
         return result; // BAIL
+      }
+
+      if constexpr (!HasFlag(Policy, ReplacementPolicy::Invalid))
+      {
+        if (result.ErrorCode == EncodingError::InvalidSequence)
+        {
+          return result; // BAIL
+        }
+      }
+
+      if constexpr (!HasFlag(Policy, ReplacementPolicy::Incomplete))
+      {
+        if (result.ErrorCode == EncodingError::IncompleteSequence)
+        {
+          return result; // BAIL
+        }
       }
 
       return ::Krys::Text::SkipInputError(encoding, this->DecodeReplace(encoding, std::move(result)),

@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="include\Krystal.HTML\DOM\Parser\HTMLEntityNames.in" />
+    <Text Include="include\Krystal.HTML\Parser\HTMLEntityNames.in" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Krystal.IO\Krystal.IO.vcxproj">
@@ -33,13 +33,17 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.HTML\DOM\Loader\ByteStreamDecoder.hpp" />
-    <ClInclude Include="include\Krystal.HTML\DOM\Loader\EncodingSniffer.hpp" />
-    <ClInclude Include="include\Krystal.HTML\DOM\Parser\InsertionMode.hpp" />
-    <ClInclude Include="include\Krystal.HTML\DOM\Parser\TokenizerState.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Parser\HTMLDocumentParser.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Loader\ContentType.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Loader\EncodingSource.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Loader\TextResourceDecoder.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Loader\HTMLEncodingSniffer.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Parser\InsertionMode.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Parser\TokenizerState.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Context.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\placeholder.cpp" />
+    <ClCompile Include="src\Context.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

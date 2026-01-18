@@ -15,24 +15,36 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="include\Krystal.HTML\DOM\Parser\HTMLEntityNames.in" />
+    <Text Include="include\Krystal.HTML\Parser\HTMLEntityNames.in" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.HTML\DOM\Loader\EncodingSniffer.hpp">
+    <ClInclude Include="include\Krystal.HTML\Loader\HTMLEncodingSniffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\DOM\Parser\InsertionMode.hpp">
+    <ClInclude Include="include\Krystal.HTML\Parser\InsertionMode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\DOM\Parser\TokenizerState.hpp">
+    <ClInclude Include="include\Krystal.HTML\Parser\TokenizerState.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\DOM\Loader\ByteStreamDecoder.hpp">
+    <ClInclude Include="include\Krystal.HTML\Loader\TextResourceDecoder.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Loader\ContentType.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Loader\EncodingSource.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Context.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Parser\HTMLDocumentParser.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\placeholder.cpp">
+    <ClCompile Include="src\Context.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

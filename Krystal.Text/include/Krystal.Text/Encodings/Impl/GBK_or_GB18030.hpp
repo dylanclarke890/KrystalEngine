@@ -7,8 +7,8 @@
 #include "Krystal.Text/Decode/DecodeResult.hpp"
 #include "Krystal.Text/Encode/EncodeResult.hpp"
 #include "Krystal.Text/Encodings/EncodingTables/GB18030.tables.hpp"
-#include "Krystal.Text/Unicode.hpp"
 #include "Krystal.Text/State.hpp"
+#include "Krystal.Text/Unicode.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 #include <climits>
 
@@ -49,8 +49,7 @@ namespace Krys::Text::Encodings::Impl
     {
       if constexpr (IsGBK)
       {
-        return Span<const code_unit, 1>(::Krys::Text::Unicode::ASCIIReplacement<code_unit>.data(),
-                                        ::Krys::Text::Unicode::ASCIIReplacement<code_unit>.size());
+        return Span<const code_unit, 1>(&::Krys::Text::Unicode::ASCIIReplacement<code_unit>, 1);
       }
       else
       {
@@ -60,12 +59,11 @@ namespace Krys::Text::Encodings::Impl
     }
 
     /// @brief A fixed-size replacement for either the GBK or GB18030 encoding.
-    constexpr Span<const code_point, 1> ReplacementCodePoints() const noexcept
+    constexpr Span<const code_point, IsGBK ? 1 : 4> ReplacementCodePoints() const noexcept
     {
       if constexpr (IsGBK)
       {
-        return Span<const code_point, 1>(::Krys::Text::Unicode::ASCIIReplacement<code_point>.data(),
-                                         ::Krys::Text::Unicode::ASCIIReplacement<code_point>.size());
+        return Span<const code_point, 1>(&::Krys::Text::Unicode::ASCIIReplacement<code_point>, 1);
       }
       else
       {

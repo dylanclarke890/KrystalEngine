@@ -158,7 +158,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="catch_main.cpp" />
-    <ClCompile Include="tests\DOM\Loader\EncodingSniffer.cpp" />
+    <ClCompile Include="tests\DOM\Loader\HTMLEncodingSniffer.cpp" />
+    <ClCompile Include="tests\DOM\Loader\TextResourceDecoder.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

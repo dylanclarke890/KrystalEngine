@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/DOM/Loader/EncodingSniffer.hpp"
+﻿#include "Krystal.HTML/Loader/HTMLEncodingSniffer.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Text/Codecs/BasicCodec.hpp"
@@ -21,10 +21,10 @@ namespace
 
 namespace Krys::Tests
 {
-  using namespace Krys::HTML::DOM;
+  using namespace Krys::HTML;
   using namespace Krys::Text;
 
-  TEST_CASE("EncodingSniffer(Detect)", "[HTML][DOM][Loader][EncodingSniffer]")
+  TEST_CASE("HTMLEncodingSniffer(Detect)", "[HTML][DOM][Loader][HTMLEncodingSniffer]")
   {
     CodecRegistry registry;
     registry.Register<BasicCodec<basic_utf8<byte>>>();
@@ -32,57 +32,14 @@ namespace Krys::Tests
     registry.Register<BasicCodec<utf16_be_t>>();
     registry.Register<BasicCodec<basic_ascii<byte>>>();
 
-    // Detects BOM
-    {
-      {
-        Array<byte, 3u> data = {byte {0xEF}, byte {0xBB}, byte {0xBF}};
-        const ICodec *codec = EncodingSniffer::Detect(data, registry, "", "UTF-8");
-        REQUIRE(codec != nullptr);
-        REQUIRE(codec->Name() == "UTF-8"_s);
-      }
-
-      {
-        Array<byte, 2u> data = {byte {0xFE}, byte {0xFF}};
-        const ICodec *codec = EncodingSniffer::Detect(data, registry, "", "UTF-8");
-        REQUIRE(codec != nullptr);
-        REQUIRE(codec->Name() == "UTF-16BE"_s);
-      }
-
-      {
-        Array<byte, 2u> data = {byte {0xFF}, byte {0xFE}};
-        const ICodec *codec = EncodingSniffer::Detect(data, registry, "", "UTF-8");
-        REQUIRE(codec != nullptr);
-        REQUIRE(codec->Name() == "UTF-16LE"_s);
-      }
-    }
-
-    // Invalid BOM and a valid transport codec should return transports codec
-    {
-      List<byte> data = {byte {0xFF}};
-      const ICodec *codec = EncodingSniffer::Detect(data, registry, "ascii", "");
-      REQUIRE(codec != nullptr);
-      REQUIRE(codec->Name() == "US-ASCII"_s);
-    }
-
-    // Invalid BOM, invalid transport, invalid meta charset should return fallback codec
-    {
-      string content = "<html>";
-      List<byte> data;
-      StringToBytes(content, data);
-
-      const ICodec *codec = EncodingSniffer::Detect(data, registry, "invalid-codec", "US-ASCII");
-      REQUIRE(codec != nullptr);
-      REQUIRE(codec->Name() == "US-ASCII"_s);
-    }
-
-    // invalid BOM, invalid transport, valid meta charset should return meta charset codec
+    // valid meta charset should return meta charset codec
     {
       string content =
         "<!-- this is some comment --> <someotherelement>asdasds</someotherelement> <meta charset='UTF-8'>";
       List<byte> data;
       StringToBytes(content, data);
 
-      const ICodec *codec = EncodingSniffer::Detect(data, registry, "invalid-codec", "US-ASCII");
+      const ICodec *codec = HTMLEncodingSniffer::Detect(data, registry);
       REQUIRE(codec != nullptr);
       REQUIRE(codec->Name() == "UTF-8"_s);
     }
@@ -94,7 +51,7 @@ namespace Krys::Tests
       List<byte> data;
       StringToBytes(content, data);
 
-      const ICodec *codec = EncodingSniffer::Detect(data, registry, "invalid-codec", "US-ASCII");
+      const ICodec *codec = HTMLEncodingSniffer::Detect(data, registry);
       REQUIRE(codec != nullptr);
       REQUIRE(codec->Name() == "UTF-8"_s);
     }
@@ -107,7 +64,7 @@ namespace Krys::Tests
         List<byte> data;
         StringToBytes(content, data);
 
-        const ICodec *codec = EncodingSniffer::Detect(data, registry, "invalid-codec", "US-ASCII");
+        const ICodec *codec = HTMLEncodingSniffer::Detect(data, registry);
         REQUIRE(codec != nullptr);
         REQUIRE(codec->Name() == "UTF-8"_s);
       }
@@ -118,7 +75,7 @@ namespace Krys::Tests
         List<byte> data;
         StringToBytes(content, data);
 
-        const ICodec *codec = EncodingSniffer::Detect(data, registry, "invalid-codec", "US-ASCII");
+        const ICodec *codec = HTMLEncodingSniffer::Detect(data, registry);
         REQUIRE(codec != nullptr);
         REQUIRE(codec->Name() == "UTF-8"_s);
       }
@@ -130,8 +87,9 @@ namespace Krys::Tests
       List<byte> data;
       StringToBytes(content, data);
 
-      const ICodec *codec = EncodingSniffer::Detect(data, registry, "invalid-codec", "asdas");
+      const ICodec *codec = HTMLEncodingSniffer::Detect(data, registry);
       REQUIRE(codec == nullptr);
     }
   }
 }
+

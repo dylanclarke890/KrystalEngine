@@ -35,8 +35,7 @@ namespace Krys::Text
 
     constexpr Span<const code_unit, 1> ReplacementCodeUnits() const noexcept
     {
-      return Span<const code_unit, 1>(::Krys::Text::Unicode::ASCIIReplacement<code_unit>.data(),
-                                      ::Krys::Text::Unicode::ASCIIReplacement<code_unit>.size());
+      return Span<const code_unit, 1>(&::Krys::Text::Unicode::ASCIIReplacement<code_unit>, 1);
     }
 
     using is_decode_injective = std::true_type;

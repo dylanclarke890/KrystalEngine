@@ -52,12 +52,12 @@ namespace Krys::Text::EncodingTable
     auto it =
       Krys::Ranges::lower_bound(first, last, lookupIndex, &LessThanIndexTarget<TIndexCodePoint, TIndex>);
 
-    if (it.current == it.last)
+    if (it.Current == it.Last)
     {
       return std::nullopt;
     }
 
-    const TIndexCodePoint &indexAndCodepoint = *it.current;
+    const TIndexCodePoint &indexAndCodepoint = *it.Current;
     if (indexAndCodepoint[0] != lookupIndex)
     {
       return std::nullopt;

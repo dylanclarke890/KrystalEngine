@@ -106,7 +106,7 @@ namespace Krys::Text
         {
           const uchar secondByteOffset = secondByte < 0x7F ? 0x40 : 0x62;
           const std::size_t lookupIndex = ((unit0 - 0x81uz) * 157uz) + (secondByte - secondByteOffset);
-          constexpr auto serializeDoubleBytes = [&](const std::size_t doubleCodePointValuesIndex)
+          auto serializeDoubleBytes = [&](const std::size_t doubleCodePointValuesIndex)
           {
             if constexpr (CallErrorHandler)
             {
@@ -133,8 +133,8 @@ namespace Krys::Text
                   TResult(TSubInput(std::move(inIt), std::move(inLast)),
                           TSubOutput(std::move(outIt), std::move(outLast)), s,
                           EncodingError::InsufficientOutputSpace),
-                  Span<const code_unit, 1>(std::addressof(units[0]), 1),
-                  Span<const code_point, 1>(std::addressof(DoubleCodePointValues[0], 1)));
+                  Span<const code_unit>(std::addressof(units[0]), 1),
+                  Span<const code_point>(std::addressof(DoubleCodePointValues[0][0]), 1));
               }
             }
             *outIt = DoubleCodePointValues[doubleCodePointValuesIndex][0];
@@ -167,7 +167,7 @@ namespace Krys::Text
                           TSubOutput(std::move(outIt), std::move(outLast)), s,
                           EncodingError::InsufficientOutputSpace),
                   Span<const code_unit, 1>(std::addressof(units[0]), 1),
-                  Span<const code_point, 1>(std::addressof(DoubleCodePointValues[0]), 1));
+                  Span<const code_point, 1>(std::addressof(DoubleCodePointValues[0][0]), 1));
               }
             }
             const code_point codePoint = static_cast<code_point>(*maybeCode);

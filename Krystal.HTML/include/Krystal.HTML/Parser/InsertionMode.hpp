@@ -3,7 +3,7 @@
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
-namespace Krys::HTML::DOM
+namespace Krys::HTML::Parser
 {
   enum class InsertionMode : uint8
   {
@@ -36,5 +36,5 @@ namespace Krys::HTML::DOM
 namespace Krys
 {
   template <>
-  constexpr underlying_t<HTML::DOM::InsertionMode> OrdinalCount<HTML::DOM::InsertionMode> = 23;
+  constexpr underlying_t<HTML::Parser::InsertionMode> OrdinalCount<HTML::Parser::InsertionMode> = 23;
 }

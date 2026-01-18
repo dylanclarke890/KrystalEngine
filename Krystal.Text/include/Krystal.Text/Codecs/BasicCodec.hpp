@@ -10,13 +10,12 @@
 #include "Krystal.Text/Decode/Decode.hpp"
 #include "Krystal.Text/Encode/Encode.hpp"
 #include "Krystal.Text/EncodingName.hpp"
-#include "Krystal.Text/Handlers/DefaultHandler.hpp"
-#include "Krystal.Text/Handlers/IncompleteHandler.hpp"
+#include "Krystal.Text/Handlers/ReplacementHandler.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys::Text
 {
-  template <typename TEncoding, typename TErrorHandler = ::Krys::Text::Handlers::DefaultHandler>
+  template <typename TEncoding>
   class BasicCodec : public ICodec
   {
     static_assert(SameType<::Krys::Text::code_point_t<TEncoding>, ::Krys::Text::UnicodeCodePoint>,
@@ -24,7 +23,7 @@ namespace Krys::Text
     static_assert(SameType<::Krys::Text::code_unit_t<TEncoding>, byte>,
                   "The encoding used in a Codec must use byte as its code unit type");
 
-    using ErrorHandler = ::Krys::Text::Handlers::BasicIncompleteHandler<TEncoding, TErrorHandler>;
+    using ErrorHandler = Handlers::ReplacementHandler<Handlers::ReplacementPolicy::Invalid>;
 
   protected:
     TEncoding _encoding {};
@@ -33,29 +32,19 @@ namespace Krys::Text
   public:
     using Encoding = TEncoding;
 
-    KRYS_NODISCARD virtual List<UnicodeCodePoint> Decode(Span<const byte> bytes) const override
-    {
-      return ::Krys::Text::Decode<List<UnicodeCodePoint>>(bytes, _encoding, _handler);
-    }
-
-    KRYS_NODISCARD virtual Span<const byte> IncompleteBytes() const noexcept
-    {
-      return std::as_bytes(_handler.CodeUnits());
-    }
-
-    KRYS_NODISCARD virtual List<byte> Encode(Span<const UnicodeCodePoint> codepoints) const override
-    {
-      return ::Krys::Text::Encode<List<byte>>(codepoints, _encoding, _handler);
-    }
-
-    KRYS_NODISCARD virtual Span<const byte> IncompleteCodepoints() const noexcept
-    {
-      return std::as_bytes(_handler.CodePoints());
-    }
-
     KRYS_NODISCARD virtual ASCIILiteral Name() const noexcept override
     {
       return ::Krys::Text::GetEncodingName<TEncoding>();
+    }
+
+    KRYS_NODISCARD virtual CodecDecodeResult Decode(Span<const byte> bytes) const override
+    {
+      return ::Krys::Text::DecodeTo<utf32_string>(bytes, _encoding, _handler);
+    }
+
+    KRYS_NODISCARD virtual CodecEncodeResult Encode(Span<const UnicodeCodePoint> codepoints) const override
+    {
+      return ::Krys::Text::EncodeTo<List<byte>>(codepoints, _encoding, _handler);
     }
   };
 

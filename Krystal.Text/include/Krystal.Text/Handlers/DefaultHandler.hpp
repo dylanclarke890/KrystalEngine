@@ -8,10 +8,10 @@ namespace Krys::Text::Handlers
 {
   /// @brief The default error handler for the entire library. Can be configured to use different strategies
   /// at build time. Without configuration, it defaults to the ReplacementHandler.
-  class DefaultHandler : private ReplacementHandler
+  class DefaultHandler : private ReplacementHandler<>
   {
   private:
-    using TErrorHandlerBase = ReplacementHandler;
+    using TErrorHandlerBase = ReplacementHandler<>;
 
   public:
     ///@brief The underlying error handler type.
