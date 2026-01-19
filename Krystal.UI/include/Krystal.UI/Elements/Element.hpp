@@ -4,7 +4,6 @@
 #include "Krystal.Lib/Handle.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/String/StringRef.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.UI/Layout/Algorithm/MeasureText.hpp"
@@ -20,7 +19,7 @@ namespace Krys::UI
   struct TextNode
   {
     NodeRef LayoutNode {nullptr};
-    StringRef Text;
+    utf8_string Text;
   };
 
   struct Geometry
@@ -88,13 +87,13 @@ namespace Krys::UI
       return *this;
     }
 
-    void SetText(StringRef text) noexcept
+    void SetText(const utf8_string& text) noexcept
     {
-      if (text.IsValid() && !TextContent.Text.IsValid())
+      if (!text.empty() && TextContent.Text.empty())
       {
         NodeInsertChild(LayoutNode, TextContent.LayoutNode, 0);
       }
-      else if (!text.IsValid() && TextContent.Text.IsValid())
+      else if (text.empty() && !TextContent.Text.empty())
       {
         NodeRemoveChild(LayoutNode, TextContent.LayoutNode);
       }
@@ -102,7 +101,7 @@ namespace Krys::UI
       TextContent.Text = text;
     }
 
-    KRYS_NODISCARD StringRef GetText() const noexcept
+    KRYS_NODISCARD utf8_stringview GetText() const noexcept
     {
       return TextContent.Text;
     }

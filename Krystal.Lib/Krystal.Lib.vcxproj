@@ -180,14 +180,6 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\String\StringInterner.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\String\StringRef.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Types\Array.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Bit.hpp" />
     <ClInclude Include="include\Krystal.Lib\ByteUtils.hpp" />

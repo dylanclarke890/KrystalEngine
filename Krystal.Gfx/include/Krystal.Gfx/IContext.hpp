@@ -15,7 +15,6 @@
 #include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/NativeHandle.hpp"
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"
-#include "Krystal.Lib/String/StringInterner.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
@@ -27,7 +26,6 @@ namespace Krys::Gfx
     uint32 Width {0u};
     uint32 Height {0u};
     IO::VirtualFileSystem *VFS {nullptr};
-    StringInterner *Strings {nullptr};
   };
 
   Expected<UniquePtr<class IContext>> CreateContext(const ContextSettings &settings) noexcept;
@@ -80,8 +78,6 @@ namespace Krys::Gfx
     KRYS_NODISCARD virtual IMaterialRegistry &Materials() noexcept = 0;
 
     KRYS_NODISCARD virtual IFontRegistry &Fonts() noexcept = 0;
-
-    KRYS_NODISCARD virtual StringInterner &Strings() noexcept = 0;
 
     KRYS_NODISCARD virtual API GetAPI() const noexcept = 0;
   };

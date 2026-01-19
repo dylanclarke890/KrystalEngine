@@ -156,9 +156,6 @@
     <ClCompile Include="tests\SmallValueBuffer.cpp" />
     <ClCompile Include="tests\String\StringUtils.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="tests\String\StringInterner.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

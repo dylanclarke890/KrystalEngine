@@ -287,7 +287,7 @@ namespace Krys::Gfx::OpenGL
           }();
 
           Shader &shader = shaders.Get(shaders.GetBuiltin(builtin));
-          DrawText(font, shader, _context.Strings().Get(cmd.Text), cmd.Colour, cmd.Position, cmd.FontSize);
+          DrawText(font, shader, cmd.Text, cmd.Colour, cmd.Position, cmd.FontSize);
           break;
         }
         default:
@@ -333,7 +333,7 @@ namespace Krys::Gfx::OpenGL
     DrawText(font, shader, text, textColour, position, ptSize);
   }
 
-  void Renderer::DrawText(Font &font, Shader &shader, const utf8_string &text,
+  void Renderer::DrawText(Font &font, Shader &shader, utf8_stringview text,
                           const ColourbPremultiplied &textColour, const Maths::Vec2 &position, float ptSize)
   {
     auto &fonts = static_cast<FontRegistry &>(_context.Fonts());

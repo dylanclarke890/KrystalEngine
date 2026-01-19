@@ -123,12 +123,6 @@
     <ClInclude Include="include\Krystal.Lib\Allocators\Block.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\String\StringInterner.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\String\StringRef.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Types\Variant.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

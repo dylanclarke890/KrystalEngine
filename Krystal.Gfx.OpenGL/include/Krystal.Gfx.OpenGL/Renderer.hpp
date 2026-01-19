@@ -57,7 +57,7 @@ namespace Krys::Gfx::OpenGL
     void Submit(const CommandList &commandList) override;
 
   private:
-    void DrawText(Font &font, Shader &shader, const utf8_string &text, const ColourbPremultiplied &textColour,
+    void DrawText(Font &font, Shader &shader, utf8_stringview text, const ColourbPremultiplied &textColour,
                   const Maths::Vec2 &position, float ptSize);
 
     void DrawTextOutlined(const utf8_string &text, FontHandle fontHandle, float ptSize,

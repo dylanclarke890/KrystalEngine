@@ -5,7 +5,6 @@
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
-#include "Krystal.Lib/String/StringRef.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
@@ -104,19 +103,19 @@ namespace Krys::Gfx
   class FontFamily : NonCopyable<FontFamily>
   {
   private:
-    StringRef _name;
+    utf8_string _name;
     IO::Path _path;
     List<FontHandle> _fonts;
 
   public:
-    FontFamily(StringRef name, const IO::Path &path) noexcept : _name(name), _path(path)
+    FontFamily(utf8_string name, const IO::Path &path) noexcept : _name(name), _path(path)
     {
     }
 
     ~FontFamily() = default;
 
     FontFamily(FontFamily &&other) noexcept
-        : _name(std::exchange(other._name, StringRef {0u})), _path(std::exchange(other._path, IO::Path {})),
+        : _name(std::exchange(other._name, utf8_string {})), _path(std::exchange(other._path, IO::Path {})),
           _fonts(std::move(other._fonts))
     {
     }
@@ -125,14 +124,14 @@ namespace Krys::Gfx
     {
       if (this != &other)
       {
-        _name = std::exchange(other._name, StringRef {0u});
+        _name = std::exchange(other._name, utf8_string {});
         _path = std::exchange(other._path, IO::Path {});
         _fonts = std::move(other._fonts);
       }
       return *this;
     }
 
-    KRYS_NODISCARD StringRef Name() const noexcept
+    KRYS_NODISCARD utf8_stringview Name() const noexcept
     {
       return _name;
     }

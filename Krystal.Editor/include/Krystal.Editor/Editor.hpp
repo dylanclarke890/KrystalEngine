@@ -101,8 +101,6 @@ namespace Krys
       using namespace Krys::Maths;
       using namespace Krys::Gfx::Colours;
 
-      StringRef textRef = _context->Strings.Intern(u8"Hello, Krystal UI!\nThis text should be on a newline!");
-
       _document.ElementStyleSetBackgroundColour(_document.Body(), Maroon);
       _document.ElementStyleSetFlexDirection(_document.Body(), FlexDirection::Row);
       _document.ElementStyleSetOpacity(_document.Body(), 0.8f);
@@ -115,7 +113,7 @@ namespace Krys
       _document.ElementStyleSetBorderWidths(leftBox, {0.f, 20.f, 20.f, 0.f});
       _document.ElementStyleSetBorderColours(leftBox, {Blue, Red, Orange, Black});
       _document.ElementStyleSetBackgroundColour(leftBox, Green);
-      _document.ElementSetTextContent(leftBox, textRef);
+      _document.ElementSetTextContent(leftBox, u8"Hello, Krystal UI!\nThis text should be on a newline!");
       _document.ElementStyleSetTextColour(leftBox, Black);
       _document.ElementStyleSetOpacity(leftBox, 0.8f);
     }

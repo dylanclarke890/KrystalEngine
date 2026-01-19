@@ -281,7 +281,7 @@ namespace Krys::UI
       }
 
       // Emit text if present
-      if (element.TextContent.Text.IsValid())
+      if (!element.TextContent.Text.empty())
       {
         Vec2 textPosition = ctx.Origin
                             + Vec2 {NodeLayoutGetLeft(element.TextContent.LayoutNode),
@@ -293,7 +293,7 @@ namespace Krys::UI
           fontFamily = _context.Fonts().GetDefaultFontFamily();
         }
 
-        _commands.Push(Commands::DrawText {.Text = element.TextContent.Text,
+        _commands.Push(Commands::DrawText {.Text = element.GetText(),
                                            .Position = textPosition,
                                            .FontFamily = fontFamily,
                                            .FontSize = NodeStyleGetFontSize(node),

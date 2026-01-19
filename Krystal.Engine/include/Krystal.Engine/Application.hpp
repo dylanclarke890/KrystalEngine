@@ -69,7 +69,6 @@ namespace Krys
     UniquePtr<IO::VirtualFileSystem> VFS {};
     UniquePtr<Gfx::IContext> GraphicsContext {};
     UniquePtr<Gfx::IRenderer> Renderer {};
-    StringInterner Strings {};
   };
 
   /// @brief Base class for a Krystal application.

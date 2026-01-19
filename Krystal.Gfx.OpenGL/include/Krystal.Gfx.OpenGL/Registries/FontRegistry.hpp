@@ -35,7 +35,7 @@ namespace Krys::Gfx::OpenGL
 
     void Shutdown() noexcept override;
 
-    KRYS_NODISCARD FontFamilyHandle Register(StringRef name, const IO::Path &path) noexcept override;
+    KRYS_NODISCARD FontFamilyHandle Register(const utf8_string &name, const IO::Path &path) noexcept override;
 
     bool Unload(FontFamilyHandle handle) noexcept override;
 

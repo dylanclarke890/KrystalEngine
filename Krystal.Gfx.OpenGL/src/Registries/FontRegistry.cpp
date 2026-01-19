@@ -25,7 +25,7 @@ namespace Krys::Gfx::OpenGL
   void FontRegistry::Startup()
   {
     const IO::Path defaultFontPath("data/assets/fonts/Antonio-Bold.ttf");
-    _defaultFontFamily = Register(_context.Strings().Intern("Antonio"), defaultFontPath);
+    _defaultFontFamily = Register(u8"Antonio", defaultFontPath);
     if (!_defaultFontFamily.IsValid())
     {
       KRYS_ERROR("Failed to register default font '{}'", defaultFontPath.ToString());
@@ -38,7 +38,7 @@ namespace Krys::Gfx::OpenGL
     // TODO: Unload all fonts and font families
   }
 
-  FontFamilyHandle FontRegistry::Register(StringRef name, const IO::Path &path) noexcept
+  FontFamilyHandle FontRegistry::Register(const utf8_string &name, const IO::Path &path) noexcept
   {
     FontFamily fontFamily {name, path};
     FontFamilyHandle handle = _fontFamilies.Add(std::move(fontFamily));

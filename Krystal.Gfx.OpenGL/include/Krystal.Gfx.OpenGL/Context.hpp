@@ -25,7 +25,6 @@ namespace Krys::Gfx::OpenGL
     uint32 _width;
     uint32 _height;
     IO::VirtualFileSystem &_vfs;
-    StringInterner &_strings;
     int _dpi;
     UniquePtr<ContextPlatformImpl> _platformImpl;
 
@@ -80,8 +79,6 @@ namespace Krys::Gfx::OpenGL
     KRYS_NODISCARD IMaterialRegistry &Materials() noexcept override;
 
     KRYS_NODISCARD IFontRegistry &Fonts() noexcept override;
-
-    KRYS_NODISCARD StringInterner &Strings() noexcept override;
 
     KRYS_NODISCARD API GetAPI() const noexcept override;
   };

@@ -14,7 +14,7 @@ namespace Krys::UI
     auto &element = *static_cast<Element *>(NodeGetContext(node));
     auto &document = *static_cast<Document *>(NodeGetContext(element.LayoutNode));
     auto &context = *static_cast<Gfx::IContext *>(ConfigGetContext(element.LayoutConfig));
-    auto &text = context.Strings().Get(element.GetText());
+    auto text = element.GetText();
     auto fontDesc = document.ElementGetFontDesc(element.Handle);
     auto font = context.Fonts().Get(fontDesc);
     const auto &characters = context.Fonts().GetCharacterMap(font);

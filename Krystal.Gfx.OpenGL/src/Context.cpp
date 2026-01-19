@@ -616,7 +616,7 @@ namespace Krys::Gfx::OpenGL
 {
   Context::Context(const ContextSettings &settings)
       : _windowHandle(settings.WindowHandle), _width(settings.Width), _height(settings.Height),
-        _vfs(*settings.VFS), _strings(*settings.Strings), _dpi(Platform::GetDPIForWindow(_windowHandle)),
+        _vfs(*settings.VFS), _dpi(Platform::GetDPIForWindow(_windowHandle)),
         _platformImpl(CreateUnique<ContextPlatformImpl>(settings.WindowHandle)), _buffers(), _images(),
         _imageViews(_images), _samplers(), _shaders(_vfs), _meshes(),
         _textures(_vfs, _images, _imageViews, _samplers), _renderTargets(_images, _imageViews),
@@ -947,11 +947,6 @@ namespace Krys::Gfx::OpenGL
   IFontRegistry &Context::Fonts() noexcept
   {
     return _fonts;
-  }
-
-  StringInterner &Context::Strings() noexcept
-  {
-    return _strings;
   }
 
   API Context::GetAPI() const noexcept

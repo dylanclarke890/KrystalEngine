@@ -5,7 +5,7 @@
 #include "Krystal.Gfx/Enums/FilterMode.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Lib/Commands/CommandType.hpp"
-#include "Krystal.Lib/String/StringRef.hpp"
+#include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
@@ -94,7 +94,7 @@ namespace Krys::Gfx::Commands
   {
     constexpr static CommandType Type = KRYS_CMD_TYPE("DrawText");
 
-    StringRef Text;
+    utf8_stringview Text;
     Maths::Vec2 Position;
     FontFamilyHandle FontFamily;
     float FontSize {16.f};

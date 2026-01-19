@@ -6,7 +6,6 @@
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/String/StringRef.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Stack.hpp"
@@ -783,13 +782,13 @@ namespace Krys::UI
 
 #pragma endregion
 
-    void ElementSetTextContent(ElementHandle element, StringRef text)
+    void ElementSetTextContent(ElementHandle element, const utf8_string &text)
     {
       assert(element.IsValid() && "Invalid element handle");
       _elements.Get(element).SetText(text);
     }
 
-    StringRef ElementGetTextContent(ElementHandle element)
+    utf8_stringview ElementGetTextContent(ElementHandle element)
     {
       assert(element.IsValid() && "Invalid element handle");
       return _elements.Get(element).GetText();
