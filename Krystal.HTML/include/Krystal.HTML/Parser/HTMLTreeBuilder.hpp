@@ -3,6 +3,7 @@
 #include "Krystal.HTML/Parser/AtomHTMLToken.hpp"
 #include "Krystal.HTML/Parser/HTMLConstructionSite.hpp"
 #include "Krystal.HTML/Parser/InsertionMode.hpp"
+#include "Krystal.HTML/StronglyTypedValues.hpp"
 #include "Krystal.Lib/Types/Stack.hpp"
 
 namespace Krys::HTML
@@ -22,7 +23,7 @@ namespace Krys::HTML
     {
     }
 
-    void ProcessToken(AtomHTMLToken &&token)
+    void ProcessToken(AtomHTMLToken &&token) noexcept
     {
     }
   };

@@ -49,6 +49,7 @@
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLInputStream.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLOpenElementStack.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLElementStackItem.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Parser\HTMLParseError.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLToken.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLTokenizer.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLTreeBuilder.hpp" />
@@ -56,6 +57,7 @@
     <ClInclude Include="include\Krystal.HTML\Parser\InsertionMode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\TokenizerState.hpp" />
     <ClInclude Include="include\Krystal.HTML\Context.hpp" />
+    <ClInclude Include="include\Krystal.HTML\StronglyTypedValues.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp" />

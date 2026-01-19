@@ -91,15 +91,15 @@ namespace Krys::Tests
     utf32_string data = {U'a', U'\0', U'b'};
     stream.Append(std::move(data), IsEOF(true));
 
-    REQUIRE(stream.Peek(IgnoreNullCharacters(false)));
+    REQUIRE(stream.Peek(SkipNullCharacters(false)));
     REQUIRE(stream.NextInputCharacter() == U'a');
-    stream.Advance(IgnoreNullCharacters(false));
+    stream.Advance(SkipNullCharacters(false));
 
-    REQUIRE(stream.Peek(IgnoreNullCharacters(false)));
+    REQUIRE(stream.Peek(SkipNullCharacters(false)));
     REQUIRE(stream.NextInputCharacter() == U'\uFFFD');
-    stream.Advance(IgnoreNullCharacters(false));
+    stream.Advance(SkipNullCharacters(false));
 
-    REQUIRE(stream.Peek(IgnoreNullCharacters(false)));
+    REQUIRE(stream.Peek(SkipNullCharacters(false)));
     REQUIRE(stream.NextInputCharacter() == U'b');
   }
 
@@ -109,11 +109,11 @@ namespace Krys::Tests
     utf32_string data = {U'a', U'\0', U'b'};
     stream.Append(std::move(data), IsEOF(true));
 
-    REQUIRE(stream.Peek(IgnoreNullCharacters(true)));
+    REQUIRE(stream.Peek(SkipNullCharacters(true)));
     REQUIRE(stream.NextInputCharacter() == U'a');
-    stream.Advance(IgnoreNullCharacters(true));
+    stream.Advance(SkipNullCharacters(true));
 
-    REQUIRE(stream.Peek(IgnoreNullCharacters(true)));
+    REQUIRE(stream.Peek(SkipNullCharacters(true)));
     REQUIRE(stream.NextInputCharacter() == U'b');
   }
 

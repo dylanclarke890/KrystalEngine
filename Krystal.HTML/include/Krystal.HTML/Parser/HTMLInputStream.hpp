@@ -1,24 +1,15 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/StronglyTypedValues.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Deque.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Types/StronglyTypedValue.hpp"
-#include "Krystal.Text/UnicodeCodePoint.hpp"
+#include "Krystal.Text/Unicode.hpp"
 #include <cassert>
 
 namespace Krys::HTML
 {
-  struct IsEOF : StronglyTypedBool<IsEOF>
-  {
-    using StronglyTypedBool::StronglyTypedBool;
-  };
-
-  struct IgnoreNullCharacters : StronglyTypedBool<IgnoreNullCharacters>
-  {
-    using StronglyTypedBool::StronglyTypedBool;
-  };
-
   class HTMLInputStream
   {
   private:
@@ -31,6 +22,8 @@ namespace Krys::HTML
     bool _skipNextNewLine : 1 {false};
 
   public:
+    constexpr static inline char32 EOFMarker = U'\uFFFF';
+
     void Append(utf32_string &&chunk, IsEOF isEOF = IsEOF(false))
     {
       assert(!_appendedLastChunk);
@@ -40,7 +33,11 @@ namespace Krys::HTML
         _data.append(chunk);
       }
 
-      _appendedLastChunk = isEOF;
+      if (isEOF)
+      {
+        _appendedLastChunk = true;
+        _data.append(1uz, EOFMarker);
+      }
     }
 
     void Insert(utf32_string &&chunk)
@@ -69,8 +66,7 @@ namespace Krys::HTML
     }
 
     /// @brief Peek the next input character without consuming it.
-    /// @param ignoreNullCharacters If true, U+0000 is skipped, else becomes U+FFFD.
-    bool Peek(IgnoreNullCharacters ignoreNullCharacters = IgnoreNullCharacters(false))
+    bool Peek()
     {
       if (IsEmpty()) KRYS_UNLIKELY
       {
@@ -79,7 +75,7 @@ namespace Krys::HTML
 
       _nextInputCharacter = _data[_readPosition];
 
-      constexpr char32 NotLFOrCROrNullMask = '\n' | '\r' | '\0';
+      constexpr char32 NotLFOrCROrNullMask = '\n' | '\r';
       if (_nextInputCharacter & ~NotLFOrCROrNullMask) KRYS_LIKELY
       {
         _skipNextNewLine = false;
@@ -87,57 +83,34 @@ namespace Krys::HTML
       }
 
       /// @see https://html.spec.whatwg.org/#preprocessing-the-input-stream
-      while (true)
+      if (_nextInputCharacter == '\n' && _skipNextNewLine)
       {
-        if (_nextInputCharacter == '\n' && _skipNextNewLine)
-        {
-          _skipNextNewLine = false;
-          _readPosition++;
-
-          if (IsEmpty())
-          {
-            return false;
-          }
-
-          _nextInputCharacter = _data[_readPosition];
-        }
-
-        if (_nextInputCharacter == '\r')
-        {
-          _nextInputCharacter = '\n';
-          _skipNextNewLine = true;
-          return true;
-        }
-
         _skipNextNewLine = false;
-        if (_nextInputCharacter)
+        _readPosition++;
+
+        if (IsEmpty())
         {
-          return true;
+          return false;
         }
 
-        if (ignoreNullCharacters)
-        {
-          _readPosition++;
-          if (IsEmpty())
-          {
-            return false;
-          }
+        _nextInputCharacter = _data[_readPosition];
+      }
 
-          _nextInputCharacter = _data[_readPosition];
-          continue;
-        }
-
-        _nextInputCharacter = ::Krys::Text::Unicode::Replacement<char32>;
+      if (_nextInputCharacter == '\r')
+      {
+        _nextInputCharacter = '\n';
+        _skipNextNewLine = true;
         return true;
       }
+
+      return true;
     }
 
     /// @brief Advance to the next input character.
-    /// @param ignoreNullCharacters If true, U+0000 is skipped, else becomes U+FFFD.
-    bool Advance(IgnoreNullCharacters ignoreNullCharacters = IgnoreNullCharacters(false))
+    bool Advance()
     {
       _readPosition++;
-      return Peek(ignoreNullCharacters);
+      return Peek();
     }
 
     KRYS_NODISCARD bool IsEmpty() const noexcept
