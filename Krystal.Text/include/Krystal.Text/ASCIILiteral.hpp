@@ -7,6 +7,7 @@
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Text/ASCII.hpp"
 #include <compare>
+#include <ranges>
 #include <xhash>
 
 namespace Krys::Text
@@ -18,7 +19,7 @@ namespace Krys::Text
     Span<const char> _characters;
 
   public:
-    static constexpr ASCIILiteral FromLiteral(const char *string) noexcept
+    static constexpr ASCIILiteral From(const char *string) noexcept
     {
       return ASCIILiteral {Span(string, std::char_traits<char>::length(string) + 1)};
     }
@@ -81,19 +82,19 @@ namespace Krys::Text
       return _characters[index];
     }
 
+    KRYS_NODISCARD constexpr bool operator<(const ASCIILiteral &other) const noexcept
+    {
+      return std::ranges::lexicographical_compare(ToSpan(), other.ToSpan(), std::less<char> {});
+    }
+
+    KRYS_NODISCARD constexpr bool operator>(const ASCIILiteral &other) const noexcept
+    {
+      return std::ranges::lexicographical_compare(ToSpan(), other.ToSpan(), std::less<char> {});
+    }
+
     KRYS_NODISCARD constexpr bool operator==(const ASCIILiteral &other) const noexcept
     {
-      if (Length() != other.Length())
-        return false;
-
-      for (size_t i = 0; i < Length(); ++i)
-      {
-        if (CharacterAt(i) != other.CharacterAt(i))
-        {
-          return false;
-        }
-      }
-      return true;
+      return std::ranges::lexicographical_compare(ToSpan(), other.ToSpan(), std::equal_to<char> {});
     }
 
   private:
@@ -111,7 +112,7 @@ namespace Krys::Text
 
   KRYS_NODISCARD consteval ASCIILiteral operator""_s(const char *str, size_t) noexcept
   {
-    return ASCIILiteral::FromLiteral(str);
+    return ASCIILiteral::From(str);
   }
 }
 

@@ -93,6 +93,9 @@
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLParseError.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Parser\HTMLCharacterReference.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">

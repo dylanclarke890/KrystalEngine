@@ -3,6 +3,7 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
@@ -64,36 +65,48 @@ namespace Krys::HTML
       return _type;
     }
 
-    void Clear() noexcept
-    {
-      _type = Type::Uninitialized;
-      _data.clear();
-    }
-
-    void SetAsEOF() noexcept
-    {
-      assert(_type == Type::Uninitialized);
-      _type = Type::EndOfFile;
-    }
-
-    void AddCharacter(char32 character) noexcept
+    void AppendToCharacters(char32 character) noexcept
     {
       assert(_type == Type::Uninitialized || _type == Type::Character);
       _type = Type::Character;
       _data.push_back(character);
     }
 
-    void AddCharacters(Span<char32> characters) noexcept
+    void AppendToCharacters(Span<char32> characters) noexcept
     {
       assert(_type == Type::Uninitialized || _type == Type::Character);
       _type = Type::Character;
-      _data.insert(_data.end(), characters.begin(), characters.end());
+      _data.append_range(characters);
+    }
+
+    void AppendToName(char32 character) noexcept
+    {
+      assert(_type == Type::StartTag || _type == Type::EndTag || _type == Type::DOCTYPE);
+      _data.push_back(character);
+    }
+
+    utf32_string GetName() const noexcept
+    {
+      assert(_type == Type::StartTag || _type == Type::EndTag || _type == Type::DOCTYPE);
+      return utf32_string(_data.begin(), _data.end());
     }
 
     void BeginComment() noexcept
     {
       assert(_type == Type::Uninitialized);
       _type = Type::Comment;
+    }
+
+    void AppendToComment(char32 character) noexcept
+    {
+      assert(_type == Type::Comment);
+      _data.push_back(character);
+    }
+
+    void AppendToComment(Text::ASCIILiteral characters) noexcept
+    {
+      assert(_type == Type::Comment);
+      _data.append_range(characters.ToSpan());
     }
 
     void BeginStartTag(char8 character) noexcept
@@ -128,94 +141,165 @@ namespace Krys::HTML
       _data.push_back(character);
     }
 
-    void AppendToName(char32 character) noexcept
+    void BeginEndTag(utf32_stringview characters) noexcept
     {
-      assert((_type == Type::StartTag || _type == Type::EndTag) && character);
+      assert(_type == Type::Uninitialized);
+
+      _type = Type::EndTag;
+      _selfClosing = false;
+      _attributes.clear();
+
+#if KRYS_ENV(DEV)
+      _currentAttribute = nullptr;
+#endif
+
+      _data.append_range(characters);
+    }
+
+    void BeginAttribute() noexcept
+    {
+#if KRYS_ENV(DEV)
+      assert(_currentAttribute == nullptr);
+#endif
+      assert(_type == Type::StartTag || _type == Type::EndTag);
+
+      _attributes.emplace_back();
+      _currentAttribute = &_attributes.back();
+    }
+
+    void EndAttribute() noexcept
+    {
+      assert(_type == Type::StartTag || _type == Type::EndTag);
+      assert(_currentAttribute != nullptr);
+
+#if KRYS_ENV(DEV)
+      _currentAttribute = nullptr;
+#endif
+    }
+
+    AttributeList &GetAttributes() noexcept
+    {
+      assert(_type == Type::StartTag || _type == Type::EndTag);
+      return _attributes;
+    }
+
+    Attribute *GetCurrentAttribute() const noexcept
+    {
+      assert(_type == Type::StartTag || _type == Type::EndTag);
+      return _currentAttribute;
+    }
+
+    void AppendToCurrentAttributeName(char32 character) noexcept
+    {
+      assert(_type == Type::StartTag || _type == Type::EndTag);
+#if KRYS_ENV(DEV)
+      assert(_currentAttribute != nullptr);
+#endif
+
+      _currentAttribute->Name.push_back(character);
+    }
+
+    void AppendToCurrentAttributeValue(char32 character) noexcept
+    {
+      assert(_type == Type::StartTag || _type == Type::EndTag);
+      assert(_currentAttribute != nullptr);
+
+      _currentAttribute->Value.push_back(character);
+    }
+
+    template <size_t N>
+    void AppendToCurrentAttributeValue(Array<char32, N> characters)
+    {
+      assert(_type == Type::StartTag || _type == Type::EndTag);
+      assert(_currentAttribute != nullptr);
+
+      _currentAttribute->Value.append_range(characters);
+    }
+
+    void AppendToCurrentAttributeValue(Span<char32> characters)
+    {
+      assert(_type == Type::StartTag || _type == Type::EndTag);
+      assert(_currentAttribute != nullptr);
+
+      _currentAttribute->Value.append_range(characters);
+    }
+
+    void BeginDOCTYPE() noexcept
+    {
+      assert(_type == Type::Uninitialized);
+
+      _type = Type::DOCTYPE;
+      _doctypeData = CreateUnique<DoctypeData>();
+    }
+
+    void BeginDOCTYPE(char32 character) noexcept
+    {
+      assert(_type == Type::Uninitialized);
+
+      _type = Type::DOCTYPE;
+      _doctypeData = CreateUnique<DoctypeData>();
       _data.push_back(character);
     }
 
-    utf32_string GetName() const noexcept
+    void SetDOCTYPEForceQuirks() noexcept
     {
-      assert(_type == Type::StartTag || _type == Type::EndTag || _type == Type::DOCTYPE);
-      return utf32_string(_data.begin(), _data.end());
-    }
-  };
+      assert(_type == Type::DOCTYPE);
 
-  class HTMLTokenizer
-  {
-    class TokenPtr
-    {
-    private:
-      RawPtr<HTMLToken> _token {nullptr};
-
-    public:
-      TokenPtr() noexcept = default;
-      TokenPtr &operator=(TokenPtr &&) = delete;
-
-      ~TokenPtr() noexcept
-      {
-        if (_token != nullptr)
-        {
-          _token->Clear();
-        }
-      }
-
-      TokenPtr(TokenPtr &&other) noexcept : _token(other._token)
-      {
-        other._token = nullptr;
-      }
-
-      void Clear() noexcept
-      {
-        if (_token != nullptr)
-        {
-          _token->Clear();
-          _token = nullptr;
-        }
-      }
-
-      operator bool() const noexcept
-      {
-        return _token != nullptr;
-      }
-
-      HTMLToken &operator*() const noexcept
-      {
-        assert(_token != nullptr);
-        return *_token;
-      }
-
-      RawPtr<HTMLToken> operator->() const noexcept
-      {
-        assert(_token != nullptr);
-        return _token;
-      }
-
-    private:
-      friend class HTMLTokenizer;
-
-      explicit TokenPtr(RawPtr<HTMLToken> token) noexcept : _token(token)
-      {
-      }
-    };
-
-  private:
-    TokenizerState _state {TokenizerState::Data};
-    HTMLToken _token;
-
-  public:
-    HTMLTokenizer() noexcept
-    {
+      _doctypeData->ForceQuirks = true;
     }
 
-    TokenPtr NextToken() noexcept
+    void SetPublicIdentifierToEmptyString()
     {
-      return TokenPtr(ProcessToken() ? &_token : nullptr);
+      assert(_type == Type::DOCTYPE);
+
+      _doctypeData->HasPublicIdentifier = true;
+      _doctypeData->PublicIdentifier.clear();
     }
 
-  private:
-    bool ProcessToken() noexcept
+    void SetSystemIdentifierToEmptyString()
     {
+      assert(_type == Type::DOCTYPE);
+      _doctypeData->HasSystemIdentifier = true;
+      _doctypeData->SystemIdentifier.clear();
+    }
+
+    inline void AppendToPublicIdentifier(char32 character)
+    {
+      assert(_type == Type::DOCTYPE);
+      assert(_doctypeData->HasPublicIdentifier);
+
+      _doctypeData->PublicIdentifier.push_back(character);
+    }
+
+    void AppendToSystemIdentifier(char32 character)
+    {
+      assert(_type == Type::DOCTYPE);
+      assert(_doctypeData->HasSystemIdentifier);
+
+      _doctypeData->SystemIdentifier.push_back(character);
+    }
+
+    UniquePtr<DoctypeData> ReleaseDOCTYPEData() noexcept
+    {
+      return std::move(_doctypeData);
+    }
+
+    void SetSelfClosingFlag() noexcept
+    {
+      assert(_type == Type::StartTag);
+      _selfClosing = true;
+    }
+
+    void SetAsEOF() noexcept
+    {
+      assert(_type == Type::Uninitialized);
+      _type = Type::EndOfFile;
+    }
+
+    void Clear() noexcept
+    {
+      _type = Type::Uninitialized;
+      _data.clear();
     }
   };
 }

@@ -6,6 +6,8 @@
 #include "Krystal.Lib/Types/Deque.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Text/Unicode.hpp"
+#include "Krystal.Text/ASCII.hpp"
+#include "Krystal.Text/ASCIILiteral.hpp"
 #include <cassert>
 
 namespace Krys::HTML
@@ -17,7 +19,6 @@ namespace Krys::HTML
     size_t _readPosition {0uz};
     size_t _insertionPosition = utf32_string::npos;
     char32 _nextInputCharacter {0};
-    char32 _currentInputCharacter {0};
     bool _appendedLastChunk : 1 {false};
     bool _skipNextNewLine : 1 {false};
 
@@ -109,6 +110,11 @@ namespace Krys::HTML
     /// @brief Advance to the next input character.
     bool Advance()
     {
+      if (IsEmpty()) KRYS_UNLIKELY
+      {
+        return false;
+      }
+
       _readPosition++;
       return Peek();
     }
@@ -118,6 +124,15 @@ namespace Krys::HTML
       return _readPosition >= _data.size();
     }
 
+    KRYS_NODISCARD size_t RemainingCharacters() const noexcept
+    {
+      if (IsEmpty())
+      {
+        return 0uz;
+      }
+      return _data.size() - _readPosition;
+    }
+
     KRYS_NODISCARD bool IsAtEOF() const noexcept
     {
       if (IsEmpty())
@@ -125,6 +140,42 @@ namespace Krys::HTML
         return _appendedLastChunk;
       }
       return false;
+    }
+
+    enum class MatchResult : uint8
+    {
+      Matched,
+      NotEnoughCharacters,
+      DidNotMatch,
+    };
+
+    template <bool CaseSensitive = true>
+    KRYS_NODISCARD MatchResult AdvancePast(Text::ASCIILiteral characters) noexcept
+    {
+      size_t availableCharacters = RemainingCharacters();
+      if (availableCharacters < characters.Length())
+      {
+        return MatchResult::NotEnoughCharacters;
+      }
+
+      for (size_t i = 0uz; i < characters.Length(); ++i)
+      {
+        char32 inputChar = _data[_readPosition + i];
+        char32 matchChar = characters[i];
+        if (CaseSensitive)
+        {
+          inputChar = Text::ToASCIILower(inputChar);
+          matchChar = Text::ToASCIILower(matchChar);
+        }
+
+        if (inputChar != matchChar)
+        {
+          return MatchResult::DidNotMatch;
+        }
+      }
+
+      _readPosition += characters.Length();
+      return MatchResult::Matched;
     }
   };
 }

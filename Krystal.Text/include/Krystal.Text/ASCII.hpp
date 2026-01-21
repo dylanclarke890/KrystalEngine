@@ -222,8 +222,15 @@ namespace Krys::Text
     auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
     return (ch >= '!' && ch <= '@') || (ch >= '[' && ch <= '`') || (ch >= '{' && ch <= '~');
   }
+  
+  template <ASCIIChar TChar>
+  KRYS_NODISCARD constexpr bool IsASCIINonWhitespaceControl(TChar character) noexcept
+  {
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    return ch == 0x00 || ch == 0x01 || ch == 0x07 || ch == 0x08;
+  }
 
-  /// @brief Checks whether an ASCII character matches a pre-normalized ASCII literal,
+  /// @brief Checks whether an ASCII character matches a pre-normalized ASCII literal.
   /// ignoring case on the input character.
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr bool MatchesASCIINormalizedLiteral(TChar character, char expected) noexcept

@@ -112,6 +112,12 @@ namespace Krys::Text::Unicode
     return (value & ContinuationMask) == ContinuationSignature;
   }
 
+  KRYS_NODISCARD constexpr inline bool IsNonCharacter(char32 value) noexcept
+  {
+    return (value >= 0xFDD0 && value <= 0xFDEF)
+           || ((value & 0xFFFE) == 0xFFFE && value >= 0xFFFE && value <= LastUnicodeCodePoint);
+  }
+
   KRYS_NODISCARD constexpr inline bool IsSingleOrLeadUTF8(char8 value) noexcept
   {
     return IsLeadUTF8(value);
