@@ -19,6 +19,7 @@ namespace Krys::HTML
     HTMLInputStream _input;
     HTMLTokenizer _tokenizer;
     HTMLTreeBuilder _treeBuilder;
+    bool _paused {false};
 
   public:
     HTMLDocumentParser(HTMLDocument &document) noexcept
@@ -33,8 +34,13 @@ namespace Krys::HTML
 
     bool PumpTokenizer() noexcept
     {
-      while (NextTokenPtr token = _tokenizer.NextToken())
+      while (!IsStopped())
       {
+        NextTokenPtr token = _tokenizer.NextToken();
+        if (!token)
+        {
+          return false;
+        }
         ConstructTreeFromToken(token);
       }
 
@@ -55,6 +61,11 @@ namespace Krys::HTML
       }
 
       _treeBuilder.ProcessToken(std::move(token));
+    }
+
+    KRYS_NODISCARD bool IsStopped() const noexcept
+    {
+      return _paused;
     }
   };
 }
