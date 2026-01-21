@@ -2299,7 +2299,7 @@ namespace Krys::HTML
       NamedCharacterReferenceEntry {stringview("vsupne;"), {0x0228B, 0x0FE00}},
     };
 
-    std::ranges::sort(entries, [](const auto& a, const auto& b) { return a.Name > b.Name;});
+    std::ranges::sort(entries, [](const auto& a, const auto& b) { return a.Name < b.Name;});
 
     return entries;
   })();
@@ -2316,7 +2316,7 @@ namespace Krys::HTML
   }
 
   KRYS_NODISCARD constexpr Span<const NamedCharacterReferenceEntry>
-    SearchNamedCharacterReferences(Span<char32> prefix,
+    SearchNamedCharacterReferences(Span<const char32> prefix,
                                    Span<const NamedCharacterReferenceEntry> entries) noexcept
   {
     string stringPrefix;
@@ -2342,7 +2342,7 @@ namespace Krys::HTML
   }
 
   KRYS_NODISCARD constexpr Span<const NamedCharacterReferenceEntry>
-    SearchNamedCharacterReferences(Span<char32> prefix) noexcept
+    SearchNamedCharacterReferences(Span<const char32> prefix) noexcept
   {
     return SearchNamedCharacterReferences(prefix, NamedCharacterReferences);
   }

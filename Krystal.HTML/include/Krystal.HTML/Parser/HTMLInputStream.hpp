@@ -5,9 +5,9 @@
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Deque.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Text/Unicode.hpp"
 #include "Krystal.Text/ASCII.hpp"
 #include "Krystal.Text/ASCIILiteral.hpp"
+#include "Krystal.Text/Unicode.hpp"
 #include <cassert>
 
 namespace Krys::HTML
@@ -19,7 +19,6 @@ namespace Krys::HTML
     size_t _readPosition {0uz};
     size_t _insertionPosition = utf32_string::npos;
     char32 _nextInputCharacter {0};
-    bool _appendedLastChunk : 1 {false};
     bool _skipNextNewLine : 1 {false};
 
   public:
@@ -27,7 +26,7 @@ namespace Krys::HTML
 
     void Append(utf32_string &&chunk, IsEOF isEOF = IsEOF(false))
     {
-      assert(!_appendedLastChunk);
+      assert(_data.empty() || _data.back() != EOFMarker);
 
       if (!chunk.empty())
       {
@@ -36,7 +35,6 @@ namespace Krys::HTML
 
       if (isEOF)
       {
-        _appendedLastChunk = true;
         _data.append(1uz, EOFMarker);
       }
     }
@@ -135,11 +133,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool IsAtEOF() const noexcept
     {
-      if (IsEmpty())
-      {
-        return _appendedLastChunk;
-      }
-      return false;
+      return _data[_readPosition] == EOFMarker;
     }
 
     enum class MatchResult : uint8

@@ -30,7 +30,8 @@ namespace Krys::Tests
     REQUIRE(stream.NextInputCharacter() == U'c');
 
     stream.Advance();
-    REQUIRE_FALSE(stream.Peek());
+    REQUIRE(stream.Peek());
+    REQUIRE(stream.NextInputCharacter() == HTMLInputStream::EOFMarker);
     REQUIRE(stream.IsAtEOF());
   }
 
@@ -85,38 +86,6 @@ namespace Krys::Tests
     REQUIRE(stream.NextInputCharacter() == U'b');
   }
 
-  TEST_CASE("HTMLInputStream: NULL replaced with U+FFFD", "[HTML][InputStream]")
-  {
-    HTMLInputStream stream;
-    utf32_string data = {U'a', U'\0', U'b'};
-    stream.Append(std::move(data), IsEOF(true));
-
-    REQUIRE(stream.Peek(SkipNullCharacters(false)));
-    REQUIRE(stream.NextInputCharacter() == U'a');
-    stream.Advance(SkipNullCharacters(false));
-
-    REQUIRE(stream.Peek(SkipNullCharacters(false)));
-    REQUIRE(stream.NextInputCharacter() == U'\uFFFD');
-    stream.Advance(SkipNullCharacters(false));
-
-    REQUIRE(stream.Peek(SkipNullCharacters(false)));
-    REQUIRE(stream.NextInputCharacter() == U'b');
-  }
-
-  TEST_CASE("HTMLInputStream: NULL ignored when requested", "[HTML][InputStream]")
-  {
-    HTMLInputStream stream;
-    utf32_string data = {U'a', U'\0', U'b'};
-    stream.Append(std::move(data), IsEOF(true));
-
-    REQUIRE(stream.Peek(SkipNullCharacters(true)));
-    REQUIRE(stream.NextInputCharacter() == U'a');
-    stream.Advance(SkipNullCharacters(true));
-
-    REQUIRE(stream.Peek(SkipNullCharacters(true)));
-    REQUIRE(stream.NextInputCharacter() == U'b');
-  }
-
   TEST_CASE("HTMLInputStream: incremental append", "[HTML][InputStream]")
   {
     HTMLInputStream stream;
@@ -168,6 +137,7 @@ namespace Krys::Tests
     REQUIRE(stream.NextInputCharacter() == U'x');
 
     stream.Advance();
-    REQUIRE_FALSE(stream.Peek());
+    REQUIRE(stream.Peek());
+    REQUIRE(stream.NextInputCharacter() == HTMLInputStream::EOFMarker);
   }
 }

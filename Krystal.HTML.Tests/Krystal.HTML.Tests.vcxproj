@@ -160,6 +160,7 @@
     <ClCompile Include="catch_main.cpp" />
     <ClCompile Include="tests\Loader\HTMLEncodingSniffer.cpp" />
     <ClCompile Include="tests\Loader\TextResourceDecoder.cpp" />
+    <ClCompile Include="tests\Parser\HTMLCharacterReference.cpp" />
     <ClCompile Include="tests\Parser\HTMLInputStream.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

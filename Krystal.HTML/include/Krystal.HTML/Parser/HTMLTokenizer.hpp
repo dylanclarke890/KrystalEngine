@@ -325,6 +325,8 @@ namespace Krys::HTML
       _token.Clear();
       _token.SetAsEOF();
 
+      _input.get().Advance();
+
       return true;
     }
 
