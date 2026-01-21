@@ -720,7 +720,7 @@ namespace Krys::HTML
           {
             _temporaryBuffer.clear();
             assert(_bufferedEndTagName.empty());
-            ADVANCE_PAST_NON_NEWLINE_TO(RCDATAEndTagOpen);
+            ADVANCE_PAST_NON_NEWLINE_TO(RAWTEXTEndTagOpen);
           }
 
           BufferCharacter(LessThanSign);
@@ -732,7 +732,7 @@ namespace Krys::HTML
           {
             AppendToTemporaryBuffer(character);
             AppendToPossibleEndTag(Text::ToASCIILower(character));
-            ADVANCE_PAST_NON_NEWLINE_TO(RCDATAEndTagName);
+            ADVANCE_PAST_NON_NEWLINE_TO(RAWTEXTEndTagName);
           }
 
           BufferCharacters(Array {LessThanSign, Solidus});
@@ -788,7 +788,7 @@ namespace Krys::HTML
           {
             _temporaryBuffer.clear();
             assert(_bufferedEndTagName.empty());
-            ADVANCE_PAST_NON_NEWLINE_TO(RCDATAEndTagOpen);
+            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEndTagOpen);
           }
           if (character == ExclamationMark)
           {
@@ -860,7 +860,7 @@ namespace Krys::HTML
           if (character == HyphenMinus)
           {
             BufferCharacter(HyphenMinus);
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedDash);
+            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapeStartDash);
           }
 
           RECONSUME_IN(ScriptData);
@@ -2362,9 +2362,13 @@ namespace Krys::HTML
           {
             ParserError(HTMLParseError::ControlCharacterReference);
           }
-          else if (auto lookup = SearchNumericCharacterReferences(_characterReferenceCode); lookup)
+          else
           {
-            _characterReferenceCode = lookup;
+            auto lookup = SearchNumericCharacterReferences(static_cast<char32>(_characterReferenceCode));
+            if (lookup != 0)
+            {
+              _characterReferenceCode = lookup;
+            }
           }
 
           AppendToTemporaryBuffer(static_cast<char32>(_characterReferenceCode));

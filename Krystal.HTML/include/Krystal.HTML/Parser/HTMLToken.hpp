@@ -11,8 +11,8 @@ namespace Krys::HTML
 {
   struct DoctypeData
   {
-    List<char16> PublicIdentifier;
-    List<char16> SystemIdentifier;
+    List<char32> PublicIdentifier;
+    List<char32> SystemIdentifier;
     bool HasPublicIdentifier : 1 {false};
     bool HasSystemIdentifier : 1 {false};
     bool ForceQuirks : 1 {false};
@@ -109,7 +109,7 @@ namespace Krys::HTML
       _data.append_range(characters.ToSpan());
     }
 
-    void BeginStartTag(char8 character) noexcept
+    void BeginStartTag(char32 character) noexcept
     {
       assert(character);
       assert(_type == Type::Uninitialized);
@@ -125,7 +125,7 @@ namespace Krys::HTML
       _data.push_back(character);
     }
 
-    void BeginEndTag(char8 character) noexcept
+    void BeginEndTag(char32 character) noexcept
     {
       assert(character);
       assert(_type == Type::Uninitialized);
