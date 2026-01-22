@@ -24,7 +24,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLCharacterReference(SearchNamedCharacterReferences)", "[HTML][CharacterReference]")
   {
-    utf32_stringview target = utf32_stringview(U"LongLeftRightArrow;");
+    utf32_stringview target = utf32_stringview(U"&LongLeftRightArrow;");
 
     auto entries = Krys::HTML::SearchNamedCharacterReferences(Span(target.begin(), target.begin() + 4));
     REQUIRE(entries.size() == 6uz);
@@ -34,9 +34,9 @@ namespace Krys::Tests
 
     entries = Krys::HTML::SearchNamedCharacterReferences(Span(target.begin(), target.end()), entries);
     REQUIRE(entries.size() == 1uz);
-    REQUIRE(entries[0].Name == "LongLeftRightArrow;");
+    REQUIRE(entries[0].Name == "&LongLeftRightArrow;");
 
-    target = utf32_stringview(U"NonExistentReference;");
+    target = utf32_stringview(U"&NonExistentReference;");
     entries = Krys::HTML::SearchNamedCharacterReferences(Span(target.begin(), target.end()));
     REQUIRE(entries.size() == 0uz);
   }

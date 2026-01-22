@@ -89,7 +89,7 @@ namespace Krys::HTML
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#named-character-reference-state
     Span<const NamedCharacterReferenceEntry> _namedCharacterReferenceMatchEntries;
     const NamedCharacterReferenceEntry *_longestNamedCharacterReferenceMatchEntry {nullptr};
-    
+
     List<HTMLParseError> _parseErrors;
 
   public:
@@ -209,7 +209,7 @@ namespace Krys::HTML
     KRYS_NODISCARD bool CommitToPartialEndTag(char32 character, TokenizerState state) noexcept
     {
       assert(_input.get().NextInputCharacter() == character);
-       _temporaryBuffer.push_back(character);
+      _temporaryBuffer.push_back(character);
       _input.get().Advance();
 
       if (HasBufferedCharacterToken())
@@ -407,6 +407,31 @@ namespace Krys::HTML
     if (_characterReferenceReturnState == TokenizerState::AttributeValueUnquoted)                            \
     {                                                                                                        \
       RECONSUME_IN(AttributeValueUnquoted);                                                                  \
+    }                                                                                                        \
+  } while (false)
+
+#define ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE()                                                        \
+  do                                                                                                         \
+  {                                                                                                          \
+    if (_characterReferenceReturnState == TokenizerState::Data)                                              \
+    {                                                                                                        \
+      ADVANCE_TO(Data);                                                                                      \
+    }                                                                                                        \
+    if (_characterReferenceReturnState == TokenizerState::RCDATA)                                            \
+    {                                                                                                        \
+      ADVANCE_TO(RCDATA);                                                                                    \
+    }                                                                                                        \
+    if (_characterReferenceReturnState == TokenizerState::AttributeValueDoubleQuoted)                        \
+    {                                                                                                        \
+      ADVANCE_TO(AttributeValueDoubleQuoted);                                                                \
+    }                                                                                                        \
+    if (_characterReferenceReturnState == TokenizerState::AttributeValueSingleQuoted)                        \
+    {                                                                                                        \
+      ADVANCE_TO(AttributeValueSingleQuoted);                                                                \
+    }                                                                                                        \
+    if (_characterReferenceReturnState == TokenizerState::AttributeValueUnquoted)                            \
+    {                                                                                                        \
+      ADVANCE_TO(AttributeValueUnquoted);                                                                    \
     }                                                                                                        \
   } while (false)
 
@@ -652,7 +677,7 @@ namespace Krys::HTML
         BEGIN_STATE(RCDATAEndTagOpen)
           if (Text::IsASCIIAlpha(character))
           {
-             _temporaryBuffer.push_back(character);
+            _temporaryBuffer.push_back(character);
             AppendToPossibleEndTag(Text::ToASCIILower(character));
             ADVANCE_PAST_NON_NEWLINE_TO(RCDATAEndTagName);
           }
@@ -693,7 +718,7 @@ namespace Krys::HTML
           }
           if (Text::IsASCIIAlpha(character))
           {
-             _temporaryBuffer.push_back(character);
+            _temporaryBuffer.push_back(character);
             AppendToPossibleEndTag(Text::ToASCIILower(character));
             ADVANCE_PAST_NON_NEWLINE_TO(RCDATAEndTagName);
           }
@@ -720,7 +745,7 @@ namespace Krys::HTML
         BEGIN_STATE(RAWTEXTEndTagOpen)
           if (Text::IsASCIIAlpha(character))
           {
-             _temporaryBuffer.push_back(character);
+            _temporaryBuffer.push_back(character);
             AppendToPossibleEndTag(Text::ToASCIILower(character));
             ADVANCE_PAST_NON_NEWLINE_TO(RAWTEXTEndTagName);
           }
@@ -761,7 +786,7 @@ namespace Krys::HTML
           }
           if (Text::IsASCIIAlpha(character))
           {
-             _temporaryBuffer.push_back(character);
+            _temporaryBuffer.push_back(character);
             AppendToPossibleEndTag(Text::ToASCIILower(character));
             ADVANCE_PAST_NON_NEWLINE_TO(RAWTEXTEndTagName);
           }
@@ -793,7 +818,7 @@ namespace Krys::HTML
         BEGIN_STATE(ScriptDataEndTagOpen)
           if (Text::IsASCIIAlpha(character))
           {
-             _temporaryBuffer.push_back(character);
+            _temporaryBuffer.push_back(character);
             AppendToPossibleEndTag(Text::ToASCIILower(character));
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEndTagName);
           }
@@ -834,7 +859,7 @@ namespace Krys::HTML
           }
           if (Text::IsASCIIAlpha(character))
           {
-             _temporaryBuffer.push_back(character);
+            _temporaryBuffer.push_back(character);
             AppendToPossibleEndTag(Text::ToASCIILower(character));
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEndTagName);
           }
@@ -970,7 +995,7 @@ namespace Krys::HTML
         BEGIN_STATE(ScriptDataEscapedEndTagOpen)
           if (Text::IsASCIIAlpha(character))
           {
-             _temporaryBuffer.push_back(character);
+            _temporaryBuffer.push_back(character);
             AppendToPossibleEndTag(Text::ToASCIILower(character));
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedEndTagName);
           }
@@ -1011,7 +1036,7 @@ namespace Krys::HTML
           }
           if (Text::IsASCIIAlpha(character))
           {
-             _temporaryBuffer.push_back(character);
+            _temporaryBuffer.push_back(character);
             AppendToPossibleEndTag(Text::ToASCIILower(character));
             ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscapedEndTagName);
           }
@@ -2179,14 +2204,14 @@ namespace Krys::HTML
 
           if (Text::IsASCIIAlphanumeric(character))
           {
-             _temporaryBuffer.push_back(character);
+            _temporaryBuffer.push_back(character);
             _namedCharacterReferenceMatchEntries = SearchNamedCharacterReferences(_temporaryBuffer);
             _longestNamedCharacterReferenceMatchEntry = nullptr;
             ADVANCE_PAST_NON_NEWLINE_TO(NamedCharacterReference);
           }
           if (character == NumberSign)
           {
-             _temporaryBuffer.push_back(character);
+            _temporaryBuffer.push_back(character);
             ADVANCE_PAST_NON_NEWLINE_TO(NumericCharacterReference);
           }
 
@@ -2195,30 +2220,51 @@ namespace Krys::HTML
         END_STATE()
 
         BEGIN_STATE(NamedCharacterReference)
-           _temporaryBuffer.push_back(character);
-          _namedCharacterReferenceMatchEntries =
-            SearchNamedCharacterReferences(_temporaryBuffer, _namedCharacterReferenceMatchEntries);
+          // TODO: optimization
+          List<char32> temp = _temporaryBuffer;
+          temp.push_back(character);
 
+          _namedCharacterReferenceMatchEntries =
+            SearchNamedCharacterReferences(temp, _namedCharacterReferenceMatchEntries);
+
+          if (_namedCharacterReferenceMatchEntries.size() >= 1)
+          {
+            _temporaryBuffer.push_back(character);
+            _longestNamedCharacterReferenceMatchEntry = &_namedCharacterReferenceMatchEntries[0];
+          }
           if (_namedCharacterReferenceMatchEntries.size() > 1)
           {
             ADVANCE_PAST_NON_NEWLINE_TO(NamedCharacterReference);
           }
-          else if (_namedCharacterReferenceMatchEntries.size() == 1)
+          if (_namedCharacterReferenceMatchEntries.size() == 1)
           {
-            _longestNamedCharacterReferenceMatchEntry = &_namedCharacterReferenceMatchEntries[0];
-            // we might have a longer match if we continue
-            ADVANCE_PAST_NON_NEWLINE_TO(NamedCharacterReference);
+            if (character != Semicolon)
+            {
+              // we might have a longer match if we continue
+              ADVANCE_PAST_NON_NEWLINE_TO(NamedCharacterReference);
+            }
+            else
+            {
+              // exact match
+              _temporaryBuffer.clear();
+              _temporaryBuffer.append_range(_longestNamedCharacterReferenceMatchEntry->ToSpan());
+              FlushCodePointsConsumedAsACharacterReference();
+              ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE();
+            }
           }
-          else if (_longestNamedCharacterReferenceMatchEntry)
+
+          if (_longestNamedCharacterReferenceMatchEntry
+              && std::ranges::equal(_temporaryBuffer, _longestNamedCharacterReferenceMatchEntry->Name))
           {
             if (CharacterReferenceWasConsumedAsPartOfAnAttribute() && _temporaryBuffer.back() != Semicolon
                 && (character == EqualSign || Text::IsASCIIAlphanumeric(character)))
             {
+              _temporaryBuffer.push_back(character);
               FlushCodePointsConsumedAsACharacterReference();
-              RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
+              ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE();
             }
 
-            if (_temporaryBuffer.back() != Semicolon)
+            if (character != Semicolon)
             {
               ParserError(HTMLParseError::MissingSemicolonAfterCharacterReference);
             }
@@ -2226,14 +2272,12 @@ namespace Krys::HTML
             _temporaryBuffer.clear();
             _temporaryBuffer.append_range(_longestNamedCharacterReferenceMatchEntry->ToSpan());
             FlushCodePointsConsumedAsACharacterReference();
-            RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
+            ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE();
           }
-          else
-          {
-            // no matches at all
-            FlushCodePointsConsumedAsACharacterReference();
-            RECONSUME_IN(AmbiguousAmpersand);
-          }
+
+          // no matches at all
+          FlushCodePointsConsumedAsACharacterReference();
+          RECONSUME_IN(AmbiguousAmpersand);
         END_STATE()
 
         BEGIN_STATE(AmbiguousAmpersand)
@@ -2247,6 +2291,7 @@ namespace Krys::HTML
             {
               _token.AppendToCharacters(character);
             }
+            ADVANCE_TO(AmbiguousAmpersand);
           }
           if (character == Semicolon)
           {
@@ -2261,7 +2306,7 @@ namespace Krys::HTML
           _characterReferenceCode = 0;
           if (Text::MatchesASCIINormalizedLiteral(character, 'x'))
           {
-             _temporaryBuffer.push_back(character);
+            _temporaryBuffer.push_back(character);
             ADVANCE_PAST_NON_NEWLINE_TO(HexadecimalCharacterReferenceStart);
           }
 
@@ -2361,6 +2406,7 @@ namespace Krys::HTML
             }
           }
 
+          _temporaryBuffer.clear();
           _temporaryBuffer.push_back(static_cast<char32>(_characterReferenceCode));
           FlushCodePointsConsumedAsACharacterReference();
           RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
@@ -2378,5 +2424,6 @@ namespace Krys::HTML
 #undef ADVANCE_TO
 #undef ADVANCE_PAST_NON_NEWLINE_TO
 #undef RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE
+#undef ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE
   };
 }
