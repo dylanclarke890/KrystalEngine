@@ -2393,7 +2393,8 @@ namespace Krys::HTML
           {
             ParserError(HTMLParseError::NonCharacterCharacterReference);
           }
-          else if (Text::IsASCIINonWhitespaceControl(static_cast<char32>(_characterReferenceCode)))
+          else if (_characterReferenceCode == '\x0D'
+                   || Text::IsASCIINonWhitespaceControl(static_cast<char32>(_characterReferenceCode)))
           {
             ParserError(HTMLParseError::ControlCharacterReference);
           }

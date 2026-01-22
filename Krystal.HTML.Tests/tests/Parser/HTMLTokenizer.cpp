@@ -33,9 +33,9 @@ namespace Krys::Tests
   size_t expectedErrorCount = 0;                                                                             \
   auto expected = U"";
 
-#define COMMON_TEST_CASES()                                                                                  \
+#define COMMON_TEST_CASES(tokenType)                                                                         \
   REQUIRE(token);                                                                                            \
-  REQUIRE(token->GetType() == HTMLToken::Type::Character);                                                   \
+  REQUIRE(token->GetType() == tokenType);                                                                    \
   REQUIRE(CompareDataBufferToString(token->GetDataBuffer(), expected));                                      \
   REQUIRE(errors.size() == expectedErrorCount)
 
@@ -47,8 +47,10 @@ namespace Krys::Tests
     inputStream.Append(U"&_", IsEOF(true));
 
     NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
   }
+
+#pragma region NamedCharacterReference
 
   TEST_CASE("HTMLTokenizer(NamedCharacterReference) - happy path", "[HTML][Tokenizer]")
   {
@@ -58,10 +60,10 @@ namespace Krys::Tests
     inputStream.Append(U"&copy;", IsEOF(true));
 
     NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
   }
 
-  TEST_CASE("HTMLTokenizer(NamedCharacterReference) - mixed case", "[HTML][Tokenizer]")
+  TEST_CASE("HTMLTokenizer(NamedCharacterReference) - mixed case reference", "[HTML][Tokenizer]")
   {
     SETUP_TEST();
 
@@ -69,7 +71,7 @@ namespace Krys::Tests
     inputStream.Append(U"&vsupnE;", IsEOF(true));
 
     NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
   }
 
   TEST_CASE("HTMLTokenizer(NamedCharacterReference) - missing semicolon", "[HTML][Tokenizer]")
@@ -81,10 +83,7 @@ namespace Krys::Tests
     inputStream.Append(U"&Agrave", IsEOF(true));
 
     NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(token);
-    REQUIRE(token->GetType() == HTMLToken::Type::Character);
-    REQUIRE(CompareDataBufferToString(token->GetDataBuffer(), expected));
-    REQUIRE(errors.size() == expectedErrorCount);
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
     REQUIRE(errors.back() == HTMLParseError::MissingSemicolonAfterCharacterReference);
   }
 
@@ -96,7 +95,7 @@ namespace Krys::Tests
     inputStream.Append(U"&nonentity", IsEOF(true));
 
     NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
   }
 
   TEST_CASE("HTMLTokenizer(NamedCharacterReference) - no match, ends in semicolon", "[HTML][Tokenizer]")
@@ -108,10 +107,26 @@ namespace Krys::Tests
     inputStream.Append(U"&nonentity;", IsEOF(true));
 
     NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
 
     REQUIRE(errors.back() == HTMLParseError::UnknownNamedCharacterReference);
   }
+
+  TEST_CASE("HTMLTokenizer(NamedCharacterReference) - EOF in middle of otherwise valid reference",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"&co";
+    inputStream.Append(U"&co", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+  }
+
+#pragma endregion
+
+#pragma region DecimalCharacterReference
 
   TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - happy path", "[HTML][Tokenizer]")
   {
@@ -121,8 +136,122 @@ namespace Krys::Tests
     inputStream.Append(U"&#8482;", IsEOF(true));
 
     NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
   }
+
+  TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - lookup table", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"€";
+    inputStream.Append(U"&#128;", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+  }
+
+  TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - missing semicolon", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"™";
+    expectedErrorCount = 1;
+    inputStream.Append(U"&#8482", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+
+    REQUIRE(errors.back() == HTMLParseError::MissingSemicolonAfterCharacterReference);
+  }
+
+  TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - no numbers provided after #", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"&#;";
+    expectedErrorCount = 1;
+    inputStream.Append(U"&#;", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+
+    REQUIRE(errors.back() == HTMLParseError::AbsenceOfDigitsInNumericCharacterReference);
+  }
+
+  TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - null character reference", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"\xFFFD";
+    expectedErrorCount = 1;
+    inputStream.Append(U"&#0;", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+
+    REQUIRE(errors.back() == HTMLParseError::NullCharacterReference);
+  }
+
+  TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - character reference outside unicode range",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"\xFFFD";
+    expectedErrorCount = 1;
+    inputStream.Append(U"&#1114112;", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+
+    REQUIRE(errors.back() == HTMLParseError::CharacterReferenceOutsideUnicodeRange);
+  }
+
+  TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - surrogate", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"\xFFFD";
+    expectedErrorCount = 1;
+    inputStream.Append(U"&#55298;", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+
+    REQUIRE(errors.back() == HTMLParseError::SurrogateCharacterReference);
+  }
+
+  TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - non character", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"\xFFFE";
+    expectedErrorCount = 1;
+    inputStream.Append(U"&#65534;", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+
+    REQUIRE(errors.back() == HTMLParseError::NonCharacterCharacterReference);
+  }
+
+  TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - control character", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"\x0D";
+    expectedErrorCount = 1;
+    inputStream.Append(U"&#13;", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+
+    REQUIRE(errors.back() == HTMLParseError::ControlCharacterReference);
+  }
+
+#pragma endregion
+
+#pragma region HexadecimalCharacterReference
 
   TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - happy path", "[HTML][Tokenizer]")
   {
@@ -132,6 +261,140 @@ namespace Krys::Tests
     inputStream.Append(U"&#x152;", IsEOF(true));
 
     NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
   }
+
+  TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - lookup table", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"€";
+    inputStream.Append(U"&#x80;", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+  }
+
+  TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - mixed case hex digits", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"€";
+    inputStream.Append(U"&#x20Ac;", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+  }
+
+  TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - uppercase X", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"Œ";
+    inputStream.Append(U"&#X152;", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+  }
+
+  TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - missing semicolon", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"Œ";
+    expectedErrorCount = 1;
+    inputStream.Append(U"&#X152", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+
+    REQUIRE(errors.back() == HTMLParseError::MissingSemicolonAfterCharacterReference);
+  }
+
+  TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - no numbers provided after #X",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"&#X;";
+    expectedErrorCount = 1;
+    inputStream.Append(U"&#X;", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(errors.back() == HTMLParseError::AbsenceOfDigitsInNumericCharacterReference);
+  }
+
+  TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - null character reference", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"\xFFFD";
+    expectedErrorCount = 1;
+    inputStream.Append(U"&#x00;", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+
+    REQUIRE(errors.back() == HTMLParseError::NullCharacterReference);
+  }
+
+  TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - character reference outside unicode range",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"\xFFFD";
+    expectedErrorCount = 1;
+    inputStream.Append(U"&#x110000;", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+
+    REQUIRE(errors.back() == HTMLParseError::CharacterReferenceOutsideUnicodeRange);
+  }
+
+  TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - surrogate", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"\xFFFD";
+    expectedErrorCount = 1;
+    inputStream.Append(U"&#xD800;", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+
+    REQUIRE(errors.back() == HTMLParseError::SurrogateCharacterReference);
+  }
+
+  TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - non character", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"\xFFFE";
+    expectedErrorCount = 1;
+    inputStream.Append(U"&#xFFFE;", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+
+    REQUIRE(errors.back() == HTMLParseError::NonCharacterCharacterReference);
+  }
+
+  TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - control character", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"\x0D";
+    expectedErrorCount = 1;
+    inputStream.Append(U"&#x0D;", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+
+    REQUIRE(errors.back() == HTMLParseError::ControlCharacterReference);
+  }
+
+#pragma endregion
 }
