@@ -126,6 +126,8 @@ namespace Krys::Tests
     COMMON_TEST_CASES(HTMLToken::Type::Character);
   }
 
+  // TODO: test cases for when character references are consumed as part of attributes
+
 #pragma endregion
 
 #pragma region DecimalCharacterReference
