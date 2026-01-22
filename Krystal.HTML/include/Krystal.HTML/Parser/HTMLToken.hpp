@@ -301,5 +301,10 @@ namespace Krys::HTML
       _type = Type::Uninitialized;
       _data.clear();
     }
+
+    const DataBuffer &GetDataBuffer() const noexcept
+    {
+      return _data;
+    }
   };
 }
