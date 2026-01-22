@@ -39,6 +39,8 @@ namespace Krys::Tests
   REQUIRE(CompareDataBufferToString(token->GetDataBuffer(), expected));                                      \
   REQUIRE(errors.size() == expectedErrorCount)
 
+#pragma region CharacterReference
+
   TEST_CASE("HTMLTokenizer(CharacterReference) - Non-character reference", "[HTML][Tokenizer]")
   {
     SETUP_TEST();
@@ -394,6 +396,22 @@ namespace Krys::Tests
     COMMON_TEST_CASES(HTMLToken::Type::Character);
 
     REQUIRE(errors.back() == HTMLParseError::ControlCharacterReference);
+  }
+
+#pragma endregion
+
+  TEST_CASE("HTMLTokenizer(CharacterReference) - Multiple", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"©À€Œ&a;";
+    expectedErrorCount = 2;
+    inputStream.Append(U"&copy;&Agrave&#128;&#X152;&a;", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(errors[0] == HTMLParseError::MissingSemicolonAfterCharacterReference);
+    REQUIRE(errors[1] == HTMLParseError::UnknownNamedCharacterReference);
   }
 
 #pragma endregion

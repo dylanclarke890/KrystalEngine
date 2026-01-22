@@ -2227,29 +2227,27 @@ namespace Krys::HTML
           _namedCharacterReferenceMatchEntries =
             SearchNamedCharacterReferences(temp, _namedCharacterReferenceMatchEntries);
 
-          if (_namedCharacterReferenceMatchEntries.size() >= 1)
-          {
-            _temporaryBuffer.push_back(character);
-            _longestNamedCharacterReferenceMatchEntry = &_namedCharacterReferenceMatchEntries[0];
-          }
           if (_namedCharacterReferenceMatchEntries.size() > 1)
           {
+            _longestNamedCharacterReferenceMatchEntry = &_namedCharacterReferenceMatchEntries[0];
+            _temporaryBuffer.push_back(character);
             ADVANCE_PAST_NON_NEWLINE_TO(NamedCharacterReference);
           }
+
           if (_namedCharacterReferenceMatchEntries.size() == 1)
           {
-            if (character != Semicolon)
-            {
-              // we might have a longer match if we continue
-              ADVANCE_PAST_NON_NEWLINE_TO(NamedCharacterReference);
-            }
-            else
+            if (character == Semicolon)
             {
               // exact match
               _temporaryBuffer.clear();
               _temporaryBuffer.append_range(_longestNamedCharacterReferenceMatchEntry->ToSpan());
               FlushCodePointsConsumedAsACharacterReference();
               ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE();
+            }
+            else
+            {
+              _temporaryBuffer.push_back(character);
+              ADVANCE_PAST_NON_NEWLINE_TO(NamedCharacterReference);
             }
           }
 
@@ -2264,14 +2262,15 @@ namespace Krys::HTML
               ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE();
             }
 
-            if (character != Semicolon)
-            {
-              ParserError(HTMLParseError::MissingSemicolonAfterCharacterReference);
-            }
-
             _temporaryBuffer.clear();
             _temporaryBuffer.append_range(_longestNamedCharacterReferenceMatchEntry->ToSpan());
             FlushCodePointsConsumedAsACharacterReference();
+            if (character != Semicolon)
+            {
+              ParserError(HTMLParseError::MissingSemicolonAfterCharacterReference);
+              RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
+            }
+
             ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE();
           }
 
