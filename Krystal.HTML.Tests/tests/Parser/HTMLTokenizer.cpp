@@ -26,9 +26,10 @@ namespace Krys::Tests
 {
   using namespace Krys::HTML;
 
-#define SETUP_TEST()                                                                                         \
+#define SETUP_TEST(initialState)                                                                             \
   HTMLInputStream inputStream;                                                                               \
   HTMLTokenizer tokenizer(inputStream);                                                                      \
+  tokenizer.SetState(initialState);                                                                          \
   const auto &errors = tokenizer.GetParseErrors();                                                           \
   size_t expectedErrorCount = 0;                                                                             \
   utf32_string expected = U"";
@@ -37,13 +38,13 @@ namespace Krys::Tests
   REQUIRE(token);                                                                                            \
   REQUIRE(token->GetType() == tokenType);                                                                    \
   REQUIRE(CompareDataBufferToString(token->GetDataBuffer(), expected));                                      \
-  REQUIRE(errors.size() == expectedErrorCount)
+  REQUIRE(errors.size() == expectedErrorCount);
 
 #pragma region CharacterReference
 
   TEST_CASE("HTMLTokenizer(CharacterReference) - Non-character reference", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"&_";
     inputStream.Append(U"&_", IsEOF(true));
@@ -56,7 +57,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(NamedCharacterReference) - happy path", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"©";
     inputStream.Append(U"&copy;", IsEOF(true));
@@ -67,7 +68,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(NamedCharacterReference) - mixed case reference", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"⫌︀";
     inputStream.Append(U"&vsupnE;", IsEOF(true));
@@ -78,7 +79,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(NamedCharacterReference) - missing semicolon", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"À";
     expectedErrorCount = 1;
@@ -91,7 +92,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(NamedCharacterReference) - no match", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"&nonentity";
     inputStream.Append(U"&nonentity", IsEOF(true));
@@ -102,7 +103,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(NamedCharacterReference) - no match, ends in semicolon", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"&nonentity;";
     expectedErrorCount = 1;
@@ -117,7 +118,7 @@ namespace Krys::Tests
   TEST_CASE("HTMLTokenizer(NamedCharacterReference) - EOF in middle of otherwise valid reference",
             "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"&co";
     inputStream.Append(U"&co", IsEOF(true));
@@ -134,7 +135,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - happy path", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"™";
     inputStream.Append(U"&#8482;", IsEOF(true));
@@ -145,7 +146,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - lookup table", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"€";
     inputStream.Append(U"&#128;", IsEOF(true));
@@ -156,7 +157,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - missing semicolon", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"™";
     expectedErrorCount = 1;
@@ -170,7 +171,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - no numbers provided after #", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"&#;";
     expectedErrorCount = 1;
@@ -184,7 +185,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - null character reference", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"\xFFFD";
     expectedErrorCount = 1;
@@ -199,7 +200,7 @@ namespace Krys::Tests
   TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - character reference outside unicode range",
             "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"\xFFFD";
     expectedErrorCount = 1;
@@ -213,7 +214,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - surrogate", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"\xFFFD";
     expectedErrorCount = 1;
@@ -227,7 +228,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - non character", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"\xFFFE";
     expectedErrorCount = 1;
@@ -241,7 +242,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - control character", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"\x0D";
     expectedErrorCount = 1;
@@ -259,7 +260,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - happy path", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"Œ";
     inputStream.Append(U"&#x152;", IsEOF(true));
@@ -270,7 +271,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - lookup table", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"€";
     inputStream.Append(U"&#x80;", IsEOF(true));
@@ -281,7 +282,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - mixed case hex digits", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"€";
     inputStream.Append(U"&#x20Ac;", IsEOF(true));
@@ -292,7 +293,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - uppercase X", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"Œ";
     inputStream.Append(U"&#X152;", IsEOF(true));
@@ -303,7 +304,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - missing semicolon", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"Œ";
     expectedErrorCount = 1;
@@ -318,7 +319,7 @@ namespace Krys::Tests
   TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - no numbers provided after #X",
             "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"&#X;";
     expectedErrorCount = 1;
@@ -331,7 +332,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - null character reference", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"\xFFFD";
     expectedErrorCount = 1;
@@ -346,7 +347,7 @@ namespace Krys::Tests
   TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - character reference outside unicode range",
             "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"\xFFFD";
     expectedErrorCount = 1;
@@ -360,7 +361,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - surrogate", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"\xFFFD";
     expectedErrorCount = 1;
@@ -374,7 +375,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - non character", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"\xFFFE";
     expectedErrorCount = 1;
@@ -388,7 +389,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - control character", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"\x0D";
     expectedErrorCount = 1;
@@ -404,7 +405,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(CharacterReference) - Multiple", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"©À€Œ&a;";
     expectedErrorCount = 2;
@@ -420,9 +421,20 @@ namespace Krys::Tests
 
 #pragma region Data
 
+  TEST_CASE("HTMLTokenizer(Data) - Replaces character references", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"Some data © some more data";
+    inputStream.Append(U"Some data &copy; some more data", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+  }
+
   TEST_CASE("HTMLTokenizer(Data) - Batches characters up to less than sign", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"a string of characters; 123145";
     inputStream.Append(U"a string of characters; 123145<", IsEOF(true));
@@ -431,15 +443,26 @@ namespace Krys::Tests
     COMMON_TEST_CASES(HTMLToken::Type::Character);
   }
 
-  
+  TEST_CASE("HTMLTokenizer(Data) - switches to TagOpen when parsing LessThanSign", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    utf32_string input = U"<";
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::TagOpen);
+  }
+
   TEST_CASE("HTMLTokenizer(Data) - Batches characters up to EOF then emits EOF", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"a string of characters; 123145";
     inputStream.Append(U"a string of characters; 123145", IsEOF(true));
 
-{
+    {
       NextTokenPtr token = tokenizer.NextToken();
       COMMON_TEST_CASES(HTMLToken::Type::Character);
     }
@@ -453,7 +476,7 @@ namespace Krys::Tests
 
   TEST_CASE("HTMLTokenizer(Data) - Emits null character as-is with parse error", "[HTML][Tokenizer]")
   {
-    SETUP_TEST();
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"1234";
     expected.append(1uz, U'\x0');
@@ -468,6 +491,344 @@ namespace Krys::Tests
     COMMON_TEST_CASES(HTMLToken::Type::Character);
 
     REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
+  }
+
+#pragma endregion
+
+#pragma region RCDATA
+
+  TEST_CASE("HTMLTokenizer(RCDATA) - Replaces character references", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::RCDATA);
+
+    expected = U"Some data © some more data";
+    inputStream.Append(U"Some data &copy; some more data", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+  }
+
+  TEST_CASE("HTMLTokenizer(RCDATA) - switches to RCDATALessThanSign when parsing LessThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::RCDATA);
+
+    utf32_string input = U"<";
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::RCDATALessThanSign);
+  }
+
+  TEST_CASE("HTMLTokenizer(RCDATA) - Replaces null character with U+FFFD", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::RCDATA);
+
+    expected = U"1234\xFFFD";
+    expectedErrorCount = 1;
+
+    utf32_string input = U"1234";
+    input.append(1uz, U'\x0');
+    inputStream.Append(std::move(input), IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
+  }
+
+  TEST_CASE("HTMLTokenizer(RCDATA) - Batches characters up to EOF then emits EOF", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::RCDATA);
+
+    expected = U"a string of characters; 123145";
+    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
+
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::Character);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(RCDATA) - Batches characters", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::RCDATA);
+
+    expected = U"a string of characters; 123145";
+    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+  }
+
+#pragma region RCDATALessThanSign
+
+  TEST_CASE("HTMLTokenizer(RCDATALessThanSign) - Switches to RCDATAEndTagOpen after parsing solidus",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::RCDATALessThanSign);
+
+    expected = U"";
+
+    utf32_string input = U"/";
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::RCDATAEndTagOpen);
+  }
+
+  TEST_CASE("HTMLTokenizer(RCDATALessThanSign) - emits less than sign after parsing non solidus",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::RCDATALessThanSign);
+
+    expected = U"<©";
+
+    utf32_string input = U"©";
+    inputStream.Append(std::move(input), IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+  }
+
+#pragma endregion
+
+#pragma region RCDATA EndTagOpen
+
+  TEST_CASE(
+    "HTMLTokenizer(RCDATAEndTagOpen) - Switches to RCDATAEndTagName after parsing valid tag name start",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::RCDATAEndTagOpen);
+
+    expected = U"";
+
+    utf32_string input = U"a";
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::RCDATAEndTagName);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(RCDATAEndTagOpen) - emits less than sign and solidus after parsing invalid tag name start",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::RCDATAEndTagOpen);
+
+    expected = U"</©";
+
+    utf32_string input = U"©";
+    inputStream.Append(std::move(input), IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+  }
+
+#pragma endregion
+
+#pragma endregion
+
+#pragma region RAWTEXT
+
+  TEST_CASE("HTMLTokenizer(RAWTEXT) - switches to RAWTEXTLessThanSign when parsing LessThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::RAWTEXT);
+
+    utf32_string input = U"<";
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::RAWTEXTLessThanSign);
+  }
+
+  TEST_CASE("HTMLTokenizer(RAWTEXT) - Replaces null character with U+FFFD", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::RAWTEXT);
+
+    expected = U"1234\xFFFD";
+    expectedErrorCount = 1;
+
+    utf32_string input = U"1234";
+    input.append(1uz, U'\x0');
+    inputStream.Append(std::move(input), IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
+  }
+
+  TEST_CASE("HTMLTokenizer(RAWTEXT) - Batches characters up to EOF then emits EOF", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::RAWTEXT);
+
+    expected = U"a string of characters; 123145";
+    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
+
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::Character);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(RAWTEXT) - Batches characters", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::RAWTEXT);
+
+    expected = U"a string of characters; 123145";
+    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+  }
+
+#pragma endregion
+
+#pragma region ScriptData
+
+  TEST_CASE("HTMLTokenizer(ScriptData) - switches to ScriptDataLessThanSign when parsing LessThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptData);
+
+    utf32_string input = U"<";
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataLessThanSign);
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptData) - Replaces null character with U+FFFD", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptData);
+
+    expected = U"1234\xFFFD";
+    expectedErrorCount = 1;
+
+    utf32_string input = U"1234";
+    input.append(1uz, U'\x0');
+    inputStream.Append(std::move(input), IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptData) - Batches characters up to EOF then emits EOF", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptData);
+
+    expected = U"a string of characters; 123145";
+    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
+
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::Character);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptData) - Batches characters", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptData);
+
+    expected = U"a string of characters; 123145";
+    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+  }
+
+#pragma endregion
+
+#pragma region PLAINTEXT
+
+  TEST_CASE("HTMLTokenizer(PLAINTEXT) - Replaces null character with U+FFFD", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::PLAINTEXT);
+
+    expected = U"1234\xFFFD";
+    expectedErrorCount = 1;
+
+    utf32_string input = U"1234";
+    input.append(1uz, U'\x0');
+    inputStream.Append(std::move(input), IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
+  }
+
+  TEST_CASE("HTMLTokenizer(PLAINTEXT) - Batches characters up to EOF then emits EOF", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::PLAINTEXT);
+
+    expected = U"a string of characters; 123145";
+    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
+
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::Character);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(PLAINTEXT) - Batches characters", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::PLAINTEXT);
+
+    expected = U"a string of characters; 123145";
+    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+  }
+
+#pragma endregion
+
+#pragma region TagOpen
+
+  TEST_CASE("HTMLTokenizer(TagOpen) - Switches to TagName after parsing valid tag name start",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::TagOpen);
+
+    expected = U"";
+
+    utf32_string input = U"a";
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::TagName);
   }
 
 #pragma endregion

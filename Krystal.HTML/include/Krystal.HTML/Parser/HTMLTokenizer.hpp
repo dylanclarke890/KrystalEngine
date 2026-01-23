@@ -349,6 +349,16 @@ namespace Krys::HTML
     return expression;                                                                                       \
   } while (false)
 
+#define RETURN_IN_CURRENT_STATE_IF_CHARACTERS_BUFFERED()                                                     \
+  do                                                                                                         \
+  {                                                                                                          \
+    if (HasBufferedCharacterToken())                                                                         \
+    {                                                                                                        \
+      _state = currentState;                                                                                 \
+      return true;                                                                                           \
+    }                                                                                                        \
+  } while (false)
+
 // For when the HTML spec says "reconsume the current input character in the <mumble> state."
 #define RECONSUME_IN(newState)                                                                               \
   do                                                                                                         \
@@ -479,25 +489,19 @@ namespace Krys::HTML
           }
           if (character == LessThanSign)
           {
-            if (HasBufferedCharacterToken())
-            {
-              RETURN_IN_CURRENT_STATE(true);
-            }
+            RETURN_IN_CURRENT_STATE_IF_CHARACTERS_BUFFERED();
             ADVANCE_PAST_NON_NEWLINE_TO(TagOpen);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            // Flush any buffered character tokens before emitting the EOF token.
-            if (HasBufferedCharacterToken())
-            {
-              RETURN_IN_CURRENT_STATE(true);
-            }
+            RETURN_IN_CURRENT_STATE_IF_CHARACTERS_BUFFERED();
             return EmitEOFToken();
           }
           if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
-            // It's a parser error but for Data we still emit it anyway as per the spec.
+            BufferCharacter(Null); // parser error but we still emit the null as per the spec.
+            ADVANCE_PAST_NON_NEWLINE_TO(Data);
           }
 
           BufferCharacter(character);
@@ -514,14 +518,15 @@ namespace Krys::HTML
           {
             ADVANCE_PAST_NON_NEWLINE_TO(RCDATALessThanSign);
           }
-          if (character == HTMLInputStream::EOFMarker) KRYS_UNLIKELY
+          if (character == EndOfFile) KRYS_UNLIKELY
           {
-            return EmitEOFToken();
+            RECONSUME_IN(Data);
           }
           if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
-            character = Replacement;
+            BufferCharacter(Replacement);
+            ADVANCE_PAST_NON_NEWLINE_TO(RCDATA);
           }
 
           BufferCharacter(character);
@@ -535,12 +540,13 @@ namespace Krys::HTML
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            return EmitEOFToken();
+            RECONSUME_IN(Data);
           }
           if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
-            character = Replacement;
+            BufferCharacter(Replacement);
+            ADVANCE_PAST_NON_NEWLINE_TO(RAWTEXT);
           }
 
           BufferCharacter(character);
@@ -554,12 +560,13 @@ namespace Krys::HTML
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            return EmitEOFToken();
+            RECONSUME_IN(Data);
           }
           if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
-            character = Replacement;
+            BufferCharacter(Replacement);
+            ADVANCE_PAST_NON_NEWLINE_TO(ScriptData);
           }
 
           BufferCharacter(character);
@@ -569,12 +576,13 @@ namespace Krys::HTML
         BEGIN_STATE(PLAINTEXT)
           if (character == EndOfFile) KRYS_UNLIKELY
           {
-            return EmitEOFToken();
+            RECONSUME_IN(Data);
           }
           if (character == Null) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
-            character = Replacement;
+            BufferCharacter(Replacement);
+            ADVANCE_PAST_NON_NEWLINE_TO(PLAINTEXT);
           }
 
           BufferCharacter(character);
