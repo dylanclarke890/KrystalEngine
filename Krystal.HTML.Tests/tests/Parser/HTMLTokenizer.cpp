@@ -31,7 +31,7 @@ namespace Krys::Tests
   HTMLTokenizer tokenizer(inputStream);                                                                      \
   const auto &errors = tokenizer.GetParseErrors();                                                           \
   size_t expectedErrorCount = 0;                                                                             \
-  auto expected = U"";
+  utf32_string expected = U"";
 
 #define COMMON_TEST_CASES(tokenType)                                                                         \
   REQUIRE(token);                                                                                            \
@@ -414,6 +414,60 @@ namespace Krys::Tests
     COMMON_TEST_CASES(HTMLToken::Type::Character);
     REQUIRE(errors[0] == HTMLParseError::MissingSemicolonAfterCharacterReference);
     REQUIRE(errors[1] == HTMLParseError::UnknownNamedCharacterReference);
+  }
+
+#pragma endregion
+
+#pragma region Data
+
+  TEST_CASE("HTMLTokenizer(Data) - Batches characters up to less than sign", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"a string of characters; 123145";
+    inputStream.Append(U"a string of characters; 123145<", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+  }
+
+  
+  TEST_CASE("HTMLTokenizer(Data) - Batches characters up to EOF then emits EOF", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"a string of characters; 123145";
+    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
+
+{
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::Character);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(Data) - Emits null character as-is with parse error", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST();
+
+    expected = U"1234";
+    expected.append(1uz, U'\x0');
+
+    expectedErrorCount = 1;
+
+    utf32_string input = U"1234";
+    input.append(1uz, U'\x0');
+    inputStream.Append(std::move(input), IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
   }
 
 #pragma endregion

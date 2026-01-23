@@ -51,8 +51,6 @@
 #ifndef CATCH_BENCHMARK_ALL_HPP_INCLUDED
 #define CATCH_BENCHMARK_ALL_HPP_INCLUDED
 
-
-
   // Adapted from donated nonius code.
 
 #ifndef CATCH_BENCHMARK_HPP_INCLUDED

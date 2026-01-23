@@ -102,9 +102,19 @@ namespace Krys::HTML
       return NextTokenPtr(ProcessToken() ? &_token : nullptr);
     }
 
-    const List<HTMLParseError> &GetParseErrors() const noexcept
+    KRYS_NODISCARD const List<HTMLParseError> &GetParseErrors() const noexcept
     {
       return _parseErrors;
+    }
+
+    KRYS_NODISCARD TokenizerState GetState() const noexcept
+    {
+      return _state;
+    }
+
+    void SetState(TokenizerState state) noexcept
+    {
+      _state = state;
     }
 
   private:
@@ -440,7 +450,7 @@ namespace Krys::HTML
     /// @see https://html.spec.whatwg.org/#tokenization
     KRYS_NODISCARD bool StepTokenizationStateMachine() noexcept
     {
-      constexpr char32 Null = U'\0';
+      constexpr char32 Null = U'\000';
       constexpr char32 Ampersand = U'&';
       constexpr char32 LessThanSign = U'<';
       constexpr char32 GreaterThanSign = U'>';

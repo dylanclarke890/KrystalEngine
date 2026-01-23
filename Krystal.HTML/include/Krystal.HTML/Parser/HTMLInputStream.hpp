@@ -3,7 +3,6 @@
 #include "Krystal.HTML/StronglyTypedValues.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types/Deque.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Text/ASCII.hpp"
 #include "Krystal.Text/ASCIILiteral.hpp"
