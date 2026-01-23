@@ -922,7 +922,7 @@ namespace Krys::HTML
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
-            ADVANCE_TO(ScriptDataEscaped);
+            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscaped);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {

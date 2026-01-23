@@ -1948,4 +1948,756 @@ namespace Krys::Tests
   }
 
 #pragma endregion
+
+#pragma region ScriptDataEscapedLessThanSign
+
+  TEST_CASE("HTMLTokenizer(ScriptDataEscapedLessThanSign) - switches to ScriptDataEscapedEndTagOpen after "
+            "parsing Solidus",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataEscapedLessThanSign);
+
+    expected = U"";
+    inputStream.Append(U"/");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscapedEndTagOpen);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(ScriptDataEscapedLessThanSign) - emits LessThanSign and next character and switches "
+    "to ScriptDataDoubleEscapeStart if ASCII alpha ",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataEscapedLessThanSign);
+
+    expected = U"<A";
+    inputStream.Append(U"A");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscapeStart);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(ScriptDataEscapedLessThanSign) - emits LessThanSign and next character and switches "
+    "to ScriptDataEscaped if not ASCII alpha ",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataEscapedLessThanSign);
+
+    expected = U"<©";
+    inputStream.Append(U"©");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscaped);
+  }
+
+#pragma endregion
+
+#pragma region ScriptDataEscapedEndTagOpen
+
+  TEST_CASE("HTMLTokenizer(ScriptDataEscapedEndTagOpen) - switches to ScriptDataEscapedEndTagName after "
+            "parsing valid tag name start",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataEscapedEndTagOpen);
+
+    expected = U"";
+    inputStream.Append(U"a");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscapedEndTagName);
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataEscapedEndTagOpen) - emits less than sign and solidus after parsing "
+            "invalid tag name start",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataEscapedEndTagOpen);
+
+    expected = U"</©";
+    inputStream.Append(U"©");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataEscapedEndTagOpen) - emits less than sign and solidus if EOF reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataEscaped);
+
+    inputStream.Append(U"</", IsEOF(true));
+
+    expected = U"</";
+    expectedErrorCount = 1;
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::Character);
+      REQUIRE(errors.back() == HTMLParseError::EOFInScriptHTMLCommentLikeText);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+#pragma endregion
+
+#pragma region ScriptDataEscapedEndTagName
+
+  TEST_CASE(
+    "HTMLTokenizer(ScriptDataEscapedEndTagName) - switches to BeforeAttributeName when parsing whitespace "
+    "and end tag name matches start tag",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+    inputStream.Append(U"<script></script ");
+
+    // Start tag
+    expected = U"script";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+    }
+
+    tokenizer.SetState(TokenizerState::ScriptDataEscaped);
+
+    // End tag
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      REQUIRE(!token);
+      REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeName);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataEscapedEndTagName) - switches to SelfClosingStartTag when parsing "
+            "solidus and end tag name matches start tag",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+    inputStream.Append(U"<script></script/");
+
+    // Start tag
+    expected = U"script";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+    }
+
+    tokenizer.SetState(TokenizerState::ScriptDataEscaped);
+
+    // End tag
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      REQUIRE(!token);
+      REQUIRE(tokenizer.GetState() == TokenizerState::SelfClosingStartTag);
+    }
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(ScriptDataEscapedEndTagName) - emits end tag token when parsing GreaterThanSign end "
+    "tag name matches start tag",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+    inputStream.Append(U"<script></script>");
+
+    // Start tag
+    expected = U"script";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+    }
+
+    tokenizer.SetState(TokenizerState::ScriptDataEscaped);
+
+    // End tag
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndTag);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataEscapedEndTagName) - allows mixed case", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+    inputStream.Append(U"<script></ScRiPt>");
+
+    // Start tag
+    expected = U"script";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+    }
+
+    tokenizer.SetState(TokenizerState::ScriptDataEscaped);
+
+    // End tag
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndTag);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataEscapedEndTagName) - emits less than sign, solidus, and characters when "
+            "tag name doesn't match",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+    inputStream.Append(U"<script></span©");
+
+    // Start tag
+    expected = U"script";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+    }
+
+    tokenizer.SetState(TokenizerState::ScriptDataEscaped);
+
+    expected = U"</span©";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::Character);
+    }
+  }
+
+#pragma endregion
+
+#pragma region ScriptDataDoubleEscapeStart
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeStart) - switches to ScriptDataEscaped after parsing "
+            "whitespace if temporary buffer is not 'script'",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeStart);
+
+    expected = U" ";
+    inputStream.Append(U" ");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscaped);
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeStart) - switches to ScriptDataEscaped after "
+            "parsing Solidus if temporary buffer is not 'script'",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeStart);
+
+    expected = U"/";
+    inputStream.Append(U"/");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscaped);
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeStart) - switches to ScriptDataEscaped after "
+            "parsing GreaterThanSign if temporary buffer is not 'script'",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeStart);
+
+    expected = U">";
+    inputStream.Append(U">");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscaped);
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeStart) - switches to ScriptDataDoubleEscaped after parsing "
+            "whitespace if temporary buffer is 'script'",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeStart);
+
+    expected = U"script ";
+    inputStream.Append(U"script ");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeStart) - switches to ScriptDataDoubleEscaped after "
+            "parsing Solidus if temporary buffer is 'script'",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeStart);
+
+    expected = U"script/";
+    inputStream.Append(U"script/");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeStart) - switches to ScriptDataDoubleEscaped after "
+            "parsing GreaterThanSign if temporary buffer is 'script'",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeStart);
+
+    expected = U"script>";
+    inputStream.Append(U"script>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeStart) - continues building temporary buffer when parsing "
+            "ASCII alpha",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeStart);
+
+    expected = U"sCr";
+    inputStream.Append(U"sCr");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscapeStart);
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeStart) - switches to ScriptDataEscaped if not ASCII alpha ",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeStart);
+
+    expected = U"©";
+    inputStream.Append(U"©");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscaped);
+  }
+
+#pragma endregion
+
+#pragma region ScriptDataDoubleEscaped
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscaped) -  switches to ScriptDataDoubleEscapedDash when parsing "
+            "HyphenMinus",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscaped);
+
+    expected = U"-";
+    inputStream.Append(U"-");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscapedDash);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(ScriptDataDoubleEscaped) - switches to ScriptDataDoubleEscapedLessThanSign when parsing "
+    "LessThanSign and emits LessThanSign",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscaped);
+
+    expected = U"<";
+    inputStream.Append(U"<");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscapedLessThanSign);
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscaped) - Replaces null character with U+FFFD",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscaped);
+
+    expected = U"1234\xFFFD";
+    expectedErrorCount = 1;
+
+    utf32_string input = U"1234";
+    input.append(1uz, U'\0');
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscaped) - Batches characters up to EOF then emits EOF",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscaped);
+
+    expected = U"a string of characters; 123145";
+    expectedErrorCount = 1;
+
+    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::Character);
+      REQUIRE(errors.back() == HTMLParseError::EOFInScriptHTMLCommentLikeText);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+#pragma endregion
+
+#pragma region ScriptDataDoubleEscapedDash
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapedDash) - switches to ScriptDataDoubleEscapedDashDash when "
+            "parsing HyphenMinus and emits HyphenMinus",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedDash);
+
+    expected = U"-";
+    inputStream.Append(U"-");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscapedDashDash);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(ScriptDataDoubleEscapedDash) - switches to ScriptDataDoubleEscapedLessThanSign when "
+    "parsing LessThanSign and emits LessThanSign",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedDash);
+
+    expected = U"<";
+    inputStream.Append(U"<");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscapedLessThanSign);
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapedDash) - Replaces null character with U+FFFD and switches "
+            "to ScriptDataDoubleEscaped",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedDash);
+
+    expected = U"1234\xFFFD";
+    expectedErrorCount = 1;
+
+    utf32_string input = U"1234";
+    input.append(1uz, U'\0');
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapedDash) - Batches characters up to EOF then emits EOF",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedDash);
+
+    expected = U"a string of characters; 123145";
+    expectedErrorCount = 1;
+
+    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::Character);
+      REQUIRE(errors.back() == HTMLParseError::EOFInScriptHTMLCommentLikeText);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(ScriptDataDoubleEscapedDash) - Switches to ScriptDataDoubleEscaped after parsing any "
+    "other character and emits that character",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedDash);
+
+    expected = U"A";
+    inputStream.Append(U"A");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
+  }
+
+#pragma endregion
+
+#pragma region ScriptDataDoubleEscapedDashDash
+
+  TEST_CASE(
+    "HTMLTokenizer(ScriptDataDoubleEscapedDashDash) - emits HyphenMinus and stays in the same state when "
+    "parsing HyphenMinus",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedDashDash);
+
+    expected = U"-";
+    inputStream.Append(U"-");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscapedDashDash);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(ScriptDataDoubleEscapedDashDash) - switches to ScriptDataDoubleEscapedLessThanSign "
+    "when parsing LessThanSign and emits LessThanSign",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedDashDash);
+
+    expected = U"<";
+    inputStream.Append(U"<");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscapedLessThanSign);
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapedDashDash) - switches to ScriptData after "
+            "parsing GreaterThanSign and emits GreaterThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedDashDash);
+
+    expected = U">";
+    inputStream.Append(U">");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptData);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(ScriptDataDoubleEscapedDashDash) - Replaces null character with U+FFFD and switches "
+    "to ScriptDataDoubleEscaped",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedDashDash);
+
+    expected = U"1234\xFFFD";
+    expectedErrorCount = 1;
+
+    utf32_string input = U"1234";
+    input.append(1uz, U'\0');
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapedDashDash) - emits EOF with parser error when EOF reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedDashDash);
+
+    expected = U"-";
+    expectedErrorCount = 1;
+
+    inputStream.Append(U"-", IsEOF(true));
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::Character);
+      REQUIRE(errors.back() == HTMLParseError::EOFInScriptHTMLCommentLikeText);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapedDashDash) - Switches to ScriptDataDoubleEscaped after "
+            "parsing any other character and emits that character",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedDashDash);
+
+    expected = U"A";
+    inputStream.Append(U"A");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
+  }
+
+#pragma endregion
+
+#pragma region ScriptDataDoubleEscapedLessThanSign
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapedLessThanSign) - switches to "
+            "ScriptDataDoubleEscapeEnd after parsing Solidus and emits Solidus",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedLessThanSign);
+
+    expected = U"/";
+    inputStream.Append(U"/");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscapeEnd);
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapedLessThanSign) - Switches to ScriptDataDoubleEscaped after "
+            "parsing any other character and emits that character",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedLessThanSign);
+
+    expected = U"A";
+    inputStream.Append(U"A");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
+  }
+
+#pragma endregion
+
+#pragma region ScriptDataDoubleEscapeEnd
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeEnd) - switches to ScriptDataDoubleEscaped after parsing "
+            "whitespace if temporary buffer is not 'script'",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeEnd);
+
+    expected = U" ";
+    inputStream.Append(U" ");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeEnd) - switches to ScriptDataDoubleEscaped after parsing "
+            "GreaterThanSign if temporary buffer is not 'script'",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeEnd);
+
+    expected = U">";
+    inputStream.Append(U">");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeEnd) - switches to ScriptDataDoubleEscaped after parsing "
+            "any other character if temporary buffer is not 'script'",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeEnd);
+
+    expected = U"_";
+    inputStream.Append(U"_");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(ScriptDataDoubleEscapeEnd) - switches to ScriptDataEscaped after parsing whitespace if "
+    "temporary buffer is 'script'",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeEnd);
+
+    expected = U"script ";
+    inputStream.Append(U"script ");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscaped);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(ScriptDataDoubleEscapeEnd) - switches to ScriptDataEscaped after parsing Solidus if "
+    "temporary buffer is 'script'",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeEnd);
+
+    expected = U"script/";
+    inputStream.Append(U"script/");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscaped);
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeEnd) - switches to ScriptDataEscaped after parsing "
+            "GreaterThanSign if temporary buffer is 'script'",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeEnd);
+
+    expected = U"script>";
+    inputStream.Append(U"script>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscaped);
+  }
+
+  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeEnd) - continues building temporary buffer when parsing "
+            "ASCII alpha",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeEnd);
+
+    expected = U"sCr";
+    inputStream.Append(U"sCr");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscapeEnd);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(ScriptDataDoubleEscapeEnd) - switches to ScriptDataDoubleEscaped if not ASCII alpha ",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeEnd);
+
+    expected = U"©";
+    inputStream.Append(U"©");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
+  }
+
+#pragma endregion
 }
