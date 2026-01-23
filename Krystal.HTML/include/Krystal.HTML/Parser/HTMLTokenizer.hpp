@@ -630,13 +630,11 @@ namespace Krys::HTML
           if (character == GreaterThanSign)
           {
             ParserError(HTMLParseError::MissingEndTagName);
-            // We don't emit the greater than sign, as per the spec.
-            ADVANCE_TO(Data);
+            ADVANCE_PAST_NON_NEWLINE_TO(Data); // We don't emit the greater than sign, as per the spec.
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
             ParserError(HTMLParseError::EOFBeforeTagName);
-
             BufferCharacters(Array {LessThanSign, Solidus});
             RECONSUME_IN(Data);
           }
@@ -667,6 +665,7 @@ namespace Krys::HTML
           if (character == Null)
           {
             _token.AppendToName(Replacement);
+            ParserError(HTMLParseError::UnexpectedNullCharacter);
             ADVANCE_PAST_NON_NEWLINE_TO(TagName);
           }
           if (character == EndOfFile) KRYS_UNLIKELY

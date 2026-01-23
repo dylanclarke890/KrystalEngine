@@ -568,74 +568,6 @@ namespace Krys::Tests
     COMMON_TEST_CASES(HTMLToken::Type::Character);
   }
 
-#pragma region RCDATALessThanSign
-
-  TEST_CASE("HTMLTokenizer(RCDATALessThanSign) - Switches to RCDATAEndTagOpen after parsing solidus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RCDATALessThanSign);
-
-    expected = U"";
-
-    utf32_string input = U"/";
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::RCDATAEndTagOpen);
-  }
-
-  TEST_CASE("HTMLTokenizer(RCDATALessThanSign) - emits less than sign after parsing non solidus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RCDATALessThanSign);
-
-    expected = U"<©";
-
-    utf32_string input = U"©";
-    inputStream.Append(std::move(input), IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
-
-#pragma endregion
-
-#pragma region RCDATA EndTagOpen
-
-  TEST_CASE(
-    "HTMLTokenizer(RCDATAEndTagOpen) - Switches to RCDATAEndTagName after parsing valid tag name start",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RCDATAEndTagOpen);
-
-    expected = U"";
-
-    utf32_string input = U"a";
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::RCDATAEndTagName);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(RCDATAEndTagOpen) - emits less than sign and solidus after parsing invalid tag name start",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RCDATAEndTagOpen);
-
-    expected = U"</©";
-
-    utf32_string input = U"©";
-    inputStream.Append(std::move(input), IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
-
-#pragma endregion
-
 #pragma endregion
 
 #pragma region RAWTEXT
@@ -916,6 +848,248 @@ namespace Krys::Tests
     NextTokenPtr token = tokenizer.NextToken();
     COMMON_TEST_CASES(HTMLToken::Type::Character);
     REQUIRE(errors.back() == HTMLParseError::InvalidFirstCharacterOfTagName);
+  }
+
+#pragma endregion
+
+#pragma region EndTagOpen
+
+  TEST_CASE("HTMLTokenizer(EndTagOpen) - Switches to TagName after parsing valid tag name start",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::EndTagOpen);
+
+    expected = U"";
+
+    utf32_string input = U"div";
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::TagName);
+  }
+
+  TEST_CASE("HTMLTokenizer(EndTagOpen) - Switches to Data if parsing GreaterThanSign (emits nothing)",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::EndTagOpen);
+
+    expectedErrorCount = 1;
+
+    inputStream.Append(U">");
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+    REQUIRE(errors.back() == HTMLParseError::MissingEndTagName);
+  }
+
+  TEST_CASE("HTMLTokenizer(EndTagOpen) - Emits LessThanSign and Solidus if EOF encountered",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::TagOpen);
+
+    expected = U"</";
+    expectedErrorCount = 1;
+
+    inputStream.Append(U"/", IsEOF(true));
+    NextTokenPtr token = tokenizer.NextToken();
+
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(errors.back() == HTMLParseError::EOFBeforeTagName);
+  }
+
+  TEST_CASE("HTMLTokenizer(EndTagOpen) - Switches to BogusComment if first character invalid",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::EndTagOpen);
+
+    expectedErrorCount = 1;
+
+    inputStream.Append(U"*");
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BogusComment);
+    REQUIRE(errors.back() == HTMLParseError::InvalidFirstCharacterOfTagName);
+  }
+
+#pragma endregion
+
+#pragma region TagName
+
+  TEST_CASE("HTMLTokenizer(TagName) - Switches to BeforeAttributeName when parsing whitespace",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::TagName);
+
+    inputStream.Append(U" ");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeName);
+  }
+
+  TEST_CASE("HTMLTokenizer(TagName) - Switches to SelfClosingStartTag when parsing solidus",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::TagName);
+
+    inputStream.Append(U"/");
+
+    NextTokenPtr token = tokenizer.NextToken();
+
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::SelfClosingStartTag);
+  }
+
+  TEST_CASE("HTMLTokenizer(TagName) - Emits tag token when parsing GreaterThanSign", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"a";
+
+    inputStream.Append(U"<a>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+  }
+
+  TEST_CASE("HTMLTokenizer(TagName) - allows mixed case", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"div";
+
+    inputStream.Append(U"<DiV>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+  }
+
+  TEST_CASE("HTMLTokenizer(TagName) - replaces Null with ReplacementCharacter", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"a\xFFFD";
+    expectedErrorCount = 1;
+
+    utf32_string input = U"<a";
+    input.append(1uz, U'\0');
+    input.append(1uz, U'>');
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
+  }
+
+  TEST_CASE("HTMLTokenizer(TagName) - Emits EOF instead of TagName if EOF reached", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<a", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    REQUIRE(errors.back() == HTMLParseError::EOFInTag);
+  }
+
+#pragma endregion
+
+#pragma region RCDATALessThanSign
+
+  TEST_CASE("HTMLTokenizer(RCDATALessThanSign) - Switches to RCDATAEndTagOpen after parsing solidus",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::RCDATALessThanSign);
+
+    expected = U"";
+
+    utf32_string input = U"/";
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::RCDATAEndTagOpen);
+  }
+
+  TEST_CASE("HTMLTokenizer(RCDATALessThanSign) - emits less than sign after parsing non solidus",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::RCDATALessThanSign);
+
+    expected = U"<©";
+
+    utf32_string input = U"©";
+    inputStream.Append(std::move(input), IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+  }
+
+  TEST_CASE("HTMLTokenizer(RCDATALessThanSign) - emits less than sign if EOF reached", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::RCDATA);
+
+    expected = U"<";
+
+    utf32_string input = U"<";
+    inputStream.Append(std::move(input), IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+  }
+
+#pragma endregion
+
+#pragma region RCDATAEndTagOpen
+
+  TEST_CASE(
+    "HTMLTokenizer(RCDATAEndTagOpen) - Switches to RCDATAEndTagName after parsing valid tag name start",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::RCDATAEndTagOpen);
+
+    expected = U"";
+
+    utf32_string input = U"a";
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::RCDATAEndTagName);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(RCDATAEndTagOpen) - emits less than sign and solidus after parsing invalid tag name start",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::RCDATAEndTagOpen);
+
+    expected = U"</©";
+
+    utf32_string input = U"©";
+    inputStream.Append(std::move(input), IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+  }
+
+  TEST_CASE("HTMLTokenizer(RCDATAEndTagOpen) - emits less than sign and solidus if EOF reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::RCDATA);
+
+    expected = U"</";
+
+    utf32_string input = U"</";
+    inputStream.Append(std::move(input), IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
   }
 
 #pragma endregion
