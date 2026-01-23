@@ -816,6 +816,35 @@ namespace Krys::Tests
 
 #pragma region TagOpen
 
+  TEST_CASE("HTMLTokenizer(TagOpen) - Switches to MarkupDeclarationOpen after parsing ExclamationMark",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::TagOpen);
+
+    expected = U"";
+
+    utf32_string input = U"!";
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::MarkupDeclarationOpen);
+  }
+
+  TEST_CASE("HTMLTokenizer(TagOpen) - Switches to EndTagOpen after parsing Solidus", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::TagOpen);
+
+    expected = U"";
+
+    utf32_string input = U"/";
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::EndTagOpen);
+  }
+
   TEST_CASE("HTMLTokenizer(TagOpen) - Switches to TagName after parsing valid tag name start",
             "[HTML][Tokenizer]")
   {
@@ -823,12 +852,70 @@ namespace Krys::Tests
 
     expected = U"";
 
-    utf32_string input = U"a";
+    utf32_string input = U"div";
     inputStream.Append(std::move(input));
 
     NextTokenPtr token = tokenizer.NextToken();
     REQUIRE(!token);
     REQUIRE(tokenizer.GetState() == TokenizerState::TagName);
+  }
+
+  TEST_CASE("HTMLTokenizer(TagOpen) - Switches to TagName after parsing valid tag name start, mixed case",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::TagOpen);
+
+    expected = U"";
+
+    utf32_string input = U"dIV";
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::TagName);
+  }
+
+  TEST_CASE("HTMLTokenizer(TagOpen) - Switches to BogusComment after parsing QuestionMark",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::TagOpen);
+
+    expected = U"";
+    expectedErrorCount = 1;
+
+    utf32_string input = U"?";
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BogusComment);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedQuestionMarkInsteadOfTagName);
+  }
+
+  TEST_CASE("HTMLTokenizer(TagOpen) - Emits LessThanSign if EOF encountered", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"<";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(errors.back() == HTMLParseError::EOFBeforeTagName);
+  }
+
+  TEST_CASE("HTMLTokenizer(TagOpen) - Emits LessThanSign if first character invalid", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::TagOpen);
+
+    expected = U"<*";
+    expectedErrorCount = 1;
+    inputStream.Append(U"*");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(errors.back() == HTMLParseError::InvalidFirstCharacterOfTagName);
   }
 
 #pragma endregion
