@@ -1497,7 +1497,7 @@ namespace Krys::HTML
             auto result = _input.get().AdvancePast("doctype"_s);
             if (result == HTMLInputStream::MatchResult::Matched)
             {
-              ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPE);
+              SWITCH_TO(DOCTYPE);
             }
             if (result == HTMLInputStream::MatchResult::NotEnoughCharacters)
             {
@@ -1511,7 +1511,7 @@ namespace Krys::HTML
             {
               if (IsCDATAAllowed())
               {
-                ADVANCE_PAST_NON_NEWLINE_TO(CDATASection);
+                SWITCH_TO(CDATASection);
               }
               else
               {
@@ -1738,6 +1738,7 @@ namespace Krys::HTML
           }
           if (character == GreaterThanSign)
           {
+            ParserError(HTMLParseError::MissingDOCTYPEName);
             _token.BeginDOCTYPE();
             _token.SetDOCTYPEForceQuirks();
             return EmitDOCTYPEToken(true);
@@ -1807,7 +1808,7 @@ namespace Krys::HTML
             auto result = _input.get().AdvancePast("public"_s);
             if (result == HTMLInputStream::MatchResult::Matched)
             {
-              ADVANCE_PAST_NON_NEWLINE_TO(AfterDOCTYPEPublicKeyword);
+              SWITCH_TO(AfterDOCTYPEPublicKeyword);
             }
             if (result == HTMLInputStream::MatchResult::NotEnoughCharacters)
             {
@@ -1819,7 +1820,7 @@ namespace Krys::HTML
             auto result = _input.get().AdvancePast("system"_s);
             if (result == HTMLInputStream::MatchResult::Matched)
             {
-              ADVANCE_PAST_NON_NEWLINE_TO(AfterDOCTYPESystemKeyword);
+              SWITCH_TO(AfterDOCTYPESystemKeyword);
             }
             if (result == HTMLInputStream::MatchResult::NotEnoughCharacters)
             {
@@ -2160,7 +2161,7 @@ namespace Krys::HTML
             return EmitDOCTYPEToken(false);
           }
 
-          ParserError(HTMLParseError::InvalidCharacterSequenceAfterDOCTYPESystemIdentifier);
+          ParserError(HTMLParseError::UnexpectedCharacterAfterDOCTYPESystemIdentifier);
           RECONSUME_IN(BogusDOCTYPE);
         END_STATE()
 

@@ -4191,10 +4191,10 @@ namespace Krys::Tests
             "[HTML][Tokenizer]")
   {
     SETUP_TEST(TokenizerState::Data);
-    
+
     expected = U"";
     inputStream.Append(U"<!--comment--!-");
-    
+
     NextTokenPtr token = tokenizer.NextToken();
     REQUIRE(!token);
     REQUIRE(tokenizer.GetState() == TokenizerState::CommentEndDash);
@@ -4203,32 +4203,33 @@ namespace Krys::Tests
   TEST_CASE("HTMLTokenizer(CommentEndBang) - emits comment when parsing GreaterThanSign", "[HTML][Tokenizer]")
   {
     SETUP_TEST(TokenizerState::Data);
-    
+
     expected = U"comment";
     expectedErrorCount = 1;
     inputStream.Append(U"<!--comment--!>");
-    
+
     NextTokenPtr token = tokenizer.NextToken();
     COMMON_TEST_CASES(HTMLToken::Type::Comment);
     REQUIRE(errors.back() == HTMLParseError::IncorrectlyClosedComment);
     REQUIRE(tokenizer.GetState() == TokenizerState::Data);
   }
 
-  TEST_CASE("HTMLTokenizer(CommentEndBang) - emits comment with parser error followed by EOF when parsing EOF",
-            "[HTML][Tokenizer]")
+  TEST_CASE(
+    "HTMLTokenizer(CommentEndBang) - emits comment with parser error followed by EOF when parsing EOF",
+    "[HTML][Tokenizer]")
   {
     SETUP_TEST(TokenizerState::Data);
-    
+
     expectedErrorCount = 1;
     inputStream.Append(U"<!--comment--!", IsEOF(true));
-    
+
     expected = U"comment";
     {
       NextTokenPtr token = tokenizer.NextToken();
       COMMON_TEST_CASES(HTMLToken::Type::Comment);
       REQUIRE(errors.back() == HTMLParseError::EOFInComment);
     }
-    
+
     expected = U"";
     {
       NextTokenPtr token = tokenizer.NextToken();
@@ -4239,13 +4240,1489 @@ namespace Krys::Tests
   TEST_CASE("HTMLTokenizer(CommentEndBang) - reconsumes in Comment for anything else", "[HTML][Tokenizer]")
   {
     SETUP_TEST(TokenizerState::Data);
-    
+
     expected = U"";
     inputStream.Append(U"<!--comment--!a");
-    
+
     NextTokenPtr token = tokenizer.NextToken();
     REQUIRE(!token);
     REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
+  }
+
+#pragma endregion
+
+#pragma region DOCTYPE
+
+  TEST_CASE("HTMLTokenizer(DOCTYPE) - switches to BeforeDOCTYPEName when parsing whitespace",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::DOCTYPE);
+
+    expected = U"";
+    inputStream.Append(U" ");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeDOCTYPEName);
+  }
+
+  TEST_CASE("HTMLTokenizer(DOCTYPE) - emits DOCTYPE token with force-quirks when parsing GreaterThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+    REQUIRE(token->IsForceQuirks());
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+    REQUIRE(errors.back() == HTMLParseError::MissingDOCTYPEName);
+  }
+
+  TEST_CASE("HTMLTokenizer(DOCTYPE) - emits EOF with force-quirks when EOF reached", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE", IsEOF(true));
+
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+      REQUIRE(token->IsForceQuirks());
+      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(DOCTYPE) - treats anything else as missing whitespace before DOCTYPE name",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPEa");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEName);
+    REQUIRE(errors.back() == HTMLParseError::MissingWhitespaceBeforeDOCTYPEName);
+  }
+
+#pragma endregion
+
+#pragma region BeforeDOCTYPEName
+
+  TEST_CASE("HTMLTokenizer(BeforeDOCTYPEName) - ignores whitespace", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE   \t\n\r  ");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeDOCTYPEName);
+  }
+
+  TEST_CASE("HTMLTokenizer(BeforeDOCTYPEName) - switches to DOCTYPEName when parsing ASCII upper",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE A");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEName);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(BeforeDOCTYPEName) - emits ReplacementCharacter with parser error when parsing Null",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    utf32_string input = U"<!DOCTYPE";
+    input.append(1uz, U'\0');
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEName);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
+  }
+
+  TEST_CASE("HTMLTokenizer(BeforeDOCTYPEName) - emits DOCTYPE with force-quirks when parsing GreaterThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+    REQUIRE(token->IsForceQuirks());
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+    REQUIRE(errors.back() == HTMLParseError::MissingDOCTYPEName);
+  }
+
+  TEST_CASE("HTMLTokenizer(BeforeDOCTYPEName) - emits DOCTYPE with force-quirks when EOF reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE", IsEOF(true));
+
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+      REQUIRE(token->IsForceQuirks());
+      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(BeforeDOCTYPEName) - treats anything else as start of DOCTYPE name",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPEa");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEName);
+    REQUIRE(errors.back() == HTMLParseError::MissingWhitespaceBeforeDOCTYPEName);
+  }
+
+#pragma endregion
+
+#pragma region DOCTYPEName
+
+  TEST_CASE("HTMLTokenizer(DOCTYPEName) - switches to AfterDOCTYPEName when parsing whitespace",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"HTML5";
+    inputStream.Append(U"<!DOCTYPE HTML5 ");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AfterDOCTYPEName);
+  }
+
+  TEST_CASE("HTMLTokenizer(DOCTYPEName) - switches to Data and emits DOCTYPE when parsing GreaterThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"html5";
+    inputStream.Append(U"<!DOCTYPE HTML5>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+    REQUIRE(!token->IsForceQuirks());
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+  }
+
+  TEST_CASE("HTMLTokenizer(DOCTYPEName) - appends to name when parsing ASCII upper", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML5");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEName);
+  }
+
+  TEST_CASE("HTMLTokenizer(DOCTYPEName) - appends ReplacementCharacter with parser error when parsing Null",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    utf32_string input = U"<!DOCTYPE HT";
+    input.append(1uz, U'\0');
+    input.append(U"ML5");
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEName);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
+  }
+
+  TEST_CASE("HTMLTokenizer(DOCTYPEName) - emits DOCTYPE with force-quirks when EOF reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"html5";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML5", IsEOF(true));
+
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+      REQUIRE(token->IsForceQuirks());
+      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(DOCTYPEName) - treats anything else as part of DOCTYPE name", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML5a");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEName);
+  }
+
+#pragma endregion
+
+#pragma region AfterDOCTYPEName
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPEName) - ignores whitespace", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"html5";
+    inputStream.Append(U"<!DOCTYPE HTML5   \t\n\r  ");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AfterDOCTYPEName);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(AfterDOCTYPEName) - switches to Data and emits DOCTYPE when parsing GreaterThanSign",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"html5";
+    inputStream.Append(U"<!DOCTYPE HTML5>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+    REQUIRE(!token->IsForceQuirks());
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPEName) - emits DOCTYPE with force-quirks when EOF reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"html5";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML5", IsEOF(true));
+
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+      REQUIRE(token->IsForceQuirks());
+      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPEName) - switches to AfterDOCTYPEPublicKeyword when parsing 'PUBLIC'",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML PuBLiC");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AfterDOCTYPEPublicKeyword);
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPEName) - switches to AfterDOCTYPESystemKeyword when parsing 'SYSTEM'",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML SySTeM");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AfterDOCTYPESystemKeyword);
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPEName) - treats anything else as unexpected and switches to "
+            "BogusDOCTYPE",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML a");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BogusDOCTYPE);
+    REQUIRE(errors.back() == HTMLParseError::InvalidCharacterSequenceAfterDOCTYPEName);
+  }
+
+#pragma endregion
+
+#pragma region AfterDOCTYPEPublicKeyword
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPEPublicKeyword) - switches to BeforeDOCTYPEPublicIdentifier when "
+            "parsing whitespace",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC ");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeDOCTYPEPublicIdentifier);
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPEPublicKeyword) - switches to DOCTYPEPublicIdentifierDoubleQuoted with "
+            "parser error when parsing QuotationMark",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC\"");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEPublicIdentifierDoubleQuoted);
+    REQUIRE(errors.back() == HTMLParseError::MissingWhitespaceAfterDOCTYPEPublicKeyword);
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPEPublicKeyword) - switches to DOCTYPEPublicIdentifierSingleQuoted with "
+            "parser error when parsing Apostrophe",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC'");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEPublicIdentifierSingleQuoted);
+    REQUIRE(errors.back() == HTMLParseError::MissingWhitespaceAfterDOCTYPEPublicKeyword);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(AfterDOCTYPEPublicKeyword) - emits DOCTYPE with force-quirks when parsing GreaterThanSign",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"html";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+    REQUIRE(token->IsForceQuirks());
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+    REQUIRE(errors.back() == HTMLParseError::MissingDOCTYPEPublicIdentifier);
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPEPublicKeyword) - emits DOCTYPE with force-quirks when EOF reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"html";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC", IsEOF(true));
+
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+      REQUIRE(token->IsForceQuirks());
+      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPEPublicKeyword) - treats anything else as unexpected and switches to "
+            "BogusDOCTYPE",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML PUBLICa");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BogusDOCTYPE);
+    REQUIRE(errors.back() == HTMLParseError::MissingQuoteBeforeDOCTYPEPublicIdentifier);
+  }
+
+#pragma endregion
+
+#pragma region BeforeDOCTYPEPublicIdentifier
+
+  TEST_CASE("HTMLTokenizer(BeforeDOCTYPEPublicIdentifier) - ignores whitespace", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC   \t\n\r  ");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeDOCTYPEPublicIdentifier);
+  }
+
+  TEST_CASE("HTMLTokenizer(BeforeDOCTYPEPublicIdentifier) - switches to DOCTYPEPublicIdentifierDoubleQuoted "
+            "when parsing QuotationMark",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEPublicIdentifierDoubleQuoted);
+  }
+
+  TEST_CASE("HTMLTokenizer(BeforeDOCTYPEPublicIdentifier) - switches to DOCTYPEPublicIdentifierSingleQuoted "
+            "when parsing Apostrophe",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC '");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEPublicIdentifierSingleQuoted);
+  }
+
+  TEST_CASE("HTMLTokenizer(BeforeDOCTYPEPublicIdentifier) - emits DOCTYPE with force-quirks when parsing "
+            "GreaterThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"html";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+    REQUIRE(token->IsForceQuirks());
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+    REQUIRE(errors.back() == HTMLParseError::MissingDOCTYPEPublicIdentifier);
+  }
+
+  TEST_CASE("HTMLTokenizer(BeforeDOCTYPEPublicIdentifier) - emits DOCTYPE with force-quirks when EOF reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"html";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC", IsEOF(true));
+
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+      REQUIRE(token->IsForceQuirks());
+      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(BeforeDOCTYPEPublicIdentifier) - treats anything else as unexpected and switches to "
+    "BogusDOCTYPE",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML PUBLICa");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BogusDOCTYPE);
+    REQUIRE(errors.back() == HTMLParseError::MissingQuoteBeforeDOCTYPEPublicIdentifier);
+  }
+
+#pragma endregion
+
+#pragma region DOCTYPEPublicIdentifierDoubleQuoted
+
+  TEST_CASE(
+    "HTMLTokenizer(DOCTYPEPublicIdentifierDoubleQuoted) - switches to AfterDOCTYPEPublicIdentifier when "
+    "parsing QuotationMark",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"identifier\"");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AfterDOCTYPEPublicIdentifier);
+  }
+
+  TEST_CASE("HTMLTokenizer(DOCTYPEPublicIdentifierDoubleQuoted) - replaces Null with U+FFFD",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    utf32_string input = U"<!DOCTYPE HTML PUBLIC \"iden";
+    input.append(1uz, U'\0');
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEPublicIdentifierDoubleQuoted);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(DOCTYPEPublicIdentifierDoubleQuoted) - emits DOCTYPE with force-quirks when parsing "
+    "GreaterThanSign",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"html";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"identifier>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+    REQUIRE(token->IsForceQuirks());
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+    REQUIRE(errors.back() == HTMLParseError::AbruptDOCTYPEPublicIdentifier);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(DOCTYPEPublicIdentifierDoubleQuoted) - emits DOCTYPE with force-quirks when EOF reached",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"html";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"identifier", IsEOF(true));
+
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+      REQUIRE(token->IsForceQuirks());
+      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(DOCTYPEPublicIdentifierDoubleQuoted) - appends to public identifier when parsing "
+            "any character except QuotationMark, GreaterThanSign, Null, or EOF",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"identifier");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEPublicIdentifierDoubleQuoted);
+  }
+
+#pragma endregion
+
+#pragma region DOCTYPEPublicIdentifierSingleQuoted
+
+  TEST_CASE(
+    "HTMLTokenizer(DOCTYPEPublicIdentifierSingleQuoted) - switches to AfterDOCTYPEPublicIdentifier when "
+    "parsing Apostrophe",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC 'identifier'");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AfterDOCTYPEPublicIdentifier);
+  }
+
+  TEST_CASE("HTMLTokenizer(DOCTYPEPublicIdentifierSingleQuoted) - replaces Null with U+FFFD",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    utf32_string input = U"<!DOCTYPE HTML PUBLIC 'iden";
+    input.append(1uz, U'\0');
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEPublicIdentifierSingleQuoted);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(DOCTYPEPublicIdentifierSingleQuoted) - emits DOCTYPE with force-quirks when parsing "
+    "GreaterThanSign",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"html";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC 'identifier>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+    REQUIRE(token->IsForceQuirks());
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+    REQUIRE(errors.back() == HTMLParseError::AbruptDOCTYPEPublicIdentifier);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(DOCTYPEPublicIdentifierSingleQuoted) - emits DOCTYPE with force-quirks when EOF reached",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC 'identifier", IsEOF(true));
+
+    expected = U"html";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+      REQUIRE(token->IsForceQuirks());
+      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(DOCTYPEPublicIdentifierSingleQuoted) - appends to public identifier when parsing "
+            "any character except Apostrophe, GreaterThanSign, Null, or EOF",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC 'identifier");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEPublicIdentifierSingleQuoted);
+  }
+
+#pragma endregion
+
+#pragma region AfterDOCTYPEPublicIdentifier
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPEPublicIdentifier) - switches to "
+            "BetweenDOCTYPEPublicAndSystemIdentifiers when parsing whitespace",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\" ");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BetweenDOCTYPEPublicAndSystemIdentifiers);
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPEPublicIdentifier) - switches to Data and emits DOCTYPE when parsing "
+            "GreaterThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"html";
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\">");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+    REQUIRE(!token->IsForceQuirks());
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPEPublicIdentifier) - switches to DOCTYPESystemIdentifierDoubleQuoted "
+            "with parsing error when parsing QuotationMark",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\"\"");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierDoubleQuoted);
+    REQUIRE(errors.back() == HTMLParseError::MissingWhitespaceBetweenDOCTYPEPublicAndSystemIdentifiers);
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPEPublicIdentifier) - switches to DOCTYPESystemIdentifierSingleQuoted "
+            "with parsing error when parsing Apostrophe",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\"'");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierSingleQuoted);
+    REQUIRE(errors.back() == HTMLParseError::MissingWhitespaceBetweenDOCTYPEPublicAndSystemIdentifiers);
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPEPublicIdentifier) - emits DOCTYPE with force-quirks when EOF reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\"", IsEOF(true));
+
+    expected = U"html";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+      REQUIRE(token->IsForceQuirks());
+      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(AfterDOCTYPEPublicIdentifier) - treats anything else as unexpected and switches to "
+    "BogusDOCTYPE",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\"a");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BogusDOCTYPE);
+    REQUIRE(errors.back() == HTMLParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
+  }
+
+#pragma endregion
+
+#pragma region BetweenDOCTYPEPublicAndSystemIdentifiers
+
+  TEST_CASE("HTMLTokenizer(BetweenDOCTYPEPublicAndSystemIdentifiers) - ignores whitespace",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\"   \t\n\r  ");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BetweenDOCTYPEPublicAndSystemIdentifiers);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(BetweenDOCTYPEPublicAndSystemIdentifiers) - emits DOCTYPE when parsing GreaterThanSign",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"html";
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\">");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+  }
+
+  TEST_CASE("HTMLTokenizer(BetweenDOCTYPEPublicAndSystemIdentifiers) - switches to "
+            "DOCTYPESystemIdentifierDoubleQuoted "
+            "when parsing QuotationMark",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\" \"");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierDoubleQuoted);
+  }
+
+  TEST_CASE("HTMLTokenizer(BetweenDOCTYPEPublicAndSystemIdentifiers) - switches to "
+            "DOCTYPESystemIdentifierSingleQuoted "
+            "when parsing Apostrophe",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\" '");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierSingleQuoted);
+  }
+
+  TEST_CASE("HTMLTokenizer(BetweenDOCTYPEPublicAndSystemIdentifiers) - emits DOCTYPE with force-quirks when "
+            "EOF reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"html";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\"", IsEOF(true));
+
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+      REQUIRE(token->IsForceQuirks());
+      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(BetweenDOCTYPEPublicAndSystemIdentifiers) - treats anything else as unexpected "
+            "and switches to "
+            "BogusDOCTYPE",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\"a");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BogusDOCTYPE);
+    REQUIRE(errors.back() == HTMLParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
+  }
+
+#pragma endregion
+
+#pragma region AfterDOCTYPESystemKeyword
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPESystemKeyword) - switches to BeforeDOCTYPESystemIdentifier when "
+            "parsing whitespace",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEM ");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeDOCTYPESystemIdentifier);
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPESystemKeyword) - switches to DOCTYPESystemIdentifierDoubleQuoted with "
+            "parser error when parsing QuotationMark",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEM\"");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierDoubleQuoted);
+    REQUIRE(errors.back() == HTMLParseError::MissingWhitespaceAfterDOCTYPESystemKeyword);
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPESystemKeyword) - switches to DOCTYPESystemIdentifierSingleQuoted with "
+            "parser error when parsing Apostrophe",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEM'");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierSingleQuoted);
+    REQUIRE(errors.back() == HTMLParseError::MissingWhitespaceAfterDOCTYPESystemKeyword);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(AfterDOCTYPESystemKeyword) - emits DOCTYPE with force-quirks when parsing GreaterThanSign",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"html";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEM>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+    REQUIRE(token->IsForceQuirks());
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+    REQUIRE(errors.back() == HTMLParseError::MissingDOCTYPESystemIdentifier);
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPESystemKeyword) - emits DOCTYPE with force-quirks when EOF reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEM", IsEOF(true));
+
+    expected = U"html";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+      REQUIRE(token->IsForceQuirks());
+      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPESystemKeyword) - treats anything else as unexpected and switches to "
+            "BogusDOCTYPE",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEMa");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BogusDOCTYPE);
+    REQUIRE(errors.back() == HTMLParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
+  }
+
+#pragma endregion
+
+#pragma region BeforeDOCTYPESystemIdentifier
+
+  TEST_CASE("HTMLTokenizer(BeforeDOCTYPESystemIdentifier) - ignores whitespace", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEM   \t\n\r  ");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeDOCTYPESystemIdentifier);
+  }
+
+  TEST_CASE("HTMLTokenizer(BeforeDOCTYPESystemIdentifier) - switches to DOCTYPESystemIdentifierDoubleQuoted "
+            "when parsing QuotationMark",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEM \"");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierDoubleQuoted);
+  }
+
+  TEST_CASE("HTMLTokenizer(BeforeDOCTYPESystemIdentifier) - switches to DOCTYPESystemIdentifierSingleQuoted "
+            "when parsing Apostrophe",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEM '");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierSingleQuoted);
+  }
+
+  TEST_CASE("HTMLTokenizer(BeforeDOCTYPESystemIdentifier) - emits DOCTYPE with force-quirks when parsing "
+            "GreaterThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"html";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEM>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+    REQUIRE(token->IsForceQuirks());
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+    REQUIRE(errors.back() == HTMLParseError::MissingDOCTYPESystemIdentifier);
+  }
+
+  TEST_CASE("HTMLTokenizer(BeforeDOCTYPESystemIdentifier) - emits DOCTYPE with force-quirks when EOF reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEM", IsEOF(true));
+
+    expected = U"html";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+      REQUIRE(token->IsForceQuirks());
+      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(BeforeDOCTYPESystemIdentifier) - treats anything else as unexpected and switches to "
+    "BogusDOCTYPE",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEMa");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BogusDOCTYPE);
+    REQUIRE(errors.back() == HTMLParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
+  }
+
+#pragma endregion
+
+#pragma region DOCTYPESystemIdentifierDoubleQuoted
+
+  TEST_CASE("HTMLTokenizer(DOCTYPESystemIdentifierDoubleQuoted) - switches to AfterDOCTYPESystemIdentifier "
+            "when parsing QuotationMark",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEM \"identifier\"");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AfterDOCTYPESystemIdentifier);
+  }
+
+  TEST_CASE("HTMLTokenizer(DOCTYPESystemIdentifierDoubleQuoted) - replaces Null with U+FFFD",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    utf32_string input = U"<!DOCTYPE HTML SYSTEM \"iden";
+    input.append(1uz, U'\0');
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierDoubleQuoted);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
+  }
+
+  TEST_CASE("HTMLTokenizer(DOCTYPESystemIdentifierDoubleQuoted) - emits DOCTYPE with parser error when "
+            "parsing GreaterThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"html";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEM \"identifier>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+    REQUIRE(errors.back() == HTMLParseError::AbruptDOCTYPESystemIdentifier);
+  }
+
+  TEST_CASE("HTMLTokenizer(DOCTYPESystemIdentifierDoubleQuoted) - emits DOCTYPE with force-quirks when EOF "
+            "reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEM \"identifier", IsEOF(true));
+
+    expected = U"html";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+      REQUIRE(token->IsForceQuirks());
+      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(DOCTYPESystemIdentifierDoubleQuoted) - appends to system identifier when parsing "
+            "any character except QuotationMark, GreaterThanSign, Null, or EOF",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEM \"identifier");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierDoubleQuoted);
+  }
+
+#pragma endregion
+
+#pragma region DOCTYPESystemIdentifierSingleQuoted
+
+  TEST_CASE("HTMLTokenizer(DOCTYPESystemIdentifierSingleQuoted) - switches to AfterDOCTYPESystemIdentifier "
+            "when parsing Apostrophe",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEM 'identifier'");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AfterDOCTYPESystemIdentifier);
+  }
+
+  TEST_CASE("HTMLTokenizer(DOCTYPESystemIdentifierSingleQuoted) - replaces Null with U+FFFD",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    utf32_string input = U"<!DOCTYPE HTML SYSTEM 'iden";
+    input.append(1uz, U'\0');
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierSingleQuoted);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
+  }
+
+  TEST_CASE("HTMLTokenizer(DOCTYPESystemIdentifierSingleQuoted) - emits DOCTYPE with parser error when "
+            "parsing GreaterThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"html";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEM 'identifier>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+    REQUIRE(errors.back() == HTMLParseError::AbruptDOCTYPESystemIdentifier);
+  }
+
+  TEST_CASE("HTMLTokenizer(DOCTYPESystemIdentifierSingleQuoted) - emits DOCTYPE with force-quirks when EOF "
+            "reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEM 'identifier", IsEOF(true));
+    expected = U"html";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+      REQUIRE(token->IsForceQuirks());
+      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
+    }
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(DOCTYPESystemIdentifierSingleQuoted) - appends to system identifier when parsing "
+            "any character except Apostrophe, GreaterThanSign, Null, or EOF",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEM 'identifier");
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierSingleQuoted);
+  }
+
+#pragma endregion
+
+#pragma region AfterDOCTYPESystemIdentifier
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPESystemIdentifier) - ignores whitespace", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEM \"id\"   \t\n\r  ");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AfterDOCTYPESystemIdentifier);
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPESystemIdentifier) - switches to Data and emits DOCTYPE when parsing "
+            "GreaterThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"html";
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEM \"id\">");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+    REQUIRE(!token->IsForceQuirks());
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterDOCTYPESystemIdentifier) - emits DOCTYPE with force-quirks when EOF reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEM \"id\"", IsEOF(true));
+
+    expected = U"html";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+      REQUIRE(token->IsForceQuirks());
+      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(AfterDOCTYPESystemIdentifier) - treats anything else as unexpected and switches to "
+    "BogusDOCTYPE",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML SYSTEM \"id\"a");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BogusDOCTYPE);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedCharacterAfterDOCTYPESystemIdentifier);
+  }
+
+#pragma endregion
+
+#pragma region BogusDOCTYPE
+
+  TEST_CASE("HTMLTokenizer(BogusDOCTYPE) - emits DOCTYPE when parsing GreaterThanSign", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+    expected = U"html";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\" a random text >");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+  }
+
+  TEST_CASE("HTMLTokenizer(BogusDOCTYPE) - emits DOCTYPE when EOF reached", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\" a random text", IsEOF(true));
+    expectedErrorCount = 1;
+
+    expected = U"html";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(BogusDOCTYPE) - ignores Null with parse error", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 2;
+    utf32_string input = U"<!DOCTYPE HTML PUBLIC \"id\" a random text";
+    input.append(1uz, U'\0');
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BogusDOCTYPE);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
+  }
+
+  TEST_CASE("HTMLTokenizer(BogusDOCTYPE) - ignores characters until GreaterThanSign or EOF",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"html";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\" a random text >");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
   }
 
 #pragma endregion

@@ -41,7 +41,7 @@ namespace Krys::Text
       return _characters.data();
     }
 
-    /// @brief Gets the length of the literal, including the null terminator.
+    /// @brief Gets the length of the literal, excluding the null terminator.
     KRYS_NODISCARD constexpr size_t Length() const noexcept
     {
       return !_characters.empty() ? _characters.size() - 1 : 0;

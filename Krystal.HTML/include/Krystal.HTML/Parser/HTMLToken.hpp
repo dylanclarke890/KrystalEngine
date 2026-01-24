@@ -312,5 +312,11 @@ namespace Krys::HTML
       assert(_type == Type::StartTag);
       return _selfClosing;
     }
+
+    KRYS_NODISCARD bool IsForceQuirks() const noexcept
+    {
+      assert(_type == Type::DOCTYPE);
+      return _doctypeData->ForceQuirks;
+    }
   };
 }
