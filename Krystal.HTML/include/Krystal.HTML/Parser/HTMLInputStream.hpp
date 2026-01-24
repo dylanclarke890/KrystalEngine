@@ -169,6 +169,8 @@ namespace Krys::HTML
       }
 
       _readPosition += characters.Length();
+      _nextInputCharacter = _data[_readPosition];
+
       return MatchResult::Matched;
     }
   };
