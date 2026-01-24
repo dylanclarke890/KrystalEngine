@@ -81,11 +81,14 @@ namespace Krys::HTML
     ReferenceWrapper<HTMLInputStream> _input;
     utf32_string _appropriateEndTagName;
     utf32_string _bufferedEndTagName;
+    bool _isCDATASectionAllowed : 1 {false};
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#character-reference-code
     int64 _characterReferenceCode {0};
+    
     /// @see https://html.spec.whatwg.org/#temporary-buffer
     List<char32> _temporaryBuffer;
+    
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#named-character-reference-state
     Span<const NamedCharacterReferenceEntry> _namedCharacterReferenceMatchEntries;
     const NamedCharacterReferenceEntry *_longestNamedCharacterReferenceMatchEntry {nullptr};
@@ -117,6 +120,11 @@ namespace Krys::HTML
       _state = state;
     }
 
+    void SetCDATASectionsAllowed(bool isAllowed) noexcept
+    {
+      _isCDATASectionAllowed = isAllowed;
+    }
+
   private:
     KRYS_NODISCARD bool ProcessToken() noexcept
     {
@@ -133,10 +141,9 @@ namespace Krys::HTML
       return _token.GetType() == HTMLToken::Type::Character;
     }
 
-    // TODO: this needs to be set based on the adjusted current node in the tree builder.
     KRYS_NODISCARD bool IsCDATAAllowed() const noexcept
     {
-      return false;
+      return _isCDATASectionAllowed;
     }
 
     void BufferCharacter(char32 character) noexcept
@@ -1474,7 +1481,7 @@ namespace Krys::HTML
 
           if (character == HyphenMinus)
           {
-            auto result = _input.get().AdvancePast("--"_s);
+            auto result = _input.get().AdvancePast<false>("--"_s);
             if (result == HTMLInputStream::MatchResult::Matched)
             {
               _token.BeginComment();
@@ -1485,9 +1492,9 @@ namespace Krys::HTML
               RETURN_IN_CURRENT_STATE(HasBufferedCharacterToken());
             }
           }
-          else if (Text::MatchesASCIINormalizedLiteral(character, 'D'))
+          else if (Text::MatchesASCIINormalizedLiteral(character, 'd'))
           {
-            auto result = _input.get().AdvancePast<false>("doctype"_s);
+            auto result = _input.get().AdvancePast("doctype"_s);
             if (result == HTMLInputStream::MatchResult::Matched)
             {
               ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPE);
@@ -1497,9 +1504,9 @@ namespace Krys::HTML
               RETURN_IN_CURRENT_STATE(HasBufferedCharacterToken());
             }
           }
-          else if (Text::MatchesASCIINormalizedLiteral(character, '['))
+          else if (character == '[')
           {
-            auto result = _input.get().AdvancePast("[CDATA[");
+            auto result = _input.get().AdvancePast<false>("[CDATA[");
             if (result == HTMLInputStream::MatchResult::Matched)
             {
               if (IsCDATAAllowed())
@@ -1510,7 +1517,7 @@ namespace Krys::HTML
               {
                 ParserError(HTMLParseError::CDATAInHTMLContent);
                 _token.BeginComment();
-                _token.AppendToComment("CDATA["_s);
+                _token.AppendToComment("[CDATA["_s);
                 SWITCH_TO(BogusComment);
               }
             }
@@ -1797,7 +1804,7 @@ namespace Krys::HTML
           }
           if (Text::MatchesASCIINormalizedLiteral(character, 'p'))
           {
-            auto result = _input.get().AdvancePast<false>("public"_s);
+            auto result = _input.get().AdvancePast("public"_s);
             if (result == HTMLInputStream::MatchResult::Matched)
             {
               ADVANCE_PAST_NON_NEWLINE_TO(AfterDOCTYPEPublicKeyword);
@@ -1809,7 +1816,7 @@ namespace Krys::HTML
           }
           if (Text::MatchesASCIINormalizedLiteral(character, 's'))
           {
-            auto result = _input.get().AdvancePast<false>("system"_s);
+            auto result = _input.get().AdvancePast("system"_s);
             if (result == HTMLInputStream::MatchResult::Matched)
             {
               ADVANCE_PAST_NON_NEWLINE_TO(AfterDOCTYPESystemKeyword);

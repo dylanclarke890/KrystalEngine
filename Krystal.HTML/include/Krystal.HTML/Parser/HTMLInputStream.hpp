@@ -142,7 +142,7 @@ namespace Krys::HTML
       DidNotMatch,
     };
 
-    template <bool CaseSensitive = true>
+    template <bool CaseInsensitive = true>
     KRYS_NODISCARD MatchResult AdvancePast(Text::ASCIILiteral characters) noexcept
     {
       size_t availableCharacters = RemainingCharacters();
@@ -155,7 +155,8 @@ namespace Krys::HTML
       {
         char32 inputChar = _data[_readPosition + i];
         char32 matchChar = characters[i];
-        if (CaseSensitive)
+        
+        if constexpr (CaseInsensitive)
         {
           inputChar = Text::ToASCIILower(inputChar);
           matchChar = Text::ToASCIILower(matchChar);

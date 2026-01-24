@@ -3538,4 +3538,715 @@ namespace Krys::Tests
   }
 
 #pragma endregion
+
+#pragma region BogusComment
+
+  TEST_CASE("HTMLTokenizer(BogusComment) - emits comment and switches to Data when parsing GreaterThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"?comment";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<?comment>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Comment);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+  }
+
+  TEST_CASE("HTMLTokenizer(BogusComment) - emits comment and then EOF when EOF reached", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    inputStream.Append(U"<?comment", IsEOF(true));
+
+    expected = U"?comment";
+    expectedErrorCount = 1;
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::Comment);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(BogusComment) - appends to comment when parsing NullCharacter",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"?com\xFFFDm";
+    expectedErrorCount = 2;
+    utf32_string input = U"<?com";
+    input.append(1uz, U'\0');
+    input.append(U"m>");
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Comment);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+  }
+
+  TEST_CASE("HTMLTokenizer(BogusComment) - appends to comment when parsing any other character",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"?comm";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<?comm>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Comment);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+  }
+
+#pragma endregion
+
+#pragma region MarkupDeclarationOpen
+
+  TEST_CASE("HTMLTokenizer(MarkupDeclarationOpen) - switches to CommentStart when parsing DoubleHyphen",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::MarkupDeclarationOpen);
+
+    expected = U"";
+    inputStream.Append(U"--");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CommentStart);
+  }
+
+  TEST_CASE("HTMLTokenizer(MarkupDeclarationOpen) - switches to DOCTYPE when parsing 'DOCTYPE'",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::MarkupDeclarationOpen);
+
+    expected = U"";
+    inputStream.Append(U"DOCTYPE");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPE);
+  }
+
+  TEST_CASE("HTMLTokenizer(MarkupDeclarationOpen) - switches to DOCTYPE when parsing 'DOCTYPE', mixed case",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::MarkupDeclarationOpen);
+
+    expected = U"";
+    inputStream.Append(U"DoCtYpe");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPE);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(MarkupDeclarationOpen) - switches to CDATASection when parsing '[CDATA[' and CDATA "
+    "is allowed",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::MarkupDeclarationOpen);
+    tokenizer.SetCDATASectionsAllowed(true);
+
+    expected = U"";
+    inputStream.Append(U"[CDATA[");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CDATASection);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(MarkupDeclarationOpen) - switches to BogusComment when parsing '[CDATA[' and CDATA "
+    "is not allowed",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::MarkupDeclarationOpen);
+    tokenizer.SetCDATASectionsAllowed(false);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"[CDATA[");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BogusComment);
+    REQUIRE(errors.back() == HTMLParseError::CDATAInHTMLContent);
+  }
+
+  TEST_CASE("HTMLTokenizer(MarkupDeclarationOpen) - switches to BogusComment with parser error when "
+            "parsing anything else",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::MarkupDeclarationOpen);
+
+    expected = U"!comment";
+    expectedErrorCount = 1;
+    inputStream.Append(U"!comment>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Comment);
+    REQUIRE(errors.back() == HTMLParseError::IncorrectlyOpenedComment);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+  }
+
+#pragma endregion
+
+#pragma region CommentStart
+
+  TEST_CASE("HTMLTokenizer(CommentStart) - switches to CommentStartDash when parsing HyphenMinus",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!---");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CommentStartDash);
+  }
+
+  TEST_CASE("HTMLTokenizer(CommentStart) - switches to Data and emits comment when parsing GreaterThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!-->");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Comment);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+    REQUIRE(errors.back() == HTMLParseError::AbruptClosingOfEmptyComment);
+  }
+
+  TEST_CASE("HTMLTokenizer(CommentStart) - reconsumes in Comment for anything else", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!--c");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
+  }
+
+#pragma endregion
+
+#pragma region CommentStartDash
+
+  TEST_CASE("HTMLTokenizer(CommentStartDash) - switches to CommentEnd when parsing HyphenMinus",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!----");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CommentEnd);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(CommentStartDash) - switches to Data and emits comment when parsing GreaterThanSign",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!--->");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Comment);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+    REQUIRE(errors.back() == HTMLParseError::AbruptClosingOfEmptyComment);
+  }
+
+  TEST_CASE("HTMLTokenizer(CommentStartDash) - Emits comment and then EOF when EOF reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"-comment";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!---comment", IsEOF(true));
+
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::Comment);
+      REQUIRE(errors.back() == HTMLParseError::EOFInComment);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(CommentStartDash) - emits HyphenMinus and reconsumes in Comment for anything else",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!---c");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
+  }
+
+#pragma endregion
+
+#pragma region Comment
+
+  TEST_CASE("HTMLTokenizer(Comment) - switches to CommentLessThanSign when parsing LessThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"comment";
+    inputStream.Append(U"<!--a<");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CommentLessThanSign);
+  }
+
+  TEST_CASE("HTMLTokenizer(Comment) - switches to CommentEndDash when parsing HyphenMinus",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"com";
+    inputStream.Append(U"<!--com-");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CommentEndDash);
+  }
+
+  TEST_CASE("HTMLTokenizer(Comment) - Replaces null character with U+FFFD when parsing NullCharacter",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    utf32_string input = U"<!--com";
+    input.append(1uz, U'\0');
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
+  }
+
+  TEST_CASE("HTMLTokenizer(Comment) - Emits comment and then EOF when EOF reached", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"comment";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!--comment", IsEOF(true));
+
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::Comment);
+      REQUIRE(errors.back() == HTMLParseError::EOFInComment);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(Comment) - appends to comment when parsing any other character",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"comment";
+    inputStream.Append(U"<!--comment");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
+  }
+
+#pragma endregion
+
+#pragma region CommentLessThanSign
+
+  TEST_CASE("HTMLTokenizer(CommentLessThanSign) - switches to CommentLessThanSignBang when parsing "
+            "ExclamationMark",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!--a<!");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CommentLessThanSignBang);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(CommentLessThanSign) - appends LessThanSign and remains in CommentLessThanSign when "
+    "parsing LessThanSign",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!--a<<");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CommentLessThanSign);
+  }
+
+  TEST_CASE("HTMLTokenizer(CommentLessThanSign) - reconsumes in Comment for anything else",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!--a<b");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
+  }
+
+#pragma endregion
+
+#pragma region CommentLessThanSignBang
+
+  TEST_CASE("HTMLTokenizer(CommentLessThanSignBang) - switches to CommentLessThanSignBangDash when parsing "
+            "HyphenMinus",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!--a<!-");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CommentLessThanSignBangDash);
+  }
+
+  TEST_CASE("HTMLTokenizer(CommentLessThanSignBang) - reconsumes in Comment for anything else",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!--a<!b");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
+  }
+
+#pragma endregion
+
+#pragma region CommentLessThanSignBangDash
+
+  TEST_CASE("HTMLTokenizer(CommentLessThanSignBangDash) - switches to CommentLessThanSignBangDashDash when "
+            "parsing HyphenMinus",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!--a<!--");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CommentLessThanSignBangDashDash);
+  }
+
+  TEST_CASE("HTMLTokenizer(CommentLessThanSignBangDash) - reconsumes in Comment for anything else",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!--a<!-b");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
+  }
+
+#pragma endregion
+
+#pragma region CommentLessThanSignBangDashDash
+
+  TEST_CASE("HTMLTokenizer(CommentLessThanSignBangDashDash) - emits comment when parsing GreaterThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"a<!";
+    inputStream.Append(U"<!--a<!-->");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Comment);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+  }
+
+  TEST_CASE("HTMLTokenizer(CommentLessThanSignBangDashDash) - emits comment with parser error followed by "
+            "EOF when parsing EOF",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"a<!";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!--a<!--", IsEOF(true));
+
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::Comment);
+      REQUIRE(errors.back() == HTMLParseError::EOFInComment);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(CommentLessThanSignBangDashDash) - reconsumes in Comment with parser error for "
+            "anything else",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!--a<!--b");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
+    REQUIRE(errors.back() == HTMLParseError::NestedComment);
+  }
+
+#pragma endregion
+
+#pragma region CommentEndDash
+
+  TEST_CASE("HTMLTokenizer(CommentEndDash) - switches to CommentEnd when parsing HyphenMinus",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!--com--");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CommentEnd);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(CommentEndDash) - emits comment with parser error followed by EOF when parsing EOF",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!--com-", IsEOF(true));
+
+    expected = U"com";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::Comment);
+      REQUIRE(errors.back() == HTMLParseError::EOFInComment);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(CommentEndDash) - reconsumes in Comment for anything else", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!--com-a");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
+  }
+
+#pragma endregion
+
+#pragma region CommentEnd
+
+  TEST_CASE("HTMLTokenizer(CommentEnd) - emits comment when parsing GreaterThanSign", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+    expected = U"comment";
+    inputStream.Append(U"<!--comment-->");
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Comment);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+  }
+
+  TEST_CASE("HTMLTokenizer(CommentEnd) - switches to CommentEndBang when parsing Exclamation",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!--comment--!");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CommentEndBang);
+  }
+
+  TEST_CASE("HTMLTokenizer(CommentEnd) - remains in CommentEnd when parsing HyphenMinus", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!--comment---");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CommentEnd);
+  }
+
+  TEST_CASE("HTMLTokenizer(CommentEnd) - emits comment with parser error followed by EOF when parsing EOF",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!--comment--", IsEOF(true));
+
+    expected = U"comment";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::Comment);
+      REQUIRE(errors.back() == HTMLParseError::EOFInComment);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(CommentEnd) - reconsumes in Comment with parser error for anything else",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<!--comment--a");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
+  }
+
+#pragma endregion
+
+#pragma region CommentEndBang
+
+  TEST_CASE("HTMLTokenizer(CommentEndBang) - switches to CommentEndDash when parsing HyphenMinus",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+    
+    expected = U"";
+    inputStream.Append(U"<!--comment--!-");
+    
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CommentEndDash);
+  }
+
+  TEST_CASE("HTMLTokenizer(CommentEndBang) - emits comment when parsing GreaterThanSign", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+    
+    expected = U"comment";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!--comment--!>");
+    
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Comment);
+    REQUIRE(errors.back() == HTMLParseError::IncorrectlyClosedComment);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+  }
+
+  TEST_CASE("HTMLTokenizer(CommentEndBang) - emits comment with parser error followed by EOF when parsing EOF",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+    
+    expectedErrorCount = 1;
+    inputStream.Append(U"<!--comment--!", IsEOF(true));
+    
+    expected = U"comment";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::Comment);
+      REQUIRE(errors.back() == HTMLParseError::EOFInComment);
+    }
+    
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    }
+  }
+
+  TEST_CASE("HTMLTokenizer(CommentEndBang) - reconsumes in Comment for anything else", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+    
+    expected = U"";
+    inputStream.Append(U"<!--comment--!a");
+    
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
+  }
+
+#pragma endregion
 }
