@@ -5726,4 +5726,136 @@ namespace Krys::Tests
   }
 
 #pragma endregion
+
+#pragma region CDATASection
+
+  TEST_CASE("HTMLTokenizer(CDATASection) - switches to CDATASectionBracket when parsing RightSquareBracket",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::CDATASection);
+
+    expected = U"";
+    inputStream.Append(U"]");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CDATASectionBracket);
+  }
+
+  TEST_CASE("HTMLTokenizer(CDATASection) - emits EndOfFile with parser error when EOF reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::CDATASection);
+
+    expectedErrorCount = 1;
+    inputStream.Append(U"A", IsEOF(true));
+
+    expected = U"A";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::Character);
+    }
+
+    expected = U"";
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+      REQUIRE(errors.back() == HTMLParseError::EOFInCDATA);
+    }
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(CDATASection) - emits Character tokens for all characters except RightSquareBracket "
+    "and EOF",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::CDATASection);
+
+    expected = U"A";
+    inputStream.Append(U"A");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CDATASection);
+  }
+
+#pragma endregion
+
+#pragma region CDATASectionBracket
+
+  TEST_CASE(
+    "HTMLTokenizer(CDATASectionBracket) - switches to CDATASectionEnd when parsing RightSquareBracket",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::CDATASectionBracket);
+
+    expected = U"";
+    inputStream.Append(U"]");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CDATASectionEnd);
+  }
+
+  TEST_CASE("HTMLTokenizer(CDATASectionBracket) - emits Character token for RightSquareBracket and switches "
+            "back to CDATASection when parsing any character except RightSquareBracket or EOF",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::CDATASectionBracket);
+
+    expected = U"]A";
+    inputStream.Append(U"A");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CDATASection);
+  }
+
+#pragma endregion
+
+#pragma region CDATASectionEnd
+  
+  TEST_CASE("HTMLTokenizer(CDATASectionEnd) - switches to Data when parsing GreaterThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::CDATASectionEnd);
+    
+    expected = U"";
+    inputStream.Append(U">");
+    
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+  }
+  
+  TEST_CASE(
+    "HTMLTokenizer(CDATASectionEnd) - emits Character tokens for two RightSquareBrackets and "
+    "switches back to CDATASection when parsing any character except RightSquareBracket or GreaterThanSign",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::CDATASectionEnd);
+    
+    expected = U"]]A";
+    inputStream.Append(U"A");
+    
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CDATASection);
+  }
+
+  TEST_CASE("HTMLTokenizer(CDATASectionEnd) - emits Character token for one RightSquareBracket and remains "
+            "CDATASectionEnd when parsing RightSquareBracket",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::CDATASectionEnd);
+    
+    expected = U"]";
+    inputStream.Append(U"]");
+    
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::Character);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CDATASectionEnd);
+  }
+
+#pragma endregion
 }

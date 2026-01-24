@@ -2190,6 +2190,7 @@ namespace Krys::HTML
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
+            ParserError(HTMLParseError::EOFInCDATA);
             RECONSUME_IN(Data);
           }
 

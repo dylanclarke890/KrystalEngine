@@ -38,6 +38,7 @@ namespace Krys::HTML
     MissingDOCTYPESystemIdentifier,
     AbruptDOCTYPESystemIdentifier,
     UnexpectedCharacterAfterDOCTYPESystemIdentifier,
+    EOFInCDATA,
     UnknownNamedCharacterReference,
     AbsenceOfDigitsInNumericCharacterReference,
     MissingSemicolonAfterCharacterReference,
