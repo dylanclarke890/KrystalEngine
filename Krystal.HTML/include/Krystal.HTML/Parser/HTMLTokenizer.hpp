@@ -1378,6 +1378,7 @@ namespace Krys::HTML
         BEGIN_STATE(AttributeValueUnquoted)
           if (IsTokenizerWhitespace(character))
           {
+            EndAttribute();
             ADVANCE_TO(BeforeAttributeName);
           }
           if (character == Ampersand)
@@ -1417,10 +1418,12 @@ namespace Krys::HTML
         BEGIN_STATE(AfterAttributeValueQuoted)
           if (IsTokenizerWhitespace(character))
           {
+            EndAttribute();
             ADVANCE_TO(BeforeAttributeName);
           }
           if (character == Solidus)
           {
+            EndAttribute();
             ADVANCE_PAST_NON_NEWLINE_TO(SelfClosingStartTag);
           }
           if (character == GreaterThanSign)

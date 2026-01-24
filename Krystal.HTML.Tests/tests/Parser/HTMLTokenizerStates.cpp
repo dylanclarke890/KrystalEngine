@@ -3257,9 +3257,9 @@ namespace Krys::Tests
             "whitespace",
             "[HTML][Tokenizer]")
   {
-    SETUP_TEST(TokenizerState::AttributeValueUnquoted);
+    SETUP_TEST(TokenizerState::Data);
 
-    inputStream.Append(U" ");
+    inputStream.Append(U"<div a=value ");
     expected = U"";
 
     NextTokenPtr token = tokenizer.NextToken();
@@ -3418,10 +3418,10 @@ namespace Krys::Tests
     "when parsing whitespace",
     "[HTML][Tokenizer]")
   {
-    SETUP_TEST(TokenizerState::AfterAttributeValueQuoted);
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"";
-    inputStream.Append(U"   \t\n\r");
+    inputStream.Append(U"<div a=\"value\"   \t\n\r");
 
     NextTokenPtr token = tokenizer.NextToken();
     REQUIRE(!token);
@@ -3431,10 +3431,10 @@ namespace Krys::Tests
   TEST_CASE("HTMLTokenizer(AfterAttributeValueQuoted) - switches to SelfClosingStartTag when parsing Solidus",
             "[HTML][Tokenizer]")
   {
-    SETUP_TEST(TokenizerState::AfterAttributeValueQuoted);
+    SETUP_TEST(TokenizerState::Data);
 
     expected = U"";
-    inputStream.Append(U"/");
+    inputStream.Append(U"<div a=\"value\"/");
 
     NextTokenPtr token = tokenizer.NextToken();
     REQUIRE(!token);

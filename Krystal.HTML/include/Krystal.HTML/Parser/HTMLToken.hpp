@@ -183,6 +183,12 @@ namespace Krys::HTML
       return _attributes;
     }
 
+    const AttributeList &GetAttributes() const noexcept
+    {
+      assert(_type == Type::StartTag || _type == Type::EndTag);
+      return _attributes;
+    }
+
     Attribute *GetCurrentAttribute() const noexcept
     {
       assert(_type == Type::StartTag || _type == Type::EndTag);
