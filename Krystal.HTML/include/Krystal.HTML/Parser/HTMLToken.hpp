@@ -263,7 +263,7 @@ namespace Krys::HTML
       _doctypeData->SystemIdentifier.clear();
     }
 
-    inline void AppendToPublicIdentifier(char32 character)
+    void AppendToPublicIdentifier(char32 character)
     {
       assert(_type == Type::DOCTYPE);
       assert(_doctypeData->HasPublicIdentifier);
@@ -279,7 +279,7 @@ namespace Krys::HTML
       _doctypeData->SystemIdentifier.push_back(character);
     }
 
-    UniquePtr<DoctypeData> ReleaseDOCTYPEData() noexcept
+    KRYS_NODISCARD UniquePtr<DoctypeData> ReleaseDOCTYPEData() noexcept
     {
       return std::move(_doctypeData);
     }
@@ -302,9 +302,15 @@ namespace Krys::HTML
       _data.clear();
     }
 
-    const DataBuffer &GetDataBuffer() const noexcept
+    KRYS_NODISCARD const DataBuffer &GetDataBuffer() const noexcept
     {
       return _data;
+    }
+
+    KRYS_NODISCARD bool IsSelfClosing() const noexcept
+    {
+      assert(_type == Type::StartTag);
+      return _selfClosing;
     }
   };
 }

@@ -2700,4 +2700,842 @@ namespace Krys::Tests
   }
 
 #pragma endregion
+
+#pragma region BeforeAttributeName
+
+  TEST_CASE("HTMLTokenizer(BeforeAttributeName) - ignores whitespace", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::BeforeAttributeName);
+
+    expected = U"";
+    inputStream.Append(U"   \t\n\r");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeName);
+  }
+
+  TEST_CASE("HTMLTokenizer(BeforeAttributeName) - switches to SelfClosingStartTag after parsing Solidus",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::BeforeAttributeName);
+
+    expected = U"";
+    inputStream.Append(U"/");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::SelfClosingStartTag);
+  }
+
+  TEST_CASE("HTMLTokenizer(BeforeAttributeName) - switches to Data after parsing GreaterThanSign and emits "
+            "the current tag",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"div";
+    inputStream.Append(U"<div >");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+  }
+
+  TEST_CASE("HTMLTokenizer(BeforeAttributeName) - switches to Data and emits EOF when EOF reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    inputStream.Append(U"<div ", IsEOF(true));
+    expected = U"";
+    expectedErrorCount = 1;
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    REQUIRE(errors.back() == HTMLParseError::EOFInTag);
+  }
+
+  TEST_CASE("HTMLTokenizer(BeforeAttributeName) - switches to AttributeName with parser error after parsing "
+            "an EqualsSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    inputStream.Append(U"<a =");
+    expected = U"";
+    expectedErrorCount = 1;
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedEqualsSignBeforeAttributeName);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AttributeName);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(BeforeAttributeName) - switches to AttributeName after parsing valid attribute name start",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    inputStream.Append(U"<a b");
+    expected = U"";
+    NextTokenPtr token = tokenizer.NextToken();
+
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AttributeName);
+  }
+
+#pragma endregion
+
+#pragma region AttributeName
+
+  TEST_CASE(
+    "HTMLTokenizer(AttributeName) - ignores whitespace and switches to AfterAttributeName when parsing "
+    "whitespace",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    inputStream.Append(U"<a b   \t\n\r");
+    expected = U"";
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AfterAttributeName);
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeName) - switches to SelfClosingStartTag when parsing Solidus",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    inputStream.Append(U"<a b/");
+    expected = U"";
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::SelfClosingStartTag);
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeName) - switches to Data and emits the current tag when parsing "
+            "GreaterThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"div";
+    inputStream.Append(U"<div b>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Name, U"b"));
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeName) - parses attribute name and switches to BeforeAttributeValue when "
+            "parsing EqualsSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    inputStream.Append(U"<a b=");
+    expected = U"";
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeValue);
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeName) - appends to attribute name when parsing valid attribute name "
+            "characters",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    inputStream.Append(U"<a data-value=");
+    expected = U"";
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeValue);
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeName) - Replaces null character with U+FFFD in attribute name",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+
+    utf32_string input = U"<a data";
+    input.append(1uz, U'\0');
+    input.append(U"value=");
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeValue);
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeName) - Treats QuotationMark as anything else but with parse error",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<a data\"value=");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedCharacterInAttributeName);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeValue);
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeName) - Treats Apostrophe as anything else but with parse error",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<a data'value=");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedCharacterInAttributeName);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeValue);
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeName) - Treats LessThanSign as anything else but with parse error",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<a data<value=");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedCharacterInAttributeName);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeValue);
+  }
+
+#pragma endregion
+
+#pragma region AfterAttributeName
+
+  TEST_CASE("HTMLTokenizer(AfterAttributeName) - ignores whitespace and stays in the same state when parsing "
+            "whitespace",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::AfterAttributeName);
+
+    expected = U"";
+    inputStream.Append(U"   \t\n\r");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AfterAttributeName);
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterAttributeName) - switches to SelfClosingStartTag when parsing Solidus",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::AfterAttributeName);
+
+    expected = U"";
+    inputStream.Append(U"/");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::SelfClosingStartTag);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(AfterAttributeName) - switches to BeforeAttributeValue after parsing an EqualsSign",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    inputStream.Append(U"<a b=");
+    expected = U"";
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeValue);
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterAttributeName) - switches to Data and emits the current tag when parsing "
+            "GreaterThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"div";
+    inputStream.Append(U"<div b>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Name, U"b"));
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterAttributeName) - Emits EOF token if EOF is reached", "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    inputStream.Append(U"<div b ", IsEOF(true));
+    expected = U"";
+    expectedErrorCount = 1;
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    REQUIRE(errors.back() == HTMLParseError::EOFInTag);
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterAttributeName) - treats any other character as the start of a new "
+            "attribute name",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<div a b");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AttributeName);
+  }
+
+#pragma endregion
+
+#pragma region BeforeAttributeValue
+
+  TEST_CASE(
+    "HTMLTokenizer(BeforeAttributeValue) - ignores whitespace and stays in the same state when parsing "
+    "whitespace",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::BeforeAttributeValue);
+
+    expected = U"";
+    inputStream.Append(U"   \t\n\r");
+    NextTokenPtr token = tokenizer.NextToken();
+
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeValue);
+  }
+
+  TEST_CASE("HTMLTokenizer(BeforeAttributeValue) - switches to AttributeValueDoubleQuoted when parsing "
+            "QuotationMark",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::BeforeAttributeValue);
+
+    expected = U"";
+    inputStream.Append(U"\"");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AttributeValueDoubleQuoted);
+  }
+
+  TEST_CASE("HTMLTokenizer(BeforeAttributeValue) - switches to AttributeValueSingleQuoted when parsing "
+            "Apostrophe",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::BeforeAttributeValue);
+
+    expected = U"";
+    inputStream.Append(U"'");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AttributeValueSingleQuoted);
+  }
+
+  TEST_CASE("HTMLTokenizer(BeforeAttributeValue) - emits current tag token and switches to Data with parser "
+            "error when parsing "
+            "GreaterThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"div";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<div a=>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+
+    REQUIRE(errors.back() == HTMLParseError::MissingAttributeValue);
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+  }
+
+  TEST_CASE("HTMLTokenizer(BeforeAttributeValue) - switches to AttributeValueUnquoted when parsing any "
+            "other character",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<div a=a");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AttributeValueUnquoted);
+  }
+
+#pragma endregion
+
+#pragma region AttributeValueDoubleQuoted
+
+  TEST_CASE("HTMLTokenizer(AttributeValueDoubleQuoted) - switches to AfterAttributeValueQuoted when parsing "
+            "QuotationMark",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::AttributeValueDoubleQuoted);
+
+    inputStream.Append(U"\"");
+    expected = U"";
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AfterAttributeValueQuoted);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(AttributeValueDoubleQuoted) - Switches to CharacterReference when parsing Ampersand",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::AttributeValueDoubleQuoted);
+
+    inputStream.Append(U"&");
+    expected = U"";
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CharacterReference);
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeValueDoubleQuoted) - Replaces null character with U+FFFD",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"div";
+    expectedErrorCount = 1;
+
+    utf32_string input = U"<div a=\"value";
+    input.append(1uz, U'\0');
+    input.append(U"\">");
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
+    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Value, U"value\xFFFD"));
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeValueDoubleQuoted) - Emits EOF instead of tag if EOF reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+    expected = U"";
+    expectedErrorCount = 1;
+
+    inputStream.Append(U"<div a=\"value", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    REQUIRE(errors.back() == HTMLParseError::EOFInTag);
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeValueDoubleQuoted) - appends to attribute value when parsing any "
+            "other character",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<div a=\"value");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AttributeValueDoubleQuoted);
+  }
+
+#pragma endregion
+
+#pragma region AttributeValueSingleQuoted
+
+  TEST_CASE("HTMLTokenizer(AttributeValueSingleQuoted) - switches to AfterAttributeValueQuoted when parsing "
+            "Apostrophe",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::AttributeValueSingleQuoted);
+
+    inputStream.Append(U"'");
+    expected = U"";
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AfterAttributeValueQuoted);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(AttributeValueSingleQuoted) - Switches to CharacterReference when parsing Ampersand",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::AttributeValueSingleQuoted);
+
+    inputStream.Append(U"&");
+    expected = U"";
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CharacterReference);
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeValueSingleQuoted) - Replaces null character with U+FFFD",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"div";
+    expectedErrorCount = 1;
+
+    utf32_string input = U"<div a='value";
+    input.append(1uz, U'\0');
+    input.append(U"'>");
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
+    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Value, U"value\xFFFD"));
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeValueSingleQuoted) - Emits EOF instead of tag if EOF reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+    expected = U"";
+    expectedErrorCount = 1;
+
+    inputStream.Append(U"<div a='value", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    REQUIRE(errors.back() == HTMLParseError::EOFInTag);
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeValueSingleQuoted) - appends to attribute value when parsing any "
+            "other character",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    inputStream.Append(U"<div a='value");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AttributeValueSingleQuoted);
+  }
+
+#pragma endregion
+
+#pragma region AttributeValueUnquoted
+
+  TEST_CASE("HTMLTokenizer(AttributeValueUnquoted) - switches to BeforeAttributeName when parsing "
+            "whitespace",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::AttributeValueUnquoted);
+
+    inputStream.Append(U" ");
+    expected = U"";
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeName);
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeValueUnquoted) - Switches to CharacterReference when parsing Ampersand",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::AttributeValueUnquoted);
+
+    inputStream.Append(U"&");
+    expected = U"";
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::CharacterReference);
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeValueUnquoted) - switches to Data and emits the current tag when parsing "
+            "GreaterThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"div";
+    inputStream.Append(U"<div a=value>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Name, U"a"));
+    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Value, U"value"));
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeValueUnquoted) - Replaces null character with U+FFFD",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"div";
+    expectedErrorCount = 1;
+
+    utf32_string input = U"<div a=value";
+    input.append(1uz, U'\0');
+    input.append(U">");
+    inputStream.Append(std::move(input));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
+    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Value, U"value\xFFFD"));
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeValueUnquoted) - treats QuotationMark as anything else but with parse "
+            "error",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"div";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<div a=va\"lue>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedCharacterInUnquotedAttributeValue);
+    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Value, U"va\"lue"));
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeValueUnquoted) - treats Apostrophe as anything else but with parse "
+            "error",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"div";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<div a=va'lue>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedCharacterInUnquotedAttributeValue);
+    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Value, U"va'lue"));
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeValueUnquoted) - treats LessThanSign as anything else but with parse "
+            "error",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"div";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<div a=va<lue>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedCharacterInUnquotedAttributeValue);
+    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Value, U"va<lue"));
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeValueUnquoted) - treats EqualsSign as anything else but with parse "
+            "error",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"div";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<div a=va=lue>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedCharacterInUnquotedAttributeValue);
+    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Value, U"va=lue"));
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeValueUnquoted) - treats GraveAccent as anything else but with parse "
+            "error",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"div";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<div a=va`lue>");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedCharacterInUnquotedAttributeValue);
+    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Value, U"va`lue"));
+  }
+
+  TEST_CASE("HTMLTokenizer(AttributeValueUnquoted) - Emits EOF instead of tag if EOF reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<div a=value", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    REQUIRE(errors.back() == HTMLParseError::EOFInTag);
+  }
+
+#pragma endregion
+
+#pragma region AfterAttributeValueQuoted
+
+  TEST_CASE(
+    "HTMLTokenizer(AfterAttributeValueQuoted) - ignores whitespace and switches to BeforeAttributeName "
+    "when parsing whitespace",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::AfterAttributeValueQuoted);
+
+    expected = U"";
+    inputStream.Append(U"   \t\n\r");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeName);
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterAttributeValueQuoted) - switches to SelfClosingStartTag when parsing Solidus",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::AfterAttributeValueQuoted);
+
+    expected = U"";
+    inputStream.Append(U"/");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::SelfClosingStartTag);
+  }
+
+  TEST_CASE(
+    "HTMLTokenizer(AfterAttributeValueQuoted) - switches to Data and emits the current tag when parsing "
+    "GreaterThanSign",
+    "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"div";
+    inputStream.Append(U"<div a=\"value\">");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Name, U"a"));
+    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Value, U"value"));
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterAttributeValueQuoted) - Emits EOF instead of tag if EOF reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<div a=\"value\"", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    REQUIRE(errors.back() == HTMLParseError::EOFInTag);
+  }
+
+  TEST_CASE("HTMLTokenizer(AfterAttributeValueQuoted) - Treats anything else as missing whitespace and "
+            "switches to AttributeName",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<div a=\"value\"b");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AttributeName);
+    REQUIRE(errors.back() == HTMLParseError::MissingWhitespaceBetweenAttributes);
+  }
+
+#pragma endregion
+
+#pragma region SelfClosingStartTag
+
+  TEST_CASE("HTMLTokenizer(SelfClosingStartTag) - switches to Data and emits the current tag as self-"
+            "closing when parsing GreaterThanSign",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"div";
+    inputStream.Append(U"<div />");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+    REQUIRE(token->IsSelfClosing());
+    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
+  }
+
+  TEST_CASE("HTMLTokenizer(SelfClosingStartTag) - Emits EOF instead of tag if EOF reached",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<div /", IsEOF(true));
+
+    NextTokenPtr token = tokenizer.NextToken();
+    COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
+    REQUIRE(errors.back() == HTMLParseError::EOFInTag);
+  }
+
+  TEST_CASE("HTMLTokenizer(SelfClosingStartTag) - Treats anything else as missing Solidus with "
+            "parser error and switches to AttributeName",
+            "[HTML][Tokenizer]")
+  {
+    SETUP_TEST(TokenizerState::Data);
+
+    expected = U"";
+    expectedErrorCount = 1;
+    inputStream.Append(U"<div /a");
+
+    NextTokenPtr token = tokenizer.NextToken();
+    REQUIRE(!token);
+    REQUIRE(tokenizer.GetState() == TokenizerState::AttributeName);
+    REQUIRE(errors.back() == HTMLParseError::UnexpectedSolidusInTag);
+  }
+
+#pragma endregion
 }

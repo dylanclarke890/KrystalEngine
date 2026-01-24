@@ -948,7 +948,7 @@ namespace Krys::HTML
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
-            ADVANCE_TO(ScriptDataEscaped);
+            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscaped);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
@@ -979,7 +979,7 @@ namespace Krys::HTML
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
-            ADVANCE_TO(ScriptDataEscaped);
+            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataEscaped);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
@@ -1103,7 +1103,7 @@ namespace Krys::HTML
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
-            ADVANCE_TO(ScriptDataDoubleEscaped);
+            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscaped);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
@@ -1130,7 +1130,7 @@ namespace Krys::HTML
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
-            ADVANCE_TO(ScriptDataDoubleEscaped);
+            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscaped);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
@@ -1162,7 +1162,7 @@ namespace Krys::HTML
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             BufferCharacter(Replacement);
-            ADVANCE_TO(ScriptDataDoubleEscaped);
+            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscaped);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
@@ -1212,7 +1212,7 @@ namespace Krys::HTML
         BEGIN_STATE(BeforeAttributeName)
           if (IsTokenizerWhitespace(character))
           {
-            ADVANCE_PAST_NON_NEWLINE_TO(BeforeAttributeName);
+            ADVANCE_TO(BeforeAttributeName);
           }
           if (character == Solidus || character == GreaterThanSign)
           {
@@ -1265,7 +1265,7 @@ namespace Krys::HTML
           if (IsTokenizerWhitespace(character))
           {
             // Ignore the character.
-            ADVANCE_PAST_NON_NEWLINE_TO(AfterAttributeName);
+            ADVANCE_TO(AfterAttributeName);
           }
           if (character == Solidus)
           {
@@ -1277,7 +1277,6 @@ namespace Krys::HTML
           }
           if (character == GreaterThanSign)
           {
-            EndAttribute();
             return EmitTagToken();
           }
           if (character == EndOfFile) KRYS_UNLIKELY
@@ -1295,7 +1294,7 @@ namespace Krys::HTML
           if (IsTokenizerWhitespace(character))
           {
             // Ignore the character.
-            ADVANCE_PAST_NON_NEWLINE_TO(AfterAttributeName);
+            ADVANCE_TO(BeforeAttributeValue);
           }
           if (character == QuotationMark)
           {
@@ -1339,7 +1338,7 @@ namespace Krys::HTML
           }
 
           _token.AppendToCurrentAttributeValue(character);
-          ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueDoubleQuoted);
+          ADVANCE_TO(AttributeValueDoubleQuoted);
         END_STATE()
 
         BEGIN_STATE(AttributeValueSingleQuoted)
@@ -1356,7 +1355,7 @@ namespace Krys::HTML
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
             _token.AppendToCurrentAttributeValue(Replacement);
-            ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueDoubleQuoted);
+            ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueSingleQuoted);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
@@ -1366,13 +1365,13 @@ namespace Krys::HTML
           }
 
           _token.AppendToCurrentAttributeValue(character);
-          ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueDoubleQuoted);
+          ADVANCE_TO(AttributeValueSingleQuoted);
         END_STATE()
 
         BEGIN_STATE(AttributeValueUnquoted)
           if (IsTokenizerWhitespace(character))
           {
-            ADVANCE_PAST_NON_NEWLINE_TO(AfterAttributeValueQuoted);
+            ADVANCE_TO(BeforeAttributeName);
           }
           if (character == Ampersand)
           {
@@ -1394,7 +1393,8 @@ namespace Krys::HTML
               || character == EqualSign || character == GraveAccent)
           {
             ParserError(HTMLParseError::UnexpectedCharacterInUnquotedAttributeValue);
-            // Treat it as per 'anything else' case below.
+            _token.AppendToCurrentAttributeValue(character);
+            ADVANCE_PAST_NON_NEWLINE_TO(AttributeValueUnquoted);
           }
           if (character == EndOfFile) KRYS_UNLIKELY
           {
@@ -1410,7 +1410,7 @@ namespace Krys::HTML
         BEGIN_STATE(AfterAttributeValueQuoted)
           if (IsTokenizerWhitespace(character))
           {
-            ADVANCE_PAST_NON_NEWLINE_TO(BeforeAttributeName);
+            ADVANCE_TO(BeforeAttributeName);
           }
           if (character == Solidus)
           {
@@ -1446,7 +1446,7 @@ namespace Krys::HTML
           }
 
           ParserError(HTMLParseError::UnexpectedSolidusInTag);
-          RECONSUME_IN(AfterAttributeName);
+          RECONSUME_IN(BeforeAttributeName);
         END_STATE()
 
         BEGIN_STATE(BogusComment)
@@ -1582,7 +1582,7 @@ namespace Krys::HTML
           }
 
           _token.AppendToComment(character);
-          ADVANCE_PAST_NON_NEWLINE_TO(Comment);
+          ADVANCE_TO(Comment);
         END_STATE()
 
         BEGIN_STATE(CommentLessThanSign)
@@ -1695,7 +1695,7 @@ namespace Krys::HTML
         BEGIN_STATE(DOCTYPE)
           if (IsTokenizerWhitespace(character))
           {
-            ADVANCE_PAST_NON_NEWLINE_TO(BeforeDOCTYPEName);
+            ADVANCE_TO(BeforeDOCTYPEName);
           }
           if (character == GreaterThanSign)
           {
@@ -1716,7 +1716,7 @@ namespace Krys::HTML
         BEGIN_STATE(BeforeDOCTYPEName)
           if (IsTokenizerWhitespace(character))
           {
-            ADVANCE_PAST_NON_NEWLINE_TO(BeforeDOCTYPEName);
+            ADVANCE_TO(BeforeDOCTYPEName);
           }
           if (Text::IsASCIIUpper(character))
           {
@@ -1750,7 +1750,7 @@ namespace Krys::HTML
         BEGIN_STATE(DOCTYPEName)
           if (IsTokenizerWhitespace(character))
           {
-            ADVANCE_PAST_NON_NEWLINE_TO(AfterDOCTYPEName);
+            ADVANCE_TO(AfterDOCTYPEName);
           }
           if (character == GreaterThanSign)
           {
@@ -1783,7 +1783,7 @@ namespace Krys::HTML
 
           if (IsTokenizerWhitespace(character))
           {
-            ADVANCE_PAST_NON_NEWLINE_TO(AfterDOCTYPEName);
+            ADVANCE_TO(AfterDOCTYPEName);
           }
           if (character == GreaterThanSign)
           {
@@ -1828,7 +1828,7 @@ namespace Krys::HTML
         BEGIN_STATE(AfterDOCTYPEPublicKeyword)
           if (IsTokenizerWhitespace(character))
           {
-            ADVANCE_PAST_NON_NEWLINE_TO(BeforeDOCTYPEPublicIdentifier);
+            ADVANCE_TO(BeforeDOCTYPEPublicIdentifier);
           }
           if (character == QuotationMark)
           {
@@ -1863,7 +1863,7 @@ namespace Krys::HTML
         BEGIN_STATE(BeforeDOCTYPEPublicIdentifier)
           if (IsTokenizerWhitespace(character))
           {
-            ADVANCE_PAST_NON_NEWLINE_TO(BeforeDOCTYPEPublicIdentifier);
+            ADVANCE_TO(BeforeDOCTYPEPublicIdentifier);
           }
           if (character == QuotationMark)
           {
@@ -1918,7 +1918,7 @@ namespace Krys::HTML
           }
 
           _token.AppendToPublicIdentifier(character);
-          ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEPublicIdentifierDoubleQuoted);
+          ADVANCE_TO(DOCTYPEPublicIdentifierDoubleQuoted);
         END_STATE()
 
         BEGIN_STATE(DOCTYPEPublicIdentifierSingleQuoted)
@@ -1946,13 +1946,13 @@ namespace Krys::HTML
           }
 
           _token.AppendToPublicIdentifier(character);
-          ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEPublicIdentifierSingleQuoted);
+          ADVANCE_TO(DOCTYPEPublicIdentifierSingleQuoted);
         END_STATE()
 
         BEGIN_STATE(AfterDOCTYPEPublicIdentifier)
           if (IsTokenizerWhitespace(character))
           {
-            ADVANCE_PAST_NON_NEWLINE_TO(BetweenDOCTYPEPublicAndSystemIdentifiers);
+            ADVANCE_TO(BetweenDOCTYPEPublicAndSystemIdentifiers);
           }
           if (character == GreaterThanSign)
           {
@@ -1985,7 +1985,7 @@ namespace Krys::HTML
         BEGIN_STATE(BetweenDOCTYPEPublicAndSystemIdentifiers)
           if (IsTokenizerWhitespace(character))
           {
-            ADVANCE_PAST_NON_NEWLINE_TO(BetweenDOCTYPEPublicAndSystemIdentifiers);
+            ADVANCE_TO(BetweenDOCTYPEPublicAndSystemIdentifiers);
           }
           if (character == GreaterThanSign)
           {
@@ -2016,7 +2016,7 @@ namespace Krys::HTML
         BEGIN_STATE(AfterDOCTYPESystemKeyword)
           if (IsTokenizerWhitespace(character))
           {
-            ADVANCE_PAST_NON_NEWLINE_TO(BeforeDOCTYPESystemIdentifier);
+            ADVANCE_TO(BeforeDOCTYPESystemIdentifier);
           }
           if (character == QuotationMark)
           {
@@ -2051,7 +2051,7 @@ namespace Krys::HTML
         BEGIN_STATE(BeforeDOCTYPESystemIdentifier)
           if (IsTokenizerWhitespace(character))
           {
-            ADVANCE_PAST_NON_NEWLINE_TO(BeforeDOCTYPESystemIdentifier);
+            ADVANCE_TO(BeforeDOCTYPESystemIdentifier);
           }
           if (character == QuotationMark)
           {
@@ -2106,7 +2106,7 @@ namespace Krys::HTML
           }
 
           _token.AppendToSystemIdentifier(character);
-          ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierDoubleQuoted);
+          ADVANCE_TO(DOCTYPESystemIdentifierDoubleQuoted);
         END_STATE()
 
         BEGIN_STATE(DOCTYPESystemIdentifierSingleQuoted)
@@ -2134,13 +2134,13 @@ namespace Krys::HTML
           }
 
           _token.AppendToSystemIdentifier(character);
-          ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPESystemIdentifierSingleQuoted);
+          ADVANCE_TO(DOCTYPESystemIdentifierSingleQuoted);
         END_STATE()
 
         BEGIN_STATE(AfterDOCTYPESystemIdentifier)
           if (IsTokenizerWhitespace(character))
           {
-            ADVANCE_PAST_NON_NEWLINE_TO(AfterDOCTYPESystemIdentifier);
+            ADVANCE_TO(AfterDOCTYPESystemIdentifier);
           }
           if (character == GreaterThanSign)
           {
@@ -2172,7 +2172,7 @@ namespace Krys::HTML
             return EmitDOCTYPEToken(false);
           }
 
-          ADVANCE_PAST_NON_NEWLINE_TO(BogusDOCTYPE);
+          ADVANCE_TO(BogusDOCTYPE);
         END_STATE()
 
         BEGIN_STATE(CDATASection)
@@ -2186,7 +2186,7 @@ namespace Krys::HTML
           }
 
           _token.AppendToCharacters(character);
-          ADVANCE_PAST_NON_NEWLINE_TO(CDATASection);
+          ADVANCE_TO(CDATASection);
         END_STATE()
 
         BEGIN_STATE(CDATASectionBracket)
