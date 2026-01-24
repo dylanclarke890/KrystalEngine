@@ -30,7 +30,7 @@
     <ClCompile Include="tests\Parser\HTMLCharacterReference.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Parser\HTMLTokenizer.cpp">
+    <ClCompile Include="tests\Parser\HTMLTokenizerStates.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
