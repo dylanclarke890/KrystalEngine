@@ -16,8 +16,8 @@ namespace Krys::HTML
   public:
     struct SourceLocation
     {
-      size_t LineNumber {1uz};
-      size_t ColumnNumber {1uz};
+      size_t Line {1uz};
+      size_t Column {1uz};
     };
 
   private:
@@ -122,12 +122,12 @@ namespace Krys::HTML
 
       if (_nextInputCharacter == '\n')
       {
-        _currentLocation.LineNumber++;
-        _currentLocation.ColumnNumber = 1uz;
+        _currentLocation.Line++;
+        _currentLocation.Column= 1uz;
       }
       else
       {
-        _currentLocation.ColumnNumber++;
+        _currentLocation.Column++;
       }
 
       _readPosition++;
@@ -194,7 +194,7 @@ namespace Krys::HTML
       }
 
       _readPosition += characters.Length();
-      _currentLocation.ColumnNumber += characters.Length();
+      _currentLocation.Column += characters.Length();
       _nextInputCharacter = _data[_readPosition];
 
       return MatchResult::Matched;

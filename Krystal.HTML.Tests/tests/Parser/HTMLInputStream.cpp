@@ -166,76 +166,76 @@ namespace Krys::Tests
   TEST_CASE("HTMLInputStream: SourceLocation tracking", "[HTML][InputStream]")
   {
     HTMLInputStream stream;
-    
+
     stream.Append(ToUTF32("a\nb\rc\r\ndtext"), IsEOF(true));
     {
       const auto &loc = stream.GetCurrentLocation();
-      REQUIRE(loc.LineNumber == 1uz);
-      REQUIRE(loc.ColumnNumber == 1uz);
+      REQUIRE(loc.Line == 1uz);
+      REQUIRE(loc.Column == 1uz);
     }
-    
+
     stream.Peek();
     stream.Advance(); // 'a'
     {
       const auto &loc = stream.GetCurrentLocation();
-      REQUIRE(loc.LineNumber == 1uz);
-      REQUIRE(loc.ColumnNumber == 2uz);
+      REQUIRE(loc.Line == 1uz);
+      REQUIRE(loc.Column == 2uz);
     }
-    
+
     stream.Peek();
     stream.Advance(); // '\n'
     {
       const auto &loc = stream.GetCurrentLocation();
-      REQUIRE(loc.LineNumber == 2uz);
-      REQUIRE(loc.ColumnNumber == 1uz);
+      REQUIRE(loc.Line == 2uz);
+      REQUIRE(loc.Column == 1uz);
     }
-    
+
     stream.Peek();
     stream.Advance(); // 'b'
     {
       const auto &loc = stream.GetCurrentLocation();
-      REQUIRE(loc.LineNumber == 2uz);
-      REQUIRE(loc.ColumnNumber == 2uz);
+      REQUIRE(loc.Line == 2uz);
+      REQUIRE(loc.Column == 2uz);
     }
-    
+
     stream.Peek();
     stream.Advance(); // '\n' (from '\r')
     {
       const auto &loc = stream.GetCurrentLocation();
-      REQUIRE(loc.LineNumber == 3uz);
-      REQUIRE(loc.ColumnNumber == 1uz);
+      REQUIRE(loc.Line == 3uz);
+      REQUIRE(loc.Column == 1uz);
     }
-    
+
     stream.Peek();
     stream.Advance(); // 'c'
     {
       const auto &loc = stream.GetCurrentLocation();
-      REQUIRE(loc.LineNumber == 3uz);
-      REQUIRE(loc.ColumnNumber == 2uz);
+      REQUIRE(loc.Line == 3uz);
+      REQUIRE(loc.Column == 2uz);
     }
-    
+
     stream.Peek();
     stream.Advance(); // '\n' (from '\r\n')
     {
       const auto &loc = stream.GetCurrentLocation();
-      REQUIRE(loc.LineNumber == 4uz);
-      REQUIRE(loc.ColumnNumber == 1uz);
+      REQUIRE(loc.Line == 4uz);
+      REQUIRE(loc.Column == 1uz);
     }
-    
+
     stream.Peek();
     stream.Advance(); // 'd'
     {
       const auto &loc = stream.GetCurrentLocation();
-      REQUIRE(loc.LineNumber == 4uz);
-      REQUIRE(loc.ColumnNumber == 2uz);
+      REQUIRE(loc.Line == 4uz);
+      REQUIRE(loc.Column == 2uz);
     }
 
     stream.Peek();
     (void)stream.AdvancePast<false>(Text::ASCIILiteral::From("text")); // 'text'
     {
       const auto &loc = stream.GetCurrentLocation();
-      REQUIRE(loc.LineNumber == 4uz);
-      REQUIRE(loc.ColumnNumber == 6uz);
+      REQUIRE(loc.Line == 4uz);
+      REQUIRE(loc.Column == 6uz);
     }
   }
 }

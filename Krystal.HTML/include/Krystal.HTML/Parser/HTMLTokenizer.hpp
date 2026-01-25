@@ -78,7 +78,7 @@ namespace Krys::HTML
     struct HTMLTokenizerError
     {
       HTMLParseError Error;
-      HTMLInputStream::SourceLocation Location;
+      HTMLInputStream::SourceLocation Location {};
     };
 
   private:
@@ -2389,7 +2389,7 @@ namespace Krys::HTML
             _characterReferenceCode += static_cast<int64>(Text::ToASCIIHexValue(character));
             ADVANCE_PAST_NON_NEWLINE_TO(HexadecimalCharacterReference);
           }
-          if (character == Semicolon)
+          if (character != Semicolon)
           {
             ParserError(HTMLParseError::MissingSemicolonAfterCharacterReference);
           }

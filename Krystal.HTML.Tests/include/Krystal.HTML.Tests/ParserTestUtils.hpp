@@ -262,7 +262,9 @@ namespace Krys::Tests
     REQUIRE(errors.size() == testCase.Errors.size());
     for (size_t i = 0uz; i < errors.size(); ++i)
     {
-      REQUIRE(errors[i].Error == testCase.Errors[i].Error);
+      CHECK(errors[i].Error == testCase.Errors[i].Error);
+      CHECK(errors[i].Location.Line== testCase.Errors[i].Line);
+      CHECK(errors[i].Location.Column== testCase.Errors[i].Column);
     }
   }
 
@@ -292,6 +294,8 @@ namespace Krys::Tests
       for (size_t i = 0uz; i < errors.size(); ++i)
       {
         CHECK(errors[i].Error == testCase.Errors[i].Error);
+        CHECK(errors[i].Location.Line == testCase.Errors[i].Line);
+        CHECK(errors[i].Location.Column == testCase.Errors[i].Column);
       }
 
       CHECK(tokenizer.GetState() == testCase.ExpectedState);
@@ -336,6 +340,14 @@ namespace Krys::Tests
       }
 
       FAIL("Unknown expected token type");
+    }
+
+    REQUIRE(errors.size() == testCase.Errors.size());
+    for (size_t i = 0uz; i < errors.size(); ++i)
+    {
+      CHECK(errors[i].Error == testCase.Errors[i].Error);
+      CHECK(errors[i].Location.Line == testCase.Errors[i].Line);
+      CHECK(errors[i].Location.Column == testCase.Errors[i].Column);
     }
   }
 
