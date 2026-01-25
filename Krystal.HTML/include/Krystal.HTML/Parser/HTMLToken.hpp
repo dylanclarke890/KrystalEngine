@@ -3,9 +3,13 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"
+#include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
+#include "Krystal.Text/ASCIILiteral.hpp"
+#include <cassert>
 
 namespace Krys::HTML
 {

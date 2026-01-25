@@ -165,6 +165,9 @@
     <ClCompile Include="tests\Parser\HTMLTokenizerIntegrationTests.cpp" />
     <ClCompile Include="tests\Parser\HTMLTokenizerStates.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Krystal.HTML.Tests\ParserTestUtils.hpp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
