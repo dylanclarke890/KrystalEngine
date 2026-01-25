@@ -74,6 +74,13 @@ namespace Krys::HTML
 
   class HTMLTokenizer
   {
+  public:
+    struct HTMLTokenizerError
+    {
+      HTMLParseError Error;
+      HTMLInputStream::SourceLocation Location;
+    };
+
   private:
     TokenizerState _state {TokenizerState::Data};
     HTMLToken _token;
@@ -93,7 +100,7 @@ namespace Krys::HTML
     Span<const NamedCharacterReferenceEntry> _namedCharacterReferenceMatchEntries;
     const NamedCharacterReferenceEntry *_longestCharacterReferenceMatch {nullptr};
 
-    List<HTMLParseError> _parseErrors;
+    List<HTMLTokenizerError> _parseErrors;
 
   public:
     HTMLTokenizer(HTMLInputStream &input) noexcept : _input(input)
@@ -105,7 +112,7 @@ namespace Krys::HTML
       return NextTokenPtr(ProcessToken() ? &_token : nullptr);
     }
 
-    KRYS_NODISCARD const List<HTMLParseError> &GetParseErrors() const noexcept
+    KRYS_NODISCARD const List<HTMLTokenizerError> &GetParseErrors() const noexcept
     {
       return _parseErrors;
     }
@@ -197,7 +204,10 @@ namespace Krys::HTML
 
     void ParserError(HTMLParseError error) noexcept
     {
-      _parseErrors.push_back(error);
+      _parseErrors.push_back(HTMLTokenizerError {
+        .Error = error,
+        .Location = _input.get().GetCurrentLocation(),
+      });
     }
 
     KRYS_NODISCARD bool IsTokenizerWhitespace(char32 character) const noexcept
@@ -2439,7 +2449,7 @@ namespace Krys::HTML
           _temporaryBuffer.clear();
           _temporaryBuffer.push_back(static_cast<char32>(_characterReferenceCode));
           FlushCodePointsConsumedAsACharacterReference();
-          
+
           if (character == Semicolon)
           {
             ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE();

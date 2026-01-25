@@ -262,7 +262,7 @@ namespace Krys::Tests
     REQUIRE(errors.size() == testCase.Errors.size());
     for (size_t i = 0uz; i < errors.size(); ++i)
     {
-      REQUIRE(errors[i] == testCase.Errors[i].Error);
+      REQUIRE(errors[i].Error == testCase.Errors[i].Error);
     }
   }
 
@@ -288,10 +288,10 @@ namespace Krys::Tests
       NextTokenPtr token = tokenizer.NextToken();
       REQUIRE(!token);
       REQUIRE(errors.size() == testCase.Errors.size());
-      
+
       for (size_t i = 0uz; i < errors.size(); ++i)
       {
-        CHECK(errors[i] == testCase.Errors[i].Error);
+        CHECK(errors[i].Error == testCase.Errors[i].Error);
       }
 
       CHECK(tokenizer.GetState() == testCase.ExpectedState);
