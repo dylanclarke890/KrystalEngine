@@ -40,7 +40,9 @@ namespace Krys::Tests
            {.Error = HTMLParseError::MissingSemicolonAfterCharacterReference, .Line = 1uz, .Column = 8uz}}}))
 
   TEST("NamedCharacterReference", "no match, incomplete reference",
-       (UnitTest {.Input = U"&nonentity", .Output = {CreateCharacterToken(U"&nonentity")}}))
+       (UnitTest {.ExpectedState = HTML::TokenizerState::AmbiguousAmpersand,
+                  .Input = U"&nonentity",
+                  .Output = {CreateCharacterToken(U"&nonentity")}}))
 
   TEST("NamedCharacterReference", "no match, ends in semicolon",
        (UnitTest {
@@ -272,7 +274,6 @@ namespace Krys::Tests
 
   TEST("RCDATA", "Batches characters up to EOF then emits EOF",
        (UnitTest {.InitialState = TokenizerState::RCDATA,
-                  .ExpectedState = TokenizerState::RCDATA,
                   .Input = U"a string of characters; 123145",
                   .AppendEOF = true,
                   .Output = {CreateCharacterToken(U"a string of characters; 123145"), CreateEOFToken()}}))
@@ -297,7 +298,6 @@ namespace Krys::Tests
 
   TEST("RAWTEXT", "Batches characters up to EOF then emits EOF",
        (UnitTest {.InitialState = TokenizerState::RAWTEXT,
-                  .ExpectedState = TokenizerState::RAWTEXT,
                   .Input = U"a string of characters; 123145",
                   .AppendEOF = true,
                   .Output = {CreateCharacterToken(U"a string of characters; 123145"), CreateEOFToken()}}))
@@ -328,7 +328,6 @@ namespace Krys::Tests
 
   TEST("ScriptData", "Batches characters up to EOF then emits EOF",
        (UnitTest {.InitialState = TokenizerState::ScriptData,
-                  .ExpectedState = TokenizerState::ScriptData,
                   .Input = U"a string of characters; 123145",
                   .AppendEOF = true,
                   .Output = {CreateCharacterToken(U"a string of characters; 123145"), CreateEOFToken()}}))
@@ -353,7 +352,6 @@ namespace Krys::Tests
 
   TEST("PLAINTEXT", "Batches characters up to EOF then emits EOF",
        (UnitTest {.InitialState = TokenizerState::PLAINTEXT,
-                  .ExpectedState = TokenizerState::PLAINTEXT,
                   .Input = U"a string of characters; 123145",
                   .AppendEOF = true,
                   .Output = {CreateCharacterToken(U"a string of characters; 123145"), CreateEOFToken()}}))
@@ -486,6 +484,7 @@ namespace Krys::Tests
 
   TEST("RCDATALessThanSign", "emits less than sign after parsing non solidus",
        (UnitTest {.InitialState = TokenizerState::RCDATALessThanSign,
+                  .ExpectedState = TokenizerState::RCDATA,
                   .Input = U"©",
                   .Output = {CreateCharacterToken(U"<©")}}))
 
@@ -506,6 +505,7 @@ namespace Krys::Tests
 
   TEST("RCDATAEndTagOpen", "emits less than sign and solidus after parsing non alpha",
        (UnitTest {.InitialState = TokenizerState::RCDATAEndTagOpen,
+                  .ExpectedState = TokenizerState::RCDATA,
                   .Input = U"©",
                   .Output = {CreateCharacterToken(U"</©")}}))
 
@@ -521,6 +521,7 @@ namespace Krys::Tests
 
   TEST("RCDATAEndTagName", "Emits less than sign, solidus, and characters when tag name doesn't match",
        (UnitTest {.InitialState = TokenizerState::RCDATAEndTagName,
+                  .ExpectedState = TokenizerState::RCDATA,
                   .Input = U"span©",
                   .Output = {CreateCharacterToken(U"</span©")}}))
 
@@ -533,6 +534,7 @@ namespace Krys::Tests
   TEST("RCDATAEndTagName",
        "Emits less than sign, solidus, and characters when invalid tag name character encountered",
        (UnitTest {.InitialState = TokenizerState::RCDATAEndTagName,
+                  .ExpectedState = TokenizerState::RCDATA,
                   .Input = U"d!v>",
                   .Output = {CreateCharacterToken(U"</d!v>")}}))
 
@@ -641,6 +643,7 @@ namespace Krys::Tests
 
   TEST("RAWTEXTEndTagOpen", "emits less than sign and solidus after parsing invalid tag name start",
        (UnitTest {.InitialState = TokenizerState::RAWTEXTEndTagOpen,
+                  .ExpectedState = TokenizerState::RAWTEXT,
                   .Input = U"©",
                   .Output = {CreateCharacterToken(U"</©")}}))
 
@@ -781,6 +784,7 @@ namespace Krys::Tests
 
   TEST("ScriptDataLessThanSign", "emits LessThanSign after parsing non solidus",
        (UnitTest {.InitialState = TokenizerState::ScriptDataLessThanSign,
+                  .ExpectedState = TokenizerState::ScriptData,
                   .Input = U"©",
                   .Output = {CreateCharacterToken(U"<©")}}))
 
@@ -809,6 +813,7 @@ namespace Krys::Tests
 
   TEST("ScriptDataEndTagOpen", "emits less than sign and solidus after parsing non alpha",
        (UnitTest {.InitialState = TokenizerState::ScriptDataEndTagOpen,
+                  .ExpectedState = TokenizerState::ScriptData,
                   .Input = U"©",
                   .Output = {CreateCharacterToken(U"</©")}}))
 
@@ -991,6 +996,7 @@ namespace Krys::Tests
   TEST("ScriptDataEscaped", "Replaces null character with U+FFFD",
        (UnitTest {
          .InitialState = TokenizerState::ScriptDataEscaped,
+         .ExpectedState = TokenizerState::ScriptDataEscaped,
          .Input = InsertNull(U"1234"),
          .Output = {CreateCharacterToken(U"1234\xFFFD")},
          .Errors = {{.Error = HTMLParseError::UnexpectedNullCharacter, .Line = 1uz, .Column = 5uz}}}))
@@ -1012,7 +1018,7 @@ namespace Krys::Tests
 
   TEST("ScriptDataEscapedDash", "Batches characters",
        (UnitTest {.InitialState = TokenizerState::ScriptDataEscapedDash,
-                  .ExpectedState = TokenizerState::ScriptDataEscapedDash,
+                  .ExpectedState = TokenizerState::ScriptDataEscaped,
                   .Input = U"a string of characters; 123145",
                   .Output = {CreateCharacterToken(U"a string of characters; 123145")}}))
 
@@ -1027,6 +1033,7 @@ namespace Krys::Tests
   TEST("ScriptDataEscapedDash", "Replaces null character with U+FFFD",
        (UnitTest {
          .InitialState = TokenizerState::ScriptDataEscapedDash,
+         .ExpectedState = TokenizerState::ScriptDataEscaped,
          .Input = InsertNull(U"1234"),
          .Output = {CreateCharacterToken(U"1234\xFFFD")},
          .Errors = {{.Error = HTMLParseError::UnexpectedNullCharacter, .Line = 1uz, .Column = 5uz}}}))
@@ -1056,7 +1063,7 @@ namespace Krys::Tests
 
   TEST("ScriptDataEscapedDashDash", "Batches characters",
        (UnitTest {.InitialState = TokenizerState::ScriptDataEscapedDashDash,
-                  .ExpectedState = TokenizerState::ScriptDataEscapedDashDash,
+                  .ExpectedState = TokenizerState::ScriptDataEscaped,
                   .Input = U"a string of characters; 123145",
                   .Output = {CreateCharacterToken(U"a string of characters; 123145")}}))
 
@@ -1146,6 +1153,7 @@ namespace Krys::Tests
 
   TEST("ScriptDataEscapedEndTagOpen", "emits less than sign and solidus after parsing non alpha",
        (UnitTest {.InitialState = TokenizerState::ScriptDataEscapedEndTagOpen,
+                  .ExpectedState = TokenizerState::ScriptDataEscaped,
                   .Input = U"©",
                   .Output = {CreateCharacterToken(U"</©")}}))
 
@@ -1357,6 +1365,7 @@ namespace Krys::Tests
   TEST("ScriptDataDoubleEscaped", "Replaces null character with U+FFFD",
        (UnitTest {
          .InitialState = TokenizerState::ScriptDataDoubleEscaped,
+         .ExpectedState = TokenizerState::ScriptDataDoubleEscaped,
          .Input = InsertNull(U"1234"),
          .Output = {CreateCharacterToken(U"1234\xFFFD")},
          .Errors = {{.Error = HTMLParseError::UnexpectedNullCharacter, .Line = 1uz, .Column = 5uz}}}))
@@ -1910,7 +1919,6 @@ namespace Krys::Tests
 
   TEST("BogusComment", "appends to comment when parsing NullCharacter",
        (UnitTest {
-         .ExpectedState = TokenizerState::BogusComment,
          .Input = InsertNull(U"<?com", U"ment>"),
          .Output = {CreateCommentToken(U"?com\xFFFDment")},
          .Errors = {
@@ -1919,7 +1927,6 @@ namespace Krys::Tests
 
   TEST("BogusComment", "appends to comment when parsing any other character",
        (UnitTest {
-         .ExpectedState = TokenizerState::BogusComment,
          .Input = U"<?comm>",
          .Output = {CreateCommentToken(U"?comm")},
          .Errors = {
@@ -2722,7 +2729,6 @@ namespace Krys::Tests
 
   TEST("BogusDOCTYPE", "ignores characters until GreaterThanSign or EOF",
        (UnitTest {
-         .ExpectedState = TokenizerState::BogusDOCTYPE,
          .Input = U"<!DOCTYPE HTML PUBLIC \"id\" a random text >",
          .Output = {CreateDOCTYPEToken({.Name = U"html", .PublicIdentifier = U"id", .ForceQuirks = true})},
          .Errors = {{.Error = HTMLParseError::MissingQuoteBeforeDOCTYPESystemIdentifier,
@@ -2749,7 +2755,8 @@ namespace Krys::Tests
                   .Errors = {{.Error = HTMLParseError::EOFInCDATA, .Line = 1uz, .Column = 11uz}}}))
 
   TEST("CDATASection", "emits Character tokens for all characters except RightSquareBracket and EOF",
-       (UnitTest {.Input = U"<![CDATA[ABC",
+       (UnitTest {.ExpectedState = TokenizerState::CDATASection,
+                  .Input = U"<![CDATA[ABC",
                   .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.SetCDATASectionsAllowed(true); },
                   .Output = {CreateCharacterToken(U"ABC")}}))
 
@@ -2767,7 +2774,8 @@ namespace Krys::Tests
   TEST("CDATASectionBracket",
        "emits RightSquareBracket and switches back to CDATASection when parsing any character except "
        "RightSquareBracket or EOF",
-       (UnitTest {.Input = U"<![CDATA[]A",
+       (UnitTest {.ExpectedState = TokenizerState::CDATASection,
+                  .Input = U"<![CDATA[]A",
                   .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.SetCDATASectionsAllowed(true); },
                   .Output = {CreateCharacterToken(U"]A")}}))
 
@@ -2784,7 +2792,7 @@ namespace Krys::Tests
 #pragma region CDATASectionEnd
 
   TEST("CDATASectionEnd", "emits RightSquareBracket when parsing RightSquareBracket",
-       (UnitTest {.ExpectedState = TokenizerState::CDATASection,
+       (UnitTest {.ExpectedState = TokenizerState::CDATASectionEnd,
                   .Input = U"<![CDATA[]]]",
                   .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.SetCDATASectionsAllowed(true); },
                   .Output = {CreateCharacterToken(U"]")}}))
@@ -2807,7 +2815,8 @@ namespace Krys::Tests
   TEST("CDATASectionEnd",
        "emits Character tokens for two RightSquareBrackets and switches back to CDATASection when parsing "
        "any character except RightSquareBracket or GreaterThanSign",
-       (UnitTest {.Input = U"<![CDATA[]]A",
+       (UnitTest {.ExpectedState = TokenizerState::CDATASection,
+                  .Input = U"<![CDATA[]]A",
                   .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.SetCDATASectionsAllowed(true); },
                   .Output = {CreateCharacterToken(U"]]A")}}))
 
