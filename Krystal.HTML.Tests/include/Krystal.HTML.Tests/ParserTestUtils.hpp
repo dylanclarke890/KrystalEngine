@@ -11,6 +11,7 @@
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Variant.hpp"
 #include <catch_all.hpp>
+#include <functional>
 
 namespace Krys::Tests
 {
@@ -81,10 +82,11 @@ namespace Krys::Tests
   struct UnitTest
   {
     HTML::TokenizerState InitialState {HTML::TokenizerState::Data};
-    bool AppendEOF {false};
-    utf32_string Input;
-    List<ExpectedToken> Output {};
     HTML::TokenizerState ExpectedState {HTML::TokenizerState::Data};
+    utf32_string Input;
+    bool AppendEOF {false};
+    std::function<void(HTML::HTMLTokenizer &tokenizer)> Setup = nullptr;
+    List<ExpectedToken> Output {};
     List<ExpectedError> Errors {};
   };
 
@@ -100,7 +102,7 @@ namespace Krys::Tests
 
   KRYS_NODISCARD inline ExpectedToken CreateCommentToken(const utf32_string &comment) noexcept
   {
-    return ExpectedToken {.Type = HTML::HTMLToken::Type::EndOfFile, .Token = ExpectedComment {comment}};
+    return ExpectedToken {.Type = HTML::HTMLToken::Type::Comment, .Token = ExpectedComment {comment}};
   }
 
   KRYS_NODISCARD inline ExpectedToken CreateStartTagToken(const ExpectedTag &expected) noexcept
@@ -138,6 +140,13 @@ namespace Krys::Tests
     }
 
     return result;
+  }
+
+  KRYS_NODISCARD inline utf32_string &&InsertNull(utf32_string &&str, utf32_string &&suffix = U"") noexcept
+  {
+    str.push_back(U'\0');
+    str.append(std::move(suffix));
+    return std::move(str);
   }
 
   inline void CheckDOCTYPE(HTML::HTMLToken &token, const ExpectedDOCTYPE &expected) noexcept
@@ -267,6 +276,11 @@ namespace Krys::Tests
     HTMLTokenizer tokenizer(inputStream);
     tokenizer.SetState(testCase.InitialState);
 
+    if (testCase.Setup)
+    {
+      testCase.Setup(tokenizer);
+    }
+
     const auto &errors = tokenizer.GetParseErrors();
 
     if (!testCase.Output.size())
@@ -274,11 +288,13 @@ namespace Krys::Tests
       NextTokenPtr token = tokenizer.NextToken();
       REQUIRE(!token);
       REQUIRE(errors.size() == testCase.Errors.size());
+      
       for (size_t i = 0uz; i < errors.size(); ++i)
       {
-        REQUIRE(errors[i] == testCase.Errors[i].Error);
+        CHECK(errors[i] == testCase.Errors[i].Error);
       }
-      REQUIRE(tokenizer.GetState() == testCase.ExpectedState);
+
+      CHECK(tokenizer.GetState() == testCase.ExpectedState);
       return;
     }
 

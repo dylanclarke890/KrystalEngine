@@ -7,13 +7,6 @@ namespace Krys::Tests
 {
   using namespace Krys::HTML;
 
-  KRYS_NODISCARD static utf32_string &&InsertNull(utf32_string &&str, utf32_string &&suffix) noexcept
-  {
-    str.push_back(U'\0');
-    str.append(std::move(suffix));
-    return std::move(str);
-  }
-
 #define SETUP_TEST(initialState)                                                                             \
   HTMLInputStream inputStream;                                                                               \
   HTMLTokenizer tokenizer(inputStream);                                                                      \
@@ -31,7 +24,7 @@ namespace Krys::Tests
 #pragma region CharacterReference
 
   TEST("CharacterReference", "Non-character reference",
-       (UnitTest {.Input = U"&_", .Output = {CreateCharacterToken(U"&_")}}));
+       (UnitTest {.Input = U"&_", .Output = {CreateCharacterToken(U"&_")}}))
 
 #pragma region NamedCharacterReference
 
@@ -39,8 +32,8 @@ namespace Krys::Tests
        (UnitTest {.Input = U"&copy;", .Output = {CreateCharacterToken(U"©")}}))
 
   TEST("NamedCharacterReference", "missing semicolon",
-       (UnitTest {.AppendEOF = true,
-                  .Input = U"&Agrave",
+       (UnitTest {.Input = U"&Agrave",
+                  .AppendEOF = true,
                   .Output = {CreateCharacterToken(U"À"), CreateEOFToken()},
                   .Errors = {{HTMLParseError::MissingSemicolonAfterCharacterReference}}}))
 
@@ -60,7 +53,7 @@ namespace Krys::Tests
 
   TEST("NamedCharacterReference", "EOF in middle of otherwise valid reference",
        (UnitTest {
-         .AppendEOF = true, .Input = U"&co", .Output = {CreateCharacterToken(U"&co"), CreateEOFToken()}}))
+         .Input = U"&co", .AppendEOF = true, .Output = {CreateCharacterToken(U"&co"), CreateEOFToken()}}))
 
   // TODO: test cases for when character references are consumed as part of attributes
 
@@ -78,53 +71,53 @@ namespace Krys::Tests
        (UnitTest {.Input = U"&#00008482;", .Output = {CreateCharacterToken(U"™")}}))
 
   TEST("DecimalCharacterReference", "missing semicolon",
-       (UnitTest {.AppendEOF = true,
-                  .Input = U"&#8482",
+       (UnitTest {.Input = U"&#8482",
+                  .AppendEOF = true,
                   .Output = {CreateCharacterToken(U"™"), CreateEOFToken()},
                   .Errors = {{HTMLParseError::MissingSemicolonAfterCharacterReference}}}))
 
   TEST("DecimalCharacterReference", "no numbers provided after #",
        (UnitTest {.Input = U"&#;",
                   .Output = {CreateCharacterToken(U"&#;")},
-                  .Errors = {{HTMLParseError::AbsenceOfDigitsInNumericCharacterReference}}}));
+                  .Errors = {{HTMLParseError::AbsenceOfDigitsInNumericCharacterReference}}}))
 
   TEST("DecimalCharacterReference", "mixed with non-digit characters",
        (UnitTest {.Input = U"&#123abc;",
                   .Output = {CreateCharacterToken(U"{abc;")},
-                  .Errors = {{HTMLParseError::MissingSemicolonAfterCharacterReference}}}));
+                  .Errors = {{HTMLParseError::MissingSemicolonAfterCharacterReference}}}))
 
   TEST("DecimalCharacterReference", "stops at semicolon",
-       (UnitTest {.Input = U"&#65;BC", .Output = {CreateCharacterToken(U"ABC")}}));
+       (UnitTest {.Input = U"&#65;BC", .Output = {CreateCharacterToken(U"ABC")}}))
 
   TEST("DecimalCharacterReference", "stops at non-digit character",
        (UnitTest {.Input = U"&#65BC;",
                   .Output = {CreateCharacterToken(U"ABC;")},
-                  .Errors = {{HTMLParseError::MissingSemicolonAfterCharacterReference}}}));
+                  .Errors = {{HTMLParseError::MissingSemicolonAfterCharacterReference}}}))
 
   TEST("DecimalCharacterReference", "null character reference",
        (UnitTest {.Input = U"&#0;",
                   .Output = {CreateCharacterToken(U"\xFFFD")},
-                  .Errors = {{HTMLParseError::NullCharacterReference}}}));
+                  .Errors = {{HTMLParseError::NullCharacterReference}}}))
 
   TEST("DecimalCharacterReference", "character reference outside unicode range",
        (UnitTest {.Input = U"&#1114112;",
                   .Output = {CreateCharacterToken(U"\xFFFD")},
-                  .Errors = {{HTMLParseError::CharacterReferenceOutsideUnicodeRange}}}));
+                  .Errors = {{HTMLParseError::CharacterReferenceOutsideUnicodeRange}}}))
 
   TEST("DecimalCharacterReference", "surrogate",
        (UnitTest {.Input = U"&#55296;",
                   .Output = {CreateCharacterToken(U"\xFFFD")},
-                  .Errors = {{HTMLParseError::SurrogateCharacterReference}}}));
+                  .Errors = {{HTMLParseError::SurrogateCharacterReference}}}))
 
   TEST("DecimalCharacterReference", "non character",
        (UnitTest {.Input = U"&#65534;",
                   .Output = {CreateCharacterToken(U"\xFFFE")},
-                  .Errors = {{HTMLParseError::NonCharacterCharacterReference}}}));
+                  .Errors = {{HTMLParseError::NonCharacterCharacterReference}}}))
 
   TEST("DecimalCharacterReference", "control character",
        (UnitTest {.Input = U"&#13;",
                   .Output = {CreateCharacterToken(U"\x0D")},
-                  .Errors = {{HTMLParseError::ControlCharacterReference}}}));
+                  .Errors = {{HTMLParseError::ControlCharacterReference}}}))
 
 #pragma endregion
 
@@ -143,728 +136,360 @@ namespace Krys::Tests
        (UnitTest {.Input = U"&#X152;", .Output = {CreateCharacterToken(U"Œ")}}))
 
   TEST("HexadecimalCharacterReference", "missing semicolon",
-       (UnitTest {.AppendEOF = true,
-                  .Input = U"&#X152",
+       (UnitTest {.Input = U"&#X152",
+                  .AppendEOF = true,
                   .Output = {CreateCharacterToken(U"Œ"), CreateEOFToken()},
                   .Errors = {{HTMLParseError::MissingSemicolonAfterCharacterReference}}}))
 
   TEST("HexadecimalCharacterReference", "no numbers provided after #X",
        (UnitTest {.Input = U"&#X;",
                   .Output = {CreateCharacterToken(U"&#X;")},
-                  .Errors = {{HTMLParseError::AbsenceOfDigitsInNumericCharacterReference}}}));
+                  .Errors = {{HTMLParseError::AbsenceOfDigitsInNumericCharacterReference}}}))
 
   TEST("HexadecimalCharacterReference", "null character reference",
        (UnitTest {.Input = U"&#x00;",
                   .Output = {CreateCharacterToken(U"\xFFFD")},
-                  .Errors = {{HTMLParseError::NullCharacterReference}}}));
+                  .Errors = {{HTMLParseError::NullCharacterReference}}}))
 
   TEST("HexadecimalCharacterReference", "character reference outside unicode range",
        (UnitTest {.Input = U"&#x110000;",
                   .Output = {CreateCharacterToken(U"\xFFFD")},
-                  .Errors = {{HTMLParseError::CharacterReferenceOutsideUnicodeRange}}}));
+                  .Errors = {{HTMLParseError::CharacterReferenceOutsideUnicodeRange}}}))
 
   TEST("HexadecimalCharacterReference", "surrogate",
        (UnitTest {.Input = U"&#xD800;",
                   .Output = {CreateCharacterToken(U"\xFFFD")},
-                  .Errors = {{HTMLParseError::SurrogateCharacterReference}}}));
+                  .Errors = {{HTMLParseError::SurrogateCharacterReference}}}))
 
   TEST("HexadecimalCharacterReference", "non character",
        (UnitTest {.Input = U"&#xFFFE;",
                   .Output = {CreateCharacterToken(U"\xFFFE")},
-                  .Errors = {{HTMLParseError::NonCharacterCharacterReference}}}));
+                  .Errors = {{HTMLParseError::NonCharacterCharacterReference}}}))
 
   TEST("HexadecimalCharacterReference", "control character",
        (UnitTest {.Input = U"&#x0D;",
                   .Output = {CreateCharacterToken(U"\x0D")},
-                  .Errors = {{HTMLParseError::ControlCharacterReference}}}));
+                  .Errors = {{HTMLParseError::ControlCharacterReference}}}))
 
 #pragma endregion
 
   TEST("CharacterReference", "Multiple character references",
        (UnitTest {.Input = U"&copy;&Agrave&#128;&#X152;&a;",
                   .Output = {CreateCharacterToken(U"©À€Œ&a;")},
-                  .Errors = {
-                    {HTMLParseError::MissingSemicolonAfterCharacterReference},
-                    {HTMLParseError::UnknownNamedCharacterReference}}}));
+                  .Errors = {{HTMLParseError::MissingSemicolonAfterCharacterReference},
+                             {HTMLParseError::UnknownNamedCharacterReference}}}))
 
 #pragma endregion
 
 #pragma region Data
 
-  TEST_CASE("HTMLTokenizer(Data) - Replaces character references", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("Data", "Batches characters ",
+       (UnitTest {.Input = U"a string of characters; 123145",
+                  .Output = {CreateCharacterToken(U"a string of characters; 123145")}}))
 
-    expected = U"Some data © some more data";
-    inputStream.Append(U"Some data &copy; some more data", IsEOF(true));
+  TEST("Data", "Replaces character references",
+       (UnitTest {.Input = U"Some data &copy; some more data",
+                  .Output = {CreateCharacterToken(U"Some data © some more data")}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("Data", "switches to TagOpen when parsing LessThanSign",
+       (UnitTest {.ExpectedState = TokenizerState::TagOpen, .Input = U"<", .Output = {}}))
 
-  TEST_CASE("HTMLTokenizer(Data) - Batches characters up to less than sign", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("Data", "Batches characters up to less than sign",
+       (UnitTest {.Input = U"a string of characters; 123145<",
+                  .Output = {CreateCharacterToken(U"a string of characters; 123145")}}))
 
-    expected = U"a string of characters; 123145";
-    inputStream.Append(U"a string of characters; 123145<", IsEOF(true));
+  TEST("Data", "Batches characters up to EOF then emits EOF",
+       (UnitTest {.Input = U"a string of characters; 123145",
+                  .AppendEOF = true,
+                  .Output = {CreateCharacterToken(U"a string of characters; 123145"), CreateEOFToken()}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
-
-  TEST_CASE("HTMLTokenizer(Data) - switches to TagOpen when parsing LessThanSign", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    utf32_string input = U"<";
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::TagOpen);
-  }
-
-  TEST_CASE("HTMLTokenizer(Data) - Batches characters up to EOF then emits EOF", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"a string of characters; 123145";
-    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
-
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Character);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(Data) - Emits null character as-is with parse error", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"1234";
-    expected.append(1uz, U'\x0');
-
-    expectedErrorCount = 1;
-
-    utf32_string input = U"1234";
-    input.append(1uz, U'\x0');
-    inputStream.Append(std::move(input), IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-  }
+  TEST("Data", "Emits null character as-is with parse error",
+       (UnitTest {.Input = InsertNull(U"1234"),
+                  .Output = {CreateCharacterToken(InsertNull(U"1234"))},
+                  .Errors = {{HTMLParseError::UnexpectedNullCharacter}}}))
 
 #pragma endregion
 
 #pragma region RCDATA
 
-  TEST_CASE("HTMLTokenizer(RCDATA) - Replaces character references", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RCDATA);
+  TEST("RCDATA", "Batches characters",
+       (UnitTest {.InitialState = TokenizerState::RCDATA,
+                  .ExpectedState = TokenizerState::RCDATA,
+                  .Input = U"a string of characters; 123145",
+                  .Output = {CreateCharacterToken(U"a string of characters; 123145")}}))
 
-    expected = U"Some data © some more data";
-    inputStream.Append(U"Some data &copy; some more data", IsEOF(true));
+  TEST("RCDATA", "Replaces character references",
+       (UnitTest {.InitialState = TokenizerState::RCDATA,
+                  .ExpectedState = TokenizerState::RCDATA,
+                  .Input = U"Some data &copy; some more data",
+                  .Output = {CreateCharacterToken(U"Some data © some more data")}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("RCDATA", "switches to RCDATALessThanSign when parsing LessThanSign",
+       (UnitTest {.InitialState = TokenizerState::RCDATA,
+                  .ExpectedState = TokenizerState::RCDATALessThanSign,
+                  .Input = U"<",
+                  .Output = {}}))
 
-  TEST_CASE("HTMLTokenizer(RCDATA) - switches to RCDATALessThanSign when parsing LessThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RCDATA);
+  TEST("RCDATA", "Emits null character as U+FFFD with parse error",
+       (UnitTest {.InitialState = TokenizerState::RCDATA,
+                  .ExpectedState = TokenizerState::RCDATA,
+                  .Input = InsertNull(U"1234"),
+                  .Output = {CreateCharacterToken(U"1234\xFFFD")},
+                  .Errors = {{HTMLParseError::UnexpectedNullCharacter}}}))
 
-    utf32_string input = U"<";
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::RCDATALessThanSign);
-  }
-
-  TEST_CASE("HTMLTokenizer(RCDATA) - Replaces null character with U+FFFD", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RCDATA);
-
-    expected = U"1234\xFFFD";
-    expectedErrorCount = 1;
-
-    utf32_string input = U"1234";
-    input.append(1uz, U'\x0');
-    inputStream.Append(std::move(input), IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-  }
-
-  TEST_CASE("HTMLTokenizer(RCDATA) - Batches characters up to EOF then emits EOF", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RCDATA);
-
-    expected = U"a string of characters; 123145";
-    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
-
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Character);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(RCDATA) - Batches characters", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RCDATA);
-
-    expected = U"a string of characters; 123145";
-    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("RCDATA", "Batches characters up to EOF then emits EOF",
+       (UnitTest {.InitialState = TokenizerState::RCDATA,
+                  .ExpectedState = TokenizerState::RCDATA,
+                  .Input = U"a string of characters; 123145",
+                  .AppendEOF = true,
+                  .Output = {CreateCharacterToken(U"a string of characters; 123145"), CreateEOFToken()}}))
 
 #pragma endregion
 
 #pragma region RAWTEXT
 
-  TEST_CASE("HTMLTokenizer(RAWTEXT) - switches to RAWTEXTLessThanSign when parsing LessThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RAWTEXT);
+  TEST("RAWTEXT", "switches to RAWTEXTLessThanSign when parsing LessThanSign",
+       (UnitTest {.InitialState = TokenizerState::RAWTEXT,
+                  .ExpectedState = TokenizerState::RAWTEXTLessThanSign,
+                  .Input = U"<",
+                  .Output = {}}))
 
-    utf32_string input = U"<";
-    inputStream.Append(std::move(input));
+  TEST("RAWTEXT", "Emits null character as U+FFFD with parse error",
+       (UnitTest {.InitialState = TokenizerState::RAWTEXT,
+                  .ExpectedState = TokenizerState::RAWTEXT,
+                  .Input = InsertNull(U"1234"),
+                  .Output = {CreateCharacterToken(U"1234\xFFFD")},
+                  .Errors = {{HTMLParseError::UnexpectedNullCharacter}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::RAWTEXTLessThanSign);
-  }
+  TEST("RAWTEXT", "Batches characters up to EOF then emits EOF",
+       (UnitTest {.InitialState = TokenizerState::RAWTEXT,
+                  .ExpectedState = TokenizerState::RAWTEXT,
+                  .Input = U"a string of characters; 123145",
+                  .AppendEOF = true,
+                  .Output = {CreateCharacterToken(U"a string of characters; 123145"), CreateEOFToken()}}))
 
-  TEST_CASE("HTMLTokenizer(RAWTEXT) - Replaces null character with U+FFFD", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RAWTEXT);
-
-    expected = U"1234\xFFFD";
-    expectedErrorCount = 1;
-
-    utf32_string input = U"1234";
-    input.append(1uz, U'\x0');
-    inputStream.Append(std::move(input), IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-  }
-
-  TEST_CASE("HTMLTokenizer(RAWTEXT) - Batches characters up to EOF then emits EOF", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RAWTEXT);
-
-    expected = U"a string of characters; 123145";
-    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
-
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Character);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(RAWTEXT) - Batches characters", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RAWTEXT);
-
-    expected = U"a string of characters; 123145";
-    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("RAWTEXT", "Batches characters",
+       (UnitTest {.InitialState = TokenizerState::RAWTEXT,
+                  .ExpectedState = TokenizerState::RAWTEXT,
+                  .Input = U"a string of characters; 123145",
+                  .Output = {CreateCharacterToken(U"a string of characters; 123145")}}))
 
 #pragma endregion
 
 #pragma region ScriptData
 
-  TEST_CASE("HTMLTokenizer(ScriptData) - switches to ScriptDataLessThanSign when parsing LessThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptData);
+  TEST("ScriptData", "switches to ScriptDataLessThanSign when parsing LessThanSign",
+       (UnitTest {.InitialState = TokenizerState::ScriptData,
+                  .ExpectedState = TokenizerState::ScriptDataLessThanSign,
+                  .Input = U"<",
+                  .Output = {}}))
 
-    utf32_string input = U"<";
-    inputStream.Append(std::move(input));
+  TEST("ScriptData", "Emits null character as U+FFFD with parse error",
+       (UnitTest {.InitialState = TokenizerState::ScriptData,
+                  .ExpectedState = TokenizerState::ScriptData,
+                  .Input = InsertNull(U"1234"),
+                  .Output = {CreateCharacterToken(U"1234\xFFFD")},
+                  .Errors = {{HTMLParseError::UnexpectedNullCharacter}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataLessThanSign);
-  }
+  TEST("ScriptData", "Batches characters up to EOF then emits EOF",
+       (UnitTest {.InitialState = TokenizerState::ScriptData,
+                  .ExpectedState = TokenizerState::ScriptData,
+                  .Input = U"a string of characters; 123145",
+                  .AppendEOF = true,
+                  .Output = {CreateCharacterToken(U"a string of characters; 123145"), CreateEOFToken()}}))
 
-  TEST_CASE("HTMLTokenizer(ScriptData) - Replaces null character with U+FFFD", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptData);
-
-    expected = U"1234\xFFFD";
-    expectedErrorCount = 1;
-
-    utf32_string input = U"1234";
-    input.append(1uz, U'\x0');
-    inputStream.Append(std::move(input), IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptData) - Batches characters up to EOF then emits EOF", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptData);
-
-    expected = U"a string of characters; 123145";
-    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
-
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Character);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptData) - Batches characters", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptData);
-
-    expected = U"a string of characters; 123145";
-    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("ScriptData", "Batches characters",
+       (UnitTest {.InitialState = TokenizerState::ScriptData,
+                  .ExpectedState = TokenizerState::ScriptData,
+                  .Input = U"a string of characters; 123145",
+                  .Output = {CreateCharacterToken(U"a string of characters; 123145")}}))
 
 #pragma endregion
 
 #pragma region PLAINTEXT
 
-  TEST_CASE("HTMLTokenizer(PLAINTEXT) - Replaces null character with U+FFFD", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::PLAINTEXT);
+  TEST("PLAINTEXT", "Emits null character as U+FFFD with parse error",
+       (UnitTest {.InitialState = TokenizerState::PLAINTEXT,
+                  .ExpectedState = TokenizerState::PLAINTEXT,
+                  .Input = InsertNull(U"1234"),
+                  .Output = {CreateCharacterToken(U"1234\xFFFD")},
+                  .Errors = {{HTMLParseError::UnexpectedNullCharacter}}}))
 
-    expected = U"1234\xFFFD";
-    expectedErrorCount = 1;
+  TEST("PLAINTEXT", "Batches characters up to EOF then emits EOF",
+       (UnitTest {.InitialState = TokenizerState::PLAINTEXT,
+                  .ExpectedState = TokenizerState::PLAINTEXT,
+                  .Input = U"a string of characters; 123145",
+                  .AppendEOF = true,
+                  .Output = {CreateCharacterToken(U"a string of characters; 123145"), CreateEOFToken()}}))
 
-    utf32_string input = U"1234";
-    input.append(1uz, U'\x0');
-    inputStream.Append(std::move(input), IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-  }
-
-  TEST_CASE("HTMLTokenizer(PLAINTEXT) - Batches characters up to EOF then emits EOF", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::PLAINTEXT);
-
-    expected = U"a string of characters; 123145";
-    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
-
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Character);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(PLAINTEXT) - Batches characters", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::PLAINTEXT);
-
-    expected = U"a string of characters; 123145";
-    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("PLAINTEXT", "Batches characters",
+       (UnitTest {.InitialState = TokenizerState::PLAINTEXT,
+                  .ExpectedState = TokenizerState::PLAINTEXT,
+                  .Input = U"a string of characters; 123145",
+                  .Output = {CreateCharacterToken(U"a string of characters; 123145")}}))
 
 #pragma endregion
 
 #pragma region TagOpen
 
-  TEST_CASE("HTMLTokenizer(TagOpen) - Switches to MarkupDeclarationOpen after parsing ExclamationMark",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::TagOpen);
+  TEST("TagOpen", "Switches to MarkupDeclarationOpen after parsing ExclamationMark",
+       (UnitTest {.InitialState = TokenizerState::TagOpen,
+                  .ExpectedState = TokenizerState::MarkupDeclarationOpen,
+                  .Input = U"!",
+                  .Output = {}}))
 
-    expected = U"";
+  TEST("TagOpen", "Switches to EndTagOpen after parsing Solidus",
+       (UnitTest {.InitialState = TokenizerState::TagOpen,
+                  .ExpectedState = TokenizerState::EndTagOpen,
+                  .Input = U"/",
+                  .Output = {}}))
 
-    utf32_string input = U"!";
-    inputStream.Append(std::move(input));
+  TEST("TagOpen", "Switches to TagName after parsing valid tag name start",
+       (UnitTest {.InitialState = TokenizerState::TagOpen,
+                  .ExpectedState = TokenizerState::TagName,
+                  .Input = U"div",
+                  .Output = {}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::MarkupDeclarationOpen);
-  }
+  TEST("TagOpen", "Switches to TagName after parsing valid tag name start, mixed case",
+       (UnitTest {.InitialState = TokenizerState::TagOpen,
+                  .ExpectedState = TokenizerState::TagName,
+                  .Input = U"DiV",
+                  .Output = {}}))
 
-  TEST_CASE("HTMLTokenizer(TagOpen) - Switches to EndTagOpen after parsing Solidus", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::TagOpen);
+  TEST("TagOpen", "Switches to BogusComment after parsing QuestionMark",
+       (UnitTest {.InitialState = TokenizerState::TagOpen,
+                  .ExpectedState = TokenizerState::BogusComment,
+                  .Input = U"?",
+                  .Output = {},
+                  .Errors = {{HTMLParseError::UnexpectedQuestionMarkInsteadOfTagName}}}))
 
-    expected = U"";
+  TEST("TagOpen", "Emits LessThanSign if EOF encountered",
+       (UnitTest {.InitialState = TokenizerState::Data,
+                  .Input = U"<",
+                  .AppendEOF = true,
+                  .Output = {CreateCharacterToken(U"<"), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFBeforeTagName}}}))
 
-    utf32_string input = U"/";
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::EndTagOpen);
-  }
-
-  TEST_CASE("HTMLTokenizer(TagOpen) - Switches to TagName after parsing valid tag name start",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::TagOpen);
-
-    expected = U"";
-
-    utf32_string input = U"div";
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::TagName);
-  }
-
-  TEST_CASE("HTMLTokenizer(TagOpen) - Switches to TagName after parsing valid tag name start, mixed case",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::TagOpen);
-
-    expected = U"";
-
-    utf32_string input = U"dIV";
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::TagName);
-  }
-
-  TEST_CASE("HTMLTokenizer(TagOpen) - Switches to BogusComment after parsing QuestionMark",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::TagOpen);
-
-    expected = U"";
-    expectedErrorCount = 1;
-
-    utf32_string input = U"?";
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BogusComment);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedQuestionMarkInsteadOfTagName);
-  }
-
-  TEST_CASE("HTMLTokenizer(TagOpen) - Emits LessThanSign if EOF encountered", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"<";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(errors.back() == HTMLParseError::EOFBeforeTagName);
-  }
-
-  TEST_CASE("HTMLTokenizer(TagOpen) - Emits LessThanSign if first character invalid", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::TagOpen);
-
-    expected = U"<*";
-    expectedErrorCount = 1;
-    inputStream.Append(U"*");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(errors.back() == HTMLParseError::InvalidFirstCharacterOfTagName);
-  }
+  TEST("TagOpen", "Emits LessThanSign if first character invalid",
+       (UnitTest {.InitialState = TokenizerState::TagOpen,
+                  .Input = U"*",
+                  .Output = {CreateCharacterToken(U"<*")},
+                  .Errors = {{HTMLParseError::InvalidFirstCharacterOfTagName}}}))
 
 #pragma endregion
 
 #pragma region EndTagOpen
 
-  TEST_CASE("HTMLTokenizer(EndTagOpen) - Switches to TagName after parsing valid tag name start",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::EndTagOpen);
+  TEST("EndTagOpen", "Switches to TagName after parsing valid tag name start",
+       (UnitTest {.InitialState = TokenizerState::EndTagOpen,
+                  .ExpectedState = TokenizerState::TagName,
+                  .Input = U"div",
+                  .Output = {}}))
 
-    expected = U"";
+  TEST("EndTagOpen", "Switches to Data if parsing GreaterThanSign (emits nothing)",
+       (UnitTest {.InitialState = TokenizerState::EndTagOpen,
+                  .ExpectedState = TokenizerState::Data,
+                  .Input = U">",
+                  .Output = {},
+                  .Errors = {{HTMLParseError::MissingEndTagName}}}))
 
-    utf32_string input = U"div";
-    inputStream.Append(std::move(input));
+  TEST("EndTagOpen", "Emits LessThanSign and Solidus if EOF encountered",
+       (UnitTest {.InitialState = TokenizerState::TagOpen,
+                  .Input = U"/",
+                  .AppendEOF = true,
+                  .Output = {CreateCharacterToken(U"</"), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFBeforeTagName}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::TagName);
-  }
-
-  TEST_CASE("HTMLTokenizer(EndTagOpen) - Switches to Data if parsing GreaterThanSign (emits nothing)",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::EndTagOpen);
-
-    expectedErrorCount = 1;
-
-    inputStream.Append(U">");
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-    REQUIRE(errors.back() == HTMLParseError::MissingEndTagName);
-  }
-
-  TEST_CASE("HTMLTokenizer(EndTagOpen) - Emits LessThanSign and Solidus if EOF encountered",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::TagOpen);
-
-    expected = U"</";
-    expectedErrorCount = 1;
-
-    inputStream.Append(U"/", IsEOF(true));
-    NextTokenPtr token = tokenizer.NextToken();
-
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(errors.back() == HTMLParseError::EOFBeforeTagName);
-  }
-
-  TEST_CASE("HTMLTokenizer(EndTagOpen) - Switches to BogusComment if first character invalid",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::EndTagOpen);
-
-    expectedErrorCount = 1;
-
-    inputStream.Append(U"*");
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BogusComment);
-    REQUIRE(errors.back() == HTMLParseError::InvalidFirstCharacterOfTagName);
-  }
+  TEST("EndTagOpen", "Switches to BogusComment if first character invalid",
+       (UnitTest {.InitialState = TokenizerState::EndTagOpen,
+                  .ExpectedState = TokenizerState::BogusComment,
+                  .Input = U"*",
+                  .Output = {},
+                  .Errors = {{HTMLParseError::InvalidFirstCharacterOfTagName}}}))
 
 #pragma endregion
 
 #pragma region TagName
 
-  TEST_CASE("HTMLTokenizer(TagName) - Switches to BeforeAttributeName when parsing whitespace",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::TagName);
+  TEST("TagName", "Emits tag token when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<div>", .Output = {CreateStartTagToken({.Name = U"div"})}}))
 
-    inputStream.Append(U" ");
+  TEST("TagName", "Allows mixed case tag name",
+       (UnitTest {.Input = U"<DiV>", .Output = {CreateStartTagToken({.Name = U"div"})}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeName);
-  }
+  TEST("TagName", "Switches to BeforeAttributeName when parsing whitespace",
+       (UnitTest {.ExpectedState = TokenizerState::BeforeAttributeName, .Input = U"<div "}))
 
-  TEST_CASE("HTMLTokenizer(TagName) - Switches to SelfClosingStartTag when parsing solidus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::TagName);
+  TEST("TagName", "Switches to BeforeAttributeName when parsing solidus",
+       (UnitTest {.ExpectedState = TokenizerState::SelfClosingStartTag, .Input = U"<div/"}))
 
-    inputStream.Append(U"/");
+  TEST("TagName", "Emits null character as U+FFFD with parse error",
+       (UnitTest {.Input = InsertNull(U"<div", U">"),
+                  .Output = {CreateStartTagToken({.Name = U"div\xFFFD"})}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::SelfClosingStartTag);
-  }
-
-  TEST_CASE("HTMLTokenizer(TagName) - Emits tag token when parsing GreaterThanSign", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"a";
-
-    inputStream.Append(U"<a>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
-
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-  }
-
-  TEST_CASE("HTMLTokenizer(TagName) - allows mixed case", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"div";
-
-    inputStream.Append(U"<DiV>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
-  }
-
-  TEST_CASE("HTMLTokenizer(TagName) - replaces Null with ReplacementCharacter", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"a\xFFFD";
-    expectedErrorCount = 1;
-
-    utf32_string input = U"<a";
-    input.append(1uz, U'\0');
-    input.append(1uz, U'>');
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-  }
-
-  TEST_CASE("HTMLTokenizer(TagName) - Emits EOF instead of TagName if EOF reached", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<a", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    REQUIRE(errors.back() == HTMLParseError::EOFInTag);
-  }
+  TEST("TagName", "Emits EOF instead of tag token if EOF reached",
+       (UnitTest {.Input = U"<div", .AppendEOF = true, .Output = {CreateEOFToken()}}))
 
 #pragma endregion
 
 #pragma region RCDATALessThanSign
 
-  TEST_CASE("HTMLTokenizer(RCDATALessThanSign) - Switches to RCDATAEndTagOpen after parsing solidus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RCDATALessThanSign);
+  TEST("RCDATALessThanSign", "Switches to RCDATAEndTagOpen after parsing solidus",
+       (UnitTest {.InitialState = TokenizerState::RCDATALessThanSign,
+                  .ExpectedState = TokenizerState::RCDATAEndTagOpen,
+                  .Input = U"/"}))
 
-    expected = U"";
+  TEST("RCDATALessThanSign", "emits less than sign after parsing non solidus",
+       (UnitTest {.InitialState = TokenizerState::RCDATALessThanSign,
+                  .Input = U"©",
+                  .Output = {CreateCharacterToken(U"<©")}}))
 
-    utf32_string input = U"/";
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::RCDATAEndTagOpen);
-  }
-
-  TEST_CASE("HTMLTokenizer(RCDATALessThanSign) - emits less than sign after parsing non solidus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RCDATALessThanSign);
-
-    expected = U"<©";
-
-    utf32_string input = U"©";
-    inputStream.Append(std::move(input), IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
-
-  TEST_CASE("HTMLTokenizer(RCDATALessThanSign) - emits less than sign if EOF reached", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RCDATA);
-
-    expected = U"<";
-
-    utf32_string input = U"<";
-    inputStream.Append(std::move(input), IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("RCDATALessThanSign", "emits less than sign if EOF reached",
+       (UnitTest {.InitialState = TokenizerState::RCDATA,
+                  .Input = U"<",
+                  .AppendEOF = true,
+                  .Output = {CreateCharacterToken(U"<"), CreateEOFToken()}}))
 
 #pragma endregion
 
 #pragma region RCDATAEndTagOpen
 
-  TEST_CASE(
-    "HTMLTokenizer(RCDATAEndTagOpen) - Switches to RCDATAEndTagName after parsing valid tag name start",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RCDATAEndTagOpen);
+  TEST("RCDATAEndTagOpen", "Switches to RCDATAEndTagName after parsing alpha",
+       (UnitTest {.InitialState = TokenizerState::RCDATAEndTagOpen,
+                  .ExpectedState = TokenizerState::RCDATAEndTagName,
+                  .Input = U"a"}))
 
-    expected = U"";
+  TEST("RCDATAEndTagOpen", "emits less than sign and solidus after parsing non alpha",
+       (UnitTest {.InitialState = TokenizerState::RCDATAEndTagOpen,
+                  .Input = U"©",
+                  .Output = {CreateCharacterToken(U"</©")}}))
 
-    utf32_string input = U"a";
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::RCDATAEndTagName);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(RCDATAEndTagOpen) - emits less than sign and solidus after parsing invalid tag name start",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RCDATAEndTagOpen);
-
-    expected = U"</©";
-
-    utf32_string input = U"©";
-    inputStream.Append(std::move(input), IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
-
-  TEST_CASE("HTMLTokenizer(RCDATAEndTagOpen) - emits less than sign and solidus if EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RCDATA);
-
-    expected = U"</";
-
-    utf32_string input = U"</";
-    inputStream.Append(std::move(input), IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("RCDATAEndTagOpen", "emits less than sign and solidus if EOF reached",
+       (UnitTest {.InitialState = TokenizerState::RCDATA,
+                  .Input = U"</",
+                  .AppendEOF = true,
+                  .Output = {CreateCharacterToken(U"</"), CreateEOFToken()}}))
 
 #pragma endregion
 
 #pragma region RCDATAEndTagName
+
+  TEST("RCDATAEndTagName", "Emits less than sign, solidus, and characters when tag name doesn't match",
+       (UnitTest {.InitialState = TokenizerState::RCDATAEndTagName,
+                  .Input = U"span©",
+                  .Output = {CreateCharacterToken(U"</span©")}}))
+
+  TEST("RCDATAEndTagName", "Emits less than sign, solidus, and characters when EOF reached",
+       (UnitTest {.InitialState = TokenizerState::RCDATAEndTagName,
+                  .Input = U"di",
+                  .AppendEOF = true,
+                  .Output = {CreateCharacterToken(U"</di"), CreateEOFToken()}}))
+
+  TEST("RCDATAEndTagName",
+       "Emits less than sign, solidus, and characters when invalid tag name character encountered",
+       (UnitTest {.InitialState = TokenizerState::RCDATAEndTagName,
+                  .Input = U"d!v>",
+                  .Output = {CreateCharacterToken(U"</d!v>")}}))
 
   TEST_CASE("HTMLTokenizer(RCDATAEndTagName) - switches to BeforeAttributeName when parsing whitespace and "
             "end tag name matches start tag",
@@ -939,151 +564,46 @@ namespace Krys::Tests
     }
   }
 
-  TEST_CASE("HTMLTokenizer(RCDATAEndTagName) - allows mixed case", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    inputStream.Append(U"<div></DiV>");
-
-    // Start tag
-    expected = U"div";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
-    }
-
-    tokenizer.SetState(TokenizerState::RCDATA);
-
-    // End tag
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndTag);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(RCDATAEndTagName) - emits less than sign, solidus, and characters when tag name "
-            "doesn't match",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    inputStream.Append(U"<div></span©", IsEOF(true));
-
-    // Start tag
-    expected = U"div";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
-    }
-
-    tokenizer.SetState(TokenizerState::RCDATA);
-
-    expected = U"</span©";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Character);
-    }
-  }
-
 #pragma endregion
 
 #pragma region RAWTEXTLessThanSign
 
-  TEST_CASE("HTMLTokenizer(RAWTEXTLessThanSign) - Switches to RAWTEXTEndTagOpen after parsing solidus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RAWTEXTLessThanSign);
+  TEST("RAWTEXTLessThanSign", "Switches to RAWTEXTEndTagOpen after parsing solidus",
+       (UnitTest {.InitialState = TokenizerState::RAWTEXTLessThanSign,
+                  .ExpectedState = TokenizerState::RAWTEXTEndTagOpen,
+                  .Input = U"/"}))
 
-    utf32_string input = U"/";
+  TEST("RAWTEXTLessThanSign", "emits less than sign after parsing non solidus",
+       (UnitTest {.InitialState = TokenizerState::RAWTEXTLessThanSign,
+                  .ExpectedState = TokenizerState::RAWTEXT,
+                  .Input = U"©",
+                  .Output = {{CreateCharacterToken(U"<©")}}}))
 
-    expected = U"";
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::RAWTEXTEndTagOpen);
-  }
-
-  TEST_CASE("HTMLTokenizer(RAWTEXTLessThanSign) - emits less than sign after parsing non solidus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RAWTEXTLessThanSign);
-
-    utf32_string input = U"©";
-
-    expected = U"<©";
-    inputStream.Append(std::move(input), IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
-
-  TEST_CASE("HTMLTokenizer(RAWTEXTLessThanSign) - emits less than sign if EOF reached", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RAWTEXT);
-
-    utf32_string input = U"<";
-
-    expected = U"<";
-    inputStream.Append(std::move(input), IsEOF(true));
-
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Character);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
+  TEST("RAWTEXTLessThanSign", "Emits LessThanSign if EOF reached",
+       (UnitTest {.InitialState = TokenizerState::RAWTEXT,
+                  .Input = U"<",
+                  .AppendEOF = true,
+                  .Output = {{CreateCharacterToken(U"<"), CreateEOFToken()}}}))
 
 #pragma endregion
 
 #pragma region RAWTEXTEndTagOpen
 
-  TEST_CASE(
-    "HTMLTokenizer(RAWTEXTEndTagOpen) - Switches to RAWTEXTEndTagName after parsing valid tag name start",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RAWTEXTEndTagOpen);
-    utf32_string input = U"a";
+  TEST("RAWTEXTEndTagOpen", "Switches to RAWTEXTEndTagName after parsing valid tag name start",
+       (UnitTest {.InitialState = TokenizerState::RAWTEXTEndTagOpen,
+                  .ExpectedState = TokenizerState::RAWTEXTEndTagName,
+                  .Input = U"a"}))
 
-    expected = U"";
-    inputStream.Append(std::move(input));
+  TEST("RAWTEXTEndTagOpen", "emits less than sign and solidus after parsing invalid tag name start",
+       (UnitTest {.InitialState = TokenizerState::RAWTEXTEndTagOpen,
+                  .Input = U"©",
+                  .Output = {CreateCharacterToken(U"</©")}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::RAWTEXTEndTagName);
-  }
-
-  TEST_CASE("HTMLTokenizer(RAWTEXTEndTagOpen) - emits less than sign and solidus after parsing invalid tag "
-            "name start",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RAWTEXTEndTagOpen);
-    utf32_string input = U"©";
-
-    expected = U"</©";
-    inputStream.Append(std::move(input), IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
-
-  TEST_CASE("HTMLTokenizer(RAWTEXTEndTagOpen) - emits less than sign and solidus if EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::RAWTEXT);
-    utf32_string input = U"</";
-
-    expected = U"</";
-    inputStream.Append(std::move(input), IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("RAWTEXTEndTagOpen", "emits less than sign and solidus if EOF reached",
+       (UnitTest {.InitialState = TokenizerState::RAWTEXT,
+                  .Input = U"</",
+                  .AppendEOF = true,
+                  .Output = {CreateCharacterToken(U"</")}}))
 
 #pragma endregion
 
@@ -1209,106 +729,49 @@ namespace Krys::Tests
 
 #pragma region ScriptDataLessThanSign
 
-  TEST_CASE("HTMLTokenizer(ScriptDataLessThanSign) - Switches to ScriptDataEndTagOpen after parsing solidus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataLessThanSign);
-    utf32_string input = U"/";
+  TEST("ScriptDataLessThanSign", "Switches to ScriptDataEndTagOpen after parsing solidus",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataLessThanSign,
+                  .ExpectedState = TokenizerState::ScriptDataEndTagOpen,
+                  .Input = U"/"}))
 
-    expected = U"";
-    inputStream.Append(std::move(input));
+  TEST("ScriptDataLessThanSign", "emits LessThanSign after parsing non solidus",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataLessThanSign,
+                  .Input = U"©",
+                  .Output = {CreateCharacterToken(U"<©")}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEndTagOpen);
-  }
+  TEST("ScriptDataLessThanSign", "Emits LessThanSign if EOF reached",
+       (UnitTest {.InitialState = TokenizerState::ScriptData,
+                  .Input = U"<",
+                  .AppendEOF = true,
+                  .Output = {CreateCharacterToken(U"<"), CreateEOFToken()}}))
 
-  TEST_CASE("HTMLTokenizer(ScriptDataLessThanSign) - emits less than sign after parsing non solidus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataLessThanSign);
-    utf32_string input = U"©";
-
-    expected = U"<©";
-    inputStream.Append(std::move(input), IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataLessThanSign) - emits less than sign if EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptData);
-    utf32_string input = U"<";
-
-    expected = U"<";
-    inputStream.Append(std::move(input), IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataLessThanSign) - switches to ScriptDataEscapeStart when parsing "
-            "ExclamationMark and emits a LessThanSign and a ExclamationMark",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataLessThanSign);
-    expected = U"<!";
-
-    utf32_string input = U"!";
-    inputStream.Append(std::move(input), IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("ScriptDataLessThanSign",
+       "Switches to ScriptDataEscapeStart after parsing ExclamationMark and emits LessThanSign and "
+       "ExclamationMark",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataLessThanSign,
+                  .ExpectedState = TokenizerState::ScriptDataEscapeStart,
+                  .Input = U"!",
+                  .Output = {CreateCharacterToken(U"<!")}}))
 
 #pragma endregion
 
 #pragma region ScriptDataEndTagOpen
 
-  TEST_CASE("HTMLTokenizer(ScriptDataEndTagOpen) - Switches to ScriptDataEndTagName after parsing valid tag "
-            "name start",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEndTagOpen);
-    utf32_string input = U"a";
+  TEST("ScriptDataEndTagOpen", "Switches to ScriptDataEndTagName after parsing alpha",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEndTagOpen,
+                  .ExpectedState = TokenizerState::ScriptDataEndTagName,
+                  .Input = U"a"}))
 
-    expected = U"";
-    inputStream.Append(std::move(input));
+  TEST("ScriptDataEndTagOpen", "emits less than sign and solidus after parsing non alpha",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEndTagOpen,
+                  .Input = U"©",
+                  .Output = {CreateCharacterToken(U"</©")}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEndTagName);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(ScriptDataEndTagOpen) - emits less than sign and solidus after parsing invalid tag "
-    "name start",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEndTagOpen);
-    utf32_string input = U"©";
-
-    expected = U"</©";
-    inputStream.Append(std::move(input), IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataEndTagOpen) - emits less than sign and solidus if EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptData);
-    utf32_string input = U"</";
-
-    expected = U"</";
-    inputStream.Append(std::move(input), IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("ScriptDataEndTagOpen", "emits less than sign and solidus if EOF reached",
+       (UnitTest {.InitialState = TokenizerState::ScriptData,
+                  .Input = U"</",
+                  .AppendEOF = true,
+                  .Output = {CreateCharacterToken(U"</")}}))
 
 #pragma endregion
 
@@ -1436,387 +899,208 @@ namespace Krys::Tests
 
 #pragma region ScriptDataEscapeStart
 
-  TEST_CASE("HTMLTokenizer(ScriptDataEscapeStart) - switches to ScriptDataEscapeStartDash after parsing "
-            "HyphenMinus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscapeStart);
-    utf32_string input = U"-";
+  TEST("ScriptDataEscapeStart", "switches to ScriptDataEscapeStartDash after parsing HyphenMinus",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapeStart,
+                  .ExpectedState = TokenizerState::ScriptDataEscapeStartDash,
+                  .Input = U"-",
+                  .Output = {CreateCharacterToken(U"-")}}))
 
-    expected = U"-";
-    inputStream.Append(std::move(input));
+  TEST("ScriptDataEscapeStart", "Replaces null character with U+FFFD and switches to ScriptData",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapeStart,
+                  .ExpectedState = TokenizerState::ScriptData,
+                  .Input = InsertNull(U"1234"),
+                  .Output = {CreateCharacterToken(U"1234\xFFFD")},
+                  .Errors = {{HTMLParseError::UnexpectedNullCharacter}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscapeStartDash);
-  }
+  TEST("ScriptDataEscapeStart", "Batches characters up to EOF then emits EOF",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapeStart,
+                  .Input = U"a string of characters; 123145",
+                  .AppendEOF = true,
+                  .Output = {CreateCharacterToken(U"a string of characters; 123145"), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInScriptHTMLCommentLikeText}}}))
 
-  TEST_CASE("HTMLTokenizer(ScriptDataEscapeStart) - switches to ScriptData after parsing non HyphenMinus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscapeStart);
-    utf32_string input = U"©";
-
-    expected = U"©";
-    inputStream.Append(std::move(input), IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("ScriptDataEscapeStart", "switches to ScriptData after parsing non HyphenMinus",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapeStart,
+                  .ExpectedState = TokenizerState::ScriptData,
+                  .Input = U"©",
+                  .Output = {CreateCharacterToken(U"©")}}))
 
 #pragma endregion
 
 #pragma region ScriptDataEscaped
 
-  TEST_CASE("HTMLTokenizer(ScriptDataEscaped) -  switches to ScriptDataEscapedDash when parsing "
-            "HyphenMinus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscaped);
+  TEST("ScriptDataEscaped", "Batches characters",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscaped,
+                  .ExpectedState = TokenizerState::ScriptDataEscaped,
+                  .Input = U"a string of characters; 123145",
+                  .Output = {CreateCharacterToken(U"a string of characters; 123145")}}))
 
-    expected = U"-";
-    inputStream.Append(U"-");
+  TEST("ScriptDataEscaped", "Batches characters up to EOF then emits EOF",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscaped,
+                  .Input = U"a string of characters; 123145",
+                  .AppendEOF = true,
+                  .Output = {CreateCharacterToken(U"a string of characters; 123145"), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInScriptHTMLCommentLikeText}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscapedDash);
-  }
+  TEST("ScriptDataEscaped", "Replaces null character with U+FFFD",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscaped,
+                  .Input = InsertNull(U"1234"),
+                  .Output = {CreateCharacterToken(U"1234\xFFFD")},
+                  .Errors = {{HTMLParseError::UnexpectedNullCharacter}}}))
 
-  TEST_CASE("HTMLTokenizer(ScriptDataEscaped) - switches to ScriptDataEscapedLessThanSign when parsing "
-            "LessThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscaped);
+  TEST("ScriptDataEscaped", "switches to ScriptDataEscapedLessThanSign when parsing LessThanSign",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscaped,
+                  .ExpectedState = TokenizerState::ScriptDataEscapedLessThanSign,
+                  .Input = U"<"}))
 
-    inputStream.Append(U"<");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscapedLessThanSign);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataEscaped) - Replaces null character with U+FFFD", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscaped);
-
-    expected = U"1234\xFFFD";
-    expectedErrorCount = 1;
-
-    utf32_string input = U"1234";
-    input.append(1uz, U'\x0');
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataEscaped) - Batches characters up to EOF then emits EOF",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscaped);
-
-    expected = U"a string of characters; 123145";
-    expectedErrorCount = 1;
-
-    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
-
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Character);
-      REQUIRE(errors.back() == HTMLParseError::EOFInScriptHTMLCommentLikeText);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataEscaped) - Batches characters", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscaped);
-
-    expected = U"a string of characters; 123145";
-    inputStream.Append(U"a string of characters; 123145");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("ScriptDataEscaped", "switches to ScriptDataEscapedDash when parsing HyphenMinus",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscaped,
+                  .ExpectedState = TokenizerState::ScriptDataEscapedDash,
+                  .Input = U"-",
+                  .Output = {CreateCharacterToken(U"-")}}))
 
 #pragma endregion
 
 #pragma region ScriptDataEscapedDash
 
-  TEST_CASE("HTMLTokenizer(ScriptDataEscapedDash) - switches to ScriptDataEscapedDashDash when parsing "
-            "HyphenMinus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscapedDash);
+  TEST("ScriptDataEscapedDash", "Batches characters",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapedDash,
+                  .ExpectedState = TokenizerState::ScriptDataEscapedDash,
+                  .Input = U"a string of characters; 123145",
+                  .Output = {CreateCharacterToken(U"a string of characters; 123145")}}))
 
-    expected = U"-";
-    inputStream.Append(U"-");
+  TEST("ScriptDataEscapedDash", "Batches characters up to EOF then emits EOF",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapedDash,
+                  .Input = U"a string of characters; 123145",
+                  .AppendEOF = true,
+                  .Output = {CreateCharacterToken(U"a string of characters; 123145"), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInScriptHTMLCommentLikeText}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscapedDashDash);
-  }
+  TEST("ScriptDataEscapedDash", "Replaces null character with U+FFFD",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapedDash,
+                  .Input = InsertNull(U"1234"),
+                  .Output = {CreateCharacterToken(U"1234\xFFFD")},
+                  .Errors = {{HTMLParseError::UnexpectedNullCharacter}}}))
 
-  TEST_CASE("HTMLTokenizer(ScriptDataEscapedDash) - switches to ScriptDataEscapedLessThanSign when parsing "
-            "LessThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscapedDash);
+  TEST("ScriptDataEscapedDash", "switches to ScriptDataEscapedLessThanSign when parsing LessThanSign",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapedDash,
+                  .ExpectedState = TokenizerState::ScriptDataEscapedLessThanSign,
+                  .Input = U"<"}))
 
-    inputStream.Append(U"<");
+  TEST("ScriptDataEscapedDash", "switches to ScriptDataEscapedDashDash when parsing HyphenMinus",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapedDash,
+                  .ExpectedState = TokenizerState::ScriptDataEscapedDashDash,
+                  .Input = U"-",
+                  .Output = {CreateCharacterToken(U"-")}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscapedLessThanSign);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataEscapedDash) - Replaces null character with U+FFFD and switches to "
-            "ScriptDataEscaped",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscapedDash);
-
-    expected = U"1234\xFFFD";
-    expectedErrorCount = 1;
-
-    utf32_string input = U"1234";
-    input.append(1uz, U'\x0');
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscaped);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataEscapedDash) - Batches characters up to EOF then emits EOF",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscapedDash);
-
-    expected = U"a string of characters; 123145";
-    expectedErrorCount = 1;
-    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
-
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Character);
-      REQUIRE(errors.back() == HTMLParseError::EOFInScriptHTMLCommentLikeText);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataEscapedDash) - Batches characters", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscapedDash);
-
-    expected = U"a string of characters; 123145";
-    inputStream.Append(U"a string of characters; 123145");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("ScriptDataEscapedDash",
+       "switches to ScriptDataEscaped when parsing non HyphenMinus or "
+       "LessThanSign",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapedDash,
+                  .ExpectedState = TokenizerState::ScriptDataEscaped,
+                  .Input = U"©",
+                  .Output = {CreateCharacterToken(U"©")}}))
 
 #pragma endregion
 
 #pragma region ScriptDataEscapedDashDash
 
-  TEST_CASE(
-    "HTMLTokenizer(ScriptDataEscapedDashDash) - emits HyphenMinus and stays in the same state when parsing "
-    "HyphenMinus",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscapedDashDash);
+  TEST("ScriptDataEscapedDashDash", "Batches characters",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapedDashDash,
+                  .ExpectedState = TokenizerState::ScriptDataEscapedDashDash,
+                  .Input = U"a string of characters; 123145",
+                  .Output = {CreateCharacterToken(U"a string of characters; 123145")}}))
 
-    expected = U"-";
-    inputStream.Append(U"-");
+  TEST("ScriptDataEscapedDashDash", "Batches characters up to EOF then emits EOF",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapedDashDash,
+                  .Input = U"a string of characters; 123145",
+                  .AppendEOF = true,
+                  .Output = {CreateCharacterToken(U"a string of characters; 123145"), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInScriptHTMLCommentLikeText}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscapedDashDash);
-  }
+  TEST("ScriptDataEscapedDashDash", "Replaces null character with U+FFFD and switches to ScriptDataEscaped",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapedDashDash,
+                  .ExpectedState = TokenizerState::ScriptDataEscaped,
+                  .Input = InsertNull(U"1234"),
+                  .Output = {CreateCharacterToken(U"1234\xFFFD")},
+                  .Errors = {{HTMLParseError::UnexpectedNullCharacter}}}))
 
-  TEST_CASE(
-    "HTMLTokenizer(ScriptDataEscapedDashDash) - switches to ScriptDataEscapedLessThanSign when parsing "
-    "LessThanSign",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscapedDashDash);
+  TEST("ScriptDataEscapedDashDash", "switches to ScriptDataEscapedLessThanSign when parsing LessThanSign",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapedDashDash,
+                  .ExpectedState = TokenizerState::ScriptDataEscapedLessThanSign,
+                  .Input = U"<"}))
 
-    inputStream.Append(U"<");
+  TEST("ScriptDataEscapedDashDash", "switches to ScriptData when parsing GreaterThanSign",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapedDashDash,
+                  .ExpectedState = TokenizerState::ScriptData,
+                  .Input = U">",
+                  .Output = {CreateCharacterToken(U">")}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscapedLessThanSign);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataEscapedDashDash) - switches to ScriptData when parsing GreaterThanSign "
-            "and emits GreaterThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscapedDashDash);
-
-    expected = U">";
-    inputStream.Append(U">");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptData);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataEscapedDashDash) - Replaces null character with U+FFFD and switches to "
-            "ScriptDataEscaped",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscapedDashDash);
-
-    expected = U"1234\xFFFD";
-    expectedErrorCount = 1;
-
-    utf32_string input = U"1234";
-    input.append(1uz, U'\x0');
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscaped);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataEscapedDashDash) - emits EOF with parser error when EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscapedDash);
-
-    expected = U"-";
-    expectedErrorCount = 1;
-
-    inputStream.Append(U"-", IsEOF(true));
-
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Character);
-      REQUIRE(errors.back() == HTMLParseError::EOFInScriptHTMLCommentLikeText);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
+  TEST("ScriptDataEscapedDashDash", "emits HyphenMinus and stays in the same state when parsing HyphenMinus",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapedDashDash,
+                  .ExpectedState = TokenizerState::ScriptDataEscapedDashDash,
+                  .Input = U"-",
+                  .Output = {CreateCharacterToken(U"-")}}))
 
 #pragma endregion
 
 #pragma region ScriptDataEscapedLessThanSign
 
-  TEST_CASE("HTMLTokenizer(ScriptDataEscapedLessThanSign) - switches to ScriptDataEscapedEndTagOpen after "
-            "parsing Solidus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscapedLessThanSign);
+  TEST("ScriptDataEscapedLessThanSign",
+       "Replaces null character with U+FFFD and switches to ScriptDataEscaped",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapedLessThanSign,
+                  .ExpectedState = TokenizerState::ScriptDataEscaped,
+                  .Input = InsertNull(U"1234"),
+                  .Output = {CreateCharacterToken(U"<1234\xFFFD")},
+                  .Errors = {{HTMLParseError::UnexpectedNullCharacter}}}))
 
-    expected = U"";
-    inputStream.Append(U"/");
+  TEST("ScriptDataEscapedLessThanSign", "Batches characters up to EOF then emits EOF",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapedLessThanSign,
+                  .Input = U"a string of characters; 123145",
+                  .AppendEOF = true,
+                  .Output = {CreateCharacterToken(U"<a string of characters; 123145"), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInScriptHTMLCommentLikeText}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscapedEndTagOpen);
-  }
+  TEST("ScriptDataEscapedLessThanSign",
+       "emits LessThanSign and switches to ScriptDataEscapedEndTagOpen after parsing Solidus",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapedLessThanSign,
+                  .ExpectedState = TokenizerState::ScriptDataEscapedEndTagOpen,
+                  .Input = U"/",
+                  .Output = {}}))
 
-  TEST_CASE(
-    "HTMLTokenizer(ScriptDataEscapedLessThanSign) - emits LessThanSign and next character and switches "
-    "to ScriptDataDoubleEscapeStart if ASCII alpha ",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscapedLessThanSign);
+  TEST("ScriptDataEscapedLessThanSign",
+       "emits LessThanSign and next character and switches to ScriptDataDoubleEscapeStart if ASCII alpha ",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapedLessThanSign,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscapeStart,
+                  .Input = U"A",
+                  .Output = {CreateCharacterToken(U"<A")}}))
 
-    expected = U"<A";
-    inputStream.Append(U"A");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscapeStart);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(ScriptDataEscapedLessThanSign) - emits LessThanSign and next character and switches "
-    "to ScriptDataEscaped if not ASCII alpha ",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscapedLessThanSign);
-
-    expected = U"<©";
-    inputStream.Append(U"©");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscaped);
-  }
+  TEST("ScriptDataEscapedLessThanSign",
+       "emits LessThanSign and next character and switches to ScriptDataEscaped if not ASCII alpha ",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapedLessThanSign,
+                  .ExpectedState = TokenizerState::ScriptDataEscaped,
+                  .Input = U"©",
+                  .Output = {CreateCharacterToken(U"<©")}}))
 
 #pragma endregion
 
 #pragma region ScriptDataEscapedEndTagOpen
 
-  TEST_CASE("HTMLTokenizer(ScriptDataEscapedEndTagOpen) - switches to ScriptDataEscapedEndTagName after "
-            "parsing valid tag name start",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscapedEndTagOpen);
+  TEST("ScriptDataEscapedEndTagOpen", "Switches to ScriptDataEscapedEndTagName after parsing alpha",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapedEndTagOpen,
+                  .ExpectedState = TokenizerState::ScriptDataEscapedEndTagName,
+                  .Input = U"a"}))
 
-    expected = U"";
-    inputStream.Append(U"a");
+  TEST("ScriptDataEscapedEndTagOpen", "emits less than sign and solidus after parsing non alpha",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscapedEndTagOpen,
+                  .Input = U"©",
+                  .Output = {CreateCharacterToken(U"</©")}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscapedEndTagName);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataEscapedEndTagOpen) - emits less than sign and solidus after parsing "
-            "invalid tag name start",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscapedEndTagOpen);
-
-    expected = U"</©";
-    inputStream.Append(U"©");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataEscapedEndTagOpen) - emits less than sign and solidus if EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataEscaped);
-
-    inputStream.Append(U"</", IsEOF(true));
-
-    expected = U"</";
-    expectedErrorCount = 1;
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Character);
-      REQUIRE(errors.back() == HTMLParseError::EOFInScriptHTMLCommentLikeText);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
+  TEST("ScriptDataEscapedEndTagOpen", "emits less than sign and solidus if EOF reached",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataEscaped,
+                  .Input = U"</",
+                  .AppendEOF = true,
+                  .Output = {CreateCharacterToken(U"</"), CreateEOFToken()}}))
 
 #pragma endregion
 
@@ -1943,945 +1227,437 @@ namespace Krys::Tests
 
 #pragma region ScriptDataDoubleEscapeStart
 
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeStart) - switches to ScriptDataEscaped after parsing "
-            "whitespace if temporary buffer is not 'script'",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeStart);
+  TEST("ScriptDataDoubleEscapeStart",
+       "switches to ScriptDataEscaped after parsing whitespace if temporary buffer is not 'script'",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapeStart,
+                  .ExpectedState = TokenizerState::ScriptDataEscaped,
+                  .Input = U" ",
+                  .Output = {CreateCharacterToken(U" ")}}))
 
-    expected = U" ";
-    inputStream.Append(U" ");
+  TEST("ScriptDataDoubleEscapeStart",
+       "switches to ScriptDataEscaped after parsing Solidus if temporary buffer is not 'script'",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapeStart,
+                  .ExpectedState = TokenizerState::ScriptDataEscaped,
+                  .Input = U"/",
+                  .Output = {CreateCharacterToken(U"/")}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscaped);
-  }
+  TEST("ScriptDataDoubleEscapeStart",
+       "switches to ScriptDataEscaped after parsing GreaterThanSign if temporary buffer is not 'script'",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapeStart,
+                  .ExpectedState = TokenizerState::ScriptDataEscaped,
+                  .Input = U">",
+                  .Output = {CreateCharacterToken(U">")}}))
 
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeStart) - switches to ScriptDataEscaped after "
-            "parsing Solidus if temporary buffer is not 'script'",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeStart);
+  TEST("ScriptDataDoubleEscapeStart", "continues building temporary buffer when parsing ASCII alpha",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapeStart,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscapeStart,
+                  .Input = U"sCr",
+                  .Output = {CreateCharacterToken(U"sCr")}}))
 
-    expected = U"/";
-    inputStream.Append(U"/");
+  TEST("ScriptDataDoubleEscapeStart", "switches to ScriptDataEscaped if not ASCII alpha ",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapeStart,
+                  .ExpectedState = TokenizerState::ScriptDataEscaped,
+                  .Input = U"©",
+                  .Output = {CreateCharacterToken(U"©")}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscaped);
-  }
+  TEST("ScriptDataDoubleEscapeStart",
+       "switches to ScriptDataDoubleEscaped after parsing whitespace if temporary buffer is 'script'",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapeStart,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscaped,
+                  .Input = U"script ",
+                  .Output = {CreateCharacterToken(U"script ")}}))
 
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeStart) - switches to ScriptDataEscaped after "
-            "parsing GreaterThanSign if temporary buffer is not 'script'",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeStart);
+  TEST("ScriptDataDoubleEscapeStart",
+       "switches to ScriptDataDoubleEscaped after parsing Solidus if temporary buffer is 'script'",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapeStart,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscaped,
+                  .Input = U"script/",
+                  .Output = {CreateCharacterToken(U"script/")}}))
 
-    expected = U">";
-    inputStream.Append(U">");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscaped);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeStart) - switches to ScriptDataDoubleEscaped after parsing "
-            "whitespace if temporary buffer is 'script'",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeStart);
-
-    expected = U"script ";
-    inputStream.Append(U"script ");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeStart) - switches to ScriptDataDoubleEscaped after "
-            "parsing Solidus if temporary buffer is 'script'",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeStart);
-
-    expected = U"script/";
-    inputStream.Append(U"script/");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeStart) - switches to ScriptDataDoubleEscaped after "
-            "parsing GreaterThanSign if temporary buffer is 'script'",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeStart);
-
-    expected = U"script>";
-    inputStream.Append(U"script>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeStart) - continues building temporary buffer when parsing "
-            "ASCII alpha",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeStart);
-
-    expected = U"sCr";
-    inputStream.Append(U"sCr");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscapeStart);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeStart) - switches to ScriptDataEscaped if not ASCII alpha ",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeStart);
-
-    expected = U"©";
-    inputStream.Append(U"©");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscaped);
-  }
+  TEST("ScriptDataDoubleEscapeStart",
+       "switches to ScriptDataDoubleEscaped after parsing GreaterThanSign if temporary buffer is 'script'",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapeStart,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscaped,
+                  .Input = U"script>",
+                  .Output = {CreateCharacterToken(U"script>")}}))
 
 #pragma endregion
 
 #pragma region ScriptDataDoubleEscaped
 
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscaped) -  switches to ScriptDataDoubleEscapedDash when parsing "
-            "HyphenMinus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscaped);
+  TEST("ScriptDataDoubleEscaped", "Batches characters",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscaped,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscaped,
+                  .Input = U"a string of characters; 123145",
+                  .Output = {CreateCharacterToken(U"a string of characters; 123145")}}))
 
-    expected = U"-";
-    inputStream.Append(U"-");
+  TEST("ScriptDataDoubleEscaped", "Batches characters up to EOF then emits EOF",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscaped,
+                  .Input = U"a string of characters; 123145",
+                  .AppendEOF = true,
+                  .Output = {CreateCharacterToken(U"a string of characters; 123145"), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInScriptHTMLCommentLikeText}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscapedDash);
-  }
+  TEST("ScriptDataDoubleEscaped", "Replaces null character with U+FFFD",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscaped,
+                  .Input = InsertNull(U"1234"),
+                  .Output = {CreateCharacterToken(U"1234\xFFFD")},
+                  .Errors = {{HTMLParseError::UnexpectedNullCharacter}}}))
 
-  TEST_CASE(
-    "HTMLTokenizer(ScriptDataDoubleEscaped) - switches to ScriptDataDoubleEscapedLessThanSign when parsing "
-    "LessThanSign and emits LessThanSign",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscaped);
+  TEST("ScriptDataDoubleEscaped", "switches to ScriptDataDoubleEscapedLessThanSign when parsing LessThanSign",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscaped,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscapedLessThanSign,
+                  .Input = U"<",
+                  .Output = {CreateCharacterToken(U"<")}}))
 
-    expected = U"<";
-    inputStream.Append(U"<");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscapedLessThanSign);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscaped) - Replaces null character with U+FFFD",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscaped);
-
-    expected = U"1234\xFFFD";
-    expectedErrorCount = 1;
-
-    utf32_string input = U"1234";
-    input.append(1uz, U'\0');
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscaped) - Batches characters up to EOF then emits EOF",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscaped);
-
-    expected = U"a string of characters; 123145";
-    expectedErrorCount = 1;
-
-    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Character);
-      REQUIRE(errors.back() == HTMLParseError::EOFInScriptHTMLCommentLikeText);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
+  TEST("ScriptDataDoubleEscaped", "switches to ScriptDataDoubleEscapedDash when parsing HyphenMinus",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscaped,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscapedDash,
+                  .Input = U"-",
+                  .Output = {CreateCharacterToken(U"-")}}))
 
 #pragma endregion
 
 #pragma region ScriptDataDoubleEscapedDash
 
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapedDash) - switches to ScriptDataDoubleEscapedDashDash when "
-            "parsing HyphenMinus and emits HyphenMinus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedDash);
+  TEST("ScriptDataDoubleEscapedDash",
+       "Switches to ScriptDataDoubleEscaped after parsing any other character and emits that character",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapedDash,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscaped,
+                  .Input = U"©",
+                  .Output = {CreateCharacterToken(U"©")}}))
 
-    expected = U"-";
-    inputStream.Append(U"-");
+  TEST("ScriptDataDoubleEscapedDash", "Batches characters up to EOF then emits EOF",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapedDash,
+                  .Input = U"a string of characters; 123145",
+                  .AppendEOF = true,
+                  .Output = {CreateCharacterToken(U"a string of characters; 123145"), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInScriptHTMLCommentLikeText}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscapedDashDash);
-  }
+  TEST("ScriptDataDoubleEscapedDash", "Replaces null character with U+FFFD",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapedDash,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscaped,
+                  .Input = InsertNull(U"1234"),
+                  .Output = {CreateCharacterToken(U"1234\xFFFD")},
+                  .Errors = {{HTMLParseError::UnexpectedNullCharacter}}}))
 
-  TEST_CASE(
-    "HTMLTokenizer(ScriptDataDoubleEscapedDash) - switches to ScriptDataDoubleEscapedLessThanSign when "
-    "parsing LessThanSign and emits LessThanSign",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedDash);
+  TEST("ScriptDataDoubleEscapedDash",
+       "switches to ScriptDataDoubleEscapedLessThanSign when parsing LessThanSign",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapedDash,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscapedLessThanSign,
+                  .Input = U"<",
+                  .Output = {CreateCharacterToken(U"<")}}))
 
-    expected = U"<";
-    inputStream.Append(U"<");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscapedLessThanSign);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapedDash) - Replaces null character with U+FFFD and switches "
-            "to ScriptDataDoubleEscaped",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedDash);
-
-    expected = U"1234\xFFFD";
-    expectedErrorCount = 1;
-
-    utf32_string input = U"1234";
-    input.append(1uz, U'\0');
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapedDash) - Batches characters up to EOF then emits EOF",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedDash);
-
-    expected = U"a string of characters; 123145";
-    expectedErrorCount = 1;
-
-    inputStream.Append(U"a string of characters; 123145", IsEOF(true));
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Character);
-      REQUIRE(errors.back() == HTMLParseError::EOFInScriptHTMLCommentLikeText);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(ScriptDataDoubleEscapedDash) - Switches to ScriptDataDoubleEscaped after parsing any "
-    "other character and emits that character",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedDash);
-
-    expected = U"A";
-    inputStream.Append(U"A");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
-  }
+  TEST("ScriptDataDoubleEscapedDash", "switches to ScriptDataDoubleEscapedDashDash when parsing HyphenMinus",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapedDash,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscapedDashDash,
+                  .Input = U"-",
+                  .Output = {CreateCharacterToken(U"-")}}))
 
 #pragma endregion
 
 #pragma region ScriptDataDoubleEscapedDashDash
 
-  TEST_CASE(
-    "HTMLTokenizer(ScriptDataDoubleEscapedDashDash) - emits HyphenMinus and stays in the same state when "
-    "parsing HyphenMinus",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedDashDash);
+  TEST("ScriptDataDoubleEscapedDashDash",
+       "Switches to ScriptDataDoubleEscaped after parsing any other character and emits that character",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapedDashDash,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscaped,
+                  .Input = U"©",
+                  .Output = {CreateCharacterToken(U"©")}}))
 
-    expected = U"-";
-    inputStream.Append(U"-");
+  TEST("ScriptDataDoubleEscapedDashDash", "emits EOF with parser error when EOF reached",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapedDashDash,
+                  .Input = U"-",
+                  .AppendEOF = true,
+                  .Output = {CreateCharacterToken(U"-"), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInScriptHTMLCommentLikeText}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscapedDashDash);
-  }
+  TEST("ScriptDataDoubleEscapedDashDash",
+       "Replaces null character with U+FFFD and switches to ScriptDataDoubleEscaped",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapedDashDash,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscaped,
+                  .Input = InsertNull(U"1234"),
+                  .Output = {CreateCharacterToken(U"1234\xFFFD")},
+                  .Errors = {{HTMLParseError::UnexpectedNullCharacter}}}))
 
-  TEST_CASE(
-    "HTMLTokenizer(ScriptDataDoubleEscapedDashDash) - switches to ScriptDataDoubleEscapedLessThanSign "
-    "when parsing LessThanSign and emits LessThanSign",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedDashDash);
+  TEST("ScriptDataDoubleEscapedDashDash",
+       "switches to ScriptDataDoubleEscapedLessThanSign when parsing LessThanSign",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapedDashDash,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscapedLessThanSign,
+                  .Input = U"<",
+                  .Output = {CreateCharacterToken(U"<")}}))
 
-    expected = U"<";
-    inputStream.Append(U"<");
+  TEST("ScriptDataDoubleEscapedDashDash", "switches to ScriptData after parsing GreaterThanSign",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapedDashDash,
+                  .ExpectedState = TokenizerState::ScriptData,
+                  .Input = U">",
+                  .Output = {CreateCharacterToken(U">")}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscapedLessThanSign);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapedDashDash) - switches to ScriptData after "
-            "parsing GreaterThanSign and emits GreaterThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedDashDash);
-
-    expected = U">";
-    inputStream.Append(U">");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptData);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(ScriptDataDoubleEscapedDashDash) - Replaces null character with U+FFFD and switches "
-    "to ScriptDataDoubleEscaped",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedDashDash);
-
-    expected = U"1234\xFFFD";
-    expectedErrorCount = 1;
-
-    utf32_string input = U"1234";
-    input.append(1uz, U'\0');
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapedDashDash) - emits EOF with parser error when EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedDashDash);
-
-    expected = U"-";
-    expectedErrorCount = 1;
-
-    inputStream.Append(U"-", IsEOF(true));
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Character);
-      REQUIRE(errors.back() == HTMLParseError::EOFInScriptHTMLCommentLikeText);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapedDashDash) - Switches to ScriptDataDoubleEscaped after "
-            "parsing any other character and emits that character",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedDashDash);
-
-    expected = U"A";
-    inputStream.Append(U"A");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
-  }
+  TEST("ScriptDataDoubleEscapedDashDash",
+       "emits HyphenMinus and stays in the same state when parsing HyphenMinus",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapedDashDash,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscapedDashDash,
+                  .Input = U"-",
+                  .Output = {CreateCharacterToken(U"-")}}))
 
 #pragma endregion
 
 #pragma region ScriptDataDoubleEscapedLessThanSign
 
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapedLessThanSign) - switches to "
-            "ScriptDataDoubleEscapeEnd after parsing Solidus and emits Solidus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedLessThanSign);
+  TEST("ScriptDataDoubleEscapedLessThanSign",
+       "Replaces null character with U+FFFD and switches to ScriptDataDoubleEscaped",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapedLessThanSign,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscaped,
+                  .Input = InsertNull(U"1234"),
+                  .Output = {CreateCharacterToken(U"1234\xFFFD")},
+                  .Errors = {{HTMLParseError::UnexpectedNullCharacter}}}))
 
-    expected = U"/";
-    inputStream.Append(U"/");
+  TEST("ScriptDataDoubleEscapedLessThanSign",
+       "Switches to ScriptDataDoubleEscapeEnd after parsing Solidus and emits Solidus",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapedLessThanSign,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscapeEnd,
+                  .Input = U"/",
+                  .Output = {CreateCharacterToken(U"/")}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscapeEnd);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapedLessThanSign) - Switches to ScriptDataDoubleEscaped after "
-            "parsing any other character and emits that character",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapedLessThanSign);
-
-    expected = U"A";
-    inputStream.Append(U"A");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
-  }
+  TEST("ScriptDataDoubleEscapedLessThanSign",
+       "Switches to ScriptDataDoubleEscaped after parsing any other character and emits that character",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapedLessThanSign,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscaped,
+                  .Input = U"A",
+                  .Output = {CreateCharacterToken(U"A")}}))
 
 #pragma endregion
 
 #pragma region ScriptDataDoubleEscapeEnd
 
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeEnd) - switches to ScriptDataDoubleEscaped after parsing "
-            "whitespace if temporary buffer is not 'script'",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeEnd);
+  TEST("ScriptDataDoubleEscapeEnd",
+       "switches to ScriptDataDoubleEscaped after parsing Solidus if temporary buffer is not 'script'",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapeEnd,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscaped,
+                  .Input = U"/",
+                  .Output = {CreateCharacterToken(U"/")}}))
 
-    expected = U" ";
-    inputStream.Append(U" ");
+  TEST(
+    "ScriptDataDoubleEscapeEnd",
+    "switches to ScriptDataDoubleEscaped after parsing GreaterThanSign if temporary buffer is not 'script'",
+    (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapeEnd,
+               .ExpectedState = TokenizerState::ScriptDataDoubleEscaped,
+               .Input = U">",
+               .Output = {CreateCharacterToken(U">")}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
-  }
+  TEST("ScriptDataDoubleEscapeEnd",
+       "switches to ScriptDataDoubleEscaped after parsing whitespace if temporary buffer is not 'script'",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapeEnd,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscaped,
+                  .Input = U" ",
+                  .Output = {CreateCharacterToken(U" ")}}))
 
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeEnd) - switches to ScriptDataDoubleEscaped after parsing "
-            "GreaterThanSign if temporary buffer is not 'script'",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeEnd);
+  TEST("ScriptDataDoubleEscapeEnd",
+       "switches to ScriptDataEscaped after parsing whitespace if temporary buffer is 'script'",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapeEnd,
+                  .ExpectedState = TokenizerState::ScriptDataEscaped,
+                  .Input = U"script ",
+                  .Output = {CreateCharacterToken(U"script ")}}))
 
-    expected = U">";
-    inputStream.Append(U">");
+  TEST("ScriptDataDoubleEscapeEnd",
+       "switches to ScriptDataEscaped after parsing Solidus if temporary buffer is 'script'",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapeEnd,
+                  .ExpectedState = TokenizerState::ScriptDataEscaped,
+                  .Input = U"script/",
+                  .Output = {CreateCharacterToken(U"script/")}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
-  }
+  TEST("ScriptDataDoubleEscapeEnd",
+       "switches to ScriptDataEscaped after parsing GreaterThanSign if temporary buffer is 'script'",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapeEnd,
+                  .ExpectedState = TokenizerState::ScriptDataEscaped,
+                  .Input = U"script>",
+                  .Output = {CreateCharacterToken(U"script>")}}))
 
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeEnd) - switches to ScriptDataDoubleEscaped after parsing "
-            "any other character if temporary buffer is not 'script'",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeEnd);
+  TEST("ScriptDataDoubleEscapeEnd", "continues building temporary buffer when parsing ASCII alpha",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapeEnd,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscapeEnd,
+                  .Input = U"sCr",
+                  .Output = {CreateCharacterToken(U"sCr")}}))
 
-    expected = U"_";
-    inputStream.Append(U"_");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(ScriptDataDoubleEscapeEnd) - switches to ScriptDataEscaped after parsing whitespace if "
-    "temporary buffer is 'script'",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeEnd);
-
-    expected = U"script ";
-    inputStream.Append(U"script ");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscaped);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(ScriptDataDoubleEscapeEnd) - switches to ScriptDataEscaped after parsing Solidus if "
-    "temporary buffer is 'script'",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeEnd);
-
-    expected = U"script/";
-    inputStream.Append(U"script/");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscaped);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeEnd) - switches to ScriptDataEscaped after parsing "
-            "GreaterThanSign if temporary buffer is 'script'",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeEnd);
-
-    expected = U"script>";
-    inputStream.Append(U"script>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataEscaped);
-  }
-
-  TEST_CASE("HTMLTokenizer(ScriptDataDoubleEscapeEnd) - continues building temporary buffer when parsing "
-            "ASCII alpha",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeEnd);
-
-    expected = U"sCr";
-    inputStream.Append(U"sCr");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscapeEnd);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(ScriptDataDoubleEscapeEnd) - switches to ScriptDataDoubleEscaped if not ASCII alpha ",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::ScriptDataDoubleEscapeEnd);
-
-    expected = U"©";
-    inputStream.Append(U"©");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::ScriptDataDoubleEscaped);
-  }
+  TEST("ScriptDataDoubleEscapeEnd", "switches to ScriptDataDoubleEscaped if not ASCII alpha ",
+       (UnitTest {.InitialState = TokenizerState::ScriptDataDoubleEscapeEnd,
+                  .ExpectedState = TokenizerState::ScriptDataDoubleEscaped,
+                  .Input = U"©",
+                  .Output = {CreateCharacterToken(U"©")}}))
 
 #pragma endregion
 
 #pragma region BeforeAttributeName
 
-  TEST_CASE("HTMLTokenizer(BeforeAttributeName) - ignores whitespace", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::BeforeAttributeName);
+  TEST("BeforeAttributeName", "ignores whitespace and stays in the same state when parsing whitespace",
+       (UnitTest {.InitialState = TokenizerState::BeforeAttributeName,
+                  .ExpectedState = TokenizerState::BeforeAttributeName,
+                  .Input = U"   \t\n\r"}))
 
-    expected = U"";
-    inputStream.Append(U"   \t\n\r");
+  TEST("BeforeAttributeName", "switches to SelfClosingStartTag when parsing Solidus",
+       (UnitTest {.InitialState = TokenizerState::BeforeAttributeName,
+                  .ExpectedState = TokenizerState::SelfClosingStartTag,
+                  .Input = U"/"}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeName);
-  }
+  TEST("BeforeAttributeName", "switches to Data and emits the current tag when parsing GreaterThanSign",
+       (UnitTest {.InitialState = TokenizerState::Data,
+                  .Input = U"<div >",
+                  .Output = {CreateStartTagToken({.Name = U"div"})}}))
 
-  TEST_CASE("HTMLTokenizer(BeforeAttributeName) - switches to SelfClosingStartTag after parsing Solidus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::BeforeAttributeName);
+  TEST("BeforeAttributeName", "switches to Data and emits EOF when EOF reached",
+       (UnitTest {.InitialState = TokenizerState::Data,
+                  .Input = U"<div ",
+                  .AppendEOF = true,
+                  .Output = {CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInTag}}}))
 
-    expected = U"";
-    inputStream.Append(U"/");
+  TEST("BeforeAttributeName", "switches to AttributeName with parser error when parsing an EqualsSign",
+       (UnitTest {.InitialState = TokenizerState::Data,
+                  .ExpectedState = TokenizerState::AttributeName,
+                  .Input = U"<a =",
+                  .Errors = {{HTMLParseError::UnexpectedEqualsSignBeforeAttributeName}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::SelfClosingStartTag);
-  }
-
-  TEST_CASE("HTMLTokenizer(BeforeAttributeName) - switches to Data after parsing GreaterThanSign and emits "
-            "the current tag",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"div";
-    inputStream.Append(U"<div >");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-  }
-
-  TEST_CASE("HTMLTokenizer(BeforeAttributeName) - switches to Data and emits EOF when EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    inputStream.Append(U"<div ", IsEOF(true));
-    expected = U"";
-    expectedErrorCount = 1;
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    REQUIRE(errors.back() == HTMLParseError::EOFInTag);
-  }
-
-  TEST_CASE("HTMLTokenizer(BeforeAttributeName) - switches to AttributeName with parser error after parsing "
-            "an EqualsSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    inputStream.Append(U"<a =");
-    expected = U"";
-    expectedErrorCount = 1;
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedEqualsSignBeforeAttributeName);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AttributeName);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(BeforeAttributeName) - switches to AttributeName after parsing valid attribute name start",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    inputStream.Append(U"<a b");
-    expected = U"";
-    NextTokenPtr token = tokenizer.NextToken();
-
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AttributeName);
-  }
+  TEST("BeforeAttributeName", "switches to AttributeName after parsing valid attribute name start",
+       (UnitTest {.InitialState = TokenizerState::Data,
+                  .ExpectedState = TokenizerState::AttributeName,
+                  .Input = U"<a b"}))
 
 #pragma endregion
 
 #pragma region AttributeName
-
-  TEST_CASE(
-    "HTMLTokenizer(AttributeName) - ignores whitespace and switches to AfterAttributeName when parsing "
-    "whitespace",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    inputStream.Append(U"<a b   \t\n\r");
-    expected = U"";
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AfterAttributeName);
-  }
-
-  TEST_CASE("HTMLTokenizer(AttributeName) - switches to SelfClosingStartTag when parsing Solidus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    inputStream.Append(U"<a b/");
-    expected = U"";
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::SelfClosingStartTag);
-  }
 
   TEST("AttributeName", "switches to Data and emits the current tag when parsing GreaterThanSign",
        (UnitTest {
          .Input = U"<div b>",
          .Output = {CreateStartTagToken({.Name = U"div", .Attributes = {{.Name = U"b", .Value = U""}}})}}))
 
-  TEST_CASE("HTMLTokenizer(AttributeName) - parses attribute name and switches to BeforeAttributeValue when "
-            "parsing EqualsSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("AttributeName", "switches to Data and emits EOF when EOF reached",
+       (UnitTest {.Input = U"<div b",
+                  .AppendEOF = true,
+                  .Output = {CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInTag}}}))
 
-    inputStream.Append(U"<a b=");
-    expected = U"";
+  TEST("AttributeName",
+       "switches to Data and emits the current tag with parser error when parsing Solidus GreaterThanSign",
+       (UnitTest {.Input = U"<div b/>",
+                  .Output = {CreateStartTagToken(
+                    {.Name = U"div", .Attributes = {{.Name = U"b", .Value = U""}}, .SelfClosing = true})}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeValue);
-  }
+  TEST("AttributeName", "ignores whitespace and switches to AfterAttributeName when parsing whitespace",
+       (UnitTest {.ExpectedState = TokenizerState::AfterAttributeName, .Input = U"<div b   \t\n\r"}))
 
-  TEST_CASE("HTMLTokenizer(AttributeName) - appends to attribute name when parsing valid attribute name "
-            "characters",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("AttributeName", "switches to SelfClosingStartTag when parsing Solidus",
+       (UnitTest {.ExpectedState = TokenizerState::SelfClosingStartTag, .Input = U"<div b/"}))
 
-    inputStream.Append(U"<a data-value=");
-    expected = U"";
+  TEST("AttributeName", "parses attribute name and switches to BeforeAttributeValue when parsing EqualsSign",
+       (UnitTest {.ExpectedState = TokenizerState::BeforeAttributeValue, .Input = U"<div b="}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeValue);
-  }
+  TEST("AttributeName", "appends to attribute name when parsing valid attribute name characters",
+       (UnitTest {.ExpectedState = TokenizerState::BeforeAttributeValue, .Input = U"<div data-value="}))
 
-  TEST_CASE("HTMLTokenizer(AttributeName) - Replaces null character with U+FFFD in attribute name",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("AttributeName", "Replaces null character with U+FFFD in attribute name",
+       (UnitTest {.ExpectedState = TokenizerState::BeforeAttributeValue,
+                  .Input = InsertNull(U"<div data", U"value="),
+                  .Errors = {{HTMLParseError::UnexpectedNullCharacter}}}))
 
-    expected = U"";
-    expectedErrorCount = 1;
+  TEST("AttributeName", "Treats QuotationMark as anything else but with parse error",
+       (UnitTest {.ExpectedState = TokenizerState::BeforeAttributeValue,
+                  .Input = U"<div data\"value=",
+                  .Errors = {{HTMLParseError::UnexpectedCharacterInAttributeName}}}))
 
-    utf32_string input = U"<a data";
-    input.append(1uz, U'\0');
-    input.append(U"value=");
-    inputStream.Append(std::move(input));
+  TEST("AttributeName", "Treats Apostrophe as anything else but with parse error",
+       (UnitTest {.ExpectedState = TokenizerState::BeforeAttributeValue,
+                  .Input = U"<div data'value=",
+                  .Errors = {{HTMLParseError::UnexpectedCharacterInAttributeName}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeValue);
-  }
-
-  TEST_CASE("HTMLTokenizer(AttributeName) - Treats QuotationMark as anything else but with parse error",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<a data\"value=");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedCharacterInAttributeName);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeValue);
-  }
-
-  TEST_CASE("HTMLTokenizer(AttributeName) - Treats Apostrophe as anything else but with parse error",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<a data'value=");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedCharacterInAttributeName);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeValue);
-  }
-
-  TEST_CASE("HTMLTokenizer(AttributeName) - Treats LessThanSign as anything else but with parse error",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<a data<value=");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedCharacterInAttributeName);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeValue);
-  }
+  TEST("AttributeName", "Treats LessThanSign as anything else but with parse error",
+       (UnitTest {.ExpectedState = TokenizerState::BeforeAttributeValue,
+                  .Input = U"<div data<value=",
+                  .Errors = {{HTMLParseError::UnexpectedCharacterInAttributeName}}}))
 
 #pragma endregion
 
 #pragma region AfterAttributeName
 
-  TEST_CASE("HTMLTokenizer(AfterAttributeName) - ignores whitespace and stays in the same state when parsing "
-            "whitespace",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::AfterAttributeName);
+  TEST("AfterAttributeName", "ignores whitespace and stays in the same state when parsing whitespace",
+       (UnitTest {.InitialState = TokenizerState::AfterAttributeName,
+                  .ExpectedState = TokenizerState::AfterAttributeName,
+                  .Input = U"   \t\n\r"}))
 
-    expected = U"";
-    inputStream.Append(U"   \t\n\r");
+  TEST("AfterAttributeName", "switches to SelfClosingStartTag when parsing Solidus",
+       (UnitTest {.InitialState = TokenizerState::AfterAttributeName,
+                  .ExpectedState = TokenizerState::SelfClosingStartTag,
+                  .Input = U"/"}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AfterAttributeName);
-  }
-
-  TEST_CASE("HTMLTokenizer(AfterAttributeName) - switches to SelfClosingStartTag when parsing Solidus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::AfterAttributeName);
-
-    expected = U"";
-    inputStream.Append(U"/");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::SelfClosingStartTag);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(AfterAttributeName) - switches to BeforeAttributeValue after parsing an EqualsSign",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    inputStream.Append(U"<a b=");
-    expected = U"";
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeValue);
-  }
+  TEST("AfterAttributeName", "switches to BeforeAttributeValue after parsing an EqualsSign",
+       (UnitTest {.InitialState = TokenizerState::Data,
+                  .ExpectedState = TokenizerState::BeforeAttributeValue,
+                  .Input = U"<a b="}))
 
   TEST("AfterAttributeName", "switches to Data and emits the current tag when parsing GreaterThanSign",
        (UnitTest {
          .Input = U"<div b>",
          .Output = {CreateStartTagToken({.Name = U"div", .Attributes = {{.Name = U"b", .Value = U""}}})}}))
 
-  TEST_CASE("HTMLTokenizer(AfterAttributeName) - Emits EOF token if EOF is reached", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("AfterAttributeName", "Emits EOF token if EOF is reached",
+       (UnitTest {.Input = U"<div b ",
+                  .AppendEOF = true,
+                  .Output = {CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInTag}}}))
 
-    inputStream.Append(U"<div b ", IsEOF(true));
-    expected = U"";
-    expectedErrorCount = 1;
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    REQUIRE(errors.back() == HTMLParseError::EOFInTag);
-  }
-
-  TEST_CASE("HTMLTokenizer(AfterAttributeName) - treats any other character as the start of a new "
-            "attribute name",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<div a b");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AttributeName);
-  }
+  TEST("AfterAttributeName", "treats any other character as the start of a new attribute name",
+       (UnitTest {.ExpectedState = TokenizerState::AttributeName, .Input = U"<div a b"}))
 
 #pragma endregion
 
 #pragma region BeforeAttributeValue
 
-  TEST_CASE(
-    "HTMLTokenizer(BeforeAttributeValue) - ignores whitespace and stays in the same state when parsing "
-    "whitespace",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::BeforeAttributeValue);
+  TEST("BeforeAttributeValue", "ignores whitespace and stays in the same state when parsing whitespace",
+       (UnitTest {.InitialState = TokenizerState::BeforeAttributeValue,
+                  .ExpectedState = TokenizerState::BeforeAttributeValue,
+                  .Input = U"   \t\n\r"}))
 
-    expected = U"";
-    inputStream.Append(U"   \t\n\r");
-    NextTokenPtr token = tokenizer.NextToken();
+  TEST("BeforeAttributeValue", "switches to AttributeValueDoubleQuoted when parsing QuotationMark",
+       (UnitTest {.ExpectedState = TokenizerState::AttributeValueDoubleQuoted, .Input = U"<div a=\""}))
 
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeValue);
-  }
+  TEST("BeforeAttributeValue", "switches to AttributeValueSingleQuoted when parsing Apostrophe",
+       (UnitTest {.ExpectedState = TokenizerState::AttributeValueSingleQuoted, .Input = U"<div a='"}))
 
-  TEST_CASE("HTMLTokenizer(BeforeAttributeValue) - switches to AttributeValueDoubleQuoted when parsing "
-            "QuotationMark",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::BeforeAttributeValue);
+  TEST("BeforeAttributeValue",
+       "emits current tag token and switches to Data with parser error when parsing GreaterThanSign",
+       (UnitTest {
+         .Input = U"<div a=>",
+         .Output = {CreateStartTagToken({.Name = U"div", .Attributes = {{.Name = U"a", .Value = U""}}})},
+         .Errors = {{HTMLParseError::MissingAttributeValue}}}))
 
-    expected = U"";
-    inputStream.Append(U"\"");
+  TEST("BeforeAttributeValue", "switches to AttributeValueUnquoted when parsing any other character",
+       (UnitTest {.ExpectedState = TokenizerState::AttributeValueUnquoted, .Input = U"<div a=value"}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AttributeValueDoubleQuoted);
-  }
-
-  TEST_CASE("HTMLTokenizer(BeforeAttributeValue) - switches to AttributeValueSingleQuoted when parsing "
-            "Apostrophe",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::BeforeAttributeValue);
-
-    expected = U"";
-    inputStream.Append(U"'");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AttributeValueSingleQuoted);
-  }
-
-  TEST_CASE("HTMLTokenizer(BeforeAttributeValue) - emits current tag token and switches to Data with parser "
-            "error when parsing "
-            "GreaterThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"div";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<div a=>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
-
-    REQUIRE(errors.back() == HTMLParseError::MissingAttributeValue);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-  }
-
-  TEST_CASE("HTMLTokenizer(BeforeAttributeValue) - switches to AttributeValueUnquoted when parsing any "
-            "other character",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<div a=a");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AttributeValueUnquoted);
-  }
+  TEST("BeforeAttributeValue", "emits EOF token if EOF is reached",
+       (UnitTest {.Input = U"<div a=",
+                  .AppendEOF = true,
+                  .Output = {CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInTag}}}))
 
 #pragma endregion
 
 #pragma region AttributeValueDoubleQuoted
 
-  TEST_CASE("HTMLTokenizer(AttributeValueDoubleQuoted) - switches to AfterAttributeValueQuoted when parsing "
-            "QuotationMark",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::AttributeValueDoubleQuoted);
+  TEST("AttributeValueDoubleQuoted", "switches to AfterAttributeValueQuoted when parsing QuotationMark ",
+       (UnitTest {.ExpectedState = TokenizerState::AfterAttributeValueQuoted, .Input = U"<div a=\"value\""}))
 
-    inputStream.Append(U"\"");
-    expected = U"";
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AfterAttributeValueQuoted);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(AttributeValueDoubleQuoted) - Switches to CharacterReference when parsing Ampersand",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::AttributeValueDoubleQuoted);
-
-    inputStream.Append(U"&");
-    expected = U"";
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CharacterReference);
-  }
+  TEST("AttributeValueDoubleQuoted", "switches to CharacterReference when parsing Ampersand ",
+       (UnitTest {.ExpectedState = TokenizerState::CharacterReference, .Input = U"<div a=\"value&"}))
 
   TEST("AttributeValueDoubleQuoted", "Replaces null character with U+FFFD",
        (UnitTest {.Input = InsertNull(U"<div a=\"value", U"\">"),
                   .Output = {CreateStartTagToken({.Name = U"div",
                                                   .Attributes = {{.Name = U"a", .Value = U"value\xFFFD"}}})},
-                  .Errors = {{.Error = HTMLParseError::UnexpectedNullCharacter}}}))
+                  .Errors = {{HTMLParseError::UnexpectedNullCharacter}}}))
 
   TEST("AttributeValueDoubleQuoted", "Emits EOF instead of tag if EOF reached",
-       (UnitTest {.AppendEOF = true,
-                  .Input = U"<div a=\"value",
+       (UnitTest {.Input = U"<div a=\"value",
+                  .AppendEOF = true,
                   .Output = {CreateEOFToken()},
                   .Errors = {{.Error = HTMLParseError::EOFInTag}}}))
 
@@ -2895,33 +1671,11 @@ namespace Krys::Tests
 
 #pragma region AttributeValueSingleQuoted
 
-  TEST_CASE("HTMLTokenizer(AttributeValueSingleQuoted) - switches to AfterAttributeValueQuoted when parsing "
-            "Apostrophe",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::AttributeValueSingleQuoted);
+  TEST("AttributeValueSingleQuoted", "switches to AfterAttributeValueQuoted when parsing Apostrophe ",
+       (UnitTest {.ExpectedState = TokenizerState::AfterAttributeValueQuoted, .Input = U"<div a='value'"}))
 
-    inputStream.Append(U"'");
-    expected = U"";
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AfterAttributeValueQuoted);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(AttributeValueSingleQuoted) - Switches to CharacterReference when parsing Ampersand",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::AttributeValueSingleQuoted);
-
-    inputStream.Append(U"&");
-    expected = U"";
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CharacterReference);
-  }
+  TEST("AttributeValueSingleQuoted", "switches to CharacterReference when parsing Ampersand ",
+       (UnitTest {.ExpectedState = TokenizerState::CharacterReference, .Input = U"<div a='value&"}))
 
   TEST("AttributeValueSingleQuoted", "Replaces null character with U+FFFD",
        (UnitTest {.Input = InsertNull(U"<div a='value", U"'>"),
@@ -2929,64 +1683,21 @@ namespace Krys::Tests
                                                   .Attributes = {{.Name = U"a", .Value = U"value\xFFFD"}}})},
                   .Errors = {{.Error = HTMLParseError::UnexpectedNullCharacter}}}))
 
-  TEST_CASE("HTMLTokenizer(AttributeValueSingleQuoted) - Emits EOF instead of tag if EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-    expected = U"";
-    expectedErrorCount = 1;
+  TEST("AttributeValueSingleQuoted", "Emits EOF instead of tag if EOF reached",
+       (UnitTest {.Input = U"<div a='value",
+                  .AppendEOF = true,
+                  .Output = {CreateEOFToken()},
+                  .Errors = {{.Error = HTMLParseError::EOFInTag}}}))
 
-    inputStream.Append(U"<div a='value", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    REQUIRE(errors.back() == HTMLParseError::EOFInTag);
-  }
-
-  TEST_CASE("HTMLTokenizer(AttributeValueSingleQuoted) - appends to attribute value when parsing any "
-            "other character",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<div a='value");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AttributeValueSingleQuoted);
-  }
+  TEST("AttributeValueSingleQuoted", "appends to attribute value when parsing any other character",
+       (UnitTest {
+         .Input = U"<div a='valúe'>",
+         .Output = {CreateStartTagToken({.Name = U"div", .Attributes = {{.Name = U"a", .Value = U"valúe"}}})},
+       }))
 
 #pragma endregion
 
 #pragma region AttributeValueUnquoted
-
-  TEST_CASE("HTMLTokenizer(AttributeValueUnquoted) - switches to BeforeAttributeName when parsing "
-            "whitespace",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    inputStream.Append(U"<div a=value ");
-    expected = U"";
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeName);
-  }
-
-  TEST_CASE("HTMLTokenizer(AttributeValueUnquoted) - Switches to CharacterReference when parsing Ampersand",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::AttributeValueUnquoted);
-
-    inputStream.Append(U"&");
-    expected = U"";
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CharacterReference);
-  }
 
   TEST("AttributeValueUnquoted", "switches to Data and emits the current tag when parsing GreaterThanSign",
        (UnitTest {
@@ -3030,2455 +1741,917 @@ namespace Krys::Tests
                                                   .Attributes = {{.Name = U"a", .Value = U"val`ue"}}})},
                   .Errors = {{.Error = HTMLParseError::UnexpectedCharacterInUnquotedAttributeValue}}}))
 
-  TEST_CASE("HTMLTokenizer(AttributeValueUnquoted) - Emits EOF instead of tag if EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("AttributeValueUnquoted", "switches to BeforeAttributeName when parsing whitespace",
+       (UnitTest {.ExpectedState = TokenizerState::BeforeAttributeName, .Input = U"<div a=value "}))
 
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<div a=value", IsEOF(true));
+  TEST("AttributeValueUnquoted", "switches to CharacterReference when parsing Ampersand",
+       (UnitTest {.ExpectedState = TokenizerState::CharacterReference, .Input = U"<div a=value&"}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    REQUIRE(errors.back() == HTMLParseError::EOFInTag);
-  }
+  TEST("AttributeValueUnquoted", "Emits EOF instead of tag if EOF reached",
+       (UnitTest {.Input = U"<div a=value",
+                  .AppendEOF = true,
+                  .Output = {CreateEOFToken()},
+                  .Errors = {{.Error = HTMLParseError::EOFInTag}}}))
 
 #pragma endregion
 
 #pragma region AfterAttributeValueQuoted
-
-  TEST_CASE(
-    "HTMLTokenizer(AfterAttributeValueQuoted) - ignores whitespace and switches to BeforeAttributeName "
-    "when parsing whitespace",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<div a=\"value\"   \t\n\r");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeName);
-  }
-
-  TEST_CASE("HTMLTokenizer(AfterAttributeValueQuoted) - switches to SelfClosingStartTag when parsing Solidus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<div a=\"value\"/");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::SelfClosingStartTag);
-  }
 
   TEST("AfterAttributeValueQuoted", "switches to Data and emits the current tag when parsing GreaterThanSign",
        (UnitTest {.Input = U"<div a=\"value\">",
                   .Output = {CreateStartTagToken({.Name = U"div",
                                                   .Attributes = {{.Name = U"a", .Value = U"value"}}})}}))
 
-  TEST_CASE("HTMLTokenizer(AfterAttributeValueQuoted) - Emits EOF instead of tag if EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("AfterAttributeValueQuoted",
+       "ignores whitespace and switches to BeforeAttributeName when parsing whitespace",
+       (UnitTest {.ExpectedState = TokenizerState::BeforeAttributeName,
+                  .Input = U"<div a=\"value\"   \t\n\r"}))
 
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<div a=\"value\"", IsEOF(true));
+  TEST("AfterAttributeValueQuoted", "switches to SelfClosingStartTag when parsing Solidus",
+       (UnitTest {.ExpectedState = TokenizerState::SelfClosingStartTag, .Input = U"<div a=\"value\"/"}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    REQUIRE(errors.back() == HTMLParseError::EOFInTag);
-  }
+  TEST("AfterAttributeValueQuoted", "Emits EOF instead of tag if EOF reached",
+       (UnitTest {.Input = U"<div a=\"value\"",
+                  .AppendEOF = true,
+                  .Output = {CreateEOFToken()},
+                  .Errors = {{.Error = HTMLParseError::EOFInTag}}}))
 
-  TEST_CASE("HTMLTokenizer(AfterAttributeValueQuoted) - Treats anything else as missing whitespace and "
-            "switches to AttributeName",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<div a=\"value\"b");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AttributeName);
-    REQUIRE(errors.back() == HTMLParseError::MissingWhitespaceBetweenAttributes);
-  }
+  TEST("AfterAttributeValueQuoted",
+       "Treats anything else as missing whitespace and switches to AttributeName",
+       (UnitTest {.ExpectedState = TokenizerState::AttributeName,
+                  .Input = U"<div a=\"value\"b",
+                  .Errors = {{.Error = HTMLParseError::MissingWhitespaceBetweenAttributes}}}))
 
 #pragma endregion
 
 #pragma region SelfClosingStartTag
 
-  TEST_CASE("HTMLTokenizer(SelfClosingStartTag) - switches to Data and emits the current tag as self-"
-            "closing when parsing GreaterThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("SelfClosingStartTag",
+       "switches to Data and emits the current tag as self-closing when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<div />",
+                  .Output = {CreateStartTagToken({.Name = U"div", .SelfClosing = true})}}))
 
-    expected = U"div";
-    inputStream.Append(U"<div />");
+  TEST("SelfClosingStartTag", "Emits EOF instead of tag if EOF reached",
+       (UnitTest {.Input = U"<div /",
+                  .AppendEOF = true,
+                  .Output = {CreateEOFToken()},
+                  .Errors = {{.Error = HTMLParseError::EOFInTag}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
-    REQUIRE(token->IsSelfClosing());
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-  }
-
-  TEST_CASE("HTMLTokenizer(SelfClosingStartTag) - Emits EOF instead of tag if EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<div /", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    REQUIRE(errors.back() == HTMLParseError::EOFInTag);
-  }
-
-  TEST_CASE("HTMLTokenizer(SelfClosingStartTag) - Treats anything else as missing Solidus with "
-            "parser error and switches to AttributeName",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<div /a");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AttributeName);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedSolidusInTag);
-  }
+  TEST("SelfClosingStartTag",
+       "Treats anything else as missing Solidus with parser error and switches to AttributeName",
+       (UnitTest {.ExpectedState = TokenizerState::AttributeName,
+                  .Input = U"<div /a",
+                  .Errors = {{.Error = HTMLParseError::UnexpectedSolidusInTag}}}))
 
 #pragma endregion
 
 #pragma region BogusComment
 
-  TEST_CASE("HTMLTokenizer(BogusComment) - emits comment and switches to Data when parsing GreaterThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("BogusComment", "emits comment and switches to Data when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<?comment>",
+                  .Output = {CreateCommentToken(U"?comment")},
+                  .Errors = {{.Error = HTMLParseError::UnexpectedQuestionMarkInsteadOfTagName}}}))
 
-    expected = U"?comment";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<?comment>");
+  TEST("BogusComment", "emits comment and then EOF when EOF reached",
+       (UnitTest {.Input = U"<?comment",
+                  .AppendEOF = true,
+                  .Output = {CreateCommentToken(U"?comment"), CreateEOFToken()},
+                  .Errors = {{.Error = HTMLParseError::UnexpectedQuestionMarkInsteadOfTagName}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Comment);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-  }
+  TEST("BogusComment", "appends to comment when parsing NullCharacter",
+       (UnitTest {.ExpectedState = TokenizerState::BogusComment,
+                  .Input = InsertNull(U"<?com", U"ment>"),
+                  .Output = {CreateCommentToken(U"?com\xFFFDment")},
+                  .Errors = {{.Error = HTMLParseError::UnexpectedQuestionMarkInsteadOfTagName},
+                             {.Error = HTMLParseError::UnexpectedNullCharacter}}}))
 
-  TEST_CASE("HTMLTokenizer(BogusComment) - emits comment and then EOF when EOF reached", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    inputStream.Append(U"<?comment", IsEOF(true));
-
-    expected = U"?comment";
-    expectedErrorCount = 1;
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Comment);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(BogusComment) - appends to comment when parsing NullCharacter",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"?com\xFFFDm";
-    expectedErrorCount = 2;
-    utf32_string input = U"<?com";
-    input.append(1uz, U'\0');
-    input.append(U"m>");
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Comment);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-  }
-
-  TEST_CASE("HTMLTokenizer(BogusComment) - appends to comment when parsing any other character",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"?comm";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<?comm>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Comment);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-  }
+  TEST("BogusComment", "appends to comment when parsing any other character",
+       (UnitTest {.ExpectedState = TokenizerState::BogusComment,
+                  .Input = U"<?comm>",
+                  .Output = {CreateCommentToken(U"?comm")},
+                  .Errors = {{.Error = HTMLParseError::UnexpectedQuestionMarkInsteadOfTagName}}}))
 
 #pragma endregion
 
 #pragma region MarkupDeclarationOpen
 
-  TEST_CASE("HTMLTokenizer(MarkupDeclarationOpen) - switches to CommentStart when parsing DoubleHyphen",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::MarkupDeclarationOpen);
+  TEST("MarkupDeclarationOpen", "switches to CommentStart when parsing DoubleHyphen",
+       (UnitTest {.ExpectedState = TokenizerState::CommentStart, .Input = U"<!--"}))
 
-    expected = U"";
-    inputStream.Append(U"--");
+  TEST("MarkupDeclarationOpen", "switches to DOCTYPE when parsing 'DOCTYPE'",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPE, .Input = U"<!DOCTYPE"}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CommentStart);
-  }
+  TEST("MarkupDeclarationOpen", "switches to DOCTYPE when parsing 'DOCTYPE', mixed case",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPE, .Input = U"<!DoCtYpe"}))
 
-  TEST_CASE("HTMLTokenizer(MarkupDeclarationOpen) - switches to DOCTYPE when parsing 'DOCTYPE'",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::MarkupDeclarationOpen);
+  TEST("MarkupDeclarationOpen", "switches to BogusComment with parser error when parsing anything else",
+       (UnitTest {.ExpectedState = TokenizerState::BogusComment,
+                  .Input = U"<!comment",
+                  .Errors = {{.Error = HTMLParseError::IncorrectlyOpenedComment}}}))
 
-    expected = U"";
-    inputStream.Append(U"DOCTYPE");
+  TEST("MarkupDeclarationOpen", "Switches to CDATASection when parsing '[CDATA[' and CDATA is allowed",
+       (UnitTest {.ExpectedState = TokenizerState::CDATASection,
+                  .Input = U"<![CDATA[",
+                  .Setup = [](HTMLTokenizer &tokenizer)
+                  {
+                    tokenizer.SetCDATASectionsAllowed(true);
+                  }}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPE);
-  }
-
-  TEST_CASE("HTMLTokenizer(MarkupDeclarationOpen) - switches to DOCTYPE when parsing 'DOCTYPE', mixed case",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::MarkupDeclarationOpen);
-
-    expected = U"";
-    inputStream.Append(U"DoCtYpe");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPE);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(MarkupDeclarationOpen) - switches to CDATASection when parsing '[CDATA[' and CDATA "
-    "is allowed",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::MarkupDeclarationOpen);
-    tokenizer.SetCDATASectionsAllowed(true);
-
-    expected = U"";
-    inputStream.Append(U"[CDATA[");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CDATASection);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(MarkupDeclarationOpen) - switches to BogusComment when parsing '[CDATA[' and CDATA "
-    "is not allowed",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::MarkupDeclarationOpen);
-    tokenizer.SetCDATASectionsAllowed(false);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"[CDATA[");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BogusComment);
-    REQUIRE(errors.back() == HTMLParseError::CDATAInHTMLContent);
-  }
-
-  TEST_CASE("HTMLTokenizer(MarkupDeclarationOpen) - switches to BogusComment with parser error when "
-            "parsing anything else",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::MarkupDeclarationOpen);
-
-    expected = U"!comment";
-    expectedErrorCount = 1;
-    inputStream.Append(U"!comment>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Comment);
-    REQUIRE(errors.back() == HTMLParseError::IncorrectlyOpenedComment);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-  }
+  TEST("MarkupDeclarationOpen", "Switches to BogusComment when parsing '[CDATA[' and CDATA is not allowed",
+       (UnitTest {.ExpectedState = TokenizerState::BogusComment,
+                  .Input = U"<![CDATA[",
+                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.SetCDATASectionsAllowed(false); },
+                  .Errors = {{.Error = HTMLParseError::CDATAInHTMLContent}}}))
 
 #pragma endregion
 
 #pragma region CommentStart
 
-  TEST_CASE("HTMLTokenizer(CommentStart) - switches to CommentStartDash when parsing HyphenMinus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("CommentStart", "switches to CommentStartDash when parsing HyphenMinus",
+       (UnitTest {.ExpectedState = TokenizerState::CommentStartDash, .Input = U"<!---"}))
 
-    expected = U"";
-    inputStream.Append(U"<!---");
+  TEST("CommentStart", "switches to Data and emits comment with parser error when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<!-->",
+                  .Output = {CreateCommentToken(U"")},
+                  .Errors = {{.Error = HTMLParseError::AbruptClosingOfEmptyComment}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CommentStartDash);
-  }
-
-  TEST_CASE("HTMLTokenizer(CommentStart) - switches to Data and emits comment when parsing GreaterThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!-->");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Comment);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-    REQUIRE(errors.back() == HTMLParseError::AbruptClosingOfEmptyComment);
-  }
-
-  TEST_CASE("HTMLTokenizer(CommentStart) - reconsumes in Comment for anything else", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<!--c");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
-  }
+  TEST("CommentStart", "reconsumes in Comment for anything else",
+       (UnitTest {.ExpectedState = TokenizerState::Comment, .Input = U"<!--c"}))
 
 #pragma endregion
 
 #pragma region CommentStartDash
 
-  TEST_CASE("HTMLTokenizer(CommentStartDash) - switches to CommentEnd when parsing HyphenMinus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("CommentStartDash", "switches to CommentEnd when parsing HyphenMinus",
+       (UnitTest {.ExpectedState = TokenizerState::CommentEnd, .Input = U"<!----"}))
 
-    expected = U"";
-    inputStream.Append(U"<!----");
+  TEST("CommentStartDash",
+       "switches to Data and emits comment with parser error when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<!--->",
+                  .Output = {CreateCommentToken(U"")},
+                  .Errors = {{.Error = HTMLParseError::AbruptClosingOfEmptyComment}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CommentEnd);
-  }
+  TEST("CommentStartDash", "Emits comment and then EOF when EOF reached",
+       (UnitTest {.Input = U"<!---comment",
+                  .AppendEOF = true,
+                  .Output = {CreateCommentToken(U"-comment"), CreateEOFToken()},
+                  .Errors = {{.Error = HTMLParseError::EOFInComment}}}))
 
-  TEST_CASE(
-    "HTMLTokenizer(CommentStartDash) - switches to Data and emits comment when parsing GreaterThanSign",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!--->");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Comment);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-    REQUIRE(errors.back() == HTMLParseError::AbruptClosingOfEmptyComment);
-  }
-
-  TEST_CASE("HTMLTokenizer(CommentStartDash) - Emits comment and then EOF when EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"-comment";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!---comment", IsEOF(true));
-
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Comment);
-      REQUIRE(errors.back() == HTMLParseError::EOFInComment);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(CommentStartDash) - emits HyphenMinus and reconsumes in Comment for anything else",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<!---c");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
-  }
+  TEST("CommentStartDash", "reconsumes in Comment for anything else",
+       (UnitTest {.ExpectedState = TokenizerState::Comment, .Input = U"<!---c"}))
 
 #pragma endregion
 
 #pragma region Comment
 
-  TEST_CASE("HTMLTokenizer(Comment) - switches to CommentLessThanSign when parsing LessThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("Comment", "switches to CommentLessThanSign when parsing LessThanSign",
+       (UnitTest {.ExpectedState = TokenizerState::CommentLessThanSign, .Input = U"<!--a<"}))
 
-    expected = U"comment";
-    inputStream.Append(U"<!--a<");
+  TEST("Comment", "switches to CommentEndDash when parsing HyphenMinus",
+       (UnitTest {.ExpectedState = TokenizerState::CommentEndDash, .Input = U"<!--comment-"}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CommentLessThanSign);
-  }
+  TEST("Comment", "Replaces null character with U+FFFD",
+       (UnitTest {.Input = InsertNull(U"<!--com", U"ment-->"),
+                  .Output = {CreateCommentToken(U"com\xFFFDment")},
+                  .Errors = {{.Error = HTMLParseError::UnexpectedNullCharacter}}}))
 
-  TEST_CASE("HTMLTokenizer(Comment) - switches to CommentEndDash when parsing HyphenMinus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("Comment", "emits comment and then EOF when EOF reached",
+       (UnitTest {.Input = U"<!--comment",
+                  .AppendEOF = true,
+                  .Output = {CreateCommentToken(U"comment"), CreateEOFToken()},
+                  .Errors = {{.Error = HTMLParseError::EOFInComment}}}))
 
-    expected = U"com";
-    inputStream.Append(U"<!--com-");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CommentEndDash);
-  }
-
-  TEST_CASE("HTMLTokenizer(Comment) - Replaces null character with U+FFFD when parsing NullCharacter",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    utf32_string input = U"<!--com";
-    input.append(1uz, U'\0');
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
-  }
-
-  TEST_CASE("HTMLTokenizer(Comment) - Emits comment and then EOF when EOF reached", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"comment";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!--comment", IsEOF(true));
-
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Comment);
-      REQUIRE(errors.back() == HTMLParseError::EOFInComment);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(Comment) - appends to comment when parsing any other character",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"comment";
-    inputStream.Append(U"<!--comment");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
-  }
+  TEST("Comment", "appends to comment when parsing any other character",
+       (UnitTest {.ExpectedState = TokenizerState::Comment, .Input = U"<!--comment"}))
 
 #pragma endregion
 
 #pragma region CommentLessThanSign
 
-  TEST_CASE("HTMLTokenizer(CommentLessThanSign) - switches to CommentLessThanSignBang when parsing "
-            "ExclamationMark",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("CommentLessThanSign", "witches to CommentLessThanSignBang when parsing ExclamationMark",
+       (UnitTest {.ExpectedState = TokenizerState::CommentLessThanSignBang, .Input = U"<!--a<!"}))
 
-    expected = U"";
-    inputStream.Append(U"<!--a<!");
+  TEST("CommentLessThanSign",
+       "appends LessThanSign and remains in CommentLessThanSign when parsing LessThanSign",
+       (UnitTest {.ExpectedState = TokenizerState::CommentLessThanSign, .Input = U"<!--a<<"}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CommentLessThanSignBang);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(CommentLessThanSign) - appends LessThanSign and remains in CommentLessThanSign when "
-    "parsing LessThanSign",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<!--a<<");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CommentLessThanSign);
-  }
-
-  TEST_CASE("HTMLTokenizer(CommentLessThanSign) - reconsumes in Comment for anything else",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<!--a<b");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
-  }
+  TEST("CommentLessThanSign", "reconsumes in Comment for anything else",
+       (UnitTest {.ExpectedState = TokenizerState::Comment, .Input = U"<!--a<b"}))
 
 #pragma endregion
 
 #pragma region CommentLessThanSignBang
 
-  TEST_CASE("HTMLTokenizer(CommentLessThanSignBang) - switches to CommentLessThanSignBangDash when parsing "
-            "HyphenMinus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("CommentLessThanSignBang", "switches to CommentLessThanSignBangDash when parsing HyphenMinus",
+       (UnitTest {.ExpectedState = TokenizerState::CommentLessThanSignBangDash, .Input = U"<!--a<!-"}))
 
-    expected = U"";
-    inputStream.Append(U"<!--a<!-");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CommentLessThanSignBangDash);
-  }
-
-  TEST_CASE("HTMLTokenizer(CommentLessThanSignBang) - reconsumes in Comment for anything else",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<!--a<!b");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
-  }
+  TEST("CommentLessThanSignBang", "reconsumes in Comment for anything else",
+       (UnitTest {.ExpectedState = TokenizerState::Comment, .Input = U"<!--a<!b"}))
 
 #pragma endregion
 
 #pragma region CommentLessThanSignBangDash
 
-  TEST_CASE("HTMLTokenizer(CommentLessThanSignBangDash) - switches to CommentLessThanSignBangDashDash when "
-            "parsing HyphenMinus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("CommentLessThanSignBangDash", "switches to CommentLessThanSignBangDashDash when parsing HyphenMinus",
+       (UnitTest {.ExpectedState = TokenizerState::CommentLessThanSignBangDashDash, .Input = U"<!--a<!--"}))
 
-    expected = U"";
-    inputStream.Append(U"<!--a<!--");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CommentLessThanSignBangDashDash);
-  }
-
-  TEST_CASE("HTMLTokenizer(CommentLessThanSignBangDash) - reconsumes in Comment for anything else",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<!--a<!-b");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
-  }
+  TEST("CommentLessThanSignBangDash", "reconsumes in Comment for anything else",
+       (UnitTest {.ExpectedState = TokenizerState::Comment, .Input = U"<!--a<!-b"}))
 
 #pragma endregion
 
 #pragma region CommentLessThanSignBangDashDash
 
-  TEST_CASE("HTMLTokenizer(CommentLessThanSignBangDashDash) - emits comment when parsing GreaterThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("CommentLessThanSignBangDashDash", "emits comment when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<!--a<!-->", .Output = {CreateCommentToken(U"a<!")}}))
 
-    expected = U"a<!";
-    inputStream.Append(U"<!--a<!-->");
+  TEST("CommentLessThanSignBangDashDash", "emits comment with parser error followed by EOF when parsing EOF",
+       (UnitTest {.ExpectedState = TokenizerState::Data,
+                  .Input = U"<!--a<!--",
+                  .AppendEOF = true,
+                  .Output = {CreateCommentToken(U"a<!"), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInComment}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Comment);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-  }
-
-  TEST_CASE("HTMLTokenizer(CommentLessThanSignBangDashDash) - emits comment with parser error followed by "
-            "EOF when parsing EOF",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"a<!";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!--a<!--", IsEOF(true));
-
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Comment);
-      REQUIRE(errors.back() == HTMLParseError::EOFInComment);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(CommentLessThanSignBangDashDash) - reconsumes in Comment with parser error for "
-            "anything else",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!--a<!--b");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
-    REQUIRE(errors.back() == HTMLParseError::NestedComment);
-  }
+  TEST("CommentLessThanSignBangDashDash", "reconsumes in Comment for anything else",
+       (UnitTest {.ExpectedState = TokenizerState::Comment,
+                  .Input = U"<!--a<!--b",
+                  .Errors = {{HTMLParseError::NestedComment}}}))
 
 #pragma endregion
 
 #pragma region CommentEndDash
 
-  TEST_CASE("HTMLTokenizer(CommentEndDash) - switches to CommentEnd when parsing HyphenMinus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("CommentEndDash", "switches to CommentEnd when parsing HyphenMinus",
+       (UnitTest {.ExpectedState = TokenizerState::CommentEnd, .Input = U"<!--com--"}))
 
-    expected = U"";
-    inputStream.Append(U"<!--com--");
+  TEST("CommentEndDash", "emits comment with parser error followed by EOF when parsing EOF",
+       (UnitTest {.Input = U"<!--com-",
+                  .AppendEOF = true,
+                  .Output = {CreateCommentToken(U"com"), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInComment}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CommentEnd);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(CommentEndDash) - emits comment with parser error followed by EOF when parsing EOF",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!--com-", IsEOF(true));
-
-    expected = U"com";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Comment);
-      REQUIRE(errors.back() == HTMLParseError::EOFInComment);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(CommentEndDash) - reconsumes in Comment for anything else", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<!--com-a");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
-  }
+  TEST("CommentEndDash", "reconsumes in Comment for anything else",
+       (UnitTest {.ExpectedState = TokenizerState::Comment, .Input = U"<!--com-a"}))
 
 #pragma endregion
 
 #pragma region CommentEnd
 
-  TEST_CASE("HTMLTokenizer(CommentEnd) - emits comment when parsing GreaterThanSign", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-    expected = U"comment";
-    inputStream.Append(U"<!--comment-->");
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Comment);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-  }
+  TEST("CommentEnd", "emits comment when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<!--comment-->", .Output = {CreateCommentToken(U"comment")}}))
 
-  TEST_CASE("HTMLTokenizer(CommentEnd) - switches to CommentEndBang when parsing Exclamation",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("CommentEnd", "switches to CommentEndBang when parsing Exclamation",
+       (UnitTest {.ExpectedState = TokenizerState::CommentEndBang, .Input = U"<!--comment--!"}))
 
-    expected = U"";
-    inputStream.Append(U"<!--comment--!");
+  TEST("CommentEnd", "remains in CommentEnd when parsing HyphenMinus",
+       (UnitTest {.ExpectedState = TokenizerState::CommentEnd, .Input = U"<!--comment---"}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CommentEndBang);
-  }
+  TEST("CommentEnd", "emits comment with parser error followed by EOF when parsing EOF",
+       (UnitTest {.Input = U"<!--comment--",
+                  .AppendEOF = true,
+                  .Output = {CreateCommentToken(U"comment"), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInComment}}}))
 
-  TEST_CASE("HTMLTokenizer(CommentEnd) - remains in CommentEnd when parsing HyphenMinus", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<!--comment---");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CommentEnd);
-  }
-
-  TEST_CASE("HTMLTokenizer(CommentEnd) - emits comment with parser error followed by EOF when parsing EOF",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!--comment--", IsEOF(true));
-
-    expected = U"comment";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Comment);
-      REQUIRE(errors.back() == HTMLParseError::EOFInComment);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(CommentEnd) - reconsumes in Comment with parser error for anything else",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<!--comment--a");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
-  }
+  TEST("CommentEnd", "reconsumes in Comment with parser error for anything else",
+       (UnitTest {.ExpectedState = TokenizerState::Comment, .Input = U"<!--comment--a"}))
 
 #pragma endregion
 
 #pragma region CommentEndBang
 
-  TEST_CASE("HTMLTokenizer(CommentEndBang) - switches to CommentEndDash when parsing HyphenMinus",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("CommentEndBang", "switches to CommentEndDash when parsing HyphenMinus",
+       (UnitTest {.ExpectedState = TokenizerState::CommentEndDash, .Input = U"<!--comment--!-"}))
 
-    expected = U"";
-    inputStream.Append(U"<!--comment--!-");
+  TEST("CommentEndBang", "emits comment when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<!--comment--!>",
+                  .Output = {CreateCommentToken(U"comment")},
+                  .Errors = {{HTMLParseError::IncorrectlyClosedComment}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CommentEndDash);
-  }
+  TEST("CommentEndBang", "emits comment with parser error followed by EOF when parsing EOF",
+       (UnitTest {.Input = U"<!--comment--!",
+                  .AppendEOF = true,
+                  .Output = {CreateCommentToken(U"comment"), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInComment}}}))
 
-  TEST_CASE("HTMLTokenizer(CommentEndBang) - emits comment when parsing GreaterThanSign", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"comment";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!--comment--!>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Comment);
-    REQUIRE(errors.back() == HTMLParseError::IncorrectlyClosedComment);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(CommentEndBang) - emits comment with parser error followed by EOF when parsing EOF",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!--comment--!", IsEOF(true));
-
-    expected = U"comment";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Comment);
-      REQUIRE(errors.back() == HTMLParseError::EOFInComment);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(CommentEndBang) - reconsumes in Comment for anything else", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<!--comment--!a");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Comment);
-  }
+  TEST("CommentEndBang", "reconsumes in Comment for anything else",
+       (UnitTest {.ExpectedState = TokenizerState::Comment, .Input = U"<!--comment--!a"}))
 
 #pragma endregion
 
 #pragma region DOCTYPE
 
-  TEST_CASE("HTMLTokenizer(DOCTYPE) - switches to BeforeDOCTYPEName when parsing whitespace",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::DOCTYPE);
+  TEST("DOCTYPE", "ignores whitespace and switches to BeforeDOCTYPEName when parsing whitespace",
+       (UnitTest {.ExpectedState = TokenizerState::BeforeDOCTYPEName, .Input = U"<!DOCTYPE   \t\n\r"}))
 
-    expected = U"";
-    inputStream.Append(U" ");
+  TEST("DOCTYPE", "emits DOCTYPE token with force-quirks when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<!DOCTYPE>", .Output = {CreateDOCTYPEToken({.ForceQuirks = true})}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeDOCTYPEName);
-  }
+  TEST("DOCTYPE", "emits DOCTYPE token with force-quirks when EOF reached",
+       (UnitTest {.Input = U"<!DOCTYPE",
+                  .AppendEOF = true,
+                  .Output = {CreateDOCTYPEToken({.ForceQuirks = true}), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInDOCTYPE}}}))
 
-  TEST_CASE("HTMLTokenizer(DOCTYPE) - emits DOCTYPE token with force-quirks when parsing GreaterThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-    REQUIRE(token->IsForceQuirks());
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-    REQUIRE(errors.back() == HTMLParseError::MissingDOCTYPEName);
-  }
-
-  TEST_CASE("HTMLTokenizer(DOCTYPE) - emits EOF with force-quirks when EOF reached", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE", IsEOF(true));
-
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-      REQUIRE(token->IsForceQuirks());
-      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(DOCTYPE) - treats anything else as missing whitespace before DOCTYPE name",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPEa");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEName);
-    REQUIRE(errors.back() == HTMLParseError::MissingWhitespaceBeforeDOCTYPEName);
-  }
+  TEST("DOCTYPE", "treats anything else as missing whitespace before DOCTYPE name",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPEName,
+                  .Input = U"<!DOCTYPEa",
+                  .Errors = {{HTMLParseError::MissingWhitespaceBeforeDOCTYPEName}}}))
 
 #pragma endregion
 
 #pragma region BeforeDOCTYPEName
 
-  TEST_CASE("HTMLTokenizer(BeforeDOCTYPEName) - ignores whitespace", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("BeforeDOCTYPEName", "ignores whitespace and stays in the same state when parsing whitespace",
+       (UnitTest {.InitialState = TokenizerState::BeforeDOCTYPEName,
+                  .ExpectedState = TokenizerState::BeforeDOCTYPEName,
+                  .Input = U"   \t\n\r"}))
 
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE   \t\n\r  ");
+  TEST("BeforeDOCTYPEName", "switches to DOCTYPEName when parsing ASCII lower",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPEName, .Input = U"<!DOCTYPE a"}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeDOCTYPEName);
-  }
+  TEST("BeforeDOCTYPEName", "switches to DOCTYPEName when parsing ASCII upper",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPEName, .Input = U"<!DOCTYPE A"}))
 
-  TEST_CASE("HTMLTokenizer(BeforeDOCTYPEName) - switches to DOCTYPEName when parsing ASCII upper",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("BeforeDOCTYPEName", "emits ReplacementCharacter with parser error when parsing Null",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPEName,
+                  .Input = InsertNull(U"<!DOCTYPE", U"a"),
+                  .Errors = {{HTMLParseError::MissingWhitespaceBeforeDOCTYPEName},
+                             {HTMLParseError::UnexpectedNullCharacter}}}))
 
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE A");
+  TEST("BeforeDOCTYPEName", "emits DOCTYPE with force-quirks when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<!DOCTYPE>",
+                  .Output = {CreateDOCTYPEToken({.ForceQuirks = true})},
+                  .Errors = {{HTMLParseError::MissingDOCTYPEName}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEName);
-  }
+  TEST("BeforeDOCTYPEName", "emits DOCTYPE with force-quirks when EOF reached",
+       (UnitTest {.Input = U"<!DOCTYPE",
+                  .AppendEOF = true,
+                  .Output = {CreateDOCTYPEToken({.ForceQuirks = true}), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInDOCTYPE}}}))
 
-  TEST_CASE(
-    "HTMLTokenizer(BeforeDOCTYPEName) - emits ReplacementCharacter with parser error when parsing Null",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    utf32_string input = U"<!DOCTYPE";
-    input.append(1uz, U'\0');
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEName);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-  }
-
-  TEST_CASE("HTMLTokenizer(BeforeDOCTYPEName) - emits DOCTYPE with force-quirks when parsing GreaterThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-    REQUIRE(token->IsForceQuirks());
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-    REQUIRE(errors.back() == HTMLParseError::MissingDOCTYPEName);
-  }
-
-  TEST_CASE("HTMLTokenizer(BeforeDOCTYPEName) - emits DOCTYPE with force-quirks when EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE", IsEOF(true));
-
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-      REQUIRE(token->IsForceQuirks());
-      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(BeforeDOCTYPEName) - treats anything else as start of DOCTYPE name",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPEa");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEName);
-    REQUIRE(errors.back() == HTMLParseError::MissingWhitespaceBeforeDOCTYPEName);
-  }
+  TEST("BeforeDOCTYPEName", "treats anything else as start of DOCTYPE name",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPEName,
+                  .Input = U"<!DOCTYPEa",
+                  .Errors = {{HTMLParseError::MissingWhitespaceBeforeDOCTYPEName}}}))
 
 #pragma endregion
 
 #pragma region DOCTYPEName
 
-  TEST_CASE("HTMLTokenizer(DOCTYPEName) - switches to AfterDOCTYPEName when parsing whitespace",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("DOCTYPEName", "ignores whitespace and switches to AfterDOCTYPEName when parsing whitespace",
+       (UnitTest {.ExpectedState = TokenizerState::AfterDOCTYPEName, .Input = U"<!DOCTYPE HTML5 "}))
 
-    expected = U"HTML5";
-    inputStream.Append(U"<!DOCTYPE HTML5 ");
+  TEST("DOCTYPEName", "switches to Data and emits DOCTYPE when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<!DOCTYPE HTML5>", .Output = {CreateDOCTYPEToken({.Name = U"html5"})}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AfterDOCTYPEName);
-  }
+  TEST("DOCTYPEName", "appends to name when parsing ASCII lower",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPEName, .Input = U"<!DOCTYPE html5"}))
 
-  TEST_CASE("HTMLTokenizer(DOCTYPEName) - switches to Data and emits DOCTYPE when parsing GreaterThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("DOCTYPEName", "appends to name when parsing ASCII upper",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPEName, .Input = U"<!DOCTYPE HTML5"}))
 
-    expected = U"html5";
-    inputStream.Append(U"<!DOCTYPE HTML5>");
+  TEST("DOCTYPEName", "appends ReplacementCharacter with parser error when parsing Null",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPEName,
+                  .Input = InsertNull(U"<!DOCTYPE ht", U"ml5"),
+                  .Errors = {{HTMLParseError::UnexpectedNullCharacter}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-    REQUIRE(!token->IsForceQuirks());
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-  }
+  TEST("DOCTYPEName", "emits DOCTYPE with force-quirks when EOF reached",
+       (UnitTest {.Input = U"<!DOCTYPE HTML5",
+                  .AppendEOF = true,
+                  .Output = {CreateDOCTYPEToken({.Name = U"html5", .ForceQuirks = true}), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInDOCTYPE}}}))
 
-  TEST_CASE("HTMLTokenizer(DOCTYPEName) - appends to name when parsing ASCII upper", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML5");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEName);
-  }
-
-  TEST_CASE("HTMLTokenizer(DOCTYPEName) - appends ReplacementCharacter with parser error when parsing Null",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    utf32_string input = U"<!DOCTYPE HT";
-    input.append(1uz, U'\0');
-    input.append(U"ML5");
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEName);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-  }
-
-  TEST_CASE("HTMLTokenizer(DOCTYPEName) - emits DOCTYPE with force-quirks when EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"html5";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML5", IsEOF(true));
-
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-      REQUIRE(token->IsForceQuirks());
-      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(DOCTYPEName) - treats anything else as part of DOCTYPE name", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML5a");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEName);
-  }
+  TEST("DOCTYPEName", "treats anything else as part of DOCTYPE name",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPEName, .Input = U"<!DOCTYPE HTML5a"}))
 
 #pragma endregion
 
 #pragma region AfterDOCTYPEName
 
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPEName) - ignores whitespace", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("AfterDOCTYPEName", "ignores whitespace and stays in the same state when parsing whitespace",
+       (UnitTest {.InitialState = TokenizerState::AfterDOCTYPEName,
+                  .ExpectedState = TokenizerState::AfterDOCTYPEName,
+                  .Input = U"   \t\n\r"}))
 
-    expected = U"html5";
-    inputStream.Append(U"<!DOCTYPE HTML5   \t\n\r  ");
+  TEST("AfterDOCTYPEName", "switches to Data and emits DOCTYPE when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<!DOCTYPE HTML5>", .Output = {CreateDOCTYPEToken({.Name = U"html5"})}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AfterDOCTYPEName);
-  }
+  TEST("AfterDOCTYPEName", "emits DOCTYPE with force-quirks when EOF reached",
+       (UnitTest {.Input = U"<!DOCTYPE HTML5",
+                  .AppendEOF = true,
+                  .Output = {CreateDOCTYPEToken({.Name = U"html5", .ForceQuirks = true}), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInDOCTYPE}}}))
 
-  TEST_CASE(
-    "HTMLTokenizer(AfterDOCTYPEName) - switches to Data and emits DOCTYPE when parsing GreaterThanSign",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("DOCTYPEName", "switches to AfterDOCTYPEPublicKeyword when parsing 'PUBLIC'",
+       (UnitTest {.ExpectedState = TokenizerState::AfterDOCTYPEPublicKeyword,
+                  .Input = U"<!DOCTYPE HTML PUBLIC"}))
 
-    expected = U"html5";
-    inputStream.Append(U"<!DOCTYPE HTML5>");
+  TEST("DOCTYPEName", "switches to AfterDOCTYPESystemKeyword when parsing 'SYSTEM'",
+       (UnitTest {.ExpectedState = TokenizerState::AfterDOCTYPESystemKeyword,
+                  .Input = U"<!DOCTYPE HTML SYSTEM"}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-    REQUIRE(!token->IsForceQuirks());
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-  }
-
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPEName) - emits DOCTYPE with force-quirks when EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"html5";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML5", IsEOF(true));
-
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-      REQUIRE(token->IsForceQuirks());
-      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPEName) - switches to AfterDOCTYPEPublicKeyword when parsing 'PUBLIC'",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML PuBLiC");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AfterDOCTYPEPublicKeyword);
-  }
-
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPEName) - switches to AfterDOCTYPESystemKeyword when parsing 'SYSTEM'",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML SySTeM");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AfterDOCTYPESystemKeyword);
-  }
-
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPEName) - treats anything else as unexpected and switches to "
-            "BogusDOCTYPE",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML a");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BogusDOCTYPE);
-    REQUIRE(errors.back() == HTMLParseError::InvalidCharacterSequenceAfterDOCTYPEName);
-  }
+  TEST("DOCTYPEName", "treats anything else as unexpected and switches to BogusDOCTYPE",
+       (UnitTest {.ExpectedState = TokenizerState::BogusDOCTYPE,
+                  .Input = U"<!DOCTYPE HTML a",
+                  .Errors = {{HTMLParseError::InvalidCharacterSequenceAfterDOCTYPEName}}}))
 
 #pragma endregion
 
 #pragma region AfterDOCTYPEPublicKeyword
 
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPEPublicKeyword) - switches to BeforeDOCTYPEPublicIdentifier when "
-            "parsing whitespace",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("AfterDOCTYPEPublicKeyword",
+       "ignores whitespace and switches to BeforeDOCTYPEPublicIdentifier when parsing whitespace",
+       (UnitTest {.ExpectedState = TokenizerState::BeforeDOCTYPEPublicIdentifier,
+                  .Input = U"<!DOCTYPE HTML PUBLIC   \t\n\r"}))
 
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC ");
+  TEST("AfterDOCTYPEPublicKeyword",
+       "switches to DOCTYPEPublicIdentifierDoubleQuoted with parser error when parsing QuotationMark",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPEPublicIdentifierDoubleQuoted,
+                  .Input = U"<!DOCTYPE HTML PUBLIC\"",
+                  .Errors = {{HTMLParseError::MissingWhitespaceAfterDOCTYPEPublicKeyword}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeDOCTYPEPublicIdentifier);
-  }
+  TEST("AfterDOCTYPEPublicKeyword",
+       "switches to DOCTYPEPublicIdentifierSingleQuoted with parser error when parsing Apostrophe",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPEPublicIdentifierSingleQuoted,
+                  .Input = U"<!DOCTYPE HTML PUBLIC'",
+                  .Errors = {{HTMLParseError::MissingWhitespaceAfterDOCTYPEPublicKeyword}}}))
 
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPEPublicKeyword) - switches to DOCTYPEPublicIdentifierDoubleQuoted with "
-            "parser error when parsing QuotationMark",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("AfterDOCTYPEPublicKeyword", "emits DOCTYPE with force-quirks when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<!DOCTYPE HTML PUBLIC>",
+                  .Output = {CreateDOCTYPEToken({.Name = U"html", .ForceQuirks = true})},
+                  .Errors = {{HTMLParseError::MissingDOCTYPEPublicIdentifier}}}))
 
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC\"");
+  TEST("AfterDOCTYPEPublicKeyword", "emits DOCTYPE with force-quirks when EOF reached",
+       (UnitTest {.Input = U"<!DOCTYPE HTML PUBLIC",
+                  .AppendEOF = true,
+                  .Output = {CreateDOCTYPEToken({.Name = U"html", .ForceQuirks = true}), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInDOCTYPE}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEPublicIdentifierDoubleQuoted);
-    REQUIRE(errors.back() == HTMLParseError::MissingWhitespaceAfterDOCTYPEPublicKeyword);
-  }
-
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPEPublicKeyword) - switches to DOCTYPEPublicIdentifierSingleQuoted with "
-            "parser error when parsing Apostrophe",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC'");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEPublicIdentifierSingleQuoted);
-    REQUIRE(errors.back() == HTMLParseError::MissingWhitespaceAfterDOCTYPEPublicKeyword);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(AfterDOCTYPEPublicKeyword) - emits DOCTYPE with force-quirks when parsing GreaterThanSign",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"html";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-    REQUIRE(token->IsForceQuirks());
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-    REQUIRE(errors.back() == HTMLParseError::MissingDOCTYPEPublicIdentifier);
-  }
-
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPEPublicKeyword) - emits DOCTYPE with force-quirks when EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"html";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC", IsEOF(true));
-
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-      REQUIRE(token->IsForceQuirks());
-      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPEPublicKeyword) - treats anything else as unexpected and switches to "
-            "BogusDOCTYPE",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML PUBLICa");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BogusDOCTYPE);
-    REQUIRE(errors.back() == HTMLParseError::MissingQuoteBeforeDOCTYPEPublicIdentifier);
-  }
+  TEST("AfterDOCTYPEPublicKeyword", "treats anything else as unexpected and switches to BogusDOCTYPE",
+       (UnitTest {.ExpectedState = TokenizerState::BogusDOCTYPE,
+                  .Input = U"<!DOCTYPE HTML PUBLICa",
+                  .Errors = {{HTMLParseError::MissingQuoteBeforeDOCTYPEPublicIdentifier}}}))
 
 #pragma endregion
 
 #pragma region BeforeDOCTYPEPublicIdentifier
 
-  TEST_CASE("HTMLTokenizer(BeforeDOCTYPEPublicIdentifier) - ignores whitespace", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("BeforeDOCTYPEPublicIdentifier",
+       "ignores whitespace and stays in the same state when parsing whitespace",
+       (UnitTest {.InitialState = TokenizerState::BeforeDOCTYPEPublicIdentifier,
+                  .ExpectedState = TokenizerState::BeforeDOCTYPEPublicIdentifier,
+                  .Input = U"   \t\n\r"}))
 
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC   \t\n\r  ");
+  TEST("BeforeDOCTYPEPublicIdentifier",
+       "switches to DOCTYPEPublicIdentifierDoubleQuoted when parsing QuotationMark",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPEPublicIdentifierDoubleQuoted,
+                  .Input = U"<!DOCTYPE HTML PUBLIC \""}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeDOCTYPEPublicIdentifier);
-  }
+  TEST("BeforeDOCTYPEPublicIdentifier",
+       "switches to DOCTYPEPublicIdentifierSingleQuoted when parsing Apostrophe",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPEPublicIdentifierSingleQuoted,
+                  .Input = U"<!DOCTYPE HTML PUBLIC '"}))
 
-  TEST_CASE("HTMLTokenizer(BeforeDOCTYPEPublicIdentifier) - switches to DOCTYPEPublicIdentifierDoubleQuoted "
-            "when parsing QuotationMark",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("BeforeDOCTYPEPublicIdentifier", "emits DOCTYPE with force-quirks when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<!DOCTYPE HTML PUBLIC>",
+                  .Output = {CreateDOCTYPEToken({.Name = U"html", .ForceQuirks = true})},
+                  .Errors = {{HTMLParseError::MissingDOCTYPEPublicIdentifier}}}))
 
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"");
+  TEST("BeforeDOCTYPEPublicIdentifier", "emits DOCTYPE with force-quirks when EOF reached",
+       (UnitTest {.Input = U"<!DOCTYPE HTML PUBLIC",
+                  .AppendEOF = true,
+                  .Output = {CreateDOCTYPEToken({.Name = U"html", .ForceQuirks = true}), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInDOCTYPE}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEPublicIdentifierDoubleQuoted);
-  }
-
-  TEST_CASE("HTMLTokenizer(BeforeDOCTYPEPublicIdentifier) - switches to DOCTYPEPublicIdentifierSingleQuoted "
-            "when parsing Apostrophe",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC '");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEPublicIdentifierSingleQuoted);
-  }
-
-  TEST_CASE("HTMLTokenizer(BeforeDOCTYPEPublicIdentifier) - emits DOCTYPE with force-quirks when parsing "
-            "GreaterThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"html";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-    REQUIRE(token->IsForceQuirks());
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-    REQUIRE(errors.back() == HTMLParseError::MissingDOCTYPEPublicIdentifier);
-  }
-
-  TEST_CASE("HTMLTokenizer(BeforeDOCTYPEPublicIdentifier) - emits DOCTYPE with force-quirks when EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"html";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC", IsEOF(true));
-
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-      REQUIRE(token->IsForceQuirks());
-      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(BeforeDOCTYPEPublicIdentifier) - treats anything else as unexpected and switches to "
-    "BogusDOCTYPE",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML PUBLICa");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BogusDOCTYPE);
-    REQUIRE(errors.back() == HTMLParseError::MissingQuoteBeforeDOCTYPEPublicIdentifier);
-  }
+  TEST("BeforeDOCTYPEPublicIdentifier", "treats anything else as unexpected and switches to BogusDOCTYPE",
+       (UnitTest {.ExpectedState = TokenizerState::BogusDOCTYPE,
+                  .Input = U"<!DOCTYPE HTML PUBLICa",
+                  .Errors = {{HTMLParseError::MissingQuoteBeforeDOCTYPEPublicIdentifier}}}))
 
 #pragma endregion
 
 #pragma region DOCTYPEPublicIdentifierDoubleQuoted
 
-  TEST_CASE(
-    "HTMLTokenizer(DOCTYPEPublicIdentifierDoubleQuoted) - switches to AfterDOCTYPEPublicIdentifier when "
-    "parsing QuotationMark",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("DOCTYPEPublicIdentifierDoubleQuoted",
+       "switches to AfterDOCTYPEPublicIdentifier when parsing QuotationMark",
+       (UnitTest {.ExpectedState = TokenizerState::AfterDOCTYPEPublicIdentifier,
+                  .Input = U"<!DOCTYPE HTML PUBLIC \"identifier\""}))
 
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"identifier\"");
+  TEST("DOCTYPEPublicIdentifierDoubleQuoted", "replaces Null with U+FFFD",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPEPublicIdentifierDoubleQuoted,
+                  .Input = InsertNull(U"<!DOCTYPE HTML PUBLIC \"iden", U"tifier"),
+                  .Errors = {{HTMLParseError::UnexpectedNullCharacter}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AfterDOCTYPEPublicIdentifier);
-  }
+  TEST("DOCTYPEPublicIdentifierDoubleQuoted", "emits DOCTYPE with force-quirks when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<!DOCTYPE HTML PUBLIC \"identifier>",
+                  .Output = {CreateDOCTYPEToken(
+                    {.Name = U"html", .PublicIdentifier = U"identifier", .ForceQuirks = true})},
+                  .Errors = {{HTMLParseError::AbruptDOCTYPEPublicIdentifier}}}))
 
-  TEST_CASE("HTMLTokenizer(DOCTYPEPublicIdentifierDoubleQuoted) - replaces Null with U+FFFD",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("DOCTYPEPublicIdentifierDoubleQuoted", "emits DOCTYPE with force-quirks when EOF reached",
+       (UnitTest {.Input = U"<!DOCTYPE HTML PUBLIC \"identifier",
+                  .AppendEOF = true,
+                  .Output = {CreateDOCTYPEToken(
+                               {.Name = U"html", .PublicIdentifier = U"identifier", .ForceQuirks = true}),
+                             CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInDOCTYPE}}}))
 
-    expected = U"";
-    expectedErrorCount = 1;
-    utf32_string input = U"<!DOCTYPE HTML PUBLIC \"iden";
-    input.append(1uz, U'\0');
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEPublicIdentifierDoubleQuoted);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(DOCTYPEPublicIdentifierDoubleQuoted) - emits DOCTYPE with force-quirks when parsing "
-    "GreaterThanSign",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"html";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"identifier>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-    REQUIRE(token->IsForceQuirks());
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-    REQUIRE(errors.back() == HTMLParseError::AbruptDOCTYPEPublicIdentifier);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(DOCTYPEPublicIdentifierDoubleQuoted) - emits DOCTYPE with force-quirks when EOF reached",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"html";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"identifier", IsEOF(true));
-
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-      REQUIRE(token->IsForceQuirks());
-      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(DOCTYPEPublicIdentifierDoubleQuoted) - appends to public identifier when parsing "
-            "any character except QuotationMark, GreaterThanSign, Null, or EOF",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"identifier");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEPublicIdentifierDoubleQuoted);
-  }
+  TEST("DOCTYPEPublicIdentifierDoubleQuoted",
+       "appends to public identifier when parsing any character except QuotationMark, GreaterThanSign, Null, "
+       "or EOF",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPEPublicIdentifierDoubleQuoted,
+                  .Input = U"<!DOCTYPE HTML PUBLIC \"identifier"}))
 
 #pragma endregion
 
 #pragma region DOCTYPEPublicIdentifierSingleQuoted
 
-  TEST_CASE(
-    "HTMLTokenizer(DOCTYPEPublicIdentifierSingleQuoted) - switches to AfterDOCTYPEPublicIdentifier when "
-    "parsing Apostrophe",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("DOCTYPEPublicIdentifierSingleQuoted",
+       "switches to AfterDOCTYPEPublicIdentifier when parsing Apostrophe",
+       (UnitTest {.ExpectedState = TokenizerState::AfterDOCTYPEPublicIdentifier,
+                  .Input = U"<!DOCTYPE HTML PUBLIC 'identifier'"}))
 
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC 'identifier'");
+  TEST("DOCTYPEPublicIdentifierSingleQuoted", "replaces Null with U+FFFD",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPEPublicIdentifierSingleQuoted,
+                  .Input = InsertNull(U"<!DOCTYPE HTML PUBLIC 'iden", U"tifier"),
+                  .Errors = {{HTMLParseError::UnexpectedNullCharacter}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AfterDOCTYPEPublicIdentifier);
-  }
+  TEST("DOCTYPEPublicIdentifierSingleQuoted", "emits DOCTYPE with force-quirks when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<!DOCTYPE HTML PUBLIC 'identifier>",
+                  .Output = {CreateDOCTYPEToken(
+                    {.Name = U"html", .PublicIdentifier = U"identifier", .ForceQuirks = true})},
+                  .Errors = {{HTMLParseError::AbruptDOCTYPEPublicIdentifier}}}))
 
-  TEST_CASE("HTMLTokenizer(DOCTYPEPublicIdentifierSingleQuoted) - replaces Null with U+FFFD",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("DOCTYPEPublicIdentifierSingleQuoted", "emits DOCTYPE with force-quirks when EOF reached",
+       (UnitTest {.Input = U"<!DOCTYPE HTML PUBLIC 'identifier",
+                  .AppendEOF = true,
+                  .Output = {CreateDOCTYPEToken(
+                               {.Name = U"html", .PublicIdentifier = U"identifier", .ForceQuirks = true}),
+                             CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInDOCTYPE}}}))
 
-    expected = U"";
-    expectedErrorCount = 1;
-    utf32_string input = U"<!DOCTYPE HTML PUBLIC 'iden";
-    input.append(1uz, U'\0');
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEPublicIdentifierSingleQuoted);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(DOCTYPEPublicIdentifierSingleQuoted) - emits DOCTYPE with force-quirks when parsing "
-    "GreaterThanSign",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"html";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC 'identifier>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-    REQUIRE(token->IsForceQuirks());
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-    REQUIRE(errors.back() == HTMLParseError::AbruptDOCTYPEPublicIdentifier);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(DOCTYPEPublicIdentifierSingleQuoted) - emits DOCTYPE with force-quirks when EOF reached",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC 'identifier", IsEOF(true));
-
-    expected = U"html";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-      REQUIRE(token->IsForceQuirks());
-      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(DOCTYPEPublicIdentifierSingleQuoted) - appends to public identifier when parsing "
-            "any character except Apostrophe, GreaterThanSign, Null, or EOF",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC 'identifier");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPEPublicIdentifierSingleQuoted);
-  }
+  TEST("DOCTYPEPublicIdentifierSingleQuoted",
+       "appends to public identifier when parsing any character except Apostrophe, GreaterThanSign, Null, "
+       "or EOF",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPEPublicIdentifierSingleQuoted,
+                  .Input = U"<!DOCTYPE HTML PUBLIC 'identifier"}))
 
 #pragma endregion
 
 #pragma region AfterDOCTYPEPublicIdentifier
 
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPEPublicIdentifier) - switches to "
-            "BetweenDOCTYPEPublicAndSystemIdentifiers when parsing whitespace",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("AfterDOCTYPEPublicIdentifier",
+       "ignores whitespace and switches to BetweenDOCTYPEPublicAndSystemIdentifiers when parsing whitespace",
+       (UnitTest {.ExpectedState = TokenizerState::BetweenDOCTYPEPublicAndSystemIdentifiers,
+                  .Input = U"<!DOCTYPE HTML PUBLIC \"id\"   \t\n\r  "}))
 
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\" ");
+  TEST("AfterDOCTYPEPublicIdentifier", "switches to Data and emits DOCTYPE when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<!DOCTYPE HTML PUBLIC \"id\">",
+                  .Output = {CreateDOCTYPEToken({.Name = U"html", .PublicIdentifier = U"id"})}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BetweenDOCTYPEPublicAndSystemIdentifiers);
-  }
+  TEST("AfterDOCTYPEPublicIdentifier",
+       "switches to DOCTYPESystemIdentifierDoubleQuoted with parser error when parsing QuotationMark",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPESystemIdentifierDoubleQuoted,
+                  .Input = U"<!DOCTYPE HTML PUBLIC \"id\"\"",
+                  .Errors = {{HTMLParseError::MissingWhitespaceBetweenDOCTYPEPublicAndSystemIdentifiers}}}))
 
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPEPublicIdentifier) - switches to Data and emits DOCTYPE when parsing "
-            "GreaterThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("AfterDOCTYPEPublicIdentifier",
+       "switches to DOCTYPESystemIdentifierSingleQuoted with parser error when parsing Apostrophe",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPESystemIdentifierSingleQuoted,
+                  .Input = U"<!DOCTYPE HTML PUBLIC \"id\"'",
+                  .Errors = {{HTMLParseError::MissingWhitespaceBetweenDOCTYPEPublicAndSystemIdentifiers}}}))
 
-    expected = U"html";
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\">");
+  TEST("AfterDOCTYPEPublicIdentifier", "emits DOCTYPE with force-quirks when EOF reached",
+       (UnitTest {
+         .Input = U"<!DOCTYPE HTML PUBLIC \"id\"",
+         .AppendEOF = true,
+         .Output = {CreateDOCTYPEToken({.Name = U"html", .PublicIdentifier = U"id", .ForceQuirks = true}),
+                    CreateEOFToken()},
+         .Errors = {{HTMLParseError::EOFInDOCTYPE}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-    REQUIRE(!token->IsForceQuirks());
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-  }
-
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPEPublicIdentifier) - switches to DOCTYPESystemIdentifierDoubleQuoted "
-            "with parsing error when parsing QuotationMark",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\"\"");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierDoubleQuoted);
-    REQUIRE(errors.back() == HTMLParseError::MissingWhitespaceBetweenDOCTYPEPublicAndSystemIdentifiers);
-  }
-
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPEPublicIdentifier) - switches to DOCTYPESystemIdentifierSingleQuoted "
-            "with parsing error when parsing Apostrophe",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\"'");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierSingleQuoted);
-    REQUIRE(errors.back() == HTMLParseError::MissingWhitespaceBetweenDOCTYPEPublicAndSystemIdentifiers);
-  }
-
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPEPublicIdentifier) - emits DOCTYPE with force-quirks when EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\"", IsEOF(true));
-
-    expected = U"html";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-      REQUIRE(token->IsForceQuirks());
-      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(AfterDOCTYPEPublicIdentifier) - treats anything else as unexpected and switches to "
-    "BogusDOCTYPE",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\"a");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BogusDOCTYPE);
-    REQUIRE(errors.back() == HTMLParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
-  }
+  TEST("AfterDOCTYPEPublicIdentifier", "treats anything else as unexpected and switches to BogusDOCTYPE",
+       (UnitTest {.ExpectedState = TokenizerState::BogusDOCTYPE,
+                  .Input = U"<!DOCTYPE HTML PUBLIC \"id\"a",
+                  .Errors = {{HTMLParseError::MissingQuoteBeforeDOCTYPESystemIdentifier}}}))
 
 #pragma endregion
 
 #pragma region BetweenDOCTYPEPublicAndSystemIdentifiers
 
-  TEST_CASE("HTMLTokenizer(BetweenDOCTYPEPublicAndSystemIdentifiers) - ignores whitespace",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("BetweenDOCTYPEPublicAndSystemIdentifiers",
+       "ignores whitespace and stays in the same state when parsing whitespace",
+       (UnitTest {.InitialState = TokenizerState::BetweenDOCTYPEPublicAndSystemIdentifiers,
+                  .ExpectedState = TokenizerState::BetweenDOCTYPEPublicAndSystemIdentifiers,
+                  .Input = U"   \t\n\r"}))
 
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\"   \t\n\r  ");
+  TEST("BetweenDOCTYPEPublicAndSystemIdentifiers",
+       "switches to Data and emits DOCTYPE when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<!DOCTYPE HTML PUBLIC \"id\">",
+                  .Output = {CreateDOCTYPEToken({.Name = U"html", .PublicIdentifier = U"id"})}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BetweenDOCTYPEPublicAndSystemIdentifiers);
-  }
+  TEST("BetweenDOCTYPEPublicAndSystemIdentifiers",
+       "switches to DOCTYPESystemIdentifierDoubleQuoted when parsing QuotationMark",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPESystemIdentifierDoubleQuoted,
+                  .Input = U"<!DOCTYPE HTML PUBLIC \"id\" \""}))
 
-  TEST_CASE(
-    "HTMLTokenizer(BetweenDOCTYPEPublicAndSystemIdentifiers) - emits DOCTYPE when parsing GreaterThanSign",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("BetweenDOCTYPEPublicAndSystemIdentifiers",
+       "switches to DOCTYPESystemIdentifierSingleQuoted when parsing Apostrophe",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPESystemIdentifierSingleQuoted,
+                  .Input = U"<!DOCTYPE HTML PUBLIC \"id\" '"}))
 
-    expected = U"html";
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\">");
+  TEST("BetweenDOCTYPEPublicAndSystemIdentifiers", "emits DOCTYPE with force-quirks when EOF reached",
+       (UnitTest {
+         .Input = U"<!DOCTYPE HTML PUBLIC \"id\"",
+         .AppendEOF = true,
+         .Output = {CreateDOCTYPEToken({.Name = U"html", .PublicIdentifier = U"id", .ForceQuirks = true}),
+                    CreateEOFToken()},
+         .Errors = {{HTMLParseError::EOFInDOCTYPE}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-  }
-
-  TEST_CASE("HTMLTokenizer(BetweenDOCTYPEPublicAndSystemIdentifiers) - switches to "
-            "DOCTYPESystemIdentifierDoubleQuoted "
-            "when parsing QuotationMark",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\" \"");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierDoubleQuoted);
-  }
-
-  TEST_CASE("HTMLTokenizer(BetweenDOCTYPEPublicAndSystemIdentifiers) - switches to "
-            "DOCTYPESystemIdentifierSingleQuoted "
-            "when parsing Apostrophe",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\" '");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierSingleQuoted);
-  }
-
-  TEST_CASE("HTMLTokenizer(BetweenDOCTYPEPublicAndSystemIdentifiers) - emits DOCTYPE with force-quirks when "
-            "EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"html";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\"", IsEOF(true));
-
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-      REQUIRE(token->IsForceQuirks());
-      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(BetweenDOCTYPEPublicAndSystemIdentifiers) - treats anything else as unexpected "
-            "and switches to "
-            "BogusDOCTYPE",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\"a");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BogusDOCTYPE);
-    REQUIRE(errors.back() == HTMLParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
-  }
+  TEST("BetweenDOCTYPEPublicAndSystemIdentifiers",
+       "treats anything else as unexpected and switches to BogusDOCTYPE",
+       (UnitTest {.ExpectedState = TokenizerState::BogusDOCTYPE,
+                  .Input = U"<!DOCTYPE HTML PUBLIC \"id\"a",
+                  .Errors = {{HTMLParseError::MissingQuoteBeforeDOCTYPESystemIdentifier}}}))
 
 #pragma endregion
 
 #pragma region AfterDOCTYPESystemKeyword
 
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPESystemKeyword) - switches to BeforeDOCTYPESystemIdentifier when "
-            "parsing whitespace",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("AfterDOCTYPESystemKeyword",
+       "ignores whitespace and switches to BeforeDOCTYPESystemIdentifier when parsing whitespace",
+       (UnitTest {.ExpectedState = TokenizerState::BeforeDOCTYPESystemIdentifier,
+                  .Input = U"<!DOCTYPE HTML SYSTEM   \t\n\r  "}))
 
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEM ");
+  TEST("AfterDOCTYPESystemKeyword",
+       "switches to DOCTYPESystemIdentifierDoubleQuoted with parser error when parsing QuotationMark",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPESystemIdentifierDoubleQuoted,
+                  .Input = U"<!DOCTYPE HTML SYSTEM\"",
+                  .Errors = {{HTMLParseError::MissingWhitespaceAfterDOCTYPESystemKeyword}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeDOCTYPESystemIdentifier);
-  }
+  TEST("AfterDOCTYPESystemKeyword",
+       "switches to DOCTYPESystemIdentifierSingleQuoted with parser error when parsing Apostrophe",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPESystemIdentifierSingleQuoted,
+                  .Input = U"<!DOCTYPE HTML SYSTEM'",
+                  .Errors = {{HTMLParseError::MissingWhitespaceAfterDOCTYPESystemKeyword}}}))
 
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPESystemKeyword) - switches to DOCTYPESystemIdentifierDoubleQuoted with "
-            "parser error when parsing QuotationMark",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("AfterDOCTYPESystemKeyword", "emits DOCTYPE with force-quirks when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<!DOCTYPE HTML SYSTEM>",
+                  .Output = {CreateDOCTYPEToken({.Name = U"html", .ForceQuirks = true})},
+                  .Errors = {{HTMLParseError::MissingDOCTYPESystemIdentifier}}}))
 
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEM\"");
+  TEST("AfterDOCTYPESystemKeyword", "emits DOCTYPE with force-quirks when EOF reached",
+       (UnitTest {.Input = U"<!DOCTYPE HTML SYSTEM",
+                  .AppendEOF = true,
+                  .Output = {CreateDOCTYPEToken({.Name = U"html", .ForceQuirks = true}), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInDOCTYPE}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierDoubleQuoted);
-    REQUIRE(errors.back() == HTMLParseError::MissingWhitespaceAfterDOCTYPESystemKeyword);
-  }
-
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPESystemKeyword) - switches to DOCTYPESystemIdentifierSingleQuoted with "
-            "parser error when parsing Apostrophe",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEM'");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierSingleQuoted);
-    REQUIRE(errors.back() == HTMLParseError::MissingWhitespaceAfterDOCTYPESystemKeyword);
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(AfterDOCTYPESystemKeyword) - emits DOCTYPE with force-quirks when parsing GreaterThanSign",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"html";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEM>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-    REQUIRE(token->IsForceQuirks());
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-    REQUIRE(errors.back() == HTMLParseError::MissingDOCTYPESystemIdentifier);
-  }
-
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPESystemKeyword) - emits DOCTYPE with force-quirks when EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEM", IsEOF(true));
-
-    expected = U"html";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-      REQUIRE(token->IsForceQuirks());
-      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPESystemKeyword) - treats anything else as unexpected and switches to "
-            "BogusDOCTYPE",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEMa");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BogusDOCTYPE);
-    REQUIRE(errors.back() == HTMLParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
-  }
+  TEST("AfterDOCTYPESystemKeyword", "treats anything else as unexpected and switches to BogusDOCTYPE",
+       (UnitTest {.ExpectedState = TokenizerState::BogusDOCTYPE,
+                  .Input = U"<!DOCTYPE HTML SYSTEMa",
+                  .Errors = {{HTMLParseError::MissingQuoteBeforeDOCTYPESystemIdentifier}}}))
 
 #pragma endregion
 
 #pragma region BeforeDOCTYPESystemIdentifier
 
-  TEST_CASE("HTMLTokenizer(BeforeDOCTYPESystemIdentifier) - ignores whitespace", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("BeforeDOCTYPESystemIdentifier",
+       "ignores whitespace and stays in the same state when parsing whitespace",
+       (UnitTest {.InitialState = TokenizerState::BeforeDOCTYPESystemIdentifier,
+                  .ExpectedState = TokenizerState::BeforeDOCTYPESystemIdentifier,
+                  .Input = U"   \t\n\r"}))
 
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEM   \t\n\r  ");
+  TEST("BeforeDOCTYPESystemIdentifier",
+       "switches to DOCTYPESystemIdentifierDoubleQuoted when parsing QuotationMark",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPESystemIdentifierDoubleQuoted,
+                  .Input = U"<!DOCTYPE HTML SYSTEM \""}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BeforeDOCTYPESystemIdentifier);
-  }
+  TEST("BeforeDOCTYPESystemIdentifier",
+       "switches to DOCTYPESystemIdentifierSingleQuoted when parsing Apostrophe",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPESystemIdentifierSingleQuoted,
+                  .Input = U"<!DOCTYPE HTML SYSTEM '"}))
 
-  TEST_CASE("HTMLTokenizer(BeforeDOCTYPESystemIdentifier) - switches to DOCTYPESystemIdentifierDoubleQuoted "
-            "when parsing QuotationMark",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("BeforeDOCTYPESystemIdentifier", "emits DOCTYPE with force-quirks when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<!DOCTYPE HTML SYSTEM>",
+                  .Output = {CreateDOCTYPEToken({.Name = U"html", .ForceQuirks = true})},
+                  .Errors = {{HTMLParseError::MissingDOCTYPESystemIdentifier}}}))
 
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEM \"");
+  TEST("BeforeDOCTYPESystemIdentifier", "emits DOCTYPE with force-quirks when EOF reached",
+       (UnitTest {.Input = U"<!DOCTYPE HTML SYSTEM",
+                  .AppendEOF = true,
+                  .Output = {CreateDOCTYPEToken({.Name = U"html", .ForceQuirks = true}), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInDOCTYPE}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierDoubleQuoted);
-  }
-
-  TEST_CASE("HTMLTokenizer(BeforeDOCTYPESystemIdentifier) - switches to DOCTYPESystemIdentifierSingleQuoted "
-            "when parsing Apostrophe",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEM '");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierSingleQuoted);
-  }
-
-  TEST_CASE("HTMLTokenizer(BeforeDOCTYPESystemIdentifier) - emits DOCTYPE with force-quirks when parsing "
-            "GreaterThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"html";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEM>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-    REQUIRE(token->IsForceQuirks());
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-    REQUIRE(errors.back() == HTMLParseError::MissingDOCTYPESystemIdentifier);
-  }
-
-  TEST_CASE("HTMLTokenizer(BeforeDOCTYPESystemIdentifier) - emits DOCTYPE with force-quirks when EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEM", IsEOF(true));
-
-    expected = U"html";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-      REQUIRE(token->IsForceQuirks());
-      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(BeforeDOCTYPESystemIdentifier) - treats anything else as unexpected and switches to "
-    "BogusDOCTYPE",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEMa");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BogusDOCTYPE);
-    REQUIRE(errors.back() == HTMLParseError::MissingQuoteBeforeDOCTYPESystemIdentifier);
-  }
+  TEST("BeforeDOCTYPESystemIdentifier", "treats anything else as unexpected and switches to BogusDOCTYPE",
+       (UnitTest {.ExpectedState = TokenizerState::BogusDOCTYPE,
+                  .Input = U"<!DOCTYPE HTML SYSTEMa",
+                  .Errors = {{HTMLParseError::MissingQuoteBeforeDOCTYPESystemIdentifier}}}))
 
 #pragma endregion
 
 #pragma region DOCTYPESystemIdentifierDoubleQuoted
 
-  TEST_CASE("HTMLTokenizer(DOCTYPESystemIdentifierDoubleQuoted) - switches to AfterDOCTYPESystemIdentifier "
-            "when parsing QuotationMark",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("DOCTYPESystemIdentifierDoubleQuoted",
+       "switches to AfterDOCTYPESystemIdentifier when parsing QuotationMark",
+       (UnitTest {.ExpectedState = TokenizerState::AfterDOCTYPESystemIdentifier,
+                  .Input = U"<!DOCTYPE HTML SYSTEM \"identifier\""}))
 
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEM \"identifier\"");
+  TEST("DOCTYPESystemIdentifierDoubleQuoted", "replaces Null with U+FFFD",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPESystemIdentifierDoubleQuoted,
+                  .Input = InsertNull(U"<!DOCTYPE HTML SYSTEM \"iden", U"tifier"),
+                  .Errors = {{HTMLParseError::UnexpectedNullCharacter}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AfterDOCTYPESystemIdentifier);
-  }
+  TEST("DOCTYPESystemIdentifierDoubleQuoted", "emits DOCTYPE with force-quirks when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<!DOCTYPE HTML SYSTEM \"identifier>",
+                  .Output = {CreateDOCTYPEToken(
+                    {.Name = U"html", .SystemIdentifier = U"identifier", .ForceQuirks = true})},
+                  .Errors = {{HTMLParseError::AbruptDOCTYPESystemIdentifier}}}))
 
-  TEST_CASE("HTMLTokenizer(DOCTYPESystemIdentifierDoubleQuoted) - replaces Null with U+FFFD",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("DOCTYPESystemIdentifierDoubleQuoted", "emits DOCTYPE with force-quirks when EOF reached",
+       (UnitTest {.Input = U"<!DOCTYPE HTML SYSTEM \"identifier",
+                  .AppendEOF = true,
+                  .Output = {CreateDOCTYPEToken(
+                               {.Name = U"html", .SystemIdentifier = U"identifier", .ForceQuirks = true}),
+                             CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInDOCTYPE}}}))
 
-    expected = U"";
-    expectedErrorCount = 1;
-    utf32_string input = U"<!DOCTYPE HTML SYSTEM \"iden";
-    input.append(1uz, U'\0');
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierDoubleQuoted);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-  }
-
-  TEST_CASE("HTMLTokenizer(DOCTYPESystemIdentifierDoubleQuoted) - emits DOCTYPE with parser error when "
-            "parsing GreaterThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"html";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEM \"identifier>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-    REQUIRE(errors.back() == HTMLParseError::AbruptDOCTYPESystemIdentifier);
-  }
-
-  TEST_CASE("HTMLTokenizer(DOCTYPESystemIdentifierDoubleQuoted) - emits DOCTYPE with force-quirks when EOF "
-            "reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEM \"identifier", IsEOF(true));
-
-    expected = U"html";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-      REQUIRE(token->IsForceQuirks());
-      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(DOCTYPESystemIdentifierDoubleQuoted) - appends to system identifier when parsing "
-            "any character except QuotationMark, GreaterThanSign, Null, or EOF",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEM \"identifier");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierDoubleQuoted);
-  }
+  TEST("DOCTYPESystemIdentifierDoubleQuoted",
+       "appends to system identifier when parsing any character except QuotationMark, GreaterThanSign, Null, "
+       "or EOF",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPESystemIdentifierDoubleQuoted,
+                  .Input = U"<!DOCTYPE HTML SYSTEM \"identifier"}))
 
 #pragma endregion
 
 #pragma region DOCTYPESystemIdentifierSingleQuoted
 
-  TEST_CASE("HTMLTokenizer(DOCTYPESystemIdentifierSingleQuoted) - switches to AfterDOCTYPESystemIdentifier "
-            "when parsing Apostrophe",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("DOCTYPESystemIdentifierSingleQuoted",
+       "switches to AfterDOCTYPESystemIdentifier when parsing Apostrophe",
+       (UnitTest {.ExpectedState = TokenizerState::AfterDOCTYPESystemIdentifier,
+                  .Input = U"<!DOCTYPE HTML SYSTEM 'identifier'"}))
 
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEM 'identifier'");
+  TEST("DOCTYPESystemIdentifierSingleQuoted", "replaces Null with U+FFFD",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPESystemIdentifierSingleQuoted,
+                  .Input = InsertNull(U"<!DOCTYPE HTML SYSTEM 'iden", U"tifier"),
+                  .Errors = {{HTMLParseError::UnexpectedNullCharacter}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AfterDOCTYPESystemIdentifier);
-  }
+  TEST("DOCTYPESystemIdentifierSingleQuoted", "emits DOCTYPE with force-quirks when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<!DOCTYPE HTML SYSTEM 'identifier>",
+                  .Output = {CreateDOCTYPEToken(
+                    {.Name = U"html", .SystemIdentifier = U"identifier", .ForceQuirks = true})},
+                  .Errors = {{HTMLParseError::AbruptDOCTYPESystemIdentifier}}}))
 
-  TEST_CASE("HTMLTokenizer(DOCTYPESystemIdentifierSingleQuoted) - replaces Null with U+FFFD",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("DOCTYPESystemIdentifierSingleQuoted", "emits DOCTYPE with force-quirks when EOF reached",
+       (UnitTest {.Input = U"<!DOCTYPE HTML SYSTEM 'identifier",
+                  .AppendEOF = true,
+                  .Output = {CreateDOCTYPEToken(
+                               {.Name = U"html", .SystemIdentifier = U"identifier", .ForceQuirks = true}),
+                             CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInDOCTYPE}}}))
 
-    expected = U"";
-    expectedErrorCount = 1;
-    utf32_string input = U"<!DOCTYPE HTML SYSTEM 'iden";
-    input.append(1uz, U'\0');
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierSingleQuoted);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-  }
-
-  TEST_CASE("HTMLTokenizer(DOCTYPESystemIdentifierSingleQuoted) - emits DOCTYPE with parser error when "
-            "parsing GreaterThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"html";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEM 'identifier>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-    REQUIRE(errors.back() == HTMLParseError::AbruptDOCTYPESystemIdentifier);
-  }
-
-  TEST_CASE("HTMLTokenizer(DOCTYPESystemIdentifierSingleQuoted) - emits DOCTYPE with force-quirks when EOF "
-            "reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEM 'identifier", IsEOF(true));
-    expected = U"html";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-      REQUIRE(token->IsForceQuirks());
-      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
-    }
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(DOCTYPESystemIdentifierSingleQuoted) - appends to system identifier when parsing "
-            "any character except Apostrophe, GreaterThanSign, Null, or EOF",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEM 'identifier");
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::DOCTYPESystemIdentifierSingleQuoted);
-  }
+  TEST("DOCTYPESystemIdentifierSingleQuoted",
+       "appends to system identifier when parsing any character except Apostrophe, GreaterThanSign, Null, or "
+       "EOF",
+       (UnitTest {.ExpectedState = TokenizerState::DOCTYPESystemIdentifierSingleQuoted,
+                  .Input = U"<!DOCTYPE HTML SYSTEM 'identifiera"}))
 
 #pragma endregion
 
 #pragma region AfterDOCTYPESystemIdentifier
 
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPESystemIdentifier) - ignores whitespace", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("AfterDOCTYPESystemIdentifier",
+       "ignores whitespace and stays in the same state when parsing whitespace",
+       (UnitTest {.InitialState = TokenizerState::AfterDOCTYPESystemIdentifier,
+                  .ExpectedState = TokenizerState::AfterDOCTYPESystemIdentifier,
+                  .Input = U"   \t\n\r"}))
 
-    expected = U"";
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEM \"id\"   \t\n\r  ");
+  TEST("AfterDOCTYPESystemIdentifier", "switches to Data and emits DOCTYPE when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<!DOCTYPE HTML SYSTEM \"id\">",
+                  .Output = {CreateDOCTYPEToken({.Name = U"html", .SystemIdentifier = U"id"})}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AfterDOCTYPESystemIdentifier);
-  }
+  TEST("AfterDOCTYPESystemIdentifier", "emits DOCTYPE with force-quirks when EOF reached",
+       (UnitTest {
+         .Input = U"<!DOCTYPE HTML SYSTEM \"id\"",
+         .AppendEOF = true,
+         .Output = {CreateDOCTYPEToken({.Name = U"html", .SystemIdentifier = U"id", .ForceQuirks = true}),
+                    CreateEOFToken()},
+         .Errors = {{HTMLParseError::EOFInDOCTYPE}}}))
 
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPESystemIdentifier) - switches to Data and emits DOCTYPE when parsing "
-            "GreaterThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"html";
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEM \"id\">");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-    REQUIRE(!token->IsForceQuirks());
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-  }
-
-  TEST_CASE("HTMLTokenizer(AfterDOCTYPESystemIdentifier) - emits DOCTYPE with force-quirks when EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEM \"id\"", IsEOF(true));
-
-    expected = U"html";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-      REQUIRE(token->IsForceQuirks());
-      REQUIRE(errors.back() == HTMLParseError::EOFInDOCTYPE);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(AfterDOCTYPESystemIdentifier) - treats anything else as unexpected and switches to "
-    "BogusDOCTYPE",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML SYSTEM \"id\"a");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BogusDOCTYPE);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedCharacterAfterDOCTYPESystemIdentifier);
-  }
+  TEST("AfterDOCTYPESystemIdentifier", "treats anything else as unexpected and switches to BogusDOCTYPE",
+       (UnitTest {.ExpectedState = TokenizerState::BogusDOCTYPE,
+                  .Input = U"<!DOCTYPE HTML SYSTEM \"id\"a",
+                  .Errors = {{HTMLParseError::UnexpectedCharacterAfterDOCTYPESystemIdentifier}}}))
 
 #pragma endregion
 
 #pragma region BogusDOCTYPE
 
-  TEST_CASE("HTMLTokenizer(BogusDOCTYPE) - emits DOCTYPE when parsing GreaterThanSign", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-    expected = U"html";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\" a random text >");
+  TEST("BogusDOCTYPE", "emits DOCTYPE when parsing GreaterThanSign",
+       (UnitTest {
+         .Input = U"<!DOCTYPE HTML PUBLIC \"id\" a random text >",
+         .Output = {CreateDOCTYPEToken({.Name = U"html", .PublicIdentifier = U"id", .ForceQuirks = true})},
+         .Errors = {{HTMLParseError::MissingQuoteBeforeDOCTYPESystemIdentifier}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-  }
+  TEST("BogusDOCTYPE", "emits DOCTYPE when EOF reached",
+       (UnitTest {
+         .Input = U"<!DOCTYPE HTML PUBLIC \"id\" a random text",
+         .AppendEOF = true,
+         .Output = {CreateDOCTYPEToken({.Name = U"html", .PublicIdentifier = U"id", .ForceQuirks = true})},
+         .Errors = {{HTMLParseError::MissingQuoteBeforeDOCTYPESystemIdentifier},
+                    {HTMLParseError::EOFInDOCTYPE}}}))
 
-  TEST_CASE("HTMLTokenizer(BogusDOCTYPE) - emits DOCTYPE when EOF reached", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\" a random text", IsEOF(true));
-    expectedErrorCount = 1;
+  TEST("BogusDOCTYPE", "ignores Null with parse error",
+       (UnitTest {.ExpectedState = TokenizerState::BogusDOCTYPE,
+                  .Input = InsertNull(U"<!DOCTYPE HTML PUBLIC \"id\" a random text", U""),
+                  .Errors = {{HTMLParseError::MissingQuoteBeforeDOCTYPESystemIdentifier},
+                             {HTMLParseError::UnexpectedNullCharacter}}}))
 
-    expected = U"html";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    }
-  }
-
-  TEST_CASE("HTMLTokenizer(BogusDOCTYPE) - ignores Null with parse error", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    expectedErrorCount = 2;
-    utf32_string input = U"<!DOCTYPE HTML PUBLIC \"id\" a random text";
-    input.append(1uz, U'\0');
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::BogusDOCTYPE);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-  }
-
-  TEST_CASE("HTMLTokenizer(BogusDOCTYPE) - ignores characters until GreaterThanSign or EOF",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"html";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<!DOCTYPE HTML PUBLIC \"id\" a random text >");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::DOCTYPE);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-  }
+  TEST("BogusDOCTYPE", "ignores characters until GreaterThanSign or EOF",
+       (UnitTest {
+         .ExpectedState = TokenizerState::BogusDOCTYPE,
+         .Input = U"<!DOCTYPE HTML PUBLIC \"id\" a random text >",
+         .Output = {CreateDOCTYPEToken({.Name = U"html", .PublicIdentifier = U"id", .ForceQuirks = true})}}))
 
 #pragma endregion
 
 #pragma region CDATASection
 
-  TEST_CASE("HTMLTokenizer(CDATASection) - switches to CDATASectionBracket when parsing RightSquareBracket",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::CDATASection);
+  TEST("CDATASection", "switches to CDATASectionEnd when parsing RightSquareBracket",
+       (UnitTest {.ExpectedState = TokenizerState::CDATASectionEnd,
+                  .Input = U"<![CDATA[]]",
+                  .Setup = [](HTMLTokenizer &tokenizer)
+                  {
+                    tokenizer.SetCDATASectionsAllowed(true);
+                  }}))
 
-    expected = U"";
-    inputStream.Append(U"]");
+  TEST("CDATASection", "emits EndOfFile with parser error when EOF reached",
+       (UnitTest {.Input = U"<![CDATA[A",
+                  .AppendEOF = true,
+                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.SetCDATASectionsAllowed(true); },
+                  .Output = {CreateCharacterToken(U"A"), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInCDATA}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CDATASectionBracket);
-  }
-
-  TEST_CASE("HTMLTokenizer(CDATASection) - emits EndOfFile with parser error when EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::CDATASection);
-
-    expectedErrorCount = 1;
-    inputStream.Append(U"A", IsEOF(true));
-
-    expected = U"A";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Character);
-    }
-
-    expected = U"";
-    {
-      NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-      REQUIRE(errors.back() == HTMLParseError::EOFInCDATA);
-    }
-  }
-
-  TEST_CASE(
-    "HTMLTokenizer(CDATASection) - emits Character tokens for all characters except RightSquareBracket "
-    "and EOF",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::CDATASection);
-
-    expected = U"A";
-    inputStream.Append(U"A");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CDATASection);
-  }
+  TEST("CDATASection", "emits Character tokens for all characters except RightSquareBracket and EOF",
+       (UnitTest {.Input = U"<![CDATA[ABC",
+                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.SetCDATASectionsAllowed(true); },
+                  .Output = {CreateCharacterToken(U"ABC")}}))
 
 #pragma endregion
 
 #pragma region CDATASectionBracket
 
-  TEST_CASE(
-    "HTMLTokenizer(CDATASectionBracket) - switches to CDATASectionEnd when parsing RightSquareBracket",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::CDATASectionBracket);
+  TEST("CDATASectionBracket", "switches to CDATASectionEnd when parsing RightSquareBracket",
+       (UnitTest {
+         .ExpectedState = TokenizerState::CDATASectionEnd,
+         .Input = U"<![CDATA[]]",
+         .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.SetCDATASectionsAllowed(true); },
+       }))
 
-    expected = U"";
-    inputStream.Append(U"]");
+  TEST("CDATASectionBracket",
+       "emits RightSquareBracket and switches back to CDATASection when parsing any character except "
+       "RightSquareBracket or EOF",
+       (UnitTest {.Input = U"<![CDATA[]A",
+                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.SetCDATASectionsAllowed(true); },
+                  .Output = {CreateCharacterToken(U"]A")}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CDATASectionEnd);
-  }
-
-  TEST_CASE("HTMLTokenizer(CDATASectionBracket) - emits Character token for RightSquareBracket and switches "
-            "back to CDATASection when parsing any character except RightSquareBracket or EOF",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::CDATASectionBracket);
-
-    expected = U"]A";
-    inputStream.Append(U"A");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CDATASection);
-  }
+  TEST("CDATASectionBracket",
+       "emits Character token for RightSquareBracket and EndOfFile with parser error when EOF reached",
+       (UnitTest {.Input = U"<![CDATA[]",
+                  .AppendEOF = true,
+                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.SetCDATASectionsAllowed(true); },
+                  .Output = {CreateCharacterToken(U"]"), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInCDATA}}}))
 
 #pragma endregion
 
 #pragma region CDATASectionEnd
 
-  TEST_CASE("HTMLTokenizer(CDATASectionEnd) - switches to Data when parsing GreaterThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::CDATASectionEnd);
+  TEST("CDATASectionEnd", "emits RightSquareBracket when parsing RightSquareBracket",
+       (UnitTest {.ExpectedState = TokenizerState::CDATASection,
+                  .Input = U"<![CDATA[]]]",
+                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.SetCDATASectionsAllowed(true); },
+                  .Output = {CreateCharacterToken(U"]")}}))
 
-    expected = U"";
-    inputStream.Append(U">");
+  TEST("CDATASectionEnd",
+       "emits Character tokens for two RightSquareBrackets and EndOfFile with parser error when EOF reached",
+       (UnitTest {.Input = U"<![CDATA[]]]",
+                  .AppendEOF = true,
+                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.SetCDATASectionsAllowed(true); },
+                  .Output = {CreateCharacterToken(U"]]]"), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::EOFInCDATA}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-  }
+  TEST("CDATASectionEnd", "switches to Data when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<![CDATA[]]>",
+                  .Setup = [](HTMLTokenizer &tokenizer)
+                  {
+                    tokenizer.SetCDATASectionsAllowed(true);
+                  }}))
 
-  TEST_CASE(
-    "HTMLTokenizer(CDATASectionEnd) - emits Character tokens for two RightSquareBrackets and "
-    "switches back to CDATASection when parsing any character except RightSquareBracket or GreaterThanSign",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::CDATASectionEnd);
-
-    expected = U"]]A";
-    inputStream.Append(U"A");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CDATASection);
-  }
-
-  TEST_CASE("HTMLTokenizer(CDATASectionEnd) - emits Character token for one RightSquareBracket and remains "
-            "CDATASectionEnd when parsing RightSquareBracket",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::CDATASectionEnd);
-
-    expected = U"]";
-    inputStream.Append(U"]");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(tokenizer.GetState() == TokenizerState::CDATASectionEnd);
-  }
+  TEST("CDATASectionEnd",
+       "emits Character tokens for two RightSquareBrackets and switches back to CDATASection when parsing "
+       "any character except RightSquareBracket or GreaterThanSign",
+       (UnitTest {.Input = U"<![CDATA[]]A",
+                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.SetCDATASectionsAllowed(true); },
+                  .Output = {CreateCharacterToken(U"]]A")}}))
 
 #pragma endregion
 }
