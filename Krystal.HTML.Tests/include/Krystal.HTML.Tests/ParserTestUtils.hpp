@@ -4,6 +4,7 @@
 #include "Krystal.HTML/Parser/HTMLParseError.hpp"
 #include "Krystal.HTML/Parser/HTMLToken.hpp"
 #include "Krystal.HTML/Parser/HTMLTokenizer.hpp"
+#include "Krystal.HTML/Parser/TokenizerState.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/List.hpp"
@@ -70,11 +71,21 @@ namespace Krys::Tests
     size_t Column {0uz};
   };
 
-  struct HTMLIntegrationTestCase
+  struct IntegrationTest
   {
     utf32_string Input;
     List<ExpectedToken> Output;
     List<ExpectedError> Errors;
+  };
+
+  struct UnitTest
+  {
+    HTML::TokenizerState InitialState {HTML::TokenizerState::Data};
+    bool AppendEOF {false};
+    utf32_string Input;
+    List<ExpectedToken> Output {};
+    HTML::TokenizerState ExpectedState {HTML::TokenizerState::Data};
+    List<ExpectedError> Errors {};
   };
 
   KRYS_NODISCARD inline ExpectedToken CreateDOCTYPEToken(const ExpectedDOCTYPE &expected) noexcept
@@ -129,7 +140,65 @@ namespace Krys::Tests
     return result;
   }
 
-  inline void DoHTMLTest(HTMLIntegrationTestCase &&testCase) noexcept
+  inline void CheckDOCTYPE(HTML::HTMLToken &token, const ExpectedDOCTYPE &expected) noexcept
+  {
+    CHECK(Compare(token.GetDataBuffer(), expected.Name));
+
+    UniquePtr<HTML::DoctypeData> doctypeData = std::move(token.ReleaseDOCTYPEData());
+    CHECK(doctypeData->ForceQuirks == expected.ForceQuirks);
+
+    if (expected.PublicIdentifier.empty())
+    {
+      CHECK(doctypeData->PublicIdentifier.empty());
+    }
+    else
+    {
+      CHECK(Compare(doctypeData->PublicIdentifier, expected.PublicIdentifier));
+    }
+
+    if (expected.SystemIdentifier.empty())
+    {
+      CHECK(doctypeData->SystemIdentifier.empty());
+    }
+    else
+    {
+      CHECK(Compare(doctypeData->SystemIdentifier, expected.SystemIdentifier));
+    }
+  }
+
+  inline void CheckCharacter(HTML::HTMLToken &token, const ExpectedCharacter &expected) noexcept
+  {
+    CHECK(Compare(token.GetDataBuffer(), expected.Data));
+  }
+
+  inline void CheckTag(HTML::HTMLToken &token, const ExpectedTag &expected) noexcept
+  {
+    CHECK(Compare(token.GetDataBuffer(), expected.Name));
+
+    if (token.GetType() == HTML::HTMLToken::Type::StartTag)
+    {
+      CHECK(token.IsSelfClosing() == expected.SelfClosing);
+    }
+
+    CHECK(token.GetAttributes().size() == expected.Attributes.size());
+    for (size_t i = 0uz; i < expected.Attributes.size(); ++i)
+    {
+      CHECK(Compare(token.GetAttributes()[i].Name, expected.Attributes[i].Name));
+      CHECK(Compare(token.GetAttributes()[i].Value, expected.Attributes[i].Value));
+    }
+  }
+
+  inline void CheckComment(HTML::HTMLToken &token, const ExpectedComment &expected) noexcept
+  {
+    CHECK(Compare(token.GetDataBuffer(), expected.Data));
+  }
+
+  inline void CheckEOF(HTML::HTMLToken &, const ExpectedEOF &) noexcept
+  {
+    // Nothing to check for EOF token.
+  }
+
+  inline void DoIntegrationTest(IntegrationTest &&testCase) noexcept
   {
     using namespace HTML;
 
@@ -142,88 +211,127 @@ namespace Krys::Tests
     size_t tokenIndex = 0uz;
     while (true)
     {
-      NextTokenPtr nextToken = tokenizer.NextToken();
-      REQUIRE(nextToken);
-      HTMLToken &token = *nextToken;
+      NextTokenPtr token = tokenizer.NextToken();
+      REQUIRE(token);
 
-      const auto &expectedToken = testCase.Output[tokenIndex++];
-      REQUIRE(token.GetType() == expectedToken.Type);
+      const auto &expected = testCase.Output[tokenIndex++];
+      REQUIRE(token->GetType() == expected.Type);
 
-      if (const auto *expectedDoctypeToken = std::get_if<ExpectedDOCTYPE>(&expectedToken.Token))
+      if (const auto *expectedDoctypeToken = std::get_if<ExpectedDOCTYPE>(&expected.Token))
       {
-        REQUIRE(Compare(token.GetDataBuffer(), expectedDoctypeToken->Name));
-
-        UniquePtr<HTML::DoctypeData> doctypeData = std::move(token.ReleaseDOCTYPEData());
-        if (expectedDoctypeToken->PublicIdentifier.empty())
-        {
-          REQUIRE(doctypeData->PublicIdentifier.empty());
-        }
-        else
-        {
-          REQUIRE(Compare(doctypeData->PublicIdentifier, expectedDoctypeToken->PublicIdentifier));
-        }
-
-        if (expectedDoctypeToken->SystemIdentifier.empty())
-        {
-          REQUIRE(doctypeData->SystemIdentifier.empty());
-        }
-        else
-        {
-          REQUIRE(Compare(doctypeData->SystemIdentifier, expectedDoctypeToken->SystemIdentifier));
-        }
-
-        REQUIRE(doctypeData->ForceQuirks == expectedDoctypeToken->ForceQuirks);
-
+        CheckDOCTYPE(*token, *expectedDoctypeToken);
         continue;
       }
 
-      if (const auto *characterToken = std::get_if<ExpectedCharacter>(&expectedToken.Token))
+      if (const auto *characterToken = std::get_if<ExpectedCharacter>(&expected.Token))
       {
-        REQUIRE(Compare(token.GetDataBuffer(), characterToken->Data));
+        CheckCharacter(*token, *characterToken);
         continue;
       }
 
-      if (const auto *tagToken = std::get_if<ExpectedTag>(&expectedToken.Token))
+      if (const auto *tagToken = std::get_if<ExpectedTag>(&expected.Token))
       {
-        REQUIRE(Compare(token.GetDataBuffer(), tagToken->Name));
-        if (expectedToken.Type == HTML::HTMLToken::Type::StartTag)
-        {
-          REQUIRE(token.IsSelfClosing() == tagToken->SelfClosing);
-        }
-        REQUIRE(token.GetAttributes().size() == tagToken->Attributes.size());
-        for (size_t i = 0uz; i < tagToken->Attributes.size(); ++i)
-        {
-          REQUIRE(Compare(token.GetAttributes()[i].Name, tagToken->Attributes[i].Name));
-          REQUIRE(Compare(token.GetAttributes()[i].Value, tagToken->Attributes[i].Value));
-        }
-
+        CheckTag(*token, *tagToken);
         continue;
       }
 
-      if (const auto *commentToken = std::get_if<ExpectedComment>(&expectedToken.Token))
+      if (const auto *commentToken = std::get_if<ExpectedComment>(&expected.Token))
       {
-        REQUIRE(Compare(token.GetDataBuffer(), commentToken->Data));
+        CheckComment(*token, *commentToken);
         continue;
       }
 
-      if (std::holds_alternative<ExpectedEOF>(expectedToken.Token))
+      if (const auto *eofToken = std::get_if<ExpectedEOF>(&expected.Token))
       {
-        REQUIRE(errors.size() == testCase.Errors.size());
-        for (size_t i = 0uz; i < errors.size(); ++i)
-        {
-          REQUIRE(errors[i] == testCase.Errors[i].Error);
-        }
-
+        CheckEOF(*token, *eofToken);
         break;
+      }
+
+      FAIL("Unknown expected token type");
+    }
+
+    REQUIRE(errors.size() == testCase.Errors.size());
+    for (size_t i = 0uz; i < errors.size(); ++i)
+    {
+      REQUIRE(errors[i] == testCase.Errors[i].Error);
+    }
+  }
+
+  inline void DoUnitTest(UnitTest &&testCase) noexcept
+  {
+    using namespace HTML;
+
+    HTMLInputStream inputStream;
+    inputStream.Append(std::move(testCase.Input), IsEOF(testCase.AppendEOF));
+
+    HTMLTokenizer tokenizer(inputStream);
+    tokenizer.SetState(testCase.InitialState);
+
+    const auto &errors = tokenizer.GetParseErrors();
+
+    if (!testCase.Output.size())
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      REQUIRE(!token);
+      REQUIRE(errors.size() == testCase.Errors.size());
+      for (size_t i = 0uz; i < errors.size(); ++i)
+      {
+        REQUIRE(errors[i] == testCase.Errors[i].Error);
+      }
+      REQUIRE(tokenizer.GetState() == testCase.ExpectedState);
+      return;
+    }
+
+    REQUIRE(tokenizer.GetState() == testCase.InitialState);
+    for (const auto &expected : testCase.Output)
+    {
+      NextTokenPtr token = tokenizer.NextToken();
+      REQUIRE(token);
+      REQUIRE(token->GetType() == expected.Type);
+
+      if (const auto *expectedDoctypeToken = std::get_if<ExpectedDOCTYPE>(&expected.Token))
+      {
+        CheckDOCTYPE(*token, *expectedDoctypeToken);
+        continue;
+      }
+
+      if (const auto *characterToken = std::get_if<ExpectedCharacter>(&expected.Token))
+      {
+        CheckCharacter(*token, *characterToken);
+        continue;
+      }
+
+      if (const auto *tagToken = std::get_if<ExpectedTag>(&expected.Token))
+      {
+        CheckTag(*token, *tagToken);
+        continue;
+      }
+
+      if (const auto *commentToken = std::get_if<ExpectedComment>(&expected.Token))
+      {
+        CheckComment(*token, *commentToken);
+        continue;
+      }
+
+      if (const auto *eofToken = std::get_if<ExpectedEOF>(&expected.Token))
+      {
+        CheckEOF(*token, *eofToken);
+        continue;
       }
 
       FAIL("Unknown expected token type");
     }
   }
 
-#define HTML_INTEGRATION_TEST(name, testCase)                                                                \
-  TEST_CASE("HTMLTokenizer(" name ")", "[HTML][Tokenizer][Integration]")                                                          \
+#define INTEGRATION_TEST(name, integrationTestCase)                                                          \
+  TEST_CASE("HTMLTokenizer(" name ")", "[HTML][Tokenizer][Integration]")                                     \
   {                                                                                                          \
-    DoHTMLTest(testCase);                                                                                    \
+    DoIntegrationTest(integrationTestCase);                                                                  \
+  }
+
+#define TEST(state, name, test)                                                                              \
+  TEST_CASE("HTMLTokenizer(" state ") - " name, "[HTML][Tokenizer]")                                         \
+  {                                                                                                          \
+    DoUnitTest(test);                                                                                        \
   }
 }

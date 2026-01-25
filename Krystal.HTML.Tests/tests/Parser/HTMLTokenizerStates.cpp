@@ -1,30 +1,18 @@
-﻿#include "Krystal.HTML/Parser/HTMLTokenizer.hpp"
+﻿#include "Krystal.HTML.Tests/ParserTestUtils.hpp"
+#include "Krystal.HTML/Parser/HTMLTokenizer.hpp"
 #include <catch_all.hpp>
+#include <format>
 
-namespace
-{
-  using namespace Krys;
-  using namespace Krys::HTML;
-
-  bool CompareDataBufferToString(const HTMLToken::DataBuffer &buffer, utf32_stringview str) noexcept
-  {
-    if (buffer.size() != str.size())
-    {
-      return false;
-    }
-    for (size_t i = 0uz; i < buffer.size(); ++i)
-    {
-      if (buffer[i] != str[i])
-      {
-        return false;
-      }
-    }
-    return true;
-  }
-}
 namespace Krys::Tests
 {
   using namespace Krys::HTML;
+
+  KRYS_NODISCARD static utf32_string &&InsertNull(utf32_string &&str, utf32_string &&suffix) noexcept
+  {
+    str.push_back(U'\0');
+    str.append(std::move(suffix));
+    return std::move(str);
+  }
 
 #define SETUP_TEST(initialState)                                                                             \
   HTMLInputStream inputStream;                                                                               \
@@ -37,95 +25,42 @@ namespace Krys::Tests
 #define COMMON_TEST_CASES(tokenType)                                                                         \
   REQUIRE(token);                                                                                            \
   REQUIRE(token->GetType() == tokenType);                                                                    \
-  REQUIRE(CompareDataBufferToString(token->GetDataBuffer(), expected));                                      \
+  REQUIRE(Compare(token->GetDataBuffer(), expected));                                                        \
   REQUIRE(errors.size() == expectedErrorCount);
 
 #pragma region CharacterReference
 
-  TEST_CASE("HTMLTokenizer(CharacterReference) - Non-character reference", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"&_";
-    inputStream.Append(U"&_", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("CharacterReference", "Non-character reference",
+       (UnitTest {.Input = U"&_", .Output = {CreateCharacterToken(U"&_")}}));
 
 #pragma region NamedCharacterReference
 
-  TEST_CASE("HTMLTokenizer(NamedCharacterReference) - happy path", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("NamedCharacterReference", "Basic named character reference",
+       (UnitTest {.Input = U"&copy;", .Output = {CreateCharacterToken(U"©")}}))
 
-    expected = U"©";
-    inputStream.Append(U"&copy;", IsEOF(true));
+  TEST("NamedCharacterReference", "missing semicolon",
+       (UnitTest {.AppendEOF = true,
+                  .Input = U"&Agrave",
+                  .Output = {CreateCharacterToken(U"À"), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::MissingSemicolonAfterCharacterReference}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("NamedCharacterReference", "no match, incomplete reference",
+       (UnitTest {.Input = U"&nonentity", .Output = {CreateCharacterToken(U"&nonentity")}}))
 
-  TEST_CASE("HTMLTokenizer(NamedCharacterReference) - mixed case reference", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("NamedCharacterReference", "no match, ends in semicolon",
+       (UnitTest {.Input = U"&nonentity;",
+                  .Output = {CreateCharacterToken(U"&nonentity;")},
+                  .Errors = {{HTMLParseError::UnknownNamedCharacterReference}}}))
 
-    expected = U"⫌︀";
-    inputStream.Append(U"&vsupnE;", IsEOF(true));
+  TEST("NamedCharacterReference", "mixed case reference",
+       (UnitTest {.Input = U"&vsupnE;", .Output = {CreateCharacterToken(U"⫌︀")}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("NamedCharacterReference", "partial match with valid prefix",
+       (UnitTest {.Input = U"&notit;", .Output = {CreateCharacterToken(U"¬it;")}}))
 
-  TEST_CASE("HTMLTokenizer(NamedCharacterReference) - missing semicolon", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"À";
-    expectedErrorCount = 1;
-    inputStream.Append(U"&Agrave", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(errors.back() == HTMLParseError::MissingSemicolonAfterCharacterReference);
-  }
-
-  TEST_CASE("HTMLTokenizer(NamedCharacterReference) - no match", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"&nonentity";
-    inputStream.Append(U"&nonentity", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
-
-  TEST_CASE("HTMLTokenizer(NamedCharacterReference) - no match, ends in semicolon", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"&nonentity;";
-    expectedErrorCount = 1;
-    inputStream.Append(U"&nonentity;", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-
-    REQUIRE(errors.back() == HTMLParseError::UnknownNamedCharacterReference);
-  }
-
-  TEST_CASE("HTMLTokenizer(NamedCharacterReference) - EOF in middle of otherwise valid reference",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"&co";
-    inputStream.Append(U"&co", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("NamedCharacterReference", "EOF in middle of otherwise valid reference",
+       (UnitTest {
+         .AppendEOF = true, .Input = U"&co", .Output = {CreateCharacterToken(U"&co"), CreateEOFToken()}}))
 
   // TODO: test cases for when character references are consumed as part of attributes
 
@@ -133,289 +68,124 @@ namespace Krys::Tests
 
 #pragma region DecimalCharacterReference
 
-  TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - happy path", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("DecimalCharacterReference", "happy path",
+       (UnitTest {.Input = U"&#8482;", .Output = {CreateCharacterToken(U"™")}}))
 
-    expected = U"™";
-    inputStream.Append(U"&#8482;", IsEOF(true));
+  TEST("DecimalCharacterReference", "lookup table",
+       (UnitTest {.Input = U"&#128;", .Output = {CreateCharacterToken(U"€")}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("DecimalCharacterReference", "leading zeros",
+       (UnitTest {.Input = U"&#00008482;", .Output = {CreateCharacterToken(U"™")}}))
 
-  TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - lookup table", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("DecimalCharacterReference", "missing semicolon",
+       (UnitTest {.AppendEOF = true,
+                  .Input = U"&#8482",
+                  .Output = {CreateCharacterToken(U"™"), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::MissingSemicolonAfterCharacterReference}}}))
 
-    expected = U"€";
-    inputStream.Append(U"&#128;", IsEOF(true));
+  TEST("DecimalCharacterReference", "no numbers provided after #",
+       (UnitTest {.Input = U"&#;",
+                  .Output = {CreateCharacterToken(U"&#;")},
+                  .Errors = {{HTMLParseError::AbsenceOfDigitsInNumericCharacterReference}}}));
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("DecimalCharacterReference", "mixed with non-digit characters",
+       (UnitTest {.Input = U"&#123abc;",
+                  .Output = {CreateCharacterToken(U"{abc;")},
+                  .Errors = {{HTMLParseError::MissingSemicolonAfterCharacterReference}}}));
 
-  TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - missing semicolon", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("DecimalCharacterReference", "stops at semicolon",
+       (UnitTest {.Input = U"&#65;BC", .Output = {CreateCharacterToken(U"ABC")}}));
 
-    expected = U"™";
-    expectedErrorCount = 1;
-    inputStream.Append(U"&#8482", IsEOF(true));
+  TEST("DecimalCharacterReference", "stops at non-digit character",
+       (UnitTest {.Input = U"&#65BC;",
+                  .Output = {CreateCharacterToken(U"ABC;")},
+                  .Errors = {{HTMLParseError::MissingSemicolonAfterCharacterReference}}}));
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
+  TEST("DecimalCharacterReference", "null character reference",
+       (UnitTest {.Input = U"&#0;",
+                  .Output = {CreateCharacterToken(U"\xFFFD")},
+                  .Errors = {{HTMLParseError::NullCharacterReference}}}));
 
-    REQUIRE(errors.back() == HTMLParseError::MissingSemicolonAfterCharacterReference);
-  }
+  TEST("DecimalCharacterReference", "character reference outside unicode range",
+       (UnitTest {.Input = U"&#1114112;",
+                  .Output = {CreateCharacterToken(U"\xFFFD")},
+                  .Errors = {{HTMLParseError::CharacterReferenceOutsideUnicodeRange}}}));
 
-  TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - no numbers provided after #", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("DecimalCharacterReference", "surrogate",
+       (UnitTest {.Input = U"&#55296;",
+                  .Output = {CreateCharacterToken(U"\xFFFD")},
+                  .Errors = {{HTMLParseError::SurrogateCharacterReference}}}));
 
-    expected = U"&#;";
-    expectedErrorCount = 1;
-    inputStream.Append(U"&#;", IsEOF(true));
+  TEST("DecimalCharacterReference", "non character",
+       (UnitTest {.Input = U"&#65534;",
+                  .Output = {CreateCharacterToken(U"\xFFFE")},
+                  .Errors = {{HTMLParseError::NonCharacterCharacterReference}}}));
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-
-    REQUIRE(errors.back() == HTMLParseError::AbsenceOfDigitsInNumericCharacterReference);
-  }
-
-  TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - null character reference", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"\xFFFD";
-    expectedErrorCount = 1;
-    inputStream.Append(U"&#0;", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-
-    REQUIRE(errors.back() == HTMLParseError::NullCharacterReference);
-  }
-
-  TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - character reference outside unicode range",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"\xFFFD";
-    expectedErrorCount = 1;
-    inputStream.Append(U"&#1114112;", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-
-    REQUIRE(errors.back() == HTMLParseError::CharacterReferenceOutsideUnicodeRange);
-  }
-
-  TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - surrogate", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"\xFFFD";
-    expectedErrorCount = 1;
-    inputStream.Append(U"&#55298;", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-
-    REQUIRE(errors.back() == HTMLParseError::SurrogateCharacterReference);
-  }
-
-  TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - non character", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"\xFFFE";
-    expectedErrorCount = 1;
-    inputStream.Append(U"&#65534;", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-
-    REQUIRE(errors.back() == HTMLParseError::NonCharacterCharacterReference);
-  }
-
-  TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - control character", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"\x0D";
-    expectedErrorCount = 1;
-    inputStream.Append(U"&#13;", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-
-    REQUIRE(errors.back() == HTMLParseError::ControlCharacterReference);
-  }
+  TEST("DecimalCharacterReference", "control character",
+       (UnitTest {.Input = U"&#13;",
+                  .Output = {CreateCharacterToken(U"\x0D")},
+                  .Errors = {{HTMLParseError::ControlCharacterReference}}}));
 
 #pragma endregion
 
 #pragma region HexadecimalCharacterReference
 
-  TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - happy path", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("HexadecimalCharacterReference", "happy path",
+       (UnitTest {.Input = U"&#x152;", .Output = {CreateCharacterToken(U"Œ")}}))
 
-    expected = U"Œ";
-    inputStream.Append(U"&#x152;", IsEOF(true));
+  TEST("HexadecimalCharacterReference", "lookup table",
+       (UnitTest {.Input = U"&#x80;", .Output = {CreateCharacterToken(U"€")}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("HexadecimalCharacterReference", "mixed case hex digits",
+       (UnitTest {.Input = U"&#x20Ac;", .Output = {CreateCharacterToken(U"€")}}))
 
-  TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - lookup table", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("HexadecimalCharacterReference", "uppercase X",
+       (UnitTest {.Input = U"&#X152;", .Output = {CreateCharacterToken(U"Œ")}}))
 
-    expected = U"€";
-    inputStream.Append(U"&#x80;", IsEOF(true));
+  TEST("HexadecimalCharacterReference", "missing semicolon",
+       (UnitTest {.AppendEOF = true,
+                  .Input = U"&#X152",
+                  .Output = {CreateCharacterToken(U"Œ"), CreateEOFToken()},
+                  .Errors = {{HTMLParseError::MissingSemicolonAfterCharacterReference}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("HexadecimalCharacterReference", "no numbers provided after #X",
+       (UnitTest {.Input = U"&#X;",
+                  .Output = {CreateCharacterToken(U"&#X;")},
+                  .Errors = {{HTMLParseError::AbsenceOfDigitsInNumericCharacterReference}}}));
 
-  TEST_CASE("HTMLTokenizer(DecimalCharacterReference) - mixed case hex digits", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("HexadecimalCharacterReference", "null character reference",
+       (UnitTest {.Input = U"&#x00;",
+                  .Output = {CreateCharacterToken(U"\xFFFD")},
+                  .Errors = {{HTMLParseError::NullCharacterReference}}}));
 
-    expected = U"€";
-    inputStream.Append(U"&#x20Ac;", IsEOF(true));
+  TEST("HexadecimalCharacterReference", "character reference outside unicode range",
+       (UnitTest {.Input = U"&#x110000;",
+                  .Output = {CreateCharacterToken(U"\xFFFD")},
+                  .Errors = {{HTMLParseError::CharacterReferenceOutsideUnicodeRange}}}));
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
+  TEST("HexadecimalCharacterReference", "surrogate",
+       (UnitTest {.Input = U"&#xD800;",
+                  .Output = {CreateCharacterToken(U"\xFFFD")},
+                  .Errors = {{HTMLParseError::SurrogateCharacterReference}}}));
 
-  TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - uppercase X", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("HexadecimalCharacterReference", "non character",
+       (UnitTest {.Input = U"&#xFFFE;",
+                  .Output = {CreateCharacterToken(U"\xFFFE")},
+                  .Errors = {{HTMLParseError::NonCharacterCharacterReference}}}));
 
-    expected = U"Œ";
-    inputStream.Append(U"&#X152;", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-  }
-
-  TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - missing semicolon", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"Œ";
-    expectedErrorCount = 1;
-    inputStream.Append(U"&#X152", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-
-    REQUIRE(errors.back() == HTMLParseError::MissingSemicolonAfterCharacterReference);
-  }
-
-  TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - no numbers provided after #X",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"&#X;";
-    expectedErrorCount = 1;
-    inputStream.Append(U"&#X;", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(errors.back() == HTMLParseError::AbsenceOfDigitsInNumericCharacterReference);
-  }
-
-  TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - null character reference", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"\xFFFD";
-    expectedErrorCount = 1;
-    inputStream.Append(U"&#x00;", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-
-    REQUIRE(errors.back() == HTMLParseError::NullCharacterReference);
-  }
-
-  TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - character reference outside unicode range",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"\xFFFD";
-    expectedErrorCount = 1;
-    inputStream.Append(U"&#x110000;", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-
-    REQUIRE(errors.back() == HTMLParseError::CharacterReferenceOutsideUnicodeRange);
-  }
-
-  TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - surrogate", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"\xFFFD";
-    expectedErrorCount = 1;
-    inputStream.Append(U"&#xD800;", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-
-    REQUIRE(errors.back() == HTMLParseError::SurrogateCharacterReference);
-  }
-
-  TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - non character", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"\xFFFE";
-    expectedErrorCount = 1;
-    inputStream.Append(U"&#xFFFE;", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-
-    REQUIRE(errors.back() == HTMLParseError::NonCharacterCharacterReference);
-  }
-
-  TEST_CASE("HTMLTokenizer(HexadecimalCharacterReference) - control character", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"\x0D";
-    expectedErrorCount = 1;
-    inputStream.Append(U"&#x0D;", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-
-    REQUIRE(errors.back() == HTMLParseError::ControlCharacterReference);
-  }
+  TEST("HexadecimalCharacterReference", "control character",
+       (UnitTest {.Input = U"&#x0D;",
+                  .Output = {CreateCharacterToken(U"\x0D")},
+                  .Errors = {{HTMLParseError::ControlCharacterReference}}}));
 
 #pragma endregion
 
-  TEST_CASE("HTMLTokenizer(CharacterReference) - Multiple", "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"©À€Œ&a;";
-    expectedErrorCount = 2;
-    inputStream.Append(U"&copy;&Agrave&#128;&#X152;&a;", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::Character);
-    REQUIRE(errors[0] == HTMLParseError::MissingSemicolonAfterCharacterReference);
-    REQUIRE(errors[1] == HTMLParseError::UnknownNamedCharacterReference);
-  }
+  TEST("CharacterReference", "Multiple character references",
+       (UnitTest {.Input = U"&copy;&Agrave&#128;&#X152;&a;",
+                  .Output = {CreateCharacterToken(U"©À€Œ&a;")},
+                  .Errors = {
+                    {HTMLParseError::MissingSemicolonAfterCharacterReference},
+                    {HTMLParseError::UnknownNamedCharacterReference}}}));
 
 #pragma endregion
 
@@ -2818,20 +2588,10 @@ namespace Krys::Tests
     REQUIRE(tokenizer.GetState() == TokenizerState::SelfClosingStartTag);
   }
 
-  TEST_CASE("HTMLTokenizer(AttributeName) - switches to Data and emits the current tag when parsing "
-            "GreaterThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"div";
-    inputStream.Append(U"<div b>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
-    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Name, U"b"));
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-  }
+  TEST("AttributeName", "switches to Data and emits the current tag when parsing GreaterThanSign",
+       (UnitTest {
+         .Input = U"<div b>",
+         .Output = {CreateStartTagToken({.Name = U"div", .Attributes = {{.Name = U"b", .Value = U""}}})}}))
 
   TEST_CASE("HTMLTokenizer(AttributeName) - parses attribute name and switches to BeforeAttributeValue when "
             "parsing EqualsSign",
@@ -2970,20 +2730,10 @@ namespace Krys::Tests
     REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeValue);
   }
 
-  TEST_CASE("HTMLTokenizer(AfterAttributeName) - switches to Data and emits the current tag when parsing "
-            "GreaterThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"div";
-    inputStream.Append(U"<div b>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
-    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Name, U"b"));
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-  }
+  TEST("AfterAttributeName", "switches to Data and emits the current tag when parsing GreaterThanSign",
+       (UnitTest {
+         .Input = U"<div b>",
+         .Output = {CreateStartTagToken({.Name = U"div", .Attributes = {{.Name = U"b", .Value = U""}}})}}))
 
   TEST_CASE("HTMLTokenizer(AfterAttributeName) - Emits EOF token if EOF is reached", "[HTML][Tokenizer]")
   {
@@ -3123,52 +2873,23 @@ namespace Krys::Tests
     REQUIRE(tokenizer.GetState() == TokenizerState::CharacterReference);
   }
 
-  TEST_CASE("HTMLTokenizer(AttributeValueDoubleQuoted) - Replaces null character with U+FFFD",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("AttributeValueDoubleQuoted", "Replaces null character with U+FFFD",
+       (UnitTest {.Input = InsertNull(U"<div a=\"value", U"\">"),
+                  .Output = {CreateStartTagToken({.Name = U"div",
+                                                  .Attributes = {{.Name = U"a", .Value = U"value\xFFFD"}}})},
+                  .Errors = {{.Error = HTMLParseError::UnexpectedNullCharacter}}}))
 
-    expected = U"div";
-    expectedErrorCount = 1;
+  TEST("AttributeValueDoubleQuoted", "Emits EOF instead of tag if EOF reached",
+       (UnitTest {.AppendEOF = true,
+                  .Input = U"<div a=\"value",
+                  .Output = {CreateEOFToken()},
+                  .Errors = {{.Error = HTMLParseError::EOFInTag}}}))
 
-    utf32_string input = U"<div a=\"value";
-    input.append(1uz, U'\0');
-    input.append(U"\">");
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Value, U"value\xFFFD"));
-  }
-
-  TEST_CASE("HTMLTokenizer(AttributeValueDoubleQuoted) - Emits EOF instead of tag if EOF reached",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-    expected = U"";
-    expectedErrorCount = 1;
-
-    inputStream.Append(U"<div a=\"value", IsEOF(true));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::EndOfFile);
-    REQUIRE(errors.back() == HTMLParseError::EOFInTag);
-  }
-
-  TEST_CASE("HTMLTokenizer(AttributeValueDoubleQuoted) - appends to attribute value when parsing any "
-            "other character",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"";
-    inputStream.Append(U"<div a=\"value");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    REQUIRE(!token);
-    REQUIRE(tokenizer.GetState() == TokenizerState::AttributeValueDoubleQuoted);
-  }
+  TEST("AttributeValueDoubleQuoted", "appends to attribute value when parsing any other character",
+       (UnitTest {
+         .Input = U"<div a=\"valúe\">",
+         .Output = {CreateStartTagToken({.Name = U"div", .Attributes = {{.Name = U"a", .Value = U"valúe"}}})},
+       }))
 
 #pragma endregion
 
@@ -3202,24 +2923,11 @@ namespace Krys::Tests
     REQUIRE(tokenizer.GetState() == TokenizerState::CharacterReference);
   }
 
-  TEST_CASE("HTMLTokenizer(AttributeValueSingleQuoted) - Replaces null character with U+FFFD",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"div";
-    expectedErrorCount = 1;
-
-    utf32_string input = U"<div a='value";
-    input.append(1uz, U'\0');
-    input.append(U"'>");
-    inputStream.Append(std::move(input));
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Value, U"value\xFFFD"));
-  }
+  TEST("AttributeValueSingleQuoted", "Replaces null character with U+FFFD",
+       (UnitTest {.Input = InsertNull(U"<div a='value", U"'>"),
+                  .Output = {CreateStartTagToken({.Name = U"div",
+                                                  .Attributes = {{.Name = U"a", .Value = U"value\xFFFD"}}})},
+                  .Errors = {{.Error = HTMLParseError::UnexpectedNullCharacter}}}))
 
   TEST_CASE("HTMLTokenizer(AttributeValueSingleQuoted) - Emits EOF instead of tag if EOF reached",
             "[HTML][Tokenizer]")
@@ -3280,120 +2988,47 @@ namespace Krys::Tests
     REQUIRE(tokenizer.GetState() == TokenizerState::CharacterReference);
   }
 
-  TEST_CASE("HTMLTokenizer(AttributeValueUnquoted) - switches to Data and emits the current tag when parsing "
-            "GreaterThanSign",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("AttributeValueUnquoted", "switches to Data and emits the current tag when parsing GreaterThanSign",
+       (UnitTest {
+         .Input = U"<div a=value>",
+         .Output = {CreateStartTagToken({.Name = U"div", .Attributes = {{.Name = U"a", .Value = U"value"}}})},
+       }))
 
-    expected = U"div";
-    inputStream.Append(U"<div a=value>");
+  TEST("AttributeValueUnquoted", "Replaces null character with U+FFFD",
+       (UnitTest {.Input = InsertNull(U"<div a=value", U">"),
+                  .Output = {CreateStartTagToken({.Name = U"div",
+                                                  .Attributes = {{.Name = U"a", .Value = U"value\xFFFD"}}})},
+                  .Errors = {{.Error = HTMLParseError::UnexpectedNullCharacter}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
-    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Name, U"a"));
-    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Value, U"value"));
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-  }
+  TEST("AttributeValueUnquoted", "treats QuotationMark as anything else but with parse error",
+       (UnitTest {.Input = U"<div a=val\"ue>",
+                  .Output = {CreateStartTagToken({.Name = U"div",
+                                                  .Attributes = {{.Name = U"a", .Value = U"val\"ue"}}})},
+                  .Errors = {{.Error = HTMLParseError::UnexpectedCharacterInUnquotedAttributeValue}}}))
 
-  TEST_CASE("HTMLTokenizer(AttributeValueUnquoted) - Replaces null character with U+FFFD",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
+  TEST("AttributeValueUnquoted", "treats Apostrophe as anything else but with parse error",
+       (UnitTest {.Input = U"<div a=val'ue>",
+                  .Output = {CreateStartTagToken({.Name = U"div",
+                                                  .Attributes = {{.Name = U"a", .Value = U"val'ue"}}})},
+                  .Errors = {{.Error = HTMLParseError::UnexpectedCharacterInUnquotedAttributeValue}}}))
 
-    expected = U"div";
-    expectedErrorCount = 1;
+  TEST("AttributeValueUnquoted", "treats LessThanSign as anything else but with parse error",
+       (UnitTest {.Input = U"<div a=val<ue>",
+                  .Output = {CreateStartTagToken({.Name = U"div",
+                                                  .Attributes = {{.Name = U"a", .Value = U"val<ue"}}})},
+                  .Errors = {{.Error = HTMLParseError::UnexpectedCharacterInUnquotedAttributeValue}}}))
 
-    utf32_string input = U"<div a=value";
-    input.append(1uz, U'\0');
-    input.append(U">");
-    inputStream.Append(std::move(input));
+  TEST("AttributeValueUnquoted", "treats EqualsSign as anything else but with parse error",
+       (UnitTest {.Input = U"<div a=val=ue>",
+                  .Output = {CreateStartTagToken({.Name = U"div",
+                                                  .Attributes = {{.Name = U"a", .Value = U"val=ue"}}})},
+                  .Errors = {{.Error = HTMLParseError::UnexpectedCharacterInUnquotedAttributeValue}}}))
 
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedNullCharacter);
-    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Value, U"value\xFFFD"));
-  }
-
-  TEST_CASE("HTMLTokenizer(AttributeValueUnquoted) - treats QuotationMark as anything else but with parse "
-            "error",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"div";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<div a=va\"lue>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedCharacterInUnquotedAttributeValue);
-    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Value, U"va\"lue"));
-  }
-
-  TEST_CASE("HTMLTokenizer(AttributeValueUnquoted) - treats Apostrophe as anything else but with parse "
-            "error",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"div";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<div a=va'lue>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedCharacterInUnquotedAttributeValue);
-    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Value, U"va'lue"));
-  }
-
-  TEST_CASE("HTMLTokenizer(AttributeValueUnquoted) - treats LessThanSign as anything else but with parse "
-            "error",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"div";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<div a=va<lue>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedCharacterInUnquotedAttributeValue);
-    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Value, U"va<lue"));
-  }
-
-  TEST_CASE("HTMLTokenizer(AttributeValueUnquoted) - treats EqualsSign as anything else but with parse "
-            "error",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"div";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<div a=va=lue>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedCharacterInUnquotedAttributeValue);
-    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Value, U"va=lue"));
-  }
-
-  TEST_CASE("HTMLTokenizer(AttributeValueUnquoted) - treats GraveAccent as anything else but with parse "
-            "error",
-            "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"div";
-    expectedErrorCount = 1;
-    inputStream.Append(U"<div a=va`lue>");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
-    REQUIRE(errors.back() == HTMLParseError::UnexpectedCharacterInUnquotedAttributeValue);
-    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Value, U"va`lue"));
-  }
+  TEST("AttributeValueUnquoted", "treats GraveAccent as anything else but with parse error",
+       (UnitTest {.Input = U"<div a=val`ue>",
+                  .Output = {CreateStartTagToken({.Name = U"div",
+                                                  .Attributes = {{.Name = U"a", .Value = U"val`ue"}}})},
+                  .Errors = {{.Error = HTMLParseError::UnexpectedCharacterInUnquotedAttributeValue}}}))
 
   TEST_CASE("HTMLTokenizer(AttributeValueUnquoted) - Emits EOF instead of tag if EOF reached",
             "[HTML][Tokenizer]")
@@ -3441,22 +3076,10 @@ namespace Krys::Tests
     REQUIRE(tokenizer.GetState() == TokenizerState::SelfClosingStartTag);
   }
 
-  TEST_CASE(
-    "HTMLTokenizer(AfterAttributeValueQuoted) - switches to Data and emits the current tag when parsing "
-    "GreaterThanSign",
-    "[HTML][Tokenizer]")
-  {
-    SETUP_TEST(TokenizerState::Data);
-
-    expected = U"div";
-    inputStream.Append(U"<div a=\"value\">");
-
-    NextTokenPtr token = tokenizer.NextToken();
-    COMMON_TEST_CASES(HTMLToken::Type::StartTag);
-    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Name, U"a"));
-    REQUIRE(CompareDataBufferToString(token->GetAttributes()[0].Value, U"value"));
-    REQUIRE(tokenizer.GetState() == TokenizerState::Data);
-  }
+  TEST("AfterAttributeValueQuoted", "switches to Data and emits the current tag when parsing GreaterThanSign",
+       (UnitTest {.Input = U"<div a=\"value\">",
+                  .Output = {CreateStartTagToken({.Name = U"div",
+                                                  .Attributes = {{.Name = U"a", .Value = U"value"}}})}}))
 
   TEST_CASE("HTMLTokenizer(AfterAttributeValueQuoted) - Emits EOF instead of tag if EOF reached",
             "[HTML][Tokenizer]")
@@ -5814,30 +5437,30 @@ namespace Krys::Tests
 #pragma endregion
 
 #pragma region CDATASectionEnd
-  
+
   TEST_CASE("HTMLTokenizer(CDATASectionEnd) - switches to Data when parsing GreaterThanSign",
             "[HTML][Tokenizer]")
   {
     SETUP_TEST(TokenizerState::CDATASectionEnd);
-    
+
     expected = U"";
     inputStream.Append(U">");
-    
+
     NextTokenPtr token = tokenizer.NextToken();
     REQUIRE(!token);
     REQUIRE(tokenizer.GetState() == TokenizerState::Data);
   }
-  
+
   TEST_CASE(
     "HTMLTokenizer(CDATASectionEnd) - emits Character tokens for two RightSquareBrackets and "
     "switches back to CDATASection when parsing any character except RightSquareBracket or GreaterThanSign",
     "[HTML][Tokenizer]")
   {
     SETUP_TEST(TokenizerState::CDATASectionEnd);
-    
+
     expected = U"]]A";
     inputStream.Append(U"A");
-    
+
     NextTokenPtr token = tokenizer.NextToken();
     COMMON_TEST_CASES(HTMLToken::Type::Character);
     REQUIRE(tokenizer.GetState() == TokenizerState::CDATASection);
@@ -5848,10 +5471,10 @@ namespace Krys::Tests
             "[HTML][Tokenizer]")
   {
     SETUP_TEST(TokenizerState::CDATASectionEnd);
-    
+
     expected = U"]";
     inputStream.Append(U"]");
-    
+
     NextTokenPtr token = tokenizer.NextToken();
     COMMON_TEST_CASES(HTMLToken::Type::Character);
     REQUIRE(tokenizer.GetState() == TokenizerState::CDATASectionEnd);

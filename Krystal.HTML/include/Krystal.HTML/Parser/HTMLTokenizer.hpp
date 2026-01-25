@@ -85,13 +85,13 @@ namespace Krys::HTML
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#character-reference-code
     int64 _characterReferenceCode {0};
-    
+
     /// @see https://html.spec.whatwg.org/#temporary-buffer
     List<char32> _temporaryBuffer;
-    
+
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#named-character-reference-state
     Span<const NamedCharacterReferenceEntry> _namedCharacterReferenceMatchEntries;
-    const NamedCharacterReferenceEntry *_longestNamedCharacterReferenceMatchEntry {nullptr};
+    const NamedCharacterReferenceEntry *_longestCharacterReferenceMatch {nullptr};
 
     List<HTMLParseError> _parseErrors;
 
@@ -2235,7 +2235,7 @@ namespace Krys::HTML
           {
             _temporaryBuffer.push_back(character);
             _namedCharacterReferenceMatchEntries = SearchNamedCharacterReferences(_temporaryBuffer);
-            _longestNamedCharacterReferenceMatchEntry = nullptr;
+            _longestCharacterReferenceMatch = nullptr;
             ADVANCE_PAST_NON_NEWLINE_TO(NamedCharacterReference);
           }
           if (character == NumberSign)
@@ -2249,61 +2249,64 @@ namespace Krys::HTML
         END_STATE()
 
         BEGIN_STATE(NamedCharacterReference)
-          // TODO: optimization
-          List<char32> temp = _temporaryBuffer;
-          temp.push_back(character);
-
+          _temporaryBuffer.push_back(character);
           _namedCharacterReferenceMatchEntries =
-            SearchNamedCharacterReferences(temp, _namedCharacterReferenceMatchEntries);
+            SearchNamedCharacterReferences(_temporaryBuffer, _namedCharacterReferenceMatchEntries);
 
-          if (_namedCharacterReferenceMatchEntries.size() > 1)
+          if (!_namedCharacterReferenceMatchEntries.empty())
           {
-            _longestNamedCharacterReferenceMatchEntry = &_namedCharacterReferenceMatchEntries[0];
-            _temporaryBuffer.push_back(character);
+            const auto &first = _namedCharacterReferenceMatchEntries[0];
+            if (character == Semicolon) // Exact match possible only if semicolon is present
+            {
+              _temporaryBuffer.clear();
+              _temporaryBuffer.append_range(first.ToSpan());
+              FlushCodePointsConsumedAsACharacterReference();
+              ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE();
+            }
+
+            // Keep track of the longest match so far
+            if (first.Name.size() == _temporaryBuffer.size())
+            {
+              _longestCharacterReferenceMatch = &first;
+            }
+
             ADVANCE_PAST_NON_NEWLINE_TO(NamedCharacterReference);
           }
 
-          if (_namedCharacterReferenceMatchEntries.size() == 1)
+          if (_longestCharacterReferenceMatch)
           {
-            if (character == Semicolon)
-            {
-              // exact match
-              _temporaryBuffer.clear();
-              _temporaryBuffer.append_range(_longestNamedCharacterReferenceMatchEntry->ToSpan());
-              FlushCodePointsConsumedAsACharacterReference();
-              ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE();
-            }
-            else
-            {
-              _temporaryBuffer.push_back(character);
-              ADVANCE_PAST_NON_NEWLINE_TO(NamedCharacterReference);
-            }
-          }
+            const auto &match = *_longestCharacterReferenceMatch;
 
-          if (_longestNamedCharacterReferenceMatchEntry
-              && std::ranges::equal(_temporaryBuffer, _longestNamedCharacterReferenceMatchEntry->Name))
-          {
-            if (CharacterReferenceWasConsumedAsPartOfAnAttribute() && _temporaryBuffer.back() != Semicolon
+            List<char32> nonMatchingCharacters;
+            for (size_t i = match.Name.size(); i < _temporaryBuffer.size() - 1; ++i)
+            {
+              nonMatchingCharacters.push_back(_temporaryBuffer[i]);
+            }
+            _temporaryBuffer.clear();
+
+            if (CharacterReferenceWasConsumedAsPartOfAnAttribute() && match.Name.back() != Semicolon
                 && (character == EqualSign || Text::IsASCIIAlphanumeric(character)))
             {
-              _temporaryBuffer.push_back(character);
+              _temporaryBuffer.append_range(match.Name);
+              _temporaryBuffer.append_range(nonMatchingCharacters);
               FlushCodePointsConsumedAsACharacterReference();
-              ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE();
-            }
-
-            _temporaryBuffer.clear();
-            _temporaryBuffer.append_range(_longestNamedCharacterReferenceMatchEntry->ToSpan());
-            FlushCodePointsConsumedAsACharacterReference();
-            if (character != Semicolon)
-            {
-              ParserError(HTMLParseError::MissingSemicolonAfterCharacterReference);
               RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
             }
 
-            ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE();
+            _temporaryBuffer.append_range(match.ToSpan());
+            _temporaryBuffer.append_range(nonMatchingCharacters);
+            FlushCodePointsConsumedAsACharacterReference();
+
+            if (match.Name.back() != Semicolon)
+            {
+              ParserError(HTMLParseError::MissingSemicolonAfterCharacterReference);
+            }
+
+            RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
           }
 
           // no matches at all
+          _temporaryBuffer.pop_back(); // remove the last character added so we can reconsume it
           FlushCodePointsConsumedAsACharacterReference();
           RECONSUME_IN(AmbiguousAmpersand);
         END_STATE()
@@ -2378,10 +2381,9 @@ namespace Krys::HTML
           }
           if (character == Semicolon)
           {
-            ADVANCE_PAST_NON_NEWLINE_TO(NumericCharacterReferenceEnd);
+            ParserError(HTMLParseError::MissingSemicolonAfterCharacterReference);
           }
 
-          ParserError(HTMLParseError::MissingSemicolonAfterCharacterReference);
           RECONSUME_IN(NumericCharacterReferenceEnd);
         END_STATE()
 
@@ -2392,12 +2394,11 @@ namespace Krys::HTML
             _characterReferenceCode += static_cast<int64>(character - '0');
             ADVANCE_PAST_NON_NEWLINE_TO(DecimalCharacterReference);
           }
-          if (character == Semicolon)
+          if (character != Semicolon)
           {
-            ADVANCE_PAST_NON_NEWLINE_TO(NumericCharacterReferenceEnd);
+            ParserError(HTMLParseError::MissingSemicolonAfterCharacterReference);
           }
 
-          ParserError(HTMLParseError::MissingSemicolonAfterCharacterReference);
           RECONSUME_IN(NumericCharacterReferenceEnd);
         END_STATE()
 
@@ -2438,6 +2439,12 @@ namespace Krys::HTML
           _temporaryBuffer.clear();
           _temporaryBuffer.push_back(static_cast<char32>(_characterReferenceCode));
           FlushCodePointsConsumedAsACharacterReference();
+          
+          if (character == Semicolon)
+          {
+            ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE();
+          }
+
           RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
         END_STATE()
       }

@@ -6,9 +6,9 @@ namespace Krys::Tests
 {
   using namespace Krys::HTML;
 
-  HTML_INTEGRATION_TEST(
+  INTEGRATION_TEST(
     "_ExampleMarkup1",
-    (HTMLIntegrationTestCase {
+    (IntegrationTest {
       .Input = UR"html(<!DOCTYPE html>
         <html lang="en">
         <head>
