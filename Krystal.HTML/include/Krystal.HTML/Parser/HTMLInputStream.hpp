@@ -13,12 +13,20 @@ namespace Krys::HTML
 {
   class HTMLInputStream
   {
+  public:
+    struct SourceLocation
+    {
+      size_t LineNumber {1uz};
+      size_t ColumnNumber {1uz};
+    };
+
   private:
     utf32_string _data;
     size_t _readPosition {0uz};
     size_t _insertionPosition = utf32_string::npos;
     char32 _nextInputCharacter {0};
     bool _skipNextNewLine : 1 {false};
+    SourceLocation _currentLocation;
 
   public:
     constexpr static inline char32 EOFMarker = U'\uFFFF';
@@ -112,6 +120,16 @@ namespace Krys::HTML
         return false;
       }
 
+      if (_nextInputCharacter == '\n')
+      {
+        _currentLocation.LineNumber++;
+        _currentLocation.ColumnNumber = 1uz;
+      }
+      else
+      {
+        _currentLocation.ColumnNumber++;
+      }
+
       _readPosition++;
       return Peek();
     }
@@ -145,6 +163,13 @@ namespace Krys::HTML
     template <bool CaseInsensitive = true>
     KRYS_NODISCARD MatchResult AdvancePast(Text::ASCIILiteral characters) noexcept
     {
+#if KRYS_ENV(DEV)
+      for (auto character : characters.ToSpan())
+      {
+        assert(character != '\n' && character != '\r' && character != EOFMarker);
+      }
+#endif
+
       size_t availableCharacters = RemainingCharacters();
       if (availableCharacters < characters.Length())
       {
@@ -155,7 +180,7 @@ namespace Krys::HTML
       {
         char32 inputChar = _data[_readPosition + i];
         char32 matchChar = characters[i];
-        
+
         if constexpr (CaseInsensitive)
         {
           inputChar = Text::ToASCIILower(inputChar);
@@ -169,9 +194,15 @@ namespace Krys::HTML
       }
 
       _readPosition += characters.Length();
+      _currentLocation.ColumnNumber += characters.Length();
       _nextInputCharacter = _data[_readPosition];
 
       return MatchResult::Matched;
+    }
+
+    KRYS_NODISCARD SourceLocation GetCurrentLocation() const noexcept
+    {
+      return _currentLocation;
     }
   };
 }
