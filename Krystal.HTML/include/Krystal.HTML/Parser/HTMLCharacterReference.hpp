@@ -6,7 +6,6 @@
 #include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
-#include "Krystal.Text/ASCIILiteral.hpp"
 
 namespace Krys::HTML
 {
@@ -2308,10 +2307,12 @@ namespace Krys::HTML
   {
     auto it = std::ranges::find_if(NumericCharacterReferences.begin(), NumericCharacterReferences.end(),
                                    [&](const auto &cr) { return cr.CodePoint == codePoint; });
+
     if (it != NumericCharacterReferences.end())
     {
       return it->MappedCodePoint;
     }
+
     return 0;
   }
 
@@ -2319,6 +2320,8 @@ namespace Krys::HTML
     SearchNamedCharacterReferences(Span<const char32> prefix,
                                    Span<const NamedCharacterReferenceEntry> entries) noexcept
   {
+    // TODO(PERF): this is inefficient but making the entries utf32_stringviews would be worse, figure out a better
+    // way to do this
     string stringPrefix;
     for (char32 ch : prefix)
     {
@@ -2327,6 +2330,7 @@ namespace Krys::HTML
 
     auto begin =
       std::ranges::lower_bound(entries, stringPrefix, std::less {}, &NamedCharacterReferenceEntry::Name);
+
     if (begin == entries.end())
     {
       return Span<const NamedCharacterReferenceEntry>(begin, begin);
