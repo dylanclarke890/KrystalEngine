@@ -1740,13 +1740,15 @@ namespace Krys::HTML
           }
           if (Text::IsASCIIUpper(character))
           {
-            _token.BeginDOCTYPE(Text::ToASCIILowerUnchecked(character));
+            _token.BeginDOCTYPE();
+            _token.AppendToName(Text::ToASCIILowerUnchecked(character));
             ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEName);
           }
           if (character == Null)
           {
             ParserError(HTMLParseError::UnexpectedNullCharacter);
-            _token.BeginDOCTYPE(Replacement);
+            _token.BeginDOCTYPE();
+            _token.AppendToName(Replacement);
             ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEName);
           }
           if (character == GreaterThanSign)
@@ -1764,7 +1766,9 @@ namespace Krys::HTML
             return EmitDOCTYPEToken(false);
           }
 
-          _token.BeginDOCTYPE(character);
+
+          _token.BeginDOCTYPE();
+          _token.AppendToName(character);
           ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEName);
         END_STATE()
 

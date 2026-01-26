@@ -50,13 +50,11 @@ namespace Krys::HTML
 
     // For start/end tag tokens.
     bool _selfClosing : 1 {false};
+    AttributeList _attributes;
+    RawPtr<Attribute> _currentAttribute {nullptr};
 
     // For DOCTYPE only
     UniquePtr<DoctypeData> _doctypeData;
-
-    // For start/end tag tokens only
-    AttributeList _attributes;
-    RawPtr<Attribute> _currentAttribute {nullptr};
 
     // The name for DOCTYPE/start/end tokens, text data for character tokens, comment data for comment tokens.
     DataBuffer _data;
@@ -69,18 +67,10 @@ namespace Krys::HTML
       return _type;
     }
 
-    void AppendToCharacters(char32 character) noexcept
+    KRYS_NODISCARD utf32_string GetName() const noexcept
     {
-      assert(_type == Type::Uninitialized || _type == Type::Character);
-      _type = Type::Character;
-      _data.push_back(character);
-    }
-
-    void AppendToCharacters(Span<char32> characters) noexcept
-    {
-      assert(_type == Type::Uninitialized || _type == Type::Character);
-      _type = Type::Character;
-      _data.append_range(characters);
+      assert(_type == Type::StartTag || _type == Type::EndTag || _type == Type::DOCTYPE);
+      return utf32_string(_data.begin(), _data.end());
     }
 
     void AppendToName(char32 character) noexcept
@@ -89,29 +79,79 @@ namespace Krys::HTML
       _data.push_back(character);
     }
 
-    utf32_string GetName() const noexcept
+        void Clear() noexcept
     {
-      assert(_type == Type::StartTag || _type == Type::EndTag || _type == Type::DOCTYPE);
-      return utf32_string(_data.begin(), _data.end());
+      _type = Type::Uninitialized;
+      _data.clear();
     }
 
-    void BeginComment() noexcept
+    KRYS_NODISCARD const DataBuffer &GetDataBuffer() const noexcept
+    {
+      return _data;
+    }
+
+#pragma region DOCTYPE
+
+    void BeginDOCTYPE() noexcept
     {
       assert(_type == Type::Uninitialized);
-      _type = Type::Comment;
+
+      _type = Type::DOCTYPE;
+      _doctypeData = CreateUnique<DoctypeData>();
     }
 
-    void AppendToComment(char32 character) noexcept
+    void SetDOCTYPEForceQuirks() noexcept
     {
-      assert(_type == Type::Comment);
-      _data.push_back(character);
+      assert(_type == Type::DOCTYPE);
+
+      _doctypeData->ForceQuirks = true;
     }
 
-    void AppendToComment(Text::ASCIILiteral characters) noexcept
+    KRYS_NODISCARD bool IsForceQuirks() const noexcept
     {
-      assert(_type == Type::Comment);
-      _data.append_range(characters.ToSpan());
+      assert(_type == Type::DOCTYPE);
+      return _doctypeData->ForceQuirks;
     }
+
+    void SetPublicIdentifierToEmptyString()
+    {
+      assert(_type == Type::DOCTYPE);
+
+      _doctypeData->HasPublicIdentifier = true;
+      _doctypeData->PublicIdentifier.clear();
+    }
+
+    void SetSystemIdentifierToEmptyString()
+    {
+      assert(_type == Type::DOCTYPE);
+      _doctypeData->HasSystemIdentifier = true;
+      _doctypeData->SystemIdentifier.clear();
+    }
+
+    void AppendToPublicIdentifier(char32 character)
+    {
+      assert(_type == Type::DOCTYPE);
+      assert(_doctypeData->HasPublicIdentifier);
+
+      _doctypeData->PublicIdentifier.push_back(character);
+    }
+
+    void AppendToSystemIdentifier(char32 character)
+    {
+      assert(_type == Type::DOCTYPE);
+      assert(_doctypeData->HasSystemIdentifier);
+
+      _doctypeData->SystemIdentifier.push_back(character);
+    }
+
+    KRYS_NODISCARD UniquePtr<DoctypeData> ReleaseDOCTYPEData() noexcept
+    {
+      return std::move(_doctypeData);
+    }
+
+#pragma endregion
+
+#pragma region Start/End Tag
 
     void BeginStartTag(char32 character) noexcept
     {
@@ -181,19 +221,19 @@ namespace Krys::HTML
 #endif
     }
 
-    AttributeList &GetAttributes() noexcept
+    KRYS_NODISCARD AttributeList &GetAttributes() noexcept
     {
       assert(_type == Type::StartTag || _type == Type::EndTag);
       return _attributes;
     }
 
-    const AttributeList &GetAttributes() const noexcept
+    KRYS_NODISCARD const AttributeList &GetAttributes() const noexcept
     {
       assert(_type == Type::StartTag || _type == Type::EndTag);
       return _attributes;
     }
 
-    Attribute *GetCurrentAttribute() const noexcept
+    KRYS_NODISCARD Attribute *GetCurrentAttribute() const noexcept
     {
       assert(_type == Type::StartTag || _type == Type::EndTag);
       return _currentAttribute;
@@ -234,87 +274,10 @@ namespace Krys::HTML
       _currentAttribute->Value.append_range(characters);
     }
 
-    void BeginDOCTYPE() noexcept
-    {
-      assert(_type == Type::Uninitialized);
-
-      _type = Type::DOCTYPE;
-      _doctypeData = CreateUnique<DoctypeData>();
-    }
-
-    void BeginDOCTYPE(char32 character) noexcept
-    {
-      assert(_type == Type::Uninitialized);
-
-      _type = Type::DOCTYPE;
-      _doctypeData = CreateUnique<DoctypeData>();
-      _data.push_back(character);
-    }
-
-    void SetDOCTYPEForceQuirks() noexcept
-    {
-      assert(_type == Type::DOCTYPE);
-
-      _doctypeData->ForceQuirks = true;
-    }
-
-    void SetPublicIdentifierToEmptyString()
-    {
-      assert(_type == Type::DOCTYPE);
-
-      _doctypeData->HasPublicIdentifier = true;
-      _doctypeData->PublicIdentifier.clear();
-    }
-
-    void SetSystemIdentifierToEmptyString()
-    {
-      assert(_type == Type::DOCTYPE);
-      _doctypeData->HasSystemIdentifier = true;
-      _doctypeData->SystemIdentifier.clear();
-    }
-
-    void AppendToPublicIdentifier(char32 character)
-    {
-      assert(_type == Type::DOCTYPE);
-      assert(_doctypeData->HasPublicIdentifier);
-
-      _doctypeData->PublicIdentifier.push_back(character);
-    }
-
-    void AppendToSystemIdentifier(char32 character)
-    {
-      assert(_type == Type::DOCTYPE);
-      assert(_doctypeData->HasSystemIdentifier);
-
-      _doctypeData->SystemIdentifier.push_back(character);
-    }
-
-    KRYS_NODISCARD UniquePtr<DoctypeData> ReleaseDOCTYPEData() noexcept
-    {
-      return std::move(_doctypeData);
-    }
-
     void SetSelfClosingFlag() noexcept
     {
       assert(_type == Type::StartTag);
       _selfClosing = true;
-    }
-
-    void SetAsEOF() noexcept
-    {
-      assert(_type == Type::Uninitialized);
-      _type = Type::EndOfFile;
-    }
-
-    void Clear() noexcept
-    {
-      _type = Type::Uninitialized;
-      _data.clear();
-    }
-
-    KRYS_NODISCARD const DataBuffer &GetDataBuffer() const noexcept
-    {
-      return _data;
     }
 
     KRYS_NODISCARD bool IsSelfClosing() const noexcept
@@ -323,10 +286,56 @@ namespace Krys::HTML
       return _selfClosing;
     }
 
-    KRYS_NODISCARD bool IsForceQuirks() const noexcept
+#pragma endregion
+
+#pragma region Character
+
+    void AppendToCharacters(char32 character) noexcept
     {
-      assert(_type == Type::DOCTYPE);
-      return _doctypeData->ForceQuirks;
+      assert(_type == Type::Uninitialized || _type == Type::Character);
+      _type = Type::Character;
+      _data.push_back(character);
     }
+
+    void AppendToCharacters(Span<char32> characters) noexcept
+    {
+      assert(_type == Type::Uninitialized || _type == Type::Character);
+      _type = Type::Character;
+      _data.append_range(characters);
+    }
+
+#pragma endregion
+
+#pragma region Comment
+
+    void BeginComment() noexcept
+    {
+      assert(_type == Type::Uninitialized);
+      _type = Type::Comment;
+    }
+
+    void AppendToComment(char32 character) noexcept
+    {
+      assert(_type == Type::Comment);
+      _data.push_back(character);
+    }
+
+    void AppendToComment(Text::ASCIILiteral characters) noexcept
+    {
+      assert(_type == Type::Comment);
+      _data.append_range(characters.ToSpan());
+    }
+
+#pragma endregion
+
+#pragma region EndOfFile
+
+    void SetAsEOF() noexcept
+    {
+      assert(_type == Type::Uninitialized);
+      _type = Type::EndOfFile;
+    }
+
+#pragma endregion
   };
 }
