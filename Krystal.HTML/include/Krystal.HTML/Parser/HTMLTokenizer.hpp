@@ -9,6 +9,7 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/SmallList.hpp"
 #include "Krystal.Lib/Utils/ReferenceWrapper.hpp"
 #include "Krystal.Text/ASCII.hpp"
 #include "Krystal.Text/Unicode.hpp"
@@ -86,15 +87,15 @@ namespace Krys::HTML
     HTMLToken _token;
     TokenizerState _characterReferenceReturnState {TokenizerState::Data};
     ReferenceWrapper<HTMLInputStream> _input;
-    utf32_string _appropriateEndTagName;
-    utf32_string _bufferedEndTagName;
+    SmallList<char32, 32u> _appropriateEndTagName;
+    SmallList<char32, 32u> _bufferedEndTagName;
     bool _isCDATASectionAllowed : 1 {false};
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#character-reference-code
     int64 _characterReferenceCode {0};
 
     /// @see https://html.spec.whatwg.org/#temporary-buffer
-    List<char32> _temporaryBuffer;
+    SmallList<char32, 32u> _temporaryBuffer;
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#named-character-reference-state
     Span<const NamedCharacterReferenceEntry> _namedCharacterReferenceMatchEntries;
@@ -151,6 +152,11 @@ namespace Krys::HTML
     KRYS_NODISCARD bool IsCDATAAllowed() const noexcept
     {
       return _isCDATASectionAllowed;
+    }
+
+    void AppendToTemporaryBuffer(const auto &characters)
+    {
+      _temporaryBuffer.append(characters.begin(), characters.end());
     }
 
     void BufferCharacter(char32 character) noexcept
@@ -298,7 +304,11 @@ namespace Krys::HTML
       assert(_token.GetType() == HTMLToken::Type::StartTag || _token.GetType() == HTMLToken::Type::EndTag);
       if (_token.GetType() == HTMLToken::Type::StartTag)
       {
-        _appropriateEndTagName = _token.GetName();
+        _appropriateEndTagName.clear();
+        for (const auto &ch : _token.GetName())
+        {
+          _appropriateEndTagName.push_back(ch);
+        }
       }
 
       _state = TokenizerState::Data;
@@ -1766,7 +1776,6 @@ namespace Krys::HTML
             return EmitDOCTYPEToken(false);
           }
 
-
           _token.BeginDOCTYPE();
           _token.AppendToName(character);
           ADVANCE_PAST_NON_NEWLINE_TO(DOCTYPEName);
@@ -2273,7 +2282,7 @@ namespace Krys::HTML
             if (character == Semicolon) // Exact match possible only if semicolon is present
             {
               _temporaryBuffer.clear();
-              _temporaryBuffer.append_range(first.ToSpan());
+              AppendToTemporaryBuffer(first.ToSpan());
               FlushCodePointsConsumedAsACharacterReference();
               ADVANCE_TO_CHARACTER_REFERENCE_RETURN_STATE();
             }
@@ -2301,14 +2310,14 @@ namespace Krys::HTML
             if (CharacterReferenceWasConsumedAsPartOfAnAttribute() && match.Name.back() != Semicolon
                 && (character == EqualSign || Text::IsASCIIAlphanumeric(character)))
             {
-              _temporaryBuffer.append_range(match.Name);
-              _temporaryBuffer.append_range(nonMatchingCharacters);
+              AppendToTemporaryBuffer(match.Name);
+              AppendToTemporaryBuffer(nonMatchingCharacters);
               FlushCodePointsConsumedAsACharacterReference();
               RECONSUME_IN_CHARACTER_REFERENCE_RETURN_STATE();
             }
 
-            _temporaryBuffer.append_range(match.ToSpan());
-            _temporaryBuffer.append_range(nonMatchingCharacters);
+            AppendToTemporaryBuffer(match.ToSpan());
+            AppendToTemporaryBuffer(nonMatchingCharacters);
             FlushCodePointsConsumedAsACharacterReference();
 
             if (match.Name.back() != Semicolon)

@@ -75,7 +75,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(KrysProjectInclude);$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(KrysProjectInclude);$(VC_IncludePath);$(solutionDir)Krystal.Lib\third-party;$(WindowsSDK_IncludePath)</IncludePath>
+    <PublicIncludeDirectories>$(KrysProjectInclude);$(solutionDir)Krystal.Lib\third-party;</PublicIncludeDirectories>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -210,6 +211,7 @@
     <ClInclude Include="include\Krystal.Lib\Types\OrderedSet.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Set.hpp" />
     <ClInclude Include="include\Krystal.Lib\SmallValueBuffer.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\SmallList.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Span.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Stack.hpp" />
     <ClInclude Include="include\Krystal.Lib\String\String.hpp" />
@@ -233,9 +235,15 @@
     <ClInclude Include="include\Krystal.Lib\Utils\Uninit.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\Unwrap.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\WhatIsThis.hpp" />
+    <ClInclude Include="third-party\llvm\ADT\ADL.h" />
+    <ClInclude Include="third-party\llvm\Support\MemAlloc.h" />
+    <ClInclude Include="third-party\llvm\ADT\SmallVector.h" />
+    <ClInclude Include="third-party\llvm\Support\Compiler.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Events\EventManager.cpp" />
+    <ClCompile Include="third-party\llvm\Support\MemAlloc.cpp" />
+    <ClCompile Include="third-party\llvm\ADT\SmallVector.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

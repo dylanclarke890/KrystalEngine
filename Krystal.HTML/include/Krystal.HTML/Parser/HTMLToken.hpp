@@ -5,8 +5,8 @@
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
-#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/SmallList.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Text/ASCIILiteral.hpp"
 #include <cassert>
@@ -15,8 +15,8 @@ namespace Krys::HTML
 {
   struct DoctypeData
   {
-    List<char32> PublicIdentifier;
-    List<char32> SystemIdentifier;
+    SmallList<char32> PublicIdentifier;
+    SmallList<char32> SystemIdentifier;
     bool HasPublicIdentifier : 1 {false};
     bool HasSystemIdentifier : 1 {false};
     bool ForceQuirks : 1 {false};
@@ -38,12 +38,12 @@ namespace Krys::HTML
 
     struct Attribute
     {
-      List<char32> Name;
-      List<char32> Value;
+      SmallList<char32, 32u> Name;
+      SmallList<char32, 64u> Value;
     };
 
-    using AttributeList = List<Attribute>;
-    using DataBuffer = List<char32>;
+    using AttributeList = SmallList<Attribute, 10u>;
+    using DataBuffer = SmallList<char32, 128u>;
 
   private:
     Type _type : 7 {Type::Uninitialized};
@@ -79,7 +79,7 @@ namespace Krys::HTML
       _data.push_back(character);
     }
 
-        void Clear() noexcept
+    void Clear() noexcept
     {
       _type = Type::Uninitialized;
       _data.clear();
@@ -185,7 +185,8 @@ namespace Krys::HTML
       _data.push_back(character);
     }
 
-    void BeginEndTag(utf32_stringview characters) noexcept
+    template <size_t N>
+    void BeginEndTag(const SmallList<char32, N>& characters) noexcept
     {
       assert(_type == Type::Uninitialized);
 
@@ -197,7 +198,7 @@ namespace Krys::HTML
       _currentAttribute = nullptr;
 #endif
 
-      _data.append_range(characters);
+      _data.append(characters);
     }
 
     void BeginAttribute() noexcept
@@ -263,7 +264,7 @@ namespace Krys::HTML
       assert(_type == Type::StartTag || _type == Type::EndTag);
       assert(_currentAttribute != nullptr);
 
-      _currentAttribute->Value.append_range(characters);
+      _currentAttribute->Value.append(characters.begin(), characters.end());
     }
 
     void AppendToCurrentAttributeValue(Span<char32> characters)
@@ -271,7 +272,10 @@ namespace Krys::HTML
       assert(_type == Type::StartTag || _type == Type::EndTag);
       assert(_currentAttribute != nullptr);
 
-      _currentAttribute->Value.append_range(characters);
+      for (auto character : characters)
+      {
+        _currentAttribute->Value.push_back(character);
+      }
     }
 
     void SetSelfClosingFlag() noexcept
@@ -301,7 +305,11 @@ namespace Krys::HTML
     {
       assert(_type == Type::Uninitialized || _type == Type::Character);
       _type = Type::Character;
-      _data.append_range(characters);
+
+      for (auto character : characters)
+      {
+        _data.push_back(character);
+      }
     }
 
 #pragma endregion
@@ -323,7 +331,11 @@ namespace Krys::HTML
     void AppendToComment(Text::ASCIILiteral characters) noexcept
     {
       assert(_type == Type::Comment);
-      _data.append_range(characters.ToSpan());
+
+      for (auto character : characters.ToSpan())
+      {
+        _data.push_back(character);
+      }
     }
 
 #pragma endregion
