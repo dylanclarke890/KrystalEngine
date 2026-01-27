@@ -24,8 +24,6 @@ namespace Krys::Tests
     StringAtom str1 = u8"hello";
     StringAtom str2 = u8"hello";
 
-    str1 == str2;
-
     REQUIRE(str1 == str2);
   }
 

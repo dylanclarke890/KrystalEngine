@@ -40,6 +40,7 @@
     <ClCompile Include="tests\Encode\Encode.cpp" />
     <ClCompile Include="tests\Encode\EncodeOne.cpp" />
     <ClCompile Include="tests\ByteOrderMark.cpp" />
+    <ClCompile Include="tests\StringConversion.cpp" />
     <ClCompile Include="tests\Transcode\Transcode.cpp" />
     <ClCompile Include="tests\Transcode\TranscodeOne.cpp" />
   </ItemGroup>
