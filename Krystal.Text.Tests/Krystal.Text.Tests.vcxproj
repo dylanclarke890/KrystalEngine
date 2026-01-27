@@ -31,7 +31,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="catch_main.cpp" />
-    <ClCompile Include="tests\AtomString.cpp" />
     <ClCompile Include="tests\CodecRegistry.cpp" />
     <ClCompile Include="tests\Count\CountAsDecoded.cpp" />
     <ClCompile Include="tests\Count\CountAsEncoded.cpp" />

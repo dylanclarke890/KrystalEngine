@@ -38,7 +38,7 @@
     <ClInclude Include="include\Krystal.HTML\Element.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLDocument.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Parser\AtomHTMLToken.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Parser\HTMLTokenAtom.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLActiveFormattingElementList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLCharacterReference.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLDocumentParser.hpp" />

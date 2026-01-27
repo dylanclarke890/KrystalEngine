@@ -149,7 +149,6 @@
   <ItemGroup>
     <ClInclude Include="include\Krystal.Text\ASCII.hpp" />
     <ClInclude Include="include\Krystal.Text\ASCIILiteral.hpp" />
-    <ClInclude Include="include\Krystal.Text\AtomString.hpp" />
     <ClInclude Include="include\Krystal.Text\Codecs\BasicCodec.hpp" />
     <ClInclude Include="include\Krystal.Text\Codecs\CodecRegistry.hpp" />
     <ClInclude Include="include\Krystal.Text\Codecs\ICodec.hpp" />

@@ -36,5 +36,8 @@
     <ClCompile Include="tests\Ranges\Reconstruct.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tests\String\StringAtom.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

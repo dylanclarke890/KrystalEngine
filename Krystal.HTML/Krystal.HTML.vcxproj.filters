@@ -84,7 +84,7 @@
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLToken.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Parser\AtomHTMLToken.hpp">
+    <ClInclude Include="include\Krystal.HTML\Parser\HTMLTokenAtom.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\StronglyTypedValues.hpp">
