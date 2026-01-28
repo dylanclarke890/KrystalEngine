@@ -68,9 +68,9 @@ namespace Krys
           if (event.Key() == Platform::Key::Space && event.State() == Platform::KeyState::Pressed)
           {
             _document.ElementStyleSetBackgroundColour(
-              _test, Maths::Random::Choice<Gfx::ColourbPremultiplied>({Gfx::Colours::Red, Gfx::Colours::Green,
-                                                         Gfx::Colours::Blue, Gfx::Colours::Cyan,
-                                                         Gfx::Colours::Magenta, Gfx::Colours::Yellow}));
+              _test, Maths::Random::Choice<Gfx::ColourbPremultiplied>(
+                       {Gfx::Colours::Red, Gfx::Colours::Green, Gfx::Colours::Blue, Gfx::Colours::Cyan,
+                        Gfx::Colours::Magenta, Gfx::Colours::Yellow}));
           }
 
           return true;
@@ -124,9 +124,9 @@ namespace Krys
       _compositor.Render(_document);
     }
 
-    void OnUpdate(double deltaTime) noexcept override
+    void OnUpdate(Seconds dt) noexcept override
     {
-      _camera.Update(deltaTime, *_context->Input);
+      _camera.Update(dt.count(), *_context->Input);
     }
   };
 }

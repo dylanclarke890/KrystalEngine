@@ -3,6 +3,7 @@
 #include "Krystal.Lib/Core/Macros.hpp"
 #include "Krystal.Lib/Detection/Environment.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Time/MonotonicTime.hpp"
 
 namespace Krys::Debug
 {
@@ -13,7 +14,7 @@ namespace Krys::Debug
     ~ScopedProfiler() noexcept;
 
   private:
-    double _start;
+    MonotonicTime::duration _performance;
     string _name;
   };
 

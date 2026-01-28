@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/DOMHighResTimeStamp.hpp"
+#include "Krystal.HTML/Time/DOMHighResTimeStamp.hpp"
 #include "Krystal.HTML/Events/EventInit.hpp"
 #include "Krystal.HTML/Events/EventPhaseType.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"

@@ -35,7 +35,7 @@
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML\ContainerNode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Document.hpp" />
-    <ClInclude Include="include\Krystal.HTML\DOMHighResTimeStamp.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Time\DOMHighResTimeStamp.hpp" />
     <ClInclude Include="include\Krystal.HTML\Element.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\CustomEvent.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\Event.hpp" />
@@ -64,7 +64,6 @@
     <ClInclude Include="include\Krystal.HTML\Parser\InsertionMode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\TokenizerState.hpp" />
     <ClInclude Include="include\Krystal.HTML\Context.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Performance.hpp" />
     <ClInclude Include="include\Krystal.HTML\StronglyTypedValues.hpp" />
   </ItemGroup>
   <ItemGroup>

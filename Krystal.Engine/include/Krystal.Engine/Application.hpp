@@ -6,10 +6,11 @@
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Events/EventManager.hpp"
 #include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
+#include "Krystal.Lib/Pointers/UniquePtr.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Time/Duration.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Pointers/UniquePtr.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include "Krystal.Platform/Events.hpp"
 #include "Krystal.Platform/Input.hpp"
@@ -49,7 +50,7 @@ namespace Krys
 
     Platform::WindowSettings WindowSettings {};
 
-    uint32 RenderFramerate {30};
+    uint32 RenderFramerate {60};
 
     uint32 PhysicsFramerate {30};
 
@@ -96,11 +97,11 @@ namespace Krys
 
     /// @brief Per-frame update method.
     /// @param dt Delta time since the last frame, in seconds.
-    virtual void OnUpdate(double dt) noexcept;
+    virtual void OnUpdate(Seconds dt) noexcept;
 
     /// @brief Fixed rate update method.
     /// @param dt The fixed time step, in seconds. Does not change unless explicitly set.
-    virtual void OnFixedUpdate(double dt) noexcept;
+    virtual void OnFixedUpdate(Seconds dt) noexcept;
 
     /// @brief Per-frame render method.
     virtual void OnRender() noexcept;
@@ -114,6 +115,6 @@ namespace Krys
     Platform::WindowCallbacks CreateWindowCallbacks() noexcept;
 
     /// @brief CPU friendly way to cap the frame rate.
-    void ClampFramerate(double &elapsedMs, const double startTime);
+    void ClampFramerate(const Nanoseconds start, Nanoseconds &elapsed);
   };
 }

@@ -1,10 +1,11 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Types/Nullable.hpp"
-#include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/NativeHandle.hpp"
+#include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Time/Duration.hpp"
+#include "Krystal.Lib/Types/Nullable.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::Platform
 {
@@ -13,12 +14,6 @@ namespace Krys::Platform
 
   /// @brief Shuts down platform-specific functionality.
   void Shutdown() noexcept;
-
-  /// @brief Gets the time in seconds since the application started.
-  KRYS_NODISCARD double GetTime() noexcept;
-
-  /// @brief Gets the time in milliseconds since the application started.
-  KRYS_NODISCARD double GetTimeMilliseconds() noexcept;
 
   /// @brief Gets dpi of the given window.
   KRYS_NODISCARD int GetDPIForWindow(NativeHandle windowHandle = {nullptr}) noexcept;
@@ -32,5 +27,5 @@ namespace Krys::Platform
   uint SetTimerPrecision(Nullable<uint> min = std::nullopt) noexcept;
 
   /// @brief Sleep for the specified number of milliseconds.
-  void Sleep(uint32 milliseconds) noexcept;
+  void Sleep(Milliseconds duration) noexcept;
 }

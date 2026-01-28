@@ -138,9 +138,6 @@
     <ProjectReference Include="..\Krystal.Log\Krystal.Log.vcxproj">
       <Project>{dfd59bfd-d1ba-4f1d-ab1a-ecd50440d091}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\Krystal.Platform\Krystal.Platform.vcxproj">
-      <Project>{42e8c0a6-1f92-456b-a8b7-0050bfdf97e2}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

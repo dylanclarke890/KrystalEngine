@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Engine/Application.hpp"
 #include "Krystal.Debug/ScopedProfiler.hpp"
 #include "Krystal.IO/Backends/NativeFileBackend.hpp"
+#include "Krystal.Lib/Time/MonotonicTime.hpp"
 #include "Krystal.Maths/Random.hpp"
 #include "Krystal.Platform/Input.hpp"
 #include "Krystal.Platform/Platform.hpp"
@@ -46,33 +47,32 @@ namespace Krys
     {
       _running = true;
 
-      double elapsedMs = 0;
-      double accumulatedMs = 0;
+      Nanoseconds elapsed {};
+      Nanoseconds accumulated {};
       while (_running)
       {
-        // auto profiler = Debug::ScopedProfiler("Frame");
-        const double startTime = Platform::GetTimeMilliseconds();
+        const Nanoseconds frameStart = MonotonicTime::Now();
 
         _context->Input->BeginFrame();
         _context->Window->ProcessMessages();
         _context->Events->DispatchAll();
 
         // Fixed update loop.
-        const double physicsStepMs = 1'000.0 / _context->Settings.PhysicsFramerate;
+        const auto fixedUpdateSizeNs = Nanoseconds(1s) / _context->Settings.PhysicsFramerate;
         const uint32 maxPhysicsSteps = _context->Settings.MaxPhysicsUpdatesPerFrame;
         {
-          uint32 physicsSteps = 0;
-          while (accumulatedMs >= physicsStepMs && physicsSteps < maxPhysicsSteps)
+          uint32 physicsStepCount = 0;
+          while (accumulated >= fixedUpdateSizeNs && physicsStepCount < maxPhysicsSteps)
           {
-            OnFixedUpdate(physicsStepMs / 1'000.0);
-            accumulatedMs -= physicsStepMs;
-            physicsSteps++;
+            OnFixedUpdate(Seconds(fixedUpdateSizeNs));
+            accumulated -= fixedUpdateSizeNs;
+            physicsStepCount++;
           }
         }
 
         // Per-frame update and render.
         {
-          OnUpdate(elapsedMs / 1'000.0);
+          OnUpdate(Seconds(elapsed));
           if (!_isWindowMinimised)
           {
             _context->Renderer->BeginFrame();
@@ -85,13 +85,15 @@ namespace Krys
         // We'll only manually cap the frame rate if vsync is disabled.
         if (!_context->Settings.WindowSettings.VSync)
         {
-          ClampFramerate(elapsedMs, startTime);
+          ClampFramerate(frameStart, elapsed);
         }
 
         // Calculate the elapsed time since the last frame.
-        elapsedMs = Platform::GetTimeMilliseconds() - startTime;
-        accumulatedMs = std::min(accumulatedMs + elapsedMs,
-                                 physicsStepMs * maxPhysicsSteps); // Cap to avoid spiral of death.
+        elapsed = MonotonicTime::Now() - frameStart;
+        accumulated = std::min(accumulated + elapsed,
+                               fixedUpdateSizeNs * maxPhysicsSteps); // Cap to avoid spiral of death.
+
+        // KRYS_INFO("Frame Time: {:.2f} ms", std::chrono::duration_cast<Milliseconds>(elapsed).count());
       }
     }
     OnShutdown();
@@ -224,21 +226,21 @@ namespace Krys
     };
   }
 
-  void Application::ClampFramerate(double &elapsedMs, const double startTime)
+  void Application::ClampFramerate(const Nanoseconds start, Nanoseconds &elapsed)
   {
-    const double targetFrameTimeMs = 1'000.0f / _context->Settings.RenderFramerate;
-    while (elapsedMs < targetFrameTimeMs - 2)
+    const Nanoseconds targetFrameTime = Nanoseconds(1s) / _context->Settings.RenderFramerate;
+    while (elapsed < (targetFrameTime - 2ms))
     {
-      Platform::Sleep(1);
-      elapsedMs = Platform::GetTimeMilliseconds() - startTime;
+      Platform::Sleep(1ms);
+      elapsed = MonotonicTime::Now() - start;
     }
 
     // Yield the thread to the OS for the remaining time, avoids busy waiting.
     do
     {
       std::this_thread::yield();
-      elapsedMs = Platform::GetTimeMilliseconds() - startTime;
-    } while (elapsedMs < targetFrameTimeMs);
+      elapsed = MonotonicTime::Now() - start;
+    } while (elapsed < targetFrameTime);
   }
 
 #pragma region Lifecycle Methods
@@ -247,11 +249,11 @@ namespace Krys
   {
   }
 
-  void Application::OnUpdate(double) noexcept
+  void Application::OnUpdate(Seconds) noexcept
   {
   }
 
-  void Application::OnFixedUpdate(double) noexcept
+  void Application::OnFixedUpdate(Seconds) noexcept
   {
   }
 

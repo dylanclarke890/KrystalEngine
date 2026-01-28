@@ -15,6 +15,7 @@
 #include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.Lib/Core/DebugBreak.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Time/MonotonicTime.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
@@ -843,7 +844,8 @@ namespace Krys::Gfx::OpenGL
 
     for (uint i = 0; i < sizeof(lightPositions) / sizeof(lightPositions[0]); ++i)
     {
-      Vec3 newPos = lightPositions[i] + Vec3(std::sin((float)Platform::GetTime() * 5.0f) * 5.0f, 0.0f, 0.0f);
+      auto time = static_cast<float>(Seconds(MonotonicTime::Now()).count());
+      Vec3 newPos = lightPositions[i] + Vec3(std::sin(time * 5.0f), 0.0f, 0.0f);
       shader.SetUniform("lightPositions[" + std::to_string(i) + "]", newPos);
       shader.SetUniform("lightColors[" + std::to_string(i) + "]", lightColors[i]);
 
