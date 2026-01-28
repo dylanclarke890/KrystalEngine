@@ -96,6 +96,27 @@
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLCharacterReference.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\EventTarget.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Events\Event.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Events\CustomEvent.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Events\EventPhaseType.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Events\EventInit.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOMHighResTimeStamp.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Performance.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -104,8 +125,26 @@
     <ClCompile Include="src\Node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Events\Event.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\HTMLTagNames.in" />
+    <None Include="data\CustomEvent.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CustomEventInit.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Event.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\EventInit.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\EventTarget.idl">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

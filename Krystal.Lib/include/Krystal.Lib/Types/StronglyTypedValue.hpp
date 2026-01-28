@@ -9,6 +9,8 @@ namespace Krys
   template <typename Derived>
   struct StronglyTypedBool
   {
+    using Base = StronglyTypedBool<Derived>;
+
     bool Value;
 
     constexpr StronglyTypedBool() noexcept : Value(false)

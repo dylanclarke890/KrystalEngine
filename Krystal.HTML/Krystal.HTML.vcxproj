@@ -35,7 +35,13 @@
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML\ContainerNode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Document.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOMHighResTimeStamp.hpp" />
     <ClInclude Include="include\Krystal.HTML\Element.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Events\CustomEvent.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Events\Event.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Events\EventInit.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Events\EventPhaseType.hpp" />
+    <ClInclude Include="include\Krystal.HTML\EventTarget.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLDocument.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLTokenAtom.hpp" />
@@ -58,14 +64,25 @@
     <ClInclude Include="include\Krystal.HTML\Parser\InsertionMode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\TokenizerState.hpp" />
     <ClInclude Include="include\Krystal.HTML\Context.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Performance.hpp" />
     <ClInclude Include="include\Krystal.HTML\StronglyTypedValues.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp" />
+    <ClCompile Include="src\Events\Event.cpp" />
     <ClCompile Include="src\Node.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\HTMLTagNames.in" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\CustomEvent.idl" />
+    <None Include="data\CustomEventInit.idl" />
+    <None Include="data\Event.idl" />
+    <None Include="data\EventInit.idl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+    </None>
+    <None Include="data\EventTarget.idl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
