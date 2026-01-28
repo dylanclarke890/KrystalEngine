@@ -35,9 +35,10 @@
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML\ContainerNode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Document.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Time\DOMHighResTimeStamp.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOMHighResTimeStamp.hpp" />
     <ClInclude Include="include\Krystal.HTML\Element.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\CustomEvent.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Events\CustomEventInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\Event.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventPhaseType.hpp" />

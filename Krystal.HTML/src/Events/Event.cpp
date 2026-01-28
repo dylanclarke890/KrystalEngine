@@ -10,7 +10,6 @@ namespace Krys::HTML
     _bubbles = eventInitDict.Bubbles;
     _cancellable = eventInitDict.Cancellable;
     _composed = eventInitDict.Composed;
-    _isInitialized = true;
   }
 
   List<EventTarget> Event::ComposedPath() const noexcept

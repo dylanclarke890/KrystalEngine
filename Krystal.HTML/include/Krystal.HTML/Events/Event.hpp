@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Time/DOMHighResTimeStamp.hpp"
+#include "Krystal.HTML/DOMHighResTimeStamp.hpp"
 #include "Krystal.HTML/Events/EventInit.hpp"
 #include "Krystal.HTML/Events/EventPhaseType.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
@@ -17,10 +17,9 @@ namespace Krys::HTML
   private:
     StringAtom _type;
     RawPtr<EventTarget> _target {nullptr};
-    RawPtr<EventTarget> _srcElement {nullptr}; // legacy
     RawPtr<EventTarget> _currentTarget {nullptr};
-    EventPhaseType _eventPhase : BitCount<EventPhaseType>() {EventPhaseType::NONE};
     DOMHighResTimeStamp _timeStamp {};
+    EventPhaseType _eventPhase : BitCount<EventPhaseType>() {EventPhaseType::NONE};
 
     bool _bubbles : 1 {false};
     bool _cancellable : 1 {false};
@@ -30,10 +29,8 @@ namespace Krys::HTML
     bool _stopImmediatePropagation : 1 {false};
     bool _cancelled : 1 {false};
     bool _inPassiveListener : 1 {false};
-    bool _isInitialized : 1 {false};
     bool _defaultHandled : 1 {false};
     bool _isTrusted : 1 {false};
-
 
   public:
     Event(StringAtom type, const EventInit &eventInitDict = {}) noexcept;
@@ -53,14 +50,14 @@ namespace Krys::HTML
       return _target;
     }
 
-    KRYS_NODISCARD RawPtr<EventTarget> GetCurrentElement() const noexcept
+    KRYS_NODISCARD RawPtr<EventTarget> GetCurrentTarget() const noexcept
     {
       return _currentTarget;
     }
 
-    KRYS_NODISCARD bool IsInitialized() const noexcept
+    KRYS_NODISCARD DOMHighResTimeStamp GetTimeStamp() const noexcept
     {
-      return _isInitialized;
+      return _timeStamp;
     }
 
     KRYS_NODISCARD bool Bubbles() const noexcept
@@ -76,6 +73,11 @@ namespace Krys::HTML
     KRYS_NODISCARD bool Composed() const noexcept
     {
       return _composed;
+    }
+
+    KRYS_NODISCARD bool IsTrusted() const noexcept
+    {
+      return _isTrusted;
     }
 
     void StopPropagation() noexcept
@@ -97,32 +99,6 @@ namespace Krys::HTML
     KRYS_NODISCARD bool IsImmediatePropagationStopped() const noexcept
     {
       return _stopImmediatePropagation;
-    }
-
-    KRYS_NODISCARD bool CancelBubble() const noexcept
-    {
-      return _stopPropagation;
-    }
-
-    void SetCancelBubble(bool cancel) noexcept
-    {
-      if (cancel)
-      {
-        _stopPropagation = true;
-      }
-    }
-
-    KRYS_NODISCARD bool ReturnValue() const noexcept
-    {
-      return !_cancelled;
-    }
-
-    void SetReturnValue(bool returnValue) noexcept
-    {
-      if (!returnValue)
-      {
-        PreventDefault();
-      }
     }
 
     void PreventDefault() noexcept
