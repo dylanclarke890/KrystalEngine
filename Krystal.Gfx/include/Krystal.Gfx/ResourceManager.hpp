@@ -2,10 +2,11 @@
 
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Nullable.hpp"
-#include "Krystal.Lib/Types/Queue.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/Queue.hpp"
 #include <cassert>
 
 namespace Krys::Gfx
@@ -37,7 +38,7 @@ namespace Krys::Gfx
       }
 
       ResourceEntry &entry = _resources[index];
-      entry.Resource = std::move(resource);
+      entry.Resource = Krys::Move(resource);
 
       return CreateHandle(index, entry.Generation);
     }
@@ -52,7 +53,7 @@ namespace Krys::Gfx
       uint16 generation = GetGeneration(handle);
 
       ResourceEntry &entry = GetResourceEntry(index, generation, false);
-      entry.Resource = std::move(resource);
+      entry.Resource = Krys::Move(resource);
     }
 
     KRYS_NODISCARD T &Get(THandle handle)
@@ -191,7 +192,7 @@ namespace Krys::Gfx
     }
 
     KRYS_NODISCARD ResourceEntry &GetResourceEntry(uint16 index, uint16 generation,
-                                               bool ensureResourceIsNotInUse = true)
+                                                   bool ensureResourceIsNotInUse = true)
     {
       if (index >= _resources.size()) KRYS_UNLIKELY
       {
@@ -214,7 +215,7 @@ namespace Krys::Gfx
     }
 
     KRYS_NODISCARD const ResourceEntry &GetResourceEntry(uint16 index, uint16 generation,
-                                                     bool ensureResourceIsNotInUse = true) const
+                                                         bool ensureResourceIsNotInUse = true) const
     {
       return const_cast<ResourceManager<T, THandle> *>(this)->GetResourceEntry(index, generation,
                                                                                ensureResourceIsNotInUse);

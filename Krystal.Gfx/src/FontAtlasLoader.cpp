@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Gfx/FontAtlasLoader.hpp"
 #include "Krystal.Lib/Core/DebugBreak.hpp"
+#include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include "Krystal.Maths/Round.hpp"
@@ -136,7 +137,7 @@ namespace
           std::memcpy(dst, src, glyph.ActualSize.x);
         }
 
-        glyphs.push_back(std::move(glyph));
+        glyphs.push_back(Krys::Move(glyph));
 
         charcode = FT_Get_Next_Char(_face, charcode, &gindex);
       }
@@ -155,7 +156,7 @@ namespace
     }
 
     KRYS_NODISCARD CharacterMap ToCodepointsMap(List<BitmapGlyph> &glyphs, int padding,
-                                            const Maths::Vec2u &atlasSize)
+                                                const Maths::Vec2u &atlasSize)
     {
       CharacterMap characters;
       characters.reserve(glyphs.size());

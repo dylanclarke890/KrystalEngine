@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Engine/Application.hpp"
 #include "Krystal.Debug/ScopedProfiler.hpp"
 #include "Krystal.IO/Backends/NativeFileBackend.hpp"
+#include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Time/MonotonicTime.hpp"
 #include "Krystal.Maths/Random.hpp"
 #include "Krystal.Platform/Input.hpp"
@@ -120,7 +121,7 @@ namespace Krys
     {
       throw std::runtime_error("Failed to create logger: " + logger.error());
     }
-    _context->Logger = std::move(logger.value());
+    _context->Logger = Krys::Move(logger.value());
     Log::SetGlobalLogger(_context->Logger);
 
     _context->Events = CreateUnique<EventManager>();
@@ -140,7 +141,7 @@ namespace Krys
     {
       throw std::runtime_error("Failed to create window: " + window.error());
     }
-    _context->Window = std::move(window.value());
+    _context->Window = Krys::Move(window.value());
 
     // TODO: this needs to be configurable on startup.
     auto cwd = std::filesystem::current_path();
@@ -167,14 +168,14 @@ namespace Krys
     {
       throw std::runtime_error("Failed to create graphics context: " + gfxContext.error());
     }
-    _context->GraphicsContext = std::move(gfxContext.value());
+    _context->GraphicsContext = Krys::Move(gfxContext.value());
 
     auto uiRenderer = CreateRenderer(*_context->GraphicsContext);
     if (!uiRenderer.has_value())
     {
       throw std::runtime_error("Failed to create renderer");
     }
-    _context->Renderer = std::move(uiRenderer.value());
+    _context->Renderer = Krys::Move(uiRenderer.value());
   }
 
   Platform::WindowCallbacks Application::CreateWindowCallbacks() noexcept

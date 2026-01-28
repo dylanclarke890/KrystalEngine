@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Editor/Editor.hpp"
 #include "Krystal.Engine/Application.hpp"
+#include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Detection/OS.hpp"
 
 #if KRYS_OS(WINDOWS)
@@ -69,7 +70,7 @@ int main(int argc, char **argv)
     return -1;
   }
 
-  UniquePtr<Editor> editor = std::move(result.value());
+  UniquePtr<Editor> editor = ::Krys::Move(result.value());
   editor->Run();
 
   return 0;

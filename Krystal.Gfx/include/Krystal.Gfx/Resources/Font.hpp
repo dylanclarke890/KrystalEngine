@@ -4,6 +4,7 @@
 #include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.IO/Path.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
@@ -116,7 +117,7 @@ namespace Krys::Gfx
 
     FontFamily(FontFamily &&other) noexcept
         : _name(std::exchange(other._name, utf8_string {})), _path(std::exchange(other._path, IO::Path {})),
-          _fonts(std::move(other._fonts))
+          _fonts(Krys::Move(other._fonts))
     {
     }
 
@@ -126,7 +127,7 @@ namespace Krys::Gfx
       {
         _name = std::exchange(other._name, utf8_string {});
         _path = std::exchange(other._path, IO::Path {});
-        _fonts = std::move(other._fonts);
+        _fonts = Krys::Move(other._fonts);
       }
       return *this;
     }

@@ -54,6 +54,9 @@ namespace Krys
   template <typename T>
   using add_const_t = typename std::add_const<T>::type;
 
+  template <typename T>
+  using add_rvalue_ref_t = typename std::add_rvalue_reference<T>::type;
+
   /// @brief Removes const qualifier from the given type.
   template <typename T>
   using remove_const_t = typename std::remove_const<T>::type;

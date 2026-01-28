@@ -138,6 +138,7 @@
     <ClInclude Include="include\Krystal.Lib\Commands\CommandListReader.hpp" />
     <ClInclude Include="include\Krystal.Lib\Commands\CommandType.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Attributes.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\Move.hpp" />
     <ClInclude Include="include\Krystal.Lib\InlineContainers\Forward.hpp" />
     <ClInclude Include="include\Krystal.Lib\Mixins\NonCopyable.hpp" />
     <ClInclude Include="include\Krystal.Lib\Detection\Compiler.hpp" />
