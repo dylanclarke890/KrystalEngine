@@ -60,23 +60,23 @@ namespace Krys
   template <typename T>
   concept IsFunction = std::is_function_v<T>;
 
-  template <typename F, class... Args>
+  template <typename F, typename... Args>
   concept Callable = std::invocable<F, Args...>;
 
-  template <typename F, class... Args>
+  template <typename F, typename... Args>
   concept NoThrowInvocable = std::is_nothrow_invocable_v<F, Args...>;
 
   /// @brief Checks type `T` is callable type that does not cause side effects.
-  template <typename T, class... Args>
+  template <typename T, typename... Args>
   concept RegularCallable = std::regular_invocable<T, Args...>;
 
-  template <typename T, class... Args>
+  template <typename T, typename... Args>
   concept Predicate = std::predicate<T, Args...>;
 
-  template <typename T, class... Args>
+  template <typename T, typename... Args>
   concept Constructible = std::is_constructible_v<T, Args...>;
 
-  template <typename T, class... Args>
+  template <typename T, typename... Args>
   concept NoThrowConstructible = std::is_nothrow_constructible_v<T, Args...>;
 
   template <typename T>
@@ -121,7 +121,7 @@ namespace Krys
   template <typename T>
   concept NoThrowMoveAssignable = std::is_nothrow_move_assignable_v<T>;
 
-  template <typename T, class... Args>
+  template <typename T, typename... Args>
   concept ConstructibleFrom = std::constructible_from<T, Args...>;
 
   template <typename TDerived, typename TBase>

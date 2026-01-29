@@ -57,3 +57,19 @@
 #elif !defined(KRYS_NO_UNIQUE_ADDRESS)
   #define KRYS_NO_UNIQUE_ADDRESS
 #endif
+
+#if !defined(KRYS_LIFETIME_BOUND)
+  #if KRYS_COMPILER_CPP_ATTRIBUTE(clang::lifetimebound)
+    #define KRYS_LIFETIME_BOUND [[clang::lifetimebound]]
+  #elif KRYS_COMPILER_CPP_ATTRIBUTE(msvc::lifetimebound)
+    #define KRYS_LIFETIME_BOUND [[msvc::lifetimebound]]
+  #elif KRYS_COMPILER_CPP_ATTRIBUTE(lifetimebound)
+    #define KRYS_LIFETIME_BOUND [[lifetimebound]]
+  #else
+    #define KRYS_LIFETIME_BOUND
+  #endif
+#endif
+
+#if !defined(KRYS_RETURNS_NONNULL)
+  #define KRYS_RETURNS_NONNULL __attribute__((returns_nonnull))
+#endif

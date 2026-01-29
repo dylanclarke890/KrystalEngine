@@ -25,3 +25,10 @@
 #else
   #define KRYS_SUPPRESS_COVERAGE
 #endif
+
+// Check if Address Sanitizer is enabled.
+#ifdef __SANITIZE_ADDRESS__
+  #define KRYS_ASAN_ENABLED 1
+#else
+  #define KRYS_ASAN_ENABLED KRYS_COMPILER_FEATURE(address_sanitizer)
+#endif

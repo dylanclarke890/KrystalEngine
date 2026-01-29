@@ -47,7 +47,7 @@ namespace Krys
 
   template <typename T>
   using add_pointer_t = typename std::add_pointer<T>::type;
-  
+
   template <typename T>
   using add_lvalue_ref_t = typename std::add_lvalue_reference<T>::type;
 
@@ -97,4 +97,12 @@ namespace Krys
   /// @brief Converts an integral type to its unsigned counterpart.
   template <typename T>
   using make_unsigned_t = typename std::make_unsigned<T>::type;
+
+  // Based on 'Detecting in C++ whether a type is defined, part 3: SFINAE and incomplete types'
+  // <https://devblogs.microsoft.com/oldnewthing/20190710-00/?p=102678>
+  template <typename, typename = void>
+  inline constexpr bool IsTypeComplete = false;
+
+  template <typename T>
+  inline constexpr bool IsTypeComplete<T, std::void_t<decltype(sizeof(T))>> = true;
 }
