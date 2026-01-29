@@ -336,6 +336,9 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\GetPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Detection\NumberOfCores.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Events\EventManager.cpp">
@@ -345,6 +348,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="third-party\llvm\Support\MemAlloc.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Detection\NumberOfCores.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
