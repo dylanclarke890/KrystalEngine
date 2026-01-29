@@ -37,6 +37,9 @@ namespace Krys
   template <typename T>
   constexpr auto Extent = std::extent<T>::value;
 
+  template <typename T>
+  constexpr auto AlignmentOf = std::alignment_of<T>::value;
+
   template <bool Test, typename T = void>
   using enable_if_t = typename std::enable_if_t<Test, T>;
 

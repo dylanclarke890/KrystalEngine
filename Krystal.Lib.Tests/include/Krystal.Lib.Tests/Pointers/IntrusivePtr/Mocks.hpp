@@ -29,14 +29,14 @@ namespace Krys::Tests
   struct mock_traits
   {
     template <int Tag>
-    static void add_ref(const instrumented_counted<Tag> *c) noexcept
+    static void AddRef(const instrumented_counted<Tag> *c) noexcept
     {
       REQUIRE(c->count > 0);
       ++c->count;
     }
 
     template <int Tag>
-    static void sub_ref(const instrumented_counted<Tag> *c) noexcept
+    static void SubRef(const instrumented_counted<Tag> *c) noexcept
     {
       CHECK(c->count > 0);
       if (--c->count == 0)
@@ -53,22 +53,22 @@ namespace Krys::Tests
   template <class T>
   mock_ptr<T> mock_ref(T *ptr)
   {
-    return mock_ptr<T>::ref(ptr);
+    return mock_ptr<T>::Ref(ptr);
   }
   template <class T>
   mock_ptr<T> mock_noref(T *ptr)
   {
-    return mock_ptr<T>::noref(ptr);
+    return mock_ptr<T>::NoRef(ptr);
   }
 
   template <class T>
   mock_ptr_different_traits<T> mock_ref_different_traits(T *ptr)
   {
-    return mock_ptr_different_traits<T>::ref(ptr);
+    return mock_ptr_different_traits<T>::Ref(ptr);
   }
   template <class T>
   mock_ptr_different_traits<T> mock_noref_different_traits(T *ptr)
   {
-    return mock_ptr_different_traits<T>::noref(ptr);
+    return mock_ptr_different_traits<T>::NoRef(ptr);
   }
 }

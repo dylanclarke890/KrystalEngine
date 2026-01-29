@@ -56,7 +56,7 @@ namespace Krys::Tests
       else
         CHECK(*res == &items[old]);
       if (*res)
-        mock_traits<>::sub_ref(*res);
+        mock_traits<>::SubRef(*res);
       *res = &items[idx];
     };
 
@@ -83,7 +83,7 @@ namespace Krys::Tests
       else
         CHECK(*ptr == &items[old]);
       if (*ptr)
-        mock_traits<>::sub_ref(*ptr);
+        mock_traits<>::SubRef(*ptr);
       *ptr = &items[idx];
     };
 

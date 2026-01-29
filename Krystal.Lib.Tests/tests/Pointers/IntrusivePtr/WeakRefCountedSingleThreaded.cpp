@@ -8,195 +8,195 @@ namespace Krys::Tests
 {
   namespace
   {
-    int derived_count = 0;
+    int DerivedCount = 0;
 
-    struct derived_counted : SingleThreadWeakRefCounted<derived_counted>
+    struct DerivedCounted : SingleThreadWeakRefCounted<DerivedCounted>
     {
       friend RefCounted;
 
     public:
-      derived_counted() noexcept
+      DerivedCounted() noexcept
       {
-        ++derived_count;
+        ++DerivedCount;
       }
 
     private:
-      ~derived_counted() noexcept
+      ~DerivedCounted() noexcept
       {
-        auto weak = get_weak_ptr();
+        auto weak = GetWeakPtr();
         CHECK(weak);
-        --derived_count;
+        --DerivedCount;
       }
     };
 
-    int wrapped_count = 0;
+    int WrappedCount = 0;
     struct wrapped
     {
       wrapped()
       {
-        ++wrapped_count;
+        ++WrappedCount;
       }
       ~wrapped()
       {
-        --wrapped_count;
+        --WrappedCount;
       }
 
       int value = 5;
     };
 
-    using wrapped_counted = SingleThreadWeakRefCountedAdapter<wrapped>;
+    using WrappedCounted = SingleThreadWeakRefCountedAdapter<wrapped>;
 
-    int with_custom_weak_reference_count = 0;
+    int WithCustomWeakReferenceCount = 0;
 
-    struct custom_weak_reference;
+    struct CustomWeakReference;
 
-    class with_custom_weak_reference
-        : public RefCounted<with_custom_weak_reference,
-                             RefCountedFlags::ProvideWeakReferences | RefCountedFlags::SingleThreaded>
+    class WithCustomWeakReference
+        : public RefCounted<WithCustomWeakReference,
+                            RefCountedFlags::ProvideWeakReferences | RefCountedFlags::SingleThreaded>
     {
       friend RefCounted;
 
     public:
-      with_custom_weak_reference()
+      WithCustomWeakReference()
       {
-        ++with_custom_weak_reference_count;
+        ++WithCustomWeakReferenceCount;
       }
 
     private:
-      ~with_custom_weak_reference() noexcept
+      ~WithCustomWeakReference() noexcept
       {
-        auto weak = get_weak_ptr();
+        auto weak = GetWeakPtr();
         CHECK(weak);
-        --with_custom_weak_reference_count;
+        --WithCustomWeakReferenceCount;
       }
 
-      custom_weak_reference *make_weak_reference(intptr_t count) const;
+      CustomWeakReference *MakeWeakReference(intptr_t count) const;
     };
 
-    struct custom_weak_reference : WeakReference<with_custom_weak_reference>
+    struct CustomWeakReference : WeakReference<WithCustomWeakReference>
     {
-      custom_weak_reference(intptr_t count, with_custom_weak_reference *obj) : WeakReference(count, obj)
+      CustomWeakReference(intptr_t count, WithCustomWeakReference *obj) : WeakReference(count, obj)
       {
       }
 
-      ~custom_weak_reference()
+      ~CustomWeakReference()
       {
-        CHECK(on_owner_destruction_called);
-        CHECK(with_custom_weak_reference_count == 0);
+        CHECK(OnOwnerDestructionCalled);
+        CHECK(WithCustomWeakReferenceCount == 0);
       }
 
-      void on_owner_destruction() const
+      void OnOwnerDestruction() const
       {
-        CHECK(with_custom_weak_reference_count
+        CHECK(WithCustomWeakReferenceCount
               == 0); // owner is still alive but its refcount is 0, you cannot ressurrect!
-        on_owner_destruction_called = true;
+        OnOwnerDestructionCalled = true;
       }
 
-      mutable bool on_owner_destruction_called = false;
+      mutable bool OnOwnerDestructionCalled = false;
     };
 
-    inline custom_weak_reference *with_custom_weak_reference::make_weak_reference(intptr_t count) const
+    inline CustomWeakReference *WithCustomWeakReference::MakeWeakReference(intptr_t count) const
     {
-      return new custom_weak_reference(count, const_cast<with_custom_weak_reference *>(this));
+      return new CustomWeakReference(count, const_cast<WithCustomWeakReference *>(this));
     }
   }
 
-  TEST_CASE("RefCounted - Weak ref counted st type traits are correct")
+  TEST_CASE("RefCounted - Weak Ref counted st type traits are correct")
   {
     SECTION("Base")
     {
-      CHECK(SingleThreadWeakRefCounted<derived_counted>::single_threaded);
-      CHECK(!std::is_default_constructible_v<SingleThreadWeakRefCounted<derived_counted>>);
-      CHECK(!std::is_copy_constructible_v<SingleThreadWeakRefCounted<derived_counted>>);
-      CHECK(!std::is_move_constructible_v<SingleThreadWeakRefCounted<derived_counted>>);
-      CHECK(!std::is_copy_assignable_v<SingleThreadWeakRefCounted<derived_counted>>);
-      CHECK(!std::is_move_assignable_v<SingleThreadWeakRefCounted<derived_counted>>);
-      CHECK(!std::is_swappable_v<SingleThreadWeakRefCounted<derived_counted>>);
-      CHECK(!std::is_destructible_v<SingleThreadWeakRefCounted<derived_counted>>);
+      CHECK(SingleThreadWeakRefCounted<DerivedCounted>::SingleThreaded);
+      CHECK(!DefaultConstructible<SingleThreadWeakRefCounted<DerivedCounted>>);
+      CHECK(!CopyConstructible<SingleThreadWeakRefCounted<DerivedCounted>>);
+      CHECK(!MoveConstructible<SingleThreadWeakRefCounted<DerivedCounted>>);
+      CHECK(!CopyAssignable<SingleThreadWeakRefCounted<DerivedCounted>>);
+      CHECK(!MoveAssignable<SingleThreadWeakRefCounted<DerivedCounted>>);
+      CHECK(!Swappable<SingleThreadWeakRefCounted<DerivedCounted>>);
+      CHECK(!Destructible<SingleThreadWeakRefCounted<DerivedCounted>>);
     }
 
     SECTION("Derived")
     {
-      CHECK(derived_counted::single_threaded);
-      CHECK(!std::is_default_constructible_v<derived_counted>);
-      CHECK(!std::is_copy_constructible_v<derived_counted>);
-      CHECK(!std::is_move_constructible_v<derived_counted>);
-      CHECK(!std::is_copy_assignable_v<derived_counted>);
-      CHECK(!std::is_move_assignable_v<derived_counted>);
-      CHECK(!std::is_swappable_v<derived_counted>);
-      CHECK(!std::is_destructible_v<derived_counted>);
+      CHECK(DerivedCounted::SingleThreaded);
+      CHECK(!DefaultConstructible<DerivedCounted>);
+      CHECK(!CopyConstructible<DerivedCounted>);
+      CHECK(!MoveConstructible<DerivedCounted>);
+      CHECK(!CopyAssignable<DerivedCounted>);
+      CHECK(!MoveAssignable<DerivedCounted>);
+      CHECK(!Swappable<DerivedCounted>);
+      CHECK(!Destructible<DerivedCounted>);
     }
 
     SECTION("Derived WeakRef")
     {
-      CHECK(derived_counted::weak_value_type::single_threaded);
-      CHECK(!std::is_default_constructible_v<derived_counted::weak_value_type>);
-      CHECK(!std::is_copy_constructible_v<derived_counted::weak_value_type>);
-      CHECK(!std::is_move_constructible_v<derived_counted::weak_value_type>);
-      CHECK(!std::is_copy_assignable_v<derived_counted::weak_value_type>);
-      CHECK(!std::is_move_assignable_v<derived_counted::weak_value_type>);
-      CHECK(!std::is_swappable_v<derived_counted::weak_value_type>);
-      CHECK(!std::is_destructible_v<derived_counted::weak_value_type>);
+      CHECK(DerivedCounted::weak_value_type::SingleThreaded);
+      CHECK(!DefaultConstructible<DerivedCounted::weak_value_type>);
+      CHECK(!CopyConstructible<DerivedCounted::weak_value_type>);
+      CHECK(!MoveConstructible<DerivedCounted::weak_value_type>);
+      CHECK(!CopyAssignable<DerivedCounted::weak_value_type>);
+      CHECK(!MoveAssignable<DerivedCounted::weak_value_type>);
+      CHECK(!Swappable<DerivedCounted::weak_value_type>);
+      CHECK(!Destructible<DerivedCounted::weak_value_type>);
     }
 
     SECTION("Wrapped")
     {
-      CHECK(wrapped_counted::single_threaded);
-      CHECK(!std::is_default_constructible_v<wrapped_counted>);
-      CHECK(!std::is_copy_constructible_v<wrapped_counted>);
-      CHECK(!std::is_move_constructible_v<wrapped_counted>);
-      CHECK(!std::is_copy_assignable_v<wrapped_counted>);
-      CHECK(!std::is_move_assignable_v<wrapped_counted>);
-      CHECK(!std::is_destructible_v<wrapped_counted>);
+      CHECK(WrappedCounted::SingleThreaded);
+      CHECK(!DefaultConstructible<WrappedCounted>);
+      CHECK(!CopyConstructible<WrappedCounted>);
+      CHECK(!MoveConstructible<WrappedCounted>);
+      CHECK(!CopyAssignable<WrappedCounted>);
+      CHECK(!MoveAssignable<WrappedCounted>);
+      CHECK(!Destructible<WrappedCounted>);
     }
 
     SECTION("Wrapped WeakRef")
     {
-      CHECK(wrapped_counted::weak_value_type::single_threaded);
-      CHECK(!std::is_default_constructible_v<wrapped_counted::weak_value_type>);
-      CHECK(!std::is_copy_constructible_v<wrapped_counted::weak_value_type>);
-      CHECK(!std::is_move_constructible_v<wrapped_counted::weak_value_type>);
-      CHECK(!std::is_copy_assignable_v<wrapped_counted::weak_value_type>);
-      CHECK(!std::is_move_assignable_v<wrapped_counted::weak_value_type>);
-      CHECK(!std::is_destructible_v<wrapped_counted::weak_value_type>);
+      CHECK(WrappedCounted::weak_value_type::SingleThreaded);
+      CHECK(!DefaultConstructible<WrappedCounted::weak_value_type>);
+      CHECK(!CopyConstructible<WrappedCounted::weak_value_type>);
+      CHECK(!MoveConstructible<WrappedCounted::weak_value_type>);
+      CHECK(!CopyAssignable<WrappedCounted::weak_value_type>);
+      CHECK(!MoveAssignable<WrappedCounted::weak_value_type>);
+      CHECK(!Destructible<WrappedCounted::weak_value_type>);
     }
   }
 
-  TEST_CASE("RefCounted - Weak ref counted st works")
+  TEST_CASE("RefCounted - Weak Ref counted st works")
   {
     SECTION("Derived")
     {
-      auto original = refcnt_attach(new derived_counted());
-      auto weak1 = original->get_weak_ptr();
-      CHECK(derived_count == 1);
-      auto strong1 = weak1->lock();
+      auto original = RefPtrAttach(new DerivedCounted());
+      auto weak1 = original->GetWeakPtr();
+      CHECK(DerivedCount == 1);
+      auto strong1 = weak1->Lock();
       CHECK(original == strong1);
-      auto weak2 = strong1->get_weak_ptr();
+      auto weak2 = strong1->GetWeakPtr();
       CHECK(weak1 == weak2);
       auto weak3 = weak_cast(strong1);
       CHECK(weak1 == weak3);
       original.reset();
       strong1.reset();
-      CHECK(derived_count == 0);
+      CHECK(DerivedCount == 0);
 
-      strong1 = weak1->lock();
+      strong1 = weak1->Lock();
       CHECK(!strong1);
     }
 
     SECTION("Const Derived")
     {
-      RefPtr<const derived_counted> original = refcnt_attach(new derived_counted());
-      auto weak1 = original->get_weak_ptr();
-      CHECK(derived_count == 1);
-      auto strong1 = weak1->lock();
+      RefPtr<const DerivedCounted> original = RefPtrAttach(new DerivedCounted());
+      auto weak1 = original->GetWeakPtr();
+      CHECK(DerivedCount == 1);
+      auto strong1 = weak1->Lock();
       CHECK(original == strong1);
-      auto weak2 = strong1->get_weak_ptr();
+      auto weak2 = strong1->GetWeakPtr();
       CHECK(weak1 == weak2);
       original.reset();
       strong1.reset();
-      CHECK(derived_count == 0);
+      CHECK(DerivedCount == 0);
 
-      strong1 = weak1->lock();
+      strong1 = weak1->Lock();
       CHECK(!strong1);
       strong1 = strong_cast(weak2);
       CHECK(!strong1);
@@ -204,26 +204,26 @@ namespace Krys::Tests
 
     SECTION("Wrapped")
     {
-      auto p = refcnt_attach(new wrapped_counted());
-      CHECK(wrapped_count == 1);
+      auto p = RefPtrAttach(new WrappedCounted());
+      CHECK(WrappedCount == 1);
       CHECK(p->value == 5);
       p.reset();
-      CHECK(wrapped_count == 0);
+      CHECK(WrappedCount == 0);
     }
 
     SECTION("Custom Weak Reference")
     {
-      auto strong = refcnt_attach(new with_custom_weak_reference);
-      CHECK(with_custom_weak_reference_count == 1);
-      auto weak = strong->get_weak_ptr();
-      auto strong1 = weak->lock();
+      auto strong = RefPtrAttach(new WithCustomWeakReference);
+      CHECK(WithCustomWeakReferenceCount == 1);
+      auto weak = strong->GetWeakPtr();
+      auto strong1 = weak->Lock();
       CHECK(strong1 == strong);
-      CHECK(with_custom_weak_reference_count == 1);
+      CHECK(WithCustomWeakReferenceCount == 1);
       strong.reset();
-      CHECK(with_custom_weak_reference_count == 1);
+      CHECK(WithCustomWeakReferenceCount == 1);
       strong1.reset();
-      CHECK(with_custom_weak_reference_count == 0);
-      strong1 = weak->lock();
+      CHECK(WithCustomWeakReferenceCount == 0);
+      strong1 = weak->Lock();
       CHECK(!strong1);
     }
   }

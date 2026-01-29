@@ -1,5 +1,5 @@
-﻿#include "Krystal.Lib/Pointers/RefPtr.hpp"
-#include "Krystal.Lib/Pointers/RefCounted.hpp"
+﻿#include "Krystal.Lib/Pointers/RefCounted.hpp"
+#include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include <catch_all.hpp>
 #include <cstddef>
 #include <cstdint>
@@ -10,138 +10,137 @@ namespace Krys::Tests
   namespace
   {
     template <class T, class Inner, class Converter>
-    class ref_counted_delegating_traits;
+    class RefCountedDelegatingTraits;
 
     template <class T, class Inner, class Converter>
-    struct ref_counted_weak_delegating_traits
+    struct RefCountedWeakDelegatingTraits
     {
       using strong_value_type = Inner;
-      using strong_ptr_traits = ref_counted_delegating_traits<T, Inner, Converter>;
+      using strong_ptr_traits = RefCountedDelegatingTraits<T, Inner, Converter>;
 
-      static void add_ref(const void *ref) noexcept
+      static void AddRef(const void *Ref) noexcept
       {
-        real_weak_from_delegating_weak(ref)->add_ref();
+        RealWeakFromDelegatingWeak(Ref)->AddRef();
       }
 
-      static void sub_ref(const void *ref) noexcept
+      static void SubRef(const void *Ref) noexcept
       {
-        real_weak_from_delegating_weak(ref)->sub_ref();
+        RealWeakFromDelegatingWeak(Ref)->SubRef();
       }
 
-      static const Inner *lock(const void *ref) noexcept
+      static const Inner *Lock(const void *Ref) noexcept
       {
-        auto outer_strong = real_weak_from_delegating_weak(ref)->lock_owner();
-        return outer_strong ? delegating_from_real(outer_strong) : nullptr;
+        auto outer_strong = RealWeakFromDelegatingWeak(Ref)->LockOwner();
+        return outer_strong ? DelegatingFromReal(outer_strong) : nullptr;
       }
 
-      static Inner *lock(void *ref) noexcept
+      static Inner *Lock(void *Ref) noexcept
       {
-        auto outer_strong = real_weak_from_delegating_weak(ref)->lock_owner();
-        return outer_strong ? delegating_from_real(outer_strong) : nullptr;
+        auto outer_strong = RealWeakFromDelegatingWeak(Ref)->LockOwner();
+        return outer_strong ? DelegatingFromReal(outer_strong) : nullptr;
       }
 
     private:
-      static T *real_from_delegating(Inner *pinner)
+      static T *RealFromDelegating(Inner *pinner)
       {
-        return const_cast<T *>(Converter::real_from_delegating(const_cast<const Inner *>(pinner)));
+        return const_cast<T *>(Converter::RealFromDelegating(const_cast<const Inner *>(pinner)));
       }
-      static const T *real_from_delegating(const Inner *pinner)
+      static const T *RealFromDelegating(const Inner *pinner)
       {
-        return const_cast<const T *>(Converter::real_from_delegating(pinner));
-      }
-
-      static Inner *delegating_from_real(T *pouter)
-      {
-        return const_cast<Inner *>(Converter::delegating_from_real(const_cast<const T *>(pouter)));
-      }
-      static const Inner *delegating_from_real(const T *pouter)
-      {
-        return const_cast<const Inner *>(Converter::delegating_from_real(pouter));
+        return const_cast<const T *>(Converter::RealFromDelegating(pinner));
       }
 
-      static typename T::weak_value_type *real_weak_from_delegating_weak(void *ref)
+      static Inner *DelegatingFromReal(T *pouter)
       {
-        return static_cast<typename T::weak_value_type *>(ref);
+        return const_cast<Inner *>(Converter::DelegatingFromReal(const_cast<const T *>(pouter)));
       }
-      static const typename T::weak_value_type *real_weak_from_delegating_weak(const void *ref)
+      static const Inner *DelegatingFromReal(const T *pouter)
       {
-        return static_cast<const typename T::weak_value_type *>(ref);
+        return const_cast<const Inner *>(Converter::DelegatingFromReal(pouter));
+      }
+
+      static typename T::weak_value_type *RealWeakFromDelegatingWeak(void *Ref)
+      {
+        return static_cast<typename T::weak_value_type *>(Ref);
+      }
+      static const typename T::weak_value_type *RealWeakFromDelegatingWeak(const void *Ref)
+      {
+        return static_cast<const typename T::weak_value_type *>(Ref);
       }
     };
 
     template <class T, class Inner, class Converter>
-    class ref_counted_delegating_traits
+    class RefCountedDelegatingTraits
     {
     public:
       using weak_value_type = void;
 
     public:
-      using weak_ptr_traits =
-        std::conditional_t<T::provides_weak_references,
-                           ref_counted_weak_delegating_traits<T, Inner, Converter>, void>;
+      using weak_ptr_traits = conditional_t<T::ProvidesWeakReferences,
+                                            RefCountedWeakDelegatingTraits<T, Inner, Converter>, void>;
 
-      static void add_ref(const Inner *pinner) noexcept
+      static void AddRef(const Inner *pinner) noexcept
       {
-        real_from_delegating(pinner)->add_ref();
+        RealFromDelegating(pinner)->AddRef();
       }
 
-      static void sub_ref(const Inner *pinner) noexcept
+      static void SubRef(const Inner *pinner) noexcept
       {
-        real_from_delegating(pinner)->sub_ref();
+        RealFromDelegating(pinner)->SubRef();
       }
 
-      static const void *get_weak_value(const Inner *pinner)
+      static const void *GetWeakValue(const Inner *pinner)
       {
-        return real_from_delegating(pinner)->get_weak_value();
+        return RealFromDelegating(pinner)->GetWeakValue();
       }
 
-      static void *get_weak_value(Inner *pinner)
+      static void *GetWeakValue(Inner *pinner)
       {
         return const_cast<void *>(
-          ref_counted_delegating_traits::get_weak_value(const_cast<const Inner *>(pinner)));
+          RefCountedDelegatingTraits::GetWeakValue(const_cast<const Inner *>(pinner)));
       }
 
     private:
-      static T *real_from_delegating(Inner *pinner)
+      static T *RealFromDelegating(Inner *pinner)
       {
-        return const_cast<T *>(Converter::real_from_delegating(const_cast<const Inner *>(pinner)));
+        return const_cast<T *>(Converter::RealFromDelegating(const_cast<const Inner *>(pinner)));
       }
-      static const T *real_from_delegating(const Inner *pinner)
+      static const T *RealFromDelegating(const Inner *pinner)
       {
-        return const_cast<const T *>(Converter::real_from_delegating(pinner));
+        return const_cast<const T *>(Converter::RealFromDelegating(pinner));
       }
     };
 
     template <class T, class Inner, class Converter>
-    inline IntrusivePtr<void, ref_counted_weak_delegating_traits<T, Inner, Converter>>
-      weak_cast(const IntrusivePtr<Inner, ref_counted_delegating_traits<T, Inner, Converter>> &src)
+    inline IntrusivePtr<void, RefCountedWeakDelegatingTraits<T, Inner, Converter>>
+      weak_cast(const IntrusivePtr<Inner, RefCountedDelegatingTraits<T, Inner, Converter>> &src)
     {
-      using dst_type = IntrusivePtr<void, ref_counted_weak_delegating_traits<T, Inner, Converter>>;
-      return dst_type::noref(ref_counted_delegating_traits<T, Inner, Converter>::get_weak_value(src.get()));
+      using dst_type = IntrusivePtr<void, RefCountedWeakDelegatingTraits<T, Inner, Converter>>;
+      return dst_type::NoRef(RefCountedDelegatingTraits<T, Inner, Converter>::GetWeakValue(src.get()));
     }
 
     template <class T, class Inner, class Converter>
-    inline IntrusivePtr<const void, ref_counted_weak_delegating_traits<T, Inner, Converter>>
-      weak_cast(const IntrusivePtr<const Inner, ref_counted_delegating_traits<T, Inner, Converter>> &src)
+    inline IntrusivePtr<const void, RefCountedWeakDelegatingTraits<T, Inner, Converter>>
+      weak_cast(const IntrusivePtr<const Inner, RefCountedDelegatingTraits<T, Inner, Converter>> &src)
     {
-      using dst_type = IntrusivePtr<const void, ref_counted_weak_delegating_traits<T, Inner, Converter>>;
-      return dst_type::noref(ref_counted_delegating_traits<T, Inner, Converter>::get_weak_value(src.get()));
+      using dst_type = IntrusivePtr<const void, RefCountedWeakDelegatingTraits<T, Inner, Converter>>;
+      return dst_type::NoRef(RefCountedDelegatingTraits<T, Inner, Converter>::GetWeakValue(src.get()));
     }
 
     template <class T, class Inner, class Converter>
-    inline IntrusivePtr<Inner, ref_counted_delegating_traits<T, Inner, Converter>> strong_cast(
-      const IntrusivePtr<void, ref_counted_weak_delegating_traits<T, Inner, Converter>> &src) noexcept
+    inline IntrusivePtr<Inner, RefCountedDelegatingTraits<T, Inner, Converter>> strong_cast(
+      const IntrusivePtr<void, RefCountedWeakDelegatingTraits<T, Inner, Converter>> &src) noexcept
     {
-      using dst_type = IntrusivePtr<Inner, ref_counted_delegating_traits<T, Inner, Converter>>;
-      return dst_type::noref(ref_counted_weak_delegating_traits<T, Inner, Converter>::lock(src.get()));
+      using dst_type = IntrusivePtr<Inner, RefCountedDelegatingTraits<T, Inner, Converter>>;
+      return dst_type::NoRef(RefCountedWeakDelegatingTraits<T, Inner, Converter>::Lock(src.get()));
     }
 
     template <class T, class Inner, class Converter>
-    inline IntrusivePtr<const Inner, ref_counted_delegating_traits<T, Inner, Converter>> strong_cast(
-      const IntrusivePtr<const void, ref_counted_weak_delegating_traits<T, Inner, Converter>> &src) noexcept
+    inline IntrusivePtr<const Inner, RefCountedDelegatingTraits<T, Inner, Converter>> strong_cast(
+      const IntrusivePtr<const void, RefCountedWeakDelegatingTraits<T, Inner, Converter>> &src) noexcept
     {
-      using dst_type = IntrusivePtr<const Inner, ref_counted_delegating_traits<T, Inner, Converter>>;
-      return dst_type::noref(ref_counted_weak_delegating_traits<T, Inner, Converter>::lock(src.get()));
+      using dst_type = IntrusivePtr<const Inner, RefCountedDelegatingTraits<T, Inner, Converter>>;
+      return dst_type::NoRef(RefCountedWeakDelegatingTraits<T, Inner, Converter>::Lock(src.get()));
     }
 
     class outer : public RefCounted<outer>
@@ -151,7 +150,7 @@ namespace Krys::Tests
     private:
       struct inner_converter
       {
-        static const outer *real_from_delegating(const int *pinner) noexcept
+        static const outer *RealFromDelegating(const int *pinner) noexcept
         {
           outer *dummy = nullptr;
           size_t distance = (uintptr_t)&(dummy->_inner) - (uintptr_t)dummy;
@@ -160,20 +159,20 @@ namespace Krys::Tests
         }
       };
 
-      using inner_traits = ref_counted_delegating_traits<outer, int, inner_converter>;
-      friend ref_counted_delegating_traits<outer, int, inner_converter>;
+      using inner_traits = RefCountedDelegatingTraits<outer, int, inner_converter>;
+      friend RefCountedDelegatingTraits<outer, int, inner_converter>;
 
     public:
       using inner_ptr = IntrusivePtr<int, inner_traits>;
       using const_inner_ptr = IntrusivePtr<const int, inner_traits>;
 
-      inner_ptr get_inner_ptr() noexcept
+      inner_ptr GetInnerPtr() noexcept
       {
-        return inner_ptr::ref(&_inner);
+        return inner_ptr::Ref(&_inner);
       }
-      const_inner_ptr get_inner_ptr() const noexcept
+      const_inner_ptr GetInnerPtr() const noexcept
       {
-        return const_inner_ptr::ref(&_inner);
+        return const_inner_ptr::Ref(&_inner);
       }
 
       int &inner()
@@ -192,21 +191,21 @@ namespace Krys::Tests
     private:
       struct inner_converter
       {
-        static const weak_outer *real_from_delegating(const int *pinner) noexcept
+        static const weak_outer *RealFromDelegating(const int *pinner) noexcept
         {
           weak_outer *dummy = nullptr;
           size_t distance = (uintptr_t)&(dummy->_inner) - (uintptr_t)dummy;
           return (const weak_outer *)((std::byte *)pinner - distance);
           // return offsetof(outer, _inner);
         }
-        static const int *delegating_from_real(const weak_outer *pouter) noexcept
+        static const int *DelegatingFromReal(const weak_outer *pouter) noexcept
         {
           return &pouter->_inner;
         }
       };
 
-      using inner_traits = ref_counted_delegating_traits<weak_outer, int, inner_converter>;
-      friend ref_counted_delegating_traits<weak_outer, int, inner_converter>;
+      using inner_traits = RefCountedDelegatingTraits<weak_outer, int, inner_converter>;
+      friend RefCountedDelegatingTraits<weak_outer, int, inner_converter>;
 
     public:
       using inner_ptr = IntrusivePtr<int, inner_traits>;
@@ -218,32 +217,32 @@ namespace Krys::Tests
       class weak_value_type : public WeakReference<weak_outer>
       {
         friend weak_outer;
-        friend ref_counted_weak_delegating_traits<weak_outer, int, inner_converter>;
+        friend RefCountedWeakDelegatingTraits<weak_outer, int, inner_converter>;
 
       private:
         weak_value_type(intptr_t count, weak_outer *owner) : WeakReference(count, owner) {};
       };
 
-      inner_ptr get_inner_ptr() noexcept
+      inner_ptr GetInnerPtr() noexcept
       {
-        return inner_ptr::ref(&_inner);
+        return inner_ptr::Ref(&_inner);
       }
-      const_inner_ptr get_inner_ptr() const noexcept
+      const_inner_ptr GetInnerPtr() const noexcept
       {
-        return const_inner_ptr::ref(&_inner);
+        return const_inner_ptr::Ref(&_inner);
       }
 
       weak_inner_ptr get_weak_inner_ptr()
       {
-        return weak_inner_ptr::noref(inner_traits::get_weak_value(&_inner));
+        return weak_inner_ptr::NoRef(inner_traits::GetWeakValue(&_inner));
       }
 
       const_weak_inner_ptr get_weak_inner_ptr() const
       {
-        return const_weak_inner_ptr::noref(inner_traits::get_weak_value(&_inner));
+        return const_weak_inner_ptr::NoRef(inner_traits::GetWeakValue(&_inner));
       }
 
-      weak_value_type *make_weak_reference(intptr_t count) const
+      weak_value_type *MakeWeakReference(intptr_t count) const
       {
         return new weak_value_type(count, const_cast<weak_outer *>(this));
       }
@@ -260,8 +259,8 @@ namespace Krys::Tests
 
   TEST_CASE("RefCounted - Inner counting")
   {
-    auto pouter = refcnt_attach(new outer());
-    auto pinner = pouter->get_inner_ptr();
+    auto pouter = RefPtrAttach(new outer());
+    auto pinner = pouter->GetInnerPtr();
     CHECK(pinner);
     *pinner = 3;
     CHECK(pouter->inner() == 3);
@@ -271,8 +270,8 @@ namespace Krys::Tests
   {
     SECTION("Non const")
     {
-      auto pouter = refcnt_attach(new weak_outer());
-      auto pinner1 = pouter->get_inner_ptr();
+      auto pouter = RefPtrAttach(new weak_outer());
+      auto pinner1 = pouter->GetInnerPtr();
       CHECK(pinner1);
       auto weak1 = pouter->get_weak_inner_ptr();
       CHECK(weak1);
@@ -285,8 +284,8 @@ namespace Krys::Tests
 
     SECTION("Const")
     {
-      auto pouter = refcnt_attach(const_cast<const weak_outer *>(new weak_outer()));
-      auto pinner1 = pouter->get_inner_ptr();
+      auto pouter = RefPtrAttach(const_cast<const weak_outer *>(new weak_outer()));
+      auto pinner1 = pouter->GetInnerPtr();
       CHECK(pinner1);
       auto weak1 = pouter->get_weak_inner_ptr();
       CHECK(weak1);

@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Lib/Pointers/RefCounted.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include <catch_all.hpp>
 
@@ -9,32 +10,32 @@ namespace Krys::Tests
 {
   namespace
   {
-    struct minimal_counted : RefCounted<minimal_counted, RefCountedFlags::None, char>
+    struct MinimalCounted : RefCounted<MinimalCounted, RefCountedFlags::None, char>
     {
       friend RefCounted;
 
     private:
-      ~minimal_counted() noexcept
+      ~MinimalCounted() noexcept
       {
       }
     };
 
-    static_assert(!std::is_default_constructible_v<RefCounted<minimal_counted>>);
-    static_assert(!std::is_copy_constructible_v<RefCounted<minimal_counted>>);
-    static_assert(!std::is_move_constructible_v<RefCounted<minimal_counted>>);
-    static_assert(!std::is_copy_assignable_v<RefCounted<minimal_counted>>);
-    static_assert(!std::is_move_assignable_v<RefCounted<minimal_counted>>);
-    static_assert(!std::is_swappable_v<RefCounted<minimal_counted>>);
-    static_assert(!std::is_destructible_v<RefCounted<minimal_counted>>);
+    static_assert(!DefaultConstructible<RefCounted<MinimalCounted>>);
+    static_assert(!CopyConstructible<RefCounted<MinimalCounted>>);
+    static_assert(!MoveConstructible<RefCounted<MinimalCounted>>);
+    static_assert(!CopyAssignable<RefCounted<MinimalCounted>>);
+    static_assert(!MoveAssignable<RefCounted<MinimalCounted>>);
+    static_assert(!Swappable<RefCounted<MinimalCounted>>);
+    static_assert(!Destructible<RefCounted<MinimalCounted>>);
 
-    static_assert(sizeof(minimal_counted) == sizeof(char));
-    static_assert(!std::is_default_constructible_v<minimal_counted>);
-    static_assert(!std::is_copy_constructible_v<minimal_counted>);
-    static_assert(!std::is_move_constructible_v<minimal_counted>);
-    static_assert(!std::is_copy_assignable_v<minimal_counted>);
-    static_assert(!std::is_move_assignable_v<minimal_counted>);
-    static_assert(!std::is_swappable_v<minimal_counted>);
-    static_assert(!std::is_destructible_v<minimal_counted>);
+    static_assert(sizeof(MinimalCounted) == sizeof(char));
+    static_assert(!DefaultConstructible<MinimalCounted>);
+    static_assert(!CopyConstructible<MinimalCounted>);
+    static_assert(!MoveConstructible<MinimalCounted>);
+    static_assert(!CopyAssignable<MinimalCounted>);
+    static_assert(!MoveAssignable<MinimalCounted>);
+    static_assert(!Swappable<MinimalCounted>);
+    static_assert(!Destructible<MinimalCounted>);
 
     struct adapded
     {
@@ -43,60 +44,60 @@ namespace Krys::Tests
     using minimal_adapded_counted = RefCountedAdapter<adapded, RefCountedFlags::None, char>;
 
     static_assert(sizeof(minimal_adapded_counted) == 2 * sizeof(char));
-    static_assert(!std::is_default_constructible_v<minimal_adapded_counted>);
-    static_assert(!std::is_copy_constructible_v<minimal_adapded_counted>);
-    static_assert(!std::is_move_constructible_v<minimal_adapded_counted>);
-    static_assert(!std::is_copy_assignable_v<minimal_adapded_counted>);
-    static_assert(!std::is_move_assignable_v<minimal_adapded_counted>);
-    static_assert(!std::is_destructible_v<minimal_adapded_counted>);
+    static_assert(!DefaultConstructible<minimal_adapded_counted>);
+    static_assert(!CopyConstructible<minimal_adapded_counted>);
+    static_assert(!MoveConstructible<minimal_adapded_counted>);
+    static_assert(!CopyAssignable<minimal_adapded_counted>);
+    static_assert(!MoveAssignable<minimal_adapded_counted>);
+    static_assert(!Destructible<minimal_adapded_counted>);
 
     using minimal_wrapped_counted = RefCountedWrapper<char, RefCountedFlags::None, char>;
 
     static_assert(sizeof(minimal_wrapped_counted) == 2 * sizeof(char));
-    static_assert(!std::is_default_constructible_v<minimal_wrapped_counted>);
-    static_assert(!std::is_copy_constructible_v<minimal_wrapped_counted>);
-    static_assert(!std::is_move_constructible_v<minimal_wrapped_counted>);
-    static_assert(!std::is_copy_assignable_v<minimal_wrapped_counted>);
-    static_assert(!std::is_move_assignable_v<minimal_wrapped_counted>);
-    static_assert(!std::is_destructible_v<minimal_wrapped_counted>);
+    static_assert(!DefaultConstructible<minimal_wrapped_counted>);
+    static_assert(!CopyConstructible<minimal_wrapped_counted>);
+    static_assert(!MoveConstructible<minimal_wrapped_counted>);
+    static_assert(!CopyAssignable<minimal_wrapped_counted>);
+    static_assert(!MoveAssignable<minimal_wrapped_counted>);
+    static_assert(!Destructible<minimal_wrapped_counted>);
 
-    struct simple_counted : RefCounted<simple_counted>
+    struct SimpleCounted : RefCounted<SimpleCounted>
     {
       friend RefCounted;
 
-      static inline int instance_count = 0;
+      static inline int InstanceCount = 0;
 
-      simple_counted() noexcept
+      SimpleCounted() noexcept
       {
-        ++instance_count;
+        ++InstanceCount;
       }
 
-      simple_counted(int)
+      SimpleCounted(int)
       {
         throw std::runtime_error("x");
       }
 
     private:
-      ~simple_counted() noexcept
+      ~SimpleCounted() noexcept
       {
-        --instance_count;
+        --InstanceCount;
       }
     };
 
-    static_assert(!std::is_default_constructible_v<simple_counted>);
-    static_assert(!std::is_copy_constructible_v<simple_counted>);
-    static_assert(!std::is_move_constructible_v<simple_counted>);
-    static_assert(!std::is_copy_assignable_v<simple_counted>);
-    static_assert(!std::is_move_assignable_v<simple_counted>);
-    static_assert(!std::is_destructible_v<simple_counted>);
+    static_assert(!DefaultConstructible<SimpleCounted>);
+    static_assert(!CopyConstructible<SimpleCounted>);
+    static_assert(!MoveConstructible<SimpleCounted>);
+    static_assert(!CopyAssignable<SimpleCounted>);
+    static_assert(!MoveAssignable<SimpleCounted>);
+    static_assert(!Destructible<SimpleCounted>);
 
   }
 
-  TEST_CASE("RefCounted - Minimal ref counted works")
+  TEST_CASE("RefCounted - Minimal Ref counted works")
   {
     SECTION("derived")
     {
-      auto p1 = refcnt_attach(new minimal_counted());
+      auto p1 = RefPtrAttach(new MinimalCounted());
       CHECK(p1);
       auto p2 = p1;
       CHECK(p2 == p1);
@@ -104,7 +105,7 @@ namespace Krys::Tests
 
     SECTION("adapted")
     {
-      auto p1 = refcnt_attach(new minimal_adapded_counted(adapded {'a'}));
+      auto p1 = RefPtrAttach(new minimal_adapded_counted(adapded {'a'}));
       CHECK(p1);
       CHECK(p1->c == 'a');
       auto p2 = p1;
@@ -113,60 +114,60 @@ namespace Krys::Tests
 
     SECTION("wrapped")
     {
-      auto p1 = refcnt_attach(new minimal_wrapped_counted('a'));
+      auto p1 = RefPtrAttach(new minimal_wrapped_counted('a'));
       CHECK(p1);
-      CHECK(p1->wrapped == 'a');
+      CHECK(p1->Wrapped == 'a');
       auto p2 = p1;
       CHECK(p2 == p1);
     }
   }
 
-  TEST_CASE("RefCounted - Simple ref counted works")
+  TEST_CASE("RefCounted - Simple Ref counted works")
   {
-    auto p1 = refcnt_attach(new simple_counted());
-    CHECK(simple_counted::instance_count == 1);
+    auto p1 = RefPtrAttach(new SimpleCounted());
+    CHECK(SimpleCounted::InstanceCount == 1);
     auto p2 = p1;
-    CHECK(simple_counted::instance_count == 1);
+    CHECK(SimpleCounted::InstanceCount == 1);
     p1.reset();
-    CHECK(simple_counted::instance_count == 1);
+    CHECK(SimpleCounted::InstanceCount == 1);
     p2.reset();
-    CHECK(simple_counted::instance_count == 0);
+    CHECK(SimpleCounted::InstanceCount == 0);
   }
 
   TEST_CASE("RefCounted - Ref counted with ctor exception")
   {
     try
     {
-      auto p1 = refcnt_attach(new simple_counted(2));
+      auto p1 = RefPtrAttach(new SimpleCounted(2));
     }
     catch (std::exception &)
     {
-      CHECK(simple_counted::instance_count == 0);
+      CHECK(SimpleCounted::InstanceCount == 0);
     }
   }
 
   TEST_CASE("RefCounted - Custom destroy")
   {
-    struct custom_destroy : RefCounted<custom_destroy>
+    struct CustomDestroy : RefCounted<CustomDestroy>
     {
       friend RefCounted;
 
-      custom_destroy(bool *d) : destroyed(d)
+      CustomDestroy(bool *d) : Destroyed(d)
       {
       }
 
-      bool *destroyed;
+      bool *Destroyed;
 
     private:
-      void destroy() const noexcept
+      void Destroy() const noexcept
       {
-        *destroyed = true;
+        *Destroyed = true;
         free((void *)this);
       }
     };
 
     bool destroyed = false;
-    auto p1 = refcnt_attach(new (malloc(sizeof(custom_destroy))) custom_destroy {&destroyed});
+    auto p1 = RefPtrAttach(new (malloc(sizeof(CustomDestroy))) CustomDestroy {&destroyed});
     p1.reset();
     CHECK(destroyed);
   }
@@ -175,13 +176,13 @@ namespace Krys::Tests
   {
     SECTION("adapter")
     {
-      auto p1 = refcnt_attach(new RefCountedAdapter<std::vector<char>>(5));
+      auto p1 = RefPtrAttach(new RefCountedAdapter<std::vector<char>>(5));
       CHECK(p1->size() == 5);
     }
     SECTION("wrapper")
     {
-      auto p1 = refcnt_attach(new RefCountedWrapper<std::vector<char>>(5));
-      CHECK(p1->wrapped.size() == 5);
+      auto p1 = RefPtrAttach(new RefCountedWrapper<std::vector<char>>(5));
+      CHECK(p1->Wrapped.size() == 5);
     }
   }
 }

@@ -14,72 +14,72 @@ namespace Krys::Tests
     SECTION("Construction, destruction and assignment")
     {
       CHECK(sizeof(ptr) == sizeof(instrumented_counted<1> *));
-      CHECK(std::alignment_of_v<ptr> == std::alignment_of_v<instrumented_counted<1> *>);
+      CHECK(AlignmentOf<ptr> == AlignmentOf<instrumented_counted<1> *>);
 
-      CHECK(std::is_default_constructible_v<ptr>);
-      CHECK(std::is_nothrow_default_constructible_v<ptr>);
-      CHECK(!std::is_trivially_default_constructible_v<ptr>);
+      CHECK(DefaultConstructible<ptr>);
+      CHECK(NoThrowDefaultConstructible<ptr>);
+      CHECK(!TriviallyDefaultConstructible<ptr>);
 
-      CHECK(std::is_copy_constructible_v<ptr>);
-      CHECK(!std::is_trivially_copy_constructible_v<ptr>);
-      CHECK(std::is_nothrow_copy_constructible_v<ptr>);
+      CHECK(CopyConstructible<ptr>);
+      CHECK(!TriviallyCopyConstructible<ptr>);
+      CHECK(NoThrowCopyConstructible<ptr>);
 
-      CHECK(std::is_move_constructible_v<ptr>);
-      CHECK(!std::is_trivially_move_constructible_v<ptr>);
-      CHECK(std::is_nothrow_move_constructible_v<ptr>);
+      CHECK(MoveConstructible<ptr>);
+      CHECK(!TriviallyMoveConstructible<ptr>);
+      CHECK(NoThrowMoveConstructible<ptr>);
 
-      CHECK(std::is_copy_assignable_v<ptr>);
-      CHECK(!std::is_trivially_copy_assignable_v<ptr>);
-      CHECK(std::is_nothrow_copy_assignable_v<ptr>);
+      CHECK(CopyAssignable<ptr>);
+      CHECK(!TriviallyCopyAssignable<ptr>);
+      CHECK(NoThrowCopyAssignable<ptr>);
 
-      CHECK(std::is_move_assignable_v<ptr>);
-      CHECK(!std::is_trivially_move_assignable_v<ptr>);
-      CHECK(std::is_nothrow_move_assignable_v<ptr>);
+      CHECK(MoveAssignable<ptr>);
+      CHECK(!TriviallyMoveAssignable<ptr>);
+      CHECK(NoThrowMoveAssignable<ptr>);
 
-      CHECK(std::is_swappable_v<ptr>);
-      CHECK(std::is_nothrow_swappable_v<ptr>);
+      CHECK(Swappable<ptr>);
+      CHECK(NoThrowSwappable<ptr>);
 
-      CHECK(std::is_destructible_v<ptr>);
-      CHECK(!std::is_trivially_destructible_v<ptr>);
-      CHECK(std::is_nothrow_destructible_v<ptr>);
+      CHECK(Destructible<ptr>);
+      CHECK(!TriviallyDestructible<ptr>);
+      CHECK(NoThrowDestructible<ptr>);
 
-      CHECK(std::is_constructible_v<ptr, std::nullptr_t>);
-      CHECK(std::is_nothrow_constructible_v<ptr, std::nullptr_t>);
-      CHECK(!std::is_trivially_constructible_v<ptr, std::nullptr_t>);
+      CHECK(Constructible<ptr, std::nullptr_t>);
+      CHECK(NoThrowConstructible<ptr, std::nullptr_t>);
+      CHECK(!TriviallyConstructible<ptr, std::nullptr_t>);
     }
 
     using another_ptr = mock_ptr<derived_instrumented_counted<1>>;
 
     SECTION("Conversions to/from other ptr types")
     {
-      CHECK(std::is_convertible_v<another_ptr, ptr>);
+      CHECK(ConvertibleTo<another_ptr, ptr>);
 
-      CHECK(std::is_constructible_v<ptr, another_ptr>);
-      CHECK(!std::is_trivially_constructible_v<ptr, another_ptr>);
-      CHECK(std::is_nothrow_constructible_v<ptr, another_ptr>);
+      CHECK(Constructible<ptr, another_ptr>);
+      CHECK(!TriviallyConstructible<ptr, another_ptr>);
+      CHECK(NoThrowConstructible<ptr, another_ptr>);
 
-      CHECK(std::is_assignable_v<ptr, another_ptr>);
-      CHECK(!std::is_trivially_assignable_v<ptr, another_ptr>);
-      CHECK(std::is_nothrow_assignable_v<ptr, another_ptr>);
+      CHECK(Assignable<ptr, another_ptr>);
+      CHECK(!TriviallyAssignable<ptr, another_ptr>);
+      CHECK(NoThrowAssignable<ptr, another_ptr>);
 
-      CHECK(!std::is_convertible_v<ptr, another_ptr>);
-      CHECK(!std::is_constructible_v<another_ptr, ptr>);
-      CHECK(!std::is_assignable_v<another_ptr, ptr>);
+      CHECK(!ConvertibleTo<ptr, another_ptr>);
+      CHECK(!Constructible<another_ptr, ptr>);
+      CHECK(!Assignable<another_ptr, ptr>);
     }
 
     using ptr_different_traits = mock_ptr_different_traits<instrumented_counted<1>>;
     SECTION("Conversions to/from other traits")
     {
-      CHECK(std::is_convertible_v<ptr_different_traits, ptr>);
-      CHECK(std::is_convertible_v<ptr, ptr_different_traits>);
+      CHECK(ConvertibleTo<ptr_different_traits, ptr>);
+      CHECK(ConvertibleTo<ptr, ptr_different_traits>);
 
-      CHECK(std::is_constructible_v<ptr, ptr_different_traits>);
-      CHECK(!std::is_trivially_constructible_v<ptr, ptr_different_traits>);
-      CHECK(std::is_nothrow_constructible_v<ptr, ptr_different_traits>);
+      CHECK(Constructible<ptr, ptr_different_traits>);
+      CHECK(!TriviallyConstructible<ptr, ptr_different_traits>);
+      CHECK(NoThrowConstructible<ptr, ptr_different_traits>);
 
-      CHECK(std::is_assignable_v<ptr, ptr_different_traits>);
-      CHECK(!std::is_trivially_assignable_v<ptr, ptr_different_traits>);
-      CHECK(std::is_nothrow_assignable_v<ptr, ptr_different_traits>);
+      CHECK(Assignable<ptr, ptr_different_traits>);
+      CHECK(!TriviallyAssignable<ptr, ptr_different_traits>);
+      CHECK(NoThrowAssignable<ptr, ptr_different_traits>);
     }
   }
 
@@ -205,7 +205,7 @@ namespace Krys::Tests
       CHECK(bool(ptr));
       CHECK(ptr.operator->() == &object);
 
-      mock_traits<>::sub_ref(&object);
+      mock_traits<>::SubRef(&object);
     }
 
     SECTION("Release")
@@ -219,7 +219,7 @@ namespace Krys::Tests
       CHECK(!bool(ptr));
       CHECK(ptr.operator->() == nullptr);
 
-      mock_traits<>::sub_ref(&object);
+      mock_traits<>::SubRef(&object);
     }
 
     SECTION("Reset")
@@ -313,7 +313,7 @@ namespace Krys::Tests
       CHECK(bool(ptr));
       CHECK(ptr.operator->() == &object);
 
-      mock_traits<>::sub_ref(&object);
+      mock_traits<>::SubRef(&object);
     }
 
     SECTION("Release")
@@ -327,7 +327,7 @@ namespace Krys::Tests
       CHECK(!bool(ptr));
       CHECK(ptr.operator->() == nullptr);
 
-      mock_traits<>::sub_ref(&object);
+      mock_traits<>::SubRef(&object);
     }
 
     SECTION("Reset")
@@ -471,11 +471,11 @@ namespace Krys::Tests
 
     auto func = [&object1](instrumented_counted<> **out)
     {
-      mock_traits<>::add_ref(&object1);
+      mock_traits<>::AddRef(&object1);
       *out = &object1;
     };
 
-    func(ptr.get_output_param());
+    func(ptr.GetOutputParam());
     CHECK(ptr.get() == &object1);
     CHECK(object.count == -1);
     CHECK(object1.count == 2);
@@ -490,12 +490,12 @@ namespace Krys::Tests
     auto func = [&](instrumented_counted<> **inout)
     {
       CHECK(*inout == &object);
-      mock_traits<>::sub_ref(&object);
-      mock_traits<>::add_ref(&object1);
+      mock_traits<>::SubRef(&object);
+      mock_traits<>::AddRef(&object1);
       *inout = &object1;
     };
 
-    func(ptr.get_inout_param());
+    func(ptr.GetInOutParam());
     CHECK(ptr.get() == &object1);
     CHECK(object.count == -1);
     CHECK(object1.count == 2);

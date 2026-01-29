@@ -1,4 +1,6 @@
 ﻿#include "Krystal.Lib.Tests/Pointers/IntrusivePtr/Mocks.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Pointers/IntrusivePtr.hpp"
 #include <atomic>
 #include <catch_all.hpp>
@@ -13,35 +15,35 @@ namespace Krys::Tests
     SECTION("Construction, destruction and assignment")
     {
       CHECK(sizeof(ptr) == sizeof(std::atomic<instrumented_counted<> *>));
-      CHECK(std::alignment_of_v<ptr> == std::alignment_of_v<std::atomic<instrumented_counted<> *>>);
+      CHECK(AlignmentOf<ptr> == AlignmentOf<std::atomic<instrumented_counted<> *>>);
 
-      CHECK(std::is_default_constructible_v<ptr>);
-      CHECK(std::is_nothrow_default_constructible_v<ptr>);
-      CHECK(!std::is_trivially_default_constructible_v<ptr>);
+      CHECK(DefaultConstructible<ptr>);
+      CHECK(NoThrowDefaultConstructible<ptr>);
+      CHECK(!TriviallyDefaultConstructible<ptr>);
 
-      CHECK(!std::is_copy_constructible_v<ptr>);
-      CHECK(!std::is_move_constructible_v<ptr>);
+      CHECK(!CopyConstructible<ptr>);
+      CHECK(!MoveConstructible<ptr>);
 
-      CHECK(!std::is_copy_assignable_v<ptr>);
-      CHECK(!std::is_move_assignable_v<ptr>);
+      CHECK(!CopyAssignable<ptr>);
+      CHECK(!MoveAssignable<ptr>);
 
-      CHECK(!std::is_swappable_v<ptr>);
+      CHECK(!Swappable<ptr>);
 
-      CHECK(std::is_destructible_v<ptr>);
-      CHECK(!std::is_trivially_destructible_v<ptr>);
-      CHECK(std::is_nothrow_destructible_v<ptr>);
+      CHECK(Destructible<ptr>);
+      CHECK(!TriviallyDestructible<ptr>);
+      CHECK(NoThrowDestructible<ptr>);
 
-      CHECK(!std::is_assignable_v<ptr, ptr>);
+      CHECK(!Assignable<ptr, ptr>);
 
-      CHECK(std::is_constructible_v<ptr, mock_ptr<instrumented_counted<1>>>);
-      CHECK(std::is_nothrow_constructible_v<ptr, mock_ptr<instrumented_counted<1>>>);
-      CHECK(!std::is_trivially_constructible_v<ptr, mock_ptr<instrumented_counted<1>>>);
+      CHECK(Constructible<ptr, mock_ptr<instrumented_counted<1>>>);
+      CHECK(NoThrowConstructible<ptr, mock_ptr<instrumented_counted<1>>>);
+      CHECK(!TriviallyConstructible<ptr, mock_ptr<instrumented_counted<1>>>);
 
-      CHECK(std::is_assignable_v<ptr, mock_ptr<instrumented_counted<1>>>);
-      CHECK(std::is_nothrow_assignable_v<ptr, mock_ptr<instrumented_counted<1>>>);
-      CHECK(!std::is_trivially_assignable_v<ptr, mock_ptr<instrumented_counted<1>>>);
+      CHECK(Assignable<ptr, mock_ptr<instrumented_counted<1>>>);
+      CHECK(NoThrowAssignable<ptr, mock_ptr<instrumented_counted<1>>>);
+      CHECK(!TriviallyAssignable<ptr, mock_ptr<instrumented_counted<1>>>);
 
-      CHECK(std::is_convertible_v<ptr, mock_ptr<instrumented_counted<1>>>);
+      CHECK(ConvertibleTo<ptr, mock_ptr<instrumented_counted<1>>>);
       // CHECK( std::is_nothrow_convertible_v<ptr, IntrusivePtr<instrumented_counted<>>> );
     }
   }

@@ -1,5 +1,5 @@
-﻿#include "Krystal.Lib/Core/TypeTraits.hpp"
-#include "Krystal.Lib/Core/Enum.hpp"
+﻿#include "Krystal.Lib/Core/Enum.hpp"
+#include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Pointers/IntrusivePtr.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <atomic>
@@ -8,7 +8,6 @@
 
 namespace Krys
 {
-  // MARK:- RefCountedFlags
   enum class RefCountedFlags : uint8
   {
     None = 0,
@@ -19,215 +18,408 @@ namespace Krys
   template <>
   constexpr inline bool EnableEnumFlags<RefCountedFlags> = true;
 
-  // MARK:- Forward Declarations
-
   template <RefCountedFlags Flags>
   using DefaultRefCountType =
-    conditional_t<HasFlag(Flags, RefCountedFlags::ProvideWeakReferences), intptr_t, int>;
+    conditional_t<HasFlag(Flags, RefCountedFlags::ProvideWeakReferences), intptr_t, int32>;
 
-  template <class Derived, RefCountedFlags Flags = RefCountedFlags::None,
-            class CountType = DefaultRefCountType<Flags>>
+  template <typename Derived, RefCountedFlags Flags = RefCountedFlags::None,
+            typename TCount = DefaultRefCountType<Flags>>
   class RefCounted;
 
-  template <class T, RefCountedFlags Flags = RefCountedFlags::None,
-            class CountType = DefaultRefCountType<Flags>>
+  template <typename T, RefCountedFlags Flags = RefCountedFlags::None,
+            typename TCount = DefaultRefCountType<Flags>>
   class RefCountedAdapter;
 
-  template <class T, RefCountedFlags Flags = RefCountedFlags::None,
-            class CountType = DefaultRefCountType<Flags>>
+  template <typename T, RefCountedFlags Flags = RefCountedFlags::None,
+            typename TCount = DefaultRefCountType<Flags>>
   class RefCountedWrapper;
 
-  template <class Derived>
+  template <typename Derived>
   using WeakRefCounted = RefCounted<Derived, RefCountedFlags::ProvideWeakReferences>;
 
-  template <class Derived>
+  template <typename Derived>
   using WeakRefCountedAdapter = RefCountedAdapter<Derived, RefCountedFlags::ProvideWeakReferences>;
 
-  template <class Derived>
+  template <typename Derived>
   using WeakRefCountedWrapper = RefCountedWrapper<Derived, RefCountedFlags::ProvideWeakReferences>;
 
-  template <class Derived, class CountType = DefaultRefCountType<RefCountedFlags::SingleThreaded>>
-  using SingleThreadRefCounted = RefCounted<Derived, RefCountedFlags::SingleThreaded, CountType>;
+  template <typename Derived, typename TCount = DefaultRefCountType<RefCountedFlags::SingleThreaded>>
+  using SingleThreadRefCounted = RefCounted<Derived, RefCountedFlags::SingleThreaded, TCount>;
 
-  template <class Derived, class CountType = DefaultRefCountType<RefCountedFlags::SingleThreaded>>
-  using SingleThreadRefCountedAdapter = RefCountedAdapter<Derived, RefCountedFlags::SingleThreaded, CountType>;
+  template <typename Derived, typename TCount = DefaultRefCountType<RefCountedFlags::SingleThreaded>>
+  using SingleThreadRefCountedAdapter = RefCountedAdapter<Derived, RefCountedFlags::SingleThreaded, TCount>;
 
-  template <class Derived, class CountType = DefaultRefCountType<RefCountedFlags::SingleThreaded>>
-  using SingleThreadRefCountedWrapper = RefCountedWrapper<Derived, RefCountedFlags::SingleThreaded, CountType>;
+  template <typename Derived, typename TCount = DefaultRefCountType<RefCountedFlags::SingleThreaded>>
+  using SingleThreadRefCountedWrapper = RefCountedWrapper<Derived, RefCountedFlags::SingleThreaded, TCount>;
 
-  template <class Derived>
+  template <typename Derived>
   using SingleThreadWeakRefCounted =
     RefCounted<Derived, RefCountedFlags::ProvideWeakReferences | RefCountedFlags::SingleThreaded>;
 
-  template <class Derived>
+  template <typename Derived>
   using SingleThreadWeakRefCountedAdapter =
     RefCountedAdapter<Derived, RefCountedFlags::ProvideWeakReferences | RefCountedFlags::SingleThreaded>;
 
-  template <class Derived>
+  template <typename Derived>
   using SingleThreadWeakRefCountedWrapper =
     RefCountedWrapper<Derived, RefCountedFlags::ProvideWeakReferences | RefCountedFlags::SingleThreaded>;
 
-  template <class Owner>
+  template <typename Owner>
   class WeakReference;
-
-  // MARK:-
 
   struct RefCountedTraits
   {
-    template <class T>
-    static void add_ref(const T *obj) noexcept
+    template <typename T>
+    static void AddRef(const T *obj) noexcept
     {
-      obj->call_add_ref();
+      obj->CallAddRef();
     }
 
-    template <class T>
-    static void sub_ref(const T *obj) noexcept
+    template <typename T>
+    static void SubRef(const T *obj) noexcept
     {
-      obj->call_sub_ref();
+      obj->CallSubRef();
     }
   };
 
-  // MARK:-
-
-  template <class Derived, RefCountedFlags Flags, class CountType>
+  template <typename Derived, RefCountedFlags Flags, typename TCount>
   class RefCounted
   {
-    template <class Owner>
+  public:
+    static constexpr bool ProvidesWeakReferences = HasFlag(Flags, RefCountedFlags::ProvideWeakReferences);
+    static constexpr bool SingleThreaded = HasFlag(Flags, RefCountedFlags::SingleThreaded);
+
+  private:
+    static_assert(!RefCounted::ProvidesWeakReferences || SameType<TCount, intptr_t>,
+                  "TCount must be intptr_t (the default) when providing weak references");
+
+    static_assert(Integral<TCount>, "TCount must be an integral type");
+
+    static_assert(RefCounted::SingleThreaded || std::atomic<TCount>::is_always_lock_free,
+                  "TCount must be such that std::atomic<TCount> is always lock free");
+
+    template <typename Owner>
     friend class WeakReference;
+
     friend RefCountedTraits;
 
   public:
     using RefPtrTraits = RefCountedTraits;
-    using ref_counted_base = RefCounted;
+    using RefCountedBase = RefCounted;
 
-    static constexpr bool provides_weak_references = HasFlag(Flags, RefCountedFlags::ProvideWeakReferences);
-    static constexpr bool single_threaded = HasFlag(Flags, RefCountedFlags::SingleThreaded);
+    using weak_value_type = conditional_t<RefCounted::ProvidesWeakReferences, WeakReference<Derived>, void>;
 
-  public:
-    using weak_value_type =
-      conditional_t<RefCounted::provides_weak_references, WeakReference<Derived>, void>;
-    using weak_ptr = conditional_t<RefCounted::provides_weak_references,
+    using weak_ptr = conditional_t<RefCounted::ProvidesWeakReferences,
                                    IntrusivePtr<weak_value_type, RefCountedTraits>, void>;
-    using const_weak_ptr = conditional_t<RefCounted::provides_weak_references,
+
+    using const_weak_ptr = conditional_t<RefCounted::ProvidesWeakReferences,
                                          IntrusivePtr<const weak_value_type, RefCountedTraits>, void>;
 
-  private:
-    static_assert(!RefCounted::provides_weak_references
-                    || (RefCounted::provides_weak_references && std::is_same_v<CountType, intptr_t>),
-                  "CountType must be intptr_t (the default) when providing weak references");
-    static_assert(std::is_integral_v<CountType>, "CountType must be an integral type");
-    static_assert(RefCounted::single_threaded || std::atomic<CountType>::is_always_lock_free,
-                  "CountType must be such that std::atomic<CountType> is alwayd lock free");
+    using count_type = conditional_t<SingleThreaded, TCount, std::atomic<TCount>>;
 
-    using count_type = conditional_t<RefCounted::single_threaded, CountType, std::atomic<CountType>>;
-
-  public:
     RefCounted(const RefCounted &) noexcept = delete;
     RefCounted &operator=(const RefCounted &) noexcept = delete;
     RefCounted(RefCounted &&) noexcept = delete;
     RefCounted &operator=(RefCounted &&) noexcept = delete;
 
-    void add_ref() const noexcept;
-    void sub_ref() const noexcept;
-
-    template <class X = Derived,
-              class = std::enable_if_t<DependentBool<RefCounted::provides_weak_references, X>>>
-    weak_ptr get_weak_ptr()
+    void AddRef() const noexcept
     {
-      return weak_ptr::noref(
-        const_cast<WeakReference<X> *>(const_cast<const RefCounted *>(this)->call_get_weak_value()));
+      if constexpr (!RefCounted::ProvidesWeakReferences)
+      {
+        if constexpr (!RefCounted::SingleThreaded)
+        {
+          KRYS_MAYBE_UNUSED auto oldCount = this->_count.fetch_add(1, std::memory_order_relaxed);
+          assert(oldCount > 0);
+          assert(oldCount < std::numeric_limits<decltype(oldCount)>::max());
+        }
+        else
+        {
+          assert(this->_count > 0);
+          assert(this->_count < std::numeric_limits<decltype(this->_count)>::max());
+          ++this->_count;
+        }
+      }
+      else if constexpr (!RefCounted::SingleThreaded)
+      {
+        for (intptr_t value = this->_count.load(std::memory_order_relaxed);;)
+        {
+          assert(value != 0);
+          if (!RefCounted::IsEncodedPointer(value))
+          {
+            assert(value < std::numeric_limits<decltype(value)>::max());
+            if (this->_count.compare_exchange_strong(value, value + 1, std::memory_order_release,
+                                                     std::memory_order_relaxed))
+              return;
+          }
+          else
+          {
+            auto ptr = RefCounted::DecodePtr<weak_value_type>(value);
+            ptr->CallAddOwnerRef();
+            return;
+          }
+        }
+      }
+      else
+      {
+        assert(this->_count != 0);
+        if (!RefCounted::IsEncodedPointer(this->_count))
+        {
+          assert(this->_count < std::numeric_limits<decltype(this->_count)>::max());
+          ++this->_count;
+        }
+        else
+        {
+          auto ptr = RefCounted::DecodePtr<weak_value_type>(this->_count);
+          ptr->CallAddOwnerRef();
+        }
+      }
     }
 
-    template <class X = Derived,
-              class = std::enable_if_t<DependentBool<RefCounted::provides_weak_references, X>>>
-    const_weak_ptr get_weak_ptr() const
+    void SubRef() const noexcept
     {
-      return const_weak_ptr::noref(this->call_get_weak_value());
+      if constexpr (!RefCounted::ProvidesWeakReferences)
+      {
+        if constexpr (!RefCounted::SingleThreaded)
+        {
+          auto oldcount = this->_count.fetch_sub(1, std::memory_order_release);
+          assert(oldcount > 0);
+          if (oldcount == 1)
+          {
+            std::atomic_thread_fence(std::memory_order_acquire);
+            this->CallDestroy();
+          }
+        }
+        else
+        {
+          assert(this->_count > 0);
+          if (--this->_count == 0)
+            this->CallDestroy();
+        }
+      }
+      else if constexpr (!RefCounted::SingleThreaded)
+      {
+        for (intptr_t value = this->_count.load(std::memory_order_relaxed);;)
+        {
+          assert(value != 0);
+          if (!RefCounted::IsEncodedPointer(value))
+          {
+            if (this->_count.compare_exchange_strong(value, value - 1, std::memory_order_release,
+                                                     std::memory_order_relaxed))
+            {
+              if (value == 1)
+              {
+                std::atomic_thread_fence(std::memory_order_acquire);
+                this->CallDestroy();
+              }
+              return;
+            }
+          }
+          else
+          {
+            auto ptr = RefCounted::DecodePtr<weak_value_type>(value);
+            ptr->CallSubOwnerRef();
+            return;
+          }
+        }
+      }
+      else
+      {
+        assert(this->_count != 0);
+        if (!RefCounted::IsEncodedPointer(this->_count))
+        {
+          if (--this->_count == 0)
+            this->CallDestroy();
+        }
+        else
+        {
+          auto ptr = RefCounted::DecodePtr<weak_value_type>(this->_count);
+          ptr->CallSubOwnerRef();
+        }
+      }
+    }
+
+    template <typename X = Derived>
+    requires(RefCounted::ProvidesWeakReferences)
+    weak_ptr GetWeakPtr()
+    {
+      return weak_ptr::NoRef(
+        const_cast<WeakReference<X> *>(const_cast<const RefCounted *>(this)->CallGetWeakValue()));
+    }
+
+    template <typename X = Derived>
+    requires(RefCounted::ProvidesWeakReferences)
+    const_weak_ptr GetWeakPtr() const
+    {
+      return const_weak_ptr::NoRef(this->CallGetWeakValue());
     }
 
   protected:
     RefCounted() noexcept = default;
-    ~RefCounted() noexcept;
 
-    void destroy() const noexcept
+    ~RefCounted() noexcept
+    {
+      KRYS_MAYBE_UNUSED auto validCount = [](auto val)
+      {
+        return val == 0 || val == 1;
+      };
+
+      if constexpr (RefCounted::ProvidesWeakReferences)
+      {
+        if constexpr (!RefCounted::SingleThreaded)
+        {
+          intptr_t value = this->_count.load(std::memory_order_relaxed);
+          if (RefCounted::IsEncodedPointer(value))
+          {
+            auto ptr = RefCounted::DecodePtr<const weak_value_type>(value);
+            assert(validCount(ptr->_strong.load(std::memory_order_relaxed)));
+            ptr->CallOnOwnerDestruction();
+            ptr->CallSubRef();
+          }
+          else
+          {
+            assert(validCount(value));
+          }
+        }
+        else if (RefCounted::IsEncodedPointer(this->_count))
+        {
+          auto ptr = RefCounted::DecodePtr<const weak_value_type>(this->_count);
+          assert(validCount(ptr->_strong));
+          ptr->CallOnOwnerDestruction();
+          ptr->CallSubRef();
+        }
+        else
+        {
+          assert(validCount(this->_count));
+        }
+      }
+      else if constexpr (!RefCounted::SingleThreaded)
+      {
+        assert(validCount(this->_count.load(std::memory_order_relaxed)));
+      }
+      else
+      {
+        assert(validCount(this->_count));
+      }
+    }
+
+    void Destroy() const noexcept
     {
       delete static_cast<const Derived *>(this);
     }
 
-    const weak_value_type *get_weak_value() const;
-
-    weak_value_type *make_weak_reference(intptr_t count) const
+    const weak_value_type *GetWeakValue() const
+    requires(RefCounted::ProvidesWeakReferences)
     {
-      auto non_const_derived = static_cast<Derived *>(const_cast<RefCounted *>(this));
-      return new weak_value_type(count, non_const_derived);
+      if constexpr (!RefCounted::SingleThreaded)
+      {
+        for (intptr_t value = this->_count.load(std::memory_order_acquire);;)
+        {
+          if (!RefCounted::IsEncodedPointer(value))
+          {
+            WeakReference<Derived> *ret = this->CallMakeWeakReference(value);
+            uintptr_t desired = RefCounted::EncodePtr(ret);
+            if (this->_count.compare_exchange_strong(value, desired, std::memory_order_release,
+                                                     std::memory_order_relaxed))
+              return ret;
+
+            ret->CallDestroy();
+          }
+          else
+          {
+            auto ptr = RefCounted::DecodePtr<weak_value_type>(value);
+            ptr->CallAddRef();
+            return ptr;
+          }
+        }
+      }
+      else if (!RefCounted::IsEncodedPointer(this->_count))
+      {
+        WeakReference<Derived> *ret = this->CallMakeWeakReference(this->_count);
+        this->_count = RefCounted::EncodePtr(ret);
+        return ret;
+      }
+      else
+      {
+        auto ptr = RefCounted::DecodePtr<weak_value_type>(this->_count);
+        ptr->CallAddRef();
+        return ptr;
+      }
+    }
+
+    weak_value_type *MakeWeakReference(intptr_t count) const
+    {
+      auto nonConstDerived = static_cast<Derived *>(const_cast<RefCounted *>(this));
+      return new weak_value_type(count, nonConstDerived);
     }
 
   private:
-    // CRTP access
-    void call_add_ref() const noexcept
+    void CallAddRef() const noexcept
     {
-      static_cast<const Derived *>(this)->add_ref();
-    }
-    void call_sub_ref() const noexcept
-    {
-      static_cast<const Derived *>(this)->sub_ref();
+      static_cast<const Derived *>(this)->AddRef();
     }
 
-    void call_destroy() const noexcept
+    void CallSubRef() const noexcept
     {
-      static_cast<const Derived *>(this)->destroy();
+      static_cast<const Derived *>(this)->SubRef();
     }
 
-    auto call_make_weak_reference(intptr_t count) const
+    void CallDestroy() const noexcept
     {
-      if constexpr (RefCounted::provides_weak_references)
-        return static_cast<const Derived *>(this)->make_weak_reference(count);
+      static_cast<const Derived *>(this)->Destroy();
     }
 
-    auto call_get_weak_value() const
+    auto CallMakeWeakReference(intptr_t count) const
     {
-      return static_cast<const Derived *>(this)->get_weak_value();
+      if constexpr (RefCounted::ProvidesWeakReferences)
+        return static_cast<const Derived *>(this)->MakeWeakReference(count);
+    }
+
+    auto CallGetWeakValue() const
+    {
+      return static_cast<const Derived *>(this)->GetWeakValue();
     }
 
     // Weak reference pointer decoding and encoding
-    template <class X>
-    static X *decode_pointer(intptr_t count) noexcept
+    template <typename X>
+    static X *DecodePtr(intptr_t count) noexcept
     {
       return (X *)(uintptr_t(count) << 1);
     }
 
-    template <class X>
-    static intptr_t encode_pointer(X *ptr) noexcept
+    template <typename X>
+    static intptr_t EncodePtr(X *ptr) noexcept
     {
       return (uintptr_t(ptr) >> 1) | uintptr_t(std::numeric_limits<intptr_t>::min());
     }
 
-    static bool is_encoded_pointer(intptr_t count) noexcept
+    static bool IsEncodedPointer(intptr_t count) noexcept
     {
       return count < 0;
     }
 
   private:
-    mutable count_type m_count = 1;
+    mutable count_type _count = 1;
   };
 
-  template <class Owner>
+  template <typename Owner>
   class WeakReference
   {
-    template <class T, RefCountedFlags Flags, class CountType>
+    template <typename T, RefCountedFlags Flags, typename TCount>
     friend class RefCounted;
+
     friend RefCountedTraits;
 
   public:
     using RefPtrTraits = RefCountedTraits;
+
     using strong_value_type = Owner;
     using strong_ptr = IntrusivePtr<strong_value_type, RefCountedTraits>;
     using const_strong_ptr = IntrusivePtr<const strong_value_type, RefCountedTraits>;
 
-    static constexpr bool single_threaded = Owner::single_threaded;
+    static constexpr bool SingleThreaded = Owner::SingleThreaded;
 
   private:
-    using count_type = std::conditional_t<WeakReference::single_threaded, intptr_t, std::atomic<intptr_t>>;
+    using count_type = conditional_t<WeakReference::SingleThreaded, intptr_t, std::atomic<intptr_t>>;
 
   public:
     WeakReference(const WeakReference &) noexcept = delete;
@@ -235,91 +427,200 @@ namespace Krys
     WeakReference(WeakReference &&) noexcept = delete;
     WeakReference &operator=(WeakReference &&) noexcept = delete;
 
-    void add_ref() const noexcept;
-    void sub_ref() const noexcept;
-
-    template <class X = Owner>
-    const_strong_ptr lock() const noexcept
+    void AddRef() const noexcept
     {
-      return const_strong_ptr::noref(this->call_lock_owner());
+      if constexpr (!WeakReference::SingleThreaded)
+      {
+        KRYS_MAYBE_UNUSED auto oldcount = this->_count.fetch_add(1, std::memory_order_relaxed);
+        assert(oldcount > 0);
+        assert(oldcount < std::numeric_limits<decltype(oldcount)>::max());
+      }
+      else
+      {
+        assert(this->_count > 0);
+        assert(this->_count < std::numeric_limits<decltype(this->_count)>::max());
+        ++this->_count;
+      }
     }
 
-    template <class X = Owner>
-    strong_ptr lock() noexcept
+    void SubRef() const noexcept
     {
-      return strong_ptr::noref(this->call_lock_owner());
+      if constexpr (!WeakReference::SingleThreaded)
+      {
+        auto oldCount = this->_count.fetch_sub(1, std::memory_order_release);
+        assert(oldCount > 0);
+        if (oldCount == 1)
+        {
+          std::atomic_thread_fence(std::memory_order_acquire);
+          this->CallDestroy();
+        }
+      }
+      else
+      {
+        assert(this->_count > 0);
+        if (--this->_count == 0)
+        {
+          this->CallDestroy();
+        }
+      }
+    }
+
+    template <typename X = Owner>
+    const_strong_ptr Lock() const noexcept
+    {
+      return const_strong_ptr::NoRef(this->CallLockOwner());
+    }
+
+    template <typename X = Owner>
+    strong_ptr Lock() noexcept
+    {
+      return strong_ptr::NoRef(this->CallLockOwner());
     }
 
   protected:
-    constexpr WeakReference(intptr_t initial_strong, Owner *owner) noexcept
-        : m_strong(initial_strong), m_owner(owner)
+    constexpr WeakReference(intptr_t initialStrong, Owner *owner) noexcept
+        : _strong(initialStrong), _owner(owner)
     {
     }
 
     ~WeakReference() noexcept = default;
 
-    void destroy() const
+    void Destroy() const
     {
       delete static_cast<const derived_type<> *>(this);
     }
 
-    void add_owner_ref() noexcept;
-    void sub_owner_ref() noexcept;
+    void AddOwnerRef() noexcept
+    {
+      if constexpr (!WeakReference::SingleThreaded)
+      {
+        KRYS_MAYBE_UNUSED auto oldcount = this->_strong.fetch_add(1, std::memory_order_relaxed);
+        assert(oldcount > 0);
+        assert(oldcount < std::numeric_limits<decltype(oldcount)>::max());
+      }
+      else
+      {
+        assert(this->_strong > 0);
+        assert(this->_strong < std::numeric_limits<decltype(this->_count)>::max());
+        ++this->_strong;
+      }
+    }
 
-    strong_value_type *lock_owner() const noexcept;
+    void SubOwnerRef() noexcept
+    {
+      if constexpr (!WeakReference::SingleThreaded)
+      {
+        auto oldCount = this->_strong.fetch_sub(1, std::memory_order_release);
+        assert(oldCount > 0);
+        if (oldCount == 1)
+        {
+          std::atomic_thread_fence(std::memory_order_acquire);
+          auto owner = this->_owner;
+          this->_owner = nullptr;
+          owner->CallDestroy(); // this can cascade to deleting ourselves so must be the last thing
+        }
+      }
+      else
+      {
+        assert(this->_strong > 0);
+        if (--this->_strong == 0)
+        {
+          auto owner = this->_owner;
+          this->_owner = nullptr;
+          owner->CallDestroy(); // this can cascade to deleting ourselves so must be the last thing
+        }
+      }
+    }
 
-    void on_owner_destruction() const noexcept
+    strong_value_type *LockOwner() const noexcept
+    {
+      if constexpr (!WeakReference::SingleThreaded)
+      {
+        for (intptr_t value = this->_strong.load(std::memory_order_relaxed);;)
+        {
+          assert(value >= 0);
+
+          if (value == 0)
+          {
+            return nullptr;
+          }
+
+          if (this->_strong.compare_exchange_strong(value, value + 1, std::memory_order_release,
+                                                    std::memory_order_relaxed))
+          {
+            return this->_owner;
+          }
+        }
+      }
+      else
+      {
+        if (this->_strong == 0)
+        {
+          return nullptr;
+        }
+        ++this->_strong;
+        return this->_owner;
+      }
+    }
+
+    void OnOwnerDestruction() const noexcept
     {
     }
 
   private:
-    template <class X = Owner>
-    using derived_type = std::remove_pointer_t<decltype(std::declval<X>().call_make_weak_reference(0))>;
+    template <typename X = Owner>
+    using derived_type = remove_pointer_t<decltype(std::declval<X>().CallMakeWeakReference(0))>;
 
-    void call_add_ref() const noexcept
+    void CallAddRef() const noexcept
     {
-      static_cast<const derived_type<> *>(this)->add_ref();
+      static_cast<const derived_type<> *>(this)->AddRef();
     }
-    void call_sub_ref() const noexcept
+
+    void CallSubRef() const noexcept
     {
-      static_cast<const derived_type<> *>(this)->sub_ref();
+      static_cast<const derived_type<> *>(this)->SubRef();
     }
-    void call_add_owner_ref() noexcept
+
+    void CallAddOwnerRef() noexcept
     {
-      static_cast<derived_type<> *>(this)->add_owner_ref();
+      static_cast<derived_type<> *>(this)->AddOwnerRef();
     }
-    void call_sub_owner_ref() noexcept
+
+    void CallSubOwnerRef() noexcept
     {
-      static_cast<derived_type<> *>(this)->sub_owner_ref();
+      static_cast<derived_type<> *>(this)->SubOwnerRef();
     }
-    void call_destroy() const
+
+    void CallDestroy() const
     {
-      static_cast<const derived_type<> *>(this)->destroy();
+      static_cast<const derived_type<> *>(this)->Destroy();
     }
-    strong_value_type *call_lock_owner() const noexcept
+
+    strong_value_type *CallLockOwner() const noexcept
     {
-      return static_cast<const derived_type<> *>(this)->lock_owner();
+      return static_cast<const derived_type<> *>(this)->LockOwner();
     }
-    void call_on_owner_destruction() const noexcept
+
+    void CallOnOwnerDestruction() const noexcept
     {
-      static_cast<const derived_type<> *>(this)->on_owner_destruction();
+      static_cast<const derived_type<> *>(this)->OnOwnerDestruction();
     }
 
   private:
-    mutable count_type m_count = 2;
-    mutable count_type m_strong = 0;
-    Owner *m_owner = nullptr;
+    mutable count_type _count = 2;
+    mutable count_type _strong = 0;
+    Owner *_owner = nullptr;
   };
 
-  template <class T, RefCountedFlags Flags, class CountType>
-  class RefCountedAdapter : public RefCounted<RefCountedAdapter<T, Flags, CountType>, Flags, CountType>,
-                              public T
+  template <typename T, RefCountedFlags Flags, typename TCount>
+  class RefCountedAdapter : public RefCounted<RefCountedAdapter<T, Flags, TCount>, Flags, TCount>, public T
   {
-    friend RefCounted<RefCountedAdapter<T, Flags, CountType>, Flags, CountType>;
+    friend RefCounted<RefCountedAdapter, Flags, TCount>;
 
   public:
-    template <class... Args, class = std::enable_if_t<std::is_constructible_v<T, Args...>>>
-    RefCountedAdapter(Args &&...args) noexcept(noexcept(T(std::forward<Args>(args)...)))
+    template <typename... Args>
+    requires(Constructible<T, Args...>)
+    RefCountedAdapter(Args &&...args) noexcept(NoThrowConstructible<T, Args...>)
         : T(std::forward<Args>(args)...)
     {
     }
@@ -328,348 +629,22 @@ namespace Krys
     ~RefCountedAdapter() noexcept = default;
   };
 
-  template <class T, RefCountedFlags Flags, class CountType>
-  class RefCountedWrapper : public RefCounted<RefCountedWrapper<T, Flags, CountType>, Flags, CountType>
+  template <class T, RefCountedFlags Flags, class TCount>
+  class RefCountedWrapper : public RefCounted<RefCountedWrapper<T, Flags, TCount>, Flags, TCount>
   {
-    friend RefCounted<RefCountedWrapper<T, Flags, CountType>, Flags, CountType>;
+    friend RefCounted<RefCountedWrapper, Flags, TCount>;
 
   public:
-    template <class... Args, class = std::enable_if_t<std::is_constructible_v<T, Args...>>>
-    RefCountedWrapper(Args &&...args) noexcept(noexcept(T(std::forward<Args>(args)...)))
-        : wrapped(std::forward<Args>(args)...)
+    template <typename... Args>
+    requires(Constructible<T, Args...>)
+    RefCountedWrapper(Args &&...args) noexcept(NoThrowConstructible<T, Args...>)
+        : Wrapped(std::forward<Args>(args)...)
     {
     }
 
-    T wrapped;
+    T Wrapped;
 
   protected:
     ~RefCountedWrapper() noexcept = default;
   };
-
-  // MARK:- Implementation
-
-  template <class Owner>
-  inline void WeakReference<Owner>::add_ref() const noexcept
-  {
-    if constexpr (!WeakReference::single_threaded)
-    {
-      KRYS_MAYBE_UNUSED auto oldcount = this->m_count.fetch_add(1, std::memory_order_relaxed);
-      assert(oldcount > 0);
-      assert(oldcount < std::numeric_limits<decltype(oldcount)>::max());
-    }
-    else
-    {
-      assert(this->m_count > 0);
-      assert(this->m_count < std::numeric_limits<decltype(this->m_count)>::max());
-      ++this->m_count;
-    }
-  }
-
-  template <class Owner>
-  inline void WeakReference<Owner>::sub_ref() const noexcept
-  {
-    if constexpr (!WeakReference::single_threaded)
-    {
-      auto oldcount = this->m_count.fetch_sub(1, std::memory_order_release);
-      assert(oldcount > 0);
-      if (oldcount == 1)
-      {
-        std::atomic_thread_fence(std::memory_order_acquire);
-        this->call_destroy();
-      }
-    }
-    else
-    {
-      assert(this->m_count > 0);
-      if (--this->m_count == 0)
-        this->call_destroy();
-    }
-  }
-
-  template <class Owner>
-  inline void WeakReference<Owner>::add_owner_ref() noexcept
-  {
-    if constexpr (!WeakReference::single_threaded)
-    {
-      KRYS_MAYBE_UNUSED auto oldcount = this->m_strong.fetch_add(1, std::memory_order_relaxed);
-      assert(oldcount > 0);
-      assert(oldcount < std::numeric_limits<decltype(oldcount)>::max());
-    }
-    else
-    {
-      assert(this->m_strong > 0);
-      assert(this->m_strong < std::numeric_limits<decltype(this->m_count)>::max());
-      ++this->m_strong;
-    }
-  }
-
-  template <class Owner>
-  inline void WeakReference<Owner>::sub_owner_ref() noexcept
-  {
-    if constexpr (!WeakReference::single_threaded)
-    {
-      auto oldcount = this->m_strong.fetch_sub(1, std::memory_order_release);
-      assert(oldcount > 0);
-      if (oldcount == 1)
-      {
-        std::atomic_thread_fence(std::memory_order_acquire);
-        auto owner = this->m_owner;
-        this->m_owner = nullptr;
-        owner->call_destroy(); // this can cascade to deleting ourselves so must be the last thing
-      }
-    }
-    else
-    {
-      assert(this->m_strong > 0);
-      if (--this->m_strong == 0)
-      {
-        auto owner = this->m_owner;
-        this->m_owner = nullptr;
-        owner->call_destroy(); // this can cascade to deleting ourselves so must be the last thing
-      }
-    }
-  }
-
-  template <class Owner>
-  inline auto WeakReference<Owner>::lock_owner() const noexcept -> strong_value_type *
-  {
-    if constexpr (!WeakReference::single_threaded)
-    {
-      for (intptr_t value = this->m_strong.load(std::memory_order_relaxed);;)
-      {
-        assert(value >= 0);
-
-        if (value == 0)
-          return nullptr;
-
-        if (this->m_strong.compare_exchange_strong(value, value + 1, std::memory_order_release,
-                                                   std::memory_order_relaxed))
-          return this->m_owner;
-      }
-    }
-    else
-    {
-      if (this->m_strong == 0)
-        return nullptr;
-      ++this->m_strong;
-      return this->m_owner;
-    }
-  }
-
-  template <class Derived, RefCountedFlags Flags, class CountType>
-  inline void RefCounted<Derived, Flags, CountType>::add_ref() const noexcept
-  {
-    if constexpr (!RefCounted::provides_weak_references)
-    {
-      if constexpr (!RefCounted::single_threaded)
-      {
-        KRYS_MAYBE_UNUSED auto oldcount = this->m_count.fetch_add(1, std::memory_order_relaxed);
-        assert(oldcount > 0);
-        assert(oldcount < std::numeric_limits<decltype(oldcount)>::max());
-      }
-      else
-      {
-        assert(this->m_count > 0);
-        assert(this->m_count < std::numeric_limits<decltype(this->m_count)>::max());
-        ++this->m_count;
-      }
-    }
-    else
-    {
-      if constexpr (!RefCounted::single_threaded)
-      {
-        for (intptr_t value = this->m_count.load(std::memory_order_relaxed);;)
-        {
-          assert(value != 0);
-          if (!RefCounted::is_encoded_pointer(value))
-          {
-            assert(value < std::numeric_limits<decltype(value)>::max());
-            if (this->m_count.compare_exchange_strong(value, value + 1, std::memory_order_release,
-                                                      std::memory_order_relaxed))
-              return;
-          }
-          else
-          {
-            auto ptr = RefCounted::decode_pointer<weak_value_type>(value);
-            ptr->call_add_owner_ref();
-            return;
-          }
-        }
-      }
-      else
-      {
-        assert(this->m_count != 0);
-        if (!RefCounted::is_encoded_pointer(this->m_count))
-        {
-          assert(this->m_count < std::numeric_limits<decltype(this->m_count)>::max());
-          ++this->m_count;
-        }
-        else
-        {
-          auto ptr = RefCounted::decode_pointer<weak_value_type>(this->m_count);
-          ptr->call_add_owner_ref();
-        }
-      }
-    }
-  }
-
-  template <class Derived, RefCountedFlags Flags, class CountType>
-  inline void RefCounted<Derived, Flags, CountType>::sub_ref() const noexcept
-  {
-    if constexpr (!RefCounted::provides_weak_references)
-    {
-      if constexpr (!RefCounted::single_threaded)
-      {
-        auto oldcount = this->m_count.fetch_sub(1, std::memory_order_release);
-        assert(oldcount > 0);
-        if (oldcount == 1)
-        {
-          std::atomic_thread_fence(std::memory_order_acquire);
-          this->call_destroy();
-        }
-      }
-      else
-      {
-        assert(this->m_count > 0);
-        if (--this->m_count == 0)
-          this->call_destroy();
-      }
-    }
-    else
-    {
-      if constexpr (!RefCounted::single_threaded)
-      {
-        for (intptr_t value = this->m_count.load(std::memory_order_relaxed);;)
-        {
-          assert(value != 0);
-          if (!RefCounted::is_encoded_pointer(value))
-          {
-            if (this->m_count.compare_exchange_strong(value, value - 1, std::memory_order_release,
-                                                      std::memory_order_relaxed))
-            {
-              if (value == 1)
-              {
-                std::atomic_thread_fence(std::memory_order_acquire);
-                this->call_destroy();
-              }
-              return;
-            }
-          }
-          else
-          {
-            auto ptr = RefCounted::decode_pointer<weak_value_type>(value);
-            ptr->call_sub_owner_ref();
-            return;
-          }
-        }
-      }
-      else
-      {
-        assert(this->m_count != 0);
-        if (!RefCounted::is_encoded_pointer(this->m_count))
-        {
-          if (--this->m_count == 0)
-            this->call_destroy();
-        }
-        else
-        {
-          auto ptr = RefCounted::decode_pointer<weak_value_type>(this->m_count);
-          ptr->call_sub_owner_ref();
-        }
-      }
-    }
-  }
-
-  template <class Derived, RefCountedFlags Flags, class CountType>
-  inline auto RefCounted<Derived, Flags, CountType>::get_weak_value() const -> const weak_value_type *
-  {
-    static_assert(RefCounted::provides_weak_references, "class doesn't provide weak references");
-
-    if constexpr (!RefCounted::single_threaded)
-    {
-      for (intptr_t value = this->m_count.load(std::memory_order_acquire);;)
-      {
-        if (!RefCounted::is_encoded_pointer(value))
-        {
-          WeakReference<Derived> *ret = this->call_make_weak_reference(value);
-          uintptr_t desired = RefCounted::encode_pointer(ret);
-          if (this->m_count.compare_exchange_strong(value, desired, std::memory_order_release,
-                                                    std::memory_order_relaxed))
-            return ret;
-
-          ret->call_destroy();
-        }
-        else
-        {
-          auto ptr = RefCounted::decode_pointer<weak_value_type>(value);
-          ptr->call_add_ref();
-          return ptr;
-        }
-      }
-    }
-    else
-    {
-      if (!RefCounted::is_encoded_pointer(this->m_count))
-      {
-        WeakReference<Derived> *ret = this->call_make_weak_reference(this->m_count);
-        this->m_count = RefCounted::encode_pointer(ret);
-        return ret;
-      }
-      else
-      {
-        auto ptr = RefCounted::decode_pointer<weak_value_type>(this->m_count);
-        ptr->call_add_ref();
-        return ptr;
-      }
-    }
-  }
-
-  template <class Derived, RefCountedFlags Flags, class CountType>
-  inline RefCounted<Derived, Flags, CountType>::~RefCounted() noexcept
-  {
-    KRYS_MAYBE_UNUSED auto valid_count = [](auto val)
-    {
-      return val == 0 || val == 1;
-    };
-
-    if constexpr (RefCounted::provides_weak_references)
-    {
-      if constexpr (!RefCounted::single_threaded)
-      {
-        intptr_t value = this->m_count.load(std::memory_order_relaxed);
-        if (RefCounted::is_encoded_pointer(value))
-        {
-          auto ptr = RefCounted::decode_pointer<const weak_value_type>(value);
-          assert(valid_count(ptr->m_strong.load(std::memory_order_relaxed)));
-          ptr->call_on_owner_destruction();
-          ptr->call_sub_ref();
-        }
-        else
-        {
-          assert(valid_count(value));
-        }
-      }
-      else
-      {
-        if (RefCounted::is_encoded_pointer(this->m_count))
-        {
-          auto ptr = RefCounted::decode_pointer<const weak_value_type>(this->m_count);
-          assert(valid_count(ptr->m_strong));
-          ptr->call_on_owner_destruction();
-          ptr->call_sub_ref();
-        }
-        else
-        {
-          assert(valid_count(this->m_count));
-        }
-      }
-    }
-    else
-    {
-      if constexpr (!RefCounted::single_threaded)
-        assert(valid_count(this->m_count.load(std::memory_order_relaxed)));
-      else
-        assert(valid_count(this->m_count));
-    }
-  }
 }

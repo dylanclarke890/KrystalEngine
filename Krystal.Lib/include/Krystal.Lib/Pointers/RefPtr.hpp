@@ -8,44 +8,44 @@ namespace Krys
   using RefPtr = IntrusivePtr<T, typename T::RefPtrTraits>;
 
   template <class T>
-  constexpr RefPtr<T> refcnt_retain(T *ptr) noexcept
+  constexpr RefPtr<T> RefPtrRetain(T *ptr) noexcept
   {
-    return RefPtr<T>::ref(ptr);
+    return RefPtr<T>::Ref(ptr);
   }
 
   template <class T>
-  constexpr RefPtr<T> refcnt_attach(T *ptr) noexcept
+  constexpr RefPtr<T> RefPtrAttach(T *ptr) noexcept
   {
-    return RefPtr<T>::noref(ptr);
+    return RefPtr<T>::NoRef(ptr);
   }
 
   template <class T, class... Args>
-  inline RefPtr<T> make_refcnt(Args &&...args)
+  inline RefPtr<T> CreateRefPtr(Args &&...args)
   {
-    return RefPtr<T>::noref(new T(std::forward<Args>(args)...));
+    return RefPtr<T>::NoRef(new T(std::forward<Args>(args)...));
   }
 
   template <class T>
   inline RefPtr<typename T::weak_value_type> weak_cast(const RefPtr<T> &src)
   {
-    return src->get_weak_ptr();
+    return src->GetWeakPtr();
   }
 
   template <class T>
   inline RefPtr<const typename T::weak_value_type> weak_cast(const RefPtr<const T> &src)
   {
-    return src->get_weak_ptr();
+    return src->GetWeakPtr();
   }
 
   template <class T>
   inline RefPtr<typename T::strong_value_type> strong_cast(const RefPtr<T> &src) noexcept
   {
-    return src->lock();
+    return src->Lock();
   }
 
   template <class T>
   inline RefPtr<const typename T::strong_value_type> strong_cast(const RefPtr<const T> &src) noexcept
   {
-    return src->lock();
+    return src->Lock();
   }
 }
