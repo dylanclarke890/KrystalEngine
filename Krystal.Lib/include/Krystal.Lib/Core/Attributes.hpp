@@ -70,6 +70,24 @@
   #endif
 #endif
 
+#if !defined(KRYS_ALWAYS_INLINE)
+  #if KRYS_COMPILER(MSVC)
+    #define KRYS_ALWAYS_INLINE __forceinline
+  #elif KRYS_COMPILER(CLANG) || KRYS_COMPILER(GCC)
+    #define KRYS_ALWAYS_INLINE [[gnu::always_inline]] inline
+  #else
+    #define KRYS_ALWAYS_INLINE
+  #endif
+#endif
+
+#if !defined(KRYS_TRIVIAL_ABI)
+  #if KRYS_COMPILER(CLANG)
+    #define KRYS_TRIVIAL_ABI [[clang::trivial_abi]]
+  #else
+    #define KRYS_TRIVIAL_ABI
+  #endif
+#endif
+
 #if !defined(KRYS_RETURNS_NONNULL)
   #define KRYS_RETURNS_NONNULL __attribute__((returns_nonnull))
 #endif

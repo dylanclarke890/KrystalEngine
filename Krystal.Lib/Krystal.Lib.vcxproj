@@ -157,7 +157,8 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\GetPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RawPtr.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\Ref.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\SharedPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\UniquePtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtr.hpp" />

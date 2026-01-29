@@ -30,6 +30,9 @@ namespace Krys
   template <typename T>
   constexpr bool DependentTrue = TrueType<T>::value;
 
+  template <bool Value, typename... Args>
+  constexpr bool DependentBool = Value;
+
   /// @brief Retrieves the size of the first dimension of an array type.
   template <typename T>
   constexpr auto Extent = std::extent<T>::value;

@@ -1,153 +1,602 @@
-﻿/*
- * Copyright (C) 2014 Apple Inc. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. AND ITS CONTRIBUTORS ``AS IS''
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL APPLE INC. OR ITS CONTRIBUTORS
- * BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
- * THE POSSIBILITY OF SUCH DAMAGE.
- */
+﻿#pragma once
 
-#pragma once
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
+#include <atomic>
+#include <compare>
+#include <format>
+#include <memory>
+#include <ostream>
+#include <type_traits>
 
-#include "Krystal.Lib/Types/Func.hpp"
-#include "Krystal.Lib/Mixins/NonCopyable.hpp"
-#include <wtf/Noncopyable.h>
-#include <wtf/RefPtr.h>
-#include <wtf/SetForScope.h>
-
-namespace WTF
+namespace Krys
 {
-
-  enum class RefCounterEvent
+  namespace detail
   {
-    Decrement,
-    Increment
-  };
-
-  template <typename T>
-  class RefCounter
-  {
-    WTF_DEPRECATED_MAKE_FAST_ALLOCATED(RefCounter);
-    WTF_MAKE_NONCOPYABLE(RefCounter);
-
-    class Count
+    struct add_ref_detector
     {
-      WTF_MAKE_NONCOPYABLE(Count);
+      template <class Traits, class T>
+      auto operator()(Traits *, T *p) noexcept(noexcept(Traits::add_ref(p))) -> decltype(Traits::add_ref(p));
+    };
+
+    struct sub_ref_detector
+    {
+      template <class Traits, class T>
+      auto operator()(Traits *, T *p) noexcept(noexcept(Traits::sub_ref(p))) -> decltype(Traits::sub_ref(p));
+    };
+
+  }
+
+  template <class Traits, class T>
+  constexpr bool are_intrusive_shared_traits =
+    std::is_nothrow_invocable_v<detail::add_ref_detector, Traits *, T *>
+    && std::is_nothrow_invocable_v<detail::sub_ref_detector, Traits *, T *>;
+
+  template <class T, class Traits>
+  class KRYS_TRIVIAL_ABI IntrusivePtr
+  {
+    static_assert(are_intrusive_shared_traits<Traits, T>, "Invalid Traits for type T");
+    friend std::atomic<IntrusivePtr<T, Traits>>;
+    friend std::out_ptr_t<IntrusivePtr<T, Traits>, T *>;
+    friend std::inout_ptr_t<IntrusivePtr<T, Traits>, T *>;
+
+  public:
+    using pointer = T *;
+    using element_type = T;
+    using traits_type = Traits;
+
+  private:
+    class output_param
+    {
+      friend class IntrusivePtr<T, Traits>;
 
     public:
-      void ref();
-      void deref();
-
-      void refCounterWasDeleted();
-
-    private:
-      friend class RefCounter;
-
-      Count(RefCounter &refCounter) : m_refCounter(&refCounter), m_value(0)
+      constexpr operator T **() && noexcept
       {
+        return _ptr;
       }
 
-      RefCounter *m_refCounter;
-      size_t m_value;
-      bool m_inValueDidChange {false};
+    private:
+      constexpr output_param(IntrusivePtr<T, Traits> &owner) noexcept : _ptr(&owner._ptr)
+      {
+        owner.reset();
+      }
+      constexpr output_param(output_param &&src) noexcept = default;
+
+      output_param(const output_param &) = delete;
+      void operator=(const output_param &) = delete;
+      void operator=(output_param &&) = delete;
+
+    private:
+      T **_ptr;
+    };
+
+    class inout_param
+    {
+      friend class IntrusivePtr<T, Traits>;
+
+    public:
+      constexpr operator T **() && noexcept
+      {
+        return _ptr;
+      }
+
+    private:
+      constexpr inout_param(IntrusivePtr<T, Traits> &owner) noexcept : _ptr(&owner._ptr)
+      {
+      }
+      constexpr inout_param(inout_param &&src) noexcept = default;
+
+      inout_param(const inout_param &) = delete;
+      void operator=(const inout_param &) = delete;
+      void operator=(inout_param &&) = delete;
+
+    private:
+      T **_ptr;
     };
 
   public:
-    using Token = RefPtr<Count>;
-    using ValueChangeFunction = WTF::Function<void(RefCounterEvent)>;
-
-    RefCounter(ValueChangeFunction && = nullptr);
-    ~RefCounter();
-
-    Token count() const
+    static constexpr IntrusivePtr noref(T *p) noexcept
     {
-      return m_count;
+      return IntrusivePtr(p);
     }
 
-    size_t value() const
+    static constexpr IntrusivePtr ref(T *p) noexcept
     {
-      return m_count->m_value;
+      IntrusivePtr::do_add_ref(p);
+      return IntrusivePtr(p);
+    }
+
+    constexpr IntrusivePtr() noexcept : _ptr(nullptr)
+    {
+    }
+
+    constexpr IntrusivePtr(std::nullptr_t) noexcept : _ptr(nullptr)
+    {
+    }
+
+    constexpr IntrusivePtr(const IntrusivePtr<T, Traits> &src) noexcept : _ptr(src._ptr)
+    {
+      this->do_add_ref(this->_ptr);
+    }
+
+    constexpr IntrusivePtr(IntrusivePtr<T, Traits> &&src) noexcept : _ptr(src.release())
+    {
+    }
+
+    constexpr IntrusivePtr<T, Traits> &operator=(const IntrusivePtr<T, Traits> &src) noexcept
+    {
+      T *temp = this->_ptr;
+      this->_ptr = src._ptr;
+      this->do_add_ref(this->_ptr);
+      this->do_sub_ref(temp);
+      return *this;
+    }
+
+    constexpr IntrusivePtr<T, Traits> &operator=(IntrusivePtr<T, Traits> &&src) noexcept
+    {
+      T *new_val = src.release();
+      // this must come second so it is nullptr if src is us
+      T *old_val = this->_ptr;
+      this->_ptr = new_val;
+      this->do_sub_ref(old_val);
+      return *this;
+    }
+
+    template <class Y, class YTraits, class = std::enable_if_t<std::is_convertible_v<Y *, T *>, void>>
+    constexpr IntrusivePtr(const IntrusivePtr<Y, YTraits> &src) noexcept : _ptr(src.get())
+    {
+      this->do_add_ref(this->_ptr);
+    }
+
+    template <class Y, class = std::enable_if_t<std::is_convertible_v<Y *, T *>, void>>
+    constexpr IntrusivePtr(IntrusivePtr<Y, Traits> &&src) noexcept : _ptr(src.release())
+    {
+    }
+
+    template <class Y, class YTraits, class = std::enable_if_t<std::is_convertible_v<Y *, T *>, void>>
+    constexpr IntrusivePtr(IntrusivePtr<Y, YTraits> &&src) noexcept : _ptr(src.get())
+    {
+      this->do_add_ref(this->_ptr);
+      src.reset();
+    }
+
+    template <class Y, class YTraits, class = std::enable_if_t<std::is_convertible_v<Y *, T *>, void>>
+    constexpr IntrusivePtr<T, Traits> &operator=(const IntrusivePtr<Y, YTraits> &src) noexcept
+    {
+      T *temp = this->_ptr;
+      this->_ptr = src.get();
+      this->do_add_ref(this->_ptr);
+      this->do_sub_ref(temp);
+      return *this;
+    }
+
+    template <class Y, class = std::enable_if_t<std::is_convertible_v<Y *, T *>, void>>
+    constexpr IntrusivePtr<T, Traits> &operator=(IntrusivePtr<Y, Traits> &&src) noexcept
+    {
+      this->do_sub_ref(this->_ptr);
+      this->_ptr = src.release();
+      return *this;
+    }
+
+    template <class Y, class YTraits, class = std::enable_if_t<std::is_convertible_v<Y *, T *>, void>>
+    constexpr IntrusivePtr<T, Traits> &operator=(IntrusivePtr<Y, YTraits> &&src) noexcept
+    {
+      this->do_sub_ref(this->_ptr);
+      this->_ptr = src.get();
+      this->do_add_ref(this->_ptr);
+      src.reset();
+      return *this;
+    }
+
+    constexpr ~IntrusivePtr() noexcept
+    {
+      this->reset();
+    }
+
+    constexpr T *get() const noexcept
+    {
+      return this->_ptr;
+    }
+
+    constexpr T *operator->() const noexcept
+    {
+      return this->_ptr;
+    }
+
+    template <class X = T>
+    constexpr std::enable_if_t<std::is_same_v<X, T>, X &> operator*() const noexcept
+    {
+      return *this->_ptr;
+    }
+
+    template <class M, class X = T>
+    constexpr std::enable_if_t<std::is_same_v<X, T>, M &> operator->*(M X::*memptr) const noexcept
+    {
+      return this->_ptr->*memptr;
+    }
+
+    constexpr explicit operator bool() const noexcept
+    {
+      return this->_ptr;
+    }
+
+    constexpr output_param get_output_param() noexcept
+    {
+      return output_param(*this);
+    }
+
+    constexpr inout_param get_inout_param() noexcept
+    {
+      return inout_param(*this);
+    }
+
+    constexpr T *release() noexcept
+    {
+      T *p = this->_ptr;
+      this->_ptr = nullptr;
+      return p;
+    }
+
+    KRYS_ALWAYS_INLINE constexpr void reset() noexcept // GCC refuses to inline this otherwise
+    {
+      this->do_sub_ref(this->_ptr);
+      this->_ptr = nullptr;
+    }
+
+    constexpr void swap(IntrusivePtr<T, Traits> &other) noexcept
+    {
+      T *temp = this->_ptr;
+      this->_ptr = other._ptr;
+      other._ptr = temp;
+    }
+
+    friend constexpr void swap(IntrusivePtr<T, Traits> &lhs, IntrusivePtr<T, Traits> &rhs) noexcept
+    {
+      lhs.swap(rhs);
+    }
+
+    template <class Y, class YTraits>
+    friend constexpr bool operator==(const IntrusivePtr<T, Traits> &lhs,
+                                     const IntrusivePtr<Y, YTraits> &rhs) noexcept
+    {
+      return lhs._ptr == rhs.get();
+    }
+
+    template <class Y>
+    friend constexpr bool operator==(const IntrusivePtr<T, Traits> &lhs, const Y *rhs) noexcept
+    {
+      return lhs._ptr == rhs;
+    }
+
+    template <class Y>
+    friend constexpr bool operator==(const Y *lhs, const IntrusivePtr<T, Traits> &rhs) noexcept
+    {
+      return lhs == rhs._ptr;
+    }
+
+    friend constexpr bool operator==(const IntrusivePtr<T, Traits> &lhs, std::nullptr_t) noexcept
+    {
+      return lhs._ptr == nullptr;
+    }
+
+    friend constexpr bool operator==(std::nullptr_t, const IntrusivePtr<T, Traits> &rhs) noexcept
+    {
+      return nullptr == rhs._ptr;
+    }
+
+    template <class Y, class YTraits>
+    friend constexpr bool operator!=(const IntrusivePtr<T, Traits> &lhs,
+                                     const IntrusivePtr<Y, YTraits> &rhs) noexcept
+    {
+      return !(lhs == rhs);
+    }
+
+    template <class Y>
+    friend constexpr bool operator!=(const IntrusivePtr<T, Traits> &lhs, const Y *rhs) noexcept
+    {
+      return !(lhs == rhs);
+    }
+
+    template <class Y>
+    friend constexpr bool operator!=(const Y *lhs, const IntrusivePtr<T, Traits> &rhs) noexcept
+    {
+      return !(lhs == rhs);
+    }
+
+    friend constexpr bool operator!=(const IntrusivePtr<T, Traits> &lhs, std::nullptr_t) noexcept
+    {
+      return !(lhs == nullptr);
+    }
+
+    friend constexpr bool operator!=(std::nullptr_t, const IntrusivePtr<T, Traits> &rhs) noexcept
+    {
+      return !(nullptr == rhs);
+    }
+
+    template <class Y, class YTraits>
+    friend constexpr auto operator<=>(const IntrusivePtr<T, Traits> &lhs,
+                                      const IntrusivePtr<Y, YTraits> &rhs) noexcept
+    {
+      return lhs._ptr <=> rhs.get();
+    }
+
+    template <class Y>
+    friend constexpr auto operator<=>(const IntrusivePtr<T, Traits> &lhs, const Y *rhs) noexcept
+    {
+      return lhs._ptr <=> rhs;
+    }
+
+    template <class Y>
+    friend constexpr auto operator<=>(const Y *lhs, const IntrusivePtr<T, Traits> &rhs) noexcept
+    {
+      return lhs <=> rhs._ptr;
+    }
+
+    template <class Char>
+    friend std::basic_ostream<Char> &operator<<(std::basic_ostream<Char> &str,
+                                                const IntrusivePtr<T, Traits> &ptr)
+    {
+      return str << ptr._ptr;
+    }
+
+    friend constexpr size_t hash_value(const IntrusivePtr<T, Traits> &ptr) noexcept
+    {
+      return std::hash<T *>()(ptr._ptr);
     }
 
   private:
-    ValueChangeFunction m_valueDidChange;
-    Count *m_count;
+    constexpr IntrusivePtr(T *ptr) noexcept : _ptr(ptr)
+    {
+    }
+
+    static constexpr void do_add_ref(T *p) noexcept
+    {
+      if (p)
+        Traits::add_ref(p);
+    }
+    static constexpr void do_sub_ref(T *p) noexcept
+    {
+      if (p)
+        Traits::sub_ref(p);
+    }
+
+  private:
+    T *_ptr;
   };
 
-  template <typename T>
-  inline void RefCounter<T>::Count::ref()
+  namespace detail
   {
-    ++m_value;
-    if (m_refCounter && m_refCounter->m_valueDidChange)
-      m_refCounter->m_valueDidChange(RefCounterEvent::Increment);
+    template <class T>
+    std::false_type is_intrusive_shared_ptr_helper(const T &);
+
+    template <class T, class Traits>
+    std::true_type is_intrusive_shared_ptr_helper(const IntrusivePtr<T, Traits> &);
   }
 
-  template <typename T>
-  inline void RefCounter<T>::Count::deref()
-  {
-    // GCC gets confused here, see https://webkit.org/b/239338.
-    IGNORE_GCC_WARNINGS_BEGIN("use-after-free")
-    ASSERT(m_value);
-    --m_value;
+  template <class T>
+  using is_intrusive_shared_ptr = decltype(detail::is_intrusive_shared_ptr_helper(std::declval<T>()));
 
-    if (m_refCounter && m_refCounter->m_valueDidChange)
+  template <class T>
+  bool constexpr is_intrusive_shared_ptr_v = is_intrusive_shared_ptr<T>::value;
+
+  template <class Dest, class Src, class Traits>
+  inline constexpr std::enable_if_t<is_intrusive_shared_ptr_v<Dest>, Dest>
+    intrusive_const_cast(IntrusivePtr<Src, Traits> p) noexcept
+  {
+    return Dest::noref(const_cast<typename Dest::pointer>(p.release()));
+  }
+
+  template <class Dest, class Src, class Traits>
+  inline constexpr std::enable_if_t<is_intrusive_shared_ptr_v<Dest>, Dest>
+    intrusive_dynamic_cast(IntrusivePtr<Src, Traits> p) noexcept
+  {
+    auto res = dynamic_cast<typename Dest::pointer>(p.get());
+    if (res)
     {
-      SetForScope inCallback(m_inValueDidChange, true);
-      m_refCounter->m_valueDidChange(RefCounterEvent::Decrement);
+      p.release();
+      return Dest::noref(res);
     }
-    IGNORE_GCC_WARNINGS_END
-
-    // The Count object is kept alive so long as either the RefCounter that created it remains
-    // allocated, or so long as its reference count is non-zero.
-    // If the RefCounter has already been deallocted then delete the Count when its reference
-    // count reaches zero.
-    if (!m_refCounter && !m_value)
-      delete this;
+    return Dest();
   }
 
-  template <typename T>
-  inline void RefCounter<T>::Count::refCounterWasDeleted()
+  template <class Dest, class Src, class Traits>
+  inline constexpr std::enable_if_t<is_intrusive_shared_ptr_v<Dest>, Dest>
+    intrusive_static_cast(IntrusivePtr<Src, Traits> p) noexcept
   {
-    // The Count object is kept alive so long as either the RefCounter that created it remains
-    // allocated, or so long as its reference count is non-zero.
-    // If the reference count of the Count is already zero then delete it now, otherwise
-    // clear its m_refCounter pointer.
-
-    m_refCounter = nullptr;
-
-    if (m_inValueDidChange)
-      return;
-
-    if (!m_value)
-      delete this;
+    return Dest::noref(static_cast<typename Dest::pointer>(p.release()));
   }
+}
 
-  template <typename T>
-  inline RefCounter<T>::RefCounter(ValueChangeFunction &&valueDidChange)
-      : m_valueDidChange(WTF::move(valueDidChange)), m_count(new Count(*this))
+namespace std
+{
+  template <class Traits, class T>
+  class atomic<::Krys::IntrusivePtr<T, Traits>>
   {
-  }
+  public:
+    using value_type = ::Krys::IntrusivePtr<T, Traits>;
 
-  template <typename T>
-  inline RefCounter<T>::~RefCounter()
+  public:
+    static constexpr bool is_always_lock_free = std::atomic<T *>::is_always_lock_free;
+
+    constexpr atomic() noexcept = default;
+    atomic(value_type desired) noexcept : _ptr(desired._ptr)
+    {
+      desired._ptr = nullptr;
+    }
+
+    atomic(const atomic &) = delete;
+    void operator=(const atomic &) = delete;
+
+    ~atomic() noexcept
+    {
+      value_type::do_sub_ref(this->_ptr.load(memory_order_acquire));
+    }
+
+    void operator=(value_type desired) noexcept
+    {
+      this->store(std::move(desired));
+    }
+
+    operator value_type() const noexcept
+    {
+      return this->load();
+    }
+
+    value_type load(memory_order order = memory_order_seq_cst) const noexcept
+    {
+      T *ret = this->_ptr.load(order);
+      return value_type::ref(ret);
+    }
+
+    void store(value_type desired, memory_order order = memory_order_seq_cst) noexcept
+    {
+      exchange(std::move(desired), order);
+    }
+
+    value_type exchange(value_type desired, memory_order order = memory_order_seq_cst) noexcept
+    {
+      T *ret = this->_ptr.exchange(desired._ptr, order);
+      desired._ptr = nullptr;
+      return value_type::noref(ret);
+    }
+
+    bool compare_exchange_strong(value_type &expected, value_type desired, memory_order success,
+                                 memory_order failure) noexcept
+    {
+      T *saved_expected = expected._ptr;
+
+      bool ret = this->_ptr.compare_exchange_strong(expected._ptr, desired._ptr, success, failure);
+      return post_compare_exchange(ret, saved_expected, expected, desired);
+    }
+    bool compare_exchange_strong(value_type &expected, value_type desired,
+                                 memory_order order = memory_order_seq_cst) noexcept
+    {
+      T *saved_expected = expected._ptr;
+
+      bool ret = this->_ptr.compare_exchange_strong(expected._ptr, desired._ptr, order);
+      return post_compare_exchange(ret, saved_expected, expected, desired);
+    }
+
+    bool compare_exchange_weak(value_type &expected, value_type desired, memory_order success,
+                               memory_order failure) noexcept
+    {
+      T *saved_expected = expected._ptr;
+
+      bool ret = this->_ptr.compare_exchange_weak(expected._ptr, desired._ptr, success, failure);
+      return post_compare_exchange(ret, saved_expected, expected, desired);
+    }
+    bool compare_exchange_weak(value_type &expected, value_type desired,
+                               memory_order order = memory_order_seq_cst) noexcept
+    {
+      T *saved_expected = expected._ptr;
+
+      bool ret = this->_ptr.compare_exchange_weak(expected._ptr, desired._ptr, order);
+      return post_compare_exchange(ret, saved_expected, expected, desired);
+    }
+
+    bool is_lock_free() const noexcept
+    {
+      return this->_ptr.is_lock_free();
+    }
+
+  private:
+    static bool post_compare_exchange(bool exchange_result, T *saved_expected, value_type &expected,
+                                      value_type &desired) noexcept
+    {
+      if (exchange_result)
+      {
+        // success: we are desired and expected is unchanged
+        desired._ptr = nullptr;
+        // saved_expected is equal to our original value which we need to sub_ref
+        value_type::do_sub_ref(saved_expected);
+      }
+      else
+      {
+        // failure: expected is us and desired is unchanged.
+        value_type::do_add_ref(expected._ptr);  // our value going out
+        value_type::do_sub_ref(saved_expected); // old expected
+      }
+      return exchange_result;
+    }
+
+  private:
+    std::atomic<T *> _ptr = nullptr;
+  };
+
+  template <class T, class Traits>
+  class out_ptr_t<::Krys::IntrusivePtr<T, Traits>, T *>
   {
-    m_count->refCounterWasDeleted();
-  }
+  public:
+    constexpr out_ptr_t(::Krys::IntrusivePtr<T, Traits> &owner) noexcept : _ptr(&owner._ptr)
+    {
+      owner.reset();
+    }
+    constexpr out_ptr_t(out_ptr_t &&src) noexcept = default;
+    out_ptr_t(const out_ptr_t &) = delete;
 
+    void operator=(const out_ptr_t &) = delete;
+    void operator=(out_ptr_t &&) = delete;
+
+    constexpr operator T **() const noexcept
+    {
+      return _ptr;
+    }
+
+    constexpr operator void **() const noexcept
+    requires(!std::is_same_v<T *, void *>)
+    {
+      return reinterpret_cast<void **>(_ptr);
+    }
+
+  private:
+    T **_ptr;
+  };
+
+  template <class T, class Traits>
+  class inout_ptr_t<::Krys::IntrusivePtr<T, Traits>, T *>
+  {
+  public:
+    constexpr inout_ptr_t(::Krys::IntrusivePtr<T, Traits> &owner) noexcept : _ptr(&owner._ptr)
+    {
+    }
+    constexpr inout_ptr_t(inout_ptr_t &&src) noexcept = default;
+    inout_ptr_t(const inout_ptr_t &) = delete;
+
+    void operator=(const inout_ptr_t &) = delete;
+    void operator=(inout_ptr_t &&) = delete;
+
+    constexpr operator T **() const noexcept
+    {
+      return _ptr;
+    }
+
+    constexpr operator void **() const noexcept
+    requires(!std::is_same_v<T *, void *>)
+    {
+      return reinterpret_cast<void **>(_ptr);
+    }
+
+  private:
+    T **_ptr;
+  };
+
+  template <class T, class Traits, class CharT>
+  struct formatter<::Krys::IntrusivePtr<T, Traits>, CharT> : public formatter<void *, CharT>
+  {
+    template <typename FormatContext>
+    auto format(const ::Krys::IntrusivePtr<T, Traits> &ptr, FormatContext &ctx) const -> decltype(ctx.out())
+    {
+      return formatter<void *, CharT>::format(ptr.get(), ctx);
+    }
+  };
+
+  template <class T, class Traits>
+  struct hash<::Krys::IntrusivePtr<T, Traits>>
+  {
+    constexpr size_t operator()(const ::Krys::IntrusivePtr<T, Traits> &ptr) const noexcept
+    {
+      return hash_value(ptr);
+    }
+  };
 }
