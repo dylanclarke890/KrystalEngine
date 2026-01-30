@@ -94,6 +94,7 @@ namespace Krys::HTML
 
   bool EventTarget::DispatchEvent(Event &event) noexcept
   {
+    // TODO(IMPL): https://dom.spec.whatwg.org/#concept-event-dispatch
     return false;
   }
 }
