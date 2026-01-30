@@ -6,7 +6,7 @@
 
 namespace Krys::HTML
 {
-  class EventListener : RefCounted<EventListener>
+  class EventListener : public RefCounted<EventListener>
   {
   public:
     virtual ~EventListener() noexcept = default;

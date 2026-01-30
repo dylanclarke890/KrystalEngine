@@ -1,8 +1,8 @@
 ﻿#include "Krystal.Platform/Platform.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
 #include <algorithm>
 #include <cassert>
-#include <optional>
 
 #define NOMINMAX
 #include <shellscalingapi.h>
@@ -44,7 +44,7 @@ namespace Krys::Platform
     return NativeHandle(::GetActiveWindow());
   }
 
-  uint SetTimerPrecision(Nullable<uint> min) noexcept
+  uint SetTimerPrecision(Maybe<uint> min) noexcept
   {
     TIMECAPS timeCaps {};
 

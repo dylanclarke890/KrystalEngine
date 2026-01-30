@@ -368,7 +368,7 @@ namespace Krys::Gfx::Vulkan
     return true;
   }
 
-  Nullable<QueueFamilyIndices> VulkanContext::FindQueueFamilyIndices(VkPhysicalDevice device) const
+  Maybe<QueueFamilyIndices> VulkanContext::FindQueueFamilyIndices(VkPhysicalDevice device) const
   {
     QueueFamilyIndices indices;
 

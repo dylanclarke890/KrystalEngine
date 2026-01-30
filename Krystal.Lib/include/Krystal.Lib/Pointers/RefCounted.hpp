@@ -373,7 +373,9 @@ namespace Krys
     auto CallMakeWeakReference(intptr_t count) const
     {
       if constexpr (RefCounted::ProvidesWeakReferences)
+      {
         return static_cast<const Derived *>(this)->MakeWeakReference(count);
+      }
     }
 
     auto CallGetWeakValue() const
@@ -433,9 +435,9 @@ namespace Krys
     {
       if constexpr (!WeakReference::SingleThreaded)
       {
-        KRYS_MAYBE_UNUSED auto oldcount = this->_count.fetch_add(1, std::memory_order_relaxed);
-        assert(oldcount > 0);
-        assert(oldcount < std::numeric_limits<decltype(oldcount)>::max());
+        KRYS_MAYBE_UNUSED auto oldCount = this->_count.fetch_add(1, std::memory_order_relaxed);
+        assert(oldCount > 0);
+        assert(oldCount < std::numeric_limits<decltype(oldCount)>::max());
       }
       else
       {

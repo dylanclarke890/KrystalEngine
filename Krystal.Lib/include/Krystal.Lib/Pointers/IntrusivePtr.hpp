@@ -104,7 +104,7 @@ namespace Krys
       return IntrusivePtr(p);
     }
 
-    static constexpr IntrusivePtr Ref(T *p) noexcept
+    static constexpr IntrusivePtr WithRef(T *p) noexcept
     {
       IntrusivePtr::DoAddRef(p);
       return IntrusivePtr(p);
@@ -146,25 +146,29 @@ namespace Krys
       return *this;
     }
 
-    template <class Y, class YTraits, class = std::enable_if_t<std::is_convertible_v<Y *, T *>, void>>
+    template <class Y, class YTraits>
+    requires(std::is_convertible_v<Y *, T *>)
     constexpr IntrusivePtr(const IntrusivePtr<Y, YTraits> &src) noexcept : _ptr(src.get())
     {
       this->DoAddRef(this->_ptr);
     }
 
-    template <class Y, class = std::enable_if_t<std::is_convertible_v<Y *, T *>, void>>
+    template <class Y>
+    requires(std::is_convertible_v<Y *, T *>)
     constexpr IntrusivePtr(IntrusivePtr<Y, Traits> &&src) noexcept : _ptr(src.release())
     {
     }
 
-    template <class Y, class YTraits, class = std::enable_if_t<std::is_convertible_v<Y *, T *>, void>>
+    template <class Y, class YTraits>
+    requires(std::is_convertible_v<Y *, T *>)
     constexpr IntrusivePtr(IntrusivePtr<Y, YTraits> &&src) noexcept : _ptr(src.get())
     {
       this->DoAddRef(this->_ptr);
       src.reset();
     }
 
-    template <class Y, class YTraits, class = std::enable_if_t<std::is_convertible_v<Y *, T *>, void>>
+    template <class Y, class YTraits>
+    requires(std::is_convertible_v<Y *, T *>)
     constexpr IntrusivePtr<T, Traits> &operator=(const IntrusivePtr<Y, YTraits> &src) noexcept
     {
       T *temp = this->_ptr;
@@ -174,7 +178,8 @@ namespace Krys
       return *this;
     }
 
-    template <class Y, class = std::enable_if_t<std::is_convertible_v<Y *, T *>, void>>
+    template <class Y>
+    requires(std::is_convertible_v<Y *, T *>)
     constexpr IntrusivePtr<T, Traits> &operator=(IntrusivePtr<Y, Traits> &&src) noexcept
     {
       this->DoSubRef(this->_ptr);
@@ -182,7 +187,8 @@ namespace Krys
       return *this;
     }
 
-    template <class Y, class YTraits, class = std::enable_if_t<std::is_convertible_v<Y *, T *>, void>>
+    template <class Y, class YTraits>
+    requires(std::is_convertible_v<Y *, T *>)
     constexpr IntrusivePtr<T, Traits> &operator=(IntrusivePtr<Y, YTraits> &&src) noexcept
     {
       this->DoSubRef(this->_ptr);
@@ -208,13 +214,13 @@ namespace Krys
     }
 
     template <class X = T>
-    constexpr std::enable_if_t<SameType<X, T>, X &> operator*() const noexcept
+    constexpr enable_if_t<SameType<X, T>, X &> operator*() const noexcept
     {
       return *this->_ptr;
     }
 
     template <class M, class X = T>
-    constexpr std::enable_if_t<SameType<X, T>, M &> operator->*(M X::*memptr) const noexcept
+    constexpr enable_if_t<SameType<X, T>, M &> operator->*(M X::*memptr) const noexcept
     {
       return this->_ptr->*memptr;
     }
@@ -411,6 +417,52 @@ namespace Krys
   {
     return Dest::NoRef(static_cast<typename Dest::pointer>(p.release()));
   }
+
+  template <typename T, typename Traits = typename T::RefPtrTraits>
+  using IntrusiveRefPtr = IntrusivePtr<T, Traits>;
+
+  template <typename T>
+  constexpr IntrusiveRefPtr<T> IntrusiveRefPtrRetain(T *ptr) noexcept
+  {
+    return IntrusiveRefPtr<T>::WithRef(ptr);
+  }
+
+  template <typename T>
+  constexpr IntrusiveRefPtr<T> IntrusiveRefPtrAttach(T *ptr) noexcept
+  {
+    return IntrusiveRefPtr<T>::NoRef(ptr);
+  }
+
+  template <typename T, typename... Args>
+  inline IntrusiveRefPtr<T> CreateIntrusiveRefPtr(Args &&...args)
+  {
+    return IntrusiveRefPtr<T>::NoRef(new T(std::forward<Args>(args)...));
+  }
+
+  template <typename T>
+  inline IntrusiveRefPtr<typename T::weak_value_type> weak_cast(const IntrusiveRefPtr<T> &src)
+  {
+    return src->GetWeakPtr();
+  }
+
+  template <typename T>
+  inline IntrusiveRefPtr<const typename T::weak_value_type> weak_cast(const IntrusiveRefPtr<const T> &src)
+  {
+    return src->GetWeakPtr();
+  }
+
+  template <typename T>
+  inline IntrusiveRefPtr<typename T::strong_value_type> strong_cast(const IntrusiveRefPtr<T> &src) noexcept
+  {
+    return src->Lock();
+  }
+
+  template <typename T>
+  inline IntrusiveRefPtr<const typename T::strong_value_type>
+    strong_cast(const IntrusiveRefPtr<const T> &src) noexcept
+  {
+    return src->Lock();
+  }
 }
 
 namespace std
@@ -451,7 +503,7 @@ namespace std
     value_type load(memory_order order = memory_order_seq_cst) const noexcept
     {
       T *ret = this->_ptr.load(order);
-      return value_type::Ref(ret);
+      return value_type::WithRef(ret);
     }
 
     void store(value_type desired, memory_order order = memory_order_seq_cst) noexcept

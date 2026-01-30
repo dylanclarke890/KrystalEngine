@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Lib/Pointers/RefCounted.hpp"
-#include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include <catch_all.hpp>
 #include <cstdint>
 #include <type_traits>
@@ -135,7 +134,7 @@ namespace Krys::Tests
   {
     SECTION("Simple")
     {
-      auto p = RefPtrAttach(new simple());
+      auto p = IntrusiveRefPtrAttach(new simple());
       decltype(p) p1 = p;
       p1.reset();
       auto w = weak_cast(p);

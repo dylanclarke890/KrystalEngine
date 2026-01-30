@@ -97,7 +97,7 @@ namespace Krys::Tests
   {
     SECTION("derived")
     {
-      auto p1 = RefPtrAttach(new MinimalCounted());
+      auto p1 = IntrusiveRefPtrAttach(new MinimalCounted());
       CHECK(p1);
       auto p2 = p1;
       CHECK(p2 == p1);
@@ -105,7 +105,7 @@ namespace Krys::Tests
 
     SECTION("adapted")
     {
-      auto p1 = RefPtrAttach(new minimal_adapded_counted(adapded {'a'}));
+      auto p1 = IntrusiveRefPtrAttach(new minimal_adapded_counted(adapded {'a'}));
       CHECK(p1);
       CHECK(p1->c == 'a');
       auto p2 = p1;
@@ -114,7 +114,7 @@ namespace Krys::Tests
 
     SECTION("wrapped")
     {
-      auto p1 = RefPtrAttach(new minimal_wrapped_counted('a'));
+      auto p1 = IntrusiveRefPtrAttach(new minimal_wrapped_counted('a'));
       CHECK(p1);
       CHECK(p1->Wrapped == 'a');
       auto p2 = p1;
@@ -124,7 +124,7 @@ namespace Krys::Tests
 
   TEST_CASE("RefCounted - Simple Ref counted works")
   {
-    auto p1 = RefPtrAttach(new SimpleCounted());
+    auto p1 = IntrusiveRefPtrAttach(new SimpleCounted());
     CHECK(SimpleCounted::InstanceCount == 1);
     auto p2 = p1;
     CHECK(SimpleCounted::InstanceCount == 1);
@@ -138,7 +138,7 @@ namespace Krys::Tests
   {
     try
     {
-      auto p1 = RefPtrAttach(new SimpleCounted(2));
+      auto p1 = IntrusiveRefPtrAttach(new SimpleCounted(2));
     }
     catch (std::exception &)
     {
@@ -167,7 +167,7 @@ namespace Krys::Tests
     };
 
     bool destroyed = false;
-    auto p1 = RefPtrAttach(new (malloc(sizeof(CustomDestroy))) CustomDestroy {&destroyed});
+    auto p1 = IntrusiveRefPtrAttach(new (malloc(sizeof(CustomDestroy))) CustomDestroy {&destroyed});
     p1.reset();
     CHECK(destroyed);
   }
@@ -176,12 +176,12 @@ namespace Krys::Tests
   {
     SECTION("adapter")
     {
-      auto p1 = RefPtrAttach(new RefCountedAdapter<std::vector<char>>(5));
+      auto p1 = IntrusiveRefPtrAttach(new RefCountedAdapter<std::vector<char>>(5));
       CHECK(p1->size() == 5);
     }
     SECTION("wrapper")
     {
-      auto p1 = RefPtrAttach(new RefCountedWrapper<std::vector<char>>(5));
+      auto p1 = IntrusiveRefPtrAttach(new RefCountedWrapper<std::vector<char>>(5));
       CHECK(p1->Wrapped.size() == 5);
     }
   }

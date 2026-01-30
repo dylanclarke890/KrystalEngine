@@ -157,6 +157,7 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\GetPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RawPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\Ref.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\SharedPtr.hpp" />
@@ -215,7 +216,7 @@
     <ClInclude Include="include\Krystal.Lib\Events\EventManager.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Hash.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Map.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Types\Nullable.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\Maybe.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\NullableFloat.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\OrderedMap.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Pair.hpp" />

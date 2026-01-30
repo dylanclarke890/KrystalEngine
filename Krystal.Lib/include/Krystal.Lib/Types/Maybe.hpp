@@ -5,5 +5,5 @@
 namespace Krys
 {
   template <typename T>
-  using Nullable = std::optional<T>;
+  using Maybe = std::optional<T>;
 }

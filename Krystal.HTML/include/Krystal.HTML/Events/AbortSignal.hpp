@@ -6,5 +6,6 @@ namespace Krys::HTML
 {
   class AbortSignal : public EventTarget
   {
+
   };
 }

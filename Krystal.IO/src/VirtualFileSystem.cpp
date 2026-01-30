@@ -5,7 +5,7 @@
 #include "Krystal.Lib/Core/DebugBreak.hpp"
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"
 #include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/Nullable.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
 #include "Krystal.Lib/Types/Pair.hpp"
 #include "Krystal.Lib/Types/Set.hpp"
 #include "Krystal.Log/ILogger.hpp"
@@ -199,7 +199,7 @@ namespace Krys::IO
     return result;
   }
 
-  Nullable<Pair<Path, IFileBackend *>> VirtualFileSystem::GetBackend(const Path &path) const noexcept
+  Maybe<Pair<Path, IFileBackend *>> VirtualFileSystem::GetBackend(const Path &path) const noexcept
   {
     if (auto all = GetBackends(path); !all.empty())
     {

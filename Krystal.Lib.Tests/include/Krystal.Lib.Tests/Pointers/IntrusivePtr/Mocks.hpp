@@ -53,7 +53,7 @@ namespace Krys::Tests
   template <class T>
   mock_ptr<T> mock_ref(T *ptr)
   {
-    return mock_ptr<T>::Ref(ptr);
+    return mock_ptr<T>::WithRef(ptr);
   }
   template <class T>
   mock_ptr<T> mock_noref(T *ptr)
@@ -64,7 +64,7 @@ namespace Krys::Tests
   template <class T>
   mock_ptr_different_traits<T> mock_ref_different_traits(T *ptr)
   {
-    return mock_ptr_different_traits<T>::Ref(ptr);
+    return mock_ptr_different_traits<T>::WithRef(ptr);
   }
   template <class T>
   mock_ptr_different_traits<T> mock_noref_different_traits(T *ptr)

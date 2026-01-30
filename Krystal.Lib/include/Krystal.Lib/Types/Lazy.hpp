@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Types/Nullable.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
 
 namespace Krys
 {
@@ -12,7 +12,7 @@ namespace Krys
   class Lazy
   {
   private:
-    Nullable<T> _value;
+    Maybe<T> _value;
     Fn _func;
 
   public:

@@ -4,7 +4,7 @@
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/Nullable.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Queue.hpp"
 #include <cassert>
@@ -20,7 +20,7 @@ namespace Krys::Gfx
   private:
     struct ResourceEntry
     {
-      Nullable<T> Resource;
+      Maybe<T> Resource;
       uint16 Generation = 1u;
     };
 

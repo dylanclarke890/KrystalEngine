@@ -1,4 +1,5 @@
 ﻿#include "Krystal.HTML/Events/Event.hpp"
+#include "Krystal.HTML/Events/AbortSignal.hpp"
 #include "Krystal.HTML/Events/EventTarget.hpp"
 #include "Krystal.Lib/Time/MonotonicTime.hpp"
 

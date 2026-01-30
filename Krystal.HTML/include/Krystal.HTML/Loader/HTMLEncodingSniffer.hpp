@@ -5,7 +5,7 @@
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/Map.hpp"
-#include "Krystal.Lib/Types/Nullable.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Set.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
@@ -47,7 +47,7 @@ namespace Krys::HTML
           i += 6;
 
           bool gotPragma = false;
-          Nullable<bool> needPragma;
+          Maybe<bool> needPragma;
           string charset;
 
           AttributeResult attribute;

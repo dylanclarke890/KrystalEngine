@@ -4,7 +4,7 @@
 #include "Krystal.Lib/NativeHandle.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Time/Duration.hpp"
-#include "Krystal.Lib/Types/Nullable.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::Platform
@@ -24,7 +24,7 @@ namespace Krys::Platform
   /// @param min The requested precision. nullopt can be passed to request the lowest possible
   /// precision.
   /// @returns The actual timer precision set, in milliseconds.
-  uint SetTimerPrecision(Nullable<uint> min = std::nullopt) noexcept;
+  uint SetTimerPrecision(Maybe<uint> min = std::nullopt) noexcept;
 
   /// @brief Sleep for the specified number of milliseconds.
   void Sleep(Milliseconds duration) noexcept;

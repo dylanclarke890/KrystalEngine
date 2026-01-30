@@ -4,7 +4,7 @@
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.IO/ImageLoader.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
-#include "Krystal.Lib/Types/Nullable.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
 
 namespace Krys::Gfx::Vulkan
 {
@@ -92,7 +92,7 @@ namespace Krys::Gfx::Vulkan
 
     void SelectPhysicalDevice();
     bool IsDeviceSuitable(VkPhysicalDevice device);
-    Nullable<QueueFamilyIndices> FindQueueFamilyIndices(VkPhysicalDevice device) const;
+    Maybe<QueueFamilyIndices> FindQueueFamilyIndices(VkPhysicalDevice device) const;
     bool AreDeviceExtensionsSupported(VkPhysicalDevice device) const noexcept;
     SwapchainSupportDetails QuerySwapchainSupport(VkPhysicalDevice device) const noexcept;
 

@@ -14,11 +14,11 @@ namespace Krys::HTML
   public:
     EventTarget() noexcept;
 
-    virtual bool AddEventListener(StringAtom type, RefPtr<EventListener> &&callback,
-                                  const AddEventListenerOptions &options = {}) noexcept;
+    virtual bool AddEventListener(StringAtom type, IntrusiveRefPtr<EventListener> &&callback,
+                                  const AddEventListenerOptions &options) noexcept;
 
-    virtual bool RemoveEventListener(StringAtom type, RefPtr<EventListener> &&callback,
-                                     const EventListenerOptions &options = {}) noexcept;
+    virtual bool RemoveEventListener(StringAtom type, IntrusiveRefPtr<EventListener> &&callback,
+                                     const EventListenerOptions &options) noexcept;
 
     virtual bool DispatchEvent(Event &event) noexcept;
   };

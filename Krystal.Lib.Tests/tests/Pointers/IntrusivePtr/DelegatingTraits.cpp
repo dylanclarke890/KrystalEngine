@@ -168,11 +168,11 @@ namespace Krys::Tests
 
       inner_ptr GetInnerPtr() noexcept
       {
-        return inner_ptr::Ref(&_inner);
+        return inner_ptr::WithRef(&_inner);
       }
       const_inner_ptr GetInnerPtr() const noexcept
       {
-        return const_inner_ptr::Ref(&_inner);
+        return const_inner_ptr::WithRef(&_inner);
       }
 
       int &inner()
@@ -225,11 +225,11 @@ namespace Krys::Tests
 
       inner_ptr GetInnerPtr() noexcept
       {
-        return inner_ptr::Ref(&_inner);
+        return inner_ptr::WithRef(&_inner);
       }
       const_inner_ptr GetInnerPtr() const noexcept
       {
-        return const_inner_ptr::Ref(&_inner);
+        return const_inner_ptr::WithRef(&_inner);
       }
 
       weak_inner_ptr get_weak_inner_ptr()
@@ -259,7 +259,7 @@ namespace Krys::Tests
 
   TEST_CASE("RefCounted - Inner counting")
   {
-    auto pouter = RefPtrAttach(new outer());
+    auto pouter = IntrusiveRefPtrAttach(new outer());
     auto pinner = pouter->GetInnerPtr();
     CHECK(pinner);
     *pinner = 3;
@@ -270,7 +270,7 @@ namespace Krys::Tests
   {
     SECTION("Non const")
     {
-      auto pouter = RefPtrAttach(new weak_outer());
+      auto pouter = IntrusiveRefPtrAttach(new weak_outer());
       auto pinner1 = pouter->GetInnerPtr();
       CHECK(pinner1);
       auto weak1 = pouter->get_weak_inner_ptr();
@@ -284,7 +284,7 @@ namespace Krys::Tests
 
     SECTION("Const")
     {
-      auto pouter = RefPtrAttach(const_cast<const weak_outer *>(new weak_outer()));
+      auto pouter = IntrusiveRefPtrAttach(const_cast<const weak_outer *>(new weak_outer()));
       auto pinner1 = pouter->GetInnerPtr();
       CHECK(pinner1);
       auto weak1 = pouter->get_weak_inner_ptr();

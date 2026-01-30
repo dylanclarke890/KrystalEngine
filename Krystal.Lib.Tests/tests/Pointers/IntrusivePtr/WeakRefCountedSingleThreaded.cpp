@@ -166,7 +166,7 @@ namespace Krys::Tests
   {
     SECTION("Derived")
     {
-      auto original = RefPtrAttach(new DerivedCounted());
+      auto original = IntrusiveRefPtrAttach(new DerivedCounted());
       auto weak1 = original->GetWeakPtr();
       CHECK(DerivedCount == 1);
       auto strong1 = weak1->Lock();
@@ -185,7 +185,7 @@ namespace Krys::Tests
 
     SECTION("Const Derived")
     {
-      RefPtr<const DerivedCounted> original = RefPtrAttach(new DerivedCounted());
+      IntrusiveRefPtr<const DerivedCounted> original = IntrusiveRefPtrAttach(new DerivedCounted());
       auto weak1 = original->GetWeakPtr();
       CHECK(DerivedCount == 1);
       auto strong1 = weak1->Lock();
@@ -204,7 +204,7 @@ namespace Krys::Tests
 
     SECTION("Wrapped")
     {
-      auto p = RefPtrAttach(new WrappedCounted());
+      auto p = IntrusiveRefPtrAttach(new WrappedCounted());
       CHECK(WrappedCount == 1);
       CHECK(p->value == 5);
       p.reset();
@@ -213,7 +213,7 @@ namespace Krys::Tests
 
     SECTION("Custom Weak Reference")
     {
-      auto strong = RefPtrAttach(new WithCustomWeakReference);
+      auto strong = IntrusiveRefPtrAttach(new WithCustomWeakReference);
       CHECK(WithCustomWeakReferenceCount == 1);
       auto weak = strong->GetWeakPtr();
       auto strong1 = weak->Lock();

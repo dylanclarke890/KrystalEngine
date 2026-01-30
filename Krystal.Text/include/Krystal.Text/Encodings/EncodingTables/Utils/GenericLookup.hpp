@@ -3,7 +3,7 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Ranges/ADL.hpp"
 #include "Krystal.Lib/Ranges/Algorithm.hpp"
-#include "Krystal.Lib/Types/Nullable.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Text/Encodings/EncodingTables/Utils/Predicates.hpp"
 #include "Krystal.Text/Encodings/EncodingTables/Utils/TableTypes.hpp"
@@ -15,7 +15,7 @@ namespace Krys::Text::EncodingTable
 {
   template <typename TIndexCodePoint = index32_code_point,
             typename TIndex = remove_cvref_t<decltype(std::declval<TIndexCodePoint>()[0])>>
-  KRYS_NODISCARD constexpr inline std::optional<std::size_t>
+  KRYS_NODISCARD constexpr inline Maybe<std::size_t>
     GenericCodePointToIndex(Span<const TIndexCodePoint> indexCodePointMap,
                             std::uint_least32_t lookupCodePoint) noexcept
   {
@@ -41,7 +41,7 @@ namespace Krys::Text::EncodingTable
 
   template <typename TIndexCodePoint = index32_code_point,
             typename TIndex = remove_cvref_t<decltype(std::declval<TIndexCodePoint>()[0])>>
-  KRYS_NODISCARD constexpr inline std::optional<std::uint_least32_t>
+  KRYS_NODISCARD constexpr inline Maybe<std::uint_least32_t>
     GenericIndexToCodePoint(Span<const TIndexCodePoint> indexCodePointMap,
                             std::size_t lookupIndexPointer) noexcept
   {

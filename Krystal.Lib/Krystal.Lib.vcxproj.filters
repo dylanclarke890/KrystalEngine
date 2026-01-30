@@ -81,7 +81,7 @@
     <ClInclude Include="include\Krystal.Lib\Types\Array.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Types\Nullable.hpp">
+    <ClInclude Include="include\Krystal.Lib\Types\Maybe.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Types\OrderedSet.hpp">
@@ -340,6 +340,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Pointers\Ref.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,6 +2,7 @@
 
 #include "Krystal.HTML/Events/EventListenerOptions.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
+#include "Krystal.Lib/Pointers/RefCounted.hpp"
 
 namespace Krys::HTML
 {

@@ -9,7 +9,7 @@
 #include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"
 #include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/Nullable.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
 #include "Krystal.Lib/Types/Pair.hpp"
 
 namespace Krys::IO
@@ -95,7 +95,7 @@ namespace Krys::IO
                                                   FileSearchFlags flags = FileSearchFlags::None) const;
 
     /// @returns The first backend that matches the given path.
-    KRYS_NODISCARD Nullable<Pair<Path, IFileBackend *>> GetBackend(const Path &path) const noexcept;
+    KRYS_NODISCARD Maybe<Pair<Path, IFileBackend *>> GetBackend(const Path &path) const noexcept;
 
     /// @returns A list of all backends that match the given path.
     KRYS_NODISCARD List<Pair<Path, IFileBackend *>> GetBackends(const Path &path) const noexcept;
