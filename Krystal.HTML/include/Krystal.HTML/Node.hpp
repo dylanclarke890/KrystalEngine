@@ -1,10 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Enum.hpp"
-#include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Pointers/SharedPtr.hpp"
-#include "Krystal.Lib/Pointers/WeakPtr.hpp"
+#include "Krystal.HTML/Events/EventTarget.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::HTML
@@ -39,42 +35,15 @@ namespace Krys::HTML
     DOCUMENT_POSITION_CONTAINED_BY = 0x10,
     DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 0x20,
   };
-
-  enum class TypeFlag : uint16
-  {
-    IsCharacterData = 1 << 0,
-    IsText = 1 << 1,
-    IsContainerNode = 1 << 2,
-    IsElement = 1 << 3,
-    IsHTMLElement = 1 << 4,
-    IsSVGElement = 1 << 5,
-    IsMathMLElement = 1 << 6,
-    IsShadowRootOrFormControlElement = 1 << 7,
-    IsUnknownElement = 1 << 8,
-    IsPseudoElementOrSpecialInternalNode = 1 << 9,
-    HasCustomStyleResolveCallbacks = 1 << 10,
-    HasDidMoveToNewDocument = 1 << 11,
-  };
-}
-
-namespace Krys
-{
-  template <>
-  constexpr inline bool EnableEnumFlags<::Krys::HTML::TypeFlag> = true;
 }
 
 namespace Krys::HTML
 {
   class ContainerNode;
 
-  class Node
+  class Node : public EventTarget
   {
     friend class Document;
-
-  private:
-    WeakPtr<ContainerNode> _parentNode;
-    RawPtr<Node> _previousSibling {nullptr};
-    WeakPtr<Node> _nextSibling;
 
   public:
   };

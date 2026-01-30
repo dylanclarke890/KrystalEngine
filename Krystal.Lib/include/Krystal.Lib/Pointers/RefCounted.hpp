@@ -1,4 +1,6 @@
-﻿#include "Krystal.Lib/Core/Enum.hpp"
+﻿#pragma once
+
+#include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Pointers/IntrusivePtr.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"

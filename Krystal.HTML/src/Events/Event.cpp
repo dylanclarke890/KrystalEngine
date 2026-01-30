@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/Events/Event.hpp"
-#include "Krystal.HTML/EventTarget.hpp"
+#include "Krystal.HTML/Events/EventTarget.hpp"
 #include "Krystal.Lib/Time/MonotonicTime.hpp"
 
 namespace Krys::HTML

@@ -37,12 +37,17 @@
     <ClInclude Include="include\Krystal.HTML\Document.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOMHighResTimeStamp.hpp" />
     <ClInclude Include="include\Krystal.HTML\Element.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Events\AbortSignal.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Events\AddEventListenerOptions.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\CustomEvent.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\CustomEventInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\Event.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventInit.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Events\EventListener.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Events\EventListenerOptions.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventPhaseType.hpp" />
-    <ClInclude Include="include\Krystal.HTML\EventTarget.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Events\EventTarget.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Events\RegisteredEventListener.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLDocument.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLTokenAtom.hpp" />
@@ -70,6 +75,7 @@
   <ItemGroup>
     <ClCompile Include="src\Context.cpp" />
     <ClCompile Include="src\Events\Event.cpp" />
+    <ClCompile Include="src\Events\EventTarget.cpp" />
     <ClCompile Include="src\Node.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -83,6 +89,12 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
     </None>
     <None Include="data\EventTarget.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\AbortSignal.idl" />
+    <None Include="data\AddEventListenerOptions.idl" />
+    <None Include="data\EventListener.idl" />
+    <None Include="data\EventListenerOptions.idl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

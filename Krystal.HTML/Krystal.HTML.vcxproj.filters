@@ -96,7 +96,7 @@
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLCharacterReference.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\EventTarget.hpp">
+    <ClInclude Include="include\Krystal.HTML\Events\EventTarget.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Events\Event.hpp">
@@ -117,6 +117,21 @@
     <ClInclude Include="include\Krystal.HTML\Events\CustomEventInit.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Events\EventListener.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Events\EventListenerOptions.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Events\AbortSignal.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Events\AddEventListenerOptions.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Events\RegisteredEventListener.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -126,6 +141,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Events\Event.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Events\EventTarget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -144,6 +162,18 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\EventTarget.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\EventListenerOptions.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\EventListener.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\AbortSignal.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\AddEventListenerOptions.idl">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
