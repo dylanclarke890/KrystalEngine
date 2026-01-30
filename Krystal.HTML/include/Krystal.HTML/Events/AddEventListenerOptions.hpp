@@ -1,8 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/Events/EventListenerOptions.hpp"
-#include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted.hpp"
+#include "Krystal.Lib/Pointers/RefPtr.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
 
 namespace Krys::HTML
 {
@@ -11,7 +12,7 @@ namespace Krys::HTML
   struct AddEventListenerOptions : public EventListenerOptions
   {
     bool Once = false;
-    bool Passive = false;
+    Maybe<bool> Passive {};
     RefPtr<AbortSignal> Signal;
   };
 }

@@ -132,6 +132,9 @@
     <ClInclude Include="include\Krystal.HTML\Events\RegisteredEventListener.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Events\EventNames.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">

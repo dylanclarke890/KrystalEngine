@@ -10,8 +10,9 @@
 namespace Krys::HTML
 {
   /// @see https://dom.spec.whatwg.org/#concept-event-listener
-  class RegisteredEventListener
+  class RegisteredEventListener : public RefCounted<RegisteredEventListener>
   {
+  public:
     struct Options
     {
       bool Capture : 1 {false};
@@ -21,6 +22,7 @@ namespace Krys::HTML
     };
 
   private:
+    const StringAtom _type;
     bool _useCapture : 1;
     bool _isPassive : 1;
     bool _isOnce : 1;
@@ -29,10 +31,16 @@ namespace Krys::HTML
     const RefPtr<EventListener> _callback;
 
   public:
-    RegisteredEventListener(const Options &options, RefPtr<EventListener> &&callback) noexcept
-        : _useCapture(options.Capture), _isPassive(options.Passive), _isOnce(options.Once),
+    RegisteredEventListener(const StringAtom type, const Options &options,
+                            RefPtr<EventListener> &&callback) noexcept
+        : _type(type), _useCapture(options.Capture), _isPassive(options.Passive), _isOnce(options.Once),
           _trustedOnly(options.TrustedOnly), _callback(Krys::Move(callback))
     {
+    }
+
+    KRYS_NODISCARD StringAtom GetType() const noexcept
+    {
+      return _type;
     }
 
     KRYS_NODISCARD EventListener &Callback() const noexcept

@@ -158,6 +158,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="catch_main.cpp" />
+    <ClCompile Include="tests\Events\EventTarget.cpp" />
     <ClCompile Include="tests\Loader\HTMLEncodingSniffer.cpp" />
     <ClCompile Include="tests\Loader\TextResourceDecoder.cpp" />
     <ClCompile Include="tests\Parser\HTMLCharacterReference.cpp" />

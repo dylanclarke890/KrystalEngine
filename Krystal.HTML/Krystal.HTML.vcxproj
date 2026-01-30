@@ -45,6 +45,7 @@
     <ClInclude Include="include\Krystal.HTML\Events\EventInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventListener.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventListenerOptions.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Events\EventNames.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventPhaseType.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventTarget.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\RegisteredEventListener.hpp" />
