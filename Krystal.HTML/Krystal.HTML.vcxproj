@@ -72,6 +72,9 @@
     <ClInclude Include="include\Krystal.HTML\Parser\TokenizerState.hpp" />
     <ClInclude Include="include\Krystal.HTML\Context.hpp" />
     <ClInclude Include="include\Krystal.HTML\StronglyTypedValues.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Utils\Exception.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Utils\ExceptionCode.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Utils\ExceptionOr.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp" />

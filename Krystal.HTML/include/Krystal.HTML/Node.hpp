@@ -1,13 +1,13 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/Events/EventTarget.hpp"
+#include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Pointers/WeakRef.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/String/StringAtom.hpp"
-#include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::HTML
@@ -75,6 +75,8 @@ namespace Krys::HTML
     RefPtr<Node> _nextSibling;
 
   public:
+    virtual ~Node() = default;
+
     /// @see https://dom.spec.whatwg.org/#connected
     KRYS_NODISCARD bool IsConnected() const noexcept;
 
@@ -93,9 +95,15 @@ namespace Krys::HTML
     KRYS_NODISCARD const StringAtom &LookupNamespaceURI(const StringAtom &prefix) const noexcept;
     KRYS_NODISCARD bool IsDefaultNamespace(const StringAtom &namespaceURI) const noexcept;
 
-    KRYS_NODISCARD Expected<void> InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept;
-    KRYS_NODISCARD Expected<void> ReplaceChild(Node &newChild, Node &oldChild) noexcept;
-    KRYS_NODISCARD Expected<void> RemoveChild(Node &child) noexcept;
-    KRYS_NODISCARD Expected<void> AppendChild(Node &newChild) noexcept;
+    KRYS_NODISCARD ExceptionOr<void> InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept;
+    KRYS_NODISCARD ExceptionOr<void> ReplaceChild(Node &newChild, Node &oldChild) noexcept;
+    KRYS_NODISCARD ExceptionOr<void> RemoveChild(Node &child) noexcept;
+    KRYS_NODISCARD ExceptionOr<void> AppendChild(Node &newChild) noexcept;
+
+  protected:
+    KRYS_NODISCARD bool IsContainerNode() const noexcept
+    {
+      return HasFlag(_flags, NodeFlag::IsContainerNode);
+    }
   };
 }

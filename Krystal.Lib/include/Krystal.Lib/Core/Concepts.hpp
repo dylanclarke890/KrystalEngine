@@ -46,6 +46,9 @@ namespace Krys
   concept Number = Integral<T> || FloatingPoint<T>;
 
   template <typename T>
+  concept Scalar = std::is_scalar_v<T>;
+
+  template <typename T>
   concept Void = std::is_void_v<T>;
 
   template <typename T>
