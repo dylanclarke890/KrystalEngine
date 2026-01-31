@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Parser/AtomHTMLToken.hpp"
+#include "Krystal.HTML/Parser/HTMLTokenAtom.hpp"
 #include "Krystal.HTML/Parser/HTMLConstructionSite.hpp"
 #include "Krystal.HTML/Parser/InsertionMode.hpp"
 #include "Krystal.HTML/StronglyTypedValues.hpp"
@@ -23,7 +23,7 @@ namespace Krys::HTML
     {
     }
 
-    void ProcessToken(AtomHTMLToken &&token) noexcept
+    void ProcessToken(HTMLTokenAtom &&token) noexcept
     {
     }
   };

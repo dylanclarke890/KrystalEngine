@@ -307,12 +307,13 @@ namespace Krys::Text::Handlers
 
   enum class ReplacementPolicy
   {
+    None = 0,
     Invalid = 1 << 0,
     Incomplete = 1 << 1,
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::Text::Handlers::ReplacementPolicy, 2u)
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::Text::Handlers::ReplacementPolicy, 3u)
 
 namespace Krys::Text::Handlers
 {

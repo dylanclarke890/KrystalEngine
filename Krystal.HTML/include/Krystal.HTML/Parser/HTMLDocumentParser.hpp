@@ -2,9 +2,9 @@
 
 #include "Krystal.HTML/HTMLDocument.hpp"
 #include "Krystal.HTML/Loader/TextResourceDecoder.hpp"
-#include "Krystal.HTML/Parser/AtomHTMLToken.hpp"
 #include "Krystal.HTML/Parser/HTMLInputStream.hpp"
 #include "Krystal.HTML/Parser/HTMLToken.hpp"
+#include "Krystal.HTML/Parser/HTMLTokenAtom.hpp"
 #include "Krystal.HTML/Parser/HTMLTokenizer.hpp"
 #include "Krystal.HTML/Parser/HTMLTreeBuilder.hpp"
 #include "Krystal.HTML/StronglyTypedValues.hpp"
@@ -49,7 +49,7 @@ namespace Krys::HTML
 
     void ConstructTreeFromToken(NextTokenPtr &rawToken) noexcept
     {
-      AtomHTMLToken token(*rawToken);
+      HTMLTokenAtom token(*rawToken);
 
       // Clear the rawToken in case _treeBuilder.ProcessToken synchronously re-enters the parser.
       // We don't clear the token immediately for Character tokens because the AtomHTMLToken avoids copying

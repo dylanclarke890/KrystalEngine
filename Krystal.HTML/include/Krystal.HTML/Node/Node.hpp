@@ -2,7 +2,9 @@
 
 #include "Krystal.HTML/Events/EventTarget.hpp"
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
+#include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Pointers/WeakRef.hpp"
@@ -43,21 +45,28 @@ namespace Krys::HTML
   {
     None = 0,
     IsContainerNode = 1 << 0,
+    IsTextNode = 1 << 1,
   };
 }
 
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::NodeType, 12u)
 KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::DocumentPosition, 7u)
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::NodeFlag, 1u)
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::NodeFlag, 3u)
 
 namespace Krys::HTML
 {
+  class NodeList;
   class ContainerNode;
   class Document;
 
+  /// @see https://dom.spec.whatwg.org/#dictdef-getrootnodeoptions
   struct GetRootNodeOptions
   {
     bool Composed = false;
+  };
+
+  struct URL
+  {
   };
 
   class Node : public EventTarget
@@ -65,10 +74,9 @@ namespace Krys::HTML
     friend class Document;
 
   private:
-    NodeType _nodeType;
     // @internal
     NodeFlag _flags : BitCount<NodeFlag>() {NodeFlag::None};
-    StringAtom _nodeName;
+    NodeType _nodeType;
     RefPtr<Document> _ownerDocument;
     RawPtr<ContainerNode> _parentNode;
     RawPtr<Node> _previousSibling;
@@ -77,8 +85,43 @@ namespace Krys::HTML
   public:
     virtual ~Node() = default;
 
+    KRYS_NODISCARD virtual utf8_string NodeName() const noexcept = 0;
+
+    KRYS_NODISCARD NodeType GetNodeType() const noexcept
+    {
+      return _nodeType;
+    }
+
+    KRYS_NODISCARD URL BaseURI() const noexcept
+    {
+      return {};
+    }
+
     /// @see https://dom.spec.whatwg.org/#connected
     KRYS_NODISCARD bool IsConnected() const noexcept;
+
+    KRYS_NODISCARD RawPtr<Document> OwnerDocument() const noexcept
+    {
+      return _ownerDocument.get();
+    }
+    KRYS_NODISCARD Node &GetRootNode(const GetRootNodeOptions &options) const noexcept;
+    KRYS_NODISCARD RawPtr<ContainerNode> ParentNode() const noexcept
+    {
+      return _parentNode;
+    }
+    KRYS_NODISCARD RawPtr<Node> ParentElement() const noexcept;
+    KRYS_NODISCARD bool HasChildNodes() const noexcept;
+    KRYS_NODISCARD RefPtr<NodeList> ChildNodes() noexcept;
+    KRYS_NODISCARD RawPtr<Node> FirstChild() const noexcept;
+    KRYS_NODISCARD RawPtr<Node> LastChild() const noexcept;
+    KRYS_NODISCARD RawPtr<Node> PreviousSibling() const noexcept;
+    KRYS_NODISCARD RawPtr<Node> NextSibling() const noexcept;
+
+    KRYS_NODISCARD virtual utf8_string NodeValue() const noexcept;
+    KRYS_NODISCARD virtual ExceptionOr<void> SetNodeValue(utf8_stringview value) noexcept;
+    KRYS_NODISCARD utf8_string TextContent(bool convertBRsToNewlines = false) const noexcept;
+    KRYS_NODISCARD ExceptionOr<void> SetTextContent(utf8_string &&text) noexcept;
+    KRYS_NODISCARD ExceptionOr<void> Normalize() noexcept;
 
     KRYS_NODISCARD Ref<Node> CloneNode(bool deep) const noexcept;
     KRYS_NODISCARD bool IsEqualNode(RawPtr<const Node> otherNode) const noexcept;
@@ -86,10 +129,6 @@ namespace Krys::HTML
 
     KRYS_NODISCARD DocumentPosition CompareDocumentPosition(Node &other) const noexcept;
     KRYS_NODISCARD bool Contains(RawPtr<const Node> other) const noexcept;
-
-    KRYS_NODISCARD virtual utf8_string NodeName() const noexcept = 0;
-
-    KRYS_NODISCARD virtual utf8_string NodeValue() const noexcept;
 
     KRYS_NODISCARD const StringAtom &LookupPrefix(const StringAtom &namespaceURI) const noexcept;
     KRYS_NODISCARD const StringAtom &LookupNamespaceURI(const StringAtom &prefix) const noexcept;
@@ -100,10 +139,35 @@ namespace Krys::HTML
     KRYS_NODISCARD ExceptionOr<void> RemoveChild(Node &child) noexcept;
     KRYS_NODISCARD ExceptionOr<void> AppendChild(Node &newChild) noexcept;
 
-  protected:
     KRYS_NODISCARD bool IsContainerNode() const noexcept
     {
       return HasFlag(_flags, NodeFlag::IsContainerNode);
     }
+    KRYS_NODISCARD bool IsDocumentNode() const noexcept
+    {
+      return _nodeType == NodeType::DOCUMENT_NODE;
+    }
+    KRYS_NODISCARD bool IsDocumentFragmentNode() const noexcept
+    {
+      return _nodeType == NodeType::DOCUMENT_FRAGMENT_NODE;
+    }
+    KRYS_NODISCARD bool IsElementNode() const noexcept
+    {
+      return _nodeType == NodeType::ELEMENT_NODE;
+    }
+    KRYS_NODISCARD bool IsTextNode() const noexcept
+    {
+      return HasFlag(_flags, NodeFlag::IsTextNode);
+    }
+
+  protected:
+    Node(Document &document, NodeType type, NodeFlag flags) noexcept;
   };
 }
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::Node)
+  static bool IsType(const Krys::HTML::EventTarget &target) noexcept
+  {
+    return target.IsNode();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

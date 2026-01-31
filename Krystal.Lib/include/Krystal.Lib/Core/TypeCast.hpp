@@ -12,7 +12,7 @@ namespace Krys
   template <typename TExpected, typename TArg, bool IsBaseType = std::is_base_of_v<TExpected, TArg>>
   struct TypeCastTraits
   {
-    static bool IsOfType(TArg &)
+    static bool IsOfType(TArg &) noexcept
     {
       // If you're hitting this assertion, it is likely because you used is<>() or downcast<>() with a type
       // that doesn't have the needed TypeCastTraits specialization. Please use the following macro to add
@@ -28,7 +28,7 @@ namespace Krys
   template <typename TExpected, typename TArg>
   struct TypeCastTraits<TExpected, TArg, true /* IsBaseType */>
   {
-    static bool IsOfType(TArg &)
+    static bool IsOfType(TArg &) noexcept
     {
       return true;
     }
@@ -113,7 +113,7 @@ namespace Krys
     class TypeCastTraits<const ClassName, TArg, false /* IsBaseType */>                                      \
     {                                                                                                        \
     public:                                                                                                  \
-      static bool IsOfType(TArg &source)                                                                     \
+      static bool IsOfType(TArg &source) noexcept                                                            \
       {                                                                                                      \
         return IsType(source);                                                                               \
       }                                                                                                      \

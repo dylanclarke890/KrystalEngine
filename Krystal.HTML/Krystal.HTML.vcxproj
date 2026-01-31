@@ -33,8 +33,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.HTML\ContainerNode.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DocumentType.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\ContainerNode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Document.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DocumentFragment.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOMHighResTimeStamp.hpp" />
     <ClInclude Include="include\Krystal.HTML\Element.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\AbortSignal.hpp" />
@@ -50,7 +52,8 @@
     <ClInclude Include="include\Krystal.HTML\Events\EventTarget.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\RegisteredEventListener.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLDocument.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Node.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\Node.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\NodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLTokenAtom.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLActiveFormattingElementList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLCharacterReference.hpp" />
@@ -59,7 +62,6 @@
     <ClInclude Include="include\Krystal.HTML\Loader\EncodingSource.hpp" />
     <ClInclude Include="include\Krystal.HTML\Loader\TextResourceDecoder.hpp" />
     <ClInclude Include="include\Krystal.HTML\Loader\HTMLEncodingSniffer.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLInputStream.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLOpenElementStack.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLElementStackItem.hpp" />
@@ -77,10 +79,12 @@
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionOr.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\DocumentType.cpp" />
+    <ClCompile Include="src\Node\ContainerNode.cpp" />
     <ClCompile Include="src\Context.cpp" />
     <ClCompile Include="src\Events\Event.cpp" />
     <ClCompile Include="src\Events\EventTarget.cpp" />
-    <ClCompile Include="src\Node.cpp" />
+    <ClCompile Include="src\Node\Node.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\HTMLTagNames.in" />
