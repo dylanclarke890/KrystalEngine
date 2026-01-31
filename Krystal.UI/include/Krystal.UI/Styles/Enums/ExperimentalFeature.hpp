@@ -12,11 +12,4 @@ namespace Krys::UI
   };
 }
 
-namespace Krys
-{
-  template <>
-  constexpr underlying_t<UI::ExperimentalFeature> OrdinalCount<UI::ExperimentalFeature> = 2;
-
-  template <>
-  inline constexpr bool EnableEnumFlags<UI::ExperimentalFeature> = true;
-}
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::UI::ExperimentalFeature, 2u)

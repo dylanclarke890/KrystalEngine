@@ -59,8 +59,4 @@ namespace Krys::IO
   };
 }
 
-namespace Krys
-{
-  template <>
-  inline constexpr bool EnableEnumFlags<IO::FileSearchFlags> = true;
-}
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::IO::FileSearchFlags, 3u)

@@ -11,6 +11,10 @@
 
 namespace Krys::HTML
 {
+  // TODO(PERF): a lot of text is just plain ASCII, we need to optimize for that case.
+  // One idea I've had is to use the last bit in each 4 bytes to indicate if the next 4 bytes are ASCII or
+  // UTF-32. We can then have a fast path for ASCII chunks. We'd need to change the way we store data, not
+  // exactly a hard task though.
   class HTMLInputStream
   {
   public:
@@ -123,7 +127,7 @@ namespace Krys::HTML
       if (_nextInputCharacter == '\n')
       {
         _currentLocation.Line++;
-        _currentLocation.Column= 1uz;
+        _currentLocation.Column = 1uz;
       }
       else
       {

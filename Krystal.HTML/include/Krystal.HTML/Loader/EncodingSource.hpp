@@ -21,8 +21,4 @@ namespace Krys::HTML
   };
 }
 
-namespace Krys
-{
-  template <>
-  constexpr underlying_t<HTML::EncodingSource> OrdinalCount<HTML::EncodingSource> = 4;
-}
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::EncodingSource, 4u)

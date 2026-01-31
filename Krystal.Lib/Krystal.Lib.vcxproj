@@ -163,6 +163,7 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\SharedPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\UniquePtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\WeakRef.hpp" />
     <ClInclude Include="include\Krystal.Lib\Ranges\ADL.hpp" />
     <ClInclude Include="include\Krystal.Lib\Ranges\Algorithm.hpp" />
     <ClInclude Include="include\Krystal.Lib\Ranges\BlackHoleIterator.hpp" />

@@ -47,11 +47,5 @@ namespace Krys::IO
   };
 }
 
-namespace Krys
-{
-  template <>
-  inline constexpr bool EnableEnumFlags<IO::ReadFlags> = true;
-
-  template <>
-  inline constexpr bool EnableEnumFlags<IO::WriteFlags> = true;
-}
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::IO::ReadFlags, 2u)
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::IO::WriteFlags, 4u)

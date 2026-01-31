@@ -16,8 +16,4 @@ namespace Krys::UI
   };
 }
 
-namespace Krys
-{
-  template <>
-  constexpr underlying_t<UI::Justify> OrdinalCount<UI::Justify> = 6;
-}
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::UI::Justify, 6u)

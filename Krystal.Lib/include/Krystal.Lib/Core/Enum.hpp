@@ -4,148 +4,134 @@
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 #include "Krystal.Lib/Utils/ToUnderlying.hpp"
 #include <bit>
 #include <utility>
 
 namespace Krys
 {
-  template <IsEnum E>
-  inline constexpr underlying_t<E> OrdinalCount = 0u;
-
   template <typename TEnum>
-  concept HasOrdinality = (OrdinalCount<TEnum> > 0u);
-
-  template <typename E>
-  inline constexpr bool EnableEnumFlags = false;
-
-  template <typename E>
-  concept IsFlagsEnum = IsEnum<E> && EnableEnumFlags<E>;
-
-  /// @brief Convenience function to iterate through every value in a Krys enum as part of
-  /// a range-based for loop.
-  template <HasOrdinality TEnum>
-  KRYS_NODISCARD constexpr auto Ordinals() noexcept
+  struct EnumTraits
   {
-    struct Iterator
+    /// @brief Total number of distinct values defined in the enum.
+    constexpr static underlying_t<TEnum> DistinctValues = 0u;
+
+    /// @brief True if the enum values are contiguous from 0 to the highest distinct value.
+    constexpr static bool Contiguous = false;
+
+    /// @brief True if the enum is used as a bitfield (flags), with each distinct value being a power of two.
+    constexpr static bool BitwiseFlags = false;
+  };
+
+// Helper to define enum traits for enums.
+#define KRYS_SPECIALIZE_ENUM_TRAITS_BEGIN(EnumName)                                                          \
+  namespace Krys                                                                                             \
+  {                                                                                                          \
+    template <>                                                                                              \
+    struct EnumTraits<EnumName>                                                                              \
     {
-      TEnum Value {};
-
-      KRYS_NODISCARD constexpr TEnum operator*() const noexcept
-      {
-        return Value;
-      }
-
-      constexpr Iterator &operator++() noexcept
-      {
-        if constexpr (EnableEnumFlags<TEnum>)
-        {
-          if (ToUnderlying<TEnum>(Value) == 0u)
-          {
-            Value = static_cast<TEnum>(1u);
-          }
-          else
-          {
-            Value = static_cast<TEnum>(ToUnderlying<TEnum>(Value) << 1);
-          }
-        }
-        else
-        {
-          Value = static_cast<TEnum>(ToUnderlying<TEnum>(Value) + 1);
-        }
-
-        return *this;
-      }
-
-      constexpr bool operator==(const Iterator &other) const noexcept = default;
-      constexpr bool operator!=(const Iterator &other) const noexcept = default;
-    };
-
-    struct Range
-    {
-      KRYS_NODISCARD constexpr Iterator begin() const noexcept
-      {
-        return Iterator {};
-      }
-      KRYS_NODISCARD constexpr Iterator end() const noexcept
-      {
-        return Iterator {static_cast<TEnum>(OrdinalCount<TEnum>)};
-      }
-    };
-
-    return Range {};
+#define KRYS_SPECIALIZE_ENUM_TRAITS_END()                                                                    \
+  }                                                                                                          \
+  ;                                                                                                          \
   }
 
-  /// @brief Count of bits needed to represent every ordinal.
-  template <HasOrdinality TEnum>
-  KRYS_NODISCARD constexpr uint32 BitCount() noexcept
+// Helper to define enum traits for contiguous enums.
+#define KRYS_DEFINE_ENUM_TRAITS(EnumName, DistinctValuesCount, IsContiguous, IsBitwiseFlags)                 \
+  KRYS_SPECIALIZE_ENUM_TRAITS_BEGIN(EnumName)                                                                \
+    constexpr static underlying_t<EnumName> DistinctValues = DistinctValuesCount;                            \
+    constexpr static bool Contiguous = IsContiguous;                                                         \
+    constexpr static bool BitwiseFlags = IsBitwiseFlags;                                                     \
+  KRYS_SPECIALIZE_ENUM_TRAITS_END()
+
+// Helper to define enum traits for enums.
+#define KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(EnumName, DistinctValuesCount)                                    \
+  KRYS_DEFINE_ENUM_TRAITS(EnumName, DistinctValuesCount, true, false)
+
+// Helper to define enum traits for bitwise flag enums.
+#define KRYS_DEFINE_FLAGS_ENUM_TRAITS(EnumName, DistinctValuesCount)                                         \
+  KRYS_DEFINE_ENUM_TRAITS(EnumName, DistinctValuesCount, true, true)
+
+  template <typename TEnum>
+  concept ContiguousEnum = IsEnum<TEnum> && EnumTraits<TEnum>::Contiguous;
+
+  template <typename TEnum>
+  concept BitwiseFlagsEnum = IsEnum<TEnum> && EnumTraits<TEnum>::BitwiseFlags;
+
+  /// @brief Count of bits needed to store every distinct value of the enum.
+  template <typename TEnum>
+  KRYS_NODISCARD constexpr static uint32 BitCount() noexcept
   {
-    if constexpr (EnableEnumFlags<TEnum>)
+    using Traits = EnumTraits<TEnum>;
+    static_assert(Traits::DistinctValues > 0u, "BitCount(): must have EnumTraits::DistinctValues > 0");
+    static_assert(Traits::Contiguous, "BitCount(): must have EnumTraits::Contiguous = true");
+
+    if constexpr (Traits::BitwiseFlags)
     {
-      return std::bit_width(static_cast<underlying_t<TEnum>>(OrdinalCount<TEnum>));
+      return std::bit_width(static_cast<underlying_t<TEnum>>((1u << (Traits::DistinctValues - 1u))));
     }
     else
     {
-      return std::bit_width(static_cast<underlying_t<TEnum>>(OrdinalCount<TEnum> - 1u));
+      return std::bit_width(static_cast<underlying_t<TEnum>>((Traits::DistinctValues - 1u)));
     }
   }
 
-  template <IsFlagsEnum TEnum>
+  template <BitwiseFlagsEnum TEnum>
   constexpr TEnum operator|(TEnum lhs, TEnum rhs)
   {
     using U = underlying_t<TEnum>;
     return static_cast<TEnum>(static_cast<U>(lhs) | static_cast<U>(rhs));
   }
 
-  template <IsFlagsEnum TEnum>
+  template <BitwiseFlagsEnum TEnum>
   constexpr TEnum &operator|=(TEnum &lhs, TEnum rhs)
   {
     lhs = lhs | rhs;
     return lhs;
   }
 
-  template <IsFlagsEnum TEnum>
+  template <BitwiseFlagsEnum TEnum>
   constexpr TEnum operator&(TEnum lhs, TEnum rhs)
   {
     using U = underlying_t<TEnum>;
     return static_cast<TEnum>(static_cast<U>(lhs) & static_cast<U>(rhs));
   }
 
-  template <IsFlagsEnum TEnum>
+  template <BitwiseFlagsEnum TEnum>
   constexpr TEnum &operator&=(TEnum &lhs, TEnum rhs)
   {
     lhs = lhs & rhs;
     return lhs;
   }
 
-  template <IsFlagsEnum TEnum>
+  template <BitwiseFlagsEnum TEnum>
   constexpr TEnum operator~(TEnum value)
   {
     using U = underlying_t<TEnum>;
     return static_cast<TEnum>(~static_cast<U>(value));
   }
 
-  template <IsFlagsEnum TEnum>
+  template <BitwiseFlagsEnum TEnum>
   constexpr TEnum operator^(TEnum lhs, TEnum rhs)
   {
     using U = underlying_t<TEnum>;
     return static_cast<TEnum>(static_cast<U>(lhs) ^ static_cast<U>(rhs));
   }
 
-  template <IsFlagsEnum TEnum>
+  template <BitwiseFlagsEnum TEnum>
   constexpr TEnum &operator^=(TEnum &lhs, TEnum rhs)
   {
     lhs = lhs ^ rhs;
     return lhs;
   }
 
-  template <IsFlagsEnum TEnum>
+  template <BitwiseFlagsEnum TEnum>
   KRYS_NODISCARD constexpr bool operator!(TEnum value) noexcept
   {
     return ToUnderlying<TEnum>(value) == 0;
   }
 
-  template <IsFlagsEnum TEnum>
+  template <BitwiseFlagsEnum TEnum>
   KRYS_NODISCARD constexpr bool HasFlag(TEnum value, TEnum flag) noexcept
   {
     using U = underlying_t<TEnum>;

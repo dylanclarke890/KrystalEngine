@@ -24,8 +24,4 @@ namespace Krys::UI
   }
 }
 
-namespace Krys
-{
-  template <>
-  constexpr underlying_t<UI::FlexDirection> OrdinalCount<UI::FlexDirection> = 4;
-}
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::UI::FlexDirection, 4u)

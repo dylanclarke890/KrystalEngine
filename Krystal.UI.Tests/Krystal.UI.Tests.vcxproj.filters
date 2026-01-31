@@ -156,9 +156,6 @@
     <ClCompile Include="tests\Layout\NodeChild.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Layout\Ordinals.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="tests\Layout\Persistence.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

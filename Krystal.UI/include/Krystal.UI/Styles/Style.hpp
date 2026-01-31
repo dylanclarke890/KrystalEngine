@@ -32,9 +32,9 @@ namespace Krys::UI
 {
   class Style
   {
-    using Dimensions = Array<StyleValueHandle, OrdinalCount<Dimension>>;
-    using Edges = Array<StyleValueHandle, OrdinalCount<Edge>>;
-    using Gutters = Array<StyleValueHandle, OrdinalCount<Gutter>>;
+    using Dimensions = Array<StyleValueHandle, EnumTraits<Dimension>::DistinctValues>;
+    using Edges = Array<StyleValueHandle, EnumTraits<Edge>::DistinctValues>;
+    using Gutters = Array<StyleValueHandle, EnumTraits<Gutter>::DistinctValues>;
 
   private:
     Direction _direction : BitCount<Direction>() = Direction::Inherit;

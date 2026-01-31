@@ -17,17 +17,13 @@ namespace Krys::Platform
   enum class MouseButton : uint16
   {
     None = 0,
-    Left = 1,
-    Right = 2,
-    Middle = 4,
-    Thumb1 = 8,
-    Thumb2 = 16,
-    UNKNOWN = 32
+    Left = 1 << 0,
+    Right = 1 << 1,
+    Middle = 1 << 2,
+    Thumb1 = 1 << 3,
+    Thumb2 = 1 << 4,
+    UNKNOWN = 1 << 5
   };
 }
 
-namespace Krys
-{
-  template <>
-  inline constexpr bool EnableEnumFlags<Platform::MouseButton> = true;
-}
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::Platform::MouseButton, 7u)

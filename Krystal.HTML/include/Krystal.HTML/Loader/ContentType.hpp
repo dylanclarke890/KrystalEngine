@@ -34,8 +34,4 @@ namespace Krys::HTML
   }
 }
 
-namespace Krys
-{
-  template <>
-  constexpr underlying_t<HTML::ContentType> OrdinalCount<HTML::ContentType> = 3;
-}
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::ContentType, 3u)

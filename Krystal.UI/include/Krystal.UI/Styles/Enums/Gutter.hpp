@@ -13,8 +13,4 @@ namespace Krys::UI
   };
 }
 
-namespace Krys
-{
-  template <>
-  constexpr underlying_t<UI::Gutter> OrdinalCount<UI::Gutter> = 3;
-}
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::UI::Gutter, 3u)

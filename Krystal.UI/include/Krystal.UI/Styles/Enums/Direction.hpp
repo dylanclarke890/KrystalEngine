@@ -13,8 +13,4 @@ namespace Krys::UI
   };
 }
 
-namespace Krys
-{
-  template <>
-  constexpr underlying_t<UI::Direction> OrdinalCount<UI::Direction> = 3;
-}
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::UI::Direction, 3u)

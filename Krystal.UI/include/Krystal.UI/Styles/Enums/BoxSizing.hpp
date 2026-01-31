@@ -12,8 +12,4 @@ namespace Krys::UI
   };
 }
 
-namespace Krys
-{
-  template <>
-  constexpr underlying_t<UI::BoxSizing> OrdinalCount<UI::BoxSizing> = 2;
-}
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::UI::BoxSizing, 2u)

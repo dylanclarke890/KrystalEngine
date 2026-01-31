@@ -13,8 +13,4 @@ namespace Krys::HTML
   };
 }
 
-namespace Krys
-{
-  template <>
-  inline constexpr underlying_t<HTML::EventPhaseType> OrdinalCount<HTML::EventPhaseType> = 4u;
-}
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::EventPhaseType, 4u)

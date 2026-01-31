@@ -13,8 +13,4 @@ namespace Krys::UI
   };
 }
 
-namespace Krys
-{
-  template <>
-  constexpr underlying_t<UI::Overflow> OrdinalCount<UI::Overflow> = 3;
-}
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::UI::Overflow, 3u)

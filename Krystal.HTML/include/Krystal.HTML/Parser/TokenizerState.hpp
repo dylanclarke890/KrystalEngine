@@ -90,8 +90,4 @@ namespace Krys::HTML
   };
 }
 
-namespace Krys
-{
-  template <>
-  constexpr underlying_t<HTML::TokenizerState> OrdinalCount<HTML::TokenizerState> = 30;
-}
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::TokenizerState, 30u)

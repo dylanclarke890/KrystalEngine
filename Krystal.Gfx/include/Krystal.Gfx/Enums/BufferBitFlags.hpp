@@ -15,8 +15,4 @@ namespace Krys::Gfx
   };
 }
 
-namespace Krys
-{
-  template <>
-  inline constexpr bool EnableEnumFlags<Gfx::BufferBitFlags> = true;
-}
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::Gfx::BufferBitFlags, 4u)

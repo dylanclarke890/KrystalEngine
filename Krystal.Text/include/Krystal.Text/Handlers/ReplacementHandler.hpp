@@ -312,11 +312,7 @@ namespace Krys::Text::Handlers
   };
 }
 
-namespace Krys
-{
-  template <>
-  inline constexpr bool EnableEnumFlags<::Krys::Text::Handlers::ReplacementPolicy> = true;
-}
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::Text::Handlers::ReplacementPolicy, 2u)
 
 namespace Krys::Text::Handlers
 {

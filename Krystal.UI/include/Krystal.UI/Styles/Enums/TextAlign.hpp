@@ -14,8 +14,4 @@ namespace Krys::UI
   };
 }
 
-namespace Krys
-{
-  template <>
-  constexpr underlying_t<UI::TextAlign> OrdinalCount<UI::TextAlign> = 4;
-}
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::UI::TextAlign, 4u)

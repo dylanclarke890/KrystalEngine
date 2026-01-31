@@ -12,8 +12,4 @@ namespace Krys::UI
   };
 }
 
-namespace Krys
-{
-  template <>
-  constexpr underlying_t<UI::NodeType> OrdinalCount<UI::NodeType> = 2;
-}
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::UI::NodeType, 2u)

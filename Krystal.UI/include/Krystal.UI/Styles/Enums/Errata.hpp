@@ -15,11 +15,4 @@ namespace Krys::UI
   };
 }
 
-namespace Krys
-{
-  template <>
-  constexpr underlying_t<UI::Errata> OrdinalCount<UI::Errata> = 4;
-
-  template <>
-  inline constexpr bool EnableEnumFlags<UI::Errata> = true;
-}
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::UI::Errata, 4u)

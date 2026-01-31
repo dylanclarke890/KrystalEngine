@@ -13,13 +13,15 @@ namespace Krys
   enum class RefCountedFlags : uint8
   {
     None = 0,
-    ProvideWeakReferences = 1,
-    SingleThreaded = 2
+    ProvideWeakReferences = 1 << 0,
+    SingleThreaded = 1 << 1,
   };
+}
 
-  template <>
-  constexpr inline bool EnableEnumFlags<RefCountedFlags> = true;
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::RefCountedFlags, 3u)
 
+namespace Krys
+{
   template <RefCountedFlags Flags>
   using DefaultRefCountType =
     conditional_t<HasFlag(Flags, RefCountedFlags::ProvideWeakReferences), intptr_t, int32>;
