@@ -180,6 +180,12 @@
     <ClInclude Include="include\Krystal.HTML\Events\EventDispatcher.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Utils\BoolOr.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Document\TreeScope.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -231,6 +237,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Events\EventDispatcher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Document\TreeScope.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -349,6 +358,18 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\Document\DocumentType.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Element\Element.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Document\DOMImplementation.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Document\ShadowRootInit.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Node\NamedNodeMap.idl">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

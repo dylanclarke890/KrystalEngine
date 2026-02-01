@@ -49,6 +49,7 @@ namespace Krys::HTML
     IsTextNode = 1 << 2,
     IsElement = 1 << 3,
     IsHTMLElement = 1 << 4,
+    IsShadowRoot = 1 << 5,
   };
 }
 
@@ -61,6 +62,7 @@ namespace Krys::HTML
   class NodeList;
   class ContainerNode;
   class Document;
+  class TreeScope;
 
   /// @see https://dom.spec.whatwg.org/#dictdef-getrootnodeoptions
   struct GetRootNodeOptions
@@ -70,6 +72,8 @@ namespace Krys::HTML
 
   struct URL
   {
+    // TODO(IMPL): Implement URL class.
+    DOMString Href;
   };
 
   class Node : public EventTarget
@@ -84,6 +88,7 @@ namespace Krys::HTML
     RawPtr<ContainerNode> _parentNode;
     RawPtr<Node> _previousSibling;
     RefPtr<Node> _nextSibling;
+    RawPtr<TreeScope> _treeScope;
 
   public:
     virtual ~Node() = default;
@@ -97,11 +102,14 @@ namespace Krys::HTML
 
     KRYS_NODISCARD URL BaseURI() const noexcept
     {
-      return {};
+      return {u8"about:blank"};
     }
 
     /// @see https://dom.spec.whatwg.org/#connected
-    KRYS_NODISCARD bool IsConnected() const noexcept;
+    KRYS_NODISCARD bool IsConnected() const noexcept
+    {
+      return HasEventTargetFlag(EventTargetFlag::IsConnected);
+    }
 
     KRYS_NODISCARD RawPtr<Document> OwnerDocument() const noexcept
     {
@@ -146,42 +154,76 @@ namespace Krys::HTML
 
     KRYS_NODISCARD size_t CountChildNodes() const noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#concept-shadow-tree
+    KRYS_NODISCARD bool IsInShadowTree() const noexcept
+    {
+      return HasEventTargetFlag(EventTargetFlag::IsInShadowTree);
+    }
+
+    /// @see https://dom.spec.whatwg.org/#concept-document-tree
+    KRYS_NODISCARD bool IsInDocumentTree() const noexcept
+    {
+      return IsConnected() && !IsInShadowTree();
+    }
+
+    void SetTreeScope(TreeScope &treeScope) noexcept
+    {
+      _treeScope = &treeScope;
+    }
+
+#pragma region Type Checks
+
     KRYS_NODISCARD bool IsContainerNode() const noexcept
     {
       return HasFlag(_flags, NodeFlags::IsContainerNode);
     }
+
     KRYS_NODISCARD bool IsAttributeNode() const noexcept
     {
       return _nodeType == NodeType::ATTRIBUTE_NODE;
     }
+
     KRYS_NODISCARD bool IsDocumentNode() const noexcept
     {
       return _nodeType == NodeType::DOCUMENT_NODE;
     }
+
     KRYS_NODISCARD bool IsDocumentTypeNode() const noexcept
     {
       return _nodeType == NodeType::DOCUMENT_TYPE_NODE;
     }
+
     KRYS_NODISCARD bool IsDocumentFragmentNode() const noexcept
     {
       return _nodeType == NodeType::DOCUMENT_FRAGMENT_NODE;
     }
+
     KRYS_NODISCARD bool IsElementNode() const noexcept
     {
       return HasFlag(_flags, NodeFlags::IsElement);
     }
+
     KRYS_NODISCARD bool IsHTMLElementNode() const noexcept
     {
       return HasFlag(_flags, NodeFlags::IsHTMLElement);
     }
+
     KRYS_NODISCARD bool IsCharacterDataNode() const noexcept
     {
       return HasFlag(_flags, NodeFlags::IsCharacterData);
     }
+
     KRYS_NODISCARD bool IsTextNode() const noexcept
     {
       return HasFlag(_flags, NodeFlags::IsTextNode);
     }
+
+    KRYS_NODISCARD bool IsShadowRootNode() const noexcept
+    {
+      return HasFlag(_flags, NodeFlags::IsShadowRoot);
+    }
+
+#pragma endregion
 
   protected:
     Node(Document &document, NodeType type, NodeFlags flags) noexcept;

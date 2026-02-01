@@ -1,13 +1,16 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/Document/TreeScope.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 
 namespace Krys::HTML
 {
-  class Document : public ContainerNode
+  class Document : public ContainerNode, public TreeScope
   {
   public:
+    Document() noexcept;
+
     KRYS_NODISCARD DOMString NodeName() const noexcept final;
   };
 }

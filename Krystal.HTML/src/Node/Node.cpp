@@ -7,15 +7,10 @@ namespace Krys::HTML
 {
   Node::Node(Document &document, NodeType type, NodeFlags flags) noexcept
       : EventTarget(ConstructNodeTag {}), _nodeType(type), _ownerDocument(RefPtrRetain(&document)),
-        _parentNode(nullptr), _previousSibling(nullptr), _nextSibling(nullptr)
+        _parentNode(nullptr), _previousSibling(nullptr), _nextSibling(nullptr),
+        _treeScope((IsDocumentNode() || IsShadowRootNode()) ? nullptr : &document)
   {
     _flags = flags;
-  }
-
-  bool Node::IsConnected() const noexcept
-  {
-    // TODO(IMPL): A node is connected if its shadow-including root(?) is a document.
-    return false;
   }
 
   ExceptionOr<void> Node::InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept

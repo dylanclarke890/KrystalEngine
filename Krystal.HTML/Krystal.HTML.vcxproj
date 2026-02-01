@@ -34,6 +34,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML\Document\ShadowRoot.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Document\TreeScope.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventDispatcher.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Attr.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\CDATASection.hpp" />
@@ -84,6 +85,7 @@
     <ClInclude Include="include\Krystal.HTML\Context.hpp" />
     <ClInclude Include="include\Krystal.HTML\QualifiedName.hpp" />
     <ClInclude Include="include\Krystal.HTML\StronglyTypedValues.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Utils\BoolOr.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\Exception.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionCode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionOr.hpp" />
@@ -91,6 +93,7 @@
   <ItemGroup>
     <ClCompile Include="src\Document\ShadowRoot.cpp" />
     <ClCompile Include="src\Document\Document.cpp" />
+    <ClCompile Include="src\Document\TreeScope.cpp" />
     <ClCompile Include="src\Element\Element.cpp" />
     <ClCompile Include="src\Events\EventDispatcher.cpp" />
     <ClCompile Include="src\Node\Attr.cpp" />
@@ -170,6 +173,14 @@
     <None Include="data\Document\DocumentFragment.idl" />
     <None Include="data\Document\DocumentType.idl" />
     <None Include="data\Document\ShadowRoot.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\Document\DOMImplementation.idl" />
+    <None Include="data\Document\ShadowRootInit.idl" />
+    <None Include="data\Element\Element.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\Node\NamedNodeMap.idl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

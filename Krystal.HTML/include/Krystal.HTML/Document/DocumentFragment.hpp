@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/Document/TreeScope.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 
@@ -7,7 +8,7 @@ namespace Krys::HTML
 {
   class Document;
 
-  class DocumentFragment : public ContainerNode
+  class DocumentFragment : public ContainerNode, public TreeScope
   {
   public:
     DocumentFragment(Document &document, NodeFlags flags = NodeFlags::None) noexcept;

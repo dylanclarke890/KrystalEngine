@@ -17,7 +17,7 @@ namespace Krys::HTML
       }
 
       // TODO(IMPL): return true if:
-      //  - eventTarget is a Window object, 
+      //  - eventTarget is a Window object,
       //  - or is a node whose node document is eventTarget,
       //  - or is a node whose node document’s document element is eventTarget,
       //  - or is a node whose node document’s body element is eventTarget.[HTML]

@@ -2,10 +2,11 @@
 
 #include "Krystal.HTML/DOMString.hpp"
 #include "Krystal.HTML/Events/AddEventListenerOptions.hpp"
-#include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.HTML/Events/EventListener.hpp"
 #include "Krystal.HTML/Events/EventListenerOptions.hpp"
 #include "Krystal.HTML/Events/RegisteredEventListener.hpp"
+#include "Krystal.HTML/Utils/BoolOr.hpp"
+#include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Pointers/Ref.hpp"
 #include "Krystal.Lib/Pointers/RefCounted.hpp"
@@ -18,10 +19,12 @@ namespace Krys::HTML
   {
     None = 0,
     IsNode = 1 << 0,
+    IsConnected = 1 << 1,
+    IsInShadowTree = 1 << 2,
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::EventTargetFlag, 2u)
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::EventTargetFlag, 3u)
 
 namespace Krys::HTML
 {
@@ -33,7 +36,7 @@ namespace Krys::HTML
 
   public:
     EventTarget() noexcept;
-
+    // TODO(IMPL): Use BoolOr for AddEventListenerOptions. The bool is used for 'capture'.
     virtual bool AddEventListener(DOMStringAtom type, RefPtr<EventListener> &&callback,
                                   const AddEventListenerOptions &options) noexcept;
 
@@ -46,7 +49,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool IsNode() const noexcept
     {
-      return HasFlag(_flags, EventTargetFlag::IsNode);
+      return HasEventTargetFlag(EventTargetFlag::IsNode);
     }
 
   protected:
@@ -56,7 +59,17 @@ namespace Krys::HTML
 
     EventTarget(ConstructNodeTag) noexcept : EventTarget()
     {
-      _flags = _flags | EventTargetFlag::IsNode;
+      SetEventTargetFlag(EventTargetFlag::IsNode);
+    }
+
+    KRYS_NODISCARD bool HasEventTargetFlag(EventTargetFlag flag) const noexcept
+    {
+      return HasFlag(_flags, flag);
+    }
+
+    void SetEventTargetFlag(EventTargetFlag flag) noexcept
+    {
+      _flags = _flags | flag;
     }
   };
 }
