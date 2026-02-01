@@ -1,4 +1,5 @@
 ﻿#include "Krystal.HTML/Document/Document.hpp"
+#include "Krystal.HTML/Document/CustomElementRegistry.hpp"
 
 namespace Krys::HTML
 {

@@ -33,6 +33,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.HTML\Document\CustomElementRegistry.hpp" />
     <ClInclude Include="include\Krystal.HTML\Document\ShadowRoot.hpp" />
     <ClInclude Include="include\Krystal.HTML\Document\TreeScope.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventDispatcher.hpp" />

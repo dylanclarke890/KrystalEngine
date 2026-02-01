@@ -1,8 +1,10 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/Document/DocumentFragment.hpp"
-#include "Krystal.HTML/Element/Element.hpp"
+#include "Krystal.HTML/Document/TreeScope.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
+#include "Krystal.Lib/Core/TypeCast.hpp"
+#include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/Ref.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
@@ -26,7 +28,10 @@ KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::SlotAssignmentMode, 2u);
 
 namespace Krys::HTML
 {
-  class ShadowRoot : public DocumentFragment
+  class Element;
+  class CustomElementRegistry;
+
+  class ShadowRoot : public DocumentFragment, public TreeScope
   {
   private:
     ShadowRootMode _mode : BitCount<ShadowRootMode>() {ShadowRootMode::Open};
@@ -38,6 +43,13 @@ namespace Krys::HTML
 
     // TODO: most of the fecking implementation lol
   public:
-    ShadowRoot(Document &document, NodeFlags flags = NodeFlags::None) noexcept;
+    ShadowRoot(Document &document, RefPtr<CustomElementRegistry>&& registry, NodeFlags flags = NodeFlags::None) noexcept;
   };
 }
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::ShadowRoot)
+  static bool IsType(const Krys::HTML::Node &node)
+  {
+    return node.IsShadowRootNode();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

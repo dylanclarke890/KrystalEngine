@@ -10,18 +10,22 @@ namespace Krys::HTML
 
   ExceptionOr<void> ContainerNode::InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept
   {
+    return {};
   }
 
   ExceptionOr<void> ContainerNode::ReplaceChild(Node &newChild, Node &oldChild) noexcept
   {
+    return {};
   }
 
   ExceptionOr<void> ContainerNode::RemoveChild(Node &oldChild) noexcept
   {
+    return {};
   }
 
   ExceptionOr<void> ContainerNode::AppendChild(Node &newChild) noexcept
   {
+    return {};
   }
 
   /// @see https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity
@@ -74,6 +78,8 @@ namespace Krys::HTML
       {
       }
     }
+
+    return {};
   }
 
   bool ContainerNode::IsHostIncludingAncestorOf(Node &node, Node &other) noexcept

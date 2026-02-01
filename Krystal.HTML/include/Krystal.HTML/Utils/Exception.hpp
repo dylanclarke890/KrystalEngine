@@ -14,7 +14,7 @@ namespace Krys::HTML
     utf8_string _message;
 
   public:
-    explicit Exception(ExceptionCode code, const utf8_string &message = {}) noexcept
+    explicit Exception(ExceptionCode code, utf8_string &&message = {}) noexcept
         : _code {code}, _message {Krys::Move(message)}
     {
     }

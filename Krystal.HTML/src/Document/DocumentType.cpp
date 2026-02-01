@@ -1,4 +1,5 @@
 ﻿#include "Krystal.HTML/Document/DocumentType.hpp"
+#include "Krystal.HTML/Document/Document.hpp"
 
 namespace Krys::HTML
 {
