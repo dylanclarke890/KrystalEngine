@@ -2,6 +2,7 @@
 
 #include "Krystal.HTML/DOMString.hpp"
 #include "Krystal.HTML/Events/AddEventListenerOptions.hpp"
+#include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.HTML/Events/EventListener.hpp"
 #include "Krystal.HTML/Events/EventListenerOptions.hpp"
 #include "Krystal.HTML/Events/RegisteredEventListener.hpp"
@@ -39,7 +40,9 @@ namespace Krys::HTML
     virtual bool RemoveEventListener(DOMStringAtom type, RefPtr<EventListener> &&callback,
                                      const EventListenerOptions &options) noexcept;
 
-    virtual bool DispatchEvent(Event &event) noexcept;
+    virtual void RemoveAllEventListeners() noexcept;
+
+    virtual ExceptionOr<bool> DispatchEvent(Event &event) noexcept;
 
     KRYS_NODISCARD bool IsNode() const noexcept
     {

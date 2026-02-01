@@ -33,6 +33,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.HTML\Document\ShadowRoot.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Events\EventDispatcher.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Attr.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\CDATASection.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\CharacterData.hpp" />
@@ -80,14 +82,17 @@
     <ClInclude Include="include\Krystal.HTML\Parser\InsertionMode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\TokenizerState.hpp" />
     <ClInclude Include="include\Krystal.HTML\Context.hpp" />
+    <ClInclude Include="include\Krystal.HTML\QualifiedName.hpp" />
     <ClInclude Include="include\Krystal.HTML\StronglyTypedValues.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\Exception.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionCode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionOr.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Document\ShadowRoot.cpp" />
     <ClCompile Include="src\Document\Document.cpp" />
     <ClCompile Include="src\Element\Element.cpp" />
+    <ClCompile Include="src\Events\EventDispatcher.cpp" />
     <ClCompile Include="src\Node\Attr.cpp" />
     <ClCompile Include="src\Node\CDATASection.cpp" />
     <ClCompile Include="src\Node\CharacterData.cpp" />
@@ -136,6 +141,9 @@
     <None Include="data\Comment.idl" />
     <None Include="data\ProcessingInstruction.idl" />
     <None Include="data\Text.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\ShadowRoot.idl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

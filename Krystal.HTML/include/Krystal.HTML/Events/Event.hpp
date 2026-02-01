@@ -29,8 +29,10 @@ namespace Krys::HTML
     bool _stopImmediatePropagation : 1 {false};
     bool _cancelled : 1 {false};
     bool _inPassiveListener : 1 {false};
-    bool _defaultHandled : 1 {false};
+    bool _dispatched : 1 {false};
     bool _isTrusted : 1 {false};
+
+    friend class EventTarget;
 
   public:
     Event(DOMStringAtom type, const EventInit &eventInitDict = {}) noexcept;

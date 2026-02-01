@@ -5,7 +5,6 @@ namespace Krys::HTML
 {
   DOMString Attr::NodeName() const noexcept
   {
-    // TODO (IMPL): qualified name
-    return u8"";
+    return _name.Name();
   }
 }

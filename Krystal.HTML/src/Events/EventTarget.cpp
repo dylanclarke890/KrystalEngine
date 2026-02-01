@@ -1,5 +1,6 @@
 ﻿#include "Krystal.HTML/Events/EventTarget.hpp"
 #include "Krystal.HTML/Events/AbortSignal.hpp"
+#include "Krystal.HTML/Events/EventDispatcher.hpp"
 #include "Krystal.HTML/Events/EventNames.hpp"
 
 namespace Krys::HTML
@@ -14,6 +15,12 @@ namespace Krys::HTML
       {
         return true;
       }
+
+      // TODO(IMPL): return true if:
+      //  - eventTarget is a Window object, 
+      //  - or is a node whose node document is eventTarget,
+      //  - or is a node whose node document’s document element is eventTarget,
+      //  - or is a node whose node document’s body element is eventTarget.[HTML]
 
       return false;
     }
@@ -92,9 +99,19 @@ namespace Krys::HTML
     return true;
   }
 
-  bool EventTarget::DispatchEvent(Event &event) noexcept
+  void EventTarget::RemoveAllEventListeners() noexcept
   {
-    // TODO(IMPL): https://dom.spec.whatwg.org/#concept-event-dispatch
-    return false;
+    _listeners.clear();
+  }
+
+  ExceptionOr<bool> EventTarget::DispatchEvent(Event &event) noexcept
+  {
+    if (event._dispatched)
+    {
+      return Exception(ExceptionCode::InvalidStateError);
+    }
+
+    event._dispatched = true;
+    return EventDispatcher::DispatchTo(*this, event);
   }
 }

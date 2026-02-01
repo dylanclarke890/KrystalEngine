@@ -171,6 +171,15 @@
     <ClInclude Include="include\Krystal.HTML\Node\ProcessingInstruction.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\QualifiedName.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Document\ShadowRoot.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Events\EventDispatcher.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -216,6 +225,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\Attr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Document\ShadowRoot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Events\EventDispatcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -273,6 +288,9 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\Text.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\ShadowRoot.idl">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

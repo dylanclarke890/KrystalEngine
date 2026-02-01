@@ -3,15 +3,15 @@
 #include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
-#include "Krystal.Lib/Pointers/Ref.hpp"
-#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Pointers/RawPtr.hpp"
 
 namespace Krys::HTML
 {
   class ContainerNode : public Node
   {
   private:
-    List<Ref<Node>> _childNodes;
+    RawPtr<Node> _firstChild;
+    RawPtr<Node> _lastChild;
 
   protected:
     ContainerNode(Document &document, NodeType type, NodeFlags flags) noexcept;
@@ -22,9 +22,7 @@ namespace Krys::HTML
     KRYS_NODISCARD ExceptionOr<void> RemoveChild(Node &child) noexcept;
     KRYS_NODISCARD ExceptionOr<void> AppendChild(Node &newChild) noexcept;
 
-
   private:
-    /// @see https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity
     KRYS_NODISCARD static ExceptionOr<void> EnsurePreInsertValidity(ContainerNode &parent, Node &newChild,
                                                                     RefPtr<Node> &&refChild) noexcept;
 
