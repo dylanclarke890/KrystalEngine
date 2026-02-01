@@ -13,11 +13,15 @@ namespace Krys::HTML
   private:
     List<Ref<Node>> _childNodes;
 
+  protected:
+    ContainerNode(Document &document, NodeType type, NodeFlags flags) noexcept;
+
   public:
     KRYS_NODISCARD ExceptionOr<void> InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept;
     KRYS_NODISCARD ExceptionOr<void> ReplaceChild(Node &newChild, Node &oldChild) noexcept;
     KRYS_NODISCARD ExceptionOr<void> RemoveChild(Node &child) noexcept;
     KRYS_NODISCARD ExceptionOr<void> AppendChild(Node &newChild) noexcept;
+
 
   private:
     /// @see https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity

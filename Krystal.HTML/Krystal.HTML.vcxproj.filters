@@ -42,7 +42,7 @@
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLDocumentParser.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\HTMLDocument.hpp">
+    <ClInclude Include="include\Krystal.HTML\Document\HTMLDocument.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLTokenizer.hpp">
@@ -60,7 +60,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\ContainerNode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Element.hpp">
+    <ClInclude Include="include\Krystal.HTML\Element\Element.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLOpenElementStack.hpp">
@@ -75,7 +75,7 @@
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLActiveFormattingElementList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Document.hpp">
+    <ClInclude Include="include\Krystal.HTML\Document\Document.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLToken.hpp">
@@ -141,13 +141,34 @@
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionOr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\DocumentFragment.hpp">
+    <ClInclude Include="include\Krystal.HTML\Document\DocumentFragment.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\NodeList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\DocumentType.hpp">
+    <ClInclude Include="include\Krystal.HTML\Document\DocumentType.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Node\CharacterData.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOMString.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Node\Attr.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Node\Text.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Node\CDATASection.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Node\Comment.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Node\ProcessingInstruction.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -167,7 +188,34 @@
     <ClCompile Include="src\Node\ContainerNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\DocumentType.cpp">
+    <ClCompile Include="src\Document\DocumentType.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Document\DocumentFragment.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Node\CharacterData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Node\Text.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Node\CDATASection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Node\ProcessingInstruction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Document\Document.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Node\Comment.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Element\Element.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Node\Attr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -201,6 +249,30 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\Node.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Document.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\DocumentFragment.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\DocumentType.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CharacterData.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CDATASection.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Comment.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\ProcessingInstruction.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Text.idl">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

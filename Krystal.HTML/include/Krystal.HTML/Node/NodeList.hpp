@@ -14,7 +14,7 @@ namespace Krys::HTML
   public:
     virtual ~NodeList() noexcept = default;
 
-    KRYS_NODISCARD virtual uint32 Length() const noexcept = 0;
-    KRYS_NODISCARD virtual RawPtr<Node> Item(uint32 index) const noexcept = 0;
+    KRYS_NODISCARD virtual size_t Length() const noexcept = 0;
+    KRYS_NODISCARD virtual RawPtr<Node> Item(size_t index) const noexcept = 0;
   };
 }

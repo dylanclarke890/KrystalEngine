@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/DOMHighResTimeStamp.hpp"
+#include "Krystal.HTML/DOMString.hpp"
 #include "Krystal.HTML/Events/EventInit.hpp"
 #include "Krystal.HTML/Events/EventPhaseType.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/String/StringAtom.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
@@ -15,7 +15,7 @@ namespace Krys::HTML
   class Event
   {
   private:
-    StringAtom _type;
+    DOMStringAtom _type;
     RawPtr<EventTarget> _target {nullptr};
     RawPtr<EventTarget> _currentTarget {nullptr};
     DOMHighResTimeStamp _timeStamp {};
@@ -33,14 +33,14 @@ namespace Krys::HTML
     bool _isTrusted : 1 {false};
 
   public:
-    Event(StringAtom type, const EventInit &eventInitDict = {}) noexcept;
+    Event(DOMStringAtom type, const EventInit &eventInitDict = {}) noexcept;
 
-    KRYS_NODISCARD StringAtom GetType() const noexcept
+    KRYS_NODISCARD DOMStringAtom GetType() const noexcept
     {
       return _type;
     }
 
-    void SetType(StringAtom type) noexcept
+    void SetType(DOMStringAtom type) noexcept
     {
       _type = type;
     }

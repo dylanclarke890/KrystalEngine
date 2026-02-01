@@ -5,7 +5,7 @@
 
 namespace Krys::HTML
 {
-  Event::Event(StringAtom type, const EventInit &eventInitDict) noexcept
+  Event::Event(DOMStringAtom type, const EventInit &eventInitDict) noexcept
       : _type(type), _timeStamp(MonotonicTime::Now())
   {
     _bubbles = eventInitDict.Bubbles;

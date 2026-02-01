@@ -33,12 +33,17 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.HTML\DocumentType.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\Attr.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\CDATASection.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\CharacterData.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Document\DocumentType.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOMString.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\Comment.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\ContainerNode.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Document.hpp" />
-    <ClInclude Include="include\Krystal.HTML\DocumentFragment.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Document\Document.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Document\DocumentFragment.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOMHighResTimeStamp.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Element.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Element\Element.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\AbortSignal.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\AddEventListenerOptions.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\CustomEvent.hpp" />
@@ -51,9 +56,11 @@
     <ClInclude Include="include\Krystal.HTML\Events\EventPhaseType.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventTarget.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\RegisteredEventListener.hpp" />
-    <ClInclude Include="include\Krystal.HTML\HTMLDocument.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Document\HTMLDocument.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Node.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\NodeList.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\ProcessingInstruction.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\Text.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLTokenAtom.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLActiveFormattingElementList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLCharacterReference.hpp" />
@@ -79,12 +86,21 @@
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionOr.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\DocumentType.cpp" />
+    <ClCompile Include="src\Document\Document.cpp" />
+    <ClCompile Include="src\Element\Element.cpp" />
+    <ClCompile Include="src\Node\Attr.cpp" />
+    <ClCompile Include="src\Node\CDATASection.cpp" />
+    <ClCompile Include="src\Node\CharacterData.cpp" />
+    <ClCompile Include="src\Document\DocumentFragment.cpp" />
+    <ClCompile Include="src\Document\DocumentType.cpp" />
+    <ClCompile Include="src\Node\Comment.cpp" />
     <ClCompile Include="src\Node\ContainerNode.cpp" />
     <ClCompile Include="src\Context.cpp" />
     <ClCompile Include="src\Events\Event.cpp" />
     <ClCompile Include="src\Events\EventTarget.cpp" />
     <ClCompile Include="src\Node\Node.cpp" />
+    <ClCompile Include="src\Node\ProcessingInstruction.cpp" />
+    <ClCompile Include="src\Node\Text.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\HTMLTagNames.in" />
@@ -106,6 +122,20 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="data\Node.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\Document.idl" />
+    <None Include="data\DocumentFragment.idl" />
+    <None Include="data\DocumentType.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\CharacterData.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\CDATASection.idl" />
+    <None Include="data\Comment.idl" />
+    <None Include="data\ProcessingInstruction.idl" />
+    <None Include="data\Text.idl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

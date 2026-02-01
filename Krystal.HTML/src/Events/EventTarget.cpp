@@ -21,7 +21,7 @@ namespace Krys::HTML
 
   EventTarget::EventTarget() noexcept = default;
 
-  bool EventTarget::AddEventListener(StringAtom type, RefPtr<EventListener> &&callback,
+  bool EventTarget::AddEventListener(DOMStringAtom type, RefPtr<EventListener> &&callback,
                                      const AddEventListenerOptions &options) noexcept
   {
     if (options.Signal && options.Signal->Aborted())
@@ -67,7 +67,7 @@ namespace Krys::HTML
     return true;
   }
 
-  bool EventTarget::RemoveEventListener(StringAtom type, RefPtr<EventListener> &&callback,
+  bool EventTarget::RemoveEventListener(DOMStringAtom type, RefPtr<EventListener> &&callback,
                                         const EventListenerOptions &options) noexcept
   {
     auto alreadyExists = [&](const Ref<RegisteredEventListener> &listener)

@@ -1,14 +1,18 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/ContainerNode.hpp"
+#include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 
 namespace Krys::HTML
 {
+  class Document;
+
   class DocumentFragment : public ContainerNode
   {
   public:
-    KRYS_NODISCARD utf8_string NodeName() const noexcept final;
+    DocumentFragment(Document &document, NodeFlags flags = NodeFlags::None) noexcept;
+
+    KRYS_NODISCARD DOMString NodeName() const noexcept final;
   };
 }
 

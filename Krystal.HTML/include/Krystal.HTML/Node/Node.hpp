@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/DOMString.hpp"
 #include "Krystal.HTML/Events/EventTarget.hpp"
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
@@ -8,7 +9,6 @@
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Pointers/WeakRef.hpp"
-#include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/String/StringAtom.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
@@ -41,17 +41,20 @@ namespace Krys::HTML
     DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 0x20,
   };
 
-  enum class NodeFlag : uint8
+  enum class NodeFlags : uint16
   {
     None = 0,
-    IsContainerNode = 1 << 0,
-    IsTextNode = 1 << 1,
+    IsCharacterData = 1 << 0,
+    IsContainerNode = 1 << 1,
+    IsTextNode = 1 << 2,
+    IsElement = 1 << 3,
+    IsHTMLElement = 1 << 4,
   };
 }
 
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::NodeType, 12u)
 KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::DocumentPosition, 7u)
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::NodeFlag, 3u)
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::NodeFlags, 6u)
 
 namespace Krys::HTML
 {
@@ -75,7 +78,7 @@ namespace Krys::HTML
 
   private:
     // @internal
-    NodeFlag _flags : BitCount<NodeFlag>() {NodeFlag::None};
+    NodeFlags _flags : BitCount<NodeFlags>() {NodeFlags::None};
     NodeType _nodeType;
     RefPtr<Document> _ownerDocument;
     RawPtr<ContainerNode> _parentNode;
@@ -117,10 +120,10 @@ namespace Krys::HTML
     KRYS_NODISCARD RawPtr<Node> PreviousSibling() const noexcept;
     KRYS_NODISCARD RawPtr<Node> NextSibling() const noexcept;
 
-    KRYS_NODISCARD virtual utf8_string NodeValue() const noexcept;
-    KRYS_NODISCARD virtual ExceptionOr<void> SetNodeValue(utf8_stringview value) noexcept;
-    KRYS_NODISCARD utf8_string TextContent(bool convertBRsToNewlines = false) const noexcept;
-    KRYS_NODISCARD ExceptionOr<void> SetTextContent(utf8_string &&text) noexcept;
+    KRYS_NODISCARD virtual DOMString NodeValue() const noexcept;
+    KRYS_NODISCARD virtual ExceptionOr<void> SetNodeValue(DOMStringView value) noexcept;
+    KRYS_NODISCARD DOMString TextContent(bool convertBRsToNewlines = false) const noexcept;
+    KRYS_NODISCARD ExceptionOr<void> SetTextContent(DOMString &&text) noexcept;
     KRYS_NODISCARD ExceptionOr<void> Normalize() noexcept;
 
     KRYS_NODISCARD Ref<Node> CloneNode(bool deep) const noexcept;
@@ -139,13 +142,25 @@ namespace Krys::HTML
     KRYS_NODISCARD ExceptionOr<void> RemoveChild(Node &child) noexcept;
     KRYS_NODISCARD ExceptionOr<void> AppendChild(Node &newChild) noexcept;
 
+    KRYS_NODISCARD size_t Length() const noexcept;
+
+    KRYS_NODISCARD size_t CountChildNodes() const noexcept;
+
     KRYS_NODISCARD bool IsContainerNode() const noexcept
     {
-      return HasFlag(_flags, NodeFlag::IsContainerNode);
+      return HasFlag(_flags, NodeFlags::IsContainerNode);
+    }
+    KRYS_NODISCARD bool IsAttributeNode() const noexcept
+    {
+      return _nodeType == NodeType::ATTRIBUTE_NODE;
     }
     KRYS_NODISCARD bool IsDocumentNode() const noexcept
     {
       return _nodeType == NodeType::DOCUMENT_NODE;
+    }
+    KRYS_NODISCARD bool IsDocumentTypeNode() const noexcept
+    {
+      return _nodeType == NodeType::DOCUMENT_TYPE_NODE;
     }
     KRYS_NODISCARD bool IsDocumentFragmentNode() const noexcept
     {
@@ -153,15 +168,23 @@ namespace Krys::HTML
     }
     KRYS_NODISCARD bool IsElementNode() const noexcept
     {
-      return _nodeType == NodeType::ELEMENT_NODE;
+      return HasFlag(_flags, NodeFlags::IsElement);
+    }
+    KRYS_NODISCARD bool IsHTMLElementNode() const noexcept
+    {
+      return HasFlag(_flags, NodeFlags::IsHTMLElement);
+    }
+    KRYS_NODISCARD bool IsCharacterDataNode() const noexcept
+    {
+      return HasFlag(_flags, NodeFlags::IsCharacterData);
     }
     KRYS_NODISCARD bool IsTextNode() const noexcept
     {
-      return HasFlag(_flags, NodeFlag::IsTextNode);
+      return HasFlag(_flags, NodeFlags::IsTextNode);
     }
 
   protected:
-    Node(Document &document, NodeType type, NodeFlag flags) noexcept;
+    Node(Document &document, NodeType type, NodeFlags flags) noexcept;
   };
 }
 

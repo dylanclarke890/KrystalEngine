@@ -1,11 +1,11 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/DOMString.hpp"
 #include "Krystal.HTML/Events/EventListener.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Pointers/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
-#include "Krystal.Lib/String/StringAtom.hpp"
 
 namespace Krys::HTML
 {
@@ -22,7 +22,7 @@ namespace Krys::HTML
     };
 
   private:
-    const StringAtom _type;
+    const DOMStringAtom _type;
     bool _useCapture : 1;
     bool _isPassive : 1;
     bool _isOnce : 1;
@@ -31,14 +31,14 @@ namespace Krys::HTML
     const RefPtr<EventListener> _callback;
 
   public:
-    RegisteredEventListener(const StringAtom type, const Options &options,
+    RegisteredEventListener(const DOMStringAtom type, const Options &options,
                             RefPtr<EventListener> &&callback) noexcept
         : _type(type), _useCapture(options.Capture), _isPassive(options.Passive), _isOnce(options.Once),
           _trustedOnly(options.TrustedOnly), _callback(Krys::Move(callback))
     {
     }
 
-    KRYS_NODISCARD StringAtom GetType() const noexcept
+    KRYS_NODISCARD DOMStringAtom GetType() const noexcept
     {
       return _type;
     }

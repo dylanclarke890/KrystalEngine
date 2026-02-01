@@ -1,9 +1,11 @@
 ﻿#include "Krystal.HTML/Node/Node.hpp"
+#include "Krystal.HTML/Document/Document.hpp"
+#include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 
 namespace Krys::HTML
 {
-  Node::Node(Document &document, NodeType type, NodeFlag flags) noexcept
+  Node::Node(Document &document, NodeType type, NodeFlags flags) noexcept
       : EventTarget(ConstructNodeTag {}), _nodeType(type), _ownerDocument(RefPtrRetain(&document)),
         _parentNode(nullptr), _previousSibling(nullptr), _nextSibling(nullptr)
   {
@@ -54,5 +56,26 @@ namespace Krys::HTML
     }
 
     return Exception {ExceptionCode::HierarchyRequestError};
+  }
+
+  /// @see https://dom.spec.whatwg.org/#concept-node-length
+  size_t Node::Length() const noexcept
+  {
+    if (auto *characterData = DynamicDowncast<CharacterData>(*this))
+    {
+      return characterData->Length();
+    }
+
+    return CountChildNodes();
+  }
+
+  size_t Node::CountChildNodes() const noexcept
+  {
+    if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
+    {
+      return containerNode->CountChildNodes();
+    }
+
+    return 0;
   }
 }

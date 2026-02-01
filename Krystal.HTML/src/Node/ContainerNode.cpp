@@ -1,7 +1,13 @@
 ﻿#include "Krystal.HTML/Node/ContainerNode.hpp"
+#include "Krystal.HTML/Document/Document.hpp"
 
 namespace Krys::HTML
 {
+  ContainerNode::ContainerNode(Document &document, NodeType type, NodeFlags flags) noexcept
+      : Node(document, type, flags | NodeFlags::IsContainerNode)
+  {
+  }
+
   ExceptionOr<void> ContainerNode::InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept
   {
   }
@@ -36,8 +42,7 @@ namespace Krys::HTML
       return Exception {ExceptionCode::NotFoundError};
     }
 
-    if (!newChild.IsDocumentFragmentNode() && !newChild.IsElementNode() && !newChild.IsTextNode()
-        && !newChild.IsCommentNode() && !newChild.IsProcessingInstructionNode())
+    if (!newChild.IsDocumentFragmentNode() && !newChild.IsDocumentTypeNode() && !newChild.IsElementNode())
     {
       return Exception {ExceptionCode::HierarchyRequestError};
     }

@@ -8,7 +8,7 @@ namespace Krys::HTML
   class Document : public ContainerNode
   {
   public:
-    KRYS_NODISCARD utf8_string NodeName() const noexcept final;
+    KRYS_NODISCARD DOMString NodeName() const noexcept final;
   };
 }
 
