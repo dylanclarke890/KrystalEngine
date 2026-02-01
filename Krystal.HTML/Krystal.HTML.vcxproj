@@ -108,6 +108,7 @@
     <ClCompile Include="src\Node\Text.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="data\EventInterfaces.in" />
     <None Include="data\HTMLTagNames.in" />
   </ItemGroup>
   <ItemGroup>
@@ -144,6 +145,31 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="data\ShadowRoot.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\Node\CDATASection.idl" />
+    <None Include="data\Node\CharacterData.idl" />
+    <None Include="data\Node\Comment.idl" />
+    <None Include="data\Node\Node.idl" />
+    <None Include="data\Node\ProcessingInstruction.idl" />
+    <None Include="data\Node\Text.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\Event\AbortSignal.idl" />
+    <None Include="data\Event\AddEventListenerOptions.idl" />
+    <None Include="data\Event\CustomEvent.idl" />
+    <None Include="data\Event\CustomEventInit.idl" />
+    <None Include="data\Event\Event.idl" />
+    <None Include="data\Event\EventInit.idl" />
+    <None Include="data\Event\EventListener.idl" />
+    <None Include="data\Event\EventListenerOptions.idl" />
+    <None Include="data\Event\EventTarget.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\Document\Document.idl" />
+    <None Include="data\Document\DocumentFragment.idl" />
+    <None Include="data\Document\DocumentType.idl" />
+    <None Include="data\Document\ShadowRoot.idl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

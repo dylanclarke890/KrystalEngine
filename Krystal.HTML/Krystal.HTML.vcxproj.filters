@@ -293,5 +293,63 @@
     <None Include="data\ShadowRoot.idl">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="data\EventInterfaces.in" />
+    <None Include="data\Node\Text.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Node\CDATASection.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Node\CharacterData.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Node\Comment.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Node\Node.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Node\ProcessingInstruction.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Event\EventTarget.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Event\AbortSignal.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Event\AddEventListenerOptions.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Event\CustomEvent.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Event\CustomEventInit.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Event\Event.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Event\EventInit.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Event\EventListener.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Event\EventListenerOptions.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Document\Document.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Document\ShadowRoot.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Document\DocumentFragment.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Document\DocumentType.idl">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
