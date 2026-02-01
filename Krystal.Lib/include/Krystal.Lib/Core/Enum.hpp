@@ -91,13 +91,6 @@ namespace Krys
   }
 
   template <BitwiseFlagsEnum TEnum>
-  constexpr TEnum &operator|=(TEnum &lhs, TEnum rhs) noexcept
-  {
-    lhs = lhs | rhs;
-    return lhs;
-  }
-
-  template <BitwiseFlagsEnum TEnum>
   constexpr TEnum operator&(TEnum lhs, TEnum rhs) noexcept
   {
     using U = underlying_t<TEnum>;
