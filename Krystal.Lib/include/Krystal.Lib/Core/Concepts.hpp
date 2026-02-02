@@ -63,11 +63,17 @@ namespace Krys
   template <typename T>
   concept IsFunction = std::is_function_v<T>;
 
-  template <typename F, typename... Args>
-  concept Callable = std::invocable<F, Args...>;
+  template <typename TFunc, typename... Args>
+  concept Callable = std::invocable<TFunc, Args...>;
 
-  template <typename F, typename... Args>
-  concept NoThrowInvocable = std::is_nothrow_invocable_v<F, Args...>;
+  template <typename TFunc, typename... Args>
+  concept NoThrowInvocable = std::is_nothrow_invocable_v<TFunc, Args...>;
+
+  template <typename TReturn, typename TFunc, typename... Args>
+  concept InvocableReturns = std::is_invocable_r_v<TReturn, TFunc, Args...>;
+
+  template <typename TReturn, typename TFunc, typename... Args>
+  concept NoThrowInvocableReturns = std::is_nothrow_invocable_r_v<TReturn, TFunc, Args...>;
 
   /// @brief Checks type `T` is callable type that does not cause side effects.
   template <typename T, typename... Args>

@@ -42,6 +42,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\CharacterData.hpp" />
     <ClInclude Include="include\Krystal.HTML\Document\DocumentType.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOMString.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\ChildNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Comment.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\ContainerNode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Document\Document.hpp" />
@@ -65,6 +66,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\NodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\NodeMutationContexts.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\NodeMutationNotifier.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\NodeRareData.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\NodeTraversal.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\ProcessingInstruction.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Text.hpp" />
