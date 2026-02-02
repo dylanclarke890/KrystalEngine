@@ -2,6 +2,7 @@
 
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include <atomic>
 #include <compare>
 #include <format>
@@ -9,51 +10,52 @@
 #include <ostream>
 #include <type_traits>
 
+namespace Krys::detail
+{
+  struct DetectAddRef
+  {
+    template <typename Traits, typename T>
+    auto operator()(RawPtr<Traits>, RawPtr<T> p) noexcept(noexcept(Traits::AddRef(p)))
+      -> decltype(Traits::AddRef(p));
+  };
+
+  struct DetectSubRef
+  {
+    template <typename Traits, typename T>
+    auto operator()(RawPtr<Traits>, RawPtr<T> p) noexcept(noexcept(Traits::SubRef(p)))
+      -> decltype(Traits::SubRef(p));
+  };
+}
+
 namespace Krys
 {
-  namespace detail
-  {
-    struct add_ref_detector
-    {
-      template <class Traits, class T>
-      auto operator()(Traits *, T *p) noexcept(noexcept(Traits::AddRef(p))) -> decltype(Traits::AddRef(p));
-    };
+  template <typename Traits, typename T>
+  concept AreIntrusiveSharedTraits = NoThrowInvocable<detail::DetectAddRef, RawPtr<Traits>, RawPtr<T>>
+                                     && NoThrowInvocable<detail::DetectSubRef, RawPtr<Traits>, RawPtr<T>>;
 
-    struct sub_ref_detector
-    {
-      template <class Traits, class T>
-      auto operator()(Traits *, T *p) noexcept(noexcept(Traits::SubRef(p))) -> decltype(Traits::SubRef(p));
-    };
-
-  }
-
-  template <class Traits, class T>
-  constexpr bool are_intrusive_shared_traits =
-    std::is_nothrow_invocable_v<detail::add_ref_detector, Traits *, T *>
-    && std::is_nothrow_invocable_v<detail::sub_ref_detector, Traits *, T *>;
-
-  template <class T, class Traits>
+  template <typename T, typename Traits>
   class KRYS_TRIVIAL_ABI IntrusivePtr
   {
-  private:
-    T *_ptr;
+    static_assert(AreIntrusiveSharedTraits<Traits, T>, "Invalid Traits for type T");
 
-    static_assert(are_intrusive_shared_traits<Traits, T>, "Invalid Traits for type T");
+  private:
+    RawPtr<T> _ptr;
+
     friend std::atomic<IntrusivePtr<T, Traits>>;
     friend std::out_ptr_t<IntrusivePtr<T, Traits>, T *>;
     friend std::inout_ptr_t<IntrusivePtr<T, Traits>, T *>;
 
   public:
-    using pointer = T *;
+    using pointer = RawPtr<T>;
     using element_type = T;
     using traits_type = Traits;
 
-    static constexpr IntrusivePtr NoRef(T *p) noexcept
+    KRYS_NODISCARD static constexpr IntrusivePtr NoRef(T *p) noexcept
     {
       return IntrusivePtr(p);
     }
 
-    static constexpr IntrusivePtr WithRef(T *p) noexcept
+    KRYS_NODISCARD static constexpr IntrusivePtr WithRef(T *p) noexcept
     {
       IntrusivePtr::DoAddRef(p);
       return IntrusivePtr(p);
@@ -78,72 +80,77 @@ namespace Krys
 
     constexpr IntrusivePtr<T, Traits> &operator=(const IntrusivePtr<T, Traits> &src) noexcept
     {
-      T *temp = this->_ptr;
+      RawPtr<T> tmp = this->_ptr;
       this->_ptr = src._ptr;
       this->DoAddRef(this->_ptr);
-      this->DoSubRef(temp);
+      this->DoSubRef(tmp);
       return *this;
     }
 
     constexpr IntrusivePtr<T, Traits> &operator=(IntrusivePtr<T, Traits> &&src) noexcept
     {
-      T *new_val = src.release();
-      // this must come second so it is nullptr if src is us
-      T *old_val = this->_ptr;
-      this->_ptr = new_val;
-      this->DoSubRef(old_val);
+      RawPtr<T> newValue = src.release();
+      RawPtr<T> oldValue = this->_ptr; // this must come second so it is nullptr if src is us
+
+      this->_ptr = newValue;
+      this->DoSubRef(oldValue);
+
       return *this;
     }
 
-    template <class Y, class YTraits>
-    requires(std::is_convertible_v<Y *, T *>)
+    template <typename Y, typename YTraits>
+    requires(ConvertibleTo<RawPtr<Y>, RawPtr<T>>)
     constexpr IntrusivePtr(const IntrusivePtr<Y, YTraits> &src) noexcept : _ptr(src.get())
     {
       this->DoAddRef(this->_ptr);
     }
 
-    template <class Y>
-    requires(std::is_convertible_v<Y *, T *>)
+    template <typename Y>
+    requires(ConvertibleTo<RawPtr<Y>, RawPtr<T>>)
     constexpr IntrusivePtr(IntrusivePtr<Y, Traits> &&src) noexcept : _ptr(src.release())
     {
     }
 
-    template <class Y, class YTraits>
-    requires(std::is_convertible_v<Y *, T *>)
+    template <typename Y, typename YTraits>
+    requires(ConvertibleTo<RawPtr<Y>, RawPtr<T>>)
     constexpr IntrusivePtr(IntrusivePtr<Y, YTraits> &&src) noexcept : _ptr(src.get())
     {
       this->DoAddRef(this->_ptr);
       src.reset();
     }
 
-    template <class Y, class YTraits>
-    requires(std::is_convertible_v<Y *, T *>)
+    template <typename Y, typename YTraits>
+    requires(ConvertibleTo<RawPtr<Y>, RawPtr<T>>)
     constexpr IntrusivePtr<T, Traits> &operator=(const IntrusivePtr<Y, YTraits> &src) noexcept
     {
-      T *temp = this->_ptr;
+      RawPtr<T> temp = this->_ptr;
       this->_ptr = src.get();
+
       this->DoAddRef(this->_ptr);
       this->DoSubRef(temp);
+
       return *this;
     }
 
-    template <class Y>
-    requires(std::is_convertible_v<Y *, T *>)
+    template <typename Y>
+    requires(ConvertibleTo<RawPtr<Y>, RawPtr<T>>)
     constexpr IntrusivePtr<T, Traits> &operator=(IntrusivePtr<Y, Traits> &&src) noexcept
     {
       this->DoSubRef(this->_ptr);
       this->_ptr = src.release();
+
       return *this;
     }
 
-    template <class Y, class YTraits>
-    requires(std::is_convertible_v<Y *, T *>)
+    template <typename Y, typename YTraits>
+    requires(ConvertibleTo<RawPtr<Y>, RawPtr<T>>)
     constexpr IntrusivePtr<T, Traits> &operator=(IntrusivePtr<Y, YTraits> &&src) noexcept
     {
       this->DoSubRef(this->_ptr);
       this->_ptr = src.get();
       this->DoAddRef(this->_ptr);
       src.reset();
+
       return *this;
     }
 
@@ -152,23 +159,23 @@ namespace Krys
       this->reset();
     }
 
-    constexpr T *get() const noexcept
+    constexpr RawPtr<T> get() const noexcept
     {
       return this->_ptr;
     }
 
-    constexpr T *operator->() const noexcept
+    constexpr RawPtr<T> operator->() const noexcept
     {
       return this->_ptr;
     }
 
-    template <class X = T>
+    template <typename X = T>
     constexpr enable_if_t<SameType<X, T>, X &> operator*() const noexcept
     {
       return *this->_ptr;
     }
 
-    template <class M, class X = T>
+    template <typename M, typename X = T>
     constexpr enable_if_t<SameType<X, T>, M &> operator->*(M X::*memptr) const noexcept
     {
       return this->_ptr->*memptr;
@@ -179,11 +186,9 @@ namespace Krys
       return this->_ptr;
     }
 
-    constexpr T *release() noexcept
+    constexpr RawPtr<T> release() noexcept
     {
-      T *p = this->_ptr;
-      this->_ptr = nullptr;
-      return p;
+      return std::exchange(this->_ptr, nullptr);
     }
 
     KRYS_ALWAYS_INLINE constexpr void reset() noexcept // GCC refuses to inline this otherwise
@@ -194,7 +199,7 @@ namespace Krys
 
     constexpr void swap(IntrusivePtr<T, Traits> &other) noexcept
     {
-      T *temp = this->_ptr;
+      RawPtr<T> temp = this->_ptr;
       this->_ptr = other._ptr;
       other._ptr = temp;
     }
@@ -204,20 +209,20 @@ namespace Krys
       lhs.swap(rhs);
     }
 
-    template <class Y, class YTraits>
+    template <typename Y, typename YTraits>
     friend constexpr bool operator==(const IntrusivePtr<T, Traits> &lhs,
                                      const IntrusivePtr<Y, YTraits> &rhs) noexcept
     {
       return lhs._ptr == rhs.get();
     }
 
-    template <class Y>
+    template <typename Y>
     friend constexpr bool operator==(const IntrusivePtr<T, Traits> &lhs, const Y *rhs) noexcept
     {
       return lhs._ptr == rhs;
     }
 
-    template <class Y>
+    template <typename Y>
     friend constexpr bool operator==(const Y *lhs, const IntrusivePtr<T, Traits> &rhs) noexcept
     {
       return lhs == rhs._ptr;
@@ -233,20 +238,20 @@ namespace Krys
       return nullptr == rhs._ptr;
     }
 
-    template <class Y, class YTraits>
+    template <typename Y, typename YTraits>
     friend constexpr bool operator!=(const IntrusivePtr<T, Traits> &lhs,
                                      const IntrusivePtr<Y, YTraits> &rhs) noexcept
     {
       return !(lhs == rhs);
     }
 
-    template <class Y>
+    template <typename Y>
     friend constexpr bool operator!=(const IntrusivePtr<T, Traits> &lhs, const Y *rhs) noexcept
     {
       return !(lhs == rhs);
     }
 
-    template <class Y>
+    template <typename Y>
     friend constexpr bool operator!=(const Y *lhs, const IntrusivePtr<T, Traits> &rhs) noexcept
     {
       return !(lhs == rhs);
@@ -281,7 +286,7 @@ namespace Krys
       return lhs <=> rhs._ptr;
     }
 
-    template <class Char>
+    template <typename Char>
     friend std::basic_ostream<Char> &operator<<(std::basic_ostream<Char> &str,
                                                 const IntrusivePtr<T, Traits> &ptr)
     {
@@ -290,84 +295,83 @@ namespace Krys
 
     friend constexpr size_t hash_value(const IntrusivePtr<T, Traits> &ptr) noexcept
     {
-      return std::hash<T *>()(ptr._ptr);
+      return std::hash<RawPtr<T>>()(ptr._ptr);
     }
 
   private:
-    constexpr IntrusivePtr(T *ptr) noexcept : _ptr(ptr)
+    constexpr IntrusivePtr(RawPtr<T> ptr) noexcept : _ptr(ptr)
     {
     }
 
-    static constexpr void DoAddRef(T *p) noexcept
+    static constexpr void DoAddRef(RawPtr<T> p) noexcept
     {
-      if (p)
+      if (p != nullptr)
       {
         Traits::AddRef(p);
       }
     }
 
-    static constexpr void DoSubRef(T *p) noexcept
+    static constexpr void DoSubRef(RawPtr<T> p) noexcept
     {
-      if (p)
+      if (p != nullptr)
       {
         Traits::SubRef(p);
       }
     }
   };
+}
 
-  namespace detail
+namespace Krys::detail
+{
+  template <typename T>
+  std::false_type IsIntrusiveSharedPtrHelper(const T &);
+
+  template <typename T, typename Traits>
+  std::true_type IsIntrusiveSharedPtrHelper(const IntrusivePtr<T, Traits> &);
+}
+
+namespace Krys
+{
+  template <typename T>
+  concept IsIntrusiveSharedPtr = decltype(detail::IsIntrusiveSharedPtrHelper(std::declval<T>()))::value;
+
+  template <typename TDest, typename TSrc, typename Traits>
+  inline constexpr enable_if_t<IsIntrusiveSharedPtr<TDest>, TDest>
+    intrusive_const_cast(IntrusivePtr<TSrc, Traits> p) noexcept
   {
-    template <class T>
-    std::false_type IsIntrusiveSharedPtrHelper(const T &);
-
-    template <class T, class Traits>
-    std::true_type IsIntrusiveSharedPtrHelper(const IntrusivePtr<T, Traits> &);
+    return TDest::NoRef(const_cast<typename TDest::pointer>(p.release()));
   }
 
-  template <class T>
-  using IsIntrusiveSharedPtr = decltype(detail::IsIntrusiveSharedPtrHelper(std::declval<T>()));
-
-  template <class T>
-  constexpr bool is_intrusive_shared_ptr_v = IsIntrusiveSharedPtr<T>::value;
-
-  template <class Dest, class Src, class Traits>
-  inline constexpr std::enable_if_t<is_intrusive_shared_ptr_v<Dest>, Dest>
-    intrusive_const_cast(IntrusivePtr<Src, Traits> p) noexcept
+  template <typename TDest, typename TSrc, typename Traits>
+  inline constexpr enable_if_t<IsIntrusiveSharedPtr<TDest>, TDest>
+    intrusive_dynamic_cast(IntrusivePtr<TSrc, Traits> p) noexcept
   {
-    return Dest::NoRef(const_cast<typename Dest::pointer>(p.release()));
-  }
-
-  template <class Dest, class Src, class Traits>
-  inline constexpr std::enable_if_t<is_intrusive_shared_ptr_v<Dest>, Dest>
-    intrusive_dynamic_cast(IntrusivePtr<Src, Traits> p) noexcept
-  {
-    auto res = dynamic_cast<typename Dest::pointer>(p.get());
-    if (res)
+    if (auto res = dynamic_cast<typename TDest::pointer>(p.get()))
     {
       p.release();
-      return Dest::NoRef(res);
+      return TDest::NoRef(res);
     }
-    return Dest();
+    return TDest();
   }
 
-  template <class Dest, class Src, class Traits>
-  inline constexpr std::enable_if_t<is_intrusive_shared_ptr_v<Dest>, Dest>
-    intrusive_static_cast(IntrusivePtr<Src, Traits> p) noexcept
+  template <typename TDest, typename TSrc, typename Traits>
+  inline constexpr enable_if_t<IsIntrusiveSharedPtr<TDest>, TDest>
+    intrusive_static_cast(IntrusivePtr<TSrc, Traits> p) noexcept
   {
-    return Dest::NoRef(static_cast<typename Dest::pointer>(p.release()));
+    return TDest::NoRef(static_cast<typename TDest::pointer>(p.release()));
   }
 
   template <typename T, typename Traits = typename T::RefPtrTraits>
   using IntrusiveRefPtr = IntrusivePtr<T, Traits>;
 
   template <typename T>
-  constexpr IntrusiveRefPtr<T> IntrusiveRefPtrRetain(T *ptr) noexcept
+  constexpr IntrusiveRefPtr<T> IntrusiveRefPtrRetain(RawPtr<T> ptr) noexcept
   {
     return IntrusiveRefPtr<T>::WithRef(ptr);
   }
 
   template <typename T>
-  constexpr IntrusiveRefPtr<T> IntrusiveRefPtrAttach(T *ptr) noexcept
+  constexpr IntrusiveRefPtr<T> IntrusiveRefPtrAttach(RawPtr<T> ptr) noexcept
   {
     return IntrusiveRefPtr<T>::NoRef(ptr);
   }
@@ -406,7 +410,7 @@ namespace Krys
 
 namespace std
 {
-  template <class Traits, class T>
+  template <typename Traits, typename T>
   class atomic<::Krys::IntrusivePtr<T, Traits>>
   {
   public:
@@ -520,7 +524,7 @@ namespace std
     std::atomic<T *> _ptr = nullptr;
   };
 
-  template <class T, class Traits>
+  template <typename T, typename Traits>
   class out_ptr_t<::Krys::IntrusivePtr<T, Traits>, T *>
   {
   public:
@@ -549,13 +553,14 @@ namespace std
     T **_ptr;
   };
 
-  template <class T, class Traits>
+  template <typename T, typename Traits>
   class inout_ptr_t<::Krys::IntrusivePtr<T, Traits>, T *>
   {
   public:
     constexpr inout_ptr_t(::Krys::IntrusivePtr<T, Traits> &owner) noexcept : _ptr(&owner._ptr)
     {
     }
+
     constexpr inout_ptr_t(inout_ptr_t &&src) noexcept = default;
     inout_ptr_t(const inout_ptr_t &) = delete;
 
@@ -577,17 +582,17 @@ namespace std
     T **_ptr;
   };
 
-  template <class T, class Traits, class CharT>
-  struct formatter<::Krys::IntrusivePtr<T, Traits>, CharT> : public formatter<void *, CharT>
+  template <typename T, typename Traits, typename TChar>
+  struct formatter<::Krys::IntrusivePtr<T, Traits>, TChar> : public formatter<void *, TChar>
   {
     template <typename FormatContext>
     auto format(const ::Krys::IntrusivePtr<T, Traits> &ptr, FormatContext &ctx) const -> decltype(ctx.out())
     {
-      return formatter<void *, CharT>::format(ptr.get(), ctx);
+      return formatter<void *, TChar>::format(ptr.get(), ctx);
     }
   };
 
-  template <class T, class Traits>
+  template <typename T, typename Traits>
   struct hash<::Krys::IntrusivePtr<T, Traits>>
   {
     constexpr size_t operator()(const ::Krys::IntrusivePtr<T, Traits> &ptr) const noexcept
