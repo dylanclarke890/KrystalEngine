@@ -10,6 +10,6 @@ namespace Krys::HTML
 
   struct NodeRareData
   {
-    LazyUnique<ChildNodeList> ChildNodes {};
+      LazyValue<ChildNodeList> ChildNodes {};
   };
 }

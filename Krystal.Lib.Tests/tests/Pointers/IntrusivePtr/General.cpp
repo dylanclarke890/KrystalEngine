@@ -463,44 +463,6 @@ namespace Krys::Tests
     CHECK(res == expected);
   }
 
-  TEST_CASE("IntrusivePtr - Output param", "[Memory]")
-  {
-    instrumented_counted<> object, object1;
-    auto ptr = mock_noref(&object);
-    auto ptr1 = mock_noref(&object1);
-
-    auto func = [&object1](instrumented_counted<> **out)
-    {
-      mock_traits<>::AddRef(&object1);
-      *out = &object1;
-    };
-
-    func(ptr.GetOutputParam());
-    CHECK(ptr.get() == &object1);
-    CHECK(object.count == -1);
-    CHECK(object1.count == 2);
-  }
-
-  TEST_CASE("IntrusivePtr - Input Output param", "[Memory]")
-  {
-    instrumented_counted<> object, object1;
-    auto ptr = mock_noref(&object);
-    auto ptr1 = mock_noref(&object1);
-
-    auto func = [&](instrumented_counted<> **inout)
-    {
-      CHECK(*inout == &object);
-      mock_traits<>::SubRef(&object);
-      mock_traits<>::AddRef(&object1);
-      *inout = &object1;
-    };
-
-    func(ptr.GetInOutParam());
-    CHECK(ptr.get() == &object1);
-    CHECK(object.count == -1);
-    CHECK(object1.count == 2);
-  }
-
   TEST_CASE("IntrusivePtr - Member pointer", "[Memory]")
   {
     instrumented_counted<> object;

@@ -48,57 +48,6 @@ namespace Krys
     using element_type = T;
     using traits_type = Traits;
 
-  private:
-    class OutputParam
-    {
-      friend class IntrusivePtr<T, Traits>;
-
-    public:
-      constexpr operator T **() && noexcept
-      {
-        return _ptr;
-      }
-
-    private:
-      constexpr OutputParam(IntrusivePtr<T, Traits> &owner) noexcept : _ptr(&owner._ptr)
-      {
-        owner.reset();
-      }
-      constexpr OutputParam(OutputParam &&src) noexcept = default;
-
-      OutputParam(const OutputParam &) = delete;
-      void operator=(const OutputParam &) = delete;
-      void operator=(OutputParam &&) = delete;
-
-    private:
-      T **_ptr;
-    };
-
-    class InOutParam
-    {
-      friend class IntrusivePtr<T, Traits>;
-
-    public:
-      constexpr operator T **() && noexcept
-      {
-        return _ptr;
-      }
-
-    private:
-      constexpr InOutParam(IntrusivePtr<T, Traits> &owner) noexcept : _ptr(&owner._ptr)
-      {
-      }
-      constexpr InOutParam(InOutParam &&src) noexcept = default;
-
-      InOutParam(const InOutParam &) = delete;
-      void operator=(const InOutParam &) = delete;
-      void operator=(InOutParam &&) = delete;
-
-    private:
-      T **_ptr;
-    };
-
-  public:
     static constexpr IntrusivePtr NoRef(T *p) noexcept
     {
       return IntrusivePtr(p);
@@ -228,16 +177,6 @@ namespace Krys
     constexpr explicit operator bool() const noexcept
     {
       return this->_ptr;
-    }
-
-    constexpr OutputParam GetOutputParam() noexcept
-    {
-      return OutputParam(*this);
-    }
-
-    constexpr InOutParam GetInOutParam() noexcept
-    {
-      return InOutParam(*this);
     }
 
     constexpr T *release() noexcept
@@ -389,7 +328,7 @@ namespace Krys
   using IsIntrusiveSharedPtr = decltype(detail::IsIntrusiveSharedPtrHelper(std::declval<T>()));
 
   template <class T>
-  bool constexpr is_intrusive_shared_ptr_v = IsIntrusiveSharedPtr<T>::value;
+  constexpr bool is_intrusive_shared_ptr_v = IsIntrusiveSharedPtr<T>::value;
 
   template <class Dest, class Src, class Traits>
   inline constexpr std::enable_if_t<is_intrusive_shared_ptr_v<Dest>, Dest>
