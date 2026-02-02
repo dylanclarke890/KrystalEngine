@@ -71,5 +71,10 @@ namespace Krys::HTML
     {
       _flags = _flags | flag;
     }
+
+    void ClearEventTargetFlag(EventTargetFlag flag) noexcept
+    {
+      _flags = _flags & ~flag;
+    }
   };
 }

@@ -63,6 +63,9 @@
     <ClInclude Include="include\Krystal.HTML\Document\HTMLDocument.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Node.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\NodeList.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\NodeMutationContexts.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\NodeMutationNotifier.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\NodeTraversal.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\ProcessingInstruction.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Text.hpp" />
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLTokenAtom.hpp" />
@@ -92,6 +95,7 @@
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionOr.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Node\NodeMutationNotifier.cpp" />
     <ClCompile Include="src\Document\ShadowRoot.cpp" />
     <ClCompile Include="src\Document\Document.cpp" />
     <ClCompile Include="src\Document\TreeScope.cpp" />
@@ -108,6 +112,7 @@
     <ClCompile Include="src\Events\Event.cpp" />
     <ClCompile Include="src\Events\EventTarget.cpp" />
     <ClCompile Include="src\Node\Node.cpp" />
+    <ClCompile Include="src\Node\NodeTraversal.cpp" />
     <ClCompile Include="src\Node\ProcessingInstruction.cpp" />
     <ClCompile Include="src\Node\Text.cpp" />
   </ItemGroup>

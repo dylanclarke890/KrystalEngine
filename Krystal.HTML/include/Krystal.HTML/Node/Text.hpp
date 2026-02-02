@@ -14,7 +14,7 @@ namespace Krys::HTML
   {
   public:
     Text(Document &document, DOMString &&data = u8"", NodeType type = NodeType::TEXT_NODE,
-         NodeFlags flags = NodeFlags::None) noexcept;
+         NodeFlag flags = NodeFlag::None) noexcept;
 
     Ref<Text> SplitText(size_t offset) noexcept;
     DOMString WholeText() const noexcept;

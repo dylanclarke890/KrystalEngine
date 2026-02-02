@@ -4,7 +4,7 @@
 namespace Krys::HTML
 {
   Document::Document() noexcept
-      : ContainerNode(*this, NodeType::DOCUMENT_NODE, NodeFlags::IsContainerNode), TreeScope(*this)
+      : ContainerNode(*this, NodeType::DOCUMENT_NODE, NodeFlag::IsContainerNode), TreeScope(*this)
   {
   }
 

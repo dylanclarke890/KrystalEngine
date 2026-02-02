@@ -10,7 +10,7 @@ namespace Krys::HTML
   class DocumentFragment : public ContainerNode
   {
   public:
-    DocumentFragment(Document &document, NodeFlags flags = NodeFlags::None) noexcept;
+    DocumentFragment(Document &document, NodeFlag flags = NodeFlag::None) noexcept;
 
     KRYS_NODISCARD DOMString NodeName() const noexcept final;
   };

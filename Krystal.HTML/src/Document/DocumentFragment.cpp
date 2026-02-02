@@ -3,7 +3,7 @@
 
 namespace Krys::HTML
 {
-  DocumentFragment::DocumentFragment(Document &document, NodeFlags flags) noexcept
+  DocumentFragment::DocumentFragment(Document &document, NodeFlag flags) noexcept
       : ContainerNode(document, NodeType::DOCUMENT_FRAGMENT_NODE, flags)
   {
   }

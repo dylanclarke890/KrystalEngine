@@ -4,7 +4,7 @@
 namespace Krys::HTML
 {
   CDATASection::CDATASection(Document &document, DOMString &&data) noexcept
-      : Text(document, Krys::Move(data), NodeType::CDATA_SECTION_NODE, NodeFlags::None)
+      : Text(document, Krys::Move(data), NodeType::CDATA_SECTION_NODE, NodeFlag::None)
   {
   }
 

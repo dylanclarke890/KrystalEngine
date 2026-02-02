@@ -7,8 +7,8 @@
 namespace Krys::HTML
 {
   ShadowRoot::ShadowRoot(Document &document, RefPtr<CustomElementRegistry> &&registry,
-                         NodeFlags flags) noexcept
-      : DocumentFragment(document, flags | NodeFlags::IsShadowRoot),
+                         NodeFlag flags) noexcept
+      : DocumentFragment(document, flags | NodeFlag::IsShadowRoot),
         TreeScope(*this, document, Krys::Move(registry)), _host(nullptr)
   {
   }

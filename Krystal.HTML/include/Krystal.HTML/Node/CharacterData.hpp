@@ -38,7 +38,7 @@ namespace Krys::HTML
     KRYS_NODISCARD ExceptionOr<void> SetNodeValue(DOMStringView value) noexcept final;
 
   protected:
-    CharacterData(Document &document, DOMString &&data, NodeType type, NodeFlags flags = NodeFlags::None) noexcept;
+    CharacterData(Document &document, DOMString &&data, NodeType type, NodeFlag flags = NodeFlag::None) noexcept;
   };
 }
 

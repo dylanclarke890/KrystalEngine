@@ -2,6 +2,7 @@
 
 #include "Krystal.HTML/DOMString.hpp"
 #include "Krystal.HTML/Events/EventTarget.hpp"
+#include "Krystal.HTML/Node/NodeMutationContexts.hpp"
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
@@ -16,6 +17,7 @@ namespace Krys::HTML
 {
   enum class NodeType : uint8
   {
+    NONE = 0,
     ELEMENT_NODE = 1,
     ATTRIBUTE_NODE = 2,
     TEXT_NODE = 3,
@@ -41,7 +43,7 @@ namespace Krys::HTML
     DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 0x20,
   };
 
-  enum class NodeFlags : uint16
+  enum class NodeFlag : uint16
   {
     None = 0,
     IsCharacterData = 1 << 0,
@@ -53,15 +55,18 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::NodeType, 12u)
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::NodeType, 13u)
 KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::DocumentPosition, 7u)
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::NodeFlags, 6u)
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::NodeFlag, 7u)
 
 namespace Krys::HTML
 {
-  class NodeList;
   class ContainerNode;
   class Document;
+  class Element;
+  class NodeList;
+  class NodeMutationNotifier;
+  class ShadowRoot;
   class TreeScope;
 
   /// @see https://dom.spec.whatwg.org/#dictdef-getrootnodeoptions
@@ -79,15 +84,15 @@ namespace Krys::HTML
   class Node : public EventTarget
   {
     friend class Document;
+    friend class NodeMutationNotifier;
 
   private:
-    // @internal
-    NodeFlags _flags : BitCount<NodeFlags>() {NodeFlags::None};
+    NodeFlag _flags : BitCount<NodeFlag>() {NodeFlag::None};
     NodeType _nodeType;
     RefPtr<Document> _ownerDocument;
     RawPtr<ContainerNode> _parentNode;
     RawPtr<Node> _previousSibling;
-    RefPtr<Node> _nextSibling;
+    RawPtr<Node> _nextSibling;
     RawPtr<TreeScope> _treeScope;
 
   public:
@@ -115,18 +120,33 @@ namespace Krys::HTML
     {
       return _ownerDocument.get();
     }
-    KRYS_NODISCARD Node &GetRootNode(const GetRootNodeOptions &options) const noexcept;
+
+    KRYS_NODISCARD Node &GetRootNode(const GetRootNodeOptions &options) noexcept;
+    KRYS_NODISCARD const Node &GetRootNode(const GetRootNodeOptions &options) const noexcept;
+
+    KRYS_NODISCARD Node &Root() noexcept;
+    KRYS_NODISCARD const Node &Root() const noexcept;
+
+    KRYS_NODISCARD Node &ShadowIncludingRoot() noexcept;
+    KRYS_NODISCARD const Node &ShadowIncludingRoot() const noexcept;
+
     KRYS_NODISCARD RawPtr<ContainerNode> ParentNode() const noexcept
     {
       return _parentNode;
     }
-    KRYS_NODISCARD RawPtr<Node> ParentElement() const noexcept;
+    KRYS_NODISCARD RawPtr<Element> ParentElement() const noexcept;
     KRYS_NODISCARD bool HasChildNodes() const noexcept;
     KRYS_NODISCARD RefPtr<NodeList> ChildNodes() noexcept;
     KRYS_NODISCARD RawPtr<Node> FirstChild() const noexcept;
     KRYS_NODISCARD RawPtr<Node> LastChild() const noexcept;
-    KRYS_NODISCARD RawPtr<Node> PreviousSibling() const noexcept;
-    KRYS_NODISCARD RawPtr<Node> NextSibling() const noexcept;
+    KRYS_NODISCARD RawPtr<Node> PreviousSibling() const noexcept
+    {
+      return _previousSibling;
+    }
+    KRYS_NODISCARD RawPtr<Node> NextSibling() const noexcept
+    {
+      return _nextSibling;
+    }
 
     KRYS_NODISCARD virtual DOMString NodeValue() const noexcept;
     KRYS_NODISCARD virtual ExceptionOr<void> SetNodeValue(DOMStringView value) noexcept;
@@ -166,17 +186,25 @@ namespace Krys::HTML
       return IsConnected() && !IsInShadowTree();
     }
 
+    KRYS_NODISCARD bool IsInTreeScope() const noexcept
+    {
+      return IsConnected() || IsInShadowTree();
+    }
+
     void SetTreeScope(TreeScope &treeScope) noexcept
     {
       _treeScope = &treeScope;
     }
 
-#pragma region Type Checks
-
-    KRYS_NODISCARD bool IsContainerNode() const noexcept
+    KRYS_NODISCARD TreeScope &GetTreeScope() const noexcept
     {
-      return HasFlag(_flags, NodeFlags::IsContainerNode);
+      assert(_treeScope != nullptr);
+      return *_treeScope;
     }
+
+    KRYS_NODISCARD RawPtr<ShadowRoot> GetShadowRoot() const noexcept;
+
+#pragma region Type Checks
 
     KRYS_NODISCARD bool IsAttributeNode() const noexcept
     {
@@ -198,35 +226,63 @@ namespace Krys::HTML
       return _nodeType == NodeType::DOCUMENT_FRAGMENT_NODE;
     }
 
+    KRYS_NODISCARD bool IsContainerNode() const noexcept
+    {
+      return HasNodeFlag(NodeFlag::IsContainerNode);
+    }
+
     KRYS_NODISCARD bool IsElementNode() const noexcept
     {
-      return HasFlag(_flags, NodeFlags::IsElement);
+      return HasNodeFlag(NodeFlag::IsElement);
     }
 
     KRYS_NODISCARD bool IsHTMLElementNode() const noexcept
     {
-      return HasFlag(_flags, NodeFlags::IsHTMLElement);
+      return HasNodeFlag(NodeFlag::IsHTMLElement);
     }
 
     KRYS_NODISCARD bool IsCharacterDataNode() const noexcept
     {
-      return HasFlag(_flags, NodeFlags::IsCharacterData);
+      return HasNodeFlag(NodeFlag::IsCharacterData);
     }
 
     KRYS_NODISCARD bool IsTextNode() const noexcept
     {
-      return HasFlag(_flags, NodeFlags::IsTextNode);
+      return HasNodeFlag(NodeFlag::IsTextNode);
     }
 
     KRYS_NODISCARD bool IsShadowRootNode() const noexcept
     {
-      return HasFlag(_flags, NodeFlags::IsShadowRoot);
+      return HasNodeFlag(NodeFlag::IsShadowRoot);
+    }
+
+    KRYS_NODISCARD bool IsTreeScope() const noexcept
+    {
+      return IsDocumentNode() || IsShadowRootNode();
     }
 
 #pragma endregion
 
   protected:
-    Node(Document &document, NodeType type, NodeFlags flags) noexcept;
+    Node(Document &document, NodeType type, NodeFlag flags) noexcept;
+
+    KRYS_NODISCARD bool HasNodeFlag(NodeFlag flag) const noexcept
+    {
+      return HasFlag(_flags, flag);
+    }
+
+    void SetNodeFlag(NodeFlag flag) noexcept
+    {
+      _flags = _flags | flag;
+    }
+
+    void ClearNodeFlag(NodeFlag flag) noexcept
+    {
+      _flags = _flags & ~flag;
+    }
+
+    virtual void InsertedIntoAncestor(const NodeInsertedContext &context) noexcept;
+    virtual void RemovedFromAncestor(const NodeRemovedContext &context) noexcept;
   };
 }
 

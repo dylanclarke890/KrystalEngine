@@ -3,8 +3,8 @@
 
 namespace Krys::HTML
 {
-  ContainerNode::ContainerNode(Document &document, NodeType type, NodeFlags flags) noexcept
-      : Node(document, type, flags | NodeFlags::IsContainerNode)
+  ContainerNode::ContainerNode(Document &document, NodeType type, NodeFlag flags) noexcept
+      : Node(document, type, flags | NodeFlag::IsContainerNode), _firstChild(nullptr), _lastChild(nullptr)
   {
   }
 
@@ -29,7 +29,7 @@ namespace Krys::HTML
   }
 
   /// @see https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity
-  ExceptionOr<void> ContainerNode::EnsurePreInsertValidity(ContainerNode &parent, Node &newChild,
+  ExceptionOr<void> ContainerNode::EnsurePreInsertValidity(Node &node, ContainerNode &parent,
                                                            RefPtr<Node> &&refChild) noexcept
   {
     // The following checks are ordered as they appear in the spec. We can change this later when we optimize.
@@ -41,26 +41,26 @@ namespace Krys::HTML
     }
 
     // 2.
-    if (IsHostIncludingAncestorOf(newChild, parent))
+    if (IsHostIncludingAncestorOf(node, parent))
     {
       return Exception {ExceptionCode::HierarchyRequestError};
     }
 
     // 3.
-    if (refChild && refChild->ParentNode() != &parent)
+    if (refChild != nullptr && refChild->ParentNode() != &parent)
     {
       return Exception {ExceptionCode::NotFoundError};
     }
 
     // 4.
-    if (!newChild.IsDocumentFragmentNode() && !newChild.IsDocumentTypeNode() && !newChild.IsElementNode())
+    if (!node.IsDocumentFragmentNode() && !node.IsDocumentTypeNode() && !node.IsElementNode())
     {
       return Exception {ExceptionCode::HierarchyRequestError};
     }
 
     // 5.
-    if ((newChild.IsTextNode() && parent.IsDocumentNode())
-        || (newChild.IsDocumentTypeNode() && !parent.IsDocumentNode()))
+    if ((node.IsTextNode() && parent.IsDocumentNode())
+        || (node.IsDocumentTypeNode() && !parent.IsDocumentNode()))
     {
       return Exception {ExceptionCode::HierarchyRequestError};
     }
@@ -68,13 +68,13 @@ namespace Krys::HTML
     // 6.
     if (parent.IsDocumentNode())
     {
-      if (newChild.IsDocumentFragmentNode())
+      if (node.IsDocumentFragmentNode())
       {
       }
-      else if (newChild.IsElementNode())
+      else if (node.IsElementNode())
       {
       }
-      else if (newChild.IsDocumentTypeNode())
+      else if (node.IsDocumentTypeNode())
       {
       }
     }

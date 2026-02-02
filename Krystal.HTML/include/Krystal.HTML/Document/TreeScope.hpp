@@ -21,7 +21,12 @@ namespace Krys::HTML
     RefPtr<CustomElementRegistry> _customElementRegistry;
 
   public:
-    KRYS_NODISCARD ContainerNode &RootNode() const noexcept
+    KRYS_NODISCARD const ContainerNode &RootNode() const noexcept
+    {
+      return *_rootNode;
+    }
+
+    KRYS_NODISCARD ContainerNode &RootNode() noexcept
     {
       return *_rootNode;
     }

@@ -14,16 +14,25 @@ namespace Krys::HTML
     RawPtr<Node> _lastChild;
 
   protected:
-    ContainerNode(Document &document, NodeType type, NodeFlags flags) noexcept;
+    ContainerNode(Document &document, NodeType type, NodeFlag flags) noexcept;
 
   public:
+    KRYS_NODISCARD RawPtr<Node> FirstChild() const noexcept
+    {
+      return _firstChild;
+    }
+    KRYS_NODISCARD RawPtr<Node> LastChild() const noexcept
+    {
+      return _lastChild;
+    }
+
     KRYS_NODISCARD ExceptionOr<void> InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept;
     KRYS_NODISCARD ExceptionOr<void> ReplaceChild(Node &newChild, Node &oldChild) noexcept;
     KRYS_NODISCARD ExceptionOr<void> RemoveChild(Node &child) noexcept;
     KRYS_NODISCARD ExceptionOr<void> AppendChild(Node &newChild) noexcept;
 
   private:
-    KRYS_NODISCARD static ExceptionOr<void> EnsurePreInsertValidity(ContainerNode &parent, Node &newChild,
+    KRYS_NODISCARD static ExceptionOr<void> EnsurePreInsertValidity(Node &node, ContainerNode &parent,
                                                                     RefPtr<Node> &&refChild) noexcept;
 
     KRYS_NODISCARD static bool IsHostIncludingAncestorOf(Node &node, Node &other) noexcept;

@@ -43,7 +43,17 @@ namespace Krys::HTML
 
     // TODO: most of the fecking implementation lol
   public:
-    ShadowRoot(Document &document, RefPtr<CustomElementRegistry>&& registry, NodeFlags flags = NodeFlags::None) noexcept;
+    ShadowRoot(Document &document, RefPtr<CustomElementRegistry>&& registry, NodeFlag flags = NodeFlag::None) noexcept;
+
+    KRYS_NODISCARD ShadowRootMode Mode() const noexcept
+    {
+      return _mode;
+    }
+
+    KRYS_NODISCARD RawPtr<Element> Host() const noexcept
+    {
+      return _host;
+    }
   };
 }
 
