@@ -184,7 +184,7 @@ namespace Krys::Tests
       int _inner = 0;
     };
 
-    class weak_outer : public RefCounted<weak_outer, RefCountedFlags::ProvideWeakReferences>
+    class weak_outer : public RefCounted<weak_outer, RefCountedFlag::ProvideWeakReferences>
     {
       friend RefCounted;
 

@@ -15,7 +15,7 @@ namespace Krys::Tests
 
     class AbstractWeakReference;
 
-    class AbstractRefCounted : public RefCounted<AbstractRefCounted, RefCountedFlags::ProvideWeakReferences>
+    class AbstractRefCounted : public RefCounted<AbstractRefCounted, RefCountedFlag::ProvideWeakReferences>
     {
       friend RefCounted;
 

@@ -2,13 +2,13 @@
 
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include <atomic>
 #include <compare>
 #include <format>
 #include <memory>
 #include <ostream>
-#include <type_traits>
 
 namespace Krys::detail
 {

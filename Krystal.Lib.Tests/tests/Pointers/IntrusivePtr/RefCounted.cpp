@@ -10,7 +10,7 @@ namespace Krys::Tests
 {
   namespace
   {
-    struct MinimalCounted : RefCounted<MinimalCounted, RefCountedFlags::None, char>
+    struct MinimalCounted : RefCounted<MinimalCounted, RefCountedFlag::None, char>
     {
       friend RefCounted;
 
@@ -41,7 +41,7 @@ namespace Krys::Tests
     {
       char c;
     };
-    using minimal_adapded_counted = RefCountedAdapter<adapded, RefCountedFlags::None, char>;
+    using minimal_adapded_counted = RefCountedAdapter<adapded, RefCountedFlag::None, char>;
 
     static_assert(sizeof(minimal_adapded_counted) == 2 * sizeof(char));
     static_assert(!DefaultConstructible<minimal_adapded_counted>);
@@ -51,7 +51,7 @@ namespace Krys::Tests
     static_assert(!MoveAssignable<minimal_adapded_counted>);
     static_assert(!Destructible<minimal_adapded_counted>);
 
-    using minimal_wrapped_counted = RefCountedWrapper<char, RefCountedFlags::None, char>;
+    using minimal_wrapped_counted = RefCountedWrapper<char, RefCountedFlag::None, char>;
 
     static_assert(sizeof(minimal_wrapped_counted) == 2 * sizeof(char));
     static_assert(!DefaultConstructible<minimal_wrapped_counted>);
