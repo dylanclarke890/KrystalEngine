@@ -51,7 +51,7 @@ namespace Krys::Tests
     struct CustomWeakReference;
 
     class WithCustomWeakReference
-        : public RefCounted<WithCustomWeakReference, RefCountedFlags::ProvideWeakReferences>
+        : public RefCounted<WithCustomWeakReference, RefCountedFlag::ProvideWeakReferences>
     {
       friend RefCounted;
 

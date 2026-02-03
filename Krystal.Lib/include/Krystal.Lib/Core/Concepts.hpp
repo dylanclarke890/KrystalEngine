@@ -160,6 +160,9 @@ namespace Krys
   template <typename TDerived, typename TBase>
   concept DerivedFrom = std::derived_from<TDerived, TBase>;
 
+  template <typename TBase, typename TDerived>
+  concept BaseOf = std::is_base_of_v<TBase, TDerived>;
+
   template <typename T, typename U>
   concept SameType = std::is_same_v<T, U>;
 

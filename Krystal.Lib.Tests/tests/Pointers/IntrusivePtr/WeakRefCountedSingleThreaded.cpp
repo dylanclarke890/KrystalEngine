@@ -52,7 +52,7 @@ namespace Krys::Tests
 
     class WithCustomWeakReference
         : public RefCounted<WithCustomWeakReference,
-                            RefCountedFlags::ProvideWeakReferences | RefCountedFlags::SingleThreaded>
+                            RefCountedFlag::ProvideWeakReferences | RefCountedFlag::SingleThreaded>
     {
       friend RefCounted;
 

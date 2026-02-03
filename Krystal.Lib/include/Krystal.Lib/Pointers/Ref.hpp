@@ -1,6 +1,10 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Pointers/IntrusivePtr.hpp"
+#include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 
@@ -13,17 +17,17 @@ namespace Krys
     RefPtr<T, Traits> _p;
 
   public:
-    static constexpr Ref NoRef(T &p) noexcept
+    using element_type = T;
+
+    KRYS_NODISCARD static constexpr Ref NoRef(T &p) noexcept
     {
       return Ref(RefPtr<T, Traits>::NoRef(&p));
     }
 
-    static constexpr Ref WithRef(T &p) noexcept
+    KRYS_NODISCARD static constexpr Ref WithRef(T &p) noexcept
     {
       return Ref(RefPtr<T, Traits>::WithRef(&p));
     }
-
-    using element_type = T;
 
     explicit constexpr Ref(RefPtr<T, Traits> &&p) noexcept : _p(std::move(p))
     {
@@ -34,18 +38,19 @@ namespace Krys
     Ref(std::nullptr_t) = delete;
 
     Ref(const Ref &) noexcept = default;
-    Ref(Ref &&) noexcept = default;
     Ref &operator=(const Ref &) noexcept = default;
+
+    Ref(Ref &&) noexcept = default;
     Ref &operator=(Ref &&) noexcept = default;
 
     template <typename U>
-    requires(std::is_convertible_v<U *, T *>)
+    requires(ConvertibleTo<RawPtr<U>, RawPtr<T>>)
     Ref(Ref<U, Traits> &&other) noexcept : _p(std::move(other._p))
     {
-      static_assert(std::is_base_of_v<T, U> || std::is_same_v<T, U>);
+      static_assert(BaseOf<T, U> || SameType<T, U>);
     }
 
-    KRYS_NODISCARD constexpr T *get() const noexcept
+    KRYS_NODISCARD constexpr RawPtr<T> get() const noexcept
     {
       return _p.get();
     }
@@ -55,7 +60,7 @@ namespace Krys
       return *_p;
     }
 
-    KRYS_NODISCARD constexpr T *operator->() const noexcept
+    KRYS_NODISCARD constexpr RawPtr<T> operator->() const noexcept
     {
       return _p.get();
     }
@@ -70,12 +75,12 @@ namespace Krys
       return a.get() == b.get();
     }
 
-    friend bool operator==(const Ref&a, const RefPtr<T, Traits>& b) noexcept
+    friend bool operator==(const Ref &a, const RefPtr<T, Traits> &b) noexcept
     {
       return a.get() == b.get();
     }
 
-    friend bool operator==(const RefPtr<T, Traits>& a, const Ref &b) noexcept
+    friend bool operator==(const RefPtr<T, Traits> &a, const Ref &b) noexcept
     {
       return a.get() == b.get();
     }
