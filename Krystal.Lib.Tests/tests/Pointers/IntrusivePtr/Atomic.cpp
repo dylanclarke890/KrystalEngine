@@ -1,7 +1,7 @@
 ﻿#include "Krystal.Lib.Tests/Pointers/IntrusivePtr/Mocks.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
-#include "Krystal.Lib/Pointers/IntrusivePtr.hpp"
+#include "Krystal.Lib/Pointers/IntrusivePtrV1/IntrusivePtr.hpp"
 #include <atomic>
 #include <catch_all.hpp>
 #include <type_traits>

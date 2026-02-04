@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Lib.Tests/Pointers/IntrusivePtr/Mocks.hpp"
-#include "Krystal.Lib/Pointers/IntrusivePtr.hpp"
+#include "Krystal.Lib/Pointers/IntrusivePtrV1/IntrusivePtr.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

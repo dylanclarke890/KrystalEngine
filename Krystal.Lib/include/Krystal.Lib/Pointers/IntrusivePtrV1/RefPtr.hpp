@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Pointers/IntrusivePtr.hpp"
-#include "Krystal.Lib/Pointers/RefCounted.hpp"
+#include "Krystal.Lib/Pointers/IntrusivePtrV1/IntrusivePtr.hpp"
+#include "Krystal.Lib/Pointers/IntrusivePtrV1/RefCounted.hpp"
 
 namespace Krys
 {

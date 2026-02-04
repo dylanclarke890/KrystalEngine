@@ -1,4 +1,4 @@
-﻿#include "Krystal.Lib/Pointers/RefCounted.hpp"
+﻿#include "Krystal.Lib/Pointers/IntrusivePtrV1/RefCounted.hpp"
 #include <catch_all.hpp>
 #include <cstdint>
 #include <type_traits>

@@ -8,9 +8,9 @@
 #include "Krystal.HTML/Utils/BoolOr.hpp"
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
-#include "Krystal.Lib/Pointers/Ref.hpp"
-#include "Krystal.Lib/Pointers/RefCounted.hpp"
-#include "Krystal.Lib/Pointers/RefPtr.hpp"
+#include "Krystal.Lib/Pointers/IntrusivePtrV1/Ref.hpp"
+#include "Krystal.Lib/Pointers/IntrusivePtrV1/RefCounted.hpp"
+#include "Krystal.Lib/Pointers/IntrusivePtrV1/RefPtr.hpp"
 #include "Krystal.Lib/Types/SmallList.hpp"
 
 namespace Krys::HTML

@@ -318,10 +318,10 @@
     <ClInclude Include="include\Krystal.Lib\Core\Move.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtr.hpp">
+    <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\IntrusivePtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefPtr.hpp">
+    <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\RefPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Core\TypeCast.hpp">
@@ -339,13 +339,16 @@
     <ClInclude Include="include\Krystal.Lib\Detection\NumberOfCores.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted.hpp">
+    <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\RefCounted.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\Ref.hpp">
+    <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\Ref.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\WeakRef.hpp">
+    <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\WeakRef.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefCounted.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -4,8 +4,8 @@
 #include "Krystal.HTML/Events/EventListener.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
-#include "Krystal.Lib/Pointers/RefCounted.hpp"
-#include "Krystal.Lib/Pointers/RefPtr.hpp"
+#include "Krystal.Lib/Pointers/IntrusivePtrV1/RefCounted.hpp"
+#include "Krystal.Lib/Pointers/IntrusivePtrV1/RefPtr.hpp"
 
 namespace Krys::HTML
 {

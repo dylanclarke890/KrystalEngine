@@ -2,7 +2,7 @@
 
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
-#include "Krystal.Lib/Pointers/IntrusivePtr.hpp"
+#include "Krystal.Lib/Pointers/IntrusivePtrV1/IntrusivePtr.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <atomic>
 #include <cassert>
@@ -600,12 +600,12 @@ namespace Krys
 
     void CallAddOwnerRef() noexcept
     {
-      static_cast<RawPtr<const derived_type<>>>(this)->AddOwnerRef();
+      static_cast<RawPtr<derived_type<>>>(this)->AddOwnerRef();
     }
 
     void CallSubOwnerRef() noexcept
     {
-      static_cast<RawPtr<const derived_type<>>>(this)->SubOwnerRef();
+      static_cast<RawPtr<derived_type<>>>(this)->SubOwnerRef();
     }
 
     void CallDestroy() const

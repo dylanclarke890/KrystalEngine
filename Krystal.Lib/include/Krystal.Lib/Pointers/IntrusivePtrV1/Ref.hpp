@@ -3,10 +3,10 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
-#include "Krystal.Lib/Pointers/IntrusivePtr.hpp"
+#include "Krystal.Lib/Pointers/IntrusivePtrV1/IntrusivePtr.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Pointers/RefCounted.hpp"
-#include "Krystal.Lib/Pointers/RefPtr.hpp"
+#include "Krystal.Lib/Pointers/IntrusivePtrV1/RefCounted.hpp"
+#include "Krystal.Lib/Pointers/IntrusivePtrV1/RefPtr.hpp"
 
 namespace Krys
 {
