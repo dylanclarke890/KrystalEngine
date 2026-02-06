@@ -8,14 +8,13 @@ namespace Krys
   {
     HashTableDeletedValue
   };
-
   enum HashTableEmptyValueType
   {
     HashTableEmptyValue
   };
 
   template <typename T>
-  inline T *GetPtr(T *p)
+  inline T *getPtr(T *p)
   {
     return p;
   }
@@ -42,16 +41,15 @@ namespace Krys
   template <typename T>
   concept NonNullableSmartPtr = SmartPtr<T> && !IsSmartPtrNullableV<T>;
 
-  template <typename T, bool IsSmartPtr>
+  template <typename T, bool isSmartPtr>
   struct GetPtrHelperBase;
 
   template <typename T>
-  struct GetPtrHelperBase<T, false /* IsSmartPtr */>
+  struct GetPtrHelperBase<T, false /* isSmartPtr */>
   {
     using PtrType = T *;
     using UnderlyingType = T;
-
-    static T *GetPtr(T &p)
+    static T *getPtr(T &p)
     {
       return std::addressof(p);
     }
@@ -62,8 +60,7 @@ namespace Krys
   {
     using PtrType = typename T::PtrType;
     using UnderlyingType = typename T::ValueType;
-
-    static PtrType GetPtr(const T &p)
+    static PtrType getPtr(const T &p)
     {
       return p.get();
     }
@@ -75,18 +72,19 @@ namespace Krys
   };
 
   template <typename T>
-  inline typename GetPtrHelper<T>::PtrType GetPtr(T &p)
+  inline typename GetPtrHelper<T>::PtrType getPtr(T &p)
   {
-    return GetPtrHelper<T>::GetPtr(p);
+    return GetPtrHelper<T>::getPtr(p);
   }
 
   template <typename T>
-  inline typename GetPtrHelper<T>::PtrType GetPtr(const T &p)
+  inline typename GetPtrHelper<T>::PtrType getPtr(const T &p)
   {
-    return GetPtrHelper<T>::GetPtr(p);
+    return GetPtrHelper<T>::getPtr(p);
   }
 
   // Explicit specialization for C++ standard library types.
+
   template <typename T, typename Deleter>
   struct IsSmartPtr<std::unique_ptr<T, Deleter>>
   {
@@ -99,9 +97,9 @@ namespace Krys
   {
     using PtrType = T *;
     using UnderlyingType = T;
-    static T *GetPtr(const std::unique_ptr<T, Deleter> &p)
+    static T *getPtr(const std::unique_ptr<T, Deleter> &p)
     {
       return p.get();
     }
   };
-}
+} 

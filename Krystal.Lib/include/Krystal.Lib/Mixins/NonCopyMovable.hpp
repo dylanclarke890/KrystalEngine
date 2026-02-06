@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/Mixins/NonMovable.hpp"
 
@@ -7,7 +8,7 @@ namespace Krys
 {
   /// @brief A mixin class that makes a class non-copyable and non-movable.
   template <class T>
-  class NonCopyMovable
+  class KRYS_EMPTY_BASE_CLASS NonCopyMovable
   {
   public:
     NonCopyMovable(const NonCopyMovable &) = delete;

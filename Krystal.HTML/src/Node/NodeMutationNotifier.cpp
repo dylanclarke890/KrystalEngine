@@ -51,7 +51,7 @@ namespace Krys::HTML
     NodeInsertedContext context {
       .InsertedInto = insertedInto,
       .ConnectedToDocument = insertedInto.IsConnected(),
-      .TreeScopeChanged = insertedInto.IsInTreeScope(),
+      .TreeScopeChanged = insertedInto.IsInTreeScope(), // TODO(FIX): More precise check
     };
     DoNotifyNodeInserted(node, context);
   }
@@ -61,7 +61,7 @@ namespace Krys::HTML
     NodeRemovedContext context {
       .RemovedFrom = removedFrom,
       .DisconnectedFromDocument = node.IsConnected(),
-      .TreeScopeChanged = removedFrom.IsInTreeScope(),
+      .TreeScopeChanged = removedFrom.IsInTreeScope(), // TODO(FIX): More precise check
     };
     DoNotifyNodeRemoved(node, context);
   }

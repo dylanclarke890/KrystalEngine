@@ -1,10 +1,12 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Core/Attributes.hpp"
+
 namespace Krys
 {
   /// @brief A mixin class that makes a class non-copyable.
   template <class T>
-  class NonCopyable
+  class KRYS_EMPTY_BASE_CLASS NonCopyable
   {
   public:
     NonCopyable(const NonCopyable &) = delete;

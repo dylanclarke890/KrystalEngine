@@ -89,5 +89,22 @@
 #endif
 
 #if !defined(KRYS_RETURNS_NONNULL)
-  #define KRYS_RETURNS_NONNULL __attribute__((returns_nonnull))
+  #if KRYS_COMPILER(CLANG)
+    #define KRYS_RETURNS_NONNULL [[clang::returns_nonnull]]
+  #else
+    #define KRYS_RETURNS_NONNULL
+  #endif
+#endif
+
+#if !defined(KRYS_UNUSED_TYPE_ALIAS)
+  #define KRYS_UNUSED_TYPE_ALIAS __attribute__((unused))
+#endif
+
+#if !defined(KRYS_EMPTY_BASE_CLASS)
+  #if KRYS_COMPILER(MSVC)
+    // https://github.com/MicrosoftDocs/cpp-docs/blob/main/docs/cpp/empty-bases.md
+    #define KRYS_EMPTY_BASE_CLASS __declspec(empty_bases)
+  #else
+    #define KRYS_EMPTY_BASE_CLASS
+  #endif
 #endif

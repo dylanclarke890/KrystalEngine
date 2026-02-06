@@ -93,8 +93,18 @@
   #define KRYS_OS_QNX 1
 #endif
 
+// KRYS_OS(WIN64) - 64-bit Windows
+#if defined(WIN64) || defined(_WIN64)
+  #define KRYS_OS_WIN64 1
+#endif
+
+// KRYS_OS(WIN32) - 32-bit Windows
+#if !KRYS_OS(WIN64) && (defined(WIN32) || defined(_WIN32))
+  #define KRYS_OS_WIN32 1
+#endif
+
 // KRYS_OS(WINDOWS) - Any version of Windows
-#if defined(WIN32) || defined(_WIN32)
+#if KRYS_OS(WIN64) || KRYS_OS(WIN32)
   #define KRYS_OS_WINDOWS 1
 #endif
 

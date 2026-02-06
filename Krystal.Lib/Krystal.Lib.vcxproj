@@ -133,6 +133,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.Lib\Atomics.hpp" />
     <ClInclude Include="include\Krystal.Lib\Commands\CommandArena.hpp" />
     <ClInclude Include="include\Krystal.Lib\Commands\CommandList.hpp" />
     <ClInclude Include="include\Krystal.Lib\Commands\CommandListReader.hpp" />
@@ -141,6 +142,7 @@
     <ClInclude Include="include\Krystal.Lib\Core\Memory.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Move.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\TypeCast.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Detection\AddressSpaceBitSize.hpp" />
     <ClInclude Include="include\Krystal.Lib\Detection\NumberOfCores.hpp" />
     <ClInclude Include="include\Krystal.Lib\ForbidHeapAllocation.hpp" />
     <ClInclude Include="include\Krystal.Lib\InlineContainers\Forward.hpp" />
@@ -154,12 +156,39 @@
     <ClInclude Include="include\Krystal.Lib\Mixins\NonCopyMovable.hpp" />
     <ClInclude Include="include\Krystal.Lib\Mixins\NonMovable.hpp" />
     <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\GetPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\IntrusivePtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RawPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\Ref.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\RefPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\RefCounted.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\AbstractCanMakeCheckedPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\AbstractRefCounted.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\AbstractRefCountedAndCanMakeWeakPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\AbstractThreadSafeRefCountedAndCanMakeWeakPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CanMakeWeakPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CheckedPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CheckedRef.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CompactPointerTuple.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CompactPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CompactRefPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CompactRefPtrTuple.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CompactUniquePtrTuple.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\GetPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\InlineWeakPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\InlineWeakRef.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RawPtrTraits.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\Ref.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefCountedAndCanMakeWeakPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefCountedWithInlineWeakPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\TaggedPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\ThreadSafeRefCounted.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\ThreadSafeWeakPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\WeakPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\WeakPtrFactory.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\WeakPtrImpl.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\WeakRef.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefCountDebugger.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefCounted.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\SharedPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\UniquePtr.hpp" />
@@ -258,6 +287,8 @@
   <ItemGroup>
     <ClCompile Include="src\Detection\NumberOfCores.cpp" />
     <ClCompile Include="src\Events\EventManager.cpp" />
+    <ClCompile Include="src\Locks\Lock.cpp" />
+    <ClCompile Include="src\Locks\WordLock.cpp" />
     <ClCompile Include="third-party\llvm\Support\MemAlloc.cpp" />
     <ClCompile Include="third-party\llvm\ADT\SmallVector.cpp" />
   </ItemGroup>
