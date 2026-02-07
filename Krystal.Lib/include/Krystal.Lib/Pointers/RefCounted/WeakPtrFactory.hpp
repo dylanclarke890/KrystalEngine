@@ -1,40 +1,13 @@
-﻿/*
- * Copyright (C) 2013 Google, Inc. All rights reserved.
- * Copyright (C) 2015-2020 Apple Inc. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *
- * THIS SOFTWARE IS PROVIDED BY APPLE INC. ``AS IS'' AND ANY
- * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL APPLE INC. OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY
- * OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
- * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+﻿#pragma once
 
-#pragma once
-
-#include <wtf/CompactRefPtrTuple.h>
-#include <wtf/Forward.h>
-#include <wtf/Packed.h>
-#include <wtf/RefPtr.h>
-#include <wtf/WeakRef.h>
+#include "Krystal.Lib/Pointers/RefCounted/CompactRefPtrTuple.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/RefPtr.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/WeakRef.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
+#include "Krystal.Lib/Detection/Environment.hpp"
 
 namespace Krys
 {
-
 #define USING_CAN_MAKE_WEAKPTR(BASE)                                                                         \
   using BASE::weakImpl;                                                                                      \
   using BASE::weakImplIfExists;                                                                              \
@@ -44,17 +17,14 @@ namespace Krys
 
   // Note: you probably want to inherit from CanMakeWeakPtr rather than use this directly.
   template <typename T, typename WeakPtrImpl = DefaultWeakPtrImpl>
-  class WeakPtrFactory
+  class WeakPtrFactory : public NonCopyable<WeakPtrFactory>
   {
-    WTF_MAKE_NONCOPYABLE(WeakPtrFactory);
-    WTF_DEPRECATED_MAKE_FAST_ALLOCATED(WeakPtrFactory);
-
   public:
     using ObjectType = T;
     using WeakPtrImplType = WeakPtrImpl;
 
     WeakPtrFactory()
-#if ASSERT_ENABLED
+#if KRYS_ENV(DEV)
         : m_wasConstructedOnMainThread(isMainThread())
 #endif
     {
@@ -62,14 +32,14 @@ namespace Krys
 
     void prepareForUseOnlyOnMainThread()
     {
-#if ASSERT_ENABLED
+#if KRYS_ENV(DEV)
       m_wasConstructedOnMainThread = true;
 #endif
     }
 
     void prepareForUseOnlyOnNonMainThread()
     {
-#if ASSERT_ENABLED
+#if KRYS_ENV(DEV)
       assert(m_wasConstructedOnMainThread);
       m_wasConstructedOnMainThread = false;
 #endif
@@ -119,7 +89,7 @@ namespace Krys
       return m_impl ? m_impl->refCount() - 1 : 0u;
     }
 
-#if ASSERT_ENABLED
+#if KRYS_ENV(DEV)
     bool isInitialized() const
     {
       return m_impl;
@@ -133,24 +103,21 @@ namespace Krys
     friend class WeakRef;
 
     mutable RefPtr<WeakPtrImpl> m_impl;
-#if ASSERT_ENABLED
+#if KRYS_ENV(DEV)
     bool m_wasConstructedOnMainThread;
 #endif
   };
 
   // Note: you probably want to inherit from CanMakeWeakPtrWithBitField rather than use this directly.
   template <typename T, typename WeakPtrImpl = DefaultWeakPtrImpl>
-  class WeakPtrFactoryWithBitField
+  class WeakPtrFactoryWithBitField : public NonCopyable<WeakPtrFactoryWithBitField<T, WeakPtrImpl>>
   {
-    WTF_MAKE_NONCOPYABLE(WeakPtrFactoryWithBitField);
-    WTF_DEPRECATED_MAKE_FAST_ALLOCATED(WeakPtrFactoryWithBitField);
-
   public:
     using ObjectType = T;
     using WeakPtrImplType = WeakPtrImpl;
 
     WeakPtrFactoryWithBitField()
-#if ASSERT_ENABLED
+#if KRYS_ENV(DEV)
         : m_wasConstructedOnMainThread(isMainThread())
 #endif
     {
@@ -205,7 +172,7 @@ namespace Krys
       return 0;
     }
 
-#if ASSERT_ENABLED
+#if KRYS_ENV(DEV)
     bool isInitialized() const
     {
       return m_impl.pointer();
@@ -228,7 +195,7 @@ namespace Krys
     friend class WeakRef;
 
     mutable CompactRefPtrTuple<WeakPtrImpl, uint16_t> m_impl;
-#if ASSERT_ENABLED
+#if KRYS_ENV(DEV)
     bool m_wasConstructedOnMainThread;
 #endif
   };
@@ -243,5 +210,3 @@ namespace Krys
 
 } 
 
-using WTF::WeakPtrFactory;
-using WTF::WeakPtrFactoryInitialization;

@@ -21,7 +21,7 @@ namespace Krys
 
     CompactRefPtrTuple(RefPtr<T> &&pointer, Type type)
     {
-      setPointer(WTF::move(pointer));
+      setPointer(Krys::Move(pointer));
       setType(type);
     }
 
@@ -48,7 +48,7 @@ namespace Krys
 
     CompactRefPtrTuple &operator=(CompactRefPtrTuple &&other)
     {
-      CompactRefPtrTuple moved(WTF::move(other));
+      CompactRefPtrTuple moved(Krys::Move(other));
       swap(moved);
       return *this;
     }
@@ -72,7 +72,7 @@ namespace Krys
 
     void setPointer(RefPtr<T> &&pointer)
     {
-      auto willRelease = WTF::move(pointer);
+      auto willRelease = Krys::Move(pointer);
       auto *old = m_data.pointer();
       m_data.setPointer(willRelease.leakRef());
       Krys::DefaultRefDerefTraits<T>::derefIfNotNull(old);
@@ -80,7 +80,7 @@ namespace Krys
 
     void setPointer(Ref<T> &&pointer)
     {
-      auto willRelease = WTF::move(pointer);
+      auto willRelease = Krys::Move(pointer);
       auto *old = m_data.pointer();
       m_data.setPointer(&willRelease.leakRef());
       Krys::DefaultRefDerefTraits<T>::derefIfNotNull(old);

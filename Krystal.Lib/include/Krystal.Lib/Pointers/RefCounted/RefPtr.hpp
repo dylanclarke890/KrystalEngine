@@ -225,7 +225,7 @@ namespace Krys
   template <typename T, typename U, typename V>
   inline RefPtr<T, U, V> &RefPtr<T, U, V>::operator=(RefPtr &&o)
   {
-    RefPtr ptr = WTF::move(o);
+    RefPtr ptr = Krys::Move(o);
     swap(ptr);
     return *this;
   }
@@ -234,7 +234,7 @@ namespace Krys
   template <typename X, typename Y, typename Z>
   inline RefPtr<T, U, V> &RefPtr<T, U, V>::operator=(RefPtr<X, Y, Z> &&o)
   {
-    RefPtr ptr = WTF::move(o);
+    RefPtr ptr = Krys::Move(o);
     swap(ptr);
     return *this;
   }
@@ -243,7 +243,7 @@ namespace Krys
   template <typename U>
   inline RefPtr<T, V, W> &RefPtr<T, V, W>::operator=(Ref<U> &&reference)
   {
-    RefPtr ptr = WTF::move(reference);
+    RefPtr ptr = Krys::Move(reference);
     swap(ptr);
     return *this;
   }
@@ -336,7 +336,7 @@ namespace Krys
     static_assert(!std::same_as<Source, Target>, "Unnecessary cast to same type");
     static_assert(std::derived_from<Target, Source>, "Should be a downcast");
     assert(!source || is<Target>(*source));
-    return unsafeRefPtrDowncast<match_constness_t<Source, Target>>(WTF::move(source));
+    return unsafeRefPtrDowncast<match_constness_t<Source, Target>>(Krys::Move(source));
   }
 
   template <typename Target, typename Source, typename PtrTraits, typename RefDerefTraits>
@@ -346,7 +346,7 @@ namespace Krys
     static_assert(!std::same_as<Source, Target>, "Unnecessary cast to same type");
     static_assert(std::derived_from<Target, Source>, "Should be a downcast");
     assert(!source || is<Target>(*source));
-    return unsafeRefPtrDowncast<match_constness_t<Source, Target>>(WTF::move(source));
+    return unsafeRefPtrDowncast<match_constness_t<Source, Target>>(Krys::Move(source));
   }
 
   template <typename Target, typename Source, typename TargetPtrTraits = RawPtrTraits<Target>,
@@ -360,13 +360,13 @@ namespace Krys
     if (!is<Target>(source))
       return nullptr;
     return unsafeRefPtrDowncast<match_constness_t<Source, Target>, TargetPtrTraits, TargetRefDerefTraits>(
-      WTF::move(source));
+      Krys::Move(source));
   }
 
   template <typename T, typename U>
   KRYS_ALWAYS_INLINE void lazyInitialize(const RefPtr<T> &ptr, Ref<U> &&obj)
   {
     assert(!ptr);
-    const_cast<RefPtr<T> &>(ptr) = WTF::move(obj);
+    const_cast<RefPtr<T> &>(ptr) = Krys::Move(obj);
   }
 }

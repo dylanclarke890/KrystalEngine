@@ -48,7 +48,7 @@ namespace Krys
     requires(std::same_as<UDeleter, Deleter> || std::same_as<UDeleter, std::default_delete<U>>)
     CompactUniquePtrTuple<T, Type, Deleter> &operator=(CompactUniquePtrTuple<U, Type, UDeleter> &&other)
     {
-      CompactUniquePtrTuple moved {WTF::move(other)};
+      CompactUniquePtrTuple moved {Krys::Move(other)};
       std::swap(m_data, moved.m_data);
       return *this;
     }

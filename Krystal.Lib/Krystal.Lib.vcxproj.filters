@@ -438,6 +438,9 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\TaggedPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\TypeTraits.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Events\EventManager.cpp">
@@ -450,12 +453,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Detection\NumberOfCores.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Locks\WordLock.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Locks\Lock.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

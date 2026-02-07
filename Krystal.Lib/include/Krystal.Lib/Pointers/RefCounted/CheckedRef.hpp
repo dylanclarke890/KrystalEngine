@@ -158,7 +158,7 @@ namespace Krys
     CheckedRef &operator=(CheckedRef &&other)
     {
       unpoison(*this);
-      CheckedRef moved {WTF::move(other)};
+      CheckedRef moved {Krys::Move(other)};
       PtrTraits::swap(_ptr, moved._ptr);
       return *this;
     }
@@ -167,7 +167,7 @@ namespace Krys
     CheckedRef &operator=(CheckedRef<OtherType, OtherPtrTraits> &&other)
     {
       unpoison(*this);
-      CheckedRef moved {WTF::move(other)};
+      CheckedRef moved {Krys::Move(other)};
       PtrTraits::swap(_ptr, moved._ptr);
       return *this;
     }
@@ -315,7 +315,7 @@ namespace Krys
     using TakeType = CheckedPtr<P>;
     static TakeType take(CheckedRef<P> &&value)
     {
-      return isEmptyValue(value) ? nullptr : CheckedPtr<P>(WTF::move(value));
+      return isEmptyValue(value) ? nullptr : CheckedPtr<P>(Krys::Move(value));
     }
   };
 

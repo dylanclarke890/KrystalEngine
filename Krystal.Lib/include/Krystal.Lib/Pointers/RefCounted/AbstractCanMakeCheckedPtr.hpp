@@ -18,7 +18,6 @@ namespace Krys
     virtual void decrementCheckedPtrCount() const = 0;
     virtual void setDidBeginCheckedPtrDeletion() = 0;
   };
-
 }
 
 #define OVERRIDE_ABSTRACT_CAN_MAKE_CHECKEDPTR(BaseClass)                                                     \

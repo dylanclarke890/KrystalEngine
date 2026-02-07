@@ -152,7 +152,7 @@ namespace Krys
   template <typename T>
   inline InlineWeakPtr<T> &InlineWeakPtr<T>::operator=(InlineWeakPtr &&o)
   {
-    InlineWeakPtr ptr = WTF::move(o);
+    InlineWeakPtr ptr = Krys::Move(o);
     swap(ptr);
     return *this;
   }
@@ -234,7 +234,7 @@ namespace Krys
     using TakeType = InlineWeakPtr<P>;
     static TakeType take(InlineWeakPtr<P> &&value)
     {
-      return isEmptyValue(value) ? nullptr : InlineWeakPtr<P>(WTF::move(value));
+      return isEmptyValue(value) ? nullptr : InlineWeakPtr<P>(Krys::Move(value));
     }
   };
 }

@@ -174,7 +174,7 @@ namespace Krys
 
     CheckedPtr &operator=(CheckedPtr &&other)
     {
-      CheckedPtr moved {WTF::move(other)};
+      CheckedPtr moved {Krys::Move(other)};
       PtrTraits::swap(_ptr, moved._ptr);
       return *this;
     }
@@ -182,7 +182,7 @@ namespace Krys
     template <typename OtherType, typename OtherPtrTraits>
     CheckedPtr &operator=(CheckedPtr<OtherType, OtherPtrTraits> &&other)
     {
-      CheckedPtr moved {WTF::move(other)};
+      CheckedPtr moved {Krys::Move(other)};
       PtrTraits::swap(_ptr, moved._ptr);
       return *this;
     }

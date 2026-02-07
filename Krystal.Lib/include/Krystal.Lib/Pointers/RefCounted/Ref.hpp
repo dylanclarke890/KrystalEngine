@@ -223,7 +223,7 @@ namespace Krys
     if (__asan_address_is_poisoned(this))
       __asan_unpoison_memory_region(this, sizeof(*this));
 #endif
-    Ref movedReference = WTF::move(reference);
+    Ref movedReference = Krys::Move(reference);
     swap(movedReference);
     return *this;
   }
@@ -237,7 +237,7 @@ namespace Krys
     if (__asan_address_is_poisoned(this))
       __asan_unpoison_memory_region(this, sizeof(*this));
 #endif
-    Ref movedReference = WTF::move(reference);
+    Ref movedReference = Krys::Move(reference);
     swap(movedReference);
     return *this;
   }
@@ -387,7 +387,7 @@ namespace Krys
     static_assert(!std::same_as<Source, Target>, "Unnecessary cast to same type");
     static_assert(std::derived_from<Target, Source>, "Should be a downcast");
     assert(is<Target>(source));
-    return unsafeRefDowncast<match_constness_t<Source, Target>>(WTF::move(source));
+    return unsafeRefDowncast<match_constness_t<Source, Target>>(Krys::Move(source));
   }
 
   template <typename Target, typename Source, typename PtrTraits, typename RefDerefTraits>
@@ -397,7 +397,7 @@ namespace Krys
     static_assert(!std::same_as<Source, Target>, "Unnecessary cast to same type");
     static_assert(std::derived_from<Target, Source>, "Should be a downcast");
     assert(is<Target>(source));
-    return unsafeRefDowncast<match_constness_t<Source, Target>>(WTF::move(source));
+    return unsafeRefDowncast<match_constness_t<Source, Target>>(Krys::Move(source));
   }
 
   template <typename Target, typename Source, typename PtrTraits, typename RefDerefTraits>
@@ -408,7 +408,7 @@ namespace Krys
     static_assert(std::derived_from<Target, Source>, "Should be a downcast");
     if (!is<Target>(source))
       return nullptr;
-    return unsafeRefDowncast<match_constness_t<Source, Target>>(WTF::move(source));
+    return unsafeRefDowncast<match_constness_t<Source, Target>>(Krys::Move(source));
   }
 
   template <typename T, typename PtrTraits, typename RefDerefTraits>

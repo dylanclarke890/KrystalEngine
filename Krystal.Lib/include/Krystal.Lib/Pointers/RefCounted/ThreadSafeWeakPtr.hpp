@@ -4,6 +4,7 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/RefPtr.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/TaggedPtr.hpp"
 #include <mutex>
 
 namespace Krys
@@ -506,7 +507,7 @@ namespace Krys
     RefPtr<T> convertToWeak()
     {
       assert(isStrong());
-      RefPtr<T> strong = WTF::move(m_strong);
+      RefPtr<T> strong = Krys::Move(m_strong);
       m_weak = strong;
       m_weak.setTag(Status::Weak);
       assert(isWeak());
@@ -519,7 +520,7 @@ namespace Krys
       RefPtr<T> strong = m_weak.get();
       m_weak.setTag(Status::Strong);
       m_weak = nullptr;
-      m_strong = WTF::move(strong);
+      m_strong = Krys::Move(strong);
       assert(isStrong());
       return m_strong.get();
     }
@@ -533,7 +534,7 @@ namespace Krys
 
     ThreadSafeWeakOrStrongPtr &operator=(ThreadSafeWeakOrStrongPtr &&other)
     {
-      ThreadSafeWeakOrStrongPtr moved(WTF::move(other));
+      ThreadSafeWeakOrStrongPtr moved(Krys::Move(other));
       swap(moved);
       return *this;
     }
@@ -556,7 +557,7 @@ namespace Krys
     template <typename U>
     ThreadSafeWeakOrStrongPtr &operator=(RefPtr<U> &&strongReference)
     {
-      ThreadSafeWeakOrStrongPtr moved(WTF::move(strongReference));
+      ThreadSafeWeakOrStrongPtr moved(Krys::Move(strongReference));
       swap(moved);
       return *this;
     }
@@ -572,7 +573,7 @@ namespace Krys
     template <typename U>
     ThreadSafeWeakOrStrongPtr &operator=(Ref<U> &&strongReference)
     {
-      ThreadSafeWeakOrStrongPtr moved(WTF::move(strongReference));
+      ThreadSafeWeakOrStrongPtr moved(Krys::Move(strongReference));
       swap(moved);
       return *this;
     }
@@ -603,14 +604,14 @@ namespace Krys
     ThreadSafeWeakOrStrongPtr(ThreadSafeWeakOrStrongPtr &&other)
     {
       assert(isStrong());
-      moveConstructFrom(WTF::move(other));
+      moveConstructFrom(Krys::Move(other));
     }
 
     template <typename U>
     ThreadSafeWeakOrStrongPtr(ThreadSafeWeakOrStrongPtr<U> &&other)
     {
       assert(isStrong());
-      moveConstructFrom(WTF::move(other));
+      moveConstructFrom(Krys::Move(other));
     }
 
     template <typename U>
@@ -633,7 +634,7 @@ namespace Krys
     ThreadSafeWeakOrStrongPtr(Ref<U> &&strongReference)
     {
       assert(isStrong());
-      m_strong = WTF::move(strongReference);
+      m_strong = Krys::Move(strongReference);
       assert(isStrong());
     }
 
@@ -641,7 +642,7 @@ namespace Krys
     ThreadSafeWeakOrStrongPtr(RefPtr<U> &&strongReference)
     {
       assert(isStrong());
-      m_strong = WTF::move(strongReference);
+      m_strong = Krys::Move(strongReference);
       assert(isStrong());
     }
 
@@ -666,7 +667,7 @@ namespace Krys
         auto weak = std::exchange(other.m_weak, ThreadSafeWeakPtr<U, EnumTaggingTraits<U, Status>> {});
         assert(other.isStrong());
         other.m_strong = std::exchange(m_strong, nullptr);
-        m_weak = WTF::move(weak);
+        m_weak = Krys::Move(weak);
         assert(isWeak());
         return;
       }
@@ -681,7 +682,7 @@ namespace Krys
       other.m_weak = std::exchange(m_weak, ThreadSafeWeakPtr<T, EnumTaggingTraits<T, Status>> {});
       assert(other.isWeak());
       assert(isStrong());
-      m_strong = WTF::move(strong);
+      m_strong = Krys::Move(strong);
     }
 
   private:

@@ -184,6 +184,7 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\TaggedPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\ThreadSafeRefCounted.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\ThreadSafeWeakPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\TypeTraits.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\WeakPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\WeakPtrFactory.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\WeakPtrImpl.hpp" />
@@ -287,8 +288,6 @@
   <ItemGroup>
     <ClCompile Include="src\Detection\NumberOfCores.cpp" />
     <ClCompile Include="src\Events\EventManager.cpp" />
-    <ClCompile Include="src\Locks\Lock.cpp" />
-    <ClCompile Include="src\Locks\WordLock.cpp" />
     <ClCompile Include="third-party\llvm\Support\MemAlloc.cpp" />
     <ClCompile Include="third-party\llvm\ADT\SmallVector.cpp" />
   </ItemGroup>

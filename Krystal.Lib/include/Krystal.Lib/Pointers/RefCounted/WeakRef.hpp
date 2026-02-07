@@ -1,13 +1,12 @@
 ﻿#pragma once
 
-#include <wtf/GetPtr.h>
-#include <wtf/HashTraits.h>
-#include <wtf/SingleThreadIntegralWrapper.h>
-#include <wtf/Threading.h>
-#include <wtf/ThreadSafeRefCounted.h>
-#include <wtf/TypeCasts.h>
-#include <wtf/TypeTraits.h>
-#include <wtf/WeakPtrImpl.h>
+#include "Krystal.Lib/Core/TypeCast.hpp"
+#include "Krystal.Lib/Detection/Environment.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/GetPtr.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/ThreadSafeRefCounted.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/TypeTraits.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/WeakPtr.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/WeakPtrImpl.hpp"
 
 namespace Krys
 {
@@ -34,23 +33,23 @@ namespace Krys
             EnableWeakPtrThreadingAssertions shouldEnableAssertions = EnableWeakPtrThreadingAssertions::Yes)
     requires(!IsSmartPtr<T>::value && !std::is_pointer_v<T>)
         : m_impl(object.weakImpl())
-#if ASSERT_ENABLED
+#if KRYS_ENV(DEV)
           ,
           m_shouldEnableAssertions(shouldEnableAssertions == EnableWeakPtrThreadingAssertions::Yes)
 #endif
     {
-      UNUSED_PARAM(shouldEnableAssertions);
+      (void)shouldEnableAssertions;
     }
 
     explicit WeakRef(Ref<WeakPtrImpl> &&impl, EnableWeakPtrThreadingAssertions shouldEnableAssertions =
                                                 EnableWeakPtrThreadingAssertions::Yes)
-        : m_impl(WTF::move(impl))
-#if ASSERT_ENABLED
+        : m_impl(Krys::Move(impl))
+#if KRYS_ENV(DEV)
           ,
           m_shouldEnableAssertions(shouldEnableAssertions == EnableWeakPtrThreadingAssertions::Yes)
 #endif
     {
-      UNUSED_PARAM(shouldEnableAssertions);
+      (void)shouldEnableAssertions;
     }
 
     WeakRef(HashTableDeletedValueType) : m_impl(HashTableDeletedValue)
@@ -75,7 +74,7 @@ namespace Krys
     }
     Ref<WeakPtrImpl> releaseImpl()
     {
-      return WTF::move(m_impl);
+      return Krys::Move(m_impl);
     }
 
     T *ptrAllowingHashTableEmptyValue() const
@@ -125,7 +124,7 @@ namespace Krys
 
     EnableWeakPtrThreadingAssertions enableWeakPtrThreadingAssertions() const
     {
-#if ASSERT_ENABLED
+#if KRYS_ENV(DEV)
       return m_shouldEnableAssertions ? EnableWeakPtrThreadingAssertions::Yes
                                       : EnableWeakPtrThreadingAssertions::No;
 #else
@@ -134,7 +133,7 @@ namespace Krys
     }
 
   private:
-#if ASSERT_ENABLED
+#if KRYS_ENV(DEV)
     inline bool canSafelyBeUsed() const
     {
       // FIXME: Our GC threads currently need to get opaque pointers from WeakPtrs and have to be
@@ -146,7 +145,7 @@ namespace Krys
 #endif
 
     Ref<WeakPtrImpl> m_impl;
-#if ASSERT_ENABLED
+#if KRYS_ENV(DEV)
     bool m_shouldEnableAssertions {true};
 #endif
   };
@@ -172,61 +171,6 @@ namespace Krys
   {
     static constexpr bool value = true;
     static constexpr bool isNullable = false;
-  };
-
-  template <typename P, typename WeakPtrImpl>
-  struct WeakRefHashTraits : SimpleClassHashTraits<WeakRef<P, WeakPtrImpl>>
-  {
-    static constexpr bool emptyValueIsZero = true;
-    static WeakRef<P, WeakPtrImpl> emptyValue()
-    {
-      return HashTableEmptyValue;
-    }
-
-    template <typename>
-    static void constructEmptyValue(WeakRef<P, WeakPtrImpl> &slot)
-    {
-      new (NotNull, std::addressof(slot)) WeakRef<P, WeakPtrImpl>(HashTableEmptyValue);
-    }
-
-    static constexpr bool hasIsEmptyValueFunction = true;
-    static bool isEmptyValue(const WeakRef<P, WeakPtrImpl> &value)
-    {
-      return value.isHashTableEmptyValue();
-    }
-
-    using PeekType = P *;
-    static PeekType peek(const WeakRef<P, WeakPtrImpl> &value)
-    {
-      return const_cast<PeekType>(value.ptrAllowingHashTableEmptyValue());
-    }
-    static PeekType peek(P *value)
-    {
-      return value;
-    }
-
-    using TakeType = WeakPtr<P, WeakPtrImpl>;
-    static TakeType take(WeakRef<P, WeakPtrImpl> &&value)
-    {
-      return isEmptyValue(value) ? nullptr : WeakPtr<P, WeakPtrImpl>(WTF::move(value));
-    }
-  };
-
-  template <typename P, typename WeakPtrImpl>
-  struct HashTraits<WeakRef<P, WeakPtrImpl>> : WeakRefHashTraits<P, WeakPtrImpl>
-  {
-  };
-
-  template <typename P, typename WeakPtrImpl>
-  struct PtrHash<WeakRef<P, WeakPtrImpl>>
-      : PtrHashBase<WeakRef<P, WeakPtrImpl>, IsSmartPtr<WeakRef<P, WeakPtrImpl>>::value>
-  {
-    static constexpr bool safeToCompareToEmptyOrDeleted = false;
-  };
-
-  template <typename P, typename WeakPtrImpl>
-  struct DefaultHash<WeakRef<P, WeakPtrImpl>> : PtrHash<WeakRef<P, WeakPtrImpl>>
-  {
   };
 
   template <typename T>
@@ -256,20 +200,16 @@ namespace Krys
   }
 
   template <typename Target, typename Source, typename WeakPtrImpl>
-  inline WeakPtr<match_constness_t<Source, Target>, WeakPtrImpl>
+  inline WeakPtr<match_constness_t<Source, Target>, WeakPtrImpl, RawPtrTraits<Target>>
     dynamicDowncast(WeakRef<Source, WeakPtrImpl> source)
   {
     static_assert(!std::same_as<Source, Target>, "Unnecessary cast to same type");
     static_assert(std::derived_from<Target, Source>, "Should be a downcast");
     if (!is<Target>(source))
       return nullptr;
-    return WeakPtr<match_constness_t<Source, Target>, WeakPtrImpl> {
+    return WeakPtr<match_constness_t<Source, Target>, WeakPtrImpl, RawPtrTraits<Target>> {
       unsafeRefDowncast<match_constness_t<Source, Target>>(source.releaseImpl()),
       source.enableWeakPtrThreadingAssertions()};
   }
 
-} 
-
-using WTF::EnableWeakPtrThreadingAssertions;
-using WTF::SingleThreadWeakRef;
-using WTF::WeakRef;
+}
