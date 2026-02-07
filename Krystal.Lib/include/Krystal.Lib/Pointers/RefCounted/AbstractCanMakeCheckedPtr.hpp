@@ -20,7 +20,7 @@ namespace Krys
   };
 }
 
-#define OVERRIDE_ABSTRACT_CAN_MAKE_CHECKEDPTR(BaseClass)                                                     \
+#define KRYS_OVERRIDE_ABSTRACT_CAN_MAKE_CHECKEDPTR(BaseClass)                                                \
   uint32_t checkedPtrCount() const final                                                                     \
   {                                                                                                          \
     return BaseClass::checkedPtrCount();                                                                     \

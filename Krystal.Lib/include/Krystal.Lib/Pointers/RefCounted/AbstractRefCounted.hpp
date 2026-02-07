@@ -10,7 +10,7 @@ namespace Krys
     virtual ~AbstractRefCounted() = default;
 
   public:
-    virtual void ref() const = 0;
-    virtual void deref() const = 0;
+    virtual void AddRef() const = 0;
+    virtual void SubRef() const = 0;
   };
 }

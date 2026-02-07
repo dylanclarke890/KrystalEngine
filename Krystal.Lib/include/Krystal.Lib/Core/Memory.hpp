@@ -8,10 +8,10 @@ namespace Krys
   {
     NotNull
   };
+}
 
-  inline void *operator new(size_t, NotNullTag, void *location)
-  {
-    assert(location);
-    return location;
-  }
+inline void *operator new(size_t, Krys::NotNullTag, void *location)
+{
+  assert(location);
+  return location;
 }

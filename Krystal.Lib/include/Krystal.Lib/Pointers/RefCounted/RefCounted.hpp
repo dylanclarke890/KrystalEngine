@@ -74,7 +74,7 @@ namespace Krys
   };
 
   template <typename T>
-  class RefCounted : RefCountedBase
+  class RefCounted : public RefCountedBase
   {
   protected:
     RefCounted() noexcept = default;

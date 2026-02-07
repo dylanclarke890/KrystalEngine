@@ -80,6 +80,16 @@
   #endif
 #endif
 
+#if !defined(KRYS_NEVER_INLINE)
+  #if KRYS_COMPILER(MSVC)
+    #define KRYS_NEVER_INLINE __declspec(noinline)
+  #elif KRYS_COMPILER(CLANG) || KRYS_COMPILER(GCC)
+    #define KRYS_NEVER_INLINE [[gnu::noinline]]
+  #else
+    #define KRYS_NEVER_INLINE
+  #endif
+#endif
+
 #if !defined(KRYS_TRIVIAL_ABI)
   #if KRYS_COMPILER(CLANG)
     #define KRYS_TRIVIAL_ABI [[clang::trivial_abi]]

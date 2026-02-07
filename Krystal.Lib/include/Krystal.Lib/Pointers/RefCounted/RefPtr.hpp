@@ -304,7 +304,7 @@ namespace Krys
   {
     static_assert(!std::same_as<X, T>, "Unnecessary cast to same type");
     static_assert(std::derived_from<T, X>, "Use upcast instead");
-    SUPPRESS_MEMORY_UNSAFE_CAST return RefPtr<T, U, V>(static_cast<T *>(p.get()));
+    return RefPtr<T, U, V>(static_cast<T *>(p.get()));
   }
 
   template <typename T, typename U = RawPtrTraits<T>, typename V = DefaultRefDerefTraits<T>, typename X,
@@ -313,7 +313,7 @@ namespace Krys
   {
     static_assert(!std::same_as<X, T>, "Unnecessary cast to same type");
     static_assert(std::derived_from<T, X>, "Use upcast instead");
-    SUPPRESS_MEMORY_UNSAFE_CAST return adoptRef(static_cast<T *>(p.leakRef()));
+    return adoptRef(static_cast<T *>(p.leakRef()));
   }
 
   template <typename T, typename U, typename V>

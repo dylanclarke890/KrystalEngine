@@ -27,28 +27,13 @@ namespace Krys
       _ptr = nullptr;
     }
 
-#if KRYS_ENV(DEV)
-    bool wasConstructedOnMainThread() const
-    {
-      return m_wasConstructedOnMainThread;
-    }
-#endif
-
     template <typename T>
-    explicit WeakPtrImplBase(T *ptr)
-        : _ptr(static_cast<typename T::WeakValueType *>(ptr))
-#if KRYS_ENV(DEV)
-          ,
-          m_wasConstructedOnMainThread(isMainThread())
-#endif
+    explicit WeakPtrImplBase(T *ptr) : _ptr(static_cast<typename T::WeakValueType *>(ptr))
     {
     }
 
   private:
     void *_ptr;
-#if KRYS_ENV(DEV)
-    bool m_wasConstructedOnMainThread;
-#endif
   };
 
   class DefaultWeakPtrImpl final : public WeakPtrImplBase<DefaultWeakPtrImpl>
@@ -79,20 +64,8 @@ namespace Krys
       _ptr = nullptr;
     }
 
-#if KRYS_ENV(DEV)
-    bool wasConstructedOnMainThread() const
-    {
-      return m_wasConstructedOnMainThread;
-    }
-#endif
-
     template <typename T>
-    explicit WeakPtrImplBaseSingleThread(T *ptr)
-        : _ptr(static_cast<typename T::WeakValueType *>(ptr))
-#if KRYS_ENV(DEV)
-          ,
-          m_wasConstructedOnMainThread(isMainThread())
-#endif
+    explicit WeakPtrImplBaseSingleThread(T *ptr) : _ptr(static_cast<typename T::WeakValueType *>(ptr))
     {
     }
 
@@ -100,11 +73,13 @@ namespace Krys
     {
       return m_refCount;
     }
-    void ref() const
+    
+    void AddRef() const
     {
       ++m_refCount;
     }
-    void deref() const
+
+    void SubRef() const
     {
       uint32_t tempRefCount = m_refCount - 1;
       if (!tempRefCount)
@@ -118,9 +93,6 @@ namespace Krys
   private:
     mutable uint32_t m_refCount {1};
     void *_ptr;
-#if KRYS_ENV(DEV)
-    bool m_wasConstructedOnMainThread;
-#endif
   };
 
   class SingleThreadWeakPtrImpl final : public WeakPtrImplBaseSingleThread<SingleThreadWeakPtrImpl>

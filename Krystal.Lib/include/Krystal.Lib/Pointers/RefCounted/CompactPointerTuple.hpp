@@ -5,6 +5,7 @@
 #include "Krystal.Lib/Detection/AddressSpaceBitSize.hpp"
 #include "Krystal.Lib/Detection/CPU.hpp"
 #include "Krystal.Lib/Detection/OS.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/CompactPtr.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <bit>
 #include <cassert>
@@ -25,7 +26,7 @@ namespace Krys
   public:
     static_assert(sizeof(Type) <= 2);
     static_assert(IsPointer<PointerType>);
-    static_assert(::allowCompactPointers<PointerType>());
+    static_assert(Krys::allowCompactPointers<PointerType>());
     static_assert(Integral<Type> || IsEnum<Type>);
     using UnsignedType = make_unsigned_t<conditional_t<SameType<Type, bool>, uint8, Type>>;
     static_assert(sizeof(UnsignedType) == sizeof(Type));

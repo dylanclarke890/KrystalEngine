@@ -191,7 +191,7 @@ namespace Krys
     static constexpr uintptr_t destructionStartedFlag = 1ull << (sizeof(uintptr_t) * CHAR_BIT - 1);
     static constexpr uintptr_t refIncrement = 2;
 
-    void ref() const
+    void AddRef() const
     {
       bool didRefStrongOnly = m_bits.transaction(
         [&](uintptr_t &bits)
@@ -211,7 +211,7 @@ namespace Krys
       std::bit_cast<ThreadSafeWeakPtrControlBlock *>(m_bits.loadRelaxed())->strongRef();
     }
 
-    void deref() const
+    void SubRef() const
     {
       uintptr_t newStrongOnlyRefCount = 0;
       bool didDerefStrongOnly = m_bits.transaction(

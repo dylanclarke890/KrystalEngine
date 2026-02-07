@@ -8,33 +8,30 @@ namespace Krys
 {
   class AbstractThreadSafeRefCountedAndCanMakeWeakPtr : public AbstractRefCounted
   {
-    template <typename>
-    friend class ThreadSafeWeakHashSet;
-
   public:
-    virtual ThreadSafeWeakPtrControlBlock &controlBlock() const = 0;
+    virtual ThreadSafeWeakPtrControlBlock &ControlBlock() const = 0;
 
   private:
-    virtual uint32 weakRefCount() const = 0;
+    virtual uint32 WeakRefCount() const = 0;
   };
 }
 
 // Convinience macro that implements AbstractThreadSafeRefCountedAndCanMakeWeakPtr for you.
-#define WTF_ABSTRACT_THREAD_SAFE_REF_COUNTED_AND_CAN_MAKE_WEAK_PTR_IMPL                                      \
-  void ref() const final                                                                                     \
+#define KRYS_ABSTRACT_THREAD_SAFE_REF_COUNTED_AND_CAN_MAKE_WEAK_PTR_IMPL                                     \
+  void AddRef() const final                                                                                  \
   {                                                                                                          \
-    ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr::ref();                                                  \
+    ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr::AddRef();                                               \
   }                                                                                                          \
-  void deref() const final                                                                                   \
+  void SubRef() const final                                                                                  \
   {                                                                                                          \
-    ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr::deref();                                                \
+    ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr::SubRef();                                               \
   }                                                                                                          \
-  ThreadSafeWeakPtrControlBlock &controlBlock() const final                                                  \
+  ThreadSafeWeakPtrControlBlock &ControlBlock() const final                                                  \
   {                                                                                                          \
-    return ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr::controlBlock();                                  \
+    return ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr::ControlBlock();                                  \
   }                                                                                                          \
-  uint32_t weakRefCount() const final                                                                        \
+  uint32 WeakRefCount() const final                                                                          \
   {                                                                                                          \
-    return ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr::weakRefCount();                                  \
+    return ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr::WeakRefCount();                                  \
   }                                                                                                          \
   using __Unused_type_for_semicolon = int

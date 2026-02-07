@@ -33,13 +33,17 @@ namespace Krys
     CanMakeWeakPtrBase()
     {
       if (initializationMode == WeakPtrFactoryInitialization::Eager)
+      {
         initializeWeakPtrFactory();
+      }
     }
 
     CanMakeWeakPtrBase(const CanMakeWeakPtrBase &)
     {
       if (initializationMode == WeakPtrFactoryInitialization::Eager)
+      {
         initializeWeakPtrFactory();
+      }
     }
 
     CanMakeWeakPtrBase &operator=(const CanMakeWeakPtrBase &)

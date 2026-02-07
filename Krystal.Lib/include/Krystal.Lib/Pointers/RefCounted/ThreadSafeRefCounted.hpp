@@ -14,7 +14,7 @@ namespace Krys
     using Debugger = RefCountDebugger<uint32>;
 
   public:
-    void ref() const
+    void AddRef() const
     {
       m_refCountDebugger.WillAddRef(m_refCount);
       ++m_refCount;
@@ -45,7 +45,7 @@ namespace Krys
     }
 
     // Returns true if the pointer should be freed.
-    bool derefBase() const
+    bool SubRefBase() const
     {
       m_refCountDebugger.WillSubRef(m_refCount);
 
@@ -68,9 +68,9 @@ namespace Krys
   class ThreadSafeRefCounted : public ThreadSafeRefCountedBase
   {
   public:
-    void deref() const
+    void SubRef() const
     {
-      if (!derefBase())
+      if (!SubRefBase())
         return;
 
       delete static_cast<const T *>(this);

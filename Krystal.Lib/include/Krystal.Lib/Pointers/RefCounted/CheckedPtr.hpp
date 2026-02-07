@@ -9,14 +9,12 @@
 
 namespace Krys
 {
-  // CheckedPtr is used to verify that the object being pointed to outlives the CheckedPtr.
-  // It does not affect the lifetime of the object being pointed to; it simply adds a runtime
-  // check (via assert) that when the object being pointed to is destroyed, there are
-  // no outstanding CheckedPtrs that reference it.
-  //
-  // Use is similar to WeakPtr, but CheckedPtr is used in cases where the target is never
-  // expected to become null, and CheckedPtr has less overhead.
-
+  /// @brief CheckedPtr is used to verify that the object being pointed to outlives the CheckedPtr.
+  /// It does not affect the lifetime of the object being pointed to; it simply adds a runtime
+  /// check (via assert) that when the object being pointed to is destroyed, there are
+  /// no outstanding CheckedPtrs that reference it.
+  /// @note Use is similar to WeakPtr, but CheckedPtr has less overhead and is used in cases where the target is
+  /// never expected to become null.
   template <typename T, typename PtrTraits>
   class CheckedPtr
   {
@@ -99,22 +97,25 @@ namespace Krys
     {
       return PtrTraits::unwrap(_ptr);
     }
+
     KRYS_ALWAYS_INLINE T *unsafeGet() const
     {
       return PtrTraits::unwrap(_ptr);
     }
+
     KRYS_ALWAYS_INLINE T &operator*() const KRYS_LIFETIME_BOUND
     {
       assert(_ptr);
       return *get();
     }
+
     KRYS_ALWAYS_INLINE T *operator->() const KRYS_LIFETIME_BOUND
     {
       assert(_ptr);
       return PtrTraits::unwrap(_ptr);
     }
 
-    CheckedRef<T> releaseNonNull()
+    CheckedRef<T, PtrTraits> releaseNonNull()
     {
       assert(_ptr);
       auto &ptr = *PtrTraits::unwrap(std::exchange(_ptr, nullptr));

@@ -105,8 +105,8 @@ namespace Krys
 
     template <class T>
     static auto HasRefPtrMemberFunctionsTest(SFINAE_OVERLOAD_PREFERRED)
-      -> SFINAE1True<decltype(static_cast<std::remove_cv_t<T> *>(nullptr)->ref(),
-                              static_cast<std::remove_cv_t<T> *>(nullptr)->deref())>;
+      -> SFINAE1True<decltype(static_cast<std::remove_cv_t<T> *>(nullptr)->AddRef(),
+                              static_cast<std::remove_cv_t<T> *>(nullptr)->SubRef())>;
     template <class>
     static auto HasRefPtrMemberFunctionsTest(SFINAE_OVERLOAD_DEFAULT) -> std::false_type;
 
@@ -188,84 +188,4 @@ namespace Krys
   struct HasIsolatedCopy : decltype(detail::HasIsolatedCopyTest<T>(SFINAE_OVERLOAD))
   {
   };
-
-  // LooksLikeRCSerialDispatcher implementation
-  namespace detail
-  {
-
-    template <bool b, typename>
-    struct SFINAE1If : std::integral_constant<bool, b>
-    {
-    };
-
-    template <bool b, class T>
-    static auto LooksLikeRCSerialDispatcherTest(SFINAE_OVERLOAD_PREFERRED)
-      -> SFINAE1If<b, decltype(std::declval<T>().ref(), std::declval<T>().deref())>;
-
-    template <bool, typename>
-    static auto LooksLikeRCSerialDispatcherTest(SFINAE_OVERLOAD_DEFAULT) -> std::false_type;
-
-  } // namespace detail
-
-  template <class T>
-  struct LooksLikeRCSerialDispatcher
-      : decltype(detail::LooksLikeRCSerialDispatcherTest<std::is_base_of_v<SerialFunctionDispatcher, T>, T>(
-          SFINAE_OVERLOAD))
-  {
-  };
-
-  class NativePromiseBase;
-  class ConvertibleToNativePromise;
-
-  template <typename T>
-  concept IsNativePromise = std::is_base_of<NativePromiseBase, T>::value;
-
-  template <typename T>
-  concept IsConvertibleToNativePromise = std::is_base_of<ConvertibleToNativePromise, T>::value;
-
-  template <typename T, typename U>
-  concept RelatedNativePromise = requires(T, U) {
-    { IsConvertibleToNativePromise<T> };
-    { IsConvertibleToNativePromise<U> };
-    { std::is_same<typename T::PromiseType, typename U::PromiseType>::value };
-  };
-
-  template <typename T>
-  struct IsExpected : std::false_type
-  {
-  };
-
-  template <typename T, typename E>
-  struct IsExpected<Expected<T, E>> : std::true_type
-  {
-  };
-
-  template <typename... Args>
-  struct ParameterCountImpl
-  {
-    static constexpr std::size_t value = sizeof...(Args);
-  };
-
-  template <typename ReturnType, typename... Args>
-  constexpr std::size_t parameterCount(ReturnType (*)(Args...))
-  {
-    return ParameterCountImpl<Args...>::value;
-  }
-
-#if defined(__has_feature)
-  #if __has_feature(objc_arc)
-  struct ARCEnabled : std::true_type
-  {
-  };
-  #else
-  struct ARCEnabled : std::false_type
-  {
-  };
-  #endif
-#else
-  struct ARCEnabled : std::false_type
-  {
-  };
-#endif
-
 }

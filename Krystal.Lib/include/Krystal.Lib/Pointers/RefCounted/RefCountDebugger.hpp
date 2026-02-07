@@ -45,7 +45,7 @@ namespace Krys
 
     void WillDestroy(TRefSize refCount) const noexcept
     {
-      assert(_refCount == 1 && "RefCountDebugger: Attempt to destroy object when ref count is not one.");
+      assert(refCount == 1 && "RefCountDebugger: Attempt to destroy object when ref count is not one.");
     }
   };
 }

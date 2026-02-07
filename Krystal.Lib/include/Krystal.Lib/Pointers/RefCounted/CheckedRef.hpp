@@ -1,18 +1,16 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
+#include "Krystal.Lib/Detection/Environment.hpp"
+#include "Krystal.Lib/Detection/Sanitizers.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/GetPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/RawPtrTraits.hpp"
 #include <atomic>
-#include <wtf/SingleThreadIntegralWrapper.h>
-
-#if ASSERT_ENABLED
-  #include <wtf/Threading.h>
-#endif
 
 namespace Krys
 {
-
-#define USING_CAN_MAKE_CHECKEDPTR(BASE)                                                                      \
+#define KRYS_USING_CAN_MAKE_CHECKEDPTR(BASE)                                                                      \
   using BASE::checkedPtrCount;                                                                               \
   using BASE::checkedPtrCountWithoutThreadCheck;                                                             \
   using BASE::incrementCheckedPtrCount;                                                                      \
@@ -21,8 +19,6 @@ namespace Krys
   template <typename T, typename PtrTraits>
   class CheckedRef
   {
-    WTF_DEPRECATED_MAKE_FAST_ALLOCATED(CheckedRef);
-
   public:
     ~CheckedRef()
     {
@@ -40,6 +36,7 @@ namespace Krys
     {
       Adopt
     };
+
     CheckedRef(T &object, AdoptTag) : _ptr(&object)
     {
     }
@@ -71,6 +68,7 @@ namespace Krys
     CheckedRef(HashTableDeletedValueType) : _ptr(PtrTraits::hashTableDeletedValue())
     {
     }
+
     bool isHashTableDeletedValue() const
     {
       return PtrTraits::isHashTableDeletedValue(_ptr);
@@ -79,10 +77,12 @@ namespace Krys
     CheckedRef(HashTableEmptyValueType) : _ptr(hashTableEmptyValue())
     {
     }
+
     bool isHashTableEmptyValue() const
     {
       return _ptr == hashTableEmptyValue();
     }
+
     static T *hashTableEmptyValue()
     {
       return nullptr;
@@ -93,6 +93,7 @@ namespace Krys
       assert(_ptr || isHashTableEmptyValue());
       return PtrTraits::unwrap(_ptr);
     }
+
     T *ptrAllowingHashTableEmptyValue()
     {
       assert(_ptr || isHashTableEmptyValue());
@@ -261,79 +262,25 @@ namespace Krys
   }
 
   template <typename ExpectedType, typename ArgType, typename ArgPtrTraits>
-  inline CheckedPtr<match_constness_t<ArgType, ExpectedType>>
+  inline CheckedPtr<match_constness_t<ArgType, ExpectedType>, ArgPtrTraits>
     dynamicDowncast(CheckedRef<ArgType, ArgPtrTraits> &source)
   {
     return dynamicDowncast<ExpectedType>(source.get());
   }
 
   template <typename ExpectedType, typename ArgType, typename ArgPtrTraits>
-  inline CheckedPtr<match_constness_t<ArgType, ExpectedType>>
+  inline CheckedPtr<match_constness_t<ArgType, ExpectedType>, ArgPtrTraits>
     dynamicDowncast(const CheckedRef<ArgType, ArgPtrTraits> &source)
   {
     return dynamicDowncast<ExpectedType>(source.get());
   }
 
   template <typename ExpectedType, typename ArgType, typename ArgPtrTraits>
-  inline const CheckedPtr<match_constness_t<ArgType, ExpectedType>>
+  inline const CheckedPtr<match_constness_t<ArgType, ExpectedType>, ArgPtrTraits>
     dynamicDowncast(CheckedRef<const ArgType, ArgPtrTraits> &source)
   {
     return dynamicDowncast<ExpectedType>(source.get());
   }
-
-  template <typename P>
-  struct CheckedRefHashTraits : SimpleClassHashTraits<CheckedRef<P>>
-  {
-    static constexpr bool emptyValueIsZero = true;
-    static CheckedRef<P> emptyValue()
-    {
-      return HashTableEmptyValue;
-    }
-
-    template <typename>
-    static void constructEmptyValue(CheckedRef<P> &slot)
-    {
-      new (NotNull, std::addressof(slot)) CheckedRef<P>(HashTableEmptyValue);
-    }
-
-    static constexpr bool hasIsEmptyValueFunction = true;
-    static bool isEmptyValue(const CheckedRef<P> &value)
-    {
-      return value.isHashTableEmptyValue();
-    }
-
-    using PeekType = P *;
-    static PeekType peek(const CheckedRef<P> &value)
-    {
-      return const_cast<PeekType>(value.ptrAllowingHashTableEmptyValue());
-    }
-    static PeekType peek(P *value)
-    {
-      return value;
-    }
-
-    using TakeType = CheckedPtr<P>;
-    static TakeType take(CheckedRef<P> &&value)
-    {
-      return isEmptyValue(value) ? nullptr : CheckedPtr<P>(Krys::Move(value));
-    }
-  };
-
-  template <typename P>
-  struct HashTraits<CheckedRef<P>> : CheckedRefHashTraits<P>
-  {
-  };
-
-  template <typename P>
-  struct PtrHash<CheckedRef<P>> : PtrHashBase<CheckedRef<P>, IsSmartPtr<CheckedRef<P>>::value>
-  {
-    static constexpr bool safeToCompareToEmptyOrDeleted = false;
-  };
-
-  template <typename P>
-  struct DefaultHash<CheckedRef<P>> : PtrHash<CheckedRef<P>>
-  {
-  };
 
   enum class DefaultedOperatorEqual : bool
   {
@@ -372,8 +319,7 @@ namespace Krys
 
     ~CanMakeCheckedPtrBase()
     {
-      assert(m_didBeginDeletion
-                                       || deleteException == CheckedPtrDeleteCheckException::Yes);
+      assert(m_didBeginDeletion || deleteException == CheckedPtrDeleteCheckException::Yes);
     }
 
     PtrCounterType checkedPtrCount() const
@@ -405,27 +351,26 @@ namespace Krys
 
     void setDidBeginCheckedPtrDeletion()
     {
-#if ASSERT_ENABLED || ENABLE(SECURITY_ASSERTIONS)
+#if KRYS_ENV(DEV)
       m_didBeginDeletion = true;
 #endif
     }
 
   private:
-    static NO_RETURN_DUE_TO_CRASH NEVER_INLINE void crashDueToCheckedPtrToDeadObject()
+    KRYS_NORETURN KRYS_NEVER_INLINE static void crashDueToCheckedPtrToDeadObject()
     {
-      CRASH();
+      assert(false);
     }
 
     mutable StorageType m_checkedPtrCount {0};
-#if ASSERT_ENABLED || ENABLE(SECURITY_ASSERTIONS)
+#if KRYS_ENV(DEV)
     DeletionFlagType m_didBeginDeletion {false};
 #endif
   };
 
   template <typename T, DefaultedOperatorEqual defaultedOperatorEqual = DefaultedOperatorEqual::No,
             CheckedPtrDeleteCheckException deleteException = CheckedPtrDeleteCheckException::No>
-  class CanMakeCheckedPtr
-      : public CanMakeCheckedPtrBase<SingleThreadIntegralWrapper<uint32_t>, uint32_t, bool, deleteException>
+  class CanMakeCheckedPtr : public CanMakeCheckedPtrBase<uint32_t, uint32_t, bool, deleteException>
   {
   public:
     ~CanMakeCheckedPtr()
@@ -469,9 +414,4 @@ namespace Krys
       return true;
     }
   };
-
-} 
-
-using WTF::CanMakeCheckedPtr;
-using WTF::CanMakeThreadSafeCheckedPtr;
-using WTF::CheckedRef;
+}

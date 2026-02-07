@@ -1,13 +1,12 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Detection/Sanitizers.hpp"
 #include "Krystal.Lib/ForbidHeapAllocation.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/GetPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/RawPtrTraits.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/Ref.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/RefPtr.hpp"
 #include <cassert>
 
 #if KRYS_ASAN_ENABLED
@@ -18,6 +17,9 @@ extern "C" int __asan_address_is_poisoned(void const volatile *addr);
 
 namespace Krys
 {
+  template <typename T, typename PtrTraits, typename RefDerefTraits>
+  class RefPtr;
+
   inline void adopted(const void *)
   {
   }
@@ -28,34 +30,41 @@ namespace Krys
     static KRYS_ALWAYS_INLINE T *refIfNotNull(T *ptr)
     {
       if (ptr) [[likely]]
-        ptr->ref();
+      {
+        ptr->AddRef();
+      }
       return ptr;
     }
 
     static KRYS_ALWAYS_INLINE T &ref(T &ref)
     {
-      ref.ref();
+      ref.AddRef();
       return ref;
     }
 
     static KRYS_ALWAYS_INLINE void derefIfNotNull(T *ptr)
     {
       if (ptr) [[likely]]
-        ptr->deref();
+      {
+        ptr->SubRef();
+      }
     }
   };
 
-  template <typename T, typename PtrTraits, typename RefDerefTraits>
+  template <typename T, typename PtrTraits = RawPtrTraits<T>,
+            typename RefDerefTraits = DefaultRefDerefTraits<T>>
   class Ref;
+
   template <typename T, typename PtrTraits = RawPtrTraits<T>,
             typename RefDerefTraits = DefaultRefDerefTraits<T>>
   Ref<T, PtrTraits, RefDerefTraits> adoptRef(T &);
 
-  template <typename T, typename _PtrTraits = RawPtrTraits<T>,
-            typename RefDerefTraits = DefaultRefDerefTraits<T>>
+  template <typename T, typename _PtrTraits, typename RefDerefTraits>
   class Ref
   {
     KRYS_FORBID_HEAP_ALLOCATION_ALLOWING_PLACEMENT_NEW;
+
+    static_assert(!IsPointer<T>, "T must not be a pointer type.");
 
   public:
     using PtrTraits = _PtrTraits;
@@ -335,7 +344,7 @@ namespace Krys
   {
     static_assert(!std::same_as<Y, X>, "Unnecessary cast to same type");
     static_assert(std::derived_from<X, Y>, "Use upcast instead");
-    SUPPRESS_MEMORY_UNSAFE_CAST return adoptRef(static_cast<X &>(reference.leakRef()));
+    return adoptRef(static_cast<X &>(reference.leakRef()));
   }
 
   template <typename X, typename _PtrTraits = RawPtrTraits<X>,

@@ -5,17 +5,12 @@
 #include "Krystal.Lib/Pointers/RefCounted/GetPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/ThreadSafeRefCounted.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/TypeTraits.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/WeakPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/WeakPtrImpl.hpp"
 
 namespace Krys
 {
-  // Classes that offer weak pointers should also offer RefPtr or CheckedPtr. Please do not add new
-  // exceptions.
-  template <typename T>
-  struct IsDeprecatedWeakRefSmartPointerException : std::false_type
-  {
-  };
+  template <typename T, typename WeakPtrImpl, typename PtrTraits>
+  class WeakPtr;
 
   enum class EnableWeakPtrThreadingAssertions : bool
   {
@@ -79,20 +74,16 @@ namespace Krys
 
     T *ptrAllowingHashTableEmptyValue() const
     {
-      static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value
-                      || IsDeprecatedWeakRefSmartPointerException<std::remove_cv_t<T>>::value,
-                    "Classes that offer weak pointers should also offer RefPtr or CheckedPtr. Please do not "
-                    "add new exceptions.");
+      static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value,
+                    "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
 
       return !m_impl.isHashTableEmptyValue() ? static_cast<T *>(m_impl->template get<T>()) : nullptr;
     }
 
     T *ptr() const
     {
-      static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value
-                      || IsDeprecatedWeakRefSmartPointerException<std::remove_cv_t<T>>::value,
-                    "Classes that offer weak pointers should also offer RefPtr or CheckedPtr. Please do not "
-                    "add new exceptions.");
+      static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value,
+                    "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
 
       auto *ptr = static_cast<T *>(m_impl->template get<T>());
       assert(ptr);
@@ -101,10 +92,8 @@ namespace Krys
 
     T &get() const
     {
-      static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value
-                      || IsDeprecatedWeakRefSmartPointerException<std::remove_cv_t<T>>::value,
-                    "Classes that offer weak pointers should also offer RefPtr or CheckedPtr. Please do not "
-                    "add new exceptions.");
+      static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value,
+                    "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
 
       auto *ptr = static_cast<T *>(m_impl->template get<T>());
       assert(ptr);
@@ -118,7 +107,6 @@ namespace Krys
 
     T *operator->() const
     {
-      assert(canSafelyBeUsed());
       return ptr();
     }
 
@@ -133,17 +121,6 @@ namespace Krys
     }
 
   private:
-#if KRYS_ENV(DEV)
-    inline bool canSafelyBeUsed() const
-    {
-      // FIXME: Our GC threads currently need to get opaque pointers from WeakPtrs and have to be
-      // special-cased.
-      return !m_impl || !m_shouldEnableAssertions
-             || (m_impl->wasConstructedOnMainThread() && Thread::mayBeGCThread())
-             || m_impl->wasConstructedOnMainThread() == isMainThread();
-    }
-#endif
-
     Ref<WeakPtrImpl> m_impl;
 #if KRYS_ENV(DEV)
     bool m_shouldEnableAssertions {true};
@@ -211,5 +188,4 @@ namespace Krys
       unsafeRefDowncast<match_constness_t<Source, Target>>(source.releaseImpl()),
       source.enableWeakPtrThreadingAssertions()};
   }
-
 }

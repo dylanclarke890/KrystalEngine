@@ -69,9 +69,30 @@
     <ClCompile Include="tests\Pointers\IntrusivePtr\WeakRefCountedSingleThreaded.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tests\Pointers\RefCounted\RefCounted.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\Pointers\RefCounted\Ref.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\Pointers\RefCounted\RefPtr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\Pointers\RefCounted\WeakRef.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\Pointers\RefCounted\WeakPtr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\Pointers\RefCounted\CheckedPtr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.Lib.Tests\Pointers\IntrusivePtr\Mocks.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib.Tests\Pointers\RefCounted\TestRefCounted.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
