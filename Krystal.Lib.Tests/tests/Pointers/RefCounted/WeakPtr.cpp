@@ -37,7 +37,7 @@ namespace Krys::Tests
   {
     auto *obj = new TestWeakRefCounted();
 
-    RefPtr<SingleThreadWeakPtrImpl> impl = obj->weakImpl();
+    RefPtr<SingleThreadWeakPtrImpl> impl = obj->WeakImpl();
     SingleThreadWeakPtr<TestWeakRefCounted> weakPtr(Krys::Move(impl));
 
     REQUIRE(impl.isHashTableEmptyValue());

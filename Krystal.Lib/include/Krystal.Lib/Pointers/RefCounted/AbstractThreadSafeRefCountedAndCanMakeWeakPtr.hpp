@@ -11,12 +11,12 @@ namespace Krys
   public:
     virtual ThreadSafeWeakPtrControlBlock &ControlBlock() const = 0;
 
-  private:
+  protected:
     virtual uint32 WeakRefCount() const = 0;
   };
 }
 
-// Convinience macro that implements AbstractThreadSafeRefCountedAndCanMakeWeakPtr for you.
+/// @brief Convenience macro that implements `AbstractThreadSafeRefCountedAndCanMakeWeakPtr` for you.
 #define KRYS_ABSTRACT_THREAD_SAFE_REF_COUNTED_AND_CAN_MAKE_WEAK_PTR_IMPL                                     \
   void AddRef() const final                                                                                  \
   {                                                                                                          \
@@ -34,4 +34,4 @@ namespace Krys
   {                                                                                                          \
     return ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr::WeakRefCount();                                  \
   }                                                                                                          \
-  using __Unused_type_for_semicolon = int
+  using _forceSemicolonAbstractThreadSafeRefCountedAndCanMakeWeakPtr = int

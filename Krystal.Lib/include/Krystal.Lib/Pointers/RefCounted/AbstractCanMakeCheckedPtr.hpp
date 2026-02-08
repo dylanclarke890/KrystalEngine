@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include <cstdint>
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys
 {
@@ -9,36 +9,31 @@ namespace Krys
   class AbstractCanMakeCheckedPtr
   {
   protected:
-    virtual ~AbstractCanMakeCheckedPtr() = default;
+    virtual ~AbstractCanMakeCheckedPtr() noexcept = default;
 
   public:
-    virtual uint32_t checkedPtrCount() const = 0;
-    virtual uint32_t checkedPtrCountWithoutThreadCheck() const = 0;
-    virtual void incrementCheckedPtrCount() const = 0;
-    virtual void decrementCheckedPtrCount() const = 0;
-    virtual void setDidBeginCheckedPtrDeletion() = 0;
+    virtual uint32 CheckedPtrCount() const noexcept = 0;
+    virtual void IncrementCheckedPtrCount() const noexcept = 0;
+    virtual void DecrementCheckedPtrCount() const noexcept = 0;
+    virtual void SetDidBeginCheckedPtrDeletion() noexcept = 0;
   };
 }
 
 #define KRYS_OVERRIDE_ABSTRACT_CAN_MAKE_CHECKEDPTR(BaseClass)                                                \
-  uint32_t checkedPtrCount() const final                                                                     \
+  Krys::uint32 CheckedPtrCount() const final                                                                 \
   {                                                                                                          \
-    return BaseClass::checkedPtrCount();                                                                     \
+    return BaseClass::CheckedPtrCount();                                                                     \
   }                                                                                                          \
-  uint32_t checkedPtrCountWithoutThreadCheck() const final                                                   \
+  void IncrementCheckedPtrCount() const final                                                                \
   {                                                                                                          \
-    return BaseClass::checkedPtrCountWithoutThreadCheck();                                                   \
+    BaseClass::IncrementCheckedPtrCount();                                                                   \
   }                                                                                                          \
-  void incrementCheckedPtrCount() const final                                                                \
+  void DecrementCheckedPtrCount() const final                                                                \
   {                                                                                                          \
-    BaseClass::incrementCheckedPtrCount();                                                                   \
+    BaseClass::DecrementCheckedPtrCount();                                                                   \
   }                                                                                                          \
-  void decrementCheckedPtrCount() const final                                                                \
+  void SetDidBeginCheckedPtrDeletion() final                                                                 \
   {                                                                                                          \
-    BaseClass::decrementCheckedPtrCount();                                                                   \
+    BaseClass::SetDidBeginCheckedPtrDeletion();                                                              \
   }                                                                                                          \
-  void setDidBeginCheckedPtrDeletion() final                                                                 \
-  {                                                                                                          \
-    BaseClass::setDidBeginCheckedPtrDeletion();                                                              \
-  }                                                                                                          \
-  using __unused_for_semicolon_canmakecheckedptr = int
+  using _forceSemicolonAbstractCanMakeCheckedPtr = int

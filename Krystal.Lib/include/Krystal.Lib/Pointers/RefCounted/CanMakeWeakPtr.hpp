@@ -7,42 +7,44 @@ namespace Krys
 {
   class DefaultWeakPtrImpl;
 
-  template <typename WeakPtrFactoryType,
-            WeakPtrFactoryInitialization initializationMode = WeakPtrFactoryInitialization::Lazy>
+  template <typename TWeakPtrFactory,
+            WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy>
   class CanMakeWeakPtrBase
   {
   public:
-    using WeakValueType = typename WeakPtrFactoryType::ObjectType;
-    using WeakPtrImplType = typename WeakPtrFactoryType::WeakPtrImplType;
+    using TWeakValue = typename TWeakPtrFactory::ObjectType;
+    using TWeakPtrImpl = typename TWeakPtrFactory::TWeakPtrImpl;
 
-    WeakPtrImplType *weakImplIfExists() const
+    TWeakPtrImpl *WeakImplIfExists() const noexcept
     {
-      return m_weakPtrFactory.impl();
+      return _weakPtrFactory.Impl();
     }
-    WeakPtrImplType &weakImpl() const
+
+    TWeakPtrImpl &WeakImpl() const noexcept
     {
-      initializeWeakPtrFactory();
-      return *m_weakPtrFactory.impl();
+      InitializeWeakPtrFactory();
+      return *_weakPtrFactory.Impl();
     }
-    unsigned weakCount() const
+
+    uint32 weakCount() const noexcept
     {
-      return m_weakPtrFactory.weakPtrCount();
+      return _weakPtrFactory.weakPtrCount();
     }
 
   protected:
-    CanMakeWeakPtrBase()
+    CanMakeWeakPtrBase() noexcept
     {
-      if (initializationMode == WeakPtrFactoryInitialization::Eager)
+      if constexpr (InitializationMode == WeakPtrFactoryInitialization::Eager)
       {
-        initializeWeakPtrFactory();
+        InitializeWeakPtrFactory();
       }
     }
 
-    CanMakeWeakPtrBase(const CanMakeWeakPtrBase &)
+    CanMakeWeakPtrBase(const CanMakeWeakPtrBase &) noexcept
     {
-      if (initializationMode == WeakPtrFactoryInitialization::Eager)
+      if constexpr (InitializationMode == WeakPtrFactoryInitialization::Eager)
       {
-        initializeWeakPtrFactory();
+        InitializeWeakPtrFactory();
       }
     }
 
@@ -51,33 +53,33 @@ namespace Krys
       return *this;
     }
 
-    void initializeWeakPtrFactory() const
+    void InitializeWeakPtrFactory() const
     {
-      m_weakPtrFactory.initializeIfNeeded(static_cast<const WeakValueType &>(*this));
+      _weakPtrFactory.InitializeIfNeeded(static_cast<const TWeakValue &>(*this));
     }
 
-    const WeakPtrFactoryType &weakPtrFactory() const
+    const TWeakPtrFactory &weakPtrFactory() const
     {
-      return m_weakPtrFactory;
+      return _weakPtrFactory;
     }
-    WeakPtrFactoryType &weakPtrFactory()
+    TWeakPtrFactory &weakPtrFactory()
     {
-      return m_weakPtrFactory;
+      return _weakPtrFactory;
     }
 
   private:
-    WeakPtrFactoryType m_weakPtrFactory;
+    TWeakPtrFactory _weakPtrFactory;
   };
 
-  template <typename T, WeakPtrFactoryInitialization initializationMode = WeakPtrFactoryInitialization::Lazy,
+  template <typename T, WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy,
             typename WeakPtrImpl = DefaultWeakPtrImpl>
-  using CanMakeWeakPtr = CanMakeWeakPtrBase<WeakPtrFactory<T, WeakPtrImpl>, initializationMode>;
+  using CanMakeWeakPtr = CanMakeWeakPtrBase<WeakPtrFactory<T, WeakPtrImpl>, InitializationMode>;
 
-  template <typename T, WeakPtrFactoryInitialization initializationMode = WeakPtrFactoryInitialization::Lazy,
+  template <typename T, WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy,
             typename WeakPtrImpl = DefaultWeakPtrImpl>
   using CanMakeWeakPtrWithBitField =
-    CanMakeWeakPtrBase<WeakPtrFactoryWithBitField<T, WeakPtrImpl>, initializationMode>;
+    CanMakeWeakPtrBase<WeakPtrFactoryWithBitField<T, WeakPtrImpl>, InitializationMode>;
 
-  template <typename T, WeakPtrFactoryInitialization initializationMode = WeakPtrFactoryInitialization::Lazy>
-  using CanMakeSingleThreadWeakPtr = CanMakeWeakPtr<T, initializationMode, SingleThreadWeakPtrImpl>;
+  template <typename T, WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy>
+  using CanMakeSingleThreadWeakPtr = CanMakeWeakPtr<T, InitializationMode, SingleThreadWeakPtrImpl>;
 }

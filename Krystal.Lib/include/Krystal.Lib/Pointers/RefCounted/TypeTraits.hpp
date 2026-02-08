@@ -123,7 +123,7 @@ namespace Krys
 
     template <class T>
     static auto HasWeakPtrFunctionsTest(SFINAE_OVERLOAD_PREFERRED)
-      -> SFINAE1True<decltype(static_cast<std::remove_cv_t<T> *>(nullptr)->weakImpl(),
+      -> SFINAE1True<decltype(static_cast<std::remove_cv_t<T> *>(nullptr)->WeakImpl(),
                               static_cast<std::remove_cv_t<T> *>(nullptr)->weakCount())>;
     template <class>
     static auto HasWeakPtrFunctionsTest(SFINAE_OVERLOAD_DEFAULT) -> std::false_type;

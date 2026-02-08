@@ -7,10 +7,10 @@ namespace Krys
   class AbstractRefCounted
   {
   protected:
-    virtual ~AbstractRefCounted() = default;
+    virtual ~AbstractRefCounted() noexcept = default;
 
   public:
-    virtual void AddRef() const = 0;
-    virtual void SubRef() const = 0;
+    virtual void AddRef() const noexcept = 0;
+    virtual void SubRef() const noexcept = 0;
   };
 }

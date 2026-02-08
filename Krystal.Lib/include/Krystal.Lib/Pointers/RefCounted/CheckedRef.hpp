@@ -13,7 +13,6 @@ namespace Krys
 {
 #define KRYS_USING_CAN_MAKE_CHECKEDPTR(BASE)                                                                 \
   using BASE::checkedPtrCount;                                                                               \
-  using BASE::checkedPtrCountWithoutThreadCheck;                                                             \
   using BASE::incrementCheckedPtrCount;                                                                      \
   using BASE::decrementCheckedPtrCount
 
@@ -107,10 +106,10 @@ namespace Krys
     KRYS_ALWAYS_INLINE T *ptr() const
     {
       // In normal execution, a CheckedPtr always points to an object with a non-zero checkedPtrCount().
-      // When it detects a dangling pointer, WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR scribbles an object with
-      // zeroes and then leaks it. When we check checkedPtrCountWithoutThreadCheck() here, we're checking for
-      // a scribbled object.
-      assert(PtrTraits::unwrap(_ptr)->checkedPtrCountWithoutThreadCheck());
+      // When it detects a dangling pointer, KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR scribbles an object with
+      // zeroes and then leaks it. When we check checkedPtrCount() here, we're checking for a scribbled
+      // object.
+      assert(PtrTraits::unwrap(_ptr)->checkedPtrCount());
       return PtrTraits::unwrap(_ptr);
     }
 
@@ -330,27 +329,23 @@ namespace Krys
     {
       return m_checkedPtrCount;
     }
+
     void incrementCheckedPtrCount() const
     {
       ++m_checkedPtrCount;
     }
+
     KRYS_ALWAYS_INLINE void decrementCheckedPtrCount() const
     {
       // In normal execution, a CheckedPtr always points to an object with a non-zero checkedPtrCount().
-      // When it detects a dangling pointer, WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR scribbles an object with
-      // zeroes and then leaks it. When we check checkedPtrCountWithoutThreadCheck() here, we're checking for
-      // a scribbled object.
-      if (!checkedPtrCountWithoutThreadCheck()) [[unlikely]]
+      // When it detects a dangling pointer, KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR scribbles an object with
+      // zeroes and then leaks it. When we check checkedPtrCount() here, we're checking for a scribbled
+      // object.
+      if (!checkedPtrCount()) [[unlikely]]
+      {
         crashDueToCheckedPtrToDeadObject();
+      }
       --m_checkedPtrCount;
-    }
-
-    KRYS_ALWAYS_INLINE PtrCounterType checkedPtrCountWithoutThreadCheck() const
-    {
-      if constexpr (std::is_same_v<StorageType, std::atomic<uint32_t>>)
-        return m_checkedPtrCount;
-      else
-        return m_checkedPtrCount;
     }
 
     void setDidBeginCheckedPtrDeletion()
@@ -428,7 +423,7 @@ namespace Krys
     object->T::~T();                                                                                         \
                                                                                                              \
     /* If CheckedPtrs still exist, poison and keep memory */                                                 \
-    if (object->checkedPtrCountWithoutThreadCheck()) KRYS_UNLIKELY                                           \
+    if (object->checkedPtrCount()) KRYS_UNLIKELY                                                             \
     {                                                                                                        \
       ByteUtils::ZeroObject(*object);                                                                        \
       return;                                                                                                \
@@ -438,7 +433,6 @@ namespace Krys
     ::operator delete(static_cast<void *>(object));                                                          \
   }                                                                                                          \
   using KrysDidOverrideDeleteForCheckedPtr = int;
-
 
   // Note: KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR must be declared in the most derived subclass.
 #define KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ClassName)                                                      \

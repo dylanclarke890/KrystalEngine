@@ -23,13 +23,13 @@ namespace Krys::Tests
       auto *obj = new TestWeakRefCounted();
       weakRef = new SingleThreadWeakRef<TestWeakRefCounted>(*obj);
 
-      REQUIRE(weakRef->impl());
-      REQUIRE(weakRef->impl().template get<TestWeakRefObject>() == obj);
+      REQUIRE(weakRef->Impl());
+      REQUIRE(weakRef->Impl().template get<TestWeakRefObject>() == obj);
 
       obj->SubRef();
     }
 
-    REQUIRE(!weakRef->impl());
+    REQUIRE(!weakRef->Impl());
     delete weakRef;
   }
 
@@ -41,8 +41,8 @@ namespace Krys::Tests
     SingleThreadWeakRef<TestWeakRefCounted> weakRef2(Krys::Move(weakRef1));
 
     REQUIRE(weakRef1.isHashTableEmptyValue());
-    REQUIRE(weakRef2.impl());
-    REQUIRE(weakRef2.impl().template get<TestWeakRefObject>() == obj);
+    REQUIRE(weakRef2.Impl());
+    REQUIRE(weakRef2.Impl().template get<TestWeakRefObject>() == obj);
 
     obj->SubRef();
   }
@@ -51,12 +51,12 @@ namespace Krys::Tests
   {
     auto *obj = new TestWeakRefCounted();
 
-    Ref<SingleThreadWeakPtrImpl> impl = obj->weakImpl();
+    Ref<SingleThreadWeakPtrImpl> impl = obj->WeakImpl();
     SingleThreadWeakRef<TestWeakRefCounted> weakRef(Krys::Move(impl));
 
     REQUIRE(impl.isHashTableEmptyValue());
-    REQUIRE(weakRef.impl());
-    REQUIRE(weakRef.impl().template get<TestWeakRefObject>() == obj);
+    REQUIRE(weakRef.Impl());
+    REQUIRE(weakRef.Impl().template get<TestWeakRefObject>() == obj);
 
     obj->SubRef();
   }
@@ -71,14 +71,14 @@ namespace Krys::Tests
       w1 = new SingleThreadWeakRef<TestWeakRefCounted>(*obj);
       w2 = new SingleThreadWeakRef<TestWeakRefCounted>(*w1);
 
-      REQUIRE(w1->impl());
-      REQUIRE(w2->impl());
+      REQUIRE(w1->Impl());
+      REQUIRE(w2->Impl());
 
       obj->SubRef();
     }
 
-    REQUIRE(!w1->impl());
-    REQUIRE(!w2->impl());
+    REQUIRE(!w1->Impl());
+    REQUIRE(!w2->Impl());
 
     delete w1;
     delete w2;
@@ -95,13 +95,13 @@ namespace Krys::Tests
 
       {
         Ref<TestWeakRefCounted> copy = ref;
-        REQUIRE(weakRef->impl());
+        REQUIRE(weakRef->Impl());
       }
 
-      REQUIRE(weakRef->impl());
+      REQUIRE(weakRef->Impl());
     }
 
-    REQUIRE(!weakRef->impl());
+    REQUIRE(!weakRef->Impl());
     delete weakRef;
   }
 }

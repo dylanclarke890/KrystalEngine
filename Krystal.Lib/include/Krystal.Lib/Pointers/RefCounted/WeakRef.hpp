@@ -12,7 +12,7 @@ namespace Krys
   template <typename T, typename WeakPtrImpl, typename PtrTraits>
   class WeakPtr;
 
-  enum class EnableWeakPtrThreadingAssertions : bool
+  enum class EnabledWeakPtrThreadAsserts : bool
   {
     No,
     Yes
@@ -25,51 +25,51 @@ namespace Krys
   {
   public:
     WeakRef(const T &object,
-            EnableWeakPtrThreadingAssertions shouldEnableAssertions = EnableWeakPtrThreadingAssertions::Yes)
+            EnabledWeakPtrThreadAsserts shouldEnableAssertions = EnabledWeakPtrThreadAsserts::Yes)
     requires(!IsSmartPtr<T>::value && !std::is_pointer_v<T>)
-        : m_impl(object.weakImpl())
+        : _impl(object.WeakImpl())
 #if KRYS_ENV(DEV)
           ,
-          m_shouldEnableAssertions(shouldEnableAssertions == EnableWeakPtrThreadingAssertions::Yes)
+          m_shouldEnableAssertions(shouldEnableAssertions == EnabledWeakPtrThreadAsserts::Yes)
 #endif
     {
       (void)shouldEnableAssertions;
     }
 
-    explicit WeakRef(Ref<WeakPtrImpl> &&impl, EnableWeakPtrThreadingAssertions shouldEnableAssertions =
-                                                EnableWeakPtrThreadingAssertions::Yes)
-        : m_impl(Krys::Move(impl))
+    explicit WeakRef(Ref<WeakPtrImpl> &&impl,
+                     EnabledWeakPtrThreadAsserts shouldEnableAssertions = EnabledWeakPtrThreadAsserts::Yes)
+        : _impl(Krys::Move(impl))
 #if KRYS_ENV(DEV)
           ,
-          m_shouldEnableAssertions(shouldEnableAssertions == EnableWeakPtrThreadingAssertions::Yes)
+          m_shouldEnableAssertions(shouldEnableAssertions == EnabledWeakPtrThreadAsserts::Yes)
 #endif
     {
       (void)shouldEnableAssertions;
     }
 
-    WeakRef(HashTableDeletedValueType) : m_impl(HashTableDeletedValue)
+    WeakRef(HashTableDeletedValueType) : _impl(HashTableDeletedValue)
     {
     }
-    WeakRef(HashTableEmptyValueType) : m_impl(HashTableEmptyValue)
+    WeakRef(HashTableEmptyValueType) : _impl(HashTableEmptyValue)
     {
     }
 
     bool isHashTableDeletedValue() const
     {
-      return m_impl.isHashTableDeletedValue();
+      return _impl.isHashTableDeletedValue();
     }
     bool isHashTableEmptyValue() const
     {
-      return m_impl.isHashTableEmptyValue();
+      return _impl.isHashTableEmptyValue();
     }
 
-    WeakPtrImpl &impl() const
+    WeakPtrImpl &Impl() const
     {
-      return m_impl;
+      return _impl;
     }
     Ref<WeakPtrImpl> releaseImpl()
     {
-      return Krys::Move(m_impl);
+      return Krys::Move(_impl);
     }
 
     T *ptrAllowingHashTableEmptyValue() const
@@ -77,7 +77,7 @@ namespace Krys
       static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value,
                     "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
 
-      return !m_impl.isHashTableEmptyValue() ? static_cast<T *>(m_impl->template get<T>()) : nullptr;
+      return !_impl.isHashTableEmptyValue() ? static_cast<T *>(_impl->template get<T>()) : nullptr;
     }
 
     T *ptr() const
@@ -85,7 +85,7 @@ namespace Krys
       static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value,
                     "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
 
-      auto *ptr = static_cast<T *>(m_impl->template get<T>());
+      auto *ptr = static_cast<T *>(_impl->template get<T>());
       assert(ptr);
       return ptr;
     }
@@ -95,7 +95,7 @@ namespace Krys
       static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value,
                     "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
 
-      auto *ptr = static_cast<T *>(m_impl->template get<T>());
+      auto *ptr = static_cast<T *>(_impl->template get<T>());
       assert(ptr);
       return *ptr;
     }
@@ -110,18 +110,17 @@ namespace Krys
       return ptr();
     }
 
-    EnableWeakPtrThreadingAssertions enableWeakPtrThreadingAssertions() const
+    EnabledWeakPtrThreadAsserts enableWeakPtrThreadingAssertions() const
     {
 #if KRYS_ENV(DEV)
-      return m_shouldEnableAssertions ? EnableWeakPtrThreadingAssertions::Yes
-                                      : EnableWeakPtrThreadingAssertions::No;
+      return m_shouldEnableAssertions ? EnabledWeakPtrThreadAsserts::Yes : EnabledWeakPtrThreadAsserts::No;
 #else
-      return EnableWeakPtrThreadingAssertions::No;
+      return EnabledWeakPtrThreadAsserts::No;
 #endif
     }
 
   private:
-    Ref<WeakPtrImpl> m_impl;
+    Ref<WeakPtrImpl> _impl;
 #if KRYS_ENV(DEV)
     bool m_shouldEnableAssertions {true};
 #endif
@@ -129,8 +128,8 @@ namespace Krys
 
   template <class T>
   requires(!IsSmartPtr<T>::value && !std::is_pointer_v<T>)
-  WeakRef(const T &value, EnableWeakPtrThreadingAssertions = EnableWeakPtrThreadingAssertions::Yes)
-    -> WeakRef<T, typename T::WeakPtrImplType>;
+  WeakRef(const T &value, EnabledWeakPtrThreadAsserts = EnabledWeakPtrThreadAsserts::Yes)
+    -> WeakRef<T, typename T::TWeakPtrImpl>;
 
   template <typename T, typename WeakPtrImpl>
   struct GetPtrHelper<WeakRef<T, WeakPtrImpl>>

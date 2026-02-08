@@ -36,67 +36,67 @@ namespace Krys
 
     template <typename = enable_if_t<!IsSmartPtr<T>::value>>
     WeakPtr(const T *object,
-            EnableWeakPtrThreadingAssertions shouldEnableAssertions = EnableWeakPtrThreadingAssertions::Yes)
-        : m_impl(object ? &object->weakImpl() : nullptr)
+            EnabledWeakPtrThreadAsserts shouldEnableAssertions = EnabledWeakPtrThreadAsserts::Yes)
+        : _impl(object ? &object->WeakImpl() : nullptr)
 #if KRYS_ENV(DEV)
           ,
-          m_shouldEnableAssertions(shouldEnableAssertions == EnableWeakPtrThreadingAssertions::Yes)
+          m_shouldEnableAssertions(shouldEnableAssertions == EnabledWeakPtrThreadAsserts::Yes)
 #endif
     {
       (void)shouldEnableAssertions;
-      assert(!object || object == m_impl->template get<T>());
+      assert(!object || object == _impl->template get<T>());
     }
 
     template <typename = std::enable_if_t<!IsSmartPtr<T>::value && !std::is_pointer_v<T>>>
     WeakPtr(const T &object,
-            EnableWeakPtrThreadingAssertions shouldEnableAssertions = EnableWeakPtrThreadingAssertions::Yes)
-        : m_impl(&object.weakImpl())
+            EnabledWeakPtrThreadAsserts shouldEnableAssertions = EnabledWeakPtrThreadAsserts::Yes)
+        : _impl(&object.WeakImpl())
 #if KRYS_ENV(DEV)
           ,
-          m_shouldEnableAssertions(shouldEnableAssertions == EnableWeakPtrThreadingAssertions::Yes)
+          m_shouldEnableAssertions(shouldEnableAssertions == EnabledWeakPtrThreadAsserts::Yes)
 #endif
     {
       (void)shouldEnableAssertions;
-      assert(&object == m_impl->template get<T>());
+      assert(&object == _impl->template get<T>());
     }
 
     template <typename = std::enable_if_t<!IsSmartPtr<T>::value>>
     WeakPtr(const Ref<T> &object,
-            EnableWeakPtrThreadingAssertions shouldEnableAssertions = EnableWeakPtrThreadingAssertions::Yes)
+            EnabledWeakPtrThreadAsserts shouldEnableAssertions = EnabledWeakPtrThreadAsserts::Yes)
         : WeakPtr(object.get(), shouldEnableAssertions)
     {
     }
 
     template <typename = std::enable_if_t<!IsSmartPtr<T>::value>>
     WeakPtr(const RefPtr<T> &object,
-            EnableWeakPtrThreadingAssertions shouldEnableAssertions = EnableWeakPtrThreadingAssertions::Yes)
+            EnabledWeakPtrThreadAsserts shouldEnableAssertions = EnabledWeakPtrThreadAsserts::Yes)
         : WeakPtr(object.get(), shouldEnableAssertions)
     {
     }
 
     template <typename OtherPtrTraits>
-    explicit WeakPtr(RefPtr<WeakPtrImpl, OtherPtrTraits> impl) : m_impl(Krys::Move(impl))
+    explicit WeakPtr(RefPtr<WeakPtrImpl, OtherPtrTraits> impl) : _impl(Krys::Move(impl))
     {
     }
 
-    WeakPtr(HashTableDeletedValueType) : m_impl(HashTableDeletedValue)
+    WeakPtr(HashTableDeletedValueType) : _impl(HashTableDeletedValue)
     {
     }
-    WeakPtr(HashTableEmptyValueType) : m_impl(HashTableEmptyValue)
+    WeakPtr(HashTableEmptyValueType) : _impl(HashTableEmptyValue)
     {
     }
 
     bool isHashTableDeletedValue() const
     {
-      return m_impl.isHashTableDeletedValue();
+      return _impl.isHashTableDeletedValue();
     }
     bool isHashTableEmptyValue() const
     {
-      return !m_impl;
+      return !_impl;
     }
     bool isWeakNullValue() const
     {
-      return !*m_impl;
+      return !*_impl;
     }
 
     T *ptrAllowingHashTableEmptyValue() const
@@ -104,38 +104,38 @@ namespace Krys
       static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value,
                     "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
 
-      return !m_impl.isHashTableEmptyValue() ? static_cast<T *>(m_impl->template get<T>()) : nullptr;
+      return !_impl.isHashTableEmptyValue() ? static_cast<T *>(_impl->template get<T>()) : nullptr;
     }
 
     RefPtr<WeakPtrImpl, PtrTraits> releaseImpl()
     {
-      return Krys::Move(m_impl);
+      return Krys::Move(_impl);
     }
 
     T *get() const
     {
       static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value,
                     "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
-      return m_impl ? static_cast<T *>(m_impl->template get<T>()) : nullptr;
+      return _impl ? static_cast<T *>(_impl->template get<T>()) : nullptr;
     }
 
     WeakRef<T, WeakPtrImpl> releaseNonNull()
     {
-      return WeakRef<T, WeakPtrImpl> {m_impl.releaseNonNull(), enableWeakPtrThreadingAssertions()};
+      return WeakRef<T, WeakPtrImpl> {_impl.releaseNonNull(), enableWeakPtrThreadingAssertions()};
     }
 
     bool operator!() const
     {
-      return !m_impl || !*m_impl;
+      return !_impl || !*_impl;
     }
     explicit operator bool() const
     {
-      return m_impl && *m_impl;
+      return _impl && *_impl;
     }
 
     WeakPtr &operator=(std::nullptr_t)
     {
-      m_impl = nullptr;
+      _impl = nullptr;
       return *this;
     }
     template <typename U>
@@ -169,16 +169,15 @@ namespace Krys
 
     void clear()
     {
-      m_impl = nullptr;
+      _impl = nullptr;
     }
 
-    EnableWeakPtrThreadingAssertions enableWeakPtrThreadingAssertions() const
+    EnabledWeakPtrThreadAsserts enableWeakPtrThreadingAssertions() const
     {
 #if KRYS_ENV(DEV)
-      return m_shouldEnableAssertions ? EnableWeakPtrThreadingAssertions::Yes
-                                      : EnableWeakPtrThreadingAssertions::No;
+      return m_shouldEnableAssertions ? EnabledWeakPtrThreadAsserts::Yes : EnabledWeakPtrThreadAsserts::No;
 #else
-      return EnableWeakPtrThreadingAssertions::No;
+      return EnabledWeakPtrThreadAsserts::No;
 #endif
     }
 
@@ -190,17 +189,17 @@ namespace Krys
     template <typename, typename>
     friend class WeakPtrFactoryWithBitField;
 
-    explicit WeakPtr(Ref<WeakPtrImpl> &&ref, EnableWeakPtrThreadingAssertions shouldEnableAssertions)
-        : m_impl(Krys::Move(ref))
+    explicit WeakPtr(Ref<WeakPtrImpl> &&ref, EnabledWeakPtrThreadAsserts shouldEnableAssertions)
+        : _impl(Krys::Move(ref))
 #if KRYS_ENV(DEV)
           ,
-          m_shouldEnableAssertions(shouldEnableAssertions == EnableWeakPtrThreadingAssertions::Yes)
+          m_shouldEnableAssertions(shouldEnableAssertions == EnabledWeakPtrThreadAsserts::Yes)
 #endif
     {
       (void)shouldEnableAssertions;
     }
 
-    RefPtr<WeakPtrImpl, PtrTraits> m_impl;
+    RefPtr<WeakPtrImpl, PtrTraits> _impl;
 #if KRYS_ENV(DEV)
     bool m_shouldEnableAssertions {true};
 #endif
@@ -209,23 +208,21 @@ namespace Krys
   template <typename T, typename U, typename WeakPtrImpl>
   inline WeakPtrImpl *weak_ptr_impl_cast(WeakPtrImpl *impl)
   {
-    static_assert(std::same_as<typename T::WeakValueType, typename U::WeakValueType>,
-                  "Invalid weak pointer cast");
+    static_assert(std::same_as<typename T::TWeakValue, typename U::TWeakValue>, "Invalid weak pointer cast");
     return impl;
   }
 
   template <typename T, typename U, typename WeakPtrImpl>
   inline WeakPtrImpl &weak_ptr_impl_cast(WeakPtrImpl &impl)
   {
-    static_assert(std::same_as<typename T::WeakValueType, typename U::WeakValueType>,
-                  "Invalid weak pointer cast");
+    static_assert(std::same_as<typename T::TWeakValue, typename U::TWeakValue>, "Invalid weak pointer cast");
     return impl;
   }
 
   template <typename T, typename WeakPtrImpl, typename PtrTraits>
   template <typename U>
   inline WeakPtr<T, WeakPtrImpl, PtrTraits>::WeakPtr(const WeakPtr<U, WeakPtrImpl, PtrTraits> &o)
-      : m_impl(weak_ptr_impl_cast<T, U>(o.m_impl.get()))
+      : _impl(weak_ptr_impl_cast<T, U>(o._impl.get()))
 #if KRYS_ENV(DEV)
         ,
         m_shouldEnableAssertions(o.m_shouldEnableAssertions)
@@ -236,7 +233,7 @@ namespace Krys
   template <typename T, typename WeakPtrImpl, typename PtrTraits>
   template <typename U>
   inline WeakPtr<T, WeakPtrImpl, PtrTraits>::WeakPtr(WeakPtr<U, WeakPtrImpl, PtrTraits> &&o)
-      : m_impl(adoptRef(weak_ptr_impl_cast<T, U>(o.m_impl.leakRef())))
+      : _impl(adoptRef(weak_ptr_impl_cast<T, U>(o._impl.leakRef())))
 #if KRYS_ENV(DEV)
         ,
         m_shouldEnableAssertions(o.m_shouldEnableAssertions)
@@ -247,11 +244,10 @@ namespace Krys
   template <typename T, typename WeakPtrImpl, typename PtrTraits>
   template <typename U>
   inline WeakPtr<T, WeakPtrImpl, PtrTraits>::WeakPtr(const WeakRef<U, WeakPtrImpl> &o)
-      : m_impl(&weak_ptr_impl_cast<T, U>(o.impl()))
+      : _impl(&weak_ptr_impl_cast<T, U>(o.Impl()))
 #if KRYS_ENV(DEV)
         ,
-        m_shouldEnableAssertions(o.enableWeakPtrThreadingAssertions()
-                                 == EnableWeakPtrThreadingAssertions::Yes)
+        m_shouldEnableAssertions(o.enableWeakPtrThreadingAssertions() == EnabledWeakPtrThreadAsserts::Yes)
 #endif
   {
   }
@@ -259,11 +255,10 @@ namespace Krys
   template <typename T, typename WeakPtrImpl, typename PtrTraits>
   template <typename U>
   inline WeakPtr<T, WeakPtrImpl, PtrTraits>::WeakPtr(WeakRef<U, WeakPtrImpl> &&o)
-      : m_impl(adoptRef(weak_ptr_impl_cast<T, U>(o.releaseImpl().leakRef())))
+      : _impl(adoptRef(weak_ptr_impl_cast<T, U>(o.releaseImpl().leakRef())))
 #if KRYS_ENV(DEV)
         ,
-        m_shouldEnableAssertions(o.enableWeakPtrThreadingAssertions()
-                                 == EnableWeakPtrThreadingAssertions::Yes)
+        m_shouldEnableAssertions(o.enableWeakPtrThreadingAssertions() == EnabledWeakPtrThreadAsserts::Yes)
 #endif
   {
   }
@@ -273,7 +268,7 @@ namespace Krys
   inline WeakPtr<T, WeakPtrImpl, PtrTraits> &
     WeakPtr<T, WeakPtrImpl, PtrTraits>::operator=(const WeakPtr<U, WeakPtrImpl, PtrTraits> &o)
   {
-    m_impl = weak_ptr_impl_cast<T, U>(o.m_impl.get());
+    _impl = weak_ptr_impl_cast<T, U>(o._impl.get());
 #if KRYS_ENV(DEV)
     m_shouldEnableAssertions = o.m_shouldEnableAssertions;
 #endif
@@ -285,7 +280,7 @@ namespace Krys
   inline WeakPtr<T, WeakPtrImpl, PtrTraits> &
     WeakPtr<T, WeakPtrImpl, PtrTraits>::operator=(WeakPtr<U, WeakPtrImpl, PtrTraits> &&o)
   {
-    m_impl = adoptRef(weak_ptr_impl_cast<T, U>(o.m_impl.leakRef()));
+    _impl = adoptRef(weak_ptr_impl_cast<T, U>(o._impl.leakRef()));
 #if KRYS_ENV(DEV)
     m_shouldEnableAssertions = o.m_shouldEnableAssertions;
 #endif
@@ -297,9 +292,9 @@ namespace Krys
   inline WeakPtr<T, WeakPtrImpl, PtrTraits> &
     WeakPtr<T, WeakPtrImpl, PtrTraits>::operator=(const WeakRef<U, WeakPtrImpl> &o)
   {
-    m_impl = &weak_ptr_impl_cast<T, U>(o.m_impl.get());
+    _impl = &weak_ptr_impl_cast<T, U>(o._impl.get());
 #if KRYS_ENV(DEV)
-    m_shouldEnableAssertions = o.enableWeakPtrThreadingAssertions() == EnableWeakPtrThreadingAssertions::Yes;
+    m_shouldEnableAssertions = o.enableWeakPtrThreadingAssertions() == EnabledWeakPtrThreadAsserts::Yes;
 #endif
     return *this;
   }
@@ -309,9 +304,9 @@ namespace Krys
   inline WeakPtr<T, WeakPtrImpl, PtrTraits> &
     WeakPtr<T, WeakPtrImpl, PtrTraits>::operator=(WeakRef<U, WeakPtrImpl> &&o)
   {
-    m_impl = adoptRef(weak_ptr_impl_cast<T, U>(o.m_impl.leakRef()));
+    _impl = adoptRef(weak_ptr_impl_cast<T, U>(o._impl.leakRef()));
 #if KRYS_ENV(DEV)
-    m_shouldEnableAssertions = o.enableWeakPtrThreadingAssertions() == EnableWeakPtrThreadingAssertions::Yes;
+    m_shouldEnableAssertions = o.enableWeakPtrThreadingAssertions() == EnabledWeakPtrThreadAsserts::Yes;
 #endif
     return *this;
   }
@@ -350,8 +345,8 @@ namespace Krys
   inline WeakPtr<match_constness_t<Source, Target>, WeakPtrImpl, PtrTraits>
     downcast(WeakPtr<Source, WeakPtrImpl, PtrTraits> source)
   {
-    static_assert(!std::same_as<Source, Target>, "Unnecessary cast to same type");
-    static_assert(std::derived_from<Target, Source>, "Should be a downcast");
+    static_assert(!SameType<Source, Target>, "Unnecessary cast to same type");
+    static_assert(DerivedFrom<Target, Source>, "Should be a downcast");
     assert(!source || is<Target>(*source));
     return WeakPtr<match_constness_t<Source, Target>, WeakPtrImpl, PtrTraits> {
       unsafeRefPtrDowncast<match_constness_t<Source, Target>>(source.releaseImpl()),
@@ -384,21 +379,21 @@ namespace Krys
     return a.get() == b;
   }
 
-  template <class T, typename = std::enable_if_t<!IsSmartPtr<T>::value>>
-  WeakPtr(const T *value, EnableWeakPtrThreadingAssertions = EnableWeakPtrThreadingAssertions::Yes)
-    -> WeakPtr<T, typename T::WeakPtrImplType, RawPtrTraits<T>>;
+  template <class T, typename = enable_if_t<!IsSmartPtr<T>::value>>
+  WeakPtr(const T *value, EnabledWeakPtrThreadAsserts = EnabledWeakPtrThreadAsserts::Yes)
+    -> WeakPtr<T, typename T::TWeakPtrImpl, RawPtrTraits<T>>;
 
-  template <class T, typename = std::enable_if_t<!IsSmartPtr<T>::value && !std::is_pointer_v<T>>>
-  WeakPtr(const T &value, EnableWeakPtrThreadingAssertions = EnableWeakPtrThreadingAssertions::Yes)
-    -> WeakPtr<T, typename T::WeakPtrImplType, RawPtrTraits<T>>;
+  template <class T, typename = enable_if_t<!IsSmartPtr<T>::value && !IsPointer<T>>>
+  WeakPtr(const T &value, EnabledWeakPtrThreadAsserts = EnabledWeakPtrThreadAsserts::Yes)
+    -> WeakPtr<T, typename T::TWeakPtrImpl, RawPtrTraits<T>>;
 
-  template <class T, typename = std::enable_if_t<!IsSmartPtr<T>::value>>
-  WeakPtr(const Ref<T> &value, EnableWeakPtrThreadingAssertions = EnableWeakPtrThreadingAssertions::Yes)
-    -> WeakPtr<T, typename T::WeakPtrImplType, RawPtrTraits<T>>;
+  template <class T, typename = enable_if_t<!IsSmartPtr<T>::value>>
+  WeakPtr(const Ref<T> &value, EnabledWeakPtrThreadAsserts = EnabledWeakPtrThreadAsserts::Yes)
+    -> WeakPtr<T, typename T::TWeakPtrImpl, RawPtrTraits<T>>;
 
-  template <class T, typename = std::enable_if_t<!IsSmartPtr<T>::value>>
-  WeakPtr(const RefPtr<T> &value, EnableWeakPtrThreadingAssertions = EnableWeakPtrThreadingAssertions::Yes)
-    -> WeakPtr<T, typename T::WeakPtrImplType, RawPtrTraits<T>>;
+  template <class T, typename = enable_if_t<!IsSmartPtr<T>::value>>
+  WeakPtr(const RefPtr<T> &value, EnabledWeakPtrThreadAsserts = EnabledWeakPtrThreadAsserts::Yes)
+    -> WeakPtr<T, typename T::TWeakPtrImpl, RawPtrTraits<T>>;
 
   template <typename T, typename PtrTraits = RawPtrTraits<SingleThreadWeakPtrImpl>>
   using SingleThreadWeakPtr = WeakPtr<T, SingleThreadWeakPtrImpl, PtrTraits>;

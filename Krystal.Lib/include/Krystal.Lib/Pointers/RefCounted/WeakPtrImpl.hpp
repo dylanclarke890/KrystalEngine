@@ -13,9 +13,9 @@ namespace Krys
   {
   public:
     template <typename T>
-    typename T::WeakValueType *get()
+    typename T::TWeakValue *get()
     {
-      return static_cast<typename T::WeakValueType *>(_ptr);
+      return static_cast<typename T::TWeakValue *>(_ptr);
     }
 
     explicit operator bool() const
@@ -28,7 +28,7 @@ namespace Krys
     }
 
     template <typename T>
-    explicit WeakPtrImplBase(T *ptr) : _ptr(static_cast<typename T::WeakValueType *>(ptr))
+    explicit WeakPtrImplBase(T *ptr) : _ptr(static_cast<typename T::TWeakValue *>(ptr))
     {
     }
 
@@ -50,9 +50,9 @@ namespace Krys
   {
   public:
     template <typename T>
-    typename T::WeakValueType *get()
+    typename T::TWeakValue *get()
     {
-      return static_cast<typename T::WeakValueType *>(_ptr);
+      return static_cast<typename T::TWeakValue *>(_ptr);
     }
 
     explicit operator bool() const
@@ -65,7 +65,7 @@ namespace Krys
     }
 
     template <typename T>
-    explicit WeakPtrImplBaseSingleThread(T *ptr) : _ptr(static_cast<typename T::WeakValueType *>(ptr))
+    explicit WeakPtrImplBaseSingleThread(T *ptr) : _ptr(static_cast<typename T::TWeakValue *>(ptr))
     {
     }
 
