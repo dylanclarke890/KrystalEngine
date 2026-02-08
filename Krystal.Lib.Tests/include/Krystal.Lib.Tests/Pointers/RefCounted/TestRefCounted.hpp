@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Pointers/RefCounted/CanMakeWeakPtr.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/CheckedRef.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/RefCounted.hpp"
 
 namespace Krys::Tests
@@ -46,5 +47,14 @@ namespace Krys::Tests
     {
       *Deleted = true;
     }
+  };
+
+  class TestCheckedRefCounted : public CanMakeCheckedPtr<TestCheckedRefCounted>
+  {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(TestCheckedRefCounted);
+
+  public:
+    TestCheckedRefCounted() = default;
+    virtual ~TestCheckedRefCounted() = default;
   };
 }

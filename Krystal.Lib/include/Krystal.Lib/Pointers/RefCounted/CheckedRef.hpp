@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/ByteUtils.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Detection/Environment.hpp"
@@ -10,13 +11,16 @@
 
 namespace Krys
 {
-#define KRYS_USING_CAN_MAKE_CHECKEDPTR(BASE)                                                                      \
+#define KRYS_USING_CAN_MAKE_CHECKEDPTR(BASE)                                                                 \
   using BASE::checkedPtrCount;                                                                               \
   using BASE::checkedPtrCountWithoutThreadCheck;                                                             \
   using BASE::incrementCheckedPtrCount;                                                                      \
   using BASE::decrementCheckedPtrCount
 
   template <typename T, typename PtrTraits>
+  class CheckedPtr;
+
+  template <typename T, typename PtrTraits = RawPtrTraits<T>>
   class CheckedRef
   {
   public:
@@ -346,7 +350,7 @@ namespace Krys
       if constexpr (std::is_same_v<StorageType, std::atomic<uint32_t>>)
         return m_checkedPtrCount;
       else
-        return m_checkedPtrCount.valueWithoutThreadCheck();
+        return m_checkedPtrCount;
     }
 
     void setDidBeginCheckedPtrDeletion()
@@ -375,11 +379,8 @@ namespace Krys
   public:
     ~CanMakeCheckedPtr()
     {
-      static_assert(
-        std::is_same<typename T::WTFIsFastMallocAllocated, int>::value,
-        "Objects that use CanMakeCheckedPtr must use FastMalloc (WTF_DEPRECATED_MAKE_FAST_ALLOCATED)");
-      static_assert(std::is_same<typename T::WTFDidOverrideDeleteForCheckedPtr, int>::value,
-                    "Objects that use CanMakeCheckedPtr must use WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR");
+      static_assert(std::is_same<typename T::KrysDidOverrideDeleteForCheckedPtr, int>::value,
+                    "Objects that use CanMakeCheckedPtr must use KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR");
     }
 
     friend bool operator==(const CanMakeCheckedPtr &, const CanMakeCheckedPtr &)
@@ -399,11 +400,8 @@ namespace Krys
   public:
     ~CanMakeThreadSafeCheckedPtr()
     {
-      static_assert(
-        std::is_same<typename T::WTFIsFastMallocAllocated, int>::value,
-        "Objects that use CanMakeCheckedPtr must use FastMalloc (WTF_DEPRECATED_MAKE_FAST_ALLOCATED)");
       static_assert(std::is_same<typename T::WTFDidOverrideDeleteForCheckedPtr, int>::value,
-                    "Objects that use CanMakeCheckedPtr must use WTF_OVERRIDE_DELETE_FOR_CHECKED_PTR");
+                    "Objects that use CanMakeCheckedPtr must use KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR");
     }
 
     friend bool operator==(const CanMakeThreadSafeCheckedPtr &, const CanMakeThreadSafeCheckedPtr &)
@@ -411,7 +409,45 @@ namespace Krys
       static_assert(defaultedOperatorEqual == DefaultedOperatorEqual::Yes,
                     "Derived class should opt-in when defaulting operator==, or invalid/undefined comparison "
                     "should be reworked/defined");
+
       return true;
     }
   };
+
+// delete(T*, std::destroying_delete_t, size_t) is preferred over delete(void*)
+// in overload resolution, so we can use it to interpose before calling delete(void*).
+// Note: KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR must be declared in every subclass.
+#define KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR_IMPL(T)                                                         \
+  void operator delete(T *object, std::destroying_delete_t, size_t size)                                     \
+  {                                                                                                          \
+    assert(sizeof(T) == size);                                                                               \
+                                                                                                             \
+    object->setDidBeginCheckedPtrDeletion();                                                                 \
+                                                                                                             \
+    /* Run destructor manually */                                                                            \
+    object->T::~T();                                                                                         \
+                                                                                                             \
+    /* If CheckedPtrs still exist, poison and keep memory */                                                 \
+    if (object->checkedPtrCountWithoutThreadCheck()) KRYS_UNLIKELY                                           \
+    {                                                                                                        \
+      ByteUtils::ZeroObject(*object);                                                                        \
+      return;                                                                                                \
+    }                                                                                                        \
+                                                                                                             \
+    /* Free memory WITHOUT re-entering delete */                                                             \
+    ::operator delete(static_cast<void *>(object));                                                          \
+  }                                                                                                          \
+  using KrysDidOverrideDeleteForCheckedPtr = int;
+
+
+  // Note: KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR must be declared in the most derived subclass.
+#define KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ClassName)                                                      \
+public:                                                                                                      \
+  KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR_IMPL(ClassName)                                                       \
+private:                                                                                                     \
+  using _forceSemicolonAfterKrysOverrideDelete = int
+
+#define KRYS_STRUCT_OVERRIDE_DELETE_FOR_CHECKED_PTR(ClassName)                                               \
+  KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR_IMPL(ClassName)                                                       \
+  using _forceSemicolonAfterKrysOverrideDelete = int
 }

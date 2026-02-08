@@ -15,7 +15,7 @@ namespace Krys
   /// no outstanding CheckedPtrs that reference it.
   /// @note Use is similar to WeakPtr, but CheckedPtr has less overhead and is used in cases where the target is
   /// never expected to become null.
-  template <typename T, typename PtrTraits>
+  template <typename T, typename PtrTraits = RawPtrTraits<T>>
   class CheckedPtr
   {
   public:
@@ -37,7 +37,7 @@ namespace Krys
       refIfNotNull();
     }
 
-    KRYS_ALWAYS_INLINE CheckedPtr(CheckedPtr &&other) : _ptr {PtrTraits::exchange(other._ptr, nullptr)}
+    KRYS_ALWAYS_INLINE CheckedPtr(CheckedPtr &&other) noexcept : _ptr {PtrTraits::exchange(other._ptr, nullptr)}
     {
     }
 

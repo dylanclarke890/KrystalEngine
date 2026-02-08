@@ -116,6 +116,25 @@ namespace Krys
       }
     }
 
+    template <typename T>
+    KRYS_NODISCARD static constexpr Span<byte> ToMutableBytes(T &object) noexcept
+    {
+      return Span<byte>(reinterpret_cast<byte *>(std::addressof(object)), sizeof(T));
+    }
+
+    template <typename T, std::size_t Extent>
+    static void ZeroSpan(Span<T, Extent> destination)
+    {
+      static_assert(std::is_trivially_copyable_v<T> || std::is_floating_point_v<T>);
+      std::memset(destination.data(), 0, destination.size_bytes());
+    }
+
+    template <typename T>
+    static void ZeroObject(T &object)
+    {
+      ZeroSpan(ToMutableBytes(object));
+    }
+
     KRYS_NODISCARD static string AsString(const List<byte> &bytes, const size_t length) noexcept
     {
       return string(reinterpret_cast<const char *>(bytes.data()), length);

@@ -164,6 +164,7 @@
     <ClCompile Include="tests\Pointers\IntrusivePtr\WeakRefCounted.cpp" />
     <ClCompile Include="tests\Pointers\IntrusivePtr\WeakRefCountedSingleThreaded.cpp" />
     <ClCompile Include="tests\Pointers\RefCounted\CheckedPtr.cpp" />
+    <ClCompile Include="tests\Pointers\RefCounted\CheckedRef.cpp" />
     <ClCompile Include="tests\Pointers\RefCounted\Ref.cpp" />
     <ClCompile Include="tests\Pointers\RefCounted\RefCounted.cpp" />
     <ClCompile Include="tests\Pointers\RefCounted\RefPtr.cpp" />
