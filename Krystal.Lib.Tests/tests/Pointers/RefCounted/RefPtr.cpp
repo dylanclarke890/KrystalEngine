@@ -32,7 +32,7 @@ namespace Krys::Tests
     REQUIRE(obj->GetRefCount() == 1);
 
     {
-      auto ref = adoptRef(*obj);
+      auto ref = AdoptRef(*obj);
       REQUIRE(obj->GetRefCount() == 1);
 
       {
@@ -49,7 +49,7 @@ namespace Krys::Tests
     auto *obj = new TestRefCounted();
 
     {
-      Ref<TestRefCounted> ref = adoptRef(*obj);
+      Ref<TestRefCounted> ref = AdoptRef(*obj);
       REQUIRE(obj->GetRefCount() == 1);
 
       RefPtr<TestRefCounted> ptr = std::move(ref);
@@ -62,7 +62,7 @@ namespace Krys::Tests
     auto *obj = new TestRefCounted();
 
     {
-      Ref<TestRefCounted> ref = adoptRef(*obj);
+      Ref<TestRefCounted> ref = AdoptRef(*obj);
       REQUIRE(obj->GetRefCount() == 1);
 
       RefPtr<TestRefCounted> p1(ref);
@@ -82,7 +82,7 @@ namespace Krys::Tests
     auto *obj = new TestRefCounted();
 
     {
-      Ref<TestRefCounted> ref = adoptRef(*obj);
+      Ref<TestRefCounted> ref = AdoptRef(*obj);
       RefPtr<TestRefCounted> p1(ref);
       REQUIRE(obj->GetRefCount() == 2);
 
@@ -97,7 +97,7 @@ namespace Krys::Tests
     auto *obj = new TestObject {&deleted};
 
     {
-      Ref<TestObject> ref = adoptRef(*obj);
+      Ref<TestObject> ref = AdoptRef(*obj);
       REQUIRE(obj->GetRefCount() == 1);
 
       RefPtr<TestObject> ptr(ref);
@@ -112,7 +112,7 @@ namespace Krys::Tests
     auto *obj = new TestRefCounted();
 
     {
-      Ref<TestRefCounted> ref = adoptRef(*obj);
+      Ref<TestRefCounted> ref = AdoptRef(*obj);
       RefPtr<TestRefCounted> p(ref);
       REQUIRE(obj->GetRefCount() == 2);
 
@@ -126,7 +126,7 @@ namespace Krys::Tests
     auto *obj = new TestRefCounted();
 
     {
-      Ref<TestRefCounted> ref = adoptRef(*obj);
+      Ref<TestRefCounted> ref = AdoptRef(*obj);
       RefPtr<TestRefCounted> p(ref);
 
       p = std::move(p);

@@ -19,11 +19,11 @@ namespace Krys::Tests
     REQUIRE(obj->GetRefCount() == 1);
 
     {
-      auto ref1 = adoptRef(*obj);
+      auto ref1 = AdoptRef(*obj);
       REQUIRE(obj->GetRefCount() == 1);
 
       {
-        auto ref2 = ref1.copyRef();
+        auto ref2 = ref1.CopyRef();
         REQUIRE(obj->GetRefCount() == 2);
 
         auto ref3 = Krys::Move(ref2);
@@ -41,7 +41,7 @@ namespace Krys::Tests
     auto *obj = new TestRefCounted();
 
     {
-      Ref<TestRefCounted> ref1 = adoptRef(*obj);
+      Ref<TestRefCounted> ref1 = AdoptRef(*obj);
       REQUIRE(obj->GetRefCount() == 1);
 
       {
@@ -60,7 +60,7 @@ namespace Krys::Tests
     auto *obj = new TestRefCounted();
 
     {
-      Ref<TestRefCounted> ref1 = adoptRef(*obj);
+      Ref<TestRefCounted> ref1 = AdoptRef(*obj);
       REQUIRE(obj->GetRefCount() == 1);
 
       Ref<TestRefCounted> ref2 = Krys::Move(ref1);
@@ -75,7 +75,7 @@ namespace Krys::Tests
     auto *obj = new TestRefCounted();
 
     {
-      Ref<TestRefCounted> ref1 = adoptRef(*obj);
+      Ref<TestRefCounted> ref1 = AdoptRef(*obj);
       REQUIRE(obj->GetRefCount() == 1);
 
       Ref<TestRefCounted> ref2 = ref1;
@@ -93,7 +93,7 @@ namespace Krys::Tests
     auto *obj = new TestRefCounted();
 
     {
-      Ref<TestRefCounted> ref1 = adoptRef(*obj);
+      Ref<TestRefCounted> ref1 = AdoptRef(*obj);
       REQUIRE(obj->GetRefCount() == 1);
 
       Ref<TestRefCounted> ref2 = Krys::Move(ref1);
@@ -111,7 +111,7 @@ namespace Krys::Tests
     auto *obj = new TestRefCounted();
 
     {
-      Ref<TestRefCounted> ref = adoptRef(*obj);
+      Ref<TestRefCounted> ref = AdoptRef(*obj);
       REQUIRE(obj->GetRefCount() == 1);
 
       ref = ref;
@@ -124,17 +124,17 @@ namespace Krys::Tests
     REQUIRE(obj->GetRefCountDebugger().DeletionHasBegun());
   }
 
-  TEST_CASE("Ref leakRef transfers ownership without refcount change", "[Ref]")
+  TEST_CASE("Ref LeakRef transfers ownership without refcount change", "[Ref]")
   {
     auto *obj = new TestRefCounted();
 
     TestRefCounted *raw = nullptr;
 
     {
-      Ref<TestRefCounted> ref = adoptRef(*obj);
+      Ref<TestRefCounted> ref = AdoptRef(*obj);
       REQUIRE(obj->GetRefCount() == 1);
 
-      raw = &ref.leakRef();
+      raw = &ref.LeakRef();
       REQUIRE(obj->GetRefCount() == 1);
     }
 

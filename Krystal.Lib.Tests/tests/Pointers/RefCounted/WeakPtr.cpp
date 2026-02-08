@@ -109,7 +109,7 @@ namespace Krys::Tests
 
     {
       auto *obj = new TestWeakRefCounted();
-      Ref<TestWeakRefCounted> ref = adoptRef(*obj);
+      Ref<TestWeakRefCounted> ref = AdoptRef(*obj);
       weakPtr = SingleThreadWeakPtr<TestWeakRefCounted>(*obj);
 
       {

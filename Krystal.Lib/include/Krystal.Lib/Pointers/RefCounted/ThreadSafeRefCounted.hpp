@@ -16,7 +16,7 @@ namespace Krys
   public:
     void AddRef() const
     {
-      m_refCountDebugger.WillAddRef(m_refCount);
+      _refCountDebugger.WillAddRef(m_refCount);
       ++m_refCount;
     }
 
@@ -32,7 +32,7 @@ namespace Krys
 
     Debugger &refCountDebugger()
     {
-      return m_refCountDebugger;
+      return _refCountDebugger;
     }
 
   protected:
@@ -40,18 +40,18 @@ namespace Krys
 
     ~ThreadSafeRefCountedBase()
     {
-      m_refCountDebugger.WillDestroy(m_refCount);
+      _refCountDebugger.WillDestroy(m_refCount);
       assert(m_refCount == 1);
     }
 
     // Returns true if the pointer should be freed.
     bool SubRefBase() const
     {
-      m_refCountDebugger.WillSubRef(m_refCount);
+      _refCountDebugger.WillSubRef(m_refCount);
 
       if (!--m_refCount) [[unlikely]]
       {
-        m_refCountDebugger.MarkDeletionHasBegun();
+        _refCountDebugger.MarkDeletionHasBegun();
         m_refCount = 1;
         return true;
       }
@@ -61,7 +61,7 @@ namespace Krys
 
   private:
     mutable std::atomic<uint32_t> m_refCount {1};
-    KRYS_NO_UNIQUE_ADDRESS Debugger m_refCountDebugger;
+    KRYS_NO_UNIQUE_ADDRESS Debugger _refCountDebugger;
   };
 
   template <class T>

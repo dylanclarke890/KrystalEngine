@@ -65,7 +65,7 @@ namespace Krys
       }
 
       static_assert(Final<WeakPtrImpl>);
-      _impl = adoptRef(*new WeakPtrImpl(const_cast<RawPtr<T>>(&object)));
+      _impl = AdoptRef(*new WeakPtrImpl(const_cast<RawPtr<T>>(&object)));
     }
 
     template <typename U>
@@ -142,7 +142,7 @@ namespace Krys
       }
 
       static_assert(Final<WeakPtrImpl>);
-      _impl.SetPtr(adoptRef(*new WeakPtrImpl(const_cast<RawPtr<T>>(&object))));
+      _impl.SetPtr(AdoptRef(*new WeakPtrImpl(const_cast<RawPtr<T>>(&object))));
     }
 
     template <typename U>

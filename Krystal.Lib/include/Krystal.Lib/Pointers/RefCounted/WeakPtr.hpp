@@ -119,9 +119,9 @@ namespace Krys
       return _impl ? static_cast<T *>(_impl->template get<T>()) : nullptr;
     }
 
-    WeakRef<T, WeakPtrImpl> releaseNonNull()
+    WeakRef<T, WeakPtrImpl> ReleaseNonNull()
     {
-      return WeakRef<T, WeakPtrImpl> {_impl.releaseNonNull(), enableWeakPtrThreadingAssertions()};
+      return WeakRef<T, WeakPtrImpl> {_impl.ReleaseNonNull(), enableWeakPtrThreadingAssertions()};
     }
 
     bool operator!() const
@@ -233,7 +233,7 @@ namespace Krys
   template <typename T, typename WeakPtrImpl, typename PtrTraits>
   template <typename U>
   inline WeakPtr<T, WeakPtrImpl, PtrTraits>::WeakPtr(WeakPtr<U, WeakPtrImpl, PtrTraits> &&o)
-      : _impl(adoptRef(weak_ptr_impl_cast<T, U>(o._impl.leakRef())))
+      : _impl(AdoptRef(weak_ptr_impl_cast<T, U>(o._impl.leakRef())))
 #if KRYS_ENV(DEV)
         ,
         m_shouldEnableAssertions(o.m_shouldEnableAssertions)
@@ -255,7 +255,7 @@ namespace Krys
   template <typename T, typename WeakPtrImpl, typename PtrTraits>
   template <typename U>
   inline WeakPtr<T, WeakPtrImpl, PtrTraits>::WeakPtr(WeakRef<U, WeakPtrImpl> &&o)
-      : _impl(adoptRef(weak_ptr_impl_cast<T, U>(o.releaseImpl().leakRef())))
+      : _impl(AdoptRef(weak_ptr_impl_cast<T, U>(o.releaseImpl().leakRef())))
 #if KRYS_ENV(DEV)
         ,
         m_shouldEnableAssertions(o.enableWeakPtrThreadingAssertions() == EnabledWeakPtrThreadAsserts::Yes)
@@ -280,7 +280,7 @@ namespace Krys
   inline WeakPtr<T, WeakPtrImpl, PtrTraits> &
     WeakPtr<T, WeakPtrImpl, PtrTraits>::operator=(WeakPtr<U, WeakPtrImpl, PtrTraits> &&o)
   {
-    _impl = adoptRef(weak_ptr_impl_cast<T, U>(o._impl.leakRef()));
+    _impl = AdoptRef(weak_ptr_impl_cast<T, U>(o._impl.leakRef()));
 #if KRYS_ENV(DEV)
     m_shouldEnableAssertions = o.m_shouldEnableAssertions;
 #endif
@@ -304,7 +304,7 @@ namespace Krys
   inline WeakPtr<T, WeakPtrImpl, PtrTraits> &
     WeakPtr<T, WeakPtrImpl, PtrTraits>::operator=(WeakRef<U, WeakPtrImpl> &&o)
   {
-    _impl = adoptRef(weak_ptr_impl_cast<T, U>(o._impl.leakRef()));
+    _impl = AdoptRef(weak_ptr_impl_cast<T, U>(o._impl.leakRef()));
 #if KRYS_ENV(DEV)
     m_shouldEnableAssertions = o.enableWeakPtrThreadingAssertions() == EnabledWeakPtrThreadAsserts::Yes;
 #endif

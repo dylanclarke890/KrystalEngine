@@ -6,6 +6,7 @@
 #include "Krystal.Lib/Detection/Sanitizers.hpp"
 #include "Krystal.Lib/ForbidHeapAllocation.hpp"
 #include "Krystal.Lib/Pointers/GetPtr.hpp"
+#include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RawPtrTraits.hpp"
 #include <cassert>
 
@@ -17,39 +18,35 @@ extern "C" int __asan_address_is_poisoned(void const volatile *addr);
 
 namespace Krys
 {
-  template <typename T, typename PtrTraits, typename RefDerefTraits>
-  class RefPtr;
-
-  inline void adopted(const void *)
-  {
-  }
-
   template <typename T>
   struct DefaultRefDerefTraits
   {
-    static KRYS_ALWAYS_INLINE T *refIfNotNull(T *ptr)
+    constexpr static KRYS_ALWAYS_INLINE RawPtr<T> AddRef(RawPtr<T> ptr) noexcept
     {
-      if (ptr) [[likely]]
+      if (ptr) KRYS_LIKELY
       {
         ptr->AddRef();
       }
       return ptr;
     }
 
-    static KRYS_ALWAYS_INLINE T &ref(T &ref)
+    constexpr static KRYS_ALWAYS_INLINE T &AddRef(T &ref) noexcept
     {
       ref.AddRef();
       return ref;
     }
 
-    static KRYS_ALWAYS_INLINE void derefIfNotNull(T *ptr)
+    constexpr static KRYS_ALWAYS_INLINE void SubRef(RawPtr<T> ptr) noexcept
     {
-      if (ptr) [[likely]]
+      if (ptr) KRYS_LIKELY
       {
         ptr->SubRef();
       }
     }
   };
+
+  template <typename T, typename PtrTraits, typename RefDerefTraits>
+  class RefPtr;
 
   template <typename T, typename PtrTraits = RawPtrTraits<T>,
             typename RefDerefTraits = DefaultRefDerefTraits<T>>
@@ -57,134 +54,207 @@ namespace Krys
 
   template <typename T, typename PtrTraits = RawPtrTraits<T>,
             typename RefDerefTraits = DefaultRefDerefTraits<T>>
-  Ref<T, PtrTraits, RefDerefTraits> adoptRef(T &);
+  constexpr Ref<T, PtrTraits, RefDerefTraits> AdoptRef(T &) noexcept;
 
-  template <typename T, typename _PtrTraits, typename RefDerefTraits>
+  template <typename T, typename PtrTraits, typename RefDerefTraits>
   class Ref
   {
-    KRYS_FORBID_HEAP_ALLOCATION_ALLOWING_PLACEMENT_NEW;
-
     static_assert(!IsPointer<T>, "T must not be a pointer type.");
 
-  public:
-    using PtrTraits = _PtrTraits;
-    static constexpr bool isRef = true;
+    KRYS_FORBID_HEAP_ALLOCATION_ALLOWING_PLACEMENT_NEW;
 
-    ~Ref()
+    friend constexpr Ref AdoptRef<T>(T &) noexcept;
+
+    template <typename X, typename Y, typename Z>
+    friend class Ref;
+
+  private:
+    typename PtrTraits::storage_type _ptr;
+
+  public:
+    constexpr ~Ref() noexcept
+    {
+#if KRYS_ASAN_ENABLED
+      if (__asan_address_is_poisoned(this))
+      {
+        __asan_unpoison_memory_region(this, sizeof(*this));
+      }
+#endif
+      if (auto *ptr = PtrTraits::exchange(_ptr, nullptr))
+      {
+        RefDerefTraits::SubRef(ptr);
+      }
+    }
+
+    constexpr Ref(T &object) noexcept : _ptr(&RefDerefTraits::AddRef(object))
+    {
+    }
+
+    constexpr Ref(const Ref &other) noexcept : _ptr(&RefDerefTraits::AddRef(other.get()))
+    {
+    }
+
+    template <typename X, typename Y>
+    constexpr Ref(const Ref<X, Y> &other) noexcept : _ptr(&RefDerefTraits::AddRef(other.get()))
+    {
+    }
+
+    constexpr Ref(Ref &&other) noexcept : _ptr(&other.LeakRef())
+    {
+      assert(_ptr);
+    }
+
+    template <typename X, typename Y>
+    constexpr Ref(Ref<X, Y> &&other) noexcept : _ptr(&other.LeakRef())
+    {
+      assert(_ptr);
+    }
+
+    constexpr Ref &operator=(T &reference) noexcept
+    {
+      Ref copiedReference = reference;
+      swap(copiedReference);
+      return *this;
+    }
+
+    constexpr Ref &operator=(Ref &&reference) noexcept
     {
 #if KRYS_ASAN_ENABLED
       if (__asan_address_is_poisoned(this))
         __asan_unpoison_memory_region(this, sizeof(*this));
 #endif
-      if (auto *ptr = PtrTraits::exchange(_ptr, nullptr))
-        RefDerefTraits::derefIfNotNull(ptr);
+      Ref movedReference = Krys::Move(reference);
+      swap(movedReference);
+      return *this;
     }
-
-    Ref(T &object) : _ptr(&RefDerefTraits::ref(object))
-    {
-    }
-
-    Ref(const Ref &other) : _ptr(&RefDerefTraits::ref(other.get()))
-    {
-    }
-
-    template <typename X, typename Y>
-    Ref(const Ref<X, Y> &other) : _ptr(&RefDerefTraits::ref(other.get()))
-    {
-    }
-
-    Ref(Ref &&other) : _ptr(&other.leakRef())
-    {
-      assert(_ptr);
-    }
-
-    template <typename X, typename Y>
-    Ref(Ref<X, Y> &&other) : _ptr(&other.leakRef())
-    {
-      assert(_ptr);
-    }
-
-    Ref &operator=(T &);
-    Ref &operator=(Ref &&);
-    template <typename X, typename Y, typename Z>
-    Ref &operator=(Ref<X, Y, Z> &&);
-
-    Ref &operator=(const Ref &);
-    template <typename X, typename Y, typename Z>
-    Ref &operator=(const Ref<X, Y, Z> &);
 
     template <typename X, typename Y, typename Z>
-    void swap(Ref<X, Y, Z> &);
+    constexpr Ref &operator=(Ref<X, Y, Z> &&reference) noexcept
+    {
+#if KRYS_ASAN_ENABLED
+      if (__asan_address_is_poisoned(this))
+        __asan_unpoison_memory_region(this, sizeof(*this));
+#endif
+      Ref movedReference = Krys::Move(reference);
+      swap(movedReference);
+      return *this;
+    }
+
+    constexpr Ref &operator=(const Ref &reference) noexcept
+    {
+#if KRYS_ASAN_ENABLED
+      if (__asan_address_is_poisoned(this))
+        __asan_unpoison_memory_region(this, sizeof(*this));
+#endif
+      Ref copy = reference;
+      swap(copy);
+      return *this;
+    }
+
+    template <typename X, typename Y, typename Z>
+    constexpr Ref &operator=(const Ref<X, Y, Z> &reference) noexcept
+    {
+#if KRYS_ASAN_ENABLED
+      if (__asan_address_is_poisoned(this))
+        __asan_unpoison_memory_region(this, sizeof(*this));
+#endif
+      Ref copy = reference;
+      swap(copy);
+      return *this;
+    }
+
+    template <typename X, typename Y, typename Z>
+    constexpr void swap(Ref<X, Y, Z> &other) noexcept
+    {
+      PtrTraits::swap(_ptr, other._ptr);
+    }
 
     // Hash table deleted values, which are only constructed and never copied or destroyed.
-    Ref(HashTableDeletedValueType) : _ptr(PtrTraits::GetHashTableDeletedValue())
+    constexpr Ref(HashTableDeletedValueType) noexcept : _ptr(PtrTraits::GetHashTableDeletedValue())
     {
     }
-    bool IsHashTableDeletedValue() const
+
+    constexpr bool IsHashTableDeletedValue() const noexcept
     {
       return PtrTraits::IsHashTableDeletedValue(_ptr);
     }
 
-    Ref(HashTableEmptyValueType) : _ptr(hashTableEmptyValue())
+    constexpr Ref(HashTableEmptyValueType) noexcept : _ptr(GetHashTableEmptyValue())
     {
     }
-    bool IsHashTableEmptyValue() const
+
+    constexpr bool IsHashTableEmptyValue() const noexcept
     {
-      return _ptr == hashTableEmptyValue();
+      return _ptr == GetHashTableEmptyValue();
     }
-    static T *hashTableEmptyValue()
+
+    constexpr static RawPtr<T> GetHashTableEmptyValue() noexcept
     {
       return nullptr;
     }
 
-    const T *ptrAllowingHashTableEmptyValue() const KRYS_LIFETIME_BOUND
-    {
-      assert(_ptr || IsHashTableEmptyValue());
-      return PtrTraits::unwrap(_ptr);
-    }
-    T *ptrAllowingHashTableEmptyValue() KRYS_LIFETIME_BOUND
+    constexpr const RawPtr<T> PtrAllowingHashTableEmptyValue() const noexcept KRYS_LIFETIME_BOUND
     {
       assert(_ptr || IsHashTableEmptyValue());
       return PtrTraits::unwrap(_ptr);
     }
 
-    T *operator->() const KRYS_LIFETIME_BOUND
+    constexpr RawPtr<T> PtrAllowingHashTableEmptyValue() noexcept KRYS_LIFETIME_BOUND
+    {
+      assert(_ptr || IsHashTableEmptyValue());
+      return PtrTraits::unwrap(_ptr);
+    }
+
+    constexpr RawPtr<T> operator->() const noexcept KRYS_LIFETIME_BOUND
     {
       assert(_ptr);
       return PtrTraits::unwrap(_ptr);
     }
-    T *ptr() const KRYS_LIFETIME_BOUND KRYS_RETURNS_NONNULL
+
+    constexpr RawPtr<T> ptr() const noexcept KRYS_LIFETIME_BOUND KRYS_RETURNS_NONNULL
     {
       assert(_ptr);
       return PtrTraits::unwrap(_ptr);
     }
-    T &get() const KRYS_LIFETIME_BOUND
+
+    constexpr T &get() const noexcept KRYS_LIFETIME_BOUND
     {
       assert(_ptr);
       return *PtrTraits::unwrap(_ptr);
     }
-    operator T &() const KRYS_LIFETIME_BOUND
+
+    constexpr operator T &() const noexcept KRYS_LIFETIME_BOUND
     {
       assert(_ptr);
       return *PtrTraits::unwrap(_ptr);
     }
-    bool operator!() const
+
+    constexpr bool operator!() const noexcept
     {
       assert(_ptr);
       return !*_ptr;
     }
 
     template <typename X, typename Y, typename Z>
-    KRYS_NODISCARD Ref<T, PtrTraits, RefDerefTraits> replace(Ref<X, Y, Z> &&);
+    KRYS_NODISCARD constexpr Ref<T, PtrTraits, RefDerefTraits> replace(Ref<X, Y, Z> &&reference) noexcept
+    {
+#if KRYS_ASAN_ENABLED
+      if (__asan_address_is_poisoned(this))
+        __asan_unpoison_memory_region(this, sizeof(*this));
+#endif
 
-    // The following function is deprecated.
-    Ref copyRef() && = delete;
-    KRYS_NODISCARD Ref copyRef() const &
+      auto oldReference = AdoptRef(*_ptr);
+      _ptr = &reference.leakRef();
+      return oldReference;
+    }
+
+    Ref CopyRef() && noexcept = delete;
+    KRYS_NODISCARD constexpr Ref CopyRef() const & noexcept
     {
       return Ref(*_ptr);
     }
 
-    KRYS_NODISCARD T &leakRef()
+    KRYS_NODISCARD constexpr T &LeakRef() noexcept
     {
       assert(_ptr);
 
@@ -196,166 +266,72 @@ namespace Krys
     }
 
   private:
-    friend Ref adoptRef<T>(T &);
-    template <typename X, typename Y, typename Z>
-    friend class Ref;
-
-    template <typename X, typename Y, typename Z, typename U, typename V, typename W>
-    friend bool operator==(const Ref<X, Y, Z> &, const Ref<U, V, W> &);
-
     enum AdoptTag
     {
       Adopt
     };
-    Ref(T &object, AdoptTag) : _ptr(&object)
+
+    constexpr Ref(T &object, AdoptTag) noexcept : _ptr(&object)
     {
     }
-
-    typename PtrTraits::storage_type _ptr;
   };
 
-  template <typename T, typename _PtrTraits, typename RefDerefTraits>
-  Ref<T, _PtrTraits, RefDerefTraits> adoptRef(T &);
-
-  template <typename T, typename _PtrTraits, typename RefDerefTraits>
-  inline Ref<T, _PtrTraits, RefDerefTraits> &Ref<T, _PtrTraits, RefDerefTraits>::operator=(T &reference)
+  template <typename T, typename PtrTraits, typename RefDerefTraits>
+  constexpr inline Ref<T, PtrTraits, RefDerefTraits> AdoptRef(T &reference) noexcept
   {
-    Ref copiedReference = reference;
-    swap(copiedReference);
-    return *this;
-  }
-
-  template <typename T, typename _PtrTraits, typename RefDerefTraits>
-  inline Ref<T, _PtrTraits, RefDerefTraits> &Ref<T, _PtrTraits, RefDerefTraits>::operator=(Ref &&reference)
-  {
-#if KRYS_ASAN_ENABLED
-    if (__asan_address_is_poisoned(this))
-      __asan_unpoison_memory_region(this, sizeof(*this));
-#endif
-    Ref movedReference = Krys::Move(reference);
-    swap(movedReference);
-    return *this;
-  }
-
-  template <typename T, typename _PtrTraits, typename RefDerefTraits>
-  template <typename U, typename _OtherPtrTraits, typename OtherRefDerefTraits>
-  inline Ref<T, _PtrTraits, RefDerefTraits> &
-    Ref<T, _PtrTraits, RefDerefTraits>::operator=(Ref<U, _OtherPtrTraits, OtherRefDerefTraits> &&reference)
-  {
-#if KRYS_ASAN_ENABLED
-    if (__asan_address_is_poisoned(this))
-      __asan_unpoison_memory_region(this, sizeof(*this));
-#endif
-    Ref movedReference = Krys::Move(reference);
-    swap(movedReference);
-    return *this;
-  }
-
-  template <typename T, typename _PtrTraits, typename RefDerefTraits>
-  inline Ref<T, _PtrTraits, RefDerefTraits> &
-    Ref<T, _PtrTraits, RefDerefTraits>::operator=(const Ref &reference)
-  {
-#if KRYS_ASAN_ENABLED
-    if (__asan_address_is_poisoned(this))
-      __asan_unpoison_memory_region(this, sizeof(*this));
-#endif
-    Ref copiedReference = reference;
-    swap(copiedReference);
-    return *this;
-  }
-
-  template <typename T, typename _PtrTraits, typename RefDerefTraits>
-  template <typename U, typename _OtherPtrTraits, typename OtherRefDerefTraits>
-  inline Ref<T, _PtrTraits, RefDerefTraits> &Ref<T, _PtrTraits, RefDerefTraits>::operator=(
-    const Ref<U, _OtherPtrTraits, OtherRefDerefTraits> &reference)
-  {
-#if KRYS_ASAN_ENABLED
-    if (__asan_address_is_poisoned(this))
-      __asan_unpoison_memory_region(this, sizeof(*this));
-#endif
-    Ref copiedReference = reference;
-    swap(copiedReference);
-    return *this;
+    return Ref<T, PtrTraits, RefDerefTraits>(reference, Ref<T, PtrTraits, RefDerefTraits>::Adopt);
   }
 
   template <typename X, typename APtrTraits, typename ARefDerefTraits, typename Y, typename BPtrTraits,
             typename BRefDerefTraits>
-  inline bool operator==(const Ref<X, APtrTraits, ARefDerefTraits> &a,
-                         const Ref<Y, BPtrTraits, BRefDerefTraits> &b)
-  {
-    return a._ptr == b._ptr;
-  }
-
-  template <typename X, typename _PtrTraits, typename RefDerefTraits>
-  template <typename Y, typename _OtherPtrTraits, typename OtherRefDerefTraits>
-  inline void Ref<X, _PtrTraits, RefDerefTraits>::swap(Ref<Y, _OtherPtrTraits, OtherRefDerefTraits> &other)
-  {
-    _PtrTraits::swap(_ptr, other._ptr);
-  }
-
-  template <typename X, typename APtrTraits, typename ARefDerefTraits, typename Y, typename BPtrTraits,
-            typename BRefDerefTraits>
-  requires(!std::same_as<APtrTraits, RawPtrTraits<X>> || !std::same_as<BPtrTraits, RawPtrTraits<Y>>)
-  inline void swap(Ref<X, APtrTraits, ARefDerefTraits> &a, Ref<Y, BPtrTraits, BRefDerefTraits> &b)
+  requires(!SameType<APtrTraits, RawPtrTraits<X>> || !SameType<BPtrTraits, RawPtrTraits<Y>>)
+  inline void swap(Ref<X, APtrTraits, ARefDerefTraits> &a, Ref<Y, BPtrTraits, BRefDerefTraits> &b) noexcept
   {
     a.swap(b);
   }
 
-  template <typename X, typename _PtrTraits, typename RefDerefTraits>
-  template <typename Y, typename _OtherPtrTraits, typename OtherRefDerefTraits>
-  inline Ref<X, _PtrTraits, RefDerefTraits>
-    Ref<X, _PtrTraits, RefDerefTraits>::replace(Ref<Y, _OtherPtrTraits, OtherRefDerefTraits> &&reference)
-  {
-#if KRYS_ASAN_ENABLED
-    if (__asan_address_is_poisoned(this))
-      __asan_unpoison_memory_region(this, sizeof(*this));
-#endif
-    auto oldReference = adoptRef(*_ptr);
-    _ptr = &reference.leakRef();
-    return oldReference;
-  }
-
-  template <typename X, typename _PtrTraits = RawPtrTraits<X>,
-            typename RefDerefTraits = DefaultRefDerefTraits<X>, typename Y, typename _OtherPtrTraits,
+  template <typename X, typename PtrTraits = RawPtrTraits<X>,
+            typename RefDerefTraits = DefaultRefDerefTraits<X>, typename Y, typename OtherPtrTraits,
             typename OtherRefDerefTraits>
-  inline Ref<X, _PtrTraits, RefDerefTraits> upcast(Ref<Y, _OtherPtrTraits, OtherRefDerefTraits> &&reference)
+  inline Ref<X, PtrTraits, RefDerefTraits>
+    Upcast(Ref<Y, OtherPtrTraits, OtherRefDerefTraits> &&reference) noexcept
   {
-    static_assert(!std::same_as<Y, X>, "Unnecessary cast to same type");
-    static_assert(std::derived_from<Y, X>, "Should be an upcast");
-    return adoptRef(static_cast<X &>(reference.leakRef()));
-  }
-
-  template <typename X, typename _PtrTraits = RawPtrTraits<X>,
-            typename RefDerefTraits = DefaultRefDerefTraits<X>, typename Y, typename _OtherPtrTraits,
-            typename OtherRefDerefTraits>
-  KRYS_ALWAYS_INLINE Ref<X, _PtrTraits, RefDerefTraits>
-    upcast(const Ref<Y, _OtherPtrTraits, OtherRefDerefTraits> &reference)
-  {
-    static_assert(!std::same_as<Y, X>, "Unnecessary cast to same type");
-    static_assert(std::derived_from<Y, X>, "Should be an upcast");
-    return upcast<X, _PtrTraits, RefDerefTraits>(reference.copyRef());
-  }
-
-  template <typename X, typename _PtrTraits = RawPtrTraits<X>,
-            typename RefDerefTraits = DefaultRefDerefTraits<X>, typename Y, typename _OtherPtrTraits,
-            typename OtherRefDerefTraits>
-  inline Ref<X, _PtrTraits, RefDerefTraits>
-    unsafeRefDowncast(Ref<Y, _OtherPtrTraits, OtherRefDerefTraits> &&reference)
-  {
-    static_assert(!std::same_as<Y, X>, "Unnecessary cast to same type");
-    static_assert(std::derived_from<X, Y>, "Use upcast instead");
-    return adoptRef(static_cast<X &>(reference.leakRef()));
+    static_assert(!SameType<Y, X>, "Unnecessary cast to same type");
+    static_assert(DerivedFrom<Y, X>, "Should be an upcast");
+    return AdoptRef(static_cast<X &>(reference.LeakRef()));
   }
 
   template <typename X, typename PtrTraits = RawPtrTraits<X>,
             typename RefDerefTraits = DefaultRefDerefTraits<X>, typename Y, typename OtherPtrTraits,
             typename OtherRefDerefTraits>
   KRYS_ALWAYS_INLINE Ref<X, PtrTraits, RefDerefTraits>
-    unsafeRefDowncast(const Ref<Y, OtherPtrTraits, OtherRefDerefTraits> &reference)
+    Upcast(const Ref<Y, OtherPtrTraits, OtherRefDerefTraits> &reference) noexcept
   {
-    static_assert(!std::same_as<Y, X>, "Unnecessary cast to same type");
-    static_assert(std::derived_from<X, Y>, "Use upcast instead");
-    return unsafeRefDowncast<X, PtrTraits, RefDerefTraits>(reference.copyRef());
+    static_assert(!SameType<Y, X>, "Unnecessary cast to same type");
+    static_assert(DerivedFrom<Y, X>, "Should be an upcast");
+    return Upcast<X, PtrTraits, RefDerefTraits>(reference.CopyRef());
+  }
+
+  template <typename X, typename PtrTraits = RawPtrTraits<X>,
+            typename RefDerefTraits = DefaultRefDerefTraits<X>, typename Y, typename OtherPtrTraits,
+            typename OtherRefDerefTraits>
+  inline Ref<X, PtrTraits, RefDerefTraits>
+    UnsafeRefDowncast(Ref<Y, OtherPtrTraits, OtherRefDerefTraits> &&reference) noexcept
+  {
+    static_assert(!SameType<Y, X>, "Unnecessary cast to same type");
+    static_assert(DerivedFrom<X, Y>, "Use upcast instead");
+    return AdoptRef(static_cast<X &>(reference.LeakRef()));
+  }
+
+  template <typename X, typename PtrTraits = RawPtrTraits<X>,
+            typename RefDerefTraits = DefaultRefDerefTraits<X>, typename Y, typename OtherPtrTraits,
+            typename OtherRefDerefTraits>
+  KRYS_ALWAYS_INLINE Ref<X, PtrTraits, RefDerefTraits>
+    UnsafeRefDowncast(const Ref<Y, OtherPtrTraits, OtherRefDerefTraits> &reference) noexcept
+  {
+    static_assert(!SameType<Y, X>, "Unnecessary cast to same type");
+    static_assert(DerivedFrom<X, Y>, "Use upcast instead");
+    return UnsafeRefDowncast<X, PtrTraits, RefDerefTraits>(reference.CopyRef());
   }
 
   template <typename T, typename PtrTraits, typename RefDerefTraits>
@@ -364,7 +340,7 @@ namespace Krys
     using pointer_type = RawPtr<T>;
     using underlying_type = T;
 
-    static pointer_type GetPtr(const Ref<T, PtrTraits, RefDerefTraits> &p)
+    static pointer_type GetPtr(const Ref<T, PtrTraits, RefDerefTraits> &p) noexcept
     {
       return const_cast<pointer_type>(p.ptr());
     }
@@ -377,53 +353,50 @@ namespace Krys
     static constexpr bool nullable = false;
   };
 
-  template <typename T, typename _PtrTraits, typename RefDerefTraits>
-  inline Ref<T, _PtrTraits, RefDerefTraits> adoptRef(T &reference)
+  template <typename TExpected, typename TArg, typename PtrTraits, typename RefDerefTraits>
+  inline bool Is(const Ref<TArg, PtrTraits, RefDerefTraits> &source) noexcept
   {
-    adopted(&reference);
-    return Ref<T, _PtrTraits, RefDerefTraits>(reference, Ref<T, _PtrTraits, RefDerefTraits>::Adopt);
-  }
-
-  template <typename ExpectedType, typename ArgType, typename PtrTraits, typename RefDerefTraits>
-  inline bool is(const Ref<ArgType, PtrTraits, RefDerefTraits> &source)
-  {
-    return is<ExpectedType>(source.get());
+    return Is<TExpected>(source.get());
   }
 
   template <typename Target, typename Source, typename PtrTraits, typename RefDerefTraits>
   inline Ref<match_constness_t<Source, Target>, PtrTraits, RefDerefTraits>
-    uncheckedDowncast(Ref<Source, PtrTraits, RefDerefTraits> source)
+    UncheckedDowncast(Ref<Source, PtrTraits, RefDerefTraits> source) noexcept
   {
-    static_assert(!std::same_as<Source, Target>, "Unnecessary cast to same type");
-    static_assert(std::derived_from<Target, Source>, "Should be a downcast");
-    assert(is<Target>(source));
-    return unsafeRefDowncast<match_constness_t<Source, Target>>(Krys::Move(source));
+    static_assert(!SameType<Source, Target>, "Unnecessary cast to same type");
+    static_assert(DerivedFrom<Target, Source>, "Should be a downcast");
+    assert(Is<Target>(source));
+    return UnsafeRefDowncast<match_constness_t<Source, Target>>(Krys::Move(source));
   }
 
   template <typename Target, typename Source, typename PtrTraits, typename RefDerefTraits>
   inline Ref<match_constness_t<Source, Target>, PtrTraits, RefDerefTraits>
-    downcast(Ref<Source, PtrTraits, RefDerefTraits> source)
+    Downcast(Ref<Source, PtrTraits, RefDerefTraits> source) noexcept
   {
-    static_assert(!std::same_as<Source, Target>, "Unnecessary cast to same type");
-    static_assert(std::derived_from<Target, Source>, "Should be a downcast");
-    assert(is<Target>(source));
-    return unsafeRefDowncast<match_constness_t<Source, Target>>(Krys::Move(source));
+    static_assert(!SameType<Source, Target>, "Unnecessary cast to same type");
+    static_assert(DerivedFrom<Target, Source>, "Should be a downcast");
+    assert(Is<Target>(source));
+    return UnsafeRefDowncast<match_constness_t<Source, Target>>(Krys::Move(source));
   }
 
   template <typename Target, typename Source, typename PtrTraits, typename RefDerefTraits>
   inline RefPtr<match_constness_t<Source, Target>, PtrTraits, RefDerefTraits>
-    dynamicDowncast(Ref<Source, PtrTraits, RefDerefTraits> source)
+    DynamicDowncast(Ref<Source, PtrTraits, RefDerefTraits> source) noexcept
   {
-    static_assert(!std::same_as<Source, Target>, "Unnecessary cast to same type");
-    static_assert(std::derived_from<Target, Source>, "Should be a downcast");
-    if (!is<Target>(source))
+    static_assert(!SameType<Source, Target>, "Unnecessary cast to same type");
+    static_assert(DerivedFrom<Target, Source>, "Should be a downcast");
+    if (!Is<Target>(source))
+    {
       return nullptr;
-    return unsafeRefDowncast<match_constness_t<Source, Target>>(Krys::Move(source));
+    }
+
+    return UnsafeRefDowncast<match_constness_t<Source, Target>>(Krys::Move(source));
   }
 
   template <typename T, typename PtrTraits, typename RefDerefTraits>
-  inline bool arePointingToEqualData(const Ref<T, PtrTraits, RefDerefTraits> &a,
-                                     const Ref<T, PtrTraits, RefDerefTraits> &b)
+  KRYS_NODISCARD constexpr inline bool
+    ArePointingToEqualData(const Ref<T, PtrTraits, RefDerefTraits> &a,
+                           const Ref<T, PtrTraits, RefDerefTraits> &b) noexcept
   {
     return a.ptr() == b.ptr() || a.get() == b.get();
   }

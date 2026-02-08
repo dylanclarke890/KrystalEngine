@@ -108,7 +108,7 @@ namespace Krys
       {
         // Calling the RefPtr constructor would call strongRef() and deadlock.
         ++m_strongReferenceCount;
-        return adoptRef(const_cast<U *>(maybeInteriorPointer));
+        return AdoptRef(const_cast<U *>(maybeInteriorPointer));
       }
       return nullptr;
     }
