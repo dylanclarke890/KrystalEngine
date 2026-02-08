@@ -10,7 +10,7 @@ namespace Krys
   class AbstractThreadSafeRefCountedAndCanMakeWeakPtr : public AbstractRefCounted
   {
   public:
-    virtual ThreadSafeWeakPtrControlBlock &ControlBlock() const noexcept = 0;
+    KRYS_NODISCARD virtual ThreadSafeWeakPtrControlBlock &ControlBlock() const noexcept = 0;
 
   protected:
     KRYS_NODISCARD virtual uint32 WeakRefCount() const noexcept = 0;
@@ -27,7 +27,7 @@ namespace Krys
   {                                                                                                          \
     ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr::SubRef();                                               \
   }                                                                                                          \
-  ThreadSafeWeakPtrControlBlock &ControlBlock() const noexcept final                                         \
+  KRYS_NODISCARD ThreadSafeWeakPtrControlBlock &ControlBlock() const noexcept final                          \
   {                                                                                                          \
     return ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr::ControlBlock();                                  \
   }                                                                                                          \

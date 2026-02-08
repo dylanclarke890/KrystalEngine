@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Lib/Pointers/RefCounted/Ref.hpp"
-#include "Krystal.Lib.Tests/Pointers/RefCounted/TestRefCounted.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/RefCounted.hpp"
 
@@ -7,6 +6,13 @@
 
 namespace Krys::Tests
 {
+  class TestRefCounted : public RefCounted<TestRefCounted>
+  {
+  public:
+    TestRefCounted() = default;
+    virtual ~TestRefCounted() = default;
+  };
+
   TEST_CASE("Ref manages reference count through copy and move", "[Ref]")
   {
     auto *obj = new TestRefCounted();

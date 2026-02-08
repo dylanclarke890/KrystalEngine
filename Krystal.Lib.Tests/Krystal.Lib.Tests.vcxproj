@@ -180,7 +180,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.Lib.Tests\Pointers\IntrusivePtr\Mocks.hpp" />
-    <ClInclude Include="include\Krystal.Lib.Tests\Pointers\RefCounted\TestRefCounted.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

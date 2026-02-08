@@ -211,7 +211,7 @@ namespace Krys
     {
     }
 
-    typename PtrTraits::StorageType _ptr;
+    typename PtrTraits::storage_type _ptr;
   };
 
   template <typename T, typename _PtrTraits, typename RefDerefTraits>

@@ -1,11 +1,31 @@
 ﻿#include "Krystal.Lib/Pointers/RefCounted/RefPtr.hpp"
-#include "Krystal.Lib.Tests/Pointers/RefCounted/TestRefCounted.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/RefCounted.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
 {
+  class TestRefCounted : public RefCounted<TestRefCounted>
+  {
+  public:
+    TestRefCounted() = default;
+    virtual ~TestRefCounted() = default;
+  };
+
+  struct TestObject : TestRefCounted
+  {
+    bool *Deleted;
+
+    TestObject(bool *ptr) : Deleted(ptr)
+    {
+    }
+
+    ~TestObject() override
+    {
+      *Deleted = true;
+    }
+  };
+
   TEST_CASE("RefPtr constructed from Ref increments refcount", "[RefPtr]")
   {
     auto *obj = new TestRefCounted();

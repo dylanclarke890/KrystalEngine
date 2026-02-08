@@ -1,9 +1,15 @@
 ﻿#include "Krystal.Lib/Pointers/RefCounted/RefCounted.hpp"
-#include "Krystal.Lib.Tests/Pointers/RefCounted/TestRefCounted.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
 {
+  class TestRefCounted : public RefCounted<TestRefCounted>
+  {
+  public:
+    TestRefCounted() = default;
+    virtual ~TestRefCounted() = default;
+  };
+
   TEST_CASE("RefCounted: manual reference add/sub", "[RefCounted]")
   {
     auto *object = new TestRefCounted();

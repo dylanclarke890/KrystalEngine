@@ -2,10 +2,10 @@
 
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
-#include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/CheckedRef.hpp"
 #include "Krystal.Lib/Pointers/GetPtr.hpp"
+#include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RawPtrTraits.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/CheckedRef.hpp"
 #include <cassert>
 
 namespace Krys
@@ -28,7 +28,7 @@ namespace Krys
     {
     }
 
-    KRYS_ALWAYS_INLINE CheckedPtr(T *ptr) noexcept : _ptr {ptr}
+    KRYS_ALWAYS_INLINE CheckedPtr(RawPtr<T> ptr) noexcept : _ptr {ptr}
     {
       AddRefIfNotNull();
     }
@@ -81,13 +81,13 @@ namespace Krys
       assert(get());
     }
 
-    CheckedPtr(HashTableDeletedValueType) noexcept : _ptr(PtrTraits::hashTableDeletedValue())
+    CheckedPtr(HashTableDeletedValueType) noexcept : _ptr(PtrTraits::HashTableDeletedValue())
     {
     }
 
     KRYS_NODISCARD bool IsHashTableDeletedValue() const noexcept
     {
-      return PtrTraits::isHashTableDeletedValue(_ptr);
+      return PtrTraits::IsHashTableDeletedValue(_ptr);
     }
 
     KRYS_ALWAYS_INLINE explicit operator bool() const noexcept
@@ -205,7 +205,7 @@ namespace Krys
       }
     }
 
-    typename PtrTraits::StorageType _ptr;
+    typename PtrTraits::storage_type _ptr;
   };
 
   template <typename T, typename PtrTraits>
@@ -227,15 +227,15 @@ namespace Krys
     static constexpr bool nullable = false;
   };
 
-  template <typename ExpectedType, typename ArgType, typename ArgPtrTraits>
-  inline bool Is(CheckedPtr<ArgType, ArgPtrTraits> &source) noexcept
+  template <typename TExpected, typename TArg, typename ArgPtrTraits>
+  inline bool Is(CheckedPtr<TArg, ArgPtrTraits> &source) noexcept
   {
-    return Is<ExpectedType>(source.get());
+    return Is<TExpected>(source.get());
   }
 
-  template <typename ExpectedType, typename ArgType, typename ArgPtrTraits>
-  inline bool Is(const CheckedPtr<ArgType, ArgPtrTraits> &source) noexcept
+  template <typename TExpected, typename TArg, typename TArgPtrTraits>
+  inline bool Is(const CheckedPtr<TArg, TArgPtrTraits> &source) noexcept
   {
-    return Is<ExpectedType>(source.get());
+    return Is<TExpected>(source.get());
   }
 }

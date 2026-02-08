@@ -1,9 +1,32 @@
 ﻿#include "Krystal.Lib/Pointers/RefCounted/WeakPtr.hpp"
-#include "Krystal.Lib.Tests/Pointers/RefCounted/TestRefCounted.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/CanMakeWeakPtr.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/RefCounted.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
 {
+  class TestWeakRefCounted : public RefCounted<TestWeakRefCounted>,
+                             public CanMakeSingleThreadWeakPtr<TestWeakRefCounted>
+  {
+  public:
+    TestWeakRefCounted() = default;
+    virtual ~TestWeakRefCounted() = default;
+  };
+
+  struct TestWeakRefObject : public TestWeakRefCounted
+  {
+    bool *Deleted;
+
+    TestWeakRefObject(bool *ptr) : Deleted(ptr)
+    {
+    }
+
+    ~TestWeakRefObject() override
+    {
+      *Deleted = true;
+    }
+  };
+
   TEST_CASE("WeakPtr does not affect refcount", "[WeakPtr]")
   {
     auto *obj = new TestWeakRefCounted();

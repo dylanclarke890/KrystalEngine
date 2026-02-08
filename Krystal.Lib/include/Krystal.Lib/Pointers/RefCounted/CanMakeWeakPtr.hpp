@@ -1,7 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/WeakPtrFactory.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/WeakPtrImpl.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/WeakRef.hpp"
 
 namespace Krys::detail
@@ -34,7 +36,7 @@ namespace Krys::detail
     }
 
   public:
-    KRYS_NODISCARD TWeakPtrImpl *WeakImplIfExists() const noexcept
+    KRYS_NODISCARD RawPtr<TWeakPtrImpl> WeakImplIfExists() const noexcept
     {
       return _weakPtrFactory.Impl();
     }
@@ -75,8 +77,6 @@ namespace Krys::detail
 
 namespace Krys
 {
-  class DefaultWeakPtrImpl;
-
   template <typename T, WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy,
             typename WeakPtrImpl = DefaultWeakPtrImpl>
   using CanMakeWeakPtr =

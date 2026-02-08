@@ -11,10 +11,10 @@
 
 namespace Krys
 {
-#define KRYS_USING_CAN_MAKE_CHECKEDPTR(BASE)                                                                 \
-  using BASE::checkedPtrCount;                                                                               \
-  using BASE::incrementCheckedPtrCount;                                                                      \
-  using BASE::decrementCheckedPtrCount
+#define KRYS_USING_CAN_MAKE_CHECKEDPTR(Base)                                                                 \
+  using Base::CheckedPtrCount;                                                                               \
+  using Base::AddRefCheckedPtr;                                                                              \
+  using Base::SubRefCheckedPtr
 
   template <typename T, typename PtrTraits>
   class CheckedPtr;
@@ -23,26 +23,25 @@ namespace Krys
   class CheckedRef
   {
   public:
-    ~CheckedRef() noexcept
+    enum AdoptTag
     {
-      unpoison(*this);
-      if (auto *ptr = PtrTraits::exchange(_ptr, nullptr))
-      {
-        PtrTraits::unwrap(ptr)->SubRefCheckedPtr();
-      }
-    }
+      Adopt
+    };
 
     CheckedRef(T &object) noexcept : _ptr(&object)
     {
       PtrTraits::unwrap(_ptr)->AddRefCheckedPtr();
     }
 
-    enum AdoptTag
-    {
-      Adopt
-    };
-
     CheckedRef(T &object, AdoptTag) noexcept : _ptr(&object)
+    {
+    }
+
+    CheckedRef(HashTableDeletedValueType) noexcept : _ptr(PtrTraits::HashTableDeletedValue())
+    {
+    }
+
+    CheckedRef(HashTableEmptyValueType) noexcept : _ptr(GetHashTableEmptyValue())
     {
     }
 
@@ -52,83 +51,84 @@ namespace Krys
       ptr->AddRefCheckedPtr();
     }
 
-    template <typename OtherType, typename OtherPtrTraits>
-    CheckedRef(const CheckedRef<OtherType, OtherPtrTraits> &other) noexcept
+    template <typename TOther, typename TOtherPtrTraits>
+    CheckedRef(const CheckedRef<TOther, TOtherPtrTraits> &other) noexcept
         : _ptr {PtrTraits::unwrap(other._ptr)}
     {
       auto *ptr = PtrTraits::unwrap(_ptr);
-      ptr->incrementCheckedPtrCount();
+      ptr->AddRefCheckedPtr();
     }
 
-    KRYS_ALWAYS_INLINE CheckedRef(CheckedRef &&other) noexcept : _ptr {other.releasePtr()}
+    KRYS_ALWAYS_INLINE CheckedRef(CheckedRef &&other) noexcept : _ptr {other.ReleasePtr()}
     {
       assert(_ptr);
     }
 
-    template <typename OtherType, typename OtherPtrTraits>
-    CheckedRef(CheckedRef<OtherType, OtherPtrTraits> &&other) noexcept : _ptr {other.releasePtr()}
+    template <typename TOther, typename TOtherPtrTraits>
+    CheckedRef(CheckedRef<TOther, TOtherPtrTraits> &&other) noexcept : _ptr {other.ReleasePtr()}
     {
       assert(_ptr);
     }
 
-    CheckedRef(HashTableDeletedValueType) noexcept : _ptr(PtrTraits::hashTableDeletedValue())
+    ~CheckedRef() noexcept
     {
+      unpoison(*this);
+      if (auto *ptr = PtrTraits::exchange(_ptr, nullptr))
+      {
+        PtrTraits::unwrap(ptr)->SubRefCheckedPtr();
+      }
     }
 
-    bool isHashTableDeletedValue() const noexcept
+    KRYS_NODISCARD bool IsHashTableDeletedValue() const noexcept
     {
-      return PtrTraits::isHashTableDeletedValue(_ptr);
+      return PtrTraits::IsHashTableDeletedValue(_ptr);
     }
 
-    CheckedRef(HashTableEmptyValueType) noexcept : _ptr(hashTableEmptyValue())
+    KRYS_NODISCARD bool IsHashTableEmptyValue() const noexcept
     {
+      return _ptr == GetHashTableEmptyValue();
     }
 
-    bool isHashTableEmptyValue() const noexcept
-    {
-      return _ptr == hashTableEmptyValue();
-    }
-
-    static T *hashTableEmptyValue() noexcept
+    KRYS_NODISCARD static RawPtr<T> GetHashTableEmptyValue() noexcept
     {
       return nullptr;
     }
 
-    const T *ptrAllowingHashTableEmptyValue() const noexcept
+    KRYS_NODISCARD const RawPtr<T> ptrAllowingHashTableEmptyValue() const noexcept
     {
-      assert(_ptr || isHashTableEmptyValue());
+      assert(_ptr || IsHashTableEmptyValue());
       return PtrTraits::unwrap(_ptr);
     }
 
-    T *ptrAllowingHashTableEmptyValue() noexcept
+    KRYS_NODISCARD RawPtr<T> ptrAllowingHashTableEmptyValue() noexcept
     {
-      assert(_ptr || isHashTableEmptyValue());
+      assert(_ptr || IsHashTableEmptyValue());
       return PtrTraits::unwrap(_ptr);
     }
 
-    KRYS_ALWAYS_INLINE T *ptr() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE RawPtr<T> ptr() const noexcept
     {
-      // In normal execution, a CheckedPtr always points to an object with a non-zero checkedPtrCount().
+      // In normal execution, a CheckedPtr always points to an object with a non-zero CheckedPtrCount().
       // When it detects a dangling pointer, KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR scribbles an object with
-      // zeroes and then leaks it. When we check checkedPtrCount() here, we're checking for a scribbled
+      // zeroes and then leaks it. When we check CheckedPtrCount() here, we're checking for a scribbled
       // object.
-      assert(PtrTraits::unwrap(_ptr)->checkedPtrCount());
+      assert(PtrTraits::unwrap(_ptr)->CheckedPtrCount());
       return PtrTraits::unwrap(_ptr);
     }
 
-    KRYS_ALWAYS_INLINE T &get() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE T &get() const noexcept
     {
       assert(_ptr);
       return *ptr();
     }
 
-    KRYS_ALWAYS_INLINE T *operator->() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE RawPtr<T> operator->() const noexcept
     {
       assert(_ptr);
       return ptr();
     }
 
-    KRYS_ALWAYS_INLINE operator T &() const noexcept
+    KRYS_NODISCARD KRYS_ALWAYS_INLINE operator T &() const noexcept
     {
       return get();
     }
@@ -185,9 +185,9 @@ namespace Krys
     template <typename OtherType, typename OtherPtrTraits>
     friend class CheckedPtr;
 
-    T *releasePtr() noexcept
+    KRYS_NODISCARD RawPtr<T> ReleasePtr() noexcept
     {
-      T *ptr = PtrTraits::exchange(_ptr, nullptr);
+      RawPtr<T> ptr = PtrTraits::exchange(_ptr, nullptr);
       poison(*this);
       return ptr;
     }
@@ -216,7 +216,7 @@ namespace Krys
     }
 #endif
 
-    typename PtrTraits::StorageType _ptr;
+    typename PtrTraits::storage_type _ptr;
   };
 
   template <typename T, typename PtrTraits>
@@ -238,55 +238,55 @@ namespace Krys
     static constexpr bool nullable = true;
   };
 
-  template <typename ExpectedType, typename ArgType, typename ArgPtrTraits>
-  inline bool Is(CheckedRef<ArgType, ArgPtrTraits> &source) noexcept
+  template <typename TExpected, typename TArg, typename TArgPtrTraits>
+  KRYS_NODISCARD inline bool Is(CheckedRef<TArg, TArgPtrTraits> &source) noexcept
   {
-    return Is<ExpectedType>(source.get());
+    return Is<TExpected>(source.get());
   }
 
-  template <typename ExpectedType, typename ArgType, typename ArgPtrTraits>
-  inline bool Is(const CheckedRef<ArgType, ArgPtrTraits> &source) noexcept
+  template <typename TExpected, typename TArg, typename TArgPtrTraits>
+  KRYS_NODISCARD inline bool Is(const CheckedRef<TArg, TArgPtrTraits> &source) noexcept
   {
-    return Is<ExpectedType>(source.get());
+    return Is<TExpected>(source.get());
   }
 
-  template <typename ExpectedType, typename ArgType, typename ArgPtrTraits>
-  inline ExpectedType &Downcast(CheckedRef<ArgType, ArgPtrTraits> &source) noexcept
+  template <typename TExpected, typename TArg, typename TArgPtrTraits>
+  KRYS_NODISCARD inline TExpected &Downcast(CheckedRef<TArg, TArgPtrTraits> &source) noexcept
   {
-    return Downcast<ExpectedType>(source.get());
+    return Downcast<TExpected>(source.get());
   }
 
-  template <typename ExpectedType, typename ArgType, typename ArgPtrTraits>
-  inline ExpectedType &Downcast(const CheckedRef<ArgType, ArgPtrTraits> &source) noexcept
+  template <typename TExpected, typename TArg, typename TArgPtrTraits>
+  KRYS_NODISCARD inline TExpected &Downcast(const CheckedRef<TArg, TArgPtrTraits> &source) noexcept
   {
-    return Downcast<ExpectedType>(source.get());
+    return Downcast<TExpected>(source.get());
   }
 
-  template <typename ExpectedType, typename ArgType, typename ArgPtrTraits>
-  inline const ExpectedType &Downcast(CheckedRef<const ArgType, ArgPtrTraits> &source) noexcept
+  template <typename TExpected, typename TArg, typename TArgPtrTraits>
+  KRYS_NODISCARD inline const TExpected &Downcast(CheckedRef<const TArg, TArgPtrTraits> &source) noexcept
   {
-    return Downcast<ExpectedType>(source.get());
+    return Downcast<TExpected>(source.get());
   }
 
-  template <typename ExpectedType, typename ArgType, typename ArgPtrTraits>
-  inline CheckedPtr<match_constness_t<ArgType, ExpectedType>, ArgPtrTraits>
-    DynamicDowncast(CheckedRef<ArgType, ArgPtrTraits> &source) noexcept
+  template <typename TExpected, typename TArg, typename TArgPtrTraits>
+  KRYS_NODISCARD inline CheckedPtr<match_constness_t<TArg, TExpected>, TArgPtrTraits>
+    DynamicDowncast(CheckedRef<TArg, TArgPtrTraits> &source) noexcept
   {
-    return DynamicDowncast<ExpectedType>(source.get());
+    return DynamicDowncast<TExpected>(source.get());
   }
 
-  template <typename ExpectedType, typename ArgType, typename ArgPtrTraits>
-  inline CheckedPtr<match_constness_t<ArgType, ExpectedType>, ArgPtrTraits>
-    DynamicDowncast(const CheckedRef<ArgType, ArgPtrTraits> &source) noexcept
+  template <typename TExpected, typename TArg, typename TArgPtrTraits>
+  KRYS_NODISCARD inline CheckedPtr<match_constness_t<TArg, TExpected>, TArgPtrTraits>
+    DynamicDowncast(const CheckedRef<TArg, TArgPtrTraits> &source) noexcept
   {
-    return DynamicDowncast<ExpectedType>(source.get());
+    return DynamicDowncast<TExpected>(source.get());
   }
 
-  template <typename ExpectedType, typename ArgType, typename ArgPtrTraits>
-  inline const CheckedPtr<match_constness_t<ArgType, ExpectedType>, ArgPtrTraits>
-    DynamicDowncast(CheckedRef<const ArgType, ArgPtrTraits> &source) noexcept
+  template <typename TExpected, typename TArg, typename TArgPtrTraits>
+  KRYS_NODISCARD inline const CheckedPtr<match_constness_t<TArg, TExpected>, TArgPtrTraits>
+    DynamicDowncast(CheckedRef<const TArg, TArgPtrTraits> &source) noexcept
   {
-    return DynamicDowncast<ExpectedType>(source.get());
+    return DynamicDowncast<TExpected>(source.get());
   }
 
   enum class DefaultedOperatorEqual : bool
@@ -295,117 +295,114 @@ namespace Krys
     Yes
   };
 
-  // DO NOT make use of this enum in new code. An object which supports CanMakeCheckedPtr must be heap
-  // allocated on its own.
-  enum class CheckedPtrDeleteCheckException : bool
-  {
-    No,
-    Yes
-  };
-
-  template <typename StorageType, typename PtrCounterType, typename DeletionFlagType,
-            CheckedPtrDeleteCheckException deleteException>
+  template <typename TCount, bool ThreadSafe>
   class CanMakeCheckedPtrBase
   {
   public:
+    using deletion_flag_type = conditional_t<ThreadSafe, std::atomic<bool>, bool>;
+    using storage_type = conditional_t<ThreadSafe, std::atomic<TCount>, TCount>;
+
+  private:
+    mutable storage_type _checkedPtrCount {0};
+#if KRYS_ENV(DEV)
+    deletion_flag_type _didBeginDeletion {false};
+#endif
+
+  public:
     CanMakeCheckedPtrBase() noexcept = default;
-    CanMakeCheckedPtrBase(CanMakeCheckedPtrBase &&) noexcept
-    {
-    }
-    CanMakeCheckedPtrBase &operator=(CanMakeCheckedPtrBase &&) noexcept
-    {
-      return *this;
-    }
+
     CanMakeCheckedPtrBase(const CanMakeCheckedPtrBase &) noexcept
     {
     }
+
+    CanMakeCheckedPtrBase(CanMakeCheckedPtrBase &&) noexcept
+    {
+    }
+
+    ~CanMakeCheckedPtrBase() noexcept
+    {
+      assert(_didBeginDeletion);
+    }
+
     CanMakeCheckedPtrBase &operator=(const CanMakeCheckedPtrBase &) noexcept
     {
       return *this;
     }
 
-    ~CanMakeCheckedPtrBase() noexcept
+    CanMakeCheckedPtrBase &operator=(CanMakeCheckedPtrBase &&) noexcept
     {
-      assert(m_didBeginDeletion || deleteException == CheckedPtrDeleteCheckException::Yes);
+      return *this;
     }
 
-    PtrCounterType checkedPtrCount() const noexcept
+    KRYS_ALWAYS_INLINE void AddRefCheckedPtr() const noexcept
     {
-      return m_checkedPtrCount;
-    }
-
-    void AddRefCheckedPtr() const noexcept
-    {
-      ++m_checkedPtrCount;
+      ++_checkedPtrCount;
     }
 
     KRYS_ALWAYS_INLINE void SubRefCheckedPtr() const noexcept
     {
-      // In normal execution, a CheckedPtr always points to an object with a non-zero checkedPtrCount().
+      // In normal execution, a CheckedPtr always points to an object with a non-zero CheckedPtrCount().
       // When it detects a dangling pointer, KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR scribbles an object with
-      // zeroes and then leaks it. When we check checkedPtrCount() here, we're checking for a scribbled
+      // zeroes and then leaks it. When we check CheckedPtrCount() here, we're checking for a scribbled
       // object.
-      if (!checkedPtrCount()) KRYS_UNLIKELY
+      if (!CheckedPtrCount()) KRYS_UNLIKELY
       {
-        crashDueToCheckedPtrToDeadObject();
+        CrashDueToCheckedPtrToDeadObject();
       }
-      --m_checkedPtrCount;
+      --_checkedPtrCount;
     }
 
-    void setDidBeginCheckedPtrDeletion() noexcept
+    KRYS_NODISCARD TCount CheckedPtrCount() const noexcept
+    {
+      return _checkedPtrCount;
+    }
+
+    void SetDidBeginCheckedPtrDeletion() noexcept
     {
 #if KRYS_ENV(DEV)
-      m_didBeginDeletion = true;
+      _didBeginDeletion = true;
 #endif
     }
 
   private:
-    KRYS_NORETURN KRYS_NEVER_INLINE static void crashDueToCheckedPtrToDeadObject() noexcept
+    KRYS_NORETURN KRYS_NEVER_INLINE static void CrashDueToCheckedPtrToDeadObject() noexcept
     {
-      assert(false);
+      std::terminate();
     }
-
-    mutable StorageType m_checkedPtrCount {0};
-#if KRYS_ENV(DEV)
-    DeletionFlagType m_didBeginDeletion {false};
-#endif
   };
 
-  template <typename T, DefaultedOperatorEqual defaultedOperatorEqual = DefaultedOperatorEqual::No,
-            CheckedPtrDeleteCheckException deleteException = CheckedPtrDeleteCheckException::No>
-  class CanMakeCheckedPtr : public CanMakeCheckedPtrBase<uint32_t, uint32_t, bool, deleteException>
+  template <typename T, DefaultedOperatorEqual DefaultOperatorEqual = DefaultedOperatorEqual::No>
+  class CanMakeCheckedPtr : public CanMakeCheckedPtrBase<uint32, false>
   {
   public:
     ~CanMakeCheckedPtr() noexcept
     {
-      static_assert(SameType<typename T::KrysDidOverrideDeleteForCheckedPtr, int>,
+      static_assert(T::_delete_overridden_for_checkedptr,
                     "Objects that use CanMakeCheckedPtr must use KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR");
     }
 
-    friend bool operator==(const CanMakeCheckedPtr &, const CanMakeCheckedPtr &)
+    friend bool operator==(const CanMakeCheckedPtr &, const CanMakeCheckedPtr &) noexcept
     {
-      static_assert(defaultedOperatorEqual == DefaultedOperatorEqual::Yes,
+      static_assert(DefaultOperatorEqual == DefaultedOperatorEqual::Yes,
                     "Derived class should opt-in when defaulting operator==, or invalid/undefined comparison "
                     "should be reworked/defined");
       return true;
     }
   };
 
-  template <typename T, DefaultedOperatorEqual defaultedOperatorEqual = DefaultedOperatorEqual::No,
-            CheckedPtrDeleteCheckException deleteException = CheckedPtrDeleteCheckException::No>
-  class CanMakeThreadSafeCheckedPtr
-      : public CanMakeCheckedPtrBase<std::atomic<uint32_t>, uint32_t, std::atomic<bool>, deleteException>
+  template <typename T, DefaultedOperatorEqual DefaultOperatorEqual = DefaultedOperatorEqual::No>
+  class CanMakeThreadSafeCheckedPtr : public CanMakeCheckedPtrBase<uint32, true>
   {
   public:
-    ~CanMakeThreadSafeCheckedPtr()
+    ~CanMakeThreadSafeCheckedPtr() noexcept
     {
-      static_assert(SameType<typename T::WTFDidOverrideDeleteForCheckedPtr, int>,
+      static_assert(T::_delete_overridden_for_checkedptr,
                     "Objects that use CanMakeCheckedPtr must use KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR");
     }
 
-    friend bool operator==(const CanMakeThreadSafeCheckedPtr &, const CanMakeThreadSafeCheckedPtr &)
+    friend bool operator==(const CanMakeThreadSafeCheckedPtr &, const CanMakeThreadSafeCheckedPtr &) noexcept
     {
-      static_assert(defaultedOperatorEqual == DefaultedOperatorEqual::Yes,
+      static_assert(DefaultOperatorEqual == DefaultedOperatorEqual::Yes,
                     "Derived class should opt-in when defaulting operator==, or invalid/undefined comparison "
                     "should be reworked/defined");
 
@@ -413,39 +410,39 @@ namespace Krys
     }
   };
 
-// delete(T*, std::destroying_delete_t, size_t) is preferred over delete(void*)
-// in overload resolution, so we can use it to interpose before calling delete(void*).
-// Note: KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR must be declared in every subclass.
+/// @brief delete(T*, std::destroying_delete_t, size_t) is preferred over delete(void*)
+/// in overload resolution, so we can use it to interpose before calling delete(void*).
+/// @note KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR must be declared in every subclass.
 #define KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR_IMPL(T)                                                         \
   void operator delete(T *object, std::destroying_delete_t, size_t size)                                     \
   {                                                                                                          \
     assert(sizeof(T) == size);                                                                               \
                                                                                                              \
-    object->setDidBeginCheckedPtrDeletion();                                                                 \
+    object->SetDidBeginCheckedPtrDeletion();                                                                 \
                                                                                                              \
     /* Run destructor manually */                                                                            \
     object->T::~T();                                                                                         \
                                                                                                              \
     /* If CheckedPtrs still exist, poison and keep memory */                                                 \
-    if (object->checkedPtrCount()) KRYS_UNLIKELY                                                             \
+    if (object->CheckedPtrCount()) KRYS_UNLIKELY                                                             \
     {                                                                                                        \
-      ByteUtils::ZeroObject(*object);                                                                        \
+      ::Krys::ByteUtils::ZeroObject(*object);                                                                \
       return;                                                                                                \
     }                                                                                                        \
                                                                                                              \
     /* Free memory WITHOUT re-entering delete */                                                             \
     ::operator delete(static_cast<void *>(object));                                                          \
   }                                                                                                          \
-  using KrysDidOverrideDeleteForCheckedPtr = int;
+  constexpr inline static bool _delete_overridden_for_checkedptr = true;
 
-  // Note: KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR must be declared in the most derived subclass.
+/// @note KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR must be declared in the most derived subclass.
 #define KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ClassName)                                                      \
 public:                                                                                                      \
   KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR_IMPL(ClassName)                                                       \
 private:                                                                                                     \
-  using _forceSemicolonAfterKrysOverrideDelete = int
+  using _forceSemicolonAfterKrysOverrideDeleteCheckedPtr = int
 
 #define KRYS_STRUCT_OVERRIDE_DELETE_FOR_CHECKED_PTR(ClassName)                                               \
   KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR_IMPL(ClassName)                                                       \
-  using _forceSemicolonAfterKrysOverrideDelete = int
+  using _forceSemicolonKrysOverrideDeleteCheckedPtr = int
 }

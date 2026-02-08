@@ -1,9 +1,18 @@
 ﻿#include "Krystal.Lib/Pointers/RefCounted/CheckedPtr.hpp"
-#include "Krystal.Lib.Tests/Pointers/RefCounted/TestRefCounted.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/CheckedRef.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
 {
+  class TestCheckedRefCounted : public CanMakeCheckedPtr<TestCheckedRefCounted>
+  {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(TestCheckedRefCounted);
+
+  public:
+    TestCheckedRefCounted() = default;
+    virtual ~TestCheckedRefCounted() = default;
+  };
+
   TEST_CASE("CheckedPtr default construction is null", "[CheckedPtr]")
   {
     CheckedPtr<TestCheckedRefCounted> ptr;
@@ -14,15 +23,15 @@ namespace Krys::Tests
   TEST_CASE("CheckedPtr increments and decrements count on scope exit", "[CheckedPtr]")
   {
     auto *obj = new TestCheckedRefCounted();
-    REQUIRE(obj->checkedPtrCount() == 0);
+    REQUIRE(obj->CheckedPtrCount() == 0);
 
     {
       CheckedPtr<TestCheckedRefCounted> ptr(obj);
       REQUIRE(ptr);
-      REQUIRE(obj->checkedPtrCount() == 1);
+      REQUIRE(obj->CheckedPtrCount() == 1);
     }
 
-    REQUIRE(obj->checkedPtrCount() == 0);
+    REQUIRE(obj->CheckedPtrCount() == 0);
     delete obj;
   }
 
@@ -32,15 +41,15 @@ namespace Krys::Tests
 
     {
       CheckedPtr<TestCheckedRefCounted> p1(obj);
-      REQUIRE(obj->checkedPtrCount() == 1);
+      REQUIRE(obj->CheckedPtrCount() == 1);
 
       {
         CheckedPtr<TestCheckedRefCounted> p2(p1);
-        REQUIRE(obj->checkedPtrCount() == 2);
+        REQUIRE(obj->CheckedPtrCount() == 2);
         REQUIRE(p2.get() == obj);
       }
 
-      REQUIRE(obj->checkedPtrCount() == 1);
+      REQUIRE(obj->CheckedPtrCount() == 1);
     }
 
     delete obj;
@@ -52,10 +61,10 @@ namespace Krys::Tests
 
     {
       CheckedPtr<TestCheckedRefCounted> p1(obj);
-      REQUIRE(obj->checkedPtrCount() == 1);
+      REQUIRE(obj->CheckedPtrCount() == 1);
 
       CheckedPtr<TestCheckedRefCounted> p2(std::move(p1));
-      REQUIRE(obj->checkedPtrCount() == 1);
+      REQUIRE(obj->CheckedPtrCount() == 1);
       REQUIRE(p2.get() == obj);
       REQUIRE(p1.get() == nullptr);
     }
@@ -70,13 +79,13 @@ namespace Krys::Tests
 
     {
       CheckedPtr<TestCheckedRefCounted> ptr(a);
-      REQUIRE(a->checkedPtrCount() == 1);
-      REQUIRE(b->checkedPtrCount() == 0);
+      REQUIRE(a->CheckedPtrCount() == 1);
+      REQUIRE(b->CheckedPtrCount() == 0);
 
       ptr = b;
 
-      REQUIRE(a->checkedPtrCount() == 0);
-      REQUIRE(b->checkedPtrCount() == 1);
+      REQUIRE(a->CheckedPtrCount() == 0);
+      REQUIRE(b->CheckedPtrCount() == 1);
       REQUIRE(ptr.get() == b);
     }
 
@@ -90,11 +99,11 @@ namespace Krys::Tests
 
     {
       CheckedPtr<TestCheckedRefCounted> ptr(obj);
-      REQUIRE(obj->checkedPtrCount() == 1);
+      REQUIRE(obj->CheckedPtrCount() == 1);
 
       ptr = nullptr;
 
-      REQUIRE(obj->checkedPtrCount() == 0);
+      REQUIRE(obj->CheckedPtrCount() == 0);
       REQUIRE_FALSE(ptr);
     }
 

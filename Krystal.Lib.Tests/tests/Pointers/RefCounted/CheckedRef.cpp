@@ -1,21 +1,29 @@
 ﻿#include "Krystal.Lib/Pointers/RefCounted/CheckedRef.hpp"
-#include "Krystal.Lib.Tests/Pointers/RefCounted/TestRefCounted.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
 {
+  class TestCheckedRefCounted : public CanMakeCheckedPtr<TestCheckedRefCounted>
+  {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(TestCheckedRefCounted);
+
+  public:
+    TestCheckedRefCounted() = default;
+    virtual ~TestCheckedRefCounted() = default;
+  };
+
   TEST_CASE("CheckedRef construction increments count", "[CheckedRef]")
   {
     auto *obj = new TestCheckedRefCounted();
-    REQUIRE(obj->checkedPtrCount() == 0);
+    REQUIRE(obj->CheckedPtrCount() == 0);
 
     {
       CheckedRef<TestCheckedRefCounted> ref(*obj);
-      REQUIRE(obj->checkedPtrCount() == 1);
+      REQUIRE(obj->CheckedPtrCount() == 1);
       REQUIRE(&ref.get() == obj);
     }
 
-    REQUIRE(obj->checkedPtrCount() == 0);
+    REQUIRE(obj->CheckedPtrCount() == 0);
     delete obj;
   }
 
@@ -25,15 +33,15 @@ namespace Krys::Tests
 
     {
       CheckedRef<TestCheckedRefCounted> r1(*obj);
-      REQUIRE(obj->checkedPtrCount() == 1);
+      REQUIRE(obj->CheckedPtrCount() == 1);
 
       {
         CheckedRef<TestCheckedRefCounted> r2(r1);
-        REQUIRE(obj->checkedPtrCount() == 2);
+        REQUIRE(obj->CheckedPtrCount() == 2);
         REQUIRE(&r2.get() == obj);
       }
 
-      REQUIRE(obj->checkedPtrCount() == 1);
+      REQUIRE(obj->CheckedPtrCount() == 1);
     }
     delete obj;
   }
@@ -44,10 +52,10 @@ namespace Krys::Tests
 
     {
       CheckedRef<TestCheckedRefCounted> r1(*obj);
-      REQUIRE(obj->checkedPtrCount() == 1);
+      REQUIRE(obj->CheckedPtrCount() == 1);
 
       CheckedRef<TestCheckedRefCounted> r2(std::move(r1));
-      REQUIRE(obj->checkedPtrCount() == 1);
+      REQUIRE(obj->CheckedPtrCount() == 1);
       REQUIRE(&r2.get() == obj);
     }
 
@@ -61,13 +69,13 @@ namespace Krys::Tests
 
     {
       CheckedRef<TestCheckedRefCounted> ref(*a);
-      REQUIRE(a->checkedPtrCount() == 1);
-      REQUIRE(b->checkedPtrCount() == 0);
+      REQUIRE(a->CheckedPtrCount() == 1);
+      REQUIRE(b->CheckedPtrCount() == 0);
 
       ref = *b;
 
-      REQUIRE(a->checkedPtrCount() == 0);
-      REQUIRE(b->checkedPtrCount() == 1);
+      REQUIRE(a->CheckedPtrCount() == 0);
+      REQUIRE(b->CheckedPtrCount() == 1);
       REQUIRE(&ref.get() == b);
     }
 

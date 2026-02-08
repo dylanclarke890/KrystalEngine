@@ -61,7 +61,7 @@ public:                                                                         
   class CompactPtr
   {
   public:
-    using StorageType = uintptr_t;
+    using storage_type = uintptr_t;
     static constexpr bool is32Bit = false;
     static constexpr bool isCompactedType = true;
     static_assert(Krys::allowCompactPointers<T *>());
@@ -220,13 +220,13 @@ public:                                                                         
       set(t1);
     }
 
-    static KRYS_ALWAYS_INLINE StorageType encode(T *ptr)
+    static KRYS_ALWAYS_INLINE storage_type encode(T *ptr)
     {
       uintptr_t intPtr = std::bit_cast<uintptr_t>(ptr);
       return intPtr;
     }
 
-    static KRYS_ALWAYS_INLINE T *decode(StorageType ptr)
+    static KRYS_ALWAYS_INLINE T *decode(storage_type ptr)
     {
       return std::bit_cast<T *>(ptr);
     }
@@ -242,7 +242,7 @@ public:                                                                         
       return a._ptr == b._ptr;
     }
 
-    StorageType storage() const
+    storage_type storage() const
     {
       return _ptr;
     }
@@ -253,10 +253,10 @@ public:                                                                         
 
     static constexpr uint32_t bitsShift = 4;
     static constexpr uintptr_t alignmentMask = (1ull << bitsShift) - 1;
-    static constexpr StorageType hashDeletedStorageValue =
+    static constexpr storage_type hashDeletedStorageValue =
       1; // 0x16 (encoded as 1) is within the first unmapped page for nullptr. Thus, it never appears.
 
-    StorageType _ptr {0};
+    storage_type _ptr {0};
   };
 
   template <typename T, typename U>
@@ -290,33 +290,33 @@ public:                                                                         
     template <typename U>
     using RebindTraits = RawPtrTraits<U>;
 
-    using StorageType = CompactPtr<T>;
+    using storage_type = CompactPtr<T>;
 
-    static constexpr bool is32Bit = StorageType::is32Bit;
+    static constexpr bool is32Bit = storage_type::is32Bit;
 
     template <typename U>
-    static KRYS_ALWAYS_INLINE T *exchange(StorageType &ptr, U &&newValue)
+    static KRYS_ALWAYS_INLINE T *exchange(storage_type &ptr, U &&newValue)
     {
       return ptr.exchange(newValue);
     }
 
     template <typename Other>
-    static KRYS_ALWAYS_INLINE void swap(StorageType &a, Other &b)
+    static KRYS_ALWAYS_INLINE void swap(storage_type &a, Other &b)
     {
       a.swap(b);
     }
 
-    static KRYS_ALWAYS_INLINE T *unwrap(const StorageType &ptr)
+    static KRYS_ALWAYS_INLINE T *unwrap(const storage_type &ptr)
     {
       return ptr.get();
     }
 
-    static StorageType hashTableDeletedValue()
+    static storage_type hashTableDeletedValue()
     {
-      return StorageType {HashTableDeletedValue};
+      return storage_type {HashTableDeletedValue};
     }
 
-    static KRYS_ALWAYS_INLINE bool isHashTableDeletedValue(const StorageType &ptr)
+    static KRYS_ALWAYS_INLINE bool isHashTableDeletedValue(const storage_type &ptr)
     {
       return ptr.isHashTableDeletedValue();
     }
