@@ -4,7 +4,7 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/RefPtr.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/TaggedPtr.hpp"
+#include "Krystal.Lib/Pointers/TaggedPtr.hpp"
 #include <mutex>
 
 namespace Krys
@@ -324,7 +324,7 @@ namespace Krys
   class ThreadSafeWeakPtr
   {
   public:
-    using TagType = typename TaggingTraits::TagType;
+    using tag_type = typename TaggingTraits::tag_type;
     ThreadSafeWeakPtr() = default;
 
     ThreadSafeWeakPtr(std::nullptr_t)
@@ -437,11 +437,11 @@ namespace Krys
                : nullptr;
     }
 
-    void setTag(TagType tag)
+    void setTag(tag_type tag)
     {
       m_objectOfCorrectType.setTag(tag);
     }
-    TagType tag() const
+    tag_type tag() const
     {
       return m_objectOfCorrectType.tag();
     }

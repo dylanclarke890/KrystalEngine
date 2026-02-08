@@ -435,7 +435,7 @@
     <ClInclude Include="include\Krystal.Lib\Atomics.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\TaggedPtr.hpp">
+    <ClInclude Include="include\Krystal.Lib\Pointers\TaggedPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\TypeTraits.hpp">
