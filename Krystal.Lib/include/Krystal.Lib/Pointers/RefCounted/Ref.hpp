@@ -117,7 +117,7 @@ namespace Krys
     void swap(Ref<X, Y, Z> &);
 
     // Hash table deleted values, which are only constructed and never copied or destroyed.
-    Ref(HashTableDeletedValueType) : _ptr(PtrTraits::hashTableDeletedValue())
+    Ref(HashTableDeletedValueType) : _ptr(PtrTraits::GetHashTableDeletedValue())
     {
     }
     bool isHashTableDeletedValue() const

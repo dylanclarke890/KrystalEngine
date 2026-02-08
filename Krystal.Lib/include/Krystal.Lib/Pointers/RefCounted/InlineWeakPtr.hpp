@@ -40,12 +40,12 @@ namespace Krys
     {
     }
 
-    static T *hashTableDeletedValue()
+    static T *GetHashTableDeletedValue()
     {
       return std::bit_cast<T *>(static_cast<uintptr_t>(-1));
     }
 
-    InlineWeakPtr(HashTableDeletedValueType) : _ptr(hashTableDeletedValue())
+    InlineWeakPtr(HashTableDeletedValueType) : _ptr(GetHashTableDeletedValue())
     {
     }
 
@@ -60,7 +60,7 @@ namespace Krys
 
     bool isHashTableDeletedValue() const
     {
-      return _ptr == hashTableDeletedValue();
+      return _ptr == GetHashTableDeletedValue();
     }
     bool isHashTableEmptyValue() const
     {

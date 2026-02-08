@@ -116,7 +116,7 @@ namespace Krys
 
     ~WeakPtrFactoryWithBitField() noexcept
     {
-      if (auto *pointer = _impl.pointer())
+      if (auto *pointer = _impl.Ptr())
       {
         pointer->clear();
       }
@@ -125,24 +125,24 @@ namespace Krys
 #if KRYS_ENV(DEV)
     KRYS_NODISCARD bool IsInitialized() const noexcept
     {
-      return _impl.pointer();
+      return _impl.Ptr();
     }
 #endif
 
     KRYS_NODISCARD RawPtr<WeakPtrImpl> Impl() const noexcept
     {
-      return _impl.pointer();
+      return _impl.Ptr();
     }
 
     void InitializeIfNeeded(const T &object) const noexcept
     {
-      if (_impl.pointer())
+      if (_impl.Ptr())
       {
         return;
       }
 
       static_assert(Final<WeakPtrImpl>);
-      _impl.setPointer(adoptRef(*new WeakPtrImpl(const_cast<RawPtr<T>>(&object))));
+      _impl.SetPtr(adoptRef(*new WeakPtrImpl(const_cast<RawPtr<T>>(&object))));
     }
 
     template <typename U>
@@ -151,22 +151,22 @@ namespace Krys
     {
       InitializeIfNeeded(object);
 
-      assert(&object == _impl.pointer()->template get<T>());
-      return WeakPtr<U, WeakPtrImpl, RawPtrTraits<U>>(*_impl.pointer(), enableAsserts);
+      assert(&object == _impl.Ptr()->template get<T>());
+      return WeakPtr<U, WeakPtrImpl, RawPtrTraits<U>>(*_impl.Ptr(), enableAsserts);
     }
 
     void RevokeAll() noexcept
     {
-      if (auto *pointer = _impl.pointer())
+      if (auto *pointer = _impl.Ptr())
       {
         pointer->clear();
-        _impl.setPointer(nullptr);
+        _impl.SetPtr(nullptr);
       }
     }
 
     KRYS_NODISCARD uint32 WeakPtrCount() const noexcept
     {
-      if (auto *pointer = _impl.pointer())
+      if (auto *pointer = _impl.Ptr())
       {
         return pointer->refCount() - 1;
       }
@@ -181,7 +181,7 @@ namespace Krys
 
     void SetBitfield(uint16 value) const noexcept
     {
-      return _impl.setType(value);
+      return _impl.SetData(value);
     }
   };
 

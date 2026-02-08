@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Pointers/RefCounted/CompactPtr.hpp"
+#include "Krystal.Lib/Pointers/CompactPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/RefPtr.hpp"
 
 namespace Krys

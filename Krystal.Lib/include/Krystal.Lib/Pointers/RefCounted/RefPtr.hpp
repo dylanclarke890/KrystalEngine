@@ -58,7 +58,7 @@ namespace Krys
     RefPtr(Ref<X, Y> &&);
 
     // Hash table deleted values, which are only constructed and never copied or destroyed.
-    RefPtr(HashTableDeletedValueType) : _ptr(PtrTraits::hashTableDeletedValue())
+    RefPtr(HashTableDeletedValueType) : _ptr(PtrTraits::GetHashTableDeletedValue())
     {
     }
     bool isHashTableDeletedValue() const

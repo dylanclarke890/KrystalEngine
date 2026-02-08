@@ -372,10 +372,10 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CheckedRef.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CompactPointerTuple.hpp">
+    <ClInclude Include="include\Krystal.Lib\Pointers\CompactPtrTuple.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CompactPtr.hpp">
+    <ClInclude Include="include\Krystal.Lib\Pointers\CompactPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CompactRefPtr.hpp">
@@ -384,7 +384,7 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CompactRefPtrTuple.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CompactUniquePtrTuple.hpp">
+    <ClInclude Include="include\Krystal.Lib\Pointers\CompactUniquePtrTuple.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\GetPtr.hpp">

@@ -1,106 +1,110 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Pointers/RefCounted/CompactPointerTuple.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/CompactPtr.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Pointers/CompactPtr.hpp"
+#include "Krystal.Lib/Pointers/CompactPtrTuple.hpp"
+#include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/RefPtr.hpp"
 
 namespace Krys
 {
-  template <typename T, typename Type>
+  template <typename T, typename TData>
   class CompactRefPtrTuple final
   {
-    static_assert(Krys::allowCompactPointers<T>());
+    static_assert(Krys::AllowsCompactPointers<T>());
+
+  private:
+    CompactPtrTuple<RawPtr<T>, TData> _data;
 
   public:
-    CompactRefPtrTuple() = default;
-    CompactRefPtrTuple(T *pointer, Type type)
+    constexpr CompactRefPtrTuple() noexcept = default;
+
+    constexpr CompactRefPtrTuple(RawPtr<T> ptr, TData data) noexcept
     {
-      setPointer(pointer);
-      setType(type);
+      SetPtr(ptr);
+      SetData(data);
     }
 
-    CompactRefPtrTuple(RefPtr<T> &&pointer, Type type)
+    constexpr CompactRefPtrTuple(RefPtr<T> &&ptr, TData data) noexcept
     {
-      setPointer(Krys::Move(pointer));
-      setType(type);
+      SetPtr(Krys::Move(ptr));
+      SetData(data);
     }
 
-    CompactRefPtrTuple(const CompactRefPtrTuple &other)
+    constexpr ~CompactRefPtrTuple() noexcept
     {
-      setPointer(other.pointer());
-      setType(other.type());
+      Krys::DefaultRefDerefTraits<T>::derefIfNotNull(_data.Ptr());
     }
 
-    CompactRefPtrTuple(CompactRefPtrTuple &&other)
+    constexpr CompactRefPtrTuple(const CompactRefPtrTuple &other) noexcept
     {
-      m_data.setPointer(other.pointer());
-      m_data.setType(other.type());
-      other.m_data.setPointer(nullptr);
-      other.m_data.setType({});
+      SetPtr(other.Ptr());
+      SetData(other.data());
     }
 
-    CompactRefPtrTuple &operator=(const CompactRefPtrTuple &other)
+    constexpr CompactRefPtrTuple(CompactRefPtrTuple &&other) noexcept
+    {
+      _data.SetPtr(other.Ptr());
+      _data.SetData(other.data());
+      other._data.SetPtr(nullptr);
+      other._data.SetData({});
+    }
+
+    constexpr CompactRefPtrTuple &operator=(const CompactRefPtrTuple &other) noexcept
     {
       CompactRefPtrTuple copied(other);
       swap(copied);
       return *this;
     }
 
-    CompactRefPtrTuple &operator=(CompactRefPtrTuple &&other)
+    constexpr CompactRefPtrTuple &operator=(CompactRefPtrTuple &&other) noexcept
     {
       CompactRefPtrTuple moved(Krys::Move(other));
       swap(moved);
       return *this;
     }
 
-    ~CompactRefPtrTuple()
+    KRYS_NODISCARD constexpr RawPtr<T> Ptr() const noexcept KRYS_LIFETIME_BOUND
     {
-      Krys::DefaultRefDerefTraits<T>::derefIfNotNull(m_data.pointer());
+      return _data.Ptr();
     }
 
-    T *pointer() const KRYS_LIFETIME_BOUND
+    constexpr void SetPtr(RawPtr<T> ptr) noexcept
     {
-      return m_data.pointer();
-    }
-
-    void setPointer(T *pointer)
-    {
-      auto *old = m_data.pointer();
-      m_data.setPointer(Krys::DefaultRefDerefTraits<T>::refIfNotNull(pointer));
+      auto *old = _data.Ptr();
+      _data.SetPtr(Krys::DefaultRefDerefTraits<T>::refIfNotNull(ptr));
       Krys::DefaultRefDerefTraits<T>::derefIfNotNull(old);
     }
 
-    void setPointer(RefPtr<T> &&pointer)
+    constexpr void SetPtr(RefPtr<T> &&ptr) noexcept
     {
-      auto willRelease = Krys::Move(pointer);
-      auto *old = m_data.pointer();
-      m_data.setPointer(willRelease.leakRef());
+      auto willRelease = Krys::Move(ptr);
+      auto *old = _data.Ptr();
+      _data.SetPtr(willRelease.leakRef());
       Krys::DefaultRefDerefTraits<T>::derefIfNotNull(old);
     }
 
-    void setPointer(Ref<T> &&pointer)
+    constexpr void SetPtr(Ref<T> &&ptr) noexcept
     {
-      auto willRelease = Krys::Move(pointer);
-      auto *old = m_data.pointer();
-      m_data.setPointer(&willRelease.leakRef());
+      auto willRelease = Krys::Move(ptr);
+      auto *old = _data.Ptr();
+      _data.SetPtr(&willRelease.leakRef());
       Krys::DefaultRefDerefTraits<T>::derefIfNotNull(old);
     }
 
-    Type type() const
+    KRYS_NODISCARD constexpr TData Data() const noexcept
     {
-      return m_data.type();
-    }
-    void setType(Type type)
-    {
-      m_data.setType(type);
+      return _data.Data();
     }
 
-    void swap(CompactRefPtrTuple<T, Type> &other)
+    constexpr void SetData(TData data) noexcept
     {
-      m_data.swap(other.m_data);
+      _data.SetData(data);
     }
 
-  private:
-    CompactPointerTuple<T *, Type> m_data;
+    constexpr void swap(CompactRefPtrTuple<T, TData> &other) noexcept
+    {
+      _data.swap(other._data);
+    }
   };
 }
