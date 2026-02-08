@@ -63,7 +63,7 @@ namespace Krys::Tests
     SingleThreadWeakRef<TestWeakRefCounted> weakRef1(*obj);
     SingleThreadWeakRef<TestWeakRefCounted> weakRef2(Krys::Move(weakRef1));
 
-    REQUIRE(weakRef1.isHashTableEmptyValue());
+    REQUIRE(weakRef1.IsHashTableEmptyValue());
     REQUIRE(weakRef2.Impl());
     REQUIRE(weakRef2.Impl().template get<TestWeakRefObject>() == obj);
 
@@ -77,7 +77,7 @@ namespace Krys::Tests
     Ref<SingleThreadWeakPtrImpl> impl = obj->WeakImpl();
     SingleThreadWeakRef<TestWeakRefCounted> weakRef(Krys::Move(impl));
 
-    REQUIRE(impl.isHashTableEmptyValue());
+    REQUIRE(impl.IsHashTableEmptyValue());
     REQUIRE(weakRef.Impl());
     REQUIRE(weakRef.Impl().template get<TestWeakRefObject>() == obj);
 

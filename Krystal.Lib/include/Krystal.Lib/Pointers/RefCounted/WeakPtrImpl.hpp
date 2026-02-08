@@ -69,7 +69,7 @@ namespace Krys
     {
     }
 
-    uint32_t refCount() const
+    uint32_t GetRefCount() const
     {
       return m_refCount;
     }

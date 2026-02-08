@@ -61,15 +61,15 @@ namespace Krys
     RefPtr(HashTableDeletedValueType) : _ptr(PtrTraits::GetHashTableDeletedValue())
     {
     }
-    bool isHashTableDeletedValue() const
+    bool IsHashTableDeletedValue() const
     {
-      return PtrTraits::isHashTableDeletedValue(_ptr);
+      return PtrTraits::IsHashTableDeletedValue(_ptr);
     }
 
     RefPtr(HashTableEmptyValueType) : _ptr(hashTableEmptyValue())
     {
     }
-    bool isHashTableEmptyValue() const
+    bool IsHashTableEmptyValue() const
     {
       return _ptr == hashTableEmptyValue();
     }

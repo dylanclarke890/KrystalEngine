@@ -88,7 +88,7 @@ namespace Krys
 
     KRYS_NODISCARD uint32 WeakPtrCount() const noexcept
     {
-      return _impl ? _impl->refCount() - 1 : 0u;
+      return _impl ? _impl->GetRefCount() - 1 : 0u;
     }
   };
 
@@ -168,7 +168,7 @@ namespace Krys
     {
       if (auto *pointer = _impl.Ptr())
       {
-        return pointer->refCount() - 1;
+        return pointer->GetRefCount() - 1;
       }
 
       return 0;

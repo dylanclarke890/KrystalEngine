@@ -91,13 +91,13 @@ namespace Krys
   };
 
   template <DerivedFrom<RefCountedBase> T>
-  inline void AddRef(RawPtr<T> obj)
+  inline void AddRef(RawPtr<T> obj) noexcept
   {
     obj->AddRef();
   }
 
   template <DerivedFrom<RefCountedBase> T>
-  inline void SubRef(RawPtr<T> obj)
+  inline void SubRef(RawPtr<T> obj) noexcept
   {
     obj->SubRef();
   }

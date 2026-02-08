@@ -130,7 +130,7 @@ namespace Krys
       return m_weakReferenceCount;
     }
 
-    uint32_t refCount() const
+    uint32_t GetRefCount() const
     {
       std::scoped_lock locker {m_lock};
       return m_strongReferenceCount;
@@ -241,7 +241,7 @@ namespace Krys
         ->template strongDeref<T, destructionThread>();
     }
 
-    uint32 refCount() const
+    uint32 GetRefCount() const
     {
       uint32 bits = m_bits.loadRelaxed();
       if (isStrongOnly(bits))
@@ -253,12 +253,12 @@ namespace Krys
         return (bits & ~strongOnlyFlag) / refIncrement;
       }
 
-      return std::bit_cast<ThreadSafeWeakPtrControlBlock *>(bits)->refCount();
+      return std::bit_cast<ThreadSafeWeakPtrControlBlock *>(bits)->GetRefCount();
     }
 
     bool hasOneRef() const
     {
-      return refCount() == 1;
+      return GetRefCount() == 1;
     }
 
     // Ideally this would have been private but AbstractRefCounted subclasses need to be able to access this

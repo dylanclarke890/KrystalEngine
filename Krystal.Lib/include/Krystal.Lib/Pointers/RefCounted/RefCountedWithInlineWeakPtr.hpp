@@ -25,7 +25,7 @@ namespace Krys
     {
       return m_strongCount == 1;
     }
-    unsigned refCount() const
+    unsigned GetRefCount() const
     {
       return m_strongCount;
     }

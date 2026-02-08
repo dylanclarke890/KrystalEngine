@@ -120,15 +120,15 @@ namespace Krys
     Ref(HashTableDeletedValueType) : _ptr(PtrTraits::GetHashTableDeletedValue())
     {
     }
-    bool isHashTableDeletedValue() const
+    bool IsHashTableDeletedValue() const
     {
-      return PtrTraits::isHashTableDeletedValue(_ptr);
+      return PtrTraits::IsHashTableDeletedValue(_ptr);
     }
 
     Ref(HashTableEmptyValueType) : _ptr(hashTableEmptyValue())
     {
     }
-    bool isHashTableEmptyValue() const
+    bool IsHashTableEmptyValue() const
     {
       return _ptr == hashTableEmptyValue();
     }
@@ -139,12 +139,12 @@ namespace Krys
 
     const T *ptrAllowingHashTableEmptyValue() const KRYS_LIFETIME_BOUND
     {
-      assert(_ptr || isHashTableEmptyValue());
+      assert(_ptr || IsHashTableEmptyValue());
       return PtrTraits::unwrap(_ptr);
     }
     T *ptrAllowingHashTableEmptyValue() KRYS_LIFETIME_BOUND
     {
-      assert(_ptr || isHashTableEmptyValue());
+      assert(_ptr || IsHashTableEmptyValue());
       return PtrTraits::unwrap(_ptr);
     }
 

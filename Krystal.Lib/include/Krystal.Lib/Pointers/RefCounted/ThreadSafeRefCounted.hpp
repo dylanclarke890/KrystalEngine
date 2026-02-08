@@ -25,7 +25,7 @@ namespace Krys
       return m_refCount == 1;
     }
 
-    uint32 refCount() const
+    uint32 GetRefCount() const
     {
       return m_refCount;
     }

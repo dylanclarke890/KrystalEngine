@@ -3,31 +3,37 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Detection/Compiler.hpp"
 #include "Krystal.Lib/ForbidHeapAllocation.hpp"
+#include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include <algorithm>
 #include <utility>
 
 namespace Krys
 {
   template <typename T>
-  inline T &weakRef(T &ref)
+  constexpr inline T &AddRefWeak(T &ref) noexcept
   {
-    ref.weakRef();
+    ref.AddRefWeak();
     return ref;
   }
 
   template <typename T>
-  inline T *weakRefIfNotNull(T *ptr)
+  constexpr inline RawPtr<T> AddRefWeak(RawPtr<T> ptr) noexcept
   {
-    if (ptr) [[likely]]
-      ptr->weakRef();
+    if (ptr) KRYS_LIKELY
+    {
+      ptr->AddRefWeak();
+    }
+
     return ptr;
   }
 
   template <typename T>
-  inline void weakDerefIfNotNull(T *ptr)
+  inline void SubRefWeak(RawPtr<T> ptr) noexcept
   {
-    if (ptr) [[likely]]
-      ptr->weakDeref();
+    if (ptr) KRYS_LIKELY
+    {
+      ptr->SubRefWeak();
+    }
   }
 
   template <typename T>
@@ -35,83 +41,75 @@ namespace Krys
   {
     KRYS_FORBID_HEAP_ALLOCATION_ALLOWING_PLACEMENT_NEW;
 
+    template <typename X>
+    friend class InlineWeakRef;
+
+  private:
+    RawPtr<T> _ptr;
+
   public:
-    KRYS_ALWAYS_INLINE InlineWeakRef(T &ptr) : _ptr(&weakRef(ptr))
+    KRYS_ALWAYS_INLINE constexpr InlineWeakRef(T &ptr) noexcept : _ptr(&AddRefWeak(ptr))
     {
     }
-    KRYS_ALWAYS_INLINE InlineWeakRef(const InlineWeakRef &o) : _ptr(weakRef(*o._ptr))
+
+    KRYS_ALWAYS_INLINE constexpr InlineWeakRef(const InlineWeakRef &o) noexcept : _ptr(AddRefWeak(*o._ptr))
     {
     }
+
     template <typename X>
-    InlineWeakRef(const InlineWeakRef<X> &o) : _ptr(weakRef(*o._ptr))
+    constexpr InlineWeakRef(const InlineWeakRef<X> &o) noexcept : _ptr(AddRefWeak(*o._ptr))
     {
     }
 
-    KRYS_ALWAYS_INLINE InlineWeakRef(InlineWeakRef &&o) : _ptr(&o.leakWeak())
+    KRYS_ALWAYS_INLINE constexpr InlineWeakRef(InlineWeakRef &&o) noexcept : _ptr(&o.LeakWeak())
     {
     }
+
     template <typename X>
-    InlineWeakRef(InlineWeakRef<X> &&o) : _ptr(&o.leakWeak())
+    constexpr InlineWeakRef(InlineWeakRef<X> &&o) noexcept : _ptr(&o.LeakWeak())
     {
     }
 
-    KRYS_ALWAYS_INLINE ~InlineWeakRef()
+    KRYS_ALWAYS_INLINE constexpr ~InlineWeakRef() noexcept
     {
-      weakDerefIfNotNull(_ptr);
+      SubRefWeak(_ptr);
     }
 
-    T &get() const KRYS_LIFETIME_BOUND;
-    T *ptr() const KRYS_LIFETIME_BOUND;
+    constexpr T &get() const noexcept KRYS_LIFETIME_BOUND
+    {
+      assert(_ptr->GetRefCount());
+      return *_ptr;
+    }
 
-    KRYS_ALWAYS_INLINE T *operator->() const KRYS_LIFETIME_BOUND
+    constexpr RawPtr<T> ptr() const noexcept KRYS_LIFETIME_BOUND
+    {
+      assert(_ptr->GetRefCount());
+      return _ptr;
+    }
+
+    KRYS_ALWAYS_INLINE constexpr T *operator->() const noexcept KRYS_LIFETIME_BOUND
     {
       return ptr();
     }
 
-    InlineWeakRef &operator=(T &);
+    constexpr InlineWeakRef &operator=(T &optr) noexcept
+    {
+      InlineWeakRef ptr = optr;
+      swap(ptr);
+      return *this;
+    }
 
     template <typename X>
-    void swap(InlineWeakRef<X> &);
+    constexpr void swap(InlineWeakRef<X> &o) noexcept
+    {
+      std::swap(_ptr, o._ptr);
+    }
 
   private:
-    template <typename X>
-    friend class InlineWeakRef;
-
-    KRYS_NODISCARD T &leakWeak()
+    KRYS_NODISCARD constexpr T &LeakWeak() noexcept
     {
       assert(_ptr);
       return *std::exchange(_ptr, nullptr);
     }
-
-    T *_ptr;
   };
-
-  template <typename T>
-  T &InlineWeakRef<T>::get() const KRYS_LIFETIME_BOUND
-  {
-    assert(_ptr->refCount());
-    return *_ptr;
-  }
-
-  template <typename T>
-  T *InlineWeakRef<T>::ptr() const KRYS_LIFETIME_BOUND
-  {
-    assert(_ptr->refCount());
-    return _ptr;
-  }
-
-  template <typename T>
-  inline InlineWeakRef<T> &InlineWeakRef<T>::operator=(T &optr)
-  {
-    InlineWeakRef ptr = optr;
-    swap(ptr);
-    return *this;
-  }
-
-  template <class T>
-  template <typename X>
-  inline void InlineWeakRef<T>::swap(InlineWeakRef<X> &o)
-  {
-    std::swap(_ptr, o._ptr);
-  }
 }

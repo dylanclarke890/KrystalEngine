@@ -54,13 +54,13 @@ namespace Krys
     {
     }
 
-    bool isHashTableDeletedValue() const
+    bool IsHashTableDeletedValue() const
     {
-      return _impl.isHashTableDeletedValue();
+      return _impl.IsHashTableDeletedValue();
     }
-    bool isHashTableEmptyValue() const
+    bool IsHashTableEmptyValue() const
     {
-      return _impl.isHashTableEmptyValue();
+      return _impl.IsHashTableEmptyValue();
     }
 
     WeakPtrImpl &Impl() const
@@ -77,7 +77,7 @@ namespace Krys
       static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value,
                     "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
 
-      return !_impl.isHashTableEmptyValue() ? static_cast<T *>(_impl->template get<T>()) : nullptr;
+      return !_impl.IsHashTableEmptyValue() ? static_cast<T *>(_impl->template get<T>()) : nullptr;
     }
 
     T *ptr() const
