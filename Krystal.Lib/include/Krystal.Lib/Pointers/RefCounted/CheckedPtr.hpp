@@ -5,7 +5,7 @@
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/CheckedRef.hpp"
 #include "Krystal.Lib/Pointers/GetPtr.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/RawPtrTraits.hpp"
+#include "Krystal.Lib/Pointers/RawPtrTraits.hpp"
 #include <cassert>
 
 namespace Krys

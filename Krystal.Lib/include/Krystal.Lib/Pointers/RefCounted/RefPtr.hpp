@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Pointers/RefCounted/RawPtrTraits.hpp"
+#include "Krystal.Lib/Pointers/RawPtrTraits.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/Ref.hpp"
 #include <algorithm>
 #include <utility>

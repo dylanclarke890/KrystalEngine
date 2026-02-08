@@ -6,7 +6,7 @@
 #include "Krystal.Lib/Detection/AddressSpaceBitSize.hpp"
 #include "Krystal.Lib/Detection/OS.hpp"
 #include "Krystal.Lib/Pointers/GetPtr.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/RawPtrTraits.hpp"
+#include "Krystal.Lib/Pointers/RawPtrTraits.hpp"
 #include <cstdint>
 #include <utility>
 

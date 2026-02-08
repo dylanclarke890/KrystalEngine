@@ -6,7 +6,7 @@
 #include "Krystal.Lib/Detection/Sanitizers.hpp"
 #include "Krystal.Lib/ForbidHeapAllocation.hpp"
 #include "Krystal.Lib/Pointers/GetPtr.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/RawPtrTraits.hpp"
+#include "Krystal.Lib/Pointers/RawPtrTraits.hpp"
 #include <cassert>
 
 #if KRYS_ASAN_ENABLED

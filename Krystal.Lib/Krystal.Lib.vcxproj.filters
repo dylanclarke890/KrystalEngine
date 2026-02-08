@@ -396,7 +396,7 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\InlineWeakRef.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RawPtrTraits.hpp">
+    <ClInclude Include="include\Krystal.Lib\Pointers\RawPtrTraits.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\Ref.hpp">
