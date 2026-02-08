@@ -1,35 +1,20 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/WeakPtrFactory.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/WeakRef.hpp"
 
-namespace Krys
+namespace Krys::detail
 {
-  class DefaultWeakPtrImpl;
-
-  template <typename TWeakPtrFactory,
-            WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy>
+  template <typename TWeakPtrFactory, WeakPtrFactoryInitialization InitializationMode>
   class CanMakeWeakPtrBase
   {
   public:
-    using TWeakValue = typename TWeakPtrFactory::ObjectType;
+    using TWeakValue = typename TWeakPtrFactory::TObject;
     using TWeakPtrImpl = typename TWeakPtrFactory::TWeakPtrImpl;
 
-    TWeakPtrImpl *WeakImplIfExists() const noexcept
-    {
-      return _weakPtrFactory.Impl();
-    }
-
-    TWeakPtrImpl &WeakImpl() const noexcept
-    {
-      InitializeWeakPtrFactory();
-      return *_weakPtrFactory.Impl();
-    }
-
-    uint32 weakCount() const noexcept
-    {
-      return _weakPtrFactory.weakPtrCount();
-    }
+  private:
+    TWeakPtrFactory _weakPtrFactory;
 
   protected:
     CanMakeWeakPtrBase() noexcept
@@ -48,37 +33,59 @@ namespace Krys
       }
     }
 
-    CanMakeWeakPtrBase &operator=(const CanMakeWeakPtrBase &)
+  public:
+    KRYS_NODISCARD TWeakPtrImpl *WeakImplIfExists() const noexcept
     {
-      return *this;
+      return _weakPtrFactory.Impl();
     }
 
-    void InitializeWeakPtrFactory() const
+    KRYS_NODISCARD TWeakPtrImpl &WeakImpl() const noexcept
+    {
+      InitializeWeakPtrFactory();
+      return *_weakPtrFactory.Impl();
+    }
+
+    KRYS_NODISCARD uint32 WeakCount() const noexcept
+    {
+      return _weakPtrFactory.WeakPtrCount();
+    }
+
+  protected:
+    void InitializeWeakPtrFactory() const noexcept
     {
       _weakPtrFactory.InitializeIfNeeded(static_cast<const TWeakValue &>(*this));
     }
 
-    const TWeakPtrFactory &weakPtrFactory() const
+    CanMakeWeakPtrBase &operator=(const CanMakeWeakPtrBase &) noexcept
     {
-      return _weakPtrFactory;
+      return *this;
     }
-    TWeakPtrFactory &weakPtrFactory()
+
+    KRYS_NODISCARD const TWeakPtrFactory &GetWeakPtrFactory() const noexcept
     {
       return _weakPtrFactory;
     }
 
-  private:
-    TWeakPtrFactory _weakPtrFactory;
+    KRYS_NODISCARD TWeakPtrFactory &GetWeakPtrFactory() noexcept
+    {
+      return _weakPtrFactory;
+    }
   };
+}
+
+namespace Krys
+{
+  class DefaultWeakPtrImpl;
 
   template <typename T, WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy,
             typename WeakPtrImpl = DefaultWeakPtrImpl>
-  using CanMakeWeakPtr = CanMakeWeakPtrBase<WeakPtrFactory<T, WeakPtrImpl>, InitializationMode>;
+  using CanMakeWeakPtr =
+    ::Krys::detail::CanMakeWeakPtrBase<WeakPtrFactory<T, WeakPtrImpl>, InitializationMode>;
 
   template <typename T, WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy,
             typename WeakPtrImpl = DefaultWeakPtrImpl>
   using CanMakeWeakPtrWithBitField =
-    CanMakeWeakPtrBase<WeakPtrFactoryWithBitField<T, WeakPtrImpl>, InitializationMode>;
+    ::Krys::detail::CanMakeWeakPtrBase<WeakPtrFactoryWithBitField<T, WeakPtrImpl>, InitializationMode>;
 
   template <typename T, WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy>
   using CanMakeSingleThreadWeakPtr = CanMakeWeakPtr<T, InitializationMode, SingleThreadWeakPtrImpl>;

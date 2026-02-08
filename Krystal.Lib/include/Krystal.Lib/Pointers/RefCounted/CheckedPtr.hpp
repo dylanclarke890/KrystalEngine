@@ -2,8 +2,9 @@
 
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
+#include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/CheckedRef.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/GetPtr.hpp"
+#include "Krystal.Lib/Pointers/GetPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/RawPtrTraits.hpp"
 #include <cassert>
 
@@ -13,175 +14,171 @@ namespace Krys
   /// It does not affect the lifetime of the object being pointed to; it simply adds a runtime
   /// check (via assert) that when the object being pointed to is destroyed, there are
   /// no outstanding CheckedPtrs that reference it.
-  /// @note Use is similar to WeakPtr, but CheckedPtr has less overhead and is used in cases where the target is
-  /// never expected to become null.
+  /// @note Use is similar to WeakPtr, but CheckedPtr has less overhead and is used in cases where the target
+  /// is never expected to become null.
   template <typename T, typename PtrTraits = RawPtrTraits<T>>
   class CheckedPtr
   {
   public:
-    constexpr CheckedPtr() : _ptr(nullptr)
+    constexpr CheckedPtr() noexcept : _ptr(nullptr)
     {
     }
 
-    constexpr CheckedPtr(std::nullptr_t) : _ptr(nullptr)
+    constexpr CheckedPtr(std::nullptr_t) noexcept : _ptr(nullptr)
     {
     }
 
-    KRYS_ALWAYS_INLINE CheckedPtr(T *ptr) : _ptr {ptr}
+    KRYS_ALWAYS_INLINE CheckedPtr(T *ptr) noexcept : _ptr {ptr}
     {
-      refIfNotNull();
+      AddRefIfNotNull();
     }
 
-    KRYS_ALWAYS_INLINE CheckedPtr(const CheckedPtr &other) : _ptr {other._ptr}
+    KRYS_ALWAYS_INLINE CheckedPtr(const CheckedPtr &other) noexcept : _ptr {other._ptr}
     {
-      refIfNotNull();
+      AddRefIfNotNull();
     }
 
-    KRYS_ALWAYS_INLINE CheckedPtr(CheckedPtr &&other) noexcept : _ptr {PtrTraits::exchange(other._ptr, nullptr)}
+    KRYS_ALWAYS_INLINE CheckedPtr(CheckedPtr &&other) noexcept
+        : _ptr {PtrTraits::exchange(other._ptr, nullptr)}
     {
     }
 
-    KRYS_ALWAYS_INLINE ~CheckedPtr()
+    KRYS_ALWAYS_INLINE ~CheckedPtr() noexcept
     {
-      derefIfNotNull();
+      SubRefIfNotNull();
     }
 
     template <typename OtherType, typename OtherPtrTraits>
-    CheckedPtr(const CheckedPtr<OtherType, OtherPtrTraits> &other)
+    CheckedPtr(const CheckedPtr<OtherType, OtherPtrTraits> &other) noexcept
         : CheckedPtr(OtherPtrTraits::unwrap(other._ptr))
     {
     }
 
     template <typename OtherType, typename OtherPtrTraits>
-    CheckedPtr(CheckedPtr<OtherType, OtherPtrTraits> &&other)
+    CheckedPtr(CheckedPtr<OtherType, OtherPtrTraits> &&other) noexcept
         : _ptr {OtherPtrTraits::exchange(other._ptr, nullptr)}
     {
     }
 
-    CheckedPtr(CheckedRef<T, PtrTraits> &other) : CheckedPtr(PtrTraits::unwrap(other._ptr))
+    CheckedPtr(CheckedRef<T, PtrTraits> &other) noexcept : CheckedPtr(PtrTraits::unwrap(other._ptr))
     {
     }
 
     template <typename OtherType, typename OtherPtrTraits>
-    CheckedPtr(const CheckedRef<OtherType, OtherPtrTraits> &other)
+    CheckedPtr(const CheckedRef<OtherType, OtherPtrTraits> &other) noexcept
         : CheckedPtr(OtherPtrTraits::unwrap(other._ptr))
     {
     }
 
-    CheckedPtr(CheckedRef<T, PtrTraits> &&other) : _ptr {other.releasePtr()}
+    CheckedPtr(CheckedRef<T, PtrTraits> &&other) noexcept : _ptr {other.releasePtr()}
     {
       assert(get());
     }
 
     template <typename OtherType, typename OtherPtrTraits>
-    CheckedPtr(CheckedRef<OtherType, OtherPtrTraits> &&other) : _ptr {other.releasePtr()}
+    CheckedPtr(CheckedRef<OtherType, OtherPtrTraits> &&other) noexcept : _ptr {other.releasePtr()}
     {
       assert(get());
     }
 
-    CheckedPtr(HashTableDeletedValueType) : _ptr(PtrTraits::hashTableDeletedValue())
+    CheckedPtr(HashTableDeletedValueType) noexcept : _ptr(PtrTraits::hashTableDeletedValue())
     {
     }
 
-    bool isHashTableDeletedValue() const
+    KRYS_NODISCARD bool IsHashTableDeletedValue() const noexcept
     {
       return PtrTraits::isHashTableDeletedValue(_ptr);
     }
 
-    KRYS_ALWAYS_INLINE explicit operator bool() const
+    KRYS_ALWAYS_INLINE explicit operator bool() const noexcept
     {
       return PtrTraits::unwrap(_ptr);
     }
 
-    KRYS_ALWAYS_INLINE T *get() const KRYS_LIFETIME_BOUND
+    KRYS_ALWAYS_INLINE RawPtr<T> get() const noexcept KRYS_LIFETIME_BOUND
     {
       return PtrTraits::unwrap(_ptr);
     }
 
-    KRYS_ALWAYS_INLINE T *unsafeGet() const
-    {
-      return PtrTraits::unwrap(_ptr);
-    }
-
-    KRYS_ALWAYS_INLINE T &operator*() const KRYS_LIFETIME_BOUND
-    {
-      assert(_ptr);
-      return *get();
-    }
-
-    KRYS_ALWAYS_INLINE T *operator->() const KRYS_LIFETIME_BOUND
-    {
-      assert(_ptr);
-      return PtrTraits::unwrap(_ptr);
-    }
-
-    CheckedRef<T, PtrTraits> releaseNonNull()
+    CheckedRef<T, PtrTraits> ReleaseNonNull() noexcept
     {
       assert(_ptr);
       auto &ptr = *PtrTraits::unwrap(std::exchange(_ptr, nullptr));
       return CheckedRef {ptr, CheckedRef<T>::Adopt};
     }
 
-    bool operator==(const T *other) const
+    KRYS_ALWAYS_INLINE T &operator*() const noexcept KRYS_LIFETIME_BOUND
+    {
+      assert(_ptr);
+      return *get();
+    }
+
+    KRYS_ALWAYS_INLINE RawPtr<T> operator->() const noexcept KRYS_LIFETIME_BOUND
+    {
+      assert(_ptr);
+      return PtrTraits::unwrap(_ptr);
+    }
+
+    bool operator==(const RawPtr<T> other) const noexcept
     {
       return _ptr == other;
     }
 
     template <typename U>
-    bool operator==(U *other) const
+    bool operator==(RawPtr<U> other) const noexcept
     {
       return _ptr == other;
     }
 
-    bool operator==(const CheckedPtr &other) const
+    bool operator==(const CheckedPtr &other) const noexcept
     {
       return _ptr == other._ptr;
     }
 
-    template <typename OtherType, typename OtherPtrTraits>
-    bool operator==(const CheckedPtr<OtherType, OtherPtrTraits> &other) const
+    template <typename TOther, typename TOtherPtrTraits>
+    bool operator==(const CheckedPtr<TOther, TOtherPtrTraits> &other) const noexcept
     {
       return _ptr == other._ptr;
     }
 
-    CheckedPtr &operator=(std::nullptr_t)
+    CheckedPtr &operator=(std::nullptr_t) noexcept
     {
-      derefIfNotNull();
+      SubRefIfNotNull();
       _ptr = nullptr;
       return *this;
     }
 
-    CheckedPtr &operator=(T *ptr)
+    CheckedPtr &operator=(RawPtr<T> ptr) noexcept
     {
       CheckedPtr copy {ptr};
       PtrTraits::swap(_ptr, copy._ptr);
       return *this;
     }
 
-    CheckedPtr &operator=(const CheckedPtr &other)
+    CheckedPtr &operator=(const CheckedPtr &other) noexcept
     {
       CheckedPtr copy {other};
       PtrTraits::swap(_ptr, copy._ptr);
       return *this;
     }
 
-    template <typename OtherType, typename OtherPtrTraits>
-    CheckedPtr &operator=(const CheckedPtr<OtherType, OtherPtrTraits> &other)
+    template <typename TOther, typename TOtherPtrTraits>
+    CheckedPtr &operator=(const CheckedPtr<TOther, TOtherPtrTraits> &other) noexcept
     {
       CheckedPtr copy {other};
       PtrTraits::swap(_ptr, copy._ptr);
       return *this;
     }
 
-    CheckedPtr &operator=(CheckedPtr &&other)
+    CheckedPtr &operator=(CheckedPtr &&other) noexcept
     {
       CheckedPtr moved {Krys::Move(other)};
       PtrTraits::swap(_ptr, moved._ptr);
       return *this;
     }
 
-    template <typename OtherType, typename OtherPtrTraits>
-    CheckedPtr &operator=(CheckedPtr<OtherType, OtherPtrTraits> &&other)
+    template <typename TOther, typename TOtherPtrTraits>
+    CheckedPtr &operator=(CheckedPtr<TOther, TOtherPtrTraits> &&other) noexcept
     {
       CheckedPtr moved {Krys::Move(other)};
       PtrTraits::swap(_ptr, moved._ptr);
@@ -189,19 +186,23 @@ namespace Krys
     }
 
   private:
-    template <typename OtherType, typename OtherPtrTraits>
+    template <typename TOther, typename TOtherPtrTraits>
     friend class CheckedPtr;
 
-    KRYS_ALWAYS_INLINE void refIfNotNull()
+    KRYS_ALWAYS_INLINE void AddRefIfNotNull() noexcept
     {
-      if (T *ptr = PtrTraits::unwrap(_ptr); ptr) [[likely]]
-        ptr->incrementCheckedPtrCount();
+      if (RawPtr<T> ptr = PtrTraits::unwrap(_ptr); ptr) KRYS_LIKELY
+      {
+        ptr->AddRefCheckedPtr();
+      }
     }
 
-    KRYS_ALWAYS_INLINE void derefIfNotNull()
+    KRYS_ALWAYS_INLINE void SubRefIfNotNull() noexcept
     {
-      if (T *ptr = PtrTraits::unwrap(_ptr); ptr) [[likely]]
-        ptr->decrementCheckedPtrCount();
+      if (RawPtr<T> ptr = PtrTraits::unwrap(_ptr); ptr) KRYS_LIKELY
+      {
+        ptr->SubRefCheckedPtr();
+      }
     }
 
     typename PtrTraits::StorageType _ptr;
@@ -210,11 +211,12 @@ namespace Krys
   template <typename T, typename PtrTraits>
   struct GetPtrHelper<CheckedPtr<T, PtrTraits>>
   {
-    using PtrType = T *;
-    using UnderlyingType = T;
-    static T *getPtr(const CheckedPtr<T, PtrTraits> &p)
+    using pointer_type = RawPtr<T>;
+    using underlying_type = T;
+
+    KRYS_NODISCARD static pointer_type GetPtr(const CheckedPtr<T, PtrTraits> &p) noexcept
     {
-      return const_cast<T *>(p.get());
+      return const_cast<pointer_type>(p.get());
     }
   };
 
@@ -222,17 +224,17 @@ namespace Krys
   struct IsSmartPtr<CheckedPtr<T, U>>
   {
     static constexpr bool value = true;
-    static constexpr bool isNullable = false;
+    static constexpr bool nullable = false;
   };
 
   template <typename ExpectedType, typename ArgType, typename ArgPtrTraits>
-  inline bool Is(CheckedPtr<ArgType, ArgPtrTraits> &source)
+  inline bool Is(CheckedPtr<ArgType, ArgPtrTraits> &source) noexcept
   {
     return Is<ExpectedType>(source.get());
   }
 
   template <typename ExpectedType, typename ArgType, typename ArgPtrTraits>
-  inline bool Is(const CheckedPtr<ArgType, ArgPtrTraits> &source)
+  inline bool Is(const CheckedPtr<ArgType, ArgPtrTraits> &source) noexcept
   {
     return Is<ExpectedType>(source.get());
   }

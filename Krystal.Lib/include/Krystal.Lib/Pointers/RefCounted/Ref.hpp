@@ -5,7 +5,7 @@
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Detection/Sanitizers.hpp"
 #include "Krystal.Lib/ForbidHeapAllocation.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/GetPtr.hpp"
+#include "Krystal.Lib/Pointers/GetPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/RawPtrTraits.hpp"
 #include <cassert>
 
@@ -347,33 +347,34 @@ namespace Krys
     return adoptRef(static_cast<X &>(reference.leakRef()));
   }
 
-  template <typename X, typename _PtrTraits = RawPtrTraits<X>,
-            typename RefDerefTraits = DefaultRefDerefTraits<X>, typename Y, typename _OtherPtrTraits,
+  template <typename X, typename PtrTraits = RawPtrTraits<X>,
+            typename RefDerefTraits = DefaultRefDerefTraits<X>, typename Y, typename OtherPtrTraits,
             typename OtherRefDerefTraits>
-  KRYS_ALWAYS_INLINE Ref<X, _PtrTraits, RefDerefTraits>
-    unsafeRefDowncast(const Ref<Y, _OtherPtrTraits, OtherRefDerefTraits> &reference)
+  KRYS_ALWAYS_INLINE Ref<X, PtrTraits, RefDerefTraits>
+    unsafeRefDowncast(const Ref<Y, OtherPtrTraits, OtherRefDerefTraits> &reference)
   {
     static_assert(!std::same_as<Y, X>, "Unnecessary cast to same type");
     static_assert(std::derived_from<X, Y>, "Use upcast instead");
-    return unsafeRefDowncast<X, _PtrTraits, RefDerefTraits>(reference.copyRef());
+    return unsafeRefDowncast<X, PtrTraits, RefDerefTraits>(reference.copyRef());
   }
 
-  template <typename T, typename _PtrTraits, typename RefDerefTraits>
-  struct GetPtrHelper<Ref<T, _PtrTraits, RefDerefTraits>>
+  template <typename T, typename PtrTraits, typename RefDerefTraits>
+  struct GetPtrHelper<Ref<T, PtrTraits, RefDerefTraits>>
   {
-    using PtrType = T *;
-    using UnderlyingType = T;
-    static T *getPtr(const Ref<T, _PtrTraits, RefDerefTraits> &p)
+    using pointer_type = RawPtr<T>;
+    using underlying_type = T;
+
+    static pointer_type GetPtr(const Ref<T, PtrTraits, RefDerefTraits> &p)
     {
-      return const_cast<T *>(p.ptr());
+      return const_cast<pointer_type>(p.ptr());
     }
   };
 
-  template <typename T, typename _PtrTraits, typename RefDerefTraits>
-  struct IsSmartPtr<Ref<T, _PtrTraits, RefDerefTraits>>
+  template <typename T, typename PtrTraits, typename RefDerefTraits>
+  struct IsSmartPtr<Ref<T, PtrTraits, RefDerefTraits>>
   {
     static constexpr bool value = true;
-    static constexpr bool isNullable = false;
+    static constexpr bool nullable = false;
   };
 
   template <typename T, typename _PtrTraits, typename RefDerefTraits>

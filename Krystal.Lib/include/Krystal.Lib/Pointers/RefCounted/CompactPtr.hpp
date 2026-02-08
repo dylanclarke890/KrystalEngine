@@ -5,7 +5,7 @@
 #include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Detection/AddressSpaceBitSize.hpp"
 #include "Krystal.Lib/Detection/OS.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/GetPtr.hpp"
+#include "Krystal.Lib/Pointers/GetPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/RawPtrTraits.hpp"
 #include <cstdint>
 #include <utility>
@@ -268,11 +268,12 @@ public:                                                                         
   template <typename T>
   struct GetPtrHelper<CompactPtr<T>>
   {
-    using PtrType = T *;
-    using UnderlyingType = T;
-    static T *getPtr(const CompactPtr<T> &p)
+    using pointer_type = RawPtr<T>;
+    using underlying_type = T;
+
+    KRYS_NODISCARD static pointer_type GetPtr(const CompactPtr<T> &p) noexcept
     {
-      return const_cast<T *>(p.get());
+      return const_cast<pointer_type>(p.get());
     }
   };
 
@@ -280,7 +281,7 @@ public:                                                                         
   struct IsSmartPtr<CompactPtr<T>>
   {
     static constexpr bool value = true;
-    static constexpr bool isNullable = true;
+    static constexpr bool nullable = true;
   };
 
   template <typename T>
@@ -314,6 +315,7 @@ public:                                                                         
     {
       return StorageType {HashTableDeletedValue};
     }
+
     static KRYS_ALWAYS_INLINE bool isHashTableDeletedValue(const StorageType &ptr)
     {
       return ptr.isHashTableDeletedValue();

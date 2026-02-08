@@ -4,7 +4,7 @@
 #include "Krystal.Lib/Detection/Environment.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/CanMakeWeakPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/CompactRefPtrTuple.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/GetPtr.hpp"
+#include "Krystal.Lib/Pointers/GetPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/TypeTraits.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/WeakPtrFactory.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/WeakPtrImpl.hpp"
@@ -314,11 +314,12 @@ namespace Krys
   template <typename T, typename WeakPtrImpl, typename PtrTraits>
   struct GetPtrHelper<WeakPtr<T, WeakPtrImpl, PtrTraits>>
   {
-    using PtrType = T *;
-    using UnderlyingType = T;
-    static T *getPtr(const WeakPtr<T, WeakPtrImpl, PtrTraits> &p)
+    using pointer_type = RawPtr<T>;
+    using underlying_type = T;
+
+    KRYS_NODISCARD static pointer_type GetPtr(const WeakPtr<T, WeakPtrImpl, PtrTraits> &p) noexcept
     {
-      return const_cast<T *>(p.get());
+      return const_cast<pointer_type>(p.get());
     }
   };
 
@@ -326,7 +327,7 @@ namespace Krys
   struct IsSmartPtr<WeakPtr<T, WeakPtrImpl, PtrTraits>>
   {
     static constexpr bool value = true;
-    static constexpr bool isNullable = true;
+    static constexpr bool nullable = true;
   };
 
   template <typename ExpectedType, typename ArgType, typename WeakPtrImpl, typename PtrTraits>

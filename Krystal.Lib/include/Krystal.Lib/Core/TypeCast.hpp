@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include <cassert>
@@ -9,7 +10,7 @@
 
 namespace Krys
 {
-  template <typename TExpected, typename TArg, bool IsBaseType = std::is_base_of_v<TExpected, TArg>>
+  template <typename TExpected, typename TArg, bool IsBaseType = BaseOf<TExpected, TArg>>
   struct TypeCastTraits
   {
     static bool IsOfType(TArg &) noexcept
@@ -28,7 +29,7 @@ namespace Krys
   template <typename TExpected, typename TArg>
   struct TypeCastTraits<TExpected, TArg, true /* IsBaseType */>
   {
-    static bool IsOfType(TArg &) noexcept
+    KRYS_NODISCARD static bool IsOfType(TArg &) noexcept
     {
       return true;
     }
@@ -36,16 +37,16 @@ namespace Krys
 
   /// @brief Type checking function, to use before casting with downcast<>().
   template <typename TExpected, typename TArg>
-  inline bool Is(const TArg &source)
+  KRYS_NODISCARD inline bool Is(const TArg &source) noexcept
   {
-    static_assert(std::is_base_of_v<TArg, TExpected>, "Unnecessary type check");
+    static_assert(BaseOf<TArg, TExpected>, "Unnecessary type check");
     return TypeCastTraits<const TExpected, const TArg>::IsOfType(source);
   }
 
   template <typename TExpected, typename TArg>
-  inline bool Is(TArg *source)
+  KRYS_NODISCARD inline bool Is(TArg *source) noexcept
   {
-    static_assert(std::is_base_of_v<TArg, TExpected>, "Unnecessary type check");
+    static_assert(BaseOf<TArg, TExpected>, "Unnecessary type check");
     return source && TypeCastTraits<const TExpected, const TArg>::IsOfType(*source);
   }
 
@@ -54,54 +55,54 @@ namespace Krys
   using match_constness_t = conditional_t<Const<Reference>, add_const_t<T>, remove_const_t<T>>;
 
   template <typename Target, typename Source>
-  inline match_constness_t<Source, Target> &UncheckedDowncast(Source &source)
+  inline match_constness_t<Source, Target> &UncheckedDowncast(Source &source) noexcept
   {
     static_assert(!SameType<Source, Target>, "Unnecessary cast to same type");
-    static_assert(std::is_base_of_v<Source, Target>, "Should be a downcast");
+    static_assert(BaseOf<Source, Target>, "Should be a downcast");
     assert(Is<Target>(source));
     return static_cast<match_constness_t<Source, Target> &>(source);
   }
 
   template <typename Target, typename Source>
-  inline match_constness_t<Source, Target> *UncheckedDowncast(Source *source)
+  inline match_constness_t<Source, Target> *UncheckedDowncast(Source *source) noexcept
   {
     static_assert(!SameType<Source, Target>, "Unnecessary cast to same type");
-    static_assert(std::is_base_of_v<Source, Target>, "Should be a downcast");
+    static_assert(BaseOf<Source, Target>, "Should be a downcast");
     assert(!source || Is<Target>(*source));
     return static_cast<match_constness_t<Source, Target> *>(source);
   }
 
   template <typename Target, typename Source>
-  inline match_constness_t<Source, Target> &Downcast(Source &source)
+  inline match_constness_t<Source, Target> &Downcast(Source &source) noexcept
   {
     static_assert(!SameType<Source, Target>, "Unnecessary cast to same type");
-    static_assert(std::is_base_of_v<Source, Target>, "Should be a downcast");
+    static_assert(BaseOf<Source, Target>, "Should be a downcast");
     assert(Is<Target>(source));
     return static_cast<match_constness_t<Source, Target> &>(source);
   }
 
   template <typename Target, typename Source>
-  inline match_constness_t<Source, Target> *Downcast(Source *source)
+  inline match_constness_t<Source, Target> *Downcast(Source *source) noexcept
   {
     static_assert(!SameType<Source, Target>, "Unnecessary cast to same type");
-    static_assert(std::is_base_of_v<Source, Target>, "Should be a downcast");
+    static_assert(BaseOf<Source, Target>, "Should be a downcast");
     assert(!source || is<Target>(*source));
     return static_cast<match_constness_t<Source, Target> *>(source);
   }
 
   template <typename Target, typename Source>
-  inline match_constness_t<Source, Target> *DynamicDowncast(Source &source)
+  inline match_constness_t<Source, Target> *DynamicDowncast(Source &source) noexcept
   {
     static_assert(!SameType<Source, Target>, "Unnecessary cast to same type");
-    static_assert(std::is_base_of_v<Source, Target>, "Should be a downcast");
+    static_assert(BaseOf<Source, Target>, "Should be a downcast");
     return Is<Target>(source) ? &static_cast<match_constness_t<Source, Target> &>(source) : nullptr;
   }
 
   template <typename Target, typename Source>
-  inline match_constness_t<Source, Target> *DynamicDowncast(Source *source)
+  inline match_constness_t<Source, Target> *DynamicDowncast(Source *source) noexcept
   {
     static_assert(!SameType<Source, Target>, "Unnecessary cast to same type");
-    static_assert(std::is_base_of_v<Source, Target>, "Should be a downcast");
+    static_assert(BaseOf<Source, Target>, "Should be a downcast");
     return Is<Target>(source) ? static_cast<match_constness_t<Source, Target> *>(source) : nullptr;
   }
 
@@ -127,13 +128,13 @@ namespace Krys
 
   // Explicit specialization for C++ standard library types.
   template <typename TExpected, typename TArg, typename Deleter>
-  inline bool Is(std::unique_ptr<TArg, Deleter> &source)
+  inline bool Is(std::unique_ptr<TArg, Deleter> &source) noexcept
   {
     return Is<TExpected>(source.get());
   }
 
   template <typename TExpected, typename TArg, typename Deleter>
-  inline bool Is(const std::unique_ptr<TArg, Deleter> &source)
+  inline bool Is(const std::unique_ptr<TArg, Deleter> &source) noexcept
   {
     return Is<TExpected>(source.get());
   }

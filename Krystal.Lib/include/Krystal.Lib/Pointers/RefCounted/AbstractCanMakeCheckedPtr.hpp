@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys
@@ -12,7 +13,7 @@ namespace Krys
     virtual ~AbstractCanMakeCheckedPtr() noexcept = default;
 
   public:
-    virtual uint32 CheckedPtrCount() const noexcept = 0;
+    KRYS_NODISCARD virtual uint32 CheckedPtrCount() const noexcept = 0;
     virtual void IncrementCheckedPtrCount() const noexcept = 0;
     virtual void DecrementCheckedPtrCount() const noexcept = 0;
     virtual void SetDidBeginCheckedPtrDeletion() noexcept = 0;
@@ -20,19 +21,19 @@ namespace Krys
 }
 
 #define KRYS_OVERRIDE_ABSTRACT_CAN_MAKE_CHECKEDPTR(BaseClass)                                                \
-  Krys::uint32 CheckedPtrCount() const final                                                                 \
+  KRYS_NODISCARD Krys::uint32 CheckedPtrCount() const noexcept final                                         \
   {                                                                                                          \
     return BaseClass::CheckedPtrCount();                                                                     \
   }                                                                                                          \
-  void IncrementCheckedPtrCount() const final                                                                \
+  void IncrementCheckedPtrCount() const noexcept final                                                       \
   {                                                                                                          \
     BaseClass::IncrementCheckedPtrCount();                                                                   \
   }                                                                                                          \
-  void DecrementCheckedPtrCount() const final                                                                \
+  void DecrementCheckedPtrCount() const noexcept final                                                       \
   {                                                                                                          \
     BaseClass::DecrementCheckedPtrCount();                                                                   \
   }                                                                                                          \
-  void SetDidBeginCheckedPtrDeletion() final                                                                 \
+  void SetDidBeginCheckedPtrDeletion() noexcept final                                                        \
   {                                                                                                          \
     BaseClass::SetDidBeginCheckedPtrDeletion();                                                              \
   }                                                                                                          \

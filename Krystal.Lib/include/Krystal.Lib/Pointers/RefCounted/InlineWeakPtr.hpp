@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Pointers/RefCounted/GetPtr.hpp"
+#include "Krystal.Lib/Pointers/GetPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/InlineWeakRef.hpp"
 #include <bit>
 
@@ -179,11 +179,12 @@ namespace Krys
   template <typename T>
   struct GetPtrHelper<InlineWeakPtr<T>>
   {
-    using PtrType = T *;
-    using UnderlyingType = T;
-    static T *getPtr(const InlineWeakPtr<T> &p)
+    using pointer_type = RawPtr<T>;
+    using underlying_type = T;
+
+    static pointer_type GetPtr(const InlineWeakPtr<T> &p)
     {
-      return const_cast<T *>(p.get());
+      return const_cast<pointer_type>(p.get());
     }
   };
 
@@ -191,14 +192,14 @@ namespace Krys
   struct IsSmartPtr<InlineWeakPtr<T>>
   {
     static constexpr bool value = true;
-    static constexpr bool isNullable = true;
+    static constexpr bool nullable = true;
   };
 
   template <typename P>
   struct InlineWeakPtrHashTraits : public SimpleClassHashTraits<InlineWeakPtr<P>>
   {
     static constexpr bool emptyValueIsZero = true;
-    static P *emptyValue()
+    static RawPtr<P> emptyValue()
     {
       return nullptr;
     }
@@ -221,7 +222,7 @@ namespace Krys
       return value.isWeakNullValue();
     }
 
-    using PeekType = P *;
+    using PeekType = RawPtr<P>;
     static PeekType peek(const InlineWeakPtr<P> &value)
     {
       return const_cast<PeekType>(value.get());

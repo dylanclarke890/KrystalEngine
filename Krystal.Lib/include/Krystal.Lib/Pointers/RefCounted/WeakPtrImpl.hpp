@@ -3,7 +3,7 @@
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Detection/Environment.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/GetPtr.hpp"
+#include "Krystal.Lib/Pointers/GetPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/ThreadSafeRefCounted.hpp"
 
 namespace Krys

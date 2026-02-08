@@ -387,7 +387,7 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CompactUniquePtrTuple.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\GetPtr.hpp">
+    <ClInclude Include="include\Krystal.Lib\Pointers\GetPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\InlineWeakPtr.hpp">
