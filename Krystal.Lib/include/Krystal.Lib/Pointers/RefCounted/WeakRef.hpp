@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Detection/Environment.hpp"
 #include "Krystal.Lib/Pointers/GetPtr.hpp"
@@ -25,95 +26,98 @@ namespace Krys
   {
   public:
     WeakRef(const T &object,
-            EnabledWeakPtrThreadAsserts shouldEnableAssertions = EnabledWeakPtrThreadAsserts::Yes)
-    requires(!IsSmartPtr<T>::value && !std::is_pointer_v<T>)
+            EnabledWeakPtrThreadAsserts shouldEnableAssertions = EnabledWeakPtrThreadAsserts::Yes) noexcept
+    requires(!IsSmartPtr<T>::value && !IsPointer<T>)
         : _impl(object.WeakImpl())
 #if KRYS_ENV(DEV)
           ,
-          m_shouldEnableAssertions(shouldEnableAssertions == EnabledWeakPtrThreadAsserts::Yes)
+          _shouldEnableAssertions(shouldEnableAssertions == EnabledWeakPtrThreadAsserts::Yes)
 #endif
     {
       (void)shouldEnableAssertions;
     }
 
-    explicit WeakRef(Ref<WeakPtrImpl> &&impl,
-                     EnabledWeakPtrThreadAsserts shouldEnableAssertions = EnabledWeakPtrThreadAsserts::Yes)
+    explicit WeakRef(Ref<WeakPtrImpl> &&impl, EnabledWeakPtrThreadAsserts shouldEnableAssertions =
+                                                EnabledWeakPtrThreadAsserts::Yes) noexcept
         : _impl(Krys::Move(impl))
 #if KRYS_ENV(DEV)
           ,
-          m_shouldEnableAssertions(shouldEnableAssertions == EnabledWeakPtrThreadAsserts::Yes)
+          _shouldEnableAssertions(shouldEnableAssertions == EnabledWeakPtrThreadAsserts::Yes)
 #endif
     {
       (void)shouldEnableAssertions;
     }
 
-    WeakRef(HashTableDeletedValueType) : _impl(HashTableDeletedValue)
-    {
-    }
-    WeakRef(HashTableEmptyValueType) : _impl(HashTableEmptyValue)
+    WeakRef(HashTableDeletedValueType) noexcept : _impl(HashTableDeletedValue)
     {
     }
 
-    bool IsHashTableDeletedValue() const
+    WeakRef(HashTableEmptyValueType) noexcept : _impl(HashTableEmptyValue)
+    {
+    }
+
+    bool IsHashTableDeletedValue() const noexcept
     {
       return _impl.IsHashTableDeletedValue();
     }
-    bool IsHashTableEmptyValue() const
+
+    bool IsHashTableEmptyValue() const noexcept
     {
       return _impl.IsHashTableEmptyValue();
     }
 
-    WeakPtrImpl &Impl() const
+    WeakPtrImpl &Impl() const noexcept
     {
       return _impl;
     }
-    Ref<WeakPtrImpl> releaseImpl()
+
+    Ref<WeakPtrImpl> ReleaseImpl() noexcept
     {
       return Krys::Move(_impl);
     }
 
-    T *ptrAllowingHashTableEmptyValue() const
+    RawPtr<T> PtrAllowingHashTableEmptyValue() const noexcept
     {
       static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value,
                     "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
 
-      return !_impl.IsHashTableEmptyValue() ? static_cast<T *>(_impl->template get<T>()) : nullptr;
+      return !_impl.IsHashTableEmptyValue() ? static_cast<RawPtr<T>>(_impl->template get<T>()) : nullptr;
     }
 
-    T *ptr() const
+    RawPtr<T> ptr() const noexcept
     {
       static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value,
                     "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
 
-      auto *ptr = static_cast<T *>(_impl->template get<T>());
+      auto *ptr = static_cast<RawPtr<T>>(_impl->template get<T>());
       assert(ptr);
       return ptr;
     }
 
-    T &get() const
+    T &get() const noexcept
     {
       static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value,
                     "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
 
-      auto *ptr = static_cast<T *>(_impl->template get<T>());
+      auto *ptr = static_cast<RawPtr<T>>(_impl->template get<T>());
       assert(ptr);
       return *ptr;
     }
 
-    operator T &() const
+    operator T &() const noexcept
     {
       return get();
     }
 
-    T *operator->() const
+    RawPtr<T> operator->() const noexcept
     {
       return ptr();
     }
 
-    EnabledWeakPtrThreadAsserts enableWeakPtrThreadingAssertions() const
+    EnabledWeakPtrThreadAsserts EnableThreadAsserts() const noexcept
     {
 #if KRYS_ENV(DEV)
-      return m_shouldEnableAssertions ? EnabledWeakPtrThreadAsserts::Yes : EnabledWeakPtrThreadAsserts::No;
+      return _shouldEnableAssertions ? EnabledWeakPtrThreadAsserts::Yes : EnabledWeakPtrThreadAsserts::No;
 #else
       return EnabledWeakPtrThreadAsserts::No;
 #endif
@@ -122,12 +126,12 @@ namespace Krys
   private:
     Ref<WeakPtrImpl> _impl;
 #if KRYS_ENV(DEV)
-    bool m_shouldEnableAssertions {true};
+    bool _shouldEnableAssertions {true};
 #endif
   };
 
   template <class T>
-  requires(!IsSmartPtr<T>::value && !std::is_pointer_v<T>)
+  requires(!IsSmartPtr<T>::value && !IsPointer<T>)
   WeakRef(const T &value, EnabledWeakPtrThreadAsserts = EnabledWeakPtrThreadAsserts::Yes)
     -> WeakRef<T, typename T::TWeakPtrImpl>;
 
@@ -154,38 +158,41 @@ namespace Krys
   using SingleThreadWeakRef = WeakRef<T, SingleThreadWeakPtrImpl>;
 
   template <typename ExpectedType, typename ArgType, typename WeakPtrImpl>
-  inline bool is(WeakRef<ArgType, WeakPtrImpl> &source)
+  inline bool Is(WeakRef<ArgType, WeakPtrImpl> &source) noexcept
   {
-    return is<ExpectedType>(source.get());
+    return Is<ExpectedType>(source.get());
   }
 
   template <typename ExpectedType, typename ArgType, typename WeakPtrImpl>
-  inline bool is(const WeakRef<ArgType, WeakPtrImpl> &source)
+  inline bool Is(const WeakRef<ArgType, WeakPtrImpl> &source) noexcept
   {
-    return is<ExpectedType>(source.get());
+    return Is<ExpectedType>(source.get());
   }
 
   template <typename Target, typename Source, typename WeakPtrImpl>
-  inline WeakRef<match_constness_t<Source, Target>, WeakPtrImpl> downcast(WeakRef<Source, WeakPtrImpl> source)
+  inline WeakRef<match_constness_t<Source, Target>, WeakPtrImpl>
+    Downcast(WeakRef<Source, WeakPtrImpl> source) noexcept
   {
-    static_assert(!std::same_as<Source, Target>, "Unnecessary cast to same type");
-    static_assert(std::derived_from<Target, Source>, "Should be a downcast");
-    assert(is<Target>(source));
+    static_assert(!SameType<Source, Target>, "Unnecessary cast to same type");
+    static_assert(DerivedFrom<Target, Source>, "Should be a downcast");
+    assert(Is<Target>(source));
     return WeakRef<match_constness_t<Source, Target>, WeakPtrImpl> {
-      unsafeRefDowncast<match_constness_t<Source, Target>>(source.releaseImpl()),
-      source.enableWeakPtrThreadingAssertions()};
+      UnsafeRefDowncast<match_constness_t<Source, Target>>(source.ReleaseImpl()),
+      source.EnableThreadAsserts()};
   }
 
   template <typename Target, typename Source, typename WeakPtrImpl>
   inline WeakPtr<match_constness_t<Source, Target>, WeakPtrImpl, RawPtrTraits<Target>>
-    dynamicDowncast(WeakRef<Source, WeakPtrImpl> source)
+    DynamicDowncast(WeakRef<Source, WeakPtrImpl> source) noexcept
   {
-    static_assert(!std::same_as<Source, Target>, "Unnecessary cast to same type");
-    static_assert(std::derived_from<Target, Source>, "Should be a downcast");
-    if (!is<Target>(source))
+    static_assert(!SameType<Source, Target>, "Unnecessary cast to same type");
+    static_assert(DerivedFrom<Target, Source>, "Should be a downcast");
+    if (!Is<Target>(source))
+    {
       return nullptr;
+    }
     return WeakPtr<match_constness_t<Source, Target>, WeakPtrImpl, RawPtrTraits<Target>> {
-      unsafeRefDowncast<match_constness_t<Source, Target>>(source.releaseImpl()),
-      source.enableWeakPtrThreadingAssertions()};
+      UnsafeRefDowncast<match_constness_t<Source, Target>>(source.ReleaseImpl()),
+      source.EnableThreadAsserts()};
   }
 }

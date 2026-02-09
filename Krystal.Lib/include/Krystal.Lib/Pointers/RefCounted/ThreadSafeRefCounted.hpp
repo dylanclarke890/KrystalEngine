@@ -14,45 +14,45 @@ namespace Krys
     using Debugger = RefCountDebugger<uint32>;
 
   public:
-    void AddRef() const
+    void AddRef() const noexcept
     {
-      _refCountDebugger.WillAddRef(m_refCount);
-      ++m_refCount;
+      _refCountDebugger.WillAddRef(_refCount);
+      ++_refCount;
     }
 
-    bool hasOneRef() const
+    bool HasOneRef() const noexcept
     {
-      return m_refCount == 1;
+      return _refCount == 1;
     }
 
-    uint32 GetRefCount() const
+    uint32 GetRefCount() const noexcept
     {
-      return m_refCount;
+      return _refCount;
     }
 
-    Debugger &refCountDebugger()
+    Debugger &GetRefCountDebugger() noexcept
     {
       return _refCountDebugger;
     }
 
   protected:
-    ThreadSafeRefCountedBase() = default;
+    constexpr ThreadSafeRefCountedBase() noexcept = default;
 
-    ~ThreadSafeRefCountedBase()
+    ~ThreadSafeRefCountedBase() noexcept
     {
-      _refCountDebugger.WillDestroy(m_refCount);
-      assert(m_refCount == 1);
+      _refCountDebugger.WillDestroy(_refCount);
+      assert(_refCount == 1);
     }
 
     // Returns true if the pointer should be freed.
-    bool SubRefBase() const
+    bool SubRefBase() const noexcept
     {
-      _refCountDebugger.WillSubRef(m_refCount);
+      _refCountDebugger.WillSubRef(_refCount);
 
-      if (!--m_refCount) [[unlikely]]
+      if (!--_refCount) KRYS_UNLIKELY
       {
         _refCountDebugger.MarkDeletionHasBegun();
-        m_refCount = 1;
+        _refCount = 1;
         return true;
       }
 
@@ -60,7 +60,7 @@ namespace Krys
     }
 
   private:
-    mutable std::atomic<uint32_t> m_refCount {1};
+    mutable std::atomic<uint32_t> _refCount {1};
     KRYS_NO_UNIQUE_ADDRESS Debugger _refCountDebugger;
   };
 
@@ -68,16 +68,18 @@ namespace Krys
   class ThreadSafeRefCounted : public ThreadSafeRefCountedBase
   {
   public:
-    void SubRef() const
+    void SubRef() const noexcept
     {
       if (!SubRefBase())
+      {
         return;
+      }
 
       delete static_cast<const T *>(this);
     }
 
   protected:
-    ThreadSafeRefCounted() = default;
-    ~ThreadSafeRefCounted() = default;
+    constexpr ThreadSafeRefCounted() noexcept = default;
+    constexpr ~ThreadSafeRefCounted() noexcept = default;
   };
 }

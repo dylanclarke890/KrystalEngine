@@ -3,6 +3,7 @@
 #include "Krystal.Lib/Atomics.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
+#include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/RefPtr.hpp"
 #include "Krystal.Lib/Pointers/TaggedPtr.hpp"
 #include <mutex>
@@ -11,28 +12,37 @@ namespace Krys
 {
   template <typename T, typename = NoTaggingTraits<T>>
   class ThreadSafeWeakPtr;
+
   template <typename>
   class ThreadSafeWeakHashSet;
+
   template <typename>
   class ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr;
 
   class ThreadSafeWeakPtrControlBlock : public NonCopyable<ThreadSafeWeakPtrControlBlock>
   {
+  private:
+    mutable std::mutex _lock;
+    mutable uint32 _strongCount {1};
+    mutable uint32 _weakCount {0};
+    mutable void *_object {nullptr};
+
   public:
-    ThreadSafeWeakPtrControlBlock *weakRef()
+    RawPtr<ThreadSafeWeakPtrControlBlock> AddRefWeak() noexcept
     {
-      std::scoped_lock locker {m_lock};
-      ++m_weakReferenceCount;
+      std::scoped_lock locker {_lock};
+      ++_weakCount;
       return this;
     }
 
-    void weakDeref()
+    void SubRefWeak() noexcept
     {
       bool shouldDeleteControlBlock {false};
       {
-        std::scoped_lock locker {m_lock};
-        assert(m_weakReferenceCount);
-        if (!--m_weakReferenceCount && !m_strongReferenceCount)
+        std::scoped_lock locker {_lock};
+
+        assert(_weakCount);
+        if (!--_weakCount && !_strongCount)
         {
           shouldDeleteControlBlock = true;
         }
@@ -44,25 +54,26 @@ namespace Krys
       }
     }
 
-    void strongRef() const
+    void AddRefStrong() const noexcept
     {
-      std::scoped_lock locker {m_lock};
-      assert(m_object);
-      ++m_strongReferenceCount;
+      std::scoped_lock locker {_lock};
+      assert(_object);
+      ++_strongCount;
     }
 
     template <typename T>
-    void strongDeref() const
+    void SubRefStrong() const noexcept
     {
-      T *object;
+      RawPtr<T> object;
       {
-        std::scoped_lock locker {m_lock};
-        assert(m_object);
-        if (--m_strongReferenceCount) [[likely]]
+        std::scoped_lock locker {_lock};
+        assert(_object);
+        if (--_strongCount) KRYS_LIKELY
         {
           return;
         }
-        object = static_cast<T *>(std::exchange(m_object, nullptr));
+        object = static_cast<T *>(std::exchange(_object, nullptr));
+
         // We need to take a weak ref so `this` survives until the `delete object` below.
         // This comes up when destructors try to eagerly remove themselves from WeakHashSets.
         // e.g.
@@ -70,7 +81,7 @@ namespace Krys
         // if m_weakSet has the last reference to the ControlBlock then we could end up doing
         // an amortized clean up, which removes the ControlBlock and destroys it. Then when we
         // check m_weakSet's backing table after the cleanup we UAF the ControlBlock.
-        m_weakReferenceCount++;
+        _weakCount++;
       }
 
       delete static_cast<const T *>(object);
@@ -78,8 +89,8 @@ namespace Krys
       bool hasOtherWeakRefs;
       {
         // We retained ourselves above.
-        std::scoped_lock locker {m_lock};
-        hasOtherWeakRefs = --m_weakReferenceCount;
+        std::scoped_lock locker {_lock};
+        hasOtherWeakRefs = --_weakCount;
         // release the lock here so we don't do it in Locker's destuctor after we've already called delete.
       }
 
@@ -90,93 +101,94 @@ namespace Krys
     }
 
     template <typename U>
-    RefPtr<U> makeStrongReferenceIfPossible(const U *maybeInteriorPointer) const
+    KRYS_NODISCARD RefPtr<U> TryCreateStrongReference(const RawPtr<U> maybeInteriorPointer) const noexcept
     {
-      std::scoped_lock locker {m_lock};
-      // N.B. We don't just return m_object here since a ThreadSafeWeakPtr could be calling with a pointer to
+      std::scoped_lock locker {_lock};
+      // N.B. We don't just return _object here since a ThreadSafeWeakPtr could be calling with a pointer to
       // some interior pointer when there is multiple inheritance.
       // Consider:
       // struct Cat : public ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr<Cat>;
-      // struct Dog { virtual ThreadSafeWeakPtrControlBlock& controlBlock() const = 0; };
-      // struct CatDog : public Cat, public Dog {
-      //     ThreadSafeWeakPtrControlBlock& controlBlock() const { return Cat::controlBlock(); }
-      // };
-      //
+      // struct Dog { virtual ThreadSafeWeakPtrControlBlock& ControlBlock() const = 0; };
+      // struct CatDog : public Cat, public Dog
+      // {  ThreadSafeWeakPtrControlBlock& ControlBlock() const { return Cat::ControlBlock(); } };
       // If we have a ThreadSafeWeakPtr<Dog> from a CatDog then we want to return maybeInteriorPointer's Dog*
-      // and not m_object's CatDog* pointer.
-      if (m_object)
+      // and not _object's CatDog* pointer.
+      if (_object)
       {
-        // Calling the RefPtr constructor would call strongRef() and deadlock.
-        ++m_strongReferenceCount;
-        return AdoptRef(const_cast<U *>(maybeInteriorPointer));
+        // Calling the RefPtr constructor would call AddRefStrong() and deadlock.
+        ++_strongCount;
+        return AdoptRef(const_cast<RawPtr<U>>(maybeInteriorPointer));
       }
       return nullptr;
     }
 
     // These should really only be used for debugging and shouldn't be used to guard any checks in production,
     // unless you really know what you're doing. This is because they're prone to time of check time of use
-    // bugs. Consider: if (!objectHasStartedDeletion())
-    //     strongRef();
-    // Between objectHasStartedDeletion() and strongRef() another thread holding the sole remaining reference
-    // to the underlying object could release it's reference and start deletion.
-    bool objectHasStartedDeletion() const
+    // bugs. Consider: if (!ObjectHasStartedDeletion()) AddRefStrong();
+    // Between ObjectHasStartedDeletion() and AddRefStrong() another thread holding the sole remaining
+    // reference to the underlying object could release it's reference and start deletion.
+    KRYS_NODISCARD bool ObjectHasStartedDeletion() const noexcept
     {
-      std::scoped_lock locker {m_lock};
-      return !m_object;
-    }
-    uint32_t weakRefCount() const
-    {
-      std::scoped_lock locker {m_lock};
-      return m_weakReferenceCount;
+      std::scoped_lock locker {_lock};
+      return !_object;
     }
 
-    uint32_t GetRefCount() const
+    KRYS_NODISCARD uint32 GetWeakRefCount() const noexcept
     {
-      std::scoped_lock locker {m_lock};
-      return m_strongReferenceCount;
+      std::scoped_lock locker {_lock};
+      return _weakCount;
     }
 
-    bool hasOneRef() const
+    KRYS_NODISCARD uint32 GetRefCount() const noexcept
     {
-      std::scoped_lock locker {m_lock};
-      return m_strongReferenceCount == 1;
+      std::scoped_lock locker {_lock};
+      return _strongCount;
+    }
+
+    KRYS_NODISCARD bool HasOneRef() const noexcept
+    {
+      std::scoped_lock locker {_lock};
+      return _strongCount == 1;
     }
 
   private:
     template <typename>
     friend class ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr;
+
     template <typename T>
-    explicit ThreadSafeWeakPtrControlBlock(const ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr<T> *object)
-        : m_object(const_cast<T *>(static_cast<const T *>(object)))
+    explicit ThreadSafeWeakPtrControlBlock(
+      const ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr<T> *object) noexcept
+        : _object(const_cast<RawPtr<T>>(static_cast<const RawPtr<T>>(object)))
     {
     }
 
-    void setStrongReferenceCountDuringInitialization(uint32_t count)
+    void SetStrongReferenceCountDuringInitialization(uint32 count) noexcept
     {
-      m_strongReferenceCount = count;
+      _strongCount = count;
     }
-
-    mutable std::mutex m_lock;
-    mutable uint32_t m_strongReferenceCount {1};
-    mutable uint32_t m_weakReferenceCount {0};
-    mutable void *m_object {nullptr};
   };
 
   struct ThreadSafeWeakPtrControlBlockRefDerefTraits
   {
-    static KRYS_ALWAYS_INLINE ThreadSafeWeakPtrControlBlock *refIfNotNull(ThreadSafeWeakPtrControlBlock *ptr)
+    static KRYS_ALWAYS_INLINE RawPtr<ThreadSafeWeakPtrControlBlock>
+      AddRef(RawPtr<ThreadSafeWeakPtrControlBlock> ptr) noexcept
     {
-      if (ptr) [[likely]]
-        return ptr->weakRef();
+      if (ptr) KRYS_LIKELY
+      {
+        return ptr->AddRefWeak();
+      }
       return nullptr;
     }
 
-    static KRYS_ALWAYS_INLINE void derefIfNotNull(ThreadSafeWeakPtrControlBlock *ptr)
+    static KRYS_ALWAYS_INLINE void SubRef(ThreadSafeWeakPtrControlBlock *ptr) noexcept
     {
-      if (ptr) [[likely]]
-        ptr->weakDeref();
+      if (ptr) KRYS_LIKELY
+      {
+        ptr->SubRefWeak();
+      }
     }
   };
+
   using ControlBlockRefPtr =
     RefPtr<ThreadSafeWeakPtrControlBlock, RawPtrTraits<ThreadSafeWeakPtrControlBlock>,
            ThreadSafeWeakPtrControlBlockRefDerefTraits>;
@@ -191,7 +203,7 @@ namespace Krys
     static constexpr uintptr_t destructionStartedFlag = 1ull << (sizeof(uintptr_t) * CHAR_BIT - 1);
     static constexpr uintptr_t refIncrement = 2;
 
-    void AddRef() const
+    void AddRef() const noexcept
     {
       bool didRefStrongOnly = m_bits.transaction(
         [&](uintptr_t &bits)
@@ -208,10 +220,10 @@ namespace Krys
       if (didRefStrongOnly)
         return;
 
-      std::bit_cast<ThreadSafeWeakPtrControlBlock *>(m_bits.loadRelaxed())->strongRef();
+      std::bit_cast<ThreadSafeWeakPtrControlBlock *>(m_bits.loadRelaxed())->AddRefStrong();
     }
 
-    void SubRef() const
+    void SubRef() const noexcept
     {
       uintptr_t newStrongOnlyRefCount = 0;
       bool didDerefStrongOnly = m_bits.transaction(
@@ -238,10 +250,10 @@ namespace Krys
       }
 
       std::bit_cast<ThreadSafeWeakPtrControlBlock *>(m_bits.loadRelaxed())
-        ->template strongDeref<T, destructionThread>();
+        ->template SubRefStrong<T, destructionThread>();
     }
 
-    uint32 GetRefCount() const
+    uint32 GetRefCount() const noexcept
     {
       uint32 bits = m_bits.loadRelaxed();
       if (isStrongOnly(bits))
@@ -256,21 +268,21 @@ namespace Krys
       return std::bit_cast<ThreadSafeWeakPtrControlBlock *>(bits)->GetRefCount();
     }
 
-    bool hasOneRef() const
+    bool hasOneRef() const noexcept
     {
       return GetRefCount() == 1;
     }
 
     // Ideally this would have been private but AbstractRefCounted subclasses need to be able to access this
     // function to provide its result to ThreadSafeWeakHashSet.
-    uint32_t weakRefCount() const
+    uint32_t weakRefCount() const noexcept
     {
       return !isStrongOnly(m_bits.loadRelaxed()) ? controlBlock().weakRefCount() : 0;
     }
 
   protected:
-    ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr() = default;
-    ThreadSafeWeakPtrControlBlock &controlBlock() const
+    ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr() noexcept = default;
+    ThreadSafeWeakPtrControlBlock &controlBlock() const noexcept
     {
       // If we ever decided there was a lot of contention here we could have some lock bits in m_bits but
       // that seems unlikely since this is a one-way street. Once we add a controlBlock we don't go back
@@ -293,7 +305,7 @@ namespace Krys
           assert(!(bits & destructionStartedFlag));
           // Technically, this bit-and isn't needed but it's included for clarity since the compiler will
           // elide it anyway.
-          controlBlock->setStrongReferenceCountDuringInitialization((bits & ~strongOnlyFlag) / refIncrement);
+          controlBlock->SetStrongReferenceCountDuringInitialization((bits & ~strongOnlyFlag) / refIncrement);
           bits = std::bit_cast<uintptr_t>(controlBlock);
           assert(!isStrongOnly(bits));
           return true;
@@ -433,7 +445,7 @@ namespace Krys
     RefPtr<T> get() const
     {
       return m_controlBlock
-               ? m_controlBlock->template makeStrongReferenceIfPossible<T>(m_objectOfCorrectType.ptr())
+               ? m_controlBlock->template TryCreateStrongReference<T>(m_objectOfCorrectType.ptr())
                : nullptr;
     }
 
@@ -463,7 +475,7 @@ namespace Krys
 
     TaggedPtr<T, TaggingTraits> m_objectOfCorrectType;
     // FIXME: Use CompactRefPtrTuple to reduce sizeof(ThreadSafeWeakPtr) by storing just an offset
-    // from ThreadSafeWeakPtrControlBlock::m_object and don't support structs larger than 65535.
+    // from ThreadSafeWeakPtrControlBlock::_object and don't support structs larger than 65535.
     // https://bugs.webkit.org/show_bug.cgi?id=283929
     ControlBlockRefPtr m_controlBlock;
   };
@@ -485,7 +497,7 @@ namespace Krys
 
     Status status() const
     {
-      return m_weak.tag();
+      return _weak.tag();
     }
     bool isWeak() const
     {
@@ -500,16 +512,16 @@ namespace Krys
 
     RefPtr<T> get() const
     {
-      return isWeak() ? m_weak.get() : m_strong;
+      return isWeak() ? _weak.get() : _strong;
     }
 
     // NB. This function is not atomic so it's not safe to call get() while this transition is happening.
     RefPtr<T> convertToWeak()
     {
       assert(isStrong());
-      RefPtr<T> strong = Krys::Move(m_strong);
-      m_weak = strong;
-      m_weak.setTag(Status::Weak);
+      RefPtr<T> strong = Krys::Move(_strong);
+      _weak = strong;
+      _weak.setTag(Status::Weak);
       assert(isWeak());
       return strong;
     }
@@ -517,12 +529,12 @@ namespace Krys
     T *tryConvertToStrong()
     {
       assert(isWeak());
-      RefPtr<T> strong = m_weak.get();
-      m_weak.setTag(Status::Strong);
-      m_weak = nullptr;
-      m_strong = Krys::Move(strong);
+      RefPtr<T> strong = _weak.get();
+      _weak.setTag(Status::Strong);
+      _weak = nullptr;
+      _strong = Krys::Move(strong);
       assert(isStrong());
-      return m_strong.get();
+      return _strong.get();
     }
 
     ThreadSafeWeakOrStrongPtr &operator=(const ThreadSafeWeakOrStrongPtr &other)
@@ -618,7 +630,7 @@ namespace Krys
     ThreadSafeWeakOrStrongPtr(const Ref<U> &strongReference)
     {
       assert(isStrong());
-      m_strong = strongReference;
+      _strong = strongReference;
       assert(isStrong());
     }
 
@@ -626,7 +638,7 @@ namespace Krys
     ThreadSafeWeakOrStrongPtr(const RefPtr<U> &strongReference)
     {
       assert(isStrong());
-      m_strong = strongReference;
+      _strong = strongReference;
       assert(isStrong());
     }
 
@@ -634,7 +646,7 @@ namespace Krys
     ThreadSafeWeakOrStrongPtr(Ref<U> &&strongReference)
     {
       assert(isStrong());
-      m_strong = Krys::Move(strongReference);
+      _strong = Krys::Move(strongReference);
       assert(isStrong());
     }
 
@@ -642,16 +654,16 @@ namespace Krys
     ThreadSafeWeakOrStrongPtr(RefPtr<U> &&strongReference)
     {
       assert(isStrong());
-      m_strong = Krys::Move(strongReference);
+      _strong = Krys::Move(strongReference);
       assert(isStrong());
     }
 
     ~ThreadSafeWeakOrStrongPtr()
     {
       if (isStrong())
-        m_strong.~RefPtr<T>();
+        _strong.~RefPtr<T>();
       else
-        m_weak.~ThreadSafeWeakPtr<T, EnumTaggingTraits<T, Status>>();
+        _weak.~ThreadSafeWeakPtr<T, EnumTaggingTraits<T, Status>>();
     }
 
     template <typename U>
@@ -661,28 +673,28 @@ namespace Krys
       {
         if (other.isStrong())
         {
-          std::swap(m_strong, other.m_strong);
+          std::swap(_strong, other._strong);
           return;
         }
-        auto weak = std::exchange(other.m_weak, ThreadSafeWeakPtr<U, EnumTaggingTraits<U, Status>> {});
+        auto weak = std::exchange(other._weak, ThreadSafeWeakPtr<U, EnumTaggingTraits<U, Status>> {});
         assert(other.isStrong());
-        other.m_strong = std::exchange(m_strong, nullptr);
-        m_weak = Krys::Move(weak);
+        other._strong = std::exchange(_strong, nullptr);
+        _weak = Krys::Move(weak);
         assert(isWeak());
         return;
       }
 
       if (other.isWeak())
       {
-        std::swap(m_weak, other.m_weak);
+        std::swap(_weak, other._weak);
         return;
       }
 
-      auto strong = std::exchange(other.m_strong, nullptr);
-      other.m_weak = std::exchange(m_weak, ThreadSafeWeakPtr<T, EnumTaggingTraits<T, Status>> {});
+      auto strong = std::exchange(other._strong, nullptr);
+      other._weak = std::exchange(_weak, ThreadSafeWeakPtr<T, EnumTaggingTraits<T, Status>> {});
       assert(other.isWeak());
       assert(isStrong());
-      m_strong = Krys::Move(strong);
+      _strong = Krys::Move(strong);
     }
 
   private:
@@ -692,12 +704,12 @@ namespace Krys
       assert(isStrong());
       if (other.isWeak())
       {
-        m_weak = other.m_weak;
+        _weak = other._weak;
         assert(isWeak());
       }
       else
       {
-        m_strong = other.m_strong;
+        _strong = other._strong;
         assert(isStrong());
       }
     }
@@ -708,13 +720,13 @@ namespace Krys
       assert(isStrong());
       if (other.isWeak())
       {
-        m_weak = std::exchange(other.m_weak, ThreadSafeWeakPtr<U, EnumTaggingTraits<U, Status>> {});
+        _weak = std::exchange(other._weak, ThreadSafeWeakPtr<U, EnumTaggingTraits<U, Status>> {});
         assert(isWeak());
         assert(other.isStrong());
       }
       else
       {
-        m_strong = std::exchange(other.m_strong, nullptr);
+        _strong = std::exchange(other._strong, nullptr);
         assert(isStrong());
         assert(other.isStrong());
       }
@@ -722,8 +734,8 @@ namespace Krys
 
     union
     {
-      ThreadSafeWeakPtr<T, EnumTaggingTraits<T, Status>> m_weak {};
-      RefPtr<T> m_strong;
+      ThreadSafeWeakPtr<T, EnumTaggingTraits<T, Status>> _weak {};
+      RefPtr<T> _strong;
     };
   };
 }

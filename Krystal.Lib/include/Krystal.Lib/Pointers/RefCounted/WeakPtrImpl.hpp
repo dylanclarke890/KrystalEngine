@@ -4,43 +4,46 @@
 #include "Krystal.Lib/Detection/Environment.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/Pointers/GetPtr.hpp"
+#include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/ThreadSafeRefCounted.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys
 {
   template <typename Derived>
   class WeakPtrImplBase : public ThreadSafeRefCounted<Derived>, public NonCopyable<WeakPtrImplBase<Derived>>
   {
+  private:
+    RawPtr<void> _ptr;
+
   public:
     template <typename T>
-    typename T::TWeakValue *get()
+    explicit WeakPtrImplBase(RawPtr<T> ptr) noexcept : _ptr(static_cast<RawPtr<typename T::TWeakValue>>(ptr))
     {
-      return static_cast<typename T::TWeakValue *>(_ptr);
     }
 
-    explicit operator bool() const
+    template <typename T>
+    RawPtr<typename T::TWeakValue> get() noexcept
     {
-      return _ptr;
+      return static_cast<RawPtr<typename T::TWeakValue>>(_ptr);
     }
-    void clear()
+
+    void Clear() noexcept
     {
       _ptr = nullptr;
     }
 
-    template <typename T>
-    explicit WeakPtrImplBase(T *ptr) : _ptr(static_cast<typename T::TWeakValue *>(ptr))
+    explicit operator bool() const noexcept
     {
+      return _ptr;
     }
-
-  private:
-    void *_ptr;
   };
 
   class DefaultWeakPtrImpl final : public WeakPtrImplBase<DefaultWeakPtrImpl>
   {
   public:
     template <typename T>
-    explicit DefaultWeakPtrImpl(T *ptr) : WeakPtrImplBase<DefaultWeakPtrImpl>(ptr)
+    explicit DefaultWeakPtrImpl(RawPtr<T> ptr) noexcept : WeakPtrImplBase<DefaultWeakPtrImpl>(ptr)
     {
     }
   };
@@ -48,58 +51,61 @@ namespace Krys
   template <typename Derived>
   class WeakPtrImplBaseSingleThread : public NonCopyable<WeakPtrImplBaseSingleThread<Derived>>
   {
+  private:
+    mutable uint32 _refCount {1};
+    RawPtr<void> _ptr;
+
   public:
     template <typename T>
-    typename T::TWeakValue *get()
+    explicit WeakPtrImplBaseSingleThread(RawPtr<T> ptr) noexcept
+        : _ptr(static_cast<RawPtr<typename T::TWeakValue>>(ptr))
     {
-      return static_cast<typename T::TWeakValue *>(_ptr);
+    }
+
+    void AddRef() const noexcept
+    {
+      ++_refCount;
+    }
+
+    void SubRef() const noexcept
+    {
+      uint32 tempRefCount = _refCount - 1;
+      if (!tempRefCount)
+      {
+        delete const_cast<Derived *>(static_cast<const Derived *>(this));
+        return;
+      }
+      _refCount = tempRefCount;
+    }
+
+    uint32_t GetRefCount() const noexcept
+    {
+      return _refCount;
+    }
+
+    template <typename T>
+    RawPtr<typename T::TWeakValue> get()
+    {
+      return static_cast<RawPtr<typename T::TWeakValue>>(_ptr);
+    }
+
+    void Clear()
+    {
+      _ptr = nullptr;
     }
 
     explicit operator bool() const
     {
       return _ptr;
     }
-    void clear()
-    {
-      _ptr = nullptr;
-    }
-
-    template <typename T>
-    explicit WeakPtrImplBaseSingleThread(T *ptr) : _ptr(static_cast<typename T::TWeakValue *>(ptr))
-    {
-    }
-
-    uint32_t GetRefCount() const
-    {
-      return m_refCount;
-    }
-    
-    void AddRef() const
-    {
-      ++m_refCount;
-    }
-
-    void SubRef() const
-    {
-      uint32_t tempRefCount = m_refCount - 1;
-      if (!tempRefCount)
-      {
-        delete const_cast<Derived *>(static_cast<const Derived *>(this));
-        return;
-      }
-      m_refCount = tempRefCount;
-    }
-
-  private:
-    mutable uint32_t m_refCount {1};
-    void *_ptr;
   };
 
   class SingleThreadWeakPtrImpl final : public WeakPtrImplBaseSingleThread<SingleThreadWeakPtrImpl>
   {
   public:
     template <typename T>
-    explicit SingleThreadWeakPtrImpl(T *ptr) : WeakPtrImplBaseSingleThread<SingleThreadWeakPtrImpl>(ptr)
+    explicit SingleThreadWeakPtrImpl(RawPtr<T> ptr) noexcept
+        : WeakPtrImplBaseSingleThread<SingleThreadWeakPtrImpl>(ptr)
     {
     }
   };

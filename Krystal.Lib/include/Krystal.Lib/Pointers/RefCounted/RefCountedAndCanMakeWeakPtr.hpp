@@ -9,13 +9,13 @@ namespace Krys
   class RefCountedAndCanMakeWeakPtr : public CanMakeWeakPtr<T>, public RefCounted<T>
   {
   public:
-    void ref() const
+    void AddRef() const noexcept
     {
-      RefCounted<T>::ref();
+      RefCounted<T>::AddRef();
     }
-    void deref() const
+    void SubRef() const noexcept
     {
-      RefCounted<T>::deref();
+      RefCounted<T>::SubRef();
     }
   };
 }

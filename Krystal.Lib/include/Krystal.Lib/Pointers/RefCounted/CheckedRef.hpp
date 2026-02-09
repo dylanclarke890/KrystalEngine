@@ -94,13 +94,13 @@ namespace Krys
       return nullptr;
     }
 
-    KRYS_NODISCARD const RawPtr<T> ptrAllowingHashTableEmptyValue() const noexcept
+    KRYS_NODISCARD const RawPtr<T> PtrAllowingHashTableEmptyValue() const noexcept
     {
       assert(_ptr || IsHashTableEmptyValue());
       return PtrTraits::unwrap(_ptr);
     }
 
-    KRYS_NODISCARD RawPtr<T> ptrAllowingHashTableEmptyValue() noexcept
+    KRYS_NODISCARD RawPtr<T> PtrAllowingHashTableEmptyValue() noexcept
     {
       assert(_ptr || IsHashTableEmptyValue());
       return PtrTraits::unwrap(_ptr);

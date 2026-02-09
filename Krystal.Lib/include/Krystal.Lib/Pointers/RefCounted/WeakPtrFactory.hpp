@@ -41,7 +41,7 @@ namespace Krys
     {
       if (_impl)
       {
-        _impl->clear();
+        _impl->Clear();
       }
     }
 
