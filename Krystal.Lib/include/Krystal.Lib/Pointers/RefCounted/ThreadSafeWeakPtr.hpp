@@ -197,291 +197,316 @@ namespace Krys
   class ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr
       : public NonCopyable<ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr>
   {
-  public:
     static_assert(alignof(ThreadSafeWeakPtrControlBlock) >= 2);
-    static constexpr uintptr_t strongOnlyFlag = 1;
-    static constexpr uintptr_t destructionStartedFlag = 1ull << (sizeof(uintptr_t) * CHAR_BIT - 1);
-    static constexpr uintptr_t refIncrement = 2;
 
+    template <typename, typename>
+    friend class ThreadSafeWeakPtr;
+
+    template <typename>
+    friend class ThreadSafeWeakHashSet;
+
+  public:
+    static constexpr uintptr_t StrongOnlyFlag = 1;
+    static constexpr uintptr_t DestructionStartedFlag = 1ull << (sizeof(uintptr_t) * CHAR_BIT - 1);
+    static constexpr uintptr_t RefIncrement = 2;
+
+  private:
+    mutable Atomic<uintptr_t> _bits {RefIncrement + StrongOnlyFlag};
+
+  public:
     void AddRef() const noexcept
     {
-      bool didRefStrongOnly = m_bits.transaction(
+      bool didRefStrongOnly = _bits.transaction(
         [&](uintptr_t &bits)
         {
-          if (!isStrongOnly(bits))
+          if (!IsStrongOnly(bits))
+          {
             return false;
-          // FIXME: Add support for ref()/deref() during destruction like we support for other RefCounted
+          }
+          // FIXME: Add support for AddRef()/SubRef() during destruction like we support for other RefCounted
           // types.
-          assert(!(bits & destructionStartedFlag));
-          bits += refIncrement;
+          assert(!(bits & DestructionStartedFlag));
+          bits += RefIncrement;
           return true;
         },
         std::memory_order_relaxed);
-      if (didRefStrongOnly)
-        return;
 
-      std::bit_cast<ThreadSafeWeakPtrControlBlock *>(m_bits.loadRelaxed())->AddRefStrong();
+      if (didRefStrongOnly)
+      {
+        return;
+      }
+
+      std::bit_cast<ThreadSafeWeakPtrControlBlock *>(_bits.loadRelaxed())->AddRefStrong();
     }
 
     void SubRef() const noexcept
     {
       uintptr_t newStrongOnlyRefCount = 0;
-      bool didDerefStrongOnly = m_bits.transaction(
+
+      bool didDerefStrongOnly = _bits.transaction(
         [&](uintptr_t &bits)
         {
-          if (!isStrongOnly(bits))
+          if (!IsStrongOnly(bits))
+          {
             return false;
+          }
+
           // FIXME: Add support for ref()/deref() during destruction like we support for other RefCounted
           // types.
-          assert(!(bits & destructionStartedFlag));
-          bits -= refIncrement;
+          assert(!(bits & DestructionStartedFlag));
+          bits -= RefIncrement;
           newStrongOnlyRefCount = bits;
           return true;
         },
         std::memory_order_relaxed);
+
       if (didDerefStrongOnly)
       {
-        if (newStrongOnlyRefCount == strongOnlyFlag)
+        if (newStrongOnlyRefCount == StrongOnlyFlag)
         {
-          assert(m_bits.exchangeOr(destructionStartedFlag) == newStrongOnlyRefCount);
+          assert(_bits.exchangeOr(DestructionStartedFlag) == newStrongOnlyRefCount);
           delete static_cast<const T *>(this);
         }
         return;
       }
 
-      std::bit_cast<ThreadSafeWeakPtrControlBlock *>(m_bits.loadRelaxed())
-        ->template SubRefStrong<T, destructionThread>();
+      std::bit_cast<ThreadSafeWeakPtrControlBlock *>(_bits.loadRelaxed())->template SubRefStrong<T>();
     }
 
     uint32 GetRefCount() const noexcept
     {
-      uint32 bits = m_bits.loadRelaxed();
-      if (isStrongOnly(bits))
+      uint32 bits = _bits.loadRelaxed();
+      if (IsStrongOnly(bits))
       {
-        // FIXME: Add support for ref()/deref() during destruction like we support for other RefCounted types.
-        assert(!(bits & destructionStartedFlag));
+        // FIXME: Add support for AddRef()/SubRef() during destruction like we support for other RefCounted
+        // types.
+        assert(!(bits & DestructionStartedFlag));
         // Technically, this bit-and isn't needed but it's included for clarity since the compiler will elide
         // it anyway.
-        return (bits & ~strongOnlyFlag) / refIncrement;
+        return (bits & ~StrongOnlyFlag) / RefIncrement;
       }
 
       return std::bit_cast<ThreadSafeWeakPtrControlBlock *>(bits)->GetRefCount();
     }
 
-    bool hasOneRef() const noexcept
+    bool HasOneRef() const noexcept
     {
       return GetRefCount() == 1;
     }
 
     // Ideally this would have been private but AbstractRefCounted subclasses need to be able to access this
     // function to provide its result to ThreadSafeWeakHashSet.
-    uint32_t weakRefCount() const noexcept
+    uint32 GetWeakRefCount() const noexcept
     {
-      return !isStrongOnly(m_bits.loadRelaxed()) ? controlBlock().weakRefCount() : 0;
+      return !IsStrongOnly(_bits.loadRelaxed()) ? ControlBlock().weakRefCount() : 0;
     }
 
   protected:
     ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr() noexcept = default;
-    ThreadSafeWeakPtrControlBlock &controlBlock() const noexcept
+
+    ThreadSafeWeakPtrControlBlock &ControlBlock() const noexcept
     {
-      // If we ever decided there was a lot of contention here we could have some lock bits in m_bits but
-      // that seems unlikely since this is a one-way street. Once we add a controlBlock we don't go back
+      // If we ever decided there was a lot of contention here we could have some lock bits in _bits but
+      // that seems unlikely since this is a one-way street. Once we add a ControlBlock we don't go back
       // to strong only.
-      uintptr_t bits = m_bits.loadRelaxed();
-      if (!isStrongOnly(bits)) [[likely]]
+      uintptr_t bits = _bits.loadRelaxed();
+      if (!IsStrongOnly(bits)) [[likely]]
         return *std::bit_cast<ThreadSafeWeakPtrControlBlock *>(bits);
 
       auto *controlBlock = new ThreadSafeWeakPtrControlBlock(this);
 
-      bool didSetControlBlock = m_bits.transaction(
+      bool didSetControlBlock = _bits.transaction(
         [&](uintptr_t &bits)
         {
-          if (!isStrongOnly(bits))
+          if (!IsStrongOnly(bits))
+          {
             return false;
+          }
 
           // It doesn't really make sense to create a ThreadSafeWeakPtr during destruction since the
-          // controlBlock has to view the object as dead. Otherwise a ThreadSafeWeakPtrFactory on an unrelated
+          // ControlBlock has to view the object as dead. Otherwise a ThreadSafeWeakPtrFactory on an unrelated
           // thread could vend out a partially destroyed object.
-          assert(!(bits & destructionStartedFlag));
+          assert(!(bits & DestructionStartedFlag));
           // Technically, this bit-and isn't needed but it's included for clarity since the compiler will
           // elide it anyway.
-          controlBlock->SetStrongReferenceCountDuringInitialization((bits & ~strongOnlyFlag) / refIncrement);
+          controlBlock->SetStrongReferenceCountDuringInitialization((bits & ~StrongOnlyFlag) / RefIncrement);
           bits = std::bit_cast<uintptr_t>(controlBlock);
-          assert(!isStrongOnly(bits));
+          assert(!IsStrongOnly(bits));
           return true;
         },
         std::memory_order_release); // We want memory_order_release here to make sure other threads see the
                                     // right ref count / object.
       if (didSetControlBlock)
+      {
         return *controlBlock;
+      }
 
       delete controlBlock;
-      return *std::bit_cast<ThreadSafeWeakPtrControlBlock *>(m_bits.loadRelaxed());
+      return *std::bit_cast<ThreadSafeWeakPtrControlBlock *>(_bits.loadRelaxed());
     }
 
   private:
-    static bool isStrongOnly(uintptr_t bits)
+    static bool IsStrongOnly(uintptr_t bits)
     {
-      return bits & strongOnlyFlag;
+      return bits & StrongOnlyFlag;
     }
-    template <typename, typename>
-    friend class ThreadSafeWeakPtr;
-    template <typename>
-    friend class ThreadSafeWeakHashSet;
-
-    mutable Atomic<uintptr_t> m_bits {refIncrement + strongOnlyFlag};
   };
 
   template <typename T, typename TaggingTraits /* = NoTaggingTraits<T> */>
   class ThreadSafeWeakPtr
   {
+    template <typename>
+    friend class ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr;
+
+    template <typename>
+    friend class ThreadSafeWeakHashSet;
+
+    template <typename>
+    friend class ThreadSafeWeakOrStrongPtr;
+
+  private:
+    TaggedPtr<T, TaggingTraits> _objectOfCorrectType;
+    // FIXME: Use CompactRefPtrTuple to reduce sizeof(ThreadSafeWeakPtr) by storing just an offset
+    // from ThreadSafeWeakPtrControlBlock::_object and don't support structs larger than 65535.
+    // https://bugs.webkit.org/show_bug.cgi?id=283929
+    ControlBlockRefPtr _controlBlock;
+
   public:
     using tag_type = typename TaggingTraits::tag_type;
-    ThreadSafeWeakPtr() = default;
 
-    ThreadSafeWeakPtr(std::nullptr_t)
+    ThreadSafeWeakPtr() noexcept = default;
+
+    ThreadSafeWeakPtr(std::nullptr_t) noexcept
     {
     }
 
-    ThreadSafeWeakPtr(const ThreadSafeWeakPtr &other)
-        : m_objectOfCorrectType(other.m_objectOfCorrectType), m_controlBlock(other.m_controlBlock)
+    ThreadSafeWeakPtr(const ThreadSafeWeakPtr &other) noexcept
+        : _objectOfCorrectType(other._objectOfCorrectType), _controlBlock(other._controlBlock)
     {
     }
 
-    ThreadSafeWeakPtr(ThreadSafeWeakPtr &&other)
-        : m_objectOfCorrectType(std::exchange(other.m_objectOfCorrectType, nullptr)),
-          m_controlBlock(std::exchange(other.m_controlBlock, nullptr))
-    {
-    }
-
-    template <typename U>
-    requires(!std::is_pointer_v<U>)
-    ThreadSafeWeakPtr(const U &retainedReference)
-        : m_objectOfCorrectType(static_cast<const T *>(&retainedReference)),
-          m_controlBlock(controlBlock(retainedReference))
+    ThreadSafeWeakPtr(ThreadSafeWeakPtr &&other) noexcept
+        : _objectOfCorrectType(std::exchange(other._objectOfCorrectType, nullptr)),
+          _controlBlock(std::exchange(other._controlBlock, nullptr))
     {
     }
 
     template <typename U>
-    ThreadSafeWeakPtr(const U *retainedPointer)
-        : m_objectOfCorrectType(static_cast<const T *>(retainedPointer)),
-          m_controlBlock(retainedPointer ? controlBlock(*retainedPointer) : nullptr)
+    requires(!IsPointer<U>)
+    ThreadSafeWeakPtr(const U &retainedReference) noexcept
+        : _objectOfCorrectType(static_cast<const T *>(&retainedReference)),
+          _controlBlock(ControlBlock(retainedReference))
     {
     }
 
     template <typename U>
-    ThreadSafeWeakPtr(const Ref<U> &strongReference)
-        : m_objectOfCorrectType(static_cast<const T *>(strongReference.ptr())),
-          m_controlBlock(controlBlock(strongReference.get()))
+    ThreadSafeWeakPtr(const U *retainedPointer) noexcept
+        : _objectOfCorrectType(static_cast<const T *>(retainedPointer)),
+          _controlBlock(retainedPointer ? ControlBlock(*retainedPointer) : nullptr)
     {
     }
 
     template <typename U>
-    ThreadSafeWeakPtr(const RefPtr<U> &strongReference)
-        : m_objectOfCorrectType(static_cast<const T *>(strongReference.get())),
-          m_controlBlock(strongReference ? controlBlock(*strongReference) : nullptr)
+    ThreadSafeWeakPtr(const Ref<U> &strongReference) noexcept
+        : _objectOfCorrectType(static_cast<const T *>(strongReference.ptr())),
+          _controlBlock(ControlBlock(strongReference.get()))
     {
     }
 
-    ThreadSafeWeakPtr(ThreadSafeWeakPtrControlBlock &controlBlock, const T &objectOfCorrectType)
-        : m_objectOfCorrectType(&objectOfCorrectType), m_controlBlock(&controlBlock)
+    template <typename U>
+    ThreadSafeWeakPtr(const RefPtr<U> &strongReference) noexcept
+        : _objectOfCorrectType(static_cast<const T *>(strongReference.get())),
+          _controlBlock(strongReference ? ControlBlock(*strongReference) : nullptr)
     {
     }
 
-    ThreadSafeWeakPtr &operator=(ThreadSafeWeakPtr &&other)
+    ThreadSafeWeakPtr(ThreadSafeWeakPtrControlBlock &ControlBlock, const T &objectOfCorrectType) noexcept
+        : _objectOfCorrectType(&objectOfCorrectType), _controlBlock(&ControlBlock)
     {
-      m_controlBlock = std::exchange(other.m_controlBlock, nullptr);
-      m_objectOfCorrectType = std::exchange(other.m_objectOfCorrectType, nullptr);
+    }
+
+    ThreadSafeWeakPtr &operator=(ThreadSafeWeakPtr &&other) noexcept
+    {
+      _controlBlock = std::exchange(other._controlBlock, nullptr);
+      _objectOfCorrectType = std::exchange(other._objectOfCorrectType, nullptr);
       return *this;
     }
 
-    ThreadSafeWeakPtr &operator=(const ThreadSafeWeakPtr &other)
+    ThreadSafeWeakPtr &operator=(const ThreadSafeWeakPtr &other) noexcept
     {
-      m_controlBlock = other.m_controlBlock;
-      m_objectOfCorrectType = other.m_objectOfCorrectType;
-      return *this;
-    }
-
-    template <typename U>
-    requires(!std::is_pointer_v<U>)
-    ThreadSafeWeakPtr &operator=(const U &retainedReference)
-    {
-      m_controlBlock = controlBlock(retainedReference);
-      m_objectOfCorrectType = static_cast<const T *>(static_cast<const U *>(&retainedReference));
+      _controlBlock = other._controlBlock;
+      _objectOfCorrectType = other._objectOfCorrectType;
       return *this;
     }
 
     template <typename U>
-    ThreadSafeWeakPtr &operator=(const U *retainedPointer)
+    requires(!IsPointer<U>)
+    ThreadSafeWeakPtr &operator=(const U &retainedReference) noexcept
     {
-      m_controlBlock = retainedPointer ? controlBlock(*retainedPointer) : nullptr;
-      m_objectOfCorrectType = static_cast<const T *>(retainedPointer);
-      return *this;
-    }
-
-    ThreadSafeWeakPtr &operator=(std::nullptr_t)
-    {
-      m_controlBlock = nullptr;
-      m_objectOfCorrectType = nullptr;
+      _controlBlock = ControlBlock(retainedReference);
+      _objectOfCorrectType = static_cast<const T *>(static_cast<const U *>(&retainedReference));
       return *this;
     }
 
     template <typename U>
-    ThreadSafeWeakPtr &operator=(const Ref<U> &strongReference)
+    ThreadSafeWeakPtr &operator=(const U *retainedPointer) noexcept
     {
-      m_controlBlock = controlBlock(strongReference);
-      m_objectOfCorrectType = static_cast<const T *>(strongReference.ptr());
+      _controlBlock = retainedPointer ? ControlBlock(*retainedPointer) : nullptr;
+      _objectOfCorrectType = static_cast<const T *>(retainedPointer);
+      return *this;
+    }
+
+    ThreadSafeWeakPtr &operator=(std::nullptr_t) noexcept
+    {
+      _controlBlock = nullptr;
+      _objectOfCorrectType = nullptr;
       return *this;
     }
 
     template <typename U>
-    ThreadSafeWeakPtr &operator=(const RefPtr<U> &strongReference)
+    ThreadSafeWeakPtr &operator=(const Ref<U> &strongReference) noexcept
     {
-      m_controlBlock = strongReference ? controlBlock(*strongReference) : nullptr;
-      m_objectOfCorrectType = static_cast<const T *>(strongReference.get());
+      _controlBlock = ControlBlock(strongReference);
+      _objectOfCorrectType = static_cast<const T *>(strongReference.ptr());
       return *this;
     }
 
-    RefPtr<T> get() const
+    template <typename U>
+    ThreadSafeWeakPtr &operator=(const RefPtr<U> &strongReference) noexcept
     {
-      return m_controlBlock
-               ? m_controlBlock->template TryCreateStrongReference<T>(m_objectOfCorrectType.ptr())
-               : nullptr;
+      _controlBlock = strongReference ? ControlBlock(*strongReference) : nullptr;
+      _objectOfCorrectType = static_cast<const T *>(strongReference.get());
+      return *this;
     }
 
-    void setTag(tag_type tag)
+    KRYS_NODISCARD RefPtr<T> get() const noexcept
     {
-      m_objectOfCorrectType.setTag(tag);
+      return _controlBlock ? _controlBlock->template TryCreateStrongReference<T>(_objectOfCorrectType.ptr())
+                           : nullptr;
     }
-    tag_type tag() const
+
+    void SetTag(tag_type Tag) noexcept
     {
-      return m_objectOfCorrectType.tag();
+      _objectOfCorrectType.SetTag(Tag);
+    }
+
+    KRYS_NODISCARD tag_type Tag() const noexcept
+    {
+      return _objectOfCorrectType.Tag();
     }
 
   private:
     template <typename U>
-    requires(std::is_convertible_v<U *, T *>)
-    ThreadSafeWeakPtrControlBlock *controlBlock(const U &classOrChildClass)
+    requires(ConvertibleTo<RawPtr<U>, RawPtr<T>>)
+    RawPtr<ThreadSafeWeakPtrControlBlock> ControlBlock(const U &classOrChildClass) noexcept
     {
-      return &classOrChildClass.controlBlock();
+      return &classOrChildClass.ControlBlock();
     }
-
-    template <typename, DestructionThread>
-    friend class ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr;
-    template <typename>
-    friend class ThreadSafeWeakHashSet;
-    template <typename>
-    friend class ThreadSafeWeakOrStrongPtr;
-
-    TaggedPtr<T, TaggingTraits> m_objectOfCorrectType;
-    // FIXME: Use CompactRefPtrTuple to reduce sizeof(ThreadSafeWeakPtr) by storing just an offset
-    // from ThreadSafeWeakPtrControlBlock::_object and don't support structs larger than 65535.
-    // https://bugs.webkit.org/show_bug.cgi?id=283929
-    ControlBlockRefPtr m_controlBlock;
   };
 
   template <class T>
   ThreadSafeWeakPtr(const T &) -> ThreadSafeWeakPtr<T>;
+
   template <class T>
   ThreadSafeWeakPtr(const T *) -> ThreadSafeWeakPtr<T>;
 
@@ -495,63 +520,73 @@ namespace Krys
       Weak = 1
     };
 
-    Status status() const
+  private:
+    union
     {
-      return _weak.tag();
-    }
-    bool isWeak() const
+      ThreadSafeWeakPtr<T, EnumTaggingTraits<T, Status>> _weak {};
+      RefPtr<T> _strong;
+    };
+
+  public:
+    KRYS_NODISCARD Status GetStatus() const noexcept
     {
-      return status() == Status::Weak;
-    }
-    // This says nullptr is strong, which makes sense because you can always have a strong reference to
-    // nullptr but could be a little non-intuitive.
-    bool isStrong() const
-    {
-      return !isWeak();
+      return _weak.Tag();
     }
 
-    RefPtr<T> get() const
+    KRYS_NODISCARD bool IsWeak() const noexcept
     {
-      return isWeak() ? _weak.get() : _strong;
+      return GetStatus() == Status::Weak;
+    }
+
+    // This says nullptr is strong, which makes sense because you can always have a strong reference to
+    // nullptr but could be a little non-intuitive.
+    KRYS_NODISCARD bool IsStrong() const noexcept
+    {
+      return !IsWeak();
+    }
+
+    KRYS_NODISCARD RefPtr<T> get() const noexcept
+    {
+      return IsWeak() ? _weak.get() : _strong;
     }
 
     // NB. This function is not atomic so it's not safe to call get() while this transition is happening.
-    RefPtr<T> convertToWeak()
+    KRYS_NODISCARD RefPtr<T> ConvertToWeak() noexcept
     {
-      assert(isStrong());
+      assert(IsStrong());
       RefPtr<T> strong = Krys::Move(_strong);
       _weak = strong;
-      _weak.setTag(Status::Weak);
-      assert(isWeak());
+      _weak.SetTag(Status::Weak);
+      assert(IsWeak());
       return strong;
     }
 
-    T *tryConvertToStrong()
+    RawPtr<T> TryConvertToStrong() noexcept
     {
-      assert(isWeak());
+      assert(IsWeak());
       RefPtr<T> strong = _weak.get();
-      _weak.setTag(Status::Strong);
+      _weak.SetTag(Status::Strong);
       _weak = nullptr;
       _strong = Krys::Move(strong);
-      assert(isStrong());
+      assert(IsStrong());
       return _strong.get();
     }
 
-    ThreadSafeWeakOrStrongPtr &operator=(const ThreadSafeWeakOrStrongPtr &other)
+    ThreadSafeWeakOrStrongPtr &operator=(const ThreadSafeWeakOrStrongPtr &other) noexcept
     {
       ThreadSafeWeakOrStrongPtr copied(other);
       swap(copied);
       return *this;
     }
 
-    ThreadSafeWeakOrStrongPtr &operator=(ThreadSafeWeakOrStrongPtr &&other)
+    ThreadSafeWeakOrStrongPtr &operator=(ThreadSafeWeakOrStrongPtr &&other) noexcept
     {
       ThreadSafeWeakOrStrongPtr moved(Krys::Move(other));
       swap(moved);
       return *this;
     }
 
-    ThreadSafeWeakOrStrongPtr &operator=(std::nullptr_t)
+    ThreadSafeWeakOrStrongPtr &operator=(std::nullptr_t) noexcept
     {
       ThreadSafeWeakOrStrongPtr zeroed;
       swap(zeroed);
@@ -559,7 +594,7 @@ namespace Krys
     }
 
     template <typename U>
-    ThreadSafeWeakOrStrongPtr &operator=(const RefPtr<U> &strongReference)
+    ThreadSafeWeakOrStrongPtr &operator=(const RefPtr<U> &strongReference) noexcept
     {
       ThreadSafeWeakOrStrongPtr copied(strongReference);
       swap(copied);
@@ -567,7 +602,7 @@ namespace Krys
     }
 
     template <typename U>
-    ThreadSafeWeakOrStrongPtr &operator=(RefPtr<U> &&strongReference)
+    ThreadSafeWeakOrStrongPtr &operator=(RefPtr<U> &&strongReference) noexcept
     {
       ThreadSafeWeakOrStrongPtr moved(Krys::Move(strongReference));
       swap(moved);
@@ -575,7 +610,7 @@ namespace Krys
     }
 
     template <typename U>
-    ThreadSafeWeakOrStrongPtr &operator=(const Ref<U> &strongReference)
+    ThreadSafeWeakOrStrongPtr &operator=(const Ref<U> &strongReference) noexcept
     {
       ThreadSafeWeakOrStrongPtr copied(strongReference);
       swap(copied);
@@ -583,108 +618,108 @@ namespace Krys
     }
 
     template <typename U>
-    ThreadSafeWeakOrStrongPtr &operator=(Ref<U> &&strongReference)
+    ThreadSafeWeakOrStrongPtr &operator=(Ref<U> &&strongReference) noexcept
     {
       ThreadSafeWeakOrStrongPtr moved(Krys::Move(strongReference));
       swap(moved);
       return *this;
     }
 
-    ThreadSafeWeakOrStrongPtr()
+    ThreadSafeWeakOrStrongPtr() noexcept
     {
-      assert(isStrong());
+      assert(IsStrong());
     }
 
-    ThreadSafeWeakOrStrongPtr(std::nullptr_t)
+    ThreadSafeWeakOrStrongPtr(std::nullptr_t) noexcept
     {
-      assert(isStrong());
+      assert(IsStrong());
     }
 
-    ThreadSafeWeakOrStrongPtr(const ThreadSafeWeakOrStrongPtr &other)
+    ThreadSafeWeakOrStrongPtr(const ThreadSafeWeakOrStrongPtr &other) noexcept
     {
-      assert(isStrong());
-      copyConstructFrom(other);
-    }
-
-    template <typename U>
-    ThreadSafeWeakOrStrongPtr(const ThreadSafeWeakOrStrongPtr<U> &other)
-    {
-      assert(isStrong());
-      copyConstructFrom(other);
-    }
-
-    ThreadSafeWeakOrStrongPtr(ThreadSafeWeakOrStrongPtr &&other)
-    {
-      assert(isStrong());
-      moveConstructFrom(Krys::Move(other));
+      assert(IsStrong());
+      CopyConstructFrom(other);
     }
 
     template <typename U>
-    ThreadSafeWeakOrStrongPtr(ThreadSafeWeakOrStrongPtr<U> &&other)
+    ThreadSafeWeakOrStrongPtr(const ThreadSafeWeakOrStrongPtr<U> &other) noexcept
     {
-      assert(isStrong());
-      moveConstructFrom(Krys::Move(other));
+      assert(IsStrong());
+      CopyConstructFrom(other);
+    }
+
+    ThreadSafeWeakOrStrongPtr(ThreadSafeWeakOrStrongPtr &&other) noexcept
+    {
+      assert(IsStrong());
+      MoveConstructFrom(Krys::Move(other));
     }
 
     template <typename U>
-    ThreadSafeWeakOrStrongPtr(const Ref<U> &strongReference)
+    ThreadSafeWeakOrStrongPtr(ThreadSafeWeakOrStrongPtr<U> &&other) noexcept
     {
-      assert(isStrong());
+      assert(IsStrong());
+      MoveConstructFrom(Krys::Move(other));
+    }
+
+    template <typename U>
+    ThreadSafeWeakOrStrongPtr(const Ref<U> &strongReference) noexcept
+    {
+      assert(IsStrong());
       _strong = strongReference;
-      assert(isStrong());
+      assert(IsStrong());
     }
 
     template <typename U>
-    ThreadSafeWeakOrStrongPtr(const RefPtr<U> &strongReference)
+    ThreadSafeWeakOrStrongPtr(const RefPtr<U> &strongReference) noexcept
     {
-      assert(isStrong());
+      assert(IsStrong());
       _strong = strongReference;
-      assert(isStrong());
+      assert(IsStrong());
     }
 
     template <typename U>
-    ThreadSafeWeakOrStrongPtr(Ref<U> &&strongReference)
+    ThreadSafeWeakOrStrongPtr(Ref<U> &&strongReference) noexcept
     {
-      assert(isStrong());
+      assert(IsStrong());
       _strong = Krys::Move(strongReference);
-      assert(isStrong());
+      assert(IsStrong());
     }
 
     template <typename U>
-    ThreadSafeWeakOrStrongPtr(RefPtr<U> &&strongReference)
+    ThreadSafeWeakOrStrongPtr(RefPtr<U> &&strongReference) noexcept
     {
-      assert(isStrong());
+      assert(IsStrong());
       _strong = Krys::Move(strongReference);
-      assert(isStrong());
+      assert(IsStrong());
     }
 
-    ~ThreadSafeWeakOrStrongPtr()
+    ~ThreadSafeWeakOrStrongPtr() noexcept
     {
-      if (isStrong())
+      if (IsStrong())
         _strong.~RefPtr<T>();
       else
         _weak.~ThreadSafeWeakPtr<T, EnumTaggingTraits<T, Status>>();
     }
 
     template <typename U>
-    void swap(ThreadSafeWeakOrStrongPtr<U> &other)
+    void swap(ThreadSafeWeakOrStrongPtr<U> &other) noexcept
     {
-      if (isStrong())
+      if (IsStrong())
       {
-        if (other.isStrong())
+        if (other.IsStrong())
         {
           std::swap(_strong, other._strong);
           return;
         }
         auto weak = std::exchange(other._weak, ThreadSafeWeakPtr<U, EnumTaggingTraits<U, Status>> {});
-        assert(other.isStrong());
+        assert(other.IsStrong());
         other._strong = std::exchange(_strong, nullptr);
         _weak = Krys::Move(weak);
-        assert(isWeak());
+        assert(IsWeak());
         return;
       }
 
-      if (other.isWeak())
+      if (other.IsWeak())
       {
         std::swap(_weak, other._weak);
         return;
@@ -692,50 +727,44 @@ namespace Krys
 
       auto strong = std::exchange(other._strong, nullptr);
       other._weak = std::exchange(_weak, ThreadSafeWeakPtr<T, EnumTaggingTraits<T, Status>> {});
-      assert(other.isWeak());
-      assert(isStrong());
+      assert(other.IsWeak());
+      assert(IsStrong());
       _strong = Krys::Move(strong);
     }
 
   private:
     template <typename U>
-    void copyConstructFrom(const ThreadSafeWeakOrStrongPtr<U> &other)
+    void CopyConstructFrom(const ThreadSafeWeakOrStrongPtr<U> &other) noexcept
     {
-      assert(isStrong());
-      if (other.isWeak())
+      assert(IsStrong());
+      if (other.IsWeak())
       {
         _weak = other._weak;
-        assert(isWeak());
+        assert(IsWeak());
       }
       else
       {
         _strong = other._strong;
-        assert(isStrong());
+        assert(IsStrong());
       }
     }
 
     template <typename U>
-    void moveConstructFrom(ThreadSafeWeakOrStrongPtr<U> &&other)
+    void MoveConstructFrom(ThreadSafeWeakOrStrongPtr<U> &&other) noexcept
     {
-      assert(isStrong());
-      if (other.isWeak())
+      assert(IsStrong());
+      if (other.IsWeak())
       {
         _weak = std::exchange(other._weak, ThreadSafeWeakPtr<U, EnumTaggingTraits<U, Status>> {});
-        assert(isWeak());
-        assert(other.isStrong());
+        assert(IsWeak());
+        assert(other.IsStrong());
       }
       else
       {
         _strong = std::exchange(other._strong, nullptr);
-        assert(isStrong());
-        assert(other.isStrong());
+        assert(IsStrong());
+        assert(other.IsStrong());
       }
     }
-
-    union
-    {
-      ThreadSafeWeakPtr<T, EnumTaggingTraits<T, Status>> _weak {};
-      RefPtr<T> _strong;
-    };
   };
 }

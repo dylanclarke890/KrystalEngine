@@ -13,6 +13,10 @@ namespace Krys
   {
     using Debugger = RefCountDebugger<uint32>;
 
+  private:
+    mutable std::atomic<uint32_t> _refCount {1};
+    KRYS_NO_UNIQUE_ADDRESS Debugger _refCountDebugger;
+
   public:
     void AddRef() const noexcept
     {
@@ -58,10 +62,6 @@ namespace Krys
 
       return false;
     }
-
-  private:
-    mutable std::atomic<uint32_t> _refCount {1};
-    KRYS_NO_UNIQUE_ADDRESS Debugger _refCountDebugger;
   };
 
   template <class T>

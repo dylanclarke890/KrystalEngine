@@ -84,17 +84,17 @@ namespace Krys
     }
 
     template <typename T>
-    RawPtr<typename T::TWeakValue> get()
-    {
+    RawPtr<typename T::TWeakValue> get() noexcept
+    { 
       return static_cast<RawPtr<typename T::TWeakValue>>(_ptr);
     }
 
-    void Clear()
+    void Clear() noexcept
     {
       _ptr = nullptr;
     }
 
-    explicit operator bool() const
+    explicit operator bool() const noexcept
     {
       return _ptr;
     }

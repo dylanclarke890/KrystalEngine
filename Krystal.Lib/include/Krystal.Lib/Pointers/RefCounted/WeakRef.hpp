@@ -24,6 +24,12 @@ namespace Krys
   template <typename T, typename WeakPtrImpl>
   class WeakRef
   {
+  private:
+    Ref<WeakPtrImpl> _impl;
+#if KRYS_ENV(DEV)
+    bool _shouldEnableAssertions {true};
+#endif
+
   public:
     WeakRef(const T &object,
             EnabledWeakPtrThreadAsserts shouldEnableAssertions = EnabledWeakPtrThreadAsserts::Yes) noexcept
@@ -122,12 +128,6 @@ namespace Krys
       return EnabledWeakPtrThreadAsserts::No;
 #endif
     }
-
-  private:
-    Ref<WeakPtrImpl> _impl;
-#if KRYS_ENV(DEV)
-    bool _shouldEnableAssertions {true};
-#endif
   };
 
   template <class T>
