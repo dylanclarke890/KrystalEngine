@@ -7,9 +7,21 @@ namespace Krys::Tests
 {
   using namespace Krys::HTML;
 
+  class TestEventTarget : public EventTarget
+  {
+  protected:
+    void AddRef(EventTargetTag) const noexcept final
+    {
+    }
+
+    void SubRef(EventTargetTag) const noexcept final
+    {
+    }
+  };
+
   TEST_CASE("EventTarget::AddEventListener", "[EventTarget]")
   {
-    EventTarget eventTarget;
+    TestEventTarget eventTarget;
 
     SECTION("null callback")
     {
@@ -79,7 +91,7 @@ namespace Krys::Tests
       }
     };
 
-    EventTarget eventTarget;
+    TestEventTarget eventTarget;
 
     AddEventListenerOptions addOptions {
       true,
@@ -113,7 +125,8 @@ namespace Krys::Tests
       EventListenerOptions differentOptions {
         false,
       };
-      REQUIRE_FALSE(eventTarget.RemoveEventListener(EventNames::Click, Krys::Move(removeCallback), differentOptions));
+      REQUIRE_FALSE(
+        eventTarget.RemoveEventListener(EventNames::Click, Krys::Move(removeCallback), differentOptions));
     }
   }
 }

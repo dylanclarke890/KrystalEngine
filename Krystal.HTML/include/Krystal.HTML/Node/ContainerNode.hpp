@@ -9,6 +9,8 @@ namespace Krys::HTML
 {
   class ContainerNode : public Node
   {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ContainerNode);
+
   private:
     RawPtr<Node> _firstChild;
     RawPtr<Node> _lastChild;

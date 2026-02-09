@@ -2,6 +2,8 @@
 #include "Krystal.HTML/Events/AbortSignal.hpp"
 #include "Krystal.HTML/Events/EventDispatcher.hpp"
 #include "Krystal.HTML/Events/EventNames.hpp"
+#include "Krystal.HTML/Document/Document.hpp"
+#include "Krystal.HTML/Node/Node.hpp"
 
 namespace Krys::HTML
 {
@@ -27,6 +29,30 @@ namespace Krys::HTML
   }
 
   EventTarget::EventTarget() noexcept = default;
+
+  void EventTarget::AddRef() const noexcept
+  {
+    if (const Node *node = DynamicDowncast<Node>(*this); node) KRYS_LIKELY
+    {
+      node->AddRef();
+    }
+    else
+    {
+      AddRef(EventTargetTag {});
+    }
+  }
+
+  void EventTarget::SubRef() const noexcept
+  {
+    if (const Node *node = DynamicDowncast<Node>(*this); node) KRYS_LIKELY
+    {
+      node->SubRef();
+    }
+    else
+    {
+      SubRef(EventTargetTag {});
+    }
+  }
 
   bool EventTarget::AddEventListener(DOMStringAtom type, RefPtr<EventListener> &&callback,
                                      const AddEventListenerOptions &options) noexcept

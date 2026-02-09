@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/Events/Event.hpp"
-#include "Krystal.Lib/Pointers/IntrusivePtrV1/RefCounted.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/RefCounted.hpp"
 #include "Krystal.Lib/Types/Func.hpp"
 
 namespace Krys::HTML

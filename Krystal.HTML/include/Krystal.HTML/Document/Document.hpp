@@ -11,6 +11,16 @@ namespace Krys::HTML
   public:
     Document() noexcept;
 
+    void AddRef() const noexcept
+    {
+      ContainerNode::AddRef();
+    }
+
+    void SubRef() const noexcept
+    {
+      ContainerNode::SubRef();
+    }
+
     KRYS_NODISCARD DOMString NodeName() const noexcept final;
   };
 }

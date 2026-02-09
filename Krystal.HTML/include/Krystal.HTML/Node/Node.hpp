@@ -8,8 +8,9 @@
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Pointers/IntrusivePtrV1/RefPtr.hpp"
-#include "Krystal.Lib/Pointers/IntrusivePtrV1/WeakRef.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/CheckedPtr.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/RefPtr.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/WeakRef.hpp"
 #include "Krystal.Lib/String/StringAtom.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
@@ -81,10 +82,12 @@ namespace Krys::HTML
     DOMString Href;
   };
 
-  class Node : public EventTarget
+  class Node : public EventTarget, public CanMakeCheckedPtr<Node>
   {
     friend class Document;
     friend class NodeMutationNotifier;
+
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Node);
 
   private:
     NodeFlag _flags : BitCount<NodeFlag>() {NodeFlag::None};
@@ -96,8 +99,23 @@ namespace Krys::HTML
     RawPtr<TreeScope> _treeScope;
 
   public:
-    virtual ~Node() = default;
+    virtual ~Node() noexcept = default;
 
+    void AddRef() const noexcept;
+    void SubRef() const noexcept;
+
+  protected:
+    void AddRef(EventTargetTag) const noexcept final
+    {
+      AddRef();
+    }
+
+    void SubRef(EventTargetTag) const noexcept final
+    {
+      SubRef();
+    }
+
+  public:
     KRYS_NODISCARD virtual utf8_string NodeName() const noexcept = 0;
 
     KRYS_NODISCARD NodeType GetNodeType() const noexcept

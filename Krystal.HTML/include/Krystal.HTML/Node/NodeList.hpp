@@ -2,7 +2,7 @@
 
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Pointers/IntrusivePtrV1/RefCounted.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/RefCounted.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::HTML

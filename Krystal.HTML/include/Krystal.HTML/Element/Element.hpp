@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/Document/Document.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 

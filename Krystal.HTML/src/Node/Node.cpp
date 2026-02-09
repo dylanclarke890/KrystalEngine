@@ -10,11 +10,19 @@
 namespace Krys::HTML
 {
   Node::Node(Document &document, NodeType type, NodeFlag flags) noexcept
-      : EventTarget(ConstructNodeTag {}), _nodeType(type), _ownerDocument(RefPtrRetain(&document)),
+      : EventTarget(ConstructNodeTag {}), _nodeType(type), _ownerDocument(RetainRefPtr(&document)),
         _parentNode(nullptr), _previousSibling(nullptr), _nextSibling(nullptr),
         _treeScope((IsDocumentNode() || IsShadowRootNode()) ? nullptr : &document)
   {
     _flags = flags;
+  }
+
+  void Node::AddRef() const noexcept
+  {
+  }
+
+  void Node::SubRef() const noexcept
+  {
   }
 
   const Node &Node::GetRootNode(const GetRootNodeOptions &options) const noexcept
@@ -106,6 +114,16 @@ namespace Krys::HTML
     }
 
     return nullptr;
+  }
+
+  DOMString Node::NodeValue() const noexcept
+  {
+    return {};
+  }
+
+  ExceptionOr<void> Node::SetNodeValue(DOMStringView) noexcept
+  {
+    return {};
   }
 
   ExceptionOr<void> Node::InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept

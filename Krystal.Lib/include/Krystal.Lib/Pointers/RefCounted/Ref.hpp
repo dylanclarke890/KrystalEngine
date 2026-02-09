@@ -265,7 +265,6 @@ namespace Krys
       return result;
     }
 
-  private:
     enum AdoptTag
     {
       Adopt
@@ -399,5 +398,28 @@ namespace Krys
                            const Ref<T, PtrTraits, RefDerefTraits> &b) noexcept
   {
     return a.ptr() == b.ptr() || a.get() == b.get();
+  }
+
+  template <typename T, typename PtrTraits = RawPtrTraits<T>,
+            typename RefDerefTraits = DefaultRefDerefTraits<T>, typename... Args>
+  requires(Constructible<T, Args...>)
+  KRYS_NODISCARD constexpr inline Ref<T, PtrTraits, RefDerefTraits> CreateRef(Args &&...args)
+  {
+    RawPtr<T> ptr = new T(std::forward<Args>(args)...);
+    return Ref<T, PtrTraits, RefDerefTraits>(*ptr, Ref<T, PtrTraits, RefDerefTraits>::Adopt);
+  }
+
+  template <typename T, typename PtrTraits = RawPtrTraits<T>,
+            typename RefDerefTraits = DefaultRefDerefTraits<T>>
+  KRYS_NODISCARD constexpr Ref<T, PtrTraits, RefDerefTraits> AttachRef(T &ptr) noexcept
+  {
+    return Ref<T, PtrTraits, RefDerefTraits>(ptr);
+  }
+
+  template <typename T, typename PtrTraits = RawPtrTraits<T>,
+            typename RefDerefTraits = DefaultRefDerefTraits<T>>
+  KRYS_NODISCARD constexpr Ref<T, PtrTraits, RefDerefTraits> RetainRef(T &ptr) noexcept
+  {
+    return Ref<T, PtrTraits, RefDerefTraits>(ptr);
   }
 }

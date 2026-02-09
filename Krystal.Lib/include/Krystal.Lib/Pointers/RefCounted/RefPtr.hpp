@@ -202,12 +202,10 @@ namespace Krys
       return RefPtr(_ptr);
     }
 
-  private:
-    template <typename T1, typename U, typename V, typename X, typename Y, typename Z>
-    friend constexpr bool operator==(const RefPtr<T1, U, V> &, const RefPtr<X, Y, Z> &) noexcept;
-
-    template <typename T1, typename U, typename V, typename X>
-    friend constexpr bool operator==(const RefPtr<T1, U, V> &, RawPtr<X>) noexcept;
+    constexpr bool operator==(std::nullptr_t) noexcept
+    {
+      return !_ptr;
+    }
 
     enum AdoptTag
     {
@@ -217,6 +215,13 @@ namespace Krys
     RefPtr(RawPtr<T> ptr, AdoptTag) : _ptr(ptr)
     {
     }
+
+  private:
+    template <typename T1, typename U, typename V, typename X, typename Y, typename Z>
+    friend constexpr bool operator==(const RefPtr<T1, U, V> &, const RefPtr<X, Y, Z> &) noexcept;
+
+    template <typename T1, typename U, typename V, typename X>
+    friend constexpr bool operator==(const RefPtr<T1, U, V> &, RawPtr<X>) noexcept;
   };
 
   // Template deduction guide.
@@ -331,5 +336,42 @@ namespace Krys
 
     return UnsafeRefPtrDowncast<match_constness_t<Source, Target>, TargetPtrTraits, TargetRefDerefTraits>(
       Krys::Move(source));
+  }
+
+  template <typename T, typename PtrTraits = RawPtrTraits<T>,
+            typename RefDerefTraits = DefaultRefDerefTraits<T>, typename... Args>
+  requires(Constructible<T, Args...>)
+  KRYS_NODISCARD constexpr inline RefPtr<T, PtrTraits, RefDerefTraits> CreateRefPtr(Args &&...args)
+  {
+    RawPtr<T> ptr = new T(std::forward<Args>(args)...);
+    return RefPtr<T, PtrTraits, RefDerefTraits>(ptr, RefPtr<T, PtrTraits, RefDerefTraits>::Adopt);
+  }
+
+  template <typename T, typename PtrTraits = RawPtrTraits<T>,
+            typename RefDerefTraits = DefaultRefDerefTraits<T>>
+  KRYS_NODISCARD RefPtr<T, PtrTraits, RefDerefTraits> AttachRefPtr(RawPtr<T> ptr) noexcept
+  {
+    return RefPtr<T, PtrTraits, RefDerefTraits>(ptr, RefPtr<T, PtrTraits, RefDerefTraits>::Adopt);
+  }
+
+  template <typename T, typename PtrTraits = RawPtrTraits<T>,
+            typename RefDerefTraits = DefaultRefDerefTraits<T>>
+  KRYS_NODISCARD RefPtr<T, PtrTraits, RefDerefTraits> AttachRefPtr(T &ptr) noexcept
+  {
+    return RefPtr<T, PtrTraits, RefDerefTraits>(&ptr, RefPtr<T, PtrTraits, RefDerefTraits>::Adopt);
+  }
+
+  template <typename T, typename PtrTraits = RawPtrTraits<T>,
+            typename RefDerefTraits = DefaultRefDerefTraits<T>>
+  KRYS_NODISCARD constexpr RefPtr<T, PtrTraits, RefDerefTraits> RetainRefPtr(T &ptr) noexcept
+  {
+    return RefPtr<T, PtrTraits, RefDerefTraits>(&ptr);
+  }
+
+  template <typename T, typename PtrTraits = RawPtrTraits<T>,
+            typename RefDerefTraits = DefaultRefDerefTraits<T>>
+  KRYS_NODISCARD constexpr RefPtr<T, PtrTraits, RefDerefTraits> RetainRefPtr(RawPtr<T> ptr) noexcept
+  {
+    return RefPtr<T, PtrTraits, RefDerefTraits>(ptr);
   }
 }
