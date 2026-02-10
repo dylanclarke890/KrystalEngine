@@ -4,7 +4,6 @@
 #include "Krystal.Lib/Pointers/CompactPtr.hpp"
 #include "Krystal.Lib/Pointers/CompactPtrTuple.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/Ref.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/RefPtr.hpp"
 
 namespace Krys

@@ -40,6 +40,33 @@ namespace Krys
   };
 
   template <typename T>
+  struct CheckedPolicy
+  {
+    KRYS_ALWAYS_INLINE constexpr static RawPtr<T> AddRef(RawPtr<T> ptr) noexcept
+    {
+      if (ptr) KRYS_LIKELY
+      {
+        ptr->AddRefChecked();
+      }
+      return ptr;
+    }
+
+    KRYS_ALWAYS_INLINE constexpr static T &AddRef(T &ref) noexcept
+    {
+      ref.AddRefChecked();
+      return ref;
+    }
+
+    KRYS_ALWAYS_INLINE constexpr static void SubRef(RawPtr<T> ptr) noexcept
+    {
+      if (ptr) KRYS_LIKELY
+      {
+        ptr->SubRefChecked();
+      }
+    }
+  };
+
+  template <typename T>
   struct NoCheckAccess
   {
     KRYS_ALWAYS_INLINE constexpr static void Validate(RawPtr<T>) noexcept

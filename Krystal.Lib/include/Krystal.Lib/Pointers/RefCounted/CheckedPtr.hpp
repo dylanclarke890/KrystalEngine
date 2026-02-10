@@ -1,10 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Pointers/GetPtr.hpp"
-#include "Krystal.Lib/Pointers/RawPtr.hpp"
+#include "Krystal.Lib/ByteUtils.hpp"
+#include "Krystal.Lib/Core/Move.hpp"
+#include "Krystal.Lib/Detection/Environment.hpp"
 #include "Krystal.Lib/Pointers/RawPtrTraits.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/CheckedRef.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/IntrusiveHandle.hpp"
+#include <atomic>
 #include <cassert>
 
 namespace Krys
@@ -15,271 +16,204 @@ namespace Krys
   /// no outstanding CheckedPtrs that reference it.
   /// @note Use is similar to WeakPtr, but CheckedPtr has less overhead and is used in cases where the target
   /// is never expected to become null.
-  template <typename T, typename PtrTraits = RawPtrTraits<T>,
-            typename RefDerefTraits = CheckedRefDerefTraits<T>>
-  class CheckedPtr
+  template <typename T, typename PtrTraits = RawPtrTraits<T>>
+  using CheckedPtr = IntrusiveHandle<T, PtrTraits, CheckedPolicy<T>, CheckedAccess<T>, IsNullable(true)>;
+
+  template <typename T, typename PtrTraits = RawPtrTraits<T>, typename... Args>
+  KRYS_NODISCARD constexpr inline CheckedPtr<T, PtrTraits> CreateCheckedPtr(Args &&...args)
   {
-    static_assert(!IsPointer<T>, "T must not be a pointer type.");
+    RawPtr<T> ptr = new T(std::forward<Args>(args)...);
+    return CheckedPtr<T, PtrTraits>::NoRef(*ptr);
+  }
 
-    KRYS_FORBID_HEAP_ALLOCATION_ALLOWING_PLACEMENT_NEW;
+  template <typename T, typename PtrTraits = RawPtrTraits<T>>
+  KRYS_NODISCARD constexpr inline CheckedPtr<T, PtrTraits> AdoptCheckedPtr(T *ptr) noexcept
+  {
+    return CheckedPtr<T, PtrTraits>::NoRef(ptr);
+  }
 
-    template <typename, typename, typename>
-    friend class CheckedPtr;
+  template <typename T, typename PtrTraits = RawPtrTraits<T>>
+  KRYS_NODISCARD constexpr inline CheckedPtr<T, PtrTraits> ShareCheckedPtr(T *ptr) noexcept
+  {
+    return CheckedPtr<T, PtrTraits>::WithRef(ptr);
+  }
 
+  template <typename T, typename PtrTraits = RawPtrTraits<T>>
+  using CheckedRef = IntrusiveHandle<T, PtrTraits, CheckedPolicy<T>, CheckedAccess<T>, IsNullable(false)>;
+
+  template <typename T, typename PtrTraits = RawPtrTraits<T>, typename... Args>
+  KRYS_NODISCARD constexpr inline CheckedRef<T, PtrTraits> CreateCheckedRef(Args &&...args)
+  {
+    RawPtr<T> ptr = new T(std::forward<Args>(args)...);
+    return CheckedRef<T, PtrTraits>::NoRef(*ptr);
+  }
+
+  template <typename T, typename PtrTraits = RawPtrTraits<T>>
+  KRYS_NODISCARD constexpr inline CheckedRef<T, PtrTraits> AdoptCheckedRef(T &ptr) noexcept
+  {
+    return CheckedRef<T, PtrTraits>::NoRef(ptr);
+  }
+
+  template <typename T, typename PtrTraits = RawPtrTraits<T>>
+  KRYS_NODISCARD constexpr inline CheckedRef<T, PtrTraits> ShareCheckedRef(T &ptr) noexcept
+  {
+    return CheckedRef<T, PtrTraits>::WithRef(ptr);
+  }
+
+  enum class DefaultedOperatorEqual : bool
+  {
+    No,
+    Yes
+  };
+
+  template <typename TCount, bool ThreadSafe>
+  class CanMakeCheckedPtrBase
+  {
   public:
-    using pointer = typename PtrTraits::storage_type;
-    using element_type = T;
-    constexpr static bool nullable = true;
+    using deletion_flag_type = conditional_t<ThreadSafe, std::atomic<bool>, bool>;
+    using storage_type = conditional_t<ThreadSafe, std::atomic<TCount>, TCount>;
 
   private:
-    pointer _ptr;
+    mutable storage_type _checkedPtrCount {0};
+#if KRYS_ENV(DEV)
+    deletion_flag_type _didBeginDeletion {false};
+#endif
 
   public:
-    KRYS_NODISCARD static constexpr CheckedPtr NoRef(RawPtr<T> ptr) noexcept
-    {
-      return CheckedPtr(ptr);
-    }
+    CanMakeCheckedPtrBase() noexcept = default;
 
-    KRYS_NODISCARD static constexpr CheckedPtr WithRef(RawPtr<T> ptr) noexcept
-    {
-      return CheckedPtr(RefDerefTraits::AddRef(ptr));
-    }
-
-    KRYS_NODISCARD static constexpr CheckedPtr NoRef(T &ref) noexcept
-    {
-      return CheckedPtr(ref);
-    }
-
-    KRYS_NODISCARD static constexpr CheckedPtr WithRef(T &ref) noexcept
-    {
-      return CheckedPtr(RefDerefTraits::AddRef(ref));
-    }
-
-    KRYS_ALWAYS_INLINE constexpr CheckedPtr() noexcept : _ptr(nullptr)
+    CanMakeCheckedPtrBase(const CanMakeCheckedPtrBase &) noexcept
     {
     }
 
-    KRYS_ALWAYS_INLINE constexpr CheckedPtr(std::nullptr_t) noexcept : _ptr(nullptr)
+    CanMakeCheckedPtrBase(CanMakeCheckedPtrBase &&) noexcept
     {
     }
 
-    KRYS_ALWAYS_INLINE CheckedPtr(const CheckedPtr &o) noexcept : _ptr(RefDerefTraits::AddRef(o.get()))
+    ~CanMakeCheckedPtrBase() noexcept
     {
+      assert(_didBeginDeletion);
     }
 
-    template <typename X, typename Y, typename Z>
-    requires(ConvertibleTo<RawPtr<X>, RawPtr<T>>)
-    KRYS_ALWAYS_INLINE constexpr CheckedPtr(const CheckedPtr<X, Y, Z> &o) noexcept
-        : _ptr(static_cast<RawPtr<T>>(RefDerefTraits::AddRef(o.get())))
+    CanMakeCheckedPtrBase &operator=(const CanMakeCheckedPtrBase &) noexcept
     {
-    }
-
-    template <typename X, typename Y, typename Z>
-    requires(ConvertibleTo<RawPtr<X>, RawPtr<T>>)
-    KRYS_ALWAYS_INLINE constexpr CheckedPtr(const CheckedRef<X, Y, Z> &o) noexcept
-        : _ptr(static_cast<RawPtr<T>>(RefDerefTraits::AddRef(o.get())))
-    {
-    }
-
-    KRYS_ALWAYS_INLINE constexpr CheckedPtr(CheckedPtr &&o) noexcept : _ptr(o.release())
-    {
-    }
-
-    template <typename X, typename Y, typename Z>
-    requires(ConvertibleTo<RawPtr<X>, RawPtr<T>>)
-    KRYS_ALWAYS_INLINE constexpr CheckedPtr(CheckedPtr<X, Y, Z> &&o) noexcept
-        : _ptr(static_cast<RawPtr<T>>(o.release()))
-    {
-    }
-
-    template <typename X, typename Y, typename Z>
-    requires(ConvertibleTo<RawPtr<X>, RawPtr<T>>)
-    KRYS_ALWAYS_INLINE constexpr CheckedPtr(CheckedRef<X, Y, Z> &&o) noexcept
-        : _ptr(static_cast<RawPtr<T>>(o.release()))
-    {
-    }
-
-    KRYS_ALWAYS_INLINE constexpr ~CheckedPtr() noexcept
-    {
-      reset();
-    }
-
-    constexpr CheckedPtr &operator=(const CheckedPtr &o) noexcept
-    {
-      CheckedPtr ptr = o;
-      swap(ptr);
       return *this;
     }
 
-    template <typename X, typename Y, typename Z>
-    requires(ConvertibleTo<RawPtr<X>, RawPtr<T>>)
-    constexpr CheckedPtr &operator=(const CheckedPtr<X, Y, Z> &o) noexcept
+    CanMakeCheckedPtrBase &operator=(CanMakeCheckedPtrBase &&) noexcept
     {
-      CheckedPtr ptr = o;
-      swap(ptr);
       return *this;
     }
 
-    template <typename X, typename Y, typename Z>
-    requires(ConvertibleTo<RawPtr<X>, RawPtr<T>>)
-    constexpr CheckedPtr &operator=(CheckedRef<X, Y, Z> &o) noexcept
+    KRYS_ALWAYS_INLINE void AddRefChecked() const noexcept
     {
-      CheckedPtr ptr = o;
-      swap(ptr);
-      return *this;
+      ++_checkedPtrCount;
     }
 
-    constexpr CheckedPtr &operator=(CheckedPtr &&o) noexcept
-    {
-      CheckedPtr ptr = Krys::Move(o);
-      swap(ptr);
-      return *this;
-    }
-
-    template <typename X, typename Y, typename Z>
-    requires(ConvertibleTo<RawPtr<X>, RawPtr<T>>)
-    constexpr CheckedPtr &operator=(CheckedPtr<X, Y, Z> &&o) noexcept
-    {
-      CheckedPtr ptr = Krys::Move(o);
-      swap(ptr);
-      return *this;
-    }
-
-    template <typename X, typename Y, typename Z>
-    requires(ConvertibleTo<RawPtr<X>, RawPtr<T>>)
-    constexpr CheckedPtr &operator=(CheckedRef<X, Y, Z> &&o) noexcept
-    {
-      CheckedPtr ptr = Krys::Move(o);
-      swap(ptr);
-      return *this;
-    }
-
-    constexpr CheckedPtr &operator=(std::nullptr_t) noexcept
-    {
-      reset();
-      return *this;
-    }
-
-    KRYS_ALWAYS_INLINE constexpr T &operator*() const noexcept KRYS_LIFETIME_BOUND
-    {
-      assert(PtrTraits::unwrap(_ptr));
-      return *PtrTraits::unwrap(_ptr);
-    }
-
-    KRYS_ALWAYS_INLINE constexpr RawPtr<T> operator->() const noexcept KRYS_LIFETIME_BOUND
-    {
-      assert(PtrTraits::unwrap(_ptr));
-      return PtrTraits::unwrap(_ptr);
-    }
-
-    template <typename TMember>
-    constexpr TMember &operator->*(TMember T::*memptr) const noexcept
-    {
-      assert(PtrTraits::unwrap(_ptr));
-      return PtrTraits::unwrap(_ptr)->*memptr;
-    }
-
-    constexpr bool operator!() const noexcept
-    {
-      return !_ptr;
-    }
-
-    explicit constexpr operator bool() const noexcept
-    {
-      return !!_ptr;
-    }
-
-    KRYS_NODISCARD RawPtr<T> get() const noexcept KRYS_LIFETIME_BOUND
+    KRYS_ALWAYS_INLINE void SubRefChecked() const noexcept
     {
       // In normal execution, a CheckedPtr always points to an object with a non-zero CheckedPtrCount().
       // When it detects a dangling pointer, KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR scribbles an object with
       // zeroes and then leaks it. When we check CheckedPtrCount() here, we're checking for a scribbled
       // object.
-      assert(PtrTraits::unwrap(_ptr) == nullptr || PtrTraits::unwrap(_ptr)->CheckedPtrCount());
-      return PtrTraits::unwrap(_ptr);
+      if (!CheckedPtrCount()) KRYS_UNLIKELY
+      {
+        CrashDueToCheckedPtrToDeadObject();
+      }
+      --_checkedPtrCount;
     }
 
-    KRYS_NODISCARD constexpr inline RawPtr<T> release() noexcept
+    KRYS_NODISCARD TCount CheckedPtrCount() const noexcept
     {
-      return PtrTraits::exchange(_ptr, nullptr);
+      return _checkedPtrCount;
     }
 
-    KRYS_ALWAYS_INLINE constexpr void reset() noexcept
+    void SetDidBeginCheckedPtrDeletion() noexcept
     {
-      RefDerefTraits::SubRef(PtrTraits::exchange(_ptr, nullptr));
-    }
-
-    KRYS_ALWAYS_INLINE constexpr void swap(CheckedPtr &o) noexcept
-    {
-      PtrTraits::swap(_ptr, o._ptr);
-    }
-
-    friend constexpr void swap(CheckedPtr &a, CheckedPtr &b) noexcept
-    {
-      a.swap(b);
+#if KRYS_ENV(DEV)
+      _didBeginDeletion = true;
+#endif
     }
 
   private:
-    KRYS_ALWAYS_INLINE explicit constexpr CheckedPtr(RawPtr<T> ptr) noexcept : _ptr(ptr)
+    KRYS_NORETURN KRYS_NEVER_INLINE static void CrashDueToCheckedPtrToDeadObject() noexcept
     {
+      std::terminate();
     }
   };
 
-  template <typename T, typename U, typename V, typename X, typename Y, typename Z>
-  constexpr inline bool operator==(const CheckedPtr<T, U, V> &a, const CheckedPtr<X, Y, Z> &b) noexcept
+  template <typename T, DefaultedOperatorEqual DefaultOperatorEqual = DefaultedOperatorEqual::No>
+  class CanMakeCheckedPtr : public CanMakeCheckedPtrBase<uint32, false>
   {
-    return a.get() == b.get();
-  }
-
-  template <typename T, typename U, typename V, typename X>
-  constexpr inline bool operator==(const CheckedPtr<T, U, V> &a, RawPtr<X> b) noexcept
-  {
-    return a.get() == b;
-  }
-
-  template <typename T, typename U, typename V, typename X>
-  constexpr inline bool operator==(const CheckedPtr<T, U, V> &a, std::nullptr_t) noexcept
-  {
-    return a.get() == nullptr;
-  }
-
-  template <typename T, typename PtrTraits>
-  struct GetPtrHelper<CheckedPtr<T, PtrTraits>>
-  {
-    using pointer_type = RawPtr<T>;
-    using underlying_type = T;
-
-    KRYS_NODISCARD static pointer_type GetPtr(const CheckedPtr<T, PtrTraits> &ptr) noexcept
+  public:
+    ~CanMakeCheckedPtr() noexcept
     {
-      return const_cast<pointer_type>(ptr.get());
+      static_assert(T::_delete_overridden_for_checkedptr,
+                    "Objects that use CanMakeCheckedPtr must use KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR");
+    }
+
+    friend bool operator==(const CanMakeCheckedPtr &, const CanMakeCheckedPtr &) noexcept
+    {
+      static_assert(DefaultOperatorEqual == DefaultedOperatorEqual::Yes,
+                    "Derived class should opt-in when defaulting operator==, or invalid/undefined comparison "
+                    "should be reworked/defined");
+      return true;
     }
   };
 
-  template <typename T, typename U>
-  struct IsSmartPtr<CheckedPtr<T, U>>
+  template <typename T, DefaultedOperatorEqual DefaultOperatorEqual = DefaultedOperatorEqual::No>
+  class CanMakeThreadSafeCheckedPtr : public CanMakeCheckedPtrBase<uint32, true>
   {
-    static constexpr bool value = true;
-    static constexpr bool nullable = false;
+  public:
+    ~CanMakeThreadSafeCheckedPtr() noexcept
+    {
+      static_assert(T::_delete_overridden_for_checkedptr,
+                    "Objects that use CanMakeCheckedPtr must use KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR");
+    }
+
+    friend bool operator==(const CanMakeThreadSafeCheckedPtr &, const CanMakeThreadSafeCheckedPtr &) noexcept
+    {
+      static_assert(DefaultOperatorEqual == DefaultedOperatorEqual::Yes,
+                    "Derived class should opt-in when defaulting operator==, or invalid/undefined comparison "
+                    "should be reworked/defined");
+
+      return true;
+    }
   };
 
-  template <typename T, typename PtrTraits = RawPtrTraits<T>,
-            typename RefDerefTraits = CheckedRefDerefTraits<T>>
-  KRYS_NODISCARD constexpr inline CheckedPtr<T, PtrTraits, RefDerefTraits> CreateCheckedPtr(T &ptr) noexcept
-  {
-    return CheckedPtr<T, PtrTraits, RefDerefTraits>::WithRef(ptr);
-  }
+/// @brief delete(T*, std::destroying_delete_t, size_t) is preferred over delete(void*)
+/// in overload resolution, so we can use it to interpose before calling delete(void*).
+/// @note KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR must be declared in every subclass.
+#define KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR_IMPL(T)                                                         \
+  void operator delete(T *object, std::destroying_delete_t, size_t size)                                     \
+  {                                                                                                          \
+    assert(sizeof(T) == size);                                                                               \
+                                                                                                             \
+    object->SetDidBeginCheckedPtrDeletion();                                                                 \
+                                                                                                             \
+    /* Run destructor manually */                                                                            \
+    object->T::~T();                                                                                         \
+                                                                                                             \
+    /* If CheckedPtrs still exist, poison and keep memory */                                                 \
+    if (object->CheckedPtrCount()) KRYS_UNLIKELY                                                             \
+    {                                                                                                        \
+      ::Krys::ByteUtils::ZeroObject(*object);                                                                \
+      return;                                                                                                \
+    }                                                                                                        \
+                                                                                                             \
+    /* Free memory WITHOUT re-entering delete */                                                             \
+    ::operator delete(static_cast<void *>(object));                                                          \
+  }                                                                                                          \
+  constexpr inline static bool _delete_overridden_for_checkedptr = true;
 
-  template <typename T, typename PtrTraits = RawPtrTraits<T>,
-            typename RefDerefTraits = CheckedRefDerefTraits<T>>
-  KRYS_NODISCARD constexpr inline CheckedPtr<T, PtrTraits, RefDerefTraits> AdoptCheckedPtr(T *ptr) noexcept
-  {
-    return CheckedPtr<T, PtrTraits, RefDerefTraits>::NoRef(ptr);
-  }
+/// @note KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR must be declared in the most derived subclass.
+#define KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ClassName)                                                      \
+public:                                                                                                      \
+  KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR_IMPL(ClassName)                                                       \
+private:                                                                                                     \
+  using _forceSemicolonAfterKrysOverrideDeleteCheckedPtr = int
 
-  template <typename T, typename PtrTraits = RawPtrTraits<T>,
-            typename RefDerefTraits = CheckedRefDerefTraits<T>>
-  KRYS_NODISCARD constexpr inline CheckedPtr<T, PtrTraits, RefDerefTraits> ShareCheckedPtr(T *ptr) noexcept
-  {
-    return CheckedPtr<T, PtrTraits, RefDerefTraits>::WithRef(ptr);
-  }
+#define KRYS_STRUCT_OVERRIDE_DELETE_FOR_CHECKED_PTR(ClassName)                                               \
+  KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR_IMPL(ClassName)                                                       \
+  using _forceSemicolonKrysOverrideDeleteCheckedPtr = int
 }

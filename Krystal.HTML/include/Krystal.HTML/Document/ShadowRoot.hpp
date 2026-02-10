@@ -5,7 +5,7 @@
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/Ref.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/RefPtr.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::HTML
@@ -43,7 +43,8 @@ namespace Krys::HTML
 
     // TODO: most of the fecking implementation lol
   public:
-    ShadowRoot(Document &document, RefPtr<CustomElementRegistry>&& registry, NodeFlag flags = NodeFlag::None) noexcept;
+    ShadowRoot(Document &document, RefPtr<CustomElementRegistry> &&registry,
+               NodeFlag flags = NodeFlag::None) noexcept;
 
     KRYS_NODISCARD ShadowRootMode Mode() const noexcept
     {
