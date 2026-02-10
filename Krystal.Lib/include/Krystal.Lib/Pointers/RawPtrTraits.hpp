@@ -28,15 +28,5 @@ namespace Krys
     {
       return ptr;
     }
-
-    KRYS_NODISCARD KRYS_NODISCARD static storage_type HashTableDeletedValue() noexcept
-    {
-      return std::bit_cast<storage_type>(static_cast<uintptr_t>(-1));
-    }
-
-    KRYS_ALWAYS_INLINE KRYS_NODISCARD static bool IsHashTableDeletedValue(const storage_type &ptr) noexcept
-    {
-      return ptr == HashTableDeletedValue();
-    }
   };
 }

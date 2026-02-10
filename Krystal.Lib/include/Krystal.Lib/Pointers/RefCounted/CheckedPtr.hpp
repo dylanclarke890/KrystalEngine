@@ -162,20 +162,20 @@ namespace Krys
 
     KRYS_ALWAYS_INLINE constexpr T &operator*() const noexcept KRYS_LIFETIME_BOUND
     {
-      assert(_ptr);
+      assert(PtrTraits::unwrap(_ptr));
       return *PtrTraits::unwrap(_ptr);
     }
 
     KRYS_ALWAYS_INLINE constexpr RawPtr<T> operator->() const noexcept KRYS_LIFETIME_BOUND
     {
-      assert(_ptr);
+      assert(PtrTraits::unwrap(_ptr));
       return PtrTraits::unwrap(_ptr);
     }
 
     template <typename TMember>
     constexpr TMember &operator->*(TMember T::*memptr) const noexcept
     {
-      assert(_ptr);
+      assert(PtrTraits::unwrap(_ptr));
       return PtrTraits::unwrap(_ptr)->*memptr;
     }
 
@@ -195,7 +195,7 @@ namespace Krys
       // When it detects a dangling pointer, KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR scribbles an object with
       // zeroes and then leaks it. When we check CheckedPtrCount() here, we're checking for a scribbled
       // object.
-      assert(_ptr == nullptr || PtrTraits::unwrap(_ptr)->CheckedPtrCount());
+      assert(PtrTraits::unwrap(_ptr) == nullptr || PtrTraits::unwrap(_ptr)->CheckedPtrCount());
       return PtrTraits::unwrap(_ptr);
     }
 
@@ -209,7 +209,7 @@ namespace Krys
       RefDerefTraits::SubRef(PtrTraits::exchange(_ptr, nullptr));
     }
 
-    constexpr void swap(CheckedPtr &o) noexcept
+    KRYS_ALWAYS_INLINE constexpr void swap(CheckedPtr &o) noexcept
     {
       PtrTraits::swap(_ptr, o._ptr);
     }
