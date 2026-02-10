@@ -79,7 +79,7 @@ namespace Krys
       static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value,
                     "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
 
-      return !_impl ? nullptr : static_cast<RawPtr<T>>(_impl->template get<T>());
+      return _impl == nullptr ? nullptr : static_cast<RawPtr<T>>(_impl->template get<T>());
     }
 
     operator T &() const noexcept

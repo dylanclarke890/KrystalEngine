@@ -48,10 +48,17 @@ namespace Krys
 
   struct IsEnabled : public StronglyTypedBool<IsEnabled>
   {
+    using Base::Base;
   };
 
   struct IsDisabled : public StronglyTypedBool<IsDisabled>
   {
+    using Base::Base;
+  };
+
+  struct IsNullable : public StronglyTypedBool<IsNullable>
+  {
+    using Base::Base;
   };
 
   template <typename Derived, Number TNumber>

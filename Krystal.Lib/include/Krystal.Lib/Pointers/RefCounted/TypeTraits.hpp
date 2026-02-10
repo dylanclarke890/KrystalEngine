@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Pointers/RefCounted/Ref.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/RefPtr.hpp"
 #include "Krystal.Lib/Types/Expected.hpp"
 #include <cstddef>

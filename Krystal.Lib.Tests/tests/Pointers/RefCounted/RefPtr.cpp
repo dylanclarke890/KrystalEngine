@@ -1,5 +1,6 @@
 ﻿#include "Krystal.Lib/Pointers/RefCounted/RefPtr.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/Ref.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/RefCounted.hpp"
 #include <catch_all.hpp>
 

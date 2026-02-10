@@ -10,12 +10,6 @@ namespace Krys
 {
 #pragma region Ref
 
-  template <typename TExpected, typename TArg, typename PtrTraits, typename RefDerefTraits>
-  KRYS_NODISCARD constexpr inline bool Is(const Ref<TArg, PtrTraits, RefDerefTraits> &source) noexcept
-  {
-    return Is<TExpected>(source.get());
-  }
-
   template <typename T, typename U = RawPtrTraits<T>, typename V = DefaultRefDerefTraits<T>, typename X,
             typename Y, typename Z>
   KRYS_NODISCARD constexpr inline Ref<match_constness_t<X, T>, U, V>
@@ -91,12 +85,6 @@ namespace Krys
 #pragma endregion
 
 #pragma region RefPtr
-
-  template <typename TExpected, typename TArg, typename PtrTraits, typename RefDerefTraits>
-  KRYS_NODISCARD constexpr inline bool Is(const RefPtr<TArg, PtrTraits, RefDerefTraits> &source) noexcept
-  {
-    return Is<TExpected>(source.get());
-  }
 
   template <typename T, typename U = RawPtrTraits<T>, typename V = DefaultRefDerefTraits<T>, typename X,
             typename Y, typename Z>
@@ -176,12 +164,6 @@ namespace Krys
 
 #pragma region CheckedRef
 
-  template <typename TExpected, typename TArg, typename PtrTraits, typename RefDerefTraits>
-  KRYS_NODISCARD constexpr inline bool Is(const CheckedRef<TArg, PtrTraits, RefDerefTraits> &source) noexcept
-  {
-    return Is<TExpected>(source.get());
-  }
-
   template <typename T, typename U = RawPtrTraits<T>, typename V = CheckedRefDerefTraits<T>, typename X,
             typename Y, typename Z>
   KRYS_NODISCARD constexpr inline CheckedRef<match_constness_t<X, T>, U, V>
@@ -254,16 +236,6 @@ namespace Krys
     }
 
     return AdoptCheckedPtr<match_constness_t<X, T>, U, V>(static_cast<RawPtr<T>>(source.release()));
-  }
-
-#pragma endregion
-
-#pragma region CheckedPtr
-
-  template <typename TExpected, typename TArg, typename PtrTraits, typename RefDerefTraits>
-  KRYS_NODISCARD constexpr inline bool Is(const CheckedPtr<TArg, PtrTraits, RefDerefTraits> &source) noexcept
-  {
-    return Is<TExpected>(source.get());
   }
 
 #pragma endregion

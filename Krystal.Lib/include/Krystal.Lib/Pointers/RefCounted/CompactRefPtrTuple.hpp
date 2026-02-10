@@ -4,6 +4,7 @@
 #include "Krystal.Lib/Pointers/CompactPtr.hpp"
 #include "Krystal.Lib/Pointers/CompactPtrTuple.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/Ref.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/RefPtr.hpp"
 
 namespace Krys
@@ -33,7 +34,7 @@ namespace Krys
 
     constexpr ~CompactRefPtrTuple() noexcept
     {
-      Krys::DefaultRefDerefTraits<T>::derefIfNotNull(_data.Ptr());
+      RefPtr<T>::ref_policy::SubRef(_data.Ptr());
     }
 
     constexpr CompactRefPtrTuple(const CompactRefPtrTuple &other) noexcept
@@ -72,24 +73,22 @@ namespace Krys
     constexpr void SetPtr(RawPtr<T> ptr) noexcept
     {
       auto *old = _data.Ptr();
-      _data.SetPtr(Krys::DefaultRefDerefTraits<T>::refIfNotNull(ptr));
-      Krys::DefaultRefDerefTraits<T>::derefIfNotNull(old);
+      _data.SetPtr(RefPtr<T>::ref_policy::AddRef(ptr));
+      RefPtr<T>::ref_policy::SubRef(old);
     }
 
     constexpr void SetPtr(RefPtr<T> &&ptr) noexcept
     {
-      auto willRelease = Krys::Move(ptr);
       auto *old = _data.Ptr();
-      _data.SetPtr(willRelease.leakRef());
-      Krys::DefaultRefDerefTraits<T>::derefIfNotNull(old);
+      _data.SetPtr(ptr.release());
+      RefPtr<T>::ref_policy::SubRef(old);
     }
 
     constexpr void SetPtr(Ref<T> &&ptr) noexcept
     {
-      auto willRelease = Krys::Move(ptr);
       auto *old = _data.Ptr();
-      _data.SetPtr(&willRelease.leakRef());
-      Krys::DefaultRefDerefTraits<T>::derefIfNotNull(old);
+      _data.SetPtr(&ptr.release());
+      RefPtr<T>::ref_policy::SubRef(old);
     }
 
     KRYS_NODISCARD constexpr TData Data() const noexcept
