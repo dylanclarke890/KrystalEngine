@@ -158,7 +158,6 @@
     <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\IntrusivePtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RawPtr.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\Ref.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\RefCounted.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\AbstractCanMakeCheckedPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\AbstractRefCounted.hpp" />

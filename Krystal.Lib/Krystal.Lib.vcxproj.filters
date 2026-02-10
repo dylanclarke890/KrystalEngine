@@ -336,9 +336,6 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\RefCounted.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\Ref.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefCounted.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
