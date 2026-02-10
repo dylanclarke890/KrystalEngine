@@ -19,8 +19,13 @@ namespace Krys
     template <typename, typename, typename>
     friend class RefPtr;
 
+  public:
+    using pointer = typename PtrTraits::storage_type;
+    using element_type = T;
+    constexpr static bool nullable = true;
+
   private:
-    typename PtrTraits::storage_type _ptr;
+    pointer _ptr;
 
   public:
     KRYS_NODISCARD static constexpr RefPtr NoRef(RawPtr<T> ptr) noexcept
@@ -56,13 +61,16 @@ namespace Krys
     }
 
     template <typename X, typename Y, typename Z>
+    requires(ConvertibleTo<RawPtr<X>, RawPtr<T>>)
     KRYS_ALWAYS_INLINE constexpr RefPtr(const RefPtr<X, Y, Z> &o) noexcept
-        : _ptr(RefDerefTraits::AddRef(o.get()))
+        : _ptr(static_cast<RawPtr<T>>(RefDerefTraits::AddRef(o.get())))
     {
     }
 
     template <typename X, typename Y, typename Z>
-    KRYS_ALWAYS_INLINE constexpr RefPtr(Ref<X, Y, Z> &o) noexcept : _ptr(RefDerefTraits::AddRef(o.get()))
+    requires(ConvertibleTo<RawPtr<X>, RawPtr<T>>)
+    KRYS_ALWAYS_INLINE constexpr RefPtr(Ref<X, Y, Z> &o) noexcept
+        : _ptr(static_cast<RawPtr<T>>(RefDerefTraits::AddRef(o.get())))
     {
     }
 
@@ -71,12 +79,15 @@ namespace Krys
     }
 
     template <typename X, typename Y, typename Z>
-    KRYS_ALWAYS_INLINE constexpr RefPtr(RefPtr<X, Y, Z> &&o) noexcept : _ptr(o.release())
+    requires(ConvertibleTo<RawPtr<X>, RawPtr<T>>)
+    KRYS_ALWAYS_INLINE constexpr RefPtr(RefPtr<X, Y, Z> &&o) noexcept
+        : _ptr(static_cast<RawPtr<T>>(o.release()))
     {
     }
 
     template <typename X, typename Y, typename Z>
-    KRYS_ALWAYS_INLINE constexpr RefPtr(Ref<X, Y, Z> &&o) noexcept : _ptr(o.release())
+    requires(ConvertibleTo<RawPtr<X>, RawPtr<T>>)
+    KRYS_ALWAYS_INLINE constexpr RefPtr(Ref<X, Y, Z> &&o) noexcept : _ptr(static_cast<RawPtr<T>>(o.release()))
     {
     }
 
@@ -93,6 +104,7 @@ namespace Krys
     }
 
     template <typename X, typename Y, typename Z>
+    requires(ConvertibleTo<RawPtr<X>, RawPtr<T>>)
     constexpr RefPtr &operator=(const RefPtr<X, Y, Z> &o) noexcept
     {
       RefPtr ptr = o;
@@ -101,6 +113,7 @@ namespace Krys
     }
 
     template <typename X, typename Y, typename Z>
+    requires(ConvertibleTo<RawPtr<X>, RawPtr<T>>)
     constexpr RefPtr &operator=(Ref<X, Y, Z> &o) noexcept
     {
       RefPtr ptr = o;
@@ -116,6 +129,7 @@ namespace Krys
     }
 
     template <typename X, typename Y, typename Z>
+    requires(ConvertibleTo<RawPtr<X>, RawPtr<T>>)
     constexpr RefPtr &operator=(RefPtr<X, Y, Z> &&o) noexcept
     {
       RefPtr ptr = Krys::Move(o);
@@ -124,6 +138,7 @@ namespace Krys
     }
 
     template <typename X, typename Y, typename Z>
+    requires(ConvertibleTo<RawPtr<X>, RawPtr<T>>)
     constexpr RefPtr &operator=(Ref<X, Y, Z> &&o) noexcept
     {
       RefPtr ptr = Krys::Move(o);
@@ -145,13 +160,15 @@ namespace Krys
 
     KRYS_ALWAYS_INLINE constexpr RawPtr<T> operator->() const noexcept KRYS_LIFETIME_BOUND
     {
+      assert(_ptr);
       return PtrTraits::unwrap(_ptr);
     }
 
     template <typename TMember>
     constexpr TMember &operator->*(TMember T::*memptr) const noexcept
     {
-      return this->_ptr->*memptr;
+      assert(_ptr);
+      return PtrTraits::unwrap(_ptr)->*memptr;
     }
 
     constexpr bool operator!() const noexcept
@@ -174,15 +191,19 @@ namespace Krys
       return PtrTraits::exchange(_ptr, nullptr);
     }
 
-    KRYS_ALWAYS_INLINE constexpr void reset() noexcept // GCC refuses to inline this otherwise
+    KRYS_ALWAYS_INLINE constexpr void reset() noexcept
     {
       RefDerefTraits::SubRef(PtrTraits::exchange(_ptr, nullptr));
     }
 
-    template <typename X, typename Y, typename Z>
-    KRYS_ALWAYS_INLINE constexpr void swap(RefPtr<X, Y, Z> &o) noexcept
+    KRYS_ALWAYS_INLINE constexpr void swap(RefPtr &o) noexcept
     {
       PtrTraits::swap(_ptr, o._ptr);
+    }
+
+    friend constexpr void swap(RefPtr &a, RefPtr &b) noexcept
+    {
+      a.swap(b);
     }
 
   private:
@@ -249,5 +270,4 @@ namespace Krys
       return const_cast<pointer_type>(ptr.get());
     }
   };
-
 }

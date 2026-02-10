@@ -10,10 +10,8 @@ namespace Krys
   class AbstractThreadSafeRefCountedAndCanMakeWeakPtr : public AbstractRefCounted
   {
   public:
-    KRYS_NODISCARD virtual ThreadSafeWeakPtrControlBlock &ControlBlock() const noexcept = 0;
-
-  protected:
-    KRYS_NODISCARD virtual uint32 WeakRefCount() const noexcept = 0;
+    KRYS_NODISCARD virtual ThreadSafeWeakPtrControlBlock &GetControlBlock() const noexcept = 0;
+    KRYS_NODISCARD virtual uint32 GetRefCountWeak() const noexcept = 0;
   };
 }
 
@@ -27,12 +25,12 @@ namespace Krys
   {                                                                                                          \
     ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr::SubRef();                                               \
   }                                                                                                          \
-  KRYS_NODISCARD ThreadSafeWeakPtrControlBlock &ControlBlock() const noexcept final                          \
+  KRYS_NODISCARD ThreadSafeWeakPtrControlBlock &GetControlBlock() const noexcept final                       \
   {                                                                                                          \
-    return ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr::ControlBlock();                                  \
+    return ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr::GetControlBlock();                               \
   }                                                                                                          \
-  KRYS_NODISCARD uint32 WeakRefCount() const noexcept final                                                  \
+  KRYS_NODISCARD uint32 GetRefCountWeak() const noexcept final                                               \
   {                                                                                                          \
-    return ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr::WeakRefCount();                                  \
+    return ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr::GetRefCountWeak();                               \
   }                                                                                                          \
   using _forceSemicolonAbstractThreadSafeRefCountedAndCanMakeWeakPtr = int

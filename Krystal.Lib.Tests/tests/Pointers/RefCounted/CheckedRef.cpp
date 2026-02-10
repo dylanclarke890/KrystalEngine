@@ -18,9 +18,9 @@ namespace Krys::Tests
     REQUIRE(obj->CheckedPtrCount() == 0);
 
     {
-      CheckedRef<TestCheckedRefCounted> ref(*obj);
+      CheckedRef<TestCheckedRefCounted> ref = ShareCheckedRef(*obj);
       REQUIRE(obj->CheckedPtrCount() == 1);
-      REQUIRE(&ref.get() == obj);
+      REQUIRE(ref.get() == obj);
     }
 
     REQUIRE(obj->CheckedPtrCount() == 0);
@@ -32,13 +32,13 @@ namespace Krys::Tests
     auto *obj = new TestCheckedRefCounted();
 
     {
-      CheckedRef<TestCheckedRefCounted> r1(*obj);
+      CheckedRef<TestCheckedRefCounted> r1 = ShareCheckedRef(*obj);
       REQUIRE(obj->CheckedPtrCount() == 1);
 
       {
         CheckedRef<TestCheckedRefCounted> r2(r1);
         REQUIRE(obj->CheckedPtrCount() == 2);
-        REQUIRE(&r2.get() == obj);
+        REQUIRE(r2.get() == obj);
       }
 
       REQUIRE(obj->CheckedPtrCount() == 1);
@@ -51,12 +51,12 @@ namespace Krys::Tests
     auto *obj = new TestCheckedRefCounted();
 
     {
-      CheckedRef<TestCheckedRefCounted> r1(*obj);
+      CheckedRef<TestCheckedRefCounted> r1 = ShareCheckedRef(*obj);
       REQUIRE(obj->CheckedPtrCount() == 1);
 
       CheckedRef<TestCheckedRefCounted> r2(std::move(r1));
       REQUIRE(obj->CheckedPtrCount() == 1);
-      REQUIRE(&r2.get() == obj);
+      REQUIRE(r2.get() == obj);
     }
 
     delete obj;
@@ -68,15 +68,15 @@ namespace Krys::Tests
     auto *b = new TestCheckedRefCounted();
 
     {
-      CheckedRef<TestCheckedRefCounted> ref(*a);
+      CheckedRef<TestCheckedRefCounted> ref = ShareCheckedRef(*a);
       REQUIRE(a->CheckedPtrCount() == 1);
       REQUIRE(b->CheckedPtrCount() == 0);
 
-      ref = *b;
+      ref = ShareCheckedRef(*b);
 
       REQUIRE(a->CheckedPtrCount() == 0);
       REQUIRE(b->CheckedPtrCount() == 1);
-      REQUIRE(&ref.get() == b);
+      REQUIRE(ref.get() == b);
     }
 
     delete a;
@@ -89,15 +89,15 @@ namespace Krys::Tests
     auto *b = new TestCheckedRefCounted();
 
     {
-      CheckedRef<TestCheckedRefCounted> ra(*a);
-      CheckedRef<TestCheckedRefCounted> ra2(*a);
-      CheckedRef<TestCheckedRefCounted> rb(*b);
+      CheckedRef<TestCheckedRefCounted> ra = ShareCheckedRef(*a);
+      CheckedRef<TestCheckedRefCounted> ra2 = ShareCheckedRef(*a);
+      CheckedRef<TestCheckedRefCounted> rb = ShareCheckedRef(*b);
 
-      REQUIRE(&ra.get() == a);
-      REQUIRE(&ra2.get() == a);
-      REQUIRE(&rb.get() == b);
-      REQUIRE(&ra.get() == &ra2.get());
-      REQUIRE(&ra.get() != &rb.get());
+      REQUIRE(ra.get() == a);
+      REQUIRE(ra2.get() == a);
+      REQUIRE(rb.get() == b);
+      REQUIRE(ra.get() == ra2.get());
+      REQUIRE(ra.get() != rb.get());
     }
 
     delete a;

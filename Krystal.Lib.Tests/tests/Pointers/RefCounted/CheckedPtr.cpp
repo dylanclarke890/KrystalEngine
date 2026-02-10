@@ -26,7 +26,7 @@ namespace Krys::Tests
     REQUIRE(obj->CheckedPtrCount() == 0);
 
     {
-      CheckedPtr<TestCheckedRefCounted> ptr(obj);
+      CheckedPtr<TestCheckedRefCounted> ptr = ShareCheckedPtr(obj);
       REQUIRE(ptr);
       REQUIRE(obj->CheckedPtrCount() == 1);
     }
@@ -40,7 +40,7 @@ namespace Krys::Tests
     auto *obj = new TestCheckedRefCounted();
 
     {
-      CheckedPtr<TestCheckedRefCounted> p1(obj);
+      CheckedPtr<TestCheckedRefCounted> p1 = ShareCheckedPtr(obj);
       REQUIRE(obj->CheckedPtrCount() == 1);
 
       {
@@ -60,7 +60,7 @@ namespace Krys::Tests
     auto *obj = new TestCheckedRefCounted();
 
     {
-      CheckedPtr<TestCheckedRefCounted> p1(obj);
+      CheckedPtr<TestCheckedRefCounted> p1 = ShareCheckedPtr(obj);
       REQUIRE(obj->CheckedPtrCount() == 1);
 
       CheckedPtr<TestCheckedRefCounted> p2(std::move(p1));
@@ -78,11 +78,11 @@ namespace Krys::Tests
     auto *b = new TestCheckedRefCounted();
 
     {
-      CheckedPtr<TestCheckedRefCounted> ptr(a);
+      CheckedPtr<TestCheckedRefCounted> ptr = ShareCheckedPtr(a);
       REQUIRE(a->CheckedPtrCount() == 1);
       REQUIRE(b->CheckedPtrCount() == 0);
 
-      ptr = b;
+      ptr = ShareCheckedPtr(b);
 
       REQUIRE(a->CheckedPtrCount() == 0);
       REQUIRE(b->CheckedPtrCount() == 1);
@@ -98,7 +98,7 @@ namespace Krys::Tests
     auto *obj = new TestCheckedRefCounted();
 
     {
-      CheckedPtr<TestCheckedRefCounted> ptr(obj);
+      CheckedPtr<TestCheckedRefCounted> ptr = ShareCheckedPtr(obj);
       REQUIRE(obj->CheckedPtrCount() == 1);
 
       ptr = nullptr;
@@ -116,9 +116,9 @@ namespace Krys::Tests
     auto *b = new TestCheckedRefCounted();
 
     {
-      CheckedPtr<TestCheckedRefCounted> pa(a);
-      CheckedPtr<TestCheckedRefCounted> pa2(a);
-      CheckedPtr<TestCheckedRefCounted> pb(b);
+      CheckedPtr<TestCheckedRefCounted> pa = ShareCheckedPtr(a);
+      CheckedPtr<TestCheckedRefCounted> pa2 = ShareCheckedPtr(a);
+      CheckedPtr<TestCheckedRefCounted> pb = ShareCheckedPtr(b);
 
       REQUIRE(pa == a);
       REQUIRE(pa == pa2);

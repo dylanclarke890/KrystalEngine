@@ -8,7 +8,7 @@
 
 namespace Krys::detail
 {
-  template <typename TWeakPtrFactory, WeakPtrFactoryInitialization InitializationMode>
+  template <WeakPtrFactoryInitialization InitializationMode, typename TWeakPtrFactory>
   class CanMakeWeakPtrBase
   {
   public:
@@ -47,7 +47,7 @@ namespace Krys::detail
       return *_weakPtrFactory.Impl();
     }
 
-    KRYS_NODISCARD uint32 WeakCount() const noexcept
+    KRYS_NODISCARD uint32 GetRefCountWeak() const noexcept
     {
       return _weakPtrFactory.WeakPtrCount();
     }
@@ -77,16 +77,17 @@ namespace Krys::detail
 
 namespace Krys
 {
-  template <typename T, WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy,
-            typename WeakPtrImpl = DefaultWeakPtrImpl>
+  template <typename T, typename WeakPtrImpl = DefaultWeakPtrImpl,
+            WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy>
   using CanMakeWeakPtr =
-    ::Krys::detail::CanMakeWeakPtrBase<WeakPtrFactory<T, WeakPtrImpl>, InitializationMode>;
+    ::Krys::detail::CanMakeWeakPtrBase<InitializationMode, WeakPtrFactory<T, WeakPtrImpl>>;
 
-  template <typename T, WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy,
-            typename WeakPtrImpl = DefaultWeakPtrImpl>
+  template <typename T, typename WeakPtrImpl = DefaultWeakPtrImpl,
+            WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy>
   using CanMakeWeakPtrWithBitField =
-    ::Krys::detail::CanMakeWeakPtrBase<WeakPtrFactoryWithBitField<T, WeakPtrImpl>, InitializationMode>;
+    ::Krys::detail::CanMakeWeakPtrBase<InitializationMode, WeakPtrFactoryWithBitField<T, WeakPtrImpl>>;
 
-  template <typename T, WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy>
-  using CanMakeSingleThreadWeakPtr = CanMakeWeakPtr<T, InitializationMode, SingleThreadWeakPtrImpl>;
+  template <typename T, typename WeakPtrImpl = SingleThreadWeakPtrImpl,
+            WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy>
+  using CanMakeSingleThreadWeakPtr = CanMakeWeakPtr<T, SingleThreadWeakPtrImpl>;
 }

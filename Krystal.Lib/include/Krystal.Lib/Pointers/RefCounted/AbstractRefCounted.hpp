@@ -12,5 +12,6 @@ namespace Krys
   public:
     virtual void AddRef() const noexcept = 0;
     virtual void SubRef() const noexcept = 0;
+    virtual uint32 GetRefCount() const noexcept = 0;
   };
 }

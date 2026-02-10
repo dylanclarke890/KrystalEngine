@@ -22,7 +22,6 @@ namespace Krys
     ~RefCountedWithInlineWeakPtrBase() noexcept
     {
       _refCountDebugger.WillDestroy(_strongCount);
-      assert(_strongCount == 1);
       _strongCount = 0;
     }
 
