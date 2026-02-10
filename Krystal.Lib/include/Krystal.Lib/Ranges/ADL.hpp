@@ -474,7 +474,7 @@ namespace Krys::Ranges
   template <typename T>
   concept IsView =
     enable_view<T> && IsRange<T>
-    && ((MoveConstructible<T> && MoveAssignable<T>) || (IsRange<T> && !Const<T> && LValueRef<T>));
+    && ((MoveConstructible<T> && MoveAssignable<T>) || (IsRange<T> && !IsConst<T> && LValueRef<T>));
 
   /// @brief Whether or not a given type is a borrowed range or not. Used as a proxy over the standard's
   /// borrowed_range, if it exists.

@@ -32,13 +32,13 @@ namespace Krys::Ranges
     constexpr WrappedPointer(pointer ptr) : _ptr(ptr)
     {
     }
-    template <typename TRight, std::enable_if_t<!SameType<WrappedPointer<T>, WrappedPointer<TRight>>
-                                                  && Const<T> && !Const<TRight>,
-                                                std::nullptr_t> = nullptr>
+    template <typename TRight, enable_if_t<!SameType<WrappedPointer<T>, WrappedPointer<TRight>> && IsConst<T>
+                                             && !IsConst<TRight>,
+                                           std::nullptr_t> = nullptr>
     constexpr WrappedPointer(const WrappedPointer<TRight> &right) noexcept : _ptr(right._ptr)
     {
     }
-    template <typename TRight, std::enable_if_t<Const<T> && !Const<TRight>, std::nullptr_t> = nullptr>
+    template <typename TRight, enable_if_t<IsConst<T> && !IsConst<TRight>, std::nullptr_t> = nullptr>
     constexpr WrappedPointer(WrappedPointer<TRight> &&right) noexcept : _ptr(std::move(right._ptr))
     {
     }

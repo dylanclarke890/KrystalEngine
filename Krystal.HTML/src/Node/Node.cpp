@@ -10,7 +10,7 @@
 namespace Krys::HTML
 {
   Node::Node(Document &document, NodeType type, NodeFlag flags) noexcept
-      : EventTarget(ConstructNodeTag {}), _nodeType(type), _ownerDocument(RetainRefPtr(&document)),
+      : EventTarget(ConstructNodeTag {}), _nodeType(type), _ownerDocument(ShareRefPtr(&document)),
         _parentNode(nullptr), _previousSibling(nullptr), _nextSibling(nullptr),
         _treeScope((IsDocumentNode() || IsShadowRootNode()) ? nullptr : &document)
   {

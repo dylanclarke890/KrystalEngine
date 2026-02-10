@@ -321,9 +321,6 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\IntrusivePtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\RefPtr.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Core\TypeCast.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -340,9 +337,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\Ref.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\WeakRef.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefCounted.hpp">
@@ -439,6 +433,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\TypeTraits.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\TypeCast.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -25,7 +25,7 @@ namespace Krys::Ranges
       using TIteratorElement = remove_ref_t<iterator_reference_t<TIterator>>;
       constexpr const bool check = NonDerivedCompatiblePointer<TIteratorElement, T> // cf
                                    && IsContiguousIterator<TIterator>               // cf
-                                   && ((Const<TIteratorElement>) ? Const<T> : true);
+                                   && ((IsConst<TIteratorElement>) ? IsConst<T> : true);
       if constexpr (check)
       {
         if constexpr (SizedSentinelFor<TIterator, TSentinel>)

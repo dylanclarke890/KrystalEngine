@@ -34,7 +34,7 @@ namespace Krys
     WeakRef(const T &object,
             EnabledWeakPtrThreadAsserts shouldEnableAssertions = EnabledWeakPtrThreadAsserts::Yes) noexcept
     requires(!IsSmartPtr<T>::value && !IsPointer<T>)
-        : _impl(object.WeakImpl())
+        : _impl(ShareRef(object.WeakImpl()))
 #if KRYS_ENV(DEV)
           ,
           _shouldEnableAssertions(shouldEnableAssertions == EnabledWeakPtrThreadAsserts::Yes)
@@ -54,40 +54,14 @@ namespace Krys
       (void)shouldEnableAssertions;
     }
 
-    WeakRef(HashTableDeletedValueType) noexcept : _impl(HashTableDeletedValue)
-    {
-    }
-
-    WeakRef(HashTableEmptyValueType) noexcept : _impl(HashTableEmptyValue)
-    {
-    }
-
-    bool IsHashTableDeletedValue() const noexcept
-    {
-      return _impl.IsHashTableDeletedValue();
-    }
-
-    bool IsHashTableEmptyValue() const noexcept
-    {
-      return _impl.IsHashTableEmptyValue();
-    }
-
     WeakPtrImpl &Impl() const noexcept
     {
-      return _impl;
+      return *_impl.get();
     }
 
     Ref<WeakPtrImpl> ReleaseImpl() noexcept
     {
       return Krys::Move(_impl);
-    }
-
-    RawPtr<T> PtrAllowingHashTableEmptyValue() const noexcept
-    {
-      static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value,
-                    "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
-
-      return !_impl.IsHashTableEmptyValue() ? static_cast<RawPtr<T>>(_impl->template get<T>()) : nullptr;
     }
 
     RawPtr<T> ptr() const noexcept
@@ -100,19 +74,17 @@ namespace Krys
       return ptr;
     }
 
-    T &get() const noexcept
+    T *get() const noexcept
     {
       static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value,
                     "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
 
-      auto *ptr = static_cast<RawPtr<T>>(_impl->template get<T>());
-      assert(ptr);
-      return *ptr;
+      return !_impl ? nullptr : static_cast<RawPtr<T>>(_impl->template get<T>());
     }
 
     operator T &() const noexcept
     {
-      return get();
+      return *get();
     }
 
     RawPtr<T> operator->() const noexcept

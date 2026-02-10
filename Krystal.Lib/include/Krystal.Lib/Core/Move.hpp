@@ -11,7 +11,7 @@ namespace Krys
   KRYS_NODISCARD constexpr inline remove_ref_t<T> &&Move(T &&value)
   {
     static_assert(LValueRef<T>, "T is not an lvalue reference; Move() is unnecessary.");
-    static_assert(!Const<remove_ref_t<T>>, "T is const qualified.");
+    static_assert(!IsConst<remove_ref_t<T>>, "T is const qualified.");
 
     return std::move(std::forward<T>(value));
   }

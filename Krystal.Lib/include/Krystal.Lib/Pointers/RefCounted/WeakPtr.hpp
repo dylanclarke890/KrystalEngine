@@ -40,7 +40,7 @@ namespace Krys
 
     template <typename U>
     WeakPtr(WeakPtr<U, WeakPtrImpl, PtrTraits> &&o) noexcept
-        : _impl(AdoptRef(weak_ptr_impl_cast<T, U>(o._impl.LeakRef())))
+        : _impl(AdoptRef(weak_ptr_impl_cast<T, U>(o._impl.release())))
 #if KRYS_ENV(DEV)
           ,
           _shouldEnableAssertions(o._shouldEnableAssertions)
@@ -60,7 +60,7 @@ namespace Krys
 
     template <typename U>
     WeakPtr(WeakRef<U, WeakPtrImpl> &&o) noexcept
-        : _impl(AdoptRef(weak_ptr_impl_cast<T, U>(o.ReleaseImpl().LeakRef())))
+        : _impl(AdoptRef(weak_ptr_impl_cast<T, U>(o.ReleaseImpl().release())))
 #if KRYS_ENV(DEV)
           ,
           _shouldEnableAssertions(o.EnableThreadAsserts() == EnabledWeakPtrThreadAsserts::Yes)
@@ -84,7 +84,7 @@ namespace Krys
     template <typename = enable_if_t<!IsSmartPtr<T>::value && !IsPointer<T>>>
     WeakPtr(const T &object,
             EnabledWeakPtrThreadAsserts shouldEnableAssertions = EnabledWeakPtrThreadAsserts::Yes) noexcept
-        : _impl(&object.WeakImpl())
+        : _impl(ShareRefPtr(&object.WeakImpl()))
 #if KRYS_ENV(DEV)
           ,
           _shouldEnableAssertions(shouldEnableAssertions == EnabledWeakPtrThreadAsserts::Yes)
@@ -188,7 +188,7 @@ namespace Krys
     template <typename U>
     WeakPtr &operator=(WeakPtr<U, WeakPtrImpl, PtrTraits> &&o) noexcept
     {
-      _impl = AdoptRef(weak_ptr_impl_cast<T, U>(o._impl.LeakRef()));
+      _impl = AdoptRef(weak_ptr_impl_cast<T, U>(o._impl.release()));
 #if KRYS_ENV(DEV)
       _shouldEnableAssertions = o._shouldEnableAssertions;
 #endif

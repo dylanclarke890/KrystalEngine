@@ -56,14 +56,14 @@ namespace Krys::Tests
     REQUIRE(weakPtr.get() == nullptr);
   }
 
-    TEST_CASE("WeakPtr can be created from impl", "[WeakPtr]")
+  TEST_CASE("WeakPtr can be created from impl", "[WeakPtr]")
   {
     auto *obj = new TestWeakRefCounted();
 
-    RefPtr<SingleThreadWeakPtrImpl> impl = obj->WeakImpl();
+    RefPtr<SingleThreadWeakPtrImpl> impl = ShareRefPtr(&obj->WeakImpl());
     SingleThreadWeakPtr<TestWeakRefCounted> weakPtr(Krys::Move(impl));
 
-    REQUIRE(impl.IsHashTableEmptyValue());
+    REQUIRE(impl.get() == nullptr);
     REQUIRE(weakPtr.get() == obj);
 
     obj->SubRef();

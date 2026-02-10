@@ -10,7 +10,7 @@ private:                                                                        
   void *operator new(size_t) = delete;                                                                       \
   void *operator new[](size_t size) = delete;                                                                \
   void *operator new(size_t, NotNullTag, void *) = delete;                                                   \
-  typedef int _thisIsHereToForceASemicolonAfterThisForbidHeapAllocationMacro
+  using _forceSemicolonForbidHeapAllocation = int
 
 #define KRYS_FORBID_HEAP_ALLOCATION_ALLOWING_PLACEMENT_NEW                                                   \
 public:                                                                                                      \
@@ -31,4 +31,4 @@ public:                                                                         
 private:                                                                                                     \
   void *operator new(size_t) = delete;                                                                       \
   void *operator new[](size_t size) = delete;                                                                \
-  typedef int _thisIsHereToForceASemicolonAfterThisForbidHeapAllocationAllowingPlacementNewMacro
+  using _forceSemicolonForbidHeapAllocationAllowingPlacementNew = int

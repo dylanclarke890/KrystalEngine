@@ -13,7 +13,7 @@ namespace Krys::HTML
   Ref<Text> Text::SplitText(size_t offset) noexcept
   {
     // TODO (IMPL):
-    return RetainRef(*this);
+    return ShareRef(*this);
   }
 
   /// @see https://dom.spec.whatwg.org/#dom-text-wholetext

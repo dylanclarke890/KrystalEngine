@@ -23,7 +23,7 @@ namespace Krys::Tests
       REQUIRE(obj->GetRefCount() == 1);
 
       {
-        auto ref2 = ref1.CopyRef();
+        auto ref2 = ref1;
         REQUIRE(obj->GetRefCount() == 2);
 
         auto ref3 = Krys::Move(ref2);
@@ -124,7 +124,7 @@ namespace Krys::Tests
     REQUIRE(obj->GetRefCountDebugger().DeletionHasBegun());
   }
 
-  TEST_CASE("Ref LeakRef transfers ownership without refcount change", "[Ref]")
+  TEST_CASE("Ref release transfers ownership without refcount change", "[Ref]")
   {
     auto *obj = new TestRefCounted();
 
@@ -134,7 +134,7 @@ namespace Krys::Tests
       Ref<TestRefCounted> ref = AdoptRef(*obj);
       REQUIRE(obj->GetRefCount() == 1);
 
-      raw = &ref.LeakRef();
+      raw = ref.release();
       REQUIRE(obj->GetRefCount() == 1);
     }
 

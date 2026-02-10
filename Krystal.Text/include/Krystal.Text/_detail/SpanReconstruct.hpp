@@ -28,7 +28,7 @@ namespace Krys::Text::detail
         using T = typename TUInput::element_type;
         return Span<T, TUInput::extent>(input);
       }
-      else if constexpr (IsArray<TUInput> && Const<remove_extent_t<TCVInput>> && LValueRef<TInput>)
+      else if constexpr (IsArray<TUInput> && IsConst<remove_extent_t<TCVInput>> && LValueRef<TInput>)
       {
         using TChar = remove_extent_t<TUInput>;
         if constexpr (IsCharTraitable<TChar>)
@@ -66,7 +66,7 @@ namespace Krys::Text::detail
         using T = const typename TUInput::value_type;
         return Span<T, TUInput::extent>(input);
       }
-      else if constexpr (IsArray<TUInput> && Const<remove_extent_t<TCVInput>> && LValueRef<TInput>)
+      else if constexpr (IsArray<TUInput> && IsConst<remove_extent_t<TCVInput>> && LValueRef<TInput>)
       {
         using TChar = remove_extent_t<TUInput>;
         if constexpr (IsCharTraitable<TChar>)

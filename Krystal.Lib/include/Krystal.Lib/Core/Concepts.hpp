@@ -181,7 +181,7 @@ namespace Krys
   concept RValueRef = std::is_rvalue_reference<T>::value;
 
   template <typename T>
-  concept Const = std::is_const_v<remove_ref_t<T>>;
+  concept IsConst = std::is_const_v<remove_ref_t<T>>;
 
   template <typename T>
   concept Class = std::is_class_v<T>;

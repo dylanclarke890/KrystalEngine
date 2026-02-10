@@ -84,10 +84,10 @@ namespace Krys::HTML
 
   class Node : public EventTarget, public CanMakeCheckedPtr<Node>
   {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Node);
+
     friend class Document;
     friend class NodeMutationNotifier;
-
-    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Node);
 
   private:
     NodeFlag _flags : BitCount<NodeFlag>() {NodeFlag::None};

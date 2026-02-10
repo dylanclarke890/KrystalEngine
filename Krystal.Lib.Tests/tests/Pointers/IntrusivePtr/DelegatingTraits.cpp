@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Lib/Pointers/IntrusivePtrV1/RefCounted.hpp"
-#include "Krystal.Lib/Pointers/IntrusivePtrV1/RefPtr.hpp"
 #include <catch_all.hpp>
 #include <cstddef>
 #include <cstdint>
