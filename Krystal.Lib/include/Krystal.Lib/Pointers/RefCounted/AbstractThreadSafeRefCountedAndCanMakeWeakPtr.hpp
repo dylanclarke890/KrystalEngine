@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/AbstractRefCounted.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/ThreadSafeWeakPtr.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 

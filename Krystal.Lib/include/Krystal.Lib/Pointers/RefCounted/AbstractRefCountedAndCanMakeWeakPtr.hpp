@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Pointers/RefCounted/AbstractRefCounted.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/CanMakeWeakPtr.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/RefCounted.hpp"
 
 namespace Krys
 {

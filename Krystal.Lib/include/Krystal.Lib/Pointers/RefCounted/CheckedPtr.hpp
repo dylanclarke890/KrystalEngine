@@ -2,8 +2,8 @@
 
 #include "Krystal.Lib/ByteUtils.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
-#include "Krystal.Lib/Pointers/RawPtrTraits.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/IntrusiveHandle.hpp"
+#include "Krystal.Lib/Pointers/IntrusivePtr.hpp"
+#include "Krystal.Lib/Pointers/RawPtr.hpp"
 
 namespace Krys
 {
@@ -14,7 +14,7 @@ namespace Krys
   /// @note Use is similar to WeakPtr, but CheckedPtr has less overhead and is used in cases where the target
   /// is never expected to become null.
   template <typename T, typename PtrTraits = RawPtrTraits<T>>
-  using CheckedPtr = IntrusiveHandle<T, PtrTraits, CheckedPolicy<T>, CheckedAccess<T>, IsNullable(true)>;
+  using CheckedPtr = IntrusivePtr<T, PtrTraits, CheckedPolicy<T>, CheckedAccess<T>, IsNullable(true)>;
 
   template <typename T, typename PtrTraits = RawPtrTraits<T>, typename... Args>
   KRYS_NODISCARD constexpr inline CheckedPtr<T, PtrTraits> CreateCheckedPtr(Args &&...args)
@@ -36,7 +36,7 @@ namespace Krys
   }
 
   template <typename T, typename PtrTraits = RawPtrTraits<T>>
-  using CheckedRef = IntrusiveHandle<T, PtrTraits, CheckedPolicy<T>, CheckedAccess<T>, IsNullable(false)>;
+  using CheckedRef = IntrusivePtr<T, PtrTraits, CheckedPolicy<T>, CheckedAccess<T>, IsNullable(false)>;
 
   template <typename T, typename PtrTraits = RawPtrTraits<T>, typename... Args>
   KRYS_NODISCARD constexpr inline CheckedRef<T, PtrTraits> CreateCheckedRef(Args &&...args)

@@ -7,8 +7,8 @@
 #include "Krystal.Lib/Detection/OS.hpp"
 #include "Krystal.Lib/Pointers/GetPtr.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Pointers/RawPtrTraits.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include <bit>
 #include <cstdint>
 #include <utility>
 

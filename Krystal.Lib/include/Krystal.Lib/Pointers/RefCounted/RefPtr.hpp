@@ -1,14 +1,13 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Pointers/IntrusivePtr.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Pointers/RawPtrTraits.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/IntrusiveHandle.hpp"
 
 namespace Krys
 {
   template <typename T, typename PtrTraits = RawPtrTraits<T>>
-  using RefPtr = IntrusiveHandle<T, PtrTraits, StrongRefPolicy<T>, NoCheckAccess<T>, IsNullable(true)>;
+  using RefPtr = IntrusivePtr<T, PtrTraits, StrongRefPolicy<T>, NoCheckAccess<T>, IsNullable(true)>;
 
   template <typename T, typename PtrTraits = RawPtrTraits<T>, typename... Args>
   KRYS_NODISCARD constexpr inline RefPtr<T, PtrTraits> CreateRefPtr(Args &&...args) noexcept
@@ -30,7 +29,7 @@ namespace Krys
   }
 
   template <typename T, typename PtrTraits = RawPtrTraits<T>>
-  using Ref = IntrusiveHandle<T, PtrTraits, StrongRefPolicy<T>, NoCheckAccess<T>, IsNullable(false)>;
+  using Ref = IntrusivePtr<T, PtrTraits, StrongRefPolicy<T>, NoCheckAccess<T>, IsNullable(false)>;
 
   template <typename T, typename PtrTraits = RawPtrTraits<T>, typename... Args>
   KRYS_NODISCARD constexpr inline Ref<T, PtrTraits> CreateRef(Args &&...args)

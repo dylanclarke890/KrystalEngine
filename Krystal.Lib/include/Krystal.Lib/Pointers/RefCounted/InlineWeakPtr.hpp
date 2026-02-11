@@ -4,7 +4,7 @@
 #include "Krystal.Lib/Pointers/GetPtr.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/InlineWeakRef.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/IntrusiveHandle.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/IntrusivePtr.hpp"
 #include <bit>
 
 namespace Krys
