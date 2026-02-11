@@ -159,7 +159,6 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\IntrusivePtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RawPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\RefCounted.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\AbstractRefCountedAndCanMakeWeakPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\AbstractRefCountedThreadSafeAndCanMakeWeakPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CanMakeCheckedPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CanMakeWeakPtr.hpp" />
@@ -169,17 +168,14 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\CompactUniquePtrTuple.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\InlineWeakPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtr.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefCountedWithInlineWeakPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\TypeCast.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\TaggedPtr.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefCountedThreadSafe.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\ThreadSafeWeakPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\WeakPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\WeakPtrFactory.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\WeakPtrImpl.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\WeakRef.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefCountDebugger.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefCounted.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\UniquePtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Ranges\ADL.hpp" />

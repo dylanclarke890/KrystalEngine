@@ -25,6 +25,6 @@ namespace Krys::Tests
     REQUIRE(object->HasOneRef());
     
     object->SubRef();
-    REQUIRE(object->GetRefCountDebugger().DeletionHasBegun());
+    REQUIRE(object->GetDebugger().DeletionHasBegun());
   }
 }

@@ -4,7 +4,7 @@
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Detection/Environment.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/CheckedPtr.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/RefCountedThreadSafe.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/RefPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/WeakPtrImpl.hpp"
 

@@ -4,7 +4,7 @@
 #include "Krystal.Lib/Detection/Environment.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/RefCountedThreadSafe.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/RefCounted.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys
@@ -84,7 +84,7 @@ namespace Krys
 
     template <typename T>
     RawPtr<typename T::TWeakValue> get() noexcept
-    { 
+    {
       return static_cast<RawPtr<typename T::TWeakValue>>(_ptr);
     }
 

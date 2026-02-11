@@ -333,12 +333,6 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefCounted.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefCountDebugger.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\AbstractRefCountedAndCanMakeWeakPtr.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\AbstractRefCountedThreadSafeAndCanMakeWeakPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -360,13 +354,7 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\InlineWeakPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefCountedWithInlineWeakPtr.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefPtr.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefCountedThreadSafe.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\ThreadSafeWeakPtr.hpp">

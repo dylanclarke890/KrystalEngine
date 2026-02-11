@@ -22,9 +22,67 @@ namespace Krys
     mutable std::mutex _lock;
     mutable uint32 _strongCount {1};
     mutable uint32 _weakCount {0};
-    mutable void *_object {nullptr};
+    mutable RawPtr<void> _object {nullptr};
 
   public:
+    void AddRefStrong() const noexcept
+    {
+      std::scoped_lock locker {_lock};
+      assert(_object);
+      ++_strongCount;
+    }
+
+    template <typename T>
+    void SubRefStrong() const noexcept
+    {
+      RawPtr<T> object;
+      {
+        std::scoped_lock locker {_lock};
+        assert(_object);
+        if (--_strongCount) KRYS_LIKELY
+        {
+          return;
+        }
+        object = static_cast<RawPtr<T>>(std::exchange(_object, nullptr));
+
+        // We need to take a weak ref so `this` survives until the `delete object` below.
+        // This comes up when destructors try to eagerly remove themselves from WeakHashSets.
+        // e.g.
+        // ~MyObject() { _weakSet.remove(this); }
+        // if _weakSet has the last reference to the ControlBlock then we could end up doing
+        // an amortized clean up, which removes the ControlBlock and destroys it. Then when we
+        // check _weakSet's backing table after the cleanup we UAF the ControlBlock.
+        _weakCount++;
+      }
+
+      delete static_cast<const T *>(object);
+
+      bool hasOtherWeakRefs;
+      {
+        // We retained ourselves above.
+        std::scoped_lock locker {_lock};
+        hasOtherWeakRefs = --_weakCount;
+        // release the lock here so we don't do it in Locker's destuctor after we've already called delete.
+      }
+
+      if (!hasOtherWeakRefs)
+      {
+        delete this;
+      }
+    }
+
+    KRYS_NODISCARD uint32 GetRefCount() const noexcept
+    {
+      std::scoped_lock locker {_lock};
+      return _strongCount;
+    }
+
+    KRYS_NODISCARD bool HasOneRef() const noexcept
+    {
+      std::scoped_lock locker {_lock};
+      return _strongCount == 1;
+    }
+
     RawPtr<ThreadSafeWeakPtrControlBlock> AddRefWeak() noexcept
     {
       std::scoped_lock locker {_lock};
@@ -51,50 +109,10 @@ namespace Krys
       }
     }
 
-    void AddRefStrong() const noexcept
+    KRYS_NODISCARD uint32 GetWeakRefCount() const noexcept
     {
       std::scoped_lock locker {_lock};
-      assert(_object);
-      ++_strongCount;
-    }
-
-    template <typename T>
-    void SubRefStrong() const noexcept
-    {
-      RawPtr<T> object;
-      {
-        std::scoped_lock locker {_lock};
-        assert(_object);
-        if (--_strongCount) KRYS_LIKELY
-        {
-          return;
-        }
-        object = static_cast<T *>(std::exchange(_object, nullptr));
-
-        // We need to take a weak ref so `this` survives until the `delete object` below.
-        // This comes up when destructors try to eagerly remove themselves from WeakHashSets.
-        // e.g.
-        // ~MyObject() { m_weakSet.remove(this); }
-        // if m_weakSet has the last reference to the ControlBlock then we could end up doing
-        // an amortized clean up, which removes the ControlBlock and destroys it. Then when we
-        // check m_weakSet's backing table after the cleanup we UAF the ControlBlock.
-        _weakCount++;
-      }
-
-      delete static_cast<const T *>(object);
-
-      bool hasOtherWeakRefs;
-      {
-        // We retained ourselves above.
-        std::scoped_lock locker {_lock};
-        hasOtherWeakRefs = --_weakCount;
-        // release the lock here so we don't do it in Locker's destuctor after we've already called delete.
-      }
-
-      if (!hasOtherWeakRefs)
-      {
-        delete this;
-      }
+      return _weakCount;
     }
 
     template <typename U>
@@ -114,7 +132,7 @@ namespace Krys
       {
         // Calling the RefPtr constructor would call AddRefStrong() and deadlock.
         ++_strongCount;
-        return AdoptRef(const_cast<RawPtr<U>>(maybeInteriorPointer));
+        return AdoptRefPtr<U>(const_cast<RawPtr<U>>(maybeInteriorPointer));
       }
       return nullptr;
     }
@@ -128,24 +146,6 @@ namespace Krys
     {
       std::scoped_lock locker {_lock};
       return !_object;
-    }
-
-    KRYS_NODISCARD uint32 GetWeakRefCount() const noexcept
-    {
-      std::scoped_lock locker {_lock};
-      return _weakCount;
-    }
-
-    KRYS_NODISCARD uint32 GetRefCount() const noexcept
-    {
-      std::scoped_lock locker {_lock};
-      return _strongCount;
-    }
-
-    KRYS_NODISCARD bool HasOneRef() const noexcept
-    {
-      std::scoped_lock locker {_lock};
-      return _strongCount == 1;
     }
 
   private:
@@ -165,34 +165,53 @@ namespace Krys
     }
   };
 
-  struct ThreadSafeWeakPtrControlBlockRefDerefTraits
+  struct WeakPtrThreadSafeControlBlockPolicy
   {
-    static KRYS_ALWAYS_INLINE RawPtr<ThreadSafeWeakPtrControlBlock>
-      AddRef(RawPtr<ThreadSafeWeakPtrControlBlock> ptr) noexcept
+    using type = ThreadSafeWeakPtrControlBlock;
+
+    KRYS_ALWAYS_INLINE constexpr static RawPtr<type> AddRef(RawPtr<type> ptr) noexcept
     {
       if (ptr) KRYS_LIKELY
       {
         return ptr->AddRefWeak();
       }
+
       return nullptr;
     }
 
-    static KRYS_ALWAYS_INLINE void SubRef(ThreadSafeWeakPtrControlBlock *ptr) noexcept
+    KRYS_ALWAYS_INLINE constexpr static type &AddRef(type &ref) noexcept
+    {
+      ref.AddRefWeak();
+      return ref;
+    }
+
+    KRYS_ALWAYS_INLINE constexpr static void SubRef(type *ptr) noexcept
     {
       if (ptr) KRYS_LIKELY
       {
         ptr->SubRefWeak();
       }
     }
+
+    KRYS_ALWAYS_INLINE KRYS_NODISCARD constexpr static RawPtr<type>
+      ValidateGetAccess(RawPtr<type> ptr) noexcept
+    {
+      return ptr;
+    }
+
+    KRYS_ALWAYS_INLINE KRYS_NODISCARD constexpr static bool IsValid(RawPtr<type> ptr) noexcept
+    {
+      return ptr != nullptr;
+    }
   };
 
-  using ControlBlockRefPtr =
-    RefPtr<ThreadSafeWeakPtrControlBlock, RawPtrTraits<ThreadSafeWeakPtrControlBlock>,
-           ThreadSafeWeakPtrControlBlockRefDerefTraits>;
+  using ThreadSafeWeakPtrControlBlockPtr =
+    IntrusivePtr<ThreadSafeWeakPtrControlBlock, RawPtrTraits<ThreadSafeWeakPtrControlBlock>,
+                 WeakPtrThreadSafeControlBlockPolicy, IsNullable(true)>;
 
   template <typename T>
-  class ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr
-      : public NonCopyable<ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr>
+  class RefCountedThreadSafeAndCanMakeWeakPtrThreadSafe
+      : public NonCopyable<RefCountedThreadSafeAndCanMakeWeakPtrThreadSafe>
   {
     static_assert(alignof(ThreadSafeWeakPtrControlBlock) >= 2);
 
@@ -233,7 +252,7 @@ namespace Krys
         return;
       }
 
-      std::bit_cast<ThreadSafeWeakPtrControlBlock *>(_bits.loadRelaxed())->AddRefStrong();
+      std::bit_cast<RawPtr<ThreadSafeWeakPtrControlBlock>>(_bits.loadRelaxed())->AddRefStrong();
     }
 
     void SubRef() const noexcept
@@ -267,7 +286,7 @@ namespace Krys
         return;
       }
 
-      std::bit_cast<ThreadSafeWeakPtrControlBlock *>(_bits.loadRelaxed())->template SubRefStrong<T>();
+      std::bit_cast<RawPtr<ThreadSafeWeakPtrControlBlock>>(_bits.loadRelaxed())->template SubRefStrong<T>();
     }
 
     uint32 GetRefCount() const noexcept
@@ -356,9 +375,6 @@ namespace Krys
     friend class ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr;
 
     template <typename>
-    friend class ThreadSafeWeakHashSet;
-
-    template <typename>
     friend class ThreadSafeWeakOrStrongPtr;
 
   private:
@@ -366,7 +382,7 @@ namespace Krys
     // FIXME: Use CompactRefPtrTuple to reduce sizeof(ThreadSafeWeakPtr) by storing just an offset
     // from ThreadSafeWeakPtrControlBlock::_object and don't support structs larger than 65535.
     // https://bugs.webkit.org/show_bug.cgi?id=283929
-    ControlBlockRefPtr _controlBlock;
+    ThreadSafeWeakPtrControlBlockPtr _controlBlock;
 
   public:
     using tag_type = typename TaggingTraits::tag_type;

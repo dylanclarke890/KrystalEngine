@@ -90,4 +90,17 @@ namespace Krys
   template <typename T, typename WeakPtrImpl = SingleThreadWeakPtrImpl,
             WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy>
   using CanMakeSingleThreadWeakPtr = CanMakeWeakPtr<T, SingleThreadWeakPtrImpl>;
+
+  template <typename T, WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy>
+  class AbstractRefCountedAndCanMakeWeakPtr : public AbstractRefCounted,
+                                              public CanMakeWeakPtr<T, DefaultWeakPtrImpl, InitializationMode>
+  {
+  };
+
+  template <typename T, WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy>
+  class AbstractRefCountedAndCanMakeSingleThreadWeakPtr
+      : public AbstractRefCounted,
+        public CanMakeSingleThreadWeakPtr<T, SingleThreadWeakPtrImpl, InitializationMode>
+  {
+  };
 }
