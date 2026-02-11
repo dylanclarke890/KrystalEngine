@@ -5,7 +5,6 @@
 #include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Detection/AddressSpaceBitSize.hpp"
 #include "Krystal.Lib/Detection/OS.hpp"
-#include "Krystal.Lib/Pointers/GetPtr.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <bit>
@@ -108,10 +107,6 @@ public:                                                                         
     {
       static_assert(ConvertibleTo<RawPtr<X>, RawPtr<T>>);
       std::exchange(other._ptr, 0);
-    }
-
-    KRYS_ALWAYS_INLINE constexpr CompactPtr(HashTableDeletedValueType) noexcept : _ptr(DeletedStorageValue)
-    {
     }
 
     constexpr T &operator*() const noexcept
@@ -240,11 +235,6 @@ public:                                                                         
       return std::bit_cast<RawPtr<T>>(ptr);
     }
 
-    constexpr bool IsHashTableDeletedValue() const noexcept
-    {
-      return _ptr == DeletedStorageValue;
-    }
-
     template <typename U>
     friend constexpr bool operator==(const CompactPtr &a, const CompactPtr<U> &b) noexcept
     {
@@ -262,25 +252,6 @@ public:                                                                         
   {
     return a.get() == b;
   }
-
-  template <typename T>
-  struct GetPtrHelper<CompactPtr<T>>
-  {
-    using pointer_type = RawPtr<T>;
-    using underlying_type = T;
-
-    KRYS_NODISCARD constexpr static pointer_type GetPtr(const CompactPtr<T> &p) noexcept
-    {
-      return const_cast<pointer_type>(p.get());
-    }
-  };
-
-  template <typename T>
-  struct IsSmartPtr<CompactPtr<T>>
-  {
-    static constexpr bool value = true;
-    static constexpr bool nullable = true;
-  };
 
   template <typename T>
   struct CompactPtrTraits
@@ -304,17 +275,6 @@ public:                                                                         
     KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr static RawPtr<T> unwrap(const storage_type &ptr) noexcept
     {
       return ptr.get();
-    }
-
-    KRYS_NODISCARD constexpr static storage_type GetHashTableDeletedValue() noexcept
-    {
-      return storage_type {HashTableDeletedValue};
-    }
-
-    KRYS_NODISCARD KRYS_ALWAYS_INLINE constexpr static bool
-      IsHashTableDeletedValue(const storage_type &ptr) noexcept
-    {
-      return ptr.IsHashTableDeletedValue();
     }
   };
 }

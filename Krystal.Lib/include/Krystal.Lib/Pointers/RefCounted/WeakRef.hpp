@@ -3,7 +3,6 @@
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Detection/Environment.hpp"
-#include "Krystal.Lib/Pointers/GetPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/ThreadSafeRefCounted.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/TypeTraits.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/WeakPtrImpl.hpp"
@@ -33,7 +32,7 @@ namespace Krys
   public:
     WeakRef(const T &object,
             EnabledWeakPtrThreadAsserts shouldEnableAssertions = EnabledWeakPtrThreadAsserts::Yes) noexcept
-    requires(!IsSmartPtr<T>::value && !IsPointer<T>)
+    requires(!IsPointer<T>)
         : _impl(ShareRef(object.WeakImpl()))
 #if KRYS_ENV(DEV)
           ,
@@ -103,28 +102,9 @@ namespace Krys
   };
 
   template <class T>
-  requires(!IsSmartPtr<T>::value && !IsPointer<T>)
+  requires(!IsPointer<T>)
   WeakRef(const T &value, EnabledWeakPtrThreadAsserts = EnabledWeakPtrThreadAsserts::Yes)
     -> WeakRef<T, typename T::TWeakPtrImpl>;
-
-  template <typename T, typename WeakPtrImpl>
-  struct GetPtrHelper<WeakRef<T, WeakPtrImpl>>
-  {
-    using pointer_type = RawPtr<T>;
-    using underlying_type = T;
-
-    KRYS_NODISCARD static pointer_type GetPtr(const WeakRef<T, WeakPtrImpl> &p) noexcept
-    {
-      return const_cast<pointer_type>(p.ptr());
-    }
-  };
-
-  template <typename T, typename WeakPtrImpl>
-  struct IsSmartPtr<WeakRef<T, WeakPtrImpl>>
-  {
-    static constexpr bool value = true;
-    static constexpr bool nullable = false;
-  };
 
   template <typename T>
   using SingleThreadWeakRef = WeakRef<T, SingleThreadWeakPtrImpl>;

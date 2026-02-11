@@ -1,10 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/ForbidHeapAllocation.hpp"
-#include "Krystal.Lib/Pointers/GetPtr.hpp"
+#include "Krystal.Lib/Pointers/IntrusivePtr.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/InlineWeakRef.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/IntrusivePtr.hpp"
 #include <bit>
 
 namespace Krys
@@ -169,23 +168,4 @@ namespace Krys
   {
     return a.get() == b;
   }
-
-  template <typename T>
-  struct GetPtrHelper<InlineWeakPtr<T>>
-  {
-    using pointer_type = RawPtr<T>;
-    using underlying_type = T;
-
-    constexpr static pointer_type GetPtr(const InlineWeakPtr<T> &p) noexcept
-    {
-      return const_cast<pointer_type>(p.get());
-    }
-  };
-
-  template <typename T>
-  struct IsSmartPtr<InlineWeakPtr<T>>
-  {
-    static constexpr bool value = true;
-    static constexpr bool nullable = true;
-  };
 }

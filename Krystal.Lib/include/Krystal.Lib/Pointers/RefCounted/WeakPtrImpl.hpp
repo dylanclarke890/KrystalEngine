@@ -3,7 +3,6 @@
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Detection/Environment.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
-#include "Krystal.Lib/Pointers/GetPtr.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/ThreadSafeRefCounted.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"

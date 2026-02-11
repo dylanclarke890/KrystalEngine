@@ -169,8 +169,6 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CompactRefPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CompactRefPtrTuple.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\CompactUniquePtrTuple.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\GetPtr.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\Concepts.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\InlineWeakPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\InlineWeakRef.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtr.hpp" />
@@ -188,7 +186,6 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\WeakRef.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefCountDebugger.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefCounted.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\SharedPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\UniquePtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Ranges\ADL.hpp" />
     <ClInclude Include="include\Krystal.Lib\Ranges\Algorithm.hpp" />

@@ -177,9 +177,6 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\UniquePtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\SharedPtr.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Ranges\Reconstruct.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -366,9 +363,6 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\CompactUniquePtrTuple.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\GetPtr.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\InlineWeakPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -415,9 +409,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtr.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\Concepts.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\TypeTraits.hpp">

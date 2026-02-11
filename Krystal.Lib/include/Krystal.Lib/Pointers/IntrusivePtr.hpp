@@ -4,7 +4,6 @@
 #include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/ForbidHeapAllocation.hpp"
-#include "Krystal.Lib/Pointers/GetPtr.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 #include <cassert>

@@ -2,7 +2,6 @@
 
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Detection/Environment.hpp"
-#include "Krystal.Lib/Pointers/GetPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/CanMakeWeakPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/CompactRefPtrTuple.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/TypeTraits.hpp"
@@ -68,7 +67,6 @@ namespace Krys
     {
     }
 
-    template <typename = enable_if_t<!IsSmartPtr<T>::value>>
     WeakPtr(const T *object,
             EnabledWeakPtrThreadAsserts shouldEnableAssertions = EnabledWeakPtrThreadAsserts::Yes) noexcept
         : _impl(object ? &object->WeakImpl() : nullptr)
@@ -81,7 +79,7 @@ namespace Krys
       assert(!object || object == _impl->template get<T>());
     }
 
-    template <typename = enable_if_t<!IsSmartPtr<T>::value && !IsPointer<T>>>
+    template <typename = enable_if_t<!IsPointer<T>>>
     WeakPtr(const T &object,
             EnabledWeakPtrThreadAsserts shouldEnableAssertions = EnabledWeakPtrThreadAsserts::Yes) noexcept
         : _impl(ShareRefPtr(&object.WeakImpl()))
@@ -113,35 +111,9 @@ namespace Krys
     {
     }
 
-    WeakPtr(HashTableDeletedValueType) noexcept : _impl(HashTableDeletedValue)
-    {
-    }
-
-    WeakPtr(HashTableEmptyValueType) noexcept : _impl(HashTableEmptyValue)
-    {
-    }
-
-    KRYS_NODISCARD bool IsHashTableDeletedValue() const noexcept
-    {
-      return _impl.IsHashTableDeletedValue();
-    }
-
-    KRYS_NODISCARD bool IsHashTableEmptyValue() const noexcept
-    {
-      return !_impl;
-    }
-
     KRYS_NODISCARD bool IsWeakNullValue() const noexcept
     {
       return !*_impl;
-    }
-
-    RawPtr<T> PtrAllowingHashTableEmptyValue() const noexcept
-    {
-      static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value,
-                    "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
-
-      return !_impl.IsHashTableEmptyValue() ? static_cast<RawPtr<T>>(_impl->template get<T>()) : nullptr;
     }
 
     RefPtr<WeakPtrImpl, PtrTraits> ReleaseImpl() noexcept
@@ -289,25 +261,6 @@ namespace Krys
     return impl;
   }
 
-  template <typename T, typename WeakPtrImpl, typename PtrTraits>
-  struct GetPtrHelper<WeakPtr<T, WeakPtrImpl, PtrTraits>>
-  {
-    using pointer_type = RawPtr<T>;
-    using underlying_type = T;
-
-    KRYS_NODISCARD static pointer_type GetPtr(const WeakPtr<T, WeakPtrImpl, PtrTraits> &p) noexcept
-    {
-      return const_cast<pointer_type>(p.get());
-    }
-  };
-
-  template <typename T, typename WeakPtrImpl, typename PtrTraits>
-  struct IsSmartPtr<WeakPtr<T, WeakPtrImpl, PtrTraits>>
-  {
-    static constexpr bool value = true;
-    static constexpr bool nullable = true;
-  };
-
   template <typename TExpected, typename TArg, typename WeakPtrImpl, typename PtrTraits>
   inline bool Is(WeakPtr<TArg, WeakPtrImpl, PtrTraits> &source) noexcept
   {
@@ -360,19 +313,19 @@ namespace Krys
     return a.get() == b;
   }
 
-  template <class T, typename = enable_if_t<!IsSmartPtr<T>::value>>
+  template <class T>
   WeakPtr(const T *value, EnabledWeakPtrThreadAsserts = EnabledWeakPtrThreadAsserts::Yes)
     -> WeakPtr<T, typename T::TWeakPtrImpl, RawPtrTraits<T>>;
 
-  template <class T, typename = enable_if_t<!IsSmartPtr<T>::value && !IsPointer<T>>>
+  template <class T>
   WeakPtr(const T &value, EnabledWeakPtrThreadAsserts = EnabledWeakPtrThreadAsserts::Yes)
     -> WeakPtr<T, typename T::TWeakPtrImpl, RawPtrTraits<T>>;
 
-  template <class T, typename = enable_if_t<!IsSmartPtr<T>::value>>
+  template <class T>
   WeakPtr(const Ref<T> &value, EnabledWeakPtrThreadAsserts = EnabledWeakPtrThreadAsserts::Yes)
     -> WeakPtr<T, typename T::TWeakPtrImpl, RawPtrTraits<T>>;
 
-  template <class T, typename = enable_if_t<!IsSmartPtr<T>::value>>
+  template <class T>
   WeakPtr(const RefPtr<T> &value, EnabledWeakPtrThreadAsserts = EnabledWeakPtrThreadAsserts::Yes)
     -> WeakPtr<T, typename T::TWeakPtrImpl, RawPtrTraits<T>>;
 
