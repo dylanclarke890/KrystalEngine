@@ -3,7 +3,7 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/CompactPtrTuple.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/RefPtr.hpp"
+#include "Krystal.Lib/Pointers/RefPtr.hpp"
 
 namespace Krys
 {

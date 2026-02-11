@@ -5,7 +5,7 @@
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/RefPtr.hpp"
+#include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::HTML

@@ -339,22 +339,22 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CanMakeWeakPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CheckedPtr.hpp">
+    <ClInclude Include="include\Krystal.Lib\Pointers\CheckedPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\CompactPtrTuple.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CompactRefPtrTuple.hpp">
+    <ClInclude Include="include\Krystal.Lib\Pointers\CompactRefPtrTuple.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\CompactUniquePtrTuple.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\InlineWeakPtr.hpp">
+    <ClInclude Include="include\Krystal.Lib\Pointers\InlineWeakPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefPtr.hpp">
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\ThreadSafeWeakPtr.hpp">

@@ -3,7 +3,7 @@
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Detection/Environment.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/CanMakeWeakPtr.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/CompactRefPtrTuple.hpp"
+#include "Krystal.Lib/Pointers/CompactRefPtrTuple.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/WeakPtrFactory.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/WeakPtrImpl.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/WeakRef.hpp"

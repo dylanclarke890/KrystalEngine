@@ -162,13 +162,13 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\AbstractRefCountedThreadSafeAndCanMakeWeakPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CanMakeCheckedPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CanMakeWeakPtr.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CheckedPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\CheckedPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\CompactPtrTuple.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CompactRefPtrTuple.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\CompactRefPtrTuple.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\CompactUniquePtrTuple.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\InlineWeakPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\InlineWeakPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtr.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\TypeCast.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\TaggedPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\ThreadSafeWeakPtr.hpp" />

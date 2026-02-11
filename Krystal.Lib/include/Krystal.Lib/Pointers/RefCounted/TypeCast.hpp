@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/TypeCast.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/CheckedPtr.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/RefPtr.hpp"
+#include "Krystal.Lib/Pointers/CheckedPtr.hpp"
+#include "Krystal.Lib/Pointers/RefPtr.hpp"
 
 namespace Krys
 {

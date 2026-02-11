@@ -4,7 +4,7 @@
 #include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/RefPtr.hpp"
+#include "Krystal.Lib/Pointers/RefPtr.hpp"
 
 namespace Krys::HTML
 {
