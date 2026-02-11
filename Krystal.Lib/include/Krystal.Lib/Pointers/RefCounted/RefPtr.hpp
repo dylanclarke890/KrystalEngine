@@ -3,9 +3,17 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/IntrusivePtr.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys
 {
+  template <typename T>
+  concept SupportsRefPtr = requires(T &value) {
+    { value.AddRef() } -> SameType<void>;
+    { value.SubRef() } -> SameType<void>;
+    { value.GetRefCount() } -> ConvertibleTo<uint32>;
+  };
+
   template <typename T>
   struct StrongRefPolicy
   {

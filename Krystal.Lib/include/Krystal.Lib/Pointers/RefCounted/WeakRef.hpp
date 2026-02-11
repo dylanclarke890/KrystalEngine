@@ -3,8 +3,9 @@
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Detection/Environment.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/CheckedPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/RefCountedThreadSafe.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/TypeTraits.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/RefPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/WeakPtrImpl.hpp"
 
 namespace Krys
@@ -65,7 +66,7 @@ namespace Krys
 
     RawPtr<T> ptr() const noexcept
     {
-      static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value,
+      static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
                     "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
 
       auto *ptr = static_cast<RawPtr<T>>(_impl->template get<T>());
@@ -75,7 +76,7 @@ namespace Krys
 
     T *get() const noexcept
     {
-      static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value,
+      static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
                     "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
 
       return _impl == nullptr ? nullptr : static_cast<RawPtr<T>>(_impl->template get<T>());

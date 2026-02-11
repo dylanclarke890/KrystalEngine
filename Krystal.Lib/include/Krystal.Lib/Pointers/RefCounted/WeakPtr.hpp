@@ -4,7 +4,6 @@
 #include "Krystal.Lib/Detection/Environment.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/CanMakeWeakPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/CompactRefPtrTuple.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/TypeTraits.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/WeakPtrFactory.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/WeakPtrImpl.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/WeakRef.hpp"
@@ -123,7 +122,7 @@ namespace Krys
 
     RawPtr<T> get() const noexcept
     {
-      static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value,
+      static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
                     "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
       return _impl ? static_cast<RawPtr<T>>(_impl->template get<T>()) : nullptr;
     }
@@ -189,7 +188,7 @@ namespace Krys
 
     RawPtr<T> operator->() const noexcept
     {
-      static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value,
+      static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
                     "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
 
       auto *result = get();
@@ -199,7 +198,7 @@ namespace Krys
 
     T &operator*() const noexcept
     {
-      static_assert(HasRefPtrMemberFunctions<T>::value || HasCheckedPtrMemberFunctions<T>::value,
+      static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
                     "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
 
       auto *result = get();

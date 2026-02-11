@@ -399,9 +399,6 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\TypeTraits.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CanMakeCheckedPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -36,14 +36,14 @@ namespace Krys
              && "RefCountDebugger: Attempt to add reference after deletion has begun.");
     }
 
-    void WillSubRef(TRefSize refCount) const noexcept
+    void WillSubRef(KRYS_MAYBE_UNUSED TRefSize refCount) const noexcept
     {
       assert(!_deletionHasBegun.load(std::memory_order_relaxed)
              && "RefCountDebugger: Attempt to subtract reference after deletion has begun.");
       assert(refCount > 0 && "RefCountDebugger: Attempt to subtract reference when ref count is zero.");
     }
 
-    void WillDestroy(TRefSize refCount) const noexcept
+    void WillDestroy(KRYS_MAYBE_UNUSED TRefSize refCount) const noexcept
     {
       assert(refCount == 1 && "RefCountDebugger: Attempt to destroy object when ref count is not one.");
     }

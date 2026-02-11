@@ -2,22 +2,18 @@
 
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/CheckedPtr.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/CheckedRef.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/Ref.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/RefPtr.hpp"
 
 namespace Krys
 {
 #pragma region Ref
 
-  template <typename T, typename U = RawPtrTraits<T>, typename V = DefaultRefDerefTraits<T>, typename X,
-            typename Y, typename Z>
-  KRYS_NODISCARD constexpr inline Ref<match_constness_t<X, T>, U, V>
-    Upcast(const Ref<X, Y, Z> &source) noexcept
+  template <typename T, typename U = RawPtrTraits<T>, typename X, typename Y>
+  KRYS_NODISCARD constexpr inline Ref<match_constness_t<X, T>, U> Upcast(const Ref<X, Y> &source) noexcept
   {
     static_assert(!UnnecessaryTypeCast<X, T>, "Unnecessary cast to same type");
     static_assert(CanUpcast<X, T>, "Invalid upcast");
-    return ShareRef<match_constness_t<X, T>, U, V>(*static_cast<RawPtr<T>>(source.get()));
+    return ShareRef<match_constness_t<X, T>, U>(*static_cast<RawPtr<T>>(source.get()));
   }
 
   template <typename T, typename U = RawPtrTraits<T>, typename V = DefaultRefDerefTraits<T>, typename X,
