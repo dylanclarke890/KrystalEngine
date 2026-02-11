@@ -1,4 +1,5 @@
 ﻿#include "Krystal.Lib/Pointers/RefCounted/CheckedPtr.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/CanMakeCheckedPtr.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

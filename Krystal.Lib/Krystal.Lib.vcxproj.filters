@@ -180,9 +180,6 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\SharedPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtr.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Ranges\Reconstruct.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -342,9 +339,6 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefCountDebugger.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\AbstractCanMakeCheckedPtr.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\AbstractRefCounted.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -436,6 +430,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\TypeTraits.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CanMakeCheckedPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
