@@ -1,13 +1,15 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Pointers/CompactPtr.hpp"
 #include "Krystal.Lib/Pointers/CompactPtrTuple.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/RefPtr.hpp"
 
 namespace Krys
 {
+  template <typename T>
+  using CompactRefPtr = RefPtr<T, CompactPtrTraits<T>>;
+
   template <typename T, typename TData>
   class CompactRefPtrTuple final
   {

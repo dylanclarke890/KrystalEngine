@@ -9,12 +9,12 @@
 
 namespace Krys
 {
-  class KRYS_EMPTY_BASE_CLASS ThreadSafeRefCountedBase : public NonCopyable<ThreadSafeRefCountedBase>
+  class KRYS_EMPTY_BASE_CLASS RefCountedThreadSafeBase : public NonCopyable<RefCountedThreadSafeBase>
   {
     using Debugger = RefCountDebugger<uint32>;
 
   private:
-    mutable std::atomic<uint32_t> _refCount {1};
+    mutable std::atomic<uint32> _refCount {1};
     KRYS_NO_UNIQUE_ADDRESS Debugger _refCountDebugger;
 
   public:
@@ -40,9 +40,9 @@ namespace Krys
     }
 
   protected:
-    constexpr ThreadSafeRefCountedBase() noexcept = default;
+    constexpr RefCountedThreadSafeBase() noexcept = default;
 
-    ~ThreadSafeRefCountedBase() noexcept
+    ~RefCountedThreadSafeBase() noexcept
     {
       _refCountDebugger.WillDestroy(_refCount);
       assert(_refCount == 1);
@@ -65,7 +65,7 @@ namespace Krys
   };
 
   template <class T>
-  class ThreadSafeRefCounted : public ThreadSafeRefCountedBase
+  class RefCountedThreadSafe : public RefCountedThreadSafeBase
   {
   public:
     void SubRef() const noexcept
@@ -79,7 +79,7 @@ namespace Krys
     }
 
   protected:
-    constexpr ThreadSafeRefCounted() noexcept = default;
-    constexpr ~ThreadSafeRefCounted() noexcept = default;
+    constexpr RefCountedThreadSafe() noexcept = default;
+    constexpr ~RefCountedThreadSafe() noexcept = default;
   };
 }

@@ -3,7 +3,7 @@
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Detection/Environment.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/ThreadSafeRefCounted.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/RefCountedThreadSafe.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/TypeTraits.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/WeakPtrImpl.hpp"
 

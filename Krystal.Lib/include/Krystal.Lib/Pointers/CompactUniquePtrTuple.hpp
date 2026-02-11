@@ -3,7 +3,6 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
-#include "Krystal.Lib/Pointers/CompactPtr.hpp"
 #include "Krystal.Lib/Pointers/CompactPtrTuple.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"
@@ -33,7 +32,7 @@ namespace Krys
     static_assert(Krys::AllowsCompactPointers<T>());
 
     template <typename U, typename E, typename... Args>
-    friend constexpr CompactUniquePtrTuple<U, E> CreateCompactUniquePtr(Args &&...args) noexcept;
+    friend constexpr CompactUniquePtrTuple<U, E, Deleter> CreateCompactUniquePtr(Args &&...args) noexcept;
 
     template <typename U, typename E, typename D, typename... Args>
     friend constexpr CompactUniquePtrTuple<U, E, D> CreateCompactUniquePtr(Args &&...args) noexcept;

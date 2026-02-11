@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/ByteUtils.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Detection/Environment.hpp"

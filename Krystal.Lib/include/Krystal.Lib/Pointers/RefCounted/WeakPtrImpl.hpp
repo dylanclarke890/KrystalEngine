@@ -4,13 +4,13 @@
 #include "Krystal.Lib/Detection/Environment.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/ThreadSafeRefCounted.hpp"
+#include "Krystal.Lib/Pointers/RefCounted/RefCountedThreadSafe.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys
 {
   template <typename Derived>
-  class WeakPtrImplBase : public ThreadSafeRefCounted<Derived>, public NonCopyable<WeakPtrImplBase<Derived>>
+  class WeakPtrImplBase : public RefCountedThreadSafe<Derived>, public NonCopyable<WeakPtrImplBase<Derived>>
   {
   private:
     RawPtr<void> _ptr;

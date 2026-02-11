@@ -14,9 +14,6 @@ namespace Krys
   class ThreadSafeWeakPtr;
 
   template <typename>
-  class ThreadSafeWeakHashSet;
-
-  template <typename>
   class ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr;
 
   class ThreadSafeWeakPtrControlBlock : public NonCopyable<ThreadSafeWeakPtrControlBlock>
