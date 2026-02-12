@@ -39,55 +39,25 @@
     <ClCompile Include="tests\String\StringAtom.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Pointers\IntrusivePtr\General.cpp">
+    <ClCompile Include="tests\Mixins\RefCounted.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Pointers\IntrusivePtr\RefCounted.cpp">
+    <ClCompile Include="tests\Pointers\Ref.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Pointers\IntrusivePtr\AbstractRefCounted.cpp">
+    <ClCompile Include="tests\Pointers\RefPtr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Pointers\IntrusivePtr\AbstractRefCountedSingleThreaded.cpp">
+    <ClCompile Include="tests\Pointers\WeakRef.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Pointers\IntrusivePtr\DelegatingTraits.cpp">
+    <ClCompile Include="tests\Pointers\WeakPtr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Pointers\IntrusivePtr\OutPtr.cpp">
+    <ClCompile Include="tests\Pointers\CheckedPtr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Pointers\IntrusivePtr\RefCountedSingleThreaded.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\Pointers\IntrusivePtr\Atomic.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\Pointers\IntrusivePtr\WeakRefCounted.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\Pointers\IntrusivePtr\WeakRefCountedSingleThreaded.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\Pointers\RefCounted\RefCounted.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\Pointers\RefCounted\Ref.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\Pointers\RefCounted\RefPtr.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\Pointers\RefCounted\WeakRef.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\Pointers\RefCounted\WeakPtr.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\Pointers\RefCounted\CheckedPtr.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\Pointers\RefCounted\CheckedRef.cpp">
+    <ClCompile Include="tests\Pointers\CheckedRef.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

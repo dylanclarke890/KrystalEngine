@@ -3,10 +3,10 @@
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Detection/Environment.hpp"
-#include "Krystal.Lib/Pointers/CheckedPtr.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"
-#include "Krystal.Lib/Pointers/RefPtr.hpp"
+#include "Krystal.Lib/Pointers/CheckedPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/WeakPtrImpl.hpp"
+#include "Krystal.Lib/Pointers/RefPtr.hpp"
 
 namespace Krys
 {
@@ -74,7 +74,7 @@ namespace Krys
       return ptr;
     }
 
-    T *get() const noexcept
+    RawPtr<T> get() const noexcept
     {
       static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
                     "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
@@ -110,42 +110,9 @@ namespace Krys
   template <typename T>
   using SingleThreadWeakRef = WeakRef<T, SingleThreadWeakPtrImpl>;
 
-  template <typename ExpectedType, typename ArgType, typename WeakPtrImpl>
-  inline bool Is(WeakRef<ArgType, WeakPtrImpl> &source) noexcept
+  template <typename TExpected, typename TArg, typename WeakPtrImpl>
+  constexpr inline bool Is(const WeakRef<TArg, WeakPtrImpl> &source) noexcept
   {
-    return Is<ExpectedType>(source.get());
-  }
-
-  template <typename ExpectedType, typename ArgType, typename WeakPtrImpl>
-  inline bool Is(const WeakRef<ArgType, WeakPtrImpl> &source) noexcept
-  {
-    return Is<ExpectedType>(source.get());
-  }
-
-  template <typename Target, typename Source, typename WeakPtrImpl>
-  inline WeakRef<match_constness_t<Source, Target>, WeakPtrImpl>
-    Downcast(WeakRef<Source, WeakPtrImpl> source) noexcept
-  {
-    static_assert(!SameType<Source, Target>, "Unnecessary cast to same type");
-    static_assert(DerivedFrom<Target, Source>, "Should be a downcast");
-    assert(Is<Target>(source));
-    return WeakRef<match_constness_t<Source, Target>, WeakPtrImpl> {
-      UnsafeRefDowncast<match_constness_t<Source, Target>>(source.ReleaseImpl()),
-      source.EnableThreadAsserts()};
-  }
-
-  template <typename Target, typename Source, typename WeakPtrImpl>
-  inline WeakPtr<match_constness_t<Source, Target>, WeakPtrImpl, RawPtrTraits<Target>>
-    DynamicDowncast(WeakRef<Source, WeakPtrImpl> source) noexcept
-  {
-    static_assert(!SameType<Source, Target>, "Unnecessary cast to same type");
-    static_assert(DerivedFrom<Target, Source>, "Should be a downcast");
-    if (!Is<Target>(source))
-    {
-      return nullptr;
-    }
-    return WeakPtr<match_constness_t<Source, Target>, WeakPtrImpl, RawPtrTraits<Target>> {
-      UnsafeRefDowncast<match_constness_t<Source, Target>>(source.ReleaseImpl()),
-      source.EnableThreadAsserts()};
+    return Is<TExpected>(source.get());
   }
 }

@@ -11,7 +11,7 @@ namespace Krys
   concept SupportsCheckedPtr = requires(T &value) {
     { value.AddRefChecked() } -> SameType<void>;
     { value.SubRefChecked() } -> SameType<void>;
-    { value.CheckedPtrCount() } -> ConvertibleTo<uint32>;
+    { value.GetRefCountChecked() } -> ConvertibleTo<uint32>;
   };
 
   /// @brief CheckedPtr is used to verify that the object being pointed to outlives the CheckedPtr.
@@ -48,7 +48,7 @@ namespace Krys
 
     KRYS_ALWAYS_INLINE KRYS_NODISCARD constexpr static RawPtr<T> ValidateGetAccess(RawPtr<T> ptr) noexcept
     {
-      if (ptr && !ptr->CheckedPtrCount())
+      if (ptr && !ptr->GetRefCountChecked())
       {
         assert(false && "Attempting to access an object through a CheckedPtr that has been deleted");
         std::terminate();
@@ -59,9 +59,8 @@ namespace Krys
 
     KRYS_ALWAYS_INLINE KRYS_NODISCARD constexpr static bool IsValid(RawPtr<T> ptr) noexcept
     {
-      // Note that we're considering a CheckedPtr to be valid as long as it points to an object, even if that
-      // object has been deleted. The runtime checks in ValidateGetAccess will catch attempts to access
-      // deleted objects.
+      // Note that we only check for nullptr here and not ptr->GetRefCountChecked() == 0 because we want to allow
+      // nullptr.
       return ptr != nullptr;
     }
   };

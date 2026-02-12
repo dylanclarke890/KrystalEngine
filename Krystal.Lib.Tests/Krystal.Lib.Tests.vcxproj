@@ -153,23 +153,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="catch_main.cpp" />
-    <ClCompile Include="tests\Pointers\IntrusivePtr\AbstractRefCounted.cpp" />
-    <ClCompile Include="tests\Pointers\IntrusivePtr\AbstractRefCountedSingleThreaded.cpp" />
-    <ClCompile Include="tests\Pointers\IntrusivePtr\Atomic.cpp" />
-    <ClCompile Include="tests\Pointers\IntrusivePtr\DelegatingTraits.cpp" />
-    <ClCompile Include="tests\Pointers\IntrusivePtr\General.cpp" />
-    <ClCompile Include="tests\Pointers\IntrusivePtr\OutPtr.cpp" />
-    <ClCompile Include="tests\Pointers\IntrusivePtr\RefCounted.cpp" />
-    <ClCompile Include="tests\Pointers\IntrusivePtr\RefCountedSingleThreaded.cpp" />
-    <ClCompile Include="tests\Pointers\IntrusivePtr\WeakRefCounted.cpp" />
-    <ClCompile Include="tests\Pointers\IntrusivePtr\WeakRefCountedSingleThreaded.cpp" />
-    <ClCompile Include="tests\Pointers\RefCounted\CheckedPtr.cpp" />
-    <ClCompile Include="tests\Pointers\RefCounted\CheckedRef.cpp" />
-    <ClCompile Include="tests\Pointers\RefCounted\Ref.cpp" />
-    <ClCompile Include="tests\Pointers\RefCounted\RefCounted.cpp" />
-    <ClCompile Include="tests\Pointers\RefCounted\RefPtr.cpp" />
-    <ClCompile Include="tests\Pointers\RefCounted\WeakPtr.cpp" />
-    <ClCompile Include="tests\Pointers\RefCounted\WeakRef.cpp" />
+    <ClCompile Include="tests\Pointers\CheckedPtr.cpp" />
+    <ClCompile Include="tests\Pointers\CheckedRef.cpp" />
+    <ClCompile Include="tests\Pointers\Ref.cpp" />
+    <ClCompile Include="tests\Mixins\RefCounted.cpp" />
+    <ClCompile Include="tests\Pointers\RefPtr.cpp" />
+    <ClCompile Include="tests\Pointers\WeakPtr.cpp" />
+    <ClCompile Include="tests\Pointers\WeakRef.cpp" />
     <ClCompile Include="tests\String\StringAtom.cpp" />
     <ClCompile Include="tests\Commands\Command.cpp" />
     <ClCompile Include="tests\Core\Bit.cpp" />

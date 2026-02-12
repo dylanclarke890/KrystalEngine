@@ -381,9 +381,6 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\TaggedPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\TypeCast.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

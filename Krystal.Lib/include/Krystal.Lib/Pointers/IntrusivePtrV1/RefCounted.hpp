@@ -30,43 +30,15 @@ namespace Krys
             typename TCount = DefaultRefCountType<Flags>>
   class RefCounted;
 
-  template <typename T, RefCountedFlag Flags = RefCountedFlag::None,
-            typename TCount = DefaultRefCountType<Flags>>
-  class RefCountedAdapter;
-
-  template <typename T, RefCountedFlag Flags = RefCountedFlag::None,
-            typename TCount = DefaultRefCountType<Flags>>
-  class RefCountedWrapper;
-
   template <typename Derived>
   using WeakRefCounted = RefCounted<Derived, RefCountedFlag::ProvideWeakReferences>;
-
-  template <typename Derived>
-  using WeakRefCountedAdapter = RefCountedAdapter<Derived, RefCountedFlag::ProvideWeakReferences>;
-
-  template <typename Derived>
-  using WeakRefCountedWrapper = RefCountedWrapper<Derived, RefCountedFlag::ProvideWeakReferences>;
 
   template <typename Derived, typename TCount = DefaultRefCountType<RefCountedFlag::SingleThreaded>>
   using SingleThreadRefCounted = RefCounted<Derived, RefCountedFlag::SingleThreaded, TCount>;
 
-  template <typename Derived, typename TCount = DefaultRefCountType<RefCountedFlag::SingleThreaded>>
-  using SingleThreadRefCountedAdapter = RefCountedAdapter<Derived, RefCountedFlag::SingleThreaded, TCount>;
-
-  template <typename Derived, typename TCount = DefaultRefCountType<RefCountedFlag::SingleThreaded>>
-  using SingleThreadRefCountedWrapper = RefCountedWrapper<Derived, RefCountedFlag::SingleThreaded, TCount>;
-
   template <typename Derived>
   using SingleThreadWeakRefCounted =
     RefCounted<Derived, RefCountedFlag::ProvideWeakReferences | RefCountedFlag::SingleThreaded>;
-
-  template <typename Derived>
-  using SingleThreadWeakRefCountedAdapter =
-    RefCountedAdapter<Derived, RefCountedFlag::ProvideWeakReferences | RefCountedFlag::SingleThreaded>;
-
-  template <typename Derived>
-  using SingleThreadWeakRefCountedWrapper =
-    RefCountedWrapper<Derived, RefCountedFlag::ProvideWeakReferences | RefCountedFlag::SingleThreaded>;
 
   template <typename Owner>
   class WeakReference;
@@ -622,41 +594,5 @@ namespace Krys
     {
       static_cast<RawPtr<const derived_type<>>>(this)->OnOwnerDestruction();
     }
-  };
-
-  template <typename T, RefCountedFlag Flags, typename TCount>
-  class RefCountedAdapter : public RefCounted<RefCountedAdapter<T, Flags, TCount>, Flags, TCount>, public T
-  {
-    friend RefCounted<RefCountedAdapter, Flags, TCount>;
-
-  public:
-    template <typename... Args>
-    requires(Constructible<T, Args...>)
-    RefCountedAdapter(Args &&...args) noexcept(NoThrowConstructible<T, Args...>)
-        : T(std::forward<Args>(args)...)
-    {
-    }
-
-  protected:
-    ~RefCountedAdapter() noexcept = default;
-  };
-
-  template <typename T, RefCountedFlag Flags, typename TCount>
-  class RefCountedWrapper : public RefCounted<RefCountedWrapper<T, Flags, TCount>, Flags, TCount>
-  {
-    friend RefCounted<RefCountedWrapper, Flags, TCount>;
-
-  public:
-    template <typename... Args>
-    requires(Constructible<T, Args...>)
-    RefCountedWrapper(Args &&...args) noexcept(NoThrowConstructible<T, Args...>)
-        : Wrapped(std::forward<Args>(args)...)
-    {
-    }
-
-    T Wrapped;
-
-  protected:
-    ~RefCountedWrapper() noexcept = default;
   };
 }

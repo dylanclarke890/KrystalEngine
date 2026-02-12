@@ -169,7 +169,6 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\InlineWeakPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefPtr.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\TypeCast.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\TaggedPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\ThreadSafeWeakPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\WeakPtr.hpp" />

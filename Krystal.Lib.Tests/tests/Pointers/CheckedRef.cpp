@@ -16,15 +16,15 @@ namespace Krys::Tests
   TEST_CASE("CheckedRef construction increments count", "[CheckedRef]")
   {
     auto *obj = new TestCheckedRefCounted();
-    REQUIRE(obj->CheckedPtrCount() == 0);
+    REQUIRE(obj->GetRefCountChecked() == 0);
 
     {
       CheckedRef<TestCheckedRefCounted> ref = ShareCheckedRef(*obj);
-      REQUIRE(obj->CheckedPtrCount() == 1);
+      REQUIRE(obj->GetRefCountChecked() == 1);
       REQUIRE(ref.get() == obj);
     }
 
-    REQUIRE(obj->CheckedPtrCount() == 0);
+    REQUIRE(obj->GetRefCountChecked() == 0);
     delete obj;
   }
 
@@ -34,15 +34,15 @@ namespace Krys::Tests
 
     {
       CheckedRef<TestCheckedRefCounted> r1 = ShareCheckedRef(*obj);
-      REQUIRE(obj->CheckedPtrCount() == 1);
+      REQUIRE(obj->GetRefCountChecked() == 1);
 
       {
         CheckedRef<TestCheckedRefCounted> r2(r1);
-        REQUIRE(obj->CheckedPtrCount() == 2);
+        REQUIRE(obj->GetRefCountChecked() == 2);
         REQUIRE(r2.get() == obj);
       }
 
-      REQUIRE(obj->CheckedPtrCount() == 1);
+      REQUIRE(obj->GetRefCountChecked() == 1);
     }
     delete obj;
   }
@@ -53,10 +53,10 @@ namespace Krys::Tests
 
     {
       CheckedRef<TestCheckedRefCounted> r1 = ShareCheckedRef(*obj);
-      REQUIRE(obj->CheckedPtrCount() == 1);
+      REQUIRE(obj->GetRefCountChecked() == 1);
 
       CheckedRef<TestCheckedRefCounted> r2(std::move(r1));
-      REQUIRE(obj->CheckedPtrCount() == 1);
+      REQUIRE(obj->GetRefCountChecked() == 1);
       REQUIRE(r2.get() == obj);
     }
 
@@ -70,13 +70,13 @@ namespace Krys::Tests
 
     {
       CheckedRef<TestCheckedRefCounted> ref = ShareCheckedRef(*a);
-      REQUIRE(a->CheckedPtrCount() == 1);
-      REQUIRE(b->CheckedPtrCount() == 0);
+      REQUIRE(a->GetRefCountChecked() == 1);
+      REQUIRE(b->GetRefCountChecked() == 0);
 
       ref = ShareCheckedRef(*b);
 
-      REQUIRE(a->CheckedPtrCount() == 0);
-      REQUIRE(b->CheckedPtrCount() == 1);
+      REQUIRE(a->GetRefCountChecked() == 0);
+      REQUIRE(b->GetRefCountChecked() == 1);
       REQUIRE(ref.get() == b);
     }
 

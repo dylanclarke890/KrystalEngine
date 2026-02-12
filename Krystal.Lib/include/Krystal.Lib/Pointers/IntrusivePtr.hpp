@@ -236,27 +236,64 @@ namespace Krys
   };
 
   template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
-  constexpr inline bool operator==(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &a,
+  constexpr inline bool operator==(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &lhs,
                                    std::nullptr_t) noexcept
   {
-    return a.get() == nullptr;
+    return lhs.get() == nullptr;
+  }
+
+  template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  constexpr inline bool operator==(std::nullptr_t,
+                                   const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &rhs) noexcept
+  {
+    return nullptr == rhs.get();
   }
 
   template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable, typename U>
   requires(ConvertibleTo<RawPtr<U>, RawPtr<T>>)
-  constexpr inline bool operator==(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &a,
-                                   RawPtr<U> b) noexcept
+  constexpr inline bool operator==(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &lhs,
+                                   RawPtr<U> rhs) noexcept
   {
-    return a.get() == b;
+    return lhs.get() == rhs;
   }
 
   template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable, typename U,
             typename UPtrTraits, typename URefPolicy, IsNullable UNullable>
   requires(ConvertibleTo<RawPtr<U>, RawPtr<T>>)
-  constexpr inline bool operator==(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &a,
-                                   const IntrusivePtr<U, UPtrTraits, URefPolicy, UNullable> &b) noexcept
+  constexpr inline bool operator==(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &lhs,
+                                   const IntrusivePtr<U, UPtrTraits, URefPolicy, UNullable> &rhs) noexcept
   {
-    return a.get() == b.get();
+    return lhs.get() == rhs.get();
+  }
+  template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  constexpr inline bool operator!=(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &lhs,
+                                   std::nullptr_t) noexcept
+  {
+    return !(lhs == nullptr);
+  }
+
+  template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  constexpr inline bool operator==(std::nullptr_t,
+                                   const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &rhs) noexcept
+  {
+    return !(nullptr == rhs);
+  }
+
+  template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable, typename U>
+  requires(ConvertibleTo<RawPtr<U>, RawPtr<T>>)
+  constexpr inline bool operator==(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &lhs,
+                                   RawPtr<U> rhs) noexcept
+  {
+    return !(lhs == rhs);
+  }
+
+  template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable, typename U,
+            typename UPtrTraits, typename URefPolicy, IsNullable UNullable>
+  requires(ConvertibleTo<RawPtr<U>, RawPtr<T>>)
+  constexpr inline bool operator==(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &lhs,
+                                   const IntrusivePtr<U, UPtrTraits, URefPolicy, UNullable> &rhs) noexcept
+  {
+    return !(lhs == rhs);
   }
 
   template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
@@ -264,5 +301,92 @@ namespace Krys
     Is(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &source) noexcept
   {
     return Is<typename T::element_type>(source.get());
+  }
+
+  template <typename T, typename U, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  KRYS_NODISCARD constexpr inline IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy, Nullable>
+    Upcast(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &source) noexcept
+  {
+    static_assert(!UnnecessaryTypeCast<T, U>, "Unnecessary cast to same type");
+    static_assert(CanUpcast<T, U>, "Invalid upcast");
+
+    using instrusive_ptr = IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy, Nullable>;
+
+    return instrusive_ptr::WithRef(static_cast<RawPtr<T>>(source.get()));
+  }
+
+  template <typename T, typename U, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  KRYS_NODISCARD constexpr inline IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy, Nullable>
+    Upcast(IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &&source) noexcept
+  {
+    static_assert(!UnnecessaryTypeCast<T, U>, "Unnecessary cast to same type");
+    static_assert(CanUpcast<T, U>, "Invalid upcast");
+
+    using instrusive_ptr = IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy, Nullable>;
+
+    return instrusive_ptr::NoRef(static_cast<RawPtr<T>>(source.release()));
+  }
+
+  template <typename T, typename U, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  KRYS_NODISCARD constexpr inline IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy, Nullable>
+    Downcast(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &source) noexcept
+  {
+    static_assert(!UnnecessaryTypeCast<T, U>, "Unnecessary cast to same type");
+    static_assert(CanDowncast<T, U>, "Invalid downcast");
+
+    using instrusive_ptr = IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy, Nullable>;
+    assert(Is<T>(source));
+    return instrusive_ptr::WithRef(static_cast<RawPtr<T>>(source.get()));
+  }
+
+  template <typename T, typename U, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  KRYS_NODISCARD constexpr inline IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy, Nullable>
+    Downcast(IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &&source) noexcept
+  {
+    static_assert(!UnnecessaryTypeCast<T, U>, "Unnecessary cast to same type");
+    static_assert(CanDowncast<T, U>, "Invalid downcast");
+
+    using instrusive_ptr = IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy, Nullable>;
+    assert(Is<T>(source));
+
+    return instrusive_ptr::NoRef(static_cast<RawPtr<T>>(source.release()));
+  }
+
+  template <typename T, typename U, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  KRYS_NODISCARD constexpr inline IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy,
+                                               IsNullable(true)>
+    DynamicDowncast(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &source) noexcept
+  {
+    static_assert(!UnnecessaryTypeCast<T, U>, "Unnecessary cast to same type");
+    static_assert(CanDowncast<T, U>, "Invalid downcast");
+
+    // regardless of what was passed in, we have to return a nullable intrusive ptr here because the dynamic
+    // cast might fail.
+    using instrusive_ptr = IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy, IsNullable(true)>;
+    if (!Is<T>(source))
+    {
+      return instrusive_ptr(nullptr);
+    }
+
+    return instrusive_ptr::WithRef(static_cast<RawPtr<T>>(source.get()));
+  }
+
+  template <typename T, typename U, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  KRYS_NODISCARD constexpr inline IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy,
+                                               IsNullable(true)>
+    DynamicDowncast(IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &&source) noexcept
+  {
+    static_assert(!UnnecessaryTypeCast<T, U>, "Unnecessary cast to same type");
+    static_assert(CanDowncast<T, U>, "Invalid downcast");
+
+    // regardless of what was passed in, we have to return a nullable intrusive ptr here because the dynamic
+    // cast might fail.
+    using instrusive_ptr = IntrusivePtr<match_constness_t<T, U>, PtrTraits, RefPolicy, IsNullable(true)>;
+    if (!Is<T>(source))
+    {
+      return instrusive_ptr(nullptr);
+    }
+
+    return instrusive_ptr::NoRef(static_cast<RawPtr<T>>(source.release()));
   }
 }

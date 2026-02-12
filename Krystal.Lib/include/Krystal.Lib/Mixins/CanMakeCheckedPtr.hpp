@@ -76,18 +76,18 @@ namespace Krys
 
     KRYS_ALWAYS_INLINE void SubRefChecked() const noexcept
     {
-      // In normal execution, a CheckedPtr always points to an object with a non-zero CheckedPtrCount().
+      // In normal execution, a CheckedPtr always points to an object with a non-zero GetRefCountChecked().
       // When it detects a dangling pointer, KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR scribbles an object with
-      // zeroes and then leaks it. When we check CheckedPtrCount() here, we're checking for a scribbled
+      // zeroes and then leaks it. When we check GetRefCountChecked() here, we're checking for a scribbled
       // object.
-      if (!CheckedPtrCount()) KRYS_UNLIKELY
+      if (!GetRefCountChecked()) KRYS_UNLIKELY
       {
         CrashDueToCheckedPtrToDeadObject();
       }
       --_checkedPtrCount;
     }
 
-    KRYS_NODISCARD TCount CheckedPtrCount() const noexcept
+    KRYS_NODISCARD TCount GetRefCountChecked() const noexcept
     {
       return _checkedPtrCount;
     }
@@ -179,7 +179,7 @@ namespace Krys
     object->T::~T();                                                                                         \
                                                                                                              \
     /* If CheckedPtrs still exist, poison and keep memory */                                                 \
-    if (object->CheckedPtrCount()) KRYS_UNLIKELY                                                             \
+    if (object->GetRefCountChecked()) KRYS_UNLIKELY                                                             \
     {                                                                                                        \
       ::Krys::ByteUtils::ZeroObject(*object);                                                                \
       return;                                                                                                \
