@@ -156,10 +156,7 @@
     <ClInclude Include="include\Krystal.Lib\Mixins\NonCopyMovable.hpp" />
     <ClInclude Include="include\Krystal.Lib\Mixins\NonMovable.hpp" />
     <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\IntrusivePtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RawPtr.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\RefCounted.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Mixins\AbstractRefCountedThreadSafeAndCanMakeWeakPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Mixins\CanMakeCheckedPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Mixins\CanMakeWeakPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\CheckedPtr.hpp" />
@@ -170,11 +167,11 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RefPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\TaggedPtr.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\ThreadSafeWeakPtr.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\WeakPtr.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\WeakPtrFactory.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\WeakPtrImpl.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\WeakRef.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\ThreadSafeWeakPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtrFactory.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtrImpl.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\WeakRef.hpp" />
     <ClInclude Include="include\Krystal.Lib\Mixins\RefCounted.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\UniquePtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Ranges\ADL.hpp" />

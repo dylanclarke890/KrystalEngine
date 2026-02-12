@@ -11,7 +11,7 @@
 #include "Krystal.Lib/Mixins/CanMakeCheckedPtr.hpp"
 #include "Krystal.Lib/Pointers/CheckedPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/WeakRef.hpp"
+#include "Krystal.Lib/Pointers/WeakRef.hpp"
 #include "Krystal.Lib/String/StringAtom.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 

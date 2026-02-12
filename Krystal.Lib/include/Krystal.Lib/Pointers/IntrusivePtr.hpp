@@ -7,13 +7,15 @@
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 #include <cassert>
+#include <format>
+#include <utility>
 
 // TODO(FIX): review how non nullable and nullable intrusive ptrs interact with each other.
 namespace Krys
 {
   /// @brief A wrapper around a pointer to an object that manages reference counting intrusively.
   template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
-  class IntrusivePtr
+  class KRYS_TRIVIAL_ABI IntrusivePtr
   {
     static_assert(!IsPointer<T>, "T must not be a pointer type.");
 
@@ -273,7 +275,7 @@ namespace Krys
   }
 
   template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
-  constexpr inline bool operator==(std::nullptr_t,
+  constexpr inline bool operator!=(std::nullptr_t,
                                    const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &rhs) noexcept
   {
     return !(nullptr == rhs);
@@ -281,7 +283,7 @@ namespace Krys
 
   template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable, typename U>
   requires(ConvertibleTo<RawPtr<U>, RawPtr<T>>)
-  constexpr inline bool operator==(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &lhs,
+  constexpr inline bool operator!=(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &lhs,
                                    RawPtr<U> rhs) noexcept
   {
     return !(lhs == rhs);
@@ -290,7 +292,7 @@ namespace Krys
   template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable, typename U,
             typename UPtrTraits, typename URefPolicy, IsNullable UNullable>
   requires(ConvertibleTo<RawPtr<U>, RawPtr<T>>)
-  constexpr inline bool operator==(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &lhs,
+  constexpr inline bool operator!=(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &lhs,
                                    const IntrusivePtr<U, UPtrTraits, URefPolicy, UNullable> &rhs) noexcept
   {
     return !(lhs == rhs);
@@ -389,4 +391,29 @@ namespace Krys
 
     return instrusive_ptr::NoRef(static_cast<RawPtr<T>>(source.release()));
   }
+}
+
+namespace std
+{
+  template <typename T, typename PtrTraits, typename RefPolicy, ::Krys::IsNullable Nullable, typename TChar>
+  struct formatter<::Krys::IntrusivePtr<T, PtrTraits, RefPolicy, Nullable>, TChar>
+      : public formatter<void *, TChar>
+  {
+    template <typename FormatContext>
+    auto format(const ::Krys::IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &ptr, FormatContext &ctx) const
+      -> decltype(ctx.out())
+    {
+      return formatter<void *, TChar>::format(ptr.get(), ctx);
+    }
+  };
+
+  template <typename T, typename PtrTraits, typename RefPolicy, ::Krys::IsNullable Nullable>
+  struct hash<::Krys::IntrusivePtr<T, PtrTraits, RefPolicy, Nullable>>
+  {
+    constexpr size_t
+      operator()(const ::Krys::IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &ptr) const noexcept
+    {
+      return std::hash<::Krys::RawPtr<T>>()(ptr.get());
+    }
+  };
 }

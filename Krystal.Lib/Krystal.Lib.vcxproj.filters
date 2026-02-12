@@ -312,9 +312,6 @@
     <ClInclude Include="include\Krystal.Lib\Core\Move.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\IntrusivePtr.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Core\TypeCast.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -327,13 +324,7 @@
     <ClInclude Include="include\Krystal.Lib\Detection\NumberOfCores.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\RefCounted.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Mixins\RefCounted.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Mixins\AbstractRefCountedThreadSafeAndCanMakeWeakPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Mixins\CanMakeWeakPtr.hpp">
@@ -357,19 +348,19 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\RefPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\ThreadSafeWeakPtr.hpp">
+    <ClInclude Include="include\Krystal.Lib\Pointers\ThreadSafeWeakPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\WeakPtr.hpp">
+    <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\WeakPtrFactory.hpp">
+    <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtrFactory.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\WeakPtrImpl.hpp">
+    <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtrImpl.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\WeakRef.hpp">
+    <ClInclude Include="include\Krystal.Lib\Pointers\WeakRef.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Detection\AddressSpaceBitSize.hpp">

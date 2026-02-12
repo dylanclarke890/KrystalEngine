@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/Node/ChildNodeList.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/WeakPtr.hpp"
+#include "Krystal.Lib/Pointers/WeakPtr.hpp"
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"
 #include "Krystal.Lib/Types/Lazy.hpp"
 

@@ -1,4 +1,4 @@
-﻿#include "Krystal.Lib/Pointers/RefCounted/WeakRef.hpp"
+﻿#include "Krystal.Lib/Pointers/WeakRef.hpp"
 #include "Krystal.Lib/Mixins/CanMakeWeakPtr.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"
 #include <catch_all.hpp>

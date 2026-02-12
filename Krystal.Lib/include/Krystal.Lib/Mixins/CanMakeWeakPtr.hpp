@@ -2,9 +2,9 @@
 
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/WeakPtrFactory.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/WeakPtrImpl.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/WeakRef.hpp"
+#include "Krystal.Lib/Pointers/WeakPtrFactory.hpp"
+#include "Krystal.Lib/Pointers/WeakPtrImpl.hpp"
+#include "Krystal.Lib/Pointers/WeakRef.hpp"
 
 namespace Krys::detail
 {

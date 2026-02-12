@@ -3,10 +3,10 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Detection/Environment.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
-#include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/CompactRefPtrTuple.hpp"
+#include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/WeakRef.hpp"
+#include "Krystal.Lib/Pointers/WeakRef.hpp"
 
 namespace Krys
 {
