@@ -330,13 +330,13 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrV1\RefCounted.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\RefCounted.hpp">
+    <ClInclude Include="include\Krystal.Lib\Mixins\RefCounted.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\AbstractRefCountedThreadSafeAndCanMakeWeakPtr.hpp">
+    <ClInclude Include="include\Krystal.Lib\Mixins\AbstractRefCountedThreadSafeAndCanMakeWeakPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CanMakeWeakPtr.hpp">
+    <ClInclude Include="include\Krystal.Lib\Mixins\CanMakeWeakPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\CheckedPtr.hpp">
@@ -387,7 +387,7 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\RefCounted\CanMakeCheckedPtr.hpp">
+    <ClInclude Include="include\Krystal.Lib\Mixins\CanMakeCheckedPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

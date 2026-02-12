@@ -1,4 +1,4 @@
-﻿#include "Krystal.Lib/Pointers/RefCounted/CanMakeCheckedPtr.hpp"
+﻿#include "Krystal.Lib/Mixins/CanMakeCheckedPtr.hpp"
 #include "Krystal.Lib/Pointers/CheckedPtr.hpp"
 #include <catch_all.hpp>
 

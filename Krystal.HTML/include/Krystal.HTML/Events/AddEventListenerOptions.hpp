@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/Events/EventListenerOptions.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/RefCounted.hpp"
+#include "Krystal.Lib/Mixins/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
 

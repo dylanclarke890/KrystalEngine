@@ -20,12 +20,6 @@ namespace Krys
   }
 
   template <typename TExpected, typename TArg, typename Deleter>
-  KRYS_NODISCARD constexpr inline bool Is(UniquePtr<TArg, Deleter> &source) noexcept
-  {
-    return Is<TExpected>(source.get());
-  }
-
-  template <typename TExpected, typename TArg, typename Deleter>
   KRYS_NODISCARD constexpr inline bool Is(const UniquePtr<TArg, Deleter> &source) noexcept
   {
     return Is<TExpected>(source.get());

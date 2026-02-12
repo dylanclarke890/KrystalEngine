@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/RefCounted.hpp"
+#include "Krystal.Lib/Mixins/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/ThreadSafeWeakPtr.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
@@ -19,18 +19,18 @@ namespace Krys
 #define KRYS_ABSTRACT_THREAD_SAFE_REF_COUNTED_AND_CAN_MAKE_WEAK_PTR_IMPL                                     \
   void AddRef() const noexcept final                                                                         \
   {                                                                                                          \
-    ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr::AddRef();                                               \
+    RefCountedThreadSafeAndCanMakeWeakPtrThreadSafe::AddRef();                                               \
   }                                                                                                          \
   void SubRef() const noexcept final                                                                         \
   {                                                                                                          \
-    ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr::SubRef();                                               \
+    RefCountedThreadSafeAndCanMakeWeakPtrThreadSafe::SubRef();                                               \
   }                                                                                                          \
   KRYS_NODISCARD ThreadSafeWeakPtrControlBlock &GetControlBlock() const noexcept final                       \
   {                                                                                                          \
-    return ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr::GetControlBlock();                               \
+    return RefCountedThreadSafeAndCanMakeWeakPtrThreadSafe::GetControlBlock();                               \
   }                                                                                                          \
   KRYS_NODISCARD uint32 GetRefCountWeak() const noexcept final                                               \
   {                                                                                                          \
-    return ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr::GetRefCountWeak();                               \
+    return RefCountedThreadSafeAndCanMakeWeakPtrThreadSafe::GetRefCountWeak();                               \
   }                                                                                                          \
   using _forceSemicolonAbstractThreadSafeRefCountedAndCanMakeWeakPtr = int

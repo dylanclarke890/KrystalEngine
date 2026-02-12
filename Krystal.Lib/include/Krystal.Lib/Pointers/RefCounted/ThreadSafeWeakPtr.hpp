@@ -14,7 +14,7 @@ namespace Krys
   class ThreadSafeWeakPtr;
 
   template <typename>
-  class ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr;
+  class RefCountedThreadSafeAndCanMakeWeakPtrThreadSafe;
 
   class ThreadSafeWeakPtrControlBlock : public NonCopyable<ThreadSafeWeakPtrControlBlock>
   {
@@ -122,7 +122,7 @@ namespace Krys
       // N.B. We don't just return _object here since a ThreadSafeWeakPtr could be calling with a pointer to
       // some interior pointer when there is multiple inheritance.
       // Consider:
-      // struct Cat : public ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr<Cat>;
+      // struct Cat : public RefCountedThreadSafeAndCanMakeWeakPtrThreadSafe<Cat>;
       // struct Dog { virtual ThreadSafeWeakPtrControlBlock& ControlBlock() const = 0; };
       // struct CatDog : public Cat, public Dog
       // {  ThreadSafeWeakPtrControlBlock& ControlBlock() const { return Cat::ControlBlock(); } };
@@ -150,11 +150,11 @@ namespace Krys
 
   private:
     template <typename>
-    friend class ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr;
+    friend class RefCountedThreadSafeAndCanMakeWeakPtrThreadSafe;
 
     template <typename T>
     explicit ThreadSafeWeakPtrControlBlock(
-      const ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr<T> *object) noexcept
+      const RefCountedThreadSafeAndCanMakeWeakPtrThreadSafe<T> *object) noexcept
         : _object(const_cast<RawPtr<T>>(static_cast<const RawPtr<T>>(object)))
     {
     }
@@ -318,7 +318,7 @@ namespace Krys
     }
 
   protected:
-    ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr() noexcept = default;
+    RefCountedThreadSafeAndCanMakeWeakPtrThreadSafe() noexcept = default;
 
     ThreadSafeWeakPtrControlBlock &ControlBlock() const noexcept
     {
@@ -372,7 +372,7 @@ namespace Krys
   class ThreadSafeWeakPtr
   {
     template <typename>
-    friend class ThreadSafeRefCountedAndCanMakeThreadSafeWeakPtr;
+    friend class RefCountedThreadSafeAndCanMakeWeakPtrThreadSafe;
 
     template <typename>
     friend class ThreadSafeWeakOrStrongPtr;

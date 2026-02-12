@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Pointers/RefCounted/RefCounted.hpp"
+#include "Krystal.Lib/Mixins/RefCounted.hpp"
 
 namespace Krys::HTML
 {

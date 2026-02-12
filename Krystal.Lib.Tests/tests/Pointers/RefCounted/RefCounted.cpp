@@ -1,4 +1,4 @@
-﻿#include "Krystal.Lib/Pointers/RefCounted/RefCounted.hpp"
+﻿#include "Krystal.Lib/Mixins/RefCounted.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

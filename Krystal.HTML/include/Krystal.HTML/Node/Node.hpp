@@ -8,7 +8,7 @@
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/CanMakeCheckedPtr.hpp"
+#include "Krystal.Lib/Mixins/CanMakeCheckedPtr.hpp"
 #include "Krystal.Lib/Pointers/CheckedPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/WeakRef.hpp"

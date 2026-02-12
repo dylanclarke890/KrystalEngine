@@ -8,7 +8,7 @@
 #include "Krystal.HTML/Utils/BoolOr.hpp"
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
-#include "Krystal.Lib/Pointers/RefCounted/RefCounted.hpp"
+#include "Krystal.Lib/Mixins/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Pointers/RefCounted/WeakPtr.hpp"
 #include "Krystal.Lib/Types/SmallList.hpp"
