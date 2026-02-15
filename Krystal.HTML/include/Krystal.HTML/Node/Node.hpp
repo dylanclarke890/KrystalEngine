@@ -93,7 +93,7 @@ namespace Krys::HTML
     NodeFlag _flags : BitCount<NodeFlag>() {NodeFlag::None};
     NodeType _nodeType;
     RefPtr<Document> _ownerDocument;
-    CheckedPtr<ContainerNode> _parentNode;
+    RawPtr<ContainerNode> _parentNode;
     RawPtr<Node> _previousSibling;
     RawPtr<Node> _nextSibling;
     RawPtr<TreeScope> _treeScope;

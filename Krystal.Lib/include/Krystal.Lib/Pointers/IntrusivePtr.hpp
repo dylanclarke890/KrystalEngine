@@ -204,9 +204,13 @@ namespace Krys
       return PtrTraits::unwrap(_ptr);
     }
 
-    template <typename TMember>
-    constexpr TMember &operator->*(TMember T::*memptr) const noexcept
+    // This X type is required to avoid intellisense losing it's fucking mind if the type is incomplete. It
+    // can never be anything other than T. Either way it compiles as expected but we need the indirection to
+    // avoid intellisense errors.
+    template <typename X = T, typename TMember>
+    constexpr TMember &operator->*(TMember X::*memptr) const noexcept
     {
+      static_assert(SameType<T, X>, "T must be the same as X");
       assert(PtrTraits::unwrap(_ptr));
       return PtrTraits::unwrap(_ptr)->*memptr;
     }
