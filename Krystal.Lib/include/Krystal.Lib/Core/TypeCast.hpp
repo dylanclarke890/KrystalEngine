@@ -85,7 +85,7 @@ namespace Krys
   {
     static_assert(!UnnecessaryTypeCast<Source, Target>, "Unnecessary cast to same type");
     static_assert(CanDowncast<Source, Target>, "Invalid downcast");
-    return Is<Target>(source) ? &static_cast<match_constness_t<Source, Target> &>(source) : nullptr;
+    return Is<Target>(source) ? static_cast<match_constness_t<Source, Target> *>(&source) : nullptr;
   }
 
   template <typename Target, typename Source>

@@ -9,27 +9,8 @@
 #include <cassert>
 #include <exception>
 
-namespace Krys
+namespace Krys::detail
 {
-  // Use this class when an abstract base class needs CheckedPtr/CheckedRef support, and the
-  // CanMakeCheckedPtr implementation will be in a concrete subclass.
-  class AbstractCanMakeCheckedPtr
-  {
-  protected:
-    virtual ~AbstractCanMakeCheckedPtr() noexcept = default;
-
-  public:
-    virtual void AddRefChecked() const noexcept = 0;
-    virtual void SubRefChecked() const noexcept = 0;
-    KRYS_NODISCARD virtual uint32 GetRefCountChecked() const noexcept = 0;
-  };
-
-  enum class DefaultedOperatorEqual : bool
-  {
-    No,
-    Yes
-  };
-
   template <typename TCount, bool ThreadSafe>
   class CanMakeCheckedPtrBase
   {
@@ -106,8 +87,8 @@ namespace Krys
     }
   };
 
-  template <typename T, DefaultedOperatorEqual DefaultOperatorEqual = DefaultedOperatorEqual::No>
-  class CanMakeCheckedPtr : public CanMakeCheckedPtrBase<uint32, false>
+  template <typename T, bool ThreadSafe, typename TCount = uint32>
+  class CanMakeCheckedPtr : public CanMakeCheckedPtrBase<uint32, ThreadSafe>
   {
   public:
     ~CanMakeCheckedPtr() noexcept
@@ -115,55 +96,8 @@ namespace Krys
       static_assert(T::_delete_overridden_for_checkedptr,
                     "Objects that use CanMakeCheckedPtr must use KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR");
     }
-
-    friend bool operator==(const CanMakeCheckedPtr &, const CanMakeCheckedPtr &) noexcept
-    {
-      static_assert(DefaultOperatorEqual == DefaultedOperatorEqual::Yes,
-                    "Derived class should opt-in when defaulting operator==, or invalid/undefined comparison "
-                    "should be reworked/defined");
-      return true;
-    }
-  };
-
-  template <typename T, DefaultedOperatorEqual DefaultOperatorEqual = DefaultedOperatorEqual::No>
-  class CanMakeThreadSafeCheckedPtr : public CanMakeCheckedPtrBase<uint32, true>
-  {
-  public:
-    ~CanMakeThreadSafeCheckedPtr() noexcept
-    {
-      static_assert(T::_delete_overridden_for_checkedptr,
-                    "Objects that use CanMakeCheckedPtr must use KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR");
-    }
-
-    friend bool operator==(const CanMakeThreadSafeCheckedPtr &, const CanMakeThreadSafeCheckedPtr &) noexcept
-    {
-      static_assert(DefaultOperatorEqual == DefaultedOperatorEqual::Yes,
-                    "Derived class should opt-in when defaulting operator==, or invalid/undefined comparison "
-                    "should be reworked/defined");
-
-      return true;
-    }
   };
 }
-
-#define KRYS_ABSTRACT_CAN_MAKE_CHECKEDPTR_OVERRIDE(Base)                                                     \
-  void AddRefChecked() const noexcept final                                                                  \
-  {                                                                                                          \
-    Base::AddRefChecked();                                                                                   \
-  }                                                                                                          \
-  void SubRefChecked() const noexcept final                                                                  \
-  {                                                                                                          \
-    Base::SubRefChecked();                                                                                   \
-  }                                                                                                          \
-  KRYS_NODISCARD Krys::uint32 GetRefCountChecked() const noexcept final                                      \
-  {                                                                                                          \
-    return Base::GetRefCountChecked();                                                                       \
-  }
-
-#define KRYS_USING_CAN_MAKE_CHECKEDPTR(Base)                                                                 \
-  using Base::AddRefChecked;                                                                                 \
-  using Base::SubRefChecked;                                                                                 \
-  using Base::GetRefCountChecked;
 
 /// @brief delete(T*, std::destroying_delete_t, size_t) is preferred over delete(void*)
 /// in overload resolution, so we can use it to interpose before calling delete(void*).
@@ -179,7 +113,7 @@ namespace Krys
     object->T::~T();                                                                                         \
                                                                                                              \
     /* If CheckedPtrs still exist, poison and keep memory */                                                 \
-    if (object->GetRefCountChecked()) KRYS_UNLIKELY                                                             \
+    if (object->GetRefCountChecked()) KRYS_UNLIKELY                                                          \
     {                                                                                                        \
       ::Krys::ByteUtils::ZeroObject(*object);                                                                \
       return;                                                                                                \
@@ -200,3 +134,44 @@ private:                                                                        
 #define KRYS_STRUCT_OVERRIDE_DELETE_FOR_CHECKED_PTR(ClassName)                                               \
   KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR_IMPL(ClassName)                                                       \
   using _forceSemicolonKrysOverrideDeleteCheckedPtr = int
+
+namespace Krys
+{
+  template <typename T>
+  using CanMakeCheckedPtr = ::Krys::detail::CanMakeCheckedPtr<T, false>;
+
+  template <typename T>
+  using CanMakeThreadSafeCheckedPtr = ::Krys::detail::CanMakeCheckedPtr<T, true>;
+
+  /// @brief Use this class when an abstract base class needs CheckedPtr/CheckedRef support, and the
+  /// CanMakeCheckedPtr implementation will be in a concrete subclass.
+  class AbstractCanMakeCheckedPtr
+  {
+  protected:
+    virtual ~AbstractCanMakeCheckedPtr() noexcept = default;
+
+  public:
+    virtual void AddRefChecked() const noexcept = 0;
+    virtual void SubRefChecked() const noexcept = 0;
+    KRYS_NODISCARD virtual uint32 GetRefCountChecked() const noexcept = 0;
+  };
+}
+
+#define KRYS_USING_CAN_MAKE_CHECKEDPTR(Base)                                                                 \
+  using Base::AddRefChecked;                                                                                 \
+  using Base::SubRefChecked;                                                                                 \
+  using Base::GetRefCountChecked;
+
+#define KRYS_ABSTRACT_CAN_MAKE_CHECKEDPTR_OVERRIDE(Base)                                                     \
+  void AddRefChecked() const noexcept final                                                                  \
+  {                                                                                                          \
+    Base::AddRefChecked();                                                                                   \
+  }                                                                                                          \
+  void SubRefChecked() const noexcept final                                                                  \
+  {                                                                                                          \
+    Base::SubRefChecked();                                                                                   \
+  }                                                                                                          \
+  KRYS_NODISCARD Krys::uint32 GetRefCountChecked() const noexcept final                                      \
+  {                                                                                                          \
+    return Base::GetRefCountChecked();                                                                       \
+  }

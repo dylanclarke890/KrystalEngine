@@ -1,195 +1,164 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Detection/Environment.hpp"
+#include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/Pointers/CompactRefPtrTuple.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
-#include "Krystal.Lib/Pointers/WeakRef.hpp"
+#include "Krystal.Lib/Pointers/WeakPtr.hpp"
+#include "Krystal.Lib/Pointers/WeakPtrImpl.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
-namespace Krys
+namespace Krys::detail
 {
-#define KRYS_USING_CAN_MAKE_WEAKPTR(Base)                                                                    \
-  using Base::WeakImpl;                                                                                      \
-  using Base::WeakImplIfExists;                                                                              \
-  using Base::WeakCount;                                                                                     \
-  using Base::TWeakValue;                                                                                    \
-  using Base::TWeakPtrImpl;
-
-  // Note: you probably want to inherit from CanMakeWeakPtr rather than use this directly.
-  template <typename T, typename WeakPtrImpl = DefaultWeakPtrImpl>
-  class WeakPtrFactory : public NonCopyable<WeakPtrFactory<T, WeakPtrImpl>>
+  template <typename T, typename WeakPtrImpl, bool UseCompactPointer>
+  class WeakPtrFactory : public NonCopyable<WeakPtrFactory<T, WeakPtrImpl, UseCompactPointer>>
   {
-    template <typename, typename, typename>
-    friend class WeakPtr;
-
-    template <typename, typename>
-    friend class WeakRef;
-
   public:
-    using TObject = T;
-    using TWeakPtrImpl = WeakPtrImpl;
+    using weak_value = T;
+    using weak_value_impl = WeakPtrImpl;
+    using weak_value_impl_ref_ptr =
+      conditional_t<UseCompactPointer, CompactRefPtrTuple<WeakPtrImpl, uint16>, RefPtr<weak_value_impl>>;
 
   private:
-    mutable RefPtr<WeakPtrImpl> _impl;
+    mutable weak_value_impl_ref_ptr _impl;
 
   public:
-    WeakPtrFactory() noexcept = default;
+    constexpr WeakPtrFactory() noexcept = default;
 
-    ~WeakPtrFactory() noexcept
+    constexpr ~WeakPtrFactory() noexcept
     {
-      if (_impl)
+      if constexpr (UseCompactPointer)
       {
-        _impl->Clear();
+        if (auto *pointer = _impl.Ptr())
+        {
+          pointer->reset();
+        }
+      }
+      else
+      {
+        if (_impl)
+        {
+          _impl->reset();
+        }
       }
     }
 
-#if KRYS_ENV(DEV)
-    KRYS_NODISCARD bool IsInitialized() const noexcept
+    constexpr void InitializeIfNeeded(const T &object) const noexcept
     {
-      return _impl;
-    }
-#endif
+      static_assert(IsFinal<WeakPtrImpl>);
 
-    KRYS_NODISCARD RawPtr<WeakPtrImpl> Impl() const noexcept
-    {
-      return _impl.get();
-    }
-
-    void InitializeIfNeeded(const T &object) const noexcept
-    {
-      if (_impl)
+      if constexpr (UseCompactPointer)
       {
-        return;
-      }
+        if (_impl.Ptr())
+        {
+          return;
+        }
 
-      static_assert(Final<WeakPtrImpl>);
-      _impl = AdoptRef(*new WeakPtrImpl(const_cast<RawPtr<T>>(&object)));
+        _impl.SetPtr(CreateRef<WeakPtrImpl>(const_cast<RawPtr<T>>(&object)));
+      }
+      else
+      {
+        if (_impl)
+        {
+          return;
+        }
+
+        _impl = CreateRef<WeakPtrImpl>(const_cast<RawPtr<T>>(&object));
+      }
+    }
+
+    KRYS_NODISCARD constexpr RawPtr<WeakPtrImpl> Impl() const noexcept
+    {
+      if constexpr (UseCompactPointer)
+      {
+        return _impl.Ptr();
+      }
+      else
+      {
+        return _impl.get();
+      }
     }
 
     template <typename U>
-    KRYS_NODISCARD WeakPtr<U, WeakPtrImpl, RawPtrTraits<U>> CreateWeakPtr(
-      U &object, EnabledWeakPtrThreadAsserts enableAsserts = EnabledWeakPtrThreadAsserts::Yes) const noexcept
+    KRYS_NODISCARD constexpr WeakPtr<U, WeakPtrImpl, RawPtrTraits<U>> CreateWeakPtr(U &object) const noexcept
     {
       InitializeIfNeeded(object);
 
-      assert(&object == _impl->template get<T>());
-      return WeakPtr<U, WeakPtrImpl, RawPtrTraits<U>>(*_impl, enableAsserts);
-    }
-
-    void RevokeAll() noexcept
-    {
-      if (RefPtr impl = std::exchange(_impl, nullptr))
+      if constexpr (UseCompactPointer)
       {
-        impl->clear();
+        assert(&object == _impl.Ptr()->template get<T>());
+        return WeakPtr<U, WeakPtrImpl, RawPtrTraits<U>>(*_impl.Ptr());
+      }
+      else
+      {
+        assert(&object == _impl->template get<T>());
+        return WeakPtr<U, WeakPtrImpl, RawPtrTraits<U>>(*_impl);
       }
     }
 
-    KRYS_NODISCARD uint32 WeakPtrCount() const noexcept
+    constexpr void RevokeAll() noexcept
     {
-      return _impl ? _impl->GetRefCount() - 1 : 0u;
-    }
-  };
-
-  // Note: you probably want to inherit from CanMakeWeakPtrWithBitField rather than use this directly.
-  template <typename T, typename WeakPtrImpl = DefaultWeakPtrImpl>
-  class WeakPtrFactoryWithBitField : public NonCopyable<WeakPtrFactoryWithBitField<T, WeakPtrImpl>>
-  {
-  public:
-    using TObject = T;
-    using TWeakPtrImpl = WeakPtrImpl;
-
-  private:
-    template <typename, typename, typename>
-    friend class WeakPtr;
-
-    template <typename, typename>
-    friend class WeakRef;
-
-    mutable CompactRefPtrTuple<WeakPtrImpl, uint16> _impl;
-
-  public:
-    WeakPtrFactoryWithBitField() noexcept
-    {
-    }
-
-    ~WeakPtrFactoryWithBitField() noexcept
-    {
-      if (auto *pointer = _impl.Ptr())
+      if constexpr (UseCompactPointer)
       {
-        pointer->clear();
+        if (auto *pointer = _impl.Ptr())
+        {
+          pointer->reset();
+          _impl.SetPtr(nullptr);
+        }
+      }
+      else
+      {
+        if (RefPtr impl = std::exchange(_impl, nullptr))
+        {
+          impl->reset();
+        }
       }
     }
 
-#if KRYS_ENV(DEV)
-    KRYS_NODISCARD bool IsInitialized() const noexcept
+    KRYS_NODISCARD constexpr uint32 GetRefCountWeak() const noexcept
     {
-      return _impl.Ptr();
-    }
-#endif
-
-    KRYS_NODISCARD RawPtr<WeakPtrImpl> Impl() const noexcept
-    {
-      return _impl.Ptr();
-    }
-
-    void InitializeIfNeeded(const T &object) const noexcept
-    {
-      if (_impl.Ptr())
+      if constexpr (UseCompactPointer)
       {
-        return;
+        if (auto *pointer = _impl.Ptr())
+        {
+          return pointer->GetRefCount() - 1;
+        }
+
+        return 0;
       }
-
-      static_assert(Final<WeakPtrImpl>);
-      _impl.SetPtr(AdoptRef(*new WeakPtrImpl(const_cast<RawPtr<T>>(&object))));
-    }
-
-    template <typename U>
-    KRYS_NODISCARD WeakPtr<U, WeakPtrImpl, RawPtrTraits<U>> CreateWeakPtr(
-      U &object, EnabledWeakPtrThreadAsserts enableAsserts = EnabledWeakPtrThreadAsserts::Yes) const noexcept
-    {
-      InitializeIfNeeded(object);
-
-      assert(&object == _impl.Ptr()->template get<T>());
-      return WeakPtr<U, WeakPtrImpl, RawPtrTraits<U>>(*_impl.Ptr(), enableAsserts);
-    }
-
-    void RevokeAll() noexcept
-    {
-      if (auto *pointer = _impl.Ptr())
+      else
       {
-        pointer->clear();
-        _impl.SetPtr(nullptr);
+        return _impl ? _impl->GetRefCount() - 1 : 0u;
       }
     }
 
-    KRYS_NODISCARD uint32 WeakPtrCount() const noexcept
+    KRYS_NODISCARD constexpr uint16 Bitfield() const noexcept
+    requires(UseCompactPointer)
     {
-      if (auto *pointer = _impl.Ptr())
-      {
-        return pointer->GetRefCount() - 1;
-      }
-
-      return 0;
+      return _impl.Data();
     }
 
-    KRYS_NODISCARD uint16 Bitfield() const noexcept
-    {
-      return _impl.type();
-    }
-
-    void SetBitfield(uint16 value) const noexcept
+    constexpr void SetBitfield(uint16 value) const noexcept
+    requires(UseCompactPointer)
     {
       return _impl.SetData(value);
     }
   };
+}
 
-  // We use lazy initialization of the WeakPtrFactory by default to avoid unnecessary initialization. Eager
-  // initialization is however useful if you plan to call construct WeakPtrs from other threads.
-  enum class WeakPtrFactoryInitialization
-  {
-    Lazy,
-    Eager
-  };
+namespace Krys
+{
+  template <typename T>
+  using WeakPtrFactory = ::Krys::detail::WeakPtrFactory<T, WeakPtrImpl, false>;
+
+  template <typename T>
+  using WeakPtrFactoryWithBitField = ::Krys::detail::WeakPtrFactory<T, WeakPtrImpl, true>;
+
+  template <typename T>
+  using ThreadSafeWeakPtrFactory = ::Krys::detail::WeakPtrFactory<T, ThreadSafeWeakPtrImpl, false>;
+
+  template <typename T>
+  using ThreadSafeWeakPtrFactoryWithBitField = ::Krys::detail::WeakPtrFactory<T, ThreadSafeWeakPtrImpl, true>;
 }

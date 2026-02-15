@@ -1,54 +1,15 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/TypeCast.hpp"
-#include "Krystal.Lib/Detection/Environment.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
-namespace Krys
+namespace Krys::detail
 {
   template <typename Derived>
-  class WeakPtrImplBase : public RefCountedThreadSafe<Derived>, public NonCopyable<WeakPtrImplBase<Derived>>
-  {
-  private:
-    RawPtr<void> _ptr;
-
-  public:
-    template <typename T>
-    explicit WeakPtrImplBase(RawPtr<T> ptr) noexcept : _ptr(static_cast<RawPtr<typename T::TWeakValue>>(ptr))
-    {
-    }
-
-    template <typename T>
-    RawPtr<typename T::TWeakValue> get() noexcept
-    {
-      return static_cast<RawPtr<typename T::TWeakValue>>(_ptr);
-    }
-
-    void Clear() noexcept
-    {
-      _ptr = nullptr;
-    }
-
-    explicit operator bool() const noexcept
-    {
-      return _ptr;
-    }
-  };
-
-  class DefaultWeakPtrImpl final : public WeakPtrImplBase<DefaultWeakPtrImpl>
-  {
-  public:
-    template <typename T>
-    explicit DefaultWeakPtrImpl(RawPtr<T> ptr) noexcept : WeakPtrImplBase<DefaultWeakPtrImpl>(ptr)
-    {
-    }
-  };
-
-  template <typename Derived>
-  class WeakPtrImplBaseSingleThread : public NonCopyable<WeakPtrImplBaseSingleThread<Derived>>
+  class WeakPtrImpl : public NonCopyable<WeakPtrImpl<Derived>>
   {
   private:
     mutable uint32 _refCount {1};
@@ -56,17 +17,17 @@ namespace Krys
 
   public:
     template <typename T>
-    explicit WeakPtrImplBaseSingleThread(RawPtr<T> ptr) noexcept
-        : _ptr(static_cast<RawPtr<typename T::TWeakValue>>(ptr))
+    constexpr explicit WeakPtrImpl(RawPtr<T> ptr) noexcept
+        : _ptr(static_cast<RawPtr<typename T::weak_value>>(ptr))
     {
     }
 
-    void AddRef() const noexcept
+    constexpr void AddRef() const noexcept
     {
       ++_refCount;
     }
 
-    void SubRef() const noexcept
+    constexpr void SubRef() const noexcept
     {
       uint32 tempRefCount = _refCount - 1;
       if (!tempRefCount)
@@ -77,34 +38,77 @@ namespace Krys
       _refCount = tempRefCount;
     }
 
-    uint32_t GetRefCount() const noexcept
+    KRYS_NODISCARD constexpr uint32 GetRefCount() const noexcept
     {
       return _refCount;
     }
 
-    template <typename T>
-    RawPtr<typename T::TWeakValue> get() noexcept
-    {
-      return static_cast<RawPtr<typename T::TWeakValue>>(_ptr);
-    }
-
-    void Clear() noexcept
-    {
-      _ptr = nullptr;
-    }
-
-    explicit operator bool() const noexcept
+    constexpr explicit operator bool() const noexcept
     {
       return _ptr;
     }
+
+    template <typename T>
+    KRYS_NODISCARD constexpr RawPtr<typename T::weak_value> get() noexcept
+    {
+      return static_cast<RawPtr<typename T::weak_value>>(_ptr);
+    }
+
+    constexpr void reset() noexcept
+    {
+      _ptr = nullptr;
+    }
   };
 
-  class SingleThreadWeakPtrImpl final : public WeakPtrImplBaseSingleThread<SingleThreadWeakPtrImpl>
+  template <typename Derived>
+  class ThreadSafeWeakPtrImpl : public ::Krys::ThreadSafeRefCounted<Derived>,
+                                public NonCopyable<ThreadSafeWeakPtrImpl<Derived>>
+  {
+  private:
+    RawPtr<void> _ptr;
+
+  public:
+    template <typename T>
+    constexpr explicit ThreadSafeWeakPtrImpl(RawPtr<T> ptr) noexcept
+        : _ptr(static_cast<RawPtr<typename T::weak_value>>(ptr))
+    {
+    }
+
+    constexpr explicit operator bool() const noexcept
+    {
+      return _ptr;
+    }
+
+    template <typename T>
+    KRYS_NODISCARD constexpr RawPtr<typename T::weak_value> get() noexcept
+    {
+      return static_cast<RawPtr<typename T::weak_value>>(_ptr);
+    }
+
+    constexpr void reset() noexcept
+    {
+      _ptr = nullptr;
+    }
+  };
+}
+
+namespace Krys
+{
+  class WeakPtrImpl final : public detail::WeakPtrImpl<WeakPtrImpl>
   {
   public:
     template <typename T>
-    explicit SingleThreadWeakPtrImpl(RawPtr<T> ptr) noexcept
-        : WeakPtrImplBaseSingleThread<SingleThreadWeakPtrImpl>(ptr)
+    constexpr explicit WeakPtrImpl(RawPtr<T> ptr) noexcept : detail::WeakPtrImpl<WeakPtrImpl>(ptr)
+    {
+    }
+  };
+
+  class ThreadSafeWeakPtrImpl final : public detail::ThreadSafeWeakPtrImpl<ThreadSafeWeakPtrImpl>
+  {
+  public:
+    template <typename T>
+    constexpr explicit ThreadSafeWeakPtrImpl(RawPtr<T> ptr) noexcept
+        : detail::ThreadSafeWeakPtrImpl<ThreadSafeWeakPtrImpl>(ptr)
     {
     }
   };

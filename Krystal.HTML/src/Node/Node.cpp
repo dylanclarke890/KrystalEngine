@@ -16,18 +16,34 @@ namespace Krys::HTML
   {
     _flags = flags;
   }
+  
+  RawPtr<Document> Node::OwnerDocument() const noexcept
+  {
+    return _ownerDocument.get();
+  }
 
   void Node::AddRef() const noexcept
   {
+    if (IsDocumentNode())
+    {
+      static_cast<const Document *>(this)->AddRef();
+    }
+    else
+    {
+      AddRef(EventTargetTag {});
+    }
   }
 
   void Node::SubRef() const noexcept
   {
-  }
-
-  const Node &Node::GetRootNode(const GetRootNodeOptions &options) const noexcept
-  {
-    return options.Composed ? ShadowIncludingRoot() : Root();
+    if (IsDocumentNode())
+    {
+      static_cast<const Document *>(this)->SubRef();
+    }
+    else
+    {
+      SubRef(EventTargetTag {});
+    }
   }
 
   Node &Node::GetRootNode(const GetRootNodeOptions &options) noexcept
@@ -35,37 +51,15 @@ namespace Krys::HTML
     return options.Composed ? ShadowIncludingRoot() : Root();
   }
 
-  const Node &Node::Root() const noexcept
-  {
-    if (IsInTreeScope())
-    {
-      return GetTreeScope().RootNode();
-    }
-
-    return NodeTraversal::Root(*this);
-  }
-
   Node &Node::Root() noexcept
   {
     if (IsInTreeScope())
     {
-      return GetTreeScope().RootNode();
+      auto &root = GetTreeScope().RootNode();
+      return root;
     }
 
     return NodeTraversal::Root(*this);
-  }
-
-  /// @see https://dom.spec.whatwg.org/#concept-shadow-including-root
-  const Node &Node::ShadowIncludingRoot() const noexcept
-  {
-    const auto &root = this->Root();
-    if (const auto *shadowRoot = DynamicDowncast<ShadowRoot>(root))
-    {
-      const auto *host = shadowRoot->Host();
-      return host ? host->ShadowIncludingRoot() : root;
-    }
-
-    return root;
   }
 
   /// @see https://dom.spec.whatwg.org/#concept-shadow-including-root

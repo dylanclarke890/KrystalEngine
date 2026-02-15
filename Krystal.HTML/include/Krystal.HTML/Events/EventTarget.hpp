@@ -8,9 +8,8 @@
 #include "Krystal.HTML/Utils/BoolOr.hpp"
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
-#include "Krystal.Lib/Mixins/RefCounted.hpp"
+#include "Krystal.Lib/Mixins/CanMakeWeakPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
-#include "Krystal.Lib/Pointers/WeakPtr.hpp"
 #include "Krystal.Lib/Types/SmallList.hpp"
 
 namespace Krys::HTML
@@ -35,7 +34,9 @@ namespace Krys::HTML
     SmallList<Ref<RegisteredEventListener>> _listeners;
 
   public:
-    EventTarget() noexcept;
+    EventTarget() noexcept = default;
+    virtual ~EventTarget() noexcept = default;
+
 
     void AddRef() const noexcept;
     void SubRef() const noexcept;

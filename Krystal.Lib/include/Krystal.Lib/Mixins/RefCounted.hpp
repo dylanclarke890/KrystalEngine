@@ -55,7 +55,7 @@ namespace Krys
 
 namespace Krys::detail
 {
-  class RefCountedBase
+  class RefCounted
   {
     using Debugger = RefCountedDebugger<uint32>;
 
@@ -64,9 +64,9 @@ namespace Krys::detail
     KRYS_NO_UNIQUE_ADDRESS Debugger _debugger;
 
   protected:
-    RefCountedBase() noexcept = default;
+    RefCounted() noexcept = default;
 
-    ~RefCountedBase() noexcept
+    ~RefCounted() noexcept
     {
       _debugger.WillDestroy(_refCount);
     }
@@ -118,7 +118,7 @@ namespace Krys::detail
     }
   };
 
-  class RefCountedThreadSafeBase : public NonCopyable<RefCountedThreadSafeBase>
+  class ThreadSafeRefCounted : public NonCopyable<ThreadSafeRefCounted>
   {
     using Debugger = RefCountedDebugger<uint32>;
 
@@ -149,9 +149,9 @@ namespace Krys::detail
     }
 
   protected:
-    constexpr RefCountedThreadSafeBase() noexcept = default;
+    constexpr ThreadSafeRefCounted() noexcept = default;
 
-    ~RefCountedThreadSafeBase() noexcept
+    ~ThreadSafeRefCounted() noexcept
     {
       _debugger.WillDestroy(_refCount);
       assert(_refCount == 1);
@@ -262,7 +262,7 @@ namespace Krys
   };
 
   template <typename T>
-  class KRYS_EMPTY_BASE_CLASS RefCounted : public ::Krys::detail::RefCountedBase
+  class KRYS_EMPTY_BASE_CLASS RefCounted : public ::Krys::detail::RefCounted
   {
   protected:
     RefCounted() noexcept = default;
@@ -279,7 +279,7 @@ namespace Krys
   };
 
   template <class T>
-  class KRYS_EMPTY_BASE_CLASS RefCountedThreadSafe : public ::Krys::detail::RefCountedThreadSafeBase
+  class KRYS_EMPTY_BASE_CLASS ThreadSafeRefCounted : public ::Krys::detail::ThreadSafeRefCounted
   {
   public:
     void SubRef() const noexcept
@@ -293,13 +293,14 @@ namespace Krys
     }
 
   protected:
-    constexpr RefCountedThreadSafe() noexcept = default;
-    constexpr ~RefCountedThreadSafe() noexcept = default;
+    constexpr ThreadSafeRefCounted() noexcept = default;
+    constexpr ~ThreadSafeRefCounted() noexcept = default;
   };
 
   template <typename T>
-  class RefCountedWithInlineWeakPtr : public ::Krys::detail::RefCountedWithInlineWeakPtrBase,
-                                      public NonCopyable<RefCountedWithInlineWeakPtr<T>>
+  class KRYS_EMPTY_BASE_CLASS RefCountedWithInlineWeakPtr
+      : public ::Krys::detail::RefCountedWithInlineWeakPtrBase,
+        public NonCopyable<RefCountedWithInlineWeakPtr<T>>
   {
   public:
     constexpr RefCountedWithInlineWeakPtr() noexcept = default;

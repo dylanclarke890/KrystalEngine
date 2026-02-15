@@ -17,8 +17,6 @@ namespace Krys
   template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
   class KRYS_TRIVIAL_ABI IntrusivePtr
   {
-    static_assert(!IsPointer<T>, "T must not be a pointer type.");
-
     KRYS_FORBID_HEAP_ALLOCATION_ALLOWING_PLACEMENT_NEW;
 
     template <typename, typename, typename, IsNullable>
@@ -37,6 +35,8 @@ namespace Krys
   public:
     KRYS_NODISCARD static constexpr IntrusivePtr NoRef(RawPtr<T> ptr) noexcept
     {
+      static_assert(!IsPointer<T>, "T must not be a pointer type.");
+
       if constexpr (!nullable)
       {
         assert(ptr);
@@ -47,11 +47,15 @@ namespace Krys
 
     KRYS_NODISCARD static constexpr IntrusivePtr NoRef(T &ref) noexcept
     {
+      static_assert(!IsPointer<T>, "T must not be a pointer type.");
+
       return IntrusivePtr(&ref);
     }
 
     KRYS_NODISCARD static constexpr IntrusivePtr WithRef(RawPtr<T> ptr) noexcept
     {
+      static_assert(!IsPointer<T>, "T must not be a pointer type.");
+
       if constexpr (!nullable)
       {
         assert(ptr);
@@ -62,6 +66,8 @@ namespace Krys
 
     KRYS_NODISCARD static constexpr IntrusivePtr WithRef(T &ref) noexcept
     {
+      static_assert(!IsPointer<T>, "T must not be a pointer type.");
+
       return IntrusivePtr(&RefPolicy::AddRef(ref));
     }
 
@@ -78,7 +84,7 @@ namespace Krys
     }
 
     KRYS_ALWAYS_INLINE constexpr IntrusivePtr(const IntrusivePtr &o) noexcept
-        : _ptr(RefPolicy::AddRef(static_cast<RawPtr<T>>(o.get())))
+        : _ptr(RefPolicy::AddRef(o.get()))
     {
       if constexpr (!nullable)
       {
@@ -90,14 +96,13 @@ namespace Krys
     KRYS_ALWAYS_INLINE constexpr IntrusivePtr(const IntrusivePtr<X, Y, Z, UNullable> &o) noexcept
         : _ptr(RefPolicy::AddRef(static_cast<RawPtr<T>>(o.get())))
     {
-      if constexpr (UNullable && !nullable)
+      if constexpr (!nullable)
       {
         assert(PtrTraits::unwrap(_ptr));
       }
     }
 
-    KRYS_ALWAYS_INLINE constexpr IntrusivePtr(IntrusivePtr &&o) noexcept
-        : _ptr(static_cast<RawPtr<T>>(o.release()))
+    KRYS_ALWAYS_INLINE constexpr IntrusivePtr(IntrusivePtr &&o) noexcept : _ptr(o.release())
     {
       if constexpr (!nullable)
       {
@@ -109,7 +114,7 @@ namespace Krys
     KRYS_ALWAYS_INLINE constexpr IntrusivePtr(IntrusivePtr<X, Y, Z, UNullable> &&o) noexcept
         : _ptr(static_cast<RawPtr<T>>(o.release()))
     {
-      if constexpr (UNullable && !nullable)
+      if constexpr (!nullable)
       {
         assert(PtrTraits::unwrap(_ptr));
       }
@@ -137,7 +142,7 @@ namespace Krys
     {
       IntrusivePtr ref = o;
       swap(ref);
-      if constexpr (UNullable && !nullable)
+      if constexpr (!nullable)
       {
         assert(PtrTraits::unwrap(_ptr));
       }
@@ -162,7 +167,7 @@ namespace Krys
     {
       IntrusivePtr ref = Krys::Move(o);
       swap(ref);
-      if constexpr (UNullable && !nullable)
+      if constexpr (!nullable)
       {
         assert(PtrTraits::unwrap(_ptr));
       }
@@ -298,11 +303,11 @@ namespace Krys
     return !(lhs == rhs);
   }
 
-  template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  template <typename TExpected, typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
   KRYS_NODISCARD constexpr inline bool
     Is(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &source) noexcept
   {
-    return Is<typename T::element_type>(source.get());
+    return Is<TExpected>(source.get());
   }
 
   template <typename T, typename U, typename PtrTraits, typename RefPolicy, IsNullable Nullable>

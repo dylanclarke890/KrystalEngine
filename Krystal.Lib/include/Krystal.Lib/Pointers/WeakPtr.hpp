@@ -1,333 +1,255 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
-#include "Krystal.Lib/Detection/Environment.hpp"
-#include "Krystal.Lib/Mixins/CanMakeWeakPtr.hpp"
+#include "Krystal.Lib/Mixins/RefCounted.hpp"
+#include "Krystal.Lib/Pointers/CheckedPtr.hpp"
 #include "Krystal.Lib/Pointers/CompactRefPtrTuple.hpp"
-#include "Krystal.Lib/Pointers/WeakPtrFactory.hpp"
+#include "Krystal.Lib/Pointers/RawPtr.hpp"
+#include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Pointers/WeakPtrImpl.hpp"
-#include "Krystal.Lib/Pointers/WeakRef.hpp"
+#include "Krystal.Lib/Types/StronglyTypedValue.hpp"
+#include <cassert>
 
-namespace Krys
+namespace Krys::detail
 {
-  template <typename T, typename U, typename WeakPtrImpl>
-  inline RawPtr<WeakPtrImpl> weak_ptr_impl_cast(RawPtr<WeakPtrImpl> impl) noexcept;
-
-  template <typename T, typename U, typename WeakPtrImpl>
-  inline WeakPtrImpl &weak_ptr_impl_cast(WeakPtrImpl &impl) noexcept;
-
-  template <typename T, typename WeakPtrImpl, typename PtrTraits>
-  class WeakPtr
+  template <typename T, typename Impl, typename PtrTraits, IsNullable Nullable>
+  class IntrusiveWeakPtr
   {
+    template <typename, typename, typename, IsNullable>
+    friend class IntrusiveWeakPtr;
+
+    template <typename, typename, bool>
+    friend class WeakPtrFactory;
+
   public:
-    WeakPtr() noexcept = default;
+    using type = T;
+    using weak_pointer_impl = Impl;
+    using pointer_traits = PtrTraits;
+    constexpr static bool nullable = Nullable.Value;
 
-    WeakPtr(std::nullptr_t) noexcept
+  private:
+    RefPtr<weak_pointer_impl, pointer_traits> _impl;
+
+  public:
+    KRYS_NODISCARD static constexpr IntrusiveWeakPtr WithRef(RawPtr<const T> ptr) noexcept
+    {
+      return IntrusiveWeakPtr(ptr);
+    }
+
+    KRYS_NODISCARD static constexpr IntrusiveWeakPtr WithRef(const T &ref) noexcept
+    {
+      return IntrusiveWeakPtr(ref);
+    }
+
+    KRYS_ALWAYS_INLINE constexpr IntrusiveWeakPtr() noexcept
+    requires(nullable)
+        : _impl(nullptr)
     {
     }
 
-    template <typename U>
-    WeakPtr(const WeakPtr<U, WeakPtrImpl, PtrTraits> &o) noexcept
-        : _impl(weak_ptr_impl_cast<T, U>(o._impl.get()))
-#if KRYS_ENV(DEV)
-          ,
-          _shouldEnableAssertions(o._shouldEnableAssertions)
-#endif
+    KRYS_ALWAYS_INLINE constexpr IntrusiveWeakPtr(std::nullptr_t) noexcept
+    requires(nullable)
+        : _impl(nullptr)
     {
     }
 
-    template <typename U>
-    WeakPtr(WeakPtr<U, WeakPtrImpl, PtrTraits> &&o) noexcept
-        : _impl(AdoptRef(weak_ptr_impl_cast<T, U>(o._impl.release())))
-#if KRYS_ENV(DEV)
-          ,
-          _shouldEnableAssertions(o._shouldEnableAssertions)
-#endif
+    KRYS_ALWAYS_INLINE constexpr IntrusiveWeakPtr(const IntrusiveWeakPtr &o) noexcept : _impl(o._impl)
     {
     }
 
-    template <typename U>
-    WeakPtr(const WeakRef<U, WeakPtrImpl> &o) noexcept
-        : _impl(&weak_ptr_impl_cast<T, U>(o.Impl()))
-#if KRYS_ENV(DEV)
-          ,
-          _shouldEnableAssertions(o.EnableThreadAsserts() == EnabledWeakPtrThreadAsserts::Yes)
-#endif
+    template <typename X, typename Y, typename Z, IsNullable Nullable>
+    KRYS_ALWAYS_INLINE constexpr IntrusiveWeakPtr(const IntrusiveWeakPtr<X, Y, Z, Nullable> &o) noexcept
+        : _impl(o._impl)
+    {
+      if constexpr (!nullable)
+      {
+        assert(_impl);
+      }
+    }
+
+    KRYS_ALWAYS_INLINE constexpr IntrusiveWeakPtr(IntrusiveWeakPtr &&o) noexcept : _impl(Krys::Move(o._impl))
     {
     }
 
-    template <typename U>
-    WeakPtr(WeakRef<U, WeakPtrImpl> &&o) noexcept
-        : _impl(AdoptRef(weak_ptr_impl_cast<T, U>(o.ReleaseImpl().release())))
-#if KRYS_ENV(DEV)
-          ,
-          _shouldEnableAssertions(o.EnableThreadAsserts() == EnabledWeakPtrThreadAsserts::Yes)
-#endif
+    template <typename X, typename Y, typename Z, IsNullable Nullable>
+    KRYS_ALWAYS_INLINE constexpr IntrusiveWeakPtr(IntrusiveWeakPtr<X, Y, Z, Nullable> &&o) noexcept
+        : _impl(Krys::Move(o._impl))
+    {
+      if constexpr (!nullable)
+      {
+        assert(_impl);
+      }
+    }
+
+    KRYS_ALWAYS_INLINE constexpr IntrusiveWeakPtr(const Ref<T> &object) noexcept
+        : IntrusiveWeakPtr(object.get())
     {
     }
 
-    WeakPtr(const T *object,
-            EnabledWeakPtrThreadAsserts shouldEnableAssertions = EnabledWeakPtrThreadAsserts::Yes) noexcept
-        : _impl(object ? &object->WeakImpl() : nullptr)
-#if KRYS_ENV(DEV)
-          ,
-          _shouldEnableAssertions(shouldEnableAssertions == EnabledWeakPtrThreadAsserts::Yes)
-#endif
-    {
-      (void)shouldEnableAssertions;
-      assert(!object || object == _impl->template get<T>());
-    }
-
-    template <typename = enable_if_t<!IsPointer<T>>>
-    WeakPtr(const T &object,
-            EnabledWeakPtrThreadAsserts shouldEnableAssertions = EnabledWeakPtrThreadAsserts::Yes) noexcept
-        : _impl(ShareRefPtr(&object.WeakImpl()))
-#if KRYS_ENV(DEV)
-          ,
-          _shouldEnableAssertions(shouldEnableAssertions == EnabledWeakPtrThreadAsserts::Yes)
-#endif
-    {
-      (void)shouldEnableAssertions;
-      assert(&object == _impl->template get<T>());
-    }
-
-    template <typename = enable_if_t<!IsSmartPtr<T>::value>>
-    WeakPtr(const Ref<T> &object,
-            EnabledWeakPtrThreadAsserts shouldEnableAssertions = EnabledWeakPtrThreadAsserts::Yes) noexcept
-        : WeakPtr(object.get(), shouldEnableAssertions)
+    KRYS_ALWAYS_INLINE constexpr IntrusiveWeakPtr(const RefPtr<T> &object) noexcept
+        : IntrusiveWeakPtr(object.get())
     {
     }
 
-    template <typename = enable_if_t<!IsSmartPtr<T>::value>>
-    WeakPtr(const RefPtr<T> &object,
-            EnabledWeakPtrThreadAsserts shouldEnableAssertions = EnabledWeakPtrThreadAsserts::Yes) noexcept
-        : WeakPtr(object.get(), shouldEnableAssertions)
+    KRYS_ALWAYS_INLINE constexpr IntrusiveWeakPtr(const Ref<Impl> &impl) noexcept
+        : _impl(ShareRefPtr<Impl>(impl.get()))
     {
     }
 
-    template <typename OtherPtrTraits>
-    explicit WeakPtr(RefPtr<WeakPtrImpl, OtherPtrTraits> impl) noexcept : _impl(Krys::Move(impl))
+    KRYS_ALWAYS_INLINE constexpr IntrusiveWeakPtr(const RefPtr<Impl> &impl) noexcept
+        : _impl(ShareRefPtr<Impl>(impl.get()))
     {
     }
 
-    KRYS_NODISCARD bool IsWeakNullValue() const noexcept
+    KRYS_ALWAYS_INLINE constexpr IntrusiveWeakPtr(Ref<Impl> &&impl) noexcept
+        : _impl(AdoptRefPtr<Impl>(impl.release()))
     {
-      return !*_impl;
     }
 
-    RefPtr<WeakPtrImpl, PtrTraits> ReleaseImpl() noexcept
+    KRYS_ALWAYS_INLINE constexpr IntrusiveWeakPtr(RefPtr<Impl> &&impl) noexcept
+        : _impl(AdoptRefPtr<Impl>(impl.release()))
     {
-      return Krys::Move(_impl);
     }
 
-    RawPtr<T> get() const noexcept
+    constexpr IntrusiveWeakPtr &operator=(std::nullptr_t) noexcept
+    requires(nullable)
     {
-      static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
-                    "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
-      return _impl ? static_cast<RawPtr<T>>(_impl->template get<T>()) : nullptr;
+      _impl = nullptr;
+      return *this;
     }
 
-    WeakRef<T, WeakPtrImpl> ReleaseNonNull() noexcept
+    constexpr IntrusiveWeakPtr &operator=(const IntrusiveWeakPtr &o) noexcept
     {
-      return WeakRef<T, WeakPtrImpl> {_impl.ReleaseNonNull(), EnableThreadAsserts()};
+      _impl = o._impl;
+      return *this;
     }
 
-    bool operator!() const noexcept
+    template <typename X, typename Y, typename Z, IsNullable Nullable>
+    constexpr IntrusiveWeakPtr &operator=(const IntrusiveWeakPtr<X, Y, Z, Nullable> &o) noexcept
+    {
+      _impl = o._impl;
+      return *this;
+    }
+
+    constexpr IntrusiveWeakPtr &operator=(IntrusiveWeakPtr &&o) noexcept
+    {
+      _impl = Krys::Move(o._impl);
+      return *this;
+    }
+
+    template <typename X, typename Y, typename Z, IsNullable Nullable>
+    constexpr IntrusiveWeakPtr &operator=(IntrusiveWeakPtr<X, Y, Z, Nullable> &&o) noexcept
+    {
+      _impl = Krys::Move(o._impl);
+      return *this;
+    }
+
+    constexpr bool operator!() const noexcept
     {
       return !_impl || !*_impl;
     }
-    explicit operator bool() const noexcept
+
+    constexpr explicit operator bool() const noexcept
     {
       return _impl && *_impl;
     }
 
-    WeakPtr &operator=(std::nullptr_t) noexcept
-    {
-      _impl = nullptr;
-      return *this;
-    }
-    template <typename U>
-    WeakPtr &operator=(const WeakPtr<U, WeakPtrImpl, PtrTraits> &o) noexcept
-    {
-      _impl = weak_ptr_impl_cast<T, U>(o._impl.get());
-#if KRYS_ENV(DEV)
-      _shouldEnableAssertions = o._shouldEnableAssertions;
-#endif
-      return *this;
-    }
-
-    template <typename U>
-    WeakPtr &operator=(WeakPtr<U, WeakPtrImpl, PtrTraits> &&o) noexcept
-    {
-      _impl = AdoptRef(weak_ptr_impl_cast<T, U>(o._impl.release()));
-#if KRYS_ENV(DEV)
-      _shouldEnableAssertions = o._shouldEnableAssertions;
-#endif
-      return *this;
-    }
-
-    template <typename U>
-    WeakPtr &operator=(const WeakRef<U, WeakPtrImpl> &o) noexcept
-    {
-      _impl = &weak_ptr_impl_cast<T, U>(o._impl.get());
-#if KRYS_ENV(DEV)
-      _shouldEnableAssertions = o.EnableThreadAsserts() == EnabledWeakPtrThreadAsserts::Yes;
-#endif
-      return *this;
-    }
-
-    template <typename U>
-    WeakPtr &operator=(WeakRef<U, WeakPtrImpl> &&o) noexcept
-    {
-      _impl = AdoptRef(weak_ptr_impl_cast<T, U>(o._impl.leakRef()));
-#if KRYS_ENV(DEV)
-      _shouldEnableAssertions = o.EnableThreadAsserts() == EnabledWeakPtrThreadAsserts::Yes;
-#endif
-      return *this;
-    }
-
-    RawPtr<T> operator->() const noexcept
+    KRYS_ALWAYS_INLINE constexpr T &operator*() const noexcept KRYS_LIFETIME_BOUND
     {
       static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
                     "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
 
-      auto *result = get();
+      assert(this->get());
+
+      RawPtr<T> result = this->get();
+      return *result;
+    }
+
+    KRYS_ALWAYS_INLINE constexpr RawPtr<T> operator->() const noexcept KRYS_LIFETIME_BOUND
+    {
+      static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
+                    "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
+
+      RawPtr<T> result = this->get();
       assert(result);
       return result;
     }
 
-    T &operator*() const noexcept
+    template <typename TMember>
+    constexpr TMember &operator->*(TMember T::*memptr) const noexcept
     {
       static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
                     "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
 
-      auto *result = get();
+      RawPtr<T> result = this->get();
       assert(result);
-      return *result;
+      return result->*memptr;
     }
 
-    void clear() noexcept
+    KRYS_NODISCARD constexpr RawPtr<T> get() const noexcept
+    {
+      static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
+                    "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
+
+      return _impl ? static_cast<RawPtr<T>>(_impl->template get<T>()) : nullptr;
+    }
+
+    KRYS_NODISCARD constexpr RawPtr<T> release() noexcept
+    {
+      static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
+                    "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
+
+      return _impl.release();
+    }
+
+    void reset() noexcept
     {
       _impl = nullptr;
     }
 
-    EnabledWeakPtrThreadAsserts EnableThreadAsserts() const noexcept
-    {
-#if KRYS_ENV(DEV)
-      return _shouldEnableAssertions ? EnabledWeakPtrThreadAsserts::Yes : EnabledWeakPtrThreadAsserts::No;
-#else
-      return EnabledWeakPtrThreadAsserts::No;
-#endif
-    }
-
   private:
-    template <typename, typename, typename>
-    friend class WeakPtr;
-
-    template <typename, typename>
-    friend class WeakPtrFactory;
-
-    template <typename, typename>
-    friend class WeakPtrFactoryWithBitField;
-
-    explicit WeakPtr(Ref<WeakPtrImpl> &&ref, EnabledWeakPtrThreadAsserts shouldEnableAssertions) noexcept
-        : _impl(Krys::Move(ref))
-#if KRYS_ENV(DEV)
-          ,
-          _shouldEnableAssertions(shouldEnableAssertions == EnabledWeakPtrThreadAsserts::Yes)
-#endif
+    explicit constexpr IntrusiveWeakPtr(const T *object) noexcept
+        : _impl(ShareRefPtr<Impl>(object ? &object->WeakImpl() : nullptr))
     {
-      (void)shouldEnableAssertions;
+      assert(!object || object == _impl->template get<T>());
     }
 
-    RefPtr<WeakPtrImpl, PtrTraits> _impl;
-#if KRYS_ENV(DEV)
-    bool _shouldEnableAssertions {true};
-#endif
+    explicit constexpr IntrusiveWeakPtr(const T &object) noexcept
+        : _impl(ShareRefPtr<Impl>(&object.WeakImpl()))
+    {
+      assert(&object == _impl->template get<T>());
+    }
   };
 
-  template <typename T, typename U, typename WeakPtrImpl>
-  inline RawPtr<WeakPtrImpl> weak_ptr_impl_cast(RawPtr<WeakPtrImpl> impl) noexcept
-  {
-    static_assert(SameType<typename T::TWeakValue, typename U::TWeakValue>, "Invalid weak pointer cast");
-    return impl;
-  }
-
-  template <typename T, typename U, typename WeakPtrImpl>
-  inline WeakPtrImpl &weak_ptr_impl_cast(WeakPtrImpl &impl) noexcept
-  {
-    static_assert(SameType<typename T::TWeakValue, typename U::TWeakValue>, "Invalid weak pointer cast");
-    return impl;
-  }
-
-  template <typename TExpected, typename TArg, typename WeakPtrImpl, typename PtrTraits>
-  inline bool Is(WeakPtr<TArg, WeakPtrImpl, PtrTraits> &source) noexcept
+  template <typename TExpected, typename T, typename WeakPtrImpl, typename PtrTraits, IsNullable Nullable>
+  KRYS_NODISCARD constexpr inline bool
+    Is(const IntrusiveWeakPtr<T, WeakPtrImpl, PtrTraits, Nullable> &source) noexcept
   {
     return Is<TExpected>(source.get());
   }
+}
 
-  template <typename TExpected, typename ArgType, typename WeakPtrImpl, typename PtrTraits>
-  inline bool Is(const WeakPtr<ArgType, WeakPtrImpl, PtrTraits> &source) noexcept
+namespace Krys
+{
+  template <typename T, typename Impl = WeakPtrImpl, typename PtrTraits = RawPtrTraits<WeakPtrImpl>>
+  using WeakPtr = ::Krys::detail::IntrusiveWeakPtr<T, Impl, PtrTraits, IsNullable(true)>;
+
+  template <typename T, typename Impl = WeakPtrImpl, typename PtrTraits = RawPtrTraits<WeakPtrImpl>>
+  using WeakRef = ::Krys::detail::IntrusiveWeakPtr<T, Impl, PtrTraits, IsNullable(false)>;
+
+  template <typename T, typename Impl = WeakPtrImpl, typename PtrTraits = RawPtrTraits<WeakPtrImpl>>
+  requires(!IsPointer<T>)
+  KRYS_NODISCARD constexpr WeakPtr<T, Impl, PtrTraits> CreateWeakPtr(const T *object) noexcept
   {
-    return Is<TExpected>(source.get());
+    return WeakPtr<T, Impl, PtrTraits>::WithRef(object);
   }
 
-  template <typename Target, typename Source, typename WeakPtrImpl, typename PtrTraits>
-  inline WeakPtr<match_constness_t<Source, Target>, WeakPtrImpl, PtrTraits>
-    Downcast(WeakPtr<Source, WeakPtrImpl, PtrTraits> source) noexcept
+  template <typename T, typename Impl = WeakPtrImpl, typename PtrTraits = RawPtrTraits<WeakPtrImpl>>
+  requires(!IsPointer<T>)
+  KRYS_NODISCARD constexpr WeakRef<T, Impl, PtrTraits> CreateWeakRef(const T &object) noexcept
   {
-    static_assert(!SameType<Source, Target>, "Unnecessary cast to same type");
-    static_assert(DerivedFrom<Target, Source>, "Should be a downcast");
-    assert(!source || Is<Target>(*source));
-    return WeakPtr<match_constness_t<Source, Target>, WeakPtrImpl, PtrTraits> {
-      UnsafeRefPtrDowncast<match_constness_t<Source, Target>>(source.ReleaseImpl()),
-      source.EnableThreadAsserts()};
+    return WeakRef<T, Impl, PtrTraits>::WithRef(object);
   }
-
-  template <typename Target, typename Source, typename WeakPtrImpl, typename PtrTraits>
-  inline WeakPtr<match_constness_t<Source, Target>, WeakPtrImpl, PtrTraits>
-    DynamicDowncast(WeakPtr<Source, WeakPtrImpl, PtrTraits> source) noexcept
-  {
-    static_assert(!SameType<Source, Target>, "Unnecessary cast to same type");
-    static_assert(DerivedFrom<Target, Source>, "Should be a downcast");
-    if (!Is<Target>(source))
-    {
-      return nullptr;
-    }
-    return WeakPtr<match_constness_t<Source, Target>, WeakPtrImpl, PtrTraits> {
-      UnsafeRefPtrDowncast<match_constness_t<Source, Target>, WeakPtrImpl>(source.ReleaseImpl()),
-      source.EnableThreadAsserts()};
-  }
-
-  template <typename T, typename U, typename WeakPtrImpl, typename PtrTraits>
-  inline bool operator==(const WeakPtr<T, WeakPtrImpl, PtrTraits> &a,
-                         const WeakPtr<U, WeakPtrImpl, PtrTraits> &b) noexcept
-  {
-    return a.get() == b.get();
-  }
-
-  template <typename T, typename U, typename WeakPtrImpl, typename PtrTraits>
-  inline bool operator==(const WeakPtr<T, WeakPtrImpl, PtrTraits> &a, RawPtr<U> b) noexcept
-  {
-    return a.get() == b;
-  }
-
-  template <class T>
-  WeakPtr(const T *value, EnabledWeakPtrThreadAsserts = EnabledWeakPtrThreadAsserts::Yes)
-    -> WeakPtr<T, typename T::TWeakPtrImpl, RawPtrTraits<T>>;
-
-  template <class T>
-  WeakPtr(const T &value, EnabledWeakPtrThreadAsserts = EnabledWeakPtrThreadAsserts::Yes)
-    -> WeakPtr<T, typename T::TWeakPtrImpl, RawPtrTraits<T>>;
-
-  template <class T>
-  WeakPtr(const Ref<T> &value, EnabledWeakPtrThreadAsserts = EnabledWeakPtrThreadAsserts::Yes)
-    -> WeakPtr<T, typename T::TWeakPtrImpl, RawPtrTraits<T>>;
-
-  template <class T>
-  WeakPtr(const RefPtr<T> &value, EnabledWeakPtrThreadAsserts = EnabledWeakPtrThreadAsserts::Yes)
-    -> WeakPtr<T, typename T::TWeakPtrImpl, RawPtrTraits<T>>;
-
-  template <typename T, typename PtrTraits = RawPtrTraits<SingleThreadWeakPtrImpl>>
-  using SingleThreadWeakPtr = WeakPtr<T, SingleThreadWeakPtrImpl, PtrTraits>;
 }

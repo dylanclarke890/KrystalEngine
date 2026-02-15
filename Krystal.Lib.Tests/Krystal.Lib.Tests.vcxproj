@@ -168,9 +168,6 @@
     <ClCompile Include="tests\SmallValueBuffer.cpp" />
     <ClCompile Include="tests\String\StringUtils.cpp" />
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="include\Krystal.Lib.Tests\Pointers\IntrusivePtr\Mocks.hpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

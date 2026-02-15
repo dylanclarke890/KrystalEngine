@@ -187,7 +187,7 @@ namespace Krys
   concept Class = std::is_class_v<T>;
 
   template <typename T>
-  concept Final = std::is_final_v<T>;
+  concept IsFinal = std::is_final_v<T>;
 
   /// @brief Concept that checks whether TFrom is convertible to TTo.
   template <typename TFrom, typename TTo>

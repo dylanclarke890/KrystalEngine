@@ -3,104 +3,112 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/WeakPtrFactory.hpp"
-#include "Krystal.Lib/Pointers/WeakPtrImpl.hpp"
-#include "Krystal.Lib/Pointers/WeakRef.hpp"
 
 namespace Krys::detail
 {
-  template <WeakPtrFactoryInitialization InitializationMode, typename TWeakPtrFactory>
-  class CanMakeWeakPtrBase
+#define KRYS_USING_CAN_MAKE_WEAKPTR(Base)                                                                    \
+  using Base::GetRefCountWeak;                                                                               \
+  using Base::WeakImpl;                                                                                      \
+  using Base::WeakImplIfExists;                                                                              \
+  using Base::weak_value;                                                                                    \
+  using Base::weak_pointer_impl;
+
+  // Uses lazy initialization by default to avoid unnecessary initialization. Eager initialization is
+  // useful if you plan to call construct WeakPtrs from other threads.
+  template <typename TFactory, bool LazilyInitialize>
+  class CanMakeWeakPtr
   {
   public:
-    using TWeakValue = typename TWeakPtrFactory::TObject;
-    using TWeakPtrImpl = typename TWeakPtrFactory::TWeakPtrImpl;
+    using weak_value = typename TFactory::weak_value;
+    using weak_pointer_impl = typename TFactory::weak_value_impl;
+    using weak_pointer_factory = TFactory;
 
   private:
-    TWeakPtrFactory _weakPtrFactory;
+    weak_pointer_factory _weakPtrFactory;
 
   protected:
-    CanMakeWeakPtrBase() noexcept
+    constexpr CanMakeWeakPtr() noexcept
     {
-      if constexpr (InitializationMode == WeakPtrFactoryInitialization::Eager)
+      if constexpr (!LazilyInitialize)
       {
         InitializeWeakPtrFactory();
       }
     }
 
-    CanMakeWeakPtrBase(const CanMakeWeakPtrBase &) noexcept
+    constexpr CanMakeWeakPtr(const CanMakeWeakPtr &) noexcept
     {
-      if constexpr (InitializationMode == WeakPtrFactoryInitialization::Eager)
+      if constexpr (!LazilyInitialize)
       {
         InitializeWeakPtrFactory();
       }
     }
 
   public:
-    KRYS_NODISCARD RawPtr<TWeakPtrImpl> WeakImplIfExists() const noexcept
+    KRYS_NODISCARD constexpr uint32 GetRefCountWeak() const noexcept
+    {
+      return _weakPtrFactory.GetRefCountWeak();
+    }
+
+    KRYS_NODISCARD constexpr RawPtr<weak_pointer_impl> WeakImplIfExists() const noexcept
     {
       return _weakPtrFactory.Impl();
     }
 
-    KRYS_NODISCARD TWeakPtrImpl &WeakImpl() const noexcept
+    KRYS_NODISCARD constexpr weak_pointer_impl &WeakImpl() const noexcept
     {
       InitializeWeakPtrFactory();
       return *_weakPtrFactory.Impl();
     }
 
-    KRYS_NODISCARD uint32 GetRefCountWeak() const noexcept
-    {
-      return _weakPtrFactory.WeakPtrCount();
-    }
-
   protected:
-    void InitializeWeakPtrFactory() const noexcept
+    constexpr void InitializeWeakPtrFactory() const noexcept
     {
-      _weakPtrFactory.InitializeIfNeeded(static_cast<const TWeakValue &>(*this));
+      _weakPtrFactory.InitializeIfNeeded(static_cast<const weak_value &>(*this));
     }
 
-    CanMakeWeakPtrBase &operator=(const CanMakeWeakPtrBase &) noexcept
+    KRYS_NODISCARD constexpr weak_pointer_factory &GetWeakPtrFactory() noexcept
+    {
+      return _weakPtrFactory;
+    }
+
+    KRYS_NODISCARD constexpr const weak_pointer_factory &GetWeakPtrFactory() const noexcept
+    {
+      return _weakPtrFactory;
+    }
+
+    constexpr CanMakeWeakPtr &operator=(const CanMakeWeakPtr &) noexcept
     {
       return *this;
-    }
-
-    KRYS_NODISCARD const TWeakPtrFactory &GetWeakPtrFactory() const noexcept
-    {
-      return _weakPtrFactory;
-    }
-
-    KRYS_NODISCARD TWeakPtrFactory &GetWeakPtrFactory() noexcept
-    {
-      return _weakPtrFactory;
     }
   };
 }
 
 namespace Krys
 {
-  template <typename T, typename WeakPtrImpl = DefaultWeakPtrImpl,
-            WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy>
-  using CanMakeWeakPtr =
-    ::Krys::detail::CanMakeWeakPtrBase<InitializationMode, WeakPtrFactory<T, WeakPtrImpl>>;
+  template <typename T, bool LazilyInitialize = true>
+  using CanMakeWeakPtr = ::Krys::detail::CanMakeWeakPtr<WeakPtrFactory<T>, LazilyInitialize>;
 
-  template <typename T, typename WeakPtrImpl = DefaultWeakPtrImpl,
-            WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy>
+  template <typename T, bool LazilyInitialize = true>
   using CanMakeWeakPtrWithBitField =
-    ::Krys::detail::CanMakeWeakPtrBase<InitializationMode, WeakPtrFactoryWithBitField<T, WeakPtrImpl>>;
+    ::Krys::detail::CanMakeWeakPtr<WeakPtrFactoryWithBitField<T>, LazilyInitialize>;
 
-  template <typename T, typename WeakPtrImpl = SingleThreadWeakPtrImpl,
-            WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy>
-  using CanMakeSingleThreadWeakPtr = CanMakeWeakPtr<T, SingleThreadWeakPtrImpl>;
+  template <typename T, bool LazilyInitialize = true>
+  using CanMakeThreadSafeWeakPtr =
+    ::Krys::detail::CanMakeWeakPtr<ThreadSafeWeakPtrFactory<T>, LazilyInitialize>;
 
-  template <typename T, WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy>
+  template <typename T, bool LazilyInitialize = true>
+  using CanMakeThreadSafeWeakPtrWithBitField =
+    ::Krys::detail::CanMakeWeakPtr<ThreadSafeWeakPtrFactoryWithBitField<T>, LazilyInitialize>;
+
+  template <typename T, bool LazilyInitialize = true>
   class AbstractRefCountedAndCanMakeWeakPtr : public AbstractRefCounted,
-                                              public CanMakeWeakPtr<T, DefaultWeakPtrImpl, InitializationMode>
+                                              public CanMakeWeakPtr<T, LazilyInitialize>
   {
   };
 
-  template <typename T, WeakPtrFactoryInitialization InitializationMode = WeakPtrFactoryInitialization::Lazy>
-  class AbstractRefCountedAndCanMakeSingleThreadWeakPtr
-      : public AbstractRefCounted,
-        public CanMakeSingleThreadWeakPtr<T, SingleThreadWeakPtrImpl, InitializationMode>
+  template <typename T, bool LazilyInitialize = true>
+  class AbstractRefCountedAndCanMakeThreadSafeWeakPtr : public AbstractRefCounted,
+                                                        public CanMakeThreadSafeWeakPtr<T, LazilyInitialize>
   {
   };
 }

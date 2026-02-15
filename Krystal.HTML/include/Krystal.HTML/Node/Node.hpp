@@ -7,11 +7,9 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
-#include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Mixins/CanMakeCheckedPtr.hpp"
-#include "Krystal.Lib/Pointers/CheckedPtr.hpp"
+#include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
-#include "Krystal.Lib/Pointers/WeakRef.hpp"
 #include "Krystal.Lib/String/StringAtom.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
@@ -135,19 +133,10 @@ namespace Krys::HTML
       return HasEventTargetFlag(EventTargetFlag::IsConnected);
     }
 
-    KRYS_NODISCARD RawPtr<Document> OwnerDocument() const noexcept
-    {
-      return _ownerDocument.get();
-    }
-
+    KRYS_NODISCARD RawPtr<Document> OwnerDocument() const noexcept;
     KRYS_NODISCARD Node &GetRootNode(const GetRootNodeOptions &options) noexcept;
-    KRYS_NODISCARD const Node &GetRootNode(const GetRootNodeOptions &options) const noexcept;
-
     KRYS_NODISCARD Node &Root() noexcept;
-    KRYS_NODISCARD const Node &Root() const noexcept;
-
     KRYS_NODISCARD Node &ShadowIncludingRoot() noexcept;
-    KRYS_NODISCARD const Node &ShadowIncludingRoot() const noexcept;
 
     KRYS_NODISCARD RawPtr<ContainerNode> ParentNode() const noexcept
     {

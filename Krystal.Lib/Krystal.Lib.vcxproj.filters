@@ -351,16 +351,7 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\ThreadSafeWeakPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtr.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtrFactory.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtrImpl.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Pointers\WeakRef.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Detection\AddressSpaceBitSize.hpp">
@@ -376,6 +367,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Mixins\CanMakeCheckedPtr.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtrImpl.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

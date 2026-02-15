@@ -88,7 +88,7 @@ namespace Krys
   /// @brief A partial template specialization for types which can be stored as a base class, enabling more of
   /// the optimization potential.
   template <typename T, std::size_t TTag>
-  requires(Class<T> && !Final<T> && !Reference<T>)
+  requires(Class<T> && !IsFinal<T> && !Reference<T>)
   class alignas(T) EBCO<T, TTag> : private T
   {
   public:

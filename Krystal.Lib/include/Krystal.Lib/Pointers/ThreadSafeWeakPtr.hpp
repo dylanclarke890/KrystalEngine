@@ -517,12 +517,6 @@ namespace Krys
     }
   };
 
-  template <class T>
-  ThreadSafeWeakPtr(const T &) -> ThreadSafeWeakPtr<T>;
-
-  template <class T>
-  ThreadSafeWeakPtr(const T *) -> ThreadSafeWeakPtr<T>;
-
   template <typename T>
   class ThreadSafeWeakOrStrongPtr
   {

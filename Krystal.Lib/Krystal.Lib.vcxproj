@@ -170,10 +170,9 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\ThreadSafeWeakPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtrFactory.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtrImpl.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pointers\WeakRef.hpp" />
     <ClInclude Include="include\Krystal.Lib\Mixins\RefCounted.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\UniquePtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtrImpl.hpp" />
     <ClInclude Include="include\Krystal.Lib\Ranges\ADL.hpp" />
     <ClInclude Include="include\Krystal.Lib\Ranges\Algorithm.hpp" />
     <ClInclude Include="include\Krystal.Lib\Ranges\BlackHoleIterator.hpp" />

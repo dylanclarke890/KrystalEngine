@@ -5,8 +5,7 @@
 
 namespace Krys::Tests
 {
-  class TestWeakRefCounted : public RefCounted<TestWeakRefCounted>,
-                             public CanMakeSingleThreadWeakPtr<TestWeakRefCounted>
+  class TestWeakRefCounted : public RefCounted<TestWeakRefCounted>, public CanMakeWeakPtr<TestWeakRefCounted>
   {
   public:
     TestWeakRefCounted() = default;
@@ -32,7 +31,7 @@ namespace Krys::Tests
     auto *obj = new TestWeakRefCounted();
     REQUIRE(obj->GetRefCount() == 1);
 
-    SingleThreadWeakPtr<TestWeakRefCounted> weakPtr(*obj);
+    WeakPtr<TestWeakRefCounted> weakPtr = CreateWeakPtr(obj);
     REQUIRE(obj->GetRefCount() == 1);
 
     obj->SubRef();
@@ -40,11 +39,11 @@ namespace Krys::Tests
 
   TEST_CASE("WeakPtr becomes null when object is destroyed", "[WeakPtr]")
   {
-    SingleThreadWeakPtr<TestWeakRefCounted> weakPtr;
+    WeakPtr<TestWeakRefCounted> weakPtr;
 
     {
       auto *obj = new TestWeakRefCounted();
-      weakPtr = SingleThreadWeakPtr<TestWeakRefCounted>(*obj);
+      weakPtr = CreateWeakPtr(obj);
 
       REQUIRE(weakPtr);
       REQUIRE(weakPtr.get() == obj);
@@ -60,8 +59,8 @@ namespace Krys::Tests
   {
     auto *obj = new TestWeakRefCounted();
 
-    RefPtr<SingleThreadWeakPtrImpl> impl = ShareRefPtr(&obj->WeakImpl());
-    SingleThreadWeakPtr<TestWeakRefCounted> weakPtr(Krys::Move(impl));
+    RefPtr<WeakPtrImpl> impl = ShareRefPtr(&obj->WeakImpl());
+    WeakPtr<TestWeakRefCounted> weakPtr(Krys::Move(impl));
 
     REQUIRE(impl.get() == nullptr);
     REQUIRE(weakPtr.get() == obj);
@@ -73,8 +72,8 @@ namespace Krys::Tests
   {
     auto *obj = new TestWeakRefCounted();
 
-    SingleThreadWeakPtr<TestWeakRefCounted> weakPtr1(*obj);
-    SingleThreadWeakPtr<TestWeakRefCounted> weakPtr2(Krys::Move(weakPtr1));
+    WeakPtr<TestWeakRefCounted> weakPtr1 = CreateWeakPtr(obj);
+    WeakPtr<TestWeakRefCounted> weakPtr2(Krys::Move(weakPtr1));
 
     REQUIRE(!weakPtr1);
     REQUIRE(weakPtr2);
@@ -85,12 +84,12 @@ namespace Krys::Tests
 
   TEST_CASE("WeakPtr copy shares invalidation state", "[WeakPtr]")
   {
-    SingleThreadWeakPtr<TestWeakRefCounted> w1;
-    SingleThreadWeakPtr<TestWeakRefCounted> w2;
+    WeakPtr<TestWeakRefCounted> w1;
+    WeakPtr<TestWeakRefCounted> w2;
 
     {
       auto *obj = new TestWeakRefCounted();
-      w1 = SingleThreadWeakPtr<TestWeakRefCounted>(*obj);
+      w1 = CreateWeakPtr(obj);
       w2 = w1;
 
       REQUIRE(w1);
@@ -105,12 +104,12 @@ namespace Krys::Tests
 
   TEST_CASE("WeakPtr remains valid while any strong ref exists", "[WeakPtr]")
   {
-    SingleThreadWeakPtr<TestWeakRefCounted> weakPtr;
+    WeakPtr<TestWeakRefCounted> weakPtr;
 
     {
       auto *obj = new TestWeakRefCounted();
       Ref<TestWeakRefCounted> ref = AdoptRef(*obj);
-      weakPtr = SingleThreadWeakPtr<TestWeakRefCounted>(*obj);
+      weakPtr = CreateWeakPtr(obj);
 
       {
         Ref<TestWeakRefCounted> copy = ref;

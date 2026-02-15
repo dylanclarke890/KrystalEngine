@@ -14,9 +14,9 @@ namespace Krys
     { value.GetRefCount() } -> ConvertibleTo<uint32>;
   };
 
-  template <typename T>
   struct StrongRefPolicy
   {
+    template <typename T>
     KRYS_ALWAYS_INLINE constexpr static RawPtr<T> AddRef(RawPtr<T> ptr) noexcept
     {
       if (ptr) KRYS_LIKELY
@@ -26,12 +26,14 @@ namespace Krys
       return ptr;
     }
 
+    template <typename T>
     KRYS_ALWAYS_INLINE constexpr static T &AddRef(T &ptr) noexcept
     {
       ptr.AddRef();
       return ptr;
     }
 
+    template <typename T>
     KRYS_ALWAYS_INLINE constexpr static void SubRef(RawPtr<T> ptr) noexcept
     {
       if (ptr) KRYS_LIKELY
@@ -40,11 +42,13 @@ namespace Krys
       }
     }
 
+    template <typename T>
     KRYS_ALWAYS_INLINE KRYS_NODISCARD constexpr static RawPtr<T> ValidateGetAccess(RawPtr<T> ptr) noexcept
     {
       return ptr;
     }
 
+    template <typename T>
     KRYS_ALWAYS_INLINE KRYS_NODISCARD constexpr static bool IsValid(RawPtr<T> ptr) noexcept
     {
       return ptr != nullptr;
@@ -52,10 +56,10 @@ namespace Krys
   };
 
   template <typename T, typename PtrTraits = RawPtrTraits<T>>
-  using Ref = IntrusivePtr<T, PtrTraits, StrongRefPolicy<T>, IsNullable(false)>;
+  using Ref = IntrusivePtr<T, PtrTraits, StrongRefPolicy, IsNullable(false)>;
 
   template <typename T, typename PtrTraits = RawPtrTraits<T>>
-  using RefPtr = IntrusivePtr<T, PtrTraits, StrongRefPolicy<T>, IsNullable(true)>;
+  using RefPtr = IntrusivePtr<T, PtrTraits, StrongRefPolicy, IsNullable(true)>;
 
   template <typename T, typename PtrTraits = RawPtrTraits<T>, typename... Args>
   KRYS_NODISCARD constexpr inline Ref<T, PtrTraits>
