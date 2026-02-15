@@ -28,30 +28,6 @@ namespace Krys::HTML
     }
   }
 
-  void EventTarget::AddRef() const noexcept
-  {
-    if (const Node *node = DynamicDowncast<Node>(*this); node) KRYS_LIKELY
-    {
-      node->AddRef();
-    }
-    else
-    {
-      AddRef(EventTargetTag {});
-    }
-  }
-
-  void EventTarget::SubRef() const noexcept
-  {
-    if (const Node *node = DynamicDowncast<Node>(*this); node) KRYS_LIKELY
-    {
-      node->SubRef();
-    }
-    else
-    {
-      SubRef(EventTargetTag {});
-    }
-  }
-
   bool EventTarget::AddEventListener(DOMStringAtom type, RefPtr<EventListener> &&callback,
                                      const AddEventListenerOptions &options) noexcept
   {

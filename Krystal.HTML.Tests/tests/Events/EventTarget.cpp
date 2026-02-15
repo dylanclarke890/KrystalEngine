@@ -10,23 +10,16 @@ namespace Krys::Tests
   class TestEventTarget : public EventTarget
   {
   protected:
-    void AddRef(EventTargetTag) const noexcept final
-    {
-    }
-
-    void SubRef(EventTargetTag) const noexcept final
-    {
-    }
   };
 
   TEST_CASE("EventTarget::AddEventListener", "[EventTarget]")
   {
-    TestEventTarget eventTarget;
+    RefPtr<TestEventTarget> eventTarget = CreateRefPtr<TestEventTarget>();
 
     SECTION("null callback")
     {
       RefPtr<EventListener> nullCallback;
-      bool result = eventTarget.AddEventListener(EventNames::Click, Krys::Move(nullCallback), {});
+      bool result = eventTarget->AddEventListener(EventNames::Click, Krys::Move(nullCallback), {});
       REQUIRE(result == false);
     }
 
@@ -46,8 +39,8 @@ namespace Krys::Tests
 
       RefPtr<EventListener> callback = CreateRefPtr<TestEventListener>();
       RefPtr<EventListener> duplicateCallback = callback;
-      REQUIRE(eventTarget.AddEventListener(EventNames::Click, Krys::Move(callback), options));
-      REQUIRE_FALSE(eventTarget.AddEventListener(EventNames::Click, Krys::Move(duplicateCallback), options));
+      REQUIRE(eventTarget->AddEventListener(EventNames::Click, Krys::Move(callback), options));
+      REQUIRE_FALSE(eventTarget->AddEventListener(EventNames::Click, Krys::Move(duplicateCallback), options));
     }
 
     SECTION("different callback or different capture")
@@ -75,9 +68,9 @@ namespace Krys::Tests
       RefPtr<EventListener> callbackA = CreateRefPtr<TestEventListenerA>();
       RefPtr<EventListener> callbackB = CreateRefPtr<TestEventListenerB>();
       RefPtr<EventListener> callbackC = callbackA;
-      REQUIRE(eventTarget.AddEventListener(EventNames::Click, Krys::Move(callbackA), optionsCaptureTrue));
-      REQUIRE(eventTarget.AddEventListener(EventNames::Click, Krys::Move(callbackB), optionsCaptureTrue));
-      REQUIRE(eventTarget.AddEventListener(EventNames::Click, Krys::Move(callbackC), optionsCaptureFalse));
+      REQUIRE(eventTarget->AddEventListener(EventNames::Click, Krys::Move(callbackA), optionsCaptureTrue));
+      REQUIRE(eventTarget->AddEventListener(EventNames::Click, Krys::Move(callbackB), optionsCaptureTrue));
+      REQUIRE(eventTarget->AddEventListener(EventNames::Click, Krys::Move(callbackC), optionsCaptureFalse));
     }
   }
 
@@ -91,7 +84,7 @@ namespace Krys::Tests
       }
     };
 
-    TestEventTarget eventTarget;
+    RefPtr<TestEventTarget> eventTarget = CreateRefPtr<TestEventTarget>();
 
     AddEventListenerOptions addOptions {
       true,
@@ -104,7 +97,7 @@ namespace Krys::Tests
     SECTION("callback which doesn't exist")
     {
       RefPtr<EventListener> callback = CreateRefPtr<TestEventListener>();
-      bool result = eventTarget.RemoveEventListener(EventNames::Click, Krys::Move(callback), options);
+      bool result = eventTarget->RemoveEventListener(EventNames::Click, Krys::Move(callback), options);
       REQUIRE(result == false);
     }
 
@@ -113,20 +106,20 @@ namespace Krys::Tests
       RefPtr<EventListener> callback = CreateRefPtr<TestEventListener>();
       RefPtr<EventListener> removeCallback = callback;
 
-      REQUIRE(eventTarget.AddEventListener(EventNames::Click, Krys::Move(callback), addOptions));
-      REQUIRE(eventTarget.RemoveEventListener(EventNames::Click, Krys::Move(removeCallback), options));
+      REQUIRE(eventTarget->AddEventListener(EventNames::Click, Krys::Move(callback), addOptions));
+      REQUIRE(eventTarget->RemoveEventListener(EventNames::Click, Krys::Move(removeCallback), options));
     }
 
     SECTION("existing callback with different capture")
     {
       RefPtr<EventListener> callback = CreateRefPtr<TestEventListener>();
       RefPtr<EventListener> removeCallback = callback;
-      REQUIRE(eventTarget.AddEventListener(EventNames::Click, Krys::Move(callback), addOptions));
+      REQUIRE(eventTarget->AddEventListener(EventNames::Click, Krys::Move(callback), addOptions));
       EventListenerOptions differentOptions {
         false,
       };
       REQUIRE_FALSE(
-        eventTarget.RemoveEventListener(EventNames::Click, Krys::Move(removeCallback), differentOptions));
+        eventTarget->RemoveEventListener(EventNames::Click, Krys::Move(removeCallback), differentOptions));
     }
   }
 }

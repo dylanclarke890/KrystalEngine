@@ -16,34 +16,10 @@ namespace Krys::HTML
   {
     _flags = flags;
   }
-  
+
   RawPtr<Document> Node::OwnerDocument() const noexcept
   {
     return _ownerDocument.get();
-  }
-
-  void Node::AddRef() const noexcept
-  {
-    if (IsDocumentNode())
-    {
-      static_cast<const Document *>(this)->AddRef();
-    }
-    else
-    {
-      AddRef(EventTargetTag {});
-    }
-  }
-
-  void Node::SubRef() const noexcept
-  {
-    if (IsDocumentNode())
-    {
-      static_cast<const Document *>(this)->SubRef();
-    }
-    else
-    {
-      SubRef(EventTargetTag {});
-    }
   }
 
   Node &Node::GetRootNode(const GetRootNodeOptions &options) noexcept
@@ -73,6 +49,16 @@ namespace Krys::HTML
     }
 
     return root;
+  }
+
+  RawPtr<ContainerNode> Node::ParentNode() const noexcept
+  {
+    if (_parentNode)
+    {
+      return _parentNode.get();
+    }
+
+    return nullptr;
   }
 
   RawPtr<Element> Node::ParentElement() const noexcept

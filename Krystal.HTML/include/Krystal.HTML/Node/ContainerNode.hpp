@@ -19,16 +19,6 @@ namespace Krys::HTML
     ContainerNode(Document &document, NodeType type, NodeFlag flags) noexcept;
 
   public:
-    void AddRef() const noexcept
-    {
-      Node::AddRef();
-    }
-
-    void SubRef() const noexcept
-    {
-      Node::SubRef();
-    }
-
     KRYS_NODISCARD RawPtr<Node> FirstChild() const noexcept
     {
       return _firstChild;

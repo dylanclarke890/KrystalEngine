@@ -8,6 +8,7 @@
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Mixins/CanMakeCheckedPtr.hpp"
+#include "Krystal.Lib/Pointers/CheckedPtr.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/String/StringAtom.hpp"
@@ -92,27 +93,13 @@ namespace Krys::HTML
     NodeFlag _flags : BitCount<NodeFlag>() {NodeFlag::None};
     NodeType _nodeType;
     RefPtr<Document> _ownerDocument;
-    RawPtr<ContainerNode> _parentNode;
+    CheckedPtr<ContainerNode> _parentNode;
     RawPtr<Node> _previousSibling;
     RawPtr<Node> _nextSibling;
     RawPtr<TreeScope> _treeScope;
 
   public:
     virtual ~Node() noexcept = default;
-
-    void AddRef() const noexcept;
-    void SubRef() const noexcept;
-
-  protected:
-    void AddRef(EventTargetTag) const noexcept final
-    {
-      AddRef();
-    }
-
-    void SubRef(EventTargetTag) const noexcept final
-    {
-      SubRef();
-    }
 
   public:
     KRYS_NODISCARD virtual utf8_string NodeName() const noexcept = 0;
@@ -138,10 +125,7 @@ namespace Krys::HTML
     KRYS_NODISCARD Node &Root() noexcept;
     KRYS_NODISCARD Node &ShadowIncludingRoot() noexcept;
 
-    KRYS_NODISCARD RawPtr<ContainerNode> ParentNode() const noexcept
-    {
-      return _parentNode;
-    }
+    KRYS_NODISCARD RawPtr<ContainerNode> ParentNode() const noexcept;
     KRYS_NODISCARD RawPtr<Element> ParentElement() const noexcept;
     KRYS_NODISCARD bool HasChildNodes() const noexcept;
     KRYS_NODISCARD RefPtr<NodeList> ChildNodes() noexcept;

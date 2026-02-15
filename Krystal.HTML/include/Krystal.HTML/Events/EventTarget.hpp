@@ -9,6 +9,7 @@
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Mixins/CanMakeWeakPtr.hpp"
+#include "Krystal.Lib/Mixins/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Types/SmallList.hpp"
 
@@ -27,7 +28,7 @@ KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::EventTargetFlag, 3u)
 
 namespace Krys::HTML
 {
-  class EventTarget : public CanMakeWeakPtr<EventTarget>
+  class EventTarget : public RefCounted<EventTarget>, public CanMakeWeakPtr<EventTarget>
   {
   private:
     EventTargetFlag _flags : BitCount<EventTargetFlag>() {EventTargetFlag::None};
@@ -36,10 +37,6 @@ namespace Krys::HTML
   public:
     EventTarget() noexcept = default;
     virtual ~EventTarget() noexcept = default;
-
-
-    void AddRef() const noexcept;
-    void SubRef() const noexcept;
 
     // TODO(IMPL): Use BoolOr for AddEventListenerOptions. The bool is used for 'capture'.
     virtual bool AddEventListener(DOMStringAtom type, RefPtr<EventListener> &&callback,
@@ -58,14 +55,6 @@ namespace Krys::HTML
     }
 
   protected:
-    struct EventTargetTag
-    {
-    };
-
-    virtual void AddRef(EventTargetTag) const noexcept = 0;
-
-    virtual void SubRef(EventTargetTag) const noexcept = 0;
-
     struct ConstructNodeTag
     {
     };
