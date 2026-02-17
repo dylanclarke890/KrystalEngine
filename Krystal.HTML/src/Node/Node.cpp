@@ -55,7 +55,7 @@ namespace Krys::HTML
   {
     if (_parentNode)
     {
-      return _parentNode;
+      return _parentNode.get();
     }
 
     return nullptr;

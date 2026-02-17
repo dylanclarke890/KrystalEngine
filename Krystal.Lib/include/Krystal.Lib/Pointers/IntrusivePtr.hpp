@@ -10,10 +10,16 @@
 #include <format>
 #include <utility>
 
-// TODO(FIX): review how non nullable and nullable intrusive ptrs interact with each other.
 namespace Krys
 {
   /// @brief A wrapper around a pointer to an object that manages reference counting intrusively.
+  /// @typeparam T The type of the object being pointed to. Must not be a pointer type.
+  /// @typeparam PtrTraits The pointer traits to use for this intrusive pointer. This defines how the pointer
+  /// is stored and accessed.
+  /// @typeparam RefPolicy The reference counting policy to use for this intrusive pointer. This defines how
+  /// reference counting is performed on the object being pointed to.
+  /// @typeparam Nullable Whether this intrusive pointer can be null or not. If false, reference-like semantics
+  /// are used (asserts for null ptrs are enabled), otherwise pointer-like semantics are used.
   template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
   class KRYS_TRIVIAL_ABI IntrusivePtr
   {
@@ -25,9 +31,9 @@ namespace Krys
   public:
     using element_type = T;
     using pointer_traits = PtrTraits;
-    using pointer = typename pointer_traits::storage_type;
     using ref_policy = RefPolicy;
     constexpr static bool nullable = Nullable.Value;
+    using pointer = typename pointer_traits::storage_type;
 
   private:
     pointer _ptr;
@@ -92,8 +98,8 @@ namespace Krys
       }
     }
 
-    template <typename X, typename Y, typename Z, IsNullable UNullable>
-    KRYS_ALWAYS_INLINE constexpr IntrusivePtr(const IntrusivePtr<X, Y, Z, UNullable> &o) noexcept
+    template <typename X, typename Y, typename Z, IsNullable ONullable>
+    KRYS_ALWAYS_INLINE constexpr IntrusivePtr(const IntrusivePtr<X, Y, Z, ONullable> &o) noexcept
         : _ptr(RefPolicy::AddRef(static_cast<RawPtr<T>>(o.get())))
     {
       if constexpr (!nullable)
@@ -110,8 +116,8 @@ namespace Krys
       }
     }
 
-    template <typename X, typename Y, typename Z, IsNullable UNullable>
-    KRYS_ALWAYS_INLINE constexpr IntrusivePtr(IntrusivePtr<X, Y, Z, UNullable> &&o) noexcept
+    template <typename X, typename Y, typename Z, IsNullable ONullable>
+    KRYS_ALWAYS_INLINE constexpr IntrusivePtr(IntrusivePtr<X, Y, Z, ONullable> &&o) noexcept
         : _ptr(static_cast<RawPtr<T>>(o.release()))
     {
       if constexpr (!nullable)
@@ -137,8 +143,8 @@ namespace Krys
       return *this;
     }
 
-    template <typename X, typename Y, typename Z, IsNullable UNullable>
-    constexpr IntrusivePtr &operator=(const IntrusivePtr<X, Y, Z, UNullable> &o) noexcept
+    template <typename X, typename Y, typename Z, IsNullable ONullable>
+    constexpr IntrusivePtr &operator=(const IntrusivePtr<X, Y, Z, ONullable> &o) noexcept
     {
       IntrusivePtr ref = o;
       swap(ref);
@@ -162,8 +168,8 @@ namespace Krys
       return *this;
     }
 
-    template <typename X, typename Y, typename Z, IsNullable UNullable>
-    constexpr IntrusivePtr &operator=(IntrusivePtr<X, Y, Z, UNullable> &&o) noexcept
+    template <typename X, typename Y, typename Z, IsNullable ONullable>
+    constexpr IntrusivePtr &operator=(IntrusivePtr<X, Y, Z, ONullable> &&o) noexcept
     {
       IntrusivePtr ref = Krys::Move(o);
       swap(ref);
@@ -269,10 +275,10 @@ namespace Krys
   }
 
   template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable, typename U,
-            typename UPtrTraits, typename URefPolicy, IsNullable UNullable>
+            typename UPtrTraits, typename URefPolicy, IsNullable ONullable>
   requires(ConvertibleTo<RawPtr<U>, RawPtr<T>>)
   constexpr inline bool operator==(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &lhs,
-                                   const IntrusivePtr<U, UPtrTraits, URefPolicy, UNullable> &rhs) noexcept
+                                   const IntrusivePtr<U, UPtrTraits, URefPolicy, ONullable> &rhs) noexcept
   {
     return lhs.get() == rhs.get();
   }
@@ -299,10 +305,10 @@ namespace Krys
   }
 
   template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable, typename U,
-            typename UPtrTraits, typename URefPolicy, IsNullable UNullable>
+            typename UPtrTraits, typename URefPolicy, IsNullable ONullable>
   requires(ConvertibleTo<RawPtr<U>, RawPtr<T>>)
   constexpr inline bool operator!=(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &lhs,
-                                   const IntrusivePtr<U, UPtrTraits, URefPolicy, UNullable> &rhs) noexcept
+                                   const IntrusivePtr<U, UPtrTraits, URefPolicy, ONullable> &rhs) noexcept
   {
     return !(lhs == rhs);
   }
