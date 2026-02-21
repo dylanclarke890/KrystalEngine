@@ -2,6 +2,7 @@
 
 #include "Krystal.HTML/Document/TreeScope.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
+#include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 
 namespace Krys::HTML
@@ -10,6 +11,8 @@ namespace Krys::HTML
   {
   public:
     Document() noexcept;
+
+    KRYS_NODISCARD ExceptionOr<Ref<Node>> AdoptNode(Node &node) noexcept;
 
     KRYS_NODISCARD DOMString NodeName() const noexcept final;
   };
@@ -20,4 +23,4 @@ KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::Document)
   {
     return node.IsDocumentNode();
   }
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

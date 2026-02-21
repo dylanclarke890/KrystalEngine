@@ -34,10 +34,12 @@ namespace Krys::HTML
     KRYS_NODISCARD ExceptionOr<void> AppendChild(Node &newChild) noexcept;
 
   private:
-    KRYS_NODISCARD static ExceptionOr<void> EnsurePreInsertValidity(Node &node, ContainerNode &parent,
-                                                                    RefPtr<Node> &&refChild) noexcept;
+    KRYS_NODISCARD ExceptionOr<void> EnsurePreInsertValidity(Node &node, RawPtr<Node> refChild) noexcept;
 
-    KRYS_NODISCARD static bool IsHostIncludingAncestorOf(Node &node, Node &other) noexcept;
+    KRYS_NODISCARD ExceptionOr<Node &> PreInsert(Node &node, RawPtr<Node> refChild) noexcept;
+
+    KRYS_NODISCARD ExceptionOr<void> Insert(Node &node, RawPtr<Node> refChild,
+                                            bool suppressObservers = false) noexcept;
   };
 }
 
@@ -46,4 +48,4 @@ KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::ContainerNode)
   {
     return node.IsContainerNode();
   }
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

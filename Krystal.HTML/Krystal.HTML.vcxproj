@@ -66,6 +66,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\NodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\NodeMutationContexts.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\NodeMutationNotifier.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\NodeQueries.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\NodeRareData.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\NodeTraversal.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\ProcessingInstruction.hpp" />
@@ -90,6 +91,9 @@
     <ClInclude Include="include\Krystal.HTML\Parser\TokenizerState.hpp" />
     <ClInclude Include="include\Krystal.HTML\Context.hpp" />
     <ClInclude Include="include\Krystal.HTML\QualifiedName.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Ranges\AbstractRange.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Ranges\Range.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Ranges\StaticRange.hpp" />
     <ClInclude Include="include\Krystal.HTML\StronglyTypedValues.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\BoolOr.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\Exception.hpp" />
@@ -97,6 +101,7 @@
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionOr.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Node\NodeQueries.cpp" />
     <ClCompile Include="src\Node\NodeMutationNotifier.cpp" />
     <ClCompile Include="src\Document\ShadowRoot.cpp" />
     <ClCompile Include="src\Document\Document.cpp" />
@@ -189,6 +194,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="data\Node\NamedNodeMap.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\Ranges\AbstractRange.idl" />
+    <None Include="data\Ranges\Range.idl" />
+    <None Include="data\Ranges\StaticRange.idl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

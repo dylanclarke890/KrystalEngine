@@ -204,6 +204,18 @@
     <ClInclude Include="include\Krystal.HTML\Node\ChildNodeList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Ranges\AbstractRange.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Ranges\Range.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Ranges\StaticRange.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Node\NodeQueries.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -264,6 +276,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\NodeMutationNotifier.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Node\NodeQueries.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -394,6 +409,15 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\Node\NamedNodeMap.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Ranges\AbstractRange.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Ranges\StaticRange.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Ranges\Range.idl">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

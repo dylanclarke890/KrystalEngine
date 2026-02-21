@@ -13,17 +13,17 @@ namespace Krys::HTML
   class ExceptionOr
   {
   public:
-    using ReturnType = T;
+    using value_type = T;
 
   private:
-    Expected<ReturnType, Exception> _value;
+    Expected<value_type, Exception> _value;
 
 #if KRYS_ENV(DEV)
     bool _wasReleased {false};
 #endif
 
   public:
-    ExceptionOr(ReturnType &&value) noexcept : _value {Krys::Move(value)}
+    ExceptionOr(value_type &&value) noexcept : _value {Krys::Move(value)}
     {
     }
 
@@ -32,9 +32,9 @@ namespace Krys::HTML
     }
 
     template <typename OtherType>
-    requires(Scalar<OtherType> && ConvertibleTo<OtherType, ReturnType>)
-    ExceptionOr(const OtherType &value) noexcept(NoThrowConvertibleTo<OtherType, ReturnType>)
-        : _value(static_cast<ReturnType>(value))
+    requires(Scalar<OtherType> && ConvertibleTo<OtherType, value_type>)
+    ExceptionOr(const OtherType &value) noexcept(NoThrowConvertibleTo<OtherType, value_type>)
+        : _value(static_cast<value_type>(value))
     {
     }
 
@@ -60,13 +60,13 @@ namespace Krys::HTML
       return Krys::Move(_value.error());
     }
 
-    KRYS_NODISCARD const ReturnType &Value() const noexcept
+    KRYS_NODISCARD const value_type &Value() const noexcept
     {
       assert(!_wasReleased);
       return _value.value();
     }
 
-    KRYS_NODISCARD ReturnType &&ReleaseValue() noexcept
+    KRYS_NODISCARD value_type &&ReleaseValue() noexcept
     {
       assert(!std::exchange(_wasReleased, true));
       return Krys::Move(_value.value());
@@ -77,7 +77,7 @@ namespace Krys::HTML
   class ExceptionOr<T &>
   {
   public:
-    using ReturnType = T &;
+    using value_type = T &;
     using ReturnReferenceType = T;
 
   private:
@@ -88,7 +88,7 @@ namespace Krys::HTML
     {
     }
 
-    ExceptionOr(Exception &&ex) noexcept : _value {Unexpected(Krys::Move(ex))}
+    ExceptionOr(Exception &&ex) noexcept : _value {Krys::Move(ex)}
     {
     }
 
@@ -119,7 +119,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD ReturnReferenceType &&ReleaseValue() noexcept
     {
-      return *_value.ReleaseValue();
+      return _value.ReleaseValue();
     }
   };
 
@@ -134,7 +134,7 @@ namespace Krys::HTML
 #endif
 
   public:
-    using ReturnType = void;
+    using value_type = void;
 
     ExceptionOr(Exception &&ex) noexcept : _value {Unexpected(Krys::Move(ex))}
     {
@@ -159,5 +159,4 @@ namespace Krys::HTML
       return Krys::Move(_value.error());
     }
   };
-
 }

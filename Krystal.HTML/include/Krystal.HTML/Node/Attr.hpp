@@ -7,13 +7,20 @@
 
 namespace Krys::HTML
 {
+  class Element;
+
   class Attr : public Node
   {
   private:
     QualifiedName _name;
+    CheckedPtr<Element> _ownerElement;
 
   public:
     KRYS_NODISCARD DOMString NodeName() const noexcept override;
+    KRYS_NODISCARD RawPtr<Element> OwnerElement() const noexcept
+    {
+      return _ownerElement.get();
+    }
   };
 }
 

@@ -6,10 +6,16 @@
 
 namespace Krys::HTML
 {
+  class Attr;
+
   class Element : public ContainerNode
   {
+  protected:
+    Element(Document &document, NodeFlag nodeFlags = NodeFlag::None) noexcept;
+
   public:
     KRYS_NODISCARD DOMString NodeName() const noexcept final;
+    KRYS_NODISCARD ExceptionOr<void> RemoveAttributeNode(Attr &attribute) const noexcept;
   };
 }
 

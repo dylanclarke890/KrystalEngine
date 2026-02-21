@@ -161,6 +161,7 @@
     <ClCompile Include="tests\Events\EventTarget.cpp" />
     <ClCompile Include="tests\Loader\HTMLEncodingSniffer.cpp" />
     <ClCompile Include="tests\Loader\TextResourceDecoder.cpp" />
+    <ClCompile Include="tests\Node\ContainerNode.cpp" />
     <ClCompile Include="tests\Parser\HTMLCharacterReference.cpp" />
     <ClCompile Include="tests\Parser\HTMLInputStream.cpp" />
     <ClCompile Include="tests\Parser\HTMLTokenizerIntegrationTests.cpp" />

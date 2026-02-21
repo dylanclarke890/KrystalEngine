@@ -17,17 +17,23 @@ namespace Krys::HTML
     _flags = flags;
   }
 
-  RawPtr<Document> Node::OwnerDocument() const noexcept
-  {
-    return _ownerDocument.get();
-  }
-
   Node &Node::GetRootNode(const GetRootNodeOptions &options) noexcept
   {
     return options.Composed ? ShadowIncludingRoot() : Root();
   }
 
   Node &Node::Root() noexcept
+  {
+    if (IsInTreeScope())
+    {
+      auto &root = GetTreeScope().RootNode();
+      return root;
+    }
+
+    return NodeTraversal::Root(*this);
+  }
+
+  const Node &Node::Root() const noexcept
   {
     if (IsInTreeScope())
     {
@@ -191,5 +197,68 @@ namespace Krys::HTML
     {
       ClearEventTargetFlag(EventTargetFlag::IsInShadowTree);
     }
+  }
+
+  void Node::SetTreeScopeRecursively(TreeScope &newTreeScope) noexcept
+  {
+    assert(!IsDocumentNode());
+    if (_treeScope != &newTreeScope)
+    {
+      //Ref<TreeScope> oldTreeScope = CreateRef<TreeScope>(*_treeScope);
+      // MoveTreeToNewScope(*this, oldTreeScope, newTreeScope);
+    }
+  }
+
+  /// @see https://dom.spec.whatwg.org/#dom-childnode-before
+  ExceptionOr<void> Node::Before(SmallList<NodeOrString> &&nodes) noexcept
+  {
+    RefPtr<Node> parent = ShareRefPtr(ParentNode());
+    if (!parent)
+    {
+      return {};
+    }
+
+    // TODO(IMPL): Implement Before algorithm.
+
+    return {};
+  }
+
+  /// @see https://dom.spec.whatwg.org/#dom-childnode-after
+  ExceptionOr<void> Node::After(SmallList<NodeOrString> &&nodes) noexcept
+  {
+    RefPtr<Node> parent = ShareRefPtr(ParentNode());
+    if (!parent)
+    {
+      return {};
+    }
+
+    // TODO(IMPL): Implement After algorithm.
+
+    return {};
+  }
+
+  /// @see https://dom.spec.whatwg.org/#dom-childnode-replacewith
+  ExceptionOr<void> Node::ReplaceWith(SmallList<NodeOrString> &&nodes) noexcept
+  {
+    RefPtr<Node> parent = ShareRefPtr(ParentNode());
+    if (!parent)
+    {
+      return {};
+    }
+
+    // TODO(IMPL): Implement ReplaceWith algorithm.
+
+    return {};
+  }
+
+  /// @see https://dom.spec.whatwg.org/#dom-childnode-remove
+  ExceptionOr<void> Node::Remove() noexcept
+  {
+    if (RefPtr<Node> parent = ShareRefPtr(ParentNode()))
+    {
+      return parent->RemoveChild(*this);
+    }
+
+    return {};
   }
 }
