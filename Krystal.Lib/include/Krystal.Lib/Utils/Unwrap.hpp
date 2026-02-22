@@ -2,7 +2,7 @@
 
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Utils/Hijack.hpp"
-#include "Krystal.Lib/Utils/ReferenceWrapper.hpp"
+#include "Krystal.Lib/Pointers/ReferenceWrapper.hpp"
 #include "Krystal.Lib/Utils/ToAddress.hpp"
 #include <iterator>
 #include <utility>

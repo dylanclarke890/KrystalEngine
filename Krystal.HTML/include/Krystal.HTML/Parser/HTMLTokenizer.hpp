@@ -10,7 +10,7 @@
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/SmallList.hpp"
-#include "Krystal.Lib/Utils/ReferenceWrapper.hpp"
+#include "Krystal.Lib/Pointers/ReferenceWrapper.hpp"
 #include "Krystal.Text/ASCII.hpp"
 #include "Krystal.Text/Unicode.hpp"
 #include <ranges>

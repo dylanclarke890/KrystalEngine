@@ -4,7 +4,7 @@
 #include "Krystal.Lib/Ranges/Reconstruct.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
-#include "Krystal.Lib/Utils/ReferenceWrapper.hpp"
+#include "Krystal.Lib/Pointers/ReferenceWrapper.hpp"
 #include "Krystal.Text/CodePoint.hpp"
 #include "Krystal.Text/CodeUnit.hpp"
 #include "Krystal.Text/_detail/ResultTypeConcepts.hpp"

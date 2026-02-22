@@ -3,7 +3,7 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
-#include "Krystal.Lib/Utils/ReferenceWrapper.hpp"
+#include "Krystal.Lib/Pointers/ReferenceWrapper.hpp"
 
 namespace Krys::HTML
 {

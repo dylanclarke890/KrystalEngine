@@ -1,15 +1,14 @@
-﻿#include "Krystal.HTML/Node/NodeMutationNotifier.hpp"
+﻿#include "Krystal.HTML/Node/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Document/Document.hpp"
 #include "Krystal.HTML/Document/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
-#include "Krystal.HTML/Node/NodeMutationContexts.hpp"
 #include "Krystal.HTML/Node/NodeTraversal.hpp"
 #include <cassert>
 
 namespace Krys::HTML
 {
-  void NodeMutationNotifier::DoNotifyNodeInserted(Node &node, const NodeInsertedContext &context) noexcept
+  void TreeMutationDispatcher::DoNotifyNodeInserted(Node &node, const NodeInsertedContext &context) noexcept
   {
     for (RawPtr<Node> currentNode = &node; currentNode != nullptr;
          currentNode = NodeTraversal::Next(*currentNode, &node))
@@ -27,7 +26,7 @@ namespace Krys::HTML
     }
   }
 
-  void NodeMutationNotifier::DoNotifyNodeRemoved(Node &node, const NodeRemovedContext &context) noexcept
+  void TreeMutationDispatcher::DoNotifyNodeRemoved(Node &node, const NodeRemovedContext &context) noexcept
   {
     for (RawPtr<Node> currentNode = &node; currentNode != nullptr;
          currentNode = NodeTraversal::Next(*currentNode))
@@ -45,7 +44,7 @@ namespace Krys::HTML
     }
   }
 
-  void NodeMutationNotifier::NotifyNodeInserted(Node &node, ContainerNode &insertedInto) noexcept
+  void TreeMutationDispatcher::NotifyNodeInserted(Node &node, ContainerNode &insertedInto) noexcept
   {
     assert(!node.IsConnected());
 
@@ -57,7 +56,7 @@ namespace Krys::HTML
     DoNotifyNodeInserted(node, context);
   }
 
-  void NodeMutationNotifier::NotifyNodeRemoved(Node &node, ContainerNode &removedFrom) noexcept
+  void TreeMutationDispatcher::NotifyNodeRemoved(Node &node, ContainerNode &removedFrom) noexcept
   {
     NodeRemovedContext context {
       .RemovedFrom = removedFrom,

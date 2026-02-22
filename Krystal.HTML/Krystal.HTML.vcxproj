@@ -37,6 +37,7 @@
     <ClInclude Include="include\Krystal.HTML\Document\ShadowRoot.hpp" />
     <ClInclude Include="include\Krystal.HTML\Document\TreeScope.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventDispatcher.hpp" />
+    <ClInclude Include="include\Krystal.HTML\MutationRecord.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Attr.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\CDATASection.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\CharacterData.hpp" />
@@ -64,8 +65,7 @@
     <ClInclude Include="include\Krystal.HTML\Document\HTMLDocument.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Node.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\NodeList.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Node\NodeMutationContexts.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Node\NodeMutationNotifier.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\TreeMutationDispatcher.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\NodeQueries.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\NodeRareData.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\NodeTraversal.hpp" />
@@ -102,7 +102,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Node\NodeQueries.cpp" />
-    <ClCompile Include="src\Node\NodeMutationNotifier.cpp" />
+    <ClCompile Include="src\Node\TreeMutationDispatcher.cpp" />
     <ClCompile Include="src\Document\ShadowRoot.cpp" />
     <ClCompile Include="src\Document\Document.cpp" />
     <ClCompile Include="src\Document\TreeScope.cpp" />
@@ -199,6 +199,9 @@
     <None Include="data\Ranges\AbstractRange.idl" />
     <None Include="data\Ranges\Range.idl" />
     <None Include="data\Ranges\StaticRange.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\MutationRecord.idl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

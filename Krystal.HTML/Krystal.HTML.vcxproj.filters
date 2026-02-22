@@ -192,10 +192,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\NodeTraversal.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\NodeMutationNotifier.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\NodeMutationContexts.hpp">
+    <ClInclude Include="include\Krystal.HTML\Node\TreeMutationDispatcher.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\NodeRareData.hpp">
@@ -214,6 +211,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\NodeQueries.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\MutationRecord.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -275,7 +275,7 @@
     <ClCompile Include="src\Node\NodeTraversal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Node\NodeMutationNotifier.cpp">
+    <ClCompile Include="src\Node\TreeMutationDispatcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\NodeQueries.cpp">
@@ -418,6 +418,9 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\Ranges\Range.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\MutationRecord.idl">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

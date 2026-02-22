@@ -3,7 +3,7 @@
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Ranges/Range.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
-#include "Krystal.Lib/Utils/ReferenceWrapper.hpp"
+#include "Krystal.Lib/Pointers/ReferenceWrapper.hpp"
 #include "Krystal.Text/Decode/DecodeResult.hpp"
 #include "Krystal.Text/Encode/EncodeResult.hpp"
 #include <type_traits>

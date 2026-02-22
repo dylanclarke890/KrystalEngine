@@ -6,7 +6,7 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/StronglyTypedValue.hpp"
-#include "Krystal.Lib/Utils/ReferenceWrapper.hpp"
+#include "Krystal.Lib/Pointers/ReferenceWrapper.hpp"
 #include "Krystal.Text/ASCII.hpp"
 #include "Krystal.Text/Codecs/ICodec.hpp"
 #include "Krystal.Text/Decode/Decode.hpp"

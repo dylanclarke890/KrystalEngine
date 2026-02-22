@@ -9,7 +9,7 @@
 #include "Krystal.HTML/Parser/HTMLTreeBuilder.hpp"
 #include "Krystal.HTML/StronglyTypedValues.hpp"
 #include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
-#include "Krystal.Lib/Utils/ReferenceWrapper.hpp"
+#include "Krystal.Lib/Pointers/ReferenceWrapper.hpp"
 
 namespace Krys::HTML
 {

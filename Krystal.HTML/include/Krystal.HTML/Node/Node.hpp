@@ -2,7 +2,6 @@
 
 #include "Krystal.HTML/DOMString.hpp"
 #include "Krystal.HTML/Events/EventTarget.hpp"
-#include "Krystal.HTML/Node/NodeMutationContexts.hpp"
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
@@ -67,9 +66,13 @@ namespace Krys::HTML
   class Document;
   class Element;
   class NodeList;
-  class NodeMutationNotifier;
   class ShadowRoot;
+  class TreeMutationAlgorithms;
+  class TreeMutationDispatcher;
   class TreeScope;
+
+  struct NodeInsertedContext;
+  struct NodeRemovedContext;
 
   /// @see https://dom.spec.whatwg.org/#dictdef-getrootnodeoptions
   struct GetRootNodeOptions
@@ -92,7 +95,8 @@ namespace Krys::HTML
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Node);
 
     friend class Document;
-    friend class NodeMutationNotifier;
+    friend class TreeMutationAlgorithms;
+    friend class TreeMutationDispatcher;
 
   private:
     NodeFlag _flags : BitCount<NodeFlag>() {NodeFlag::None};
