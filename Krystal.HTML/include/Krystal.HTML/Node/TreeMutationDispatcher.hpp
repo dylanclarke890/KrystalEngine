@@ -1,13 +1,27 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Utils/ReferenceWrapper.hpp"
+
 namespace Krys::HTML
 {
-  struct NodeInsertedContext;
-  struct NodeRemovedContext;
   class ContainerNode;
   class Node;
 
-  class NodeMutationNotifier
+  struct NodeInsertedContext
+  {
+    ReferenceWrapper<ContainerNode> InsertedInto;
+    bool ConnectedToDocument;
+    bool TreeScopeChanged;
+  };
+
+  struct NodeRemovedContext
+  {
+    ReferenceWrapper<ContainerNode> RemovedFrom;
+    bool DisconnectedFromDocument;
+    bool TreeScopeChanged;
+  };
+
+  class TreeMutationDispatcher
   {
   public:
     static void NotifyNodeInserted(Node &node, ContainerNode &insertedInto) noexcept;

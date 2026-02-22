@@ -6,6 +6,7 @@
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/NodeTraversal.hpp"
+#include "Krystal.HTML/Node/TreeMutationDispatcher.hpp"
 
 namespace Krys::HTML
 {
@@ -204,8 +205,8 @@ namespace Krys::HTML
     assert(!IsDocumentNode());
     if (_treeScope != &newTreeScope)
     {
-      //Ref<TreeScope> oldTreeScope = CreateRef<TreeScope>(*_treeScope);
-      // MoveTreeToNewScope(*this, oldTreeScope, newTreeScope);
+      // Ref<TreeScope> oldTreeScope = CreateRef<TreeScope>(*_treeScope);
+      //  MoveTreeToNewScope(*this, oldTreeScope, newTreeScope);
     }
   }
 

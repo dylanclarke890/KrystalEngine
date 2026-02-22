@@ -109,29 +109,10 @@ namespace Krys::HTML
 
   ExceptionOr<void> ContainerNode::AppendChild(Node &newChild) noexcept
   {
-    if (auto result = EnsurePreInsertValidity(newChild, nullptr); result.HasException())
+    if (auto result = PreInsert(newChild, nullptr); result.HasException())
     {
       return {result.ReleaseException()};
     }
-
-    if (auto result = newChild.Remove(); result.HasException())
-    {
-      return {result.ReleaseException()};
-    }
-
-    newChild.SetParentNode(this);
-
-    if (RefPtr lastChild = ShareRefPtr(LastChild()))
-    {
-      newChild.SetPreviousSibling(lastChild.get());
-      lastChild->SetNextSibling(&newChild);
-    }
-    else
-    {
-      _firstChild = &newChild;
-    }
-
-    _lastChild = &newChild;
 
     return {};
   }
@@ -281,17 +262,17 @@ namespace Krys::HTML
   {
     auto &parent = *this;
 
-    NodeSmallList childrenToInsert;
+    NodeSmallList targets;
     if (node.IsDocumentFragmentNode())
     {
-      CollectChildNodes(node, childrenToInsert);
+      CollectChildNodes(node, targets);
     }
     else
     {
-      childrenToInsert.push_back(ShareRef<Node>(node));
+      targets.push_back(ShareRef<Node>(node));
     }
 
-    if (childrenToInsert.empty())
+    if (targets.empty())
     {
       return {};
     }
@@ -312,10 +293,53 @@ namespace Krys::HTML
     }
 
     auto previousSibling = ShareRefPtr<Node>(refChild ? refChild->PreviousSibling() : parent.LastChild());
-
-    for (auto &node : childrenToInsert)
+    for (auto &target : targets)
     {
-      (void)parent.OwnerDocument()->AdoptNode(*node);
+      if (auto result = parent.OwnerDocument()->AdoptNode(*target); result.HasException())
+      {
+        return {result.ReleaseException()};
+      }
+
+      if (auto result = target->Remove(); result.HasException())
+      {
+        return {result.ReleaseException()};
+      }
+
+      target->SetParentNode(this);
+
+      if (refChild)
+      {
+        if (refChild->PreviousSibling())
+        {
+          refChild->PreviousSibling()->SetNextSibling(target.get());
+          target->SetPreviousSibling(refChild->PreviousSibling());
+
+          refChild->SetPreviousSibling(target.get());
+          target->SetNextSibling(refChild);
+        }
+        else
+        {
+          assert(_firstChild == refChild);
+          _firstChild = target.get();
+
+          refChild->SetPreviousSibling(target.get());
+          target->SetNextSibling(refChild);
+        }
+      }
+      else
+      {
+        if (auto lastChild = ShareRefPtr(LastChild()))
+        {
+          target->SetPreviousSibling(lastChild.get());
+          lastChild->SetNextSibling(target.get());
+        }
+        else
+        {
+          _firstChild = target.get();
+        }
+
+        _lastChild = target.get();
+      }
     }
 
     return {};
