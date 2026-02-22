@@ -62,6 +62,7 @@ namespace Krys
   using RefPtr = IntrusivePtr<T, PtrTraits, StrongRefPolicy, IsNullable(true)>;
 
   template <typename T, typename PtrTraits = RawPtrTraits<T>, typename... Args>
+  requires(Constructible<T, Args...>)
   KRYS_NODISCARD constexpr inline Ref<T, PtrTraits>
     CreateRef(Args &&...args) noexcept(NoThrowConstructible<T, Args...>)
   {
@@ -70,6 +71,7 @@ namespace Krys
   }
 
   template <typename T, typename PtrTraits = RawPtrTraits<T>, typename... Args>
+  requires(Constructible<T, Args...>)
   KRYS_NODISCARD constexpr inline RefPtr<T, PtrTraits>
     CreateRefPtr(Args &&...args) noexcept(NoThrowConstructible<T, Args...>)
   {

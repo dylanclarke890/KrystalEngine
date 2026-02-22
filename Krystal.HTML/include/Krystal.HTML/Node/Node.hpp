@@ -166,10 +166,10 @@ namespace Krys::HTML
     KRYS_NODISCARD const StringAtom &LookupNamespaceURI(const StringAtom &prefix) const noexcept;
     KRYS_NODISCARD bool IsDefaultNamespace(const StringAtom &namespaceURI) const noexcept;
 
-    KRYS_NODISCARD ExceptionOr<void> InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept;
-    KRYS_NODISCARD ExceptionOr<void> ReplaceChild(Node &newChild, Node &oldChild) noexcept;
-    KRYS_NODISCARD ExceptionOr<void> RemoveChild(Node &child) noexcept;
-    KRYS_NODISCARD ExceptionOr<void> AppendChild(Node &newChild) noexcept;
+    ExceptionOr<void> InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept;
+    ExceptionOr<void> ReplaceChild(Node &newChild, Node &oldChild) noexcept;
+    ExceptionOr<void> RemoveChild(Node &child) noexcept;
+    ExceptionOr<void> AppendChild(Node &newChild) noexcept;
 
     KRYS_NODISCARD size_t Length() const noexcept;
 

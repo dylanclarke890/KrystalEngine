@@ -67,7 +67,7 @@ namespace Krys::Tests
         REQUIRE(!childA->NextSibling());
       }
 
-      // Remove childB
+      // Remove childB using RemoveChild
       {
         auto result = parent->RemoveChild(*childB);
         REQUIRE(!result.HasException());
@@ -80,9 +80,9 @@ namespace Krys::Tests
         REQUIRE(!childA->NextSibling());
       }
 
-      // Remove childA
+      // Remove childA using Remove
       {
-        auto result = parent->RemoveChild(*childA);
+        auto result = childA->Remove();
         REQUIRE(!result.HasException());
 
         REQUIRE(!parent->FirstChild());
@@ -93,5 +93,77 @@ namespace Krys::Tests
         REQUIRE(!childA->NextSibling());
       }
     }
+
+    SECTION("InsertBefore")
+    {
+      Ref<TestNode> childC = CreateRef<TestNode>(*doc);
+
+      auto result = parent->AppendChild(*childA);
+      REQUIRE(!result.HasException());
+
+      result = parent->AppendChild(*childB);
+      REQUIRE(!result.HasException());
+
+      // Inserting child before itself does nothing
+      {
+        result = parent->InsertBefore(*childA, ShareRefPtr<Node>(childA.get()));
+        REQUIRE(!result.HasException());
+
+        REQUIRE(parent->FirstChild() == childA.get());
+        REQUIRE(childA->ParentNode() == parent.get());
+
+        REQUIRE(parent->LastChild() == childB.get());
+        REQUIRE(childB->ParentNode() == parent.get());
+
+        REQUIRE(!childA->PreviousSibling());
+        REQUIRE(childA->NextSibling() == childB.get());
+
+        REQUIRE(childB->PreviousSibling() == childA.get());
+        REQUIRE(!childB->NextSibling());
+      }
+
+      // Insertion with new node
+      {
+        result = parent->InsertBefore(*childC, ShareRefPtr<Node>(childA.get()));
+        REQUIRE(!result.HasException());
+
+        REQUIRE(parent->FirstChild() == childC.get());
+        REQUIRE(childC->ParentNode() == parent.get());
+
+        REQUIRE(parent->LastChild() == childB.get());
+        REQUIRE(childB->ParentNode() == parent.get());
+
+        REQUIRE(!childC->PreviousSibling());
+        REQUIRE(childC->NextSibling() == childA.get());
+
+        REQUIRE(childA->PreviousSibling() == childC.get());
+        REQUIRE(childA->NextSibling() == childB.get());
+
+        REQUIRE(childC->NextSibling() == childA.get());
+        REQUIRE(!childB->NextSibling());
+      }
+
+      childC->Remove();
+    }
+
+    SECTION("Replace child")
+    {
+      auto result = parent->AppendChild(*childA);
+      REQUIRE(!result.HasException());
+
+      result = parent->AppendChild(*childB);
+      REQUIRE(!result.HasException());
+
+      SECTION("Replace with same child does nothing")
+      {
+        result = parent->ReplaceChild(*childA, *childA);
+        REQUIRE(!result.HasException());
+        REQUIRE(parent->FirstChild() == childA.get());
+        REQUIRE(childB->PreviousSibling() == childA.get());
+      }
+    }
+
+    childA->Remove();
+    childB->Remove();
   }
 }

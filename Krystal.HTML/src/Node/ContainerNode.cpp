@@ -39,9 +39,9 @@ namespace Krys::HTML
 
   ExceptionOr<void> ContainerNode::InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept
   {
-    if (auto result = EnsurePreInsertValidity(newChild, refChild.get()); result.HasException())
+    if (auto result = PreInsert(newChild, refChild.get()); result.HasException())
     {
-      return {result.ReleaseException()};
+      return result.ReleaseException();
     }
 
     return {};
@@ -49,6 +49,21 @@ namespace Krys::HTML
 
   ExceptionOr<void> ContainerNode::ReplaceChild(Node &newChild, Node &oldChild) noexcept
   {
+    if (&newChild == &oldChild)
+    {
+      return {};
+    }
+
+    if (auto result = InsertBefore(newChild, ShareRefPtr<Node>(&oldChild)); result.HasException())
+    {
+      return {result.ReleaseException()};
+    }
+
+    if (auto result = RemoveChild(oldChild); result.HasException())
+    {
+      return {result.ReleaseException()};
+    }
+
     return {};
   }
 
