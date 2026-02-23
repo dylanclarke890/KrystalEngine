@@ -450,7 +450,10 @@
     <None Include="data\Ranges\Range.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\MutationRecord.idl">
+    <None Include="data\MutationRecord\MutationRecord.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\MutationObserver\MutationObserver.idl">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

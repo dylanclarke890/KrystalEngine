@@ -211,7 +211,10 @@
     <None Include="data\Ranges\StaticRange.idl" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="data\MutationRecord.idl" />
+    <None Include="data\MutationRecord\MutationRecord.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\MutationObserver\MutationObserver.idl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
