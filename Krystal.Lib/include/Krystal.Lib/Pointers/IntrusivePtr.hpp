@@ -77,6 +77,7 @@ namespace Krys
       return IntrusivePtr(&RefPolicy::AddRef(ref));
     }
 
+    
     KRYS_ALWAYS_INLINE constexpr IntrusivePtr() noexcept
     requires(nullable)
         : _ptr(nullptr)

@@ -1,0 +1,46 @@
+﻿#include "Krystal.HTML/NodeList/StaticNodeList.hpp"
+#include "Krystal.HTML/Document/Document.hpp"
+#include "Krystal.HTML/Node/Node.hpp"
+#include "Krystal.Lib/Core/Move.hpp"
+
+namespace Krys::HTML
+{
+  StaticNodeList::StaticNodeList(List<Ref<Node>> &&nodes) noexcept : _nodes(Krys::Move(nodes))
+  {
+  }
+
+  size_t StaticNodeList::Length() const noexcept
+  {
+    return _nodes.size();
+  }
+
+  RawPtr<Node> StaticNodeList::Item(size_t index) const noexcept
+  {
+    if (index < _nodes.size())
+    {
+      return _nodes.at(index).get();
+    }
+
+    return nullptr;
+  }
+
+  StaticElementList::StaticElementList(List<Ref<Element>> &&elements) noexcept
+      : _elements(Krys::Move(elements))
+  {
+  }
+
+  size_t StaticElementList::Length() const noexcept
+  {
+    return _elements.size();
+  }
+
+  RawPtr<Element> StaticElementList::Item(size_t index) const noexcept
+  {
+    if (index < _elements.size())
+    {
+      return _elements.at(index).get();
+    }
+
+    return nullptr;
+  }
+}

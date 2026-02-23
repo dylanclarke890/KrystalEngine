@@ -1,12 +1,13 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"
+#include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::HTML
 {
+  class Element;
   class Node;
 
   class NodeList : public RefCounted<NodeList>
@@ -15,6 +16,7 @@ namespace Krys::HTML
     virtual ~NodeList() noexcept = default;
 
     KRYS_NODISCARD virtual size_t Length() const noexcept = 0;
+
     KRYS_NODISCARD virtual RawPtr<Node> Item(size_t index) const noexcept = 0;
   };
 }

@@ -37,7 +37,12 @@
     <ClInclude Include="include\Krystal.HTML\Document\ShadowRoot.hpp" />
     <ClInclude Include="include\Krystal.HTML\Document\TreeScope.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventDispatcher.hpp" />
-    <ClInclude Include="include\Krystal.HTML\MutationRecord.hpp" />
+    <ClInclude Include="include\Krystal.HTML\MutationRecord\AttributesMutationRecord.hpp" />
+    <ClInclude Include="include\Krystal.HTML\MutationRecord\CharacterDataMutationRecord.hpp" />
+    <ClInclude Include="include\Krystal.HTML\MutationRecord\ChildNodeMutationRecord.hpp" />
+    <ClInclude Include="include\Krystal.HTML\MutationRecord\detail\EmptyNodeMutationRecord.hpp" />
+    <ClInclude Include="include\Krystal.HTML\MutationRecord\MutationRecord.hpp" />
+    <ClInclude Include="include\Krystal.HTML\NodeList\StaticNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Attr.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\CDATASection.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\CharacterData.hpp" />
@@ -64,7 +69,7 @@
     <ClInclude Include="include\Krystal.HTML\Events\RegisteredEventListener.hpp" />
     <ClInclude Include="include\Krystal.HTML\Document\HTMLDocument.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Node.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Node\NodeList.hpp" />
+    <ClInclude Include="include\Krystal.HTML\NodeList\NodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\TreeMutationDispatcher.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\NodeQueries.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\NodeRareData.hpp" />
@@ -101,6 +106,11 @@
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionOr.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\MutationRecord\AttributesMutationRecord.cpp" />
+    <ClCompile Include="src\MutationRecord\CharacterDataMutationRecord.cpp" />
+    <ClCompile Include="src\MutationRecord\detail\EmptyNodeMutationRecord.cpp" />
+    <ClCompile Include="src\NodeList\StaticNodeList.cpp" />
+    <ClCompile Include="src\MutationRecord\ChildNodeMutationRecord.cpp" />
     <ClCompile Include="src\Node\NodeQueries.cpp" />
     <ClCompile Include="src\Node\TreeMutationDispatcher.cpp" />
     <ClCompile Include="src\Document\ShadowRoot.cpp" />

@@ -144,7 +144,7 @@
     <ClInclude Include="include\Krystal.HTML\Document\DocumentFragment.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\NodeList.hpp">
+    <ClInclude Include="include\Krystal.HTML\NodeList\NodeList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Document\DocumentType.hpp">
@@ -213,7 +213,22 @@
     <ClInclude Include="include\Krystal.HTML\Node\NodeQueries.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\MutationRecord.hpp">
+    <ClInclude Include="include\Krystal.HTML\MutationRecord\MutationRecord.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\MutationRecord\detail\EmptyNodeMutationRecord.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\MutationRecord\ChildNodeMutationRecord.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\MutationRecord\AttributesMutationRecord.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\MutationRecord\CharacterDataMutationRecord.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\NodeList\StaticNodeList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -279,6 +294,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\NodeQueries.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MutationRecord\ChildNodeMutationRecord.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\NodeList\StaticNodeList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MutationRecord\detail\EmptyNodeMutationRecord.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MutationRecord\AttributesMutationRecord.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MutationRecord\CharacterDataMutationRecord.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

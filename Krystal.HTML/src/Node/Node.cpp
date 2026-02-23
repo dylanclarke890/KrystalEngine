@@ -4,9 +4,9 @@
 #include "Krystal.HTML/Element/Element.hpp"
 #include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
-#include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/NodeTraversal.hpp"
 #include "Krystal.HTML/Node/TreeMutationDispatcher.hpp"
+#include "Krystal.HTML/NodeList/NodeList.hpp"
 
 namespace Krys::HTML
 {
