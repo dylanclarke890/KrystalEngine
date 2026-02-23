@@ -37,6 +37,7 @@
     <ClInclude Include="include\Krystal.HTML\Document\ShadowRoot.hpp" />
     <ClInclude Include="include\Krystal.HTML\Document\TreeScope.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventDispatcher.hpp" />
+    <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationObserver.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationRecord\AttributesMutationRecord.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationRecord\CharacterDataMutationRecord.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationRecord\ChildNodeMutationRecord.hpp" />

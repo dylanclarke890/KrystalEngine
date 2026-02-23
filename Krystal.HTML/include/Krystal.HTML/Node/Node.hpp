@@ -67,7 +67,6 @@ namespace Krys::HTML
   class Element;
   class NodeList;
   class ShadowRoot;
-  class TreeMutationAlgorithms;
   class TreeMutationDispatcher;
   class TreeScope;
 
@@ -95,7 +94,6 @@ namespace Krys::HTML
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Node);
 
     friend class Document;
-    friend class TreeMutationAlgorithms;
     friend class TreeMutationDispatcher;
 
   private:
