@@ -9,7 +9,7 @@ namespace Krys::HTML
   class Node;
   class Text;
 
-  class NodeTraversal
+  class TreeTraversal
   {
   public:
     KRYS_NODISCARD static const Node &Root(const Node &node) noexcept;

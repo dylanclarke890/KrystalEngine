@@ -1,9 +1,9 @@
-﻿#include "Krystal.HTML/Node/TreeMutationDispatcher.hpp"
+﻿#include "Krystal.HTML/Tree/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Document/Document.hpp"
 #include "Krystal.HTML/Document/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
-#include "Krystal.HTML/Node/NodeTraversal.hpp"
+#include "Krystal.HTML/Tree/TreeTraversal.hpp"
 #include <cassert>
 
 namespace Krys::HTML
@@ -11,7 +11,7 @@ namespace Krys::HTML
   void TreeMutationDispatcher::DoNotifyNodeInserted(Node &node, const NodeInsertedContext &context) noexcept
   {
     for (RawPtr<Node> currentNode = &node; currentNode != nullptr;
-         currentNode = NodeTraversal::Next(*currentNode, &node))
+         currentNode = TreeTraversal::Next(*currentNode, &node))
     {
       currentNode->InsertedIntoAncestor(context);
       if (RawPtr<ShadowRoot> root = currentNode->GetShadowRoot())
@@ -29,7 +29,7 @@ namespace Krys::HTML
   void TreeMutationDispatcher::DoNotifyNodeRemoved(Node &node, const NodeRemovedContext &context) noexcept
   {
     for (RawPtr<Node> currentNode = &node; currentNode != nullptr;
-         currentNode = NodeTraversal::Next(*currentNode))
+         currentNode = TreeTraversal::Next(*currentNode))
     {
       currentNode->RemovedFromAncestor(context);
       if (RawPtr<ShadowRoot> root = currentNode->GetShadowRoot())

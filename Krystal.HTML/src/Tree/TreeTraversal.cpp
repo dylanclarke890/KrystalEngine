@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Node/NodeTraversal.hpp"
+﻿#include "Krystal.HTML/Tree/TreeTraversal.hpp"
 #include "Krystal.HTML/Document/Document.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
@@ -7,7 +7,7 @@
 
 namespace Krys::HTML
 {
-  const Node &NodeTraversal::Root(const Node &node) noexcept
+  const Node &TreeTraversal::Root(const Node &node) noexcept
   {
     const Node *current = &node;
     while (current->ParentNode())
@@ -18,7 +18,7 @@ namespace Krys::HTML
     return *current;
   }
 
-  Node &NodeTraversal::Root(Node &node) noexcept
+  Node &TreeTraversal::Root(Node &node) noexcept
   {
     Node *current = &node;
     while (current->ParentNode())
@@ -44,7 +44,7 @@ namespace Krys::HTML
       return current.NextSibling();
     }
 
-    return NodeTraversal::NextAncestorSibling(current);
+    return TreeTraversal::NextAncestorSibling(current);
   }
 
   template <bool CheckChildren = true, typename TNode>
@@ -68,51 +68,51 @@ namespace Krys::HTML
       return current.NextSibling();
     }
 
-    return NodeTraversal::NextAncestorSibling(current, stayWithin);
+    return TreeTraversal::NextAncestorSibling(current, stayWithin);
   }
 
-  RawPtr<Node> NodeTraversal::Next(const Node &current) noexcept
+  RawPtr<Node> TreeTraversal::Next(const Node &current) noexcept
   {
     return GetNext(current);
   }
 
-  RawPtr<Node> NodeTraversal::Next(const ContainerNode &current) noexcept
+  RawPtr<Node> TreeTraversal::Next(const ContainerNode &current) noexcept
   {
     return GetNext(current);
   }
 
-  RawPtr<Node> NodeTraversal::Next(const Text &current) noexcept
+  RawPtr<Node> TreeTraversal::Next(const Text &current) noexcept
   {
     return GetNext(current);
   }
 
-  RawPtr<Node> NodeTraversal::Next(const Node &current, RawPtr<const Node> stayWithin) noexcept
+  RawPtr<Node> TreeTraversal::Next(const Node &current, RawPtr<const Node> stayWithin) noexcept
   {
     return GetNext(current, stayWithin);
   }
 
-  RawPtr<Node> NodeTraversal::Next(const ContainerNode &current, RawPtr<const Node> stayWithin) noexcept
+  RawPtr<Node> TreeTraversal::Next(const ContainerNode &current, RawPtr<const Node> stayWithin) noexcept
   {
     return GetNext(current, stayWithin);
   }
 
-  RawPtr<Node> NodeTraversal::Next(const Text &current, RawPtr<const Node> stayWithin) noexcept
+  RawPtr<Node> TreeTraversal::Next(const Text &current, RawPtr<const Node> stayWithin) noexcept
   {
     return GetNext(current, stayWithin);
   }
 
-  RawPtr<Node> NodeTraversal::NextSkippingChildren(const Node &current) noexcept
+  RawPtr<Node> TreeTraversal::NextSkippingChildren(const Node &current) noexcept
   {
     return GetNext<false>(current);
   }
 
-  RawPtr<Node> NodeTraversal::NextSkippingChildren(const Node &current,
+  RawPtr<Node> TreeTraversal::NextSkippingChildren(const Node &current,
                                                    RawPtr<const Node> stayWithin) noexcept
   {
     return GetNext<false>(current, stayWithin);
   }
 
-  RawPtr<Node> NodeTraversal::NextAncestorSibling(const Node &current) noexcept
+  RawPtr<Node> TreeTraversal::NextAncestorSibling(const Node &current) noexcept
   {
     assert(!current.NextSibling());
 
@@ -130,7 +130,7 @@ namespace Krys::HTML
     return nullptr;
   }
 
-  RawPtr<Node> NodeTraversal::NextAncestorSibling(const Node &current, RawPtr<const Node> stayWithin) noexcept
+  RawPtr<Node> TreeTraversal::NextAncestorSibling(const Node &current, RawPtr<const Node> stayWithin) noexcept
   {
     assert(!current.NextSibling());
     assert(&current != stayWithin);
@@ -149,7 +149,7 @@ namespace Krys::HTML
     return nullptr;
   }
 
-  RawPtr<Node> NodeTraversal::DeepLastChild(Node &current) noexcept
+  RawPtr<Node> TreeTraversal::DeepLastChild(Node &current) noexcept
   {
     RawPtr<Node> last = &current;
     while (last->LastChild())
@@ -160,7 +160,7 @@ namespace Krys::HTML
     return last;
   }
 
-  RawPtr<Node> NodeTraversal::Last(const ContainerNode &current) noexcept
+  RawPtr<Node> TreeTraversal::Last(const ContainerNode &current) noexcept
   {
     RawPtr<Node> node = current.LastChild();
     if (node == nullptr)
@@ -175,7 +175,7 @@ namespace Krys::HTML
     return node;
   }
 
-  RawPtr<Node> NodeTraversal::Previous(const Node &current) noexcept
+  RawPtr<Node> TreeTraversal::Previous(const Node &current) noexcept
   {
     if (RawPtr<Node> previous = current.PreviousSibling())
     {
@@ -185,7 +185,7 @@ namespace Krys::HTML
     return current.ParentNode();
   }
 
-  RawPtr<Node> NodeTraversal::Previous(const Node &current, RawPtr<const Node> stayWithin) noexcept
+  RawPtr<Node> TreeTraversal::Previous(const Node &current, RawPtr<const Node> stayWithin) noexcept
   {
     if (RawPtr<Node> previous = current.PreviousSibling())
     {
@@ -199,7 +199,7 @@ namespace Krys::HTML
     return current.ParentNode();
   }
 
-  RawPtr<Node> NodeTraversal::PreviousSkippingChildren(const Node &current) noexcept
+  RawPtr<Node> TreeTraversal::PreviousSkippingChildren(const Node &current) noexcept
   {
     if (current.PreviousSibling())
     {
@@ -217,7 +217,7 @@ namespace Krys::HTML
     return nullptr;
   }
 
-  RawPtr<Node> NodeTraversal::PreviousSkippingChildren(const Node &current,
+  RawPtr<Node> TreeTraversal::PreviousSkippingChildren(const Node &current,
                                                        RawPtr<const Node> stayWithin) noexcept
   {
     if (&current == stayWithin)
@@ -244,7 +244,7 @@ namespace Krys::HTML
     return nullptr;
   }
 
-  RawPtr<Node> NodeTraversal::NextPostOrder(const Node &current) noexcept
+  RawPtr<Node> TreeTraversal::NextPostOrder(const Node &current) noexcept
   {
     if (!current.NextSibling())
     {
@@ -258,7 +258,7 @@ namespace Krys::HTML
     return next;
   }
 
-  RawPtr<Node> NodeTraversal::NextPostOrder(const Node &current, RawPtr<const Node> stayWithin) noexcept
+  RawPtr<Node> TreeTraversal::NextPostOrder(const Node &current, RawPtr<const Node> stayWithin) noexcept
   {
     if (&current == stayWithin)
     {
@@ -276,7 +276,7 @@ namespace Krys::HTML
     return next;
   }
 
-  RawPtr<Node> NodeTraversal::PreviousPostOrder(const Node &current) noexcept
+  RawPtr<Node> TreeTraversal::PreviousPostOrder(const Node &current) noexcept
   {
     if (current.LastChild())
     {
@@ -290,7 +290,7 @@ namespace Krys::HTML
     return PreviousAncestorSiblingPostOrder(current);
   }
 
-  RawPtr<Node> NodeTraversal::PreviousPostOrder(const Node &current, RawPtr<const Node> stayWithin) noexcept
+  RawPtr<Node> TreeTraversal::PreviousPostOrder(const Node &current, RawPtr<const Node> stayWithin) noexcept
   {
     if (current.LastChild())
     {
@@ -308,7 +308,7 @@ namespace Krys::HTML
     return PreviousAncestorSiblingPostOrder(current, stayWithin);
   }
 
-  RawPtr<Node> NodeTraversal::PreviousSkippingChildrenPostOrder(const Node &current) noexcept
+  RawPtr<Node> TreeTraversal::PreviousSkippingChildrenPostOrder(const Node &current) noexcept
   {
     if (current.PreviousSibling())
     {
@@ -317,7 +317,7 @@ namespace Krys::HTML
     return PreviousAncestorSiblingPostOrder(current);
   }
 
-  RawPtr<Node> NodeTraversal::PreviousSkippingChildrenPostOrder(const Node &current,
+  RawPtr<Node> TreeTraversal::PreviousSkippingChildrenPostOrder(const Node &current,
                                                                 RawPtr<const Node> stayWithin) noexcept
   {
     if (&current == stayWithin)
@@ -331,7 +331,7 @@ namespace Krys::HTML
     return PreviousAncestorSiblingPostOrder(current, stayWithin);
   }
 
-  RawPtr<Node> NodeTraversal::PreviousAncestorSiblingPostOrder(const Node &current) noexcept
+  RawPtr<Node> TreeTraversal::PreviousAncestorSiblingPostOrder(const Node &current) noexcept
   {
     assert(!current.PreviousSibling());
     for (RawPtr<Node> ancestor = current.ParentNode(); ancestor != nullptr; ancestor = ancestor->ParentNode())
@@ -345,7 +345,7 @@ namespace Krys::HTML
     return nullptr;
   }
 
-  RawPtr<Node> NodeTraversal::PreviousAncestorSiblingPostOrder(const Node &current,
+  RawPtr<Node> TreeTraversal::PreviousAncestorSiblingPostOrder(const Node &current,
                                                                RawPtr<const Node> stayWithin) noexcept
   {
     assert(!current.PreviousSibling());

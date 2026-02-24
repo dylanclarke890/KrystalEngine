@@ -23,7 +23,7 @@ namespace Krys::HTML
       Node &startContainer = *this->StartContainer();
       Node &endContainer = *this->EndContainer();
 
-      if (!NodeQueries::IsConnectedInSameTreeScope(*this->StartContainer(), *this->EndContainer()))
+      if (!TreeQueries::IsConnectedInSameTreeScope(*this->StartContainer(), *this->EndContainer()))
       {
         return false;
       }

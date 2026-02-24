@@ -7,9 +7,13 @@
 
 namespace Krys::HTML
 {
+  class TreeMutationAlgorithms;
+
   class ContainerNode : public Node
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ContainerNode);
+    
+    friend class TreeMutationAlgorithms;
 
   private:
     RawPtr<Node> _firstChild;
@@ -33,13 +37,16 @@ namespace Krys::HTML
     KRYS_NODISCARD ExceptionOr<void> RemoveChild(Node &child) noexcept;
     KRYS_NODISCARD ExceptionOr<void> AppendChild(Node &newChild) noexcept;
 
-  private:
-    KRYS_NODISCARD ExceptionOr<void> EnsurePreInsertValidity(Node &node, RawPtr<Node> refChild) noexcept;
+  protected:
+    void SetFirstChild(RawPtr<Node> node) noexcept
+    {
+      _firstChild = node;
+    }
 
-    KRYS_NODISCARD ExceptionOr<Node &> PreInsert(Node &node, RawPtr<Node> refChild) noexcept;
-
-    KRYS_NODISCARD ExceptionOr<void> Insert(Node &node, RawPtr<Node> refChild,
-                                            bool suppressObservers = false) noexcept;
+    void SetLastChild(RawPtr<Node> node) noexcept
+    {
+      _lastChild = node;
+    }
   };
 }
 

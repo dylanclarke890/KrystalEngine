@@ -1,12 +1,13 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Pointers/RawPtr.hpp"
 
 namespace Krys::HTML
 {
   class Node;
 
-  struct NodeQueries
+  struct TreeQueries
   {
     KRYS_NODISCARD static bool HasSameRoot(const Node &a, const Node &b) noexcept;
     KRYS_NODISCARD static bool IsFollowing(const Node &a, const Node &b) noexcept;
@@ -14,5 +15,6 @@ namespace Krys::HTML
     KRYS_NODISCARD static bool IsChildOf(const Node &parent, const Node &child) noexcept;
     KRYS_NODISCARD static bool IsHostIncludingAncestorOf(Node &node, Node &other) noexcept;
     KRYS_NODISCARD static bool IsConnectedInSameTreeScope(const Node &a, const Node &b) noexcept;
+    KRYS_NODISCARD static bool IsDocTypeOrDocTypeFollows(RawPtr<Node> node) noexcept;
   };
 }

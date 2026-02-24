@@ -4,8 +4,8 @@
 #include "Krystal.HTML/Element/Element.hpp"
 #include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
-#include "Krystal.HTML/Node/NodeTraversal.hpp"
-#include "Krystal.HTML/Node/TreeMutationDispatcher.hpp"
+#include "Krystal.HTML/Tree/TreeTraversal.hpp"
+#include "Krystal.HTML/Tree/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/NodeList/NodeList.hpp"
 
 namespace Krys::HTML
@@ -31,7 +31,7 @@ namespace Krys::HTML
       return root;
     }
 
-    return NodeTraversal::Root(*this);
+    return TreeTraversal::Root(*this);
   }
 
   const Node &Node::Root() const noexcept
@@ -42,7 +42,7 @@ namespace Krys::HTML
       return root;
     }
 
-    return NodeTraversal::Root(*this);
+    return TreeTraversal::Root(*this);
   }
 
   /// @see https://dom.spec.whatwg.org/#concept-shadow-including-root

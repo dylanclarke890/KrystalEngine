@@ -2,7 +2,7 @@
 
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
-#include "Krystal.HTML/Node/NodeQueries.hpp"
+#include "Krystal.HTML/Node/TreeQueries.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
@@ -23,22 +23,22 @@ namespace Krys::HTML
       const Node &a = *Container;
       const Node &b = *other.Container;
 
-      assert(NodeQueries::HasSameRoot(a, b));
+      assert(TreeQueries::HasSameRoot(a, b));
 
       if (&a == &b)
       {
         return Offset <=> other.Offset;
       }
 
-      if (NodeQueries::IsFollowing(a, b))
+      if (TreeQueries::IsFollowing(a, b))
       {
         return StrongOrder::Reverse(other <=> *this);
       }
 
-      if (NodeQueries::IsAncestorOf(a, b))
+      if (TreeQueries::IsAncestorOf(a, b))
       {
         RawPtr<const Node> child = &b;
-        while (child && !NodeQueries::IsChildOf(a, *child))
+        while (child && !TreeQueries::IsChildOf(a, *child))
         {
           child = child->ParentNode();
         }

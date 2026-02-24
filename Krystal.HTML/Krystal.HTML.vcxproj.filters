@@ -189,16 +189,16 @@
     <ClInclude Include="include\Krystal.HTML\Document\CustomElementRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\NodeTraversal.hpp">
+    <ClInclude Include="include\Krystal.HTML\Tree\TreeTraversal.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\TreeMutationDispatcher.hpp">
+    <ClInclude Include="include\Krystal.HTML\Tree\TreeMutationDispatcher.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\NodeRareData.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\ChildNodeList.hpp">
+    <ClInclude Include="include\Krystal.HTML\NodeList\ChildNodeList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Ranges\AbstractRange.hpp">
@@ -210,7 +210,7 @@
     <ClInclude Include="include\Krystal.HTML\Ranges\StaticRange.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\NodeQueries.hpp">
+    <ClInclude Include="include\Krystal.HTML\Tree\TreeQueries.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\MutationRecord\MutationRecord.hpp">
@@ -232,6 +232,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationObserver.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Tree\TreeMutationAlgorithms.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Iterator\NodeIterator.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Iterator\TreeWalker.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Iterator\NodeFilter.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -290,13 +302,13 @@
     <ClCompile Include="src\Document\TreeScope.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Node\NodeTraversal.cpp">
+    <ClCompile Include="src\Tree\TreeTraversal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Node\TreeMutationDispatcher.cpp">
+    <ClCompile Include="src\Tree\TreeMutationDispatcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Node\NodeQueries.cpp">
+    <ClCompile Include="src\Tree\TreeQueries.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MutationRecord\ChildNodeMutationRecord.cpp">
@@ -312,6 +324,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MutationRecord\CharacterDataMutationRecord.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Tree\TreeMutationAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -457,6 +472,66 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\MutationObserver\MutationObserver.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\XSLT\XSLTProcessor.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\XPath\XPathResult.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\XPath\XPathExpression.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\XPath\XPathEvaluatorBase.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\XPath\XPathEvaluator.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Iterator\TreeWalker.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Iterator\NodeIterator.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Iterator\NodeFilter.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Sets\DOMTokenList.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\NodeList\NodeList.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\NodeList\HTMLCollection.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Document\CustomElementRegistry.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Mixin\Slottable.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Mixin\ParentNode.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Mixin\NonElementParentNode.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Mixin\NonDocumentTypeChildNode.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Mixin\DocumentOrShadowRoot.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Mixin\ChildNode.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Abort\AbortSignal.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Abort\AbortController.idl">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Node/NodeList.hpp"
+#include "Krystal.HTML/NodeList/NodeList.hpp"
 
 namespace Krys::HTML
 {
