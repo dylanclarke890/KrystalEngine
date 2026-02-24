@@ -34,6 +34,15 @@ namespace Krys::HTML
     }
 
     KRYS_NODISCARD DOMString NodeName() const noexcept override;
+
+#pragma region ChildNode Mixin - https://dom.spec.whatwg.org/#childnode
+
+    ExceptionOr<void> Before(SmallList<NodeOrString> &&nodes) noexcept;
+    ExceptionOr<void> After(SmallList<NodeOrString> &&nodes) noexcept;
+    ExceptionOr<void> ReplaceWith(SmallList<NodeOrString> &&nodes) noexcept;
+    ExceptionOr<void> Remove() noexcept;
+
+#pragma endregion
   };
 }
 

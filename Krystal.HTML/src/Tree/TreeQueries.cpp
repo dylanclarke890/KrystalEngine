@@ -98,4 +98,12 @@ namespace Krys::HTML
 
     return false;
   }
+
+  void TreeQueries::CollectChildNodes(const ContainerNode &parent, SmallNodeList &collection) noexcept
+  {
+    for (auto child = ShareRefPtr(parent.FirstChild()); child; child = ShareRefPtr(child->NextSibling()))
+    {
+      collection.emplace_back(ShareRef(*child));
+    }
+  }
 }

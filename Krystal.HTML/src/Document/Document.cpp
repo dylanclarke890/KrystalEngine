@@ -37,9 +37,12 @@ namespace Krys::HTML
     }
     else
     {
-      if (auto result = node.Remove(); result.HasException())
+      if (auto oldParent = ShareRefPtr(node.ParentNode()))
       {
-        return result.ReleaseException();
+        if (auto result = oldParent->RemoveChild(node); result.HasException())
+        {
+          return {result.ReleaseException()};
+        }
       }
 
       assert(!node.IsConnected());
@@ -54,5 +57,11 @@ namespace Krys::HTML
   DOMString Document::NodeName() const noexcept
   {
     return u8"#document";
+  }
+
+  RefPtr<Element> Document::GetElementById(const DOMStringAtom &id) const noexcept
+  {
+    // TODO(IMPL): looking for an element with a matching id (obviously)
+    return RefPtr<Element>();
   }
 }

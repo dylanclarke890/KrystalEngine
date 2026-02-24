@@ -5,13 +5,9 @@
 
 namespace Krys::HTML
 {
-  StaticNodeList::StaticNodeList(List<Ref<Node>> &&nodes) noexcept : _nodes(Krys::Move(nodes))
+  StaticNodeList::StaticNodeList(List<Ref<Node>> &&nodes) noexcept
+      : NodeList(NodeListType::Static, NodeListFlag::ContainsOnlyElements), _nodes(Krys::Move(nodes))
   {
-  }
-
-  size_t StaticNodeList::Length() const noexcept
-  {
-    return _nodes.size();
   }
 
   RawPtr<Node> StaticNodeList::Item(size_t index) const noexcept
@@ -24,14 +20,14 @@ namespace Krys::HTML
     return nullptr;
   }
 
-  StaticElementList::StaticElementList(List<Ref<Element>> &&elements) noexcept
-      : _elements(Krys::Move(elements))
+  size_t StaticNodeList::Length() const noexcept
   {
+    return _nodes.size();
   }
 
-  size_t StaticElementList::Length() const noexcept
+  StaticElementList::StaticElementList(List<Ref<Element>> &&elements) noexcept
+      : NodeList(NodeListType::Static, NodeListFlag::ContainsOnlyElements), _elements(Krys::Move(elements))
   {
-    return _elements.size();
   }
 
   RawPtr<Element> StaticElementList::Item(size_t index) const noexcept
@@ -42,5 +38,10 @@ namespace Krys::HTML
     }
 
     return nullptr;
+  }
+
+  size_t StaticElementList::Length() const noexcept
+  {
+    return _elements.size();
   }
 }

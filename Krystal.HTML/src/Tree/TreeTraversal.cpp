@@ -1,5 +1,6 @@
 ﻿#include "Krystal.HTML/Tree/TreeTraversal.hpp"
 #include "Krystal.HTML/Document/Document.hpp"
+#include "Krystal.HTML/Element/Element.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
@@ -94,6 +95,19 @@ namespace Krys::HTML
   RawPtr<Node> TreeTraversal::Next(const ContainerNode &current, RawPtr<const Node> stayWithin) noexcept
   {
     return GetNext(current, stayWithin);
+  }
+
+  RawPtr<Element> TreeTraversal::NextElementSibling(const Node &current) noexcept
+  {
+    for (RawPtr<Node> next = current.NextSibling(); next; next = next->NextSibling())
+    {
+      if (RawPtr<Element> element = DynamicDowncast<Element>(*next))
+      {
+        return element;
+      }
+    }
+
+    return nullptr;
   }
 
   RawPtr<Node> TreeTraversal::Next(const Text &current, RawPtr<const Node> stayWithin) noexcept
@@ -197,6 +211,19 @@ namespace Krys::HTML
       return nullptr;
     }
     return current.ParentNode();
+  }
+
+  RawPtr<Element> TreeTraversal::PreviousElementSibling(const Node &current) noexcept
+  {
+    for (RawPtr<Node> prev = current.PreviousSibling(); prev; prev = prev->PreviousSibling())
+    {
+      if (RawPtr<Element> element = DynamicDowncast<Element>(*prev))
+      {
+        return element;
+      }
+    }
+
+    return nullptr;
   }
 
   RawPtr<Node> TreeTraversal::PreviousSkippingChildren(const Node &current) noexcept

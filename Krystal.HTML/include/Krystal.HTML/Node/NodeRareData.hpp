@@ -1,16 +1,22 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Node/ChildNodeList.hpp"
+#include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Pointers/WeakPtr.hpp"
-#include "Krystal.Lib/Pointers/UniquePtr.hpp"
-#include "Krystal.Lib/Types/Lazy.hpp"
 
 namespace Krys::HTML
 {
   class Node;
+  class EmptyNodeList;
+  class ChildNodeList;
+  class NodeList;
 
-  struct NodeRareData
+  class NodeRareData
   {
-    LazyValue<ChildNodeList> ChildNodes {};
+  private:
+    WeakPtr<ChildNodeList> _childNodeList;
+
+  public:
+    KRYS_NODISCARD Ref<NodeList> ChildNodes(Node &node) noexcept;
+    void InvalidateChildNodes() noexcept;
   };
 }

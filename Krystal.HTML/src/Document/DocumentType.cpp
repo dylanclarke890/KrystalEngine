@@ -1,5 +1,6 @@
 ﻿#include "Krystal.HTML/Document/DocumentType.hpp"
 #include "Krystal.HTML/Document/Document.hpp"
+#include "Krystal.HTML/Tree/TreeMutationAlgorithms.hpp"
 
 namespace Krys::HTML
 {
@@ -14,4 +15,33 @@ namespace Krys::HTML
   {
     return _name;
   }
+
+#pragma region ChildNode
+
+  ExceptionOr<void> DocumentType::Before(SmallList<NodeOrString> &&nodes) noexcept
+  {
+    return ExceptionOr<void>();
+  }
+
+  ExceptionOr<void> DocumentType::After(SmallList<NodeOrString> &&nodes) noexcept
+  {
+    return ExceptionOr<void>();
+  }
+
+  ExceptionOr<void> DocumentType::ReplaceWith(SmallList<NodeOrString> &&nodes) noexcept
+  {
+    return ExceptionOr<void>();
+  }
+
+  ExceptionOr<void> DocumentType::Remove() noexcept
+  {
+    if (auto parent = ShareRefPtr(ParentNode()))
+    {
+      return TreeMutationAlgorithms::Remove(*this, *parent, SuppressObservers(false));
+    }
+
+    return {};
+  }
+
+#pragma endregion
 }

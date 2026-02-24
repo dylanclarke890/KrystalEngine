@@ -41,13 +41,13 @@ namespace Krys
     constexpr CompactRefPtrTuple(const CompactRefPtrTuple &other) noexcept
     {
       SetPtr(other.Ptr());
-      SetData(other.data());
+      SetData(other.Data());
     }
 
     constexpr CompactRefPtrTuple(CompactRefPtrTuple &&other) noexcept
     {
       _data.SetPtr(other.Ptr());
-      _data.SetData(other.data());
+      _data.SetData(other.Data());
       other._data.SetPtr(nullptr);
       other._data.SetData({});
     }

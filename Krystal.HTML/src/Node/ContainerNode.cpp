@@ -11,6 +11,8 @@ namespace Krys::HTML
   {
   }
 
+#pragma region Node
+
   ExceptionOr<void> ContainerNode::InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept
   {
     if (auto result = TreeMutationAlgorithms::PreInsert(newChild, *this, refChild.get());
@@ -60,5 +62,15 @@ namespace Krys::HTML
     }
 
     return TreeMutationAlgorithms::Insert(newChild, *this, nullptr, SuppressObservers(false));
+  }
+
+#pragma endregion
+
+  void ContainerNode::OnChildrenChanged() noexcept
+  {
+    if (_nodeRareData)
+    {
+      _nodeRareData->InvalidateChildNodes();
+    }
   }
 }

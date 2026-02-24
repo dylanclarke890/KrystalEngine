@@ -12,24 +12,26 @@ namespace Krys::HTML
   class ContainerNode : public Node
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ContainerNode);
-    
+
     friend class TreeMutationAlgorithms;
 
   private:
-    RawPtr<Node> _firstChild;
-    RawPtr<Node> _lastChild;
+    CheckedPtr<Node> _firstChild;
+    CheckedPtr<Node> _lastChild;
 
   protected:
     ContainerNode(Document &document, NodeType type, NodeFlag flags) noexcept;
 
   public:
+#pragma region Node
+
     KRYS_NODISCARD RawPtr<Node> FirstChild() const noexcept
     {
-      return _firstChild;
+      return _firstChild.get();
     }
     KRYS_NODISCARD RawPtr<Node> LastChild() const noexcept
     {
-      return _lastChild;
+      return _lastChild.get();
     }
 
     KRYS_NODISCARD ExceptionOr<void> InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept;
@@ -37,15 +39,19 @@ namespace Krys::HTML
     KRYS_NODISCARD ExceptionOr<void> RemoveChild(Node &child) noexcept;
     KRYS_NODISCARD ExceptionOr<void> AppendChild(Node &newChild) noexcept;
 
+#pragma endregion
+
   protected:
-    void SetFirstChild(RawPtr<Node> node) noexcept
+    virtual void OnChildrenChanged() noexcept;
+
+    void SetFirstChild(RawPtr<Node> child) noexcept
     {
-      _firstChild = node;
+      _firstChild = ShareCheckedPtr(child);
     }
 
-    void SetLastChild(RawPtr<Node> node) noexcept
+    void SetLastChild(RawPtr<Node> child) noexcept
     {
-      _lastChild = node;
+      _lastChild = ShareCheckedPtr(child);
     }
   };
 }

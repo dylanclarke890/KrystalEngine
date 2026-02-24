@@ -4,9 +4,9 @@
 #include "Krystal.HTML/Element/Element.hpp"
 #include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
-#include "Krystal.HTML/Tree/TreeTraversal.hpp"
-#include "Krystal.HTML/Tree/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/NodeList/NodeList.hpp"
+#include "Krystal.HTML/Tree/TreeMutationDispatcher.hpp"
+#include "Krystal.HTML/Tree/TreeTraversal.hpp"
 
 namespace Krys::HTML
 {
@@ -18,44 +18,11 @@ namespace Krys::HTML
     _flags = flags;
   }
 
+#pragma region Node
+
   Node &Node::GetRootNode(const GetRootNodeOptions &options) noexcept
   {
     return options.Composed ? ShadowIncludingRoot() : Root();
-  }
-
-  Node &Node::Root() noexcept
-  {
-    if (IsInTreeScope())
-    {
-      auto &root = GetTreeScope().RootNode();
-      return root;
-    }
-
-    return TreeTraversal::Root(*this);
-  }
-
-  const Node &Node::Root() const noexcept
-  {
-    if (IsInTreeScope())
-    {
-      auto &root = GetTreeScope().RootNode();
-      return root;
-    }
-
-    return TreeTraversal::Root(*this);
-  }
-
-  /// @see https://dom.spec.whatwg.org/#concept-shadow-including-root
-  Node &Node::ShadowIncludingRoot() noexcept
-  {
-    auto &root = this->Root();
-    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(root))
-    {
-      auto *host = shadowRoot->Host();
-      return host ? host->ShadowIncludingRoot() : root;
-    }
-
-    return root;
   }
 
   RawPtr<ContainerNode> Node::ParentNode() const noexcept
@@ -78,9 +45,14 @@ namespace Krys::HTML
     return FirstChild() != nullptr;
   }
 
-  RefPtr<NodeList> Node::ChildNodes() noexcept
+  Ref<NodeList> Node::ChildNodes() noexcept
   {
-    return nullptr;
+    if (!_nodeRareData)
+    {
+      _nodeRareData = CreateUnique<NodeRareData>();
+    }
+
+    return _nodeRareData->ChildNodes(*this);
   }
 
   RawPtr<Node> Node::FirstChild() const noexcept
@@ -103,15 +75,72 @@ namespace Krys::HTML
     return nullptr;
   }
 
-  DOMString Node::NodeValue() const noexcept
+  DOMString Node::TextContent(bool convertBRsToNewlines) const noexcept
   {
+    // TODO(IMPL)
+    (void)convertBRsToNewlines;
     return {};
   }
 
-  ExceptionOr<void> Node::SetNodeValue(DOMStringView) noexcept
+  ExceptionOr<void> Node::SetTextContent(DOMString &&text) noexcept
   {
+    (void)text;
+    // TODO(IMPL)
     return {};
   }
+
+  ExceptionOr<void> Node::Normalize() noexcept
+  {
+    // TODO(IMPL)
+    return {};
+  }
+
+  Ref<Node> Node::CloneNode(bool deep) const noexcept
+  {
+    (void)deep;
+    // TODO(IMPL)
+    return ShareRef<Node>(*const_cast<Node *>(this));
+  }
+
+  bool Node::IsEqualNode(RawPtr<const Node> otherNode) const noexcept
+  {
+    (void)otherNode;
+    // TODO(IMPL)
+    return false;
+  }
+
+  bool Node::IsSameNode(RawPtr<const Node> otherNode) const noexcept
+  {
+    (void)otherNode;
+    // TODO(IMPL)
+    return false;
+  }
+
+  DocumentPosition Node::CompareDocumentPosition(Node &other) const noexcept
+  {
+    (void)other;
+    // TODO(IMPL)
+    return DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC;
+  }
+
+  bool Node::Contains(RawPtr<const Node> other) const noexcept
+  {
+    (void)other;
+    // TODO(IMPL)
+    return false;
+  }
+
+  // const StringAtom &Node::LookupPrefix(const StringAtom &namespaceURI) const noexcept
+  //{
+  // }
+
+  // const StringAtom &Node::LookupNamespaceURI(const StringAtom &prefix) const noexcept
+  //{
+  // }
+
+  // bool Node::IsDefaultNamespace(const StringAtom &namespaceURI) const noexcept
+  //{
+  // }
 
   ExceptionOr<void> Node::InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept
   {
@@ -153,6 +182,43 @@ namespace Krys::HTML
     return Exception {ExceptionCode::HierarchyRequestError};
   }
 
+#pragma endregion
+
+  Node &Node::Root() noexcept
+  {
+    if (IsInTreeScope())
+    {
+      auto &root = GetTreeScope().RootNode();
+      return root;
+    }
+
+    return TreeTraversal::Root(*this);
+  }
+
+  const Node &Node::Root() const noexcept
+  {
+    if (IsInTreeScope())
+    {
+      auto &root = GetTreeScope().RootNode();
+      return root;
+    }
+
+    return TreeTraversal::Root(*this);
+  }
+
+  /// @see https://dom.spec.whatwg.org/#concept-shadow-including-root
+  Node &Node::ShadowIncludingRoot() noexcept
+  {
+    auto &root = this->Root();
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(root))
+    {
+      auto *host = shadowRoot->Host();
+      return host ? host->ShadowIncludingRoot() : root;
+    }
+
+    return root;
+  }
+
   /// @see https://dom.spec.whatwg.org/#concept-node-length
   size_t Node::Length() const noexcept
   {
@@ -172,6 +238,16 @@ namespace Krys::HTML
     }
 
     return 0;
+  }
+
+  void Node::SetTreeScopeRecursively(TreeScope &newTreeScope) noexcept
+  {
+    assert(!IsDocumentNode());
+    if (_treeScope != &newTreeScope)
+    {
+      // Ref<TreeScope> oldTreeScope = CreateRef<TreeScope>(*_treeScope);
+      //  MoveTreeToNewScope(*this, oldTreeScope, newTreeScope);
+    }
   }
 
   void Node::InsertedIntoAncestor(const NodeInsertedContext &context) noexcept
@@ -198,68 +274,5 @@ namespace Krys::HTML
     {
       ClearEventTargetFlag(EventTargetFlag::IsInShadowTree);
     }
-  }
-
-  void Node::SetTreeScopeRecursively(TreeScope &newTreeScope) noexcept
-  {
-    assert(!IsDocumentNode());
-    if (_treeScope != &newTreeScope)
-    {
-      // Ref<TreeScope> oldTreeScope = CreateRef<TreeScope>(*_treeScope);
-      //  MoveTreeToNewScope(*this, oldTreeScope, newTreeScope);
-    }
-  }
-
-  /// @see https://dom.spec.whatwg.org/#dom-childnode-before
-  ExceptionOr<void> Node::Before(SmallList<NodeOrString> &&nodes) noexcept
-  {
-    RefPtr<Node> parent = ShareRefPtr(ParentNode());
-    if (!parent)
-    {
-      return {};
-    }
-
-    // TODO(IMPL): Implement Before algorithm.
-
-    return {};
-  }
-
-  /// @see https://dom.spec.whatwg.org/#dom-childnode-after
-  ExceptionOr<void> Node::After(SmallList<NodeOrString> &&nodes) noexcept
-  {
-    RefPtr<Node> parent = ShareRefPtr(ParentNode());
-    if (!parent)
-    {
-      return {};
-    }
-
-    // TODO(IMPL): Implement After algorithm.
-
-    return {};
-  }
-
-  /// @see https://dom.spec.whatwg.org/#dom-childnode-replacewith
-  ExceptionOr<void> Node::ReplaceWith(SmallList<NodeOrString> &&nodes) noexcept
-  {
-    RefPtr<Node> parent = ShareRefPtr(ParentNode());
-    if (!parent)
-    {
-      return {};
-    }
-
-    // TODO(IMPL): Implement ReplaceWith algorithm.
-
-    return {};
-  }
-
-  /// @see https://dom.spec.whatwg.org/#dom-childnode-remove
-  ExceptionOr<void> Node::Remove() noexcept
-  {
-    if (RefPtr<Node> parent = ShareRefPtr(ParentNode()))
-    {
-      return parent->RemoveChild(*this);
-    }
-
-    return {};
   }
 }

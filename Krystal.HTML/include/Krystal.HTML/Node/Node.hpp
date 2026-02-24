@@ -2,7 +2,9 @@
 
 #include "Krystal.HTML/DOMString.hpp"
 #include "Krystal.HTML/Events/EventTarget.hpp"
+#include "Krystal.HTML/Node/NodeRareData.hpp"
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
+#include "Krystal.HTML/Utils/SmallNodeList.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
@@ -10,6 +12,7 @@
 #include "Krystal.Lib/Pointers/CheckedPtr.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
+#include "Krystal.Lib/Pointers/UniquePtr.hpp"
 #include "Krystal.Lib/String/StringAtom.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Variant.hpp"
@@ -87,8 +90,7 @@ namespace Krys::HTML
   };
 
   class Node;
-  using NodeSmallList = SmallList<Ref<Node>, 11>; // Covers 99.5%. See webkit.org/b/80706
-  using NodeOrString = Variant<RefPtr<Node>, utf8_string>;
+  using NodeOrString = Variant<RefPtr<Node>, DOMString>;
 
   class Node : public EventTarget, public CanMakeCheckedPtr<Node>
   {
@@ -107,6 +109,7 @@ namespace Krys::HTML
     CheckedPtr<Node> _previousSibling;
     CheckedPtr<Node> _nextSibling;
     RawPtr<TreeScope> _treeScope;
+    UniquePtr<NodeRareData> _nodeRareData;
 
   protected:
     Node(Document &document, NodeType type, NodeFlag flags) noexcept;
@@ -114,12 +117,14 @@ namespace Krys::HTML
   public:
     virtual ~Node() noexcept = default;
 
-    KRYS_NODISCARD virtual utf8_string NodeName() const noexcept = 0;
+#pragma region Node - https://dom.spec.whatwg.org/#node
 
     KRYS_NODISCARD NodeType GetNodeType() const noexcept
     {
       return _nodeType;
     }
+
+    KRYS_NODISCARD virtual utf8_string NodeName() const noexcept = 0;
 
     KRYS_NODISCARD URL BaseURI() const noexcept
     {
@@ -136,15 +141,12 @@ namespace Krys::HTML
     {
       return _ownerDocument.get();
     }
-    KRYS_NODISCARD Node &GetRootNode(const GetRootNodeOptions &options) noexcept;
-    KRYS_NODISCARD Node &Root() noexcept;
-    KRYS_NODISCARD const Node &Root() const noexcept;
-    KRYS_NODISCARD Node &ShadowIncludingRoot() noexcept;
 
+    KRYS_NODISCARD Node &GetRootNode(const GetRootNodeOptions &options) noexcept;
     KRYS_NODISCARD RawPtr<ContainerNode> ParentNode() const noexcept;
     KRYS_NODISCARD RawPtr<Element> ParentElement() const noexcept;
     KRYS_NODISCARD bool HasChildNodes() const noexcept;
-    KRYS_NODISCARD RefPtr<NodeList> ChildNodes() noexcept;
+    KRYS_NODISCARD Ref<NodeList> ChildNodes() noexcept;
     KRYS_NODISCARD RawPtr<Node> FirstChild() const noexcept;
     KRYS_NODISCARD RawPtr<Node> LastChild() const noexcept;
     KRYS_NODISCARD RawPtr<Node> PreviousSibling() const noexcept
@@ -156,11 +158,18 @@ namespace Krys::HTML
       return _nextSibling.get();
     }
 
-    KRYS_NODISCARD virtual DOMString NodeValue() const noexcept;
-    KRYS_NODISCARD virtual ExceptionOr<void> SetNodeValue(DOMStringView value) noexcept;
+    KRYS_NODISCARD virtual DOMString NodeValue() const noexcept
+    {
+      return {};
+    }
+    virtual ExceptionOr<void> SetNodeValue(DOMStringView value) noexcept
+    {
+      (void)value; // still want it in the signature
+      return {};
+    }
     KRYS_NODISCARD DOMString TextContent(bool convertBRsToNewlines = false) const noexcept;
-    KRYS_NODISCARD ExceptionOr<void> SetTextContent(DOMString &&text) noexcept;
-    KRYS_NODISCARD ExceptionOr<void> Normalize() noexcept;
+    ExceptionOr<void> SetTextContent(DOMString &&text) noexcept;
+    ExceptionOr<void> Normalize() noexcept;
 
     KRYS_NODISCARD Ref<Node> CloneNode(bool deep) const noexcept;
     KRYS_NODISCARD bool IsEqualNode(RawPtr<const Node> otherNode) const noexcept;
@@ -178,15 +187,27 @@ namespace Krys::HTML
     ExceptionOr<void> RemoveChild(Node &child) noexcept;
     ExceptionOr<void> AppendChild(Node &newChild) noexcept;
 
-    KRYS_NODISCARD size_t Length() const noexcept;
-    KRYS_NODISCARD size_t CountChildNodes() const noexcept;
+#pragma endregion
 
-    /// ChildNode Mixin
-    /// @see https://dom.spec.whatwg.org/#childnode
-    ExceptionOr<void> Before(SmallList<NodeOrString> &&nodes) noexcept;
-    ExceptionOr<void> After(SmallList<NodeOrString> &&nodes) noexcept;
-    ExceptionOr<void> ReplaceWith(SmallList<NodeOrString> &&nodes) noexcept;
-    ExceptionOr<void> Remove() noexcept;
+#pragma region Tree Scope
+
+    KRYS_NODISCARD TreeScope &GetTreeScope() const noexcept
+    {
+      assert(_treeScope != nullptr);
+      return *_treeScope;
+    }
+
+    void SetTreeScope(TreeScope &treeScope) noexcept
+    {
+      _treeScope = &treeScope;
+    }
+
+    void SetTreeScopeRecursively(TreeScope &newTreeScope) noexcept;
+
+    KRYS_NODISCARD bool IsInTreeScope() const noexcept
+    {
+      return IsConnected() || IsInShadowTree();
+    }
 
     /// @see https://dom.spec.whatwg.org/#concept-shadow-tree
     KRYS_NODISCARD bool IsInShadowTree() const noexcept
@@ -200,25 +221,7 @@ namespace Krys::HTML
       return IsConnected() && !IsInShadowTree();
     }
 
-    KRYS_NODISCARD bool IsInTreeScope() const noexcept
-    {
-      return IsConnected() || IsInShadowTree();
-    }
-
-    void SetTreeScope(TreeScope &treeScope) noexcept
-    {
-      _treeScope = &treeScope;
-    }
-
-    void SetTreeScopeRecursively(TreeScope &newTreeScope) noexcept;
-
-    KRYS_NODISCARD TreeScope &GetTreeScope() const noexcept
-    {
-      assert(_treeScope != nullptr);
-      return *_treeScope;
-    }
-
-    KRYS_NODISCARD RawPtr<ShadowRoot> GetShadowRoot() const noexcept;
+#pragma endregion
 
 #pragma region Type Checks
 
@@ -279,7 +282,19 @@ namespace Krys::HTML
 
 #pragma endregion
 
+    KRYS_NODISCARD Node &Root() noexcept;
+    KRYS_NODISCARD const Node &Root() const noexcept;
+    KRYS_NODISCARD Node &ShadowIncludingRoot() noexcept;
+    KRYS_NODISCARD RawPtr<ShadowRoot> GetShadowRoot() const noexcept;
+
+    KRYS_NODISCARD size_t Length() const noexcept;
+    KRYS_NODISCARD size_t CountChildNodes() const noexcept;
+
   protected:
+    virtual void InsertedIntoAncestor(const NodeInsertedContext &context) noexcept;
+
+    virtual void RemovedFromAncestor(const NodeRemovedContext &context) noexcept;
+
     void SetParentNode(RawPtr<Node> parent) noexcept
     {
       _parentNode = ShareCheckedPtr(parent);
@@ -295,11 +310,6 @@ namespace Krys::HTML
       _previousSibling = ShareCheckedPtr(sibling);
     }
 
-    KRYS_NODISCARD bool HasNodeFlag(NodeFlag flag) const noexcept
-    {
-      return HasFlag(_flags, flag);
-    }
-
     void SetNodeFlag(NodeFlag flag) noexcept
     {
       _flags = _flags | flag;
@@ -310,9 +320,10 @@ namespace Krys::HTML
       _flags = _flags & ~flag;
     }
 
-    virtual void InsertedIntoAncestor(const NodeInsertedContext &context) noexcept;
-
-    virtual void RemovedFromAncestor(const NodeRemovedContext &context) noexcept;
+    KRYS_NODISCARD bool HasNodeFlag(NodeFlag flag) const noexcept
+    {
+      return HasFlag(_flags, flag);
+    }
   };
 }
 
@@ -321,4 +332,4 @@ KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::Node)
   {
     return target.IsNode();
   }
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

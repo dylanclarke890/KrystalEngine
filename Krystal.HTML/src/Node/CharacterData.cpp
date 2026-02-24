@@ -1,5 +1,7 @@
 ﻿#include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Document/Document.hpp"
+#include "Krystal.HTML/Tree/TreeMutationAlgorithms.hpp"
+#include "Krystal.HTML/Tree/TreeTraversal.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
 
 namespace Krys::HTML
@@ -54,7 +56,51 @@ namespace Krys::HTML
 
   ExceptionOr<void> CharacterData::SetNodeValue(DOMStringView value) noexcept
   {
-    // TODO (IMPL): 
+    // TODO (IMPL):
     return {};
   }
+
+#pragma region ChildNode
+
+  ExceptionOr<void> CharacterData::Before(SmallList<NodeOrString> &&nodes) noexcept
+  {
+    return ExceptionOr<void>();
+  }
+
+  ExceptionOr<void> CharacterData::After(SmallList<NodeOrString> &&nodes) noexcept
+  {
+    return ExceptionOr<void>();
+  }
+
+  ExceptionOr<void> CharacterData::ReplaceWith(SmallList<NodeOrString> &&nodes) noexcept
+  {
+    return ExceptionOr<void>();
+  }
+
+  ExceptionOr<void> CharacterData::Remove() noexcept
+  {
+    if (auto parent = ShareRefPtr(ParentNode()))
+    {
+      return TreeMutationAlgorithms::Remove(*this, *parent, SuppressObservers(false));
+    }
+
+    return {};
+  }
+
+#pragma endregion
+
+#pragma region NonDocumentTypeChildNode
+
+  RawPtr<Element> CharacterData::PreviousElementSibling() const noexcept
+  {
+    return TreeTraversal::PreviousElementSibling(*this);
+  }
+
+  RawPtr<Element> CharacterData::NextElementSibling() const noexcept
+  {
+    return TreeTraversal::NextElementSibling(*this);
+  }
+
+#pragma endregion
+
 }

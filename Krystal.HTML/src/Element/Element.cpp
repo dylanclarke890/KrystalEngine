@@ -1,4 +1,6 @@
 ﻿#include "Krystal.HTML/Element/Element.hpp"
+#include "Krystal.HTML/Tree/TreeMutationAlgorithms.hpp"
+#include "Krystal.HTML/Tree/TreeTraversal.hpp"
 
 namespace Krys::HTML
 {
@@ -18,4 +20,47 @@ namespace Krys::HTML
     // TODO(IMPL): Implement this method
     return {};
   }
+
+#pragma region ChildNode
+
+  ExceptionOr<void> Element::Before(SmallList<NodeOrString> &&nodes) noexcept
+  {
+    return ExceptionOr<void>();
+  }
+
+  ExceptionOr<void> Element::After(SmallList<NodeOrString> &&nodes) noexcept
+  {
+    return ExceptionOr<void>();
+  }
+
+  ExceptionOr<void> Element::ReplaceWith(SmallList<NodeOrString> &&nodes) noexcept
+  {
+    return ExceptionOr<void>();
+  }
+
+  ExceptionOr<void> Element::Remove() noexcept
+  {
+    if (auto parent = ShareRefPtr(ParentNode()))
+    {
+      return TreeMutationAlgorithms::Remove(*this, *parent, SuppressObservers(false));
+    }
+
+    return {};
+  }
+
+#pragma endregion
+
+#pragma region NonDocumentTypeChildNode
+
+  RawPtr<Element> Element::PreviousElementSibling() const noexcept
+  {
+    return TreeTraversal::PreviousElementSibling(*this);
+  }
+
+  RawPtr<Element> Element::NextElementSibling() const noexcept
+  {
+    return TreeTraversal::NextElementSibling(*this);
+  }
+
+#pragma endregion
 }

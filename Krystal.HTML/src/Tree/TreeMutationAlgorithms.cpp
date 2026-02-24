@@ -137,13 +137,10 @@ namespace Krys::HTML
   ExceptionOr<void> TreeMutationAlgorithms::Insert(Node &node, ContainerNode &parent, RawPtr<Node> refChild,
                                                    SuppressObservers suppressObservers) noexcept
   {
-    NodeSmallList targets;
+    SmallNodeList targets;
     if (node.IsDocumentFragmentNode())
     {
-      for (RawPtr<Node> child = node.FirstChild(); child != nullptr; child = child->NextSibling())
-      {
-        targets.emplace_back(ShareRef(*child));
-      }
+      TreeQueries::CollectChildNodes(static_cast<ContainerNode &>(node), targets);
     }
     else
     {
@@ -185,11 +182,6 @@ namespace Krys::HTML
         return {result.ReleaseException()};
       }
 
-      if (auto result = target->Remove(); result.HasException())
-      {
-        return {result.ReleaseException()};
-      }
-
       target->SetParentNode(&parent);
 
       if (refChild)
@@ -226,6 +218,8 @@ namespace Krys::HTML
         parent.SetLastChild(target.get());
       }
     }
+
+    parent.OnChildrenChanged();
 
     return {};
   }
@@ -272,6 +266,8 @@ namespace Krys::HTML
 
     node.SetParentNode(nullptr);
     node.SetTreeScopeRecursively(*parent.OwnerDocument());
+
+    parent.OnChildrenChanged();
 
     return {};
   }

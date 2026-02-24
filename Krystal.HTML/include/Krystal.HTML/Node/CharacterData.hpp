@@ -15,6 +15,10 @@ namespace Krys::HTML
   private:
     DOMString _data;
 
+  protected:
+    CharacterData(Document &document, DOMString &&data, NodeType type,
+                  NodeFlag flags = NodeFlag::None) noexcept;
+
   public:
     KRYS_NODISCARD const DOMString &Data() const noexcept
     {
@@ -37,8 +41,21 @@ namespace Krys::HTML
     }
     KRYS_NODISCARD ExceptionOr<void> SetNodeValue(DOMStringView value) noexcept final;
 
-  protected:
-    CharacterData(Document &document, DOMString &&data, NodeType type, NodeFlag flags = NodeFlag::None) noexcept;
+#pragma region ChildNode Mixin - https://dom.spec.whatwg.org/#childnode
+
+    ExceptionOr<void> Before(SmallList<NodeOrString> &&nodes) noexcept;
+    ExceptionOr<void> After(SmallList<NodeOrString> &&nodes) noexcept;
+    ExceptionOr<void> ReplaceWith(SmallList<NodeOrString> &&nodes) noexcept;
+    ExceptionOr<void> Remove() noexcept;
+
+#pragma endregion
+
+#pragma region NonDocumentTypeChildNode Mixin - https://dom.spec.whatwg.org/#interface-nondocumenttypechildnode
+
+    KRYS_NODISCARD RawPtr<Element> PreviousElementSibling() const noexcept;
+    KRYS_NODISCARD RawPtr<Element> NextElementSibling() const noexcept;
+
+#pragma endregion
   };
 }
 
