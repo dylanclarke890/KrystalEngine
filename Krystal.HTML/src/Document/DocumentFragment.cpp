@@ -1,6 +1,7 @@
 ﻿#include "Krystal.HTML/Document/DocumentFragment.hpp"
 #include "Krystal.HTML/Document/Document.hpp"
 #include "Krystal.HTML/Element/Element.hpp"
+#include "Krystal.HTML/Tree/TreeQueries.hpp"
 
 namespace Krys::HTML
 {
@@ -12,6 +13,11 @@ namespace Krys::HTML
   utf8_string DocumentFragment::NodeName() const noexcept
   {
     return u8"#document-fragment";
+  }
+
+  DOMString DocumentFragment::TextContent() const noexcept
+  {
+    return TreeQueries::DescendantTextContent(*this);
   }
 
   RefPtr<Element> DocumentFragment::GetElementById(const DOMStringAtom &id) const noexcept

@@ -8,12 +8,14 @@
 namespace Krys::HTML
 {
   class TreeMutationAlgorithms;
+  class TreeMutationDispatcher;
 
   class ContainerNode : public Node
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ContainerNode);
 
     friend class TreeMutationAlgorithms;
+    friend class TreeMutationDispatcher;
 
   private:
     CheckedPtr<Node> _firstChild;

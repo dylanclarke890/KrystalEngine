@@ -54,12 +54,6 @@ namespace Krys::HTML
     return {};
   }
 
-  ExceptionOr<void> CharacterData::SetNodeValue(DOMStringView value) noexcept
-  {
-    // TODO (IMPL):
-    return {};
-  }
-
 #pragma region ChildNode
 
   ExceptionOr<void> CharacterData::Before(SmallList<NodeOrString> &&nodes) noexcept

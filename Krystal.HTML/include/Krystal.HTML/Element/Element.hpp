@@ -3,6 +3,7 @@
 #include "Krystal.HTML/Document/Document.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
+#include "Krystal.Lib/Pointers/RefPtr.hpp"
 
 namespace Krys::HTML
 {
@@ -11,11 +12,29 @@ namespace Krys::HTML
 
   class Element : public ContainerNode
   {
+  private:
+    RefPtr<ShadowRoot> _shadowRoot;
+
   protected:
     Element(Document &document, NodeFlag nodeFlags = NodeFlag::None) noexcept;
 
   public:
+#pragma region Node
+
     KRYS_NODISCARD DOMString NodeName() const noexcept final;
+
+    KRYS_NODISCARD DOMString TextContent() const noexcept final;
+    ExceptionOr<void> SetTextContent(DOMString &&value) noexcept final
+    {
+      return {};
+    }
+
+#pragma endregion
+
+    KRYS_NODISCARD RawPtr<ShadowRoot> GetShadowRoot() const noexcept
+    {
+      return _shadowRoot.get();
+    }
 
     KRYS_NODISCARD ExceptionOr<void> RemoveAttributeNode(Attr &attribute) const noexcept;
 

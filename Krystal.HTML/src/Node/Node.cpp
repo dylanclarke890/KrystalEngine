@@ -25,16 +25,6 @@ namespace Krys::HTML
     return options.Composed ? ShadowIncludingRoot() : Root();
   }
 
-  RawPtr<ContainerNode> Node::ParentNode() const noexcept
-  {
-    if (_parentNode)
-    {
-      return _parentNode.get();
-    }
-
-    return nullptr;
-  }
-
   RawPtr<Element> Node::ParentElement() const noexcept
   {
     return DynamicDowncast<Element>(ParentNode());
@@ -73,20 +63,6 @@ namespace Krys::HTML
     }
 
     return nullptr;
-  }
-
-  DOMString Node::TextContent(bool convertBRsToNewlines) const noexcept
-  {
-    // TODO(IMPL)
-    (void)convertBRsToNewlines;
-    return {};
-  }
-
-  ExceptionOr<void> Node::SetTextContent(DOMString &&text) noexcept
-  {
-    (void)text;
-    // TODO(IMPL)
-    return {};
   }
 
   ExceptionOr<void> Node::Normalize() noexcept

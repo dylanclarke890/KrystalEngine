@@ -15,7 +15,17 @@ namespace Krys::HTML
   public:
     DocumentFragment(Document &document, NodeFlag flags = NodeFlag::None) noexcept;
 
+#pragma region Node
+
     KRYS_NODISCARD DOMString NodeName() const noexcept final;
+
+    KRYS_NODISCARD DOMString TextContent() const noexcept final;
+    ExceptionOr<void> SetTextContent(DOMString &&value) noexcept final
+    {
+      return {};
+    }
+
+#pragma endregion
 
 #pragma region ParentNode Mixin - https://dom.spec.whatwg.org/#parentnode
 

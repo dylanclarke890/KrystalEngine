@@ -103,7 +103,7 @@ namespace Krys::HTML
 
   private:
     NodeFlag _flags : BitCount<NodeFlag>() {NodeFlag::None};
-    NodeType _nodeType : BitCount<NodeType>();
+    NodeType _nodeType : BitCount<NodeType>() {NodeType::NONE};
     RefPtr<Document> _ownerDocument;
     CheckedPtr<ContainerNode> _parentNode;
     CheckedPtr<Node> _previousSibling;
@@ -143,7 +143,10 @@ namespace Krys::HTML
     }
 
     KRYS_NODISCARD Node &GetRootNode(const GetRootNodeOptions &options) noexcept;
-    KRYS_NODISCARD RawPtr<ContainerNode> ParentNode() const noexcept;
+    KRYS_NODISCARD RawPtr<ContainerNode> ParentNode() const noexcept
+    {
+      return _parentNode.get();
+    }
     KRYS_NODISCARD RawPtr<Element> ParentElement() const noexcept;
     KRYS_NODISCARD bool HasChildNodes() const noexcept;
     KRYS_NODISCARD Ref<NodeList> ChildNodes() noexcept;
@@ -162,13 +165,20 @@ namespace Krys::HTML
     {
       return {};
     }
-    virtual ExceptionOr<void> SetNodeValue(DOMStringView value) noexcept
+    virtual ExceptionOr<void> SetNodeValue(DOMString &&value) noexcept
     {
       (void)value; // still want it in the signature
       return {};
     }
-    KRYS_NODISCARD DOMString TextContent(bool convertBRsToNewlines = false) const noexcept;
-    ExceptionOr<void> SetTextContent(DOMString &&text) noexcept;
+    KRYS_NODISCARD virtual DOMString TextContent() const noexcept
+    {
+      return {};
+    }
+    virtual ExceptionOr<void> SetTextContent(DOMString &&value) noexcept
+    {
+      (void)value; // still want it in the signature
+      return {};
+    }
     ExceptionOr<void> Normalize() noexcept;
 
     KRYS_NODISCARD Ref<Node> CloneNode(bool deep) const noexcept;
@@ -285,7 +295,6 @@ namespace Krys::HTML
     KRYS_NODISCARD Node &Root() noexcept;
     KRYS_NODISCARD const Node &Root() const noexcept;
     KRYS_NODISCARD Node &ShadowIncludingRoot() noexcept;
-    KRYS_NODISCARD RawPtr<ShadowRoot> GetShadowRoot() const noexcept;
 
     KRYS_NODISCARD size_t Length() const noexcept;
     KRYS_NODISCARD size_t CountChildNodes() const noexcept;
@@ -295,7 +304,7 @@ namespace Krys::HTML
 
     virtual void RemovedFromAncestor(const NodeRemovedContext &context) noexcept;
 
-    void SetParentNode(RawPtr<Node> parent) noexcept
+    void SetParentNode(RawPtr<ContainerNode> parent) noexcept
     {
       _parentNode = ShareCheckedPtr(parent);
     }

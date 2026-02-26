@@ -1,7 +1,10 @@
 ﻿#include "Krystal.HTML/Tree/TreeQueries.hpp"
 #include "Krystal.HTML/Document/Document.hpp"
+#include "Krystal.HTML/Document/ShadowRoot.hpp"
+#include "Krystal.HTML/Element/Element.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
+#include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/Tree/TreeTraversal.hpp"
 
 namespace Krys::HTML
@@ -99,11 +102,37 @@ namespace Krys::HTML
     return false;
   }
 
+  RawPtr<ShadowRoot> TreeQueries::GetShadowRoot(const Node &node) noexcept
+  {
+    if (auto *element = DynamicDowncast<Element>(node))
+    {
+      return element->GetShadowRoot();
+    }
+
+    return nullptr;
+  }
+
   void TreeQueries::CollectChildNodes(const ContainerNode &parent, SmallNodeList &collection) noexcept
   {
     for (auto child = ShareRefPtr(parent.FirstChild()); child; child = ShareRefPtr(child->NextSibling()))
     {
       collection.emplace_back(ShareRef(*child));
     }
+  }
+
+  DOMString TreeQueries::DescendantTextContent(const ContainerNode &node) noexcept
+  {
+    DOMString content;
+
+    for (auto *descendant = node.FirstChild(); descendant;
+         descendant = TreeTraversal::Next(*descendant, &node))
+    {
+      if (auto *textNode = DynamicDowncast<Text>(descendant))
+      {
+        content += textNode->TextContent();
+      }
+    }
+
+    return content;
   }
 }

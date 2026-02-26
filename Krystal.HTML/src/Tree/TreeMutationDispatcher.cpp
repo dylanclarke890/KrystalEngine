@@ -3,66 +3,69 @@
 #include "Krystal.HTML/Document/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
+#include "Krystal.HTML/Tree/TreeQueries.hpp"
 #include "Krystal.HTML/Tree/TreeTraversal.hpp"
 #include <cassert>
 
 namespace Krys::HTML
 {
-  void TreeMutationDispatcher::DoNotifyNodeInserted(Node &node, const NodeInsertedContext &context) noexcept
+  void TreeMutationDispatcher::DispatchNodeInserted(Node &node, const NodeInsertedContext &context) noexcept
   {
-    for (RawPtr<Node> currentNode = &node; currentNode != nullptr;
-         currentNode = TreeTraversal::Next(*currentNode, &node))
+    for (auto *currentNode = &node; currentNode; currentNode = TreeTraversal::Next(*currentNode, &node))
     {
       currentNode->InsertedIntoAncestor(context);
-      if (RawPtr<ShadowRoot> root = currentNode->GetShadowRoot())
+      if (RawPtr<ShadowRoot> root = TreeQueries::GetShadowRoot(*currentNode))
       {
         NodeInsertedContext ctx = {
           .InsertedInto = context.InsertedInto,
           .ConnectedToDocument = context.ConnectedToDocument,
           .TreeScopeChanged = false, // The tree scope of a shadow root doesn't change on node insertion
         };
-        DoNotifyNodeInserted(*root, ctx);
+        DispatchNodeInserted(*root, ctx);
       }
     }
   }
 
-  void TreeMutationDispatcher::DoNotifyNodeRemoved(Node &node, const NodeRemovedContext &context) noexcept
+  void TreeMutationDispatcher::DispatchNodeRemoved(Node &node, const NodeRemovedContext &context) noexcept
   {
-    for (RawPtr<Node> currentNode = &node; currentNode != nullptr;
-         currentNode = TreeTraversal::Next(*currentNode))
+    for (auto *currentNode = &node; currentNode; currentNode = TreeTraversal::Next(*currentNode))
     {
       currentNode->RemovedFromAncestor(context);
-      if (RawPtr<ShadowRoot> root = currentNode->GetShadowRoot())
+      if (RawPtr<ShadowRoot> root = TreeQueries::GetShadowRoot(*currentNode))
       {
         NodeRemovedContext ctx = {
           .RemovedFrom = context.RemovedFrom,
           .DisconnectedFromDocument = context.DisconnectedFromDocument,
           .TreeScopeChanged = false, // The tree scope of a shadow root doesn't change on node removal
         };
-        DoNotifyNodeRemoved(*root, ctx);
+        DispatchNodeRemoved(*root, ctx);
       }
     }
   }
 
-  void TreeMutationDispatcher::NotifyNodeInserted(Node &node, ContainerNode &insertedInto) noexcept
+  void TreeMutationDispatcher::NodeInserted(Node &node, ContainerNode &insertedInto) noexcept
   {
     assert(!node.IsConnected());
+
+    insertedInto.OnChildrenChanged();
 
     NodeInsertedContext context {
       .InsertedInto = insertedInto,
       .ConnectedToDocument = insertedInto.IsConnected(),
       .TreeScopeChanged = insertedInto.IsInTreeScope(), // TODO(FIX): More precise check
     };
-    DoNotifyNodeInserted(node, context);
+    DispatchNodeInserted(node, context);
   }
 
-  void TreeMutationDispatcher::NotifyNodeRemoved(Node &node, ContainerNode &removedFrom) noexcept
+  void TreeMutationDispatcher::NodeRemoved(Node &node, ContainerNode &removedFrom) noexcept
   {
+    removedFrom.OnChildrenChanged();
+
     NodeRemovedContext context {
       .RemovedFrom = removedFrom,
       .DisconnectedFromDocument = node.IsConnected(),
       .TreeScopeChanged = removedFrom.IsInTreeScope(), // TODO(FIX): More precise check
     };
-    DoNotifyNodeRemoved(node, context);
+    DispatchNodeRemoved(node, context);
   }
 }

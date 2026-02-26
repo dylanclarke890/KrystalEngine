@@ -1,5 +1,7 @@
 ﻿#include "Krystal.HTML/Element/Element.hpp"
+#include "Krystal.HTML/Document/ShadowRoot.hpp"
 #include "Krystal.HTML/Tree/TreeMutationAlgorithms.hpp"
+#include "Krystal.HTML/Tree/TreeQueries.hpp"
 #include "Krystal.HTML/Tree/TreeTraversal.hpp"
 
 namespace Krys::HTML
@@ -13,6 +15,11 @@ namespace Krys::HTML
   {
     // TODO(IMPL): Return the qualified name
     return u8"element";
+  }
+
+  DOMString Element::TextContent() const noexcept
+  {
+    return TreeQueries::DescendantTextContent(*this);
   }
 
   ExceptionOr<void> Element::RemoveAttributeNode(Attr &attribute) const noexcept

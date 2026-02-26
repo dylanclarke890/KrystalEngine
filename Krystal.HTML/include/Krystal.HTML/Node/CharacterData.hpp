@@ -20,6 +20,27 @@ namespace Krys::HTML
                   NodeFlag flags = NodeFlag::None) noexcept;
 
   public:
+#pragma region Node
+
+    KRYS_NODISCARD DOMString NodeValue() const noexcept final
+    {
+      return _data;
+    }
+    ExceptionOr<void> SetNodeValue(DOMString &&value) noexcept final
+    {
+      return ReplaceData(0, value.size(), Krys::Move(value));
+    }
+    KRYS_NODISCARD DOMString TextContent() const noexcept final
+    {
+      return _data;
+    }
+    ExceptionOr<void> SetTextContent(DOMString &&value) noexcept final
+    {
+      return ReplaceData(0, value.size(), Krys::Move(value));
+    }
+
+#pragma endregion
+
     KRYS_NODISCARD const DOMString &Data() const noexcept
     {
       return _data;
@@ -34,12 +55,6 @@ namespace Krys::HTML
     KRYS_NODISCARD ExceptionOr<void> InsertData(size_t offset, const DOMString &data) noexcept;
     KRYS_NODISCARD ExceptionOr<void> DeleteData(size_t offset, size_t count) noexcept;
     KRYS_NODISCARD ExceptionOr<void> ReplaceData(size_t offset, size_t count, const DOMString &data) noexcept;
-
-    KRYS_NODISCARD DOMString NodeValue() const noexcept final
-    {
-      return _data;
-    }
-    KRYS_NODISCARD ExceptionOr<void> SetNodeValue(DOMStringView value) noexcept final;
 
 #pragma region ChildNode Mixin - https://dom.spec.whatwg.org/#childnode
 

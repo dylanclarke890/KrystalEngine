@@ -2,6 +2,7 @@
 #include "Krystal.HTML/Document/Document.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
+#include "Krystal.HTML/Tree/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Tree/TreeQueries.hpp"
 #include "Krystal.HTML/Tree/TreeTraversal.hpp"
 
@@ -217,9 +218,11 @@ namespace Krys::HTML
 
         parent.SetLastChild(target.get());
       }
-    }
 
-    parent.OnChildrenChanged();
+      TreeMutationDispatcher::NodeInserted(*target, parent);
+
+      target->SetTreeScopeRecursively(*parent.OwnerDocument());
+    }
 
     return {};
   }
@@ -240,7 +243,6 @@ namespace Krys::HTML
     if (auto previousSibling = ShareRefPtr(node.PreviousSibling()))
     {
       previousSibling->SetNextSibling(node.NextSibling());
-      node.SetPreviousSibling(nullptr);
     }
     else
     {
@@ -251,7 +253,6 @@ namespace Krys::HTML
     if (auto nextSibling = ShareRefPtr(node.NextSibling()))
     {
       nextSibling->SetPreviousSibling(node.PreviousSibling());
-      node.SetNextSibling(nullptr);
     }
     else
     {
@@ -259,15 +260,16 @@ namespace Krys::HTML
       parent.SetLastChild(node.PreviousSibling());
     }
 
+    node.SetParentNode(nullptr);
+    node.SetPreviousSibling(nullptr);
+    node.SetNextSibling(nullptr);
+
     assert(parent.FirstChild() != &node);
     assert(parent.LastChild() != &node);
     assert(!node.PreviousSibling());
     assert(!node.NextSibling());
 
-    node.SetParentNode(nullptr);
-    node.SetTreeScopeRecursively(*parent.OwnerDocument());
-
-    parent.OnChildrenChanged();
+    TreeMutationDispatcher::NodeRemoved(node, parent);
 
     return {};
   }
