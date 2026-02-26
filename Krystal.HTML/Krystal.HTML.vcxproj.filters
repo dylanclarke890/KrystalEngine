@@ -519,34 +519,34 @@
     <None Include="data\Iterator\NodeFilter.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Sets\DOMTokenList.idl">
+    <None Include="data\Node\DOMTokenList.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\NodeList\NodeList.idl">
+    <None Include="data\Node\NodeList.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\NodeList\HTMLCollection.idl">
+    <None Include="data\Node\HTMLCollection.idl">
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\Document\CustomElementRegistry.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Mixin\Slottable.idl">
+    <None Include="data\Node\Mixin\Slottable.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Mixin\ParentNode.idl">
+    <None Include="data\Node\Mixin\ParentNode.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Mixin\NonElementParentNode.idl">
+    <None Include="data\Node\Mixin\NonElementParentNode.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Mixin\NonDocumentTypeChildNode.idl">
+    <None Include="data\Node\Mixin\NonDocumentTypeChildNode.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Mixin\DocumentOrShadowRoot.idl">
+    <None Include="data\Node\Mixin\DocumentOrShadowRoot.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Mixin\ChildNode.idl">
+    <None Include="data\Node\Mixin\ChildNode.idl">
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\Abort\AbortSignal.idl">

@@ -240,22 +240,22 @@
     <None Include="data\XSLT\XSLTProcessor.idl" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="data\Sets\DOMTokenList.idl" />
+    <None Include="data\Node\DOMTokenList.idl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\Document\CustomElementRegistry.idl" />
-    <None Include="data\NodeList\HTMLCollection.idl" />
-    <None Include="data\NodeList\NodeList.idl" />
+    <None Include="data\Node\HTMLCollection.idl" />
+    <None Include="data\Node\NodeList.idl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\Abort\AbortController.idl" />
     <None Include="data\Abort\AbortSignal.idl" />
-    <None Include="data\Mixin\ChildNode.idl" />
-    <None Include="data\Mixin\DocumentOrShadowRoot.idl" />
-    <None Include="data\Mixin\NonDocumentTypeChildNode.idl" />
-    <None Include="data\Mixin\NonElementParentNode.idl" />
-    <None Include="data\Mixin\ParentNode.idl" />
-    <None Include="data\Mixin\Slottable.idl" />
+    <None Include="data\Node\Mixin\ChildNode.idl" />
+    <None Include="data\Node\Mixin\DocumentOrShadowRoot.idl" />
+    <None Include="data\Node\Mixin\NonDocumentTypeChildNode.idl" />
+    <None Include="data\Node\Mixin\NonElementParentNode.idl" />
+    <None Include="data\Node\Mixin\ParentNode.idl" />
+    <None Include="data\Node\Mixin\Slottable.idl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
