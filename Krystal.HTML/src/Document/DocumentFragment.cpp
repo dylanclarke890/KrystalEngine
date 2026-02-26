@@ -1,6 +1,6 @@
 ﻿#include "Krystal.HTML/Document/DocumentFragment.hpp"
 #include "Krystal.HTML/Document/Document.hpp"
-#include "Krystal.HTML/Element/Element.hpp"
+#include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Tree/TreeQueries.hpp"
 
 namespace Krys::HTML

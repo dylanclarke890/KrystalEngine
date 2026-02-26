@@ -60,7 +60,7 @@
     <ClInclude Include="include\Krystal.HTML\Document\Document.hpp" />
     <ClInclude Include="include\Krystal.HTML\Document\DocumentFragment.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOMHighResTimeStamp.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Element\Element.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\Element.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\AbortSignal.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\AddEventListenerOptions.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\CustomEvent.hpp" />
@@ -129,7 +129,7 @@
     <ClCompile Include="src\Document\ShadowRoot.cpp" />
     <ClCompile Include="src\Document\Document.cpp" />
     <ClCompile Include="src\Document\TreeScope.cpp" />
-    <ClCompile Include="src\Element\Element.cpp" />
+    <ClCompile Include="src\Node\Element.cpp" />
     <ClCompile Include="src\Events\EventDispatcher.cpp" />
     <ClCompile Include="src\Node\Attr.cpp" />
     <ClCompile Include="src\Node\CDATASection.cpp" />
@@ -213,7 +213,7 @@
   <ItemGroup>
     <None Include="data\Document\DOMImplementation.idl" />
     <None Include="data\Document\ShadowRootInit.idl" />
-    <None Include="data\Element\Element.idl" />
+    <None Include="data\Node\Element.idl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\Node\NamedNodeMap.idl" />

@@ -60,7 +60,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\ContainerNode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Element\Element.hpp">
+    <ClInclude Include="include\Krystal.HTML\Node\Element.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLOpenElementStack.hpp">
@@ -296,7 +296,7 @@
     <ClCompile Include="src\Node\Comment.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Element\Element.cpp">
+    <ClCompile Include="src\Node\Element.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\Attr.cpp">
@@ -468,7 +468,7 @@
     <None Include="data\Document\DocumentType.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Element\Element.idl">
+    <None Include="data\Node\Element.idl">
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\Document\DOMImplementation.idl">

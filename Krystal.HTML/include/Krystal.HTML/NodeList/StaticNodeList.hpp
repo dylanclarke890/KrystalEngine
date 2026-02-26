@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Element/Element.hpp"
+#include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/NodeList/NodeList.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"

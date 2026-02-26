@@ -1,7 +1,7 @@
 ﻿#include "Krystal.HTML/Document/ShadowRoot.hpp"
 #include "Krystal.HTML/Document/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Document/Document.hpp"
-#include "Krystal.HTML/Element/Element.hpp"
+#include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 
 namespace Krys::HTML

@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Element/Element.hpp"
+﻿#include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Document/ShadowRoot.hpp"
 #include "Krystal.HTML/Tree/TreeMutationAlgorithms.hpp"
 #include "Krystal.HTML/Tree/TreeQueries.hpp"
