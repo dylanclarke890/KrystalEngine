@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/Node/CharacterData.hpp"
-#include "Krystal.HTML/Document/Document.hpp"
+#include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Tree/TreeMutationAlgorithms.hpp"
 #include "Krystal.HTML/Tree/TreeTraversal.hpp"
 #include "Krystal.Lib/Core/Move.hpp"

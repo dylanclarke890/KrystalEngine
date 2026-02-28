@@ -177,8 +177,9 @@ namespace Krys::detail
       return result;
     }
 
-    template <typename TMember>
-    constexpr TMember &operator->*(TMember T::*memptr) const noexcept
+    template <typename X = T, typename TMember>
+    requires(SameType<X, T>)
+    constexpr TMember &operator->*(TMember X::*memptr) const noexcept
     {
       static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
                     "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");

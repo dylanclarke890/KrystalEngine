@@ -1,8 +1,8 @@
 ﻿#include "Krystal.HTML/Tree/TreeQueries.hpp"
-#include "Krystal.HTML/Document/Document.hpp"
-#include "Krystal.HTML/Document/ShadowRoot.hpp"
-#include "Krystal.HTML/Node/Element.hpp"
+#include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
+#include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/Tree/TreeTraversal.hpp"
@@ -52,6 +52,7 @@ namespace Krys::HTML
       {
         return true;
       }
+
       current = current->ParentNode();
     }
 
@@ -112,11 +113,42 @@ namespace Krys::HTML
     return nullptr;
   }
 
+  size_t TreeQueries::ChildNodeCount(const ContainerNode &node) noexcept
+  {
+    size_t count = 0;
+    for (auto child = ShareRefPtr(node.FirstChild()); child; child = ShareRefPtr(child->NextSibling()))
+    {
+      count++;
+    }
+    return count;
+  }
+
+  KRYS_NODISCARD size_t TreeQueries::ChildElementCount(const ContainerNode &node) noexcept
+  {
+    size_t count = 0;
+    for (auto childElement = ShareRefPtr(TreeTraversal::FirstElementChild(node)); childElement;
+         childElement = ShareRefPtr(TreeTraversal::NextElementSibling(*childElement)))
+    {
+      count++;
+    }
+
+    return count;
+  }
+
   void TreeQueries::CollectChildNodes(const ContainerNode &parent, SmallNodeList &collection) noexcept
   {
     for (auto child = ShareRefPtr(parent.FirstChild()); child; child = ShareRefPtr(child->NextSibling()))
     {
       collection.emplace_back(ShareRef(*child));
+    }
+  }
+
+  void TreeQueries::CollectChildElements(const ContainerNode &parent, SmallElementList &collection) noexcept
+  {
+    for (auto childElement = ShareRefPtr(TreeTraversal::FirstElementChild(parent)); childElement;
+         childElement = ShareRefPtr(TreeTraversal::NextElementSibling(*childElement)))
+    {
+      collection.emplace_back(ShareRef(*childElement));
     }
   }
 
@@ -128,6 +160,20 @@ namespace Krys::HTML
          descendant = TreeTraversal::Next(*descendant, &node))
     {
       if (auto *textNode = DynamicDowncast<Text>(descendant))
+      {
+        content += textNode->TextContent();
+      }
+    }
+
+    return content;
+  }
+
+  DOMString TreeQueries::ChildTextContent(const ContainerNode &node) noexcept
+  {
+    DOMString content;
+    for (auto child = ShareRefPtr(node.FirstChild()); child; child = ShareRefPtr(child->NextSibling()))
+    {
+      if (auto *textNode = DynamicDowncast<Text>(*child))
       {
         content += textNode->TextContent();
       }

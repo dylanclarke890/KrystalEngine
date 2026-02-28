@@ -1,7 +1,7 @@
 ﻿#include "Krystal.HTML/Tree/TreeTraversal.hpp"
-#include "Krystal.HTML/Document/Document.hpp"
-#include "Krystal.HTML/Node/Element.hpp"
+#include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
+#include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include <cassert>
@@ -95,19 +95,6 @@ namespace Krys::HTML
   RawPtr<Node> TreeTraversal::Next(const ContainerNode &current, RawPtr<const Node> stayWithin) noexcept
   {
     return GetNext(current, stayWithin);
-  }
-
-  RawPtr<Element> TreeTraversal::NextElementSibling(const Node &current) noexcept
-  {
-    for (RawPtr<Node> next = current.NextSibling(); next; next = next->NextSibling())
-    {
-      if (RawPtr<Element> element = DynamicDowncast<Element>(*next))
-      {
-        return element;
-      }
-    }
-
-    return nullptr;
   }
 
   RawPtr<Node> TreeTraversal::Next(const Text &current, RawPtr<const Node> stayWithin) noexcept
@@ -211,19 +198,6 @@ namespace Krys::HTML
       return nullptr;
     }
     return current.ParentNode();
-  }
-
-  RawPtr<Element> TreeTraversal::PreviousElementSibling(const Node &current) noexcept
-  {
-    for (RawPtr<Node> prev = current.PreviousSibling(); prev; prev = prev->PreviousSibling())
-    {
-      if (RawPtr<Element> element = DynamicDowncast<Element>(*prev))
-      {
-        return element;
-      }
-    }
-
-    return nullptr;
   }
 
   RawPtr<Node> TreeTraversal::PreviousSkippingChildren(const Node &current) noexcept
@@ -387,6 +361,59 @@ namespace Krys::HTML
         return ancestor->PreviousSibling();
       }
     }
+    return nullptr;
+  }
+
+  RawPtr<Element> TreeTraversal::NextElementSibling(const Node &current) noexcept
+  {
+    for (RawPtr<Node> next = current.NextSibling(); next; next = next->NextSibling())
+    {
+      if (RawPtr<Element> element = DynamicDowncast<Element>(*next))
+      {
+        return element;
+      }
+    }
+
+    return nullptr;
+  }
+
+  RawPtr<Element> TreeTraversal::PreviousElementSibling(const Node &current) noexcept
+  {
+    for (RawPtr<Node> prev = current.PreviousSibling(); prev; prev = prev->PreviousSibling())
+    {
+      if (RawPtr<Element> element = DynamicDowncast<Element>(*prev))
+      {
+        return element;
+      }
+    }
+
+    return nullptr;
+  }
+
+  RawPtr<Element> TreeTraversal::FirstElementChild(const ContainerNode &node) noexcept
+  {
+    for (auto child = ShareRefPtr(node.FirstChild()); child; child = ShareRefPtr(child->NextSibling()))
+    {
+      if (auto *element = DynamicDowncast<Element>(*child))
+      {
+        return element;
+      }
+    }
+
+    return nullptr;
+  }
+
+  RawPtr<Element> TreeTraversal::LastElementChild(const ContainerNode &node) noexcept
+  {
+    RawPtr<Element> lastElement = nullptr;
+    for (auto child = ShareRefPtr(node.LastChild()); child; child = ShareRefPtr(child->PreviousSibling()))
+    {
+      if (auto *element = DynamicDowncast<Element>(*child))
+      {
+        return element;
+      }
+    }
+
     return nullptr;
   }
 }

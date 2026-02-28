@@ -1,7 +1,10 @@
-﻿#include "Krystal.HTML/Document/Document.hpp"
-#include "Krystal.HTML/Document/CustomElementRegistry.hpp"
-#include "Krystal.HTML/Node/Element.hpp"
+﻿#include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
+#include "Krystal.HTML/Node/CustomElementRegistry.hpp"
+#include "Krystal.HTML/Node/Element.hpp"
+#include "Krystal.HTML/NodeList/HTMLCollection.hpp"
+#include "Krystal.HTML/Tree/TreeQueries.hpp"
+#include "Krystal.HTML/Tree/TreeTraversal.hpp"
 #include <cassert>
 
 namespace Krys::HTML
@@ -59,9 +62,37 @@ namespace Krys::HTML
     return u8"#document";
   }
 
+#pragma region ParentNode
+
+  Ref<HTMLCollection> Document::Children() const noexcept
+  {
+    return _documentRareData->Children(*this);
+  }
+
+  KRYS_NODISCARD RawPtr<Element> Document::FirstElementChild() const noexcept
+  {
+    return TreeTraversal::FirstElementChild(*this);
+  }
+
+  KRYS_NODISCARD RawPtr<Element> Document::LastElementChild() const noexcept
+  {
+    return TreeTraversal::LastElementChild(*this);
+  }
+
+  KRYS_NODISCARD size_t Document::ChildElementCount() const noexcept
+  {
+    return TreeQueries::ChildElementCount(*this);
+  }
+
+#pragma endregion
+
+#pragma region NonElementParentNode
+
   RefPtr<Element> Document::GetElementById(const DOMStringAtom &id) const noexcept
   {
     // TODO(IMPL): looking for an element with a matching id (obviously)
     return RefPtr<Element>();
   }
+
+#pragma endregion
 }

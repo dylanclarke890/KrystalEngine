@@ -1,5 +1,7 @@
 ﻿#include "Krystal.HTML/Node/Element.hpp"
-#include "Krystal.HTML/Document/ShadowRoot.hpp"
+#include "Krystal.HTML/Node/ElementRareData.hpp"
+#include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/NodeList/HTMLCollection.hpp"
 #include "Krystal.HTML/Tree/TreeMutationAlgorithms.hpp"
 #include "Krystal.HTML/Tree/TreeQueries.hpp"
 #include "Krystal.HTML/Tree/TreeTraversal.hpp"
@@ -67,6 +69,30 @@ namespace Krys::HTML
   RawPtr<Element> Element::NextElementSibling() const noexcept
   {
     return TreeTraversal::NextElementSibling(*this);
+  }
+
+#pragma endregion
+
+#pragma region ParentNode
+
+  Ref<HTMLCollection> Element::Children() const noexcept
+  {
+    return _elementRareData->Children(*this);
+  }
+
+  KRYS_NODISCARD RawPtr<Element> Element::FirstElementChild() const noexcept
+  {
+    return TreeTraversal::FirstElementChild(*this);
+  }
+
+  KRYS_NODISCARD RawPtr<Element> Element::LastElementChild() const noexcept
+  {
+    return TreeTraversal::LastElementChild(*this);
+  }
+
+  KRYS_NODISCARD size_t Element::ChildElementCount() const noexcept
+  {
+    return TreeQueries::ChildElementCount(*this);
   }
 
 #pragma endregion

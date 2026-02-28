@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Document/DocumentFragment.hpp"
-#include "Krystal.HTML/Document/TreeScope.hpp"
+#include "Krystal.HTML/Node/DocumentFragment.hpp"
+#include "Krystal.HTML/Node/TreeScope.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"

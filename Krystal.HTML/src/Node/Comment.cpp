@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/Node/Comment.hpp"
-#include "Krystal.HTML/Document/Document.hpp"
+#include "Krystal.HTML/Node/Document.hpp"
 
 namespace Krys::HTML
 {

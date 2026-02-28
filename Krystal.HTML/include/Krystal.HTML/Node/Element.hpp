@@ -1,9 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Document/Document.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
+#include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/Node/ElementRareData.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
+#include "Krystal.Lib/Pointers/UniquePtr.hpp"
 
 namespace Krys::HTML
 {
@@ -14,6 +16,7 @@ namespace Krys::HTML
   {
   private:
     RefPtr<ShadowRoot> _shadowRoot;
+    UniquePtr<ElementRareData> _elementRareData;
 
   protected:
     Element(Document &document, NodeFlag nodeFlags = NodeFlag::None) noexcept;

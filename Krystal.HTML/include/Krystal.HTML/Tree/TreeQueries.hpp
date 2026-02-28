@@ -8,6 +8,7 @@
 namespace Krys::HTML
 {
   class ContainerNode;
+  class Element;
   class Node;
   class ShadowRoot;
 
@@ -23,8 +24,13 @@ namespace Krys::HTML
 
     KRYS_NODISCARD static RawPtr<ShadowRoot> GetShadowRoot(const Node &node) noexcept;
 
-    static void CollectChildNodes(const ContainerNode &parent, SmallNodeList &collection) noexcept;
+    KRYS_NODISCARD static size_t ChildNodeCount(const ContainerNode &node) noexcept;
+    KRYS_NODISCARD static size_t ChildElementCount(const ContainerNode &node) noexcept;
 
+    static void CollectChildNodes(const ContainerNode &parent, SmallNodeList &collection) noexcept;
+    static void CollectChildElements(const ContainerNode &parent, SmallElementList &collection) noexcept;
+    
     KRYS_NODISCARD static DOMString DescendantTextContent(const ContainerNode &node) noexcept;
+    KRYS_NODISCARD static DOMString ChildTextContent(const ContainerNode &node) noexcept;
   };
 }

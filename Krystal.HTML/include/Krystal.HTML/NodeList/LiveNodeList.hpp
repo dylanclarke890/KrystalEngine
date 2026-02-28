@@ -9,7 +9,7 @@ namespace Krys::HTML
 {
   class Node;
 
-  class LiveNodeList final : public NodeList, public CanMakeWeakPtr<LiveNodeList>
+  class LiveNodeList final : public NodeList
   {
   private:
     Ref<Node> _owner;

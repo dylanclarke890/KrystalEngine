@@ -1,6 +1,6 @@
 ﻿#include "Krystal.HTML/Tree/TreeMutationDispatcher.hpp"
-#include "Krystal.HTML/Document/Document.hpp"
-#include "Krystal.HTML/Document/ShadowRoot.hpp"
+#include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Tree/TreeQueries.hpp"

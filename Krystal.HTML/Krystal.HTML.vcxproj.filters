@@ -42,7 +42,7 @@
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLDocumentParser.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Document\HTMLDocument.hpp">
+    <ClInclude Include="include\Krystal.HTML\Node\HTMLDocument.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLTokenizer.hpp">
@@ -75,7 +75,7 @@
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLActiveFormattingElementList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Document\Document.hpp">
+    <ClInclude Include="include\Krystal.HTML\Node\Document.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLToken.hpp">
@@ -141,13 +141,13 @@
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionOr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Document\DocumentFragment.hpp">
+    <ClInclude Include="include\Krystal.HTML\Node\DocumentFragment.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\NodeList\NodeList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Document\DocumentType.hpp">
+    <ClInclude Include="include\Krystal.HTML\Node\DocumentType.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\CharacterData.hpp">
@@ -174,7 +174,7 @@
     <ClInclude Include="include\Krystal.HTML\QualifiedName.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Document\ShadowRoot.hpp">
+    <ClInclude Include="include\Krystal.HTML\Node\ShadowRoot.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Events\EventDispatcher.hpp">
@@ -183,10 +183,10 @@
     <ClInclude Include="include\Krystal.HTML\Utils\BoolOr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Document\TreeScope.hpp">
+    <ClInclude Include="include\Krystal.HTML\Node\TreeScope.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Document\CustomElementRegistry.hpp">
+    <ClInclude Include="include\Krystal.HTML\Node\CustomElementRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Tree\TreeTraversal.hpp">
@@ -246,13 +246,31 @@
     <ClInclude Include="include\Krystal.HTML\Iterator\NodeFilter.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\NodeList\EmptyNodeList.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Utils\SmallNodeList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\NodeList\LiveNodeList.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\NodeList\HTMLCollection.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Node\ElementRareData.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Node\DocumentRareData.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Node\DocumentFragmentRareData.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Node\ParentNodeRareData.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationObserverInit.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\MutationObserver\RegisteredMutationObserver.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -272,10 +290,10 @@
     <ClCompile Include="src\Node\ContainerNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Document\DocumentType.cpp">
+    <ClCompile Include="src\Node\DocumentType.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Document\DocumentFragment.cpp">
+    <ClCompile Include="src\Node\DocumentFragment.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\CharacterData.cpp">
@@ -290,7 +308,7 @@
     <ClCompile Include="src\Node\ProcessingInstruction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Document\Document.cpp">
+    <ClCompile Include="src\Node\Document.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\Comment.cpp">
@@ -302,13 +320,13 @@
     <ClCompile Include="src\Node\Attr.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Document\ShadowRoot.cpp">
+    <ClCompile Include="src\Node\ShadowRoot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Events\EventDispatcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Document\TreeScope.cpp">
+    <ClCompile Include="src\Node\TreeScope.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Tree\TreeTraversal.cpp">
@@ -338,9 +356,6 @@
     <ClCompile Include="src\Tree\TreeMutationAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\NodeList\EmptyNodeList.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\NodeList\ChildNodeList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -348,6 +363,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\NodeRareData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\NodeList\HTMLCollection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Node\ParentNodeRareData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

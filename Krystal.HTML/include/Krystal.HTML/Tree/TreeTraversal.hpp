@@ -24,8 +24,6 @@ namespace Krys::HTML
     KRYS_NODISCARD static RawPtr<Node> Next(const ContainerNode &current,
                                             RawPtr<const Node> stayWithin) noexcept;
 
-    KRYS_NODISCARD static RawPtr<Element> NextElementSibling(const Node &current) noexcept;
-
     KRYS_NODISCARD static RawPtr<Node> NextSkippingChildren(const Node &current) noexcept;
     KRYS_NODISCARD static RawPtr<Node> NextSkippingChildren(const Node &current,
                                                             RawPtr<const Node> stayWithin) noexcept;
@@ -39,8 +37,6 @@ namespace Krys::HTML
 
     KRYS_NODISCARD static RawPtr<Node> Previous(const Node &current) noexcept;
     KRYS_NODISCARD static RawPtr<Node> Previous(const Node &current, RawPtr<const Node> stayWithin) noexcept;
-
-    KRYS_NODISCARD static RawPtr<Element> PreviousElementSibling(const Node &current) noexcept;
 
     KRYS_NODISCARD static RawPtr<Node> PreviousSkippingChildren(const Node &current) noexcept;
     KRYS_NODISCARD static RawPtr<Node> PreviousSkippingChildren(const Node &current,
@@ -61,5 +57,10 @@ namespace Krys::HTML
     KRYS_NODISCARD static RawPtr<Node> PreviousAncestorSiblingPostOrder(const Node &current) noexcept;
     KRYS_NODISCARD static RawPtr<Node>
       PreviousAncestorSiblingPostOrder(const Node &current, RawPtr<const Node> stayWithin) noexcept;
+
+    KRYS_NODISCARD static RawPtr<Element> NextElementSibling(const Node &current) noexcept;
+    KRYS_NODISCARD static RawPtr<Element> PreviousElementSibling(const Node &current) noexcept;
+    KRYS_NODISCARD static RawPtr<Element> FirstElementChild(const ContainerNode &node) noexcept;
+    KRYS_NODISCARD static RawPtr<Element> LastElementChild(const ContainerNode &node) noexcept;
   };
 }

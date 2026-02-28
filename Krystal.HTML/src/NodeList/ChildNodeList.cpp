@@ -1,12 +1,12 @@
 ﻿#include "Krystal.HTML/NodeList/ChildNodeList.hpp"
-#include "Krystal.HTML/Document/Document.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
+#include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Tree/TreeQueries.hpp"
 
 namespace Krys::HTML
 {
-  ChildNodeList::ChildNodeList(ContainerNode &owner) noexcept
+  ChildNodeList::ChildNodeList(Node &owner) noexcept
       : NodeList(NodeListType::ChildNode, NodeListFlag::None), _owner(ShareRef(owner)), _invalid(true)
   {
   }
@@ -39,7 +39,11 @@ namespace Krys::HTML
   void ChildNodeList::BuildCollection() const noexcept
   {
     _invalid = false;
-    _nodes.clear();
-    TreeQueries::CollectChildNodes(*_owner, _nodes);
+
+    if (auto *container = DynamicDowncast<ContainerNode>(*_owner))
+    {
+      _nodes.clear();
+      TreeQueries::CollectChildNodes(*container, _nodes);
+    }
   }
 }

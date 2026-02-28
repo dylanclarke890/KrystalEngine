@@ -2,6 +2,7 @@
 
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
+#include "Krystal.Lib/Mixins/CanMakeWeakPtr.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
@@ -13,7 +14,6 @@ namespace Krys::HTML
     Live,
     ChildNode,
     Static,
-    Empty,
   };
 
   enum NodeListFlag : uint8
@@ -31,7 +31,7 @@ namespace Krys::HTML
   class Element;
   class Node;
 
-  class NodeList : public RefCounted<NodeList>
+  class NodeList : public RefCounted<NodeList>, public CanMakeWeakPtr<NodeList>
   {
   private:
     NodeListType _type : BitCount<NodeListType>();
@@ -74,11 +74,6 @@ namespace Krys::HTML
     KRYS_NODISCARD bool IsStaticElementList() const noexcept
     {
       return _type == NodeListType::Static && HasFlag(_flags, NodeListFlag::ContainsOnlyElements);
-    }
-
-    KRYS_NODISCARD bool IsEmptyNodeList() const noexcept
-    {
-      return _type == NodeListType::Empty;
     }
 
 #pragma endregion

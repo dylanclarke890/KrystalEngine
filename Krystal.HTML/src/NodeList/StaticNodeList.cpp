@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/NodeList/StaticNodeList.hpp"
-#include "Krystal.HTML/Document/Document.hpp"
+#include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
 

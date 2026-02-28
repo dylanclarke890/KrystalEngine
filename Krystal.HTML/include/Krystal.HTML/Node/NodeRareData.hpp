@@ -2,6 +2,8 @@
 
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Pointers/WeakPtr.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
+#include "Krystal.Lib/Types/Variant.hpp"
 
 namespace Krys::HTML
 {
@@ -17,6 +19,7 @@ namespace Krys::HTML
 
   public:
     KRYS_NODISCARD Ref<NodeList> ChildNodes(Node &node) noexcept;
+
     void InvalidateChildNodes() noexcept;
   };
 }

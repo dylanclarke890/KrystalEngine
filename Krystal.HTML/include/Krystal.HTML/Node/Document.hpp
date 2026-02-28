@@ -1,31 +1,28 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/Node/ContainerNode.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.HTML/Node/DocumentRareData.hpp"
+#include "Krystal.HTML/Node/TreeScope.hpp"
+#include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 
 namespace Krys::HTML
 {
-  class Document;
-  class Element;
   class HTMLCollection;
 
-  class DocumentFragment : public ContainerNode
+  class Document : public ContainerNode, public TreeScope
   {
-  public:
-    DocumentFragment(Document &document, NodeFlag flags = NodeFlag::None) noexcept;
+    friend class DocumentRareData;
 
-#pragma region Node
+  private:
+    UniquePtr<DocumentRareData> _documentRareData;
+
+  public:
+    Document() noexcept;
 
     KRYS_NODISCARD DOMString NodeName() const noexcept final;
 
-    KRYS_NODISCARD DOMString TextContent() const noexcept final;
-    ExceptionOr<void> SetTextContent(DOMString &&value) noexcept final
-    {
-      return {};
-    }
-
-#pragma endregion
+    KRYS_NODISCARD ExceptionOr<Ref<Node>> AdoptNode(Node &node) noexcept;
 
 #pragma region ParentNode Mixin - https://dom.spec.whatwg.org/#parentnode
 
@@ -53,9 +50,9 @@ namespace Krys::HTML
   };
 }
 
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::DocumentFragment)
-  static bool IsType(const Krys::HTML::Node &node)
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::Document)
+  static bool IsType(const Krys::HTML::Node &node) noexcept
   {
-    return node.IsDocumentFragmentNode();
+    return node.IsDocumentNode();
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();
