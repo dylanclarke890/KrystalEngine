@@ -1,4 +1,5 @@
 ﻿#include "Krystal.HTML/NodeList/HTMLCollection.hpp"
+#include "Krystal.HTML/MutationObserver/MutationObserver.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
@@ -6,7 +7,8 @@
 
 namespace Krys::HTML
 {
-  HTMLCollection::HTMLCollection(const ContainerNode &owner) noexcept : _owner(ShareRef(owner)), _invalid(true)
+  HTMLCollection::HTMLCollection(const ContainerNode &owner) noexcept
+      : _owner(ShareRef(owner)), _invalid(true)
   {
   }
 

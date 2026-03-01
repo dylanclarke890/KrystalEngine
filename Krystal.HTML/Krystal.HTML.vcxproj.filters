@@ -213,19 +213,19 @@
     <ClInclude Include="include\Krystal.HTML\Tree\TreeQueries.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\MutationRecord\MutationRecord.hpp">
+    <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationRecord.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\MutationRecord\detail\EmptyNodeMutationRecord.hpp">
+    <ClInclude Include="include\Krystal.HTML\MutationObserver\detail\EmptyNodeMutationRecord.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\MutationRecord\ChildNodeMutationRecord.hpp">
+    <ClInclude Include="include\Krystal.HTML\MutationObserver\ChildNodeMutationRecord.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\MutationRecord\AttributesMutationRecord.hpp">
+    <ClInclude Include="include\Krystal.HTML\MutationObserver\AttributesMutationRecord.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\MutationRecord\CharacterDataMutationRecord.hpp">
+    <ClInclude Include="include\Krystal.HTML\MutationObserver\CharacterDataMutationRecord.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\NodeList\StaticNodeList.hpp">
@@ -270,7 +270,13 @@
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationObserverInit.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\MutationObserver\RegisteredMutationObserver.hpp">
+    <ClInclude Include="include\Krystal.HTML\MutationObserver\RegisteredObserver.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationCallback.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\MutationObserver\TransientRegisteredObserver.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -338,19 +344,19 @@
     <ClCompile Include="src\Tree\TreeQueries.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\MutationRecord\ChildNodeMutationRecord.cpp">
+    <ClCompile Include="src\MutationObserver\ChildNodeMutationRecord.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\NodeList\StaticNodeList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\MutationRecord\detail\EmptyNodeMutationRecord.cpp">
+    <ClCompile Include="src\MutationObserver\detail\EmptyNodeMutationRecord.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\MutationRecord\AttributesMutationRecord.cpp">
+    <ClCompile Include="src\MutationObserver\AttributesMutationRecord.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\MutationRecord\CharacterDataMutationRecord.cpp">
+    <ClCompile Include="src\MutationObserver\CharacterDataMutationRecord.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Tree\TreeMutationAlgorithms.cpp">
@@ -369,6 +375,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\ParentNodeRareData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MutationObserver\MutationObserver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -510,7 +519,7 @@
     <None Include="data\Ranges\Range.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\MutationRecord\MutationRecord.idl">
+    <None Include="data\MutationObserver\MutationRecord.idl">
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\MutationObserver\MutationObserver.idl">

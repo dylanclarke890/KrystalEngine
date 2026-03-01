@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/MutationRecord/MutationRecord.hpp"
+#include "Krystal.HTML/MutationObserver/MutationRecord.hpp"
 
 namespace Krys::HTML
 {

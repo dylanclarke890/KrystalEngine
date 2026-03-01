@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/MutationRecord/detail/EmptyNodeMutationRecord.hpp"
+﻿#include "Krystal.HTML/MutationObserver/detail/EmptyNodeMutationRecord.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Node.hpp"

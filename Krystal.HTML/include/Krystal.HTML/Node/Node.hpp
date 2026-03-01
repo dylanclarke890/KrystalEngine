@@ -68,6 +68,7 @@ namespace Krys::HTML
   class ContainerNode;
   class Document;
   class Element;
+  class MutationObserver;
   class NodeList;
   class ShadowRoot;
   class TreeMutationAlgorithms;
@@ -98,6 +99,7 @@ namespace Krys::HTML
 
     friend class ContainerNode;
     friend class Document;
+    friend class MutationObserver;
     friend class TreeMutationAlgorithms;
     friend class TreeMutationDispatcher;
 
@@ -333,6 +335,10 @@ namespace Krys::HTML
     {
       return HasFlag(_flags, flag);
     }
+
+    KRYS_NODISCARD List<Ref<RegisteredObserver>> &RegisteredObserverList() noexcept;
+
+    KRYS_NODISCARD List<Ref<TransientRegisteredObserver>> &TransientRegisteredObservers() noexcept;
   };
 }
 

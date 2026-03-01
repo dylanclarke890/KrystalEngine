@@ -1,9 +1,11 @@
 ﻿#include "Krystal.HTML/Node/Node.hpp"
-#include "Krystal.HTML/Node/Document.hpp"
-#include "Krystal.HTML/Node/ShadowRoot.hpp"
-#include "Krystal.HTML/Node/Element.hpp"
+#include "Krystal.HTML/MutationObserver/RegisteredObserver.hpp"
+#include "Krystal.HTML/MutationObserver/TransientRegisteredObserver.hpp"
 #include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
+#include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/Node/Element.hpp"
+#include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/NodeList/NodeList.hpp"
 #include "Krystal.HTML/Tree/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Tree/TreeTraversal.hpp"
@@ -208,7 +210,7 @@ namespace Krys::HTML
 
   size_t Node::CountChildNodes() const noexcept
   {
-    if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
+    if (const auto *containerNode = DynamicDowncast<ContainerNode>(*this))
     {
       return containerNode->CountChildNodes();
     }
@@ -250,5 +252,25 @@ namespace Krys::HTML
     {
       ClearEventTargetFlag(EventTargetFlag::IsInShadowTree);
     }
+  }
+
+  List<Ref<RegisteredObserver>> &Node::RegisteredObserverList() noexcept
+  {
+    if (!_nodeRareData)
+    {
+      _nodeRareData = CreateUnique<NodeRareData>();
+    }
+
+    return _nodeRareData->RegisteredObserverList();
+  }
+
+  List<Ref<TransientRegisteredObserver>> &Node::TransientRegisteredObservers() noexcept
+  {
+    if (!_nodeRareData)
+    {
+      _nodeRareData = CreateUnique<NodeRareData>();
+    }
+
+    return _nodeRareData->TransientRegisteredObservers();
   }
 }

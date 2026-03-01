@@ -2,17 +2,18 @@
 
 #include "Krystal.HTML/DOMString.hpp"
 #include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
 
 namespace Krys::HTML
 {
   struct MutationObserverInit
   {
-    bool ChildList : 1 {false};
-    bool Attributes : 1 {false};
-    bool CharacterData : 1 {false};
-    bool Subtree : 1 {false};
-    bool AttributeOldValue : 1 {false};
-    bool CharacterDataOldValue : 1 {false};
-    List<DOMString> AttributeFilter;
+    bool ChildList {false};
+    Maybe<bool> Attributes {false};
+    Maybe<bool> CharacterData {false};
+    bool Subtree {false};
+    Maybe<bool> AttributeOldValue {false};
+    Maybe<bool> CharacterDataOldValue {false};
+    Maybe<List<DOMStringAtom>> AttributeFilter;
   };
 }

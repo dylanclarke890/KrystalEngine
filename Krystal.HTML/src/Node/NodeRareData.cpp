@@ -1,4 +1,5 @@
 ﻿#include "Krystal.HTML/Node/NodeRareData.hpp"
+#include "Krystal.HTML/MutationObserver/MutationObserver.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
@@ -24,5 +25,25 @@ namespace Krys::HTML
     {
       _childNodeList->Invalidate();
     }
+  }
+
+  List<Ref<RegisteredObserver>> &NodeRareData::RegisteredObserverList() noexcept
+  {
+    if (!_registeredObserverList.has_value())
+    {
+      _registeredObserverList = {};
+    }
+
+    return *_registeredObserverList;
+  }
+
+  List<Ref<TransientRegisteredObserver>> &NodeRareData::TransientRegisteredObservers() noexcept
+  {
+    if (!_transientRegisteredObservers.has_value())
+    {
+      _transientRegisteredObservers = {};
+    }
+
+    return *_transientRegisteredObservers;
   }
 }
