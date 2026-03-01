@@ -18,6 +18,6 @@ namespace Krys::HTML
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::CDATASection)
   static bool IsType(const Krys::HTML::Node &node)
   {
-    return node.GetNodeType() == Krys::HTML::NodeType::CDATA_SECTION_NODE;
+    return node.IsCDATASectionNode();
   }
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

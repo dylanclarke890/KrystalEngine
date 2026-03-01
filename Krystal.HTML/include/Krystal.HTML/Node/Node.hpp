@@ -3,6 +3,7 @@
 #include "Krystal.HTML/DOMString.hpp"
 #include "Krystal.HTML/Events/EventTarget.hpp"
 #include "Krystal.HTML/Node/NodeRareData.hpp"
+#include "Krystal.HTML/URL.hpp"
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.HTML/Utils/SmallNodeList.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
@@ -69,6 +70,7 @@ namespace Krys::HTML
   class Document;
   class Element;
   class MutationObserver;
+  class Node;
   class NodeList;
   class ShadowRoot;
   class TreeMutationAlgorithms;
@@ -84,13 +86,6 @@ namespace Krys::HTML
     bool Composed = false;
   };
 
-  struct URL
-  {
-    // TODO(IMPL): Implement URL class.
-    DOMString Href;
-  };
-
-  class Node;
   using NodeOrString = Variant<RefPtr<Node>, DOMString>;
 
   class Node : public EventTarget, public CanMakeCheckedPtr<Node>
@@ -275,6 +270,11 @@ namespace Krys::HTML
     KRYS_NODISCARD bool IsCharacterDataNode() const noexcept
     {
       return HasNodeFlag(NodeFlag::IsCharacterData);
+    }
+
+    KRYS_NODISCARD bool IsCDATASectionNode() const noexcept
+    {
+      return _nodeType == NodeType::CDATA_SECTION_NODE;
     }
 
     KRYS_NODISCARD bool IsTextNode() const noexcept

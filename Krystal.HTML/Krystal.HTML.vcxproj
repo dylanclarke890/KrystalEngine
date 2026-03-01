@@ -115,6 +115,7 @@
     <ClInclude Include="include\Krystal.HTML\Ranges\Range.hpp" />
     <ClInclude Include="include\Krystal.HTML\Ranges\StaticRange.hpp" />
     <ClInclude Include="include\Krystal.HTML\StronglyTypedValues.hpp" />
+    <ClInclude Include="include\Krystal.HTML\URL.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\BoolOr.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\Exception.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionCode.hpp" />

@@ -103,6 +103,11 @@ namespace Krys::HTML
     return false;
   }
 
+  bool TreeQueries::IsExclusiveTextNode(const Node& node) noexcept
+  {
+    return node.IsTextNode() && !node.IsCDATASectionNode();
+  }
+
   RawPtr<ShadowRoot> TreeQueries::GetShadowRoot(const Node &node) noexcept
   {
     if (auto *element = DynamicDowncast<Element>(node))

@@ -42,9 +42,21 @@
     <ClCompile Include="tests\Node\ContainerNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tests\Node\Node.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\Node\Text.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML.Tests\ParserTestUtils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML.Tests\TestNode.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML.Tests\TestContainerNode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

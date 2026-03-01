@@ -30,6 +30,7 @@ namespace Krys::HTML
     {
       return ReplaceData(0, value.size(), Krys::Move(value));
     }
+
     KRYS_NODISCARD DOMString TextContent() const noexcept final
     {
       return _data;
@@ -45,16 +46,18 @@ namespace Krys::HTML
     {
       return _data;
     }
-    void SetData(const DOMString &data) noexcept;
+    ExceptionOr<void> SetData(const DOMString &data) noexcept;
+
     KRYS_NODISCARD size_t Length() const noexcept
     {
       return _data.size();
     }
-    KRYS_NODISCARD ExceptionOr<DOMString> SubstringData(size_t offset, size_t count) const noexcept;
-    void AppendData(const DOMString &data) noexcept;
-    KRYS_NODISCARD ExceptionOr<void> InsertData(size_t offset, const DOMString &data) noexcept;
-    KRYS_NODISCARD ExceptionOr<void> DeleteData(size_t offset, size_t count) noexcept;
-    KRYS_NODISCARD ExceptionOr<void> ReplaceData(size_t offset, size_t count, const DOMString &data) noexcept;
+    
+    ExceptionOr<DOMString> SubstringData(size_t offset, size_t count) const noexcept;
+    ExceptionOr<void> AppendData(const DOMString &data) noexcept;
+    ExceptionOr<void> InsertData(size_t offset, const DOMString &data) noexcept;
+    ExceptionOr<void> DeleteData(size_t offset, size_t count) noexcept;
+    ExceptionOr<void> ReplaceData(size_t offset, size_t count, const DOMString &data) noexcept;
 
 #pragma region ChildNode Mixin - https://dom.spec.whatwg.org/#childnode
 

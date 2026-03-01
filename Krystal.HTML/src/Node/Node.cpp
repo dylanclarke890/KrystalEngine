@@ -6,6 +6,7 @@
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/NodeList/NodeList.hpp"
 #include "Krystal.HTML/Tree/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Tree/TreeTraversal.hpp"
@@ -69,7 +70,16 @@ namespace Krys::HTML
 
   ExceptionOr<void> Node::Normalize() noexcept
   {
-    // TODO(IMPL)
+    for (auto *textNode = TreeTraversal::NextExclusiveTextNode(*this, this); textNode;
+         textNode = TreeTraversal::NextExclusiveTextNode(*textNode, this))
+    {
+      auto length = textNode->Length();
+      if (!length)
+      {
+        RemoveChild(*textNode);
+      }
+    }
+
     return {};
   }
 

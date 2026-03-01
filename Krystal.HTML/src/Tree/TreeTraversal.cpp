@@ -1,9 +1,10 @@
 ﻿#include "Krystal.HTML/Tree/TreeTraversal.hpp"
-#include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
+#include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
+#include "Krystal.HTML/Tree/TreeQueries.hpp"
 #include <cassert>
 
 namespace Krys::HTML
@@ -411,6 +412,33 @@ namespace Krys::HTML
       if (auto *element = DynamicDowncast<Element>(*child))
       {
         return element;
+      }
+    }
+
+    return nullptr;
+  }
+
+  RawPtr<Text> TreeTraversal::NextExclusiveTextNode(const Node &current) noexcept
+  {
+    for (RawPtr<Node> next = Next(current); next; next = Next(*next))
+    {
+      if (TreeQueries::IsExclusiveTextNode(*next))
+      {
+        return Downcast<Text>(next);
+      }
+    }
+
+    return nullptr;
+  }
+
+  RawPtr<Text> TreeTraversal::NextExclusiveTextNode(const Node &current,
+                                                    RawPtr<const Node> stayWithin) noexcept
+  {
+    for (RawPtr<Node> next = Next(current, stayWithin); next; next = Next(*next, stayWithin))
+    {
+      if (TreeQueries::IsExclusiveTextNode(*next))
+      {
+        return Downcast<Text>(next);
       }
     }
 

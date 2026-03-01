@@ -21,6 +21,7 @@ namespace Krys::HTML
     KRYS_NODISCARD static bool IsHostIncludingAncestorOf(Node &node, Node &other) noexcept;
     KRYS_NODISCARD static bool IsConnectedInSameTreeScope(const Node &a, const Node &b) noexcept;
     KRYS_NODISCARD static bool IsDocTypeOrDocTypeFollows(RawPtr<Node> node) noexcept;
+    KRYS_NODISCARD static bool IsExclusiveTextNode(const Node& node) noexcept;
 
     KRYS_NODISCARD static RawPtr<ShadowRoot> GetShadowRoot(const Node &node) noexcept;
 

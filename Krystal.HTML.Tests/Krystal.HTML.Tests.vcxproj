@@ -162,6 +162,8 @@
     <ClCompile Include="tests\Loader\HTMLEncodingSniffer.cpp" />
     <ClCompile Include="tests\Loader\TextResourceDecoder.cpp" />
     <ClCompile Include="tests\Node\ContainerNode.cpp" />
+    <ClCompile Include="tests\Node\Node.cpp" />
+    <ClCompile Include="tests\Node\Text.cpp" />
     <ClCompile Include="tests\Parser\HTMLCharacterReference.cpp" />
     <ClCompile Include="tests\Parser\HTMLInputStream.cpp" />
     <ClCompile Include="tests\Parser\HTMLTokenizerIntegrationTests.cpp" />
@@ -169,6 +171,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML.Tests\ParserTestUtils.hpp" />
+    <ClInclude Include="include\Krystal.HTML.Tests\TestContainerNode.hpp" />
+    <ClInclude Include="include\Krystal.HTML.Tests\TestNode.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

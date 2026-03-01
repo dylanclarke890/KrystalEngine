@@ -1,6 +1,7 @@
 ﻿#include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Tree/TreeMutationAlgorithms.hpp"
+#include "Krystal.HTML/Tree/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Tree/TreeTraversal.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
 
@@ -11,47 +12,86 @@ namespace Krys::HTML
   {
   }
 
-  void CharacterData::SetData(const DOMString &data) noexcept
+  ExceptionOr<void> CharacterData::SetData(const DOMString &data) noexcept
   {
+    return ReplaceData(0, _data.size(), data);
   }
 
   /// @see https://dom.spec.whatwg.org/#concept-cd-substring
   ExceptionOr<DOMString> CharacterData::SubstringData(size_t offset, size_t count) const noexcept
   {
-    size_t length = Length();
+    auto length = _data.size();
     if (offset > length)
     {
       return Exception {ExceptionCode::IndexSizeError};
     }
 
-    size_t availableCount = length - offset;
-    if (count < availableCount)
+    if (offset + count > length)
     {
-      return _data.substr(offset, count);
+      return _data.substr(offset);
     }
 
-    return _data.substr(offset);
+    return _data.substr(offset, count);
   }
 
-  void CharacterData::AppendData(const DOMString &data) noexcept
+  ExceptionOr<void> CharacterData::AppendData(const DOMString &data) noexcept
   {
+    return ReplaceData(_data.size(), 0, data);
   }
 
   ExceptionOr<void> CharacterData::InsertData(size_t offset, const DOMString &data) noexcept
   {
-    return {};
+    return ReplaceData(offset, 0, data);
   }
 
   ExceptionOr<void> CharacterData::DeleteData(size_t offset, size_t count) noexcept
   {
-    return {};
+    return ReplaceData(offset, count, u8"");
   }
 
   /// @see https://dom.spec.whatwg.org/#concept-cd-replace
   ExceptionOr<void> CharacterData::ReplaceData(size_t offset, size_t count, const DOMString &data) noexcept
   {
-    // TODO (IMPL): needs mutation records and live ranges
-    return {};
+    auto length = _data.size();
+    if (offset > length)
+    {
+      return Exception {ExceptionCode::IndexSizeError};
+    }
+
+    if (offset + count > length)
+    {
+      count = length - offset;
+    }
+
+    // TODO(IMPL):
+    // Queue a mutation record of "characterData" for node with null, null, node’s data, « », « », null, and
+    // null.
+
+    _data.insert(offset, data);
+    length = _data.size();
+
+    _data.erase(offset + length, count);
+
+    // TODO(IMPL):
+    // For each live range whose start node is node and start offset is greater than offset but less than or
+    // equal to offset + count: set its start offset to offset.
+
+    // TODO(IMPL):
+    // For each live range whose end node is node and end offset is greater than offset but less than or equal
+    // to offset + count: set its end offset to offset.
+
+    // TODO(IMPL):
+    // For each live range whose start node is node and start offset is greater than offset + count: increase
+    // its start offset by data’s length and decrease it by count.
+
+    // TODO(IMPL):
+    // For each live range whose end node is node and end offset is greater than offset + count: increase its
+    // end offset by data’s length and decrease it by count.
+
+    if (auto parent = ShareRefPtr(ParentNode()))
+    {
+      TreeMutationDispatcher::ChildrenChanged(*parent);
+    }
   }
 
 #pragma region ChildNode

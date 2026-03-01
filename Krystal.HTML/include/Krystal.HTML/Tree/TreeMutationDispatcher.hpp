@@ -28,6 +28,7 @@ namespace Krys::HTML
   public:
     static void NodeInserted(Node &node, ContainerNode &insertedInto) noexcept;
     static void NodeRemoved(Node &node, ContainerNode &removedFrom) noexcept;
+    static void ChildrenChanged(ContainerNode &node) noexcept;
 
     // static void QueueMutationRecord(ContainerNode &target, Ref<NodeList> &&added, Ref<NodeList> &&removed,
     //                                 RefPtr<Node> &&previousSibling, RefPtr<Node> &&nextSibling) noexcept;

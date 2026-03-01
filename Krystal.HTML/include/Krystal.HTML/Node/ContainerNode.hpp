@@ -31,15 +31,16 @@ namespace Krys::HTML
     {
       return _firstChild.get();
     }
+
     KRYS_NODISCARD RawPtr<Node> LastChild() const noexcept
     {
       return _lastChild.get();
     }
 
-    KRYS_NODISCARD ExceptionOr<void> InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept;
-    KRYS_NODISCARD ExceptionOr<void> ReplaceChild(Node &newChild, Node &oldChild) noexcept;
-    KRYS_NODISCARD ExceptionOr<void> RemoveChild(Node &child) noexcept;
-    KRYS_NODISCARD ExceptionOr<void> AppendChild(Node &newChild) noexcept;
+    ExceptionOr<void> InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept;
+    ExceptionOr<void> ReplaceChild(Node &newChild, Node &oldChild) noexcept;
+    ExceptionOr<void> RemoveChild(Node &child) noexcept;
+    ExceptionOr<void> AppendChild(Node &newChild) noexcept;
 
 #pragma endregion
 
