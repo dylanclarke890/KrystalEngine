@@ -12,6 +12,8 @@ namespace Krys::HTML
 
   class Document : public ContainerNode, public TreeScope
   {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Document);
+
     friend class DocumentRareData;
 
   private:

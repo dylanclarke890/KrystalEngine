@@ -3,6 +3,7 @@
 #include "Krystal.HTML/MutationObserver/TransientRegisteredObserver.hpp"
 #include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
+#include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
@@ -99,9 +100,7 @@ namespace Krys::HTML
 
   bool Node::IsSameNode(RawPtr<const Node> otherNode) const noexcept
   {
-    (void)otherNode;
-    // TODO(IMPL)
-    return false;
+    return this == otherNode;
   }
 
   DocumentPosition Node::CompareDocumentPosition(Node &other) const noexcept

@@ -1,4 +1,5 @@
 ﻿#include "Krystal.HTML/Node/Element.hpp"
+#include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/ElementRareData.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/NodeList/HTMLCollection.hpp"

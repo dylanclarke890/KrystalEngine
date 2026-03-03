@@ -11,6 +11,8 @@ namespace Krys::HTML
 
   class Attr : public Node
   {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Attr);
+
   private:
     QualifiedName _name;
     CheckedPtr<Element> _ownerElement;

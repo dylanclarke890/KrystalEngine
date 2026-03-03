@@ -1,9 +1,10 @@
 ﻿#include "Krystal.HTML/Tree/TreeQueries.hpp"
-#include "Krystal.HTML/Node/Document.hpp"
-#include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
+#include "Krystal.HTML/Node/CustomElementRegistry.hpp"
+#include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
+#include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/Tree/TreeTraversal.hpp"
 
@@ -103,7 +104,7 @@ namespace Krys::HTML
     return false;
   }
 
-  bool TreeQueries::IsExclusiveTextNode(const Node& node) noexcept
+  bool TreeQueries::IsExclusiveTextNode(const Node &node) noexcept
   {
     return node.IsTextNode() && !node.IsCDATASectionNode();
   }
@@ -184,6 +185,54 @@ namespace Krys::HTML
       }
     }
 
+    return content;
+  }
+
+  DOMString TreeQueries::ContiguousTextContent(const Text &node) noexcept
+  {
+    RawPtr<const Text> start = &node;
+    while (RawPtr<const Node> prev = start->PreviousSibling())
+    {
+      if (const auto *prevText = DynamicDowncast<Text>(*prev))
+      {
+        start = prevText;
+      }
+      else
+      {
+        break;
+      }
+    }
+
+    DOMString content;
+    for (RawPtr<const Node> current = start; current && current->IsTextNode();
+         current = current->NextSibling())
+    {
+      content += Downcast<Text>(current)->TextContent();
+    }
+    return content;
+  }
+
+  DOMString TreeQueries::ContiguousExclusiveTextContent(const Text &node) noexcept
+  {
+    RawPtr<const Text> start = &node;
+    while (RawPtr<const Node> prev = start->PreviousSibling())
+    {
+      if (IsExclusiveTextNode(*prev))
+      {
+        start = Downcast<Text>(prev);
+      }
+      else
+      {
+        break;
+      }
+    }
+
+    DOMString content;
+    for (RawPtr<const Node> current = start; current && IsExclusiveTextNode(*current);
+         current = current->NextSibling())
+    {
+      content += Downcast<Text>(current)->TextContent();
+    }
     return content;
   }
 }

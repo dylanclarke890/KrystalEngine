@@ -1,8 +1,10 @@
 ﻿#include "Krystal.HTML/Tree/TreeMutationAlgorithms.hpp"
 #include "Krystal.HTML/MutationObserver/MutationObserver.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
+#include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
+#include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Tree/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Tree/TreeQueries.hpp"
 #include "Krystal.HTML/Tree/TreeTraversal.hpp"
@@ -44,7 +46,7 @@ namespace Krys::HTML
       if (node.IsDocumentFragmentNode())
       {
         uint32 elementCount = 0;
-        for (RawPtr<Node> child = node.FirstChild(); child != nullptr; child = child->NextSibling())
+        for (RawPtr<Node> child = node.FirstChild(); child; child = child->NextSibling())
         {
           if (child->IsElementNode())
           {
@@ -62,7 +64,7 @@ namespace Krys::HTML
 
         if (elementCount == 1)
         {
-          for (RawPtr<Node> child = parent.FirstChild(); child != nullptr; child = child->NextSibling())
+          for (RawPtr<Node> child = parent.FirstChild(); child; child = child->NextSibling())
           {
             if (child->IsElementNode())
             {
@@ -78,7 +80,7 @@ namespace Krys::HTML
       }
       else if (node.IsElementNode())
       {
-        for (RawPtr<Node> child = parent.FirstChild(); child != nullptr; child = child->NextSibling())
+        for (RawPtr<Node> child = parent.FirstChild(); child; child = child->NextSibling())
         {
           if (child->IsElementNode())
           {
@@ -94,7 +96,7 @@ namespace Krys::HTML
       else if (node.IsDocumentTypeNode())
       {
         bool hasElementChild = false;
-        for (RawPtr<Node> child = parent.FirstChild(); child != nullptr; child = child->NextSibling())
+        for (RawPtr<Node> child = parent.FirstChild(); child; child = child->NextSibling())
         {
           if (child->IsDocumentTypeNode())
           {

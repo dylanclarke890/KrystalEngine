@@ -1,6 +1,8 @@
 ﻿#include "Krystal.HTML/Node/DocumentFragment.hpp"
+#include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
+#include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/NodeList/HTMLCollection.hpp"
 #include "Krystal.HTML/Tree/TreeQueries.hpp"
 #include "Krystal.HTML/Tree/TreeTraversal.hpp"

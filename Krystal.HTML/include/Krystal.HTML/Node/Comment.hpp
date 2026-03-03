@@ -6,10 +6,10 @@
 
 namespace Krys::HTML
 {
-  class Document;
-
   class Comment : public CharacterData
   {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Comment);
+
   public:
     Comment(Document &document, DOMString &&data = u8"") noexcept;
 

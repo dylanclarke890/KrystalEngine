@@ -9,6 +9,8 @@ namespace Krys::HTML
 {
   class DocumentType final : public Node
   {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(DocumentType);
+
   private:
     DOMString _name;
     DOMString _publicId;

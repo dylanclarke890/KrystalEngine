@@ -105,7 +105,7 @@ namespace Krys::detail
 #define KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR_IMPL(T)                                                         \
   void operator delete(T *object, std::destroying_delete_t, size_t size)                                     \
   {                                                                                                          \
-    assert(sizeof(T) == size);                                                                               \
+    assert("invalid size" && sizeof(T) == size);                                                             \
                                                                                                              \
     object->SetDidBeginCheckedPtrDeletion();                                                                 \
                                                                                                              \

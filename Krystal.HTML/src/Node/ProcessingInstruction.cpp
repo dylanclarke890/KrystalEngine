@@ -1,5 +1,7 @@
 ﻿#include "Krystal.HTML/Node/ProcessingInstruction.hpp"
+#include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/Node/ShadowRoot.hpp"
 
 namespace Krys::HTML
 {

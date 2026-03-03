@@ -8,6 +8,8 @@ namespace Krys::HTML
 {
   class CDATASection : public Text
   {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CDATASection);
+
   public:
     CDATASection(Document &document, DOMString &&data = u8"") noexcept;
 

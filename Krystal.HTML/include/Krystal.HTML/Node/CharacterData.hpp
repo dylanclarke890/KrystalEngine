@@ -12,6 +12,8 @@ namespace Krys::HTML
 
   class CharacterData : public Node
   {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CharacterData);
+
   private:
     DOMString _data;
 
@@ -52,7 +54,7 @@ namespace Krys::HTML
     {
       return _data.size();
     }
-    
+
     ExceptionOr<DOMString> SubstringData(size_t offset, size_t count) const noexcept;
     ExceptionOr<void> AppendData(const DOMString &data) noexcept;
     ExceptionOr<void> InsertData(size_t offset, const DOMString &data) noexcept;

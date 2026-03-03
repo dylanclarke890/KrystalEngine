@@ -14,6 +14,8 @@ namespace Krys::HTML
 
   class Element : public ContainerNode
   {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Element);
+
   private:
     RefPtr<ShadowRoot> _shadowRoot;
     UniquePtr<ElementRareData> _elementRareData;

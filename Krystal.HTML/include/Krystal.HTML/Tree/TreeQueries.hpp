@@ -11,6 +11,7 @@ namespace Krys::HTML
   class Element;
   class Node;
   class ShadowRoot;
+  class Text;
 
   struct TreeQueries
   {
@@ -21,7 +22,7 @@ namespace Krys::HTML
     KRYS_NODISCARD static bool IsHostIncludingAncestorOf(Node &node, Node &other) noexcept;
     KRYS_NODISCARD static bool IsConnectedInSameTreeScope(const Node &a, const Node &b) noexcept;
     KRYS_NODISCARD static bool IsDocTypeOrDocTypeFollows(RawPtr<Node> node) noexcept;
-    KRYS_NODISCARD static bool IsExclusiveTextNode(const Node& node) noexcept;
+    KRYS_NODISCARD static bool IsExclusiveTextNode(const Node &node) noexcept;
 
     KRYS_NODISCARD static RawPtr<ShadowRoot> GetShadowRoot(const Node &node) noexcept;
 
@@ -30,8 +31,10 @@ namespace Krys::HTML
 
     static void CollectChildNodes(const ContainerNode &parent, SmallNodeList &collection) noexcept;
     static void CollectChildElements(const ContainerNode &parent, SmallElementList &collection) noexcept;
-    
+
     KRYS_NODISCARD static DOMString DescendantTextContent(const ContainerNode &node) noexcept;
     KRYS_NODISCARD static DOMString ChildTextContent(const ContainerNode &node) noexcept;
+    KRYS_NODISCARD static DOMString ContiguousTextContent(const Text &node) noexcept;
+    KRYS_NODISCARD static DOMString ContiguousExclusiveTextContent(const Text &node) noexcept;
   };
 }

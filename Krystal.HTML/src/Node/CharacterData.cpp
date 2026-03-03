@@ -1,5 +1,7 @@
 ﻿#include "Krystal.HTML/Node/CharacterData.hpp"
+#include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Tree/TreeMutationAlgorithms.hpp"
 #include "Krystal.HTML/Tree/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Tree/TreeTraversal.hpp"
@@ -68,9 +70,7 @@ namespace Krys::HTML
     // null.
 
     _data.insert(offset, data);
-    length = _data.size();
-
-    _data.erase(offset + length, count);
+    _data.erase(offset, count);
 
     // TODO(IMPL):
     // For each live range whose start node is node and start offset is greater than offset but less than or
@@ -92,6 +92,8 @@ namespace Krys::HTML
     {
       TreeMutationDispatcher::ChildrenChanged(*parent);
     }
+
+    return {};
   }
 
 #pragma region ChildNode

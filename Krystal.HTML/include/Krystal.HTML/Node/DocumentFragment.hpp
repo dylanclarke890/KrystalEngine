@@ -14,6 +14,8 @@ namespace Krys::HTML
 
   class DocumentFragment : public ContainerNode
   {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(DocumentFragment);
+
     friend class DocumentFragmentRareData;
 
   private:

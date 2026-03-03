@@ -11,6 +11,8 @@ namespace Krys::HTML
 
   class ProcessingInstruction : public CharacterData
   {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ProcessingInstruction);
+
   private:
     DOMString _target;
 

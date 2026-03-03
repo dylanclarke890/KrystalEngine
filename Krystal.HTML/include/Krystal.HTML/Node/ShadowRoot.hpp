@@ -33,6 +33,8 @@ namespace Krys::HTML
 
   class ShadowRoot : public DocumentFragment, public TreeScope
   {
+    KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ShadowRoot);
+
   private:
     ShadowRootMode _mode : BitCount<ShadowRootMode>() {ShadowRootMode::Open};
     bool _delegatesFocus : 1 {false};

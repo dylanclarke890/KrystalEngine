@@ -39,9 +39,9 @@ namespace Krys
   template <typename Target, typename Source>
   KRYS_NODISCARD constexpr inline bool Is(const Source &source) noexcept
   {
-    static_assert(CanUpcast<Target, Source> || CanDowncast<Source, Target>, "Unrelated types");
+    static_assert(CanDowncast<Source, Target>, "Unrelated types");
 
-    if constexpr (SameType<Target, Source> || CanUpcast<Target, Source>)
+    if constexpr (SameType<Target, Source>)
     {
       return true;
     }
@@ -52,9 +52,9 @@ namespace Krys
   template <typename Target, typename Source>
   KRYS_NODISCARD constexpr inline bool Is(Source *source) noexcept
   {
-    static_assert(CanUpcast<Target, Source> || CanDowncast<Source, Target>, "Unrelated types");
+    static_assert(CanDowncast<Source, Target>, "Unrelated types");
 
-    if constexpr (SameType<Target, Source> || CanUpcast<Target, Source>)
+    if constexpr (SameType<Target, Source>)
     {
       return true;
     }
