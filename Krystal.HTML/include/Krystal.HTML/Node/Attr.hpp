@@ -19,28 +19,7 @@ namespace Krys::HTML
     DOMString _value;
 
   public:
-#pragma region Node
-
-    KRYS_NODISCARD DOMString NodeName() const noexcept final;
-
-    KRYS_NODISCARD DOMString NodeValue() const noexcept final
-    {
-      return Value();
-    }
-    ExceptionOr<void> SetNodeValue(DOMString &&value) noexcept final
-    {
-      return SetExistingAttributeValue(*this, Krys::Move(value));
-    }
-    KRYS_NODISCARD DOMString TextContent() const noexcept final
-    {
-      return Value();
-    }
-    ExceptionOr<void> SetTextContent(DOMString &&value) noexcept final
-    {
-      return SetExistingAttributeValue(*this, Krys::Move(value));
-    }
-
-#pragma endregion
+#pragma region Attr
 
     KRYS_NODISCARD RawPtr<Element> OwnerElement() const noexcept
     {
@@ -51,7 +30,39 @@ namespace Krys::HTML
 
     static ExceptionOr<void> SetExistingAttributeValue(Attr &attribute, DOMString &&value) noexcept
     {
+      return {};
     }
+
+#pragma endregion
+
+#pragma region Node
+
+    KRYS_NODISCARD DOMString NodeName() const noexcept final
+    {
+      return _name.Name();
+    }
+
+    KRYS_NODISCARD DOMString NodeValue() const noexcept final
+    {
+      return Value();
+    }
+
+    ExceptionOr<void> SetNodeValue(DOMString &&value) noexcept final
+    {
+      return SetExistingAttributeValue(*this, Krys::Move(value));
+    }
+    
+    KRYS_NODISCARD DOMString TextContent() const noexcept final
+    {
+      return Value();
+    }
+    
+    ExceptionOr<void> SetTextContent(DOMString &&value) noexcept final
+    {
+      return SetExistingAttributeValue(*this, Krys::Move(value));
+    }
+
+#pragma endregion
   };
 }
 
@@ -60,4 +71,4 @@ KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::Attr)
   {
     return node.IsAttributeNode();
   }
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

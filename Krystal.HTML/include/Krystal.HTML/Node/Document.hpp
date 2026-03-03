@@ -22,9 +22,20 @@ namespace Krys::HTML
   public:
     Document() noexcept;
 
-    KRYS_NODISCARD DOMString NodeName() const noexcept final;
+#pragma region Document
 
     KRYS_NODISCARD ExceptionOr<Ref<Node>> AdoptNode(Node &node) noexcept;
+
+#pragma endregion
+
+#pragma region Node
+
+    KRYS_NODISCARD DOMString NodeName() const noexcept final
+    {
+      return u8"#document";
+    }
+
+#pragma endregion
 
 #pragma region ParentNode Mixin - https://dom.spec.whatwg.org/#parentnode
 

@@ -9,9 +9,4 @@ namespace Krys::HTML
       : CharacterData(document, Krys::Move(data), NodeType::COMMENT_NODE)
   {
   }
-
-  DOMString Comment::NodeName() const noexcept
-  {
-    return u8"#comment";
-  }
 }

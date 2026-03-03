@@ -14,6 +14,8 @@ namespace Krys::HTML
   {
   }
 
+#pragma region CharacterData
+
   ExceptionOr<void> CharacterData::SetData(const DOMString &data) noexcept
   {
     return ReplaceData(0, _data.size(), data);
@@ -95,6 +97,8 @@ namespace Krys::HTML
 
     return {};
   }
+
+#pragma endregion
 
 #pragma region ChildNode
 

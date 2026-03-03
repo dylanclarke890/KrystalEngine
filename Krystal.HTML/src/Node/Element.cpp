@@ -14,6 +14,18 @@ namespace Krys::HTML
   {
   }
 
+#pragma region Element
+
+  ExceptionOr<void> Element::RemoveAttributeNode(Attr &attribute) const noexcept
+  {
+    // TODO(IMPL): Implement this method
+    return {};
+  }
+
+#pragma endregion
+
+#pragma region Node
+
   DOMString Element::NodeName() const noexcept
   {
     // TODO(IMPL): Return the qualified name
@@ -25,11 +37,12 @@ namespace Krys::HTML
     return TreeQueries::DescendantTextContent(*this);
   }
 
-  ExceptionOr<void> Element::RemoveAttributeNode(Attr &attribute) const noexcept
+  ExceptionOr<void> Element::SetTextContent(DOMString &&value) noexcept
   {
-    // TODO(IMPL): Implement this method
-    return {};
+    return ExceptionOr<void>();
   }
+
+#pragma endregion
 
 #pragma region ChildNode
 

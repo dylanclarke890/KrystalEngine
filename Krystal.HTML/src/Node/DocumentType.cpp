@@ -13,26 +13,21 @@ namespace Krys::HTML
   {
   }
 
-  DOMString DocumentType::NodeName() const noexcept
-  {
-    return _name;
-  }
-
 #pragma region ChildNode
 
   ExceptionOr<void> DocumentType::Before(SmallList<NodeOrString> &&nodes) noexcept
   {
-    return ExceptionOr<void>();
+    return {};
   }
 
   ExceptionOr<void> DocumentType::After(SmallList<NodeOrString> &&nodes) noexcept
   {
-    return ExceptionOr<void>();
+    return {};
   }
 
   ExceptionOr<void> DocumentType::ReplaceWith(SmallList<NodeOrString> &&nodes) noexcept
   {
-    return ExceptionOr<void>();
+    return {};
   }
 
   ExceptionOr<void> DocumentType::Remove() noexcept

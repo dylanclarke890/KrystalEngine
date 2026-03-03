@@ -22,12 +22,29 @@ namespace Krys::HTML
                   NodeFlag flags = NodeFlag::None) noexcept;
 
   public:
+#pragma region CharacterData - https://dom.spec.whatwg.org/#interface-characterdata
+
+    KRYS_NODISCARD const DOMString &Data() const noexcept
+    {
+      return _data;
+    }
+    ExceptionOr<void> SetData(const DOMString &data) noexcept;
+
+    ExceptionOr<DOMString> SubstringData(size_t offset, size_t count) const noexcept;
+    ExceptionOr<void> AppendData(const DOMString &data) noexcept;
+    ExceptionOr<void> InsertData(size_t offset, const DOMString &data) noexcept;
+    ExceptionOr<void> DeleteData(size_t offset, size_t count) noexcept;
+    ExceptionOr<void> ReplaceData(size_t offset, size_t count, const DOMString &data) noexcept;
+
+#pragma endregion
+
 #pragma region Node
 
     KRYS_NODISCARD DOMString NodeValue() const noexcept final
     {
       return _data;
     }
+
     ExceptionOr<void> SetNodeValue(DOMString &&value) noexcept final
     {
       return ReplaceData(0, value.size(), Krys::Move(value));
@@ -37,29 +54,18 @@ namespace Krys::HTML
     {
       return _data;
     }
+
     ExceptionOr<void> SetTextContent(DOMString &&value) noexcept final
     {
       return ReplaceData(0, value.size(), Krys::Move(value));
     }
-
-#pragma endregion
-
-    KRYS_NODISCARD const DOMString &Data() const noexcept
-    {
-      return _data;
-    }
-    ExceptionOr<void> SetData(const DOMString &data) noexcept;
 
     KRYS_NODISCARD size_t Length() const noexcept
     {
       return _data.size();
     }
 
-    ExceptionOr<DOMString> SubstringData(size_t offset, size_t count) const noexcept;
-    ExceptionOr<void> AppendData(const DOMString &data) noexcept;
-    ExceptionOr<void> InsertData(size_t offset, const DOMString &data) noexcept;
-    ExceptionOr<void> DeleteData(size_t offset, size_t count) noexcept;
-    ExceptionOr<void> ReplaceData(size_t offset, size_t count, const DOMString &data) noexcept;
+#pragma endregion
 
 #pragma region ChildNode Mixin - https://dom.spec.whatwg.org/#childnode
 

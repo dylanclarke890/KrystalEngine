@@ -48,6 +48,8 @@ namespace Krys::HTML
     ShadowRoot(Document &document, RefPtr<CustomElementRegistry> &&registry,
                NodeFlag flags = NodeFlag::None) noexcept;
 
+#pragma region ShadowRoot
+
     KRYS_NODISCARD ShadowRootMode Mode() const noexcept
     {
       return _mode;
@@ -57,6 +59,8 @@ namespace Krys::HTML
     {
       return _host;
     }
+
+#pragma endregion
   };
 }
 

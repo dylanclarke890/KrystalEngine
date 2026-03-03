@@ -14,15 +14,19 @@ namespace Krys::HTML
   {
   }
 
-  utf8_string DocumentFragment::NodeName() const noexcept
-  {
-    return u8"#document-fragment";
-  }
+#pragma region Node
 
   DOMString DocumentFragment::TextContent() const noexcept
   {
     return TreeQueries::DescendantTextContent(*this);
   }
+
+  ExceptionOr<void> DocumentFragment::SetTextContent(DOMString &&value) noexcept
+  {
+    return {};
+  }
+
+#pragma endregion
 
 #pragma region ParentNode
 

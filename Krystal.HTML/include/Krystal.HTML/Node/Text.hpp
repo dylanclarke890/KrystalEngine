@@ -19,17 +19,20 @@ namespace Krys::HTML
     Text(Document &document, DOMString &&data, NodeType type = NodeType::TEXT_NODE,
          NodeFlag flags = NodeFlag::None) noexcept;
 
-#pragma region Node
-
-    KRYS_NODISCARD DOMString NodeName() const noexcept override;
-
-#pragma endregion
-
 #pragma region Text
 
     KRYS_NODISCARD ExceptionOr<Ref<Text>> SplitText(size_t offset) noexcept;
 
     KRYS_NODISCARD DOMString WholeText() const noexcept;
+
+#pragma endregion
+
+#pragma region Node
+
+    KRYS_NODISCARD DOMString NodeName() const noexcept override
+    {
+      return u8"#text";
+    }
 
 #pragma endregion
   };

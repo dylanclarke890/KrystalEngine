@@ -26,13 +26,14 @@ namespace Krys::HTML
 
 #pragma region Node
 
-    KRYS_NODISCARD DOMString NodeName() const noexcept final;
+    KRYS_NODISCARD DOMString NodeName() const noexcept final
+    {
+      return u8"#document-fragment";
+    }
 
     KRYS_NODISCARD DOMString TextContent() const noexcept final;
-    ExceptionOr<void> SetTextContent(DOMString &&value) noexcept final
-    {
-      return {};
-    }
+
+    ExceptionOr<void> SetTextContent(DOMString &&value) noexcept final;
 
 #pragma endregion
 

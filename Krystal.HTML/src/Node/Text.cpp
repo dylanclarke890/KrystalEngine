@@ -12,16 +12,6 @@ namespace Krys::HTML
   {
   }
 
-#pragma region Node
-
-  /// @see https://dom.spec.whatwg.org/#exclusive-text-node
-  DOMString Text::NodeName() const noexcept
-  {
-    return u8"#text";
-  }
-
-#pragma endregion
-
 #pragma region Text
 
   /// @see https://dom.spec.whatwg.org/#concept-text-split

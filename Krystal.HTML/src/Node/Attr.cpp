@@ -6,8 +6,5 @@
 
 namespace Krys::HTML
 {
-  DOMString Attr::NodeName() const noexcept
-  {
-    return _name.Name();
-  }
+
 }

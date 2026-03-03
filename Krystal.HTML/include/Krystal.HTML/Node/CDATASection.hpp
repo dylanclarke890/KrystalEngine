@@ -13,7 +13,14 @@ namespace Krys::HTML
   public:
     CDATASection(Document &document, DOMString &&data = u8"") noexcept;
 
-    KRYS_NODISCARD DOMString NodeName() const noexcept override;
+#pragma region Node
+
+    KRYS_NODISCARD DOMString NodeName() const noexcept final
+    {
+      return u8"#cdata-section";
+    }
+
+#pragma endregion
   };
 }
 

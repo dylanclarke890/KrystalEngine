@@ -11,9 +11,4 @@ namespace Krys::HTML
         _target(Krys::Move(target))
   {
   }
-
-  DOMString ProcessingInstruction::NodeName() const noexcept
-  {
-    return _target;
-  }
 }

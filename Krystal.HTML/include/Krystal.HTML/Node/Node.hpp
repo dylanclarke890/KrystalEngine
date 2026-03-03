@@ -277,6 +277,11 @@ namespace Krys::HTML
       return _nodeType == NodeType::CDATA_SECTION_NODE;
     }
 
+    KRYS_NODISCARD bool IsProcessingInstructionNode() const noexcept
+    {
+      return _nodeType == NodeType::PROCESSING_INSTRUCTION_NODE;
+    }
+
     KRYS_NODISCARD bool IsTextNode() const noexcept
     {
       return HasNodeFlag(NodeFlag::IsTextNode);

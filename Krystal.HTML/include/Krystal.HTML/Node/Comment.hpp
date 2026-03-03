@@ -13,7 +13,14 @@ namespace Krys::HTML
   public:
     Comment(Document &document, DOMString &&data = u8"") noexcept;
 
-    KRYS_NODISCARD DOMString NodeName() const noexcept final;
+#pragma region Node
+
+    KRYS_NODISCARD DOMString NodeName() const noexcept final
+    {
+      return u8"#comment";
+    }
+
+#pragma endregion
   };
 }
 
@@ -22,4 +29,4 @@ KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::Comment)
   {
     return node.GetNodeType() == Krys::HTML::NodeType::COMMENT_NODE;
   }
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

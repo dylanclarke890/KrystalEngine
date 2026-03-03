@@ -9,9 +9,4 @@ namespace Krys::HTML
       : Text(document, Krys::Move(data), NodeType::CDATA_SECTION_NODE, NodeFlag::None)
   {
   }
-
-  DOMString CDATASection::NodeName() const noexcept
-  {
-    return u8"#cdata-section";
-  }
 }

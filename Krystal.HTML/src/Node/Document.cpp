@@ -15,6 +15,8 @@ namespace Krys::HTML
   {
   }
 
+#pragma region Document
+
   ExceptionOr<Ref<Node>> Document::AdoptNode(Node &node) noexcept
   {
     if (node.GetNodeType() == NodeType::DOCUMENT_NODE)
@@ -58,10 +60,7 @@ namespace Krys::HTML
     return ShareRef<Node>(node);
   }
 
-  DOMString Document::NodeName() const noexcept
-  {
-    return u8"#document";
-  }
+#pragma endregion
 
 #pragma region ParentNode
 

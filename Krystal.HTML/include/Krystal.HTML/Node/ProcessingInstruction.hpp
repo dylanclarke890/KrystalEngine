@@ -7,8 +7,6 @@
 
 namespace Krys::HTML
 {
-  class Document;
-
   class ProcessingInstruction : public CharacterData
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ProcessingInstruction);
@@ -19,18 +17,29 @@ namespace Krys::HTML
   public:
     ProcessingInstruction(Document &document, DOMString &&target, DOMString &&data) noexcept;
 
+#pragma region ProcessingInstruction
+
     KRYS_NODISCARD const DOMString &Target() const noexcept
     {
       return _target;
     }
 
-    KRYS_NODISCARD DOMString NodeName() const noexcept final;
+#pragma endregion
+
+#pragma region Node
+
+    KRYS_NODISCARD DOMString NodeName() const noexcept final
+    {
+      return _target;
+    }
+
+#pragma endregion
   };
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::ProcessingInstruction)
   static bool IsType(const Krys::HTML::Node &node)
   {
-    return node.GetNodeType() == Krys::HTML::NodeType::PROCESSING_INSTRUCTION_NODE;
+    return node.IsProcessingInstructionNode();
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()

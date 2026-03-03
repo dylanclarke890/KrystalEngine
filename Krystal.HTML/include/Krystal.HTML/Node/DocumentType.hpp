@@ -20,6 +20,8 @@ namespace Krys::HTML
     DocumentType(Document &document, const DOMString &name, const DOMString &publicId,
                  const DOMString &systemId) noexcept;
 
+#pragma region DocumentType
+
     KRYS_NODISCARD const DOMString &Name() const noexcept
     {
       return _name;
@@ -35,7 +37,16 @@ namespace Krys::HTML
       return _systemId;
     }
 
-    KRYS_NODISCARD DOMString NodeName() const noexcept override;
+#pragma endregion
+
+#pragma region Node
+
+    KRYS_NODISCARD DOMString NodeName() const noexcept final
+    {
+      return _name;
+    }
+
+#pragma endregion
 
 #pragma region ChildNode Mixin - https://dom.spec.whatwg.org/#childnode
 
@@ -53,4 +64,4 @@ KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::DocumentType)
   {
     return node.IsDocumentTypeNode();
   }
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

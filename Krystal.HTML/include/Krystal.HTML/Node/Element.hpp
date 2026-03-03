@@ -24,17 +24,7 @@ namespace Krys::HTML
     Element(Document &document, NodeFlag nodeFlags = NodeFlag::None) noexcept;
 
   public:
-#pragma region Node
-
-    KRYS_NODISCARD DOMString NodeName() const noexcept final;
-
-    KRYS_NODISCARD DOMString TextContent() const noexcept final;
-    ExceptionOr<void> SetTextContent(DOMString &&value) noexcept final
-    {
-      return {};
-    }
-
-#pragma endregion
+#pragma region Element
 
     KRYS_NODISCARD RawPtr<ShadowRoot> GetShadowRoot() const noexcept
     {
@@ -42,6 +32,18 @@ namespace Krys::HTML
     }
 
     KRYS_NODISCARD ExceptionOr<void> RemoveAttributeNode(Attr &attribute) const noexcept;
+
+#pragma endregion
+
+#pragma region Node
+
+    KRYS_NODISCARD DOMString NodeName() const noexcept final;
+
+    KRYS_NODISCARD DOMString TextContent() const noexcept final;
+
+    ExceptionOr<void> SetTextContent(DOMString &&value) noexcept final;
+
+#pragma endregion
 
 #pragma region ChildNode Mixin - https://dom.spec.whatwg.org/#childnode
 
