@@ -178,7 +178,7 @@ namespace Krys::HTML
     }
     ExceptionOr<void> Normalize() noexcept;
 
-    KRYS_NODISCARD Ref<Node> CloneNode(bool deep) const noexcept;
+    KRYS_NODISCARD Ref<Node> CloneNode(bool subtree = false) const noexcept;
     KRYS_NODISCARD bool IsEqualNode(RawPtr<const Node> otherNode) const noexcept;
     KRYS_NODISCARD bool IsSameNode(RawPtr<const Node> otherNode) const noexcept; // legacy alias of ===
 
@@ -272,6 +272,11 @@ namespace Krys::HTML
       return HasNodeFlag(NodeFlag::IsCharacterData);
     }
 
+    KRYS_NODISCARD bool IsTextNode() const noexcept
+    {
+      return HasNodeFlag(NodeFlag::IsTextNode);
+    }
+
     KRYS_NODISCARD bool IsCDATASectionNode() const noexcept
     {
       return _nodeType == NodeType::CDATA_SECTION_NODE;
@@ -282,9 +287,9 @@ namespace Krys::HTML
       return _nodeType == NodeType::PROCESSING_INSTRUCTION_NODE;
     }
 
-    KRYS_NODISCARD bool IsTextNode() const noexcept
+    KRYS_NODISCARD bool IsCommentNode() const noexcept
     {
-      return HasNodeFlag(NodeFlag::IsTextNode);
+      return _nodeType == NodeType::COMMENT_NODE;
     }
 
     KRYS_NODISCARD bool IsShadowRootNode() const noexcept

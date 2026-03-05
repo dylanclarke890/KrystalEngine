@@ -84,6 +84,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\ElementRareData.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Node.hpp" />
     <ClInclude Include="include\Krystal.HTML\NodeList\NodeList.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Ranges\BoundaryPoint.hpp" />
     <ClInclude Include="include\Krystal.HTML\Tree\TreeMutationAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Tree\TreeMutationDispatcher.hpp" />
     <ClInclude Include="include\Krystal.HTML\Tree\TreeQueries.hpp" />
@@ -123,6 +124,7 @@
     <ClInclude Include="include\Krystal.HTML\Utils\SmallNodeList.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Ranges\Range.cpp" />
     <ClCompile Include="src\MutationObserver\MutationObserver.cpp" />
     <ClCompile Include="src\Node\ParentNodeRareData.cpp" />
     <ClCompile Include="src\NodeList\HTMLCollection.cpp" />

@@ -119,10 +119,34 @@ namespace Krys::HTML
     return nullptr;
   }
 
+  size_t TreeQueries::NodeIndex(const Node &node) noexcept
+  {
+    size_t index = 0;
+    for (auto *sibling = node.PreviousSibling(); sibling; sibling = sibling->PreviousSibling())
+    {
+      index++;
+    }
+    return index;
+  }
+
+  RawPtr<Node> TreeQueries::ChildAt(const Node &node, size_t index) noexcept
+  {
+    size_t currentIndex = 0;
+    for (auto child = node.FirstChild(); child; child = child->NextSibling())
+    {
+      if (currentIndex == index)
+      {
+        return child;
+      }
+      currentIndex++;
+    }
+    return nullptr;
+  }
+
   size_t TreeQueries::ChildNodeCount(const ContainerNode &node) noexcept
   {
     size_t count = 0;
-    for (auto child = ShareRefPtr(node.FirstChild()); child; child = ShareRefPtr(child->NextSibling()))
+    for (auto child = node.FirstChild(); child; child = child->NextSibling())
     {
       count++;
     }
@@ -132,8 +156,8 @@ namespace Krys::HTML
   KRYS_NODISCARD size_t TreeQueries::ChildElementCount(const ContainerNode &node) noexcept
   {
     size_t count = 0;
-    for (auto childElement = ShareRefPtr(TreeTraversal::FirstElementChild(node)); childElement;
-         childElement = ShareRefPtr(TreeTraversal::NextElementSibling(*childElement)))
+    for (auto childElement = TreeTraversal::FirstElementChild(node); childElement;
+         childElement = TreeTraversal::NextElementSibling(*childElement))
     {
       count++;
     }
@@ -143,7 +167,7 @@ namespace Krys::HTML
 
   void TreeQueries::CollectChildNodes(const ContainerNode &parent, SmallNodeList &collection) noexcept
   {
-    for (auto child = ShareRefPtr(parent.FirstChild()); child; child = ShareRefPtr(child->NextSibling()))
+    for (auto child = parent.FirstChild(); child; child = child->NextSibling())
     {
       collection.emplace_back(ShareRef(*child));
     }
@@ -151,8 +175,8 @@ namespace Krys::HTML
 
   void TreeQueries::CollectChildElements(const ContainerNode &parent, SmallElementList &collection) noexcept
   {
-    for (auto childElement = ShareRefPtr(TreeTraversal::FirstElementChild(parent)); childElement;
-         childElement = ShareRefPtr(TreeTraversal::NextElementSibling(*childElement)))
+    for (auto childElement = TreeTraversal::FirstElementChild(parent); childElement;
+         childElement = TreeTraversal::NextElementSibling(*childElement))
     {
       collection.emplace_back(ShareRef(*childElement));
     }
@@ -177,9 +201,9 @@ namespace Krys::HTML
   DOMString TreeQueries::ChildTextContent(const ContainerNode &node) noexcept
   {
     DOMString content;
-    for (auto child = ShareRefPtr(node.FirstChild()); child; child = ShareRefPtr(child->NextSibling()))
+    for (auto child = node.FirstChild(); child; child = child->NextSibling())
     {
-      if (auto *textNode = DynamicDowncast<Text>(*child))
+      if (auto *textNode = DynamicDowncast<Text>(child))
       {
         content += textNode->TextContent();
       }
@@ -193,7 +217,7 @@ namespace Krys::HTML
     RawPtr<const Text> start = &node;
     while (RawPtr<const Node> prev = start->PreviousSibling())
     {
-      if (const auto *prevText = DynamicDowncast<Text>(*prev))
+      if (const auto *prevText = DynamicDowncast<Text>(prev))
       {
         start = prevText;
       }
@@ -233,6 +257,49 @@ namespace Krys::HTML
     {
       content += Downcast<Text>(current)->TextContent();
     }
+
     return content;
+  }
+
+  bool TreeQueries::IsInclusiveAncestorOf(const Node &a, const Node &b) noexcept
+  {
+    if (!HasSameRoot(a, b))
+    {
+      return false;
+    }
+
+    RawPtr<const Node> current = &b;
+    while (current)
+    {
+      if (current == &a)
+      {
+        return true;
+      }
+
+      current = current->ParentNode();
+    }
+
+    return false;
+  }
+
+  RawPtr<ContainerNode> TreeQueries::CommonAncestorContainer(Node &a, Node &b) noexcept
+  {
+    if (!HasSameRoot(a, b))
+    {
+      return nullptr;
+    }
+
+    auto *container = &a;
+    while (container)
+    {
+      if (IsInclusiveAncestorOf(*container, b))
+      {
+        return Downcast<ContainerNode>(container);
+      }
+
+      container = container->ParentNode();
+    }
+
+    return nullptr;
   }
 }

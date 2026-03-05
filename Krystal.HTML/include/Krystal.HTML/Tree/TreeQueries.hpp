@@ -26,6 +26,8 @@ namespace Krys::HTML
 
     KRYS_NODISCARD static RawPtr<ShadowRoot> GetShadowRoot(const Node &node) noexcept;
 
+    KRYS_NODISCARD static size_t NodeIndex(const Node &node) noexcept;
+    KRYS_NODISCARD static RawPtr<Node> ChildAt(const Node &node, size_t index) noexcept;
     KRYS_NODISCARD static size_t ChildNodeCount(const ContainerNode &node) noexcept;
     KRYS_NODISCARD static size_t ChildElementCount(const ContainerNode &node) noexcept;
 
@@ -36,5 +38,9 @@ namespace Krys::HTML
     KRYS_NODISCARD static DOMString ChildTextContent(const ContainerNode &node) noexcept;
     KRYS_NODISCARD static DOMString ContiguousTextContent(const Text &node) noexcept;
     KRYS_NODISCARD static DOMString ContiguousExclusiveTextContent(const Text &node) noexcept;
+
+    KRYS_NODISCARD static bool IsInclusiveAncestorOf(const Node &a, const Node &b) noexcept;
+
+    KRYS_NODISCARD static RawPtr<ContainerNode> CommonAncestorContainer(Node &a, Node &b) noexcept;
   };
 }

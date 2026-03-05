@@ -27,14 +27,21 @@ namespace Krys::HTML
                                                       RawPtr<Node> refChild) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-node-insert
-    KRYS_NODISCARD static ExceptionOr<void> Insert(Node &node, ContainerNode &parent, RawPtr<Node> refChild,
-                                                   SuppressObservers suppressObservers) noexcept;
+    KRYS_NODISCARD static ExceptionOr<void>
+      Insert(Node &node, ContainerNode &parent, RawPtr<Node> refChild,
+             SuppressObservers suppressObservers = SuppressObservers(false)) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-node-pre-remove
     KRYS_NODISCARD static ExceptionOr<void> PreRemove(Node &node, ContainerNode &parent) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-node-remove
-    KRYS_NODISCARD static ExceptionOr<void> Remove(Node &node, ContainerNode &parent,
-                                                   SuppressObservers suppressObservers) noexcept;
+    KRYS_NODISCARD static ExceptionOr<void>
+      Remove(Node &node, ContainerNode &parent,
+             SuppressObservers suppressObservers = SuppressObservers(false)) noexcept;
+
+    // TODO(fix): replace this with a call to ReplaceAll with a null node.
+    KRYS_NODISCARD static ExceptionOr<void>
+      RemoveAllChildren(ContainerNode &parent,
+                        SuppressObservers suppressObservers = SuppressObservers(false)) noexcept;
   };
 }

@@ -84,9 +84,9 @@ namespace Krys::HTML
     return {};
   }
 
-  Ref<Node> Node::CloneNode(bool deep) const noexcept
+  Ref<Node> Node::CloneNode(bool subtree) const noexcept
   {
-    (void)deep;
+    (void)subtree;
     // TODO(IMPL)
     return ShareRef<Node>(*const_cast<Node *>(this));
   }
@@ -175,8 +175,7 @@ namespace Krys::HTML
   {
     if (IsInTreeScope())
     {
-      auto &root = GetTreeScope().RootNode();
-      return root;
+      return GetTreeScope().RootNode();
     }
 
     return TreeTraversal::Root(*this);
@@ -186,8 +185,7 @@ namespace Krys::HTML
   {
     if (IsInTreeScope())
     {
-      auto &root = GetTreeScope().RootNode();
-      return root;
+      return GetTreeScope().RootNode();
     }
 
     return TreeTraversal::Root(*this);

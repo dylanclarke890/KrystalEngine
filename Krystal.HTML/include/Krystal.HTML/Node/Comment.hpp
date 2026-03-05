@@ -27,6 +27,6 @@ namespace Krys::HTML
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::Comment)
   static bool IsType(const Krys::HTML::Node &node)
   {
-    return node.GetNodeType() == Krys::HTML::NodeType::COMMENT_NODE;
+    return node.IsCommentNode();
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

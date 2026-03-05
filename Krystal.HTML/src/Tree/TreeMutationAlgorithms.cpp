@@ -276,4 +276,19 @@ namespace Krys::HTML
 
     return {};
   }
+
+  ExceptionOr<void> TreeMutationAlgorithms::RemoveAllChildren(ContainerNode &parent,
+                                                              SuppressObservers suppressObservers) noexcept
+  {
+    for (RawPtr<Node> child = parent.FirstChild(); child; child = child->NextSibling())
+    {
+      auto result = Remove(*child, parent, suppressObservers);
+      if (result.HasException())
+      {
+        return {result.ReleaseException()};
+      }
+    }
+
+    return {};
+  }
 }

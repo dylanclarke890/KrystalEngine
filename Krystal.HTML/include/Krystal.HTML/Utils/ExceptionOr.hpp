@@ -27,6 +27,10 @@ namespace Krys::HTML
     {
     }
 
+    ExceptionOr(const value_type &value) noexcept : _value {value}
+    {
+    }
+
     ExceptionOr(Exception &&ex) noexcept : _value {Unexpected(Krys::Move(ex))}
     {
     }

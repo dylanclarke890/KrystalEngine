@@ -82,6 +82,7 @@ namespace Krys
   template <typename T, typename PtrTraits = RawPtrTraits<T>>
   KRYS_NODISCARD constexpr inline Ref<T, PtrTraits> AdoptRef(T &ptr) noexcept
   {
+    static_assert(!IsPointer<T>, "T must not be a pointer type.");
     return Ref<T, PtrTraits>::NoRef(ptr);
   }
 
@@ -94,6 +95,7 @@ namespace Krys
   template <typename T, typename PtrTraits = RawPtrTraits<T>>
   KRYS_NODISCARD constexpr inline Ref<T, PtrTraits> ShareRef(T &ptr) noexcept
   {
+    static_assert(!IsPointer<T>, "T must not be a pointer type.");
     return Ref<T, PtrTraits>::WithRef(ptr);
   }
 
