@@ -87,7 +87,7 @@ namespace Krys::HTML
     auto *parent = node.ParentNode();
     assert(parent != nullptr);
 
-    auto index = TreeQueries::NodeIndex(node);
+    auto index = TreeQueries::Index(node);
 
     for (auto &range : node.NodeDocument()._liveRanges)
     {

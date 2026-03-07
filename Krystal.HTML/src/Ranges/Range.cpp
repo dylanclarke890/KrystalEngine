@@ -37,7 +37,7 @@ namespace Krys::HTML
       return Exception(ExceptionCode::InvalidNodeTypeError);
     }
 
-    SetStartBoundaryPoint(*parent, TreeQueries::NodeIndex(node));
+    SetStartBoundaryPoint(*parent, TreeQueries::Index(node));
     return {};
   }
 
@@ -49,7 +49,7 @@ namespace Krys::HTML
       return Exception(ExceptionCode::InvalidNodeTypeError);
     }
 
-    SetStartBoundaryPoint(*parent, TreeQueries::NodeIndex(node) + 1uz);
+    SetStartBoundaryPoint(*parent, TreeQueries::Index(node) + 1uz);
     return {};
   }
 
@@ -61,7 +61,7 @@ namespace Krys::HTML
       return Exception(ExceptionCode::InvalidNodeTypeError);
     }
 
-    SetEndBoundaryPoint(*parent, TreeQueries::NodeIndex(node));
+    SetEndBoundaryPoint(*parent, TreeQueries::Index(node));
     return {};
   }
 
@@ -73,7 +73,7 @@ namespace Krys::HTML
       return Exception(ExceptionCode::InvalidNodeTypeError);
     }
 
-    SetEndBoundaryPoint(*parent, TreeQueries::NodeIndex(node) + 1uz);
+    SetEndBoundaryPoint(*parent, TreeQueries::Index(node) + 1uz);
     return {};
   }
 
@@ -97,7 +97,7 @@ namespace Krys::HTML
       return Exception(ExceptionCode::InvalidNodeTypeError);
     }
 
-    auto index = TreeQueries::NodeIndex(node);
+    auto index = TreeQueries::Index(node);
     SetStartBoundaryPoint(*parent, index);
     SetEndBoundaryPoint(*parent, index + 1uz);
 
@@ -185,7 +185,7 @@ namespace Krys::HTML
       }
 
       newNode = ShareRefPtr(refNode->ParentNode());
-      newOffset = TreeQueries::NodeIndex(*refNode) + 1uz;
+      newOffset = TreeQueries::Index(*refNode) + 1uz;
     }
 
     if (_start.Container->IsCharacterDataNode())
@@ -262,7 +262,7 @@ namespace Krys::HTML
       }
 
       newNode = ShareRefPtr(refNode->ParentNode());
-      newOffset = TreeQueries::NodeIndex(*refNode) + 1uz;
+      newOffset = TreeQueries::Index(*refNode) + 1uz;
     }
 
     auto cloneResult = CloneFirstPartiallyContainedChildContents(firstPartiallyContainedChild, *fragment,
@@ -395,7 +395,7 @@ namespace Krys::HTML
       node.ParentNode()->RemoveChild(node);
     }
 
-    auto newOffset = refNode ? TreeQueries::NodeIndex(*refNode) : parent->Length();
+    auto newOffset = refNode ? TreeQueries::Index(*refNode) : parent->Length();
     newOffset += node.IsDocumentFragmentNode() ? node.Length() : 1uz;
 
     if (auto preInsert = TreeMutationAlgorithms::PreInsert(node, *parent, refNode.get());
@@ -531,7 +531,7 @@ namespace Krys::HTML
       return true;
     }
 
-    auto offset = TreeQueries::NodeIndex(node);
+    auto offset = TreeQueries::Index(node);
 
     auto boundaryPoint = BoundaryPoint {ShareRef(*parent), offset};
     if (boundaryPoint.ComparePositionTo(_start) != std::strong_ordering::greater)

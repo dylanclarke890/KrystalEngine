@@ -10,6 +10,18 @@
 
 namespace Krys::HTML
 {
+#pragma region Trees
+
+  bool TreeQueries::IsParent(const Node &a, const Node &b) noexcept
+  {
+    return &a == b.ParentNode();
+  }
+
+  bool TreeQueries::IsChild(const Node &a, const Node &b) noexcept
+  {
+    return a.ParentNode() == &b;
+  }
+
   const Node &TreeQueries::Root(const Node &node) noexcept
   {
     if (node.IsInTreeScope())
@@ -29,6 +41,131 @@ namespace Krys::HTML
 
     return TreeTraversal::Root(node);
   }
+
+  bool TreeQueries::IsDescendant(const Node &a, const Node &b) noexcept
+  {
+    RawPtr<const Node> current = &a;
+    while (current = current->ParentNode())
+    {
+      if (current == &b)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool TreeQueries::IsInclusiveDescendant(const Node &a, const Node &b) noexcept
+  {
+    if (&a == &b)
+    {
+      return true;
+    }
+
+    return IsDescendant(a, b);
+  }
+
+  bool TreeQueries::IsAncestor(const Node &a, const Node &b) noexcept
+  {
+    RawPtr<const Node> current = &b;
+    while (current = current->ParentNode())
+    {
+      if (current == &a)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool TreeQueries::IsInclusiveAncestor(const Node &a, const Node &b) noexcept
+  {
+    if (&a == &b)
+    {
+      return true;
+    }
+
+    return IsAncestor(a, b);
+  }
+
+  bool TreeQueries::IsSibling(const Node &a, const Node &b) noexcept
+  {
+    if (a.ParentNode() == nullptr || b.ParentNode() == nullptr || &a == &b)
+    {
+      return false;
+    }
+
+    return a.ParentNode() == b.ParentNode();
+  }
+
+  bool TreeQueries::IsInclusiveSibling(const Node &a, const Node &b) noexcept
+  {
+    if (&a == &b)
+    {
+      return true;
+    }
+
+    if (a.ParentNode() == nullptr || b.ParentNode() == nullptr)
+    {
+      return false;
+    }
+
+    return a.ParentNode() == b.ParentNode();
+  }
+
+  bool TreeQueries::IsPreceding(const Node &a, const Node &b) noexcept
+  {
+    if (&a == &b)
+    {
+      return false;
+    }
+
+    RawPtr<const Node> current = &a;
+    while (current = TreeTraversal::Next(*current))
+    {
+      if (current == &b)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  bool TreeQueries::IsFollowing(const Node &a, const Node &b) noexcept
+  {
+    if (&a == &b)
+    {
+      return false;
+    }
+
+    RawPtr<const Node> current = &b;
+    while (current = TreeTraversal::Next(*current))
+    {
+      if (current == &a)
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  size_t TreeQueries::Index(const Node &node) noexcept
+  {
+    size_t index = 0;
+    for (auto *sibling = node.PreviousSibling(); sibling; sibling = sibling->PreviousSibling())
+    {
+      index++;
+    }
+    return index;
+  }
+
+#pragma endregion
+
+#pragma region ShadowRoot
 
   const Node &TreeQueries::ShadowIncludingRoot(const Node &node) noexcept
   {
@@ -54,6 +191,8 @@ namespace Krys::HTML
     return root;
   }
 
+#pragma endregion
+
   bool TreeQueries::HasSameRoot(const Node &a, const Node &b) noexcept
   {
     return &Root(a) == &Root(b);
@@ -62,67 +201,6 @@ namespace Krys::HTML
   bool TreeQueries::HasSameShadowIncludingRoot(const Node &a, const Node &b) noexcept
   {
     return &ShadowIncludingRoot(a) == &ShadowIncludingRoot(b);
-  }
-
-  bool TreeQueries::IsPreceding(const Node &a, const Node &b) noexcept
-  {
-    // TODO(IMPL):
-    return false;
-  }
-
-  bool TreeQueries::IsFollowing(const Node &a, const Node &b) noexcept
-  {
-    if (!HasSameRoot(a, b))
-    {
-      return false;
-    }
-
-    if (&a == &b)
-    {
-      return false;
-    }
-
-    RawPtr<const Node> current = &a;
-    while (current = TreeTraversal::Next(*current))
-    {
-      if (current == &b)
-      {
-        return true;
-      }
-    }
-
-    return false;
-  }
-
-  bool TreeQueries::IsAncestorOf(const Node &a, const Node &b) noexcept
-  {
-    if (!HasSameRoot(a, b))
-    {
-      return false;
-    }
-
-    RawPtr<const Node> current = &b;
-    while (current)
-    {
-      if (current == &a)
-      {
-        return true;
-      }
-
-      current = current->ParentNode();
-    }
-
-    return false;
-  }
-
-  bool TreeQueries::IsChildOf(const Node &parent, const Node &child) noexcept
-  {
-    if (!HasSameRoot(parent, child))
-    {
-      return false;
-    }
-
-    return child.ParentNode() == &parent;
   }
 
   bool TreeQueries::IsHostIncludingAncestorOf(Node &node, Node &other) noexcept
@@ -200,16 +278,6 @@ namespace Krys::HTML
     }
 
     return nullptr;
-  }
-
-  size_t TreeQueries::NodeIndex(const Node &node) noexcept
-  {
-    size_t index = 0;
-    for (auto *sibling = node.PreviousSibling(); sibling; sibling = sibling->PreviousSibling())
-    {
-      index++;
-    }
-    return index;
   }
 
   RawPtr<Node> TreeQueries::ChildAt(const Node &node, size_t index) noexcept

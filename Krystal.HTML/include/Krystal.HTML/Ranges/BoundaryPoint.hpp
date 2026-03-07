@@ -32,10 +32,10 @@ namespace Krys::HTML
         return StrongOrder::Reverse(other.ComparePositionTo(*this));
       }
 
-      if (TreeQueries::IsAncestorOf(a, b))
+      if (TreeQueries::IsAncestor(a, b))
       {
         RawPtr<const Node> child = &b;
-        while (child && !TreeQueries::IsChildOf(a, *child))
+        while (child && !TreeQueries::IsChild(a, *child))
         {
           child = child->ParentNode();
         }

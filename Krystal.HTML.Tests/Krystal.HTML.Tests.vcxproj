@@ -168,6 +168,7 @@
     <ClCompile Include="tests\Parser\HTMLInputStream.cpp" />
     <ClCompile Include="tests\Parser\HTMLTokenizerIntegrationTests.cpp" />
     <ClCompile Include="tests\Parser\HTMLTokenizerStates.cpp" />
+    <ClCompile Include="tests\Tree\TreeQueries.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML.Tests\ParserTestUtils.hpp" />

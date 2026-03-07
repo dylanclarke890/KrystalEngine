@@ -18,21 +18,57 @@ namespace Krys::HTML
   class TreeQueries
   {
   public:
+#pragma region Trees - https://dom.spec.whatwg.org/#trees
+
+    /// @see https://dom.spec.whatwg.org/#concept-tree-participate
+    KRYS_NODISCARD static bool IsParent(const Node &a, const Node &b) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-tree-participate
+    KRYS_NODISCARD static bool IsChild(const Node &a, const Node &b) noexcept;
+
     /// @see https://dom.spec.whatwg.org/#concept-tree-root
     KRYS_NODISCARD static const Node &Root(const Node &node) noexcept;
     KRYS_NODISCARD static Node &Root(Node &node) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-tree-descendant
+    KRYS_NODISCARD static bool IsDescendant(const Node &a, const Node &b) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-tree-inclusive-descendant
+    KRYS_NODISCARD static bool IsInclusiveDescendant(const Node &a, const Node &b) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-tree-ancestor
+    KRYS_NODISCARD static bool IsAncestor(const Node &a, const Node &b) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-tree-inclusive-ancestor
+    KRYS_NODISCARD static bool IsInclusiveAncestor(const Node &a, const Node &b) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-tree-sibling
+    KRYS_NODISCARD static bool IsSibling(const Node &a, const Node &b) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-tree-inclusive-sibling
+    KRYS_NODISCARD static bool IsInclusiveSibling(const Node &a, const Node &b) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-tree-preceding
+    KRYS_NODISCARD static bool IsPreceding(const Node &a, const Node &b) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-tree-following
+    KRYS_NODISCARD static bool IsFollowing(const Node &a, const Node &b) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-tree-index
+    KRYS_NODISCARD static size_t Index(const Node &node) noexcept;
+
+#pragma endregion
+
+#pragma region ShadowRoot - https://dom.spec.whatwg.org/#interface-shadowroot
 
     /// @see https://dom.spec.whatwg.org/#concept-shadow-including-root
     KRYS_NODISCARD static const Node &ShadowIncludingRoot(const Node &node) noexcept;
     KRYS_NODISCARD static Node &ShadowIncludingRoot(Node &node) noexcept;
 
+#pragma endregion
+
     KRYS_NODISCARD static bool HasSameRoot(const Node &a, const Node &b) noexcept;
     KRYS_NODISCARD static bool HasSameShadowIncludingRoot(const Node &a, const Node &b) noexcept;
-
-    KRYS_NODISCARD static bool IsPreceding(const Node &a, const Node &b) noexcept;
-    KRYS_NODISCARD static bool IsFollowing(const Node &a, const Node &b) noexcept;
-    KRYS_NODISCARD static bool IsAncestorOf(const Node &node, const Node &b) noexcept;
-    KRYS_NODISCARD static bool IsChildOf(const Node &parent, const Node &child) noexcept;
 
     KRYS_NODISCARD static bool IsHostIncludingAncestorOf(Node &node, Node &other) noexcept;
     KRYS_NODISCARD static bool IsHostIncludingInclusiveAncestorOf(Node &node, Node &other) noexcept;
@@ -44,7 +80,6 @@ namespace Krys::HTML
 
     KRYS_NODISCARD static RawPtr<ShadowRoot> GetShadowRoot(const Node &node) noexcept;
 
-    KRYS_NODISCARD static size_t NodeIndex(const Node &node) noexcept;
     KRYS_NODISCARD static RawPtr<Node> ChildAt(const Node &node, size_t index) noexcept;
     KRYS_NODISCARD static size_t ChildNodeCount(const ContainerNode &node) noexcept;
     KRYS_NODISCARD static size_t ChildElementCount(const ContainerNode &node) noexcept;
