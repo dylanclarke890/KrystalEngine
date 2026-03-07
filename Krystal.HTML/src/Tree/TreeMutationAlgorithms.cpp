@@ -3,6 +3,7 @@
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Tree/TreeMutationDispatcher.hpp"
@@ -64,12 +65,9 @@ namespace Krys::HTML
 
         if (elementCount == 1)
         {
-          for (RawPtr<Node> child = parent.FirstChild(); child; child = child->NextSibling())
+          if (TreeQueries::HasElementChild(parent))
           {
-            if (child->IsElementNode())
-            {
-              return Exception {ExceptionCode::HierarchyRequestError};
-            }
+            return Exception {ExceptionCode::HierarchyRequestError};
           }
 
           if (TreeQueries::IsDocTypeOrDocTypeFollows(refChild))
@@ -80,12 +78,9 @@ namespace Krys::HTML
       }
       else if (node.IsElementNode())
       {
-        for (RawPtr<Node> child = parent.FirstChild(); child; child = child->NextSibling())
+        if (TreeQueries::HasElementChild(parent))
         {
-          if (child->IsElementNode())
-          {
-            return Exception {ExceptionCode::HierarchyRequestError};
-          }
+          return Exception {ExceptionCode::HierarchyRequestError};
         }
 
         if (TreeQueries::IsDocTypeOrDocTypeFollows(refChild))
@@ -135,7 +130,12 @@ namespace Krys::HTML
       return {result.ReleaseException()};
     }
 
-    return {};
+    if (&node == refChild)
+    {
+      refChild = node.NextSibling();
+    }
+
+    return Insert(node, parent, refChild);
   }
 
   ExceptionOr<void> TreeMutationAlgorithms::Insert(Node &node, ContainerNode &parent, RawPtr<Node> refChild,
@@ -161,13 +161,6 @@ namespace Krys::HTML
       // TODO(IMPL):
       // remove children from the document fragment with suppressObservers = true
       // Queue mutation record for node with << >>, nodes, null, and null.
-    }
-
-    // This step is part of the PreInsert algorithm but it'd be annoying to take a pointer to a pointer to be
-    // able to update this properly
-    if (&node == refChild)
-    {
-      refChild = node.NextSibling();
     }
 
     if (refChild != nullptr)
@@ -237,7 +230,7 @@ namespace Krys::HTML
       return Exception {ExceptionCode::NotFoundError};
     }
 
-    return {};
+    return Remove(node, parent);
   }
 
   ExceptionOr<void> TreeMutationAlgorithms::Remove(Node &node, ContainerNode &parent,
@@ -277,10 +270,72 @@ namespace Krys::HTML
     return {};
   }
 
+  ExceptionOr<void> TreeMutationAlgorithms::Move(Node &node, ContainerNode &newParent,
+                                                 RawPtr<Node> refChild) noexcept
+  {
+    if (!TreeQueries::HasSameShadowIncludingRoot(newParent, node))
+    {
+      return Exception {ExceptionCode::HierarchyRequestError};
+    }
+
+    if (TreeQueries::IsHostIncludingInclusiveAncestorOf(node, newParent))
+    {
+      return Exception {ExceptionCode::HierarchyRequestError};
+    }
+
+    if (refChild != nullptr && refChild->ParentNode() != &newParent)
+    {
+      return Exception {ExceptionCode::NotFoundError};
+    }
+
+    if (!node.IsElementNode() && !node.IsCharacterDataNode())
+    {
+      return Exception {ExceptionCode::HierarchyRequestError};
+    }
+
+    if (node.IsTextNode() && newParent.IsDocumentNode())
+    {
+      return Exception {ExceptionCode::HierarchyRequestError};
+    }
+
+    if (newParent.IsDocumentNode() && node.IsElementNode())
+    {
+      if (TreeQueries::HasElementChild(newParent))
+      {
+        return Exception {ExceptionCode::HierarchyRequestError};
+      }
+
+      if (refChild != nullptr && TreeQueries::IsDocTypeOrDocTypeFollows(refChild))
+      {
+        return Exception {ExceptionCode::HierarchyRequestError};
+      }
+    }
+
+    auto *oldParent = node.ParentNode();
+    assert(oldParent != nullptr);
+
+    TreeMutationDispatcher::LiveRangePreRemove(node);
+
+    // TODO(IMPL): For each NodeIterator object iterator whose root’s node document is node’s node document:
+    // run the NodeIterator pre-remove steps given node and iterator.
+
+    auto *oldPreviousSibling = node.PreviousSibling();
+    auto *oldNextSibling = node.NextSibling();
+
+    if (auto result = Remove(node, *oldParent); result.HasException())
+    {
+      return {result.ReleaseException()};
+    }
+
+    // TODO(IMPL):
+
+    return {};
+  }
+
   ExceptionOr<void> TreeMutationAlgorithms::RemoveAllChildren(ContainerNode &parent,
                                                               SuppressObservers suppressObservers) noexcept
   {
-    for (RawPtr<Node> child = parent.FirstChild(); child; child = child->NextSibling())
+    while (RawPtr<Node> child = parent.FirstChild())
     {
       auto result = Remove(*child, parent, suppressObservers);
       if (result.HasException())
@@ -290,5 +345,84 @@ namespace Krys::HTML
     }
 
     return {};
+  }
+
+  Ref<Node> TreeMutationAlgorithms::CloneNode(Node &node, RawPtr<Document> document, bool subtree,
+                                              RawPtr<ContainerNode> parent,
+                                              RawPtr<CustomElementRegistry> fallbackRegistry) noexcept
+  {
+    if (document == nullptr)
+    {
+      document = node.OwnerDocument();
+    }
+
+    assert(!node.IsDocumentNode() || &node == document);
+
+    auto copy = CloneSingleNode(node, *document, fallbackRegistry);
+    TreeMutationDispatcher::NodeCloned(node, *copy, subtree);
+
+    if (parent != nullptr)
+    {
+      parent->AppendChild(*copy);
+    }
+
+    if (subtree)
+    {
+      assert(node.IsContainerNode());
+      for (RawPtr<Node> child = node.FirstChild(); child; child = child->NextSibling())
+      {
+        CloneNode(*child, document, subtree, Downcast<ContainerNode>(copy.get()), fallbackRegistry);
+      }
+    }
+
+    if (auto *element = DynamicDowncast<Element>(node))
+    {
+      auto *elementCopy = DynamicDowncast<Element>(copy.get());
+      if (auto *shadowRoot = element->GetShadowRoot(); shadowRoot && shadowRoot->Clonable())
+      {
+        assert(elementCopy->GetShadowRoot() && !elementCopy->GetShadowRoot()->Clonable());
+        // TODO(IMPL):
+      }
+    }
+
+    return copy;
+  }
+
+  Ref<Node> TreeMutationAlgorithms::CloneSingleNode(Node &node, Document &document,
+                                                    RawPtr<CustomElementRegistry> fallbackRegistry) noexcept
+  {
+    RefPtr<Node> copy = nullptr;
+
+    if (auto *element = DynamicDowncast<Element>(node))
+    {
+      // TODO(IMPL):
+    }
+    else
+    {
+      if (node.IsDocumentNode())
+      {
+        // TODO(IMPL):
+      }
+      else if (node.IsDocumentTypeNode())
+      {
+        // TODO(IMPL):
+      }
+      else if (node.IsAttributeNode())
+      {
+        // TODO(IMPL):
+      }
+      else if (node.IsTextNode() || node.IsCommentNode())
+      {
+        // TODO(IMPL):
+      }
+      else if (node.IsProcessingInstructionNode())
+      {
+        // TODO(IMPL):
+      }
+    }
+
+    assert(copy);
+
+    return copy;
   }
 }

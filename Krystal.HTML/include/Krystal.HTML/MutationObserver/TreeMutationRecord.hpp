@@ -4,7 +4,7 @@
 
 namespace Krys::HTML
 {
-  class ChildNodeMutationRecord : public MutationRecord
+  class TreeMutationRecord : public MutationRecord
   {
   private:
     Ref<Node> _target;
@@ -14,8 +14,8 @@ namespace Krys::HTML
     Ref<Node> _nextSibling;
 
   public:
-    ChildNodeMutationRecord(ContainerNode &target, Ref<NodeList> &&added, Ref<NodeList> &&removed,
-                            RefPtr<Node> &&previousSibling, RefPtr<Node> &&nextSibling) noexcept;
+    TreeMutationRecord(ContainerNode &target, Ref<NodeList> &&added, Ref<NodeList> &&removed,
+                       RefPtr<Node> &&previousSibling, RefPtr<Node> &&nextSibling) noexcept;
 
     KRYS_NODISCARD const StringAtom &Type() const noexcept override
     {

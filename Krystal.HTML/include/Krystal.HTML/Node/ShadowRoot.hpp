@@ -60,6 +60,11 @@ namespace Krys::HTML
       return _host;
     }
 
+    KRYS_NODISCARD bool Clonable() const noexcept
+    {
+      return _clonable;
+    }
+
 #pragma endregion
   };
 }

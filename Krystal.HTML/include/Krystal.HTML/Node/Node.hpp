@@ -75,6 +75,7 @@ namespace Krys::HTML
   class ShadowRoot;
   class TreeMutationAlgorithms;
   class TreeMutationDispatcher;
+  class TreeQueries;
   class TreeScope;
 
   struct NodeInsertedContext;
@@ -97,6 +98,8 @@ namespace Krys::HTML
     friend class MutationObserver;
     friend class TreeMutationAlgorithms;
     friend class TreeMutationDispatcher;
+    friend class TreeQueries;
+    friend class TreeScope;
 
   private:
     NodeFlag _flags : BitCount<NodeFlag>() {NodeFlag::None};
@@ -123,10 +126,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD virtual utf8_string NodeName() const noexcept = 0;
 
-    KRYS_NODISCARD URL BaseURI() const noexcept
-    {
-      return {u8"about:blank"};
-    }
+    KRYS_NODISCARD URL BaseURI() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#connected
     KRYS_NODISCARD bool IsConnected() const noexcept
@@ -134,10 +134,12 @@ namespace Krys::HTML
       return HasEventTargetFlag(EventTargetFlag::IsConnected);
     }
 
-    KRYS_NODISCARD RawPtr<Document> OwnerDocument() const noexcept
+    KRYS_NODISCARD Document &NodeDocument() const noexcept
     {
-      return _ownerDocument.get();
+      return *_ownerDocument;
     }
+
+    KRYS_NODISCARD RawPtr<Document> OwnerDocument() const noexcept;
 
     KRYS_NODISCARD Node &GetRootNode(const GetRootNodeOptions &options) noexcept;
     KRYS_NODISCARD RawPtr<ContainerNode> ParentNode() const noexcept
@@ -194,39 +196,9 @@ namespace Krys::HTML
     ExceptionOr<void> RemoveChild(Node &child) noexcept;
     ExceptionOr<void> AppendChild(Node &newChild) noexcept;
 
-#pragma endregion
+    KRYS_NODISCARD size_t Length() const noexcept;
 
-#pragma region Tree Scope
-
-    KRYS_NODISCARD TreeScope &GetTreeScope() const noexcept
-    {
-      assert(_treeScope != nullptr);
-      return *_treeScope;
-    }
-
-    void SetTreeScope(TreeScope &treeScope) noexcept
-    {
-      _treeScope = &treeScope;
-    }
-
-    void SetTreeScopeRecursively(TreeScope &newTreeScope) noexcept;
-
-    KRYS_NODISCARD bool IsInTreeScope() const noexcept
-    {
-      return IsConnected() || IsInShadowTree();
-    }
-
-    /// @see https://dom.spec.whatwg.org/#concept-shadow-tree
-    KRYS_NODISCARD bool IsInShadowTree() const noexcept
-    {
-      return HasEventTargetFlag(EventTargetFlag::IsInShadowTree);
-    }
-
-    /// @see https://dom.spec.whatwg.org/#concept-document-tree
-    KRYS_NODISCARD bool IsInDocumentTree() const noexcept
-    {
-      return IsConnected() && !IsInShadowTree();
-    }
+    KRYS_NODISCARD size_t CountChildNodes() const noexcept;
 
 #pragma endregion
 
@@ -304,14 +276,41 @@ namespace Krys::HTML
 
 #pragma endregion
 
-    KRYS_NODISCARD Node &Root() noexcept;
-    KRYS_NODISCARD const Node &Root() const noexcept;
-    KRYS_NODISCARD Node &ShadowIncludingRoot() noexcept;
-
-    KRYS_NODISCARD size_t Length() const noexcept;
-    KRYS_NODISCARD size_t CountChildNodes() const noexcept;
-
   protected:
+#pragma region Tree Scope
+
+    KRYS_NODISCARD TreeScope &GetTreeScope() const noexcept
+    {
+      assert(_treeScope != nullptr);
+      return *_treeScope;
+    }
+
+    void SetTreeScope(TreeScope &treeScope) noexcept
+    {
+      _treeScope = &treeScope;
+    }
+
+    void SetTreeScopeRecursively(TreeScope &newTreeScope) noexcept;
+
+    KRYS_NODISCARD bool IsInTreeScope() const noexcept
+    {
+      return IsConnected() || IsInShadowTree();
+    }
+
+    /// @see https://dom.spec.whatwg.org/#concept-shadow-tree
+    KRYS_NODISCARD bool IsInShadowTree() const noexcept
+    {
+      return HasEventTargetFlag(EventTargetFlag::IsInShadowTree);
+    }
+
+    /// @see https://dom.spec.whatwg.org/#concept-document-tree
+    KRYS_NODISCARD bool IsInDocumentTree() const noexcept
+    {
+      return IsConnected() && !IsInShadowTree();
+    }
+
+#pragma endregion
+
     virtual void InsertedIntoAncestor(const NodeInsertedContext &context) noexcept;
 
     virtual void RemovedFromAncestor(const NodeRemovedContext &context) noexcept;

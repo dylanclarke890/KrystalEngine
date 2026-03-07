@@ -3,13 +3,88 @@
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/NodeList/NodeList.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
 {
   using namespace Krys::HTML;
 
-  TEST_CASE("ContainerNode - AppendChild/RemoveChild", "[ContainerNode]")
+  TEST_CASE("ContainerNode::HasChildNodes", "[ContainerNode]")
+  {
+    Ref<Document> doc = CreateRef<Document>();
+    auto container = CreateRef<TestContainerNode>(*doc);
+    REQUIRE_FALSE(container->HasChildNodes());
+
+    auto child = CreateRef<TestContainerNode>(*doc);
+    auto appendResult = container->AppendChild(*child);
+    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE(container->HasChildNodes());
+
+    container->RemoveChild(*child);
+  }
+
+  TEST_CASE("ContainerNode::ChildNodes", "[ContainerNode]")
+  {
+    Ref<Document> doc = CreateRef<Document>();
+    auto container = CreateRef<TestContainerNode>(*doc);
+    auto childA = CreateRef<TestContainerNode>(*doc);
+    auto childB = CreateRef<TestContainerNode>(*doc);
+
+    auto result = container->AppendChild(*childA);
+    REQUIRE_FALSE(result.HasException());
+
+    result = container->AppendChild(*childB);
+    REQUIRE_FALSE(result.HasException());
+
+    Ref<NodeList> childNodes = container->ChildNodes();
+    REQUIRE(childNodes->Length() == 2uz);
+    REQUIRE(childNodes->Item(0uz) == childA.get());
+    REQUIRE(childNodes->Item(1uz) == childB.get());
+
+    container->RemoveChild(*childA);
+    container->RemoveChild(*childB);
+  }
+
+  TEST_CASE("ContainerNode::FirstChild", "[ContainerNode]")
+  {
+    Ref<Document> doc = CreateRef<Document>();
+    auto container = CreateRef<TestContainerNode>(*doc);
+    auto childA = CreateRef<TestContainerNode>(*doc);
+    auto childB = CreateRef<TestContainerNode>(*doc);
+
+    auto result = container->AppendChild(*childA);
+    REQUIRE_FALSE(result.HasException());
+    REQUIRE(container->FirstChild() == childA.get());
+
+    result = container->InsertBefore(*childB, childA);
+    REQUIRE_FALSE(result.HasException());
+    REQUIRE(container->FirstChild() == childB.get());
+
+    container->RemoveChild(*childA);
+    container->RemoveChild(*childB);
+  }
+
+  TEST_CASE("ContainerNode::LastChild", "[ContainerNode]")
+  {
+    Ref<Document> doc = CreateRef<Document>();
+    auto container = CreateRef<TestContainerNode>(*doc);
+    auto childA = CreateRef<TestContainerNode>(*doc);
+    auto childB = CreateRef<TestContainerNode>(*doc);
+
+    auto result = container->AppendChild(*childA);
+    REQUIRE_FALSE(result.HasException());
+    REQUIRE(container->LastChild() == childA.get());
+
+    result = container->AppendChild(*childB);
+    REQUIRE_FALSE(result.HasException());
+    REQUIRE(container->LastChild() == childB.get());
+
+    container->RemoveChild(*childA);
+    container->RemoveChild(*childB);
+  }
+
+  TEST_CASE("ContainerNode::AppendChild/RemoveChild", "[ContainerNode]")
   {
     Ref<Document> doc = CreateRef<Document>();
     auto parent = CreateRef<TestContainerNode>(*doc);
@@ -75,7 +150,7 @@ namespace Krys::Tests
     parent->RemoveChild(*childA);
   }
 
-  TEST_CASE("ContainerNode - InsertBefore", "[ContainerNode]")
+  TEST_CASE("ContainerNode::InsertBefore", "[ContainerNode]")
   {
     Ref<Document> doc = CreateRef<Document>();
     auto parent = CreateRef<TestContainerNode>(*doc);
@@ -134,7 +209,7 @@ namespace Krys::Tests
     parent->RemoveChild(*childC);
   }
 
-  TEST_CASE("ContainerNode - ReplaceChild", "[ContainerNode]")
+  TEST_CASE("ContainerNode::ReplaceChild", "[ContainerNode]")
   {
     Ref<Document> doc = CreateRef<Document>();
     auto parent = CreateRef<TestContainerNode>(*doc);
@@ -157,5 +232,43 @@ namespace Krys::Tests
 
     parent->RemoveChild(*childA);
     parent->RemoveChild(*childB);
+  }
+
+  TEST_CASE("ContainerNode::Length", "[ContainerNode]")
+  {
+    Ref<Document> doc = CreateRef<Document>();
+    auto container = CreateRef<TestContainerNode>(*doc);
+    auto childA = CreateRef<TestContainerNode>(*doc);
+    auto childB = CreateRef<TestContainerNode>(*doc);
+
+    auto result = container->AppendChild(*childA);
+    REQUIRE_FALSE(result.HasException());
+
+    result = container->AppendChild(*childB);
+    REQUIRE_FALSE(result.HasException());
+
+    REQUIRE(container->Length() == 2uz);
+
+    container->RemoveChild(*childA);
+    container->RemoveChild(*childB);
+  }
+
+  TEST_CASE("ContainerNode::CountChildNodes", "[ContainerNode]")
+  {
+    Ref<Document> doc = CreateRef<Document>();
+    auto container = CreateRef<TestContainerNode>(*doc);
+    auto childA = CreateRef<TestContainerNode>(*doc);
+    auto childB = CreateRef<TestContainerNode>(*doc);
+
+    auto result = container->AppendChild(*childA);
+    REQUIRE_FALSE(result.HasException());
+
+    result = container->AppendChild(*childB);
+    REQUIRE_FALSE(result.HasException());
+
+    REQUIRE(container->CountChildNodes() == 2uz);
+
+    container->RemoveChild(*childA);
+    container->RemoveChild(*childB);
   }
 }

@@ -120,7 +120,7 @@ namespace Krys::HTML
   ExceptionOr<std::strong_ordering> Range::CompareBoundaryPoints(BoundaryPointComparator how,
                                                                  const Range &other) const noexcept
   {
-    if (&_start.Container->Root() != &other._start.Container->Root())
+    if (!TreeQueries::HasSameRoot(*_start.Container, *other._start.Container))
     {
       return Exception(ExceptionCode::WrongDocumentError);
     }
@@ -368,8 +368,8 @@ namespace Krys::HTML
     RefPtr<ContainerNode> parent =
       refNode ? RefPtr<ContainerNode>(_start.Container) : ShareRefPtr(refNode->ParentNode());
 
-    auto preInsertValid = TreeMutationAlgorithms::EnsurePreInsertValidity(node, *parent, refNode.get());
-    if (preInsertValid.HasException())
+    if (auto preInsertValid = TreeMutationAlgorithms::EnsurePreInsertValidity(node, *parent, refNode.get());
+        preInsertValid.HasException())
     {
       return preInsertValid.ReleaseException();
     }
@@ -398,16 +398,10 @@ namespace Krys::HTML
     auto newOffset = refNode ? TreeQueries::NodeIndex(*refNode) : parent->Length();
     newOffset += node.IsDocumentFragmentNode() ? node.Length() : 1uz;
 
-    if (preInsertValid = TreeMutationAlgorithms::PreInsert(node, *parent, refNode.get());
-        preInsertValid.HasException())
+    if (auto preInsert = TreeMutationAlgorithms::PreInsert(node, *parent, refNode.get());
+        preInsert.HasException())
     {
-      return preInsertValid.ReleaseException();
-    }
-
-    if (auto insertResult = TreeMutationAlgorithms::Insert(node, *parent, refNode.get());
-        insertResult.HasException())
-    {
-      return insertResult.ReleaseException();
+      return preInsert.ReleaseException();
     }
 
     if (IsCollapsed())
@@ -495,7 +489,7 @@ namespace Krys::HTML
 
   ExceptionOr<std::strong_ordering> Range::ComparePoint(Node &node, uint64 offset) const noexcept
   {
-    if (&node.Root() != &_start.Container->Root())
+    if (!TreeQueries::HasSameRoot(node, *_start.Container))
     {
       return Exception(ExceptionCode::WrongDocumentError);
     }
@@ -526,7 +520,7 @@ namespace Krys::HTML
 
   bool Range::IntersectsNode(const Node &node) const noexcept
   {
-    if (&node.Root() != &_start.Container->Root())
+    if (!TreeQueries::HasSameRoot(node, *_start.Container))
     {
       return false;
     }
@@ -616,7 +610,7 @@ namespace Krys::HTML
 
     BoundaryPoint boundaryPoint {ShareRef(node), offset};
 
-    if (&_start.Container->Root() != &node.Root()
+    if (!TreeQueries::HasSameRoot(node, *_start.Container)
         || boundaryPoint.ComparePositionTo(_end) == std::strong_ordering::greater)
     {
       _end = boundaryPoint;
@@ -640,7 +634,7 @@ namespace Krys::HTML
 
     BoundaryPoint boundaryPoint {ShareRef(node), offset};
 
-    if (&_start.Container->Root() != &node.Root()
+    if (!TreeQueries::HasSameRoot(node, *_start.Container)
         || boundaryPoint.ComparePositionTo(_start) == std::strong_ordering::less)
     {
       _start = boundaryPoint;

@@ -3,21 +3,29 @@
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/DocumentRareData.hpp"
 #include "Krystal.HTML/Node/TreeScope.hpp"
+#include "Krystal.HTML/Ranges/Range.hpp"
+#include "Krystal.HTML/URL.hpp"
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 
 namespace Krys::HTML
 {
   class HTMLCollection;
+  class TreeMutationAlgorithms;
 
   class Document : public ContainerNode, public TreeScope
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Document);
 
     friend class DocumentRareData;
+    friend class TreeMutationAlgorithms;
+    friend class TreeMutationDispatcher;
 
   private:
     UniquePtr<DocumentRareData> _documentRareData;
+    URL _baseURL {u8"about:blank"};
+    List<Ref<Range>> _liveRanges;
 
   public:
     Document() noexcept;
@@ -33,6 +41,11 @@ namespace Krys::HTML
     KRYS_NODISCARD DOMString NodeName() const noexcept final
     {
       return u8"#document";
+    }
+
+    KRYS_NODISCARD URL BaseURI() const noexcept
+    {
+      return _baseURL;
     }
 
 #pragma endregion

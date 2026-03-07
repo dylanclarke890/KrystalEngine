@@ -10,6 +10,7 @@
 #include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/NodeList/NodeList.hpp"
 #include "Krystal.HTML/Tree/TreeMutationDispatcher.hpp"
+#include "Krystal.HTML/Tree/TreeQueries.hpp"
 #include "Krystal.HTML/Tree/TreeTraversal.hpp"
 
 namespace Krys::HTML
@@ -24,9 +25,20 @@ namespace Krys::HTML
 
 #pragma region Node
 
+  URL Node::BaseURI() const noexcept
+  {
+    return NodeDocument().BaseURI();
+  }
+
+  RawPtr<Document> Node::OwnerDocument() const noexcept
+  {
+    Document &document = NodeDocument();
+    return &document == this ? nullptr : &document;
+  }
+
   Node &Node::GetRootNode(const GetRootNodeOptions &options) noexcept
   {
-    return options.Composed ? ShadowIncludingRoot() : Root();
+    return options.Composed ? TreeQueries::ShadowIncludingRoot(*this) : TreeQueries::Root(*this);
   }
 
   RawPtr<Element> Node::ParentElement() const noexcept
@@ -112,8 +124,16 @@ namespace Krys::HTML
 
   bool Node::Contains(RawPtr<const Node> other) const noexcept
   {
-    (void)other;
-    // TODO(IMPL)
+    if (other == nullptr)
+    {
+      return false;
+    }
+
+    if (auto *container = DynamicDowncast<ContainerNode>(this))
+    {
+      return TreeQueries::IsInclusiveDescendantOf(*container, *other);
+    }
+
     return false;
   }
 
@@ -169,41 +189,6 @@ namespace Krys::HTML
     return Exception {ExceptionCode::HierarchyRequestError};
   }
 
-#pragma endregion
-
-  Node &Node::Root() noexcept
-  {
-    if (IsInTreeScope())
-    {
-      return GetTreeScope().RootNode();
-    }
-
-    return TreeTraversal::Root(*this);
-  }
-
-  const Node &Node::Root() const noexcept
-  {
-    if (IsInTreeScope())
-    {
-      return GetTreeScope().RootNode();
-    }
-
-    return TreeTraversal::Root(*this);
-  }
-
-  /// @see https://dom.spec.whatwg.org/#concept-shadow-including-root
-  Node &Node::ShadowIncludingRoot() noexcept
-  {
-    auto &root = this->Root();
-    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(root))
-    {
-      auto *host = shadowRoot->Host();
-      return host ? host->ShadowIncludingRoot() : root;
-    }
-
-    return root;
-  }
-
   /// @see https://dom.spec.whatwg.org/#concept-node-length
   size_t Node::Length() const noexcept
   {
@@ -224,6 +209,8 @@ namespace Krys::HTML
 
     return 0;
   }
+
+#pragma endregion
 
   void Node::SetTreeScopeRecursively(TreeScope &newTreeScope) noexcept
   {

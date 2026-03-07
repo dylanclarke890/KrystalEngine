@@ -10,9 +10,64 @@
 
 namespace Krys::HTML
 {
+  const Node &TreeQueries::Root(const Node &node) noexcept
+  {
+    if (node.IsInTreeScope())
+    {
+      return node.GetTreeScope().RootNode();
+    }
+
+    return TreeTraversal::Root(node);
+  }
+
+  Node &TreeQueries::Root(Node &node) noexcept
+  {
+    if (node.IsInTreeScope())
+    {
+      return node.GetTreeScope().RootNode();
+    }
+
+    return TreeTraversal::Root(node);
+  }
+
+  const Node &TreeQueries::ShadowIncludingRoot(const Node &node) noexcept
+  {
+    auto &root = Root(node);
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(root))
+    {
+      auto *host = shadowRoot->Host();
+      return host ? ShadowIncludingRoot(*host) : root;
+    }
+
+    return root;
+  }
+
+  Node &TreeQueries::ShadowIncludingRoot(Node &node) noexcept
+  {
+    auto &root = Root(node);
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(root))
+    {
+      auto *host = shadowRoot->Host();
+      return host ? ShadowIncludingRoot(*host) : root;
+    }
+
+    return root;
+  }
+
   bool TreeQueries::HasSameRoot(const Node &a, const Node &b) noexcept
   {
-    return &a.Root() == &b.Root();
+    return &Root(a) == &Root(b);
+  }
+
+  bool TreeQueries::HasSameShadowIncludingRoot(const Node &a, const Node &b) noexcept
+  {
+    return &ShadowIncludingRoot(a) == &ShadowIncludingRoot(b);
+  }
+
+  bool TreeQueries::IsPreceding(const Node &a, const Node &b) noexcept
+  {
+    // TODO(IMPL):
+    return false;
   }
 
   bool TreeQueries::IsFollowing(const Node &a, const Node &b) noexcept
@@ -72,6 +127,13 @@ namespace Krys::HTML
 
   bool TreeQueries::IsHostIncludingAncestorOf(Node &node, Node &other) noexcept
   {
+    // TODO(IMPL):
+    return false;
+  }
+
+  bool TreeQueries::IsHostIncludingInclusiveAncestorOf(Node &node, Node &other) noexcept
+  {
+    // TODO(IMPL):
     return false;
   }
 
@@ -107,6 +169,27 @@ namespace Krys::HTML
   bool TreeQueries::IsExclusiveTextNode(const Node &node) noexcept
   {
     return node.IsTextNode() && !node.IsCDATASectionNode();
+  }
+
+  bool TreeQueries::IsInclusiveDescendantOf(const ContainerNode &node,
+                                            const Node &possibleInclusiveDescendant) noexcept
+  {
+    if (!HasSameRoot(node, possibleInclusiveDescendant))
+    {
+      return false;
+    }
+
+    RawPtr<const Node> current = &possibleInclusiveDescendant;
+    while (current)
+    {
+      if (current == &node)
+      {
+        return true;
+      }
+      current = current->ParentNode();
+    }
+
+    return false;
   }
 
   RawPtr<ShadowRoot> TreeQueries::GetShadowRoot(const Node &node) noexcept
@@ -165,6 +248,19 @@ namespace Krys::HTML
     return count;
   }
 
+  bool TreeQueries::HasElementChild(const ContainerNode &node) noexcept
+  {
+    for (RawPtr<Node> child = node.FirstChild(); child; child = child->NextSibling())
+    {
+      if (child->IsElementNode())
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   void TreeQueries::CollectChildNodes(const ContainerNode &parent, SmallNodeList &collection) noexcept
   {
     for (auto child = parent.FirstChild(); child; child = child->NextSibling())
@@ -180,6 +276,16 @@ namespace Krys::HTML
     {
       collection.emplace_back(ShareRef(*childElement));
     }
+  }
+
+  List<Ref<Node>> TreeQueries::InclusiveAncestors(Node &node) noexcept
+  {
+    List<Ref<Node>> ancestors;
+    for (RawPtr<Node> current = &node; current; current = current->ParentNode())
+    {
+      ancestors.emplace_back(ShareRef(*current));
+    }
+    return ancestors;
   }
 
   DOMString TreeQueries::DescendantTextContent(const ContainerNode &node) noexcept

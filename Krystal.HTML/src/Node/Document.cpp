@@ -13,6 +13,7 @@ namespace Krys::HTML
   Document::Document() noexcept
       : ContainerNode(*this, NodeType::DOCUMENT_NODE, NodeFlag::IsContainerNode), TreeScope(*this)
   {
+    SetEventTargetFlag(EventTargetFlag::IsConnected);
   }
 
 #pragma region Document

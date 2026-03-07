@@ -4,6 +4,8 @@
 #include "Krystal.HTML/Utils/SmallNodeList.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
+#include "Krystal.Lib/Pointers/RefPtr.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 
 namespace Krys::HTML
 {
@@ -13,16 +15,32 @@ namespace Krys::HTML
   class ShadowRoot;
   class Text;
 
-  struct TreeQueries
+  class TreeQueries
   {
+  public:
+    /// @see https://dom.spec.whatwg.org/#concept-tree-root
+    KRYS_NODISCARD static const Node &Root(const Node &node) noexcept;
+    KRYS_NODISCARD static Node &Root(Node &node) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-shadow-including-root
+    KRYS_NODISCARD static const Node &ShadowIncludingRoot(const Node &node) noexcept;
+    KRYS_NODISCARD static Node &ShadowIncludingRoot(Node &node) noexcept;
+
     KRYS_NODISCARD static bool HasSameRoot(const Node &a, const Node &b) noexcept;
+    KRYS_NODISCARD static bool HasSameShadowIncludingRoot(const Node &a, const Node &b) noexcept;
+
+    KRYS_NODISCARD static bool IsPreceding(const Node &a, const Node &b) noexcept;
     KRYS_NODISCARD static bool IsFollowing(const Node &a, const Node &b) noexcept;
-    KRYS_NODISCARD static bool IsAncestorOf(const Node &a, const Node &b) noexcept;
+    KRYS_NODISCARD static bool IsAncestorOf(const Node &node, const Node &b) noexcept;
     KRYS_NODISCARD static bool IsChildOf(const Node &parent, const Node &child) noexcept;
+
     KRYS_NODISCARD static bool IsHostIncludingAncestorOf(Node &node, Node &other) noexcept;
+    KRYS_NODISCARD static bool IsHostIncludingInclusiveAncestorOf(Node &node, Node &other) noexcept;
     KRYS_NODISCARD static bool IsConnectedInSameTreeScope(const Node &a, const Node &b) noexcept;
     KRYS_NODISCARD static bool IsDocTypeOrDocTypeFollows(RawPtr<Node> node) noexcept;
     KRYS_NODISCARD static bool IsExclusiveTextNode(const Node &node) noexcept;
+    KRYS_NODISCARD static bool IsInclusiveDescendantOf(const ContainerNode &node,
+                                                       const Node &possibleInclusiveDescendant) noexcept;
 
     KRYS_NODISCARD static RawPtr<ShadowRoot> GetShadowRoot(const Node &node) noexcept;
 
@@ -30,9 +48,12 @@ namespace Krys::HTML
     KRYS_NODISCARD static RawPtr<Node> ChildAt(const Node &node, size_t index) noexcept;
     KRYS_NODISCARD static size_t ChildNodeCount(const ContainerNode &node) noexcept;
     KRYS_NODISCARD static size_t ChildElementCount(const ContainerNode &node) noexcept;
+    KRYS_NODISCARD static bool HasElementChild(const ContainerNode &node) noexcept;
 
     static void CollectChildNodes(const ContainerNode &parent, SmallNodeList &collection) noexcept;
     static void CollectChildElements(const ContainerNode &parent, SmallElementList &collection) noexcept;
+
+    KRYS_NODISCARD static List<Ref<Node>> InclusiveAncestors(Node &node) noexcept;
 
     KRYS_NODISCARD static DOMString DescendantTextContent(const ContainerNode &node) noexcept;
     KRYS_NODISCARD static DOMString ChildTextContent(const ContainerNode &node) noexcept;

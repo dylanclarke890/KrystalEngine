@@ -3,11 +3,14 @@
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
+#include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 
 namespace Krys::HTML
 {
   class ContainerNode;
+  class CustomElementRegistry;
+  class Document;
   class Node;
 
   struct SuppressObservers : public StronglyTypedBool<SuppressObservers>
@@ -38,6 +41,20 @@ namespace Krys::HTML
     KRYS_NODISCARD static ExceptionOr<void>
       Remove(Node &node, ContainerNode &parent,
              SuppressObservers suppressObservers = SuppressObservers(false)) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#move
+    KRYS_NODISCARD static ExceptionOr<void> Move(Node &node, ContainerNode &newParent,
+                                                 RawPtr<Node> refChild) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-node-clone
+    static Ref<Node> CloneNode(Node &node, RawPtr<Document> document = nullptr, bool subtree = false,
+                               RawPtr<ContainerNode> parent = nullptr,
+                               RawPtr<CustomElementRegistry> fallbackRegistry = nullptr) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#clone-a-single-node
+    KRYS_NODISCARD static Ref<Node>
+      CloneSingleNode(Node &node, Document &document,
+                      RawPtr<CustomElementRegistry> fallbackRegistry = nullptr) noexcept;
 
     // TODO(fix): replace this with a call to ReplaceAll with a null node.
     KRYS_NODISCARD static ExceptionOr<void>
