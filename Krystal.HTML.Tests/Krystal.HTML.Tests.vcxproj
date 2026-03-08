@@ -161,6 +161,7 @@
     <ClCompile Include="tests\Events\EventTarget.cpp" />
     <ClCompile Include="tests\Loader\HTMLEncodingSniffer.cpp" />
     <ClCompile Include="tests\Loader\TextResourceDecoder.cpp" />
+    <ClCompile Include="tests\NameValidation.cpp" />
     <ClCompile Include="tests\Node\ContainerNode.cpp" />
     <ClCompile Include="tests\Node\Node.cpp" />
     <ClCompile Include="tests\Node\Text.cpp" />
@@ -169,6 +170,7 @@
     <ClCompile Include="tests\Parser\HTMLTokenizerIntegrationTests.cpp" />
     <ClCompile Include="tests\Parser\HTMLTokenizerStates.cpp" />
     <ClCompile Include="tests\Tree\TreeQueries.cpp" />
+    <ClCompile Include="tests\Utils\StringAlgorithms.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML.Tests\ParserTestUtils.hpp" />

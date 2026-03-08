@@ -37,6 +37,8 @@
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationObserverInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\RegisteredObserver.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\TransientRegisteredObserver.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Namespaces.hpp" />
+    <ClInclude Include="include\Krystal.HTML\NameValidation.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\CustomElementRegistry.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\DocumentFragmentRareData.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\DocumentRareData.hpp" />
@@ -122,6 +124,7 @@
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionCode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionOr.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\SmallNodeList.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Utils\StringAlgorithms.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Ranges\Range.cpp" />

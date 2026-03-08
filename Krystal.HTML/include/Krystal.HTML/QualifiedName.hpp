@@ -18,16 +18,6 @@ namespace Krys::HTML
     {
     }
 
-    KRYS_NODISCARD friend bool operator==(const QualifiedName &a, const QualifiedName &b) noexcept
-    {
-      return a.NamespaceURI == b.NamespaceURI && a.Prefix == b.Prefix && a.LocalName == b.LocalName;
-    }
-
-    KRYS_NODISCARD friend bool operator!=(const QualifiedName &a, const QualifiedName &b) noexcept
-    {
-      return !(a == b);
-    }
-
     /// @see https://dom.spec.whatwg.org/#concept-attribute-qualified-name
     KRYS_NODISCARD DOMString Name() const noexcept
     {
@@ -39,6 +29,16 @@ namespace Krys::HTML
       {
         return DOMString {Prefix.View()} + u8":" + DOMString {LocalName.View()};
       }
+    }
+
+    KRYS_NODISCARD friend bool operator==(const QualifiedName &a, const QualifiedName &b) noexcept
+    {
+      return a.NamespaceURI == b.NamespaceURI && a.Prefix == b.Prefix && a.LocalName == b.LocalName;
+    }
+
+    KRYS_NODISCARD friend bool operator!=(const QualifiedName &a, const QualifiedName &b) noexcept
+    {
+      return !(a == b);
     }
   };
 }
