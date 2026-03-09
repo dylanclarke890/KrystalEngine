@@ -11,11 +11,15 @@ namespace Krys::HTML
   public:
     virtual ~EventListener() noexcept = default;
 
+#pragma region EventListener - https://dom.spec.whatwg.org/#eventlistener
+
+    virtual void HandleEvent(Event &event) noexcept = 0;
+
+#pragma endregion
+
     virtual bool operator==(const EventListener &other) const noexcept
     {
       return this == &other;
     }
-
-    virtual void HandleEvent(Event &event) noexcept = 0;
   };
 }

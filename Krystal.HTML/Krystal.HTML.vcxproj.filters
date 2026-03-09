@@ -123,9 +123,6 @@
     <ClInclude Include="include\Krystal.HTML\Abort\AbortSignal.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Events\AddEventListenerOptions.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Events\RegisteredEventListener.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -298,6 +295,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Events\EventPath.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Events\EventTargetFlag.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -31,8 +31,18 @@ namespace Krys::HTML
   }
 
   bool EventTarget::AddEventListener(DOMStringAtom type, RefPtr<EventListener> &&callback,
-                                     const AddEventListenerOptions &options) noexcept
+                                     const AddEventListenerOptionsOrBool &optionsOrBool) noexcept
   {
+    AddEventListenerOptions options;
+    if (std::holds_alternative<bool>(optionsOrBool))
+    {
+      options.Capture = std::get<bool>(optionsOrBool);
+    }
+    else
+    {
+      options = std::get<AddEventListenerOptions>(optionsOrBool);
+    }
+
     if (options.Signal && options.Signal->Aborted())
     {
       return false;
@@ -77,8 +87,18 @@ namespace Krys::HTML
   }
 
   bool EventTarget::RemoveEventListener(DOMStringAtom type, RefPtr<EventListener> &&callback,
-                                        const EventListenerOptions &options) noexcept
+                                        const EventListenerOptionsOrBool &optionsOrBool) noexcept
   {
+    EventListenerOptions options;
+    if (std::holds_alternative<bool>(optionsOrBool))
+    {
+      options.Capture = std::get<bool>(optionsOrBool);
+    }
+    else
+    {
+      options = std::get<EventListenerOptions>(optionsOrBool);
+    }
+
     auto alreadyExists = [&](const Ref<RegisteredEventListener> &listener)
     {
       if (listener->GetType() == type && &listener->Callback() == callback.get()
@@ -101,11 +121,6 @@ namespace Krys::HTML
     return true;
   }
 
-  void EventTarget::RemoveAllEventListeners() noexcept
-  {
-    _listeners.clear();
-  }
-
   ExceptionOr<bool> EventTarget::DispatchEvent(Event &event) noexcept
   {
     if (event._dispatched)
@@ -115,5 +130,10 @@ namespace Krys::HTML
 
     event._dispatched = true;
     return EventDispatcher::DispatchTo(*this, event);
+  }
+
+  void EventTarget::RemoveAllEventListeners() noexcept
+  {
+    _listeners.clear();
   }
 }

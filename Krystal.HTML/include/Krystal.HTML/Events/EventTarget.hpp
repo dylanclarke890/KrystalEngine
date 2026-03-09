@@ -1,30 +1,16 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/DOMString.hpp"
-#include "Krystal.HTML/Events/AddEventListenerOptions.hpp"
 #include "Krystal.HTML/Events/EventListener.hpp"
 #include "Krystal.HTML/Events/EventListenerOptions.hpp"
+#include "Krystal.HTML/Events/EventTargetFlag.hpp"
 #include "Krystal.HTML/Events/RegisteredEventListener.hpp"
 #include "Krystal.HTML/Utils/BoolOr.hpp"
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
-#include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Mixins/CanMakeWeakPtr.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Types/SmallList.hpp"
-
-namespace Krys::HTML
-{
-  enum class EventTargetFlag : uint8
-  {
-    None = 0,
-    IsNode = 1 << 0,
-    IsConnected = 1 << 1,
-    IsInShadowTree = 1 << 2,
-  };
-}
-
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::EventTargetFlag, 3u)
 
 namespace Krys::HTML
 {
@@ -35,33 +21,38 @@ namespace Krys::HTML
     SmallList<Ref<RegisteredEventListener>> _listeners;
 
   public:
-    EventTarget() noexcept = default;
     virtual ~EventTarget() noexcept = default;
 
-    // TODO(IMPL): Use BoolOr for AddEventListenerOptions. The bool is used for 'capture'.
+#pragma region EventTarget - https://dom.spec.whatwg.org/#eventtarget
+
+    EventTarget() noexcept = default;
+
     virtual bool AddEventListener(DOMStringAtom type, RefPtr<EventListener> &&callback,
-                                  const AddEventListenerOptions &options) noexcept;
+                                  const AddEventListenerOptionsOrBool &options) noexcept;
 
     virtual bool RemoveEventListener(DOMStringAtom type, RefPtr<EventListener> &&callback,
-                                     const EventListenerOptions &options) noexcept;
+                                     const EventListenerOptionsOrBool &options) noexcept;
+
+    virtual ExceptionOr<bool> DispatchEvent(Event &event) noexcept;
+
+#pragma endregion
 
     virtual void RemoveAllEventListeners() noexcept;
 
-    virtual ExceptionOr<bool> DispatchEvent(Event &event) noexcept;
+#pragma region Type Checks
 
     KRYS_NODISCARD bool IsNode() const noexcept
     {
       return HasEventTargetFlag(EventTargetFlag::IsNode);
     }
 
-  protected:
-    struct ConstructNodeTag
-    {
-    };
+#pragma endregion
 
-    EventTarget(ConstructNodeTag) noexcept : EventTarget()
+#pragma region EventTarget Flags
+
+  protected:
+    EventTarget(EventTargetFlag flags) noexcept : _flags(flags)
     {
-      SetEventTargetFlag(EventTargetFlag::IsNode);
     }
 
     KRYS_NODISCARD bool HasEventTargetFlag(EventTargetFlag flag) const noexcept
@@ -78,5 +69,7 @@ namespace Krys::HTML
     {
       _flags = _flags & ~flag;
     }
+
+#pragma endregion
   };
 }

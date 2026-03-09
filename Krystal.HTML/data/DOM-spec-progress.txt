@@ -6,7 +6,7 @@
         1.2 Ordered sets- Implemented, unit tested
         1.3 Selectors - MISSING, CSS parser not implemented
         1.4 Name validation - Implemented, unit tested
-    2 Events - 3/11
+    2 Events - 4/11
         2.1 Introduction to "DOM Events" - Nothing to do (just an introduction)
         2.2 Interface Event - Implemented, unit tested
         2.3 Legacy extensions to the Window interface - SPEC-VIOLATION(DOM) - At present I have no plans to implement the Window interface.
