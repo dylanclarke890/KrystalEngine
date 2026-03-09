@@ -97,17 +97,16 @@ namespace Krys::Tests
             == List<DOMString> {u8"foo", u8"bar", u8"baz"});
     REQUIRE(StringAlgorithms::SplitOnComma(u8"      ") == List<DOMString> {u8""});
     REQUIRE(StringAlgorithms::SplitOnComma(u8"") == List<DOMString> {});
-    REQUIRE(StringAlgorithms::SplitOnComma(u8"\t\n\r\f") == List<DOMString> {u8"\t\n\r\f"});
+    REQUIRE(StringAlgorithms::SplitOnComma(u8"\t\n\r\f") == List<DOMString> {u8""});
     REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo \n bar \r baz \f")
-            == List<DOMString> {u8"\t foo \n bar \r baz \f"});
+            == List<DOMString> {u8"foo \n bar \r baz"});
     REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo ,\n  bar \r  baz \f")
-            == List<DOMString> {u8"\t foo ", u8"\n  bar \r  baz \f"});
+            == List<DOMString> {u8"foo", u8"bar \r  baz"});
     REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo ,\n  bar \r    \f")
-            == List<DOMString> {u8"\t foo ", u8"\n  bar \r    \f"});
-    REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo ,\n    \r    \f")
-            == List<DOMString> {u8"\t foo ", u8"\n    \r    \f"});
-    REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo,") == List<DOMString> {u8"\t foo", u8""});
-    REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo, ") == List<DOMString> {u8"\t foo", u8" "});
+            == List<DOMString> {u8"foo", u8"bar"});
+    REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo ,\n    \r    \f") == List<DOMString> {u8"foo", u8""});
+    REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo,") == List<DOMString> {u8"foo"});
+    REQUIRE(StringAlgorithms::SplitOnComma(u8"\t foo, ") == List<DOMString> {u8"foo", u8""});
   }
 
   TEST_CASE("StringAlgorithms::Concatenate", "[HTML][StringAlgorithms]")
@@ -119,7 +118,7 @@ namespace Krys::Tests
     REQUIRE(StringAlgorithms::Concatenate(List<DOMString> {u8"foo", u8"", u8"bar"}, std::nullopt)
             == u8"foobar");
 
-    REQUIRE(StringAlgorithms::Concatenate(List<DOMString> {u8"foo", u8"bar", u8"baz"}, u8", ") 
+    REQUIRE(StringAlgorithms::Concatenate(List<DOMString> {u8"foo", u8"bar", u8"baz"}, u8", ")
             == u8"foo, bar, baz");
   }
 }

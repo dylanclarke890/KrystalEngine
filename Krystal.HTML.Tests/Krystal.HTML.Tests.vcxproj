@@ -170,6 +170,7 @@
     <ClCompile Include="tests\Parser\HTMLTokenizerIntegrationTests.cpp" />
     <ClCompile Include="tests\Parser\HTMLTokenizerStates.cpp" />
     <ClCompile Include="tests\Tree\TreeQueries.cpp" />
+    <ClCompile Include="tests\Utils\OrderedSetParser.cpp" />
     <ClCompile Include="tests\Utils\StringAlgorithms.cpp" />
   </ItemGroup>
   <ItemGroup>

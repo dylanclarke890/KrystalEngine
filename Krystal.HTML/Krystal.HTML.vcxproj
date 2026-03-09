@@ -123,6 +123,7 @@
     <ClInclude Include="include\Krystal.HTML\Utils\Exception.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionCode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionOr.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Utils\OrderedSetParser.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\SmallNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\StringAlgorithms.hpp" />
   </ItemGroup>

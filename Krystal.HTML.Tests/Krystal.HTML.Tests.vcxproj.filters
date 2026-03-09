@@ -57,6 +57,9 @@
     <ClCompile Include="tests\Utils\StringAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tests\Utils\OrderedSetParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML.Tests\ParserTestUtils.hpp">
