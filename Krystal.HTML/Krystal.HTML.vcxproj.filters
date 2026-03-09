@@ -120,7 +120,7 @@
     <ClInclude Include="include\Krystal.HTML\Events\EventListenerOptions.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Events\AbortSignal.hpp">
+    <ClInclude Include="include\Krystal.HTML\Abort\AbortSignal.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Events\AddEventListenerOptions.hpp">

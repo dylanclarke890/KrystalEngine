@@ -71,7 +71,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\DocumentFragment.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOMHighResTimeStamp.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Element.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Events\AbortSignal.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Abort\AbortSignal.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\AddEventListenerOptions.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\CustomEvent.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\CustomEventInit.hpp" />
