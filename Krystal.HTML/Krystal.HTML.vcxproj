@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <None Include="data\DOM-spec-progress.txt" />
     <Text Include="data\HTMLEntityNames.in" />
-    <None Include="data\progress.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Krystal.IO\Krystal.IO.vcxproj">
@@ -34,6 +34,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.HTML\Events\EventPath.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationCallback.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationObserverInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\RegisteredObserver.hpp" />

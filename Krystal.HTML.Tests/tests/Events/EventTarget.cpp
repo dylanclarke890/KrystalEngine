@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/Events/EventTarget.hpp"
-#include "Krystal.HTML/Events/AbortSignal.hpp"
+#include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Events/EventNames.hpp"
 #include <catch_all.hpp>
 

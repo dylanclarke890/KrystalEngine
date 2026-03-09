@@ -1,7 +1,8 @@
 ﻿#include "Krystal.HTML/Events/Event.hpp"
-#include "Krystal.HTML/Events/AbortSignal.hpp"
+#include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Events/EventTarget.hpp"
 #include "Krystal.Lib/Time/MonotonicTime.hpp"
+#include <cassert>
 
 namespace Krys::HTML
 {
@@ -13,9 +14,125 @@ namespace Krys::HTML
     _composed = eventInitDict.Composed;
   }
 
-  List<EventTarget> Event::ComposedPath() const noexcept
+  /// @see https://dom.spec.whatwg.org/#dom-event-composedpath
+  List<Ref<EventTarget>> Event::ComposedPath() const noexcept
   {
-    // TODO(IMPL)
-    return {};
+    List<Ref<EventTarget>> composedPath {};
+
+    if (_path == nullptr)
+    {
+      return composedPath;
+    }
+
+    auto &path = _path->PathItems();
+    if (path.empty())
+    {
+      return composedPath;
+    }
+
+    RawPtr<EventTarget> currentTarget = CurrentTarget();
+    assert(currentTarget != nullptr);
+    composedPath.emplace_back(ShareRef(*currentTarget));
+
+    int32 currentTargetIndex = 0;
+    int32 currentTargetHiddenSubtreeLevel = 0;
+    int32 index = static_cast<int32>(path.size()) - 1;
+
+    while (index >= 0)
+    {
+      auto &item = path[index];
+
+      if (item.RootOfClosedTree())
+      {
+        currentTargetHiddenSubtreeLevel++;
+      }
+
+      if (item.InvocationTarget() == currentTarget)
+      {
+        currentTargetIndex = index;
+        break;
+      }
+
+      if (item.SlotInClosedTree())
+      {
+        currentTargetHiddenSubtreeLevel--;
+      }
+
+      --index;
+    }
+
+    int32 currentHiddenLevel = currentTargetHiddenSubtreeLevel;
+    int32 maxHiddenLevel = currentTargetHiddenSubtreeLevel;
+
+    index = currentTargetIndex - 1;
+    while (index >= 0)
+    {
+      auto &item = path[index];
+
+      if (item.RootOfClosedTree())
+      {
+        currentHiddenLevel++;
+      }
+
+      if (currentHiddenLevel <= maxHiddenLevel)
+      {
+        composedPath.insert(composedPath.begin(), ShareRef(*item.InvocationTarget()));
+      }
+
+      if (item.RootOfClosedTree())
+      {
+        currentHiddenLevel++;
+        if (currentHiddenLevel < maxHiddenLevel)
+        {
+          maxHiddenLevel = currentHiddenLevel;
+        }
+      }
+
+      --index;
+    }
+
+    currentHiddenLevel = currentTargetHiddenSubtreeLevel;
+    maxHiddenLevel = currentTargetHiddenSubtreeLevel;
+
+    index = currentTargetIndex + 1;
+
+    while (index < static_cast<int32>(path.size()))
+    {
+      auto &item = path[index];
+
+      if (item.SlotInClosedTree())
+      {
+        currentHiddenLevel--;
+      }
+
+      if (currentHiddenLevel <= maxHiddenLevel)
+      {
+        composedPath.emplace_back(ShareRef(*item.InvocationTarget()));
+      }
+
+      if (item.SlotInClosedTree())
+      {
+        currentHiddenLevel--;
+        if (currentHiddenLevel < maxHiddenLevel)
+        {
+          maxHiddenLevel = currentHiddenLevel;
+        }
+      }
+      ++index;
+    }
+
+    return composedPath;
+  }
+
+  void Event::InitEvent(DOMStringAtom type, bool bubbles, bool cancelable) noexcept
+  {
+    if (_dispatched)
+    {
+      return;
+    }
+
+    _type = type;
+    _bubbles = bubbles;
+    _cancellable = cancelable;
   }
 }

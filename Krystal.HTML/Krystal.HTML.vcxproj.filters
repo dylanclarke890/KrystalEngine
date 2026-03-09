@@ -297,6 +297,9 @@
     <ClInclude Include="include\Krystal.HTML\Utils\OrderedSetParser.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Events\EventPath.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -606,6 +609,6 @@
     <None Include="data\Abort\AbortController.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\progress.txt" />
+    <None Include="data\DOM-spec-progress.txt" />
   </ItemGroup>
 </Project>
