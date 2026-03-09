@@ -1,0 +1,83 @@
+
+    Copied from WHATWG table of contents
+    1 Infrastructure - 3/4
+        1.1 Trees - Implemented, unit tested
+        1.2 Ordered sets- Implemented, unit tested
+        1.3 Selectors - MISSING 
+        1.4 Name validation - Implemented, unit tested
+    2 Events - 0/11
+        2.1 Introduction to "DOM Events"
+        2.2 Interface Event
+        2.3 Legacy extensions to the Window interface
+        2.4 Interface CustomEvent
+        2.5 Constructing events
+        2.6 Defining event interfaces
+        2.7 Interface EventTarget
+        2.8 Observing event listeners
+        2.9 Dispatching events
+        2.10 Firing events
+        2.11 Action versus occurrence 
+    3 Aborting ongoing activities - 0/3
+        3.1 Interface AbortController
+        3.2 Interface AbortSignal
+            3.2.1 Garbage collection 
+        3.3 Using AbortController and AbortSignal objects in APIs 
+    4 Nodes - 0/36
+        4.1 Introduction to "The DOM"
+        4.2 Node tree
+            4.2.1 Document tree
+            4.2.2 Shadow tree
+                4.2.2.1 Slots
+                4.2.2.2 Slottables
+                4.2.2.3 Finding slots and slottables
+                4.2.2.4 Assigning slottables and slots
+                4.2.2.5 Signaling slot change 
+            4.2.3 Mutation algorithms
+            4.2.4 Mixin NonElementParentNode
+            4.2.5 Mixin DocumentOrShadowRoot
+            4.2.6 Mixin ParentNode
+            4.2.7 Mixin NonDocumentTypeChildNode
+            4.2.8 Mixin ChildNode
+            4.2.9 Mixin Slottable
+            4.2.10 Old-style collections: NodeList and HTMLCollection
+                4.2.10.1 Interface NodeList
+                4.2.10.2 Interface HTMLCollection 
+        4.3 Mutation observers
+            4.3.1 Interface MutationObserver
+            4.3.2 Queuing a mutation record
+            4.3.3 Interface MutationRecord 
+        4.4 Interface Node
+        4.5 Interface Document
+            4.5.1 Interface DOMImplementation 
+        4.6 Interface DocumentType
+        4.7 Interface DocumentFragment
+        4.8 Interface ShadowRoot
+        4.9 Interface Element
+            4.9.1 Interface NamedNodeMap
+            4.9.2 Interface Attr 
+        4.10 Interface CharacterData
+        4.11 Interface Text
+        4.12 Interface CDATASection
+        4.13 Interface ProcessingInstruction
+        4.14 Interface Comment 
+    5 Ranges - 0/5
+        5.1 Introduction to "DOM Ranges"
+        5.2 Boundary points
+        5.3 Interface AbstractRange
+        5.4 Interface StaticRange
+        5.5 Interface Range 
+    6 Traversal - 0/3
+        6.1 Interface NodeIterator
+        6.2 Interface TreeWalker
+        6.3 Interface NodeFilter 
+    7 Sets - 0/1
+        7.1 Interface DOMTokenList 
+    8 XPath - 0/4
+        8.1 Interface XPathResult
+        8.2 Interface XPathExpression
+        8.3 Mixin XPathEvaluatorBase
+        8.4 Interface XPathEvaluator 
+    9 XSLT - 0/1
+        9.1 Interface XSLTProcessor 
+    10 Security and privacy considerations
+    11 Historical

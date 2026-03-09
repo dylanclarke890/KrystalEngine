@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="data\HTMLEntityNames.in" />
+    <None Include="data\progress.txt" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Krystal.IO\Krystal.IO.vcxproj">

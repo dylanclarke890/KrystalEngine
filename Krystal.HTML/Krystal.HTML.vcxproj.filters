@@ -606,5 +606,6 @@
     <None Include="data\Abort\AbortController.idl">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="data\progress.txt" />
   </ItemGroup>
 </Project>
