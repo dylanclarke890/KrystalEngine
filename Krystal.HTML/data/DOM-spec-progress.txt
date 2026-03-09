@@ -6,13 +6,13 @@
         1.2 Ordered sets- Implemented, unit tested
         1.3 Selectors - MISSING, CSS parser not implemented
         1.4 Name validation - Implemented, unit tested
-    2 Events - 4/11
-        2.1 Introduction to "DOM Events" - Nothing to do (just an introduction)
+    2 Events - 6/11
+        2.1 Introduction to "DOM Events" - Nothing to do
         2.2 Interface Event - Implemented, unit tested
         2.3 Legacy extensions to the Window interface - SPEC-VIOLATION(DOM) - At present I have no plans to implement the Window interface.
         2.4 Interface CustomEvent - Implemented, unit tested
-        2.5 Constructing events
-        2.6 Defining event interfaces
+        2.5 Constructing events - TODO(spec): The only relevant section is 'To create an event' because it sets 'isTrusted' to true but we'll address this later.
+        2.6 Defining event interfaces - Nothing to do
         2.7 Interface EventTarget
         2.8 Observing event listeners
         2.9 Dispatching events
