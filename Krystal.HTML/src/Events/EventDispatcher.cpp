@@ -17,7 +17,7 @@ namespace Krys::HTML
       // legacy target override flag is only used by HTML and only when target is a Window object.
       assert(target.IsWindow());
 
-      // SPEC-VIOLATION(DOM, HTML): We don't implement Window.
+      // SPEC-VIOLATION(DOM, HTML): We don't actually implement Window.
       // Let targetOverride be target, if legacy target override flag is not given, and target’s associated
       // Document otherwise.
     }
