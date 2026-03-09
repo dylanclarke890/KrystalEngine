@@ -17,7 +17,7 @@ namespace Krys::HTML
 
   class Event : public RefCounted<Event>
   {
-  private:
+  protected:
     DOMStringAtom _type;
     RefPtr<EventTarget> _target {nullptr};
     RefPtr<EventTarget> _currentTarget {nullptr};
@@ -39,6 +39,8 @@ namespace Krys::HTML
     friend class EventTarget;
 
   public:
+    virtual ~Event() noexcept = default;
+
 #pragma region Event - https://dom.spec.whatwg.org/#event
 
     Event(DOMStringAtom type, const EventInit &eventInitDict = {}) noexcept;

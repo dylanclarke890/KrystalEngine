@@ -1,15 +1,16 @@
 ﻿
-    Copied from WHATWG table of contents
+    NOTE: Copied from WHATWG table of contents
+    
     1 Infrastructure - 3/4
         1.1 Trees - Implemented, unit tested
         1.2 Ordered sets- Implemented, unit tested
-        1.3 Selectors - MISSING 
+        1.3 Selectors - MISSING, CSS parser not implemented
         1.4 Name validation - Implemented, unit tested
     2 Events - 3/11
         2.1 Introduction to "DOM Events" - Nothing to do (just an introduction)
         2.2 Interface Event - Implemented, unit tested
-        2.3 Legacy extensions to the Window interface - SPEC-VIOLATION(DOM) - Nothing to do (Window not implemented)
-        2.4 Interface CustomEvent
+        2.3 Legacy extensions to the Window interface - SPEC-VIOLATION(DOM) - At present I have no plans to implement the Window interface.
+        2.4 Interface CustomEvent - Implemented, unit tested
         2.5 Constructing events
         2.6 Defining event interfaces
         2.7 Interface EventTarget
