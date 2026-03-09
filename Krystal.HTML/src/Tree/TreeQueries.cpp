@@ -1,5 +1,6 @@
 ﻿#include "Krystal.HTML/Tree/TreeQueries.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Events/EventTarget.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
@@ -69,26 +70,12 @@ namespace Krys::HTML
 
   bool TreeQueries::IsAncestor(const Node &a, const Node &b) noexcept
   {
-    RawPtr<const Node> current = &b;
-    while (current = current->ParentNode())
-    {
-      if (current == &a)
-      {
-        return true;
-      }
-    }
-
-    return false;
+    return IsDescendant(b, a);
   }
 
   bool TreeQueries::IsInclusiveAncestor(const Node &a, const Node &b) noexcept
   {
-    if (&a == &b)
-    {
-      return true;
-    }
-
-    return IsAncestor(a, b);
+    return IsInclusiveDescendant(b, a);
   }
 
   bool TreeQueries::IsSibling(const Node &a, const Node &b) noexcept
@@ -190,6 +177,125 @@ namespace Krys::HTML
     }
 
     return root;
+  }
+
+  bool TreeQueries::IsShadowIncludingDescendant(const Node &a, const Node &b) noexcept
+  {
+    if (IsDescendant(a, b))
+    {
+      return true;
+    }
+
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(Root(a)))
+    {
+      if (auto *host = shadowRoot->Host())
+      {
+        return IsShadowIncludingDescendant(*host, b);
+      }
+    }
+
+    return false;
+  }
+
+  bool TreeQueries::IsShadowIncludingInclusiveDescendant(const Node &a, const Node &b) noexcept
+  {
+    if (&a == &b)
+    {
+      return true;
+    }
+
+    return IsShadowIncludingDescendant(a, b);
+  }
+
+  bool TreeQueries::IsShadowIncludingAncestor(const Node &a, const Node &b) noexcept
+  {
+    return IsShadowIncludingDescendant(b, a);
+  }
+
+  bool TreeQueries::IsShadowIncludingInclusiveAncestor(const Node &a, const Node &b) noexcept
+  {
+    return IsShadowIncludingInclusiveDescendant(b, a);
+  }
+
+  bool TreeQueries::IsClosedShadowHidden(const Node &a, const Node &b) noexcept
+  {
+    auto &aRoot = Root(a);
+    auto *aShadowRoot = DynamicDowncast<ShadowRoot>(aRoot);
+    if (aShadowRoot == nullptr)
+    {
+      return false;
+    }
+
+    if (IsShadowIncludingInclusiveAncestor(aRoot, b))
+    {
+      return false;
+    }
+
+    if (aShadowRoot->Mode() == ShadowRootMode::Closed)
+    {
+      return true;
+    }
+
+    if (aShadowRoot->Host() && IsClosedShadowHidden(*aShadowRoot->Host(), b))
+    {
+      return true;
+    }
+
+    return false;
+  }
+
+  const EventTarget &TreeQueries::Retarget(const EventTarget &a, const EventTarget &b) noexcept
+  {
+    auto *current = &a;
+    while (true)
+    {
+      if (!current->IsNode())
+      {
+        return *current;
+      }
+
+      auto &currentNode = Downcast<Node>(*current);
+      auto &currentRoot = Root(currentNode);
+      if (!currentNode.IsShadowRootNode()
+          && !IsShadowIncludingInclusiveAncestor(currentRoot, Downcast<Node>(b)))
+      {
+        return *current;
+      }
+
+      current = Downcast<ShadowRoot>(&currentNode)->Host();
+    }
+
+    // The spec handles the necessary cases to ensure we never get here, but we need this to satisfy the
+    // compiler that current is always valid.
+    std::unreachable();
+    return *current;
+  }
+
+  EventTarget &TreeQueries::Retarget(EventTarget &a, EventTarget &b) noexcept
+  {
+    auto *current = &a;
+    while (true)
+    {
+      if (!current->IsNode())
+      {
+        return *current;
+      }
+
+      auto &currentNode = Downcast<Node>(*current);
+      auto &currentRoot = Root(currentNode);
+      if (!currentNode.IsShadowRootNode()
+          && !IsShadowIncludingInclusiveAncestor(currentRoot, Downcast<Node>(b)))
+      {
+        return *current;
+      }
+
+      current = Downcast<ShadowRoot>(&currentNode)->Host();
+    }
+
+    // The spec handles the necessary cases to ensure we never get here, but we need this to satisfy the
+    // compiler that current is always valid.
+    std::unreachable();
+    return *current;
   }
 
 #pragma endregion

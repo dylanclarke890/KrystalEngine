@@ -11,6 +11,7 @@ namespace Krys::HTML
 {
   class ContainerNode;
   class Element;
+  class EventTarget;
   class Node;
   class ShadowRoot;
   class Text;
@@ -64,6 +65,25 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#concept-shadow-including-root
     KRYS_NODISCARD static const Node &ShadowIncludingRoot(const Node &node) noexcept;
     KRYS_NODISCARD static Node &ShadowIncludingRoot(Node &node) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-shadow-including-descendant
+    KRYS_NODISCARD static bool IsShadowIncludingDescendant(const Node &a, const Node &b) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-shadow-including-inclusive-descendant
+    KRYS_NODISCARD static bool IsShadowIncludingInclusiveDescendant(const Node &a, const Node &b) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-shadow-including-ancestor
+    KRYS_NODISCARD static bool IsShadowIncludingAncestor(const Node &a, const Node &b) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-shadow-including-inclusive-ancestor
+    KRYS_NODISCARD static bool IsShadowIncludingInclusiveAncestor(const Node &a, const Node &b) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-closed-shadow-hidden
+    KRYS_NODISCARD static bool IsClosedShadowHidden(const Node &a, const Node &b) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#retarget
+    KRYS_NODISCARD static const EventTarget &Retarget(const EventTarget &a, const EventTarget &b) noexcept;
+    KRYS_NODISCARD static EventTarget &Retarget(EventTarget &a, EventTarget &b) noexcept;
 
 #pragma endregion
 
