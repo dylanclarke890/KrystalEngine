@@ -13,10 +13,13 @@
 
 namespace Krys::HTML
 {
+  class EventDispatcher;
   class EventTarget;
 
   class Event : public RefCounted<Event>
   {
+    friend class EventDispatcher;
+
   protected:
     DOMStringAtom _type;
     RefPtr<EventTarget> _target {nullptr};

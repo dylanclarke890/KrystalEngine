@@ -1,5 +1,6 @@
 ﻿#include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML.Tests/TestContainerNode.hpp"
+#include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
@@ -50,7 +51,7 @@ namespace Krys::Tests
   {
     auto doc = CreateRef<Document>();
     auto textNode = CreateRef<Text>(*doc, u8"Hello, world!");
-    
+
     REQUIRE(textNode->NodeName() == u8"#text");
   }
 }

@@ -1,4 +1,5 @@
 ﻿#include "Krystal.HTML/Node/CharacterData.hpp"
+#include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
@@ -22,7 +23,8 @@ namespace Krys::HTML
   }
 
   /// @see https://dom.spec.whatwg.org/#concept-cd-substring
-  KRYS_NODISCARD ExceptionOr<DOMString> CharacterData::SubstringData(size_t offset, size_t count) const noexcept
+  KRYS_NODISCARD ExceptionOr<DOMString> CharacterData::SubstringData(size_t offset,
+                                                                     size_t count) const noexcept
   {
     auto length = _data.size();
     if (offset > length)

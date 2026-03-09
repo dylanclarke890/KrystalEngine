@@ -13,6 +13,6 @@ namespace Krys::HTML
     EventDispatcher() = delete;
     ~EventDispatcher() = delete;
 
-    static ExceptionOr<bool> DispatchTo(EventTarget &target, Event &event);
+    static ExceptionOr<bool> DispatchToTarget(Event &event, EventTarget &target, bool legacyTargetOverrideFlag = false, bool legacyOutputDidListenersThrowFlag = false) noexcept;
   };
 }

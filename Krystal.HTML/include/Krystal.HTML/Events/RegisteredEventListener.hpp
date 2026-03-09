@@ -4,13 +4,17 @@
 #include "Krystal.HTML/Events/EventListener.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
+#include "Krystal.Lib/Mixins/CanMakeWeakPtr.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 
 namespace Krys::HTML
 {
+  class AbortSignal;
+
   /// @see https://dom.spec.whatwg.org/#concept-event-listener
-  class RegisteredEventListener : public RefCounted<RegisteredEventListener>
+  class RegisteredEventListener : public RefCounted<RegisteredEventListener>,
+                                  public CanMakeWeakPtr<RegisteredEventListener>
   {
   public:
     struct Options
@@ -19,6 +23,7 @@ namespace Krys::HTML
       bool Passive : 1 {false};
       bool Once : 1 {false};
       bool TrustedOnly : 1 {false};
+      RefPtr<AbortSignal> Signal {nullptr};
     };
 
   private:
@@ -29,12 +34,13 @@ namespace Krys::HTML
     bool _wasRemoved : 1;
     bool _trustedOnly : 1;
     const RefPtr<EventListener> _callback;
+    RefPtr<AbortSignal> _abortSignal;
 
   public:
     RegisteredEventListener(const DOMStringAtom type, const Options &options,
                             RefPtr<EventListener> &&callback) noexcept
         : _type(type), _useCapture(options.Capture), _isPassive(options.Passive), _isOnce(options.Once),
-          _trustedOnly(options.TrustedOnly), _callback(Krys::Move(callback))
+          _trustedOnly(options.TrustedOnly), _callback(Krys::Move(callback)), _abortSignal(options.Signal)
     {
     }
 

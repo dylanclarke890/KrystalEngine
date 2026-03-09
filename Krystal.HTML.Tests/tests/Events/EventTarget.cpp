@@ -122,4 +122,6 @@ namespace Krys::Tests
         eventTarget->RemoveEventListener(EventNames::Click, Krys::Move(removeCallback), differentOptions));
     }
   }
+
+  // TODO(impl): test DispatchEvent and RemoveAllEventListeners.
 }

@@ -37,6 +37,7 @@ namespace Krys::HTML
 
 #pragma endregion
 
+    /// @see https://dom.spec.whatwg.org/#remove-all-event-listeners
     virtual void RemoveAllEventListeners() noexcept;
 
 #pragma region Type Checks
@@ -44,6 +45,11 @@ namespace Krys::HTML
     KRYS_NODISCARD bool IsNode() const noexcept
     {
       return HasEventTargetFlag(EventTargetFlag::IsNode);
+    }
+
+    KRYS_NODISCARD bool IsWindow() const noexcept
+    {
+      return HasEventTargetFlag(EventTargetFlag::IsWindow);
     }
 
 #pragma endregion
@@ -71,5 +77,20 @@ namespace Krys::HTML
     }
 
 #pragma endregion
+
+    virtual void ActivationBehavior(Event &event) noexcept
+    {
+      (void)event;
+    }
+
+    virtual void LegacyPreActivationBehavior(Event &event) noexcept
+    {
+      (void)event;
+    }
+
+    virtual void LegacyCanceledActivationBehavior(Event &event) noexcept
+    {
+      (void)event;
+    }
   };
 }

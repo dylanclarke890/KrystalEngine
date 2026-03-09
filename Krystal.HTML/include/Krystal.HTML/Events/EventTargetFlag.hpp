@@ -10,7 +10,8 @@ namespace Krys::HTML
     IsNode = 1 << 0,
     IsConnected = 1 << 1,
     IsInShadowTree = 1 << 2,
+    IsWindow = 1 << 3,
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::EventTargetFlag, 3u)
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::EventTargetFlag, 5u)

@@ -1,4 +1,5 @@
 ﻿#include "Krystal.HTML/Node/Node.hpp"
+#include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/MutationObserver/RegisteredObserver.hpp"
 #include "Krystal.HTML/MutationObserver/TransientRegisteredObserver.hpp"
 #include "Krystal.HTML/Node/CharacterData.hpp"
