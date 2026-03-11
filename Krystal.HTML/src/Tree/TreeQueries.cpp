@@ -244,58 +244,42 @@ namespace Krys::HTML
     return false;
   }
 
-  const EventTarget &TreeQueries::Retarget(const EventTarget &a, const EventTarget &b) noexcept
+  RawPtr<EventTarget> TreeQueries::Retarget(RawPtr<EventTarget> a, EventTarget& b) noexcept
   {
-    auto *current = &a;
+    auto *current = a;
+    auto *bNode = DynamicDowncast<Node>(b);
     while (true)
     {
+      if (current == nullptr)
+      {
+        return nullptr;
+      }
+
       if (!current->IsNode())
       {
-        return *current;
+        return current;
       }
 
-      auto &currentNode = Downcast<Node>(*current);
-      auto &currentRoot = Root(currentNode);
-      if (!currentNode.IsShadowRootNode()
-          && !IsShadowIncludingInclusiveAncestor(currentRoot, Downcast<Node>(b)))
+      auto *currentNode = Downcast<Node>(current);
+      auto &currentRoot = Root(*currentNode);
+      if (!currentNode->IsShadowRootNode())
       {
-        return *current;
+        return current;
       }
 
-      current = Downcast<ShadowRoot>(&currentNode)->Host();
+      if (bNode && !IsShadowIncludingInclusiveAncestor(currentRoot, *bNode))
+      {
+        return current;
+      }
+
+      auto *host = Downcast<ShadowRoot>(&currentRoot)->Host();
+      current = host;
     }
 
     // The spec handles the necessary cases to ensure we never get here, but we need this to satisfy the
     // compiler that current is always valid.
     std::unreachable();
-    return *current;
-  }
-
-  EventTarget &TreeQueries::Retarget(EventTarget &a, EventTarget &b) noexcept
-  {
-    auto *current = &a;
-    while (true)
-    {
-      if (!current->IsNode())
-      {
-        return *current;
-      }
-
-      auto &currentNode = Downcast<Node>(*current);
-      auto &currentRoot = Root(currentNode);
-      if (!currentNode.IsShadowRootNode()
-          && !IsShadowIncludingInclusiveAncestor(currentRoot, Downcast<Node>(b)))
-      {
-        return *current;
-      }
-
-      current = Downcast<ShadowRoot>(&currentNode)->Host();
-    }
-
-    // The spec handles the necessary cases to ensure we never get here, but we need this to satisfy the
-    // compiler that current is always valid.
-    std::unreachable();
-    return *current;
+    return current;
   }
 
 #pragma endregion

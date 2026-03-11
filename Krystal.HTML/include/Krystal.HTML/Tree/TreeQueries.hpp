@@ -82,8 +82,7 @@ namespace Krys::HTML
     KRYS_NODISCARD static bool IsClosedShadowHidden(const Node &a, const Node &b) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#retarget
-    KRYS_NODISCARD static const EventTarget &Retarget(const EventTarget &a, const EventTarget &b) noexcept;
-    KRYS_NODISCARD static EventTarget &Retarget(EventTarget &a, EventTarget &b) noexcept;
+    KRYS_NODISCARD static RawPtr<EventTarget> Retarget(RawPtr<EventTarget> a, EventTarget &b) noexcept;
 
 #pragma endregion
 

@@ -160,7 +160,6 @@
     <ClCompile Include="catch_main.cpp" />
     <ClCompile Include="tests\Events\CustomEvent.cpp" />
     <ClCompile Include="tests\Events\Event.cpp" />
-    <ClCompile Include="tests\Events\EventTarget.cpp" />
     <ClCompile Include="tests\Loader\HTMLEncodingSniffer.cpp" />
     <ClCompile Include="tests\Loader\TextResourceDecoder.cpp" />
     <ClCompile Include="tests\NameValidation.cpp" />

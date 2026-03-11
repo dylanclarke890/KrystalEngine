@@ -16,72 +16,66 @@ namespace Krys::HTML
   class RegisteredEventListener : public RefCounted<RegisteredEventListener>,
                                   public CanMakeWeakPtr<RegisteredEventListener>
   {
-  public:
-    struct Options
-    {
-      bool Capture : 1 {false};
-      bool Passive : 1 {false};
-      bool Once : 1 {false};
-      bool TrustedOnly : 1 {false};
-      RefPtr<AbortSignal> Signal {nullptr};
-    };
-
   private:
     const DOMStringAtom _type;
-    bool _useCapture : 1;
-    bool _isPassive : 1;
-    bool _isOnce : 1;
-    bool _wasRemoved : 1;
-    bool _trustedOnly : 1;
     const RefPtr<EventListener> _callback;
-    RefPtr<AbortSignal> _abortSignal;
+    RefPtr<AbortSignal> _signal {nullptr};
+    bool _removed {false};
+    bool _capture {false};
+    Maybe<bool> _passive;
+    bool _once {false};
 
   public:
-    RegisteredEventListener(const DOMStringAtom type, const Options &options,
+    RegisteredEventListener(const DOMStringAtom type, AddEventListenerOptions &&options,
                             RefPtr<EventListener> &&callback) noexcept
-        : _type(type), _useCapture(options.Capture), _isPassive(options.Passive), _isOnce(options.Once),
-          _trustedOnly(options.TrustedOnly), _callback(Krys::Move(callback)), _abortSignal(options.Signal)
+        : _type(type), _callback(Krys::Move(callback)), _signal(Krys::Move(options.Signal)), _removed(false),
+          _capture(options.Capture), _passive(options.Passive), _once(options.Once)
     {
     }
 
-    KRYS_NODISCARD DOMStringAtom GetType() const noexcept
+    KRYS_NODISCARD DOMStringAtom Type() const noexcept
     {
       return _type;
     }
 
-    KRYS_NODISCARD EventListener &Callback() const noexcept
+    KRYS_NODISCARD RawPtr<EventListener> Callback() const noexcept
     {
-      return *_callback.get();
+      return _callback.get();
     }
 
-    KRYS_NODISCARD bool UseCapture() const noexcept
+    KRYS_NODISCARD RawPtr<AbortSignal> Signal() const noexcept
     {
-      return _useCapture;
+      return _signal.get();
     }
 
-    KRYS_NODISCARD bool IsPassive() const noexcept
+    KRYS_NODISCARD bool Capture() const noexcept
     {
-      return _isPassive;
+      return _capture;
     }
 
-    KRYS_NODISCARD bool IsOnce() const noexcept
+    KRYS_NODISCARD Maybe<bool> Passive() const noexcept
     {
-      return _isOnce;
+      return _passive;
     }
 
-    KRYS_NODISCARD bool TrustedOnly() const noexcept
+    void Passive(bool passive) noexcept
     {
-      return _trustedOnly;
+      _passive = passive;
     }
 
-    KRYS_NODISCARD bool WasRemoved() const noexcept
+    KRYS_NODISCARD bool Once() const noexcept
     {
-      return _wasRemoved;
+      return _once;
     }
 
-    KRYS_NODISCARD void MarkAsRemoved() noexcept
+    void Remove() noexcept
     {
-      _wasRemoved = true;
+      _removed = true;
+    }
+
+    KRYS_NODISCARD bool Removed() const noexcept
+    {
+      return _removed;
     }
   };
 }

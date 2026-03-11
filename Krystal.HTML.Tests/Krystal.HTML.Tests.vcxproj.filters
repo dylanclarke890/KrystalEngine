@@ -36,9 +36,6 @@
     <ClCompile Include="tests\Parser\HTMLTokenizerIntegrationTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Events\EventTarget.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="tests\Node\ContainerNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

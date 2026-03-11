@@ -19,6 +19,7 @@ namespace Krys::HTML
   class Event : public RefCounted<Event>
   {
     friend class EventDispatcher;
+    friend class EventTarget;
 
   protected:
     DOMStringAtom _type;
@@ -38,8 +39,6 @@ namespace Krys::HTML
     bool _inPassiveListener : 1 {false};
     bool _dispatched : 1 {false};
     bool _isTrusted : 1 {false};
-
-    friend class EventTarget;
 
   public:
     virtual ~Event() noexcept = default;
@@ -163,14 +162,19 @@ namespace Krys::HTML
       (void)relatedTarget;
     }
 
-    virtual List<RefPtr<EventTarget>> TouchTargetList() const noexcept
+    virtual List<Ref<EventTarget>> TouchTargetList() const noexcept
     {
       return {};
     }
 
+    virtual void TouchTargetList(const List<Ref<EventTarget>> &touchTargets) const noexcept
+    {
+      (void)touchTargets;
+    }
+
 #pragma endregion
 
-    void SetEventPath(RefPtr<EventPath> &&path) noexcept
+    void SetEventPath(Ref<EventPath> &&path) noexcept
     {
       _path = std::move(path);
     }
@@ -179,5 +183,14 @@ namespace Krys::HTML
     {
       return _stopImmediatePropagation;
     }
+
+#pragma region Type Checks
+
+    KRYS_NODISCARD bool IsMouseEvent() const noexcept
+    {
+      return false;
+    }
+
+#pragma endregion
   };
 }

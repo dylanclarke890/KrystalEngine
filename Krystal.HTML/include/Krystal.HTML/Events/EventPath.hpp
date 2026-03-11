@@ -14,12 +14,17 @@ namespace Krys::HTML
     Ref<EventTarget> _invocationTarget;
     RefPtr<EventTarget> _shadowAdjustedTarget {nullptr};
     RefPtr<EventTarget> _relatedTarget {nullptr};
-    List<RefPtr<EventTarget>> _touchTargetList;
+    List<Ref<EventTarget>> _touchTargetList;
     bool _invocationTargetInShadowTree : 1 {false};
     bool _rootOfClosedTree : 1 {false};
     bool _slotInClosedTree : 1 {false};
 
   public:
+    EventPathItem(EventTarget &invocationTarget, bool invocationTargetInShadowTree,
+                  RawPtr<EventTarget> shadowAdjustedTarget, RawPtr<EventTarget> relatedTarget,
+                  List<Ref<EventTarget>> &touchTargetList, bool rootOfClosedTree,
+                  bool slotInClosedTree) noexcept;
+
     KRYS_NODISCARD RawPtr<EventTarget> InvocationTarget() const noexcept
     {
       return _invocationTarget.get();
@@ -35,7 +40,7 @@ namespace Krys::HTML
       return _relatedTarget.get();
     }
 
-    KRYS_NODISCARD const List<RefPtr<EventTarget>> &TouchTargetList() const noexcept
+    KRYS_NODISCARD const List<Ref<EventTarget>> &TouchTargetList() const noexcept
     {
       return _touchTargetList;
     }
@@ -63,6 +68,11 @@ namespace Krys::HTML
 
   public:
     KRYS_NODISCARD const List<EventPathItem> &PathItems() const noexcept
+    {
+      return _pathItems;
+    }
+
+    KRYS_NODISCARD List<EventPathItem> &PathItems() noexcept
     {
       return _pathItems;
     }

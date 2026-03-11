@@ -130,6 +130,7 @@
     <ClInclude Include="include\Krystal.HTML\Utils\StringAlgorithms.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Events\EventPath.cpp" />
     <ClCompile Include="src\Ranges\Range.cpp" />
     <ClCompile Include="src\MutationObserver\MutationObserver.cpp" />
     <ClCompile Include="src\Node\ParentNodeRareData.cpp" />
