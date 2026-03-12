@@ -47,14 +47,18 @@
     2.11 Action versus occurrence
          - N/A
 
-3 Aborting ongoing activities:
+3 Aborting ongoing activities: 4/4
     3.1   Interface AbortController
+         - No test coverage.
 
     3.2   Interface AbortSignal
+         - No test coverage.
 
     3.2.1 Garbage collection 
+         - N/A
 
     3.3   Using AbortController and AbortSignal objects in APIs 
+         - N/A
 
 4 Nodes
     4.1      Introduction to "The DOM"
