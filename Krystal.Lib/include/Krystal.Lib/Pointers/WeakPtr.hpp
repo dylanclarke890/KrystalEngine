@@ -11,6 +11,8 @@
 #include "Krystal.Lib/Pointers/WeakPtrImpl.hpp"
 #include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 #include <cassert>
+#include <format>
+#include <utility>
 
 namespace Krys::detail
 {
@@ -205,10 +207,17 @@ namespace Krys::detail
       return _impl.release();
     }
 
-    void reset() noexcept
+    constexpr void reset() noexcept
     {
       _impl = nullptr;
     }
+
+    KRYS_NODISCARD constexpr RefPtr<T> lock() const noexcept
+    {
+      static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
+                    "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
+      return _impl ? ShareRefPtr(_impl->template get<T>()) : nullptr;
+    } 
 
   private:
     explicit constexpr IntrusiveWeakPtr(const T *object) noexcept
@@ -223,6 +232,67 @@ namespace Krys::detail
       assert(&object == _impl->template get<T>());
     }
   };
+
+  template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  constexpr inline bool operator==(const IntrusiveWeakPtr<T, PtrTraits, RefPolicy, Nullable> &lhs,
+                                   std::nullptr_t) noexcept
+  {
+    return lhs.get() == nullptr;
+  }
+
+  template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  constexpr inline bool operator==(std::nullptr_t,
+                                   const IntrusiveWeakPtr<T, PtrTraits, RefPolicy, Nullable> &rhs) noexcept
+  {
+    return nullptr == rhs.get();
+  }
+
+  template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable, typename U>
+  requires(ConvertibleTo<RawPtr<U>, RawPtr<T>>)
+  constexpr inline bool operator==(const IntrusiveWeakPtr<T, PtrTraits, RefPolicy, Nullable> &lhs,
+                                   RawPtr<U> rhs) noexcept
+  {
+    return lhs.get() == rhs;
+  }
+
+  template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable, typename U,
+            typename UPtrTraits, typename URefPolicy, IsNullable ONullable>
+  requires(ConvertibleTo<RawPtr<U>, RawPtr<T>>)
+  constexpr inline bool operator==(const IntrusiveWeakPtr<T, PtrTraits, RefPolicy, Nullable> &lhs,
+                                   const IntrusiveWeakPtr<U, UPtrTraits, URefPolicy, ONullable> &rhs) noexcept
+  {
+    return lhs.get() == rhs.get();
+  }
+  template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  constexpr inline bool operator!=(const IntrusiveWeakPtr<T, PtrTraits, RefPolicy, Nullable> &lhs,
+                                   std::nullptr_t) noexcept
+  {
+    return !(lhs == nullptr);
+  }
+
+  template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
+  constexpr inline bool operator!=(std::nullptr_t,
+                                   const IntrusiveWeakPtr<T, PtrTraits, RefPolicy, Nullable> &rhs) noexcept
+  {
+    return !(nullptr == rhs);
+  }
+
+  template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable, typename U>
+  requires(ConvertibleTo<RawPtr<U>, RawPtr<T>>)
+  constexpr inline bool operator!=(const IntrusiveWeakPtr<T, PtrTraits, RefPolicy, Nullable> &lhs,
+                                   RawPtr<U> rhs) noexcept
+  {
+    return !(lhs == rhs);
+  }
+
+  template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable, typename U,
+            typename UPtrTraits, typename URefPolicy, IsNullable ONullable>
+  requires(ConvertibleTo<RawPtr<U>, RawPtr<T>>)
+  constexpr inline bool operator!=(const IntrusiveWeakPtr<T, PtrTraits, RefPolicy, Nullable> &lhs,
+                                   const IntrusiveWeakPtr<U, UPtrTraits, URefPolicy, ONullable> &rhs) noexcept
+  {
+    return !(lhs == rhs);
+  }
 
   template <typename TExpected, typename T, typename WeakPtrImpl, typename PtrTraits, IsNullable Nullable>
   KRYS_NODISCARD constexpr inline bool
@@ -253,4 +323,28 @@ namespace Krys
   {
     return WeakRef<T, Impl, PtrTraits>::WithRef(object);
   }
+}
+
+namespace std
+{
+  template <typename T, typename PtrTraits, typename RefPolicy, ::Krys::IsNullable Nullable, typename TChar>
+  struct formatter<::Krys::detail::IntrusiveWeakPtr<T, PtrTraits, RefPolicy, Nullable>, TChar>
+      : public formatter<void *, TChar>
+  {
+    template <typename FormatContext>
+    auto format(const ::Krys::detail::IntrusiveWeakPtr<T, PtrTraits, RefPolicy, Nullable> &ptr,
+                FormatContext &ctx) const -> decltype(ctx.out())
+    {
+      return formatter<void *, TChar>::format(ptr.get(), ctx);
+    }
+  };
+
+  template <typename T, typename Impl, typename PtrTraits, ::Krys::IsNullable Nullable>
+  struct hash<Krys::detail::IntrusiveWeakPtr<T, Impl, PtrTraits, Nullable>>
+  {
+    size_t operator()(const Krys::detail::IntrusiveWeakPtr<T, Impl, PtrTraits, Nullable> &ptr) const noexcept
+    {
+      return hash<::Krys::RawPtr<T>>()(ptr.get());
+    }
+  };
 }

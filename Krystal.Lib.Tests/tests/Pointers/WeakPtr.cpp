@@ -52,7 +52,7 @@ namespace Krys::Tests
     }
 
     REQUIRE(!weakPtr);
-    REQUIRE(weakPtr.get() == nullptr);
+    REQUIRE(weakPtr.lock() == nullptr);
   }
 
   TEST_CASE("WeakPtr can be created from impl", "[WeakPtr]")
@@ -76,7 +76,7 @@ namespace Krys::Tests
     WeakPtr<TestWeakRefCounted> weakPtr2(Krys::Move(weakPtr1));
 
     REQUIRE(!weakPtr1);
-    REQUIRE(weakPtr2);
+    REQUIRE(weakPtr2.lock());
     REQUIRE(weakPtr2.get() == obj);
 
     obj->SubRef();
@@ -98,8 +98,8 @@ namespace Krys::Tests
       obj->SubRef();
     }
 
-    REQUIRE(!w1);
-    REQUIRE(!w2);
+    REQUIRE(!w1.lock());
+    REQUIRE(!w2.lock());
   }
 
   TEST_CASE("WeakPtr remains valid while any strong ref exists", "[WeakPtr]")
@@ -113,12 +113,12 @@ namespace Krys::Tests
 
       {
         Ref<TestWeakRefCounted> copy = ref;
-        REQUIRE(weakPtr);
+        REQUIRE(weakPtr.lock());
       }
 
-      REQUIRE(weakPtr);
+      REQUIRE(weakPtr.lock());
     }
 
-    REQUIRE(!weakPtr);
+    REQUIRE(!weakPtr.lock());
   }
 }
