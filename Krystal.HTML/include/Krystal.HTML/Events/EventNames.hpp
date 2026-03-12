@@ -4,6 +4,7 @@
 
 namespace Krys::HTML::EventNames
 {
+  inline static DOMStringAtom Abort = u8"abort";
   inline static DOMStringAtom Click = u8"click";
   inline static DOMStringAtom TouchStart = u8"touchstart";
   inline static DOMStringAtom TouchMove = u8"touchmove";
