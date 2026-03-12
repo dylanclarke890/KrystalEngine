@@ -82,17 +82,19 @@ namespace Krys::HTML
 
     if (listener.Signal() != nullptr)
     {
-      listener.Signal()->OnAbort(
-        [weakListener = CreateWeakPtr(&listener), weakTarget = CreateWeakPtr(&eventTarget)]() mutable
-        {
-          auto strongListener = ShareRefPtr(weakListener.get());
-          auto strongTarget = ShareRefPtr(weakTarget.get());
+      auto algorithm =
+        [weakListener = CreateWeakPtr(&listener), weakTarget = CreateWeakPtr(&eventTarget)](Any)
+      {
+        auto strongListener = weakListener.lock();
+        auto strongTarget = weakTarget.lock();
 
-          if (strongListener && strongTarget)
-          {
-            EventTarget::RemoveEventListener(*strongTarget, *strongListener);
-          }
-        });
+        if (strongListener && strongTarget)
+        {
+          EventTarget::RemoveEventListener(*strongTarget, *strongListener);
+        }
+      };
+
+      AbortSignal::Add(algorithm, *listener.Signal());
     }
   }
 

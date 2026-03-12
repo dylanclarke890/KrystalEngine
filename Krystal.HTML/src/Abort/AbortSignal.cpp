@@ -33,15 +33,15 @@ namespace Krys::HTML
     return CreateDependentAbortSignal(signals);
   }
 
-  size_t AbortSignal::Add(const AbortAlgorithm &algorithm, Ref<AbortSignal> &signal) noexcept
+  size_t AbortSignal::Add(const AbortAlgorithm &algorithm, AbortSignal &signal) noexcept
   {
-    if (signal->Aborted())
+    if (signal.Aborted())
     {
       return 0;
     }
 
-    auto id = signal->_abortAlgorithms.size();
-    signal->_abortAlgorithms.push_back({id, algorithm});
+    auto id = signal._abortAlgorithms.size();
+    signal._abortAlgorithms.push_back({id, algorithm});
     return id;
   }
 
@@ -116,11 +116,11 @@ namespace Krys::HTML
       {
         for (const auto &sourceSignal : signal->_sourceSignals)
         {
-          if (auto srcSignal = ShareRefPtr(sourceSignal.get()))
+          if (auto srcSignal = sourceSignal.lock())
           {
             assert(!sourceSignal->Aborted() && !sourceSignal->_dependent);
-            resultSignal->_sourceSignals.insert(CreateWeakRef(*sourceSignal));
-            sourceSignal->_dependentSignals.insert(CreateWeakRef(*resultSignal));
+            resultSignal->_sourceSignals.insert(CreateWeakPtr(sourceSignal.get()));
+            sourceSignal->_dependentSignals.insert(CreateWeakPtr(resultSignal.get()));
           }
         }
       }

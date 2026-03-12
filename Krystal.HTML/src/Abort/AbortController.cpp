@@ -11,7 +11,7 @@ namespace Krys::HTML
   {
     if (_signal)
     {
-      _signal->Abort();
+      _signal->Abort(reason);
     }
   }
 }

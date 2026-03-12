@@ -11,19 +11,17 @@
 
 namespace Krys::HTML
 {
-  class AbortController;
-
   using AbortAlgorithm = Func<void(Any)>;
 
   class AbortSignal : public EventTarget
   {
-    friend class AbortController;
+    friend class EventTarget;
 
   private:
     Maybe<::Krys::Any> _reason;
     List<Pair<size_t, AbortAlgorithm>> _abortAlgorithms;
-    Set<WeakRef<AbortSignal>> _sourceSignals;
-    Set<WeakRef<AbortSignal>> _dependentSignals;
+    Set<WeakPtr<AbortSignal>> _sourceSignals;
+    Set<WeakPtr<AbortSignal>> _dependentSignals;
     bool _dependent {false};
 
   public:
@@ -54,9 +52,9 @@ namespace Krys::HTML
     }
 
 #pragma endregion
-
+  private:
     /// @see https://dom.spec.whatwg.org/#abortsignal-add
-    static size_t Add(const AbortAlgorithm &algorithm, Ref<AbortSignal> &signal) noexcept;
+    static size_t Add(const AbortAlgorithm &algorithm, AbortSignal &signal) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#abortsignal-remove
     static void Remove(size_t algorithm, Ref<AbortSignal> &signal) noexcept;
