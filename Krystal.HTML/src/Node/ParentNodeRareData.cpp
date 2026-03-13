@@ -8,7 +8,7 @@
 
 namespace Krys::HTML
 {
-  Ref<HTMLCollection> ParentNodeRareData::Children(const ContainerNode &parent) noexcept
+  Ref<HTMLCollection> ParentNodeRareData::Children(ContainerNode &parent) noexcept
   {
     if (!_children)
     {

@@ -10,11 +10,12 @@
 #include "Krystal.HTML/Tree/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Tree/TreeQueries.hpp"
 #include "Krystal.HTML/Tree/TreeTraversal.hpp"
+#include "Krystal.HTML/Utils/SubtreeRanges.hpp"
 
 namespace Krys::HTML
 {
   ExceptionOr<void> TreeMutationAlgorithms::EnsurePreInsertValidity(Node &node, ContainerNode &parent,
-                                                                    RawPtr<Node> refChild) noexcept
+                                                                    RawPtr<Node> child) noexcept
   {
     if (!parent.IsDocumentNode() && !parent.IsDocumentFragmentNode() && !parent.IsElementNode())
     {
@@ -26,7 +27,7 @@ namespace Krys::HTML
       return Exception {ExceptionCode::HierarchyRequestError};
     }
 
-    if (refChild && refChild->ParentNode() != &parent)
+    if (child && child->ParentNode() != &parent)
     {
       return Exception {ExceptionCode::NotFoundError};
     }
@@ -48,9 +49,9 @@ namespace Krys::HTML
       if (node.IsDocumentFragmentNode())
       {
         uint32 elementCount = 0;
-        for (RawPtr<Node> child = node.FirstChild(); child; child = child->NextSibling())
+        for (Node &fragmentChild : ChildNodeRange(Downcast<ContainerNode>(node)))
         {
-          if (child->IsElementNode())
+          if (fragmentChild.IsElementNode())
           {
             ++elementCount;
             if (elementCount > 1)
@@ -58,7 +59,7 @@ namespace Krys::HTML
               return Exception {ExceptionCode::HierarchyRequestError};
             }
           }
-          else if (child->IsTextNode())
+          else if (fragmentChild.IsTextNode())
           {
             return Exception {ExceptionCode::HierarchyRequestError};
           }
@@ -71,7 +72,7 @@ namespace Krys::HTML
             return Exception {ExceptionCode::HierarchyRequestError};
           }
 
-          if (TreeQueries::IsDocTypeOrDocTypeFollows(refChild))
+          if (TreeQueries::IsDocTypeOrDocTypeFollows(child))
           {
             return Exception {ExceptionCode::HierarchyRequestError};
           }
@@ -84,38 +85,29 @@ namespace Krys::HTML
           return Exception {ExceptionCode::HierarchyRequestError};
         }
 
-        if (TreeQueries::IsDocTypeOrDocTypeFollows(refChild))
+        if (TreeQueries::IsDocTypeOrDocTypeFollows(child))
         {
           return Exception {ExceptionCode::HierarchyRequestError};
         }
       }
       else if (node.IsDocumentTypeNode())
       {
-        bool hasElementChild = false;
-        for (RawPtr<Node> child = parent.FirstChild(); child; child = child->NextSibling())
+        auto children = ChildNodeRange(parent);
+        if (std::any_of(
+              children.begin(), children.end(), [&](const Node &current)
+              { return current.IsDocumentTypeNode() || (current.IsElementNode() && child == nullptr); }))
         {
-          if (child->IsDocumentTypeNode())
+          return Exception {ExceptionCode::HierarchyRequestError};
+        }
+
+        if (child != nullptr)
+        {
+          auto preceding = PrecedingRange(*child);
+          if (std::any_of(preceding.begin(), preceding.end(),
+                          [](const Node &current) { return current.IsElementNode(); }))
           {
             return Exception {ExceptionCode::HierarchyRequestError};
           }
-
-          hasElementChild = hasElementChild || child->IsElementNode();
-        }
-
-        if (refChild != nullptr)
-        {
-          RawPtr<Node> current = refChild;
-          while (current = TreeTraversal::Previous(*current))
-          {
-            if (current->IsElementNode())
-            {
-              return Exception {ExceptionCode::HierarchyRequestError};
-            }
-          }
-        }
-        else if (hasElementChild)
-        {
-          return Exception {ExceptionCode::HierarchyRequestError};
         }
       }
     }
@@ -139,32 +131,36 @@ namespace Krys::HTML
     return Insert(node, parent, refChild);
   }
 
-  ExceptionOr<void> TreeMutationAlgorithms::Insert(Node &node, ContainerNode &parent, RawPtr<Node> refChild,
+  ExceptionOr<void> TreeMutationAlgorithms::Insert(Node &node, ContainerNode &parent, RawPtr<Node> child,
                                                    SuppressObservers suppressObservers) noexcept
   {
-    SmallNodeList targets;
+    SmallNodeList nodes;
     if (node.IsDocumentFragmentNode())
     {
-      TreeQueries::CollectChildNodes(static_cast<ContainerNode &>(node), targets);
+      TreeQueries::CollectChildNodes(Downcast<ContainerNode>(node), nodes);
     }
     else
     {
-      targets.push_back(ShareRef<Node>(node));
+      nodes.push_back(ShareRef<Node>(node));
     }
 
-    if (targets.empty())
+    if (nodes.empty())
     {
       return {};
     }
 
     if (node.IsDocumentFragmentNode())
     {
-      // TODO(IMPL):
-      // remove children from the document fragment with suppressObservers = true
-      // Queue mutation record for node with << >>, nodes, null, and null.
+      if (auto removeAllResult = RemoveAllChildren(Downcast<ContainerNode>(node), SuppressObservers(true));
+          removeAllResult.HasException())
+      {
+        return {removeAllResult.ReleaseException()};
+      }
+
+      TreeMutationDispatcher::QueueTreeMutationRecord(node, {}, nodes, nullptr, nullptr);
     }
 
-    if (refChild != nullptr)
+    if (child != nullptr)
     {
       // TODO(IMPL):
       // For each live range whose start node is parent and start offset is greater than child’s index:
@@ -172,8 +168,8 @@ namespace Krys::HTML
       // greater than child’s index: increase its end offset by count.
     }
 
-    auto previousSibling = ShareRefPtr<Node>(refChild ? refChild->PreviousSibling() : parent.LastChild());
-    for (auto &target : targets)
+    auto previousSibling = ShareRefPtr<Node>(child ? child->PreviousSibling() : parent.LastChild());
+    for (auto &target : nodes)
     {
       if (auto result = parent.OwnerDocument()->AdoptNode(*target); result.HasException())
       {
@@ -182,23 +178,23 @@ namespace Krys::HTML
 
       target->SetParentNode(&parent);
 
-      if (refChild)
+      if (child)
       {
-        if (auto previousSibling = ShareRefPtr(refChild->PreviousSibling()))
+        if (auto previousSibling = ShareRefPtr(child->PreviousSibling()))
         {
           previousSibling->SetNextSibling(target.get());
           target->SetPreviousSibling(previousSibling.get());
 
-          refChild->SetPreviousSibling(target.get());
-          target->SetNextSibling(refChild);
+          child->SetPreviousSibling(target.get());
+          target->SetNextSibling(child);
         }
         else
         {
-          assert(parent.FirstChild() == refChild);
+          assert(parent.FirstChild() == child);
           parent.SetFirstChild(target.get());
 
-          refChild->SetPreviousSibling(target.get());
-          target->SetNextSibling(refChild);
+          child->SetPreviousSibling(target.get());
+          target->SetNextSibling(child);
         }
       }
       else
@@ -216,7 +212,7 @@ namespace Krys::HTML
         parent.SetLastChild(target.get());
       }
 
-      TreeMutationDispatcher::NodeInserted(*target, parent);
+      TreeMutationDispatcher::Inserted(parent, *target);
 
       target->SetTreeScopeRecursively(*parent.OwnerDocument());
     }
@@ -266,7 +262,9 @@ namespace Krys::HTML
     assert(!node.PreviousSibling());
     assert(!node.NextSibling());
 
-    TreeMutationDispatcher::NodeRemoved(node, parent);
+    TreeMutationDispatcher::Removed(node, true, parent);
+
+    // TODO(impl):
 
     return {};
   }
@@ -360,7 +358,7 @@ namespace Krys::HTML
     assert(!node.IsDocumentNode() || &node == document);
 
     auto copy = CloneSingleNode(node, *document, fallbackRegistry);
-    TreeMutationDispatcher::NodeCloned(node, *copy, subtree);
+    TreeMutationDispatcher::Cloned(node, *copy, subtree);
 
     if (parent != nullptr)
     {
@@ -370,9 +368,9 @@ namespace Krys::HTML
     if (subtree)
     {
       assert(node.IsContainerNode());
-      for (RawPtr<Node> child = node.FirstChild(); child; child = child->NextSibling())
+      for (auto &child : ChildNodeRange(Downcast<ContainerNode>(node)))
       {
-        CloneNode(*child, document, subtree, Downcast<ContainerNode>(copy.get()), fallbackRegistry);
+        CloneNode(child, document, subtree, Downcast<ContainerNode>(copy.get()), fallbackRegistry);
       }
     }
 

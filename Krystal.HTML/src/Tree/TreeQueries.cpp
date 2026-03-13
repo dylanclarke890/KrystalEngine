@@ -9,6 +9,7 @@
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/Tree/TreeTraversal.hpp"
+#include "Krystal.HTML/Utils/SubtreeRanges.hpp"
 
 namespace Krys::HTML
 {
@@ -46,26 +47,12 @@ namespace Krys::HTML
 
   bool TreeQueries::IsDescendant(const Node &a, const Node &b) noexcept
   {
-    RawPtr<const Node> current = &a;
-    while (current = current->ParentNode())
-    {
-      if (current == &b)
-      {
-        return true;
-      }
-    }
-
-    return false;
+    return std::ranges::any_of(ConstAncestorRange(a), [&](const Node &n) { return &n == &b; });
   }
 
   bool TreeQueries::IsInclusiveDescendant(const Node &a, const Node &b) noexcept
   {
-    if (&a == &b)
-    {
-      return true;
-    }
-
-    return IsDescendant(a, b);
+    return std::ranges::any_of(ConstInclusiveAncestorRange(a), [&](const Node &n) { return &n == &b; });
   }
 
   bool TreeQueries::IsAncestor(const Node &a, const Node &b) noexcept
@@ -95,12 +82,7 @@ namespace Krys::HTML
       return true;
     }
 
-    if (a.ParentNode() == nullptr || b.ParentNode() == nullptr)
-    {
-      return false;
-    }
-
-    return a.ParentNode() == b.ParentNode();
+    return IsSibling(a, b);
   }
 
   bool TreeQueries::IsPreceding(const Node &a, const Node &b) noexcept
@@ -110,16 +92,7 @@ namespace Krys::HTML
       return false;
     }
 
-    RawPtr<const Node> current = &a;
-    while (current = TreeTraversal::Next(*current))
-    {
-      if (current == &b)
-      {
-        return true;
-      }
-    }
-
-    return false;
+    return std::ranges::any_of(ConstPrecedingRange(b), [&](const Node &current) { return &current == &a; });
   }
 
   bool TreeQueries::IsFollowing(const Node &a, const Node &b) noexcept
@@ -129,16 +102,7 @@ namespace Krys::HTML
       return false;
     }
 
-    RawPtr<const Node> current = &b;
-    while (current = TreeTraversal::Next(*current))
-    {
-      if (current == &a)
-      {
-        return true;
-      }
-    }
-
-    return false;
+    return std::ranges::any_of(ConstPrecedingRange(a), [&](const Node &current) { return &current == &b; });
   }
 
   size_t TreeQueries::Index(const Node &node) noexcept
@@ -149,6 +113,36 @@ namespace Krys::HTML
       index++;
     }
     return index;
+  }
+
+#pragma endregion
+
+#pragma region Document Trees
+
+  bool TreeQueries::IsInDocumentTree(const Node &node) noexcept
+  {
+    return Root(node).IsDocumentNode();
+  }
+
+  RawPtr<Element> TreeQueries::DocumentElement(const Node &node) noexcept
+  {
+    // The document element of a document is the element whose parent is that document, if it exists;
+    // otherwise null.
+    if (auto *document = DynamicDowncast<Document>(&Root(node)))
+    {
+      return TreeTraversal::FirstElementChild(*document);
+    }
+
+    return nullptr;
+  }
+
+#pragma endregion
+
+#pragma region Shadow Trees
+
+  bool TreeQueries::IsInShadowTree(const Node &node) noexcept
+  {
+    return Root(node).IsShadowRootNode();
   }
 
 #pragma endregion
@@ -244,7 +238,7 @@ namespace Krys::HTML
     return false;
   }
 
-  RawPtr<EventTarget> TreeQueries::Retarget(RawPtr<EventTarget> a, EventTarget& b) noexcept
+  RawPtr<EventTarget> TreeQueries::Retarget(RawPtr<EventTarget> a, EventTarget &b) noexcept
   {
     auto *current = a;
     auto *bNode = DynamicDowncast<Node>(b);
@@ -340,27 +334,6 @@ namespace Krys::HTML
     return node.IsTextNode() && !node.IsCDATASectionNode();
   }
 
-  bool TreeQueries::IsInclusiveDescendantOf(const ContainerNode &node,
-                                            const Node &possibleInclusiveDescendant) noexcept
-  {
-    if (!HasSameRoot(node, possibleInclusiveDescendant))
-    {
-      return false;
-    }
-
-    RawPtr<const Node> current = &possibleInclusiveDescendant;
-    while (current)
-    {
-      if (current == &node)
-      {
-        return true;
-      }
-      current = current->ParentNode();
-    }
-
-    return false;
-  }
-
   RawPtr<ShadowRoot> TreeQueries::GetShadowRoot(const Node &node) noexcept
   {
     if (auto *element = DynamicDowncast<Element>(node))
@@ -371,14 +344,14 @@ namespace Krys::HTML
     return nullptr;
   }
 
-  RawPtr<Node> TreeQueries::ChildAt(const Node &node, size_t index) noexcept
+  RawPtr<Node> TreeQueries::ChildAt(ContainerNode &node, size_t index) noexcept
   {
     size_t currentIndex = 0;
-    for (auto child = node.FirstChild(); child; child = child->NextSibling())
+    for (Node &child : ChildNodeRange(node))
     {
       if (currentIndex == index)
       {
-        return child;
+        return &child;
       }
       currentIndex++;
     }
@@ -388,7 +361,7 @@ namespace Krys::HTML
   size_t TreeQueries::ChildNodeCount(const ContainerNode &node) noexcept
   {
     size_t count = 0;
-    for (auto child = node.FirstChild(); child; child = child->NextSibling())
+    for (const Node &child : ConstChildNodeRange(node))
     {
       count++;
     }
@@ -398,8 +371,7 @@ namespace Krys::HTML
   KRYS_NODISCARD size_t TreeQueries::ChildElementCount(const ContainerNode &node) noexcept
   {
     size_t count = 0;
-    for (auto childElement = TreeTraversal::FirstElementChild(node); childElement;
-         childElement = TreeTraversal::NextElementSibling(*childElement))
+    for (const Element &child : ConstChildElementRange(node))
     {
       count++;
     }
@@ -409,50 +381,40 @@ namespace Krys::HTML
 
   bool TreeQueries::HasElementChild(const ContainerNode &node) noexcept
   {
-    for (RawPtr<Node> child = node.FirstChild(); child; child = child->NextSibling())
-    {
-      if (child->IsElementNode())
-      {
-        return true;
-      }
-    }
-
-    return false;
+    return std::ranges::any_of(ConstChildNodeRange(node), [](const Node &n) { return n.IsElementNode(); });
   }
 
-  void TreeQueries::CollectChildNodes(const ContainerNode &parent, SmallNodeList &collection) noexcept
+  void TreeQueries::CollectChildNodes(ContainerNode &parent, SmallNodeList &collection) noexcept
   {
-    for (auto child = parent.FirstChild(); child; child = child->NextSibling())
+    for (Node &child : ChildNodeRange(parent))
     {
-      collection.emplace_back(ShareRef(*child));
+      collection.emplace_back(ShareRef(child));
     }
   }
 
-  void TreeQueries::CollectChildElements(const ContainerNode &parent, SmallElementList &collection) noexcept
+  void TreeQueries::CollectChildElements(ContainerNode &parent, SmallElementList &collection) noexcept
   {
-    for (auto childElement = TreeTraversal::FirstElementChild(parent); childElement;
-         childElement = TreeTraversal::NextElementSibling(*childElement))
+    for (Element &child : ChildElementRange(parent))
     {
-      collection.emplace_back(ShareRef(*childElement));
+      collection.emplace_back(ShareRef(child));
     }
   }
 
   List<Ref<Node>> TreeQueries::InclusiveAncestors(Node &node) noexcept
   {
     List<Ref<Node>> ancestors;
-    for (RawPtr<Node> current = &node; current; current = current->ParentNode())
+    for (Node &ancestor : InclusiveAncestorRange(node))
     {
-      ancestors.emplace_back(ShareRef(*current));
+      ancestors.emplace_back(ShareRef(ancestor));
     }
+
     return ancestors;
   }
 
   DOMString TreeQueries::DescendantTextContent(const ContainerNode &node) noexcept
   {
     DOMString content;
-
-    for (auto *descendant = node.FirstChild(); descendant;
-         descendant = TreeTraversal::Next(*descendant, &node))
+    for (const Node &descendant : ConstDescendantRange(node))
     {
       if (auto *textNode = DynamicDowncast<Text>(descendant))
       {
@@ -466,7 +428,7 @@ namespace Krys::HTML
   DOMString TreeQueries::ChildTextContent(const ContainerNode &node) noexcept
   {
     DOMString content;
-    for (auto child = node.FirstChild(); child; child = child->NextSibling())
+    for (const Node &child : ConstChildNodeRange(node))
     {
       if (auto *textNode = DynamicDowncast<Text>(child))
       {
@@ -526,27 +488,6 @@ namespace Krys::HTML
     return content;
   }
 
-  bool TreeQueries::IsInclusiveAncestorOf(const Node &a, const Node &b) noexcept
-  {
-    if (!HasSameRoot(a, b))
-    {
-      return false;
-    }
-
-    RawPtr<const Node> current = &b;
-    while (current)
-    {
-      if (current == &a)
-      {
-        return true;
-      }
-
-      current = current->ParentNode();
-    }
-
-    return false;
-  }
-
   RawPtr<ContainerNode> TreeQueries::CommonAncestorContainer(Node &a, Node &b) noexcept
   {
     if (!HasSameRoot(a, b))
@@ -557,7 +498,7 @@ namespace Krys::HTML
     auto *container = &a;
     while (container)
     {
-      if (IsInclusiveAncestorOf(*container, b))
+      if (IsInclusiveAncestor(*container, b))
       {
         return Downcast<ContainerNode>(container);
       }

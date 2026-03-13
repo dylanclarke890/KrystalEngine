@@ -172,7 +172,7 @@ namespace Krys::HTML
     RefPtr<Node> newNode;
     size_t newOffset = 0;
 
-    if (TreeQueries::IsInclusiveAncestorOf(*_start.Container, *_end.Container))
+    if (TreeQueries::IsInclusiveAncestor(*_start.Container, *_end.Container))
     {
       newNode = _start.Container;
       newOffset = _start.Offset;
@@ -180,7 +180,7 @@ namespace Krys::HTML
     else
     {
       RawPtr<Node> refNode = _start.Container.get();
-      while (refNode->ParentNode() && !TreeQueries::IsInclusiveAncestorOf(*refNode, *_end.Container))
+      while (refNode->ParentNode() && !TreeQueries::IsInclusiveAncestor(*refNode, *_end.Container))
       {
         refNode = refNode->ParentNode();
       }
@@ -249,7 +249,7 @@ namespace Krys::HTML
 
     RefPtr<Node> newNode;
     size_t newOffset = 0uz;
-    if (TreeQueries::IsInclusiveAncestorOf(*_start.Container, *_end.Container))
+    if (TreeQueries::IsInclusiveAncestor(*_start.Container, *_end.Container))
     {
       newNode = _start.Container;
       newOffset = _start.Offset;
@@ -257,7 +257,7 @@ namespace Krys::HTML
     else
     {
       RawPtr<Node> refNode = _start.Container.get();
-      while (refNode->ParentNode() && !TreeQueries::IsInclusiveAncestorOf(*refNode, *_end.Container))
+      while (refNode->ParentNode() && !TreeQueries::IsInclusiveAncestor(*refNode, *_end.Container))
       {
         refNode = refNode->ParentNode();
       }
@@ -363,11 +363,11 @@ namespace Krys::HTML
     }
     else
     {
-      refNode = ShareRefPtr(TreeQueries::ChildAt(*_start.Container, _start.Offset));
+      refNode = ShareRefPtr(TreeQueries::ChildAt(Downcast<ContainerNode>(*_start.Container), _start.Offset));
     }
 
     RefPtr<ContainerNode> parent =
-      refNode ? RefPtr<ContainerNode>(_start.Container) : ShareRefPtr(refNode->ParentNode());
+      refNode ? ShareRefPtr(refNode->ParentNode()) : RefPtr<ContainerNode>(_start.Container);
 
     if (auto preInsertValid = TreeMutationAlgorithms::EnsurePreInsertValidity(node, *parent, refNode.get());
         preInsertValid.HasException())
@@ -671,14 +671,14 @@ namespace Krys::HTML
 
   bool Range::IsPartiallyContained(const Node &node) const noexcept
   {
-    bool isStartInclusive = TreeQueries::IsInclusiveAncestorOf(node, *_start.Container);
-    bool isEndInclusive = TreeQueries::IsInclusiveAncestorOf(node, *_end.Container);
+    bool isStartInclusive = TreeQueries::IsInclusiveAncestor(node, *_start.Container);
+    bool isEndInclusive = TreeQueries::IsInclusiveAncestor(node, *_end.Container);
     return (isStartInclusive && !isEndInclusive) || (!isStartInclusive && isEndInclusive);
   }
 
   RawPtr<Node> Range::GetFirstPartiallyContainedChild(RawPtr<Node> commonAncestor) const noexcept
   {
-    if (!TreeQueries::IsInclusiveAncestorOf(*_start.Container, *_end.Container))
+    if (!TreeQueries::IsInclusiveAncestor(*_start.Container, *_end.Container))
     {
       for (RawPtr<Node> child = commonAncestor->FirstChild(); child; child = child->NextSibling())
       {
@@ -694,7 +694,7 @@ namespace Krys::HTML
 
   RawPtr<Node> Range::GetLastPartiallyContainedChild(RawPtr<Node> commonAncestor) const noexcept
   {
-    if (!TreeQueries::IsInclusiveAncestorOf(*_end.Container, *_start.Container))
+    if (!TreeQueries::IsInclusiveAncestor(*_end.Container, *_start.Container))
     {
       for (auto *child = commonAncestor->LastChild(); child; child = child->PreviousSibling())
       {

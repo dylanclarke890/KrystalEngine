@@ -39,7 +39,7 @@ namespace Krys::HTML
 
 #pragma region ParentNode Mixin - https://dom.spec.whatwg.org/#parentnode
 
-    KRYS_NODISCARD Ref<HTMLCollection> Children() const noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> Children() noexcept;
     KRYS_NODISCARD RawPtr<Element> FirstElementChild() const noexcept;
     KRYS_NODISCARD RawPtr<Element> LastElementChild() const noexcept;
     KRYS_NODISCARD size_t ChildElementCount() const noexcept;

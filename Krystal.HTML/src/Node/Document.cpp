@@ -66,7 +66,7 @@ namespace Krys::HTML
 
 #pragma region ParentNode
 
-  Ref<HTMLCollection> Document::Children() const noexcept
+  Ref<HTMLCollection> Document::Children() noexcept
   {
     return _documentRareData->Children(*this);
   }

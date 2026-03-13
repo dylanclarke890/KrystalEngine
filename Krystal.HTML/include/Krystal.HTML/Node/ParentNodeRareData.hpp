@@ -13,7 +13,7 @@ namespace Krys::HTML
     WeakPtr<HTMLCollection> _children;
 
   public:
-    KRYS_NODISCARD Ref<HTMLCollection> Children(const ContainerNode &parent) noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> Children(ContainerNode &parent) noexcept;
 
     void InvalidateChildren() noexcept;
   };

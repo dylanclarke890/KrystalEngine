@@ -13,7 +13,6 @@
 namespace Krys::HTML
 {
   class Node;
-  class EmptyNodeList;
   class ChildNodeList;
   class NodeList;
 

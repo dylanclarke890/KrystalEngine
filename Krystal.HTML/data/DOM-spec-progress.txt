@@ -62,12 +62,16 @@
 
 4 Nodes
     4.1      Introduction to "The DOM"
+         - N/A
 
     4.2      Node tree
+         - N/A
 
     4.2.1    Document tree
+         - No test coverage.
 
     4.2.2    Shadow tree
+         - No test coverage.
 
     4.2.2.1  Slots
 
@@ -88,6 +92,7 @@
     4.2.6    Mixin ParentNode
 
     4.2.7    Mixin NonDocumentTypeChildNode
+        - Full test coverage.
 
     4.2.8    Mixin ChildNode
 

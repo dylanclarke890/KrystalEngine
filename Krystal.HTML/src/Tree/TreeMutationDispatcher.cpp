@@ -13,52 +13,60 @@
 
 namespace Krys::HTML
 {
-  void TreeMutationDispatcher::NodeInserted(Node &node, ContainerNode &insertedInto) noexcept
+  void TreeMutationDispatcher::Inserted(ContainerNode &node, Node &insertedNode) noexcept
   {
-    assert(!node.IsConnected());
+    assert(!insertedNode.IsConnected());
 
-    ChildrenChanged(insertedInto);
+    ChildrenChanged(node);
 
     NodeInsertedContext context {
-      .InsertedInto = insertedInto,
-      .ConnectedToDocument = insertedInto.IsConnected(),
-      .TreeScopeChanged = insertedInto.IsInTreeScope(), // TODO(FIX): More precise check
+      .InsertedInto = node,
+      .ConnectedToDocument = node.IsConnected(),
+      .TreeScopeChanged = node.IsInTreeScope(), // TODO(FIX): More precise check
     };
 
-    DispatchNodeInserted(node, context);
+    DispatchNodeInserted(insertedNode, context);
   }
 
-  void TreeMutationDispatcher::NodeRemoved(Node &node, ContainerNode &removedFrom) noexcept
+  void TreeMutationDispatcher::PostConnection(ContainerNode &node, Node &insertedNode) noexcept
   {
-    ChildrenChanged(removedFrom);
-
-    NodeRemovedContext context {
-      .RemovedFrom = removedFrom,
-      .DisconnectedFromDocument = node.IsConnected(),
-      .TreeScopeChanged = removedFrom.IsInTreeScope(), // TODO(FIX): More precise check
-    };
-
-    DispatchNodeRemoved(node, context);
   }
 
   void TreeMutationDispatcher::ChildrenChanged(ContainerNode &node) noexcept
   {
+    node.InvalidateChildNodes();
     node.OnChildrenChanged();
   }
 
-  void TreeMutationDispatcher::NodeCloned(Node &node, Node &copy, bool subtree) noexcept
+  void TreeMutationDispatcher::Moved(ContainerNode &node, Node &movedNode, bool isSubtreeRoot,
+                                     ContainerNode &oldAncestor) noexcept
   {
-    (void)node;
-    (void)copy;
-    (void)subtree;
+  }
 
+  void TreeMutationDispatcher::Removed(Node &removedNode, bool isSubtreeRoot,
+                                       ContainerNode &oldAncestor) noexcept
+  {
+    ChildrenChanged(oldAncestor);
+
+    NodeRemovedContext context {
+      .RemovedFrom = oldAncestor,
+      .DisconnectedFromDocument = removedNode.IsConnected(),
+      .TreeScopeChanged = oldAncestor.IsInTreeScope(), // TODO(FIX): More precise check
+    };
+
+    DispatchNodeRemoved(removedNode, context);
+  }
+
+  void TreeMutationDispatcher::Cloned(Node &node, Node &copy, bool subtree) noexcept
+  {
     // TODO(IMPL): Run any cloning steps defined for node in other applicable specifications and pass node,
     // copy, and subtree as parameters.
   }
 
   void TreeMutationDispatcher::QueueMutationRecord(DOMString &&type, Node &target, Maybe<DOMString> name,
                                                    Maybe<DOMString> nameSpace, Maybe<DOMString> oldValue,
-                                                   Ref<NodeList> &&addedNodes, Ref<NodeList> &&removedNodes,
+                                                   const SmallNodeList &addedNodes,
+                                                   const SmallNodeList &removedNodes,
                                                    RefPtr<Node> &&previousSibling,
                                                    RefPtr<Node> &&nextSibling) noexcept
   {
@@ -71,15 +79,14 @@ namespace Krys::HTML
     }
   }
 
-  void TreeMutationDispatcher::QueueTreeMutationRecord(Node &target, Ref<NodeList> &&addedNodes,
-                                                       Ref<NodeList> &&removedNodes,
+  void TreeMutationDispatcher::QueueTreeMutationRecord(Node &target, const SmallNodeList &addedNodes,
+                                                       const SmallNodeList &removedNodes,
                                                        RefPtr<Node> &&previousSibling,
                                                        RefPtr<Node> &&nextSibling) noexcept
   {
-    assert(addedNodes->Length() > 0 || removedNodes->Length() > 0);
-    QueueMutationRecord(u8"childList", target, std::nullopt, std::nullopt, std::nullopt,
-                        Krys::Move(addedNodes), Krys::Move(removedNodes), Krys::Move(previousSibling),
-                        Krys::Move(nextSibling));
+    assert(addedNodes.size() > 0 || removedNodes.size() > 0);
+    QueueMutationRecord(u8"childList", target, std::nullopt, std::nullopt, std::nullopt, addedNodes,
+                        removedNodes, Krys::Move(previousSibling), Krys::Move(nextSibling));
   }
 
   void TreeMutationDispatcher::LiveRangePreRemove(const Node &node) noexcept
@@ -93,7 +100,7 @@ namespace Krys::HTML
     {
       if (auto *startContainer = DynamicDowncast<ContainerNode>(*range->StartContainer()))
       {
-        if (TreeQueries::IsInclusiveDescendantOf(*startContainer, node))
+        if (TreeQueries::IsInclusiveDescendant(*startContainer, node))
         {
           range->SetStart(*parent, index);
         }
@@ -101,7 +108,7 @@ namespace Krys::HTML
 
       if (auto *endContainer = DynamicDowncast<ContainerNode>(*range->EndContainer()))
       {
-        if (TreeQueries::IsInclusiveDescendantOf(*endContainer, node))
+        if (TreeQueries::IsInclusiveDescendant(*endContainer, node))
         {
           range->SetEnd(*parent, index);
         }

@@ -37,6 +37,8 @@
     <ClInclude Include="include\Krystal.HTML\Abort\AbortController.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventPath.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventTargetFlag.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLSlotElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationCallback.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationObserverInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\RegisteredObserver.hpp" />
@@ -126,6 +128,7 @@
     <ClInclude Include="include\Krystal.HTML\Utils\Exception.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionCode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionOr.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Utils\SubtreeRanges.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\OrderedSetParser.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\SmallNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\StringAlgorithms.hpp" />

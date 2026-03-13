@@ -130,12 +130,7 @@ namespace Krys::HTML
       return false;
     }
 
-    if (auto *container = DynamicDowncast<ContainerNode>(this))
-    {
-      return TreeQueries::IsInclusiveDescendantOf(*container, *other);
-    }
-
-    return false;
+    return TreeQueries::IsInclusiveDescendant(*other, *this);
   }
 
   // const StringAtom &Node::LookupPrefix(const StringAtom &namespaceURI) const noexcept

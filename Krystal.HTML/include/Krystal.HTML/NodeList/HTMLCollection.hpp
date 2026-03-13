@@ -18,20 +18,20 @@ namespace Krys::HTML
     friend class ParentNodeRareData;
 
   private:
-    Ref<const ContainerNode> _owner;
-    mutable SmallElementList _elements;
-    mutable bool _invalid;
+    Ref<ContainerNode> _owner;
+    SmallElementList _elements;
+    bool _invalid;
 
   public:
-    explicit HTMLCollection(const ContainerNode &owner) noexcept;
+    explicit HTMLCollection(ContainerNode &owner) noexcept;
 
-    KRYS_NODISCARD RawPtr<Element> Item(size_t index) const noexcept;
+    KRYS_NODISCARD RawPtr<Element> Item(size_t index) noexcept;
 
-    KRYS_NODISCARD RawPtr<Element> NamedItem(const DOMString &name) const noexcept;
+    KRYS_NODISCARD RawPtr<Element> NamedItem(const DOMString &name) noexcept;
 
-    KRYS_NODISCARD RawPtr<Element> operator[](const DOMString &name) const noexcept;
+    KRYS_NODISCARD RawPtr<Element> operator[](const DOMString &name) noexcept;
 
-    KRYS_NODISCARD size_t Length() const noexcept
+    KRYS_NODISCARD size_t Length() noexcept
     {
       return _elements.size();
     }
@@ -42,6 +42,6 @@ namespace Krys::HTML
       _invalid = true;
     }
 
-    void BuildCollection() const noexcept;
+    void BuildCollection() noexcept;
   };
 }

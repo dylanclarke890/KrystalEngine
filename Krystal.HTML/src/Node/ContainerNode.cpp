@@ -58,7 +58,7 @@ namespace Krys::HTML
 
 #pragma endregion
 
-  void ContainerNode::OnChildrenChanged() noexcept
+  void ContainerNode::InvalidateChildNodes()
   {
     if (_nodeRareData)
     {

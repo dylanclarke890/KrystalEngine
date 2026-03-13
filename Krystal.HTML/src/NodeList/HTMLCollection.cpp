@@ -10,12 +10,12 @@
 
 namespace Krys::HTML
 {
-  HTMLCollection::HTMLCollection(const ContainerNode &owner) noexcept
+  HTMLCollection::HTMLCollection(ContainerNode &owner) noexcept
       : _owner(ShareRef(owner)), _invalid(true)
   {
   }
 
-  RawPtr<Element> HTMLCollection::Item(size_t index) const noexcept
+  RawPtr<Element> HTMLCollection::Item(size_t index) noexcept
   {
     if (_invalid)
     {
@@ -30,7 +30,7 @@ namespace Krys::HTML
     return nullptr;
   }
 
-  RawPtr<Element> HTMLCollection::NamedItem(const DOMString &idOrName) const noexcept
+  RawPtr<Element> HTMLCollection::NamedItem(const DOMString &idOrName) noexcept
   {
     if (_invalid)
     {
@@ -41,7 +41,7 @@ namespace Krys::HTML
     return nullptr;
   }
 
-  RawPtr<Element> HTMLCollection::operator[](const DOMString &idOrName) const noexcept
+  RawPtr<Element> HTMLCollection::operator[](const DOMString &idOrName) noexcept
   {
     if (_invalid)
     {
@@ -52,7 +52,7 @@ namespace Krys::HTML
     return nullptr;
   }
 
-  void HTMLCollection::BuildCollection() const noexcept
+  void HTMLCollection::BuildCollection() noexcept
   {
     _invalid = false;
     _elements.clear();

@@ -47,7 +47,11 @@ namespace Krys::HTML
 #pragma endregion
 
   protected:
-    virtual void OnChildrenChanged() noexcept;
+    virtual void OnChildrenChanged() noexcept
+    {
+    }
+
+    void InvalidateChildNodes();
 
     void SetFirstChild(RawPtr<Node> child) noexcept
     {

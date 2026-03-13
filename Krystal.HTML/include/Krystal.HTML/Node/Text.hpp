@@ -10,6 +10,7 @@
 namespace Krys::HTML
 {
   class Document;
+  class HTMLSlotElement;
 
   class Text : public CharacterData
   {
@@ -33,6 +34,12 @@ namespace Krys::HTML
     {
       return u8"#text";
     }
+
+#pragma endregion
+
+#pragma region Slottable
+
+      KRYS_NODISCARD RawPtr<HTMLSlotElement> AssignedSlot() const noexcept;
 
 #pragma endregion
   };

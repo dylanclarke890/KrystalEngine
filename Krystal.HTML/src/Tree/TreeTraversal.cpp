@@ -8,16 +8,17 @@
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/Tree/TreeQueries.hpp"
+#include "Krystal.HTML/Utils/SubtreeRanges.hpp"
 #include <cassert>
 
 namespace Krys::HTML
 {
   const Node &TreeTraversal::Root(const Node &node) noexcept
   {
-    const Node *current = &node;
-    while (current->ParentNode())
+    const Node *current = nullptr;
+    for (const Node &ancestor : ConstInclusiveAncestorRange(node))
     {
-      current = current->ParentNode();
+      current = &ancestor;
     }
 
     return *current;
@@ -26,10 +27,11 @@ namespace Krys::HTML
   Node &TreeTraversal::Root(Node &node) noexcept
   {
     Node *current = &node;
-    while (current->ParentNode())
+    for (Node &ancestor : InclusiveAncestorRange(node))
     {
-      current = current->ParentNode();
+      current = &ancestor;
     }
+
     return *current;
   }
 
@@ -121,15 +123,12 @@ namespace Krys::HTML
   {
     assert(!current.NextSibling());
 
-    const Node *ancestor = current.ParentNode();
-    while (ancestor)
+    for (const Node &ancestor : ConstAncestorRange(current))
     {
-      if (ancestor->NextSibling())
+      if (ancestor.NextSibling())
       {
-        return ancestor->NextSibling();
+        return ancestor.NextSibling();
       }
-
-      ancestor = ancestor->ParentNode();
     }
 
     return nullptr;
@@ -140,15 +139,17 @@ namespace Krys::HTML
     assert(!current.NextSibling());
     assert(&current != stayWithin);
 
-    const Node *ancestor = current.ParentNode();
-    while (ancestor && ancestor != stayWithin)
+    for (const Node &ancestor : ConstAncestorRange(current))
     {
-      if (ancestor->NextSibling())
+      if (&ancestor == stayWithin)
       {
-        return ancestor->NextSibling();
+        return nullptr;
       }
 
-      ancestor = ancestor->ParentNode();
+      if (ancestor.NextSibling())
+      {
+        return ancestor.NextSibling();
+      }
     }
 
     return nullptr;
