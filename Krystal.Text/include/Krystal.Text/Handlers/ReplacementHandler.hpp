@@ -29,8 +29,8 @@ namespace Krys::Text::Handlers
     {
       using TSubOutput = decltype(result.Output);
 
-      auto outIt = Krys::Ranges::begin(result.Output);
-      auto outLast = Krys::Ranges::end(result.Output);
+      auto outIt = ::std::ranges::begin(result.Output);
+      auto outLast = ::std::ranges::end(result.Output);
       if (outIt == outLast) // BAIL
       {
         return std::forward<TResult>(result);

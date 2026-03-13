@@ -78,8 +78,8 @@ namespace Krys::Text::Impl
       using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = DecodeResult<TSubInput, TSubOutput, state>;
 
-      auto inIt = ::Krys::Ranges::cbegin(input);
-      auto inLast = ::Krys::Ranges::cend(input);
+      auto inIt = ::std::ranges::cbegin(input);
+      auto inLast = ::std::ranges::cend(input);
       if (inIt == inLast)
       {
         // an exhausted sequence is fine
@@ -87,8 +87,8 @@ namespace Krys::Text::Impl
                        EncodingError::OK);
       }
 
-      auto outIt = ::Krys::Ranges::begin(output);
-      KRYS_MAYBE_UNUSED auto outLast = ::Krys::Ranges::end(output);
+      auto outIt = ::std::ranges::begin(output);
+      KRYS_MAYBE_UNUSED auto outLast = ::std::ranges::end(output);
 
       constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TErrorHandler>;
       if constexpr (CallErrorHandler)
@@ -136,8 +136,8 @@ namespace Krys::Text::Impl
       using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = EncodeResult<TSubInput, TSubOutput, state>;
 
-      auto inIt = ::Krys::Ranges::cbegin(input);
-      auto inLast = ::Krys::Ranges::cend(input);
+      auto inIt = ::std::ranges::cbegin(input);
+      auto inLast = ::std::ranges::cend(input);
       if (inIt == inLast)
       {
         // an exhausted sequence is fine
@@ -145,8 +145,8 @@ namespace Krys::Text::Impl
                        EncodingError::OK);
       }
 
-      auto outIt = ::Krys::Ranges::begin(output);
-      KRYS_MAYBE_UNUSED auto outLast = ::Krys::Ranges::end(output);
+      auto outIt = ::std::ranges::begin(output);
+      KRYS_MAYBE_UNUSED auto outLast = ::std::ranges::end(output);
 
       char32 point32 = static_cast<char32>(*inIt);
 

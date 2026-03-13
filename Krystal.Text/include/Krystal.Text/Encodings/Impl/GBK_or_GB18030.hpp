@@ -104,8 +104,8 @@ namespace Krys::Text::Encodings::Impl
       using TResult = ::Krys::Text::DecodeResult<TSubInput, TSubOutput, state>;
       constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TErrorHandler>;
 
-      auto inIt = ::Krys::Ranges::cbegin(input);
-      auto inLast = ::Krys::Ranges::cend(input);
+      auto inIt = ::std::ranges::cbegin(input);
+      auto inLast = ::std::ranges::cend(input);
 
       if (inIt == inLast)
       {
@@ -116,8 +116,8 @@ namespace Krys::Text::Encodings::Impl
       std::size_t readUnits = 0;
       code_unit units[4] = {static_cast<code_unit>(*inIt)};
       const uchar unit0 = static_cast<uchar>(units[0]);
-      auto outIt = ::Krys::Ranges::begin(output);
-      auto outLast = ::Krys::Ranges::end(output);
+      auto outIt = ::std::ranges::begin(output);
+      auto outLast = ::std::ranges::end(output);
 
       if (unit0 <= 0x7F)
       {
@@ -332,8 +332,8 @@ namespace Krys::Text::Encodings::Impl
       using TResult = ::Krys::Text::EncodeResult<TSubInput, TSubOutput, state>;
       constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TUErrorHandler>;
 
-      auto inIt = ::Krys::Ranges::cbegin(input);
-      auto inLast = ::Krys::Ranges::cend(input);
+      auto inIt = ::std::ranges::cbegin(input);
+      auto inLast = ::std::ranges::cend(input);
 
       if (inIt == inLast)
       {
@@ -343,8 +343,8 @@ namespace Krys::Text::Encodings::Impl
 
       char32 codePoint32 = static_cast<char32>(*inIt);
       code_point codePoint = static_cast<code_point>(codePoint32);
-      auto outIt = ::Krys::Ranges::begin(output);
-      auto outLast = ::Krys::Ranges::end(output);
+      auto outIt = ::std::ranges::begin(output);
+      auto outLast = ::std::ranges::end(output);
       if (codePoint32 <= 0x7F)
       {
         if constexpr (CallErrorHandler)

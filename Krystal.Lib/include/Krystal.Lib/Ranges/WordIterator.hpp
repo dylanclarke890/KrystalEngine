@@ -3,12 +3,12 @@
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/Endian.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
+#include "Krystal.Lib/Pointers/ReferenceWrapper.hpp"
 #include "Krystal.Lib/Ranges/Algorithm.hpp"
 #include "Krystal.Lib/Ranges/Range.hpp"
 #include "Krystal.Lib/Ranges/Reconstruct.hpp"
 #include "Krystal.Lib/Utils/EBCO.hpp"
 #include "Krystal.Lib/Utils/ipow.hpp"
-#include "Krystal.Lib/Pointers/ReferenceWrapper.hpp"
 #include "Krystal.Lib/Utils/ToAddress.hpp"
 #include "Krystal.Lib/Utils/ToUnderlying.hpp"
 #include <climits>
@@ -169,7 +169,7 @@ namespace Krys::Ranges
         {
           if constexpr (TEndian == Endian::Big)
           {
-            ::Krys::Ranges::Impl::ReverseRange(writeStorageFirst, writeStorageLast);
+            ::std::ranges::reverse(writeStorageFirst, writeStorageLast);
           }
           else
           {
@@ -182,14 +182,14 @@ namespace Krys::Ranges
         if constexpr (IsInputOrOutput)
         {
           auto result =
-            Impl::Copy(writeStorageFirst, writeStorageLast, Krys::Ranges::begin(std::move(baseRange)),
-                       Krys::Ranges::end(std::move(baseRange)));
+            Impl::Copy(writeStorageFirst, writeStorageLast, ::std::ranges::begin(std::move(baseRange)),
+                       ::std::ranges::end(std::move(baseRange)));
           this->BaseRange() = Krys::Ranges::reconstruct(std::in_place_type<TURange>, std::move(result.out));
         }
         else
         {
-          Impl::Copy(writeStorageFirst, writeStorageLast, Krys::Ranges::begin(baseRange),
-                     Krys::Ranges::end(baseRange));
+          Impl::Copy(writeStorageFirst, writeStorageLast, ::std::ranges::begin(baseRange),
+                     ::std::ranges::end(baseRange));
         }
         return *this;
       }
@@ -215,7 +215,7 @@ namespace Krys::Ranges
           // to prevent failure
           auto &baseRange = this->BaseRange();
           auto result =
-            Impl::CopyNUnsafe(Krys::Ranges::begin(std::move(baseRange)), readStorageSize, readStorageFirst);
+            Impl::CopyNUnsafe(::std::ranges::begin(std::move(baseRange)), readStorageSize, readStorageFirst);
           this->BaseRange() = Krys::Ranges::reconstruct(
             std::in_place_type<TURange>, std::move(result.in).begin().base(), std::move(baseRange).end());
         }
@@ -223,8 +223,8 @@ namespace Krys::Ranges
         {
           // prevent feed-updating iterator through usage here
           // just copy-and-use
-          auto baseItCopy = Krys::Ranges::begin(this->BaseRange());
-          [[maybe_unused]] auto result =
+          auto baseItCopy = ::std::ranges::begin(this->BaseRange());
+          KRYS_MAYBE_UNUSED auto result =
             Impl::CopyNUnsafe(std::move(baseItCopy), readStorageSize, readStorageFirst);
         }
         if constexpr (TEndian == Endian::Big)
@@ -232,7 +232,7 @@ namespace Krys::Ranges
           if constexpr ((sizeof(value_type) * CHAR_BIT) > 8)
           {
             TBaseValueType *readStorageLast = readStorage + BaseValuesPerWord;
-            ::Krys::Ranges::Impl::ReverseRange(readStorageFirst, readStorageLast);
+            ::std::ranges::reverse(readStorageFirst, readStorageLast);
           }
         }
         if (!std::is_constant_evaluated())
@@ -428,8 +428,8 @@ namespace Krys::Ranges
       }
       else
       {
-        auto firstIt = Krys::Ranges::begin(std::move(this->TBaseStorage::GetValue()));
-        auto lastIt = Krys::Ranges::end(std::move(this->TBaseStorage::GetValue()));
+        auto firstIt = ::std::ranges::begin(std::move(this->TBaseStorage::GetValue()));
+        auto lastIt = ::std::ranges::end(std::move(this->TBaseStorage::GetValue()));
         Krys::Ranges::iter_advance(firstIt, BaseValuesPerWord);
         this->TBaseStorage::GetValue() =
           Krys::Ranges::reconstruct(std::in_place_type<TURange>, std::move(firstIt), std::move(lastIt));
@@ -481,8 +481,8 @@ namespace Krys::Ranges
       {
         return this->operator+=(-by);
       }
-      auto firstIt = Krys::Ranges::begin(std::move(this->TBaseStorage::GetValue()));
-      auto lastIt = Krys::Ranges::end(std::move(this->TBaseStorage::GetValue()));
+      auto firstIt = ::std::ranges::begin(std::move(this->TBaseStorage::GetValue()));
+      auto lastIt = ::std::ranges::end(std::move(this->TBaseStorage::GetValue()));
       Krys::Ranges::iter_advance(firstIt, BaseValuesPerWord * by);
       this->TBaseStorage::GetValue() =
         Krys::Ranges::reconstruct(std::in_place_type<TURange>, std::move(firstIt), std::move(lastIt));
@@ -523,8 +523,8 @@ namespace Krys::Ranges
       {
         return this->operator+=(-by);
       }
-      auto firstIt = Krys::Ranges::begin(std::move(this->TBaseStorage::GetValue()));
-      auto lastIt = Krys::Ranges::end(std::move(this->TBaseStorage::GetValue()));
+      auto firstIt = ::std::ranges::begin(std::move(this->TBaseStorage::GetValue()));
+      auto lastIt = ::std::ranges::end(std::move(this->TBaseStorage::GetValue()));
       _recede(firstIt, BaseValuesPerWord * by);
       this->TBaseStorage::GetValue() =
         Krys::Ranges::reconstruct(std::in_place_type<TURange>, std::move(firstIt), std::move(lastIt));
@@ -645,8 +645,8 @@ namespace Krys::Ranges
       }
       else
       {
-        return Krys::Ranges::begin(this->TBaseStorage::GetValue())
-               == Krys::Ranges::end(this->TBaseStorage::GetValue());
+        return ::std::ranges::begin(this->TBaseStorage::GetValue())
+               == ::std::ranges::end(this->TBaseStorage::GetValue());
       }
     }
   };

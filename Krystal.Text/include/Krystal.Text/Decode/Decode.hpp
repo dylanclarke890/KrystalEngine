@@ -4,12 +4,12 @@
 #include "Krystal.Lib/Ranges/Impl/InsertBulk.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Lib/Utils/Tag.hpp"
-#include "Krystal.Text/CodePoint.hpp"
-#include "Krystal.Text/Concepts.hpp"
-#include "Krystal.Text/Decode/DecodeResult.hpp"
 #include "Krystal.Text/_detail/IsLossless.hpp"
 #include "Krystal.Text/_detail/SpanReconstruct.hpp"
 #include "Krystal.Text/_detail/UpdateInput.hpp"
+#include "Krystal.Text/CodePoint.hpp"
+#include "Krystal.Text/Concepts.hpp"
+#include "Krystal.Text/Decode/DecodeResult.hpp"
 #include "Krystal.Text/Encodings/DefaultEncoding.hpp"
 #include "Krystal.Text/Handlers/DefaultHandler.hpp"
 #include "Krystal.Text/Handlers/ProgressHandler.hpp"
@@ -219,9 +219,9 @@ namespace Krys::Text::detail_decode
             // result in the same error, unless it was legitimiately an EncodingError::InvalidSequence.
             workingInput = ::Krys::Text::detail::UpdateInput<TWorkingInput>(::Krys::Ranges::reconstruct(
               std::in_place_type<TWorkingInput>,
-              ::Krys::Ranges::iter_recede(::Krys::Ranges::begin(result.Input),
+              ::Krys::Ranges::iter_recede(::std::ranges::begin(result.Input),
                                           progressHandler.CodeUnitsProgressSize()),
-              ::Krys::Ranges::end(result.Input)));
+              ::std::ranges::end(result.Input)));
           }
           else
           {

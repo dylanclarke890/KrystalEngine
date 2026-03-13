@@ -3739,8 +3739,8 @@ namespace Krys::Text::EncodingTable
     big5_hkscs_index_to_code_point(std::size_t lookupIndexPointer) noexcept
   {
     const index16 lookupIndex = static_cast<index16>(lookupIndexPointer);
-    auto itAndLast = Krys::Ranges::lower_bound(Krys::Ranges::cbegin(Big5HKSCSIndexCodePointMap),
-                                               Krys::Ranges::cend(Big5HKSCSIndexCodePointMap),
+    auto itAndLast = Krys::Ranges::lower_bound(::std::ranges::cbegin(Big5HKSCSIndexCodePointMap),
+                                               ::std::ranges::cend(Big5HKSCSIndexCodePointMap),
                                                lookupIndex, &LessThanIndex32Target);
     if (itAndLast.Current == itAndLast.Last)
     {
@@ -3762,8 +3762,8 @@ namespace Krys::Text::EncodingTable
       return lookupCodePoint == value[1];
     };
     auto itAndLast =
-      Krys::Ranges::find_if(Krys::Ranges::cbegin(Big5HKSCSIndexCodePointMap),
-                            Krys::Ranges::cend(Big5HKSCSIndexCodePointMap), predicate);
+      Krys::Ranges::find_if(::std::ranges::cbegin(Big5HKSCSIndexCodePointMap),
+                            ::std::ranges::cend(Big5HKSCSIndexCodePointMap), predicate);
     if (itAndLast.Current == itAndLast.Last)
     {
       return std::nullopt;

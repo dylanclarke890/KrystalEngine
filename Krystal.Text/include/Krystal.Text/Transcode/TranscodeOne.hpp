@@ -119,9 +119,9 @@ namespace Krys::Text
     std::size_t errorCount = intermediateResult.ErrorCount;
     for (;;)
     {
-      ::Krys::Ranges::subrange<decltype(::Krys::Ranges::cbegin(pivot))> workingIntermediate(
-        ::Krys::Ranges::cbegin(pivot) + intermediateStart,
-        ::Krys::Ranges::cbegin(pivot) + intermediateWritten);
+      ::Krys::Ranges::subrange<decltype(::std::ranges::cbegin(pivot))> workingIntermediate(
+        ::std::ranges::cbegin(pivot) + intermediateStart,
+        ::std::ranges::cbegin(pivot) + intermediateWritten);
       std::size_t intermediateSize = Krys::Ranges::size(workingIntermediate);
       auto endResult = std::forward<TToEncoding>(toEncoding)
                          .EncodeOne(std::move(workingIntermediate), std::move(workingOutput),
@@ -205,8 +205,8 @@ namespace Krys::Text
       (void)pivot;
 
       auto result = ::Krys::Ranges::Impl::Copy(
-        ::Krys::Ranges::cbegin(std::forward<TInput>(input)), ::Krys::Ranges::cend(input),
-        ::Krys::Ranges::begin(std::forward<TOutput>(output)), ::Krys::Ranges::end(output));
+        ::std::ranges::cbegin(std::forward<TInput>(input)), ::std::ranges::cend(input),
+        ::std::ranges::begin(std::forward<TOutput>(output)), ::std::ranges::end(output));
       using TResult = ::Krys::Text::Impl::reconstruct_pivot_transcode_result_t<TUInput, TUOutput, TFromState,
                                                                                TToState, TUPivot>;
       return TResult(::Krys::Ranges::reconstruct(std::in_place_type<TUInput>, std::move(result.in)),

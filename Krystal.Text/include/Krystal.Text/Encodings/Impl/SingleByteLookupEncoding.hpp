@@ -46,8 +46,8 @@ namespace Krys::Text::Impl
       using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = ::Krys::Text::DecodeResult<TSubInput, TSubOutput, state>;
 
-      auto inIt = Krys::Ranges::cbegin(input);
-      auto inLast = Krys::Ranges::cend(input);
+      auto inIt = ::std::ranges::cbegin(input);
+      auto inLast = ::std::ranges::cend(input);
 
       if (inIt == inLast)
       {
@@ -57,8 +57,8 @@ namespace Krys::Text::Impl
 
       code_unit units[MaxCodeUnits] = {static_cast<code_unit>(*inIt)};
       uchar unit0 = static_cast<uchar>(units[0]);
-      auto outIt = ::Krys::Ranges::begin(output);
-      auto outLast = ::Krys::Ranges::end(output);
+      auto outIt = ::std::ranges::begin(output);
+      auto outLast = ::std::ranges::end(output);
 
       std::size_t lookupIndex = static_cast<std::size_t>(unit0);
       const std::optional<std::uint_least32_t> maybeCode = TLookupCodePoint(lookupIndex);
@@ -102,8 +102,8 @@ namespace Krys::Text::Impl
       using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = EncodeResult<TSubInput, TSubOutput, state>;
 
-      auto inIt = ::Krys::Ranges::cbegin(input);
-      auto inLast = ::Krys::Ranges::cend(input);
+      auto inIt = ::std::ranges::cbegin(input);
+      auto inLast = ::std::ranges::cend(input);
 
       if (inIt == inLast)
       {
@@ -112,8 +112,8 @@ namespace Krys::Text::Impl
       }
 
       char32 codePoint32 = static_cast<char32>(*inIt);
-      auto outIt = ::Krys::Ranges::begin(output);
-      auto outLast = ::Krys::Ranges::end(output);
+      auto outIt = ::std::ranges::begin(output);
+      auto outLast = ::std::ranges::end(output);
 
       constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TErrorHandler>;
       const std::optional<std::size_t> maybeIndex = TLookupIndex(codePoint32);

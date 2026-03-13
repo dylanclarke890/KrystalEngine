@@ -33,8 +33,8 @@ namespace Krys::Text::detail
         using TChar = remove_extent_t<TUInput>;
         if constexpr (IsCharTraitable<TChar>)
         {
-          return Krys::Ranges::reconstruct(std::in_place_type<Span<const TChar>>, Krys::Ranges::begin(input),
-                                           Krys::Ranges::begin(input) + Krys::cstringPtrSize(input));
+          return Krys::Ranges::reconstruct(std::in_place_type<Span<const TChar>>, ::std::ranges::begin(input),
+                                           ::std::ranges::begin(input) + Krys::cstringPtrSize(input));
         }
         else
         {
@@ -72,8 +72,8 @@ namespace Krys::Text::detail
         if constexpr (IsCharTraitable<TChar>)
         {
           return Krys::Ranges::const_reconstruct(std::in_place_type<Span<const TChar>>,
-                                                 Krys::Ranges::cbegin(input),
-                                                 Krys::Ranges::cbegin(input) + Krys::cstringPtrSize(input));
+                                                 ::std::ranges::cbegin(input),
+                                                 ::std::ranges::cbegin(input) + Krys::cstringPtrSize(input));
         }
         else
         {

@@ -25,7 +25,7 @@ namespace Krys::Ranges
   constexpr subrange_for_t<TRange>
     CreateSubrange(TRange &&range) noexcept(NoThrowConstructible<TRange, subrange_for_t<TRange>>)
   {
-    return subrange_for_t<TRange>(::Krys::Ranges::begin(range), ::Krys::Ranges::end(range));
+    return subrange_for_t<TRange>(::std::ranges::begin(range), ::std::ranges::end(range));
   }
 
   /// @brief Takes two iterators and returns them as a subrange.

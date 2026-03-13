@@ -240,10 +240,6 @@ namespace Krys::Ranges
   template <typename TIterator>
   using iterator_size_type_t = make_signed_t<iterator_difference_type_t<remove_ref_t<TIterator>>>;
 
-  inline constexpr auto &begin = std::ranges::begin;
-  inline constexpr auto &cbegin = std::ranges::cbegin;
-  inline constexpr auto &end = std::ranges::end;
-  inline constexpr auto &cend = std::ranges::cend;
   inline constexpr auto &size = std::ranges::size;
   inline constexpr auto &data = std::ranges::data;
   inline constexpr auto &empty = std::ranges::empty;
@@ -305,11 +301,11 @@ namespace Krys::Ranges
 
   template <typename TRange>
   using range_const_iterator_t =
-    remove_cvref_t<decltype(Krys::Ranges::cbegin(std::declval<add_lvalue_ref_t<TRange>>()))>;
+    remove_cvref_t<decltype(::std::ranges::cbegin(std::declval<add_lvalue_ref_t<TRange>>()))>;
 
   template <typename TRange>
   using range_const_sentinel_t =
-    remove_cvref_t<decltype(Krys::Ranges::cend(std::declval<add_lvalue_ref_t<TRange>>()))>;
+    remove_cvref_t<decltype(::std::ranges::cend(std::declval<add_lvalue_ref_t<TRange>>()))>;
 
   template <typename TTag, typename TActualTag>
   concept IsConceptOrBetter = DerivedFrom<TTag, TActualTag>;

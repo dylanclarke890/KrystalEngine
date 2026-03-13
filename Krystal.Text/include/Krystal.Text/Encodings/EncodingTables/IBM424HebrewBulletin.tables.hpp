@@ -62,8 +62,8 @@ namespace Krys::Text::EncodingTable
     ibm_424_hebrew_bulletin_index_to_code_point(std::size_t lookupIndexPointer) noexcept
   {
     const index16 lookupIndex = static_cast<index16>(lookupIndexPointer);
-    auto first = Krys::Ranges::cbegin(IBM424HebrewBulletinIndexCodePointMap);
-    auto last = Krys::Ranges::cend(IBM424HebrewBulletinIndexCodePointMap);
+    auto first = ::std::ranges::cbegin(IBM424HebrewBulletinIndexCodePointMap);
+    auto last = ::std::ranges::cend(IBM424HebrewBulletinIndexCodePointMap);
     auto itAndLast = Krys::Ranges::lower_bound(first, last, lookupIndex, &LessThanIndex16Target);
     if (itAndLast.Current == itAndLast.Last)
     {
@@ -84,8 +84,8 @@ namespace Krys::Text::EncodingTable
     {
       return lookupCodePoint == value[1];
     };
-    auto first = Krys::Ranges::cbegin(IBM424HebrewBulletinIndexCodePointMap);
-    auto last = Krys::Ranges::cend(IBM424HebrewBulletinIndexCodePointMap);
+    auto first = ::std::ranges::cbegin(IBM424HebrewBulletinIndexCodePointMap);
+    auto last = ::std::ranges::cend(IBM424HebrewBulletinIndexCodePointMap);
     auto itAndLast = Krys::Ranges::find_if(first, last, predicate);
     if (itAndLast.Current == itAndLast.Last)
     {

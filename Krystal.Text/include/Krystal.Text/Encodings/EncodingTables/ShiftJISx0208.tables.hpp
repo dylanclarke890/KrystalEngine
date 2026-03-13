@@ -1564,8 +1564,8 @@ namespace Krys::Text::EncodingTable
     shift_jis_x0208_index_to_code_point(std::size_t lookupIndexPointer) noexcept
   {
     const index16 lookupIndex = static_cast<index16>(lookupIndexPointer);
-    auto itAndLast = Krys::Ranges::lower_bound(Krys::Ranges::cbegin(ShiftJISx0208IndexCodePointMap),
-                                               Krys::Ranges::cend(ShiftJISx0208IndexCodePointMap),
+    auto itAndLast = Krys::Ranges::lower_bound(::std::ranges::cbegin(ShiftJISx0208IndexCodePointMap),
+                                               ::std::ranges::cend(ShiftJISx0208IndexCodePointMap),
                                                lookupIndex, &LessThanIndex16Target);
     if (itAndLast.Current == itAndLast.Last)
     {
@@ -1589,8 +1589,8 @@ namespace Krys::Text::EncodingTable
       return lookupCodePoint == value[1] && !(value[0] > 8'272 && value[0] < 8'835);
     };
 
-    auto itAndLast = Krys::Ranges::find_if(Krys::Ranges::cbegin(ShiftJISx0208IndexCodePointMap),
-                                           Krys::Ranges::cend(ShiftJISx0208IndexCodePointMap), predicate);
+    auto itAndLast = Krys::Ranges::find_if(::std::ranges::cbegin(ShiftJISx0208IndexCodePointMap),
+                                           ::std::ranges::cend(ShiftJISx0208IndexCodePointMap), predicate);
 
     if (itAndLast.Current == itAndLast.Last)
     {

@@ -105,19 +105,19 @@ namespace Krys::Text::Handlers
         if constexpr (IsSpecializationOf<TResult, DecodeResult>)
         {
           this->_codeUnitsSize = ::Krys::Ranges::size(inputProgress);
-          ::Krys::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(inputProgress), this->_codeUnitsSize,
+          ::Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(inputProgress), this->_codeUnitsSize,
                                             this->_codeUnits.data());
           this->_codePointsSize = Krys::Ranges::size(outputProgress);
-          ::Krys::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(outputProgress), this->_codePointsSize,
+          ::Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(outputProgress), this->_codePointsSize,
                                             this->_codePoints.data());
         }
         else
         {
           this->_codeUnitsSize = ::Krys::Ranges::size(outputProgress);
-          ::Krys::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(outputProgress), this->_codeUnitsSize,
+          ::Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(outputProgress), this->_codeUnitsSize,
                                             this->_codeUnits.data());
           this->_codePointsSize = ::Krys::Ranges::size(inputProgress);
-          ::Krys::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(inputProgress), this->_codePointsSize,
+          ::Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(inputProgress), this->_codePointsSize,
                                             this->_codePoints.data());
         }
         return result;
@@ -146,19 +146,19 @@ namespace Krys::Text::Handlers
         if constexpr (IsSpecializationOf<TResult, DecodeResult>)
         {
           this->_codeUnitsSize = ::Krys::Ranges::size(inputProgress);
-          ::Krys::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(inputProgress), this->_codeUnitsSize,
+          ::Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(inputProgress), this->_codeUnitsSize,
                                             this->_codeUnits.data());
           this->_codePointsSize = ::Krys::Ranges::size(outputProgress);
-          ::Krys::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(outputProgress), this->_codePointsSize,
+          ::Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(outputProgress), this->_codePointsSize,
                                             this->_codePoints.data());
         }
         else
         {
           this->_codeUnitsSize = ::Krys::Ranges::size(outputProgress);
-          ::Krys::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(outputProgress), this->_codeUnitsSize,
+          ::Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(outputProgress), this->_codeUnitsSize,
                                             this->_codeUnits.data());
           this->_codePointsSize = ::Krys::Ranges::size(inputProgress);
-          ::Krys::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(inputProgress), this->_codePointsSize,
+          ::Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(inputProgress), this->_codePointsSize,
                                             this->_codePoints.data());
         }
         return result;
@@ -187,19 +187,19 @@ namespace Krys::Text::Handlers
         if constexpr (IsSpecializationOf<TResult, DecodeResult>)
         {
           this->_codeUnitsSize = ::Krys::Ranges::size(inputProgress);
-          ::Krys::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(inputProgress), this->_codeUnitsSize,
+          ::Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(inputProgress), this->_codeUnitsSize,
                                             this->_codeUnits.data());
           this->_codePointsSize = ::Krys::Ranges::size(outputProgress);
-          ::Krys::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(outputProgress), this->_codePointsSize,
+          ::Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(outputProgress), this->_codePointsSize,
                                             this->_codePoints.data());
         }
         else
         {
           this->_codeUnitsSize = ::Krys::Ranges::size(outputProgress);
-          ::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(outputProgress), this->_codeUnitsSize,
+          ::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(outputProgress), this->_codeUnitsSize,
                                       this->_codeUnits.data());
           this->_codePointsSize = ::Krys::Ranges::size(inputProgress);
-          ::Ranges::Impl::CopyNUnsafe(::Krys::Ranges::cbegin(inputProgress), this->_codePointsSize,
+          ::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(inputProgress), this->_codePointsSize,
                                       this->_codePoints.data());
         }
         return result;

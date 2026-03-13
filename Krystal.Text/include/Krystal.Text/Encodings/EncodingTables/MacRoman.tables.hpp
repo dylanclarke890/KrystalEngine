@@ -38,8 +38,8 @@ namespace Krys::Text::EncodingTable
     mac_roman_index_to_code_point(std::size_t lookupIndexPointer) noexcept
   {
     const index16 lookupIndex = static_cast<index16>(lookupIndexPointer);
-    auto first = Krys::Ranges::cbegin(MacRomanIndexCodePointMap);
-    auto last = Krys::Ranges::cend(MacRomanIndexCodePointMap);
+    auto first = ::std::ranges::cbegin(MacRomanIndexCodePointMap);
+    auto last = ::std::ranges::cend(MacRomanIndexCodePointMap);
     auto itAndLast = Krys::Ranges::lower_bound(first, last, lookupIndex, &LessThanIndex16Target);
     if (itAndLast.Current == itAndLast.Last)
     {
@@ -60,8 +60,8 @@ namespace Krys::Text::EncodingTable
     {
       return lookupCodePoint == value[1];
     };
-    auto first = Krys::Ranges::cbegin(MacRomanIndexCodePointMap);
-    auto last = Krys::Ranges::cend(MacRomanIndexCodePointMap);
+    auto first = ::std::ranges::cbegin(MacRomanIndexCodePointMap);
+    auto last = ::std::ranges::cend(MacRomanIndexCodePointMap);
     auto itAndLast = Krys::Ranges::find_if(first, last, predicate);
     if (itAndLast.Current == itAndLast.Last)
     {

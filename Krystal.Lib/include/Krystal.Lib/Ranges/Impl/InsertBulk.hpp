@@ -13,7 +13,7 @@ namespace Krys::Ranges::Impl
     if constexpr (has_insert_bulk<TOutputContainer, TIterator, TIterator>)
     {
       // inserting in bulk can be faster, more performant, save us some coding too
-      output.insert(output.cend(), ::Krys::Ranges::cbegin(insertion), ::Krys::Ranges::cend(insertion));
+      output.insert(output.cend(), ::std::ranges::cbegin(insertion), ::std::ranges::cend(insertion));
     }
     else
     {

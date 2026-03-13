@@ -80,8 +80,8 @@ namespace Krys::Text
           return TResult(std::move(result.Input), codeUnitCount, state, result.ErrorCode, errorCount);
         }
 
-        std::size_t usedSize = static_cast<std::size_t>(::Krys::Ranges::distance(
-          ::Krys::Ranges::begin(intermediate), ::Krys::Ranges::begin(result.Output)));
+        std::size_t usedSize = static_cast<std::size_t>(
+          ::std::distance(::std::ranges::begin(intermediate), ::std::ranges::begin(result.Output)));
 
         codeUnitCount += usedSize;
         workingInput = std::move(result.Input);

@@ -17,8 +17,8 @@ namespace Krys::Text::EncodingTable
     SingleByteHighIndexToCodePoint(TTable &table, std::size_t lookupIndexPointer) noexcept
   {
     // standard lookup table
-    auto first = Krys::Ranges::cbegin(table);
-    auto last = Krys::Ranges::cend(table);
+    auto first = ::std::ranges::cbegin(table);
+    auto last = ::std::ranges::cend(table);
 
     using TIndexCodePoint = decltype(*first);
     using TIndex = decltype(*first[0]);
@@ -49,8 +49,8 @@ namespace Krys::Text::EncodingTable
   constexpr inline std::optional<std::size_t>
     SingleByteHighCodePointToIndex(const TTable &table, std::uint_least32_t lookupCodePoint) noexcept
   {
-    auto first = Krys::Ranges::cbegin(table);
-    auto last = Krys::Ranges::cend(table);
+    auto first = ::std::ranges::cbegin(table);
+    auto last = ::std::ranges::cend(table);
 
     using TTableElement = remove_cvref_t<decltype(*first)>;
     auto predicate = [&lookupCodePoint](const TTableElement &value)

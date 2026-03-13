@@ -57,8 +57,8 @@ namespace Krys::Text::EncodingTable
   {
     const index32 lookupIndex = static_cast<index32>(lookupIndexPointer);
 
-    auto first = Krys::Ranges::cbegin(ATASCIIIndexCodePointMap);
-    auto last = Krys::Ranges::cend(ATASCIIIndexCodePointMap);
+    auto first = ::std::ranges::cbegin(ATASCIIIndexCodePointMap);
+    auto last = ::std::ranges::cend(ATASCIIIndexCodePointMap);
     auto itAndLast = Krys::Ranges::lower_bound(first, last, lookupIndex, &LessThanIndex32Target);
 
     if (itAndLast.Current == itAndLast.Last)
@@ -83,8 +83,8 @@ namespace Krys::Text::EncodingTable
       return lookupCodePoint == value[1];
     };
 
-    auto first = Krys::Ranges::cbegin(ATASCIIIndexCodePointMap);
-    auto last = Krys::Ranges::cend(ATASCIIIndexCodePointMap);
+    auto first = ::std::ranges::cbegin(ATASCIIIndexCodePointMap);
+    auto last = ::std::ranges::cend(ATASCIIIndexCodePointMap);
     auto itAndLast = Krys::Ranges::find_if(first, last, predicate);
 
     if (itAndLast.Current == itAndLast.Last)

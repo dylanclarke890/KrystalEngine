@@ -109,8 +109,8 @@ namespace Krys::Text::EncodingTable
   {
     const index16 lookupIndex = static_cast<index16>(lookupIndexPointer);
 
-    auto first = Krys::Ranges::cbegin(PETSCIIUnshiftedIndexCodePointMap);
-    auto last = Krys::Ranges::cend(PETSCIIUnshiftedIndexCodePointMap);
+    auto first = ::std::ranges::cbegin(PETSCIIUnshiftedIndexCodePointMap);
+    auto last = ::std::ranges::cend(PETSCIIUnshiftedIndexCodePointMap);
     auto itAndLast = Krys::Ranges::lower_bound(first, last, lookupIndex, &LessThanIndex16Target);
 
     if (itAndLast.Current == itAndLast.Last)
@@ -135,8 +135,8 @@ namespace Krys::Text::EncodingTable
       return lookupCodePoint == value[1];
     };
 
-    auto first = Krys::Ranges::cbegin(PETSCIIUnshiftedIndexCodePointMap);
-    auto last = Krys::Ranges::cend(PETSCIIUnshiftedIndexCodePointMap);
+    auto first = ::std::ranges::cbegin(PETSCIIUnshiftedIndexCodePointMap);
+    auto last = ::std::ranges::cend(PETSCIIUnshiftedIndexCodePointMap);
     auto itAndLast = Krys::Ranges::find_if(first, last, predicate);
 
     if (itAndLast.Current == itAndLast.Last)
@@ -153,8 +153,8 @@ namespace Krys::Text::EncodingTable
   {
     const index16 lookupIndex = static_cast<index16>(lookupIndexPointer);
 
-    auto first = Krys::Ranges::cbegin(PETSCIIShiftedIndexCodePointMap);
-    auto last = Krys::Ranges::cend(PETSCIIShiftedIndexCodePointMap);
+    auto first = ::std::ranges::cbegin(PETSCIIShiftedIndexCodePointMap);
+    auto last = ::std::ranges::cend(PETSCIIShiftedIndexCodePointMap);
     auto itAndLast = Krys::Ranges::lower_bound(first, last, lookupIndex, &LessThanIndex16Target);
 
     if (itAndLast.Current == itAndLast.Last)
@@ -179,8 +179,8 @@ namespace Krys::Text::EncodingTable
       return lookupCodePoint == value[1];
     };
 
-    auto first = Krys::Ranges::cbegin(PETSCIIShiftedIndexCodePointMap);
-    auto last = Krys::Ranges::cend(PETSCIIShiftedIndexCodePointMap);
+    auto first = ::std::ranges::cbegin(PETSCIIShiftedIndexCodePointMap);
+    auto last = ::std::ranges::cend(PETSCIIShiftedIndexCodePointMap);
     auto itAndLast = Krys::Ranges::find_if(first, last, predicate);
 
     if (itAndLast.Current == itAndLast.Last)

@@ -72,8 +72,8 @@ namespace Krys::Text::Impl
                                          const TInputProgress &inputProgress,
                                          const TOutputProgress &outputProgress) noexcept
     {
-      auto it = ::Krys::Ranges::cbegin(result.Input);
-      auto last = ::Krys::Ranges::cend(result.Input);
+      auto it = ::std::ranges::cbegin(result.Input);
+      auto last = ::std::ranges::cend(result.Input);
       if (it != last)
       {
         // if there is already some items in the input progress (things irreversibly read), then
@@ -149,8 +149,8 @@ namespace Krys::Text::Impl
       using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = DecodeResult<TSubInput, TSubOutput, state>;
 
-      auto inIt = ::Krys::Ranges::cbegin(input);
-      KRYS_MAYBE_UNUSED auto inLast = ::Krys::Ranges::cend(input);
+      auto inIt = ::std::ranges::cbegin(input);
+      KRYS_MAYBE_UNUSED auto inLast = ::std::ranges::cend(input);
 
       constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TErrorHandler>;
       if constexpr (CallErrorHandler)
@@ -163,8 +163,8 @@ namespace Krys::Text::Impl
         }
       }
 
-      auto outIt = ::Krys::Ranges::begin(output);
-      KRYS_MAYBE_UNUSED auto outLast = ::Krys::Ranges::end(output);
+      auto outIt = ::std::ranges::begin(output);
+      KRYS_MAYBE_UNUSED auto outLast = ::std::ranges::end(output);
 
       std::array<code_unit, 2> units {};
       const char16_t lead16 = static_cast<char16_t>(*inIt);
@@ -319,8 +319,8 @@ namespace Krys::Text::Impl
       using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = EncodeResult<TSubInput, TSubOutput, state>;
 
-      auto inIt = ::Krys::Ranges::cbegin(input);
-      auto inLast = ::Krys::Ranges::cend(input);
+      auto inIt = ::std::ranges::cbegin(input);
+      auto inLast = ::std::ranges::cend(input);
       if (inIt == inLast)
       {
         // an exhausted sequence is fine
@@ -328,8 +328,8 @@ namespace Krys::Text::Impl
                        EncodingError::OK);
       }
 
-      auto outIt = ::Krys::Ranges::begin(output);
-      KRYS_MAYBE_UNUSED auto outLast = ::Krys::Ranges::end(output);
+      auto outIt = ::std::ranges::begin(output);
+      KRYS_MAYBE_UNUSED auto outLast = ::std::ranges::end(output);
 
       code_point points[1] {};
       points[0] = *inIt;

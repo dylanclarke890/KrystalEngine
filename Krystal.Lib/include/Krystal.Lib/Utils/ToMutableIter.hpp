@@ -22,9 +22,9 @@ namespace Krys
 
     template <typename T>
     concept HasPairIteratorInsert = requires {
-      std::declval<T &>().insert(Krys::Ranges::cbegin(std::declval<T &>()),
-                                 Krys::Ranges::cbegin(std::declval<T &>()),
-                                 Krys::Ranges::cend(std::declval<T &>()));
+      std::declval<T &>().insert(::std::ranges::cbegin(std::declval<T &>()),
+                                 ::std::ranges::cbegin(std::declval<T &>()),
+                                 ::std::ranges::cend(std::declval<T &>()));
     };
 
     template <IterStart from>
@@ -54,8 +54,8 @@ namespace Krys
           // or p if i == j."
           // in other words, this is our cheat code to avoid
           // hitting the worst-case-scenario here
-          return source.insert(std::forward<TFromIt>(fromIt), Krys::Ranges::cend(source),
-                               Krys::Ranges::cend(source));
+          return source.insert(std::forward<TFromIt>(fromIt), ::std::ranges::cend(source),
+                               ::std::ranges::cend(source));
         }
         else if constexpr (std::is_invocable_r_v<bool, std::not_equal_to<>, TToIt, TFromIt> // cf
                            && (Krys::Ranges::ForwardIterator<TFromIt>                       // cf
@@ -66,7 +66,7 @@ namespace Krys
           // comparable to one another
           if constexpr (from == IterStart::Begin)
           {
-            auto beginIt = Krys::Ranges::begin(source);
+            auto beginIt = ::std::ranges::begin(source);
             while (beginIt != fromIt)
             {
               ++beginIt;
@@ -75,7 +75,7 @@ namespace Krys
           }
           else
           {
-            auto endIt = Krys::Ranges::end(source);
+            auto endIt = ::std::ranges::end(source);
             while (endIt != fromIt)
             {
               --endIt;
@@ -89,7 +89,7 @@ namespace Krys
           {
             // either this is random access and O(1),
             // or this is some other weird iterator and it's O(2N)
-            auto beginIt = Krys::Ranges::begin(source);
+            auto beginIt = ::std::ranges::begin(source);
             auto itDist = std::distance(TFromIt(beginIt), std::forward<TFromIt>(fromIt));
             std::advance(beginIt, itDist);
             return beginIt;
@@ -98,7 +98,7 @@ namespace Krys
           {
             // either this is random access and O(1),
             // or this is some other weird iterator and it's O(2N)
-            auto endIt = Krys::Ranges::end(source);
+            auto endIt = ::std::ranges::end(source);
             auto itDist = std::distance(std::forward<TFromIt>(fromIt), TFromIt(endIt));
             std::advance(endIt, -itDist);
             return endIt;

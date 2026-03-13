@@ -149,8 +149,8 @@ namespace Krys::Text
         (void)toState;
 
         auto result = ::Krys::Ranges::Impl::Copy(
-          ::Krys::Ranges::cbegin(std::forward<TInput>(input)), ::Krys::Ranges::cend(input),
-          ::Krys::Ranges::begin(std::forward<TOutput>(output)), ::Krys::Ranges::end(output));
+          ::std::ranges::cbegin(std::forward<TInput>(input)), ::std::ranges::cend(input),
+          ::std::ranges::begin(std::forward<TOutput>(output)), ::std::ranges::end(output));
 
         using TResult = TranscodeResult<decltype(result.In), decltype(result.Out), TFromState, TToState,
                                         remove_cvref_t<TPivot>>;
@@ -327,7 +327,7 @@ namespace Krys::Text::detail_transcode
 
     TFromProgressHandler fromProgressHandler {};
     TToProgressHandler toProgressHandler {};
-    TWorkingInput workingInput(::Krys::Ranges::cbegin(input), ::Krys::Ranges::cend(input));
+    TWorkingInput workingInput(::std::ranges::cbegin(input), ::std::ranges::cend(input));
 
     std::size_t errorCount = 0;
     std::size_t pivotErrorCount = 0;
@@ -363,8 +363,8 @@ namespace Krys::Text::detail_transcode
           std::size_t pivotRemnantCount =
             static_cast<std::size_t>(::Krys::Ranges::size(pivot) - ::Krys::Ranges::size(result.Pivot));
           auto pivotRemnant =
-            ::Krys::Ranges::reconstruct(std::in_place_type<TPivot>, ::Krys::Ranges::cbegin(pivot),
-                                        ::Krys::Ranges::cbegin(pivot) + pivotRemnantCount);
+            ::Krys::Ranges::reconstruct(std::in_place_type<TPivot>, ::std::ranges::cbegin(pivot),
+                                        ::std::ranges::cbegin(pivot) + pivotRemnantCount);
           auto pivotResult = ::Krys::Text::EncodeIntoRaw(pivotRemnant, toEncoding, intermediateOutput,
                                                          toErrorHandler, toState);
           std::size_t intermediateWrittenCount =

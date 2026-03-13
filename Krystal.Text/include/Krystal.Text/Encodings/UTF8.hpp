@@ -95,8 +95,8 @@ namespace Krys::Text::Impl
                                          const TInputProgress &inputProgress,
                                          const TOutputProgress &outputProgress) noexcept
     {
-      auto it = ::Krys::Ranges::cbegin(result.Input);
-      auto last = ::Krys::Ranges::cend(result.Input);
+      auto it = ::std::ranges::cbegin(result.Input);
+      auto last = ::std::ranges::cend(result.Input);
 
       // there may be more values to skip beyond what was read.
       if (it != last)
@@ -152,8 +152,8 @@ namespace Krys::Text::Impl
       using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = ::Krys::Text::EncodeResult<TSubInput, TSubOutput, encode_state>;
 
-      auto inIt = ::Krys::Ranges::cbegin(input);
-      auto inLast = ::Krys::Ranges::cend(input);
+      auto inIt = ::std::ranges::cbegin(input);
+      auto inLast = ::std::ranges::cend(input);
 
       if (inIt == inLast)
       {
@@ -162,8 +162,8 @@ namespace Krys::Text::Impl
                        EncodingError::OK);
       }
 
-      auto outIt = ::Krys::Ranges::begin(output);
-      KRYS_MAYBE_UNUSED auto outLast = ::Krys::Ranges::end(output);
+      auto outIt = ::std::ranges::begin(output);
+      KRYS_MAYBE_UNUSED auto outLast = ::std::ranges::end(output);
 
       const char32 point32 = static_cast<char32>(*inIt);
 
@@ -309,8 +309,8 @@ namespace Krys::Text::Impl
       using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = ::Krys::Text::DecodeResult<TSubInput, TSubOutput, decode_state>;
 
-      auto inIt = ::Krys::Ranges::cbegin(input);
-      auto inLast = ::Krys::Ranges::cend(input);
+      auto inIt = ::std::ranges::cbegin(input);
+      auto inLast = ::std::ranges::cend(input);
 
       if (inIt == inLast)
       {
@@ -319,8 +319,8 @@ namespace Krys::Text::Impl
                        EncodingError::OK);
       }
 
-      auto outIt = ::Krys::Ranges::begin(output);
-      KRYS_MAYBE_UNUSED auto outLast = ::Krys::Ranges::end(output);
+      auto outIt = ::std::ranges::begin(output);
+      KRYS_MAYBE_UNUSED auto outLast = ::std::ranges::end(output);
 
       const uchar8 unit0 = static_cast<uchar8>(*inIt);
       code_unit units[MaxCodeUnits] {static_cast<code_unit>(unit0)};

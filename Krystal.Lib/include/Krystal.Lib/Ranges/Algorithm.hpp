@@ -86,12 +86,6 @@ namespace Krys::Ranges
 
   namespace Impl
   {
-    template <typename TIterator0, typename TIterator1>
-    constexpr TIterator0 ReverseRange(TIterator0 first, TIterator1 last) noexcept
-    {
-      return std::ranges::reverse(std::move(first), std::move(last));
-    }
-
     template <typename TFirst, typename, typename TOutFirst>
     constexpr bool IsCopyUnsafeNoexcept() noexcept
     {
@@ -269,8 +263,8 @@ namespace Krys::Ranges
       IsCopyNoexcept<range_const_iterator_t<TInput>, range_const_sentinel_t<TInput>,
                      range_iterator_t<TOutput>, range_sentinel_t<TOutput>>())
     {
-      return Impl::Copy(Krys::Ranges::cbegin(std::forward<TInput>(input)), Krys::Ranges::cend(input),
-                        Krys::Ranges::begin(std::forward<TOutput>(output)), Krys::Ranges::end(output));
+      return Impl::Copy(::std::ranges::cbegin(std::forward<TInput>(input)), ::std::ranges::cend(input),
+                        ::std::ranges::begin(std::forward<TOutput>(output)), ::std::ranges::end(output));
     }
 
     template <typename TFirst0, typename TLast0, typename TFirst1, typename TLast1>
@@ -298,32 +292,6 @@ namespace Krys::Ranges
       {
         return 1;
       }
-    }
-
-    template <typename TFirst0, typename TLast0, typename TFirst1, typename TLast1>
-    constexpr bool LexicographicalCompare(TFirst0 first0, TLast0 last0, TFirst1 first1, TLast1 last1) noexcept
-    {
-      return std::ranges::lexicographical_compare(std::move(first0), std::move(last0), std::move(first1),
-                                                  std::move(last1));
-    }
-
-  }
-
-  template <typename TIterator, typename TLast>
-  constexpr auto distance(TIterator &&it, TLast &&last) noexcept
-  {
-    if constexpr (IsIteratorConceptOrBetter<std::random_access_iterator_tag, TIterator>)
-    {
-      return last - it;
-    }
-    else
-    {
-      iterator_difference_type_t<TIterator> diff = 0;
-      for (; it != last; ++it)
-      {
-        ++diff;
-      }
-      return diff;
     }
   }
 
@@ -355,7 +323,7 @@ namespace Krys::Ranges
       }
     }
     TIterator it = {};
-    TDiff count = Krys::Ranges::distance(first, last);
+    TDiff count = std::distance(first, last);
     TDiff step = 0;
     while (count > 0)
     {
@@ -373,40 +341,5 @@ namespace Krys::Ranges
       }
     }
     return {std::move(first), std::move(last)};
-  }
-
-  template <typename TIteratorLast, typename T, typename TCompare>
-  constexpr auto lower_bound(TIteratorLast &&it_last, T &&targetValue, TCompare compare) noexcept
-  {
-    return std::ranges::lower_bound(cbegin(std::forward<TIteratorLast>(it_last)), cend(it_last),
-                                    std::forward<T>(targetValue), std::forward<TCompare>(compare));
-  }
-
-  template <typename TIterator0, typename TSentinel0, typename TIterator1, typename TSentinel1>
-  constexpr bool equal(TIterator0 first0, TSentinel0 last0, TIterator1 first1, TSentinel1 last1)
-  {
-    return std::ranges::equal(std::move(first0), std::move(last0), std::move(first1), std::move(last1));
-  }
-
-  template <typename TIterator0, typename TSentinel0, typename TIterator1, typename TSentinel1,
-            typename TPredicate>
-  constexpr bool equal(TIterator0 first0, TSentinel0 last0, TIterator1 first1, TSentinel1 last1,
-                       TPredicate &&predicate)
-  {
-    return std::ranges::equal(std::move(first0), std::move(last0), std::move(first1), std::move(last1),
-                              std::forward<TPredicate>(predicate));
-  }
-
-  template <typename TFirstLast0, typename TFirstLast1>
-  constexpr bool equal(TFirstLast0 &&first_last0, TFirstLast1 &&first_last1)
-  {
-    return std::ranges::equal(std::forward<TFirstLast0>(first_last0), std::forward<TFirstLast1>(first_last1));
-  }
-
-  template <typename TFirstLast0, typename TFirstLast1, typename TPredicate>
-  constexpr bool equal(TFirstLast0 &&first_last0, TFirstLast1 &&first_last1, TPredicate &&predicate)
-  {
-    return std::ranges::equal(std::forward<TFirstLast0>(first_last0), std::forward<TFirstLast1>(first_last1),
-                              std::forward<TPredicate>(predicate));
   }
 }

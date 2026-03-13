@@ -21,8 +21,8 @@ namespace Krys::Text::EncodingTable
   {
     const TIndex lookupCode = static_cast<TIndex>(lookupCodePoint);
 
-    auto first = Krys::Ranges::cbegin(indexCodePointMap);
-    auto last = Krys::Ranges::cend(indexCodePointMap);
+    auto first = ::std::ranges::cbegin(indexCodePointMap);
+    auto last = ::std::ranges::cend(indexCodePointMap);
 
     const auto predicate = [&lookupCode](const TIndexCodePoint &value)
     {
@@ -47,8 +47,8 @@ namespace Krys::Text::EncodingTable
   {
     TIndex lookupIndex = static_cast<TIndex>(lookupIndexPointer);
 
-    auto first = Krys::Ranges::cbegin(indexCodePointMap);
-    auto last = Krys::Ranges::cend(indexCodePointMap);
+    auto first = ::std::ranges::cbegin(indexCodePointMap);
+    auto last = ::std::ranges::cend(indexCodePointMap);
     auto it =
       Krys::Ranges::lower_bound(first, last, lookupIndex, &LessThanIndexTarget<TIndexCodePoint, TIndex>);
 

@@ -370,13 +370,13 @@ namespace Krys::Ranges
             {
               return (*this)(std::forward<TInPlaceOrIterator>(inplaceOrIterator),
                              std::forward<TRangeOrSentinel>(rangeOrSentinel),
-                             Krys::Ranges::begin(rangeOrSentinel), Krys::Ranges::end(rangeOrSentinel));
+                             ::std::ranges::begin(rangeOrSentinel), ::std::ranges::end(rangeOrSentinel));
             }
             else
             {
               return (*this)(std::forward<TInPlaceOrIterator>(inplaceOrIterator),
                              std::forward<TRangeOrSentinel>(rangeOrSentinel),
-                             Krys::Ranges::cbegin(rangeOrSentinel), Krys::Ranges::cend(rangeOrSentinel));
+                             ::std::ranges::cbegin(rangeOrSentinel), ::std::ranges::cend(rangeOrSentinel));
             }
           }
         }

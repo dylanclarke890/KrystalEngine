@@ -3431,8 +3431,8 @@ namespace Krys::Text::EncodingTable
     euc_kr_uhc_index_to_code_point(std::size_t lookupIndexPointer) noexcept
   {
     const index16 lookupIndex = static_cast<index16>(lookupIndexPointer);
-    auto itAndLast = Krys::Ranges::lower_bound(Krys::Ranges::cbegin(EUC_KR_UHCIndexCodePointMap),
-                                               Krys::Ranges::cend(EUC_KR_UHCIndexCodePointMap), lookupIndex,
+    auto itAndLast = Krys::Ranges::lower_bound(::std::ranges::cbegin(EUC_KR_UHCIndexCodePointMap),
+                                               ::std::ranges::cend(EUC_KR_UHCIndexCodePointMap), lookupIndex,
                                                &LessThanIndex16Target);
     if (itAndLast.Current == itAndLast.Last)
     {
@@ -3453,8 +3453,8 @@ namespace Krys::Text::EncodingTable
     {
       return lookupCodePoint == value[1];
     };
-    auto itAndLast = Krys::Ranges::find_if(Krys::Ranges::cbegin(EUC_KR_UHCIndexCodePointMap),
-                                           Krys::Ranges::cend(EUC_KR_UHCIndexCodePointMap), predicate);
+    auto itAndLast = Krys::Ranges::find_if(::std::ranges::cbegin(EUC_KR_UHCIndexCodePointMap),
+                                           ::std::ranges::cend(EUC_KR_UHCIndexCodePointMap), predicate);
     if (itAndLast.Current == itAndLast.Last)
     {
       return std::nullopt;

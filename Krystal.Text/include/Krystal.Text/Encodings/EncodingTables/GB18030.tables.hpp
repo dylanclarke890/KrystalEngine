@@ -4866,9 +4866,9 @@ namespace Krys::Text::EncodingTable
     }
 
     std::uint_least32_t lookupIndex = static_cast<std::uint_least32_t>(lookupIndexPointer);
-    auto last = Krys::Ranges::cend(GB18030RangesIndexCodePointMap);
-    auto first = Krys::Ranges::cbegin(GB18030RangesIndexCodePointMap);
-    auto it = std::lower_bound(Krys::Ranges::cbegin(GB18030RangesIndexCodePointMap), last, lookupIndex,
+    auto last = ::std::ranges::cend(GB18030RangesIndexCodePointMap);
+    auto first = ::std::ranges::cbegin(GB18030RangesIndexCodePointMap);
+    auto it = std::lower_bound(::std::ranges::cbegin(GB18030RangesIndexCodePointMap), last, lookupIndex,
                                &LessThanIndex32Target);
     if (it == first)
     {
@@ -4890,8 +4890,8 @@ namespace Krys::Text::EncodingTable
     {
       return 7'457;
     }
-    auto first = Krys::Ranges::cbegin(GB18030RangesIndexCodePointMap);
-    auto last = Krys::Ranges::cend(GB18030RangesIndexCodePointMap);
+    auto first = ::std::ranges::cbegin(GB18030RangesIndexCodePointMap);
+    auto last = ::std::ranges::cend(GB18030RangesIndexCodePointMap);
     auto it = std::lower_bound(first, last, lookupCodePoint, &LessThanCodePoint32Target);
     if (it == first)
     {

@@ -65,8 +65,8 @@ namespace Krys::Text
                                      const TOutputProgress &outputProgress) noexcept
   {
     // we can only advance one character at a time.
-    auto it = ::Krys::Ranges::begin(std::forward<TResult>(result).Input);
-    auto last = ::Krys::Ranges::end(result.Input);
+    auto it = ::std::ranges::begin(std::forward<TResult>(result).Input);
+    auto last = ::std::ranges::end(result.Input);
 
     using TInput = decltype(result.Input);
     using TUInput = remove_cvref_t<TInput>;
@@ -111,8 +111,8 @@ namespace Krys::Text
                                                    const TOutputProgress &outputProgress) noexcept
   {
     // we can only advance one character at a time.
-    auto it = ::Krys::Ranges::begin(std::forward<TResult>(result).Input);
-    auto last = ::Krys::Ranges::end(result.Input);
+    auto it = ::std::ranges::begin(std::forward<TResult>(result).Input);
+    auto last = ::std::ranges::end(result.Input);
 
     using TInput = decltype(result.Input);
     using TUInput = remove_cvref_t<TInput>;
@@ -175,8 +175,8 @@ namespace Krys::Text
     else
     {
       auto input = std::forward<TResult>(result).Input;
-      auto it = ::Krys::Ranges::begin(input);
-      auto last = ::Krys::Ranges::end(input);
+      auto it = ::std::ranges::begin(input);
+      auto last = ::std::ranges::end(input);
 
       if (it != last)
       {

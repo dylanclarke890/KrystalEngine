@@ -60,8 +60,8 @@ namespace Krys::Text::EncodingTable
     }
 
     // standard lookup table
-    auto first = Krys::Ranges::cbegin(Windows1250IndexCodePointMap);
-    auto last = Krys::Ranges::cend(Windows1250IndexCodePointMap);
+    auto first = ::std::ranges::cbegin(Windows1250IndexCodePointMap);
+    auto last = ::std::ranges::cend(Windows1250IndexCodePointMap);
     auto itAndLast = Krys::Ranges::lower_bound(first, last, lookupIndex, &LessThanIndex16Target);
     
     if (itAndLast.Current == itAndLast.Last)
@@ -86,8 +86,8 @@ namespace Krys::Text::EncodingTable
       return lookupCodePoint == value[1];
     };
 
-    auto first = Krys::Ranges::cbegin(Windows1250IndexCodePointMap);
-    auto last = Krys::Ranges::cend(Windows1250IndexCodePointMap);
+    auto first = ::std::ranges::cbegin(Windows1250IndexCodePointMap);
+    auto last = ::std::ranges::cend(Windows1250IndexCodePointMap);
     auto itAndLast = Krys::Ranges::find_if(first, last, predicate);
 
     if (itAndLast.Current == itAndLast.Last)

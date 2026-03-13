@@ -79,8 +79,8 @@ namespace Krys::Text
       using TResult = DecodeResult<TSubInput, TSubOutput, state>;
       constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TUErrorHandler>;
 
-      auto inIt = Krys::Ranges::cbegin(input);
-      auto inLast = Krys::Ranges::cend(input);
+      auto inIt = ::std::ranges::cbegin(input);
+      auto inLast = ::std::ranges::cend(input);
       if (inIt == inLast)
       {
         // an exhausted sequence is fine
@@ -88,8 +88,8 @@ namespace Krys::Text
                        TSubOutput(std::forward<TOutput>(output)), s, EncodingError::OK);
       }
 
-      auto outIt = Krys::Ranges::begin(output);
-      auto outLast = Krys::Ranges::end(output);
+      auto outIt = ::std::ranges::begin(output);
+      auto outLast = ::std::ranges::end(output);
 
       if constexpr (CallErrorHandler)
       {
@@ -160,8 +160,8 @@ namespace Krys::Text
       using TResult = EncodeResult<TSubInput, TSubOutput, state>;
       constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TUErrorHandler>;
 
-      auto inIt = Krys::Ranges::cbegin(input);
-      auto inLast = Krys::Ranges::cend(input);
+      auto inIt = ::std::ranges::cbegin(input);
+      auto inLast = ::std::ranges::cend(input);
       if (inIt == inLast)
       {
         // an exhausted sequence is fine
@@ -169,8 +169,8 @@ namespace Krys::Text
                        EncodingError::OK);
       }
 
-      auto outIt = Krys::Ranges::begin(output);
-      KRYS_MAYBE_UNUSED auto outLast = Krys::Ranges::end(output);
+      auto outIt = ::std::ranges::begin(output);
+      KRYS_MAYBE_UNUSED auto outLast = ::std::ranges::end(output);
 
       if constexpr (CallErrorHandler)
       {

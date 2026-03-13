@@ -194,8 +194,8 @@ namespace Krys::Text
       using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = DecodeResult<TSubInput, TSubOutput, decode_state>;
 
-      auto inIt = ::Krys::Ranges::cbegin(input);
-      auto inLast = ::Krys::Ranges::cend(input);
+      auto inIt = ::std::ranges::cbegin(input);
+      auto inLast = ::std::ranges::cend(input);
       if (inIt == inLast)
       {
         // an exhausted sequence is fine
@@ -203,8 +203,8 @@ namespace Krys::Text
                        EncodingError::OK);
       }
 
-      auto outIt = ::Krys::Ranges::begin(output);
-      auto outLast = ::Krys::Ranges::end(output);
+      auto outIt = ::std::ranges::begin(output);
+      auto outLast = ::std::ranges::end(output);
 
       WCHAR intermediateData[17] = {};
       const size_t initialIntermediateDataSize = ::Krys::Ranges::size(intermediateData);
@@ -353,8 +353,8 @@ namespace Krys::Text
       using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = EncodeResult<TSubInput, TSubOutput, encode_state>;
 
-      auto inIt = ::Krys::Ranges::cbegin(input);
-      auto inLast = ::Krys::Ranges::cend(input);
+      auto inIt = ::std::ranges::cbegin(input);
+      auto inLast = ::std::ranges::cend(input);
       if (inIt == inLast)
       {
         // an exhausted sequence is fine
@@ -362,8 +362,8 @@ namespace Krys::Text
                        EncodingError::OK);
       }
 
-      auto outIt = ::Krys::Ranges::begin(output);
-      auto outLast = ::Krys::Ranges::end(output);
+      auto outIt = ::std::ranges::begin(output);
+      auto outLast = ::std::ranges::end(output);
 
       using wutf16 = ::Krys::Text::Impl::UTF16With<void, wchar_t, code_point, false>;
       using TIntermediateState = encode_state_t<wutf16>;
