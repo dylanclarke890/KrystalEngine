@@ -1,9 +1,9 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
-#include "Krystal.Lib/Utils/Hijack.hpp"
 #include "Krystal.Lib/Pointers/ReferenceWrapper.hpp"
-#include "Krystal.Lib/Utils/ToAddress.hpp"
+#include "Krystal.Lib/Utils/Hijack.hpp"
 #include <iterator>
 #include <utility>
 

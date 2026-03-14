@@ -189,9 +189,6 @@
     <ClInclude Include="include\Krystal.Lib\Ranges\Impl\ContiguousIterator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Utils\ToAddress.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\ReferenceWrapper.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

@@ -9,7 +9,6 @@
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Lib/Utils/Hijack.hpp"
 #include "Krystal.Lib/Utils/Tag.hpp"
-#include "Krystal.Lib/Utils/ToAddress.hpp"
 #include "Krystal.Lib/Utils/Unwrap.hpp"
 #include <string_view>
 #include <utility>
@@ -71,19 +70,19 @@ namespace Krys::Ranges
       {
         if constexpr (IsContiguousIterator<TSentinel>)
         {
-          auto iteratorAddress = to_address(iterator);
-          auto sentinelAddress = to_address(sentinel);
+          auto iteratorAddress = std::to_address(iterator);
+          auto sentinelAddress = std::to_address(sentinel);
           return Span<T>(iteratorAddress, static_cast<std::size_t>(sentinelAddress - iteratorAddress));
         }
         else
         {
-          auto iteratorAddress = to_address(iterator);
+          auto iteratorAddress = std::to_address(iterator);
           return Span<T>(iteratorAddress, static_cast<std::size_t>(sentinel - iterator));
         }
       }
       else
       {
-        auto iteratorAddress = to_address(iterator);
+        auto iteratorAddress = std::to_address(iterator);
         return Span<T>(iteratorAddress, sentinel);
       }
     }
@@ -103,7 +102,7 @@ namespace Krys::Ranges
           const auto &emptyStr = EmptyString<T>();
           return std::basic_string_view<T, TTraits>(emptyStr + 0, 0);
         }
-        return std::basic_string_view<T, TTraits>(to_address(iterator), ptrSize);
+        return std::basic_string_view<T, TTraits>(std::to_address(iterator), ptrSize);
       }
       else if (static_cast<TSize>(sentinel) == static_cast<TSize>(0))
       {
@@ -112,7 +111,7 @@ namespace Krys::Ranges
       }
       else
       {
-        return std::basic_string_view<T, TTraits>(to_address(iterator), static_cast<TSize>(sentinel));
+        return std::basic_string_view<T, TTraits>(std::to_address(iterator), static_cast<TSize>(sentinel));
       }
     }
 

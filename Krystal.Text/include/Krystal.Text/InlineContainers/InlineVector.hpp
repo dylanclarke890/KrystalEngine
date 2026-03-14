@@ -3,7 +3,6 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Utils/ConstructDestroy.hpp"
-#include "Krystal.Lib/Utils/ToAddress.hpp"
 #include "Krystal.Lib/Utils/ToMutableIter.hpp"
 #include "Krystal.Text/InlineContainers/detail/Storage.hpp"
 #include "Krystal.Text/InlineContainers/detail/WrappedPointer.hpp"
@@ -441,14 +440,14 @@ namespace Krys::Text
 
       // Step 0: create a new object off-to-the-right
       auto whereMiddleLast = std::prev(whereLast);
-      Krys::construct_at(Krys::to_address(whereLast), *whereMiddleLast);
+      Krys::construct_at(std::to_address(whereLast), *whereMiddleLast);
       // Step 1: shift everything to the right, if size is large enough to need it
       if (whereMiddleLast != whereFirst)
       {
         KRYS_MAYBE_UNUSED auto destinationLast = std::move_backward(whereFirst, whereMiddleLast, whereLast);
       }
       // Step 2: construct the new value in place
-      Krys::construct_at(Krys::to_address(whereFirst), std::forward<TArgs>(args)...);
+      Krys::construct_at(std::to_address(whereFirst), std::forward<TArgs>(args)...);
       ++this->_layout.Size;
       return whereFirst;
     }
@@ -475,7 +474,7 @@ namespace Krys::Text
                         "it impossible to properly copy in a constexpr constext in a pre-C++20 world.");
         }
       }
-      Krys::destroy_at(Krys::to_address(whereLast));
+      Krys::destroy_at(std::to_address(whereLast));
       --this->_layout.Size;
       return whereFirst;
     }

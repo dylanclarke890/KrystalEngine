@@ -251,7 +251,6 @@
     <ClInclude Include="include\Krystal.Lib\Utils\Size.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\StrongOrder.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\Tag.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Utils\ToAddress.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\ToMutableIter.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\ToUnderlying.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\Uninit.hpp" />

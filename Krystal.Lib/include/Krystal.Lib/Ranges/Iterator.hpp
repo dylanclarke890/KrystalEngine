@@ -3,7 +3,6 @@
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Ranges/ADL.hpp"
 #include "Krystal.Lib/Ranges/Impl/ContiguousIterator.hpp"
-#include "Krystal.Lib/Utils/ToAddress.hpp"
 #include <iterator>
 #include <ranges>
 #include <type_traits>
@@ -60,6 +59,11 @@ namespace Krys::Ranges
 
   template <typename TIterator>
   concept RandomAccessIterator = IsIteratorConceptOrBetter<std::random_access_iterator_tag, TIterator>;
+
+  template <typename T>
+  concept ToAddressable = requires(T &&t) {
+    { std::to_address(std::forward<T>(t)) };
+  };
 
   template <typename TIterator>
   concept ContiguousIterator =

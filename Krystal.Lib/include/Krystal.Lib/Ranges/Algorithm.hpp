@@ -6,7 +6,6 @@
 #include "Krystal.Lib/Ranges/Iterator.hpp"
 #include "Krystal.Lib/Ranges/Subrange.hpp"
 #include "Krystal.Lib/Ranges/Unbounded.hpp"
-#include "Krystal.Lib/Utils/ToAddress.hpp"
 #include <algorithm>
 
 namespace Krys::Ranges
@@ -122,11 +121,11 @@ namespace Krys::Ranges
         if constexpr (IsContiguousIterator<TFirst> && HasUniqueObjectRepresentations<TValue>
                       && IsContiguousIterator<TOutFirst> && HasUniqueObjectRepresentations<TOutValue>)
         {
-          auto first_ptr = to_address(first);
+          auto first_ptr = std::to_address(first);
           auto distance = size;
           std::size_t byteDistance = sizeof(TValue) * distance;
           std::size_t outDistance = byteDistance / sizeof(TOutValue);
-          std::memcpy(to_address(outFirst), first_ptr, byteDistance);
+          std::memcpy(std::to_address(outFirst), first_ptr, byteDistance);
           return TResult {
             TInRange(TResultInIterator(std::move(first) + distance, 0), std::default_sentinel_t {}),
             TOutRange(std::move(outFirst) + outDistance)};
@@ -156,11 +155,11 @@ namespace Krys::Ranges
         if constexpr (IsContiguousIterator<TFirst> && HasUniqueObjectRepresentations<TValue>
                       && IsContiguousIterator<TOutFirst> && HasUniqueObjectRepresentations<TOutValue>)
         {
-          auto first_ptr = to_address(first);
+          auto first_ptr = std::to_address(first);
           auto distance = last - first;
           std::size_t byteDistance = sizeof(TValue) * distance;
           std::size_t outDistance = byteDistance / sizeof(TOutValue);
-          std::memcpy(to_address(outFirst), first_ptr, byteDistance);
+          std::memcpy(std::to_address(outFirst), first_ptr, byteDistance);
           return TResult {TInRange(std::move(first) + distance, std::move(last)),
                           TOutRange(std::move(outFirst) + outDistance)};
         }

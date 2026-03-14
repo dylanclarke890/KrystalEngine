@@ -2,7 +2,6 @@
 
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
-#include "Krystal.Lib/Utils/ToAddress.hpp"
 #include "Krystal.Lib/Utils/Unwrap.hpp"
 #include <iterator>
 #include <utility>
@@ -204,9 +203,9 @@ namespace std
     }
 
     static constexpr pointer to_address(const Krys::Ranges::WrappedPointer<T> &iter) noexcept(
-      noexcept(Krys::to_address(iter.base())))
+      noexcept(std::to_address(iter.base())))
     {
-      return Krys::to_address(iter.base());
+      return std::to_address(iter.base());
     }
   };
 }
