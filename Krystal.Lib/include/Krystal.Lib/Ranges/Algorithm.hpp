@@ -4,10 +4,8 @@
 #include "Krystal.Lib/Ranges/ADL.hpp"
 #include "Krystal.Lib/Ranges/CountedIterator.hpp"
 #include "Krystal.Lib/Ranges/Iterator.hpp"
-#include "Krystal.Lib/Ranges/Range.hpp"
 #include "Krystal.Lib/Ranges/Subrange.hpp"
 #include "Krystal.Lib/Ranges/Unbounded.hpp"
-#include "Krystal.Lib/Ranges/UnreachableSentinel.hpp"
 #include "Krystal.Lib/Utils/ToAddress.hpp"
 #include <algorithm>
 
@@ -89,7 +87,7 @@ namespace Krys::Ranges
     template <typename TFirst, typename, typename TOutFirst>
     constexpr bool IsCopyUnsafeNoexcept() noexcept
     {
-      return NoThrowAssignable<iterator_reference_t<TOutFirst>, iterator_reference_t<TFirst>>;
+      return NoThrowAssignable<std::iter_reference_t<TOutFirst>, std::iter_reference_t<TFirst>>;
     }
 
     template <typename TFirst, typename TLast, typename TOutFirst, typename TOutLast>
@@ -98,11 +96,11 @@ namespace Krys::Ranges
       if constexpr (SizedSentinelFor<TOutFirst, TOutLast>)
       {
         return IsCopyUnsafeNoexcept<TFirst, TLast, TOutFirst>()
-               && NoThrowAssignable<iterator_reference_t<TOutFirst>, iterator_reference_t<TFirst>>;
+               && NoThrowAssignable<std::iter_reference_t<TOutFirst>, std::iter_reference_t<TFirst>>;
       }
       else
       {
-        return NoThrowAssignable<iterator_reference_t<TOutFirst>, iterator_reference_t<TFirst>>;
+        return NoThrowAssignable<std::iter_reference_t<TOutFirst>, std::iter_reference_t<TFirst>>;
       }
     }
 
@@ -112,7 +110,7 @@ namespace Krys::Ranges
                   TOutFirst outFirst) noexcept(IsCopyUnsafeNoexcept<TFirst, TFirstCount, TOutFirst>())
     {
       using TResultInIterator = CountedIterator<TFirst>;
-      using TInRange = subrange<TResultInIterator, DefaultSentinel>;
+      using TInRange = subrange<TResultInIterator, std::default_sentinel_t>;
       using TOutRange = UnboundedView<TOutFirst>;
       using TResult = InOutResult<TInRange, TOutRange>;
 
@@ -129,8 +127,9 @@ namespace Krys::Ranges
           std::size_t byteDistance = sizeof(TValue) * distance;
           std::size_t outDistance = byteDistance / sizeof(TOutValue);
           std::memcpy(to_address(outFirst), first_ptr, byteDistance);
-          return TResult {TInRange(TResultInIterator(std::move(first) + distance, 0), default_sentinel),
-                          TOutRange(std::move(outFirst) + outDistance)};
+          return TResult {
+            TInRange(TResultInIterator(std::move(first) + distance, 0), std::default_sentinel_t {}),
+            TOutRange(std::move(outFirst) + outDistance)};
         }
       }
       TFirstCount currentSize = 0;
@@ -138,7 +137,7 @@ namespace Krys::Ranges
       {
         *outFirst = *first;
       }
-      return TResult {TInRange(TResultInIterator(std::move(first), 0), default_sentinel),
+      return TResult {TInRange(TResultInIterator(std::move(first), 0), std::default_sentinel_t {}),
                       TOutRange(std::move(outFirst))};
     }
 
@@ -179,8 +178,8 @@ namespace Krys::Ranges
       CopyN(TFirst first, TFirstCount size, TOutFirst outFirst,
             TOutFirstCount outSize) noexcept(IsCopyNoexcept<TFirst, TFirstCount, TOutFirst, TOutFirstCount>())
     {
-      using TInRange = subrange<CountedIterator<TFirst>, DefaultSentinel>;
-      using TOutRange = subrange<CountedIterator<TOutFirst>, DefaultSentinel>;
+      using TInRange = subrange<CountedIterator<TFirst>, std::default_sentinel_t>;
+      using TOutRange = subrange<CountedIterator<TOutFirst>, std::default_sentinel_t>;
       using TResult = InOutResult<TInRange, TOutRange>;
       if (!std::is_constant_evaluated())
       {
@@ -196,8 +195,8 @@ namespace Krys::Ranges
             auto result = CopyNUnsafe(std::move(first), outSize, std::move(outFirst));
             iterator_difference_type_t<TOutFirst> outSize_left =
               static_cast<iterator_difference_type_t<TOutFirst>>(size - outSize);
-            return TResult {std::move(result.In),
-                            TOutRange({std::move(result.Out).begin(), outSize_left}, default_sentinel)};
+            return TResult {std::move(result.In), TOutRange({std::move(result.Out).begin(), outSize_left},
+                                                            std::default_sentinel_t {})};
           }
         }
       }
@@ -216,8 +215,8 @@ namespace Krys::Ranges
       iterator_difference_type_t<TOutFirst> outSize_left =
         static_cast<iterator_difference_type_t<TOutFirst>>(outSize - currentOutCount);
 
-      return TResult {TInRange({std::move(first), size_left}, default_sentinel),
-                      TOutRange({std::move(outFirst), outSize_left}, default_sentinel)};
+      return TResult {TInRange({std::move(first), size_left}, std::default_sentinel_t {}),
+                      TOutRange({std::move(outFirst), outSize_left}, std::default_sentinel_t {})};
     }
 
     template <typename TFirst, typename TLast, typename TOutFirst, typename TOutLast>
@@ -261,7 +260,7 @@ namespace Krys::Ranges
     template <typename TInput, typename TOutput>
     constexpr auto Copy(TInput &&input, TOutput &&output) noexcept(
       IsCopyNoexcept<range_const_iterator_t<TInput>, range_const_sentinel_t<TInput>,
-                     range_iterator_t<TOutput>, range_sentinel_t<TOutput>>())
+                     ::std::ranges::iterator_t<TOutput>, range_sentinel_t<TOutput>>())
     {
       return Impl::Copy(::std::ranges::cbegin(std::forward<TInput>(input)), ::std::ranges::cend(input),
                         ::std::ranges::begin(std::forward<TOutput>(output)), ::std::ranges::end(output));

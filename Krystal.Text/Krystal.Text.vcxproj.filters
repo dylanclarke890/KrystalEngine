@@ -530,5 +530,8 @@
     <ClInclude Include="include\Krystal.Text\StringConversion.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Text\InlineContainers\detail\WrappedPointer.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

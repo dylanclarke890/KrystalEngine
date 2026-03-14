@@ -2,8 +2,8 @@
 
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
+#include "Krystal.Lib/Ranges/Concepts.hpp"
 #include "Krystal.Lib/Ranges/Iterator.hpp"
-#include "Krystal.Lib/Ranges/Range.hpp"
 
 namespace Krys::Ranges
 {

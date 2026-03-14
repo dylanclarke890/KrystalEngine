@@ -53,7 +53,7 @@ namespace Krys::Text
                      firstResult.ErrorCode, firstResult.ErrorCount);
     }
 
-    if (::Krys::Ranges::empty(firstResult.Input) && ::Krys::Text::IsStateComplete(encoding, state))
+    if (::std::ranges::empty(firstResult.Input) && ::Krys::Text::IsStateComplete(encoding, state))
     {
       return TResult(std::move(firstResult.Input), std::move(firstResult.Output), state, EncodingError::OK,
                      firstResult.ErrorCount);
@@ -77,7 +77,7 @@ namespace Krys::Text
                        errorCount);
       }
 
-      if (::Krys::Ranges::empty(workingInput))
+      if (::std::ranges::empty(workingInput))
       {
         if (!::Krys::Text::IsStateComplete(encoding, state))
         {
@@ -212,7 +212,7 @@ namespace Krys::Text::detail_decode
         }
         else if (progressHandler.CodeUnitsProgressSize() != 0)
         {
-          if constexpr (::Krys::Ranges::BidirectionalRange<TWorkingInput>)
+          if constexpr (::std::ranges::bidirectional_range<TWorkingInput>)
           {
             // we can try to rewind our current input by the amount that was not successfully
             // read. This will allow us to try again, when the buffer has more space in it, and should not
@@ -248,7 +248,7 @@ namespace Krys::Text::detail_decode
         return errorResult;
       }
 
-      if (::Krys::Ranges::empty(result.Input))
+      if (::std::ranges::empty(result.Input))
       {
         if (!::Krys::Text::IsStateComplete(encoding, state))
         {
@@ -268,10 +268,10 @@ namespace Krys::Text::detail_decode
     TOutputContainer output {};
     if constexpr (::Krys::Ranges::HasSizeADL<TInput>)
     {
-      using TSize = decltype(::Krys::Ranges::size(input));
+      using TSize = decltype(::std::ranges::size(input));
       if constexpr (::Krys::Ranges::has_reserve_with_size<TOutputContainer, TSize>)
       {
-        auto outputSizeHint = ::Krys::Ranges::size(input) * ::Krys::Text::MaxDecodeCodePoints<TEncoding> / 2;
+        auto outputSizeHint = ::std::ranges::size(input) * ::Krys::Text::MaxDecodeCodePoints<TEncoding> / 2;
         output.reserve(outputSizeHint);
       }
     }

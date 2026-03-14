@@ -2,7 +2,6 @@
 
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Ranges/ADL.hpp"
-#include "Krystal.Lib/Ranges/DefaultSentinel.hpp"
 #include "Krystal.Lib/Ranges/Iterator.hpp"
 #include <iterator>
 #include <ranges>
@@ -10,10 +9,6 @@
 
 namespace Krys::Ranges
 {
-  /// @brief A sentinel for the counted_iterator to be paired with; lets a ztd::counted_iterator compare
-  /// against this type to test if it is at the end.
-  using CountedSentinel = DefaultSentinel;
-
   namespace Impl
   {
     template <typename TIterator>
@@ -190,12 +185,13 @@ namespace Krys::Ranges
         return this->_iterator[index];
       }
 
-      friend constexpr difference_type operator-(const CountedIterator &left, DefaultSentinel) noexcept
+      friend constexpr difference_type operator-(const CountedIterator &left,
+                                                 std::default_sentinel_t) noexcept
       {
         return left._count;
       }
 
-      friend constexpr difference_type operator-(DefaultSentinel, const CountedIterator &right) noexcept
+      friend constexpr difference_type operator-(std::default_sentinel_t, const CountedIterator &right) noexcept
       {
         return -right._count;
       }
@@ -207,7 +203,7 @@ namespace Krys::Ranges
         return left._iterator == right._iterator && left._count == right._count;
       }
 
-      friend constexpr bool operator==(const CountedIterator &left, DefaultSentinel) noexcept
+      friend constexpr bool operator==(const CountedIterator &left, std::default_sentinel_t) noexcept
       {
         return left._count == static_cast<TIteratorDiff>(0);
       }
@@ -219,23 +215,23 @@ namespace Krys::Ranges
         return left._iterator != right._iterator || left._count != right._count;
       }
 
-      friend constexpr bool operator!=(const CountedIterator &left, DefaultSentinel) noexcept
+      friend constexpr bool operator!=(const CountedIterator &left, std::default_sentinel_t) noexcept
       {
         return left._count != static_cast<TIteratorDiff>(0);
       }
 
       friend constexpr iterator_rvalue_reference_t<TIterator>
-        iter_move(const CountedIterator &it) noexcept(noexcept(Krys::Ranges::iter_move(it.base())))
+        iter_move(const CountedIterator &it) noexcept(noexcept(::std::ranges::iter_move(it.base())))
       {
-        return Krys::Ranges::iter_move(it.base());
+        return ::std::ranges::iter_move(it.base());
       }
 
       template <typename TRightIterator>
       friend constexpr void
         iter_swap(const CountedIterator &left, const CountedIterator<TRightIterator> &right) noexcept(
-          noexcept(Krys::Ranges::iter_swap(left.base(), right.base())))
+          noexcept(::std::ranges::iter_swap(left.base(), right.base())))
       {
-        Krys::Ranges::iter_swap(left.base(), right.base());
+        ::std::ranges::iter_swap(left.base(), right.base());
       }
 
     private:

@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Ranges/Range.hpp"
 #include "Krystal.Text/CodePoint.hpp"
 #include "Krystal.Text/CodeUnit.hpp"
 #include "Krystal.Text/Concepts.hpp"
@@ -79,7 +78,7 @@ namespace Krys::Text::Impl
         // if there is already some items in the input progress (things irreversibly read), then
         // we are not obligated to do "at least" one skip; barrier it behind an empty check for
         // progress.
-        if (::Krys::Ranges::empty(inputProgress) && ::Krys::Ranges::empty(outputProgress))
+        if (::std::ranges::empty(inputProgress) && ::std::ranges::empty(outputProgress))
         {
           ++it;
         }

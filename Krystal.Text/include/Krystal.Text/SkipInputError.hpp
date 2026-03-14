@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Ranges/Range.hpp"
 #include "Krystal.Lib/Ranges/Reconstruct.hpp"
 #include "Krystal.Lib/Utils/Unwrap.hpp"
 #include "Krystal.Text/Decode/DecodeResult.hpp"
@@ -81,7 +80,7 @@ namespace Krys::Text
       // if there is already some items in the input progress (things irreversibly read), then
       // we are not obligated to do "at least" one skip; barrier it behind an empty check for
       // progress.
-      if (::Krys::Ranges::empty(inputProgress) && ::Krys::Ranges::empty(outputProgress))
+      if (::std::ranges::empty(inputProgress) && ::std::ranges::empty(outputProgress))
       {
         ++it;
       }
@@ -128,7 +127,7 @@ namespace Krys::Text
       // if there is already some items in the input progress (things irreversibly read), then
       // we are not obligated to do "at least" one skip; barrier it behind an empty check for
       // progress.
-      if (::Krys::Ranges::empty(inputProgress) && ::Krys::Ranges::empty(outputProgress))
+      if (::std::ranges::empty(inputProgress) && ::std::ranges::empty(outputProgress))
       {
         ++it;
       }
@@ -180,7 +179,7 @@ namespace Krys::Text
 
       if (it != last)
       {
-        if (::Krys::Ranges::empty(inputProgress) && ::Krys::Ranges::empty(outputProgress))
+        if (::std::ranges::empty(inputProgress) && ::std::ranges::empty(outputProgress))
         {
           ++it;
         }

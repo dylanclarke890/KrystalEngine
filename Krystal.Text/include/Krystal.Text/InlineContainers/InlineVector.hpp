@@ -2,11 +2,11 @@
 
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
-#include "Krystal.Lib/Ranges/WrappedPointer.hpp"
 #include "Krystal.Lib/Utils/ConstructDestroy.hpp"
 #include "Krystal.Lib/Utils/ToAddress.hpp"
 #include "Krystal.Lib/Utils/ToMutableIter.hpp"
 #include "Krystal.Text/InlineContainers/detail/Storage.hpp"
+#include "Krystal.Text/InlineContainers/detail/WrappedPointer.hpp"
 #include <cassert>
 #include <cstddef>
 #include <initializer_list>

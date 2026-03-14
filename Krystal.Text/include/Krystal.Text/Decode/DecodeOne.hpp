@@ -119,10 +119,10 @@ namespace Krys::Text::detail_decode
     TOutputContainer output {};
     if constexpr (::Krys::Ranges::HasSizeADL<TInput>)
     {
-      using TSize = decltype(::Krys::Ranges::size(input));
+      using TSize = decltype(::std::ranges::size(input));
       if constexpr (::Krys::Ranges::has_reserve_with_size<TOutputContainer, TSize>)
       {
-        output.reserve(::Krys::Ranges::size(input) * (::Krys::Text::MaxDecodeCodePoints<TEncoding> / 2));
+        output.reserve(::std::ranges::size(input) * (::Krys::Text::MaxDecodeCodePoints<TEncoding> / 2));
       }
     }
 

@@ -114,19 +114,19 @@ namespace Krys::Text::Handlers
     {
       if constexpr (Krys::IsSpecializationOf<remove_cvref_t<TResult>, DecodeResult>)
       {
-        this->_codeUnitsSize = Krys::Ranges::size(inputProgress);
+        this->_codeUnitsSize = ::std::ranges::size(inputProgress);
         Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(inputProgress), this->_codeUnitsSize,
                                         this->_codeUnits.data());
-        this->_codePointsSize = Krys::Ranges::size(outputProgress);
+        this->_codePointsSize = ::std::ranges::size(outputProgress);
         Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(outputProgress), this->_codePointsSize,
                                         this->_codePoints.data());
       }
       else
       {
-        this->_codePointsSize = Krys::Ranges::size(inputProgress);
+        this->_codePointsSize = ::std::ranges::size(inputProgress);
         Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(inputProgress), this->_codePointsSize,
                                         this->_codePoints.data());
-        this->_codeUnitsSize = Krys::Ranges::size(outputProgress);
+        this->_codeUnitsSize = ::std::ranges::size(outputProgress);
         Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(outputProgress), this->_codeUnitsSize,
                                         this->_codeUnits.data());
       }
@@ -252,19 +252,19 @@ namespace Krys::Text::Handlers
         ForwardingProgressHandler &nonConstSelf = *this;
         if constexpr (Krys::IsSpecializationOf<remove_cvref_t<TResult>, DecodeResult>)
         {
-          nonConstSelf._codeUnitsSize = Krys::Ranges::size(inputProgress);
+          nonConstSelf._codeUnitsSize = ::std::ranges::size(inputProgress);
           Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(inputProgress), nonConstSelf._codeUnitsSize,
                                           nonConstSelf._codeUnits.data());
-          nonConstSelf._codePointsSize = Krys::Ranges::size(outputProgress);
+          nonConstSelf._codePointsSize = ::std::ranges::size(outputProgress);
           Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(outputProgress), nonConstSelf._codePointsSize,
                                           nonConstSelf._codePoints.data());
         }
         else
         {
-          nonConstSelf._codePointsSize = Krys::Ranges::size(inputProgress);
+          nonConstSelf._codePointsSize = ::std::ranges::size(inputProgress);
           Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(inputProgress), nonConstSelf._codePointsSize,
                                           nonConstSelf._codePoints.data());
-          nonConstSelf._codeUnitsSize = Krys::Ranges::size(outputProgress);
+          nonConstSelf._codeUnitsSize = ::std::ranges::size(outputProgress);
           Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(outputProgress), nonConstSelf._codeUnitsSize,
                                           nonConstSelf._codeUnits.data());
         }
@@ -287,19 +287,19 @@ namespace Krys::Text::Handlers
         ForwardingProgressHandler &nonConstSelf = const_cast<ForwardingProgressHandler &>(*this);
         if constexpr (Krys::IsSpecializationOf<remove_cvref_t<TResult>, DecodeResult>)
         {
-          nonConstSelf._codeUnitsSize = Krys::Ranges::size(inputProgress);
+          nonConstSelf._codeUnitsSize = ::std::ranges::size(inputProgress);
           Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(inputProgress), nonConstSelf._codeUnitsSize,
                                           nonConstSelf._codeUnits.data());
-          nonConstSelf._codePointsSize = Krys::Ranges::size(outputProgress);
+          nonConstSelf._codePointsSize = ::std::ranges::size(outputProgress);
           Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(outputProgress), nonConstSelf._codePointsSize,
                                           nonConstSelf._codePoints.data());
         }
         else
         {
-          nonConstSelf._codePointsSize = Krys::Ranges::size(inputProgress);
+          nonConstSelf._codePointsSize = ::std::ranges::size(inputProgress);
           Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(inputProgress), nonConstSelf._codePointsSize,
                                           nonConstSelf._codePoints.data());
-          nonConstSelf._codeUnitsSize = Krys::Ranges::size(outputProgress);
+          nonConstSelf._codeUnitsSize = ::std::ranges::size(outputProgress);
           Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(outputProgress), nonConstSelf._codeUnitsSize,
                                           nonConstSelf._codeUnits.data());
         }
@@ -322,19 +322,19 @@ namespace Krys::Text::Handlers
         ForwardingProgressHandler &nonConstSelf = *this;
         if constexpr (Krys::IsSpecializationOf<remove_cvref_t<TResult>, DecodeResult>)
         {
-          nonConstSelf._codeUnitsSize = Krys::Ranges::size(inputProgress);
+          nonConstSelf._codeUnitsSize = ::std::ranges::size(inputProgress);
           Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(inputProgress), nonConstSelf._codeUnitsSize,
                                           nonConstSelf._codeUnits.data());
-          nonConstSelf._codePointsSize = Krys::Ranges::size(outputProgress);
+          nonConstSelf._codePointsSize = ::std::ranges::size(outputProgress);
           Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(outputProgress), nonConstSelf._codePointsSize,
                                           nonConstSelf._codePoints.data());
         }
         else
         {
-          nonConstSelf._codePointsSize = Krys::Ranges::size(inputProgress);
+          nonConstSelf._codePointsSize = ::std::ranges::size(inputProgress);
           Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(inputProgress), nonConstSelf._codePointsSize,
                                           nonConstSelf._codePoints.data());
-          nonConstSelf._codeUnitsSize = Krys::Ranges::size(outputProgress);
+          nonConstSelf._codeUnitsSize = ::std::ranges::size(outputProgress);
           Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(outputProgress), nonConstSelf._codeUnitsSize,
                                           nonConstSelf._codeUnits.data());
         }

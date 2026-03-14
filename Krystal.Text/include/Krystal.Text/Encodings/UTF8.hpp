@@ -3,7 +3,6 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Ranges/ADL.hpp"
-#include "Krystal.Lib/Ranges/Range.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Utils/LosslessStaticCast.hpp"
@@ -104,7 +103,7 @@ namespace Krys::Text::Impl
         // if there is already some items in the input progress (things irreversibly read), then
         // we are not obligated to do "at least" one skip; barrier it behind an empty check for
         // progress.
-        if (::Krys::Ranges::empty(inputProgress) && ::Krys::Ranges::empty(outputProgress))
+        if (::std::ranges::empty(inputProgress) && ::std::ranges::empty(outputProgress))
         {
           ++it;
         }

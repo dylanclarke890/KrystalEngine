@@ -1,8 +1,6 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Concepts.hpp"
-#include "Krystal.Lib/Ranges/ADL.hpp"
-#include <ranges>
 #include <span>
 
 namespace Krys
@@ -26,13 +24,4 @@ namespace Krys
 
   template <typename T>
   concept IsSpan = is_span<T>::value;
-
-  namespace Ranges
-  {
-    template <typename T, decltype(std::dynamic_extent) Extent>
-    inline constexpr bool enable_view<Krys::Span<T, Extent>> = true;
-
-    template <typename T, decltype(std::dynamic_extent) Extent>
-    inline constexpr bool enable_borrowed_range<Krys::Span<T, Extent>> = true;
-  }
 }

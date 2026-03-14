@@ -120,11 +120,11 @@ namespace Krys::Text::detail_encode
     TOutputContainer output {};
     if constexpr (::Krys::Ranges::HasSizeADL<TInput>)
     {
-      using TSize = decltype(::Krys::Ranges::size(input));
+      using TSize = decltype(::std::ranges::size(input));
       if constexpr (::Krys::Ranges::has_reserve_with_size<TOutputContainer, TSize>)
       {
         constexpr std::size_t maxUnits = ::Krys::Text::MaxEncodeCodeUnits<TEncoding>;
-        TSize outputSizeHint = static_cast<TSize>(::Krys::Ranges::size(input));
+        TSize outputSizeHint = static_cast<TSize>(::std::ranges::size(input));
         outputSizeHint *= (maxUnits > 3) ? (maxUnits / 4) : maxUnits;
         output.reserve(outputSizeHint);
       }

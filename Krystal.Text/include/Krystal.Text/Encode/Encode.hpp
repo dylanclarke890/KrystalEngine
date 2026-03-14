@@ -52,7 +52,7 @@ namespace Krys::Text
                      firstResult.ErrorCode, firstResult.ErrorCount);
     }
 
-    if (::Krys::Ranges::empty(firstResult.Input))
+    if (::std::ranges::empty(firstResult.Input))
     {
       if (::Krys::Text::IsStateComplete(encoding, state))
       {
@@ -79,7 +79,7 @@ namespace Krys::Text
                        errorCount);
       }
 
-      if (::Krys::Ranges::empty(workingInput))
+      if (::std::ranges::empty(workingInput))
       {
         if (!::Krys::Text::IsStateComplete(encoding, state))
         {
@@ -212,7 +212,7 @@ namespace Krys::Text::detail_encode
         }
         else if (handler.CodePointsProgressSize() != 0)
         {
-          if constexpr (::Krys::Ranges::BidirectionalRange<TWorkingInput>)
+          if constexpr (::std::ranges::bidirectional_range<TWorkingInput>)
           {
             // we can try to rewind our current input by the amount that was not successfully
             // read. This will allow us to try again, when the buffer
@@ -248,7 +248,7 @@ namespace Krys::Text::detail_encode
           handler.CodeUnitsProgress());
         return TResult(errorResult);
       }
-      if (::Krys::Ranges::empty(result.Input))
+      if (::std::ranges::empty(result.Input))
       {
         if (!::Krys::Text::IsStateComplete(encoding, state))
         {
@@ -269,10 +269,10 @@ namespace Krys::Text::detail_encode
     TOutputContainer output {};
     if constexpr (::Krys::Ranges::HasSizeADL<TInput>)
     {
-      using TSize = decltype(::Krys::Ranges::size(input));
+      using TSize = decltype(::std::ranges::size(input));
       if constexpr (::Krys::Ranges::has_reserve_with_size<TOutputContainer, TSize>)
       {
-        TSize outputSizeHint = static_cast<TSize>(::Krys::Ranges::size(input));
+        TSize outputSizeHint = static_cast<TSize>(::std::ranges::size(input));
         outputSizeHint *= (maxUnits > 3) ? (maxUnits / 4) : maxUnits;
         output.reserve(outputSizeHint);
       }

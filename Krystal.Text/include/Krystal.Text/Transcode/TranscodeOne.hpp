@@ -113,8 +113,8 @@ namespace Krys::Text
           toIntermediateHandler.CodeUnitsProgress());
       }
     }
-    const std::size_t pivotSize = ::Krys::Ranges::size(pivot);
-    std::size_t intermediateWritten = pivotSize - ::Krys::Ranges::size(intermediateResult.Output);
+    const std::size_t pivotSize = ::std::ranges::size(pivot);
+    std::size_t intermediateWritten = pivotSize - ::std::ranges::size(intermediateResult.Output);
     std::size_t intermediateStart = 0;
     std::size_t errorCount = intermediateResult.ErrorCount;
     for (;;)
@@ -122,7 +122,7 @@ namespace Krys::Text
       ::Krys::Ranges::subrange<decltype(::std::ranges::cbegin(pivot))> workingIntermediate(
         ::std::ranges::cbegin(pivot) + intermediateStart,
         ::std::ranges::cbegin(pivot) + intermediateWritten);
-      std::size_t intermediateSize = Krys::Ranges::size(workingIntermediate);
+      std::size_t intermediateSize = ::std::ranges::size(workingIntermediate);
       auto endResult = std::forward<TToEncoding>(toEncoding)
                          .EncodeOne(std::move(workingIntermediate), std::move(workingOutput),
                                     toIntermediateHandler, toState);
@@ -144,7 +144,7 @@ namespace Krys::Text
             toIntermediateHandler.CodePointsProgress(), toIntermediateHandler.CodeUnitsProgress());
         }
       }
-      if (::Krys::Ranges::empty(endResult.Input))
+      if (::std::ranges::empty(endResult.Input))
       {
         if constexpr (IsFromProgressHandler && IsToProgressHandler)
         {
@@ -161,7 +161,7 @@ namespace Krys::Text
                          intermediateResult.ErrorCount);
         }
       }
-      intermediateStart = intermediateSize - ::Krys::Ranges::size(endResult.Input);
+      intermediateStart = intermediateSize - ::std::ranges::size(endResult.Input);
       workingOutput = std::move(endResult.Output);
     }
   }
@@ -393,10 +393,10 @@ namespace Krys::Text::detail_transcode
     TOutputContainer output {};
     if constexpr (::Krys::Ranges::HasSizeADL<TInput>)
     {
-      using TSize = decltype(::Krys::Ranges::size(input));
+      using TSize = decltype(::std::ranges::size(input));
       if constexpr (::Krys::Ranges::has_reserve_with_size<TOutputContainer, TSize>)
       {
-        output.reserve(::Krys::Ranges::size(input));
+        output.reserve(::std::ranges::size(input));
       }
     }
 

@@ -69,7 +69,7 @@ namespace Krys::Text
   codeUnitCount += result.Count;                                                                             \
   errorCount += result.ErrorCount;                                                                           \
   workingInput = std::move(result.Input);                                                                    \
-  if (::Krys::Ranges::empty(workingInput))                                                                   \
+  if (::std::ranges::empty(workingInput))                                                                   \
   {                                                                                                          \
     if (!::Krys::Text::IsStateComplete(fromEncoding, result.FromState))                                      \
     {                                                                                                        \
@@ -121,7 +121,7 @@ namespace Krys::Text
         codeUnitCount += written;
         errorCount += result.ErrorCount;
         workingInput = std::move(result.Input);
-        if (::Krys::Ranges::empty(workingInput))
+        if (::std::ranges::empty(workingInput))
         {
           if (!::Krys::Text::IsStateComplete(fromEncoding, fromState))
           {

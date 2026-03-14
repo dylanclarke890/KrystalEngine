@@ -9,9 +9,6 @@
 
 namespace Krys::Ranges
 {
-  template <typename TIterator>
-  using iterator_reference_t = std::iter_reference_t<TIterator>;
-
   namespace Impl
   {
     template <typename TIterator, typename = void>
@@ -158,27 +155,10 @@ namespace Krys::Ranges
     };
 
     template <typename TIterator, typename = void>
-    struct IteratorPointerOrFallback
-    {
-    private:
-      using TReference = iterator_reference_t<remove_ref_t<TIterator>>;
-
-    public:
-      using type = conditional_t<Reference<TReference>, add_pointer_t<remove_ref_t<TReference>>, void>;
-    };
-
-    template <typename TIterator>
-    struct IteratorPointerOrFallback<TIterator,
-                                     void_t<typename std::iterator_traits<remove_ref_t<TIterator>>::pointer>>
-    {
-      using type = typename std::iterator_traits<remove_ref_t<TIterator>>::pointer;
-    };
-
-    template <typename TIterator, typename = void>
     struct IteratorElementTypeOrFallback
     {
     private:
-      using TReference = iterator_reference_t<remove_ref_t<TIterator>>;
+      using TReference = std::iter_reference_t<remove_ref_t<TIterator>>;
 
     public:
       using type = conditional_t<Reference<TReference>, remove_ref_t<TReference>, void>;
@@ -240,37 +220,20 @@ namespace Krys::Ranges
   template <typename TIterator>
   using iterator_size_type_t = make_signed_t<iterator_difference_type_t<remove_ref_t<TIterator>>>;
 
-  inline constexpr auto &size = std::ranges::size;
-  inline constexpr auto &data = std::ranges::data;
-  inline constexpr auto &empty = std::ranges::empty;
-  inline constexpr auto &swap = std::ranges::swap;
-  inline constexpr auto &iter_swap = std::ranges::iter_swap;
-  inline constexpr auto &iter_move = std::ranges::iter_move;
-  inline constexpr auto &rbegin = std::ranges::rbegin;
-  inline constexpr auto &crbegin = std::ranges::crbegin;
-  inline constexpr auto &crend = std::ranges::crend;
-  inline constexpr auto &rend = std::ranges::rend;
+  template <typename TRange>
+  concept HasSizeADL = requires { ::std::ranges::size(std::declval<add_lvalue_ref_t<TRange>>()); };
 
   template <typename TRange>
-  concept HasSizeADL = requires { size(std::declval<add_lvalue_ref_t<TRange>>()); };
+  concept HasEmptyADL = requires { ::std::ranges::empty(std::declval<add_lvalue_ref_t<TRange>>()); };
 
   template <typename TRange>
-  concept HasEmptyADL = requires { empty(std::declval<add_lvalue_ref_t<TRange>>()); };
+  concept HasBeginADL = requires { ::std::ranges::begin(std::declval<TRange>()); };
 
   template <typename TRange>
-  concept HasBeginADL = requires { begin(std::declval<TRange>()); };
-
-  template <typename TRange>
-  concept HasEndADL = requires { end(std::declval<TRange>()); };
-
-  template <typename T>
-  concept IsRange = HasBeginADL<T> && HasEndADL<T>;
+  concept HasEndADL = requires { ::std::ranges::end(std::declval<TRange>()); };
 
   template <typename TIterator>
-  using iterator_rvalue_reference_t = decltype(::Krys::Ranges::iter_move(std::declval<TIterator &>()));
-
-  template <typename TRange>
-  using range_iterator_t = std::ranges::iterator_t<TRange>;
+  using iterator_rvalue_reference_t = decltype(::std::ranges::iter_move(std::declval<TIterator &>()));
 
   template <typename TRange>
   using range_sentinel_t = std::ranges::sentinel_t<TRange>;
@@ -297,7 +260,7 @@ namespace Krys::Ranges
   using iterator_concept_t = Krys::Ranges::Impl::iterator_concept_or_fallback_t<TIterator>;
 
   template <typename TRange>
-  using range_element_type_t = iterator_element_type_t<range_iterator_t<TRange>>;
+  using range_element_type_t = iterator_element_type_t<::std::ranges::iterator_t<TRange>>;
 
   template <typename TRange>
   using range_const_iterator_t =
@@ -448,35 +411,6 @@ namespace Krys::Ranges
 
   using ViewBase = std::ranges::view_base;
 
-  inline constexpr auto &ssize = std::ranges::ssize;
-  inline constexpr auto &cdata = std::ranges::cdata;
   inline constexpr ::Krys::Ranges::detail::adl::iter_advance_fn iter_advance {};
   inline constexpr ::Krys::Ranges::detail::adl::iter_recede_fn iter_recede {};
-
-  /// @brief A trait specialized by downstream classes to determine whether or not the type is a view.
-  /// @tparam TRange The range type that may or may not be a view.
-  template <typename TRange>
-  inline constexpr bool enable_view = std::ranges::enable_view<TRange>;
-
-  /// @brief A trait specialized by downstream classes to determine whether or not the type is a borrowed
-  /// range.
-  /// @tparam TRange The range type that may or may not be a borrowed range.
-  template <typename TRange>
-  inline constexpr bool enable_borrowed_range = std::ranges::enable_borrowed_range<TRange>;
-
-  /// @brief Checks whether or not the provided type is a view. This means that `enable_view` has been
-  /// turned on, and it meets a few other criteria.
-  /// @tparam T The type to check if it is a view or not.
-  template <typename T>
-  concept IsView =
-    enable_view<T> && IsRange<T>
-    && ((MoveConstructible<T> && MoveAssignable<T>) || (IsRange<T> && !IsConst<T> && LValueRef<T>));
-
-  /// @brief Whether or not a given type is a borrowed range or not. Used as a proxy over the standard's
-  /// borrowed_range, if it exists.
-  /// @tparam TRange The range type that may or may not be a borrowed range.
-  /// @remarks This is placed in the low-level library because it has to be used in multiple places,
-  /// including the std::span shim if necessary.
-  template <typename TRange>
-  concept BorrowedRange = std::ranges::borrowed_range<TRange>;
 }

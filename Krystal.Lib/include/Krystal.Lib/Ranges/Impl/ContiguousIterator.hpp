@@ -3,6 +3,7 @@
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Detection/Compiler.hpp"
+#include <ranges>
 
 namespace Krys::Ranges
 {

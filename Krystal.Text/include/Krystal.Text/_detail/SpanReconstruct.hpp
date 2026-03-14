@@ -44,7 +44,7 @@ namespace Krys::Text::detail
       }
       else
       {
-        if constexpr (Krys::Ranges::ContiguousRange<TCVInput> && Krys::Ranges::SizedRange<TCVInput>)
+        if constexpr (std::ranges::contiguous_range<TCVInput> && std::ranges::sized_range<TCVInput>)
         {
           using T = Krys::Ranges::range_element_type_t<TCVInput>;
           return Krys::Ranges::reconstruct(std::in_place_type<Span<T>>, std::forward<TInput>(input));
@@ -84,7 +84,7 @@ namespace Krys::Text::detail
       }
       else
       {
-        if constexpr (Krys::Ranges::ContiguousRange<TCVInput> && Krys::Ranges::SizedRange<TCVInput>)
+        if constexpr (std::ranges::contiguous_range<TCVInput> && std::ranges::sized_range<TCVInput>)
         {
           using T = Krys::Ranges::range_element_type_t<TCVInput>;
           return Krys::Ranges::const_reconstruct(std::in_place_type<Span<T>>, std::forward<TInput>(input));

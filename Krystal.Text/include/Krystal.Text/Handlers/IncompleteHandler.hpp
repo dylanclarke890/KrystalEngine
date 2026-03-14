@@ -104,19 +104,19 @@ namespace Krys::Text::Handlers
         // it's incomplete and we are okay with that
         if constexpr (IsSpecializationOf<TResult, DecodeResult>)
         {
-          this->_codeUnitsSize = ::Krys::Ranges::size(inputProgress);
+          this->_codeUnitsSize = ::std::ranges::size(inputProgress);
           ::Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(inputProgress), this->_codeUnitsSize,
                                             this->_codeUnits.data());
-          this->_codePointsSize = Krys::Ranges::size(outputProgress);
+          this->_codePointsSize = ::std::ranges::size(outputProgress);
           ::Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(outputProgress), this->_codePointsSize,
                                             this->_codePoints.data());
         }
         else
         {
-          this->_codeUnitsSize = ::Krys::Ranges::size(outputProgress);
+          this->_codeUnitsSize = ::std::ranges::size(outputProgress);
           ::Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(outputProgress), this->_codeUnitsSize,
                                             this->_codeUnits.data());
-          this->_codePointsSize = ::Krys::Ranges::size(inputProgress);
+          this->_codePointsSize = ::std::ranges::size(inputProgress);
           ::Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(inputProgress), this->_codePointsSize,
                                             this->_codePoints.data());
         }
@@ -145,19 +145,19 @@ namespace Krys::Text::Handlers
         // it's incomplete and we are okay with that
         if constexpr (IsSpecializationOf<TResult, DecodeResult>)
         {
-          this->_codeUnitsSize = ::Krys::Ranges::size(inputProgress);
+          this->_codeUnitsSize = ::std::ranges::size(inputProgress);
           ::Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(inputProgress), this->_codeUnitsSize,
                                             this->_codeUnits.data());
-          this->_codePointsSize = ::Krys::Ranges::size(outputProgress);
+          this->_codePointsSize = ::std::ranges::size(outputProgress);
           ::Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(outputProgress), this->_codePointsSize,
                                             this->_codePoints.data());
         }
         else
         {
-          this->_codeUnitsSize = ::Krys::Ranges::size(outputProgress);
+          this->_codeUnitsSize = ::std::ranges::size(outputProgress);
           ::Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(outputProgress), this->_codeUnitsSize,
                                             this->_codeUnits.data());
-          this->_codePointsSize = ::Krys::Ranges::size(inputProgress);
+          this->_codePointsSize = ::std::ranges::size(inputProgress);
           ::Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(inputProgress), this->_codePointsSize,
                                             this->_codePoints.data());
         }
@@ -186,19 +186,19 @@ namespace Krys::Text::Handlers
         // it's incomplete and we are okay with that
         if constexpr (IsSpecializationOf<TResult, DecodeResult>)
         {
-          this->_codeUnitsSize = ::Krys::Ranges::size(inputProgress);
+          this->_codeUnitsSize = ::std::ranges::size(inputProgress);
           ::Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(inputProgress), this->_codeUnitsSize,
                                             this->_codeUnits.data());
-          this->_codePointsSize = ::Krys::Ranges::size(outputProgress);
+          this->_codePointsSize = ::std::ranges::size(outputProgress);
           ::Krys::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(outputProgress), this->_codePointsSize,
                                             this->_codePoints.data());
         }
         else
         {
-          this->_codeUnitsSize = ::Krys::Ranges::size(outputProgress);
+          this->_codeUnitsSize = ::std::ranges::size(outputProgress);
           ::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(outputProgress), this->_codeUnitsSize,
                                       this->_codeUnits.data());
-          this->_codePointsSize = ::Krys::Ranges::size(inputProgress);
+          this->_codePointsSize = ::std::ranges::size(inputProgress);
           ::Ranges::Impl::CopyNUnsafe(::std::ranges::cbegin(inputProgress), this->_codePointsSize,
                                       this->_codePoints.data());
         }

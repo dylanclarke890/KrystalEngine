@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Concepts.hpp"
-#include "Krystal.Lib/Ranges/Range.hpp"
-#include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Lib/Pointers/ReferenceWrapper.hpp"
+#include "Krystal.Lib/Ranges/Iterator.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Text/Decode/DecodeResult.hpp"
 #include "Krystal.Text/Encode/EncodeResult.hpp"
 #include <type_traits>
@@ -78,8 +78,7 @@ namespace Krys::Text::Handlers
       using TProgressWord = ::Krys::Ranges::range_value_type_t<TOutputProgress>;
       TByte *byteProgressData =
         reinterpret_cast<TByte *>(const_cast<TProgressPointer>(outputProgress.data()));
-      auto byteProgressSize =
-        (::Krys::Ranges::size(outputProgress) * sizeof(TProgressWord)) / (sizeof(TByte));
+      auto byteProgressSize = (::std::ranges::size(outputProgress) * sizeof(TProgressWord)) / (sizeof(TByte));
       Span<TByte> byteProgress(byteProgressData, byteProgressSize);
       return this->_handler.get()(encoding, std::move(result), inputProgress, byteProgress);
     }
@@ -95,7 +94,7 @@ namespace Krys::Text::Handlers
       using TProgressPointer = ::Krys::Ranges::range_pointer_t<TInputProgress>;
       using TProgressWord = ::Krys::Ranges::range_value_type_t<TInputProgress>;
       TByte *byteProgressData = reinterpret_cast<TByte *>(const_cast<TProgressPointer>(inputProgress.data()));
-      auto byteProgressSize = (::Krys::Ranges::size(inputProgress) * sizeof(TProgressWord)) / (sizeof(TByte));
+      auto byteProgressSize = (::std::ranges::size(inputProgress) * sizeof(TProgressWord)) / (sizeof(TByte));
       Span<TByte> byteProgress(byteProgressData, byteProgressSize);
       return this->_handler.get()(encoding, std::move(result), byteProgress, outputProgress);
     }

@@ -3,7 +3,6 @@
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
-#include "Krystal.Lib/Ranges/Range.hpp"
 #include "Krystal.Lib/Ranges/Reconstruct.hpp"
 #include "Krystal.Text/CodePoint.hpp"
 #include "Krystal.Text/CodeUnit.hpp"
@@ -36,7 +35,7 @@ namespace Krys::Text::Handlers
         return std::forward<TResult>(result);
       }
 
-      if (Krys::Ranges::empty(replacement)) // empty range, everything is okay
+      if (::std::ranges::empty(replacement)) // empty range, everything is okay
       {
         result.ErrorCode = EncodingError::OK;
         return std::forward<TResult>(result);

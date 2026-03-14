@@ -8,10 +8,12 @@
 #include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Tree/TreeQueries.hpp"
+#include <ranges>
 
 namespace Krys::HTML
 {
-  bool EventDispatcher::DispatchToTarget(Event &event, EventTarget *target, bool legacyTargetOverrideFlag,
+  bool EventDispatcher::DispatchToTarget(Event &event, RawPtr<EventTarget> target,
+                                         bool legacyTargetOverrideFlag,
                                          bool legacyOutputDidListenersThrowFlag) noexcept
   {
     assert(target);

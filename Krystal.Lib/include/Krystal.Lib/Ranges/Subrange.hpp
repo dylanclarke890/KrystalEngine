@@ -4,7 +4,6 @@
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Ranges/ADL.hpp"
 #include "Krystal.Lib/Ranges/Iterator.hpp"
-#include "Krystal.Lib/Ranges/Range.hpp"
 #include <iterator>
 #include <ranges>
 #include <utility>
@@ -15,7 +14,7 @@ namespace Krys::Ranges
   using ::std::ranges::subrange_kind;
 
   template <typename TRange>
-  using subrange_for_t = subrange<range_iterator_t<TRange>, range_sentinel_t<TRange>>;
+  using subrange_for_t = subrange<::std::ranges::iterator_t<TRange>, range_sentinel_t<TRange>>;
 
   template <typename TRange>
   using csubrange_for_t = subrange<range_const_iterator_t<TRange>, range_const_sentinel_t<TRange>>;
@@ -38,8 +37,4 @@ namespace Krys::Ranges
     return subrange<remove_cvref_t<TIterator>, remove_cvref_t<TSentinel>>(::std::forward<TIterator>(it),
                                                                           ::std::forward<TSentinel>(sen));
   }
-
-  /// @brief Mark subranges as appropriately borrowed ranges.
-  template <typename TIterator, typename TSentinel, ::std::ranges::subrange_kind TKind>
-  inline constexpr bool enable_borrowed_range<subrange<TIterator, TSentinel, TKind>> = true;
 }

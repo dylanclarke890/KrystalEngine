@@ -44,9 +44,6 @@ namespace Krys::Ranges
   }
 
   template <typename TIterator>
-  using iterator_pointer_t = typename Impl::IteratorPointerOrFallback<remove_ref_t<TIterator>>::type;
-
-  template <typename TIterator>
   concept InputIterator = IsIteratorConceptOrBetter<std::input_iterator_tag, TIterator>;
 
   template <typename TIterator>
@@ -69,7 +66,7 @@ namespace Krys::Ranges
     Impl::IsContiguousIterator<TIterator>
     || (
       IsIteratorConceptOrBetter<std::contiguous_iterator_tag, TIterator> &&
-      ToAddressable<TIterator> && LValueRef<iterator_reference_t<remove_ref_t<TIterator>>>);
+      ToAddressable<TIterator> && LValueRef<std::iter_reference_t<remove_ref_t<TIterator>>>);
 
   template <typename TIterator>
   concept InputIteratorExact = SameType<std::input_iterator_tag, iterator_concept_t<TIterator>>;

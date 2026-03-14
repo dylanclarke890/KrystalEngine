@@ -5,7 +5,7 @@
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Pointers/ReferenceWrapper.hpp"
 #include "Krystal.Lib/Ranges/Algorithm.hpp"
-#include "Krystal.Lib/Ranges/Range.hpp"
+#include "Krystal.Lib/Ranges/Concepts.hpp"
 #include "Krystal.Lib/Ranges/Reconstruct.hpp"
 #include "Krystal.Lib/Utils/EBCO.hpp"
 #include "Krystal.Lib/Utils/ipow.hpp"
@@ -75,7 +75,7 @@ namespace Krys::Ranges
   }
 
   ///@brief The sentinel type to be paired with a ztd::ranges::WordIterator
-  using WordSentinel = Krys::Ranges::DefaultSentinel;
+  using WordSentinel = std::default_sentinel_t;
 
   ///@brief An iterator that composes words out of the bits of a provided underlying stored range.
   template <typename TWord, typename TRange, Endian::Type TEndian>
@@ -85,9 +85,9 @@ namespace Krys::Ranges
   {
   private:
     using TURange = range_reconstruct_t<remove_cvref_t<TRange>>;
-    using TBaseIterator = Krys::Ranges::range_iterator_t<TURange>;
-    using TBaseSentinel = range_sentinel_t<TURange>;
-    using TBaseReference = iterator_reference_t<TBaseIterator>;
+    using TBaseIterator = ::std::ranges::iterator_t<TURange>;
+    using TBaseSentinel = std::ranges::sentinel_t<TURange>;
+    using TBaseReference = std::iter_reference_t<TBaseIterator>;
     using TMaybeVoidBaseValueType = iterator_value_type_t<TBaseIterator>;
     using TBaseValueType = conditional_t<Void<TMaybeVoidBaseValueType>                       // cf
                                            || (!Number<TMaybeVoidBaseValueType>              // cf
@@ -205,7 +205,7 @@ namespace Krys::Ranges
         }
         TBaseValueType readStorage[BaseValuesPerWord] {};
         TBaseValueType *readStorageFirst = readStorage + 0;
-        std::size_t readStorageSize = Krys::Ranges::size(readStorage);
+        std::size_t readStorageSize = ::std::ranges::size(readStorage);
         TUnsignedValue val {};
         if constexpr (IsInputOrOutput)
         {
@@ -641,7 +641,7 @@ namespace Krys::Ranges
     {
       if constexpr (Krys::Ranges::HasEmptyADL<range_type>)
       {
-        return Krys::Ranges::empty(this->TBaseStorage::GetValue());
+        return ::std::ranges::empty(this->TBaseStorage::GetValue());
       }
       else
       {

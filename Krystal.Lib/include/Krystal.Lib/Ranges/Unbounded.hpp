@@ -1,8 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Ranges/Range.hpp"
+#include "Krystal.Lib/Ranges/Concepts.hpp"
 #include "Krystal.Lib/Ranges/Reconstruct.hpp"
-#include "Krystal.Lib/Ranges/UnreachableSentinel.hpp"
 #include <iterator>
 #include <utility>
 
@@ -24,7 +23,7 @@ namespace Krys::Ranges
     using const_iterator = iterator;
 
     /// @brief The sentinel type, an infinity type that compares equal to nothing.
-    using sentinel = UnreachableSentinel;
+    using sentinel = std::unreachable_sentinel_t;
 
     /// @brief The const sentinel type.
     /// @remarks It's just the sentinal type.
@@ -38,7 +37,7 @@ namespace Krys::Ranges
     using const_pointer = pointer;
 
     /// @brief The reference type for this range.
-    using reference = iterator_reference_t<iterator>;
+    using reference = std::iter_reference_t<iterator>;
 
     /// @brief The const reference type for this range.
     /// @remarks It's just the reference type.

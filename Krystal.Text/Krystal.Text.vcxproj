@@ -265,6 +265,7 @@
     <ClInclude Include="include\Krystal.Text\Encodings\Windows874.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\WindowsCodePage.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\EncodingScheme.hpp" />
+    <ClInclude Include="include\Krystal.Text\InlineContainers\detail\WrappedPointer.hpp" />
     <ClInclude Include="include\Krystal.Text\StringConversion.hpp" />
     <ClInclude Include="include\Krystal.Text\_detail\ConstantEncodingTraits.hpp" />
     <ClInclude Include="include\Krystal.Text\Encodings\Impl\GBK_or_GB18030.hpp" />

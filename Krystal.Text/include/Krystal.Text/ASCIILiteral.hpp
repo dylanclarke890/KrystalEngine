@@ -6,6 +6,7 @@
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Text/ASCII.hpp"
+#include <algorithm>
 #include <compare>
 #include <ranges>
 #include <xhash>

@@ -85,7 +85,7 @@ namespace Krys::Text
                        std::move(transcodeResult.Pivot), transcodeResult.PivotErrorCode,
                        transcodeResult.PivotErrorCount);
       }
-      if (::Krys::Ranges::empty(workingInput))
+      if (::std::ranges::empty(workingInput))
       {
         if (!::Krys::Text::IsStateComplete(fromEncoding, fromState))
         {
@@ -361,7 +361,7 @@ namespace Krys::Text::detail_transcode
           // If this occured, we need to record the original pivot position, and then try to
           // re-serialize with enough space all over again to avoid issues.
           std::size_t pivotRemnantCount =
-            static_cast<std::size_t>(::Krys::Ranges::size(pivot) - ::Krys::Ranges::size(result.Pivot));
+            static_cast<std::size_t>(::std::ranges::size(pivot) - ::std::ranges::size(result.Pivot));
           auto pivotRemnant =
             ::Krys::Ranges::reconstruct(std::in_place_type<TPivot>, ::std::ranges::cbegin(pivot),
                                         ::std::ranges::cbegin(pivot) + pivotRemnantCount);
@@ -444,7 +444,7 @@ namespace Krys::Text::detail_transcode
         }
         continue;
       }
-      if (::Krys::Ranges::empty(result.Input) && ::Krys::Text::IsStateComplete(fromEncoding, fromState)
+      if (::std::ranges::empty(result.Input) && ::Krys::Text::IsStateComplete(fromEncoding, fromState)
           && ::Krys::Text::IsStateComplete(toEncoding, toState))
       {
         errorCount += result.ErrorCount;
@@ -467,10 +467,10 @@ namespace Krys::Text::detail_transcode
     TOutputContainer output {};
     if constexpr (::Krys::Ranges::HasSizeADL<TInput>)
     {
-      using TSize = decltype(::Krys::Ranges::size(input));
+      using TSize = decltype(::std::ranges::size(input));
       if constexpr (::Krys::Ranges::has_reserve_with_size<TOutputContainer, TSize>)
       {
-        output.reserve(Krys::Ranges::size(input));
+        output.reserve(::std::ranges::size(input));
       }
     }
 

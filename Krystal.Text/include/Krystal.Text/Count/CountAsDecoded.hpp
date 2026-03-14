@@ -47,7 +47,7 @@ namespace Krys::Text
         }
         codePointCount += result.Count;
         workingInput = std::move(result.Input);
-        if (::Krys::Ranges::empty(workingInput))
+        if (::std::ranges::empty(workingInput))
         {
           if (!::Krys::Text::IsStateComplete(encoding, state))
           {
@@ -80,7 +80,7 @@ namespace Krys::Text
         codePointCount += usedSize;
         workingInput = std::move(result.Input);
 
-        if (::Krys::Ranges::empty(workingInput))
+        if (::std::ranges::empty(workingInput))
         {
           if (!::Krys::Text::IsStateComplete(encoding, state))
           {

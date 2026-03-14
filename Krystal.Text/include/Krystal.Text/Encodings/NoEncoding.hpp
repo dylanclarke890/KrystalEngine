@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Ranges/Range.hpp"
 #include "Krystal.Text/CodePoint.hpp"
 #include "Krystal.Text/CodeUnit.hpp"
 #include "Krystal.Text/Concepts.hpp"

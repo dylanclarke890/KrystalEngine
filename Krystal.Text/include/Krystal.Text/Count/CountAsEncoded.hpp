@@ -57,7 +57,7 @@ namespace Krys::Text
           continue;
         }
 
-        if (::Krys::Ranges::empty(workingInput))
+        if (::std::ranges::empty(workingInput))
         {
           break;
         }
@@ -86,7 +86,7 @@ namespace Krys::Text
         codeUnitCount += usedSize;
         workingInput = std::move(result.Input);
 
-        if (::Krys::Ranges::empty(workingInput))
+        if (::std::ranges::empty(workingInput))
         {
           if (!::Krys::Text::IsStateComplete(encoding, state))
           {

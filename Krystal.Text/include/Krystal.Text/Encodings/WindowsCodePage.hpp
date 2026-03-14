@@ -207,10 +207,10 @@ namespace Krys::Text
       auto outLast = ::std::ranges::end(output);
 
       WCHAR intermediateData[17] = {};
-      const size_t initialIntermediateDataSize = ::Krys::Ranges::size(intermediateData);
+      const size_t initialIntermediateDataSize = ::std::ranges::size(intermediateData);
       CHAR inputReadData[17] = {*inIt};
       size_t inputReadSize = 1;
-      const size_t initialInputReadDataSize = ::Krys::Ranges::size(inputReadData);
+      const size_t initialInputReadDataSize = ::std::ranges::size(inputReadData);
       std::uint32_t codePageId = this->CodePage();
       auto Flags = ::Krys::Text::Windows::MultiByteToWidecharFlags(codePageId);
       size_t intermediateInputSize = 0;
@@ -290,7 +290,7 @@ namespace Krys::Text
               Span<code_unit>(), intermediateHandler.CodePointsProgress());
           }
         }
-        if (!::Krys::Ranges::empty(intermediateResult.Input))
+        if (!::std::ranges::empty(intermediateResult.Input))
         {
           intermediateInputBuffer = Span<const WCHAR>(std::to_address(intermediateResult.Input.cbegin()),
                                                       std::to_address(intermediateResult.Input.cend()));

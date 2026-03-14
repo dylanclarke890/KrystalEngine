@@ -4,7 +4,6 @@
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Ranges/ADL.hpp"
-#include "Krystal.Lib/Ranges/Range.hpp"
 #include "Krystal.Lib/Ranges/Subrange.hpp"
 #include "Krystal.Lib/String/EmptyString.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
@@ -22,7 +21,7 @@ namespace Krys::Ranges
     template <typename T, typename TIterator, typename TSentinel>
     constexpr bool IsSpanReconstructible() noexcept
     {
-      using TIteratorElement = remove_ref_t<iterator_reference_t<TIterator>>;
+      using TIteratorElement = remove_ref_t<std::iter_reference_t<TIterator>>;
       constexpr const bool check = NonDerivedCompatiblePointer<TIteratorElement, T> // cf
                                    && IsContiguousIterator<TIterator>               // cf
                                    && ((IsConst<TIteratorElement>) ? IsConst<T> : true);
@@ -195,7 +194,7 @@ namespace Krys::Ranges
     {
       if constexpr (IsMutable)
       {
-        return IsRangeIteratorReconstructNoexcept<TInPlace, TRange, range_iterator_t<TRange>,
+        return IsRangeIteratorReconstructNoexcept<TInPlace, TRange, ::std::ranges::iterator_t<TRange>,
                                                   range_sentinel_t<TRange>>();
       }
       else
@@ -234,7 +233,7 @@ namespace Krys::Ranges
             if constexpr (IsMutable)
             {
               return IsReconstructible<IsMutable, TInPlaceOrIterator, TRangeOrSentinel,
-                                       range_iterator_t<TRangeOrSentinel>,
+                                       ::std::ranges::iterator_t<TRangeOrSentinel>,
                                        range_sentinel_t<TRangeOrSentinel>>();
             }
             else
@@ -547,7 +546,7 @@ namespace Krys::Ranges
     RangeReconstructible<TTag, TRange>
     && NoThrowReconstructible<std::in_place_type_t<unwrap_remove_cvref_t<TTag>>, TRange>;
 
-  template <typename TRange, typename TIterator = range_iterator_t<unwrap_remove_ref_t<TRange>>,
+  template <typename TRange, typename TIterator = ::std::ranges::iterator_t<unwrap_remove_ref_t<TRange>>,
             typename TSentinel = range_sentinel_t<unwrap_remove_ref_t<TRange>>>
   using reconstruct_t = decltype(Krys::Ranges::reconstruct(
     std::in_place_type<unwrap_remove_cvref_t<TRange>>, std::declval<TIterator>(), std::declval<TSentinel>()));
@@ -595,7 +594,7 @@ namespace Krys::Ranges
     RangeConstReconstructible<TTag, TRange>
     && NoThrowConstReconstructible<std::in_place_type_t<unwrap_remove_cvref_t<TTag>>, TRange>;
 
-  template <typename TRange, typename TIterator = range_iterator_t<unwrap_remove_ref_t<TRange>>,
+  template <typename TRange, typename TIterator = ::std::ranges::iterator_t<unwrap_remove_ref_t<TRange>>,
             typename TSentinel = range_sentinel_t<unwrap_remove_ref_t<TRange>>>
   using const_reconstruct_t = decltype(Krys::Ranges::const_reconstruct(
     std::in_place_type<unwrap_remove_cvref_t<TRange>>, std::declval<TIterator>(), std::declval<TSentinel>()));
