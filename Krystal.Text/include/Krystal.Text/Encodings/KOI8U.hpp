@@ -2,18 +2,17 @@
 
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Text/ASCIILiteral.hpp"
-#include "Krystal.Text/Encodings/EncodingTables/KOI8U.tables.hpp"
-#include "Krystal.Text/Encodings/Impl/SingleASCIIByteHighBitLookupEncoding.hpp"
+#include "Krystal.Text/Encodings/detail/SingleASCIIByteHighBitLookupEncoding.hpp"
+#include "Krystal.Text/Encodings/EncodingTables/KOI8U.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys::Text
 {
   /// @brief The encoding that matches the KOI-8 (Ukranian) encoding specification.
   template <typename TCodeUnit = char, typename TCodePoint = UnicodeCodePoint>
-  class basic_koi8_u
-      : public ::Krys::Text::Impl::SingleASCIIByteHighBitLookupEncoding<
-          basic_koi8_u<TCodeUnit, TCodePoint>, &::Krys::Text::EncodingTable::koi8_u_index_to_code_point,
-          &::Krys::Text::EncodingTable::koi8_u_code_point_to_index, TCodeUnit, TCodePoint>
+  class basic_koi8_u : public SingleASCIIByteHighBitLookupEncoding<
+                         basic_koi8_u<TCodeUnit, TCodePoint>, &EncodingTable::KOI8UIndexToCodePoint,
+                         &EncodingTable::KOI8UCodePointToIndex, TCodeUnit, TCodePoint>
   {
   public:
     constexpr static inline ::Krys::Text::ASCIILiteral Name = {"KOI8-U"_s};

@@ -2,11 +2,9 @@
 
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
-#include "Krystal.Lib/Ranges/ADL.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Utils/LosslessStaticCast.hpp"
-#include "Krystal.Lib/Utils/Size.hpp"
 #include "Krystal.Text/ASCIILiteral.hpp"
 #include "Krystal.Text/Concepts.hpp"
 #include "Krystal.Text/Decode/DecodeResult.hpp"
@@ -94,20 +92,20 @@ namespace Krys::Text::Impl
                                          const TInputProgress &inputProgress,
                                          const TOutputProgress &outputProgress) noexcept
     {
-      auto it = ::std::ranges::cbegin(result.Input);
-      auto last = ::std::ranges::cend(result.Input);
+      auto it = std::ranges::cbegin(result.Input);
+      auto end = std::ranges::cend(result.Input);
 
       // there may be more values to skip beyond what was read.
-      if (it != last)
+      if (it != end)
       {
         // if there is already some items in the input progress (things irreversibly read), then
         // we are not obligated to do "at least" one skip; barrier it behind an empty check for
         // progress.
-        if (::std::ranges::empty(inputProgress) && ::std::ranges::empty(outputProgress))
+        if (std::ranges::empty(inputProgress) && std::ranges::empty(outputProgress))
         {
           ++it;
         }
-        for (; it != last; ++it)
+        for (; it != end; ++it)
         {
           const bool foundGoodUTF8Stop =
             (UseOverlongNullOnly
@@ -121,7 +119,7 @@ namespace Krys::Text::Impl
         }
       }
       using TSubInput = ::Krys::Ranges::csubrange_for_t<TInput>;
-      return DecodeResult<TSubInput, TOutput, TState>(TSubInput(std::move(it), std::move(last)),
+      return DecodeResult<TSubInput, TOutput, TState>(TSubInput(std::move(it), std::move(end)),
                                                       std::move(result.Output), result.State,
                                                       result.ErrorCode, result.ErrorCount);
     }
@@ -151,8 +149,8 @@ namespace Krys::Text::Impl
       using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = ::Krys::Text::EncodeResult<TSubInput, TSubOutput, encode_state>;
 
-      auto inIt = ::std::ranges::cbegin(input);
-      auto inLast = ::std::ranges::cend(input);
+      auto inIt = std::ranges::cbegin(input);
+      auto inLast = std::ranges::cend(input);
 
       if (inIt == inLast)
       {
@@ -161,8 +159,8 @@ namespace Krys::Text::Impl
                        EncodingError::OK);
       }
 
-      auto outIt = ::std::ranges::begin(output);
-      KRYS_MAYBE_UNUSED auto outLast = ::std::ranges::end(output);
+      auto outIt = std::ranges::begin(output);
+      KRYS_MAYBE_UNUSED auto outLast = std::ranges::end(output);
 
       const char32 point32 = static_cast<char32>(*inIt);
 
@@ -200,7 +198,7 @@ namespace Krys::Text::Impl
           constexpr code_unit payload[] = {static_cast<code_unit>(0b11'000'000u),
                                            static_cast<code_unit>(0b10'000'000u)};
           constexpr std::size_t payloadSize = 2uz;
-          ::Krys::Ranges::iter_advance(inIt);
+          std::ranges::advance(inIt);
           for (std::size_t i = 0; i < payloadSize; ++i)
           {
             if constexpr (CallErrorHandler)
@@ -217,7 +215,7 @@ namespace Krys::Text::Impl
               }
             }
             *outIt = static_cast<code_unit>(payload[i]);
-            ::Krys::Ranges::iter_advance(outIt);
+            std::ranges::advance(outIt);
           }
           return TResult(TSubInput(std::move(inIt), std::move(inLast)),
                          TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);
@@ -257,8 +255,8 @@ namespace Krys::Text::Impl
           }
         }
         *outIt = static_cast<code_unit>(first);
-        ::Krys::Ranges::iter_advance(outIt);
-        ::Krys::Ranges::iter_advance(inIt);
+        outIt++;
+        inIt++;
         return TResult(TSubInput(std::move(inIt), std::move(inLast)),
                        TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);
       }
@@ -275,7 +273,7 @@ namespace Krys::Text::Impl
         currentShift -= 6;
       }
 
-      ::Krys::Ranges::iter_advance(inIt);
+      inIt++;
       for (std::size_t i = 0; i < length; ++i)
       {
         if constexpr (CallErrorHandler)
@@ -294,7 +292,7 @@ namespace Krys::Text::Impl
         }
 
         *outIt = values[i];
-        ::Krys::Ranges::iter_advance(outIt);
+        outIt++;
       }
       return TResult(TSubInput(std::move(inIt), std::move(inLast)),
                      TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);
@@ -308,8 +306,8 @@ namespace Krys::Text::Impl
       using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = ::Krys::Text::DecodeResult<TSubInput, TSubOutput, decode_state>;
 
-      auto inIt = ::std::ranges::cbegin(input);
-      auto inLast = ::std::ranges::cend(input);
+      auto inIt = std::ranges::cbegin(input);
+      auto inLast = std::ranges::cend(input);
 
       if (inIt == inLast)
       {
@@ -318,8 +316,8 @@ namespace Krys::Text::Impl
                        EncodingError::OK);
       }
 
-      auto outIt = ::std::ranges::begin(output);
-      KRYS_MAYBE_UNUSED auto outLast = ::std::ranges::end(output);
+      auto outIt = std::ranges::begin(output);
+      KRYS_MAYBE_UNUSED auto outLast = std::ranges::end(output);
 
       const uchar8 unit0 = static_cast<uchar8>(*inIt);
       code_unit units[MaxCodeUnits] {static_cast<code_unit>(unit0)};
@@ -355,8 +353,8 @@ namespace Krys::Text::Impl
           }
         }
         *outIt = static_cast<code_point>(unit0);
-        ::Krys::Ranges::iter_advance(outIt);
-        ::Krys::Ranges::iter_advance(inIt);
+        outIt++;
+        inIt++;
         return TResult(TSubInput(std::move(inIt), std::move(inLast)),
                        TSubOutput(std::move(outIt), std::move(outLast)), s);
       }
@@ -394,7 +392,7 @@ namespace Krys::Text::Impl
         }
       }
 
-      ::Krys::Ranges::iter_advance(inIt);
+      inIt++;
 
       for (std::size_t i = 1; i < length; ++i)
       {
@@ -420,7 +418,7 @@ namespace Krys::Text::Impl
                     TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::InvalidSequence),
             Span<code_unit>(units, i + 1), Span<code_point>());
         }
-        ::Krys::Ranges::iter_advance(inIt);
+        inIt++;
       }
 
       code_point decoded {};
@@ -533,7 +531,7 @@ namespace Krys::Text::Impl
       }
       // then everything is fine
       *outIt = decoded;
-      ::Krys::Ranges::iter_advance(outIt);
+      outIt++;
 
       return TResult(TSubInput(std::move(inIt), std::move(inLast)),
                      TSubOutput(std::move(outIt), std::move(outLast)), s);

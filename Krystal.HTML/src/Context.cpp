@@ -1,7 +1,6 @@
 ﻿#include "Krystal.HTML/Context.hpp"
 #include "Krystal.Text/Codecs/BasicCodec.hpp"
 #include "Krystal.Text/Encodings/Big5-HKSCS.hpp"
-#include "Krystal.Text/Encodings/EncodingScheme.hpp"
 #include "Krystal.Text/Encodings/EUC-KR-UHC.hpp"
 #include "Krystal.Text/Encodings/GB18030.hpp"
 #include "Krystal.Text/Encodings/GBK.hpp"
@@ -70,8 +69,6 @@ namespace Krys::HTML
     context.DecoderRegistry.Register<Decoder<basic_windows_1257>>();
     context.DecoderRegistry.Register<Decoder<basic_windows_1258>>();
     context.DecoderRegistry.Register<Decoder<basic_utf8>>();
-    context.DecoderRegistry.Register<SchemeDecoder<utf16_le_t>>();
-    context.DecoderRegistry.Register<SchemeDecoder<utf16_be_t>>();
 
     return context;
   }

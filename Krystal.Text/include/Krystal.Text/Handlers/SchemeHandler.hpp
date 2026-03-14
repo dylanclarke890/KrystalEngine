@@ -2,7 +2,7 @@
 
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Pointers/ReferenceWrapper.hpp"
-#include "Krystal.Lib/Ranges/Iterator.hpp"
+#include "Krystal.Lib/Ranges/TypeTraits.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Text/Decode/DecodeResult.hpp"
 #include "Krystal.Text/Encode/EncodeResult.hpp"
@@ -10,6 +10,9 @@
 
 namespace Krys::Text::Handlers
 {
+  template <typename TRange>
+  using range_pointer_t = std::iterator_traits<remove_ref_t<std::ranges::iterator_t<TRange>>>::pointer;
+
   template <typename TByte, typename TUInputRange, typename TUOutputRange, typename TErrorHandler>
   class SchemeHandler
   {
@@ -20,7 +23,7 @@ namespace Krys::Text::Handlers
               typename TOutputProgress>
     constexpr static bool DecodeCallOperatorNoexcept() noexcept
     {
-      if constexpr (ConvertibleTo<::Krys::Ranges::range_value_type_t<TInputProgress>, TByte>)
+      if constexpr (ConvertibleTo<std::ranges::range_value_t<TInputProgress>, TByte>)
       {
         if constexpr (Callable<TErrorHandler &, const TEncoding &, DecodeResult<TInput, TOutput, TState>,
                                const TInputProgress &, const TOutputProgress &>)
@@ -45,7 +48,7 @@ namespace Krys::Text::Handlers
               typename TOutputProgress>
     constexpr static bool EncodeCallOperatorNoexcept() noexcept
     {
-      if constexpr (ConvertibleTo<::Krys::Ranges::range_value_type_t<TOutputProgress>, TByte>)
+      if constexpr (ConvertibleTo<std::ranges::range_value_t<TOutputProgress>, TByte>)
       {
         if constexpr (Callable<TErrorHandler &, const TEncoding &, EncodeResult<TInput, TOutput, TState>,
                                const TInputProgress &, const TOutputProgress &>)
@@ -74,11 +77,11 @@ namespace Krys::Text::Handlers
       noexcept(NoThrowInvocable<TErrorHandler &, const TEncoding &, EncodeResult<TInput, TOutput, TState>,
                                 const TInputProgress &, Span<TByte>>)
     {
-      using TProgressPointer = ::Krys::Ranges::range_pointer_t<TOutputProgress>;
-      using TProgressWord = ::Krys::Ranges::range_value_type_t<TOutputProgress>;
+      using TProgressPointer = range_pointer_t<TOutputProgress>;
+      using TProgressWord = std::ranges::range_value_t<TOutputProgress>;
       TByte *byteProgressData =
         reinterpret_cast<TByte *>(const_cast<TProgressPointer>(outputProgress.data()));
-      auto byteProgressSize = (::std::ranges::size(outputProgress) * sizeof(TProgressWord)) / (sizeof(TByte));
+      auto byteProgressSize = (std::ranges::size(outputProgress) * sizeof(TProgressWord)) / (sizeof(TByte));
       Span<TByte> byteProgress(byteProgressData, byteProgressSize);
       return this->_handler.get()(encoding, std::move(result), inputProgress, byteProgress);
     }
@@ -91,10 +94,10 @@ namespace Krys::Text::Handlers
       noexcept(NoThrowInvocable<TErrorHandler &, const TEncoding &, DecodeResult<TInput, TOutput, TState>,
                                 Span<TByte>, const TOutputProgress &>)
     {
-      using TProgressPointer = ::Krys::Ranges::range_pointer_t<TInputProgress>;
-      using TProgressWord = ::Krys::Ranges::range_value_type_t<TInputProgress>;
+      using TProgressPointer = range_pointer_t<TInputProgress>;
+      using TProgressWord = std::ranges::range_value_t<TInputProgress>;
       TByte *byteProgressData = reinterpret_cast<TByte *>(const_cast<TProgressPointer>(inputProgress.data()));
-      auto byteProgressSize = (::std::ranges::size(inputProgress) * sizeof(TProgressWord)) / (sizeof(TByte));
+      auto byteProgressSize = (std::ranges::size(inputProgress) * sizeof(TProgressWord)) / (sizeof(TByte));
       Span<TByte> byteProgress(byteProgressData, byteProgressSize);
       return this->_handler.get()(encoding, std::move(result), byteProgress, outputProgress);
     }
@@ -112,7 +115,7 @@ namespace Krys::Text::Handlers
       noexcept(
         DecodeCallOperatorNoexcept<TEncoding, TInput, TOutput, TState, TInputProgress, TOutputProgress>())
     {
-      if constexpr (ConvertibleTo<::Krys::Ranges::range_value_type_t<TInputProgress>, TByte>)
+      if constexpr (ConvertibleTo<std::ranges::range_value_t<TInputProgress>, TByte>)
       {
         if constexpr (Callable<TErrorHandler &, const TEncoding &, DecodeResult<TInput, TOutput, TState>,
                                const TInputProgress &, const TOutputProgress &>)
@@ -138,7 +141,7 @@ namespace Krys::Text::Handlers
       noexcept(
         EncodeCallOperatorNoexcept<TEncoding, TInput, TOutput, TState, TInputProgress, TOutputProgress>())
     {
-      if constexpr (ConvertibleTo<::Krys::Ranges::range_value_type_t<TInputProgress>, TByte>)
+      if constexpr (ConvertibleTo<std::ranges::range_value_t<TInputProgress>, TByte>)
       {
         if constexpr (Callable<TErrorHandler &, const TEncoding &, EncodeResult<TInput, TOutput, TState>,
                                const TInputProgress &, const TOutputProgress &>)

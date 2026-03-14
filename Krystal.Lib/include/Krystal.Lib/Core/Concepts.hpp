@@ -2,6 +2,7 @@
 
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include <concepts>
+#include <xutility>
 
 namespace Krys::detail_concepts
 {
@@ -242,4 +243,20 @@ namespace Krys
 
   template <typename T>
   concept NoThrowSwappable = std::is_nothrow_swappable_v<T>;
+
+  template <typename T>
+  concept ToAddressable = requires(T &&t) {
+    { std::to_address(std::forward<T>(t)) };
+  };
+
+  template <typename TRange, typename TIteratorFirst, typename TIteratorLast = TIteratorFirst>
+  concept HasInsertBulk = requires(TRange &range, TIteratorFirst &first, TIteratorLast &last) {
+    range.insert(std::ranges::begin(range), first, last);
+  };
+
+  template <typename TRange, typename TElement>
+  concept HasPushBack = requires { std::declval<TRange>().push_back(std::declval<TElement>()); };
+
+  template <typename T, typename TSize = size_t>
+  concept HasReserve = requires { std::declval<T>().reserve(std::declval<TSize>()); };
 }

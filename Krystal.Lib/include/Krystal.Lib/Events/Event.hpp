@@ -24,7 +24,6 @@ namespace Krys
   }
 
   /// @brief Base event class.
-  ///
   /// Custom events can easily be created by extending this class and specifying it's `EventType`.
   /// A macro has been provided to make this even easier, see `KRYS_EVENT_CLASS_TYPE()`.
   class Event

@@ -74,14 +74,14 @@ namespace std
     constexpr static char_type *copy(char_type *destination, const char_type *source,
                                      std::size_t count) noexcept
     {
-      (void)::Krys::Ranges::Impl::CopyNUnsafe(source, count, destination);
+      (void)std::ranges::copy_n(source, count, destination);
       return destination;
     }
 
     constexpr static char_type *move(char_type *destination, const char_type *source,
                                      std::size_t count) noexcept
     {
-      (void)::Krys::Ranges::Impl::CopyNUnsafe(source, count, destination);
+      (void)std::ranges::copy_n(source, count, destination);
       return destination;
     }
 
@@ -92,7 +92,7 @@ namespace std
       {
         return 0;
       }
-      return ::Krys::Ranges::Impl::LexicographicalCompareThreeWayBasic(left, left + count, right,
+      return ::Krys::Ranges::LexicographicalCompareThreeWayBasic(left, left + count, right,
                                                                        right + count);
     }
 

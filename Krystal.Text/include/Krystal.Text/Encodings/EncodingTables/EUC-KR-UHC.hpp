@@ -1,14 +1,12 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Ranges/ADL.hpp"
-#include "Krystal.Lib/Ranges/Algorithm.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Text/Encodings/EncodingTables/Utils/Predicates.hpp"
 #include "Krystal.Text/Encodings/EncodingTables/Utils/TableTypes.hpp"
 #include <algorithm>
-#include <cstddef>
-#include <iterator>
-#include <optional>
+#include <ranges>
 
 namespace Krys::Text::EncodingTable
 {
@@ -3427,39 +3425,39 @@ namespace Krys::Text::EncodingTable
   };
 #pragma endregion
 
-  KRYS_NODISCARD constexpr inline std::optional<uint_least32_t>
-    euc_kr_uhc_index_to_code_point(std::size_t lookupIndexPointer) noexcept
+  KRYS_NODISCARD constexpr Maybe<uint32> EUC_KR_UCHIndexToCodePoint(size_t lookupIndexPointer) noexcept
   {
-    const index16 lookupIndex = static_cast<index16>(lookupIndexPointer);
-    auto itAndLast = Krys::Ranges::lower_bound(::std::ranges::cbegin(EUC_KR_UHCIndexCodePointMap),
-                                               ::std::ranges::cend(EUC_KR_UHCIndexCodePointMap), lookupIndex,
-                                               &LessThanIndex16Target);
-    if (itAndLast.Current == itAndLast.Last)
+    auto lookupIndex = static_cast<const index16>(lookupIndexPointer);
+    auto begin = std::ranges::cbegin(EUC_KR_UHCIndexCodePointMap);
+    auto end = std::ranges::cend(EUC_KR_UHCIndexCodePointMap);
+    auto it = std::lower_bound(begin, end, lookupIndex, &LessThanIndex16Target);
+
+    if (it == end)
     {
       return std::nullopt;
     }
-    const index16_code_point &indexAndCodepoint = *itAndLast.Current;
+
+    auto &indexAndCodepoint = *it;
     if (indexAndCodepoint[0] != lookupIndex)
     {
       return std::nullopt;
     }
-    return static_cast<uint_least32_t>(indexAndCodepoint[1]);
+
+    return static_cast<uint32>(indexAndCodepoint[1]);
   }
 
-  KRYS_NODISCARD constexpr inline std::optional<std::size_t>
-    euc_kr_uhc_code_point_to_index(uint_least32_t lookupCodePoint) noexcept
+  KRYS_NODISCARD constexpr Maybe<size_t> EUC_KR_UCHCodePointToIndex(uint32 lookupCodePoint) noexcept
   {
-    auto predicate = [&lookupCodePoint](const index16_code_point &value)
-    {
-      return lookupCodePoint == value[1];
-    };
-    auto itAndLast = Krys::Ranges::find_if(::std::ranges::cbegin(EUC_KR_UHCIndexCodePointMap),
-                                           ::std::ranges::cend(EUC_KR_UHCIndexCodePointMap), predicate);
-    if (itAndLast.Current == itAndLast.Last)
+    auto begin = std::ranges::cbegin(EUC_KR_UHCIndexCodePointMap);
+    auto end = std::ranges::cend(EUC_KR_UHCIndexCodePointMap);
+    auto it = std::find_if(begin, end, [&](const auto &value) { return lookupCodePoint == value[1]; });
+
+    if (it == end)
     {
       return std::nullopt;
     }
-    const index16_code_point &indexAndCodepoint = *itAndLast.Current;
-    return static_cast<std::size_t>(indexAndCodepoint[0]);
+
+    auto &indexAndCodepoint = *it;
+    return static_cast<size_t>(indexAndCodepoint[0]);
   }
 }

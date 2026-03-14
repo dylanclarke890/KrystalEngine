@@ -1,13 +1,13 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/TypeTraits.hpp"
-#include "Krystal.Lib/Ranges/Subrange.hpp"
+#include "Krystal.Lib/Ranges/TypeTraits.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Lib/Utils/Tag.hpp"
+#include "Krystal.Text/_detail/SpanReconstruct.hpp"
 #include "Krystal.Text/CodePoint.hpp"
 #include "Krystal.Text/CodeUnit.hpp"
 #include "Krystal.Text/Count/CountResult.hpp"
-#include "Krystal.Text/_detail/SpanReconstruct.hpp"
 #include "Krystal.Text/Encodings/DefaultEncoding.hpp"
 #include "Krystal.Text/Handlers/DefaultHandler.hpp"
 #include "Krystal.Text/MaxUnits.hpp"
@@ -69,7 +69,7 @@ namespace Krys::Text
   codeUnitCount += result.Count;                                                                             \
   errorCount += result.ErrorCount;                                                                           \
   workingInput = std::move(result.Input);                                                                    \
-  if (::std::ranges::empty(workingInput))                                                                   \
+  if (std::ranges::empty(workingInput))                                                                    \
   {                                                                                                          \
     if (!::Krys::Text::IsStateComplete(fromEncoding, result.FromState))                                      \
     {                                                                                                        \
@@ -121,7 +121,7 @@ namespace Krys::Text
         codeUnitCount += written;
         errorCount += result.ErrorCount;
         workingInput = std::move(result.Input);
-        if (::std::ranges::empty(workingInput))
+        if (std::ranges::empty(workingInput))
         {
           if (!::Krys::Text::IsStateComplete(fromEncoding, fromState))
           {
@@ -326,7 +326,7 @@ namespace Krys::Text
   template <typename TInput, typename TToEncoding>
   constexpr auto CountAsTranscoded(TInput &&input, TToEncoding &&toEncoding)
   {
-    using TCodeUnit = remove_cvref_t<::Krys::Ranges::range_value_type_t<remove_cvref_t<TInput>>>;
+    using TCodeUnit = remove_cvref_t<std::ranges::range_value_t<remove_cvref_t<TInput>>>;
     using TFromEncoding =
       conditional_t<std::is_constant_evaluated(), default_consteval_code_unit_encoding_t<TCodeUnit>,
                     default_code_unit_encoding_t<TCodeUnit>>;

@@ -48,9 +48,6 @@
     <ClInclude Include="include\Krystal.Lib\Detection\Environment.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Core\DebugBreak.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Core\Bit.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -120,9 +117,6 @@
     <ClInclude Include="include\Krystal.Lib\Allocators\Arena.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Allocators\Block.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Types\Variant.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -186,9 +180,6 @@
     <ClInclude Include="include\Krystal.Lib\Utils\Hijack.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Ranges\Impl\ContiguousIterator.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Pointers\ReferenceWrapper.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -201,34 +192,10 @@
     <ClInclude Include="include\Krystal.Lib\String\EmptyString.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Ranges\ADL.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Ranges\Subrange.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Ranges\Iterator.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Ranges\Unbounded.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Ranges\CountedIterator.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Ranges\Algorithm.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Utils\EBCO.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Ranges\BlackHoleIterator.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Utils\Size.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Ranges\WordIterator.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Utils\ipow.hpp">
@@ -237,28 +204,7 @@
     <ClInclude Include="include\Krystal.Lib\InlineContainers\Forward.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Utils\ConstructDestroy.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Utils\ToMutableIter.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Utils\Uninit.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Ranges\Impl\InsertBulk.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Ranges\SaveRange.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Ranges\SaveIterator.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Utils\WhatIsThis.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Utils\EqualToChar.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Utils\LosslessStaticCast.hpp">
@@ -301,9 +247,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\ForbidHeapAllocation.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Core\Memory.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Detection\NumberOfCores.hpp">
@@ -366,7 +309,10 @@
     <ClInclude Include="include\Krystal.Lib\Types\Any.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Ranges\Concepts.hpp">
+    <ClInclude Include="include\Krystal.Lib\Ranges\TypeTraits.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.Lib\Core\DebugBreak.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

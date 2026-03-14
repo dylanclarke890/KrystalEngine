@@ -3,7 +3,6 @@
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Detection/Compiler.hpp"
 #include "Krystal.Lib/Detection/OS.hpp"
-#include "Krystal.Lib/Ranges/Range.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Text/ASCIILiteral.hpp"
@@ -23,10 +22,10 @@ namespace Krys::Text
 {
   namespace Impl
   {
-    constexpr inline int32_t CodePageActive = 0;
-    constexpr inline int32_t CodePageOEM = 1;
-    constexpr inline int32_t CodePageMac = 2;
-    constexpr inline int32_t CodePageActiveThread = 3;
+    constexpr inline int32 CodePageActive = 0;
+    constexpr inline int32 CodePageOEM = 1;
+    constexpr inline int32 CodePageMac = 2;
+    constexpr inline int32 CodePageActiveThread = 3;
   }
 
   template <typename TCodeUnit, typename TCodePoint>
@@ -194,8 +193,8 @@ namespace Krys::Text
       using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = DecodeResult<TSubInput, TSubOutput, decode_state>;
 
-      auto inIt = ::std::ranges::cbegin(input);
-      auto inLast = ::std::ranges::cend(input);
+      auto inIt = std::ranges::cbegin(input);
+      auto inLast = std::ranges::cend(input);
       if (inIt == inLast)
       {
         // an exhausted sequence is fine
@@ -203,20 +202,20 @@ namespace Krys::Text
                        EncodingError::OK);
       }
 
-      auto outIt = ::std::ranges::begin(output);
-      auto outLast = ::std::ranges::end(output);
+      auto outIt = std::ranges::begin(output);
+      auto outLast = std::ranges::end(output);
 
       WCHAR intermediateData[17] = {};
-      const size_t initialIntermediateDataSize = ::std::ranges::size(intermediateData);
+      const size_t initialIntermediateDataSize = std::ranges::size(intermediateData);
       CHAR inputReadData[17] = {*inIt};
       size_t inputReadSize = 1;
-      const size_t initialInputReadDataSize = ::std::ranges::size(inputReadData);
+      const size_t initialInputReadDataSize = std::ranges::size(inputReadData);
       std::uint32_t codePageId = this->CodePage();
       auto Flags = ::Krys::Text::Windows::MultiByteToWidecharFlags(codePageId);
       size_t intermediateInputSize = 0;
 
       constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TErrorHandler>;
-      for (; inIt != inLast; ++inputReadSize, ::Krys::Ranges::iter_advance(inIt))
+      for (; inIt != inLast; ++inputReadSize, std::ranges::advance(inIt))
       {
         if constexpr (CallErrorHandler)
         {
@@ -290,7 +289,7 @@ namespace Krys::Text
               Span<code_unit>(), intermediateHandler.CodePointsProgress());
           }
         }
-        if (!::std::ranges::empty(intermediateResult.Input))
+        if (!std::ranges::empty(intermediateResult.Input))
         {
           intermediateInputBuffer = Span<const WCHAR>(std::to_address(intermediateResult.Input.cbegin()),
                                                       std::to_address(intermediateResult.Input.cend()));
@@ -318,7 +317,7 @@ namespace Krys::Text
           }
         }
         *outIt = *intermediateOutputIt;
-        ::Krys::Ranges::iter_advance(outIt);
+        std::ranges::advance(outIt);
       }
 
       return TResult(TSubInput(std::move(inIt), std::move(inLast)),
@@ -353,8 +352,8 @@ namespace Krys::Text
       using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = EncodeResult<TSubInput, TSubOutput, encode_state>;
 
-      auto inIt = ::std::ranges::cbegin(input);
-      auto inLast = ::std::ranges::cend(input);
+      auto inIt = std::ranges::cbegin(input);
+      auto inLast = std::ranges::cend(input);
       if (inIt == inLast)
       {
         // an exhausted sequence is fine
@@ -362,8 +361,8 @@ namespace Krys::Text
                        EncodingError::OK);
       }
 
-      auto outIt = ::std::ranges::begin(output);
-      auto outLast = ::std::ranges::end(output);
+      auto outIt = std::ranges::begin(output);
+      auto outLast = std::ranges::end(output);
 
       using wutf16 = ::Krys::Text::Impl::UTF16With<void, wchar_t, code_point, false>;
       using TIntermediateState = encode_state_t<wutf16>;
@@ -447,7 +446,7 @@ namespace Krys::Text
           }
         }
         *outIt = *intermediateOutputIt;
-        ::Krys::Ranges::iter_advance(outIt);
+        std::ranges::advance(outIt);
       }
       return TResult(std::move(intermediateResult.Input), TSubOutput(std::move(outIt), std::move(outLast)), s,
                      intermediateResult.ErrorCode);

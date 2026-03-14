@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/TypeTraits.hpp"
-#include "Krystal.Lib/Ranges/Impl/InsertBulk.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Lib/Utils/Tag.hpp"
 #include "Krystal.Text/_detail/IsLossless.hpp"
@@ -52,7 +51,7 @@ namespace Krys::Text
                      firstResult.ErrorCode, firstResult.ErrorCount);
     }
 
-    if (::std::ranges::empty(firstResult.Input))
+    if (std::ranges::empty(firstResult.Input))
     {
       if (::Krys::Text::IsStateComplete(encoding, state))
       {
@@ -79,7 +78,7 @@ namespace Krys::Text
                        errorCount);
       }
 
-      if (::std::ranges::empty(workingInput))
+      if (std::ranges::empty(workingInput))
       {
         if (!::Krys::Text::IsStateComplete(encoding, state))
         {
@@ -155,7 +154,7 @@ namespace Krys::Text
   template <typename TInput, typename TOutput>
   constexpr auto EncodeIntoRaw(TInput &&input, TOutput &&output)
   {
-    using TCodePoint = ::Krys::Ranges::range_value_type_t<TInput>;
+    using TCodePoint = std::ranges::range_value_t<TInput>;
     using TEncoding =
       conditional_t<std::is_constant_evaluated(), default_consteval_code_point_encoding_t<TCodePoint>,
                     default_code_point_encoding_t<TCodePoint>>;
@@ -199,30 +198,30 @@ namespace Krys::Text::detail_encode
       // Ignore "out of output" errors and do our best to recover properly along the way...
       auto result =
         ::Krys::Text::EncodeIntoRaw(std::move(workingInput), encoding, initialOutput, handler, state);
-      ::Krys::Ranges::Impl::ContainerInsertBulk(output, Span(initialOutput.data(), result.Output.data()));
+      ::Krys::Ranges::ContainerInsertBulk(output, Span(initialOutput.data(), result.Output.data()));
 
       if (result.ErrorCode == EncodingError::InsufficientOutputSpace)
       {
         if (handler.CodeUnitsProgressSize() != 0)
         {
           // add any leftover partially-unwritten characters to our output
-          ::Krys::Ranges::Impl::ContainerInsertBulk(output, handler.ConstCodeUnitsProgress());
+          ::Krys::Ranges::ContainerInsertBulk(output, handler.ConstCodeUnitsProgress());
           // it's okay, just loop around, we've got S P A C E for more
           workingInput = ::Krys::Text::detail::UpdateInput<TWorkingInput>(std::move(result.Input));
         }
         else if (handler.CodePointsProgressSize() != 0)
         {
-          if constexpr (::std::ranges::bidirectional_range<TWorkingInput>)
+          if constexpr (std::ranges::bidirectional_range<TWorkingInput>)
           {
             // we can try to rewind our current input by the amount that was not successfully
             // read. This will allow us to try again, when the buffer
             // has more space in it, and should not result in the same error,
             // unless it was legitimiately an EncodingError::InvalidSequence.
-            workingInput = ::Krys::Text::detail::UpdateInput<TWorkingInput>(::Krys::Ranges::reconstruct(
-              std::in_place_type<TWorkingInput>,
-              ::Krys::Ranges::iter_recede(::std::ranges::begin(std::move(result.Input)),
-                                          handler.CodePointsProgressSize()),
-              ::std::ranges::end(result.Input)));
+            workingInput = ::Krys::Text::detail::UpdateInput<TWorkingInput>(
+              ::Krys::Ranges::reconstruct(std::in_place_type<TWorkingInput>,
+                                          std::ranges::prev(std::ranges::begin(std::move(result.Input)),
+                                                            handler.CodePointsProgressSize()),
+                                          std::ranges::end(result.Input)));
           }
           else
           {
@@ -248,7 +247,7 @@ namespace Krys::Text::detail_encode
           handler.CodeUnitsProgress());
         return TResult(errorResult);
       }
-      if (::std::ranges::empty(result.Input))
+      if (std::ranges::empty(result.Input))
       {
         if (!::Krys::Text::IsStateComplete(encoding, state))
         {
@@ -267,12 +266,12 @@ namespace Krys::Text::detail_encode
     constexpr std::size_t maxUnits = ::Krys::Text::MaxEncodeCodeUnits<TEncoding>;
 
     TOutputContainer output {};
-    if constexpr (::Krys::Ranges::HasSizeADL<TInput>)
+    if constexpr (std::ranges::sized_range<TInput>)
     {
-      using TSize = decltype(::std::ranges::size(input));
-      if constexpr (::Krys::Ranges::has_reserve_with_size<TOutputContainer, TSize>)
+      using TSize = decltype(std::ranges::size(input));
+      if constexpr (HasReserve<TOutputContainer, TSize>)
       {
-        TSize outputSizeHint = static_cast<TSize>(::std::ranges::size(input));
+        TSize outputSizeHint = static_cast<TSize>(std::ranges::size(input));
         outputSizeHint *= (maxUnits > 3) ? (maxUnits / 4) : maxUnits;
         output.reserve(outputSizeHint);
       }
@@ -380,7 +379,7 @@ namespace Krys::Text
   template <typename TInput, typename TOutput>
   constexpr auto EncodeInto(TInput &&input, TOutput &&output)
   {
-    using TCodePoint = ::Krys::Ranges::range_value_type_t<TInput>;
+    using TCodePoint = std::ranges::range_value_t<TInput>;
     using TEncoding =
       conditional_t<std::is_constant_evaluated(), default_consteval_code_point_encoding_t<TCodePoint>,
                     default_code_point_encoding_t<TCodePoint>>;
@@ -475,7 +474,7 @@ namespace Krys::Text
   template <typename TOutputContainer = void, typename TInput>
   constexpr auto EncodeTo(TInput &&input)
   {
-    using TCodePoint = ::Krys::Ranges::range_value_type_t<TInput>;
+    using TCodePoint = std::ranges::range_value_t<TInput>;
     using TEncoding =
       conditional_t<std::is_constant_evaluated(), default_consteval_code_point_encoding_t<TCodePoint>,
                     default_code_point_encoding_t<TCodePoint>>;
@@ -565,7 +564,7 @@ namespace Krys::Text
   template <typename TOutputContainer = void, typename TInput>
   constexpr auto Encode(TInput &&input)
   {
-    using TCodePoint = ::Krys::Ranges::range_value_type_t<TInput>;
+    using TCodePoint = std::ranges::range_value_t<TInput>;
     using TEncoding =
       conditional_t<std::is_constant_evaluated(), default_consteval_code_point_encoding_t<TCodePoint>,
                     default_code_point_encoding_t<TCodePoint>>;

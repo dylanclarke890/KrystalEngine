@@ -6,7 +6,6 @@
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Text/EncodingName.hpp"
-#include "Krystal.Text/Encodings/EncodingScheme.hpp"
 #include "Krystal.Text/IsUnicodeEncoding.hpp"
 
 #if KRYS_COMPILER(MSVC)
@@ -2079,53 +2078,34 @@ namespace Krys::Tests
   constexpr auto unicode_sequence_for()
   {
     using TCodeUnit = code_unit_t<TEncoding>;
-    if constexpr (SameType<TEncoding, utf16_le_t>)
+    if constexpr (SameType<TCodeUnit, char>)
     {
-      return Krys::Tests::u16_unicode_sequence_truth_little_endian;
+      return Krys::Tests::unicode_sequence_truth_native_endian;
     }
-    else if constexpr (SameType<TEncoding, utf16_be_t>)
+    else if constexpr (SameType<TCodeUnit, wchar_t>)
     {
-      return Krys::Tests::u16_unicode_sequence_truth_big_endian;
+      return Krys::Tests::w_unicode_sequence_truth_native_endian;
     }
-    else if constexpr (SameType<TEncoding, utf32_le_t>)
+    else if constexpr (SameType<TCodeUnit, uchar8>)
     {
-      return Krys::Tests::u32_unicode_sequence_truth_little_endian;
+      return Krys::Tests::u8_unicode_sequence_truth_native_endian;
     }
-    else if constexpr (SameType<TEncoding, utf32_be_t>)
+    else if constexpr (SameType<TCodeUnit, char8_t>)
     {
-      return Krys::Tests::u32_unicode_sequence_truth_big_endian;
+      return Krys::Tests::u8_unicode_sequence_truth_native_endian;
+    }
+    else if constexpr (SameType<TCodeUnit, char16_t>)
+    {
+      return Krys::Tests::u16_unicode_sequence_truth_native_endian;
+    }
+    else if constexpr (SameType<TCodeUnit, char32_t>)
+    {
+      return Krys::Tests::u32_unicode_sequence_truth_native_endian;
     }
     else
     {
-      if constexpr (SameType<TCodeUnit, char>)
-      {
-        return Krys::Tests::unicode_sequence_truth_native_endian;
-      }
-      else if constexpr (SameType<TCodeUnit, wchar_t>)
-      {
-        return Krys::Tests::w_unicode_sequence_truth_native_endian;
-      }
-      else if constexpr (SameType<TCodeUnit, uchar8>)
-      {
-        return Krys::Tests::u8_unicode_sequence_truth_native_endian;
-      }
-      else if constexpr (SameType<TCodeUnit, char8_t>)
-      {
-        return Krys::Tests::u8_unicode_sequence_truth_native_endian;
-      }
-      else if constexpr (SameType<TCodeUnit, char16_t>)
-      {
-        return Krys::Tests::u16_unicode_sequence_truth_native_endian;
-      }
-      else if constexpr (SameType<TCodeUnit, char32_t>)
-      {
-        return Krys::Tests::u32_unicode_sequence_truth_native_endian;
-      }
-      else
-      {
-        static_assert(DependentFalse<TEncoding>,
-                      "Cannot pick basic_source_character_set object for this Encoding");
-      }
+      static_assert(DependentFalse<TEncoding>,
+                    "Cannot pick basic_source_character_set object for this Encoding");
     }
   }
 }

@@ -18,8 +18,7 @@ namespace Krys::Text::Impl
   };
 
   /// @brief An internal type meant to provide the bulk of the UTF-16 functionality.
-  /// @remarks Relies on CRTP.
-  template <typename TDerived = void, typename TCodeUnit = char16_t, typename TCodePoint = UnicodeCodePoint,
+  template <typename TDerived = void, typename TCodeUnit = char16, typename TCodePoint = UnicodeCodePoint,
             bool AllowSurrogates = false>
   class UTF16With : public UTF16Tag
   {
@@ -31,58 +30,47 @@ namespace Krys::Text::Impl
 
   public:
     using is_unicode_encoding = std::true_type;
-
     using self_synchronizing_code = std::true_type;
-
     using state = EmptyState;
-
     using code_unit = TCodeUnit;
-
     using code_point = TCodePoint;
-
     using is_decode_injective = std::true_type;
-
     using is_encode_injective = std::true_type;
 
-    constexpr inline static std::size_t MaxCodePoints = 1;
-
-    constexpr inline static std::size_t MaxCodeUnits = 2;
-
-    constexpr inline static Krys::Text::EncodingId EncodedId =
-      AllowSurrogates ? Krys::Text::EncodingId::ucs2 : Krys::Text::EncodingId::utf16;
-
-    constexpr inline static Krys::Text::EncodingId DecodedId =
-      AllowSurrogates ? Krys::Text::EncodingId::ucs4 : Krys::Text::EncodingId::utf32;
+    constexpr inline static size_t MaxCodePoints = 1;
+    constexpr inline static size_t MaxCodeUnits = 2;
+    constexpr inline static EncodingId EncodedId = AllowSurrogates ? EncodingId::ucs2 : EncodingId::utf16;
+    constexpr inline static EncodingId DecodedId = AllowSurrogates ? EncodingId::ucs4 : EncodingId::utf32;
 
     constexpr static Span<const code_unit, 1> ReplacementCodeUnits() noexcept
     {
-      return Span<const code_unit, 1>(::Krys::Text::Unicode::ReplacementAsArray<code_unit>);
+      return Span<const code_unit, 1>(Unicode::ReplacementAsArray<code_unit>);
     }
 
     constexpr static Span<const code_point, 1> ReplacementCodePoints() noexcept
     {
-      return Span<const code_point, 1>(::Krys::Text::Unicode::ReplacementAsArray<code_point>);
+      return Span<const code_point, 1>(Unicode::ReplacementAsArray<code_point>);
     }
 
-    template <bool TStrawman = AllowSurrogates, typename TInput, typename TOutput, typename TState,
-              typename TInputProgress, typename TOutputProgress>
-    requires(!TStrawman)
+    template <typename TInput, typename TOutput, typename TState, typename TInputProgress,
+              typename TOutputProgress>
+    requires(!AllowSurrogates)
     constexpr static auto SkipInputError(DecodeResult<TInput, TOutput, TState> result,
                                          const TInputProgress &inputProgress,
                                          const TOutputProgress &outputProgress) noexcept
     {
-      auto it = ::std::ranges::cbegin(result.Input);
-      auto last = ::std::ranges::cend(result.Input);
-      if (it != last)
+      auto it = std::ranges::cbegin(result.Input);
+      auto end = std::ranges::cend(result.Input);
+      if (it != end)
       {
         // if there is already some items in the input progress (things irreversibly read), then
         // we are not obligated to do "at least" one skip; barrier it behind an empty check for
         // progress.
-        if (::std::ranges::empty(inputProgress) && ::std::ranges::empty(outputProgress))
+        if (std::ranges::empty(inputProgress) && std::ranges::empty(outputProgress))
         {
           ++it;
         }
-        for (; it != last; ++it)
+        for (; it != end; ++it)
         {
           const auto &itValue = *it;
           const bool isSingleUTF16Unit = !::Krys::Text::Unicode::IsSingleUTF16(itValue);
@@ -92,11 +80,11 @@ namespace Krys::Text::Impl
           }
           const bool foundGoodUTF16Stop =
             ::Krys::Text::Unicode::IsLeadSurrogate(static_cast<char32>(itValue));
-          if constexpr (::Krys::Ranges::ForwardIterator<decltype(it)>)
+          if constexpr (std::forward_iterator<decltype(it)>)
           {
             // if we have forward-or-better iterators, we can
             // do a search for a more appropriate sequence rather than stop
-            if (it == last)
+            if (it == end)
             {
               break;
             }
@@ -119,7 +107,7 @@ namespace Krys::Text::Impl
         }
       }
       using TSubInput = ::Krys::Ranges::csubrange_for_t<TInput>;
-      return ::Krys::Text::DecodeResult<TSubInput, TOutput, TState>(TSubInput(std::move(it), std::move(last)),
+      return ::Krys::Text::DecodeResult<TSubInput, TOutput, TState>(TSubInput(std::move(it), std::move(end)),
                                                                     std::move(result.Output), result.State,
                                                                     result.ErrorCode, result.ErrorCount);
     }
@@ -148,8 +136,8 @@ namespace Krys::Text::Impl
       using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = DecodeResult<TSubInput, TSubOutput, state>;
 
-      auto inIt = ::std::ranges::cbegin(input);
-      KRYS_MAYBE_UNUSED auto inLast = ::std::ranges::cend(input);
+      auto inIt = std::ranges::cbegin(input);
+      KRYS_MAYBE_UNUSED auto inLast = std::ranges::cend(input);
 
       constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TErrorHandler>;
       if constexpr (CallErrorHandler)
@@ -162,8 +150,8 @@ namespace Krys::Text::Impl
         }
       }
 
-      auto outIt = ::std::ranges::begin(output);
-      KRYS_MAYBE_UNUSED auto outLast = ::std::ranges::end(output);
+      auto outIt = std::ranges::begin(output);
+      KRYS_MAYBE_UNUSED auto outLast = std::ranges::end(output);
 
       std::array<code_unit, 2> units {};
       const char16_t lead16 = static_cast<char16_t>(*inIt);
@@ -188,8 +176,8 @@ namespace Krys::Text::Impl
             }
           }
           *outIt = static_cast<code_point>(lead16);
-          ::Krys::Ranges::iter_advance(inIt);
-          ::Krys::Ranges::iter_advance(outIt);
+          std::ranges::advance(inIt);
+          std::ranges::advance(outIt);
 
           return TResult(TSubInput(std::move(inIt), std::move(inLast)),
                          TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);
@@ -213,8 +201,8 @@ namespace Krys::Text::Impl
             }
           }
           *outIt = static_cast<code_point>(lead16);
-          ::Krys::Ranges::iter_advance(inIt);
-          ::Krys::Ranges::iter_advance(outIt);
+          inIt++;
+          outIt++;
 
           return TResult(TSubInput(std::move(inIt), std::move(inLast)),
                          TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);
@@ -246,7 +234,7 @@ namespace Krys::Text::Impl
         }
       }
 
-      ::Krys::Ranges::iter_advance(inIt);
+      inIt++;
       const char16_t trail16 = static_cast<char16_t>(*inIt);
       units[1] = static_cast<code_unit>(trail16);
       if constexpr (AllowSurrogates)
@@ -270,7 +258,7 @@ namespace Krys::Text::Impl
             }
           }
           *outIt = static_cast<code_point>(lead16);
-          ::Krys::Ranges::iter_advance(outIt);
+          std::ranges::advance(outIt);
 
           return TResult(TSubInput(std::move(inIt), std::move(inLast)),
                          TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);
@@ -304,8 +292,8 @@ namespace Krys::Text::Impl
       }
       char32 point32 = ::Krys::Text::Unicode::UTF16CombineSurrogates(lead16, trail16);
       *outIt = static_cast<code_point>(point32);
-      ::Krys::Ranges::iter_advance(outIt);
-      ::Krys::Ranges::iter_advance(inIt);
+      outIt++;
+      inIt++;
 
       return TResult(TSubInput(std::move(inIt), std::move(inLast)),
                      TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);
@@ -318,8 +306,8 @@ namespace Krys::Text::Impl
       using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = EncodeResult<TSubInput, TSubOutput, state>;
 
-      auto inIt = ::std::ranges::cbegin(input);
-      auto inLast = ::std::ranges::cend(input);
+      auto inIt = std::ranges::cbegin(input);
+      auto inLast = std::ranges::cend(input);
       if (inIt == inLast)
       {
         // an exhausted sequence is fine
@@ -327,8 +315,8 @@ namespace Krys::Text::Impl
                        EncodingError::OK);
       }
 
-      auto outIt = ::std::ranges::begin(output);
-      KRYS_MAYBE_UNUSED auto outLast = ::std::ranges::end(output);
+      auto outIt = std::ranges::begin(output);
+      KRYS_MAYBE_UNUSED auto outLast = std::ranges::end(output);
 
       code_point points[1] {};
       points[0] = *inIt;
@@ -367,8 +355,8 @@ namespace Krys::Text::Impl
           }
 
           *outIt = static_cast<code_unit>(static_cast<char16>(static_cast<char32>(point)));
-          ::Krys::Ranges::iter_advance(outIt);
-          ::Krys::Ranges::iter_advance(inIt);
+          outIt++;
+          inIt++;
 
           return TResult(TSubInput(std::move(inIt), std::move(inLast)),
                          TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);
@@ -407,8 +395,8 @@ namespace Krys::Text::Impl
         }
 
         *outIt = static_cast<code_unit>(static_cast<char16>(static_cast<char32>(point)));
-        ::Krys::Ranges::iter_advance(outIt);
-        ::Krys::Ranges::iter_advance(inIt);
+        outIt++;
+        inIt++;
         return TResult(TSubInput(std::move(inIt), std::move(inLast)),
                        TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);
       }
@@ -437,9 +425,9 @@ namespace Krys::Text::Impl
         }
       }
 
-      ::Krys::Ranges::iter_advance(inIt);
+      inIt++;
       *outIt = lead;
-      ::Krys::Ranges::iter_advance(outIt);
+      outIt++;
 
       if constexpr (CallErrorHandler)
       {
@@ -455,7 +443,7 @@ namespace Krys::Text::Impl
         }
       }
       *outIt = trail;
-      ::Krys::Ranges::iter_advance(outIt);
+      outIt++;
 
       return TResult(TSubInput(std::move(inIt), std::move(inLast)),
                      TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);

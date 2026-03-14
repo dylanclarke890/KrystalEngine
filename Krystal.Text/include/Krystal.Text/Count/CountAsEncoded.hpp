@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/TypeTraits.hpp"
-#include "Krystal.Lib/Ranges/Subrange.hpp"
+#include "Krystal.Lib/Ranges/TypeTraits.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Lib/Utils/Tag.hpp"
 #include "Krystal.Text/CodePoint.hpp"
@@ -16,7 +16,6 @@
 /// the input code units.
 namespace Krys::Text
 {
-
   /// @brief Counts the number of code units that will result from attempting an encode operation on the input
   /// code points.
   /// @param[in] input The input range (of code points) to find out how many code units there are.
@@ -57,7 +56,7 @@ namespace Krys::Text
           continue;
         }
 
-        if (::std::ranges::empty(workingInput))
+        if (std::ranges::empty(workingInput))
         {
           break;
         }
@@ -81,12 +80,12 @@ namespace Krys::Text
         }
 
         std::size_t usedSize = static_cast<std::size_t>(
-          ::std::distance(::std::ranges::begin(intermediate), ::std::ranges::begin(result.Output)));
+          ::std::distance(std::ranges::begin(intermediate), std::ranges::begin(result.Output)));
 
         codeUnitCount += usedSize;
         workingInput = std::move(result.Input);
 
-        if (::std::ranges::empty(workingInput))
+        if (std::ranges::empty(workingInput))
         {
           if (!::Krys::Text::IsStateComplete(encoding, state))
           {
@@ -161,7 +160,7 @@ namespace Krys::Text
   template <typename TInput>
   constexpr auto CountAsEncoded(TInput &&input)
   {
-    using TCodePoint = remove_cvref_t<::Krys::Ranges::range_value_type_t<remove_cvref_t<TInput>>>;
+    using TCodePoint = remove_cvref_t<std::ranges::range_value_t<remove_cvref_t<TInput>>>;
     using TEncoding =
       conditional_t<std::is_constant_evaluated(), default_consteval_code_point_encoding_t<TCodePoint>,
                     default_code_point_encoding_t<TCodePoint>>;

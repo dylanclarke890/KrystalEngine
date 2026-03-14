@@ -30,7 +30,7 @@ namespace Krys::Text
     using TWorkingInput = ::Krys::Ranges::subrange_for_t<TInput>;
     using TResult = ::Krys::Text::CountResult<TWorkingInput, TState>;
 
-    TWorkingInput workingInput(std::forward<TInput>(input));
+    auto workingInput = std::ranges::subrange(std::forward<TInput>(input));
     std::size_t codePointCount = 0;
 
     if constexpr (::Krys::Text::HasCountTextAsDecodedOne<TWorkingInput, TEncoding, TErrorHandler, TState>)
@@ -47,7 +47,7 @@ namespace Krys::Text
         }
         codePointCount += result.Count;
         workingInput = std::move(result.Input);
-        if (::std::ranges::empty(workingInput))
+        if (std::ranges::empty(workingInput))
         {
           if (!::Krys::Text::IsStateComplete(encoding, state))
           {
@@ -75,12 +75,12 @@ namespace Krys::Text
           return TResult(std::move(result.Input), codePointCount, state, result.ErrorCode, errorCount);
         }
         std::size_t usedSize = static_cast<std::size_t>(
-          ::std::distance(::std::ranges::begin(intermediate), ::std::ranges::begin(result.Output)));
+          ::std::distance(std::ranges::begin(intermediate), std::ranges::begin(result.Output)));
 
         codePointCount += usedSize;
         workingInput = std::move(result.Input);
 
-        if (::std::ranges::empty(workingInput))
+        if (std::ranges::empty(workingInput))
         {
           if (!::Krys::Text::IsStateComplete(encoding, state))
           {
@@ -155,7 +155,7 @@ namespace Krys::Text
   template <typename TInput>
   constexpr auto CountAsDecoded(TInput &&input)
   {
-    using TCodeUnit = ::Krys::Ranges::range_value_type_t<remove_cvref_t<TInput>>;
+    using TCodeUnit = std::ranges::range_value_t<remove_cvref_t<TInput>>;
     using TEncoding =
       conditional_t<std::is_constant_evaluated(), default_consteval_code_unit_encoding_t<TCodeUnit>,
                     default_code_unit_encoding_t<TCodeUnit>>;

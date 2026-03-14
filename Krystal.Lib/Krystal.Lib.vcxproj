@@ -139,7 +139,7 @@
     <ClInclude Include="include\Krystal.Lib\Commands\CommandListReader.hpp" />
     <ClInclude Include="include\Krystal.Lib\Commands\CommandType.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Attributes.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Core\Memory.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\DebugBreak.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Move.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\TypeCast.hpp" />
     <ClInclude Include="include\Krystal.Lib\Detection\AddressSpaceBitSize.hpp" />
@@ -173,20 +173,9 @@
     <ClInclude Include="include\Krystal.Lib\Mixins\RefCounted.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\UniquePtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtrImpl.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Ranges\ADL.hpp" />
     <ClInclude Include="include\Krystal.Lib\Ranges\Algorithm.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Ranges\BlackHoleIterator.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Ranges\Concepts.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Ranges\CountedIterator.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Ranges\Impl\ContiguousIterator.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Ranges\Impl\InsertBulk.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Ranges\Iterator.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Ranges\TypeTraits.hpp" />
     <ClInclude Include="include\Krystal.Lib\Ranges\Reconstruct.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Ranges\SaveIterator.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Ranges\SaveRange.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Ranges\Subrange.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Ranges\Unbounded.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Ranges\WordIterator.hpp" />
     <ClInclude Include="include\Krystal.Lib\String\StringAtom.hpp" />
     <ClInclude Include="include\Krystal.Lib\String\EmptyString.hpp" />
     <ClInclude Include="include\Krystal.Lib\Time\Duration.hpp" />
@@ -198,16 +187,11 @@
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Allocators\Block.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Lib\Types\Array.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Bit.hpp" />
     <ClInclude Include="include\Krystal.Lib\ByteUtils.hpp" />
     <ClInclude Include="include\Krystal.Lib\ComparisonHelpers.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Concepts.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Core\DebugBreak.hpp" />
     <ClInclude Include="include\Krystal.Lib\Detection\Environment.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Endian.hpp" />
     <ClInclude Include="include\Krystal.Lib\Core\Enum.hpp">
@@ -242,20 +226,15 @@
     <ClInclude Include="include\Krystal.Lib\Types\Numeric.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Variant.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\LosslessStaticCast.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Utils\EqualToChar.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Utils\ConstructDestroy.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\EBCO.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\Hijack.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\ipow.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\ReferenceWrapper.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Utils\Size.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\StrongOrder.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\Tag.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\ToMutableIter.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\ToUnderlying.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Utils\Uninit.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\Unwrap.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Utils\WhatIsThis.hpp" />
     <ClInclude Include="third-party\llvm\ADT\ADL.h" />
     <ClInclude Include="third-party\llvm\Support\MemAlloc.h" />
     <ClInclude Include="third-party\llvm\ADT\SmallVector.h" />

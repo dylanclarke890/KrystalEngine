@@ -4,8 +4,8 @@
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Ranges/Algorithm.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Text/Unicode.hpp"
 #include "Krystal.Text/TypeTraits.hpp"
+#include "Krystal.Text/Unicode.hpp"
 #include <cassert>
 #include <cstdint>
 #include <cuchar>
@@ -14,8 +14,7 @@
 
 namespace Krys::Text
 {
-  /// @brief A 32-bit value that is within the allowed 21 bits of Unicode and is not one of the Surrogate
-  /// values.
+  /// @brief A non-surrogate Unicode code point value.
   class alignas(alignof(char32)) UnicodeScalarValue
   {
   private:
@@ -24,59 +23,43 @@ namespace Krys::Text
   public:
     UnicodeScalarValue() noexcept = default;
 
-    /// @brief Constructs a scalar value with the given code point value.
     constexpr UnicodeScalarValue(char32 codePoint) noexcept : _scalar(codePoint)
     {
-      assert(!::Krys::Text::Unicode::IsSurrogate(this->_scalar)
-             && (this->_scalar <= ::Krys::Text::Unicode::LastUnicodeCodePoint)
+      assert(!Unicode::IsSurrogate(this->_scalar) && (this->_scalar <= Unicode::LastUnicodeCodePoint)
              && "The code point value must be a valid code point and must not be a surrogate value.");
     }
 
-    /// @brief An explicit conversion to a typical char32 value, bit-compatible with a normal code point
-    /// value.
     constexpr explicit operator char32() const noexcept
     {
       return this->_scalar;
     }
 
-    /// @brief Retrieves the underlying value.
     constexpr const char32 &value() const & noexcept
     {
       return this->_scalar;
     }
 
-    /// @brief Retrieves the underlying value.
     constexpr char32 &value() & noexcept
     {
       return this->_scalar;
     }
 
-    /// @brief Retrieves the underlying value.
     constexpr char32 &&value() && noexcept
     {
       return std::move(this->_scalar);
     }
   };
 
-  /// @brief Check if two unicode scalar values are equal.
-  /// @param[in] left Left hand value of equality operator.
-  /// @param[in] right Right hand value of equality operator.
   constexpr bool operator==(const UnicodeScalarValue &left, const UnicodeScalarValue &right)
   {
     return left.value() == right.value();
   }
 
-  /// @brief Check if two unicode code points are not equal.
-  /// @param[in] left Left hand value of inequality operator.
-  /// @param[in] right Right hand value of inequality operator.
   constexpr bool operator!=(const UnicodeScalarValue &left, const UnicodeScalarValue &right)
   {
     return left.value() != right.value();
   }
 
-  /// @brief Check if one unicode scalar value is less than the other.
-  /// @param[in] left Left hand value of less than operator.
-  /// @param[in] right Right hand value of less than operator.
   constexpr bool operator<(const UnicodeScalarValue &left, const UnicodeScalarValue &right)
   {
     return left.value() < right.value();
@@ -97,14 +80,14 @@ namespace std
     constexpr static char_type *copy(char_type *destination, const char_type *source,
                                      std::size_t count) noexcept
     {
-      (void)Krys::Ranges::Impl::CopyNUnsafe(source, count, destination);
+      std::ranges::copy_n(source, count, destination);
       return destination;
     }
 
     constexpr static char_type *move(char_type *destination, const char_type *source,
                                      std::size_t count) noexcept
     {
-      (void)Krys::Ranges::Impl::CopyNUnsafe(source, count, destination);
+      std::ranges::copy_n(source, count, destination);
       return destination;
     }
 
@@ -115,8 +98,7 @@ namespace std
       {
         return 0;
       }
-      return Krys::Ranges::Impl::LexicographicalCompareThreeWayBasic(left, left + count, right,
-                                                                     right + count);
+      return Krys::Ranges::LexicographicalCompareThreeWayBasic(left, left + count, right, right + count);
     }
 
     KRYS_NODISCARD constexpr static size_t length(const char_type *it) noexcept

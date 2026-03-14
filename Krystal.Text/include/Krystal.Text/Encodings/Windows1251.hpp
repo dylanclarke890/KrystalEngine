@@ -2,18 +2,17 @@
 
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Text/ASCIILiteral.hpp"
-#include "Krystal.Text/Encodings/EncodingTables/Windows1251.tables.hpp"
-#include "Krystal.Text/Encodings/Impl/SingleASCIIByteHighBitLookupEncoding.hpp"
+#include "Krystal.Text/Encodings/detail/SingleASCIIByteHighBitLookupEncoding.hpp"
+#include "Krystal.Text/Encodings/EncodingTables/Windows1251.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 namespace Krys::Text
 {
   /// @brief The encoding that matches Microsoft Windows's Codepage 1251.
   template <typename TCodeUnit = char, typename TCodePoint = UnicodeCodePoint>
   class basic_windows_1251
-      : public ::Krys::Text::Impl::SingleASCIIByteHighBitLookupEncoding<
-          basic_windows_1251<TCodeUnit, TCodePoint>,
-          &::Krys::Text::EncodingTable::windows_1251_index_to_code_point,
-          &::Krys::Text::EncodingTable::windows_1251_code_point_to_index, TCodeUnit, TCodePoint>
+      : public SingleASCIIByteHighBitLookupEncoding<
+          basic_windows_1251<TCodeUnit, TCodePoint>, &EncodingTable::Windows1251IndexToCodePoint,
+          &EncodingTable::Windows1251CodePointToIndex, TCodeUnit, TCodePoint>
   {
   public:
     constexpr static inline ::Krys::Text::ASCIILiteral Name = {"windows-1251"_s};

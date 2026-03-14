@@ -1,7 +1,20 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Memory.hpp"
 #include <cassert>
+
+namespace Krys
+{
+  enum NotNullTag
+  {
+    NotNull
+  };
+}
+
+inline void *operator new(size_t, Krys::NotNullTag, void *location)
+{
+  assert(location);
+  return location;
+}
 
 #define KRYS_FORBID_HEAP_ALLOCATION                                                                          \
 private:                                                                                                     \
@@ -14,7 +27,7 @@ private:                                                                        
 
 #define KRYS_FORBID_HEAP_ALLOCATION_ALLOWING_PLACEMENT_NEW                                                   \
 public:                                                                                                      \
-  void *operator new(size_t, NotNullTag, void *location)                                                     \
+  void *operator new(size_t, Krys::NotNullTag, void *location)                                               \
   {                                                                                                          \
     assert(location);                                                                                        \
     return location;                                                                                         \

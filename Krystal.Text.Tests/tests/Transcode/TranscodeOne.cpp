@@ -28,7 +28,7 @@ namespace Krys::Tests
     for (; expected_it != expected_last && source_it != source_last;)
     {
       const auto result =
-        TranscodeOneTo(CreateSubrange(source_it, source_last), from_encoding, to_encoding, handler);
+        TranscodeOneTo(std::ranges::subrange(source_it, source_last), from_encoding, to_encoding, handler);
       REQUIRE(result.ErrorCode == EncodingError::OK);
       REQUIRE_FALSE(result.ErrorsWereHandled());
 
@@ -37,7 +37,7 @@ namespace Krys::Tests
 
       // make sure that the transcode_one branch of functions is also tested
       const Output otherResult =
-        TranscodeOne(CreateSubrange(source_it, source_last), from_encoding, to_encoding, handler);
+        TranscodeOne(std::ranges::subrange(source_it, source_last), from_encoding, to_encoding, handler);
       REQUIRE(output == otherResult);
 
       expected_it += otherResult.size();

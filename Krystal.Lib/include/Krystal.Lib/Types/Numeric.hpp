@@ -5,7 +5,7 @@
 
 namespace Krys
 {
-  using byte = std::byte;
+  using std::byte;
 
   using int8 = int8_t;
   using int16 = int16_t;
@@ -38,4 +38,6 @@ namespace Krys
   using sint = signed int;
   using slong = signed long;
   using sllong = signed long long;
+
+  using std::size_t;
 }

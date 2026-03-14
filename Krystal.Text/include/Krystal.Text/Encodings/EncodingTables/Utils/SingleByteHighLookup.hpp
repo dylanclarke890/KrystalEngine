@@ -1,75 +1,67 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/TypeTraits.hpp"
-#include "Krystal.Lib/Ranges/ADL.hpp"
-#include "Krystal.Lib/Ranges/Algorithm.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Text/Encodings/EncodingTables/Utils/Predicates.hpp"
 #include "Krystal.Text/Encodings/EncodingTables/Utils/TableTypes.hpp"
-#include <cstddef>
-#include <optional>
+#include <algorithm>
+#include <ranges>
 
 namespace Krys::Text::EncodingTable
 {
-  template <char32 TFailureCodePoint = 0xFFFFu, typename TTable>
-  constexpr inline std::optional<std::uint_least32_t>
-    SingleByteHighIndexToCodePoint(TTable &table, std::size_t lookupIndexPointer) noexcept
+  template <char32 TInvalidCodePoint = 0xFFFFu, typename TTable>
+  KRYS_NODISCARD constexpr Maybe<uint32> SingleByteHighIndexToCodePoint(TTable &table,
+                                                                        size_t lookupIndexPointer) noexcept
   {
-    // standard lookup table
-    auto first = ::std::ranges::cbegin(table);
-    auto last = ::std::ranges::cend(table);
+    auto lookupIndex = static_cast<const decltype(*std::ranges::cbegin(table)[0])>(lookupIndexPointer);
+    auto begin = std::ranges::cbegin(table);
+    auto end = std::ranges::cend(table);
+    auto it = std::lower_bound(begin, end, lookupIndex, &LessThanIndexTarget<decltype(*begin)>);
 
-    using TIndexCodePoint = decltype(*first);
-    using TIndex = decltype(*first[0]);
-    const TIndex lookupIndex = static_cast<TIndex>(lookupIndexPointer);
-    auto itAndLast =
-      Krys::Ranges::lower_bound(first, last, lookupIndex, &LessThanIndexTarget<TIndexCodePoint>);
-
-    if (itAndLast.Current == itAndLast.Last)
+    if (it == end)
     {
       return std::nullopt;
     }
-    const auto &indexAndCodepoint = *itAndLast.Current;
+
+    auto &indexAndCodepoint = *it;
     if (indexAndCodepoint[0] != lookupIndex)
     {
       return std::nullopt;
     }
-    if constexpr (TFailureCodePoint != 0)
+
+    if constexpr (TInvalidCodePoint != 0)
     {
-      if (indexAndCodepoint[0] == static_cast<TIndex>(TFailureCodePoint))
+      if (indexAndCodepoint[0] == TInvalidCodePoint)
       {
         return std::nullopt;
       }
     }
-    return static_cast<uint_least32_t>(indexAndCodepoint[1]);
+
+    return static_cast<uint32>(indexAndCodepoint[1]);
   }
 
-  template <char32 TFailureCodePoint = 0xFFFFu, typename TTable>
-  constexpr inline std::optional<std::size_t>
-    SingleByteHighCodePointToIndex(const TTable &table, std::uint_least32_t lookupCodePoint) noexcept
+  template <char32 TInvalidCodePoint = 0xFFFFu, typename TTable>
+  KRYS_NODISCARD constexpr inline Maybe<size_t>
+    SingleByteHighCodePointToIndex(const TTable &table, uint32 lookupCodePoint) noexcept
   {
-    auto first = ::std::ranges::cbegin(table);
-    auto last = ::std::ranges::cend(table);
-
-    using TTableElement = remove_cvref_t<decltype(*first)>;
-    auto predicate = [&lookupCodePoint](const TTableElement &value)
-    {
-      return lookupCodePoint == value[1];
-    };
-    auto itAndLast = Krys::Ranges::find_if(first, last, predicate);
-    if (itAndLast.Current == itAndLast.Last)
+    auto begin = std::ranges::cbegin(table);
+    auto end = std::ranges::cend(table);
+    auto it = std::find_if(begin, end, [&](const auto &value) { return lookupCodePoint == value[1]; });
+    if (it == end)
     {
       return std::nullopt;
     }
-    const TTableElement &indexAndCodepoint = *itAndLast.Current;
-    if constexpr (TFailureCodePoint != 0)
+
+    auto &indexAndCodepoint = *it;
+    if constexpr (TInvalidCodePoint != 0)
     {
-      if (indexAndCodepoint[0] == TFailureCodePoint)
+      if (indexAndCodepoint[0] == TInvalidCodePoint)
       {
         return std::nullopt;
       }
     }
-    return static_cast<std::size_t>(indexAndCodepoint[0]);
+
+    return static_cast<size_t>(indexAndCodepoint[0]);
   }
 }

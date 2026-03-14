@@ -28,14 +28,14 @@ namespace Krys::Text::Handlers
     {
       using TSubOutput = decltype(result.Output);
 
-      auto outIt = ::std::ranges::begin(result.Output);
-      auto outLast = ::std::ranges::end(result.Output);
+      auto outIt = std::ranges::begin(result.Output);
+      auto outLast = std::ranges::end(result.Output);
       if (outIt == outLast) // BAIL
       {
         return std::forward<TResult>(result);
       }
 
-      if (::std::ranges::empty(replacement)) // empty range, everything is okay
+      if (std::ranges::empty(replacement)) // empty range, everything is okay
       {
         result.ErrorCode = EncodingError::OK;
         return std::forward<TResult>(result);
@@ -642,7 +642,7 @@ namespace Krys::Text::Handlers
       {
         return result; // BAIL
       }
-      auto copyResult = ::Krys::Ranges::Impl::Copy(CodeUnitReplacement, std::move(result.Output));
+      auto copyResult = std::ranges::copy(CodeUnitReplacement, std::move(result.Output));
       result.Output = std::move(copyResult.Out);
       return ::Krys::Text::SkipInputError(encoding, std::move(result), inputProgress, outputProgress);
     }
@@ -668,7 +668,7 @@ namespace Krys::Text::Handlers
         return result; // BAIL
       }
 
-      auto copyResult = ::Krys::Ranges::Impl::Copy(CodePointReplacement, std::move(result.Output));
+      auto copyResult = std::ranges::copy(CodePointReplacement, std::move(result.Output));
       result.Output = std::move(copyResult.Out);
       return ::Krys::Text::SkipInputError(encoding, std::move(result), inputProgress, outputProgress);
     }

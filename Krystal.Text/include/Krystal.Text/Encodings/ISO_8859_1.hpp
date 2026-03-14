@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Ranges/ADL.hpp"
 #include "Krystal.Text/ASCIILiteral.hpp"
 #include "Krystal.Text/Concepts.hpp"
 #include "Krystal.Text/Decode/DecodeResult.hpp"
@@ -79,8 +78,8 @@ namespace Krys::Text
       using TResult = DecodeResult<TSubInput, TSubOutput, state>;
       constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TUErrorHandler>;
 
-      auto inIt = ::std::ranges::cbegin(input);
-      auto inLast = ::std::ranges::cend(input);
+      auto inIt = std::ranges::cbegin(input);
+      auto inLast = std::ranges::cend(input);
       if (inIt == inLast)
       {
         // an exhausted sequence is fine
@@ -88,8 +87,8 @@ namespace Krys::Text
                        TSubOutput(std::forward<TOutput>(output)), s, EncodingError::OK);
       }
 
-      auto outIt = ::std::ranges::begin(output);
-      auto outLast = ::std::ranges::end(output);
+      auto outIt = std::ranges::begin(output);
+      auto outLast = std::ranges::end(output);
 
       if constexpr (CallErrorHandler)
       {
@@ -126,10 +125,10 @@ namespace Krys::Text
         }
       }
 
-      Krys::Ranges::iter_advance(inIt);
+      std::ranges::advance(inIt);
 
       *outIt = unit;
-      Krys::Ranges::iter_advance(outIt);
+      std::ranges::advance(outIt);
 
       return TResult(TSubInput(std::move(inIt), std::move(inLast)),
                      TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);
@@ -160,8 +159,8 @@ namespace Krys::Text
       using TResult = EncodeResult<TSubInput, TSubOutput, state>;
       constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TUErrorHandler>;
 
-      auto inIt = ::std::ranges::cbegin(input);
-      auto inLast = ::std::ranges::cend(input);
+      auto inIt = std::ranges::cbegin(input);
+      auto inLast = std::ranges::cend(input);
       if (inIt == inLast)
       {
         // an exhausted sequence is fine
@@ -169,8 +168,8 @@ namespace Krys::Text
                        EncodingError::OK);
       }
 
-      auto outIt = ::std::ranges::begin(output);
-      KRYS_MAYBE_UNUSED auto outLast = ::std::ranges::end(output);
+      auto outIt = std::ranges::begin(output);
+      KRYS_MAYBE_UNUSED auto outLast = std::ranges::end(output);
 
       if constexpr (CallErrorHandler)
       {
@@ -203,10 +202,10 @@ namespace Krys::Text
         }
       }
 
-      Krys::Ranges::iter_advance(inIt);
+      std::ranges::advance(inIt);
 
       *outIt = static_cast<code_unit>(point);
-      Krys::Ranges::iter_advance(outIt);
+      std::ranges::advance(outIt);
 
       return TResult(TSubInput(std::move(inIt), std::move(inLast)),
                      TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);

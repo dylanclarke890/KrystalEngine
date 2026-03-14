@@ -1,12 +1,12 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Ranges/ADL.hpp"
-#include "Krystal.Lib/Ranges/Algorithm.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Text/Encodings/EncodingTables/Utils/Predicates.hpp"
 #include "Krystal.Text/Encodings/EncodingTables/Utils/TableTypes.hpp"
-#include <cstddef>
-#include <optional>
+#include <algorithm>
+#include <ranges>
 
 namespace Krys::Text::EncodingTable
 {
@@ -52,47 +52,39 @@ namespace Krys::Text::EncodingTable
   };
 #pragma endregion
 
-  KRYS_NODISCARD constexpr inline std::optional<std::uint_least32_t>
-    atascii_index_to_code_point(std::size_t lookupIndexPointer) noexcept
+  KRYS_NODISCARD constexpr Maybe<uint32> ATASCIIIndexToCodePoint(size_t lookupIndexPointer) noexcept
   {
-    const index32 lookupIndex = static_cast<index32>(lookupIndexPointer);
+    auto lookupIndex = static_cast<const index32>(lookupIndexPointer);
+    auto begin = std::ranges::cbegin(ATASCIIIndexCodePointMap);
+    auto end = std::ranges::cend(ATASCIIIndexCodePointMap);
+    auto it = std::lower_bound(begin, end, lookupIndex, &LessThanIndex32Target);
 
-    auto first = ::std::ranges::cbegin(ATASCIIIndexCodePointMap);
-    auto last = ::std::ranges::cend(ATASCIIIndexCodePointMap);
-    auto itAndLast = Krys::Ranges::lower_bound(first, last, lookupIndex, &LessThanIndex32Target);
-
-    if (itAndLast.Current == itAndLast.Last)
+    if (it == end)
     {
       return std::nullopt;
     }
 
-    const index32_code_point &indexAndCodepoint = *itAndLast.Current;
+    auto &indexAndCodepoint = *it;
     if (indexAndCodepoint[0] != lookupIndex)
     {
       return std::nullopt;
     }
 
-    return static_cast<uint_least32_t>(indexAndCodepoint[1]);
+    return static_cast<uint32>(indexAndCodepoint[1]);
   }
 
-  KRYS_NODISCARD constexpr inline std::optional<std::size_t>
-    atascii_code_point_to_index(std::uint_least32_t lookupCodePoint) noexcept
+  KRYS_NODISCARD constexpr Maybe<size_t> ATASCIICodePointToIndex(uint32 lookupCodePoint) noexcept
   {
-    auto predicate = [&lookupCodePoint](const index32_code_point &value)
-    {
-      return lookupCodePoint == value[1];
-    };
+    auto begin = std::ranges::cbegin(ATASCIIIndexCodePointMap);
+    auto end = std::ranges::cend(ATASCIIIndexCodePointMap);
+    auto it = std::find_if(begin, end, [&](const auto &value) { return lookupCodePoint == value[1]; });
 
-    auto first = ::std::ranges::cbegin(ATASCIIIndexCodePointMap);
-    auto last = ::std::ranges::cend(ATASCIIIndexCodePointMap);
-    auto itAndLast = Krys::Ranges::find_if(first, last, predicate);
-
-    if (itAndLast.Current == itAndLast.Last)
+    if (it == end)
     {
       return std::nullopt;
     }
 
-    const index32_code_point &indexAndCodepoint = *itAndLast.Current;
-    return static_cast<std::size_t>(indexAndCodepoint[0]);
+    auto &indexAndCodepoint = *it;
+    return static_cast<size_t>(indexAndCodepoint[0]);
   }
 }

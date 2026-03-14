@@ -1,15 +1,14 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/TypeTraits.hpp"
-#include "Krystal.Lib/Ranges/Impl/InsertBulk.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
+#include "Krystal.Text/_detail/IsLossless.hpp"
+#include "Krystal.Text/_detail/SpanReconstruct.hpp"
 #include "Krystal.Text/CodePoint.hpp"
 #include "Krystal.Text/Concepts.hpp"
 #include "Krystal.Text/Decode/DecodeResult.hpp"
-#include "Krystal.Text/_detail/IsLossless.hpp"
 #include "Krystal.Text/Encodings/DefaultEncoding.hpp"
 #include "Krystal.Text/Handlers/DefaultHandler.hpp"
-#include "Krystal.Text/_detail/SpanReconstruct.hpp"
 #include "Krystal.Text/InlineContainers/InlineBasicString.hpp"
 #include "Krystal.Text/IsUnicodeCodePoint.hpp"
 #include "Krystal.Text/MaxUnits.hpp"
@@ -79,7 +78,7 @@ namespace Krys::Text
   template <typename TInput, typename TOutput>
   constexpr auto DecodeOneIntoRaw(TInput &&input, TOutput &&output)
   {
-    using TCodeUnit = ::Krys::Ranges::range_value_type_t<TInput>;
+    using TCodeUnit = std::ranges::range_value_t<TInput>;
     using TEncoding =
       conditional_t<std::is_constant_evaluated(), default_consteval_code_unit_encoding_t<TCodeUnit>,
                     default_code_unit_encoding_t<TCodeUnit>>;
@@ -107,7 +106,7 @@ namespace Krys::Text::detail_decode
 
     auto result = ::Krys::Text::DecodeOneIntoRaw(std::forward<TInput>(input), encoding, initialOutput,
                                                  errorHandler, state);
-    ::Krys::Ranges::Impl::ContainerInsertBulk(output, Span {initialOutput.data(), result.Output.data()});
+    ::Krys::Ranges::ContainerInsertBulk(output, Span {initialOutput.data(), result.Output.data()});
     return result;
   }
 
@@ -117,12 +116,12 @@ namespace Krys::Text::detail_decode
                                    TState &state)
   {
     TOutputContainer output {};
-    if constexpr (::Krys::Ranges::HasSizeADL<TInput>)
+    if constexpr (std::ranges::sized_range<TInput>)
     {
-      using TSize = decltype(::std::ranges::size(input));
-      if constexpr (::Krys::Ranges::has_reserve_with_size<TOutputContainer, TSize>)
+      using TSize = decltype(std::ranges::size(input));
+      if constexpr (HasReserve<TOutputContainer, TSize>)
       {
-        output.reserve(::std::ranges::size(input) * (::Krys::Text::MaxDecodeCodePoints<TEncoding> / 2));
+        output.reserve(std::ranges::size(input) * (::Krys::Text::MaxDecodeCodePoints<TEncoding> / 2));
       }
     }
 
@@ -210,7 +209,7 @@ namespace Krys::Text
   template <typename TInput, typename TOutput>
   constexpr auto DecodeOneInto(TInput &&input, TOutput &&output)
   {
-    using TCodeUnit = ::Krys::Ranges::range_value_type_t<TInput>;
+    using TCodeUnit = std::ranges::range_value_t<TInput>;
     using TEncoding =
       conditional_t<std::is_constant_evaluated(), default_consteval_code_unit_encoding_t<TCodeUnit>,
                     default_code_unit_encoding_t<TCodeUnit>>;
@@ -293,7 +292,7 @@ namespace Krys::Text
   template <typename TOutputContainer = void, typename TInput>
   constexpr auto DecodeOneTo(TInput &&input)
   {
-    using TCodeUnit = ::Krys::Ranges::range_value_type_t<TInput>;
+    using TCodeUnit = std::ranges::range_value_t<TInput>;
     using TEncoding =
       conditional_t<std::is_constant_evaluated(), default_consteval_code_unit_encoding_t<TCodeUnit>,
                     default_code_unit_encoding_t<TCodeUnit>>;
@@ -371,7 +370,7 @@ namespace Krys::Text
   template <typename TOutputContainer = void, typename TInput>
   constexpr auto DecodeOne(TInput &&input)
   {
-    using TCodeUnit = ::Krys::Ranges::range_value_type_t<TInput>;
+    using TCodeUnit = std::ranges::range_value_t<TInput>;
     using TEncoding =
       conditional_t<std::is_constant_evaluated(), default_consteval_code_unit_encoding_t<TCodeUnit>,
                     default_code_unit_encoding_t<TCodeUnit>>;

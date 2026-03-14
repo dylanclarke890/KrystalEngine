@@ -64,8 +64,8 @@ namespace Krys::Text
                                      const TOutputProgress &outputProgress) noexcept
   {
     // we can only advance one character at a time.
-    auto it = ::std::ranges::begin(std::forward<TResult>(result).Input);
-    auto last = ::std::ranges::end(result.Input);
+    auto it = std::ranges::begin(std::forward<TResult>(result).Input);
+    auto last = std::ranges::end(result.Input);
 
     using TInput = decltype(result.Input);
     using TUInput = remove_cvref_t<TInput>;
@@ -80,7 +80,7 @@ namespace Krys::Text
       // if there is already some items in the input progress (things irreversibly read), then
       // we are not obligated to do "at least" one skip; barrier it behind an empty check for
       // progress.
-      if (::std::ranges::empty(inputProgress) && ::std::ranges::empty(outputProgress))
+      if (std::ranges::empty(inputProgress) && std::ranges::empty(outputProgress))
       {
         ++it;
       }
@@ -110,8 +110,8 @@ namespace Krys::Text
                                                    const TOutputProgress &outputProgress) noexcept
   {
     // we can only advance one character at a time.
-    auto it = ::std::ranges::begin(std::forward<TResult>(result).Input);
-    auto last = ::std::ranges::end(result.Input);
+    auto it = std::ranges::begin(std::forward<TResult>(result).Input);
+    auto last = std::ranges::end(result.Input);
 
     using TInput = decltype(result.Input);
     using TUInput = remove_cvref_t<TInput>;
@@ -127,7 +127,7 @@ namespace Krys::Text
       // if there is already some items in the input progress (things irreversibly read), then
       // we are not obligated to do "at least" one skip; barrier it behind an empty check for
       // progress.
-      if (::std::ranges::empty(inputProgress) && ::std::ranges::empty(outputProgress))
+      if (std::ranges::empty(inputProgress) && std::ranges::empty(outputProgress))
       {
         ++it;
       }
@@ -174,12 +174,12 @@ namespace Krys::Text
     else
     {
       auto input = std::forward<TResult>(result).Input;
-      auto it = ::std::ranges::begin(input);
-      auto last = ::std::ranges::end(input);
+      auto it = std::ranges::begin(input);
+      auto last = std::ranges::end(input);
 
       if (it != last)
       {
-        if (::std::ranges::empty(inputProgress) && ::std::ranges::empty(outputProgress))
+        if (std::ranges::empty(inputProgress) && std::ranges::empty(outputProgress))
         {
           ++it;
         }

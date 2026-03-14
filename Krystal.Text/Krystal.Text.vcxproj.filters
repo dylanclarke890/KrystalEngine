@@ -119,7 +119,7 @@
     <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\EUC-KR-UHC.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\GB18030.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\GB18030.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\GBK.hpp">
@@ -128,85 +128,85 @@
     <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Utils\GenericLookup.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\IBM424HebrewBulletin.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\IBM424HebrewBulletin.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\IBM856Hebrew.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\IBM856Hebrew.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\IBM866Cyrillic.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\IBM866Cyrillic.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\IBM1006Urdu.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\IBM1006Urdu.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_1_1985.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_1_1985.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_1_1998.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_1_1998.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_2.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_2.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_3.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_3.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_4.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_4.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_5.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_5.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_6.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_6.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_7.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_7.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_8.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_8.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_10.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_10.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_13.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_13.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_14.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_14.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_15.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_15.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_16.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ISO_8859_16.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Kamenicky.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Kamenicky.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\KazakhSTRK1048.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\KazakhSTRK1048.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\KOI8R.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\KOI8R.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\KOI8U.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\KOI8U.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\MacCyrillic.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\MacCyrillic.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\MacRoman.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\MacRoman.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\PETSCII.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\PETSCII.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Utils\Predicates.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ShiftJISx0208.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\ShiftJISx0208.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Utils\SingleByteHighLookup.hpp">
@@ -215,46 +215,46 @@
     <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Utils\TableTypes.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\TatarANSI.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\TatarANSI.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\TatarASCII.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\TatarASCII.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows437DOSLatinUS.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows437DOSLatinUS.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows865DOSNordic.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows865DOSNordic.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows874.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows874.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows1250.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows1250.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows1251.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows1251.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows1252.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows1252.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows1253.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows1253.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows1254.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows1254.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows1255.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows1255.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows1256.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows1256.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows1257.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows1257.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows1258.tables.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\EncodingTables\Windows1258.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\Encodings\EUC-KR-UHC.hpp">
@@ -413,7 +413,7 @@
     <ClInclude Include="include\Krystal.Text\Transcode\PropagateTranscodeError.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\Impl\GBK_or_GB18030.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\detail\GBK_or_GB18030.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\_detail\IsLossless.hpp">
@@ -422,19 +422,16 @@
     <ClInclude Include="include\Krystal.Text\Handlers\ProgressHandler.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\Impl\SingleASCIIByteHighBitLookupEncoding.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\detail\SingleASCIIByteHighBitLookupEncoding.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\Impl\SingleByteLookupEncoding.hpp">
+    <ClInclude Include="include\Krystal.Text\Encodings\detail\SingleByteLookupEncoding.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\_detail\SpanReconstruct.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\_detail\UpdateInput.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\BasicEncodingScheme.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\Count\CountAsDecoded.hpp">
@@ -459,9 +456,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\Encode\EncodeOne.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Text\Encodings\EncodingScheme.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.Text\Transcode\Transcode.hpp">

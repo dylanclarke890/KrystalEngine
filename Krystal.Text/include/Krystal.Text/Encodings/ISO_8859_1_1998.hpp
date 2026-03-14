@@ -2,8 +2,8 @@
 
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Text/ASCIILiteral.hpp"
-#include "Krystal.Text/Encodings/EncodingTables/iso_8859_1_1998.tables.hpp"
-#include "Krystal.Text/Encodings/Impl/SingleByteLookupEncoding.hpp"
+#include "Krystal.Text/Encodings/detail/SingleByteLookupEncoding.hpp"
+#include "Krystal.Text/Encodings/EncodingTables/iso_8859_1_1998.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys::Text
@@ -11,10 +11,9 @@ namespace Krys::Text
   /// @brief The encoding that matches the ISO/IEC 8859-1 encoding specification published in 1998.
   template <typename TCodeUnit = char, typename TCodePoint = UnicodeCodePoint>
   class basic_iso_8859_1_1998
-      : public ::Krys::Text::Impl::SingleByteLookupEncoding<
-          basic_iso_8859_1_1998<TCodeUnit, TCodePoint>,
-          &::Krys::Text::EncodingTable::iso_8859_1_1998_index_to_code_point,
-          &::Krys::Text::EncodingTable::iso_8859_1_1998_code_point_to_index, TCodeUnit, TCodePoint>
+      : public SingleByteLookupEncoding<basic_iso_8859_1_1998<TCodeUnit, TCodePoint>,
+                                        &EncodingTable::ISO8859_1_1998IndexToCodePoint,
+                                        &EncodingTable::ISO8859_1_1998CodePointToIndex, TCodeUnit, TCodePoint>
   {
   public:
     constexpr static inline ::Krys::Text::ASCIILiteral Name = "ISO-8859-1-1998"_s;

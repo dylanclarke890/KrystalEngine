@@ -2,8 +2,8 @@
 
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Text/ASCIILiteral.hpp"
-#include "Krystal.Text/Encodings/EncodingTables/iso_8859_8.tables.hpp"
-#include "Krystal.Text/Encodings/Impl/SingleASCIIByteHighBitLookupEncoding.hpp"
+#include "Krystal.Text/Encodings/detail/SingleASCIIByteHighBitLookupEncoding.hpp"
+#include "Krystal.Text/Encodings/EncodingTables/iso_8859_8.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys::Text
@@ -11,10 +11,9 @@ namespace Krys::Text
   /// @brief The encoding that matches the ISO/IEC 8859-8 encoding specification.
   template <typename TCodeUnit = char, typename TCodePoint = UnicodeCodePoint>
   class basic_iso_8859_8
-      : public ::Krys::Text::Impl::SingleASCIIByteHighBitLookupEncoding<
-          basic_iso_8859_8<TCodeUnit, TCodePoint>,
-          &::Krys::Text::EncodingTable::iso_8859_8_index_to_code_point,
-          &::Krys::Text::EncodingTable::iso_8859_8_code_point_to_index, TCodeUnit, TCodePoint>
+      : public SingleASCIIByteHighBitLookupEncoding<
+          basic_iso_8859_8<TCodeUnit, TCodePoint>, &EncodingTable::ISO_8859_8IndexToCodePoint,
+          &EncodingTable::ISO_8859_8CodePointToIndex, TCodeUnit, TCodePoint>
   {
   public:
     constexpr static inline ::Krys::Text::ASCIILiteral Name = "ISO-8859-8"_s;

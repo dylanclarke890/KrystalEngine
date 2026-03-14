@@ -2,7 +2,6 @@
 #include "Krystal.Text/Codecs/BasicCodec.hpp"
 #include "Krystal.Text/Codecs/CodecRegistry.hpp"
 #include "Krystal.Text/Encodings/ASCII.hpp"
-#include "Krystal.Text/Encodings/EncodingScheme.hpp"
 #include <catch_all.hpp>
 
 namespace
@@ -25,8 +24,6 @@ namespace Krys::Tests
   {
     CodecRegistry registry;
     registry.Register<BasicCodec<basic_utf8<byte>>>();
-    registry.Register<BasicCodec<utf16_le_t>>();
-    registry.Register<BasicCodec<utf16_be_t>>();
     registry.Register<BasicCodec<basic_ascii<byte>>>();
     return registry;
   }

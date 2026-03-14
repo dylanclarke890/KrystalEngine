@@ -2,7 +2,7 @@
 
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Text/ASCIILiteral.hpp"
-#include "Krystal.Text/Encodings/Impl/GBK_or_GB18030.hpp"
+#include "Krystal.Text/Encodings/detail/GBK_or_GB18030.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys::Text
@@ -13,12 +13,11 @@ namespace Krys::Text
   /// @tparam TCodePoint The code point type to use when outputting decoded units.
   template <typename TCodeUnit = char, typename TCodePoint = UnicodeCodePoint>
   class basic_gb18030
-      : public ::Krys::Text::Encodings::Impl::BasicGB18030<basic_gb18030<TCodeUnit, TCodePoint>, TCodeUnit,
-                                                           TCodePoint, false>
+      : public Basic_GBK_GB18030<basic_gb18030<TCodeUnit, TCodePoint>, TCodeUnit, TCodePoint, false>
   {
   public:
-    constexpr static inline ::Krys::Text::ASCIILiteral Name = {"gb18030"_s};
-    constexpr static inline ::Krys::Array<::Krys::Text::ASCIILiteral, 1> Aliases = {"gb18030"_s};
+    constexpr static inline ASCIILiteral Name = {"gb18030"_s};
+    constexpr static inline Array<ASCIILiteral, 1> Aliases = {"gb18030"_s};
   };
 
   /// @brief An instance of basic_gb18030 for ease of use.

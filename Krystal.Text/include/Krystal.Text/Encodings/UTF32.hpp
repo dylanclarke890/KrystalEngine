@@ -77,8 +77,8 @@ namespace Krys::Text::Impl
       using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = DecodeResult<TSubInput, TSubOutput, state>;
 
-      auto inIt = ::std::ranges::cbegin(input);
-      auto inLast = ::std::ranges::cend(input);
+      auto inIt = std::ranges::cbegin(input);
+      auto inLast = std::ranges::cend(input);
       if (inIt == inLast)
       {
         // an exhausted sequence is fine
@@ -86,8 +86,8 @@ namespace Krys::Text::Impl
                        EncodingError::OK);
       }
 
-      auto outIt = ::std::ranges::begin(output);
-      KRYS_MAYBE_UNUSED auto outLast = ::std::ranges::end(output);
+      auto outIt = std::ranges::begin(output);
+      KRYS_MAYBE_UNUSED auto outLast = std::ranges::end(output);
 
       constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TErrorHandler>;
       if constexpr (CallErrorHandler)
@@ -121,8 +121,8 @@ namespace Krys::Text::Impl
       }
 
       *outIt = unit;
-      ::Krys::Ranges::iter_advance(outIt);
-      ::Krys::Ranges::iter_advance(inIt);
+      outIt++;
+      inIt++;
 
       return TResult(TSubInput(std::move(inIt), std::move(inLast)),
                      TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);
@@ -135,8 +135,8 @@ namespace Krys::Text::Impl
       using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = EncodeResult<TSubInput, TSubOutput, state>;
 
-      auto inIt = ::std::ranges::cbegin(input);
-      auto inLast = ::std::ranges::cend(input);
+      auto inIt = std::ranges::cbegin(input);
+      auto inLast = std::ranges::cend(input);
       if (inIt == inLast)
       {
         // an exhausted sequence is fine
@@ -144,8 +144,8 @@ namespace Krys::Text::Impl
                        EncodingError::OK);
       }
 
-      auto outIt = ::std::ranges::begin(output);
-      KRYS_MAYBE_UNUSED auto outLast = ::std::ranges::end(output);
+      auto outIt = std::ranges::begin(output);
+      KRYS_MAYBE_UNUSED auto outLast = std::ranges::end(output);
 
       char32 point32 = static_cast<char32>(*inIt);
 
@@ -176,8 +176,8 @@ namespace Krys::Text::Impl
       }
 
       *outIt = static_cast<code_unit>(point32);
-      ::Krys::Ranges::iter_advance(outIt);
-      ::Krys::Ranges::iter_advance(inIt);
+      outIt++;
+      inIt++;
 
       return TResult(TSubInput(std::move(inIt), std::move(inLast)),
                      TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);

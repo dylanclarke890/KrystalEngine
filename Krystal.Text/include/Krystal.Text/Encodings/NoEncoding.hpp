@@ -36,8 +36,8 @@ namespace Krys::Text
       using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = ::Krys::Text::DecodeResult<TSubInput, TSubOutput, state>;
 
-      auto inIt = ::std::ranges::cbegin(input);
-      auto inLast = ::std::ranges::cend(input);
+      auto inIt = std::ranges::cbegin(input);
+      auto inLast = std::ranges::cend(input);
       if (inIt == inLast)
       {
         // an exhausted sequence is fine
@@ -45,8 +45,8 @@ namespace Krys::Text
                        EncodingError::OK);
       }
 
-      auto outIt = ::std::ranges::begin(output);
-      KRYS_MAYBE_UNUSED auto outLast = ::std::ranges::end(output);
+      auto outIt = std::ranges::begin(output);
+      KRYS_MAYBE_UNUSED auto outLast = std::ranges::end(output);
 
       constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TErrorHandler>;
       if constexpr (CallErrorHandler)
@@ -64,10 +64,10 @@ namespace Krys::Text
       }
 
       code_unit unit = *inIt;
-      ::Krys::Ranges::iter_advance(inIt);
+      std::ranges::advance(inIt);
 
       *outIt = static_cast<code_point>(unit);
-      ::Krys::Ranges::iter_advance(outIt);
+      std::ranges::advance(outIt);
 
       return TResult(TSubInput(std::move(inIt), std::move(inLast)),
                      TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);
@@ -80,8 +80,8 @@ namespace Krys::Text
       using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = ::Krys::Text::EncodeResult<TSubInput, TSubOutput, state>;
 
-      auto inIt = ::std::ranges::cbegin(input);
-      auto inLast = ::std::ranges::cend(input);
+      auto inIt = std::ranges::cbegin(input);
+      auto inLast = std::ranges::cend(input);
       if (inIt == inLast)
       {
         // an exhausted sequence is fine
@@ -89,8 +89,8 @@ namespace Krys::Text
                        EncodingError::OK);
       }
 
-      auto outIt = ::std::ranges::begin(output);
-      KRYS_MAYBE_UNUSED auto outLast = ::std::ranges::end(output);
+      auto outIt = std::ranges::begin(output);
+      KRYS_MAYBE_UNUSED auto outLast = std::ranges::end(output);
 
       constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TErrorHandler>;
       if constexpr (CallErrorHandler)
@@ -110,10 +110,10 @@ namespace Krys::Text
       code_point points[1] {};
       points[0] = *inIt;
       const code_point &point = points[0];
-      ::Krys::Ranges::iter_advance(inIt);
+      std::ranges::advance(inIt);
 
       *outIt = static_cast<code_unit>(point);
-      ::Krys::Ranges::iter_advance(outIt);
+      std::ranges::advance(outIt);
 
       return TResult(TSubInput(std::move(inIt), std::move(inLast)),
                      TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);

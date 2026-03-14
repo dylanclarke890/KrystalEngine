@@ -1,343 +1,116 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Concepts.hpp"
-#include "Krystal.Lib/Ranges/ADL.hpp"
-#include "Krystal.Lib/Ranges/CountedIterator.hpp"
-#include "Krystal.Lib/Ranges/Iterator.hpp"
-#include "Krystal.Lib/Ranges/Subrange.hpp"
-#include "Krystal.Lib/Ranges/Unbounded.hpp"
-#include <algorithm>
+#include "Krystal.Lib/Ranges/TypeTraits.hpp"
+#include <ranges>
 
 namespace Krys::Ranges
 {
-  namespace Impl
+  template <typename TFirst0, typename TLast0, typename TFirst1, typename TLast1>
+  constexpr int LexicographicalCompareThreeWayBasic(TFirst0 first0, TLast0 last0, TFirst1 first1,
+                                                    TLast1 last1)
   {
-    template <typename TInIteratorOrRange, typename TOutIteratorOrRange>
-    struct InOutResult
+    for (; (first0 != last0) && (first1 != last1); ++first0, (void)++first1)
     {
-      TInIteratorOrRange In;
-      TOutIteratorOrRange Out;
-
-      template <typename TArgInIterator, typename TArgOutIterator>
-      requires(ConvertibleTo<const TInIteratorOrRange &, TArgInIterator>
-               && ConvertibleTo<const TOutIteratorOrRange &, TArgOutIterator>)
-      constexpr operator InOutResult<TArgInIterator, TArgOutIterator>() const &
-      {
-        return {In, Out};
-      }
-
-      template <typename TArgInIterator, typename TArgOutIterator>
-      requires(ConvertibleTo<const TInIteratorOrRange &, TArgInIterator>
-               && ConvertibleTo<const TOutIteratorOrRange &, TArgOutIterator>)
-      constexpr operator InOutResult<TArgInIterator, TArgOutIterator>() &
-      {
-        return {In, Out};
-      }
-
-      template <typename TArgInIterator, typename TArgOutIterator>
-      requires(ConvertibleTo<TInIteratorOrRange, TArgInIterator>
-               && ConvertibleTo<TOutIteratorOrRange, TArgOutIterator>)
-      constexpr operator InOutResult<TArgInIterator, TArgOutIterator>() &&
-      {
-        return {std::move(In), std::move(Out)};
-      }
-    };
-
-    template <typename TInIteratorOrRange, typename TOutIteratorOrRange>
-    struct CurrentLastResult
-    {
-      TInIteratorOrRange Current;
-      TOutIteratorOrRange Last;
-
-      template <typename TArgInIterator, typename TArgOutIterator>
-      requires(ConvertibleTo<const TInIteratorOrRange &, TArgInIterator>
-               && ConvertibleTo<const TOutIteratorOrRange &, TArgOutIterator>)
-      constexpr operator CurrentLastResult<TArgInIterator, TArgOutIterator>() const &
-      {
-        return {Current, Last};
-      }
-
-      template <typename TArgInIterator, typename TArgOutIterator>
-      requires(ConvertibleTo<const TInIteratorOrRange &, TArgInIterator>
-               && ConvertibleTo<const TOutIteratorOrRange &, TArgOutIterator>)
-      constexpr operator CurrentLastResult<TArgInIterator, TArgOutIterator>() &
-      {
-        return {Current, Last};
-      }
-
-      template <typename TArgInIterator, typename TArgOutIterator>
-      requires(ConvertibleTo<TInIteratorOrRange, TArgInIterator>
-               && ConvertibleTo<TOutIteratorOrRange, TArgOutIterator>)
-      constexpr operator CurrentLastResult<TArgInIterator, TArgOutIterator>() &&
-      {
-        return {std::move(Current), std::move(Last)};
-      }
-    };
-  }
-
-  template <typename TInIteratorOrRange, typename TOutIteratorOrRange>
-  using InOutResult = std::ranges::in_out_result<TInIteratorOrRange, TOutIteratorOrRange>;
-
-  template <typename TInIteratorOrRange, typename TOutIteratorOrRange>
-  using CurrentLastResult = Impl::CurrentLastResult<TInIteratorOrRange, TOutIteratorOrRange>;
-
-  namespace Impl
-  {
-    template <typename TFirst, typename, typename TOutFirst>
-    constexpr bool IsCopyUnsafeNoexcept() noexcept
-    {
-      return NoThrowAssignable<std::iter_reference_t<TOutFirst>, std::iter_reference_t<TFirst>>;
-    }
-
-    template <typename TFirst, typename TLast, typename TOutFirst, typename TOutLast>
-    constexpr bool IsCopyNoexcept() noexcept
-    {
-      if constexpr (SizedSentinelFor<TOutFirst, TOutLast>)
-      {
-        return IsCopyUnsafeNoexcept<TFirst, TLast, TOutFirst>()
-               && NoThrowAssignable<std::iter_reference_t<TOutFirst>, std::iter_reference_t<TFirst>>;
-      }
-      else
-      {
-        return NoThrowAssignable<std::iter_reference_t<TOutFirst>, std::iter_reference_t<TFirst>>;
-      }
-    }
-
-    template <typename TFirst, typename TFirstCount, typename TOutFirst>
-    constexpr auto
-      CopyNUnsafe(TFirst first, TFirstCount size,
-                  TOutFirst outFirst) noexcept(IsCopyUnsafeNoexcept<TFirst, TFirstCount, TOutFirst>())
-    {
-      using TResultInIterator = CountedIterator<TFirst>;
-      using TInRange = subrange<TResultInIterator, std::default_sentinel_t>;
-      using TOutRange = UnboundedView<TOutFirst>;
-      using TResult = InOutResult<TInRange, TOutRange>;
-
-      if (!std::is_constant_evaluated())
-      {
-        using TValue = iterator_value_type_t<TFirst>;
-        using TOutValue = iterator_value_type_t<TOutFirst>;
-
-        if constexpr (IsContiguousIterator<TFirst> && HasUniqueObjectRepresentations<TValue>
-                      && IsContiguousIterator<TOutFirst> && HasUniqueObjectRepresentations<TOutValue>)
-        {
-          auto first_ptr = std::to_address(first);
-          auto distance = size;
-          std::size_t byteDistance = sizeof(TValue) * distance;
-          std::size_t outDistance = byteDistance / sizeof(TOutValue);
-          std::memcpy(std::to_address(outFirst), first_ptr, byteDistance);
-          return TResult {
-            TInRange(TResultInIterator(std::move(first) + distance, 0), std::default_sentinel_t {}),
-            TOutRange(std::move(outFirst) + outDistance)};
-        }
-      }
-      TFirstCount currentSize = 0;
-      for (; currentSize < size; ++first, (void)++outFirst, (void)++currentSize)
-      {
-        *outFirst = *first;
-      }
-      return TResult {TInRange(TResultInIterator(std::move(first), 0), std::default_sentinel_t {}),
-                      TOutRange(std::move(outFirst))};
-    }
-
-    template <typename TFirst, typename TLast, typename TOutFirst>
-    constexpr auto CopyUnsafe(TFirst first, TLast last,
-                              TOutFirst outFirst) noexcept(IsCopyUnsafeNoexcept<TFirst, TLast, TOutFirst>())
-    {
-      using TInRange = subrange<TFirst, TLast>;
-      using TOutRange = UnboundedView<TOutFirst>;
-      using TResult = InOutResult<TInRange, TOutRange>;
-
-      if (!std::is_constant_evaluated())
-      {
-        using TValue = iterator_value_type_t<TFirst>;
-        using TOutValue = iterator_value_type_t<TOutFirst>;
-        if constexpr (IsContiguousIterator<TFirst> && HasUniqueObjectRepresentations<TValue>
-                      && IsContiguousIterator<TOutFirst> && HasUniqueObjectRepresentations<TOutValue>)
-        {
-          auto first_ptr = std::to_address(first);
-          auto distance = last - first;
-          std::size_t byteDistance = sizeof(TValue) * distance;
-          std::size_t outDistance = byteDistance / sizeof(TOutValue);
-          std::memcpy(std::to_address(outFirst), first_ptr, byteDistance);
-          return TResult {TInRange(std::move(first) + distance, std::move(last)),
-                          TOutRange(std::move(outFirst) + outDistance)};
-        }
-      }
-
-      for (; first != last; ++first, (void)++outFirst)
-      {
-        *outFirst = *first;
-      }
-      return TResult {TInRange(std::move(first), std::move(last)), TOutRange(std::move(outFirst))};
-    }
-
-    template <typename TFirst, typename TFirstCount, typename TOutFirst, typename TOutFirstCount>
-    constexpr auto
-      CopyN(TFirst first, TFirstCount size, TOutFirst outFirst,
-            TOutFirstCount outSize) noexcept(IsCopyNoexcept<TFirst, TFirstCount, TOutFirst, TOutFirstCount>())
-    {
-      using TInRange = subrange<CountedIterator<TFirst>, std::default_sentinel_t>;
-      using TOutRange = subrange<CountedIterator<TOutFirst>, std::default_sentinel_t>;
-      using TResult = InOutResult<TInRange, TOutRange>;
-      if (!std::is_constant_evaluated())
-      {
-        if constexpr (IsIteratorConceptOrBetter<std::random_access_iterator_tag, TOutFirst>)
-        {
-          if (size <= outSize)
-          {
-            auto result = CopyNUnsafe(std::move(first), size, std::move(outFirst));
-            return TResult {std::move(result.In), TOutRange(result.Out.begin(), result.Out.begin() + size)};
-          }
-          else
-          {
-            auto result = CopyNUnsafe(std::move(first), outSize, std::move(outFirst));
-            iterator_difference_type_t<TOutFirst> outSize_left =
-              static_cast<iterator_difference_type_t<TOutFirst>>(size - outSize);
-            return TResult {std::move(result.In), TOutRange({std::move(result.Out).begin(), outSize_left},
-                                                            std::default_sentinel_t {})};
-          }
-        }
-      }
-
-      decltype(size) currentCount = 0;
-      decltype(outSize) currentOutCount = 0;
-      for (; currentCount < size && currentOutCount != outSize;
-           ++first, (void)++outFirst, (void)++currentCount, (void)++currentOutCount)
-      {
-        *outFirst = *first;
-      }
-
-      iterator_difference_type_t<TFirst> size_left =
-        static_cast<iterator_difference_type_t<TFirst>>(size - currentCount);
-
-      iterator_difference_type_t<TOutFirst> outSize_left =
-        static_cast<iterator_difference_type_t<TOutFirst>>(outSize - currentOutCount);
-
-      return TResult {TInRange({std::move(first), size_left}, std::default_sentinel_t {}),
-                      TOutRange({std::move(outFirst), outSize_left}, std::default_sentinel_t {})};
-    }
-
-    template <typename TFirst, typename TLast, typename TOutFirst, typename TOutLast>
-    constexpr auto Copy(TFirst first, TLast last, TOutFirst outFirst,
-                        TOutLast outLast) noexcept(IsCopyNoexcept<TFirst, TLast, TOutFirst, TOutLast>())
-    {
-      using TInRange = subrange<TFirst, TLast>;
-      using TOutRange = subrange<TOutFirst, TOutLast>;
-      using TResult = InOutResult<TInRange, TOutRange>;
-
-      if (!std::is_constant_evaluated())
-      {
-        if constexpr (SizedSentinelFor<TOutFirst, TOutLast>)
-        {
-          auto outSize = outLast - outFirst;
-          auto size = last - first;
-          if (size <= outSize)
-          {
-            auto result = CopyUnsafe(std::move(first), std::move(last), std::move(outFirst));
-            return TResult {std::move(result.In),
-                            TOutRange(std::move(result.Out).begin(), std::move(outLast))};
-          }
-          else
-          {
-            auto shortLast = first + outSize;
-            auto result = CopyUnsafe(std::move(first), std::move(shortLast), std::move(outFirst));
-            return TResult {std::move(result.In),
-                            TOutRange(std::move(result.Out).begin(), std::move(outLast))};
-          }
-        }
-      }
-
-      for (; first != last && outFirst != outLast; ++first, (void)++outFirst)
-      {
-        *outFirst = *first;
-      }
-      return TResult {TInRange(std::move(first), std::move(last)),
-                      TOutRange(std::move(outFirst), std::move(outLast))};
-    }
-
-    template <typename TInput, typename TOutput>
-    constexpr auto Copy(TInput &&input, TOutput &&output) noexcept(
-      IsCopyNoexcept<range_const_iterator_t<TInput>, range_const_sentinel_t<TInput>,
-                     ::std::ranges::iterator_t<TOutput>, range_sentinel_t<TOutput>>())
-    {
-      return Impl::Copy(::std::ranges::cbegin(std::forward<TInput>(input)), ::std::ranges::cend(input),
-                        ::std::ranges::begin(std::forward<TOutput>(output)), ::std::ranges::end(output));
-    }
-
-    template <typename TFirst0, typename TLast0, typename TFirst1, typename TLast1>
-    constexpr int LexicographicalCompareThreeWayBasic(TFirst0 first0, TLast0 last0, TFirst1 first1,
-                                                      TLast1 last1)
-    {
-      for (; (first0 != last0) && (first1 != last1); ++first0, (void)++first1)
-      {
-        if (*first0 < *first1)
-          return -1;
-        if (*first1 < *first0)
-          return 1;
-      }
-      bool firstlast0_exhausted = (first0 == last0);
-      bool firstlast1_exhausted = (first1 == last1);
-      if (firstlast0_exhausted && firstlast1_exhausted)
-      {
-        return 0;
-      }
-      else if (firstlast0_exhausted)
+      if (*first0 < *first1)
       {
         return -1;
       }
-      else
+      if (*first1 < *first0)
       {
         return 1;
       }
     }
+
+    if (first0 == last0 && first1 == last1)
+    {
+      return 0;
+    }
+    else if (first0 == last0)
+    {
+      return -1;
+    }
+    else
+    {
+      return 1;
+    }
   }
 
-  template <typename TIterator, typename TLast, typename TPredicate>
-  constexpr CurrentLastResult<TIterator, TLast> find_if(TIterator first, TLast last,
-                                                        TPredicate predicate) noexcept
+  template <typename TOutputContainer, typename TInsertion>
+  constexpr void ContainerInsertBulk(TOutputContainer &output, TInsertion &&insertion) noexcept
   {
-    for (; first != last; ++first)
+    using iterator = std::ranges::iterator_t<remove_cvref_t<TInsertion>>;
+
+    if constexpr (HasInsertBulk<TOutputContainer, iterator, iterator>)
     {
-      if (predicate(*first))
+      output.insert(std::ranges::cend(output), std::ranges::cbegin(insertion), std::ranges::cend(insertion));
+    }
+    else
+    {
+      for (auto &&value : insertion)
       {
-        return {std::move(first), std::move(last)};
+        if constexpr (HasPushBack<TOutputContainer, std::iter_reference_t<iterator>>)
+        {
+          output.push_back(std::forward<decltype(value)>(value));
+        }
+        else
+        {
+          output.insert(std::ranges::cend(output), std::forward<decltype(value)>(value));
+        }
       }
     }
-    return {std::move(first), std::move(last)};
   }
 
-  template <typename TIterator, typename TLast, typename T, typename TCompare>
-  constexpr CurrentLastResult<TIterator, TLast> lower_bound(TIterator first, TLast last, T &&targetValue,
-                                                            TCompare compare) noexcept
+  struct range_iterator_unsaveable_t
   {
-    using TDiff = iterator_difference_type_t<TIterator>;
-    if (!std::is_constant_evaluated())
+  };
+
+  constexpr range_iterator_unsaveable_t range_iterator_unsaveable {};
+
+  template <typename TRange>
+  concept InputOrOutputRange =
+    std::ranges::input_range<TRange> || std::ranges::output_range<TRange, std::ranges::range_value_t<TRange>>;
+
+  /// @brief Clones a range if it is not an input or output range.
+  /// @param range The range to save.
+  /// @returns Either an implementation-defined object that indicates the save could not be done, or a
+  /// move/copy of the given range.
+  template <typename TRange>
+  constexpr auto SaveRange(TRange &&range) noexcept
+  {
+    if constexpr (SameType<remove_cvref_t<TRange>, range_iterator_unsaveable_t>)
     {
-      if constexpr (SameType<TIterator, TLast>)
-      {
-        auto it = std::lower_bound(first, last, targetValue, compare);
-        return {std::move(it), std::move(last)};
-      }
+      return range_iterator_unsaveable;
     }
-    TIterator it = {};
-    TDiff count = std::distance(first, last);
-    TDiff step = 0;
-    while (count > 0)
+    else if constexpr (InputOrOutputRange<remove_cvref_t<TRange>>)
     {
-      it = first;
-      step = count / 2;
-      Krys::Ranges::iter_advance(it, step);
-      if (compare(*it, targetValue))
-      {
-        first = ++it;
-        count -= step + 1;
-      }
-      else
-      {
-        count = step;
-      }
+      return range_iterator_unsaveable;
     }
-    return {std::move(first), std::move(last)};
+    else
+    {
+      return std::forward<TRange>(range);
+    }
+  }
+
+  /// @brief Clones a range if it is not aan input or output range.
+  /// @param range An object returned by a previous call to ztd::ranges::SaveRange.
+  /// @param fallbackRange The range to return if the given range is either an input/output range or is
+  /// the implementation-defined "unsaveable" object.
+  /// @returns Either a clone of the `range` if possible, or if not returns the `fallbackRange`.
+  template <typename TRange, typename TFallbackRange>
+  constexpr auto RestoreRange(TRange &&range, TFallbackRange &&fallbackRange) noexcept
+  {
+    if constexpr (SameType<remove_cvref_t<TRange>, range_iterator_unsaveable_t>)
+    {
+      return std::forward<TFallbackRange>(fallbackRange);
+    }
+    else if constexpr (InputOrOutputRange<remove_cvref_t<TRange>>)
+    {
+      return std::forward<TFallbackRange>(fallbackRange);
+    }
+    else
+    {
+      return std::forward<TRange>(range);
+    }
   }
 }

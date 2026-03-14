@@ -1,14 +1,34 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Ranges/ADL.hpp"
 #include "Krystal.Lib/Ranges/Reconstruct.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
-#include "Krystal.Lib/Utils/Size.hpp"
 #include "Krystal.Text/TypeTraits.hpp"
 #include <string_view>
 
 namespace Krys::Text::detail
 {
+  template <typename T, typename TSentinel>
+  constexpr size_t cstringPtrSize(T *ptr, const TSentinel &sentinel) noexcept
+  {
+    if (ptr == nullptr)
+    {
+      return 0;
+    }
+    size_t len = 0;
+    while (ptr[len] != sentinel)
+    {
+      ++len;
+    }
+    return len;
+  }
+
+  template <typename T>
+  constexpr size_t cstringPtrSize(T *ptr) noexcept
+  {
+    constexpr T sentinel {};
+    return cstringPtrSize(ptr, sentinel);
+  }
+
   template <typename TInputTag, bool IsMutable, typename TInput>
   constexpr auto SpanReconstructAs(TInput &&input) noexcept
   {
@@ -33,8 +53,8 @@ namespace Krys::Text::detail
         using TChar = remove_extent_t<TUInput>;
         if constexpr (IsCharTraitable<TChar>)
         {
-          return Krys::Ranges::reconstruct(std::in_place_type<Span<const TChar>>, ::std::ranges::begin(input),
-                                           ::std::ranges::begin(input) + Krys::cstringPtrSize(input));
+          return Krys::Ranges::reconstruct(std::in_place_type<Span<const TChar>>, std::ranges::begin(input),
+                                           std::ranges::begin(input) + cstringPtrSize(input));
         }
         else
         {
@@ -46,7 +66,7 @@ namespace Krys::Text::detail
       {
         if constexpr (std::ranges::contiguous_range<TCVInput> && std::ranges::sized_range<TCVInput>)
         {
-          using T = Krys::Ranges::range_element_type_t<TCVInput>;
+          using T = std::ranges::range_value_t<TCVInput>;
           return Krys::Ranges::reconstruct(std::in_place_type<Span<T>>, std::forward<TInput>(input));
         }
         else
@@ -72,8 +92,8 @@ namespace Krys::Text::detail
         if constexpr (IsCharTraitable<TChar>)
         {
           return Krys::Ranges::const_reconstruct(std::in_place_type<Span<const TChar>>,
-                                                 ::std::ranges::cbegin(input),
-                                                 ::std::ranges::cbegin(input) + Krys::cstringPtrSize(input));
+                                                 std::ranges::cbegin(input),
+                                                 std::ranges::cbegin(input) + cstringPtrSize(input));
         }
         else
         {
@@ -86,7 +106,7 @@ namespace Krys::Text::detail
       {
         if constexpr (std::ranges::contiguous_range<TCVInput> && std::ranges::sized_range<TCVInput>)
         {
-          using T = Krys::Ranges::range_element_type_t<TCVInput>;
+          using T = std::ranges::range_value_t<TCVInput>;
           return Krys::Ranges::const_reconstruct(std::in_place_type<Span<T>>, std::forward<TInput>(input));
         }
         else

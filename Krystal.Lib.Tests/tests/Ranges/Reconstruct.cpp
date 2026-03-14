@@ -1,5 +1,5 @@
 ﻿#include "Krystal.Lib/Ranges/Reconstruct.hpp"
-#include "Krystal.Lib/Ranges/Subrange.hpp"
+#include "Krystal.Lib/Ranges/TypeTraits.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include <catch_all.hpp>
 
@@ -104,7 +104,7 @@ TEST_CASE("Ranges::const_reconstruct - requesting Span<T> from const range falls
   // Your CPO will still compile, but should fall back to subrange.
   auto res = Krys::Ranges::const_reconstruct(std::in_place_type<Krys::Span<int>>, r);
 
-  STATIC_REQUIRE(std::is_same_v<decltype(res), Krys::Ranges::subrange<const int *, const int *>>);
+  STATIC_REQUIRE(std::is_same_v<decltype(res), std::ranges::subrange<const int *, const int *>>);
 
   REQUIRE(*res.begin() == 20);
   REQUIRE(*(res.end() - 1) == 40);
@@ -148,7 +148,7 @@ TEST_CASE("Ranges::reconstruct - tagless iterator+sentinel (no in_place) returns
 
   auto sr = Krys::Ranges::reconstruct(a + 1, a + 4);
 
-  STATIC_REQUIRE(std::is_same_v<decltype(sr), Krys::Ranges::subrange<int *, int *>>);
+  STATIC_REQUIRE(std::is_same_v<decltype(sr), std::ranges::subrange<int *, int *>>);
 
   REQUIRE(*sr.begin() == 2);
   REQUIRE(*(sr.end() - 1) == 4);

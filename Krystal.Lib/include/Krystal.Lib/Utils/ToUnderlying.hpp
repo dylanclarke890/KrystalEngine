@@ -64,7 +64,7 @@ namespace Krys
       else
       {
         static_assert(sizeof(wchar) <= sizeof(std::uint_least64_t),
-                      "[ztd.idk] The size of wchar exceeds what is anticiapted for "
+                      "[ztd.idk] The size of wchar exceeds what is anticipated for "
                       "ztd::AnyEnumOrCharToUnderlying(...).");
         using TU = std::conditional_t<Signed<wchar>, std::int_least64_t, std::uint_least64_t>;
         return static_cast<TU>(value);
@@ -80,7 +80,7 @@ namespace Krys
     }
     else if constexpr (SameType<TIntegralish, char32_t>)
     {
-      return static_cast<uint_least32_t>(value);
+      return static_cast<uint32>(value);
     }
     else
     {

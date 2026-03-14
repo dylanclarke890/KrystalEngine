@@ -2,8 +2,8 @@
 
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Text/ASCIILiteral.hpp"
-#include "Krystal.Text/Encodings/EncodingTables/Windows1254.tables.hpp"
-#include "Krystal.Text/Encodings/Impl/SingleASCIIByteHighBitLookupEncoding.hpp"
+#include "Krystal.Text/Encodings/detail/SingleASCIIByteHighBitLookupEncoding.hpp"
+#include "Krystal.Text/Encodings/EncodingTables/Windows1254.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys::Text
@@ -11,10 +11,9 @@ namespace Krys::Text
   /// @brief The encoding that matches Microsoft Windows's Codepage 1254.
   template <typename TCodeUnit = char, typename TCodePoint = UnicodeCodePoint>
   class basic_windows_1254
-      : public ::Krys::Text::Impl::SingleASCIIByteHighBitLookupEncoding<
-          basic_windows_1254<TCodeUnit, TCodePoint>,
-          &::Krys::Text::EncodingTable::windows_1254_index_to_code_point,
-          &::Krys::Text::EncodingTable::windows_1254_code_point_to_index, TCodeUnit, TCodePoint>
+      : public SingleASCIIByteHighBitLookupEncoding<
+          basic_windows_1254<TCodeUnit, TCodePoint>, &EncodingTable::Windows1254IndexToCodePoint,
+          &EncodingTable::Windows1254CodePointToIndex, TCodeUnit, TCodePoint>
   {
   public:
     constexpr static inline ::Krys::Text::ASCIILiteral Name = {"windows-1254"_s};

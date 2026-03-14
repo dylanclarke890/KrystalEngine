@@ -39,7 +39,7 @@ namespace Krys::Text
     constexpr void SetNullTerminator() noexcept
     {
       auto *sentinelPtr = this->Data(this->_layout.Size);
-      Krys::construct_at(sentinelPtr);
+      std::construct_at(sentinelPtr);
     }
 
   public:

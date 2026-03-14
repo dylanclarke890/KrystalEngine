@@ -2,8 +2,8 @@
 
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Text/ASCIILiteral.hpp"
+#include "Krystal.Text/Encodings/detail/SingleByteLookupEncoding.hpp"
 #include "Krystal.Text/Encodings/EncodingTables/ATASCII.hpp"
-#include "Krystal.Text/Encodings/Impl/SingleByteLookupEncoding.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys::Text
@@ -11,9 +11,9 @@ namespace Krys::Text
   /// @brief The ATASCII (Atari ASCII) Encoding.
   template <typename TCodeUnit = char, typename TCodePoint = UnicodeCodePoint>
   class basic_atascii
-      : public ::Krys::Text::Impl::SingleByteLookupEncoding<
-          basic_atascii<TCodeUnit, TCodePoint>, &::Krys::Text::EncodingTable::atascii_index_to_code_point,
-          &::Krys::Text::EncodingTable::atascii_code_point_to_index, TCodeUnit, TCodePoint>
+      : public SingleByteLookupEncoding<
+          basic_atascii<TCodeUnit, TCodePoint>, &EncodingTable::ATASCIIIndexToCodePoint,
+          &EncodingTable::ATASCIICodePointToIndex, TCodeUnit, TCodePoint>
   {
     static_assert((sizeof(typename basic_atascii::code_point) * CHAR_BIT) >= 22,
                   "The code point type for atascii must be at least 22 bits wide");

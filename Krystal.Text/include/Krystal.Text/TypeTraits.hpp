@@ -5,6 +5,7 @@
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Ranges/Algorithm.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include <algorithm>
 
 namespace Krys::Text::detail_traits
 {
@@ -23,14 +24,14 @@ namespace Krys::Text::detail_traits
     constexpr static char_type *copy(char_type *destination, const char_type *source,
                                      std::size_t count) noexcept
     {
-      (void)::Krys::Ranges::Impl::CopyNUnsafe(source, count, destination);
+      (void)std::ranges::copy_n(source, count, destination);
       return destination;
     }
 
     constexpr static char_type *move(char_type *destination, const char_type *source,
                                      std::size_t count) noexcept
     {
-      (void)::Krys::Ranges::Impl::CopyNUnsafe(source, count, destination);
+      (void)std::ranges::copy_n(source, count, destination);
       return destination;
     }
 
@@ -41,8 +42,7 @@ namespace Krys::Text::detail_traits
       {
         return 0;
       }
-      return ::Krys::Ranges::Impl::LexicographicalCompareThreeWayBasic(left, left + count, right,
-                                                                       right + count);
+      return ::Krys::Ranges::LexicographicalCompareThreeWayBasic(left, left + count, right, right + count);
     }
 
     KRYS_NODISCARD constexpr static size_t length(const char_type *it) noexcept

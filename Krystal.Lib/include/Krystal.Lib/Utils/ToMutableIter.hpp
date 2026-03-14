@@ -1,8 +1,6 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/TypeTraits.hpp"
-#include "Krystal.Lib/Ranges/ADL.hpp"
-#include "Krystal.Lib/Ranges/Iterator.hpp"
 #include "Krystal.Lib/Utils/Hijack.hpp"
 #include <functional>
 #include <iterator>
@@ -22,9 +20,9 @@ namespace Krys
 
     template <typename T>
     concept HasPairIteratorInsert = requires {
-      std::declval<T &>().insert(::std::ranges::cbegin(std::declval<T &>()),
-                                 ::std::ranges::cbegin(std::declval<T &>()),
-                                 ::std::ranges::cend(std::declval<T &>()));
+      std::declval<T &>().insert(std::ranges::cbegin(std::declval<T &>()),
+                                 std::ranges::cbegin(std::declval<T &>()),
+                                 std::ranges::cend(std::declval<T &>()));
     };
 
     template <IterStart from>
@@ -54,19 +52,19 @@ namespace Krys
           // or p if i == j."
           // in other words, this is our cheat code to avoid
           // hitting the worst-case-scenario here
-          return source.insert(std::forward<TFromIt>(fromIt), ::std::ranges::cend(source),
-                               ::std::ranges::cend(source));
+          return source.insert(std::forward<TFromIt>(fromIt), std::ranges::cend(source),
+                               std::ranges::cend(source));
         }
         else if constexpr (std::is_invocable_r_v<bool, std::not_equal_to<>, TToIt, TFromIt> // cf
-                           && (Krys::Ranges::ForwardIterator<TFromIt>                       // cf
-                               || Krys::Ranges::BidirectionalIterator<TFromIt>))
+                           && (std::forward_iterator<TFromIt>                               // cf
+                               || std::bidirectional_iterator<TFromIt>))
         {
           // we can avoid 2N walk of iterators
           // by just moving up by them if they're
           // comparable to one another
           if constexpr (from == IterStart::Begin)
           {
-            auto beginIt = ::std::ranges::begin(source);
+            auto beginIt = std::ranges::begin(source);
             while (beginIt != fromIt)
             {
               ++beginIt;
@@ -75,7 +73,7 @@ namespace Krys
           }
           else
           {
-            auto endIt = ::std::ranges::end(source);
+            auto endIt = std::ranges::end(source);
             while (endIt != fromIt)
             {
               --endIt;
@@ -89,7 +87,7 @@ namespace Krys
           {
             // either this is random access and O(1),
             // or this is some other weird iterator and it's O(2N)
-            auto beginIt = ::std::ranges::begin(source);
+            auto beginIt = std::ranges::begin(source);
             auto itDist = std::distance(TFromIt(beginIt), std::forward<TFromIt>(fromIt));
             std::advance(beginIt, itDist);
             return beginIt;
@@ -98,7 +96,7 @@ namespace Krys
           {
             // either this is random access and O(1),
             // or this is some other weird iterator and it's O(2N)
-            auto endIt = ::std::ranges::end(source);
+            auto endIt = std::ranges::end(source);
             auto itDist = std::distance(std::forward<TFromIt>(fromIt), TFromIt(endIt));
             std::advance(endIt, -itDist);
             return endIt;

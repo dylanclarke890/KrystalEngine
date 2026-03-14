@@ -2,9 +2,8 @@
 
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
-#include "Krystal.Text/Encodings/BasicEncodingScheme.hpp"
-#include "Krystal.Text/Encodings/NoEncoding.hpp"
 #include "Krystal.Text/Encodings/ASCII.hpp"
+#include "Krystal.Text/Encodings/NoEncoding.hpp"
 #include "Krystal.Text/Encodings/UTF16.hpp"
 #include "Krystal.Text/Encodings/UTF32.hpp"
 #include "Krystal.Text/Encodings/UTF8.hpp"
@@ -31,8 +30,7 @@ namespace Krys::Text
                     conditional_t<SameType<T, char32>, utf32_t,
                       conditional_t<SameType<T, UnicodeCodePoint>, basic_utf32<UnicodeCodePoint>,
                         conditional_t<SameType<T, UnicodeScalarValue>, basic_utf32<UnicodeScalarValue>,
-                          conditional_t<SameType<T, byte>, EncodingScheme<utf8_t, Endian::System, byte>,
-                                        basic_no_encoding<T, UnicodeCodePoint>>>>>>>>>>>>;
+                          basic_no_encoding<T, UnicodeCodePoint>>>>>>>>>>>;
       // clang-format on
 
       static_assert(!::Krys::IsSpecializationOf<TChosen, basic_no_encoding>,

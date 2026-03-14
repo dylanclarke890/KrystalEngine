@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Text/ASCIILiteral.hpp"
-#include "Krystal.Text/Encodings/EncodingTables/PETSCII.tables.hpp"
-#include "Krystal.Text/Encodings/Impl/SingleByteLookupEncoding.hpp"
+#include "Krystal.Text/Encodings/detail/SingleByteLookupEncoding.hpp"
+#include "Krystal.Text/Encodings/EncodingTables/PETSCII.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys::Text
@@ -11,10 +11,9 @@ namespace Krys::Text
   /// characters (when the SHIFT button was pressed on a PET/CBM device).
   template <typename TCodeUnit = char, typename TCodePoint = UnicodeCodePoint>
   class basic_petscii_shifted
-      : public ::Krys::Text::Impl::SingleByteLookupEncoding<
-          basic_petscii_shifted<TCodeUnit, TCodePoint>,
-          &::Krys::Text::EncodingTable::petscii_shifted_index_to_code_point,
-          &::Krys::Text::EncodingTable::petscii_shifted_code_point_to_index, TCodeUnit, TCodePoint>
+      : public SingleByteLookupEncoding<basic_petscii_shifted<TCodeUnit, TCodePoint>,
+                                        &EncodingTable::PETSCIIShiftedIndexToCodePoint,
+                                        &EncodingTable::PETSCIIShiftedCodePointToIndex, TCodeUnit, TCodePoint>
   {
   public:
     constexpr static inline ::Krys::Text::ASCIILiteral Name = "PETSCII"_s;

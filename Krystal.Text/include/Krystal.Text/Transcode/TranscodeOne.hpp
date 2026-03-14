@@ -2,20 +2,18 @@
 
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/Ranges/Algorithm.hpp"
-#include "Krystal.Lib/Ranges/Impl/InsertBulk.hpp"
-#include "Krystal.Lib/Ranges/SaveRange.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Lib/Utils/Tag.hpp"
+#include "Krystal.Text/_detail/IsLossless.hpp"
+#include "Krystal.Text/_detail/SpanReconstruct.hpp"
 #include "Krystal.Text/CodePoint.hpp"
 #include "Krystal.Text/CodeUnit.hpp"
 #include "Krystal.Text/Concepts.hpp"
 #include "Krystal.Text/Decode/DecodeOne.hpp"
-#include "Krystal.Text/_detail/IsLossless.hpp"
 #include "Krystal.Text/Encodings/DefaultEncoding.hpp"
 #include "Krystal.Text/Handlers/DefaultHandler.hpp"
 #include "Krystal.Text/Handlers/ProgressHandler.hpp"
-#include "Krystal.Text/_detail/SpanReconstruct.hpp"
 #include "Krystal.Text/InlineContainers/InlineBasicString.hpp"
 #include "Krystal.Text/IsUnicodeCodePoint.hpp"
 #include "Krystal.Text/MaxUnits.hpp"
@@ -113,16 +111,15 @@ namespace Krys::Text
           toIntermediateHandler.CodeUnitsProgress());
       }
     }
-    const std::size_t pivotSize = ::std::ranges::size(pivot);
-    std::size_t intermediateWritten = pivotSize - ::std::ranges::size(intermediateResult.Output);
+    const std::size_t pivotSize = std::ranges::size(pivot);
+    std::size_t intermediateWritten = pivotSize - std::ranges::size(intermediateResult.Output);
     std::size_t intermediateStart = 0;
     std::size_t errorCount = intermediateResult.ErrorCount;
     for (;;)
     {
-      ::Krys::Ranges::subrange<decltype(::std::ranges::cbegin(pivot))> workingIntermediate(
-        ::std::ranges::cbegin(pivot) + intermediateStart,
-        ::std::ranges::cbegin(pivot) + intermediateWritten);
-      std::size_t intermediateSize = ::std::ranges::size(workingIntermediate);
+      std::ranges::subrange<decltype(std::ranges::cbegin(pivot))> workingIntermediate(
+        std::ranges::cbegin(pivot) + intermediateStart, std::ranges::cbegin(pivot) + intermediateWritten);
+      std::size_t intermediateSize = std::ranges::size(workingIntermediate);
       auto endResult = std::forward<TToEncoding>(toEncoding)
                          .EncodeOne(std::move(workingIntermediate), std::move(workingOutput),
                                     toIntermediateHandler, toState);
@@ -144,7 +141,7 @@ namespace Krys::Text
             toIntermediateHandler.CodePointsProgress(), toIntermediateHandler.CodeUnitsProgress());
         }
       }
-      if (::std::ranges::empty(endResult.Input))
+      if (std::ranges::empty(endResult.Input))
       {
         if constexpr (IsFromProgressHandler && IsToProgressHandler)
         {
@@ -161,7 +158,7 @@ namespace Krys::Text
                          intermediateResult.ErrorCount);
         }
       }
-      intermediateStart = intermediateSize - ::std::ranges::size(endResult.Input);
+      intermediateStart = intermediateSize - std::ranges::size(endResult.Input);
       workingOutput = std::move(endResult.Output);
     }
   }
@@ -204,9 +201,9 @@ namespace Krys::Text
       (void)toState;
       (void)pivot;
 
-      auto result = ::Krys::Ranges::Impl::Copy(
-        ::std::ranges::cbegin(std::forward<TInput>(input)), ::std::ranges::cend(input),
-        ::std::ranges::begin(std::forward<TOutput>(output)), ::std::ranges::end(output));
+      auto result =
+        std::ranges::copy(std::ranges::cbegin(std::forward<TInput>(input)), std::ranges::cend(input),
+                          std::ranges::begin(std::forward<TOutput>(output)), std::ranges::end(output));
       using TResult = ::Krys::Text::Impl::reconstruct_pivot_transcode_result_t<TUInput, TUOutput, TFromState,
                                                                                TToState, TUPivot>;
       return TResult(::Krys::Ranges::reconstruct(std::in_place_type<TUInput>, std::move(result.in)),
@@ -341,8 +338,7 @@ namespace Krys::Text
   template <typename TInput, typename TToEncoding, typename TOutput>
   constexpr auto TranscodeOneIntoRaw(TInput &&input, TToEncoding &&toEncoding, TOutput &&output)
   {
-    using TFromEncoding =
-      default_code_unit_encoding_t<::Krys::Ranges::range_value_type_t<remove_cvref_t<TInput>>>;
+    using TFromEncoding = default_code_unit_encoding_t<std::ranges::range_value_t<remove_cvref_t<TInput>>>;
 
     TFromEncoding fromEncoding {};
     ::Krys::Text::Handlers::DefaultHandler handler {};
@@ -379,7 +375,7 @@ namespace Krys::Text::detail_transcode
       std::forward<TToEncoding>(toEncoding), std::forward<TFromErrorHandler>(fromErrorHandler),
       std::forward<TToErrorHandler>(toErrorHandler), fromState, toState, pivot);
 
-    ::Krys::Ranges::Impl::ContainerInsertBulk(output, Span(translationBuffer.data(), result.Output.data()));
+    ::Krys::Ranges::ContainerInsertBulk(output, Span(translationBuffer.data(), result.Output.data()));
     return result;
   }
 
@@ -391,12 +387,12 @@ namespace Krys::Text::detail_transcode
                                       TFromState &fromState, TToState &toState, TPivot &&pivot)
   {
     TOutputContainer output {};
-    if constexpr (::Krys::Ranges::HasSizeADL<TInput>)
+    if constexpr (std::ranges::sized_range<TInput>)
     {
-      using TSize = decltype(::std::ranges::size(input));
-      if constexpr (::Krys::Ranges::has_reserve_with_size<TOutputContainer, TSize>)
+      using TSize = decltype(std::ranges::size(input));
+      if constexpr (HasReserve<TOutputContainer, TSize>)
       {
-        output.reserve(::std::ranges::size(input));
+        output.reserve(std::ranges::size(input));
       }
     }
 
@@ -609,8 +605,7 @@ namespace Krys::Text
   template <typename TInput, typename TToEncoding, typename TOutput>
   constexpr auto TranscodeOneInto(TInput &&input, TToEncoding &&toEncoding, TOutput &&output)
   {
-    using TFromEncoding =
-      default_code_unit_encoding_t<::Krys::Ranges::range_value_type_t<remove_cvref_t<TInput>>>;
+    using TFromEncoding = default_code_unit_encoding_t<std::ranges::range_value_t<remove_cvref_t<TInput>>>;
 
     TFromEncoding fromEncoding {};
     ::Krys::Text::Handlers::DefaultHandler handler {};
@@ -777,7 +772,7 @@ namespace Krys::Text
   template <typename TOutputContainer, typename TInput, typename TToEncoding>
   constexpr auto TranscodeOneTo(TInput &&input, TToEncoding &&toEncoding)
   {
-    using TCodeUnit = ::Krys::Ranges::range_value_type_t<remove_cvref_t<TInput>>;
+    using TCodeUnit = std::ranges::range_value_t<remove_cvref_t<TInput>>;
     using TFromEncoding =
       conditional_t<std::is_constant_evaluated(), default_consteval_code_unit_encoding_t<TCodeUnit>,
                     default_code_unit_encoding_t<TCodeUnit>>;
@@ -912,8 +907,8 @@ namespace Krys::Text
   constexpr auto TranscodeOne(TInput &&input, TFromEncoding &&fromEncoding, TToEncoding &&toEncoding,
                               TFromErrorHandler &&fromErrorHandler)
   {
-    auto handler = ::Krys::Text::Handlers::CopyOrDefault(fromErrorHandler);
-    return ::Krys::Text::TranscodeOne<TOutputContainer>(
+    auto handler = Handlers::CopyOrDefault(fromErrorHandler);
+    return TranscodeOne<TOutputContainer>(
       std::forward<TInput>(input), std::forward<TFromEncoding>(fromEncoding),
       std::forward<TToEncoding>(toEncoding), std::forward<TFromErrorHandler>(fromErrorHandler), handler);
   }
@@ -927,10 +922,10 @@ namespace Krys::Text
   template <typename TOutputContainer = void, typename TInput, typename TFromEncoding, typename TToEncoding>
   constexpr auto TranscodeOne(TInput &&input, TFromEncoding &&fromEncoding, TToEncoding &&toEncoding)
   {
-    ::Krys::Text::Handlers::DefaultHandler handler {};
-    return ::Krys::Text::TranscodeOne<TOutputContainer>(std::forward<TInput>(input),
-                                                        std::forward<TFromEncoding>(fromEncoding),
-                                                        std::forward<TToEncoding>(toEncoding), handler);
+    Handlers::DefaultHandler handler {};
+    return TranscodeOne<TOutputContainer>(std::forward<TInput>(input),
+                                          std::forward<TFromEncoding>(fromEncoding),
+                                          std::forward<TToEncoding>(toEncoding), handler);
   }
 
   /// @brief Converts one code unit from the given `input` view into code units in `TOutputContainer`.
@@ -941,14 +936,14 @@ namespace Krys::Text
   template <typename TOutputContainer = void, typename TInput, typename TToEncoding>
   constexpr auto TranscodeOne(TInput &&input, TToEncoding &&toEncoding)
   {
-    using TCodeUnit = Krys::Ranges::range_value_type_t<remove_cvref_t<TInput>>;
+    using TCodeUnit = std::ranges::range_value_t<remove_cvref_t<TInput>>;
     using TFromEncoding =
       conditional_t<std::is_constant_evaluated(), default_consteval_code_unit_encoding_t<TCodeUnit>,
                     default_code_unit_encoding_t<TCodeUnit>>;
 
     TFromEncoding fromEncoding {};
-    ::Krys::Text::Handlers::DefaultHandler handler {};
-    return ::Krys::Text::TranscodeOne<TOutputContainer>(std::forward<TInput>(input), fromEncoding,
-                                                        std::forward<TToEncoding>(toEncoding));
+    Handlers::DefaultHandler handler {};
+    return TranscodeOne<TOutputContainer>(std::forward<TInput>(input), fromEncoding,
+                                          std::forward<TToEncoding>(toEncoding));
   }
 }

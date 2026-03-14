@@ -1,12 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Ranges/ADL.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Text/ASCIILiteral.hpp"
 #include "Krystal.Text/Concepts.hpp"
 #include "Krystal.Text/Decode/DecodeResult.hpp"
 #include "Krystal.Text/Encode/EncodeResult.hpp"
-#include "Krystal.Text/Encodings/EncodingTables/ShiftJISx0208.tables.hpp"
+#include "Krystal.Text/Encodings/EncodingTables/ShiftJISx0208.hpp"
 #include "Krystal.Text/State.hpp"
 #include "Krystal.Text/Unicode.hpp"
 #include "Krystal.Text/UnicodeCodePoint.hpp"
@@ -49,8 +48,8 @@ namespace Krys::Text
       using TResult = DecodeResult<TSubInput, TSubOutput, state>;
       ;
 
-      auto inIt = ::std::ranges::cbegin(input);
-      auto inLast = ::std::ranges::cend(input);
+      auto inIt = std::ranges::cbegin(input);
+      auto inLast = std::ranges::cend(input);
 
       if (inIt == inLast)
       {
@@ -60,8 +59,8 @@ namespace Krys::Text
 
       code_unit units[MaxCodeUnits] = {static_cast<code_unit>(*inIt)};
       uchar unit0 = static_cast<uchar>(units[0]);
-      auto outIt = ::std::ranges::begin(output);
-      auto outLast = ::std::ranges::end(output);
+      auto outIt = std::ranges::begin(output);
+      auto outLast = std::ranges::end(output);
 
       constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TErrorHandler>;
       if (unit0 <= 0x80)
@@ -157,7 +156,7 @@ namespace Krys::Text
           else
           {
             std::optional<std::uint_least32_t> maybeCode =
-              Krys::Text::EncodingTable::shift_jis_x0208_index_to_code_point(lookupIndex);
+              Krys::Text::EncodingTable::ShiftJISx0208IndexToCodePoint(lookupIndex);
             if (maybeCode)
             {
               if constexpr (CallErrorHandler)
@@ -201,8 +200,8 @@ namespace Krys::Text
       using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
       using TResult = EncodeResult<TSubInput, TSubOutput, state>;
 
-      auto inIt = ::std::ranges::cbegin(input);
-      auto inLast = ::std::ranges::cend(input);
+      auto inIt = std::ranges::cbegin(input);
+      auto inLast = std::ranges::cend(input);
 
       if (inIt == inLast)
       {
@@ -212,8 +211,8 @@ namespace Krys::Text
 
       char32 codePoint32 = static_cast<char32>(*inIt);
       code_point codePoint = static_cast<code_point>(codePoint32);
-      auto outIt = ::std::ranges::begin(output);
-      auto outLast = ::std::ranges::end(output);
+      auto outIt = std::ranges::begin(output);
+      auto outLast = std::ranges::end(output);
 
       constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TErrorHandler>;
       if (codePoint32 <= 0x80)
@@ -308,8 +307,7 @@ namespace Krys::Text
         codePoint = 0xFF0D;
       }
 
-      std::optional<std::size_t> maybeIndex =
-        ::Krys::Text::EncodingTable::shift_jis_x0208_code_point_to_index(codePoint);
+      std::optional<std::size_t> maybeIndex = EncodingTable::shift_jis_x0208_code_point_to_index(codePoint);
       if (maybeIndex)
       {
         std::size_t i = *maybeIndex;

@@ -27,7 +27,7 @@ namespace Krys::Tests
     constexpr auto &handler = Handlers::Replacement;
     for (; expected_it != expected_last && source_it != source_last;)
     {
-      const auto result = EncodeOneTo(CreateSubrange(source_it, source_last), encoding, handler);
+      const auto result = EncodeOneTo(std::ranges::subrange(source_it, source_last), encoding, handler);
       REQUIRE(result.ErrorCode == EncodingError::OK);
       REQUIRE_FALSE(result.ErrorsWereHandled());
 
@@ -35,7 +35,7 @@ namespace Krys::Tests
       REQUIRE(std::equal(output.cbegin(), output.cend(), expected_it));
 
       // make sure that the encode_one branch of functions is also tested
-      const Output otherResult = EncodeOne(CreateSubrange(source_it, source_last), encoding, handler);
+      const Output otherResult = EncodeOne(std::ranges::subrange(source_it, source_last), encoding, handler);
       REQUIRE((output == otherResult));
 
       expected_it += output.size();

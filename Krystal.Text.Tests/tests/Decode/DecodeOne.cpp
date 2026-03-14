@@ -1,5 +1,4 @@
 ﻿#include "Krystal.Text/Decode/DecodeOne.hpp"
-#include "Krystal.Lib/Utils/WhatIsThis.hpp"
 #include "Krystal.Text.Tests/BasicUnicodeStrings.hpp"
 #include "Krystal.Text/Encodings/UTF16.hpp"
 #include "Krystal.Text/Encodings/UTF32.hpp"
@@ -28,7 +27,7 @@ namespace Krys::Tests
     constexpr auto &handler = Handlers::Replacement;
     for (; expected_it != expected_last && source_it != source_last;)
     {
-      const auto result = DecodeOneTo(CreateSubrange(source_it, source_last), encoding, handler);
+      const auto result = DecodeOneTo(std::ranges::subrange(source_it, source_last), encoding, handler);
       REQUIRE(result.ErrorCode == EncodingError::OK);
       REQUIRE_FALSE(result.ErrorsWereHandled());
 
@@ -36,7 +35,7 @@ namespace Krys::Tests
       REQUIRE(std::equal(output.cbegin(), output.cend(), expected_it));
 
       // make sure that the DecodeOne branch of functions is also tested
-      const Output otherResult = DecodeOne(CreateSubrange(source_it, source_last), encoding, handler);
+      const Output otherResult = DecodeOne(std::ranges::subrange(source_it, source_last), encoding, handler);
       REQUIRE(output == otherResult);
 
       expected_it += output.size();
