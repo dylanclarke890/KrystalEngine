@@ -72,7 +72,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD static RawPtr<const Text> NextExclusiveTextNode(const Node &current) noexcept;
     KRYS_NODISCARD static RawPtr<Text> NextExclusiveTextNode(Node &current) noexcept;
-    
+
     KRYS_NODISCARD static RawPtr<Text> NextExclusiveTextNode(const Node &current,
                                                              RawPtr<const Node> stayWithin) noexcept;
   };

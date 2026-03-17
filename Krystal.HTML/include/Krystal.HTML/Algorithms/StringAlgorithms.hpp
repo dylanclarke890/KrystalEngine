@@ -38,7 +38,7 @@ namespace Krys::HTML
     {
       DOMString result;
       // TODO(fix): we're not iterating over code points properly here. we need a way of just iterating over
-      // code points in a UTF-8 string instead of having to 
+      // code points in a UTF-8 string instead of having to
       while (position != input.end() && condition(*position))
       {
         result.push_back(*position);

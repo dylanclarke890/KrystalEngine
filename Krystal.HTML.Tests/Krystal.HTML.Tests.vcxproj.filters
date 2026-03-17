@@ -45,16 +45,16 @@
     <ClCompile Include="tests\Node\Text.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Tree\TreeQueries.cpp">
+    <ClCompile Include="tests\Algorithms\TreeQueries.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\NameValidation.cpp">
+    <ClCompile Include="tests\Algorithms\NameValidation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Utils\StringAlgorithms.cpp">
+    <ClCompile Include="tests\Algorithms\StringAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Utils\OrderedSetParser.cpp">
+    <ClCompile Include="tests\Algorithms\OrderedSetParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tests\Events\Event.cpp">

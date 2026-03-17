@@ -1,10 +1,10 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/Algorithms/StringAlgorithms.hpp"
 #include "Krystal.HTML/DOMString.hpp"
 #include "Krystal.HTML/Namespaces.hpp"
 #include "Krystal.HTML/QualifiedName.hpp"
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
-#include "Krystal.HTML/Utils/StringAlgorithms.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
 #include "Krystal.Text/ASCII.hpp"

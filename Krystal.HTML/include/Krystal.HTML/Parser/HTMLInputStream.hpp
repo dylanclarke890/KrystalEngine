@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/StronglyTypedValues.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 #include "Krystal.Text/ASCII.hpp"
 #include "Krystal.Text/ASCIILiteral.hpp"
 #include "Krystal.Text/Unicode.hpp"
@@ -11,6 +11,11 @@
 
 namespace Krys::HTML
 {
+  struct IsEOF : StronglyTypedBool<IsEOF>
+  {
+    using StronglyTypedBool::StronglyTypedBool;
+  };
+
   // TODO(PERF): a lot of text is just plain ASCII, we need to optimize for that case.
   // One idea I've had is to use the last bit in each 4 bytes to indicate if the next 4 bytes are ASCII or
   // UTF-32. We can then have a fast path for ASCII chunks. We'd need to change the way we store data, not

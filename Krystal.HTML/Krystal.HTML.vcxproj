@@ -44,7 +44,7 @@
     <ClInclude Include="include\Krystal.HTML\MutationObserver\RegisteredObserver.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\TransientRegisteredObserver.hpp" />
     <ClInclude Include="include\Krystal.HTML\Namespaces.hpp" />
-    <ClInclude Include="include\Krystal.HTML\NameValidation.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\NameValidation.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\CustomElementRegistry.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\DocumentFragmentRareData.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\DocumentRareData.hpp" />
@@ -122,16 +122,15 @@
     <ClInclude Include="include\Krystal.HTML\Ranges\AbstractRange.hpp" />
     <ClInclude Include="include\Krystal.HTML\Ranges\Range.hpp" />
     <ClInclude Include="include\Krystal.HTML\Ranges\StaticRange.hpp" />
-    <ClInclude Include="include\Krystal.HTML\StronglyTypedValues.hpp" />
     <ClInclude Include="include\Krystal.HTML\URL.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\BoolOr.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\Exception.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionCode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionOr.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Utils\SubtreeRanges.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Utils\OrderedSetParser.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\SubtreeRanges.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\OrderedSetParser.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\SmallNodeList.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Utils\StringAlgorithms.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\StringAlgorithms.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Algorithms\SlotAssignmentAlgorithms.cpp" />

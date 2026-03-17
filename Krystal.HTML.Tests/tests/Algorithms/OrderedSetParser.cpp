@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Utils/OrderedSetParser.hpp"
+﻿#include "Krystal.HTML/Algorithms/OrderedSetParser.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

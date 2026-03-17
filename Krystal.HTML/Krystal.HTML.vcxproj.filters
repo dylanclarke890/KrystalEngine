@@ -84,9 +84,6 @@
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLTokenAtom.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\StronglyTypedValues.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLParseError.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -279,16 +276,16 @@
     <ClInclude Include="include\Krystal.HTML\Ranges\BoundaryPoint.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\NameValidation.hpp">
+    <ClInclude Include="include\Krystal.HTML\Algorithms\NameValidation.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Utils\StringAlgorithms.hpp">
+    <ClInclude Include="include\Krystal.HTML\Algorithms\StringAlgorithms.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Namespaces.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Utils\OrderedSetParser.hpp">
+    <ClInclude Include="include\Krystal.HTML\Algorithms\OrderedSetParser.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Events\EventPath.hpp">
@@ -306,7 +303,7 @@
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLSlotElement.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Utils\SubtreeRanges.hpp">
+    <ClInclude Include="include\Krystal.HTML\Algorithms\SubtreeRanges.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Algorithms\SlotAssignmentAlgorithms.hpp">
