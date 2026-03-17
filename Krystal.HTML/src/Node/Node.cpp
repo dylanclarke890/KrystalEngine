@@ -10,9 +10,9 @@
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/NodeList/NodeList.hpp"
-#include "Krystal.HTML/Tree/TreeMutationDispatcher.hpp"
-#include "Krystal.HTML/Tree/TreeQueries.hpp"
-#include "Krystal.HTML/Tree/TreeTraversal.hpp"
+#include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
+#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 
 namespace Krys::HTML
 {

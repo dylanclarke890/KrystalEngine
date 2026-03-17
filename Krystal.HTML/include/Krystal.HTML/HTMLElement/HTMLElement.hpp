@@ -14,3 +14,10 @@ namespace Krys::HTML
   public:
   };
 }
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::HTMLElement)
+  static bool IsType(const Krys::HTML::Node &target) noexcept
+  {
+    return target.IsHTMLElementNode();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

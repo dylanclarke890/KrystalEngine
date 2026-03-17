@@ -109,19 +109,6 @@ namespace Krys::HTML
 
 #pragma endregion
 
-#pragma region Finding slots and slotted elements - https://dom.spec.whatwg.org/#finding-slots-and-slotables
-
-    /// @see https://dom.spec.whatwg.org/#find-a-slot
-    KRYS_NODISCARD static RawPtr<HTMLSlotElement> FindSlot(Node &slottable, bool open = false) noexcept;
-
-    /// @see https://dom.spec.whatwg.org/#find-slotables
-    KRYS_NODISCARD static List<Ref<Node>> FindSlottables(HTMLSlotElement &slot) noexcept;
-
-    /// @see https://dom.spec.whatwg.org/#find-flattened-slotables
-    KRYS_NODISCARD static List<Ref<Node>> FindFlattenedSlottables(HTMLSlotElement &slot) noexcept;
-
-#pragma endregion
-
     /// @see https://dom.spec.whatwg.org/#retarget
     KRYS_NODISCARD static RawPtr<EventTarget> Retarget(RawPtr<EventTarget> a, EventTarget &b) noexcept;
 

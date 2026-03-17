@@ -1,5 +1,8 @@
-﻿#include "Krystal.HTML/Tree/TreeMutationAlgorithms.hpp"
+﻿#include "Krystal.HTML/Algorithms/TreeMutationAlgorithms.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
+#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/MutationObserver/MutationObserver.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
@@ -7,9 +10,6 @@
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
-#include "Krystal.HTML/Tree/TreeMutationDispatcher.hpp"
-#include "Krystal.HTML/Tree/TreeQueries.hpp"
-#include "Krystal.HTML/Tree/TreeTraversal.hpp"
 #include "Krystal.HTML/Utils/SubtreeRanges.hpp"
 
 namespace Krys::HTML

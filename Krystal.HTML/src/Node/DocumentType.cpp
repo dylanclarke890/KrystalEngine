@@ -3,7 +3,7 @@
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
-#include "Krystal.HTML/Tree/TreeMutationAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/TreeMutationAlgorithms.hpp"
 
 namespace Krys::HTML
 {

@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Tree/TreeQueries.hpp"
+﻿#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML.Tests/TestNode.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"

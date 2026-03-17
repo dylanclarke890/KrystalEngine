@@ -186,10 +186,10 @@
     <ClInclude Include="include\Krystal.HTML\Node\CustomElementRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Tree\TreeTraversal.hpp">
+    <ClInclude Include="include\Krystal.HTML\Algorithms\TreeTraversal.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Tree\TreeMutationDispatcher.hpp">
+    <ClInclude Include="include\Krystal.HTML\Algorithms\TreeMutationDispatcher.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\NodeRareData.hpp">
@@ -207,7 +207,7 @@
     <ClInclude Include="include\Krystal.HTML\Ranges\StaticRange.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Tree\TreeQueries.hpp">
+    <ClInclude Include="include\Krystal.HTML\Algorithms\TreeQueries.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationRecord.hpp">
@@ -231,7 +231,7 @@
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationObserver.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Tree\TreeMutationAlgorithms.hpp">
+    <ClInclude Include="include\Krystal.HTML\Algorithms\TreeMutationAlgorithms.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Iterator\NodeIterator.hpp">
@@ -309,6 +309,9 @@
     <ClInclude Include="include\Krystal.HTML\Utils\SubtreeRanges.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Algorithms\SlotAssignmentAlgorithms.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -365,13 +368,13 @@
     <ClCompile Include="src\Node\TreeScope.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Tree\TreeTraversal.cpp">
+    <ClCompile Include="src\Algorithms\TreeTraversal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Tree\TreeMutationDispatcher.cpp">
+    <ClCompile Include="src\Algorithms\TreeMutationDispatcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Tree\TreeQueries.cpp">
+    <ClCompile Include="src\Algorithms\TreeQueries.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MutationObserver\TreeMutationRecord.cpp">
@@ -389,7 +392,7 @@
     <ClCompile Include="src\MutationObserver\CharacterDataMutationRecord.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Tree\TreeMutationAlgorithms.cpp">
+    <ClCompile Include="src\Algorithms\TreeMutationAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\NodeList\ChildNodeList.cpp">
@@ -417,6 +420,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Abort\AbortSignal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Algorithms\SlotAssignmentAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

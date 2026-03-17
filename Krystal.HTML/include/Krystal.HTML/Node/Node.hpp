@@ -56,13 +56,14 @@ namespace Krys::HTML
     IsTextNode = 1 << 2,
     IsElement = 1 << 3,
     IsHTMLElement = 1 << 4,
-    IsShadowRoot = 1 << 5,
+    IsHTMLSlotElement = 1 << 5,
+    IsShadowRoot = 1 << 6,
   };
 }
 
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::NodeType, 13u)
 KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::DocumentPosition, 7u)
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::NodeFlag, 7u)
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::NodeFlag, 8u)
 
 namespace Krys::HTML
 {
@@ -235,6 +236,11 @@ namespace Krys::HTML
     KRYS_NODISCARD bool IsHTMLElementNode() const noexcept
     {
       return HasNodeFlag(NodeFlag::IsHTMLElement);
+    }
+
+    KRYS_NODISCARD bool IsHTMLSlotElementNode() const noexcept
+    {
+      return HasNodeFlag(NodeFlag::IsHTMLSlotElement);
     }
 
     KRYS_NODISCARD bool IsCharacterDataNode() const noexcept

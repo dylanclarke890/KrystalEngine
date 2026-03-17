@@ -7,7 +7,7 @@
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
-#include "Krystal.HTML/Tree/TreeQueries.hpp"
+#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include <ranges>
 
 namespace Krys::HTML

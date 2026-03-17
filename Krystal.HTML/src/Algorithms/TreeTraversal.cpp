@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Tree/TreeTraversal.hpp"
+﻿#include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
@@ -7,7 +7,7 @@
 #include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
-#include "Krystal.HTML/Tree/TreeQueries.hpp"
+#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Utils/SubtreeRanges.hpp"
 #include "Krystal.Lib/Ranges/Algorithm.hpp"
 #include <cassert>

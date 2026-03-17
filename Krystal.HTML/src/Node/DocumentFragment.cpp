@@ -5,8 +5,8 @@
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/NodeList/HTMLCollection.hpp"
-#include "Krystal.HTML/Tree/TreeQueries.hpp"
-#include "Krystal.HTML/Tree/TreeTraversal.hpp"
+#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 
 namespace Krys::HTML
 {
