@@ -23,8 +23,7 @@ namespace Krys::HTML
   }
 
   /// @see https://dom.spec.whatwg.org/#concept-cd-substring
-  KRYS_NODISCARD ExceptionOr<DOMString> CharacterData::SubstringData(size_t offset,
-                                                                     size_t count) const noexcept
+  ExceptionOr<DOMString> CharacterData::SubstringData(size_t offset, size_t count) const noexcept
   {
     auto length = _data.size();
     if (offset > length)
@@ -69,10 +68,8 @@ namespace Krys::HTML
       count = length - offset;
     }
 
-    // TODO(IMPL):
-    // Queue a mutation record of "characterData" for node with null, null, node’s data, « », « », null, and
-    // null.
-
+    TreeMutationDispatcher::QueueMutationRecord(u8"characterData", *this, std::nullopt, std::nullopt, _data,
+                                                {}, {}, nullptr, nullptr);
     _data.insert(offset, data);
     _data.erase(offset, count);
 

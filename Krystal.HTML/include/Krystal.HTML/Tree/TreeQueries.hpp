@@ -76,6 +76,16 @@ namespace Krys::HTML
 
 #pragma endregion
 
+#pragma region Node Trees - https://dom.spec.whatwg.org/#node-trees
+
+    /// @see https://dom.spec.whatwg.org/#concept-node-length
+    KRYS_NODISCARD static size_t Length(Node &node) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-node-empty
+    KRYS_NODISCARD static bool IsEmpty(Node &node) noexcept;
+
+#pragma endregion
+
 #pragma region ShadowRoot - https://dom.spec.whatwg.org/#interface-shadowroot
 
     /// @see https://dom.spec.whatwg.org/#concept-shadow-including-root
@@ -97,20 +107,30 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#concept-closed-shadow-hidden
     KRYS_NODISCARD static bool IsClosedShadowHidden(const Node &a, const Node &b) noexcept;
 
-    /// @see https://dom.spec.whatwg.org/#retarget
-    KRYS_NODISCARD static RawPtr<EventTarget> Retarget(RawPtr<EventTarget> a, EventTarget &b) noexcept;
-
 #pragma endregion
 
 #pragma region Finding slots and slotted elements - https://dom.spec.whatwg.org/#finding-slots-and-slotables
 
+    /// @see https://dom.spec.whatwg.org/#find-a-slot
+    KRYS_NODISCARD static RawPtr<HTMLSlotElement> FindSlot(Node &slottable, bool open = false) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#find-slotables
+    KRYS_NODISCARD static List<Ref<Node>> FindSlottables(HTMLSlotElement &slot) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#find-flattened-slotables
+    KRYS_NODISCARD static List<Ref<Node>> FindFlattenedSlottables(HTMLSlotElement &slot) noexcept;
+
 #pragma endregion
+
+    /// @see https://dom.spec.whatwg.org/#retarget
+    KRYS_NODISCARD static RawPtr<EventTarget> Retarget(RawPtr<EventTarget> a, EventTarget &b) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-tree-host-including-inclusive-ancestor
+    KRYS_NODISCARD static bool IsHostIncludingInclusiveAncestorOf(Node &a, Node &b) noexcept;
 
     KRYS_NODISCARD static bool HasSameRoot(const Node &a, const Node &b) noexcept;
     KRYS_NODISCARD static bool HasSameShadowIncludingRoot(const Node &a, const Node &b) noexcept;
 
-    KRYS_NODISCARD static bool IsHostIncludingAncestorOf(Node &node, Node &other) noexcept;
-    KRYS_NODISCARD static bool IsHostIncludingInclusiveAncestorOf(Node &node, Node &other) noexcept;
     KRYS_NODISCARD static bool IsConnectedInSameTreeScope(const Node &a, const Node &b) noexcept;
     KRYS_NODISCARD static bool IsDocTypeOrDocTypeFollows(RawPtr<Node> node) noexcept;
     KRYS_NODISCARD static bool IsExclusiveTextNode(const Node &node) noexcept;

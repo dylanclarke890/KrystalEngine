@@ -22,7 +22,7 @@ namespace Krys::HTML
       return Exception {ExceptionCode::HierarchyRequestError};
     }
 
-    if (TreeQueries::IsHostIncludingAncestorOf(node, parent))
+    if (TreeQueries::IsHostIncludingInclusiveAncestorOf(node, parent))
     {
       return Exception {ExceptionCode::HierarchyRequestError};
     }

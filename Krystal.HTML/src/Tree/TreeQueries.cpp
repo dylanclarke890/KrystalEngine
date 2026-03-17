@@ -1,6 +1,7 @@
 ﻿#include "Krystal.HTML/Tree/TreeQueries.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Events/EventTarget.hpp"
+#include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
@@ -155,6 +156,30 @@ namespace Krys::HTML
 
 #pragma endregion
 
+#pragma region Node Trees - https://dom.spec.whatwg.org/#node-trees
+
+  size_t TreeQueries::Length(Node &node) noexcept
+  {
+    if (node.IsDocumentTypeNode() || node.IsAttributeNode())
+    {
+      return 0;
+    }
+    
+    if (auto *characterData = DynamicDowncast<CharacterData>(node))
+    {
+      return characterData->Data().size();
+    }
+
+    return node.CountChildNodes();
+  }
+  
+  bool TreeQueries::IsEmpty(Node &node) noexcept
+  {
+    return Length(node) == 0;
+  }
+
+#pragma endregion
+
 #pragma region ShadowRoot
 
   const Node &TreeQueries::ShadowIncludingRoot(const Node &node) noexcept
@@ -246,6 +271,78 @@ namespace Krys::HTML
     return false;
   }
 
+#pragma endregion
+
+#pragma region Finding slots and slotted elements - https://dom.spec.whatwg.org/#finding-slots-and-slotables
+
+  RawPtr<HTMLSlotElement> TreeQueries::FindSlot(Node &slottable, bool open) noexcept
+  {
+    RawPtr<Element> parent = slottable.ParentElement();
+
+    if (parent == nullptr)
+    {
+      return nullptr;
+    }
+
+    RawPtr<ShadowRoot> shadow = parent->GetShadowRoot();
+
+    if (shadow == nullptr || (open && shadow->Mode() != ShadowRootMode::Open))
+    {
+      return nullptr;
+    }
+
+    if (shadow->SlotAssignment() == SlotAssignmentMode::Manual)
+    {
+      // return the slot in shadow’s descendants whose manually assigned nodes contains slottable, if any;
+      // otherwise null.
+      return nullptr;
+    }
+    else
+    {
+      // Return the first slot in tree order in shadow’s descendants whose name is slottable’s name, if any;
+      // otherwise null.
+      return nullptr;
+    }
+  }
+
+  List<Ref<Node>> TreeQueries::FindSlottables(HTMLSlotElement &slot) noexcept
+  {
+    List<Ref<Node>> result;
+    RawPtr<ShadowRoot> root = DynamicDowncast<ShadowRoot>(Root(slot));
+
+    if (root == nullptr)
+    {
+      return result;
+    }
+
+    RawPtr<Element> host = root->Host();
+    if (root->SlotAssignment() == SlotAssignmentMode::Manual)
+    {
+      // For each slottable slottable of slot’s manually assigned nodes, if slottable’s parent is host, append
+      // slottable to result.
+    }
+    else
+    {
+      // or each slottable child slottable of host, in tree order:
+      // Let foundSlot be the result of finding a slot given slottable.
+      // If foundSlot is slot,
+      // then append slottable to result.
+    }
+
+    return result;
+  }
+
+  List<Ref<Node>> TreeQueries::FindFlattenedSlottables(HTMLSlotElement &slot) noexcept
+  {
+    List<Ref<Node>> result;
+
+    // TODO(impl):
+
+    return result;
+  }
+
+#pragma endregion
+
   RawPtr<EventTarget> TreeQueries::Retarget(RawPtr<EventTarget> a, EventTarget &b) noexcept
   {
     auto *current = a;
@@ -284,7 +381,23 @@ namespace Krys::HTML
     return current;
   }
 
-#pragma endregion
+  bool TreeQueries::IsHostIncludingInclusiveAncestorOf(Node &a, Node &b) noexcept
+  {
+    if (IsInclusiveAncestor(a, b))
+    {
+      return true;
+    }
+
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(Root(b)))
+    {
+      if (auto *host = shadowRoot->Host())
+      {
+        return IsHostIncludingInclusiveAncestorOf(a, *host);
+      }
+    }
+
+    return false;
+  }
 
   bool TreeQueries::HasSameRoot(const Node &a, const Node &b) noexcept
   {
@@ -294,18 +407,6 @@ namespace Krys::HTML
   bool TreeQueries::HasSameShadowIncludingRoot(const Node &a, const Node &b) noexcept
   {
     return &ShadowIncludingRoot(a) == &ShadowIncludingRoot(b);
-  }
-
-  bool TreeQueries::IsHostIncludingAncestorOf(Node &node, Node &other) noexcept
-  {
-    // TODO(IMPL):
-    return false;
-  }
-
-  bool TreeQueries::IsHostIncludingInclusiveAncestorOf(Node &node, Node &other) noexcept
-  {
-    // TODO(IMPL):
-    return false;
   }
 
   bool TreeQueries::IsConnectedInSameTreeScope(const Node &a, const Node &b) noexcept

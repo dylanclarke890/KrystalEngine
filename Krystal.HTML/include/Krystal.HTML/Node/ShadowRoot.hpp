@@ -41,9 +41,8 @@ namespace Krys::HTML
     SlotAssignmentMode _slotAssignment : BitCount<SlotAssignmentMode>() {SlotAssignmentMode::Manual};
     bool _clonable : 1 {false};
     bool _serializable : 1 {false};
-    RawPtr<Element> _host;
+    RawPtr<Element> _host {nullptr};
 
-    // TODO: most of the fecking implementation lol
   public:
     ShadowRoot(Document &document, RefPtr<CustomElementRegistry> &&registry,
                NodeFlag flags = NodeFlag::None) noexcept;
@@ -53,6 +52,11 @@ namespace Krys::HTML
     KRYS_NODISCARD ShadowRootMode Mode() const noexcept
     {
       return _mode;
+    }
+
+    KRYS_NODISCARD SlotAssignmentMode SlotAssignment() const noexcept
+    {
+      return _slotAssignment;
     }
 
     KRYS_NODISCARD RawPtr<Element> Host() const noexcept
@@ -74,4 +78,4 @@ KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::ShadowRoot)
   {
     return node.IsShadowRootNode();
   }
-KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END()
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

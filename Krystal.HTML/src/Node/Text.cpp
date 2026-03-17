@@ -18,7 +18,7 @@ namespace Krys::HTML
   /// @see https://dom.spec.whatwg.org/#concept-text-split
   ExceptionOr<Ref<Text>> Text::SplitText(size_t offset) noexcept
   {
-    auto length = Length();
+    auto length = Data().size();
     if (offset > length)
     {
       return Exception {ExceptionCode::IndexSizeError};

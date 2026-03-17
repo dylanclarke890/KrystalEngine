@@ -113,7 +113,7 @@ namespace Krys::HTML
     }
 
     SetStartBoundaryPoint(node, 0);
-    SetEndBoundaryPoint(node, node.Length());
+    SetEndBoundaryPoint(node, TreeQueries::Length(node));
 
     return {};
   }
@@ -159,7 +159,7 @@ namespace Krys::HTML
       if (startCmp.HasException() || startCmp.Value() != std::strong_ordering::greater)
         continue;
 
-      auto endCmp = ComparePoint(*node, node->Length());
+      auto endCmp = ComparePoint(*node, TreeQueries::Length(*node));
       if (endCmp.HasException() || endCmp.Value() != std::strong_ordering::less)
         continue;
 
@@ -192,7 +192,7 @@ namespace Krys::HTML
     if (_start.Container->IsCharacterDataNode())
     {
       RawPtr<CharacterData> characterData = Downcast<CharacterData>(_start.Container.get());
-      auto length = characterData->Length();
+      auto length = TreeQueries::Length(*characterData);
       characterData->DeleteData(_start.Offset, length - _start.Offset);
     }
 
@@ -396,8 +396,8 @@ namespace Krys::HTML
       node.ParentNode()->RemoveChild(node);
     }
 
-    auto newOffset = refNode ? TreeQueries::Index(*refNode) : parent->Length();
-    newOffset += node.IsDocumentFragmentNode() ? node.Length() : 1uz;
+    auto newOffset = refNode ? TreeQueries::Index(*refNode) : TreeQueries::Length(*parent);
+    newOffset += node.IsDocumentFragmentNode() ? TreeQueries::Length(node) : 1uz;
 
     if (auto preInsert = TreeMutationAlgorithms::PreInsert(node, *parent, refNode.get());
         preInsert.HasException())
@@ -500,7 +500,7 @@ namespace Krys::HTML
       return Exception(ExceptionCode::InvalidNodeTypeError);
     }
 
-    if (offset > node.Length())
+    if (offset > TreeQueries::Length(node))
     {
       return Exception(ExceptionCode::IndexSizeError);
     }
@@ -567,7 +567,7 @@ namespace Krys::HTML
     if (auto *startTextNode = DynamicDowncast<Text>(_start.Container.get()))
     {
       auto substringResult =
-        startTextNode->SubstringData(_start.Offset, startTextNode->Length() - _start.Offset);
+        startTextNode->SubstringData(_start.Offset, TreeQueries::Length(*startTextNode) - _start.Offset);
       if (substringResult.HasException())
       {
         return substringResult.ReleaseException();
@@ -604,7 +604,7 @@ namespace Krys::HTML
       return Exception(ExceptionCode::InvalidNodeTypeError);
     }
 
-    if (offset > node.Length())
+    if (offset > TreeQueries::Length(node))
     {
       return Exception(ExceptionCode::IndexSizeError);
     }
@@ -628,7 +628,7 @@ namespace Krys::HTML
       return Exception(ExceptionCode::InvalidNodeTypeError);
     }
 
-    if (offset > node.Length())
+    if (offset > TreeQueries::Length(node))
     {
       return Exception(ExceptionCode::IndexSizeError);
     }
@@ -720,7 +720,7 @@ namespace Krys::HTML
         continue;
       }
 
-      auto beforeEnd = ComparePoint(*child, child->Length());
+      auto beforeEnd = ComparePoint(*child, TreeQueries::Length(*child));
       if (beforeEnd.HasException() || beforeEnd.Value() != std::strong_ordering::less)
       {
         continue;
@@ -738,7 +738,7 @@ namespace Krys::HTML
   {
     if (child && child->IsCharacterDataNode())
     {
-      auto length = Downcast<CharacterData>(_start.Container.get())->Length() - _start.Offset;
+      auto length = TreeQueries::Length(*_start.Container) - _start.Offset;
       auto cloneResult =
         CloneCharacterDataContents(fragment, *_start.Container, _start.Offset, length, deleteClonedContent);
       if (cloneResult.HasException())
@@ -751,7 +751,7 @@ namespace Krys::HTML
       Ref<Node> clone = child->CloneNode();
       fragment.AppendChild(*clone);
 
-      auto subrange = Range {_start, BoundaryPoint {ShareRef(*child), child->Length()}};
+      auto subrange = Range {_start, BoundaryPoint {ShareRef(*child), TreeQueries::Length(*child)}};
       auto subFragment = deleteClonedContent ? subrange.ExtractContents() : subrange.CloneContents();
 
       if (subFragment.HasException())

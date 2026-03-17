@@ -196,8 +196,6 @@ namespace Krys::HTML
     ExceptionOr<void> RemoveChild(Node &child) noexcept;
     ExceptionOr<void> AppendChild(Node &newChild) noexcept;
 
-    KRYS_NODISCARD size_t Length() const noexcept;
-
     KRYS_NODISCARD size_t CountChildNodes() const noexcept;
 
 #pragma endregion

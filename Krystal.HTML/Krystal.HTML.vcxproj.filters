@@ -246,9 +246,6 @@
     <ClInclude Include="include\Krystal.HTML\Utils\SmallNodeList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\NodeList\LiveNodeList.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.HTML\NodeList\HTMLCollection.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -396,9 +393,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\NodeList\ChildNodeList.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\NodeList\LiveNodeList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\NodeRareData.cpp">

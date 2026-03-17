@@ -1,6 +1,6 @@
 ﻿NOTE: https://dom.spec.whatwg.org table of contents.
     
-1 Infrastructure: 3/4
+1 Infrastructure:
     1.1 Trees
         - Full test coverage.
 
@@ -13,7 +13,7 @@
     1.4 Name validation
         - Full test coverage.
     
-2 Events: 11/11
+2 Events:
     2.1  Introduction to "DOM Events" 
          - N/A
 
@@ -47,7 +47,7 @@
     2.11 Action versus occurrence
          - N/A
 
-3 Aborting ongoing activities: 4/4
+3 Aborting ongoing activities:
     3.1   Interface AbortController
          - No test coverage.
 
@@ -92,15 +92,16 @@
     4.2.6    Mixin ParentNode
 
     4.2.7    Mixin NonDocumentTypeChildNode
-        - Full test coverage.
 
     4.2.8    Mixin ChildNode
 
     4.2.9    Mixin Slottable
 
     4.2.10   Old-style collections: NodeList and HTMLCollection
+         - N/A
 
     4.2.10.1 Interface NodeList
+         - No test coverage.
 
     4.2.10.2 Interface HTMLCollection 
 
@@ -119,8 +120,10 @@
     4.5.1    Interface DOMImplementation 
 
     4.6      Interface DocumentType
+         - No test coverage.
 
     4.7      Interface DocumentFragment
+         - No test coverage.
 
     4.8      Interface ShadowRoot
 

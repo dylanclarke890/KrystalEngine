@@ -60,11 +60,6 @@ namespace Krys::HTML
       return ReplaceData(0, value.size(), Krys::Move(value));
     }
 
-    KRYS_NODISCARD size_t Length() const noexcept
-    {
-      return _data.size();
-    }
-
 #pragma endregion
 
 #pragma region ChildNode Mixin - https://dom.spec.whatwg.org/#childnode

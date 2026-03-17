@@ -87,7 +87,7 @@ namespace Krys::HTML
     for (auto *textNode = TreeTraversal::NextExclusiveTextNode(*this, this); textNode;
          textNode = TreeTraversal::NextExclusiveTextNode(*textNode, this))
     {
-      auto length = textNode->Length();
+      auto length = textNode->Data().size();
       if (!length)
       {
         RemoveChild(*textNode);
@@ -183,17 +183,6 @@ namespace Krys::HTML
     }
 
     return Exception {ExceptionCode::HierarchyRequestError};
-  }
-
-  /// @see https://dom.spec.whatwg.org/#concept-node-length
-  size_t Node::Length() const noexcept
-  {
-    if (auto *characterData = DynamicDowncast<CharacterData>(*this))
-    {
-      return characterData->Length();
-    }
-
-    return CountChildNodes();
   }
 
   size_t Node::CountChildNodes() const noexcept

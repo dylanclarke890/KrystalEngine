@@ -11,7 +11,6 @@ namespace Krys::HTML
 {
   enum class NodeListType : uint8
   {
-    Live,
     ChildNode,
     Static,
   };
@@ -23,7 +22,7 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::NodeListType, 4);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::NodeListType, 2);
 KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::NodeListFlag, 2);
 
 namespace Krys::HTML
@@ -55,11 +54,6 @@ namespace Krys::HTML
     }
 
 #pragma region Type Checks
-
-    KRYS_NODISCARD bool IsLiveNodeList() const noexcept
-    {
-      return _type == NodeListType::Live;
-    }
 
     KRYS_NODISCARD bool IsChildNodeList() const noexcept
     {

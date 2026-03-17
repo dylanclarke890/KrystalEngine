@@ -62,7 +62,6 @@
     <ClInclude Include="include\Krystal.HTML\MutationObserver\detail\EmptyNodeMutationRecord.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationRecord.hpp" />
     <ClInclude Include="include\Krystal.HTML\NodeList\HTMLCollection.hpp" />
-    <ClInclude Include="include\Krystal.HTML\NodeList\LiveNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\NodeList\StaticNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Attr.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\CDATASection.hpp" />
@@ -142,7 +141,6 @@
     <ClCompile Include="src\Node\ParentNodeRareData.cpp" />
     <ClCompile Include="src\NodeList\HTMLCollection.cpp" />
     <ClCompile Include="src\Node\NodeRareData.cpp" />
-    <ClCompile Include="src\NodeList\LiveNodeList.cpp" />
     <ClCompile Include="src\NodeList\ChildNodeList.cpp" />
     <ClCompile Include="src\Tree\TreeMutationAlgorithms.cpp" />
     <ClCompile Include="src\MutationObserver\AttributesMutationRecord.cpp" />
