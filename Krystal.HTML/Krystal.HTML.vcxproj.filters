@@ -422,6 +422,9 @@
     <ClCompile Include="src\Algorithms\SlotAssignmentAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\HTMLElement\HTMLSlotElement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\HTMLTagNames.in" />

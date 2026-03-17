@@ -133,6 +133,7 @@
     <ClInclude Include="include\Krystal.HTML\Algorithms\StringAlgorithms.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\HTMLElement\HTMLSlotElement.cpp" />
     <ClCompile Include="src\Algorithms\SlotAssignmentAlgorithms.cpp" />
     <ClCompile Include="src\Abort\AbortSignal.cpp" />
     <ClCompile Include="src\Abort\AbortController.cpp" />
