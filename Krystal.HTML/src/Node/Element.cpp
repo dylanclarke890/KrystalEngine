@@ -76,12 +76,22 @@ namespace Krys::HTML
 
 #pragma region NonDocumentTypeChildNode
 
-  RawPtr<Element> Element::PreviousElementSibling() const noexcept
+  RawPtr<const Element> Element::PreviousElementSibling() const noexcept
   {
     return TreeTraversal::PreviousElementSibling(*this);
   }
 
-  RawPtr<Element> Element::NextElementSibling() const noexcept
+  RawPtr<Element> Element::PreviousElementSibling() noexcept
+  {
+    return TreeTraversal::PreviousElementSibling(*this);
+  }
+
+  RawPtr<const Element> Element::NextElementSibling() const noexcept
+  {
+    return TreeTraversal::NextElementSibling(*this);
+  }
+
+  RawPtr<Element> Element::NextElementSibling() noexcept
   {
     return TreeTraversal::NextElementSibling(*this);
   }
@@ -95,17 +105,27 @@ namespace Krys::HTML
     return _elementRareData->Children(*this);
   }
 
-  KRYS_NODISCARD RawPtr<Element> Element::FirstElementChild() const noexcept
+  RawPtr<const Element> Element::FirstElementChild() const noexcept
   {
     return TreeTraversal::FirstElementChild(*this);
   }
 
-  KRYS_NODISCARD RawPtr<Element> Element::LastElementChild() const noexcept
+  RawPtr<Element> Element::FirstElementChild() noexcept
+  {
+    return TreeTraversal::FirstElementChild(*this);
+  }
+
+  RawPtr<const Element> Element::LastElementChild() const noexcept
   {
     return TreeTraversal::LastElementChild(*this);
   }
 
-  KRYS_NODISCARD size_t Element::ChildElementCount() const noexcept
+  RawPtr<Element> Element::LastElementChild() noexcept
+  {
+    return TreeTraversal::LastElementChild(*this);
+  }
+
+  size_t Element::ChildElementCount() const noexcept
   {
     return TreeQueries::ChildElementCount(*this);
   }

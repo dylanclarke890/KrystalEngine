@@ -78,9 +78,11 @@ namespace Krys::HTML
 
 #pragma region NonDocumentTypeChildNode Mixin - https://dom.spec.whatwg.org/#interface-nondocumenttypechildnode
 
-    KRYS_NODISCARD RawPtr<Element> PreviousElementSibling() const noexcept;
+    KRYS_NODISCARD RawPtr<const Element> PreviousElementSibling() const noexcept;
+    KRYS_NODISCARD RawPtr<Element> PreviousElementSibling() noexcept;
 
-    KRYS_NODISCARD RawPtr<Element> NextElementSibling() const noexcept;
+    KRYS_NODISCARD RawPtr<const Element> NextElementSibling() const noexcept;
+    KRYS_NODISCARD RawPtr<Element> NextElementSibling() noexcept;
 
 #pragma endregion
   };

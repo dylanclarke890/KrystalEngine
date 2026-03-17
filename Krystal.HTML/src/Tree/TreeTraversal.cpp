@@ -9,30 +9,19 @@
 #include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/Tree/TreeQueries.hpp"
 #include "Krystal.HTML/Utils/SubtreeRanges.hpp"
+#include "Krystal.Lib/Ranges/Algorithm.hpp"
 #include <cassert>
 
 namespace Krys::HTML
 {
   const Node &TreeTraversal::Root(const Node &node) noexcept
   {
-    const Node *current = nullptr;
-    for (const Node &ancestor : ConstInclusiveAncestorRange(node))
-    {
-      current = &ancestor;
-    }
-
-    return *current;
+    return *Krys::HTML::Last(ConstInclusiveAncestorRange(node));
   }
 
   Node &TreeTraversal::Root(Node &node) noexcept
   {
-    Node *current = &node;
-    for (Node &ancestor : InclusiveAncestorRange(node))
-    {
-      current = &ancestor;
-    }
-
-    return *current;
+    return *Krys::HTML::Last(InclusiveAncestorRange(node));
   }
 
   template <bool CheckChildren = true, typename TNode>
@@ -340,11 +329,11 @@ namespace Krys::HTML
   RawPtr<Node> TreeTraversal::PreviousAncestorSiblingPostOrder(const Node &current) noexcept
   {
     assert(!current.PreviousSibling());
-    for (RawPtr<Node> ancestor = current.ParentNode(); ancestor != nullptr; ancestor = ancestor->ParentNode())
+    for (const auto &ancestor : ConstAncestorRange(current))
     {
-      if (ancestor->PreviousSibling())
+      if (ancestor.PreviousSibling())
       {
-        return ancestor->PreviousSibling();
+        return ancestor.PreviousSibling();
       }
     }
 
@@ -355,84 +344,88 @@ namespace Krys::HTML
                                                                RawPtr<const Node> stayWithin) noexcept
   {
     assert(!current.PreviousSibling());
-    for (RawPtr<Node> ancestor = current.ParentNode(); ancestor != nullptr; ancestor = ancestor->ParentNode())
+    for (const auto &ancestor : ConstAncestorRange(current))
     {
-      if (ancestor == stayWithin)
+      if (&ancestor == stayWithin)
       {
         return nullptr;
       }
-      if (ancestor->PreviousSibling())
+      if (ancestor.PreviousSibling())
       {
-        return ancestor->PreviousSibling();
+        return ancestor.PreviousSibling();
       }
     }
     return nullptr;
   }
 
-  RawPtr<Element> TreeTraversal::NextElementSibling(const Node &current) noexcept
+  RawPtr<const Element> TreeTraversal::NextElementSibling(const Node &current) noexcept
   {
-    for (RawPtr<Node> next = current.NextSibling(); next; next = next->NextSibling())
-    {
-      if (RawPtr<Element> element = DynamicDowncast<Element>(*next))
-      {
-        return element;
-      }
-    }
-
-    return nullptr;
+    auto siblings = ConstNextSiblingRange(current);
+    auto it = FirstOfType<Element>(siblings);
+    return it == std::ranges::end(siblings) ? nullptr : Downcast<Element>(&*it);
   }
 
-  RawPtr<Element> TreeTraversal::PreviousElementSibling(const Node &current) noexcept
+  RawPtr<Element> TreeTraversal::NextElementSibling(Node &current) noexcept
   {
-    for (RawPtr<Node> prev = current.PreviousSibling(); prev; prev = prev->PreviousSibling())
-    {
-      if (RawPtr<Element> element = DynamicDowncast<Element>(*prev))
-      {
-        return element;
-      }
-    }
-
-    return nullptr;
+    auto siblings = NextSiblingRange(current);
+    auto it = FirstOfType<Element>(siblings);
+    return it == std::ranges::end(siblings) ? nullptr : Downcast<Element>(&*it);
   }
 
-  RawPtr<Element> TreeTraversal::FirstElementChild(const ContainerNode &node) noexcept
+  RawPtr<const Element> TreeTraversal::PreviousElementSibling(const Node &current) noexcept
   {
-    for (auto child = ShareRefPtr(node.FirstChild()); child; child = ShareRefPtr(child->NextSibling()))
-    {
-      if (auto *element = DynamicDowncast<Element>(*child))
-      {
-        return element;
-      }
-    }
-
-    return nullptr;
+    auto siblings = ConstPreviousSiblingRange(current);
+    auto it = FirstOfType<Element>(siblings);
+    return it == std::ranges::end(siblings) ? nullptr : Downcast<Element>(&*it);
   }
 
-  RawPtr<Element> TreeTraversal::LastElementChild(const ContainerNode &node) noexcept
+  RawPtr<Element> TreeTraversal::PreviousElementSibling(Node &current) noexcept
   {
-    RawPtr<Element> lastElement = nullptr;
-    for (auto child = ShareRefPtr(node.LastChild()); child; child = ShareRefPtr(child->PreviousSibling()))
-    {
-      if (auto *element = DynamicDowncast<Element>(*child))
-      {
-        return element;
-      }
-    }
-
-    return nullptr;
+    auto siblings = PreviousSiblingRange(current);
+    auto it = FirstOfType<Element>(siblings);
+    return it == std::ranges::end(siblings) ? nullptr : Downcast<Element>(&*it);
   }
 
-  RawPtr<Text> TreeTraversal::NextExclusiveTextNode(const Node &current) noexcept
+  RawPtr<const Element> TreeTraversal::FirstElementChild(const ContainerNode &node) noexcept
   {
-    for (RawPtr<Node> next = Next(current); next; next = Next(*next))
-    {
-      if (TreeQueries::IsExclusiveTextNode(*next))
-      {
-        return Downcast<Text>(next);
-      }
-    }
+    auto children = ConstChildNodeRange(node);
+    auto it = FirstOfType<Element>(children);
+    return it == std::ranges::end(children) ? nullptr : Downcast<Element>(&*it);
+  }
 
-    return nullptr;
+  RawPtr<Element> TreeTraversal::FirstElementChild(ContainerNode &node) noexcept
+  {
+    auto children = ChildNodeRange(node);
+    auto it = FirstOfType<Element>(children);
+    return it == std::ranges::end(children) ? nullptr : Downcast<Element>(&*it);
+  }
+
+  RawPtr<const Element> TreeTraversal::LastElementChild(const ContainerNode &node) noexcept
+  {
+    auto children = ConstChildNodeRange(node);
+    auto it = LastOfType<Element>(children);
+    return it == std::ranges::end(children) ? nullptr : Downcast<Element>(&*it);
+  }
+
+  RawPtr<Element> TreeTraversal::LastElementChild(ContainerNode &node) noexcept
+  {
+    auto children = ChildNodeRange(node);
+    auto it = LastOfType<Element>(children);
+    return it == std::ranges::end(children) ? nullptr : Downcast<Element>(&*it);
+  }
+
+  RawPtr<const Text> TreeTraversal::NextExclusiveTextNode(const Node &current) noexcept
+  {
+    auto next = ConstFollowingRange(current);
+    auto it = std::ranges::find_if(next, [](const auto &n) { return TreeQueries::IsExclusiveTextNode(n); });
+    return it == std::ranges::end(next) ? nullptr : Downcast<Text>(&*it);
+  }
+
+  RawPtr<Text> TreeTraversal::NextExclusiveTextNode(Node &current) noexcept
+  {
+    auto next = FollowingRange(current);
+    auto it = std::ranges::find_if(next, [](const auto &n) { return TreeQueries::IsExclusiveTextNode(n); });
+    return it == std::ranges::end(next) ? nullptr : Downcast<Text>(&*it);
   }
 
   RawPtr<Text> TreeTraversal::NextExclusiveTextNode(const Node &current,

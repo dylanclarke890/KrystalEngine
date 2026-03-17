@@ -57,17 +57,24 @@ namespace Krys::HTML
 
 #pragma region NonDocumentTypeChildNode Mixin - https://dom.spec.whatwg.org/#interface-nondocumenttypechildnode
 
-    KRYS_NODISCARD RawPtr<Element> PreviousElementSibling() const noexcept;
+    KRYS_NODISCARD RawPtr<const Element> PreviousElementSibling() const noexcept;
+    KRYS_NODISCARD RawPtr<Element> PreviousElementSibling() noexcept;
 
-    KRYS_NODISCARD RawPtr<Element> NextElementSibling() const noexcept;
+    KRYS_NODISCARD RawPtr<const Element> NextElementSibling() const noexcept;
+    KRYS_NODISCARD RawPtr<Element> NextElementSibling() noexcept;
 
 #pragma endregion
 
 #pragma region ParentNode Mixin - https://dom.spec.whatwg.org/#parentnode
 
     KRYS_NODISCARD Ref<HTMLCollection> Children() noexcept;
-    KRYS_NODISCARD RawPtr<Element> FirstElementChild() const noexcept;
-    KRYS_NODISCARD RawPtr<Element> LastElementChild() const noexcept;
+
+    KRYS_NODISCARD RawPtr<const Element> FirstElementChild() const noexcept;
+    KRYS_NODISCARD RawPtr<Element> FirstElementChild() noexcept;
+    
+    KRYS_NODISCARD RawPtr<const Element> LastElementChild() const noexcept;
+    KRYS_NODISCARD RawPtr<Element> LastElementChild() noexcept;
+    
     KRYS_NODISCARD size_t ChildElementCount() const noexcept;
 
     ExceptionOr<void> Prepend(const List<NodeOrString> &nodes) noexcept;

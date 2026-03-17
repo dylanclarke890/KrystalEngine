@@ -71,17 +71,27 @@ namespace Krys::HTML
     return _documentRareData->Children(*this);
   }
 
-  KRYS_NODISCARD RawPtr<Element> Document::FirstElementChild() const noexcept
+  RawPtr<const Element> Document::FirstElementChild() const noexcept
   {
     return TreeTraversal::FirstElementChild(*this);
   }
 
-  KRYS_NODISCARD RawPtr<Element> Document::LastElementChild() const noexcept
+  RawPtr<Element> Document::FirstElementChild() noexcept
+  {
+    return TreeTraversal::FirstElementChild(*this);
+  }
+
+  RawPtr<const Element> Document::LastElementChild() const noexcept
   {
     return TreeTraversal::LastElementChild(*this);
   }
 
-  KRYS_NODISCARD size_t Document::ChildElementCount() const noexcept
+  RawPtr<Element> Document::LastElementChild() noexcept
+  {
+    return TreeTraversal::LastElementChild(*this);
+  }
+
+  size_t Document::ChildElementCount() const noexcept
   {
     return TreeQueries::ChildElementCount(*this);
   }

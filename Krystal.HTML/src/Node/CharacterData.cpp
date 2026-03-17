@@ -133,12 +133,22 @@ namespace Krys::HTML
 
 #pragma region NonDocumentTypeChildNode
 
-  RawPtr<Element> CharacterData::PreviousElementSibling() const noexcept
+  RawPtr<const Element> CharacterData::PreviousElementSibling() const noexcept
   {
     return TreeTraversal::PreviousElementSibling(*this);
   }
 
-  RawPtr<Element> CharacterData::NextElementSibling() const noexcept
+  RawPtr<Element> CharacterData::PreviousElementSibling() noexcept
+  {
+    return TreeTraversal::PreviousElementSibling(*this);
+  }
+
+  RawPtr<const Element> CharacterData::NextElementSibling() const noexcept
+  {
+    return TreeTraversal::NextElementSibling(*this);
+  }
+
+  RawPtr<Element> CharacterData::NextElementSibling() noexcept
   {
     return TreeTraversal::NextElementSibling(*this);
   }

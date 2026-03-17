@@ -10,6 +10,8 @@
 #include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/Tree/TreeTraversal.hpp"
 #include "Krystal.HTML/Utils/SubtreeRanges.hpp"
+#include "Krystal.Lib/Ranges/Algorithm.hpp"
+#include <ranges>
 
 namespace Krys::HTML
 {
@@ -107,12 +109,7 @@ namespace Krys::HTML
 
   size_t TreeQueries::Index(const Node &node) noexcept
   {
-    size_t index = 0;
-    for (auto *sibling = node.PreviousSibling(); sibling; sibling = sibling->PreviousSibling())
-    {
-      index++;
-    }
-    return index;
+    return Krys::HTML::Count(ConstPreviousSiblingRange(node));
   }
 
 #pragma endregion
@@ -124,11 +121,22 @@ namespace Krys::HTML
     return Root(node).IsDocumentNode();
   }
 
-  RawPtr<Element> TreeQueries::DocumentElement(const Node &node) noexcept
+  // The document element of a document is the element whose parent is that document, if it exists;
+  // otherwise null.
+
+  RawPtr<const Element> TreeQueries::DocumentElement(const Node &node) noexcept
   {
-    // The document element of a document is the element whose parent is that document, if it exists;
-    // otherwise null.
-    if (auto *document = DynamicDowncast<Document>(&Root(node)))
+    if (auto *document = DynamicDowncast<Document>(Root(node)))
+    {
+      return TreeTraversal::FirstElementChild(*document);
+    }
+
+    return nullptr;
+  }
+
+  RawPtr<Element> TreeQueries::DocumentElement(Node &node) noexcept
+  {
+    if (auto *document = DynamicDowncast<Document>(Root(node)))
     {
       return TreeTraversal::FirstElementChild(*document);
     }
@@ -317,16 +325,8 @@ namespace Krys::HTML
       return true;
     }
 
-    RawPtr<Node> current = node;
-    while (current = TreeTraversal::Next(*current))
-    {
-      if (current->IsDocumentTypeNode())
-      {
-        return true;
-      }
-    }
-
-    return false;
+    return std::ranges::any_of(ConstFollowingRange(*node),
+                               [](const auto &current) { return current.IsDocumentTypeNode(); });
   }
 
   bool TreeQueries::IsExclusiveTextNode(const Node &node) noexcept
@@ -346,42 +346,25 @@ namespace Krys::HTML
 
   RawPtr<Node> TreeQueries::ChildAt(ContainerNode &node, size_t index) noexcept
   {
-    size_t currentIndex = 0;
-    for (Node &child : ChildNodeRange(node))
-    {
-      if (currentIndex == index)
-      {
-        return &child;
-      }
-      currentIndex++;
-    }
-    return nullptr;
+    size_t i = 0;
+    auto children = ChildNodeRange(node);
+    auto it = std::ranges::find_if(children, [&](const Node &) { return i++ == index; });
+    return it == std::ranges::end(children) ? nullptr : &*it;
   }
 
   size_t TreeQueries::ChildNodeCount(const ContainerNode &node) noexcept
   {
-    size_t count = 0;
-    for (const Node &child : ConstChildNodeRange(node))
-    {
-      count++;
-    }
-    return count;
+    return Krys::HTML::Count(ConstChildNodeRange(node));
   }
 
   KRYS_NODISCARD size_t TreeQueries::ChildElementCount(const ContainerNode &node) noexcept
   {
-    size_t count = 0;
-    for (const Element &child : ConstChildElementRange(node))
-    {
-      count++;
-    }
-
-    return count;
+    return Krys::HTML::Count(ConstChildElementRange(node));
   }
 
   bool TreeQueries::HasElementChild(const ContainerNode &node) noexcept
   {
-    return std::ranges::any_of(ConstChildNodeRange(node), [](const Node &n) { return n.IsElementNode(); });
+    return std::ranges::any_of(ConstChildNodeRange(node), [](const Node &n) { return Is<Element>(n); });
   }
 
   void TreeQueries::CollectChildNodes(ContainerNode &parent, SmallNodeList &collection) noexcept
@@ -402,13 +385,13 @@ namespace Krys::HTML
 
   List<Ref<Node>> TreeQueries::InclusiveAncestors(Node &node) noexcept
   {
-    List<Ref<Node>> ancestors;
+    List<Ref<Node>> collection;
     for (Node &ancestor : InclusiveAncestorRange(node))
     {
-      ancestors.emplace_back(ShareRef(ancestor));
+      collection.emplace_back(ShareRef(ancestor));
     }
 
-    return ancestors;
+    return collection;
   }
 
   DOMString TreeQueries::DescendantTextContent(const ContainerNode &node) noexcept

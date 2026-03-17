@@ -36,12 +36,22 @@ namespace Krys::HTML
     return _documentFragmentRareData->Children(*this);
   }
 
-  RawPtr<Element> DocumentFragment::FirstElementChild() const noexcept
+  RawPtr<const Element> DocumentFragment::FirstElementChild() const noexcept
   {
     return TreeTraversal::FirstElementChild(*this);
   }
 
-  RawPtr<Element> DocumentFragment::LastElementChild() const noexcept
+  RawPtr<Element> DocumentFragment::FirstElementChild() noexcept
+  {
+    return TreeTraversal::FirstElementChild(*this);
+  }
+
+  RawPtr<const Element> DocumentFragment::LastElementChild() const noexcept
+  {
+    return TreeTraversal::LastElementChild(*this);
+  }
+
+  RawPtr<Element> DocumentFragment::LastElementChild() noexcept
   {
     return TreeTraversal::LastElementChild(*this);
   }

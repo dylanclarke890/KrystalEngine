@@ -24,7 +24,8 @@ namespace Krys::HTML
 
     KRYS_NODISCARD static bool IsInDocumentTree(const Node &node) noexcept;
 
-    KRYS_NODISCARD static RawPtr<Element> DocumentElement(const Node &node) noexcept;
+    KRYS_NODISCARD static RawPtr<const Element> DocumentElement(const Node &node) noexcept;
+    KRYS_NODISCARD static RawPtr<Element> DocumentElement(Node &node) noexcept;
 
 #pragma endregion
 

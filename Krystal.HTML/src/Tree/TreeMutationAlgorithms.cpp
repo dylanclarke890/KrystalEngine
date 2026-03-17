@@ -92,22 +92,18 @@ namespace Krys::HTML
       }
       else if (node.IsDocumentTypeNode())
       {
-        auto children = ChildNodeRange(parent);
-        if (std::any_of(
-              children.begin(), children.end(), [&](const Node &current)
+        if (std::ranges::any_of(
+              ChildNodeRange(parent), [&](const Node &current)
               { return current.IsDocumentTypeNode() || (current.IsElementNode() && child == nullptr); }))
         {
           return Exception {ExceptionCode::HierarchyRequestError};
         }
 
-        if (child != nullptr)
+        if (child != nullptr
+            && std::ranges::any_of(PrecedingRange(*child),
+                                   [](const Node &current) { return current.IsElementNode(); }))
         {
-          auto preceding = PrecedingRange(*child);
-          if (std::any_of(preceding.begin(), preceding.end(),
-                          [](const Node &current) { return current.IsElementNode(); }))
-          {
-            return Exception {ExceptionCode::HierarchyRequestError};
-          }
+          return Exception {ExceptionCode::HierarchyRequestError};
         }
       }
     }
