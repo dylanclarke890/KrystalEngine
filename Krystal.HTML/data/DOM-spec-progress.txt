@@ -138,10 +138,13 @@
     4.11     Interface Text
 
     4.12     Interface CDATASection
+         - N/A
 
     4.13     Interface ProcessingInstruction
+         - No test coverage.
 
     4.14     Interface Comment 
+         - No test coverage.
 
 5 Ranges
     5.1 Introduction to "DOM Ranges"
@@ -155,11 +158,14 @@
     5.5 Interface Range 
 
 6 Traversal
+         - No test coverage.
+
     6.1 Interface NodeIterator
 
     6.2 Interface TreeWalker
 
     6.3 Interface NodeFilter 
+         - No test coverage.
 
 7 Sets
     7.1 Interface DOMTokenList 

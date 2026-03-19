@@ -35,10 +35,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML\Abort\AbortController.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\IteratorAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventPath.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventTargetFlag.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLSlotElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Iterator\FilterResult.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Iterator\WhatToShow.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Iterator\_detail\IteratorBase.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationCallback.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationObserverInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\RegisteredObserver.hpp" />
@@ -133,11 +137,13 @@
     <ClInclude Include="include\Krystal.HTML\Algorithms\StringAlgorithms.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Algorithms\IteratorAlgorithms.cpp" />
     <ClCompile Include="src\HTMLElement\HTMLSlotElement.cpp" />
     <ClCompile Include="src\Algorithms\SlotAssignmentAlgorithms.cpp" />
     <ClCompile Include="src\Abort\AbortSignal.cpp" />
     <ClCompile Include="src\Abort\AbortController.cpp" />
     <ClCompile Include="src\Events\EventPath.cpp" />
+    <ClCompile Include="src\Iterator\NodeIterator.cpp" />
     <ClCompile Include="src\Ranges\Range.cpp" />
     <ClCompile Include="src\MutationObserver\MutationObserver.cpp" />
     <ClCompile Include="src\Node\ParentNodeRareData.cpp" />

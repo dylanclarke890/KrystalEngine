@@ -178,16 +178,17 @@ namespace Krys::HTML
 
     auto *parentRoot = DynamicDowncast<ShadowRoot>(TreeQueries::Root(parent));
     auto *parentAsElement = DynamicDowncast<Element>(parent);
-    auto *parentShadowRoot = parentAsElement ? parentAsElement->GetShadowRoot() : nullptr;
+    auto *parentShadowRoot = parentAsElement != nullptr ? parentAsElement->GetShadowRoot() : nullptr;
     auto *parentAsSlot = DynamicDowncast<HTMLSlotElement>(parent);
 
-    auto *previousSibling = child ? child->PreviousSibling() : parent.LastChild();
+    auto *previousSibling = child != nullptr ? child->PreviousSibling() : parent.LastChild();
     for (auto &target : nodes)
     {
       if (auto result = parent.OwnerDocument()->AdoptNode(*target); result.HasException())
       {
         return {result.ReleaseException()};
       }
+
       target->SetParentNode(&parent);
       target->SetTreeScopeRecursively(*parent.OwnerDocument());
 
