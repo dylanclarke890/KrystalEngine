@@ -95,6 +95,88 @@ namespace Krys::HTML
     return GetNext(current, stayWithin);
   }
 
+  RawPtr<Node> TreeTraversal::NextShadowIncluding(const Node &current) noexcept
+  {
+    if (auto *child = current.FirstChild())
+    {
+      return child;
+    }
+
+    if (auto *host = DynamicDowncast<Element>(current))
+    {
+      if (auto *shadowRoot = host->GetShadowRoot())
+      {
+        return shadowRoot;
+      }
+    }
+
+    for (RawPtr<const Node> node = &current; node; node = node->ParentNode())
+    {
+      if (auto *sibling = node->NextSibling())
+      {
+        return sibling;
+      }
+
+      // If climbing out of a shadow tree, continue from the host.
+      if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(*node))
+      {
+        node = shadowRoot->Host();
+        if (auto *sibling = node->NextSibling())
+        {
+          return sibling;
+        }
+      }
+    }
+
+    return nullptr;
+  }
+
+  RawPtr<Node> TreeTraversal::NextShadowIncluding(const Node &current, RawPtr<const Node> stayWithin) noexcept
+  {
+    if (auto *child = current.FirstChild())
+    {
+      return child;
+    }
+
+    if (auto *host = DynamicDowncast<Element>(current))
+    {
+      if (auto *shadowRoot = host->GetShadowRoot())
+      {
+        return shadowRoot;
+      }
+    }
+
+    for (RawPtr<const Node> node = &current; node; node = node->ParentNode())
+    {
+      if (node == stayWithin)
+      {
+        return nullptr;
+      }
+
+      if (auto *sibling = node->NextSibling())
+      {
+        return sibling;
+      }
+
+      // If climbing out of a shadow tree, continue from the host.
+      if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(*node))
+      {
+        node = shadowRoot->Host();
+        
+        if (node == stayWithin)
+        {
+          return nullptr;
+        }
+
+        if (auto *sibling = node->NextSibling())
+        {
+          return sibling;
+        }
+      }
+    }
+    return nullptr;
+  }
+
   RawPtr<Node> TreeTraversal::Next(const Text &current, RawPtr<const Node> stayWithin) noexcept
   {
     return GetNext(current, stayWithin);

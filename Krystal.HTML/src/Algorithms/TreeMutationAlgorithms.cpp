@@ -242,6 +242,7 @@ namespace Krys::HTML
         for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(*targetContainer))
         {
           TreeMutationDispatcher::Inserted(inclusiveDescendant);
+
           if (!inclusiveDescendant.IsConnected())
           {
             continue;
@@ -304,55 +305,6 @@ namespace Krys::HTML
     return PreInsert(node, parent, nullptr);
   }
 
-  ExceptionOr<void> TreeMutationAlgorithms::PreRemove(Node &node, ContainerNode &parent) noexcept
-  {
-    if (node.ParentNode() != &parent)
-    {
-      return Exception {ExceptionCode::NotFoundError};
-    }
-
-    return Remove(node, parent);
-  }
-
-  ExceptionOr<void> TreeMutationAlgorithms::Remove(Node &node, ContainerNode &parent,
-                                                   SuppressObservers suppressObservers) noexcept
-  {
-    if (auto previousSibling = ShareRefPtr(node.PreviousSibling()))
-    {
-      previousSibling->SetNextSibling(node.NextSibling());
-    }
-    else
-    {
-      assert(parent.FirstChild() == &node);
-      parent.SetFirstChild(node.NextSibling());
-    }
-
-    if (auto nextSibling = ShareRefPtr(node.NextSibling()))
-    {
-      nextSibling->SetPreviousSibling(node.PreviousSibling());
-    }
-    else
-    {
-      assert(parent.LastChild() == &node);
-      parent.SetLastChild(node.PreviousSibling());
-    }
-
-    node.SetParentNode(nullptr);
-    node.SetPreviousSibling(nullptr);
-    node.SetNextSibling(nullptr);
-
-    assert(parent.FirstChild() != &node);
-    assert(parent.LastChild() != &node);
-    assert(!node.PreviousSibling());
-    assert(!node.NextSibling());
-
-    TreeMutationDispatcher::Removed(node, true, parent);
-
-    // TODO(impl):
-
-    return {};
-  }
-
   ExceptionOr<void> TreeMutationAlgorithms::Move(Node &node, ContainerNode &newParent,
                                                  RawPtr<Node> refChild) noexcept
   {
@@ -411,6 +363,55 @@ namespace Krys::HTML
     }
 
     // TODO(IMPL):
+
+    return {};
+  }
+
+  ExceptionOr<void> TreeMutationAlgorithms::PreRemove(Node &node, ContainerNode &parent) noexcept
+  {
+    if (node.ParentNode() != &parent)
+    {
+      return Exception {ExceptionCode::NotFoundError};
+    }
+
+    return Remove(node, parent);
+  }
+
+  ExceptionOr<void> TreeMutationAlgorithms::Remove(Node &node, ContainerNode &parent,
+                                                   SuppressObservers suppressObservers) noexcept
+  {
+    if (auto previousSibling = ShareRefPtr(node.PreviousSibling()))
+    {
+      previousSibling->SetNextSibling(node.NextSibling());
+    }
+    else
+    {
+      assert(parent.FirstChild() == &node);
+      parent.SetFirstChild(node.NextSibling());
+    }
+
+    if (auto nextSibling = ShareRefPtr(node.NextSibling()))
+    {
+      nextSibling->SetPreviousSibling(node.PreviousSibling());
+    }
+    else
+    {
+      assert(parent.LastChild() == &node);
+      parent.SetLastChild(node.PreviousSibling());
+    }
+
+    node.SetParentNode(nullptr);
+    node.SetPreviousSibling(nullptr);
+    node.SetNextSibling(nullptr);
+
+    assert(parent.FirstChild() != &node);
+    assert(parent.LastChild() != &node);
+    assert(!node.PreviousSibling());
+    assert(!node.NextSibling());
+
+    TreeMutationDispatcher::Removed(node, true, parent);
+
+    // TODO(impl):
 
     return {};
   }

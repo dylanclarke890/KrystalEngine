@@ -37,6 +37,10 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#concept-node-append
     KRYS_NODISCARD static ExceptionOr<void> Append(Node &node, ContainerNode &parent) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#move
+    KRYS_NODISCARD static ExceptionOr<void> Move(Node &node, ContainerNode &newParent,
+                                                 RawPtr<Node> refChild) noexcept;
+
     /// @see https://dom.spec.whatwg.org/#concept-node-pre-remove
     KRYS_NODISCARD static ExceptionOr<void> PreRemove(Node &node, ContainerNode &parent) noexcept;
 
@@ -44,10 +48,6 @@ namespace Krys::HTML
     KRYS_NODISCARD static ExceptionOr<void>
       Remove(Node &node, ContainerNode &parent,
              SuppressObservers suppressObservers = SuppressObservers(false)) noexcept;
-
-    /// @see https://dom.spec.whatwg.org/#move
-    KRYS_NODISCARD static ExceptionOr<void> Move(Node &node, ContainerNode &newParent,
-                                                 RawPtr<Node> refChild) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-node-clone
     static Ref<Node> CloneNode(Node &node, RawPtr<Document> document = nullptr, bool subtree = false,

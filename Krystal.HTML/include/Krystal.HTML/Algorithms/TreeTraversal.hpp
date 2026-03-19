@@ -24,6 +24,10 @@ namespace Krys::HTML
     KRYS_NODISCARD static RawPtr<Node> Next(const ContainerNode &current,
                                             RawPtr<const Node> stayWithin) noexcept;
 
+    KRYS_NODISCARD static RawPtr<Node> NextShadowIncluding(const Node &current) noexcept;
+    KRYS_NODISCARD static RawPtr<Node> NextShadowIncluding(const Node &current,
+                                                           RawPtr<const Node> stayWithin) noexcept;
+
     KRYS_NODISCARD static RawPtr<Node> NextSkippingChildren(const Node &current) noexcept;
     KRYS_NODISCARD static RawPtr<Node> NextSkippingChildren(const Node &current,
                                                             RawPtr<const Node> stayWithin) noexcept;

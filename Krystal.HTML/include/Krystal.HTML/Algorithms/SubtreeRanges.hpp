@@ -362,9 +362,7 @@ namespace Krys::HTML::detail
     KRYS_NODISCARD static RawPtr<TNode> ScopedAdvance(RawPtr<const Node> current,
                                                       RawPtr<const Node> stayWithin) noexcept
     {
-      // TODO(impl): doesn't take shadow DOM into account yet, but we should probably add a
-      // TreeTraversal::NextIncludingShadow() and use it here.
-      return TreeTraversal::Next(*current, stayWithin);
+      return TreeTraversal::NextShadowIncluding(*current, stayWithin);
     }
   };
 
