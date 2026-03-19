@@ -8,8 +8,13 @@
 
 namespace Krys::HTML
 {
-#pragma region Finding slots and slotted elements - https://dom.spec.whatwg.org/#finding-slots-and-slotables
+  bool SlotAssignmentAlgorithms::IsSlottable(const Node &node) noexcept
+  {
+    return node.IsElementNode() || node.IsTextNode();
+  }
 
+#pragma region Finding slots and slotted elements - https://dom.spec.whatwg.org/#finding-slots-and-slotables
+  
   RawPtr<HTMLSlotElement> SlotAssignmentAlgorithms::FindSlot(Node &slottable, bool open) noexcept
   {
     RawPtr<Element> parent = slottable.ParentElement();

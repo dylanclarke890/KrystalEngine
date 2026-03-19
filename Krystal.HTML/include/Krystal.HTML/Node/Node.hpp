@@ -315,9 +315,7 @@ namespace Krys::HTML
 
 #pragma endregion
 
-    virtual void InsertedIntoAncestor(const NodeInsertedContext &context) noexcept;
-
-    virtual void RemovedFromAncestor(const NodeRemovedContext &context) noexcept;
+#pragma region Relationships
 
     void SetParentNode(RawPtr<ContainerNode> parent) noexcept
     {
@@ -334,6 +332,10 @@ namespace Krys::HTML
       _previousSibling = ShareCheckedPtr(sibling);
     }
 
+#pragma endregion
+
+#pragma region Node Flags
+
     void SetNodeFlag(NodeFlag flag) noexcept
     {
       _flags = _flags | flag;
@@ -348,6 +350,8 @@ namespace Krys::HTML
     {
       return HasFlag(_flags, flag);
     }
+
+#pragma endregion
 
     KRYS_NODISCARD List<Ref<RegisteredObserver>> &RegisteredObserverList() noexcept;
 

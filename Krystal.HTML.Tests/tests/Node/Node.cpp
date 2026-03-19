@@ -47,10 +47,13 @@ namespace Krys::Tests
   {
     CommonTestData data {};
     REQUIRE_FALSE(data.test_node->IsConnected());
+    REQUIRE(data.test_document->IsConnected());
 
     auto appendResult = data.test_document->AppendChild(*data.test_node);
     REQUIRE_FALSE(appendResult.HasException());
+   
     REQUIRE(data.test_node->IsConnected());
+    REQUIRE(data.test_document->IsConnected());
   }
 
   TEST_CASE("Node::OwnerDocument", "[Node]")

@@ -271,8 +271,6 @@ namespace Krys::HTML
     return false;
   }
 
-#pragma endregion
-
   RawPtr<EventTarget> TreeQueries::Retarget(RawPtr<EventTarget> a, EventTarget &b) noexcept
   {
     auto *current = a;
@@ -311,6 +309,8 @@ namespace Krys::HTML
     return current;
   }
 
+#pragma endregion
+
   bool TreeQueries::IsHostIncludingInclusiveAncestorOf(Node &a, Node &b) noexcept
   {
     if (IsInclusiveAncestor(a, b))
@@ -327,6 +327,21 @@ namespace Krys::HTML
     }
 
     return false;
+  }
+
+  bool TreeQueries::IsShadowHost(const Node &node) noexcept
+  {
+    if (!node.IsElementNode())
+    {
+      return false;
+    }
+
+    return IsShadowHost(Downcast<Element>(node));
+  }
+
+  bool TreeQueries::IsShadowHost(const Element &node) noexcept
+  {
+    return node.GetShadowRoot() != nullptr;
   }
 
   bool TreeQueries::HasSameRoot(const Node &a, const Node &b) noexcept

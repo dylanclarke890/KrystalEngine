@@ -1,9 +1,11 @@
 ﻿#include "Krystal.HTML/Algorithms/TreeMutationAlgorithms.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/SlotAssignmentAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
+#include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/MutationObserver/MutationObserver.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
@@ -140,7 +142,8 @@ namespace Krys::HTML
       nodes.push_back(ShareRef<Node>(node));
     }
 
-    if (nodes.empty())
+    auto count = nodes.size();
+    if (count == 0)
     {
       return {};
     }
@@ -158,28 +161,56 @@ namespace Krys::HTML
 
     if (child != nullptr)
     {
-      // TODO(IMPL):
-      // For each live range whose start node is parent and start offset is greater than child’s index:
-      // increase its start offset by count. For each live range whose end node is parent and end offset is
-      // greater than child’s index: increase its end offset by count.
+      auto childIndex = TreeQueries::Index(*child);
+      for (auto &range : parent.NodeDocument().LiveRanges())
+      {
+        if (range->StartContainer() == &parent && range->StartOffset() > childIndex)
+        {
+          range->_start.Offset += count;
+        }
+
+        if (range->EndContainer() == &parent && range->EndOffset() > childIndex)
+        {
+          range->_end.Offset += count;
+        }
+      }
     }
 
-    auto previousSibling = ShareRefPtr<Node>(child ? child->PreviousSibling() : parent.LastChild());
+    auto *parentRoot = DynamicDowncast<ShadowRoot>(TreeQueries::Root(parent));
+    auto *parentAsElement = DynamicDowncast<Element>(parent);
+    auto *parentShadowRoot = parentAsElement ? parentAsElement->GetShadowRoot() : nullptr;
+    auto *parentAsSlot = DynamicDowncast<HTMLSlotElement>(parent);
+
+    auto *previousSibling = child ? child->PreviousSibling() : parent.LastChild();
     for (auto &target : nodes)
     {
       if (auto result = parent.OwnerDocument()->AdoptNode(*target); result.HasException())
       {
         return {result.ReleaseException()};
       }
-
       target->SetParentNode(&parent);
+      target->SetTreeScopeRecursively(*parent.OwnerDocument());
 
-      if (child)
+      if (child == nullptr)
       {
-        if (auto previousSibling = ShareRefPtr(child->PreviousSibling()))
+        if (parent.LastChild())
         {
-          previousSibling->SetNextSibling(target.get());
-          target->SetPreviousSibling(previousSibling.get());
+          target->SetPreviousSibling(parent.LastChild());
+          parent.LastChild()->SetNextSibling(target.get());
+        }
+        else
+        {
+          parent.SetFirstChild(target.get());
+        }
+
+        parent.SetLastChild(target.get());
+      }
+      else
+      {
+        if (child->PreviousSibling())
+        {
+          child->PreviousSibling()->SetNextSibling(target.get());
+          target->SetPreviousSibling(child->PreviousSibling());
 
           child->SetPreviousSibling(target.get());
           target->SetNextSibling(child);
@@ -193,27 +224,84 @@ namespace Krys::HTML
           target->SetNextSibling(child);
         }
       }
-      else
-      {
-        if (auto lastChild = ShareRefPtr(parent.LastChild()))
-        {
-          target->SetPreviousSibling(lastChild.get());
-          lastChild->SetNextSibling(target.get());
-        }
-        else
-        {
-          parent.SetFirstChild(target.get());
-        }
 
-        parent.SetLastChild(target.get());
+      if (parentShadowRoot && parentShadowRoot->SlotAssignment() == SlotAssignmentMode::Named
+          && SlotAssignmentAlgorithms::IsSlottable(*target))
+      {
+        SlotAssignmentAlgorithms::AssignSlot(*target);
       }
 
-      TreeMutationDispatcher::Inserted(parent, *target);
+      if (parentShadowRoot && parentAsSlot && parentAsSlot->AssignedNodes().empty())
+      {
+        SlotAssignmentAlgorithms::SignalSlotChange(*parentAsSlot);
+      }
 
-      target->SetTreeScopeRecursively(*parent.OwnerDocument());
+      SlotAssignmentAlgorithms::AssignSlottablesForTree(Downcast<ContainerNode>(TreeQueries::Root(*target)));
+      if (auto *targetContainer = DynamicDowncast<ContainerNode>(*target))
+      {
+        for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(*targetContainer))
+        {
+          TreeMutationDispatcher::Inserted(inclusiveDescendant);
+          if (!inclusiveDescendant.IsConnected())
+          {
+            continue;
+          }
+
+          if (auto *inclusiveDescendantAsElement = DynamicDowncast<Element>(inclusiveDescendant))
+          {
+            // TODO(impl):
+            // If inclusiveDescendant is an element and inclusiveDescendant’s custom element registry is
+            // non-null:
+            // If inclusiveDescendant’s custom element registry’s is scoped is true, then append
+            // inclusiveDescendant’s node document to inclusiveDescendant’s custom element registry’s scoped
+            // document set.
+            // If inclusiveDescendant is custom, then enqueue a custom element callback reaction with
+            // inclusiveDescendant, callback name "connectedCallback", and « ».
+            // Otherwise, try to upgrade inclusiveDescendant.
+          }
+          else if (auto *inclusiveDescendantAsShadowRoot = DynamicDowncast<ShadowRoot>(inclusiveDescendant))
+          {
+            // Otherwise, if inclusiveDescendant is a shadow root, inclusiveDescendant’s custom element
+            // registry is non-null, and inclusiveDescendant’s custom element registry’s is scoped is true,
+            // then append inclusiveDescendant’s node document to inclusiveDescendant’s custom element
+            // registry’s scoped document set.
+          }
+        }
+      }
+    }
+
+    if (!suppressObservers)
+    {
+      TreeMutationDispatcher::QueueTreeMutationRecord(parent, nodes, {}, ShareRefPtr(previousSibling),
+                                                      ShareRefPtr(child));
+    }
+
+    TreeMutationDispatcher::ChildrenChanged(parent);
+
+    List<Ref<Node>> staticNodeList;
+
+    for (auto &target : nodes)
+    {
+      for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(*target))
+      {
+        staticNodeList.push_back(ShareRef(inclusiveDescendant));
+      }
+    }
+
+    for (auto &node : staticNodeList)
+    {
+      if (node->IsConnected())
+      {
+        TreeMutationDispatcher::PostConnection(*node);
+      }
     }
 
     return {};
+  }
+
+  ExceptionOr<void> TreeMutationAlgorithms::Append(Node &node, ContainerNode &parent) noexcept
+  {
+    return PreInsert(node, parent, nullptr);
   }
 
   ExceptionOr<void> TreeMutationAlgorithms::PreRemove(Node &node, ContainerNode &parent) noexcept

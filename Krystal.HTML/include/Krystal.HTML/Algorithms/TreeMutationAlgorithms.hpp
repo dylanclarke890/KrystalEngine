@@ -34,6 +34,9 @@ namespace Krys::HTML
       Insert(Node &node, ContainerNode &parent, RawPtr<Node> refChild,
              SuppressObservers suppressObservers = SuppressObservers(false)) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#concept-node-append
+    KRYS_NODISCARD static ExceptionOr<void> Append(Node &node, ContainerNode &parent) noexcept;
+
     /// @see https://dom.spec.whatwg.org/#concept-node-pre-remove
     KRYS_NODISCARD static ExceptionOr<void> PreRemove(Node &node, ContainerNode &parent) noexcept;
 

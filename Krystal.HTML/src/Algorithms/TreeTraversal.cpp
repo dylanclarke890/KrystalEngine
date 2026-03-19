@@ -14,6 +14,52 @@
 
 namespace Krys::HTML
 {
+  namespace
+  {
+    template <bool CheckChildren = true, typename TNode>
+    static RawPtr<Node> GetNext(const TNode &current) noexcept
+    {
+      if constexpr (CheckChildren)
+      {
+        if (current.FirstChild())
+        {
+          return current.FirstChild();
+        }
+      }
+
+      if (current.NextSibling())
+      {
+        return current.NextSibling();
+      }
+
+      return TreeTraversal::NextAncestorSibling(current);
+    }
+
+    template <bool CheckChildren = true, typename TNode>
+    static RawPtr<Node> GetNext(const TNode &current, RawPtr<const Node> stayWithin) noexcept
+    {
+      if constexpr (CheckChildren)
+      {
+        if (current.FirstChild())
+        {
+          return current.FirstChild();
+        }
+      }
+
+      if (&current == stayWithin)
+      {
+        return nullptr;
+      }
+
+      if (current.NextSibling())
+      {
+        return current.NextSibling();
+      }
+
+      return TreeTraversal::NextAncestorSibling(current, stayWithin);
+    }
+  }
+
   const Node &TreeTraversal::Root(const Node &node) noexcept
   {
     return *Krys::HTML::Last(ConstInclusiveAncestorRange(node));
@@ -22,49 +68,6 @@ namespace Krys::HTML
   Node &TreeTraversal::Root(Node &node) noexcept
   {
     return *Krys::HTML::Last(InclusiveAncestorRange(node));
-  }
-
-  template <bool CheckChildren = true, typename TNode>
-  static RawPtr<Node> GetNext(const TNode &current) noexcept
-  {
-    if constexpr (CheckChildren)
-    {
-      if (current.FirstChild())
-      {
-        return current.FirstChild();
-      }
-    }
-
-    if (current.NextSibling())
-    {
-      return current.NextSibling();
-    }
-
-    return TreeTraversal::NextAncestorSibling(current);
-  }
-
-  template <bool CheckChildren = true, typename TNode>
-  static RawPtr<Node> GetNext(const TNode &current, RawPtr<const Node> stayWithin) noexcept
-  {
-    if constexpr (CheckChildren)
-    {
-      if (current.FirstChild())
-      {
-        return current.FirstChild();
-      }
-    }
-
-    if (&current == stayWithin)
-    {
-      return nullptr;
-    }
-
-    if (current.NextSibling())
-    {
-      return current.NextSibling();
-    }
-
-    return TreeTraversal::NextAncestorSibling(current, stayWithin);
   }
 
   RawPtr<Node> TreeTraversal::Next(const Node &current) noexcept

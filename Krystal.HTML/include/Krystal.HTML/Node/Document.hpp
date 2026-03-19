@@ -53,13 +53,13 @@ namespace Krys::HTML
 #pragma region ParentNode Mixin - https://dom.spec.whatwg.org/#parentnode
 
     KRYS_NODISCARD Ref<HTMLCollection> Children() noexcept;
-    
+
     KRYS_NODISCARD RawPtr<const Element> FirstElementChild() const noexcept;
     KRYS_NODISCARD RawPtr<Element> FirstElementChild() noexcept;
 
     KRYS_NODISCARD RawPtr<const Element> LastElementChild() const noexcept;
     KRYS_NODISCARD RawPtr<Element> LastElementChild() noexcept;
-    
+
     KRYS_NODISCARD size_t ChildElementCount() const noexcept;
 
     ExceptionOr<void> Prepend(const List<NodeOrString> &nodes) noexcept;
@@ -78,6 +78,17 @@ namespace Krys::HTML
     RefPtr<Element> GetElementById(const DOMStringAtom &id) const noexcept;
 
 #pragma endregion
+
+  protected:
+    KRYS_NODISCARD List<Ref<Range>> &LiveRanges() noexcept
+    {
+      return _liveRanges;
+    }
+
+    KRYS_NODISCARD const List<Ref<Range>> &LiveRanges() const noexcept
+    {
+      return _liveRanges;
+    }
   };
 }
 

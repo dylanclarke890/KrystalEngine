@@ -16,6 +16,9 @@ namespace Krys::HTML
   class SlotAssignmentAlgorithms
   {
   public:
+    /// @see https://dom.spec.whatwg.org/#concept-slotable
+    KRYS_NODISCARD static bool IsSlottable(const Node &node) noexcept;
+
 #pragma region Finding slots and slotted elements - https://dom.spec.whatwg.org/#finding-slots-and-slotables
 
     /// @see https://dom.spec.whatwg.org/#find-a-slot

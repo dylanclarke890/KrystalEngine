@@ -207,32 +207,6 @@ namespace Krys::HTML
     }
   }
 
-  void Node::InsertedIntoAncestor(const NodeInsertedContext &context) noexcept
-  {
-    if (context.ConnectedToDocument)
-    {
-      SetEventTargetFlag(EventTargetFlag::IsConnected);
-    }
-
-    if (context.InsertedInto.get().IsInShadowTree())
-    {
-      SetEventTargetFlag(EventTargetFlag::IsInShadowTree);
-    }
-  }
-
-  void Node::RemovedFromAncestor(const NodeRemovedContext &context) noexcept
-  {
-    if (context.DisconnectedFromDocument)
-    {
-      ClearEventTargetFlag(EventTargetFlag::IsConnected);
-    }
-
-    if (IsInShadowTree() && !GetTreeScope().RootNode().IsShadowRootNode())
-    {
-      ClearEventTargetFlag(EventTargetFlag::IsInShadowTree);
-    }
-  }
-
   List<Ref<RegisteredObserver>> &Node::RegisteredObserverList() noexcept
   {
     if (!_nodeRareData)

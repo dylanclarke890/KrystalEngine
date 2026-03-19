@@ -11,28 +11,14 @@ namespace Krys::HTML
   class ContainerNode;
   class Node;
 
-  struct NodeInsertedContext
-  {
-    ReferenceWrapper<ContainerNode> InsertedInto;
-    bool ConnectedToDocument;
-    bool TreeScopeChanged;
-  };
-
-  struct NodeRemovedContext
-  {
-    ReferenceWrapper<ContainerNode> RemovedFrom;
-    bool DisconnectedFromDocument;
-    bool TreeScopeChanged;
-  };
-
   class TreeMutationDispatcher
   {
   public:
     /// @see https://dom.spec.whatwg.org/#concept-node-insert-ext
-    static void Inserted(ContainerNode &node, Node &insertedNode) noexcept;
+    static void Inserted(Node &insertedNode) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-node-post-connection-ext
-    static void PostConnection(ContainerNode &node, Node &insertedNode) noexcept;
+    static void PostConnection(Node &connectedNode) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-node-children-changed-ext
     static void ChildrenChanged(ContainerNode &node) noexcept;
@@ -59,9 +45,5 @@ namespace Krys::HTML
                                         RefPtr<Node> &&nextSibling) noexcept;
 
     static void LiveRangePreRemove(const Node &node) noexcept;
-
-  private:
-    static void DispatchNodeInserted(Node &node, const NodeInsertedContext &context) noexcept;
-    static void DispatchNodeRemoved(Node &node, const NodeRemovedContext &context) noexcept;
   };
 }
