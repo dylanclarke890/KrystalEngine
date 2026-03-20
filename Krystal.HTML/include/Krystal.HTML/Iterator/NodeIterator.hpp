@@ -41,7 +41,6 @@ namespace Krys::HTML
     }
 
     KRYS_NODISCARD ExceptionOr<RefPtr<Node>> NextNode() noexcept;
-
     KRYS_NODISCARD ExceptionOr<RefPtr<Node>> PreviousNode() noexcept;
 
     void Detach() const noexcept

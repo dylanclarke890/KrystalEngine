@@ -68,14 +68,14 @@ namespace Krys::HTML
     nodeIterator.ReferenceNode(ShareRef(*prev));
   }
 
-  ExceptionOr<RefPtr<Node>> IteratorAlgorithms::Traverse(NodeIterator &iterator, TraversalType type) noexcept
+  ExceptionOr<RefPtr<Node>> IteratorAlgorithms::Traverse(NodeIterator &iterator, TraversalNextOrPrev type) noexcept
   {
     RawPtr<Node> node = &iterator.ReferenceNode();
     bool beforeNode = iterator.PointerBeforeReferenceNode();
 
     while (true)
     {
-      if (type == TraversalType::Next)
+      if (type == TraversalNextOrPrev::Next)
       {
         if (!beforeNode)
         {
@@ -117,5 +117,111 @@ namespace Krys::HTML
     iterator.PointerBeforeReferenceNode(beforeNode);
 
     return ShareRefPtr(node);
+  }
+
+  ExceptionOr<RawPtr<Node>> IteratorAlgorithms::TraverseChildren(TreeWalker &walker,
+                                                                 TraverseFirstOrLast type) noexcept
+  {
+    RawPtr<Node> node = &walker.CurrentNode();
+    node = type == TraverseFirstOrLast::First ? node->FirstChild() : node->LastChild();
+
+    while (node != nullptr)
+    {
+      auto result = FilterNode(walker, *node);
+      if (result.HasException())
+      {
+        return result.ReleaseException();
+      }
+
+      if (result.Value() == FilterResult::FILTER_ACCEPT)
+      {
+        walker.CurrentNode(*node);
+        return node;
+      }
+      else if (result.Value() == FilterResult::FILTER_SKIP)
+      {
+        auto child = type == TraverseFirstOrLast::First ? node->FirstChild() : node->LastChild();
+        if (child)
+        {
+          node = child;
+          continue;
+        }
+      }
+
+      while (node != nullptr)
+      {
+        auto *sibling = type == TraverseFirstOrLast::First ? node->NextSibling() : node->PreviousSibling();
+        if (sibling != nullptr)
+        {
+          node = sibling;
+          break;
+        }
+
+        auto *parent = node != nullptr ? node->ParentNode() : nullptr;
+        if (parent == nullptr || parent == &walker.Root() || parent == &walker.CurrentNode())
+        {
+          return nullptr;
+        }
+
+        node = parent;
+      }
+    }
+
+    return nullptr;
+  }
+
+  ExceptionOr<RawPtr<Node>> IteratorAlgorithms::TraverseSiblings(TreeWalker &walker,
+                                                                 TraversalNextOrPrev type) noexcept
+  {
+    RawPtr<Node> node = &walker.CurrentNode();
+    if (node == &walker.Root())
+    {
+      return nullptr;
+    }
+
+    while (true)
+    {
+      auto sibling = type == TraversalNextOrPrev::Next ? node->NextSibling() : node->PreviousSibling();
+      while (sibling != nullptr)
+      {
+        node = sibling;
+
+        auto result = FilterNode(walker, *node);
+        if (result.HasException())
+        {
+          return result.ReleaseException();
+        }
+
+        if (result.Value() == FilterResult::FILTER_ACCEPT)
+        {
+          walker.CurrentNode(*node);
+          return node;
+        }
+
+        sibling = type == TraversalNextOrPrev::Next ? node->FirstChild() : node->LastChild();
+
+        if (result.Value() == FilterResult::FILTER_REJECT || sibling == nullptr)
+        {
+          sibling = type == TraversalNextOrPrev::Next ? node->NextSibling() : node->PreviousSibling();
+        }
+      }
+
+      node = node->ParentNode();
+      if (node == nullptr || node == &walker.Root())
+      {
+        return nullptr;
+      }
+
+      auto result = FilterNode(walker, *node);
+      if (result.HasException())
+      {
+        return result.ReleaseException();
+      }
+
+      if (result.Value() == FilterResult::FILTER_ACCEPT)
+      {
+        return nullptr;
+      }
+    }
   }
 }

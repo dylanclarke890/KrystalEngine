@@ -11,10 +11,16 @@ namespace Krys::HTML
   class NodeIterator;
   class TreeWalker;
 
-  enum class TraversalType
+  enum class TraversalNextOrPrev
   {
     Next,
     Previous
+  };
+
+  enum class TraverseFirstOrLast
+  {
+    First,
+    Last
   };
 
   class IteratorAlgorithms
@@ -29,6 +35,14 @@ namespace Krys::HTML
 
     /// @see https://dom.spec.whatwg.org/#concept-nodeiterator-traverse
     KRYS_NODISCARD static ExceptionOr<RefPtr<Node>> Traverse(NodeIterator &iterator,
-                                                             TraversalType type) noexcept;
+                                                             TraversalNextOrPrev type) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-traverse-children
+    KRYS_NODISCARD static ExceptionOr<RawPtr<Node>> TraverseChildren(TreeWalker &walker,
+                                                                     TraverseFirstOrLast type) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-traverse-siblings
+    KRYS_NODISCARD static ExceptionOr<RawPtr<Node>> TraverseSiblings(TreeWalker &walker,
+                                                                     TraversalNextOrPrev type) noexcept;
   };
 }

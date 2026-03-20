@@ -11,11 +11,11 @@ namespace Krys::HTML
 {
   ExceptionOr<RefPtr<Node>> NodeIterator::NextNode() noexcept
   {
-    return IteratorAlgorithms::Traverse(*this, TraversalType::Next);
+    return IteratorAlgorithms::Traverse(*this, TraversalNextOrPrev::Next);
   }
   
   ExceptionOr<RefPtr<Node>> NodeIterator::PreviousNode() noexcept
   {
-    return IteratorAlgorithms::Traverse(*this, TraversalType::Previous);
+    return IteratorAlgorithms::Traverse(*this, TraversalNextOrPrev::Previous);
   }
 }
