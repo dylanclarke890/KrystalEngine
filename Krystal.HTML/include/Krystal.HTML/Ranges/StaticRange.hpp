@@ -14,11 +14,13 @@ namespace Krys::HTML
   class StaticRange : public AbstractRange
   {
   public:
-    constexpr StaticRange(const StaticRangeInit &init) noexcept : AbstractRange(init.Start, init.End)
+    StaticRange(const StaticRangeInit &init) noexcept : AbstractRange(init.Start, init.End)
     {
+      // TODO(fix): If init["startContainer"] or init["endContainer"] is a DocumentType or Attr node, then
+      // throw an "InvalidNodeTypeError" DOMException.
     }
 
-    KRYS_NODISCARD constexpr bool IsValid() const noexcept
+    KRYS_NODISCARD bool IsValid() const noexcept
     {
       Node &startContainer = *this->StartContainer();
       Node &endContainer = *this->EndContainer();
@@ -28,12 +30,12 @@ namespace Krys::HTML
         return false;
       }
 
-      if (StartOffset() > startContainer.Length())
+      if (StartOffset() > TreeQueries::Length(startContainer))
       {
         return false;
       }
 
-      if (EndOffset() > endContainer.Length())
+      if (EndOffset() > TreeQueries::Length(endContainer))
       {
         return false;
       }
@@ -43,7 +45,7 @@ namespace Krys::HTML
         return EndOffset() > StartOffset();
       }
 
-      return !StrongOrder::IsGreaterThan(_start <=> _end);
+      return !StrongOrder::IsGreaterThan(_start.ComparePositionTo(_end));
     }
   };
 }

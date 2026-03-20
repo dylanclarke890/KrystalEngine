@@ -177,14 +177,19 @@ Source: https://dom.spec.whatwg.org
 ======================================================================
 
 5.1 Introduction to "DOM Ranges"
+    Status: N/A
 
 5.2 Boundary points
+    Status: No test coverage
 
 5.3 Interface AbstractRange
+    Status: No test coverage
 
 5.4 Interface StaticRange
+    Status: No test coverage
 
 5.5 Interface Range
+    Status: No test coverage
 
 
 ======================================================================

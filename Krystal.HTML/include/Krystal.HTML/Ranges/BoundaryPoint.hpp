@@ -1,8 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
-#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Utils/StrongOrder.hpp"
 #include <compare>
@@ -35,20 +35,12 @@ namespace Krys::HTML
       if (TreeQueries::IsAncestor(a, b))
       {
         RawPtr<const Node> child = &b;
-        while (child && !TreeQueries::IsChild(a, *child))
+        while (!TreeQueries::IsChild(a, *child))
         {
           child = child->ParentNode();
         }
 
-        uint32 childIndex = 0;
-        RawPtr<const Node> currentChild = a.FirstChild();
-        while (currentChild && currentChild != child)
-        {
-          ++childIndex;
-          currentChild = currentChild->NextSibling();
-        }
-
-        if (currentChild == child && childIndex < Offset)
+        if (TreeQueries::Index(*child) < Offset)
         {
           return std::strong_ordering::greater;
         }
@@ -57,5 +49,4 @@ namespace Krys::HTML
       return std::strong_ordering::less;
     }
   };
-
 }
