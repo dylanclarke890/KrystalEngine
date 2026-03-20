@@ -47,13 +47,17 @@ namespace Krys::HTML
 
     if (nodeIterator.PointerBeforeReferenceNode())
     {
-      // Let next be toBeRemovedNode’s first following node that is an inclusive descendant of nodeIterator’s
-      // root and is not an inclusive descendant of toBeRemovedNode, if there is such a node; otherwise null.
-      RawPtr<Node> next = nullptr;
+      RawPtr<Node> next = TreeTraversal::NextSkippingChildren(toBeRemovedNode);
+      if (!next || !TreeQueries::IsInclusiveDescendant(*next, nodeIterator.Root()))
+      {
+        next = nullptr;
+      }
+
       if (next != nullptr)
       {
         nodeIterator.ReferenceNode(ShareRef(*next));
       }
+
       nodeIterator.PointerBeforeReferenceNode(false);
     }
 
@@ -62,5 +66,56 @@ namespace Krys::HTML
                           : TreeTraversal::DeepLastChild(*toBeRemovedNode.PreviousSibling());
     assert(prev);
     nodeIterator.ReferenceNode(ShareRef(*prev));
+  }
+
+  ExceptionOr<RefPtr<Node>> IteratorAlgorithms::Traverse(NodeIterator &iterator, TraversalType type) noexcept
+  {
+    RawPtr<Node> node = &iterator.ReferenceNode();
+    bool beforeNode = iterator.PointerBeforeReferenceNode();
+
+    while (true)
+    {
+      if (type == TraversalType::Next)
+      {
+        if (!beforeNode)
+        {
+          node = TreeTraversal::Next(*node, &iterator.Root());
+          if (node == nullptr)
+          {
+            return nullptr;
+          }
+        }
+
+        beforeNode = false;
+      }
+      else
+      {
+        if (beforeNode)
+        {
+          node = TreeTraversal::Previous(*node, &iterator.Root());
+          if (node == nullptr)
+          {
+            return nullptr;
+          }
+        }
+        beforeNode = false;
+      }
+
+      auto result = FilterNode(iterator, *node);
+      if (result.HasException())
+      {
+        return result.ReleaseException();
+      }
+
+      if (result.Value() == FilterResult::FILTER_ACCEPT)
+      {
+        break;
+      }
+    }
+
+    iterator.ReferenceNode(ShareRef(*node));
+    iterator.PointerBeforeReferenceNode(beforeNode);
+
+    return ShareRefPtr(node);
   }
 }

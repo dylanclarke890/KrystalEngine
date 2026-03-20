@@ -30,14 +30,19 @@ namespace Krys::HTML
       return *_referenceNode;
     }
 
+    KRYS_NODISCARD Node &ReferenceNode() noexcept
+    {
+      return *_referenceNode;
+    }
+
     KRYS_NODISCARD bool PointerBeforeReferenceNode() const noexcept
     {
       return _pointerBeforeReferenceNode;
     }
 
-    KRYS_NODISCARD RawPtr<Node> NextNode() noexcept;
+    KRYS_NODISCARD ExceptionOr<RefPtr<Node>> NextNode() noexcept;
 
-    KRYS_NODISCARD RawPtr<Node> PreviousNode() noexcept;
+    KRYS_NODISCARD ExceptionOr<RefPtr<Node>> PreviousNode() noexcept;
 
     void Detach() const noexcept
     {

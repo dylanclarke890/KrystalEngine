@@ -1,4 +1,5 @@
 ﻿#include "Krystal.HTML/Iterator/NodeIterator.hpp"
+#include "Krystal.HTML/Algorithms/IteratorAlgorithms.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
@@ -8,11 +9,13 @@
 
 namespace Krys::HTML
 {
-  RawPtr<Node> NodeIterator::NextNode() noexcept
+  ExceptionOr<RefPtr<Node>> NodeIterator::NextNode() noexcept
   {
+    return IteratorAlgorithms::Traverse(*this, TraversalType::Next);
   }
   
-  RawPtr<Node> NodeIterator::PreviousNode() noexcept
+  ExceptionOr<RefPtr<Node>> NodeIterator::PreviousNode() noexcept
   {
+    return IteratorAlgorithms::Traverse(*this, TraversalType::Previous);
   }
 }

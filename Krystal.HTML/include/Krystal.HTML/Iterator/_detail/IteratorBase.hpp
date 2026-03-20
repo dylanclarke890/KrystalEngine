@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/Iterator/NodeFilter.hpp"
 #include "Krystal.HTML/Iterator/WhatToShow.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"

@@ -161,6 +161,7 @@
          - No test coverage.
 
     6.1 Interface NodeIterator
+         - No test coverage.
 
     6.2 Interface TreeWalker
 
