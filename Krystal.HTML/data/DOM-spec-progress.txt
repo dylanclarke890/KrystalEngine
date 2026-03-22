@@ -109,6 +109,7 @@ Source: https://dom.spec.whatwg.org
 4.2.2.5 Signaling slot change
 
 4.2.3 Mutation algorithms
+    Status: Mostly complete, missing implementation relating to custom elements and a small section for mutation observers in Remove.
 
 4.2.4 Mixin NonElementParentNode
 
