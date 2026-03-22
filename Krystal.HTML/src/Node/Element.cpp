@@ -106,24 +106,24 @@ namespace Krys::HTML
     return _elementRareData->Children(*this);
   }
 
-  RawPtr<const Element> Element::FirstElementChild() const noexcept
+  RefPtr<const Element> Element::FirstElementChild() const noexcept
   {
-    return TreeTraversal::FirstElementChild(*this);
+    return ShareRefPtr(TreeTraversal::FirstElementChild(*this));
   }
 
-  RawPtr<Element> Element::FirstElementChild() noexcept
+  RefPtr<Element> Element::FirstElementChild() noexcept
   {
-    return TreeTraversal::FirstElementChild(*this);
+    return ShareRefPtr(TreeTraversal::FirstElementChild(*this));
   }
 
-  RawPtr<const Element> Element::LastElementChild() const noexcept
+  RefPtr<const Element> Element::LastElementChild() const noexcept
   {
-    return TreeTraversal::LastElementChild(*this);
+    return ShareRefPtr(TreeTraversal::LastElementChild(*this));
   }
 
-  RawPtr<Element> Element::LastElementChild() noexcept
+  RefPtr<Element> Element::LastElementChild() noexcept
   {
-    return TreeTraversal::LastElementChild(*this);
+    return ShareRefPtr(TreeTraversal::LastElementChild(*this));
   }
 
   size_t Element::ChildElementCount() const noexcept

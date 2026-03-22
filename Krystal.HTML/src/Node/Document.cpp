@@ -1,12 +1,13 @@
 ﻿#include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/NodeList/HTMLCollection.hpp"
-#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
-#include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include <cassert>
 
 namespace Krys::HTML
@@ -71,29 +72,106 @@ namespace Krys::HTML
     return _documentRareData->Children(*this);
   }
 
-  RawPtr<const Element> Document::FirstElementChild() const noexcept
+  RefPtr<const Element> Document::FirstElementChild() const noexcept
   {
-    return TreeTraversal::FirstElementChild(*this);
+    return ShareRefPtr(TreeTraversal::FirstElementChild(*this));
   }
 
-  RawPtr<Element> Document::FirstElementChild() noexcept
+  RefPtr<Element> Document::FirstElementChild() noexcept
   {
-    return TreeTraversal::FirstElementChild(*this);
+    return ShareRefPtr(TreeTraversal::FirstElementChild(*this));
   }
 
-  RawPtr<const Element> Document::LastElementChild() const noexcept
+  RefPtr<const Element> Document::LastElementChild() const noexcept
   {
-    return TreeTraversal::LastElementChild(*this);
+    return ShareRefPtr(TreeTraversal::LastElementChild(*this));
   }
 
-  RawPtr<Element> Document::LastElementChild() noexcept
+  RefPtr<Element> Document::LastElementChild() noexcept
   {
-    return TreeTraversal::LastElementChild(*this);
+    return ShareRefPtr(TreeTraversal::LastElementChild(*this));
   }
 
   size_t Document::ChildElementCount() const noexcept
   {
     return TreeQueries::ChildElementCount(*this);
+  }
+
+  ExceptionOr<void> Document::Prepend(const List<NodeOrString> &nodes) noexcept
+  {
+    auto node = MutationAlgorithms::ConvertNodesIntoNode(nodes, NodeDocument());
+    if (node.HasException())
+    {
+      return node.ReleaseException();
+    }
+
+    if (auto result = MutationAlgorithms::PreInsert(*node.Value(), *this, FirstChild());
+        result.HasException())
+    {
+      return result.ReleaseException();
+    }
+
+    return {};
+  }
+
+  ExceptionOr<void> Document::Append(const List<NodeOrString> &nodes) noexcept
+  {
+    auto node = MutationAlgorithms::ConvertNodesIntoNode(nodes, NodeDocument());
+    if (node.HasException())
+    {
+      return node.ReleaseException();
+    }
+
+    if (auto result = MutationAlgorithms::Append(*node.Value(), *this); result.HasException())
+    {
+      return result.ReleaseException();
+    }
+
+    return {};
+  }
+
+  ExceptionOr<void> Document::ReplaceChildren(const List<NodeOrString> &nodes) noexcept
+  {
+    auto node = MutationAlgorithms::ConvertNodesIntoNode(nodes, NodeDocument());
+    if (node.HasException())
+    {
+      return node.ReleaseException();
+    }
+
+    if (auto result = MutationAlgorithms::EnsurePreInsertValidity(*node.Value(), *this, nullptr);
+        result.HasException())
+    {
+      return result.ReleaseException();
+    }
+
+    return MutationAlgorithms::ReplaceAll(node.Value().get(), *this);
+  }
+
+  ExceptionOr<void> Document::MoveBefore(Node &node, RawPtr<Node> refChild) noexcept
+  {
+    if (refChild == &node)
+    {
+      refChild = node.NextSibling();
+    }
+
+    if (auto result = MutationAlgorithms::Move(node, *this, refChild); result.HasException())
+    {
+      return result.ReleaseException();
+    }
+
+    return {};
+  }
+
+  ExceptionOr<RefPtr<Element>> Document::QuerySelector(const DOMString &selectors) noexcept
+  {
+    // TODO(impl): implement this when we have css parsing.
+    return Exception {ExceptionCode::NotSupportedError};
+  }
+
+  ExceptionOr<Ref<NodeList>> Document::QuerySelectorAll(const DOMString &selectors) noexcept
+  {
+    // TODO(impl): implement this when we have css parsing.
+    return Exception {ExceptionCode::NotSupportedError};
   }
 
 #pragma endregion

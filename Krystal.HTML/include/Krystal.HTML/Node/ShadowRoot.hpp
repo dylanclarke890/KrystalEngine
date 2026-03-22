@@ -42,6 +42,7 @@ namespace Krys::HTML
     bool _clonable : 1 {false};
     bool _serializable : 1 {false};
     RawPtr<Element> _host {nullptr};
+    RefPtr<CustomElementRegistry> _customElementRegistry;
 
   public:
     ShadowRoot(Document &document, RefPtr<CustomElementRegistry> &&registry,
@@ -67,6 +68,15 @@ namespace Krys::HTML
     KRYS_NODISCARD bool Clonable() const noexcept
     {
       return _clonable;
+    }
+
+#pragma endregion
+
+#pragma region DocumentOrShadowRoot Mixin - https://dom.spec.whatwg.org/#mixin-documentorshadowroot
+
+    RefPtr<CustomElementRegistry> CustomElementRegistry() const noexcept
+    {
+      return _customElementRegistry;
     }
 
 #pragma endregion

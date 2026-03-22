@@ -1,12 +1,12 @@
 ﻿#include "Krystal.HTML/Node/DocumentFragment.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/NodeList/HTMLCollection.hpp"
-#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
-#include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 
 namespace Krys::HTML
 {
@@ -36,24 +36,24 @@ namespace Krys::HTML
     return _documentFragmentRareData->Children(*this);
   }
 
-  RawPtr<const Element> DocumentFragment::FirstElementChild() const noexcept
+  RefPtr<const Element> DocumentFragment::FirstElementChild() const noexcept
   {
-    return TreeTraversal::FirstElementChild(*this);
+    return ShareRefPtr(TreeTraversal::FirstElementChild(*this));
   }
 
-  RawPtr<Element> DocumentFragment::FirstElementChild() noexcept
+  RefPtr<Element> DocumentFragment::FirstElementChild() noexcept
   {
-    return TreeTraversal::FirstElementChild(*this);
+    return ShareRefPtr(TreeTraversal::FirstElementChild(*this));
   }
 
-  RawPtr<const Element> DocumentFragment::LastElementChild() const noexcept
+  RefPtr<const Element> DocumentFragment::LastElementChild() const noexcept
   {
-    return TreeTraversal::LastElementChild(*this);
+    return ShareRefPtr(TreeTraversal::LastElementChild(*this));
   }
 
-  RawPtr<Element> DocumentFragment::LastElementChild() noexcept
+  RefPtr<Element> DocumentFragment::LastElementChild() noexcept
   {
-    return TreeTraversal::LastElementChild(*this);
+    return ShareRefPtr(TreeTraversal::LastElementChild(*this));
   }
 
   size_t DocumentFragment::ChildElementCount() const noexcept
