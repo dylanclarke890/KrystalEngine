@@ -122,6 +122,7 @@ Source: https://dom.spec.whatwg.org
     Status: No test coverage
 
 4.2.8 Mixin ChildNode
+    Status: No test coverage
 
 4.2.9 Mixin Slottable
 

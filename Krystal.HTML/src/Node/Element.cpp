@@ -1,5 +1,6 @@
 ﻿#include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/ChildNodeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
@@ -48,29 +49,24 @@ namespace Krys::HTML
 
 #pragma region ChildNode
 
-  ExceptionOr<void> Element::Before(SmallList<NodeOrString> &&nodes) noexcept
+  ExceptionOr<void> Element::Before(const List<NodeOrString> &nodes) noexcept
   {
-    return ExceptionOr<void>();
+    return ChildNodeAlgorithms::Before(*this, nodes);
   }
 
-  ExceptionOr<void> Element::After(SmallList<NodeOrString> &&nodes) noexcept
+  ExceptionOr<void> Element::After(const List<NodeOrString> &nodes) noexcept
   {
-    return ExceptionOr<void>();
+    return ChildNodeAlgorithms::After(*this, nodes);
   }
 
-  ExceptionOr<void> Element::ReplaceWith(SmallList<NodeOrString> &&nodes) noexcept
+  ExceptionOr<void> Element::ReplaceWith(const List<NodeOrString> &nodes) noexcept
   {
-    return ExceptionOr<void>();
+    return ChildNodeAlgorithms::ReplaceWith(*this, nodes);
   }
 
   ExceptionOr<void> Element::Remove() noexcept
   {
-    if (auto parent = ShareRefPtr(ParentNode()))
-    {
-      return MutationAlgorithms::Remove(*this, SuppressObservers(false));
-    }
-
-    return {};
+    ChildNodeAlgorithms::Remove(*this);
   }
 
 #pragma endregion

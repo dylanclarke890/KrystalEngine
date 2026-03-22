@@ -3,9 +3,11 @@
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/DocumentFragment.hpp"
+#include "Krystal.HTML/Node/DocumentType.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/NodeList/NodeList.hpp"
+#include "Krystal.Lib/Types/SmallList.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
@@ -73,5 +75,20 @@ namespace Krys::Tests
   {
     STATIC_REQUIRE(NonDocumentTypeChildNodeMixin<Element>);
     STATIC_REQUIRE(NonDocumentTypeChildNodeMixin<CharacterData>);
+  }
+
+  template <typename T>
+  concept ChildNodeMixin = requires(T &node, const List<NodeOrString> &nodes) {
+    { node.Before(nodes) } -> SameType<ExceptionOr<void>>;
+    { node.After(nodes) } -> SameType<ExceptionOr<void>>;
+    { node.ReplaceWith(nodes) } -> SameType<ExceptionOr<void>>;
+    { node.Remove() } -> SameType<ExceptionOr<void>>;
+  };
+
+  TEST_CASE("ChildNode", "[HTML][Mixins]")
+  {
+    STATIC_REQUIRE(ChildNodeMixin<DocumentType>);
+    STATIC_REQUIRE(ChildNodeMixin<Element>);
+    STATIC_REQUIRE(ChildNodeMixin<CharacterData>);
   }
 }

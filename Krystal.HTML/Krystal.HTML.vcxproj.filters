@@ -330,6 +330,9 @@
     <ClInclude Include="include\Krystal.HTML\Node\NodeOrString.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Algorithms\ChildNodeAlgorithms.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">

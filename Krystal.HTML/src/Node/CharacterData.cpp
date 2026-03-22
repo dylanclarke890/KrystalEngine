@@ -1,10 +1,13 @@
 ﻿#include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/ChildNodeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
 
@@ -113,29 +116,24 @@ namespace Krys::HTML
 
 #pragma region ChildNode
 
-  ExceptionOr<void> CharacterData::Before(SmallList<NodeOrString> &&nodes) noexcept
+  ExceptionOr<void> CharacterData::Before(const List<NodeOrString> &nodes) noexcept
   {
-    return ExceptionOr<void>();
+    return ChildNodeAlgorithms::Before(*this, nodes);
   }
 
-  ExceptionOr<void> CharacterData::After(SmallList<NodeOrString> &&nodes) noexcept
+  ExceptionOr<void> CharacterData::After(const List<NodeOrString> &nodes) noexcept
   {
-    return ExceptionOr<void>();
+    return ChildNodeAlgorithms::After(*this, nodes);
   }
 
-  ExceptionOr<void> CharacterData::ReplaceWith(SmallList<NodeOrString> &&nodes) noexcept
+  ExceptionOr<void> CharacterData::ReplaceWith(const List<NodeOrString> &nodes) noexcept
   {
-    return ExceptionOr<void>();
+    return ChildNodeAlgorithms::ReplaceWith(*this, nodes);
   }
 
   ExceptionOr<void> CharacterData::Remove() noexcept
   {
-    if (auto parent = ShareRefPtr(ParentNode()))
-    {
-      return MutationAlgorithms::Remove(*this, SuppressObservers(false));
-    }
-
-    return {};
+    ChildNodeAlgorithms::Remove(*this);
   }
 
 #pragma endregion

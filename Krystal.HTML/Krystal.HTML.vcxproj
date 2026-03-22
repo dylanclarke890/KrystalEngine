@@ -36,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML\Abort\AbortController.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\ChildNodeAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\IteratorAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOMTokenList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventPath.hpp" />
