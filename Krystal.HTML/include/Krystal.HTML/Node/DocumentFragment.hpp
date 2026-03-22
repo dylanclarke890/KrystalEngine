@@ -50,10 +50,10 @@ namespace Krys::HTML
     ExceptionOr<void> Append(const List<NodeOrString> &nodes) noexcept;
     ExceptionOr<void> ReplaceChildren(const List<NodeOrString> &nodes) noexcept;
 
-    ExceptionOr<void> MoveBefore(Node &node, RefPtr<Node> &&child) noexcept;
+    ExceptionOr<void> MoveBefore(Node &node, RawPtr<Node> child) noexcept;
 
-    KRYS_NODISCARD RawPtr<Element> QuerySelector(const DOMString &selectors) noexcept;
-    KRYS_NODISCARD Ref<NodeList> QuerySelectorAll(const DOMString &selectors) noexcept;
+    KRYS_NODISCARD ExceptionOr<RefPtr<Element>> QuerySelector(const DOMString &selectors) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<NodeList>> QuerySelectorAll(const DOMString &selectors) noexcept;
 
 #pragma endregion
 

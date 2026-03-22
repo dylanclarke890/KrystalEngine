@@ -77,24 +77,24 @@ namespace Krys::HTML
 
 #pragma region NonDocumentTypeChildNode
 
-  RawPtr<const Element> Element::PreviousElementSibling() const noexcept
+  RefPtr<const Element> Element::PreviousElementSibling() const noexcept
   {
-    return TreeTraversal::PreviousElementSibling(*this);
+    return ShareRefPtr(TreeTraversal::PreviousElementSibling(*this));
   }
 
-  RawPtr<Element> Element::PreviousElementSibling() noexcept
+  RefPtr<Element> Element::PreviousElementSibling() noexcept
   {
-    return TreeTraversal::PreviousElementSibling(*this);
+    return ShareRefPtr(TreeTraversal::PreviousElementSibling(*this));
   }
 
-  RawPtr<const Element> Element::NextElementSibling() const noexcept
+  RefPtr<const Element> Element::NextElementSibling() const noexcept
   {
-    return TreeTraversal::NextElementSibling(*this);
+    return ShareRefPtr(TreeTraversal::NextElementSibling(*this));
   }
 
-  RawPtr<Element> Element::NextElementSibling() noexcept
+  RefPtr<Element> Element::NextElementSibling() noexcept
   {
-    return TreeTraversal::NextElementSibling(*this);
+    return ShareRefPtr(TreeTraversal::NextElementSibling(*this));
   }
 
 #pragma endregion
@@ -172,7 +172,7 @@ namespace Krys::HTML
       return node.ReleaseException();
     }
 
-    if (auto result = MutationAlgorithms::PreInsert(*node.Value(), *this, nullptr); result.HasException())
+    if (auto result = MutationAlgorithms::ReplaceAll(node.Value().get(), *this); result.HasException())
     {
       return result.ReleaseException();
     }
@@ -190,15 +190,15 @@ namespace Krys::HTML
     return MutationAlgorithms::Move(node, *this, refChild);
   }
 
-  ExceptionOr<RawPtr<Element>> Element::QuerySelector(const DOMString &selectors) noexcept
+  ExceptionOr<RefPtr<Element>> Element::QuerySelector(const DOMString &selectors) noexcept
   {
-    // TODO(impl): Implement this method
+    // TODO(impl): implement this when we have css parsing.
     return Exception {ExceptionCode::NotSupportedError};
   }
 
   ExceptionOr<Ref<NodeList>> Element::QuerySelectorAll(const DOMString &selectors) noexcept
   {
-    // TODO(impl): Implement this method
+    // TODO(impl): implement this when we have css parsing.
     return Exception {ExceptionCode::NotSupportedError};
   }
 

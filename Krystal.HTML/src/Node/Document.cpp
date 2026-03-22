@@ -154,12 +154,7 @@ namespace Krys::HTML
       refChild = node.NextSibling();
     }
 
-    if (auto result = MutationAlgorithms::Move(node, *this, refChild); result.HasException())
-    {
-      return result.ReleaseException();
-    }
-
-    return {};
+    return MutationAlgorithms::Move(node, *this, refChild);
   }
 
   ExceptionOr<RefPtr<Element>> Document::QuerySelector(const DOMString &selectors) noexcept

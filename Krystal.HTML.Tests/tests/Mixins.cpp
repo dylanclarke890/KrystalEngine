@@ -1,4 +1,5 @@
 ﻿#include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/DocumentFragment.hpp"
@@ -58,5 +59,19 @@ namespace Krys::Tests
     STATIC_REQUIRE(ParentNodeMixin<Element>);
     STATIC_REQUIRE(ParentNodeMixin<Document>);
     STATIC_REQUIRE(ParentNodeMixin<DocumentFragment>);
+  }
+
+  template <typename T>
+  concept NonDocumentTypeChildNodeMixin = requires(T &node, const T &constNode) {
+    { constNode.PreviousElementSibling() } -> SameType<RefPtr<const Element>>;
+    { node.PreviousElementSibling() } -> SameType<RefPtr<Element>>;
+    { constNode.NextElementSibling() } -> SameType<RefPtr<const Element>>;
+    { node.NextElementSibling() } -> SameType<RefPtr<Element>>;
+  };
+
+  TEST_CASE("NonDocumentTypeChildNode", "[HTML][Mixins]")
+  {
+    STATIC_REQUIRE(NonDocumentTypeChildNodeMixin<Element>);
+    STATIC_REQUIRE(NonDocumentTypeChildNodeMixin<CharacterData>);
   }
 }

@@ -142,24 +142,24 @@ namespace Krys::HTML
 
 #pragma region NonDocumentTypeChildNode
 
-  RawPtr<const Element> CharacterData::PreviousElementSibling() const noexcept
+  RefPtr<const Element> CharacterData::PreviousElementSibling() const noexcept
   {
-    return TreeTraversal::PreviousElementSibling(*this);
+    return ShareRefPtr(TreeTraversal::PreviousElementSibling(*this));
   }
 
-  RawPtr<Element> CharacterData::PreviousElementSibling() noexcept
+  RefPtr<Element> CharacterData::PreviousElementSibling() noexcept
   {
-    return TreeTraversal::PreviousElementSibling(*this);
+    return ShareRefPtr(TreeTraversal::PreviousElementSibling(*this));
   }
 
-  RawPtr<const Element> CharacterData::NextElementSibling() const noexcept
+  RefPtr<const Element> CharacterData::NextElementSibling() const noexcept
   {
-    return TreeTraversal::NextElementSibling(*this);
+    return ShareRefPtr(TreeTraversal::NextElementSibling(*this));
   }
 
-  RawPtr<Element> CharacterData::NextElementSibling() noexcept
+  RefPtr<Element> CharacterData::NextElementSibling() noexcept
   {
-    return TreeTraversal::NextElementSibling(*this);
+    return ShareRefPtr(TreeTraversal::NextElementSibling(*this));
   }
 
 #pragma endregion

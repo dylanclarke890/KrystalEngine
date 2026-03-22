@@ -116,8 +116,10 @@ Source: https://dom.spec.whatwg.org
 4.2.5 Mixin DocumentOrShadowRoot
 
 4.2.6 Mixin ParentNode
+    Status: No test coverage, missing QuerySelector and QuerySelectorAll implementations.
 
 4.2.7 Mixin NonDocumentTypeChildNode
+    Status: No test coverage
 
 4.2.8 Mixin ChildNode
 
