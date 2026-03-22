@@ -100,7 +100,7 @@
     <ClInclude Include="include\Krystal.HTML\NodeList\NodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Ranges\BoundaryPoint.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\SlotAssignmentAlgorithms.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Algorithms\TreeMutationAlgorithms.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\MutationAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\TreeMutationDispatcher.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\TreeQueries.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\NodeRareData.hpp" />
@@ -156,7 +156,7 @@
     <ClCompile Include="src\NodeList\HTMLCollection.cpp" />
     <ClCompile Include="src\Node\NodeRareData.cpp" />
     <ClCompile Include="src\NodeList\ChildNodeList.cpp" />
-    <ClCompile Include="src\Algorithms\TreeMutationAlgorithms.cpp" />
+    <ClCompile Include="src\Algorithms\MutationAlgorithms.cpp" />
     <ClCompile Include="src\MutationObserver\AttributesMutationRecord.cpp" />
     <ClCompile Include="src\MutationObserver\CharacterDataMutationRecord.cpp" />
     <ClCompile Include="src\MutationObserver\detail\EmptyNodeMutationRecord.cpp" />

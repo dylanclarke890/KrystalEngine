@@ -22,11 +22,11 @@ KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::BoundaryPointComparator, 4u)
 namespace Krys::HTML
 {
   class DocumentFragment;
-  class TreeMutationAlgorithms;
+  class MutationAlgorithms;
 
   class Range : public AbstractRange
   {
-    friend class TreeMutationAlgorithms;
+    friend class MutationAlgorithms;
 
     struct DeleteClonedContent : public StronglyTypedBool<DeleteClonedContent>
     {

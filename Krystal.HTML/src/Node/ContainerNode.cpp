@@ -3,7 +3,7 @@
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
-#include "Krystal.HTML/Algorithms/TreeMutationAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 
@@ -18,22 +18,22 @@ namespace Krys::HTML
 
   ExceptionOr<Node &> ContainerNode::InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept
   {
-    return TreeMutationAlgorithms::PreInsert(newChild, *this, refChild.get());
+    return MutationAlgorithms::PreInsert(newChild, *this, refChild.get());
   }
 
   ExceptionOr<Node &> ContainerNode::ReplaceChild(Node &newChild, Node &oldChild) noexcept
   {
-    return TreeMutationAlgorithms::Replace(newChild, oldChild, *this);
+    return MutationAlgorithms::Replace(newChild, oldChild, *this);
   }
 
   ExceptionOr<Node &> ContainerNode::RemoveChild(Node &oldChild) noexcept
   {
-    return TreeMutationAlgorithms::PreRemove(oldChild, *this);
+    return MutationAlgorithms::PreRemove(oldChild, *this);
   }
 
   ExceptionOr<Node &> ContainerNode::AppendChild(Node &newChild) noexcept
   {
-    return TreeMutationAlgorithms::Append(newChild, *this);
+    return MutationAlgorithms::Append(newChild, *this);
   }
 
   size_t ContainerNode::CountChildNodes() const noexcept

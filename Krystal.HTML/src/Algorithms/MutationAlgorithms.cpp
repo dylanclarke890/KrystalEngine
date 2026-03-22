@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Algorithms/TreeMutationAlgorithms.hpp"
+﻿#include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/IteratorAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/SlotAssignmentAlgorithms.hpp"
@@ -19,7 +19,7 @@
 
 namespace Krys::HTML
 {
-  ExceptionOr<void> TreeMutationAlgorithms::EnsurePreInsertValidity(Node &node, ContainerNode &parent,
+  ExceptionOr<void> MutationAlgorithms::EnsurePreInsertValidity(Node &node, ContainerNode &parent,
                                                                     RawPtr<Node> child) noexcept
   {
     if (!parent.IsDocumentNode() && !parent.IsDocumentFragmentNode() && !parent.IsElementNode())
@@ -100,7 +100,7 @@ namespace Krys::HTML
     return {};
   }
 
-  ExceptionOr<Node &> TreeMutationAlgorithms::PreInsert(Node &node, ContainerNode &parent,
+  ExceptionOr<Node &> MutationAlgorithms::PreInsert(Node &node, ContainerNode &parent,
                                                         RawPtr<Node> refChild) noexcept
   {
     if (auto result = EnsurePreInsertValidity(node, parent, refChild); result.HasException())
@@ -121,7 +121,7 @@ namespace Krys::HTML
     return node;
   }
 
-  ExceptionOr<void> TreeMutationAlgorithms::Insert(Node &node, ContainerNode &parent, RawPtr<Node> child,
+  ExceptionOr<void> MutationAlgorithms::Insert(Node &node, ContainerNode &parent, RawPtr<Node> child,
                                                    SuppressObservers suppressObservers) noexcept
   {
     SmallNodeList nodes;
@@ -297,12 +297,12 @@ namespace Krys::HTML
     return {};
   }
 
-  ExceptionOr<Node &> TreeMutationAlgorithms::Append(Node &node, ContainerNode &parent) noexcept
+  ExceptionOr<Node &> MutationAlgorithms::Append(Node &node, ContainerNode &parent) noexcept
   {
     return PreInsert(node, parent, nullptr);
   }
 
-  ExceptionOr<void> TreeMutationAlgorithms::Move(Node &node, ContainerNode &newParent,
+  ExceptionOr<void> MutationAlgorithms::Move(Node &node, ContainerNode &newParent,
                                                  RawPtr<Node> child) noexcept
   {
     if (!TreeQueries::HasSameShadowIncludingRoot(newParent, node))
@@ -477,7 +477,7 @@ namespace Krys::HTML
     return {};
   }
 
-  ExceptionOr<Node &> TreeMutationAlgorithms::Replace(Node &child, Node &node, ContainerNode &parent) noexcept
+  ExceptionOr<Node &> MutationAlgorithms::Replace(Node &child, Node &node, ContainerNode &parent) noexcept
   {
     if (!parent.IsDocumentNode() && !parent.IsDocumentFragmentNode() && !parent.IsElementNode())
     {
@@ -605,7 +605,7 @@ namespace Krys::HTML
     return child;
   }
 
-  ExceptionOr<void> TreeMutationAlgorithms::ReplaceAll(RawPtr<Node> node, ContainerNode &parent) noexcept
+  ExceptionOr<void> MutationAlgorithms::ReplaceAll(RawPtr<Node> node, ContainerNode &parent) noexcept
   {
     SmallNodeList removedNodes;
     TreeQueries::CollectChildNodes(parent, removedNodes);
@@ -647,7 +647,7 @@ namespace Krys::HTML
     return {};
   }
 
-  ExceptionOr<Node &> TreeMutationAlgorithms::PreRemove(Node &node, ContainerNode &parent) noexcept
+  ExceptionOr<Node &> MutationAlgorithms::PreRemove(Node &node, ContainerNode &parent) noexcept
   {
     if (node.ParentNode() != &parent)
     {
@@ -662,7 +662,7 @@ namespace Krys::HTML
     return node;
   }
 
-  ExceptionOr<void> TreeMutationAlgorithms::Remove(Node &node, SuppressObservers suppressObservers) noexcept
+  ExceptionOr<void> MutationAlgorithms::Remove(Node &node, SuppressObservers suppressObservers) noexcept
   {
     assert(node.ParentNode() != nullptr);
     auto &parent = *node.ParentNode();
@@ -754,7 +754,7 @@ namespace Krys::HTML
     return {};
   }
 
-  ExceptionOr<Ref<Node>> TreeMutationAlgorithms::ConvertNodesIntoNode(const List<NodeOrString> &nodes,
+  ExceptionOr<Ref<Node>> MutationAlgorithms::ConvertNodesIntoNode(const List<NodeOrString> &nodes,
                                                                       Document &document) noexcept
   {
     List<Ref<Node>> nodeList;
@@ -788,7 +788,7 @@ namespace Krys::HTML
     return AdoptRef<Node>(*fragment);
   }
 
-  Ref<Node> TreeMutationAlgorithms::CloneNode(Node &node, RawPtr<Document> document, bool subtree,
+  Ref<Node> MutationAlgorithms::CloneNode(Node &node, RawPtr<Document> document, bool subtree,
                                               RawPtr<ContainerNode> parent,
                                               RawPtr<CustomElementRegistry> fallbackRegistry) noexcept
   {
@@ -829,7 +829,7 @@ namespace Krys::HTML
     return copy;
   }
 
-  Ref<Node> TreeMutationAlgorithms::CloneSingleNode(Node &node, Document &document,
+  Ref<Node> MutationAlgorithms::CloneSingleNode(Node &node, Document &document,
                                                     RawPtr<CustomElementRegistry> fallbackRegistry) noexcept
   {
     RefPtr<Node> copy = nullptr;

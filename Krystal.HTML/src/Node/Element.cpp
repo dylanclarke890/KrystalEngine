@@ -1,6 +1,6 @@
 ﻿#include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Algorithms/TreeMutationAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
@@ -67,7 +67,7 @@ namespace Krys::HTML
   {
     if (auto parent = ShareRefPtr(ParentNode()))
     {
-      return TreeMutationAlgorithms::Remove(*this, SuppressObservers(false));
+      return MutationAlgorithms::Remove(*this, SuppressObservers(false));
     }
 
     return {};
@@ -133,13 +133,13 @@ namespace Krys::HTML
 
   ExceptionOr<void> Element::Prepend(const List<NodeOrString> &nodes) noexcept
   {
-    auto node = TreeMutationAlgorithms::ConvertNodesIntoNode(nodes, NodeDocument());
+    auto node = MutationAlgorithms::ConvertNodesIntoNode(nodes, NodeDocument());
     if (node.HasException())
     {
       return node.ReleaseException();
     }
 
-    if (auto result = TreeMutationAlgorithms::PreInsert(*node.Value(), *this, FirstChild());
+    if (auto result = MutationAlgorithms::PreInsert(*node.Value(), *this, FirstChild());
         result.HasException())
     {
       return result.ReleaseException();
@@ -150,13 +150,13 @@ namespace Krys::HTML
 
   ExceptionOr<void> Element::Append(const List<NodeOrString> &nodes) noexcept
   {
-    auto node = TreeMutationAlgorithms::ConvertNodesIntoNode(nodes, NodeDocument());
+    auto node = MutationAlgorithms::ConvertNodesIntoNode(nodes, NodeDocument());
     if (node.HasException())
     {
       return node.ReleaseException();
     }
 
-    if (auto result = TreeMutationAlgorithms::Append(*node.Value(), *this); result.HasException())
+    if (auto result = MutationAlgorithms::Append(*node.Value(), *this); result.HasException())
     {
       return result.ReleaseException();
     }
@@ -166,13 +166,13 @@ namespace Krys::HTML
 
   ExceptionOr<void> Element::ReplaceChildren(const List<NodeOrString> &nodes) noexcept
   {
-    auto node = TreeMutationAlgorithms::ConvertNodesIntoNode(nodes, NodeDocument());
+    auto node = MutationAlgorithms::ConvertNodesIntoNode(nodes, NodeDocument());
     if (node.HasException())
     {
       return node.ReleaseException();
     }
 
-    if (auto result = TreeMutationAlgorithms::PreInsert(*node.Value(), *this, nullptr); result.HasException())
+    if (auto result = MutationAlgorithms::PreInsert(*node.Value(), *this, nullptr); result.HasException())
     {
       return result.ReleaseException();
     }
@@ -187,7 +187,7 @@ namespace Krys::HTML
       refChild = node.NextSibling();
     }
 
-    return TreeMutationAlgorithms::Move(node, *this, refChild);
+    return MutationAlgorithms::Move(node, *this, refChild);
   }
 
   ExceptionOr<RawPtr<Element>> Element::QuerySelector(const DOMString &selectors) noexcept

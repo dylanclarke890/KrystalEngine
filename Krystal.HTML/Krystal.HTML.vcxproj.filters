@@ -228,7 +228,7 @@
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationObserver.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Algorithms\TreeMutationAlgorithms.hpp">
+    <ClInclude Include="include\Krystal.HTML\Algorithms\MutationAlgorithms.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Iterator\NodeIterator.hpp">
@@ -410,7 +410,7 @@
     <ClCompile Include="src\MutationObserver\CharacterDataMutationRecord.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Algorithms\TreeMutationAlgorithms.cpp">
+    <ClCompile Include="src\Algorithms\MutationAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\NodeList\ChildNodeList.cpp">

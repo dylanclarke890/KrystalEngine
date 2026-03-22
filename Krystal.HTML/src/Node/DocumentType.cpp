@@ -3,7 +3,7 @@
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
-#include "Krystal.HTML/Algorithms/TreeMutationAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 
 namespace Krys::HTML
 {
@@ -35,7 +35,7 @@ namespace Krys::HTML
   {
     if (auto parent = ShareRefPtr(ParentNode()))
     {
-      return TreeMutationAlgorithms::Remove(*this, SuppressObservers(false));
+      return MutationAlgorithms::Remove(*this, SuppressObservers(false));
     }
 
     return {};

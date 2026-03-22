@@ -20,7 +20,7 @@ namespace Krys::HTML
     using Base::Base;
   };
 
-  class TreeMutationAlgorithms
+  class MutationAlgorithms
   {
   public:
     /// @see https://dom.spec.whatwg.org/#concept-node-ensure-pre-insertion-validity

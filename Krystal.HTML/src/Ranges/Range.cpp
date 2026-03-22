@@ -1,6 +1,6 @@
 ﻿#include "Krystal.HTML/Ranges/Range.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Algorithms/TreeMutationAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Node/CharacterData.hpp"
@@ -369,7 +369,7 @@ namespace Krys::HTML
     RefPtr<ContainerNode> parent =
       refNode ? ShareRefPtr(refNode->ParentNode()) : RefPtr<ContainerNode>(_start.Container);
 
-    if (auto preInsertValid = TreeMutationAlgorithms::EnsurePreInsertValidity(node, *parent, refNode.get());
+    if (auto preInsertValid = MutationAlgorithms::EnsurePreInsertValidity(node, *parent, refNode.get());
         preInsertValid.HasException())
     {
       return preInsertValid.ReleaseException();
@@ -399,7 +399,7 @@ namespace Krys::HTML
     auto newOffset = refNode ? TreeQueries::Index(*refNode) : TreeQueries::Length(*parent);
     newOffset += node.IsDocumentFragmentNode() ? TreeQueries::Length(node) : 1uz;
 
-    if (auto preInsert = TreeMutationAlgorithms::PreInsert(node, *parent, refNode.get());
+    if (auto preInsert = MutationAlgorithms::PreInsert(node, *parent, refNode.get());
         preInsert.HasException())
     {
       return preInsert.ReleaseException();
@@ -444,7 +444,7 @@ namespace Krys::HTML
 
     while (auto *child = newParent.FirstChild())
     {
-      auto result = TreeMutationAlgorithms::Remove(*child, SuppressObservers(true));
+      auto result = MutationAlgorithms::Remove(*child, SuppressObservers(true));
       if (result.HasException())
       {
         return result.ReleaseException();
@@ -452,14 +452,14 @@ namespace Krys::HTML
     }
 
     auto surroundPreInsertValid =
-      TreeMutationAlgorithms::EnsurePreInsertValidity(newParent, *fragment.Value(), newParent.FirstChild());
+      MutationAlgorithms::EnsurePreInsertValidity(newParent, *fragment.Value(), newParent.FirstChild());
     if (surroundPreInsertValid.HasException())
     {
       return surroundPreInsertValid.ReleaseException();
     }
 
     auto surroundInsertResult =
-      TreeMutationAlgorithms::Insert(*fragment.Value(), newParent, newParent.FirstChild());
+      MutationAlgorithms::Insert(*fragment.Value(), newParent, newParent.FirstChild());
     if (surroundInsertResult.HasException())
     {
       return surroundInsertResult.ReleaseException();

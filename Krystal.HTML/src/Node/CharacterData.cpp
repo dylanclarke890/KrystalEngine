@@ -1,6 +1,6 @@
 ﻿#include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Algorithms/TreeMutationAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
@@ -132,7 +132,7 @@ namespace Krys::HTML
   {
     if (auto parent = ShareRefPtr(ParentNode()))
     {
-      return TreeMutationAlgorithms::Remove(*this, SuppressObservers(false));
+      return MutationAlgorithms::Remove(*this, SuppressObservers(false));
     }
 
     return {};

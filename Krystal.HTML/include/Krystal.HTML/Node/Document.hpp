@@ -13,14 +13,14 @@
 namespace Krys::HTML
 {
   class HTMLCollection;
-  class TreeMutationAlgorithms;
+  class MutationAlgorithms;
 
   class Document : public ContainerNode, public TreeScope
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Document);
 
     friend class DocumentRareData;
-    friend class TreeMutationAlgorithms;
+    friend class MutationAlgorithms;
     friend class TreeMutationDispatcher;
 
   private:

@@ -73,7 +73,7 @@ namespace Krys::HTML
   class Node;
   class NodeList;
   class ShadowRoot;
-  class TreeMutationAlgorithms;
+  class MutationAlgorithms;
   class TreeMutationDispatcher;
   class TreeQueries;
   class TreeScope;
@@ -94,7 +94,7 @@ namespace Krys::HTML
     friend class ContainerNode;
     friend class Document;
     friend class MutationObserver;
-    friend class TreeMutationAlgorithms;
+    friend class MutationAlgorithms;
     friend class TreeMutationDispatcher;
     friend class TreeQueries;
     friend class TreeScope;
