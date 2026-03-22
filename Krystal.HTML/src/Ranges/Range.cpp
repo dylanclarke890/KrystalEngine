@@ -1,13 +1,13 @@
 ﻿#include "Krystal.HTML/Ranges/Range.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/TreeMutationAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
-#include "Krystal.HTML/Algorithms/TreeMutationAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
-#include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 
 namespace Krys::HTML
 {
@@ -442,10 +442,13 @@ namespace Krys::HTML
       return fragment.ReleaseException();
     }
 
-    auto removeAllChildrenResult = TreeMutationAlgorithms::RemoveAllChildren(newParent);
-    if (removeAllChildrenResult.HasException())
+    while (auto *child = newParent.FirstChild())
     {
-      return removeAllChildrenResult.ReleaseException();
+      auto result = TreeMutationAlgorithms::Remove(*child, SuppressObservers(true));
+      if (result.HasException())
+      {
+        return result.ReleaseException();
+      }
     }
 
     auto surroundPreInsertValid =

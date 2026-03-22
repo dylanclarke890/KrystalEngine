@@ -23,4 +23,10 @@ namespace Krys::HTML
 
     return tokens;
   }
+
+  /// @see https://dom.spec.whatwg.org/#concept-ordered-set-serializer
+  KRYS_NODISCARD inline DOMString OrderedSetSerializer(const List<DOMString> &tokens) noexcept
+  {
+    return StringAlgorithms::Concatenate(tokens, u8" ");
+  }
 }

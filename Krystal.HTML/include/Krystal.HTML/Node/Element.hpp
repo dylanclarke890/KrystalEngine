@@ -3,6 +3,7 @@
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/ElementRareData.hpp"
+#include "Krystal.HTML/QualifiedName.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"
@@ -12,12 +13,15 @@ namespace Krys::HTML
   class Attr;
   class HTMLCollection;
   class HTMLSlotElement;
+  class NodeList;
 
   class Element : public ContainerNode
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Element);
 
   private:
+    QualifiedName _qualifiedName;
+    DOMStringAtom _tagName;
     RefPtr<ShadowRoot> _shadowRoot;
     UniquePtr<ElementRareData> _elementRareData;
 
@@ -26,6 +30,26 @@ namespace Krys::HTML
 
   public:
 #pragma region Element
+
+    KRYS_NODISCARD DOMStringAtom LocalName() const noexcept
+    {
+      return _qualifiedName.LocalName;
+    }
+
+    KRYS_NODISCARD DOMStringAtom Prefix() const noexcept
+    {
+      return _qualifiedName.Prefix;
+    }
+
+    KRYS_NODISCARD DOMStringAtom NamespaceURI() const noexcept
+    {
+      return _qualifiedName.NamespaceURI;
+    }
+
+    KRYS_NODISCARD DOMStringAtom TagName() const noexcept
+    {
+      return _tagName;
+    }
 
     KRYS_NODISCARD RawPtr<ShadowRoot> GetShadowRoot() const noexcept
     {
@@ -71,20 +95,19 @@ namespace Krys::HTML
 
     KRYS_NODISCARD RawPtr<const Element> FirstElementChild() const noexcept;
     KRYS_NODISCARD RawPtr<Element> FirstElementChild() noexcept;
-    
+
     KRYS_NODISCARD RawPtr<const Element> LastElementChild() const noexcept;
     KRYS_NODISCARD RawPtr<Element> LastElementChild() noexcept;
-    
+
     KRYS_NODISCARD size_t ChildElementCount() const noexcept;
 
     ExceptionOr<void> Prepend(const List<NodeOrString> &nodes) noexcept;
     ExceptionOr<void> Append(const List<NodeOrString> &nodes) noexcept;
     ExceptionOr<void> ReplaceChildren(const List<NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> MoveBefore(Node &node, RawPtr<Node> child) noexcept;
 
-    ExceptionOr<void> MoveBefore(Node &node, RefPtr<Node> &&child) noexcept;
-
-    KRYS_NODISCARD RawPtr<Element> QuerySelector(const DOMString &selectors) noexcept;
-    KRYS_NODISCARD Ref<NodeList> QuerySelectorAll(const DOMString &selectors) noexcept;
+    KRYS_NODISCARD ExceptionOr<RawPtr<Element>> QuerySelector(const DOMString &selectors) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<NodeList>> QuerySelectorAll(const DOMString &selectors) noexcept;
 
 #pragma endregion
   };

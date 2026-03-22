@@ -527,6 +527,12 @@ namespace Krys::HTML
     return Last(range, [](auto &&node) { return Is<TNode>(node); });
   }
 
+  template <DerivedFrom<Node> TNode, std::ranges::forward_range TRange>
+  constexpr bool HasNodeOfType(TRange &&range) noexcept
+  {
+    return First(range, [](auto &&node) { return Is<TNode>(node); }) != std::ranges::end(range);
+  }
+
   /// @brief Counts the number of nodes in a range.
   template <std::ranges::forward_range TRange>
   constexpr auto Count(TRange &&range) noexcept

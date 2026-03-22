@@ -16,8 +16,17 @@ namespace Krys::HTML
   class SlotAssignmentAlgorithms
   {
   public:
+#pragma region Slottables
+
     /// @see https://dom.spec.whatwg.org/#concept-slotable
     KRYS_NODISCARD static bool IsSlottable(const Node &node) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#slotable-assigned
+    KRYS_NODISCARD static bool IsAssigned(const Node &node) noexcept;
+
+    KRYS_NODISCARD static RawPtr<HTMLSlotElement> GetAssignedSlot(const Node &node) noexcept;
+
+#pragma endregion
 
 #pragma region Finding slots and slotted elements - https://dom.spec.whatwg.org/#finding-slots-and-slotables
 
@@ -38,7 +47,7 @@ namespace Krys::HTML
     static void AssignSlottables(HTMLSlotElement &slot) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#assign-slotables-for-a-tree
-    static void AssignSlottablesForTree(ContainerNode &root) noexcept;
+    static void AssignSlottablesForTree(Node &root) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#assign-a-slot
     static void AssignSlot(Node &slottable) noexcept;

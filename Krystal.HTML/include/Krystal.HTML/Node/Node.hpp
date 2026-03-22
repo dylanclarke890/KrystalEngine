@@ -2,6 +2,7 @@
 
 #include "Krystal.HTML/DOMString.hpp"
 #include "Krystal.HTML/Events/EventTarget.hpp"
+#include "Krystal.HTML/Node/NodeOrString.hpp"
 #include "Krystal.HTML/Node/NodeRareData.hpp"
 #include "Krystal.HTML/URL.hpp"
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
@@ -14,9 +15,7 @@
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"
-#include "Krystal.Lib/String/StringAtom.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Types/Variant.hpp"
 
 namespace Krys::HTML
 {
@@ -87,8 +86,6 @@ namespace Krys::HTML
   {
     bool Composed = false;
   };
-
-  using NodeOrString = Variant<RefPtr<Node>, DOMString>;
 
   class Node : public EventTarget, public CanMakeCheckedPtr<Node>
   {
@@ -192,10 +189,10 @@ namespace Krys::HTML
     KRYS_NODISCARD const StringAtom &LookupNamespaceURI(const StringAtom &prefix) const noexcept;
     KRYS_NODISCARD bool IsDefaultNamespace(const StringAtom &namespaceURI) const noexcept;
 
-    ExceptionOr<void> InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept;
-    ExceptionOr<void> ReplaceChild(Node &newChild, Node &oldChild) noexcept;
-    ExceptionOr<void> RemoveChild(Node &child) noexcept;
-    ExceptionOr<void> AppendChild(Node &newChild) noexcept;
+    ExceptionOr<Node&> InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept;
+    ExceptionOr<Node&> ReplaceChild(Node &newChild, Node &oldChild) noexcept;
+    ExceptionOr<Node&> RemoveChild(Node &child) noexcept;
+    ExceptionOr<Node&> AppendChild(Node &newChild) noexcept;
 
     KRYS_NODISCARD size_t CountChildNodes() const noexcept;
 

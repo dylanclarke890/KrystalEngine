@@ -8,13 +8,29 @@
 
 namespace Krys::HTML
 {
+#pragma region Slottables
+
   bool SlotAssignmentAlgorithms::IsSlottable(const Node &node) noexcept
   {
     return node.IsElementNode() || node.IsTextNode();
   }
 
-#pragma region Finding slots and slotted elements - https://dom.spec.whatwg.org/#finding-slots-and-slotables
-  
+  bool SlotAssignmentAlgorithms::IsAssigned(const Node &node) noexcept
+  {
+    // TODO(impl): A slottable is assigned if its assigned slot is non-null.
+    return false;
+  }
+
+  RawPtr<HTMLSlotElement> SlotAssignmentAlgorithms::GetAssignedSlot(const Node &node) noexcept
+  {
+    // TODO(impl): check for either text or element node and get assigned slot if slottable
+    return nullptr;
+  }
+
+#pragma endregion
+
+#pragma region Finding slots and slotted elements
+
   RawPtr<HTMLSlotElement> SlotAssignmentAlgorithms::FindSlot(Node &slottable, bool open) noexcept
   {
     RawPtr<Element> parent = slottable.ParentElement();
@@ -117,7 +133,7 @@ namespace Krys::HTML
 
 #pragma endregion
 
-#pragma region Assigning slottables and slots https://dom.spec.whatwg.org/#assigning-slotables-and-slots
+#pragma region Assigning slottables and slots
 
   void SlotAssignmentAlgorithms::AssignSlottables(HTMLSlotElement &slot) noexcept
   {
@@ -128,7 +144,7 @@ namespace Krys::HTML
     // For each slottable of slottables: set slottable’s assigned slot to slot.
   }
 
-  void SlotAssignmentAlgorithms::AssignSlottablesForTree(ContainerNode &root) noexcept
+  void SlotAssignmentAlgorithms::AssignSlottablesForTree(Node &root) noexcept
   {
     for (auto &inclusiveDescendant : InclusiveDescendantRange(root))
     {
@@ -150,7 +166,7 @@ namespace Krys::HTML
 
 #pragma endregion
 
-#pragma region Signaling slot change - https://dom.spec.whatwg.org/#signaling-slot-change
+#pragma region Signaling slot change
 
   void SlotAssignmentAlgorithms::SignalSlotChange(HTMLSlotElement &slot) noexcept
   {

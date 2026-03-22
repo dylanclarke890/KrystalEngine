@@ -1,9 +1,9 @@
 ﻿#include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
-#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
 
 namespace Krys::HTML
@@ -40,21 +40,29 @@ namespace Krys::HTML
         return insertResult.ReleaseException();
       }
 
-      // TODO(IMPL): Update live ranges.
-      // For each live range whose start node is node and start offset is greater than offset, set its start
-      // node to newNode and decrease its start offset by offset.
+      auto index = TreeQueries::Index(*this);
+      for (auto &range : NodeDocument().LiveRanges())
+      {
+        if (range->StartContainer() == this && range->StartOffset() > offset)
+        {
+          range->SetStart(*newNode, range->StartOffset() - offset);
+        }
 
-      // TODO(IMPL): Update live ranges.
-      // For each live range whose end node is node and end offset is greater than offset, set its end node to
-      // newNode and decrease its end offset by offset.
+        if (range->EndContainer() == this)
+        {
+          range->SetEnd(*newNode, range->EndOffset() - offset);
+        }
 
-      // TODO(IMPL): Update live ranges.
-      // For each live range whose start node is parent and start offset is equal to the index of node plus 1,
-      // increase its start offset by 1.
+        if (range->StartContainer() == ParentNode() && range->StartOffset() == index + 1)
+        {
+          range->SetStart(*range->StartContainer(), range->StartOffset() + 1);
+        }
 
-      // TODO(IMPL): Update live ranges.
-      // For each live range whose end node is parent and end offset is equal to the index of node plus 1,
-      // increase its end offset by 1.
+        if (range->EndContainer() == ParentNode() && range->EndOffset() == index + 1)
+        {
+          range->SetEnd(*range->EndContainer(), range->EndOffset() + 1);
+        }
+      }
     }
 
     ReplaceData(offset, count, u8"");

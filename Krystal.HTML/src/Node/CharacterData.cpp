@@ -1,11 +1,11 @@
 ﻿#include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Node/CustomElementRegistry.hpp"
-#include "Krystal.HTML/Node/Document.hpp"
-#include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
+#include "Krystal.HTML/Node/CustomElementRegistry.hpp"
+#include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
 
 namespace Krys::HTML
@@ -71,23 +71,35 @@ namespace Krys::HTML
     TreeMutationDispatcher::QueueMutationRecord(u8"characterData", *this, std::nullopt, std::nullopt, _data,
                                                 {}, {}, nullptr, nullptr);
     _data.insert(offset, data);
-    _data.erase(offset, count);
+    auto deleteOffset = offset + data.size();
+    _data.erase(deleteOffset, count);
 
-    // TODO(IMPL):
-    // For each live range whose start node is node and start offset is greater than offset but less than or
-    // equal to offset + count: set its start offset to offset.
+    for (auto &range : NodeDocument().LiveRanges())
+    {
+      if (range->StartContainer() == this)
+      {
+        if (range->StartOffset() > offset && range->StartOffset() <= offset + count)
+        {
+          range->SetStart(*this, offset);
+        }
+        else if (range->StartOffset() > offset + count)
+        {
+          range->SetStart(*this, range->StartOffset() + data.size() - count);
+        }
+      }
 
-    // TODO(IMPL):
-    // For each live range whose end node is node and end offset is greater than offset but less than or equal
-    // to offset + count: set its end offset to offset.
-
-    // TODO(IMPL):
-    // For each live range whose start node is node and start offset is greater than offset + count: increase
-    // its start offset by data’s length and decrease it by count.
-
-    // TODO(IMPL):
-    // For each live range whose end node is node and end offset is greater than offset + count: increase its
-    // end offset by data’s length and decrease it by count.
+      if (range->EndContainer() == this)
+      {
+        if (range->EndOffset() > offset && range->EndOffset() <= offset + count)
+        {
+          range->SetEnd(*this, offset);
+        }
+        else if (range->EndOffset() > offset + count)
+        {
+          range->SetEnd(*this, range->EndOffset() + data.size() - count);
+        }
+      }
+    }
 
     if (auto parent = ShareRefPtr(ParentNode()))
     {
@@ -120,7 +132,7 @@ namespace Krys::HTML
   {
     if (auto parent = ShareRefPtr(ParentNode()))
     {
-      return TreeMutationAlgorithms::Remove(*this, *parent, SuppressObservers(false));
+      return TreeMutationAlgorithms::Remove(*this, SuppressObservers(false));
     }
 
     return {};
@@ -151,5 +163,4 @@ namespace Krys::HTML
   }
 
 #pragma endregion
-
 }

@@ -37,10 +37,10 @@ namespace Krys::HTML
       return _lastChild.get();
     }
 
-    ExceptionOr<void> InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept;
-    ExceptionOr<void> ReplaceChild(Node &newChild, Node &oldChild) noexcept;
-    ExceptionOr<void> RemoveChild(Node &child) noexcept;
-    ExceptionOr<void> AppendChild(Node &newChild) noexcept;
+    ExceptionOr<Node &> InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept;
+    ExceptionOr<Node &> ReplaceChild(Node &newChild, Node &oldChild) noexcept;
+    ExceptionOr<Node &> RemoveChild(Node &child) noexcept;
+    ExceptionOr<Node &> AppendChild(Node &newChild) noexcept;
 
     KRYS_NODISCARD size_t CountChildNodes() const noexcept;
 

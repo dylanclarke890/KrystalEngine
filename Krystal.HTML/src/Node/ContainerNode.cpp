@@ -16,39 +16,24 @@ namespace Krys::HTML
 
 #pragma region Node
 
-  ExceptionOr<void> ContainerNode::InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept
+  ExceptionOr<Node &> ContainerNode::InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept
   {
     return TreeMutationAlgorithms::PreInsert(newChild, *this, refChild.get());
   }
 
-  ExceptionOr<void> ContainerNode::ReplaceChild(Node &newChild, Node &oldChild) noexcept
+  ExceptionOr<Node &> ContainerNode::ReplaceChild(Node &newChild, Node &oldChild) noexcept
   {
-    if (&newChild == &oldChild)
-    {
-      return {};
-    }
-
-    if (auto result = InsertBefore(newChild, ShareRefPtr<Node>(&oldChild)); result.HasException())
-    {
-      return {result.ReleaseException()};
-    }
-
-    if (auto result = RemoveChild(oldChild); result.HasException())
-    {
-      return {result.ReleaseException()};
-    }
-
-    return {};
+    return TreeMutationAlgorithms::Replace(newChild, oldChild, *this);
   }
 
-  ExceptionOr<void> ContainerNode::RemoveChild(Node &oldChild) noexcept
+  ExceptionOr<Node &> ContainerNode::RemoveChild(Node &oldChild) noexcept
   {
     return TreeMutationAlgorithms::PreRemove(oldChild, *this);
   }
 
-  ExceptionOr<void> ContainerNode::AppendChild(Node &newChild) noexcept
+  ExceptionOr<Node &> ContainerNode::AppendChild(Node &newChild) noexcept
   {
-    return TreeMutationAlgorithms::PreInsert(newChild, *this, nullptr);
+    return TreeMutationAlgorithms::Append(newChild, *this);
   }
 
   size_t ContainerNode::CountChildNodes() const noexcept

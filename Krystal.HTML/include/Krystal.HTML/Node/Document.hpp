@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/Iterator/NodeIterator.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/DocumentRareData.hpp"
 #include "Krystal.HTML/Node/TreeScope.hpp"
@@ -25,7 +26,8 @@ namespace Krys::HTML
   private:
     UniquePtr<DocumentRareData> _documentRareData;
     URL _baseURL {u8"about:blank"};
-    List<Ref<Range>> _liveRanges;
+    List<RawPtr<Range>> _liveRanges;
+    List<RawPtr<NodeIterator>> _nodeIterators;
 
   public:
     Document() noexcept;
@@ -79,15 +81,25 @@ namespace Krys::HTML
 
 #pragma endregion
 
-  protected:
-    KRYS_NODISCARD List<Ref<Range>> &LiveRanges() noexcept
+    // TODO(fix): this shouldn't be part of the public API
+    KRYS_NODISCARD List<Range *> &LiveRanges() noexcept
     {
       return _liveRanges;
     }
 
-    KRYS_NODISCARD const List<Ref<Range>> &LiveRanges() const noexcept
+    KRYS_NODISCARD const List<RawPtr<Range>> &LiveRanges() const noexcept
     {
       return _liveRanges;
+    }
+
+    KRYS_NODISCARD List<RawPtr<NodeIterator>> &NodeIterators() noexcept
+    {
+      return _nodeIterators;
+    }
+
+    KRYS_NODISCARD const List<RawPtr<NodeIterator>> &NodeIterators() const noexcept
+    {
+      return _nodeIterators;
     }
   };
 }

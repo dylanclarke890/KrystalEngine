@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <None Include="cpp.hint" />
     <None Include="data\DOM-spec-progress.txt" />
     <Text Include="data\HTMLEntityNames.in" />
   </ItemGroup>
@@ -36,6 +37,7 @@
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML\Abort\AbortController.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\IteratorAlgorithms.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOMTokenList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventPath.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventTargetFlag.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLElement.hpp" />
@@ -50,8 +52,10 @@
     <ClInclude Include="include\Krystal.HTML\Namespaces.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\NameValidation.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\CustomElementRegistry.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\CustomElementState.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\DocumentFragmentRareData.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\DocumentRareData.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\NodeOrString.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\ParentNodeRareData.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\ShadowRoot.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\TreeScope.hpp" />
@@ -132,11 +136,12 @@
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionCode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionOr.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\SubtreeRanges.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Algorithms\OrderedSetParser.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\OrderedSetAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\SmallNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\StringAlgorithms.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\DOMTokenList.cpp" />
     <ClCompile Include="src\Algorithms\IteratorAlgorithms.cpp" />
     <ClCompile Include="src\HTMLElement\HTMLSlotElement.cpp" />
     <ClCompile Include="src\Algorithms\SlotAssignmentAlgorithms.cpp" />

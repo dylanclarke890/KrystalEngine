@@ -43,7 +43,7 @@ namespace Krys::HTML
     node.OnChildrenChanged();
   }
 
-  void TreeMutationDispatcher::Moved(ContainerNode &node, Node &movedNode, bool isSubtreeRoot,
+  void TreeMutationDispatcher::Moved(Node &node, Node &movedNode, bool isSubtreeRoot,
                                      ContainerNode &oldAncestor) noexcept
   {
   }

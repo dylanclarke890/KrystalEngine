@@ -159,8 +159,10 @@ Source: https://dom.spec.whatwg.org
 4.9.2 Interface Attr
 
 4.10 Interface CharacterData
+    Status: No test coverage
 
 4.11 Interface Text
+    Status: No test coverage
 
 4.12 Interface CDATASection
     Status: N/A
@@ -214,6 +216,8 @@ Source: https://dom.spec.whatwg.org
 ======================================================================
 
 7.1 Interface DOMTokenList
+    Status: No test coverage
+    Note: Missing implementation for 'Value' setter, needs element/attr implementing first.
 
 
 ======================================================================
@@ -221,12 +225,16 @@ Source: https://dom.spec.whatwg.org
 ======================================================================
 
 8.1 Interface XPathResult
+    Status: Not supported
 
 8.2 Interface XPathExpression
+    Status: Not supported
 
 8.3 Mixin XPathEvaluatorBase
+    Status: Not supported
 
 8.4 Interface XPathEvaluator
+    Status: Not supported
 
 
 ======================================================================
@@ -234,3 +242,4 @@ Source: https://dom.spec.whatwg.org
 ======================================================================
 
 9.1 Interface XSLTProcessor
+    Status: Not supported

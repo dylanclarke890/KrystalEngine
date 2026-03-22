@@ -24,8 +24,7 @@ namespace Krys::HTML
     static void ChildrenChanged(ContainerNode &node) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-node-move-ext
-    static void Moved(ContainerNode &node, Node &movedNode, bool isSubtreeRoot,
-                      ContainerNode &oldAncestor) noexcept;
+    static void Moved(Node &node, Node &movedNode, bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-node-remove-ext
     static void Removed(Node &removedNode, bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept;

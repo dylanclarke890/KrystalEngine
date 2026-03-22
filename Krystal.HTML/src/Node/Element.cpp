@@ -1,12 +1,13 @@
 ﻿#include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/TreeMutationAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/ElementRareData.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/NodeList/HTMLCollection.hpp"
-#include "Krystal.HTML/Algorithms/TreeMutationAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
-#include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
+#include "Krystal.HTML/NodeList/NodeList.hpp"
 
 namespace Krys::HTML
 {
@@ -66,7 +67,7 @@ namespace Krys::HTML
   {
     if (auto parent = ShareRefPtr(ParentNode()))
     {
-      return TreeMutationAlgorithms::Remove(*this, *parent, SuppressObservers(false));
+      return TreeMutationAlgorithms::Remove(*this, SuppressObservers(false));
     }
 
     return {};
@@ -128,6 +129,77 @@ namespace Krys::HTML
   size_t Element::ChildElementCount() const noexcept
   {
     return TreeQueries::ChildElementCount(*this);
+  }
+
+  ExceptionOr<void> Element::Prepend(const List<NodeOrString> &nodes) noexcept
+  {
+    auto node = TreeMutationAlgorithms::ConvertNodesIntoNode(nodes, NodeDocument());
+    if (node.HasException())
+    {
+      return node.ReleaseException();
+    }
+
+    if (auto result = TreeMutationAlgorithms::PreInsert(*node.Value(), *this, FirstChild());
+        result.HasException())
+    {
+      return result.ReleaseException();
+    }
+
+    return {};
+  }
+
+  ExceptionOr<void> Element::Append(const List<NodeOrString> &nodes) noexcept
+  {
+    auto node = TreeMutationAlgorithms::ConvertNodesIntoNode(nodes, NodeDocument());
+    if (node.HasException())
+    {
+      return node.ReleaseException();
+    }
+
+    if (auto result = TreeMutationAlgorithms::Append(*node.Value(), *this); result.HasException())
+    {
+      return result.ReleaseException();
+    }
+
+    return {};
+  }
+
+  ExceptionOr<void> Element::ReplaceChildren(const List<NodeOrString> &nodes) noexcept
+  {
+    auto node = TreeMutationAlgorithms::ConvertNodesIntoNode(nodes, NodeDocument());
+    if (node.HasException())
+    {
+      return node.ReleaseException();
+    }
+
+    if (auto result = TreeMutationAlgorithms::PreInsert(*node.Value(), *this, nullptr); result.HasException())
+    {
+      return result.ReleaseException();
+    }
+
+    return {};
+  }
+
+  ExceptionOr<void> Element::MoveBefore(Node &node, RawPtr<Node> refChild) noexcept
+  {
+    if (&node == refChild)
+    {
+      refChild = node.NextSibling();
+    }
+
+    return TreeMutationAlgorithms::Move(node, *this, refChild);
+  }
+
+  ExceptionOr<RawPtr<Element>> Element::QuerySelector(const DOMString &selectors) noexcept
+  {
+    // TODO(impl): Implement this method
+    return Exception {ExceptionCode::NotSupportedError};
+  }
+
+  ExceptionOr<Ref<NodeList>> Element::QuerySelectorAll(const DOMString &selectors) noexcept
+  {
+    // TODO(impl): Implement this method
+    return Exception {ExceptionCode::NotSupportedError};
   }
 
 #pragma endregion

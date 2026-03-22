@@ -54,7 +54,7 @@
     <ClCompile Include="tests\Algorithms\StringAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Algorithms\OrderedSetParser.cpp">
+    <ClCompile Include="tests\Algorithms\OrderedSetAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tests\Events\Event.cpp">

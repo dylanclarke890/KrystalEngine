@@ -145,7 +145,7 @@ namespace Krys::HTML
   //{
   // }
 
-  ExceptionOr<void> Node::InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept
+  ExceptionOr<Node &> Node::InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept
   {
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
     {
@@ -155,7 +155,7 @@ namespace Krys::HTML
     return Exception {ExceptionCode::HierarchyRequestError};
   }
 
-  ExceptionOr<void> Node::ReplaceChild(Node &newChild, Node &oldChild) noexcept
+  ExceptionOr<Node &> Node::ReplaceChild(Node &newChild, Node &oldChild) noexcept
   {
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
     {
@@ -165,7 +165,7 @@ namespace Krys::HTML
     return Exception {ExceptionCode::HierarchyRequestError};
   }
 
-  ExceptionOr<void> Node::RemoveChild(Node &oldChild) noexcept
+  ExceptionOr<Node &> Node::RemoveChild(Node &oldChild) noexcept
   {
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
     {
@@ -175,7 +175,7 @@ namespace Krys::HTML
     return Exception {ExceptionCode::NotFoundError};
   }
 
-  ExceptionOr<void> Node::AppendChild(Node &newChild) noexcept
+  ExceptionOr<Node &> Node::AppendChild(Node &newChild) noexcept
   {
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
     {

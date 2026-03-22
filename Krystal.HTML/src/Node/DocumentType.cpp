@@ -35,7 +35,7 @@ namespace Krys::HTML
   {
     if (auto parent = ShareRefPtr(ParentNode()))
     {
-      return TreeMutationAlgorithms::Remove(*this, *parent, SuppressObservers(false));
+      return TreeMutationAlgorithms::Remove(*this, SuppressObservers(false));
     }
 
     return {};

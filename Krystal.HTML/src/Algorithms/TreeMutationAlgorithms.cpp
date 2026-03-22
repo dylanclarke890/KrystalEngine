@@ -1,5 +1,6 @@
 ﻿#include "Krystal.HTML/Algorithms/TreeMutationAlgorithms.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/IteratorAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/SlotAssignmentAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
@@ -10,9 +11,11 @@
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/Node/DocumentFragment.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/Node/Text.hpp"
 
 namespace Krys::HTML
 {
@@ -48,62 +51,46 @@ namespace Krys::HTML
 
     if (parent.IsDocumentNode())
     {
-      if (node.IsDocumentFragmentNode())
+      if (auto *documentFragment = DynamicDowncast<DocumentFragment>(node))
       {
-        uint32 elementCount = 0;
-        for (Node &fragmentChild : ChildNodeRange(Downcast<ContainerNode>(node)))
-        {
-          if (fragmentChild.IsElementNode())
-          {
-            ++elementCount;
-            if (elementCount > 1)
-            {
-              return Exception {ExceptionCode::HierarchyRequestError};
-            }
-          }
-          else if (fragmentChild.IsTextNode())
-          {
-            return Exception {ExceptionCode::HierarchyRequestError};
-          }
-        }
-
-        if (elementCount == 1)
-        {
-          if (TreeQueries::HasElementChild(parent))
-          {
-            return Exception {ExceptionCode::HierarchyRequestError};
-          }
-
-          if (TreeQueries::IsDocTypeOrDocTypeFollows(child))
-          {
-            return Exception {ExceptionCode::HierarchyRequestError};
-          }
-        }
-      }
-      else if (node.IsElementNode())
-      {
-        if (TreeQueries::HasElementChild(parent))
+        auto count = TreeQueries::ChildElementCount(*documentFragment);
+        if (count > 1)
         {
           return Exception {ExceptionCode::HierarchyRequestError};
         }
 
-        if (TreeQueries::IsDocTypeOrDocTypeFollows(child))
+        if (std::ranges::any_of(ConstChildNodeRange(*documentFragment),
+                                [](auto &c) { return c.IsTextNode(); }))
+        {
+          return Exception {ExceptionCode::HierarchyRequestError};
+        }
+
+        if (count && (TreeQueries::HasElementChild(parent) || TreeQueries::IsDocTypeOrDocTypeFollows(child)))
+        {
+          return Exception {ExceptionCode::HierarchyRequestError};
+        }
+      }
+      else if (node.IsElementNode())
+      {
+        if (TreeQueries::HasElementChild(parent) || TreeQueries::IsDocTypeOrDocTypeFollows(child))
         {
           return Exception {ExceptionCode::HierarchyRequestError};
         }
       }
       else if (node.IsDocumentTypeNode())
       {
-        if (std::ranges::any_of(
-              ChildNodeRange(parent), [&](const Node &current)
-              { return current.IsDocumentTypeNode() || (current.IsElementNode() && child == nullptr); }))
+        if (std::ranges::any_of(ChildNodeRange(parent), [](auto &c) { return c.IsDocumentTypeNode(); }))
         {
           return Exception {ExceptionCode::HierarchyRequestError};
         }
 
         if (child != nullptr
-            && std::ranges::any_of(PrecedingRange(*child),
-                                   [](const Node &current) { return current.IsElementNode(); }))
+            && std::ranges::any_of(PrecedingRange(*child), [](auto &c) { return c.IsElementNode(); }))
+        {
+          return Exception {ExceptionCode::HierarchyRequestError};
+        }
+
+        if (child == nullptr && TreeQueries::HasElementChild(parent))
         {
           return Exception {ExceptionCode::HierarchyRequestError};
         }
@@ -113,12 +100,12 @@ namespace Krys::HTML
     return {};
   }
 
-  ExceptionOr<void> TreeMutationAlgorithms::PreInsert(Node &node, ContainerNode &parent,
-                                                      RawPtr<Node> refChild) noexcept
+  ExceptionOr<Node &> TreeMutationAlgorithms::PreInsert(Node &node, ContainerNode &parent,
+                                                        RawPtr<Node> refChild) noexcept
   {
     if (auto result = EnsurePreInsertValidity(node, parent, refChild); result.HasException())
     {
-      return {result.ReleaseException()};
+      return result.ReleaseException();
     }
 
     if (&node == refChild)
@@ -126,7 +113,12 @@ namespace Krys::HTML
       refChild = node.NextSibling();
     }
 
-    return Insert(node, parent, refChild);
+    if (auto result = Insert(node, parent, refChild); result.HasException())
+    {
+      return result.ReleaseException();
+    }
+
+    return node;
   }
 
   ExceptionOr<void> TreeMutationAlgorithms::Insert(Node &node, ContainerNode &parent, RawPtr<Node> child,
@@ -148,12 +140,15 @@ namespace Krys::HTML
       return {};
     }
 
-    if (node.IsDocumentFragmentNode())
+    if (auto *documentFragment = DynamicDowncast<DocumentFragment>(node))
     {
-      if (auto removeAllResult = RemoveAllChildren(Downcast<ContainerNode>(node), SuppressObservers(true));
-          removeAllResult.HasException())
+      while (auto *child = documentFragment->FirstChild())
       {
-        return {removeAllResult.ReleaseException()};
+        auto result = Remove(*child, SuppressObservers(true));
+        if (result.HasException())
+        {
+          return result.ReleaseException();
+        }
       }
 
       TreeMutationDispatcher::QueueTreeMutationRecord(node, {}, nodes, nullptr, nullptr);
@@ -176,28 +171,23 @@ namespace Krys::HTML
       }
     }
 
-    auto *parentRoot = DynamicDowncast<ShadowRoot>(TreeQueries::Root(parent));
-    auto *parentAsElement = DynamicDowncast<Element>(parent);
-    auto *parentShadowRoot = parentAsElement != nullptr ? parentAsElement->GetShadowRoot() : nullptr;
-    auto *parentAsSlot = DynamicDowncast<HTMLSlotElement>(parent);
-
     auto *previousSibling = child != nullptr ? child->PreviousSibling() : parent.LastChild();
+    auto &parentRoot = TreeQueries::Root(parent);
+    auto *slotParent = DynamicDowncast<HTMLSlotElement>(parent);
     for (auto &target : nodes)
     {
       if (auto result = parent.OwnerDocument()->AdoptNode(*target); result.HasException())
       {
-        return {result.ReleaseException()};
+        return result.ReleaseException();
       }
 
       target->SetParentNode(&parent);
-      target->SetTreeScopeRecursively(*parent.OwnerDocument());
-
       if (child == nullptr)
       {
-        if (parent.LastChild())
+        if (auto *lastChild = parent.LastChild())
         {
-          target->SetPreviousSibling(parent.LastChild());
-          parent.LastChild()->SetNextSibling(target.get());
+          target->SetPreviousSibling(lastChild);
+          lastChild->SetNextSibling(target.get());
         }
         else
         {
@@ -208,10 +198,10 @@ namespace Krys::HTML
       }
       else
       {
-        if (child->PreviousSibling())
+        if (auto *previousSibling = child->PreviousSibling())
         {
-          child->PreviousSibling()->SetNextSibling(target.get());
-          target->SetPreviousSibling(child->PreviousSibling());
+          previousSibling->SetNextSibling(target.get());
+          target->SetPreviousSibling(previousSibling);
 
           child->SetPreviousSibling(target.get());
           target->SetNextSibling(child);
@@ -226,48 +216,54 @@ namespace Krys::HTML
         }
       }
 
-      if (parentShadowRoot && parentShadowRoot->SlotAssignment() == SlotAssignmentMode::Named
-          && SlotAssignmentAlgorithms::IsSlottable(*target))
+      // TODO(fix): i'm not a fan of this tree scope business. think about how to make it better.
+      target->SetTreeScopeRecursively(*parent.OwnerDocument());
+
+      if (auto *shadowHost = DynamicDowncast<Element>(parent))
       {
-        SlotAssignmentAlgorithms::AssignSlot(*target);
+        if (shadowHost->GetShadowRoot()
+            && shadowHost->GetShadowRoot()->SlotAssignment() == SlotAssignmentMode::Named
+            && SlotAssignmentAlgorithms::IsSlottable(*target))
+        {
+          SlotAssignmentAlgorithms::AssignSlot(*target);
+        }
       }
 
-      if (parentShadowRoot && parentAsSlot && parentAsSlot->AssignedNodes().empty())
+      if (Is<ShadowRoot>(parentRoot) && slotParent && slotParent->AssignedNodes().empty())
       {
-        SlotAssignmentAlgorithms::SignalSlotChange(*parentAsSlot);
+        SlotAssignmentAlgorithms::SignalSlotChange(*slotParent);
       }
 
       SlotAssignmentAlgorithms::AssignSlottablesForTree(Downcast<ContainerNode>(TreeQueries::Root(*target)));
-      if (auto *targetContainer = DynamicDowncast<ContainerNode>(*target))
+
+      for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(*target))
       {
-        for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(*targetContainer))
+        TreeMutationDispatcher::Inserted(inclusiveDescendant);
+
+        if (!inclusiveDescendant.IsConnected())
         {
-          TreeMutationDispatcher::Inserted(inclusiveDescendant);
+          continue;
+        }
 
-          if (!inclusiveDescendant.IsConnected())
-          {
-            continue;
-          }
-
-          if (auto *inclusiveDescendantAsElement = DynamicDowncast<Element>(inclusiveDescendant))
-          {
-            // TODO(impl):
-            // If inclusiveDescendant is an element and inclusiveDescendant’s custom element registry is
-            // non-null:
-            // If inclusiveDescendant’s custom element registry’s is scoped is true, then append
-            // inclusiveDescendant’s node document to inclusiveDescendant’s custom element registry’s scoped
-            // document set.
-            // If inclusiveDescendant is custom, then enqueue a custom element callback reaction with
-            // inclusiveDescendant, callback name "connectedCallback", and « ».
-            // Otherwise, try to upgrade inclusiveDescendant.
-          }
-          else if (auto *inclusiveDescendantAsShadowRoot = DynamicDowncast<ShadowRoot>(inclusiveDescendant))
-          {
-            // Otherwise, if inclusiveDescendant is a shadow root, inclusiveDescendant’s custom element
-            // registry is non-null, and inclusiveDescendant’s custom element registry’s is scoped is true,
-            // then append inclusiveDescendant’s node document to inclusiveDescendant’s custom element
-            // registry’s scoped document set.
-          }
+        if (auto *element = DynamicDowncast<Element>(inclusiveDescendant))
+        {
+          // TODO(impl):
+          // If inclusiveDescendant is an element and inclusiveDescendant’s custom element registry is
+          // non-null:
+          // If inclusiveDescendant’s custom element registry’s is scoped is true, then append
+          // inclusiveDescendant’s node document to inclusiveDescendant’s custom element registry’s scoped
+          // document set.
+          // If inclusiveDescendant is custom, then enqueue a custom element callback reaction with
+          // inclusiveDescendant, callback name "connectedCallback", and « ».
+          // Otherwise, try to upgrade inclusiveDescendant.
+        }
+        else if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(inclusiveDescendant))
+        {
+          // TODO(impl):
+          // Otherwise, if inclusiveDescendant is a shadow root, inclusiveDescendant’s custom element
+          // registry is non-null, and inclusiveDescendant’s custom element registry’s is scoped is true,
+          // then append inclusiveDescendant’s node document to inclusiveDescendant’s custom element
+          // registry’s scoped document set.
         }
       }
     }
@@ -301,13 +297,13 @@ namespace Krys::HTML
     return {};
   }
 
-  ExceptionOr<void> TreeMutationAlgorithms::Append(Node &node, ContainerNode &parent) noexcept
+  ExceptionOr<Node &> TreeMutationAlgorithms::Append(Node &node, ContainerNode &parent) noexcept
   {
     return PreInsert(node, parent, nullptr);
   }
 
   ExceptionOr<void> TreeMutationAlgorithms::Move(Node &node, ContainerNode &newParent,
-                                                 RawPtr<Node> refChild) noexcept
+                                                 RawPtr<Node> child) noexcept
   {
     if (!TreeQueries::HasSameShadowIncludingRoot(newParent, node))
     {
@@ -319,7 +315,7 @@ namespace Krys::HTML
       return Exception {ExceptionCode::HierarchyRequestError};
     }
 
-    if (refChild != nullptr && refChild->ParentNode() != &newParent)
+    if (child != nullptr && child->ParentNode() != &newParent)
     {
       return Exception {ExceptionCode::NotFoundError};
     }
@@ -341,47 +337,350 @@ namespace Krys::HTML
         return Exception {ExceptionCode::HierarchyRequestError};
       }
 
-      if (refChild != nullptr && TreeQueries::IsDocTypeOrDocTypeFollows(refChild))
+      if (TreeQueries::IsDocTypeOrDocTypeFollows(child))
       {
         return Exception {ExceptionCode::HierarchyRequestError};
       }
     }
 
-    auto *oldParent = node.ParentNode();
-    assert(oldParent != nullptr);
+    assert(node.ParentNode() != nullptr);
+    auto &oldParent = *node.ParentNode();
 
     TreeMutationDispatcher::LiveRangePreRemove(node);
 
-    // TODO(IMPL): For each NodeIterator object iterator whose root’s node document is node’s node document:
-    // run the NodeIterator pre-remove steps given node and iterator.
+    for (auto iterator : node.NodeDocument().NodeIterators())
+    {
+      if (&iterator->Root() == &node.NodeDocument())
+      {
+        IteratorAlgorithms::PreRemove(*iterator, node);
+      }
+    }
 
     auto *oldPreviousSibling = node.PreviousSibling();
     auto *oldNextSibling = node.NextSibling();
 
-    if (auto result = Remove(node, *oldParent); result.HasException())
+    if (auto previousSibling = node.PreviousSibling())
     {
-      return {result.ReleaseException()};
+      previousSibling->SetNextSibling(node.NextSibling());
+    }
+    else
+    {
+      assert(oldParent.FirstChild() == &node);
+      oldParent.SetFirstChild(node.NextSibling());
     }
 
-    // TODO(IMPL):
+    if (auto nextSibling = node.NextSibling())
+    {
+      nextSibling->SetPreviousSibling(node.PreviousSibling());
+    }
+    else
+    {
+      assert(oldParent.LastChild() == &node);
+      oldParent.SetLastChild(node.PreviousSibling());
+    }
+    assert(oldParent.FirstChild() != &node);
+    assert(oldParent.LastChild() != &node);
+    node.SetParentNode(nullptr);
+    node.SetPreviousSibling(nullptr);
+    node.SetNextSibling(nullptr);
+
+    if (auto *assignedSlot = SlotAssignmentAlgorithms::GetAssignedSlot(node))
+    {
+      SlotAssignmentAlgorithms::AssignSlottables(*assignedSlot);
+    }
+
+    auto &oldParentRoot = TreeQueries::Root(oldParent);
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(oldParentRoot))
+    {
+      if (auto *slot = DynamicDowncast<HTMLSlotElement>(oldParent); slot && slot->AssignedNodes().empty())
+      {
+        SlotAssignmentAlgorithms::SignalSlotChange(*slot);
+      }
+    }
+
+    if (Krys::HTML::HasNodeOfType<HTMLSlotElement>(ConstInclusiveDescendantRange(node)))
+    {
+      SlotAssignmentAlgorithms::AssignSlottablesForTree(oldParentRoot);
+      SlotAssignmentAlgorithms::AssignSlottablesForTree(node);
+    }
+
+    if (child != nullptr)
+    {
+      auto childIndex = TreeQueries::Index(*child);
+      for (auto range : newParent.NodeDocument().LiveRanges())
+      {
+        if (range->_start.Container == &newParent && range->_start.Offset > childIndex)
+        {
+          range->_start.Offset += 1;
+        }
+
+        if (range->_end.Container == &newParent && range->_end.Offset > childIndex)
+        {
+          range->_end.Offset += 1;
+        }
+      }
+    }
+
+    auto *newPreviousSibling = child != nullptr ? child->PreviousSibling() : newParent.LastChild();
+
+    if (child == nullptr)
+    {
+      if (auto *lastChild = newParent.LastChild())
+      {
+        node.SetPreviousSibling(lastChild);
+        lastChild->SetNextSibling(&node);
+      }
+      else
+      {
+        newParent.SetFirstChild(&node);
+      }
+
+      newParent.SetLastChild(&node);
+    }
+    else
+    {
+      if (auto *previousSibling = child->PreviousSibling())
+      {
+        previousSibling->SetNextSibling(&node);
+        node.SetPreviousSibling(previousSibling);
+
+        child->SetPreviousSibling(&node);
+        node.SetNextSibling(child);
+      }
+      else
+      {
+        assert(newParent.FirstChild() == child);
+        newParent.SetFirstChild(&node);
+
+        child->SetPreviousSibling(&node);
+        node.SetNextSibling(child);
+      }
+    }
+
+    SlotAssignmentAlgorithms::AssignSlottablesForTree(TreeQueries::Root(node));
+
+    for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(node))
+    {
+      auto isSubtreeRoot = &inclusiveDescendant == &node;
+      TreeMutationDispatcher::Moved(inclusiveDescendant, node, isSubtreeRoot, oldParent);
+
+      // TODO(impl):If inclusiveDescendant is custom and newParent is connected, then enqueue a custom element
+      // callback reaction with inclusiveDescendant, callback name "connectedMoveCallback", and « ».
+    }
+
+    TreeMutationDispatcher::QueueTreeMutationRecord(
+      oldParent, {}, {ShareRef(node)}, ShareRefPtr(oldPreviousSibling), ShareRefPtr(oldNextSibling));
+
+    TreeMutationDispatcher::QueueTreeMutationRecord(newParent, {ShareRef(node)}, {},
+                                                    ShareRefPtr(newPreviousSibling), ShareRefPtr(child));
 
     return {};
   }
 
-  ExceptionOr<void> TreeMutationAlgorithms::PreRemove(Node &node, ContainerNode &parent) noexcept
+  ExceptionOr<Node &> TreeMutationAlgorithms::Replace(Node &child, Node &node, ContainerNode &parent) noexcept
+  {
+    if (!parent.IsDocumentNode() && !parent.IsDocumentFragmentNode() && !parent.IsElementNode())
+    {
+      return Exception {ExceptionCode::HierarchyRequestError};
+    }
+
+    if (TreeQueries::IsHostIncludingInclusiveAncestorOf(node, parent))
+    {
+      return Exception {ExceptionCode::HierarchyRequestError};
+    }
+
+    if (child.ParentNode() != &parent)
+    {
+      return Exception {ExceptionCode::NotFoundError};
+    }
+
+    if (!node.IsDocumentFragmentNode() && !node.IsDocumentTypeNode() && !node.IsElementNode()
+        && !node.IsCharacterDataNode())
+    {
+      return Exception {ExceptionCode::HierarchyRequestError};
+    }
+
+    if ((node.IsTextNode() && parent.IsDocumentNode())
+        || (node.IsDocumentTypeNode() && !parent.IsDocumentNode()))
+    {
+      return Exception {ExceptionCode::HierarchyRequestError};
+    }
+
+    if (parent.IsDocumentNode())
+    {
+      if (node.IsDocumentFragmentNode())
+      {
+        uint32 elementCount = 0;
+        for (Node &fragmentChild : ChildNodeRange(Downcast<ContainerNode>(node)))
+        {
+          if (fragmentChild.IsElementNode())
+          {
+            if (++elementCount > 1)
+            {
+              return Exception {ExceptionCode::HierarchyRequestError};
+            }
+          }
+          else if (fragmentChild.IsTextNode())
+          {
+            return Exception {ExceptionCode::HierarchyRequestError};
+          }
+        }
+
+        if (elementCount == 1)
+        {
+          if (std::ranges::any_of(ConstChildElementRange(parent), [&](auto &e) { return &e != &child; }))
+          {
+            return Exception {ExceptionCode::HierarchyRequestError};
+          }
+
+          if (std::ranges::any_of(ConstFollowingRange(child), [](auto &e) { return e.IsDocumentTypeNode(); }))
+          {
+            return Exception {ExceptionCode::HierarchyRequestError};
+          }
+        }
+      }
+      else if (node.IsElementNode())
+      {
+        if (std::ranges::any_of(ConstChildElementRange(parent), [&](auto &e) { return &e != &child; }))
+        {
+          return Exception {ExceptionCode::HierarchyRequestError};
+        }
+
+        if (std::ranges::any_of(ConstFollowingRange(child), [](auto &e) { return e.IsDocumentTypeNode(); }))
+        {
+          return Exception {ExceptionCode::HierarchyRequestError};
+        }
+      }
+      else if (node.IsDocumentFragmentNode())
+      {
+        if (std::ranges::any_of(ConstChildNodeRange(parent),
+                                [&](auto &e) { return e.IsDocumentTypeNode() && &e != &child; }))
+        {
+          return Exception {ExceptionCode::HierarchyRequestError};
+        }
+
+        if (std::ranges::any_of(ConstPrecedingRange(child), [](auto &e) { return e.IsElementNode(); }))
+        {
+          return Exception {ExceptionCode::HierarchyRequestError};
+        }
+      }
+    }
+
+    auto referenceChild = child.NextSibling();
+    if (referenceChild == &node)
+    {
+      referenceChild = node.NextSibling();
+    }
+
+    auto previousSibling = child.PreviousSibling();
+
+    SmallNodeList removedNodes;
+    if (child.ParentNode())
+    {
+      removedNodes.push_back(ShareRef(child));
+      if (auto result = Remove(child, SuppressObservers(true)); result.HasException())
+      {
+        return result.ReleaseException();
+      }
+    }
+
+    SmallNodeList nodes;
+    if (node.IsDocumentFragmentNode())
+    {
+      TreeQueries::CollectChildNodes(Downcast<ContainerNode>(node), nodes);
+    }
+    else
+    {
+      nodes.push_back(ShareRef(node));
+    }
+
+    if (auto result = Insert(node, parent, referenceChild, SuppressObservers(true)); result.HasException())
+    {
+      return result.ReleaseException();
+    }
+
+    TreeMutationDispatcher::QueueTreeMutationRecord(parent, nodes, removedNodes, ShareRefPtr(previousSibling),
+                                                    ShareRefPtr(referenceChild));
+
+    return child;
+  }
+
+  ExceptionOr<void> TreeMutationAlgorithms::ReplaceAll(RawPtr<Node> node, ContainerNode &parent) noexcept
+  {
+    SmallNodeList removedNodes;
+    TreeQueries::CollectChildNodes(parent, removedNodes);
+
+    SmallNodeList addedNodes;
+    if (node != nullptr)
+    {
+      if (auto *documentFragment = DynamicDowncast<DocumentFragment>(node))
+      {
+        TreeQueries::CollectChildNodes(*documentFragment, addedNodes);
+      }
+      else
+      {
+        addedNodes.push_back(ShareRef(*node));
+      }
+    }
+
+    while (auto *firstChild = parent.FirstChild())
+    {
+      if (auto result = Remove(*firstChild, SuppressObservers(true)); result.HasException())
+      {
+        return result.ReleaseException();
+      }
+    }
+
+    if (node != nullptr)
+    {
+      if (auto result = Insert(*node, parent, nullptr, SuppressObservers(true)); result.HasException())
+      {
+        return result.ReleaseException();
+      }
+    }
+
+    if (!addedNodes.empty() || !removedNodes.empty())
+    {
+      TreeMutationDispatcher::QueueTreeMutationRecord(parent, addedNodes, removedNodes, nullptr, nullptr);
+    }
+
+    return {};
+  }
+
+  ExceptionOr<Node &> TreeMutationAlgorithms::PreRemove(Node &node, ContainerNode &parent) noexcept
   {
     if (node.ParentNode() != &parent)
     {
       return Exception {ExceptionCode::NotFoundError};
     }
 
-    return Remove(node, parent);
+    if (auto result = Remove(node); result.HasException())
+    {
+      return result.ReleaseException();
+    }
+
+    return node;
   }
 
-  ExceptionOr<void> TreeMutationAlgorithms::Remove(Node &node, ContainerNode &parent,
-                                                   SuppressObservers suppressObservers) noexcept
+  ExceptionOr<void> TreeMutationAlgorithms::Remove(Node &node, SuppressObservers suppressObservers) noexcept
   {
-    if (auto previousSibling = ShareRefPtr(node.PreviousSibling()))
+    assert(node.ParentNode() != nullptr);
+    auto &parent = *node.ParentNode();
+
+    TreeMutationDispatcher::LiveRangePreRemove(node);
+
+    for (auto iterator : node.NodeDocument().NodeIterators())
+    {
+      if (&iterator->Root() == &node.NodeDocument())
+      {
+        IteratorAlgorithms::PreRemove(*iterator, node);
+      }
+    }
+
+    auto oldPreviousSibling = node.PreviousSibling();
+    auto oldNextSibling = node.NextSibling();
+
+    if (auto previousSibling = node.PreviousSibling())
     {
       previousSibling->SetNextSibling(node.NextSibling());
     }
@@ -391,7 +690,7 @@ namespace Krys::HTML
       parent.SetFirstChild(node.NextSibling());
     }
 
-    if (auto nextSibling = ShareRefPtr(node.NextSibling()))
+    if (auto nextSibling = node.NextSibling())
     {
       nextSibling->SetPreviousSibling(node.PreviousSibling());
     }
@@ -400,36 +699,93 @@ namespace Krys::HTML
       assert(parent.LastChild() == &node);
       parent.SetLastChild(node.PreviousSibling());
     }
-
+    assert(parent.FirstChild() != &node);
+    assert(parent.LastChild() != &node);
     node.SetParentNode(nullptr);
     node.SetPreviousSibling(nullptr);
     node.SetNextSibling(nullptr);
 
-    assert(parent.FirstChild() != &node);
-    assert(parent.LastChild() != &node);
-    assert(!node.PreviousSibling());
-    assert(!node.NextSibling());
+    if (auto *assignedSlot = SlotAssignmentAlgorithms::GetAssignedSlot(node))
+    {
+      SlotAssignmentAlgorithms::AssignSlottables(*assignedSlot);
+    }
+
+    auto &parentRoot = TreeQueries::Root(parent);
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(parentRoot))
+    {
+      if (auto *slot = DynamicDowncast<HTMLSlotElement>(parent); slot && slot->AssignedNodes().empty())
+      {
+        SlotAssignmentAlgorithms::SignalSlotChange(*slot);
+      }
+    }
+
+    if (Krys::HTML::HasNodeOfType<HTMLSlotElement>(ConstInclusiveDescendantRange(node)))
+    {
+      SlotAssignmentAlgorithms::AssignSlottablesForTree(parentRoot);
+      SlotAssignmentAlgorithms::AssignSlottablesForTree(node);
+    }
 
     TreeMutationDispatcher::Removed(node, true, parent);
 
-    // TODO(impl):
+    // bool isParentConnected = parent.IsConnected();
+    // TODO(impl): if node is custom and isParentConnected is true, then enqueue a custom element callback
+    // reaction with node, callback name "disconnectedCallback", and « ».
+
+    for (auto &descendant : InclusiveShadowIncludingDescendantRange(node))
+    {
+      TreeMutationDispatcher::Removed(descendant, false, parent);
+      // TODO(impl): If descendant is custom and isParentConnected is true, then enqueue a custom element
+      // callback reaction with descendant, callback name "disconnectedCallback", and « ».
+    }
+
+    // TODO(impl): For each inclusive ancestor inclusiveAncestor of parent, and then for each registered of
+    // inclusiveAncestor’s registered observer list, if registered’s options["subtree"] is true, then append a
+    // new transient registered observer whose observer is registered’s observer, options is registered’s
+    // options, and source is registered to node’s registered observer list.
+
+    if (!suppressObservers)
+    {
+      TreeMutationDispatcher::QueueTreeMutationRecord(
+        parent, {}, {ShareRef(node)}, ShareRefPtr(oldPreviousSibling), ShareRefPtr(oldNextSibling));
+    }
+
+    TreeMutationDispatcher::ChildrenChanged(parent);
 
     return {};
   }
 
-  ExceptionOr<void> TreeMutationAlgorithms::RemoveAllChildren(ContainerNode &parent,
-                                                              SuppressObservers suppressObservers) noexcept
+  ExceptionOr<Ref<Node>> TreeMutationAlgorithms::ConvertNodesIntoNode(const List<NodeOrString> &nodes,
+                                                                      Document &document) noexcept
   {
-    while (RawPtr<Node> child = parent.FirstChild())
+    List<Ref<Node>> nodeList;
+    for (auto &nodeOrString : nodes)
     {
-      auto result = Remove(*child, parent, suppressObservers);
-      if (result.HasException())
+      if (std::holds_alternative<DOMString>(nodeOrString))
       {
-        return {result.ReleaseException()};
+        DOMString copy = std::get<DOMString>(nodeOrString);
+        nodeList.emplace_back(CreateRef<Text>(document, Krys::Move(copy)));
+      }
+      else
+      {
+        nodeList.push_back(std::get<Ref<Node>>(nodeOrString));
       }
     }
 
-    return {};
+    if (nodeList.size() == 1)
+    {
+      return nodeList[0];
+    }
+
+    auto fragment = CreateRef<DocumentFragment>(document);
+    for (auto &node : nodeList)
+    {
+      if (auto result = Append(*node, *fragment); result.HasException())
+      {
+        return result.ReleaseException();
+      }
+    }
+
+    return AdoptRef<Node>(*fragment);
   }
 
   Ref<Node> TreeMutationAlgorithms::CloneNode(Node &node, RawPtr<Document> document, bool subtree,

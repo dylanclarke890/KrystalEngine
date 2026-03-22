@@ -285,7 +285,7 @@
     <ClInclude Include="include\Krystal.HTML\Namespaces.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Algorithms\OrderedSetParser.hpp">
+    <ClInclude Include="include\Krystal.HTML\Algorithms\OrderedSetAlgorithms.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Events\EventPath.hpp">
@@ -319,6 +319,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Iterator\_detail\IteratorBase.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOMTokenList.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Node\CustomElementState.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Node\NodeOrString.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -444,6 +453,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Iterator\TreeWalker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DOMTokenList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -652,5 +664,6 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\DOM-spec-progress.txt" />
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

@@ -371,8 +371,7 @@ namespace Krys::HTML
       return true;
     }
 
-    return std::ranges::any_of(ConstFollowingRange(*node),
-                               [](const auto &current) { return current.IsDocumentTypeNode(); });
+    return std::ranges::any_of(ConstFollowingRange(*node), [](auto &c) { return c.IsDocumentTypeNode(); });
   }
 
   bool TreeQueries::IsExclusiveTextNode(const Node &node) noexcept
