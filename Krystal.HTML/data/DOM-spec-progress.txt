@@ -138,6 +138,8 @@ Source: https://dom.spec.whatwg.org
     Status: No test coverage
 
 4.2.10.2 Interface HTMLCollection
+    Status: TODO(spec)
+    Notes : namedItem/named index requires element/attr implementing first.
 
 4.3 Mutation observers
 

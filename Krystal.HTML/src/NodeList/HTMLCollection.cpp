@@ -30,6 +30,21 @@ namespace Krys::HTML
     return nullptr;
   }
 
+  RawPtr<Element> HTMLCollection::operator[](size_t index) noexcept
+  {
+    if (_invalid)
+    {
+      BuildCollection();
+    }
+
+    if (index < _elements.size())
+    {
+      return _elements[index].get();
+    }
+
+    return nullptr;
+  }
+
   RawPtr<Element> HTMLCollection::NamedItem(const DOMString &idOrName) noexcept
   {
     if (_invalid)
@@ -50,6 +65,16 @@ namespace Krys::HTML
 
     // TODO(IMPL): Implement this method
     return nullptr;
+  }
+
+  size_t HTMLCollection::Length() noexcept
+  {
+    if (_invalid)
+    {
+      BuildCollection();
+    }
+
+    return _elements.size();
   }
 
   void HTMLCollection::BuildCollection() noexcept

@@ -27,14 +27,13 @@ namespace Krys::HTML
 
     KRYS_NODISCARD RawPtr<Element> Item(size_t index) noexcept;
 
+    KRYS_NODISCARD RawPtr<Element> operator[](size_t index) noexcept;
+
     KRYS_NODISCARD RawPtr<Element> NamedItem(const DOMString &name) noexcept;
 
     KRYS_NODISCARD RawPtr<Element> operator[](const DOMString &name) noexcept;
 
-    KRYS_NODISCARD size_t Length() noexcept
-    {
-      return _elements.size();
-    }
+    KRYS_NODISCARD size_t Length() noexcept;
 
   private:
     void Invalidate() noexcept
