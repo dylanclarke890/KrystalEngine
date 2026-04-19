@@ -86,7 +86,7 @@ namespace Krys::HTML
 
   List<Ref<MutationRecord>> MutationObserver::TakeRecords() noexcept
   {
-    List<Ref<MutationRecord>> records = _recordQueue;
+    RecordQueue records = _recordQueue;
     _recordQueue.clear();
     return records;
   }
