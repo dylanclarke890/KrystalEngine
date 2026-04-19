@@ -56,6 +56,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\CustomElementState.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\DocumentFragmentRareData.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\DocumentRareData.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\NamedNodeMap.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\NodeOrString.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\ParentNodeRareData.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\ShadowRoot.hpp" />
@@ -151,6 +152,7 @@
     <ClCompile Include="src\Events\EventPath.cpp" />
     <ClCompile Include="src\Iterator\NodeIterator.cpp" />
     <ClCompile Include="src\Iterator\TreeWalker.cpp" />
+    <ClCompile Include="src\Node\NamedNodeMap.cpp" />
     <ClCompile Include="src\Ranges\Range.cpp" />
     <ClCompile Include="src\MutationObserver\MutationObserver.cpp" />
     <ClCompile Include="src\Node\ParentNodeRareData.cpp" />
