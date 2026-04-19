@@ -133,7 +133,7 @@ namespace Krys::HTML
 
   ExceptionOr<void> CharacterData::Remove() noexcept
   {
-    ChildNodeAlgorithms::Remove(*this);
+    return ChildNodeAlgorithms::Remove(*this);
   }
 
 #pragma endregion

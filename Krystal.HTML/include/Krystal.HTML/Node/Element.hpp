@@ -70,25 +70,6 @@ namespace Krys::HTML
 
 #pragma endregion
 
-#pragma region ChildNode Mixin - https://dom.spec.whatwg.org/#childnode
-
-    ExceptionOr<void> Before(const List<NodeOrString> &nodes) noexcept;
-    ExceptionOr<void> After(const List<NodeOrString> &nodes) noexcept;
-    ExceptionOr<void> ReplaceWith(const List<NodeOrString> &nodes) noexcept;
-    ExceptionOr<void> Remove() noexcept;
-
-#pragma endregion
-
-#pragma region NonDocumentTypeChildNode Mixin - https://dom.spec.whatwg.org/#interface-nondocumenttypechildnode
-
-    KRYS_NODISCARD RefPtr<const Element> PreviousElementSibling() const noexcept;
-    KRYS_NODISCARD RefPtr<Element> PreviousElementSibling() noexcept;
-
-    KRYS_NODISCARD RefPtr<const Element> NextElementSibling() const noexcept;
-    KRYS_NODISCARD RefPtr<Element> NextElementSibling() noexcept;
-
-#pragma endregion
-
 #pragma region ParentNode Mixin - https://dom.spec.whatwg.org/#parentnode
 
     KRYS_NODISCARD Ref<HTMLCollection> Children() noexcept;
@@ -106,6 +87,31 @@ namespace Krys::HTML
 
     KRYS_NODISCARD ExceptionOr<RefPtr<Element>> QuerySelector(const DOMString &selectors) noexcept;
     KRYS_NODISCARD ExceptionOr<Ref<NodeList>> QuerySelectorAll(const DOMString &selectors) noexcept;
+
+#pragma endregion
+
+#pragma region NonDocumentTypeChildNode Mixin - https://dom.spec.whatwg.org/#interface-nondocumenttypechildnode
+
+    KRYS_NODISCARD RefPtr<const Element> PreviousElementSibling() const noexcept;
+    KRYS_NODISCARD RefPtr<Element> PreviousElementSibling() noexcept;
+
+    KRYS_NODISCARD RefPtr<const Element> NextElementSibling() const noexcept;
+    KRYS_NODISCARD RefPtr<Element> NextElementSibling() noexcept;
+
+#pragma endregion
+
+#pragma region ChildNode Mixin - https://dom.spec.whatwg.org/#childnode
+
+    ExceptionOr<void> Before(const List<NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> After(const List<NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> ReplaceWith(const List<NodeOrString> &nodes) noexcept;
+    ExceptionOr<void> Remove() noexcept;
+
+#pragma endregion
+
+#pragma region Slottable Mixin - https://dom.spec.whatwg.org/#slotable
+
+    KRYS_NODISCARD RawPtr<HTMLSlotElement> AssignedSlot() noexcept;
 
 #pragma endregion
   };

@@ -36,6 +36,8 @@ namespace Krys::HTML
       {
         return result.ReleaseException();
       }
+
+      return {};
     }
 
     KRYS_NODISCARD static ExceptionOr<void> After(Node &childNode, const List<NodeOrString> &nodes) noexcept
@@ -118,13 +120,24 @@ namespace Krys::HTML
     template <std::ranges::forward_range TRange>
     static RawPtr<Node> ViableSibling(TRange &&range, const List<NodeOrString> &nodes) noexcept
     {
-      for (auto &item : range)
+      for (auto& item : range)
       {
-        if (std::ranges::find(nodes, item) == std::ranges::end(nodes))
+        auto predicate = [&](auto &nodeOrString)
         {
-          return item;
+          if (std::holds_alternative<Ref<Node>>(nodeOrString))
+          {
+            return std::get<Ref<Node>>(nodeOrString).get() == &item;
+          }
+
+          return false;
+        };
+
+        if (std::ranges::any_of(nodes, Krys::Move(predicate)))
+        {
+          return std::addressof(item);
         }
       }
+
       return nullptr;
     }
   };

@@ -1,6 +1,8 @@
 ﻿#include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/SlotAssignmentAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
@@ -74,6 +76,15 @@ namespace Krys::HTML
   DOMString Text::WholeText() const noexcept
   {
     return TreeQueries::ContiguousTextContent(*this);
+  }
+
+#pragma endregion
+
+#pragma region Slottables
+
+  RawPtr<HTMLSlotElement> Text::AssignedSlot() noexcept
+  {
+    return SlotAssignmentAlgorithms::FindSlot(*this, true);
   }
 
 #pragma endregion

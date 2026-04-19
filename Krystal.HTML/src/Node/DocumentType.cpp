@@ -34,7 +34,7 @@ namespace Krys::HTML
 
   ExceptionOr<void> DocumentType::Remove() noexcept
   {
-    ChildNodeAlgorithms::Remove(*this);
+    return ChildNodeAlgorithms::Remove(*this);
   }
 
 #pragma endregion

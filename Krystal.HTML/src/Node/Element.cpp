@@ -2,8 +2,10 @@
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/ChildNodeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/SlotAssignmentAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
+#include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/ElementRareData.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
@@ -66,7 +68,7 @@ namespace Krys::HTML
 
   ExceptionOr<void> Element::Remove() noexcept
   {
-    ChildNodeAlgorithms::Remove(*this);
+    return ChildNodeAlgorithms::Remove(*this);
   }
 
 #pragma endregion
@@ -196,6 +198,15 @@ namespace Krys::HTML
   {
     // TODO(impl): implement this when we have css parsing.
     return Exception {ExceptionCode::NotSupportedError};
+  }
+
+#pragma endregion
+
+#pragma region Slottable
+
+  RawPtr<HTMLSlotElement> Element::AssignedSlot() noexcept
+  {
+    return SlotAssignmentAlgorithms::FindSlot(*this, true);
   }
 
 #pragma endregion

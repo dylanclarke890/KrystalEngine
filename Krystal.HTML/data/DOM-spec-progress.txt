@@ -18,7 +18,6 @@ Source: https://dom.spec.whatwg.org
 1.4 Name validation
     Status: Full test coverage
 
-
 ======================================================================
 2. EVENTS
 ======================================================================
@@ -64,7 +63,6 @@ Source: https://dom.spec.whatwg.org
 2.11 Action versus occurrence
     Status: N/A
 
-
 ======================================================================
 3. ABORTING ONGOING ACTIVITIES
 ======================================================================
@@ -80,7 +78,6 @@ Source: https://dom.spec.whatwg.org
 
 3.3 Using AbortController and AbortSignal objects in APIs
     Status: N/A
-
 
 ======================================================================
 4. NODES
@@ -109,14 +106,21 @@ Source: https://dom.spec.whatwg.org
 4.2.2.5 Signaling slot change
 
 4.2.3 Mutation algorithms
-    Status: Mostly complete, missing implementation relating to custom elements and a small section for mutation observers in Remove.
+    Status : No test coverage
+    Missing: 
+        Custom element support
+        mutation observers (Remove).
 
 4.2.4 Mixin NonElementParentNode
 
 4.2.5 Mixin DocumentOrShadowRoot
+    Status: No test coverage
 
 4.2.6 Mixin ParentNode
-    Status: No test coverage, missing QuerySelector and QuerySelectorAll implementations.
+    Status : No test coverage
+    Missing: 
+        QuerySelector
+        QuerySelectorAll
 
 4.2.7 Mixin NonDocumentTypeChildNode
     Status: No test coverage
@@ -125,6 +129,7 @@ Source: https://dom.spec.whatwg.org
     Status: No test coverage
 
 4.2.9 Mixin Slottable
+    Status: No test coverage
 
 4.2.10 Old-style collections: NodeList and HTMLCollection
     Status: N/A
@@ -177,7 +182,6 @@ Source: https://dom.spec.whatwg.org
 4.14 Interface Comment
     Status: No test coverage
 
-
 ======================================================================
 5. RANGES
 ======================================================================
@@ -197,7 +201,6 @@ Source: https://dom.spec.whatwg.org
 5.5 Interface Range
     Status: No test coverage
 
-
 ======================================================================
 6. TRAVERSAL
 ======================================================================
@@ -214,7 +217,6 @@ Source: https://dom.spec.whatwg.org
 6.3 Interface NodeFilter
     Status: No test coverage
 
-
 ======================================================================
 7. SETS
 ======================================================================
@@ -222,7 +224,6 @@ Source: https://dom.spec.whatwg.org
 7.1 Interface DOMTokenList
     Status: No test coverage
     Note: Missing implementation for 'Value' setter, needs element/attr implementing first.
-
 
 ======================================================================
 8. XPATH
@@ -239,7 +240,6 @@ Source: https://dom.spec.whatwg.org
 
 8.4 Interface XPathEvaluator
     Status: Not supported
-
 
 ======================================================================
 9. XSLT

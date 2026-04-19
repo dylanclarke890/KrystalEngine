@@ -1,4 +1,5 @@
 ﻿#include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
@@ -6,6 +7,7 @@
 #include "Krystal.HTML/Node/DocumentType.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/NodeList/NodeList.hpp"
 #include "Krystal.Lib/Types/SmallList.hpp"
 #include <catch_all.hpp>
@@ -19,7 +21,7 @@ namespace Krys::Tests
     { t.GetElementById(elementId) } -> SameType<RefPtr<Element>>;
   };
 
-  TEST_CASE("NonElementParentNode", "[HTML][Mixins]")
+  TEST_CASE("Mixin::NonElementParentNode", "[HTML][Mixins]")
   {
     STATIC_REQUIRE(NonElementParentNodeMixin<Document>);
     STATIC_REQUIRE(NonElementParentNodeMixin<DocumentFragment>);
@@ -30,7 +32,7 @@ namespace Krys::Tests
     { t.CustomElementRegistry() } -> SameType<RefPtr<CustomElementRegistry>>;
   };
 
-  TEST_CASE("DocumentOrShadowRoot", "[HTML][Mixins]")
+  TEST_CASE("Mixin::DocumentOrShadowRoot", "[HTML][Mixins]")
   {
     STATIC_REQUIRE(DocumentOrShadowRootMixin<Document>);
     STATIC_REQUIRE(DocumentOrShadowRootMixin<ShadowRoot>);
@@ -56,7 +58,7 @@ namespace Krys::Tests
     { node.QuerySelectorAll(str) } -> SameType<ExceptionOr<Ref<NodeList>>>;
   };
 
-  TEST_CASE("ParentNode", "[HTML][Mixins]")
+  TEST_CASE("Mixin::ParentNode", "[HTML][Mixins]")
   {
     STATIC_REQUIRE(ParentNodeMixin<Element>);
     STATIC_REQUIRE(ParentNodeMixin<Document>);
@@ -71,7 +73,7 @@ namespace Krys::Tests
     { node.NextElementSibling() } -> SameType<RefPtr<Element>>;
   };
 
-  TEST_CASE("NonDocumentTypeChildNode", "[HTML][Mixins]")
+  TEST_CASE("Mixin::NonDocumentTypeChildNode", "[HTML][Mixins]")
   {
     STATIC_REQUIRE(NonDocumentTypeChildNodeMixin<Element>);
     STATIC_REQUIRE(NonDocumentTypeChildNodeMixin<CharacterData>);
@@ -85,10 +87,21 @@ namespace Krys::Tests
     { node.Remove() } -> SameType<ExceptionOr<void>>;
   };
 
-  TEST_CASE("ChildNode", "[HTML][Mixins]")
+  TEST_CASE("Mixin::ChildNode", "[HTML][Mixins]")
   {
     STATIC_REQUIRE(ChildNodeMixin<DocumentType>);
     STATIC_REQUIRE(ChildNodeMixin<Element>);
     STATIC_REQUIRE(ChildNodeMixin<CharacterData>);
+  }
+
+  template <typename T>
+  concept SlottableMixin = requires(T &node) {
+    { node.AssignedSlot() } -> SameType<RawPtr<HTMLSlotElement>>;
+  };
+
+  TEST_CASE("Mixin::Slottable", "[HTML][Mixins]")
+  {
+    STATIC_REQUIRE(SlottableMixin<Element>);
+    STATIC_REQUIRE(SlottableMixin<Text>);
   }
 }
