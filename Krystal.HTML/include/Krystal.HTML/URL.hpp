@@ -6,7 +6,7 @@ namespace Krys::HTML
 {
   struct URL
   {
-    // TODO(IMPL): Implement URL class.
+    // TODO(impl): Implement URL class.
     DOMString Href;
   };
 }

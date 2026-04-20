@@ -21,8 +21,7 @@ namespace Krys::Gfx::OpenGL
 
     static void SetName(Buffer &buffer, stringview debugName) noexcept
     {
-      // TODO: GetHandle should be Id().
-      SetName(GL_BUFFER, buffer.GetHandle(), debugName);
+      SetName(GL_BUFFER, buffer.Id(), debugName);
     }
 
     static void SetName(Mesh &mesh, stringview debugName) noexcept

@@ -75,14 +75,12 @@ namespace Krys::UI
   {
     if (measureFunc == nullptr)
     {
-      // TODO: t18095186 Move nodeType to opt-in function and mark appropriate places in Litho
       SetNodeType(NodeType::Default);
     }
     else
     {
       assert(_children.empty()
              && "Cannot set measure function: Nodes with measure functions cannot have children.");
-      // TODO: t18095186 Move nodeType to opt-in function and mark appropriate places in Litho
       SetNodeType(NodeType::Text);
     }
 

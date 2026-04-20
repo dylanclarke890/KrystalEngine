@@ -18,7 +18,7 @@ namespace Krys::HTML
 
   constexpr KRYS_NODISCARD ContentType DetermineContentType(const string &mimeType) noexcept
   {
-    // TODO: should be a caseless comparison.
+    // TODO(fix): should be a caseless comparison.
 
     if (mimeType == "text/css")
     {

@@ -70,7 +70,7 @@ namespace Krys::Serialisation
   };
 
   /// @brief Base class for all archives.
-  class BaseArchive : NonCopyMovable<BaseArchive> // TODO: should we allow moving?
+  class BaseArchive : NonCopyMovable<BaseArchive> // TODO(check): should we allow moving?
   {
   protected:
     BaseArchive() noexcept = default;

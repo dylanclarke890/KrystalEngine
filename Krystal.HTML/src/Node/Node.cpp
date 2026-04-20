@@ -101,14 +101,14 @@ namespace Krys::HTML
   Ref<Node> Node::CloneNode(bool subtree) const noexcept
   {
     (void)subtree;
-    // TODO(IMPL)
+    // TODO(impl)
     return ShareRef<Node>(*const_cast<Node *>(this));
   }
 
   bool Node::IsEqualNode(RawPtr<const Node> otherNode) const noexcept
   {
     (void)otherNode;
-    // TODO(IMPL)
+    // TODO(impl)
     return false;
   }
 
@@ -120,7 +120,7 @@ namespace Krys::HTML
   DocumentPosition Node::CompareDocumentPosition(Node &other) const noexcept
   {
     (void)other;
-    // TODO(IMPL)
+    // TODO(impl)
     return DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC;
   }
 
@@ -203,7 +203,7 @@ namespace Krys::HTML
     assert(!IsDocumentNode());
     if (_treeScope != &newTreeScope)
     {
-      // TODO(IMPL):
+      // TODO(impl):
       // Ref<TreeScope> oldTreeScope = CreateRef<TreeScope>(*_treeScope);
       //  MoveTreeToNewScope(*this, oldTreeScope, newTreeScope);
     }

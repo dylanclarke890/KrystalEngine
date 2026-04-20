@@ -204,7 +204,7 @@ namespace Krys::Gfx::OpenGL
       attributes.push_back(8);
     }
 
-    // TODO: this should be configurable
+    // TODO(feat): this should be configurable
     bool srgbCapable = true;
     if (srgbCapable && OpenGL::IsWGLExtensionSupported("WGL_ARB_framebuffer_sRGB"))
     {
@@ -212,13 +212,13 @@ namespace Krys::Gfx::OpenGL
       attributes.push_back(GL_TRUE);
     }
 
-    // TODO: this should be configurable
+    // TODO(feat): this should be configurable
     bool multisampleCapable = true;
     if (multisampleCapable && OpenGL::IsWGLExtensionSupported("WGL_ARB_multisample"))
     {
       attributes.push_back(WGL_SAMPLE_BUFFERS_ARB);
       attributes.push_back(1); // Enable multisampling
-      // TODO: this should be configurable
+      // TODO(feat): this should be configurable
       attributes.push_back(WGL_SAMPLES_ARB);
       attributes.push_back(4); // 4x MSAA
     }
@@ -256,7 +256,7 @@ namespace Krys::Gfx::OpenGL
       attributes.push_back(WGL_CONTEXT_CORE_PROFILE_BIT_ARB);
     }
 
-    // TODO: this should be configurable
+    // TODO(feat): this should be configurable
     bool disableErrorChecking = false;
     if (disableErrorChecking && OpenGL::IsWGLExtensionSupported("WGL_ARB_create_context_no_error"))
     {

@@ -64,7 +64,7 @@ namespace Krys::Tests
        (UnitTest {
          .Input = U"&co", .AppendEOF = true, .Output = {CreateCharacterToken(U"&co"), CreateEOFToken()}}))
 
-  // TODO: test cases for when character references are consumed as part of attributes
+  // TODO(test): test cases for when character references are consumed as part of attributes
 
 #pragma endregion
 

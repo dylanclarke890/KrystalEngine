@@ -17,7 +17,7 @@ namespace Krys::Gfx
     Font_SDF,
     Font_SDF_Outline,
     Font_MSDF,
-    Font_MSDF_Outline, // TODO: check if outlines are suitable for MSDF
+    Font_MSDF_Outline, // TODO(check): are outlines are suitable for MSDF?
     Font_MTSDF,
     Font_MTSDF_Outline,
   };

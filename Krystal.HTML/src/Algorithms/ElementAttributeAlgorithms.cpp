@@ -12,7 +12,7 @@ namespace Krys::HTML
                                                     DOMStringView oldValue, DOMStringView value,
                                                     DOMStringAtom namespaceURI) noexcept
   {
-    // TODO(IMPL): Implement this method
+    // TODO(impl): Implement this method
   }
 
   void ElementAttributeAlgorithms::HandleAttributeChanges(Attr &attribute, Element &element,
@@ -22,7 +22,7 @@ namespace Krys::HTML
     TreeMutationDispatcher::QueueMutationRecord(u8"attributes", element, attribute.LocalName(),
                                                 attribute.NamespaceURI(), oldValue, {}, {}, nullptr, nullptr);
 
-    // TODO(IMPL): If element is custom, then enqueue a custom element callback reaction with element,
+    // TODO(impl): If element is custom, then enqueue a custom element callback reaction with element,
     // callback name "attributeChangedCallback", and « attribute’s local name, oldValue, newValue, attribute’s
     // namespace ».
 
@@ -84,7 +84,7 @@ namespace Krys::HTML
   RawPtr<Attr> ElementAttributeAlgorithms::GetAttributeByName(DOMStringAtom qualifiedName,
                                                               const Element &element) noexcept
   {
-    // TODO(IMPL): If element is in the HTML namespace and its node document is an HTML document, then set
+    // TODO(impl): If element is in the HTML namespace and its node document is an HTML document, then set
     // qualifiedName to qualifiedName in ASCII lowercase.
 
     auto it = std::find_if(element._attributes.begin(), element._attributes.end(),
@@ -156,7 +156,7 @@ namespace Krys::HTML
     RawPtr<Attr> attribute = GetAttributeByNamespace(namespaceURI, localName, element);
     if (attribute == nullptr)
     {
-      // TODO(IMPL): create an attribute whose namespace is namespace, namespace prefix is prefix, local name
+      // TODO(impl): create an attribute whose namespace is namespace, namespace prefix is prefix, local name
       // is localName, value is value, and node document is element’s node document, then append this
       // attribute to element
       return;

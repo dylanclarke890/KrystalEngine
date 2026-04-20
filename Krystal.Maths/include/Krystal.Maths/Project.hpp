@@ -45,7 +45,7 @@ namespace Krys::Maths
     return Vector<T, 3>(tmp);
   }
 
-  // TODO: use policy based design to select between ZO and NO at compile time
+  // TODO(fix): use policy based design to select between ZO and NO at compile time
   /// Map the specified object coordinates (obj.x, obj.y, obj.z) into window coordinates.
   template <FloatingPoint T, Number U>
   KRYS_NODISCARD constexpr Vector<T, 3> Project(const Vector<T, 3> &obj, const Matrix<T, 4, 4> &model,

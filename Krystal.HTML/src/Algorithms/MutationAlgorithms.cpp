@@ -823,7 +823,7 @@ namespace Krys::HTML
       if (auto *shadowRoot = element->ShadowRoot(); shadowRoot && shadowRoot->Clonable())
       {
         assert(elementCopy->ShadowRoot() && !elementCopy->ShadowRoot()->Clonable());
-        // TODO(IMPL):
+        // TODO(impl):
       }
     }
 
@@ -837,29 +837,29 @@ namespace Krys::HTML
 
     if (auto *element = DynamicDowncast<Element>(node))
     {
-      // TODO(IMPL):
+      // TODO(impl):
     }
     else
     {
       if (node.IsDocumentNode())
       {
-        // TODO(IMPL):
+        // TODO(impl):
       }
       else if (node.IsDocumentTypeNode())
       {
-        // TODO(IMPL):
+        // TODO(impl):
       }
       else if (node.IsAttributeNode())
       {
-        // TODO(IMPL):
+        // TODO(impl):
       }
       else if (node.IsTextNode() || node.IsCommentNode())
       {
-        // TODO(IMPL):
+        // TODO(impl):
       }
       else if (node.IsProcessingInstructionNode())
       {
-        // TODO(IMPL):
+        // TODO(impl):
       }
     }
 

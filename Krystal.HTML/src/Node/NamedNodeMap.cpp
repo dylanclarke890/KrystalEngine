@@ -5,7 +5,7 @@
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 
-// TODO(IMPL): Implement this class
+// TODO(impl): Implement this class
 namespace Krys::HTML
 {
   size_t NamedNodeMap::Length() noexcept

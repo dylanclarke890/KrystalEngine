@@ -56,7 +56,7 @@ namespace Krys::HTML
     KRYS_NODISCARD DOMString TagName() const noexcept
     {
       auto qualifiedName = _qualifiedName.Name();
-      // TODO(IMPL)
+      // TODO(impl):
       // If this is in the HTML namespace and its node document is an HTML document, then set qualifiedName to
       // qualifiedName in ASCII uppercase.
 
@@ -101,7 +101,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD RawPtr<CustomElementRegistry> CustomElementRegistry() const noexcept
     {
-      // TODO(IMPL): Implement custom element registry and return it here.
+      // TODO(impl): Implement custom element registry and return it here.
       return nullptr;
     }
 

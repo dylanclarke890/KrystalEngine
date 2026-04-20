@@ -37,7 +37,7 @@ namespace Krys::Gfx::OpenGL
 
     void Shutdown() noexcept override
     {
-      // TODO: Destroy all render targets
+      // TODO(fix): Destroy all render targets
       // The issue isn't destroying the render targets themselves as they'll be deallocated on destruction,
       // but ensuring that the images and image views are cleaned up correctly, otherwise we're leaking GPU
       // resources.
@@ -45,8 +45,8 @@ namespace Krys::Gfx::OpenGL
 
     KRYS_NODISCARD RenderTargetHandle Create(const RenderTargetDesc &desc) override
     {
-      // TODO: support for cubemaps and texture arrays as attachments
-      // TODO!: support for multi-sampling
+      // TODO(feat): support for cubemaps and texture arrays as attachments
+      // TODO(feat): support for multi-sampling
       assert(desc.Width > 0 && desc.Height > 0 && "Invalid width and height.");
       assert(desc.Attachments.size() > 0 && "Must specify at least one attachment.");
 

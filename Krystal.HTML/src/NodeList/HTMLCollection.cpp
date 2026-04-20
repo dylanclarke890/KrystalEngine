@@ -52,7 +52,7 @@ namespace Krys::HTML
       BuildCollection();
     }
 
-    // TODO(IMPL): Implement this method
+    // TODO(impl): Implement this method
     return nullptr;
   }
 
@@ -63,7 +63,7 @@ namespace Krys::HTML
       BuildCollection();
     }
 
-    // TODO(IMPL): Implement this method
+    // TODO(impl): Implement this method
     return nullptr;
   }
 

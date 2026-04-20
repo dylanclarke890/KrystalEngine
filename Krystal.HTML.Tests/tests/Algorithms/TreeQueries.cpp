@@ -568,7 +568,7 @@ namespace Krys::Tests
     REQUIRE(&TreeQueries::ShadowIncludingRoot(*parent) == doc.get());
     REQUIRE(&TreeQueries::ShadowIncludingRoot(*child) == doc.get());
 
-    // TODO(IMPL): Test with ShadowRoot when implemented
+    // TODO(impl): Test with ShadowRoot when implemented
 
     auto removeResult = parent->RemoveChild(*child);
     REQUIRE_FALSE(removeResult.HasException());

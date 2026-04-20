@@ -16,7 +16,7 @@ namespace Krys::HTML
   class MutationRecord : public RefCounted<MutationRecord>
   {
   private:
-    // TODO(FIX): do this better
+    // TODO(fix): do this better
     static StringAtom _emptyStringAtom;
 
   public:

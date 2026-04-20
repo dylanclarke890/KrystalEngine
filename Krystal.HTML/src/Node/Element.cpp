@@ -103,13 +103,13 @@ namespace Krys::HTML
       return Exception {ExceptionCode::InvalidCharacterError};
     }
 
-    // TODO(IMPL): If this is in the HTML namespace and its node document is an HTML document, then set
+    // TODO(impl): If this is in the HTML namespace and its node document is an HTML document, then set
     // qualifiedName to qualifiedName in ASCII lowercase.
 
-    // TODO(IMPL): Let verifiedValue be the result of calling get trusted type compliant attribute value with
-    // qualifiedName, null, this, and value. [TRUSTED-TYPES]
+    // SPEC-VIOLATION(TRUSTED-TYPES): Let verifiedValue be the result of calling get trusted type compliant attribute value with
+    // qualifiedName, null, this, and value.
 
-    // TODO(IMPL): Implement this method
+    // TODO(impl): Implement this method
 
     return {};
   }
@@ -147,13 +147,13 @@ namespace Krys::HTML
 
   bool Element::ToggleAttribute(DOMStringAtom qualifiedName, const Maybe<bool> &force) noexcept
   {
-    // TODO(IMPL): Implement this method
+    // TODO(impl): Implement this method
     return false;
   }
 
   bool Element::HasAttribute(DOMStringAtom qualifiedName) const noexcept
   {
-    // TODO(IMPL): If this is in the HTML namespace and its node document is an HTML document, then set
+    // TODO(impl): If this is in the HTML namespace and its node document is an HTML document, then set
     // qualifiedName to qualifiedName in ASCII lowercase.
 
     return std::ranges::any_of(_attributes,
@@ -174,7 +174,7 @@ namespace Krys::HTML
 
   ExceptionOr<Ref<Attr>> Element::RemoveAttributeNode(Attr &attribute) noexcept
   {
-    // TODO(IMPL): Implement this method
+    // TODO(impl): Implement this method
     return Exception {ExceptionCode::NotSupportedError};
   }
 
@@ -184,7 +184,7 @@ namespace Krys::HTML
 
   DOMString Element::NodeName() const noexcept
   {
-    // TODO(IMPL): Return the qualified name
+    // TODO(impl): Return the qualified name
     return u8"element";
   }
 

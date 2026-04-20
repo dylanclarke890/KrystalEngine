@@ -142,7 +142,7 @@ namespace Krys::HTML
 
   RefPtr<Element> DocumentFragment::GetElementById(const DOMStringAtom &id) const noexcept
   {
-    // TODO(IMPL): looking for an element with a matching id (obviously)
+    // TODO(impl): looking for an element with a matching id (obviously)
     return RefPtr<Element>();
   }
 

@@ -97,7 +97,7 @@ namespace
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType,
     const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData)
   {
-    // TODO: use the engine logger
+    // TODO(fix): use the engine logger
     std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
 
     return VK_FALSE;
@@ -211,15 +211,15 @@ namespace Krys::Gfx::Vulkan
 
     VkApplicationInfo application {.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
                                    .pNext = nullptr,
-                                   // TODO: get application name
+                                   // TODO(feat): get application name
                                    .pApplicationName = "Krystal Gfx Vulkan",
-                                   // TODO: get application version
+                                   // TODO(feat): get application version
                                    .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
-                                   // TODO: get engine name
+                                   // TODO(feat): get engine name
                                    .pEngineName = "Krystal Engine",
-                                   // TODO: get engine version
+                                   // TODO(feat): get engine version
                                    .engineVersion = VK_MAKE_VERSION(1, 0, 0),
-                                   // TODO: set api version
+                                   // TODO(feat): set api version
                                    .apiVersion = VK_API_VERSION_1_0};
 
     if (EnableValidationLayers && !AreValidationLayersAvailable())

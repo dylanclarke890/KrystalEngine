@@ -231,7 +231,7 @@ namespace Krys::Platform
 
     void Win32Window::RegisterRawInput() const
     {
-      // TODO: account for dpi?
+      // TODO(fix): account for dpi?
       RAWINPUTDEVICE rid {};
       rid.usUsagePage = HID_USAGE_PAGE_GENERIC;
       rid.usUsage = HID_USAGE_GENERIC_MOUSE;

@@ -35,7 +35,7 @@ namespace Krys::Gfx::OpenGL
 
   void FontRegistry::Shutdown() noexcept
   {
-    // TODO: Unload all fonts and font families
+    // TODO(fix): Unload all fonts and font families
   }
 
   FontFamilyHandle FontRegistry::Register(const utf8_string &name, const IO::Path &path) noexcept

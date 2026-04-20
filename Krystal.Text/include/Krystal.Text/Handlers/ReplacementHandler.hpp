@@ -490,7 +490,7 @@ namespace Krys::Text::Handlers
 
         const Span<const TInputCodeUnit> replacementRange(replacement, replacementSize);
         decode_state_t<TEncoding> state = ::Krys::Text::CopyDecodeStateWith(encoding, result.State);
-        // TODO: We copy the above state but it is not actually used in the decode operation below?
+        // TODO(fix): We copy the above state but it is not actually used in the decode operation below?
         ::Krys::Text::Handlers::PassThroughHandler handler {};
         auto decodingResult =
           encoding.DecodeOne(replacementRange, std::move(result.Output), handler, result.State);

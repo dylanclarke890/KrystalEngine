@@ -57,7 +57,7 @@ namespace Krys::HTML
 
   void TreeMutationDispatcher::Cloned(Node &node, Node &copy, bool subtree) noexcept
   {
-    // TODO(IMPL): Run any cloning steps defined for node in other applicable specifications and pass node,
+    // TODO(impl): Run any cloning steps defined for node in other applicable specifications and pass node,
     // copy, and subtree as parameters.
   }
 

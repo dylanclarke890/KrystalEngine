@@ -301,7 +301,7 @@ namespace Krys::UI
 
   void NodeSetMeasureFunc(NodeRef node, MeasureFunc measureFunc)
   {
-    node->SetMeasureFunc(measureFunc); // TODO: should we mark dirty?
+    node->SetMeasureFunc(measureFunc); // TODO(fix): should we mark dirty?
   }
 
   bool NodeHasMeasureFunc(NodeConstRef node)
@@ -311,7 +311,7 @@ namespace Krys::UI
 
   void NodeSetBaselineFunc(NodeRef node, BaselineFunc baselineFunc)
   {
-    node->SetBaselineFunc(baselineFunc); // TODO: should we mark dirty?
+    node->SetBaselineFunc(baselineFunc); // TODO(fix): should we mark dirty?
   }
 
   bool NodeHasBaselineFunc(NodeConstRef node)

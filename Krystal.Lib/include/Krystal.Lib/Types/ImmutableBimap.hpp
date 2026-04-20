@@ -16,7 +16,7 @@ namespace Krys
   template <typename T>
   concept ImmutableBimapItem = EqualityComparable<T> && GreaterThanComparable<T>;
 
-  /// TODO: this is a bit of a naive implementation in terms of performance.
+  /// TODO(perf): this is a bit of a naive implementation in terms of performance.
 
   /// @brief Fixed-size bi-directional flat map which is immutable after creation.
   /// @tparam N number of items/entrys in dictionary

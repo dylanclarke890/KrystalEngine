@@ -766,7 +766,7 @@ namespace
 
   static GL gl = {nullptr};
 
-  // TODO: this is only for windows, need to implement for other platforms
+  // TODO(feat): this is only for windows, need to implement for other platforms
   static void *GetFunctionAddress(const char *name, const char *fallbackModule = "opengl32.dll") noexcept
   {
     void *p = (void *)::wglGetProcAddress(name);
@@ -1583,7 +1583,7 @@ namespace Krys::Gfx::OpenGL
 
   bool IsGLExtensionSupported(const char *extension) noexcept
   {
-    // TODO: Implement extension checking
+    // TODO(feat): Implement extension checking
     return false;
   }
 }

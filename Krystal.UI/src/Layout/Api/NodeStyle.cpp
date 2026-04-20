@@ -9,7 +9,7 @@ namespace Krys::UI
     if (dstNode->GetStyle() != srcNode->GetStyle())
     {
       dstNode->SetStyle(srcNode->GetStyle());
-      // TODO: Optimize by only marking dirty if properties that affect layout/style have changed.
+      // TODO(perf): Optimize by only marking dirty if properties that affect layout/style have changed.
       dstNode->MarkLayoutDirtyAndPropagate();
       dstNode->MarkStyleDirtyAndPropagate();
     }

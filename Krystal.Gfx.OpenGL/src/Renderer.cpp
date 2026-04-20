@@ -383,7 +383,7 @@ namespace Krys::Gfx::OpenGL
         const auto &glyph = characters.find(c);
         if (glyph == characters.end())
         {
-          // TODO: this check is better than before but we should default to using a missing glyph character
+          // TODO(fix): this check is better than before but we should default to using a missing glyph character
           //KRYS_WARN("Font '{}' does not contain glyph for character '{}'", font.Family().Id, c);
           continue;
         }
