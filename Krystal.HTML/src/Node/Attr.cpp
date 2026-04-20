@@ -8,6 +8,12 @@
 
 namespace Krys::HTML
 {
+  Attr::Attr(Document &document, const QualifiedName &qualifiedName, DOMString &&value) noexcept
+      : Node(document, NodeType::ATTRIBUTE_NODE, NodeFlag::None), _name {qualifiedName},
+        _value {Krys::Move(value)}
+  {
+  }
+
   void Attr::SetExistingAttributeValue(Attr &attribute, DOMString &&value) noexcept
   {
     RefPtr<Element> element = attribute._ownerElement ? attribute._ownerElement.lock() : nullptr;

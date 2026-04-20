@@ -167,14 +167,14 @@ namespace Krys::HTML
       return SerializeSteps();
     }
 
-    void Value(const DOMString &value) noexcept;
+    void Value(DOMString &&value) noexcept;
 
   private:
     /// @see https://dom.spec.whatwg.org/#concept-domtokenlist-validation
     KRYS_NODISCARD ExceptionOr<bool> ValidationSteps(DOMStringView token) const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-dtl-update
-    KRYS_NODISCARD void UpdateSteps() noexcept;
+    void UpdateSteps() noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-dtl-serialize
     KRYS_NODISCARD DOMString SerializeSteps() const noexcept;

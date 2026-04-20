@@ -15,10 +15,6 @@ namespace Krys::HTML
 
   class MutationRecord : public RefCounted<MutationRecord>
   {
-  private:
-    // TODO(fix): do this better
-    static StringAtom _emptyStringAtom;
-
   public:
     constexpr virtual ~MutationRecord() noexcept = default;
 
@@ -40,14 +36,14 @@ namespace Krys::HTML
       return nullptr;
     }
 
-    KRYS_NODISCARD virtual const StringAtom &AttributeName() const noexcept
+    KRYS_NODISCARD virtual DOMStringAtom AttributeName() const noexcept
     {
-      return _emptyStringAtom;
+      return DOMStringAtom::Empty();
     }
 
-    KRYS_NODISCARD virtual const StringAtom &AttributeNamespace() const noexcept
+    KRYS_NODISCARD virtual DOMStringAtom AttributeNamespace() const noexcept
     {
-      return _emptyStringAtom;
+      return DOMStringAtom::Empty();
     }
 
     KRYS_NODISCARD virtual DOMString OldValue() const noexcept

@@ -156,13 +156,13 @@ namespace Krys::HTML
     RawPtr<Attr> attribute = GetAttributeByNamespace(namespaceURI, localName, element);
     if (attribute == nullptr)
     {
-      // TODO(impl): create an attribute whose namespace is namespace, namespace prefix is prefix, local name
-      // is localName, value is value, and node document is element’s node document, then append this
-      // attribute to element
-      return;
+      auto attr = CreateRef<Attr>(element.NodeDocument(), QualifiedName {localName, prefix, namespaceURI}, Krys::Move(value));
+      Append(*attr, element);
     }
-
-    Change(*attribute, Krys::Move(value));
+    else
+    {
+      Change(*attribute, Krys::Move(value));
+    }
   }
 
   RefPtr<Attr> ElementAttributeAlgorithms::RemoveAttributeByName(DOMStringAtom qualifiedName,

@@ -222,7 +222,7 @@ namespace Krys::Text
     auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
     return (ch >= '!' && ch <= '@') || (ch >= '[' && ch <= '`') || (ch >= '{' && ch <= '~');
   }
-  
+
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr bool IsASCIINonWhitespaceControl(TChar character) noexcept
   {
@@ -262,5 +262,27 @@ namespace Krys::Text
   {
     uint8 nibble = value >> 4;
     return nibble + (nibble < 10 ? '0' : 'a' - 10);
+  }
+
+  KRYS_NODISCARD inline string ToASCIILowercase(stringview input) noexcept
+  {
+    string result;
+    for (char codePoint : input)
+    {
+      result.push_back(ToASCIILower(codePoint));
+    }
+
+    return result;
+  }
+
+  KRYS_NODISCARD inline utf8_string ToASCIILowercase(utf8_stringview input) noexcept
+  {
+    utf8_string result;
+    for (char8 codePoint : input)
+    {
+      result.push_back(ToASCIILower(codePoint));
+    }
+
+    return result;
   }
 }

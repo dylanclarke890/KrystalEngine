@@ -64,9 +64,10 @@ namespace Krys::HTML
     return !_attributes.empty();
   }
 
+  // TODO(impl): Implement this method
   // NamedNodeMap &Element::Attributes() const noexcept
   //{
-  // }
+  //}
 
   List<DOMString> Element::GetAttributeNames() const noexcept
   {
@@ -106,10 +107,22 @@ namespace Krys::HTML
     // TODO(impl): If this is in the HTML namespace and its node document is an HTML document, then set
     // qualifiedName to qualifiedName in ASCII lowercase.
 
-    // SPEC-VIOLATION(TRUSTED-TYPES): Let verifiedValue be the result of calling get trusted type compliant attribute value with
-    // qualifiedName, null, this, and value.
+    // SPEC-VIOLATION(TRUSTED-TYPES): Let verifiedValue be the result of calling get trusted type compliant
+    // attribute value with qualifiedName, null, this, and value.
 
-    // TODO(impl): Implement this method
+    auto it = std::find_if(_attributes.begin(), _attributes.end(),
+                           [&](const Ref<Attr> &attr) { return attr->Name() == qualifiedName; });
+    if (it != _attributes.end())
+    {
+      ElementAttributeAlgorithms::Change(**it, Krys::Move(value));
+    }
+    else
+    {
+      auto attr = CreateRef<Attr>(NodeDocument(),
+                                  QualifiedName {qualifiedName, DOMStringAtom::Null(), DOMStringAtom::Null()},
+                                  Krys::Move(value));
+      ElementAttributeAlgorithms::Append(*attr, *this);
+    }
 
     return {};
   }
@@ -145,10 +158,39 @@ namespace Krys::HTML
     ElementAttributeAlgorithms::RemoveAttributeByNamespace(namespaceURI, localName, *this);
   }
 
-  bool Element::ToggleAttribute(DOMStringAtom qualifiedName, const Maybe<bool> &force) noexcept
+  ExceptionOr<bool> Element::ToggleAttribute(DOMStringAtom qualifiedName, const Maybe<bool> &force) noexcept
   {
-    // TODO(impl): Implement this method
-    return false;
+    if (!NameValidation::IsValidAttributeLocalName(qualifiedName.View()))
+    {
+      return Exception {ExceptionCode::InvalidCharacterError};
+    }
+
+    // TODO(impl): If this is in the HTML namespace and its node document is an HTML document, then set
+    // qualifiedName to qualifiedName in ASCII lowercase.
+
+    auto it = std::find_if(_attributes.begin(), _attributes.end(),
+                           [&](const Ref<Attr> &attr) { return attr->Name() == qualifiedName; });
+
+    if (it == _attributes.end())
+    {
+      if (!force.has_value() || force.value())
+      {
+        auto attr = CreateRef<Attr>(
+          NodeDocument(), QualifiedName {qualifiedName, DOMStringAtom::Null(), DOMStringAtom::Null()}, u8"");
+        ElementAttributeAlgorithms::Append(*attr, *this);
+        return true;
+      }
+
+      return false;
+    }
+
+    if (!force.has_value() || !force.value())
+    {
+      ElementAttributeAlgorithms::Remove(**it);
+      return false;
+    }
+
+    return true;
   }
 
   bool Element::HasAttribute(DOMStringAtom qualifiedName) const noexcept
@@ -156,8 +198,7 @@ namespace Krys::HTML
     // TODO(impl): If this is in the HTML namespace and its node document is an HTML document, then set
     // qualifiedName to qualifiedName in ASCII lowercase.
 
-    return std::ranges::any_of(_attributes,
-                               [&](const Ref<Attr> &attr) { return attr->Name() == qualifiedName; });
+    return std::ranges::any_of(_attributes, [&](const Ref<Attr> &a) { return a->Name() == qualifiedName; });
   }
 
   bool Element::HasAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) const noexcept
@@ -167,15 +208,40 @@ namespace Krys::HTML
       namespaceURI = DOMStringAtom::Null();
     }
 
-    return std::ranges::any_of(
-      _attributes, [&](const Ref<Attr> &attr)
-      { return attr->NamespaceURI() == namespaceURI && attr->LocalName() == localName; });
+    return std::ranges::any_of(_attributes, [&](const Ref<Attr> &a)
+                               { return a->NamespaceURI() == namespaceURI && a->LocalName() == localName; });
   }
 
-  ExceptionOr<Ref<Attr>> Element::RemoveAttributeNode(Attr &attribute) noexcept
+  RawPtr<Attr> Element::GetAttributeNode(DOMStringAtom qualifiedName) const noexcept
   {
-    // TODO(impl): Implement this method
-    return Exception {ExceptionCode::NotSupportedError};
+    return ElementAttributeAlgorithms::GetAttributeByName(qualifiedName, *this);
+  }
+
+  RawPtr<Attr> Element::GetAttributeNodeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) const noexcept
+  {
+    return ElementAttributeAlgorithms::GetAttributeByNamespace(namespaceURI, localName, *this);
+  }
+
+  ExceptionOr<RefPtr<Attr>> Element::SetAttributeNode(Attr &attr) noexcept
+  {
+    return ElementAttributeAlgorithms::SetAttribute(attr, *this);
+  }
+
+  ExceptionOr<RefPtr<Attr>> Element::SetAttributeNodeNS(Attr &attr) noexcept
+  {
+    return ElementAttributeAlgorithms::SetAttribute(attr, *this);
+  }
+
+  ExceptionOr<Ref<Attr>> Element::RemoveAttributeNode(Attr &attr) noexcept
+  {
+    if (!std::ranges::any_of(_attributes, [&](const Ref<Attr> &a) { return a.get() == &attr; }))
+    {
+      return Exception {ExceptionCode::NotFoundError};
+    }
+
+    ElementAttributeAlgorithms::Remove(attr);
+
+    return ShareRef(attr);
   }
 
 #pragma endregion
@@ -184,8 +250,7 @@ namespace Krys::HTML
 
   DOMString Element::NodeName() const noexcept
   {
-    // TODO(impl): Return the qualified name
-    return u8"element";
+    return _qualifiedName.Name();
   }
 
   DOMString Element::TextContent() const noexcept

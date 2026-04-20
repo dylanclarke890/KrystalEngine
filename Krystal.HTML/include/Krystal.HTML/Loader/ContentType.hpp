@@ -15,17 +15,22 @@ namespace Krys::HTML
     HTML,
     CSS
   };
+}
 
-  constexpr KRYS_NODISCARD ContentType DetermineContentType(const string &mimeType) noexcept
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::ContentType, 3u)
+
+namespace Krys::HTML
+{
+  KRYS_NODISCARD inline ContentType DetermineContentType(const string &mimeType) noexcept
   {
-    // TODO(fix): should be a caseless comparison.
+    string lowerMimeType = Text::ToASCIILowercase(mimeType);
 
-    if (mimeType == "text/css")
+    if (lowerMimeType == "text/css")
     {
       return ContentType::CSS;
     }
 
-    if (mimeType == "text/html")
+    if (lowerMimeType == "text/html")
     {
       return ContentType::HTML;
     }
@@ -33,5 +38,3 @@ namespace Krys::HTML
     return ContentType::PlainText;
   }
 }
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::ContentType, 3u)

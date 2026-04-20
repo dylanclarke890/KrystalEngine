@@ -1,5 +1,7 @@
 ﻿#include "Krystal.HTML/DOMTokenList.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/ElementAttributeAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/StringAlgorithms.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
@@ -16,10 +18,9 @@ namespace Krys::HTML
   {
   }
 
-  void DOMTokenList::Value(const DOMString &value) noexcept
+  void DOMTokenList::Value(DOMString &&value) noexcept
   {
-    // TODO(impl): the value setter steps are to set an attribute value for this’s element using this’s
-    // attribute name and the given value.
+    ElementAttributeAlgorithms::SetAttributeValue(*_element, _attributeName, Krys::Move(value));
   }
 
   ExceptionOr<bool> DOMTokenList::ValidationSteps(DOMStringView token) const noexcept
@@ -29,8 +30,8 @@ namespace Krys::HTML
       return Exception {ExceptionCode::TypeError};
     }
 
-    // TODO(fix): Let lowercaseToken be token, in ASCII lowercase.
+    auto lowercaseToken = Krys::Text::ToASCIILowercase(token);
 
-    return _isSupportedToken(_element->NodeDocument(), token);
+    return _isSupportedToken(_element->NodeDocument(), lowercaseToken);
   }
 }

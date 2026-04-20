@@ -82,16 +82,16 @@ namespace Krys::HTML
                                      DOMString &&value) noexcept;
     void RemoveAttribute(DOMStringAtom qualifiedName) noexcept;
     void RemoveAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) noexcept;
-    bool ToggleAttribute(DOMStringAtom qualifiedName, const Maybe<bool> &force) noexcept;
+    ExceptionOr<bool> ToggleAttribute(DOMStringAtom qualifiedName, const Maybe<bool> &force) noexcept;
     KRYS_NODISCARD bool HasAttribute(DOMStringAtom qualifiedName) const noexcept;
     KRYS_NODISCARD bool HasAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) const noexcept;
 
     KRYS_NODISCARD RawPtr<Attr> GetAttributeNode(DOMStringAtom qualifiedName) const noexcept;
     KRYS_NODISCARD RawPtr<Attr> GetAttributeNodeNS(DOMStringAtom namespaceURI,
                                                    DOMStringAtom localName) const noexcept;
-    RawPtr<Attr> SetAttributeNode(Attr &attribute) const noexcept;
-    RawPtr<Attr> SetAttributeNodeNS(Attr &attribute) const noexcept;
-    ExceptionOr<Ref<Attr>> RemoveAttributeNode(Attr &attribute) noexcept;
+    ExceptionOr<RefPtr<Attr>> SetAttributeNode(Attr &attr) noexcept;
+    ExceptionOr<RefPtr<Attr>> SetAttributeNodeNS(Attr &attr) noexcept;
+    ExceptionOr<Ref<Attr>> RemoveAttributeNode(Attr &attr) noexcept;
 
     Ref<ShadowRoot> AttachShadow(const ShadowRootInit &init) noexcept;
     KRYS_NODISCARD RawPtr<ShadowRoot> ShadowRoot() const noexcept

@@ -7,6 +7,7 @@
 
 namespace Krys::HTML
 {
+  class Document;
   class Element;
   class ElementAttributeAlgorithms;
 
@@ -22,6 +23,8 @@ namespace Krys::HTML
     DOMString _value;
 
   public:
+    Attr(Document &document, const QualifiedName &qualifiedName, DOMString &&value) noexcept;
+
 #pragma region Attr
 
     KRYS_NODISCARD DOMStringAtom NamespaceURI() const noexcept
