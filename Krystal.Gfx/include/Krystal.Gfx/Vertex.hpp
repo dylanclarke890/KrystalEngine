@@ -2,20 +2,14 @@
 
 #include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/Enums/VertexAttributeType.hpp"
+#include "Krystal.Gfx/Enums/VertexInputRate.hpp"
 #include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
 namespace Krys::Gfx
 {
-  // TODO: move to enums directory
-  enum class VertexInputRate
-  {
-    PerVertex,
-    PerInstance
-  };
-
   struct IsNormalized : public StronglyTypedBool<IsNormalized>
   {
     using StronglyTypedBool<IsNormalized>::StronglyTypedBool;

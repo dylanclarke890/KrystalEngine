@@ -33,6 +33,7 @@
     <ClInclude Include="include\Krystal.Gfx\Enums\PixelFormat.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Enums\PrimitiveType.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Enums\VertexAttributeType.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Enums\VertexInputRate.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Enums\WrapMode.hpp" />
     <ClInclude Include="include\Krystal.Gfx\FontAtlasLoader.hpp">
       <SubType>
