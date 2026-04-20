@@ -29,7 +29,7 @@ namespace Krys::Tests
 
   TEST_CASE("StringAtom - empty strings compare equal", "[StringAtom]")
   {
-    StringAtom str1;
+    StringAtom str1 = StringAtom::Empty();
     StringAtom str2 = u8"";
     REQUIRE(str1 == str2);
   }

@@ -3,6 +3,7 @@
 #include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
+#include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 
@@ -40,7 +41,7 @@ namespace Krys::HTML
       return nullptr;
     }
 
-    RawPtr<ShadowRoot> shadow = parent->GetShadowRoot();
+    RawPtr<ShadowRoot> shadow = parent->ShadowRoot();
 
     if (shadow == nullptr || (open && shadow->Mode() != ShadowRootMode::Open))
     {

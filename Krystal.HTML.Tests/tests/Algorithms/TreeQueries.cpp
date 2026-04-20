@@ -1,6 +1,7 @@
 ﻿#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML.Tests/TestNode.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"

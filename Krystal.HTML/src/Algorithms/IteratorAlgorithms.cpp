@@ -6,6 +6,7 @@
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Iterator/NodeIterator.hpp"
 #include "Krystal.HTML/Iterator/TreeWalker.hpp"
+#include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 
@@ -68,7 +69,8 @@ namespace Krys::HTML
     nodeIterator.ReferenceNode(ShareRef(*prev));
   }
 
-  ExceptionOr<RefPtr<Node>> IteratorAlgorithms::Traverse(NodeIterator &iterator, TraversalNextOrPrev type) noexcept
+  ExceptionOr<RefPtr<Node>> IteratorAlgorithms::Traverse(NodeIterator &iterator,
+                                                         TraversalNextOrPrev type) noexcept
   {
     RawPtr<Node> node = &iterator.ReferenceNode();
     bool beforeNode = iterator.PointerBeforeReferenceNode();

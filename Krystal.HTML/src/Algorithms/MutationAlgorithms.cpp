@@ -8,6 +8,7 @@
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/MutationObserver/MutationObserver.hpp"
+#include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
@@ -20,7 +21,7 @@
 namespace Krys::HTML
 {
   ExceptionOr<void> MutationAlgorithms::EnsurePreInsertValidity(Node &node, ContainerNode &parent,
-                                                                    RawPtr<Node> child) noexcept
+                                                                RawPtr<Node> child) noexcept
   {
     if (!parent.IsDocumentNode() && !parent.IsDocumentFragmentNode() && !parent.IsElementNode())
     {
@@ -101,7 +102,7 @@ namespace Krys::HTML
   }
 
   ExceptionOr<Node &> MutationAlgorithms::PreInsert(Node &node, ContainerNode &parent,
-                                                        RawPtr<Node> refChild) noexcept
+                                                    RawPtr<Node> refChild) noexcept
   {
     if (auto result = EnsurePreInsertValidity(node, parent, refChild); result.HasException())
     {
@@ -122,7 +123,7 @@ namespace Krys::HTML
   }
 
   ExceptionOr<void> MutationAlgorithms::Insert(Node &node, ContainerNode &parent, RawPtr<Node> child,
-                                                   SuppressObservers suppressObservers) noexcept
+                                               SuppressObservers suppressObservers) noexcept
   {
     SmallNodeList nodes;
     if (node.IsDocumentFragmentNode())
@@ -221,8 +222,8 @@ namespace Krys::HTML
 
       if (auto *shadowHost = DynamicDowncast<Element>(parent))
       {
-        if (shadowHost->GetShadowRoot()
-            && shadowHost->GetShadowRoot()->SlotAssignment() == SlotAssignmentMode::Named
+        if (shadowHost->ShadowRoot()
+            && shadowHost->ShadowRoot()->SlotAssignment() == SlotAssignmentMode::Named
             && SlotAssignmentAlgorithms::IsSlottable(*target))
         {
           SlotAssignmentAlgorithms::AssignSlot(*target);
@@ -303,7 +304,7 @@ namespace Krys::HTML
   }
 
   ExceptionOr<void> MutationAlgorithms::Move(Node &node, ContainerNode &newParent,
-                                                 RawPtr<Node> child) noexcept
+                                             RawPtr<Node> child) noexcept
   {
     if (!TreeQueries::HasSameShadowIncludingRoot(newParent, node))
     {
@@ -755,7 +756,7 @@ namespace Krys::HTML
   }
 
   ExceptionOr<Ref<Node>> MutationAlgorithms::ConvertNodesIntoNode(const List<NodeOrString> &nodes,
-                                                                      Document &document) noexcept
+                                                                  Document &document) noexcept
   {
     List<Ref<Node>> nodeList;
     for (auto &nodeOrString : nodes)
@@ -789,8 +790,8 @@ namespace Krys::HTML
   }
 
   Ref<Node> MutationAlgorithms::CloneNode(Node &node, RawPtr<Document> document, bool subtree,
-                                              RawPtr<ContainerNode> parent,
-                                              RawPtr<CustomElementRegistry> fallbackRegistry) noexcept
+                                          RawPtr<ContainerNode> parent,
+                                          RawPtr<CustomElementRegistry> fallbackRegistry) noexcept
   {
     if (document == nullptr)
     {
@@ -819,9 +820,9 @@ namespace Krys::HTML
     if (auto *element = DynamicDowncast<Element>(node))
     {
       auto *elementCopy = DynamicDowncast<Element>(copy.get());
-      if (auto *shadowRoot = element->GetShadowRoot(); shadowRoot && shadowRoot->Clonable())
+      if (auto *shadowRoot = element->ShadowRoot(); shadowRoot && shadowRoot->Clonable())
       {
-        assert(elementCopy->GetShadowRoot() && !elementCopy->GetShadowRoot()->Clonable());
+        assert(elementCopy->ShadowRoot() && !elementCopy->ShadowRoot()->Clonable());
         // TODO(IMPL):
       }
     }
@@ -830,7 +831,7 @@ namespace Krys::HTML
   }
 
   Ref<Node> MutationAlgorithms::CloneSingleNode(Node &node, Document &document,
-                                                    RawPtr<CustomElementRegistry> fallbackRegistry) noexcept
+                                                RawPtr<CustomElementRegistry> fallbackRegistry) noexcept
   {
     RefPtr<Node> copy = nullptr;
 

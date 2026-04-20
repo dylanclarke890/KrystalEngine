@@ -20,17 +20,22 @@ namespace Krys::HTML
 
   using IsSupportedTokenFunction = Func<bool(Document &, DOMStringView)>;
 
+  constexpr auto DefaultIsSupportedTokenFunction = [](Document &, DOMStringView) -> bool
+  {
+    return true;
+  };
+
   class DOMTokenList
   {
   private:
-    ReferenceWrapper<const QualifiedName> _attributeName;
+    DOMStringAtom _attributeName;
     SmallList<DOMString, 1> _tokens;
     CheckedRef<Element> _element;
     IsSupportedTokenFunction _isSupportedToken;
 
   public:
-    DOMTokenList(Element &element, const QualifiedName &attributeName,
-                 IsSupportedTokenFunction &&isSupportedToken = {}) noexcept;
+    DOMTokenList(Element &element, DOMStringAtom attributeName,
+                 IsSupportedTokenFunction &&isSupportedToken = DefaultIsSupportedTokenFunction) noexcept;
 
     KRYS_NODISCARD size_t Length() const noexcept
     {

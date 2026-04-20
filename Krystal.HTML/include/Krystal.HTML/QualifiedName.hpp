@@ -7,15 +7,18 @@ namespace Krys::HTML
   /// @see https://dom.spec.whatwg.org/#concept-element-qualified-name
   struct QualifiedName
   {
-    DOMStringAtom NamespaceURI;
-    DOMStringAtom Prefix;
-    DOMStringAtom LocalName;
+    DOMStringAtom NamespaceURI {DOMStringAtom::Null()};
+    DOMStringAtom Prefix {DOMStringAtom::Null()};
+    DOMStringAtom LocalName {DOMStringAtom::Null()};
 
     QualifiedName() noexcept = default;
 
     QualifiedName(DOMStringAtom namespaceURI, DOMStringAtom prefix, DOMStringAtom localName) noexcept
         : NamespaceURI(namespaceURI), Prefix(prefix), LocalName(localName)
     {
+      assert(NamespaceURI == DOMStringAtom::Null() || NamespaceURI != DOMStringAtom::Empty());
+      assert(Prefix == DOMStringAtom::Null() || Prefix != DOMStringAtom::Empty());
+      assert(LocalName != DOMStringAtom::Null() && Prefix != DOMStringAtom::Empty());
     }
 
     /// @see https://dom.spec.whatwg.org/#concept-attribute-qualified-name

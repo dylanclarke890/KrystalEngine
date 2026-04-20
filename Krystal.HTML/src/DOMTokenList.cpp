@@ -1,5 +1,6 @@
 ﻿#include "Krystal.HTML/DOMTokenList.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
@@ -8,7 +9,7 @@
 
 namespace Krys::HTML
 {
-  DOMTokenList::DOMTokenList(Element &element, const QualifiedName &attributeName,
+  DOMTokenList::DOMTokenList(Element &element, DOMStringAtom attributeName,
                              IsSupportedTokenFunction &&isSupportedToken) noexcept
       : _attributeName {attributeName}, _element {ShareCheckedRef(element)},
         _isSupportedToken {Krys::Move(isSupportedToken)}

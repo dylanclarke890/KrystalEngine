@@ -1,5 +1,6 @@
 ﻿#include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
+#include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
@@ -102,6 +103,6 @@ namespace Krys::Tests
   TEST_CASE("Mixin::Slottable", "[HTML][Mixins]")
   {
     STATIC_REQUIRE(SlottableMixin<Element>);
-    STATIC_REQUIRE(SlottableMixin<Text>);
+    STATIC_REQUIRE(SlottableMixin<Krys::HTML::Text>);
   }
 }

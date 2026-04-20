@@ -1,11 +1,14 @@
 ﻿#include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/ChildNodeAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/ElementAttributeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/Algorithms/SlotAssignmentAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
+#include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/ElementRareData.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
@@ -21,10 +24,133 @@ namespace Krys::HTML
 
 #pragma region Element
 
-  ExceptionOr<void> Element::RemoveAttributeNode(Attr &attribute) const noexcept
+  void Element::Id(DOMString &&id) noexcept
+  {
+    ElementAttributeAlgorithms::SetAttributeValue(*this, u8"id", Krys::Move(id));
+  }
+
+  DOMString Element::Id() const noexcept
+  {
+    return ElementAttributeAlgorithms::GetAttributeValue(*this, u8"id");
+  }
+
+  void Element::ClassName(DOMString &&className) noexcept
+  {
+    ElementAttributeAlgorithms::SetAttributeValue(*this, u8"class", Krys::Move(className));
+  }
+
+  DOMString Element::ClassName() const noexcept
+  {
+    return ElementAttributeAlgorithms::GetAttributeValue(*this, u8"class");
+  }
+
+  KRYS_NODISCARD DOMTokenList Element::ClassList() noexcept
+  {
+    return DOMTokenList(*this, u8"class");
+  }
+
+  void Element::Slot(DOMString &&slot) noexcept
+  {
+    ElementAttributeAlgorithms::SetAttributeValue(*this, u8"slot", Krys::Move(slot));
+  }
+
+  DOMString Element::Slot() const noexcept
+  {
+    return ElementAttributeAlgorithms::GetAttributeValue(*this, u8"slot");
+  }
+
+  bool Element::HasAttributes() const noexcept
+  {
+    return !_attributes.empty();
+  }
+
+  // NamedNodeMap &Element::Attributes() const noexcept
+  //{
+  // }
+
+  List<DOMString> Element::GetAttributeNames() const noexcept
+  {
+    return std::ranges::views::transform(_attributes, [](const Ref<Attr> &attr) { return attr->Name(); })
+           | std::ranges::to<List<DOMString>>();
+  }
+
+  Maybe<DOMString> Element::GetAttribute(DOMStringAtom qualifiedName) const noexcept
+  {
+    RawPtr<Attr> attr = ElementAttributeAlgorithms::GetAttributeByName(qualifiedName, *this);
+    if (attr == nullptr)
+    {
+      return std::nullopt;
+    }
+
+    return attr->Value();
+  }
+
+  Maybe<DOMString> Element::GetAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) const noexcept
+  {
+    RawPtr<Attr> attr = ElementAttributeAlgorithms::GetAttributeByNamespace(namespaceURI, localName, *this);
+    if (attr == nullptr)
+    {
+      return std::nullopt;
+    }
+
+    return attr->Value();
+  }
+
+  ExceptionOr<void> Element::SetAttribute(DOMStringAtom qualifiedName, DOMStringAtom value) noexcept
+  {
+    if (!NameValidation::IsValidAttributeLocalName(qualifiedName.View()))
+    {
+      return Exception {ExceptionCode::InvalidCharacterError};
+    }
+
+    // TODO(IMPL): If this is in the HTML namespace and its node document is an HTML document, then set
+    // qualifiedName to qualifiedName in ASCII lowercase.
+
+    // TODO(IMPL): Let verifiedValue be the result of calling get trusted type compliant attribute value with
+    // qualifiedName, null, this, and value. [TRUSTED-TYPES]
+
+    return {};
+  }
+
+  ExceptionOr<void> Element::SetAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom qualifiedName,
+                                            DOMStringAtom value) noexcept
   {
     // TODO(IMPL): Implement this method
     return {};
+  }
+
+  void Element::RemoveAttribute(DOMStringAtom qualifiedName) noexcept
+  {
+    ElementAttributeAlgorithms::RemoveAttributeByName(qualifiedName, *this);
+  }
+
+  void Element::RemoveAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) noexcept
+  {
+    ElementAttributeAlgorithms::RemoveAttributeByNamespace(namespaceURI, localName, *this);
+  }
+
+  bool Element::ToggleAttribute(DOMStringAtom qualifiedName, const Maybe<bool> &force) noexcept
+  {
+    // TODO(IMPL): Implement this method
+    return false;
+  }
+
+  bool Element::HasAttribute(DOMStringAtom qualifiedName) const noexcept
+  {
+    // TODO(IMPL): Implement this method
+    return false;
+  }
+
+  bool Element::HasAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) const noexcept
+  {
+    // TODO(IMPL): Implement this method
+    return false;
+  }
+
+  ExceptionOr<Ref<Attr>> Element::RemoveAttributeNode(Attr &attribute) noexcept
+  {
+    // TODO(IMPL): Implement this method
+    return Exception {ExceptionCode::NotSupportedError};
   }
 
 #pragma endregion

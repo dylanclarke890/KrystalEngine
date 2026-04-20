@@ -115,9 +115,33 @@ namespace Krys
       return globalPool;
     }
 
-  public:
-    StringAtom() noexcept : _ptr(Pool().GetOrAdd(utf8_stringview {u8""}))
+    struct NullTag
     {
+    };
+
+    struct EmptyTag
+    {
+    };
+
+    StringAtom(NullTag) noexcept : _ptr(nullptr)
+    {
+    }
+
+    StringAtom(EmptyTag) noexcept : _ptr(Pool().GetOrAdd(utf8_stringview {u8""}))
+    {
+    }
+
+  public:
+    KRYS_NODISCARD static StringAtom Null() noexcept
+    {
+      static StringAtom nullAtom = StringAtom(NullTag {});
+      return nullAtom;
+    }
+
+    KRYS_NODISCARD static StringAtom Empty() noexcept
+    {
+      static StringAtom emptyAtom = StringAtom(EmptyTag {});
+      return emptyAtom;
     }
 
     StringAtom(const char8 *str) noexcept : _ptr(Pool().GetOrAdd(utf8_stringview {str}))

@@ -4,6 +4,7 @@
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Events/EventTarget.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
+#include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
@@ -341,7 +342,7 @@ namespace Krys::HTML
 
   bool TreeQueries::IsShadowHost(const Element &node) noexcept
   {
-    return node.GetShadowRoot() != nullptr;
+    return node.ShadowRoot() != nullptr;
   }
 
   bool TreeQueries::HasSameRoot(const Node &a, const Node &b) noexcept
@@ -383,7 +384,7 @@ namespace Krys::HTML
   {
     if (auto *element = DynamicDowncast<Element>(node))
     {
-      return element->GetShadowRoot();
+      return element->ShadowRoot();
     }
 
     return nullptr;

@@ -1,29 +1,39 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/DOMTokenList.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/ElementRareData.hpp"
+#include "Krystal.HTML/Node/InsertAdjacentWhere.hpp"
+#include "Krystal.HTML/Node/ShadowRootInit.hpp"
 #include "Krystal.HTML/QualifiedName.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
 
 namespace Krys::HTML
 {
   class Attr;
   class HTMLCollection;
   class HTMLSlotElement;
+  class NamedNodeMap;
   class NodeList;
+  class ShadowRoot;
+  class ElementAttributeAlgorithms;
 
   class Element : public ContainerNode
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Element);
 
+    friend class ElementAttributeAlgorithms;
+
   private:
     QualifiedName _qualifiedName;
-    DOMStringAtom _tagName;
     RefPtr<ShadowRoot> _shadowRoot;
     UniquePtr<ElementRareData> _elementRareData;
+    List<Ref<Attr>> _attributes;
 
   protected:
     Element(Document &document, NodeFlag nodeFlags = NodeFlag::None) noexcept;
@@ -35,28 +45,80 @@ namespace Krys::HTML
     {
       return _qualifiedName.LocalName;
     }
-
     KRYS_NODISCARD DOMStringAtom Prefix() const noexcept
     {
       return _qualifiedName.Prefix;
     }
-
     KRYS_NODISCARD DOMStringAtom NamespaceURI() const noexcept
     {
       return _qualifiedName.NamespaceURI;
     }
-
-    KRYS_NODISCARD DOMStringAtom TagName() const noexcept
+    KRYS_NODISCARD DOMString TagName() const noexcept
     {
-      return _tagName;
+      auto qualifiedName = _qualifiedName.Name();
+      // TODO(IMPL)
+      // If this is in the HTML namespace and its node document is an HTML document, then set qualifiedName to
+      // qualifiedName in ASCII uppercase.
+
+      return qualifiedName;
     }
 
-    KRYS_NODISCARD RawPtr<ShadowRoot> GetShadowRoot() const noexcept
+    void Id(DOMString &&id) noexcept;
+    KRYS_NODISCARD DOMString Id() const noexcept;
+    void ClassName(DOMString &&className) noexcept;
+    KRYS_NODISCARD DOMString ClassName() const noexcept;
+    KRYS_NODISCARD DOMTokenList ClassList() noexcept;
+    void Slot(DOMString &&slot) noexcept;
+    KRYS_NODISCARD DOMString Slot() const noexcept;
+
+    KRYS_NODISCARD bool HasAttributes() const noexcept;
+    KRYS_NODISCARD NamedNodeMap &Attributes() const noexcept;
+    KRYS_NODISCARD List<DOMString> GetAttributeNames() const noexcept;
+    KRYS_NODISCARD Maybe<DOMString> GetAttribute(DOMStringAtom qualifiedName) const noexcept;
+    KRYS_NODISCARD Maybe<DOMString> GetAttributeNS(DOMStringAtom namespaceURI,
+                                                   DOMStringAtom localName) const noexcept;
+    ExceptionOr<void> SetAttribute(DOMStringAtom qualifiedName, DOMStringAtom value) noexcept;
+    ExceptionOr<void> SetAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom qualifiedName,
+                                     DOMStringAtom value) noexcept;
+    void RemoveAttribute(DOMStringAtom qualifiedName) noexcept;
+    void RemoveAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) noexcept;
+    bool ToggleAttribute(DOMStringAtom qualifiedName, const Maybe<bool> &force) noexcept;
+    KRYS_NODISCARD bool HasAttribute(DOMStringAtom qualifiedName) const noexcept;
+    KRYS_NODISCARD bool HasAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) const noexcept;
+
+    KRYS_NODISCARD RawPtr<Attr> GetAttributeNode(DOMStringAtom qualifiedName) const noexcept;
+    KRYS_NODISCARD RawPtr<Attr> GetAttributeNodeNS(DOMStringAtom namespaceURI,
+                                                   DOMStringAtom localName) const noexcept;
+    RawPtr<Attr> SetAttributeNode(Attr &attribute) const noexcept;
+    RawPtr<Attr> SetAttributeNodeNS(Attr &attribute) const noexcept;
+    ExceptionOr<Ref<Attr>> RemoveAttributeNode(Attr &attribute) noexcept;
+
+    Ref<ShadowRoot> AttachShadow(const ShadowRootInit &init) noexcept;
+    KRYS_NODISCARD RawPtr<ShadowRoot> ShadowRoot() const noexcept
     {
       return _shadowRoot.get();
     }
 
-    KRYS_NODISCARD ExceptionOr<void> RemoveAttributeNode(Attr &attribute) const noexcept;
+    KRYS_NODISCARD RawPtr<CustomElementRegistry> CustomElementRegistry() const noexcept
+    {
+      // TODO(IMPL): Implement custom element registry and return it here.
+      return nullptr;
+    }
+
+    KRYS_NODISCARD RawPtr<Element> Closest(const DOMString &selectors) noexcept;
+    KRYS_NODISCARD bool Matches(const DOMString &selectors) const noexcept;
+    KRYS_NODISCARD bool WebkitMatchesSelector(const DOMString &selectors) const noexcept
+    {
+      return Matches(selectors);
+    }
+
+    KRYS_NODISCARD Ref<HTMLCollection> GetElementsByTagName(DOMStringAtom qualifiedName) noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> GetElementsByTagNameNS(DOMStringAtom namespaceURI,
+                                                              DOMStringAtom localName) noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> GetElementsByClassName(const DOMString &classNames) noexcept;
+
+    RawPtr<Element> InsertAdjacentElement(InsertAdjacentWhere where, Element &element) noexcept;
+    void InsertAdjacentText(InsertAdjacentWhere where, const DOMString &data) noexcept;
 
 #pragma endregion
 

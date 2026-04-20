@@ -61,12 +61,10 @@ namespace Krys::HTML
     // copy, and subtree as parameters.
   }
 
-  void TreeMutationDispatcher::QueueMutationRecord(DOMString &&type, Node &target, Maybe<DOMString> name,
-                                                   Maybe<DOMString> nameSpace, Maybe<DOMString> oldValue,
-                                                   const SmallNodeList &addedNodes,
-                                                   const SmallNodeList &removedNodes,
-                                                   RefPtr<Node> &&previousSibling,
-                                                   RefPtr<Node> &&nextSibling) noexcept
+  void TreeMutationDispatcher::QueueMutationRecord(
+    DOMString &&type, Node &target, Maybe<DOMStringAtom> name, Maybe<DOMStringAtom> namespaceURI,
+    Maybe<DOMStringView> oldValue, const SmallNodeList &addedNodes, const SmallNodeList &removedNodes,
+    RefPtr<Node> &&previousSibling, RefPtr<Node> &&nextSibling) noexcept
   {
     // TODO: figure out the actual type to use here
     List<int> interestedObservers;

@@ -37,6 +37,7 @@
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML\Abort\AbortController.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\ChildNodeAlgorithms.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\ElementAttributeAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\IteratorAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOMTokenList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventPath.hpp" />
@@ -56,6 +57,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\CustomElementState.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\DocumentFragmentRareData.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\DocumentRareData.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\InsertAdjacentWhere.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\NamedNodeMap.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\NodeOrString.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\ParentNodeRareData.hpp" />
@@ -146,6 +148,7 @@
     <ClInclude Include="include\Krystal.HTML\Algorithms\StringAlgorithms.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Algorithms\ElementAttributeAlgorithms.cpp" />
     <ClCompile Include="src\DOMTokenList.cpp" />
     <ClCompile Include="src\Algorithms\IteratorAlgorithms.cpp" />
     <ClCompile Include="src\HTMLElement\HTMLSlotElement.cpp" />

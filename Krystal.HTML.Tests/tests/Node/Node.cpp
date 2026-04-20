@@ -1,6 +1,7 @@
 ﻿#include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML.Tests/TestNode.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
@@ -51,7 +52,7 @@ namespace Krys::Tests
 
     auto appendResult = data.test_document->AppendChild(*data.test_node);
     REQUIRE_FALSE(appendResult.HasException());
-   
+
     REQUIRE(data.test_node->IsConnected());
     REQUIRE(data.test_document->IsConnected());
   }

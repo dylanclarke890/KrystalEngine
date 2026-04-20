@@ -69,6 +69,7 @@ namespace Krys::HTML
   class ContainerNode;
   class Document;
   class Element;
+  class ElementAttributeAlgorithms;
   class MutationObserver;
   class Node;
   class NodeList;
@@ -93,6 +94,7 @@ namespace Krys::HTML
 
     friend class ContainerNode;
     friend class Document;
+    friend class ElementAttributeAlgorithms;
     friend class MutationObserver;
     friend class MutationAlgorithms;
     friend class TreeMutationDispatcher;
@@ -189,10 +191,10 @@ namespace Krys::HTML
     KRYS_NODISCARD const StringAtom &LookupNamespaceURI(const StringAtom &prefix) const noexcept;
     KRYS_NODISCARD bool IsDefaultNamespace(const StringAtom &namespaceURI) const noexcept;
 
-    ExceptionOr<Node&> InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept;
-    ExceptionOr<Node&> ReplaceChild(Node &newChild, Node &oldChild) noexcept;
-    ExceptionOr<Node&> RemoveChild(Node &child) noexcept;
-    ExceptionOr<Node&> AppendChild(Node &newChild) noexcept;
+    ExceptionOr<Node &> InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept;
+    ExceptionOr<Node &> ReplaceChild(Node &newChild, Node &oldChild) noexcept;
+    ExceptionOr<Node &> RemoveChild(Node &child) noexcept;
+    ExceptionOr<Node &> AppendChild(Node &newChild) noexcept;
 
     KRYS_NODISCARD size_t CountChildNodes() const noexcept;
 

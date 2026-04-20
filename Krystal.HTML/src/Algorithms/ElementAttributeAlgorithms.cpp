@@ -1,0 +1,192 @@
+﻿#include "Krystal.HTML/Algorithms/ElementAttributeAlgorithms.hpp"
+#include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
+#include "Krystal.HTML/Node/Attr.hpp"
+#include "Krystal.HTML/Node/CustomElementRegistry.hpp"
+#include "Krystal.HTML/Node/Element.hpp"
+#include "Krystal.HTML/Node/ShadowRoot.hpp"
+
+namespace Krys::HTML
+{
+  void ElementAttributeAlgorithms::AttributeChanged(Element &element, DOMStringAtom localName,
+                                                    DOMStringView oldValue, DOMStringView value,
+                                                    DOMStringAtom namespaceURI) noexcept
+  {
+    // TODO(IMPL): Implement this method
+  }
+
+  void ElementAttributeAlgorithms::HandleAttributeChanges(Attr &attribute, Element &element,
+                                                          DOMStringView oldValue,
+                                                          DOMStringView newValue) noexcept
+  {
+    TreeMutationDispatcher::QueueMutationRecord(u8"attributes", element, attribute.LocalName(),
+                                                attribute.NamespaceURI(), oldValue, {}, {}, nullptr, nullptr);
+
+    // TODO(IMPL): If element is custom, then enqueue a custom element callback reaction with element,
+    // callback name "attributeChangedCallback", and « attribute’s local name, oldValue, newValue, attribute’s
+    // namespace ».
+
+    AttributeChanged(element, attribute.LocalName(), oldValue, attribute.Value(), attribute.NamespaceURI());
+  }
+
+  void ElementAttributeAlgorithms::Change(Attr &attribute, DOMString &&value) noexcept
+  {
+    DOMString &&oldValue = Krys::Move(attribute._value);
+
+    attribute._value = Krys::Move(value);
+
+    HandleAttributeChanges(attribute, *attribute._ownerElement, oldValue, attribute._value);
+  }
+
+  void ElementAttributeAlgorithms::Append(Attr &attribute, Element &element) noexcept
+  {
+    element._attributes.push_back(ShareRef(attribute));
+
+    attribute._ownerElement = CreateWeakPtr(&element);
+    attribute._ownerDocument = ShareRefPtr(&element.NodeDocument());
+
+    HandleAttributeChanges(attribute, element, {}, attribute._value);
+  }
+
+  void ElementAttributeAlgorithms::Remove(Attr &attribute) noexcept
+  {
+    assert(attribute._ownerElement);
+    RefPtr<Element> element = attribute._ownerElement.lock();
+    assert(element);
+
+    Ref<Attr> attributeRef = ShareRef(attribute);
+    element->_attributes.erase(std::remove_if(element->_attributes.begin(), element->_attributes.end(),
+                                              [&](const Ref<Attr> &attr)
+                                              { return attr.get() == &attribute; }));
+
+    attribute._ownerElement.reset();
+
+    HandleAttributeChanges(attribute, *element, attribute._value, {});
+  }
+
+  void ElementAttributeAlgorithms::Replace(Attr &oldAttribute, Attr &newAttribute) noexcept
+  {
+    assert(oldAttribute._ownerElement);
+    RefPtr<Element> element = oldAttribute._ownerElement.lock();
+    assert(element);
+
+    std::replace_if(
+      element->_attributes.begin(), element->_attributes.end(),
+      [&](const Ref<Attr> &attr) { return attr.get() == &oldAttribute; }, ShareRef(newAttribute));
+
+    newAttribute._ownerElement = CreateWeakPtr(element.get());
+    newAttribute._ownerDocument = ShareRefPtr(&element->NodeDocument());
+    oldAttribute._ownerElement.reset();
+
+    HandleAttributeChanges(oldAttribute, *element, oldAttribute._value, newAttribute._value);
+  }
+
+  RawPtr<Attr> ElementAttributeAlgorithms::GetAttributeByName(DOMStringAtom qualifiedName,
+                                                              const Element &element) noexcept
+  {
+    // TODO(IMPL): If element is in the HTML namespace and its node document is an HTML document, then set
+    // qualifiedName to qualifiedName in ASCII lowercase.
+
+    auto it = std::find_if(element._attributes.begin(), element._attributes.end(),
+                           [&](const Ref<Attr> &attr) { return attr->Name() == qualifiedName; });
+    return it != element._attributes.end() ? it->get() : nullptr;
+  }
+
+  RawPtr<Attr> ElementAttributeAlgorithms::GetAttributeByNamespace(DOMStringAtom namespaceURI,
+                                                                   DOMStringAtom localName,
+                                                                   const Element &element) noexcept
+  {
+    if (namespaceURI == DOMStringAtom::Empty())
+    {
+      namespaceURI = DOMStringAtom::Null();
+    }
+
+    auto it =
+      std::find_if(element._attributes.begin(), element._attributes.end(), [&](const Ref<Attr> &attr)
+                   { return attr->LocalName() == localName && attr->NamespaceURI() == namespaceURI; });
+    return it != element._attributes.end() ? it->get() : nullptr;
+  }
+
+  DOMString ElementAttributeAlgorithms::GetAttributeValue(const Element &element, DOMStringAtom localName,
+                                                          DOMStringAtom namespaceURI) noexcept
+  {
+    RawPtr<Attr> attr = GetAttributeByNamespace(namespaceURI, localName, element);
+    if (attr == nullptr)
+    {
+      return u8"";
+    }
+
+    return attr->Value();
+  }
+
+  ExceptionOr<RefPtr<Attr>> ElementAttributeAlgorithms::SetAttribute(Attr &attr, Element &element) noexcept
+  {
+    // SPEC-VIOLATION(TRUSTED-TYPES): Let verifiedValue be the result of calling get trusted type compliant
+    // attribute value with attr’s local name, attr’s namespace, element, and attr’s value.
+
+    if (attr._ownerElement != nullptr || attr._ownerElement.get() != &element)
+    {
+      return Exception {ExceptionCode::InUseAttributeError};
+    }
+
+    RawPtr<Attr> oldAttr = GetAttributeByNamespace(attr.NamespaceURI(), attr.LocalName(), element);
+    if (&attr == oldAttr)
+    {
+      return ShareRefPtr(&attr);
+    }
+
+    // SPEC-VIOLATION(TRUSTED-TYPES): Set attr’s value to verifiedValue.
+
+    if (oldAttr != nullptr)
+    {
+      Replace(*oldAttr, attr);
+    }
+    else
+    {
+      Append(attr, element);
+    }
+
+    return ShareRefPtr(oldAttr);
+  }
+
+  void ElementAttributeAlgorithms::SetAttributeValue(Element &element, DOMStringAtom localName,
+                                                     DOMString &&value, DOMStringAtom prefix,
+                                                     DOMStringAtom namespaceURI) noexcept
+  {
+    RawPtr<Attr> attribute = GetAttributeByNamespace(namespaceURI, localName, element);
+    if (attribute == nullptr)
+    {
+      // TODO(IMPL): create an attribute whose namespace is namespace, namespace prefix is prefix, local name
+      // is localName, value is value, and node document is element’s node document, then append this
+      // attribute to element
+      return;
+    }
+
+    Change(*attribute, Krys::Move(value));
+  }
+
+  RefPtr<Attr> ElementAttributeAlgorithms::RemoveAttributeByName(DOMStringAtom qualifiedName,
+                                                                 Element &element) noexcept
+  {
+    RawPtr<Attr> attr = GetAttributeByName(qualifiedName, element);
+    if (attr != nullptr)
+    {
+      Remove(*attr);
+    }
+
+    return ShareRefPtr(attr);
+  }
+
+  RefPtr<Attr> ElementAttributeAlgorithms::RemoveAttributeByNamespace(DOMStringAtom namespaceURI,
+                                                                      DOMStringAtom localName,
+                                                                      Element &element) noexcept
+  {
+    RawPtr<Attr> attr = GetAttributeByNamespace(namespaceURI, localName, element);
+    if (attr != nullptr)
+    {
+      Remove(*attr);
+    }
+
+    return ShareRefPtr(attr);
+  }
+}

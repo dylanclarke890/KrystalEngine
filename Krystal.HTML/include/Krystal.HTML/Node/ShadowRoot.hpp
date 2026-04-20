@@ -1,30 +1,14 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/Node/DocumentFragment.hpp"
+#include "Krystal.HTML/Node/ShadowRootMode.hpp"
+#include "Krystal.HTML/Node/SlotAssignmentMode.hpp"
 #include "Krystal.HTML/Node/TreeScope.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-
-namespace Krys::HTML
-{
-  enum class ShadowRootMode : uint8
-  {
-    Open,
-    Closed
-  };
-
-  enum class SlotAssignmentMode : uint8
-  {
-    Manual,
-    Named
-  };
-}
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::ShadowRootMode, 2u);
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::SlotAssignmentMode, 2u);
 
 namespace Krys::HTML
 {

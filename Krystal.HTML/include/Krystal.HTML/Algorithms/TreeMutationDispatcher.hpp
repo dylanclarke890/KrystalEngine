@@ -33,8 +33,8 @@ namespace Krys::HTML
     static void Cloned(Node &node, Node &copy, bool subtree) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#queue-a-mutation-record
-    static void QueueMutationRecord(DOMString &&type, Node &target, Maybe<DOMString> name,
-                                    Maybe<DOMString> nameSpace, Maybe<DOMString> oldValue,
+    static void QueueMutationRecord(DOMString &&type, Node &target, Maybe<DOMStringAtom> name,
+                                    Maybe<DOMStringAtom> namespaceURI, Maybe<DOMStringView> oldValue,
                                     const SmallNodeList &addedNodes, const SmallNodeList &removedNodes,
                                     RefPtr<Node> &&previousSibling, RefPtr<Node> &&nextSibling) noexcept;
 

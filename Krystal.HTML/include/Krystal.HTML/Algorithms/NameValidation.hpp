@@ -16,7 +16,7 @@ namespace Krys::HTML
   {
   public:
     /// @see https://dom.spec.whatwg.org/#valid-namespace-prefix
-    KRYS_NODISCARD static bool IsValidNamespacePrefix(const DOMString &name) noexcept
+    KRYS_NODISCARD static bool IsValidNamespacePrefix(DOMStringView name) noexcept
     {
       if (name.empty())
       {
@@ -35,7 +35,7 @@ namespace Krys::HTML
     }
 
     /// @see https://dom.spec.whatwg.org/#valid-attribute-local-name
-    KRYS_NODISCARD static bool IsValidAttributeLocalName(const DOMString &name) noexcept
+    KRYS_NODISCARD static bool IsValidAttributeLocalName(DOMStringView name) noexcept
     {
       if (name.empty())
       {
@@ -54,7 +54,7 @@ namespace Krys::HTML
     }
 
     /// @see https://dom.spec.whatwg.org/#valid-element-local-name
-    KRYS_NODISCARD static bool IsValidElementLocalName(const DOMString &name) noexcept
+    KRYS_NODISCARD static bool IsValidElementLocalName(DOMStringView name) noexcept
     {
       if (name.empty())
       {
@@ -99,7 +99,7 @@ namespace Krys::HTML
     }
 
     /// @see https://dom.spec.whatwg.org/#valid-doctype-name
-    KRYS_NODISCARD static bool IsValidDocTypeName(const DOMString &name) noexcept
+    KRYS_NODISCARD static bool IsValidDocTypeName(DOMStringView name) noexcept
     {
       for (const auto &ch : name)
       {
@@ -140,6 +140,7 @@ namespace Krys::HTML
 
       assert(!prefix.has_value() || IsValidNamespacePrefix(prefix.value()));
 
+      // TODO(FIX, PERF): use an enum for context instead of string comparison.
       if (context == u8"attribute")
       {
         if (!IsValidAttributeLocalName(localName))

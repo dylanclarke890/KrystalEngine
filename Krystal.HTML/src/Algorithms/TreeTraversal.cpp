@@ -2,6 +2,7 @@
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
@@ -104,7 +105,7 @@ namespace Krys::HTML
 
     if (auto *host = DynamicDowncast<Element>(current))
     {
-      if (auto *shadowRoot = host->GetShadowRoot())
+      if (auto *shadowRoot = host->ShadowRoot())
       {
         return shadowRoot;
       }
@@ -140,7 +141,7 @@ namespace Krys::HTML
 
     if (auto *host = DynamicDowncast<Element>(current))
     {
-      if (auto *shadowRoot = host->GetShadowRoot())
+      if (auto *shadowRoot = host->ShadowRoot())
       {
         return shadowRoot;
       }
@@ -162,7 +163,7 @@ namespace Krys::HTML
       if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(*node))
       {
         node = shadowRoot->Host();
-        
+
         if (node == stayWithin)
         {
           return nullptr;
