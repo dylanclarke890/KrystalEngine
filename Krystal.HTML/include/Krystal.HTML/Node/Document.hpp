@@ -90,7 +90,7 @@ namespace Krys::HTML
 #pragma endregion
 
     // TODO(fix): this shouldn't be part of the public API
-    KRYS_NODISCARD List<Range *> &LiveRanges() noexcept
+    KRYS_NODISCARD List<RawPtr<Range>> &LiveRanges() noexcept
     {
       return _liveRanges;
     }

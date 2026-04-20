@@ -202,6 +202,7 @@ namespace Krys::HTML
     assert(!IsDocumentNode());
     if (_treeScope != &newTreeScope)
     {
+      // TODO(IMPL):
       // Ref<TreeScope> oldTreeScope = CreateRef<TreeScope>(*_treeScope);
       //  MoveTreeToNewScope(*this, oldTreeScope, newTreeScope);
     }

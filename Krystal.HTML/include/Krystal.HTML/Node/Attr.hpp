@@ -15,22 +15,50 @@ namespace Krys::HTML
 
   private:
     QualifiedName _name;
-    CheckedPtr<Element> _ownerElement;
+    WeakPtr<Element> _ownerElement;
     DOMString _value;
 
   public:
 #pragma region Attr
+
+    KRYS_NODISCARD DOMStringAtom NamespaceURI() const noexcept
+    {
+      return _name.NamespaceURI;
+    }
+
+    KRYS_NODISCARD DOMStringAtom Prefix() const noexcept
+    {
+      return _name.Prefix;
+    }
+
+    KRYS_NODISCARD DOMStringAtom LocalName() const noexcept
+    {
+      return _name.LocalName;
+    }
+
+    KRYS_NODISCARD DOMString Name() const noexcept
+    {
+      return _name.Name();
+    }
+
+    KRYS_NODISCARD const DOMString &Value() const noexcept
+    {
+      return _value;
+    }
+
+    void Value(DOMString &&value) noexcept
+    {
+      SetExistingAttributeValue(*this, Krys::Move(value));
+    }
 
     KRYS_NODISCARD RawPtr<Element> OwnerElement() const noexcept
     {
       return _ownerElement.get();
     }
 
-    KRYS_NODISCARD DOMString Value() const noexcept;
-
-    static ExceptionOr<void> SetExistingAttributeValue(Attr &attribute, DOMString &&value) noexcept
+    KRYS_NODISCARD bool Specified() const noexcept
     {
-      return {};
+      return true;
     }
 
 #pragma endregion
@@ -39,7 +67,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD DOMString NodeName() const noexcept final
     {
-      return _name.Name();
+      return Name();
     }
 
     KRYS_NODISCARD DOMString NodeValue() const noexcept final
@@ -49,20 +77,26 @@ namespace Krys::HTML
 
     ExceptionOr<void> SetNodeValue(DOMString &&value) noexcept final
     {
-      return SetExistingAttributeValue(*this, Krys::Move(value));
+      SetExistingAttributeValue(*this, Krys::Move(value));
+      return {};
     }
-    
+
     KRYS_NODISCARD DOMString TextContent() const noexcept final
     {
       return Value();
     }
-    
+
     ExceptionOr<void> SetTextContent(DOMString &&value) noexcept final
     {
-      return SetExistingAttributeValue(*this, Krys::Move(value));
+      SetExistingAttributeValue(*this, Krys::Move(value));
+      return {};
     }
 
 #pragma endregion
+
+  private:
+    /// @see https://dom.spec.whatwg.org/#set-an-existing-attribute-value
+    static void SetExistingAttributeValue(Attr &attribute, DOMString &&value) noexcept;
   };
 }
 

@@ -60,6 +60,9 @@
     <ClInclude Include="include\Krystal.HTML\Node\NodeOrString.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\ParentNodeRareData.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\ShadowRoot.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\ShadowRootInit.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\ShadowRootMode.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\SlotAssignmentMode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\TreeScope.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventDispatcher.hpp" />
     <ClInclude Include="include\Krystal.HTML\Iterator\NodeFilter.hpp" />

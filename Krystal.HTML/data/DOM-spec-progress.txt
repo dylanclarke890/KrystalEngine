@@ -6,247 +6,329 @@ Source: https://dom.spec.whatwg.org
 ======================================================================
 
 1.1 Trees
-    Status: Full test coverage
+    Implementation: Full
+    Test Coverage : Full
 
 1.2 Ordered sets
-    Status: Full test coverage
+    Implementation: Full
+    Test Coverage : Full
 
 1.3 Selectors
-    Status: TODO(spec)
-    Notes : Requires CSS parser and selector engine
+    Implementation: None
+    Test Coverage : None
+    Notes         :
+        - Requires CSS parser and selector engine
 
 1.4 Name validation
-    Status: Full test coverage
+    Implementation: Full
+    Test Coverage : Full
 
 ======================================================================
 2. EVENTS
 ======================================================================
 
 2.1 Introduction to "DOM Events"
-    Status: N/A
+    - N/A
 
 2.2 Interface Event
-    Status : Partial test coverage
-    Missing:
-        - composedPath
-        - target
-        - currentTarget
-        - relatedTarget
+    Implementation: Full
+    Test Coverage : Partial
+    Notes         :
+        - Missing tests for composedPath, target, currentTarget && relatedTarget.
 
 2.3 Legacy extensions to the Window interface
-    Status: SPEC-VIOLATION(DOM, HTML)
-    Notes : Window interface currently not supported
+    Implementation: None
+    Test Coverage : None
+    Notes         :
+        - SPEC-VIOLATION(DOM, HTML) -> Window interface currently not supported
 
 2.4 Interface CustomEvent
-    Status: Full test coverage
+    Implementation: Full
+    Test Coverage : Full
 
 2.5 Constructing events
-    Status: TODO(spec)
-    Notes : "To create an event" sets event.IsTrusted
+    Implementation: Partial
+    Test Coverage : Partial
+    Notes         : 
+        - TODO(spec) -> "To create an event" sets event.IsTrusted
 
 2.6 Defining event interfaces
-    Status: N/A
+    - N/A
 
 2.7 Interface EventTarget
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 2.8 Observing event listeners
-    Status: SPEC-VIOLATION(DOM, SERVICE-WORKER)
-    Notes : ServiceWorkGlobalScope currently not supported
+    Implementation: None
+    Test Coverage : None
+    Notes         :
+        - SPEC-VIOLATION(DOM, SERVICE-WORKER) -> ServiceWorkGlobalScope currently not supported
 
 2.9 Dispatching events
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 2.10 Firing events
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 2.11 Action versus occurrence
-    Status: N/A
+    - N/A
 
 ======================================================================
 3. ABORTING ONGOING ACTIVITIES
 ======================================================================
 
 3.1 Interface AbortController
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 3.2 Interface AbortSignal
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 3.2.1 Garbage collection
-    Status: N/A
+    - N/A
 
 3.3 Using AbortController and AbortSignal objects in APIs
-    Status: N/A
+    - N/A
 
 ======================================================================
 4. NODES
 ======================================================================
 
 4.1 Introduction to "The DOM"
-    Status: N/A
+    - N/A
 
 4.2 Node tree
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 4.2.1 Document tree
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 4.2.2 Shadow tree
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 4.2.2.1 Slots
+    Implementation: None
+    Test Coverage : None
 
 4.2.2.2 Slottables
+    Implementation: None
+    Test Coverage : None
 
 4.2.2.3 Finding slots and slottables
+    Implementation: None
+    Test Coverage : None
 
 4.2.2.4 Assigning slottables and slots
+    Implementation: None
+    Test Coverage : None
 
 4.2.2.5 Signaling slot change
+    Implementation: None
+    Test Coverage : None
 
 4.2.3 Mutation algorithms
-    Status : No test coverage
-    Missing: 
-        Custom element support
-        mutation observers (Remove).
+    Implementation: Partial
+    Test Coverage : None
+    Notes         : 
+        - Missing Custom element support.
+        - Missing mutation observers (Remove).
 
 4.2.4 Mixin NonElementParentNode
+    Implementation: None
+    Test Coverage : None
+    Notes         : 
+        - Missing GetElementById (requires implementing element first).
 
 4.2.5 Mixin DocumentOrShadowRoot
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 4.2.6 Mixin ParentNode
-    Status : No test coverage
-    Missing: 
-        QuerySelector
-        QuerySelectorAll
+    Implementation: Partial
+    Test Coverage : None
+    Notes         : 
+        - Missing QuerySelector && QuerySelectorAll (requires CSS selector engine).
 
 4.2.7 Mixin NonDocumentTypeChildNode
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 4.2.8 Mixin ChildNode
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 4.2.9 Mixin Slottable
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 4.2.10 Old-style collections: NodeList and HTMLCollection
-    Status: N/A
+    - N/A
 
 4.2.10.1 Interface NodeList
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 4.2.10.2 Interface HTMLCollection
-    Status: TODO(spec)
-    Notes : namedItem/named index requires element/attr implementing first.
+    Implementation: Partial
+    Test Coverage : None
+    Notes         : 
+        - namedItem/named index requires implementing element/attr first.
 
 4.3 Mutation observers
+    Implementation: None
+    Test Coverage : None
 
 4.3.1 Interface MutationObserver
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 4.3.2 Queuing a mutation record
+    Implementation: None
+    Test Coverage : None
 
 4.3.3 Interface MutationRecord
+    Implementation: None
+    Test Coverage : None
 
 4.4 Interface Node
+    Implementation: Partial
+    Test Coverage : Partial
 
 4.5 Interface Document
+    Implementation: None
+    Test Coverage : None
 
 4.5.1 Interface DOMImplementation
+    Implementation: None
+    Test Coverage : None
 
 4.6 Interface DocumentType
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 4.7 Interface DocumentFragment
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 4.8 Interface ShadowRoot
+    Implementation: None
+    Test Coverage : None
 
 4.9 Interface Element
+    Implementation: None
+    Test Coverage : None
 
 4.9.1 Interface NamedNodeMap
+    Implementation: None
+    Test Coverage : None
+    Notes         : 
+        - requires implementing element/attr first.
 
 4.9.2 Interface Attr
+    Implementation: Partial
+    Test Coverage : None
+    Notes         : 
+        - SetExistingAttributeValue requires implementing element first.
 
 4.10 Interface CharacterData
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 4.11 Interface Text
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 4.12 Interface CDATASection
-    Status: N/A
+    Implementation: Full
+    Test Coverage : None
 
 4.13 Interface ProcessingInstruction
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 4.14 Interface Comment
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 ======================================================================
 5. RANGES
 ======================================================================
 
 5.1 Introduction to "DOM Ranges"
-    Status: N/A
+    - N/A
 
 5.2 Boundary points
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 5.3 Interface AbstractRange
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 5.4 Interface StaticRange
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 5.5 Interface Range
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 ======================================================================
 6. TRAVERSAL
 ======================================================================
 
 6.0 Traversal
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 6.1 Interface NodeIterator
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 6.2 Interface TreeWalker
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 6.3 Interface NodeFilter
-    Status: No test coverage
+    Implementation: Full
+    Test Coverage : None
 
 ======================================================================
 7. SETS
 ======================================================================
 
 7.1 Interface DOMTokenList
-    Status: No test coverage
-    Note: Missing implementation for 'Value' setter, needs element/attr implementing first.
+    Implementation: Partial
+    Test Coverage : None
+    Notes         :
+        - Missing implementation for 'Value' setter, needs element/attr implementing first.
 
 ======================================================================
 8. XPATH
 ======================================================================
 
 8.1 Interface XPathResult
-    Status: Not supported
+    - N/A
 
 8.2 Interface XPathExpression
-    Status: Not supported
+    - N/A
 
 8.3 Mixin XPathEvaluatorBase
-    Status: Not supported
+    - N/A
 
 8.4 Interface XPathEvaluator
-    Status: Not supported
+    - N/A
 
 ======================================================================
 9. XSLT
 ======================================================================
 
 9.1 Interface XSLTProcessor
-    Status: Not supported
+    - N/A
