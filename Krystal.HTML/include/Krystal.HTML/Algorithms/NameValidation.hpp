@@ -12,6 +12,12 @@
 
 namespace Krys::HTML
 {
+  enum class ValidateAndExtractContext : uint8
+  {
+    Attribute,
+    Element,
+  };
+
   class NameValidation
   {
   public:
@@ -113,50 +119,48 @@ namespace Krys::HTML
     }
 
     /// @see https://dom.spec.whatwg.org/#validate-and-extract
-    KRYS_NODISCARD static ExceptionOr<QualifiedName> ValidateAndExtract(const DOMString &namespaceUri,
-                                                                        const DOMString &qualifiedName,
-                                                                        const DOMString &context) noexcept
+    KRYS_NODISCARD static ExceptionOr<QualifiedName>
+      ValidateAndExtract(DOMStringAtom namespaceURI, DOMStringAtom qualifiedName,
+                         ValidateAndExtractContext context) noexcept
     {
-      Maybe<DOMString> namespaceURI;
-      if (!namespaceUri.empty())
+      if (namespaceURI == DOMStringAtom::Empty())
       {
-        namespaceURI = namespaceUri;
+        namespaceURI = DOMStringAtom::Null();
       }
 
-      Maybe<DOMString> prefix;
+      DOMStringAtom prefix = DOMStringAtom::Null();
 
-      DOMString localName = qualifiedName;
-      if (qualifiedName.contains(':'))
+      DOMStringAtom localName = qualifiedName;
+      if (localName.View().contains(':'))
       {
-        auto splitResult = StringAlgorithms::StrictlySplit(qualifiedName, ':');
+        auto splitResult = StringAlgorithms::StrictlySplit(localName.View(), ':');
         prefix = splitResult[0];
         localName = splitResult[1];
 
-        if (!IsValidNamespacePrefix(prefix.value()))
+        if (!IsValidNamespacePrefix(prefix.View()))
         {
           return Exception {ExceptionCode::InvalidCharacterError};
         }
       }
 
-      assert(!prefix.has_value() || IsValidNamespacePrefix(prefix.value()));
+      assert(prefix == DOMStringAtom::Null() || IsValidNamespacePrefix(prefix.View()));
 
-      // TODO(FIX, PERF): use an enum for context instead of string comparison.
-      if (context == u8"attribute")
+      if (context == ValidateAndExtractContext::Attribute)
       {
-        if (!IsValidAttributeLocalName(localName))
+        if (!IsValidAttributeLocalName(localName.View()))
         {
           return Exception {ExceptionCode::InvalidCharacterError};
         }
       }
-      else if (context == u8"element")
+      else if (context == ValidateAndExtractContext::Element)
       {
-        if (!IsValidElementLocalName(localName))
+        if (!IsValidElementLocalName(localName.View()))
         {
           return Exception {ExceptionCode::InvalidCharacterError};
         }
       }
 
-      if (prefix.has_value() && !namespaceURI.has_value())
+      if (prefix != DOMStringAtom::Null() && namespaceURI == DOMStringAtom::Null())
       {
         return Exception {ExceptionCode::NamespaceError};
       }
@@ -172,8 +176,8 @@ namespace Krys::HTML
       }
 
       QualifiedName qualifiedNameStruct;
-      qualifiedNameStruct.NamespaceURI = DOMStringAtom {namespaceURI.value_or(u8"")};
-      qualifiedNameStruct.Prefix = DOMStringAtom {prefix.value_or(u8"")};
+      qualifiedNameStruct.NamespaceURI = namespaceURI;
+      qualifiedNameStruct.Prefix = prefix;
       qualifiedNameStruct.LocalName = DOMStringAtom {localName};
 
       return qualifiedNameStruct;

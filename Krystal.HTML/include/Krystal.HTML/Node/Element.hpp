@@ -77,9 +77,9 @@ namespace Krys::HTML
     KRYS_NODISCARD Maybe<DOMString> GetAttribute(DOMStringAtom qualifiedName) const noexcept;
     KRYS_NODISCARD Maybe<DOMString> GetAttributeNS(DOMStringAtom namespaceURI,
                                                    DOMStringAtom localName) const noexcept;
-    ExceptionOr<void> SetAttribute(DOMStringAtom qualifiedName, DOMStringAtom value) noexcept;
+    ExceptionOr<void> SetAttribute(DOMStringAtom qualifiedName, DOMString &&value) noexcept;
     ExceptionOr<void> SetAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom qualifiedName,
-                                     DOMStringAtom value) noexcept;
+                                     DOMString &&value) noexcept;
     void RemoveAttribute(DOMStringAtom qualifiedName) noexcept;
     void RemoveAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) noexcept;
     bool ToggleAttribute(DOMStringAtom qualifiedName, const Maybe<bool> &force) noexcept;

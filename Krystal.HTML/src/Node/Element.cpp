@@ -96,7 +96,7 @@ namespace Krys::HTML
     return attr->Value();
   }
 
-  ExceptionOr<void> Element::SetAttribute(DOMStringAtom qualifiedName, DOMStringAtom value) noexcept
+  ExceptionOr<void> Element::SetAttribute(DOMStringAtom qualifiedName, DOMString &&value) noexcept
   {
     if (!NameValidation::IsValidAttributeLocalName(qualifiedName.View()))
     {
@@ -109,13 +109,29 @@ namespace Krys::HTML
     // TODO(IMPL): Let verifiedValue be the result of calling get trusted type compliant attribute value with
     // qualifiedName, null, this, and value. [TRUSTED-TYPES]
 
+    // TODO(IMPL): Implement this method
+
     return {};
   }
 
   ExceptionOr<void> Element::SetAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom qualifiedName,
-                                            DOMStringAtom value) noexcept
+                                            DOMString &&value) noexcept
   {
-    // TODO(IMPL): Implement this method
+    auto validateAndExtractResult =
+      NameValidation::ValidateAndExtract(namespaceURI, qualifiedName, ValidateAndExtractContext::Attribute);
+
+    if (validateAndExtractResult.HasException())
+    {
+      return validateAndExtractResult.ReleaseException();
+    }
+
+    // SPEC-VIOLATION(TRUSTED-TYPES): Let verifiedValue be the result of calling get trusted type compliant
+    // attribute value with localName, namespace, this, and value.
+
+    const auto &qName = validateAndExtractResult.Value();
+    ElementAttributeAlgorithms::SetAttributeValue(*this, qName.LocalName, std::move(value), qName.Prefix,
+                                                  qName.NamespaceURI);
+
     return {};
   }
 
@@ -137,14 +153,23 @@ namespace Krys::HTML
 
   bool Element::HasAttribute(DOMStringAtom qualifiedName) const noexcept
   {
-    // TODO(IMPL): Implement this method
-    return false;
+    // TODO(IMPL): If this is in the HTML namespace and its node document is an HTML document, then set
+    // qualifiedName to qualifiedName in ASCII lowercase.
+
+    return std::ranges::any_of(_attributes,
+                               [&](const Ref<Attr> &attr) { return attr->Name() == qualifiedName; });
   }
 
   bool Element::HasAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) const noexcept
   {
-    // TODO(IMPL): Implement this method
-    return false;
+    if (namespaceURI == DOMStringAtom::Empty())
+    {
+      namespaceURI = DOMStringAtom::Null();
+    }
+
+    return std::ranges::any_of(
+      _attributes, [&](const Ref<Attr> &attr)
+      { return attr->NamespaceURI() == namespaceURI && attr->LocalName() == localName; });
   }
 
   ExceptionOr<Ref<Attr>> Element::RemoveAttributeNode(Attr &attribute) noexcept

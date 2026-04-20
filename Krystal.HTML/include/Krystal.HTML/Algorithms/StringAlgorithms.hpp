@@ -11,11 +11,11 @@ namespace Krys::HTML
   /// @see https://infra.spec.whatwg.org/#string-algorithms
   class StringAlgorithms
   {
-    using position_variable = DOMString::const_iterator;
+    using position_variable = DOMStringView::const_iterator;
 
   public:
     /// @see https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace
-    KRYS_NODISCARD static DOMString StripLeadingAndTrailingWhitespace(const DOMString &input) noexcept
+    KRYS_NODISCARD static DOMString StripLeadingAndTrailingWhitespace(DOMStringView input) noexcept
     {
       auto start = input.begin();
       auto end = input.end();
@@ -32,8 +32,7 @@ namespace Krys::HTML
 
     /// @see https://infra.spec.whatwg.org/#collect-a-sequence-of-code-points
     template <typename TFunc>
-    KRYS_NODISCARD static DOMString CollectCodePointSequence(const DOMString &input,
-                                                             position_variable &position,
+    KRYS_NODISCARD static DOMString CollectCodePointSequence(DOMStringView input, position_variable &position,
                                                              TFunc &&condition) noexcept
     {
       DOMString result;
@@ -54,7 +53,7 @@ namespace Krys::HTML
     }
 
     /// @see https://infra.spec.whatwg.org/#skip-ascii-whitespace
-    static void SkipWhitespace(const DOMString &input, position_variable &position) noexcept
+    static void SkipWhitespace(DOMStringView input, position_variable &position) noexcept
     {
       while (position != input.end() && IsASCIIWhitespace(*position))
       {
@@ -63,7 +62,7 @@ namespace Krys::HTML
     }
 
     /// @see https://infra.spec.whatwg.org/#strictly-split
-    KRYS_NODISCARD static List<DOMString> StrictlySplit(const DOMString &input, char32 delimiter) noexcept
+    KRYS_NODISCARD static List<DOMString> StrictlySplit(DOMStringView input, char32 delimiter) noexcept
     {
       List<DOMString> tokens;
       auto position = input.begin();
@@ -83,7 +82,7 @@ namespace Krys::HTML
     }
 
     /// @see https://infra.spec.whatwg.org/#split-on-ascii-whitespace
-    KRYS_NODISCARD static List<DOMString> SplitOnWhitespace(const DOMString &input)
+    KRYS_NODISCARD static List<DOMString> SplitOnWhitespace(DOMStringView input)
     {
       List<DOMString> tokens;
       auto position = input.begin();
@@ -100,7 +99,7 @@ namespace Krys::HTML
     }
 
     /// @see https://infra.spec.whatwg.org/#split-on-commas
-    KRYS_NODISCARD static List<DOMString> SplitOnComma(const DOMString &input)
+    KRYS_NODISCARD static List<DOMString> SplitOnComma(DOMStringView input)
     {
       List<DOMString> tokens;
       auto position = input.begin();

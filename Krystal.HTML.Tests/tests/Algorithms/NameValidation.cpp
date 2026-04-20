@@ -192,8 +192,8 @@ namespace Krys::Tests
   {
     SECTION("Contains ':' and has invalid prefix")
     {
-      auto result =
-        NameValidation::ValidateAndExtract(u8"http://www.w3.org/1999/xhtml", u8":foo", u8"element");
+      auto result = NameValidation::ValidateAndExtract(u8"http://www.w3.org/1999/xhtml", u8":foo",
+                                                       ValidateAndExtractContext::Element);
       REQUIRE(result.HasException());
       REQUIRE(result.GetException().Code() == ExceptionCode::InvalidCharacterError);
     }
@@ -202,24 +202,24 @@ namespace Krys::Tests
     {
       SECTION("Qualified name with empty local name is invalid")
       {
-        auto result =
-          NameValidation::ValidateAndExtract(u8"http://www.w3.org/1999/xhtml", u8"foo:", u8"attribute");
+        auto result = NameValidation::ValidateAndExtract(u8"http://www.w3.org/1999/xhtml", u8"foo:",
+                                                         ValidateAndExtractContext::Attribute);
         REQUIRE(result.HasException());
         REQUIRE(result.GetException().Code() == ExceptionCode::InvalidCharacterError);
       }
 
       SECTION("Qualified name with invalid characters is invalid")
       {
-        auto result =
-          NameValidation::ValidateAndExtract(u8"http://www.w3.org/1999/xhtml", u8"foo:bar=", u8"attribute");
+        auto result = NameValidation::ValidateAndExtract(u8"http://www.w3.org/1999/xhtml", u8"foo:bar=",
+                                                         ValidateAndExtractContext::Attribute);
         REQUIRE(result.HasException());
         REQUIRE(result.GetException().Code() == ExceptionCode::InvalidCharacterError);
       }
 
       SECTION("Valid qualified name")
       {
-        auto result =
-          NameValidation::ValidateAndExtract(u8"http://www.w3.org/1999/xhtml", u8"foo:bar", u8"attribute");
+        auto result = NameValidation::ValidateAndExtract(u8"http://www.w3.org/1999/xhtml", u8"foo:bar",
+                                                         ValidateAndExtractContext::Attribute);
         REQUIRE_FALSE(result.HasException());
         REQUIRE(result.Value().NamespaceURI.View() == u8"http://www.w3.org/1999/xhtml");
         REQUIRE(result.Value().Prefix.View() == u8"foo");
@@ -231,24 +231,24 @@ namespace Krys::Tests
     {
       SECTION("Qualified name with empty local name is invalid")
       {
-        auto result =
-          NameValidation::ValidateAndExtract(u8"http://www.w3.org/1999/xhtml", u8"foo:", u8"element");
+        auto result = NameValidation::ValidateAndExtract(u8"http://www.w3.org/1999/xhtml", u8"foo:",
+                                                         ValidateAndExtractContext::Element);
         REQUIRE(result.HasException());
         REQUIRE(result.GetException().Code() == ExceptionCode::InvalidCharacterError);
       }
 
       SECTION("Qualified name with invalid characters is invalid")
       {
-        auto result =
-          NameValidation::ValidateAndExtract(u8"http://www.w3.org/1999/xhtml", u8"foo:bar>", u8"element");
+        auto result = NameValidation::ValidateAndExtract(u8"http://www.w3.org/1999/xhtml", u8"foo:bar>",
+                                                         ValidateAndExtractContext::Element);
         REQUIRE(result.HasException());
         REQUIRE(result.GetException().Code() == ExceptionCode::InvalidCharacterError);
       }
 
       SECTION("Valid qualified name")
       {
-        auto result =
-          NameValidation::ValidateAndExtract(u8"http://www.w3.org/1999/xhtml", u8"foo:bar", u8"element");
+        auto result = NameValidation::ValidateAndExtract(u8"http://www.w3.org/1999/xhtml", u8"foo:bar",
+                                                         ValidateAndExtractContext::Element);
         REQUIRE_FALSE(result.HasException());
         REQUIRE(result.Value().NamespaceURI.View() == u8"http://www.w3.org/1999/xhtml");
         REQUIRE(result.Value().Prefix.View() == u8"foo");
@@ -258,15 +258,15 @@ namespace Krys::Tests
 
     SECTION("prefix with missing namespace is NamespaceError")
     {
-      auto result = NameValidation::ValidateAndExtract(u8"", u8"foo:bar", u8"element");
+      auto result = NameValidation::ValidateAndExtract(u8"", u8"foo:bar", ValidateAndExtractContext::Element);
       REQUIRE(result.HasException());
       REQUIRE(result.GetException().Code() == ExceptionCode::NamespaceError);
     }
 
     SECTION("xml prefix with non-xml namespace is an error")
     {
-      auto result =
-        NameValidation::ValidateAndExtract(u8"http://www.w3.org/1999/xhtml", u8"xml:foo", u8"element");
+      auto result = NameValidation::ValidateAndExtract(u8"http://www.w3.org/1999/xhtml", u8"xml:foo",
+                                                       ValidateAndExtractContext::Element);
       REQUIRE(result.HasException());
       REQUIRE(result.GetException().Code() == ExceptionCode::NamespaceError);
     }
@@ -274,7 +274,7 @@ namespace Krys::Tests
     SECTION("xml prefix with xml namespace is valid")
     {
       auto result = NameValidation::ValidateAndExtract(u8"http://www.w3.org/XML/1998/namespace", u8"xml:foo",
-                                                       u8"element");
+                                                       ValidateAndExtractContext::Element);
       REQUIRE_FALSE(result.HasException());
       REQUIRE(result.Value().NamespaceURI.View() == u8"http://www.w3.org/XML/1998/namespace");
       REQUIRE(result.Value().Prefix.View() == u8"xml");
@@ -283,16 +283,16 @@ namespace Krys::Tests
 
     SECTION("xmlns prefix with non xmlns namespace is an error")
     {
-      auto result =
-        NameValidation::ValidateAndExtract(u8"http://www.w3.org/1999/xhtml", u8"xmlns:foo", u8"element");
+      auto result = NameValidation::ValidateAndExtract(u8"http://www.w3.org/1999/xhtml", u8"xmlns:foo",
+                                                       ValidateAndExtractContext::Element);
       REQUIRE(result.HasException());
       REQUIRE(result.GetException().Code() == ExceptionCode::NamespaceError);
     }
 
     SECTION("xmlns prefix with xmlns namespace is valid")
     {
-      auto result =
-        NameValidation::ValidateAndExtract(u8"http://www.w3.org/2000/xmlns/", u8"xmlns:foo", u8"element");
+      auto result = NameValidation::ValidateAndExtract(u8"http://www.w3.org/2000/xmlns/", u8"xmlns:foo",
+                                                       ValidateAndExtractContext::Element);
       REQUIRE_FALSE(result.HasException());
       REQUIRE(result.Value().NamespaceURI.View() == u8"http://www.w3.org/2000/xmlns/");
       REQUIRE(result.Value().Prefix.View() == u8"xmlns");

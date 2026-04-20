@@ -21,16 +21,18 @@ namespace Krys::Tests
     };
 
     DOMString input = u8"foo bar baz";
-    auto position = input.begin();
+    DOMStringView inputView(input);
 
-    REQUIRE(StringAlgorithms::CollectCodePointSequence(input, position, condition) == u8"foo");
+    auto position = inputView.begin();
+
+    REQUIRE(StringAlgorithms::CollectCodePointSequence(inputView, position, condition) == u8"foo");
     ++position; // skip the space
 
-    REQUIRE(StringAlgorithms::CollectCodePointSequence(input, position, condition) == u8"bar");
+    REQUIRE(StringAlgorithms::CollectCodePointSequence(inputView, position, condition) == u8"bar");
     ++position; // skip the space
 
-    REQUIRE(StringAlgorithms::CollectCodePointSequence(input, position, condition) == u8"baz");
-    REQUIRE(position == input.end());
+    REQUIRE(StringAlgorithms::CollectCodePointSequence(inputView, position, condition) == u8"baz");
+    REQUIRE(position == inputView.end());
   }
 
   TEST_CASE("StringAlgorithms::IsASCIIWhitespace", "[HTML][StringAlgorithms]")
@@ -56,9 +58,11 @@ namespace Krys::Tests
   TEST_CASE("StringAlgorithms::SkipWhitespace", "[HTML][StringAlgorithms]")
   {
     DOMString input = u8"   foo bar baz";
-    auto position = input.begin();
-    StringAlgorithms::SkipWhitespace(input, position);
-    REQUIRE(position == input.begin() + 3);
+    DOMStringView inputView(input);
+
+    auto position = inputView.begin();
+    StringAlgorithms::SkipWhitespace(inputView, position);
+    REQUIRE(position == inputView.begin() + 3);
   }
 
   TEST_CASE("StringAlgorithms::SplitOnWhitespace", "[HTML][StringAlgorithms]")
