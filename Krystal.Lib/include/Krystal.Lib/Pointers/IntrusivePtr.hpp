@@ -314,6 +314,22 @@ namespace Krys
     return !(lhs == rhs);
   }
 
+  template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable, typename U>
+  requires(ConvertibleTo<RawPtr<U>, RawPtr<T>>)
+  constexpr inline bool operator==(RawPtr<U> lhs,
+                                   const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &rhs) noexcept
+  {
+    return lhs == rhs.get();
+  }
+
+  template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable, typename U>
+  requires(ConvertibleTo<RawPtr<U>, RawPtr<T>>)
+  constexpr inline bool operator!=(RawPtr<U> lhs,
+                                   const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &rhs) noexcept
+  {
+    return lhs != rhs.get();
+  }
+
   template <typename TExpected, typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
   KRYS_NODISCARD constexpr inline bool
     Is(const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &source) noexcept

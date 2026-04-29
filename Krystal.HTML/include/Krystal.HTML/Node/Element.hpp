@@ -16,6 +16,7 @@
 namespace Krys::HTML
 {
   class Attr;
+  class CustomElementRegistry;
   class HTMLCollection;
   class HTMLSlotElement;
   class NamedNodeMap;
@@ -32,6 +33,7 @@ namespace Krys::HTML
   private:
     QualifiedName _qualifiedName;
     RefPtr<ShadowRoot> _shadowRoot;
+    RefPtr<CustomElementRegistry> _customElementRegistry;
     UniquePtr<ElementRareData> _elementRareData;
     List<Ref<Attr>> _attributes;
 
@@ -53,15 +55,7 @@ namespace Krys::HTML
     {
       return _qualifiedName.NamespaceURI;
     }
-    KRYS_NODISCARD DOMString TagName() const noexcept
-    {
-      auto qualifiedName = _qualifiedName.Name();
-      // TODO(impl):
-      // If this is in the HTML namespace and its node document is an HTML document, then set qualifiedName to
-      // qualifiedName in ASCII uppercase.
-
-      return qualifiedName;
-    }
+    KRYS_NODISCARD DOMString TagName() const noexcept;
 
     void Id(DOMString &&id) noexcept;
     KRYS_NODISCARD DOMString Id() const noexcept;
@@ -72,6 +66,7 @@ namespace Krys::HTML
     KRYS_NODISCARD DOMString Slot() const noexcept;
 
     KRYS_NODISCARD bool HasAttributes() const noexcept;
+    // TODO(impl):
     KRYS_NODISCARD NamedNodeMap &Attributes() const noexcept;
     KRYS_NODISCARD List<DOMString> GetAttributeNames() const noexcept;
     KRYS_NODISCARD Maybe<DOMString> GetAttribute(DOMStringAtom qualifiedName) const noexcept;
@@ -93,21 +88,14 @@ namespace Krys::HTML
     ExceptionOr<RefPtr<Attr>> SetAttributeNodeNS(Attr &attr) noexcept;
     ExceptionOr<Ref<Attr>> RemoveAttributeNode(Attr &attr) noexcept;
 
-    Ref<ShadowRoot> AttachShadow(const ShadowRootInit &init) noexcept;
-    KRYS_NODISCARD RawPtr<ShadowRoot> ShadowRoot() const noexcept
-    {
-      return _shadowRoot.get();
-    }
+    ExceptionOr<Ref<ShadowRoot>> AttachShadow(const ShadowRootInit &init) noexcept;
+    KRYS_NODISCARD RefPtr<ShadowRoot> ShadowRoot() const noexcept;
 
-    KRYS_NODISCARD RawPtr<CustomElementRegistry> CustomElementRegistry() const noexcept
-    {
-      // TODO(impl): Implement custom element registry and return it here.
-      return nullptr;
-    }
+    KRYS_NODISCARD RefPtr<CustomElementRegistry> CustomElementRegistry() const noexcept;
 
-    KRYS_NODISCARD RawPtr<Element> Closest(const DOMString &selectors) noexcept;
-    KRYS_NODISCARD bool Matches(const DOMString &selectors) const noexcept;
-    KRYS_NODISCARD bool WebkitMatchesSelector(const DOMString &selectors) const noexcept
+    KRYS_NODISCARD RefPtr<Element> Closest(DOMStringView selectors) noexcept;
+    KRYS_NODISCARD bool Matches(DOMStringView selectors) const noexcept;
+    KRYS_NODISCARD bool WebkitMatchesSelector(DOMStringView selectors) const noexcept
     {
       return Matches(selectors);
     }
@@ -117,8 +105,8 @@ namespace Krys::HTML
                                                               DOMStringAtom localName) noexcept;
     KRYS_NODISCARD Ref<HTMLCollection> GetElementsByClassName(const DOMString &classNames) noexcept;
 
-    RawPtr<Element> InsertAdjacentElement(InsertAdjacentWhere where, Element &element) noexcept;
-    void InsertAdjacentText(InsertAdjacentWhere where, const DOMString &data) noexcept;
+    ExceptionOr<RawPtr<Element>> InsertAdjacentElement(InsertAdjacentWhere where, Element &element) noexcept;
+    ExceptionOr<void> InsertAdjacentText(InsertAdjacentWhere where, DOMString &&data) noexcept;
 
 #pragma endregion
 

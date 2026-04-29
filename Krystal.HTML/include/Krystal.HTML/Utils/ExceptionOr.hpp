@@ -70,6 +70,12 @@ namespace Krys::HTML
       return _value.value();
     }
 
+    KRYS_NODISCARD value_type &Value() noexcept
+    {
+      assert(!_wasReleased);
+      return _value.value();
+    }
+
     KRYS_NODISCARD value_type &&ReleaseValue() noexcept
     {
       assert(!std::exchange(_wasReleased, true));
@@ -117,6 +123,11 @@ namespace Krys::HTML
     }
 
     KRYS_NODISCARD const ReturnReferenceType &Value() const noexcept
+    {
+      return *_value.Value();
+    }
+
+    KRYS_NODISCARD ReturnReferenceType &Value() noexcept
     {
       return *_value.Value();
     }

@@ -39,6 +39,8 @@
     <ClInclude Include="include\Krystal.HTML\Algorithms\ChildNodeAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\ElementAttributeAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\IteratorAlgorithms.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\ParentNodeAlgorithms.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\ShadowRootAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOMTokenList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventPath.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventTargetFlag.hpp" />
@@ -149,6 +151,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Algorithms\ElementAttributeAlgorithms.cpp" />
+    <ClCompile Include="src\Algorithms\ParentNodeAlgorithms.cpp" />
+    <ClCompile Include="src\Algorithms\ShadowRootAlgorithms.cpp" />
     <ClCompile Include="src\DOMTokenList.cpp" />
     <ClCompile Include="src\Algorithms\IteratorAlgorithms.cpp" />
     <ClCompile Include="src\HTMLElement\HTMLSlotElement.cpp" />

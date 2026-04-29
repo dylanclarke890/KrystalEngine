@@ -4,6 +4,8 @@
 #include "Krystal.HTML/Algorithms/ElementAttributeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/NameValidation.hpp"
+#include "Krystal.HTML/Algorithms/ParentNodeAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/SlotAssignmentAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
@@ -12,6 +14,7 @@
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/ElementRareData.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/NodeList/HTMLCollection.hpp"
 #include "Krystal.HTML/NodeList/NodeList.hpp"
 
@@ -23,6 +26,16 @@ namespace Krys::HTML
   }
 
 #pragma region Element
+
+  DOMString Element::TagName() const noexcept
+  {
+    auto qualifiedName = _qualifiedName.Name();
+
+    // TODO(impl): If this is in the HTML namespace and its node document is an HTML document, then set
+    // qualifiedName to qualifiedName in ASCII uppercase.
+
+    return qualifiedName;
+  }
 
   void Element::Id(DOMString &&id) noexcept
   {
@@ -244,6 +257,88 @@ namespace Krys::HTML
     return ShareRef(attr);
   }
 
+  ExceptionOr<Ref<ShadowRoot>> Element::AttachShadow(const ShadowRootInit &init) noexcept
+  {
+    auto registry =
+      init.CustomElementRegistry ? init.CustomElementRegistry : NodeDocument().CustomElementRegistry().get();
+
+    if (registry != nullptr && !registry->IsScoped() && registry != NodeDocument().CustomElementRegistry())
+    {
+      return Exception {ExceptionCode::NotSupportedError};
+    }
+
+    return ShadowRootAlgorithms::AttachShadowRoot(*this, init.Mode, init.Clonable, init.Serializable,
+                                                  init.DelegatesFocus, init.SlotAssignment, registry);
+  }
+
+  RefPtr<ShadowRoot> Element::ShadowRoot() const noexcept
+  {
+    if (!_shadowRoot || _shadowRoot->Mode() == ShadowRootMode::Closed)
+    {
+      return nullptr;
+    }
+
+    return _shadowRoot;
+  }
+
+  RefPtr<CustomElementRegistry> Element::CustomElementRegistry() const noexcept
+  {
+    return _customElementRegistry;
+  }
+
+  RefPtr<Element> Element::Closest(DOMStringView selectors) noexcept
+  {
+    // TODO(impl): implement this when we have css parsing.
+    return nullptr;
+  }
+
+  bool Element::Matches(DOMStringView selectors) const noexcept
+  {
+    // TODO(impl): implement this when we have css parsing.
+    return false;
+  }
+
+  Ref<HTMLCollection> Element::GetElementsByTagName(DOMStringAtom qualifiedName) noexcept
+  {
+    // TODO(impl): implement this
+    return CreateRef<HTMLCollection>(*this);
+  }
+
+  Ref<HTMLCollection> Element::GetElementsByTagNameNS(DOMStringAtom namespaceURI,
+                                                      DOMStringAtom localName) noexcept
+  {
+    // TODO(impl): implement this
+    return CreateRef<HTMLCollection>(*this);
+  }
+
+  Ref<HTMLCollection> Element::GetElementsByClassName(const DOMString &classNames) noexcept
+  {
+    // TODO(impl): implement this
+    return CreateRef<HTMLCollection>(*this);
+  }
+
+  ExceptionOr<RawPtr<Element>> Element::InsertAdjacentElement(InsertAdjacentWhere where,
+                                                              Element &element) noexcept
+  {
+    if (auto result = MutationAlgorithms::InsertAdjacent(*this, where, element); result.HasException())
+    {
+      return result.ReleaseException();
+    }
+
+    return &element;
+  }
+
+  ExceptionOr<void> Element::InsertAdjacentText(InsertAdjacentWhere where, DOMString &&data) noexcept
+  {
+    auto textNode = CreateRef<Text>(NodeDocument(), Krys::Move(data));
+    if (auto result = MutationAlgorithms::InsertAdjacent(*this, where, *textNode); result.HasException())
+    {
+      return result.ReleaseException();
+    }
+
+    return {};
+  }
+
 #pragma endregion
 
 #pragma region Node
@@ -260,7 +355,7 @@ namespace Krys::HTML
 
   ExceptionOr<void> Element::SetTextContent(DOMString &&value) noexcept
   {
-    return ExceptionOr<void>();
+    return MutationAlgorithms::StringReplaceAll(Krys::Move(value), *this);
   }
 
 #pragma endregion
@@ -347,61 +442,22 @@ namespace Krys::HTML
 
   ExceptionOr<void> Element::Prepend(const List<NodeOrString> &nodes) noexcept
   {
-    auto node = MutationAlgorithms::ConvertNodesIntoNode(nodes, NodeDocument());
-    if (node.HasException())
-    {
-      return node.ReleaseException();
-    }
-
-    if (auto result = MutationAlgorithms::PreInsert(*node.Value(), *this, FirstChild());
-        result.HasException())
-    {
-      return result.ReleaseException();
-    }
-
-    return {};
+    return ParentNodeAlgorithms::Prepend(*this, nodes);
   }
 
   ExceptionOr<void> Element::Append(const List<NodeOrString> &nodes) noexcept
   {
-    auto node = MutationAlgorithms::ConvertNodesIntoNode(nodes, NodeDocument());
-    if (node.HasException())
-    {
-      return node.ReleaseException();
-    }
-
-    if (auto result = MutationAlgorithms::Append(*node.Value(), *this); result.HasException())
-    {
-      return result.ReleaseException();
-    }
-
-    return {};
+    return ParentNodeAlgorithms::Append(*this, nodes);
   }
 
   ExceptionOr<void> Element::ReplaceChildren(const List<NodeOrString> &nodes) noexcept
   {
-    auto node = MutationAlgorithms::ConvertNodesIntoNode(nodes, NodeDocument());
-    if (node.HasException())
-    {
-      return node.ReleaseException();
-    }
-
-    if (auto result = MutationAlgorithms::ReplaceAll(node.Value().get(), *this); result.HasException())
-    {
-      return result.ReleaseException();
-    }
-
-    return {};
+    return ParentNodeAlgorithms::ReplaceChildren(*this, nodes);
   }
 
   ExceptionOr<void> Element::MoveBefore(Node &node, RawPtr<Node> refChild) noexcept
   {
-    if (&node == refChild)
-    {
-      refChild = node.NextSibling();
-    }
-
-    return MutationAlgorithms::Move(node, *this, refChild);
+    return ParentNodeAlgorithms::MoveBefore(*this, node, refChild);
   }
 
   ExceptionOr<RefPtr<Element>> Element::QuerySelector(const DOMString &selectors) noexcept

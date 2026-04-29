@@ -128,7 +128,7 @@ namespace Krys::HTML
     KRYS_NODISCARD static bool IsDocTypeOrDocTypeFollows(RawPtr<Node> node) noexcept;
     KRYS_NODISCARD static bool IsExclusiveTextNode(const Node &node) noexcept;
 
-    KRYS_NODISCARD static RawPtr<ShadowRoot> GetShadowRoot(const Node &node) noexcept;
+    KRYS_NODISCARD static RefPtr<ShadowRoot> GetShadowRoot(const Node &node) noexcept;
 
     KRYS_NODISCARD static RawPtr<const Node> ChildAt(const ContainerNode &node, size_t index) noexcept;
     KRYS_NODISCARD static RawPtr<Node> ChildAt(ContainerNode &node, size_t index) noexcept;

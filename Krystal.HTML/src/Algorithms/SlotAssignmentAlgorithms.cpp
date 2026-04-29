@@ -41,7 +41,7 @@ namespace Krys::HTML
       return nullptr;
     }
 
-    RawPtr<ShadowRoot> shadow = parent->ShadowRoot();
+    RefPtr<ShadowRoot> shadow = parent->ShadowRoot();
 
     if (shadow == nullptr || (open && shadow->Mode() != ShadowRootMode::Open))
     {

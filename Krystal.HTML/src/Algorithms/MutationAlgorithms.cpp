@@ -714,7 +714,8 @@ namespace Krys::HTML
     auto &parentRoot = TreeQueries::Root(parent);
     if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(parentRoot))
     {
-      if (auto *slot = DynamicDowncast<HTMLSlotElement>(parent); slot && slot->AssignedNodes().empty())
+      auto *slot = DynamicDowncast<HTMLSlotElement>(parent);
+      if (slot && slot->AssignedNodes().empty())
       {
         SlotAssignmentAlgorithms::SignalSlotChange(*slot);
       }
@@ -755,40 +756,6 @@ namespace Krys::HTML
     return {};
   }
 
-  ExceptionOr<Ref<Node>> MutationAlgorithms::ConvertNodesIntoNode(const List<NodeOrString> &nodes,
-                                                                  Document &document) noexcept
-  {
-    List<Ref<Node>> nodeList;
-    for (auto &nodeOrString : nodes)
-    {
-      if (std::holds_alternative<DOMString>(nodeOrString))
-      {
-        DOMString copy = std::get<DOMString>(nodeOrString);
-        nodeList.emplace_back(CreateRef<Text>(document, Krys::Move(copy)));
-      }
-      else
-      {
-        nodeList.push_back(std::get<Ref<Node>>(nodeOrString));
-      }
-    }
-
-    if (nodeList.size() == 1)
-    {
-      return nodeList[0];
-    }
-
-    auto fragment = CreateRef<DocumentFragment>(document);
-    for (auto &node : nodeList)
-    {
-      if (auto result = Append(*node, *fragment); result.HasException())
-      {
-        return result.ReleaseException();
-      }
-    }
-
-    return AdoptRef<Node>(*fragment);
-  }
-
   Ref<Node> MutationAlgorithms::CloneNode(Node &node, RawPtr<Document> document, bool subtree,
                                           RawPtr<ContainerNode> parent,
                                           RawPtr<CustomElementRegistry> fallbackRegistry) noexcept
@@ -820,7 +787,7 @@ namespace Krys::HTML
     if (auto *element = DynamicDowncast<Element>(node))
     {
       auto *elementCopy = DynamicDowncast<Element>(copy.get());
-      if (auto *shadowRoot = element->ShadowRoot(); shadowRoot && shadowRoot->Clonable())
+      if (auto shadowRoot = element->ShadowRoot(); shadowRoot && shadowRoot->Clonable())
       {
         assert(elementCopy->ShadowRoot() && !elementCopy->ShadowRoot()->Clonable());
         // TODO(impl):
@@ -866,5 +833,112 @@ namespace Krys::HTML
     assert(copy);
 
     return copy;
+  }
+
+  ExceptionOr<Ref<Node>> MutationAlgorithms::ConvertNodesIntoNode(const List<NodeOrString> &nodes,
+                                                                  Document &document) noexcept
+  {
+    List<Ref<Node>> nodeList;
+    for (auto &nodeOrString : nodes)
+    {
+      if (std::holds_alternative<DOMString>(nodeOrString))
+      {
+        DOMString copy = std::get<DOMString>(nodeOrString);
+        nodeList.emplace_back(CreateRef<Text>(document, Krys::Move(copy)));
+      }
+      else
+      {
+        nodeList.push_back(std::get<Ref<Node>>(nodeOrString));
+      }
+    }
+
+    if (nodeList.size() == 1)
+    {
+      return nodeList[0];
+    }
+
+    auto fragment = CreateRef<DocumentFragment>(document);
+    for (auto &node : nodeList)
+    {
+      if (auto result = Append(*node, *fragment); result.HasException())
+      {
+        return result.ReleaseException();
+      }
+    }
+
+    return AdoptRef<Node>(*fragment);
+  }
+
+  ExceptionOr<RawPtr<Node>> MutationAlgorithms::InsertAdjacent(Element &element, InsertAdjacentWhere where,
+                                                               Node &node) noexcept
+  {
+    switch (where)
+    {
+      case InsertAdjacentWhere::BeforeBegin:
+      {
+        if (element.ParentNode() == nullptr)
+        {
+          return nullptr;
+        }
+
+        auto result = PreInsert(node, *element.ParentNode(), &element);
+        if (result.HasException())
+        {
+          return result.ReleaseException();
+        }
+
+        return &result.Value();
+      }
+      case InsertAdjacentWhere::AfterBegin:
+      {
+        auto result = PreInsert(node, element, element.FirstChild());
+        if (result.HasException())
+        {
+          return result.ReleaseException();
+        }
+
+        return &result.Value();
+      }
+      case InsertAdjacentWhere::BeforeEnd:
+      {
+        auto result = PreInsert(node, element, nullptr);
+        if (result.HasException())
+        {
+          return result.ReleaseException();
+        }
+
+        return &result.Value();
+      }
+      case InsertAdjacentWhere::AfterEnd:
+      {
+        auto parent = element.ParentNode();
+        if (parent == nullptr)
+        {
+          return nullptr;
+        }
+
+        auto result = PreInsert(node, *parent, element.NextSibling());
+        if (result.HasException())
+        {
+          return result.ReleaseException();
+        }
+
+        return &result.Value();
+      }
+      default: return Exception {ExceptionCode::SyntaxError};
+    }
+  }
+
+  ExceptionOr<void> MutationAlgorithms::StringReplaceAll(DOMString &&string, ContainerNode &parent) noexcept
+  {
+    if (string.empty())
+    {
+      return ReplaceAll(nullptr, parent);
+    }
+    else
+    {
+      Ref<Text> textNode = CreateRef<Text>(parent.NodeDocument(), Krys::Move(string));
+      return ReplaceAll(textNode.get(), parent);
+    }
   }
 }

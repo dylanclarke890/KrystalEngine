@@ -34,7 +34,7 @@ namespace Krys::HTML
       return newData.ReleaseException();
     }
 
-    auto newNode = CreateRef<Text>(*OwnerDocument(), newData.ReleaseValue());
+    auto newNode = CreateRef<Text>(NodeDocument(), newData.ReleaseValue());
     if (auto parent = ShareRefPtr(ParentNode()))
     {
       if (auto insertResult = parent->InsertBefore(*newNode, ShareRefPtr(NextSibling()));

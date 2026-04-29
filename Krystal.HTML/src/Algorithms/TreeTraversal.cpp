@@ -105,7 +105,7 @@ namespace Krys::HTML
 
     if (auto *host = DynamicDowncast<Element>(current))
     {
-      if (auto *shadowRoot = host->ShadowRoot())
+      if (auto *shadowRoot = host->ShadowRoot().get())
       {
         return shadowRoot;
       }
@@ -141,7 +141,7 @@ namespace Krys::HTML
 
     if (auto *host = DynamicDowncast<Element>(current))
     {
-      if (auto *shadowRoot = host->ShadowRoot())
+      if (auto *shadowRoot = host->ShadowRoot().get())
       {
         return shadowRoot;
       }

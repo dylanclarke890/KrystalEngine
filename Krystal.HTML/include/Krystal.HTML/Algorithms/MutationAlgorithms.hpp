@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/Node/InsertAdjacentWhere.hpp"
 #include "Krystal.HTML/Node/NodeOrString.hpp"
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
@@ -13,6 +14,7 @@ namespace Krys::HTML
   class ContainerNode;
   class CustomElementRegistry;
   class Document;
+  class Element;
   class Node;
 
   struct SuppressObservers : public StronglyTypedBool<SuppressObservers>
@@ -67,7 +69,15 @@ namespace Krys::HTML
       CloneSingleNode(Node &node, Document &document,
                       RawPtr<CustomElementRegistry> fallbackRegistry = nullptr) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#convert-nodes-into-a-node
     KRYS_NODISCARD static ExceptionOr<Ref<Node>> ConvertNodesIntoNode(const List<NodeOrString> &nodes,
                                                                       Document &document) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#insert-adjacent
+    KRYS_NODISCARD static ExceptionOr<RawPtr<Node>>
+      InsertAdjacent(Element &element, InsertAdjacentWhere where, Node &node) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#string-replace-all
+    static ExceptionOr<void> StringReplaceAll(DOMString&& string, ContainerNode& parent) noexcept;
   };
 }

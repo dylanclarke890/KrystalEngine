@@ -1,6 +1,7 @@
 ﻿#include "Krystal.HTML/Node/DocumentFragment.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/ParentNodeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
@@ -27,7 +28,7 @@ namespace Krys::HTML
 
   ExceptionOr<void> DocumentFragment::SetTextContent(DOMString &&value) noexcept
   {
-    return {};
+    return MutationAlgorithms::StringReplaceAll(Krys::Move(value), *this);
   }
 
 #pragma endregion
@@ -66,62 +67,22 @@ namespace Krys::HTML
 
   ExceptionOr<void> DocumentFragment::Prepend(const List<NodeOrString> &nodes) noexcept
   {
-    auto node = MutationAlgorithms::ConvertNodesIntoNode(nodes, NodeDocument());
-    if (node.HasException())
-    {
-      return node.ReleaseException();
-    }
-
-    if (auto result = MutationAlgorithms::PreInsert(*node.Value(), *this, FirstChild());
-        result.HasException())
-    {
-      return result.ReleaseException();
-    }
-
-    return {};
+    return ParentNodeAlgorithms::Prepend(*this, nodes);
   }
 
   ExceptionOr<void> DocumentFragment::Append(const List<NodeOrString> &nodes) noexcept
   {
-    auto node = MutationAlgorithms::ConvertNodesIntoNode(nodes, NodeDocument());
-    if (node.HasException())
-    {
-      return node.ReleaseException();
-    }
-
-    if (auto result = MutationAlgorithms::Append(*node.Value(), *this); result.HasException())
-    {
-      return result.ReleaseException();
-    }
-
-    return {};
+    return ParentNodeAlgorithms::Append(*this, nodes);
   }
 
   ExceptionOr<void> DocumentFragment::ReplaceChildren(const List<NodeOrString> &nodes) noexcept
   {
-    auto node = MutationAlgorithms::ConvertNodesIntoNode(nodes, NodeDocument());
-    if (node.HasException())
-    {
-      return node.ReleaseException();
-    }
-
-    if (auto result = MutationAlgorithms::EnsurePreInsertValidity(*node.Value(), *this, nullptr);
-        result.HasException())
-    {
-      return result.ReleaseException();
-    }
-
-    return MutationAlgorithms::ReplaceAll(node.Value().get(), *this);
+    return ParentNodeAlgorithms::ReplaceChildren(*this, nodes);
   }
 
   ExceptionOr<void> DocumentFragment::MoveBefore(Node &node, RawPtr<Node> refChild) noexcept
   {
-    if (refChild == &node)
-    {
-      refChild = node.NextSibling();
-    }
-
-    return MutationAlgorithms::Move(node, *this, refChild);
+    return ParentNodeAlgorithms::MoveBefore(*this, node, refChild);
   }
 
   ExceptionOr<RefPtr<Element>> DocumentFragment::QuerySelector(const DOMString &selectors) noexcept
