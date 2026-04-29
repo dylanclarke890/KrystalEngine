@@ -9,7 +9,7 @@
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
-#include "Krystal.HTML/NodeList/NodeList.hpp"
+#include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.Lib/Types/SmallList.hpp"
 #include <catch_all.hpp>
 

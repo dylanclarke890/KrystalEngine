@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/NodeList/ChildNodeList.hpp"
+﻿#include "Krystal.HTML/Node/ChildNodeList.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/MutationObserver/MutationObserver.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"

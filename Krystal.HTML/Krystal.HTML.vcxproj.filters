@@ -138,7 +138,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\DocumentFragment.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\NodeList\NodeList.hpp">
+    <ClInclude Include="include\Krystal.HTML\Node\NodeList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\DocumentType.hpp">
@@ -192,7 +192,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\NodeRareData.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\NodeList\ChildNodeList.hpp">
+    <ClInclude Include="include\Krystal.HTML\Node\ChildNodeList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Ranges\AbstractRange.hpp">
@@ -222,7 +222,7 @@
     <ClInclude Include="include\Krystal.HTML\MutationObserver\CharacterDataMutationRecord.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\NodeList\StaticNodeList.hpp">
+    <ClInclude Include="include\Krystal.HTML\Node\StaticNodeList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationObserver.hpp">
@@ -243,7 +243,7 @@
     <ClInclude Include="include\Krystal.HTML\Utils\SmallNodeList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\NodeList\HTMLCollection.hpp">
+    <ClInclude Include="include\Krystal.HTML\Node\HTMLCollection.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\ElementRareData.hpp">
@@ -425,7 +425,7 @@
     <ClCompile Include="src\MutationObserver\TreeMutationRecord.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\NodeList\StaticNodeList.cpp">
+    <ClCompile Include="src\Node\StaticNodeList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MutationObserver\detail\EmptyNodeMutationRecord.cpp">
@@ -440,13 +440,13 @@
     <ClCompile Include="src\Algorithms\MutationAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\NodeList\ChildNodeList.cpp">
+    <ClCompile Include="src\Node\ChildNodeList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\NodeRareData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\NodeList\HTMLCollection.cpp">
+    <ClCompile Include="src\Node\HTMLCollection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\ParentNodeRareData.cpp">

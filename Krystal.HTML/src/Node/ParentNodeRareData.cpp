@@ -5,7 +5,7 @@
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
-#include "Krystal.HTML/NodeList/HTMLCollection.hpp"
+#include "Krystal.HTML/Node/HTMLCollection.hpp"
 
 namespace Krys::HTML
 {

@@ -5,7 +5,7 @@
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
-#include "Krystal.HTML/NodeList/NodeList.hpp"
+#include "Krystal.HTML/Node/NodeList.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

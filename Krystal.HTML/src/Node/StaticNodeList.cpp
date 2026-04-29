@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/NodeList/StaticNodeList.hpp"
+﻿#include "Krystal.HTML/Node/StaticNodeList.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"

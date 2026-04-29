@@ -15,8 +15,8 @@
 #include "Krystal.HTML/Node/ElementRareData.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
-#include "Krystal.HTML/NodeList/HTMLCollection.hpp"
-#include "Krystal.HTML/NodeList/NodeList.hpp"
+#include "Krystal.HTML/Node/HTMLCollection.hpp"
+#include "Krystal.HTML/Node/NodeList.hpp"
 
 namespace Krys::HTML
 {
