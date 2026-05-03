@@ -17,8 +17,7 @@ namespace Krys::HTML
   void Attr::SetExistingAttributeValue(Attr &attribute, DOMString &&value) noexcept
   {
     RefPtr<Element> element = attribute._ownerElement ? attribute._ownerElement.lock() : nullptr;
-
-    if (!element)
+    if (element == nullptr)
     {
       attribute._value = Krys::Move(value);
     }

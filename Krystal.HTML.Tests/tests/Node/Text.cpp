@@ -13,7 +13,7 @@ namespace Krys::Tests
 {
   using namespace Krys::HTML;
 
-  TEST_CASE("Text::SplitText", "[Text]")
+  TEST_CASE("Text::SplitText", "[HTML][Text]")
   {
     auto doc = CreateRef<Document>();
     auto textNode = CreateRef<Krys::HTML::Text>(*doc, u8"Hello, world!");
@@ -24,7 +24,7 @@ namespace Krys::Tests
     REQUIRE(splitResult.Value()->Data() == u8"world!");
   }
 
-  TEST_CASE("Text::WholeText", "[Text]")
+  TEST_CASE("Text::WholeText", "[HTML][Text]")
   {
     auto doc = CreateRef<Document>();
     auto parent = CreateRef<TestContainerNode>(*doc);
@@ -48,7 +48,7 @@ namespace Krys::Tests
     parent->RemoveChild(*childNode);
   }
 
-  TEST_CASE("Text::NodeName", "[Text]")
+  TEST_CASE("Text::NodeName", "[HTML][Text]")
   {
     auto doc = CreateRef<Document>();
     auto textNode = CreateRef<Krys::HTML::Text>(*doc, u8"Hello, world!");

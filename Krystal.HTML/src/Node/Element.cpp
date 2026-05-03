@@ -13,10 +13,10 @@
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/ElementRareData.hpp"
-#include "Krystal.HTML/Node/ShadowRoot.hpp"
-#include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/Node/HTMLCollection.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
+#include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/Node/Text.hpp"
 
 namespace Krys::HTML
 {
@@ -77,8 +77,7 @@ namespace Krys::HTML
     return !_attributes.empty();
   }
 
-  // TODO(impl): Implement this method
-  // NamedNodeMap &Element::Attributes() const noexcept
+  //NamedNodeMap &Element::Attributes() const noexcept
   //{
   //}
 

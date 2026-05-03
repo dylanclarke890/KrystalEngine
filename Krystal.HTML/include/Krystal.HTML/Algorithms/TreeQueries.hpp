@@ -20,6 +20,16 @@ namespace Krys::HTML
   class TreeQueries
   {
   public:
+#pragma region Node Trees - https://dom.spec.whatwg.org/#node-trees
+
+    /// @see https://dom.spec.whatwg.org/#concept-node-length
+    KRYS_NODISCARD static size_t Length(Node &node) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-node-empty
+    KRYS_NODISCARD static bool IsEmpty(Node &node) noexcept;
+
+#pragma endregion
+
 #pragma region Document Trees - https://dom.spec.whatwg.org/#document-trees
 
     KRYS_NODISCARD static bool IsInDocumentTree(const Node &node) noexcept;
@@ -73,16 +83,6 @@ namespace Krys::HTML
 
     /// @see https://dom.spec.whatwg.org/#concept-tree-index
     KRYS_NODISCARD static size_t Index(const Node &node) noexcept;
-
-#pragma endregion
-
-#pragma region Node Trees - https://dom.spec.whatwg.org/#node-trees
-
-    /// @see https://dom.spec.whatwg.org/#concept-node-length
-    KRYS_NODISCARD static size_t Length(Node &node) noexcept;
-
-    /// @see https://dom.spec.whatwg.org/#concept-node-empty
-    KRYS_NODISCARD static bool IsEmpty(Node &node) noexcept;
 
 #pragma endregion
 

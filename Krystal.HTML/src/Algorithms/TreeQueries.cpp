@@ -17,6 +17,71 @@
 
 namespace Krys::HTML
 {
+#pragma region Node Trees - https://dom.spec.whatwg.org/#node-trees
+
+  size_t TreeQueries::Length(Node &node) noexcept
+  {
+    if (node.IsDocumentTypeNode() || node.IsAttributeNode())
+    {
+      return 0;
+    }
+
+    if (auto *characterData = DynamicDowncast<CharacterData>(node))
+    {
+      return characterData->Data().size();
+    }
+
+    return node.CountChildNodes();
+  }
+
+  bool TreeQueries::IsEmpty(Node &node) noexcept
+  {
+    return Length(node) == 0;
+  }
+
+#pragma endregion
+
+#pragma region Document Trees
+
+  bool TreeQueries::IsInDocumentTree(const Node &node) noexcept
+  {
+    return Is<Document>(Root(node));
+  }
+
+  RawPtr<const Element> TreeQueries::DocumentElement(const Node &node) noexcept
+  {
+    // The document element of a document is the element whose parent is that document, if it exists;
+    // otherwise null.
+
+    if (auto *document = DynamicDowncast<Document>(Root(node)))
+    {
+      return TreeTraversal::FirstElementChild(*document);
+    }
+
+    return nullptr;
+  }
+
+  RawPtr<Element> TreeQueries::DocumentElement(Node &node) noexcept
+  {
+    if (auto *document = DynamicDowncast<Document>(Root(node)))
+    {
+      return TreeTraversal::FirstElementChild(*document);
+    }
+
+    return nullptr;
+  }
+
+#pragma endregion
+
+#pragma region Shadow Trees
+
+  bool TreeQueries::IsInShadowTree(const Node &node) noexcept
+  {
+    return Root(node).IsShadowRootNode();
+  }
+
+#pragma endregion
+
 #pragma region Trees
 
   bool TreeQueries::IsParent(const Node &a, const Node &b) noexcept
@@ -112,71 +177,6 @@ namespace Krys::HTML
   size_t TreeQueries::Index(const Node &node) noexcept
   {
     return Krys::HTML::Count(ConstPreviousSiblingRange(node));
-  }
-
-#pragma endregion
-
-#pragma region Document Trees
-
-  bool TreeQueries::IsInDocumentTree(const Node &node) noexcept
-  {
-    return Root(node).IsDocumentNode();
-  }
-
-  // The document element of a document is the element whose parent is that document, if it exists;
-  // otherwise null.
-
-  RawPtr<const Element> TreeQueries::DocumentElement(const Node &node) noexcept
-  {
-    if (auto *document = DynamicDowncast<Document>(Root(node)))
-    {
-      return TreeTraversal::FirstElementChild(*document);
-    }
-
-    return nullptr;
-  }
-
-  RawPtr<Element> TreeQueries::DocumentElement(Node &node) noexcept
-  {
-    if (auto *document = DynamicDowncast<Document>(Root(node)))
-    {
-      return TreeTraversal::FirstElementChild(*document);
-    }
-
-    return nullptr;
-  }
-
-#pragma endregion
-
-#pragma region Shadow Trees
-
-  bool TreeQueries::IsInShadowTree(const Node &node) noexcept
-  {
-    return Root(node).IsShadowRootNode();
-  }
-
-#pragma endregion
-
-#pragma region Node Trees - https://dom.spec.whatwg.org/#node-trees
-
-  size_t TreeQueries::Length(Node &node) noexcept
-  {
-    if (node.IsDocumentTypeNode() || node.IsAttributeNode())
-    {
-      return 0;
-    }
-
-    if (auto *characterData = DynamicDowncast<CharacterData>(node))
-    {
-      return characterData->Data().size();
-    }
-
-    return node.CountChildNodes();
-  }
-
-  bool TreeQueries::IsEmpty(Node &node) noexcept
-  {
-    return Length(node) == 0;
   }
 
 #pragma endregion

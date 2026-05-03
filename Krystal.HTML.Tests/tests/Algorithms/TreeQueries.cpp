@@ -15,6 +15,65 @@ namespace Krys::Tests
 
 #pragma region Trees
 
+  TEST_CASE("TreeQueries::Length", "[TreeQueries]")
+  {
+    auto doc = CreateRef<Document>();
+    auto parent = CreateRef<TestNode>(*doc);
+    auto child = CreateRef<TestNode>(*doc);
+    auto textNode = CreateRef<HTML::Text>(*doc, u8"Hello, world!");
+
+    REQUIRE(TreeQueries::Length(*parent) == 0);
+    REQUIRE(TreeQueries::Length(*child) == 0);
+    REQUIRE(TreeQueries::Length(*textNode) == 13);
+    
+    auto appendResult = parent->AppendChild(*child);
+    REQUIRE_FALSE(appendResult.HasException());
+    
+    REQUIRE(TreeQueries::Length(*parent) == 1);
+    REQUIRE(TreeQueries::Length(*child) == 0);
+    
+    appendResult = child->AppendChild(*textNode);
+    REQUIRE_FALSE(appendResult.HasException());
+    
+    REQUIRE(TreeQueries::Length(*parent) == 1);
+    REQUIRE(TreeQueries::Length(*child) == 1);
+    REQUIRE(TreeQueries::Length(*textNode) == 13);
+    
+    child->RemoveChild(*textNode);
+    parent->RemoveChild(*child);
+  }
+
+  TEST_CASE("TreeQueries::IsEmpty", "[TreeQueries]")
+  {
+    auto doc = CreateRef<Document>();
+    auto parent = CreateRef<TestNode>(*doc);
+    auto child = CreateRef<TestNode>(*doc);
+    auto textNode = CreateRef<HTML::Text>(*doc, u8"Hello, world!");
+    REQUIRE(TreeQueries::IsEmpty(*parent));
+    REQUIRE(TreeQueries::IsEmpty(*child));
+    REQUIRE_FALSE(TreeQueries::IsEmpty(*textNode));
+    
+    auto appendResult = parent->AppendChild(*child);
+    REQUIRE_FALSE(appendResult.HasException());
+    
+    REQUIRE_FALSE(TreeQueries::IsEmpty(*parent));
+    REQUIRE(TreeQueries::IsEmpty(*child));
+    
+    appendResult = child->AppendChild(*textNode);
+    REQUIRE_FALSE(appendResult.HasException());
+    
+    REQUIRE_FALSE(TreeQueries::IsEmpty(*parent));
+    REQUIRE_FALSE(TreeQueries::IsEmpty(*child));
+    REQUIRE_FALSE(TreeQueries::IsEmpty(*textNode));
+    
+    child->RemoveChild(*textNode);
+    parent->RemoveChild(*child);
+  }
+
+#pragma endregion
+
+#pragma region Trees
+
   TEST_CASE("TreeQueries::IsParent", "[TreeQueries]")
   {
     auto doc = CreateRef<Document>();

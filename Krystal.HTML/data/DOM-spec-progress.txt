@@ -37,9 +37,10 @@ Source: https://dom.spec.whatwg.org
         - Missing tests for composedPath, target, currentTarget && relatedTarget.
 
 2.3 Legacy extensions to the Window interface
-    Implementation: None
-    Test Coverage : None
+    Implementation: Full
+    Test Coverage : Full
     Notes         :
+        - Only thing to implement is the violation below which isn't planned for now.
         - SPEC-VIOLATION(DOM, HTML) -> Window interface currently not supported
 
 2.4 Interface CustomEvent
@@ -60,9 +61,10 @@ Source: https://dom.spec.whatwg.org
     Test Coverage : None
 
 2.8 Observing event listeners
-    Implementation: None
-    Test Coverage : None
+    Implementation: Full
+    Test Coverage : Full
     Notes         :
+        - Only thing to implement is the violation below which isn't planned for now.
         - SPEC-VIOLATION(DOM, SERVICE-WORKER) -> ServiceWorkGlobalScope currently not supported
 
 2.9 Dispatching events
@@ -103,15 +105,21 @@ Source: https://dom.spec.whatwg.org
 
 4.2 Node tree
     Implementation: Full
-    Test Coverage : None
+    Test Coverage : Full
+    Notes		 :
+        - Implemented in TreeQueries.
 
 4.2.1 Document tree
     Implementation: Full
     Test Coverage : None
+    Notes		 :
+        - Implemented in TreeQueries.
 
 4.2.2 Shadow tree
     Implementation: Full
     Test Coverage : None
+    Notes		 :
+        - Implemented in TreeQueries.
 
 4.2.2.1 Slots
     Implementation: None
@@ -174,12 +182,15 @@ Source: https://dom.spec.whatwg.org
 4.2.10.1 Interface NodeList
     Implementation: Full
     Test Coverage : None
+    Notes         : 
+        - needs more work if a node list can be used for anything other than child nodes.
 
 4.2.10.2 Interface HTMLCollection
     Implementation: Partial
     Test Coverage : None
     Notes         : 
         - namedItem/named index requires implementing element/attr first.
+        - collection needs to be 'live' for a variety of different collection types which is going to be annoying to implement.
 
 4.3 Mutation observers
     Implementation: None
@@ -232,10 +243,8 @@ Source: https://dom.spec.whatwg.org
         - requires implementing element/attr first.
 
 4.9.2 Interface Attr
-    Implementation: Partial
+    Implementation: Full
     Test Coverage : None
-    Notes         : 
-        - SetExistingAttributeValue requires implementing element first.
 
 4.10 Interface CharacterData
     Implementation: Full
