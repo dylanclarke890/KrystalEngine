@@ -15,7 +15,7 @@ namespace Krys::Tests
 
 #pragma region Node Trees
 
-  TEST_CASE("TreeQueries::Length", "[TreeQueries]")
+  TEST_CASE("TreeQueries::Length", "[HTML][TreeQueries]")
   {
     auto doc = CreateRef<Document>();
     auto parent = CreateRef<TestNode>(*doc);
@@ -43,7 +43,7 @@ namespace Krys::Tests
     parent->RemoveChild(*child);
   }
 
-  TEST_CASE("TreeQueries::IsEmpty", "[TreeQueries]")
+  TEST_CASE("TreeQueries::IsEmpty", "[HTML][TreeQueries]")
   {
     auto doc = CreateRef<Document>();
     auto parent = CreateRef<TestNode>(*doc);
@@ -74,60 +74,92 @@ namespace Krys::Tests
 
 #pragma region Document Trees
 
-  TEST_CASE("TreeQueries::IsInDocumentTree", "[TreeQueries]")
+  TEST_CASE("TreeQueries::IsInDocumentTree", "[HTML][TreeQueries]")
   {
     auto doc = CreateRef<Document>();
     auto parent = CreateRef<TestNode>(*doc);
     auto child = CreateRef<TestNode>(*doc);
-    
+
     REQUIRE_FALSE(TreeQueries::IsInDocumentTree(*parent));
     REQUIRE_FALSE(TreeQueries::IsInDocumentTree(*child));
-    
+
     auto appendResult = parent->AppendChild(*child);
     REQUIRE_FALSE(appendResult.HasException());
-    
+
     REQUIRE_FALSE(TreeQueries::IsInDocumentTree(*parent));
     REQUIRE_FALSE(TreeQueries::IsInDocumentTree(*child));
-    
+
     appendResult = doc->AppendChild(*parent);
     REQUIRE_FALSE(appendResult.HasException());
-    
+
     REQUIRE(TreeQueries::IsInDocumentTree(*parent));
     REQUIRE(TreeQueries::IsInDocumentTree(*child));
-    
+
     auto removeResult = parent->RemoveChild(*child);
     REQUIRE_FALSE(removeResult.HasException());
     removeResult = doc->RemoveChild(*parent);
     REQUIRE_FALSE(removeResult.HasException());
   }
 
-  TEST_CASE("TreeQueries::DocumentElement", "[TreeQueries]")
+  TEST_CASE("TreeQueries::DocumentElement", "[HTML][TreeQueries]")
   {
     auto doc = CreateRef<Document>();
     auto parent = CreateRef<TestNode>(*doc);
     auto child = CreateRef<TestNode>(*doc);
-    
+
     REQUIRE(TreeQueries::DocumentElement(*doc) == nullptr);
     REQUIRE(TreeQueries::DocumentElement(*parent) == nullptr);
     REQUIRE(TreeQueries::DocumentElement(*child) == nullptr);
-    
+
     auto appendResult = parent->AppendChild(*child);
     REQUIRE_FALSE(appendResult.HasException());
-    
+
     REQUIRE(TreeQueries::DocumentElement(*doc) == nullptr);
     REQUIRE(TreeQueries::DocumentElement(*parent) == nullptr);
     REQUIRE(TreeQueries::DocumentElement(*child) == nullptr);
-    
+
     appendResult = doc->AppendChild(*parent);
     REQUIRE_FALSE(appendResult.HasException());
-    
+
     REQUIRE(TreeQueries::DocumentElement(*doc) == parent.get());
     REQUIRE(TreeQueries::DocumentElement(*parent) == parent.get());
     REQUIRE(TreeQueries::DocumentElement(*child) == parent.get());
-    
+
     auto removeResult = parent->RemoveChild(*child);
     REQUIRE_FALSE(removeResult.HasException());
     removeResult = doc->RemoveChild(*parent);
+    REQUIRE_FALSE(removeResult.HasException());
+  }
+
+#pragma endregion
+
+#pragma region Shadow Trees
+
+  TEST_CASE("TreeQueries::IsInShadowTree", "[HTML][TreeQueries]")
+  {
+    auto doc = CreateRef<Document>();
+    auto docChild = CreateRef<TestNode>(*doc);
+
+    REQUIRE_FALSE(TreeQueries::IsInShadowTree(*docChild));
+
+    auto appendResult = doc->AppendChild(*docChild);
+    REQUIRE_FALSE(appendResult.HasException());
+
+    REQUIRE_FALSE(TreeQueries::IsInShadowTree(*docChild));
+
+    auto shadowRoot = CreateRef<ShadowRoot>(*doc, nullptr);
+    auto shadowChild = CreateRef<TestNode>(*doc);
+
+    REQUIRE_FALSE(TreeQueries::IsInShadowTree(*shadowChild));
+
+    appendResult = shadowRoot->AppendChild(*shadowChild);
+    REQUIRE_FALSE(appendResult.HasException());
+
+    REQUIRE(TreeQueries::IsInShadowTree(*shadowChild));
+
+    auto removeResult = doc->RemoveChild(*docChild);
+    REQUIRE_FALSE(removeResult.HasException());
+    removeResult = shadowRoot->RemoveChild(*shadowChild);
     REQUIRE_FALSE(removeResult.HasException());
   }
 

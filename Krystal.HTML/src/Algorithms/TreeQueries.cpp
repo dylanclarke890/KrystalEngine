@@ -77,7 +77,7 @@ namespace Krys::HTML
 
   bool TreeQueries::IsInShadowTree(const Node &node) noexcept
   {
-    return Root(node).IsShadowRootNode();
+    return Is<ShadowRoot>(Root(node));
   }
 
 #pragma endregion
