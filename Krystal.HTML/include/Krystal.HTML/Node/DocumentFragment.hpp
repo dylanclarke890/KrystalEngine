@@ -59,7 +59,9 @@ namespace Krys::HTML
 
 #pragma region NonElementParentNode Mixin - https://dom.spec.whatwg.org/#interface-nonelementparentnode
 
-    RefPtr<Element> GetElementById(const DOMStringAtom &id) const noexcept;
+    RefPtr<Element> GetElementById(DOMStringView elementId) noexcept;
+
+    RefPtr<const Element> GetElementById(DOMStringView elementId) const noexcept;
 
 #pragma endregion
   };

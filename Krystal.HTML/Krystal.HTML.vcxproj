@@ -39,6 +39,7 @@
     <ClInclude Include="include\Krystal.HTML\Algorithms\ChildNodeAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\ElementAttributeAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\IteratorAlgorithms.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\NonElementParentNodeAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\ParentNodeAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\ShadowRootAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOMTokenList.hpp" />
@@ -163,6 +164,7 @@
     <ClCompile Include="src\Iterator\NodeIterator.cpp" />
     <ClCompile Include="src\Iterator\TreeWalker.cpp" />
     <ClCompile Include="src\Node\NamedNodeMap.cpp" />
+    <ClCompile Include="src\Node\NonElementParentNodeAlgorithms.cpp" />
     <ClCompile Include="src\Ranges\Range.cpp" />
     <ClCompile Include="src\MutationObserver\MutationObserver.cpp" />
     <ClCompile Include="src\Node\ParentNodeRareData.cpp" />

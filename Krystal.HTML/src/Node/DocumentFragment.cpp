@@ -1,6 +1,7 @@
 ﻿#include "Krystal.HTML/Node/DocumentFragment.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/NonElementParentNodeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/ParentNodeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
@@ -8,9 +9,9 @@
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
-#include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/HTMLCollection.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
+#include "Krystal.HTML/Node/ShadowRoot.hpp"
 
 namespace Krys::HTML
 {
@@ -101,10 +102,14 @@ namespace Krys::HTML
 
 #pragma region NonElementParentNode
 
-  RefPtr<Element> DocumentFragment::GetElementById(const DOMStringAtom &id) const noexcept
+  RefPtr<Element> DocumentFragment::GetElementById(DOMStringView elementId) noexcept
   {
-    // TODO(impl): looking for an element with a matching id (obviously)
-    return RefPtr<Element>();
+    return ShareRefPtr(NonElementParentNodeAlgorithms::GetElementById(*this, elementId));
+  }
+
+  RefPtr<const Element> DocumentFragment::GetElementById(DOMStringView elementId) const noexcept
+  {
+    return ShareRefPtr(NonElementParentNodeAlgorithms::GetElementById(*this, elementId));
   }
 
 #pragma endregion

@@ -34,7 +34,7 @@ Source: https://dom.spec.whatwg.org
     Implementation: Full
     Test Coverage : Partial
     Notes         :
-        - Missing tests for composedPath, target, currentTarget && relatedTarget.
+        - Missing tests for composedPath, target, currentTarget & relatedTarget.
 
 2.3 Legacy extensions to the Window interface
     Implementation: Full

@@ -7,9 +7,9 @@
 #include "Krystal.HTML/Node/DocumentFragment.hpp"
 #include "Krystal.HTML/Node/DocumentType.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
+#include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
-#include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.Lib/Types/SmallList.hpp"
 #include <catch_all.hpp>
 
@@ -18,8 +18,9 @@ namespace Krys::Tests
   using namespace Krys::HTML;
 
   template <typename T>
-  concept NonElementParentNodeMixin = requires(T &t, DOMStringAtom elementId) {
-    { t.GetElementById(elementId) } -> SameType<RefPtr<Element>>;
+  concept NonElementParentNodeMixin = requires(T &node, const T &constNode, DOMStringView id) {
+    { node.GetElementById(id) } -> SameType<RefPtr<Element>>;
+    { constNode.GetElementById(id) } -> SameType<RefPtr<const Element>>;
   };
 
   TEST_CASE("Mixin::NonElementParentNode", "[HTML][Mixins]")
@@ -29,8 +30,8 @@ namespace Krys::Tests
   }
 
   template <typename T>
-  concept DocumentOrShadowRootMixin = requires(T &t) {
-    { t.CustomElementRegistry() } -> SameType<RefPtr<CustomElementRegistry>>;
+  concept DocumentOrShadowRootMixin = requires(T &node) {
+    { node.CustomElementRegistry() } -> SameType<RefPtr<CustomElementRegistry>>;
   };
 
   TEST_CASE("Mixin::DocumentOrShadowRoot", "[HTML][Mixins]")
