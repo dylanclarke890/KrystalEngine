@@ -111,7 +111,7 @@ Source: https://dom.spec.whatwg.org
 
 4.2.1 Document tree
     Implementation: Full
-    Test Coverage : None
+    Test Coverage : Full
     Notes		 :
         - Implemented in TreeQueries.
 

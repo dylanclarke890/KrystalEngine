@@ -13,7 +13,7 @@ namespace Krys::Tests
 {
   using namespace Krys::HTML;
 
-#pragma region Trees
+#pragma region Node Trees
 
   TEST_CASE("TreeQueries::Length", "[TreeQueries]")
   {
@@ -25,20 +25,20 @@ namespace Krys::Tests
     REQUIRE(TreeQueries::Length(*parent) == 0);
     REQUIRE(TreeQueries::Length(*child) == 0);
     REQUIRE(TreeQueries::Length(*textNode) == 13);
-    
+
     auto appendResult = parent->AppendChild(*child);
     REQUIRE_FALSE(appendResult.HasException());
-    
+
     REQUIRE(TreeQueries::Length(*parent) == 1);
     REQUIRE(TreeQueries::Length(*child) == 0);
-    
+
     appendResult = child->AppendChild(*textNode);
     REQUIRE_FALSE(appendResult.HasException());
-    
+
     REQUIRE(TreeQueries::Length(*parent) == 1);
     REQUIRE(TreeQueries::Length(*child) == 1);
     REQUIRE(TreeQueries::Length(*textNode) == 13);
-    
+
     child->RemoveChild(*textNode);
     parent->RemoveChild(*child);
   }
@@ -52,22 +52,83 @@ namespace Krys::Tests
     REQUIRE(TreeQueries::IsEmpty(*parent));
     REQUIRE(TreeQueries::IsEmpty(*child));
     REQUIRE_FALSE(TreeQueries::IsEmpty(*textNode));
+
+    auto appendResult = parent->AppendChild(*child);
+    REQUIRE_FALSE(appendResult.HasException());
+
+    REQUIRE_FALSE(TreeQueries::IsEmpty(*parent));
+    REQUIRE(TreeQueries::IsEmpty(*child));
+
+    appendResult = child->AppendChild(*textNode);
+    REQUIRE_FALSE(appendResult.HasException());
+
+    REQUIRE_FALSE(TreeQueries::IsEmpty(*parent));
+    REQUIRE_FALSE(TreeQueries::IsEmpty(*child));
+    REQUIRE_FALSE(TreeQueries::IsEmpty(*textNode));
+
+    child->RemoveChild(*textNode);
+    parent->RemoveChild(*child);
+  }
+
+#pragma endregion
+
+#pragma region Document Trees
+
+  TEST_CASE("TreeQueries::IsInDocumentTree", "[TreeQueries]")
+  {
+    auto doc = CreateRef<Document>();
+    auto parent = CreateRef<TestNode>(*doc);
+    auto child = CreateRef<TestNode>(*doc);
+    
+    REQUIRE_FALSE(TreeQueries::IsInDocumentTree(*parent));
+    REQUIRE_FALSE(TreeQueries::IsInDocumentTree(*child));
     
     auto appendResult = parent->AppendChild(*child);
     REQUIRE_FALSE(appendResult.HasException());
     
-    REQUIRE_FALSE(TreeQueries::IsEmpty(*parent));
-    REQUIRE(TreeQueries::IsEmpty(*child));
+    REQUIRE_FALSE(TreeQueries::IsInDocumentTree(*parent));
+    REQUIRE_FALSE(TreeQueries::IsInDocumentTree(*child));
     
-    appendResult = child->AppendChild(*textNode);
+    appendResult = doc->AppendChild(*parent);
     REQUIRE_FALSE(appendResult.HasException());
     
-    REQUIRE_FALSE(TreeQueries::IsEmpty(*parent));
-    REQUIRE_FALSE(TreeQueries::IsEmpty(*child));
-    REQUIRE_FALSE(TreeQueries::IsEmpty(*textNode));
+    REQUIRE(TreeQueries::IsInDocumentTree(*parent));
+    REQUIRE(TreeQueries::IsInDocumentTree(*child));
     
-    child->RemoveChild(*textNode);
-    parent->RemoveChild(*child);
+    auto removeResult = parent->RemoveChild(*child);
+    REQUIRE_FALSE(removeResult.HasException());
+    removeResult = doc->RemoveChild(*parent);
+    REQUIRE_FALSE(removeResult.HasException());
+  }
+
+  TEST_CASE("TreeQueries::DocumentElement", "[TreeQueries]")
+  {
+    auto doc = CreateRef<Document>();
+    auto parent = CreateRef<TestNode>(*doc);
+    auto child = CreateRef<TestNode>(*doc);
+    
+    REQUIRE(TreeQueries::DocumentElement(*doc) == nullptr);
+    REQUIRE(TreeQueries::DocumentElement(*parent) == nullptr);
+    REQUIRE(TreeQueries::DocumentElement(*child) == nullptr);
+    
+    auto appendResult = parent->AppendChild(*child);
+    REQUIRE_FALSE(appendResult.HasException());
+    
+    REQUIRE(TreeQueries::DocumentElement(*doc) == nullptr);
+    REQUIRE(TreeQueries::DocumentElement(*parent) == nullptr);
+    REQUIRE(TreeQueries::DocumentElement(*child) == nullptr);
+    
+    appendResult = doc->AppendChild(*parent);
+    REQUIRE_FALSE(appendResult.HasException());
+    
+    REQUIRE(TreeQueries::DocumentElement(*doc) == parent.get());
+    REQUIRE(TreeQueries::DocumentElement(*parent) == parent.get());
+    REQUIRE(TreeQueries::DocumentElement(*child) == parent.get());
+    
+    auto removeResult = parent->RemoveChild(*child);
+    REQUIRE_FALSE(removeResult.HasException());
+    removeResult = doc->RemoveChild(*parent);
+    REQUIRE_FALSE(removeResult.HasException());
   }
 
 #pragma endregion

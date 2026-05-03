@@ -32,9 +32,13 @@ namespace Krys::HTML
 
 #pragma region Document Trees - https://dom.spec.whatwg.org/#document-trees
 
+    /// @see https://dom.spec.whatwg.org/#in-a-document-tree
     KRYS_NODISCARD static bool IsInDocumentTree(const Node &node) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#document-element
     KRYS_NODISCARD static RawPtr<const Element> DocumentElement(const Node &node) noexcept;
+    
+    /// @see https://dom.spec.whatwg.org/#document-element
     KRYS_NODISCARD static RawPtr<Element> DocumentElement(Node &node) noexcept;
 
 #pragma endregion
