@@ -120,16 +120,14 @@ namespace Krys::HTML
     return ParentNodeAlgorithms::MoveBefore(*this, node, refChild);
   }
 
-  ExceptionOr<RefPtr<Element>> Document::QuerySelector(const DOMString &selectors) noexcept
+  ExceptionOr<RefPtr<Element>> Document::QuerySelector(DOMStringView selectors) noexcept
   {
-    // TODO(impl): implement this when we have css parsing.
-    return Exception {ExceptionCode::NotSupportedError};
+    return ParentNodeAlgorithms::QuerySelector(*this, selectors);
   }
 
-  ExceptionOr<Ref<NodeList>> Document::QuerySelectorAll(const DOMString &selectors) noexcept
+  ExceptionOr<Ref<NodeList>> Document::QuerySelectorAll(DOMStringView selectors) noexcept
   {
-    // TODO(impl): implement this when we have css parsing.
-    return Exception {ExceptionCode::NotSupportedError};
+    return ParentNodeAlgorithms::QuerySelectorAll(*this, selectors);
   }
 
 #pragma endregion

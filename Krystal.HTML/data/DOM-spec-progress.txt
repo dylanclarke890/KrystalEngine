@@ -151,10 +151,8 @@ Source: https://dom.spec.whatwg.org
         - Missing mutation observers (Remove).
 
 4.2.4 Mixin NonElementParentNode
-    Implementation: None
+    Implementation: Full
     Test Coverage : None
-    Notes         : 
-        - Missing GetElementById (requires implementing element first).
 
 4.2.5 Mixin DocumentOrShadowRoot
     Implementation: Full
@@ -185,7 +183,7 @@ Source: https://dom.spec.whatwg.org
     Implementation: Full
     Test Coverage : None
     Notes         : 
-        - needs more work if a node list can be used for anything other than child nodes.
+        - needs more work if a node list can be used for anything other than child nodes (hint: it can).
 
 4.2.10.2 Interface HTMLCollection
     Implementation: Partial

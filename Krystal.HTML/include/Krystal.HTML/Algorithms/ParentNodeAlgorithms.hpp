@@ -24,5 +24,11 @@ namespace Krys::HTML
 
     KRYS_NODISCARD static ExceptionOr<void> MoveBefore(ContainerNode &parent, Node &node,
                                                        RawPtr<Node> refChild) noexcept;
+
+    KRYS_NODISCARD static ExceptionOr<RefPtr<Element>> QuerySelector(ContainerNode &parent,
+                                                                     DOMStringView selectors) noexcept;
+
+    KRYS_NODISCARD static ExceptionOr<Ref<NodeList>> QuerySelectorAll(ContainerNode &parent,
+                                                                      DOMStringView selectors) noexcept;
   };
 }

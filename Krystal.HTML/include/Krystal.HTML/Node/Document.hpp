@@ -69,8 +69,8 @@ namespace Krys::HTML
 
     ExceptionOr<void> MoveBefore(Node &node, RawPtr<Node> child) noexcept;
 
-    KRYS_NODISCARD ExceptionOr<RefPtr<Element>> QuerySelector(const DOMString &selectors) noexcept;
-    KRYS_NODISCARD ExceptionOr<Ref<NodeList>> QuerySelectorAll(const DOMString &selectors) noexcept;
+    KRYS_NODISCARD ExceptionOr<RefPtr<Element>> QuerySelector(DOMStringView selectors) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<NodeList>> QuerySelectorAll(DOMStringView selectors) noexcept;
 
 #pragma endregion
 

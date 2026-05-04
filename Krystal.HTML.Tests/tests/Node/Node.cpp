@@ -32,19 +32,19 @@ namespace Krys::Tests
     }
   };
 
-  TEST_CASE("Node::GetNodeType", "[Node]")
+  TEST_CASE("Node::GetNodeType", "[HTML][Node]")
   {
     CommonTestData data {};
     REQUIRE(data.test_node->GetNodeType() == NodeType::ELEMENT_NODE);
   }
 
-  TEST_CASE("Node::BaseURI", "[Node]")
+  TEST_CASE("Node::BaseURI", "[HTML][Node]")
   {
     CommonTestData data {};
     REQUIRE(data.test_node->BaseURI().Href == u8"about:blank");
   }
 
-  TEST_CASE("Node::IsConnected", "[Node]")
+  TEST_CASE("Node::IsConnected", "[HTML][Node]")
   {
     CommonTestData data {};
     REQUIRE_FALSE(data.test_node->IsConnected());
@@ -57,14 +57,14 @@ namespace Krys::Tests
     REQUIRE(data.test_document->IsConnected());
   }
 
-  TEST_CASE("Node::OwnerDocument", "[Node]")
+  TEST_CASE("Node::OwnerDocument", "[HTML][Node]")
   {
     CommonTestData data {};
     REQUIRE(data.test_node->OwnerDocument() == data.test_document.get());
     REQUIRE(data.test_document->OwnerDocument() == nullptr);
   }
 
-  TEST_CASE("Node::GetRootNode", "[Node]")
+  TEST_CASE("Node::GetRootNode", "[HTML][Node]")
   {
     CommonTestData data {};
 
@@ -78,7 +78,7 @@ namespace Krys::Tests
     REQUIRE(&data.test_node->GetRootNode({.Composed = true}) == data.test_document.get());
   }
 
-  TEST_CASE("Node::ParentNode", "[Node]")
+  TEST_CASE("Node::ParentNode", "[HTML][Node]")
   {
     CommonTestData data {};
     REQUIRE(data.test_node->ParentNode() == nullptr);
@@ -95,7 +95,7 @@ namespace Krys::Tests
     data.test_node->RemoveChild(*div);
   }
 
-  TEST_CASE("Node::ParentElement", "[Node]")
+  TEST_CASE("Node::ParentElement", "[HTML][Node]")
   {
     CommonTestData data {};
     REQUIRE(data.test_node->ParentElement() == nullptr);
@@ -112,7 +112,7 @@ namespace Krys::Tests
     data.test_node->RemoveChild(*div);
   }
 
-  TEST_CASE("Node::IsSameNode", "[Node]")
+  TEST_CASE("Node::IsSameNode", "[HTML][Node]")
   {
     CommonTestData data {};
     REQUIRE(data.test_node->IsSameNode(data.test_node.get()));

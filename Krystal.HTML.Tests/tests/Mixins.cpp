@@ -42,7 +42,7 @@ namespace Krys::Tests
 
   template <typename T>
   concept ParentNodeMixin = requires(T &node, const T &constNode, const List<NodeOrString> &nodes,
-                                     RawPtr<Node> optionalNode, const DOMString &str) {
+                                     RawPtr<Node> optionalNode, DOMString selectors) {
     { node.Children() } -> SameType<Ref<HTMLCollection>>;
     { constNode.FirstElementChild() } -> SameType<RefPtr<const Element>>;
     { node.FirstElementChild() } -> SameType<RefPtr<Element>>;
@@ -56,8 +56,8 @@ namespace Krys::Tests
 
     { node.MoveBefore(node, optionalNode) } -> SameType<ExceptionOr<void>>;
 
-    { node.QuerySelector(str) } -> SameType<ExceptionOr<RefPtr<Element>>>;
-    { node.QuerySelectorAll(str) } -> SameType<ExceptionOr<Ref<NodeList>>>;
+    { node.QuerySelector(selectors) } -> SameType<ExceptionOr<RefPtr<Element>>>;
+    { node.QuerySelectorAll(selectors) } -> SameType<ExceptionOr<Ref<NodeList>>>;
   };
 
   TEST_CASE("Mixin::ParentNode", "[HTML][Mixins]")

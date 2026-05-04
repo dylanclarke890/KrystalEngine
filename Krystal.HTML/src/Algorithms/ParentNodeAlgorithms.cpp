@@ -7,9 +7,9 @@
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
-#include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/HTMLCollection.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
+#include "Krystal.HTML/Node/ShadowRoot.hpp"
 
 namespace Krys::HTML
 {
@@ -75,5 +75,19 @@ namespace Krys::HTML
     }
 
     return MutationAlgorithms::Move(node, parent, refChild);
+  }
+
+  ExceptionOr<RefPtr<Element>> ParentNodeAlgorithms::QuerySelector(ContainerNode &parent,
+                                                                   DOMStringView selectors) noexcept
+  {
+    // TODO(impl): implement this when we have css parsing.
+    return Exception {ExceptionCode::NotSupportedError};
+  }
+
+  ExceptionOr<Ref<NodeList>> ParentNodeAlgorithms::QuerySelectorAll(ContainerNode &parent,
+                                                                    DOMStringView selectors) noexcept
+  {
+    // TODO(impl): implement this when we have css parsing.
+    return Exception {ExceptionCode::NotSupportedError};
   }
 }
