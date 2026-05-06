@@ -25,7 +25,7 @@ namespace Krys::HTML
 
   ExceptionOr<Ref<Node>> Document::AdoptNode(Node &node) noexcept
   {
-    if (node.GetNodeType() == NodeType::DOCUMENT_NODE)
+    if (node.NodeType() == NodeType::DOCUMENT_NODE)
     {
       return Exception {ExceptionCode::NotSupportedError};
     }
@@ -35,7 +35,7 @@ namespace Krys::HTML
       return Exception {ExceptionCode::HierarchyRequestError};
     }
 
-    if (node.GetNodeType() == NodeType::ATTRIBUTE_NODE)
+    if (node.NodeType() == NodeType::ATTRIBUTE_NODE)
     {
       auto &attr = Downcast<Attr>(node);
       RefPtr<Element> element = ShareRefPtr(attr.OwnerElement());

@@ -119,12 +119,12 @@ namespace Krys::HTML
 
 #pragma region Node - https://dom.spec.whatwg.org/#node
 
-    KRYS_NODISCARD NodeType GetNodeType() const noexcept
+    KRYS_NODISCARD NodeType NodeType() const noexcept
     {
       return _nodeType;
     }
 
-    KRYS_NODISCARD virtual utf8_string NodeName() const noexcept = 0;
+    KRYS_NODISCARD virtual DOMString NodeName() const noexcept = 0;
 
     KRYS_NODISCARD URL BaseURI() const noexcept;
 
@@ -160,36 +160,36 @@ namespace Krys::HTML
       return _nextSibling.get();
     }
 
-    KRYS_NODISCARD virtual DOMString NodeValue() const noexcept
+    KRYS_NODISCARD virtual Maybe<DOMString> NodeValue() const noexcept
     {
-      return {};
+      return Null;
     }
-    virtual ExceptionOr<void> SetNodeValue(DOMString &&value) noexcept
+    virtual ExceptionOr<void> NodeValue(DOMString &&value) noexcept
     {
       (void)value; // still want it in the signature
       return {};
     }
-    KRYS_NODISCARD virtual DOMString TextContent() const noexcept
+    KRYS_NODISCARD virtual Maybe<DOMString> TextContent() const noexcept
     {
-      return {};
+      return Null;
     }
-    virtual ExceptionOr<void> SetTextContent(DOMString &&value) noexcept
+    virtual ExceptionOr<void> TextContent(DOMString &&value) noexcept
     {
       (void)value; // still want it in the signature
       return {};
     }
     ExceptionOr<void> Normalize() noexcept;
 
-    KRYS_NODISCARD Ref<Node> CloneNode(bool subtree = false) const noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<Node>> CloneNode(bool subtree = false) const noexcept;
     KRYS_NODISCARD bool IsEqualNode(RawPtr<const Node> otherNode) const noexcept;
     KRYS_NODISCARD bool IsSameNode(RawPtr<const Node> otherNode) const noexcept; // legacy alias of ===
 
-    KRYS_NODISCARD DocumentPosition CompareDocumentPosition(Node &other) const noexcept;
+    KRYS_NODISCARD DocumentPosition CompareDocumentPosition(const Node &other) const noexcept;
     KRYS_NODISCARD bool Contains(RawPtr<const Node> other) const noexcept;
 
-    KRYS_NODISCARD const StringAtom &LookupPrefix(const StringAtom &namespaceURI) const noexcept;
-    KRYS_NODISCARD const StringAtom &LookupNamespaceURI(const StringAtom &prefix) const noexcept;
-    KRYS_NODISCARD bool IsDefaultNamespace(const StringAtom &namespaceURI) const noexcept;
+    KRYS_NODISCARD DOMStringAtom LookupPrefix(DOMStringAtom namespaceURI) const noexcept;
+    KRYS_NODISCARD DOMStringAtom LookupNamespaceURI(DOMStringAtom prefix) const noexcept;
+    KRYS_NODISCARD bool IsDefaultNamespace(DOMStringAtom namespaceURI) const noexcept;
 
     ExceptionOr<Node &> InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept;
     ExceptionOr<Node &> ReplaceChild(Node &newChild, Node &oldChild) noexcept;

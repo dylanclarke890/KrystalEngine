@@ -17,7 +17,7 @@ namespace Krys::HTML
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Text);
 
   public:
-    Text(Document &document, DOMString &&data, NodeType type = NodeType::TEXT_NODE,
+    Text(Document &document, DOMString &&data = u8"", HTML::NodeType type = NodeType::TEXT_NODE,
          NodeFlag flags = NodeFlag::None) noexcept;
 
 #pragma region Text

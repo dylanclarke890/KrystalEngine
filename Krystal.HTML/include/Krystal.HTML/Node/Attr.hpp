@@ -76,23 +76,23 @@ namespace Krys::HTML
       return Name();
     }
 
-    KRYS_NODISCARD DOMString NodeValue() const noexcept final
+    KRYS_NODISCARD Maybe<DOMString> NodeValue() const noexcept final
     {
       return Value();
     }
 
-    ExceptionOr<void> SetNodeValue(DOMString &&value) noexcept final
+    ExceptionOr<void> NodeValue(DOMString &&value) noexcept final
     {
       SetExistingAttributeValue(*this, Krys::Move(value));
       return {};
     }
 
-    KRYS_NODISCARD DOMString TextContent() const noexcept final
+    KRYS_NODISCARD Maybe<DOMString> TextContent() const noexcept final
     {
       return Value();
     }
 
-    ExceptionOr<void> SetTextContent(DOMString &&value) noexcept final
+    ExceptionOr<void> TextContent(DOMString &&value) noexcept final
     {
       SetExistingAttributeValue(*this, Krys::Move(value));
       return {};

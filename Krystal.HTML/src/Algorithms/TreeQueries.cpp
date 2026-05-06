@@ -4,6 +4,7 @@
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Events/EventTarget.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
+#include "Krystal.HTML/Namespaces.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
@@ -50,9 +51,6 @@ namespace Krys::HTML
 
   RawPtr<const Element> TreeQueries::DocumentElement(const Node &node) noexcept
   {
-    // The document element of a document is the element whose parent is that document, if it exists;
-    // otherwise null.
-
     if (auto *document = DynamicDowncast<Document>(Root(node)))
     {
       return TreeTraversal::FirstElementChild(*document);
@@ -345,6 +343,115 @@ namespace Krys::HTML
     return node.ShadowRoot() != nullptr;
   }
 
+  DOMStringAtom TreeQueries::LocateNamespacePrefix(const Element &element,
+                                                   DOMStringAtom namespaceURI) noexcept
+  {
+    if (element.NamespaceURI() == namespaceURI && element.Prefix() != DOMStringAtom::Null())
+    {
+      return element.Prefix();
+    }
+
+    for (auto &attribute : element._attributes)
+    {
+      if (attribute->Prefix() == u8"xmlns" && attribute->Value() == namespaceURI)
+      {
+        return attribute->LocalName();
+      }
+    }
+
+    RawPtr<const Element> parentElement = element.ParentElement();
+    if (parentElement != nullptr)
+    {
+      return LocateNamespacePrefix(*parentElement, namespaceURI);
+    }
+
+    return DOMStringAtom::Null();
+  }
+
+  DOMStringAtom TreeQueries::LocateNamespace(const Node &node, DOMStringAtom prefix) noexcept
+  {
+    switch (node.NodeType())
+    {
+      case NodeType::ELEMENT_NODE:
+      {
+        if (prefix == Namespaces::XML)
+        {
+          return Namespaces::XML;
+        }
+
+        if (prefix == Namespaces::XMLNSPrefix)
+        {
+          return Namespaces::XMLNS;
+        }
+
+        auto &element = Downcast<Element>(node);
+        if (element.NamespaceURI() != DOMStringAtom::Null() && element.Prefix() == prefix)
+        {
+          return element.NamespaceURI();
+        }
+
+        for (auto &attribute : element._attributes)
+        {
+          if (attribute->NamespaceURI() == Namespaces::XMLNS && attribute->Prefix() == Namespaces::XMLNSPrefix
+              && attribute->LocalName() == prefix)
+          {
+            return attribute->Value().empty() ? DOMStringAtom::Null() : attribute->Value();
+          }
+
+          if (prefix == DOMStringAtom::Null() && attribute->NamespaceURI() == Namespaces::XMLNS
+              && attribute->Prefix() == DOMStringAtom::Null()
+              && attribute->LocalName() == Namespaces::XMLNSPrefix)
+          {
+            return attribute->Value().empty() ? DOMStringAtom::Null() : attribute->Value();
+          }
+        }
+
+        RawPtr<const Element> parentElement = element.ParentElement();
+        if (parentElement == nullptr)
+        {
+          return DOMStringAtom::Null();
+        }
+
+        return LocateNamespace(*parentElement, prefix);
+      }
+      case NodeType::DOCUMENT_NODE:
+      {
+        RawPtr<const Element> documentElement = DocumentElement(node);
+        if (documentElement == nullptr)
+        {
+          return DOMStringAtom::Null();
+        }
+
+        return LocateNamespace(*documentElement, prefix);
+      }
+      case NodeType::DOCUMENT_TYPE_NODE:
+      case NodeType::DOCUMENT_FRAGMENT_NODE:
+      {
+        return DOMStringAtom::Null();
+      }
+      case NodeType::ATTRIBUTE_NODE:
+      {
+        RawPtr<const Element> ownerElement = Downcast<Attr>(node).OwnerElement();
+        if (ownerElement == nullptr)
+        {
+          return DOMStringAtom::Null();
+        }
+
+        return LocateNamespace(*ownerElement, prefix);
+      }
+      default:
+      {
+        RawPtr<const Element> parentElement = node.ParentElement();
+        if (parentElement == nullptr)
+        {
+          return DOMStringAtom::Null();
+        }
+
+        return LocateNamespace(*parentElement, prefix);
+      }
+    }
+  }
+
   bool TreeQueries::HasSameRoot(const Node &a, const Node &b) noexcept
   {
     return &Root(a) == &Root(b);
@@ -447,7 +554,7 @@ namespace Krys::HTML
     {
       if (auto *textNode = DynamicDowncast<Text>(descendant))
       {
-        content += textNode->TextContent();
+        content += *textNode->TextContent();
       }
     }
 
@@ -461,7 +568,7 @@ namespace Krys::HTML
     {
       if (auto *textNode = DynamicDowncast<Text>(child))
       {
-        content += textNode->TextContent();
+        content += *textNode->TextContent();
       }
     }
 
@@ -487,7 +594,7 @@ namespace Krys::HTML
     for (RawPtr<const Node> current = start; current && current->IsTextNode();
          current = current->NextSibling())
     {
-      content += Downcast<Text>(current)->TextContent();
+      content += *Downcast<Text>(current)->TextContent();
     }
     return content;
   }
@@ -507,11 +614,25 @@ namespace Krys::HTML
       }
     }
 
-    DOMString content;
+    DOMString content {};
     for (RawPtr<const Node> current = start; current && IsExclusiveTextNode(*current);
          current = current->NextSibling())
     {
-      content += Downcast<Text>(current)->TextContent();
+      content += *Downcast<Text>(current)->TextContent();
+    }
+
+    return content;
+  }
+
+  DOMString TreeQueries::FollowingContiguousExclusiveTextContent(const Text &node) noexcept
+  {
+    DOMString content {};
+
+    RawPtr<const Node> current = node.NextSibling();
+    while (current != nullptr && IsExclusiveTextNode(*current))
+    {
+      content += *Downcast<Text>(current)->TextContent();
+      current = current->NextSibling();
     }
 
     return content;

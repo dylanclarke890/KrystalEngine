@@ -756,7 +756,7 @@ namespace Krys::HTML
     return {};
   }
 
-  Ref<Node> MutationAlgorithms::CloneNode(Node &node, RawPtr<Document> document, bool subtree,
+  Ref<Node> MutationAlgorithms::CloneNode(const Node &node, RawPtr<Document> document, bool subtree,
                                           RawPtr<ContainerNode> parent,
                                           RawPtr<CustomElementRegistry> fallbackRegistry) noexcept
   {
@@ -778,7 +778,7 @@ namespace Krys::HTML
     if (subtree)
     {
       assert(node.IsContainerNode());
-      for (auto &child : ChildNodeRange(Downcast<ContainerNode>(node)))
+      for (auto &child : ConstChildNodeRange(Downcast<ContainerNode>(node)))
       {
         CloneNode(child, document, subtree, Downcast<ContainerNode>(copy.get()), fallbackRegistry);
       }
@@ -797,7 +797,7 @@ namespace Krys::HTML
     return copy;
   }
 
-  Ref<Node> MutationAlgorithms::CloneSingleNode(Node &node, Document &document,
+  Ref<Node> MutationAlgorithms::CloneSingleNode(const Node &node, Document &document,
                                                 RawPtr<CustomElementRegistry> fallbackRegistry) noexcept
   {
     RefPtr<Node> copy = nullptr;

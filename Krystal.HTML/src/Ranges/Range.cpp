@@ -334,7 +334,14 @@ namespace Krys::HTML
 
     for (auto &contained : containedChildren)
     {
-      fragment->AppendChild(*contained->CloneNode(true));
+      auto containedCloneResult = contained->CloneNode(true);
+      if (containedCloneResult.HasException())
+      {
+        return containedCloneResult.ReleaseException();
+      }
+
+      Ref<Node> containedClone = containedCloneResult.ReleaseValue();
+      fragment->AppendChild(*containedClone);
     }
 
     cloneResult = CloneLastPartiallyContainedChildContents(lastPartiallyContainedChild, *fragment,
@@ -653,7 +660,14 @@ namespace Krys::HTML
                                                       DeleteClonedContent deleteClonedContent) const noexcept
   {
     CharacterData &characterData = Downcast<CharacterData>(container);
-    Ref<Node> clone = characterData.CloneNode();
+
+    auto cloneResult = characterData.CloneNode();
+    if (cloneResult.HasException())
+    {
+      return cloneResult.ReleaseException();
+    }
+
+    Ref<Node> clone = cloneResult.ReleaseValue();
 
     auto data = characterData.SubstringData(offset, length);
     if (data.HasException())
@@ -751,7 +765,13 @@ namespace Krys::HTML
     }
     else if (child != nullptr)
     {
-      Ref<Node> clone = child->CloneNode();
+      auto cloneResult = child->CloneNode();
+      if (cloneResult.HasException())
+      {
+        return cloneResult.ReleaseException();
+      }
+
+      Ref<Node> clone = cloneResult.ReleaseValue();
       fragment.AppendChild(*clone);
 
       auto subrange = Range {_start, BoundaryPoint {ShareRef(*child), TreeQueries::Length(*child)}};
@@ -784,7 +804,13 @@ namespace Krys::HTML
     }
     else if (child != nullptr)
     {
-      Ref<Node> clone = child->CloneNode();
+      auto cloneResult = child->CloneNode();
+      if (cloneResult.HasException())
+      {
+        return cloneResult.ReleaseException();
+      }
+
+      Ref<Node> clone = cloneResult.ReleaseValue();
       fragment.AppendChild(*clone);
 
       auto subrange = Range {BoundaryPoint {ShareRef(*child), 0}, _end};

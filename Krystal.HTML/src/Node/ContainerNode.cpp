@@ -9,7 +9,7 @@
 
 namespace Krys::HTML
 {
-  ContainerNode::ContainerNode(Document &document, NodeType type, NodeFlag flags) noexcept
+  ContainerNode::ContainerNode(Document &document, HTML::NodeType type, NodeFlag flags) noexcept
       : Node(document, type, flags | NodeFlag::IsContainerNode), _firstChild(nullptr), _lastChild(nullptr)
   {
   }
@@ -23,7 +23,7 @@ namespace Krys::HTML
 
   ExceptionOr<Node &> ContainerNode::ReplaceChild(Node &newChild, Node &oldChild) noexcept
   {
-    return MutationAlgorithms::Replace(newChild, oldChild, *this);
+    return MutationAlgorithms::Replace(oldChild, newChild, *this);
   }
 
   ExceptionOr<Node &> ContainerNode::RemoveChild(Node &oldChild) noexcept

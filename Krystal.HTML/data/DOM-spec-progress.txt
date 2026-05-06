@@ -209,7 +209,7 @@ Source: https://dom.spec.whatwg.org
     Test Coverage : None
 
 4.4 Interface Node
-    Implementation: Partial
+    Implementation: Full
     Test Coverage : Partial
 
 4.5 Interface Document
@@ -341,3 +341,6 @@ Source: https://dom.spec.whatwg.org
 
 9.1 Interface XSLTProcessor
     - N/A
+
+TODO:
+ - MutationAlgorithms need completing.

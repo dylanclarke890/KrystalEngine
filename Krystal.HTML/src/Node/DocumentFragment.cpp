@@ -22,12 +22,12 @@ namespace Krys::HTML
 
 #pragma region Node
 
-  DOMString DocumentFragment::TextContent() const noexcept
+  Maybe<DOMString> DocumentFragment::TextContent() const noexcept
   {
     return TreeQueries::DescendantTextContent(*this);
   }
 
-  ExceptionOr<void> DocumentFragment::SetTextContent(DOMString &&value) noexcept
+  ExceptionOr<void> DocumentFragment::TextContent(DOMString &&value) noexcept
   {
     return MutationAlgorithms::StringReplaceAll(Krys::Move(value), *this);
   }

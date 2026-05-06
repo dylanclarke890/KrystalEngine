@@ -19,7 +19,7 @@ namespace Krys::HTML
       return Exception {ExceptionCode::InvalidStateError};
     }
 
-    auto n = 1u << (static_cast<underlying_t<NodeType>>(node.GetNodeType()) - 1u);
+    auto n = 1u << (static_cast<underlying_t<NodeType>>(node.NodeType()) - 1u);
     auto whatToShow = static_cast<underlying_t<WhatToShow>>(traverser.WhatToShow());
     if ((whatToShow & n) == 0u)
     {

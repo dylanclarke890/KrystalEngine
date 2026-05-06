@@ -347,12 +347,12 @@ namespace Krys::HTML
     return _qualifiedName.Name();
   }
 
-  DOMString Element::TextContent() const noexcept
+  Maybe<DOMString> Element::TextContent() const noexcept
   {
     return TreeQueries::DescendantTextContent(*this);
   }
 
-  ExceptionOr<void> Element::SetTextContent(DOMString &&value) noexcept
+  ExceptionOr<void> Element::TextContent(DOMString &&value) noexcept
   {
     return MutationAlgorithms::StringReplaceAll(Krys::Move(value), *this);
   }

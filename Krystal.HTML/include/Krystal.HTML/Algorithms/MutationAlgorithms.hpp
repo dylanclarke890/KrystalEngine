@@ -60,13 +60,13 @@ namespace Krys::HTML
       Remove(Node &node, SuppressObservers suppressObservers = SuppressObservers(false)) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-node-clone
-    static Ref<Node> CloneNode(Node &node, RawPtr<Document> document = nullptr, bool subtree = false,
+    static Ref<Node> CloneNode(const Node &node, RawPtr<Document> document = nullptr, bool subtree = false,
                                RawPtr<ContainerNode> parent = nullptr,
                                RawPtr<CustomElementRegistry> fallbackRegistry = nullptr) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#clone-a-single-node
     KRYS_NODISCARD static Ref<Node>
-      CloneSingleNode(Node &node, Document &document,
+      CloneSingleNode(const Node &node, Document &document,
                       RawPtr<CustomElementRegistry> fallbackRegistry = nullptr) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#convert-nodes-into-a-node
@@ -78,6 +78,7 @@ namespace Krys::HTML
       InsertAdjacent(Element &element, InsertAdjacentWhere where, Node &node) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#string-replace-all
-    static ExceptionOr<void> StringReplaceAll(DOMString&& string, ContainerNode& parent) noexcept;
+    KRYS_NODISCARD static ExceptionOr<void> StringReplaceAll(DOMString &&string,
+                                                            ContainerNode &parent) noexcept;
   };
 }

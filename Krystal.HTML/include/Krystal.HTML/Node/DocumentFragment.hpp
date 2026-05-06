@@ -31,9 +31,9 @@ namespace Krys::HTML
       return u8"#document-fragment";
     }
 
-    KRYS_NODISCARD DOMString TextContent() const noexcept final;
+    KRYS_NODISCARD Maybe<DOMString> TextContent() const noexcept final;
 
-    ExceptionOr<void> SetTextContent(DOMString &&value) noexcept final;
+    ExceptionOr<void> TextContent(DOMString &&value) noexcept final;
 
 #pragma endregion
 

@@ -37,7 +37,7 @@ namespace Krys::HTML
 
     /// @see https://dom.spec.whatwg.org/#document-element
     KRYS_NODISCARD static RawPtr<const Element> DocumentElement(const Node &node) noexcept;
-    
+
     /// @see https://dom.spec.whatwg.org/#document-element
     KRYS_NODISCARD static RawPtr<Element> DocumentElement(Node &node) noexcept;
 
@@ -125,6 +125,13 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#element-shadow-host
     KRYS_NODISCARD static bool IsShadowHost(const Element &node) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#locate-a-namespace-prefix
+    KRYS_NODISCARD static DOMStringAtom LocateNamespacePrefix(const Element &element,
+                                                              DOMStringAtom namespaceURI) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#locate-a-namespace
+    KRYS_NODISCARD static DOMStringAtom LocateNamespace(const Node &node, DOMStringAtom prefix) noexcept;
+
     KRYS_NODISCARD static bool HasSameRoot(const Node &a, const Node &b) noexcept;
     KRYS_NODISCARD static bool HasSameShadowIncludingRoot(const Node &a, const Node &b) noexcept;
 
@@ -150,6 +157,7 @@ namespace Krys::HTML
     KRYS_NODISCARD static DOMString ChildTextContent(const ContainerNode &node) noexcept;
     KRYS_NODISCARD static DOMString ContiguousTextContent(const Text &node) noexcept;
     KRYS_NODISCARD static DOMString ContiguousExclusiveTextContent(const Text &node) noexcept;
+    KRYS_NODISCARD static DOMString FollowingContiguousExclusiveTextContent(const Text &node) noexcept;
 
     KRYS_NODISCARD static RawPtr<ContainerNode> CommonAncestorContainer(Node &a, Node &b) noexcept;
   };

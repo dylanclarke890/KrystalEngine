@@ -18,7 +18,7 @@ namespace Krys::HTML
     DOMString _data;
 
   protected:
-    CharacterData(Document &document, DOMString &&data, NodeType type,
+    CharacterData(Document &document, DOMString &&data, HTML::NodeType type,
                   NodeFlag flags = NodeFlag::None) noexcept;
 
   public:
@@ -40,22 +40,22 @@ namespace Krys::HTML
 
 #pragma region Node
 
-    KRYS_NODISCARD DOMString NodeValue() const noexcept final
+    KRYS_NODISCARD Maybe<DOMString> NodeValue() const noexcept final
     {
       return _data;
     }
 
-    ExceptionOr<void> SetNodeValue(DOMString &&value) noexcept final
+    ExceptionOr<void> NodeValue(DOMString &&value) noexcept final
     {
       return ReplaceData(0, value.size(), Krys::Move(value));
     }
 
-    KRYS_NODISCARD DOMString TextContent() const noexcept final
+    KRYS_NODISCARD Maybe<DOMString> TextContent() const noexcept final
     {
       return _data;
     }
 
-    ExceptionOr<void> SetTextContent(DOMString &&value) noexcept final
+    ExceptionOr<void> TextContent(DOMString &&value) noexcept final
     {
       return ReplaceData(0, value.size(), Krys::Move(value));
     }

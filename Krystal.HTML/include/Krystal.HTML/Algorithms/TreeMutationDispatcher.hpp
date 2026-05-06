@@ -30,7 +30,7 @@ namespace Krys::HTML
     static void Removed(Node &removedNode, bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-node-clone-ext
-    static void Cloned(Node &node, Node &copy, bool subtree) noexcept;
+    static void Cloned(const Node &node, Node &copy, bool subtree) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#queue-a-mutation-record
     static void QueueMutationRecord(DOMString &&type, Node &target, Maybe<DOMStringAtom> name,

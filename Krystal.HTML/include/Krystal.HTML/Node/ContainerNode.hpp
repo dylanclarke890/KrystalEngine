@@ -22,7 +22,7 @@ namespace Krys::HTML
     CheckedPtr<Node> _lastChild;
 
   protected:
-    ContainerNode(Document &document, NodeType type, NodeFlag flags) noexcept;
+    ContainerNode(Document &document, HTML::NodeType type, NodeFlag flags) noexcept;
 
   public:
 #pragma region Node

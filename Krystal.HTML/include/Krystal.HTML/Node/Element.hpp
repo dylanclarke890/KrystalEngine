@@ -17,18 +17,21 @@ namespace Krys::HTML
 {
   class Attr;
   class CustomElementRegistry;
+  class ElementAttributeAlgorithms;
   class HTMLCollection;
   class HTMLSlotElement;
   class NamedNodeMap;
   class NodeList;
   class ShadowRoot;
-  class ElementAttributeAlgorithms;
+  class TreeQueries;
 
   class Element : public ContainerNode
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Element);
 
     friend class ElementAttributeAlgorithms;
+    friend class Node;
+    friend class TreeQueries;
 
   private:
     QualifiedName _qualifiedName;
@@ -114,9 +117,9 @@ namespace Krys::HTML
 
     KRYS_NODISCARD DOMString NodeName() const noexcept final;
 
-    KRYS_NODISCARD DOMString TextContent() const noexcept final;
+    KRYS_NODISCARD Maybe<DOMString> TextContent() const noexcept final;
 
-    ExceptionOr<void> SetTextContent(DOMString &&value) noexcept final;
+    ExceptionOr<void> TextContent(DOMString &&value) noexcept final;
 
 #pragma endregion
 

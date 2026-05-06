@@ -1,5 +1,6 @@
 ﻿#include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
@@ -10,14 +11,16 @@
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/Node/DocumentType.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
+#include "Krystal.HTML/Node/NodeList.hpp"
+#include "Krystal.HTML/Node/ProcessingInstruction.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
-#include "Krystal.HTML/Node/NodeList.hpp"
 
 namespace Krys::HTML
 {
-  Node::Node(Document &document, NodeType type, NodeFlag flags) noexcept
+  Node::Node(Document &document, HTML::NodeType type, NodeFlag flags) noexcept
       : EventTarget(EventTargetFlag::IsNode), _nodeType(type), _ownerDocument(ShareRefPtr(&document)),
         _parentNode(nullptr), _previousSibling(nullptr), _nextSibling(nullptr),
         _treeScope((IsDocumentNode() || IsShadowRootNode()) ? nullptr : &document)
@@ -85,31 +88,231 @@ namespace Krys::HTML
 
   ExceptionOr<void> Node::Normalize() noexcept
   {
-    for (auto *textNode = TreeTraversal::NextExclusiveTextNode(*this, this); textNode;
-         textNode = TreeTraversal::NextExclusiveTextNode(*textNode, this))
+    for (auto *node = TreeTraversal::NextExclusiveTextNode(*this, this); node != nullptr;
+         node = TreeTraversal::NextExclusiveTextNode(*node, this))
     {
-      auto length = textNode->Data().size();
-      if (!length)
+      auto length = node->Data().size();
+      if (length == 0uz)
       {
-        RemoveChild(*textNode);
+        if (auto removeResult = MutationAlgorithms::Remove(*node); removeResult.HasException())
+        {
+          return removeResult.ReleaseException();
+        }
+
+        continue;
+      }
+
+      auto data = TreeQueries::FollowingContiguousExclusiveTextContent(*node);
+      if (auto replaceResult = node->ReplaceData(length, 0uz, data); replaceResult.HasException())
+      {
+        return replaceResult.ReleaseException();
+      }
+
+      RawPtr<Node> currentNode = node->NextSibling();
+      while (currentNode != nullptr && TreeQueries::IsExclusiveTextNode(*currentNode))
+      {
+        auto &currentTextNode = Downcast<Text>(*currentNode);
+
+        for (auto &range : NodeDocument().LiveRanges())
+        {
+          if (range->StartContainer() == currentNode)
+          {
+            range->SetStart(*node, range->StartOffset() + length);
+          }
+
+          if (range->EndContainer() == currentNode)
+          {
+            range->SetEnd(*node, range->EndOffset() + length);
+          }
+
+          if (range->StartContainer() == currentNode->ParentNode() && range->StartOffset() == TreeQueries::Index(*currentNode))
+          {
+            range->SetStart(*node, length);
+          }
+
+          if (range->EndContainer() == currentNode->ParentNode() && range->EndOffset() == TreeQueries::Index(*currentNode))
+          {
+            range->SetEnd(*node, length);
+          }
+        }
+
+        length += currentTextNode.Data().size();
+        currentNode = currentNode->NextSibling();
+      }
+
+      while (node->NextSibling() != nullptr && TreeQueries::IsExclusiveTextNode(*node->NextSibling()))
+      {
+        if (auto removeResult = MutationAlgorithms::Remove(*node->NextSibling()); removeResult.HasException())
+        {
+          return removeResult.ReleaseException();
+        }
       }
     }
 
     return {};
   }
 
-  Ref<Node> Node::CloneNode(bool subtree) const noexcept
+  ExceptionOr<Ref<Node>> Node::CloneNode(bool subtree) const noexcept
   {
-    (void)subtree;
-    // TODO(impl)
-    return ShareRef<Node>(*const_cast<Node *>(this));
+    if (Is<ShadowRoot>(this))
+    {
+      return Exception {ExceptionCode::NotSupportedError};
+    }
+
+    return MutationAlgorithms::CloneNode(*this, &NodeDocument(), subtree);
   }
 
   bool Node::IsEqualNode(RawPtr<const Node> otherNode) const noexcept
   {
-    (void)otherNode;
-    // TODO(impl)
-    return false;
+    if (otherNode == nullptr)
+    {
+      return false;
+    }
+
+    if (NodeType() != otherNode->NodeType())
+    {
+      return false;
+    }
+
+    switch (NodeType())
+    {
+      case HTML::NodeType::DOCUMENT_TYPE_NODE:
+      {
+        auto &thisDocType = Downcast<DocumentType>(*this);
+        auto &otherDocType = Downcast<DocumentType>(*otherNode);
+
+        if (thisDocType.Name() != otherDocType.Name())
+        {
+          return false;
+        }
+        if (thisDocType.PublicId() != otherDocType.PublicId())
+        {
+          return false;
+        }
+        if (thisDocType.SystemId() != otherDocType.SystemId())
+        {
+          return false;
+        }
+
+        break;
+      }
+      case HTML::NodeType::ELEMENT_NODE:
+      {
+        auto &thisElement = Downcast<Element>(*this);
+        auto &otherElement = Downcast<Element>(*otherNode);
+
+        if (thisElement.NamespaceURI() != otherElement.NamespaceURI())
+        {
+          return false;
+        }
+        if (thisElement.Prefix() != otherElement.Prefix())
+        {
+          return false;
+        }
+        if (thisElement.LocalName() != otherElement.LocalName())
+        {
+          return false;
+        }
+
+        for (size_t i = 0uz; i < thisElement._attributes.size(); i++)
+        {
+          if (i >= otherElement._attributes.size())
+          {
+            return false;
+          }
+
+          auto &thisAttribute = thisElement._attributes[i];
+          auto &otherAttribute = otherElement._attributes[i];
+
+          if (thisAttribute->LocalName() != otherAttribute->LocalName())
+          {
+            return false;
+          }
+          if (thisAttribute->NamespaceURI() != otherAttribute->NamespaceURI())
+          {
+            return false;
+          }
+          if (thisAttribute->Value() != otherAttribute->Value())
+          {
+            return false;
+          }
+        }
+
+        break;
+      }
+      case HTML::NodeType::ATTRIBUTE_NODE:
+      {
+        auto &thisAttribute = Downcast<Attr>(*this);
+        auto &otherAttribute = Downcast<Attr>(*otherNode);
+
+        if (thisAttribute.LocalName() != otherAttribute.LocalName())
+        {
+          return false;
+        }
+        if (thisAttribute.NamespaceURI() != otherAttribute.NamespaceURI())
+        {
+          return false;
+        }
+        if (thisAttribute.Value() != otherAttribute.Value())
+        {
+          return false;
+        }
+        break;
+      }
+      case HTML::NodeType::PROCESSING_INSTRUCTION_NODE:
+      {
+        auto &thisProcessingInstruction = Downcast<ProcessingInstruction>(*this);
+        auto &otherProcessingInstruction = Downcast<ProcessingInstruction>(*otherNode);
+
+        if (thisProcessingInstruction.Target() != otherProcessingInstruction.Target())
+        {
+          return false;
+        }
+        if (thisProcessingInstruction.Data() != otherProcessingInstruction.Data())
+        {
+          return false;
+        }
+
+        break;
+      }
+      case HTML::NodeType::CDATA_SECTION_NODE:
+      case HTML::NodeType::TEXT_NODE:
+      case HTML::NodeType::COMMENT_NODE:
+      {
+        auto &thisCharacterData = Downcast<CharacterData>(*this);
+        auto &otherCharacterData = Downcast<CharacterData>(*otherNode);
+
+        if (thisCharacterData.Data() != otherCharacterData.Data())
+        {
+          return false;
+        }
+
+        break;
+      }
+      case HTML::NodeType::DOCUMENT_NODE:
+      case HTML::NodeType::DOCUMENT_FRAGMENT_NODE: break;
+    }
+
+    RawPtr<Node> child = FirstChild();
+    RawPtr<Node> otherChild = otherNode->FirstChild();
+
+    while (child != nullptr)
+    {
+      if (!child->IsEqualNode(otherChild))
+      {
+        return false;
+      }
+
+      child = child->NextSibling();
+      otherChild = otherChild->NextSibling();
+    }
+
+    if (otherChild != nullptr)
+    {
+      return false;
+    }
+
+    return true;
   }
 
   bool Node::IsSameNode(RawPtr<const Node> otherNode) const noexcept
@@ -117,11 +320,78 @@ namespace Krys::HTML
     return this == otherNode;
   }
 
-  DocumentPosition Node::CompareDocumentPosition(Node &other) const noexcept
+  DocumentPosition Node::CompareDocumentPosition(const Node &other) const noexcept
   {
-    (void)other;
-    // TODO(impl)
-    return DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC;
+    if (this == &other)
+    {
+      return DocumentPosition::DOCUMENT_POSITION_EQUIVALENT;
+    }
+
+    RawPtr<const Node> node1 = &other;
+    RawPtr<const Node> node2 = this;
+
+    RawPtr<const Attr> attr1 = nullptr;
+    RawPtr<const Attr> attr2 = nullptr;
+
+    if (Is<Attr>(node1))
+    {
+      attr1 = Downcast<Attr>(node1);
+      node1 = attr1->OwnerElement();
+    }
+
+    if (Is<Attr>(node2))
+    {
+      attr2 = Downcast<Attr>(node2);
+      node2 = attr2->OwnerElement();
+
+      if (attr1 != nullptr && node2 == node1)
+      {
+        auto &element1 = Downcast<Element>(*node1);
+        auto &element2 = Downcast<Element>(*node2);
+
+        for (auto &attribute : element2._attributes)
+        {
+          if (attribute->IsEqualNode(attr1))
+          {
+            return DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC
+                   | DocumentPosition::DOCUMENT_POSITION_PRECEDING;
+          }
+
+          if (attribute->IsEqualNode(attr2))
+          {
+            return DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC
+                   | DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
+          }
+        }
+      }
+    }
+
+    if (node1 == nullptr || node2 == nullptr || &TreeQueries::Root(*node1) != &TreeQueries::Root(*node2))
+    {
+      auto orderingFlag = node1 < node2 ? DocumentPosition::DOCUMENT_POSITION_PRECEDING
+                                        : DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
+
+      return DocumentPosition::DOCUMENT_POSITION_DISCONNECTED
+             | DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC | orderingFlag;
+    }
+
+    if ((TreeQueries::IsAncestor(*node1, *node2) && attr1 == nullptr) || (node1 == node2 && attr2 != nullptr))
+    {
+      return DocumentPosition::DOCUMENT_POSITION_CONTAINS | DocumentPosition::DOCUMENT_POSITION_PRECEDING;
+    }
+
+    if ((TreeQueries::IsDescendant(*node1, *node2) && attr2 == nullptr)
+        || (node1 == node2 && attr1 != nullptr))
+    {
+      return DocumentPosition::DOCUMENT_POSITION_CONTAINED_BY | DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
+    }
+
+    if (TreeQueries::IsPreceding(*node1, *node2))
+    {
+      return DocumentPosition::DOCUMENT_POSITION_PRECEDING;
+    }
+
+    return DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
   }
 
   bool Node::Contains(RawPtr<const Node> other) const noexcept
@@ -134,17 +404,77 @@ namespace Krys::HTML
     return TreeQueries::IsInclusiveDescendant(*other, *this);
   }
 
-  // const StringAtom &Node::LookupPrefix(const StringAtom &namespaceURI) const noexcept
-  //{
-  // }
+  DOMStringAtom Node::LookupPrefix(DOMStringAtom namespaceURI) const noexcept
+  {
+    if (namespaceURI == DOMStringAtom::Null() || namespaceURI == DOMStringAtom::Empty())
+    {
+      return DOMStringAtom::Null();
+    }
 
-  // const StringAtom &Node::LookupNamespaceURI(const StringAtom &prefix) const noexcept
-  //{
-  // }
+    switch (NodeType())
+    {
+      case NodeType::ELEMENT_NODE:
+      {
+        return TreeQueries::LocateNamespacePrefix(Downcast<Element>(*this), namespaceURI);
+      }
+      case NodeType::DOCUMENT_NODE:
+      {
+        RawPtr<const Element> documentElement = TreeQueries::DocumentElement(*this);
+        if (documentElement == nullptr)
+        {
+          return DOMStringAtom::Null();
+        }
 
-  // bool Node::IsDefaultNamespace(const StringAtom &namespaceURI) const noexcept
-  //{
-  // }
+        return TreeQueries::LocateNamespacePrefix(*documentElement, namespaceURI);
+      }
+      case NodeType::DOCUMENT_TYPE_NODE:
+      case NodeType::DOCUMENT_FRAGMENT_NODE:
+      {
+        return DOMStringAtom::Null();
+      }
+      case NodeType::ATTRIBUTE_NODE:
+      {
+        RawPtr<const Element> ownerElement = Downcast<Attr>(*this).OwnerElement();
+        if (ownerElement == nullptr)
+        {
+          return DOMStringAtom::Null();
+        }
+
+        return TreeQueries::LocateNamespacePrefix(*ownerElement, namespaceURI);
+      }
+      default:
+      {
+        RawPtr<const Element> parentElement = ParentElement();
+        if (parentElement == nullptr)
+        {
+          return DOMStringAtom::Null();
+        }
+
+        return TreeQueries::LocateNamespacePrefix(*parentElement, namespaceURI);
+      }
+    }
+  }
+
+  DOMStringAtom Node::LookupNamespaceURI(DOMStringAtom prefix) const noexcept
+  {
+    if (prefix == DOMStringAtom::Empty())
+    {
+      prefix = DOMStringAtom::Null();
+    }
+
+    return TreeQueries::LocateNamespace(*this, prefix);
+  }
+
+  bool Node::IsDefaultNamespace(DOMStringAtom namespaceURI) const noexcept
+  {
+    if (namespaceURI == DOMStringAtom::Empty())
+    {
+      namespaceURI = DOMStringAtom::Null();
+    }
+
+    auto defaultNamespace = TreeQueries::LocateNamespace(*this, DOMStringAtom::Null());
+    return namespaceURI == defaultNamespace;
+  }
 
   ExceptionOr<Node &> Node::InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept
   {
@@ -193,7 +523,7 @@ namespace Krys::HTML
       return containerNode->CountChildNodes();
     }
 
-    return 0;
+    return 0uz;
   }
 
 #pragma endregion

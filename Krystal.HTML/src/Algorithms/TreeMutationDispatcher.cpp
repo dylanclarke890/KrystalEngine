@@ -55,7 +55,7 @@ namespace Krys::HTML
     removedNode.ClearEventTargetFlag(EventTargetFlag::IsInShadowTree);
   }
 
-  void TreeMutationDispatcher::Cloned(Node &node, Node &copy, bool subtree) noexcept
+  void TreeMutationDispatcher::Cloned(const Node &node, Node &copy, bool subtree) noexcept
   {
     // TODO(impl): Run any cloning steps defined for node in other applicable specifications and pass node,
     // copy, and subtree as parameters.
