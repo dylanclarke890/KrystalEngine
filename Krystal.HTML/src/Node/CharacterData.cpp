@@ -22,15 +22,15 @@ namespace Krys::HTML
 
 #pragma region CharacterData
 
-  ExceptionOr<void> CharacterData::SetData(const DOMString &data) noexcept
+  ExceptionOr<void> CharacterData::Data(DOMString &&data) noexcept
   {
-    return ReplaceData(0, _data.size(), data);
+    return ReplaceData(0, Length(), Krys::Move(data));
   }
 
   /// @see https://dom.spec.whatwg.org/#concept-cd-substring
   ExceptionOr<DOMString> CharacterData::SubstringData(size_t offset, size_t count) const noexcept
   {
-    auto length = _data.size();
+    auto length = Length();
     if (offset > length)
     {
       return Exception {ExceptionCode::IndexSizeError};
@@ -44,14 +44,14 @@ namespace Krys::HTML
     return _data.substr(offset, count);
   }
 
-  ExceptionOr<void> CharacterData::AppendData(const DOMString &data) noexcept
+  ExceptionOr<void> CharacterData::AppendData(DOMString &&data) noexcept
   {
-    return ReplaceData(_data.size(), 0, data);
+    return ReplaceData(_data.size(), 0, Krys::Move(data));
   }
 
-  ExceptionOr<void> CharacterData::InsertData(size_t offset, const DOMString &data) noexcept
+  ExceptionOr<void> CharacterData::InsertData(size_t offset, DOMString &&data) noexcept
   {
-    return ReplaceData(offset, 0, data);
+    return ReplaceData(offset, 0, Krys::Move(data));
   }
 
   ExceptionOr<void> CharacterData::DeleteData(size_t offset, size_t count) noexcept
@@ -60,9 +60,9 @@ namespace Krys::HTML
   }
 
   /// @see https://dom.spec.whatwg.org/#concept-cd-replace
-  ExceptionOr<void> CharacterData::ReplaceData(size_t offset, size_t count, const DOMString &data) noexcept
+  ExceptionOr<void> CharacterData::ReplaceData(size_t offset, size_t count, DOMString &&data) noexcept
   {
-    auto length = _data.size();
+    auto length = Length();
     if (offset > length)
     {
       return Exception {ExceptionCode::IndexSizeError};
@@ -73,8 +73,8 @@ namespace Krys::HTML
       count = length - offset;
     }
 
-    TreeMutationDispatcher::QueueMutationRecord(u8"characterData", *this, std::nullopt, std::nullopt, _data,
-                                                {}, {}, nullptr, nullptr);
+    TreeMutationDispatcher::QueueMutationRecord(u8"characterData", *this, Null, Null, _data, {}, {}, nullptr,
+                                                nullptr);
     _data.insert(offset, data);
     auto deleteOffset = offset + data.size();
     _data.erase(deleteOffset, count);

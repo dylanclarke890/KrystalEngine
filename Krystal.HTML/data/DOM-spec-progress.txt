@@ -251,7 +251,9 @@ Source: https://dom.spec.whatwg.org
 
 4.10 Interface CharacterData
     Implementation: Full
-    Test Coverage : None
+    Test Coverage : Partial
+    Notes         : 
+        - Missing test cases for queued mutation records and live range updates.
 
 4.11 Interface Text
     Implementation: Full

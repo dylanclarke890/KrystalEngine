@@ -164,6 +164,7 @@
     <ClCompile Include="tests\Loader\TextResourceDecoder.cpp" />
     <ClCompile Include="tests\Algorithms\NameValidation.cpp" />
     <ClCompile Include="tests\Mixins.cpp" />
+    <ClCompile Include="tests\Node\CharacterData.cpp" />
     <ClCompile Include="tests\Node\ContainerNode.cpp" />
     <ClCompile Include="tests\Node\DocumentType.cpp" />
     <ClCompile Include="tests\Node\Node.cpp" />
@@ -178,6 +179,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML.Tests\ParserTestUtils.hpp" />
+    <ClInclude Include="include\Krystal.HTML.Tests\TestCharacterData.hpp" />
     <ClInclude Include="include\Krystal.HTML.Tests\TestContainerNode.hpp" />
     <ClInclude Include="include\Krystal.HTML.Tests\TestNode.hpp" />
   </ItemGroup>

@@ -28,13 +28,17 @@ namespace Krys::HTML
     {
       return _data;
     }
-    ExceptionOr<void> SetData(const DOMString &data) noexcept;
+    ExceptionOr<void> Data(DOMString &&data) noexcept;
+    size_t Length() const noexcept
+    {
+      return _data.size();
+    }
 
     ExceptionOr<DOMString> SubstringData(size_t offset, size_t count) const noexcept;
-    ExceptionOr<void> AppendData(const DOMString &data) noexcept;
-    ExceptionOr<void> InsertData(size_t offset, const DOMString &data) noexcept;
+    ExceptionOr<void> AppendData(DOMString &&data) noexcept;
+    ExceptionOr<void> InsertData(size_t offset, DOMString &&data) noexcept;
     ExceptionOr<void> DeleteData(size_t offset, size_t count) noexcept;
-    ExceptionOr<void> ReplaceData(size_t offset, size_t count, const DOMString &data) noexcept;
+    ExceptionOr<void> ReplaceData(size_t offset, size_t count, DOMString &&data) noexcept;
 
 #pragma endregion
 
@@ -47,7 +51,7 @@ namespace Krys::HTML
 
     ExceptionOr<void> NodeValue(DOMString &&value) noexcept final
     {
-      return ReplaceData(0, value.size(), Krys::Move(value));
+      return Data(Krys::Move(value));
     }
 
     KRYS_NODISCARD Maybe<DOMString> TextContent() const noexcept final
@@ -57,7 +61,7 @@ namespace Krys::HTML
 
     ExceptionOr<void> TextContent(DOMString &&value) noexcept final
     {
-      return ReplaceData(0, value.size(), Krys::Move(value));
+      return Data(Krys::Move(value));
     }
 
 #pragma endregion

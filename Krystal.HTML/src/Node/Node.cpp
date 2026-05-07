@@ -103,7 +103,7 @@ namespace Krys::HTML
       }
 
       auto data = TreeQueries::FollowingContiguousExclusiveTextContent(*node);
-      if (auto replaceResult = node->ReplaceData(length, 0uz, data); replaceResult.HasException())
+      if (auto replaceResult = node->ReplaceData(length, 0uz, Krys::Move(data)); replaceResult.HasException())
       {
         return replaceResult.ReleaseException();
       }

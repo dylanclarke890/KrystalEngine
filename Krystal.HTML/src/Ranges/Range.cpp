@@ -678,12 +678,23 @@ namespace Krys::HTML
       return data.ReleaseException();
     }
 
-    Downcast<CharacterData>(clone.get())->SetData(data.ReleaseValue());
-    fragment.AppendChild(*clone);
+    auto characterDataClone = Downcast<CharacterData>(clone.get());
+    if (auto setDataResult = characterDataClone->Data(data.ReleaseValue()); setDataResult.HasException())
+    {
+      return setDataResult.ReleaseException();
+    }
+
+    if (auto appendResult = fragment.AppendChild(*clone); appendResult.HasException())
+    {
+      return appendResult.ReleaseException();
+    }
 
     if (deleteClonedContent)
     {
-      characterData.DeleteData(offset, length);
+      if (auto deleteDataResult = characterData.DeleteData(offset, length); deleteDataResult.HasException())
+      {
+        return deleteDataResult.ReleaseException();
+      }
     }
 
     return {};
