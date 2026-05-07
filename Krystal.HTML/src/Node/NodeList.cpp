@@ -12,7 +12,7 @@
 namespace Krys::HTML
 {
   LiveNodeList::LiveNodeList(WeakRef<Node> &&root, LiveNodeListFilterFunc &&filter) noexcept
-      : NodeList(NodeListType::Live), _root(Krys::Move(root)), _filter(Krys::Move(filter))
+      : NodeList(NodeCollectionLiveness::Live), _root(Krys::Move(root)), _filter(Krys::Move(filter))
   {
   }
 
@@ -60,6 +60,16 @@ namespace Krys::HTML
     return nullptr;
   }
 
+  RawPtr<Node> LiveNodeList::operator[](size_t index) noexcept
+  {
+    return Item(index);
+  }
+
+  RawPtr<const Node> LiveNodeList::operator[](size_t index) const noexcept
+  {
+    return Item(index);
+  }
+
   size_t LiveNodeList::Length() const noexcept
   {
     if (auto root = _root.lock())
@@ -70,8 +80,8 @@ namespace Krys::HTML
     return 0uz;
   }
 
-  StaticNodeList::StaticNodeList(List<Ref<Node>> &&nodes) noexcept
-      : NodeList(NodeListType::Static), _nodes(Krys::Move(nodes))
+  StaticNodeList::StaticNodeList(SmallNodeList &&nodes) noexcept
+      : NodeList(NodeCollectionLiveness::Static), _nodes(Krys::Move(nodes))
   {
   }
 
@@ -79,7 +89,7 @@ namespace Krys::HTML
   {
     if (index < _nodes.size())
     {
-      return _nodes.at(index).get();
+      return _nodes[index].get();
     }
 
     return nullptr;
@@ -89,10 +99,20 @@ namespace Krys::HTML
   {
     if (index < _nodes.size())
     {
-      return _nodes.at(index).get();
+      return _nodes[index].get();
     }
 
     return nullptr;
+  }
+
+  RawPtr<Node> StaticNodeList::operator[](size_t index) noexcept
+  {
+    return Item(index);
+  }
+
+  RawPtr<const Node> StaticNodeList::operator[](size_t index) const noexcept
+  {
+    return Item(index);
   }
 
   size_t StaticNodeList::Length() const noexcept

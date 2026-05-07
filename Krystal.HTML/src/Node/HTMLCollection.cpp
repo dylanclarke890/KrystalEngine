@@ -1,5 +1,6 @@
 ﻿#include "Krystal.HTML/Node/HTMLCollection.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/MutationObserver/MutationObserver.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
@@ -11,17 +12,112 @@
 
 namespace Krys::HTML
 {
-  HTMLCollection::HTMLCollection(ContainerNode &owner) noexcept : _owner(ShareRef(owner)), _invalid(true)
+  LiveHTMLCollection::LiveHTMLCollection(WeakRef<ContainerNode> &&root,
+                                         LiveHTMLCollectionFilterFunc &&filter) noexcept
+      : HTMLCollection(NodeCollectionLiveness::Live), _root(Krys::Move(root)), _filter(Krys::Move(filter))
   {
   }
 
-  RawPtr<Element> HTMLCollection::Item(size_t index) noexcept
+  RawPtr<Element> LiveHTMLCollection::Item(size_t index) noexcept
   {
-    if (_invalid)
+    if (auto root = _root.lock())
     {
-      BuildCollection();
+      size_t count = 0;
+      for (Node &node : DescendantRange(*root))
+      {
+        if (auto element = DynamicDowncast<Element>(node))
+        {
+          if (_filter(*element))
+          {
+            ++count;
+          }
+
+          if (count > index)
+          {
+            return element;
+          }
+        }
+      }
     }
 
+    return nullptr;
+  }
+
+  RawPtr<const Element> LiveHTMLCollection::Item(size_t index) const noexcept
+  {
+    if (auto root = _root.lock())
+    {
+      size_t count = 0;
+      for (const Node &node : DescendantRange(*root))
+      {
+        if (auto element = DynamicDowncast<Element>(node))
+        {
+          if (_filter(*element))
+          {
+            ++count;
+          }
+
+          if (count > index)
+          {
+            return element;
+          }
+        }
+      }
+    }
+
+    return nullptr;
+  }
+
+  RawPtr<Element> LiveHTMLCollection::operator[](size_t index) noexcept
+  {
+    return Item(index);
+  }
+
+  RawPtr<const Element> LiveHTMLCollection::operator[](size_t index) const noexcept
+  {
+    return Item(index);
+  }
+
+  RawPtr<Element> LiveHTMLCollection::NamedItem(DOMStringView name) noexcept
+  {
+    // TODO(impl):
+    return nullptr;
+  }
+
+  RawPtr<const Element> LiveHTMLCollection::NamedItem(DOMStringView name) const noexcept
+  {
+    // TODO(impl):
+    return nullptr;
+  }
+
+  RawPtr<Element> LiveHTMLCollection::operator[](DOMStringView name) noexcept
+  {
+    return NamedItem(name);
+  }
+
+  RawPtr<const Element> LiveHTMLCollection::operator[](DOMStringView name) const noexcept
+  {
+    return NamedItem(name);
+  }
+
+  size_t LiveHTMLCollection::Length() const noexcept
+  {
+    if (auto root = _root.lock())
+    {
+      return Count(ConstDescendantRange(*root),
+                   [&](auto &&node) { return Is<Element>(node) && _filter(Downcast<Element>(node)); });
+    }
+
+    return 0uz;
+  }
+
+  StaticHTMLCollection::StaticHTMLCollection(SmallElementList &&elements) noexcept
+      : HTMLCollection(NodeCollectionLiveness::Static), _elements(Krys::Move(elements))
+  {
+  }
+
+  RawPtr<Element> StaticHTMLCollection::Item(size_t index) noexcept
+  {
     if (index < _elements.size())
     {
       return _elements[index].get();
@@ -30,13 +126,8 @@ namespace Krys::HTML
     return nullptr;
   }
 
-  RawPtr<Element> HTMLCollection::operator[](size_t index) noexcept
+  RawPtr<const Element> StaticHTMLCollection::Item(size_t index) const noexcept
   {
-    if (_invalid)
-    {
-      BuildCollection();
-    }
-
     if (index < _elements.size())
     {
       return _elements[index].get();
@@ -45,42 +136,40 @@ namespace Krys::HTML
     return nullptr;
   }
 
-  RawPtr<Element> HTMLCollection::NamedItem(const DOMString &idOrName) noexcept
+  RawPtr<Element> StaticHTMLCollection::operator[](size_t index) noexcept
   {
-    if (_invalid)
-    {
-      BuildCollection();
-    }
+    return Item(index);
+  }
 
-    // TODO(impl): Implement this method
+  RawPtr<const Element> StaticHTMLCollection::operator[](size_t index) const noexcept
+  {
+    return Item(index);
+  }
+
+  RawPtr<Element> StaticHTMLCollection::NamedItem(DOMStringView name) noexcept
+  {
+    // TODO(impl):
     return nullptr;
   }
 
-  RawPtr<Element> HTMLCollection::operator[](const DOMString &idOrName) noexcept
+  RawPtr<const Element> StaticHTMLCollection::NamedItem(DOMStringView name) const noexcept
   {
-    if (_invalid)
-    {
-      BuildCollection();
-    }
-
-    // TODO(impl): Implement this method
+    // TODO(impl):
     return nullptr;
   }
 
-  size_t HTMLCollection::Length() noexcept
+  RawPtr<Element> StaticHTMLCollection::operator[](DOMStringView name) noexcept
   {
-    if (_invalid)
-    {
-      BuildCollection();
-    }
+    return NamedItem(name);
+  }
 
+  RawPtr<const Element> StaticHTMLCollection::operator[](DOMStringView name) const noexcept
+  {
+    return NamedItem(name);
+  }
+
+  size_t StaticHTMLCollection::Length() const noexcept
+  {
     return _elements.size();
-  }
-
-  void HTMLCollection::BuildCollection() noexcept
-  {
-    _invalid = false;
-    _elements.clear();
-    TreeQueries::CollectChildElements(*_owner, _elements);
   }
 }

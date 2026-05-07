@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Node/NodeRareData.hpp"
+﻿#include "Krystal.HTML/Node/RareData/NodeRareData.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/MutationObserver/MutationObserver.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
@@ -12,13 +12,14 @@ namespace Krys::HTML
 {
   Ref<NodeList> NodeRareData::ChildNodes(Node &node) noexcept
   {
-    auto childNodes = _childNodeList.lock();
-    if (childNodes == nullptr)
+    if (auto childNodes = _childNodeList.lock())
     {
-      childNodes = CreateRefPtr<LiveNodeList>(CreateWeakPtr<Node>(&node),
-                                              [&](const Node &n) { return n.ParentNode() == &node; });
-      _childNodeList = CreateWeakPtr<NodeList>(childNodes.get());
+      return ShareRef(*childNodes.get());
     }
+
+    auto childNodes = CreateRef<LiveNodeList>(CreateWeakRef<Node>(node),
+                                              [&](const Node &n) { return n.ParentNode() == &node; });
+    _childNodeList = CreateWeakPtr<NodeList>(childNodes.get());
 
     return childNodes;
   }

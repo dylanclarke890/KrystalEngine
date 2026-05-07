@@ -189,7 +189,7 @@
     <ClInclude Include="include\Krystal.HTML\Algorithms\TreeMutationDispatcher.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\NodeRareData.hpp">
+    <ClInclude Include="include\Krystal.HTML\Node\RareData\NodeRareData.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Ranges\AbstractRange.hpp">
@@ -240,16 +240,16 @@
     <ClInclude Include="include\Krystal.HTML\Node\HTMLCollection.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\ElementRareData.hpp">
+    <ClInclude Include="include\Krystal.HTML\Node\RareData\ElementRareData.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\DocumentRareData.hpp">
+    <ClInclude Include="include\Krystal.HTML\Node\RareData\DocumentRareData.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\DocumentFragmentRareData.hpp">
+    <ClInclude Include="include\Krystal.HTML\Node\RareData\DocumentFragmentRareData.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\ParentNodeRareData.hpp">
+    <ClInclude Include="include\Krystal.HTML\Node\RareData\ParentNodeRareData.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationObserverInit.hpp">
@@ -318,10 +318,10 @@
     <ClInclude Include="include\Krystal.HTML\DOMTokenList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\CustomElementState.hpp">
+    <ClInclude Include="include\Krystal.HTML\Node\Enums\CustomElementState.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\NodeOrString.hpp">
+    <ClInclude Include="include\Krystal.HTML\Utils\NodeOrString.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Algorithms\ChildNodeAlgorithms.hpp">
@@ -333,13 +333,13 @@
     <ClInclude Include="include\Krystal.HTML\Node\ShadowRootInit.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\ShadowRootMode.hpp">
+    <ClInclude Include="include\Krystal.HTML\Node\Enums\ShadowRootMode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\SlotAssignmentMode.hpp">
+    <ClInclude Include="include\Krystal.HTML\Node\Enums\SlotAssignmentMode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\InsertAdjacentWhere.hpp">
+    <ClInclude Include="include\Krystal.HTML\Node\Enums\InsertAdjacentWhere.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Algorithms\ElementAttributeAlgorithms.hpp">
@@ -352,6 +352,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Algorithms\NonElementParentNodeAlgorithms.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Node\Enums\NodeCollectionLiveness.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -437,13 +440,13 @@
     <ClCompile Include="src\Algorithms\MutationAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Node\NodeRareData.cpp">
+    <ClCompile Include="src\Node\RareData\NodeRareData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\HTMLCollection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Node\ParentNodeRareData.cpp">
+    <ClCompile Include="src\Node\RareData\ParentNodeRareData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MutationObserver\MutationObserver.cpp">

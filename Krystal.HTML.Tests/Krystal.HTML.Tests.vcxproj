@@ -164,10 +164,14 @@
     <ClCompile Include="tests\Loader\TextResourceDecoder.cpp" />
     <ClCompile Include="tests\Algorithms\NameValidation.cpp" />
     <ClCompile Include="tests\Mixins.cpp" />
+    <ClCompile Include="tests\Node\Attr.cpp" />
+    <ClCompile Include="tests\Node\CDATASection.cpp" />
     <ClCompile Include="tests\Node\CharacterData.cpp" />
+    <ClCompile Include="tests\Node\Comment.cpp" />
     <ClCompile Include="tests\Node\ContainerNode.cpp" />
     <ClCompile Include="tests\Node\DocumentType.cpp" />
     <ClCompile Include="tests\Node\Node.cpp" />
+    <ClCompile Include="tests\Node\ProcessingInstruction.cpp" />
     <ClCompile Include="tests\Node\Text.cpp" />
     <ClCompile Include="tests\Parser\HTMLCharacterReference.cpp" />
     <ClCompile Include="tests\Parser\HTMLInputStream.cpp" />

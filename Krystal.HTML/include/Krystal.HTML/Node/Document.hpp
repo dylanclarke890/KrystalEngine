@@ -2,7 +2,7 @@
 
 #include "Krystal.HTML/Iterator/NodeIterator.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
-#include "Krystal.HTML/Node/DocumentRareData.hpp"
+#include "Krystal.HTML/Node/RareData/DocumentRareData.hpp"
 #include "Krystal.HTML/Node/TreeScope.hpp"
 #include "Krystal.HTML/Ranges/Range.hpp"
 #include "Krystal.HTML/URL.hpp"

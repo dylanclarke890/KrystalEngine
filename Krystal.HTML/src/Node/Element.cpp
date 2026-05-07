@@ -12,9 +12,9 @@
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
-#include "Krystal.HTML/Node/ElementRareData.hpp"
 #include "Krystal.HTML/Node/HTMLCollection.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
+#include "Krystal.HTML/Node/RareData/ElementRareData.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 
@@ -77,9 +77,9 @@ namespace Krys::HTML
     return !_attributes.empty();
   }
 
-  //NamedNodeMap &Element::Attributes() const noexcept
+  // NamedNodeMap &Element::Attributes() const noexcept
   //{
-  //}
+  // }
 
   List<DOMString> Element::GetAttributeNames() const noexcept
   {
@@ -300,20 +300,20 @@ namespace Krys::HTML
   Ref<HTMLCollection> Element::GetElementsByTagName(DOMStringAtom qualifiedName) noexcept
   {
     // TODO(impl): implement this
-    return CreateRef<HTMLCollection>(*this);
+    return CreateRef<LiveHTMLCollection>(CreateWeakRef(*this), [](const Element &) { return true; });
   }
 
   Ref<HTMLCollection> Element::GetElementsByTagNameNS(DOMStringAtom namespaceURI,
                                                       DOMStringAtom localName) noexcept
   {
     // TODO(impl): implement this
-    return CreateRef<HTMLCollection>(*this);
+    return CreateRef<LiveHTMLCollection>(CreateWeakRef(*this), [](const Element &) { return true; });
   }
 
   Ref<HTMLCollection> Element::GetElementsByClassName(const DOMString &classNames) noexcept
   {
     // TODO(impl): implement this
-    return CreateRef<HTMLCollection>(*this);
+    return CreateRef<LiveHTMLCollection>(CreateWeakRef(*this), [](const Element &) { return true; });
   }
 
   ExceptionOr<RawPtr<Element>> Element::InsertAdjacentElement(InsertAdjacentWhere where,

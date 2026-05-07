@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Node/InsertAdjacentWhere.hpp"
-#include "Krystal.HTML/Node/NodeOrString.hpp"
+#include "Krystal.HTML/Node/Enums/InsertAdjacentWhere.hpp"
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
+#include "Krystal.HTML/Utils/NodeOrString.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
@@ -79,6 +79,6 @@ namespace Krys::HTML
 
     /// @see https://dom.spec.whatwg.org/#string-replace-all
     KRYS_NODISCARD static ExceptionOr<void> StringReplaceAll(DOMString &&string,
-                                                            ContainerNode &parent) noexcept;
+                                                             ContainerNode &parent) noexcept;
   };
 }

@@ -14,7 +14,5 @@ namespace Krys::HTML
 
   public:
     KRYS_NODISCARD Ref<HTMLCollection> Children(ContainerNode &parent) noexcept;
-
-    void InvalidateChildren() noexcept;
   };
 }

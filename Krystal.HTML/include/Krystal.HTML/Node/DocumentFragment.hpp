@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/Node/ContainerNode.hpp"
-#include "Krystal.HTML/Node/DocumentFragmentRareData.hpp"
+#include "Krystal.HTML/Node/RareData/DocumentFragmentRareData.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"

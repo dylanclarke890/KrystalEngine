@@ -17,10 +17,11 @@ namespace Krys::Tests
   {
     auto doc = CreateRef<Document>();
     auto textNode = CreateRef<Krys::HTML::Text>(*doc, u8"Hello, world!");
+    
     auto splitResult = textNode->SplitText(7);
+    REQUIRE_FALSE(splitResult.HasException());
 
     REQUIRE(textNode->Data() == u8"Hello, ");
-    REQUIRE(!splitResult.HasException());
     REQUIRE(splitResult.Value()->Data() == u8"world!");
   }
 
@@ -33,19 +34,19 @@ namespace Krys::Tests
     auto textNodeC = CreateRef<Krys::HTML::Text>(*doc, u8"world!");
     auto childNode = CreateRef<TestContainerNode>(*doc);
 
-    parent->AppendChild(*textNodeA);
-    parent->AppendChild(*textNodeB);
-    parent->AppendChild(*textNodeC);
-    parent->AppendChild(*childNode);
+    REQUIRE_FALSE(parent->AppendChild(*textNodeA).HasException());
+    REQUIRE_FALSE(parent->AppendChild(*textNodeB).HasException());
+    REQUIRE_FALSE(parent->AppendChild(*textNodeC).HasException());
+    REQUIRE_FALSE(parent->AppendChild(*childNode).HasException());
 
     REQUIRE(textNodeA->WholeText() == u8"Hello, world!");
     REQUIRE(textNodeB->WholeText() == u8"Hello, world!");
     REQUIRE(textNodeC->WholeText() == u8"Hello, world!");
 
-    parent->RemoveChild(*textNodeA);
-    parent->RemoveChild(*textNodeB);
-    parent->RemoveChild(*textNodeC);
-    parent->RemoveChild(*childNode);
+    REQUIRE_FALSE(parent->RemoveChild(*textNodeA).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*textNodeB).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*textNodeC).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*childNode).HasException());
   }
 
   TEST_CASE("Text::NodeName", "[HTML][Text]")
@@ -54,5 +55,13 @@ namespace Krys::Tests
     auto textNode = CreateRef<Krys::HTML::Text>(*doc, u8"Hello, world!");
 
     REQUIRE(textNode->NodeName() == u8"#text");
+  }
+
+  TEST_CASE("Text::NodeType", "[HTML][Text]")
+  {
+    auto doc = CreateRef<Document>();
+    auto textNode = CreateRef<Krys::HTML::Text>(*doc, u8"Hello, world!");
+
+    REQUIRE(textNode->NodeType() == NodeType::TEXT_NODE);
   }
 }

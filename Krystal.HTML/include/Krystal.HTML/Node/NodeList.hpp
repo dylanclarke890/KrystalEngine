@@ -1,24 +1,14 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/Node/Enums/NodeCollectionLiveness.hpp"
+#include "Krystal.HTML/Utils/SmallNodeList.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Mixins/CanMakeWeakPtr.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Types/Func.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-
-namespace Krys::HTML
-{
-  enum class NodeListType : uint8
-  {
-    Static,
-    Live
-  };
-}
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::NodeListType, 2);
 
 namespace Krys::HTML
 {
@@ -31,10 +21,10 @@ namespace Krys::HTML
     KRYS_TYPE_CAST_TRAITS_ACCESS();
 
   private:
-    NodeListType _type : BitCount<NodeListType>();
+    NodeCollectionLiveness _liveness;
 
   protected:
-    explicit NodeList(NodeListType type) noexcept : _type(type)
+    explicit NodeList(NodeCollectionLiveness type) noexcept : _liveness(type)
     {
     }
 
@@ -43,6 +33,9 @@ namespace Krys::HTML
 
     KRYS_NODISCARD virtual RawPtr<Node> Item(size_t index) noexcept = 0;
     KRYS_NODISCARD virtual RawPtr<const Node> Item(size_t index) const noexcept = 0;
+
+    KRYS_NODISCARD virtual RawPtr<Node> operator[](size_t index) noexcept = 0;
+    KRYS_NODISCARD virtual RawPtr<const Node> operator[](size_t index) const noexcept = 0;
 
     KRYS_NODISCARD virtual size_t Length() const noexcept = 0;
 
@@ -56,12 +49,12 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool IsLiveNodeList() const noexcept
     {
-      return _type == NodeListType::Live;
+      return _liveness == NodeCollectionLiveness::Live;
     }
 
     KRYS_NODISCARD bool IsStaticNodeList() const noexcept
     {
-      return _type == NodeListType::Static;
+      return _liveness == NodeCollectionLiveness::Static;
     }
 
 #pragma endregion
@@ -74,10 +67,13 @@ namespace Krys::HTML
     LiveNodeListFilterFunc _filter;
 
   public:
-    LiveNodeList(WeakRef<Node> &&root, LiveNodeListFilterFunc&& filter) noexcept;
+    LiveNodeList(WeakRef<Node> &&root, LiveNodeListFilterFunc &&filter) noexcept;
 
     KRYS_NODISCARD RawPtr<Node> Item(size_t index) noexcept override;
     KRYS_NODISCARD RawPtr<const Node> Item(size_t index) const noexcept override;
+
+    KRYS_NODISCARD RawPtr<Node> operator[](size_t index) noexcept override;
+    KRYS_NODISCARD RawPtr<const Node> operator[](size_t index) const noexcept override;
 
     KRYS_NODISCARD size_t Length() const noexcept override;
   };
@@ -85,13 +81,16 @@ namespace Krys::HTML
   class StaticNodeList final : public NodeList
   {
   private:
-    List<Ref<Node>> _nodes;
+    SmallNodeList _nodes;
 
   public:
-    StaticNodeList(List<Ref<Node>> &&nodes = {}) noexcept;
+    StaticNodeList(SmallNodeList &&nodes = {}) noexcept;
 
     KRYS_NODISCARD RawPtr<Node> Item(size_t index) noexcept override;
     KRYS_NODISCARD RawPtr<const Node> Item(size_t index) const noexcept override;
+
+    KRYS_NODISCARD RawPtr<Node> operator[](size_t index) noexcept override;
+    KRYS_NODISCARD RawPtr<const Node> operator[](size_t index) const noexcept override;
 
     KRYS_NODISCARD size_t Length() const noexcept override;
   };

@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/Node/DocumentFragment.hpp"
-#include "Krystal.HTML/Node/ShadowRootMode.hpp"
-#include "Krystal.HTML/Node/SlotAssignmentMode.hpp"
+#include "Krystal.HTML/Node/Enums/ShadowRootMode.hpp"
+#include "Krystal.HTML/Node/Enums/SlotAssignmentMode.hpp"
 #include "Krystal.HTML/Node/TreeScope.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"

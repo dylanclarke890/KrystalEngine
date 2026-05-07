@@ -1,8 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/Node/Enums/ShadowRootMode.hpp"
+#include "Krystal.HTML/Node/Enums/SlotAssignmentMode.hpp"
 #include "Krystal.HTML/Node/ShadowRootInit.hpp"
-#include "Krystal.HTML/Node/ShadowRootMode.hpp"
-#include "Krystal.HTML/Node/SlotAssignmentMode.hpp"
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
