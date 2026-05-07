@@ -181,9 +181,7 @@ Source: https://dom.spec.whatwg.org
 
 4.2.10.1 Interface NodeList
     Implementation: Full
-    Test Coverage : None
-    Notes         : 
-        - needs more work if a node list can be used for anything other than child nodes (hint: it can).
+    Test Coverage : Full
 
 4.2.10.2 Interface HTMLCollection
     Implementation: Partial
@@ -215,6 +213,7 @@ Source: https://dom.spec.whatwg.org
         - CloneNode: Missing test coverage.
         - IsEqualNode: Missing test coverage for most cases.
         - CompareDocumentPosition: Missing test coverage for comparing attribute nodes, both with each other and with other node types.
+        - LookupPrefix, LookupNamespaceURI, IsDefaultNamespace: Missing test coverage.
 
 4.5 Interface Document
     Implementation: None
@@ -226,7 +225,7 @@ Source: https://dom.spec.whatwg.org
 
 4.6 Interface DocumentType
     Implementation: Full
-    Test Coverage : None
+    Test Coverage : Full
 
 4.7 Interface DocumentFragment
     Implementation: Full
