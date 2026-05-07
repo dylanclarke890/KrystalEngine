@@ -65,7 +65,7 @@ namespace Krys::HTML
           slottable = nullptr;
 
           auto parentRoot = parent->IsNode() ? &TreeQueries::Root(*parentNode) : nullptr;
-          auto parentShadowRoot = parentRoot->IsShadowRootNode() ? Downcast<ShadowRoot>(parentRoot) : nullptr;
+          auto parentShadowRoot = DynamicDowncast<ShadowRoot>(parentRoot);
           if (parentShadowRoot && parentShadowRoot->Mode() == ShadowRootMode::Closed)
           {
             slotInClosedTree = true;
@@ -132,7 +132,7 @@ namespace Krys::HTML
 
           if (auto *node = DynamicDowncast<Node>(target))
           {
-            if (TreeQueries::ShadowIncludingRoot(*node).IsShadowRootNode())
+            if (Is<ShadowRoot>(TreeQueries::ShadowIncludingRoot(*node)))
             {
               return true;
             }
@@ -237,7 +237,7 @@ namespace Krys::HTML
 
     if (auto *invocationTargetNode = DynamicDowncast<Node>(invocationTarget))
     {
-      if (TreeQueries::Root(*invocationTargetNode).IsShadowRootNode())
+      if (Is<ShadowRoot>(TreeQueries::Root(*invocationTargetNode)))
       {
         invocationTargetInShadowTree = true;
       }

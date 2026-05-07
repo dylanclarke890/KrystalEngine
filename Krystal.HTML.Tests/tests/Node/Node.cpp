@@ -1,10 +1,12 @@
 ﻿#include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML.Tests/TestNode.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Namespaces.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include <catch_all.hpp>
@@ -15,24 +17,24 @@ namespace Krys::Tests
 
   struct CommonTestData
   {
-    Ref<Document> test_document;
-    Ref<TestNode> test_node;
+    Ref<Document> Document;
+    Ref<TestNode> Node;
 
     CommonTestData(bool appendChild = false)
-        : test_document(CreateRef<Document>()), test_node(CreateRef<TestNode>(*test_document))
+        : Document(CreateRef<HTML::Document>()), Node(CreateRef<TestNode>(*Document))
     {
       if (appendChild)
       {
-        auto result = test_document->AppendChild(*test_node);
+        auto result = Document->AppendChild(*Node);
         REQUIRE_FALSE(result.HasException());
       }
     }
 
     ~CommonTestData()
     {
-      if (test_node->IsConnected())
+      if (Node->IsConnected())
       {
-        auto result = test_document->RemoveChild(*test_node);
+        auto result = Document->RemoveChild(*Node);
         REQUIRE_FALSE(result.HasException());
       }
     }
@@ -41,143 +43,180 @@ namespace Krys::Tests
   TEST_CASE("Node::NodeType", "[HTML][Node]")
   {
     CommonTestData data {};
-    REQUIRE(data.test_node->NodeType() == NodeType::ELEMENT_NODE);
+    REQUIRE(data.Node->NodeType() == NodeType::ELEMENT_NODE);
   }
 
   TEST_CASE("Node::BaseURI", "[HTML][Node]")
   {
     CommonTestData data {};
-    REQUIRE(data.test_node->BaseURI().Href == u8"about:blank");
+    REQUIRE(data.Node->BaseURI().Href == u8"about:blank");
   }
 
   TEST_CASE("Node::IsConnected", "[HTML][Node]")
   {
     CommonTestData data {};
-    REQUIRE_FALSE(data.test_node->IsConnected());
-    REQUIRE(data.test_document->IsConnected());
+    REQUIRE_FALSE(data.Node->IsConnected());
+    REQUIRE(data.Document->IsConnected());
 
-    auto appendResult = data.test_document->AppendChild(*data.test_node);
+    auto appendResult = data.Document->AppendChild(*data.Node);
     REQUIRE_FALSE(appendResult.HasException());
 
-    REQUIRE(data.test_node->IsConnected());
-    REQUIRE(data.test_document->IsConnected());
+    REQUIRE(data.Node->IsConnected());
+    REQUIRE(data.Document->IsConnected());
   }
 
   TEST_CASE("Node::OwnerDocument", "[HTML][Node]")
   {
     CommonTestData data {};
-    REQUIRE(data.test_node->OwnerDocument() == data.test_document.get());
-    REQUIRE(data.test_document->OwnerDocument() == nullptr);
+    REQUIRE(data.Node->OwnerDocument() == data.Document.get());
+    REQUIRE(data.Document->OwnerDocument() == nullptr);
   }
 
   TEST_CASE("Node::GetRootNode", "[HTML][Node]")
   {
     CommonTestData data {};
 
-    REQUIRE(&data.test_node->GetRootNode({.Composed = false}) == data.test_node.get());
-    REQUIRE(&data.test_node->GetRootNode({.Composed = true}) == data.test_node.get());
+    REQUIRE(&data.Node->GetRootNode({.Composed = false}) == data.Node.get());
+    REQUIRE(&data.Node->GetRootNode({.Composed = true}) == data.Node.get());
 
-    auto appendResult = data.test_document->AppendChild(*data.test_node);
+    auto appendResult = data.Document->AppendChild(*data.Node);
     REQUIRE_FALSE(appendResult.HasException());
 
-    REQUIRE(&data.test_node->GetRootNode({.Composed = false}) == data.test_document.get());
-    REQUIRE(&data.test_node->GetRootNode({.Composed = true}) == data.test_document.get());
+    REQUIRE(&data.Node->GetRootNode({.Composed = false}) == data.Document.get());
+    REQUIRE(&data.Node->GetRootNode({.Composed = true}) == data.Document.get());
   }
 
   TEST_CASE("Node::ParentNode", "[HTML][Node]")
   {
     CommonTestData data {};
-    REQUIRE(data.test_node->ParentNode() == nullptr);
+    REQUIRE(data.Node->ParentNode() == nullptr);
 
-    auto appendResult = data.test_document->AppendChild(*data.test_node);
+    auto appendResult = data.Document->AppendChild(*data.Node);
     REQUIRE_FALSE(appendResult.HasException());
-    REQUIRE(data.test_node->ParentNode() == data.test_document.get());
+    REQUIRE(data.Node->ParentNode() == data.Document.get());
 
-    auto div = CreateRef<TestNode>(*data.test_document);
-    auto appendDivResult = data.test_node->AppendChild(*div);
+    auto div = CreateRef<TestNode>(*data.Document);
+    auto appendDivResult = data.Node->AppendChild(*div);
     REQUIRE_FALSE(appendDivResult.HasException());
-    REQUIRE(div->ParentNode() == data.test_node.get());
+    REQUIRE(div->ParentNode() == data.Node.get());
 
-    data.test_node->RemoveChild(*div);
+    data.Node->RemoveChild(*div);
   }
 
   TEST_CASE("Node::ParentElement", "[HTML][Node]")
   {
     CommonTestData data {};
-    REQUIRE(data.test_node->ParentElement() == nullptr);
+    REQUIRE(data.Node->ParentElement() == nullptr);
 
-    auto appendResult = data.test_document->AppendChild(*data.test_node);
+    auto appendResult = data.Document->AppendChild(*data.Node);
     REQUIRE_FALSE(appendResult.HasException());
-    REQUIRE(data.test_node->ParentElement() == nullptr);
+    REQUIRE(data.Node->ParentElement() == nullptr);
 
-    auto div = CreateRef<TestNode>(*data.test_document);
-    auto appendDivResult = data.test_node->AppendChild(*div);
+    auto div = CreateRef<TestNode>(*data.Document);
+    auto appendDivResult = data.Node->AppendChild(*div);
     REQUIRE_FALSE(appendDivResult.HasException());
-    REQUIRE(div->ParentElement() == data.test_node.get());
+    REQUIRE(div->ParentElement() == data.Node.get());
 
-    auto removeResult = data.test_node->RemoveChild(*div);
+    auto removeResult = data.Node->RemoveChild(*div);
     REQUIRE_FALSE(removeResult.HasException());
   }
 
   TEST_CASE("Node::HasChildNodes", "[HTML][Node]")
   {
     CommonTestData data {true};
-    REQUIRE_FALSE(data.test_node->HasChildNodes());
-    REQUIRE(data.test_document->HasChildNodes());
+    REQUIRE_FALSE(data.Node->HasChildNodes());
+    REQUIRE(data.Document->HasChildNodes());
 
-    auto child = CreateRef<TestNode>(*data.test_document);
-    auto appendResult = data.test_node->AppendChild(*child);
+    auto child = CreateRef<TestNode>(*data.Document);
+    auto appendResult = data.Node->AppendChild(*child);
 
     REQUIRE_FALSE(appendResult.HasException());
-    REQUIRE(data.test_node->HasChildNodes());
-    REQUIRE(data.test_document->HasChildNodes());
+    REQUIRE(data.Node->HasChildNodes());
+    REQUIRE(data.Document->HasChildNodes());
 
-    auto removeResult = data.test_node->RemoveChild(*child);
+    auto removeResult = data.Node->RemoveChild(*child);
     REQUIRE_FALSE(removeResult.HasException());
   }
 
-  // TODO(impl):
-  // TEST_CASE("Node::ChildNodes", "[HTML][Node]")
+  TEST_CASE("Node::ChildNodes", "[HTML][Node]")
+  {
+    CommonTestData data {true};
+    auto childA = CreateRef<TestNode>(*data.Document);
+    auto childB = CreateRef<TestNode>(*data.Document);
+    auto childC = CreateRef<TestNode>(*data.Document);
+
+    Ref<NodeList> childNodes = data.Node->ChildNodes();
+
+    REQUIRE(childNodes->Length() == 0uz);
+    REQUIRE(childNodes->Item(0uz) == nullptr);
+    REQUIRE(childNodes->Item(1uz) == nullptr);
+
+    auto result = data.Node->AppendChild(*childA);
+    REQUIRE_FALSE(result.HasException());
+
+    REQUIRE(childNodes->Length() == 1uz);
+    REQUIRE(childNodes->Item(0uz) == childA.get());
+    REQUIRE(childNodes->Item(1uz) == nullptr);
+
+    result = data.Node->AppendChild(*childB);
+    REQUIRE_FALSE(result.HasException());
+
+    REQUIRE(childNodes->Length() == 2uz);
+    REQUIRE(childNodes->Item(0uz) == childA.get());
+    REQUIRE(childNodes->Item(1uz) == childB.get());
+
+    result = data.Node->InsertBefore(*childC, ShareRefPtr(childA.get()));
+    REQUIRE_FALSE(result.HasException());
+
+    REQUIRE(childNodes->Length() == 3uz);
+    REQUIRE(childNodes->Item(0uz) == childC.get());
+    REQUIRE(childNodes->Item(1uz) == childA.get());
+    REQUIRE(childNodes->Item(2uz) == childB.get());
+
+    data.Node->RemoveChild(*childA);
+    data.Node->RemoveChild(*childB);
+    data.Node->RemoveChild(*childC);
+  }
 
   TEST_CASE("Node::FirstChild", "[HTML][Node]")
   {
     CommonTestData data {true};
-    auto child = CreateRef<TestNode>(*data.test_document);
+    auto child = CreateRef<TestNode>(*data.Document);
 
-    REQUIRE(data.test_node->FirstChild() == nullptr);
+    REQUIRE(data.Node->FirstChild() == nullptr);
 
-    auto appendResult = data.test_node->AppendChild(*child);
+    auto appendResult = data.Node->AppendChild(*child);
     REQUIRE_FALSE(appendResult.HasException());
 
-    REQUIRE(data.test_node->FirstChild() == child.get());
+    REQUIRE(data.Node->FirstChild() == child.get());
 
-    auto removeResult = data.test_node->RemoveChild(*child);
+    auto removeResult = data.Node->RemoveChild(*child);
     REQUIRE_FALSE(removeResult.HasException());
 
-    REQUIRE(data.test_node->FirstChild() == nullptr);
+    REQUIRE(data.Node->FirstChild() == nullptr);
   }
 
   TEST_CASE("Node::LastChild", "[HTML][Node]")
   {
     CommonTestData data {true};
-    auto child = CreateRef<TestNode>(*data.test_document);
-    REQUIRE(data.test_node->LastChild() == nullptr);
+    auto child = CreateRef<TestNode>(*data.Document);
+    REQUIRE(data.Node->LastChild() == nullptr);
 
-    auto appendResult = data.test_node->AppendChild(*child);
+    auto appendResult = data.Node->AppendChild(*child);
     REQUIRE_FALSE(appendResult.HasException());
 
-    REQUIRE(data.test_node->LastChild() == child.get());
+    REQUIRE(data.Node->LastChild() == child.get());
 
-    auto removeResult = data.test_node->RemoveChild(*child);
+    auto removeResult = data.Node->RemoveChild(*child);
     REQUIRE_FALSE(removeResult.HasException());
-    REQUIRE(data.test_node->LastChild() == nullptr);
+    REQUIRE(data.Node->LastChild() == nullptr);
   }
 
   TEST_CASE("Node::NextSibling/PreviousSibling", "[HTML][Node]")
   {
     CommonTestData data {true};
-    auto sibling1 = CreateRef<TestNode>(*data.test_document);
-    auto sibling2 = CreateRef<TestNode>(*data.test_document);
+    auto sibling1 = CreateRef<TestNode>(*data.Document);
+    auto sibling2 = CreateRef<TestNode>(*data.Document);
 
     REQUIRE(sibling1->NextSibling() == nullptr);
     REQUIRE(sibling1->PreviousSibling() == nullptr);
@@ -185,28 +224,28 @@ namespace Krys::Tests
     REQUIRE(sibling2->NextSibling() == nullptr);
     REQUIRE(sibling2->PreviousSibling() == nullptr);
 
-    auto appendResult = data.test_node->AppendChild(*sibling1);
+    auto appendResult = data.Node->AppendChild(*sibling1);
     REQUIRE_FALSE(appendResult.HasException());
-    appendResult = data.test_node->AppendChild(*sibling2);
+    appendResult = data.Node->AppendChild(*sibling2);
     REQUIRE_FALSE(appendResult.HasException());
 
     REQUIRE(sibling2->PreviousSibling() == sibling1.get());
 
-    auto removeResult = data.test_node->RemoveChild(*sibling1);
+    auto removeResult = data.Node->RemoveChild(*sibling1);
     REQUIRE_FALSE(removeResult.HasException());
-    removeResult = data.test_node->RemoveChild(*sibling2);
+    removeResult = data.Node->RemoveChild(*sibling2);
     REQUIRE_FALSE(removeResult.HasException());
   }
 
   TEST_CASE("Node::NodeValue", "[HTML][Node]")
   {
     CommonTestData data {};
-    REQUIRE(data.test_node->NodeValue() == Null);
+    REQUIRE(data.Node->NodeValue() == Null);
 
-    auto setValueResult = data.test_node->NodeValue(u8"test value");
+    auto setValueResult = data.Node->NodeValue(u8"test value");
     REQUIRE_FALSE(setValueResult.HasException());
 
-    REQUIRE(data.test_node->NodeValue() == Null);
+    REQUIRE(data.Node->NodeValue() == Null);
   }
 
   // NOTE: TextContent is tested in the tests for the derived classes that override it, so we don't need to
@@ -215,7 +254,7 @@ namespace Krys::Tests
   TEST_CASE("Node::Normalize(no children)", "[HTML][Node]")
   {
     CommonTestData data {};
-    auto normalizeResult = data.test_node->Normalize();
+    auto normalizeResult = data.Node->Normalize();
     REQUIRE_FALSE(normalizeResult.HasException());
   }
 
@@ -223,26 +262,26 @@ namespace Krys::Tests
   {
     CommonTestData data {};
 
-    auto emptyTextNode = CreateRef<HTML::Text>(*data.test_document);
-    auto appendResult = data.test_node->AppendChild(*emptyTextNode);
+    auto emptyTextNode = CreateRef<HTML::Text>(*data.Document);
+    auto appendResult = data.Node->AppendChild(*emptyTextNode);
     REQUIRE_FALSE(appendResult.HasException());
 
-    auto normalizeResult = data.test_node->Normalize();
+    auto normalizeResult = data.Node->Normalize();
     REQUIRE_FALSE(normalizeResult.HasException());
-    REQUIRE(data.test_node->FirstChild() == nullptr); // was removed by normalization since it was empty.
+    REQUIRE(data.Node->FirstChild() == nullptr); // was removed by normalization since it was empty.
   }
 
   TEST_CASE("Node::Normalize(With children)", "[HTML][Node]")
   {
     CommonTestData data {};
 
-    auto textNode1 = CreateRef<HTML::Text>(*data.test_document);
-    auto textNode2 = CreateRef<HTML::Text>(*data.test_document);
+    auto textNode1 = CreateRef<HTML::Text>(*data.Document);
+    auto textNode2 = CreateRef<HTML::Text>(*data.Document);
 
-    auto appendResult = data.test_node->AppendChild(*textNode1);
+    auto appendResult = data.Node->AppendChild(*textNode1);
     REQUIRE_FALSE(appendResult.HasException());
 
-    appendResult = data.test_node->AppendChild(*textNode2);
+    appendResult = data.Node->AppendChild(*textNode2);
     REQUIRE_FALSE(appendResult.HasException());
 
     auto setValueResult = textNode1->NodeValue(u8"test");
@@ -251,14 +290,14 @@ namespace Krys::Tests
     setValueResult = textNode2->NodeValue(u8" value");
     REQUIRE_FALSE(setValueResult.HasException());
 
-    auto normalizeResult = data.test_node->Normalize();
+    auto normalizeResult = data.Node->Normalize();
     REQUIRE_FALSE(normalizeResult.HasException());
 
-    REQUIRE(data.test_node->FirstChild() == textNode1.get());
-    REQUIRE(data.test_node->LastChild() == textNode1.get());
-    REQUIRE(data.test_node->FirstChild()->NodeValue() == u8"test value");
+    REQUIRE(data.Node->FirstChild() == textNode1.get());
+    REQUIRE(data.Node->LastChild() == textNode1.get());
+    REQUIRE(data.Node->FirstChild()->NodeValue() == u8"test value");
 
-    auto removeResult = data.test_node->RemoveChild(*textNode1);
+    auto removeResult = data.Node->RemoveChild(*textNode1);
     REQUIRE_FALSE(removeResult.HasException());
   }
 
@@ -268,11 +307,11 @@ namespace Krys::Tests
   TEST_CASE("Node::IsEqualNode", "[HTML][Node]")
   {
     CommonTestData data {};
-    auto equalNode = CreateRef<TestNode>(*data.test_document);
+    auto equalNode = CreateRef<TestNode>(*data.Document);
 
-    REQUIRE_FALSE(data.test_node->IsEqualNode(nullptr));
-    REQUIRE(data.test_node->IsEqualNode(data.test_node.get()));
-    REQUIRE(data.test_node->IsEqualNode(equalNode.get()));
+    REQUIRE_FALSE(data.Node->IsEqualNode(nullptr));
+    REQUIRE(data.Node->IsEqualNode(data.Node.get()));
+    REQUIRE(data.Node->IsEqualNode(equalNode.get()));
 
     // TODO(impl): other test cases for equality.
   }
@@ -281,38 +320,109 @@ namespace Krys::Tests
   {
     CommonTestData data {};
 
-    REQUIRE_FALSE(data.test_node->IsSameNode(nullptr));
-    REQUIRE(data.test_node->IsSameNode(data.test_node.get()));
-    REQUIRE_FALSE(data.test_node->IsSameNode(data.test_document.get()));
+    REQUIRE_FALSE(data.Node->IsSameNode(nullptr));
+    REQUIRE(data.Node->IsSameNode(data.Node.get()));
+    REQUIRE_FALSE(data.Node->IsSameNode(data.Document.get()));
   }
 
-  // TODO(impl):
-  // TEST_CASE("Node::CompareDocumentPosition", "[HTML][Node]")
+  TEST_CASE("Node::CompareDocumentPosition(same node returns equivalent)", "[HTML][Node]")
+  {
+    CommonTestData data {};
+    REQUIRE(data.Node->CompareDocumentPosition(*data.Node) == DocumentPosition::DOCUMENT_POSITION_EQUIVALENT);
+  }
+
+  TEST_CASE("Node::CompareDocumentPosition(disconnected node)", "[HTML][Node]")
+  {
+    CommonTestData data {true};
+
+    auto disconnectedNode = CreateRef<TestNode>(*data.Document);
+    auto position = data.Node->CompareDocumentPosition(*disconnectedNode);
+
+    REQUIRE(HasFlag(position, DocumentPosition::DOCUMENT_POSITION_DISCONNECTED));
+    REQUIRE(HasFlag(position, DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC));
+
+    auto nodePrecedesDisconnected = HasFlag(position, DocumentPosition::DOCUMENT_POSITION_PRECEDING);
+    // Should be either preceding or following, but not both.
+    REQUIRE(nodePrecedesDisconnected ^ HasFlag(position, DocumentPosition::DOCUMENT_POSITION_FOLLOWING));
+
+    auto reversePosition = disconnectedNode->CompareDocumentPosition(*data.Node);
+
+    REQUIRE(HasFlag(reversePosition, DocumentPosition::DOCUMENT_POSITION_DISCONNECTED));
+    REQUIRE(HasFlag(reversePosition, DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC));
+
+    auto reverseNodePrecedesDisconnected =
+      HasFlag(reversePosition, DocumentPosition::DOCUMENT_POSITION_PRECEDING);
+    // Should be either preceding or following, but not both.
+    REQUIRE(reverseNodePrecedesDisconnected
+            ^ HasFlag(reversePosition, DocumentPosition::DOCUMENT_POSITION_FOLLOWING));
+
+    REQUIRE(reverseNodePrecedesDisconnected
+            != nodePrecedesDisconnected); // if it was following one way, it should be preceding the other.
+  }
+
+  TEST_CASE("Node::CompareDocumentPosition(nodes in same document)")
+  {
+    CommonTestData data {true};
+    auto sibling1 = CreateRef<TestNode>(*data.Document);
+    auto sibling2 = CreateRef<TestNode>(*data.Document);
+
+    auto appendResult = data.Node->AppendChild(*sibling1);
+    REQUIRE_FALSE(appendResult.HasException());
+    appendResult = data.Node->AppendChild(*sibling2);
+    REQUIRE_FALSE(appendResult.HasException());
+
+    auto nodePositionToSibling1 = data.Node->CompareDocumentPosition(*sibling1);
+    REQUIRE(HasFlag(nodePositionToSibling1, DocumentPosition::DOCUMENT_POSITION_CONTAINED_BY));
+    REQUIRE(HasFlag(nodePositionToSibling1, DocumentPosition::DOCUMENT_POSITION_FOLLOWING));
+
+    auto sibling1PositionToNode = sibling1->CompareDocumentPosition(*data.Node);
+    REQUIRE(HasFlag(sibling1PositionToNode, DocumentPosition::DOCUMENT_POSITION_CONTAINS));
+    REQUIRE(HasFlag(sibling1PositionToNode, DocumentPosition::DOCUMENT_POSITION_PRECEDING));
+
+    auto nodePositionToSibling2 = data.Node->CompareDocumentPosition(*sibling2);
+    REQUIRE(HasFlag(nodePositionToSibling2, DocumentPosition::DOCUMENT_POSITION_CONTAINED_BY));
+    REQUIRE(HasFlag(nodePositionToSibling2, DocumentPosition::DOCUMENT_POSITION_FOLLOWING));
+
+    auto sibling2PositionToNode = sibling2->CompareDocumentPosition(*data.Node);
+    REQUIRE(HasFlag(sibling2PositionToNode, DocumentPosition::DOCUMENT_POSITION_CONTAINS));
+    REQUIRE(HasFlag(sibling2PositionToNode, DocumentPosition::DOCUMENT_POSITION_PRECEDING));
+
+    auto sibling1PositionToSibling2 = sibling1->CompareDocumentPosition(*sibling2);
+    REQUIRE(HasFlag(sibling1PositionToSibling2, DocumentPosition::DOCUMENT_POSITION_FOLLOWING));
+
+    auto sibling2PositionToSibling1 = sibling2->CompareDocumentPosition(*sibling1);
+    REQUIRE(HasFlag(sibling2PositionToSibling1, DocumentPosition::DOCUMENT_POSITION_PRECEDING));
+
+    auto removeResult = data.Node->RemoveChild(*sibling1);
+    REQUIRE_FALSE(removeResult.HasException());
+    removeResult = data.Node->RemoveChild(*sibling2);
+    REQUIRE_FALSE(removeResult.HasException());
+  }
 
   TEST_CASE("Node::Contains", "[HTML][Node]")
   {
     CommonTestData data {};
-    auto grandchild = CreateRef<TestNode>(*data.test_document);
+    auto grandchild = CreateRef<TestNode>(*data.Document);
 
-    REQUIRE_FALSE(data.test_node->Contains(nullptr));
-    REQUIRE_FALSE(data.test_node->Contains(data.test_document.get()));
-    REQUIRE_FALSE(data.test_document->Contains(data.test_node.get()));
-    REQUIRE_FALSE(data.test_node->Contains(grandchild.get()));
-    REQUIRE_FALSE(data.test_document->Contains(grandchild.get()));
+    REQUIRE_FALSE(data.Node->Contains(nullptr));
+    REQUIRE_FALSE(data.Node->Contains(data.Document.get()));
+    REQUIRE_FALSE(data.Document->Contains(data.Node.get()));
+    REQUIRE_FALSE(data.Node->Contains(grandchild.get()));
+    REQUIRE_FALSE(data.Document->Contains(grandchild.get()));
 
-    auto appendResult = data.test_document->AppendChild(*data.test_node);
+    auto appendResult = data.Document->AppendChild(*data.Node);
     REQUIRE_FALSE(appendResult.HasException());
-    appendResult = data.test_node->AppendChild(*grandchild);
+    appendResult = data.Node->AppendChild(*grandchild);
     REQUIRE_FALSE(appendResult.HasException());
 
-    REQUIRE(data.test_document->Contains(data.test_node.get()));
-    REQUIRE(data.test_node->Contains(grandchild.get()));
-    REQUIRE(data.test_document->Contains(grandchild.get()));
-    REQUIRE_FALSE(grandchild->Contains(data.test_node.get()));
-    REQUIRE_FALSE(grandchild->Contains(data.test_document.get()));
-    REQUIRE_FALSE(data.test_node->Contains(data.test_document.get()));
+    REQUIRE(data.Document->Contains(data.Node.get()));
+    REQUIRE(data.Node->Contains(grandchild.get()));
+    REQUIRE(data.Document->Contains(grandchild.get()));
+    REQUIRE_FALSE(grandchild->Contains(data.Node.get()));
+    REQUIRE_FALSE(grandchild->Contains(data.Document.get()));
+    REQUIRE_FALSE(data.Node->Contains(data.Document.get()));
 
-    auto removeResult = data.test_node->RemoveChild(*grandchild);
+    auto removeResult = data.Node->RemoveChild(*grandchild);
     REQUIRE_FALSE(removeResult.HasException());
   }
 
@@ -321,6 +431,20 @@ namespace Krys::Tests
 
   // TODO(impl):
   // TEST_CASE("Node::LookupNamespaceURI", "[HTML][Node]")
+  // TEST_CASE("Node::LookupNamespaceURI(simple prefix lookup)", "[HTML][Node]")
+  //{
+  //  CommonTestData data {};
+
+  // auto root = CreateRef<TestNode>(*data.Document);
+  // auto child = CreateRef<TestNode>(*data.Document);
+
+  // REQUIRE_FALSE(data.Document->AppendChild(*root).HasException());
+  // REQUIRE_FALSE(root->AppendChild(*child).HasException());
+
+  // REQUIRE_FALSE(root->SetAttributeNS(Namespaces::XMLNS, u8"xmlns:foo", u8"http://a").HasException());
+
+  // REQUIRE(child->LookupNamespaceURI(u8"foo") == u8"http://a");
+  // }
 
   // TODO(impl):
   // TEST_CASE("Node::IsDefaultNamespace", "[HTML][Node]")
@@ -328,97 +452,97 @@ namespace Krys::Tests
   TEST_CASE("Node::InsertBefore", "[HTML][Node]")
   {
     CommonTestData data {true};
-    auto child = CreateRef<TestNode>(*data.test_document);
+    auto child = CreateRef<TestNode>(*data.Document);
 
-    REQUIRE(data.test_node->FirstChild() == nullptr);
-    REQUIRE(data.test_node->LastChild() == nullptr);
+    REQUIRE(data.Node->FirstChild() == nullptr);
+    REQUIRE(data.Node->LastChild() == nullptr);
 
-    auto insertResult = data.test_node->InsertBefore(*child, nullptr);
+    auto insertResult = data.Node->InsertBefore(*child, nullptr);
     REQUIRE_FALSE(insertResult.HasException());
 
     REQUIRE(&insertResult.Value() == child.get());
-    REQUIRE(data.test_node->FirstChild() == child.get());
-    REQUIRE(data.test_node->LastChild() == child.get());
+    REQUIRE(data.Node->FirstChild() == child.get());
+    REQUIRE(data.Node->LastChild() == child.get());
 
-    auto removeResult = data.test_node->RemoveChild(*child);
+    auto removeResult = data.Node->RemoveChild(*child);
     REQUIRE_FALSE(removeResult.HasException());
   }
 
   TEST_CASE("Node::ReplaceChild", "[HTML][Node]")
   {
     CommonTestData data {true};
-    auto child1 = CreateRef<TestNode>(*data.test_document);
-    auto child2 = CreateRef<TestNode>(*data.test_document);
+    auto child1 = CreateRef<TestNode>(*data.Document);
+    auto child2 = CreateRef<TestNode>(*data.Document);
 
-    auto appendResult = data.test_node->AppendChild(*child1);
+    auto appendResult = data.Node->AppendChild(*child1);
     REQUIRE_FALSE(appendResult.HasException());
 
-    REQUIRE(data.test_node->FirstChild() == child1.get());
-    REQUIRE(data.test_node->LastChild() == child1.get());
+    REQUIRE(data.Node->FirstChild() == child1.get());
+    REQUIRE(data.Node->LastChild() == child1.get());
 
-    auto replaceResult = data.test_node->ReplaceChild(*child2, *child1);
+    auto replaceResult = data.Node->ReplaceChild(*child2, *child1);
     REQUIRE_FALSE(replaceResult.HasException());
 
     REQUIRE(&replaceResult.Value() == child1.get());
-    REQUIRE(data.test_node->FirstChild() == child2.get());
-    REQUIRE(data.test_node->LastChild() == child2.get());
+    REQUIRE(data.Node->FirstChild() == child2.get());
+    REQUIRE(data.Node->LastChild() == child2.get());
 
-    auto removeResult = data.test_node->RemoveChild(*child2);
+    auto removeResult = data.Node->RemoveChild(*child2);
     REQUIRE_FALSE(removeResult.HasException());
   }
 
   TEST_CASE("Node::RemoveChild", "[HTML][Node]")
   {
     CommonTestData data {true};
-    auto child = CreateRef<TestNode>(*data.test_document);
+    auto child = CreateRef<TestNode>(*data.Document);
 
-    auto appendResult = data.test_node->AppendChild(*child);
+    auto appendResult = data.Node->AppendChild(*child);
     REQUIRE_FALSE(appendResult.HasException());
 
-    REQUIRE(data.test_node->FirstChild() == child.get());
-    REQUIRE(data.test_node->LastChild() == child.get());
+    REQUIRE(data.Node->FirstChild() == child.get());
+    REQUIRE(data.Node->LastChild() == child.get());
 
-    auto removeResult = data.test_node->RemoveChild(*child);
+    auto removeResult = data.Node->RemoveChild(*child);
     REQUIRE_FALSE(removeResult.HasException());
 
-    REQUIRE(data.test_node->FirstChild() == nullptr);
-    REQUIRE(data.test_node->LastChild() == nullptr);
+    REQUIRE(data.Node->FirstChild() == nullptr);
+    REQUIRE(data.Node->LastChild() == nullptr);
   }
 
   TEST_CASE("Node::AppendChild", "[HTML][Node]")
   {
     CommonTestData data {true};
-    auto child = CreateRef<TestNode>(*data.test_document);
+    auto child = CreateRef<TestNode>(*data.Document);
 
-    REQUIRE(data.test_node->FirstChild() == nullptr);
-    REQUIRE(data.test_node->LastChild() == nullptr);
+    REQUIRE(data.Node->FirstChild() == nullptr);
+    REQUIRE(data.Node->LastChild() == nullptr);
 
-    auto appendResult = data.test_node->AppendChild(*child);
+    auto appendResult = data.Node->AppendChild(*child);
     REQUIRE_FALSE(appendResult.HasException());
 
     REQUIRE(&appendResult.Value() == child.get());
-    REQUIRE(data.test_node->FirstChild() == child.get());
-    REQUIRE(data.test_node->LastChild() == child.get());
+    REQUIRE(data.Node->FirstChild() == child.get());
+    REQUIRE(data.Node->LastChild() == child.get());
 
-    auto removeResult = data.test_node->RemoveChild(*child);
+    auto removeResult = data.Node->RemoveChild(*child);
     REQUIRE_FALSE(removeResult.HasException());
   }
 
   TEST_CASE("Node::CountChildNodes", "[HTML][Node]")
   {
     CommonTestData data {true};
-    auto child = CreateRef<TestNode>(*data.test_document);
+    auto child = CreateRef<TestNode>(*data.Document);
 
-    REQUIRE(data.test_node->CountChildNodes() == 0uz);
-    REQUIRE(data.test_document->CountChildNodes() == 1uz);
+    REQUIRE(data.Node->CountChildNodes() == 0uz);
+    REQUIRE(data.Document->CountChildNodes() == 1uz);
 
-    auto appendResult = data.test_node->AppendChild(*child);
+    auto appendResult = data.Node->AppendChild(*child);
     REQUIRE_FALSE(appendResult.HasException());
 
-    REQUIRE(data.test_node->CountChildNodes() == 1uz);
-    REQUIRE(data.test_document->CountChildNodes() == 1uz);
+    REQUIRE(data.Node->CountChildNodes() == 1uz);
+    REQUIRE(data.Document->CountChildNodes() == 1uz);
 
-    auto removeResult = data.test_node->RemoveChild(*child);
+    auto removeResult = data.Node->RemoveChild(*child);
     REQUIRE_FALSE(removeResult.HasException());
   }
 }

@@ -4,8 +4,11 @@
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Node/CharacterData.hpp"
+#include "Krystal.HTML/Node/Comment.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/Node/DocumentType.hpp"
+#include "Krystal.HTML/Node/ProcessingInstruction.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 
@@ -107,7 +110,7 @@ namespace Krys::HTML
 
   ExceptionOr<void> Range::SelectNodeContents(Node &node) noexcept
   {
-    if (node.IsDocumentTypeNode())
+    if (Is<DocumentType>(node))
     {
       return Exception(ExceptionCode::InvalidNodeTypeError);
     }
@@ -143,7 +146,7 @@ namespace Krys::HTML
       return;
     }
 
-    if (_start.Container.get() == _end.Container.get() && _start.Container->IsCharacterDataNode())
+    if (_start.Container.get() == _end.Container.get() && Is<CharacterData>(_start.Container))
     {
       Downcast<CharacterData>(_start.Container.get())->DeleteData(_start.Offset, _end.Offset - _start.Offset);
       return;
@@ -189,7 +192,7 @@ namespace Krys::HTML
       newOffset = TreeQueries::Index(*refNode) + 1uz;
     }
 
-    if (_start.Container->IsCharacterDataNode())
+    if (Is<CharacterData>(_start.Container))
     {
       RawPtr<CharacterData> characterData = Downcast<CharacterData>(_start.Container.get());
       auto length = TreeQueries::Length(*characterData);
@@ -204,7 +207,7 @@ namespace Krys::HTML
       }
     }
 
-    if (_end.Container->IsCharacterDataNode())
+    if (Is<CharacterData>(_end.Container))
     {
       auto *characterData = Downcast<CharacterData>(_end.Container.get());
       characterData->DeleteData(0uz, _end.Offset);
@@ -222,7 +225,7 @@ namespace Krys::HTML
       return fragment;
     }
 
-    if (_start.Container.get() == _end.Container.get() && _start.Container->IsCharacterDataNode())
+    if (_start.Container.get() == _end.Container.get() && Is<CharacterData>(_start.Container))
     {
       auto cloneResult = CloneCharacterDataContents(*fragment, *_start.Container, _start.Offset,
                                                     _end.Offset - _start.Offset, DeleteClonedContent(true));
@@ -241,7 +244,7 @@ namespace Krys::HTML
     List<Ref<Node>> containedChildren = GetContainedChildren(commonAncestor);
     for (auto &contained : containedChildren)
     {
-      if (contained->IsDocumentTypeNode())
+      if (Is<DocumentType>(contained))
       {
         return Exception(ExceptionCode::HierarchyRequestError);
       }
@@ -299,7 +302,7 @@ namespace Krys::HTML
       return fragment;
     }
 
-    if (_start.Container.get() == _end.Container.get() && _start.Container->IsCharacterDataNode())
+    if (_start.Container.get() == _end.Container.get() && Is<CharacterData>(_start.Container))
     {
       auto cloneResult = CloneCharacterDataContents(*fragment, *_start.Container, _start.Offset,
                                                     _end.Offset - _start.Offset, DeleteClonedContent(false));
@@ -319,7 +322,7 @@ namespace Krys::HTML
     List<Ref<Node>> containedChildren = GetContainedChildren(commonAncestor);
     for (auto &contained : containedChildren)
     {
-      if (contained->IsDocumentTypeNode())
+      if (Is<DocumentType>(contained))
       {
         return Exception(ExceptionCode::HierarchyRequestError);
       }
@@ -356,15 +359,14 @@ namespace Krys::HTML
 
   ExceptionOr<void> Range::InsertNode(Node &node) noexcept
   {
-    if (_start.Container->IsProcessingInstructionNode() || _start.Container->IsCommentNode()
-        || (_start.Container->IsTextNode() && !_start.Container->ParentNode())
-        || _start.Container.get() == &node)
+    if (Is<ProcessingInstruction>(_start.Container) || Is<Comment>(_start.Container)
+        || (Is<Text>(_start.Container) && !_start.Container->ParentNode()) || _start.Container.get() == &node)
     {
       return Exception(ExceptionCode::HierarchyRequestError);
     }
 
     RefPtr<Node> refNode;
-    if (_start.Container->IsTextNode())
+    if (Is<Text>(_start.Container))
     {
       refNode = _start.Container;
     }
@@ -382,7 +384,7 @@ namespace Krys::HTML
       return preInsertValid.ReleaseException();
     }
 
-    if (_start.Container->IsTextNode())
+    if (Is<Text>(_start.Container))
     {
       auto splitResult = Downcast<Text>(_start.Container.get())->SplitText(_start.Offset);
       if (splitResult.HasException())
@@ -404,7 +406,7 @@ namespace Krys::HTML
     }
 
     auto newOffset = refNode ? TreeQueries::Index(*refNode) : TreeQueries::Length(*parent);
-    newOffset += node.IsDocumentFragmentNode() ? TreeQueries::Length(node) : 1uz;
+    newOffset += Is<DocumentFragment>(node) ? TreeQueries::Length(node) : 1uz;
 
     if (auto preInsert = MutationAlgorithms::PreInsert(node, *parent, refNode.get());
         preInsert.HasException())
@@ -427,18 +429,19 @@ namespace Krys::HTML
     auto *firstPartiallyContainedChild = GetFirstPartiallyContainedChild(commonAncestor);
     auto *lastPartiallyContainedChild = GetLastPartiallyContainedChild(commonAncestor);
 
-    if ((firstPartiallyContainedChild && !firstPartiallyContainedChild->IsTextNode())
-        || (lastPartiallyContainedChild && !lastPartiallyContainedChild->IsTextNode()))
+    if ((firstPartiallyContainedChild && !Is<Text>(firstPartiallyContainedChild))
+        || (lastPartiallyContainedChild && !Is<Text>(lastPartiallyContainedChild)))
     {
       return Exception(ExceptionCode::InvalidStateError);
     }
 
-    if (_start.Container->IsTextNode() && IsPartiallyContained(*_start.Container))
+    if (Is<Text>(_start.Container) && IsPartiallyContained(*_start.Container))
     {
       return Exception(ExceptionCode::InvalidStateError);
     }
 
-    if (newParent.IsDocumentNode() || newParent.IsDocumentTypeNode() || newParent.IsDocumentFragmentNode())
+    // Note: Is<DocumentType>(newParent) isn't needed here as a DocumentType can never be a ContainerNode.
+    if (Is<Document>(newParent) || Is<DocumentFragment>(newParent))
     {
       return Exception(ExceptionCode::InvalidNodeTypeError);
     }
@@ -505,7 +508,7 @@ namespace Krys::HTML
       return Exception(ExceptionCode::WrongDocumentError);
     }
 
-    if (node.IsDocumentTypeNode())
+    if (Is<DocumentType>(node))
     {
       return Exception(ExceptionCode::InvalidNodeTypeError);
     }
@@ -561,7 +564,7 @@ namespace Krys::HTML
 
   ExceptionOr<DOMString> Range::ToString() const noexcept
   {
-    if (_start.Container.get() == _end.Container.get() && _start.Container->IsCharacterDataNode())
+    if (_start.Container.get() == _end.Container.get() && Is<CharacterData>(_start.Container))
     {
       auto characterData = Downcast<CharacterData>(_start.Container.get());
       auto substringResult = characterData->SubstringData(_start.Offset, _end.Offset - _start.Offset);
@@ -609,7 +612,7 @@ namespace Krys::HTML
 
   ExceptionOr<void> Range::SetStartBoundaryPoint(Node &node, uint64 offset) noexcept
   {
-    if (node.IsDocumentTypeNode())
+    if (Is<DocumentType>(node))
     {
       return Exception(ExceptionCode::InvalidNodeTypeError);
     }
@@ -633,7 +636,7 @@ namespace Krys::HTML
 
   ExceptionOr<void> Range::SetEndBoundaryPoint(Node &node, uint64 offset) noexcept
   {
-    if (node.IsDocumentTypeNode())
+    if (Is<DocumentType>(node))
     {
       return Exception(ExceptionCode::InvalidNodeTypeError);
     }
@@ -753,7 +756,7 @@ namespace Krys::HTML
     Range::CloneFirstPartiallyContainedChildContents(RawPtr<Node> child, DocumentFragment &fragment,
                                                      DeleteClonedContent deleteClonedContent) const noexcept
   {
-    if (child && child->IsCharacterDataNode())
+    if (child != nullptr && Is<CharacterData>(child))
     {
       auto length = TreeQueries::Length(*_start.Container) - _start.Offset;
       auto cloneResult =
@@ -792,7 +795,7 @@ namespace Krys::HTML
     Range::CloneLastPartiallyContainedChildContents(RawPtr<Node> child, DocumentFragment &fragment,
                                                     DeleteClonedContent deleteClonedContent) const noexcept
   {
-    if (child && child->IsCharacterDataNode())
+    if (child != nullptr && Is<CharacterData>(child))
     {
       auto cloneResult =
         CloneCharacterDataContents(fragment, *_end.Container, 0uz, _end.Offset, deleteClonedContent);

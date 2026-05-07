@@ -5,48 +5,41 @@
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
+#include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
-#include "Krystal.HTML/Node/ChildNodeList.hpp"
 
 namespace Krys::HTML
 {
   Ref<NodeList> NodeRareData::ChildNodes(Node &node) noexcept
   {
-    if (!_childNodeList)
+    auto childNodes = _childNodeList.lock();
+    if (childNodes == nullptr)
     {
-      auto children = CreateRef<ChildNodeList>(node);
-      _childNodeList = CreateWeakPtr<NodeList>(children.get());
-      return children;
+      childNodes = CreateRefPtr<LiveNodeList>(CreateWeakPtr<Node>(&node),
+                                              [&](const Node &n) { return n.ParentNode() == &node; });
+      _childNodeList = CreateWeakPtr<NodeList>(childNodes.get());
     }
 
-    return ShareRef(*_childNodeList.get());
-  }
-
-  void NodeRareData::InvalidateChildNodes() noexcept
-  {
-    if (_childNodeList)
-    {
-      _childNodeList->Invalidate();
-    }
+    return childNodes;
   }
 
   List<Ref<RegisteredObserver>> &NodeRareData::RegisteredObserverList() noexcept
   {
     if (!_registeredObserverList.has_value())
     {
-      _registeredObserverList = {};
+      _registeredObserverList = List<Ref<RegisteredObserver>> {};
     }
 
-    return *_registeredObserverList;
+    return _registeredObserverList.value();
   }
 
   List<Ref<TransientRegisteredObserver>> &NodeRareData::TransientRegisteredObservers() noexcept
   {
     if (!_transientRegisteredObservers.has_value())
     {
-      _transientRegisteredObservers = {};
+      _transientRegisteredObservers = List<Ref<TransientRegisteredObserver>> {};
     }
 
-    return *_transientRegisteredObservers;
+    return _transientRegisteredObservers.value();
   }
 }

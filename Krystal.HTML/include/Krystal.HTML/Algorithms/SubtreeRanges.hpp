@@ -225,13 +225,13 @@ namespace Krys::HTML::detail
 
     ScopedSubtreeRange(typename iterator::reference root) noexcept
     requires(!IteratorPolicy::IsInclusive)
-        : _root(&root), _begin(IteratorPolicy::ScopedAdvance(&root))
+        : _root(&root), _begin(IteratorPolicy::ScopedAdvance(&root, &root))
     {
     }
 
     ScopedSubtreeRange(typename iterator::pointer root) noexcept
     requires(!IteratorPolicy::IsInclusive)
-        : _root(root), _begin(IteratorPolicy::ScopedAdvance(root))
+        : _root(root), _begin(IteratorPolicy::ScopedAdvance(root, root))
     {
     }
 

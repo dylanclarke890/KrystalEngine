@@ -58,7 +58,7 @@ namespace Krys::HTML
 
   Ref<NodeList> Node::ChildNodes() noexcept
   {
-    if (!_nodeRareData)
+    if (_nodeRareData == nullptr)
     {
       _nodeRareData = CreateUnique<NodeRareData>();
     }
@@ -125,12 +125,14 @@ namespace Krys::HTML
             range->SetEnd(*node, range->EndOffset() + length);
           }
 
-          if (range->StartContainer() == currentNode->ParentNode() && range->StartOffset() == TreeQueries::Index(*currentNode))
+          if (range->StartContainer() == currentNode->ParentNode()
+              && range->StartOffset() == TreeQueries::Index(*currentNode))
           {
             range->SetStart(*node, length);
           }
 
-          if (range->EndContainer() == currentNode->ParentNode() && range->EndOffset() == TreeQueries::Index(*currentNode))
+          if (range->EndContainer() == currentNode->ParentNode()
+              && range->EndOffset() == TreeQueries::Index(*currentNode))
           {
             range->SetEnd(*node, length);
           }

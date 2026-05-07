@@ -211,6 +211,10 @@ Source: https://dom.spec.whatwg.org
 4.4 Interface Node
     Implementation: Full
     Test Coverage : Partial
+    Notes		 :
+        - CloneNode: Missing test coverage.
+        - IsEqualNode: Missing test coverage for most cases.
+        - CompareDocumentPosition: Missing test coverage for comparing attribute nodes, both with each other and with other node types.
 
 4.5 Interface Document
     Implementation: None
@@ -341,6 +345,3 @@ Source: https://dom.spec.whatwg.org
 
 9.1 Interface XSLTProcessor
     - N/A
-
-TODO:
- - MutationAlgorithms need completing.

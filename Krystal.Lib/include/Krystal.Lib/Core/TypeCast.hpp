@@ -115,4 +115,10 @@ namespace Krys
   }                                                                                                          \
   ;                                                                                                          \
   }
+
+/// @brief Helper macro to allow the type cast traits specialization to access private members of the type.
+/// Use this in the class definition of the type for which you are specializing TypeCastTraits.
+#define KRYS_TYPE_CAST_TRAITS_ACCESS()                                                                       \
+  template <typename, typename>                                                                              \
+  friend struct Krys::TypeCastTraits
 }

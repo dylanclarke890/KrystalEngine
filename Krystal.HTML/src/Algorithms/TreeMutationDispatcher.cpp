@@ -39,7 +39,6 @@ namespace Krys::HTML
 
   void TreeMutationDispatcher::ChildrenChanged(ContainerNode &node) noexcept
   {
-    node.InvalidateChildNodes();
     node.OnChildrenChanged();
   }
 

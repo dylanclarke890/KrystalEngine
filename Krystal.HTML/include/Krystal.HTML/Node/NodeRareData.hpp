@@ -13,20 +13,17 @@
 namespace Krys::HTML
 {
   class Node;
-  class ChildNodeList;
   class NodeList;
 
   class NodeRareData
   {
   private:
-    WeakPtr<ChildNodeList> _childNodeList;
+    WeakPtr<NodeList> _childNodeList;
     Maybe<List<Ref<RegisteredObserver>>> _registeredObserverList;
     Maybe<List<Ref<TransientRegisteredObserver>>> _transientRegisteredObservers;
 
   public:
     KRYS_NODISCARD Ref<NodeList> ChildNodes(Node &node) noexcept;
-
-    void InvalidateChildNodes() noexcept;
 
     KRYS_NODISCARD List<Ref<RegisteredObserver>> &RegisteredObserverList() noexcept;
 

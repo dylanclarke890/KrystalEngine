@@ -42,12 +42,4 @@ namespace Krys::HTML
   }
 
 #pragma endregion
-
-  void ContainerNode::InvalidateChildNodes()
-  {
-    if (_nodeRareData)
-    {
-      _nodeRareData->InvalidateChildNodes();
-    }
-  }
 }

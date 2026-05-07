@@ -90,6 +90,7 @@ namespace Krys::HTML
 
   class Node : public EventTarget, public CanMakeCheckedPtr<Node>
   {
+    KRYS_TYPE_CAST_TRAITS_ACCESS();
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Node);
 
     friend class ContainerNode;
@@ -200,6 +201,7 @@ namespace Krys::HTML
 
 #pragma endregion
 
+  protected:
 #pragma region Type Checks
 
     KRYS_NODISCARD bool IsAttributeNode() const noexcept
@@ -279,7 +281,6 @@ namespace Krys::HTML
 
 #pragma endregion
 
-  protected:
 #pragma region Tree Scope
 
     KRYS_NODISCARD TreeScope &GetTreeScope() const noexcept

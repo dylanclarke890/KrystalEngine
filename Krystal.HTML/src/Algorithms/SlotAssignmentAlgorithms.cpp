@@ -6,6 +6,7 @@
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/Node/Text.hpp"
 
 namespace Krys::HTML
 {
@@ -13,7 +14,7 @@ namespace Krys::HTML
 
   bool SlotAssignmentAlgorithms::IsSlottable(const Node &node) noexcept
   {
-    return node.IsElementNode() || node.IsTextNode();
+    return Is<Element>(node) || Is<Text>(node);
   }
 
   bool SlotAssignmentAlgorithms::IsAssigned(const Node &node) noexcept
@@ -107,7 +108,7 @@ namespace Krys::HTML
     {
       for (auto &child : ChildNodeRange(slot))
       {
-        if (child.IsTextNode() || child.IsElementNode())
+        if (Is<Text>(child) || Is<Element>(child))
         {
           slottables.push_back(ShareRef(child));
         }

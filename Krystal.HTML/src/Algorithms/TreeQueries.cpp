@@ -374,7 +374,7 @@ namespace Krys::HTML
     {
       case NodeType::ELEMENT_NODE:
       {
-        if (prefix == Namespaces::XML)
+        if (prefix == Namespaces::XMLPrefix)
         {
           return Namespaces::XML;
         }

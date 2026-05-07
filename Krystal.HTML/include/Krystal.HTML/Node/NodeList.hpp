@@ -5,46 +5,44 @@
 #include "Krystal.Lib/Mixins/CanMakeWeakPtr.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
+#include "Krystal.Lib/Types/Func.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::HTML
 {
   enum class NodeListType : uint8
   {
-    ChildNode,
     Static,
-  };
-
-  enum NodeListFlag : uint8
-  {
-    None = 0,
-    ContainsOnlyElements = 1 << 0
+    Live
   };
 }
 
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::NodeListType, 2);
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::NodeListFlag, 2);
 
 namespace Krys::HTML
 {
-  class Element;
   class Node;
+
+  using LiveNodeListFilterFunc = Func<bool(const Node &)>;
 
   class NodeList : public RefCounted<NodeList>, public CanMakeWeakPtr<NodeList>
   {
+    KRYS_TYPE_CAST_TRAITS_ACCESS();
+
   private:
     NodeListType _type : BitCount<NodeListType>();
-    NodeListFlag _flags : BitCount<NodeListFlag>();
 
   protected:
-    explicit NodeList(NodeListType type, NodeListFlag flags) noexcept : _type(type), _flags(flags)
+    explicit NodeList(NodeListType type) noexcept : _type(type)
     {
     }
 
   public:
     virtual ~NodeList() noexcept = default;
 
-    KRYS_NODISCARD virtual RawPtr<Node> Item(size_t index) const noexcept = 0;
+    KRYS_NODISCARD virtual RawPtr<Node> Item(size_t index) noexcept = 0;
+    KRYS_NODISCARD virtual RawPtr<const Node> Item(size_t index) const noexcept = 0;
 
     KRYS_NODISCARD virtual size_t Length() const noexcept = 0;
 
@@ -53,23 +51,62 @@ namespace Krys::HTML
       return index < Length();
     }
 
+  protected:
 #pragma region Type Checks
 
-    KRYS_NODISCARD bool IsChildNodeList() const noexcept
+    KRYS_NODISCARD bool IsLiveNodeList() const noexcept
     {
-      return _type == NodeListType::ChildNode;
+      return _type == NodeListType::Live;
     }
 
     KRYS_NODISCARD bool IsStaticNodeList() const noexcept
     {
-      return _type == NodeListType::Static && !HasFlag(_flags, NodeListFlag::ContainsOnlyElements);
-    }
-
-    KRYS_NODISCARD bool IsStaticElementList() const noexcept
-    {
-      return _type == NodeListType::Static && HasFlag(_flags, NodeListFlag::ContainsOnlyElements);
+      return _type == NodeListType::Static;
     }
 
 #pragma endregion
   };
+
+  class LiveNodeList final : public NodeList
+  {
+  private:
+    WeakRef<Node> _root;
+    LiveNodeListFilterFunc _filter;
+
+  public:
+    LiveNodeList(WeakRef<Node> &&root, LiveNodeListFilterFunc&& filter) noexcept;
+
+    KRYS_NODISCARD RawPtr<Node> Item(size_t index) noexcept override;
+    KRYS_NODISCARD RawPtr<const Node> Item(size_t index) const noexcept override;
+
+    KRYS_NODISCARD size_t Length() const noexcept override;
+  };
+
+  class StaticNodeList final : public NodeList
+  {
+  private:
+    List<Ref<Node>> _nodes;
+
+  public:
+    StaticNodeList(List<Ref<Node>> &&nodes = {}) noexcept;
+
+    KRYS_NODISCARD RawPtr<Node> Item(size_t index) noexcept override;
+    KRYS_NODISCARD RawPtr<const Node> Item(size_t index) const noexcept override;
+
+    KRYS_NODISCARD size_t Length() const noexcept override;
+  };
 }
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::LiveNodeList)
+  static bool IsType(const Krys::HTML::NodeList &target) noexcept
+  {
+    return target.IsLiveNodeList();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::StaticNodeList)
+  static bool IsType(const Krys::HTML::NodeList &target) noexcept
+  {
+    return target.IsStaticNodeList();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

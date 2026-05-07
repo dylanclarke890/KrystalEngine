@@ -51,8 +51,6 @@ namespace Krys::HTML
     {
     }
 
-    void InvalidateChildNodes();
-
     void SetFirstChild(RawPtr<Node> child) noexcept
     {
       _firstChild = ShareCheckedPtr(child);
