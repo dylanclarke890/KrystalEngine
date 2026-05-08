@@ -1,6 +1,6 @@
 ﻿#include "Krystal.HTML/Events/EventTarget.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Events/EventDispatcher.hpp"
+#include "Krystal.HTML/Algorithms/EventDispatcher.hpp"
 #include "Krystal.HTML/Events/EventNames.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"

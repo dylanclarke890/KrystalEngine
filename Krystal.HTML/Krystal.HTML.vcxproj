@@ -36,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML\Abort\AbortController.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\Factories\ElementFactory.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\Mixins\ChildNode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\ElementAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\ExtensibilityHooks.hpp" />
@@ -44,7 +45,7 @@
     <ClInclude Include="include\Krystal.HTML\Algorithms\Mixins\ParentNode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\ShadowRootAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOMTokenList.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Events\EventFactory.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\Factories\EventFactory.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventPath.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventTargetFlag.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLElement.hpp" />
@@ -71,7 +72,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\ShadowRootInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Enums\ShadowRootMode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Enums\SlotAssignmentMode.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Events\EventDispatcher.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\EventDispatcher.hpp" />
     <ClInclude Include="include\Krystal.HTML\Iterator\NodeFilter.hpp" />
     <ClInclude Include="include\Krystal.HTML\Iterator\NodeIterator.hpp" />
     <ClInclude Include="include\Krystal.HTML\Iterator\TreeWalker.hpp" />
@@ -183,7 +184,7 @@
     <ClCompile Include="src\Node\ShadowRoot.cpp" />
     <ClCompile Include="src\Node\Document.cpp" />
     <ClCompile Include="src\Node\Element.cpp" />
-    <ClCompile Include="src\Events\EventDispatcher.cpp" />
+    <ClCompile Include="src\Algorithms\EventDispatcher.cpp" />
     <ClCompile Include="src\Node\Attr.cpp" />
     <ClCompile Include="src\Node\CDATASection.cpp" />
     <ClCompile Include="src\Node\CharacterData.cpp" />

@@ -1,8 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/Algorithms/Factories/EventFactory.hpp"
 #include "Krystal.HTML/DOMString.hpp"
 #include "Krystal.HTML/Events/Event.hpp"
-#include "Krystal.HTML/Events/EventFactory.hpp"
 #include "Krystal.HTML/Events/EventPhaseType.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Types/Func.hpp"

@@ -171,7 +171,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\ShadowRoot.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Events\EventDispatcher.hpp">
+    <ClInclude Include="include\Krystal.HTML\Algorithms\EventDispatcher.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Utils\BoolOr.hpp">
@@ -357,7 +357,10 @@
     <ClInclude Include="include\Krystal.HTML\Algorithms\ExtensibilityHooks.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Events\EventFactory.hpp">
+    <ClInclude Include="include\Krystal.HTML\Algorithms\Factories\EventFactory.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Algorithms\Factories\ElementFactory.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -410,7 +413,7 @@
     <ClCompile Include="src\Node\ShadowRoot.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Events\EventDispatcher.cpp">
+    <ClCompile Include="src\Algorithms\EventDispatcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Algorithms\TreeTraversal.cpp">

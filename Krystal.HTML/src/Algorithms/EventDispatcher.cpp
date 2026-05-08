@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Events/EventDispatcher.hpp"
+﻿#include "Krystal.HTML/Algorithms/EventDispatcher.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
