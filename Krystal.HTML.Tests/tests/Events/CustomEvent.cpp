@@ -10,9 +10,10 @@ namespace Krys::Tests
 
   TEST_CASE("CustomEvent::Detail", "[HTML][Event]")
   {
-    CustomEventInit<uint32> init {};
-    init.Detail = 4u;
-    auto event = CreateRef<CustomEvent<uint32>>(init, EventNames::Click);
+    CustomEventInit<uint32> init {.Detail = 4u};
+
+    auto event = CreateRef<CustomEvent<uint32>>(EventNames::Click, init);
+    REQUIRE_FALSE(event->IsTrusted());
     REQUIRE(event->Detail() == 4u);
 
     event->Detail(5u);
@@ -21,8 +22,9 @@ namespace Krys::Tests
 
   TEST_CASE("CustomEvent::InitCustomEvent", "[HTML][Event]")
   {
-    auto event = CreateRef<CustomEvent<uint32>>(CustomEventInit<uint32> {}, EventNames::Click);
+    auto event = CreateRef<CustomEvent<uint32>>(EventNames::Click, CustomEventInit<uint32> {});
     event->InitCustomEvent(EventNames::MouseWheel, true, true, 6u);
+    REQUIRE_FALSE(event->IsTrusted());
 
     REQUIRE(event->Type() == EventNames::MouseWheel);
     REQUIRE(event->Bubbles() == true);

@@ -161,6 +161,7 @@
     <ClCompile Include="tests\Algorithms\ShadowRootAlgorithms.cpp" />
     <ClCompile Include="tests\Events\CustomEvent.cpp" />
     <ClCompile Include="tests\Events\Event.cpp" />
+    <ClCompile Include="tests\Events\EventFactory.cpp" />
     <ClCompile Include="tests\Loader\HTMLEncodingSniffer.cpp" />
     <ClCompile Include="tests\Loader\TextResourceDecoder.cpp" />
     <ClCompile Include="tests\Algorithms\NameValidation.cpp" />

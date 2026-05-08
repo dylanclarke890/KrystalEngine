@@ -108,7 +108,7 @@ namespace Krys::HTML
 
     if (auto parent = ShareRefPtr(ParentNode()))
     {
-      ExtensibilityHooks::ChildrenChanged(*parent);
+      ExtensibilityHooks::NodeChildrenChanged(*parent);
     }
 
     return {};

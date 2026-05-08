@@ -31,6 +31,8 @@ Source: https://dom.spec.whatwg.org
 
 2.4 Interface CustomEvent
 
+2.5 Constructing events
+
 2.6 Defining event interfaces (N/A)
 
 2.8 Observing event listeners
@@ -130,12 +132,6 @@ Source: https://dom.spec.whatwg.org
     Test Coverage : Partial
     Notes         :
         - Missing tests for composedPath, target, currentTarget & relatedTarget.
-
-2.5 Constructing events
-    Implementation: Partial
-    Test Coverage : Partial
-    Notes         : 
-        - TODO(spec) -> "To create an event" sets event.IsTrusted
 
 2.9 Dispatching events
     Implementation: Full

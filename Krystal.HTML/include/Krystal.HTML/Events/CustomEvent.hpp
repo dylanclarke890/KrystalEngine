@@ -10,13 +10,17 @@ namespace Krys::HTML
   template <typename T>
   class CustomEvent : public Event
   {
+    friend class EventFactory;
+
+    using dictionary_type = CustomEventInit<T>;
+
   private:
     Maybe<T> _detail;
 
   public:
 #pragma region CustomEvent - https://dom.spec.whatwg.org/#customevent
 
-    CustomEvent(const CustomEventInit<T> &eventInitDict = {}, DOMStringAtom type = {}) noexcept
+    CustomEvent(DOMStringAtom type, const CustomEventInit<T> &eventInitDict = {}) noexcept
         : Event(type, eventInitDict), _detail(eventInitDict.Detail)
     {
     }

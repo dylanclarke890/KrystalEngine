@@ -19,8 +19,8 @@ namespace Krys::HTML
     // callback name "attributeChangedCallback", and « attribute’s local name, oldValue, newValue, attribute’s
     // namespace ».
 
-    ExtensibilityHooks::AttributeChanged(element, attribute.LocalName(), oldValue, attribute.Value(),
-                                         attribute.NamespaceURI());
+    ExtensibilityHooks::ElementAttributeChanged(element, attribute.LocalName(), oldValue, attribute.Value(),
+                                                attribute.NamespaceURI());
   }
 
   void ElementAlgorithms::ChangeAttribute(Attr &attribute, DOMString &&value) noexcept

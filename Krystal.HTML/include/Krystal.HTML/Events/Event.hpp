@@ -13,13 +13,18 @@
 
 namespace Krys::HTML
 {
-  class EventDispatcher;
   class EventTarget;
 
   class Event : public RefCounted<Event>
   {
     friend class EventDispatcher;
+    friend class EventFactory;
     friend class EventTarget;
+
+    using dictionary_type = EventInit;
+
+  protected:
+    Event() noexcept = default;
 
   protected:
     DOMStringAtom _type;
@@ -28,6 +33,8 @@ namespace Krys::HTML
     DOMHighResTimeStamp _timeStamp {};
     RefPtr<EventPath> _path;
     EventPhaseType _eventPhase : BitCount<EventPhaseType>() {EventPhaseType::NONE};
+
+    bool _isTrusted : 1 {false};
 
     bool _bubbles : 1 {false};
     bool _cancellable : 1 {false};
@@ -38,7 +45,6 @@ namespace Krys::HTML
     bool _cancelled : 1 {false};
     bool _inPassiveListener : 1 {false};
     bool _dispatched : 1 {false};
-    bool _isTrusted : 1 {false};
 
   public:
     virtual ~Event() noexcept = default;

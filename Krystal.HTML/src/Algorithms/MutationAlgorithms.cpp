@@ -238,7 +238,7 @@ namespace Krys::HTML
 
       for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(*target))
       {
-        ExtensibilityHooks::Inserted(inclusiveDescendant);
+        ExtensibilityHooks::NodeInserted(inclusiveDescendant);
 
         if (!inclusiveDescendant.IsConnected())
         {
@@ -274,7 +274,7 @@ namespace Krys::HTML
                                                       ShareRefPtr(child));
     }
 
-    ExtensibilityHooks::ChildrenChanged(parent);
+    ExtensibilityHooks::NodeChildrenChanged(parent);
 
     List<Ref<Node>> staticNodeList;
 
@@ -290,7 +290,7 @@ namespace Krys::HTML
     {
       if (node->IsConnected())
       {
-        ExtensibilityHooks::PostConnection(*node);
+        ExtensibilityHooks::NodePostConnection(*node);
       }
     }
 
@@ -462,7 +462,7 @@ namespace Krys::HTML
     for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(node))
     {
       auto isSubtreeRoot = &inclusiveDescendant == &node;
-      ExtensibilityHooks::Moved(inclusiveDescendant, node, isSubtreeRoot, oldParent);
+      ExtensibilityHooks::NodeMoved(inclusiveDescendant, node, isSubtreeRoot, oldParent);
 
       // TODO(impl):If inclusiveDescendant is custom and newParent is connected, then enqueue a custom element
       // callback reaction with inclusiveDescendant, callback name "connectedMoveCallback", and « ».
@@ -739,7 +739,7 @@ namespace Krys::HTML
       SlotAlgorithms::AssignSlottablesForTree(node);
     }
 
-    ExtensibilityHooks::Removed(node, true, parent);
+    ExtensibilityHooks::NodeRemoved(node, true, parent);
 
     // bool isParentConnected = parent.IsConnected();
     // TODO(impl): if node is custom and isParentConnected is true, then enqueue a custom element callback
@@ -747,7 +747,7 @@ namespace Krys::HTML
 
     for (auto &descendant : InclusiveShadowIncludingDescendantRange(node))
     {
-      ExtensibilityHooks::Removed(descendant, false, parent);
+      ExtensibilityHooks::NodeRemoved(descendant, false, parent);
       // TODO(impl): If descendant is custom and isParentConnected is true, then enqueue a custom element
       // callback reaction with descendant, callback name "disconnectedCallback", and « ».
     }
@@ -763,7 +763,7 @@ namespace Krys::HTML
         parent, {}, {ShareRef(node)}, ShareRefPtr(oldPreviousSibling), ShareRefPtr(oldNextSibling));
     }
 
-    ExtensibilityHooks::ChildrenChanged(parent);
+    ExtensibilityHooks::NodeChildrenChanged(parent);
 
     return {};
   }
@@ -780,7 +780,7 @@ namespace Krys::HTML
     assert(!node.IsDocumentNode() || &node == document);
 
     auto copy = CloneSingleNode(node, *document, fallbackRegistry);
-    ExtensibilityHooks::Cloned(node, *copy, subtree);
+    ExtensibilityHooks::NodeCloned(node, *copy, subtree);
 
     if (parent != nullptr)
     {

@@ -8,6 +8,12 @@ namespace Krys::Tests
 {
   using namespace Krys::HTML;
 
+  TEST_CASE("Event::IsTrusted should be false for events created via constructor", "[HTML][Event]")
+  {
+    auto event = CreateRef<Event>(EventNames::Click);
+    REQUIRE_FALSE(event->IsTrusted());
+  }
+
   TEST_CASE("Event::Type", "[HTML][Event]")
   {
     auto event = CreateRef<Event>(EventNames::Click);

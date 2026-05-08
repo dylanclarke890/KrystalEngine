@@ -401,21 +401,4 @@ namespace Krys::HTML
     }
     return found;
   }
-
-  bool EventDispatcher::FireEvent(DOMStringAtom e, EventTarget &target, EventConstructor eventConstructor,
-                                  EventInitializer idlAttributeInitializer,
-                                  bool legacyTargetOverrideFlag) noexcept
-  {
-    // SPEC-VIOLATION(HTML): realms and global objects currently not supported.
-    // Let event be the result of creating an event given eventConstructor, in the relevant realm of target.
-    Ref<Event> event = eventConstructor ? eventConstructor() : CreateRef<Event>(e);
-    event->_type = e;
-
-    if (idlAttributeInitializer)
-    {
-      idlAttributeInitializer(*event);
-    }
-
-    return DispatchToTarget(*event, &target, legacyTargetOverrideFlag);
-  }
 }

@@ -1,5 +1,6 @@
 ﻿#include "Krystal.HTML/Events/Event.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Events/EventFactory.hpp"
 #include "Krystal.HTML/Events/EventTarget.hpp"
 #include "Krystal.Lib/Time/MonotonicTime.hpp"
 #include <cassert>
@@ -7,11 +8,9 @@
 namespace Krys::HTML
 {
   Event::Event(DOMStringAtom type, const EventInit &eventInitDict) noexcept
-      : _type(type), _timeStamp(MonotonicTime::Now())
+      : _type(type), _timeStamp(MonotonicTime::Now()), _bubbles(eventInitDict.Bubbles),
+        _cancellable(eventInitDict.Cancellable), _composed(eventInitDict.Composed)
   {
-    _bubbles = eventInitDict.Bubbles;
-    _cancellable = eventInitDict.Cancellable;
-    _composed = eventInitDict.Composed;
   }
 
   /// @see https://dom.spec.whatwg.org/#dom-event-composedpath

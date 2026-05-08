@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/DOMString.hpp"
+#include "Krystal.HTML/Events/Event.hpp"
+#include "Krystal.HTML/Events/EventFactory.hpp"
 #include "Krystal.HTML/Events/EventPhaseType.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Types/Func.hpp"
@@ -9,12 +11,10 @@
 
 namespace Krys::HTML
 {
-  class Event;
   class EventTarget;
   class EventPathItem;
   class RegisteredEventListener;
 
-  using EventConstructor = Func<Ref<Event>()>;
   using EventInitializer = Func<void(Event &)>;
 
   class EventDispatcher
@@ -24,7 +24,7 @@ namespace Krys::HTML
     ~EventDispatcher() = delete;
 
     /// @see https://dom.spec.whatwg.org/#concept-event-dispatch
-    KRYS_NODISCARD static bool DispatchToTarget(Event &event, EventTarget *target,
+    KRYS_NODISCARD static bool DispatchToTarget(Event &event, RawPtr<EventTarget> target,
                                                 bool legacyTargetOverrideFlag = false,
                                                 bool legacyOutputDidListenersThrowFlag = false) noexcept;
 
@@ -43,8 +43,22 @@ namespace Krys::HTML
                             bool &legacyOutputDidListenersThrowFlag) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-event-fire
-    static bool FireEvent(DOMStringAtom e, EventTarget &target, EventConstructor eventConstructor = nullptr,
+    template <DerivedFrom<Event> TEvent = Event>
+    static bool FireEvent(DOMStringAtom e, EventTarget &target,
                           EventInitializer idlAttributeInitializer = nullptr,
-                          bool legacyTargetOverrideFlag = false) noexcept;
+                          bool legacyTargetOverrideFlag = false) noexcept
+    {
+      // SPEC-VIOLATION(HTML): realms and global objects currently not supported.
+      // Let event be the result of creating an event given eventConstructor, in the relevant realm of target.
+      Ref<TEvent> event = EventFactory::Create<TEvent>();
+      event->_type = e;
+
+      if (idlAttributeInitializer)
+      {
+        idlAttributeInitializer(*event);
+      }
+
+      return DispatchToTarget(*event, &target, legacyTargetOverrideFlag);
+    }
   };
 }
