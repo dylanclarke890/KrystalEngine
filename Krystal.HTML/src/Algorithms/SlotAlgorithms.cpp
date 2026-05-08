@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Algorithms/SlotAssignmentAlgorithms.hpp"
+﻿#include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
@@ -12,18 +12,18 @@ namespace Krys::HTML
 {
 #pragma region Slottables
 
-  bool SlotAssignmentAlgorithms::IsSlottable(const Node &node) noexcept
+  bool SlotAlgorithms::IsSlottable(const Node &node) noexcept
   {
     return Is<Element>(node) || Is<Text>(node);
   }
 
-  bool SlotAssignmentAlgorithms::IsAssigned(const Node &node) noexcept
+  bool SlotAlgorithms::IsAssigned(const Node &node) noexcept
   {
     // TODO(impl): A slottable is assigned if its assigned slot is non-null.
     return false;
   }
 
-  RawPtr<HTMLSlotElement> SlotAssignmentAlgorithms::GetAssignedSlot(const Node &node) noexcept
+  RawPtr<HTMLSlotElement> SlotAlgorithms::GetAssignedSlot(const Node &node) noexcept
   {
     // TODO(impl): check for either text or element node and get assigned slot if slottable
     return nullptr;
@@ -33,7 +33,7 @@ namespace Krys::HTML
 
 #pragma region Finding slots and slotted elements
 
-  RawPtr<HTMLSlotElement> SlotAssignmentAlgorithms::FindSlot(Node &slottable, bool open) noexcept
+  RawPtr<HTMLSlotElement> SlotAlgorithms::FindSlot(Node &slottable, bool open) noexcept
   {
     RawPtr<Element> parent = slottable.ParentElement();
 
@@ -65,7 +65,7 @@ namespace Krys::HTML
     }
   }
 
-  List<Ref<Node>> SlotAssignmentAlgorithms::FindSlottables(HTMLSlotElement &slot) noexcept
+  List<Ref<Node>> SlotAlgorithms::FindSlottables(HTMLSlotElement &slot) noexcept
   {
     List<Ref<Node>> result;
     RawPtr<ShadowRoot> root = DynamicDowncast<ShadowRoot>(TreeQueries::Root(slot));
@@ -94,7 +94,7 @@ namespace Krys::HTML
     return result;
   }
 
-  List<Ref<Node>> SlotAssignmentAlgorithms::FindFlattenedSlottables(HTMLSlotElement &slot) noexcept
+  List<Ref<Node>> SlotAlgorithms::FindFlattenedSlottables(HTMLSlotElement &slot) noexcept
   {
     List<Ref<Node>> result;
 
@@ -137,7 +137,7 @@ namespace Krys::HTML
 
 #pragma region Assigning slottables and slots
 
-  void SlotAssignmentAlgorithms::AssignSlottables(HTMLSlotElement &slot) noexcept
+  void SlotAlgorithms::AssignSlottables(HTMLSlotElement &slot) noexcept
   {
     auto slottables = FindSlottables(slot);
     // TODO(impl):
@@ -146,7 +146,7 @@ namespace Krys::HTML
     // For each slottable of slottables: set slottable’s assigned slot to slot.
   }
 
-  void SlotAssignmentAlgorithms::AssignSlottablesForTree(Node &root) noexcept
+  void SlotAlgorithms::AssignSlottablesForTree(Node &root) noexcept
   {
     for (auto &inclusiveDescendant : InclusiveDescendantRange(root))
     {
@@ -157,7 +157,7 @@ namespace Krys::HTML
     }
   }
 
-  void SlotAssignmentAlgorithms::AssignSlot(Node &slottable) noexcept
+  void SlotAlgorithms::AssignSlot(Node &slottable) noexcept
   {
     RawPtr<HTMLSlotElement> slot = FindSlot(slottable);
     if (slot != nullptr)
@@ -170,7 +170,7 @@ namespace Krys::HTML
 
 #pragma region Signaling slot change
 
-  void SlotAssignmentAlgorithms::SignalSlotChange(HTMLSlotElement &slot) noexcept
+  void SlotAlgorithms::SignalSlotChange(HTMLSlotElement &slot) noexcept
   {
     // TODO(impl):
     // Append slot to slot’s relevant agent’s signal slots

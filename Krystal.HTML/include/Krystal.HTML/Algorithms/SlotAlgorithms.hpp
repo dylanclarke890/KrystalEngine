@@ -13,7 +13,7 @@ namespace Krys::HTML
   class ContainerNode;
   class Node;
 
-  class SlotAssignmentAlgorithms
+  class SlotAlgorithms
   {
   public:
 #pragma region Slottables

@@ -693,40 +693,4 @@ namespace Krys::Tests
   }
 
 #pragma endregion
-
-#pragma region ShadowRoot
-
-  TEST_CASE("TreeQueries::ShadowIncludingRoot", "[TreeQueries]")
-  {
-    auto doc = CreateRef<Document>();
-    auto parent = CreateRef<TestNode>(*doc);
-    auto child = CreateRef<TestNode>(*doc);
-
-    REQUIRE(&TreeQueries::ShadowIncludingRoot(*doc) == doc.get());
-    REQUIRE(&TreeQueries::ShadowIncludingRoot(*parent) == parent.get());
-    REQUIRE(&TreeQueries::ShadowIncludingRoot(*child) == child.get());
-
-    auto appendResult = parent->AppendChild(*child);
-    REQUIRE_FALSE(appendResult.HasException());
-
-    REQUIRE(&TreeQueries::ShadowIncludingRoot(*doc) == doc.get());
-    REQUIRE(&TreeQueries::ShadowIncludingRoot(*parent) == parent.get());
-    REQUIRE(&TreeQueries::ShadowIncludingRoot(*child) == parent.get());
-
-    appendResult = doc->AppendChild(*parent);
-    REQUIRE_FALSE(appendResult.HasException());
-
-    REQUIRE(&TreeQueries::ShadowIncludingRoot(*doc) == doc.get());
-    REQUIRE(&TreeQueries::ShadowIncludingRoot(*parent) == doc.get());
-    REQUIRE(&TreeQueries::ShadowIncludingRoot(*child) == doc.get());
-
-    // TODO(impl): Test with ShadowRoot when implemented
-
-    auto removeResult = parent->RemoveChild(*child);
-    REQUIRE_FALSE(removeResult.HasException());
-    removeResult = doc->RemoveChild(*parent);
-    REQUIRE_FALSE(removeResult.HasException());
-  }
-
-#pragma endregion
 }

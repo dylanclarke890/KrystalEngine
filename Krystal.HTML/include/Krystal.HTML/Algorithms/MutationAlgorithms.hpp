@@ -53,6 +53,10 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#concept-node-replace-all
     KRYS_NODISCARD static ExceptionOr<void> ReplaceAll(RawPtr<Node> node, ContainerNode &parent) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#string-replace-all
+    KRYS_NODISCARD static ExceptionOr<void> StringReplaceAll(DOMString &&string,
+                                                             ContainerNode &parent) noexcept;
+
     /// @see https://dom.spec.whatwg.org/#concept-node-pre-remove
     KRYS_NODISCARD static ExceptionOr<Node &> PreRemove(Node &node, ContainerNode &parent) noexcept;
 
@@ -78,8 +82,5 @@ namespace Krys::HTML
     KRYS_NODISCARD static ExceptionOr<RawPtr<Node>>
       InsertAdjacent(Element &element, InsertAdjacentWhere where, Node &node) noexcept;
 
-    /// @see https://dom.spec.whatwg.org/#string-replace-all
-    KRYS_NODISCARD static ExceptionOr<void> StringReplaceAll(DOMString &&string,
-                                                             ContainerNode &parent) noexcept;
   };
 }

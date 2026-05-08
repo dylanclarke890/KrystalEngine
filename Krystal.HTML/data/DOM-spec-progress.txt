@@ -219,7 +219,6 @@ Source: https://dom.spec.whatwg.org
     Test Coverage : None
     Notes         : 
         - namedItem/named index requires implementing element/attr first.
-        - collection needs to be 'live' for a variety of different collection types which is going to be annoying to implement.
 
 4.3 Mutation observers
     Implementation: None
@@ -256,7 +255,8 @@ Source: https://dom.spec.whatwg.org
 
 4.7 Interface DocumentFragment
     Implementation: Full
-    Test Coverage : None
+    Test Coverage : Partial
+        - Missing test cases for TextContent.
 
 4.8 Interface ShadowRoot
     Implementation: None

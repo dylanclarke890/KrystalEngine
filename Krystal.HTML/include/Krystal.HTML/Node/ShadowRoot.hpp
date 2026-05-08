@@ -24,7 +24,6 @@ namespace Krys::HTML
     SlotAssignmentMode _slotAssignment : BitCount<SlotAssignmentMode>() {SlotAssignmentMode::Manual};
     bool _clonable : 1 {false};
     bool _serializable : 1 {false};
-    RawPtr<Element> _host {nullptr};
     RefPtr<CustomElementRegistry> _customElementRegistry;
 
   public:
@@ -45,7 +44,12 @@ namespace Krys::HTML
 
     KRYS_NODISCARD RawPtr<Element> Host() const noexcept
     {
-      return _host;
+      if (auto host = _host.lock())
+      {
+        return host.get();
+      }
+
+      return nullptr;
     }
 
     KRYS_NODISCARD bool Clonable() const noexcept

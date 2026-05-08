@@ -20,6 +20,11 @@ namespace Krys::HTML
   {
   }
 
+  DocumentFragment::DocumentFragment(Document &document) noexcept
+      : ContainerNode(document, NodeType::DOCUMENT_FRAGMENT_NODE, NodeFlag::None)
+  {
+  }
+
 #pragma region Node
 
   Maybe<DOMString> DocumentFragment::TextContent() const noexcept

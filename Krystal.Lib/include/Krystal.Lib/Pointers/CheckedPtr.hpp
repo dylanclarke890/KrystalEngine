@@ -25,6 +25,8 @@ namespace Krys
   {
     KRYS_ALWAYS_INLINE constexpr static RawPtr<T> AddRef(RawPtr<T> ptr) noexcept
     {
+      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
+
       if (ptr) KRYS_LIKELY
       {
         ptr->AddRefChecked();
@@ -34,12 +36,16 @@ namespace Krys
 
     KRYS_ALWAYS_INLINE constexpr static T &AddRef(T &ref) noexcept
     {
+      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
+
       ref.AddRefChecked();
       return ref;
     }
 
     KRYS_ALWAYS_INLINE constexpr static void SubRef(RawPtr<T> ptr) noexcept
     {
+      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
+
       if (ptr) KRYS_LIKELY
       {
         ptr->SubRefChecked();
@@ -48,6 +54,8 @@ namespace Krys
 
     KRYS_ALWAYS_INLINE KRYS_NODISCARD constexpr static RawPtr<T> ValidateGetAccess(RawPtr<T> ptr) noexcept
     {
+      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
+
       if (ptr && !ptr->GetRefCountChecked())
       {
         assert(false && "Attempting to access an object through a CheckedPtr that has been deleted");
@@ -59,8 +67,10 @@ namespace Krys
 
     KRYS_ALWAYS_INLINE KRYS_NODISCARD constexpr static bool IsValid(RawPtr<T> ptr) noexcept
     {
-      // Note that we only check for nullptr here and not ptr->GetRefCountChecked() == 0 because we want to allow
-      // nullptr.
+      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
+
+      // Note that we only check for nullptr here and not ptr->GetRefCountChecked() == 0 because we want to
+      // allow nullptr.
       return ptr != nullptr;
     }
   };

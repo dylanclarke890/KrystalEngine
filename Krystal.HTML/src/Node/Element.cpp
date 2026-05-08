@@ -6,7 +6,7 @@
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/SlotAssignmentAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
@@ -130,9 +130,9 @@ namespace Krys::HTML
     }
     else
     {
-      auto attr = CreateRef<Attr>(NodeDocument(),
-                                  QualifiedName {qualifiedName, DOMStringAtom::Null(), DOMStringAtom::Null()},
-                                  Krys::Move(value));
+      auto attr = AdoptRef<Attr>(
+        *new Attr(NodeDocument(), QualifiedName {qualifiedName, DOMStringAtom::Null(), DOMStringAtom::Null()},
+                  Krys::Move(value)));
       ElementAlgorithms::AppendAttribute(*attr, *this);
     }
 
@@ -155,7 +155,7 @@ namespace Krys::HTML
 
     const auto &qName = validateAndExtractResult.Value();
     ElementAlgorithms::SetAttributeValue(*this, qName.LocalName, std::move(value), qName.Prefix,
-                                                  qName.NamespaceURI);
+                                         qName.NamespaceURI);
 
     return {};
   }
@@ -187,8 +187,8 @@ namespace Krys::HTML
     {
       if (!force.has_value() || force.value())
       {
-        auto attr = CreateRef<Attr>(
-          NodeDocument(), QualifiedName {qualifiedName, DOMStringAtom::Null(), DOMStringAtom::Null()}, u8"");
+        auto attr = AdoptRef<Attr>(*new Attr(
+          NodeDocument(), QualifiedName {qualifiedName, DOMStringAtom::Null(), DOMStringAtom::Null()}, u8""));
         ElementAlgorithms::AppendAttribute(*attr, *this);
         return true;
       }
@@ -475,7 +475,7 @@ namespace Krys::HTML
 
   RawPtr<HTMLSlotElement> Element::AssignedSlot() noexcept
   {
-    return SlotAssignmentAlgorithms::FindSlot(*this, true);
+    return SlotAlgorithms::FindSlot(*this, true);
   }
 
 #pragma endregion

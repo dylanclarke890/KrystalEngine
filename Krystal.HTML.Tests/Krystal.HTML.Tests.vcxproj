@@ -158,6 +158,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="catch_main.cpp" />
+    <ClCompile Include="tests\Algorithms\ShadowRootAlgorithms.cpp" />
     <ClCompile Include="tests\Events\CustomEvent.cpp" />
     <ClCompile Include="tests\Events\Event.cpp" />
     <ClCompile Include="tests\Loader\HTMLEncodingSniffer.cpp" />
@@ -169,7 +170,9 @@
     <ClCompile Include="tests\Node\CharacterData.cpp" />
     <ClCompile Include="tests\Node\Comment.cpp" />
     <ClCompile Include="tests\Node\ContainerNode.cpp" />
+    <ClCompile Include="tests\Node\DocumentFragment.cpp" />
     <ClCompile Include="tests\Node\DocumentType.cpp" />
+    <ClCompile Include="tests\Node\Element.cpp" />
     <ClCompile Include="tests\Node\Node.cpp" />
     <ClCompile Include="tests\Node\ProcessingInstruction.cpp" />
     <ClCompile Include="tests\Node\Text.cpp" />
@@ -185,6 +188,7 @@
     <ClInclude Include="include\Krystal.HTML.Tests\ParserTestUtils.hpp" />
     <ClInclude Include="include\Krystal.HTML.Tests\TestCharacterData.hpp" />
     <ClInclude Include="include\Krystal.HTML.Tests\TestContainerNode.hpp" />
+    <ClInclude Include="include\Krystal.HTML.Tests\TestElement.hpp" />
     <ClInclude Include="include\Krystal.HTML.Tests\TestNode.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

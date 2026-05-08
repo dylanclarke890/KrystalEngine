@@ -18,8 +18,8 @@ namespace Krys
   /// is stored and accessed.
   /// @typeparam RefPolicy The reference counting policy to use for this intrusive pointer. This defines how
   /// reference counting is performed on the object being pointed to.
-  /// @typeparam Nullable Whether this intrusive pointer can be null or not. If false, reference-like semantics
-  /// are used (asserts for null ptrs are enabled), otherwise pointer-like semantics are used.
+  /// @typeparam Nullable Whether this intrusive pointer can be null or not. If false, reference-like
+  /// semantics are used (asserts for null ptrs are enabled), otherwise pointer-like semantics are used.
   template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable>
   class KRYS_TRIVIAL_ABI IntrusivePtr
   {
@@ -27,6 +27,7 @@ namespace Krys
 
     template <typename, typename, typename, IsNullable>
     friend class IntrusivePtr;
+
 
   public:
     using element_type = T;
@@ -77,7 +78,6 @@ namespace Krys
       return IntrusivePtr(&RefPolicy::AddRef(ref));
     }
 
-    
     KRYS_ALWAYS_INLINE constexpr IntrusivePtr() noexcept
     requires(nullable)
         : _ptr(nullptr)

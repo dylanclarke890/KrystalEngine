@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Pointers/IntrusivePtr.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
@@ -19,6 +20,8 @@ namespace Krys
     template <typename T>
     KRYS_ALWAYS_INLINE constexpr static RawPtr<T> AddRef(RawPtr<T> ptr) noexcept
     {
+      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
+
       if (ptr) KRYS_LIKELY
       {
         ptr->AddRef();
@@ -29,6 +32,8 @@ namespace Krys
     template <typename T>
     KRYS_ALWAYS_INLINE constexpr static T &AddRef(T &ptr) noexcept
     {
+      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
+
       ptr.AddRef();
       return ptr;
     }
@@ -36,6 +41,8 @@ namespace Krys
     template <typename T>
     KRYS_ALWAYS_INLINE constexpr static void SubRef(RawPtr<T> ptr) noexcept
     {
+      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
+
       if (ptr) KRYS_LIKELY
       {
         ptr->SubRef();
@@ -45,12 +52,16 @@ namespace Krys
     template <typename T>
     KRYS_ALWAYS_INLINE KRYS_NODISCARD constexpr static RawPtr<T> ValidateGetAccess(RawPtr<T> ptr) noexcept
     {
+      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
+
       return ptr;
     }
 
     template <typename T>
     KRYS_ALWAYS_INLINE KRYS_NODISCARD constexpr static bool IsValid(RawPtr<T> ptr) noexcept
     {
+      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
+
       return ptr != nullptr;
     }
   };

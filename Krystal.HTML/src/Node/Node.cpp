@@ -1,6 +1,7 @@
 ﻿#include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
@@ -42,7 +43,7 @@ namespace Krys::HTML
 
   Node &Node::GetRootNode(const GetRootNodeOptions &options) noexcept
   {
-    return options.Composed ? TreeQueries::ShadowIncludingRoot(*this) : TreeQueries::Root(*this);
+    return options.Composed ? ShadowRootAlgorithms::ShadowIncludingRoot(*this) : TreeQueries::Root(*this);
   }
 
   RawPtr<Element> Node::ParentElement() const noexcept

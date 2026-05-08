@@ -14,7 +14,6 @@ namespace Krys::HTML
   class EventTarget;
   class HTMLSlotElement;
   class Node;
-  class ShadowRoot;
   class Text;
 
   class TreeQueries
@@ -90,40 +89,8 @@ namespace Krys::HTML
 
 #pragma endregion
 
-#pragma region ShadowRoot - https://dom.spec.whatwg.org/#interface-shadowroot
-
-    /// @see https://dom.spec.whatwg.org/#concept-shadow-including-root
-    KRYS_NODISCARD static const Node &ShadowIncludingRoot(const Node &node) noexcept;
-    KRYS_NODISCARD static Node &ShadowIncludingRoot(Node &node) noexcept;
-
-    /// @see https://dom.spec.whatwg.org/#concept-shadow-including-descendant
-    KRYS_NODISCARD static bool IsShadowIncludingDescendant(const Node &a, const Node &b) noexcept;
-
-    /// @see https://dom.spec.whatwg.org/#concept-shadow-including-inclusive-descendant
-    KRYS_NODISCARD static bool IsShadowIncludingInclusiveDescendant(const Node &a, const Node &b) noexcept;
-
-    /// @see https://dom.spec.whatwg.org/#concept-shadow-including-ancestor
-    KRYS_NODISCARD static bool IsShadowIncludingAncestor(const Node &a, const Node &b) noexcept;
-
-    /// @see https://dom.spec.whatwg.org/#concept-shadow-including-inclusive-ancestor
-    KRYS_NODISCARD static bool IsShadowIncludingInclusiveAncestor(const Node &a, const Node &b) noexcept;
-
-    /// @see https://dom.spec.whatwg.org/#concept-closed-shadow-hidden
-    KRYS_NODISCARD static bool IsClosedShadowHidden(const Node &a, const Node &b) noexcept;
-
-    /// @see https://dom.spec.whatwg.org/#retarget
-    KRYS_NODISCARD static RawPtr<EventTarget> Retarget(RawPtr<EventTarget> a, EventTarget &b) noexcept;
-
-#pragma endregion
-
     /// @see https://dom.spec.whatwg.org/#concept-tree-host-including-inclusive-ancestor
     KRYS_NODISCARD static bool IsHostIncludingInclusiveAncestorOf(Node &a, Node &b) noexcept;
-
-    /// @see https://dom.spec.whatwg.org/#element-shadow-host
-    KRYS_NODISCARD static bool IsShadowHost(const Node &node) noexcept;
-
-    /// @see https://dom.spec.whatwg.org/#element-shadow-host
-    KRYS_NODISCARD static bool IsShadowHost(const Element &node) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#locate-a-namespace-prefix
     KRYS_NODISCARD static DOMStringAtom LocateNamespacePrefix(const Element &element,
@@ -133,13 +100,10 @@ namespace Krys::HTML
     KRYS_NODISCARD static DOMStringAtom LocateNamespace(const Node &node, DOMStringAtom prefix) noexcept;
 
     KRYS_NODISCARD static bool HasSameRoot(const Node &a, const Node &b) noexcept;
-    KRYS_NODISCARD static bool HasSameShadowIncludingRoot(const Node &a, const Node &b) noexcept;
 
     KRYS_NODISCARD static bool IsConnectedInSameTreeScope(const Node &a, const Node &b) noexcept;
     KRYS_NODISCARD static bool IsDocTypeOrDocTypeFollows(RawPtr<Node> node) noexcept;
     KRYS_NODISCARD static bool IsExclusiveTextNode(const Node &node) noexcept;
-
-    KRYS_NODISCARD static RefPtr<ShadowRoot> GetShadowRoot(const Node &node) noexcept;
 
     KRYS_NODISCARD static RawPtr<const Node> ChildAt(const ContainerNode &node, size_t index) noexcept;
     KRYS_NODISCARD static RawPtr<Node> ChildAt(ContainerNode &node, size_t index) noexcept;

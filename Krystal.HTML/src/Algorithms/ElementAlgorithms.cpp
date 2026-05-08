@@ -9,9 +9,8 @@
 
 namespace Krys::HTML
 {
-  void ElementAlgorithms::HandleAttributeChanges(Attr &attribute, Element &element,
-                                                          DOMStringView oldValue,
-                                                          DOMStringView newValue) noexcept
+  void ElementAlgorithms::HandleAttributeChanges(Attr &attribute, Element &element, DOMStringView oldValue,
+                                                 DOMStringView newValue) noexcept
   {
     TreeMutationDispatcher::QueueMutationRecord(u8"attributes", element, attribute.LocalName(),
                                                 attribute.NamespaceURI(), oldValue, {}, {}, nullptr, nullptr);
@@ -77,7 +76,7 @@ namespace Krys::HTML
   }
 
   RawPtr<Attr> ElementAlgorithms::GetAttributeByName(DOMStringAtom qualifiedName,
-                                                              const Element &element) noexcept
+                                                     const Element &element) noexcept
   {
     // TODO(impl): If element is in the HTML namespace and its node document is an HTML document, then set
     // qualifiedName to qualifiedName in ASCII lowercase.
@@ -87,9 +86,8 @@ namespace Krys::HTML
     return it != element._attributes.end() ? it->get() : nullptr;
   }
 
-  RawPtr<Attr> ElementAlgorithms::GetAttributeByNamespace(DOMStringAtom namespaceURI,
-                                                                   DOMStringAtom localName,
-                                                                   const Element &element) noexcept
+  RawPtr<Attr> ElementAlgorithms::GetAttributeByNamespace(DOMStringAtom namespaceURI, DOMStringAtom localName,
+                                                          const Element &element) noexcept
   {
     if (namespaceURI == DOMStringAtom::Empty())
     {
@@ -103,7 +101,7 @@ namespace Krys::HTML
   }
 
   DOMString ElementAlgorithms::GetAttributeValue(const Element &element, DOMStringAtom localName,
-                                                          DOMStringAtom namespaceURI) noexcept
+                                                 DOMStringAtom namespaceURI) noexcept
   {
     RawPtr<Attr> attr = GetAttributeByNamespace(namespaceURI, localName, element);
     if (attr == nullptr)
@@ -144,15 +142,14 @@ namespace Krys::HTML
     return ShareRefPtr(oldAttr);
   }
 
-  void ElementAlgorithms::SetAttributeValue(Element &element, DOMStringAtom localName,
-                                                     DOMString &&value, DOMStringAtom prefix,
-                                                     DOMStringAtom namespaceURI) noexcept
+  void ElementAlgorithms::SetAttributeValue(Element &element, DOMStringAtom localName, DOMString &&value,
+                                            DOMStringAtom prefix, DOMStringAtom namespaceURI) noexcept
   {
     RawPtr<Attr> attribute = GetAttributeByNamespace(namespaceURI, localName, element);
     if (attribute == nullptr)
     {
-      auto attr = CreateRef<Attr>(element.NodeDocument(), QualifiedName {localName, prefix, namespaceURI},
-                                  Krys::Move(value));
+      auto attr = AdoptRef<Attr>(*new Attr(
+        element.NodeDocument(), QualifiedName {localName, prefix, namespaceURI}, Krys::Move(value)));
       AppendAttribute(*attr, element);
     }
     else
@@ -162,7 +159,7 @@ namespace Krys::HTML
   }
 
   RefPtr<Attr> ElementAlgorithms::RemoveAttributeByName(DOMStringAtom qualifiedName,
-                                                                 Element &element) noexcept
+                                                        Element &element) noexcept
   {
     RawPtr<Attr> attr = GetAttributeByName(qualifiedName, element);
     if (attr != nullptr)
@@ -174,8 +171,8 @@ namespace Krys::HTML
   }
 
   RefPtr<Attr> ElementAlgorithms::RemoveAttributeByNamespace(DOMStringAtom namespaceURI,
-                                                                      DOMStringAtom localName,
-                                                                      Element &element) noexcept
+                                                             DOMStringAtom localName,
+                                                             Element &element) noexcept
   {
     RawPtr<Attr> attr = GetAttributeByNamespace(namespaceURI, localName, element);
     if (attr != nullptr)

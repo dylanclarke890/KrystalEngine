@@ -24,9 +24,9 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#concept-attribute-qualified-name
     KRYS_NODISCARD DOMString Name() const noexcept
     {
-      if (Prefix.View().empty())
+      if (Prefix == DOMStringAtom::Null())
       {
-        return DOMString {LocalName.View()};
+        return LocalName == DOMStringAtom::Null() ? DOMString {} : DOMString {LocalName.View()};
       }
       else
       {

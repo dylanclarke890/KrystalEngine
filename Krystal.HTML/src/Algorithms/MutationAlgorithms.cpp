@@ -2,7 +2,8 @@
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.HTML/Algorithms/IteratorAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/SlotAssignmentAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
@@ -222,18 +223,18 @@ namespace Krys::HTML
       {
         if (shadowHost->ShadowRoot()
             && shadowHost->ShadowRoot()->SlotAssignment() == SlotAssignmentMode::Named
-            && SlotAssignmentAlgorithms::IsSlottable(*target))
+            && SlotAlgorithms::IsSlottable(*target))
         {
-          SlotAssignmentAlgorithms::AssignSlot(*target);
+          SlotAlgorithms::AssignSlot(*target);
         }
       }
 
       if (Is<ShadowRoot>(parentRoot) && slotParent && slotParent->AssignedNodes().empty())
       {
-        SlotAssignmentAlgorithms::SignalSlotChange(*slotParent);
+        SlotAlgorithms::SignalSlotChange(*slotParent);
       }
 
-      SlotAssignmentAlgorithms::AssignSlottablesForTree(Downcast<ContainerNode>(TreeQueries::Root(*target)));
+      SlotAlgorithms::AssignSlottablesForTree(Downcast<ContainerNode>(TreeQueries::Root(*target)));
 
       for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(*target))
       {
@@ -304,7 +305,7 @@ namespace Krys::HTML
   ExceptionOr<void> MutationAlgorithms::Move(Node &node, ContainerNode &newParent,
                                              RawPtr<Node> child) noexcept
   {
-    if (!TreeQueries::HasSameShadowIncludingRoot(newParent, node))
+    if (!ShadowRootAlgorithms::HasSameShadowIncludingRoot(newParent, node))
     {
       return Exception {ExceptionCode::HierarchyRequestError};
     }
@@ -383,9 +384,9 @@ namespace Krys::HTML
     node.SetPreviousSibling(nullptr);
     node.SetNextSibling(nullptr);
 
-    if (auto *assignedSlot = SlotAssignmentAlgorithms::GetAssignedSlot(node))
+    if (auto *assignedSlot = SlotAlgorithms::GetAssignedSlot(node))
     {
-      SlotAssignmentAlgorithms::AssignSlottables(*assignedSlot);
+      SlotAlgorithms::AssignSlottables(*assignedSlot);
     }
 
     auto &oldParentRoot = TreeQueries::Root(oldParent);
@@ -393,14 +394,14 @@ namespace Krys::HTML
     {
       if (auto *slot = DynamicDowncast<HTMLSlotElement>(oldParent); slot && slot->AssignedNodes().empty())
       {
-        SlotAssignmentAlgorithms::SignalSlotChange(*slot);
+        SlotAlgorithms::SignalSlotChange(*slot);
       }
     }
 
     if (Krys::HTML::HasNodeOfType<HTMLSlotElement>(ConstInclusiveDescendantRange(node)))
     {
-      SlotAssignmentAlgorithms::AssignSlottablesForTree(oldParentRoot);
-      SlotAssignmentAlgorithms::AssignSlottablesForTree(node);
+      SlotAlgorithms::AssignSlottablesForTree(oldParentRoot);
+      SlotAlgorithms::AssignSlottablesForTree(node);
     }
 
     if (child != nullptr)
@@ -456,7 +457,7 @@ namespace Krys::HTML
       }
     }
 
-    SlotAssignmentAlgorithms::AssignSlottablesForTree(TreeQueries::Root(node));
+    SlotAlgorithms::AssignSlottablesForTree(TreeQueries::Root(node));
 
     for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(node))
     {
@@ -646,6 +647,19 @@ namespace Krys::HTML
     return {};
   }
 
+  ExceptionOr<void> MutationAlgorithms::StringReplaceAll(DOMString &&string, ContainerNode &parent) noexcept
+  {
+    if (string.empty())
+    {
+      return ReplaceAll(nullptr, parent);
+    }
+    else
+    {
+      Ref<Text> textNode = CreateRef<Text>(parent.NodeDocument(), Krys::Move(string));
+      return ReplaceAll(textNode.get(), parent);
+    }
+  }
+
   ExceptionOr<Node &> MutationAlgorithms::PreRemove(Node &node, ContainerNode &parent) noexcept
   {
     if (node.ParentNode() != &parent)
@@ -704,9 +718,9 @@ namespace Krys::HTML
     node.SetPreviousSibling(nullptr);
     node.SetNextSibling(nullptr);
 
-    if (auto *assignedSlot = SlotAssignmentAlgorithms::GetAssignedSlot(node))
+    if (auto *assignedSlot = SlotAlgorithms::GetAssignedSlot(node))
     {
-      SlotAssignmentAlgorithms::AssignSlottables(*assignedSlot);
+      SlotAlgorithms::AssignSlottables(*assignedSlot);
     }
 
     auto &parentRoot = TreeQueries::Root(parent);
@@ -715,14 +729,14 @@ namespace Krys::HTML
       auto *slot = DynamicDowncast<HTMLSlotElement>(parent);
       if (slot && slot->AssignedNodes().empty())
       {
-        SlotAssignmentAlgorithms::SignalSlotChange(*slot);
+        SlotAlgorithms::SignalSlotChange(*slot);
       }
     }
 
     if (Krys::HTML::HasNodeOfType<HTMLSlotElement>(ConstInclusiveDescendantRange(node)))
     {
-      SlotAssignmentAlgorithms::AssignSlottablesForTree(parentRoot);
-      SlotAssignmentAlgorithms::AssignSlottablesForTree(node);
+      SlotAlgorithms::AssignSlottablesForTree(parentRoot);
+      SlotAlgorithms::AssignSlottablesForTree(node);
     }
 
     ExtensibilityHooks::Removed(node, true, parent);
@@ -924,19 +938,6 @@ namespace Krys::HTML
         return &result.Value();
       }
       default: return Exception {ExceptionCode::SyntaxError};
-    }
-  }
-
-  ExceptionOr<void> MutationAlgorithms::StringReplaceAll(DOMString &&string, ContainerNode &parent) noexcept
-  {
-    if (string.empty())
-    {
-      return ReplaceAll(nullptr, parent);
-    }
-    else
-    {
-      Ref<Text> textNode = CreateRef<Text>(parent.NodeDocument(), Krys::Move(string));
-      return ReplaceAll(textNode.get(), parent);
     }
   }
 }

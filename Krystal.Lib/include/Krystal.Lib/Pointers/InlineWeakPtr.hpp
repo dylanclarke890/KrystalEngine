@@ -10,6 +10,8 @@ namespace Krys
   {
     KRYS_ALWAYS_INLINE constexpr static RawPtr<T> AddRef(RawPtr<T> ptr) noexcept
     {
+      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
+
       if (ptr) KRYS_LIKELY
       {
         ptr->AddRefWeak();
@@ -19,12 +21,16 @@ namespace Krys
 
     KRYS_ALWAYS_INLINE constexpr static T &AddRef(T &ref) noexcept
     {
+      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
+
       ref.AddRefWeak();
       return ref;
     }
 
     KRYS_ALWAYS_INLINE constexpr static void SubRef(RawPtr<T> ptr) noexcept
     {
+      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
+
       if (ptr) KRYS_LIKELY
       {
         ptr->SubRefWeak();
@@ -33,6 +39,8 @@ namespace Krys
 
     KRYS_ALWAYS_INLINE KRYS_NODISCARD constexpr static RawPtr<T> ValidateGetAccess(RawPtr<T> ptr) noexcept
     {
+      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
+
       if (!ptr || !ptr->GetRefCount())
       {
         return nullptr;
@@ -43,6 +51,8 @@ namespace Krys
 
     KRYS_ALWAYS_INLINE KRYS_NODISCARD constexpr static bool IsValid(RawPtr<T> ptr) noexcept
     {
+      static_assert(IsTypeComplete<T>, "T is an incomplete type.");
+
       return ptr && ptr->GetRefCount();
     }
   };

@@ -5,6 +5,7 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"
+#include "Krystal.Lib/Pointers/WeakPtr.hpp"
 
 namespace Krys::HTML
 {
@@ -21,8 +22,14 @@ namespace Krys::HTML
   private:
     UniquePtr<DocumentFragmentRareData> _documentFragmentRareData;
 
+  protected:
+    WeakPtr<Element> _host;
+
+  protected:
+    DocumentFragment(Document &document, NodeFlag flags) noexcept;
+
   public:
-    DocumentFragment(Document &document, NodeFlag flags = NodeFlag::None) noexcept;
+    DocumentFragment(Document &document) noexcept;
 
 #pragma region Node
 

@@ -10,11 +10,22 @@
 namespace Krys::HTML
 {
   class Attr;
+  class CustomElementRegistry;
+  class Document;
   class Element;
+
+  using CustomElementRegistryOrDefault = Maybe<RawPtr<CustomElementRegistry>>;
+  constexpr inline auto DefaultCustomElementRegistry = Null;
 
   class ElementAlgorithms
   {
   public:
+    static Ref<Element>
+      CreateElement(Document &document, DOMStringAtom localName, DOMStringAtom namespaceURI,
+                    DOMStringAtom prefix = DOMStringAtom::Null(), DOMStringAtom is = DOMStringAtom::Null(),
+                    bool synchronousCustomElements = false,
+                    CustomElementRegistryOrDefault registry = DefaultCustomElementRegistry) noexcept;
+
     /// @see https://dom.spec.whatwg.org/#handle-attribute-changes
     static void HandleAttributeChanges(Attr &attribute, Element &element, DOMStringView oldValue,
                                        DOMStringView newValue) noexcept;
@@ -49,7 +60,7 @@ namespace Krys::HTML
     static ExceptionOr<RefPtr<Attr>> SetAttribute(Attr &attr, Element &element) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-set-value
-    static void SetAttributeValue(Element &element, DOMStringAtom localName, DOMString&& value,
+    static void SetAttributeValue(Element &element, DOMStringAtom localName, DOMString &&value,
                                   DOMStringAtom prefix = DOMStringAtom::Null(),
                                   DOMStringAtom namespaceURI = DOMStringAtom::Null()) noexcept;
 

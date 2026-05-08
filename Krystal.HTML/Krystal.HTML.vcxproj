@@ -108,7 +108,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\Node.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\NodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Ranges\BoundaryPoint.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Algorithms\SlotAssignmentAlgorithms.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\SlotAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\MutationAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\TreeMutationDispatcher.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\TreeQueries.hpp" />
@@ -158,7 +158,7 @@
     <ClCompile Include="src\DOMTokenList.cpp" />
     <ClCompile Include="src\Algorithms\IteratorAlgorithms.cpp" />
     <ClCompile Include="src\HTMLElement\HTMLSlotElement.cpp" />
-    <ClCompile Include="src\Algorithms\SlotAssignmentAlgorithms.cpp" />
+    <ClCompile Include="src\Algorithms\SlotAlgorithms.cpp" />
     <ClCompile Include="src\Abort\AbortSignal.cpp" />
     <ClCompile Include="src\Abort\AbortController.cpp" />
     <ClCompile Include="src\Events\EventPath.cpp" />

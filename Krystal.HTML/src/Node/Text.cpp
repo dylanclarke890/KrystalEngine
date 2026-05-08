@@ -1,6 +1,6 @@
 ﻿#include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Algorithms/SlotAssignmentAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
@@ -85,7 +85,7 @@ namespace Krys::HTML
 
   RawPtr<HTMLSlotElement> Text::AssignedSlot() noexcept
   {
-    return SlotAssignmentAlgorithms::FindSlot(*this, true);
+    return SlotAlgorithms::FindSlot(*this, true);
   }
 
 #pragma endregion

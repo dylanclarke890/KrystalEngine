@@ -1,6 +1,6 @@
 ﻿#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Utils/SubtreeRanges.hpp"
+#include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Events/EventTarget.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
@@ -15,6 +15,7 @@
 #include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
+#include "Krystal.HTML/Utils/SubtreeRanges.hpp"
 #include "Krystal.Lib/Ranges/Algorithm.hpp"
 #include <ranges>
 
@@ -171,137 +172,6 @@ namespace Krys::HTML
 
 #pragma endregion
 
-#pragma region ShadowRoot - https://dom.spec.whatwg.org/#interface-shadowroot
-
-  const Node &TreeQueries::ShadowIncludingRoot(const Node &node) noexcept
-  {
-    auto &root = Root(node);
-    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(root))
-    {
-      auto *host = shadowRoot->Host();
-      return host ? ShadowIncludingRoot(*host) : root;
-    }
-
-    return root;
-  }
-
-  Node &TreeQueries::ShadowIncludingRoot(Node &node) noexcept
-  {
-    auto &root = Root(node);
-    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(root))
-    {
-      auto *host = shadowRoot->Host();
-      return host ? ShadowIncludingRoot(*host) : root;
-    }
-
-    return root;
-  }
-
-  bool TreeQueries::IsShadowIncludingDescendant(const Node &a, const Node &b) noexcept
-  {
-    if (IsDescendant(a, b))
-    {
-      return true;
-    }
-
-    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(Root(a)))
-    {
-      if (auto *host = shadowRoot->Host())
-      {
-        return IsShadowIncludingDescendant(*host, b);
-      }
-    }
-
-    return false;
-  }
-
-  bool TreeQueries::IsShadowIncludingInclusiveDescendant(const Node &a, const Node &b) noexcept
-  {
-    if (&a == &b)
-    {
-      return true;
-    }
-
-    return IsShadowIncludingDescendant(a, b);
-  }
-
-  bool TreeQueries::IsShadowIncludingAncestor(const Node &a, const Node &b) noexcept
-  {
-    return IsShadowIncludingDescendant(b, a);
-  }
-
-  bool TreeQueries::IsShadowIncludingInclusiveAncestor(const Node &a, const Node &b) noexcept
-  {
-    return IsShadowIncludingInclusiveDescendant(b, a);
-  }
-
-  bool TreeQueries::IsClosedShadowHidden(const Node &a, const Node &b) noexcept
-  {
-    auto &aRoot = Root(a);
-    auto *aShadowRoot = DynamicDowncast<ShadowRoot>(aRoot);
-    if (aShadowRoot == nullptr)
-    {
-      return false;
-    }
-
-    if (IsShadowIncludingInclusiveAncestor(aRoot, b))
-    {
-      return false;
-    }
-
-    if (aShadowRoot->Mode() == ShadowRootMode::Closed)
-    {
-      return true;
-    }
-
-    if (aShadowRoot->Host() && IsClosedShadowHidden(*aShadowRoot->Host(), b))
-    {
-      return true;
-    }
-
-    return false;
-  }
-
-  RawPtr<EventTarget> TreeQueries::Retarget(RawPtr<EventTarget> a, EventTarget &b) noexcept
-  {
-    auto *current = a;
-    auto *bNode = DynamicDowncast<Node>(b);
-    while (true)
-    {
-      if (current == nullptr)
-      {
-        return nullptr;
-      }
-
-      if (!Is<Node>(current))
-      {
-        return current;
-      }
-
-      auto *currentNode = Downcast<Node>(current);
-      auto &currentRoot = Root(*currentNode);
-      if (!Is<ShadowRoot>(currentNode))
-      {
-        return current;
-      }
-
-      if (bNode != nullptr && !IsShadowIncludingInclusiveAncestor(currentRoot, *bNode))
-      {
-        return current;
-      }
-
-      auto *host = Downcast<ShadowRoot>(&currentRoot)->Host();
-      current = host;
-    }
-
-    // The spec handles the necessary cases to ensure we never get here, but we need this to satisfy the
-    // compiler that current is always valid.
-    std::unreachable();
-    return current;
-  }
-
-#pragma endregion
-
   bool TreeQueries::IsHostIncludingInclusiveAncestorOf(Node &a, Node &b) noexcept
   {
     if (IsInclusiveAncestor(a, b))
@@ -318,21 +188,6 @@ namespace Krys::HTML
     }
 
     return false;
-  }
-
-  bool TreeQueries::IsShadowHost(const Node &node) noexcept
-  {
-    if (!Is<Element>(node))
-    {
-      return false;
-    }
-
-    return IsShadowHost(Downcast<Element>(node));
-  }
-
-  bool TreeQueries::IsShadowHost(const Element &node) noexcept
-  {
-    return node.ShadowRoot() != nullptr;
   }
 
   DOMStringAtom TreeQueries::LocateNamespacePrefix(const Element &element,
@@ -449,11 +304,6 @@ namespace Krys::HTML
     return &Root(a) == &Root(b);
   }
 
-  bool TreeQueries::HasSameShadowIncludingRoot(const Node &a, const Node &b) noexcept
-  {
-    return &ShadowIncludingRoot(a) == &ShadowIncludingRoot(b);
-  }
-
   bool TreeQueries::IsConnectedInSameTreeScope(const Node &a, const Node &b) noexcept
   {
     return a.IsConnected() == b.IsConnected() && &Root(a) == &Root(b);
@@ -477,16 +327,6 @@ namespace Krys::HTML
   bool TreeQueries::IsExclusiveTextNode(const Node &node) noexcept
   {
     return Is<Text>(node) && !Is<CDATASection>(node);
-  }
-
-  RefPtr<ShadowRoot> TreeQueries::GetShadowRoot(const Node &node) noexcept
-  {
-    if (auto *element = DynamicDowncast<Element>(node))
-    {
-      return element->ShadowRoot();
-    }
-
-    return nullptr;
   }
 
   RawPtr<Node> TreeQueries::ChildAt(ContainerNode &node, size_t index) noexcept

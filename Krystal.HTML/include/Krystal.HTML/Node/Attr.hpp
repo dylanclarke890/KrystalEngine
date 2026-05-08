@@ -15,16 +15,19 @@ namespace Krys::HTML
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Attr);
 
+    friend class Element;
     friend class ElementAlgorithms;
+    friend class Document;
 
   private:
     QualifiedName _name;
     WeakPtr<Element> _ownerElement;
     DOMString _value;
 
-  public:
+  protected:
     Attr(Document &document, const QualifiedName &qualifiedName, DOMString &&value) noexcept;
 
+  public:
 #pragma region Attr
 
     KRYS_NODISCARD DOMStringAtom NamespaceURI() const noexcept
