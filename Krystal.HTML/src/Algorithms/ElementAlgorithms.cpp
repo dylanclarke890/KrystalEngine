@@ -15,9 +15,9 @@ namespace Krys::HTML
     TreeMutationDispatcher::QueueMutationRecord(u8"attributes", element, attribute.LocalName(),
                                                 attribute.NamespaceURI(), oldValue, {}, {}, nullptr, nullptr);
 
-    // TODO(impl): If element is custom, then enqueue a custom element callback reaction with element,
-    // callback name "attributeChangedCallback", and « attribute’s local name, oldValue, newValue, attribute’s
-    // namespace ».
+    // TODO(impl): CUSTOM-ELEMENT
+    // If element is custom, then enqueue a custom element callback reaction with element, callback name
+    // "attributeChangedCallback", and « attribute’s local name, oldValue, newValue, attribute’s namespace ».
 
     ExtensibilityHooks::ElementAttributeChanged(element, attribute.LocalName(), oldValue, attribute.Value(),
                                                 attribute.NamespaceURI());

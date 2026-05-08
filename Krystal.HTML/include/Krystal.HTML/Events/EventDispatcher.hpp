@@ -15,7 +15,8 @@ namespace Krys::HTML
   class EventPathItem;
   class RegisteredEventListener;
 
-  using EventInitializer = Func<void(Event &)>;
+  template <DerivedFrom<Event> TEvent>
+  using EventIDLInitializer = Func<void(TEvent &)>;
 
   class EventDispatcher
   {
@@ -45,7 +46,7 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#concept-event-fire
     template <DerivedFrom<Event> TEvent = Event>
     static bool FireEvent(DOMStringAtom e, EventTarget &target,
-                          EventInitializer idlAttributeInitializer = nullptr,
+                          EventIDLInitializer<TEvent> idlAttributeInitializer = nullptr,
                           bool legacyTargetOverrideFlag = false) noexcept
     {
       // SPEC-VIOLATION(HTML): realms and global objects currently not supported.
