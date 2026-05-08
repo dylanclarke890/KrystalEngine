@@ -18,6 +18,7 @@ namespace Krys::HTML
     Element,
   };
 
+  /// @see https://dom.spec.whatwg.org/#namespaces
   class NameValidation
   {
   public:
@@ -186,14 +187,14 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#valid-shadow-host-name
     KRYS_NODISCARD static bool IsValidShadowHostName(DOMStringView name) noexcept
     {
-      // TODO(impl): implement this
+      // TODO(impl):
       return false;
     }
 
     /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name
     KRYS_NODISCARD static bool IsValidCustomElementName(DOMStringView name) noexcept
     {
-      // TODO(impl): implement this
+      // TODO(impl):
       return false;
     }
   };

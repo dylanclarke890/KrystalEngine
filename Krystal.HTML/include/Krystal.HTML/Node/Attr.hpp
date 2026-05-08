@@ -9,13 +9,13 @@ namespace Krys::HTML
 {
   class Document;
   class Element;
-  class ElementAttributeAlgorithms;
+  class ElementAlgorithms;
 
   class Attr : public Node
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Attr);
 
-    friend class ElementAttributeAlgorithms;
+    friend class ElementAlgorithms;
 
   private:
     QualifiedName _name;

@@ -1,6 +1,6 @@
 ﻿#include "Krystal.HTML/DOMTokenList.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Algorithms/ElementAttributeAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/StringAlgorithms.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
@@ -20,7 +20,7 @@ namespace Krys::HTML
 
   void DOMTokenList::Value(DOMString &&value) noexcept
   {
-    ElementAttributeAlgorithms::SetAttributeValue(*_element, _attributeName, Krys::Move(value));
+    ElementAlgorithms::SetAttributeValue(*_element, _attributeName, Krys::Move(value));
   }
 
   ExceptionOr<bool> DOMTokenList::ValidationSteps(DOMStringView token) const noexcept

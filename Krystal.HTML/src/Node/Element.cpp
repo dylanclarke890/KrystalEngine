@@ -1,10 +1,10 @@
 ﻿#include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Algorithms/ChildNodeAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/ElementAttributeAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/Mixins/ChildNode.hpp"
+#include "Krystal.HTML/Algorithms/Mixins/ParentNode.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/NameValidation.hpp"
-#include "Krystal.HTML/Algorithms/ParentNodeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/SlotAssignmentAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
@@ -39,22 +39,22 @@ namespace Krys::HTML
 
   void Element::Id(DOMString &&id) noexcept
   {
-    ElementAttributeAlgorithms::SetAttributeValue(*this, u8"id", Krys::Move(id));
+    ElementAlgorithms::SetAttributeValue(*this, u8"id", Krys::Move(id));
   }
 
   DOMString Element::Id() const noexcept
   {
-    return ElementAttributeAlgorithms::GetAttributeValue(*this, u8"id");
+    return ElementAlgorithms::GetAttributeValue(*this, u8"id");
   }
 
   void Element::ClassName(DOMString &&className) noexcept
   {
-    ElementAttributeAlgorithms::SetAttributeValue(*this, u8"class", Krys::Move(className));
+    ElementAlgorithms::SetAttributeValue(*this, u8"class", Krys::Move(className));
   }
 
   DOMString Element::ClassName() const noexcept
   {
-    return ElementAttributeAlgorithms::GetAttributeValue(*this, u8"class");
+    return ElementAlgorithms::GetAttributeValue(*this, u8"class");
   }
 
   KRYS_NODISCARD DOMTokenList Element::ClassList() noexcept
@@ -64,12 +64,12 @@ namespace Krys::HTML
 
   void Element::Slot(DOMString &&slot) noexcept
   {
-    ElementAttributeAlgorithms::SetAttributeValue(*this, u8"slot", Krys::Move(slot));
+    ElementAlgorithms::SetAttributeValue(*this, u8"slot", Krys::Move(slot));
   }
 
   DOMString Element::Slot() const noexcept
   {
-    return ElementAttributeAlgorithms::GetAttributeValue(*this, u8"slot");
+    return ElementAlgorithms::GetAttributeValue(*this, u8"slot");
   }
 
   bool Element::HasAttributes() const noexcept
@@ -89,7 +89,7 @@ namespace Krys::HTML
 
   Maybe<DOMString> Element::GetAttribute(DOMStringAtom qualifiedName) const noexcept
   {
-    RawPtr<Attr> attr = ElementAttributeAlgorithms::GetAttributeByName(qualifiedName, *this);
+    RawPtr<Attr> attr = ElementAlgorithms::GetAttributeByName(qualifiedName, *this);
     if (attr == nullptr)
     {
       return std::nullopt;
@@ -100,7 +100,7 @@ namespace Krys::HTML
 
   Maybe<DOMString> Element::GetAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) const noexcept
   {
-    RawPtr<Attr> attr = ElementAttributeAlgorithms::GetAttributeByNamespace(namespaceURI, localName, *this);
+    RawPtr<Attr> attr = ElementAlgorithms::GetAttributeByNamespace(namespaceURI, localName, *this);
     if (attr == nullptr)
     {
       return std::nullopt;
@@ -126,14 +126,14 @@ namespace Krys::HTML
                            [&](const Ref<Attr> &attr) { return attr->Name() == qualifiedName; });
     if (it != _attributes.end())
     {
-      ElementAttributeAlgorithms::Change(**it, Krys::Move(value));
+      ElementAlgorithms::ChangeAttribute(**it, Krys::Move(value));
     }
     else
     {
       auto attr = CreateRef<Attr>(NodeDocument(),
                                   QualifiedName {qualifiedName, DOMStringAtom::Null(), DOMStringAtom::Null()},
                                   Krys::Move(value));
-      ElementAttributeAlgorithms::Append(*attr, *this);
+      ElementAlgorithms::AppendAttribute(*attr, *this);
     }
 
     return {};
@@ -154,7 +154,7 @@ namespace Krys::HTML
     // attribute value with localName, namespace, this, and value.
 
     const auto &qName = validateAndExtractResult.Value();
-    ElementAttributeAlgorithms::SetAttributeValue(*this, qName.LocalName, std::move(value), qName.Prefix,
+    ElementAlgorithms::SetAttributeValue(*this, qName.LocalName, std::move(value), qName.Prefix,
                                                   qName.NamespaceURI);
 
     return {};
@@ -162,12 +162,12 @@ namespace Krys::HTML
 
   void Element::RemoveAttribute(DOMStringAtom qualifiedName) noexcept
   {
-    ElementAttributeAlgorithms::RemoveAttributeByName(qualifiedName, *this);
+    ElementAlgorithms::RemoveAttributeByName(qualifiedName, *this);
   }
 
   void Element::RemoveAttributeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) noexcept
   {
-    ElementAttributeAlgorithms::RemoveAttributeByNamespace(namespaceURI, localName, *this);
+    ElementAlgorithms::RemoveAttributeByNamespace(namespaceURI, localName, *this);
   }
 
   ExceptionOr<bool> Element::ToggleAttribute(DOMStringAtom qualifiedName, const Maybe<bool> &force) noexcept
@@ -189,7 +189,7 @@ namespace Krys::HTML
       {
         auto attr = CreateRef<Attr>(
           NodeDocument(), QualifiedName {qualifiedName, DOMStringAtom::Null(), DOMStringAtom::Null()}, u8"");
-        ElementAttributeAlgorithms::Append(*attr, *this);
+        ElementAlgorithms::AppendAttribute(*attr, *this);
         return true;
       }
 
@@ -198,7 +198,7 @@ namespace Krys::HTML
 
     if (!force.has_value() || !force.value())
     {
-      ElementAttributeAlgorithms::Remove(**it);
+      ElementAlgorithms::RemoveAttribute(**it);
       return false;
     }
 
@@ -226,22 +226,22 @@ namespace Krys::HTML
 
   RawPtr<Attr> Element::GetAttributeNode(DOMStringAtom qualifiedName) const noexcept
   {
-    return ElementAttributeAlgorithms::GetAttributeByName(qualifiedName, *this);
+    return ElementAlgorithms::GetAttributeByName(qualifiedName, *this);
   }
 
   RawPtr<Attr> Element::GetAttributeNodeNS(DOMStringAtom namespaceURI, DOMStringAtom localName) const noexcept
   {
-    return ElementAttributeAlgorithms::GetAttributeByNamespace(namespaceURI, localName, *this);
+    return ElementAlgorithms::GetAttributeByNamespace(namespaceURI, localName, *this);
   }
 
   ExceptionOr<RefPtr<Attr>> Element::SetAttributeNode(Attr &attr) noexcept
   {
-    return ElementAttributeAlgorithms::SetAttribute(attr, *this);
+    return ElementAlgorithms::SetAttribute(attr, *this);
   }
 
   ExceptionOr<RefPtr<Attr>> Element::SetAttributeNodeNS(Attr &attr) noexcept
   {
-    return ElementAttributeAlgorithms::SetAttribute(attr, *this);
+    return ElementAlgorithms::SetAttribute(attr, *this);
   }
 
   ExceptionOr<Ref<Attr>> Element::RemoveAttributeNode(Attr &attr) noexcept
@@ -251,7 +251,7 @@ namespace Krys::HTML
       return Exception {ExceptionCode::NotFoundError};
     }
 
-    ElementAttributeAlgorithms::Remove(attr);
+    ElementAlgorithms::RemoveAttribute(attr);
 
     return ShareRef(attr);
   }
@@ -363,22 +363,22 @@ namespace Krys::HTML
 
   ExceptionOr<void> Element::Before(const List<NodeOrString> &nodes) noexcept
   {
-    return ChildNodeAlgorithms::Before(*this, nodes);
+    return Mixins::ChildNode::Before(*this, nodes);
   }
 
   ExceptionOr<void> Element::After(const List<NodeOrString> &nodes) noexcept
   {
-    return ChildNodeAlgorithms::After(*this, nodes);
+    return Mixins::ChildNode::After(*this, nodes);
   }
 
   ExceptionOr<void> Element::ReplaceWith(const List<NodeOrString> &nodes) noexcept
   {
-    return ChildNodeAlgorithms::ReplaceWith(*this, nodes);
+    return Mixins::ChildNode::ReplaceWith(*this, nodes);
   }
 
   ExceptionOr<void> Element::Remove() noexcept
   {
-    return ChildNodeAlgorithms::Remove(*this);
+    return Mixins::ChildNode::Remove(*this);
   }
 
 #pragma endregion
@@ -441,32 +441,32 @@ namespace Krys::HTML
 
   ExceptionOr<void> Element::Prepend(const List<NodeOrString> &nodes) noexcept
   {
-    return ParentNodeAlgorithms::Prepend(*this, nodes);
+    return Mixins::ParentNode::Prepend(*this, nodes);
   }
 
   ExceptionOr<void> Element::Append(const List<NodeOrString> &nodes) noexcept
   {
-    return ParentNodeAlgorithms::Append(*this, nodes);
+    return Mixins::ParentNode::Append(*this, nodes);
   }
 
   ExceptionOr<void> Element::ReplaceChildren(const List<NodeOrString> &nodes) noexcept
   {
-    return ParentNodeAlgorithms::ReplaceChildren(*this, nodes);
+    return Mixins::ParentNode::ReplaceChildren(*this, nodes);
   }
 
   ExceptionOr<void> Element::MoveBefore(Node &node, RawPtr<Node> refChild) noexcept
   {
-    return ParentNodeAlgorithms::MoveBefore(*this, node, refChild);
+    return Mixins::ParentNode::MoveBefore(*this, node, refChild);
   }
 
   ExceptionOr<RefPtr<Element>> Element::QuerySelector(DOMStringView selectors) noexcept
   {
-    return ParentNodeAlgorithms::QuerySelector(*this, selectors);
+    return Mixins::ParentNode::QuerySelector(*this, selectors);
   }
 
   ExceptionOr<Ref<NodeList>> Element::QuerySelectorAll(DOMStringView selectors) noexcept
   {
-    return ParentNodeAlgorithms::QuerySelectorAll(*this, selectors);
+    return Mixins::ParentNode::QuerySelectorAll(*this, selectors);
   }
 
 #pragma endregion

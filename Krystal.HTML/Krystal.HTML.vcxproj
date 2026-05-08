@@ -36,11 +36,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML\Abort\AbortController.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Algorithms\ChildNodeAlgorithms.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Algorithms\ElementAttributeAlgorithms.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\Mixins\ChildNode.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\ElementAlgorithms.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\ExtensibilityHooks.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\IteratorAlgorithms.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Algorithms\NonElementParentNodeAlgorithms.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Algorithms\ParentNodeAlgorithms.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\Mixins\NonElementParentNode.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\Mixins\ParentNode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\ShadowRootAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOMTokenList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventPath.hpp" />
@@ -69,7 +70,6 @@
     <ClInclude Include="include\Krystal.HTML\Node\ShadowRootInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Enums\ShadowRootMode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Enums\SlotAssignmentMode.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Node\TreeScope.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\EventDispatcher.hpp" />
     <ClInclude Include="include\Krystal.HTML\Iterator\NodeFilter.hpp" />
     <ClInclude Include="include\Krystal.HTML\Iterator\NodeIterator.hpp" />
@@ -144,14 +144,16 @@
     <ClInclude Include="include\Krystal.HTML\Utils\Exception.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionCode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\ExceptionOr.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Algorithms\SubtreeRanges.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Algorithms\OrderedSetAlgorithms.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Utils\SubtreeRanges.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\OrderedSet.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\SmallNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\StringAlgorithms.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Algorithms\ElementAttributeAlgorithms.cpp" />
-    <ClCompile Include="src\Algorithms\ParentNodeAlgorithms.cpp" />
+    <ClCompile Include="src\Algorithms\ElementAlgorithms.cpp" />
+    <ClCompile Include="src\Algorithms\ExtensibilityHooks.cpp" />
+    <ClCompile Include="src\Algorithms\Mixins\ChildNode.cpp" />
+    <ClCompile Include="src\Algorithms\Mixins\ParentNode.cpp" />
     <ClCompile Include="src\Algorithms\ShadowRootAlgorithms.cpp" />
     <ClCompile Include="src\DOMTokenList.cpp" />
     <ClCompile Include="src\Algorithms\IteratorAlgorithms.cpp" />
@@ -163,7 +165,7 @@
     <ClCompile Include="src\Iterator\NodeIterator.cpp" />
     <ClCompile Include="src\Iterator\TreeWalker.cpp" />
     <ClCompile Include="src\Node\NamedNodeMap.cpp" />
-    <ClCompile Include="src\Algorithms\NonElementParentNodeAlgorithms.cpp" />
+    <ClCompile Include="src\Algorithms\Mixins\NonElementParentNode.cpp" />
     <ClCompile Include="src\Ranges\Range.cpp" />
     <ClCompile Include="src\MutationObserver\MutationObserver.cpp" />
     <ClCompile Include="src\Node\RareData\ParentNodeRareData.cpp" />
@@ -179,7 +181,6 @@
     <ClCompile Include="src\Algorithms\TreeMutationDispatcher.cpp" />
     <ClCompile Include="src\Node\ShadowRoot.cpp" />
     <ClCompile Include="src\Node\Document.cpp" />
-    <ClCompile Include="src\Node\TreeScope.cpp" />
     <ClCompile Include="src\Node\Element.cpp" />
     <ClCompile Include="src\Events\EventDispatcher.cpp" />
     <ClCompile Include="src\Node\Attr.cpp" />

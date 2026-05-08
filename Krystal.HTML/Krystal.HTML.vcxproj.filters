@@ -177,9 +177,6 @@
     <ClInclude Include="include\Krystal.HTML\Utils\BoolOr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\TreeScope.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\CustomElementRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -279,7 +276,7 @@
     <ClInclude Include="include\Krystal.HTML\Namespaces.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Algorithms\OrderedSetAlgorithms.hpp">
+    <ClInclude Include="include\Krystal.HTML\Algorithms\OrderedSet.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Events\EventPath.hpp">
@@ -297,7 +294,7 @@
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLSlotElement.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Algorithms\SubtreeRanges.hpp">
+    <ClInclude Include="include\Krystal.HTML\Utils\SubtreeRanges.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Algorithms\SlotAssignmentAlgorithms.hpp">
@@ -324,7 +321,7 @@
     <ClInclude Include="include\Krystal.HTML\Utils\NodeOrString.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Algorithms\ChildNodeAlgorithms.hpp">
+    <ClInclude Include="include\Krystal.HTML\Algorithms\Mixins\ChildNode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\NamedNodeMap.hpp">
@@ -342,19 +339,22 @@
     <ClInclude Include="include\Krystal.HTML\Node\Enums\InsertAdjacentWhere.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Algorithms\ElementAttributeAlgorithms.hpp">
+    <ClInclude Include="include\Krystal.HTML\Algorithms\ElementAlgorithms.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Algorithms\ShadowRootAlgorithms.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Algorithms\ParentNodeAlgorithms.hpp">
+    <ClInclude Include="include\Krystal.HTML\Algorithms\Mixins\ParentNode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Algorithms\NonElementParentNodeAlgorithms.hpp">
+    <ClInclude Include="include\Krystal.HTML\Algorithms\Mixins\NonElementParentNode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\Enums\NodeCollectionLiveness.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Algorithms\ExtensibilityHooks.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -408,9 +408,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Events\EventDispatcher.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Node\TreeScope.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Algorithms\TreeTraversal.cpp">
@@ -485,16 +482,22 @@
     <ClCompile Include="src\Node\NamedNodeMap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Algorithms\ElementAttributeAlgorithms.cpp">
+    <ClCompile Include="src\Algorithms\ElementAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Algorithms\ShadowRootAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Algorithms\ParentNodeAlgorithms.cpp">
+    <ClCompile Include="src\Algorithms\Mixins\ParentNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Algorithms\NonElementParentNodeAlgorithms.cpp">
+    <ClCompile Include="src\Algorithms\Mixins\NonElementParentNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Algorithms\ExtensibilityHooks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Algorithms\Mixins\ChildNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

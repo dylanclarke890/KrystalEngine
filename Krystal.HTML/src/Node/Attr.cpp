@@ -1,6 +1,6 @@
 ﻿#include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Algorithms/ElementAttributeAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
@@ -26,7 +26,7 @@ namespace Krys::HTML
       // SPEC-VIOLATION(TRUSTED-TYPES): Let verifiedValue be the result of calling get trusted type compliant
       // attribute value with attribute’s local name, attribute’s namespace, element, and value.
 
-      ElementAttributeAlgorithms::Change(attribute, Krys::Move(value));
+      ElementAlgorithms::ChangeAttribute(attribute, Krys::Move(value));
     }
   }
 }

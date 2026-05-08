@@ -1,8 +1,8 @@
 ﻿#include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.HTML/Algorithms/IteratorAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/SlotAssignmentAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
@@ -13,17 +13,19 @@
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/DocumentFragment.hpp"
+#include "Krystal.HTML/Node/DocumentType.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
+#include "Krystal.HTML/Utils/SubtreeRanges.hpp"
 
 namespace Krys::HTML
 {
   ExceptionOr<void> MutationAlgorithms::EnsurePreInsertValidity(Node &node, ContainerNode &parent,
                                                                 RawPtr<Node> child) noexcept
   {
-    if (!parent.IsDocumentNode() && !parent.IsDocumentFragmentNode() && !parent.IsElementNode())
+    if (!IsOneOf<Document, DocumentFragment, Element>(parent))
     {
       return Exception {ExceptionCode::HierarchyRequestError};
     }
@@ -33,24 +35,22 @@ namespace Krys::HTML
       return Exception {ExceptionCode::HierarchyRequestError};
     }
 
-    if (child && child->ParentNode() != &parent)
+    if (child != nullptr && child->ParentNode() != &parent)
     {
       return Exception {ExceptionCode::NotFoundError};
     }
 
-    if (!node.IsDocumentFragmentNode() && !node.IsDocumentTypeNode() && !node.IsElementNode()
-        && !node.IsCharacterDataNode())
+    if (!IsOneOf<DocumentFragment, DocumentType, Element, CharacterData>(node))
     {
       return Exception {ExceptionCode::HierarchyRequestError};
     }
 
-    if ((node.IsTextNode() && parent.IsDocumentNode())
-        || (node.IsDocumentTypeNode() && !parent.IsDocumentNode()))
+    if ((Is<Text>(node) && Is<Document>(parent)) || (Is<DocumentType>(node) && !Is<Document>(parent)))
     {
       return Exception {ExceptionCode::HierarchyRequestError};
     }
 
-    if (parent.IsDocumentNode())
+    if (Is<Document>(parent))
     {
       if (auto *documentFragment = DynamicDowncast<DocumentFragment>(node))
       {
@@ -60,33 +60,33 @@ namespace Krys::HTML
           return Exception {ExceptionCode::HierarchyRequestError};
         }
 
-        if (std::ranges::any_of(ConstChildNodeRange(*documentFragment),
-                                [](auto &c) { return c.IsTextNode(); }))
+        if (std::ranges::any_of(ConstChildNodeRange(*documentFragment), [](auto &c) { return Is<Text>(c); }))
         {
           return Exception {ExceptionCode::HierarchyRequestError};
         }
 
-        if (count && (TreeQueries::HasElementChild(parent) || TreeQueries::IsDocTypeOrDocTypeFollows(child)))
+        if (count == 1
+            && (TreeQueries::HasElementChild(parent) || TreeQueries::IsDocTypeOrDocTypeFollows(child)))
         {
           return Exception {ExceptionCode::HierarchyRequestError};
         }
       }
-      else if (node.IsElementNode())
+      else if (Is<Element>(node))
       {
         if (TreeQueries::HasElementChild(parent) || TreeQueries::IsDocTypeOrDocTypeFollows(child))
         {
           return Exception {ExceptionCode::HierarchyRequestError};
         }
       }
-      else if (node.IsDocumentTypeNode())
+      else if (Is<DocumentType>(node))
       {
-        if (std::ranges::any_of(ChildNodeRange(parent), [](auto &c) { return c.IsDocumentTypeNode(); }))
+        if (std::ranges::any_of(ChildNodeRange(parent), [](auto &c) { return Is<DocumentType>(c); }))
         {
           return Exception {ExceptionCode::HierarchyRequestError};
         }
 
         if (child != nullptr
-            && std::ranges::any_of(PrecedingRange(*child), [](auto &c) { return c.IsElementNode(); }))
+            && std::ranges::any_of(PrecedingRange(*child), [](auto &c) { return Is<Element>(c); }))
         {
           return Exception {ExceptionCode::HierarchyRequestError};
         }
@@ -102,19 +102,20 @@ namespace Krys::HTML
   }
 
   ExceptionOr<Node &> MutationAlgorithms::PreInsert(Node &node, ContainerNode &parent,
-                                                    RawPtr<Node> refChild) noexcept
+                                                    RawPtr<Node> child) noexcept
   {
-    if (auto result = EnsurePreInsertValidity(node, parent, refChild); result.HasException())
+    if (auto result = EnsurePreInsertValidity(node, parent, child); result.HasException())
     {
       return result.ReleaseException();
     }
 
-    if (&node == refChild)
+    auto referenceChild = child;
+    if (&node == referenceChild)
     {
-      refChild = node.NextSibling();
+      referenceChild = node.NextSibling();
     }
 
-    if (auto result = Insert(node, parent, refChild); result.HasException())
+    if (auto result = Insert(node, parent, referenceChild); result.HasException())
     {
       return result.ReleaseException();
     }
@@ -126,7 +127,7 @@ namespace Krys::HTML
                                                SuppressObservers suppressObservers) noexcept
   {
     SmallNodeList nodes;
-    if (node.IsDocumentFragmentNode())
+    if (Is<DocumentFragment>(node))
     {
       TreeQueries::CollectChildNodes(Downcast<ContainerNode>(node), nodes);
     }
@@ -217,9 +218,6 @@ namespace Krys::HTML
         }
       }
 
-      // TODO(fix): i'm not a fan of this tree scope business. think about how to make it better.
-      target->SetTreeScopeRecursively(*parent.OwnerDocument());
-
       if (auto *shadowHost = DynamicDowncast<Element>(parent))
       {
         if (shadowHost->ShadowRoot()
@@ -239,7 +237,7 @@ namespace Krys::HTML
 
       for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(*target))
       {
-        TreeMutationDispatcher::Inserted(inclusiveDescendant);
+        ExtensibilityHooks::Inserted(inclusiveDescendant);
 
         if (!inclusiveDescendant.IsConnected())
         {
@@ -275,7 +273,7 @@ namespace Krys::HTML
                                                       ShareRefPtr(child));
     }
 
-    TreeMutationDispatcher::ChildrenChanged(parent);
+    ExtensibilityHooks::ChildrenChanged(parent);
 
     List<Ref<Node>> staticNodeList;
 
@@ -291,7 +289,7 @@ namespace Krys::HTML
     {
       if (node->IsConnected())
       {
-        TreeMutationDispatcher::PostConnection(*node);
+        ExtensibilityHooks::PostConnection(*node);
       }
     }
 
@@ -463,7 +461,7 @@ namespace Krys::HTML
     for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(node))
     {
       auto isSubtreeRoot = &inclusiveDescendant == &node;
-      TreeMutationDispatcher::Moved(inclusiveDescendant, node, isSubtreeRoot, oldParent);
+      ExtensibilityHooks::Moved(inclusiveDescendant, node, isSubtreeRoot, oldParent);
 
       // TODO(impl):If inclusiveDescendant is custom and newParent is connected, then enqueue a custom element
       // callback reaction with inclusiveDescendant, callback name "connectedMoveCallback", and « ».
@@ -727,7 +725,7 @@ namespace Krys::HTML
       SlotAssignmentAlgorithms::AssignSlottablesForTree(node);
     }
 
-    TreeMutationDispatcher::Removed(node, true, parent);
+    ExtensibilityHooks::Removed(node, true, parent);
 
     // bool isParentConnected = parent.IsConnected();
     // TODO(impl): if node is custom and isParentConnected is true, then enqueue a custom element callback
@@ -735,7 +733,7 @@ namespace Krys::HTML
 
     for (auto &descendant : InclusiveShadowIncludingDescendantRange(node))
     {
-      TreeMutationDispatcher::Removed(descendant, false, parent);
+      ExtensibilityHooks::Removed(descendant, false, parent);
       // TODO(impl): If descendant is custom and isParentConnected is true, then enqueue a custom element
       // callback reaction with descendant, callback name "disconnectedCallback", and « ».
     }
@@ -751,7 +749,7 @@ namespace Krys::HTML
         parent, {}, {ShareRef(node)}, ShareRefPtr(oldPreviousSibling), ShareRefPtr(oldNextSibling));
     }
 
-    TreeMutationDispatcher::ChildrenChanged(parent);
+    ExtensibilityHooks::ChildrenChanged(parent);
 
     return {};
   }
@@ -768,7 +766,7 @@ namespace Krys::HTML
     assert(!node.IsDocumentNode() || &node == document);
 
     auto copy = CloneSingleNode(node, *document, fallbackRegistry);
-    TreeMutationDispatcher::Cloned(node, *copy, subtree);
+    ExtensibilityHooks::Cloned(node, *copy, subtree);
 
     if (parent != nullptr)
     {

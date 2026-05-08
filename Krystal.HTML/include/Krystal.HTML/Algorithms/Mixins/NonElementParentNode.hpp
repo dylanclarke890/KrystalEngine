@@ -8,8 +8,11 @@ namespace Krys::HTML
 {
   class Element;
   class ContainerNode;
+}
 
-  class NonElementParentNodeAlgorithms
+namespace Krys::HTML::Mixins
+{
+  class NonElementParentNode
   {
   public:
     KRYS_NODISCARD static RawPtr<Element> GetElementById(ContainerNode &node, DOMStringView id) noexcept;

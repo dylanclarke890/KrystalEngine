@@ -22,6 +22,7 @@ namespace Krys::HTML
     using Base::Base;
   };
 
+  /// @see https://dom.spec.whatwg.org/#mutation-algorithms
   class MutationAlgorithms
   {
   public:

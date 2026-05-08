@@ -12,28 +12,24 @@ namespace Krys::HTML
   class Attr;
   class Element;
 
-  class ElementAttributeAlgorithms
+  class ElementAlgorithms
   {
   public:
-    /// @see https://dom.spec.whatwg.org/#concept-element-attributes-change-ext
-    static void AttributeChanged(Element &element, DOMStringAtom localName, DOMStringView oldValue,
-                                 DOMStringView value, DOMStringAtom namespaceURI) noexcept;
-
     /// @see https://dom.spec.whatwg.org/#handle-attribute-changes
     static void HandleAttributeChanges(Attr &attribute, Element &element, DOMStringView oldValue,
                                        DOMStringView newValue) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-change
-    static void Change(Attr &attribute, DOMString &&value) noexcept;
+    static void ChangeAttribute(Attr &attribute, DOMString &&value) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-append
-    static void Append(Attr &attribute, Element &element) noexcept;
+    static void AppendAttribute(Attr &attribute, Element &element) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-remove
-    static void Remove(Attr &attribute) noexcept;
+    static void RemoveAttribute(Attr &attribute) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-replace
-    static void Replace(Attr &oldAttribute, Attr &newAttribute) noexcept;
+    static void ReplaceAttribute(Attr &oldAttribute, Attr &newAttribute) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-get-by-name
     KRYS_NODISCARD static RawPtr<Attr> GetAttributeByName(DOMStringAtom qualifiedName,

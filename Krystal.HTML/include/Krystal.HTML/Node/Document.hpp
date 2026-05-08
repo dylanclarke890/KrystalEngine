@@ -3,7 +3,6 @@
 #include "Krystal.HTML/Iterator/NodeIterator.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/RareData/DocumentRareData.hpp"
-#include "Krystal.HTML/Node/TreeScope.hpp"
 #include "Krystal.HTML/Ranges/Range.hpp"
 #include "Krystal.HTML/URL.hpp"
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
@@ -16,7 +15,7 @@ namespace Krys::HTML
   class HTMLCollection;
   class MutationAlgorithms;
 
-  class Document : public ContainerNode, public TreeScope
+  class Document : public ContainerNode
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Document);
 

@@ -20,35 +20,6 @@ namespace Krys::HTML
   class TreeQueries
   {
   public:
-#pragma region Node Trees - https://dom.spec.whatwg.org/#node-trees
-
-    /// @see https://dom.spec.whatwg.org/#concept-node-length
-    KRYS_NODISCARD static size_t Length(Node &node) noexcept;
-
-    /// @see https://dom.spec.whatwg.org/#concept-node-empty
-    KRYS_NODISCARD static bool IsEmpty(Node &node) noexcept;
-
-#pragma endregion
-
-#pragma region Document Trees - https://dom.spec.whatwg.org/#document-trees
-
-    /// @see https://dom.spec.whatwg.org/#in-a-document-tree
-    KRYS_NODISCARD static bool IsInDocumentTree(const Node &node) noexcept;
-
-    /// @see https://dom.spec.whatwg.org/#document-element
-    KRYS_NODISCARD static RawPtr<const Element> DocumentElement(const Node &node) noexcept;
-
-    /// @see https://dom.spec.whatwg.org/#document-element
-    KRYS_NODISCARD static RawPtr<Element> DocumentElement(Node &node) noexcept;
-
-#pragma endregion
-
-#pragma region Shadow Trees - https://dom.spec.whatwg.org/#shadow-trees
-
-    KRYS_NODISCARD static bool IsInShadowTree(const Node &node) noexcept;
-
-#pragma endregion
-
 #pragma region Trees - https://dom.spec.whatwg.org/#trees
 
     /// @see https://dom.spec.whatwg.org/#concept-tree-participate
@@ -87,6 +58,35 @@ namespace Krys::HTML
 
     /// @see https://dom.spec.whatwg.org/#concept-tree-index
     KRYS_NODISCARD static size_t Index(const Node &node) noexcept;
+
+#pragma endregion
+
+#pragma region Node Trees - https://dom.spec.whatwg.org/#node-trees
+
+    /// @see https://dom.spec.whatwg.org/#concept-node-length
+    KRYS_NODISCARD static size_t Length(Node &node) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-node-empty
+    KRYS_NODISCARD static bool IsEmpty(Node &node) noexcept;
+
+#pragma endregion
+
+#pragma region Document Trees - https://dom.spec.whatwg.org/#document-trees
+
+    /// @see https://dom.spec.whatwg.org/#in-a-document-tree
+    KRYS_NODISCARD static bool IsInDocumentTree(const Node &node) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#document-element
+    KRYS_NODISCARD static RawPtr<const Element> DocumentElement(const Node &node) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#document-element
+    KRYS_NODISCARD static RawPtr<Element> DocumentElement(Node &node) noexcept;
+
+#pragma endregion
+
+#pragma region Shadow Trees - https://dom.spec.whatwg.org/#shadow-trees
+
+    KRYS_NODISCARD static bool IsInShadowTree(const Node &node) noexcept;
 
 #pragma endregion
 

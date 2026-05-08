@@ -1,8 +1,8 @@
 ﻿#include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/Mixins/NonElementParentNode.hpp"
+#include "Krystal.HTML/Algorithms/Mixins/ParentNode.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/NonElementParentNodeAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/ParentNodeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
@@ -15,8 +15,7 @@
 
 namespace Krys::HTML
 {
-  Document::Document() noexcept
-      : ContainerNode(*this, NodeType::DOCUMENT_NODE, NodeFlag::IsContainerNode), TreeScope(*this)
+  Document::Document() noexcept : ContainerNode(*this, NodeType::DOCUMENT_NODE, NodeFlag::IsContainerNode)
   {
     SetEventTargetFlag(EventTargetFlag::IsConnected);
   }
@@ -61,8 +60,6 @@ namespace Krys::HTML
       assert(!node.ParentNode());
     }
 
-    node.SetTreeScopeRecursively(*this);
-
     return ShareRef<Node>(node);
   }
 
@@ -102,32 +99,32 @@ namespace Krys::HTML
 
   ExceptionOr<void> Document::Prepend(const List<NodeOrString> &nodes) noexcept
   {
-    return ParentNodeAlgorithms::Prepend(*this, nodes);
+    return Mixins::ParentNode::Prepend(*this, nodes);
   }
 
   ExceptionOr<void> Document::Append(const List<NodeOrString> &nodes) noexcept
   {
-    return ParentNodeAlgorithms::Append(*this, nodes);
+    return Mixins::ParentNode::Append(*this, nodes);
   }
 
   ExceptionOr<void> Document::ReplaceChildren(const List<NodeOrString> &nodes) noexcept
   {
-    return ParentNodeAlgorithms::ReplaceChildren(*this, nodes);
+    return Mixins::ParentNode::ReplaceChildren(*this, nodes);
   }
 
   ExceptionOr<void> Document::MoveBefore(Node &node, RawPtr<Node> refChild) noexcept
   {
-    return ParentNodeAlgorithms::MoveBefore(*this, node, refChild);
+    return Mixins::ParentNode::MoveBefore(*this, node, refChild);
   }
 
   ExceptionOr<RefPtr<Element>> Document::QuerySelector(DOMStringView selectors) noexcept
   {
-    return ParentNodeAlgorithms::QuerySelector(*this, selectors);
+    return Mixins::ParentNode::QuerySelector(*this, selectors);
   }
 
   ExceptionOr<Ref<NodeList>> Document::QuerySelectorAll(DOMStringView selectors) noexcept
   {
-    return ParentNodeAlgorithms::QuerySelectorAll(*this, selectors);
+    return Mixins::ParentNode::QuerySelectorAll(*this, selectors);
   }
 
 #pragma endregion
@@ -136,12 +133,12 @@ namespace Krys::HTML
 
   RefPtr<Element> Document::GetElementById(DOMStringView elementId) noexcept
   {
-    return ShareRefPtr(NonElementParentNodeAlgorithms::GetElementById(*this, elementId));
+    return ShareRefPtr(Mixins::NonElementParentNode::GetElementById(*this, elementId));
   }
 
   RefPtr<const Element> Document::GetElementById(DOMStringView elementId) const noexcept
   {
-    return ShareRefPtr(NonElementParentNodeAlgorithms::GetElementById(*this, elementId));
+    return ShareRefPtr(Mixins::NonElementParentNode::GetElementById(*this, elementId));
   }
 
 #pragma endregion

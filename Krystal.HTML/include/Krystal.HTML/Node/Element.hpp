@@ -17,7 +17,7 @@ namespace Krys::HTML
 {
   class Attr;
   class CustomElementRegistry;
-  class ElementAttributeAlgorithms;
+  class ElementAlgorithms;
   class HTMLCollection;
   class HTMLSlotElement;
   class NamedNodeMap;
@@ -29,7 +29,7 @@ namespace Krys::HTML
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Element);
 
-    friend class ElementAttributeAlgorithms;
+    friend class ElementAlgorithms;
     friend class Node;
     friend class TreeQueries;
 

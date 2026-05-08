@@ -69,7 +69,8 @@ namespace Krys::HTML
   class ContainerNode;
   class Document;
   class Element;
-  class ElementAttributeAlgorithms;
+  class ElementAlgorithms;
+  class ExtensibilityHooks;
   class MutationObserver;
   class Node;
   class NodeList;
@@ -77,7 +78,6 @@ namespace Krys::HTML
   class MutationAlgorithms;
   class TreeMutationDispatcher;
   class TreeQueries;
-  class TreeScope;
 
   struct NodeInsertedContext;
   struct NodeRemovedContext;
@@ -95,7 +95,8 @@ namespace Krys::HTML
 
     friend class ContainerNode;
     friend class Document;
-    friend class ElementAttributeAlgorithms;
+    friend class ElementAlgorithms;
+    friend class ExtensibilityHooks;
     friend class MutationObserver;
     friend class MutationAlgorithms;
     friend class TreeMutationDispatcher;
@@ -109,7 +110,6 @@ namespace Krys::HTML
     CheckedPtr<ContainerNode> _parentNode;
     CheckedPtr<Node> _previousSibling;
     CheckedPtr<Node> _nextSibling;
-    RawPtr<TreeScope> _treeScope;
     UniquePtr<NodeRareData> _nodeRareData;
 
   protected:
@@ -282,19 +282,6 @@ namespace Krys::HTML
 #pragma endregion
 
 #pragma region Tree Scope
-
-    KRYS_NODISCARD TreeScope &GetTreeScope() const noexcept
-    {
-      assert(_treeScope != nullptr);
-      return *_treeScope;
-    }
-
-    void SetTreeScope(TreeScope &treeScope) noexcept
-    {
-      _treeScope = &treeScope;
-    }
-
-    void SetTreeScopeRecursively(TreeScope &newTreeScope) noexcept;
 
     KRYS_NODISCARD bool IsInTreeScope() const noexcept
     {

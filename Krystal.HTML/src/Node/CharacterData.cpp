@@ -1,8 +1,7 @@
 ﻿#include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Algorithms/ChildNodeAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
+#include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
+#include "Krystal.HTML/Algorithms/Mixins/ChildNode.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
@@ -10,6 +9,7 @@
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/Utils/SubtreeRanges.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
 
 namespace Krys::HTML
@@ -108,7 +108,7 @@ namespace Krys::HTML
 
     if (auto parent = ShareRefPtr(ParentNode()))
     {
-      TreeMutationDispatcher::ChildrenChanged(*parent);
+      ExtensibilityHooks::ChildrenChanged(*parent);
     }
 
     return {};
@@ -120,22 +120,22 @@ namespace Krys::HTML
 
   ExceptionOr<void> CharacterData::Before(const List<NodeOrString> &nodes) noexcept
   {
-    return ChildNodeAlgorithms::Before(*this, nodes);
+    return Mixins::ChildNode::Before(*this, nodes);
   }
 
   ExceptionOr<void> CharacterData::After(const List<NodeOrString> &nodes) noexcept
   {
-    return ChildNodeAlgorithms::After(*this, nodes);
+    return Mixins::ChildNode::After(*this, nodes);
   }
 
   ExceptionOr<void> CharacterData::ReplaceWith(const List<NodeOrString> &nodes) noexcept
   {
-    return ChildNodeAlgorithms::ReplaceWith(*this, nodes);
+    return Mixins::ChildNode::ReplaceWith(*this, nodes);
   }
 
   ExceptionOr<void> CharacterData::Remove() noexcept
   {
-    return ChildNodeAlgorithms::Remove(*this);
+    return Mixins::ChildNode::Remove(*this);
   }
 
 #pragma endregion

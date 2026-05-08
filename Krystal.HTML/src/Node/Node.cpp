@@ -22,8 +22,7 @@ namespace Krys::HTML
 {
   Node::Node(Document &document, HTML::NodeType type, NodeFlag flags) noexcept
       : EventTarget(EventTargetFlag::IsNode), _nodeType(type), _ownerDocument(ShareRefPtr(&document)),
-        _parentNode(nullptr), _previousSibling(nullptr), _nextSibling(nullptr),
-        _treeScope((IsDocumentNode() || IsShadowRootNode()) ? nullptr : &document)
+        _parentNode(nullptr), _previousSibling(nullptr), _nextSibling(nullptr)
   {
     _flags = flags;
   }
@@ -530,20 +529,9 @@ namespace Krys::HTML
 
 #pragma endregion
 
-  void Node::SetTreeScopeRecursively(TreeScope &newTreeScope) noexcept
-  {
-    assert(!IsDocumentNode());
-    if (_treeScope != &newTreeScope)
-    {
-      // TODO(impl):
-      // Ref<TreeScope> oldTreeScope = CreateRef<TreeScope>(*_treeScope);
-      //  MoveTreeToNewScope(*this, oldTreeScope, newTreeScope);
-    }
-  }
-
   List<Ref<RegisteredObserver>> &Node::RegisteredObserverList() noexcept
   {
-    if (!_nodeRareData)
+    if (_nodeRareData == nullptr)
     {
       _nodeRareData = CreateUnique<NodeRareData>();
     }
@@ -553,7 +541,7 @@ namespace Krys::HTML
 
   List<Ref<TransientRegisteredObserver>> &Node::TransientRegisteredObservers() noexcept
   {
-    if (!_nodeRareData)
+    if (_nodeRareData == nullptr)
     {
       _nodeRareData = CreateUnique<NodeRareData>();
     }

@@ -1,14 +1,16 @@
 ﻿#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
+#include "Krystal.HTML/Utils/SubtreeRanges.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Events/EventTarget.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Namespaces.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
+#include "Krystal.HTML/Node/CDATASection.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/Node/DocumentType.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
@@ -18,69 +20,7 @@
 
 namespace Krys::HTML
 {
-#pragma region Node Trees - https://dom.spec.whatwg.org/#node-trees
-
-  size_t TreeQueries::Length(Node &node) noexcept
-  {
-    if (node.IsDocumentTypeNode() || node.IsAttributeNode())
-    {
-      return 0;
-    }
-
-    if (auto *characterData = DynamicDowncast<CharacterData>(node))
-    {
-      return characterData->Data().size();
-    }
-
-    return node.CountChildNodes();
-  }
-
-  bool TreeQueries::IsEmpty(Node &node) noexcept
-  {
-    return Length(node) == 0;
-  }
-
-#pragma endregion
-
-#pragma region Document Trees
-
-  bool TreeQueries::IsInDocumentTree(const Node &node) noexcept
-  {
-    return Is<Document>(Root(node));
-  }
-
-  RawPtr<const Element> TreeQueries::DocumentElement(const Node &node) noexcept
-  {
-    if (auto *document = DynamicDowncast<Document>(Root(node)))
-    {
-      return TreeTraversal::FirstElementChild(*document);
-    }
-
-    return nullptr;
-  }
-
-  RawPtr<Element> TreeQueries::DocumentElement(Node &node) noexcept
-  {
-    if (auto *document = DynamicDowncast<Document>(Root(node)))
-    {
-      return TreeTraversal::FirstElementChild(*document);
-    }
-
-    return nullptr;
-  }
-
-#pragma endregion
-
-#pragma region Shadow Trees
-
-  bool TreeQueries::IsInShadowTree(const Node &node) noexcept
-  {
-    return Is<ShadowRoot>(Root(node));
-  }
-
-#pragma endregion
-
-#pragma region Trees
+#pragma region Trees - https://dom.spec.whatwg.org/#trees
 
   bool TreeQueries::IsParent(const Node &a, const Node &b) noexcept
   {
@@ -94,21 +34,11 @@ namespace Krys::HTML
 
   const Node &TreeQueries::Root(const Node &node) noexcept
   {
-    if (node.IsInTreeScope())
-    {
-      return node.GetTreeScope().RootNode();
-    }
-
     return TreeTraversal::Root(node);
   }
 
   Node &TreeQueries::Root(Node &node) noexcept
   {
-    if (node.IsInTreeScope())
-    {
-      return node.GetTreeScope().RootNode();
-    }
-
     return TreeTraversal::Root(node);
   }
 
@@ -179,7 +109,69 @@ namespace Krys::HTML
 
 #pragma endregion
 
-#pragma region ShadowRoot
+#pragma region Node Trees - https://dom.spec.whatwg.org/#node-trees
+
+  size_t TreeQueries::Length(Node &node) noexcept
+  {
+    if (Is<DocumentType>(node) || Is<Attr>(node))
+    {
+      return 0;
+    }
+
+    if (auto *characterData = DynamicDowncast<CharacterData>(node))
+    {
+      return characterData->Data().size();
+    }
+
+    return node.CountChildNodes();
+  }
+
+  bool TreeQueries::IsEmpty(Node &node) noexcept
+  {
+    return Length(node) == 0;
+  }
+
+#pragma endregion
+
+#pragma region Document Trees - https://dom.spec.whatwg.org/#document-trees
+
+  bool TreeQueries::IsInDocumentTree(const Node &node) noexcept
+  {
+    return Is<Document>(Root(node));
+  }
+
+  RawPtr<const Element> TreeQueries::DocumentElement(const Node &node) noexcept
+  {
+    if (auto *document = DynamicDowncast<Document>(Root(node)))
+    {
+      return TreeTraversal::FirstElementChild(*document);
+    }
+
+    return nullptr;
+  }
+
+  RawPtr<Element> TreeQueries::DocumentElement(Node &node) noexcept
+  {
+    if (auto *document = DynamicDowncast<Document>(Root(node)))
+    {
+      return TreeTraversal::FirstElementChild(*document);
+    }
+
+    return nullptr;
+  }
+
+#pragma endregion
+
+#pragma region Shadow Trees - https://dom.spec.whatwg.org/#shadow-trees
+
+  bool TreeQueries::IsInShadowTree(const Node &node) noexcept
+  {
+    return Is<ShadowRoot>(Root(node));
+  }
+
+#pragma endregion
+
+#pragma region ShadowRoot - https://dom.spec.whatwg.org/#interface-shadowroot
 
   const Node &TreeQueries::ShadowIncludingRoot(const Node &node) noexcept
   {
@@ -281,19 +273,19 @@ namespace Krys::HTML
         return nullptr;
       }
 
-      if (!current->IsNode())
+      if (!Is<Node>(current))
       {
         return current;
       }
 
       auto *currentNode = Downcast<Node>(current);
       auto &currentRoot = Root(*currentNode);
-      if (!currentNode->IsShadowRootNode())
+      if (!Is<ShadowRoot>(currentNode))
       {
         return current;
       }
 
-      if (bNode && !IsShadowIncludingInclusiveAncestor(currentRoot, *bNode))
+      if (bNode != nullptr && !IsShadowIncludingInclusiveAncestor(currentRoot, *bNode))
       {
         return current;
       }
@@ -330,7 +322,7 @@ namespace Krys::HTML
 
   bool TreeQueries::IsShadowHost(const Node &node) noexcept
   {
-    if (!node.IsElementNode())
+    if (!Is<Element>(node))
     {
       return false;
     }
@@ -353,7 +345,7 @@ namespace Krys::HTML
 
     for (auto &attribute : element._attributes)
     {
-      if (attribute->Prefix() == u8"xmlns" && attribute->Value() == namespaceURI)
+      if (attribute->Prefix() == Namespaces::XMLNSPrefix && attribute->Value() == namespaceURI)
       {
         return attribute->LocalName();
       }
@@ -464,7 +456,7 @@ namespace Krys::HTML
 
   bool TreeQueries::IsConnectedInSameTreeScope(const Node &a, const Node &b) noexcept
   {
-    return a.IsConnected() == b.IsConnected() && &a.GetTreeScope() == &b.GetTreeScope();
+    return a.IsConnected() == b.IsConnected() && &Root(a) == &Root(b);
   }
 
   bool TreeQueries::IsDocTypeOrDocTypeFollows(RawPtr<Node> node) noexcept
@@ -474,17 +466,17 @@ namespace Krys::HTML
       return false;
     }
 
-    if (node->IsDocumentTypeNode())
+    if (Is<DocumentType>(node))
     {
       return true;
     }
 
-    return std::ranges::any_of(ConstFollowingRange(*node), [](auto &c) { return c.IsDocumentTypeNode(); });
+    return std::ranges::any_of(ConstFollowingRange(*node), [](auto &c) { return Is<DocumentType>(c); });
   }
 
   bool TreeQueries::IsExclusiveTextNode(const Node &node) noexcept
   {
-    return node.IsTextNode() && !node.IsCDATASectionNode();
+    return Is<Text>(node) && !Is<CDATASection>(node);
   }
 
   RefPtr<ShadowRoot> TreeQueries::GetShadowRoot(const Node &node) noexcept
@@ -591,8 +583,7 @@ namespace Krys::HTML
     }
 
     DOMString content;
-    for (RawPtr<const Node> current = start; current && current->IsTextNode();
-         current = current->NextSibling())
+    for (RawPtr<const Node> current = start; current && Is<Text>(current); current = current->NextSibling())
     {
       content += *Downcast<Text>(current)->TextContent();
     }

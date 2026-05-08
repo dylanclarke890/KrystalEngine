@@ -1,10 +1,11 @@
 ﻿#include "Krystal.HTML/Node/DocumentType.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Algorithms/ChildNodeAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/Mixins/ChildNode.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 
 namespace Krys::HTML
@@ -20,22 +21,22 @@ namespace Krys::HTML
 
   ExceptionOr<void> DocumentType::Before(const List<NodeOrString> &nodes) noexcept
   {
-    return ChildNodeAlgorithms::Before(*this, nodes);
+    return Mixins::ChildNode::Before(*this, nodes);
   }
 
   ExceptionOr<void> DocumentType::After(const List<NodeOrString> &nodes) noexcept
   {
-    return ChildNodeAlgorithms::After(*this, nodes);
+    return Mixins::ChildNode::After(*this, nodes);
   }
 
   ExceptionOr<void> DocumentType::ReplaceWith(const List<NodeOrString> &nodes) noexcept
   {
-    return ChildNodeAlgorithms::ReplaceWith(*this, nodes);
+    return Mixins::ChildNode::ReplaceWith(*this, nodes);
   }
 
   ExceptionOr<void> DocumentType::Remove() noexcept
   {
-    return ChildNodeAlgorithms::Remove(*this);
+    return Mixins::ChildNode::Remove(*this);
   }
 
 #pragma endregion

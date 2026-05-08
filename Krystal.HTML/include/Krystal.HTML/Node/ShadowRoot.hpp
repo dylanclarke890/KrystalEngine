@@ -3,7 +3,6 @@
 #include "Krystal.HTML/Node/DocumentFragment.hpp"
 #include "Krystal.HTML/Node/Enums/ShadowRootMode.hpp"
 #include "Krystal.HTML/Node/Enums/SlotAssignmentMode.hpp"
-#include "Krystal.HTML/Node/TreeScope.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
@@ -15,7 +14,7 @@ namespace Krys::HTML
   class Element;
   class CustomElementRegistry;
 
-  class ShadowRoot : public DocumentFragment, public TreeScope
+  class ShadowRoot : public DocumentFragment
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ShadowRoot);
 

@@ -1,5 +1,6 @@
-﻿#include "Krystal.HTML/Algorithms/ElementAttributeAlgorithms.hpp"
+﻿#include "Krystal.HTML/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
@@ -8,14 +9,7 @@
 
 namespace Krys::HTML
 {
-  void ElementAttributeAlgorithms::AttributeChanged(Element &element, DOMStringAtom localName,
-                                                    DOMStringView oldValue, DOMStringView value,
-                                                    DOMStringAtom namespaceURI) noexcept
-  {
-    // TODO(impl): Implement this method
-  }
-
-  void ElementAttributeAlgorithms::HandleAttributeChanges(Attr &attribute, Element &element,
+  void ElementAlgorithms::HandleAttributeChanges(Attr &attribute, Element &element,
                                                           DOMStringView oldValue,
                                                           DOMStringView newValue) noexcept
   {
@@ -26,10 +20,11 @@ namespace Krys::HTML
     // callback name "attributeChangedCallback", and « attribute’s local name, oldValue, newValue, attribute’s
     // namespace ».
 
-    AttributeChanged(element, attribute.LocalName(), oldValue, attribute.Value(), attribute.NamespaceURI());
+    ExtensibilityHooks::AttributeChanged(element, attribute.LocalName(), oldValue, attribute.Value(),
+                                         attribute.NamespaceURI());
   }
 
-  void ElementAttributeAlgorithms::Change(Attr &attribute, DOMString &&value) noexcept
+  void ElementAlgorithms::ChangeAttribute(Attr &attribute, DOMString &&value) noexcept
   {
     DOMString &&oldValue = Krys::Move(attribute._value);
 
@@ -38,7 +33,7 @@ namespace Krys::HTML
     HandleAttributeChanges(attribute, *attribute._ownerElement, oldValue, attribute._value);
   }
 
-  void ElementAttributeAlgorithms::Append(Attr &attribute, Element &element) noexcept
+  void ElementAlgorithms::AppendAttribute(Attr &attribute, Element &element) noexcept
   {
     element._attributes.push_back(ShareRef(attribute));
 
@@ -48,7 +43,7 @@ namespace Krys::HTML
     HandleAttributeChanges(attribute, element, {}, attribute._value);
   }
 
-  void ElementAttributeAlgorithms::Remove(Attr &attribute) noexcept
+  void ElementAlgorithms::RemoveAttribute(Attr &attribute) noexcept
   {
     assert(attribute._ownerElement);
     RefPtr<Element> element = attribute._ownerElement.lock();
@@ -64,7 +59,7 @@ namespace Krys::HTML
     HandleAttributeChanges(attribute, *element, attribute._value, {});
   }
 
-  void ElementAttributeAlgorithms::Replace(Attr &oldAttribute, Attr &newAttribute) noexcept
+  void ElementAlgorithms::ReplaceAttribute(Attr &oldAttribute, Attr &newAttribute) noexcept
   {
     assert(oldAttribute._ownerElement);
     RefPtr<Element> element = oldAttribute._ownerElement.lock();
@@ -81,7 +76,7 @@ namespace Krys::HTML
     HandleAttributeChanges(oldAttribute, *element, oldAttribute._value, newAttribute._value);
   }
 
-  RawPtr<Attr> ElementAttributeAlgorithms::GetAttributeByName(DOMStringAtom qualifiedName,
+  RawPtr<Attr> ElementAlgorithms::GetAttributeByName(DOMStringAtom qualifiedName,
                                                               const Element &element) noexcept
   {
     // TODO(impl): If element is in the HTML namespace and its node document is an HTML document, then set
@@ -92,7 +87,7 @@ namespace Krys::HTML
     return it != element._attributes.end() ? it->get() : nullptr;
   }
 
-  RawPtr<Attr> ElementAttributeAlgorithms::GetAttributeByNamespace(DOMStringAtom namespaceURI,
+  RawPtr<Attr> ElementAlgorithms::GetAttributeByNamespace(DOMStringAtom namespaceURI,
                                                                    DOMStringAtom localName,
                                                                    const Element &element) noexcept
   {
@@ -107,7 +102,7 @@ namespace Krys::HTML
     return it != element._attributes.end() ? it->get() : nullptr;
   }
 
-  DOMString ElementAttributeAlgorithms::GetAttributeValue(const Element &element, DOMStringAtom localName,
+  DOMString ElementAlgorithms::GetAttributeValue(const Element &element, DOMStringAtom localName,
                                                           DOMStringAtom namespaceURI) noexcept
   {
     RawPtr<Attr> attr = GetAttributeByNamespace(namespaceURI, localName, element);
@@ -119,7 +114,7 @@ namespace Krys::HTML
     return attr->Value();
   }
 
-  ExceptionOr<RefPtr<Attr>> ElementAttributeAlgorithms::SetAttribute(Attr &attr, Element &element) noexcept
+  ExceptionOr<RefPtr<Attr>> ElementAlgorithms::SetAttribute(Attr &attr, Element &element) noexcept
   {
     // SPEC-VIOLATION(TRUSTED-TYPES): Let verifiedValue be the result of calling get trusted type compliant
     // attribute value with attr’s local name, attr’s namespace, element, and attr’s value.
@@ -139,52 +134,53 @@ namespace Krys::HTML
 
     if (oldAttr != nullptr)
     {
-      Replace(*oldAttr, attr);
+      ReplaceAttribute(*oldAttr, attr);
     }
     else
     {
-      Append(attr, element);
+      AppendAttribute(attr, element);
     }
 
     return ShareRefPtr(oldAttr);
   }
 
-  void ElementAttributeAlgorithms::SetAttributeValue(Element &element, DOMStringAtom localName,
+  void ElementAlgorithms::SetAttributeValue(Element &element, DOMStringAtom localName,
                                                      DOMString &&value, DOMStringAtom prefix,
                                                      DOMStringAtom namespaceURI) noexcept
   {
     RawPtr<Attr> attribute = GetAttributeByNamespace(namespaceURI, localName, element);
     if (attribute == nullptr)
     {
-      auto attr = CreateRef<Attr>(element.NodeDocument(), QualifiedName {localName, prefix, namespaceURI}, Krys::Move(value));
-      Append(*attr, element);
+      auto attr = CreateRef<Attr>(element.NodeDocument(), QualifiedName {localName, prefix, namespaceURI},
+                                  Krys::Move(value));
+      AppendAttribute(*attr, element);
     }
     else
     {
-      Change(*attribute, Krys::Move(value));
+      ChangeAttribute(*attribute, Krys::Move(value));
     }
   }
 
-  RefPtr<Attr> ElementAttributeAlgorithms::RemoveAttributeByName(DOMStringAtom qualifiedName,
+  RefPtr<Attr> ElementAlgorithms::RemoveAttributeByName(DOMStringAtom qualifiedName,
                                                                  Element &element) noexcept
   {
     RawPtr<Attr> attr = GetAttributeByName(qualifiedName, element);
     if (attr != nullptr)
     {
-      Remove(*attr);
+      RemoveAttribute(*attr);
     }
 
     return ShareRefPtr(attr);
   }
 
-  RefPtr<Attr> ElementAttributeAlgorithms::RemoveAttributeByNamespace(DOMStringAtom namespaceURI,
+  RefPtr<Attr> ElementAlgorithms::RemoveAttributeByNamespace(DOMStringAtom namespaceURI,
                                                                       DOMStringAtom localName,
                                                                       Element &element) noexcept
   {
     RawPtr<Attr> attr = GetAttributeByNamespace(namespaceURI, localName, element);
     if (attr != nullptr)
     {
-      Remove(*attr);
+      RemoveAttribute(*attr);
     }
 
     return ShareRefPtr(attr);

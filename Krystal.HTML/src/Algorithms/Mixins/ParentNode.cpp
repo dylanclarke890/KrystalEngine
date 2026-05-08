@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Algorithms/ParentNodeAlgorithms.hpp"
+﻿#include "Krystal.HTML/Algorithms/Mixins/ParentNode.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
@@ -11,10 +11,9 @@
 #include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 
-namespace Krys::HTML
+namespace Krys::HTML::Mixins
 {
-  ExceptionOr<void> ParentNodeAlgorithms::Prepend(ContainerNode &parent,
-                                                  const List<NodeOrString> &nodes) noexcept
+  ExceptionOr<void> ParentNode::Prepend(ContainerNode &parent, const List<NodeOrString> &nodes) noexcept
   {
     auto node = MutationAlgorithms::ConvertNodesIntoNode(nodes, parent.NodeDocument());
     if (node.HasException())
@@ -31,8 +30,7 @@ namespace Krys::HTML
     return {};
   }
 
-  ExceptionOr<void> ParentNodeAlgorithms::Append(ContainerNode &parent,
-                                                 const List<NodeOrString> &nodes) noexcept
+  ExceptionOr<void> ParentNode::Append(ContainerNode &parent, const List<NodeOrString> &nodes) noexcept
   {
     auto node = MutationAlgorithms::ConvertNodesIntoNode(nodes, parent.NodeDocument());
     if (node.HasException())
@@ -48,8 +46,8 @@ namespace Krys::HTML
     return {};
   }
 
-  ExceptionOr<void> ParentNodeAlgorithms::ReplaceChildren(ContainerNode &parent,
-                                                          const List<NodeOrString> &nodes) noexcept
+  ExceptionOr<void> ParentNode::ReplaceChildren(ContainerNode &parent,
+                                                const List<NodeOrString> &nodes) noexcept
   {
     auto node = MutationAlgorithms::ConvertNodesIntoNode(nodes, parent.NodeDocument());
     if (node.HasException())
@@ -66,8 +64,7 @@ namespace Krys::HTML
     return MutationAlgorithms::ReplaceAll(node.Value().get(), parent);
   }
 
-  ExceptionOr<void> ParentNodeAlgorithms::MoveBefore(ContainerNode &parent, Node &node,
-                                                     RawPtr<Node> refChild) noexcept
+  ExceptionOr<void> ParentNode::MoveBefore(ContainerNode &parent, Node &node, RawPtr<Node> refChild) noexcept
   {
     if (refChild == &node)
     {
@@ -77,15 +74,15 @@ namespace Krys::HTML
     return MutationAlgorithms::Move(node, parent, refChild);
   }
 
-  ExceptionOr<RefPtr<Element>> ParentNodeAlgorithms::QuerySelector(ContainerNode &parent,
-                                                                   DOMStringView selectors) noexcept
+  ExceptionOr<RefPtr<Element>> ParentNode::QuerySelector(ContainerNode &parent,
+                                                         DOMStringView selectors) noexcept
   {
     // TODO(impl): implement this when we have css parsing.
     return Exception {ExceptionCode::NotSupportedError};
   }
 
-  ExceptionOr<Ref<NodeList>> ParentNodeAlgorithms::QuerySelectorAll(ContainerNode &parent,
-                                                                    DOMStringView selectors) noexcept
+  ExceptionOr<Ref<NodeList>> ParentNode::QuerySelectorAll(ContainerNode &parent,
+                                                          DOMStringView selectors) noexcept
   {
     // TODO(impl): implement this when we have css parsing.
     return Exception {ExceptionCode::NotSupportedError};

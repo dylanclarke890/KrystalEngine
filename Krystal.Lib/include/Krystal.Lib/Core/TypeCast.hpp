@@ -62,6 +62,12 @@ namespace Krys
     return source && TypeCastTraits<const Target, const Source>::IsOfType(*source);
   }
 
+  template <typename... Ts, typename Source>
+  KRYS_NODISCARD constexpr inline bool IsOneOf(const Source &source) noexcept
+  {
+    return (Is<Ts>(source) || ...);
+  }
+
   template <typename Target, typename Source>
   KRYS_NODISCARD constexpr inline decltype(auto) Downcast(Source &source) noexcept
   {

@@ -7,6 +7,7 @@
 
 namespace Krys::HTML
 {
+  class ExtensibilityHooks;
   class MutationAlgorithms;
   class TreeMutationDispatcher;
 
@@ -14,6 +15,7 @@ namespace Krys::HTML
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ContainerNode);
 
+    friend class ExtensibilityHooks;
     friend class MutationAlgorithms;
     friend class TreeMutationDispatcher;
 

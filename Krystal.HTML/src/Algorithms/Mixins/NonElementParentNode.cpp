@@ -1,16 +1,16 @@
-﻿#include "Krystal.HTML/Algorithms/NonElementParentNodeAlgorithms.hpp"
+﻿#include "Krystal.HTML/Algorithms/Mixins/NonElementParentNode.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
+#include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
+#include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/Utils/SubtreeRanges.hpp"
 
-namespace Krys::HTML
+namespace Krys::HTML::Mixins
 {
-  RawPtr<Element> NonElementParentNodeAlgorithms::GetElementById(ContainerNode &node,
-                                                                 DOMStringView id) noexcept
+  RawPtr<Element> NonElementParentNode::GetElementById(ContainerNode &node, DOMStringView id) noexcept
   {
     auto descendants = DescendantRange(node);
 
@@ -27,8 +27,8 @@ namespace Krys::HTML
     return it != std::ranges::end(descendants) ? DynamicDowncast<Element>(&*it) : nullptr;
   }
 
-  RawPtr<const Element> NonElementParentNodeAlgorithms::GetElementById(const ContainerNode &node,
-                                                                       DOMStringView id) noexcept
+  RawPtr<const Element> NonElementParentNode::GetElementById(const ContainerNode &node,
+                                                             DOMStringView id) noexcept
   {
     auto descendants = ConstDescendantRange(node);
 
