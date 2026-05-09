@@ -30,6 +30,6 @@ namespace Krys::HTML
 
     void Disconnect() noexcept;
 
-    KRYS_NODISCARD List<Ref<MutationRecord>> TakeRecords() noexcept;
+    KRYS_NODISCARD RecordQueue TakeRecords() noexcept;
   };
 }

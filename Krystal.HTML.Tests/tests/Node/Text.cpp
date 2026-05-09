@@ -6,6 +6,7 @@
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
+#include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include <catch_all.hpp>
 
@@ -17,7 +18,7 @@ namespace Krys::Tests
   {
     auto doc = CreateRef<Document>();
     auto textNode = CreateRef<Krys::HTML::Text>(*doc, u8"Hello, world!");
-    
+
     auto splitResult = textNode->SplitText(7);
     REQUIRE_FALSE(splitResult.HasException());
 

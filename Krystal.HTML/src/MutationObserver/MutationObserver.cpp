@@ -7,6 +7,7 @@
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
+#include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
 
@@ -31,18 +32,18 @@ namespace Krys::HTML
       options.CharacterData = true;
     }
 
-    if (!options.ChildList && !(*options.Attributes) && !(*options.CharacterData))
+    if (!options.ChildList && !options.Attributes.value_or(false) && !options.CharacterData.value_or(false))
     {
       return Exception {ExceptionCode::TypeError};
     }
 
     if ((options.AttributeOldValue == true || options.AttributeFilter.has_value())
-        && options.Attributes == false)
+        && !options.Attributes.value_or(false))
     {
       return Exception {ExceptionCode::TypeError};
     }
 
-    if (options.CharacterDataOldValue == true && options.CharacterData == false)
+    if (options.CharacterDataOldValue == true && !options.CharacterData.value_or(false))
     {
       return Exception {ExceptionCode::TypeError};
     }
@@ -53,10 +54,10 @@ namespace Krys::HTML
       {
         for (auto &n : _nodes)
         {
-          if (auto node = ShareRefPtr(n.get()))
+          if (auto node = n.lock())
           {
             std::erase_if(node->TransientRegisteredObservers(),
-                          [source = registered](Ref<TransientRegisteredObserver> &observer)
+                          [source = registered.get()](Ref<TransientRegisteredObserver> &observer)
                           { return observer->Source() == source; });
           }
         }
@@ -68,7 +69,7 @@ namespace Krys::HTML
 
     Ref<RegisteredObserver> registered = CreateRef<RegisteredObserver>(ShareRef(*this), options);
     target.RegisteredObserverList().emplace_back(Krys::Move(registered));
-    _nodes.emplace_back(ShareRef(target));
+    _nodes.emplace_back(CreateWeakRef(target));
 
     return {};
   }
@@ -77,7 +78,7 @@ namespace Krys::HTML
   {
     for (auto &n : _nodes)
     {
-      if (auto node = ShareRefPtr(n.get()))
+      if (auto node = n.lock())
       {
         std::erase_if(node->RegisteredObserverList(), [self = this](Ref<RegisteredObserver> &observer)
                       { return observer->Observer() == self; });
@@ -86,7 +87,7 @@ namespace Krys::HTML
     _recordQueue.clear();
   }
 
-  List<Ref<MutationRecord>> MutationObserver::TakeRecords() noexcept
+  MutationObserver::RecordQueue MutationObserver::TakeRecords() noexcept
   {
     RecordQueue records = _recordQueue;
     _recordQueue.clear();

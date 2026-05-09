@@ -17,7 +17,7 @@ Source: https://dom.spec.whatwg.org
     Implementation: None
     Test Coverage : None
     Notes         :
-        - Requires CSS parsing
+        - Implementation: scope-match-a-selectors-string requires CSS parsing.
 
 ======================================================================
 2. EVENTS
@@ -27,7 +27,7 @@ Source: https://dom.spec.whatwg.org
     Implementation: Full
     Test Coverage : Partial
     Notes         :
-        - Missing tests for composedPath, target, currentTarget & relatedTarget.
+        - Test Coverage: Missing tests for composedPath, target, currentTarget and relatedTarget.
 
 2.9 Dispatching events
     Implementation: Full
@@ -94,7 +94,7 @@ Source: https://dom.spec.whatwg.org
     Implementation: Partial
     Test Coverage : None
     Notes         : 
-        - Missing QuerySelector && QuerySelectorAll (requires CSS parsing).
+        - Implementation: QuerySelector and QuerySelectorAll require CSS parsing.
 
 4.2.7 Mixin NonDocumentTypeChildNode
     Implementation: Full
@@ -112,22 +112,32 @@ Source: https://dom.spec.whatwg.org
     Implementation: Partial
     Test Coverage : None
     Notes         : 
-        - namedItem/named index requires implementing element/attr first.
+        - Implementation: namedItem/named index requires implementing element/attr first.
 
 4.3 Mutation observers
     Implementation: None
     Test Coverage : None
+    Notes         : 
+        - Implementation: Queue mutation observer microtask.
+        - Implementation: Notify mutation observers.
 
 4.3.1 Interface MutationObserver
     Implementation: Full
-    Test Coverage : None
+    Test Coverage : Partial
+    Notes         : 
+        - Test Coverage: for observing attribute changes, including attribute old value and attribute namespace.
+        - Test Coverage: for observing character data changes, including character data old value.
+        - Test Coverage: for observing child list changes, including added/removed nodes and previous/next sibling.
+        - Test Coverage: for observing subtree changes.
+        - Test Coverage: for disconnecting observers and ensuring they no longer receive notifications.
+        - Test Coverage: for taking records and ensuring they are cleared from the observer's record queue.
 
 4.3.2 Queuing a mutation record
     Implementation: None
     Test Coverage : None
 
 4.3.3 Interface MutationRecord
-    Implementation: None
+    Implementation: Full
     Test Coverage : None
 
 4.4 Interface Node

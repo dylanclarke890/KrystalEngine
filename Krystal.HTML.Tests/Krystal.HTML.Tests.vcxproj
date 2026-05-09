@@ -167,6 +167,7 @@
     <ClCompile Include="tests\Loader\TextResourceDecoder.cpp" />
     <ClCompile Include="tests\Algorithms\NameValidation.cpp" />
     <ClCompile Include="tests\Mixins.cpp" />
+    <ClCompile Include="tests\MutationObserver\MutationObserver.cpp" />
     <ClCompile Include="tests\Node\Attr.cpp" />
     <ClCompile Include="tests\Node\CDATASection.cpp" />
     <ClCompile Include="tests\Node\CharacterData.cpp" />

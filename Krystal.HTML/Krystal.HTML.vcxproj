@@ -53,8 +53,10 @@
     <ClInclude Include="include\Krystal.HTML\Iterator\FilterResult.hpp" />
     <ClInclude Include="include\Krystal.HTML\Iterator\WhatToShow.hpp" />
     <ClInclude Include="include\Krystal.HTML\Iterator\_detail\IteratorBase.hpp" />
+    <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationRecordType.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationCallback.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationObserverInit.hpp" />
+    <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationRecordType.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\RegisteredObserver.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\TransientRegisteredObserver.hpp" />
     <ClInclude Include="include\Krystal.HTML\Namespaces.hpp" />
@@ -78,10 +80,6 @@
     <ClInclude Include="include\Krystal.HTML\Iterator\NodeIterator.hpp" />
     <ClInclude Include="include\Krystal.HTML\Iterator\TreeWalker.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationObserver.hpp" />
-    <ClInclude Include="include\Krystal.HTML\MutationObserver\AttributesMutationRecord.hpp" />
-    <ClInclude Include="include\Krystal.HTML\MutationObserver\CharacterDataMutationRecord.hpp" />
-    <ClInclude Include="include\Krystal.HTML\MutationObserver\TreeMutationRecord.hpp" />
-    <ClInclude Include="include\Krystal.HTML\MutationObserver\detail\EmptyNodeMutationRecord.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationRecord.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\HTMLCollection.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Attr.hpp" />
@@ -168,6 +166,7 @@
     <ClCompile Include="src\Events\EventPath.cpp" />
     <ClCompile Include="src\Iterator\NodeIterator.cpp" />
     <ClCompile Include="src\Iterator\TreeWalker.cpp" />
+    <ClCompile Include="src\MutationObserver\MutationRecord.cpp" />
     <ClCompile Include="src\Node\NamedNodeMap.cpp" />
     <ClCompile Include="src\Algorithms\Mixins\NonElementParentNode.cpp" />
     <ClCompile Include="src\Ranges\Range.cpp" />
@@ -176,11 +175,7 @@
     <ClCompile Include="src\Node\HTMLCollection.cpp" />
     <ClCompile Include="src\Node\RareData\NodeRareData.cpp" />
     <ClCompile Include="src\Algorithms\MutationAlgorithms.cpp" />
-    <ClCompile Include="src\MutationObserver\AttributesMutationRecord.cpp" />
-    <ClCompile Include="src\MutationObserver\CharacterDataMutationRecord.cpp" />
-    <ClCompile Include="src\MutationObserver\detail\EmptyNodeMutationRecord.cpp" />
     <ClCompile Include="src\Node\NodeList.cpp" />
-    <ClCompile Include="src\MutationObserver\TreeMutationRecord.cpp" />
     <ClCompile Include="src\Algorithms\TreeQueries.cpp" />
     <ClCompile Include="src\Algorithms\TreeMutationDispatcher.cpp" />
     <ClCompile Include="src\Node\ShadowRoot.cpp" />

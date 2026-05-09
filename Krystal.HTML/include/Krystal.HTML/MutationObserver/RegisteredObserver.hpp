@@ -15,7 +15,7 @@ namespace Krys::HTML
     MutationObserverInit _options;
 
   public:
-    RegisteredObserver(Ref<MutationObserver> observer, const MutationObserverInit &options) noexcept
+    RegisteredObserver(Ref<MutationObserver> &&observer, const MutationObserverInit &options) noexcept
         : _observer(Krys::Move(observer)), _options(options)
     {
     }
@@ -30,7 +30,7 @@ namespace Krys::HTML
       return _options;
     }
 
-    void SetOptions(const MutationObserverInit& options) noexcept
+    void SetOptions(const MutationObserverInit &options) noexcept
     {
       _options = options;
     }

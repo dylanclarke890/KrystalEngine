@@ -7,6 +7,7 @@
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/DocumentType.hpp"
+#include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include <catch_all.hpp>
@@ -353,20 +354,20 @@ namespace Krys::Tests
     }
 
     // TODO(impl): uncomment this once document has AdoptNode implemented properly.
-    //SECTION("Inserting a node from another Document adopts the node into the new Document")
+    // SECTION("Inserting a node from another Document adopts the node into the new Document")
     //{
     //  auto otherDocument = CreateRef<Document>();
     //  auto element = CreateRef<TestElement>(*otherDocument);
 
-    //  REQUIRE(&element->NodeDocument() == otherDocument.get());
-    //  REQUIRE_FALSE(element->IsConnected());
+    // REQUIRE(&element->NodeDocument() == otherDocument.get());
+    // REQUIRE_FALSE(element->IsConnected());
 
-    //  REQUIRE_FALSE(MutationAlgorithms::Insert(*element, *document, nullptr).HasException());
+    // REQUIRE_FALSE(MutationAlgorithms::Insert(*element, *document, nullptr).HasException());
 
-    //  REQUIRE(&element->NodeDocument() == document.get());
-    //  REQUIRE(element->IsConnected());
+    // REQUIRE(&element->NodeDocument() == document.get());
+    // REQUIRE(element->IsConnected());
 
-    //  REQUIRE_FALSE(document->RemoveChild(*element).HasException());
-    //}
+    // REQUIRE_FALSE(document->RemoveChild(*element).HasException());
+    // }
   }
 }

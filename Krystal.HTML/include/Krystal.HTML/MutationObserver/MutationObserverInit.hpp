@@ -9,11 +9,11 @@ namespace Krys::HTML
   struct MutationObserverInit
   {
     bool ChildList {false};
-    Maybe<bool> Attributes {false};
-    Maybe<bool> CharacterData {false};
+    Maybe<bool> Attributes {};
+    Maybe<bool> CharacterData {};
     bool Subtree {false};
-    Maybe<bool> AttributeOldValue {false};
-    Maybe<bool> CharacterDataOldValue {false};
+    Maybe<bool> AttributeOldValue {};
+    Maybe<bool> CharacterDataOldValue {};
     Maybe<List<DOMStringAtom>> AttributeFilter;
   };
 }
