@@ -4,110 +4,6 @@ Source: https://dom.spec.whatwg.org
 ======================================================================
 ======================================================================
 
-                            COMPLETE
-
-======================================================================
-======================================================================
-
-======================================================================
-1. INFRASTRUCTURE
-======================================================================
-
-1.1 Trees
-
-1.2 Ordered sets
-
-1.4 Name validation
-
-======================================================================
-2. EVENTS
-======================================================================
-
-2.1 Introduction to "DOM Events" (N/A)
-
-2.3 Legacy extensions to the Window interface
-        - Only thing to implement is the violation below which isn't planned for now.
-        - SPEC-VIOLATION(DOM, HTML) -> Window interface currently not supported
-
-2.4 Interface CustomEvent
-
-2.5 Constructing events
-
-2.6 Defining event interfaces (N/A)
-
-2.8 Observing event listeners
-        - Only thing to implement is the violation below which isn't planned for now.
-        - SPEC-VIOLATION(DOM, SERVICE-WORKER) -> ServiceWorkGlobalScope currently not supported
-
-2.11 Action versus occurrence (N/A)
-
-======================================================================
-3. ABORTING ONGOING ACTIVITIES
-======================================================================
-
-3.2.1 Garbage collection (N/A)
-
-3.3 Using AbortController and AbortSignal objects in APIs (N/A)
-
-======================================================================
-4. NODES
-======================================================================
-
-4.1 Introduction to "The DOM" (N/A)
-
-4.2 Node tree
-
-4.2.1 Document tree
-
-4.2.2 Shadow tree
-
-4.2.10 Old-style collections: NodeList and HTMLCollection (N/A)
-
-4.2.10.1 Interface NodeList
-
-4.6 Interface DocumentType
-
-4.12 Interface CDATASection
-
-4.13 Interface ProcessingInstruction
-
-4.14 Interface Comment
-
-======================================================================
-5. RANGES
-======================================================================
-
-5.1 Introduction to "DOM Ranges" (N/A)
-
-======================================================================
-6. TRAVERSAL
-======================================================================
-
-======================================================================
-7. SETS
-======================================================================
-
-======================================================================
-8. XPATH
-======================================================================
-
-8.1 Interface XPathResult (N/A)
-
-8.2 Interface XPathExpression (N/A)
-
-8.3 Mixin XPathEvaluatorBase (N/A)
-
-8.4 Interface XPathEvaluator (N/A)
-
-======================================================================
-9. XSLT
-======================================================================
-
-9.1 Interface XSLTProcessor (N/A)
-
-======================================================================
-======================================================================
-
                                 TODO
 
 ======================================================================
@@ -334,3 +230,108 @@ Source: https://dom.spec.whatwg.org
     Test Coverage : None
     Notes         :
         - Missing implementation for 'Value' setter, needs element/attr implementing first.
+
+
+======================================================================
+======================================================================
+
+                            COMPLETE
+
+======================================================================
+======================================================================
+
+======================================================================
+1. INFRASTRUCTURE
+======================================================================
+
+1.1 Trees
+
+1.2 Ordered sets
+
+1.4 Name validation
+
+======================================================================
+2. EVENTS
+======================================================================
+
+2.1 Introduction to "DOM Events" (N/A)
+
+2.3 Legacy extensions to the Window interface
+        - Only thing to implement is the violation below which isn't planned for now.
+        - SPEC-VIOLATION(DOM, HTML) -> Window interface currently not supported
+
+2.4 Interface CustomEvent
+
+2.5 Constructing events
+
+2.6 Defining event interfaces (N/A)
+
+2.8 Observing event listeners
+        - Only thing to implement is the violation below which isn't planned for now.
+        - SPEC-VIOLATION(DOM, SERVICE-WORKER) -> ServiceWorkGlobalScope currently not supported
+
+2.11 Action versus occurrence (N/A)
+
+======================================================================
+3. ABORTING ONGOING ACTIVITIES
+======================================================================
+
+3.2.1 Garbage collection (N/A)
+
+3.3 Using AbortController and AbortSignal objects in APIs (N/A)
+
+======================================================================
+4. NODES
+======================================================================
+
+4.1 Introduction to "The DOM" (N/A)
+
+4.2 Node tree
+
+4.2.1 Document tree
+
+4.2.2 Shadow tree
+
+4.2.10 Old-style collections: NodeList and HTMLCollection (N/A)
+
+4.2.10.1 Interface NodeList
+
+4.6 Interface DocumentType
+
+4.12 Interface CDATASection
+
+4.13 Interface ProcessingInstruction
+
+4.14 Interface Comment
+
+======================================================================
+5. RANGES
+======================================================================
+
+5.1 Introduction to "DOM Ranges" (N/A)
+
+======================================================================
+6. TRAVERSAL
+======================================================================
+
+======================================================================
+7. SETS
+======================================================================
+
+======================================================================
+8. XPATH
+======================================================================
+
+8.1 Interface XPathResult (N/A)
+
+8.2 Interface XPathExpression (N/A)
+
+8.3 Mixin XPathEvaluatorBase (N/A)
+
+8.4 Interface XPathEvaluator (N/A)
+
+======================================================================
+9. XSLT
+======================================================================
+
+9.1 Interface XSLTProcessor (N/A)
