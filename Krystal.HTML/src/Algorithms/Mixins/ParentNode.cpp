@@ -1,6 +1,7 @@
 ﻿#include "Krystal.HTML/Algorithms/Mixins/ParentNode.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
@@ -15,7 +16,7 @@ namespace Krys::HTML::Mixins
 {
   ExceptionOr<void> ParentNode::Prepend(ContainerNode &parent, const List<NodeOrString> &nodes) noexcept
   {
-    auto node = MutationAlgorithms::ConvertNodesIntoNode(nodes, parent.NodeDocument());
+    auto node = NodeAlgorithms::ConvertNodesIntoNode(nodes, parent.NodeDocument());
     if (node.HasException())
     {
       return node.ReleaseException();
@@ -32,7 +33,7 @@ namespace Krys::HTML::Mixins
 
   ExceptionOr<void> ParentNode::Append(ContainerNode &parent, const List<NodeOrString> &nodes) noexcept
   {
-    auto node = MutationAlgorithms::ConvertNodesIntoNode(nodes, parent.NodeDocument());
+    auto node = NodeAlgorithms::ConvertNodesIntoNode(nodes, parent.NodeDocument());
     if (node.HasException())
     {
       return node.ReleaseException();
@@ -49,7 +50,7 @@ namespace Krys::HTML::Mixins
   ExceptionOr<void> ParentNode::ReplaceChildren(ContainerNode &parent,
                                                 const List<NodeOrString> &nodes) noexcept
   {
-    auto node = MutationAlgorithms::ConvertNodesIntoNode(nodes, parent.NodeDocument());
+    auto node = NodeAlgorithms::ConvertNodesIntoNode(nodes, parent.NodeDocument());
     if (node.HasException())
     {
       return node.ReleaseException();

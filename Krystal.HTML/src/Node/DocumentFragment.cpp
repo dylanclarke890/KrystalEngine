@@ -3,6 +3,7 @@
 #include "Krystal.HTML/Algorithms/Mixins/NonElementParentNode.hpp"
 #include "Krystal.HTML/Algorithms/Mixins/ParentNode.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
@@ -34,7 +35,7 @@ namespace Krys::HTML
 
   ExceptionOr<void> DocumentFragment::TextContent(DOMString &&value) noexcept
   {
-    return MutationAlgorithms::StringReplaceAll(Krys::Move(value), *this);
+    return NodeAlgorithms::StringReplaceAll(Krys::Move(value), *this);
   }
 
 #pragma endregion

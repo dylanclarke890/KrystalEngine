@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/DOMString.hpp"
+#include "Krystal.HTML/Node/Enums/InsertAdjacentWhere.hpp"
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
@@ -13,6 +14,7 @@ namespace Krys::HTML
   class CustomElementRegistry;
   class Document;
   class Element;
+  class Node;
 
   using CustomElementRegistryOrDefault = Maybe<RawPtr<CustomElementRegistry>>;
   constexpr inline auto DefaultCustomElementRegistry = Null;
@@ -20,6 +22,10 @@ namespace Krys::HTML
   class ElementAlgorithms
   {
   public:
+    /// @see https://dom.spec.whatwg.org/#insert-adjacent
+    KRYS_NODISCARD static ExceptionOr<RawPtr<Node>>
+      InsertAdjacent(Element &element, InsertAdjacentWhere where, Node &node) noexcept;
+
     static Ref<Element>
       CreateElement(Document &document, DOMStringAtom localName, DOMStringAtom namespaceURI,
                     DOMStringAtom prefix = DOMStringAtom::Null(), DOMStringAtom is = DOMStringAtom::Null(),

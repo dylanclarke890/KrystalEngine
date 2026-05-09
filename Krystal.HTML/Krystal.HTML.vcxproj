@@ -59,6 +59,7 @@
     <ClInclude Include="include\Krystal.HTML\MutationObserver\TransientRegisteredObserver.hpp" />
     <ClInclude Include="include\Krystal.HTML\Namespaces.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\NameValidation.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\NodeAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\CustomElementRegistry.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Enums\CustomElementState.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Enums\NodeCollectionLiveness.hpp" />
@@ -156,6 +157,7 @@
     <ClCompile Include="src\Algorithms\ExtensibilityHooks.cpp" />
     <ClCompile Include="src\Algorithms\Mixins\ChildNode.cpp" />
     <ClCompile Include="src\Algorithms\Mixins\ParentNode.cpp" />
+    <ClCompile Include="src\Algorithms\NodeAlgorithms.cpp" />
     <ClCompile Include="src\Algorithms\ShadowRootAlgorithms.cpp" />
     <ClCompile Include="src\DOMTokenList.cpp" />
     <ClCompile Include="src\Algorithms\IteratorAlgorithms.cpp" />

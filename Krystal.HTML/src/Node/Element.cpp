@@ -5,6 +5,7 @@
 #include "Krystal.HTML/Algorithms/Mixins/ParentNode.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/NameValidation.hpp"
+#include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
@@ -319,7 +320,7 @@ namespace Krys::HTML
   ExceptionOr<RawPtr<Element>> Element::InsertAdjacentElement(InsertAdjacentWhere where,
                                                               Element &element) noexcept
   {
-    if (auto result = MutationAlgorithms::InsertAdjacent(*this, where, element); result.HasException())
+    if (auto result = ElementAlgorithms::InsertAdjacent(*this, where, element); result.HasException())
     {
       return result.ReleaseException();
     }
@@ -330,7 +331,7 @@ namespace Krys::HTML
   ExceptionOr<void> Element::InsertAdjacentText(InsertAdjacentWhere where, DOMString &&data) noexcept
   {
     auto textNode = CreateRef<Text>(NodeDocument(), Krys::Move(data));
-    if (auto result = MutationAlgorithms::InsertAdjacent(*this, where, *textNode); result.HasException())
+    if (auto result = ElementAlgorithms::InsertAdjacent(*this, where, *textNode); result.HasException())
     {
       return result.ReleaseException();
     }
@@ -355,7 +356,7 @@ namespace Krys::HTML
 
   ExceptionOr<void> Element::TextContent(DOMString &&value) noexcept
   {
-    return MutationAlgorithms::StringReplaceAll(Krys::Move(value), *this);
+    return NodeAlgorithms::StringReplaceAll(Krys::Move(value), *this);
   }
 
 #pragma endregion

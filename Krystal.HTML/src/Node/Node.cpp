@@ -1,6 +1,7 @@
 ﻿#include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
@@ -161,7 +162,7 @@ namespace Krys::HTML
       return Exception {ExceptionCode::NotSupportedError};
     }
 
-    return MutationAlgorithms::CloneNode(*this, &NodeDocument(), subtree);
+    return NodeAlgorithms::CloneNode(*this, &NodeDocument(), subtree);
   }
 
   bool Node::IsEqualNode(RawPtr<const Node> otherNode) const noexcept

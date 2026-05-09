@@ -1,6 +1,7 @@
 ﻿#include "Krystal.HTML/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
+#include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
@@ -9,6 +10,66 @@
 
 namespace Krys::HTML
 {
+  ExceptionOr<RawPtr<Node>> ElementAlgorithms::InsertAdjacent(Element &element, InsertAdjacentWhere where,
+                                                              Node &node) noexcept
+  {
+    switch (where)
+    {
+      case InsertAdjacentWhere::BeforeBegin:
+      {
+        if (element.ParentNode() == nullptr)
+        {
+          return nullptr;
+        }
+
+        auto result = MutationAlgorithms::PreInsert(node, *element.ParentNode(), &element);
+        if (result.HasException())
+        {
+          return result.ReleaseException();
+        }
+
+        return &result.Value();
+      }
+      case InsertAdjacentWhere::AfterBegin:
+      {
+        auto result = MutationAlgorithms::PreInsert(node, element, element.FirstChild());
+        if (result.HasException())
+        {
+          return result.ReleaseException();
+        }
+
+        return &result.Value();
+      }
+      case InsertAdjacentWhere::BeforeEnd:
+      {
+        auto result = MutationAlgorithms::PreInsert(node, element, nullptr);
+        if (result.HasException())
+        {
+          return result.ReleaseException();
+        }
+
+        return &result.Value();
+      }
+      case InsertAdjacentWhere::AfterEnd:
+      {
+        auto parent = element.ParentNode();
+        if (parent == nullptr)
+        {
+          return nullptr;
+        }
+
+        auto result = MutationAlgorithms::PreInsert(node, *parent, element.NextSibling());
+        if (result.HasException())
+        {
+          return result.ReleaseException();
+        }
+
+        return &result.Value();
+      }
+      default: return Exception {ExceptionCode::SyntaxError};
+    }
+  }
+
   void ElementAlgorithms::HandleAttributeChanges(Attr &attribute, Element &element, DOMStringView oldValue,
                                                  DOMStringView newValue) noexcept
   {
