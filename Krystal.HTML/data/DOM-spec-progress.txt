@@ -179,10 +179,12 @@ Source: https://dom.spec.whatwg.org
 
 4.2.3 Mutation algorithms
     Implementation: Partial
-    Test Coverage : None
+    Test Coverage : Partial
     Notes         : 
-        - Missing Custom element support.
-        - Missing mutation observers (Remove).
+        - Implementation: Missing custom element support.
+        - Implementation: Missing slottable support.
+        - Implementation: 'Remove' is missing mutation transient observer support.
+        - Test Coverage: Currently only EnsurePreInsertionValidity and PreInsert are fully tested.
 
 4.2.4 Mixin NonElementParentNode
     Implementation: Full

@@ -24,17 +24,17 @@ namespace Krys::HTML
 
   ExceptionOr<Ref<Node>> Document::AdoptNode(Node &node) noexcept
   {
-    if (node.NodeType() == NodeType::DOCUMENT_NODE)
+    if (Is<Document>(node))
     {
       return Exception {ExceptionCode::NotSupportedError};
     }
 
-    if (node.IsShadowRootNode()) // ShadowRoot cannot disconnect itself from the host node.
+    if (Is<ShadowRoot>(node)) // ShadowRoot cannot disconnect itself from the host node.
     {
       return Exception {ExceptionCode::HierarchyRequestError};
     }
 
-    if (node.NodeType() == NodeType::ATTRIBUTE_NODE)
+    if (Is<Attr>(node))
     {
       auto &attr = Downcast<Attr>(node);
       RefPtr<Element> element = ShareRefPtr(attr.OwnerElement());

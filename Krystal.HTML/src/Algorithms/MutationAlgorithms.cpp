@@ -61,7 +61,7 @@ namespace Krys::HTML
           return Exception {ExceptionCode::HierarchyRequestError};
         }
 
-        if (std::ranges::any_of(ConstChildNodeRange(*documentFragment), [](auto &c) { return Is<Text>(c); }))
+        if (HasNodeOfType<Text>(ConstChildNodeRange(*documentFragment)))
         {
           return Exception {ExceptionCode::HierarchyRequestError};
         }
@@ -81,13 +81,12 @@ namespace Krys::HTML
       }
       else if (Is<DocumentType>(node))
       {
-        if (std::ranges::any_of(ChildNodeRange(parent), [](auto &c) { return Is<DocumentType>(c); }))
+        if (HasNodeOfType<DocumentType>(ChildNodeRange(parent)))
         {
           return Exception {ExceptionCode::HierarchyRequestError};
         }
 
-        if (child != nullptr
-            && std::ranges::any_of(PrecedingRange(*child), [](auto &c) { return Is<Element>(c); }))
+        if (child != nullptr && HasNodeOfType<Element>(PrecedingRange(*child)))
         {
           return Exception {ExceptionCode::HierarchyRequestError};
         }
@@ -175,6 +174,12 @@ namespace Krys::HTML
     }
 
     auto *previousSibling = child != nullptr ? child->PreviousSibling() : parent.LastChild();
+
+    bool isParentNamedShadowHost =
+      ShadowRootAlgorithms::IsShadowHost(parent)
+      && Downcast<Element>(parent).ShadowRoot()->SlotAssignment() == SlotAssignmentMode::Named;
+    bool isParentRootShadowRoot = Is<ShadowRoot>(TreeQueries::Root(parent));
+
     auto &parentRoot = TreeQueries::Root(parent);
     auto *slotParent = DynamicDowncast<HTMLSlotElement>(parent);
     for (auto &target : nodes)
@@ -219,17 +224,12 @@ namespace Krys::HTML
         }
       }
 
-      if (auto *shadowHost = DynamicDowncast<Element>(parent))
+      if (isParentNamedShadowHost && SlotAlgorithms::IsSlottable(*target))
       {
-        if (shadowHost->ShadowRoot()
-            && shadowHost->ShadowRoot()->SlotAssignment() == SlotAssignmentMode::Named
-            && SlotAlgorithms::IsSlottable(*target))
-        {
-          SlotAlgorithms::AssignSlot(*target);
-        }
+        SlotAlgorithms::AssignSlot(*target);
       }
 
-      if (Is<ShadowRoot>(parentRoot) && slotParent && slotParent->AssignedNodes().empty())
+      if (isParentRootShadowRoot && slotParent != nullptr && slotParent->AssignedNodes().empty())
       {
         SlotAlgorithms::SignalSlotChange(*slotParent);
       }
@@ -247,7 +247,7 @@ namespace Krys::HTML
 
         if (auto *element = DynamicDowncast<Element>(inclusiveDescendant))
         {
-          // TODO(impl):
+          // TODO(impl) - CUSTOM-ELEMENTS:
           // If inclusiveDescendant is an element and inclusiveDescendant’s custom element registry is
           // non-null:
           // If inclusiveDescendant’s custom element registry’s is scoped is true, then append
@@ -259,7 +259,7 @@ namespace Krys::HTML
         }
         else if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(inclusiveDescendant))
         {
-          // TODO(impl):
+          // TODO(impl) - CUSTOM-ELEMENTS:
           // Otherwise, if inclusiveDescendant is a shadow root, inclusiveDescendant’s custom element
           // registry is non-null, and inclusiveDescendant’s custom element registry’s is scoped is true,
           // then append inclusiveDescendant’s node document to inclusiveDescendant’s custom element
@@ -276,8 +276,7 @@ namespace Krys::HTML
 
     ExtensibilityHooks::NodeChildrenChanged(parent);
 
-    List<Ref<Node>> staticNodeList;
-
+    SmallNodeList staticNodeList;
     for (auto &target : nodes)
     {
       for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(*target))
@@ -286,11 +285,11 @@ namespace Krys::HTML
       }
     }
 
-    for (auto &node : staticNodeList)
+    for (auto &target : staticNodeList)
     {
-      if (node->IsConnected())
+      if (target->IsConnected())
       {
-        ExtensibilityHooks::NodePostConnection(*node);
+        ExtensibilityHooks::NodePostConnection(*target);
       }
     }
 
@@ -320,17 +319,17 @@ namespace Krys::HTML
       return Exception {ExceptionCode::NotFoundError};
     }
 
-    if (!node.IsElementNode() && !node.IsCharacterDataNode())
+    if (!IsOneOf<Element, CharacterData>(node))
     {
       return Exception {ExceptionCode::HierarchyRequestError};
     }
 
-    if (node.IsTextNode() && newParent.IsDocumentNode())
+    if (Is<Text>(node) && Is<Document>(newParent))
     {
       return Exception {ExceptionCode::HierarchyRequestError};
     }
 
-    if (newParent.IsDocumentNode() && node.IsElementNode())
+    if (Is<Document>(newParent) && Is<Element>(node))
     {
       if (TreeQueries::HasElementChild(newParent))
       {
@@ -350,7 +349,7 @@ namespace Krys::HTML
 
     for (auto iterator : node.NodeDocument().NodeIterators())
     {
-      if (&iterator->Root() == &node.NodeDocument())
+      if (&iterator->Root().NodeDocument() == &node.NodeDocument())
       {
         IteratorAlgorithms::PreRemove(*iterator, node);
       }
@@ -457,6 +456,12 @@ namespace Krys::HTML
       }
     }
 
+    // TODO(impl) - SLOTTABLES:
+    // If newParent is a shadow host whose shadow root’s slot assignment is "named" and node is a slottable,
+    // then assign a slot for node.
+    // If newParent’s root is a shadow root, and newParent is a slot whose assigned nodes is empty, then run
+    // signal a slot change for newParent.
+
     SlotAlgorithms::AssignSlottablesForTree(TreeQueries::Root(node));
 
     for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(node))
@@ -464,7 +469,8 @@ namespace Krys::HTML
       auto isSubtreeRoot = &inclusiveDescendant == &node;
       ExtensibilityHooks::NodeMoved(inclusiveDescendant, node, isSubtreeRoot, oldParent);
 
-      // TODO(impl):If inclusiveDescendant is custom and newParent is connected, then enqueue a custom element
+      // TODO(impl) - CUSTOM-ELEMENT:
+      // If inclusiveDescendant is custom and newParent is connected, then enqueue a custom element
       // callback reaction with inclusiveDescendant, callback name "connectedMoveCallback", and « ».
     }
 
@@ -479,7 +485,7 @@ namespace Krys::HTML
 
   ExceptionOr<Node &> MutationAlgorithms::Replace(Node &child, Node &node, ContainerNode &parent) noexcept
   {
-    if (!parent.IsDocumentNode() && !parent.IsDocumentFragmentNode() && !parent.IsElementNode())
+    if (!IsOneOf<Document, DocumentFragment, Element>(parent))
     {
       return Exception {ExceptionCode::HierarchyRequestError};
     }
@@ -494,72 +500,65 @@ namespace Krys::HTML
       return Exception {ExceptionCode::NotFoundError};
     }
 
-    if (!node.IsDocumentFragmentNode() && !node.IsDocumentTypeNode() && !node.IsElementNode()
-        && !node.IsCharacterDataNode())
+    if (!IsOneOf<DocumentFragment, DocumentType, Element, CharacterData>(node))
     {
       return Exception {ExceptionCode::HierarchyRequestError};
     }
 
-    if ((node.IsTextNode() && parent.IsDocumentNode())
-        || (node.IsDocumentTypeNode() && !parent.IsDocumentNode()))
+    if ((Is<Text>(node) && Is<Document>(parent)) || (Is<DocumentType>(node) && !Is<Document>(parent)))
     {
       return Exception {ExceptionCode::HierarchyRequestError};
     }
 
-    if (parent.IsDocumentNode())
+    if (Is<Document>(parent))
     {
-      if (node.IsDocumentFragmentNode())
+      if (auto *documentFragment = DynamicDowncast<DocumentFragment>(node))
       {
-        uint32 elementCount = 0;
-        for (Node &fragmentChild : ChildNodeRange(Downcast<ContainerNode>(node)))
+        auto count = TreeQueries::ChildElementCount(*documentFragment);
+        if (count > 1)
         {
-          if (fragmentChild.IsElementNode())
-          {
-            if (++elementCount > 1)
-            {
-              return Exception {ExceptionCode::HierarchyRequestError};
-            }
-          }
-          else if (fragmentChild.IsTextNode())
-          {
-            return Exception {ExceptionCode::HierarchyRequestError};
-          }
+          return Exception {ExceptionCode::HierarchyRequestError};
         }
 
-        if (elementCount == 1)
+        if (HasNodeOfType<Text>(ConstChildNodeRange(*documentFragment)))
+        {
+          return Exception {ExceptionCode::HierarchyRequestError};
+        }
+
+        if (count == 1)
         {
           if (std::ranges::any_of(ConstChildElementRange(parent), [&](auto &e) { return &e != &child; }))
           {
             return Exception {ExceptionCode::HierarchyRequestError};
           }
 
-          if (std::ranges::any_of(ConstFollowingRange(child), [](auto &e) { return e.IsDocumentTypeNode(); }))
+          if (HasNodeOfType<DocumentType>(ConstFollowingRange(child)))
           {
             return Exception {ExceptionCode::HierarchyRequestError};
           }
         }
       }
-      else if (node.IsElementNode())
+      else if (Is<Element>(node))
       {
         if (std::ranges::any_of(ConstChildElementRange(parent), [&](auto &e) { return &e != &child; }))
         {
           return Exception {ExceptionCode::HierarchyRequestError};
         }
 
-        if (std::ranges::any_of(ConstFollowingRange(child), [](auto &e) { return e.IsDocumentTypeNode(); }))
+        if (HasNodeOfType<DocumentType>(ConstFollowingRange(child)))
         {
           return Exception {ExceptionCode::HierarchyRequestError};
         }
       }
-      else if (node.IsDocumentFragmentNode())
+      else if (Is<DocumentType>(node))
       {
         if (std::ranges::any_of(ConstChildNodeRange(parent),
-                                [&](auto &e) { return e.IsDocumentTypeNode() && &e != &child; }))
+                                [&](auto &e) { return Is<DocumentType>(e) && &e != &child; }))
         {
           return Exception {ExceptionCode::HierarchyRequestError};
         }
 
-        if (std::ranges::any_of(ConstPrecedingRange(child), [](auto &e) { return e.IsElementNode(); }))
+        if (HasNodeOfType<Element>(ConstPrecedingRange(child)))
         {
           return Exception {ExceptionCode::HierarchyRequestError};
         }
@@ -585,7 +584,7 @@ namespace Krys::HTML
     }
 
     SmallNodeList nodes;
-    if (node.IsDocumentFragmentNode())
+    if (Is<DocumentFragment>(node))
     {
       TreeQueries::CollectChildNodes(Downcast<ContainerNode>(node), nodes);
     }
@@ -611,16 +610,13 @@ namespace Krys::HTML
     TreeQueries::CollectChildNodes(parent, removedNodes);
 
     SmallNodeList addedNodes;
-    if (node != nullptr)
+    if (auto *documentFragment = DynamicDowncast<DocumentFragment>(node))
     {
-      if (auto *documentFragment = DynamicDowncast<DocumentFragment>(node))
-      {
-        TreeQueries::CollectChildNodes(*documentFragment, addedNodes);
-      }
-      else
-      {
-        addedNodes.push_back(ShareRef(*node));
-      }
+      TreeQueries::CollectChildNodes(*documentFragment, addedNodes);
+    }
+    else if (node != nullptr)
+    {
+      addedNodes.push_back(ShareRef(*node));
     }
 
     while (auto *firstChild = parent.FirstChild())
@@ -645,19 +641,6 @@ namespace Krys::HTML
     }
 
     return {};
-  }
-
-  ExceptionOr<void> MutationAlgorithms::StringReplaceAll(DOMString &&string, ContainerNode &parent) noexcept
-  {
-    if (string.empty())
-    {
-      return ReplaceAll(nullptr, parent);
-    }
-    else
-    {
-      Ref<Text> textNode = CreateRef<Text>(parent.NodeDocument(), Krys::Move(string));
-      return ReplaceAll(textNode.get(), parent);
-    }
   }
 
   ExceptionOr<Node &> MutationAlgorithms::PreRemove(Node &node, ContainerNode &parent) noexcept
@@ -726,8 +709,7 @@ namespace Krys::HTML
     auto &parentRoot = TreeQueries::Root(parent);
     if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(parentRoot))
     {
-      auto *slot = DynamicDowncast<HTMLSlotElement>(parent);
-      if (slot && slot->AssignedNodes().empty())
+      if (auto *slot = DynamicDowncast<HTMLSlotElement>(parent); slot && slot->AssignedNodes().empty())
       {
         SlotAlgorithms::SignalSlotChange(*slot);
       }
@@ -741,18 +723,21 @@ namespace Krys::HTML
 
     ExtensibilityHooks::NodeRemoved(node, true, parent);
 
+    // TODO(impl) - CUSTOM-ELEMENTS:
     // bool isParentConnected = parent.IsConnected();
-    // TODO(impl): if node is custom and isParentConnected is true, then enqueue a custom element callback
+    // if node is custom and isParentConnected is true, then enqueue a custom element callback
     // reaction with node, callback name "disconnectedCallback", and « ».
 
     for (auto &descendant : InclusiveShadowIncludingDescendantRange(node))
     {
       ExtensibilityHooks::NodeRemoved(descendant, false, parent);
-      // TODO(impl): If descendant is custom and isParentConnected is true, then enqueue a custom element
-      // callback reaction with descendant, callback name "disconnectedCallback", and « ».
+      // TODO(impl) - CUSTOM-ELEMENTS:
+      // If descendant is custom and isParentConnected is true, then enqueue a custom element callback
+      // reaction with descendant, callback name "disconnectedCallback", and « ».
     }
 
-    // TODO(impl): For each inclusive ancestor inclusiveAncestor of parent, and then for each registered of
+    // TODO(impl): - MUTATION-OBSERVERS:
+    // For each inclusive ancestor inclusiveAncestor of parent, and then for each registered of
     // inclusiveAncestor’s registered observer list, if registered’s options["subtree"] is true, then append a
     // new transient registered observer whose observer is registered’s observer, options is registered’s
     // options, and source is registered to node’s registered observer list.
@@ -766,6 +751,19 @@ namespace Krys::HTML
     ExtensibilityHooks::NodeChildrenChanged(parent);
 
     return {};
+  }
+
+  ExceptionOr<void> MutationAlgorithms::StringReplaceAll(DOMString &&string, ContainerNode &parent) noexcept
+  {
+    if (string.empty())
+    {
+      return ReplaceAll(nullptr, parent);
+    }
+    else
+    {
+      Ref<Text> textNode = CreateRef<Text>(parent.NodeDocument(), Krys::Move(string));
+      return ReplaceAll(textNode.get(), parent);
+    }
   }
 
   Ref<Node> MutationAlgorithms::CloneNode(const Node &node, RawPtr<Document> document, bool subtree,

@@ -344,6 +344,7 @@ namespace Krys::HTML
 
   DOMString Element::NodeName() const noexcept
   {
+    // TODO(impl): return it's HTML uppercased tag name
     return _qualifiedName.Name();
   }
 

@@ -53,16 +53,18 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#concept-node-replace-all
     KRYS_NODISCARD static ExceptionOr<void> ReplaceAll(RawPtr<Node> node, ContainerNode &parent) noexcept;
 
-    /// @see https://dom.spec.whatwg.org/#string-replace-all
-    KRYS_NODISCARD static ExceptionOr<void> StringReplaceAll(DOMString &&string,
-                                                             ContainerNode &parent) noexcept;
-
     /// @see https://dom.spec.whatwg.org/#concept-node-pre-remove
     KRYS_NODISCARD static ExceptionOr<Node &> PreRemove(Node &node, ContainerNode &parent) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-node-remove
     KRYS_NODISCARD static ExceptionOr<void>
       Remove(Node &node, SuppressObservers suppressObservers = SuppressObservers(false)) noexcept;
+
+    // TODO(fix): move the below methods to 'NodeAlgorithms' as they're from a different section of the spec.
+
+    /// @see https://dom.spec.whatwg.org/#string-replace-all
+    KRYS_NODISCARD static ExceptionOr<void> StringReplaceAll(DOMString &&string,
+                                                             ContainerNode &parent) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-node-clone
     static Ref<Node> CloneNode(const Node &node, RawPtr<Document> document = nullptr, bool subtree = false,
@@ -81,6 +83,5 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#insert-adjacent
     KRYS_NODISCARD static ExceptionOr<RawPtr<Node>>
       InsertAdjacent(Element &element, InsertAdjacentWhere where, Node &node) noexcept;
-
   };
 }

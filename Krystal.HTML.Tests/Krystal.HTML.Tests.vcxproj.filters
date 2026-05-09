@@ -96,6 +96,9 @@
     <ClCompile Include="tests\Algorithms\Factories\EventFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tests\Algorithms\MutationAlgorithms.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML.Tests\ParserTestUtils.hpp">

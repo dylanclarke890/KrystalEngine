@@ -54,12 +54,17 @@ namespace Krys
   {
     static_assert(CanDowncast<Source, Target>, "Unrelated types");
 
+    if (source == nullptr)
+    {
+      return false;
+    }
+
     if constexpr (SameType<Target, Source>)
     {
       return true;
     }
 
-    return source && TypeCastTraits<const Target, const Source>::IsOfType(*source);
+    return TypeCastTraits<const Target, const Source>::IsOfType(*source);
   }
 
   template <typename... Ts, typename Source>

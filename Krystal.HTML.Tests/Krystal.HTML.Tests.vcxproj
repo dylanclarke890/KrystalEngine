@@ -158,6 +158,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="catch_main.cpp" />
+    <ClCompile Include="tests\Algorithms\MutationAlgorithms.cpp" />
     <ClCompile Include="tests\Algorithms\ShadowRootAlgorithms.cpp" />
     <ClCompile Include="tests\Events\CustomEvent.cpp" />
     <ClCompile Include="tests\Events\Event.cpp" />
