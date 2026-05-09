@@ -1,7 +1,7 @@
 ﻿#include "Krystal.HTML/Algorithms/Mixins/ChildNode.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/Mixins/ParentNode.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
@@ -50,7 +50,7 @@ namespace Krys::HTML::Mixins
 
     auto *viablePreviousSibling = ViableSibling(PreviousSiblingRange(childNode), nodes);
 
-    auto node = NodeAlgorithms::ConvertNodesIntoNode(nodes, childNode.NodeDocument());
+    auto node = Mixins::ParentNode::ConvertNodesIntoNode(nodes, childNode.NodeDocument());
     if (node.HasException())
     {
       return node.ReleaseException();
@@ -78,7 +78,7 @@ namespace Krys::HTML::Mixins
 
     auto *viableNextSibling = ViableSibling(NextSiblingRange(childNode), nodes);
 
-    auto node = NodeAlgorithms::ConvertNodesIntoNode(nodes, childNode.NodeDocument());
+    auto node = Mixins::ParentNode::ConvertNodesIntoNode(nodes, childNode.NodeDocument());
     if (node.HasException())
     {
       return node.ReleaseException();
@@ -103,7 +103,7 @@ namespace Krys::HTML::Mixins
 
     auto *viableNextSibling = ViableSibling(NextSiblingRange(childNode), nodes);
 
-    auto node = NodeAlgorithms::ConvertNodesIntoNode(nodes, childNode.NodeDocument());
+    auto node = Mixins::ParentNode::ConvertNodesIntoNode(nodes, childNode.NodeDocument());
     if (node.HasException())
     {
       return node.ReleaseException();

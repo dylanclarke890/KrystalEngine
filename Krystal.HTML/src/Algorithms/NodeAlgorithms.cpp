@@ -118,38 +118,4 @@ namespace Krys::HTML
 
     return copy;
   }
-
-  ExceptionOr<Ref<Node>> NodeAlgorithms::ConvertNodesIntoNode(const List<NodeOrString> &nodes,
-                                                              Document &document) noexcept
-  {
-    List<Ref<Node>> nodeList;
-    for (auto &nodeOrString : nodes)
-    {
-      if (std::holds_alternative<DOMString>(nodeOrString))
-      {
-        DOMString copy = std::get<DOMString>(nodeOrString);
-        nodeList.emplace_back(CreateRef<Text>(document, Krys::Move(copy)));
-      }
-      else
-      {
-        nodeList.push_back(std::get<Ref<Node>>(nodeOrString));
-      }
-    }
-
-    if (nodeList.size() == 1)
-    {
-      return nodeList[0];
-    }
-
-    auto fragment = CreateRef<DocumentFragment>(document);
-    for (auto &node : nodeList)
-    {
-      if (auto result = MutationAlgorithms::Append(*node, *fragment); result.HasException())
-      {
-        return result.ReleaseException();
-      }
-    }
-
-    return AdoptRef<Node>(*fragment);
-  }
 }

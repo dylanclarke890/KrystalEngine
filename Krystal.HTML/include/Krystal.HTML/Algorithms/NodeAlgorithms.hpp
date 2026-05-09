@@ -32,8 +32,6 @@ namespace Krys::HTML
       CloneSingleNode(const Node &node, Document &document,
                       RawPtr<CustomElementRegistry> fallbackRegistry = nullptr) noexcept;
 
-    /// @see https://dom.spec.whatwg.org/#convert-nodes-into-a-node
-    KRYS_NODISCARD static ExceptionOr<Ref<Node>> ConvertNodesIntoNode(const List<NodeOrString> &nodes,
-                                                                      Document &document) noexcept;
+
   };
 }

@@ -10,6 +10,7 @@
 namespace Krys::HTML
 {
   class ContainerNode;
+  class Document;
   class Element;
   class Node;
   class NodeList;
@@ -20,6 +21,10 @@ namespace Krys::HTML::Mixins
   class ParentNode
   {
   public:
+    /// @see https://dom.spec.whatwg.org/#convert-nodes-into-a-node
+    KRYS_NODISCARD static ExceptionOr<Ref<Node>> ConvertNodesIntoNode(const List<NodeOrString> &nodes,
+                                                                      Document &document) noexcept;
+
     KRYS_NODISCARD static ExceptionOr<void> Prepend(ContainerNode &parent,
                                                     const List<NodeOrString> &nodes) noexcept;
 

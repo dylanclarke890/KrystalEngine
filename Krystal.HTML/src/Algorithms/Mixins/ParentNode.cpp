@@ -11,12 +11,47 @@
 #include "Krystal.HTML/Node/HTMLCollection.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/Node/Text.hpp"
 
 namespace Krys::HTML::Mixins
 {
+  ExceptionOr<Ref<Node>> ParentNode::ConvertNodesIntoNode(const List<NodeOrString> &nodes,
+                                                          Document &document) noexcept
+  {
+    List<Ref<Node>> nodeList;
+    for (auto &nodeOrString : nodes)
+    {
+      if (std::holds_alternative<DOMString>(nodeOrString))
+      {
+        DOMString copy = std::get<DOMString>(nodeOrString);
+        nodeList.emplace_back(CreateRef<Text>(document, Krys::Move(copy)));
+      }
+      else
+      {
+        nodeList.push_back(std::get<Ref<Node>>(nodeOrString));
+      }
+    }
+
+    if (nodeList.size() == 1)
+    {
+      return nodeList[0];
+    }
+
+    auto fragment = CreateRef<DocumentFragment>(document);
+    for (auto &node : nodeList)
+    {
+      if (auto result = MutationAlgorithms::Append(*node, *fragment); result.HasException())
+      {
+        return result.ReleaseException();
+      }
+    }
+
+    return AdoptRef<Node>(*fragment);
+  }
+
   ExceptionOr<void> ParentNode::Prepend(ContainerNode &parent, const List<NodeOrString> &nodes) noexcept
   {
-    auto node = NodeAlgorithms::ConvertNodesIntoNode(nodes, parent.NodeDocument());
+    auto node = ConvertNodesIntoNode(nodes, parent.NodeDocument());
     if (node.HasException())
     {
       return node.ReleaseException();
@@ -33,7 +68,7 @@ namespace Krys::HTML::Mixins
 
   ExceptionOr<void> ParentNode::Append(ContainerNode &parent, const List<NodeOrString> &nodes) noexcept
   {
-    auto node = NodeAlgorithms::ConvertNodesIntoNode(nodes, parent.NodeDocument());
+    auto node = ConvertNodesIntoNode(nodes, parent.NodeDocument());
     if (node.HasException())
     {
       return node.ReleaseException();
@@ -50,7 +85,7 @@ namespace Krys::HTML::Mixins
   ExceptionOr<void> ParentNode::ReplaceChildren(ContainerNode &parent,
                                                 const List<NodeOrString> &nodes) noexcept
   {
-    auto node = NodeAlgorithms::ConvertNodesIntoNode(nodes, parent.NodeDocument());
+    auto node = ConvertNodesIntoNode(nodes, parent.NodeDocument());
     if (node.HasException())
     {
       return node.ReleaseException();
