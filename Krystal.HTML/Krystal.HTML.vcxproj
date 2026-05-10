@@ -176,6 +176,7 @@
     <ClCompile Include="src\Iterator\NodeIterator.cpp" />
     <ClCompile Include="src\Iterator\TreeWalker.cpp" />
     <ClCompile Include="src\MutationObserver\MutationRecord.cpp" />
+    <ClCompile Include="src\Node\DOMImplementation.cpp" />
     <ClCompile Include="src\Node\NamedNodeMap.cpp" />
     <ClCompile Include="src\Algorithms\Mixins\NonElementParentNode.cpp" />
     <ClCompile Include="src\Ranges\Range.cpp" />

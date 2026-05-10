@@ -33,6 +33,7 @@ namespace Krys::HTML
     KRYS_TYPE_CAST_TRAITS_ACCESS();
 
     friend class DocumentRareData;
+    friend class DOMImplementation;
     friend class MutationAlgorithms;
     friend class TreeMutationDispatcher;
 

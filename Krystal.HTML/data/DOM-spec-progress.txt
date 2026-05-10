@@ -158,8 +158,10 @@ Source: https://dom.spec.whatwg.org
         - Implementation: ContentType - Document needs this passed to it on creation.
 
 4.5.1 Interface DOMImplementation
-    Implementation: None
+    Implementation: Partial
     Test Coverage : None
+    Notes 	      : 
+        - Implementation: CreateDocument/CreateHTMLDocument needs to set the origin of the new document.
 
 4.7 Interface DocumentFragment
     Implementation: Full

@@ -225,22 +225,7 @@ namespace Krys::HTML
   ExceptionOr<Ref<Element>> Document::CreateElementNS(DOMStringAtom namespaceUri, DOMStringAtom qualifiedName,
                                                       const ElementCreationOptionsOrString &options) noexcept
   {
-    auto name =
-      NameValidation::ValidateAndExtract(namespaceUri, qualifiedName, ValidateAndExtractContext::Element);
-    if (name.HasException())
-    {
-      return name.ReleaseException();
-    }
-
-    auto creationOptions = DocumentAlgorithms::FlattenElementCreationOptions(options, *this);
-    if (creationOptions.HasException())
-    {
-      return creationOptions.ReleaseException();
-    }
-
-    return ElementFactory::CreateElement(
-      *this, {name.Value().NamespaceURI, name.Value().Prefix, name.Value().LocalName},
-      creationOptions.Value().Is, true, creationOptions.Value().CustomElementRegistry);
+    return DocumentAlgorithms::InternalCreateElementNS(*this, namespaceUri, qualifiedName, options);
   }
 
   Ref<DocumentFragment> Document::CreateDocumentFragment() noexcept

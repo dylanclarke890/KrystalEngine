@@ -1,5 +1,7 @@
 ﻿#include "Krystal.HTML/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/Factories/ElementFactory.hpp"
+#include "Krystal.HTML/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
@@ -32,6 +34,29 @@ namespace Krys::HTML
 
     return ElementCreationOptions {.CustomElementRegistry = document.CustomElementRegistry(),
                                    .Is = DOMStringAtom::Null()};
+  }
+
+  ExceptionOr<Ref<Element>>
+    DocumentAlgorithms::InternalCreateElementNS(Document &document, DOMStringAtom namespaceUri,
+                                                DOMStringAtom qualifiedName,
+                                                const ElementCreationOptionsOrString &options) noexcept
+  {
+    auto name =
+      NameValidation::ValidateAndExtract(namespaceUri, qualifiedName, ValidateAndExtractContext::Element);
+    if (name.HasException())
+    {
+      return name.ReleaseException();
+    }
+
+    auto creationOptions = DocumentAlgorithms::FlattenElementCreationOptions(options, document);
+    if (creationOptions.HasException())
+    {
+      return creationOptions.ReleaseException();
+    }
+
+    return ElementFactory::CreateElement(
+      document, {name.Value().NamespaceURI, name.Value().Prefix, name.Value().LocalName},
+      creationOptions.Value().Is, true, creationOptions.Value().CustomElementRegistry);
   }
 
   ExceptionOr<void> DocumentAlgorithms::AdoptNode(Node &node, Document &document) noexcept
