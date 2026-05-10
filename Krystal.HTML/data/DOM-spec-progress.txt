@@ -143,13 +143,19 @@ Source: https://dom.spec.whatwg.org
 4.4 Interface Node
     Implementation: Full
     Test Coverage : Partial
-    Notes		 :
+    Notes		  :
         - Test Coverage: CloneNode, IsEqualNode, LookupPrefix, LookupNamespaceURI, IsDefaultNamespace missing all test cases.
         - Test Coverage: CompareDocumentPosition: Missing test coverage for comparing attribute nodes, both with each other and with other node types.
 
 4.5 Interface Document
-    Implementation: None
+    Implementation: Partial
     Test Coverage : None
+    Notes		  :
+        - Implementation: Url/BaseUri.
+        - Implementation: GetElementsByClassName needs to be implemented.
+        - Implementation: Validate name for CreateProcessingInstruction's target.
+        - Implementation: CharacterSet - Document needs the encoding used passed to it on creation.
+        - Implementation: ContentType - Document needs this passed to it on creation.
 
 4.5.1 Interface DOMImplementation
     Implementation: None

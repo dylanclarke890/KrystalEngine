@@ -17,14 +17,15 @@ namespace Krys::HTML
   class NodeIterator : public IteratorBase, public RefCounted<NodeIterator>
   {
     friend class IteratorAlgorithms;
+    friend class Document;
 
   private:
     Ref<Node> _referenceNode;
     bool _pointerBeforeReferenceNode {false};
 
-  public:
-    NodeIterator() noexcept = default;
+    NodeIterator(Node &root, HTML::WhatToShow whatToShow, RefPtr<NodeFilter> &&filter) noexcept;
 
+  public:
     KRYS_NODISCARD const Node &ReferenceNode() const noexcept
     {
       return *_referenceNode;

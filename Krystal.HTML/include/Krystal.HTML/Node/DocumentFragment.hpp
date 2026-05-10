@@ -17,6 +17,7 @@ namespace Krys::HTML
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(DocumentFragment);
 
+    friend class Document;
     friend class DocumentFragmentRareData;
 
   private:

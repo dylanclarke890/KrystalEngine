@@ -44,6 +44,12 @@ namespace Krys::HTML
     Element(Document &document, NodeFlag nodeFlags = NodeFlag::None) noexcept;
 
   public:
+    // TODO(fix): this method shouldn't be public
+    KRYS_NODISCARD const QualifiedName &GetQualifiedName() const noexcept
+    {
+      return _qualifiedName;
+    }
+
 #pragma region Element
 
     KRYS_NODISCARD DOMStringAtom LocalName() const noexcept

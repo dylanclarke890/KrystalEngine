@@ -35,6 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML\Abort\AbortController.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\DocumentAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\Factories\ElementFactory.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\Mixins\ChildNode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\ElementAlgorithms.hpp" />
@@ -63,9 +64,13 @@
     <ClInclude Include="include\Krystal.HTML\Algorithms\NameValidation.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\NodeAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\CustomElement\CustomElementRegistry.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\DOMImplementation.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\ElementCreationOptions.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Enums\CustomElementState.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Enums\HTMLTagName.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Enums\NodeCollectionLiveness.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\Enums\QuirksMode.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\ImportNodeOptions.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\RareData\DocumentFragmentRareData.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\RareData\DocumentRareData.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Enums\InsertAdjacentWhere.hpp" />
@@ -153,6 +158,7 @@
     <ClInclude Include="include\Krystal.HTML\Algorithms\StringAlgorithms.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Algorithms\DocumentAlgorithms.cpp" />
     <ClCompile Include="src\Algorithms\ElementAlgorithms.cpp" />
     <ClCompile Include="src\Algorithms\ExtensibilityHooks.cpp" />
     <ClCompile Include="src\Algorithms\Factories\ElementFactory.cpp" />

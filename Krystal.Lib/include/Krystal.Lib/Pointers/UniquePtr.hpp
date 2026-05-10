@@ -13,6 +13,7 @@ namespace Krys
   using UniquePtr = std::unique_ptr<T, Deleter>;
 
   template <typename T, typename... Args>
+  requires(Constructible<T, Args...>)
   KRYS_NODISCARD constexpr UniquePtr<T>
     CreateUnique(Args &&...args) noexcept(NoThrowConstructible<T, Args...>)
   {

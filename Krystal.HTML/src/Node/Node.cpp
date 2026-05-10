@@ -31,7 +31,7 @@ namespace Krys::HTML
 
 #pragma region Node
 
-  URL Node::BaseURI() const noexcept
+  DOMString Node::BaseURI() const noexcept
   {
     return NodeDocument().BaseURI();
   }

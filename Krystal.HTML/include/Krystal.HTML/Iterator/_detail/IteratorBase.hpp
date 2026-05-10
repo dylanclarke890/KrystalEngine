@@ -21,6 +21,11 @@ namespace Krys::HTML
     WhatToShow _whatToShow {WhatToShow::SHOW_ALL};
     bool _isActive {false};
 
+    IteratorBase(Node &root, WhatToShow whatToShow, RefPtr<NodeFilter> &&filter) noexcept
+        : _root(ShareRef(root)), _filter(Krys::Move(filter)), _whatToShow(whatToShow)
+    {
+    }
+
   public:
     KRYS_NODISCARD Node &Root() noexcept
     {

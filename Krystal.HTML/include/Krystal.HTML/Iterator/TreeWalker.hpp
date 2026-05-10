@@ -13,8 +13,13 @@ namespace Krys::HTML
 {
   class TreeWalker : public RefCounted<TreeWalker>, public IteratorBase
   {
+    friend class Document;
+
   private:
     Ref<Node> _currentNode;
+
+  protected:
+    TreeWalker(Node &root, HTML::WhatToShow whatToShow, RefPtr<NodeFilter> &&filter) noexcept;
 
   public:
     KRYS_NODISCARD const Node &CurrentNode() const noexcept

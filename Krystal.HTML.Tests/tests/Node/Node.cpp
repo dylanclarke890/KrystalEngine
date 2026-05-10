@@ -49,7 +49,7 @@ namespace Krys::Tests
   TEST_CASE("Node::BaseURI", "[HTML][Node]")
   {
     CommonTestData data {};
-    REQUIRE(data.Node->BaseURI().Href == u8"about:blank");
+    REQUIRE(data.Node->BaseURI() == u8"about:blank");
   }
 
   TEST_CASE("Node::IsConnected", "[HTML][Node]")

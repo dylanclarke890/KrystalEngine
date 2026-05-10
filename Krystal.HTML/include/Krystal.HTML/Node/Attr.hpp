@@ -25,7 +25,7 @@ namespace Krys::HTML
     DOMString _value;
 
   protected:
-    Attr(Document &document, const QualifiedName &qualifiedName, DOMString &&value) noexcept;
+    Attr(Document &document, const QualifiedName &qualifiedName, DOMString &&value = {}) noexcept;
 
   public:
 #pragma region Attr

@@ -19,6 +19,8 @@ namespace Krys::HTML
       registry = document.CustomElementRegistry();
     }
 
+    // TODO(impl):
+
     return result;
   }
 

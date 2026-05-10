@@ -12,7 +12,7 @@ namespace Krys::HTML
   {
   public:
     /// @see https://dom.spec.whatwg.org/#concept-ordered-set-parser
-    KRYS_NODISCARD static List<DOMString> Parser(const DOMString &input) noexcept
+    KRYS_NODISCARD static List<DOMString> Parser(DOMStringView input) noexcept
     {
       auto inputTokens = StringAlgorithms::SplitOnWhitespace(input);
 

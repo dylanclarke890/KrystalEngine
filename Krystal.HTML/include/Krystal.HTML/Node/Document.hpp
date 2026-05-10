@@ -1,7 +1,14 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/Iterator/NodeFilter.hpp"
 #include "Krystal.HTML/Iterator/NodeIterator.hpp"
+#include "Krystal.HTML/Iterator/TreeWalker.hpp"
+#include "Krystal.HTML/Iterator/WhatToShow.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
+#include "Krystal.HTML/Node/DOMImplementation.hpp"
+#include "Krystal.HTML/Node/ElementCreationOptions.hpp"
+#include "Krystal.HTML/Node/Enums/QuirksMode.hpp"
+#include "Krystal.HTML/Node/ImportNodeOptions.hpp"
 #include "Krystal.HTML/Node/RareData/DocumentRareData.hpp"
 #include "Krystal.HTML/Ranges/Range.hpp"
 #include "Krystal.HTML/URL.hpp"
@@ -11,31 +18,98 @@
 
 namespace Krys::HTML
 {
+  class Attr;
+  class CDATASection;
+  class Comment;
   class CustomElementRegistry;
+  class DocumentType;
+  class Element;
   class HTMLCollection;
-  class MutationAlgorithms;
+  class ProcessingInstruction;
 
   class Document : public ContainerNode
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Document);
+    KRYS_TYPE_CAST_TRAITS_ACCESS();
 
     friend class DocumentRareData;
     friend class MutationAlgorithms;
     friend class TreeMutationDispatcher;
 
+  protected:
+    enum class Type
+    {
+      XML,
+      HTML
+    };
+
   private:
     UniquePtr<DocumentRareData> _documentRareData;
+    UniquePtr<DOMImplementation> _implementation;
     URL _baseURL {u8"about:blank"};
+    DOMString _contentType;
+    QuirksMode _quirksMode {QuirksMode::NoQuirks};
+    Type _documentType {Type::HTML};
     List<RawPtr<Range>> _liveRanges;
     List<RawPtr<NodeIterator>> _nodeIterators;
     RefPtr<CustomElementRegistry> _customElementRegistry;
+
+  protected:
+    Document(Type documentType) noexcept;
 
   public:
     Document() noexcept;
 
 #pragma region Document
 
+    KRYS_NODISCARD DOMImplementation &Implementation() noexcept;
+    KRYS_NODISCARD DOMString URL() const noexcept;
+    KRYS_NODISCARD DOMString DocumentURI() const noexcept;
+    KRYS_NODISCARD DOMString CompatMode() const noexcept;
+    KRYS_NODISCARD DOMString CharacterSet() const noexcept;
+    KRYS_NODISCARD DOMString Charset() const noexcept;       // legacy alias of .characterSet
+    KRYS_NODISCARD DOMString InputEncoding() const noexcept; // legacy alias of .characterSet
+    KRYS_NODISCARD DOMString ContentType() const noexcept;
+
+    KRYS_NODISCARD RefPtr<DocumentType> DocType() noexcept;
+    KRYS_NODISCARD RefPtr<const DocumentType> DocType() const noexcept;
+    KRYS_NODISCARD RefPtr<Element> DocumentElement() noexcept;
+    KRYS_NODISCARD RefPtr<const Element> DocumentElement() const noexcept;
+
+    KRYS_NODISCARD Ref<HTMLCollection> GetElementsByTagName(DOMStringAtom qualifiedName) noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> GetElementsByTagNameNS(DOMStringAtom namespaceUri,
+                                                              DOMStringAtom localName) noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> GetElementsByClassName(DOMStringAtom classNames) noexcept;
+
+    KRYS_NODISCARD ExceptionOr<Ref<Element>>
+      CreateElement(DOMStringAtom localName, const ElementCreationOptionsOrString &options = {}) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<Element>>
+      CreateElementNS(DOMStringAtom namespaceUri, DOMStringAtom qualifiedName,
+                      const ElementCreationOptionsOrString &options = {}) noexcept;
+    KRYS_NODISCARD Ref<DocumentFragment> CreateDocumentFragment() noexcept;
+    KRYS_NODISCARD Ref<Text> CreateTextNode(DOMString &&data) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<CDATASection>> CreateCDATASection(DOMString &&data) noexcept;
+    KRYS_NODISCARD Ref<Comment> CreateComment(DOMString &&data) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<ProcessingInstruction>>
+      CreateProcessingInstruction(DOMString &&target, DOMString &&data) noexcept;
+
+    KRYS_NODISCARD ExceptionOr<Ref<Node>> ImportNode(Node &node,
+                                                     const BoolOrImportNodeOptions &options = false) noexcept;
     KRYS_NODISCARD ExceptionOr<Ref<Node>> AdoptNode(Node &node) noexcept;
+
+    KRYS_NODISCARD ExceptionOr<Ref<Attr>> CreateAttribute(DOMStringAtom localName) noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<Attr>> CreateAttributeNS(DOMStringAtom namespaceUri,
+                                                            DOMStringAtom qualifiedName) noexcept;
+
+    KRYS_NODISCARD Ref<Event> CreateEvent(DOMStringAtom interface) noexcept;
+
+    KRYS_NODISCARD Ref<Range> CreateRange() noexcept;
+
+    KRYS_NODISCARD Ref<NodeIterator> CreateNodeIterator(Node &root,
+                                                        WhatToShow whatToShow = WhatToShow::SHOW_ALL,
+                                                        RefPtr<NodeFilter> &&filter = nullptr) noexcept;
+    KRYS_NODISCARD Ref<TreeWalker> CreateTreeWalker(Node &root, WhatToShow whatToShow = WhatToShow::SHOW_ALL,
+                                                    RefPtr<NodeFilter> &&filter = nullptr) noexcept;
 
 #pragma endregion
 
@@ -46,9 +120,10 @@ namespace Krys::HTML
       return u8"#document";
     }
 
-    KRYS_NODISCARD URL BaseURI() const noexcept
+    KRYS_NODISCARD DOMString BaseURI() const noexcept
     {
-      return _baseURL;
+      // TODO(impl): return the base url
+      return URL();
     }
 
 #pragma endregion
@@ -83,10 +158,7 @@ namespace Krys::HTML
 
 #pragma region DocumentOrShadowRoot Mixin - https://dom.spec.whatwg.org/#mixin-documentorshadowroot
 
-    RefPtr<CustomElementRegistry> CustomElementRegistry() const noexcept
-    {
-      return _customElementRegistry;
-    }
+    RefPtr<CustomElementRegistry> CustomElementRegistry() const noexcept;
 
 #pragma endregion
 
@@ -109,6 +181,17 @@ namespace Krys::HTML
     KRYS_NODISCARD const List<RawPtr<NodeIterator>> &NodeIterators() const noexcept
     {
       return _nodeIterators;
+    }
+
+  protected:
+    KRYS_NODISCARD bool IsHTMLDocument() const noexcept
+    {
+      return _documentType == Type::HTML;
+    }
+
+    KRYS_NODISCARD bool IsXMLDocument() const noexcept
+    {
+      return _documentType == Type::HTML;
     }
   };
 }

@@ -3,7 +3,6 @@
 #include "Krystal.HTML/DOMString.hpp"
 #include "Krystal.HTML/Events/EventTarget.hpp"
 #include "Krystal.HTML/Node/RareData/NodeRareData.hpp"
-#include "Krystal.HTML/URL.hpp"
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.HTML/Utils/NodeOrString.hpp"
 #include "Krystal.HTML/Utils/SmallNodeList.hpp"
@@ -122,7 +121,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD virtual DOMString NodeName() const noexcept = 0;
 
-    KRYS_NODISCARD URL BaseURI() const noexcept;
+    KRYS_NODISCARD DOMString BaseURI() const noexcept;
 
     /// @see https://dom.spec.whatwg.org/#connected
     KRYS_NODISCARD bool IsConnected() const noexcept
