@@ -177,7 +177,7 @@
     <ClInclude Include="include\Krystal.HTML\Utils\BoolOr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\CustomElementRegistry.hpp">
+    <ClInclude Include="include\Krystal.HTML\CustomElement\CustomElementRegistry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Algorithms\TreeTraversal.hpp">
@@ -360,6 +360,18 @@
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationRecordType.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CustomElement\CustomElementDefinition.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CustomElement\ElementDefinitionOptions.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Node\XMLDocument.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Node\Enums\HTMLTagName.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -495,6 +507,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\MutationObserver\MutationRecord.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Algorithms\Factories\ElementFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -703,6 +718,5 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\DOM-spec-progress.txt" />
-    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

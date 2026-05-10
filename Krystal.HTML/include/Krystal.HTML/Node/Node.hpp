@@ -69,14 +69,9 @@ namespace Krys::HTML
   class ContainerNode;
   class Document;
   class Element;
-  class ElementAlgorithms;
-  class ExtensibilityHooks;
-  class MutationObserver;
   class Node;
   class NodeList;
   class ShadowRoot;
-  class MutationAlgorithms;
-  class TreeMutationDispatcher;
   class TreeQueries;
 
   struct NodeInsertedContext;

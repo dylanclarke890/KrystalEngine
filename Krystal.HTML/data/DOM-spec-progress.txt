@@ -17,7 +17,7 @@ Source: https://dom.spec.whatwg.org
     Implementation: None
     Test Coverage : None
     Notes         :
-        - Implementation: scope-match-a-selectors-string requires CSS parsing.
+        - Implementation: 'scope-match-a-selectors-string' requires CSS parsing.
 
 ======================================================================
 2. EVENTS
@@ -27,7 +27,7 @@ Source: https://dom.spec.whatwg.org
     Implementation: Full
     Test Coverage : Partial
     Notes         :
-        - Test Coverage: Missing tests for composedPath, target, currentTarget and relatedTarget.
+        - Test Coverage: ComposedPath, Target, CurrentTarget, RelatedTarget.
 
 2.9 Dispatching events
     Implementation: Full
@@ -144,10 +144,8 @@ Source: https://dom.spec.whatwg.org
     Implementation: Full
     Test Coverage : Partial
     Notes		 :
-        - CloneNode: Missing test coverage.
-        - IsEqualNode: Missing test coverage for most cases.
-        - CompareDocumentPosition: Missing test coverage for comparing attribute nodes, both with each other and with other node types.
-        - LookupPrefix, LookupNamespaceURI, IsDefaultNamespace: Missing test coverage.
+        - Test Coverage: CloneNode, IsEqualNode, LookupPrefix, LookupNamespaceURI, IsDefaultNamespace missing all test cases.
+        - Test Coverage: CompareDocumentPosition: Missing test coverage for comparing attribute nodes, both with each other and with other node types.
 
 4.5 Interface Document
     Implementation: None

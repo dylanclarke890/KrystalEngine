@@ -6,7 +6,7 @@
 #include "Krystal.HTML/Events/EventNames.hpp"
 #include "Krystal.HTML/Events/EventTarget.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/Node/CustomElementRegistry.hpp"
+#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/Node.hpp"

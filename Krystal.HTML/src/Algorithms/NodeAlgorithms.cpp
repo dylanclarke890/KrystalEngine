@@ -13,7 +13,7 @@
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Comment.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
-#include "Krystal.HTML/Node/CustomElementRegistry.hpp"
+#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/DocumentFragment.hpp"
 #include "Krystal.HTML/Node/DocumentType.hpp"

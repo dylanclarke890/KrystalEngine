@@ -11,13 +11,9 @@
 namespace Krys::HTML
 {
   class Attr;
-  class CustomElementRegistry;
   class Document;
   class Element;
   class Node;
-
-  using CustomElementRegistryOrDefault = Maybe<RawPtr<CustomElementRegistry>>;
-  constexpr inline auto DefaultCustomElementRegistry = Null;
 
   class ElementAlgorithms
   {
@@ -25,12 +21,6 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#insert-adjacent
     KRYS_NODISCARD static ExceptionOr<RawPtr<Node>>
       InsertAdjacent(Element &element, InsertAdjacentWhere where, Node &node) noexcept;
-
-    static Ref<Element>
-      CreateElement(Document &document, DOMStringAtom localName, DOMStringAtom namespaceURI,
-                    DOMStringAtom prefix = DOMStringAtom::Null(), DOMStringAtom is = DOMStringAtom::Null(),
-                    bool synchronousCustomElements = false,
-                    CustomElementRegistryOrDefault registry = DefaultCustomElementRegistry) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#handle-attribute-changes
     static void HandleAttributeChanges(Attr &attribute, Element &element, DOMStringView oldValue,
