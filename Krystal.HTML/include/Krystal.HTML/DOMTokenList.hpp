@@ -27,6 +27,8 @@ namespace Krys::HTML
 
   class DOMTokenList
   {
+    friend class ExtensibilityHooks;
+
   private:
     DOMStringAtom _attributeName;
     SmallList<DOMString, 1> _tokens;
@@ -173,7 +175,6 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#concept-domtokenlist-validation
     KRYS_NODISCARD ExceptionOr<bool> ValidationSteps(DOMStringView token) const noexcept;
 
-    // TODO(impl):
     /// @see https://dom.spec.whatwg.org/#concept-dtl-update
     void UpdateSteps() noexcept;
 

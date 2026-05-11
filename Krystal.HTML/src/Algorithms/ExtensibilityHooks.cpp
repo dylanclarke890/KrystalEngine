@@ -1,7 +1,11 @@
 ﻿#include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/OrderedSet.hpp"
+#include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Events/Event.hpp"
+#include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
@@ -29,11 +33,13 @@ namespace Krys::HTML
     {
       insertedNode.SetEventTargetFlag(EventTargetFlag::IsInShadowTree);
     }
+
+    insertedNode.OnInsert();
   }
 
   void ExtensibilityHooks::NodePostConnection(Node &connectedNode) noexcept
   {
-    // TODO(impl): post connection steps
+    connectedNode.OnPostConnection();
   }
 
   void ExtensibilityHooks::NodeChildrenChanged(ContainerNode &node) noexcept
@@ -41,10 +47,11 @@ namespace Krys::HTML
     node.OnChildrenChanged();
   }
 
-  void ExtensibilityHooks::NodeMoved(Node &node, Node &movedNode, bool isSubtreeRoot,
-                                     ContainerNode &oldAncestor) noexcept
+  void ExtensibilityHooks::NodeMoved(Node &movedNode, bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
     // TODO(impl): clear and set flags on node and movedNode as necessary
+
+    movedNode.OnMove(isSubtreeRoot, oldAncestor);
   }
 
   void ExtensibilityHooks::NodeRemoved(Node &removedNode, bool isSubtreeRoot,
@@ -52,18 +59,94 @@ namespace Krys::HTML
   {
     removedNode.ClearEventTargetFlag(EventTargetFlag::IsConnected);
     removedNode.ClearEventTargetFlag(EventTargetFlag::IsInShadowTree);
+    
+    removedNode.OnRemove(isSubtreeRoot, oldAncestor);
   }
 
-  void ExtensibilityHooks::NodeCloned(const Node &node, Node &copy, bool subtree) noexcept
+  void ExtensibilityHooks::NodeCloned(Node &node, Node &copy, bool subtree) noexcept
   {
-    // TODO(impl): Run any cloning steps defined for node in other applicable specifications and pass node,
-    // copy, and subtree as parameters.
+    node.OnClone(copy, subtree);
   }
 
   void ExtensibilityHooks::ElementAttributeChanged(Element &element, DOMStringAtom localName,
-                                                   DOMStringView oldValue, DOMStringView value,
+                                                   Maybe<DOMStringView> oldValue, Maybe<DOMStringView> value,
                                                    DOMStringAtom namespaceURI) noexcept
   {
-    // TODO(impl): Implement this method
+    if (localName == u8"id" && namespaceURI == DOMStringAtom::Null())
+    {
+      if (value.has_value() && !value->empty())
+      {
+        element.Id(DOMString(*value));
+      }
+      else
+      {
+        element.Id(u8"");
+      }
+
+      return;
+    }
+
+    if (localName == u8"class" && namespaceURI == DOMStringAtom::Null())
+    {
+      element._domTokenList->_tokens.clear();
+      if (value.has_value())
+      {
+        auto tokens = OrderedSet::Parser(*value);
+        element._domTokenList->_tokens.clear();
+        element._domTokenList->_tokens.append(tokens.begin(), tokens.end());
+      }
+
+      return;
+    }
+
+    if (localName == u8"slot" && namespaceURI == DOMStringAtom::Null())
+    {
+      if (value == oldValue)
+      {
+        return;
+      }
+
+      if (!value.has_value() && oldValue.has_value() && oldValue->empty())
+      {
+        return;
+      }
+
+      if (value.has_value() && value->empty() && !oldValue.has_value())
+      {
+        return;
+      }
+
+      if (Is<HTMLSlotElement>(element))
+      {
+        auto &slotElement = Downcast<HTMLSlotElement>(element);
+        if (!value.has_value() || value->empty())
+        {
+          slotElement.Name(u8"");
+        }
+        else
+        {
+          slotElement.Name(DOMString(*value));
+        }
+
+        SlotAlgorithms::AssignSlottablesForTree(TreeQueries::Root(slotElement));
+      }
+
+      if (!value.has_value() || value->empty())
+      {
+        element._slottableName = u8"";
+      }
+      else
+      {
+        element._slottableName = DOMString(*value);
+      }
+
+      if (auto *assignedSlot = SlotAlgorithms::GetAssignedSlot(element))
+      {
+        SlotAlgorithms::AssignSlottables(*assignedSlot);
+      }
+
+      SlotAlgorithms::AssignSlot(element);
+      return;
+    }
   }
 }

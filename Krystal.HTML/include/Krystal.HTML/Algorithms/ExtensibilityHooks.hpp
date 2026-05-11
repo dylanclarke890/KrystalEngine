@@ -1,14 +1,13 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/DOMString.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
 
 namespace Krys::HTML
 {
   class ContainerNode;
   class Element;
   class Node;
-  class Event;
-  struct EventInit;
 
   /// @see https://dom.spec.whatwg.org/#other-applicable-specifications
   class ExtensibilityHooks
@@ -24,17 +23,17 @@ namespace Krys::HTML
     static void NodeChildrenChanged(ContainerNode &node) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-node-move-ext
-    static void NodeMoved(Node &node, Node &movedNode, bool isSubtreeRoot,
-                          ContainerNode &oldAncestor) noexcept;
+    static void NodeMoved(Node &movedNode, bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-node-remove-ext
     static void NodeRemoved(Node &removedNode, bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-node-clone-ext
-    static void NodeCloned(const Node &node, Node &copy, bool subtree) noexcept;
+    static void NodeCloned(Node &node, Node &copy, bool subtree) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-change-ext
-    static void ElementAttributeChanged(Element &element, DOMStringAtom localName, DOMStringView oldValue,
-                                        DOMStringView value, DOMStringAtom namespaceURI) noexcept;
+    static void ElementAttributeChanged(Element &element, DOMStringAtom localName,
+                                        Maybe<DOMStringView> oldValue, Maybe<DOMStringView> value,
+                                        DOMStringAtom namespaceURI) noexcept;
   };
 }

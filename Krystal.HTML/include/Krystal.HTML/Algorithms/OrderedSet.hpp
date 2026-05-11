@@ -4,6 +4,7 @@
 #include "Krystal.HTML/DOMString.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 
 namespace Krys::HTML
 {
@@ -29,7 +30,7 @@ namespace Krys::HTML
     }
 
     /// @see https://dom.spec.whatwg.org/#concept-ordered-set-serializer
-    KRYS_NODISCARD static inline DOMString Serializer(const List<DOMString> &tokens) noexcept
+    KRYS_NODISCARD static inline DOMString Serializer(Span<DOMString> tokens) noexcept
     {
       return StringAlgorithms::Concatenate(tokens, u8" ");
     }

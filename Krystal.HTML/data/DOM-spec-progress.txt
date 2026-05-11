@@ -133,7 +133,7 @@ Source: https://dom.spec.whatwg.org
         - Test Coverage: for taking records and ensuring they are cleared from the observer's record queue.
 
 4.3.2 Queuing a mutation record
-    Implementation: None
+    Implementation: Partial
     Test Coverage : None
 
 4.3.3 Interface MutationRecord
@@ -183,12 +183,11 @@ Source: https://dom.spec.whatwg.org
     Test Coverage : None
     Notes 	      : 
         - Implementation: Closest/Matches requires CSS parsing.
+        - Implementation: GetElementsByClassName needs to be implemented.
 
 4.9.1 Interface NamedNodeMap
-    Implementation: None
+    Implementation: Full
     Test Coverage : None
-    Notes         : 
-        - requires implementing element/attr first.
 
 4.9.2 Interface Attr
     Implementation: Full
@@ -250,11 +249,8 @@ Source: https://dom.spec.whatwg.org
 ======================================================================
 
 7.1 Interface DOMTokenList
-    Implementation: Partial
+    Implementation: Full
     Test Coverage : None
-    Notes         :
-        - Missing implementation for 'Value' setter, needs element/attr implementing first.
-
 
 ======================================================================
 ======================================================================

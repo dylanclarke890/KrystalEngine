@@ -115,14 +115,25 @@ namespace Krys::Tests
 
   TEST_CASE("StringAlgorithms::Concatenate", "[HTML][StringAlgorithms]")
   {
-    REQUIRE(StringAlgorithms::Concatenate(List<DOMString> {u8"foo", u8"bar", u8"baz"}, std::nullopt)
-            == u8"foobarbaz");
-    REQUIRE(StringAlgorithms::Concatenate(List<DOMString> {}, std::nullopt) == u8"");
-    REQUIRE(StringAlgorithms::Concatenate(List<DOMString> {u8""}, std::nullopt) == u8"");
-    REQUIRE(StringAlgorithms::Concatenate(List<DOMString> {u8"foo", u8"", u8"bar"}, std::nullopt)
-            == u8"foobar");
-
-    REQUIRE(StringAlgorithms::Concatenate(List<DOMString> {u8"foo", u8"bar", u8"baz"}, u8", ")
-            == u8"foo, bar, baz");
+    {
+      auto input = List<DOMString> {u8"foo", u8"bar", u8"baz"};
+      REQUIRE(StringAlgorithms::Concatenate(input, std::nullopt) == u8"foobarbaz");
+    }
+    {
+      auto input = List<DOMString> {};
+      REQUIRE(StringAlgorithms::Concatenate(input, std::nullopt) == u8"");
+    }
+    {
+      auto input = List<DOMString> {u8""};
+      REQUIRE(StringAlgorithms::Concatenate(input, std::nullopt) == u8"");
+    }
+    {
+      auto input = List<DOMString> {u8"foo", u8"", u8"bar"};
+      REQUIRE(StringAlgorithms::Concatenate(input, std::nullopt) == u8"foobar");
+    }
+    {
+      auto input = List<DOMString> {u8"foo", u8"bar", u8"baz"};
+      REQUIRE(StringAlgorithms::Concatenate(input, u8", ") == u8"foo, bar, baz");
+    }
   }
 }

@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/HTMLElement/HTMLElement.hpp"
-#include "Krystal.Lib/Pointers/RefPtr.hpp"
+#include "Krystal.Lib/Pointers/WeakPtr.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 
 namespace Krys::HTML
@@ -12,7 +12,7 @@ namespace Krys::HTML
 
   private:
     DOMString _name;
-    List<Ref<Node>> _assignedNodes;
+    List<WeakRef<Node>> _assignedNodes;
 
   public:
     HTMLSlotElement(Document &document) noexcept;
@@ -27,7 +27,7 @@ namespace Krys::HTML
       _name = Krys::Move(name);
     }
 
-    KRYS_NODISCARD const List<Ref<Node>> &AssignedNodes() const noexcept
+    KRYS_NODISCARD const List<WeakRef<Node>> &AssignedNodes() const noexcept
     {
       return _assignedNodes;
     }

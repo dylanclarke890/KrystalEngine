@@ -3,6 +3,7 @@
 #include "Krystal.HTML/DOMString.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 #include "Krystal.Text/ASCII.hpp"
 #include <cassert>
 
@@ -120,8 +121,7 @@ namespace Krys::HTML
     }
 
     /// @see https://infra.spec.whatwg.org/#string-concatenate
-    KRYS_NODISCARD static DOMString Concatenate(const List<DOMString> &tokens,
-                                                Maybe<DOMString> separator) noexcept
+    KRYS_NODISCARD static DOMString Concatenate(Span<DOMString> tokens, Maybe<DOMString> separator) noexcept
     {
       if (tokens.empty())
       {

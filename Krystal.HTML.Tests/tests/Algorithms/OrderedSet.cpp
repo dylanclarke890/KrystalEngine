@@ -16,8 +16,17 @@ namespace Krys::Tests
 
   TEST_CASE("OrderedSet", "[HTML][OrderedSet]")
   {
-    REQUIRE(OrderedSet::Serializer(List<DOMString> {}) == u8"");
-    REQUIRE(OrderedSet::Serializer(List<DOMString> {u8"foo"}) == u8"foo");
-    REQUIRE(OrderedSet::Serializer(List<DOMString> {u8"foo", u8"bar"}) == u8"foo bar");
+    {
+      auto input = List<DOMString> {};
+      REQUIRE(OrderedSet::Serializer(input) == u8"");
+    }
+    {
+      auto input = List<DOMString> {u8"foo"};
+      REQUIRE(OrderedSet::Serializer(input) == u8"foo");
+    }
+    {
+      auto input = List<DOMString> {u8"foo", u8"bar"};
+      REQUIRE(OrderedSet::Serializer(input) == u8"foo bar");
+    }
   }
 }

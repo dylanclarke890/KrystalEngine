@@ -73,9 +73,6 @@ namespace Krys::HTML
   class ShadowRoot;
   class TreeQueries;
 
-  struct NodeInsertedContext;
-  struct NodeRemovedContext;
-
   /// @see https://dom.spec.whatwg.org/#dictdef-getrootnodeoptions
   struct GetRootNodeOptions
   {
@@ -175,7 +172,7 @@ namespace Krys::HTML
     }
     ExceptionOr<void> Normalize() noexcept;
 
-    KRYS_NODISCARD ExceptionOr<Ref<Node>> CloneNode(bool subtree = false) const noexcept;
+    KRYS_NODISCARD ExceptionOr<Ref<Node>> CloneNode(bool subtree = false) noexcept;
     KRYS_NODISCARD bool IsEqualNode(RawPtr<const Node> otherNode) const noexcept;
     KRYS_NODISCARD bool IsSameNode(RawPtr<const Node> otherNode) const noexcept; // legacy alias of ===
 
@@ -198,6 +195,32 @@ namespace Krys::HTML
   protected:
     /// @see https://dom.spec.whatwg.org/#get-the-parent
     KRYS_NODISCARD RawPtr<EventTarget> GetParent(Event &event) const noexcept override;
+
+    virtual void OnInsert() noexcept
+    {
+    }
+
+    virtual void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
+    {
+      (void)isSubtreeRoot;
+      (void)oldAncestor;
+    }
+
+    virtual void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
+    {
+      (void)isSubtreeRoot;
+      (void)oldAncestor;
+    }
+
+    virtual void OnClone(Node &copy, bool subtree) noexcept
+    {
+      (void)copy;
+      (void)subtree;
+    }
+
+    virtual void OnPostConnection() noexcept
+    {
+    }
 
 #pragma region Type Checks
 

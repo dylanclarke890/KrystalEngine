@@ -30,7 +30,9 @@ namespace Krys::HTML
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Element);
 
     friend class ElementAlgorithms;
+    friend class ExtensibilityHooks;
     friend class Node;
+    friend class NamedNodeMap;
     friend class TreeQueries;
 
   private:
@@ -39,7 +41,9 @@ namespace Krys::HTML
     RefPtr<CustomElementRegistry> _customElementRegistry;
     UniquePtr<ElementRareData> _elementRareData;
     UniquePtr<NamedNodeMap> _namedNodeMap;
+    UniquePtr<DOMTokenList> _domTokenList;
     List<Ref<Attr>> _attributes;
+    DOMString _slottableName;
 
   protected:
     Element(Document &document, NodeFlag nodeFlags = NodeFlag::None) noexcept;
@@ -71,7 +75,7 @@ namespace Krys::HTML
     KRYS_NODISCARD DOMString Id() const noexcept;
     void ClassName(DOMString &&className) noexcept;
     KRYS_NODISCARD DOMString ClassName() const noexcept;
-    KRYS_NODISCARD DOMTokenList ClassList() noexcept;
+    KRYS_NODISCARD DOMTokenList &ClassList() noexcept;
     void Slot(DOMString &&slot) noexcept;
     KRYS_NODISCARD DOMString Slot() const noexcept;
 

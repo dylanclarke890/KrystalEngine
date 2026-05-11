@@ -27,20 +27,22 @@ namespace Krys::HTML
 
     KRYS_NODISCARD size_t Length() noexcept;
 
-    KRYS_NODISCARD RawPtr<Attr> Item(size_t index) noexcept;
+    KRYS_NODISCARD RefPtr<Attr> Item(size_t index) noexcept;
 
-    KRYS_NODISCARD RawPtr<Attr> NamedItem(const DOMString &qualifiedName) noexcept;
+    KRYS_NODISCARD RefPtr<Attr> GetNamedItem(DOMStringAtom qualifiedName) noexcept;
 
-    KRYS_NODISCARD RawPtr<Attr> NamedItemNS(const DOMString &attrNamespace,
-                                            const DOMString &localName) noexcept;
+    KRYS_NODISCARD RefPtr<Attr> GetNamedItemNS(DOMStringAtom attrNamespace, DOMStringAtom localName) noexcept;
 
-    RawPtr<Attr> SetNamedItem(Attr &attr) noexcept;
+    ExceptionOr<RefPtr<Attr>> SetNamedItem(Attr &attr) noexcept;
 
-    RawPtr<Attr> SetNamedItemNS(Attr &attr) noexcept;
+    ExceptionOr<RefPtr<Attr>> SetNamedItemNS(Attr &attr) noexcept;
 
-    ExceptionOr<Ref<Attr>> RemoveNamedItem(const DOMString &qualifiedName) noexcept;
+    ExceptionOr<Ref<Attr>> RemoveNamedItem(DOMStringAtom qualifiedName) noexcept;
 
-    ExceptionOr<Ref<Attr>> RemoveNamedItemNS(const DOMString &attrNamespace,
-                                             const DOMString &localName) noexcept;
+    ExceptionOr<Ref<Attr>> RemoveNamedItemNS(DOMStringAtom attrNamespace, DOMStringAtom localName) noexcept;
+  
+    KRYS_NODISCARD RefPtr<Attr> operator[](size_t index) noexcept;
+    KRYS_NODISCARD RefPtr<Attr> operator[](DOMStringAtom qualifiedName) noexcept;
+  
   };
 }

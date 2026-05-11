@@ -41,7 +41,7 @@ namespace Krys::HTML
     }
   }
 
-  Ref<Node> NodeAlgorithms::CloneNode(const Node &node, RawPtr<Document> document, bool subtree,
+  Ref<Node> NodeAlgorithms::CloneNode(Node &node, RawPtr<Document> document, bool subtree,
                                       RawPtr<ContainerNode> parent,
                                       RawPtr<CustomElementRegistry> fallbackRegistry) noexcept
   {
@@ -63,7 +63,7 @@ namespace Krys::HTML
     if (subtree)
     {
       assert(Is<ContainerNode>(node));
-      for (auto &child : ConstChildNodeRange(Downcast<ContainerNode>(node)))
+      for (auto &child : ChildNodeRange(Downcast<ContainerNode>(node)))
       {
         CloneNode(child, document, subtree, Downcast<ContainerNode>(copy.get()), fallbackRegistry);
       }

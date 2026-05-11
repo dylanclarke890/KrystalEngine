@@ -64,9 +64,14 @@ namespace Krys::HTML
     return ElementAlgorithms::GetAttributeValue(*this, u8"class");
   }
 
-  KRYS_NODISCARD DOMTokenList Element::ClassList() noexcept
+  KRYS_NODISCARD DOMTokenList &Element::ClassList() noexcept
   {
-    return DOMTokenList(*this, u8"class");
+    if (_domTokenList == nullptr)
+    {
+      _domTokenList = CreateUnique<DOMTokenList>(*this, u8"class");
+    }
+
+    return *_domTokenList;
   }
 
   void Element::Slot(DOMString &&slot) noexcept

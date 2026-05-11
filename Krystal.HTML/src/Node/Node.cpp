@@ -157,7 +157,7 @@ namespace Krys::HTML
     return {};
   }
 
-  ExceptionOr<Ref<Node>> Node::CloneNode(bool subtree) const noexcept
+  ExceptionOr<Ref<Node>> Node::CloneNode(bool subtree) noexcept
   {
     if (Is<ShadowRoot>(this))
     {
