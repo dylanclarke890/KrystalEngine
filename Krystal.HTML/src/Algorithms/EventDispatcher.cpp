@@ -2,11 +2,12 @@
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Events/Event.hpp"
 #include "Krystal.HTML/Events/EventNames.hpp"
 #include "Krystal.HTML/Events/EventTarget.hpp"
+#include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
@@ -30,8 +31,7 @@ namespace Krys::HTML
       assert(target->IsWindow());
 
       // SPEC-VIOLATION(DOM, HTML): We don't actually implement Window.
-      // Let targetOverride be target, if legacy target override flag is not given, and target’s associated
-      // Document otherwise.
+      // if legacy target override flag is given, let targetOverride be target’s associated Document.
     }
 
     RawPtr<EventTarget> activationTarget = nullptr;
@@ -56,7 +56,8 @@ namespace Krys::HTML
       }
 
       bool slotInClosedTree = false;
-      // TODO(impl): Let slottable be target, if target is a slottable and is assigned, and null otherwise.
+      // TODO(impl): SLOTTABLES - Let slottable be target, if target is a slottable and is assigned, and null
+      // otherwise.
       RawPtr<EventTarget> slottable = nullptr;
       RawPtr<EventTarget> parent = target->GetParent(event);
 
@@ -65,10 +66,10 @@ namespace Krys::HTML
         RawPtr<Node> parentNode = DynamicDowncast<Node>(parent);
         if (slottable != nullptr)
         {
-          // TODO(impl): assert: parent is a slot.
+          assert(Is<HTMLSlotElement>(*parentNode));
           slottable = nullptr;
 
-          auto parentRoot = parent->IsNode() ? &TreeQueries::Root(*parentNode) : nullptr;
+          auto parentRoot = Is<Node>(parent) ? &TreeQueries::Root(*parentNode) : nullptr;
           auto parentShadowRoot = DynamicDowncast<ShadowRoot>(parentRoot);
           if (parentShadowRoot && parentShadowRoot->Mode() == ShadowRootMode::Closed)
           {
@@ -76,7 +77,7 @@ namespace Krys::HTML
           }
         }
 
-        // TODO(impl): If parent is a slottable and is assigned, then set slottable to parent.
+        // TODO(impl): SLOTTABLES - If parent is a slottable and is assigned, then set slottable to parent.
         relatedTarget = ShadowRootAlgorithms::Retarget(event.RelatedTarget(), *parent);
         touchTargets.clear();
         for (auto &touchTarget : event.TouchTargetList())
@@ -386,8 +387,8 @@ namespace Krys::HTML
       //   global object.
       //   Set legacyOutputDidListenersThrowFlag if given.
 
-      // TODO(impl): we should probably have some way to report exceptions that occur during event listener
-      // invocation, even if we don't have JS objects or realms.
+      // TODO(impl): LOGGING - we should probably have some way to report exceptions that occur during event
+      // listener invocations, even if we don't have JS objects or realms.
       listener->Callback()->HandleEvent(event);
       event._inPassiveListener = false;
 

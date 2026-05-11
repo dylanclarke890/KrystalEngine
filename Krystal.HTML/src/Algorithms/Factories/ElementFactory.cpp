@@ -19,7 +19,7 @@ namespace Krys::HTML
       registry = document.CustomElementRegistry();
     }
 
-    // TODO(impl):
+    // TODO(impl): REQUIRED - create an element
 
     return result;
   }

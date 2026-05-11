@@ -155,7 +155,7 @@ namespace Krys::HTML
       return;
     }
 
-    // TODO(fix): this is probably wrong.
+    // TODO(fix): REQUIRED - this is probably wrong.
     List<Ref<Node>> nodesToRemove;
     auto *root = CommonAncestorContainer();
     for (auto *node = TreeTraversal::Next(*_start.Container, root); node;
@@ -427,7 +427,7 @@ namespace Krys::HTML
 
   ExceptionOr<void> Range::SurroundContents(ContainerNode &newParent) noexcept
   {
-    // TODO(fix): this is probably wrong.
+    // TODO(fix): REQUIRED - this is probably wrong.
     auto *commonAncestor = CommonAncestorContainer();
     auto *firstPartiallyContainedChild = GetFirstPartiallyContainedChild(commonAncestor);
     auto *lastPartiallyContainedChild = GetLastPartiallyContainedChild(commonAncestor);

@@ -64,7 +64,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD RawPtr<Element> Host() const noexcept;
 
-    // TODO(impl): The onslotchange attribute is an event handler IDL attribute for the onslotchange event
+    // TODO(impl): MINOR - The onslotchange attribute is an event handler IDL attribute for the onslotchange event
     // handler, whose event handler event type is slotchange.
 
 #pragma endregion

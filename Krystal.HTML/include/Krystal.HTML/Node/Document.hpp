@@ -127,7 +127,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD DOMString BaseURI() const noexcept
     {
-      // TODO(impl): return the base url
+      // TODO(fix): MINOR - return the base url
       return URL();
     }
 

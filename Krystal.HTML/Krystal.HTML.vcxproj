@@ -161,6 +161,7 @@
     <ClInclude Include="include\Krystal.HTML\Algorithms\StringAlgorithms.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Ranges\StaticRange.cpp" />
     <ClCompile Include="src\Node\XMLDocument.cpp" />
     <ClCompile Include="src\Algorithms\CustomElementAlgorithms.cpp" />
     <ClCompile Include="src\Algorithms\DocumentAlgorithms.cpp" />

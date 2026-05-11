@@ -49,7 +49,26 @@ namespace Krys::HTML
 
   void ExtensibilityHooks::NodeMoved(Node &movedNode, bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
   {
-    // TODO(impl): clear and set flags on node and movedNode as necessary
+    auto *parent = movedNode.ParentNode();
+    assert(parent != nullptr);
+
+    if (parent->IsConnected())
+    {
+      movedNode.SetEventTargetFlag(EventTargetFlag::IsConnected);
+    }
+    else
+    {
+      movedNode.ClearEventTargetFlag(EventTargetFlag::IsConnected);
+    }
+
+    if (parent->IsInShadowTree())
+    {
+      movedNode.SetEventTargetFlag(EventTargetFlag::IsInShadowTree);
+    }
+    else
+    {
+      movedNode.ClearEventTargetFlag(EventTargetFlag::IsInShadowTree);
+    }
 
     movedNode.OnMove(isSubtreeRoot, oldAncestor);
   }
@@ -59,7 +78,7 @@ namespace Krys::HTML
   {
     removedNode.ClearEventTargetFlag(EventTargetFlag::IsConnected);
     removedNode.ClearEventTargetFlag(EventTargetFlag::IsInShadowTree);
-    
+
     removedNode.OnRemove(isSubtreeRoot, oldAncestor);
   }
 

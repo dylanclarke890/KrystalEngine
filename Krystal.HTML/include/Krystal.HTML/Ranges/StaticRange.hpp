@@ -5,19 +5,35 @@
 
 namespace Krys::HTML
 {
-  struct StaticRangeInit
+  class StaticRangeInit
   {
-    BoundaryPoint Start;
-    BoundaryPoint End;
+    BoundaryPoint _start;
+    BoundaryPoint _end;
+
+    StaticRangeInit(BoundaryPoint start, BoundaryPoint end) noexcept
+        : _start {Krys::Move(start)}, _end {Krys::Move(end)}
+    {
+    }
+
+  public:
+    static ExceptionOr<StaticRangeInit> Create(BoundaryPoint start, BoundaryPoint end) noexcept;
+
+    KRYS_NODISCARD const BoundaryPoint &Start() const noexcept
+    {
+      return _start;
+    }
+
+    KRYS_NODISCARD const BoundaryPoint &End() const noexcept
+    {
+      return _end;
+    }
   };
 
   class StaticRange : public AbstractRange
   {
   public:
-    StaticRange(const StaticRangeInit &init) noexcept : AbstractRange(init.Start, init.End)
+    StaticRange(const StaticRangeInit &init) noexcept : AbstractRange(init.Start(), init.End())
     {
-      // TODO(fix): If init["startContainer"] or init["endContainer"] is a DocumentType or Attr node, then
-      // throw an "InvalidNodeTypeError" DOMException.
     }
 
     KRYS_NODISCARD bool IsValid() const noexcept

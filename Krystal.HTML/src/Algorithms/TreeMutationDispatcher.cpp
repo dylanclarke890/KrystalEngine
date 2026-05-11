@@ -2,10 +2,10 @@
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
+#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/MutationObserver/MutationObserver.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
-#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
@@ -20,7 +20,7 @@ namespace Krys::HTML
     Maybe<DOMStringView> oldValue, const SmallNodeList &addedNodes, const SmallNodeList &removedNodes,
     RefPtr<Node> &&previousSibling, RefPtr<Node> &&nextSibling) noexcept
   {
-    // TODO(impl): MUTATION-OBSERVERS - figure out the actual type to use here
+    // TODO(impl): MUTATION-OBSERVERS - Queue a mutation record
     List<int> interestedObservers;
 
     auto nodes = TreeQueries::InclusiveAncestors(target);
@@ -35,7 +35,7 @@ namespace Krys::HTML
                                                        RefPtr<Node> &&nextSibling) noexcept
   {
     assert(addedNodes.size() > 0 || removedNodes.size() > 0);
-    QueueMutationRecord(u8"childList", target, std::nullopt, std::nullopt, std::nullopt, addedNodes,
-                        removedNodes, Krys::Move(previousSibling), Krys::Move(nextSibling));
+    QueueMutationRecord(u8"childList", target, Null, Null, Null, addedNodes, removedNodes,
+                        Krys::Move(previousSibling), Krys::Move(nextSibling));
   }
 }
