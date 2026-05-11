@@ -1,10 +1,11 @@
 ﻿#include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
@@ -44,29 +45,7 @@ namespace Krys::HTML
         return insertResult.ReleaseException();
       }
 
-      auto index = TreeQueries::Index(*this);
-      for (auto &range : NodeDocument().LiveRanges())
-      {
-        if (range->StartContainer() == this && range->StartOffset() > offset)
-        {
-          range->SetStart(*newNode, range->StartOffset() - offset);
-        }
-
-        if (range->EndContainer() == this)
-        {
-          range->SetEnd(*newNode, range->EndOffset() - offset);
-        }
-
-        if (range->StartContainer() == ParentNode() && range->StartOffset() == index + 1)
-        {
-          range->SetStart(*range->StartContainer(), range->StartOffset() + 1);
-        }
-
-        if (range->EndContainer() == ParentNode() && range->EndOffset() == index + 1)
-        {
-          range->SetEnd(*range->EndContainer(), range->EndOffset() + 1);
-        }
-      }
+      LiveRangeUpdater::SplitTextNode(*this, *newNode, offset);
     }
 
     ReplaceData(offset, count, u8"");

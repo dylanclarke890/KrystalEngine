@@ -35,9 +35,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML\Abort\AbortController.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\CustomElementAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\DocumentAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\Factories\ElementFactory.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\HTMLCollectionAlgorithms.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\LiveRangeUpdater.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\Mixins\ChildNode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\ElementAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\ExtensibilityHooks.hpp" />
@@ -159,11 +161,14 @@
     <ClInclude Include="include\Krystal.HTML\Algorithms\StringAlgorithms.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Node\XMLDocument.cpp" />
+    <ClCompile Include="src\Algorithms\CustomElementAlgorithms.cpp" />
     <ClCompile Include="src\Algorithms\DocumentAlgorithms.cpp" />
     <ClCompile Include="src\Algorithms\ElementAlgorithms.cpp" />
     <ClCompile Include="src\Algorithms\ExtensibilityHooks.cpp" />
     <ClCompile Include="src\Algorithms\Factories\ElementFactory.cpp" />
     <ClCompile Include="src\Algorithms\HTMLCollectionAlgorithms.cpp" />
+    <ClCompile Include="src\Algorithms\LiveRangeUpdater.cpp" />
     <ClCompile Include="src\Algorithms\Mixins\ChildNode.cpp" />
     <ClCompile Include="src\Algorithms\Mixins\ParentNode.cpp" />
     <ClCompile Include="src\Algorithms\NodeAlgorithms.cpp" />

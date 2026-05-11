@@ -196,6 +196,8 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#get-the-parent
     KRYS_NODISCARD RawPtr<EventTarget> GetParent(Event &event) const noexcept override;
 
+#pragma region Hooks
+
     virtual void OnInsert() noexcept
     {
     }
@@ -221,6 +223,8 @@ namespace Krys::HTML
     virtual void OnPostConnection() noexcept
     {
     }
+
+#pragma endregion
 
 #pragma region Type Checks
 

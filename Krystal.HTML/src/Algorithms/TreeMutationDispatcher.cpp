@@ -38,41 +38,4 @@ namespace Krys::HTML
     QueueMutationRecord(u8"childList", target, std::nullopt, std::nullopt, std::nullopt, addedNodes,
                         removedNodes, Krys::Move(previousSibling), Krys::Move(nextSibling));
   }
-
-  void TreeMutationDispatcher::LiveRangePreRemove(const Node &node) noexcept
-  {
-    auto *parent = node.ParentNode();
-    assert(parent != nullptr);
-
-    auto index = TreeQueries::Index(node);
-
-    for (auto &range : node.NodeDocument().LiveRanges())
-    {
-      if (auto *startContainer = DynamicDowncast<ContainerNode>(*range->StartContainer()))
-      {
-        if (TreeQueries::IsInclusiveDescendant(*startContainer, node))
-        {
-          range->SetStart(*parent, index);
-        }
-      }
-
-      if (auto *endContainer = DynamicDowncast<ContainerNode>(*range->EndContainer()))
-      {
-        if (TreeQueries::IsInclusiveDescendant(*endContainer, node))
-        {
-          range->SetEnd(*parent, index);
-        }
-      }
-
-      if (range->StartContainer() == parent)
-      {
-        range->SetStart(*parent, range->StartOffset() - 1uz);
-      }
-
-      if (range->EndContainer() == parent)
-      {
-        range->SetEnd(*parent, range->EndOffset() - 1uz);
-      }
-    }
-  }
 }

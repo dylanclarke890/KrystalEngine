@@ -23,9 +23,10 @@ namespace Krys::HTML
                                                              ContainerNode &parent) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-node-clone
-    static Ref<Node> CloneNode(Node &node, RawPtr<Document> document = nullptr, bool subtree = false,
-                               RawPtr<ContainerNode> parent = nullptr,
-                               RawPtr<CustomElementRegistry> fallbackRegistry = nullptr) noexcept;
+    KRYS_NODISCARD static ExceptionOr<Ref<Node>>
+      CloneNode(Node &node, RawPtr<Document> document = nullptr, bool subtree = false,
+                RawPtr<ContainerNode> parent = nullptr,
+                RawPtr<CustomElementRegistry> fallbackRegistry = nullptr) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#clone-a-single-node
     KRYS_NODISCARD static Ref<Node>

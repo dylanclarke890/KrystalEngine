@@ -187,15 +187,52 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#valid-shadow-host-name
     KRYS_NODISCARD static bool IsValidShadowHostName(DOMStringView name) noexcept
     {
-      // TODO(impl):
+      if (IsValidCustomElementName(name))
+      {
+        return true;
+      }
+
+      static Array<DOMStringView, 18> validNames = {
+        u8"article", u8"aside", u8"blockquote", u8"body", u8"div",     u8"footer",
+        u8"h1",      u8"h2",    u8"h3",         u8"h4",   u8"h5",      u8"h6",
+        u8"header",  u8"main",  u8"nav",        u8"p",    u8"section", u8"span"};
+
+      if (std::ranges::contains(validNames, name))
+      {
+        return true;
+      }
+
       return false;
     }
 
     /// @see https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name
     KRYS_NODISCARD static bool IsValidCustomElementName(DOMStringView name) noexcept
     {
-      // TODO(impl):
-      return false;
+      if (!IsValidElementLocalName(name))
+      {
+        return false;
+      }
+
+      if (!Krys::Text::IsASCIILower(name[0]))
+      {
+        return false;
+      }
+
+      if (std::ranges::any_of(name, [](char8 ch) { return Krys::Text::IsASCIIUpper(ch) || ch == '-'; }))
+      {
+        return false;
+      }
+
+      static Array<DOMStringView, 8> reservedNames = {
+        u8"annotation-xml", u8"color-profile",    u8"font-face",      u8"font-face-src",
+        u8"font-face-uri",  u8"font-face-format", u8"font-face-name", u8"missing-glyph"};
+
+      if (std::ranges::contains(reservedNames, name))
+      {
+        return false;
+      }
+
+      return true;
     }
   };
 }

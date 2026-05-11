@@ -1,10 +1,12 @@
 ﻿#include "Krystal.HTML/Node/HTMLCollection.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/MutationObserver/MutationObserver.hpp"
+#include "Krystal.HTML/Namespaces.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
-#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
@@ -46,27 +48,8 @@ namespace Krys::HTML
 
   RawPtr<const Element> LiveHTMLCollection::Item(size_t index) const noexcept
   {
-    if (auto root = _root.lock())
-    {
-      size_t count = 0;
-      for (const Node &node : DescendantRange(*root))
-      {
-        if (auto element = DynamicDowncast<Element>(node))
-        {
-          if (_filter(*element))
-          {
-            ++count;
-          }
+    return const_cast<LiveHTMLCollection *>(this)->Item(index);
 
-          if (count > index)
-          {
-            return element;
-          }
-        }
-      }
-    }
-
-    return nullptr;
   }
 
   RawPtr<Element> LiveHTMLCollection::operator[](size_t index) noexcept
@@ -81,14 +64,36 @@ namespace Krys::HTML
 
   RawPtr<Element> LiveHTMLCollection::NamedItem(DOMStringView name) noexcept
   {
-    // TODO(impl):
+    if (auto root = _root.lock())
+    {
+      size_t count = 0;
+      for (Node &node : DescendantRange(*root))
+      {
+        if (auto element = DynamicDowncast<Element>(node))
+        {
+          if (_filter(*element))
+          {
+            if (element->Id() == name)
+            {
+              return element;
+            }
+
+            if (element->NamespaceURI() == Namespaces::HTML
+                && ElementAlgorithms::GetAttributeValue(*element, u8"name") == name)
+            {
+              return element;
+            }
+          }
+        }
+      }
+    }
+
     return nullptr;
   }
 
   RawPtr<const Element> LiveHTMLCollection::NamedItem(DOMStringView name) const noexcept
   {
-    // TODO(impl):
-    return nullptr;
+    return const_cast<LiveHTMLCollection *>(this)->NamedItem(name);
   }
 
   RawPtr<Element> LiveHTMLCollection::operator[](DOMStringView name) noexcept
@@ -129,12 +134,7 @@ namespace Krys::HTML
 
   RawPtr<const Element> StaticHTMLCollection::Item(size_t index) const noexcept
   {
-    if (index < _elements.size())
-    {
-      return _elements[index].get();
-    }
-
-    return nullptr;
+    return const_cast<StaticHTMLCollection *>(this)->Item(index);
   }
 
   RawPtr<Element> StaticHTMLCollection::operator[](size_t index) noexcept
@@ -149,14 +149,24 @@ namespace Krys::HTML
 
   RawPtr<Element> StaticHTMLCollection::NamedItem(DOMStringView name) noexcept
   {
-    // TODO(impl):
+    for (auto &element : _elements)
+    {
+      if (element->Id() == name)
+      {
+        return element.get();
+      }
+      if (element->NamespaceURI() == Namespaces::HTML && ElementAlgorithms::GetAttributeValue(*element, u8"name") == name)
+      {
+        return element.get();
+      }
+    }
+
     return nullptr;
   }
 
   RawPtr<const Element> StaticHTMLCollection::NamedItem(DOMStringView name) const noexcept
   {
-    // TODO(impl):
-    return nullptr;
+    return const_cast<StaticHTMLCollection *>(this)->NamedItem(name);
   }
 
   RawPtr<Element> StaticHTMLCollection::operator[](DOMStringView name) noexcept

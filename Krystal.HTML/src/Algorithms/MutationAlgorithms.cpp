@@ -2,6 +2,7 @@
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.HTML/Algorithms/IteratorAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
@@ -346,7 +347,7 @@ namespace Krys::HTML
     assert(node.ParentNode() != nullptr);
     auto &oldParent = *node.ParentNode();
 
-    TreeMutationDispatcher::LiveRangePreRemove(node);
+    LiveRangeUpdater::PreRemove(node);
 
     for (auto iterator : node.NodeDocument().NodeIterators())
     {
@@ -664,7 +665,7 @@ namespace Krys::HTML
     assert(node.ParentNode() != nullptr);
     auto &parent = *node.ParentNode();
 
-    TreeMutationDispatcher::LiveRangePreRemove(node);
+    LiveRangeUpdater::PreRemove(node);
 
     for (auto iterator : node.NodeDocument().NodeIterators())
     {

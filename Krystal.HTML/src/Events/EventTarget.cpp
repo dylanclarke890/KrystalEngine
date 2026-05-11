@@ -145,11 +145,15 @@ namespace Krys::HTML
       {
         return true;
       }
+
+      if (node->NodeDocument().DocumentElement().get() == node)
+      {
+        return true;
+      }
     }
 
     // TODO(impl): we don't have document/body elements yet.
     // return true if:
-    //  - or is a node whose node document’s document element is eventTarget,
     //  - or is a node whose node document’s body element is eventTarget.[HTML]
 
     return false;

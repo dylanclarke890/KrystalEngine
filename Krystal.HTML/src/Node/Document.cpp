@@ -1,5 +1,6 @@
 ﻿#include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/Factories/ElementFactory.hpp"
 #include "Krystal.HTML/Algorithms/HTMLCollectionAlgorithms.hpp"
@@ -412,7 +413,7 @@ namespace Krys::HTML
 
   RefPtr<CustomElementRegistry> Document::CustomElementRegistry() const noexcept
   {
-    if (_customElementRegistry != nullptr && !_customElementRegistry->IsScoped())
+    if (CustomElementAlgorithms::IsGlobalCustomElementRegistry(_customElementRegistry.get()))
     {
       return _customElementRegistry;
     }

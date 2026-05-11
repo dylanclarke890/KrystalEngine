@@ -64,7 +64,7 @@ namespace Krys::HTML
     return ElementAlgorithms::GetAttributeValue(*this, u8"class");
   }
 
-  KRYS_NODISCARD DOMTokenList &Element::ClassList() noexcept
+  DOMTokenList &Element::ClassList() noexcept
   {
     if (_domTokenList == nullptr)
     {

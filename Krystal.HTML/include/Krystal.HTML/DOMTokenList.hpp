@@ -178,7 +178,6 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#concept-dtl-update
     void UpdateSteps() noexcept;
 
-    // TODO(impl):
     /// @see https://dom.spec.whatwg.org/#concept-dtl-serialize
     KRYS_NODISCARD DOMString SerializeSteps() const noexcept;
 

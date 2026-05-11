@@ -8,8 +8,14 @@ namespace Krys::HTML
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(XMLDocument);
 
-    // TODO(impl): set the type of the document to 'xml'
+  public:
+    XMLDocument() noexcept;
   };
 }
 
-// TODO(impl): add type cast traits for XMLDocument
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::XMLDocument)
+  KRYS_NODISCARD static bool IsType(const Krys::HTML::Document &document) noexcept
+  {
+    return document.IsXMLDocument();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

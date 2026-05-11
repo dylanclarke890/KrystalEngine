@@ -4,10 +4,13 @@
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/Namespaces.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
+#include "Krystal.HTML/Node/HTMLDocument.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.Text/ASCII.hpp"
 
 namespace Krys::HTML
 {
@@ -140,8 +143,10 @@ namespace Krys::HTML
   RawPtr<Attr> ElementAlgorithms::GetAttributeByName(DOMStringAtom qualifiedName,
                                                      const Element &element) noexcept
   {
-    // TODO(impl): If element is in the HTML namespace and its node document is an HTML document, then set
-    // qualifiedName to qualifiedName in ASCII lowercase.
+    if (element.NamespaceURI() == Namespaces::HTML && Is<HTMLDocument>(element.NodeDocument()))
+    {
+      qualifiedName = Krys::Text::ToASCIILowercase(qualifiedName.View());
+    }
 
     auto it = std::find_if(element._attributes.begin(), element._attributes.end(),
                            [&](const Ref<Attr> &attr) { return attr->Name() == qualifiedName; });

@@ -35,6 +35,8 @@ namespace Krys::HTML
     friend class DocumentRareData;
     friend class DOMImplementation;
     friend class MutationAlgorithms;
+    friend class LiveRangeUpdater;
+    friend class NodeAlgorithms;
     friend class HTMLCollectionAlgorithms;
     friend class TreeMutationDispatcher;
 
@@ -55,6 +57,7 @@ namespace Krys::HTML
     List<RawPtr<Range>> _liveRanges;
     List<RawPtr<NodeIterator>> _nodeIterators;
     RefPtr<CustomElementRegistry> _customElementRegistry;
+    bool _allowDeclarativeShadowRoots : 1 {false};
 
   protected:
     Document(Type documentType) noexcept;
@@ -164,7 +167,7 @@ namespace Krys::HTML
 
 #pragma endregion
 
-    // TODO(fix): this shouldn't be part of the public API
+  protected:
     KRYS_NODISCARD List<RawPtr<Range>> &LiveRanges() noexcept
     {
       return _liveRanges;
@@ -185,11 +188,11 @@ namespace Krys::HTML
       return _nodeIterators;
     }
 
-  protected:
     /// @see https://dom.spec.whatwg.org/#get-the-parent
     KRYS_NODISCARD RawPtr<EventTarget> GetParent(Event &event) const noexcept override
     {
-      // TODO(impl): A document’s get the parent algorithm, given an event, returns null if event’s type
+      // SPEC-VIOLATION:
+      // A document’s get the parent algorithm, given an event, returns null if event’s type
       // attribute value is "load" or document does not have a browsing context; otherwise the document’s
       // relevant global object.
 

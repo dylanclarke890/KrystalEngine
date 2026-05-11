@@ -18,12 +18,17 @@ namespace Krys::HTML
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ShadowRoot);
 
+    friend class NodeAlgorithms;
+
   private:
     ShadowRootMode _mode : BitCount<ShadowRootMode>() {ShadowRootMode::Open};
     bool _delegatesFocus : 1 {false};
+    bool _availableToElementInternals : 1 {false};
+    bool _declarative : 1 {false};
     SlotAssignmentMode _slotAssignment : BitCount<SlotAssignmentMode>() {SlotAssignmentMode::Manual};
     bool _clonable : 1 {false};
     bool _serializable : 1 {false};
+    bool _keepCustomElementRegistryNull : 1 {false};
     RefPtr<CustomElementRegistry> _customElementRegistry;
 
   public:

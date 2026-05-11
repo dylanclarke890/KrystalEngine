@@ -1,5 +1,6 @@
 ﻿#include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
@@ -115,34 +116,10 @@ namespace Krys::HTML
       while (currentNode != nullptr && TreeQueries::IsExclusiveTextNode(*currentNode))
       {
         auto &currentTextNode = Downcast<Text>(*currentNode);
-
-        for (auto &range : NodeDocument().LiveRanges())
-        {
-          if (range->StartContainer() == currentNode)
-          {
-            range->SetStart(*node, range->StartOffset() + length);
-          }
-
-          if (range->EndContainer() == currentNode)
-          {
-            range->SetEnd(*node, range->EndOffset() + length);
-          }
-
-          if (range->StartContainer() == currentNode->ParentNode()
-              && range->StartOffset() == TreeQueries::Index(*currentNode))
-          {
-            range->SetStart(*node, length);
-          }
-
-          if (range->EndContainer() == currentNode->ParentNode()
-              && range->EndOffset() == TreeQueries::Index(*currentNode))
-          {
-            range->SetEnd(*node, length);
-          }
-        }
-
+        LiveRangeUpdater::NodeNormalized(*this, currentTextNode, length);
+        
         length += currentTextNode.Data().size();
-        currentNode = currentNode->NextSibling();
+        currentNode = currentTextNode.NextSibling();
       }
 
       while (node->NextSibling() != nullptr && TreeQueries::IsExclusiveTextNode(*node->NextSibling()))
@@ -164,7 +141,7 @@ namespace Krys::HTML
       return Exception {ExceptionCode::NotSupportedError};
     }
 
-    return NodeAlgorithms::CloneNode(*this, &NodeDocument(), subtree);
+    return NodeAlgorithms::CloneNode(*this, nullptr, subtree);
   }
 
   bool Node::IsEqualNode(RawPtr<const Node> otherNode) const noexcept

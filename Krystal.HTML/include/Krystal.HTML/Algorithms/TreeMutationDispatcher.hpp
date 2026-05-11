@@ -25,6 +25,5 @@ namespace Krys::HTML
                                         const SmallNodeList &removedNodes, RefPtr<Node> &&previousSibling,
                                         RefPtr<Node> &&nextSibling) noexcept;
 
-    static void LiveRangePreRemove(const Node &node) noexcept;
   };
 }

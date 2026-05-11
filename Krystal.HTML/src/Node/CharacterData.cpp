@@ -1,11 +1,12 @@
 ﻿#include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
+#include "Krystal.HTML/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.HTML/Algorithms/Mixins/ChildNode.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
-#include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
@@ -80,32 +81,7 @@ namespace Krys::HTML
     auto deleteOffset = offset + data.size();
     _data.erase(deleteOffset, count);
 
-    for (auto &range : NodeDocument().LiveRanges())
-    {
-      if (range->StartContainer() == this)
-      {
-        if (range->StartOffset() > offset && range->StartOffset() <= offset + count)
-        {
-          range->SetStart(*this, offset);
-        }
-        else if (range->StartOffset() > offset + count)
-        {
-          range->SetStart(*this, range->StartOffset() + data.size() - count);
-        }
-      }
-
-      if (range->EndContainer() == this)
-      {
-        if (range->EndOffset() > offset && range->EndOffset() <= offset + count)
-        {
-          range->SetEnd(*this, offset);
-        }
-        else if (range->EndOffset() > offset + count)
-        {
-          range->SetEnd(*this, range->EndOffset() + data.size() - count);
-        }
-      }
-    }
+    LiveRangeUpdater::CharacterDataReplaced(*this, offset, count, data.size());
 
     if (auto parent = ShareRefPtr(ParentNode()))
     {

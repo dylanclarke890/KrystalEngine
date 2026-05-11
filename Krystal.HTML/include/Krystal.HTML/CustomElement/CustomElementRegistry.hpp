@@ -4,7 +4,7 @@
 
 namespace Krys::HTML
 {
-  // TODO(impl): Implement this class
+  // TODO(impl) - CUSTOM-ELEMENT:
   class CustomElementRegistry : public RefCounted<CustomElementRegistry>
   {
   public:

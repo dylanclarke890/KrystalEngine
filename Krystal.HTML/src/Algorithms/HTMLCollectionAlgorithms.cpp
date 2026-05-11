@@ -30,18 +30,17 @@ namespace Krys::HTML
                                            {
                                              if (element.NamespaceURI() == Namespaces::HTML)
                                              {
-                                               return element.GetQualifiedName().Name()
-                                                      == qualifiedNameLowercase;
+                                               return element._qualifiedName.Name() == qualifiedNameLowercase;
                                              }
                                              else
                                              {
-                                               return element.GetQualifiedName().Name() == qualifiedName;
+                                               return element._qualifiedName.Name() == qualifiedName;
                                              }
                                            });
     }
 
     return CreateRef<LiveHTMLCollection>(CreateWeakRef(root), [qualifiedName](const Element &element)
-                                         { return element.GetQualifiedName().Name() == qualifiedName; });
+                                         { return element._qualifiedName.Name() == qualifiedName; });
   }
 
   Ref<HTMLCollection> HTMLCollectionAlgorithms::ElementsByTagNameNS(ContainerNode &root,

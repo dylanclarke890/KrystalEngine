@@ -18,12 +18,10 @@ namespace Krys::HTML
 {
   class Attr;
   class CustomElementRegistry;
-  class ElementAlgorithms;
   class HTMLCollection;
   class HTMLSlotElement;
   class NodeList;
   class ShadowRoot;
-  class TreeQueries;
 
   class Element : public ContainerNode
   {
@@ -31,7 +29,9 @@ namespace Krys::HTML
 
     friend class ElementAlgorithms;
     friend class ExtensibilityHooks;
+    friend class HTMLCollectionAlgorithms;
     friend class Node;
+    friend class NodeAlgorithms;
     friend class NamedNodeMap;
     friend class TreeQueries;
 
@@ -44,17 +44,12 @@ namespace Krys::HTML
     UniquePtr<DOMTokenList> _domTokenList;
     List<Ref<Attr>> _attributes;
     DOMString _slottableName;
+    DOMStringAtom _is {DOMStringAtom::Null()};
 
   protected:
     Element(Document &document, NodeFlag nodeFlags = NodeFlag::None) noexcept;
 
   public:
-    // TODO(fix): this method shouldn't be public
-    KRYS_NODISCARD const QualifiedName &GetQualifiedName() const noexcept
-    {
-      return _qualifiedName;
-    }
-
 #pragma region Element
 
     KRYS_NODISCARD DOMStringAtom LocalName() const noexcept
