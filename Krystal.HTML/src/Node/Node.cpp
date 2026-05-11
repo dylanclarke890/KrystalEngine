@@ -3,15 +3,17 @@
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
+#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/MutationObserver/RegisteredObserver.hpp"
 #include "Krystal.HTML/MutationObserver/TransientRegisteredObserver.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
-#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/DocumentType.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
@@ -530,6 +532,16 @@ namespace Krys::HTML
   }
 
 #pragma endregion
+
+  RawPtr<EventTarget> Node::GetParent(Event &event) const noexcept
+  {
+    if (SlotAlgorithms::IsAssigned(*this))
+    {
+      return SlotAlgorithms::GetAssignedSlot(*this);
+    }
+
+    return ParentNode();
+  }
 
   List<Ref<RegisteredObserver>> &Node::RegisteredObserverList() noexcept
   {

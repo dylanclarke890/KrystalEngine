@@ -2,6 +2,7 @@
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/Factories/ElementFactory.hpp"
+#include "Krystal.HTML/Algorithms/HTMLCollectionAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/Mixins/NonElementParentNode.hpp"
 #include "Krystal.HTML/Algorithms/Mixins/ParentNode.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
@@ -117,79 +118,18 @@ namespace Krys::HTML
 
   Ref<HTMLCollection> Document::GetElementsByTagName(DOMStringAtom qualifiedName) noexcept
   {
-    if (qualifiedName == u8"*")
-    {
-      return CreateRef<LiveHTMLCollection>(CreateWeakRef(*this), [](const Element &) { return true; });
-    }
-
-    if (Is<HTMLDocument>(this))
-    {
-      DOMStringAtom qualifiedNameLowercase = ::Krys::Text::ToASCIILowercase(qualifiedName.View());
-      return CreateRef<LiveHTMLCollection>(CreateWeakRef(*this),
-                                           [qualifiedName, qualifiedNameLowercase](const Element &element)
-                                           {
-                                             if (element.NamespaceURI() == Namespaces::HTML)
-                                             {
-                                               return element.GetQualifiedName().Name()
-                                                      == qualifiedNameLowercase;
-                                             }
-                                             else
-                                             {
-                                               return element.GetQualifiedName().Name() == qualifiedName;
-                                             }
-                                           });
-    }
-
-    return CreateRef<LiveHTMLCollection>(CreateWeakRef(*this), [qualifiedName](const Element &element)
-                                         { return element.GetQualifiedName().Name() == qualifiedName; });
+    return HTMLCollectionAlgorithms::ElementsByTagName(*this, qualifiedName);
   }
 
   Ref<HTMLCollection> Document::GetElementsByTagNameNS(DOMStringAtom namespaceUri,
                                                        DOMStringAtom localName) noexcept
   {
-    if (namespaceUri == DOMStringAtom::Empty())
-    {
-      namespaceUri = DOMStringAtom::Null();
-    }
-
-    if (namespaceUri == u8"*" && localName == u8"*")
-    {
-      return CreateRef<LiveHTMLCollection>(CreateWeakRef(*this), [](const Element &node) { return true; });
-    }
-
-    if (namespaceUri == u8"*")
-    {
-      return CreateRef<LiveHTMLCollection>(CreateWeakRef(*this), [localName](const Element &element)
-                                           { return element.LocalName() == localName; });
-    }
-
-    if (localName == u8"*")
-    {
-      return CreateRef<LiveHTMLCollection>(CreateWeakRef(*this), [namespaceUri](const Element &element)
-                                           { return element.NamespaceURI() == namespaceUri; });
-    }
-
-    return CreateRef<LiveHTMLCollection>(
-      CreateWeakRef(*this), [namespaceUri, localName](const Element &element)
-      { return element.NamespaceURI() == namespaceUri && element.LocalName() == localName; });
+    return HTMLCollectionAlgorithms::ElementsByTagNameNS(*this, namespaceUri, localName);
   }
 
   Ref<HTMLCollection> Document::GetElementsByClassName(DOMStringAtom classNames) noexcept
   {
-    auto classes = OrderedSet::Parser(classNames.View());
-    if (classes.empty())
-    {
-      // TODO(perf): return an empty collection instead.
-      return CreateRef<StaticHTMLCollection>(SmallElementList {});
-    }
-
-    if (_quirksMode == QuirksMode::Quirks)
-    {
-      // TODO(impl): case insensitive matching in quirks mode.
-    }
-
-    // TODO(impl): case sensitive matching
-    return CreateRef<StaticHTMLCollection>(SmallElementList {});
+    return HTMLCollectionAlgorithms::ElementsByClassName(*this, classNames);
   }
 
   ExceptionOr<Ref<Element>> Document::CreateElement(DOMStringAtom localName,

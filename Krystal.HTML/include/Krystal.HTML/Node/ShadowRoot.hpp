@@ -27,7 +27,7 @@ namespace Krys::HTML
     RefPtr<CustomElementRegistry> _customElementRegistry;
 
   public:
-    ShadowRoot(Document &document, RefPtr<CustomElementRegistry> &&registry,
+    ShadowRoot(Document &document, RefPtr<CustomElementRegistry> &&registry = nullptr,
                NodeFlag flags = NodeFlag::None) noexcept;
 
 #pragma region ShadowRoot
@@ -37,25 +37,30 @@ namespace Krys::HTML
       return _mode;
     }
 
+    KRYS_NODISCARD bool DelegatesFocus() const noexcept
+    {
+      return _delegatesFocus;
+    }
+
     KRYS_NODISCARD SlotAssignmentMode SlotAssignment() const noexcept
     {
       return _slotAssignment;
-    }
-
-    KRYS_NODISCARD RawPtr<Element> Host() const noexcept
-    {
-      if (auto host = _host.lock())
-      {
-        return host.get();
-      }
-
-      return nullptr;
     }
 
     KRYS_NODISCARD bool Clonable() const noexcept
     {
       return _clonable;
     }
+
+    KRYS_NODISCARD bool Serializable() const noexcept
+    {
+      return _serializable;
+    }
+
+    KRYS_NODISCARD RawPtr<Element> Host() const noexcept;
+
+    // TODO(impl): The onslotchange attribute is an event handler IDL attribute for the onslotchange event
+    // handler, whose event handler event type is slotchange.
 
 #pragma endregion
 
@@ -67,6 +72,10 @@ namespace Krys::HTML
     }
 
 #pragma endregion
+
+  protected:
+    /// @see https://dom.spec.whatwg.org/#get-the-parent
+    KRYS_NODISCARD RawPtr<EventTarget> GetParent(Event &event) const noexcept override;
   };
 }
 

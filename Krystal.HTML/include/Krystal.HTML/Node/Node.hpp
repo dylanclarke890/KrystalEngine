@@ -196,6 +196,9 @@ namespace Krys::HTML
 #pragma endregion
 
   protected:
+    /// @see https://dom.spec.whatwg.org/#get-the-parent
+    KRYS_NODISCARD RawPtr<EventTarget> GetParent(Event &event) const noexcept override;
+
 #pragma region Type Checks
 
     KRYS_NODISCARD bool IsAttributeNode() const noexcept

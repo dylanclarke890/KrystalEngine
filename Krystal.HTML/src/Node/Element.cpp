@@ -1,6 +1,7 @@
 ﻿#include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/HTMLCollectionAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/Mixins/ChildNode.hpp"
 #include "Krystal.HTML/Algorithms/Mixins/ParentNode.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
@@ -10,14 +11,17 @@
 #include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
+#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/HTMLCollection.hpp"
+#include "Krystal.HTML/Node/HTMLDocument.hpp"
+#include "Krystal.HTML/Node/NamedNodeMap.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/RareData/ElementRareData.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
+#include "Krystal.Text/ASCII.hpp"
 
 namespace Krys::HTML
 {
@@ -32,8 +36,10 @@ namespace Krys::HTML
   {
     auto qualifiedName = _qualifiedName.Name();
 
-    // TODO(impl): If this is in the HTML namespace and its node document is an HTML document, then set
-    // qualifiedName to qualifiedName in ASCII uppercase.
+    if (NamespaceURI() == Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
+    {
+      qualifiedName = Krys::Text::ToASCIIUppercase(qualifiedName);
+    }
 
     return qualifiedName;
   }
@@ -78,9 +84,15 @@ namespace Krys::HTML
     return !_attributes.empty();
   }
 
-  // NamedNodeMap &Element::Attributes() const noexcept
-  //{
-  // }
+  NamedNodeMap &Element::Attributes() noexcept
+  {
+    if (_namedNodeMap == nullptr)
+    {
+      _namedNodeMap = CreateUnique<NamedNodeMap>(*this);
+    }
+
+    return *_namedNodeMap;
+  }
 
   List<DOMString> Element::GetAttributeNames() const noexcept
   {
@@ -117,8 +129,10 @@ namespace Krys::HTML
       return Exception {ExceptionCode::InvalidCharacterError};
     }
 
-    // TODO(impl): If this is in the HTML namespace and its node document is an HTML document, then set
-    // qualifiedName to qualifiedName in ASCII lowercase.
+    if (NamespaceURI() == Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
+    {
+      qualifiedName = Krys::Text::ToASCIILowercase(qualifiedName.View());
+    }
 
     // SPEC-VIOLATION(TRUSTED-TYPES): Let verifiedValue be the result of calling get trusted type compliant
     // attribute value with qualifiedName, null, this, and value.
@@ -178,8 +192,10 @@ namespace Krys::HTML
       return Exception {ExceptionCode::InvalidCharacterError};
     }
 
-    // TODO(impl): If this is in the HTML namespace and its node document is an HTML document, then set
-    // qualifiedName to qualifiedName in ASCII lowercase.
+    if (NamespaceURI() == Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
+    {
+      qualifiedName = Krys::Text::ToASCIILowercase(qualifiedName.View());
+    }
 
     auto it = std::find_if(_attributes.begin(), _attributes.end(),
                            [&](const Ref<Attr> &attr) { return attr->Name() == qualifiedName; });
@@ -208,8 +224,10 @@ namespace Krys::HTML
 
   bool Element::HasAttribute(DOMStringAtom qualifiedName) const noexcept
   {
-    // TODO(impl): If this is in the HTML namespace and its node document is an HTML document, then set
-    // qualifiedName to qualifiedName in ASCII lowercase.
+    if (NamespaceURI() == Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
+    {
+      qualifiedName = Krys::Text::ToASCIILowercase(qualifiedName.View());
+    }
 
     return std::ranges::any_of(_attributes, [&](const Ref<Attr> &a) { return a->Name() == qualifiedName; });
   }
@@ -300,21 +318,18 @@ namespace Krys::HTML
 
   Ref<HTMLCollection> Element::GetElementsByTagName(DOMStringAtom qualifiedName) noexcept
   {
-    // TODO(impl): implement this
-    return CreateRef<LiveHTMLCollection>(CreateWeakRef(*this), [](const Element &) { return true; });
+    return HTMLCollectionAlgorithms::ElementsByTagName(*this, qualifiedName);
   }
 
   Ref<HTMLCollection> Element::GetElementsByTagNameNS(DOMStringAtom namespaceURI,
                                                       DOMStringAtom localName) noexcept
   {
-    // TODO(impl): implement this
-    return CreateRef<LiveHTMLCollection>(CreateWeakRef(*this), [](const Element &) { return true; });
+    return HTMLCollectionAlgorithms::ElementsByTagNameNS(*this, namespaceURI, localName);
   }
 
-  Ref<HTMLCollection> Element::GetElementsByClassName(const DOMString &classNames) noexcept
+  Ref<HTMLCollection> Element::GetElementsByClassName(DOMStringAtom classNames) noexcept
   {
-    // TODO(impl): implement this
-    return CreateRef<LiveHTMLCollection>(CreateWeakRef(*this), [](const Element &) { return true; });
+    return HTMLCollectionAlgorithms::ElementsByClassName(*this, classNames);
   }
 
   ExceptionOr<RawPtr<Element>> Element::InsertAdjacentElement(InsertAdjacentWhere where,
@@ -345,8 +360,7 @@ namespace Krys::HTML
 
   DOMString Element::NodeName() const noexcept
   {
-    // TODO(impl): return it's HTML uppercased tag name
-    return _qualifiedName.Name();
+    return TagName();
   }
 
   Maybe<DOMString> Element::TextContent() const noexcept

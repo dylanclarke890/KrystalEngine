@@ -387,6 +387,9 @@
     <ClInclude Include="include\Krystal.HTML\Algorithms\DocumentAlgorithms.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Algorithms\HTMLCollectionAlgorithms.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -531,6 +534,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\DOMImplementation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Algorithms\HTMLCollectionAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

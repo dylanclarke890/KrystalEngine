@@ -144,6 +144,7 @@ Source: https://dom.spec.whatwg.org
     Implementation: Full
     Test Coverage : Partial
     Notes		  :
+        - Implementation: CloneNode.
         - Test Coverage: CloneNode, IsEqualNode, LookupPrefix, LookupNamespaceURI, IsDefaultNamespace missing all test cases.
         - Test Coverage: CompareDocumentPosition: Missing test coverage for comparing attribute nodes, both with each other and with other node types.
 
@@ -156,6 +157,8 @@ Source: https://dom.spec.whatwg.org
         - Implementation: Validate name for CreateProcessingInstruction's target.
         - Implementation: CharacterSet - Document needs the encoding used passed to it on creation.
         - Implementation: ContentType - Document needs this passed to it on creation.
+        - Implementation: AdoptNode needs it's implementation finishing.
+
 
 4.5.1 Interface DOMImplementation
     Implementation: Partial
@@ -166,15 +169,20 @@ Source: https://dom.spec.whatwg.org
 4.7 Interface DocumentFragment
     Implementation: Full
     Test Coverage : Partial
-        - Missing test cases for TextContent.
+    Notes 	      : 
+        - Test Coverage: TextContent.
 
 4.8 Interface ShadowRoot
-    Implementation: None
+    Implementation: Partial
     Test Coverage : None
+    Notes 	      : 
+        - Implementation: 'onslotchange' event handler and 'slotchange' event support.
 
 4.9 Interface Element
-    Implementation: None
+    Implementation: Partial
     Test Coverage : None
+    Notes 	      : 
+        - Implementation: Closest/Matches requires CSS parsing.
 
 4.9.1 Interface NamedNodeMap
     Implementation: None

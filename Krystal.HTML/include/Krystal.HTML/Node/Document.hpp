@@ -35,6 +35,7 @@ namespace Krys::HTML
     friend class DocumentRareData;
     friend class DOMImplementation;
     friend class MutationAlgorithms;
+    friend class HTMLCollectionAlgorithms;
     friend class TreeMutationDispatcher;
 
   protected:
@@ -185,6 +186,16 @@ namespace Krys::HTML
     }
 
   protected:
+    /// @see https://dom.spec.whatwg.org/#get-the-parent
+    KRYS_NODISCARD RawPtr<EventTarget> GetParent(Event &event) const noexcept override
+    {
+      // TODO(impl): A document’s get the parent algorithm, given an event, returns null if event’s type
+      // attribute value is "load" or document does not have a browsing context; otherwise the document’s
+      // relevant global object.
+
+      return nullptr;
+    }
+
     KRYS_NODISCARD bool IsHTMLDocument() const noexcept
     {
       return _documentType == Type::HTML;

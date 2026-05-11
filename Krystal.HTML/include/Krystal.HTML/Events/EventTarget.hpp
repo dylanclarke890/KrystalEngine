@@ -42,7 +42,7 @@ namespace Krys::HTML
 #pragma endregion
 
     /// @see https://dom.spec.whatwg.org/#get-the-parent
-    RawPtr<EventTarget> GetParent(Event &event) const noexcept
+    KRYS_NODISCARD virtual RawPtr<EventTarget> GetParent(Event &event) const noexcept
     {
       (void)event;
       return nullptr;

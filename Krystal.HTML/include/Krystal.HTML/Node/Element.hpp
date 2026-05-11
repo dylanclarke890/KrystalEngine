@@ -4,6 +4,7 @@
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Enums/InsertAdjacentWhere.hpp"
+#include "Krystal.HTML/Node/NamedNodeMap.hpp"
 #include "Krystal.HTML/Node/RareData/ElementRareData.hpp"
 #include "Krystal.HTML/Node/ShadowRootInit.hpp"
 #include "Krystal.HTML/QualifiedName.hpp"
@@ -20,7 +21,6 @@ namespace Krys::HTML
   class ElementAlgorithms;
   class HTMLCollection;
   class HTMLSlotElement;
-  class NamedNodeMap;
   class NodeList;
   class ShadowRoot;
   class TreeQueries;
@@ -38,6 +38,7 @@ namespace Krys::HTML
     RefPtr<ShadowRoot> _shadowRoot;
     RefPtr<CustomElementRegistry> _customElementRegistry;
     UniquePtr<ElementRareData> _elementRareData;
+    UniquePtr<NamedNodeMap> _namedNodeMap;
     List<Ref<Attr>> _attributes;
 
   protected:
@@ -75,8 +76,7 @@ namespace Krys::HTML
     KRYS_NODISCARD DOMString Slot() const noexcept;
 
     KRYS_NODISCARD bool HasAttributes() const noexcept;
-    // TODO(impl):
-    KRYS_NODISCARD NamedNodeMap &Attributes() const noexcept;
+    KRYS_NODISCARD NamedNodeMap &Attributes() noexcept;
     KRYS_NODISCARD List<DOMString> GetAttributeNames() const noexcept;
     KRYS_NODISCARD Maybe<DOMString> GetAttribute(DOMStringAtom qualifiedName) const noexcept;
     KRYS_NODISCARD Maybe<DOMString> GetAttributeNS(DOMStringAtom namespaceURI,
@@ -112,7 +112,7 @@ namespace Krys::HTML
     KRYS_NODISCARD Ref<HTMLCollection> GetElementsByTagName(DOMStringAtom qualifiedName) noexcept;
     KRYS_NODISCARD Ref<HTMLCollection> GetElementsByTagNameNS(DOMStringAtom namespaceURI,
                                                               DOMStringAtom localName) noexcept;
-    KRYS_NODISCARD Ref<HTMLCollection> GetElementsByClassName(const DOMString &classNames) noexcept;
+    KRYS_NODISCARD Ref<HTMLCollection> GetElementsByClassName(DOMStringAtom classNames) noexcept;
 
     ExceptionOr<RawPtr<Element>> InsertAdjacentElement(InsertAdjacentWhere where, Element &element) noexcept;
     ExceptionOr<void> InsertAdjacentText(InsertAdjacentWhere where, DOMString &&data) noexcept;

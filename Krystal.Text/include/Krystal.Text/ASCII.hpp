@@ -285,4 +285,15 @@ namespace Krys::Text
 
     return result;
   }
+
+  KRYS_NODISCARD inline utf8_string ToASCIIUppercase(utf8_stringview input) noexcept
+  {
+    utf8_string result;
+    for (char8 codePoint : input)
+    {
+      result.push_back(ToASCIIUpper(codePoint));
+    }
+
+    return result;
+  }
 }

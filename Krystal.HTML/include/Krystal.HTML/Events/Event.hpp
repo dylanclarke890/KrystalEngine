@@ -19,6 +19,7 @@ namespace Krys::HTML
   {
     friend class EventDispatcher;
     friend class EventFactory;
+    friend class ShadowRoot;
     friend class EventTarget;
 
     using dictionary_type = EventInit;

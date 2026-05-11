@@ -1,7 +1,8 @@
 ﻿#include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Node/Attr.hpp"
+#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
@@ -14,5 +15,41 @@ namespace Krys::HTML
       : DocumentFragment(document, flags | NodeFlag::IsShadowRoot),
         _customElementRegistry(Krys::Move(registry))
   {
+  }
+
+  RawPtr<Element> ShadowRoot::Host() const noexcept
+  {
+    if (auto host = _host.lock())
+    {
+      return host.get();
+    }
+
+    return nullptr;
+  }
+
+  RawPtr<EventTarget> ShadowRoot::GetParent(Event &event) const noexcept
+  {
+    if (!event.Composed())
+    {
+      auto &path = event._path->PathItems();
+      if (path.size() >= 1)
+      {
+        auto &firstItem = path[0];
+        if (auto *invocationTargetNode = DynamicDowncast<Node>(firstItem.InvocationTarget()))
+        {
+          if (&TreeQueries::Root(*invocationTargetNode) == this)
+          {
+            return nullptr;
+          }
+        }
+      }
+    }
+
+    if (auto host = _host.lock())
+    {
+      return host.get();
+    }
+
+    return nullptr;
   }
 }
