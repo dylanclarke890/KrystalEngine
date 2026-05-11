@@ -2,9 +2,11 @@
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/CharacterData.hpp"
+#include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
+#include <cassert>
 
 namespace Krys::HTML
 {
@@ -103,6 +105,47 @@ namespace Krys::HTML
       }
     }
   }
+
+  void LiveRangeUpdater::MovedBeforeNode(Node &movedBefore) noexcept
+  {
+    auto childIndex = TreeQueries::Index(movedBefore);
+    auto *newParent = movedBefore.ParentNode();
+    assert(newParent != nullptr);
+
+    for (auto range : newParent->NodeDocument().LiveRanges())
+    {
+      if (range->StartContainer() == newParent && range->StartOffset() > childIndex)
+      {
+        range->SetStart(*newParent, range->StartOffset() + 1);
+      }
+
+      if (range->EndContainer() == newParent && range->EndOffset() > childIndex)
+      {
+        range->SetEnd(*newParent, range->EndOffset() + 1);
+      }
+    }
+  }
+
+  void LiveRangeUpdater::InsertedBeforeNode(Node &insertedBefore, size_t nodesInserted) noexcept
+  {
+    auto childIndex = TreeQueries::Index(insertedBefore);
+    auto *newParent = insertedBefore.ParentNode();
+    assert(newParent != nullptr);
+
+    for (auto &range : newParent->NodeDocument().LiveRanges())
+    {
+      if (range->StartContainer() == newParent && range->StartOffset() > childIndex)
+      {
+        range->SetStart(*newParent, range->StartOffset() + nodesInserted);
+      }
+
+      if (range->EndContainer() == newParent && range->EndOffset() > childIndex)
+      {
+        range->SetEnd(*newParent, range->EndOffset() + nodesInserted);
+      }
+    }
+  }
+
   void LiveRangeUpdater::SplitTextNode(Text &original, Text &newNode, size_t offset) noexcept
   {
     auto index = TreeQueries::Index(original);

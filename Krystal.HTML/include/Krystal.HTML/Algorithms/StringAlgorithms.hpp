@@ -103,16 +103,18 @@ namespace Krys::HTML
     KRYS_NODISCARD static List<DOMString> SplitOnComma(DOMStringView input)
     {
       List<DOMString> tokens;
+      const char comma = ',';
       auto position = input.begin();
 
       while (position != input.end())
       {
-        auto token = CollectCodePointSequence(input, position, [](char32 current) { return current != ','; });
+        auto token =
+          CollectCodePointSequence(input, position, [comma](char32 current) { return current != comma; });
         tokens.emplace_back(StripLeadingAndTrailingWhitespace(token));
 
         if (position != input.end())
         {
-          assert(*position == ',');
+          assert(*position == comma);
           ++position;
         }
       }

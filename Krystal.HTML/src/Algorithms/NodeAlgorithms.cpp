@@ -164,7 +164,7 @@ namespace Krys::HTML
       }
       auto &docCopy = Downcast<Document>(*copy);
 
-      // TODO(impl): Set copy’s encoding, origin, type
+      // TODO(impl): MINOR - Set copy’s encoding, origin
       docCopy._contentType = doc._contentType;
       docCopy._baseURL = doc._baseURL;
       docCopy._quirksMode = doc._quirksMode;

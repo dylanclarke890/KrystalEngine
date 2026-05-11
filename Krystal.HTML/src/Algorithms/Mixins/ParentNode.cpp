@@ -113,14 +113,14 @@ namespace Krys::HTML::Mixins
   ExceptionOr<RefPtr<Element>> ParentNode::QuerySelector(ContainerNode &parent,
                                                          DOMStringView selectors) noexcept
   {
-    // TODO(impl): implement this when we have css parsing.
+    // TODO(impl): CSS-SELECTORS
     return Exception {ExceptionCode::NotSupportedError};
   }
 
   ExceptionOr<Ref<NodeList>> ParentNode::QuerySelectorAll(ContainerNode &parent,
                                                           DOMStringView selectors) noexcept
   {
-    // TODO(impl): implement this when we have css parsing.
+    // TODO(impl): CSS-SELECTORS
     return Exception {ExceptionCode::NotSupportedError};
   }
 }

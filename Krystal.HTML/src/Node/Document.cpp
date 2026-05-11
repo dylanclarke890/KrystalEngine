@@ -57,7 +57,7 @@ namespace Krys::HTML
 
   DOMString Document::URL() const noexcept
   {
-    // TODO(impl):
+    // TODO(impl): MINOR - set/get base url correctly
     return _baseURL.Href;
   }
 
@@ -73,7 +73,7 @@ namespace Krys::HTML
 
   DOMString Document::CharacterSet() const noexcept
   {
-    // TODO(impl):
+    // TODO(impl): MINOR - pass encoding to document
     return u8"UTF-8";
   }
 
@@ -89,7 +89,6 @@ namespace Krys::HTML
 
   DOMString Document::ContentType() const noexcept
   {
-    // TODO(impl):
     return _contentType;
   }
 
@@ -202,7 +201,7 @@ namespace Krys::HTML
   ExceptionOr<Ref<ProcessingInstruction>> Document::CreateProcessingInstruction(DOMString &&target,
                                                                                 DOMString &&data) noexcept
   {
-    // TODO(impl): If target does not match the (xml 'NT-Name) Name production, then throw an
+    // TODO(impl): MINOR - If target does not match the (xml 'NT-Name) Name production, then throw an
     // "InvalidCharacterError" DOMException.
 
     if (data.contains(u8"?>"))
@@ -308,7 +307,7 @@ namespace Krys::HTML
 
   Ref<Event> Document::CreateEvent(DOMStringAtom interface) noexcept
   {
-    // TODO(impl): create correct event based on 'interface'
+    // TODO(impl): MINOR - create correct event based on 'interface'
     return CreateRef<Event>(interface);
   }
 

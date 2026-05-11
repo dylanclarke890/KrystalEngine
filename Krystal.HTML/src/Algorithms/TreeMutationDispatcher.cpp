@@ -20,7 +20,7 @@ namespace Krys::HTML
     Maybe<DOMStringView> oldValue, const SmallNodeList &addedNodes, const SmallNodeList &removedNodes,
     RefPtr<Node> &&previousSibling, RefPtr<Node> &&nextSibling) noexcept
   {
-    // TODO: figure out the actual type to use here
+    // TODO(impl): MUTATION-OBSERVERS - figure out the actual type to use here
     List<int> interestedObservers;
 
     auto nodes = TreeQueries::InclusiveAncestors(target);

@@ -80,16 +80,16 @@ namespace Krys::HTML
     auto classes = OrderedSet::Parser(classNames.View());
     if (classes.empty())
     {
-      // TODO(perf): return an empty collection instead.
+      // TODO(perf): MINOR - return an empty collection instead.
       return CreateRef<StaticHTMLCollection>(SmallElementList {});
     }
 
     if (root.NodeDocument()._quirksMode == QuirksMode::Quirks)
     {
-      // TODO(impl): case insensitive matching in quirks mode.
+      // TODO(impl): REQUIRED - case insensitive matching in quirks mode.
     }
 
-    // TODO(impl): case sensitive matching
+    // TODO(impl): REQUIRED - case sensitive matching
     return CreateRef<StaticHTMLCollection>(SmallElementList {});
   }
 }

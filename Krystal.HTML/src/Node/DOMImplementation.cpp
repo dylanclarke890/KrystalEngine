@@ -68,7 +68,7 @@ namespace Krys::HTML
       }
     }
 
-    // TODO(impl): doc’s origin is this’s associated document’s origin.
+    // TODO(impl): ORIGIN - doc’s origin is this’s associated document’s origin.
 
     if (namespaceUri == Namespaces::HTML)
     {
@@ -135,7 +135,7 @@ namespace Krys::HTML
       return appendResult.ReleaseException();
     }
 
-    // TODO(impl): doc’s origin is this’s associated document’s origin.
+    // TODO(impl): ORIGIN - doc’s origin is this’s associated document’s origin.
 
     return AdoptRef<Document>(*document.release());
   }

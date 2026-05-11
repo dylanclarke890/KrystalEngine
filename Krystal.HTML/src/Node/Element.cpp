@@ -311,13 +311,13 @@ namespace Krys::HTML
 
   RefPtr<Element> Element::Closest(DOMStringView selectors) noexcept
   {
-    // TODO(impl): implement this when we have css parsing.
+    // TODO(impl): CSS-SELECTORS
     return nullptr;
   }
 
   bool Element::Matches(DOMStringView selectors) const noexcept
   {
-    // TODO(impl): implement this when we have css parsing.
+    // TODO(impl): CSS-SELECTORS
     return false;
   }
 

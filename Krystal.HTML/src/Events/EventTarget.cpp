@@ -1,9 +1,9 @@
 ﻿#include "Krystal.HTML/Events/EventTarget.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/EventDispatcher.hpp"
+#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Events/EventNames.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
@@ -152,9 +152,7 @@ namespace Krys::HTML
       }
     }
 
-    // TODO(impl): we don't have document/body elements yet.
-    // return true if:
-    //  - or is a node whose node document’s body element is eventTarget.[HTML]
+    // TODO(impl): REQUIRED - return true if node is a node whose node document’s body element is eventTarget.
 
     return false;
   }

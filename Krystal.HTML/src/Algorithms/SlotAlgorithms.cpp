@@ -1,9 +1,9 @@
 ﻿#include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
@@ -20,13 +20,13 @@ namespace Krys::HTML
 
   bool SlotAlgorithms::IsAssigned(const Node &node) noexcept
   {
-    // TODO(impl): A slottable is assigned if its assigned slot is non-null.
+    // TODO(impl): SLOTTABLES - A slottable is assigned if its assigned slot is non-null.
     return false;
   }
 
   RawPtr<HTMLSlotElement> SlotAlgorithms::GetAssignedSlot(const Node &node) noexcept
   {
-    // TODO(impl): check for either text or element node and get assigned slot if slottable
+    // TODO(impl): SLOTTABLES - check for either text or element node and get assigned slot if slottable
     return nullptr;
   }
 
@@ -52,16 +52,14 @@ namespace Krys::HTML
 
     if (shadow->SlotAssignment() == SlotAssignmentMode::Manual)
     {
-      // TODO(impl):
-      // return the slot in shadow’s descendants whose manually assigned nodes contains slottable, if any;
-      // otherwise null.
+      // TODO(impl): SLOTTABLES - return the slot in shadow’s descendants whose manually assigned nodes
+      // contains slottable, if any; otherwise null.
       return nullptr;
     }
     else
     {
-      // TODO(impl):
-      // Return the first slot in tree order in shadow’s descendants whose name is slottable’s name, if any;
-      // otherwise null.
+      // TODO(impl): SLOTTABLES - Return the first slot in tree order in shadow’s descendants whose name is
+      // slottable’s name, if any; otherwise null.
       return nullptr;
     }
   }
@@ -79,14 +77,12 @@ namespace Krys::HTML
     RawPtr<Element> host = root->Host();
     if (root->SlotAssignment() == SlotAssignmentMode::Manual)
     {
-      // TODO(impl):
-      // For each slottable slottable of slot’s manually assigned nodes, if slottable’s parent is host, append
-      // slottable to result.
+      // TODO(impl): SLOTTABLES - For each slottable slottable of slot’s manually assigned nodes, if
+      // slottable’s parent is host, append slottable to result.
     }
     else
     {
-      // TODO(impl):
-      // or each slottable child slottable of host, in tree order:
+      // TODO(impl): SLOTTABLES - for each slottable child slottable of host, in tree order:
       // Let foundSlot be the result of finding a slot given slottable.
       // If foundSlot is slot,
       // then append slottable to result.
@@ -141,10 +137,9 @@ namespace Krys::HTML
   void SlotAlgorithms::AssignSlottables(HTMLSlotElement &slot) noexcept
   {
     auto slottables = FindSlottables(slot);
-    // TODO(impl):
-    // if slottables and slot’s assigned nodes are not identical, then run signal a slot change for slot.
-    // Set slot’s assigned nodes to slottables.
-    // For each slottable of slottables: set slottable’s assigned slot to slot.
+    // TODO(impl): SLOTTABLES - if slottables and slot’s assigned nodes are not identical, then run signal a
+    // slot change for slot. Set slot’s assigned nodes to slottables. For each slottable of slottables: set
+    // slottable’s assigned slot to slot.
   }
 
   void SlotAlgorithms::AssignSlottablesForTree(Node &root) noexcept
@@ -173,8 +168,7 @@ namespace Krys::HTML
 
   void SlotAlgorithms::SignalSlotChange(HTMLSlotElement &slot) noexcept
   {
-    // TODO(impl):
-    // Append slot to slot’s relevant agent’s signal slots
+    // TODO(impl): SLOTTABLES - Append slot to slot’s relevant agent’s signal slots
     // Queue a mutation observer microtask.
   }
 

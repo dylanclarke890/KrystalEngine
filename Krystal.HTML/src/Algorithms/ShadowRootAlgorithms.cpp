@@ -17,7 +17,7 @@ namespace Krys::HTML
                                            SlotAssignmentMode slotAssignment,
                                            RawPtr<CustomElementRegistry> registry) noexcept
   {
-    // TODO(impl): Implement this method
+    // TODO(impl): SHADOW-ROOT - Implement this method
     return Exception {ExceptionCode::NotSupportedError};
   }
 

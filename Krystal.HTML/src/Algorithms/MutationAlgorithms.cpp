@@ -160,19 +160,7 @@ namespace Krys::HTML
 
     if (child != nullptr)
     {
-      auto childIndex = TreeQueries::Index(*child);
-      for (auto &range : parent.NodeDocument().LiveRanges())
-      {
-        if (range->StartContainer() == &parent && range->StartOffset() > childIndex)
-        {
-          range->_start.Offset += count;
-        }
-
-        if (range->EndContainer() == &parent && range->EndOffset() > childIndex)
-        {
-          range->_end.Offset += count;
-        }
-      }
+      LiveRangeUpdater::InsertedBeforeNode(*child, count);
     }
 
     auto *previousSibling = child != nullptr ? child->PreviousSibling() : parent.LastChild();
@@ -407,19 +395,7 @@ namespace Krys::HTML
 
     if (child != nullptr)
     {
-      auto childIndex = TreeQueries::Index(*child);
-      for (auto range : newParent.NodeDocument().LiveRanges())
-      {
-        if (range->_start.Container == &newParent && range->_start.Offset > childIndex)
-        {
-          range->_start.Offset += 1;
-        }
-
-        if (range->_end.Container == &newParent && range->_end.Offset > childIndex)
-        {
-          range->_end.Offset += 1;
-        }
-      }
+      LiveRangeUpdater::MovedBeforeNode(*child);
     }
 
     auto *newPreviousSibling = child != nullptr ? child->PreviousSibling() : newParent.LastChild();
@@ -471,7 +447,7 @@ namespace Krys::HTML
       auto isSubtreeRoot = &inclusiveDescendant == &node;
       ExtensibilityHooks::NodeMoved(inclusiveDescendant, isSubtreeRoot, oldParent);
 
-      // TODO(impl) - CUSTOM-ELEMENT:
+      // TODO(impl) - CUSTOM-ELEMENTS:
       // If inclusiveDescendant is custom and newParent is connected, then enqueue a custom element
       // callback reaction with inclusiveDescendant, callback name "connectedMoveCallback", and « ».
     }
