@@ -39,8 +39,8 @@ namespace Krys::Tests
       REQUIRE(result.HasException());
       REQUIRE(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
 
-      REQUIRE_FALSE(document->RemoveChild(*element).HasException());
       REQUIRE_FALSE(element->RemoveChild(*otherElement).HasException());
+      REQUIRE_FALSE(document->RemoveChild(*element).HasException());
     }
 
     SECTION("Inserting before a node that isn't a child of the parent returns a NotFoundError")
@@ -102,8 +102,8 @@ namespace Krys::Tests
           REQUIRE(result.HasException());
           REQUIRE(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
 
-          REQUIRE_FALSE(docFragment->RemoveChild(*element).HasException());
           REQUIRE_FALSE(docFragment->RemoveChild(*otherElement).HasException());
+          REQUIRE_FALSE(docFragment->RemoveChild(*element).HasException());
         }
 
         SECTION("Node has a Text child returns a HierarchyRequestError")
@@ -130,8 +130,8 @@ namespace Krys::Tests
             REQUIRE(result.HasException());
             REQUIRE(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
 
-            REQUIRE_FALSE(document->RemoveChild(*element).HasException());
             REQUIRE_FALSE(docFragment->RemoveChild(*otherElement).HasException());
+            REQUIRE_FALSE(document->RemoveChild(*element).HasException());
           }
 
           auto docType = CreateRef<HTML::DocumentType>(*document, u8"html", u8"", u8"");
@@ -145,8 +145,8 @@ namespace Krys::Tests
             REQUIRE(result.HasException());
             REQUIRE(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
 
-            REQUIRE_FALSE(document->RemoveChild(*docType).HasException());
             REQUIRE_FALSE(docFragment->RemoveChild(*otherElement).HasException());
+            REQUIRE_FALSE(document->RemoveChild(*docType).HasException());
           }
 
           SECTION(
@@ -162,9 +162,9 @@ namespace Krys::Tests
             REQUIRE(result.HasException());
             REQUIRE(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
 
-            REQUIRE_FALSE(docFragment->RemoveChild(*otherElement).HasException());
-            REQUIRE_FALSE(document->RemoveChild(*docType).HasException());
             REQUIRE_FALSE(document->RemoveChild(*comment).HasException());
+            REQUIRE_FALSE(document->RemoveChild(*docType).HasException());
+            REQUIRE_FALSE(docFragment->RemoveChild(*otherElement).HasException());
           }
         }
       }
@@ -207,8 +207,8 @@ namespace Krys::Tests
           REQUIRE(result.HasException());
           REQUIRE(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
 
-          REQUIRE_FALSE(document->RemoveChild(*comment).HasException());
           REQUIRE_FALSE(document->RemoveChild(*docType).HasException());
+          REQUIRE_FALSE(document->RemoveChild(*comment).HasException());
         }
       }
 
@@ -240,8 +240,8 @@ namespace Krys::Tests
           REQUIRE(result.HasException());
           REQUIRE(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
 
-          REQUIRE_FALSE(document->RemoveChild(*element).HasException());
           REQUIRE_FALSE(document->RemoveChild(*comment).HasException());
+          REQUIRE_FALSE(document->RemoveChild(*element).HasException());
         }
 
         SECTION("Document already has an element child and ref child is null returns a HierarchyRequestError")

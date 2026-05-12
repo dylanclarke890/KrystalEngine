@@ -191,7 +191,7 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#get-the-parent
     KRYS_NODISCARD RawPtr<EventTarget> GetParent(Event &event) const noexcept override
     {
-      // SPEC-VIOLATION:
+      // SPEC-VIOLATION(HTML, DOM): We don't have global objects so we'll always return nullptr here.
       // A document’s get the parent algorithm, given an event, returns null if event’s type
       // attribute value is "load" or document does not have a browsing context; otherwise the document’s
       // relevant global object.

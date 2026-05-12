@@ -706,7 +706,7 @@ namespace Krys::HTML
     // if node is custom and isParentConnected is true, then enqueue a custom element callback
     // reaction with node, callback name "disconnectedCallback", and « ».
 
-    for (auto &descendant : InclusiveShadowIncludingDescendantRange(node))
+    for (auto &descendant : ShadowIncludingDescendantRange(node))
     {
       ExtensibilityHooks::NodeRemoved(descendant, false, parent);
       // TODO(impl) - CUSTOM-ELEMENTS:

@@ -24,6 +24,8 @@ namespace Krys::HTML
       return;
     }
 
+    insertedNode.AddRef();
+    
     if (parent->IsConnected())
     {
       insertedNode.SetEventTargetFlag(EventTargetFlag::IsConnected);
@@ -80,6 +82,8 @@ namespace Krys::HTML
     removedNode.ClearEventTargetFlag(EventTargetFlag::IsInShadowTree);
 
     removedNode.OnRemove(isSubtreeRoot, oldAncestor);
+
+    removedNode.SubRef();
   }
 
   void ExtensibilityHooks::NodeCloned(Node &node, Node &copy, bool subtree) noexcept

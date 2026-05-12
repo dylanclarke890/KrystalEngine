@@ -31,18 +31,6 @@ namespace Krys::HTML::Mixins
   RawPtr<const Element> NonElementParentNode::GetElementById(const ContainerNode &node,
                                                              DOMStringView id) noexcept
   {
-    auto descendants = ConstDescendantRange(node);
-
-    auto it = First(descendants,
-                    [id](auto &&descendant)
-                    {
-                      if (auto *element = DynamicDowncast<const Element>(descendant))
-                      {
-                        return element->Id() == id;
-                      }
-                      return false;
-                    });
-
-    return it != std::ranges::end(descendants) ? DynamicDowncast<const Element>(&*it) : nullptr;
+    return GetElementById(const_cast<ContainerNode &>(node), id);
   }
 }

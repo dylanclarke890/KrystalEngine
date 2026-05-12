@@ -1,8 +1,8 @@
 ﻿#include "Krystal.HTML/Node/DocumentFragment.hpp"
 #include "Krystal.HTML.Tests/TestElement.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
@@ -44,8 +44,22 @@ namespace Krys::Tests
     REQUIRE(data.Node->NodeName() == u8"#document-fragment");
   }
 
-  // TODO(impl):
-  // TEST_CASE("DocumentFragment::TextContent", "[HTML][DocumentFragment]")
-  //{
-  //}
+  TEST_CASE("DocumentFragment::TextContent", "[HTML][DocumentFragment]")
+  {
+    CommonTestData data;
+    auto textNode1 = CreateRef<HTML::Text>(*data.Document, u8"Hello");
+    auto textNode2 = CreateRef<HTML::Text>(*data.Document, u8" world!");
+
+    REQUIRE_FALSE(data.Node->AppendChild(*textNode1).HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*textNode2).HasException());
+
+    REQUIRE(data.Node->TextContent() == u8"Hello world!");
+
+    REQUIRE_FALSE(data.Node->TextContent(u8"New text content").HasException());
+    REQUIRE(data.Node->TextContent() == u8"New text content");
+
+    REQUIRE_FALSE(data.Node->TextContent(u8"").HasException());
+    REQUIRE_FALSE(data.Node->HasChildNodes());
+    REQUIRE(data.Node->TextContent() == u8"");
+  }
 }

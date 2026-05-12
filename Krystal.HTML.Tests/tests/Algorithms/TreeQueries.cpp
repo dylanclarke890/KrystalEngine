@@ -1,9 +1,9 @@
 ﻿#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML.Tests/TestNode.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
-#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
@@ -27,21 +27,19 @@ namespace Krys::Tests
     REQUIRE(TreeQueries::Length(*child) == 0);
     REQUIRE(TreeQueries::Length(*textNode) == 13);
 
-    auto appendResult = parent->AppendChild(*child);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(parent->AppendChild(*child).HasException());
 
     REQUIRE(TreeQueries::Length(*parent) == 1);
     REQUIRE(TreeQueries::Length(*child) == 0);
 
-    appendResult = child->AppendChild(*textNode);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(child->AppendChild(*textNode).HasException());
 
     REQUIRE(TreeQueries::Length(*parent) == 1);
     REQUIRE(TreeQueries::Length(*child) == 1);
     REQUIRE(TreeQueries::Length(*textNode) == 13);
 
-    child->RemoveChild(*textNode);
-    parent->RemoveChild(*child);
+    REQUIRE_FALSE(child->RemoveChild(*textNode).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
   }
 
   TEST_CASE("TreeQueries::IsEmpty", "[HTML][TreeQueries]")
@@ -50,25 +48,24 @@ namespace Krys::Tests
     auto parent = CreateRef<TestNode>(*doc);
     auto child = CreateRef<TestNode>(*doc);
     auto textNode = CreateRef<HTML::Text>(*doc, u8"Hello, world!");
+
     REQUIRE(TreeQueries::IsEmpty(*parent));
     REQUIRE(TreeQueries::IsEmpty(*child));
     REQUIRE_FALSE(TreeQueries::IsEmpty(*textNode));
 
-    auto appendResult = parent->AppendChild(*child);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(parent->AppendChild(*child).HasException());
 
     REQUIRE_FALSE(TreeQueries::IsEmpty(*parent));
     REQUIRE(TreeQueries::IsEmpty(*child));
 
-    appendResult = child->AppendChild(*textNode);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(child->AppendChild(*textNode).HasException());
 
     REQUIRE_FALSE(TreeQueries::IsEmpty(*parent));
     REQUIRE_FALSE(TreeQueries::IsEmpty(*child));
     REQUIRE_FALSE(TreeQueries::IsEmpty(*textNode));
 
-    child->RemoveChild(*textNode);
-    parent->RemoveChild(*child);
+    REQUIRE_FALSE(child->RemoveChild(*textNode).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
   }
 
 #pragma endregion
@@ -84,22 +81,18 @@ namespace Krys::Tests
     REQUIRE_FALSE(TreeQueries::IsInDocumentTree(*parent));
     REQUIRE_FALSE(TreeQueries::IsInDocumentTree(*child));
 
-    auto appendResult = parent->AppendChild(*child);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(parent->AppendChild(*child).HasException());
 
     REQUIRE_FALSE(TreeQueries::IsInDocumentTree(*parent));
     REQUIRE_FALSE(TreeQueries::IsInDocumentTree(*child));
 
-    appendResult = doc->AppendChild(*parent);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(doc->AppendChild(*parent).HasException());
 
     REQUIRE(TreeQueries::IsInDocumentTree(*parent));
     REQUIRE(TreeQueries::IsInDocumentTree(*child));
 
-    auto removeResult = parent->RemoveChild(*child);
-    REQUIRE_FALSE(removeResult.HasException());
-    removeResult = doc->RemoveChild(*parent);
-    REQUIRE_FALSE(removeResult.HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
+    REQUIRE_FALSE(doc->RemoveChild(*parent).HasException());
   }
 
   TEST_CASE("TreeQueries::DocumentElement", "[HTML][TreeQueries]")
@@ -112,24 +105,20 @@ namespace Krys::Tests
     REQUIRE(TreeQueries::DocumentElement(*parent) == nullptr);
     REQUIRE(TreeQueries::DocumentElement(*child) == nullptr);
 
-    auto appendResult = parent->AppendChild(*child);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(parent->AppendChild(*child).HasException());
 
     REQUIRE(TreeQueries::DocumentElement(*doc) == nullptr);
     REQUIRE(TreeQueries::DocumentElement(*parent) == nullptr);
     REQUIRE(TreeQueries::DocumentElement(*child) == nullptr);
 
-    appendResult = doc->AppendChild(*parent);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(doc->AppendChild(*parent).HasException());
 
     REQUIRE(TreeQueries::DocumentElement(*doc) == parent.get());
     REQUIRE(TreeQueries::DocumentElement(*parent) == parent.get());
     REQUIRE(TreeQueries::DocumentElement(*child) == parent.get());
 
-    auto removeResult = parent->RemoveChild(*child);
-    REQUIRE_FALSE(removeResult.HasException());
-    removeResult = doc->RemoveChild(*parent);
-    REQUIRE_FALSE(removeResult.HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
+    REQUIRE_FALSE(doc->RemoveChild(*parent).HasException());
   }
 
 #pragma endregion
@@ -143,8 +132,7 @@ namespace Krys::Tests
 
     REQUIRE_FALSE(TreeQueries::IsInShadowTree(*docChild));
 
-    auto appendResult = doc->AppendChild(*docChild);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(doc->AppendChild(*docChild).HasException());
 
     REQUIRE_FALSE(TreeQueries::IsInShadowTree(*docChild));
 
@@ -153,15 +141,12 @@ namespace Krys::Tests
 
     REQUIRE_FALSE(TreeQueries::IsInShadowTree(*shadowChild));
 
-    appendResult = shadowRoot->AppendChild(*shadowChild);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(shadowRoot->AppendChild(*shadowChild).HasException());
 
     REQUIRE(TreeQueries::IsInShadowTree(*shadowChild));
 
-    auto removeResult = doc->RemoveChild(*docChild);
-    REQUIRE_FALSE(removeResult.HasException());
-    removeResult = shadowRoot->RemoveChild(*shadowChild);
-    REQUIRE_FALSE(removeResult.HasException());
+    REQUIRE_FALSE(doc->RemoveChild(*docChild).HasException());
+    REQUIRE_FALSE(shadowRoot->RemoveChild(*shadowChild).HasException());
   }
 
 #pragma endregion
@@ -177,13 +162,12 @@ namespace Krys::Tests
     REQUIRE_FALSE(TreeQueries::IsParent(*parent, *child));
     REQUIRE_FALSE(TreeQueries::IsParent(*child, *parent));
 
-    auto appendResult = parent->AppendChild(*child);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(parent->AppendChild(*child).HasException());
 
     REQUIRE(TreeQueries::IsParent(*parent, *child));
     REQUIRE_FALSE(TreeQueries::IsParent(*child, *parent));
 
-    parent->RemoveChild(*child);
+    REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
   }
 
   TEST_CASE("TreeQueries::IsChild", "[TreeQueries]")
@@ -195,13 +179,12 @@ namespace Krys::Tests
     REQUIRE_FALSE(TreeQueries::IsChild(*parent, *child));
     REQUIRE_FALSE(TreeQueries::IsChild(*child, *parent));
 
-    auto appendResult = parent->AppendChild(*child);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(parent->AppendChild(*child).HasException());
 
     REQUIRE_FALSE(TreeQueries::IsChild(*parent, *child));
     REQUIRE(TreeQueries::IsChild(*child, *parent));
 
-    parent->RemoveChild(*child);
+    REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
   }
 
   TEST_CASE("TreeQueries::Root", "[TreeQueries]")
@@ -214,24 +197,20 @@ namespace Krys::Tests
     REQUIRE(&TreeQueries::Root(*parent) == parent.get());
     REQUIRE(&TreeQueries::Root(*child) == child.get());
 
-    auto appendResult = parent->AppendChild(*child);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(parent->AppendChild(*child).HasException());
 
     REQUIRE(&TreeQueries::Root(*doc) == doc.get());
     REQUIRE(&TreeQueries::Root(*parent) == parent.get());
     REQUIRE(&TreeQueries::Root(*child) == parent.get());
 
-    appendResult = doc->AppendChild(*parent);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(doc->AppendChild(*parent).HasException());
 
     REQUIRE(&TreeQueries::Root(*doc) == doc.get());
     REQUIRE(&TreeQueries::Root(*parent) == doc.get());
     REQUIRE(&TreeQueries::Root(*child) == doc.get());
 
-    auto removeResult = parent->RemoveChild(*child);
-    REQUIRE_FALSE(removeResult.HasException());
-    removeResult = doc->RemoveChild(*parent);
-    REQUIRE_FALSE(removeResult.HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
+    REQUIRE_FALSE(doc->RemoveChild(*parent).HasException());
   }
 
   TEST_CASE("TreeQueries::IsDescendant", "[TreeQueries]")
@@ -244,14 +223,12 @@ namespace Krys::Tests
     REQUIRE_FALSE(TreeQueries::IsDescendant(*child, *parent));
     REQUIRE_FALSE(TreeQueries::IsDescendant(*parent, *child));
 
-    auto appendResult = parent->AppendChild(*child);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(parent->AppendChild(*child).HasException());
 
     REQUIRE(TreeQueries::IsDescendant(*child, *parent));
     REQUIRE_FALSE(TreeQueries::IsDescendant(*parent, *child));
 
-    appendResult = child->AppendChild(*grandchild);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(child->AppendChild(*grandchild).HasException());
 
     REQUIRE(TreeQueries::IsDescendant(*grandchild, *parent));
     REQUIRE_FALSE(TreeQueries::IsDescendant(*parent, *grandchild));
@@ -263,11 +240,8 @@ namespace Krys::Tests
     REQUIRE_FALSE(TreeQueries::IsDescendant(*child, *child));
     REQUIRE_FALSE(TreeQueries::IsDescendant(*grandchild, *grandchild));
 
-    auto removeResult = parent->RemoveChild(*child);
-    REQUIRE_FALSE(removeResult.HasException());
-
-    removeResult = child->RemoveChild(*grandchild);
-    REQUIRE_FALSE(removeResult.HasException());
+    REQUIRE_FALSE(child->RemoveChild(*grandchild).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
 
     REQUIRE_FALSE(TreeQueries::IsDescendant(*parent, *parent));
     REQUIRE_FALSE(TreeQueries::IsDescendant(*child, *child));
@@ -284,14 +258,12 @@ namespace Krys::Tests
     REQUIRE_FALSE(TreeQueries::IsInclusiveDescendant(*child, *parent));
     REQUIRE_FALSE(TreeQueries::IsInclusiveDescendant(*parent, *child));
 
-    auto appendResult = parent->AppendChild(*child);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(parent->AppendChild(*child).HasException());
 
     REQUIRE(TreeQueries::IsInclusiveDescendant(*child, *parent));
     REQUIRE_FALSE(TreeQueries::IsInclusiveDescendant(*parent, *child));
 
-    appendResult = child->AppendChild(*grandchild);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(child->AppendChild(*grandchild).HasException());
 
     REQUIRE(TreeQueries::IsInclusiveDescendant(*grandchild, *parent));
     REQUIRE_FALSE(TreeQueries::IsInclusiveDescendant(*parent, *grandchild));
@@ -303,11 +275,8 @@ namespace Krys::Tests
     REQUIRE(TreeQueries::IsInclusiveDescendant(*grandchild, *grandchild));
     REQUIRE(TreeQueries::IsInclusiveDescendant(*parent, *parent));
 
-    auto removeResult = parent->RemoveChild(*child);
-    REQUIRE_FALSE(removeResult.HasException());
-
-    removeResult = child->RemoveChild(*grandchild);
-    REQUIRE_FALSE(removeResult.HasException());
+    REQUIRE_FALSE(child->RemoveChild(*grandchild).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
 
     REQUIRE(TreeQueries::IsInclusiveDescendant(*parent, *parent));
     REQUIRE(TreeQueries::IsInclusiveDescendant(*child, *child));
@@ -324,14 +293,12 @@ namespace Krys::Tests
     REQUIRE_FALSE(TreeQueries::IsAncestor(*parent, *child));
     REQUIRE_FALSE(TreeQueries::IsAncestor(*child, *parent));
 
-    auto appendResult = parent->AppendChild(*child);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(parent->AppendChild(*child).HasException());
 
     REQUIRE(TreeQueries::IsAncestor(*parent, *child));
     REQUIRE_FALSE(TreeQueries::IsAncestor(*child, *parent));
 
-    appendResult = child->AppendChild(*grandchild);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(child->AppendChild(*grandchild).HasException());
 
     REQUIRE(TreeQueries::IsAncestor(*parent, *grandchild));
     REQUIRE_FALSE(TreeQueries::IsAncestor(*grandchild, *parent));
@@ -343,11 +310,8 @@ namespace Krys::Tests
     REQUIRE_FALSE(TreeQueries::IsAncestor(*child, *child));
     REQUIRE_FALSE(TreeQueries::IsAncestor(*grandchild, *grandchild));
 
-    auto removeResult = parent->RemoveChild(*child);
-    REQUIRE_FALSE(removeResult.HasException());
-
-    removeResult = child->RemoveChild(*grandchild);
-    REQUIRE_FALSE(removeResult.HasException());
+    REQUIRE_FALSE(child->RemoveChild(*grandchild).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
 
     REQUIRE_FALSE(TreeQueries::IsAncestor(*parent, *parent));
     REQUIRE_FALSE(TreeQueries::IsAncestor(*child, *child));
@@ -364,14 +328,12 @@ namespace Krys::Tests
     REQUIRE_FALSE(TreeQueries::IsInclusiveAncestor(*parent, *child));
     REQUIRE_FALSE(TreeQueries::IsInclusiveAncestor(*child, *parent));
 
-    auto appendResult = parent->AppendChild(*child);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(parent->AppendChild(*child).HasException());
 
     REQUIRE(TreeQueries::IsInclusiveAncestor(*parent, *child));
     REQUIRE_FALSE(TreeQueries::IsInclusiveAncestor(*child, *parent));
 
-    appendResult = child->AppendChild(*grandchild);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(child->AppendChild(*grandchild).HasException());
 
     REQUIRE(TreeQueries::IsInclusiveAncestor(*parent, *grandchild));
     REQUIRE_FALSE(TreeQueries::IsInclusiveAncestor(*grandchild, *parent));
@@ -383,11 +345,8 @@ namespace Krys::Tests
     REQUIRE(TreeQueries::IsInclusiveAncestor(*child, *child));
     REQUIRE(TreeQueries::IsInclusiveAncestor(*grandchild, *grandchild));
 
-    auto removeResult = parent->RemoveChild(*child);
-    REQUIRE_FALSE(removeResult.HasException());
-
-    removeResult = child->RemoveChild(*grandchild);
-    REQUIRE_FALSE(removeResult.HasException());
+    REQUIRE_FALSE(child->RemoveChild(*grandchild).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
 
     REQUIRE(TreeQueries::IsInclusiveAncestor(*parent, *parent));
     REQUIRE(TreeQueries::IsInclusiveAncestor(*child, *child));
@@ -409,14 +368,9 @@ namespace Krys::Tests
     REQUIRE_FALSE(TreeQueries::IsSibling(*childB, *childC));
     REQUIRE_FALSE(TreeQueries::IsSibling(*childC, *childB));
 
-    auto appendResult = parent->AppendChild(*childA);
-    REQUIRE_FALSE(appendResult.HasException());
-
-    appendResult = parent->AppendChild(*childB);
-    REQUIRE_FALSE(appendResult.HasException());
-
-    appendResult = parent->AppendChild(*childC);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(parent->AppendChild(*childA).HasException());
+    REQUIRE_FALSE(parent->AppendChild(*childB).HasException());
+    REQUIRE_FALSE(parent->AppendChild(*childC).HasException());
 
     REQUIRE(TreeQueries::IsSibling(*childA, *childB));
     REQUIRE(TreeQueries::IsSibling(*childB, *childA));
@@ -429,14 +383,9 @@ namespace Krys::Tests
     REQUIRE_FALSE(TreeQueries::IsSibling(*childB, *childB));
     REQUIRE_FALSE(TreeQueries::IsSibling(*childC, *childC));
 
-    auto removeResult = parent->RemoveChild(*childA);
-    REQUIRE_FALSE(removeResult.HasException());
-
-    removeResult = parent->RemoveChild(*childB);
-    REQUIRE_FALSE(removeResult.HasException());
-
-    removeResult = parent->RemoveChild(*childC);
-    REQUIRE_FALSE(removeResult.HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*childC).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*childB).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*childA).HasException());
 
     REQUIRE_FALSE(TreeQueries::IsSibling(*childA, *childA));
     REQUIRE_FALSE(TreeQueries::IsSibling(*childB, *childB));
@@ -458,14 +407,9 @@ namespace Krys::Tests
     REQUIRE_FALSE(TreeQueries::IsInclusiveSibling(*childB, *childC));
     REQUIRE_FALSE(TreeQueries::IsInclusiveSibling(*childC, *childB));
 
-    auto appendResult = parent->AppendChild(*childA);
-    REQUIRE_FALSE(appendResult.HasException());
-
-    appendResult = parent->AppendChild(*childB);
-    REQUIRE_FALSE(appendResult.HasException());
-
-    appendResult = parent->AppendChild(*childC);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(parent->AppendChild(*childA).HasException());
+    REQUIRE_FALSE(parent->AppendChild(*childB).HasException());
+    REQUIRE_FALSE(parent->AppendChild(*childC).HasException());
 
     REQUIRE(TreeQueries::IsInclusiveSibling(*childA, *childB));
     REQUIRE(TreeQueries::IsInclusiveSibling(*childB, *childA));
@@ -478,14 +422,9 @@ namespace Krys::Tests
     REQUIRE(TreeQueries::IsInclusiveSibling(*childB, *childB));
     REQUIRE(TreeQueries::IsInclusiveSibling(*childC, *childC));
 
-    auto removeResult = parent->RemoveChild(*childA);
-    REQUIRE_FALSE(removeResult.HasException());
-
-    removeResult = parent->RemoveChild(*childB);
-    REQUIRE_FALSE(removeResult.HasException());
-
-    removeResult = parent->RemoveChild(*childC);
-    REQUIRE_FALSE(removeResult.HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*childA).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*childB).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*childC).HasException());
 
     REQUIRE(TreeQueries::IsInclusiveSibling(*childA, *childA));
     REQUIRE(TreeQueries::IsInclusiveSibling(*childB, *childB));
@@ -516,18 +455,12 @@ namespace Krys::Tests
     REQUIRE_FALSE(TreeQueries::IsPreceding(*childC, *grandchildC));
     REQUIRE_FALSE(TreeQueries::IsPreceding(*grandchildC, *childC));
 
-    auto appendResult = parent->AppendChild(*childA);
-    REQUIRE_FALSE(appendResult.HasException());
-    appendResult = parent->AppendChild(*childB);
-    REQUIRE_FALSE(appendResult.HasException());
-    appendResult = parent->AppendChild(*childC);
-    REQUIRE_FALSE(appendResult.HasException());
-    appendResult = childA->AppendChild(*grandchildA);
-    REQUIRE_FALSE(appendResult.HasException());
-    appendResult = childB->AppendChild(*grandchildB);
-    REQUIRE_FALSE(appendResult.HasException());
-    appendResult = childC->AppendChild(*grandchildC);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(parent->AppendChild(*childA).HasException());
+    REQUIRE_FALSE(parent->AppendChild(*childB).HasException());
+    REQUIRE_FALSE(parent->AppendChild(*childC).HasException());
+    REQUIRE_FALSE(childA->AppendChild(*grandchildA).HasException());
+    REQUIRE_FALSE(childB->AppendChild(*grandchildB).HasException());
+    REQUIRE_FALSE(childC->AppendChild(*grandchildC).HasException());
 
     REQUIRE(TreeQueries::IsPreceding(*childA, *childB));
     REQUIRE(TreeQueries::IsPreceding(*childA, *childC));
@@ -546,18 +479,12 @@ namespace Krys::Tests
     REQUIRE_FALSE(TreeQueries::IsPreceding(*grandchildB, *childB));
     REQUIRE_FALSE(TreeQueries::IsPreceding(*grandchildC, *childC));
 
-    auto removeResult = parent->RemoveChild(*childA);
-    REQUIRE_FALSE(removeResult.HasException());
-    removeResult = parent->RemoveChild(*childB);
-    REQUIRE_FALSE(removeResult.HasException());
-    removeResult = parent->RemoveChild(*childC);
-    REQUIRE_FALSE(removeResult.HasException());
-    removeResult = childA->RemoveChild(*grandchildA);
-    REQUIRE_FALSE(removeResult.HasException());
-    removeResult = childB->RemoveChild(*grandchildB);
-    REQUIRE_FALSE(removeResult.HasException());
-    removeResult = childC->RemoveChild(*grandchildC);
-    REQUIRE_FALSE(removeResult.HasException());
+    REQUIRE_FALSE(childC->RemoveChild(*grandchildC).HasException());
+    REQUIRE_FALSE(childB->RemoveChild(*grandchildB).HasException());
+    REQUIRE_FALSE(childA->RemoveChild(*grandchildA).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*childC).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*childB).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*childA).HasException());
   }
 
   TEST_CASE("TreeQueries::IsFollowing", "[TreeQueries]")
@@ -584,18 +511,12 @@ namespace Krys::Tests
     REQUIRE_FALSE(TreeQueries::IsFollowing(*childC, *grandchildC));
     REQUIRE_FALSE(TreeQueries::IsFollowing(*grandchildC, *childC));
 
-    auto appendResult = parent->AppendChild(*childA);
-    REQUIRE_FALSE(appendResult.HasException());
-    appendResult = parent->AppendChild(*childB);
-    REQUIRE_FALSE(appendResult.HasException());
-    appendResult = parent->AppendChild(*childC);
-    REQUIRE_FALSE(appendResult.HasException());
-    appendResult = childA->AppendChild(*grandchildA);
-    REQUIRE_FALSE(appendResult.HasException());
-    appendResult = childB->AppendChild(*grandchildB);
-    REQUIRE_FALSE(appendResult.HasException());
-    appendResult = childC->AppendChild(*grandchildC);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(parent->AppendChild(*childA).HasException());
+    REQUIRE_FALSE(parent->AppendChild(*childB).HasException());
+    REQUIRE_FALSE(parent->AppendChild(*childC).HasException());
+    REQUIRE_FALSE(childA->AppendChild(*grandchildA).HasException());
+    REQUIRE_FALSE(childB->AppendChild(*grandchildB).HasException());
+    REQUIRE_FALSE(childC->AppendChild(*grandchildC).HasException());
 
     REQUIRE(TreeQueries::IsFollowing(*childB, *childA));
     REQUIRE(TreeQueries::IsFollowing(*childC, *childA));
@@ -614,18 +535,12 @@ namespace Krys::Tests
     REQUIRE_FALSE(TreeQueries::IsFollowing(*childB, *grandchildC));
     REQUIRE_FALSE(TreeQueries::IsFollowing(*childC, *grandchildC));
 
-    auto removeResult = parent->RemoveChild(*childA);
-    REQUIRE_FALSE(removeResult.HasException());
-    removeResult = parent->RemoveChild(*childB);
-    REQUIRE_FALSE(removeResult.HasException());
-    removeResult = parent->RemoveChild(*childC);
-    REQUIRE_FALSE(removeResult.HasException());
-    removeResult = childA->RemoveChild(*grandchildA);
-    REQUIRE_FALSE(removeResult.HasException());
-    removeResult = childB->RemoveChild(*grandchildB);
-    REQUIRE_FALSE(removeResult.HasException());
-    removeResult = childC->RemoveChild(*grandchildC);
-    REQUIRE_FALSE(removeResult.HasException());
+    REQUIRE_FALSE(childC->RemoveChild(*grandchildC).HasException());
+    REQUIRE_FALSE(childB->RemoveChild(*grandchildB).HasException());
+    REQUIRE_FALSE(childA->RemoveChild(*grandchildA).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*childC).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*childB).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*childA).HasException());
   }
 
   TEST_CASE("TreeQueries::Index", "[TreeQueries]")
@@ -648,18 +563,12 @@ namespace Krys::Tests
     REQUIRE(TreeQueries::Index(*grandchildB) == 0);
     REQUIRE(TreeQueries::Index(*grandchildC) == 0);
 
-    auto appendResult = parent->AppendChild(*childA);
-    REQUIRE_FALSE(appendResult.HasException());
-    appendResult = parent->AppendChild(*childB);
-    REQUIRE_FALSE(appendResult.HasException());
-    appendResult = parent->AppendChild(*childC);
-    REQUIRE_FALSE(appendResult.HasException());
-    appendResult = childA->AppendChild(*grandchildA);
-    REQUIRE_FALSE(appendResult.HasException());
-    appendResult = childB->AppendChild(*grandchildB);
-    REQUIRE_FALSE(appendResult.HasException());
-    appendResult = childC->AppendChild(*grandchildC);
-    REQUIRE_FALSE(appendResult.HasException());
+    REQUIRE_FALSE(parent->AppendChild(*childA).HasException());
+    REQUIRE_FALSE(parent->AppendChild(*childB).HasException());
+    REQUIRE_FALSE(parent->AppendChild(*childC).HasException());
+    REQUIRE_FALSE(childA->AppendChild(*grandchildA).HasException());
+    REQUIRE_FALSE(childB->AppendChild(*grandchildB).HasException());
+    REQUIRE_FALSE(childC->AppendChild(*grandchildC).HasException());
 
     REQUIRE(TreeQueries::Index(*doc) == 0);
     REQUIRE(TreeQueries::Index(*parent) == 0);
@@ -670,18 +579,12 @@ namespace Krys::Tests
     REQUIRE(TreeQueries::Index(*grandchildB) == 0);
     REQUIRE(TreeQueries::Index(*grandchildC) == 0);
 
-    auto removeResult = parent->RemoveChild(*childA);
-    REQUIRE_FALSE(removeResult.HasException());
-    removeResult = parent->RemoveChild(*childB);
-    REQUIRE_FALSE(removeResult.HasException());
-    removeResult = parent->RemoveChild(*childC);
-    REQUIRE_FALSE(removeResult.HasException());
-    removeResult = childA->RemoveChild(*grandchildA);
-    REQUIRE_FALSE(removeResult.HasException());
-    removeResult = childB->RemoveChild(*grandchildB);
-    REQUIRE_FALSE(removeResult.HasException());
-    removeResult = childC->RemoveChild(*grandchildC);
-    REQUIRE_FALSE(removeResult.HasException());
+    REQUIRE_FALSE(childC->RemoveChild(*grandchildC).HasException());
+    REQUIRE_FALSE(childB->RemoveChild(*grandchildB).HasException());
+    REQUIRE_FALSE(childA->RemoveChild(*grandchildA).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*childC).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*childB).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*childA).HasException());
 
     REQUIRE(TreeQueries::Index(*doc) == 0);
     REQUIRE(TreeQueries::Index(*parent) == 0);

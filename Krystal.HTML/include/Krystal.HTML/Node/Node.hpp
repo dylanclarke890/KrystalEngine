@@ -71,7 +71,6 @@ namespace Krys::HTML
   class Node;
   class NodeList;
   class ShadowRoot;
-  class TreeQueries;
 
   /// @see https://dom.spec.whatwg.org/#dictdef-getrootnodeoptions
   struct GetRootNodeOptions
@@ -92,7 +91,6 @@ namespace Krys::HTML
     friend class MutationAlgorithms;
     friend class TreeMutationDispatcher;
     friend class TreeQueries;
-    friend class TreeScope;
 
   private:
     NodeFlag _flags : BitCount<NodeFlag>() {NodeFlag::None};
