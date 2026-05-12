@@ -109,10 +109,8 @@ Source: https://dom.spec.whatwg.org
     Test Coverage : None
 
 4.2.10.2 Interface HTMLCollection
-    Implementation: Partial
+    Implementation: Full
     Test Coverage : None
-    Notes         : 
-        - Implementation: namedItem/named index requires implementing element/attr first.
 
 4.3 Mutation observers
     Implementation: None
@@ -165,12 +163,6 @@ Source: https://dom.spec.whatwg.org
     Test Coverage : None
     Notes 	      : 
         - Implementation: CreateDocument/CreateHTMLDocument needs to set the origin of the new document.
-
-4.7 Interface DocumentFragment
-    Implementation: Full
-    Test Coverage : Partial
-    Notes 	      : 
-        - Test Coverage: TextContent.
 
 4.8 Interface ShadowRoot
     Implementation: Partial
@@ -317,6 +309,8 @@ Source: https://dom.spec.whatwg.org
 4.2.10.1 Interface NodeList
 
 4.6 Interface DocumentType
+
+4.7 Interface DocumentFragment
 
 4.12 Interface CDATASection
 
