@@ -64,7 +64,13 @@ namespace Krys::Tests
 
     SECTION("Inserting an Attr returns a HierarchyRequestError")
     {
-      // TODO(impl): test by creating via an element or document.
+      auto attrResult = document->CreateAttribute(u8"test");
+      REQUIRE_FALSE(attrResult.HasException());
+      auto&& attr = attrResult.ReleaseValue();
+
+      auto result = MutationAlgorithms::EnsurePreInsertValidity(*attr, *element, nullptr);
+      REQUIRE(result.HasException());
+      REQUIRE(result.GetException().Code() == ExceptionCode::HierarchyRequestError);
     }
 
     SECTION("Inserting a Text node into a Document returns a HierarchyRequestError")
