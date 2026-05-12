@@ -154,7 +154,6 @@ Source: https://dom.spec.whatwg.org
         - Implementation: Validate name for CreateProcessingInstruction's target.
         - Implementation: CharacterSet - Document needs the encoding used passed to it on creation.
         - Implementation: ContentType - Document needs this passed to it on creation.
-        - Implementation: AdoptNode needs it's implementation finishing.
         - Implementation: ElementFactory::CreateElement needs it's implementation finishing.
 
 

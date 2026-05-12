@@ -1,6 +1,9 @@
 ﻿#include "Krystal.HTML/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/CustomElementAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.HTML/Algorithms/Factories/ElementFactory.hpp"
+#include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
@@ -8,6 +11,7 @@
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/Utils/SubtreeRanges.hpp"
 
 namespace Krys::HTML
 {
@@ -61,30 +65,60 @@ namespace Krys::HTML
 
   ExceptionOr<void> DocumentAlgorithms::AdoptNode(Node &node, Document &document) noexcept
   {
-    if (Is<Attr>(node))
+    auto &oldDocument = node.NodeDocument();
+    if (node.ParentNode() != nullptr)
     {
-      auto &attr = Downcast<Attr>(node);
-      RefPtr<Element> element = ShareRefPtr(attr.OwnerElement());
-      if (element != nullptr)
+      if (auto result = MutationAlgorithms::Remove(node); result.HasException())
       {
-        if (auto result = element->RemoveAttributeNode(attr); result.HasException())
-        {
-          return result.ReleaseException();
-        }
+        return result.ReleaseException();
       }
     }
-    else
+
+    if (&document != &oldDocument)
     {
-      if (auto oldParent = ShareRefPtr(node.ParentNode()))
+      auto documentEffectiveGlobalRegistry = document.CustomElementRegistry();
+
+      for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(node))
       {
-        if (auto result = oldParent->RemoveChild(node); result.HasException())
+        inclusiveDescendant._ownerDocument = ShareRefPtr(&document);
+        if (Is<ShadowRoot>(inclusiveDescendant))
         {
-          return {result.ReleaseException()};
+          auto &shadowRootInclusiveDescendant = Downcast<ShadowRoot>(inclusiveDescendant);
+          auto registry = shadowRootInclusiveDescendant.CustomElementRegistry();
+          if (registry == nullptr && !shadowRootInclusiveDescendant._keepCustomElementRegistryNull)
+          {
+            shadowRootInclusiveDescendant._customElementRegistry = documentEffectiveGlobalRegistry;
+          }
+          else if (CustomElementAlgorithms::IsGlobalCustomElementRegistry(registry.get()))
+          {
+            shadowRootInclusiveDescendant._customElementRegistry = documentEffectiveGlobalRegistry;
+          }
+        }
+        else if (Is<Element>(inclusiveDescendant))
+        {
+          auto &elementInclusiveDescendant = Downcast<Element>(inclusiveDescendant);
+          for (auto &attr : elementInclusiveDescendant._attributes)
+          {
+            attr->_ownerDocument = ShareRefPtr(&document);
+          }
+
+          auto registry = elementInclusiveDescendant.CustomElementRegistry();
+          if (registry == nullptr || !registry->IsScoped())
+          {
+            elementInclusiveDescendant._customElementRegistry = documentEffectiveGlobalRegistry;
+          }
         }
       }
 
-      assert(!node.IsConnected());
-      assert(!node.ParentNode());
+      // TODO(impl): CUSTOM-ELEMENTS
+      // For each inclusiveDescendant of node’s shadow-including inclusive descendants that is custom, in
+      // shadow-including tree order: enqueue a custom element callback reaction with inclusiveDescendant,
+      // callback name "adoptedCallback", and « oldDocument, document ».
+
+      for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(node))
+      {
+        ExtensibilityHooks::NodeAdopted(inclusiveDescendant, oldDocument);
+      }
     }
 
     return {};

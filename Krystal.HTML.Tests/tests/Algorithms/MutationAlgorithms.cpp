@@ -1,10 +1,10 @@
 ﻿#include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML.Tests/TestElement.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Comment.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
-#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/DocumentType.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
@@ -353,21 +353,20 @@ namespace Krys::Tests
       // TODO(impl): need to be able to create a live range in order to test this.
     }
 
-    // TODO(impl): uncomment this once document has AdoptNode implemented properly.
-    // SECTION("Inserting a node from another Document adopts the node into the new Document")
-    //{
-    //  auto otherDocument = CreateRef<Document>();
-    //  auto element = CreateRef<TestElement>(*otherDocument);
+    SECTION("Inserting a node from another Document adopts the node into the new Document")
+    {
+      auto otherDocument = CreateRef<Document>();
+      auto element = CreateRef<TestElement>(*otherDocument);
 
-    // REQUIRE(&element->NodeDocument() == otherDocument.get());
-    // REQUIRE_FALSE(element->IsConnected());
+      REQUIRE(&element->NodeDocument() == otherDocument.get());
+      REQUIRE_FALSE(element->IsConnected());
 
-    // REQUIRE_FALSE(MutationAlgorithms::Insert(*element, *document, nullptr).HasException());
+      REQUIRE_FALSE(MutationAlgorithms::Insert(*element, *document, nullptr).HasException());
 
-    // REQUIRE(&element->NodeDocument() == document.get());
-    // REQUIRE(element->IsConnected());
+      REQUIRE(&element->NodeDocument() == document.get());
+      REQUIRE(element->IsConnected());
 
-    // REQUIRE_FALSE(document->RemoveChild(*element).HasException());
-    // }
+      REQUIRE_FALSE(document->RemoveChild(*element).HasException());
+    }
   }
 }

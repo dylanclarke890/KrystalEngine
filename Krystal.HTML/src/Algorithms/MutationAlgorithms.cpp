@@ -174,7 +174,7 @@ namespace Krys::HTML
     auto *slotParent = DynamicDowncast<HTMLSlotElement>(parent);
     for (auto &target : nodes)
     {
-      if (auto result = parent.OwnerDocument()->AdoptNode(*target); result.HasException())
+      if (auto result = parent.NodeDocument().AdoptNode(*target); result.HasException())
       {
         return result.ReleaseException();
       }

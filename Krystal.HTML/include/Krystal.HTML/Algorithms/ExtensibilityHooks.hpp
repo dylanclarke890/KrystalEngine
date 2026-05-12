@@ -6,6 +6,7 @@
 namespace Krys::HTML
 {
   class ContainerNode;
+  class Document;
   class Element;
   class Node;
 
@@ -30,6 +31,9 @@ namespace Krys::HTML
 
     /// @see https://dom.spec.whatwg.org/#concept-node-clone-ext
     static void NodeCloned(Node &node, Node &copy, bool subtree) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-node-adopt-ext
+    static void NodeAdopted(Node &node, Document &oldDocument) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-element-attributes-change-ext
     static void ElementAttributeChanged(Element &element, DOMStringAtom localName,

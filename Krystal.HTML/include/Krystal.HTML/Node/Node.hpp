@@ -84,6 +84,7 @@ namespace Krys::HTML
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Node);
 
     friend class Document;
+    friend class DocumentAlgorithms;
     friend class ElementAlgorithms;
     friend class ExtensibilityHooks;
     friend class MutationAlgorithms;
@@ -213,6 +214,11 @@ namespace Krys::HTML
     {
       (void)copy;
       (void)subtree;
+    }
+
+    virtual void OnAdopt(Document &oldDocument) noexcept
+    {
+      (void)oldDocument;
     }
 
     virtual void OnPostConnection() noexcept

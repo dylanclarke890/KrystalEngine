@@ -94,6 +94,11 @@ namespace Krys::HTML
     node.OnClone(copy, subtree);
   }
 
+  void ExtensibilityHooks::NodeAdopted(Node &node, Document &oldDocument) noexcept
+  {
+    node.OnAdopt(oldDocument);
+  }
+
   void ExtensibilityHooks::ElementAttributeChanged(Element &element, DOMStringAtom localName,
                                                    Maybe<DOMStringView> oldValue, Maybe<DOMStringView> value,
                                                    DOMStringAtom namespaceURI) noexcept

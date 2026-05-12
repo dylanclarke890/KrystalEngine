@@ -18,6 +18,7 @@ namespace Krys::HTML
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ShadowRoot);
 
+    friend class DocumentAlgorithms;
     friend class NodeAlgorithms;
 
   private:
@@ -64,8 +65,8 @@ namespace Krys::HTML
 
     KRYS_NODISCARD RawPtr<Element> Host() const noexcept;
 
-    // TODO(impl): MINOR - The onslotchange attribute is an event handler IDL attribute for the onslotchange event
-    // handler, whose event handler event type is slotchange.
+    // TODO(impl): MINOR - The onslotchange attribute is an event handler IDL attribute for the onslotchange
+    // event handler, whose event handler event type is slotchange.
 
 #pragma endregion
 
