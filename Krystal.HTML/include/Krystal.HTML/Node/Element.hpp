@@ -7,6 +7,7 @@
 #include "Krystal.HTML/Node/NamedNodeMap.hpp"
 #include "Krystal.HTML/Node/RareData/ElementRareData.hpp"
 #include "Krystal.HTML/Node/ShadowRootInit.hpp"
+#include "Krystal.HTML/Node/Enums/CustomElementState.hpp"
 #include "Krystal.HTML/QualifiedName.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
@@ -30,6 +31,7 @@ namespace Krys::HTML
     friend class DocumentAlgorithms;
     friend class ElementAlgorithms;
     friend class ExtensibilityHooks;
+    friend class ShadowRootAlgorithms;
     friend class HTMLCollectionAlgorithms;
     friend class Node;
     friend class NodeAlgorithms;
@@ -46,6 +48,7 @@ namespace Krys::HTML
     List<Ref<Attr>> _attributes;
     DOMString _slottableName;
     DOMStringAtom _is {DOMStringAtom::Null()};
+    CustomElementState _customElementState {CustomElementState::Undefined};
 
   protected:
     Element(Document &document, NodeFlag nodeFlags = NodeFlag::None) noexcept;

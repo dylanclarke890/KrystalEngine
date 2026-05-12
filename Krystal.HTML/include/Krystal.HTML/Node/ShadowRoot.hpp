@@ -20,6 +20,7 @@ namespace Krys::HTML
 
     friend class DocumentAlgorithms;
     friend class NodeAlgorithms;
+    friend class ShadowRootAlgorithms;
 
   private:
     ShadowRootMode _mode : BitCount<ShadowRootMode>() {ShadowRootMode::Open};

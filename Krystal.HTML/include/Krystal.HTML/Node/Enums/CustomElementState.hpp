@@ -9,8 +9,9 @@ namespace Krys::HTML
     Undefined,
     Failed,
     Uncustomized,
+    Precustomized,
     Custom
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CustomElementState, 4);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CustomElementState, 5uz);

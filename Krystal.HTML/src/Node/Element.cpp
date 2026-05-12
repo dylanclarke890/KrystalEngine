@@ -290,8 +290,15 @@ namespace Krys::HTML
       return Exception {ExceptionCode::NotSupportedError};
     }
 
-    return ShadowRootAlgorithms::AttachShadowRoot(*this, init.Mode, init.Clonable, init.Serializable,
-                                                  init.DelegatesFocus, init.SlotAssignment, registry);
+    if (auto attachResult =
+          ShadowRootAlgorithms::AttachShadowRoot(*this, init.Mode, init.Clonable, init.Serializable,
+                                                 init.DelegatesFocus, init.SlotAssignment, registry);
+        attachResult.HasException())
+    {
+      return attachResult.ReleaseException();
+    }
+
+    return ShareRef(*_shadowRoot);
   }
 
   RefPtr<ShadowRoot> Element::ShadowRoot() const noexcept

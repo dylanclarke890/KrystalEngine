@@ -45,10 +45,11 @@ namespace Krys::HTML
     KRYS_NODISCARD static RawPtr<EventTarget> Retarget(RawPtr<EventTarget> a, EventTarget &b) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-attach-a-shadow-root
-    KRYS_NODISCARD static ExceptionOr<Ref<ShadowRoot>>
-      AttachShadowRoot(Element &element, ShadowRootMode mode, Clonable clonable, Serializable serializable,
-                       DelegatesFocus delegatesFocus, SlotAssignmentMode slotAssignment,
-                       RawPtr<CustomElementRegistry> registry) noexcept;
+    KRYS_NODISCARD static ExceptionOr<void> AttachShadowRoot(Element &element, ShadowRootMode mode,
+                                                             Clonable clonable, Serializable serializable,
+                                                             DelegatesFocus delegatesFocus,
+                                                             SlotAssignmentMode slotAssignment,
+                                                             RawPtr<CustomElementRegistry> registry) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#element-shadow-host
     KRYS_NODISCARD static bool IsShadowHost(const Node &node) noexcept;
