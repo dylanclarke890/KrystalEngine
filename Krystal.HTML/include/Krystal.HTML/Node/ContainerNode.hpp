@@ -13,7 +13,6 @@ namespace Krys::HTML
 
     friend class ExtensibilityHooks;
     friend class MutationAlgorithms;
-    friend class TreeMutationDispatcher;
 
   private:
     CheckedPtr<Node> _firstChild;

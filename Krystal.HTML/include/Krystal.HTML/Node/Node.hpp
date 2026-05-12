@@ -83,14 +83,11 @@ namespace Krys::HTML
     KRYS_TYPE_CAST_TRAITS_ACCESS();
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Node);
 
-    friend class ContainerNode;
     friend class Document;
     friend class ElementAlgorithms;
     friend class ExtensibilityHooks;
-    friend class MutationObserver;
     friend class MutationAlgorithms;
-    friend class TreeMutationDispatcher;
-    friend class TreeQueries;
+    friend class MutationObserver;
 
   private:
     NodeFlag _flags : BitCount<NodeFlag>() {NodeFlag::None};

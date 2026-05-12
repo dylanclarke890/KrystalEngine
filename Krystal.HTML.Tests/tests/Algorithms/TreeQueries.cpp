@@ -479,12 +479,12 @@ namespace Krys::Tests
     REQUIRE_FALSE(TreeQueries::IsPreceding(*grandchildB, *childB));
     REQUIRE_FALSE(TreeQueries::IsPreceding(*grandchildC, *childC));
 
-    REQUIRE_FALSE(childC->RemoveChild(*grandchildC).HasException());
-    REQUIRE_FALSE(childB->RemoveChild(*grandchildB).HasException());
-    REQUIRE_FALSE(childA->RemoveChild(*grandchildA).HasException());
-    REQUIRE_FALSE(parent->RemoveChild(*childC).HasException());
-    REQUIRE_FALSE(parent->RemoveChild(*childB).HasException());
     REQUIRE_FALSE(parent->RemoveChild(*childA).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*childB).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*childC).HasException());
+    REQUIRE_FALSE(childA->RemoveChild(*grandchildA).HasException());
+    REQUIRE_FALSE(childB->RemoveChild(*grandchildB).HasException());
+    REQUIRE_FALSE(childC->RemoveChild(*grandchildC).HasException());
   }
 
   TEST_CASE("TreeQueries::IsFollowing", "[TreeQueries]")
