@@ -63,7 +63,7 @@
     <ClCompile Include="tests\Events\CustomEvent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Mixins.cpp">
+    <ClCompile Include="tests\Algorithms\Mixins.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tests\Node\DocumentType.cpp">
@@ -104,6 +104,12 @@
     </ClCompile>
     <ClCompile Include="tests\Ranges\BoundaryPoint.cpp">
       <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\Ranges\StaticRange.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\Ranges\Range.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

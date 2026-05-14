@@ -142,7 +142,7 @@ Source: https://dom.spec.whatwg.org
     Implementation: Full
     Test Coverage : Partial
     Notes		  :
-        - Test Coverage: CloneNode, IsEqualNode, LookupPrefix, LookupNamespaceURI, IsDefaultNamespace missing all test cases.
+        - Test Coverage: CloneNode, IsEqualNode, LookupPrefix, LookupNamespaceURI, IsDefaultNamespace missing test cases.
         - Test Coverage: CompareDocumentPosition: Missing test coverage for comparing attribute nodes, both with each other and with other node types.
 
 4.5 Interface Document
@@ -198,10 +198,6 @@ Source: https://dom.spec.whatwg.org
 ======================================================================
 5. RANGES
 ======================================================================
-
-5.4 Interface StaticRange
-    Implementation: Full
-    Test Coverage : None
 
 5.5 Interface Range
     Implementation: Full
@@ -318,6 +314,8 @@ Source: https://dom.spec.whatwg.org
 5.2 Boundary points
 
 5.3 Interface AbstractRange
+
+5.4 Interface StaticRange
 
 ======================================================================
 6. TRAVERSAL
