@@ -103,52 +103,49 @@ namespace Krys::HTML
                                                    Maybe<DOMStringView> oldValue, Maybe<DOMStringView> value,
                                                    DOMStringAtom namespaceURI) noexcept
   {
-    if (localName == u8"id" && namespaceURI == DOMStringAtom::Null())
+    if (localName == u8"id")
     {
-      if (value.has_value() && !value->empty())
+      if (namespaceURI == DOMStringAtom::Null())
       {
-        element.Id(DOMString(*value));
+        if (value.has_value() && !value->empty())
+        {
+          element.Id(DOMString(*value));
+        }
+        else
+        {
+          element.Id(u8"");
+        }
       }
-      else
-      {
-        element.Id(u8"");
-      }
-
-      return;
     }
-
-    if (localName == u8"class" && namespaceURI == DOMStringAtom::Null())
+    else if (localName == u8"class")
     {
-      element._domTokenList->_tokens.clear();
-      if (value.has_value())
+      if (namespaceURI == DOMStringAtom::Null())
       {
-        auto tokens = OrderedSet::Parser(*value);
         element._domTokenList->_tokens.clear();
-        element._domTokenList->_tokens.append(tokens.begin(), tokens.end());
+        if (value.has_value())
+        {
+          auto tokens = OrderedSet::Parser(*value);
+          element._domTokenList->_tokens.clear();
+          element._domTokenList->_tokens.append(tokens.begin(), tokens.end());
+        }
       }
-
-      return;
     }
-
-    if (localName == u8"slot" && namespaceURI == DOMStringAtom::Null())
+    else if (localName == u8"name")
     {
-      if (value == oldValue)
+      if (Is<HTMLSlotElement>(element) && namespaceURI == DOMStringAtom::Null())
       {
-        return;
-      }
-
-      if (!value.has_value() && oldValue.has_value() && oldValue->empty())
-      {
-        return;
-      }
-
-      if (value.has_value() && value->empty() && !oldValue.has_value())
-      {
-        return;
-      }
-
-      if (Is<HTMLSlotElement>(element))
-      {
+        if (value == oldValue)
+        {
+          return;
+        }
+        if (!value.has_value() && oldValue.has_value() && oldValue->empty())
+        {
+          return;
+        }
+        if (value.has_value() && value->empty() && !oldValue.has_value())
+        {
+          return;
+        }
         auto &slotElement = Downcast<HTMLSlotElement>(element);
         if (!value.has_value() || value->empty())
         {
@@ -158,26 +155,44 @@ namespace Krys::HTML
         {
           slotElement.Name(DOMString(*value));
         }
-
         SlotAlgorithms::AssignSlottablesForTree(TreeQueries::Root(slotElement));
       }
-
-      if (!value.has_value() || value->empty())
+    }
+    else if (localName == u8"slot")
+    {
+      if (namespaceURI == DOMStringAtom::Null())
       {
-        element._slottableName = u8"";
-      }
-      else
-      {
-        element._slottableName = DOMString(*value);
-      }
+        if (value == oldValue)
+        {
+          return;
+        }
 
-      if (auto *assignedSlot = SlotAlgorithms::GetAssignedSlot(element))
-      {
-        SlotAlgorithms::AssignSlottables(*assignedSlot);
-      }
+        if (!value.has_value() && oldValue.has_value() && oldValue->empty())
+        {
+          return;
+        }
 
-      SlotAlgorithms::AssignSlot(element);
-      return;
+        if (value.has_value() && value->empty() && !oldValue.has_value())
+        {
+          return;
+        }
+
+        if (!value.has_value() || value->empty())
+        {
+          element._slottableName = u8"";
+        }
+        else
+        {
+          element._slottableName = DOMString(*value);
+        }
+
+        if (auto *assignedSlot = SlotAlgorithms::GetAssignedSlot(element))
+        {
+          SlotAlgorithms::AssignSlottables(*assignedSlot);
+        }
+
+        SlotAlgorithms::AssignSlot(element);
+      }
     }
   }
 }
