@@ -16,11 +16,9 @@
 
 namespace Krys::HTML
 {
-  RefPtr<HTMLElement> HTMLElementFactory::TryCreate(Document &document, const QualifiedName &name,
-                                                    DOMStringAtom is,
-                                                    RawPtr<CustomElementRegistry> registry) noexcept
+  RefPtr<HTMLElement> HTMLElementFactory::TryCreate(Document &document, DOMStringAtom localName) noexcept
   {
-    auto tagName = TryParseHTMLTagName(Krys::Text::ToASCIIUppercase(name.LocalName.View()));
+    auto tagName = TryParseHTMLTagName(Krys::Text::ToASCIIUppercase(localName.View()));
 
     if (tagName.has_value())
     {
@@ -35,7 +33,7 @@ namespace Krys::HTML
         case HTMLTagName::Nextid:
         case HTMLTagName::Spacer:
         {
-          return CreateRef<HTMLUnknownElement>(document, name);
+          return CreateRef<HTMLUnknownElement>(document);
         }
         case HTMLTagName::Acronym:
         case HTMLTagName::Basefont:
@@ -50,30 +48,30 @@ namespace Krys::HTML
         case HTMLTagName::Strike:
         case HTMLTagName::Tt:
         {
-          return CreateRef<HTMLElement>(document, name);
+          return CreateRef<HTMLElement>(document);
         }
         case HTMLTagName::Listing:
         case HTMLTagName::Xmp:
         {
-          return CreateRef<HTMLPreElement>(document, name);
+          return CreateRef<HTMLPreElement>(document);
         }
         default:
         {
           if (tagName == HTMLTagName::Unknown)
           {
-            return CreateRef<HTMLUnknownElement>(document, name);
+            return CreateRef<HTMLUnknownElement>(document);
           }
 
-          return CreateRef<HTMLElement>(document, name);
+          return CreateRef<HTMLElement>(document);
         }
       }
     }
 
-    if (NameValidation::IsValidCustomElementName(name.LocalName.View()))
+    if (NameValidation::IsValidCustomElementName(localName.View()))
     {
-      return CreateRef<HTMLElement>(document, name);
+      return CreateRef<HTMLElement>(document);
     }
 
-    return CreateRef<HTMLUnknownElement>(document, name);
+    return CreateRef<HTMLUnknownElement>(document);
   }
 }

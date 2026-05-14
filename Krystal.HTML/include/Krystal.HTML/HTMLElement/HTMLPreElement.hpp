@@ -10,6 +10,6 @@ namespace Krys::HTML
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLPreElement);
 
   public:
-    HTMLPreElement(Document &document, const QualifiedName &name) noexcept;
+    HTMLPreElement(Document &document) noexcept;
   };
 }

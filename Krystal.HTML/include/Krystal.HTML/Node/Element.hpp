@@ -52,11 +52,11 @@ namespace Krys::HTML
     CustomElementState _customElementState {CustomElementState::Undefined};
 
   protected:
+    Element(Document &document, NodeFlag nodeFlags) noexcept;
+
     Element(Document &document, const QualifiedName& name, NodeFlag nodeFlags) noexcept;
 
   public:
-    Element(Document &document, const QualifiedName &name) noexcept;
-
 #pragma region Element
 
     KRYS_NODISCARD DOMStringAtom LocalName() const noexcept

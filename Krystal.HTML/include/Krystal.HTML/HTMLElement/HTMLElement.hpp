@@ -12,10 +12,12 @@ namespace Krys::HTML
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLElement);
 
   protected:
-    HTMLElement(Document &document, const QualifiedName &name, NodeFlag flags) noexcept;
+    HTMLElement(Document &document, NodeFlag flags) noexcept;
+
+    HTMLElement(Document &document, const QualifiedName& name, NodeFlag flags) noexcept;
 
   public:
-    HTMLElement(Document &document, const QualifiedName &name) noexcept;
+    HTMLElement(Document &document) noexcept;
   };
 }
 

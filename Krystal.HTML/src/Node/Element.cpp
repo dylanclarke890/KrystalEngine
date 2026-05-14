@@ -25,13 +25,13 @@
 
 namespace Krys::HTML
 {
-  Element::Element(Document &document, const QualifiedName &name, NodeFlag nodeFlags) noexcept
-      : ContainerNode(document, NodeType::ELEMENT_NODE, nodeFlags), _qualifiedName(name)
+  Element::Element(Document &document, NodeFlag nodeFlags) noexcept
+      : ContainerNode(document, NodeType::ELEMENT_NODE, nodeFlags)
   {
   }
 
-  Element::Element(Document &document, const QualifiedName &name) noexcept
-      : Element(document, name, NodeFlag::None)
+  Element::Element(Document &document, const QualifiedName &name, NodeFlag nodeFlags) noexcept
+      : ContainerNode(document, NodeType::ELEMENT_NODE, nodeFlags), _qualifiedName(name)
   {
   }
 

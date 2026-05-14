@@ -10,7 +10,7 @@ namespace Krys::HTML
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLUnknownElement);
 
   public:
-    HTMLUnknownElement(Document &document, const QualifiedName& name) noexcept;
+    HTMLUnknownElement(Document &document) noexcept;
   };
 }
 

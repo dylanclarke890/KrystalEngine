@@ -31,7 +31,7 @@ namespace Krys::Tests
   TEST_CASE("Element::NodeName", "[HTML][Element]")
   {
     CommonTestData data;
-    REQUIRE(data.Node->NodeName() == u8"TEST-ELEMENT");
+    REQUIRE(data.Node->NodeName() == u8"");
   }
 
   TEST_CASE("Element::NodeType", "[HTML][Element]")

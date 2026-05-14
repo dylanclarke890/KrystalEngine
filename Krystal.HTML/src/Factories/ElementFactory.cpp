@@ -37,7 +37,7 @@ namespace Krys::HTML
 
       if (result == nullptr)
       {
-        result = HTMLElementFactory::TryCreate(document, name, is, registry.value().get());
+        result = HTMLElementFactory::TryCreate(document, name.LocalName);
         if (NameValidation::IsValidCustomElementName(name.LocalName.View()) || is != DOMStringAtom::Null())
         {
           result->_customElementState = CustomElementState::Undefined;
@@ -55,8 +55,12 @@ namespace Krys::HTML
 
     if (result == nullptr)
     {
-      result = CreateRefPtr<Element>(document, name);
+      result = AdoptRefPtr<Element>(new Element(document, name, NodeFlag::None));
     }
+
+    result->_qualifiedName = name;
+    result->_customElementRegistry = registry.value();
+    result->_is = is;
 
     return AdoptRef(*result.release());
   }
