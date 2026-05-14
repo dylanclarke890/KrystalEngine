@@ -1,9 +1,9 @@
 ﻿#include "Krystal.HTML/Node/DOMImplementation.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/DocumentAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/Factories/ElementFactory.hpp"
 #include "Krystal.HTML/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/Factories/ElementFactory.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/DocumentType.hpp"
@@ -98,14 +98,14 @@ namespace Krys::HTML
     }
 
     auto qualifiedName = QualifiedName {Namespaces::HTML, DOMStringAtom::Null(), u8"html"};
-    auto htmlElement = ElementFactory::CreateElement(*document, qualifiedName);
+    auto htmlElement = ElementFactory::Create(*document, qualifiedName);
     if (auto appendResult = document->AppendChild(*htmlElement); appendResult.HasException())
     {
       return appendResult.ReleaseException();
     }
 
     qualifiedName.LocalName = u8"head";
-    auto headElement = ElementFactory::CreateElement(*document, qualifiedName);
+    auto headElement = ElementFactory::Create(*document, qualifiedName);
     if (auto appendResult = document->AppendChild(*headElement); appendResult.HasException())
     {
       return appendResult.ReleaseException();
@@ -114,7 +114,7 @@ namespace Krys::HTML
     if (title.has_value())
     {
       qualifiedName.LocalName = u8"title";
-      auto titleElement = ElementFactory::CreateElement(*document, qualifiedName);
+      auto titleElement = ElementFactory::Create(*document, qualifiedName);
       if (auto appendResult = headElement->AppendChild(*titleElement); appendResult.HasException())
       {
         return appendResult.ReleaseException();
@@ -129,7 +129,7 @@ namespace Krys::HTML
     }
 
     qualifiedName.LocalName = u8"body";
-    auto bodyElement = ElementFactory::CreateElement(*document, qualifiedName);
+    auto bodyElement = ElementFactory::Create(*document, qualifiedName);
     if (auto appendResult = document->AppendChild(*bodyElement); appendResult.HasException())
     {
       return appendResult.ReleaseException();

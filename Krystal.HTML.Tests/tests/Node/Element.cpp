@@ -1,8 +1,8 @@
 ﻿#include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML.Tests/TestElement.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
@@ -31,7 +31,7 @@ namespace Krys::Tests
   TEST_CASE("Element::NodeName", "[HTML][Element]")
   {
     CommonTestData data;
-    REQUIRE(data.Node->NodeName() == u8"");
+    REQUIRE(data.Node->NodeName() == u8"TEST-ELEMENT");
   }
 
   TEST_CASE("Element::NodeType", "[HTML][Element]")

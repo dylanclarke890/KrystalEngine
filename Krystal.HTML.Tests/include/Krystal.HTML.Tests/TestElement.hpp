@@ -1,6 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/Namespaces.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
+#include "Krystal.HTML/QualifiedName.hpp"
 
 namespace Krys::Tests
 {
@@ -11,7 +13,8 @@ namespace Krys::Tests
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(TestElement);
 
   public:
-    TestElement(Document &document) noexcept : Element(document, NodeFlag::None)
+    TestElement(Document &document) noexcept
+        : Element(document, {Namespaces::HTML, DOMStringAtom::Null(), u8"test-element"}, NodeFlag::None)
     {
     }
   };

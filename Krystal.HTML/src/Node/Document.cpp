@@ -2,7 +2,6 @@
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/DocumentAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/Factories/ElementFactory.hpp"
 #include "Krystal.HTML/Algorithms/HTMLCollectionAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/Mixins/NonElementParentNode.hpp"
 #include "Krystal.HTML/Algorithms/Mixins/ParentNode.hpp"
@@ -13,6 +12,7 @@
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/Factories/ElementFactory.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CDATASection.hpp"
 #include "Krystal.HTML/Node/Comment.hpp"
@@ -157,9 +157,9 @@ namespace Krys::HTML
       namespaceURI = Namespaces::HTML;
     }
 
-    return ElementFactory::CreateElement(*this, {namespaceURI, DOMStringAtom::Null(), localName},
-                                         creationOptions.Value().Is, true,
-                                         creationOptions.Value().CustomElementRegistry);
+    return ElementFactory::Create(*this, {namespaceURI, DOMStringAtom::Null(), localName},
+                                  creationOptions.Value().Is, true,
+                                  creationOptions.Value().CustomElementRegistry);
   }
 
   ExceptionOr<Ref<Element>> Document::CreateElementNS(DOMStringAtom namespaceUri, DOMStringAtom qualifiedName,

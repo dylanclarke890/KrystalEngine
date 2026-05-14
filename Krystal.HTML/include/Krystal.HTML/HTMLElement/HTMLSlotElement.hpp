@@ -37,6 +37,6 @@ namespace Krys::HTML
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::HTMLSlotElement)
   static bool IsType(const Krys::HTML::Node &target) noexcept
   {
-    return target.IsHTMLSlotElementNode();
+    return target.IsHTMLSlotElement();
   }
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

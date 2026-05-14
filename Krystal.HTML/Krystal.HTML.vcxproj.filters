@@ -345,10 +345,10 @@
     <ClInclude Include="include\Krystal.HTML\Algorithms\ExtensibilityHooks.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Algorithms\Factories\EventFactory.hpp">
+    <ClInclude Include="include\Krystal.HTML\Factories\EventFactory.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Algorithms\Factories\ElementFactory.hpp">
+    <ClInclude Include="include\Krystal.HTML\Factories\ElementFactory.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Algorithms\NodeAlgorithms.hpp">
@@ -369,7 +369,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\XMLDocument.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\Enums\HTMLTagName.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLTagName.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\ElementCreationOptions.hpp">
@@ -394,6 +394,33 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Algorithms\LiveRangeUpdater.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\CustomElement\CustomElementConstructor.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Factories\CustomElementFactory.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Factories\SVGElementFactory.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Factories\MathMLElementFactory.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\MathMLElement\MathMLElement.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\SVGElement\SVGElement.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLUnknownElement.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Factories\HTMLElementFactory.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLPreElement.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -533,7 +560,7 @@
     <ClCompile Include="src\MutationObserver\MutationRecord.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Algorithms\Factories\ElementFactory.cpp">
+    <ClCompile Include="src\Factories\ElementFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Algorithms\DocumentAlgorithms.cpp">
@@ -555,6 +582,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Ranges\StaticRange.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Factories\CustomElementFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Factories\HTMLElementFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HTMLElement\HTMLElement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HTMLElement\HTMLUnknownElement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HTMLElement\HTMLPreElement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

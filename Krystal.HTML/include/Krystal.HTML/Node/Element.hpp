@@ -3,11 +3,11 @@
 #include "Krystal.HTML/DOMTokenList.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/Node/Enums/CustomElementState.hpp"
 #include "Krystal.HTML/Node/Enums/InsertAdjacentWhere.hpp"
 #include "Krystal.HTML/Node/NamedNodeMap.hpp"
 #include "Krystal.HTML/Node/RareData/ElementRareData.hpp"
 #include "Krystal.HTML/Node/ShadowRootInit.hpp"
-#include "Krystal.HTML/Node/Enums/CustomElementState.hpp"
 #include "Krystal.HTML/QualifiedName.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
@@ -28,6 +28,7 @@ namespace Krys::HTML
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Element);
 
+    friend class ElementFactory;
     friend class DocumentAlgorithms;
     friend class ElementAlgorithms;
     friend class ExtensibilityHooks;
@@ -51,9 +52,11 @@ namespace Krys::HTML
     CustomElementState _customElementState {CustomElementState::Undefined};
 
   protected:
-    Element(Document &document, NodeFlag nodeFlags = NodeFlag::None) noexcept;
+    Element(Document &document, const QualifiedName& name, NodeFlag nodeFlags) noexcept;
 
   public:
+    Element(Document &document, const QualifiedName &name) noexcept;
+
 #pragma region Element
 
     KRYS_NODISCARD DOMStringAtom LocalName() const noexcept

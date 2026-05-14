@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Algorithms/Factories/EventFactory.hpp"
+﻿#include "Krystal.HTML/Factories/EventFactory.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Events/Event.hpp"
 #include "Krystal.HTML/Events/EventNames.hpp"

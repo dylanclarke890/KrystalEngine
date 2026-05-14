@@ -2,10 +2,10 @@
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
-#include "Krystal.HTML/Algorithms/Factories/ElementFactory.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/Factories/ElementFactory.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
@@ -58,7 +58,7 @@ namespace Krys::HTML
       return creationOptions.ReleaseException();
     }
 
-    return ElementFactory::CreateElement(
+    return ElementFactory::Create(
       document, {name.Value().NamespaceURI, name.Value().Prefix, name.Value().LocalName},
       creationOptions.Value().Is, true, creationOptions.Value().CustomElementRegistry);
   }

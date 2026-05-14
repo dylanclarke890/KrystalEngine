@@ -51,17 +51,18 @@ namespace Krys::HTML
     None = 0,
     IsCharacterData = 1 << 0,
     IsContainerNode = 1 << 1,
-    IsTextNode = 1 << 2,
-    IsElement = 1 << 3,
+    IsShadowRoot = 1 << 2,
+    IsUnknownElement = 1 << 3,
     IsHTMLElement = 1 << 4,
-    IsHTMLSlotElement = 1 << 5,
-    IsShadowRoot = 1 << 6,
+    IsSVGElement = 1 << 5,
+    IsMathMLElement = 1 << 6,
+    IsHTMLSlotElement = 1 << 7,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::NodeType, 13u)
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::DocumentPosition, 7u)
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::NodeFlag, 8u)
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::NodeType, 13u);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::DocumentPosition, 7u);
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::NodeFlag, 9u);
 
 namespace Krys::HTML
 {
@@ -256,17 +257,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool IsElementNode() const noexcept
     {
-      return HasNodeFlag(NodeFlag::IsElement);
-    }
-
-    KRYS_NODISCARD bool IsHTMLElementNode() const noexcept
-    {
-      return HasNodeFlag(NodeFlag::IsHTMLElement);
-    }
-
-    KRYS_NODISCARD bool IsHTMLSlotElementNode() const noexcept
-    {
-      return HasNodeFlag(NodeFlag::IsHTMLSlotElement);
+      return _nodeType == NodeType::ELEMENT_NODE;
     }
 
     KRYS_NODISCARD bool IsCharacterDataNode() const noexcept
@@ -276,7 +267,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool IsTextNode() const noexcept
     {
-      return HasNodeFlag(NodeFlag::IsTextNode);
+      return _nodeType == NodeType::TEXT_NODE;
     }
 
     KRYS_NODISCARD bool IsCDATASectionNode() const noexcept
@@ -299,19 +290,49 @@ namespace Krys::HTML
       return HasNodeFlag(NodeFlag::IsShadowRoot);
     }
 
-    KRYS_NODISCARD bool IsTreeScope() const noexcept
+    KRYS_NODISCARD bool IsUnknownElement() const noexcept
     {
-      return IsDocumentNode() || IsShadowRootNode();
+      return HasNodeFlag(NodeFlag::IsUnknownElement);
+    }
+
+    KRYS_NODISCARD bool IsHTMLElement() const noexcept
+    {
+      return HasNodeFlag(NodeFlag::IsHTMLElement);
+    }
+
+    KRYS_NODISCARD bool IsHTMLSlotElement() const noexcept
+    {
+      return HasNodeFlag(NodeFlag::IsHTMLSlotElement);
+    }
+
+    KRYS_NODISCARD bool IsSVGElement() const noexcept
+    {
+      return HasNodeFlag(NodeFlag::IsSVGElement);
+    }
+
+    KRYS_NODISCARD bool IsMathMLElement() const noexcept
+    {
+      return HasNodeFlag(NodeFlag::IsMathMLElement);
+    }
+
+    KRYS_NODISCARD bool IsHTMLUnknownElement() const noexcept
+    {
+      return HasNodeFlag(NodeFlag::IsHTMLElement) && HasNodeFlag(NodeFlag::IsUnknownElement);
+    }
+
+    KRYS_NODISCARD bool IsSVGUnknownElement() const noexcept
+    {
+      return HasNodeFlag(NodeFlag::IsSVGElement) && HasNodeFlag(NodeFlag::IsUnknownElement);
+    }
+
+    KRYS_NODISCARD bool IsMathMLUnknownElement() const noexcept
+    {
+      return HasNodeFlag(NodeFlag::IsMathMLElement) && HasNodeFlag(NodeFlag::IsUnknownElement);
     }
 
 #pragma endregion
 
 #pragma region Tree Scope
-
-    KRYS_NODISCARD bool IsInTreeScope() const noexcept
-    {
-      return IsConnected() || IsInShadowTree();
-    }
 
     /// @see https://dom.spec.whatwg.org/#concept-shadow-tree
     KRYS_NODISCARD bool IsInShadowTree() const noexcept
