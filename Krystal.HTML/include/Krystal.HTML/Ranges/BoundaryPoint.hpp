@@ -35,7 +35,7 @@ namespace Krys::HTML
       if (TreeQueries::IsAncestor(a, b))
       {
         RawPtr<const Node> child = &b;
-        while (!TreeQueries::IsChild(a, *child))
+        while (!TreeQueries::IsChild(*child, a))
         {
           child = child->ParentNode();
         }

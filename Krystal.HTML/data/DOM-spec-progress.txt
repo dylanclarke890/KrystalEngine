@@ -199,10 +199,6 @@ Source: https://dom.spec.whatwg.org
 5. RANGES
 ======================================================================
 
-5.3 Interface AbstractRange
-    Implementation: Full
-    Test Coverage : None
-
 5.4 Interface StaticRange
     Implementation: Full
     Test Coverage : None
@@ -320,6 +316,8 @@ Source: https://dom.spec.whatwg.org
 5.1 Introduction to "DOM Ranges" (N/A)
 
 5.2 Boundary points
+
+5.3 Interface AbstractRange
 
 ======================================================================
 6. TRAVERSAL

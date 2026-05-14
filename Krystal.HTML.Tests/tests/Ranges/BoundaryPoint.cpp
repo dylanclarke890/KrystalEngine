@@ -1,6 +1,10 @@
 ﻿#include "Krystal.HTML/Ranges/BoundaryPoint.hpp"
-#include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML.Tests/TestContainerNode.hpp"
+#include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/Node/Attr.hpp"
+#include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/Node/NodeList.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
@@ -31,12 +35,14 @@ namespace Krys::Tests
     REQUIRE(pointBOffset.ComparePositionTo(pointAOffset) == std::strong_ordering::greater);
     REQUIRE(pointAOffset.ComparePositionTo(pointAOffset) == std::strong_ordering::equal);
 
-
     BoundaryPoint pointAParent {parent, 0};
     BoundaryPoint pointBChild {childB, 0};
 
     REQUIRE(pointAParent.ComparePositionTo(pointBChild) == std::strong_ordering::less);
     REQUIRE(pointBChild.ComparePositionTo(pointAParent) == std::strong_ordering::greater);
     REQUIRE(pointAParent.ComparePositionTo(pointAParent) == std::strong_ordering::equal);
+
+    REQUIRE_FALSE(parent->RemoveChild(*childA).HasException());
+    REQUIRE_FALSE(parent->RemoveChild(*childB).HasException());
   }
 }

@@ -193,7 +193,7 @@
     <ClInclude Include="include\Krystal.HTML.Tests\TestContainerNode.hpp" />
     <ClInclude Include="include\Krystal.HTML.Tests\TestElement.hpp" />
     <ClInclude Include="include\Krystal.HTML.Tests\TestNode.hpp" />
-    <ClInclude Include="tests\Ranges\BoundaryPoint.hpp" />
+    <ClCompile Include="tests\Ranges\BoundaryPoint.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
