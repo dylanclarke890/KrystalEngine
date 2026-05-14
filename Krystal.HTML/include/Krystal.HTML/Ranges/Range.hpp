@@ -36,7 +36,7 @@ namespace Krys::HTML
   public:
     Range(BoundaryPoint start, BoundaryPoint end) noexcept;
 
-    ~Range() noexcept override = default;
+    ~Range() noexcept override;
 
     KRYS_NODISCARD RawPtr<Node> CommonAncestorContainer() const noexcept;
 

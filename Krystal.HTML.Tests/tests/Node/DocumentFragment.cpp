@@ -14,23 +14,26 @@ namespace Krys::Tests
 {
   using namespace Krys::HTML;
 
-  struct CommonTestData
+  namespace
   {
-    Ref<Document> Document;
-    Ref<DocumentFragment> Node;
-
-    CommonTestData() : Document(CreateRef<HTML::Document>()), Node(CreateRef<DocumentFragment>(*Document))
+    struct CommonTestData
     {
-    }
+      Ref<Document> Document;
+      Ref<DocumentFragment> Node;
 
-    ~CommonTestData()
-    {
-      while (auto *firstChild = Node->FirstChild())
+      CommonTestData() : Document(CreateRef<HTML::Document>()), Node(CreateRef<DocumentFragment>(*Document))
       {
-        REQUIRE_FALSE(Node->RemoveChild(*firstChild).HasException());
       }
-    }
-  };
+
+      ~CommonTestData()
+      {
+        while (auto *firstChild = Node->FirstChild())
+        {
+          REQUIRE_FALSE(Node->RemoveChild(*firstChild).HasException());
+        }
+      }
+    };
+  }
 
   TEST_CASE("DocumentFragment::NodeType", "[HTML][DocumentFragment]")
   {

@@ -188,7 +188,7 @@ Source: https://dom.spec.whatwg.org
     Implementation: Full
     Test Coverage : Partial
     Notes         : 
-        - Missing test cases for queued mutation records and live range updates.
+        - Missing test cases for queued mutation records.
 
 4.11 Interface Text
     Implementation: Full

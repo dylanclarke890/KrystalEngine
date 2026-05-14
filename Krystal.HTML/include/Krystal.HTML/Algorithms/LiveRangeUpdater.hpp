@@ -5,11 +5,16 @@ namespace Krys::HTML
   class Node;
   class CharacterData;
   class ContainerNode;
+  class Range;
   class Text;
 
   class LiveRangeUpdater
   {
   public:
+    static void Add(Range &range) noexcept;
+
+    static void Remove(Range &range) noexcept;
+
     static void PreRemove(const Node &node) noexcept;
 
     static void CharacterDataReplaced(CharacterData &characterData, size_t offset, size_t count,

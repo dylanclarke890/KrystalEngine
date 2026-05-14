@@ -1,12 +1,13 @@
 ﻿#include "Krystal.HTML/Ranges/Range.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
+#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Node/Comment.hpp"
-#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/DocumentType.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
@@ -19,6 +20,12 @@ namespace Krys::HTML
 {
   Range::Range(BoundaryPoint start, BoundaryPoint end) noexcept : AbstractRange(start, end)
   {
+    LiveRangeUpdater::Add(*this);
+  }
+
+  Range::~Range() noexcept
+  {
+    LiveRangeUpdater::Remove(*this);
   }
 
   RawPtr<Node> Range::CommonAncestorContainer() const noexcept
