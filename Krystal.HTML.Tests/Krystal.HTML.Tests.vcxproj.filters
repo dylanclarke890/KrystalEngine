@@ -119,5 +119,8 @@
     <ClInclude Include="include\Krystal.HTML.Tests\TestElement.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="tests\Ranges\BoundaryPoint.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
