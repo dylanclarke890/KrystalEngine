@@ -30,7 +30,13 @@ namespace Krys::HTML
 
     for (auto &range : node.NodeDocument().LiveRanges())
     {
-      if (auto *startContainer = DynamicDowncast<ContainerNode>(*range->StartContainer()))
+      auto *originalStartContainer = range->StartContainer();
+      auto *originalEndContainer = range->EndContainer();
+
+      auto originalStartOffset = range->StartOffset();
+      auto originalEndOffset = range->EndOffset();
+
+      if (auto *startContainer = DynamicDowncast<ContainerNode>(*originalStartContainer))
       {
         if (TreeQueries::IsInclusiveDescendant(*startContainer, node))
         {
@@ -38,7 +44,7 @@ namespace Krys::HTML
         }
       }
 
-      if (auto *endContainer = DynamicDowncast<ContainerNode>(*range->EndContainer()))
+      if (auto *endContainer = DynamicDowncast<ContainerNode>(*originalEndContainer))
       {
         if (TreeQueries::IsInclusiveDescendant(*endContainer, node))
         {
@@ -46,14 +52,14 @@ namespace Krys::HTML
         }
       }
 
-      if (range->StartContainer() == parent)
+      if (originalStartContainer == parent)
       {
-        range->SetStart(*parent, range->StartOffset() - 1uz);
+        range->SetStart(*parent, originalStartOffset - 1uz);
       }
 
-      if (range->EndContainer() == parent)
+      if (originalEndContainer == parent)
       {
-        range->SetEnd(*parent, range->EndOffset() - 1uz);
+        range->SetEnd(*parent, originalEndOffset - 1uz);
       }
     }
   }
@@ -63,27 +69,33 @@ namespace Krys::HTML
   {
     for (auto &range : characterData.NodeDocument().LiveRanges())
     {
-      if (range->StartContainer() == &characterData)
+      auto *originalStartContainer = range->StartContainer();
+      auto *originalEndContainer = range->EndContainer();
+
+      auto originalStartOffset = range->StartOffset();
+      auto originalEndOffset = range->EndOffset();
+
+      if (originalStartContainer == &characterData)
       {
-        if (range->StartOffset() > offset && range->StartOffset() <= offset + count)
+        if (originalStartOffset > offset && originalStartOffset <= offset + count)
         {
           range->SetStart(characterData, offset);
         }
-        else if (range->StartOffset() > offset + count)
+        else if (originalStartOffset > offset + count)
         {
-          range->SetStart(characterData, range->StartOffset() + newDataSize - count);
+          range->SetStart(characterData, originalStartOffset + newDataSize - count);
         }
       }
 
-      if (range->EndContainer() == &characterData)
+      if (originalEndContainer == &characterData)
       {
-        if (range->EndOffset() > offset && range->EndOffset() <= offset + count)
+        if (originalEndOffset > offset && originalEndOffset <= offset + count)
         {
           range->SetEnd(characterData, offset);
         }
-        else if (range->EndOffset() > offset + count)
+        else if (originalEndOffset > offset + count)
         {
-          range->SetEnd(characterData, range->EndOffset() + newDataSize - count);
+          range->SetEnd(characterData, originalEndOffset + newDataSize - count);
         }
       }
     }
@@ -91,26 +103,33 @@ namespace Krys::HTML
 
   void LiveRangeUpdater::NodeNormalized(Node &node, Text &removedText, size_t length) noexcept
   {
+    auto *parent = removedText.ParentNode();
+
+    auto index = TreeQueries::Index(removedText);
     for (auto &range : node.NodeDocument().LiveRanges())
     {
-      if (range->StartContainer() == &removedText)
+      auto *originalStartContainer = range->StartContainer();
+      auto *originalEndContainer = range->EndContainer();
+
+      auto originalStartOffset = range->StartOffset();
+      auto originalEndOffset = range->EndOffset();
+
+      if (originalStartContainer == &removedText)
       {
-        range->SetStart(node, range->StartOffset() + length);
+        range->SetStart(node, originalStartOffset + length);
       }
 
-      if (range->EndContainer() == &removedText)
+      if (originalEndContainer == &removedText)
       {
-        range->SetEnd(node, range->EndOffset() + length);
+        range->SetEnd(node, originalEndOffset + length);
       }
 
-      if (range->StartContainer() == removedText.ParentNode()
-          && range->StartOffset() == TreeQueries::Index(removedText))
+      if (originalStartContainer == parent && originalStartOffset == index)
       {
         range->SetStart(node, length);
       }
 
-      if (range->EndContainer() == removedText.ParentNode()
-          && range->EndOffset() == TreeQueries::Index(removedText))
+      if (originalEndContainer == parent && originalEndOffset == index)
       {
         range->SetEnd(node, length);
       }
@@ -123,16 +142,22 @@ namespace Krys::HTML
     auto *newParent = movedBefore.ParentNode();
     assert(newParent != nullptr);
 
-    for (auto range : newParent->NodeDocument().LiveRanges())
+    for (auto range : movedBefore.NodeDocument().LiveRanges())
     {
-      if (range->StartContainer() == newParent && range->StartOffset() > childIndex)
+      auto *originalStartContainer = range->StartContainer();
+      auto *originalEndContainer = range->EndContainer();
+
+      auto originalStartOffset = range->StartOffset();
+      auto originalEndOffset = range->EndOffset();
+
+      if (originalStartContainer == newParent && originalStartOffset > childIndex)
       {
-        range->SetStart(*newParent, range->StartOffset() + 1);
+        range->SetStart(*newParent, originalStartOffset + 1uz);
       }
 
-      if (range->EndContainer() == newParent && range->EndOffset() > childIndex)
+      if (originalEndContainer == newParent && originalEndOffset > childIndex)
       {
-        range->SetEnd(*newParent, range->EndOffset() + 1);
+        range->SetEnd(*newParent, originalEndOffset + 1uz);
       }
     }
   }
@@ -145,14 +170,20 @@ namespace Krys::HTML
 
     for (auto &range : newParent->NodeDocument().LiveRanges())
     {
-      if (range->StartContainer() == newParent && range->StartOffset() > childIndex)
+      auto *originalStartContainer = range->StartContainer();
+      auto *originalEndContainer = range->EndContainer();
+
+      auto originalStartOffset = range->StartOffset();
+      auto originalEndOffset = range->EndOffset();
+
+      if (originalStartContainer == newParent && originalStartOffset > childIndex)
       {
-        range->SetStart(*newParent, range->StartOffset() + nodesInserted);
+        range->SetStart(*newParent, originalStartOffset + nodesInserted);
       }
 
-      if (range->EndContainer() == newParent && range->EndOffset() > childIndex)
+      if (originalEndContainer == newParent && originalEndOffset > childIndex)
       {
-        range->SetEnd(*newParent, range->EndOffset() + nodesInserted);
+        range->SetEnd(*newParent, originalEndOffset + nodesInserted);
       }
     }
   }
@@ -160,26 +191,33 @@ namespace Krys::HTML
   void LiveRangeUpdater::SplitTextNode(Text &original, Text &newNode, size_t offset) noexcept
   {
     auto index = TreeQueries::Index(original);
+
     for (auto &range : original.NodeDocument().LiveRanges())
     {
-      if (range->StartContainer() == &original && range->StartOffset() > offset)
+      auto *originalStartContainer = range->StartContainer();
+      auto *originalEndContainer = range->EndContainer();
+
+      auto originalStartOffset = range->StartOffset();
+      auto originalEndOffset = range->EndOffset();
+
+      if (originalStartContainer == &original && originalStartOffset > offset)
       {
-        range->SetStart(newNode, range->StartOffset() - offset);
+        range->SetStart(newNode, originalStartOffset - offset);
       }
 
-      if (range->EndContainer() == &original)
+      if (originalEndContainer == &original && originalEndOffset > offset)
       {
-        range->SetEnd(newNode, range->EndOffset() - offset);
+        range->SetEnd(newNode, originalEndOffset - offset);
       }
 
-      if (range->StartContainer() == original.ParentNode() && range->StartOffset() == index + 1uz)
+      if (originalStartContainer == original.ParentNode() && originalStartOffset == index + 1uz)
       {
-        range->SetStart(*range->StartContainer(), range->StartOffset() + 1uz);
+        range->SetStart(*original.ParentNode(), originalStartOffset + 1uz);
       }
 
-      if (range->EndContainer() == original.ParentNode() && range->EndOffset() == index + 1uz)
+      if (originalEndContainer == original.ParentNode() && originalEndOffset == index + 1uz)
       {
-        range->SetEnd(*range->EndContainer(), range->EndOffset() + 1uz);
+        range->SetEnd(*original.ParentNode(), originalEndOffset + 1uz);
       }
     }
   }
