@@ -234,6 +234,7 @@
     <ClInclude Include="include\Krystal.Lib\Utils\Tag.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\ToMutableIter.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\ToUnderlying.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Utils\Uninit.hpp" />
     <ClInclude Include="include\Krystal.Lib\Utils\Unwrap.hpp" />
     <ClInclude Include="third-party\llvm\ADT\ADL.h" />
     <ClInclude Include="third-party\llvm\Support\MemAlloc.h" />

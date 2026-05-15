@@ -115,7 +115,7 @@ namespace Krys::HTML
     RawPtr<Attr> attr = ElementAlgorithms::GetAttributeByName(qualifiedName, *this);
     if (attr == nullptr)
     {
-      return std::nullopt;
+      return Null;
     }
 
     return attr->Value();
@@ -156,7 +156,7 @@ namespace Krys::HTML
     else
     {
       auto attr = AdoptRef<Attr>(
-        *new Attr(NodeDocument(), QualifiedName {qualifiedName, DOMStringAtom::Null(), DOMStringAtom::Null()},
+        *new Attr(NodeDocument(), QualifiedName {DOMStringAtom::Null(), DOMStringAtom::Null(), qualifiedName},
                   Krys::Move(value)));
       ElementAlgorithms::AppendAttribute(*attr, *this);
     }

@@ -216,7 +216,7 @@ namespace Krys::HTML
     if (attribute == nullptr)
     {
       auto attr = AdoptRef<Attr>(*new Attr(
-        element.NodeDocument(), QualifiedName {localName, prefix, namespaceURI}, Krys::Move(value)));
+        element.NodeDocument(), QualifiedName {namespaceURI, prefix, localName}, Krys::Move(value)));
       AppendAttribute(*attr, element);
     }
     else

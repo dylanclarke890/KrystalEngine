@@ -29,13 +29,18 @@ namespace Krys::HTML
   {
     friend class ExtensibilityHooks;
 
+    using TokenList = SmallList<DOMString, 1>;
+
   private:
     DOMStringAtom _attributeName;
-    SmallList<DOMString, 1> _tokens;
+    TokenList _tokens;
     CheckedRef<Element> _element;
     IsSupportedTokenFunction _isSupportedToken;
 
   public:
+    using iterator = TokenList::iterator;
+    using const_iterator = TokenList::const_iterator;
+
     DOMTokenList(Element &element, DOMStringAtom attributeName,
                  IsSupportedTokenFunction &&isSupportedToken = DefaultIsSupportedTokenFunction) noexcept;
 
@@ -44,14 +49,19 @@ namespace Krys::HTML
       return _tokens.size();
     }
 
-    KRYS_NODISCARD Maybe<DOMString> Item(size_t index) noexcept
+    KRYS_NODISCARD Maybe<DOMString> Item(size_t index) const noexcept
     {
       if (index >= _tokens.size())
       {
-        return std::nullopt;
+        return Null;
       }
 
       return _tokens[index];
+    }
+
+    KRYS_NODISCARD Maybe<DOMString> operator[](size_t index) const noexcept
+    {
+      return Item(index);
     }
 
     KRYS_NODISCARD bool Contains(const DOMString &token) const noexcept
@@ -78,11 +88,13 @@ namespace Krys::HTML
       }
 
       UpdateSteps();
+
+      return {};
     }
 
     ExceptionOr<void> Add(const DOMString &token) noexcept
     {
-      return Add({token});
+      return Add(List<DOMString> {token});
     }
 
     ExceptionOr<void> Remove(const List<DOMString> &tokens) noexcept
@@ -98,14 +110,18 @@ namespace Krys::HTML
       auto it = std::ranges::remove_if(_tokens, [&](const DOMString &current)
                                        { return std::ranges::contains(tokens, current); });
       _tokens.erase(it.begin(), it.end());
+
+      UpdateSteps();
+
+      return {};
     }
 
     ExceptionOr<void> Remove(const DOMString &token) noexcept
     {
-      return Remove({token});
+      return Remove(List<DOMString> {token});
     }
 
-    ExceptionOr<bool> Toggle(const DOMString &token, Maybe<bool> force = std::nullopt) noexcept
+    ExceptionOr<bool> Toggle(const DOMString &token, Maybe<bool> force = Null) noexcept
     {
       if (auto result = ValidateToken(token); result.HasException())
       {
@@ -171,6 +187,26 @@ namespace Krys::HTML
 
     void Value(DOMString &&value) noexcept;
 
+    KRYS_NODISCARD iterator begin() noexcept
+    {
+      return _tokens.begin();
+    }
+
+    KRYS_NODISCARD iterator end() noexcept
+    {
+      return _tokens.end();
+    }
+
+    KRYS_NODISCARD const_iterator begin() const noexcept
+    {
+      return _tokens.begin();
+    }
+
+    KRYS_NODISCARD const_iterator end() const noexcept
+    {
+      return _tokens.end();
+    }
+
   private:
     /// @see https://dom.spec.whatwg.org/#concept-domtokenlist-validation
     KRYS_NODISCARD ExceptionOr<bool> ValidationSteps(DOMStringView token) const noexcept;
@@ -181,7 +217,7 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#concept-dtl-serialize
     KRYS_NODISCARD DOMString SerializeSteps() const noexcept;
 
-    KRYS_NODISCARD ExceptionOr<void> ValidateToken(DOMStringView token)
+    KRYS_NODISCARD ExceptionOr<void> ValidateToken(DOMStringView token) const noexcept
     {
       if (token.empty())
       {
