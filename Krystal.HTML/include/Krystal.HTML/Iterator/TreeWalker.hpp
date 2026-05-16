@@ -38,10 +38,13 @@ namespace Krys::HTML
     }
 
     KRYS_NODISCARD ExceptionOr<RawPtr<Node>> ParentNode() noexcept;
+
     KRYS_NODISCARD ExceptionOr<RawPtr<Node>> FirstChild() noexcept;
     KRYS_NODISCARD ExceptionOr<RawPtr<Node>> LastChild() noexcept;
+
     KRYS_NODISCARD ExceptionOr<RawPtr<Node>> PreviousSibling() noexcept;
     KRYS_NODISCARD ExceptionOr<RawPtr<Node>> NextSibling() noexcept;
+
     KRYS_NODISCARD ExceptionOr<RawPtr<Node>> PreviousNode() noexcept;
     KRYS_NODISCARD ExceptionOr<RawPtr<Node>> NextNode() noexcept;
   };

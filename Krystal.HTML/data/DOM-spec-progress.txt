@@ -196,18 +196,6 @@ Source: https://dom.spec.whatwg.org
     Test Coverage : None
 
 ======================================================================
-6. TRAVERSAL
-======================================================================
-
-6.0 Traversal
-    Implementation: Full
-    Test Coverage : None
-
-6.2 Interface TreeWalker
-    Implementation: Full
-    Test Coverage : None
-
-======================================================================
 ======================================================================
 
                             COMPLETE
@@ -301,7 +289,11 @@ Source: https://dom.spec.whatwg.org
 6. TRAVERSAL
 ======================================================================
 
+6.0 Traversal
+
 6.1 Interface NodeIterator
+
+6.2 Interface TreeWalker
 
 6.3 Interface NodeFilter
 
