@@ -177,6 +177,7 @@
     <ClCompile Include="tests\Node\DocumentFragment.cpp" />
     <ClCompile Include="tests\Node\DocumentType.cpp" />
     <ClCompile Include="tests\Node\Element.cpp" />
+    <ClCompile Include="tests\Node\NamedNodeMap.cpp" />
     <ClCompile Include="tests\Node\Node.cpp" />
     <ClCompile Include="tests\Node\ProcessingInstruction.cpp" />
     <ClCompile Include="tests\Node\Text.cpp" />
