@@ -171,9 +171,11 @@ Source: https://dom.spec.whatwg.org
 
 4.9 Interface Element
     Implementation: Partial
-    Test Coverage : None
+    Test Coverage : Partial
     Notes 	      : 
         - Implementation: Closest/Matches requires CSS parsing.
+        - Test Coverage : AttachShadow and ShadowRoot.
+        - Test Coverage : CustomElementRegistry.
 
 4.9.1 Interface NamedNodeMap
     Implementation: Full
