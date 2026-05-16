@@ -176,10 +176,6 @@ Source: https://dom.spec.whatwg.org
         - Test Coverage : AttachShadow and ShadowRoot.
         - Test Coverage : CustomElementRegistry.
 
-4.9.2 Interface Attr
-    Implementation: Full
-    Test Coverage : None
-
 4.10 Interface CharacterData
     Implementation: Full
     Test Coverage : Partial
@@ -288,6 +284,8 @@ Source: https://dom.spec.whatwg.org
 4.7 Interface DocumentFragment
 
 4.9.1 Interface NamedNodeMap
+
+4.9.2 Interface Attr
 
 4.12 Interface CDATASection
 
