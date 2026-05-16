@@ -98,8 +98,18 @@ namespace Krys::Tests
     REQUIRE(data.Node->GetAttribute(u8"test-attr") == u8"test-value");
   }
 
-  // TODO(impl):
-  // TEST_CASE("Element::Attributes", "[HTML][Element]")
+  TEST_CASE("Element::Attributes", "[HTML][Element]")
+  {
+    CommonTestData data;
+   
+    auto &attributes = data.Node->Attributes();
+    REQUIRE(attributes.Length() == 0uz);
+    
+    REQUIRE_FALSE(data.Node->SetAttribute(u8"test-attr", u8"test-value").HasException());
+    REQUIRE(attributes.Length() == 1uz);
+    REQUIRE(attributes.Item(0)->Name() == u8"test-attr");
+    REQUIRE(attributes.Item(0)->Value() == u8"test-value");
+  }
 
   TEST_CASE("Element::GetAttributeNames", "[HTML][Element]")
   {

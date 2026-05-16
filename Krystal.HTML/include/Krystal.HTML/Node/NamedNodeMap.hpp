@@ -3,7 +3,6 @@
 #include "Krystal.HTML/DOMString.hpp"
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Mixins/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Pointers/WeakPtr.hpp"
@@ -14,7 +13,7 @@ namespace Krys::HTML
   class Attr;
   class Element;
 
-  class NamedNodeMap : public RefCounted<NamedNodeMap>
+  class NamedNodeMap
   {
   private:
     WeakRef<Element> _associatedElement;
@@ -40,9 +39,8 @@ namespace Krys::HTML
     ExceptionOr<Ref<Attr>> RemoveNamedItem(DOMStringAtom qualifiedName) noexcept;
 
     ExceptionOr<Ref<Attr>> RemoveNamedItemNS(DOMStringAtom attrNamespace, DOMStringAtom localName) noexcept;
-  
+
     KRYS_NODISCARD RefPtr<Attr> operator[](size_t index) noexcept;
     KRYS_NODISCARD RefPtr<Attr> operator[](DOMStringAtom qualifiedName) noexcept;
-  
   };
 }
