@@ -39,4 +39,293 @@ namespace Krys::Tests
     CommonTestData data;
     REQUIRE(data.Node->NodeType() == NodeType::ELEMENT_NODE);
   }
+
+  TEST_CASE("Element::TagName", "[HTML][Element]")
+  {
+    CommonTestData data;
+    REQUIRE(data.Node->TagName() == u8"TEST-ELEMENT");
+  }
+
+  TEST_CASE("Element::Id", "[HTML][Element]")
+  {
+    CommonTestData data;
+    REQUIRE(data.Node->Id() == u8"");
+    data.Node->Id(u8"test-id");
+    REQUIRE(data.Node->Id() == u8"test-id");
+  }
+
+  TEST_CASE("Element::ClassName", "[HTML][Element]")
+  {
+    CommonTestData data;
+    REQUIRE(data.Node->ClassName() == u8"");
+    data.Node->ClassName(u8"test-class");
+    REQUIRE(data.Node->ClassName() == u8"test-class");
+  }
+
+  TEST_CASE("Element::ClassList", "[HTML][Element]")
+  {
+    CommonTestData data;
+    auto &classList = data.Node->ClassList();
+    REQUIRE(classList.Length() == 0uz);
+
+    REQUIRE_FALSE(classList.Add(u8"foo").HasException());
+    REQUIRE(classList.Length() == 1uz);
+    REQUIRE(classList.Contains(u8"foo"));
+
+    REQUIRE_FALSE(classList.Add(u8"bar").HasException());
+    REQUIRE(classList.Length() == 2uz);
+    REQUIRE(classList.Contains(u8"bar"));
+
+    REQUIRE_FALSE(classList.Remove(u8"foo").HasException());
+    REQUIRE(classList.Length() == 1uz);
+    REQUIRE_FALSE(classList.Contains(u8"foo"));
+
+    REQUIRE_FALSE(classList.Remove(u8"bar").HasException());
+    REQUIRE(classList.Length() == 0uz);
+    REQUIRE_FALSE(classList.Contains(u8"bar"));
+  }
+
+  // TODO(impl): SLOTTABLES
+  // TEST_CASE("Element::Slot", "[HTML][Element]")
+
+  TEST_CASE("Element::HasAttributes", "[HTML][Element]")
+  {
+    CommonTestData data;
+    REQUIRE_FALSE(data.Node->HasAttributes());
+    REQUIRE_FALSE(data.Node->GetAttribute(u8"test-attr").has_value());
+    REQUIRE_FALSE(data.Node->SetAttribute(u8"test-attr", u8"test-value").HasException());
+    REQUIRE(data.Node->HasAttributes());
+    REQUIRE(data.Node->GetAttribute(u8"test-attr") == u8"test-value");
+  }
+
+  // TODO(impl):
+  // TEST_CASE("Element::Attributes", "[HTML][Element]")
+
+  TEST_CASE("Element::GetAttributeNames", "[HTML][Element]")
+  {
+    CommonTestData data;
+    REQUIRE(data.Node->GetAttributeNames().empty());
+    REQUIRE_FALSE(data.Node->SetAttribute(u8"test-attr1", u8"value1").HasException());
+    REQUIRE_FALSE(data.Node->SetAttribute(u8"test-attr2", u8"value2").HasException());
+
+    auto attributeNames = data.Node->GetAttributeNames();
+    REQUIRE(attributeNames.size() == 2uz);
+    REQUIRE(attributeNames[0] == u8"test-attr1");
+    REQUIRE(attributeNames[1] == u8"test-attr2");
+  }
+
+  TEST_CASE("Element::GetAttribute", "[HTML][Element]")
+  {
+    CommonTestData data;
+    REQUIRE_FALSE(data.Node->GetAttribute(u8"test-attr").has_value());
+    REQUIRE_FALSE(data.Node->SetAttribute(u8"test-attr", u8"test-value").HasException());
+    REQUIRE(data.Node->GetAttribute(u8"test-attr") == u8"test-value");
+  }
+
+  TEST_CASE("Element::GetAttributeNS", "[HTML][Element]")
+  {
+    CommonTestData data;
+    REQUIRE_FALSE(data.Node->GetAttributeNS(u8"http://example.com/ns", u8"test-attr").has_value());
+    REQUIRE_FALSE(
+      data.Node->SetAttributeNS(u8"http://example.com/ns", u8"test-attr", u8"test-value").HasException());
+    REQUIRE(data.Node->GetAttributeNS(u8"http://example.com/ns", u8"test-attr") == u8"test-value");
+  }
+
+  TEST_CASE("Element::SetAttribute", "[HTML][Element]")
+  {
+    CommonTestData data;
+    REQUIRE_FALSE(data.Node->SetAttribute(u8"test-attr", u8"test-value").HasException());
+    REQUIRE(data.Node->GetAttribute(u8"test-attr") == u8"test-value");
+  }
+
+  TEST_CASE("Element::SetAttributeNS", "[HTML][Element]")
+  {
+    CommonTestData data;
+    REQUIRE_FALSE(
+      data.Node->SetAttributeNS(u8"http://example.com/ns", u8"test-attr", u8"test-value").HasException());
+    REQUIRE(data.Node->GetAttributeNS(u8"http://example.com/ns", u8"test-attr") == u8"test-value");
+  }
+
+  TEST_CASE("Element::RemoveAttribute", "[HTML][Element]")
+  {
+    CommonTestData data;
+    REQUIRE_FALSE(data.Node->SetAttribute(u8"test-attr", u8"test-value").HasException());
+    REQUIRE(data.Node->GetAttribute(u8"test-attr") == u8"test-value");
+    data.Node->RemoveAttribute(u8"test-attr");
+    REQUIRE_FALSE(data.Node->GetAttribute(u8"test-attr").has_value());
+  }
+
+  TEST_CASE("Element::RemoveAttributeNS", "[HTML][Element]")
+  {
+    CommonTestData data;
+    REQUIRE_FALSE(
+      data.Node->SetAttributeNS(u8"http://example.com/ns", u8"test-attr", u8"test-value").HasException());
+    REQUIRE(data.Node->GetAttributeNS(u8"http://example.com/ns", u8"test-attr") == u8"test-value");
+    data.Node->RemoveAttributeNS(u8"http://example.com/ns", u8"test-attr");
+    REQUIRE_FALSE(data.Node->GetAttributeNS(u8"http://example.com/ns", u8"test-attr").has_value());
+  }
+
+  TEST_CASE("Element::ToggleAttribute", "[HTML][Element]")
+  {
+    CommonTestData data;
+    REQUIRE_FALSE(data.Node->HasAttribute(u8"test-attr"));
+    REQUIRE_FALSE(data.Node->ToggleAttribute(u8"test-attr", true).HasException());
+    REQUIRE(data.Node->HasAttribute(u8"test-attr"));
+    REQUIRE_FALSE(data.Node->ToggleAttribute(u8"test-attr", false).HasException());
+    REQUIRE_FALSE(data.Node->HasAttribute(u8"test-attr"));
+  }
+
+  TEST_CASE("Element::HasAttribute", "[HTML][Element]")
+  {
+    CommonTestData data;
+    REQUIRE_FALSE(data.Node->HasAttribute(u8"test-attr"));
+    REQUIRE_FALSE(data.Node->SetAttribute(u8"test-attr", u8"test-value").HasException());
+    REQUIRE(data.Node->HasAttribute(u8"test-attr"));
+  }
+
+  TEST_CASE("Element::HasAttributeNS", "[HTML][Element]")
+  {
+    CommonTestData data;
+    REQUIRE_FALSE(data.Node->HasAttributeNS(u8"http://example.com/ns", u8"test-attr"));
+    REQUIRE_FALSE(
+      data.Node->SetAttributeNS(u8"http://example.com/ns", u8"test-attr", u8"test-value").HasException());
+    REQUIRE(data.Node->HasAttributeNS(u8"http://example.com/ns", u8"test-attr"));
+  }
+
+  TEST_CASE("Element::GetAttributeNode", "[HTML][Element]")
+  {
+    CommonTestData data;
+    REQUIRE_FALSE(data.Node->GetAttributeNode(u8"test-attr"));
+    REQUIRE_FALSE(data.Node->SetAttribute(u8"test-attr", u8"test-value").HasException());
+    auto attrNode = data.Node->GetAttributeNode(u8"test-attr");
+    REQUIRE(attrNode);
+    REQUIRE(attrNode->Name() == u8"test-attr");
+    REQUIRE(attrNode->Value() == u8"test-value");
+  }
+
+  TEST_CASE("Element::GetAttributeNodeNS", "[HTML][Element]")
+  {
+    CommonTestData data;
+    REQUIRE_FALSE(data.Node->GetAttributeNodeNS(u8"http://example.com/ns", u8"test-attr"));
+    REQUIRE_FALSE(
+      data.Node->SetAttributeNS(u8"http://example.com/ns", u8"test-attr", u8"test-value").HasException());
+
+    auto attrNode = data.Node->GetAttributeNodeNS(u8"http://example.com/ns", u8"test-attr");
+    REQUIRE(attrNode);
+    REQUIRE(attrNode->Name() == u8"test-attr");
+    REQUIRE(attrNode->Value() == u8"test-value");
+  }
+
+  TEST_CASE("Element::SetAttributeNode", "[HTML][Element]")
+  {
+    CommonTestData data;
+
+    SECTION("new attribute")
+    {
+      auto attr = data.Document->CreateAttribute(u8"test-attr");
+      REQUIRE_FALSE(attr.HasException());
+      attr->Value(u8"test-value");
+      REQUIRE_FALSE(data.Node->SetAttributeNode(*attr.Value()).HasException());
+
+      auto attrNode = data.Node->GetAttributeNode(u8"test-attr");
+      REQUIRE(attrNode);
+      REQUIRE(attrNode->Name() == u8"test-attr");
+      REQUIRE(attrNode->Value() == u8"test-value");
+    }
+
+    SECTION("replacing existing attribute")
+    {
+      auto attr1 = data.Document->CreateAttribute(u8"test-attr");
+      REQUIRE_FALSE(attr1.HasException());
+      attr1.Value()->Value(u8"value1");
+      REQUIRE_FALSE(data.Node->SetAttributeNode(*attr1.Value()).HasException());
+
+      auto attr2 = data.Document->CreateAttribute(u8"test-attr");
+      REQUIRE_FALSE(attr2.HasException());
+      attr2.Value()->Value(u8"value2");
+
+      auto result = data.Node->SetAttributeNode(*attr2.Value());
+      REQUIRE_FALSE(result.HasException());
+
+      auto &replacedAttr = *result;
+      REQUIRE(replacedAttr);
+      REQUIRE(replacedAttr->Name() == u8"test-attr");
+      REQUIRE(replacedAttr->Value() == u8"value1");
+
+      auto attrNode = data.Node->GetAttributeNode(u8"test-attr");
+      REQUIRE(attrNode);
+      REQUIRE(attrNode->Name() == u8"test-attr");
+      REQUIRE(attrNode->Value() == u8"value2");
+    }
+  }
+
+  TEST_CASE("Element::SetAttributeNodeNS", "[HTML][Element]")
+  {
+    CommonTestData data;
+
+    SECTION("new attribute")
+    {
+      auto attr = data.Document->CreateAttributeNS(u8"http://example.com/ns", u8"test-attr");
+      REQUIRE_FALSE(attr.HasException());
+      attr->Value(u8"test-value");
+      REQUIRE_FALSE(data.Node->SetAttributeNodeNS(*attr.Value()).HasException());
+
+      auto attrNode = data.Node->GetAttributeNodeNS(u8"http://example.com/ns", u8"test-attr");
+      REQUIRE(attrNode);
+      REQUIRE(attrNode->Name() == u8"test-attr");
+      REQUIRE(attrNode->Value() == u8"test-value");
+    }
+
+    SECTION("replacing existing attribute")
+    {
+      auto attr1 = data.Document->CreateAttributeNS(u8"http://example.com/ns", u8"test-attr");
+      REQUIRE_FALSE(attr1.HasException());
+      attr1.Value()->Value(u8"value1");
+      REQUIRE_FALSE(data.Node->SetAttributeNodeNS(*attr1.Value()).HasException());
+
+      auto attr2 = data.Document->CreateAttributeNS(u8"http://example.com/ns", u8"test-attr");
+      REQUIRE_FALSE(attr2.HasException());
+      attr2.Value()->Value(u8"value2");
+
+      auto result = data.Node->SetAttributeNodeNS(*attr2.Value());
+      REQUIRE_FALSE(result.HasException());
+
+      auto &replacedAttr = result.Value();
+      REQUIRE(replacedAttr);
+      REQUIRE(replacedAttr->Name() == u8"test-attr");
+      REQUIRE(replacedAttr->Value() == u8"value1");
+
+      auto attrNode = data.Node->GetAttributeNodeNS(u8"http://example.com/ns", u8"test-attr");
+      REQUIRE(attrNode);
+      REQUIRE(attrNode->Name() == u8"test-attr");
+      REQUIRE(attrNode->Value() == u8"value2");
+    }
+  }
+
+  TEST_CASE("Element::RemoveAttributeNode", "[HTML][Element]")
+  {
+    CommonTestData data;
+
+    SECTION("Existing attribute node")
+    {
+      auto attr = data.Document->CreateAttribute(u8"test-attr");
+      REQUIRE_FALSE(attr.HasException());
+      REQUIRE_FALSE(data.Node->SetAttributeNode(*attr.Value()).HasException());
+
+      auto attrNode = data.Node->GetAttributeNode(u8"test-attr");
+      REQUIRE(attrNode);
+      REQUIRE_FALSE(data.Node->RemoveAttributeNode(*attrNode).HasException());
+      REQUIRE_FALSE(data.Node->GetAttribute(u8"test-attr").has_value());
+    }
+
+    SECTION("Non-existing attribute node")
+    {
+      auto attr = data.Document->CreateAttribute(u8"test-attr");
+      REQUIRE_FALSE(attr.HasException());
+
+      auto removeResult = data.Node->RemoveAttributeNode(*attr.Value());
+      REQUIRE(removeResult.HasException());
+      REQUIRE(removeResult.GetException().Code() == ExceptionCode::NotFoundError);
+    }
+  }
 }

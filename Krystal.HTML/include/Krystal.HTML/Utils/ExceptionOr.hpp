@@ -81,6 +81,16 @@ namespace Krys::HTML
       assert(!std::exchange(_wasReleased, true));
       return Krys::Move(_value.value());
     }
+
+    KRYS_NODISCARD value_type &operator*() noexcept
+    {
+      return Value();
+    }
+
+    KRYS_NODISCARD value_type &operator->() noexcept
+    {
+      return Value();
+    }
   };
 
   template <typename T>
@@ -135,6 +145,16 @@ namespace Krys::HTML
     KRYS_NODISCARD ReturnReferenceType &&ReleaseValue() noexcept
     {
       return _value.ReleaseValue();
+    }
+
+    KRYS_NODISCARD value_type &operator*() noexcept
+    {
+      return Value();
+    }
+
+    KRYS_NODISCARD value_type &operator->() noexcept
+    {
+      return Value();
     }
   };
 

@@ -184,15 +184,15 @@ namespace Krys::HTML
     // SPEC-VIOLATION(TRUSTED-TYPES): Let verifiedValue be the result of calling get trusted type compliant
     // attribute value with attr’s local name, attr’s namespace, element, and attr’s value.
 
-    if (attr._ownerElement != nullptr || attr._ownerElement.get() != &element)
+    if (attr._ownerElement != nullptr && attr._ownerElement.get() != &element)
     {
       return Exception {ExceptionCode::InUseAttributeError};
     }
 
-    RawPtr<Attr> oldAttr = GetAttributeByNamespace(attr.NamespaceURI(), attr.LocalName(), element);
+    auto oldAttr = ShareRefPtr(GetAttributeByNamespace(attr.NamespaceURI(), attr.LocalName(), element));
     if (&attr == oldAttr)
     {
-      return ShareRefPtr(&attr);
+      return oldAttr;
     }
 
     // SPEC-VIOLATION(TRUSTED-TYPES): Set attr’s value to verifiedValue.
@@ -206,7 +206,7 @@ namespace Krys::HTML
       AppendAttribute(attr, element);
     }
 
-    return ShareRefPtr(oldAttr);
+    return oldAttr;
   }
 
   void ElementAlgorithms::SetAttributeValue(Element &element, DOMStringAtom localName, DOMString &&value,
@@ -228,25 +228,25 @@ namespace Krys::HTML
   RefPtr<Attr> ElementAlgorithms::RemoveAttributeByName(DOMStringAtom qualifiedName,
                                                         Element &element) noexcept
   {
-    RawPtr<Attr> attr = GetAttributeByName(qualifiedName, element);
+    auto attr = ShareRefPtr(GetAttributeByName(qualifiedName, element));
     if (attr != nullptr)
     {
       RemoveAttribute(*attr);
     }
 
-    return ShareRefPtr(attr);
+    return attr;
   }
 
   RefPtr<Attr> ElementAlgorithms::RemoveAttributeByNamespace(DOMStringAtom namespaceURI,
                                                              DOMStringAtom localName,
                                                              Element &element) noexcept
   {
-    RawPtr<Attr> attr = GetAttributeByNamespace(namespaceURI, localName, element);
+    auto attr = ShareRefPtr(GetAttributeByNamespace(namespaceURI, localName, element));
     if (attr != nullptr)
     {
       RemoveAttribute(*attr);
     }
 
-    return ShareRefPtr(attr);
+    return attr;
   }
 }

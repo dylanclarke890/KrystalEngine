@@ -103,30 +103,34 @@ namespace Krys::HTML
                                                    Maybe<DOMStringView> oldValue, Maybe<DOMStringView> value,
                                                    DOMStringAtom namespaceURI) noexcept
   {
-    if (localName == u8"id")
+    // TODO(perf): we currently don't need this as we just use the value stored in the attribute. Later, when
+    // we optimize we can use this hook to update Element's member variable to skip needing to lookup the
+    // attribute. This will be particularly important for a faster implementation of GetElementById.
+
+    // if (localName == u8"id")
+    //{
+    //   if (namespaceURI == DOMStringAtom::Null())
+    //   {
+    //     if (value.has_value() && !value->empty())
+    //     {
+    //       element.Id(DOMString(*value));
+    //     }
+    //     else
+    //     {
+    //       element.Id(u8"");
+    //     }
+    //   }
+    // }
+    if (localName == u8"class")
     {
       if (namespaceURI == DOMStringAtom::Null())
       {
-        if (value.has_value() && !value->empty())
-        {
-          element.Id(DOMString(*value));
-        }
-        else
-        {
-          element.Id(u8"");
-        }
-      }
-    }
-    else if (localName == u8"class")
-    {
-      if (namespaceURI == DOMStringAtom::Null())
-      {
-        element._domTokenList->_tokens.clear();
+        auto &domTokenList = element.ClassList();
+        domTokenList._tokens.clear();
         if (value.has_value())
         {
           auto tokens = OrderedSet::Parser(*value);
-          element._domTokenList->_tokens.clear();
-          element._domTokenList->_tokens.append(tokens.begin(), tokens.end());
+          domTokenList._tokens.append(tokens.begin(), tokens.end());
         }
       }
     }

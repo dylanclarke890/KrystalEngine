@@ -215,7 +215,7 @@ namespace Krys::HTML
       if (!force.has_value() || force.value())
       {
         auto attr = AdoptRef<Attr>(*new Attr(
-          NodeDocument(), QualifiedName {qualifiedName, DOMStringAtom::Null(), DOMStringAtom::Null()}, u8""));
+          NodeDocument(), QualifiedName {DOMStringAtom::Null(), DOMStringAtom::Null(), qualifiedName}, u8""));
         ElementAlgorithms::AppendAttribute(*attr, *this);
         return true;
       }

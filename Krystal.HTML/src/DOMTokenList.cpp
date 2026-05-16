@@ -19,8 +19,9 @@ namespace Krys::HTML
       : _attributeName {attributeName}, _element {ShareCheckedRef(element)},
         _isSupportedToken {Krys::Move(isSupportedToken)}
   {
-    auto value = ElementAlgorithms::GetAttributeValue(element, attributeName);
-    ExtensibilityHooks::ElementAttributeChanged(element, attributeName, value, value, DOMStringAtom::Null());
+    auto value = ElementAlgorithms::GetAttributeValue(*_element, _attributeName);
+    auto tokens = OrderedSet::Parser(value);
+    _tokens.append(tokens.begin(), tokens.end());
   }
 
   void DOMTokenList::Value(DOMString &&value) noexcept
