@@ -29,6 +29,7 @@ namespace Krys::HTML
   {
     friend class Element;
     friend class ExtensibilityHooks;
+    friend class HTMLCollectionAlgorithms;
 
     using TokenList = SmallList<DOMString, 1>;
 

@@ -174,7 +174,6 @@ Source: https://dom.spec.whatwg.org
     Test Coverage : None
     Notes 	      : 
         - Implementation: Closest/Matches requires CSS parsing.
-        - Implementation: GetElementsByClassName needs to be implemented.
 
 4.9.1 Interface NamedNodeMap
     Implementation: Full

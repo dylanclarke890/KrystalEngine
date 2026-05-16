@@ -11,6 +11,7 @@
 #include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.Lib/Pointers/WeakPtr.hpp"
+#include "Krystal.Text/ASCII.hpp"
 
 namespace Krys::HTML
 {
@@ -77,19 +78,55 @@ namespace Krys::HTML
   Ref<HTMLCollection> HTMLCollectionAlgorithms::ElementsByClassName(ContainerNode &root,
                                                                     DOMStringAtom classNames) noexcept
   {
-    auto classes = OrderedSet::Parser(classNames.View());
-    if (classes.empty())
+    bool isQuirksMode = root.NodeDocument()._quirksMode == QuirksMode::Quirks;
+
+    List<DOMString> classes;
+    if (isQuirksMode)
     {
-      // TODO(perf): MINOR - return an empty collection instead.
+      classes = OrderedSet::Parser(Krys::Text::ToASCIILowercase(classNames.View()));
+    }
+    else
+    {
+      classes = OrderedSet::Parser(classNames.View());
+    }
+
+    if (classes.empty()) // TODO(perf): MINOR - return an empty collection instead.
+    {
       return CreateRef<StaticHTMLCollection>(SmallElementList {});
     }
 
-    if (root.NodeDocument()._quirksMode == QuirksMode::Quirks)
+    if (isQuirksMode)
     {
-      // TODO(impl): REQUIRED - case insensitive matching in quirks mode.
+      return CreateRef<LiveHTMLCollection>(
+        CreateWeakRef(root),
+        [classesQuery = Krys::Move(classes)](const Element &element)
+        {
+          if (!element.HasAttribute(u8"class"))
+          {
+            return false;
+          }
+
+          // TODO(perf): MINOR - this is terrible for performance but eh, it's quirks mode.
+          auto elementClasses =
+            OrderedSet::Parser(Krys::Text::ToASCIILowercase(*element.GetAttribute(u8"class")));
+          return std::ranges::all_of(classesQuery,
+                                     [elementClasses = Krys::Move(elementClasses)](const DOMString &className)
+                                     { return std::ranges::contains(elementClasses, className); });
+        });
     }
 
-    // TODO(impl): REQUIRED - case sensitive matching
-    return CreateRef<StaticHTMLCollection>(SmallElementList {});
+    return CreateRef<LiveHTMLCollection>(
+      CreateWeakRef(root),
+      [classes = Krys::Move(classes)](const Element &element)
+      {
+        if (!element.HasAttribute(u8"class"))
+        {
+          return false;
+        }
+
+        auto &classList = *element._domTokenList;
+        return std::ranges::all_of(classes,
+                                   [&](const DOMString &className) { return classList.Contains(className); });
+      });
   }
 }

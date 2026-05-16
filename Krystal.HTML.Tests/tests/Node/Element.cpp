@@ -3,7 +3,8 @@
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/Node/HTMLCollection.hpp"
+#include "Krystal.HTML/Node/HTMLDocument.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ProcessingInstruction.hpp"
@@ -22,7 +23,7 @@ namespace Krys::Tests
       Ref<Document> Document;
       Ref<TestElement> Node;
 
-      CommonTestData() : Document(CreateRef<HTML::Document>()), Node(CreateRef<TestElement>(*Document))
+      CommonTestData() : Document(CreateRef<HTMLDocument>()), Node(CreateRef<TestElement>(*Document))
       {
       }
     };
@@ -101,10 +102,10 @@ namespace Krys::Tests
   TEST_CASE("Element::Attributes", "[HTML][Element]")
   {
     CommonTestData data;
-   
+
     auto &attributes = data.Node->Attributes();
     REQUIRE(attributes.Length() == 0uz);
-    
+
     REQUIRE_FALSE(data.Node->SetAttribute(u8"test-attr", u8"test-value").HasException());
     REQUIRE(attributes.Length() == 1uz);
     REQUIRE(attributes.Item(0)->Name() == u8"test-attr");
@@ -444,5 +445,123 @@ namespace Krys::Tests
       REQUIRE(removeResult.HasException());
       REQUIRE(removeResult.GetException().Code() == ExceptionCode::NotFoundError);
     }
+  }
+
+  // TODO(impl): SHADOW-ROOT
+  // TEST_CASE("Element::AttachShadow", "[HTML][Element]")
+  // TEST_CASE("Element::ShadowRoot", "[HTML][Element]")
+
+  // TODO(impl): CUSTOM-ELEMENTS
+  // TEST_CASE("Element::CustomElementRegistry", "[HTML][Element]")
+
+  // TODO(impl): CSS-SELECTORS:
+  // TEST_CASE("Element::Matches", "[HTML][Element]")
+  // TEST_CASE("Element::Closest", "[HTML][Element]")
+  // TEST_CASE("Element::WebkitMatchesSelector", "[HTML][Element]")
+
+  TEST_CASE("Element::GetElementsByTagName", "[HTML][Element]")
+  {
+    CommonTestData data;
+
+    auto element1 = data.Document->CreateElement(u8"test-element");
+    REQUIRE_FALSE(element1.HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*element1.Value()).HasException());
+
+    auto element2 = data.Document->CreateElement(u8"test-element");
+    REQUIRE_FALSE(element2.HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*element2.Value()).HasException());
+
+    auto element3 = data.Document->CreateElement(u8"another-element");
+    REQUIRE_FALSE(element3.HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*element3.Value()).HasException());
+
+    auto elements = data.Node->GetElementsByTagName(u8"test-element");
+    REQUIRE(elements->Length() == 2uz);
+
+    REQUIRE(elements->Item(0)->TagName() == u8"TEST-ELEMENT");
+    REQUIRE(elements->Item(0) == element1.Value());
+
+    REQUIRE(elements->Item(1)->TagName() == u8"TEST-ELEMENT");
+    REQUIRE(elements->Item(1) == element2.Value());
+
+    REQUIRE_FALSE(data.Node->RemoveChild(*element1.Value()).HasException());
+
+    REQUIRE(elements->Length() == 1uz);
+    REQUIRE(elements->Item(0)->TagName() == u8"TEST-ELEMENT");
+    REQUIRE(elements->Item(0) == element2.Value());
+
+    REQUIRE_FALSE(data.Node->RemoveChild(*element2.Value()).HasException());
+    REQUIRE_FALSE(data.Node->RemoveChild(*element3.Value()).HasException());
+  }
+
+  TEST_CASE("Element::GetElementsByTagNameNS", "[HTML][Element]")
+  {
+    CommonTestData data;
+    auto element1 = data.Document->CreateElementNS(u8"http://example.com/ns", u8"test-element");
+    REQUIRE_FALSE(element1.HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*element1.Value()).HasException());
+
+    auto element2 = data.Document->CreateElementNS(u8"http://example.com/ns", u8"test-element");
+    REQUIRE_FALSE(element2.HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*element2.Value()).HasException());
+
+    auto element3 = data.Document->CreateElementNS(u8"http://example.com/ns", u8"another-element");
+    REQUIRE_FALSE(element3.HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*element3.Value()).HasException());
+
+    auto elements = data.Node->GetElementsByTagNameNS(u8"http://example.com/ns", u8"test-element");
+    REQUIRE(elements->Length() == 2uz);
+    REQUIRE(elements->Item(0)->NamespaceURI() == u8"http://example.com/ns");
+    REQUIRE(elements->Item(0)->LocalName() == u8"test-element");
+    REQUIRE(elements->Item(0) == element1.Value());
+    REQUIRE(elements->Item(1)->NamespaceURI() == u8"http://example.com/ns");
+    REQUIRE(elements->Item(1)->LocalName() == u8"test-element");
+    REQUIRE(elements->Item(1) == element2.Value());
+
+    REQUIRE_FALSE(data.Node->RemoveChild(*element1.Value()).HasException());
+    REQUIRE(elements->Length() == 1uz);
+    REQUIRE(elements->Item(0)->NamespaceURI() == u8"http://example.com/ns");
+    REQUIRE(elements->Item(0)->LocalName() == u8"test-element");
+    REQUIRE(elements->Item(0) == element2.Value());
+
+    REQUIRE_FALSE(data.Node->RemoveChild(*element2.Value()).HasException());
+    REQUIRE_FALSE(data.Node->RemoveChild(*element3.Value()).HasException());
+  }
+
+  TEST_CASE("Element::GetElementsByClassName", "[HTML][Element]")
+  {
+    CommonTestData data;
+
+    auto element1 = data.Document->CreateElement(u8"test-element");
+    REQUIRE_FALSE(element1.HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*element1.Value()).HasException());
+    element1.Value()->ClassName(u8"foo");
+
+    auto element2 = data.Document->CreateElement(u8"test-element");
+    REQUIRE_FALSE(element2.HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*element2.Value()).HasException());
+    element2.Value()->ClassName(u8"foo bar");
+
+    auto element3 = data.Document->CreateElement(u8"test-element");
+    REQUIRE_FALSE(element3.HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*element3.Value()).HasException());
+    element3.Value()->ClassName(u8"bar");
+
+    auto elements = data.Node->GetElementsByClassName(u8"foo");
+    REQUIRE(elements->Length() == 2uz);
+    REQUIRE(elements->Item(0) == element1.Value());
+    REQUIRE(elements->Item(1) == element2.Value());
+
+    elements = data.Node->GetElementsByClassName(u8"bar");
+    REQUIRE(elements->Length() == 2uz);
+    REQUIRE(elements->Item(0) == element2.Value());
+    REQUIRE(elements->Item(1) == element3.Value());
+
+    elements = data.Node->GetElementsByClassName(u8"baz");
+    REQUIRE(elements->Length() == 0uz);
+
+    REQUIRE_FALSE(data.Node->RemoveChild(*element1.Value()).HasException());
+    REQUIRE_FALSE(data.Node->RemoveChild(*element2.Value()).HasException());
+    REQUIRE_FALSE(data.Node->RemoveChild(*element3.Value()).HasException());
   }
 }
