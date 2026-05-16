@@ -257,6 +257,20 @@ namespace Krys::Tests
       REQUIRE(attrNode->Name() == u8"test-attr");
       REQUIRE(attrNode->Value() == u8"value2");
     }
+
+    SECTION("InUseAttributeError if attr has different owner element")
+    {
+      auto attr1 = data.Document->CreateAttribute(u8"test-attr");
+      REQUIRE_FALSE(attr1.HasException());
+      attr1.Value()->Value(u8"value1");
+      REQUIRE_FALSE(data.Node->SetAttributeNode(*attr1.Value()).HasException());
+      
+      auto anotherElement = data.Document->CreateElement(u8"another-element");
+      REQUIRE_FALSE(anotherElement.HasException());
+      auto result = anotherElement->SetAttributeNode(*attr1.Value());
+      REQUIRE(result.HasException());
+      REQUIRE(result.GetException().Code() == ExceptionCode::InUseAttributeError);
+    }
   }
 
   TEST_CASE("Element::SetAttributeNodeNS", "[HTML][Element]")
@@ -299,6 +313,20 @@ namespace Krys::Tests
       REQUIRE(attrNode);
       REQUIRE(attrNode->Name() == u8"test-attr");
       REQUIRE(attrNode->Value() == u8"value2");
+    }
+
+    SECTION("InUseAttributeError if attr has different owner element")
+    {
+      auto attr1 = data.Document->CreateAttribute(u8"test-attr");
+      REQUIRE_FALSE(attr1.HasException());
+      attr1.Value()->Value(u8"value1");
+      REQUIRE_FALSE(data.Node->SetAttributeNode(*attr1.Value()).HasException());
+
+      auto anotherElement = data.Document->CreateElement(u8"another-element");
+      REQUIRE_FALSE(anotherElement.HasException());
+      auto result = anotherElement->SetAttributeNodeNS(*attr1.Value());
+      REQUIRE(result.HasException());
+      REQUIRE(result.GetException().Code() == ExceptionCode::InUseAttributeError);
     }
   }
 
