@@ -134,16 +134,60 @@ namespace Krys::Tests
   TEST_CASE("Element::SetAttribute", "[HTML][Element]")
   {
     CommonTestData data;
-    REQUIRE_FALSE(data.Node->SetAttribute(u8"test-attr", u8"test-value").HasException());
-    REQUIRE(data.Node->GetAttribute(u8"test-attr") == u8"test-value");
+
+    SECTION("new attribute")
+    {
+      REQUIRE_FALSE(data.Node->HasAttribute(u8"test-attr"));
+      REQUIRE_FALSE(data.Node->SetAttribute(u8"test-attr", u8"test-value").HasException());
+      REQUIRE(data.Node->HasAttribute(u8"test-attr"));
+      REQUIRE(data.Node->GetAttribute(u8"test-attr") == u8"test-value");
+    }
+
+    SECTION("replacing existing attribute")
+    {
+      REQUIRE_FALSE(data.Node->SetAttribute(u8"test-attr", u8"value1").HasException());
+      REQUIRE(data.Node->GetAttribute(u8"test-attr") == u8"value1");
+      REQUIRE_FALSE(data.Node->SetAttribute(u8"test-attr", u8"value2").HasException());
+      REQUIRE(data.Node->GetAttribute(u8"test-attr") == u8"value2");
+    }
+
+    SECTION("invalid attribute name")
+    {
+      auto result = data.Node->SetAttribute(u8"invalid name", u8"value");
+      REQUIRE(result.HasException());
+      REQUIRE(result.GetException().Code() == ExceptionCode::InvalidCharacterError);
+    }
   }
 
   TEST_CASE("Element::SetAttributeNS", "[HTML][Element]")
   {
     CommonTestData data;
-    REQUIRE_FALSE(
-      data.Node->SetAttributeNS(u8"http://example.com/ns", u8"test-attr", u8"test-value").HasException());
-    REQUIRE(data.Node->GetAttributeNS(u8"http://example.com/ns", u8"test-attr") == u8"test-value");
+
+    SECTION("new attribute")
+    {
+      REQUIRE_FALSE(data.Node->HasAttributeNS(u8"http://example.com/ns", u8"test-attr"));
+      REQUIRE_FALSE(
+        data.Node->SetAttributeNS(u8"http://example.com/ns", u8"test-attr", u8"test-value").HasException());
+      REQUIRE(data.Node->HasAttributeNS(u8"http://example.com/ns", u8"test-attr"));
+      REQUIRE(data.Node->GetAttributeNS(u8"http://example.com/ns", u8"test-attr") == u8"test-value");
+    }
+
+    SECTION("replacing existing attribute")
+    {
+      REQUIRE_FALSE(
+        data.Node->SetAttributeNS(u8"http://example.com/ns", u8"test-attr", u8"value1").HasException());
+      REQUIRE(data.Node->GetAttributeNS(u8"http://example.com/ns", u8"test-attr") == u8"value1");
+      REQUIRE_FALSE(
+        data.Node->SetAttributeNS(u8"http://example.com/ns", u8"test-attr", u8"value2").HasException());
+      REQUIRE(data.Node->GetAttributeNS(u8"http://example.com/ns", u8"test-attr") == u8"value2");
+    }
+
+    SECTION("invalid attribute name")
+    {
+      auto result = data.Node->SetAttributeNS(u8"http://example.com/ns", u8"invalid name", u8"value");
+      REQUIRE(result.HasException());
+      REQUIRE(result.GetException().Code() == ExceptionCode::InvalidCharacterError);
+    }
   }
 
   TEST_CASE("Element::RemoveAttribute", "[HTML][Element]")
@@ -168,11 +212,46 @@ namespace Krys::Tests
   TEST_CASE("Element::ToggleAttribute", "[HTML][Element]")
   {
     CommonTestData data;
-    REQUIRE_FALSE(data.Node->HasAttribute(u8"test-attr"));
-    REQUIRE_FALSE(data.Node->ToggleAttribute(u8"test-attr", true).HasException());
-    REQUIRE(data.Node->HasAttribute(u8"test-attr"));
-    REQUIRE_FALSE(data.Node->ToggleAttribute(u8"test-attr", false).HasException());
-    REQUIRE_FALSE(data.Node->HasAttribute(u8"test-attr"));
+
+    SECTION("toggling on")
+    {
+      REQUIRE_FALSE(data.Node->HasAttribute(u8"test-attr"));
+      auto result = data.Node->ToggleAttribute(u8"test-attr", true);
+      REQUIRE_FALSE(result.HasException());
+      REQUIRE(result.Value());
+      REQUIRE(data.Node->HasAttribute(u8"test-attr"));
+    }
+
+    SECTION("toggling off")
+    {
+      REQUIRE_FALSE(data.Node->HasAttribute(u8"test-attr"));
+      REQUIRE_FALSE(data.Node->SetAttribute(u8"test-attr", u8"value").HasException());
+      REQUIRE(data.Node->HasAttribute(u8"test-attr"));
+      auto result = data.Node->ToggleAttribute(u8"test-attr", false);
+      REQUIRE_FALSE(result.HasException());
+      REQUIRE_FALSE(result.Value());
+      REQUIRE_FALSE(data.Node->HasAttribute(u8"test-attr"));
+    }
+
+    SECTION("toggling without force")
+    {
+      REQUIRE_FALSE(data.Node->HasAttribute(u8"test-attr"));
+      auto result = data.Node->ToggleAttribute(u8"test-attr", Null);
+      REQUIRE_FALSE(result.HasException());
+      REQUIRE(result.Value());
+      REQUIRE(data.Node->HasAttribute(u8"test-attr"));
+      result = data.Node->ToggleAttribute(u8"test-attr", Null);
+      REQUIRE_FALSE(result.HasException());
+      REQUIRE_FALSE(result.Value());
+      REQUIRE_FALSE(data.Node->HasAttribute(u8"test-attr"));
+    }
+
+    SECTION("invalid attribute name")
+    {
+      auto result = data.Node->ToggleAttribute(u8"invalid name", true);
+      REQUIRE(result.HasException());
+      REQUIRE(result.GetException().Code() == ExceptionCode::InvalidCharacterError);
+    }
   }
 
   TEST_CASE("Element::HasAttribute", "[HTML][Element]")
@@ -264,7 +343,7 @@ namespace Krys::Tests
       REQUIRE_FALSE(attr1.HasException());
       attr1.Value()->Value(u8"value1");
       REQUIRE_FALSE(data.Node->SetAttributeNode(*attr1.Value()).HasException());
-      
+
       auto anotherElement = data.Document->CreateElement(u8"another-element");
       REQUIRE_FALSE(anotherElement.HasException());
       auto result = anotherElement->SetAttributeNode(*attr1.Value());
