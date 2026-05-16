@@ -12,12 +12,11 @@
 namespace Krys::HTML
 {
   class Node;
-  class IteratorAlgorithms;
 
   class NodeIterator : public IteratorBase, public RefCounted<NodeIterator>
   {
-    friend class IteratorAlgorithms;
     friend class Document;
+    friend class IteratorAlgorithms;
 
   private:
     Ref<Node> _referenceNode;

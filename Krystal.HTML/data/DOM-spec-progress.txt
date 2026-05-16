@@ -203,15 +203,7 @@ Source: https://dom.spec.whatwg.org
     Implementation: Full
     Test Coverage : None
 
-6.1 Interface NodeIterator
-    Implementation: Full
-    Test Coverage : None
-
 6.2 Interface TreeWalker
-    Implementation: Full
-    Test Coverage : None
-
-6.3 Interface NodeFilter
     Implementation: Full
     Test Coverage : None
 
@@ -308,6 +300,10 @@ Source: https://dom.spec.whatwg.org
 ======================================================================
 6. TRAVERSAL
 ======================================================================
+
+6.1 Interface NodeIterator
+
+6.3 Interface NodeFilter
 
 ======================================================================
 7. SETS

@@ -164,6 +164,7 @@
     <ClCompile Include="tests\Events\CustomEvent.cpp" />
     <ClCompile Include="tests\Events\Event.cpp" />
     <ClCompile Include="tests\Factories\EventFactory.cpp" />
+    <ClCompile Include="tests\Iterators\NodeIterator.cpp" />
     <ClCompile Include="tests\Loader\HTMLEncodingSniffer.cpp" />
     <ClCompile Include="tests\Loader\TextResourceDecoder.cpp" />
     <ClCompile Include="tests\Algorithms\NameValidation.cpp" />

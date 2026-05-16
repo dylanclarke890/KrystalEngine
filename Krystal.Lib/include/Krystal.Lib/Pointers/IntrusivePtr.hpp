@@ -28,7 +28,6 @@ namespace Krys
     template <typename, typename, typename, IsNullable>
     friend class IntrusivePtr;
 
-
   public:
     using element_type = T;
     using pointer_traits = PtrTraits;
@@ -316,16 +315,16 @@ namespace Krys
 
   template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable, typename U>
   requires(ConvertibleTo<RawPtr<U>, RawPtr<T>>)
-  constexpr inline bool operator==(RawPtr<U> lhs,
-                                   const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &rhs) noexcept
+  constexpr inline bool operator==(RawPtr<T> lhs,
+                                   const IntrusivePtr<U, PtrTraits, RefPolicy, Nullable> &rhs) noexcept
   {
     return lhs == rhs.get();
   }
 
   template <typename T, typename PtrTraits, typename RefPolicy, IsNullable Nullable, typename U>
   requires(ConvertibleTo<RawPtr<U>, RawPtr<T>>)
-  constexpr inline bool operator!=(RawPtr<U> lhs,
-                                   const IntrusivePtr<T, PtrTraits, RefPolicy, Nullable> &rhs) noexcept
+  constexpr inline bool operator!=(RawPtr<T> lhs,
+                                   const IntrusivePtr<U, PtrTraits, RefPolicy, Nullable> &rhs) noexcept
   {
     return lhs != rhs.get();
   }

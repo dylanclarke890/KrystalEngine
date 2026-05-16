@@ -34,8 +34,8 @@ namespace Krys::HTML
 
     traverser.IsActive(true);
     auto result = traverser.Filter()->AcceptNode(node);
-
     traverser.IsActive(false);
+
     return result;
   }
 
@@ -101,7 +101,7 @@ namespace Krys::HTML
             return nullptr;
           }
         }
-        beforeNode = false;
+        beforeNode = true;
       }
 
       auto result = FilterNode(iterator, *node);
