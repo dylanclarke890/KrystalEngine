@@ -10,15 +10,21 @@
 
 namespace Krys::HTML
 {
-  void LiveRangeUpdater::Add(Range &range) noexcept
+  void LiveRangeUpdater::Created(Range &range) noexcept
   {
     range.StartContainer()->NodeDocument().LiveRanges().push_back(&range);
   }
 
-  void LiveRangeUpdater::Remove(Range &range) noexcept
+  void LiveRangeUpdater::Destroyed(Range &range) noexcept
   {
     auto &liveRanges = range.StartContainer()->NodeDocument().LiveRanges();
     std::erase_if(liveRanges, [&range](const auto *liveRange) { return liveRange == &range; });
+  }
+
+  void LiveRangeUpdater::RootChanged(Document &oldDocument, Document &newDocument, Range &range) noexcept
+  {
+    std::erase_if(oldDocument.LiveRanges(), [&range](const auto *liveRange) { return liveRange == &range; });
+    newDocument.LiveRanges().push_back(&range);
   }
 
   void LiveRangeUpdater::PreRemove(const Node &node) noexcept

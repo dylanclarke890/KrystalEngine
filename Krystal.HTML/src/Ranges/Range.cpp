@@ -20,12 +20,12 @@ namespace Krys::HTML
 {
   Range::Range(BoundaryPoint start, BoundaryPoint end) noexcept : AbstractRange(start, end)
   {
-    LiveRangeUpdater::Add(*this);
+    LiveRangeUpdater::Created(*this);
   }
 
   Range::~Range() noexcept
   {
-    LiveRangeUpdater::Remove(*this);
+    LiveRangeUpdater::Destroyed(*this);
   }
 
   RawPtr<Node> Range::CommonAncestorContainer() const noexcept
@@ -51,7 +51,11 @@ namespace Krys::HTML
       return Exception(ExceptionCode::InvalidNodeTypeError);
     }
 
-    SetStartBoundaryPoint(*parent, TreeQueries::Index(node));
+    if (auto result = SetStartBoundaryPoint(*parent, TreeQueries::Index(node)); result.HasException())
+    {
+      return result.ReleaseException();
+    }
+
     return {};
   }
 
@@ -63,7 +67,11 @@ namespace Krys::HTML
       return Exception(ExceptionCode::InvalidNodeTypeError);
     }
 
-    SetStartBoundaryPoint(*parent, TreeQueries::Index(node) + 1uz);
+    if (auto result = SetStartBoundaryPoint(*parent, TreeQueries::Index(node) + 1uz); result.HasException())
+    {
+      return result.ReleaseException();
+    }
+
     return {};
   }
 
@@ -75,7 +83,11 @@ namespace Krys::HTML
       return Exception(ExceptionCode::InvalidNodeTypeError);
     }
 
-    SetEndBoundaryPoint(*parent, TreeQueries::Index(node));
+    if (auto result = SetEndBoundaryPoint(*parent, TreeQueries::Index(node)); result.HasException())
+    {
+      return result.ReleaseException();
+    }
+
     return {};
   }
 
@@ -87,7 +99,11 @@ namespace Krys::HTML
       return Exception(ExceptionCode::InvalidNodeTypeError);
     }
 
-    SetEndBoundaryPoint(*parent, TreeQueries::Index(node) + 1uz);
+    if (auto result = SetEndBoundaryPoint(*parent, TreeQueries::Index(node) + 1uz); result.HasException())
+    {
+      return result.ReleaseException();
+    }
+
     return {};
   }
 
@@ -112,8 +128,15 @@ namespace Krys::HTML
     }
 
     auto index = TreeQueries::Index(node);
-    SetStartBoundaryPoint(*parent, index);
-    SetEndBoundaryPoint(*parent, index + 1uz);
+    if (auto result = SetStartBoundaryPoint(*parent, index); result.HasException())
+    {
+      return result.ReleaseException();
+    }
+
+    if (auto result = SetEndBoundaryPoint(*parent, index + 1uz); result.HasException())
+    {
+      return result.ReleaseException();
+    }
 
     return {};
   }
@@ -125,8 +148,15 @@ namespace Krys::HTML
       return Exception(ExceptionCode::InvalidNodeTypeError);
     }
 
-    SetStartBoundaryPoint(node, 0);
-    SetEndBoundaryPoint(node, TreeQueries::Length(node));
+    if (auto result = SetStartBoundaryPoint(node, 0); result.HasException())
+    {
+      return result.ReleaseException();
+    }
+
+    if (auto result = SetEndBoundaryPoint(node, TreeQueries::Length(node)); result.HasException())
+    {
+      return result.ReleaseException();
+    }
 
     return {};
   }
@@ -149,32 +179,35 @@ namespace Krys::HTML
     }
   }
 
-  void Range::DeleteContents() noexcept
+  ExceptionOr<void> Range::DeleteContents() noexcept
   {
     if (IsCollapsed())
     {
-      return;
+      return {};
     }
 
-    if (_start.Container.get() == _end.Container.get() && Is<CharacterData>(_start.Container))
+    if (_start.Container.get() == _end.Container.get())
     {
-      Downcast<CharacterData>(_start.Container.get())->DeleteData(_start.Offset, _end.Offset - _start.Offset);
-      return;
+      if (auto *characterData = DynamicDowncast<CharacterData>(_start.Container.get()))
+      {
+        auto deleteData = characterData->DeleteData(_start.Offset, _end.Offset - _start.Offset);
+        if (deleteData.HasException())
+        {
+          return deleteData.ReleaseException();
+        }
+        return {};
+      }
     }
 
-    // TODO(fix): REQUIRED - this is probably wrong.
     List<Ref<Node>> nodesToRemove;
     auto *root = CommonAncestorContainer();
     for (auto *node = TreeTraversal::Next(*_start.Container, root); node;
          node = TreeTraversal::Next(*node, root))
     {
-      auto startCmp = ComparePoint(*node, 0);
-      if (startCmp.HasException() || startCmp.Value() != std::strong_ordering::greater)
-        continue;
-
-      auto endCmp = ComparePoint(*node, TreeQueries::Length(*node));
-      if (endCmp.HasException() || endCmp.Value() != std::strong_ordering::less)
-        continue;
+      if (IsPointInRange(*node, 0) == true)
+      {
+        break;
+      }
 
       nodesToRemove.emplace_back(ShareRef(*node));
 
@@ -183,7 +216,7 @@ namespace Krys::HTML
     }
 
     RefPtr<Node> newNode;
-    size_t newOffset = 0;
+    size_t newOffset = 0uz;
 
     if (TreeQueries::IsInclusiveAncestor(*_start.Container, *_end.Container))
     {
@@ -206,25 +239,38 @@ namespace Krys::HTML
     {
       RawPtr<CharacterData> characterData = Downcast<CharacterData>(_start.Container.get());
       auto length = TreeQueries::Length(*characterData);
-      characterData->DeleteData(_start.Offset, length - _start.Offset);
+      auto offset = _start.Offset;
+
+      if (auto deleteData = characterData->DeleteData(offset, length - offset); deleteData.HasException())
+      {
+        return deleteData.ReleaseException();
+      }
     }
 
     for (auto &node : nodesToRemove)
     {
       if (auto parent = ShareRefPtr(node->ParentNode()))
       {
-        parent->RemoveChild(*node);
+        if (auto remove = parent->RemoveChild(*node); remove.HasException())
+        {
+          return remove.ReleaseException();
+        }
       }
     }
 
     if (Is<CharacterData>(_end.Container))
     {
       auto *characterData = Downcast<CharacterData>(_end.Container.get());
-      characterData->DeleteData(0uz, _end.Offset);
+      if (auto deleteData = characterData->DeleteData(0uz, _end.Offset); deleteData.HasException())
+      {
+        return deleteData.ReleaseException();
+      }
     }
 
     _start = BoundaryPoint {Krys::Move(newNode), newOffset};
     _end = _start;
+
+    return {};
   }
 
   ExceptionOr<Ref<DocumentFragment>> Range::ExtractContents() noexcept
@@ -632,6 +678,11 @@ namespace Krys::HTML
       return Exception(ExceptionCode::IndexSizeError);
     }
 
+    if (&_start.Container->NodeDocument() != &node.NodeDocument())
+    {
+      LiveRangeUpdater::RootChanged(_start.Container->NodeDocument(), node.NodeDocument(), *this);
+    }
+
     BoundaryPoint boundaryPoint {ShareRef(node), offset};
 
     if (!TreeQueries::HasSameRoot(node, *_start.Container)
@@ -654,6 +705,11 @@ namespace Krys::HTML
     if (offset > TreeQueries::Length(node))
     {
       return Exception(ExceptionCode::IndexSizeError);
+    }
+
+    if (&_start.Container->NodeDocument() != &node.NodeDocument())
+    {
+      LiveRangeUpdater::RootChanged(_start.Container->NodeDocument(), node.NodeDocument(), *this);
     }
 
     BoundaryPoint boundaryPoint {ShareRef(node), offset};

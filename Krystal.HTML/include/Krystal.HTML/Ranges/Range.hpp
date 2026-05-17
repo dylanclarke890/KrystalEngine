@@ -53,7 +53,7 @@ namespace Krys::HTML
     KRYS_NODISCARD ExceptionOr<std::strong_ordering> CompareBoundaryPoints(BoundaryPointComparator how,
                                                                            const Range &other) const noexcept;
 
-    void DeleteContents() noexcept;
+    ExceptionOr<void> DeleteContents() noexcept;
     KRYS_NODISCARD ExceptionOr<Ref<DocumentFragment>> ExtractContents() noexcept;
     KRYS_NODISCARD ExceptionOr<Ref<DocumentFragment>> CloneContents() const noexcept;
     ExceptionOr<void> InsertNode(Node &node) noexcept;
@@ -70,12 +70,12 @@ namespace Krys::HTML
     KRYS_NODISCARD ExceptionOr<DOMString> ToString() const noexcept;
 
   private:
-    ExceptionOr<void> SetStartBoundaryPoint(Node &node, uint64 offset) noexcept;
-    ExceptionOr<void> SetEndBoundaryPoint(Node &node, uint64 offset) noexcept;
+    KRYS_NODISCARD ExceptionOr<void> SetStartBoundaryPoint(Node &node, uint64 offset) noexcept;
+    KRYS_NODISCARD ExceptionOr<void> SetEndBoundaryPoint(Node &node, uint64 offset) noexcept;
 
-    ExceptionOr<void> CloneCharacterDataContents(DocumentFragment &fragment, Node &container, size_t offset,
-                                                 size_t length,
-                                                 DeleteClonedContent deleteClonedContent) const noexcept;
+    KRYS_NODISCARD ExceptionOr<void>
+      CloneCharacterDataContents(DocumentFragment &fragment, Node &container, size_t offset, size_t length,
+                                 DeleteClonedContent deleteClonedContent) const noexcept;
 
     KRYS_NODISCARD bool IsPartiallyContained(const Node &node) const noexcept;
     KRYS_NODISCARD RawPtr<Node> GetFirstPartiallyContainedChild(RawPtr<Node> commonAncestor) const noexcept;
