@@ -63,10 +63,10 @@ namespace Krys::HTML
 #pragma region Node Trees - https://dom.spec.whatwg.org/#node-trees
 
     /// @see https://dom.spec.whatwg.org/#concept-node-length
-    KRYS_NODISCARD static size_t Length(Node &node) noexcept;
+    KRYS_NODISCARD static size_t Length(const Node &node) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-node-empty
-    KRYS_NODISCARD static bool IsEmpty(Node &node) noexcept;
+    KRYS_NODISCARD static bool IsEmpty(const Node &node) noexcept;
 
 #pragma endregion
 

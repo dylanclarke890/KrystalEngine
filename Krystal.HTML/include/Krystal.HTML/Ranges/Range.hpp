@@ -73,6 +73,8 @@ namespace Krys::HTML
     KRYS_NODISCARD ExceptionOr<void> SetStartBoundaryPoint(Node &node, uint64 offset) noexcept;
     KRYS_NODISCARD ExceptionOr<void> SetEndBoundaryPoint(Node &node, uint64 offset) noexcept;
 
+    KRYS_NODISCARD bool IsContained(Node &node) const noexcept;
+
     KRYS_NODISCARD ExceptionOr<void>
       CloneCharacterDataContents(DocumentFragment &fragment, Node &container, size_t offset, size_t length,
                                  DeleteClonedContent deleteClonedContent) const noexcept;

@@ -35,6 +35,10 @@ namespace Krys::HTML
     {
     }
 
+    constexpr ExceptionOr(ExceptionCode code) noexcept : _value {Unexpected(Exception(code))}
+    {
+    }
+
     template <typename OtherType>
     requires(Scalar<OtherType> && ConvertibleTo<OtherType, value_type>)
     constexpr ExceptionOr(const OtherType &value) noexcept(NoThrowConvertibleTo<OtherType, value_type>)
@@ -133,6 +137,11 @@ namespace Krys::HTML
     {
       return !(*this == exception);
     }
+
+    KRYS_NODISCARD constexpr bool operator==(ExceptionCode code) const noexcept
+    {
+      return HasException() && GetException().Code() == code;
+    }
   };
 
   template <typename T>
@@ -151,6 +160,10 @@ namespace Krys::HTML
     }
 
     constexpr ExceptionOr(Exception &&ex) noexcept : _value {Krys::Move(ex)}
+    {
+    }
+
+    constexpr ExceptionOr(ExceptionCode code) noexcept : _value {Unexpected(Exception(code))}
     {
     }
 
@@ -240,6 +253,11 @@ namespace Krys::HTML
     {
       return !(*this == exception);
     }
+
+    KRYS_NODISCARD constexpr bool operator==(ExceptionCode code) const noexcept
+    {
+      return HasException() && GetException().Code() == code;
+    }
   };
 
   template <>
@@ -258,6 +276,10 @@ namespace Krys::HTML
     constexpr ExceptionOr() = default;
 
     constexpr ExceptionOr(Exception &&ex) noexcept : _value {Unexpected(Krys::Move(ex))}
+    {
+    }
+
+    constexpr ExceptionOr(ExceptionCode code) noexcept : _value {Unexpected(Exception(code))}
     {
     }
 

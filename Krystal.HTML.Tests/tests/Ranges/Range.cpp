@@ -725,12 +725,10 @@ namespace Krys::Tests
       REQUIRE(result.GetException().Code() == ExceptionCode::WrongDocumentError);
     }
 
-    SECTION("InvalidNodeTypeError if BoundaryPointComparator is out of range")
+    SECTION("NotSupportedError if BoundaryPointComparator is out of range")
     {
       auto result = data.Range->CompareBoundaryPoints(static_cast<BoundaryPointComparator>(4), *data.Range);
-
-      REQUIRE(result.HasException());
-      REQUIRE(result.GetException().Code() == ExceptionCode::InvalidNodeTypeError);
+      REQUIRE(result == ExceptionCode::NotSupportedError);
     }
 
     auto otherRange = data.Document->CreateRange();
@@ -1002,15 +1000,292 @@ namespace Krys::Tests
     REQUIRE(data.Range->EndOffset() == 0uz);
   }
 
-  // TODO(impl):
-  // TEST_CASE("Range::IsPointInRange", "[HMTL][Range]")
+  TEST_CASE("Range::IsPointInRange", "[HMTL][Range]")
+  {
+    CommonTestData data;
 
-  // TODO(impl):
-  // TEST_CASE("Range::ComparePoint", "[HMTL][Range]")
+    auto child1 = CreateRef<TestContainerNode>(*data.Document);
+    auto child2 = CreateRef<TestContainerNode>(*data.Document);
+    auto child3 = CreateRef<TestContainerNode>(*data.Document);
+    auto child4 = CreateRef<TestContainerNode>(*data.Document);
+    auto child5 = CreateRef<TestContainerNode>(*data.Document);
 
-  // TODO(impl):
-  // TEST_CASE("Range::IntersectsNode", "[HMTL][Range]")
+    REQUIRE_FALSE(data.Document->AppendChild(*data.Node).HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*child3).HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*child4).HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*child5).HasException());
 
-  // TODO(impl):
-  // TEST_CASE("Range::ToString", "[HMTL][Range]")
+    SECTION("WrongDocumentError if node is from a different document")
+    {
+      auto otherDocument = CreateRef<HTMLDocument>();
+      auto otherNode = CreateRef<TestContainerNode>(*otherDocument);
+      auto result = data.Range->IsPointInRange(*otherNode, 0uz);
+      REQUIRE(result.HasException());
+      REQUIRE(result.GetException().Code() == ExceptionCode::WrongDocumentError);
+    }
+
+    SECTION("InvalidNodeTypeError if node is a DocumentType")
+    {
+      auto doctype = data.Document->Implementation().CreateDocumentType(u8"html", u8"", u8"");
+      REQUIRE_FALSE(doctype.HasException());
+
+      REQUIRE_FALSE(data.Document->InsertBefore(*doctype.Value(), data.Node).HasException());
+
+      auto result = data.Range->IsPointInRange(*doctype.Value(), 0uz);
+      REQUIRE(result.HasException());
+      REQUIRE(result.GetException().Code() == ExceptionCode::InvalidNodeTypeError);
+
+      REQUIRE_FALSE(data.Document->RemoveChild(*doctype.Value()).HasException());
+    }
+
+    SECTION("IndexSizeError if offset is greater than the length of the node")
+    {
+      auto result = data.Range->IsPointInRange(*child3, 1uz);
+      REQUIRE(result.HasException());
+      REQUIRE(result.GetException().Code() == ExceptionCode::IndexSizeError);
+    }
+
+    REQUIRE_FALSE(data.Range->SetStart(*child2, 0uz).HasException());
+    REQUIRE_FALSE(data.Range->SetEnd(*child4, 0uz).HasException());
+
+    SECTION("True if the point is between the start and end boundary points")
+    {
+      REQUIRE(data.Range->IsPointInRange(*child3, 0uz) == true);
+    }
+    SECTION("False if the point is before the start boundary point")
+    {
+      REQUIRE(data.Range->IsPointInRange(*child1, 0uz) == false);
+    }
+    SECTION("False if the point is after the end boundary point")
+    {
+      REQUIRE(data.Range->IsPointInRange(*child5, 0uz) == false);
+    }
+    SECTION("True if the point is at the start boundary point")
+    {
+      REQUIRE(data.Range->IsPointInRange(*child2, 0uz) == true);
+    }
+    SECTION("True if the point is at the end boundary point")
+    {
+      REQUIRE(data.Range->IsPointInRange(*child4, 0uz) == true);
+    }
+
+    REQUIRE_FALSE(data.Document->RemoveChild(*data.Node).HasException());
+    REQUIRE_FALSE(data.Node->RemoveChild(*child1).HasException());
+    REQUIRE_FALSE(data.Node->RemoveChild(*child2).HasException());
+    REQUIRE_FALSE(data.Node->RemoveChild(*child3).HasException());
+    REQUIRE_FALSE(data.Node->RemoveChild(*child4).HasException());
+    REQUIRE_FALSE(data.Node->RemoveChild(*child5).HasException());
+  }
+
+  TEST_CASE("Range::ComparePoint", "[HMTL][Range]")
+  {
+    CommonTestData data;
+
+    auto child1 = CreateRef<TestContainerNode>(*data.Document);
+    auto child2 = CreateRef<TestContainerNode>(*data.Document);
+    auto child3 = CreateRef<TestContainerNode>(*data.Document);
+    auto child4 = CreateRef<TestContainerNode>(*data.Document);
+    auto child5 = CreateRef<TestContainerNode>(*data.Document);
+
+    REQUIRE_FALSE(data.Document->AppendChild(*data.Node).HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*child3).HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*child4).HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*child5).HasException());
+
+    SECTION("WrongDocumentError if node is from a different document")
+    {
+      auto otherDocument = CreateRef<HTMLDocument>();
+      auto otherNode = CreateRef<TestContainerNode>(*otherDocument);
+      auto result = data.Range->ComparePoint(*otherNode, 0uz);
+
+      REQUIRE(result.HasException());
+      REQUIRE(result == ExceptionCode::WrongDocumentError);
+    }
+
+    SECTION("InvalidNodeTypeError if node is a DocumentType")
+    {
+      auto doctype = data.Document->Implementation().CreateDocumentType(u8"html", u8"", u8"");
+      REQUIRE_FALSE(doctype.HasException());
+
+      REQUIRE_FALSE(data.Document->InsertBefore(*doctype.Value(), data.Node).HasException());
+
+      auto result = data.Range->ComparePoint(*doctype.Value(), 0uz);
+      REQUIRE(result.HasException());
+      REQUIRE(result == ExceptionCode::InvalidNodeTypeError);
+
+      REQUIRE_FALSE(data.Document->RemoveChild(*doctype.Value()).HasException());
+    }
+
+    SECTION("IndexSizeError if offset is greater than the length of the node")
+    {
+      auto result = data.Range->ComparePoint(*child3, 1uz);
+      REQUIRE(result.HasException());
+      REQUIRE(result == ExceptionCode::IndexSizeError);
+    }
+
+    REQUIRE_FALSE(data.Range->SetStart(*child2, 0uz).HasException());
+    REQUIRE_FALSE(data.Range->SetEnd(*child4, 0uz).HasException());
+
+    SECTION("Equal if the point is between the start and end boundary points")
+    {
+      REQUIRE(data.Range->ComparePoint(*child3, 0uz) == std::strong_ordering::equal);
+    }
+    SECTION("Less if the point is before the start boundary point")
+    {
+      REQUIRE(data.Range->ComparePoint(*child1, 0uz) == std::strong_ordering::less);
+    }
+    SECTION("Greater if the point is after the end boundary point")
+    {
+      REQUIRE(data.Range->ComparePoint(*child5, 0uz) == std::strong_ordering::greater);
+    }
+    SECTION("Equal if the point is at the start boundary point")
+    {
+      REQUIRE(data.Range->ComparePoint(*child2, 0uz) == std::strong_ordering::equal);
+    }
+    SECTION("Equal if the point is at the end boundary point")
+    {
+      REQUIRE(data.Range->ComparePoint(*child4, 0uz) == std::strong_ordering::equal);
+    }
+
+    REQUIRE_FALSE(data.Document->RemoveChild(*data.Node).HasException());
+    REQUIRE_FALSE(data.Node->RemoveChild(*child1).HasException());
+    REQUIRE_FALSE(data.Node->RemoveChild(*child2).HasException());
+    REQUIRE_FALSE(data.Node->RemoveChild(*child3).HasException());
+    REQUIRE_FALSE(data.Node->RemoveChild(*child4).HasException());
+    REQUIRE_FALSE(data.Node->RemoveChild(*child5).HasException());
+  }
+
+  TEST_CASE("Range::IntersectsNode", "[HMTL][Range]")
+  {
+    CommonTestData data;
+
+    auto child1 = CreateRef<TestContainerNode>(*data.Document);
+    auto child2 = CreateRef<TestContainerNode>(*data.Document);
+    auto child3 = CreateRef<TestContainerNode>(*data.Document);
+
+    REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());
+    REQUIRE_FALSE(data.Node->AppendChild(*child3).HasException());
+
+    REQUIRE_FALSE(data.Range->SetStart(*child2, 0uz).HasException());
+    REQUIRE_FALSE(data.Range->SetEnd(*child2, 0uz).HasException());
+    SECTION("True if the node intersects with the range")
+    {
+      REQUIRE(data.Range->IntersectsNode(*child2) == true);
+    }
+    SECTION("False if the node does not intersect with the range")
+    {
+      REQUIRE(data.Range->IntersectsNode(*child1) == false);
+      REQUIRE(data.Range->IntersectsNode(*child3) == false);
+    }
+
+    REQUIRE_FALSE(data.Node->RemoveChild(*child1).HasException());
+    REQUIRE_FALSE(data.Node->RemoveChild(*child2).HasException());
+    REQUIRE_FALSE(data.Node->RemoveChild(*child3).HasException());
+  }
+
+  TEST_CASE("Range::ToString", "[HMTL][Range]")
+  {
+    CommonTestData data;
+    
+    SECTION("When start and end container are the same and it is not a Text node, returns an empty string")
+    {
+      auto element = data.Document->CreateElement(u8"div");
+      REQUIRE_FALSE(element.HasException());
+
+      REQUIRE_FALSE(data.Range->SetStart(*element.Value(), 0uz).HasException());
+      REQUIRE_FALSE(data.Range->SetEnd(*element.Value(), 0uz).HasException());
+
+      auto result = data.Range->ToString();
+      REQUIRE_FALSE(result.HasException());
+      REQUIRE(result == u8"");
+    }
+
+    SECTION("When start and end container are the same and it is a Text node, returns the content "
+            "from start to end offset")
+    {
+      auto textNode = data.Document->CreateTextNode(u8"Hello, world!");
+
+      REQUIRE_FALSE(data.Range->SetStart(*textNode, 7uz).HasException());
+      REQUIRE_FALSE(data.Range->SetEnd(*textNode, 12uz).HasException());
+
+      auto result = data.Range->ToString();
+      REQUIRE_FALSE(result.HasException());
+      REQUIRE(result == u8"world");
+
+      REQUIRE(textNode->Data() == u8"Hello, world!");
+    }
+
+    SECTION("When start is a partially contained text node, returns the substringed content")
+    {
+      auto textNode = data.Document->CreateTextNode(u8"Hello, world!");
+      auto element = data.Document->CreateElement(u8"div");
+      REQUIRE_FALSE(element.HasException());
+
+      REQUIRE_FALSE(data.Node->AppendChild(*textNode).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*element.Value()).HasException());
+
+      REQUIRE_FALSE(data.Range->SetStart(*textNode, 7uz).HasException());
+      REQUIRE_FALSE(data.Range->SetEnd(*element.Value(), 0uz).HasException());
+
+      auto result = data.Range->ToString();
+      REQUIRE_FALSE(result.HasException());
+      REQUIRE(result == u8"world!");
+
+      REQUIRE_FALSE(data.Node->RemoveChild(*textNode).HasException());
+      REQUIRE_FALSE(data.Node->RemoveChild(*element.Value()).HasException());
+    }
+
+    SECTION("When range contains text nodes and non-text nodes, returns the concatenation of the text "
+            "content of the contained text nodes")
+    {
+      auto textNode1 = data.Document->CreateTextNode(u8"Hello, ");
+      auto textNode2 = data.Document->CreateTextNode(u8"nested text");
+      auto textNode3 = data.Document->CreateTextNode(u8"World!");
+
+      auto element = data.Document->CreateElement(u8"div");
+      REQUIRE_FALSE(element.HasException());
+
+      REQUIRE_FALSE(data.Node->AppendChild(*textNode1).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*element.Value()).HasException());
+      REQUIRE_FALSE(element->AppendChild(*textNode2).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*textNode3).HasException());
+
+      REQUIRE_FALSE(data.Range->SetStart(*textNode1, 0uz).HasException());
+      REQUIRE_FALSE(data.Range->SetEnd(*textNode3, 6uz).HasException());
+
+      auto result = data.Range->ToString();
+      REQUIRE_FALSE(result.HasException());
+      REQUIRE(result == u8"Hello, nested textWorld!");
+
+      REQUIRE_FALSE(data.Node->RemoveChild(*textNode1).HasException());
+      REQUIRE_FALSE(data.Node->RemoveChild(*element.Value()).HasException());
+      REQUIRE_FALSE(element->RemoveChild(*textNode2).HasException());
+      REQUIRE_FALSE(data.Node->RemoveChild(*textNode3).HasException());
+    }
+
+    SECTION("When end is a partially contained text node, returns the substringed content")
+    {
+      auto textNode = data.Document->CreateTextNode(u8"Hello, world!");
+      auto element = data.Document->CreateElement(u8"div");
+      REQUIRE_FALSE(element.HasException());
+
+      REQUIRE_FALSE(data.Node->AppendChild(*element.Value()).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*textNode).HasException());
+
+      REQUIRE_FALSE(data.Range->SetStart(*element.Value(), 0uz).HasException());
+      REQUIRE_FALSE(data.Range->SetEnd(*textNode, 5uz).HasException());
+
+      auto result = data.Range->ToString();
+      REQUIRE_FALSE(result.HasException());
+      REQUIRE(result == u8"Hello");
+
+      REQUIRE_FALSE(data.Node->RemoveChild(*element.Value()).HasException());
+      REQUIRE_FALSE(data.Node->RemoveChild(*textNode).HasException());
+    }
+  }
 }

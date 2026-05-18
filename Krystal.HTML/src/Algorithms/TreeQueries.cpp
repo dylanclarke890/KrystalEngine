@@ -113,11 +113,11 @@ namespace Krys::HTML
 
 #pragma region Node Trees - https://dom.spec.whatwg.org/#node-trees
 
-  size_t TreeQueries::Length(Node &node) noexcept
+  size_t TreeQueries::Length(const Node &node) noexcept
   {
     if (Is<DocumentType>(node) || Is<Attr>(node))
     {
-      return 0;
+      return 0uz;
     }
 
     if (auto *characterData = DynamicDowncast<CharacterData>(node))
@@ -128,9 +128,9 @@ namespace Krys::HTML
     return node.CountChildNodes();
   }
 
-  bool TreeQueries::IsEmpty(Node &node) noexcept
+  bool TreeQueries::IsEmpty(const Node &node) noexcept
   {
-    return Length(node) == 0;
+    return Length(node) == 0uz;
   }
 
 #pragma endregion

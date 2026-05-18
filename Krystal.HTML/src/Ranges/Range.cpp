@@ -175,7 +175,7 @@ namespace Krys::HTML
       case BoundaryPointComparator::StartToEnd:   return _start.ComparePositionTo(other._end);
       case BoundaryPointComparator::EndToEnd:     return _end.ComparePositionTo(other._end);
       case BoundaryPointComparator::EndToStart:   return _end.ComparePositionTo(other._start);
-      default:                                    return Exception(ExceptionCode::InvalidNodeTypeError);
+      default:                                    return Exception(ExceptionCode::NotSupportedError);
     }
   }
 
@@ -352,7 +352,7 @@ namespace Krys::HTML
 
   ExceptionOr<Ref<DocumentFragment>> Range::CloneContents() const noexcept
   {
-    auto fragment = CreateRef<DocumentFragment>(*_start.Container->OwnerDocument());
+    auto fragment = CreateRef<DocumentFragment>(_start.Container->NodeDocument());
     if (IsCollapsed())
     {
       return fragment;
@@ -554,24 +554,24 @@ namespace Krys::HTML
       return compareResult.ReleaseException();
     }
 
-    return compareResult.Value() == std::strong_ordering::equal;
+    return compareResult == std::strong_ordering::equal;
   }
 
   ExceptionOr<std::strong_ordering> Range::ComparePoint(Node &node, uint64 offset) const noexcept
   {
     if (!TreeQueries::HasSameRoot(node, *_start.Container))
     {
-      return Exception(ExceptionCode::WrongDocumentError);
+      return ExceptionCode::WrongDocumentError;
     }
 
     if (Is<DocumentType>(node))
     {
-      return Exception(ExceptionCode::InvalidNodeTypeError);
+      return ExceptionCode::InvalidNodeTypeError;
     }
 
     if (offset > TreeQueries::Length(node))
     {
-      return Exception(ExceptionCode::IndexSizeError);
+      return ExceptionCode::IndexSizeError;
     }
 
     auto boundaryPoint = BoundaryPoint {ShareRef(node), offset};
@@ -604,13 +604,13 @@ namespace Krys::HTML
     auto offset = TreeQueries::Index(node);
 
     auto boundaryPoint = BoundaryPoint {ShareRef(*parent), offset};
-    if (boundaryPoint.ComparePositionTo(_start) != std::strong_ordering::greater)
+    if (boundaryPoint.ComparePositionTo(_end) != std::strong_ordering::less)
     {
       return false;
     }
 
-    boundaryPoint = BoundaryPoint {ShareRef(*parent), offset + 1uz};
-    if (boundaryPoint.ComparePositionTo(_end) != std::strong_ordering::less)
+    boundaryPoint.Offset = offset + 1uz;
+    if (boundaryPoint.ComparePositionTo(_start) != std::strong_ordering::greater)
     {
       return false;
     }
@@ -620,16 +620,12 @@ namespace Krys::HTML
 
   ExceptionOr<DOMString> Range::ToString() const noexcept
   {
-    if (_start.Container.get() == _end.Container.get() && Is<CharacterData>(_start.Container))
+    if (_start.Container == _end.Container)
     {
-      auto characterData = Downcast<CharacterData>(_start.Container.get());
-      auto substringResult = characterData->SubstringData(_start.Offset, _end.Offset - _start.Offset);
-      if (substringResult.HasException())
+      if (auto *textNode = DynamicDowncast<Text>(_start.Container.get()))
       {
-        return substringResult.ReleaseException();
+        return textNode->SubstringData(_start.Offset, _end.Offset - _start.Offset);
       }
-
-      return substringResult.ReleaseValue();
     }
 
     DOMString string;
@@ -637,20 +633,25 @@ namespace Krys::HTML
     {
       auto substringResult =
         startTextNode->SubstringData(_start.Offset, TreeQueries::Length(*startTextNode) - _start.Offset);
+
       if (substringResult.HasException())
       {
         return substringResult.ReleaseException();
       }
+
       string += substringResult.ReleaseValue();
     }
 
-    auto containedNodes = GetContainedChildren(CommonAncestorContainer());
-    for (auto &node : containedNodes)
+    auto *root = CommonAncestorContainer();
+    for (auto *node = TreeTraversal::Next(*_start.Container, root); node;
+         node = TreeTraversal::Next(*node, root))
     {
-      if (auto *textNode = DynamicDowncast<Text>(node.get()))
+      if (!Is<Text>(node) || !IsContained(*node))
       {
-        string += textNode->Data();
+        continue;
       }
+
+      string += Downcast<Text>(*node).Data();
     }
 
     if (auto *endTextNode = DynamicDowncast<Text>(_end.Container.get()))
@@ -722,6 +723,23 @@ namespace Krys::HTML
 
     _end = Krys::Move(boundaryPoint);
     return {};
+  }
+
+  bool Range::IsContained(Node &node) const noexcept
+  {
+    auto boundaryPoint = BoundaryPoint {ShareRef(node), 0uz};
+    if (boundaryPoint.ComparePositionTo(_start) != std::strong_ordering::greater)
+    {
+      return false;
+    }
+
+    boundaryPoint.Offset = TreeQueries::Length(node);
+    if (boundaryPoint.ComparePositionTo(_end) != std::strong_ordering::less)
+    {
+      return false;
+    }
+
+    return true;
   }
 
   ExceptionOr<void> Range::CloneCharacterDataContents(DocumentFragment &fragment, Node &container,
