@@ -66,7 +66,7 @@ namespace Krys::Tests
     {
       auto attrResult = document->CreateAttribute(u8"test");
       REQUIRE_FALSE(attrResult.HasException());
-      auto&& attr = attrResult.ReleaseValue();
+      auto &&attr = attrResult.ReleaseValue();
 
       auto result = MutationAlgorithms::EnsurePreInsertValidity(*attr, *element, nullptr);
       REQUIRE(result.HasException());
@@ -346,8 +346,8 @@ namespace Krys::Tests
       REQUIRE(document->LastChild() == element.get());
       REQUIRE_FALSE(docFragment->HasChildNodes());
 
-      // TODO(impl): need to test that a mutation record is queued for the nodes removed from the
-      // DocumentFragment.
+      // TODO(impl): MUTATION-OBSERVERS - need to test that a mutation record is queued for the nodes removed
+      // from the DocumentFragment.
 
       REQUIRE_FALSE(document->RemoveChild(*comment).HasException());
       REQUIRE_FALSE(document->RemoveChild(*element).HasException());
@@ -356,7 +356,31 @@ namespace Krys::Tests
     SECTION("Inserting before a refChild that is contained within a live range correctly updates the offsets "
             "of the live range")
     {
-      // TODO(impl): need to be able to create a live range in order to test this.
+      auto element = CreateRef<TestElement>(*document);
+      auto child1 = CreateRef<TestElement>(*document);
+      auto child2 = CreateRef<TestElement>(*document);
+      auto child3 = CreateRef<TestElement>(*document);
+
+      REQUIRE_FALSE(document->AppendChild(*element).HasException());
+      REQUIRE_FALSE(element->AppendChild(*child2).HasException());
+      REQUIRE_FALSE(element->AppendChild(*child3).HasException());
+
+      auto range = document->CreateRange();
+      REQUIRE_FALSE(range->SetStart(*element, 0uz).HasException());
+      REQUIRE_FALSE(range->SetEnd(*element, 2uz).HasException());
+
+      REQUIRE_FALSE(MutationAlgorithms::Insert(*child1, *element, child2.get()).HasException());
+
+      REQUIRE(range->StartContainer() == element.get());
+      REQUIRE(range->StartOffset() == 0uz);
+
+      REQUIRE(range->EndContainer() == element.get());
+      REQUIRE(range->EndOffset() == 3uz);
+
+      REQUIRE_FALSE(document->RemoveChild(*element).HasException());
+      REQUIRE_FALSE(element->RemoveChild(*child1).HasException());
+      REQUIRE_FALSE(element->RemoveChild(*child2).HasException());
+      REQUIRE_FALSE(element->RemoveChild(*child3).HasException());
     }
 
     SECTION("Inserting a node from another Document adopts the node into the new Document")

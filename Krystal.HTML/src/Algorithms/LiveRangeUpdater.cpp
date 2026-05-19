@@ -46,7 +46,7 @@ namespace Krys::HTML
       {
         if (TreeQueries::IsInclusiveDescendant(*startContainer, node))
         {
-          range->SetStart(*parent, index);
+          range->_start = BoundaryPoint {ShareRef(*parent), index};
         }
       }
 
@@ -54,18 +54,18 @@ namespace Krys::HTML
       {
         if (TreeQueries::IsInclusiveDescendant(*endContainer, node))
         {
-          range->SetEnd(*parent, index);
+          range->_end = BoundaryPoint {ShareRef(*parent), index};
         }
       }
 
-      if (originalStartContainer == parent)
+      if (originalStartContainer == parent && originalStartOffset > index)
       {
-        range->SetStart(*parent, originalStartOffset - 1uz);
+        range->_start.Offset -= 1;
       }
 
-      if (originalEndContainer == parent)
+      if (originalEndContainer == parent && originalEndOffset > index)
       {
-        range->SetEnd(*parent, originalEndOffset - 1uz);
+        range->_end.Offset -= 1;
       }
     }
   }
@@ -85,11 +85,12 @@ namespace Krys::HTML
       {
         if (originalStartOffset > offset && originalStartOffset <= offset + count)
         {
-          range->SetStart(characterData, offset);
+          range->_start.Offset = offset;
         }
         else if (originalStartOffset > offset + count)
         {
-          range->SetStart(characterData, originalStartOffset + newDataSize - count);
+          range->_start.Offset += newDataSize;
+          range->_start.Offset -= count;
         }
       }
 
@@ -97,11 +98,12 @@ namespace Krys::HTML
       {
         if (originalEndOffset > offset && originalEndOffset <= offset + count)
         {
-          range->SetEnd(characterData, offset);
+          range->_end.Offset = offset;
         }
         else if (originalEndOffset > offset + count)
         {
-          range->SetEnd(characterData, originalEndOffset + newDataSize - count);
+          range->_end.Offset += newDataSize;
+          range->_end.Offset -= count;
         }
       }
     }
@@ -122,22 +124,22 @@ namespace Krys::HTML
 
       if (originalStartContainer == &removedText)
       {
-        range->SetStart(node, originalStartOffset + length);
+        range->_start = BoundaryPoint {ShareRef(node), range->_start.Offset + length};
       }
 
       if (originalEndContainer == &removedText)
       {
-        range->SetEnd(node, originalEndOffset + length);
+        range->_end = BoundaryPoint {ShareRef(node), range->_end.Offset + length};
       }
 
       if (originalStartContainer == parent && originalStartOffset == index)
       {
-        range->SetStart(node, length);
+        range->_start = BoundaryPoint {ShareRef(node), length};
       }
 
       if (originalEndContainer == parent && originalEndOffset == index)
       {
-        range->SetEnd(node, length);
+        range->_end = BoundaryPoint {ShareRef(node), length};
       }
     }
   }
@@ -158,22 +160,22 @@ namespace Krys::HTML
 
       if (originalStartContainer == newParent && originalStartOffset > childIndex)
       {
-        range->SetStart(*newParent, originalStartOffset + 1uz);
+        range->_start.Offset += 1;
       }
 
       if (originalEndContainer == newParent && originalEndOffset > childIndex)
       {
-        range->SetEnd(*newParent, originalEndOffset + 1uz);
+        range->_end.Offset += 1;
       }
     }
   }
 
   void LiveRangeUpdater::InsertedBeforeNode(Node &insertedBefore, size_t nodesInserted) noexcept
   {
-    auto childIndex = TreeQueries::Index(insertedBefore);
     auto *newParent = insertedBefore.ParentNode();
     assert(newParent != nullptr);
 
+    auto childIndex = TreeQueries::Index(insertedBefore);
     for (auto &range : newParent->NodeDocument().LiveRanges())
     {
       auto *originalStartContainer = range->StartContainer();
@@ -184,12 +186,12 @@ namespace Krys::HTML
 
       if (originalStartContainer == newParent && originalStartOffset > childIndex)
       {
-        range->SetStart(*newParent, originalStartOffset + nodesInserted);
+        range->_start.Offset += nodesInserted;
       }
 
       if (originalEndContainer == newParent && originalEndOffset > childIndex)
       {
-        range->SetEnd(*newParent, originalEndOffset + nodesInserted);
+        range->_end.Offset += nodesInserted;
       }
     }
   }
@@ -208,22 +210,22 @@ namespace Krys::HTML
 
       if (originalStartContainer == &original && originalStartOffset > offset)
       {
-        range->SetStart(newNode, originalStartOffset - offset);
+        range->_start = BoundaryPoint {ShareRef(newNode), originalStartOffset - offset};
       }
 
       if (originalEndContainer == &original && originalEndOffset > offset)
       {
-        range->SetEnd(newNode, originalEndOffset - offset);
+        range->_end = BoundaryPoint {ShareRef(newNode), originalEndOffset - offset};
       }
 
       if (originalStartContainer == original.ParentNode() && originalStartOffset == index + 1uz)
       {
-        range->SetStart(*original.ParentNode(), originalStartOffset + 1uz);
+        range->_start.Offset += 1;
       }
 
       if (originalEndContainer == original.ParentNode() && originalEndOffset == index + 1uz)
       {
-        range->SetEnd(*original.ParentNode(), originalEndOffset + 1uz);
+        range->_end.Offset += 1;
       }
     }
   }
