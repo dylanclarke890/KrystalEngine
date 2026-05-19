@@ -74,21 +74,16 @@ namespace Krys::HTML
     KRYS_NODISCARD ExceptionOr<void> SetEndBoundaryPoint(Node &node, uint64 offset) noexcept;
 
     KRYS_NODISCARD bool IsContained(Node &node) const noexcept;
+    KRYS_NODISCARD bool IsPartiallyContained(const Node &node) const noexcept;
+
+    KRYS_NODISCARD RawPtr<Node> FirstPartiallyContainedChild(Node &commonAncestor, Node &startContainer,
+                                                             Node &endContainer) const noexcept;
+    KRYS_NODISCARD RawPtr<Node> LastPartiallyContainedChild(Node &commonAncestor, Node &startContainer,
+                                                            Node &endContainer) const noexcept;
+    KRYS_NODISCARD ExceptionOr<SmallNodeList> GetContainedChildren(RawPtr<Node> commonAncestor) const noexcept;
 
     KRYS_NODISCARD ExceptionOr<void>
       CloneCharacterDataContents(DocumentFragment &fragment, Node &container, size_t offset, size_t length,
                                  DeleteClonedContent deleteClonedContent) const noexcept;
-
-    KRYS_NODISCARD bool IsPartiallyContained(const Node &node) const noexcept;
-    KRYS_NODISCARD RawPtr<Node> GetFirstPartiallyContainedChild(RawPtr<Node> commonAncestor) const noexcept;
-    KRYS_NODISCARD RawPtr<Node> GetLastPartiallyContainedChild(RawPtr<Node> commonAncestor) const noexcept;
-    KRYS_NODISCARD List<Ref<Node>> GetContainedChildren(RawPtr<Node> commonAncestor) const noexcept;
-
-    ExceptionOr<void>
-      CloneFirstPartiallyContainedChildContents(RawPtr<Node> child, DocumentFragment &fragment,
-                                                DeleteClonedContent deleteClonedContent) const noexcept;
-    ExceptionOr<void>
-      CloneLastPartiallyContainedChildContents(RawPtr<Node> child, DocumentFragment &fragment,
-                                               DeleteClonedContent deleteClonedContent) const noexcept;
   };
 }

@@ -3,8 +3,10 @@
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
+#include "Krystal.HTML/Node/Comment.hpp"
 #include "Krystal.HTML/Node/HTMLDocument.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
+#include "Krystal.HTML/Node/ProcessingInstruction.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include <catch_all.hpp>
 
@@ -919,45 +921,333 @@ namespace Krys::Tests
       REQUIRE(data.Range->EndOffset() == 7uz);
     }
 
-    // TODO(impl):
-    // SECTION("Deletes the content between the start and end boundary points")
-    //{
-    //  auto child1 = CreateRef<TestContainerNode>(*data.Document);
-    //  auto child2 = CreateRef<TestContainerNode>(*data.Document);
-    //  auto child3 = CreateRef<TestContainerNode>(*data.Document);
+    SECTION("Deletes the content between the start and end boundary points")
+    {
+      auto child1 = CreateRef<TestContainerNode>(*data.Document);
+      auto child2 = CreateRef<TestContainerNode>(*data.Document);
+      auto child3 = CreateRef<TestContainerNode>(*data.Document);
 
-    // REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
-    // REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());
-    // REQUIRE_FALSE(data.Node->AppendChild(*child3).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*child3).HasException());
 
-    // REQUIRE_FALSE(data.Range->SetStart(*data.Node, 0uz).HasException());
-    // REQUIRE_FALSE(data.Range->SetStart(*data.Node, 2uz).HasException());
+      REQUIRE_FALSE(data.Range->SetStart(*data.Node, 0uz).HasException());
+      REQUIRE_FALSE(data.Range->SetEnd(*data.Node, 2uz).HasException());
 
-    // REQUIRE_FALSE(data.Range->DeleteContents().HasException());
+      REQUIRE_FALSE(data.Range->DeleteContents().HasException());
 
-    // REQUIRE(data.Node->ChildNodes()->Length() == 2uz);
-    // REQUIRE(data.Range->StartContainer() == data.Node);
-    // REQUIRE(data.Range->StartOffset() == 0uz);
-    // REQUIRE(data.Range->EndContainer() == data.Node);
-    // REQUIRE(data.Range->EndOffset() == 0uz);
+      REQUIRE(data.Node->ChildNodes()->Length() == 1uz);
+      REQUIRE(data.Range->StartContainer() == data.Node);
+      REQUIRE(data.Range->StartOffset() == 0uz);
+      REQUIRE(data.Range->EndContainer() == data.Node);
+      REQUIRE(data.Range->EndOffset() == 0uz);
 
-    // REQUIRE_FALSE(data.Node->RemoveChild(*child1).HasException());
-    // REQUIRE_FALSE(data.Node->RemoveChild(*child2).HasException());
-    // REQUIRE_FALSE(data.Node->RemoveChild(*child3).HasException());
-    // }
+      REQUIRE_FALSE(data.Node->RemoveChild(*child3).HasException());
+    }
   }
 
-  // TODO(impl):
-  // TEST_CASE("Range::ExtractContents", "[HMTL][Range]")
+  TEST_CASE("Range::ExtractContents", "[HMTL][Range]")
+  {
+    CommonTestData data;
 
-  // TODO(impl):
-  // TEST_CASE("Range::CloneContents", "[HMTL][Range]")
+    SECTION("Collapsed range returns an empty document fragment")
+    {
+      auto result = data.Range->ExtractContents();
+      REQUIRE_FALSE(result.HasException());
 
-  // TODO(impl):
-  // TEST_CASE("Range::InsertNode", "[HMTL][Range]")
+      auto &fragment = result.Value();
+      REQUIRE(fragment->ChildNodes()->Length() == 0uz);
+    }
 
-  // TODO(impl):
-  // TEST_CASE("Range::SurroundContents", "[HMTL][Range]")
+    SECTION("When start and end container are the same and it is a CharacterData node, extracts the content "
+            "from start to end offset into a document fragment")
+    {
+      auto textNode = data.Document->CreateTextNode(u8"Hello, world!");
+
+      REQUIRE_FALSE(data.Range->SetStart(*textNode, 7uz).HasException());
+      REQUIRE_FALSE(data.Range->SetEnd(*textNode, 12uz).HasException());
+
+      auto result = data.Range->ExtractContents();
+      REQUIRE_FALSE(result.HasException());
+
+      auto &fragment = result.Value();
+      REQUIRE(fragment->ChildNodes()->Length() == 1uz);
+
+      auto extractedTextNode = fragment->ChildNodes()->Item(0uz);
+      REQUIRE(extractedTextNode);
+      REQUIRE(extractedTextNode->NodeType() == NodeType::TEXT_NODE);
+
+      REQUIRE(Downcast<HTML::Text>(extractedTextNode)->Data() == u8"world");
+      REQUIRE(textNode->Data() == u8"Hello, !");
+
+      REQUIRE(data.Range->StartContainer() == textNode);
+      REQUIRE(data.Range->StartOffset() == 7uz);
+      REQUIRE(data.Range->EndContainer() == textNode);
+      REQUIRE(data.Range->EndOffset() == 7uz);
+    }
+
+    SECTION("Extracts the content between the start and end boundary points into a document fragment")
+    {
+      auto child1 = CreateRef<TestContainerNode>(*data.Document);
+      auto child2 = CreateRef<TestContainerNode>(*data.Document);
+      auto child3 = CreateRef<TestContainerNode>(*data.Document);
+
+      REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*child3).HasException());
+
+      REQUIRE_FALSE(data.Range->SetStart(*data.Node, 0uz).HasException());
+      REQUIRE_FALSE(data.Range->SetEnd(*data.Node, 2uz).HasException());
+
+      auto result = data.Range->ExtractContents();
+      REQUIRE_FALSE(result.HasException());
+
+      auto &fragment = result.Value();
+      REQUIRE(fragment->ChildNodes()->Length() == 2uz);
+
+      auto extractedChild1 = fragment->ChildNodes()->Item(0uz);
+      REQUIRE(extractedChild1);
+      REQUIRE(extractedChild1 == child1);
+
+      auto extractedChild2 = fragment->ChildNodes()->Item(1uz);
+      REQUIRE(extractedChild2);
+      REQUIRE(extractedChild2 == child2);
+      REQUIRE(data.Node->ChildNodes()->Length() == 1uz);
+      REQUIRE(data.Node->ChildNodes()->Item(0uz) == child3);
+      REQUIRE(data.Range->StartContainer() == data.Node);
+      REQUIRE(data.Range->StartOffset() == 0uz);
+      REQUIRE(data.Range->EndContainer() == data.Node);
+      REQUIRE(data.Range->EndOffset() == 0uz);
+
+      REQUIRE_FALSE(data.Node->RemoveChild(*child3).HasException());
+    }
+  }
+
+  TEST_CASE("Range::CloneContents", "[HMTL][Range]")
+  {
+    CommonTestData data;
+
+    SECTION("Collapsed range returns an empty document fragment")
+    {
+      auto result = data.Range->CloneContents();
+      REQUIRE_FALSE(result.HasException());
+
+      auto &fragment = result.Value();
+      REQUIRE(fragment->ChildNodes()->Length() == 0uz);
+    }
+
+    SECTION("When start and end container are the same and it is a CharacterData node, clones the content "
+            "from start to end offset into a text node appended to a document fragment")
+    {
+      auto textNode = data.Document->CreateTextNode(u8"Hello, world!");
+
+      REQUIRE_FALSE(data.Range->SetStart(*textNode, 7uz).HasException());
+      REQUIRE_FALSE(data.Range->SetEnd(*textNode, 12uz).HasException());
+
+      auto result = data.Range->CloneContents();
+      REQUIRE_FALSE(result.HasException());
+
+      auto &fragment = result.Value();
+      REQUIRE(fragment->ChildNodes()->Length() == 1uz);
+
+      auto extractedTextNode = fragment->ChildNodes()->Item(0uz);
+      REQUIRE(extractedTextNode);
+      REQUIRE(extractedTextNode->NodeType() == NodeType::TEXT_NODE);
+
+      REQUIRE(Downcast<HTML::Text>(extractedTextNode)->Data() == u8"world");
+      REQUIRE(textNode->Data() == u8"Hello, world!");
+
+      REQUIRE(data.Range->StartContainer() == textNode);
+      REQUIRE(data.Range->StartOffset() == 7uz);
+      REQUIRE(data.Range->EndContainer() == textNode);
+      REQUIRE(data.Range->EndOffset() == 12uz);
+    }
+
+    SECTION("Clones the content between the start and end boundary points into a document fragment")
+    {
+      auto child1 = CreateRef<TestContainerNode>(*data.Document);
+      auto child2 = CreateRef<TestContainerNode>(*data.Document);
+      auto child3 = CreateRef<TestContainerNode>(*data.Document);
+
+      REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*child3).HasException());
+
+      REQUIRE_FALSE(data.Range->SetStart(*data.Node, 0uz).HasException());
+      REQUIRE_FALSE(data.Range->SetEnd(*data.Node, 2uz).HasException());
+
+      auto result = data.Range->CloneContents();
+      REQUIRE_FALSE(result.HasException());
+
+      auto &fragment = result.Value();
+      REQUIRE(fragment->ChildNodes()->Length() == 2uz);
+
+      REQUIRE(data.Node->ChildNodes()->Length() == 3uz);
+      REQUIRE(data.Node->ChildNodes()->Item(0uz) == child1);
+      REQUIRE(data.Node->ChildNodes()->Item(1uz) == child2);
+      REQUIRE(data.Node->ChildNodes()->Item(2uz) == child3);
+      REQUIRE(data.Range->StartContainer() == data.Node);
+      REQUIRE(data.Range->StartOffset() == 0uz);
+      REQUIRE(data.Range->EndContainer() == data.Node);
+      REQUIRE(data.Range->EndOffset() == 2uz);
+
+      REQUIRE_FALSE(data.Node->RemoveChild(*child1).HasException());
+      REQUIRE_FALSE(data.Node->RemoveChild(*child2).HasException());
+      REQUIRE_FALSE(data.Node->RemoveChild(*child3).HasException());
+    }
+  }
+
+  TEST_CASE("Range::InsertNode", "[HMTL][Range]")
+  {
+    CommonTestData data;
+    auto newNode = CreateRef<TestContainerNode>(*data.Document);
+
+    SECTION("HierarchyRequestError if start container is a ProcessingInstruction node")
+    {
+      auto node = CreateRef<ProcessingInstruction>(*data.Document, u8"target", u8"data");
+      REQUIRE_FALSE(data.Range->SetStart(*node, 0uz).HasException());
+      REQUIRE(data.Range->InsertNode(*node) == ExceptionCode::HierarchyRequestError);
+    }
+
+    SECTION("HierarchyRequestError if start container is a Comment node")
+    {
+      auto node = CreateRef<Comment>(*data.Document, u8"data");
+      REQUIRE_FALSE(data.Range->SetStart(*node, 0uz).HasException());
+      REQUIRE(data.Range->InsertNode(*node) == ExceptionCode::HierarchyRequestError);
+    }
+
+    SECTION("HierarchyRequestError if start container is a Text node with a null parent")
+    {
+      auto node = CreateRef<HTML::Text>(*data.Document, u8"data");
+      REQUIRE_FALSE(data.Range->SetStart(*node, 0uz).HasException());
+      REQUIRE(data.Range->InsertNode(*node) == ExceptionCode::HierarchyRequestError);
+    }
+
+    SECTION("HierarchyRequestError if newNode is the start container")
+    {
+      REQUIRE_FALSE(data.Range->SetStart(*newNode, 0uz).HasException());
+      REQUIRE(data.Range->InsertNode(*newNode) == ExceptionCode::HierarchyRequestError);
+    }
+
+    SECTION("Inserts the node at the start boundary point")
+    {
+      REQUIRE_FALSE(data.Node->AppendChild(*newNode).HasException());
+      REQUIRE_FALSE(data.Range->SetStart(*data.Node, 0uz).HasException());
+
+      REQUIRE_FALSE(data.Range->InsertNode(*newNode).HasException());
+
+      REQUIRE(data.Node->ChildNodes()->Length() == 1uz);
+      REQUIRE(data.Node->ChildNodes()->Item(0uz) == newNode);
+      REQUIRE(data.Range->StartContainer() == data.Node);
+      REQUIRE(data.Range->StartOffset() == 0uz);
+      REQUIRE(data.Range->EndContainer() == data.Node);
+      REQUIRE(data.Range->EndOffset() == 1uz);
+      REQUIRE_FALSE(data.Node->RemoveChild(*newNode).HasException());
+    }
+  }
+
+  TEST_CASE("Range::SurroundContents", "[HMTL][Range]")
+  {
+    CommonTestData data;
+    auto newNode = CreateRef<TestContainerNode>(*data.Document);
+
+    SECTION("InvalidStateError if range partially contains a non-Text node")
+    {
+      auto comment = CreateRef<Comment>(*data.Document, u8"Hello, world!");
+      auto otherChild = CreateRef<TestContainerNode>(*data.Document);
+
+      REQUIRE_FALSE(data.Node->AppendChild(*comment).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*otherChild).HasException());
+
+      REQUIRE_FALSE(data.Range->SetStart(*comment, 0uz).HasException());
+      REQUIRE_FALSE(data.Range->SetEnd(*otherChild, 0uz).HasException());
+
+      REQUIRE(data.Range->SurroundContents(*newNode) == ExceptionCode::InvalidStateError);
+
+      REQUIRE_FALSE(data.Node->RemoveChild(*comment).HasException());
+      REQUIRE_FALSE(data.Node->RemoveChild(*otherChild).HasException());
+    }
+
+    SECTION("InvalidNodeTypeError if newParent is a Document node")
+    {
+      auto document = CreateRef<HTMLDocument>();
+      REQUIRE(data.Range->SurroundContents(*document) == ExceptionCode::InvalidNodeTypeError);
+    }
+
+    SECTION("InvalidNodeTypeError if newParent is a DocumentFragment node")
+    {
+      auto fragment = CreateRef<DocumentFragment>(*data.Document);
+      REQUIRE(data.Range->SurroundContents(*fragment) == ExceptionCode::InvalidNodeTypeError);
+    }
+
+    SECTION("Surrounds the contents of the range with the given node")
+    {
+      auto child1 = CreateRef<TestContainerNode>(*data.Document);
+      auto child2 = CreateRef<TestContainerNode>(*data.Document);
+
+      REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());
+
+      REQUIRE_FALSE(data.Range->SetStart(*data.Node, 0uz).HasException());
+      REQUIRE_FALSE(data.Range->SetEnd(*data.Node, 2uz).HasException());
+
+      REQUIRE_FALSE(data.Range->SurroundContents(*newNode).HasException());
+
+      REQUIRE(data.Node->ChildNodes()->Length() == 1uz);
+      REQUIRE(data.Node->ChildNodes()->Item(0uz) == newNode);
+
+      REQUIRE(newNode->ChildNodes()->Length() == 2uz);
+      REQUIRE(newNode->ChildNodes()->Item(0uz) == child1);
+      REQUIRE(newNode->ChildNodes()->Item(1uz) == child2);
+
+      REQUIRE(data.Range->StartContainer() == data.Node);
+      REQUIRE(data.Range->StartOffset() == 0uz);
+
+      REQUIRE(data.Range->EndContainer() == data.Node);
+      REQUIRE(data.Range->EndOffset() == 1uz);
+
+      REQUIRE_FALSE(data.Node->RemoveChild(*newNode).HasException());
+      REQUIRE_FALSE(newNode->RemoveChild(*child1).HasException());
+      REQUIRE_FALSE(newNode->RemoveChild(*child2).HasException());
+    }
+
+    SECTION("newParent's children are replaced with the contents of the range")
+    {
+      auto child1 = CreateRef<TestContainerNode>(*data.Document);
+      auto child2 = CreateRef<TestContainerNode>(*data.Document);
+
+      REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
+      REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());
+
+      REQUIRE_FALSE(data.Range->SetStart(*data.Node, 0uz).HasException());
+      REQUIRE_FALSE(data.Range->SetEnd(*data.Node, 2uz).HasException());
+
+      auto newNodeChild1 = CreateRef<TestContainerNode>(*data.Document);
+      auto newNodeChild2 = CreateRef<TestContainerNode>(*data.Document);
+
+      REQUIRE_FALSE(newNode->AppendChild(*newNodeChild1).HasException());
+      REQUIRE_FALSE(newNode->AppendChild(*newNodeChild2).HasException());
+
+      REQUIRE_FALSE(data.Range->SurroundContents(*newNode).HasException());
+
+      REQUIRE(data.Node->ChildNodes()->Length() == 1uz);
+      REQUIRE(data.Node->ChildNodes()->Item(0uz) == newNode);
+
+      REQUIRE(newNode->ChildNodes()->Length() == 2uz);
+      REQUIRE(newNode->ChildNodes()->Item(0uz) == child1);
+      REQUIRE(newNode->ChildNodes()->Item(1uz) == child2);
+
+      REQUIRE(data.Range->StartContainer() == data.Node);
+      REQUIRE(data.Range->StartOffset() == 0uz);
+
+      REQUIRE(data.Range->EndContainer() == data.Node);
+      REQUIRE(data.Range->EndOffset() == 1uz);
+
+      REQUIRE_FALSE(data.Node->RemoveChild(*newNode).HasException());
+      REQUIRE_FALSE(newNode->RemoveChild(*child1).HasException());
+      REQUIRE_FALSE(newNode->RemoveChild(*child2).HasException());
+    }
+  }
 
   TEST_CASE("Range::CloneRange", "[HMTL][Range]")
   {
@@ -1191,7 +1481,7 @@ namespace Krys::Tests
   TEST_CASE("Range::ToString", "[HMTL][Range]")
   {
     CommonTestData data;
-    
+
     SECTION("When start and end container are the same and it is not a Text node, returns an empty string")
     {
       auto element = data.Document->CreateElement(u8"div");

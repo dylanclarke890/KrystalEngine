@@ -299,5 +299,21 @@ namespace Krys::HTML
       assert(!std::exchange(_wasReleased, true));
       return Krys::Move(_value.error());
     }
+
+    KRYS_NODISCARD constexpr bool operator==(const Exception &exception) const noexcept
+    {
+      return HasException() && GetException().Code() == exception.Code()
+             && GetException().Message() == exception.Message();
+    }
+
+    KRYS_NODISCARD constexpr bool operator!=(const Exception &exception) const noexcept
+    {
+      return !(*this == exception);
+    }
+
+    KRYS_NODISCARD constexpr bool operator==(ExceptionCode code) const noexcept
+    {
+      return HasException() && GetException().Code() == code;
+    }
   };
 }

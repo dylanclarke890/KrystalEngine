@@ -472,20 +472,15 @@ namespace Krys::HTML
 
   RawPtr<ContainerNode> TreeQueries::CommonAncestorContainer(Node &a, Node &b) noexcept
   {
-    if (!HasSameRoot(a, b))
+    auto *commonAncestor = &a;
+    while (commonAncestor != nullptr)
     {
-      return nullptr;
-    }
-
-    auto *container = &a;
-    while (container)
-    {
-      if (IsInclusiveAncestor(*container, b))
+      if (IsInclusiveAncestor(*commonAncestor, b))
       {
-        return Downcast<ContainerNode>(container);
+        return Downcast<ContainerNode>(commonAncestor);
       }
 
-      container = container->ParentNode();
+      commonAncestor = commonAncestor->ParentNode();
     }
 
     return nullptr;

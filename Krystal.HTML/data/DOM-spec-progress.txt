@@ -154,6 +154,7 @@ Source: https://dom.spec.whatwg.org
         - Implementation: CharacterSet - Document needs the encoding used passed to it on creation.
         - Implementation: ContentType - Document needs this passed to it on creation.
         - Implementation: ElementFactory::CreateElement needs it's implementation finishing.
+        - Implementation: CustomElementRegistry needs checking.
 
 
 4.5.1 Interface DOMImplementation
@@ -186,14 +187,6 @@ Source: https://dom.spec.whatwg.org
     Implementation: Full
     Test Coverage : Partial
         - Only missing test cases for queued mutation records.
-
-======================================================================
-5. RANGES
-======================================================================
-
-5.5 Interface Range
-    Implementation: Full
-    Test Coverage : None
 
 ======================================================================
 ======================================================================
@@ -284,6 +277,8 @@ Source: https://dom.spec.whatwg.org
 5.3 Interface AbstractRange
 
 5.4 Interface StaticRange
+
+5.5 Interface Range
 
 ======================================================================
 6. TRAVERSAL

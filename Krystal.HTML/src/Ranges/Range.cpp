@@ -2,6 +2,7 @@
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
@@ -15,6 +16,7 @@
 #include "Krystal.HTML/Node/ProcessingInstruction.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
+#include "Krystal.HTML/Utils/SubtreeRanges.hpp"
 
 namespace Krys::HTML
 {
@@ -30,6 +32,11 @@ namespace Krys::HTML
 
   RawPtr<Node> Range::CommonAncestorContainer() const noexcept
   {
+    if (!TreeQueries::HasSameRoot(*_start.Container, *_end.Container))
+    {
+      return nullptr;
+    }
+
     return TreeQueries::CommonAncestorContainer(*_start.Container, *_end.Container);
   }
 
@@ -186,11 +193,17 @@ namespace Krys::HTML
       return {};
     }
 
-    if (_start.Container.get() == _end.Container.get())
+    auto originalStartNode = _start.Container.get();
+    auto originalStartOffset = _start.Offset;
+    auto originalEndNode = _end.Container.get();
+    auto originalEndOffset = _end.Offset;
+
+    if (originalStartNode == originalEndNode)
     {
-      if (auto *characterData = DynamicDowncast<CharacterData>(_start.Container.get()))
+      if (auto *characterData = DynamicDowncast<CharacterData>(originalStartNode))
       {
-        auto deleteData = characterData->DeleteData(_start.Offset, _end.Offset - _start.Offset);
+        auto deleteData =
+          characterData->DeleteData(originalStartOffset, originalEndOffset - originalStartOffset);
         if (deleteData.HasException())
         {
           return deleteData.ReleaseException();
@@ -199,47 +212,51 @@ namespace Krys::HTML
       }
     }
 
-    List<Ref<Node>> nodesToRemove;
-    auto *root = CommonAncestorContainer();
-    for (auto *node = TreeTraversal::Next(*_start.Container, root); node;
-         node = TreeTraversal::Next(*node, root))
+    SmallNodeList nodesToRemove;
+
+    RawPtr<Node> root = CommonAncestorContainer();
+    RawPtr<Node> current = root->FirstChild();
+    while (current != nullptr)
     {
-      if (IsPointInRange(*node, 0) == true)
+      if (IsContained(*current))
       {
-        break;
+        nodesToRemove.emplace_back(ShareRef(*current));
+        current = TreeTraversal::NextSkippingChildren(*current, root);
       }
-
-      nodesToRemove.emplace_back(ShareRef(*node));
-
-      // skip descendants
-      node = TreeTraversal::NextSkippingChildren(*node, root);
+      else
+      {
+        current = TreeTraversal::Next(*current, root);
+      }
     }
 
-    RefPtr<Node> newNode;
+    RawPtr<Node> newNode = nullptr;
     size_t newOffset = 0uz;
 
-    if (TreeQueries::IsInclusiveAncestor(*_start.Container, *_end.Container))
+    if (TreeQueries::IsInclusiveAncestor(*originalStartNode, *originalEndNode))
     {
-      newNode = _start.Container;
-      newOffset = _start.Offset;
+      newNode = originalStartNode;
+      newOffset = originalStartOffset;
     }
     else
     {
-      RawPtr<Node> refNode = _start.Container.get();
-      while (refNode->ParentNode() && !TreeQueries::IsInclusiveAncestor(*refNode, *_end.Container))
+      RawPtr<Node> refNode = originalStartNode;
+      while (refNode->ParentNode() && !TreeQueries::IsInclusiveAncestor(*refNode, *originalEndNode))
       {
         refNode = refNode->ParentNode();
       }
 
-      newNode = ShareRefPtr(refNode->ParentNode());
+      newNode = refNode->ParentNode();
       newOffset = TreeQueries::Index(*refNode) + 1uz;
     }
 
-    if (Is<CharacterData>(_start.Container))
+    assert(newNode != nullptr);
+    _start = BoundaryPoint {ShareRef(*newNode), newOffset};
+    _end = _start;
+
+    if (auto *characterData = DynamicDowncast<CharacterData>(originalStartNode))
     {
-      RawPtr<CharacterData> characterData = Downcast<CharacterData>(_start.Container.get());
       auto length = TreeQueries::Length(*characterData);
-      auto offset = _start.Offset;
+      auto offset = originalStartOffset;
 
       if (auto deleteData = characterData->DeleteData(offset, length - offset); deleteData.HasException())
       {
@@ -249,7 +266,7 @@ namespace Krys::HTML
 
     for (auto &node : nodesToRemove)
     {
-      if (auto parent = ShareRefPtr(node->ParentNode()))
+      if (auto parent = node->ParentNode())
       {
         if (auto remove = parent->RemoveChild(*node); remove.HasException())
         {
@@ -258,94 +275,172 @@ namespace Krys::HTML
       }
     }
 
-    if (Is<CharacterData>(_end.Container))
+    if (auto *characterData = DynamicDowncast<CharacterData>(originalEndNode))
     {
-      auto *characterData = Downcast<CharacterData>(_end.Container.get());
-      if (auto deleteData = characterData->DeleteData(0uz, _end.Offset); deleteData.HasException())
+      if (auto deleteData = characterData->DeleteData(0uz, originalEndOffset); deleteData.HasException())
       {
         return deleteData.ReleaseException();
       }
     }
-
-    _start = BoundaryPoint {Krys::Move(newNode), newOffset};
-    _end = _start;
 
     return {};
   }
 
   ExceptionOr<Ref<DocumentFragment>> Range::ExtractContents() noexcept
   {
-    auto fragment = CreateRef<DocumentFragment>(*_start.Container->OwnerDocument());
+    auto fragment = CreateRef<DocumentFragment>(_start.Container->NodeDocument());
+
     if (IsCollapsed())
     {
       return fragment;
     }
 
-    if (_start.Container.get() == _end.Container.get() && Is<CharacterData>(_start.Container))
+    auto *originalStartNode = _start.Container.get();
+    auto originalStartOffset = _start.Offset;
+    auto *originalEndNode = _end.Container.get();
+    auto originalEndOffset = _end.Offset;
+
+    if (originalStartNode == originalEndNode)
     {
-      auto cloneResult = CloneCharacterDataContents(*fragment, *_start.Container, _start.Offset,
-                                                    _end.Offset - _start.Offset, DeleteClonedContent(true));
+      if (auto *characterData = DynamicDowncast<CharacterData>(originalStartNode))
+      {
+        auto cloneResult =
+          CloneCharacterDataContents(*fragment, *originalStartNode, originalStartOffset,
+                                     originalEndOffset - originalStartOffset, DeleteClonedContent(true));
+
+        if (cloneResult.HasException())
+        {
+          return cloneResult.ReleaseException();
+        }
+
+        return fragment;
+      }
+    }
+
+    auto *commonAncestor = TreeQueries::CommonAncestorContainer(*originalStartNode, *originalEndNode);
+
+    auto *firstPartiallyContainedChild =
+      FirstPartiallyContainedChild(*commonAncestor, *originalStartNode, *originalEndNode);
+    auto *lastPartiallyContainedChild =
+      LastPartiallyContainedChild(*commonAncestor, *originalStartNode, *originalEndNode);
+
+    auto containedChildrenResult = GetContainedChildren(commonAncestor);
+    if (containedChildrenResult.HasException())
+    {
+      return containedChildrenResult.ReleaseException();
+    }
+    SmallNodeList containedChildren = containedChildrenResult.ReleaseValue();
+
+    RawPtr<Node> newNode = nullptr;
+    size_t newOffset = 0uz;
+
+    if (TreeQueries::IsInclusiveAncestor(*originalStartNode, *originalEndNode))
+    {
+      newNode = originalStartNode;
+      newOffset = originalStartOffset;
+    }
+    else
+    {
+      RawPtr<Node> referenceNode = originalStartNode;
+      while (referenceNode->ParentNode() != nullptr
+             && !TreeQueries::IsInclusiveAncestor(*referenceNode, *originalEndNode))
+      {
+        referenceNode = referenceNode->ParentNode();
+      }
+      newNode = referenceNode->ParentNode();
+      newOffset = TreeQueries::Index(*referenceNode) + 1uz;
+    }
+
+    assert(newNode != nullptr);
+    _start = BoundaryPoint {ShareRef(*newNode), newOffset};
+    _end = _start;
+
+    if (Is<CharacterData>(firstPartiallyContainedChild))
+    {
+      auto length = TreeQueries::Length(*originalStartNode) - originalStartOffset;
+      auto cloneResult = CloneCharacterDataContents(*fragment, *originalStartNode, originalStartOffset,
+                                                    length, DeleteClonedContent(true));
+      if (cloneResult.HasException())
+      {
+        return cloneResult.ReleaseException();
+      }
+    }
+    else if (firstPartiallyContainedChild != nullptr)
+    {
+      auto cloneResult = NodeAlgorithms::CloneNode(*firstPartiallyContainedChild);
       if (cloneResult.HasException())
       {
         return cloneResult.ReleaseException();
       }
 
-      return fragment;
-    }
-
-    RawPtr<Node> commonAncestor = CommonAncestorContainer();
-    RawPtr<Node> firstPartiallyContainedChild = GetFirstPartiallyContainedChild(commonAncestor);
-    RawPtr<Node> lastPartiallyContainedChild = GetLastPartiallyContainedChild(commonAncestor);
-
-    List<Ref<Node>> containedChildren = GetContainedChildren(commonAncestor);
-    for (auto &contained : containedChildren)
-    {
-      if (Is<DocumentType>(contained))
+      if (auto appendResult = fragment->AppendChild(*cloneResult.Value()); appendResult.HasException())
       {
-        return Exception(ExceptionCode::HierarchyRequestError);
-      }
-    }
-
-    RefPtr<Node> newNode;
-    size_t newOffset = 0uz;
-    if (TreeQueries::IsInclusiveAncestor(*_start.Container, *_end.Container))
-    {
-      newNode = _start.Container;
-      newOffset = _start.Offset;
-    }
-    else
-    {
-      RawPtr<Node> refNode = _start.Container.get();
-      while (refNode->ParentNode() && !TreeQueries::IsInclusiveAncestor(*refNode, *_end.Container))
-      {
-        refNode = refNode->ParentNode();
+        return appendResult.ReleaseException();
       }
 
-      newNode = ShareRefPtr(refNode->ParentNode());
-      newOffset = TreeQueries::Index(*refNode) + 1uz;
-    }
+      auto subrange = Range {BoundaryPoint {ShareRef(*originalStartNode), originalStartOffset},
+                             BoundaryPoint {ShareRef(*firstPartiallyContainedChild),
+                                            TreeQueries::Length(*firstPartiallyContainedChild)}};
 
-    auto cloneResult = CloneFirstPartiallyContainedChildContents(firstPartiallyContainedChild, *fragment,
-                                                                 DeleteClonedContent(true));
-    if (cloneResult.HasException())
-    {
-      return cloneResult.ReleaseException();
+      auto subFragment = subrange.ExtractContents();
+      if (subFragment.HasException())
+      {
+        return subFragment.ReleaseException();
+      }
+
+      if (auto appendSubFragmentResult = cloneResult.Value()->AppendChild(*subFragment.Value());
+          appendSubFragmentResult.HasException())
+      {
+        return appendSubFragmentResult.ReleaseException();
+      }
     }
 
     for (auto &contained : containedChildren)
     {
-      fragment->AppendChild(*contained);
+      auto appendResult = fragment->AppendChild(*contained);
+      if (appendResult.HasException())
+      {
+        return appendResult.ReleaseException();
+      }
     }
 
-    cloneResult = CloneLastPartiallyContainedChildContents(lastPartiallyContainedChild, *fragment,
-                                                           DeleteClonedContent(true));
-    if (cloneResult.HasException())
+    if (Is<CharacterData>(lastPartiallyContainedChild))
     {
-      return cloneResult.ReleaseException();
+      auto cloneResult = CloneCharacterDataContents(*fragment, *originalEndNode, 0uz, originalEndOffset,
+                                                    DeleteClonedContent(true));
+      if (cloneResult.HasException())
+      {
+        return cloneResult.ReleaseException();
+      }
     }
+    else if (lastPartiallyContainedChild != nullptr)
+    {
+      auto cloneResult = NodeAlgorithms::CloneNode(*lastPartiallyContainedChild);
+      if (cloneResult.HasException())
+      {
+        return cloneResult.ReleaseException();
+      }
 
-    _start = BoundaryPoint {Krys::Move(newNode), newOffset};
-    _end = _start;
+      if (auto appendResult = fragment->AppendChild(*cloneResult.Value()); appendResult.HasException())
+      {
+        return appendResult.ReleaseException();
+      }
+
+      auto subrange = Range {BoundaryPoint {ShareRef(*lastPartiallyContainedChild), 0uz},
+                             BoundaryPoint {ShareRef(*originalEndNode), originalEndOffset}};
+
+      auto subFragment = subrange.ExtractContents();
+      if (subFragment.HasException())
+      {
+        return subFragment.ReleaseException();
+      }
+
+      if (auto appendSubFragmentResult = cloneResult.Value()->AppendChild(*subFragment.Value());
+          appendSubFragmentResult.HasException())
+      {
+        return appendSubFragmentResult.ReleaseException();
+      }
+    }
 
     return fragment;
   }
@@ -353,61 +448,134 @@ namespace Krys::HTML
   ExceptionOr<Ref<DocumentFragment>> Range::CloneContents() const noexcept
   {
     auto fragment = CreateRef<DocumentFragment>(_start.Container->NodeDocument());
+
     if (IsCollapsed())
     {
       return fragment;
     }
 
-    if (_start.Container.get() == _end.Container.get() && Is<CharacterData>(_start.Container))
+    auto *originalStartNode = _start.Container.get();
+    auto originalStartOffset = _start.Offset;
+    auto *originalEndNode = _end.Container.get();
+    auto originalEndOffset = _end.Offset;
+
+    if (originalStartNode == originalEndNode)
     {
-      auto cloneResult = CloneCharacterDataContents(*fragment, *_start.Container, _start.Offset,
-                                                    _end.Offset - _start.Offset, DeleteClonedContent(false));
-
-      if (cloneResult.HasException())
+      if (auto *characterData = DynamicDowncast<CharacterData>(originalStartNode))
       {
-        return cloneResult.ReleaseException();
-      }
+        auto clone =
+          CloneCharacterDataContents(*fragment, *originalStartNode, originalStartOffset,
+                                     originalEndOffset - originalStartOffset, DeleteClonedContent(false));
 
-      return fragment;
-    }
+        if (clone.HasException())
+        {
+          return clone.ReleaseException();
+        }
 
-    RawPtr<Node> commonAncestor = CommonAncestorContainer();
-    RawPtr<Node> firstPartiallyContainedChild = GetFirstPartiallyContainedChild(commonAncestor);
-    RawPtr<Node> lastPartiallyContainedChild = GetLastPartiallyContainedChild(commonAncestor);
-
-    List<Ref<Node>> containedChildren = GetContainedChildren(commonAncestor);
-    for (auto &contained : containedChildren)
-    {
-      if (Is<DocumentType>(contained))
-      {
-        return Exception(ExceptionCode::HierarchyRequestError);
+        return fragment;
       }
     }
 
-    auto cloneResult = CloneFirstPartiallyContainedChildContents(firstPartiallyContainedChild, *fragment,
-                                                                 DeleteClonedContent(false));
-    if (cloneResult.HasException())
+    auto *commonAncestor = TreeQueries::CommonAncestorContainer(*originalStartNode, *originalEndNode);
+    auto *firstPartiallyContainedChild =
+      FirstPartiallyContainedChild(*commonAncestor, *originalStartNode, *originalEndNode);
+    auto *lastPartiallyContainedChild =
+      LastPartiallyContainedChild(*commonAncestor, *originalStartNode, *originalEndNode);
+
+    auto containedChildren = GetContainedChildren(commonAncestor);
+    if (containedChildren.HasException())
     {
-      return cloneResult.ReleaseException();
+      return containedChildren.ReleaseException();
     }
 
-    for (auto &contained : containedChildren)
+    if (Is<CharacterData>(firstPartiallyContainedChild))
     {
-      auto containedCloneResult = contained->CloneNode(true);
-      if (containedCloneResult.HasException())
+      auto length = TreeQueries::Length(*originalStartNode) - originalStartOffset;
+      auto clone = CloneCharacterDataContents(*fragment, *originalStartNode, originalStartOffset, length,
+                                              DeleteClonedContent(false));
+      if (clone.HasException())
       {
-        return containedCloneResult.ReleaseException();
+        return clone.ReleaseException();
+      }
+    }
+    else if (firstPartiallyContainedChild != nullptr)
+    {
+      auto clone = NodeAlgorithms::CloneNode(*firstPartiallyContainedChild);
+      if (clone.HasException())
+      {
+        return clone.ReleaseException();
       }
 
-      Ref<Node> containedClone = containedCloneResult.ReleaseValue();
-      fragment->AppendChild(*containedClone);
+      if (auto append = fragment->AppendChild(*clone.Value()); append.HasException())
+      {
+        return append.ReleaseException();
+      }
+
+      auto subrange = Range {BoundaryPoint {ShareRef(*originalStartNode), originalStartOffset},
+                             BoundaryPoint {ShareRef(*firstPartiallyContainedChild),
+                                            TreeQueries::Length(*firstPartiallyContainedChild)}};
+
+      auto subFragment = subrange.CloneContents();
+      if (subFragment.HasException())
+      {
+        return subFragment.ReleaseException();
+      }
+
+      if (auto appendSubFragment = clone->AppendChild(*subFragment.Value()); appendSubFragment.HasException())
+      {
+        return appendSubFragment.ReleaseException();
+      }
     }
 
-    cloneResult = CloneLastPartiallyContainedChildContents(lastPartiallyContainedChild, *fragment,
-                                                           DeleteClonedContent(false));
-    if (cloneResult.HasException())
+    for (auto &contained : containedChildren.Value())
     {
-      return cloneResult.ReleaseException();
+      auto clone = NodeAlgorithms::CloneNode(*contained, nullptr, true);
+      if (clone.HasException())
+      {
+        return clone.ReleaseException();
+      }
+
+      if (auto append = fragment->AppendChild(*clone.Value()); append.HasException())
+      {
+        return append.ReleaseException();
+      }
+    }
+
+    if (Is<CharacterData>(lastPartiallyContainedChild))
+    {
+      auto clone = CloneCharacterDataContents(*fragment, *originalEndNode, 0uz, originalEndOffset,
+                                              DeleteClonedContent(false));
+      if (clone.HasException())
+      {
+        return clone.ReleaseException();
+      }
+    }
+    else if (lastPartiallyContainedChild != nullptr)
+    {
+      auto clone = NodeAlgorithms::CloneNode(*lastPartiallyContainedChild);
+      if (clone.HasException())
+      {
+        return clone.ReleaseException();
+      }
+
+      if (auto append = fragment->AppendChild(*clone.Value()); append.HasException())
+      {
+        return append.ReleaseException();
+      }
+
+      auto subrange = Range {BoundaryPoint {ShareRef(*lastPartiallyContainedChild), 0uz},
+                             BoundaryPoint {ShareRef(*originalEndNode), originalEndOffset}};
+
+      auto subFragment = subrange.CloneContents();
+      if (subFragment.HasException())
+      {
+        return subFragment.ReleaseException();
+      }
+
+      if (auto appendSubFragment = clone->AppendChild(*subFragment.Value()); appendSubFragment.HasException())
+      {
+        return appendSubFragment.ReleaseException();
+      }
     }
 
     return fragment;
@@ -415,32 +583,33 @@ namespace Krys::HTML
 
   ExceptionOr<void> Range::InsertNode(Node &node) noexcept
   {
-    if (Is<ProcessingInstruction>(_start.Container) || Is<Comment>(_start.Container)
-        || (Is<Text>(_start.Container) && !_start.Container->ParentNode()) || _start.Container.get() == &node)
+    if (Is<ProcessingInstruction>(_start.Container.get()) || Is<Comment>(_start.Container.get())
+        || (Is<Text>(_start.Container.get()) && _start.Container->ParentNode() == nullptr)
+        || _start.Container == &node)
     {
-      return Exception(ExceptionCode::HierarchyRequestError);
+      return ExceptionCode::HierarchyRequestError;
     }
 
-    RefPtr<Node> refNode;
-    if (Is<Text>(_start.Container))
+    RawPtr<Node> referenceNode;
+    if (Is<Text>(_start.Container.get()))
     {
-      refNode = _start.Container;
+      referenceNode = _start.Container.get();
     }
     else
     {
-      refNode = ShareRefPtr(TreeQueries::ChildAt(Downcast<ContainerNode>(*_start.Container), _start.Offset));
+      referenceNode = TreeQueries::ChildAt(Downcast<ContainerNode>(*_start.Container), _start.Offset);
     }
 
-    RefPtr<ContainerNode> parent =
-      refNode ? ShareRefPtr(refNode->ParentNode()) : RefPtr<ContainerNode>(_start.Container);
+    RawPtr<ContainerNode> parent = referenceNode == nullptr ? Downcast<ContainerNode>(_start.Container.get())
+                                                            : referenceNode->ParentNode();
 
-    if (auto preInsertValid = MutationAlgorithms::EnsurePreInsertValidity(node, *parent, refNode.get());
+    if (auto preInsertValid = MutationAlgorithms::EnsurePreInsertValidity(node, *parent, referenceNode);
         preInsertValid.HasException())
     {
       return preInsertValid.ReleaseException();
     }
 
-    if (Is<Text>(_start.Container))
+    if (Is<Text>(_start.Container.get()))
     {
       auto splitResult = Downcast<Text>(_start.Container.get())->SplitText(_start.Offset);
       if (splitResult.HasException())
@@ -448,23 +617,27 @@ namespace Krys::HTML
         return splitResult.ReleaseException();
       }
 
-      refNode = splitResult.Value();
+      referenceNode = splitResult.Value().get();
     }
 
-    if (&node == refNode.get())
+    if (&node == referenceNode)
     {
-      refNode = ShareRefPtr(node.NextSibling());
+      referenceNode = node.NextSibling();
     }
 
-    if (node.ParentNode())
+    if (node.ParentNode() != nullptr)
     {
-      node.ParentNode()->RemoveChild(node);
+      if (auto remove = node.ParentNode()->RemoveChild(node); remove.HasException())
+      {
+        return remove.ReleaseException();
+      }
     }
 
-    auto newOffset = refNode ? TreeQueries::Index(*refNode) : TreeQueries::Length(*parent);
+    auto newOffset =
+      referenceNode == nullptr ? TreeQueries::Length(*parent) : TreeQueries::Index(*referenceNode);
     newOffset += Is<DocumentFragment>(node) ? TreeQueries::Length(node) : 1uz;
 
-    if (auto preInsert = MutationAlgorithms::PreInsert(node, *parent, refNode.get());
+    if (auto preInsert = MutationAlgorithms::PreInsert(node, *parent, referenceNode);
         preInsert.HasException())
     {
       return preInsert.ReleaseException();
@@ -480,26 +653,25 @@ namespace Krys::HTML
 
   ExceptionOr<void> Range::SurroundContents(ContainerNode &newParent) noexcept
   {
-    // TODO(fix): REQUIRED - this is probably wrong.
-    auto *commonAncestor = CommonAncestorContainer();
-    auto *firstPartiallyContainedChild = GetFirstPartiallyContainedChild(commonAncestor);
-    auto *lastPartiallyContainedChild = GetLastPartiallyContainedChild(commonAncestor);
-
-    if ((firstPartiallyContainedChild && !Is<Text>(firstPartiallyContainedChild))
-        || (lastPartiallyContainedChild && !Is<Text>(lastPartiallyContainedChild)))
+    auto IsPartiallyContainedNonTextNode = [&](const Node &node)
     {
-      return Exception(ExceptionCode::InvalidStateError);
+      return !Is<Text>(node) && IsPartiallyContained(node);
+    };
+
+    if (std::ranges::any_of(ConstInclusiveAncestorRange(*_start.Container), IsPartiallyContainedNonTextNode))
+    {
+      return ExceptionCode::InvalidStateError;
     }
 
-    if (Is<Text>(_start.Container) && IsPartiallyContained(*_start.Container))
+    if (std::ranges::any_of(ConstInclusiveAncestorRange(*_end.Container), IsPartiallyContainedNonTextNode))
     {
-      return Exception(ExceptionCode::InvalidStateError);
+      return ExceptionCode::InvalidStateError;
     }
 
-    // Note: Is<DocumentType>(newParent) isn't needed here as a DocumentType can never be a ContainerNode.
+    // NOTE: Is<DocumentType>(newParent) isn't needed here as a DocumentType can never be a ContainerNode.
     if (Is<Document>(newParent) || Is<DocumentFragment>(newParent))
     {
-      return Exception(ExceptionCode::InvalidNodeTypeError);
+      return ExceptionCode::InvalidNodeTypeError;
     }
 
     auto fragment = ExtractContents();
@@ -508,30 +680,30 @@ namespace Krys::HTML
       return fragment.ReleaseException();
     }
 
-    while (auto *child = newParent.FirstChild())
+    if (newParent.HasChildNodes())
     {
-      auto result = MutationAlgorithms::Remove(*child, SuppressObservers(true));
-      if (result.HasException())
+      if (auto replaceAll = MutationAlgorithms::ReplaceAll(nullptr, newParent); replaceAll.HasException())
       {
-        return result.ReleaseException();
+        return replaceAll.ReleaseException();
       }
     }
 
-    auto surroundPreInsertValid =
-      MutationAlgorithms::EnsurePreInsertValidity(newParent, *fragment.Value(), newParent.FirstChild());
-    if (surroundPreInsertValid.HasException())
+    if (auto insert = InsertNode(newParent); insert.HasException())
     {
-      return surroundPreInsertValid.ReleaseException();
+      return insert.ReleaseException();
     }
 
-    auto surroundInsertResult =
-      MutationAlgorithms::Insert(*fragment.Value(), newParent, newParent.FirstChild());
-    if (surroundInsertResult.HasException())
+    if (auto append = MutationAlgorithms::Append(*fragment.Value(), newParent); append.HasException())
     {
-      return surroundInsertResult.ReleaseException();
+      return append.ReleaseException();
     }
 
-    return SelectNode(newParent);
+    if (auto select = SelectNode(newParent); select.HasException())
+    {
+      return select.ReleaseException();
+    }
+
+    return {};
   }
 
   Ref<Range> Range::CloneRange() const noexcept
@@ -742,19 +914,78 @@ namespace Krys::HTML
     return true;
   }
 
-  ExceptionOr<void> Range::CloneCharacterDataContents(DocumentFragment &fragment, Node &container,
-                                                      size_t offset, size_t length,
+  bool Range::IsPartiallyContained(const Node &node) const noexcept
+  {
+    bool isStartInclusive = TreeQueries::IsInclusiveAncestor(node, *_start.Container);
+    bool isEndInclusive = TreeQueries::IsInclusiveAncestor(node, *_end.Container);
+    return isStartInclusive ^ isEndInclusive;
+  }
+
+  RawPtr<Node> Range::FirstPartiallyContainedChild(Node &commonAncestor, Node &startContainer,
+                                                   Node &endContainer) const noexcept
+  {
+    if (!TreeQueries::IsInclusiveAncestor(startContainer, endContainer))
+    {
+      for (RawPtr<Node> child = commonAncestor.FirstChild(); child; child = child->NextSibling())
+      {
+        if (IsPartiallyContained(*child))
+        {
+          return child;
+        }
+      }
+    }
+
+    return nullptr;
+  }
+
+  RawPtr<Node> Range::LastPartiallyContainedChild(Node &commonAncestor, Node &startContainer,
+                                                  Node &endContainer) const noexcept
+  {
+    if (!TreeQueries::IsInclusiveAncestor(endContainer, startContainer))
+    {
+      for (RawPtr<Node> child = commonAncestor.LastChild(); child; child = child->PreviousSibling())
+      {
+        if (IsPartiallyContained(*child))
+        {
+          return child;
+        }
+      }
+    }
+
+    return nullptr;
+  }
+
+  ExceptionOr<SmallNodeList> Range::GetContainedChildren(RawPtr<Node> commonAncestor) const noexcept
+  {
+    SmallNodeList containedChildren;
+
+    for (RawPtr<Node> child = commonAncestor->FirstChild(); child; child = child->NextSibling())
+    {
+      if (Is<DocumentType>(*child))
+      {
+        return ExceptionCode::HierarchyRequestError;
+      }
+
+      if (IsContained(*child))
+      {
+        containedChildren.emplace_back(ShareRef(*child));
+      }
+    }
+
+    return containedChildren;
+  }
+
+  ExceptionOr<void> Range::CloneCharacterDataContents(DocumentFragment &fragment, Node &node, size_t offset,
+                                                      size_t length,
                                                       DeleteClonedContent deleteClonedContent) const noexcept
   {
-    CharacterData &characterData = Downcast<CharacterData>(container);
+    CharacterData &characterData = Downcast<CharacterData>(node);
 
-    auto cloneResult = characterData.CloneNode();
+    auto cloneResult = NodeAlgorithms::CloneNode(characterData);
     if (cloneResult.HasException())
     {
       return cloneResult.ReleaseException();
     }
-
-    Ref<Node> clone = cloneResult.ReleaseValue();
 
     auto data = characterData.SubstringData(offset, length);
     if (data.HasException())
@@ -762,13 +993,13 @@ namespace Krys::HTML
       return data.ReleaseException();
     }
 
-    auto characterDataClone = Downcast<CharacterData>(clone.get());
+    auto characterDataClone = Downcast<CharacterData>(cloneResult.Value().get());
     if (auto setDataResult = characterDataClone->Data(data.ReleaseValue()); setDataResult.HasException())
     {
       return setDataResult.ReleaseException();
     }
 
-    if (auto appendResult = fragment.AppendChild(*clone); appendResult.HasException())
+    if (auto appendResult = fragment.AppendChild(*characterDataClone); appendResult.HasException())
     {
       return appendResult.ReleaseException();
     }
@@ -779,146 +1010,6 @@ namespace Krys::HTML
       {
         return deleteDataResult.ReleaseException();
       }
-    }
-
-    return {};
-  }
-
-  bool Range::IsPartiallyContained(const Node &node) const noexcept
-  {
-    bool isStartInclusive = TreeQueries::IsInclusiveAncestor(node, *_start.Container);
-    bool isEndInclusive = TreeQueries::IsInclusiveAncestor(node, *_end.Container);
-    return (isStartInclusive && !isEndInclusive) || (!isStartInclusive && isEndInclusive);
-  }
-
-  RawPtr<Node> Range::GetFirstPartiallyContainedChild(RawPtr<Node> commonAncestor) const noexcept
-  {
-    if (!TreeQueries::IsInclusiveAncestor(*_start.Container, *_end.Container))
-    {
-      for (RawPtr<Node> child = commonAncestor->FirstChild(); child; child = child->NextSibling())
-      {
-        if (IsPartiallyContained(*child))
-        {
-          return child;
-        }
-      }
-    }
-
-    return nullptr;
-  }
-
-  RawPtr<Node> Range::GetLastPartiallyContainedChild(RawPtr<Node> commonAncestor) const noexcept
-  {
-    if (!TreeQueries::IsInclusiveAncestor(*_end.Container, *_start.Container))
-    {
-      for (auto *child = commonAncestor->LastChild(); child; child = child->PreviousSibling())
-      {
-        if (IsPartiallyContained(*child))
-        {
-          return child;
-        }
-      }
-    }
-
-    return nullptr;
-  }
-
-  List<Ref<Node>> Range::GetContainedChildren(RawPtr<Node> commonAncestor) const noexcept
-  {
-    List<Ref<Node>> containedChildren;
-
-    for (RawPtr<Node> child = commonAncestor->FirstChild(); child; child = child->NextSibling())
-    {
-      auto afterStart = ComparePoint(*child, 0);
-      if (afterStart.HasException() || afterStart.Value() != std::strong_ordering::greater)
-      {
-        continue;
-      }
-
-      auto beforeEnd = ComparePoint(*child, TreeQueries::Length(*child));
-      if (beforeEnd.HasException() || beforeEnd.Value() != std::strong_ordering::less)
-      {
-        continue;
-      }
-
-      containedChildren.emplace_back(ShareRef(*child));
-    }
-
-    return containedChildren;
-  }
-
-  ExceptionOr<void>
-    Range::CloneFirstPartiallyContainedChildContents(RawPtr<Node> child, DocumentFragment &fragment,
-                                                     DeleteClonedContent deleteClonedContent) const noexcept
-  {
-    if (child != nullptr && Is<CharacterData>(child))
-    {
-      auto length = TreeQueries::Length(*_start.Container) - _start.Offset;
-      auto cloneResult =
-        CloneCharacterDataContents(fragment, *_start.Container, _start.Offset, length, deleteClonedContent);
-      if (cloneResult.HasException())
-      {
-        return cloneResult.ReleaseException();
-      }
-    }
-    else if (child != nullptr)
-    {
-      auto cloneResult = child->CloneNode();
-      if (cloneResult.HasException())
-      {
-        return cloneResult.ReleaseException();
-      }
-
-      Ref<Node> clone = cloneResult.ReleaseValue();
-      fragment.AppendChild(*clone);
-
-      auto subrange = Range {_start, BoundaryPoint {ShareRef(*child), TreeQueries::Length(*child)}};
-      auto subFragment = deleteClonedContent ? subrange.ExtractContents() : subrange.CloneContents();
-
-      if (subFragment.HasException())
-      {
-        return subFragment.ReleaseException();
-      }
-
-      clone->AppendChild(*subFragment.Value());
-    }
-
-    return {};
-  }
-
-  ExceptionOr<void>
-    Range::CloneLastPartiallyContainedChildContents(RawPtr<Node> child, DocumentFragment &fragment,
-                                                    DeleteClonedContent deleteClonedContent) const noexcept
-  {
-    if (child != nullptr && Is<CharacterData>(child))
-    {
-      auto cloneResult =
-        CloneCharacterDataContents(fragment, *_end.Container, 0uz, _end.Offset, deleteClonedContent);
-
-      if (cloneResult.HasException())
-      {
-        return cloneResult.ReleaseException();
-      }
-    }
-    else if (child != nullptr)
-    {
-      auto cloneResult = child->CloneNode();
-      if (cloneResult.HasException())
-      {
-        return cloneResult.ReleaseException();
-      }
-
-      Ref<Node> clone = cloneResult.ReleaseValue();
-      fragment.AppendChild(*clone);
-
-      auto subrange = Range {BoundaryPoint {ShareRef(*child), 0}, _end};
-      auto subFragment = subrange.ExtractContents();
-      if (subFragment.HasException())
-      {
-        return subFragment.ReleaseException();
-      }
-
-      clone->AppendChild(*subFragment.Value());
     }
 
     return {};
