@@ -165,7 +165,7 @@ namespace Krys::Tests
     REQUIRE(childNodes->Item(0uz) == childA.get());
     REQUIRE(childNodes->Item(1uz) == childB.get());
 
-    result = data.Node->InsertBefore(*childC, ShareRefPtr(childA.get()));
+    result = data.Node->InsertBefore(*childC, childA.get());
     REQUIRE_FALSE(result.HasException());
 
     REQUIRE(childNodes->Length() == 3uz);
@@ -301,7 +301,7 @@ namespace Krys::Tests
     REQUIRE_FALSE(removeResult.HasException());
   }
 
-  // TODO(impl):
+  // TODO(test):
   // TEST_CASE("Node::CloneNode", "[HTML][Node]")
 
   TEST_CASE("Node::IsEqualNode", "[HTML][Node]")
@@ -313,7 +313,7 @@ namespace Krys::Tests
     REQUIRE(data.Node->IsEqualNode(data.Node.get()));
     REQUIRE(data.Node->IsEqualNode(equalNode.get()));
 
-    // TODO(impl): other test cases for equality.
+    // TODO(test): other test cases for equality.
   }
 
   TEST_CASE("Node::IsSameNode", "[HTML][Node]")
@@ -426,10 +426,10 @@ namespace Krys::Tests
     REQUIRE_FALSE(removeResult.HasException());
   }
 
-  // TODO(impl):
+  // TODO(test):
   // TEST_CASE("Node::LookupPrefix", "[HTML][Node]")
 
-  // TODO(impl):
+  // TODO(test):
   // TEST_CASE("Node::LookupNamespaceURI", "[HTML][Node]")
   // TEST_CASE("Node::LookupNamespaceURI(simple prefix lookup)", "[HTML][Node]")
   //{
@@ -446,7 +446,7 @@ namespace Krys::Tests
   // REQUIRE(child->LookupNamespaceURI(u8"foo") == u8"http://a");
   // }
 
-  // TODO(impl):
+  // TODO(test):
   // TEST_CASE("Node::IsDefaultNamespace", "[HTML][Node]")
 
   TEST_CASE("Node::InsertBefore", "[HTML][Node]")

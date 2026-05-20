@@ -1,8 +1,8 @@
 ﻿#include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML.Tests/TestContainerNode.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
@@ -59,7 +59,7 @@ namespace Krys::Tests
     REQUIRE_FALSE(result.HasException());
     REQUIRE(container->FirstChild() == childA.get());
 
-    result = container->InsertBefore(*childB, childA);
+    result = container->InsertBefore(*childB, childA.get());
     REQUIRE_FALSE(result.HasException());
     REQUIRE(container->FirstChild() == childB.get());
 
@@ -168,7 +168,7 @@ namespace Krys::Tests
 
     // Inserting child before itself does nothing
     {
-      result = parent->InsertBefore(*childA, ShareRefPtr<Node>(childA.get()));
+      result = parent->InsertBefore(*childA, childA.get());
       REQUIRE(!result.HasException());
 
       REQUIRE(parent->FirstChild() == childA.get());
@@ -186,7 +186,7 @@ namespace Krys::Tests
 
     // Insertion with new node
     {
-      result = parent->InsertBefore(*childC, ShareRefPtr<Node>(childA.get()));
+      result = parent->InsertBefore(*childC, childA.get());
       REQUIRE(!result.HasException());
 
       REQUIRE(parent->FirstChild() == childC.get());

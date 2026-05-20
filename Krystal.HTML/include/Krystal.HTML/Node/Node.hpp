@@ -180,7 +180,7 @@ namespace Krys::HTML
     KRYS_NODISCARD DOMStringAtom LookupNamespaceURI(DOMStringAtom prefix) const noexcept;
     KRYS_NODISCARD bool IsDefaultNamespace(DOMStringAtom namespaceURI) const noexcept;
 
-    ExceptionOr<Node &> InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept;
+    ExceptionOr<Node &> InsertBefore(Node &newChild, RawPtr<Node> refChild) noexcept;
     ExceptionOr<Node &> ReplaceChild(Node &newChild, Node &oldChild) noexcept;
     ExceptionOr<Node &> RemoveChild(Node &child) noexcept;
     ExceptionOr<Node &> AppendChild(Node &newChild) noexcept;

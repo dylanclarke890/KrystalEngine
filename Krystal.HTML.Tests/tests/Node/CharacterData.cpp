@@ -274,5 +274,5 @@ namespace Krys::Tests
     REQUIRE(data.PartialRange->EndOffset() == 0uz);
   }
 
-  // TODO(impl): none of the above tests check that mutation records are queued
+  // TODO(test): none of the above tests check that mutation records are queued
 }

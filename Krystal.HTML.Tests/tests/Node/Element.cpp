@@ -86,7 +86,7 @@ namespace Krys::Tests
     REQUIRE_FALSE(classList.Contains(u8"bar"));
   }
 
-  // TODO(impl): SLOTTABLES
+  // TODO(test): SLOTTABLES
   // TEST_CASE("Element::Slot", "[HTML][Element]")
 
   TEST_CASE("Element::HasAttributes", "[HTML][Element]")
@@ -447,14 +447,14 @@ namespace Krys::Tests
     }
   }
 
-  // TODO(impl): SHADOW-ROOT
+  // TODO(test): SHADOW-ROOT
   // TEST_CASE("Element::AttachShadow", "[HTML][Element]")
   // TEST_CASE("Element::ShadowRoot", "[HTML][Element]")
 
-  // TODO(impl): CUSTOM-ELEMENTS
+  // TODO(test): CUSTOM-ELEMENTS
   // TEST_CASE("Element::CustomElementRegistry", "[HTML][Element]")
 
-  // TODO(impl): CSS-SELECTORS:
+  // TODO(test): CSS-SELECTORS:
   // TEST_CASE("Element::Matches", "[HTML][Element]")
   // TEST_CASE("Element::Closest", "[HTML][Element]")
   // TEST_CASE("Element::WebkitMatchesSelector", "[HTML][Element]")

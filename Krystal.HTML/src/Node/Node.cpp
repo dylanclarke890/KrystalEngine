@@ -117,7 +117,7 @@ namespace Krys::HTML
       {
         auto &currentTextNode = Downcast<Text>(*currentNode);
         LiveRangeUpdater::NodeNormalized(*this, currentTextNode, length);
-        
+
         length += currentTextNode.Data().size();
         currentNode = currentTextNode.NextSibling();
       }
@@ -458,11 +458,11 @@ namespace Krys::HTML
     return namespaceURI == defaultNamespace;
   }
 
-  ExceptionOr<Node &> Node::InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept
+  ExceptionOr<Node &> Node::InsertBefore(Node &newChild, RawPtr<Node> refChild) noexcept
   {
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
     {
-      return containerNode->InsertBefore(newChild, Krys::Move(refChild));
+      return containerNode->InsertBefore(newChild, refChild);
     }
 
     return Exception {ExceptionCode::HierarchyRequestError};

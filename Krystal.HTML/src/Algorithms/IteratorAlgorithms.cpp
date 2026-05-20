@@ -41,8 +41,8 @@ namespace Krys::HTML
 
   void IteratorAlgorithms::PreRemove(NodeIterator &nodeIterator, const Node &toBeRemovedNode) noexcept
   {
-    auto inclusiveAncestor = !TreeQueries::IsInclusiveAncestor(toBeRemovedNode, nodeIterator.ReferenceNode());
-    if (inclusiveAncestor || &toBeRemovedNode == &nodeIterator.Root())
+    if (!TreeQueries::IsInclusiveAncestor(toBeRemovedNode, nodeIterator.ReferenceNode())
+        || &toBeRemovedNode == &nodeIterator.Root())
     {
       return;
     }

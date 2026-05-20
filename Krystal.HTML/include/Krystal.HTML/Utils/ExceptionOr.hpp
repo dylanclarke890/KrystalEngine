@@ -163,7 +163,7 @@ namespace Krys::HTML
     {
     }
 
-    constexpr ExceptionOr(ExceptionCode code) noexcept : _value {Unexpected(Exception(code))}
+    constexpr ExceptionOr(ExceptionCode code) noexcept : _value {Exception(code)}
     {
     }
 

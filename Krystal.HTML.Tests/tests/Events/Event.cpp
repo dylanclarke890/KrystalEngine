@@ -29,7 +29,7 @@ namespace Krys::Tests
       REQUIRE(event->SrcElement() == nullptr);
     }
 
-    // TODO(impl): more unit test coverage
+    // TODO(test): more unit test coverage
   }
 
   TEST_CASE("Event::CurrentTarget", "[HTML][Event]")
@@ -40,7 +40,7 @@ namespace Krys::Tests
       REQUIRE(event->CurrentTarget() == nullptr);
     }
 
-    // TODO(impl): more unit test coverage
+    // TODO(test): more unit test coverage
   }
 
   TEST_CASE("Event::ComposedPath", "[HTML][Event]")
@@ -52,7 +52,7 @@ namespace Krys::Tests
       REQUIRE(composedPath.empty());
     }
 
-    // TODO(impl): more unit test coverage
+    // TODO(test): more unit test coverage
   }
 
   TEST_CASE("Event::EventPhase", "[HTML][Event]")

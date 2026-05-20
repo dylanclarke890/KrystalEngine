@@ -19,9 +19,9 @@ namespace Krys::HTML
 
 #pragma region Node
 
-  ExceptionOr<Node &> ContainerNode::InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept
+  ExceptionOr<Node &> ContainerNode::InsertBefore(Node &newChild, RawPtr<Node> refChild) noexcept
   {
-    return MutationAlgorithms::PreInsert(newChild, *this, refChild.get());
+    return MutationAlgorithms::PreInsert(newChild, *this, refChild);
   }
 
   ExceptionOr<Node &> ContainerNode::ReplaceChild(Node &newChild, Node &oldChild) noexcept

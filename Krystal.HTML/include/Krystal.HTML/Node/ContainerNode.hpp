@@ -34,7 +34,7 @@ namespace Krys::HTML
       return _lastChild.get();
     }
 
-    ExceptionOr<Node &> InsertBefore(Node &newChild, RefPtr<Node> &&refChild) noexcept;
+    ExceptionOr<Node &> InsertBefore(Node &newChild, RawPtr<Node> refChild) noexcept;
     ExceptionOr<Node &> ReplaceChild(Node &newChild, Node &oldChild) noexcept;
     ExceptionOr<Node &> RemoveChild(Node &child) noexcept;
     ExceptionOr<Node &> AppendChild(Node &newChild) noexcept;

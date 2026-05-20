@@ -36,7 +36,7 @@ namespace Krys::Tests
     REQUIRE(&ShadowRootAlgorithms::ShadowIncludingRoot(*parent) == doc.get());
     REQUIRE(&ShadowRootAlgorithms::ShadowIncludingRoot(*child) == doc.get());
 
-    // TODO(impl): Test with ShadowRoot when implemented
+    // TODO(test): Test with ShadowRoot when implemented
 
     auto removeResult = parent->RemoveChild(*child);
     REQUIRE_FALSE(removeResult.HasException());

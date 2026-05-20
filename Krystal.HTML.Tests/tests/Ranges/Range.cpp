@@ -1321,7 +1321,7 @@ namespace Krys::Tests
       auto doctype = data.Document->Implementation().CreateDocumentType(u8"html", u8"", u8"");
       REQUIRE_FALSE(doctype.HasException());
 
-      REQUIRE_FALSE(data.Document->InsertBefore(*doctype.Value(), data.Node).HasException());
+      REQUIRE_FALSE(data.Document->InsertBefore(*doctype.Value(), data.Node.get()).HasException());
 
       auto result = data.Range->IsPointInRange(*doctype.Value(), 0uz);
       REQUIRE(result.HasException());
@@ -1401,7 +1401,7 @@ namespace Krys::Tests
       auto doctype = data.Document->Implementation().CreateDocumentType(u8"html", u8"", u8"");
       REQUIRE_FALSE(doctype.HasException());
 
-      REQUIRE_FALSE(data.Document->InsertBefore(*doctype.Value(), data.Node).HasException());
+      REQUIRE_FALSE(data.Document->InsertBefore(*doctype.Value(), data.Node.get()).HasException());
 
       auto result = data.Range->ComparePoint(*doctype.Value(), 0uz);
       REQUIRE(result.HasException());
