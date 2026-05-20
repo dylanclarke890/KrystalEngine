@@ -125,13 +125,6 @@ Source: https://dom.spec.whatwg.org
     Implementation: Full
     Test Coverage : None
 
-4.4 Interface Node
-    Implementation: Full
-    Test Coverage : Partial
-    Notes		  :
-        - Test Coverage: CloneNode, IsEqualNode, LookupPrefix, LookupNamespaceURI, IsDefaultNamespace missing test cases.
-        - Test Coverage: CompareDocumentPosition: Missing test coverage for comparing attribute nodes, both with each other and with other node types.
-
 4.5 Interface Document
     Implementation: Partial
     Test Coverage : None
@@ -242,6 +235,8 @@ Source: https://dom.spec.whatwg.org
 4.2.10.1 Interface NodeList
 
 4.2.10.2 Interface HTMLCollection
+
+4.4 Interface Node
 
 4.6 Interface DocumentType
 

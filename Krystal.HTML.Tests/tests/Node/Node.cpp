@@ -1,10 +1,10 @@
 ﻿#include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML.Tests/TestNode.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Namespaces.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
-#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
@@ -15,30 +15,33 @@ namespace Krys::Tests
 {
   using namespace Krys::HTML;
 
-  struct CommonTestData
+  namespace
   {
-    Ref<Document> Document;
-    Ref<TestNode> Node;
-
-    CommonTestData(bool appendChild = false)
-        : Document(CreateRef<HTML::Document>()), Node(CreateRef<TestNode>(*Document))
+    struct CommonTestData
     {
-      if (appendChild)
-      {
-        auto result = Document->AppendChild(*Node);
-        REQUIRE_FALSE(result.HasException());
-      }
-    }
+      Ref<Document> Document;
+      Ref<TestNode> Node;
 
-    ~CommonTestData()
-    {
-      if (Node->IsConnected())
+      CommonTestData(bool appendChild = false)
+          : Document(CreateRef<HTML::Document>()), Node(CreateRef<TestNode>(*Document))
       {
-        auto result = Document->RemoveChild(*Node);
-        REQUIRE_FALSE(result.HasException());
+        if (appendChild)
+        {
+          auto result = Document->AppendChild(*Node);
+          REQUIRE_FALSE(result.HasException());
+        }
       }
-    }
-  };
+
+      ~CommonTestData()
+      {
+        if (Node->IsConnected())
+        {
+          auto result = Document->RemoveChild(*Node);
+          REQUIRE_FALSE(result.HasException());
+        }
+      }
+    };
+  }
 
   TEST_CASE("Node::NodeType", "[HTML][Node]")
   {
@@ -251,58 +254,59 @@ namespace Krys::Tests
   // NOTE: TextContent is tested in the tests for the derived classes that override it, so we don't need to
   // test it here.
 
-  TEST_CASE("Node::Normalize(no children)", "[HTML][Node]")
-  {
-    CommonTestData data {};
-    auto normalizeResult = data.Node->Normalize();
-    REQUIRE_FALSE(normalizeResult.HasException());
-  }
-
-  TEST_CASE("Node::Normalize(With only an empty text node)", "[HTML][Node]")
+  TEST_CASE("Node::Normalize", "[HTML][Node]")
   {
     CommonTestData data {};
 
-    auto emptyTextNode = CreateRef<HTML::Text>(*data.Document);
-    auto appendResult = data.Node->AppendChild(*emptyTextNode);
-    REQUIRE_FALSE(appendResult.HasException());
+    SECTION("no children")
+    {
+      auto normalizeResult = data.Node->Normalize();
+      REQUIRE_FALSE(normalizeResult.HasException());
+    }
 
-    auto normalizeResult = data.Node->Normalize();
-    REQUIRE_FALSE(normalizeResult.HasException());
-    REQUIRE(data.Node->FirstChild() == nullptr); // was removed by normalization since it was empty.
+    SECTION("With only an empty text node")
+    {
+      auto emptyTextNode = CreateRef<HTML::Text>(*data.Document);
+      auto appendResult = data.Node->AppendChild(*emptyTextNode);
+      REQUIRE_FALSE(appendResult.HasException());
+
+      auto normalizeResult = data.Node->Normalize();
+      REQUIRE_FALSE(normalizeResult.HasException());
+      REQUIRE(data.Node->FirstChild() == nullptr); // was removed by normalization since it was empty.
+    }
+
+    SECTION("with children")
+    {
+      CommonTestData data {};
+
+      auto textNode1 = CreateRef<HTML::Text>(*data.Document);
+      auto textNode2 = CreateRef<HTML::Text>(*data.Document);
+
+      auto appendResult = data.Node->AppendChild(*textNode1);
+      REQUIRE_FALSE(appendResult.HasException());
+
+      appendResult = data.Node->AppendChild(*textNode2);
+      REQUIRE_FALSE(appendResult.HasException());
+
+      auto setValueResult = textNode1->NodeValue(u8"test");
+      REQUIRE_FALSE(setValueResult.HasException());
+
+      setValueResult = textNode2->NodeValue(u8" value");
+      REQUIRE_FALSE(setValueResult.HasException());
+
+      auto normalizeResult = data.Node->Normalize();
+      REQUIRE_FALSE(normalizeResult.HasException());
+
+      REQUIRE(data.Node->FirstChild() == textNode1.get());
+      REQUIRE(data.Node->LastChild() == textNode1.get());
+      REQUIRE(data.Node->FirstChild()->NodeValue() == u8"test value");
+
+      auto removeResult = data.Node->RemoveChild(*textNode1);
+      REQUIRE_FALSE(removeResult.HasException());
+    }
   }
 
-  TEST_CASE("Node::Normalize(With children)", "[HTML][Node]")
-  {
-    CommonTestData data {};
-
-    auto textNode1 = CreateRef<HTML::Text>(*data.Document);
-    auto textNode2 = CreateRef<HTML::Text>(*data.Document);
-
-    auto appendResult = data.Node->AppendChild(*textNode1);
-    REQUIRE_FALSE(appendResult.HasException());
-
-    appendResult = data.Node->AppendChild(*textNode2);
-    REQUIRE_FALSE(appendResult.HasException());
-
-    auto setValueResult = textNode1->NodeValue(u8"test");
-    REQUIRE_FALSE(setValueResult.HasException());
-
-    setValueResult = textNode2->NodeValue(u8" value");
-    REQUIRE_FALSE(setValueResult.HasException());
-
-    auto normalizeResult = data.Node->Normalize();
-    REQUIRE_FALSE(normalizeResult.HasException());
-
-    REQUIRE(data.Node->FirstChild() == textNode1.get());
-    REQUIRE(data.Node->LastChild() == textNode1.get());
-    REQUIRE(data.Node->FirstChild()->NodeValue() == u8"test value");
-
-    auto removeResult = data.Node->RemoveChild(*textNode1);
-    REQUIRE_FALSE(removeResult.HasException());
-  }
-
-  // TODO(test):
-  // TEST_CASE("Node::CloneNode", "[HTML][Node]")
+  // TODO(test): TEST_CASE("Node::CloneNode", "[HTML][Node]")
 
   TEST_CASE("Node::IsEqualNode", "[HTML][Node]")
   {
@@ -325,78 +329,83 @@ namespace Krys::Tests
     REQUIRE_FALSE(data.Node->IsSameNode(data.Document.get()));
   }
 
-  TEST_CASE("Node::CompareDocumentPosition(same node returns equivalent)", "[HTML][Node]")
+  TEST_CASE("Node::CompareDocumentPosition", "[HTML][Node]")
   {
-    CommonTestData data {};
-    REQUIRE(data.Node->CompareDocumentPosition(*data.Node) == DocumentPosition::DOCUMENT_POSITION_EQUIVALENT);
-  }
+    SECTION("same node returns equivalent")
+    {
+      CommonTestData data {};
+      REQUIRE(data.Node->CompareDocumentPosition(*data.Node) == DocumentPosition::DOCUMENT_POSITION_EQUIVALENT);
+    }
 
-  TEST_CASE("Node::CompareDocumentPosition(disconnected node)", "[HTML][Node]")
-  {
-    CommonTestData data {true};
+    SECTION("disconnected node")
+    {
+      CommonTestData data {true};
 
-    auto disconnectedNode = CreateRef<TestNode>(*data.Document);
-    auto position = data.Node->CompareDocumentPosition(*disconnectedNode);
+      auto disconnectedNode = CreateRef<TestNode>(*data.Document);
+      auto position = data.Node->CompareDocumentPosition(*disconnectedNode);
 
-    REQUIRE(HasFlag(position, DocumentPosition::DOCUMENT_POSITION_DISCONNECTED));
-    REQUIRE(HasFlag(position, DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC));
+      REQUIRE(HasFlag(position, DocumentPosition::DOCUMENT_POSITION_DISCONNECTED));
+      REQUIRE(HasFlag(position, DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC));
 
-    auto nodePrecedesDisconnected = HasFlag(position, DocumentPosition::DOCUMENT_POSITION_PRECEDING);
-    // Should be either preceding or following, but not both.
-    REQUIRE(nodePrecedesDisconnected ^ HasFlag(position, DocumentPosition::DOCUMENT_POSITION_FOLLOWING));
+      auto nodePrecedesDisconnected = HasFlag(position, DocumentPosition::DOCUMENT_POSITION_PRECEDING);
+      // Should be either preceding or following, but not both.
+      REQUIRE(nodePrecedesDisconnected ^ HasFlag(position, DocumentPosition::DOCUMENT_POSITION_FOLLOWING));
 
-    auto reversePosition = disconnectedNode->CompareDocumentPosition(*data.Node);
+      auto reversePosition = disconnectedNode->CompareDocumentPosition(*data.Node);
 
-    REQUIRE(HasFlag(reversePosition, DocumentPosition::DOCUMENT_POSITION_DISCONNECTED));
-    REQUIRE(HasFlag(reversePosition, DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC));
+      REQUIRE(HasFlag(reversePosition, DocumentPosition::DOCUMENT_POSITION_DISCONNECTED));
+      REQUIRE(HasFlag(reversePosition, DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC));
 
-    auto reverseNodePrecedesDisconnected =
-      HasFlag(reversePosition, DocumentPosition::DOCUMENT_POSITION_PRECEDING);
-    // Should be either preceding or following, but not both.
-    REQUIRE(reverseNodePrecedesDisconnected
-            ^ HasFlag(reversePosition, DocumentPosition::DOCUMENT_POSITION_FOLLOWING));
+      auto reverseNodePrecedesDisconnected =
+        HasFlag(reversePosition, DocumentPosition::DOCUMENT_POSITION_PRECEDING);
+      // Should be either preceding or following, but not both.
+      REQUIRE(reverseNodePrecedesDisconnected
+              ^ HasFlag(reversePosition, DocumentPosition::DOCUMENT_POSITION_FOLLOWING));
 
-    REQUIRE(reverseNodePrecedesDisconnected
-            != nodePrecedesDisconnected); // if it was following one way, it should be preceding the other.
-  }
+      REQUIRE(reverseNodePrecedesDisconnected
+              != nodePrecedesDisconnected); // if it was following one way, it should be preceding the other.
+    }
 
-  TEST_CASE("Node::CompareDocumentPosition(nodes in same document)")
-  {
-    CommonTestData data {true};
-    auto sibling1 = CreateRef<TestNode>(*data.Document);
-    auto sibling2 = CreateRef<TestNode>(*data.Document);
+    SECTION("nodes in same document")
+    {
+      CommonTestData data {true};
+      auto sibling1 = CreateRef<TestNode>(*data.Document);
+      auto sibling2 = CreateRef<TestNode>(*data.Document);
 
-    auto appendResult = data.Node->AppendChild(*sibling1);
-    REQUIRE_FALSE(appendResult.HasException());
-    appendResult = data.Node->AppendChild(*sibling2);
-    REQUIRE_FALSE(appendResult.HasException());
+      auto appendResult = data.Node->AppendChild(*sibling1);
+      REQUIRE_FALSE(appendResult.HasException());
+      appendResult = data.Node->AppendChild(*sibling2);
+      REQUIRE_FALSE(appendResult.HasException());
 
-    auto nodePositionToSibling1 = data.Node->CompareDocumentPosition(*sibling1);
-    REQUIRE(HasFlag(nodePositionToSibling1, DocumentPosition::DOCUMENT_POSITION_CONTAINED_BY));
-    REQUIRE(HasFlag(nodePositionToSibling1, DocumentPosition::DOCUMENT_POSITION_FOLLOWING));
+      auto nodePositionToSibling1 = data.Node->CompareDocumentPosition(*sibling1);
+      REQUIRE(HasFlag(nodePositionToSibling1, DocumentPosition::DOCUMENT_POSITION_CONTAINED_BY));
+      REQUIRE(HasFlag(nodePositionToSibling1, DocumentPosition::DOCUMENT_POSITION_FOLLOWING));
 
-    auto sibling1PositionToNode = sibling1->CompareDocumentPosition(*data.Node);
-    REQUIRE(HasFlag(sibling1PositionToNode, DocumentPosition::DOCUMENT_POSITION_CONTAINS));
-    REQUIRE(HasFlag(sibling1PositionToNode, DocumentPosition::DOCUMENT_POSITION_PRECEDING));
+      auto sibling1PositionToNode = sibling1->CompareDocumentPosition(*data.Node);
+      REQUIRE(HasFlag(sibling1PositionToNode, DocumentPosition::DOCUMENT_POSITION_CONTAINS));
+      REQUIRE(HasFlag(sibling1PositionToNode, DocumentPosition::DOCUMENT_POSITION_PRECEDING));
 
-    auto nodePositionToSibling2 = data.Node->CompareDocumentPosition(*sibling2);
-    REQUIRE(HasFlag(nodePositionToSibling2, DocumentPosition::DOCUMENT_POSITION_CONTAINED_BY));
-    REQUIRE(HasFlag(nodePositionToSibling2, DocumentPosition::DOCUMENT_POSITION_FOLLOWING));
+      auto nodePositionToSibling2 = data.Node->CompareDocumentPosition(*sibling2);
+      REQUIRE(HasFlag(nodePositionToSibling2, DocumentPosition::DOCUMENT_POSITION_CONTAINED_BY));
+      REQUIRE(HasFlag(nodePositionToSibling2, DocumentPosition::DOCUMENT_POSITION_FOLLOWING));
 
-    auto sibling2PositionToNode = sibling2->CompareDocumentPosition(*data.Node);
-    REQUIRE(HasFlag(sibling2PositionToNode, DocumentPosition::DOCUMENT_POSITION_CONTAINS));
-    REQUIRE(HasFlag(sibling2PositionToNode, DocumentPosition::DOCUMENT_POSITION_PRECEDING));
+      auto sibling2PositionToNode = sibling2->CompareDocumentPosition(*data.Node);
+      REQUIRE(HasFlag(sibling2PositionToNode, DocumentPosition::DOCUMENT_POSITION_CONTAINS));
+      REQUIRE(HasFlag(sibling2PositionToNode, DocumentPosition::DOCUMENT_POSITION_PRECEDING));
 
-    auto sibling1PositionToSibling2 = sibling1->CompareDocumentPosition(*sibling2);
-    REQUIRE(HasFlag(sibling1PositionToSibling2, DocumentPosition::DOCUMENT_POSITION_FOLLOWING));
+      auto sibling1PositionToSibling2 = sibling1->CompareDocumentPosition(*sibling2);
+      REQUIRE(HasFlag(sibling1PositionToSibling2, DocumentPosition::DOCUMENT_POSITION_FOLLOWING));
 
-    auto sibling2PositionToSibling1 = sibling2->CompareDocumentPosition(*sibling1);
-    REQUIRE(HasFlag(sibling2PositionToSibling1, DocumentPosition::DOCUMENT_POSITION_PRECEDING));
+      auto sibling2PositionToSibling1 = sibling2->CompareDocumentPosition(*sibling1);
+      REQUIRE(HasFlag(sibling2PositionToSibling1, DocumentPosition::DOCUMENT_POSITION_PRECEDING));
 
-    auto removeResult = data.Node->RemoveChild(*sibling1);
-    REQUIRE_FALSE(removeResult.HasException());
-    removeResult = data.Node->RemoveChild(*sibling2);
-    REQUIRE_FALSE(removeResult.HasException());
+      auto removeResult = data.Node->RemoveChild(*sibling1);
+      REQUIRE_FALSE(removeResult.HasException());
+      removeResult = data.Node->RemoveChild(*sibling2);
+      REQUIRE_FALSE(removeResult.HasException());
+    }
+
+    // TODO(test): comparing attribute nodes, both with each other and with other node types.
   }
 
   TEST_CASE("Node::Contains", "[HTML][Node]")
