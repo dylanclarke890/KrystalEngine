@@ -21,11 +21,12 @@ namespace Krys::HTML
   private:
     NodeCollectionLiveness _liveness;
 
-  public:
+  protected:
     explicit HTMLCollection(NodeCollectionLiveness liveness) noexcept : _liveness(liveness)
     {
     }
 
+  public:
     virtual ~HTMLCollection() noexcept = default;
 
     KRYS_NODISCARD virtual RawPtr<Element> Item(size_t index) noexcept = 0;
@@ -50,8 +51,7 @@ namespace Krys::HTML
     LiveHTMLCollectionFilterFunc _filter;
 
   public:
-    explicit LiveHTMLCollection(WeakRef<ContainerNode> &&root,
-                                LiveHTMLCollectionFilterFunc &&filter) noexcept;
+    LiveHTMLCollection(WeakRef<ContainerNode> &&root, LiveHTMLCollectionFilterFunc &&filter) noexcept;
 
     KRYS_NODISCARD RawPtr<Element> Item(size_t index) noexcept override;
     KRYS_NODISCARD RawPtr<const Element> Item(size_t index) const noexcept override;

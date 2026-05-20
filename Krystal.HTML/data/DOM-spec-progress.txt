@@ -99,10 +99,6 @@ Source: https://dom.spec.whatwg.org
     Implementation: Full
     Test Coverage : None
 
-4.2.10.2 Interface HTMLCollection
-    Implementation: Full
-    Test Coverage : None
-
 4.3 Mutation observers
     Implementation: None
     Test Coverage : None
@@ -244,6 +240,8 @@ Source: https://dom.spec.whatwg.org
 4.2.10 Old-style collections: NodeList and HTMLCollection (N/A)
 
 4.2.10.1 Interface NodeList
+
+4.2.10.2 Interface HTMLCollection
 
 4.6 Interface DocumentType
 
