@@ -54,6 +54,9 @@ namespace Krys::HTML
     auto *parent = movedNode.ParentNode();
     assert(parent != nullptr);
 
+    // TODO(check): the spec restricts moving to nodes that are within the same tree so the logic below
+    // probably isn't necessary. Verify and remove if not needed.
+
     if (parent->IsConnected())
     {
       movedNode.SetEventTargetFlag(EventTargetFlag::IsConnected);

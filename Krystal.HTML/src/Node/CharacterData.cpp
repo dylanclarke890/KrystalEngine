@@ -83,7 +83,7 @@ namespace Krys::HTML
 
     LiveRangeUpdater::CharacterDataReplaced(*this, offset, count, data.size());
 
-    if (auto parent = ShareRefPtr(ParentNode()))
+    if (auto parent = ParentNode())
     {
       ExtensibilityHooks::NodeChildrenChanged(*parent);
     }

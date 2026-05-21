@@ -47,82 +47,55 @@ namespace Krys::Tests
 
     REQUIRE_FALSE(parent->AppendChild(*text).HasException());
 
-    // Text content: "Hello, world!"
-    // Split at offset 2:
-    // Original: "He"
-    // New node: "llo, world!"
-
-    // Range entirely before split
-    // Should remain unchanged.
     auto beforeRange = document->CreateRange();
     beforeRange->SetStart(*text, 1uz);
     beforeRange->SetEnd(*text, 2uz);
 
-    // Range start > split offset
-    // Start container should move to new node.
     auto movedStartRange = document->CreateRange();
     movedStartRange->SetStart(*text, 5uz);
     movedStartRange->SetEnd(*text, 6uz);
 
-    // Range end > split offset
-    // End container should move to new node.
     auto movedEndRange = document->CreateRange();
     movedEndRange->SetStart(*text, 1uz);
     movedEndRange->SetEnd(*text, 8uz);
 
-    // Range exactly at split offset
-    // MUST NOT move because spec says "greater than offset".
     auto exactOffsetRange = document->CreateRange();
     exactOffsetRange->SetStart(*text, 2uz);
     exactOffsetRange->SetEnd(*text, 2uz);
 
-    // Parent-based boundary points.
     auto parentRange = document->CreateRange();
 
-    // text is child index 0
-    // index + 1 == 1
     parentRange->SetStart(*parent, 1uz);
     parentRange->SetEnd(*parent, 1uz);
 
     auto splitResult = text->SplitText(2);
     REQUIRE_FALSE(splitResult.HasException());
 
-    auto& newNode = splitResult.Value();
+    auto &newNode = splitResult.Value();
 
-    // Verify text contents
     REQUIRE(text->Data() == u8"He");
     REQUIRE(newNode->Data() == u8"llo, world!");
 
-    // beforeRange unchanged
     REQUIRE(beforeRange->StartContainer() == text.get());
     REQUIRE(beforeRange->EndContainer() == text.get());
     REQUIRE(beforeRange->StartOffset() == 1uz);
     REQUIRE(beforeRange->EndOffset() == 2uz);
 
-    // movedStartRange:
-    // start offset 5 -> new node offset 3
-    // end offset 6 -> new node offset 4
     REQUIRE(movedStartRange->StartContainer() == newNode.get());
     REQUIRE(movedStartRange->EndContainer() == newNode.get());
     REQUIRE(movedStartRange->StartOffset() == 3uz);
     REQUIRE(movedStartRange->EndOffset() == 4uz);
 
-    // movedEndRange:
-    // start remains
-    // end moves: 8 -> 6
     REQUIRE(movedEndRange->StartContainer() == text.get());
     REQUIRE(movedEndRange->EndContainer() == newNode.get());
     REQUIRE(movedEndRange->StartOffset() == 1uz);
     REQUIRE(movedEndRange->EndOffset() == 6uz);
 
-    // exactOffsetRange unchanged
     REQUIRE(exactOffsetRange->StartContainer() == text.get());
     REQUIRE(exactOffsetRange->EndContainer() == text.get());
     REQUIRE(exactOffsetRange->StartOffset() == 2uz);
     REQUIRE(exactOffsetRange->EndOffset() == 2uz);
 
-    // parentRange offsets incremented:
-    // spec says: "if offset == index(node)+1 increase by 1"
     REQUIRE(parentRange->StartContainer() == parent.get());
     REQUIRE(parentRange->EndContainer() == parent.get());
     REQUIRE(parentRange->StartOffset() == 2uz);
@@ -131,6 +104,8 @@ namespace Krys::Tests
     REQUIRE_FALSE(parent->RemoveChild(*newNode).HasException());
     REQUIRE_FALSE(parent->RemoveChild(*text).HasException());
   }
+
+  // TODO(test): check that mutation records are queued for the text nodes whose data is changed by SplitText.
 
   TEST_CASE("Text::WholeText", "[HTML][Text]")
   {
