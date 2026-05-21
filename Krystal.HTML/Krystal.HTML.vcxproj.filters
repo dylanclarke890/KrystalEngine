@@ -309,7 +309,7 @@
     <ClInclude Include="include\Krystal.HTML\Utils\NodeOrString.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Algorithms\Mixins\ChildNode.hpp">
+    <ClInclude Include="include\Krystal.HTML\Mixins\ChildNode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\NamedNodeMap.hpp">
@@ -333,10 +333,10 @@
     <ClInclude Include="include\Krystal.HTML\Algorithms\ShadowRootAlgorithms.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Algorithms\Mixins\ParentNode.hpp">
+    <ClInclude Include="include\Krystal.HTML\Mixins\ParentNode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Algorithms\Mixins\NonElementParentNode.hpp">
+    <ClInclude Include="include\Krystal.HTML\Mixins\NonElementParentNode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\Enums\NodeCollectionLiveness.hpp">
@@ -421,6 +421,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLPreElement.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Mixins\NonDocumentTypeChildNode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -542,16 +545,16 @@
     <ClCompile Include="src\Algorithms\ShadowRootAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Algorithms\Mixins\ParentNode.cpp">
+    <ClCompile Include="src\Mixins\ParentNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Algorithms\Mixins\NonElementParentNode.cpp">
+    <ClCompile Include="src\Mixins\NonElementParentNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Algorithms\ExtensibilityHooks.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Algorithms\Mixins\ChildNode.cpp">
+    <ClCompile Include="src\Mixins\ChildNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Algorithms\NodeAlgorithms.cpp">
@@ -597,6 +600,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\HTMLElement\HTMLPreElement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Mixins\NonDocumentTypeChildNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

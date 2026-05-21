@@ -2,8 +2,6 @@
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/HTMLCollectionAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/Mixins/ChildNode.hpp"
-#include "Krystal.HTML/Algorithms/Mixins/ParentNode.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"
@@ -13,6 +11,9 @@
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
+#include "Krystal.HTML/Mixins/ChildNode.hpp"
+#include "Krystal.HTML/Mixins/NonDocumentTypeChildNode.hpp"
+#include "Krystal.HTML/Mixins/ParentNode.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/HTMLCollection.hpp"
 #include "Krystal.HTML/Node/HTMLDocument.hpp"
@@ -420,22 +421,22 @@ namespace Krys::HTML
 
   RefPtr<const Element> Element::PreviousElementSibling() const noexcept
   {
-    return ShareRefPtr(TreeTraversal::PreviousElementSibling(*this));
+    return Mixins::NonDocumentTypeChildNode::PreviousElementSibling(*this);
   }
 
   RefPtr<Element> Element::PreviousElementSibling() noexcept
   {
-    return ShareRefPtr(TreeTraversal::PreviousElementSibling(*this));
+    return Mixins::NonDocumentTypeChildNode::PreviousElementSibling(*this);
   }
 
   RefPtr<const Element> Element::NextElementSibling() const noexcept
   {
-    return ShareRefPtr(TreeTraversal::NextElementSibling(*this));
+    return Mixins::NonDocumentTypeChildNode::NextElementSibling(*this);
   }
 
   RefPtr<Element> Element::NextElementSibling() noexcept
   {
-    return ShareRefPtr(TreeTraversal::NextElementSibling(*this));
+    return Mixins::NonDocumentTypeChildNode::NextElementSibling(*this);
   }
 
 #pragma endregion

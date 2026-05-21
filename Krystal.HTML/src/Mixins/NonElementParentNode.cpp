@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Algorithms/Mixins/NonElementParentNode.hpp"
+﻿#include "Krystal.HTML/Mixins/NonElementParentNode.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"

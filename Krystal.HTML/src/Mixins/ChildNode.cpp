@@ -1,6 +1,6 @@
-﻿#include "Krystal.HTML/Algorithms/Mixins/ChildNode.hpp"
+﻿#include "Krystal.HTML/Mixins/ChildNode.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Algorithms/Mixins/ParentNode.hpp"
+#include "Krystal.HTML/Mixins/ParentNode.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"

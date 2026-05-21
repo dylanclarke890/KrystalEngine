@@ -99,7 +99,7 @@ namespace Krys::HTML
                                                    Maybe<DOMStringView> oldValue, Maybe<DOMStringView> value,
                                                    DOMStringAtom namespaceURI) noexcept
   {
-    // TODO(perf): we currently don't need this as we just use the value stored in the attribute. Later, when
+    // NOTE: we currently don't need this as we just use the value stored in the attribute. Later, when
     // we optimize we can use this hook to update Element's member variable to skip needing to lookup the
     // attribute. This will be particularly important for a faster implementation of GetElementById.
 

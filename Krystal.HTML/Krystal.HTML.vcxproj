@@ -40,12 +40,13 @@
     <ClInclude Include="include\Krystal.HTML\Factories\ElementFactory.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\HTMLCollectionAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\LiveRangeUpdater.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Algorithms\Mixins\ChildNode.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Mixins\ChildNode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\ElementAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\ExtensibilityHooks.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\IteratorAlgorithms.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Algorithms\Mixins\NonElementParentNode.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Algorithms\Mixins\ParentNode.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Mixins\NonDocumentTypeChildNode.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Mixins\NonElementParentNode.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Mixins\ParentNode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\ShadowRootAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\CustomElement\CustomElementConstructor.hpp" />
     <ClInclude Include="include\Krystal.HTML\CustomElement\CustomElementDefinition.hpp" />
@@ -175,6 +176,7 @@
     <ClCompile Include="src\HTMLElement\HTMLElement.cpp" />
     <ClCompile Include="src\HTMLElement\HTMLPreElement.cpp" />
     <ClCompile Include="src\HTMLElement\HTMLUnknownElement.cpp" />
+    <ClCompile Include="src\Mixins\NonDocumentTypeChildNode.cpp" />
     <ClCompile Include="src\Ranges\StaticRange.cpp" />
     <ClCompile Include="src\Node\XMLDocument.cpp" />
     <ClCompile Include="src\Algorithms\CustomElementAlgorithms.cpp" />
@@ -184,8 +186,8 @@
     <ClCompile Include="src\Factories\ElementFactory.cpp" />
     <ClCompile Include="src\Algorithms\HTMLCollectionAlgorithms.cpp" />
     <ClCompile Include="src\Algorithms\LiveRangeUpdater.cpp" />
-    <ClCompile Include="src\Algorithms\Mixins\ChildNode.cpp" />
-    <ClCompile Include="src\Algorithms\Mixins\ParentNode.cpp" />
+    <ClCompile Include="src\Mixins\ChildNode.cpp" />
+    <ClCompile Include="src\Mixins\ParentNode.cpp" />
     <ClCompile Include="src\Algorithms\NodeAlgorithms.cpp" />
     <ClCompile Include="src\Algorithms\ShadowRootAlgorithms.cpp" />
     <ClCompile Include="src\DOMTokenList.cpp" />
@@ -200,7 +202,7 @@
     <ClCompile Include="src\MutationObserver\MutationRecord.cpp" />
     <ClCompile Include="src\Node\DOMImplementation.cpp" />
     <ClCompile Include="src\Node\NamedNodeMap.cpp" />
-    <ClCompile Include="src\Algorithms\Mixins\NonElementParentNode.cpp" />
+    <ClCompile Include="src\Mixins\NonElementParentNode.cpp" />
     <ClCompile Include="src\Ranges\Range.cpp" />
     <ClCompile Include="src\MutationObserver\MutationObserver.cpp" />
     <ClCompile Include="src\Node\RareData\ParentNodeRareData.cpp" />
