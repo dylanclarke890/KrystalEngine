@@ -1,12 +1,15 @@
 ﻿#include "Krystal.HTML/Node/Node.hpp"
+#include "Krystal.HTML.Tests/TestElement.hpp"
 #include "Krystal.HTML.Tests/TestNode.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Namespaces.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
+#include "Krystal.HTML/Node/Comment.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
+#include "Krystal.HTML/Node/ProcessingInstruction.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include <catch_all.hpp>
@@ -39,6 +42,17 @@ namespace Krys::Tests
           auto result = Document->RemoveChild(*Node);
           REQUIRE_FALSE(result.HasException());
         }
+      }
+    };
+
+    class NamespaceTestElement : public Element
+    {
+      KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(NamespaceTestElement);
+
+    public:
+      NamespaceTestElement(Document &document, DOMStringAtom namespacePrefix) noexcept
+          : Element(document, {u8"http://a", namespacePrefix, u8"test-element"}, NodeFlag::None)
+      {
       }
     };
   }
@@ -306,7 +320,84 @@ namespace Krys::Tests
     }
   }
 
-  // TODO(test): TEST_CASE("Node::CloneNode", "[HTML][Node]")
+  TEST_CASE("Node::CloneNode", "[HTML][Node]")
+  {
+    auto document = CreateRef<Document>();
+
+    SECTION("Element")
+    {
+      // TODO(test): cloning an element
+    }
+
+    SECTION("Document")
+    {
+      // TODO(test): cloning a document
+    }
+
+    SECTION("DocumentType")
+    {
+      auto doctype = CreateRef<DocumentType>(*document, u8"html", u8"public-id", u8"system-id");
+
+      auto clone = doctype->CloneNode();
+      REQUIRE(clone.HasValue());
+
+      auto &doctypeClone = Downcast<DocumentType>(*clone.Value());
+      REQUIRE(doctypeClone.Name() == u8"html");
+      REQUIRE(doctypeClone.PublicId() == u8"public-id");
+      REQUIRE(doctypeClone.SystemId() == u8"system-id");
+    }
+
+    SECTION("Attr")
+    {
+      auto attribute = document->CreateAttributeNS(Namespaces::XML, u8"xml:name");
+      REQUIRE_FALSE(attribute.HasException());
+      attribute->Value(u8"value");
+
+      auto clone = attribute->CloneNode();
+
+      auto &attributeClone = Downcast<Attr>(*clone.Value());
+      REQUIRE(attributeClone.NamespaceURI() == Namespaces::XML);
+      REQUIRE(attributeClone.LocalName() == u8"name");
+      REQUIRE(attributeClone.Prefix() == u8"xml");
+      REQUIRE(attributeClone.Value() == u8"value");
+    }
+
+    SECTION("Text")
+    {
+      auto textNode = CreateRef<HTML::Text>(*document, u8"text");
+
+      auto clone = textNode->CloneNode();
+      REQUIRE(clone.HasValue());
+
+      auto &textNodeClone = Downcast<HTML::Text>(*clone.Value());
+      REQUIRE(textNodeClone.Data() == u8"text");
+    }
+
+    SECTION("Comment")
+    {
+      auto comment = CreateRef<HTML::Comment>(*document, u8"text");
+
+      auto clone = comment->CloneNode();
+      REQUIRE(clone.HasValue());
+
+      auto &commentClone = Downcast<HTML::Comment>(*clone.Value());
+      REQUIRE(commentClone.Data() == u8"text");
+    }
+
+    SECTION("ProcessingInstruction")
+    {
+      auto processingInstruction = CreateRef<HTML::ProcessingInstruction>(*document, u8"target", u8"data");
+
+      auto clone = processingInstruction->CloneNode();
+      REQUIRE(clone.HasValue());
+
+      REQUIRE(clone->NodeType() == NodeType::PROCESSING_INSTRUCTION_NODE);
+      auto &processingInstructionClone = Downcast<HTML::ProcessingInstruction>(*clone.Value());
+
+      REQUIRE(processingInstructionClone.Target() == u8"target");
+      REQUIRE(processingInstructionClone.Data() == u8"data");
+    }
+  }
 
   TEST_CASE("Node::IsEqualNode", "[HTML][Node]")
   {
@@ -334,7 +425,8 @@ namespace Krys::Tests
     SECTION("same node returns equivalent")
     {
       CommonTestData data {};
-      REQUIRE(data.Node->CompareDocumentPosition(*data.Node) == DocumentPosition::DOCUMENT_POSITION_EQUIVALENT);
+      REQUIRE(data.Node->CompareDocumentPosition(*data.Node)
+              == DocumentPosition::DOCUMENT_POSITION_EQUIVALENT);
     }
 
     SECTION("disconnected node")
@@ -435,28 +527,222 @@ namespace Krys::Tests
     REQUIRE_FALSE(removeResult.HasException());
   }
 
-  // TODO(test):
-  // TEST_CASE("Node::LookupPrefix", "[HTML][Node]")
+  TEST_CASE("Node::LookupPrefix", "[HTML][Node]")
+  {
+    CommonTestData data {};
 
-  // TODO(test):
-  // TEST_CASE("Node::LookupNamespaceURI", "[HTML][Node]")
-  // TEST_CASE("Node::LookupNamespaceURI(simple prefix lookup)", "[HTML][Node]")
-  //{
-  //  CommonTestData data {};
+    SECTION("node is an Element")
+    {
+      SECTION("returns its namespace prefix if it has one")
+      {
+        auto element = CreateRef<NamespaceTestElement>(*data.Document, u8"testprefix");
+        REQUIRE(element->LookupPrefix(u8"http://a") == u8"testprefix");
+      }
 
-  // auto root = CreateRef<TestNode>(*data.Document);
-  // auto child = CreateRef<TestNode>(*data.Document);
+      SECTION("returns null if it doesn't have a namespace prefix")
+      {
+        auto element = CreateRef<NamespaceTestElement>(*data.Document, DOMStringAtom::Null());
+        REQUIRE(element->LookupPrefix(u8"http://a") == DOMStringAtom::Null());
+      }
 
-  // REQUIRE_FALSE(data.Document->AppendChild(*root).HasException());
-  // REQUIRE_FALSE(root->AppendChild(*child).HasException());
+      SECTION("returns null if its namespace doesn't match")
+      {
+        auto element = CreateRef<NamespaceTestElement>(*data.Document, u8"testprefix");
+        REQUIRE(element->LookupPrefix(u8"http://b") == DOMStringAtom::Null());
+      }
+    }
 
-  // REQUIRE_FALSE(root->SetAttributeNS(Namespaces::XMLNS, u8"xmlns:foo", u8"http://a").HasException());
+    SECTION("Node is a Document")
+    {
+      SECTION("returns null if its documentElement is null")
+      {
+        REQUIRE(data.Document->LookupPrefix(u8"foo") == DOMStringAtom::Null());
+      }
 
-  // REQUIRE(child->LookupNamespaceURI(u8"foo") == u8"http://a");
-  // }
+      SECTION("returns its documentElement's namespace prefix if its documentElement is not null")
+      {
+        auto child = CreateRef<NamespaceTestElement>(*data.Document, u8"testprefix");
+        REQUIRE_FALSE(data.Document->AppendChild(*child).HasException());
+        REQUIRE(data.Document->LookupPrefix(u8"http://a") == u8"testprefix");
+        REQUIRE_FALSE(data.Document->RemoveChild(*child).HasException());
+      }
+    }
 
-  // TODO(test):
-  // TEST_CASE("Node::IsDefaultNamespace", "[HTML][Node]")
+    SECTION("returns null if Node is a DocumentFragment")
+    {
+      auto fragment = CreateRef<DocumentFragment>(*data.Document);
+      REQUIRE(fragment->LookupPrefix(u8"foo") == DOMStringAtom::Null());
+    }
+
+    SECTION("returns null if Node is a DocumentType")
+    {
+      auto doctype = data.Document->Implementation().CreateDocumentType(u8"test", u8"", u8"");
+      REQUIRE(doctype->LookupPrefix(u8"foo") == DOMStringAtom::Null());
+    }
+
+    SECTION("Node is an Attr")
+    {
+      SECTION("returns null if it doesn't have an element owner")
+      {
+        auto attr = data.Document->CreateAttribute(u8"test");
+        REQUIRE_FALSE(attr.HasException());
+        REQUIRE(attr->LookupPrefix(u8"foo") == DOMStringAtom::Null());
+      }
+
+      SECTION("returns its element owner's namespace prefix if it has an element owner")
+      {
+        auto attr = data.Document->CreateAttribute(u8"test");
+        REQUIRE_FALSE(attr.HasException());
+        auto element = CreateRef<NamespaceTestElement>(*data.Document, u8"testprefix");
+        REQUIRE_FALSE(element->SetAttributeNode(*attr.Value()).HasException());
+        REQUIRE(attr->LookupPrefix(u8"http://a") == u8"testprefix");
+      }
+    }
+
+    SECTION("Node that is none of the above returns it's parent element's namespace prefix")
+    {
+      auto textNode = CreateRef<HTML::Text>(*data.Document, u8"");
+
+      SECTION("returns null if parent element is null")
+      {
+        REQUIRE(textNode->LookupPrefix(u8"foo") == DOMStringAtom::Null());
+      }
+
+      SECTION("returns parent element's namespace prefix if parent element is not null")
+      {
+        auto parentElement = CreateRef<NamespaceTestElement>(*data.Document, u8"testprefix");
+        REQUIRE_FALSE(parentElement->AppendChild(*textNode).HasException());
+        REQUIRE(textNode->LookupPrefix(u8"http://a") == u8"testprefix");
+        REQUIRE_FALSE(parentElement->RemoveChild(*textNode).HasException());
+      }
+    }
+  }
+
+  TEST_CASE("Node::LookupNamespaceURI", "[HTML][Node]")
+  {
+    CommonTestData data {};
+
+    SECTION("node is an Element")
+    {
+      auto element = CreateRef<NamespaceTestElement>(*data.Document, u8"testprefix");
+
+      SECTION("returns XML namespace if prefix is 'xml'")
+      {
+        REQUIRE(element->LookupNamespaceURI(u8"xml") == Namespaces::XML);
+      }
+
+      SECTION("returns XMLNS namespace if prefix is 'xmlns'")
+      {
+        REQUIRE(element->LookupNamespaceURI(u8"xmlns") == Namespaces::XMLNS);
+      }
+
+      SECTION("returns it's namespace when non null and it's prefix matches")
+      {
+        REQUIRE(element->LookupNamespaceURI(u8"testprefix") == u8"http://a");
+      }
+
+      // TODO(test): If it has an attribute whose namespace is the XMLNS namespace, namespace prefix is
+      // "xmlns", and local name is prefix, or if prefix is null and it has an attribute whose namespace is
+      // the XMLNS namespace, namespace prefix is null, and local name is "xmlns", then return its value if it
+      // is not the empty string, and null otherwise.
+
+      SECTION("returns null if prefix doesn't match and parent is null")
+      {
+        REQUIRE(element->LookupNamespaceURI(u8"foo") == DOMStringAtom::Null());
+      }
+
+      SECTION("returns it's parent's namespace if prefix doesn't match and parent is not null")
+      {
+        auto parentElement = CreateRef<NamespaceTestElement>(*data.Document, u8"foo");
+        REQUIRE_FALSE(parentElement->AppendChild(*element).HasException());
+
+        REQUIRE(element->LookupNamespaceURI(u8"foo") == u8"http://a");
+
+        REQUIRE_FALSE(parentElement->RemoveChild(*element).HasException());
+      }
+    }
+
+    SECTION("Node is a Document")
+    {
+      SECTION("returns null if it's documentElement is null")
+      {
+        REQUIRE(data.Document->LookupNamespaceURI(u8"foo") == DOMStringAtom::Null());
+      }
+
+      SECTION("returns it's documentElement's namespace if it's documentElement is not null")
+      {
+        auto child = CreateRef<NamespaceTestElement>(*data.Document, u8"testprefix");
+        REQUIRE_FALSE(data.Document->AppendChild(*child).HasException());
+
+        REQUIRE(data.Document->LookupNamespaceURI(u8"testprefix") == u8"http://a");
+
+        REQUIRE_FALSE(data.Document->RemoveChild(*child).HasException());
+      }
+    }
+
+    SECTION("returns null if Node is a DocumentFragment")
+    {
+      auto fragment = CreateRef<DocumentFragment>(*data.Document);
+      REQUIRE(fragment->LookupNamespaceURI(u8"foo") == DOMStringAtom::Null());
+    }
+
+    SECTION("returns null if Node is a DocumentType")
+    {
+      auto doctype = data.Document->Implementation().CreateDocumentType(u8"test", u8"", u8"");
+      REQUIRE(doctype->LookupNamespaceURI(u8"foo") == DOMStringAtom::Null());
+    }
+
+    SECTION("Node is an Attr")
+    {
+      SECTION("returns null if it doesn't have an element owner")
+      {
+        auto attr = data.Document->CreateAttribute(u8"test");
+        REQUIRE_FALSE(attr.HasException());
+
+        REQUIRE(attr->LookupNamespaceURI(u8"foo") == DOMStringAtom::Null());
+      }
+
+      SECTION("returns it's element owner's namespace if it has an element owner")
+      {
+        auto attr = data.Document->CreateAttribute(u8"test");
+        REQUIRE_FALSE(attr.HasException());
+
+        auto element = CreateRef<NamespaceTestElement>(*data.Document, u8"testprefix");
+        REQUIRE_FALSE(element->SetAttributeNode(*attr.Value()).HasException());
+
+        REQUIRE(attr->LookupNamespaceURI(u8"testprefix") == u8"http://a");
+      }
+    }
+
+    SECTION("Node that is none of the above returns it's parent element's namespace")
+    {
+      auto textNode = CreateRef<HTML::Text>(*data.Document, u8"");
+
+      SECTION("returns null if parent element is null")
+      {
+        REQUIRE(textNode->LookupNamespaceURI(u8"foo") == DOMStringAtom::Null());
+      }
+
+      SECTION("returns parent element's namespace if parent element is not null")
+      {
+        auto parentElement = CreateRef<NamespaceTestElement>(*data.Document, u8"testprefix");
+        REQUIRE_FALSE(parentElement->AppendChild(*textNode).HasException());
+
+        REQUIRE(textNode->LookupNamespaceURI(u8"testprefix") == u8"http://a");
+
+        REQUIRE_FALSE(parentElement->RemoveChild(*textNode).HasException());
+      }
+    }
+  }
+
+  TEST_CASE("Node::IsDefaultNamespace", "[HTML][Node]")
+  {
+    CommonTestData data {};
+    auto element = CreateRef<NamespaceTestElement>(*data.Document, u8"testprefix");
+    REQUIRE_FALSE(element->IsDefaultNamespace(u8"foo"));
+    REQUIRE_FALSE(element->IsDefaultNamespace(u8"http://a"));
+    REQUIRE(element->IsDefaultNamespace(DOMStringAtom::Null()));
+  }
 
   TEST_CASE("Node::InsertBefore", "[HTML][Node]")
   {
