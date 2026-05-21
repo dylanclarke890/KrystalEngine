@@ -15,9 +15,8 @@
 
 namespace Krys::HTML
 {
-  LiveHTMLCollection::LiveHTMLCollection(WeakRef<ContainerNode> &&root,
-                                         LiveHTMLCollectionFilterFunc &&filter) noexcept
-      : HTMLCollection(NodeCollectionLiveness::Live), _root(Krys::Move(root)), _filter(Krys::Move(filter))
+  LiveHTMLCollection::LiveHTMLCollection(ContainerNode &root, LiveHTMLCollectionFilterFunc &&filter) noexcept
+      : HTMLCollection(NodeCollectionLiveness::Live), _root(CreateWeakRef(root)), _filter(Krys::Move(filter))
   {
   }
 
@@ -49,7 +48,6 @@ namespace Krys::HTML
   RawPtr<const Element> LiveHTMLCollection::Item(size_t index) const noexcept
   {
     return const_cast<LiveHTMLCollection *>(this)->Item(index);
-
   }
 
   RawPtr<Element> LiveHTMLCollection::operator[](size_t index) noexcept
@@ -155,7 +153,8 @@ namespace Krys::HTML
       {
         return element.get();
       }
-      if (element->NamespaceURI() == Namespaces::HTML && ElementAlgorithms::GetAttributeValue(*element, u8"name") == name)
+      if (element->NamespaceURI() == Namespaces::HTML
+          && ElementAlgorithms::GetAttributeValue(*element, u8"name") == name)
       {
         return element.get();
       }

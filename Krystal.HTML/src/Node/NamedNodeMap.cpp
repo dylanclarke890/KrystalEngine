@@ -11,22 +11,14 @@ namespace Krys::HTML
 {
   size_t NamedNodeMap::Length() noexcept
   {
-    if (auto element = _associatedElement.lock())
-    {
-      return element->_attributes.size();
-    }
-
-    return 0uz;
+    return _associatedElement->_attributes.size();
   }
 
   RefPtr<Attr> NamedNodeMap::Item(size_t index) noexcept
   {
-    if (auto element = _associatedElement.lock())
+    if (index < _associatedElement->_attributes.size())
     {
-      if (index < element->_attributes.size())
-      {
-        return element->_attributes[index];
-      }
+      return _associatedElement->_attributes[index];
     }
 
     return nullptr;
@@ -34,82 +26,53 @@ namespace Krys::HTML
 
   RefPtr<Attr> NamedNodeMap::GetNamedItem(DOMStringAtom qualifiedName) noexcept
   {
-    if (auto element = _associatedElement.lock())
-    {
-      return ShareRefPtr(ElementAlgorithms::GetAttributeByName(qualifiedName, *element));
-    }
-
-    return nullptr;
+    return ShareRefPtr(ElementAlgorithms::GetAttributeByName(qualifiedName, *_associatedElement));
   }
 
   RefPtr<Attr> NamedNodeMap::GetNamedItemNS(DOMStringAtom attrNamespace, DOMStringAtom localName) noexcept
   {
-    if (auto element = _associatedElement.lock())
-    {
-      return ShareRefPtr(ElementAlgorithms::GetAttributeByNamespace(attrNamespace, localName, *element));
-    }
-
-    return nullptr;
+    return ShareRefPtr(
+      ElementAlgorithms::GetAttributeByNamespace(attrNamespace, localName, *_associatedElement));
   }
 
   ExceptionOr<RefPtr<Attr>> NamedNodeMap::SetNamedItem(Attr &attr) noexcept
   {
-    if (auto element = _associatedElement.lock())
-    {
-      return ElementAlgorithms::SetAttribute(attr, *element);
-    }
-
-    return nullptr;
+    return ElementAlgorithms::SetAttribute(attr, *_associatedElement);
   }
 
   ExceptionOr<RefPtr<Attr>> NamedNodeMap::SetNamedItemNS(Attr &attr) noexcept
   {
-    if (auto element = _associatedElement.lock())
-    {
-      return ElementAlgorithms::SetAttribute(attr, *element);
-    }
-
-    return nullptr;
+    return ElementAlgorithms::SetAttribute(attr, *_associatedElement);
   }
 
   ExceptionOr<Ref<Attr>> NamedNodeMap::RemoveNamedItem(DOMStringAtom qualifiedName) noexcept
   {
-    if (auto element = _associatedElement.lock())
+    auto attr = ElementAlgorithms::RemoveAttributeByName(qualifiedName, *_associatedElement);
+    if (attr == nullptr)
     {
-      auto attr = ElementAlgorithms::RemoveAttributeByName(qualifiedName, *element);
-      if (attr == nullptr)
-      {
-        return Exception {ExceptionCode::NotFoundError};
-      }
-
-      return ShareRef(*attr);
+      return Exception {ExceptionCode::NotFoundError};
     }
 
-    return Exception {ExceptionCode::InvalidStateError};
+    return ShareRef(*attr);
   }
 
   ExceptionOr<Ref<Attr>> NamedNodeMap::RemoveNamedItemNS(DOMStringAtom attrNamespace,
                                                          DOMStringAtom localName) noexcept
   {
-    if (auto element = _associatedElement.lock())
+    auto attr = ElementAlgorithms::RemoveAttributeByNamespace(attrNamespace, localName, *_associatedElement);
+    if (attr == nullptr)
     {
-      auto attr = ElementAlgorithms::RemoveAttributeByNamespace(attrNamespace, localName, *element);
-      if (attr == nullptr)
-      {
-        return Exception {ExceptionCode::NotFoundError};
-      }
-
-      return ShareRef(*attr);
+      return Exception {ExceptionCode::NotFoundError};
     }
 
-    return Exception {ExceptionCode::InvalidStateError};
+    return ShareRef(*attr);
   }
-  
+
   RefPtr<Attr> NamedNodeMap::operator[](size_t index) noexcept
   {
     return Item(index);
   }
-  
+
   RefPtr<Attr> NamedNodeMap::operator[](DOMStringAtom qualifiedName) noexcept
   {
     return GetNamedItem(qualifiedName);

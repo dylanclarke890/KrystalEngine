@@ -1,8 +1,8 @@
 ﻿#include "Krystal.HTML/Node/RareData/ParentNodeRareData.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/MutationObserver/MutationObserver.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/HTMLCollection.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
@@ -17,8 +17,8 @@ namespace Krys::HTML
       return ShareRef(*children.get());
     }
 
-    auto children = CreateRef<LiveHTMLCollection>(CreateWeakRef(parent), [&](const Element &n)
-                                                  { return n.ParentNode() == &parent; });
+    auto children =
+      CreateRef<LiveHTMLCollection>(parent, [&](const Element &n) { return n.ParentNode() == &parent; });
     _children = CreateWeakPtr(children.get());
 
     return children;

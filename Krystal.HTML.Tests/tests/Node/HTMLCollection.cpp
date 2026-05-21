@@ -37,7 +37,7 @@ namespace Krys::Tests
             TextChild2(CreateRef<HTML::Text>(*Document, u8"")),
             ElementChild1(CreateRef<TestElement>(*Document)),
             ElementChild2(CreateRef<TestElement>(*Document)),
-            Collection(CreateRef<LiveHTMLCollection>(CreateWeakRef(*Element), Krys::Move(filter)))
+            Collection(CreateRef<LiveHTMLCollection>(*Element, Krys::Move(filter)))
       {
         REQUIRE_FALSE(Document->AppendChild(*Element).HasException());
         REQUIRE_FALSE(Element->AppendChild(*TextChild1).HasException());

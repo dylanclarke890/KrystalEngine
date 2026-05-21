@@ -36,12 +36,6 @@ namespace Krys::HTML
   private:
     DOMStringAtom _attributeName;
     TokenList _tokens;
-    // TODO(check): does this need to be a WeakRef instead? If the element is destroyed while someone still
-    // has a reference to the DOMTokenList, the CheckedRef will throw when it's next accessed. We can't really
-    // prevent someone from doing that since the DOMTokenList is exposed as a reference from the Element, so
-    // we might need to make sure it doesn't crash in that case. We could make it a WeakRef and then return
-    // empty values from the DOMTokenList if the element has been destroyed, but that might hide bugs where
-    // someone is keeping a reference to the DOMTokenList longer than they should be.
     CheckedRef<Element> _element;
     IsSupportedTokenFunction _isSupportedToken;
 

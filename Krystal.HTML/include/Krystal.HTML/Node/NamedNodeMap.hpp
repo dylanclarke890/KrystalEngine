@@ -16,11 +16,11 @@ namespace Krys::HTML
   class NamedNodeMap
   {
   private:
-    WeakRef<Element> _associatedElement;
+    CheckedRef<Element> _associatedElement;
 
   public:
     explicit NamedNodeMap(Element &associatedElement) noexcept
-        : _associatedElement(CreateWeakRef(associatedElement))
+        : _associatedElement(ShareCheckedRef(associatedElement))
     {
     }
 

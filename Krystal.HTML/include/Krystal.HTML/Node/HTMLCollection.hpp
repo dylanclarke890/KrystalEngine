@@ -51,7 +51,7 @@ namespace Krys::HTML
     LiveHTMLCollectionFilterFunc _filter;
 
   public:
-    LiveHTMLCollection(WeakRef<ContainerNode> &&root, LiveHTMLCollectionFilterFunc &&filter) noexcept;
+    LiveHTMLCollection(ContainerNode &root, LiveHTMLCollectionFilterFunc &&filter) noexcept;
 
     KRYS_NODISCARD RawPtr<Element> Item(size_t index) noexcept override;
     KRYS_NODISCARD RawPtr<const Element> Item(size_t index) const noexcept override;

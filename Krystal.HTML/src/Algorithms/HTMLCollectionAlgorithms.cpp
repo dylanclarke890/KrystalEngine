@@ -20,13 +20,13 @@ namespace Krys::HTML
   {
     if (qualifiedName == u8"*")
     {
-      return CreateRef<LiveHTMLCollection>(CreateWeakRef(root), [](const Element &) { return true; });
+      return CreateRef<LiveHTMLCollection>(root, [](const Element &) { return true; });
     }
 
     if (Is<HTMLDocument>(root.NodeDocument()))
     {
       DOMStringAtom qualifiedNameLowercase = ::Krys::Text::ToASCIILowercase(qualifiedName.View());
-      return CreateRef<LiveHTMLCollection>(CreateWeakRef(root),
+      return CreateRef<LiveHTMLCollection>(root,
                                            [qualifiedName, qualifiedNameLowercase](const Element &element)
                                            {
                                              if (element.NamespaceURI() == Namespaces::HTML)
@@ -40,7 +40,7 @@ namespace Krys::HTML
                                            });
     }
 
-    return CreateRef<LiveHTMLCollection>(CreateWeakRef(root), [qualifiedName](const Element &element)
+    return CreateRef<LiveHTMLCollection>(root, [qualifiedName](const Element &element)
                                          { return element._qualifiedName.Name() == qualifiedName; });
   }
 
@@ -55,23 +55,23 @@ namespace Krys::HTML
 
     if (namespaceUri == u8"*" && localName == u8"*")
     {
-      return CreateRef<LiveHTMLCollection>(CreateWeakRef(root), [](const Element &node) { return true; });
+      return CreateRef<LiveHTMLCollection>(root, [](const Element &node) { return true; });
     }
 
     if (namespaceUri == u8"*")
     {
-      return CreateRef<LiveHTMLCollection>(CreateWeakRef(root), [localName](const Element &element)
+      return CreateRef<LiveHTMLCollection>(root, [localName](const Element &element)
                                            { return element.LocalName() == localName; });
     }
 
     if (localName == u8"*")
     {
-      return CreateRef<LiveHTMLCollection>(CreateWeakRef(root), [namespaceUri](const Element &element)
+      return CreateRef<LiveHTMLCollection>(root, [namespaceUri](const Element &element)
                                            { return element.NamespaceURI() == namespaceUri; });
     }
 
     return CreateRef<LiveHTMLCollection>(
-      CreateWeakRef(root), [namespaceUri, localName](const Element &element)
+      root, [namespaceUri, localName](const Element &element)
       { return element.NamespaceURI() == namespaceUri && element.LocalName() == localName; });
   }
 
@@ -98,7 +98,7 @@ namespace Krys::HTML
     if (isQuirksMode)
     {
       return CreateRef<LiveHTMLCollection>(
-        CreateWeakRef(root),
+        root,
         [classesQuery = Krys::Move(classes)](const Element &element)
         {
           if (!element.HasAttribute(u8"class"))
@@ -116,7 +116,7 @@ namespace Krys::HTML
     }
 
     return CreateRef<LiveHTMLCollection>(
-      CreateWeakRef(root),
+      root,
       [classes = Krys::Move(classes)](const Element &element)
       {
         if (!element.HasAttribute(u8"class"))
