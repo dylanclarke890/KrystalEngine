@@ -126,7 +126,7 @@
     <ClCompile Include="tests\Node\HTMLCollection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Algorithms\NonDocumentTypeChildNode.cpp">
+    <ClCompile Include="tests\Mixins\NonDocumentTypeChildNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

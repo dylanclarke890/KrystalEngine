@@ -87,10 +87,6 @@ Source: https://dom.spec.whatwg.org
     Notes         : 
         - Implementation: QuerySelector and QuerySelectorAll require CSS parsing.
 
-4.2.7 Mixin NonDocumentTypeChildNode
-    Implementation: Full
-    Test Coverage : None
-
 4.2.8 Mixin ChildNode
     Implementation: Full
     Test Coverage : None
@@ -218,6 +214,8 @@ Source: https://dom.spec.whatwg.org
 4.2.2 Shadow tree
 
 4.2.3 Mutation algorithms
+
+4.2.7 Mixin NonDocumentTypeChildNode
 
 4.2.10 Old-style collections: NodeList and HTMLCollection (N/A)
 

@@ -159,7 +159,7 @@
   <ItemGroup>
     <ClCompile Include="catch_main.cpp" />
     <ClCompile Include="tests\Algorithms\MutationAlgorithms.cpp" />
-    <ClCompile Include="tests\Algorithms\NonDocumentTypeChildNode.cpp" />
+    <ClCompile Include="tests\Mixins\NonDocumentTypeChildNode.cpp" />
     <ClCompile Include="tests\Algorithms\ShadowRootAlgorithms.cpp" />
     <ClCompile Include="tests\DOMTokenList.cpp" />
     <ClCompile Include="tests\Events\CustomEvent.cpp" />
