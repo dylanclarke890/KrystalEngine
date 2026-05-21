@@ -155,8 +155,12 @@ namespace Krys::HTML
 
 #pragma region NonElementParentNode Mixin - https://dom.spec.whatwg.org/#interface-nonelementparentnode
 
+    /// @brief Returns the first element within node’s descendants whose ID is `elementId`.
+    /// @see https://dom.spec.whatwg.org/#dom-nonelementparentnode-getelementbyid
     RefPtr<Element> GetElementById(DOMStringView elementId) noexcept;
 
+    /// @brief Returns the first element within node’s descendants whose ID is `elementId`.
+    /// @see https://dom.spec.whatwg.org/#dom-nonelementparentnode-getelementbyid
     RefPtr<const Element> GetElementById(DOMStringView elementId) const noexcept;
 
 #pragma endregion

@@ -108,12 +108,12 @@ namespace Krys::HTML
 
   RefPtr<Element> DocumentFragment::GetElementById(DOMStringView elementId) noexcept
   {
-    return ShareRefPtr(Mixins::NonElementParentNode::GetElementById(*this, elementId));
+    return Mixins::NonElementParentNode::GetElementById(*this, elementId);
   }
 
   RefPtr<const Element> DocumentFragment::GetElementById(DOMStringView elementId) const noexcept
   {
-    return ShareRefPtr(Mixins::NonElementParentNode::GetElementById(*this, elementId));
+    return Mixins::NonElementParentNode::GetElementById(*this, elementId);
   }
 
 #pragma endregion

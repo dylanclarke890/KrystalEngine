@@ -11,7 +11,7 @@
 
 namespace Krys::HTML::Mixins
 {
-  RawPtr<Element> NonElementParentNode::GetElementById(ContainerNode &node, DOMStringView id) noexcept
+  RefPtr<Element> NonElementParentNode::GetElementById(ContainerNode &node, DOMStringView id) noexcept
   {
     auto descendants = DescendantRange(node);
 
@@ -25,10 +25,10 @@ namespace Krys::HTML::Mixins
                       return false;
                     });
 
-    return it != std::ranges::end(descendants) ? DynamicDowncast<Element>(&*it) : nullptr;
+    return it != std::ranges::end(descendants) ? ShareRefPtr(DynamicDowncast<Element>(&*it)) : nullptr;
   }
 
-  RawPtr<const Element> NonElementParentNode::GetElementById(const ContainerNode &node,
+  RefPtr<const Element> NonElementParentNode::GetElementById(const ContainerNode &node,
                                                              DOMStringView id) noexcept
   {
     return GetElementById(const_cast<ContainerNode &>(node), id);

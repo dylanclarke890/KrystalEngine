@@ -1,6 +1,5 @@
 ﻿#include "Krystal.HTML/Mixins/NonDocumentTypeChildNode.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CharacterData.hpp"

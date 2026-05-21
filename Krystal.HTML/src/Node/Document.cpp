@@ -398,12 +398,12 @@ namespace Krys::HTML
 
   RefPtr<Element> Document::GetElementById(DOMStringView elementId) noexcept
   {
-    return ShareRefPtr(Mixins::NonElementParentNode::GetElementById(*this, elementId));
+    return Mixins::NonElementParentNode::GetElementById(*this, elementId);
   }
 
   RefPtr<const Element> Document::GetElementById(DOMStringView elementId) const noexcept
   {
-    return ShareRefPtr(Mixins::NonElementParentNode::GetElementById(*this, elementId));
+    return Mixins::NonElementParentNode::GetElementById(*this, elementId);
   }
 
 #pragma endregion
