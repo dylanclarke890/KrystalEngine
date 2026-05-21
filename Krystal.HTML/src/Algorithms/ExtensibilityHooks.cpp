@@ -54,17 +54,10 @@ namespace Krys::HTML
     auto *parent = movedNode.ParentNode();
     assert(parent != nullptr);
 
-    // TODO(check): the spec restricts moving to nodes that are within the same tree so the logic below
-    // probably isn't necessary. Verify and remove if not needed.
-
-    if (parent->IsConnected())
-    {
-      movedNode.SetEventTargetFlag(EventTargetFlag::IsConnected);
-    }
-    else
-    {
-      movedNode.ClearEventTargetFlag(EventTargetFlag::IsConnected);
-    }
+    // NOTE: a node can be moved from a shadow tree to a light tree and vice versa but only as long as
+    // they share the same shadow-including root (i.e. they're in the same document). This means that
+    // `IsConnected` will be the same for the node before and after the move but `IsInShadowTree` may be
+    // different.
 
     if (parent->IsInShadowTree())
     {
