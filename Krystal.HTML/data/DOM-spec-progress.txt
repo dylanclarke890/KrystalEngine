@@ -66,10 +66,6 @@ TODO:
     Implementation: Full
     Test Coverage : None
 
-4.2.8 Mixin ChildNode
-    Implementation: Full
-    Test Coverage : None
-
 4.2.9 Mixin Slottable
     Implementation: Full
     Test Coverage : None
@@ -197,6 +193,8 @@ TODO:
 4.2.4 Mixin NonElementParentNode
 
 4.2.7 Mixin NonDocumentTypeChildNode
+
+4.2.8 Mixin ChildNode
 
 4.2.10 Old-style collections: NodeList and HTMLCollection (N/A)
 

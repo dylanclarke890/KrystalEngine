@@ -50,9 +50,25 @@ namespace Krys::HTML
 
 #pragma region ChildNode Mixin - https://dom.spec.whatwg.org/#childnode
 
+    /// @brief Inserts `nodes` just before `this`, while replacing strings in `nodes` with equivalent Text
+    /// nodes.
+    /// @throws HierarchyRequestError if the constraints of the node tree are violated.
+    /// @see https://dom.spec.whatwg.org/#dom-childnode-before
     ExceptionOr<void> Before(const List<NodeOrString> &nodes) noexcept;
+
+    /// @brief Inserts `nodes` just after `this`, while replacing strings in `nodes` with equivalent Text
+    /// nodes.
+    /// @throws HierarchyRequestError if the constraints of the node tree are violated.
+    /// @see https://dom.spec.whatwg.org/#dom-childnode-after
     ExceptionOr<void> After(const List<NodeOrString> &nodes) noexcept;
+
+    /// @brief Replaces `this` with `nodes`, while replacing strings in `nodes` with equivalent Text nodes.
+    /// @throws HierarchyRequestError if the constraints of the node tree are violated.
+    /// @see https://dom.spec.whatwg.org/#dom-childnode-replacewith
     ExceptionOr<void> ReplaceWith(const List<NodeOrString> &nodes) noexcept;
+
+    /// @brief Removes `this`.
+    /// @see https://dom.spec.whatwg.org/#dom-childnode-remove
     ExceptionOr<void> Remove() noexcept;
 
 #pragma endregion

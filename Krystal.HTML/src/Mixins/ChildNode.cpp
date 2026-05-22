@@ -1,8 +1,8 @@
 ﻿#include "Krystal.HTML/Mixins/ChildNode.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Mixins/ParentNode.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/Mixins/ParentNode.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
@@ -17,7 +17,8 @@ namespace Krys::HTML::Mixins
     /// @brief Return the first node in the given range that isn't contained in the given list of nodes, or
     /// null if there are no such nodes.
     template <std::ranges::forward_range TRange>
-    static RawPtr<Node> ViableSibling(TRange &&range, const List<NodeOrString> &nodes) noexcept
+    KRYS_NODISCARD static RawPtr<Node> FirstViableSibling(TRange &&range,
+                                                          const List<NodeOrString> &nodes) noexcept
     {
       for (auto &item : range)
       {
@@ -25,7 +26,7 @@ namespace Krys::HTML::Mixins
         {
           if (std::holds_alternative<Ref<Node>>(nodeOrString))
           {
-            return std::get<Ref<Node>>(nodeOrString).get() == &item;
+            return std::get<Ref<Node>>(nodeOrString) == &item;
           }
 
           return false;
@@ -47,9 +48,9 @@ namespace Krys::HTML::Mixins
     {
       return {};
     }
-    auto &parent = *childNode.ParentNode();
 
-    auto *viablePreviousSibling = ViableSibling(PreviousSiblingRange(childNode), nodes);
+    auto &parent = *childNode.ParentNode();
+    auto *viablePreviousSibling = FirstViableSibling(PreviousSiblingRange(childNode), nodes);
 
     auto node = Mixins::ParentNode::ConvertNodesIntoNode(nodes, childNode.NodeDocument());
     if (node.HasException())
@@ -75,9 +76,9 @@ namespace Krys::HTML::Mixins
     {
       return {};
     }
-    auto &parent = *childNode.ParentNode();
 
-    auto *viableNextSibling = ViableSibling(NextSiblingRange(childNode), nodes);
+    auto &parent = *childNode.ParentNode();
+    auto *viableNextSibling = FirstViableSibling(NextSiblingRange(childNode), nodes);
 
     auto node = Mixins::ParentNode::ConvertNodesIntoNode(nodes, childNode.NodeDocument());
     if (node.HasException())
@@ -100,9 +101,9 @@ namespace Krys::HTML::Mixins
     {
       return {};
     }
-    auto &parent = *childNode.ParentNode();
 
-    auto *viableNextSibling = ViableSibling(NextSiblingRange(childNode), nodes);
+    auto &parent = *childNode.ParentNode();
+    auto *viableNextSibling = FirstViableSibling(NextSiblingRange(childNode), nodes);
 
     auto node = Mixins::ParentNode::ConvertNodesIntoNode(nodes, childNode.NodeDocument());
     if (node.HasException())
@@ -116,8 +117,6 @@ namespace Krys::HTML::Mixins
       {
         return result.ReleaseException();
       }
-
-      return {};
     }
     else
     {
@@ -126,18 +125,18 @@ namespace Krys::HTML::Mixins
       {
         return result.ReleaseException();
       }
-
-      return {};
     }
+
+    return {};
   }
 
-  ExceptionOr<void> ChildNode::Remove(Node &childNode) noexcept
+  ExceptionOr<void> ChildNode::Remove(Node &node) noexcept
   {
-    if (!childNode.ParentNode())
+    if (node.ParentNode() == nullptr)
     {
       return {};
     }
 
-    return MutationAlgorithms::Remove(childNode, SuppressObservers(false));
+    return MutationAlgorithms::Remove(node, SuppressObservers(false));
   }
 }
