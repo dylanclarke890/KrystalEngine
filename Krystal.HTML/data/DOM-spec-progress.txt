@@ -11,6 +11,14 @@ TODO:
   - 3.1 Interface AbortController and 3.2 Interface AbortSignal - https://dom.spec.whatwg.org/#interface-abortcontroller
     - The apis have been mostly implemented but a microtask queue is needed to properly implement the aborting behavior.
 
+  - 4.8 Interface ShadowRoot - https://dom.spec.whatwg.org/#interface-shadowroot
+    - 'onslotchange' event handler and 'slotchange' event support.
+  
+  - 4.9 Interface Element - https://dom.spec.whatwg.org/#interface-element
+    - Closest/Matches requires CSS parsing.
+    - AttachShadow and ShadowRoot missing test cases.
+    - CustomElementRegistry missing test cases.
+
 ======================================================================
 2. EVENTS
 ======================================================================
@@ -96,20 +104,6 @@ TODO:
         - Implementation: CharacterSet - Document needs the encoding used passed to it on creation.
         - Implementation: ContentType - Document needs this passed to it on creation.
         - Implementation: CustomElementRegistry needs checking.
-
-4.8 Interface ShadowRoot
-    Implementation: Partial
-    Test Coverage : None
-    Notes 	      : 
-        - Implementation: 'onslotchange' event handler and 'slotchange' event support.
-
-4.9 Interface Element
-    Implementation: Partial
-    Test Coverage : Partial
-    Notes 	      : 
-        - Implementation: Closest/Matches requires CSS parsing.
-        - Test Coverage : AttachShadow and ShadowRoot.
-        - Test Coverage : CustomElementRegistry.
 
 ======================================================================
 ======================================================================
