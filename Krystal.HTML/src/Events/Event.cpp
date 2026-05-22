@@ -17,13 +17,7 @@ namespace Krys::HTML
   {
     List<Ref<EventTarget>> composedPath {};
 
-    if (_path == nullptr)
-    {
-      return composedPath;
-    }
-
-    auto &path = _path->PathItems();
-    if (path.empty())
+    if (_path.empty())
     {
       return composedPath;
     }
@@ -34,11 +28,11 @@ namespace Krys::HTML
 
     int32 currentTargetIndex = 0;
     int32 currentTargetHiddenSubtreeLevel = 0;
-    int32 index = static_cast<int32>(path.size()) - 1;
+    int32 index = static_cast<int32>(_path.size()) - 1;
 
     while (index >= 0)
     {
-      auto &item = path[index];
+      auto &item = _path[index];
 
       if (item.RootOfClosedTree())
       {
@@ -65,7 +59,7 @@ namespace Krys::HTML
     index = currentTargetIndex - 1;
     while (index >= 0)
     {
-      auto &item = path[index];
+      auto &item = _path[index];
 
       if (item.RootOfClosedTree())
       {
@@ -94,9 +88,9 @@ namespace Krys::HTML
 
     index = currentTargetIndex + 1;
 
-    while (index < static_cast<int32>(path.size()))
+    while (index < static_cast<int32>(_path.size()))
     {
-      auto &item = path[index];
+      auto &item = _path[index];
 
       if (item.SlotInClosedTree())
       {

@@ -23,17 +23,7 @@ TODO:
 2. EVENTS
 ======================================================================
 
-2.2 Interface Event
-    Implementation: Full
-    Test Coverage : Partial
-    Notes         :
-        - Test Coverage: ComposedPath, Target, CurrentTarget, RelatedTarget.
-
 2.9 Dispatching events
-    Implementation: Full
-    Test Coverage : None
-
-2.10 Firing events
     Implementation: Full
     Test Coverage : None
 
@@ -129,6 +119,8 @@ TODO:
 
 2.1 Introduction to "DOM Events" (N/A)
 
+2.2 Interface Event
+
 2.3 Legacy extensions to the Window interface
         - Only thing to implement is the violation below which isn't planned for now.
         - SPEC-VIOLATION(DOM, HTML) -> Window interface currently not supported
@@ -142,6 +134,8 @@ TODO:
 2.8 Observing event listeners
         - Only thing to implement is the violation below which isn't planned for now.
         - SPEC-VIOLATION(DOM, SERVICE-WORKER) -> ServiceWorkGlobalScope currently not supported
+
+2.10 Firing events
 
 2.11 Action versus occurrence (N/A)
 

@@ -31,10 +31,9 @@ namespace Krys::HTML
   {
     if (!event.Composed())
     {
-      auto &path = event._path->PathItems();
-      if (path.size() >= 1)
+      if (event._path.size() >= 1)
       {
-        auto &firstItem = path[0];
+        auto &firstItem = event._path[0];
         if (auto *invocationTargetNode = DynamicDowncast<Node>(firstItem.InvocationTarget()))
         {
           if (&TreeQueries::Root(*invocationTargetNode) == this)

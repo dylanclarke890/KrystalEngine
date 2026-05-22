@@ -60,21 +60,4 @@ namespace Krys::HTML
       return _slotInClosedTree;
     }
   };
-
-  class EventPath : public RefCounted<EventPath>
-  {
-  private:
-    List<EventPathItem> _pathItems;
-
-  public:
-    KRYS_NODISCARD const List<EventPathItem> &PathItems() const noexcept
-    {
-      return _pathItems;
-    }
-
-    KRYS_NODISCARD List<EventPathItem> &PathItems() noexcept
-    {
-      return _pathItems;
-    }
-  };
 }

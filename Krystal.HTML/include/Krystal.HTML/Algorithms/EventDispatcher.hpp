@@ -31,7 +31,7 @@ namespace Krys::HTML
 
     /// @see https://dom.spec.whatwg.org/#concept-event-path-append
     static void AppendToEventPath(Event &event, EventTarget &invocationTarget,
-                                  RawPtr<EventTarget> shadowAdjustedTarget, EventTarget &relatedTarget,
+                                  RawPtr<EventTarget> shadowAdjustedTarget, RawPtr<EventTarget> relatedTarget,
                                   List<Ref<EventTarget>> &touchTargets, bool slotInClosedTree) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-event-listener-invoke

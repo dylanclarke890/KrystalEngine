@@ -46,8 +46,7 @@ namespace Krys::HTML
         touchTargets.push_back(ShareRef(*ShadowRootAlgorithms::Retarget(touchTarget.get(), *target)));
       }
 
-      assert(relatedTarget);
-      AppendToEventPath(event, *target, targetOverride, *relatedTarget, touchTargets, false);
+      AppendToEventPath(event, *target, targetOverride, relatedTarget, touchTargets, false);
 
       bool isActivationEvent = event.IsMouseEvent() && event.Type() == EventNames::Click;
       if (isActivationEvent && target->HasActivationBehavior())
@@ -98,8 +97,7 @@ namespace Krys::HTML
             activationTarget = parent;
           }
 
-          assert(relatedTarget);
-          AppendToEventPath(event, *parent, targetOverride, *relatedTarget, touchTargets, slotInClosedTree);
+          AppendToEventPath(event, *parent, targetOverride, relatedTarget, touchTargets, slotInClosedTree);
         }
         else if (parent == relatedTarget)
         {
@@ -112,7 +110,7 @@ namespace Krys::HTML
           {
             activationTarget = target;
           }
-          AppendToEventPath(event, *parent, target, *relatedTarget, touchTargets, slotInClosedTree);
+          AppendToEventPath(event, *parent, target, relatedTarget, touchTargets, slotInClosedTree);
         }
 
         if (parent != nullptr)
@@ -124,10 +122,10 @@ namespace Krys::HTML
       }
 
       auto clearTargetStruct =
-        std::find_if(event._path->PathItems().rbegin(), event._path->PathItems().rend(),
+        std::find_if(event._path.rbegin(), event._path.rend(),
                      [](const EventPathItem &i) { return i.ShadowAdjustedTarget() != nullptr; });
 
-      if (clearTargetStruct != event._path->PathItems().rend())
+      if (clearTargetStruct != event._path.rend())
       {
         auto IsNodeWithShadowRoot = [](RawPtr<EventTarget> target)
         {
@@ -170,7 +168,7 @@ namespace Krys::HTML
         activationTarget->LegacyPreActivationBehavior(event);
       }
 
-      for (auto &structItem : event._path->PathItems() | std::views::reverse)
+      for (auto &structItem : event._path | std::views::reverse)
       {
         if (structItem.ShadowAdjustedTarget() != nullptr)
         {
@@ -184,7 +182,7 @@ namespace Krys::HTML
         Invoke(structItem, event, EventPhaseType::CAPTURING_PHASE, legacyOutputDidListenersThrowFlag);
       }
 
-      for (auto &structItem : event._path->PathItems())
+      for (auto &structItem : event._path)
       {
         if (structItem.ShadowAdjustedTarget() != nullptr)
         {
@@ -206,7 +204,7 @@ namespace Krys::HTML
 
     event._eventPhase = EventPhaseType::NONE;
     event._currentTarget = nullptr;
-    event._path->PathItems().clear();
+    event._path.clear();
     event._dispatched = false;
     event._stopPropagation = false;
     event._stopImmediatePropagation = false;
@@ -235,7 +233,8 @@ namespace Krys::HTML
 
   void EventDispatcher::AppendToEventPath(Event &event, EventTarget &invocationTarget,
                                           RawPtr<EventTarget> shadowAdjustedTarget,
-                                          EventTarget &relatedTarget, List<Ref<EventTarget>> &touchTargets,
+                                          RawPtr<EventTarget> relatedTarget,
+                                          List<Ref<EventTarget>> &touchTargets,
                                           bool slotInClosedTree) noexcept
   {
     bool invocationTargetInShadowTree = false;
@@ -257,24 +256,22 @@ namespace Krys::HTML
       }
     }
 
-    event._path->PathItems().emplace_back(invocationTarget, invocationTargetInShadowTree,
-                                          shadowAdjustedTarget, &relatedTarget, touchTargets,
-                                          rootOfClosedTree, slotInClosedTree);
+    event._path.push_back(EventPathItem {invocationTarget, invocationTargetInShadowTree, shadowAdjustedTarget,
+                                         relatedTarget, touchTargets, rootOfClosedTree, slotInClosedTree});
   }
 
   void EventDispatcher::Invoke(EventPathItem &pathStruct, Event &event, EventPhaseType phase,
                                bool legacyOutputDidListenersThrowFlag) noexcept
   {
-    auto indexOfStruct =
-      std::distance(event._path->PathItems().rbegin(),
-                    std::find_if(event._path->PathItems().rbegin(), event._path->PathItems().rend(),
-                                 [&](const EventPathItem &i) { return &i == &pathStruct; }));
+    auto indexOfStruct = std::distance(
+      event._path.rbegin(), std::find_if(event._path.rbegin(), event._path.rend(),
+                                         [&](const EventPathItem &i) { return &i == &pathStruct; }));
     auto lastNonNullShadowAdjustedTarget =
-      std::find_if(event._path->PathItems().rbegin(), event._path->PathItems().rbegin() + indexOfStruct,
+      std::find_if(event._path.rbegin(), event._path.rbegin() + indexOfStruct,
                    [](const EventPathItem &i) { return i.ShadowAdjustedTarget() != nullptr; });
-    assert(lastNonNullShadowAdjustedTarget != event._path->PathItems().rend());
+    assert(lastNonNullShadowAdjustedTarget != event._path.rend());
 
-    event._target = lastNonNullShadowAdjustedTarget != event._path->PathItems().rend()
+    event._target = lastNonNullShadowAdjustedTarget != event._path.rend()
                       ? ShareRefPtr(lastNonNullShadowAdjustedTarget->ShadowAdjustedTarget())
                       : nullptr;
     event.RelatedTarget(ShareRefPtr(pathStruct.RelatedTarget()));

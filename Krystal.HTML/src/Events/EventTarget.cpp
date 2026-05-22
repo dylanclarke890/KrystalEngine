@@ -146,7 +146,7 @@ namespace Krys::HTML
         return true;
       }
 
-      if (node->NodeDocument().DocumentElement().get() == node)
+      if (node->NodeDocument().DocumentElement().get() == &eventTarget)
       {
         return true;
       }

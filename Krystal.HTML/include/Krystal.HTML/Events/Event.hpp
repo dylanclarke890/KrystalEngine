@@ -32,7 +32,7 @@ namespace Krys::HTML
     RefPtr<EventTarget> _target {nullptr};
     RefPtr<EventTarget> _currentTarget {nullptr};
     DOMHighResTimeStamp _timeStamp {};
-    RefPtr<EventPath> _path;
+    List<EventPathItem> _path;
     EventPhaseType _eventPhase : BitCount<EventPhaseType>() {EventPhaseType::NONE};
 
     bool _isTrusted : 1 {false};
@@ -180,11 +180,6 @@ namespace Krys::HTML
     }
 
 #pragma endregion
-
-    void SetEventPath(Ref<EventPath> &&path) noexcept
-    {
-      _path = std::move(path);
-    }
 
     KRYS_NODISCARD bool IsImmediatePropagationStopped() const noexcept
     {
