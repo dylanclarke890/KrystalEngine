@@ -182,6 +182,7 @@
     <ClCompile Include="tests\Node\ContainerNode.cpp" />
     <ClCompile Include="tests\Node\DocumentFragment.cpp" />
     <ClCompile Include="tests\Node\DocumentType.cpp" />
+    <ClCompile Include="tests\Node\DOMImplementation.cpp" />
     <ClCompile Include="tests\Node\Element.cpp" />
     <ClCompile Include="tests\Node\HTMLCollection.cpp" />
     <ClCompile Include="tests\Node\NamedNodeMap.cpp" />

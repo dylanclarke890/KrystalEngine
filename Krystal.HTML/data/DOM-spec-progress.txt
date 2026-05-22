@@ -8,6 +8,9 @@ TODO:
   - 4.2.6 Mixin ParentNode - https://dom.spec.whatwg.org/#dom-parentnode-queryselector
     - QuerySelector and QuerySelectorAll require CSS parsing.
 
+  - 3.1 Interface AbortController and 3.2 Interface AbortSignal - https://dom.spec.whatwg.org/#interface-abortcontroller
+    - The apis have been mostly implemented but a microtask queue is needed to properly implement the aborting behavior.
+
 ======================================================================
 2. EVENTS
 ======================================================================
@@ -23,18 +26,6 @@ TODO:
     Test Coverage : None
 
 2.10 Firing events
-    Implementation: Full
-    Test Coverage : None
-
-======================================================================
-3. ABORTING ONGOING ACTIVITIES
-======================================================================
-
-3.1 Interface AbortController
-    Implementation: Full
-    Test Coverage : None
-
-3.2 Interface AbortSignal
     Implementation: Full
     Test Coverage : None
 
@@ -104,15 +95,7 @@ TODO:
         - Implementation: Validate name for CreateProcessingInstruction's target.
         - Implementation: CharacterSet - Document needs the encoding used passed to it on creation.
         - Implementation: ContentType - Document needs this passed to it on creation.
-        - Implementation: ElementFactory::CreateElement needs it's implementation finishing.
         - Implementation: CustomElementRegistry needs checking.
-
-
-4.5.1 Interface DOMImplementation
-    Implementation: Partial
-    Test Coverage : None
-    Notes 	      : 
-        - Implementation: CreateDocument/CreateHTMLDocument needs to set the origin of the new document.
 
 4.8 Interface ShadowRoot
     Implementation: Partial
@@ -203,6 +186,8 @@ TODO:
 4.2.10.2 Interface HTMLCollection
 
 4.4 Interface Node
+
+4.5.1 Interface DOMImplementation
 
 4.6 Interface DocumentType
 
