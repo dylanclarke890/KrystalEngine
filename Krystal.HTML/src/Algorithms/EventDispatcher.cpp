@@ -21,17 +21,18 @@ namespace Krys::HTML
                                          bool legacyTargetOverrideFlag,
                                          bool legacyOutputDidListenersThrowFlag) noexcept
   {
+    // NOTE: `target` is intentionally a raw pointer instead of a reference as we reassign the target later
+    // on, would be a pain to do with a reference.
     assert(target);
     event._dispatched = true;
 
     auto *targetOverride = target;
-    if (legacyTargetOverrideFlag)
+    if (legacyTargetOverrideFlag) // only used by HTML and only when target is a Window object.
     {
-      // legacy target override flag is only used by HTML and only when target is a Window object.
       assert(target->IsWindow());
-
-      // SPEC-VIOLATION(DOM, HTML): We don't actually implement Window.
+      // SPEC-VIOLATION(DOM, HTML): We don't actually implement Window. Might implement in the future.
       // if legacy target override flag is given, let targetOverride be target’s associated Document.
+      assert(false && "Not implemented");
     }
 
     RawPtr<EventTarget> activationTarget = nullptr;

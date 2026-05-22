@@ -43,14 +43,25 @@ namespace Krys::HTML
                             EventPhaseType phase, bool invocationTargetInShadowTree,
                             bool &legacyOutputDidListenersThrowFlag) noexcept;
 
+    /// @brief Fires an event named `e` at `target`. Returns false if the event is
+    /// cancelable and at least one of the event handlers which received the event called `PreventDefault()`,
+    /// otherwise returns true.
+    /// @tparam TEvent The type of event to fire, must derive from `Event`. Defaults to `Event`.
+    /// @param e The type of the event to fire.
+    /// @param target The target to fire the event on.
+    /// @param idlAttributeInitializer An optional callback which initializes the event's IDL attributes. The
+    /// event is passed as an argument to the callback, and the callback is expected to modify the event's
+    /// attributes directly.
+    /// @param legacyTargetOverrideFlag If true, the event will be dispatched with the legacy target override
+    /// flag set.
+    /// @note `legacyTargetOverrideFlag` is only used by HTML when firing events on Window objects, and causes
+    /// the event to be dispatched to the Document associated with the Window instead of the Window itself.
     /// @see https://dom.spec.whatwg.org/#concept-event-fire
     template <DerivedFrom<Event> TEvent = Event>
     static bool FireEvent(DOMStringAtom e, EventTarget &target,
                           EventIDLInitializer<TEvent> idlAttributeInitializer = nullptr,
                           bool legacyTargetOverrideFlag = false) noexcept
     {
-      // SPEC-VIOLATION(HTML): realms and global objects currently not supported.
-      // Let event be the result of creating an event given eventConstructor, in the relevant realm of target.
       Ref<TEvent> event = EventFactory::Create<TEvent>();
       event->_type = e;
 
