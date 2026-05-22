@@ -502,9 +502,10 @@ namespace Krys::HTML
   constexpr auto Last(TRange &&range, Predicate &&pred) noexcept
   {
     auto it = std::ranges::begin(range);
-    auto last = it;
+    auto end = std::ranges::end(range);
+    auto last = end;
 
-    for (; it != std::ranges::end(range); ++it)
+    for (; it != end; ++it)
     {
       if (pred(*it))
       {

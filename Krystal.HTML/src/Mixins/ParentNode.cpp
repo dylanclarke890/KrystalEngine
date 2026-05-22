@@ -18,13 +18,13 @@ namespace Krys::HTML::Mixins
   ExceptionOr<Ref<Node>> ParentNode::ConvertNodesIntoNode(const List<NodeOrString> &nodes,
                                                           Document &document) noexcept
   {
-    List<Ref<Node>> nodeList;
+    SmallNodeList nodeList;
     for (auto &nodeOrString : nodes)
     {
       if (std::holds_alternative<DOMString>(nodeOrString))
       {
         DOMString copy = std::get<DOMString>(nodeOrString);
-        nodeList.emplace_back(CreateRef<Text>(document, Krys::Move(copy)));
+        nodeList.emplace_back(document.CreateTextNode(Krys::Move(copy)));
       }
       else
       {
@@ -32,21 +32,47 @@ namespace Krys::HTML::Mixins
       }
     }
 
-    if (nodeList.size() == 1)
+    if (nodeList.size() == 1uz)
     {
       return nodeList[0];
     }
 
-    auto fragment = CreateRef<DocumentFragment>(document);
+    Ref<Node> fragment = CreateRef<DocumentFragment>(document);
     for (auto &node : nodeList)
     {
-      if (auto result = MutationAlgorithms::Append(*node, *fragment); result.HasException())
+      if (auto result = MutationAlgorithms::Append(*node, Downcast<ContainerNode>(*fragment));
+          result.HasException())
       {
         return result.ReleaseException();
       }
     }
 
-    return AdoptRef<Node>(*fragment);
+    return fragment;
+  }
+
+  RefPtr<Element> ParentNode::FirstElementChild(ContainerNode &node) noexcept
+  {
+    return ShareRefPtr(TreeTraversal::FirstElementChild(node));
+  }
+
+  RefPtr<const Element> ParentNode::FirstElementChild(const ContainerNode &node) noexcept
+  {
+    return ShareRefPtr(TreeTraversal::FirstElementChild(node));
+  }
+
+  RefPtr<Element> ParentNode::LastElementChild(ContainerNode &node) noexcept
+  {
+    return ShareRefPtr(TreeTraversal::LastElementChild(node));
+  }
+
+  RefPtr<const Element> ParentNode::LastElementChild(const ContainerNode &node) noexcept
+  {
+    return ShareRefPtr(TreeTraversal::LastElementChild(node));
+  }
+
+  size_t ParentNode::ChildElementCount(const ContainerNode &node) noexcept
+  {
+    return TreeQueries::ChildElementCount(node);
   }
 
   ExceptionOr<void> ParentNode::Prepend(ContainerNode &parent, const List<NodeOrString> &nodes) noexcept

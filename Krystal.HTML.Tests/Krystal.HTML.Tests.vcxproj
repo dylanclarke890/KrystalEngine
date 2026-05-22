@@ -172,6 +172,7 @@
     <ClCompile Include="tests\Algorithms\NameValidation.cpp" />
     <ClCompile Include="tests\Algorithms\Mixins.cpp" />
     <ClCompile Include="tests\Mixins\NonElementParentNode.cpp" />
+    <ClCompile Include="tests\Mixins\ParentNode.cpp" />
     <ClCompile Include="tests\MutationObserver\MutationObserver.cpp" />
     <ClCompile Include="tests\Node\Attr.cpp" />
     <ClCompile Include="tests\Node\CDATASection.cpp" />

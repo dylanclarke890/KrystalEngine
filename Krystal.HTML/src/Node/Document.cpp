@@ -96,14 +96,14 @@ namespace Krys::HTML
   {
     auto children = ChildNodeRange(*this);
     auto it = FirstOfType<DocumentType>(children);
-    return ShareRefPtr(it == std::ranges::end(children) ? nullptr : Downcast<DocumentType>(&*it));
+    return it == std::ranges::end(children) ? nullptr : ShareRefPtr(Downcast<DocumentType>(&*it));
   }
 
   RefPtr<const DocumentType> Document::DocType() const noexcept
   {
     auto children = ConstChildNodeRange(*this);
     auto it = FirstOfType<DocumentType>(children);
-    return ShareRefPtr(it == std::ranges::end(children) ? nullptr : Downcast<DocumentType>(&*it));
+    return it == std::ranges::end(children) ? nullptr :  ShareRefPtr(Downcast<DocumentType>(&*it));
   }
 
   RefPtr<Element> Document::DocumentElement() noexcept
@@ -263,7 +263,7 @@ namespace Krys::HTML
       // If node is a DocumentFragment node whose host is non-null, then return.
       if (auto host = documentFragment._host.lock())
       {
-        return ShareRef<Node>(node);
+        return ShareRef(node);
       }
     }
 
@@ -272,9 +272,11 @@ namespace Krys::HTML
       return adoptResult.ReleaseException();
     }
 
-    return ShareRef<Node>(node);
+    return ShareRef(node);
   }
 
+  // NOTE: MSVC says this method can be made const but it's lying, Attr constructor needs a non-const Document
+  // reference and we can't make it const without breaking that.
   ExceptionOr<Ref<Attr>> Document::CreateAttribute(DOMStringAtom localName) noexcept
   {
     if (!NameValidation::IsValidAttributeLocalName(localName.View()))
@@ -339,27 +341,27 @@ namespace Krys::HTML
 
   RefPtr<const Element> Document::FirstElementChild() const noexcept
   {
-    return ShareRefPtr(TreeTraversal::FirstElementChild(*this));
+    return Mixins::ParentNode::FirstElementChild(*this);
   }
 
   RefPtr<Element> Document::FirstElementChild() noexcept
   {
-    return ShareRefPtr(TreeTraversal::FirstElementChild(*this));
+    return Mixins::ParentNode::FirstElementChild(*this);
   }
 
   RefPtr<const Element> Document::LastElementChild() const noexcept
   {
-    return ShareRefPtr(TreeTraversal::LastElementChild(*this));
+    return Mixins::ParentNode::LastElementChild(*this);
   }
 
   RefPtr<Element> Document::LastElementChild() noexcept
   {
-    return ShareRefPtr(TreeTraversal::LastElementChild(*this));
+    return Mixins::ParentNode::LastElementChild(*this);
   }
 
   size_t Document::ChildElementCount() const noexcept
   {
-    return TreeQueries::ChildElementCount(*this);
+    return Mixins::ParentNode::ChildElementCount(*this);
   }
 
   ExceptionOr<void> Document::Prepend(const List<NodeOrString> &nodes) noexcept

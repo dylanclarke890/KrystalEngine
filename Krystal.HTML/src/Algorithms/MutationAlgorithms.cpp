@@ -639,6 +639,8 @@ namespace Krys::HTML
 
   ExceptionOr<void> MutationAlgorithms::Remove(Node &node, SuppressObservers suppressObservers) noexcept
   {
+    auto protectedNode = Protect(node);
+
     assert(node.ParentNode() != nullptr);
     auto &parent = *node.ParentNode();
 
@@ -724,7 +726,7 @@ namespace Krys::HTML
     if (!suppressObservers)
     {
       TreeMutationDispatcher::QueueTreeMutationRecord(
-        parent, {}, {ShareRef(node)}, ShareRefPtr(oldPreviousSibling), ShareRefPtr(oldNextSibling));
+        parent, {}, {Krys::Move(protectedNode)}, ShareRefPtr(oldPreviousSibling), ShareRefPtr(oldNextSibling));
     }
 
     ExtensibilityHooks::NodeChildrenChanged(parent);

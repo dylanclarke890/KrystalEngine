@@ -450,27 +450,27 @@ namespace Krys::HTML
 
   RefPtr<const Element> Element::FirstElementChild() const noexcept
   {
-    return ShareRefPtr(TreeTraversal::FirstElementChild(*this));
+    return Mixins::ParentNode::FirstElementChild(*this);
   }
 
   RefPtr<Element> Element::FirstElementChild() noexcept
   {
-    return ShareRefPtr(TreeTraversal::FirstElementChild(*this));
+    return Mixins::ParentNode::FirstElementChild(*this);
   }
 
   RefPtr<const Element> Element::LastElementChild() const noexcept
   {
-    return ShareRefPtr(TreeTraversal::LastElementChild(*this));
+    return Mixins::ParentNode::LastElementChild(*this);
   }
 
   RefPtr<Element> Element::LastElementChild() noexcept
   {
-    return ShareRefPtr(TreeTraversal::LastElementChild(*this));
+    return Mixins::ParentNode::LastElementChild(*this);
   }
 
   size_t Element::ChildElementCount() const noexcept
   {
-    return TreeQueries::ChildElementCount(*this);
+    return Mixins::ParentNode::ChildElementCount(*this);
   }
 
   ExceptionOr<void> Element::Prepend(const List<NodeOrString> &nodes) noexcept

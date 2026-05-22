@@ -115,4 +115,14 @@ namespace Krys
   {
     return RefPtr<T, PtrTraits>::WithRef(ptr);
   }
+
+  /// @brief Similar to 'ShareRef' but is to be used for indicating that the underlying object needs to
+  /// persist for the duration of it's current scope. This is for cases where operations on the object may
+  /// decrement it's last reference count, but the caller needs to ensure that the object isn't destroyed
+  /// until the end of the current scope.
+  template <typename T>
+  KRYS_NODISCARD constexpr inline Ref<T> Protect(T &object) noexcept
+  {
+    return ShareRef(object);
+  }
 }

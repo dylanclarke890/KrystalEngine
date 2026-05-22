@@ -1,23 +1,12 @@
 ﻿DOM SPEC IMPLEMENTATION / TEST COVERAGE NOTES
 Source: https://dom.spec.whatwg.org
 
-======================================================================
-======================================================================
+TODO:
+  - 1.3 Selectors - https://dom.spec.whatwg.org/#selectors
+    - Requires CSS parsing.
 
-                                TODO
-
-======================================================================
-======================================================================
-
-======================================================================
-1. INFRASTRUCTURE
-======================================================================
-
-1.3 Selectors
-    Implementation: None
-    Test Coverage : None
-    Notes         :
-        - Implementation: 'scope-match-a-selectors-string' requires CSS parsing.
+  - 4.2.6 Mixin ParentNode - https://dom.spec.whatwg.org/#dom-parentnode-queryselector
+    - QuerySelector and QuerySelectorAll require CSS parsing.
 
 ======================================================================
 2. EVENTS
@@ -76,12 +65,6 @@ Source: https://dom.spec.whatwg.org
 4.2.5 Mixin DocumentOrShadowRoot
     Implementation: Full
     Test Coverage : None
-
-4.2.6 Mixin ParentNode
-    Implementation: Partial
-    Test Coverage : None
-    Notes         : 
-        - Implementation: QuerySelector and QuerySelectorAll require CSS parsing.
 
 4.2.8 Mixin ChildNode
     Implementation: Full
