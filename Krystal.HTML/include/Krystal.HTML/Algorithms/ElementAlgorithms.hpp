@@ -18,6 +18,12 @@ namespace Krys::HTML
   class ElementAlgorithms
   {
   public:
+    /// @see https://dom.spec.whatwg.org/#concept-element-defined
+    KRYS_NODISCARD static bool IsDefined(const Element &element) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-element-custom
+    KRYS_NODISCARD static bool IsCustom(const Element &element) noexcept;
+
     /// @see https://dom.spec.whatwg.org/#insert-adjacent
     KRYS_NODISCARD static ExceptionOr<RawPtr<Node>>
       InsertAdjacent(Element &element, InsertAdjacentWhere where, Node &node) noexcept;

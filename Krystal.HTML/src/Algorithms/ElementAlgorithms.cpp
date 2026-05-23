@@ -15,6 +15,17 @@
 
 namespace Krys::HTML
 {
+  bool ElementAlgorithms::IsDefined(const Element &element) noexcept
+  {
+    return element._customElementState == CustomElementState::Uncustomized
+           || element._customElementState == CustomElementState::Custom;
+  }
+
+  bool ElementAlgorithms::IsCustom(const Element &element) noexcept
+  {
+    return element._customElementState == CustomElementState::Custom;
+  }
+
   ExceptionOr<RawPtr<Node>> ElementAlgorithms::InsertAdjacent(Element &element, InsertAdjacentWhere where,
                                                               Node &node) noexcept
   {

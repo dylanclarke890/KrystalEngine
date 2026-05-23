@@ -10,6 +10,9 @@ TODO:
 
   - 3.1 Interface AbortController and 3.2 Interface AbortSignal - https://dom.spec.whatwg.org/#interface-abortcontroller
     - The apis have been mostly implemented but a microtask queue is needed to properly implement the aborting behavior.
+    
+  - 4.2.2.1 Slots and 4.2.2.2 Slottables - https://dom.spec.whatwg.org/#shadow-tree-slots
+    - Slots/Slottable attribute changes (name/slot attribute) missing test cases.
 
   - 4.8 Interface ShadowRoot - https://dom.spec.whatwg.org/#interface-shadowroot
     - 'onslotchange' event handler and 'slotchange' event support.
@@ -17,10 +20,10 @@ TODO:
   - 4.9 Interface Element - https://dom.spec.whatwg.org/#interface-element
     - Closest/Matches requires CSS parsing.
     - AttachShadow and ShadowRoot missing test cases.
-    - CustomElementRegistry missing test cases.
 
-  - 4.2.2.1 Slots and 4.2.2.2 Slottables - https://dom.spec.whatwg.org/#shadow-tree-slots
-    - Slots/Slottable attribute changes (name/slot attribute) missing test cases.
+  - 4.3 Mutation observers - https://dom.spec.whatwg.org/#mutation-observers
+    - Requires mutation observer microtask queue.
+    - Missing implementation for notifying mutation observers.
 
 ======================================================================
 4. NODES
@@ -35,17 +38,6 @@ TODO:
 4.2.2.5 Signaling slot change
     Implementation: None
     Test Coverage : None
-
-4.2.5 Mixin DocumentOrShadowRoot
-    Implementation: Full
-    Test Coverage : None
-
-4.3 Mutation observers
-    Implementation: None
-    Test Coverage : None
-    Notes         : 
-        - Implementation: Queue mutation observer microtask.
-        - Implementation: Notify mutation observers.
 
 4.3.1 Interface MutationObserver
     Implementation: Full
@@ -74,7 +66,6 @@ TODO:
         - Implementation: Validate name for CreateProcessingInstruction's target.
         - Implementation: CharacterSet - Document needs the encoding used passed to it on creation.
         - Implementation: ContentType - Document needs this passed to it on creation.
-        - Implementation: CustomElementRegistry needs checking.
 
 ======================================================================
 ======================================================================
@@ -143,6 +134,8 @@ TODO:
 4.2.2.2 Slottables
 
 4.2.3 Mutation algorithms
+
+4.2.5 Mixin DocumentOrShadowRoot
 
 4.2.4 Mixin NonElementParentNode
 

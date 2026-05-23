@@ -410,18 +410,4 @@ namespace Krys::HTML
   }
 
 #pragma endregion
-
-#pragma region DocumentOrShadowRoot
-
-  RefPtr<CustomElementRegistry> Document::CustomElementRegistry() const noexcept
-  {
-    if (CustomElementAlgorithms::IsGlobalCustomElementRegistry(_customElementRegistry.get()))
-    {
-      return _customElementRegistry;
-    }
-
-    return nullptr;
-  }
-
-#pragma endregion
 }

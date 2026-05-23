@@ -318,11 +318,6 @@ namespace Krys::HTML
     return _shadowRoot;
   }
 
-  RefPtr<CustomElementRegistry> Element::CustomElementRegistry() const noexcept
-  {
-    return _customElementRegistry;
-  }
-
   RefPtr<Element> Element::Closest(DOMStringView selectors) noexcept
   {
     // TODO(impl): CSS-SELECTORS

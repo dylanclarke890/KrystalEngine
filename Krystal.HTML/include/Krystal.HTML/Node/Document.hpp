@@ -38,6 +38,7 @@ namespace Krys::HTML
     friend class LiveRangeUpdater;
     friend class NodeAlgorithms;
     friend class HTMLCollectionAlgorithms;
+    friend class CustomElementAlgorithms;
     friend class TreeMutationDispatcher;
 
   protected:
@@ -208,7 +209,10 @@ namespace Krys::HTML
 
 #pragma region DocumentOrShadowRoot Mixin - https://dom.spec.whatwg.org/#mixin-documentorshadowroot
 
-    RefPtr<CustomElementRegistry> CustomElementRegistry() const noexcept;
+    RefPtr<CustomElementRegistry> CustomElementRegistry() const noexcept
+    {
+      return _customElementRegistry;
+    }
 
 #pragma endregion
 

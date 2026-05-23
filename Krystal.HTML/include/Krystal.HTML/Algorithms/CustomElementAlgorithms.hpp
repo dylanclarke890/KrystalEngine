@@ -8,12 +8,16 @@ namespace Krys::HTML
 {
   class CustomElementRegistry;
   class CustomElementDefinition;
+  class Document;
 
   class CustomElementAlgorithms
   {
   public:
     KRYS_NODISCARD static bool
       IsGlobalCustomElementRegistry(RawPtr<const CustomElementRegistry> registry) noexcept;
+
+    KRYS_NODISCARD static RawPtr<CustomElementRegistry>
+      EffectiveGlobalCustomElementRegistry(Document &document) noexcept;
 
     KRYS_NODISCARD static RawPtr<CustomElementDefinition>
       LookupCustomElementDefinition(RawPtr<CustomElementRegistry> registry, DOMStringAtom namespaceURI,

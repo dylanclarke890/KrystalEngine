@@ -109,7 +109,10 @@ namespace Krys::HTML
     ExceptionOr<Ref<ShadowRoot>> AttachShadow(const ShadowRootInit &init) noexcept;
     KRYS_NODISCARD RefPtr<ShadowRoot> ShadowRoot() const noexcept;
 
-    KRYS_NODISCARD RefPtr<CustomElementRegistry> CustomElementRegistry() const noexcept;
+    KRYS_NODISCARD RefPtr<CustomElementRegistry> CustomElementRegistry() const noexcept
+    {
+      return _customElementRegistry;
+    }
 
     KRYS_NODISCARD RefPtr<Element> Closest(DOMStringView selectors) noexcept;
     KRYS_NODISCARD bool Matches(DOMStringView selectors) const noexcept;

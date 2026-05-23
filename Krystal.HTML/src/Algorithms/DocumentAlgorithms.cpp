@@ -77,7 +77,8 @@ namespace Krys::HTML
 
     if (&document != &oldDocument)
     {
-      auto documentEffectiveGlobalRegistry = document.CustomElementRegistry();
+      auto documentEffectiveGlobalRegistry =
+        ShareRefPtr(CustomElementAlgorithms::EffectiveGlobalCustomElementRegistry(document));
 
       for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(node))
       {

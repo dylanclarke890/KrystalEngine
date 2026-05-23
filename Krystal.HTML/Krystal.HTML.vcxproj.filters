@@ -817,5 +817,6 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\DOM-spec-progress.txt" />
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

@@ -92,7 +92,8 @@ namespace Krys::HTML
         auto shadowRootRegistry = shadowRoot->CustomElementRegistry();
         if (CustomElementAlgorithms::IsGlobalCustomElementRegistry(shadowRootRegistry.get()))
         {
-          shadowRootRegistry = document->CustomElementRegistry();
+          shadowRootRegistry =
+            ShareRefPtr(CustomElementAlgorithms::EffectiveGlobalCustomElementRegistry(*document));
         }
 
         if (auto attachShadowResult = ShadowRootAlgorithms::AttachShadowRoot(
@@ -129,21 +130,18 @@ namespace Krys::HTML
 
     if (auto *element = DynamicDowncast<Element>(node))
     {
-      auto refRegistry = element->CustomElementRegistry();
-      RawPtr<CustomElementRegistry> registry = refRegistry.get();
+      auto registry = element->CustomElementRegistry();
       if (registry == nullptr)
       {
-        registry = fallbackRegistry;
+        registry = ShareRefPtr(fallbackRegistry);
       }
 
-      if (CustomElementAlgorithms::IsGlobalCustomElementRegistry(registry))
+      if (CustomElementAlgorithms::IsGlobalCustomElementRegistry(registry.get()))
       {
-        auto documentRegistry = document.CustomElementRegistry();
-        registry = documentRegistry.get();
+        registry = ShareRefPtr(CustomElementAlgorithms::EffectiveGlobalCustomElementRegistry(document));
       }
 
-      copy =
-        ElementFactory::Create(document, element->_qualifiedName, element->_is, false, ShareRefPtr(registry));
+      copy = ElementFactory::Create(document, element->_qualifiedName, element->_is, false, registry);
 
       for (auto &attr : element->_attributes)
       {
