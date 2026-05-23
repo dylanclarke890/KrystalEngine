@@ -4,6 +4,7 @@
 #include "Krystal.HTML/Events/Event.hpp"
 #include "Krystal.HTML/Events/EventPhaseType.hpp"
 #include "Krystal.HTML/Factories/EventFactory.hpp"
+#include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Types/Func.hpp"
 #include "Krystal.Lib/Types/List.hpp"
@@ -25,23 +26,24 @@ namespace Krys::HTML
     ~EventDispatcher() = delete;
 
     /// @see https://dom.spec.whatwg.org/#concept-event-dispatch
-    KRYS_NODISCARD static bool DispatchToTarget(Event &event, RawPtr<EventTarget> target,
-                                                bool legacyTargetOverrideFlag = false,
-                                                bool legacyOutputDidListenersThrowFlag = false) noexcept;
+    KRYS_NODISCARD static bool
+      DispatchToTarget(Event &event, RawPtr<EventTarget> target, bool legacyTargetOverrideFlag = false,
+                       RawPtr<bool> legacyOutputDidListenersThrowFlag = nullptr) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-event-path-append
     static void AppendToEventPath(Event &event, EventTarget &invocationTarget,
                                   RawPtr<EventTarget> shadowAdjustedTarget, RawPtr<EventTarget> relatedTarget,
                                   List<Ref<EventTarget>> &touchTargets, bool slotInClosedTree) noexcept;
 
+    /// @note: The legacyOutputDidListenersThrowFlag is only used by Indexed Database API.
     /// @see https://dom.spec.whatwg.org/#concept-event-listener-invoke
     static void Invoke(EventPathItem &pathStruct, Event &event, EventPhaseType phase,
-                       bool legacyOutputDidListenersThrowFlag) noexcept;
+                       RawPtr<bool> legacyOutputDidListenersThrowFlag) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-event-listener-inner-invoke
     static bool InnerInvoke(Event &event, SmallList<Ref<RegisteredEventListener>> &listeners,
                             EventPhaseType phase, bool invocationTargetInShadowTree,
-                            bool &legacyOutputDidListenersThrowFlag) noexcept;
+                            RawPtr<bool> legacyOutputDidListenersThrowFlag) noexcept;
 
     /// @brief Fires an event named `e` at `target`. Returns false if the event is
     /// cancelable and at least one of the event handlers which received the event called `PreventDefault()`,

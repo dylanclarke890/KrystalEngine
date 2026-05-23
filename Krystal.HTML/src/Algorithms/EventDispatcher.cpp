@@ -20,7 +20,7 @@ namespace Krys::HTML
 {
   bool EventDispatcher::DispatchToTarget(Event &event, RawPtr<EventTarget> target,
                                          bool legacyTargetOverrideFlag,
-                                         bool legacyOutputDidListenersThrowFlag) noexcept
+                                         RawPtr<bool> legacyOutputDidListenersThrowFlag) noexcept
   {
     // NOTE: `target` is intentionally a raw pointer instead of a reference as we reassign the target later
     // on, would be a pain to do with a reference.
@@ -247,17 +247,11 @@ namespace Krys::HTML
 
     if (auto *invocationTargetNode = DynamicDowncast<Node>(invocationTarget))
     {
-      if (Is<ShadowRoot>(TreeQueries::Root(*invocationTargetNode)))
-      {
-        invocationTargetInShadowTree = true;
-      }
+      invocationTargetInShadowTree = Is<ShadowRoot>(TreeQueries::Root(*invocationTargetNode));
 
       if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(invocationTargetNode))
       {
-        if (shadowRoot->Mode() == ShadowRootMode::Closed)
-        {
-          rootOfClosedTree = true;
-        }
+        rootOfClosedTree = shadowRoot->Mode() == ShadowRootMode::Closed;
       }
     }
 
@@ -266,7 +260,7 @@ namespace Krys::HTML
   }
 
   void EventDispatcher::Invoke(EventPathItem &pathStruct, Event &event, EventPhaseType phase,
-                               bool legacyOutputDidListenersThrowFlag) noexcept
+                               RawPtr<bool> legacyOutputDidListenersThrowFlag) noexcept
   {
     auto indexOfStruct = std::distance(
       event._path.rbegin(), std::find_if(event._path.rbegin(), event._path.rend(),
@@ -333,7 +327,7 @@ namespace Krys::HTML
 
   bool EventDispatcher::InnerInvoke(Event &event, SmallList<Ref<RegisteredEventListener>> &listeners,
                                     EventPhaseType phase, bool invocationTargetInShadowTree,
-                                    bool &legacyOutputDidListenersThrowFlag) noexcept
+                                    RawPtr<bool> legacyOutputDidListenersThrowFlag) noexcept
   {
     bool found = false;
 
@@ -394,7 +388,7 @@ namespace Krys::HTML
       listener->Callback()->HandleEvent(event);
       event._inPassiveListener = false;
 
-      // SPEC-VIOLATION(HTML): global objects currently not supported.
+      // SPEC-VIOLATION(HTML): window/global objects currently not supported.
       // NOTE: this uses the legacy extensions to the windows interface which exposes an event attribute.
       // If global is a Window object, then set global’s current event to currentEvent.
 
@@ -403,6 +397,7 @@ namespace Krys::HTML
         break;
       }
     }
+
     return found;
   }
 }
