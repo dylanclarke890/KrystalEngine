@@ -1,12 +1,12 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Platform/IWindow.hpp"
 
 #ifndef WIN32_LEAN_AND_MEAN
   #define WIN32_LEAN_AND_MEAN
+  #include <windows.h>
 #endif
-#include <windows.h>
 
 namespace Krys::Platform::Win32
 {
@@ -18,8 +18,6 @@ namespace Krys::Platform::Win32
     HWND _handle;
 
   public:
-    NO_COPY_MOVE(Win32Window)
-
     Win32Window(const WindowSettings &settings);
 
     ~Win32Window() noexcept override;
@@ -28,15 +26,15 @@ namespace Krys::Platform::Win32
 
     void SetTitle(const string &title) noexcept override;
 
-    NO_DISCARD const string &GetTitle() const noexcept override;
+    KRYS_NODISCARD const string &GetTitle() const noexcept override;
 
-    NO_DISCARD virtual WindowSize GetSize() const noexcept override;
+    KRYS_NODISCARD virtual WindowSize GetSize() const noexcept override;
 
     void Show() noexcept override;
 
     void Hide() noexcept override;
 
-    NO_DISCARD WindowHandle GetWindowHandle() const noexcept override;
+    KRYS_NODISCARD WindowHandle GetWindowHandle() const noexcept override;
 
     void SetCallbacks(WindowCallbacks &&callbacks) noexcept override;
 

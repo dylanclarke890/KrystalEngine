@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/OrderedMap.hpp"
+#include "Krystal.Lib/Types/OrderedMap.hpp"
 #include "Krystal.Serialisation/Types/Generic/KeyValuePairContainer.hpp"

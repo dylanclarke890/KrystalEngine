@@ -1,16 +1,16 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.IO/IStream.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.IO/Streams/Stream.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 #include <cassert>
 
 namespace Krys::Serialisation
 {
-  class RapidJsonStreamWriterAdapter
+  class RapidJsonStreamWriterAdapter : NonCopyMovable<RapidJsonStreamWriterAdapter>
   {
   private:
-    NO_COPY_MOVE(RapidJsonStreamWriterAdapter)
-
     IO::IStreamWriter &_stream;
 
   public:
@@ -22,8 +22,8 @@ namespace Krys::Serialisation
 
     void Put(Ch c)
     {
-      byte b = static_cast<byte>(c);
-      _stream.Write(&b, 1);
+      Array<byte, 1> data = {static_cast<byte>(c)};
+      _stream.Write(data);
     }
 
     Ch *PutBegin()
@@ -44,11 +44,9 @@ namespace Krys::Serialisation
     }
   };
 
-  class RapidJsonStreamReaderAdapter
+  class RapidJsonStreamReaderAdapter : NonCopyMovable<RapidJsonStreamReaderAdapter>
   {
   private:
-    NO_COPY_MOVE(RapidJsonStreamReaderAdapter)
-
     IO::IStreamReader &_stream;
 
   public:
@@ -69,10 +67,10 @@ namespace Krys::Serialisation
 
     Ch Take()
     {
-      byte next {};
-      if (_stream.Read(&next, 1) == 1)
+      Array<byte, 1> next {};
+      if (_stream.Read(next) == 1)
       {
-        return (Ch)next;
+        return static_cast<Ch>(next[0]);
       }
       return '\0';
     }

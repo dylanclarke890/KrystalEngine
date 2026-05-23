@@ -1,4 +1,4 @@
-#include "Krystal.Lib/ComparisonHelpers.hpp"
+﻿#include "Krystal.Lib/ComparisonHelpers.hpp"
 #include "Krystal.UI/Layout/LayoutEngine.hpp"
 #include <catch_all.hpp>
 

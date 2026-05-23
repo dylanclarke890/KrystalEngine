@@ -1,0 +1,37 @@
+﻿#include "Krystal.HTML/Mixins/NonElementParentNode.hpp"
+#include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
+#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
+#include "Krystal.HTML/Node/Attr.hpp"
+#include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/Node/Element.hpp"
+#include "Krystal.HTML/Node/NodeList.hpp"
+#include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/Utils/SubtreeRanges.hpp"
+
+namespace Krys::HTML::Mixins
+{
+  RefPtr<Element> NonElementParentNode::GetElementById(ContainerNode &node, DOMStringView id) noexcept
+  {
+    auto descendants = DescendantRange(node);
+
+    auto it = First(descendants,
+                    [id](auto &&descendant)
+                    {
+                      if (auto *element = DynamicDowncast<Element>(descendant))
+                      {
+                        return element->Id() == id;
+                      }
+                      return false;
+                    });
+
+    return it != std::ranges::end(descendants) ? ShareRefPtr(DynamicDowncast<Element>(&*it)) : nullptr;
+  }
+
+  RefPtr<const Element> NonElementParentNode::GetElementById(const ContainerNode &node,
+                                                             DOMStringView id) noexcept
+  {
+    return GetElementById(const_cast<ContainerNode &>(node), id);
+  }
+}

@@ -1,4 +1,4 @@
-#include "Krystal.IO/Path.hpp"
+﻿#include "Krystal.IO/Path.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

@@ -19,23 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.Gfx\Commands\CommandListReader.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx\Commands\CommandArena.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx\Commands\CommandList.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx\Commands\CommandType.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx\Commands\Commands.hpp">
+    <ClInclude Include="include\Krystal.Gfx\Colour.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Commands.hpp">
       <SubType>
       </SubType>
     </ClInclude>
@@ -48,6 +33,7 @@
     <ClInclude Include="include\Krystal.Gfx\Enums\PixelFormat.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Enums\PrimitiveType.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Enums\VertexAttributeType.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\Enums\VertexInputRate.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Enums\WrapMode.hpp" />
     <ClInclude Include="include\Krystal.Gfx\FontAtlasLoader.hpp">
       <SubType>
@@ -75,6 +61,7 @@
       <SubType>
       </SubType>
     </ClInclude>
+    <ClInclude Include="include\Krystal.Gfx\ResourceManager.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Resources\Buffer.hpp">
       <SubType>
       </SubType>
@@ -269,9 +256,6 @@
     <ClInclude Include="third-party\msdfgen\resource.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Krystal.Gfx.Lib\Krystal.Gfx.Lib.vcxproj">
-      <Project>{9033b349-4104-46b5-af4d-3ddedfc44176}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\Krystal.IO\Krystal.IO.vcxproj">
       <Project>{85cea139-a547-4747-b050-05c8de66d591}</Project>
     </ProjectReference>

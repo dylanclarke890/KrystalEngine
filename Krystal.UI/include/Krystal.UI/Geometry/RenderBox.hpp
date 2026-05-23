@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Array.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Maths/Vector.hpp"
 #include "Krystal.UI/Geometry/Common.hpp"
 
@@ -23,7 +23,7 @@ namespace Krys::UI
     }
 
     /// @brief Returns the size of the fill area of the box.
-    NO_DISCARD Maths::Vec2 GetFillSize() const noexcept
+    KRYS_NODISCARD Maths::Vec2 GetFillSize() const noexcept
     {
       return _fillSize;
     }
@@ -35,13 +35,13 @@ namespace Krys::UI
     }
 
     /// @brief Returns the offset from the border area to the fill area of the box.
-    NO_DISCARD Maths::Vec2 GetFillOffset() const noexcept
+    KRYS_NODISCARD Maths::Vec2 GetFillOffset() const noexcept
     {
       return {_borderWidths[3], _borderWidths[0]};
     }
 
     /// @brief Returns the offset to the border area of the box.
-    NO_DISCARD Maths::Vec2 GetBorderOffset() const noexcept
+    KRYS_NODISCARD Maths::Vec2 GetBorderOffset() const noexcept
     {
       return _borderOffset;
     }
@@ -53,7 +53,7 @@ namespace Krys::UI
     }
 
     /// @brief Returns the border widths of the box.
-    NO_DISCARD const EdgeSizes &GetBorderWidths() const noexcept
+    KRYS_NODISCARD const EdgeSizes &GetBorderWidths() const noexcept
     {
       return _borderWidths;
     }
@@ -65,7 +65,7 @@ namespace Krys::UI
     }
 
     /// @brief Returns the border radius of the box.
-    NO_DISCARD const CornerSizes &GetBorderRadius() const noexcept
+    KRYS_NODISCARD const CornerSizes &GetBorderRadius() const noexcept
     {
       return _borderRadii;
     }

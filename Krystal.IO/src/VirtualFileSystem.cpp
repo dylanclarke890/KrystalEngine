@@ -1,8 +1,15 @@
-#include "Krystal.IO/VirtualFileSystem.hpp"
-#include "Krystal.Lib/DebugBreak.hpp"
-#include "Krystal.Lib/Set.hpp"
+﻿#include "Krystal.IO/VirtualFileSystem.hpp"
+#include "Krystal.IO/IFileBackend.hpp"
+#include "Krystal.IO/Streams/Stream.hpp"
+#include "Krystal.IO/Path.hpp"
+#include "Krystal.Lib/Core/DebugBreak.hpp"
+#include "Krystal.Lib/Pointers/UniquePtr.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
+#include "Krystal.Lib/Types/Pair.hpp"
+#include "Krystal.Lib/Types/Set.hpp"
 #include "Krystal.Log/ILogger.hpp"
-#include <ranges>
+#include <algorithm>
 
 namespace Krys::IO
 {
@@ -10,18 +17,16 @@ namespace Krys::IO
   {
     for (const auto &mount : _mounts)
     {
-      if (mount.Backend == nullptr)
+      if (mount.Backend != nullptr)
       {
-        continue;
+        // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
+        delete mount.Backend; // Clean up any allocated backends that were not used.
       }
-
-      // NOLINTNEXTLINE(cppcoreguidelines-owning-memory)
-      delete mount.Backend; // Clean up any allocated backends that were not used.
     }
     _mounts.clear();
   }
 
-  Unique<VirtualFileSystem> VirtualFileSystemBuilder::Build()
+  UniquePtr<VirtualFileSystem> VirtualFileSystemBuilder::Build()
   {
     if (_mounts.empty())
     {
@@ -55,18 +60,18 @@ namespace Krys::IO
 
     std::ranges::sort(_mounts, sortFn);
 
-    List<Pair<Path, Unique<IFileBackend>>> backends {};
+    List<Pair<Path, UniquePtr<IFileBackend>>> backends {};
     backends.reserve(_mounts.size());
     for (auto &entry : _mounts)
     {
-      backends.emplace_back(entry.Prefix, Unique<IFileBackend>(entry.Backend));
+      backends.emplace_back(entry.Prefix, UniquePtr<IFileBackend>(entry.Backend));
       entry.Backend = nullptr; // prevent double delete
     }
 
     _mounts.clear();     // Clear mounts after building to avoid dangling references.
     _insertionOrder = 0; // Reset insertion order for the next build.
 
-    auto vfs = Unique<VirtualFileSystem>(new VirtualFileSystem());
+    auto vfs = UniquePtr<VirtualFileSystem>(new VirtualFileSystem());
     vfs->_backends = std::move(backends);
     return vfs;
   }
@@ -90,7 +95,7 @@ namespace Krys::IO
     return std::ranges::any_of(allBackends, [](const auto &pair) { return pair.second->IsFile(pair.first); });
   }
 
-  Unique<IStreamReader> VirtualFileSystem::GetReader(const Path &path, ReadFlags flags) const noexcept
+  UniquePtr<IStreamReader> VirtualFileSystem::GetReader(const Path &path, ReadFlags flags) const noexcept
   {
     auto allBackends = GetBackends(path);
     for (const auto &pair : allBackends)
@@ -103,7 +108,7 @@ namespace Krys::IO
     return nullptr;
   }
 
-  Unique<IStreamWriter> VirtualFileSystem::GetWriter(const Path &path, WriteFlags flags) const noexcept
+  UniquePtr<IStreamWriter> VirtualFileSystem::GetWriter(const Path &path, WriteFlags flags) const noexcept
   {
     auto allBackends = GetBackends(path);
     for (const auto &pair : allBackends)
@@ -122,7 +127,14 @@ namespace Krys::IO
   {
     if (auto backend = GetBackend(path); backend.has_value())
     {
-      return backend->second->CreateFile(backend->first, overwriteExisting);
+      try
+      {
+        return backend->second->CreateFile(backend->first, overwriteExisting);
+      }
+      catch (...)
+      {
+        return false;
+      }
     }
 
     return false;
@@ -132,7 +144,14 @@ namespace Krys::IO
   {
     if (auto backend = GetBackend(path); backend.has_value())
     {
-      return backend->second->DeleteFile(backend->first);
+      try
+      {
+        return backend->second->DeleteFile(backend->first);
+      }
+      catch (...)
+      {
+        return false;
+      }
     }
 
     return false;
@@ -157,9 +176,9 @@ namespace Krys::IO
     return out;
   }
 
-  List<Pair<Path, Ptr<IFileBackend>>> VirtualFileSystem::GetBackends(const Path &path) const noexcept
+  List<Pair<Path, IFileBackend *>> VirtualFileSystem::GetBackends(const Path &path) const noexcept
   {
-    List<Pair<Path, Ptr<IFileBackend>>> result;
+    List<Pair<Path, IFileBackend *>> result;
     for (const auto &[alias, backend] : _backends)
     {
       if (path.StartsWith(alias))
@@ -180,7 +199,7 @@ namespace Krys::IO
     return result;
   }
 
-  Nullable<Pair<Path, Ptr<IFileBackend>>> VirtualFileSystem::GetBackend(const Path &path) const noexcept
+  Maybe<Pair<Path, IFileBackend *>> VirtualFileSystem::GetBackend(const Path &path) const noexcept
   {
     if (auto all = GetBackends(path); !all.empty())
     {

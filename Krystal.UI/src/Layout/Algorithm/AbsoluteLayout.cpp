@@ -1,4 +1,4 @@
-#include "Krystal.UI/Layout/Algorithm/AbsoluteLayout.hpp"
+﻿#include "Krystal.UI/Layout/Algorithm/AbsoluteLayout.hpp"
 #include "Krystal.UI/Layout/Algorithm/Align.hpp"
 #include "Krystal.UI/Layout/Algorithm/BoundAxis.hpp"
 #include "Krystal.UI/Layout/Algorithm/CalculateLayout.hpp"

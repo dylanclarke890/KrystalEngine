@@ -75,7 +75,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(KrysProjectInclude);$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(KrysProjectInclude);$(VC_IncludePath);$(solutionDir)Krystal.Lib\third-party;$(WindowsSDK_IncludePath)</IncludePath>
+    <PublicIncludeDirectories>$(KrysProjectInclude);$(solutionDir)Krystal.Lib\third-party;</PublicIncludeDirectories>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -132,76 +133,119 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.Lib\ImmutableBimap.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Atomics.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Commands\CommandArena.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Commands\CommandList.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Commands\CommandListReader.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Commands\CommandType.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\Attributes.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\DebugBreak.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\Move.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\TypeCast.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Detection\AddressSpaceBitSize.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Detection\NumberOfCores.hpp" />
+    <ClInclude Include="include\Krystal.Lib\ForbidHeapAllocation.hpp" />
+    <ClInclude Include="include\Krystal.Lib\InlineContainers\Forward.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Mixins\NonCopyable.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Detection\Compiler.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Detection\CPU.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Detection\OS.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\TypeTraits.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Detection\Sanitizers.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Handle.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Mixins\NonCopyMovable.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Mixins\NonMovable.hpp" />
+    <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RawPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Mixins\CanMakeCheckedPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Mixins\CanMakeWeakPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\CheckedPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\CompactPtrTuple.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\CompactRefPtrTuple.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\CompactUniquePtrTuple.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\InlineWeakPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\RefPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\TaggedPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\ThreadSafeWeakPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtrFactory.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Mixins\RefCounted.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\UniquePtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtrImpl.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Ranges\Algorithm.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Ranges\TypeTraits.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Ranges\Reconstruct.hpp" />
+    <ClInclude Include="include\Krystal.Lib\String\StringAtom.hpp" />
+    <ClInclude Include="include\Krystal.Lib\String\EmptyString.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Time\Duration.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Time\MonotonicTime.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\Any.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\Deque.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\ImmutableBimap.hpp" />
     <ClInclude Include="include\Krystal.Lib\Allocators\Arena.hpp">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Allocators\Block.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\String\Codepoint.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\String\StringInterner.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\String\StringRef.hpp">
-      <SubType>
-      </SubType>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Array.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Attributes.hpp" />
-    <ClInclude Include="include\Krystal.Lib\BitUtils.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\Array.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\Bit.hpp" />
     <ClInclude Include="include\Krystal.Lib\ByteUtils.hpp" />
     <ClInclude Include="include\Krystal.Lib\ComparisonHelpers.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Concepts.hpp" />
-    <ClInclude Include="include\Krystal.Lib\DebugBreak.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Detection.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Endian.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Enum.hpp">
+    <ClInclude Include="include\Krystal.Lib\Core\Concepts.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Detection\Environment.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\Endian.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\Enum.hpp">
       <SubType>
       </SubType>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Lib\Expected.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Flags.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Func.hpp" />
-    <ClInclude Include="include\Krystal.Lib\FuncPtrTraits.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Lazy.hpp" />
-    <ClInclude Include="include\Krystal.Lib\LinkedList.hpp" />
-    <ClInclude Include="include\Krystal.Lib\List.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Macros.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\Expected.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\Func.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\Lazy.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\LinkedList.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\List.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\Macros.hpp" />
     <ClInclude Include="include\Krystal.Lib\Events\Event.hpp" />
     <ClInclude Include="include\Krystal.Lib\Events\EventManager.hpp" />
-    <ClInclude Include="include\Krystal.Lib\HashUtils.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Map.hpp" />
-    <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Nullable.hpp" />
-    <ClInclude Include="include\Krystal.Lib\NullableFloat.hpp" />
-    <ClInclude Include="include\Krystal.Lib\OrderedMap.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Pair.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Queue.hpp" />
-    <ClInclude Include="include\Krystal.Lib\RangeUtils.hpp" />
-    <ClInclude Include="include\Krystal.Lib\OrderedSet.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Set.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\Hash.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\Map.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\Maybe.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\NullableFloat.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\OrderedMap.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\Pair.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\Queue.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\OrderedSet.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\Set.hpp" />
     <ClInclude Include="include\Krystal.Lib\SmallValueBuffer.hpp" />
-    <ClInclude Include="include\Krystal.Lib\SmartPointers.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Span.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Stack.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\SmallList.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\Span.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\Stack.hpp" />
     <ClInclude Include="include\Krystal.Lib\String\String.hpp" />
-    <ClInclude Include="include\Krystal.Lib\StringId.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Core\StringId.hpp" />
     <ClInclude Include="include\Krystal.Lib\String\StringUtils.hpp" />
-    <ClInclude Include="include\Krystal.Lib\StronglyTypedValue.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Types.hpp" />
-    <ClInclude Include="include\Krystal.Lib\TypeName.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Variant.hpp" />
-    <ClInclude Include="include\Krystal.Lib\Version.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\StronglyTypedValue.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\Numeric.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\Variant.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Utils\LosslessStaticCast.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Utils\EBCO.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Utils\Hijack.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Utils\ipow.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\ReferenceWrapper.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Utils\StrongOrder.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Utils\Tag.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Utils\ToMutableIter.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Utils\ToUnderlying.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Utils\Uninit.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Utils\Unwrap.hpp" />
+    <ClInclude Include="third-party\llvm\ADT\ADL.h" />
+    <ClInclude Include="third-party\llvm\Support\MemAlloc.h" />
+    <ClInclude Include="third-party\llvm\ADT\SmallVector.h" />
+    <ClInclude Include="third-party\llvm\Support\Compiler.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\Detection\NumberOfCores.cpp" />
     <ClCompile Include="src\Events\EventManager.cpp" />
+    <ClCompile Include="third-party\llvm\Support\MemAlloc.cpp" />
+    <ClCompile Include="third-party\llvm\ADT\SmallVector.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,24 +1,25 @@
 ﻿#pragma once
 
-#include "Krystal.IO/IStream.hpp"
-#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.IO/Streams/Stream.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
-#include "Krystal.Lib/Concepts.hpp"
-#include "Krystal.Lib/Endian.hpp"
-#include "Krystal.Lib/Expected.hpp"
-#include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Core/Endian.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Expected.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::IO
 {
-  struct StreamUtils final
+  struct StreamUtils : NonCopyMovable<StreamUtils>
   {
-    STATIC_CLASS(StreamUtils)
+    StreamUtils() = delete;
+    ~StreamUtils() = delete;
 
     template <UnsignedIntegral T, DerivedFrom<IStreamReader> TReader>
-    NO_DISCARD static Expected<List<T>> ReadAllAs(TReader &stream) noexcept
+    KRYS_NODISCARD static Expected<List<T>> ReadAllAs(TReader &stream) noexcept
     {
       stream.Open();
       if (!stream.IsOpen())
@@ -38,7 +39,7 @@ namespace Krys::IO
       }
 
       List<byte> buffer(size);
-      auto bytesRead = stream.Read(buffer.data(), size);
+      auto bytesRead = stream.Read(buffer);
 
       if (bytesRead != size)
       {
@@ -51,7 +52,7 @@ namespace Krys::IO
     }
 
     template <DerivedFrom<IStreamReader> TReader>
-    NO_DISCARD static Expected<List<byte>> ReadAll(TReader &stream) noexcept
+    KRYS_NODISCARD static Expected<List<byte>> ReadAll(TReader &stream) noexcept
     {
       stream.Open();
       if (!stream.IsOpen())
@@ -66,7 +67,7 @@ namespace Krys::IO
       }
 
       List<byte> buffer(size);
-      auto bytesRead = stream.Read(buffer.data(), size);
+      auto bytesRead = stream.Read(buffer);
 
       if (bytesRead != size)
       {
@@ -79,7 +80,7 @@ namespace Krys::IO
     }
 
     template <DerivedFrom<IStreamReader> TReader>
-    NO_DISCARD static Expected<string> ReadAllText(TReader &stream) noexcept
+    KRYS_NODISCARD static Expected<string> ReadAllText(TReader &stream) noexcept
     {
       return ReadAll(stream).and_then(
         [](List<byte> &&bytes) -> Expected<string>

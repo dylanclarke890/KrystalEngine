@@ -1,4 +1,4 @@
-#include "Krystal.Maths/Traits.hpp"
+﻿#include "Krystal.Maths/Traits.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Vector.hpp"
 #include <catch_all.hpp>
@@ -6,25 +6,6 @@
 namespace Krys::Tests
 {
   using namespace Krys::Maths;
-
-  TEST_CASE("Traits(NonArithmetic)", "[Traits]")
-  {
-    STATIC_REQUIRE_FALSE(Traits<void>::IsArithmetic);
-    STATIC_REQUIRE_FALSE(Traits<std::string>::IsArithmetic);
-    STATIC_REQUIRE_FALSE(Traits<std::vector<int>>::IsArithmetic);
-    STATIC_REQUIRE_FALSE(Traits<std::array<int, 3>>::IsArithmetic);
-    STATIC_REQUIRE_FALSE(Traits<std::tuple<int, float>>::IsArithmetic);
-  }
-
-  TEST_CASE("Traits(Arithmetic)", "[Traits]")
-  {
-    STATIC_REQUIRE(Traits<int>::IsArithmetic);
-    STATIC_REQUIRE(Traits<float>::IsArithmetic);
-    STATIC_REQUIRE(Traits<double>::IsArithmetic);
-    STATIC_REQUIRE(Traits<long double>::IsArithmetic);
-    STATIC_REQUIRE(Traits<unsigned int>::IsArithmetic);
-    STATIC_REQUIRE(Traits<unsigned long>::IsArithmetic);
-  }
 
   TEST_CASE("Traits(Vector)", "[Traits]")
   {

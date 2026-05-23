@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Concepts.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Serialisation/Access.hpp"
 #include "Krystal.Serialisation/Concepts.hpp"
 
@@ -69,10 +69,9 @@ namespace Krys::Serialisation
     }
   };
 
-  class BaseArchive
+  /// @brief Base class for all archives.
+  class BaseArchive : NonCopyMovable<BaseArchive> // TODO(check): should we allow moving?
   {
-    NO_COPY_MOVE(BaseArchive)
-
   protected:
     BaseArchive() noexcept = default;
 
@@ -83,8 +82,6 @@ namespace Krys::Serialisation
   template <typename Derived>
   class BaseArchiveWriter : public BaseArchive
   {
-    NO_COPY_MOVE(BaseArchiveWriter)
-
   private:
     Derived &_self {*static_cast<Derived *>(this)};
 
@@ -92,11 +89,11 @@ namespace Krys::Serialisation
     BaseArchiveWriter() noexcept = default;
 
     template <typename T>
-    Derived &operator()(T &&value)
+    Derived &operator()(T &&value) noexcept
     {
       TransferGuard guard(_self, value);
 
-      using DecayedT = RemoveCvRef<T>;
+      using DecayedT = remove_cvref_t<T>;
 
       if constexpr (HasVersionedTransferMember<Derived, DecayedT>)
       {
@@ -147,22 +144,22 @@ namespace Krys::Serialisation
     }
 
     template <ArchiveBuiltin T>
-    Derived &operator()(T &&value)
+    Derived &operator()(T &&value) noexcept
     {
       TransferGuard guard(_self, value);
       _self.Write(value);
       return _self;
     }
 
-    template <Pointer T>
-    Derived &operator()(T &&ptr)
+    template <IsPointer T>
+    Derived &operator()(T &&ptr) noexcept
     {
       static_assert(DependentFalse<T>, "Pointer types are not supported.");
     }
 
     template <typename... Types>
     requires(sizeof...(Types) > 1)
-    Derived &operator()(Types &&...types)
+    Derived &operator()(Types &&...types) noexcept
     {
       ((void)(*this)(std::forward<Types>(types)), ...);
       return _self;
@@ -172,8 +169,6 @@ namespace Krys::Serialisation
   template <typename Derived>
   class BaseArchiveReader : public BaseArchive
   {
-    NO_COPY_MOVE(BaseArchiveReader)
-
   private:
     Derived &_self {*static_cast<Derived *>(this)};
 
@@ -181,11 +176,11 @@ namespace Krys::Serialisation
     BaseArchiveReader() noexcept = default;
 
     template <typename T>
-    Derived &operator()(T &&value)
+    Derived &operator()(T &&value) noexcept
     {
       TransferGuard guard(_self, value);
 
-      using DecayedT = RemoveCvRef<T>;
+      using DecayedT = remove_cvref_t<T>;
 
       if constexpr (HasVersionedTransferMember<Derived, DecayedT>)
       {
@@ -236,22 +231,22 @@ namespace Krys::Serialisation
     }
 
     template <ArchiveBuiltin T>
-    Derived &operator()(T &&value)
+    Derived &operator()(T &&value) noexcept
     {
       TransferGuard guard(_self, value);
       _self.Read(value);
       return _self;
     }
 
-    template <Pointer T>
-    Derived &operator()(T &&ptr)
+    template <IsPointer T>
+    Derived &operator()(T &&ptr) noexcept
     {
       static_assert(DependentFalse<T>, "Pointer types are not supported.");
     }
 
     template <typename... Types>
     requires(sizeof...(Types) > 1)
-    Derived &operator()(Types &&...types)
+    Derived &operator()(Types &&...types) noexcept
     {
       ((void)(*this)(std::forward<Types>(types)), ...);
       return _self;
@@ -261,7 +256,7 @@ namespace Krys::Serialisation
   template <typename Archive, IsArray T>
   void Transfer(Archive &archive, T &value) noexcept
   {
-    using ElementType = RemoveCvRef<RemoveExtent<T>>;
+    using ElementType = remove_cvref_t<remove_extent_t<T>>;
     for (size_t i = 0; i < Extent<T>; i++)
     {
       archive(value[i]);

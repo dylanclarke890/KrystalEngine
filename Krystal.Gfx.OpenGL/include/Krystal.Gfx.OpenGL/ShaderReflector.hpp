@@ -1,11 +1,10 @@
 ﻿#pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
-#include "Krystal.Lib/Array.hpp"
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Map.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Log/ILogger.hpp"
 
@@ -75,7 +74,7 @@ namespace Krys::Gfx::OpenGL
     mutable ShaderLayout _info;
 
   public:
-    NO_DISCARD ShaderLayout Reflect(GLuint programId) const noexcept
+    KRYS_NODISCARD ShaderLayout Reflect(GLuint programId) const noexcept
     {
       _info = ShaderLayout {};
       ReflectUniforms(programId);

@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 
 #ifndef WIN32_LEAN_AND_MEAN
   #define WIN32_LEAN_AND_MEAN
@@ -124,10 +124,10 @@
 namespace Krys::Gfx::OpenGL
 {
   /// @brief Initializes WGL hooks for OpenGL context management.
-  NO_DISCARD bool InitialiseWGLHooks(HDC deviceContext) noexcept;
+  KRYS_NODISCARD bool InitialiseWGLHooks(HDC deviceContext) noexcept;
 
   /// @brief Checks if a specific WGL extension is supported.
-  NO_DISCARD bool IsWGLExtensionSupported(const char *extension) noexcept;
+  KRYS_NODISCARD bool IsWGLExtensionSupported(const char *extension) noexcept;
 }
 
 // WGL hook declarations
@@ -136,19 +136,19 @@ namespace Krys::Gfx::OpenGL
 #pragma region WGL Core Functions
 
   /// @brief Gets the current draw device context for the calling thread.
-  NO_DISCARD HDC wglGetCurrentDC() noexcept;
+  KRYS_NODISCARD HDC wglGetCurrentDC() noexcept;
 
   /// @brief Gets the current OpenGL context associated with the calling thread.
-  NO_DISCARD HGLRC wglGetCurrentContext() noexcept;
+  KRYS_NODISCARD HGLRC wglGetCurrentContext() noexcept;
 
   /// @brief Makes the specified GL context current for the specified device context.
-  NO_DISCARD BOOL wglMakeCurrent(HDC hdc, HGLRC hglrc) noexcept;
+  KRYS_NODISCARD BOOL wglMakeCurrent(HDC hdc, HGLRC hglrc) noexcept;
 
   /// @brief Destroys the specified GL context and frees its resources.
-  NO_DISCARD BOOL wglDeleteContext(HGLRC hglrc) noexcept;
+  KRYS_NODISCARD BOOL wglDeleteContext(HGLRC hglrc) noexcept;
 
   /// @brief Swaps the front and back buffers of the specified device context.
-  NO_DISCARD BOOL wglSwapBuffers(HDC hdc) noexcept;
+  KRYS_NODISCARD BOOL wglSwapBuffers(HDC hdc) noexcept;
 
 #if KRYS_WGL_OVERRIDE_FUNCTIONS
   /// @brief Gets the current draw device context for the calling thread.
@@ -174,7 +174,7 @@ namespace Krys::Gfx::OpenGL
   /// @brief Gets a space delimited string containing all available WGL extensions.
   ///
   /// @extension WGL_ARB_extensions_string
-  NO_DISCARD const char *wglGetExtensionsStringARB(HDC dc) noexcept;
+  KRYS_NODISCARD const char *wglGetExtensionsStringARB(HDC dc) noexcept;
 
 #if KRYS_WGL_OVERRIDE_FUNCTIONS
   /// @brief Gets a space delimited string containing all available WGL extensions.
@@ -190,7 +190,7 @@ namespace Krys::Gfx::OpenGL
   /// @brief Creates an OpenGL context with specified attributes.
   ///
   /// @extension WGL_ARB_create_context
-  NO_DISCARD HGLRC wglCreateContextAttribsARB(HDC dc, HGLRC shareContext, const int *attribs) noexcept;
+  KRYS_NODISCARD HGLRC wglCreateContextAttribsARB(HDC dc, HGLRC shareContext, const int *attribs) noexcept;
 
 #if KRYS_WGL_OVERRIDE_FUNCTIONS
   /// @brief Creates an OpenGL context with specified attributes.
@@ -206,19 +206,19 @@ namespace Krys::Gfx::OpenGL
   /// @brief Gets a list of pixel formats that match the specified attributes.
   ///
   /// @extension WGL_ARB_pixel_format
-  NO_DISCARD BOOL wglGetPixelFormatAttribivARB(HDC hdc, int iPixelFormat, int iLayerPlane, UINT nAttributes,
+  KRYS_NODISCARD BOOL wglGetPixelFormatAttribivARB(HDC hdc, int iPixelFormat, int iLayerPlane, UINT nAttributes,
                                                const int *piAttributes, int *piValues) noexcept;
 
   /// @brief Gets the values of pixel format attributes as floating-point numbers.
   ///
   /// @extension WGL_ARB_pixel_format
-  NO_DISCARD BOOL wglGetPixelFormatAttribfvARB(HDC hdc, int iPixelFormat, int iLayerPlane, UINT nAttributes,
+  KRYS_NODISCARD BOOL wglGetPixelFormatAttribfvARB(HDC hdc, int iPixelFormat, int iLayerPlane, UINT nAttributes,
                                                const int *piAttributes, float *pfValues) noexcept;
 
   /// @brief Chooses a pixel format based on specified attributes and returns the number of formats found.
   ///
   /// @extension WGL_ARB_pixel_format
-  NO_DISCARD BOOL wglChoosePixelFormatARB(HDC hdc, const int *piAttribIList, const float *pfAttribFList,
+  KRYS_NODISCARD BOOL wglChoosePixelFormatARB(HDC hdc, const int *piAttribIList, const float *pfAttribFList,
                                           UINT nMaxFormats, int *piFormats, UINT *nNumFormats) noexcept;
 
 #if KRYS_WGL_OVERRIDE_FUNCTIONS
@@ -246,12 +246,12 @@ namespace Krys::Gfx::OpenGL
   /// If interval is 1, it enables VSync. If "WGL_EXT_swap_control_tear" is supported, interval can be set to
   /// -1.
   /// @extension WGL_EXT_swap_control
-  NO_DISCARD BOOL wglSwapIntervalEXT(int interval) noexcept;
+  KRYS_NODISCARD BOOL wglSwapIntervalEXT(int interval) noexcept;
 
   /// @brief Gets the current swap interval for vertical synchronization.
   ///
   /// @extension WGL_EXT_swap_control
-  NO_DISCARD int wglGetSwapIntervalEXT() noexcept;
+  KRYS_NODISCARD int wglGetSwapIntervalEXT() noexcept;
 
 #if KRYS_WGL_OVERRIDE_FUNCTIONS
   /// @brief Sets the swap interval for vertical synchronization. If interval is 0, it disables VSync.

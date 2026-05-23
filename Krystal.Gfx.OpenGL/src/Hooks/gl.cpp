@@ -1,6 +1,6 @@
-#define KRYS_GL_OVERRIDE_FUNCTIONS 0
+﻿#define KRYS_GL_OVERRIDE_FUNCTIONS 0
 #include "Krystal.Gfx.OpenGL/Hooks/gl.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Core/Macros.hpp"
 #include <cassert>
 
 #ifdef MemoryBarrier
@@ -766,7 +766,7 @@ namespace
 
   static GL gl = {nullptr};
 
-  // TODO: this is only for windows, need to implement for other platforms
+  // TODO(feat): this is only for windows, need to implement for other platforms
   static void *GetFunctionAddress(const char *name, const char *fallbackModule = "opengl32.dll") noexcept
   {
     void *p = (void *)::wglGetProcAddress(name);
@@ -791,10 +791,10 @@ namespace
 namespace
 {
 #define LoadGLFunc(name, funcPtrTypedef)                                                                     \
-  gl.name = (funcPtrTypedef)GetFunctionAddress(STRINGIFY(CONCAT(gl, name)))
+  gl.name = (funcPtrTypedef)GetFunctionAddress(KRYS_STRINGIFY(KRYS_CONCAT(gl, name)))
 
 #define LoadGLVersion(majorVersion, minorVersion)                                                            \
-  CONCAT(LoadVersion_, CONCAT(CONCAT(majorVersion, _), minorVersion))()
+  KRYS_CONCAT(LoadVersion_, KRYS_CONCAT(KRYS_CONCAT(majorVersion, _), minorVersion))()
 
   static void LoadVersion_1_0() noexcept
   {
@@ -1583,7 +1583,7 @@ namespace Krys::Gfx::OpenGL
 
   bool IsGLExtensionSupported(const char *extension) noexcept
   {
-    // TODO: Implement extension checking
+    // TODO(feat): Implement extension checking
     return false;
   }
 }

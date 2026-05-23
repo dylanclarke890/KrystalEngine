@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #ifndef KRYS_ENABLE_PROFILING
   #define KRYS_ENABLE_PROFILING
@@ -68,9 +68,9 @@ namespace Krys
           if (event.Key() == Platform::Key::Space && event.State() == Platform::KeyState::Pressed)
           {
             _document.ElementStyleSetBackgroundColour(
-              _test, Maths::Random::Choice<Gfx::ColourbPremultiplied>({Gfx::Colours::Red, Gfx::Colours::Green,
-                                                         Gfx::Colours::Blue, Gfx::Colours::Cyan,
-                                                         Gfx::Colours::Magenta, Gfx::Colours::Yellow}));
+              _test, Maths::Random::Choice<Gfx::ColourbPremultiplied>(
+                       {Gfx::Colours::Red, Gfx::Colours::Green, Gfx::Colours::Blue, Gfx::Colours::Cyan,
+                        Gfx::Colours::Magenta, Gfx::Colours::Yellow}));
           }
 
           return true;
@@ -101,8 +101,6 @@ namespace Krys
       using namespace Krys::Maths;
       using namespace Krys::Gfx::Colours;
 
-      StringRef textRef = _context->Strings.Intern(u8"Hello, Krystal UI!\nThis text should be on a newline!");
-
       _document.ElementStyleSetBackgroundColour(_document.Body(), Maroon);
       _document.ElementStyleSetFlexDirection(_document.Body(), FlexDirection::Row);
       _document.ElementStyleSetOpacity(_document.Body(), 0.8f);
@@ -115,7 +113,7 @@ namespace Krys
       _document.ElementStyleSetBorderWidths(leftBox, {0.f, 20.f, 20.f, 0.f});
       _document.ElementStyleSetBorderColours(leftBox, {Blue, Red, Orange, Black});
       _document.ElementStyleSetBackgroundColour(leftBox, Green);
-      _document.ElementSetTextContent(leftBox, textRef);
+      _document.ElementSetTextContent(leftBox, u8"Hello, Krystal UI!\nThis text should be on a newline!");
       _document.ElementStyleSetTextColour(leftBox, Black);
       _document.ElementStyleSetOpacity(leftBox, 0.8f);
     }
@@ -126,9 +124,9 @@ namespace Krys
       _compositor.Render(_document);
     }
 
-    void OnUpdate(double deltaTime) noexcept override
+    void OnUpdate(Seconds dt) noexcept override
     {
-      _camera.Update(deltaTime, *_context->Input);
+      _camera.Update(dt.count(), *_context->Input);
     }
   };
 }

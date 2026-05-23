@@ -1,4 +1,4 @@
-#include "Krystal.Maths/Maths.hpp"
+﻿#include "Krystal.Maths/Maths.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

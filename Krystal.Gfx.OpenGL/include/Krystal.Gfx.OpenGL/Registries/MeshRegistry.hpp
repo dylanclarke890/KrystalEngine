@@ -1,22 +1,19 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Debug.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/PrimitiveType.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Mesh.hpp"
 #include "Krystal.Gfx/Registries/IMeshRegistry.hpp"
+#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Gfx/Utils/MeshDataUtils.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
-#include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
   class MeshRegistry final : public IMeshRegistry
   {
-    NO_COPY_MOVE(MeshRegistry)
-
     using MeshManager = ResourceManager<Mesh, MeshHandle>;
 
   private:
@@ -51,7 +48,7 @@ namespace Krys::Gfx::OpenGL
       _meshes.Remove(_fullScreenQuadHandle);
     }
 
-    NO_DISCARD MeshHandle Create(const MeshDesc &desc) noexcept override
+    KRYS_NODISCARD MeshHandle Create(const MeshDesc &desc) noexcept override
     {
       GLenum primitiveType = MapPrimitiveType(desc.Primitive);
 
@@ -63,7 +60,7 @@ namespace Krys::Gfx::OpenGL
       return AddMesh(Mesh {desc.Vertices, desc.Layout, primitiveType, desc.Type});
     }
 
-    NO_DISCARD MeshHandle GetFullScreenQuad() const noexcept override
+    KRYS_NODISCARD MeshHandle GetFullScreenQuad() const noexcept override
     {
       return _fullScreenQuadHandle;
     }
@@ -252,7 +249,7 @@ namespace Krys::Gfx::OpenGL
     }
 
   private:
-    NO_DISCARD MeshHandle AddMesh(Mesh &&mesh) noexcept
+    KRYS_NODISCARD MeshHandle AddMesh(Mesh &&mesh) noexcept
     {
       auto handle = _meshes.Add(std::move(mesh));
       if (!handle.IsValid())

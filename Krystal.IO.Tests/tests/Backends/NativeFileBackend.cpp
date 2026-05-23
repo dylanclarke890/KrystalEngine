@@ -1,4 +1,4 @@
-#include "Krystal.IO/Backends/NativeFileBackend.hpp"
+﻿#include "Krystal.IO/Backends/NativeFileBackend.hpp"
 #include "Krystal.IO/Common.hpp"
 #include "Krystal.IO/Path.hpp"
 #include <catch_all.hpp>
@@ -60,16 +60,16 @@ namespace Krys::Tests
       REQUIRE(writer != nullptr);
       REQUIRE(writer->IsOpen());
 
-      const char data[] = {0x01, 0x02, 0x03};
-      REQUIRE(writer->Write(reinterpret_cast<const Krys::byte *>(data), sizeof(data)));
+      const byte data[] = {byte {0x01}, byte {0x02}, byte {0x03}};
+      REQUIRE(writer->Write(data));
       writer->Close();
 
       auto reader = backend.GetReader(path, ReadFlags::None);
       REQUIRE(reader != nullptr);
       REQUIRE(reader->IsOpen());
 
-      Krys::byte buffer[3];
-      REQUIRE(reader->Read(buffer, sizeof(buffer)) == 3);
+      Krys::byte buffer[3] {};
+      REQUIRE(reader->Read(buffer) == 3);
       REQUIRE(memcmp(data, buffer, 3) == 0);
     }
 

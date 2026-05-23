@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Gfx.Lib/Handle.hpp"
+#include "Krystal.Lib/Handle.hpp"
 
 namespace Krys::Gfx
 {

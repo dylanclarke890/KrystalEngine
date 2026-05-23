@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Concepts.hpp"
-#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
@@ -9,8 +9,8 @@ namespace Krys::Maths
 {
   /// Map the specified object coordinates (obj.x, obj.y, obj.z) into window coordinates.
   /// The near and far clip planes correspond to z normalized device coordinates of 0 and +1 respectively.
-  template <FloatingPoint T, Arithmetic U>
-  NO_DISCARD constexpr auto Project_ZO(const Vector<T, 3> &obj, const Matrix<T, 4, 4> &model,
+  template <FloatingPoint T, Number U>
+  KRYS_NODISCARD constexpr auto Project_ZO(const Vector<T, 3> &obj, const Matrix<T, 4, 4> &model,
                                        const Matrix<T, 4, 4> &proj, const Vector<U, 4> &viewport) noexcept
   {
     Vector<T, 4> tmp(obj.x, obj.y, obj.z, T(1));
@@ -29,8 +29,8 @@ namespace Krys::Maths
 
   /// Map the specified object coordinates (obj.x, obj.y, obj.z) into window coordinates.
   /// The near and far clip planes correspond to z normalized device coordinates of -1 and +1 respectively.
-  template <FloatingPoint T, Arithmetic U>
-  NO_DISCARD constexpr auto Project_NO(const Vector<T, 3> &obj, const Matrix<T, 4, 4> &model,
+  template <FloatingPoint T, Number U>
+  KRYS_NODISCARD constexpr auto Project_NO(const Vector<T, 3> &obj, const Matrix<T, 4, 4> &model,
                                        const Matrix<T, 4, 4> &proj, const Vector<U, 4> &viewport)
   {
     Vector<T, 4> tmp(obj.x, obj.y, obj.z, T(1));
@@ -45,10 +45,10 @@ namespace Krys::Maths
     return Vector<T, 3>(tmp);
   }
 
-  // TODO: use policy based design to select between ZO and NO at compile time
+  // TODO(fix): use policy based design to select between ZO and NO at compile time
   /// Map the specified object coordinates (obj.x, obj.y, obj.z) into window coordinates.
-  template <FloatingPoint T, Arithmetic U>
-  NO_DISCARD constexpr Vector<T, 3> Project(const Vector<T, 3> &obj, const Matrix<T, 4, 4> &model,
+  template <FloatingPoint T, Number U>
+  KRYS_NODISCARD constexpr Vector<T, 3> Project(const Vector<T, 3> &obj, const Matrix<T, 4, 4> &model,
                                             const Matrix<T, 4, 4> &proj, const Vector<U, 4> &viewport)
   {
 #if KRYS_MATRIX_DEPTH_RANGE == KRYS_MATRIX_DEPTH_RANGE_ZERO_TO_ONE

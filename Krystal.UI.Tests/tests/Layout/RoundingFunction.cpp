@@ -1,4 +1,4 @@
-#include "Krystal.UI/Layout/Algorithm/PixelGrid.hpp"
+﻿#include "Krystal.UI/Layout/Algorithm/PixelGrid.hpp"
 #include "Krystal.UI/Layout/LayoutEngine.hpp"
 #include <catch_all.hpp>
 #include <cmath>

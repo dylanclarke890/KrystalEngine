@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Enum.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Core/Enum.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::UI
 {
@@ -14,11 +14,4 @@ namespace Krys::UI
   };
 }
 
-namespace Krys
-{
-  template <>
-  constexpr uint32 OrdinalCount<UI::TextAlign>()
-  {
-    return 4;
-  }
-}
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::UI::TextAlign, 4u)

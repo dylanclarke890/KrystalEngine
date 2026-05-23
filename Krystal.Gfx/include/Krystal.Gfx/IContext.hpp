@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx/ICamera.hpp"
 #include "Krystal.Gfx/Registries/IBufferRegistry.hpp"
@@ -12,12 +12,11 @@
 #include "Krystal.Gfx/Registries/IShaderRegistry.hpp"
 #include "Krystal.Gfx/Registries/ITextureRegistry.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
-#include "Krystal.Lib/Expected.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/NativeHandle.hpp"
-#include "Krystal.Lib/SmartPointers.hpp"
-#include "Krystal.Lib/String/StringInterner.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Pointers/UniquePtr.hpp"
+#include "Krystal.Lib/Types/Expected.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::Gfx
 {
@@ -27,10 +26,9 @@ namespace Krys::Gfx
     uint32 Width {0u};
     uint32 Height {0u};
     IO::VirtualFileSystem *VFS {nullptr};
-    StringInterner *Strings {nullptr};
   };
 
-  Expected<Unique<class IContext>> CreateContext(const ContextSettings &settings) noexcept;
+  Expected<UniquePtr<class IContext>> CreateContext(const ContextSettings &settings) noexcept;
 
   enum class API
   {
@@ -41,10 +39,8 @@ namespace Krys::Gfx
     Vulkan,
   };
 
-  class IContext
+  class IContext : NonCopyMovable<IContext>
   {
-    NO_COPY_MOVE(IContext)
-
   protected:
     IContext() noexcept = default;
 
@@ -63,28 +59,26 @@ namespace Krys::Gfx
 
     virtual void DPIChanged(int dpi) noexcept = 0;
 
-    NO_DISCARD virtual IBufferRegistry &Buffers() noexcept = 0;
+    KRYS_NODISCARD virtual IBufferRegistry &Buffers() noexcept = 0;
 
-    NO_DISCARD virtual IImageRegistry &Images() noexcept = 0;
+    KRYS_NODISCARD virtual IImageRegistry &Images() noexcept = 0;
 
-    NO_DISCARD virtual IImageViewRegistry &ImageViews() noexcept = 0;
+    KRYS_NODISCARD virtual IImageViewRegistry &ImageViews() noexcept = 0;
 
-    NO_DISCARD virtual ISamplerRegistry &Samplers() noexcept = 0;
+    KRYS_NODISCARD virtual ISamplerRegistry &Samplers() noexcept = 0;
 
-    NO_DISCARD virtual ITextureRegistry &Textures() noexcept = 0;
+    KRYS_NODISCARD virtual ITextureRegistry &Textures() noexcept = 0;
 
-    NO_DISCARD virtual IRenderTargetRegistry &RenderTargets() noexcept = 0;
+    KRYS_NODISCARD virtual IRenderTargetRegistry &RenderTargets() noexcept = 0;
 
-    NO_DISCARD virtual IShaderRegistry &Shaders() noexcept = 0;
+    KRYS_NODISCARD virtual IShaderRegistry &Shaders() noexcept = 0;
 
-    NO_DISCARD virtual IMeshRegistry &Meshes() noexcept = 0;
+    KRYS_NODISCARD virtual IMeshRegistry &Meshes() noexcept = 0;
 
-    NO_DISCARD virtual IMaterialRegistry &Materials() noexcept = 0;
+    KRYS_NODISCARD virtual IMaterialRegistry &Materials() noexcept = 0;
 
-    NO_DISCARD virtual IFontRegistry &Fonts() noexcept = 0;
+    KRYS_NODISCARD virtual IFontRegistry &Fonts() noexcept = 0;
 
-    NO_DISCARD virtual StringInterner &Strings() noexcept = 0;
-
-    NO_DISCARD virtual API GetAPI() const noexcept = 0;
+    KRYS_NODISCARD virtual API GetAPI() const noexcept = 0;
   };
 }

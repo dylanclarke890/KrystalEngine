@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.UI/Layout/Api/Node.hpp"
 #include "Krystal.UI/Layout/Event/Event.hpp"

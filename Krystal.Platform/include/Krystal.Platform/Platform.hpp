@@ -1,10 +1,11 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/Nullable.hpp"
-#include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/NativeHandle.hpp"
+#include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Time/Duration.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::Platform
 {
@@ -14,26 +15,17 @@ namespace Krys::Platform
   /// @brief Shuts down platform-specific functionality.
   void Shutdown() noexcept;
 
-  /// @brief Gets the time in seconds since the application started.
-  NO_DISCARD double GetTime() noexcept;
-
-  /// @brief Gets the time in milliseconds since the application started.
-  NO_DISCARD double GetTimeMilliseconds() noexcept;
-
   /// @brief Gets dpi of the given window.
-  NO_DISCARD int GetDPIForWindow(NativeHandle windowHandle = {nullptr}) noexcept;
+  KRYS_NODISCARD int GetDPIForWindow(NativeHandle windowHandle = {nullptr}) noexcept;
 
-  NO_DISCARD NativeHandle GetActiveWindow() noexcept;
+  KRYS_NODISCARD NativeHandle GetActiveWindow() noexcept;
 
   /// @brief Sets the timer precision for the application.
   /// @param min The requested precision. nullopt can be passed to request the lowest possible
   /// precision.
   /// @returns The actual timer precision set, in milliseconds.
-  uint SetTimerPrecision(Nullable<uint> min = std::nullopt) noexcept;
+  uint SetTimerPrecision(Maybe<uint> min = std::nullopt) noexcept;
 
   /// @brief Sleep for the specified number of milliseconds.
-  void Sleep(uint32 milliseconds) noexcept;
-
-  /// @brief Converts a UTF-8 string to a wide string.
-  NO_DISCARD wstring ToWideString(const string &utf8String) noexcept;
+  void Sleep(Milliseconds duration) noexcept;
 }

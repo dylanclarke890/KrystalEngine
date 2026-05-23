@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Platform/MouseButtons.hpp"
 
 namespace Krys::Platform
@@ -22,35 +22,35 @@ namespace Krys::Platform
 
     /// @brief Gets the x-coordinate of the cursor in client space.
     /// @note The origin is the top-left corner of the window, minus the title bar.
-    NO_DISCARD float ClientX() const noexcept;
+    KRYS_NODISCARD float ClientX() const noexcept;
 
     /// @brief Gets the y-coordinate of the cursor in client space.
     /// @note The origin is the top-left corner of the window, minus the title bar.
-    NO_DISCARD float ClientY() const noexcept;
+    KRYS_NODISCARD float ClientY() const noexcept;
 
     /// @brief Gets the amount the cursor has moved along the x-axis since the last frame.
-    NO_DISCARD float DeltaX() const noexcept;
+    KRYS_NODISCARD float DeltaX() const noexcept;
 
     /// @brief Gets the amount the cursor has moved along the y-axis since the last frame.
-    NO_DISCARD float DeltaY() const noexcept;
+    KRYS_NODISCARD float DeltaY() const noexcept;
 
     /// @brief Gets the amount the scroll wheel has changed since the last frame.
-    NO_DISCARD float ScrollDelta() const noexcept;
+    KRYS_NODISCARD float ScrollDelta() const noexcept;
 
     /// @brief Checks if a button was pressed this frame.
     /// @param button The button to check.
     /// @returns `true` if the button is in the state `MouseButtonState::Pressed`.
-    NO_DISCARD bool IsButtonPressed(MouseButton button) const noexcept;
+    KRYS_NODISCARD bool IsButtonPressed(MouseButton button) const noexcept;
 
     /// @brief Checks if a button is currently held down.
     /// @param button The button to check.
     /// @returns `true` if the button is in the state `MouseButtonState::Held`.
-    NO_DISCARD bool IsButtonHeld(MouseButton button) const noexcept;
+    KRYS_NODISCARD bool IsButtonHeld(MouseButton button) const noexcept;
 
     /// @brief Checks if a button was released this frame.
     /// @param button The button to check.
     /// @returns `true` if the button is in the state `MouseButtonState::Pressed`.
-    NO_DISCARD bool WasButtonReleased(MouseButton button) const noexcept;
+    KRYS_NODISCARD bool WasButtonReleased(MouseButton button) const noexcept;
 
   private:
     float _clientX {0}, _clientY {0};

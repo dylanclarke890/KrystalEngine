@@ -1,6 +1,6 @@
-#include "Krystal.Platform/Events.hpp"
+﻿#include "Krystal.Platform/Events.hpp"
 #include "Krystal.Lib/Events/Event.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Platform/Keys.hpp"
 #include "Krystal.Platform/MouseButtons.hpp"
 

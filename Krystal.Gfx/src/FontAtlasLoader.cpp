@@ -1,6 +1,7 @@
 ﻿#include "Krystal.Gfx/FontAtlasLoader.hpp"
-#include "Krystal.Lib/DebugBreak.hpp"
-#include "Krystal.Lib/List.hpp"
+#include "Krystal.Lib/Core/DebugBreak.hpp"
+#include "Krystal.Lib/Core/Move.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include "Krystal.Maths/Round.hpp"
 #include <algorithm>
@@ -20,7 +21,7 @@ namespace
 
   struct BitmapGlyph
   {
-    Text::UnicodeCodepoint Char {};
+    Text::UnicodeCodePoint Char {};
     Maths::Vec2u ActualSize {}; // actual glyph bitmap size (tight)
     Maths::Vec2u PaddedSize {}; // size including padding
     Maths::Vec2i Bearing {};    // slot->bitmap_left/top
@@ -76,12 +77,12 @@ namespace
       }
     }
 
-    NO_DISCARD bool IsLoaded() const noexcept
+    KRYS_NODISCARD bool IsLoaded() const noexcept
     {
       return _loaded;
     }
 
-    NO_DISCARD bool SetPixelSize(uint32 height) const noexcept
+    KRYS_NODISCARD bool SetPixelSize(uint32 height) const noexcept
     {
       KRYS_INFO("FREETYPE: Setting font size to {}px", height);
       if (FT_Set_Pixel_Sizes(_face, 0, height) != 0)
@@ -94,7 +95,7 @@ namespace
       return true;
     }
 
-    NO_DISCARD List<BitmapGlyph> LoadGlyphs(uint8 paddingPerGlyph) const noexcept
+    KRYS_NODISCARD List<BitmapGlyph> LoadGlyphs(uint8 paddingPerGlyph) const noexcept
     {
       List<BitmapGlyph> glyphs;
 
@@ -117,7 +118,7 @@ namespace
         const FT_GlyphSlot slot = _face->glyph;
         const FT_Bitmap &bm = slot->bitmap;
         BitmapGlyph glyph {
-          .Char = Text::UnicodeCodepoint(charcode),
+          .Char = Text::UnicodeCodePoint(charcode),
           .ActualSize = {bm.width, bm.rows},
           .PaddedSize = glyph.ActualSize + (paddingPerGlyph * 2u),
           .Bearing = {slot->bitmap_left, slot->bitmap_top},
@@ -136,7 +137,7 @@ namespace
           std::memcpy(dst, src, glyph.ActualSize.x);
         }
 
-        glyphs.push_back(std::move(glyph));
+        glyphs.push_back(Krys::Move(glyph));
 
         charcode = FT_Get_Next_Char(_face, charcode, &gindex);
       }
@@ -144,7 +145,7 @@ namespace
       return glyphs;
     }
 
-    NO_DISCARD FontMetrics GetMetrics() const noexcept
+    KRYS_NODISCARD FontMetrics GetMetrics() const noexcept
     {
       auto ascender = static_cast<float>(_face->size->metrics.ascender >> 6);
       auto descender = static_cast<float>(_face->size->metrics.descender >> 6);
@@ -154,8 +155,8 @@ namespace
       return {.Ascender = ascender, .Descender = descender, .Height = height, .LineHeight = lineHeight};
     }
 
-    NO_DISCARD CharacterMap ToCodepointsMap(List<BitmapGlyph> &glyphs, int padding,
-                                            const Maths::Vec2u &atlasSize)
+    KRYS_NODISCARD CharacterMap ToCodepointsMap(List<BitmapGlyph> &glyphs, int padding,
+                                                const Maths::Vec2u &atlasSize)
     {
       CharacterMap characters;
       characters.reserve(glyphs.size());
@@ -180,7 +181,7 @@ namespace
       return characters;
     }
 
-    NO_DISCARD List<uint8> ToPixels(const List<BitmapGlyph> &glyphs, const Maths::Vec2u &atlasSize)
+    KRYS_NODISCARD List<uint8> ToPixels(const List<BitmapGlyph> &glyphs, const Maths::Vec2u &atlasSize)
     {
       List<uint8> pixels(size_t(atlasSize.x) * atlasSize.y);
       std::fill(pixels.begin(), pixels.end(), 0);
@@ -198,7 +199,7 @@ namespace
       return pixels;
     }
 
-    NO_DISCARD bool TryPackGlyphs(List<BitmapGlyph> &glyphs, Maths::Vec2u &size)
+    KRYS_NODISCARD bool TryPackGlyphs(List<BitmapGlyph> &glyphs, Maths::Vec2u &size)
     {
       while (true)
       {
@@ -384,7 +385,7 @@ namespace
         double scale = _params.EMSizeInPixels;
 
         using namespace Krys::Maths;
-        characters[Text::UnicodeCodepoint(glyph.getCodepoint())] = Character {
+        characters[Text::UnicodeCodePoint(glyph.getCodepoint())] = Character {
           .Size = Vec2u(Round(Vec2d(pr - pl, pt - pb) * scale)),
           .Bearing = Vec2i(Round(Vec2d(pl, pt) * scale)),
           .Advance = static_cast<int32>(Round(glyph.getAdvance() * scale)),

@@ -3,15 +3,15 @@
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Map.hpp"
-#include "Krystal.Lib/String/StringRef.hpp"
-#include "Krystal.Lib/StronglyTypedValue.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Move.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Map.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 #include "Krystal.Maths/Vector.hpp"
-#include "Krystal.Text/Unicode.hpp"
+#include "Krystal.Text/UnicodeCodePoint.hpp"
 #include <compare>
 #include <type_traits>
 
@@ -31,7 +31,7 @@ namespace Krys::Gfx
     FontType Type {FontType::Bitmap};
     float Size {16.f};
 
-    NO_DISCARD auto operator<=>(const FontDesc &other) const noexcept = default;
+    KRYS_NODISCARD auto operator<=>(const FontDesc &other) const noexcept = default;
   };
 
   struct SDFParams
@@ -59,8 +59,7 @@ namespace Krys::Gfx
     Maths::Vec2 UVMax;       // (u1, v1)
   };
 
-  using CharacterMap =
-    Map<Text::UnicodeCodepoint, Character, StronglyTypedNumberHasher<Text::UnicodeCodepoint>>;
+  using CharacterMap = Map<Text::UnicodeCodePoint, Character>;
 
   struct FontMetrics
   {
@@ -102,30 +101,43 @@ namespace std
 
 namespace Krys::Gfx
 {
-  class FontFamily
+  class FontFamily : NonCopyable<FontFamily>
   {
-    NO_COPY(FontFamily)
-
   private:
-    StringRef _name;
+    utf8_string _name;
     IO::Path _path;
     List<FontHandle> _fonts;
 
   public:
-    FontFamily(StringRef name, const IO::Path &path) noexcept : _name(name), _path(path)
+    FontFamily(utf8_string name, const IO::Path &path) noexcept : _name(name), _path(path)
     {
     }
 
     ~FontFamily() = default;
 
-    MOVE_SWAP(FontFamily)
+    FontFamily(FontFamily &&other) noexcept
+        : _name(std::exchange(other._name, utf8_string {})), _path(std::exchange(other._path, IO::Path {})),
+          _fonts(Krys::Move(other._fonts))
+    {
+    }
 
-    NO_DISCARD StringRef Name() const noexcept
+    FontFamily &operator=(FontFamily &&other) noexcept
+    {
+      if (this != &other)
+      {
+        _name = std::exchange(other._name, utf8_string {});
+        _path = std::exchange(other._path, IO::Path {});
+        _fonts = Krys::Move(other._fonts);
+      }
+      return *this;
+    }
+
+    KRYS_NODISCARD utf8_stringview Name() const noexcept
     {
       return _name;
     }
 
-    NO_DISCARD const IO::Path &Path() const noexcept
+    KRYS_NODISCARD const IO::Path &Path() const noexcept
     {
       return _path;
     }
@@ -140,15 +152,9 @@ namespace Krys::Gfx
       std::erase(_fonts, font);
     }
 
-    NO_DISCARD const List<FontHandle> &Fonts() const noexcept
+    KRYS_NODISCARD const List<FontHandle> &Fonts() const noexcept
     {
       return _fonts;
-    }
-
-  private:
-    void Swap(FontFamily &other) noexcept
-    {
-      _path = std::move(other._path);
     }
   };
 }

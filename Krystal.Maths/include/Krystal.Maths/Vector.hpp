@@ -1,9 +1,9 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/Concepts.hpp"
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Core/Macros.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Traits.hpp"
 #include <cassert>
 #include <cmath>
@@ -12,12 +12,12 @@
 
 #pragma region Helper Macros
 
-#define VECTOR_TEMPLATE_PARAMS Krys::Arithmetic T, int N
+#define VECTOR_TEMPLATE_PARAMS Krys::Number T, int N
 #define VECTOR_TEMPLATE_ARGS T, N
 #define VECTOR_TYPE Krys::Maths::Vector<VECTOR_TEMPLATE_ARGS>
 
 #define VECTOR_TYPE_ALIASES(length)                                                                          \
-  template <Arithmetic T>                                                                                    \
+  template <Number T>                                                                                        \
   using Vector##length = Vector<T, length>;                                                                  \
   using Vec##length = Vector<float, length>;                                                                 \
   using Vec##length##b = Vector<bool, length>;                                                               \
@@ -33,30 +33,31 @@
 
 #define VECTOR_BINARY_OPERATOR(OP)                                                                           \
   template <VECTOR_TEMPLATE_PARAMS>                                                                          \
-  NO_DISCARD constexpr auto CONCAT(operator, OP)(const Vector<T, N> &lhs, const Vector<T, N> &rhs) noexcept  \
+  KRYS_NODISCARD constexpr auto KRYS_CONCAT(operator, OP)(const Vector<T, N> &lhs,                           \
+                                                          const Vector<T, N> &rhs) noexcept                  \
   {                                                                                                          \
     return Zip(lhs, rhs, [](auto l, auto r) { return l OP r; });                                             \
   }                                                                                                          \
   template <VECTOR_TEMPLATE_PARAMS>                                                                          \
-  NO_DISCARD constexpr auto CONCAT(operator, OP)(const Vector<T, N> &lhs, T scalar) noexcept                 \
+  KRYS_NODISCARD constexpr auto KRYS_CONCAT(operator, OP)(const Vector<T, N> &lhs, T scalar) noexcept        \
   {                                                                                                          \
     return MapEach(lhs, [&](auto v) { return v OP scalar; });                                                \
   }
 
 #define VECTOR_UNARY_OPERATOR(OP)                                                                            \
   template <VECTOR_TEMPLATE_PARAMS>                                                                          \
-  NO_DISCARD constexpr auto CONCAT(operator, OP)(const Vector<T, N> &rhs) noexcept                           \
+  KRYS_NODISCARD constexpr auto KRYS_CONCAT(operator, OP)(const Vector<T, N> &rhs) noexcept                  \
   {                                                                                                          \
     return MapEach(rhs, [](auto v) { return OP v; });                                                        \
   }
 
 #define VECTOR_OPERATOR_ASSIGNMENT(OP)                                                                       \
-  constexpr auto &CONCAT(operator, CONCAT(OP, =))(const Vector &other) noexcept                              \
+  constexpr auto &KRYS_CONCAT(operator, KRYS_CONCAT(OP, =))(const Vector &other) noexcept                    \
   {                                                                                                          \
     *this = *this OP other;                                                                                  \
     return *this;                                                                                            \
   }                                                                                                          \
-  constexpr auto &CONCAT(operator, CONCAT(OP, =))(T scalar) noexcept                                         \
+  constexpr auto &KRYS_CONCAT(operator, KRYS_CONCAT(OP, =))(T scalar) noexcept                               \
   {                                                                                                          \
     *this = *this OP scalar;                                                                                 \
     return *this;                                                                                            \
@@ -86,7 +87,7 @@ namespace Krys::Maths
   template <VECTOR_TEMPLATE_PARAMS>
   struct Vector;
 
-  template <Arithmetic T>
+  template <Number T>
   struct Vector<T, 1>
   {
     T x;
@@ -104,13 +105,13 @@ namespace Krys::Maths
     {
     }
 
-    NO_DISCARD constexpr auto operator[](int index) const noexcept
+    KRYS_NODISCARD constexpr auto operator[](int index) const noexcept
     {
       assert(index == 0);
       return x;
     }
 
-    NO_DISCARD constexpr auto &operator[](int index) noexcept
+    KRYS_NODISCARD constexpr auto &operator[](int index) noexcept
     {
       assert(index == 0);
       return x;
@@ -119,7 +120,7 @@ namespace Krys::Maths
     VECTOR_COMMON_MEMBER_FUNCTIONS()
   };
 
-  template <Arithmetic T>
+  template <Number T>
   struct Vector<T, 2>
   {
     T x, y;
@@ -141,7 +142,7 @@ namespace Krys::Maths
     {
     }
 
-    NO_DISCARD constexpr auto operator[](int index) const noexcept
+    KRYS_NODISCARD constexpr auto operator[](int index) const noexcept
     {
       assert(index >= 0 && index < Length);
       if (index == 0)
@@ -150,7 +151,7 @@ namespace Krys::Maths
         return y;
     }
 
-    NO_DISCARD constexpr auto &operator[](int index) noexcept
+    KRYS_NODISCARD constexpr auto &operator[](int index) noexcept
     {
       assert(index >= 0 && index < Length);
       if (index == 0)
@@ -162,7 +163,7 @@ namespace Krys::Maths
     VECTOR_COMMON_MEMBER_FUNCTIONS()
   };
 
-  template <Arithmetic T>
+  template <Number T>
   struct Vector<T, 3>
   {
     T x, y, z;
@@ -189,13 +190,13 @@ namespace Krys::Maths
     {
     }
 
-    template <ConvertibleTo<T> U>
+    template <Number U>
     constexpr Vector(const Vector<U, 3> &other) noexcept
         : x(static_cast<T>(other.x)), y(static_cast<T>(other.y)), z(static_cast<T>(other.z))
     {
     }
 
-    NO_DISCARD constexpr auto operator[](int index) const noexcept
+    KRYS_NODISCARD constexpr auto operator[](int index) const noexcept
     {
       assert(index >= 0 && index < Length);
       if (index == 0)
@@ -206,7 +207,7 @@ namespace Krys::Maths
         return z;
     }
 
-    NO_DISCARD constexpr auto &operator[](int index) noexcept
+    KRYS_NODISCARD constexpr auto &operator[](int index) noexcept
     {
       assert(index >= 0 && index < Length);
       if (index == 0)
@@ -220,7 +221,7 @@ namespace Krys::Maths
     VECTOR_COMMON_MEMBER_FUNCTIONS()
   };
 
-  template <Arithmetic T>
+  template <Number T>
   struct Vector<T, 4>
   {
     T x, y, z, w;
@@ -256,7 +257,7 @@ namespace Krys::Maths
     {
     }
 
-    NO_DISCARD constexpr auto operator[](int index) const noexcept
+    KRYS_NODISCARD constexpr auto operator[](int index) const noexcept
     {
       assert(index >= 0 && index < Length);
       if (index == 0)
@@ -269,7 +270,7 @@ namespace Krys::Maths
         return w;
     }
 
-    NO_DISCARD constexpr auto &operator[](int index) noexcept
+    KRYS_NODISCARD constexpr auto &operator[](int index) noexcept
     {
       assert(index >= 0 && index < Length);
       if (index == 0)
@@ -289,7 +290,6 @@ namespace Krys::Maths
   struct Traits<VECTOR_TYPE>
   {
     using ComponentType = T;
-    static constexpr bool IsArithmetic = true;
     static constexpr bool IsVector = true;
     static constexpr bool IsMatrix = false;
 
@@ -308,7 +308,7 @@ namespace Krys::Maths
 
   /// @brief Map each component of the vector using the provided function.
   template <VECTOR_TEMPLATE_PARAMS, RegularCallable<T> F>
-  NO_DISCARD constexpr auto MapEach(const VECTOR_TYPE &vec, const F &func) noexcept
+  KRYS_NODISCARD constexpr auto MapEach(const VECTOR_TYPE &vec, const F &func) noexcept
   {
     static_assert(N > 0 && N < 5, "Unsupported vector length");
 
@@ -349,7 +349,7 @@ namespace Krys::Maths
 
   /// @brief Apply a function to each component of the vector.
   template <VECTOR_TEMPLATE_PARAMS, RegularCallable<T> F>
-  NO_DISCARD constexpr void ForEach(const VECTOR_TYPE &vec, const F &func) noexcept
+  KRYS_NODISCARD constexpr void ForEach(const VECTOR_TYPE &vec, const F &func) noexcept
   {
     static_assert(N > 0 && N < 5, "Unsupported vector length");
 
@@ -383,7 +383,7 @@ namespace Krys::Maths
 
   /// @brief Zip two vectors together using the provided function.
   template <VECTOR_TEMPLATE_PARAMS, RegularCallable<T, T> F>
-  NO_DISCARD constexpr auto Zip(const VECTOR_TYPE &lhs, const Vector<T, N> &rhs, const F &func) noexcept
+  KRYS_NODISCARD constexpr auto Zip(const VECTOR_TYPE &lhs, const Vector<T, N> &rhs, const F &func) noexcept
   {
     static_assert(N > 0 && N < 5, "Unsupported vector length");
 
@@ -424,8 +424,8 @@ namespace Krys::Maths
 
   /// @brief Zip three vectors together using the provided function.
   template <VECTOR_TEMPLATE_PARAMS, RegularCallable<T, T, T> F>
-  NO_DISCARD constexpr auto Zip(const VECTOR_TYPE &a, const VECTOR_TYPE &b, const VECTOR_TYPE &c,
-                                const F &func) noexcept
+  KRYS_NODISCARD constexpr auto Zip(const VECTOR_TYPE &a, const VECTOR_TYPE &b, const VECTOR_TYPE &c,
+                                    const F &func) noexcept
   {
     static_assert(N > 0 && N < 5, "Unsupported vector length");
 
@@ -466,7 +466,7 @@ namespace Krys::Maths
 
   /// @brief Computes the sum of all components of the vector.
   template <VECTOR_TEMPLATE_PARAMS>
-  NO_DISCARD constexpr auto Sum(const VECTOR_TYPE &v) noexcept
+  KRYS_NODISCARD constexpr auto Sum(const VECTOR_TYPE &v) noexcept
   {
     T sum = T(0);
     ForEach(v, [&sum](auto val) { sum += val; });
@@ -475,7 +475,7 @@ namespace Krys::Maths
 
   /// @brief Computes the sum of all components of the vector after applying a function to each component.
   template <VECTOR_TEMPLATE_PARAMS, RegularCallable<T> F>
-  NO_DISCARD constexpr auto Sum(const VECTOR_TYPE &v, const F &func) noexcept
+  KRYS_NODISCARD constexpr auto Sum(const VECTOR_TYPE &v, const F &func) noexcept
   {
     using U = std::invoke_result_t<F, T>;
 
@@ -547,13 +547,13 @@ namespace Krys::Maths
   VECTOR_UNARY_OPERATOR(~);
 
   template <VECTOR_TEMPLATE_PARAMS>
-  NO_DISCARD constexpr auto operator+(T scalar, const Vector<T, N> &rhs) noexcept
+  KRYS_NODISCARD constexpr auto operator+(T scalar, const Vector<T, N> &rhs) noexcept
   {
     return rhs + scalar;
   }
 
   template <VECTOR_TEMPLATE_PARAMS>
-  NO_DISCARD constexpr auto operator*(T scalar, const Vector<T, N> &rhs) noexcept
+  KRYS_NODISCARD constexpr auto operator*(T scalar, const Vector<T, N> &rhs) noexcept
   {
     return rhs * scalar;
   }
@@ -646,8 +646,8 @@ namespace Krys::Maths
 
   /// @brief Compute the normal of a triangle.
   template <FloatingPoint T>
-  NO_DISCARD constexpr auto TriangleNormal(const Vector3<T> &p1, const Vector3<T> &p2,
-                                           const Vector3<T> &p3) noexcept
+  KRYS_NODISCARD constexpr auto TriangleNormal(const Vector3<T> &p1, const Vector3<T> &p2,
+                                               const Vector3<T> &p3) noexcept
   {
     return Normalize(Cross(p1 - p2, p1 - p3));
   }

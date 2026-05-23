@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Gfx/Enums/ImageType.hpp"
 #include "Krystal.Gfx/Enums/PixelFormat.hpp"
 

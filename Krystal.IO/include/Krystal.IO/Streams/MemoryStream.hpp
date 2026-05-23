@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.IO/Common.hpp"
-#include "Krystal.IO/IStream.hpp"
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.IO/Streams/Stream.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 #include <algorithm>
 #include <cstring>
 
@@ -15,14 +15,12 @@ namespace Krys::IO
   class MemoryStreamReader : public IStreamReader
   {
     List<byte> &_buffer;
-    uint64 _position = 0;
+    size_t _position = 0uz;
     bool _isOpen = false;
     ReadFlags _flags;
 
   public:
     static constexpr ReadFlags DefaultReadFlags = ReadFlags::None;
-
-    NO_COPY_MOVE(MemoryStreamReader)
 
     explicit MemoryStreamReader(List<byte> &buffer, ReadFlags flags = DefaultReadFlags) noexcept
         : _buffer(buffer), _flags(flags)
@@ -36,7 +34,7 @@ namespace Krys::IO
     }
 
     /// @brief Checks if the stream is open.
-    NO_DISCARD bool IsOpen() const noexcept override
+    KRYS_NODISCARD bool IsOpen() const noexcept override
     {
       return _isOpen;
     }
@@ -50,9 +48,10 @@ namespace Krys::IO
       }
 
       _isOpen = true;
+
       if ((_flags & ReadFlags::OpenAtEnd) == ReadFlags::OpenAtEnd)
       {
-        _position = static_cast<uint64>(_buffer.size());
+        _position = _buffer.size();
       }
 
       return true;
@@ -62,22 +61,22 @@ namespace Krys::IO
     void Close() noexcept override
     {
       _isOpen = false;
-      _position = 0;
+      _position = 0uz;
     }
 
-    /// @brief Reads 'count' bytes from the stream.
+    /// @brief Reads bytes from the stream into the destination buffer.
     /// @return The number of bytes actually read from the stream.
-    uint64 Read(byte *dst, uint64 count) noexcept override
+    size_t Read(Span<byte> destination) noexcept override
     {
-      if (dst == nullptr || count == 0 || !_isOpen || EndOfStream())
+      if (!_isOpen || destination.empty() || EndOfStream())
       {
         return 0;
       }
 
-      const uint64 remainingBytes = static_cast<uint64>(_buffer.size()) - _position;
-      const uint64 bytesRead = std::min(count, remainingBytes);
+      const size_t remaining = _buffer.size() - _position;
+      const size_t bytesRead = std::min(destination.size(), remaining);
 
-      std::memcpy(dst, &_buffer[_position], bytesRead);
+      std::memcpy(destination.data(), &_buffer[_position], bytesRead);
       _position += bytesRead;
 
       return bytesRead;
@@ -106,38 +105,39 @@ namespace Krys::IO
         return false;
       }
 
-      _position = newPosition;
+      _position = static_cast<size_t>(newPosition);
       return true;
     }
 
     /// @brief Peeks at the next byte in the stream without advancing the position.
-    NO_DISCARD bool Peek(byte &next) noexcept override
+    KRYS_NODISCARD bool Peek(byte &next) noexcept override
     {
-      if (!_isOpen || _position >= _buffer.size())
+      if (!_isOpen || EndOfStream())
       {
         return false;
       }
+
       next = _buffer[_position];
       return true;
     }
 
     /// @brief Gets the total size of the stream in bytes, or 0 if the size is unknown.
-    NO_DISCARD uint64 Size() const noexcept override
+    KRYS_NODISCARD size_t Size() const noexcept override
     {
-      return static_cast<uint64>(_buffer.size());
+      return _buffer.size();
     }
 
     /// @brief Gets the current position in the stream.
-    NO_DISCARD uint64 Position() noexcept override
+    KRYS_NODISCARD size_t Position() noexcept override
     {
       return _position;
     }
 
     /// @brief Checks if the end of the stream has been reached.
     /// @return True if the end of the stream has been reached, false otherwise.
-    NO_DISCARD bool EndOfStream() const noexcept override
+    KRYS_NODISCARD bool EndOfStream() const noexcept override
     {
-      return _position >= static_cast<uint64>(_buffer.size());
+      return _position >= _buffer.size();
     }
   };
 
@@ -145,14 +145,12 @@ namespace Krys::IO
   class MemoryStreamWriter : public IStreamWriter
   {
     List<byte> &_buffer;
-    uint64 _position = 0;
+    size_t _position = 0;
     bool _isOpen = false;
     WriteFlags _flags;
 
   public:
     static constexpr WriteFlags DefaultWriteFlags = WriteFlags::None;
-
-    NO_COPY_MOVE(MemoryStreamWriter)
 
     explicit MemoryStreamWriter(List<byte> &buffer, WriteFlags flags = DefaultWriteFlags) noexcept
         : _buffer(buffer), _flags(flags)
@@ -166,7 +164,7 @@ namespace Krys::IO
     }
 
     /// @brief Checks if the stream is open.
-    NO_DISCARD bool IsOpen() const noexcept override
+    KRYS_NODISCARD bool IsOpen() const noexcept override
     {
       return _isOpen;
     }
@@ -188,7 +186,7 @@ namespace Krys::IO
 
       if ((_flags & WriteFlags::OpenAtEnd) == WriteFlags::OpenAtEnd)
       {
-        _position = static_cast<uint64>(_buffer.size());
+        _position = _buffer.size();
       }
 
       return _isOpen;
@@ -198,13 +196,13 @@ namespace Krys::IO
     void Close() noexcept override
     {
       _isOpen = false;
-      _position = 0;
+      _position = 0uz;
     }
 
-    /// @brief Writes 'count' bytes to the stream.
-    bool Write(const byte *src, uint64 count) noexcept override
+    /// @brief Writes bytes to the stream from the source buffer.
+    bool Write(Span<const byte> source) noexcept override
     {
-      if (!_isOpen || src == nullptr)
+      if (!_isOpen || source.empty())
       {
         return false;
       }
@@ -212,13 +210,13 @@ namespace Krys::IO
       try
       {
         // ensure the buffer can accommodate the new data
-        if (_position + count > static_cast<uint64>(_buffer.size()))
+        if (_position + source.size() > _buffer.size())
         {
-          _buffer.resize(_position + count);
+          _buffer.resize(_position + source.size());
         }
 
-        std::memcpy(&_buffer[_position], src, count);
-        _position += count;
+        std::memcpy(&_buffer[_position], source.data(), source.size());
+        _position += source.size();
 
         return true;
       }
@@ -251,18 +249,18 @@ namespace Krys::IO
         return false;
       }
 
-      _position = static_cast<uint64>(newPosition);
+      _position = static_cast<size_t>(newPosition);
       return true;
     }
 
-    /// @brief Gets the total size of the stream in bytes, or 0 if the size is unknown.
-    NO_DISCARD uint64 Size() const noexcept override
+    /// @brief Gets the total size of the stream in bytes.
+    KRYS_NODISCARD size_t Size() const noexcept override
     {
-      return static_cast<uint64>(_buffer.size());
+      return _buffer.size();
     }
 
     /// @brief Gets the current position in the stream.
-    NO_DISCARD uint64 Position() noexcept override
+    KRYS_NODISCARD size_t Position() noexcept override
     {
       return _position;
     }

@@ -1,8 +1,8 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/List.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 
 namespace Krys::Gfx
 {

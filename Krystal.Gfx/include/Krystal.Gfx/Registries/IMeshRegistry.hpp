@@ -1,19 +1,17 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/Mesh.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Span.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 
 namespace Krys::Gfx
 {
-  class IMeshRegistry
+  class IMeshRegistry : NonCopyMovable<IMeshRegistry>
   {
-    NO_COPY_MOVE(IMeshRegistry)
-
   protected:
     IMeshRegistry() noexcept = default;
 
@@ -24,9 +22,9 @@ namespace Krys::Gfx
 
     virtual void Shutdown() noexcept = 0;
 
-    NO_DISCARD virtual MeshHandle Create(const MeshDesc &desc) noexcept = 0;
+    KRYS_NODISCARD virtual MeshHandle Create(const MeshDesc &desc) noexcept = 0;
 
-    NO_DISCARD virtual MeshHandle GetFullScreenQuad() const noexcept = 0;
+    KRYS_NODISCARD virtual MeshHandle GetFullScreenQuad() const noexcept = 0;
 
     virtual bool Destroy(MeshHandle handle) noexcept = 0;
   };

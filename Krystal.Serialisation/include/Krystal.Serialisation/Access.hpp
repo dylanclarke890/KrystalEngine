@@ -1,11 +1,10 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Macros.hpp"
 #include "Krystal.Serialisation/Builtins.hpp"
 
 namespace Krys::Serialisation
 {
-#define KRYS_ACCESS_FRIEND() friend class Krys::Serialisation::Access
+#define KRYS_ACCESS_FRIEND() friend class ::Krys::Serialisation::Access
 
   /// @brief Allows archives to use private Transfer/Save/Load methods of types by being a friend.
   class Access
@@ -16,9 +15,9 @@ namespace Krys::Serialisation
     {
       if constexpr (HasTraitVersion<T>)
       {
-        return VersionTraits<RemoveCvRef<T>>::ClassVersion;
+        return VersionTraits<remove_cvref_t<T>>::ClassVersion;
       }
-      else if constexpr (requires(RemoveCvRef<T> &value) { value.GetVersion(); })
+      else if constexpr (requires(remove_cvref_t<T> &value) { value.GetVersion(); })
       {
         return value.GetVersion();
       }

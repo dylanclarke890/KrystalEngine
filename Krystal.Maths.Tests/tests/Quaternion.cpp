@@ -1,4 +1,4 @@
-#include "Krystal.Maths/Quaternion.hpp"
+﻿#include "Krystal.Maths/Quaternion.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

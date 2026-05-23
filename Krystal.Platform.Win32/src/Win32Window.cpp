@@ -1,5 +1,5 @@
-#include "Krystal.Platform.Win32/Win32Window.hpp"
-#include "Krystal.Lib/Set.hpp"
+﻿#include "Krystal.Platform.Win32/Win32Window.hpp"
+#include "Krystal.Lib/Types/Set.hpp"
 #include "Krystal.Platform.Win32/Utils.hpp"
 #include "Krystal.Platform/IWindow.hpp"
 #include "Krystal.Platform/Platform.hpp"
@@ -134,15 +134,24 @@ namespace
       default:             return Key::UNKNOWN;
     }
   }
+
+  static std::wstring ToWideString(const Krys::string &str)
+  {
+    const int sizeNeeded =
+      ::MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()), NULL, 0);
+    std::wstring wideStr(sizeNeeded, 0);
+    ::MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()), wideStr.data(), sizeNeeded);
+    return wideStr;
+  }
 }
 
 namespace Krys::Platform
 {
-  Expected<Unique<IWindow>> CreateWindow(const WindowSettings &settings) noexcept
+  Expected<UniquePtr<IWindow>> CreateWindow(const WindowSettings &settings) noexcept
   {
     try
     {
-      return Expected<Unique<IWindow>>(CreateUnique<Win32::Win32Window>(settings));
+      return Expected<UniquePtr<IWindow>>(CreateUnique<Win32::Win32Window>(settings));
     }
     catch (const std::exception &e)
     {
@@ -222,7 +231,7 @@ namespace Krys::Platform
 
     void Win32Window::RegisterRawInput() const
     {
-      // TODO: account for dpi?
+      // TODO(fix): account for dpi?
       RAWINPUTDEVICE rid {};
       rid.usUsagePage = HID_USAGE_PAGE_GENERIC;
       rid.usUsage = HID_USAGE_GENERIC_MOUSE;

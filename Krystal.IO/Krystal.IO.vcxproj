@@ -34,7 +34,7 @@
     <ClInclude Include="include\Krystal.IO\Streams\MemoryStream.hpp" />
     <ClInclude Include="include\Krystal.IO\Streams\NativeFileStream.hpp" />
     <ClInclude Include="include\Krystal.IO\Common.hpp" />
-    <ClInclude Include="include\Krystal.IO\IStream.hpp" />
+    <ClInclude Include="include\Krystal.IO\Streams\Stream.hpp" />
     <ClInclude Include="include\Krystal.IO\Streams\StreamUtils.hpp" />
     <ClInclude Include="include\Krystal.IO\VirtualFileSystem.hpp" />
     <ClInclude Include="include\Krystal.IO\Path.hpp" />

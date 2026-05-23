@@ -1,23 +1,20 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/TextureRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Material.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Registries/IMaterialRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
+#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Gfx/Resources/Material.hpp"
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Map.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Types/Map.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
   class MaterialRegistry final : public IMaterialRegistry
   {
-    NO_COPY_MOVE(MaterialRegistry)
-
     using MaterialManager = ResourceManager<Material, MaterialHandle>;
     using MaterialCache = ResourceHandleCache<string, MaterialHandle>;
 
@@ -43,8 +40,8 @@ namespace Krys::Gfx::OpenGL
     {
     }
 
-    NO_DISCARD MaterialHandle Create(const string &name, ShaderHandle shader,
-                                     const PBRMaterialDesc &desc) noexcept override
+    KRYS_NODISCARD MaterialHandle Create(const string &name, ShaderHandle shader,
+                                         const PBRMaterialDesc &desc) noexcept override
     {
       if (auto cached = _cache.Get(name); cached.IsValid())
       {
@@ -74,7 +71,7 @@ namespace Krys::Gfx::OpenGL
       return handle;
     }
 
-    NO_DISCARD MaterialHandle LoadPBRMaterial(const string &name, ShaderHandle shader) noexcept
+    KRYS_NODISCARD MaterialHandle LoadPBRMaterial(const string &name, ShaderHandle shader) noexcept
     {
       if (auto cached = _cache.Get(name); cached.IsValid())
       {
@@ -94,12 +91,12 @@ namespace Krys::Gfx::OpenGL
       return Create(name, shader, desc);
     }
 
-    NO_DISCARD Material &Get(MaterialHandle handle) noexcept
+    KRYS_NODISCARD Material &Get(MaterialHandle handle) noexcept
     {
       return _materials.Get(handle);
     }
 
-    NO_DISCARD Material *TryGet(MaterialHandle handle) noexcept
+    KRYS_NODISCARD Material *TryGet(MaterialHandle handle) noexcept
     {
       return _materials.TryGet(handle);
     }

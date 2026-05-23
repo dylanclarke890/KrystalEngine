@@ -1,18 +1,18 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Gfx/Commands/CommandList.hpp"
 #include "Krystal.Gfx/IContext.hpp"
-#include "Krystal.Lib/Expected.hpp"
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/SmartPointers.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Commands/CommandList.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
+#include "Krystal.Lib/Types/Expected.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Pointers/UniquePtr.hpp"
 
 namespace Krys::Gfx
 {
-  class IRenderer
-  {
-    NO_COPY_MOVE(IRenderer)
+  Expected<UniquePtr<class IRenderer>> CreateRenderer(IContext &ctx) noexcept;
 
+  class IRenderer : NonCopyMovable<IRenderer>
+  {
   public:
     IRenderer() noexcept = default;
 
@@ -28,6 +28,4 @@ namespace Krys::Gfx
 
     virtual void Submit(const CommandList &commandList) = 0;
   };
-
-  Expected<Unique<IRenderer>> CreateRenderer(IContext &ctx) noexcept;
 }

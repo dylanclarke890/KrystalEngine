@@ -1,8 +1,8 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/Set.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Types/Set.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Platform/Keys.hpp"
 
 namespace Krys::Platform
@@ -26,17 +26,17 @@ namespace Krys::Platform
     /// @brief Checks if a key was pressed this frame.
     /// @param key The key to check.
     /// @returns `true` if the key is in the state `KeyState::Pressed`.
-    NO_DISCARD bool IsKeyPressed(Key key) const noexcept;
+    KRYS_NODISCARD bool IsKeyPressed(Key key) const noexcept;
 
     /// @brief Checks if a key is being held this frame.
     /// @param key The key to check.
     /// @returns `true` if the key is in the state `KeyState::Held`.
-    NO_DISCARD bool IsKeyHeld(Key key) const noexcept;
+    KRYS_NODISCARD bool IsKeyHeld(Key key) const noexcept;
 
     /// @brief Checks if a key was released this frame.
     /// @param key The key to check.
     /// @returns `true` if the key is in the state `KeyState::Released`.
-    NO_DISCARD bool WasKeyReleased(Key key) const noexcept;
+    KRYS_NODISCARD bool WasKeyReleased(Key key) const noexcept;
 
   private:
     Set<Key> _pressed, _held, _released;

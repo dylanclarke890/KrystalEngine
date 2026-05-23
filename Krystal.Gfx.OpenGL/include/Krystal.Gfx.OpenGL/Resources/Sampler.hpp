@@ -1,17 +1,15 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/FilterMode.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/WrapMode.hpp"
 #include "Krystal.Gfx/Resources/Sampler.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
-  class Sampler
+  class Sampler : NonCopyable<Sampler>
   {
-    NO_COPY(Sampler)
-
   private:
     GLuint _id {0u};
     GLenum _minFilter {GL_LINEAR};
@@ -22,8 +20,6 @@ namespace Krys::Gfx::OpenGL
     float _anisotropicLevel {1.0f};
 
   public:
-    MOVE_SWAP(Sampler)
-
     Sampler(GLenum minFilter, GLenum magFilter, GLenum wrapS, GLenum wrapT, GLenum wrapR,
             float anisotropicLevel) noexcept
         : _minFilter(minFilter), _magFilter(magFilter), _wrapS(wrapS), _wrapT(wrapT), _wrapR(wrapR),
@@ -35,6 +31,7 @@ namespace Krys::Gfx::OpenGL
       glSamplerParameteri(_id, GL_TEXTURE_WRAP_S, _wrapS);
       glSamplerParameteri(_id, GL_TEXTURE_WRAP_T, _wrapT);
       glSamplerParameteri(_id, GL_TEXTURE_WRAP_R, _wrapR);
+
       if (_anisotropicLevel > 1.0f)
       {
         glSamplerParameterf(_id, GL_TEXTURE_MAX_ANISOTROPY, _anisotropicLevel);
@@ -49,6 +46,32 @@ namespace Krys::Gfx::OpenGL
       }
     }
 
+    Sampler(Sampler &&other) noexcept
+        : _id(std::exchange(other._id, 0u)), _minFilter(std::exchange(other._minFilter, GL_LINEAR)),
+          _magFilter(std::exchange(other._magFilter, GL_LINEAR)),
+          _wrapS(std::exchange(other._wrapS, GL_REPEAT)), _wrapT(std::exchange(other._wrapT, GL_REPEAT)),
+          _wrapR(std::exchange(other._wrapR, GL_REPEAT)),
+          _anisotropicLevel(std::exchange(other._anisotropicLevel, 1.0f))
+    {
+    }
+
+    Sampler &operator=(Sampler &&other) noexcept
+    {
+      if (this != &other)
+      {
+        glDeleteSamplers(1, &_id);
+
+        _id = std::exchange(other._id, 0u);
+        _minFilter = std::exchange(other._minFilter, GL_LINEAR);
+        _magFilter = std::exchange(other._magFilter, GL_LINEAR);
+        _wrapS = std::exchange(other._wrapS, GL_REPEAT);
+        _wrapT = std::exchange(other._wrapT, GL_REPEAT);
+        _wrapR = std::exchange(other._wrapR, GL_REPEAT);
+        _anisotropicLevel = std::exchange(other._anisotropicLevel, 1.0f);
+      }
+      return *this;
+    }
+
     GLuint Id() const noexcept
     {
       return _id;
@@ -57,18 +80,6 @@ namespace Krys::Gfx::OpenGL
     void Bind(GLuint unit) const noexcept
     {
       glBindSampler(unit, _id);
-    }
-
-  private:
-    void Swap(Sampler &other) noexcept
-    {
-      std::swap(_id, other._id);
-      std::swap(_minFilter, other._minFilter);
-      std::swap(_magFilter, other._magFilter);
-      std::swap(_wrapS, other._wrapS);
-      std::swap(_wrapT, other._wrapT);
-      std::swap(_wrapR, other._wrapR);
-      std::swap(_anisotropicLevel, other._anisotropicLevel);
     }
   };
 }

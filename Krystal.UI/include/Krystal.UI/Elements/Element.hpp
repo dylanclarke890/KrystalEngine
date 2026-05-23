@@ -1,12 +1,11 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Gfx.Lib/Handle.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Map.hpp"
+#include "Krystal.Lib/Handle.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/String/StringRef.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.UI/Layout/Algorithm/MeasureText.hpp"
 #include "Krystal.UI/Layout/LayoutEngine.hpp"
 #include <type_traits>
@@ -20,7 +19,7 @@ namespace Krys::UI
   struct TextNode
   {
     NodeRef LayoutNode {nullptr};
-    StringRef Text;
+    utf8_string Text;
   };
 
   struct Geometry
@@ -31,10 +30,8 @@ namespace Krys::UI
     Maths::Vec2 Translation;
   };
 
-  class Element
+  class Element : NonCopyable<Element>
   {
-    NO_COPY(Element)
-
   public:
     ElementHandle Handle;
     ElementHandle Parent;
@@ -66,15 +63,37 @@ namespace Krys::UI
       }
     }
 
-    MOVE_SWAP(Element)
-
-    void SetText(StringRef text) noexcept
+    Element(Element &&other) noexcept
+        : Handle(std::exchange(other.Handle, ElementHandle {})),
+          Parent(std::exchange(other.Parent, ElementHandle {})), Children(std::move(other.Children)),
+          LayoutNode(std::exchange(other.LayoutNode, nullptr)),
+          LayoutConfig(std::exchange(other.LayoutConfig, nullptr)),
+          TextContent(std::exchange(other.TextContent, TextNode {})), Geometries(std::move(other.Geometries))
     {
-      if (text.IsValid() && !TextContent.Text.IsValid())
+    }
+
+    Element &operator=(Element &&other) noexcept
+    {
+      if (this != &other)
+      {
+        Handle = std::exchange(other.Handle, ElementHandle {});
+        Parent = std::exchange(other.Parent, ElementHandle {});
+        Children = std::move(other.Children);
+        LayoutNode = std::exchange(other.LayoutNode, nullptr);
+        LayoutConfig = std::exchange(other.LayoutConfig, nullptr);
+        TextContent = std::exchange(other.TextContent, TextNode {});
+        Geometries = std::move(other.Geometries);
+      }
+      return *this;
+    }
+
+    void SetText(const utf8_string& text) noexcept
+    {
+      if (!text.empty() && TextContent.Text.empty())
       {
         NodeInsertChild(LayoutNode, TextContent.LayoutNode, 0);
       }
-      else if (!text.IsValid() && TextContent.Text.IsValid())
+      else if (text.empty() && !TextContent.Text.empty())
       {
         NodeRemoveChild(LayoutNode, TextContent.LayoutNode);
       }
@@ -82,21 +101,9 @@ namespace Krys::UI
       TextContent.Text = text;
     }
 
-    NO_DISCARD StringRef GetText() const noexcept
+    KRYS_NODISCARD utf8_stringview GetText() const noexcept
     {
       return TextContent.Text;
-    }
-
-  private:
-    void Swap(Element &other) noexcept
-    {
-      std::swap(Handle, other.Handle);
-      std::swap(Parent, other.Parent);
-      std::swap(Children, other.Children);
-      std::swap(LayoutNode, other.LayoutNode);
-      std::swap(LayoutConfig, other.LayoutConfig);
-      std::swap(TextContent, other.TextContent);
-      std::swap(Geometries, other.Geometries);
     }
   };
 }
@@ -106,7 +113,7 @@ namespace std
   template <>
   struct hash<Krys::UI::ElementHandle>
   {
-    NO_DISCARD size_t operator()(const Krys::UI::ElementHandle &handle) const noexcept
+    KRYS_NODISCARD size_t operator()(const Krys::UI::ElementHandle &handle) const noexcept
     {
       return std::hash<Krys::uint32>()(handle.Id);
     }

@@ -1,9 +1,10 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Concepts.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Core/TypeTraits.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::Serialisation
 {
@@ -19,17 +20,15 @@ namespace Krys::Serialisation
   /// @brief A wrapper around a field to be serialised, to provide a more readable name for the appropriate
   /// archives to display. Use CreateNamedField() or the KRYS_NAMED_FIELD() macro for convenience.
   template <typename T>
-  class NamedField : public Impl::NamedField
+  class NamedField : public Impl::NamedField, NonCopyable<NamedField<T>>
   {
-    NO_COPY(NamedField)
-
     static_assert(!DerivedFrom<T, Impl::NamedField>, "T must not derive from NamedField");
 
     // If array   - store as is so we preserve the array type/size.
     // if l-value - take l-value reference.
     // else       - make a copy of the data (not ideal).
     using FieldType =
-      Conditional<IsArray<RemoveCvRef<T>>, RemoveCv<T>, Conditional<IsLValueRef<T>, T, Decay<T>>>;
+      conditional_t<IsArray<remove_cvref_t<T>>, remove_cv_t<T>, conditional_t<LValueRef<T>, T, decay_t<T>>>;
 
   public:
     constexpr NamedField(stringview name, T &&value) noexcept : Name(name), Value(std::forward<T>(value))
@@ -70,13 +69,11 @@ namespace Krys::Serialisation
   /// internal state as needed (e.g. start a JSON array) by utilising the
   /// BeforeTransfer/Transfer/AfterTransfer hooks.
   template <typename T>
-  class ContainerSize : public Impl::ContainerSize
+  class ContainerSize : public Impl::ContainerSize, NonCopyable<ContainerSize<T>>
   {
-    NO_COPY(ContainerSize)
-
   public:
     // Stores a reference if passed an lvalue reference, otherwise makes a copy of the data.
-    using SizeType = Conditional<IsLValueRef<T>, T, Decay<T>>;
+    using SizeType = conditional_t<LValueRef<T>, T, decay_t<T>>;
 
     ContainerSize(T &&value) noexcept : Size(std::forward<T>(value))
     {
@@ -105,12 +102,10 @@ namespace Krys::Serialisation
   }
 
   template <typename TKey, typename TValue>
-  struct KeyValuePair : public Impl::KeyValuePair
+  struct KeyValuePair : public Impl::KeyValuePair, NonCopyable<KeyValuePair<TKey, TValue>>
   {
-    NO_COPY(KeyValuePair)
-
-    using KeyType = Conditional<IsLValueRef<TKey>, TKey, Decay<TKey>>;
-    using ValueType = Conditional<IsLValueRef<TValue>, TValue, Decay<TValue>>;
+    using KeyType = conditional_t<LValueRef<TKey>, TKey, decay_t<TKey>>;
+    using ValueType = conditional_t<LValueRef<TValue>, TValue, decay_t<TValue>>;
 
     KeyValuePair(TKey &&key, TValue &&value) noexcept
         : Key(std::forward<TKey>(key)), Value(std::forward<TValue>(value))
@@ -162,7 +157,7 @@ namespace Krys::Serialisation
   /// @brief Macro to define a class version inside a class definition.
 #define KRYS_CLASS_VERSION(version)                                                                          \
   static constexpr Krys::Serialisation::Version ClassVersion = Krys::Serialisation::Version(version);        \
-  NO_DISCARD constexpr Version GetVersion() const noexcept                                                   \
+  KRYS_NODISCARD constexpr Version GetVersion() const noexcept                                               \
   {                                                                                                          \
     return ClassVersion;                                                                                     \
   }
@@ -180,7 +175,7 @@ namespace Krys::Serialisation
   }
 
   template <typename T>
-  concept HasTraitVersion = requires { VersionTraits<RemoveCvRef<T>>::ClassVersion; };
+  concept HasTraitVersion = requires { VersionTraits<remove_cvref_t<T>>::ClassVersion; };
 
 #pragma endregion
 }

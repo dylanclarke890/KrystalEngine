@@ -1,13 +1,13 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Array.hpp"
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/Concepts.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::Maths
 {
-  template <Arithmetic T, size_t MaxSamples>
+  template <Number T, size_t MaxSamples>
   class MovingAverage
   {
     using Type = T;
@@ -35,7 +35,7 @@ namespace Krys::Maths
       _currentSample = (_currentSample + 1) % MaxSamples;
     }
 
-    NO_DISCARD constexpr T GetAverage() const noexcept
+    KRYS_NODISCARD constexpr T GetAverage() const noexcept
     {
       if (_sampleCount == 0)
         return static_cast<T>(0);

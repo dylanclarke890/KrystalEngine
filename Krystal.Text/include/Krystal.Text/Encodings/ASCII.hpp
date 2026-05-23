@@ -1,83 +1,169 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types.hpp"
-#include "Krystal.Text/Encodings/Encoding.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Ranges/TypeTraits.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Text/ASCIILiteral.hpp"
+#include "Krystal.Text/Concepts.hpp"
+#include "Krystal.Text/Decode/DecodeResult.hpp"
+#include "Krystal.Text/Encode/EncodeResult.hpp"
+#include "Krystal.Text/EncodingError.hpp"
+#include "Krystal.Text/State.hpp"
 #include "Krystal.Text/Unicode.hpp"
+#include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys::Text
 {
-  class ASCIIEncoding : public Encoding
+  /// @brief The American Standard Code for Information Exchange (ASCII) Encoding.
+  template <typename TCodeUnit, typename TCodePoint = UnicodeCodePoint>
+  class basic_ascii
   {
   public:
-    static constexpr utf8_stringview Name = u8"US-ASCII";
-    static constexpr uint32 MIBenum = 3u;
-    static constexpr uint32 WindowsCodePage = 20'127u;
+    constexpr static inline ASCIILiteral Name = {"US-ASCII"_s};
 
-  public:
-    constexpr ASCIIEncoding() noexcept
-        : Encoding({Name, MIBenum, WindowsCodePage}, EncoderFallback(EncodingReplacement_ASCII),
-                   DecoderFallback(EncodingReplacement_UTF))
+    constexpr static inline Array<ASCIILiteral, 12> Aliases = {
+      "ASCII"_s, "US-ASCII"_s, "ANSI_X3.4-1968"_s, "ANSI_X3.4-1986"_s, "ISO_646.irv:1991"_s, "ISO646-US"_s,
+      "us"_s,    "iso-ir-6"_s, "IBM367"_s,         "cp367"_s,          "csASCII"_s,          "ascii"_s,
+    };
+
+    using code_unit = TCodeUnit;
+    using code_point = TCodePoint;
+    using state = EmptyState;
+    using is_decode_injective = std::true_type;
+    using is_encode_injective = std::false_type;
+
+    constexpr static inline const size_t MaxCodeUnits = 1;
+    constexpr static inline const size_t MaxCodePoints = 1;
+
+    constexpr static Span<const code_unit, 1> ReplacementCodeUnits() noexcept
     {
+      return Span<const code_unit, 1>(std::addressof(Unicode::ASCIIReplacement<code_unit>), 1);
     }
 
-    constexpr virtual ~ASCIIEncoding() noexcept = default;
-
-    NO_DISCARD constexpr bool IsSingleByte() const noexcept override
+    template <typename TInput, typename TOutput, typename TErrorHandler>
+    constexpr static auto DecodeOne(TInput &&input, TOutput &&output, TErrorHandler &&errorHandler, state &s)
     {
-      return true;
-    }
+      using TSubInput = Krys::Ranges::csubrange_for_t<remove_ref_t<TInput>>;
+      using TSubOutput = Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
+      using TResult = DecodeResult<TSubInput, TSubOutput, state>;
 
-    NO_DISCARD constexpr List<byte> Encode(utf8_stringview characters) const noexcept override
-    {
-      List<byte> bytes;
-      Encode(characters, bytes);
-      return bytes;
-    }
-
-    NO_DISCARD constexpr utf8_string Decode(Span<const byte> bytes) const noexcept override
-    {
-      utf8_string characters;
-      Decode(bytes, characters);
-      return characters;
-    }
-
-    constexpr void Encode(utf8_stringview characters, List<byte> &out) const noexcept override
-    {
-      Reserve(out, characters.size());
-
-      const auto EncodeCodepoint = [&](UnicodeCodepoint ch, bool wasInvalid) noexcept
+      auto inIt = std::ranges::cbegin(input);
+      auto inLast = std::ranges::cend(input);
+      if (inIt == inLast)
       {
-        if (wasInvalid || !Unicode::IsASCIICharacter(ch))
-        {
-          Encode(_encoderFallback.GetReplacementCharacter(), out);
-        }
-        else
-        {
-          out.push_back(static_cast<byte>(ch.Value));
-        }
-      };
+        // an exhausted sequence is fine
+        return TResult(TSubInput(std::move(inIt), std::move(inLast)),
+                       TSubOutput(std::forward<TOutput>(output)), s, EncodingError::OK);
+      }
 
-      Unicode::ForEachCodepoint(characters, EncodeCodepoint);
-    }
+      auto outIt = std::ranges::begin(output);
+      KRYS_MAYBE_UNUSED auto outLast = std::ranges::end(output);
 
-    constexpr void Decode(Span<const byte> bytes, utf8_string &out) const noexcept override
-    {
-      Reserve(out, bytes.size());
-
-      for (byte b : bytes)
+      constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TErrorHandler>;
+      if constexpr (CallErrorHandler)
       {
-        if (Unicode::IsASCIICharacter(b))
+        if (outIt == outLast)
         {
-          out.push_back(static_cast<char8_t>(b));
-        }
-        else
-        {
-          out += _decoderFallback.GetReplacementCharacter();
+          basic_ascii self {};
+          return std::forward<TErrorHandler>(errorHandler)(
+            self,
+            TResult(TSubInput(std::move(inIt), std::move(inLast)),
+                    TSubOutput(std::move(outIt), std::move(outLast)), s,
+                    EncodingError::InsufficientOutputSpace),
+            Span<code_unit>(), Span<code_point>());
         }
       }
+
+      code_unit units[1] {};
+      units[0] = *inIt;
+      const code_unit &unit = units[0];
+
+      if constexpr (CallErrorHandler)
+      {
+        if (static_cast<schar>(unit) < static_cast<schar>(0))
+        {
+          basic_ascii self {};
+          return std::forward<TErrorHandler>(errorHandler)(
+            self,
+            TResult(TSubInput(std::move(inIt), std::move(inLast)),
+                    TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::InvalidSequence),
+            Span<code_unit>(std::addressof(units[0]), 1), Span<code_point>());
+        }
+      }
+
+      inIt++;
+
+      *outIt = static_cast<code_point>(unit);
+      outIt++;
+
+      return TResult(TSubInput(std::move(inIt), std::move(inLast)),
+                     TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);
+    }
+
+    template <typename TInput, typename TOutput, typename TErrorHandler>
+    constexpr static auto EncodeOne(TInput &&input, TOutput &&output, TErrorHandler &&errorHandler, state &s)
+    {
+      using TSubInput = ::Krys::Ranges::csubrange_for_t<remove_ref_t<TInput>>;
+      using TSubOutput = ::Krys::Ranges::subrange_for_t<remove_ref_t<TOutput>>;
+      using TResult = ::Krys::Text::EncodeResult<TSubInput, TSubOutput, state>;
+
+      auto inIt = std::ranges::cbegin(input);
+      auto inLast = std::ranges::cend(input);
+
+      if (inIt == inLast)
+      {
+        // an exhausted sequence is fine
+        return TResult(TSubInput(std::move(inIt), std::move(inLast)), std::forward<TOutput>(output), s,
+                       EncodingError::OK);
+      }
+
+      auto outIt = std::ranges::begin(output);
+      KRYS_MAYBE_UNUSED auto outLast = std::ranges::end(output);
+
+      constexpr bool CallErrorHandler = !IsIgnorableErrorHandler<TErrorHandler>;
+      if constexpr (CallErrorHandler)
+      {
+        if (outIt == outLast)
+        {
+          basic_ascii self {};
+          return TResult(std::forward<TErrorHandler>(errorHandler)(
+            self,
+            TResult(TSubInput(std::move(inIt), std::move(inLast)),
+                    TSubOutput(std::move(outIt), std::move(outLast)), s,
+                    EncodingError::InsufficientOutputSpace),
+            Span<code_point>(), Span<code_unit>()));
+        }
+      }
+
+      code_point points[1] {};
+      points[0] = *inIt;
+      const code_point &point = points[0];
+
+      if constexpr (CallErrorHandler)
+      {
+        if (point > Unicode::LastASCIIValue)
+        {
+          basic_ascii self {};
+          return TResult(std::forward<TErrorHandler>(errorHandler)(
+            self,
+            TResult(TSubInput(std::move(inIt), std::move(inLast)),
+                    TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::InvalidSequence),
+            Span<code_point>(std::addressof(points[0]), 1), Span<code_unit>()));
+        }
+      }
+
+      inIt++;
+
+      *outIt = static_cast<code_unit>(point);
+      outIt++;
+
+      return TResult(TSubInput(std::move(inIt), std::move(inLast)),
+                     TSubOutput(std::move(outIt), std::move(outLast)), s, EncodingError::OK);
     }
   };
+
+  using ascii_t = basic_ascii<char>;
+
+  /// @brief The American Standard Code for Information Exchange (ASCII) Encoding.
+  constexpr inline ascii_t ascii = {};
 }

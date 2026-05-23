@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx/Enums/VertexAttributeType.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
-  NO_DISCARD constexpr inline GLenum MapVertexAttributeType(VertexAttributeType type) noexcept
+  KRYS_NODISCARD constexpr inline GLenum MapVertexAttributeType(VertexAttributeType type) noexcept
   {
     switch (type)
     {
@@ -18,7 +18,7 @@ namespace Krys::Gfx::OpenGL
     }
   }
 
-  NO_DISCARD constexpr inline VertexAttributeType MapVertexAttributeType(GLenum type) noexcept
+  KRYS_NODISCARD constexpr inline VertexAttributeType MapVertexAttributeType(GLenum type) noexcept
   {
     switch (type)
     {

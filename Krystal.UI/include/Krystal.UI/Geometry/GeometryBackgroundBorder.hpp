@@ -1,21 +1,19 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Gfx.Lib/Colour.hpp"
+#include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/Resources/Mesh.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/Array.hpp"
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Maths.hpp"
 #include "Krystal.UI/Geometry/BorderMetrics.hpp"
 #include "Krystal.UI/Geometry/Common.hpp"
 
 namespace Krys::UI
 {
-  class GeometryBackgroundBorder
+  class GeometryBackgroundBorder : NonCopyMovable<GeometryBackgroundBorder>
   {
-    NO_COPY_MOVE(GeometryBackgroundBorder)
-
   private:
     GeometryMeshWriter &_writer;
 

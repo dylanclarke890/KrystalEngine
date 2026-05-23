@@ -1,10 +1,11 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Expected.hpp"
-#include "Krystal.Lib/Func.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/NativeHandle.hpp"
-#include "Krystal.Lib/SmartPointers.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Pointers/UniquePtr.hpp"
+#include "Krystal.Lib/Types/Expected.hpp"
+#include "Krystal.Lib/Types/Func.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Platform/Keys.hpp"
 #include "Krystal.Platform/MouseButtons.hpp"
 
@@ -14,7 +15,7 @@ namespace Krys::Platform
   struct WindowCallbacks;
   class IWindow;
 
-  Expected<Unique<IWindow>> CreateWindow(const WindowSettings &settings) noexcept;
+  Expected<UniquePtr<IWindow>> CreateWindow(const WindowSettings &settings) noexcept;
 
   struct WindowSize
   {
@@ -75,22 +76,20 @@ namespace Krys::Platform
     DPIChangeHandler OnDPIChange = nullptr;
   };
 
-  class IWindow
+  class IWindow : NonCopyMovable<IWindow>
   {
   public:
-    NO_COPY_MOVE(IWindow)
-
     virtual ~IWindow() noexcept = default;
 
-    NO_DISCARD virtual WindowHandle GetWindowHandle() const noexcept = 0;
+    KRYS_NODISCARD virtual WindowHandle GetWindowHandle() const noexcept = 0;
 
     virtual void ProcessMessages() noexcept = 0;
 
     virtual void SetTitle(const string &title) noexcept = 0;
 
-    NO_DISCARD virtual const string &GetTitle() const noexcept = 0;
+    KRYS_NODISCARD virtual const string &GetTitle() const noexcept = 0;
 
-    NO_DISCARD virtual WindowSize GetSize() const noexcept = 0;
+    KRYS_NODISCARD virtual WindowSize GetSize() const noexcept = 0;
 
     virtual void Show() noexcept = 0;
 

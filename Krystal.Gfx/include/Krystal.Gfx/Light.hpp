@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Gfx.Lib/Colour.hpp"
+#include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
 namespace Krys::Gfx

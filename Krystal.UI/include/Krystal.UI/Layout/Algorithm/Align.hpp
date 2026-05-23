@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.UI/Styles/Enums/Align.hpp"
 #include "Krystal.UI/Layout/Node/Node.hpp"
@@ -43,7 +43,7 @@ namespace Krys::UI
     {
         // Fallback to flex-start
       case Justify::SpaceBetween:
-        // TODO: Support `justify-content: stretch`
+        // TODO(feat): Support `justify-content: stretch`
         // case Justify::Stretch:
         return Justify::FlexStart;
 

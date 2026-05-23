@@ -60,22 +60,26 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\KrystalEngine.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\KrystalEngine.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\KrystalEngine.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\KrystalEngine.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(KrysProjectInclude);</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -149,13 +153,20 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="catch_main.cpp" />
-    <ClCompile Include="tests\BitUtils.cpp" />
-    <ClCompile Include="tests\NullableFloat.cpp" />
+    <ClCompile Include="tests\Pointers\CheckedPtr.cpp" />
+    <ClCompile Include="tests\Pointers\CheckedRef.cpp" />
+    <ClCompile Include="tests\Pointers\Ref.cpp" />
+    <ClCompile Include="tests\Mixins\RefCounted.cpp" />
+    <ClCompile Include="tests\Pointers\RefPtr.cpp" />
+    <ClCompile Include="tests\Pointers\WeakPtr.cpp" />
+    <ClCompile Include="tests\Pointers\WeakRef.cpp" />
+    <ClCompile Include="tests\String\StringAtom.cpp" />
+    <ClCompile Include="tests\Commands\Command.cpp" />
+    <ClCompile Include="tests\Core\Bit.cpp" />
+    <ClCompile Include="tests\Ranges\Reconstruct.cpp" />
+    <ClCompile Include="tests\Types\NullableFloat.cpp" />
     <ClCompile Include="tests\SmallValueBuffer.cpp" />
     <ClCompile Include="tests\String\StringUtils.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="tests\String\StringInterner.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

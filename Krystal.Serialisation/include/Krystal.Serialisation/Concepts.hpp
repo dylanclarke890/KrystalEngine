@@ -1,8 +1,9 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Concepts.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Core/TypeTraits.hpp"
 #include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Serialisation/Access.hpp"
 #include "Krystal.Serialisation/Builtins.hpp"
 
@@ -13,20 +14,20 @@ namespace Krys::Serialisation
   /// @brief A type that needs to be supported by all archives by default.
   template <typename T>
   concept ArchiveBuiltin =
-    Arithmetic<RemoveCvRef<T>> || OneOf<RemoveCvRef<T>, byte, char, uchar, short, ushort, string>;
+    Number<remove_cvref_t<T>> || OneOf<remove_cvref_t<T>, byte, char, uchar, short, ushort, string>;
 
   /// @brief A special type that provides a name for the next field to be serialised along with its
   /// value.
   template <typename T>
-  concept ArchiveNamedField = DerivedFrom<RemoveCvRef<T>, Impl::NamedField>;
+  concept ArchiveNamedField = DerivedFrom<remove_cvref_t<T>, Impl::NamedField>;
 
   /// @brief A special type that indicates a container is about to be serialised, and provides its size.
   template <typename T>
-  concept ArchiveContainerSize = DerivedFrom<RemoveCvRef<T>, Impl::ContainerSize>;
+  concept ArchiveContainerSize = DerivedFrom<remove_cvref_t<T>, Impl::ContainerSize>;
 
   /// @brief A special type that indicates a key-value pair is being serialised.
   template <typename T>
-  concept ArchiveKeyValuePair = DerivedFrom<RemoveCvRef<T>, Impl::KeyValuePair>;
+  concept ArchiveKeyValuePair = DerivedFrom<remove_cvref_t<T>, Impl::KeyValuePair>;
 
   /// @brief A type that requires custom serialisation methods.
   template <typename T>
@@ -34,63 +35,63 @@ namespace Krys::Serialisation
     !ArchiveBuiltin<T> && !ArchiveNamedField<T> && !ArchiveContainerSize<T> && !ArchiveKeyValuePair<T>;
 
   template <typename T>
-  concept ArchiveVersion = SameType<RemoveCvRef<T>, Version>;
+  concept ArchiveVersion = SameType<remove_cvref_t<T>, Version>;
 
 #pragma endregion
 
 #pragma region Serialisation Method Concepts
 
   template <typename Archive, typename T>
-  concept HasVersionedTransferMember = requires(Archive &archive, RemoveCvRef<T> &value) {
+  concept HasVersionedTransferMember = requires(Archive &archive, remove_cvref_t<T> &value) {
     Access::MemberTransfer(archive, value, Version {0});
   };
 
   template <typename Archive, typename T>
-  concept HasVersionedSaveMember = requires(Archive &archive, const RemoveCvRef<T> &value) {
+  concept HasVersionedSaveMember = requires(Archive &archive, const remove_cvref_t<T> &value) {
     Access::MemberSave(archive, value, Version {0});
   };
 
   template <typename Archive, typename T>
   concept HasVersionedLoadMember =
-    requires(Archive &archive, RemoveCvRef<T> &value) { Access::MemberLoad(archive, value, Version {0}); };
+    requires(Archive &archive, remove_cvref_t<T> &value) { Access::MemberLoad(archive, value, Version {0}); };
 
   template <typename Archive, typename T>
-  concept HasVersionedTransferNonMember = requires(Archive &archive, RemoveCvRef<T> &value) {
+  concept HasVersionedTransferNonMember = requires(Archive &archive, remove_cvref_t<T> &value) {
     Access::NonMemberTransfer(archive, value, Version {0});
   };
 
   template <typename Archive, typename T>
-  concept HasVersionedSaveNonMember = requires(Archive &archive, const RemoveCvRef<T> &value) {
+  concept HasVersionedSaveNonMember = requires(Archive &archive, const remove_cvref_t<T> &value) {
     Access::NonMemberSave(archive, value, Version {0});
   };
 
   template <typename Archive, typename T>
   concept HasVersionedLoadNonMember =
-    requires(Archive &archive, RemoveCvRef<T> &value) { Access::NonMemberLoad(archive, value, Version {0}); };
+    requires(Archive &archive, remove_cvref_t<T> &value) { Access::NonMemberLoad(archive, value, Version {0}); };
 
   template <typename Archive, typename T>
   concept HasNonVersionedTransferMember =
-    requires(Archive &archive, RemoveCvRef<T> &value) { Access::MemberTransfer(archive, value); };
+    requires(Archive &archive, remove_cvref_t<T> &value) { Access::MemberTransfer(archive, value); };
 
   template <typename Archive, typename T>
   concept HasNonVersionedSaveMember =
-    requires(Archive &archive, const RemoveCvRef<T> &value) { Access::MemberSave(archive, value); };
+    requires(Archive &archive, const remove_cvref_t<T> &value) { Access::MemberSave(archive, value); };
 
   template <typename Archive, typename T>
   concept HasNonVersionedLoadMember =
-    requires(Archive &archive, RemoveCvRef<T> &value) { Access::MemberLoad(archive, value); };
+    requires(Archive &archive, remove_cvref_t<T> &value) { Access::MemberLoad(archive, value); };
 
   template <typename Archive, typename T>
   concept HasNonVersionedTransferNonMember =
-    requires(Archive &archive, RemoveCvRef<T> &value) { Access::NonMemberTransfer(archive, value); };
+    requires(Archive &archive, remove_cvref_t<T> &value) { Access::NonMemberTransfer(archive, value); };
 
   template <typename Archive, typename T>
   concept HasNonVersionedSaveNonMember =
-    requires(Archive &archive, const RemoveCvRef<T> &value) { Access::NonMemberSave(archive, value); };
+    requires(Archive &archive, const remove_cvref_t<T> &value) { Access::NonMemberSave(archive, value); };
 
   template <typename Archive, typename T>
   concept HasNonVersionedLoadNonMember =
-    requires(Archive &archive, RemoveCvRef<T> &value) { Access::NonMemberLoad(archive, value); };
+    requires(Archive &archive, remove_cvref_t<T> &value) { Access::NonMemberLoad(archive, value); };
 
 #pragma endregion
 
@@ -106,19 +107,19 @@ namespace Krys::Serialisation
   };
 
   template <typename Archive>
-  concept IsArchiveWriter = ArchiveTraits<RemoveCvRef<Archive>>::IsWriter;
+  concept IsArchiveWriter = ArchiveTraits<remove_cvref_t<Archive>>::IsWriter;
 
   template <typename Archive>
-  concept IsArchiveReader = ArchiveTraits<RemoveCvRef<Archive>>::IsReader;
+  concept IsArchiveReader = ArchiveTraits<remove_cvref_t<Archive>>::IsReader;
 
   template <typename Archive>
-  concept IsArchive = IsArchiveWriter<RemoveCvRef<Archive>> || IsArchiveReader<RemoveCvRef<Archive>>;
+  concept IsArchive = IsArchiveWriter<remove_cvref_t<Archive>> || IsArchiveReader<remove_cvref_t<Archive>>;
 
   template <typename Archive>
-  concept IsBinaryArchive = ArchiveTraits<RemoveCvRef<Archive>>::IsBinary;
+  concept IsBinaryArchive = ArchiveTraits<remove_cvref_t<Archive>>::IsBinary;
 
   template <typename Archive>
-  concept IsTextArchive = ArchiveTraits<RemoveCvRef<Archive>>::IsText;
+  concept IsTextArchive = ArchiveTraits<remove_cvref_t<Archive>>::IsText;
 
 #pragma endregion
 }

@@ -1,7 +1,7 @@
-#include "Krystal.Gfx.OpenGL/Context.hpp"
-#include "Krystal.Lib/Detection.hpp"
+﻿#include "Krystal.Gfx.OpenGL/Context.hpp"
+#include "Krystal.Lib/Detection/OS.hpp"
 
-#ifdef KRYS_PLATFORM_WINDOWS
+#if KRYS_OS(WINDOWS)
   #include "Krystal.Gfx.OpenGL/ContextImpl/Win32.hpp"
 #else
   #error "Unsupported platform for OpenGL context creation."
@@ -13,11 +13,12 @@
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/Light.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/DebugBreak.hpp"
-#include "Krystal.Lib/Expected.hpp"
-#include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/Map.hpp"
+#include "Krystal.Lib/Core/DebugBreak.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Time/MonotonicTime.hpp"
+#include "Krystal.Lib/Types/Expected.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Map.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include "Krystal.Maths/Clipspace.hpp"
 #include "Krystal.Maths/Convert.hpp"
@@ -599,11 +600,11 @@ namespace
 
 namespace Krys::Gfx
 {
-  Expected<Unique<IContext>> CreateContext(const ContextSettings &settings) noexcept
+  Expected<UniquePtr<IContext>> CreateContext(const ContextSettings &settings) noexcept
   {
     try
     {
-      return Expected<Unique<IContext>>(CreateUnique<OpenGL::Context>(settings));
+      return Expected<UniquePtr<IContext>>(CreateUnique<OpenGL::Context>(settings));
     }
     catch (const std::exception &e)
     {
@@ -616,7 +617,7 @@ namespace Krys::Gfx::OpenGL
 {
   Context::Context(const ContextSettings &settings)
       : _windowHandle(settings.WindowHandle), _width(settings.Width), _height(settings.Height),
-        _vfs(*settings.VFS), _strings(*settings.Strings), _dpi(Platform::GetDPIForWindow(_windowHandle)),
+        _vfs(*settings.VFS), _dpi(Platform::GetDPIForWindow(_windowHandle)),
         _platformImpl(CreateUnique<ContextPlatformImpl>(settings.WindowHandle)), _buffers(), _images(),
         _imageViews(_images), _samplers(), _shaders(_vfs), _meshes(),
         _textures(_vfs, _images, _imageViews, _samplers), _renderTargets(_images, _imageViews),
@@ -843,7 +844,8 @@ namespace Krys::Gfx::OpenGL
 
     for (uint i = 0; i < sizeof(lightPositions) / sizeof(lightPositions[0]); ++i)
     {
-      Vec3 newPos = lightPositions[i] + Vec3(std::sin((float)Platform::GetTime() * 5.0f) * 5.0f, 0.0f, 0.0f);
+      auto time = static_cast<float>(Seconds(MonotonicTime::Now()).count());
+      Vec3 newPos = lightPositions[i] + Vec3(std::sin(time * 5.0f), 0.0f, 0.0f);
       shader.SetUniform("lightPositions[" + std::to_string(i) + "]", newPos);
       shader.SetUniform("lightColors[" + std::to_string(i) + "]", lightColors[i]);
 
@@ -947,11 +949,6 @@ namespace Krys::Gfx::OpenGL
   IFontRegistry &Context::Fonts() noexcept
   {
     return _fonts;
-  }
-
-  StringInterner &Context::Strings() noexcept
-  {
-    return _strings;
   }
 
   API Context::GetAPI() const noexcept

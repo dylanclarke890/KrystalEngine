@@ -1,18 +1,17 @@
-#include "Krystal.Debug/ScopedProfiler.hpp"
+﻿#include "Krystal.Debug/ScopedProfiler.hpp"
 #include "Krystal.Log/ILogger.hpp"
-#include "Krystal.Platform/Platform.hpp"
+#include "Krystal.Lib/Time/Duration.hpp"
+#include <chrono>
 
 namespace Krys::Debug
 {
-  ScopedProfiler::ScopedProfiler(const string &name) noexcept : _start(0), _name(name)
+  ScopedProfiler::ScopedProfiler(const string &name) noexcept : _performance(), _name(name)
   {
-    _start = Platform::GetTimeMilliseconds();
   }
 
   ScopedProfiler::~ScopedProfiler() noexcept
   {
-    const auto end = Platform::GetTimeMilliseconds();
-    const auto elapsedMs = end - _start;
+    const auto elapsedMs = Milliseconds(MonotonicTime::Now()).count();
     KRYS_INFO("{} took {:.3f} ms.", _name, elapsedMs);
   }
 }

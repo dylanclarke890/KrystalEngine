@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx/Resources/RenderTarget.hpp"
-#include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Clipspace.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include <cassert>
@@ -18,10 +18,8 @@ namespace Krys::Gfx::OpenGL
     GLuint Texture {0u};
   };
 
-  class RenderTarget
+  class RenderTarget : NonCopyable<RenderTarget>
   {
-    NO_COPY(RenderTarget)
-
     uint32 _width {0u};
     uint32 _height {0u};
     GLuint _fbo {0u};
@@ -33,8 +31,6 @@ namespace Krys::Gfx::OpenGL
     RenderTarget() = default;
 
   public:
-    MOVE_SWAP(RenderTarget)
-
     RenderTarget(uint32 width, uint32 height) noexcept : _width(width), _height(height)
     {
       glCreateFramebuffers(1, &_fbo);
@@ -45,7 +41,33 @@ namespace Krys::Gfx::OpenGL
       glDeleteFramebuffers(1, &_fbo);
     }
 
-    NO_DISCARD static RenderTarget CreateScreenFramebuffer(uint32 width, uint32 height) noexcept
+    RenderTarget(RenderTarget &&other) noexcept
+        : _width(std::exchange(other._width, 0u)), _height(std::exchange(other._height, 0u)),
+          _fbo(std::exchange(other._fbo, 0u)), _colorAttachments(std::move(other._colorAttachments)),
+          _depthAttachment(std::exchange(other._depthAttachment, {})),
+          _stencilAttachment(std::exchange(other._stencilAttachment, {})),
+          _depthStencilAttachment(std::exchange(other._depthStencilAttachment, {}))
+    {
+    }
+
+    RenderTarget &operator=(RenderTarget &&other) noexcept
+    {
+      if (this != &other)
+      {
+        glDeleteFramebuffers(1, &_fbo);
+
+        _width = std::exchange(other._width, 0u);
+        _height = std::exchange(other._height, 0u);
+        _fbo = std::exchange(other._fbo, 0u);
+        _colorAttachments = std::move(other._colorAttachments);
+        _depthAttachment = std::exchange(other._depthAttachment, {});
+        _stencilAttachment = std::exchange(other._stencilAttachment, {});
+        _depthStencilAttachment = std::exchange(other._depthStencilAttachment, {});
+      }
+      return *this;
+    }
+
+    KRYS_NODISCARD static RenderTarget CreateScreenFramebuffer(uint32 width, uint32 height) noexcept
     {
       RenderTarget rt;
       rt.SetDimensions(width, height);
@@ -151,22 +173,22 @@ namespace Krys::Gfx::OpenGL
       return attachments;
     }
 
-    NO_DISCARD GLuint GetHandle() const noexcept
+    KRYS_NODISCARD GLuint GetHandle() const noexcept
     {
       return _fbo;
     }
 
-    NO_DISCARD uint32 Width() const noexcept
+    KRYS_NODISCARD uint32 Width() const noexcept
     {
       return _width;
     }
 
-    NO_DISCARD uint32 Height() const noexcept
+    KRYS_NODISCARD uint32 Height() const noexcept
     {
       return _height;
     }
 
-    NO_DISCARD const RenderTargetAttachment &GetColourAttachment(size_t index) const
+    KRYS_NODISCARD const RenderTargetAttachment &GetColourAttachment(size_t index) const
     {
       if (index >= _colorAttachments.size())
       {
@@ -175,23 +197,23 @@ namespace Krys::Gfx::OpenGL
       return _colorAttachments[index];
     }
 
-    NO_DISCARD const RenderTargetAttachment &GetDepthAttachment() const noexcept
+    KRYS_NODISCARD const RenderTargetAttachment &GetDepthAttachment() const noexcept
     {
       return _depthAttachment;
     }
 
-    NO_DISCARD const RenderTargetAttachment &GetStencilAttachment() const noexcept
+    KRYS_NODISCARD const RenderTargetAttachment &GetStencilAttachment() const noexcept
     {
       return _stencilAttachment;
     }
 
-    NO_DISCARD const RenderTargetAttachment &GetDepthStencilAttachment() const noexcept
+    KRYS_NODISCARD const RenderTargetAttachment &GetDepthStencilAttachment() const noexcept
     {
       return _depthStencilAttachment;
     }
 
     /// @brief Get an ortho projection matrix that has the origin at the top-left corner.
-    NO_DISCARD Maths::Mat4 GetProjectionMatrix() const noexcept
+    KRYS_NODISCARD Maths::Mat4 GetProjectionMatrix() const noexcept
     {
       return Maths::Ortho(0.f, static_cast<float>(_width), static_cast<float>(_height), 0.f);
     }
@@ -201,18 +223,6 @@ namespace Krys::Gfx::OpenGL
     {
       _width = width;
       _height = height;
-    }
-
-  private:
-    void Swap(RenderTarget &other)
-    {
-      std::swap(_width, other._width);
-      std::swap(_height, other._height);
-      std::swap(_fbo, other._fbo);
-      std::swap(_colorAttachments, other._colorAttachments);
-      std::swap(_depthAttachment, other._depthAttachment);
-      std::swap(_stencilAttachment, other._stencilAttachment);
-      std::swap(_depthStencilAttachment, other._depthStencilAttachment);
     }
   };
 }

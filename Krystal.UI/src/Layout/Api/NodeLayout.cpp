@@ -1,4 +1,4 @@
-#include "Krystal.UI/Layout/Api/NodeLayout.hpp"
+﻿#include "Krystal.UI/Layout/Api/NodeLayout.hpp"
 #include "Krystal.UI/Layout/Node/Node.hpp"
 #include "Krystal.UI/Styles/Enums/Edge.hpp"
 

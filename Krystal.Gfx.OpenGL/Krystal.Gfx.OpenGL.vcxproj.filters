@@ -42,9 +42,6 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Shader.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Model.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Utils.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

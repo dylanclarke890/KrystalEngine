@@ -1,15 +1,15 @@
-#pragma once
+﻿#pragma once
 
 #include <bitset>
 #include <cassert>
 #include <cstdint>
 #include <memory>
 
-#include "Krystal.Lib/Array.hpp"
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/SmartPointers.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Pointers/UniquePtr.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys
 {
@@ -29,7 +29,7 @@ namespace Krys
     uint16 _count {0};
     Array<uint32, BufferSize> _buffer {};
     std::bitset<BufferSize> _wideElements;
-    Unique<Overflow> _overflow;
+    UniquePtr<Overflow> _overflow;
 
   public:
     SmallValueBuffer() noexcept = default;
@@ -39,7 +39,19 @@ namespace Krys
       *this = other;
     }
 
+    SmallValueBuffer &operator=(const SmallValueBuffer &other)
+    {
+      _count = other._count;
+      _buffer = other._buffer;
+      _wideElements = other._wideElements;
+      _overflow = other._overflow ? CreateUnique<Overflow>(*other._overflow) : nullptr;
+
+      return *this;
+    }
+
     SmallValueBuffer(SmallValueBuffer &&other) noexcept = default;
+
+    SmallValueBuffer &operator=(SmallValueBuffer &&other) noexcept = default;
 
     /// @brief Add a new element to the buffer, returning the index of the element.
     uint16 Push(uint32 value)
@@ -70,7 +82,7 @@ namespace Krys
       const auto msb = static_cast<uint32>(value >> 32);
 
       const auto lsbIndex = Push(lsb);
-      MAYBE_UNUSED const auto msbIndex = Push(msb);
+      KRYS_MAYBE_UNUSED const auto msbIndex = Push(msb);
       assert(msbIndex < 4'096 && "SmallValueBuffer can only hold up to 4096 chunks");
 
       if (lsbIndex < _buffer.size())
@@ -86,7 +98,7 @@ namespace Krys
 
     /// @brief Replace an existing element in the buffer with a new value. A new index may be returned, e.g.
     /// if a new value is wider than the previous.
-    NO_DISCARD uint16 Replace(uint16 index, uint32 value)
+    KRYS_NODISCARD uint16 Replace(uint16 index, uint32 value)
     {
       if (index < _buffer.size())
       {
@@ -100,7 +112,7 @@ namespace Krys
       return index;
     }
 
-    NO_DISCARD uint16 Replace(uint16 index, uint64 value)
+    KRYS_NODISCARD uint16 Replace(uint16 index, uint64 value)
     {
       const bool isWide = index < _wideElements.size() ? _wideElements[index]
                                                        : _overflow->WideElements.at(index - _buffer.size());
@@ -110,8 +122,8 @@ namespace Krys
         const auto lsb = static_cast<uint32>(value & 0xFF'FF'FF'FF);
         const auto msb = static_cast<uint32>(value >> 32);
 
-        MAYBE_UNUSED auto lsbIndex = Replace(index, lsb);
-        MAYBE_UNUSED auto msbIndex = Replace(index + 1, msb);
+        KRYS_MAYBE_UNUSED auto lsbIndex = Replace(index, lsb);
+        KRYS_MAYBE_UNUSED auto msbIndex = Replace(index + 1, msb);
         return index;
       }
       else
@@ -140,16 +152,5 @@ namespace Krys
       const auto msb = GetU32(index + 1);
       return (static_cast<uint64_t>(msb) << 32) | lsb;
     }
-
-    SmallValueBuffer &operator=(const SmallValueBuffer &other)
-    {
-      _count = other._count;
-      _buffer = other._buffer;
-      _wideElements = other._wideElements;
-      _overflow = other._overflow ? CreateUnique<Overflow>(*other._overflow) : nullptr;
-      return *this;
-    }
-
-    SmallValueBuffer &operator=(SmallValueBuffer &&other) noexcept = default;
   };
 }

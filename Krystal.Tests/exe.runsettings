@@ -3,6 +3,6 @@
   <!-- Adapter-specific section -->
   <Catch2Adapter>
     <!-- Regex to include all test executables -->
-    <FilenameFilter>.*</FilenameFilter>
+    <FilenameFilter>.*\.Tests$</FilenameFilter>
   </Catch2Adapter>
 </RunSettings>

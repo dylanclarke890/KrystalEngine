@@ -1,17 +1,15 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Resources/RenderTarget.hpp"
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
 namespace Krys::Gfx
 {
-  class IRenderTargetRegistry
+  class IRenderTargetRegistry : NonCopyMovable<IRenderTargetRegistry>
   {
-    NO_COPY_MOVE(IRenderTargetRegistry)
-
   public:
     IRenderTargetRegistry() = default;
 
@@ -22,19 +20,19 @@ namespace Krys::Gfx
     virtual void Shutdown() noexcept = 0;
 
     /// @brief Creates a new render target based on the provided description.
-    virtual NO_DISCARD RenderTargetHandle Create(const RenderTargetDesc &desc) = 0;
+    virtual KRYS_NODISCARD RenderTargetHandle Create(const RenderTargetDesc &desc) = 0;
 
     /// @brief Destroys a render target.
     virtual bool Destroy(RenderTargetHandle handle) noexcept = 0;
 
     /// @brief Get the dimensions of a render target.
-    virtual NO_DISCARD Maths::Vec2 GetDimensions(RenderTargetHandle handle) noexcept = 0;
+    virtual KRYS_NODISCARD Maths::Vec2 GetDimensions(RenderTargetHandle handle) noexcept = 0;
 
     /// @brief Gets the image handle for a specific colour attachment of a render target.
-    virtual NO_DISCARD ImageHandle GetColourAttachmentImage(RenderTargetHandle handle,
-                                                            uint32 index) noexcept = 0;
+    virtual KRYS_NODISCARD ImageHandle GetColourAttachmentImage(RenderTargetHandle handle,
+                                                                uint32 index) noexcept = 0;
 
     /// @brief Gets the current frame's screen render target.
-    virtual NO_DISCARD RenderTargetHandle GetScreenRenderTarget() const noexcept = 0;
+    virtual KRYS_NODISCARD RenderTargetHandle GetScreenRenderTarget() const noexcept = 0;
   };
 }

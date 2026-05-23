@@ -147,9 +147,6 @@
     <ProjectReference Include="..\Krystal.Engine\Krystal.Engine.vcxproj">
       <Project>{1169be54-100b-4d6a-830f-50b29301e1cc}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\Krystal.Gfx.Lib\Krystal.Gfx.Lib.vcxproj">
-      <Project>{9033b349-4104-46b5-af4d-3ddedfc44176}</Project>
-    </ProjectReference>
     <ProjectReference Include="..\Krystal.Gfx.OpenGL\Krystal.Gfx.OpenGL.vcxproj">
       <Project>{70dcee10-579e-44e3-b6a9-8fa5505f42d4}</Project>
     </ProjectReference>

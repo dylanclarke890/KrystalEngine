@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Concepts.hpp"
-#include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/Stack.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Stack.hpp"
 #include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Serialisation/Archives/Adapters/RapidJsonStreamAdapters.hpp"
 #include "Krystal.Serialisation/Archives/BaseArchive.hpp"
 #include "Krystal.Serialisation/Builtins.hpp"
@@ -346,7 +346,7 @@ namespace Krys::Serialisation
     template <typename T>
     void Read(ContainerSize<T> &value) noexcept
     {
-      using Size = RemoveRef<typename ContainerSize<T>::SizeType>;
+      using Size = remove_ref_t<typename ContainerSize<T>::SizeType>;
       Size size = _iteratorStack.size() == 1
                     ? static_cast<Size>(_document.Size())
                     : static_cast<Size>((_iteratorStack.rbegin() + 1)->Value().Size());

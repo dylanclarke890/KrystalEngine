@@ -1,4 +1,4 @@
-#include "Krystal.UI/Layout/LayoutEngine.hpp"
+﻿#include "Krystal.UI/Layout/LayoutEngine.hpp"
 #include "Krystal.UI/Elements/Element.hpp"
 
 namespace Krys::UI

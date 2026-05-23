@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx.Vulkan/Hooks/vulkan_hooks.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.IO/ImageLoader.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
-#include "Krystal.Lib/Nullable.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
 
 namespace Krys::Gfx::Vulkan
 {
@@ -21,7 +21,7 @@ namespace Krys::Gfx::Vulkan
     List<VkPresentModeKHR> PresentModes {};
   };
 
-  class VulkanContext
+  class VulkanContext : public IContext
   {
     NativeHandle _windowHandle = nullptr;
     uint32 _width = 0, _height = 0;
@@ -71,7 +71,6 @@ namespace Krys::Gfx::Vulkan
     uint32 _currentFrame = 0;
     bool _framebufferResized = false;
 
-    NO_COPY_MOVE(VulkanContext)
   public:
     VulkanContext(const ContextSettings &settings);
 
@@ -93,7 +92,7 @@ namespace Krys::Gfx::Vulkan
 
     void SelectPhysicalDevice();
     bool IsDeviceSuitable(VkPhysicalDevice device);
-    Nullable<QueueFamilyIndices> FindQueueFamilyIndices(VkPhysicalDevice device) const;
+    Maybe<QueueFamilyIndices> FindQueueFamilyIndices(VkPhysicalDevice device) const;
     bool AreDeviceExtensionsSupported(VkPhysicalDevice device) const noexcept;
     SwapchainSupportDetails QuerySwapchainSupport(VkPhysicalDevice device) const noexcept;
 

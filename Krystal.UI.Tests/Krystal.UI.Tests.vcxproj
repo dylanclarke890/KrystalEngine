@@ -194,7 +194,6 @@
     <ClCompile Include="tests\Layout\MeasureMode.cpp" />
     <ClCompile Include="tests\Layout\NodeCallback.cpp" />
     <ClCompile Include="tests\Layout\NodeChild.cpp" />
-    <ClCompile Include="tests\Layout\Ordinals.cpp" />
     <ClCompile Include="tests\Layout\Persistence.cpp" />
     <ClCompile Include="tests\Layout\PersistentNodeCloning.cpp" />
     <ClCompile Include="tests\Layout\Relayout.cpp" />

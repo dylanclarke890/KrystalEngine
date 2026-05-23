@@ -1,4 +1,4 @@
-#include "Krystal.UI/Layout/Api/NodeStyle.hpp"
+﻿#include "Krystal.UI/Layout/Api/NodeStyle.hpp"
 #include "Krystal.UI/Layout/Node/Node.hpp"
 #include "Krystal.UI/Styles/Style.hpp"
 
@@ -9,7 +9,7 @@ namespace Krys::UI
     if (dstNode->GetStyle() != srcNode->GetStyle())
     {
       dstNode->SetStyle(srcNode->GetStyle());
-      // TODO: Optimize by only marking dirty if properties that affect layout/style have changed.
+      // TODO(perf): Optimize by only marking dirty if properties that affect layout/style have changed.
       dstNode->MarkLayoutDirtyAndPropagate();
       dstNode->MarkStyleDirtyAndPropagate();
     }

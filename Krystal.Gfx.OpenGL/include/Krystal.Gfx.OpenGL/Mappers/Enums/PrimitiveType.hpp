@@ -1,12 +1,12 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx/Enums/PrimitiveType.hpp"
-#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
-  NO_DISCARD constexpr inline GLenum MapPrimitiveType(PrimitiveType type) noexcept
+  KRYS_NODISCARD constexpr inline GLenum MapPrimitiveType(PrimitiveType type) noexcept
   {
     switch (type)
     {
@@ -20,7 +20,7 @@ namespace Krys::Gfx::OpenGL
     }
   }
 
-  NO_DISCARD constexpr inline PrimitiveType MapPrimitiveType(GLenum type) noexcept
+  KRYS_NODISCARD constexpr inline PrimitiveType MapPrimitiveType(GLenum type) noexcept
   {
     switch (type)
     {

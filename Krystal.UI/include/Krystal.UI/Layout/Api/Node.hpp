@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.UI/Layout/Api/Forward.hpp"
 #include "Krystal.UI/Styles/Enums/Direction.hpp"
 #include "Krystal.UI/Styles/Enums/NodeType.hpp"
@@ -9,14 +9,14 @@
 namespace Krys::UI
 {
   /// @brief Heap allocates and returns a new node using default settings.
-  NO_DISCARD NodeRef NodeCreate();
+  KRYS_NODISCARD NodeRef NodeCreate();
 
   /// @brief Heap allocates and returns a new node, with customized settings.
-  NO_DISCARD NodeRef NodeCreate(ConfigConstRef config);
+  KRYS_NODISCARD NodeRef NodeCreate(ConfigConstRef config);
 
   /// @brief Returns a mutable copy of an existing node, with the same context and children, but no owner
   /// set.Does not call the function set by ConfigSetCloneNodeFunc().
-  NO_DISCARD NodeRef NodeClone(NodeConstRef node);
+  KRYS_NODISCARD NodeRef NodeClone(NodeConstRef node);
 
   /// @brief Frees the node, disconnecting it from its owner and children.
   void NodeDestroy(NodeRef node);
@@ -85,7 +85,7 @@ namespace Krys::UI
   void NodeSetChildren(NodeRef owner, const NodeRef *children, size_t count);
 
   /// @brief Get the child node at a given index.
-  NO_DISCARD NodeRef NodeGetChild(NodeRef node, size_t index);
+  KRYS_NODISCARD NodeRef NodeGetChild(NodeRef node, size_t index);
 
   /// @brief The number of child nodes.
   size_t NodeGetChildCount(NodeConstRef node);

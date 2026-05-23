@@ -1,10 +1,11 @@
+﻿#include "Krystal.UI/Layout/Node/Node.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Utils/ToUnderlying.hpp"
+#include "Krystal.UI/Layout/Config/Config.hpp"
+#include "Krystal.UI/Styles/Helpers/FlexDirection.hpp"
 #include <algorithm>
 #include <cstddef>
 #include <iostream>
-
-#include "Krystal.UI/Layout/Config/Config.hpp"
-#include "Krystal.UI/Layout/Node/Node.hpp"
-#include "Krystal.UI/Styles/Helpers/FlexDirection.hpp"
 
 namespace Krys::UI
 {
@@ -74,14 +75,12 @@ namespace Krys::UI
   {
     if (measureFunc == nullptr)
     {
-      // TODO: t18095186 Move nodeType to opt-in function and mark appropriate places in Litho
       SetNodeType(NodeType::Default);
     }
     else
     {
       assert(_children.empty()
              && "Cannot set measure function: Nodes with measure functions cannot have children.");
-      // TODO: t18095186 Move nodeType to opt-in function and mark appropriate places in Litho
       SetNodeType(NodeType::Text);
     }
 
@@ -405,7 +404,7 @@ namespace Krys::UI
         child = _config->CloneNode(child, this, i);
         child->SetOwner(this);
 
-        if (child->HasContentsChildren()) [[unlikely]]
+        if (child->HasContentsChildren()) KRYS_UNLIKELY
         {
           child->CloneContentsChildrenIfNeeded();
         }

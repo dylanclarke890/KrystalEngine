@@ -1,6 +1,6 @@
-#include "Krystal.Gfx.D3D11/D3D11Context.hpp"
-#include "Krystal.Lib/Expected.hpp"
+﻿#include "Krystal.Gfx.D3D11/D3D11Context.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Types/Expected.hpp"
 
 #pragma comment(lib, "d3dcompiler.lib")
 #include <d3d11.h>
@@ -34,11 +34,12 @@ namespace
 
 namespace Krys::Gfx
 {
-  // Expected<Unique<IContext>> CreateContext(NativeHandle windowHandle, uint32 width, uint32 height) noexcept
+  // Expected<UniquePtr<IContext>> CreateContext(NativeHandle windowHandle, uint32 width, uint32 height)
+  // noexcept
   //{
   //   try
   //   {
-  //     return Expected<Unique<IContext>>(CreateUnique<D3D11::D3D11Context>(windowHandle, width, height));
+  //     return Expected<UniquePtr<IContext>>(CreateUnique<D3D11::D3D11Context>(windowHandle, width, height));
   //   }
   //   catch (const std::exception &e)
   //   {

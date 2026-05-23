@@ -1,14 +1,16 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx.Vulkan/Hooks/vulkan_hooks.hpp"
-#include "Krystal.Lib/Detection.hpp"
+#include "Krystal.Lib/Detection/OS.hpp"
 
-#ifndef WIN32_LEAN_AND_MEAN
-  #define NOMINMAX
-  #define WIN32_LEAN_AND_MEAN
+#if KRYS_OS(WINDOWS)
+  #ifndef WIN32_LEAN_AND_MEAN
+    #define NOMINMAX
+    #define WIN32_LEAN_AND_MEAN
+    #include <windows.h>
+  #endif
+  #include <vulkan/vulkan_win32.h>
 #endif
-#include <windows.h>
-#include <vulkan/vulkan_win32.h>
 
 namespace Krys::Gfx::Vulkan
 {

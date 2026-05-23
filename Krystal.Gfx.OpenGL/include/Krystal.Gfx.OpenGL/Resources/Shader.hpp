@@ -1,26 +1,22 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/ShaderReflector.hpp"
-#include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Vector.hpp"
 #include <cassert>
 
 namespace Krys::Gfx::OpenGL
 {
-  class Shader
+  class Shader : NonCopyable<Shader>
   {
-    NO_COPY(Shader)
-
     GLuint _id {0u};
     ShaderLayout _layout {};
 
   public:
-    MOVE_SWAP(Shader)
-
     Shader(const string &vertex, const string &fragment) noexcept : _id(glCreateProgram())
     {
       auto vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -70,6 +66,23 @@ namespace Krys::Gfx::OpenGL
       }
     }
 
+    Shader(Shader &&other) noexcept : _id(std::exchange(other._id, 0u)), _layout(std::move(other._layout))
+    {
+    }
+
+    Shader &operator=(Shader &&other) noexcept
+    {
+      if (this != &other)
+      {
+        glDeleteProgram(_id);
+
+        _id = std::exchange(other._id, 0u);
+        _layout = std::move(other._layout);
+      }
+
+      return *this;
+    }
+
     void Bind() const noexcept
     {
       glUseProgram(_id);
@@ -95,7 +108,7 @@ namespace Krys::Gfx::OpenGL
         glProgramUniform1i(_id, location, value);
       else if IsUniformType (uint32)
         glProgramUniform1ui(_id, location, value);
-      else if IsUniformType (float32)
+      else if IsUniformType (float)
         glProgramUniform1f(_id, location, value);
       else if IsUniformType (Vec2)
         glProgramUniform2f(_id, location, value.x, value.y);
@@ -113,7 +126,7 @@ namespace Krys::Gfx::OpenGL
         glProgramUniform1iv(_id, location, static_cast<GLsizei>(value.size()), value.data());
       else if IsUniformType (List<uint32>)
         glProgramUniform1uiv(_id, location, static_cast<GLsizei>(value.size()), value.data());
-      else if IsUniformType (List<float32>)
+      else if IsUniformType (List<float>)
         glProgramUniform1fv(_id, location, static_cast<GLsizei>(value.size()), value.data());
       else if IsUniformType (List<Vec2>)
         glProgramUniform2fv(_id, location, static_cast<GLsizei>(value.size()), &value[0].x);
@@ -136,12 +149,12 @@ namespace Krys::Gfx::OpenGL
 #undef IsUniformType
     }
 
-    NO_DISCARD GLuint Id() const noexcept
+    KRYS_NODISCARD GLuint Id() const noexcept
     {
       return _id;
     }
 
-    NO_DISCARD GLuint GetSamplerUnit(const string &samplerName) const noexcept
+    KRYS_NODISCARD GLuint GetSamplerUnit(const string &samplerName) const noexcept
     {
       auto it = _layout.Samplers.find(samplerName);
       if (it != _layout.Samplers.end())
@@ -188,7 +201,7 @@ namespace Krys::Gfx::OpenGL
     {
       ShaderReflector reflector {};
       _layout = reflector.Reflect(_id);
-      //reflector.LogReflectionInfo(_layout);
+      // reflector.LogReflectionInfo(_layout);
 
       SetSamplerUniforms();
     }
@@ -202,12 +215,6 @@ namespace Krys::Gfx::OpenGL
         sampler.FirstUnit = textureUnit;
         textureUnit += sampler.ArraySize;
       }
-    }
-
-    void Swap(Shader &other) noexcept
-    {
-      std::swap(_id, other._id);
-      std::swap(_layout, other._layout);
     }
   };
 }

@@ -1,9 +1,8 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/Array.hpp"
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Interpolate.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
@@ -47,7 +46,7 @@ namespace Krys::UI
     return static_cast<std::underlying_type_t<BoxCorner>>(c);
   }
 
-  // TODO: consider moving to Maths
+  // TODO(fix): consider moving to Maths
   template <std::integral T>
   constexpr T RoundTo(float value) noexcept
   {

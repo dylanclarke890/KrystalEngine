@@ -1,8 +1,8 @@
-#include "Krystal.Platform/Platform.hpp"
+﻿#include "Krystal.Platform/Platform.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
 #include <algorithm>
 #include <cassert>
-#include <optional>
 
 #define NOMINMAX
 #include <shellscalingapi.h>
@@ -10,33 +10,11 @@
 
 #pragma comment(lib, "Shcore.lib")
 
-namespace
-{
-  using namespace Krys;
-
-  int64 StartTicks = 0;
-  int64 TickFrequency = 0;
-}
-
 namespace Krys::Platform
 {
   void Initialise() noexcept
   {
     SetTimerPrecision();
-
-    {
-      LARGE_INTEGER freq;
-      auto result = ::QueryPerformanceFrequency(&freq);
-      assert(result);
-      TickFrequency = freq.QuadPart;
-    }
-
-    {
-      LARGE_INTEGER start;
-      auto result = ::QueryPerformanceCounter(&start);
-      assert(result);
-      StartTicks = start.QuadPart;
-    }
   }
 
   void Shutdown() noexcept
@@ -49,26 +27,6 @@ namespace Krys::Platform
     {
       ::timeEndPeriod(timeCaps.wPeriodMin);
     }
-  }
-
-  double GetTime() noexcept
-  {
-    LARGE_INTEGER now;
-    {
-      auto result = ::QueryPerformanceCounter(&now);
-      assert(result);
-    }
-    return static_cast<double>(now.QuadPart - StartTicks) / TickFrequency;
-  }
-
-  double GetTimeMilliseconds() noexcept
-  {
-    LARGE_INTEGER now;
-    {
-      auto result = ::QueryPerformanceCounter(&now);
-      assert(result);
-    }
-    return static_cast<double>(now.QuadPart - StartTicks) * 1000.0 / TickFrequency;
   }
 
   int GetDPIForWindow(NativeHandle windowHandle) noexcept
@@ -86,7 +44,7 @@ namespace Krys::Platform
     return NativeHandle(::GetActiveWindow());
   }
 
-  uint SetTimerPrecision(Nullable<uint> min) noexcept
+  uint SetTimerPrecision(Maybe<uint> min) noexcept
   {
     TIMECAPS timeCaps {};
 
@@ -105,16 +63,8 @@ namespace Krys::Platform
     return period;
   }
 
-  void Sleep(uint32 milliseconds) noexcept
+  void Sleep(Milliseconds duration) noexcept
   {
-    ::Sleep(milliseconds);
-  }
-
-  wstring ToWideString(const string &utf8String) noexcept
-  {
-    int len = ::MultiByteToWideChar(CP_UTF8, 0, utf8String.c_str(), -1, nullptr, 0);
-    wstring wstr(len, 0);
-    ::MultiByteToWideChar(CP_UTF8, 0, utf8String.c_str(), -1, &wstr[0], len);
-    return wstr;
+    ::Sleep(static_cast<unsigned long>(duration.count()));
   }
 }

@@ -1,9 +1,9 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.IO/IStream.hpp"
-#include "Krystal.Lib/Concepts.hpp"
+#include "Krystal.IO/Streams/Stream.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Serialisation/Archives/BaseArchive.hpp"
 #include "Krystal.Serialisation/Builtins.hpp"
 #include "Krystal.Serialisation/Concepts.hpp"
@@ -29,7 +29,7 @@ namespace Krys::Serialisation
     {
       if constexpr (SameType<T, byte>)
       {
-        _stream.Write(std::addressof(value), 1);
+        _stream.Write(FixedSpan(std::addressof(value), 1u));
       }
       else if constexpr (SameType<T, string>)
       {
@@ -38,12 +38,12 @@ namespace Krys::Serialisation
         if (length == 0)
           return *this;
         auto *data = std::bit_cast<const byte *>(value.data());
-        _stream.Write(data, length);
+        _stream.Write(Span(data, length));
       }
       else
       {
         auto *data = std::bit_cast<byte *>(std::addressof(value));
-        _stream.Write(data, sizeof(T));
+        _stream.Write(FixedSpan(data, sizeof(T)));
       }
 
       return *this;
@@ -67,7 +67,7 @@ namespace Krys::Serialisation
     {
       if constexpr (SameType<T, byte>)
       {
-        _stream.Read(std::addressof(value), 1);
+        _stream.Read(FixedSpan(std::addressof(value), 1u));
       }
       else if constexpr (SameType<T, string>)
       {
@@ -79,12 +79,12 @@ namespace Krys::Serialisation
 
         value.resize(length);
         auto *data = std::bit_cast<byte *>(value.data());
-        _stream.Read(data, length);
+        _stream.Read(Span(data, length));
       }
       else
       {
         auto *data = std::bit_cast<byte *>(std::addressof(value));
-        _stream.Read(data, sizeof(T));
+        _stream.Read(FixedSpan(data, sizeof(T)));
       }
 
       return *this;

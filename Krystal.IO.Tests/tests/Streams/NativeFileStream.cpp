@@ -1,5 +1,6 @@
-#include "Krystal.IO/Streams/NativeFileStream.hpp"
+﻿#include "Krystal.IO/Streams/NativeFileStream.hpp"
 #include "Krystal.IO/Common.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.IO/Path.hpp"
 #include <catch_all.hpp>
 
@@ -33,20 +34,20 @@ namespace Krys::Tests
       NativeFileReader reader(testFile);
 
       byte buffer[5] = {};
-      REQUIRE(reader.Read(buffer, 3) == 3);
+      REQUIRE(reader.Read(Span(buffer, 3)) == 3);
       REQUIRE(buffer[0] == byte {0x01});
       REQUIRE(buffer[1] == byte {0x02});
       REQUIRE(buffer[2] == byte {0x03});
       REQUIRE(reader.Position() == 3);
 
       // Read remaining
-      REQUIRE(reader.Read(buffer + 3, 2) == 2);
+      REQUIRE(reader.Read(Span(buffer + 3, 2)) == 2);
       REQUIRE(buffer[3] == byte {0x04});
       REQUIRE(buffer[4] == byte {0x05});
       REQUIRE(reader.Position() == 5);
 
       // EOF read
-      REQUIRE(reader.Read(buffer, 1) == 0);
+      REQUIRE(reader.Read(Span(buffer, 1)) == 0);
     }
 
     SECTION("Seek operations")
@@ -86,7 +87,7 @@ namespace Krys::Tests
       REQUIRE_FALSE(reader.Open());
 
       byte buffer[1];
-      REQUIRE(reader.Read(buffer, 1) == 0);
+      REQUIRE(reader.Read(buffer) == 0);
     }
 
     // Cleanup
@@ -114,7 +115,7 @@ namespace Krys::Tests
       NativeFileWriter writer(testFile);
       const std::vector<byte> testData = {byte {0xAA}, byte {0xBB}, byte {0xCC}};
 
-      REQUIRE(writer.Write(testData.data(), testData.size()));
+      REQUIRE(writer.Write(testData));
       REQUIRE((size_t)writer.Position() == testData.size());
       REQUIRE((size_t)writer.Size() == testData.size());
 
@@ -131,12 +132,12 @@ namespace Krys::Tests
     SECTION("Seek and write")
     {
       NativeFileWriter writer(testFile);
-      const byte data1 = byte {0x11};
-      const byte data2 = byte {0x22};
+      Array<const byte, 1> data1 = {byte {0x11}};
+      Array<const byte, 1> data2 = {byte {0x22}};
 
-      REQUIRE(writer.Write(&data1, 1));
+      REQUIRE(writer.Write(data1));
       REQUIRE(writer.Seek(10, SeekOrigin::Begin));
-      REQUIRE(writer.Write(&data2, 1));
+      REQUIRE(writer.Write(data2));
 
       // File should be 11 bytes with data at positions 0 and 10
       REQUIRE(writer.Size() == 11);
@@ -155,14 +156,14 @@ namespace Krys::Tests
       // Create initial file
       {
         NativeFileWriter writer(testFile);
-        const byte data = byte {0xFF};
-        writer.Write(&data, 1);
+        Array<const byte, 1> data1 = {byte {0xFF}};
+        writer.Write(data1);
       }
 
       // Open again and overwrite
       NativeFileWriter writer(testFile);
-      const byte newData = byte {0xEE};
-      REQUIRE(writer.Write(&newData, 1));
+      Array<const byte, 1> newData = {byte {0xEE}};
+      REQUIRE(writer.Write(newData));
       REQUIRE(writer.Size() == 1); // Should truncate
     }
 

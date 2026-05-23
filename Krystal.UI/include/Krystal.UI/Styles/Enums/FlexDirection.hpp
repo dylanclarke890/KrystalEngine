@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Enum.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Core/Enum.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::UI
 {
@@ -13,22 +13,15 @@ namespace Krys::UI
     RowReverse
   };
 
-  NO_DISCARD inline bool IsRow(const FlexDirection flexDirection) noexcept
+  KRYS_NODISCARD constexpr inline bool IsRow(const FlexDirection flexDirection) noexcept
   {
     return flexDirection == FlexDirection::Row || flexDirection == FlexDirection::RowReverse;
   }
 
-  NO_DISCARD inline bool IsColumn(const FlexDirection flexDirection) noexcept
+  KRYS_NODISCARD constexpr inline bool IsColumn(const FlexDirection flexDirection) noexcept
   {
     return flexDirection == FlexDirection::Column || flexDirection == FlexDirection::ColumnReverse;
   }
 }
 
-namespace Krys
-{
-  template <>
-  constexpr uint32 OrdinalCount<UI::FlexDirection>()
-  {
-    return 4;
-  }
-}
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::UI::FlexDirection, 4u)

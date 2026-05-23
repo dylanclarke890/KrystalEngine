@@ -2,18 +2,20 @@
 #include "Krystal.Gfx.OpenGL/Debug.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/BufferBitFlags.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/FilterMode.hpp"
-#include "Krystal.Gfx/Commands/CommandListReader.hpp"
-#include "Krystal.Gfx/Commands/Commands.hpp"
+#include "Krystal.Gfx/Commands.hpp"
 #include "Krystal.Gfx/Enums/BufferBitFlags.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/Expected.hpp"
+#include "Krystal.Lib/Commands/CommandListReader.hpp"
+#include "Krystal.Lib/Types/Expected.hpp"
 #include "Krystal.Maths/Clamp.hpp"
 #include "Krystal.Maths/Transform.hpp"
-#include "Krystal.Text/Unicode.hpp"
+#include "Krystal.Text/Decode/Decode.hpp"
+#include "Krystal.Text/Encodings/UTF8.hpp"
+#include "Krystal.Text/UnicodeCodePoint.hpp"
 
 namespace Krys::Gfx
 {
-  Expected<Unique<IRenderer>> CreateRenderer(IContext &context) noexcept
+  Expected<UniquePtr<IRenderer>> CreateRenderer(IContext &context) noexcept
   {
     try
     {
@@ -106,8 +108,7 @@ namespace Krys::Gfx::OpenGL
         }
         case Commands::ClearScissor::Type:
         {
-          const auto &cmd = reader.ReadCommand<Commands::ClearScissor>();
-          KRYS_UNUSED(cmd);
+          KRYS_MAYBE_UNUSED const auto &cmd = reader.ReadCommand<Commands::ClearScissor>();
 
           glDisable(GL_SCISSOR_TEST);
           break;
@@ -146,16 +147,16 @@ namespace Krys::Gfx::OpenGL
           const auto &cmd = reader.ReadCommand<Commands::ClearRenderTarget>();
 
           GLbitfield clearMask = MapBufferBitFlags(cmd.Clear);
-          if (!!(cmd.Clear & BufferBitFlags::Colour))
+          if (HasFlag(cmd.Clear, BufferBitFlags::Colour))
           {
             const auto &colour = cmd.Colour.ToVec4();
             glClearColor(colour.x, colour.y, colour.z, colour.w);
           }
-          if (!!(cmd.Clear & BufferBitFlags::Depth))
+          if (HasFlag(cmd.Clear, BufferBitFlags::Depth))
           {
             glClearDepthf(Maths::Clamp(cmd.Depth, 0.f, 1.f));
           }
-          if (!!(cmd.Clear & BufferBitFlags::Stencil))
+          if (HasFlag(cmd.Clear, BufferBitFlags::Stencil))
           {
             glClearStencil(static_cast<GLint>(cmd.Stencil));
           }
@@ -286,7 +287,7 @@ namespace Krys::Gfx::OpenGL
           }();
 
           Shader &shader = shaders.Get(shaders.GetBuiltin(builtin));
-          DrawText(font, shader, _context.Strings().Get(cmd.Text), cmd.Colour, cmd.Position, cmd.FontSize);
+          DrawText(font, shader, cmd.Text, cmd.Colour, cmd.Position, cmd.FontSize);
           break;
         }
         default:
@@ -332,7 +333,7 @@ namespace Krys::Gfx::OpenGL
     DrawText(font, shader, text, textColour, position, ptSize);
   }
 
-  void Renderer::DrawText(Font &font, Shader &shader, const utf8_string &text,
+  void Renderer::DrawText(Font &font, Shader &shader, utf8_stringview text,
                           const ColourbPremultiplied &textColour, const Maths::Vec2 &position, float ptSize)
   {
     auto &fonts = static_cast<FontRegistry &>(_context.Fonts());
@@ -358,21 +359,21 @@ namespace Krys::Gfx::OpenGL
     Buffer &buffer = buffers.Get(_glyphBuffer);
     Maths::Vec2 cursor = position + Maths::Vec2 {0.f, font.Metrics().Ascender * scale};
 
-    using namespace Text;
-    List<UnicodeCodepoint> codepoints = Unicode::GetCodepoints(text);
-    auto count = codepoints.size();
+    utf32_string result = Text::Decode(text, Text::utf8);
+    auto count = result.size();
+
     while (count > 0)
     {
       auto batchSize = Maths::Min(count, static_cast<size_t>(GlyphVertex::BatchSize));
-      Span<const UnicodeCodepoint> batch(codepoints.data() + (codepoints.size() - count), batchSize);
+      utf32_stringview batch(result.data() + (result.size() - count), batchSize);
       count -= batchSize;
 
       _glyphVertices.clear();
       const auto &characters = font.Characters();
-      for (const UnicodeCodepoint &c : batch)
+      for (const auto c : batch)
       {
         // Check for newline character
-        if (c.Value == '\n')
+        if (c == '\n')
         {
           cursor.x = position.x;
           cursor.y += font.Metrics().Height * scale;
@@ -382,8 +383,8 @@ namespace Krys::Gfx::OpenGL
         const auto &glyph = characters.find(c);
         if (glyph == characters.end())
         {
-          // TODO: this check is better than before but we should default to using a missing glyph character
-          KRYS_WARN("Font '{}' does not contain glyph for character '{}'", font.Family().Id, c.Value);
+          // TODO(fix): this check is better than before but we should default to using a missing glyph character
+          //KRYS_WARN("Font '{}' does not contain glyph for character '{}'", font.Family().Id, c);
           continue;
         }
 

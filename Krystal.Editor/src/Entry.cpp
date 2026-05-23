@@ -1,8 +1,9 @@
-#include "Krystal.Editor/Editor.hpp"
+﻿#include "Krystal.Editor/Editor.hpp"
 #include "Krystal.Engine/Application.hpp"
-#include "Krystal.Lib/Detection.hpp"
+#include "Krystal.Lib/Core/Move.hpp"
+#include "Krystal.Lib/Detection/OS.hpp"
 
-#ifdef KRYS_PLATFORM_WINDOWS
+#if KRYS_OS(WINDOWS)
   #define WIN32_LEAN_AND_MEAN
   #define NOGDICAPMASKS
   #define NOVIRTUALKEYCODES
@@ -63,13 +64,13 @@ int main(int argc, char **argv)
   auto result = CreateApplication<Editor>(argc, argv, settings);
   if (!result.has_value())
   {
-#ifdef KRYS_PLATFORM_WINDOWS
+#if KRYS_OS(WINDOWS)
     ::MessageBoxA(nullptr, result.error().c_str(), NULL, MB_OK | MB_ICONERROR | MB_DEFAULT_DESKTOP_ONLY);
 #endif
     return -1;
   }
 
-  Editor *editor = (*result).get();
+  UniquePtr<Editor> editor = ::Krys::Move(result.value());
   editor->Run();
 
   return 0;

@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Attributes.hpp"
 #include "Krystal.Lib/ByteUtils.hpp"
-#include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Span.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 #include <new>
 #include <utility>
 
@@ -14,10 +14,8 @@ namespace Krys
   /// @brief A memory arena for fast allocations for a particular type.
   /// @tparam T The type of object to allocate.
   template <typename T>
-  class Arena
+  class Arena : NonCopyable<Page>
   {
-    NO_COPY(Arena)
-
     constexpr static size_t Alignment = alignof(T);
 
   private:
@@ -44,11 +42,9 @@ namespace Krys
       }
     }
 
-    MOVE_SWAP(Arena)
-
-    T &Emplace(Args &&...args)
+    KRYS_NODISCARD T &Emplace(Args &&...args)
     {
-      // Ensure there�s enough room
+      // Ensure there’s enough room
       size_t alignedOffset = ByteUtils::AlignNext(_offset, Alignment);
       size_t requiredSize = alignedOffset + sizeof(T);
       if (requiredSize > _memoryPool.size())
@@ -64,7 +60,7 @@ namespace Krys
       return *obj;
     }
 
-    NO_DISCARD size_t SizeInBytes() const noexcept
+    KRYS_NODISCARD size_t SizeInBytes() const noexcept
     {
       return _memoryPool.size();
     }
@@ -82,13 +78,6 @@ namespace Krys
       }
       _offset = 0;
       _constructedCount = 0;
-    }
-
-    void Swap(Arena &other) noexcept
-    {
-      _memoryPool.swap(other._memoryPool);
-      std::swap(_offset, other._offset);
-      std::swap(_constructedCount, other._constructedCount);
     }
   };
 }

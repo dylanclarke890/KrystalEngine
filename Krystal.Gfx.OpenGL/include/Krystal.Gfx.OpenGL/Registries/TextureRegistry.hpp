@@ -1,28 +1,25 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/gl.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ImageRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ImageViewRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/SamplerRegistry.hpp"
 #include "Krystal.Gfx/Registries/ITextureRegistry.hpp"
 #include "Krystal.Gfx/ResourceHandleCache.hpp"
+#include "Krystal.Gfx/ResourceManager.hpp"
 #include "Krystal.Gfx/Resources/Texture.hpp"
 #include "Krystal.IO/ImageLoader.hpp"
-#include "Krystal.IO/IStream.hpp"
+#include "Krystal.IO/Streams/Stream.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Map.hpp"
-#include "Krystal.Lib/Pair.hpp"
-#include "Krystal.Lib/Span.hpp"
 #include "Krystal.Lib/String/String.hpp"
+#include "Krystal.Lib/Types/Map.hpp"
+#include "Krystal.Lib/Types/Pair.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
   class TextureRegistry final : public ITextureRegistry
   {
-    NO_COPY_MOVE(TextureRegistry)
-
     using TextureManager = ResourceManager<Texture, TextureHandle>;
     using TextureCache = ResourceHandleCache<string, TextureHandle>;
 
@@ -54,15 +51,15 @@ namespace Krys::Gfx::OpenGL
       _cache.Clear();
     }
 
-    NO_DISCARD virtual TextureHandle Create(ImageViewHandle imageView,
-                                            SamplerHandle sampler) noexcept override
+    KRYS_NODISCARD virtual TextureHandle Create(ImageViewHandle imageView,
+                                                SamplerHandle sampler) noexcept override
     {
       static uint32 unnamedTextureCounter = 0u;
       Texture texture {imageView, sampler, TextureOwner::Other};
       return AddTexture(std::format("{}", unnamedTextureCounter++), std::move(texture));
     }
 
-    NO_DISCARD TextureHandle Load(const IO::Path &path, const TextureDesc &desc = {}) noexcept override
+    KRYS_NODISCARD TextureHandle Load(const IO::Path &path, const TextureDesc &desc = {}) noexcept override
     {
       auto key = path.ToString();
       if (auto existing = _cache.Get(key); existing.IsValid())
@@ -70,7 +67,7 @@ namespace Krys::Gfx::OpenGL
         return existing;
       }
 
-      Unique<IO::IStreamReader> stream = _vfs.GetReader(BaseDirectory / path, IO::ReadFlags::None);
+      UniquePtr<IO::IStreamReader> stream = _vfs.GetReader(BaseDirectory / path, IO::ReadFlags::None);
       IO::ImageLoader loader;
       auto imageResult = loader.Load(*stream, {.FlipVertically = true});
       assert(imageResult.has_value() && "Failed to load texture image.");
@@ -123,9 +120,10 @@ namespace Krys::Gfx::OpenGL
       return AddTexture(key, std::move(texture));
     }
 
-    NO_DISCARD TextureHandle LoadCubemap(const IO::Path &left, const IO::Path &right, const IO::Path &top,
-                                         const IO::Path &bottom, const IO::Path &front, const IO::Path &back,
-                                         const TextureDesc &desc = {}) noexcept override
+    KRYS_NODISCARD TextureHandle LoadCubemap(const IO::Path &left, const IO::Path &right, const IO::Path &top,
+                                             const IO::Path &bottom, const IO::Path &front,
+                                             const IO::Path &back,
+                                             const TextureDesc &desc = {}) noexcept override
     {
       auto key = left.ToString() + "|" + right.ToString() + "|" + top.ToString() + "|" + bottom.ToString()
                  + "|" + front.ToString() + "|" + back.ToString();
@@ -140,7 +138,7 @@ namespace Krys::Gfx::OpenGL
 
       for (const auto &path : paths)
       {
-        Unique<IO::IStreamReader> stream = _vfs.GetReader(BaseDirectory / path, IO::ReadFlags::None);
+        UniquePtr<IO::IStreamReader> stream = _vfs.GetReader(BaseDirectory / path, IO::ReadFlags::None);
         assert(stream != nullptr && "Failed to open cubemap face image.");
 
         auto imageResult = loader.Load(*stream, {.FlipVertically = false});
@@ -221,13 +219,13 @@ namespace Krys::Gfx::OpenGL
       return false;
     }
 
-    NO_DISCARD Texture &Get(TextureHandle handle) noexcept
+    KRYS_NODISCARD Texture &Get(TextureHandle handle) noexcept
     {
       assert(handle.IsValid() && "Invalid texture handle.");
       return _textures.Get(handle);
     }
 
-    NO_DISCARD ImageView &GetView(TextureHandle handle) noexcept
+    KRYS_NODISCARD ImageView &GetView(TextureHandle handle) noexcept
     {
       assert(handle.IsValid() && "Invalid texture handle.");
       Texture &texture = Get(handle);

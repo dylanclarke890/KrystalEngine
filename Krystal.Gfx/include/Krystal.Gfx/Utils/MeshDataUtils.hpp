@@ -1,19 +1,20 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Gfx.Lib/Colour.hpp"
+#include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/Resources/Mesh.hpp"
 #include "Krystal.Gfx/Vertex.hpp"
-#include "Krystal.Lib/Array.hpp"
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
 namespace Krys::Gfx
 {
-  class MeshDataUtils
+  class MeshDataUtils : NonCopyMovable<MeshDataUtils>
   {
-    STATIC_CLASS(MeshDataUtils)
+    MeshDataUtils() = delete;
+    ~MeshDataUtils() = delete;
 
   public:
     static void GenerateQuad(MeshData &data, const Maths::Vec2 &origin, const Maths::Vec2 &dimensions,

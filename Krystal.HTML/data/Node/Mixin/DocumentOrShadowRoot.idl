@@ -1,0 +1,5 @@
+interface mixin DocumentOrShadowRoot {
+  readonly attribute CustomElementRegistry? customElementRegistry;
+};
+Document includes DocumentOrShadowRoot;
+ShadowRoot includes DocumentOrShadowRoot;

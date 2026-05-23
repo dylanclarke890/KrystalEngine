@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Lib/ComparisonHelpers.hpp"
-#include "Krystal.Lib/NullableFloat.hpp"
+#include "Krystal.Lib/Types/NullableFloat.hpp"
 #include "Krystal.UI/Layout/Node/Node.hpp"
 #include "Krystal.UI/Styles/Enums/Dimension.hpp"
 #include "Krystal.UI/Styles/Enums/Direction.hpp"

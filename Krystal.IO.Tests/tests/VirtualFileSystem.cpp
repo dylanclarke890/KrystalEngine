@@ -1,7 +1,7 @@
-#include "Krystal.IO/VirtualFileSystem.hpp"
+﻿#include "Krystal.IO/VirtualFileSystem.hpp"
 #include "Krystal.IO/Backends/NativeFileBackend.hpp"
-#include "Krystal.IO/IStream.hpp"
 #include "Krystal.IO/Path.hpp"
+#include "Krystal.IO/Streams/Stream.hpp"
 #include <catch_all.hpp>
 #include <filesystem>
 #include <fstream>
@@ -27,8 +27,10 @@ namespace
   {
     string out;
     out.resize(static_cast<size_t>(r.Size()));
-    const auto n = r.Read(reinterpret_cast<byte *>(out.data()), static_cast<uint64>(out.size()));
+
+    const auto n = r.Read(Span(reinterpret_cast<byte *>(out.data()), out.size()));
     out.resize(static_cast<size_t>(n));
+
     return out;
   }
 }
@@ -102,8 +104,11 @@ TEST_CASE("VirtualFileSystem", "[IO][VFS]")
     {
       auto w = vfs->GetWriter(Path("/data/new.txt"), WriteFlags::Create | WriteFlags::Truncate);
       REQUIRE(w != nullptr);
+
       const char *text = "hello-new";
-      REQUIRE(w->Write(reinterpret_cast<const byte *>(text), static_cast<uint64>(std::strlen(text))));
+      Span<const byte> d {reinterpret_cast<const byte *>(text), std::strlen(text)};
+      
+      REQUIRE(w->Write(d));
       w->Flush();
     }
     {
@@ -116,8 +121,10 @@ TEST_CASE("VirtualFileSystem", "[IO][VFS]")
     {
       auto w = vfs->GetWriter(Path("/new_root.txt"), WriteFlags::Create | WriteFlags::Truncate);
       REQUIRE(w != nullptr);
+
       const char *text = "root-file";
-      REQUIRE(w->Write(reinterpret_cast<const byte *>(text), static_cast<uint64>(std::strlen(text))));
+      Span<const byte> d {reinterpret_cast<const byte *>(text), std::strlen(text)};
+      REQUIRE(w->Write(d));
       w->Flush();
     }
     {
@@ -199,8 +206,11 @@ TEST_CASE("VirtualFileSystem", "[IO][VFS]")
     {
       auto w = vfs->GetWriter(p, WriteFlags::Create | WriteFlags::Truncate);
       REQUIRE(w != nullptr);
+
       const char *msg = "to-be-deleted";
-      REQUIRE(w->Write(reinterpret_cast<const byte *>(msg), static_cast<uint64>(std::strlen(msg))));
+      Span<const byte> d {reinterpret_cast<const byte *>(msg), std::strlen(msg)};
+
+      REQUIRE(w->Write(d));
     }
     REQUIRE(vfs->Exists(p));
     REQUIRE(vfs->DeleteFile(p));
@@ -209,8 +219,10 @@ TEST_CASE("VirtualFileSystem", "[IO][VFS]")
     {
       auto w = vfs->GetWriter(p, WriteFlags::Create | WriteFlags::Truncate);
       REQUIRE(w != nullptr);
+
       const char *msg = "recreated";
-      REQUIRE(w->Write(reinterpret_cast<const byte *>(msg), static_cast<uint64>(std::strlen(msg))));
+      Span<const byte> d {reinterpret_cast<const byte *>(msg), std::strlen(msg)};
+      REQUIRE(w->Write(d));
     }
     auto r = vfs->GetReader(p, ReadFlags::None);
     REQUIRE(r != nullptr);

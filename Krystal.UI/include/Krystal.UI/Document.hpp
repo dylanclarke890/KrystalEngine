@@ -1,16 +1,14 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Gfx.Lib/Colour.hpp"
-#include "Krystal.Gfx.Lib/ResourceManager.hpp"
+#include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/IContext.hpp"
-#include "Krystal.Lib/Concepts.hpp"
-#include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/SmartPointers.hpp"
-#include "Krystal.Lib/Stack.hpp"
+#include "Krystal.Gfx/ResourceManager.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/String/StringRef.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/Stack.hpp"
 #include "Krystal.UI/Elements/Element.hpp"
 #include "Krystal.UI/Layout/Algorithm/MeasureText.hpp"
 #include "Krystal.UI/Layout/LayoutEngine.hpp"
@@ -18,10 +16,8 @@
 
 namespace Krys::UI
 {
-  class Document
+  class Document : NonCopyMovable<Document>
   {
-    NO_COPY_MOVE(Document)
-
     using ElementManager = Gfx::ResourceManager<Element, ElementHandle>;
 
   private:
@@ -49,7 +45,7 @@ namespace Krys::UI
 
     /// @brief Create a new element.
     template <DerivedFrom<Element> TElement, typename... Args>
-    NO_DISCARD ElementHandle Create(Args &&...args)
+    KRYS_NODISCARD ElementHandle Create(Args &&...args)
     {
       ElementHandle handle = _elements.NextHandle();
       _elements.Set(handle, TElement(handle, _layoutConfig, std::forward<Args>(args)...));
@@ -59,7 +55,7 @@ namespace Krys::UI
       return handle;
     }
 
-    NO_DISCARD Element &Get(ElementHandle element)
+    KRYS_NODISCARD Element &Get(ElementHandle element)
     {
       assert(element.IsValid() && "Invalid handle");
       return _elements.Get(element);
@@ -786,13 +782,13 @@ namespace Krys::UI
 
 #pragma endregion
 
-    void ElementSetTextContent(ElementHandle element, StringRef text)
+    void ElementSetTextContent(ElementHandle element, const utf8_string &text)
     {
       assert(element.IsValid() && "Invalid element handle");
       _elements.Get(element).SetText(text);
     }
 
-    StringRef ElementGetTextContent(ElementHandle element)
+    utf8_stringview ElementGetTextContent(ElementHandle element)
     {
       assert(element.IsValid() && "Invalid element handle");
       return _elements.Get(element).GetText();

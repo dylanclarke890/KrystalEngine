@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx/ICamera.hpp"
 #include "Krystal.Maths/Clipspace.hpp"

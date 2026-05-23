@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/NullableFloat.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/NullableFloat.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.UI/Styles/Values/StyleLength.hpp"
 
 namespace Krys::UI

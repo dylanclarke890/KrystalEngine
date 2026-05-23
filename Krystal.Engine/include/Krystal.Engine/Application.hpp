@@ -1,14 +1,16 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/IRenderer.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
-#include "Krystal.Lib/Concepts.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Events/EventManager.hpp"
-#include "Krystal.Lib/Expected.hpp"
-#include "Krystal.Lib/SmartPointers.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
+#include "Krystal.Lib/Pointers/UniquePtr.hpp"
 #include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Time/Duration.hpp"
+#include "Krystal.Lib/Types/Expected.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Log/ILogger.hpp"
 #include "Krystal.Platform/Events.hpp"
 #include "Krystal.Platform/Input.hpp"
@@ -26,9 +28,9 @@ namespace Krys
   /// @param argv Command line arguments.
   /// @param settings Application settings.
   template <DerivedFrom<Application> TApplication, typename... Args>
-  static Expected<Unique<TApplication>> CreateApplication(int argc, char **argv,
-                                                          const struct ApplicationSettings &settings,
-                                                          Args &&...args) noexcept
+  static Expected<UniquePtr<TApplication>> CreateApplication(int argc, char **argv,
+                                                             const struct ApplicationSettings &settings,
+                                                             Args &&...args) noexcept
   {
     try
     {
@@ -48,7 +50,7 @@ namespace Krys
 
     Platform::WindowSettings WindowSettings {};
 
-    uint32 RenderFramerate {30};
+    uint32 RenderFramerate {60};
 
     uint32 PhysicsFramerate {30};
 
@@ -61,24 +63,22 @@ namespace Krys
   {
     List<string> CommandLineArgs {};
     ApplicationSettings Settings {};
-    Unique<Log::ILogger> Logger {};
-    Unique<EventManager> Events {};
-    Unique<Platform::IWindow> Window {};
-    Unique<Platform::Input> Input {};
-    Unique<IO::VirtualFileSystem> VFS {};
-    Unique<Gfx::IContext> GraphicsContext {};
-    Unique<Gfx::IRenderer> Renderer {};
-    StringInterner Strings {};
+    UniquePtr<Log::ILogger> Logger {};
+    UniquePtr<EventManager> Events {};
+    UniquePtr<Platform::IWindow> Window {};
+    UniquePtr<Platform::Input> Input {};
+    UniquePtr<IO::VirtualFileSystem> VFS {};
+    UniquePtr<Gfx::IContext> GraphicsContext {};
+    UniquePtr<Gfx::IRenderer> Renderer {};
   };
 
   /// @brief Base class for a Krystal application.
-  class Application
+  class Application : NonCopyMovable<Application>
   {
-    NO_COPY_MOVE(Application)
-
   protected:
-    bool _running, _isWindowMinimised;
-    Unique<ApplicationContext> _context;
+    bool _running;
+    bool _isWindowMinimised;
+    UniquePtr<ApplicationContext> _context;
 
   public:
     /// @brief Constructs an `Application`.
@@ -97,11 +97,11 @@ namespace Krys
 
     /// @brief Per-frame update method.
     /// @param dt Delta time since the last frame, in seconds.
-    virtual void OnUpdate(double dt) noexcept;
+    virtual void OnUpdate(Seconds dt) noexcept;
 
     /// @brief Fixed rate update method.
     /// @param dt The fixed time step, in seconds. Does not change unless explicitly set.
-    virtual void OnFixedUpdate(double dt) noexcept;
+    virtual void OnFixedUpdate(Seconds dt) noexcept;
 
     /// @brief Per-frame render method.
     virtual void OnRender() noexcept;
@@ -115,6 +115,6 @@ namespace Krys
     Platform::WindowCallbacks CreateWindowCallbacks() noexcept;
 
     /// @brief CPU friendly way to cap the frame rate.
-    void ClampFramerate(double &elapsedMs, const double startTime);
+    void ClampFramerate(const Nanoseconds start, Nanoseconds &elapsed);
   };
 }

@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Gfx.Lib/Colour.hpp"
+#include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/Handle.hpp"
-#include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Lib/Mixins/NonCopyable.hpp"
 #include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Vector.hpp"
 #include <variant>
 
@@ -34,26 +34,32 @@ namespace Krys::Gfx::OpenGL
     MaterialParameterValue Value;
   };
 
-  struct Material
+  struct Material : NonCopyable<Material>
   {
-    NO_COPY(Material)
-    MOVE_SWAP(Material)
+    string Name;
+    ShaderHandle Shader;
+    List<MaterialParameter> Parameters;
 
     Material(const string &name, ShaderHandle shader, const List<MaterialParameter> &parameters) noexcept
         : Name(name), Shader(shader), Parameters(parameters)
     {
     }
 
-    string Name;
-    ShaderHandle Shader;
-    List<MaterialParameter> Parameters;
-
-  private:
-    void Swap(Material &other) noexcept
+    Material(Material &&other) noexcept
+        : Name(std::move(other.Name)), Shader(std::exchange(other.Shader, {})),
+          Parameters(std::move(other.Parameters))
     {
-      std::swap(Name, other.Name);
-      std::swap(Shader, other.Shader);
-      std::swap(Parameters, other.Parameters);
+    }
+
+    Material &operator=(Material &&other) noexcept
+    {
+      if (this != &other)
+      {
+        Name = std::move(other.Name);
+        Shader = std::exchange(other.Shader, {});
+        Parameters = std::move(other.Parameters);
+      }
+      return *this;
     }
   };
 }

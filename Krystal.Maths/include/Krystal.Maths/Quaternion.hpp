@@ -1,7 +1,7 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/Concepts.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Vector.hpp"
 #include <cassert>
@@ -11,7 +11,7 @@ namespace Krys
 {
   namespace Maths
   {
-    template <Arithmetic T>
+    template <Number T>
     struct Quaternion;
   }
 
@@ -19,7 +19,7 @@ namespace Krys
   {
     using namespace Krys::Maths;
 
-    template <Arithmetic T, typename TMatrix>
+    template <Number T, typename TMatrix>
     constexpr void SetQuatFrom(Quaternion<T> &q, const TMatrix &m) noexcept
     {
       // The rotation matrix is of form: (Eric Lengyel's Mathematics for 3D Game Programming and Computer
@@ -81,14 +81,14 @@ namespace Krys::Maths
 {
 #pragma region Helper Macros
 
-#define QUATERNION_TEMPLATE_PARAMS Krys::Arithmetic T
+#define QUATERNION_TEMPLATE_PARAMS Krys::Number T
 #define QUATERNION_TEMPLATE_ARGS T
 #define QUATERNION_TYPE Krys::Maths::Quaternion<T>
 
 #pragma endregion
 
   /// @brief Represents an axis-angle pair, which is a rotation around a 3D axis.
-  template <Arithmetic T>
+  template <Number T>
   struct AxisAngle final
   {
     /// @brief The axis of rotation.
@@ -100,7 +100,7 @@ namespace Krys::Maths
 
   /// @brief Represents a quaternion, which is a rotation around a 3D axis.
   /// @tparam T the underlying type of the quaternion components.
-  template <Arithmetic T>
+  template <Number T>
   struct Quaternion
   {
     T w, x, y, z;
@@ -239,7 +239,7 @@ namespace Krys::Maths
 
     /// @brief Get the axis-angle representation of the quaternion.
     /// @return the axis-angle representation of the quaternion.
-    NO_DISCARD constexpr AxisAngle<T> ToAxisAngle() const noexcept
+    KRYS_NODISCARD constexpr AxisAngle<T> ToAxisAngle() const noexcept
     {
       const auto halfAngle = std::acos(w);
       const auto sinHalfAngle = std::sin(halfAngle);
@@ -261,7 +261,7 @@ namespace Krys::Maths
     }
 
     /// @brief Get the axis of rotation of the quaternion.
-    NO_DISCARD Vector3<T> GetAxis() const noexcept
+    KRYS_NODISCARD Vector3<T> GetAxis() const noexcept
     {
       const auto sinHalfAngle = std::sqrt(x * x + y * y + z * z);
 
@@ -276,7 +276,7 @@ namespace Krys::Maths
 
     /// @brief Get the angle of rotation around the axis in radians. The quaternion must be Normalized.
     /// @return the angle of rotation around the axis in radians.
-    NO_DISCARD T GetAngle() const noexcept
+    KRYS_NODISCARD T GetAngle() const noexcept
     {
       return 2.0f * std::acos(w);
     }
@@ -284,7 +284,7 @@ namespace Krys::Maths
     /// @brief Get the angle between this and the target orientation (the shortest route) in radians.
     /// Both this and the target quaternion must be Normalized.
     /// @param target the target orientation.
-    NO_DISCARD T AngleBetween(const Quaternion<T> &target) const noexcept
+    KRYS_NODISCARD T AngleBetween(const Quaternion<T> &target) const noexcept
     {
       // Compute the dot product
       const auto dot = Dot(target);
@@ -299,7 +299,7 @@ namespace Krys::Maths
     /// @brief Get the axis of rotation to get from this orientation to target orientation (the shortest
     /// route).
     /// @param target the target orientation.
-    NO_DISCARD Vector3<T> AxisFromTo(const Quaternion<T> &target) const noexcept
+    KRYS_NODISCARD Vector3<T> AxisFromTo(const Quaternion<T> &target) const noexcept
     {
       // Compute the relative rotation quaternion
       const Quaternion<T> relative = target * Inverse(*this);
@@ -322,7 +322,7 @@ namespace Krys::Maths
 
     /// @brief Adds a quaternion to another quaternion.
     /// @param other the other quaternion.
-    NO_DISCARD constexpr Quaternion<T> operator+(const Quaternion<T> &other) const noexcept
+    KRYS_NODISCARD constexpr Quaternion<T> operator+(const Quaternion<T> &other) const noexcept
     {
       return Quaternion<T>(w + other.w, x + other.x, y + other.y, z + other.z);
     }
@@ -341,7 +341,7 @@ namespace Krys::Maths
 
     /// @brief Subtracts a quaternion from another quaternion.
     /// @param other the other quaternion.
-    NO_DISCARD constexpr Quaternion<T> operator-(const Quaternion<T> &other) const noexcept
+    KRYS_NODISCARD constexpr Quaternion<T> operator-(const Quaternion<T> &other) const noexcept
     {
       return Quaternion<T>(w - other.w, x - other.x, y - other.y, z - other.z);
     }
@@ -360,7 +360,7 @@ namespace Krys::Maths
 
     /// @brief Multiplies a quaternion by a scalar.
     /// @param scalar the scalar.
-    NO_DISCARD constexpr Quaternion<T> operator*(const T scalar) const noexcept
+    KRYS_NODISCARD constexpr Quaternion<T> operator*(const T scalar) const noexcept
     {
       return Quaternion<T>(w * scalar, x * scalar, y * scalar, z * scalar);
     }
@@ -377,7 +377,7 @@ namespace Krys::Maths
     /// @param other the other quaternion.
     /// @note The product q1 * q2 returns a quaternion that concatenates the two orientation rotations.
     /// The rotation q2 is applied first before q1.
-    NO_DISCARD constexpr Quaternion<T> operator*(const Quaternion<T> &other) const noexcept
+    KRYS_NODISCARD constexpr Quaternion<T> operator*(const Quaternion<T> &other) const noexcept
     {
       T w1 = w;
       T x1 = x;
@@ -432,7 +432,7 @@ namespace Krys::Maths
 
     /// @brief Divides a quaternion by a scalar.
     /// @param scalar the scalar.
-    NO_DISCARD constexpr Quaternion<T> operator/(const T scalar) const noexcept
+    KRYS_NODISCARD constexpr Quaternion<T> operator/(const T scalar) const noexcept
     {
       assert(scalar != 0);
       return Quaternion<T>(w / scalar, x / scalar, y / scalar, z / scalar);
@@ -450,7 +450,7 @@ namespace Krys::Maths
     /// @brief Divides a quaternion by another.
     /// @note Division "a / b" results in a quaternion that rotates the orientation b to coincide with the
     /// orientation a.
-    NO_DISCARD constexpr Quaternion<T> operator/(const Quaternion<T> &rhs) const noexcept
+    KRYS_NODISCARD constexpr Quaternion<T> operator/(const Quaternion<T> &rhs) const noexcept
     {
       return *this * rhs.Inverse();
     }
@@ -469,7 +469,7 @@ namespace Krys::Maths
 #pragma region ToMatrix
 
     /// @brief Converts this quaternion to a 3x3 rotation matrix.
-    NO_DISCARD constexpr Matrix3x3<T> ToMat3x3() const noexcept
+    KRYS_NODISCARD constexpr Matrix3x3<T> ToMat3x3() const noexcept
     {
       assert(IsNormalized());
 
@@ -491,7 +491,7 @@ namespace Krys::Maths
     }
 
     /// @brief Converts this quaternion to a 3x4 rotation matrix.
-    NO_DISCARD constexpr Matrix3x4<T> ToMat3x4() const noexcept
+    KRYS_NODISCARD constexpr Matrix3x4<T> ToMat3x4() const noexcept
     {
       assert(IsNormalized());
 
@@ -513,7 +513,7 @@ namespace Krys::Maths
     }
 
     /// @brief Converts this quaternion to a 4x4 rotation matrix.
-    NO_DISCARD constexpr Matrix4x4<T> ToMat4x4() const noexcept
+    KRYS_NODISCARD constexpr Matrix4x4<T> ToMat4x4() const noexcept
     {
       assert(IsNormalized());
 
@@ -536,7 +536,7 @@ namespace Krys::Maths
 
     /// @brief Converts this quaternion to a 4x4 rotation matrix with translation.
     /// @param translation the translation vector.
-    NO_DISCARD constexpr Matrix4x4<T> ToMat4x4(const Vector3<T> &translation) const noexcept
+    KRYS_NODISCARD constexpr Matrix4x4<T> ToMat4x4(const Vector3<T> &translation) const noexcept
     {
       assert(IsNormalized());
 
@@ -559,7 +559,7 @@ namespace Krys::Maths
 
     /// @brief Converts this quaternion to a 4x4 rotation matrix with translation.
     /// @param translation the translation vector. The w component of the vector is ignored.
-    NO_DISCARD constexpr Matrix4x4<T> ToMat4x4(const Vector4<T> &translation) const noexcept
+    KRYS_NODISCARD constexpr Matrix4x4<T> ToMat4x4(const Vector4<T> &translation) const noexcept
     {
       assert(IsNormalized());
       return ToMat4x4(Vector3<T>(translation.x, translation.y, translation.z));
@@ -568,13 +568,13 @@ namespace Krys::Maths
 #pragma endregion ToMatrix
 
     /// @brief Negates this quaternion.
-    NO_DISCARD constexpr Quaternion<T> operator-() const noexcept
+    KRYS_NODISCARD constexpr Quaternion<T> operator-() const noexcept
     {
       return Quaternion<T>(-w, -x, -y, -z);
     }
 
     /// @brief Unary plus operator. No effect.
-    NO_DISCARD constexpr Quaternion<T> operator+() const noexcept
+    KRYS_NODISCARD constexpr Quaternion<T> operator+() const noexcept
     {
       return *this;
     }
@@ -584,7 +584,7 @@ namespace Krys::Maths
     /// imaginary.
     /// @note (q* = (w, -x, -y, -z))
     /// @return the conjugate of this quaternion.
-    NO_DISCARD constexpr Quaternion<T> Conjugate() const noexcept
+    KRYS_NODISCARD constexpr Quaternion<T> Conjugate() const noexcept
     {
       return Quaternion<T>(w, -x, -y, -z);
     }
@@ -592,7 +592,7 @@ namespace Krys::Maths
     /// @brief Get the dot product of this and another quaternion.
     /// @param other the other quaternion.
     /// @return the dot product of the two quaternions.
-    NO_DISCARD constexpr T Dot(const Quaternion<T> &other) const noexcept
+    KRYS_NODISCARD constexpr T Dot(const Quaternion<T> &other) const noexcept
     {
       return w * other.w + x * other.x + y * other.y + z * other.z;
     }
@@ -601,14 +601,14 @@ namespace Krys::Maths
     /// @note The inverse of a quaternion is the conjugate of the quaternion divided by the dot product of
     /// the quaternion with itself.
     /// @note (q^-1 = q^* / (q * q))
-    NO_DISCARD constexpr Quaternion<T> Inverse() const noexcept
+    KRYS_NODISCARD constexpr Quaternion<T> Inverse() const noexcept
     {
       assert(Dot(*this) != 0);
       return Conjugate() / Dot(*this);
     }
 
     /// @brief Get the length of this quaternion.
-    NO_DISCARD constexpr T Length() const noexcept
+    KRYS_NODISCARD constexpr T Length() const noexcept
     {
       return std::sqrt(w * w + x * x + y * y + z * z);
     }
@@ -623,7 +623,7 @@ namespace Krys::Maths
     }
 
     /// @brief Check whether this quaternion is normalized.
-    NO_DISCARD constexpr bool IsNormalized() const noexcept
+    KRYS_NODISCARD constexpr bool IsNormalized() const noexcept
     {
       return Abs(Length() - 1) < (std::numeric_limits<T>::epsilon() * 10);
     }

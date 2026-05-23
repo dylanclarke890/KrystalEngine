@@ -1,9 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx/Utils/MeshDataUtils.hpp"
-#include "Krystal.Lib/Array.hpp"
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Clamp.hpp"
 #include "Krystal.Maths/Round.hpp"
 #include "Krystal.Maths/Vector.hpp"
@@ -14,11 +14,11 @@
 
 namespace Krys::UI
 {
-  class GeometryUtils
+  struct GeometryUtils : NonCopyMovable<GeometryUtils>
   {
-    STATIC_CLASS(GeometryUtils)
+    GeometryUtils() = delete;
+    ~GeometryUtils() = delete;
 
-  public:
     static void GenerateBorderBackground(Gfx::MeshData &data, const RenderBox &renderBox,
                                          Gfx::ColourbPremultiplied backgroundColour,
                                          const Array<Gfx::ColourbPremultiplied, 4> &borderColours)

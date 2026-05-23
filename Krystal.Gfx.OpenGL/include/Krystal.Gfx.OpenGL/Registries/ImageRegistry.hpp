@@ -1,20 +1,17 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/ImageType.hpp"
 #include "Krystal.Gfx.OpenGL/Mappers/Enums/PixelFormat.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/Image.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Registries/IImageRegistry.hpp"
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Gfx/ResourceManager.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
   class ImageRegistry : public IImageRegistry
   {
-    NO_COPY_MOVE(ImageRegistry)
-
     using ImageManager = ResourceManager<Image, ImageHandle>;
 
   private:
@@ -33,7 +30,7 @@ namespace Krys::Gfx::OpenGL
     {
     }
 
-    NO_DISCARD ImageHandle Create(const ImageDesc &desc)
+    KRYS_NODISCARD ImageHandle Create(const ImageDesc &desc)
     {
       GLenum target = MapImageType(desc.Type);
       GLenum internalFormat = MapPixelFormat(desc.Format);
@@ -48,12 +45,12 @@ namespace Krys::Gfx::OpenGL
       return _images.Remove(image);
     }
 
-    NO_DISCARD Image &Get(ImageHandle handle)
+    KRYS_NODISCARD Image &Get(ImageHandle handle)
     {
       return _images.Get(handle);
     }
 
-    NO_DISCARD Image *TryGet(ImageHandle handle) noexcept
+    KRYS_NODISCARD Image *TryGet(ImageHandle handle) noexcept
     {
       return _images.TryGet(handle);
     }

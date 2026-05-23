@@ -1,19 +1,16 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Gfx.Lib/ResourceManager.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ImageRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Resources/ImageView.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/Registries/IImageViewRegistry.hpp"
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.Gfx/ResourceManager.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
   class ImageViewRegistry : public IImageViewRegistry
   {
-    NO_COPY_MOVE(ImageViewRegistry)
-
     using ImageViewManager = ResourceManager<ImageView, ImageViewHandle>;
 
   private:
@@ -35,11 +32,11 @@ namespace Krys::Gfx::OpenGL
     {
     }
 
-    NO_DISCARD ImageViewHandle Create(const ImageViewDesc &desc) noexcept
+    KRYS_NODISCARD ImageViewHandle Create(const ImageViewDesc &desc) noexcept
     {
       assert(desc.Image.IsValid() && "Invalid image handle.");
       auto *image = _images.TryGet(desc.Image);
-      if (image == nullptr) [[unlikely]]
+      if (image == nullptr) KRYS_UNLIKELY
       {
         assert(false && "Image handle does not reference a valid image.");
         return ImageViewHandle {};
@@ -56,12 +53,12 @@ namespace Krys::Gfx::OpenGL
       return _imageViews.Remove(handle);
     }
 
-    NO_DISCARD ImageView &Get(ImageViewHandle handle)
+    KRYS_NODISCARD ImageView &Get(ImageViewHandle handle)
     {
       return _imageViews.Get(handle);
     }
 
-    NO_DISCARD ImageView *TryGet(ImageViewHandle handle)
+    KRYS_NODISCARD ImageView *TryGet(ImageViewHandle handle)
     {
       return _imageViews.TryGet(handle);
     }

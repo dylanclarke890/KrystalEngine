@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.UI/Layout/Config/Config.hpp"
 #include "Krystal.UI/Styles/Enums/SizingMode.hpp"

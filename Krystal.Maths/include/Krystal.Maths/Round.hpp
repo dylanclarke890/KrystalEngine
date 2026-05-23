@@ -1,7 +1,8 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Concepts.hpp"
-#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Maths/Matrix.hpp"
 #include "Krystal.Maths/Vector.hpp"
 
@@ -11,14 +12,14 @@ namespace Krys::Maths
 
 #define VECTOR_ROUND_FUNC(FuncName)                                                                          \
   template <FloatingPoint T, int N>                                                                          \
-  NO_DISCARD constexpr auto FuncName(const VECTOR_TYPE &x) noexcept                                          \
+  KRYS_NODISCARD constexpr auto FuncName(const VECTOR_TYPE &x) noexcept                                          \
   {                                                                                                          \
     return MapEach(x, [](auto v) { return FuncName(v); });                                                   \
   }
 
 #define MATRIX_ROUND_FUNC(FuncName)                                                                          \
   template <FloatingPoint T, int R, int C>                                                                   \
-  NO_DISCARD constexpr auto FuncName(const MATRIX_TYPE &x) noexcept                                          \
+  KRYS_NODISCARD constexpr auto FuncName(const MATRIX_TYPE &x) noexcept                                          \
   {                                                                                                          \
     return MapEach(x, [](auto v) { return FuncName(v); });                                                   \
   }
@@ -26,9 +27,9 @@ namespace Krys::Maths
 #pragma endregion
 
   template <FloatingPoint T>
-  NO_DISCARD constexpr T Ceil(T x) noexcept
+  KRYS_NODISCARD constexpr T Ceil(T x) noexcept
   {
-    if (IS_COMPILE_TIME)
+    if (std::is_constant_evaluated())
     {
       if (static_cast<long long>(x) == x)
         return x;
@@ -40,9 +41,9 @@ namespace Krys::Maths
   }
 
   template <FloatingPoint T>
-  NO_DISCARD constexpr T Floor(T x) noexcept
+  KRYS_NODISCARD constexpr T Floor(T x) noexcept
   {
-    if (IS_COMPILE_TIME)
+    if (std::is_constant_evaluated())
     {
       if (static_cast<long long>(x) == x)
         return x;
@@ -54,18 +55,18 @@ namespace Krys::Maths
   }
 
   template <FloatingPoint T>
-  NO_DISCARD constexpr T Round(T x) noexcept
+  KRYS_NODISCARD constexpr T Round(T x) noexcept
   {
-    if (IS_COMPILE_TIME)
+    if (std::is_constant_evaluated())
       return T(static_cast<long long>(x + (x > T(0) ? T(0.5) : T(-0.5))));
     else
       return std::round(x);
   }
 
   template <FloatingPoint T>
-  NO_DISCARD constexpr T Trunc(T x) noexcept
+  KRYS_NODISCARD constexpr T Trunc(T x) noexcept
   {
-    if (IS_COMPILE_TIME)
+    if (std::is_constant_evaluated())
       return T(static_cast<long long>(x));
     else
       return std::trunc(x);

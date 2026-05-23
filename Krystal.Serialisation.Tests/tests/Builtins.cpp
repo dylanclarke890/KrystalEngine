@@ -1,6 +1,6 @@
-#include "Krystal.Serialisation/Builtins.hpp"
+﻿#include "Krystal.Serialisation/Builtins.hpp"
 #include "Krystal.IO/Streams/MemoryStream.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Serialisation/Access.hpp"
 #include "Krystal.Serialisation/Archives/BinaryArchive.hpp"
 #include "Krystal.Serialisation/Archives/JsonArchive.hpp"

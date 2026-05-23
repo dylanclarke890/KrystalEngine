@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/NativeHandle.hpp"
 
 #define VK_NO_PROTOTYPES
@@ -10,20 +10,20 @@ namespace Krys::Gfx::Vulkan
 {
   namespace Hooks
   {
-    NO_DISCARD bool HookCreateInstanceFunction() noexcept;
+    KRYS_NODISCARD bool HookCreateInstanceFunction() noexcept;
 
-    NO_DISCARD bool HookEntryFunctions() noexcept;
+    KRYS_NODISCARD bool HookEntryFunctions() noexcept;
 
-    NO_DISCARD bool HookInstanceFunctions(VkInstance instance) noexcept;
+    KRYS_NODISCARD bool HookInstanceFunctions(VkInstance instance) noexcept;
 
-    NO_DISCARD bool HookPlatformInstanceFunctions(VkInstance instance) noexcept;
+    KRYS_NODISCARD bool HookPlatformInstanceFunctions(VkInstance instance) noexcept;
 
-    NO_DISCARD bool HookDeviceFunctions(VkDevice device) noexcept;
+    KRYS_NODISCARD bool HookDeviceFunctions(VkDevice device) noexcept;
 
-    NO_DISCARD bool HookDebugMessengerFunctions(VkInstance instance) noexcept;
+    KRYS_NODISCARD bool HookDebugMessengerFunctions(VkInstance instance) noexcept;
   }
 
-  NO_DISCARD VkSurfaceKHR CreateSurface(VkInstance instance, NativeHandle windowHandle);
+  KRYS_NODISCARD VkSurfaceKHR CreateSurface(VkInstance instance, NativeHandle windowHandle);
 
 #define KRYS_DECLARE_VK_FUNC_PTR(name) inline PFN_##name name = nullptr;
 

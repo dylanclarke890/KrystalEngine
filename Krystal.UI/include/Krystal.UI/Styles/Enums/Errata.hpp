@@ -1,19 +1,18 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Core/Enum.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::UI
 {
   enum class Errata : uint8
   {
     None,
-    StretchFlexBasis,
-    AbsolutePositionWithoutInsetsExcludesPadding,
-    AbsolutePercentAgainstInnerSize,
-    All,
-    Classic,
+    StretchFlexBasis = 1 << 0,
+    AbsolutePositionWithoutInsetsExcludesPadding = 1 << 1,
+    AbsolutePercentAgainstInnerSize = 1 << 2,
+    All = StretchFlexBasis | AbsolutePositionWithoutInsetsExcludesPadding | AbsolutePercentAgainstInnerSize,
   };
-
-  ENUM_BITWISE_OPERATORS(Errata)
 }
+
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::UI::Errata, 4u)

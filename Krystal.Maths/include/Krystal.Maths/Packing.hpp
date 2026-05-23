@@ -1,8 +1,8 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/Concepts.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Clamp.hpp"
 #include "Krystal.Maths/Round.hpp"
 #include "Krystal.Maths/Vector.hpp"
@@ -12,21 +12,21 @@ namespace Krys::Maths
 #pragma region Pack2x8To16
 
   template <ConvertibleTo<uint8> T>
-  NO_DISCARD constexpr uint16 Pack2x8To16(T a, T b) noexcept
+  KRYS_NODISCARD constexpr uint16 Pack2x8To16(T a, T b) noexcept
   requires UnsignedIntegral<T>
   {
     return (static_cast<uint16>(a) << 8) | static_cast<uint16>(b);
   }
 
   template <ConvertibleTo<uint8> T>
-  NO_DISCARD constexpr uint16 Pack2x8To16(const Vector2<T> &v) noexcept
+  KRYS_NODISCARD constexpr uint16 Pack2x8To16(const Vector2<T> &v) noexcept
   requires UnsignedIntegral<T>
   {
     return Pack2x8To16(v.x, v.y);
   }
 
   template <ConvertibleTo<uint16> T>
-  NO_DISCARD constexpr Vector2<uint8> Unpack16To2x8(T value) noexcept
+  KRYS_NODISCARD constexpr Vector2<uint8> Unpack16To2x8(T value) noexcept
   requires UnsignedIntegral<T>
   {
     uint8 a = static_cast<uint8>((value >> 8) & 0xFF);
@@ -35,21 +35,21 @@ namespace Krys::Maths
   }
 
   template <ConvertibleTo<int8> T>
-  NO_DISCARD constexpr int16 Pack2x8To16(T a, T b) noexcept
+  KRYS_NODISCARD constexpr int16 Pack2x8To16(T a, T b) noexcept
   requires SignedIntegral<T>
   {
     return (static_cast<int16>(a) << 8) | static_cast<int16>(b);
   }
 
   template <ConvertibleTo<int8> T>
-  NO_DISCARD constexpr int16 Pack2x8To16(const Vector2<T> &v) noexcept
+  KRYS_NODISCARD constexpr int16 Pack2x8To16(const Vector2<T> &v) noexcept
   requires SignedIntegral<T>
   {
     return Pack2x8To16(v.x, v.y);
   }
 
   template <ConvertibleTo<int16> T>
-  NO_DISCARD constexpr Vector2<int8> Unpack16To2x8(T value) noexcept
+  KRYS_NODISCARD constexpr Vector2<int8> Unpack16To2x8(T value) noexcept
   requires SignedIntegral<T>
   {
     int8 a = static_cast<int8>((value >> 8) & 0xFF);
@@ -62,7 +62,7 @@ namespace Krys::Maths
 #pragma region Pack4x8To32
 
   template <ConvertibleTo<uint8> T>
-  NO_DISCARD constexpr uint32 Pack4x8To32(T a, T b, T c, T d) noexcept
+  KRYS_NODISCARD constexpr uint32 Pack4x8To32(T a, T b, T c, T d) noexcept
   requires UnsignedIntegral<T>
   {
     return (static_cast<uint32>(a) << 24) | (static_cast<uint32>(b) << 16) | (static_cast<uint32>(c) << 8)
@@ -70,14 +70,14 @@ namespace Krys::Maths
   }
 
   template <ConvertibleTo<uint8> T>
-  NO_DISCARD constexpr uint32 Pack4x8To32(const Vector4<T> &v) noexcept
+  KRYS_NODISCARD constexpr uint32 Pack4x8To32(const Vector4<T> &v) noexcept
   requires UnsignedIntegral<T>
   {
     return Pack4x8To32(v.x, v.y, v.z, v.w);
   }
 
   template <ConvertibleTo<uint32> T>
-  NO_DISCARD constexpr Vector4<uint8> Unpack32To4x8(T value) noexcept
+  KRYS_NODISCARD constexpr Vector4<uint8> Unpack32To4x8(T value) noexcept
   requires UnsignedIntegral<T>
   {
     uint8 a = static_cast<uint8>((value >> 24) & 0xFF);
@@ -88,7 +88,7 @@ namespace Krys::Maths
   }
 
   template <ConvertibleTo<int8> T>
-  NO_DISCARD constexpr int32 Pack4x8To32(T a, T b, T c, T d) noexcept
+  KRYS_NODISCARD constexpr int32 Pack4x8To32(T a, T b, T c, T d) noexcept
   requires SignedIntegral<T>
   {
     return (static_cast<int32>(a) << 24) | (static_cast<int32>(b) << 16) | (static_cast<int32>(c) << 8)
@@ -96,14 +96,14 @@ namespace Krys::Maths
   }
 
   template <ConvertibleTo<int8> T>
-  NO_DISCARD constexpr int32 Pack4x8To32(const Vector4<T> &v) noexcept
+  KRYS_NODISCARD constexpr int32 Pack4x8To32(const Vector4<T> &v) noexcept
   requires SignedIntegral<T>
   {
     return Pack4x8To32(v.x, v.y, v.z, v.w);
   }
 
   template <ConvertibleTo<int32> T>
-  NO_DISCARD constexpr Vector4<int8> Unpack32To4x8(T value) noexcept
+  KRYS_NODISCARD constexpr Vector4<int8> Unpack32To4x8(T value) noexcept
   requires SignedIntegral<T>
   {
     int8 a = static_cast<int8>((value >> 24) & 0xFF);
@@ -118,21 +118,21 @@ namespace Krys::Maths
 #pragma region Pack2x16To32
 
   template <ConvertibleTo<uint16> T>
-  NO_DISCARD constexpr uint32 Pack2x16To32(T a, T b) noexcept
+  KRYS_NODISCARD constexpr uint32 Pack2x16To32(T a, T b) noexcept
   requires UnsignedIntegral<T>
   {
     return (static_cast<uint32>(a) << 16) | static_cast<uint32>(b);
   }
 
   template <ConvertibleTo<uint16> T>
-  NO_DISCARD constexpr uint32 Pack2x16To32(const Vector2<T> &v) noexcept
+  KRYS_NODISCARD constexpr uint32 Pack2x16To32(const Vector2<T> &v) noexcept
   requires UnsignedIntegral<T>
   {
     return Pack2x16To32(v.x, v.y);
   }
 
   template <ConvertibleTo<uint32> T>
-  NO_DISCARD constexpr Vector2<uint16> Unpack32To2x16(T value) noexcept
+  KRYS_NODISCARD constexpr Vector2<uint16> Unpack32To2x16(T value) noexcept
   requires UnsignedIntegral<T>
   {
     uint16 a = static_cast<uint16>((value >> 16) & 0xFFFF);
@@ -141,21 +141,21 @@ namespace Krys::Maths
   }
 
   template <ConvertibleTo<int16> T>
-  NO_DISCARD constexpr int32 Pack2x16To32(T a, T b) noexcept
+  KRYS_NODISCARD constexpr int32 Pack2x16To32(T a, T b) noexcept
   requires SignedIntegral<T>
   {
     return (static_cast<int32>(a) << 16) | static_cast<int32>(b);
   }
 
   template <ConvertibleTo<int16> T>
-  NO_DISCARD constexpr int32 Pack2x16To32(const Vector2<T> &v) noexcept
+  KRYS_NODISCARD constexpr int32 Pack2x16To32(const Vector2<T> &v) noexcept
   requires SignedIntegral<T>
   {
     return Pack2x16To32(v.x, v.y);
   }
 
   template <ConvertibleTo<int32> T>
-  NO_DISCARD constexpr Vector2<int16> Unpack32To2x16(T value) noexcept
+  KRYS_NODISCARD constexpr Vector2<int16> Unpack32To2x16(T value) noexcept
   requires SignedIntegral<T>
   {
     int16 a = static_cast<int16>((value >> 16) & 0xFFFF);
@@ -168,7 +168,7 @@ namespace Krys::Maths
 #pragma region Pack4x16To64
 
   template <ConvertibleTo<uint16> T>
-  NO_DISCARD constexpr uint64 Pack4x16To64(T a, T b, T c, T d) noexcept
+  KRYS_NODISCARD constexpr uint64 Pack4x16To64(T a, T b, T c, T d) noexcept
   requires UnsignedIntegral<T>
   {
     return (static_cast<uint64>(a) << 48) | (static_cast<uint64>(b) << 32) | (static_cast<uint64>(c) << 16)
@@ -176,14 +176,14 @@ namespace Krys::Maths
   }
 
   template <ConvertibleTo<uint16> T>
-  NO_DISCARD constexpr uint64 Pack4x16To64(const Vector4<T> &v) noexcept
+  KRYS_NODISCARD constexpr uint64 Pack4x16To64(const Vector4<T> &v) noexcept
   requires UnsignedIntegral<T>
   {
     return Pack4x16To64(v.x, v.y, v.z, v.w);
   }
 
   template <ConvertibleTo<uint64> T>
-  NO_DISCARD constexpr Vector4<uint16> Unpack64To4x16(T value) noexcept
+  KRYS_NODISCARD constexpr Vector4<uint16> Unpack64To4x16(T value) noexcept
   requires UnsignedIntegral<T>
   {
     uint16 a = static_cast<uint16>((value >> 48) & 0xFF'FF'FF'FF);
@@ -194,7 +194,7 @@ namespace Krys::Maths
   }
 
   template <ConvertibleTo<int16> T>
-  NO_DISCARD constexpr int64 Pack4x16To64(T a, T b, T c, T d) noexcept
+  KRYS_NODISCARD constexpr int64 Pack4x16To64(T a, T b, T c, T d) noexcept
   requires SignedIntegral<T>
   {
     return (static_cast<int64>(a) << 48) | (static_cast<int64>(b) << 32) | (static_cast<int64>(c) << 16)
@@ -202,14 +202,14 @@ namespace Krys::Maths
   }
 
   template <ConvertibleTo<int16> T>
-  NO_DISCARD constexpr int64 Pack4x16To64(const Vector4<T> &v) noexcept
+  KRYS_NODISCARD constexpr int64 Pack4x16To64(const Vector4<T> &v) noexcept
   requires SignedIntegral<T>
   {
     return Pack4x16To64(v.x, v.y, v.z, v.w);
   }
 
   template <ConvertibleTo<int64> T>
-  NO_DISCARD constexpr Vector4<int16> Unpack64To4x16(T value) noexcept
+  KRYS_NODISCARD constexpr Vector4<int16> Unpack64To4x16(T value) noexcept
   requires SignedIntegral<T>
   {
     int16 a = static_cast<int16>((value >> 48) & 0xFF'FF'FF'FF);
@@ -224,21 +224,21 @@ namespace Krys::Maths
 #pragma region Pack2x32To64
 
   template <ConvertibleTo<uint32> T>
-  NO_DISCARD constexpr uint64 Pack2x32To64(T a, T b) noexcept
+  KRYS_NODISCARD constexpr uint64 Pack2x32To64(T a, T b) noexcept
   requires UnsignedIntegral<T>
   {
     return (static_cast<uint64>(a) << 32) | static_cast<uint64>(b);
   }
 
   template <ConvertibleTo<uint32> T>
-  NO_DISCARD constexpr uint64 Pack2x32To64(const Vector2<T> &v) noexcept
+  KRYS_NODISCARD constexpr uint64 Pack2x32To64(const Vector2<T> &v) noexcept
   requires UnsignedIntegral<T>
   {
     return Pack2x32To64(v.x, v.y);
   }
 
   template <ConvertibleTo<uint64> T>
-  NO_DISCARD constexpr Vector2<uint32> Unpack64To2x32(T value) noexcept
+  KRYS_NODISCARD constexpr Vector2<uint32> Unpack64To2x32(T value) noexcept
   requires UnsignedIntegral<T>
   {
     uint32 a = static_cast<uint32>((value >> 32) & 0xFF'FF'FF'FF);
@@ -247,21 +247,21 @@ namespace Krys::Maths
   }
 
   template <ConvertibleTo<int32> T>
-  NO_DISCARD constexpr int64 Pack2x32To64(T a, T b) noexcept
+  KRYS_NODISCARD constexpr int64 Pack2x32To64(T a, T b) noexcept
   requires SignedIntegral<T>
   {
     return (static_cast<int64>(a) << 32) | static_cast<int64>(b);
   }
 
   template <ConvertibleTo<int32> T>
-  NO_DISCARD constexpr int64 Pack2x32To64(const Vector2<T> &v) noexcept
+  KRYS_NODISCARD constexpr int64 Pack2x32To64(const Vector2<T> &v) noexcept
   requires SignedIntegral<T>
   {
     return Pack2x32To64(v.x, v.y);
   }
 
   template <ConvertibleTo<int64> T>
-  NO_DISCARD constexpr Vector2<int32> Unpack64To2x32(T value) noexcept
+  KRYS_NODISCARD constexpr Vector2<int32> Unpack64To2x32(T value) noexcept
   requires SignedIntegral<T>
   {
     int32 a = static_cast<int32>((value >> 32) & 0xFF'FF'FF'FF);
@@ -273,22 +273,22 @@ namespace Krys::Maths
 
 #pragma region PackNormFloatTo8
 
-  NO_DISCARD constexpr int8 PackNormFloatToInt8(float value) noexcept
+  KRYS_NODISCARD constexpr int8 PackNormFloatToInt8(float value) noexcept
   {
     return static_cast<int8>(Round(Clamp(value, -1.0f, 1.0f) * 127.0f));
   }
 
-  NO_DISCARD constexpr float UnpackInt8ToNormFloat(int8 value) noexcept
+  KRYS_NODISCARD constexpr float UnpackInt8ToNormFloat(int8 value) noexcept
   {
     return static_cast<float>(value) / 127.0f;
   }
 
-  NO_DISCARD constexpr uint8 PackNormFloatToUint8(float value) noexcept
+  KRYS_NODISCARD constexpr uint8 PackNormFloatToUint8(float value) noexcept
   {
     return static_cast<uint8>(Round(Clamp(value, 0.0f, 1.0f) * 255.0f));
   }
 
-  NO_DISCARD constexpr float UnpackUint8ToNormFloat(uint8 value) noexcept
+  KRYS_NODISCARD constexpr float UnpackUint8ToNormFloat(uint8 value) noexcept
   {
     return static_cast<float>(value) / 255.0f;
   }
@@ -297,22 +297,22 @@ namespace Krys::Maths
 
 #pragma region PackNormFloatTo16
 
-  NO_DISCARD constexpr int16 PackNormFloatToInt16(float value) noexcept
+  KRYS_NODISCARD constexpr int16 PackNormFloatToInt16(float value) noexcept
   {
     return static_cast<int16>(Round(Clamp(value, -1.0f, 1.0f) * 32767.0f));
   }
 
-  NO_DISCARD constexpr float UnpackInt16ToNormFloat(int16 value) noexcept
+  KRYS_NODISCARD constexpr float UnpackInt16ToNormFloat(int16 value) noexcept
   {
     return static_cast<float>(value) / 32767.0f;
   }
 
-  NO_DISCARD constexpr uint16 PackNormFloatToUint16(float value) noexcept
+  KRYS_NODISCARD constexpr uint16 PackNormFloatToUint16(float value) noexcept
   {
     return static_cast<uint16>(Round(Clamp(value, 0.0f, 1.0f) * 65535.0f));
   }
 
-  NO_DISCARD constexpr float UnpackUint16ToNormFloat(uint16 value) noexcept
+  KRYS_NODISCARD constexpr float UnpackUint16ToNormFloat(uint16 value) noexcept
   {
     return static_cast<float>(value) / 65535.0f;
   }

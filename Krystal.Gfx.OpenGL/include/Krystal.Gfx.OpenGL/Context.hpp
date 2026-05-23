@@ -1,6 +1,5 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Gfx.Lib/Colour.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/BufferRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/FontRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ImageRegistry.hpp"
@@ -11,24 +10,23 @@
 #include "Krystal.Gfx.OpenGL/Registries/SamplerRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/ShaderRegistry.hpp"
 #include "Krystal.Gfx.OpenGL/Registries/TextureRegistry.hpp"
+#include "Krystal.Gfx/Colour.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.IO/VirtualFileSystem.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
-  class Context final : public IContext
+  class Context final : public IContext, NonCopyMovable<Context>
   {
     class ContextPlatformImpl;
-
-    NO_COPY_MOVE(Context)
 
     NativeHandle _windowHandle;
     uint32 _width;
     uint32 _height;
     IO::VirtualFileSystem &_vfs;
-    StringInterner& _strings;
     int _dpi;
-    Unique<ContextPlatformImpl> _platformImpl;
+    UniquePtr<ContextPlatformImpl> _platformImpl;
 
     BufferRegistry _buffers;
     ImageRegistry _images;
@@ -58,32 +56,30 @@ namespace Krys::Gfx::OpenGL
 
     void DPIChanged(int dpi) noexcept override;
 
-    NO_DISCARD uint32 Width() const noexcept;
+    KRYS_NODISCARD uint32 Width() const noexcept;
 
-    NO_DISCARD uint32 Height() const noexcept;
+    KRYS_NODISCARD uint32 Height() const noexcept;
 
-    NO_DISCARD IBufferRegistry &Buffers() noexcept override;
+    KRYS_NODISCARD IBufferRegistry &Buffers() noexcept override;
 
-    NO_DISCARD IImageRegistry &Images() noexcept override;
+    KRYS_NODISCARD IImageRegistry &Images() noexcept override;
 
-    NO_DISCARD IImageViewRegistry &ImageViews() noexcept override;
+    KRYS_NODISCARD IImageViewRegistry &ImageViews() noexcept override;
 
-    NO_DISCARD ISamplerRegistry &Samplers() noexcept override;
+    KRYS_NODISCARD ISamplerRegistry &Samplers() noexcept override;
 
-    NO_DISCARD ITextureRegistry &Textures() noexcept override;
+    KRYS_NODISCARD ITextureRegistry &Textures() noexcept override;
 
-    NO_DISCARD IRenderTargetRegistry &RenderTargets() noexcept override;
+    KRYS_NODISCARD IRenderTargetRegistry &RenderTargets() noexcept override;
 
-    NO_DISCARD IShaderRegistry &Shaders() noexcept override;
+    KRYS_NODISCARD IShaderRegistry &Shaders() noexcept override;
 
-    NO_DISCARD IMeshRegistry &Meshes() noexcept override;
+    KRYS_NODISCARD IMeshRegistry &Meshes() noexcept override;
 
-    NO_DISCARD IMaterialRegistry &Materials() noexcept override;
+    KRYS_NODISCARD IMaterialRegistry &Materials() noexcept override;
 
-    NO_DISCARD IFontRegistry &Fonts() noexcept override;
-    
-    NO_DISCARD StringInterner &Strings() noexcept override;
+    KRYS_NODISCARD IFontRegistry &Fonts() noexcept override;
 
-    NO_DISCARD API GetAPI() const noexcept override;
+    KRYS_NODISCARD API GetAPI() const noexcept override;
   };
 }

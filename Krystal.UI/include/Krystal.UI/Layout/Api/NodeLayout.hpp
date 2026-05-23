@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.UI/Layout/Api/Forward.hpp"
 #include "Krystal.UI/Styles/Enums/Direction.hpp"

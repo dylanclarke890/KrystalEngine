@@ -1,13 +1,12 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.Gfx.OpenGL/Context.hpp"
-#include "Krystal.Gfx/Commands/CommandList.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/InstanceData.hpp"
 #include "Krystal.Gfx/IRenderer.hpp"
-#include "Krystal.Lib/List.hpp"
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Commands/CommandList.hpp"
+#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::Gfx::OpenGL
 {
@@ -35,8 +34,6 @@ namespace Krys::Gfx::OpenGL
 
   class Renderer : public IRenderer
   {
-    NO_COPY_MOVE(Renderer)
-
   private:
     Context &_context;
     RendererState _state;
@@ -60,7 +57,7 @@ namespace Krys::Gfx::OpenGL
     void Submit(const CommandList &commandList) override;
 
   private:
-    void DrawText(Font &font, Shader &shader, const utf8_string &text, const ColourbPremultiplied &textColour,
+    void DrawText(Font &font, Shader &shader, utf8_stringview text, const ColourbPremultiplied &textColour,
                   const Maths::Vec2 &position, float ptSize);
 
     void DrawTextOutlined(const utf8_string &text, FontHandle fontHandle, float ptSize,

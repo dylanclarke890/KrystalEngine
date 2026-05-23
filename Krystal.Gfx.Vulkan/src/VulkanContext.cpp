@@ -1,15 +1,15 @@
-#include "Krystal.Gfx.Vulkan/VulkanContext.hpp"
+﻿#include "Krystal.Gfx.Vulkan/VulkanContext.hpp"
 
-#include "Krystal.Lib/Detection.hpp"
+#include "Krystal.Lib/Detection/OS.hpp"
 
-#ifdef KRYS_PLATFORM_WINDOWS
+#if KRYS_OS(WINDOWS)
   #include "Krystal.Gfx.Vulkan/Hooks/vulkan_win32_hooks.hpp"
   #define KRYS_SURFACE_EXTENSION_NAME VK_KHR_WIN32_SURFACE_EXTENSION_NAME
 #endif
 
 #include "Krystal.IO/Streams/NativeFileStream.hpp"
 #include "Krystal.IO/Streams/StreamUtils.hpp"
-#include "Krystal.Lib/Array.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Maths/Clipspace.hpp"
 #include "Krystal.Maths/Convert.hpp"
 #include "Krystal.Maths/Matrix.hpp"
@@ -21,7 +21,7 @@
 
 namespace Krys::Gfx
 {
-  // Expected<Unique<IContext>> CreateContext(NativeHandle windowHandle, uint32 width, uint32 height) noexcept
+  // Expected<UniquePtr<IContext>> CreateContext(NativeHandle windowHandle, uint32 width, uint32 height) noexcept
   //{
   //   try
   //   {
@@ -97,7 +97,7 @@ namespace
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType,
     const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData, void *pUserData)
   {
-    // TODO: use the engine logger
+    // TODO(fix): use the engine logger
     std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
 
     return VK_FALSE;
@@ -211,15 +211,15 @@ namespace Krys::Gfx::Vulkan
 
     VkApplicationInfo application {.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO,
                                    .pNext = nullptr,
-                                   // TODO: get application name
+                                   // TODO(feat): get application name
                                    .pApplicationName = "Krystal Gfx Vulkan",
-                                   // TODO: get application version
+                                   // TODO(feat): get application version
                                    .applicationVersion = VK_MAKE_VERSION(1, 0, 0),
-                                   // TODO: get engine name
+                                   // TODO(feat): get engine name
                                    .pEngineName = "Krystal Engine",
-                                   // TODO: get engine version
+                                   // TODO(feat): get engine version
                                    .engineVersion = VK_MAKE_VERSION(1, 0, 0),
-                                   // TODO: set api version
+                                   // TODO(feat): set api version
                                    .apiVersion = VK_API_VERSION_1_0};
 
     if (EnableValidationLayers && !AreValidationLayersAvailable())
@@ -368,7 +368,7 @@ namespace Krys::Gfx::Vulkan
     return true;
   }
 
-  Nullable<QueueFamilyIndices> VulkanContext::FindQueueFamilyIndices(VkPhysicalDevice device) const
+  Maybe<QueueFamilyIndices> VulkanContext::FindQueueFamilyIndices(VkPhysicalDevice device) const
   {
     QueueFamilyIndices indices;
 

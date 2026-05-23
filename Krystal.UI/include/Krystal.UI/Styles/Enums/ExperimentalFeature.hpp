@@ -1,25 +1,15 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Enum.hpp"
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Core/Enum.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::UI
 {
   enum class ExperimentalFeature : uint8
   {
     None,
-    WebFlexBasis,
+    WebFlexBasis = 1 << 0,
   };
-
-  ENUM_BITWISE_OPERATORS(ExperimentalFeature)
 }
 
-namespace Krys
-{
-  template <>
-  constexpr uint32 OrdinalCount<UI::ExperimentalFeature>()
-  {
-    return 2;
-  }
-}
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::UI::ExperimentalFeature, 2u)

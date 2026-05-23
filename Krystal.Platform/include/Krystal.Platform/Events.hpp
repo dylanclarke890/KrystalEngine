@@ -1,6 +1,6 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Attributes.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Events/Event.hpp"
 #include "Krystal.Platform/IWindow.hpp"
 #include "Krystal.Platform/Keys.hpp"
@@ -21,12 +21,12 @@ namespace Krys::Events
                   const Platform::KeyState state) noexcept;
 
     /// @brief Gets the key involved in the interaction.
-    NO_DISCARD Platform::Key Key() const noexcept;
+    KRYS_NODISCARD Platform::Key Key() const noexcept;
 
     /// @brief Gets the state of the key.
-    NO_DISCARD Platform::KeyState State() const noexcept;
+    KRYS_NODISCARD Platform::KeyState State() const noexcept;
 
-    NO_DISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
+    KRYS_NODISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
 
   private:
     Platform::WindowHandle _window;
@@ -47,20 +47,20 @@ namespace Krys::Events
                      const Platform::MouseButtonState state) noexcept;
 
     /// @brief Gets the mouse button involved in the interaction.
-    NO_DISCARD Platform::MouseButton Button() const noexcept;
+    KRYS_NODISCARD Platform::MouseButton Button() const noexcept;
 
     /// @brief Gets the state of the mouse button.
-    NO_DISCARD Platform::MouseButtonState State() const noexcept;
+    KRYS_NODISCARD Platform::MouseButtonState State() const noexcept;
 
     /// @brief Checks if the button is pressed.
     /// @returns `true` if the button is in the state `MouseButtonState::Pressed`.
-    NO_DISCARD bool IsPressed() const noexcept;
+    KRYS_NODISCARD bool IsPressed() const noexcept;
 
     /// @brief Checks if the button was released.
     /// @returns `true` if the button is in the state `MouseButtonState::Released`.
-    NO_DISCARD bool WasReleased() const noexcept;
+    KRYS_NODISCARD bool WasReleased() const noexcept;
 
-    NO_DISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
+    KRYS_NODISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
 
   private:
     Platform::WindowHandle _window;
@@ -83,20 +83,20 @@ namespace Krys::Events
                    const float clientY) noexcept;
 
     /// @brief Gets the amount the cursor has moved along the x-axis since the last event.
-    NO_DISCARD float DeltaX() const noexcept;
+    KRYS_NODISCARD float DeltaX() const noexcept;
 
     /// @brief Gets the amount the cursor has moved along the y-axis since the last event.
-    NO_DISCARD float DeltaY() const noexcept;
+    KRYS_NODISCARD float DeltaY() const noexcept;
 
     /// @brief Gets the x-coordinate of the cursor in client space.
     /// @note The origin is the top-left corner of the window, minus the title bar.
-    NO_DISCARD float ClientX() const noexcept;
+    KRYS_NODISCARD float ClientX() const noexcept;
 
     /// @brief Gets the y-coordinate of the cursor in client space.
     /// @note The origin is the top-left corner of the window, minus the title bar.
-    NO_DISCARD float ClientY() const noexcept;
+    KRYS_NODISCARD float ClientY() const noexcept;
 
-    NO_DISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
+    KRYS_NODISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
 
   private:
     Platform::WindowHandle _window;
@@ -117,9 +117,9 @@ namespace Krys::Events
 
     /// @brief Gets the scroll delta since the last event. Positive values indicate scrolling forward (away
     /// from the user), and negative values indicate scrolling backward (toward the user).
-    NO_DISCARD float Delta() const noexcept;
+    KRYS_NODISCARD float Delta() const noexcept;
 
-    NO_DISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
+    KRYS_NODISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
 
   private:
     Platform::WindowHandle _window;
@@ -136,10 +136,10 @@ namespace Krys::Events
     /// @param height The new height of the window.
     WindowResizeEvent(Platform::WindowHandle window, const uint32 width, const uint32 height) noexcept;
 
-    NO_DISCARD uint32 Width() const noexcept;
-    NO_DISCARD uint32 Height() const noexcept;
+    KRYS_NODISCARD uint32 Width() const noexcept;
+    KRYS_NODISCARD uint32 Height() const noexcept;
 
-    NO_DISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
+    KRYS_NODISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
 
   private:
     Platform::WindowHandle _window;
@@ -154,7 +154,7 @@ namespace Krys::Events
     /// @brief Constructs a `WindowMinimiseEvent`.
     WindowMinimiseEvent(Platform::WindowHandle window) noexcept;
 
-    NO_DISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
+    KRYS_NODISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
 
   private:
     Platform::WindowHandle _window;
@@ -168,7 +168,7 @@ namespace Krys::Events
     /// @brief Constructs a `WindowRestoreEvent`.
     WindowRestoreEvent(Platform::WindowHandle window) noexcept;
 
-    NO_DISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
+    KRYS_NODISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
 
   private:
     Platform::WindowHandle _window;
@@ -187,7 +187,7 @@ namespace Krys::Events
     /// @param handle The native handle of the window that requested the quit event.
     WindowCloseEvent(Platform::WindowHandle window) noexcept;
 
-    NO_DISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
+    KRYS_NODISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
 
   private:
     Platform::WindowHandle _window;
@@ -204,9 +204,9 @@ namespace Krys::Events
     /// @param dpi The new dpi of the window.
     WindowDPIChangeEvent(Platform::WindowHandle window, const int dpi) noexcept;
 
-    NO_DISCARD int DPI() const noexcept;
+    KRYS_NODISCARD int DPI() const noexcept;
 
-    NO_DISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
+    KRYS_NODISCARD Platform::WindowHandle GetWindowHandle() const noexcept;
 
   private:
     Platform::WindowHandle _window;

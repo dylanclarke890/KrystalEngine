@@ -1,4 +1,4 @@
-
+﻿
 //              Copyright Catch2 Authors
 // Distributed under the Boost Software License, Version 1.0.
 //   (See accompanying file LICENSE.txt or copy at
@@ -50,8 +50,6 @@
 
 #ifndef CATCH_BENCHMARK_ALL_HPP_INCLUDED
 #define CATCH_BENCHMARK_ALL_HPP_INCLUDED
-
-
 
   // Adapted from donated nonius code.
 
@@ -2776,7 +2774,7 @@ namespace Catch
     {
       if (ref == nullptr)
         return std::string("null");
-      auto bytes = System::Text::Encoding::UTF8->GetBytes(ref->ToString());
+      auto bytes = System::Encoding::UTF8->GetBytes(ref->ToString());
       cli::pin_ptr<System::Byte> p = &bytes[0];
       return std::string(reinterpret_cast<char const*>(p), bytes->Length);
     }

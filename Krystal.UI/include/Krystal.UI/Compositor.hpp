@@ -1,17 +1,17 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Gfx/Commands/CommandList.hpp"
-#include "Krystal.Gfx/Commands/Commands.hpp"
+#include "Krystal.Gfx/Commands.hpp"
 #include "Krystal.Gfx/Handle.hpp"
 #include "Krystal.Gfx/IContext.hpp"
 #include "Krystal.Gfx/IRenderer.hpp"
 #include "Krystal.Gfx/Utils/MeshDataUtils.hpp"
-#include "Krystal.Lib/Array.hpp"
-#include "Krystal.Lib/DebugBreak.hpp"
-#include "Krystal.Lib/HashUtils.hpp"
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Stack.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Commands/CommandList.hpp"
+#include "Krystal.Lib/Core/DebugBreak.hpp"
+#include "Krystal.Lib/Core/Hash.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/Stack.hpp"
 #include "Krystal.UI/Document.hpp"
 #include "Krystal.UI/Geometry/GeometryUtils.hpp"
 #include "Krystal.UI/Geometry/RenderBox.hpp"
@@ -50,7 +50,7 @@ namespace Krys::UI
       }
     }
 
-    NO_DISCARD Gfx::RenderTargetHandle Acquire(Maths::Vec2 size)
+    KRYS_NODISCARD Gfx::RenderTargetHandle Acquire(Maths::Vec2 size)
     {
       const uint32 Samples = 2u;
 
@@ -102,10 +102,8 @@ namespace Krys::UI
     }
   };
 
-  class Compositor
+  class Compositor : NonCopyMovable<Compositor>
   {
-    NO_COPY_MOVE(Compositor)
-
     struct RenderContext
     {
       Maths::Vec2 Origin;
@@ -123,7 +121,7 @@ namespace Krys::UI
     Gfx::IContext &_context;
     Gfx::IRenderer &_renderer;
     LayerPool _layerPool;
-    Gfx::CommandList _commands;
+    CommandList _commands;
     Stack<Layer> _layerStack;
     Maths::Vec2 _viewportSize;
     PostProcessTargets _post;
@@ -283,7 +281,7 @@ namespace Krys::UI
       }
 
       // Emit text if present
-      if (element.TextContent.Text.IsValid())
+      if (!element.TextContent.Text.empty())
       {
         Vec2 textPosition = ctx.Origin
                             + Vec2 {NodeLayoutGetLeft(element.TextContent.LayoutNode),
@@ -295,7 +293,7 @@ namespace Krys::UI
           fontFamily = _context.Fonts().GetDefaultFontFamily();
         }
 
-        _commands.Push(Commands::DrawText {.Text = element.TextContent.Text,
+        _commands.Push(Commands::DrawText {.Text = element.GetText(),
                                            .Position = textPosition,
                                            .FontFamily = fontFamily,
                                            .FontSize = NodeStyleGetFontSize(node),

@@ -1,10 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.IO/Image.hpp"
-#include "Krystal.IO/IStream.hpp"
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/Expected.hpp"
-#include "Krystal.Lib/Macros.hpp"
+#include "Krystal.IO/Streams/Stream.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Types/Expected.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 
 namespace Krys::IO
 {
@@ -17,19 +17,17 @@ namespace Krys::IO
     int DesiredComponents = 0;
   };
 
-  class ImageLoader
+  class ImageLoader : NonCopyMovable<ImageLoader>
   {
-    NO_COPY_MOVE(ImageLoader)
-
   public:
     ImageLoader() = default;
 
     ~ImageLoader() = default;
 
     /// @brief Checks if the image from the stream is a HDR image.
-    NO_DISCARD bool IsHDRImage(IStreamReader &stream);
+    KRYS_NODISCARD bool IsHDRImage(IStreamReader &stream);
 
     /// @brief Loads an image from the given stream.
-    NO_DISCARD Expected<Image> Load(IStreamReader &stream, const ImageLoadSettings &settings = {});
+    KRYS_NODISCARD Expected<Image> Load(IStreamReader &stream, const ImageLoadSettings &settings = {});
   };
 }

@@ -1,0 +1,83 @@
+﻿#pragma once
+
+#include "Krystal.IO/Common.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Types/Span.hpp"
+
+namespace Krys::IO
+{
+  /// @brief Interface for reading from a stream.
+  class IStreamReader : NonCopyMovable<IStreamReader>
+  {
+  public:
+    IStreamReader() = default;
+    virtual ~IStreamReader() = default;
+
+    /// @brief Checks if the stream is open.
+    KRYS_NODISCARD virtual bool IsOpen() const noexcept = 0;
+
+    /// @brief Opens the stream. If the stream is already open, this function does nothing.
+    virtual bool Open() = 0;
+
+    /// @brief Closes the stream. If the stream is already closed, this function does nothing.
+    virtual void Close() noexcept = 0;
+
+    /// @brief Reads 'count' bytes from the stream.
+    /// @return The number of bytes actually read from the stream.
+    virtual size_t Read(Span<byte> destination) noexcept = 0;
+
+    /// @brief Seeks to a specific position in the stream.
+    /// @return True if the seek operation was successful, false otherwise.
+    virtual bool Seek(int64 offset, SeekOrigin origin = SeekOrigin::Current) noexcept = 0;
+
+    /// @brief Peeks at the next byte in the stream without advancing the position.
+    /// @return True if a byte was successfully peeked, false if the end of the stream was reached.
+    KRYS_NODISCARD virtual bool Peek(byte &next) noexcept = 0;
+
+    /// @brief Gets the total size of the stream in bytes, or 0 if the size is unknown.
+    KRYS_NODISCARD virtual size_t Size() const noexcept = 0;
+
+    /// @brief Gets the current position in the stream.
+    KRYS_NODISCARD virtual size_t Position() noexcept = 0;
+
+    /// @brief Checks if the end of the stream has been reached.
+    /// @return True if the end of the stream has been reached, false otherwise.
+    KRYS_NODISCARD virtual bool EndOfStream() const noexcept = 0;
+  };
+
+  /// @brief Interface for writing to a stream.
+  class IStreamWriter : NonCopyMovable<IStreamWriter>
+  {
+  public:
+    IStreamWriter() = default;
+    virtual ~IStreamWriter() = default;
+
+    /// @brief Checks if the stream is open.
+    KRYS_NODISCARD virtual bool IsOpen() const noexcept = 0;
+
+    /// @brief Opens the stream writer for writing. If the stream is already open, this function does nothing.
+    virtual bool Open() = 0;
+
+    /// @brief Closes the stream writer. If the stream is already closed, this function does nothing.
+    virtual void Close() noexcept = 0;
+
+    /// @brief Writes bytes to the stream.
+    /// @return True if the write operation was successful, false otherwise.
+    virtual bool Write(Span<const byte> source) noexcept = 0;
+
+    /// @brief Seeks to a specific position in the stream.
+    /// @return True if the seek operation was successful, false otherwise.
+    virtual bool Seek(int64 offset, SeekOrigin origin = SeekOrigin::Current) noexcept = 0;
+
+    /// @brief Gets the size of the stream in bytes.
+    KRYS_NODISCARD virtual size_t Size() const noexcept = 0;
+
+    /// @brief Gets the current position in the stream.
+    KRYS_NODISCARD virtual size_t Position() noexcept = 0;
+
+    /// @brief Flushes any buffered data to the underlying storage, if applicable.
+    virtual void Flush() noexcept = 0;
+  };
+}

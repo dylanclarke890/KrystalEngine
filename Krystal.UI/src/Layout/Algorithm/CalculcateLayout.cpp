@@ -1,5 +1,6 @@
-#include "Krystal.Lib/ComparisonHelpers.hpp"
-#include "Krystal.Lib/NullableFloat.hpp"
+﻿#include "Krystal.Lib/ComparisonHelpers.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Types/NullableFloat.hpp"
 #include "Krystal.UI/Layout/Algorithm/AbsoluteLayout.hpp"
 #include "Krystal.UI/Layout/Algorithm/Align.hpp"
 #include "Krystal.UI/Layout/Algorithm/Baseline.hpp"
@@ -367,7 +368,7 @@ namespace Krys::UI
 
   static void CleanupContentsNodesRecursively(Node *const node)
   {
-    if (node->HasContentsChildren()) [[unlikely]]
+    if (node->HasContentsChildren()) KRYS_UNLIKELY
     {
       node->CloneContentsChildrenIfNeeded();
       for (auto child : node->GetChildren())

@@ -1,8 +1,8 @@
-#pragma once
+﻿#pragma once
 
 #include "Krystal.IO/Path.hpp"
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Core/Enum.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::IO
 {
@@ -12,8 +12,6 @@ namespace Krys::IO
     OpenAtEnd = 1 << 0 // Open the file and move the read position to the end
   };
 
-  ENUM_BITWISE_OPERATORS(ReadFlags)
-
   enum class WriteFlags : uint8
   {
     None = 0,
@@ -21,8 +19,6 @@ namespace Krys::IO
     Truncate = 1 << 1, // Truncate the file to zero length if it already exists
     OpenAtEnd = 1 << 2 // Open the file and move the write position to the end
   };
-
-  ENUM_BITWISE_OPERATORS(WriteFlags)
 
   /// @brief Specifies the reference point used to obtain the new position in a stream.
   enum class SeekOrigin : uint8
@@ -50,3 +46,6 @@ namespace Krys::IO
     bool IsReadOnly = false;
   };
 }
+
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::IO::ReadFlags, 2u)
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::IO::WriteFlags, 4u)

@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/Concepts.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Concepts.hpp"
 
 namespace Krys::Maths
 {
-  template <Arithmetic T>
+  template <Number T>
   struct BoundingBox
   {
     using Type = T;
@@ -25,12 +25,12 @@ namespace Krys::Maths
     {
     }
 
-    NO_DISCARD constexpr T GetWidth() const noexcept
+    KRYS_NODISCARD constexpr T GetWidth() const noexcept
     {
       return Right - Left;
     }
 
-    NO_DISCARD constexpr T GetHeight() const noexcept
+    KRYS_NODISCARD constexpr T GetHeight() const noexcept
     {
       return Top - Bottom;
     }

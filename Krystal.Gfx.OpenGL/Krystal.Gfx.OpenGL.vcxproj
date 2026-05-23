@@ -103,7 +103,6 @@
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Official\glext.h" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Official\khrplatform.h" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Official\wglext.h" />
-    <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Model.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\Resources\Shader.hpp" />
     <ClInclude Include="include\Krystal.Gfx.OpenGL\ContextImpl\Win32.hpp" />
     <ClCompile Include="src\Registries\FontRegistry.cpp" />

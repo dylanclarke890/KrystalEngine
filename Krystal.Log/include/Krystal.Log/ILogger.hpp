@@ -1,11 +1,11 @@
-#pragma once
+﻿#pragma once
 
-#include "Krystal.Lib/Attributes.hpp"
-#include "Krystal.Lib/Expected.hpp"
-#include "Krystal.Lib/Macros.hpp"
-#include "Krystal.Lib/SmartPointers.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types.hpp"
+#include "Krystal.Lib/Types/Expected.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Pointers/UniquePtr.hpp"
 #include <format>
 
 namespace Krys::Log
@@ -13,11 +13,11 @@ namespace Krys::Log
   struct LoggerSettings;
   class ILogger;
 
-  NO_DISCARD Expected<Unique<ILogger>> CreateLogger(const LoggerSettings &settings) noexcept;
+  KRYS_NODISCARD Expected<UniquePtr<ILogger>> CreateLogger(const LoggerSettings &settings) noexcept;
 
-  void SetGlobalLogger(const Unique<ILogger> &logger) noexcept;
+  void SetGlobalLogger(const UniquePtr<ILogger> &logger) noexcept;
 
-  NO_DISCARD ILogger *GetGlobalLogger() noexcept;
+  KRYS_NODISCARD ILogger *GetGlobalLogger() noexcept;
 
   enum class Level : uint8
   {
@@ -38,12 +38,15 @@ namespace Krys::Log
     Level Level {Level::Info};
   };
 
-  class ILogger
+  class ILogger : NonCopyMovable<ILogger>
   {
   public:
-    NO_COPY_MOVE(ILogger)
-
     virtual ~ILogger() noexcept = default;
+
+    ILogger(ILogger &) = default;
+    ILogger &operator=(ILogger &) = default;
+    ILogger(ILogger &&) = default;
+    ILogger &operator=(ILogger &&) = default;
 
     template <typename... Args>
     void Log(Level level, stringview fmt, Args &&...args)
@@ -70,7 +73,7 @@ namespace Krys::Log
 
     virtual void SetLevel(Level level) noexcept = 0;
 
-    NO_DISCARD virtual Level GetLevel() const noexcept = 0;
+    KRYS_NODISCARD virtual Level GetLevel() const noexcept = 0;
 
     virtual void Flush() noexcept = 0;
 

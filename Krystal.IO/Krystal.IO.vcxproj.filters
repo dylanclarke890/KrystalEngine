@@ -53,7 +53,7 @@
     <ClInclude Include="include\Krystal.IO\Common.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.IO\IStream.hpp">
+    <ClInclude Include="include\Krystal.IO\Streams\Stream.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.IO\Streams\NativeFileStream.hpp">
