@@ -19,25 +19,12 @@ TODO:
     - AttachShadow and ShadowRoot missing test cases.
     - CustomElementRegistry missing test cases.
 
-======================================================================
-2. EVENTS
-======================================================================
-
-2.9 Dispatching events
-    Implementation: Full
-    Test Coverage : None
+  - 4.2.2.1 Slots and 4.2.2.2 Slottables - https://dom.spec.whatwg.org/#shadow-tree-slots
+    - Slots/Slottable attribute changes (name/slot attribute) missing test cases.
 
 ======================================================================
 4. NODES
 ======================================================================
-
-4.2.2.1 Slots
-    Implementation: None
-    Test Coverage : None
-
-4.2.2.2 Slottables
-    Implementation: None
-    Test Coverage : None
 
 4.2.2.3 Finding slots and slottables
     Implementation: None
@@ -122,8 +109,6 @@ TODO:
 2.2 Interface Event
 
 2.3 Legacy extensions to the Window interface
-        - Only thing to implement is the violation below which isn't planned for now.
-        - SPEC-VIOLATION(DOM, HTML) -> Window interface currently not supported
 
 2.4 Interface CustomEvent
 
@@ -132,8 +117,8 @@ TODO:
 2.6 Defining event interfaces (N/A)
 
 2.8 Observing event listeners
-        - Only thing to implement is the violation below which isn't planned for now.
-        - SPEC-VIOLATION(DOM, SERVICE-WORKER) -> ServiceWorkGlobalScope currently not supported
+
+2.9 Dispatching events
 
 2.10 Firing events
 
@@ -158,6 +143,10 @@ TODO:
 4.2.1 Document tree
 
 4.2.2 Shadow tree
+
+4.2.2.1 Slots
+
+4.2.2.2 Slottables
 
 4.2.3 Mutation algorithms
 

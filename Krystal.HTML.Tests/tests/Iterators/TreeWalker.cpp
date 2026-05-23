@@ -2,6 +2,7 @@
 #include "Krystal.HTML.Tests/TestElement.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Iterator/NodeFilter.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
@@ -110,19 +111,19 @@ namespace Krys::Tests
   TEST_CASE("TreeWalker::WhatToShow", "[HTML][TreeWalker]")
   {
     CommonTestData data;
-    
+
     auto elementNode = CreateRef<TestElement>(*data.Document);
     auto textNode = CreateRef<HTML::Text>(*data.Document, u8"Hello, World!");
-    
+
     REQUIRE_FALSE(data.Node->AppendChild(*elementNode).HasException());
     REQUIRE_FALSE(data.Node->AppendChild(*textNode).HasException());
-    
+
     auto treeWalker = data.Document->CreateTreeWalker(*data.Node, WhatToShow::SHOW_ELEMENT, nullptr);
-    
+
     auto firstChild = treeWalker->FirstChild();
     REQUIRE(firstChild.HasValue());
     REQUIRE(firstChild.Value() == elementNode);
-    
+
     auto nextSibling = treeWalker->NextSibling();
     REQUIRE(nextSibling.HasValue());
     REQUIRE(nextSibling.Value() == nullptr);

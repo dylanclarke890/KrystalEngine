@@ -50,6 +50,8 @@ namespace Krys::HTML
     DOMString _slottableName;
     DOMStringAtom _is {DOMStringAtom::Null()};
     CustomElementState _customElementState {CustomElementState::Undefined};
+    RefPtr<HTMLSlotElement> _assignedSlot;
+    WeakPtr<HTMLSlotElement> _manuallyAssignedSlot;
 
   protected:
     Element(Document &document, NodeFlag nodeFlags) noexcept;

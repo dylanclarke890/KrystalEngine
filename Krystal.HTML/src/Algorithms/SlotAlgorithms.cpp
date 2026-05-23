@@ -18,6 +18,39 @@ namespace Krys::HTML
     return Is<Element>(node) || Is<Text>(node);
   }
 
+  bool SlotAlgorithms::IsSlottable(const Text &node) noexcept
+  {
+    return true;
+  }
+
+  bool SlotAlgorithms::IsSlottable(const Element &node) noexcept
+  {
+    return true;
+  }
+
+  RawPtr<HTMLSlotElement> SlotAlgorithms::DefaultSlot(Node &node) noexcept
+  {
+    assert(Is<ShadowRoot>(TreeQueries::Root(node)));
+
+    for (auto &descendant : DescendantRange(TreeQueries::Root(node)))
+    {
+      if (auto *slot = DynamicDowncast<HTMLSlotElement>(descendant))
+      {
+        if (slot->Name().empty())
+        {
+          return slot;
+        }
+      }
+    }
+
+    return nullptr;
+  }
+
+  RawPtr<const HTMLSlotElement> SlotAlgorithms::DefaultSlot(const Node &node) noexcept
+  {
+    return DefaultSlot(const_cast<Node &>(node));
+  }
+
   bool SlotAlgorithms::IsAssigned(const Node &node) noexcept
   {
     // TODO(impl): SLOTTABLES - A slottable is assigned if its assigned slot is non-null.

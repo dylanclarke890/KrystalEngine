@@ -9,6 +9,7 @@
 #include "Krystal.HTML/Factories/MathMLElementFactory.hpp"
 #include "Krystal.HTML/Factories/SVGElementFactory.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLElement.hpp"
+#include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/MathMLElement/MathMLElement.hpp"
 #include "Krystal.HTML/Namespaces.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"

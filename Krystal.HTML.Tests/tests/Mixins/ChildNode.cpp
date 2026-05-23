@@ -1,6 +1,7 @@
 ﻿#include "Krystal.HTML/Mixins/ChildNode.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
@@ -76,11 +77,11 @@ namespace Krys::Tests
     auto document = CreateRef<HTMLDocument>();
     Ref<Element> parent = document->CreateElement(u8"div").Value();
     Ref<Element> element = document->CreateElement(u8"span").Value();
-    
+
     REQUIRE_FALSE(parent->AppendChild(*element).HasException());
-    
+
     REQUIRE_FALSE(Mixins::ChildNode::Remove(*element).HasException());
- 
+
     REQUIRE(parent->FirstChild() == nullptr);
   }
 }

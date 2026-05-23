@@ -16,6 +16,10 @@ namespace Krys::HTML
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Text);
 
+  private:
+    RefPtr<HTMLSlotElement> _assignedSlot;
+    WeakPtr<HTMLSlotElement> _manuallyAssignedSlot;
+
   public:
     Text(Document &document, DOMString &&data = u8"", HTML::NodeType type = NodeType::TEXT_NODE,
          NodeFlag flags = NodeFlag::None) noexcept;

@@ -12,12 +12,12 @@ namespace Krys::HTML
 
   private:
     DOMString _name;
-    List<WeakRef<Node>> _assignedNodes;
+    List<Ref<Node>> _assignedNodes;
 
   public:
     HTMLSlotElement(Document &document) noexcept;
 
-    KRYS_NODISCARD DOMString Name() const noexcept
+    KRYS_NODISCARD const DOMString &Name() const noexcept
     {
       return _name;
     }
@@ -27,7 +27,7 @@ namespace Krys::HTML
       _name = Krys::Move(name);
     }
 
-    KRYS_NODISCARD const List<WeakRef<Node>> &AssignedNodes() const noexcept
+    KRYS_NODISCARD const List<Ref<Node>> &AssignedNodes() const noexcept
     {
       return _assignedNodes;
     }

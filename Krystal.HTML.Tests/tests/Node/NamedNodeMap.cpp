@@ -1,6 +1,7 @@
 ﻿#include "Krystal.HTML/Node/NamedNodeMap.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/HTMLDocument.hpp"
@@ -192,17 +193,17 @@ namespace Krys::Tests
   TEST_CASE("NamedNodeMap::operator[]", "[HTML][NamedNodeMap]")
   {
     CommonTestData data;
-    
+
     auto attr1 = data.Document->CreateAttribute(u8"test-attr1");
     REQUIRE_FALSE(attr1.HasException());
     attr1.Value()->Value(u8"value1");
     REQUIRE_FALSE(data.Node->Attributes().SetNamedItem(*attr1.Value()).HasException());
-    
+
     auto attr2 = data.Document->CreateAttribute(u8"test-attr2");
     REQUIRE_FALSE(attr2.HasException());
     attr2.Value()->Value(u8"value2");
     REQUIRE_FALSE(data.Node->Attributes().SetNamedItem(*attr2.Value()).HasException());
-    
+
     REQUIRE(data.Node->Attributes()[0]->Name() == u8"test-attr1");
     REQUIRE(data.Node->Attributes()[0]->Value() == u8"value1");
     REQUIRE(data.Node->Attributes()[1]->Name() == u8"test-attr2");

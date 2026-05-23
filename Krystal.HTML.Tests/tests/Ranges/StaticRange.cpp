@@ -2,10 +2,13 @@
 #include "Krystal.HTML.Tests/TestContainerNode.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/DocumentType.hpp"
+#include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
+#include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
@@ -72,7 +75,7 @@ namespace Krys::Tests
       auto otherChild = CreateRef<TestContainerNode>(*document);
 
       REQUIRE_FALSE(otherParent->AppendChild(*otherChild).HasException());
-      
+
       auto invalidRangeInit = StaticRangeInit::Create({childA, 0}, {otherChild, 0});
       REQUIRE_FALSE(invalidRangeInit.HasException());
 

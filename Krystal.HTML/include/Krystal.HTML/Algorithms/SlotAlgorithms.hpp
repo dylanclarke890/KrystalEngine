@@ -21,6 +21,20 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#concept-slotable
     KRYS_NODISCARD static bool IsSlottable(const Node &node) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#concept-slotable
+    KRYS_NODISCARD static bool IsSlottable(const Text &node) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-slotable
+    KRYS_NODISCARD static bool IsSlottable(const Element &node) noexcept;
+
+    /// @brief The first slot in a shadow tree, in tree order, whose name is the empty string, is sometimes
+    /// known as the "default slot".
+    KRYS_NODISCARD static RawPtr<HTMLSlotElement> DefaultSlot(Node &node) noexcept;
+
+    /// @brief The first slot in a shadow tree, in tree order, whose name is the empty string, is sometimes
+    /// known as the "default slot".
+    KRYS_NODISCARD static RawPtr<const HTMLSlotElement> DefaultSlot(const Node &node) noexcept;
+
     /// @see https://dom.spec.whatwg.org/#slotable-assigned
     KRYS_NODISCARD static bool IsAssigned(const Node &node) noexcept;
 

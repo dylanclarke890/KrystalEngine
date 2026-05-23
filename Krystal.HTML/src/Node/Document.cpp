@@ -3,8 +3,6 @@
 #include "Krystal.HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/HTMLCollectionAlgorithms.hpp"
-#include "Krystal.HTML/Mixins/NonElementParentNode.hpp"
-#include "Krystal.HTML/Mixins/ParentNode.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"
@@ -13,6 +11,9 @@
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Factories/ElementFactory.hpp"
+#include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
+#include "Krystal.HTML/Mixins/NonElementParentNode.hpp"
+#include "Krystal.HTML/Mixins/ParentNode.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CDATASection.hpp"
 #include "Krystal.HTML/Node/Comment.hpp"
@@ -103,7 +104,7 @@ namespace Krys::HTML
   {
     auto children = ConstChildNodeRange(*this);
     auto it = FirstOfType<DocumentType>(children);
-    return it == std::ranges::end(children) ? nullptr :  ShareRefPtr(Downcast<DocumentType>(&*it));
+    return it == std::ranges::end(children) ? nullptr : ShareRefPtr(Downcast<DocumentType>(&*it));
   }
 
   RefPtr<Element> Document::DocumentElement() noexcept

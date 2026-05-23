@@ -99,6 +99,8 @@ namespace Krys::HTML
                                                    Maybe<DOMStringView> oldValue, Maybe<DOMStringView> value,
                                                    DOMStringAtom namespaceURI) noexcept
   {
+    // TODO(perf): optimise by making DOMStringAtom's for each of these attributes
+    
     // NOTE: we currently don't need this as we just use the value stored in the attribute. Later, when
     // we optimize we can use this hook to update Element's member variable to skip needing to lookup the
     // attribute. This will be particularly important for a faster implementation of GetElementById.
@@ -138,14 +140,17 @@ namespace Krys::HTML
         {
           return;
         }
+
         if (!value.has_value() && oldValue.has_value() && oldValue->empty())
         {
           return;
         }
+        
         if (value.has_value() && value->empty() && !oldValue.has_value())
         {
           return;
         }
+        
         auto &slotElement = Downcast<HTMLSlotElement>(element);
         if (!value.has_value() || value->empty())
         {
@@ -155,6 +160,7 @@ namespace Krys::HTML
         {
           slotElement.Name(DOMString(*value));
         }
+        
         SlotAlgorithms::AssignSlottablesForTree(TreeQueries::Root(slotElement));
       }
     }
