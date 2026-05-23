@@ -25,6 +25,12 @@ TODO:
     - Requires mutation observer microtask queue.
     - Missing implementation for notifying mutation observers.
 
+  - 4.4 Interface Node - https://dom.spec.whatwg.org/#interface-node
+    - Missing support for URLs.
+
+  - 4.5 Interface Document - https://dom.spec.whatwg.org/#interface-document
+    - Missing support for URLs.
+
 ======================================================================
 4. NODES
 ======================================================================
@@ -62,7 +68,6 @@ TODO:
     Implementation: Partial
     Test Coverage : None
     Notes		  :
-        - Implementation: Url/BaseUri.
         - Implementation: Validate name for CreateProcessingInstruction's target.
         - Implementation: CharacterSet - Document needs the encoding used passed to it on creation.
         - Implementation: ContentType - Document needs this passed to it on creation.

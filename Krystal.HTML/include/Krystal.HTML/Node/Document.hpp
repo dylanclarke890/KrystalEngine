@@ -51,10 +51,11 @@ namespace Krys::HTML
   private:
     UniquePtr<DocumentRareData> _documentRareData;
     UniquePtr<DOMImplementation> _implementation;
-    URL _baseURL {u8"about:blank"};
-    DOMString _contentType;
+    // TODO(impl): URL - decide whether we want to support urls.
+    // URL _baseURL {};
+    DOMString _contentType {u8"application/xml"};
     QuirksMode _quirksMode {QuirksMode::NoQuirks};
-    Type _documentType {Type::HTML};
+    Type _documentType {Type::XML};
     List<RawPtr<Range>> _liveRanges;
     List<RawPtr<NodeIterator>> _nodeIterators;
     RefPtr<CustomElementRegistry> _customElementRegistry;
@@ -124,12 +125,6 @@ namespace Krys::HTML
     KRYS_NODISCARD DOMString NodeName() const noexcept final
     {
       return u8"#document";
-    }
-
-    KRYS_NODISCARD DOMString BaseURI() const noexcept
-    {
-      // TODO(fix): MINOR - return the base url
-      return URL();
     }
 
 #pragma endregion

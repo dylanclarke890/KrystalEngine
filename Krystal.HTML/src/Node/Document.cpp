@@ -37,6 +37,11 @@ namespace Krys::HTML
   Document::Document(Type documentType) noexcept : Document()
   {
     _documentType = documentType;
+
+    if (documentType == Type::HTML)
+    {
+      _contentType = u8"application/xhtml+xml";
+    }
   }
 
 #pragma region Document
@@ -58,8 +63,8 @@ namespace Krys::HTML
 
   DOMString Document::URL() const noexcept
   {
-    // TODO(impl): MINOR - set/get base url correctly
-    return _baseURL.Href;
+    // TODO(impl): URL - return the url, serialized.
+    return {};
   }
 
   DOMString Document::DocumentURI() const noexcept

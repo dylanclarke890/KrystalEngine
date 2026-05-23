@@ -164,7 +164,9 @@ namespace Krys::HTML
 
       // TODO(feat): MINOR - Set copy's encoding and origin.
       docCopy._contentType = doc._contentType;
-      docCopy._baseURL = doc._baseURL;
+
+      // TODO(impl): URL - Set the url on the cloned document to the url of the original document.
+      //docCopy._baseURL = doc._baseURL;
       docCopy._quirksMode = doc._quirksMode;
       docCopy._allowDeclarativeShadowRoots = doc._allowDeclarativeShadowRoots;
     }
