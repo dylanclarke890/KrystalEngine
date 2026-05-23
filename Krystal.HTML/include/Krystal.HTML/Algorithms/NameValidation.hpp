@@ -234,5 +234,48 @@ namespace Krys::HTML
 
       return true;
     }
+
+    KRYS_NODISCARD static bool IsXMLNameStartChar(char32 ch) noexcept
+    {
+      return ch == ':' || ch == '_' || ::Krys::Text::IsASCIIAlpha(ch) || (ch >= 0xC0 && ch <= 0xD6)
+             || (ch >= 0xD8 && ch <= 0xF6) || (ch >= 0xF8 && ch <= 0x2FF) || (ch >= 0x370 && ch <= 0x37D)
+             || (ch >= 0x37F && ch <= 0x1FFF) || (ch >= 0x200C && ch <= 0x200D)
+             || (ch >= 0x2070 && ch <= 0x218F) || (ch >= 0x2C00 && ch <= 0x2FEF)
+             || (ch >= 0x3001 && ch <= 0xD7FF) || (ch >= 0xF900 && ch <= 0xFDCF)
+             || (ch >= 0xFDF0 && ch <= 0xFFFD) || (ch >= 0x10000 && ch <= 0xEFFFF);
+    }
+
+    KRYS_NODISCARD static bool IsXMLNameChar(char32 ch) noexcept
+    {
+      return IsXMLNameStartChar(ch) || ch == '-' || ch == '.' || ::Krys::Text::IsASCIIDigit(ch) || ch == 0xB7
+             || (ch >= 0x0300 && ch <= 0x036F) || (ch >= 0x203F && ch <= 0x2040);
+    }
+
+    /// @see https://www.w3.org/TR/xml/#NT-Name
+    KRYS_NODISCARD static bool IsValidXMLName(DOMStringView name) noexcept
+    {
+      if (name.empty())
+      {
+        return false;
+      }
+
+      // TODO(fix): We can't guarantee that the name is valid UTF-8, validate before converting.
+      auto utf32 = ::Krys::Text::ConvertToUTF32(utf8_stringview {name});
+      if (!IsXMLNameStartChar(utf32[0]))
+      {
+        return false;
+      }
+
+
+      for (auto ch : utf32_stringview {utf32.begin() + 1uz, utf32.end()})
+      {
+        if (!IsXMLNameChar(ch))
+        {
+          return false;
+        }
+      }
+
+      return true;
+    }
   };
 }

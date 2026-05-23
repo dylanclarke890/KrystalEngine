@@ -51,8 +51,6 @@ namespace Krys::HTML
   private:
     UniquePtr<DocumentRareData> _documentRareData;
     UniquePtr<DOMImplementation> _implementation;
-    // TODO(impl): URL - decide whether we want to support urls.
-    // URL _baseURL {};
     DOMString _contentType {u8"application/xml"};
     QuirksMode _quirksMode {QuirksMode::NoQuirks};
     Type _documentType {Type::XML};

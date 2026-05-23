@@ -207,12 +207,14 @@ namespace Krys::HTML
   ExceptionOr<Ref<ProcessingInstruction>> Document::CreateProcessingInstruction(DOMString &&target,
                                                                                 DOMString &&data) noexcept
   {
-    // TODO(impl): MINOR - If target does not match the (xml 'NT-Name) Name production, then throw an
-    // "InvalidCharacterError" DOMException.
+    if (!NameValidation::IsValidXMLName(target))
+    {
+      return ExceptionCode::InvalidCharacterError;
+    }
 
     if (data.contains(u8"?>"))
     {
-      return Exception {ExceptionCode::InvalidCharacterError};
+      return ExceptionCode::InvalidCharacterError;
     }
 
     return CreateRef<ProcessingInstruction>(*this, Krys::Move(target), Krys::Move(data));
@@ -281,7 +283,7 @@ namespace Krys::HTML
     return ShareRef(node);
   }
 
-  // NOTE: MSVC says this method can be made const but it's lying, Attr constructor needs a non-const Document
+  // NOTE: VS says this method can be made const but it's lying, Attr constructor needs a non-const Document
   // reference and we can't make it const without breaking that.
   ExceptionOr<Ref<Attr>> Document::CreateAttribute(DOMStringAtom localName) noexcept
   {
