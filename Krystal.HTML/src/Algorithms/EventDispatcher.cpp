@@ -1,6 +1,7 @@
 ﻿#include "Krystal.HTML/Algorithms/EventDispatcher.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Events/Event.hpp"
@@ -55,42 +56,54 @@ namespace Krys::HTML
         activationTarget = target;
       }
 
-      bool slotInClosedTree = false;
-      // TODO(impl): SLOTTABLES - Let slottable be target, if target is a slottable and is assigned, and null
-      // otherwise.
       RawPtr<EventTarget> slottable = nullptr;
+      if (auto *nodeTarget = DynamicDowncast<Node>(target))
+      {
+        if (SlotAlgorithms::IsSlottable(*nodeTarget) && SlotAlgorithms::IsAssigned(*nodeTarget))
+        {
+          slottable = target;
+        }
+      }
+
+      bool slotInClosedTree = false;
       RawPtr<EventTarget> parent = target->GetParent(event);
 
       while (parent != nullptr)
       {
-        RawPtr<Node> parentNode = DynamicDowncast<Node>(parent);
+        RawPtr<Node> nodeParent = DynamicDowncast<Node>(parent);
+
         if (slottable != nullptr)
         {
-          assert(Is<HTMLSlotElement>(*parentNode));
+          assert(Is<HTMLSlotElement>(nodeParent));
+
           slottable = nullptr;
 
-          auto parentRoot = Is<Node>(parent) ? &TreeQueries::Root(*parentNode) : nullptr;
-          auto parentShadowRoot = DynamicDowncast<ShadowRoot>(parentRoot);
-          if (parentShadowRoot && parentShadowRoot->Mode() == ShadowRootMode::Closed)
+          if (auto shadowRootParent = DynamicDowncast<ShadowRoot>(TreeQueries::Root(*nodeParent)))
           {
-            slotInClosedTree = true;
+            slotInClosedTree = shadowRootParent->Mode() == ShadowRootMode::Closed;
           }
         }
 
-        // TODO(impl): SLOTTABLES - If parent is a slottable and is assigned, then set slottable to parent.
+        if (nodeParent != nullptr && SlotAlgorithms::IsSlottable(*nodeParent)
+            && SlotAlgorithms::IsAssigned(*nodeParent))
+        {
+          slottable = parent;
+        }
+
         relatedTarget = ShadowRootAlgorithms::Retarget(event.RelatedTarget(), *parent);
+
         touchTargets.clear();
         for (auto &touchTarget : event.TouchTargetList())
         {
           touchTargets.push_back(ShareRef(*ShadowRootAlgorithms::Retarget(touchTarget.get(), *parent)));
         }
 
-        RawPtr<Node> targetRoot = parentNode != nullptr ? Downcast<Node>(target) : nullptr;
-        bool rootIsShadowIncludingInclusiveAncestor =
-          parent->IsNode()
-          && ShadowRootAlgorithms::IsShadowIncludingInclusiveAncestor(*targetRoot, *parentNode);
+        RawPtr<Node> targetRoot =
+          nodeParent != nullptr ? &TreeQueries::Root(Downcast<Node>(*target)) : nullptr;
 
-        if (parent->IsWindow() || rootIsShadowIncludingInclusiveAncestor)
+        if (parent->IsWindow()
+            || (Is<Node>(parent)
+                && ShadowRootAlgorithms::IsShadowIncludingInclusiveAncestor(*targetRoot, *nodeParent)))
         {
           if (isActivationEvent && event.Bubbles() && activationTarget == nullptr
               && parent->HasActivationBehavior())
@@ -98,7 +111,7 @@ namespace Krys::HTML
             activationTarget = parent;
           }
 
-          AppendToEventPath(event, *parent, targetOverride, relatedTarget, touchTargets, slotInClosedTree);
+          AppendToEventPath(event, *parent, nullptr, relatedTarget, touchTargets, slotInClosedTree);
         }
         else if (parent == relatedTarget)
         {
@@ -130,34 +143,25 @@ namespace Krys::HTML
       {
         auto IsNodeWithShadowRoot = [](RawPtr<EventTarget> target)
         {
-          if (target == nullptr)
-          {
-            return false;
-          }
-
           if (auto *node = DynamicDowncast<Node>(target))
           {
-            if (Is<ShadowRoot>(ShadowRootAlgorithms::ShadowIncludingRoot(*node)))
-            {
-              return true;
-            }
+            return Is<ShadowRoot>(ShadowRootAlgorithms::ShadowIncludingRoot(*node));
           }
 
           return false;
         };
 
-        if (IsNodeWithShadowRoot(clearTargetStruct->ShadowAdjustedTarget())
-            || IsNodeWithShadowRoot(clearTargetStruct->RelatedTarget()))
-        {
-          clearTargets = true;
-        }
-        else
-        {
-          auto touchTargetWithShadowRoot = std::find_if(
-            clearTargetStruct->TouchTargetList().begin(), clearTargetStruct->TouchTargetList().end(),
-            [&](auto &i) { return IsNodeWithShadowRoot(i.get()); });
+        clearTargets = IsNodeWithShadowRoot(clearTargetStruct->ShadowAdjustedTarget())
+                       || IsNodeWithShadowRoot(clearTargetStruct->RelatedTarget());
 
-          if (touchTargetWithShadowRoot != clearTargetStruct->TouchTargetList().end())
+        if (!clearTargets)
+        {
+          auto touchTargetListEnd = clearTargetStruct->TouchTargetList().end();
+          auto touchTargetWithShadowRoot =
+            std::find_if(clearTargetStruct->TouchTargetList().begin(), touchTargetListEnd,
+                         [&](auto &touchTarget) { return IsNodeWithShadowRoot(touchTarget.get()); });
+
+          if (touchTargetWithShadowRoot != touchTargetListEnd)
           {
             clearTargets = true;
           }
