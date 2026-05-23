@@ -33,6 +33,7 @@ namespace Krys::HTML
     friend class ElementAlgorithms;
     friend class ExtensibilityHooks;
     friend class ShadowRootAlgorithms;
+    friend class SlotAlgorithms;
     friend class HTMLCollectionAlgorithms;
     friend class Node;
     friend class NodeAlgorithms;

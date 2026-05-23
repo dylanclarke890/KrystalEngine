@@ -67,6 +67,7 @@
     <ClInclude Include="include\Krystal.HTML\Iterator\WhatToShow.hpp" />
     <ClInclude Include="include\Krystal.HTML\Iterator\_detail\IteratorBase.hpp" />
     <ClInclude Include="include\Krystal.HTML\MathMLElement\MathMLElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Mixins\Slottable.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationCallback.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationObserverInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationRecordType.hpp" />
@@ -177,6 +178,7 @@
     <ClCompile Include="src\HTMLElement\HTMLPreElement.cpp" />
     <ClCompile Include="src\HTMLElement\HTMLUnknownElement.cpp" />
     <ClCompile Include="src\Mixins\NonDocumentTypeChildNode.cpp" />
+    <ClCompile Include="src\Mixins\Slottable.cpp" />
     <ClCompile Include="src\Ranges\StaticRange.cpp" />
     <ClCompile Include="src\Node\XMLDocument.cpp" />
     <ClCompile Include="src\Algorithms\CustomElementAlgorithms.cpp" />

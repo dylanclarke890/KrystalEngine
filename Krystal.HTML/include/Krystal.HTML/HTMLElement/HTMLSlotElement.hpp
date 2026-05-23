@@ -10,9 +10,13 @@ namespace Krys::HTML
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLSlotElement);
 
+    friend class MutationAlgorithms;
+    friend class SlotAlgorithms;
+
   private:
     DOMString _name;
     List<Ref<Node>> _assignedNodes;
+    List<WeakRef<Node>> _manuallyAssignedNodes;
 
   public:
     HTMLSlotElement(Document &document) noexcept;
@@ -25,11 +29,6 @@ namespace Krys::HTML
     void Name(DOMString &&name) noexcept
     {
       _name = Krys::Move(name);
-    }
-
-    KRYS_NODISCARD const List<Ref<Node>> &AssignedNodes() const noexcept
-    {
-      return _assignedNodes;
     }
   };
 }

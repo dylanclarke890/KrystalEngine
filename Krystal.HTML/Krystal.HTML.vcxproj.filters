@@ -426,6 +426,9 @@
     <ClInclude Include="include\Krystal.HTML\Mixins\NonDocumentTypeChildNode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Mixins\Slottable.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -603,6 +606,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Mixins\NonDocumentTypeChildNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Mixins\Slottable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -38,7 +38,17 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#slotable-assigned
     KRYS_NODISCARD static bool IsAssigned(const Node &node) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#slotable-assigned
+    KRYS_NODISCARD static bool IsAssigned(const Text &node) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#slotable-assigned
+    KRYS_NODISCARD static bool IsAssigned(const Element &node) noexcept;
+
     KRYS_NODISCARD static RawPtr<HTMLSlotElement> GetAssignedSlot(const Node &node) noexcept;
+
+    KRYS_NODISCARD static RawPtr<HTMLSlotElement> GetAssignedSlot(const Text &node) noexcept;
+
+    KRYS_NODISCARD static RawPtr<HTMLSlotElement> GetAssignedSlot(const Element &node) noexcept;
 
 #pragma endregion
 

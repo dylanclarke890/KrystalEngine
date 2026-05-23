@@ -27,11 +27,9 @@ TODO:
 ======================================================================
 
 4.2.2.3 Finding slots and slottables
-    Implementation: None
     Test Coverage : None
 
 4.2.2.4 Assigning slottables and slots
-    Implementation: None
     Test Coverage : None
 
 4.2.2.5 Signaling slot change
@@ -39,10 +37,6 @@ TODO:
     Test Coverage : None
 
 4.2.5 Mixin DocumentOrShadowRoot
-    Implementation: Full
-    Test Coverage : None
-
-4.2.9 Mixin Slottable
     Implementation: Full
     Test Coverage : None
 
@@ -155,6 +149,8 @@ TODO:
 4.2.7 Mixin NonDocumentTypeChildNode
 
 4.2.8 Mixin ChildNode
+
+4.2.9 Mixin Slottable
 
 4.2.10 Old-style collections: NodeList and HTMLCollection (N/A)
 

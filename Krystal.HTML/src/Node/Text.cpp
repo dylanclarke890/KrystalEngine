@@ -5,6 +5,7 @@
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
+#include "Krystal.HTML/Mixins/Slottable.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
@@ -64,7 +65,7 @@ namespace Krys::HTML
 
   RawPtr<HTMLSlotElement> Text::AssignedSlot() noexcept
   {
-    return SlotAlgorithms::FindSlot(*this, true);
+    return Mixins::Slottable::AssignedSlot(*this);
   }
 
 #pragma endregion

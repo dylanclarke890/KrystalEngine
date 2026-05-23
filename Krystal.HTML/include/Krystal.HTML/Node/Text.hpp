@@ -16,6 +16,8 @@ namespace Krys::HTML
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Text);
 
+    friend class SlotAlgorithms;
+
   private:
     RefPtr<HTMLSlotElement> _assignedSlot;
     WeakPtr<HTMLSlotElement> _manuallyAssignedSlot;

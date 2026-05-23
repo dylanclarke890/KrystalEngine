@@ -219,7 +219,7 @@ namespace Krys::HTML
         SlotAlgorithms::AssignSlot(*target);
       }
 
-      if (isParentRootShadowRoot && slotParent != nullptr && slotParent->AssignedNodes().empty())
+      if (isParentRootShadowRoot && slotParent != nullptr && slotParent->_assignedNodes.empty())
       {
         SlotAlgorithms::SignalSlotChange(*slotParent);
       }
@@ -381,7 +381,7 @@ namespace Krys::HTML
     auto &oldParentRoot = TreeQueries::Root(oldParent);
     if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(oldParentRoot))
     {
-      if (auto *slot = DynamicDowncast<HTMLSlotElement>(oldParent); slot && slot->AssignedNodes().empty())
+      if (auto *slot = DynamicDowncast<HTMLSlotElement>(oldParent); slot && slot->_assignedNodes.empty())
       {
         SlotAlgorithms::SignalSlotChange(*slot);
       }
@@ -690,7 +690,7 @@ namespace Krys::HTML
     auto &parentRoot = TreeQueries::Root(parent);
     if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(parentRoot))
     {
-      if (auto *slot = DynamicDowncast<HTMLSlotElement>(parent); slot && slot->AssignedNodes().empty())
+      if (auto *slot = DynamicDowncast<HTMLSlotElement>(parent); slot && slot->_assignedNodes.empty())
       {
         SlotAlgorithms::SignalSlotChange(*slot);
       }

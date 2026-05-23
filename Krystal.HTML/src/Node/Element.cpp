@@ -14,6 +14,7 @@
 #include "Krystal.HTML/Mixins/ChildNode.hpp"
 #include "Krystal.HTML/Mixins/NonDocumentTypeChildNode.hpp"
 #include "Krystal.HTML/Mixins/ParentNode.hpp"
+#include "Krystal.HTML/Mixins/Slottable.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/HTMLCollection.hpp"
 #include "Krystal.HTML/Node/HTMLDocument.hpp"
@@ -509,7 +510,7 @@ namespace Krys::HTML
 
   RawPtr<HTMLSlotElement> Element::AssignedSlot() noexcept
   {
-    return SlotAlgorithms::FindSlot(*this, true);
+    return Mixins::Slottable::AssignedSlot(*this);
   }
 
 #pragma endregion
