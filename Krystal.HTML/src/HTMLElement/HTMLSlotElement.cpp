@@ -9,8 +9,7 @@
 namespace Krys::HTML
 {
   HTMLSlotElement::HTMLSlotElement(Document &document) noexcept
-      : HTMLElement(document, QualifiedName {Namespaces::HTML, DOMStringAtom::Null(), u8"slot"},
-                    NodeFlag::IsHTMLSlotElement)
+      : HTMLElement(document, HTMLTagName::Slot, NodeFlag::IsHTMLSlotElement)
   {
   }
 }

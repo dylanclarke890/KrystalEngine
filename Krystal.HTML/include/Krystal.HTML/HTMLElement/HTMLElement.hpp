@@ -6,15 +6,17 @@
 
 namespace Krys::HTML
 {
+  class Document;
+
   class HTMLElement : public Element
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLElement);
 
   protected:
-    HTMLElement(Document &document, NodeFlag flags) noexcept;
+    HTMLTagName _tagName {HTMLTagName::Unknown};
 
-    HTMLElement(Document &document, const QualifiedName& name, NodeFlag flags) noexcept;
+    HTMLElement(Document &document, HTMLTagName tag, NodeFlag flags = NodeFlag::None) noexcept;
 
   public:
     HTMLElement(Document &document) noexcept;

@@ -35,12 +35,19 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLMetaElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\Abort\AbortController.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\CustomElementAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\DocumentAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Factories\ElementFactory.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\HTMLCollectionAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\LiveRangeUpdater.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLBaseElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLHeadElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLHtmlElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLLinkElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLStyleElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLTitleElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\Mixins\ChildNode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\ElementAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\ExtensibilityHooks.hpp" />
@@ -171,6 +178,13 @@
     <ClInclude Include="include\Krystal.HTML\Algorithms\OrderedSet.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\SmallNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\StringAlgorithms.hpp" />
+    <ClCompile Include="src\HTMLElement\HTMLBaseElement.cpp" />
+    <ClCompile Include="src\HTMLElement\HTMLHeadElement.cpp" />
+    <ClCompile Include="src\HTMLElement\HTMLHtmlElement.cpp" />
+    <ClCompile Include="src\HTMLElement\HTMLLinkElement.cpp" />
+    <ClCompile Include="src\HTMLElement\HTMLMetaElement.cpp" />
+    <ClCompile Include="src\HTMLElement\HTMLStyleElement.cpp" />
+    <ClCompile Include="src\HTMLElement\HTMLTitleElement.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Factories\CustomElementFactory.cpp" />
@@ -344,6 +358,15 @@
     <None Include="data\Node\Mixin\NonElementParentNode.idl" />
     <None Include="data\Node\Mixin\ParentNode.idl" />
     <None Include="data\Node\Mixin\Slottable.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\HTMLElement\HTMLHeadElement.idl" />
+    <None Include="data\HTMLElement\HTMLHtmlElement.idl" />
+    <None Include="data\HTMLElement\HTMLTitleElement.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\HTMLElement\HTMLBaseElement.idl" />
+    <None Include="data\HTMLElement\HTMLLinkElement.idl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

@@ -8,7 +8,7 @@
 
 namespace Krys::HTML
 {
-  HTMLPreElement::HTMLPreElement(Document &document) noexcept : HTMLElement(document)
+  HTMLPreElement::HTMLPreElement(Document &document) noexcept : HTMLElement(document, HTMLTagName::Pre)
   {
   }
 }

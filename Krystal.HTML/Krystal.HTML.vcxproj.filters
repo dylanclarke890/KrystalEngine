@@ -429,6 +429,27 @@
     <ClInclude Include="include\Krystal.HTML\Mixins\Slottable.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLHtmlElement.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLHeadElement.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLTitleElement.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLBaseElement.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLLinkElement.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLMetaElement.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLStyleElement.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -609,6 +630,27 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Mixins\Slottable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HTMLElement\HTMLHeadElement.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HTMLElement\HTMLHtmlElement.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HTMLElement\HTMLTitleElement.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HTMLElement\HTMLBaseElement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HTMLElement\HTMLLinkElement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HTMLElement\HTMLMetaElement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HTMLElement\HTMLStyleElement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -818,5 +860,20 @@
     </None>
     <None Include="data\DOM-spec-progress.txt" />
     <None Include="cpp.hint" />
+    <None Include="data\HTMLElement\HTMLHeadElement.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\HTMLElement\HTMLTitleElement.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\HTMLElement\HTMLHtmlElement.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\HTMLElement\HTMLBaseElement.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\HTMLElement\HTMLLinkElement.idl">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

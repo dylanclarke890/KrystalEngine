@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/HTMLElement/HTMLUnknownElement.hpp"
+﻿#include "Krystal.HTML/HTMLElement/HTMLStyleElement.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
@@ -8,8 +8,7 @@
 
 namespace Krys::HTML
 {
-  HTMLUnknownElement::HTMLUnknownElement(Document &document) noexcept
-      : HTMLElement(document, HTMLTagName::Unknown)
+  HTMLStyleElement::HTMLStyleElement(Document &document) noexcept : HTMLElement(document, HTMLTagName::Style)
   {
   }
 }

@@ -40,7 +40,7 @@ namespace Krys::HTML
 
     if (documentType == Type::HTML)
     {
-      _contentType = u8"application/xhtml+xml";
+      _contentType = u8"text/html";
     }
   }
 
