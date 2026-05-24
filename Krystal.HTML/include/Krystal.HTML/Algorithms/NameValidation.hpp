@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Algorithms/StringAlgorithms.hpp"
+#include "Krystal.HTML/Infra/StringAlgorithms.hpp"
 #include "Krystal.HTML/DOMString.hpp"
-#include "Krystal.HTML/Namespaces.hpp"
+#include "Krystal.HTML/Infra/Namespaces.hpp"
 #include "Krystal.HTML/QualifiedName.hpp"
 #include "Krystal.HTML/Utils/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"

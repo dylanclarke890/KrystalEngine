@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Namespaces.hpp"
+#include "Krystal.HTML/Infra/Namespaces.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/QualifiedName.hpp"
 

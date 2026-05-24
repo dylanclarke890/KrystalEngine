@@ -258,10 +258,10 @@
     <ClInclude Include="include\Krystal.HTML\Algorithms\NameValidation.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Algorithms\StringAlgorithms.hpp">
+    <ClInclude Include="include\Krystal.HTML\Infra\StringAlgorithms.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Namespaces.hpp">
+    <ClInclude Include="include\Krystal.HTML\Infra\Namespaces.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Algorithms\OrderedSet.hpp">

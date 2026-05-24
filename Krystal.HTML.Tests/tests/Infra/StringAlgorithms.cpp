@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Algorithms/StringAlgorithms.hpp"
+﻿#include "Krystal.HTML/Infra/StringAlgorithms.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
