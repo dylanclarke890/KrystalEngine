@@ -875,5 +875,12 @@
     <None Include="data\HTMLElement\HTMLLinkElement.idl">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="data\HTML-spec-progress.txt" />
+    <None Include="data\HTMLElement\HTMLMetaElement.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\HTMLElement\HTMLStyleElement.idl">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

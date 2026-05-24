@@ -1,45 +1,45 @@
 ﻿Source: https://dom.spec.whatwg.org
 
 TODO:
-  - CSS-SELECTORS
-    - Separate spec implementation required first, significant work to implement CSS selector parsing and matching.
-    - 1.3 Selectors - https://dom.spec.whatwg.org/#selectors
-    - 4.9 Interface Element (Closest/Matches) - https://dom.spec.whatwg.org/#dom-element-closest
-    - 4.2.6 Mixin ParentNode (QuerySelector/QuerySelectorAll) - https://dom.spec.whatwg.org/#dom-parentnode-queryselector
+CSS-SELECTORS
+  - Separate spec implementation required first, significant work to implement CSS selector parsing and matching.
+  - 1.3 Selectors - https://dom.spec.whatwg.org/#selectors
+  - 4.9 Interface Element (Closest/Matches) - https://dom.spec.whatwg.org/#dom-element-closest
+  - 4.2.6 Mixin ParentNode (QuerySelector/QuerySelectorAll) - https://dom.spec.whatwg.org/#dom-parentnode-queryselector
+
+URLS
+  - Separate spec implementation required first, fair bit of work to parse and serialize URLs.
+  - 4.4 Interface Node (BaseURI) - https://dom.spec.whatwg.org/#dom-node-baseuri
+  - 4.5 Interface Document (DocumentURI) - https://dom.spec.whatwg.org/#dom-document-documenturi
+
+CUSTOM-ELEMENTS
+  - Separate spec implementation required first, significant work required.
+  - 4.2.3 Mutation algorithms (Insert/Remove) - https://dom.spec.whatwg.org/#mutation-algorithms
+    - Custom element reactions and upgrade steps are required.
+
+EVENT-LOOP
+  - 4.3.2 Queuing a mutation record - https://dom.spec.whatwg.org/#mutation-observers
+  - 3.1 Interface AbortController - https://dom.spec.whatwg.org/#interface-abortcontroller
+  - 4.2.2.5 Signaling slot change - https://dom.spec.whatwg.org/#signaling-slot-change
   
-  - URLS
-    - Separate spec implementation required first, fair bit of work to parse and serialize URLs.
-    - 4.4 Interface Node (BaseURI) - https://dom.spec.whatwg.org/#dom-node-baseuri
-    - 4.5 Interface Document (DocumentURI) - https://dom.spec.whatwg.org/#dom-document-documenturi
+SLOTTABLES
+  - 4.2.2.1 Slots and 4.2.2.2 Slottables
+    - Slots/Slottable attribute changes (name/slot attribute) missing test cases.
+  - 4.2.2.3 Finding slots and slottables and 4.2.2.4 Assigning slottables and slots
+    - Missing test cases.
 
-  - CUSTOM-ELEMENTS
-    - Separate spec implementation required first, significant work required.
-    - 4.2.3 Mutation algorithms (Insert/Remove) - https://dom.spec.whatwg.org/#mutation-algorithms
-      - Custom element reactions and upgrade steps are required.
+MUTATION-OBSERVERS
+  - 4.3.1 Interface MutationObserver - https://dom.spec.whatwg.org/#interface-mutationobserver
+    - Missing test cases for observing attribute changes, character data changes, child list changes, subtree changes, disconnecting observers, and taking records.
 
-  - EVENT-LOOP
-    - 4.3.2 Queuing a mutation record - https://dom.spec.whatwg.org/#mutation-observers
-    - 3.1 Interface AbortController - https://dom.spec.whatwg.org/#interface-abortcontroller
-    - 4.2.2.5 Signaling slot change - https://dom.spec.whatwg.org/#signaling-slot-change
-    
-  - SLOTTABLES
-    - 4.2.2.1 Slots and 4.2.2.2 Slottables
-      - Slots/Slottable attribute changes (name/slot attribute) missing test cases.
-    - 4.2.2.3 Finding slots and slottables and 4.2.2.4 Assigning slottables and slots
-      - Missing test cases.
+Section 4.8 Interface ShadowRoot - https://dom.spec.whatwg.org/#interface-shadowroot
+  - 'onslotchange' event handler and 'slotchange' event support.
 
-  - MUTATION-OBSERVERS
-    - 4.3.1 Interface MutationObserver - https://dom.spec.whatwg.org/#interface-mutationobserver
-      - Missing test cases for observing attribute changes, character data changes, child list changes, subtree changes, disconnecting observers, and taking records.
+Section 4.9 Interface Element - https://dom.spec.whatwg.org/#interface-element
+  - AttachShadow and ShadowRoot missing test cases.
 
-  - 4.8 Interface ShadowRoot - https://dom.spec.whatwg.org/#interface-shadowroot
-    - 'onslotchange' event handler and 'slotchange' event support.
-  
-  - 4.9 Interface Element - https://dom.spec.whatwg.org/#interface-element
-    - AttachShadow and ShadowRoot missing test cases.
-
-  - 4.5 Interface Document - https://dom.spec.whatwg.org/#interface-document
-    - Needs the encoding used passed to it on creation.
+Section 4.5 Interface Document - https://dom.spec.whatwg.org/#interface-document
+  - Needs the encoding used passed to it on creation.
 
 ======================================================================
 ======================================================================

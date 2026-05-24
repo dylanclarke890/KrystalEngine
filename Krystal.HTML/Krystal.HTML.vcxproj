@@ -21,6 +21,7 @@
   <ItemGroup>
     <None Include="cpp.hint" />
     <None Include="data\DOM-spec-progress.txt" />
+    <None Include="data\HTML-spec-progress.txt" />
     <Text Include="data\HTMLEntityNames.in" />
   </ItemGroup>
   <ItemGroup>
@@ -367,6 +368,10 @@
   <ItemGroup>
     <None Include="data\HTMLElement\HTMLBaseElement.idl" />
     <None Include="data\HTMLElement\HTMLLinkElement.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\HTMLElement\HTMLMetaElement.idl" />
+    <None Include="data\HTMLElement\HTMLStyleElement.idl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

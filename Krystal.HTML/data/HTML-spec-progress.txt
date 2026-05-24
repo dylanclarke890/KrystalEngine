@@ -1,0 +1,4 @@
+Important Sections:
+
+Section 2.1.4: DOM Trees - https://html.spec.whatwg.org/multipage/infrastructure.html#dom-trees
+  - Defines HTML Standard extensibility hook steps for inserting, removing, moving etc. any Element within the HTML namespace.
