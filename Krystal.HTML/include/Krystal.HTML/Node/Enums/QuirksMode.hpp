@@ -4,7 +4,7 @@
 
 namespace Krys::HTML
 {
-  enum class QuirksMode
+  enum class QuirksMode : uint8
   {
     NoQuirks,
     Quirks,

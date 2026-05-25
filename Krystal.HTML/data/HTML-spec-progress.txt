@@ -17,3 +17,9 @@ Section 2.6.4.1: HTMLAllCollection - https://html.spec.whatwg.org/multipage/comm
 
 Section 2.6.5: DOMStringList - https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#the-domstringlist-interface
   - Old legacy API for representing a list of DOMStrings.
+
+
+NOTES:
+ - When implementing event handler IDL attributes (on* members), the spec defines an EventHandler as a function that takes an Event and returns any type.
+   The return type is only used to determine whether the event is cancelled. Explore whether using a lambda as the argument to the attribute setter, deducing it's return type
+   using decltype and using that as a way to resolve the return type to a boolean.

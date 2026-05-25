@@ -13,3 +13,10 @@ namespace Krys::HTML
     HTMLHtmlElement(Document &document) noexcept;
   };
 }
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::HTMLHtmlElement)
+  static bool IsType(const Krys::HTML::HTMLElement &target) noexcept
+  {
+    return target.IsHTMLHtmlElement();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

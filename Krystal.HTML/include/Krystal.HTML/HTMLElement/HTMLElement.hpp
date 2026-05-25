@@ -20,6 +20,59 @@ namespace Krys::HTML
 
   public:
     HTMLElement(Document &document) noexcept;
+
+#pragma region Type Checks
+
+    KRYS_NODISCARD bool IsHTMLBaseElement() const noexcept
+    {
+      return _tagName == HTMLTagName::Base;
+    }
+
+    KRYS_NODISCARD bool IsHTMLBodyElement() const noexcept
+    {
+      return _tagName == HTMLTagName::Body;
+    }
+
+    KRYS_NODISCARD bool IsHTMLHeadElement() const noexcept
+    {
+      return _tagName == HTMLTagName::Head;
+    }
+
+    KRYS_NODISCARD bool IsHTMLHtmlElement() const noexcept
+    {
+      return _tagName == HTMLTagName::Html;
+    }
+
+    KRYS_NODISCARD bool IsHTMLLinkElement() const noexcept
+    {
+      return _tagName == HTMLTagName::Link;
+    }
+
+    KRYS_NODISCARD bool IsHTMLMetaElement() const noexcept
+    {
+      return _tagName == HTMLTagName::Meta;
+    }
+
+    KRYS_NODISCARD bool IsHTMLPreElement() const noexcept
+    {
+      return _tagName == HTMLTagName::Pre;
+    }
+
+    // NOTE: HTMLSlotElement type check is not needed here as Node already has it.
+
+    KRYS_NODISCARD bool IsHTMLStyleElement() const noexcept
+    {
+      return _tagName == HTMLTagName::Style;
+    }
+
+    KRYS_NODISCARD bool IsHTMLTitleElement() const noexcept
+    {
+      return _tagName == HTMLTagName::Title;
+    }
+
+    // NOTE: HTMLUnknownElement type check is not needed here as Node already has it.
+
+#pragma endregion
   };
 }
 

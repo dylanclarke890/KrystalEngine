@@ -529,4 +529,60 @@ namespace Krys::HTML
 
     return nullptr;
   }
+
+  RawPtr<const HTMLElement> TreeTraversal::NextHTMLElementSibling(const Node &current) noexcept
+  {
+    auto siblings = ConstNextSiblingRange(current);
+    auto it = FirstOfType<HTMLElement>(siblings);
+    return it == std::ranges::end(siblings) ? nullptr : Downcast<HTMLElement>(&*it);
+  }
+
+  RawPtr<HTMLElement> TreeTraversal::NextHTMLElementSibling(Node &current) noexcept
+  {
+    auto siblings = NextSiblingRange(current);
+    auto it = FirstOfType<HTMLElement>(siblings);
+    return it == std::ranges::end(siblings) ? nullptr : Downcast<HTMLElement>(&*it);
+  }
+
+  RawPtr<const HTMLElement> TreeTraversal::PreviousHTMLElementSibling(const Node &current) noexcept
+  {
+    auto siblings = ConstPreviousSiblingRange(current);
+    auto it = FirstOfType<HTMLElement>(siblings);
+    return it == std::ranges::end(siblings) ? nullptr : Downcast<HTMLElement>(&*it);
+  }
+
+  RawPtr<HTMLElement> TreeTraversal::PreviousHTMLElementSibling(Node &current) noexcept
+  {
+    auto siblings = PreviousSiblingRange(current);
+    auto it = FirstOfType<HTMLElement>(siblings);
+    return it == std::ranges::end(siblings) ? nullptr : Downcast<HTMLElement>(&*it);
+  }
+
+  RawPtr<const HTMLElement> TreeTraversal::FirstHTMLElementChild(const ContainerNode &node) noexcept
+  {
+    auto children = ConstChildNodeRange(node);
+    auto it = FirstOfType<HTMLElement>(children);
+    return it == std::ranges::end(children) ? nullptr : Downcast<HTMLElement>(&*it);
+  }
+
+  RawPtr<HTMLElement> TreeTraversal::FirstHTMLElementChild(ContainerNode &node) noexcept
+  {
+    auto children = ChildNodeRange(node);
+    auto it = FirstOfType<HTMLElement>(children);
+    return it == std::ranges::end(children) ? nullptr : Downcast<HTMLElement>(&*it);
+  }
+
+  RawPtr<const HTMLElement> TreeTraversal::LastHTMLElementChild(const ContainerNode &node) noexcept
+  {
+    auto children = ConstChildNodeRange(node);
+    auto it = LastOfType<HTMLElement>(children);
+    return it == std::ranges::end(children) ? nullptr : Downcast<HTMLElement>(&*it);
+  }
+
+  RawPtr<HTMLElement> TreeTraversal::LastHTMLElementChild(ContainerNode &node) noexcept
+  {
+    auto children = ChildNodeRange(node);
+    auto it = LastOfType<HTMLElement>(children);
+    return it == std::ranges::end(children) ? nullptr : Downcast<HTMLElement>(&*it);
+  }
 }

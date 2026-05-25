@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
+#include "Krystal.HTML/HTMLElement/HTMLElement.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
@@ -288,7 +289,11 @@ namespace Krys::HTML::detail
 
     KRYS_NODISCARD static RawPtr<TNode> Advance(RawPtr<match_constness_t<TNode, Node>> current) noexcept
     {
-      if constexpr (SameType<match_constness_t<TNode, Element>, TNode>)
+      if constexpr (SameType<match_constness_t<TNode, HTMLElement>, TNode>)
+      {
+        return TreeTraversal::NextHTMLElementSibling(*current);
+      }
+      else if constexpr (SameType<match_constness_t<TNode, Element>, TNode>)
       {
         return TreeTraversal::NextElementSibling(*current);
       }
@@ -313,7 +318,11 @@ namespace Krys::HTML::detail
 
     KRYS_NODISCARD static RawPtr<TNode> Advance(RawPtr<match_constness_t<TNode, Node>> current) noexcept
     {
-      if constexpr (SameType<match_constness_t<TNode, Element>, TNode>)
+      if constexpr (SameType<match_constness_t<TNode, HTMLElement>, TNode>)
+      {
+        return TreeTraversal::PreviousHTMLElementSibling(*current);
+      }
+      else if constexpr (SameType<match_constness_t<TNode, Element>, TNode>)
       {
         return TreeTraversal::PreviousElementSibling(*current);
       }
@@ -472,6 +481,12 @@ namespace Krys::HTML
     detail::ScopedSubtreeRange<detail::NextSiblingIteratorPolicy<Element, false>, Element>;
   using ConstChildElementRange =
     detail::ScopedSubtreeRange<detail::NextSiblingIteratorPolicy<const Element, false>, const Element>;
+
+  using ChildHTMLElementRange =
+    detail::ScopedSubtreeRange<detail::NextSiblingIteratorPolicy<HTMLElement, false>, HTMLElement>;
+  using ConstChildHTMLElementRange =
+    detail::ScopedSubtreeRange<detail::NextSiblingIteratorPolicy<const HTMLElement, false>,
+                               const HTMLElement>;
 
 #pragma region Node Range Algorithms
 

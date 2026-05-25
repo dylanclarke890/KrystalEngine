@@ -36,6 +36,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLBodyElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLMetaElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\Abort\AbortController.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\CustomElementAlgorithms.hpp" />
@@ -182,6 +183,7 @@
     <ClInclude Include="include\Krystal.HTML\Utils\SmallNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Infra\StringAlgorithms.hpp" />
     <ClCompile Include="src\HTMLElement\HTMLBaseElement.cpp" />
+    <ClCompile Include="src\HTMLElement\HTMLBodyElement.cpp" />
     <ClCompile Include="src\HTMLElement\HTMLHeadElement.cpp" />
     <ClCompile Include="src\HTMLElement\HTMLHtmlElement.cpp" />
     <ClCompile Include="src\HTMLElement\HTMLLinkElement.cpp" />

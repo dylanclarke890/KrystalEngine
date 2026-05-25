@@ -456,6 +456,9 @@
     <ClInclude Include="include\Krystal.HTML\Node\Enums\DocumentVisibilityState.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLBodyElement.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -657,6 +660,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\HTMLElement\HTMLStyleElement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HTMLElement\HTMLBodyElement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

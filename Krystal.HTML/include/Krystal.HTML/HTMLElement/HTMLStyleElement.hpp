@@ -15,3 +15,10 @@ namespace Krys::HTML
     // TODO(impl): URL and Target IDL attributes
   };
 }
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::HTMLStyleElement)
+  static bool IsType(const Krys::HTML::HTMLElement &target) noexcept
+  {
+    return target.IsHTMLStyleElement();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

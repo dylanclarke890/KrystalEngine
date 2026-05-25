@@ -7,6 +7,8 @@
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/DOMImplementation.hpp"
 #include "Krystal.HTML/Node/ElementCreationOptions.hpp"
+#include "Krystal.HTML/Node/Enums/DocumentReadyState.hpp"
+#include "Krystal.HTML/Node/Enums/DocumentVisibilityState.hpp"
 #include "Krystal.HTML/Node/Enums/QuirksMode.hpp"
 #include "Krystal.HTML/Node/ImportNodeOptions.hpp"
 #include "Krystal.HTML/Node/RareData/DocumentRareData.hpp"
@@ -25,6 +27,10 @@ namespace Krys::HTML
   class DocumentType;
   class Element;
   class HTMLCollection;
+  class HTMLBodyElement;
+  class HTMLHeadElement;
+  class HTMLHtmlElement;
+  class HTMLTitleElement;
   class ProcessingInstruction;
 
   class Document : public ContainerNode
@@ -52,12 +58,18 @@ namespace Krys::HTML
     UniquePtr<DocumentRareData> _documentRareData;
     UniquePtr<DOMImplementation> _implementation;
     DOMString _contentType {u8"application/xml"};
-    QuirksMode _quirksMode {QuirksMode::NoQuirks};
+    QuirksMode _quirksMode : BitCount<QuirksMode>() {QuirksMode::NoQuirks};
     Type _documentType {Type::XML};
     List<RawPtr<Range>> _liveRanges;
     List<RawPtr<NodeIterator>> _nodeIterators;
     RefPtr<CustomElementRegistry> _customElementRegistry;
     bool _allowDeclarativeShadowRoots : 1 {false};
+
+    // HTML spec extensions
+    DocumentReadyState _currentDocumentReadiness
+        : BitCount<DocumentReadyState>() {DocumentReadyState::Complete};
+    DocumentVisibilityState _visibilityState
+        : BitCount<DocumentVisibilityState>() {DocumentVisibilityState::Hidden};
 
   protected:
     Document(Type documentType) noexcept;
@@ -65,7 +77,7 @@ namespace Krys::HTML
   public:
     Document() noexcept;
 
-#pragma region Document
+#pragma region Document - https://dom.spec.whatwg.org/#interface-document
 
     KRYS_NODISCARD DOMImplementation &Implementation() noexcept;
     KRYS_NODISCARD DOMString URL() const noexcept;
@@ -118,7 +130,7 @@ namespace Krys::HTML
 
 #pragma endregion
 
-#pragma region Node
+#pragma region Node - https://dom.spec.whatwg.org/#interface-node
 
     KRYS_NODISCARD DOMString NodeName() const noexcept final
     {
@@ -209,26 +221,109 @@ namespace Krys::HTML
 
 #pragma endregion
 
+#pragma region HTML spec extensions - https://html.spec.whatwg.org/multipage/dom.html#the-document-object
+
+    KRYS_NODISCARD static Ref<Document> ParseHTMLUnsafe(const DOMString &html) noexcept;
+
+    // TODO(check): do we need to implement these?
+    // resource metadata management
+    // [ PutForwards = href, LegacyUnforgeable ] readonly attribute Location? location;
+    // attribute USVString domain;
+    // readonly attribute USVString referrer;
+    // attribute USVString cookie;
+    // readonly attribute DOMString lastModified;
+
+    KRYS_NODISCARD DocumentReadyState ReadyState() const noexcept
+    {
+      return _currentDocumentReadiness;
+    }
+
+    // DOM tree accessors
+    // getter object (DOMString name);
+
+    KRYS_NODISCARD DOMString Title() const noexcept;
+    ExceptionOr<void> Title(DOMString &&value) noexcept;
+
+    KRYS_NODISCARD DOMString Dir() const noexcept;
+    void Dir(DOMString &&value) noexcept;
+
+    // NOTE: the HTML spec says that body returns a HTMLElement but that's because it can also return a
+    // HTMLFrameSetElement which is a legacy element that we don't support. In our case, body will always
+    // return an HTMLBodyElement if it exists.
+
+    KRYS_NODISCARD RefPtr<HTMLBodyElement> Body() noexcept;
+    KRYS_NODISCARD RefPtr<const HTMLBodyElement> Body() const noexcept;
+    ExceptionOr<void> Body(HTMLBodyElement &body) noexcept;
+
+    KRYS_NODISCARD RefPtr<HTMLHeadElement> Head() noexcept;
+    KRYS_NODISCARD RefPtr<const HTMLHeadElement> Head() const noexcept;
+
+    // [SameObject] readonly attribute HTMLCollection images;
+    // [SameObject] readonly attribute HTMLCollection embeds;
+    // [SameObject] readonly attribute HTMLCollection plugins;
+    // [SameObject] readonly attribute HTMLCollection links;
+    // [SameObject] readonly attribute HTMLCollection forms;
+    // [SameObject] readonly attribute HTMLCollection scripts;
+    // NodeList getElementsByName(DOMString elementName);
+    // readonly attribute HTMLOrSVGScriptElement? currentScript; // classic scripts in a document tree only
+
+    // dynamic markup insertion
+    // [CEReactions] Document open(optional DOMString unused1, optional DOMString unused2);
+    // WindowProxy? open(USVString url, DOMString name, DOMString features);
+    // [CEReactions] undefined close();
+    // [CEReactions] undefined write((TrustedHTML or DOMString)... text);
+    // [CEReactions] undefined writeln((TrustedHTML or DOMString)... text);
+
+    // user interaction
+    // readonly attribute WindowProxy? defaultView;
+    // boolean hasFocus();
+    // [CEReactions] attribute DOMString designMode;
+    // [CEReactions] boolean execCommand(DOMString commandId, optional boolean showUI = false, optional
+    // DOMString value = "");
+    // boolean queryCommandEnabled(DOMString commandId);
+    // boolean queryCommandIndeterm(DOMString commandId);
+    // boolean queryCommandState(DOMString commandId);
+    // boolean queryCommandSupported(DOMString commandId);
+    // DOMString queryCommandValue(DOMString commandId);
+
+    KRYS_NODISCARD bool Hidden() const noexcept
+    {
+      return _visibilityState == DocumentVisibilityState::Hidden;
+    }
+
+    KRYS_NODISCARD DocumentVisibilityState VisibilityState() const noexcept
+    {
+      return _visibilityState;
+    }
+
+    // special event handler IDL attributes that only apply to Document objects
+    // [LegacyLenientThis] attribute EventHandler onreadystatechange;
+    // attribute EventHandler onvisibilitychange;
+
   protected:
-    KRYS_NODISCARD List<RawPtr<Range>> &LiveRanges() noexcept
+    KRYS_NODISCARD RefPtr<HTMLHtmlElement> GetHTMLHtmlElement() noexcept;
+    KRYS_NODISCARD RefPtr<const HTMLHtmlElement> GetHTMLHtmlElement() const noexcept;
+
+    KRYS_NODISCARD RefPtr<HTMLTitleElement> GetHTMLTitleElement() noexcept;
+    KRYS_NODISCARD RefPtr<const HTMLTitleElement> GetHTMLTitleElement() const noexcept;
+
+  public:
+#pragma endregion
+
+  protected:
+#pragma region Type Checks
+
+    KRYS_NODISCARD bool IsHTMLDocument() const noexcept
     {
-      return _liveRanges;
+      return _documentType == Type::HTML;
     }
 
-    KRYS_NODISCARD const List<RawPtr<Range>> &LiveRanges() const noexcept
+    KRYS_NODISCARD bool IsXMLDocument() const noexcept
     {
-      return _liveRanges;
+      return _documentType == Type::HTML;
     }
 
-    KRYS_NODISCARD List<RawPtr<NodeIterator>> &NodeIterators() noexcept
-    {
-      return _nodeIterators;
-    }
-
-    KRYS_NODISCARD const List<RawPtr<NodeIterator>> &NodeIterators() const noexcept
-    {
-      return _nodeIterators;
-    }
+#pragma endregion
 
     /// @see https://dom.spec.whatwg.org/#get-the-parent
     KRYS_NODISCARD RawPtr<EventTarget> GetParent(Event &event) const noexcept override
@@ -241,14 +336,14 @@ namespace Krys::HTML
       return nullptr;
     }
 
-    KRYS_NODISCARD bool IsHTMLDocument() const noexcept
+    KRYS_NODISCARD List<RawPtr<Range>> &LiveRanges() noexcept
     {
-      return _documentType == Type::HTML;
+      return _liveRanges;
     }
 
-    KRYS_NODISCARD bool IsXMLDocument() const noexcept
+    KRYS_NODISCARD List<RawPtr<NodeIterator>> &NodeIterators() noexcept
     {
-      return _documentType == Type::HTML;
+      return _nodeIterators;
     }
   };
 }

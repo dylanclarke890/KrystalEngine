@@ -6,8 +6,9 @@
 namespace Krys::HTML
 {
   class ContainerNode;
-  class Node;
   class Element;
+  class HTMLElement;
+  class Node;
   class Text;
 
   class TreeTraversal
@@ -79,5 +80,17 @@ namespace Krys::HTML
 
     KRYS_NODISCARD static RawPtr<Text> NextExclusiveTextNode(const Node &current,
                                                              RawPtr<const Node> stayWithin) noexcept;
+
+    KRYS_NODISCARD static RawPtr<const HTMLElement> NextHTMLElementSibling(const Node &current) noexcept;
+    KRYS_NODISCARD static RawPtr<HTMLElement> NextHTMLElementSibling(Node &current) noexcept;
+
+    KRYS_NODISCARD static RawPtr<const HTMLElement> PreviousHTMLElementSibling(const Node &current) noexcept;
+    KRYS_NODISCARD static RawPtr<HTMLElement> PreviousHTMLElementSibling(Node &current) noexcept;
+
+    KRYS_NODISCARD static RawPtr<const HTMLElement> FirstHTMLElementChild(const ContainerNode &node) noexcept;
+    KRYS_NODISCARD static RawPtr<HTMLElement> FirstHTMLElementChild(ContainerNode &node) noexcept;
+
+    KRYS_NODISCARD static RawPtr<const HTMLElement> LastHTMLElementChild(const ContainerNode &node) noexcept;
+    KRYS_NODISCARD static RawPtr<HTMLElement> LastHTMLElementChild(ContainerNode &node) noexcept;
   };
 }
