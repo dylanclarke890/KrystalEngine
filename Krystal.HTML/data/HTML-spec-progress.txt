@@ -1,4 +1,19 @@
-Important Sections:
+﻿Important Sections:
 
 Section 2.1.4: DOM Trees - https://html.spec.whatwg.org/multipage/infrastructure.html#dom-trees
   - Defines HTML Standard extensibility hook steps for inserting, removing, moving etc. any Element within the HTML namespace.
+
+Section 2.3.3: Keywords and Enumerated Attributes - https://html.spec.whatwg.org/multipage/common-microsyntaxes.html#keywords-and-enumerated-attributes
+  - 'To determine the state of an attribute' algorithm will be useful later
+
+Section 2.5.6: Nonce attribute - https://html.spec.whatwg.org/multipage/urls-and-fetching.html#nonce-attributes
+  - Defines the nonce attribute along with attribute change / cloning steps
+
+Section 2.6.1: Reflecting content attributes as IDL attributes - https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflecting-content-attributes-in-idl-attributes
+  - Defines the various algorithms to use when an IDL attribute is marked with [Reflect].
+
+Section 2.6.4.1: HTMLAllCollection - https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#the-htmlallcollection-interface
+  - Needed to support document.all, has special, legacy behavior to keep in mind.
+
+Section 2.6.5: DOMStringList - https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#the-domstringlist-interface
+  - Old legacy API for representing a list of DOMStrings.
