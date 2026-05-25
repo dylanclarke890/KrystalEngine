@@ -2,7 +2,7 @@
 #include "Krystal.HTML/Abort/AbortController.hpp"
 #include "Krystal.HTML/Algorithms/EventDispatcher.hpp"
 #include "Krystal.HTML/Events/EventNames.hpp"
-#include "Krystal.HTML/Utils/Exception.hpp"
+#include "Krystal.HTML/Types/Exception.hpp"
 
 namespace Krys::HTML
 {

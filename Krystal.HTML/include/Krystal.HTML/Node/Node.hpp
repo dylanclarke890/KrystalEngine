@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/DOMString.hpp"
+#include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.HTML/Events/EventTarget.hpp"
 #include "Krystal.HTML/Node/RareData/NodeRareData.hpp"
-#include "Krystal.HTML/Utils/ExceptionOr.hpp"
-#include "Krystal.HTML/Utils/NodeOrString.hpp"
-#include "Krystal.HTML/Utils/SmallNodeList.hpp"
+#include "Krystal.HTML/Types/ExceptionOr.hpp"
+#include "Krystal.HTML/Types/NodeOrString.hpp"
+#include "Krystal.HTML/Types/SmallNodeList.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"

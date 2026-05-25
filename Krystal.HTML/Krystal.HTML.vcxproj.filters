@@ -105,7 +105,7 @@
     <ClInclude Include="include\Krystal.HTML\Events\EventInit.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\DOMHighResTimeStamp.hpp">
+    <ClInclude Include="include\Krystal.HTML\Types\DOMHighResTimeStamp.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Events\CustomEventInit.hpp">
@@ -126,13 +126,10 @@
     <ClInclude Include="include\Krystal.HTML\Events\EventNames.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Utils\ExceptionCode.hpp">
+    <ClInclude Include="include\Krystal.HTML\Types\Exception.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Utils\Exception.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Utils\ExceptionOr.hpp">
+    <ClInclude Include="include\Krystal.HTML\Types\ExceptionOr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\DocumentFragment.hpp">
@@ -147,7 +144,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\CharacterData.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\DOMString.hpp">
+    <ClInclude Include="include\Krystal.HTML\Types\DOMString.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\Attr.hpp">
@@ -174,7 +171,7 @@
     <ClInclude Include="include\Krystal.HTML\Algorithms\EventDispatcher.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Utils\BoolOr.hpp">
+    <ClInclude Include="include\Krystal.HTML\Types\BoolOr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\CustomElement\CustomElementRegistry.hpp">
@@ -219,7 +216,7 @@
     <ClInclude Include="include\Krystal.HTML\Iterator\NodeFilter.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Utils\SmallNodeList.hpp">
+    <ClInclude Include="include\Krystal.HTML\Types\SmallNodeList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\HTMLCollection.hpp">
@@ -261,9 +258,6 @@
     <ClInclude Include="include\Krystal.HTML\Infra\StringAlgorithms.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Infra\Namespaces.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Algorithms\OrderedSet.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -282,7 +276,7 @@
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLSlotElement.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Utils\SubtreeRanges.hpp">
+    <ClInclude Include="include\Krystal.HTML\Algorithms\SubtreeRanges.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Algorithms\SlotAlgorithms.hpp">
@@ -306,7 +300,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\Enums\CustomElementState.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Utils\NodeOrString.hpp">
+    <ClInclude Include="include\Krystal.HTML\Types\NodeOrString.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Mixins\ChildNode.hpp">
@@ -472,6 +466,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\HTMLElement\ElementInternals.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Constants\Namespaces.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Constants\MIMETypes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Constants\Attributes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Constants\Keywords.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

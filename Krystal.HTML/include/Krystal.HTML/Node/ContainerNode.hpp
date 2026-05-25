@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/Node/Node.hpp"
-#include "Krystal.HTML/Utils/ExceptionOr.hpp"
+#include "Krystal.HTML/Types/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 

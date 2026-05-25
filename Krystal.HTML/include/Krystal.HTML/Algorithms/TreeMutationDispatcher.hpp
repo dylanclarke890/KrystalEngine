@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/DOMString.hpp"
-#include "Krystal.HTML/Utils/SmallNodeList.hpp"
+#include "Krystal.HTML/Types/DOMString.hpp"
+#include "Krystal.HTML/Types/SmallNodeList.hpp"
 #include "Krystal.Lib/Pointers/ReferenceWrapper.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"

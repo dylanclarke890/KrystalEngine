@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/DOMString.hpp"
+#include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.HTML/Node/Enums/CustomElementState.hpp"
 #include "Krystal.HTML/QualifiedName.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"

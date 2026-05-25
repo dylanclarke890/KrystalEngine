@@ -2,9 +2,9 @@
 #include "Krystal.HTML.Tests/TestElement.hpp"
 #include "Krystal.HTML.Tests/TestNode.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/Constants/Namespaces.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
-#include "Krystal.HTML/Infra/Namespaces.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Comment.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
@@ -321,14 +321,14 @@ namespace Krys::Tests
 
     SECTION("Attr")
     {
-      auto attribute = document->CreateAttributeNS(Namespaces::XML, u8"xml:name");
+      auto attribute = document->CreateAttributeNS(Namespace::XML, u8"xml:name");
       REQUIRE_FALSE(attribute.HasException());
       attribute->Value(u8"value");
 
       auto clone = attribute->CloneNode();
 
       auto &attributeClone = Downcast<Attr>(*clone.Value());
-      REQUIRE(attributeClone.NamespaceURI() == Namespaces::XML);
+      REQUIRE(attributeClone.NamespaceURI() == Namespace::XML);
       REQUIRE(attributeClone.LocalName() == u8"name");
       REQUIRE(attributeClone.Prefix() == u8"xml");
       REQUIRE(attributeClone.Value() == u8"value");
@@ -600,12 +600,12 @@ namespace Krys::Tests
 
       SECTION("returns XML namespace if prefix is 'xml'")
       {
-        REQUIRE(element->LookupNamespaceURI(u8"xml") == Namespaces::XML);
+        REQUIRE(element->LookupNamespaceURI(u8"xml") == Namespace::XML);
       }
 
       SECTION("returns XMLNS namespace if prefix is 'xmlns'")
       {
-        REQUIRE(element->LookupNamespaceURI(u8"xmlns") == Namespaces::XMLNS);
+        REQUIRE(element->LookupNamespaceURI(u8"xmlns") == Namespace::XMLNS);
       }
 
       SECTION("returns it's namespace when non null and it's prefix matches")

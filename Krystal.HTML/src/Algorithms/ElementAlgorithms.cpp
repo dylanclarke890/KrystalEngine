@@ -3,9 +3,9 @@
 #include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
+#include "Krystal.HTML/Constants/Namespaces.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
-#include "Krystal.HTML/Infra/Namespaces.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/HTMLDocument.hpp"
@@ -155,7 +155,7 @@ namespace Krys::HTML
   RawPtr<Attr> ElementAlgorithms::GetAttributeByName(DOMStringAtom qualifiedName,
                                                      const Element &element) noexcept
   {
-    if (element.NamespaceURI() == Namespaces::HTML && Is<HTMLDocument>(element.NodeDocument()))
+    if (element.NamespaceURI() == Namespace::HTML && Is<HTMLDocument>(element.NodeDocument()))
     {
       qualifiedName = Krys::Text::ToASCIILowercase(qualifiedName.View());
     }

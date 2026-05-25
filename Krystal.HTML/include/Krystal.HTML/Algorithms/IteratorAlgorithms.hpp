@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/Iterator/FilterResult.hpp"
-#include "Krystal.HTML/Utils/ExceptionOr.hpp"
+#include "Krystal.HTML/Types/ExceptionOr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 
 namespace Krys::HTML

@@ -2,9 +2,9 @@
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/Constants/Namespaces.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
-#include "Krystal.HTML/Infra/Namespaces.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
@@ -20,7 +20,7 @@ namespace Krys::HTML
                                                            SlotAssignmentMode slotAssignment,
                                                            RawPtr<CustomElementRegistry> registry) noexcept
   {
-    if (element.NamespaceURI() != Namespaces::HTML)
+    if (element.NamespaceURI() != Namespace::HTML)
     {
       return Exception {ExceptionCode::NotSupportedError};
     }

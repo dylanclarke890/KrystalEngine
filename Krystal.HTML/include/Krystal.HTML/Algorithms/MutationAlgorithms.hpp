@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Utils/ExceptionOr.hpp"
+#include "Krystal.HTML/Types/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Types/StronglyTypedValue.hpp"

@@ -32,7 +32,7 @@
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/Ranges/Range.hpp"
-#include "Krystal.HTML/Utils/SubtreeRanges.hpp"
+#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.Text/ASCII.hpp"
 #include <cassert>
 
@@ -164,7 +164,7 @@ namespace Krys::HTML
     DOMStringAtom namespaceURI = DOMStringAtom::Null();
     if (Is<HTMLDocument>(*this) || _contentType == u8"application/xhtml+xml")
     {
-      namespaceURI = Namespaces::HTML;
+      namespaceURI = Namespace::HTML;
     }
 
     return ElementFactory::Create(*this, {namespaceURI, DOMStringAtom::Null(), localName},
@@ -452,7 +452,7 @@ namespace Krys::HTML
     // String replace all with the given value within element.
 
     auto documentElement = DocumentElement();
-    if (documentElement->NamespaceURI() == Namespaces::HTML)
+    if (documentElement->NamespaceURI() == Namespace::HTML)
     {
       auto head = Head();
       auto title = GetHTMLTitleElement();
@@ -464,7 +464,7 @@ namespace Krys::HTML
 
       if (title == nullptr)
       {
-        title = ElementFactory::Create(*this, {Namespaces::HTML, DOMStringAtom::Null(), u8"title"});
+        title = ElementFactory::Create(*this, {Namespace::HTML, DOMStringAtom::Null(), u8"title"});
 
         if (auto append = MutationAlgorithms::Append(*documentElement, *title); append.HasException())
         {

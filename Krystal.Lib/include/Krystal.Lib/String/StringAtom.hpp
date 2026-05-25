@@ -54,22 +54,12 @@ namespace Krys
 
   private:
     Set<utf8_string, UTF8Hash, UTF8KeyEqual> _strings;
-    InternedString _empty;
 
   public:
-    StringAtomPool()
-    {
-      auto [it, inserted] = _strings.insert(utf8_string {u8""});
-      _empty = std::addressof(*it);
-    }
+    StringAtomPool() noexcept = default;
 
-    KRYS_NODISCARD InternedString GetOrAdd(utf8_stringview v)
+    KRYS_NODISCARD InternedString GetOrAdd(utf8_stringview v) noexcept
     {
-      if (!v.data() || v.size() == 0)
-      {
-        return _empty;
-      }
-
       if (auto it = _strings.find(v); it != _strings.end())
       {
         return std::addressof(*it);
@@ -80,18 +70,13 @@ namespace Krys
       return std::addressof(*insertedIt);
     }
 
-    KRYS_NODISCARD InternedString GetOrAdd(const utf8_string &s)
+    KRYS_NODISCARD InternedString GetOrAdd(const utf8_string &s) noexcept
     {
       return GetOrAdd(utf8_stringview {s});
     }
 
-    KRYS_NODISCARD InternedString GetOrAdd(utf8_string &&s)
+    KRYS_NODISCARD InternedString GetOrAdd(utf8_string &&s) noexcept
     {
-      if (s.empty())
-      {
-        return _empty;
-      }
-
       if (auto it = _strings.find(utf8_stringview {s}); it != _strings.end())
       {
         return std::addressof(*it);
@@ -111,7 +96,7 @@ namespace Krys
 
     static StringAtomPool &Pool()
     {
-      static StringAtomPool globalPool;
+      static StringAtomPool globalPool {};
       return globalPool;
     }
 

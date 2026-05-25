@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Utils/ExceptionOr.hpp"
-#include "Krystal.HTML/Utils/NodeOrString.hpp"
+#include "Krystal.HTML/Types/ExceptionOr.hpp"
+#include "Krystal.HTML/Types/NodeOrString.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 
 namespace Krys::HTML

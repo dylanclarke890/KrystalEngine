@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/CustomElement/CustomElementConstructor.hpp"
-#include "Krystal.HTML/DOMString.hpp"
+#include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 
 namespace Krys::HTML

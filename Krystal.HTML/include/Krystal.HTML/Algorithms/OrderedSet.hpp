@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/Infra/StringAlgorithms.hpp"
-#include "Krystal.HTML/DOMString.hpp"
+#include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Span.hpp"

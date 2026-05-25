@@ -1,12 +1,13 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.Lib/Core/Move.hpp"
+#include "Krystal.Lib/String/String.hpp"
 
 namespace Krys::HTML
 {
   /// @see https://webidl.spec.whatwg.org/#idl-DOMException-error-names.
-  /// @note Needs to be kept in sync with the array in Exception.cpp.
   enum class ExceptionCode : uint8
   {
     IndexSizeError, // Deprecated. Use RangeError instead.
@@ -57,3 +58,29 @@ namespace Krys::HTML
 }
 
 KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::ExceptionCode, 38u)
+
+namespace Krys::HTML
+{
+  class Exception
+  {
+  private:
+    ExceptionCode _code;
+    utf8_string _message;
+
+  public:
+    explicit Exception(ExceptionCode code, utf8_string &&message = {}) noexcept
+        : _code {code}, _message {Krys::Move(message)}
+    {
+    }
+
+    KRYS_NODISCARD ExceptionCode Code() const noexcept
+    {
+      return _code;
+    }
+
+    KRYS_NODISCARD const utf8_string &Message() const noexcept
+    {
+      return _message;
+    }
+  };
+}

@@ -2,17 +2,17 @@
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/Constants/Namespaces.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/MutationObserver/MutationObserver.hpp"
-#include "Krystal.HTML/Infra/Namespaces.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
-#include "Krystal.HTML/Utils/SubtreeRanges.hpp"
+#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 
 namespace Krys::HTML
 {
@@ -77,7 +77,7 @@ namespace Krys::HTML
               return element;
             }
 
-            if (element->NamespaceURI() == Namespaces::HTML
+            if (element->NamespaceURI() == Namespace::HTML
                 && ElementAlgorithms::GetAttributeValue(*element, u8"name") == name)
             {
               return element;
@@ -154,7 +154,7 @@ namespace Krys::HTML
       {
         return element.get();
       }
-      if (element->NamespaceURI() == Namespaces::HTML
+      if (element->NamespaceURI() == Namespace::HTML
           && ElementAlgorithms::GetAttributeValue(*element, u8"name") == name)
       {
         return element.get();

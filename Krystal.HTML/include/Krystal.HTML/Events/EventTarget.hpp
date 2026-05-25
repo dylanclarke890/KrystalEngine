@@ -1,12 +1,12 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/DOMString.hpp"
+#include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.HTML/Events/EventListener.hpp"
 #include "Krystal.HTML/Events/EventListenerOptions.hpp"
 #include "Krystal.HTML/Events/EventTargetFlag.hpp"
 #include "Krystal.HTML/Events/RegisteredEventListener.hpp"
-#include "Krystal.HTML/Utils/BoolOr.hpp"
-#include "Krystal.HTML/Utils/ExceptionOr.hpp"
+#include "Krystal.HTML/Types/BoolOr.hpp"
+#include "Krystal.HTML/Types/ExceptionOr.hpp"
 #include "Krystal.Lib/Mixins/CanMakeWeakPtr.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"

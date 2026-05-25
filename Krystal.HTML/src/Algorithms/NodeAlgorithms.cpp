@@ -28,7 +28,7 @@
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/Node/XMLDocument.hpp"
-#include "Krystal.HTML/Utils/SubtreeRanges.hpp"
+#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 
 namespace Krys::HTML
 {

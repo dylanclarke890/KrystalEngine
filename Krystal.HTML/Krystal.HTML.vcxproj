@@ -38,6 +38,10 @@
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML\Algorithms\ContentAttributeReflection.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\RenderBlocking.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Constants\Attributes.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Constants\Keywords.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Constants\MIMETypes.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Constants\Namespaces.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLElement\ElementInternals.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLBodyElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLMetaElement.hpp" />
@@ -88,7 +92,6 @@
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationRecordType.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\RegisteredObserver.hpp" />
     <ClInclude Include="include\Krystal.HTML\MutationObserver\TransientRegisteredObserver.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Infra\Namespaces.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\NameValidation.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\NodeAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\CustomElement\CustomElementRegistry.hpp" />
@@ -107,7 +110,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\NamedNodeMap.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\XMLDocument.hpp" />
     <ClInclude Include="include\Krystal.HTML\SVGElement\SVGElement.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Utils\NodeOrString.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Types\NodeOrString.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\RareData\ParentNodeRareData.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\ShadowRoot.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\ShadowRootInit.hpp" />
@@ -124,12 +127,12 @@
     <ClInclude Include="include\Krystal.HTML\Node\CDATASection.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\CharacterData.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\DocumentType.hpp" />
-    <ClInclude Include="include\Krystal.HTML\DOMString.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Types\DOMString.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Comment.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\ContainerNode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Document.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\DocumentFragment.hpp" />
-    <ClInclude Include="include\Krystal.HTML\DOMHighResTimeStamp.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Types\DOMHighResTimeStamp.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Element.hpp" />
     <ClInclude Include="include\Krystal.HTML\Abort\AbortSignal.hpp" />
     <ClInclude Include="include\Krystal.HTML\Events\CustomEvent.hpp" />
@@ -179,13 +182,12 @@
     <ClInclude Include="include\Krystal.HTML\Ranges\Range.hpp" />
     <ClInclude Include="include\Krystal.HTML\Ranges\StaticRange.hpp" />
     <ClInclude Include="include\Krystal.HTML\URL.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Utils\BoolOr.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Utils\Exception.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Utils\ExceptionCode.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Utils\ExceptionOr.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Utils\SubtreeRanges.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Types\BoolOr.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Types\Exception.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Types\ExceptionOr.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Algorithms\SubtreeRanges.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\OrderedSet.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Utils\SmallNodeList.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Types\SmallNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Infra\StringAlgorithms.hpp" />
     <ClCompile Include="src\Algorithms\RenderBlocking.cpp" />
     <ClCompile Include="src\HTMLElement\HTMLBaseElement.cpp" />

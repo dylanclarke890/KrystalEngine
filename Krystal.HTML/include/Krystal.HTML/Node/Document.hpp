@@ -14,7 +14,7 @@
 #include "Krystal.HTML/Node/RareData/DocumentRareData.hpp"
 #include "Krystal.HTML/Ranges/Range.hpp"
 #include "Krystal.HTML/URL.hpp"
-#include "Krystal.HTML/Utils/ExceptionOr.hpp"
+#include "Krystal.HTML/Types/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 

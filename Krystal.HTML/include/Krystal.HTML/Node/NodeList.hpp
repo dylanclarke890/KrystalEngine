@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/Node/Enums/NodeCollectionLiveness.hpp"
-#include "Krystal.HTML/Utils/SmallNodeList.hpp"
+#include "Krystal.HTML/Types/SmallNodeList.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Mixins/CanMakeWeakPtr.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"

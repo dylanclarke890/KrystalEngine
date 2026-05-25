@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/HTMLElement/ShowPopoverOptions.hpp"
-#include "Krystal.HTML/Utils/BoolOr.hpp"
+#include "Krystal.HTML/Types/BoolOr.hpp"
 
 namespace Krys::HTML
 {

@@ -2,6 +2,7 @@
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/NameValidation.hpp"
+#include "Krystal.HTML/Constants/Namespaces.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementDefinition.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Factories/CustomElementFactory.hpp"
@@ -11,7 +12,6 @@
 #include "Krystal.HTML/HTMLElement/HTMLElement.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/MathMLElement/MathMLElement.hpp"
-#include "Krystal.HTML/Infra/Namespaces.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
@@ -31,7 +31,7 @@ namespace Krys::HTML
       registry = document.CustomElementRegistry();
     }
 
-    if (name.NamespaceURI == Namespaces::HTML)
+    if (name.NamespaceURI == Namespace::HTML)
     {
       result = CustomElementFactory::TryCreate(document, name, is, synchronousCustomElements,
                                                registry.value().get());
@@ -45,11 +45,11 @@ namespace Krys::HTML
         }
       }
     }
-    else if (name.NamespaceURI == Namespaces::SVG)
+    else if (name.NamespaceURI == Namespace::SVG)
     {
       result = SVGElementFactory::TryCreate(document, name);
     }
-    else if (name.NamespaceURI == Namespaces::MathML)
+    else if (name.NamespaceURI == Namespace::MathML)
     {
       result = MathMLElementFactory::TryCreate(document, name);
     }

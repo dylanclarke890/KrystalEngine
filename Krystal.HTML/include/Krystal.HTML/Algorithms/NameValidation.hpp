@@ -1,10 +1,10 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/Constants/Namespaces.hpp"
+#include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.HTML/Infra/StringAlgorithms.hpp"
-#include "Krystal.HTML/DOMString.hpp"
-#include "Krystal.HTML/Infra/Namespaces.hpp"
 #include "Krystal.HTML/QualifiedName.hpp"
-#include "Krystal.HTML/Utils/ExceptionOr.hpp"
+#include "Krystal.HTML/Types/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
 #include "Krystal.Text/ASCII.hpp"
@@ -166,12 +166,12 @@ namespace Krys::HTML
         return Exception {ExceptionCode::NamespaceError};
       }
 
-      if (prefix == Namespaces::XMLPrefix && namespaceURI != Namespaces::XML)
+      if (prefix == NamespacePrefix::XML && namespaceURI != Namespace::XML)
       {
         return Exception {ExceptionCode::NamespaceError};
       }
 
-      if (prefix == Namespaces::XMLNSPrefix && namespaceURI != Namespaces::XMLNS)
+      if (prefix == NamespacePrefix::XMLNS && namespaceURI != Namespace::XMLNS)
       {
         return Exception {ExceptionCode::NamespaceError};
       }
@@ -265,7 +265,6 @@ namespace Krys::HTML
       {
         return false;
       }
-
 
       for (auto ch : utf32_stringview {utf32.begin() + 1uz, utf32.end()})
       {

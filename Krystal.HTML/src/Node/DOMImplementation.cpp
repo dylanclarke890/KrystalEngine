@@ -71,11 +71,11 @@ namespace Krys::HTML
 
     // TODO(impl): ORIGIN - doc’s origin is this’s associated document’s origin.
 
-    if (namespaceUri == Namespaces::HTML)
+    if (namespaceUri == Namespace::HTML)
     {
       document->_contentType = u8"text/html";
     }
-    else if (namespaceUri == Namespaces::SVG)
+    else if (namespaceUri == Namespace::SVG)
     {
       document->_contentType = u8"image/svg+xml";
     }
@@ -98,7 +98,7 @@ namespace Krys::HTML
       return appendResult.ReleaseException();
     }
 
-    auto qualifiedName = QualifiedName {Namespaces::HTML, DOMStringAtom::Null(), u8"html"};
+    auto qualifiedName = QualifiedName {Namespace::HTML, DOMStringAtom::Null(), u8"html"};
     auto htmlElement = ElementFactory::Create(*document, qualifiedName);
     if (auto appendResult = document->AppendChild(*htmlElement); appendResult.HasException())
     {

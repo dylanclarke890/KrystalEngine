@@ -2,13 +2,13 @@
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
+#include "Krystal.HTML/Constants/Namespaces.hpp"
+#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Events/EventTarget.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
-#include "Krystal.HTML/Infra/Namespaces.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CDATASection.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
-#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/DocumentType.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
@@ -16,7 +16,7 @@
 #include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
-#include "Krystal.HTML/Utils/SubtreeRanges.hpp"
+#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.Lib/Ranges/Algorithm.hpp"
 #include <ranges>
 
@@ -201,7 +201,7 @@ namespace Krys::HTML
 
     for (auto &attribute : element._attributes)
     {
-      if (attribute->Prefix() == Namespaces::XMLNSPrefix && attribute->Value() == namespaceURI)
+      if (attribute->Prefix() == NamespacePrefix::XMLNS && attribute->Value() == namespaceURI)
       {
         return attribute->LocalName();
       }
@@ -222,14 +222,14 @@ namespace Krys::HTML
     {
       case NodeType::ELEMENT_NODE:
       {
-        if (prefix == Namespaces::XMLPrefix)
+        if (prefix == NamespacePrefix::XML)
         {
-          return Namespaces::XML;
+          return Namespace::XML;
         }
 
-        if (prefix == Namespaces::XMLNSPrefix)
+        if (prefix == NamespacePrefix::XMLNS)
         {
-          return Namespaces::XMLNS;
+          return Namespace::XMLNS;
         }
 
         auto &element = Downcast<Element>(node);
@@ -240,15 +240,15 @@ namespace Krys::HTML
 
         for (auto &attribute : element._attributes)
         {
-          if (attribute->NamespaceURI() == Namespaces::XMLNS && attribute->Prefix() == Namespaces::XMLNSPrefix
+          if (attribute->NamespaceURI() == Namespace::XMLNS && attribute->Prefix() == NamespacePrefix::XMLNS
               && attribute->LocalName() == prefix)
           {
             return attribute->Value().empty() ? DOMStringAtom::Null() : attribute->Value();
           }
 
-          if (prefix == DOMStringAtom::Null() && attribute->NamespaceURI() == Namespaces::XMLNS
+          if (prefix == DOMStringAtom::Null() && attribute->NamespaceURI() == Namespace::XMLNS
               && attribute->Prefix() == DOMStringAtom::Null()
-              && attribute->LocalName() == Namespaces::XMLNSPrefix)
+              && attribute->LocalName() == NamespacePrefix::XMLNS)
           {
             return attribute->Value().empty() ? DOMStringAtom::Null() : attribute->Value();
           }
