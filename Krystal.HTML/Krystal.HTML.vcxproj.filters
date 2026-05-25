@@ -258,9 +258,6 @@
     <ClInclude Include="include\Krystal.HTML\Infra\StringAlgorithms.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Algorithms\OrderedSet.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Events\EventPath.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -480,6 +477,9 @@
     <ClInclude Include="include\Krystal.HTML\Constants\Keywords.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\OrderedSet.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -687,6 +687,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Algorithms\RenderBlocking.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DOM\Algorithms\OrderedSet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.HTML/HTMLElement/ElementInternals.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
+#include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
@@ -17,29 +17,26 @@ namespace Krys::HTML
   // TODO(impl): CONTENT-ATTRIBUTE-REFLECTION - FrozenArray<T>? is also one of the possible types but we
   // currently don't support it.
   template <typename T>
-  concept ReflectedAttributeType =
-    OneOf<DOMString, Maybe<DOMString>, bool, int32, uint32, double, DOMTokenList>;
+  concept IDLReflectionType = OneOf<DOMString, Maybe<DOMString>, bool, int32, uint32, double, DOMTokenList>;
 
   template <typename T>
-  concept ReflectionTarget = OneOf<HTMLElement, ElementInternals>;
+  concept IDLReflectionTarget = OneOf<HTMLElement, ElementInternals>;
 
-  /// @see
-  /// https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflecting-content-attributes-in-idl-attributes
+  /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflect
   class ContentAttributeReflection
   {
   public:
-    template <ReflectedAttributeType TValue, ReflectionTarget Target>
+    template <IDLReflectionType TValue, IDLReflectionTarget Target>
     static TValue Reflect(Target &target, DOMStringAtom name) noexcept
     {
       if constexpr (SameType<TValue, DOMString>)
       {
         auto *element = GetElement(target);
         auto contentAttribute = GetContentAttribute(target, name);
-
       }
     }
 
-    template <ReflectedAttributeType TValue, ReflectionTarget Target>
+    template <IDLReflectionType TValue, IDLReflectionTarget Target>
     static void Reflect(Target &target, DOMStringAtom name, DOMString &&value) noexcept
     {
       auto *element = GetElement(target);

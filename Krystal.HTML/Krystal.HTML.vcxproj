@@ -42,6 +42,7 @@
     <ClInclude Include="include\Krystal.HTML\Constants\Keywords.hpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\MIMETypes.hpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\Namespaces.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\OrderedSet.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLElement\ElementInternals.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLBodyElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLMetaElement.hpp" />
@@ -186,10 +187,10 @@
     <ClInclude Include="include\Krystal.HTML\Types\Exception.hpp" />
     <ClInclude Include="include\Krystal.HTML\Types\ExceptionOr.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\SubtreeRanges.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Algorithms\OrderedSet.hpp" />
     <ClInclude Include="include\Krystal.HTML\Types\SmallNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Infra\StringAlgorithms.hpp" />
     <ClCompile Include="src\Algorithms\RenderBlocking.cpp" />
+    <ClCompile Include="src\DOM\Algorithms\OrderedSet.cpp" />
     <ClCompile Include="src\HTMLElement\HTMLBaseElement.cpp" />
     <ClCompile Include="src\HTMLElement\HTMLBodyElement.cpp" />
     <ClCompile Include="src\HTMLElement\HTMLHeadElement.cpp" />

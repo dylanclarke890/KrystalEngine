@@ -1,6 +1,6 @@
 ﻿#include "Krystal.HTML/Algorithms/HTMLCollectionAlgorithms.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Algorithms/OrderedSet.hpp"
+#include "Krystal.HTML/DOM/_internal/OrderedSet.hpp"
 #include "Krystal.HTML/Constants/Namespaces.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"

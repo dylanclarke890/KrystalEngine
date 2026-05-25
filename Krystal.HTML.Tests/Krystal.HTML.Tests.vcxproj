@@ -195,7 +195,7 @@
     <ClCompile Include="tests\Parser\HTMLTokenizerIntegrationTests.cpp" />
     <ClCompile Include="tests\Parser\HTMLTokenizerStates.cpp" />
     <ClCompile Include="tests\Algorithms\TreeQueries.cpp" />
-    <ClCompile Include="tests\Algorithms\OrderedSet.cpp" />
+    <ClCompile Include="tests\DOM\Algorithms\OrderedSet.cpp" />
     <ClCompile Include="tests\Infra\StringAlgorithms.cpp" />
     <ClCompile Include="tests\Ranges\Range.cpp" />
     <ClCompile Include="tests\Ranges\StaticRange.cpp" />
