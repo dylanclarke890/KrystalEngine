@@ -1,17 +1,19 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/Types/DOMString.hpp"
+#include "Krystal.HTML/Types/DOMStringAtom.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
 #include "Krystal.HTML/Types/NodeOrString.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Pointers/RefPtr.hpp"
 
 namespace Krys::HTML
 {
   class ContainerNode;
   class CustomElementRegistry;
   class Document;
+  class Element;
   class Node;
 
   /// @see https://dom.spec.whatwg.org/#mutation-algorithms

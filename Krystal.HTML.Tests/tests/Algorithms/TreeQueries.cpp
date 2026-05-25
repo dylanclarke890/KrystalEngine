@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
+﻿#include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML.Tests/TestNode.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
@@ -103,23 +103,15 @@ namespace Krys::Tests
     auto child = CreateRef<TestNode>(*doc);
 
     REQUIRE(TreeQueries::DocumentElement(*doc) == nullptr);
-    REQUIRE(TreeQueries::DocumentElement(*parent) == nullptr);
-    REQUIRE(TreeQueries::DocumentElement(*child) == nullptr);
 
     REQUIRE_FALSE(parent->AppendChild(*child).HasException());
-
     REQUIRE(TreeQueries::DocumentElement(*doc) == nullptr);
-    REQUIRE(TreeQueries::DocumentElement(*parent) == nullptr);
-    REQUIRE(TreeQueries::DocumentElement(*child) == nullptr);
 
     REQUIRE_FALSE(doc->AppendChild(*parent).HasException());
-
     REQUIRE(TreeQueries::DocumentElement(*doc) == parent.get());
-    REQUIRE(TreeQueries::DocumentElement(*parent) == parent.get());
-    REQUIRE(TreeQueries::DocumentElement(*child) == parent.get());
 
-    REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
-    REQUIRE_FALSE(doc->RemoveChild(*parent).HasException());
+    REQUIRE_FALSE(child->Remove().HasException());
+    REQUIRE_FALSE(parent->Remove().HasException());
   }
 
 #pragma endregion

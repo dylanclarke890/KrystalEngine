@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Algorithms/NameValidation.hpp"
+﻿#include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

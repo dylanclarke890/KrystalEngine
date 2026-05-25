@@ -98,7 +98,7 @@ namespace Krys::Tests
 
   template <typename T>
   concept SlottableMixin = requires(T &node) {
-    { node.AssignedSlot() } -> SameType<RawPtr<HTMLSlotElement>>;
+    { node.AssignedSlot() } -> SameType<RefPtr<HTMLSlotElement>>;
   };
 
   TEST_CASE("Mixin::Slottable", "[HTML][Mixins]")

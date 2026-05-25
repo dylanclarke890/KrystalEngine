@@ -249,7 +249,7 @@ namespace Krys::HTML
 
 #pragma region Slottable Mixin - https://dom.spec.whatwg.org/#slotable
 
-    KRYS_NODISCARD RawPtr<HTMLSlotElement> AssignedSlot() noexcept;
+    KRYS_NODISCARD RefPtr<HTMLSlotElement> AssignedSlot() noexcept;
 
 #pragma endregion
   };

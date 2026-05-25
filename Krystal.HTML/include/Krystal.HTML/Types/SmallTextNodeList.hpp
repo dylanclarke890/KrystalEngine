@@ -13,6 +13,6 @@ namespace Krys::HTML
   /// @brief Covers 99.5%. See webkit.org/b/80706
   constexpr inline size_t OptimalSmallTextNodeListSize = 11uz;
 
-  using SmallTextNodeList = SmallList<Ref<Text>, OptimalSmallTextListSize>;
-  using SmallConstTextNodeList = SmallList<Ref<const Text>, OptimalSmallTextListSize>;
+  using SmallTextNodeList = SmallList<Ref<Text>, OptimalSmallTextNodeListSize>;
+  using SmallConstTextNodeList = SmallList<Ref<const Text>, OptimalSmallTextNodeListSize>;
 }

@@ -4,12 +4,15 @@
 #include "Krystal.HTML/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/HTMLCollectionAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"
-#include "Krystal.HTML/DOM/Algorithms/OrderedSet.hpp"
-#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
+#include "Krystal.HTML/Constants/Namespaces.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
+#include "Krystal.HTML/DOM/Algorithms/OrderedSet.hpp"
+#include "Krystal.HTML/DOM/Algorithms/TextAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Factories/ElementFactory.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLBodyElement.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLHeadElement.hpp"
@@ -32,7 +35,6 @@
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/Ranges/Range.hpp"
-#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.Text/ASCII.hpp"
 #include <cassert>
 
@@ -435,7 +437,7 @@ namespace Krys::HTML
       return {};
     }
 
-    auto value = TreeQueries::ChildTextContent(*title);
+    auto value = TextAlgorithms::ChildTextContent(*title);
 
     // TODO(impl): STRINGS - Strip and collapse ASCII whitespace in value.
 

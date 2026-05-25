@@ -3,13 +3,15 @@
 #include "Krystal.HTML/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/HTMLCollectionAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
+#include "Krystal.HTML/Constants/Namespaces.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
+#include "Krystal.HTML/DOM/Algorithms/TextAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Mixins/ChildNode.hpp"
 #include "Krystal.HTML/Mixins/NonDocumentTypeChildNode.hpp"
@@ -24,6 +26,7 @@
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.Text/ASCII.hpp"
+#include <ranges>
 
 namespace Krys::HTML
 {
@@ -379,7 +382,7 @@ namespace Krys::HTML
 
   Maybe<DOMString> Element::TextContent() const noexcept
   {
-    return TreeQueries::DescendantTextContent(*this);
+    return TextAlgorithms::DescendantTextContent(*this);
   }
 
   ExceptionOr<void> Element::TextContent(DOMString &&value) noexcept
@@ -503,7 +506,7 @@ namespace Krys::HTML
 
 #pragma region Slottable
 
-  RawPtr<HTMLSlotElement> Element::AssignedSlot() noexcept
+  RefPtr<HTMLSlotElement> Element::AssignedSlot() noexcept
   {
     return Mixins::Slottable::AssignedSlot(*this);
   }

@@ -249,7 +249,7 @@
     <ClInclude Include="include\Krystal.HTML\Ranges\BoundaryPoint.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Algorithms\NameValidation.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\NameValidation.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Infra\StringAlgorithms.hpp">
@@ -705,6 +705,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Ranges\BoundaryPoint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DOM\Algorithms\NameValidation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

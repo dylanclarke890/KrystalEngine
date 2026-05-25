@@ -1,7 +1,7 @@
 ﻿#include "Krystal.HTML/Factories/HTMLElementFactory.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/CustomElementAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/NameValidation.hpp"
+#include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLElement.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLPreElement.hpp"

@@ -2,9 +2,10 @@
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/DOM/Algorithms/TextAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Mixins/NonElementParentNode.hpp"
 #include "Krystal.HTML/Mixins/ParentNode.hpp"
@@ -31,7 +32,7 @@ namespace Krys::HTML
 
   Maybe<DOMString> DocumentFragment::TextContent() const noexcept
   {
-    return TreeQueries::DescendantTextContent(*this);
+    return TextAlgorithms::DescendantTextContent(*this);
   }
 
   ExceptionOr<void> DocumentFragment::TextContent(DOMString &&value) noexcept
