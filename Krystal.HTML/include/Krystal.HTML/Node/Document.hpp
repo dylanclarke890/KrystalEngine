@@ -38,13 +38,15 @@ namespace Krys::HTML
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Document);
     KRYS_TYPE_CAST_TRAITS_ACCESS();
 
+    friend class CustomElementAlgorithms;
+    friend class DocumentAlgorithms;
     friend class DocumentRareData;
     friend class DOMImplementation;
-    friend class MutationAlgorithms;
-    friend class LiveRangeUpdater;
-    friend class NodeAlgorithms;
     friend class HTMLCollectionAlgorithms;
-    friend class CustomElementAlgorithms;
+    friend class LiveRangeUpdater;
+    friend class MutationAlgorithms;
+    friend class NodeAlgorithms;
+    friend class RenderBlocking;
     friend class TreeMutationDispatcher;
 
   protected:
@@ -70,6 +72,8 @@ namespace Krys::HTML
         : BitCount<DocumentReadyState>() {DocumentReadyState::Complete};
     DocumentVisibilityState _visibilityState
         : BitCount<DocumentVisibilityState>() {DocumentVisibilityState::Hidden};
+
+    List<WeakRef<Element>> _renderBlockingElements;
 
   protected:
     Document(Type documentType) noexcept;

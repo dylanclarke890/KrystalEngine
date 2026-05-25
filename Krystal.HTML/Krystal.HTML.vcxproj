@@ -36,6 +36,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.HTML\Algorithms\RenderBlocking.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLBodyElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLMetaElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\Abort\AbortController.hpp" />
@@ -182,6 +183,7 @@
     <ClInclude Include="include\Krystal.HTML\Algorithms\OrderedSet.hpp" />
     <ClInclude Include="include\Krystal.HTML\Utils\SmallNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Infra\StringAlgorithms.hpp" />
+    <ClCompile Include="src\Algorithms\RenderBlocking.cpp" />
     <ClCompile Include="src\HTMLElement\HTMLBaseElement.cpp" />
     <ClCompile Include="src\HTMLElement\HTMLBodyElement.cpp" />
     <ClCompile Include="src\HTMLElement\HTMLHeadElement.cpp" />
@@ -387,6 +389,9 @@
     <None Include="data\Node\DOMImplementation.idl" />
     <None Include="data\Node\ShadowRoot.idl" />
     <None Include="data\Node\ShadowRootInit.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\HTMLElement\HTMLElement.idl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>

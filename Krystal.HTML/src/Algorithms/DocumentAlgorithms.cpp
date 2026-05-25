@@ -1,10 +1,12 @@
 ﻿#include "Krystal.HTML/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/CustomElementAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/EventDispatcher.hpp"
 #include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/Events/EventNames.hpp"
 #include "Krystal.HTML/Factories/ElementFactory.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
@@ -124,5 +126,25 @@ namespace Krys::HTML
     }
 
     return {};
+  }
+
+  void DocumentAlgorithms::UpdateCurrentDocumentReadiness(Document &document,
+                                                          DocumentReadyState readiness) noexcept
+  {
+    if (document._currentDocumentReadiness == readiness)
+    {
+      return;
+    }
+
+    document._currentDocumentReadiness = readiness;
+
+    // TODO(impl): DOCUMENT - If document is associated with an HTML parser:
+    // Let now be the current high resolution time given document's relevant global object.
+    // If readinessValue is "complete", and document's load timing info's DOM complete time is 0, then set
+    // document's load timing info's DOM complete time to now.
+    // Otherwise, if readinessValue is "interactive", and document's load timing info's DOM interactive time
+    // is 0, then set document's load timing info's DOM interactive time to now.
+
+    EventDispatcher::FireEvent(EventNames::ReadyStateChange, document);
   }
 }
