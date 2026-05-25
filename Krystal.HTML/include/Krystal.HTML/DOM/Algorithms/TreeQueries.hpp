@@ -1,20 +1,23 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Types/DOMString.hpp"
-#include "Krystal.HTML/Types/DOMStringAtom.hpp"
-#include "Krystal.HTML/Types/SmallNodeList.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Pointers/RefPtr.hpp"
-#include "Krystal.Lib/Types/List.hpp"
 
 namespace Krys::HTML
 {
   class ContainerNode;
+  class Document;
   class Element;
   class Node;
-  class Text;
 
+  /// @brief Implementations of the various tree concepts/algorithms defined in the DOM spec, grouped together
+  /// for ease of use. Also contains additional helper functions related to tree queries that aren't
+  /// explicitly defined in the spec, but are useful for implementing the algorithms.
+  /// @see https://dom.spec.whatwg.org/#trees
+  /// @see https://dom.spec.whatwg.org/#node-trees
+  /// @see https://dom.spec.whatwg.org/#document-trees
+  /// @see https://dom.spec.whatwg.org/#shadow-trees
+  /// @see https://dom.spec.whatwg.org/#interface-documentfragment
   class TreeQueries
   {
   public:
@@ -28,6 +31,8 @@ namespace Krys::HTML
 
     /// @see https://dom.spec.whatwg.org/#concept-tree-root
     KRYS_NODISCARD static const Node &Root(const Node &node) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-tree-root
     KRYS_NODISCARD static Node &Root(Node &node) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-tree-descendant
@@ -75,53 +80,41 @@ namespace Krys::HTML
     KRYS_NODISCARD static bool IsInDocumentTree(const Node &node) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#document-element
-    KRYS_NODISCARD static RawPtr<const Element> DocumentElement(const Node &node) noexcept;
+    KRYS_NODISCARD static RawPtr<const Element> DocumentElement(const Document &document) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#document-element
-    KRYS_NODISCARD static RawPtr<Element> DocumentElement(Node &node) noexcept;
+    KRYS_NODISCARD static RawPtr<Element> DocumentElement(Document &document) noexcept;
 
 #pragma endregion
 
 #pragma region Shadow Trees - https://dom.spec.whatwg.org/#shadow-trees
 
+    /// @see https://dom.spec.whatwg.org/#concept-shadow-tree
     KRYS_NODISCARD static bool IsInShadowTree(const Node &node) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#concept-tree-host-including-inclusive-ancestor
+    KRYS_NODISCARD static bool IsHostIncludingInclusiveAncestorOf(const Node &a, const Node &b) noexcept;
 
 #pragma endregion
 
-    /// @see https://dom.spec.whatwg.org/#concept-tree-host-including-inclusive-ancestor
-    KRYS_NODISCARD static bool IsHostIncludingInclusiveAncestorOf(Node &a, Node &b) noexcept;
+#pragma region Helpers
 
-    /// @see https://dom.spec.whatwg.org/#locate-a-namespace-prefix
-    KRYS_NODISCARD static DOMStringAtom LocateNamespacePrefix(const Element &element,
-                                                              DOMStringAtom namespaceURI) noexcept;
+    /// @brief Helper function for checking that `a` and `b` share the same root.
+    /// @note This does not mean that they are in a document/shadow tree.
+    KRYS_NODISCARD static bool SameRoot(const Node &a, const Node &b) noexcept;
 
-    /// @see https://dom.spec.whatwg.org/#locate-a-namespace
-    KRYS_NODISCARD static DOMStringAtom LocateNamespace(const Node &node, DOMStringAtom prefix) noexcept;
+    /// @brief Helper function for getting the closest common ancestor of two nodes.
+    KRYS_NODISCARD static RawPtr<ContainerNode> CommonAncestor(Node &a, Node &b) noexcept;
 
-    KRYS_NODISCARD static bool HasSameRoot(const Node &a, const Node &b) noexcept;
+    /// @brief Helper function for getting the closest common ancestor of two nodes.
+    KRYS_NODISCARD static RawPtr<const ContainerNode> CommonAncestor(const Node &a, const Node &b) noexcept;
 
-    KRYS_NODISCARD static bool IsConnectedInSameTreeScope(const Node &a, const Node &b) noexcept;
-    KRYS_NODISCARD static bool IsDocTypeOrDocTypeFollows(RawPtr<Node> node) noexcept;
-    KRYS_NODISCARD static bool IsExclusiveTextNode(const Node &node) noexcept;
-
+    /// @brief Helper function for getting the nth child of a node.
     KRYS_NODISCARD static RawPtr<const Node> ChildAt(const ContainerNode &node, size_t index) noexcept;
+
+    /// @brief Helper function for getting the nth child of a node.
     KRYS_NODISCARD static RawPtr<Node> ChildAt(ContainerNode &node, size_t index) noexcept;
 
-    KRYS_NODISCARD static size_t ChildNodeCount(const ContainerNode &node) noexcept;
-    KRYS_NODISCARD static size_t ChildElementCount(const ContainerNode &node) noexcept;
-    KRYS_NODISCARD static bool HasElementChild(const ContainerNode &node) noexcept;
-
-    static void CollectChildNodes(ContainerNode &parent, SmallNodeList &collection) noexcept;
-    static void CollectChildElements(ContainerNode &parent, SmallElementList &collection) noexcept;
-
-    KRYS_NODISCARD static List<Ref<Node>> InclusiveAncestors(Node &node) noexcept;
-
-    KRYS_NODISCARD static DOMString DescendantTextContent(const ContainerNode &node) noexcept;
-    KRYS_NODISCARD static DOMString ChildTextContent(const ContainerNode &node) noexcept;
-    KRYS_NODISCARD static DOMString ContiguousTextContent(const Text &node) noexcept;
-    KRYS_NODISCARD static DOMString ContiguousExclusiveTextContent(const Text &node) noexcept;
-    KRYS_NODISCARD static DOMString FollowingContiguousExclusiveTextContent(const Text &node) noexcept;
-
-    KRYS_NODISCARD static RawPtr<ContainerNode> CommonAncestorContainer(Node &a, Node &b) noexcept;
+#pragma endregion
   };
 }

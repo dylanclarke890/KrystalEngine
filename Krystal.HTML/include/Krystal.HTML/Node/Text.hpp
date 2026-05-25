@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.HTML/Node/CharacterData.hpp"
+#include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
+#include "Krystal.Lib/Pointers/WeakPtr.hpp"
 
 namespace Krys::HTML
 {
@@ -28,8 +28,10 @@ namespace Krys::HTML
 
 #pragma region Text
 
+    /// @see https://dom.spec.whatwg.org/#dom-text-splittext
     KRYS_NODISCARD ExceptionOr<Ref<Text>> SplitText(size_t offset) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#dom-text-wholetext
     KRYS_NODISCARD DOMString WholeText() const noexcept;
 
 #pragma endregion
@@ -45,7 +47,7 @@ namespace Krys::HTML
 
 #pragma region Slottable Mixin - https://dom.spec.whatwg.org/#slotable
 
-    KRYS_NODISCARD RawPtr<HTMLSlotElement> AssignedSlot() noexcept;
+    KRYS_NODISCARD RefPtr<HTMLSlotElement> AssignedSlot() noexcept;
 
 #pragma endregion
   };

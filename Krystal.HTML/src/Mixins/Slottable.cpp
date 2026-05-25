@@ -11,13 +11,13 @@
 
 namespace Krys::HTML::Mixins
 {
-  RawPtr<HTMLSlotElement> Slottable::AssignedSlot(Text &node) noexcept
+  RefPtr<HTMLSlotElement> Slottable::AssignedSlot(Text &node) noexcept
   {
-    return SlotAlgorithms::FindSlot(node, true);
+    return ShareRefPtr(SlotAlgorithms::FindSlot(node, true));
   }
 
-  RawPtr<HTMLSlotElement> Slottable::AssignedSlot(Element &node) noexcept
+  RefPtr<HTMLSlotElement> Slottable::AssignedSlot(Element &node) noexcept
   {
-    return SlotAlgorithms::FindSlot(node, true);
+    return ShareRefPtr(SlotAlgorithms::FindSlot(node, true));
   }
 }

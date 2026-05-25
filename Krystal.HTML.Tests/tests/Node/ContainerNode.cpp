@@ -236,23 +236,4 @@ namespace Krys::Tests
     parent->RemoveChild(*childA);
     parent->RemoveChild(*childB);
   }
-
-  TEST_CASE("ContainerNode::CountChildNodes", "[ContainerNode]")
-  {
-    Ref<Document> doc = CreateRef<Document>();
-    auto container = CreateRef<TestContainerNode>(*doc);
-    auto childA = CreateRef<TestContainerNode>(*doc);
-    auto childB = CreateRef<TestContainerNode>(*doc);
-
-    auto result = container->AppendChild(*childA);
-    REQUIRE_FALSE(result.HasException());
-
-    result = container->AppendChild(*childB);
-    REQUIRE_FALSE(result.HasException());
-
-    REQUIRE(container->CountChildNodes() == 2uz);
-
-    container->RemoveChild(*childA);
-    container->RemoveChild(*childB);
-  }
 }

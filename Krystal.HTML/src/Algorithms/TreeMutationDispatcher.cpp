@@ -24,10 +24,10 @@ namespace Krys::HTML
     // TODO(impl): MUTATION-OBSERVERS - Queue a mutation record
     List<int> interestedObservers;
 
-    auto nodes = TreeQueries::InclusiveAncestors(target);
-    for (auto &node : nodes)
-    {
-    }
+    //auto nodes = TreeQueries::InclusiveAncestors(target);
+    //for (auto &node : nodes)
+    //{
+    //}
   }
 
   void TreeMutationDispatcher::QueueTreeMutationRecord(Node &target, const SmallNodeList &addedNodes,

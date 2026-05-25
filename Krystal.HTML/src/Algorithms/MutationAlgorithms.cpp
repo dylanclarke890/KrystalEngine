@@ -5,10 +5,11 @@
 #include "Krystal.HTML/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
-#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/MutationObserver/MutationObserver.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
@@ -21,10 +22,45 @@
 #include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
-#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
+#include "Krystal.HTML/Types/SmallNodeList.hpp"
 
 namespace Krys::HTML
 {
+  namespace
+  {
+    KRYS_NODISCARD bool HasElementChild(ContainerNode &node) noexcept
+    {
+      return HasNodeOfType<Element>(ChildNodeRange(node));
+    }
+
+    KRYS_NODISCARD bool IsDocTypeOrDocTypeFollows(RawPtr<Node> node) noexcept
+    {
+      if (node == nullptr)
+      {
+        return false;
+      }
+
+      if (Is<DocumentType>(node))
+      {
+        return true;
+      }
+
+      return HasNodeOfType<DocumentType>(ConstNextSiblingRange(*node));
+    }
+
+    SmallNodeList CollectChildNodes(ContainerNode &parent) noexcept
+    {
+      SmallNodeList nodes;
+
+      for (Node &child : ChildNodeRange(parent))
+      {
+        nodes.emplace_back(ShareRef(child));
+      }
+
+      return nodes;
+    }
+  }
+
   ExceptionOr<void> MutationAlgorithms::EnsurePreInsertValidity(Node &node, ContainerNode &parent,
                                                                 RawPtr<Node> child) noexcept
   {
@@ -57,7 +93,7 @@ namespace Krys::HTML
     {
       if (auto *documentFragment = DynamicDowncast<DocumentFragment>(node))
       {
-        auto count = TreeQueries::ChildElementCount(*documentFragment);
+        auto count = documentFragment->ChildElementCount();
         if (count > 1)
         {
           return ExceptionCode::HierarchyRequestError;
@@ -68,32 +104,31 @@ namespace Krys::HTML
           return ExceptionCode::HierarchyRequestError;
         }
 
-        if (count == 1
-            && (TreeQueries::HasElementChild(parent) || TreeQueries::IsDocTypeOrDocTypeFollows(child)))
+        if (count == 1 && (HasElementChild(parent) || IsDocTypeOrDocTypeFollows(child)))
         {
           return ExceptionCode::HierarchyRequestError;
         }
       }
       else if (Is<Element>(node))
       {
-        if (TreeQueries::HasElementChild(parent) || TreeQueries::IsDocTypeOrDocTypeFollows(child))
+        if (HasElementChild(parent) || IsDocTypeOrDocTypeFollows(child))
         {
           return ExceptionCode::HierarchyRequestError;
         }
       }
       else if (Is<DocumentType>(node))
       {
-        if (HasNodeOfType<DocumentType>(ChildNodeRange(parent)))
+        if (HasNodeOfType<DocumentType>(ConstChildNodeRange(parent)))
         {
           return ExceptionCode::HierarchyRequestError;
         }
 
-        if (child != nullptr && HasNodeOfType<Element>(PrecedingRange(*child)))
+        if (child != nullptr && HasNodeOfType<Element>(ConstPreviousSiblingRange(*child)))
         {
           return ExceptionCode::HierarchyRequestError;
         }
 
-        if (child == nullptr && TreeQueries::HasElementChild(parent))
+        if (child == nullptr && HasElementChild(parent))
         {
           return ExceptionCode::HierarchyRequestError;
         }
@@ -131,7 +166,7 @@ namespace Krys::HTML
     SmallNodeList nodes;
     if (Is<DocumentFragment>(node))
     {
-      TreeQueries::CollectChildNodes(Downcast<ContainerNode>(node), nodes);
+      nodes = CollectChildNodes(Downcast<ContainerNode>(node));
     }
     else
     {
@@ -321,12 +356,12 @@ namespace Krys::HTML
 
     if (Is<Document>(newParent) && Is<Element>(node))
     {
-      if (TreeQueries::HasElementChild(newParent))
+      if (HasElementChild(newParent))
       {
         return ExceptionCode::HierarchyRequestError;
       }
 
-      if (TreeQueries::IsDocTypeOrDocTypeFollows(child))
+      if (IsDocTypeOrDocTypeFollows(child))
       {
         return ExceptionCode::HierarchyRequestError;
       }
@@ -493,7 +528,7 @@ namespace Krys::HTML
     {
       if (auto *documentFragment = DynamicDowncast<DocumentFragment>(node))
       {
-        auto count = TreeQueries::ChildElementCount(*documentFragment);
+        auto count = documentFragment->ChildElementCount();
         if (count > 1)
         {
           return ExceptionCode::HierarchyRequestError;
@@ -565,7 +600,7 @@ namespace Krys::HTML
     SmallNodeList nodes;
     if (Is<DocumentFragment>(node))
     {
-      TreeQueries::CollectChildNodes(Downcast<ContainerNode>(node), nodes);
+      nodes = CollectChildNodes(Downcast<ContainerNode>(node));
     }
     else
     {
@@ -585,13 +620,12 @@ namespace Krys::HTML
 
   ExceptionOr<void> MutationAlgorithms::ReplaceAll(RawPtr<Node> node, ContainerNode &parent) noexcept
   {
-    SmallNodeList removedNodes;
-    TreeQueries::CollectChildNodes(parent, removedNodes);
+    SmallNodeList removedNodes = CollectChildNodes(parent);
 
     SmallNodeList addedNodes;
     if (auto *documentFragment = DynamicDowncast<DocumentFragment>(node))
     {
-      TreeQueries::CollectChildNodes(*documentFragment, addedNodes);
+      addedNodes = CollectChildNodes(*documentFragment);
     }
     else if (node != nullptr)
     {
@@ -725,8 +759,9 @@ namespace Krys::HTML
 
     if (!suppressObservers)
     {
-      TreeMutationDispatcher::QueueTreeMutationRecord(
-        parent, {}, {Krys::Move(protectedNode)}, ShareRefPtr(oldPreviousSibling), ShareRefPtr(oldNextSibling));
+      TreeMutationDispatcher::QueueTreeMutationRecord(parent, {}, {Krys::Move(protectedNode)},
+                                                      ShareRefPtr(oldPreviousSibling),
+                                                      ShareRefPtr(oldNextSibling));
     }
 
     ExtensibilityHooks::NodeChildrenChanged(parent);

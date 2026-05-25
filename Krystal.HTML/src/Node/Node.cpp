@@ -9,6 +9,8 @@
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/DOM/Algorithms/TextAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/MutationObserver/RegisteredObserver.hpp"
 #include "Krystal.HTML/MutationObserver/TransientRegisteredObserver.hpp"
@@ -36,7 +38,8 @@ namespace Krys::HTML
 
   DOMString Node::BaseURI() const noexcept
   {
-    // TODO(impl): URL - The baseURI getter steps are to return this’s node document’s document base URL, serialized.
+    // TODO(impl): URL - The baseURI getter steps are to return this’s node document’s document base URL,
+    // serialized.
     // @see https://html.spec.whatwg.org/multipage/urls-and-fetching.html#document-base-url
     return {};
   }
@@ -108,14 +111,22 @@ namespace Krys::HTML
         continue;
       }
 
-      auto data = TreeQueries::FollowingContiguousExclusiveTextContent(*node);
+      DOMString data {};
+
+      RawPtr<const Node> current = node->NextSibling();
+      while (current != nullptr && TextAlgorithms::IsExclusiveTextNode(*current))
+      {
+        data += *Downcast<Text>(current)->TextContent();
+        current = current->NextSibling();
+      }
+
       if (auto replaceResult = node->ReplaceData(length, 0uz, Krys::Move(data)); replaceResult.HasException())
       {
         return replaceResult.ReleaseException();
       }
 
       RawPtr<Node> currentNode = node->NextSibling();
-      while (currentNode != nullptr && TreeQueries::IsExclusiveTextNode(*currentNode))
+      while (currentNode != nullptr && TextAlgorithms::IsExclusiveTextNode(*currentNode))
       {
         auto &currentTextNode = Downcast<Text>(*currentNode);
         LiveRangeUpdater::NodeNormalized(*this, currentTextNode, length);
@@ -124,7 +135,7 @@ namespace Krys::HTML
         currentNode = currentTextNode.NextSibling();
       }
 
-      while (node->NextSibling() != nullptr && TreeQueries::IsExclusiveTextNode(*node->NextSibling()))
+      while (node->NextSibling() != nullptr && TextAlgorithms::IsExclusiveTextNode(*node->NextSibling()))
       {
         if (auto removeResult = MutationAlgorithms::Remove(*node->NextSibling()); removeResult.HasException())
         {
@@ -399,17 +410,17 @@ namespace Krys::HTML
     {
       case NodeType::ELEMENT_NODE:
       {
-        return TreeQueries::LocateNamespacePrefix(Downcast<Element>(*this), namespaceURI);
+        return NodeAlgorithms::LocateNamespacePrefix(Downcast<Element>(*this), namespaceURI);
       }
       case NodeType::DOCUMENT_NODE:
       {
-        RawPtr<const Element> documentElement = TreeQueries::DocumentElement(*this);
+        auto *documentElement = TreeQueries::DocumentElement(Downcast<Document>(*this));
         if (documentElement == nullptr)
         {
           return DOMStringAtom::Null();
         }
 
-        return TreeQueries::LocateNamespacePrefix(*documentElement, namespaceURI);
+        return NodeAlgorithms::LocateNamespacePrefix(*documentElement, namespaceURI);
       }
       case NodeType::DOCUMENT_TYPE_NODE:
       case NodeType::DOCUMENT_FRAGMENT_NODE:
@@ -424,7 +435,7 @@ namespace Krys::HTML
           return DOMStringAtom::Null();
         }
 
-        return TreeQueries::LocateNamespacePrefix(*ownerElement, namespaceURI);
+        return NodeAlgorithms::LocateNamespacePrefix(*ownerElement, namespaceURI);
       }
       default:
       {
@@ -434,7 +445,7 @@ namespace Krys::HTML
           return DOMStringAtom::Null();
         }
 
-        return TreeQueries::LocateNamespacePrefix(*parentElement, namespaceURI);
+        return NodeAlgorithms::LocateNamespacePrefix(*parentElement, namespaceURI);
       }
     }
   }
@@ -446,7 +457,7 @@ namespace Krys::HTML
       prefix = DOMStringAtom::Null();
     }
 
-    return TreeQueries::LocateNamespace(*this, prefix);
+    return NodeAlgorithms::LocateNamespace(*this, prefix);
   }
 
   bool Node::IsDefaultNamespace(DOMStringAtom namespaceURI) const noexcept
@@ -456,7 +467,7 @@ namespace Krys::HTML
       namespaceURI = DOMStringAtom::Null();
     }
 
-    auto defaultNamespace = TreeQueries::LocateNamespace(*this, DOMStringAtom::Null());
+    auto defaultNamespace = NodeAlgorithms::LocateNamespace(*this, DOMStringAtom::Null());
     return namespaceURI == defaultNamespace;
   }
 
@@ -498,16 +509,6 @@ namespace Krys::HTML
     }
 
     return Exception {ExceptionCode::HierarchyRequestError};
-  }
-
-  size_t Node::CountChildNodes() const noexcept
-  {
-    if (const auto *containerNode = DynamicDowncast<ContainerNode>(*this))
-    {
-      return containerNode->CountChildNodes();
-    }
-
-    return 0uz;
   }
 
 #pragma endregion

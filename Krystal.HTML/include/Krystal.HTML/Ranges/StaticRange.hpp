@@ -36,32 +36,6 @@ namespace Krys::HTML
     {
     }
 
-    KRYS_NODISCARD bool IsValid() const noexcept
-    {
-      Node &startContainer = *this->StartContainer();
-      Node &endContainer = *this->EndContainer();
-
-      if (!TreeQueries::IsConnectedInSameTreeScope(*this->StartContainer(), *this->EndContainer()))
-      {
-        return false;
-      }
-
-      if (StartOffset() > TreeQueries::Length(startContainer))
-      {
-        return false;
-      }
-
-      if (EndOffset() > TreeQueries::Length(endContainer))
-      {
-        return false;
-      }
-
-      if (&startContainer == &endContainer)
-      {
-        return EndOffset() > StartOffset();
-      }
-
-      return !StrongOrder::IsGreaterThan(_start.ComparePositionTo(_end));
-    }
+    KRYS_NODISCARD bool IsValid() const noexcept;
   };
 }

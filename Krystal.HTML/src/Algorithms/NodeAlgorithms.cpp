@@ -7,9 +7,11 @@
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
+#include "Krystal.HTML/Constants/Namespaces.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Factories/ElementFactory.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
@@ -28,7 +30,6 @@
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/Node/XMLDocument.hpp"
-#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 
 namespace Krys::HTML
 {
@@ -166,7 +167,7 @@ namespace Krys::HTML
       docCopy._contentType = doc._contentType;
 
       // TODO(impl): URL - Set the url on the cloned document to the url of the original document.
-      //docCopy._baseURL = doc._baseURL;
+      // docCopy._baseURL = doc._baseURL;
       docCopy._quirksMode = doc._quirksMode;
       docCopy._allowDeclarativeShadowRoots = doc._allowDeclarativeShadowRoots;
     }
@@ -200,4 +201,114 @@ namespace Krys::HTML
     assert(copy);
     return copy;
   }
+
+  DOMStringAtom NodeAlgorithms::LocateNamespacePrefix(const Element &element,
+                                                      DOMStringAtom namespaceURI) noexcept
+  {
+    if (element.NamespaceURI() == namespaceURI && element.Prefix() != DOMStringAtom::Null())
+    {
+      return element.Prefix();
+    }
+
+    for (auto &attribute : element._attributes)
+    {
+      if (attribute->Prefix() == NamespacePrefix::XMLNS && attribute->Value() == namespaceURI)
+      {
+        return attribute->LocalName();
+      }
+    }
+
+    RawPtr<const Element> parentElement = element.ParentElement();
+    if (parentElement != nullptr)
+    {
+      return LocateNamespacePrefix(*parentElement, namespaceURI);
+    }
+
+    return DOMStringAtom::Null();
+  }
+
+  DOMStringAtom NodeAlgorithms::LocateNamespace(const Node &node, DOMStringAtom prefix) noexcept
+  {
+    switch (node.NodeType())
+    {
+      case NodeType::ELEMENT_NODE:
+      {
+        if (prefix == NamespacePrefix::XML)
+        {
+          return Namespace::XML;
+        }
+
+        if (prefix == NamespacePrefix::XMLNS)
+        {
+          return Namespace::XMLNS;
+        }
+
+        auto &element = Downcast<Element>(node);
+        if (element.NamespaceURI() != DOMStringAtom::Null() && element.Prefix() == prefix)
+        {
+          return element.NamespaceURI();
+        }
+
+        for (auto &attribute : element._attributes)
+        {
+          if (attribute->NamespaceURI() == Namespace::XMLNS && attribute->Prefix() == NamespacePrefix::XMLNS
+              && attribute->LocalName() == prefix)
+          {
+            return attribute->Value().empty() ? DOMStringAtom::Null() : attribute->Value();
+          }
+
+          if (prefix == DOMStringAtom::Null() && attribute->NamespaceURI() == Namespace::XMLNS
+              && attribute->Prefix() == DOMStringAtom::Null()
+              && attribute->LocalName() == NamespacePrefix::XMLNS)
+          {
+            return attribute->Value().empty() ? DOMStringAtom::Null() : attribute->Value();
+          }
+        }
+
+        RawPtr<const Element> parentElement = element.ParentElement();
+        if (parentElement == nullptr)
+        {
+          return DOMStringAtom::Null();
+        }
+
+        return LocateNamespace(*parentElement, prefix);
+      }
+      case NodeType::DOCUMENT_NODE:
+      {
+        RefPtr<const Element> documentElement = Downcast<Document>(node).DocumentElement();
+        if (documentElement == nullptr)
+        {
+          return DOMStringAtom::Null();
+        }
+
+        return LocateNamespace(*documentElement, prefix);
+      }
+      case NodeType::DOCUMENT_TYPE_NODE:
+      case NodeType::DOCUMENT_FRAGMENT_NODE:
+      {
+        return DOMStringAtom::Null();
+      }
+      case NodeType::ATTRIBUTE_NODE:
+      {
+        RawPtr<const Element> ownerElement = Downcast<Attr>(node).OwnerElement();
+        if (ownerElement == nullptr)
+        {
+          return DOMStringAtom::Null();
+        }
+
+        return LocateNamespace(*ownerElement, prefix);
+      }
+      default:
+      {
+        RawPtr<const Element> parentElement = node.ParentElement();
+        if (parentElement == nullptr)
+        {
+          return DOMStringAtom::Null();
+        }
+
+        return LocateNamespace(*parentElement, prefix);
+      }
+    }
+  }
+
 }

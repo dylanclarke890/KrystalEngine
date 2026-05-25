@@ -3,9 +3,10 @@
 #include "Krystal.HTML/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CharacterData.hpp"
@@ -17,7 +18,6 @@
 #include "Krystal.HTML/Node/ProcessingInstruction.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
-#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 
 namespace Krys::HTML
 {
@@ -33,12 +33,23 @@ namespace Krys::HTML
 
   RawPtr<Node> Range::CommonAncestorContainer() const noexcept
   {
-    if (!TreeQueries::HasSameRoot(*_start.Container, *_end.Container))
+    if (!TreeQueries::SameRoot(*_start.Container, *_end.Container))
     {
       return nullptr;
     }
 
-    return TreeQueries::CommonAncestorContainer(*_start.Container, *_end.Container);
+    auto *commonAncestor = _start.Container.get();
+    while (commonAncestor != nullptr)
+    {
+      if (TreeQueries::IsInclusiveAncestor(*commonAncestor, b))
+      {
+        return Downcast<ContainerNode>(commonAncestor);
+      }
+
+      commonAncestor = commonAncestor->ParentNode();
+    }
+
+    return nullptr;
   }
 
   ExceptionOr<void> Range::SetStart(Node &node, uint64 offset) noexcept

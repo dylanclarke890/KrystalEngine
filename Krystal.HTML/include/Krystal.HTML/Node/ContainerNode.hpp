@@ -22,8 +22,6 @@ namespace Krys::HTML
     ContainerNode(Document &document, HTML::NodeType type, NodeFlag flags) noexcept;
 
   public:
-#pragma region Node
-
     KRYS_NODISCARD RawPtr<Node> FirstChild() const noexcept
     {
       return _firstChild.get();
@@ -38,10 +36,6 @@ namespace Krys::HTML
     ExceptionOr<Node &> ReplaceChild(Node &newChild, Node &oldChild) noexcept;
     ExceptionOr<Node &> RemoveChild(Node &child) noexcept;
     ExceptionOr<Node &> AppendChild(Node &newChild) noexcept;
-
-    KRYS_NODISCARD size_t CountChildNodes() const noexcept;
-
-#pragma endregion
 
   protected:
     virtual void OnChildrenChanged() noexcept

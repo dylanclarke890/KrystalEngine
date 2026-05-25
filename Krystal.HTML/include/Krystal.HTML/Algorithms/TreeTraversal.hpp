@@ -14,9 +14,6 @@ namespace Krys::HTML
   class TreeTraversal
   {
   public:
-    KRYS_NODISCARD static const Node &Root(const Node &node) noexcept;
-    KRYS_NODISCARD static Node &Root(Node &node) noexcept;
-
     KRYS_NODISCARD static RawPtr<Node> Next(const Node &current) noexcept;
     KRYS_NODISCARD static RawPtr<Node> Next(const Text &current) noexcept;
     KRYS_NODISCARD static RawPtr<Node> Next(const ContainerNode &current) noexcept;

@@ -1,8 +1,6 @@
 ﻿#include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
-#include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
@@ -17,8 +15,6 @@ namespace Krys::HTML
       : Node(document, type, flags | NodeFlag::IsContainerNode), _firstChild(nullptr), _lastChild(nullptr)
   {
   }
-
-#pragma region Node
 
   ExceptionOr<Node &> ContainerNode::InsertBefore(Node &newChild, RawPtr<Node> refChild) noexcept
   {
@@ -39,11 +35,4 @@ namespace Krys::HTML
   {
     return MutationAlgorithms::Append(newChild, *this);
   }
-
-  size_t ContainerNode::CountChildNodes() const noexcept
-  {
-    return TreeQueries::ChildNodeCount(*this);
-  }
-
-#pragma endregion
 }

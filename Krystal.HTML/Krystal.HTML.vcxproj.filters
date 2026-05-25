@@ -195,9 +195,6 @@
     <ClInclude Include="include\Krystal.HTML\Ranges\StaticRange.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Algorithms\TreeQueries.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationRecord.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -483,6 +480,15 @@
     <ClInclude Include="include\Krystal.HTML\Types\DOMStringAtom.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\TreeQueries.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\TextAlgorithms.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Types\SmallTextNodeList.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -542,7 +548,7 @@
     <ClCompile Include="src\Algorithms\TreeMutationDispatcher.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Algorithms\TreeQueries.cpp">
+    <ClCompile Include="src\DOM\Algorithms\TreeQueries.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\NodeList.cpp">
@@ -693,6 +699,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\DOM\Algorithms\OrderedSet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DOM\Algorithms\TextAlgorithms.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Ranges\BoundaryPoint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

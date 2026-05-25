@@ -794,22 +794,4 @@ namespace Krys::Tests
     auto removeResult = data.Node->RemoveChild(*child);
     REQUIRE_FALSE(removeResult.HasException());
   }
-
-  TEST_CASE("Node::CountChildNodes", "[HTML][Node]")
-  {
-    CommonTestData data {true};
-    auto child = CreateRef<TestNode>(*data.Document);
-
-    REQUIRE(data.Node->CountChildNodes() == 0uz);
-    REQUIRE(data.Document->CountChildNodes() == 1uz);
-
-    auto appendResult = data.Node->AppendChild(*child);
-    REQUIRE_FALSE(appendResult.HasException());
-
-    REQUIRE(data.Node->CountChildNodes() == 1uz);
-    REQUIRE(data.Document->CountChildNodes() == 1uz);
-
-    auto removeResult = data.Node->RemoveChild(*child);
-    REQUIRE_FALSE(removeResult.HasException());
-  }
 }

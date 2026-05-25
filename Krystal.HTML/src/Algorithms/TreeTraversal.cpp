@@ -63,16 +63,6 @@ namespace Krys::HTML
     }
   }
 
-  const Node &TreeTraversal::Root(const Node &node) noexcept
-  {
-    return *Krys::HTML::Last(ConstInclusiveAncestorRange(node));
-  }
-
-  Node &TreeTraversal::Root(Node &node) noexcept
-  {
-    return *Krys::HTML::Last(InclusiveAncestorRange(node));
-  }
-
   RawPtr<Node> TreeTraversal::Next(const Node &current) noexcept
   {
     return GetNext(current);

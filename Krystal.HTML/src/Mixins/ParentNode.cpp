@@ -2,7 +2,7 @@
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
@@ -73,7 +73,7 @@ namespace Krys::HTML::Mixins
 
   size_t ParentNode::ChildElementCount(const ContainerNode &node) noexcept
   {
-    return TreeQueries::ChildElementCount(node);
+    return Krys::HTML::Count(ConstChildElementRange(node));
   }
 
   ExceptionOr<void> ParentNode::Prepend(ContainerNode &parent, const List<NodeOrString> &nodes) noexcept

@@ -1,15 +1,14 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Ranges/BoundaryPoint.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include <cassert>
 
 namespace Krys::HTML
 {
+  class Node;
+
   class AbstractRange : public RefCounted<AbstractRange>
   {
   protected:

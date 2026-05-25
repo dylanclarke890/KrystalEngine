@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Pointers/RawPtr.hpp"
+#include "Krystal.Lib/Pointers/RefPtr.hpp"
 
 namespace Krys::HTML
 {
@@ -17,9 +17,9 @@ namespace Krys::HTML::Mixins
   {
   public:
     /// @see https://dom.spec.whatwg.org/#dom-slotable-assignedslot
-    KRYS_NODISCARD static RawPtr<HTMLSlotElement> AssignedSlot(Text &node) noexcept;
+    KRYS_NODISCARD static RefPtr<HTMLSlotElement> AssignedSlot(Text &node) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-slotable-assignedslot
-    KRYS_NODISCARD static RawPtr<HTMLSlotElement> AssignedSlot(Element &node) noexcept;
+    KRYS_NODISCARD static RefPtr<HTMLSlotElement> AssignedSlot(Element &node) noexcept;
   };
 }

@@ -4,6 +4,7 @@
 #include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Mixins/Slottable.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
@@ -21,49 +22,37 @@ namespace Krys::HTML
 
 #pragma region Text
 
-  /// @see https://dom.spec.whatwg.org/#concept-text-split
   ExceptionOr<Ref<Text>> Text::SplitText(size_t offset) noexcept
   {
-    auto length = Data().size();
-    if (offset > length)
-    {
-      return Exception {ExceptionCode::IndexSizeError};
-    }
-
-    auto count = length - offset;
-    auto newData = SubstringData(offset, count);
-    if (newData.HasException())
-    {
-      return newData.ReleaseException();
-    }
-
-    auto newNode = CreateRef<Text>(NodeDocument(), newData.ReleaseValue());
-    if (auto parent = ShareRefPtr(ParentNode()))
-    {
-      if (auto insertResult = parent->InsertBefore(*newNode, NextSibling()); insertResult.HasException())
-      {
-        return insertResult.ReleaseException();
-      }
-
-      LiveRangeUpdater::SplitTextNode(*this, *newNode, offset);
-    }
-
-    ReplaceData(offset, count, u8"");
-
-    return newNode;
+    return TextAlgorithms::Split(*this, offset);
   }
 
-  /// @see https://dom.spec.whatwg.org/#dom-text-wholetext
   DOMString Text::WholeText() const noexcept
   {
-    return TreeQueries::ContiguousTextContent(*this);
+    auto contiguousTextNodes = TextAlgorithms::ContiguousTextNodes(*this);
+
+    size_t capacity = 0uz;
+    for (auto &node : contiguousTextNodes)
+    {
+      capacity += node->Length();
+    }
+
+    DOMString wholeText;
+    wholeText.reserve(capacity);
+
+    for (auto &node : contiguousTextNodes)
+    {
+      wholeText += node->Data();
+    }
+
+    return wholeText;
   }
 
 #pragma endregion
 
 #pragma region Slottables
 
-  RawPtr<HTMLSlotElement> Text::AssignedSlot() noexcept
+  RefPtr<HTMLSlotElement> Text::AssignedSlot() noexcept
   {
     return Mixins::Slottable::AssignedSlot(*this);
   }

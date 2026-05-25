@@ -69,7 +69,6 @@ namespace Krys::HTML
   class ContainerNode;
   class Document;
   class Element;
-  class Node;
   class NodeList;
   class ShadowRoot;
 
@@ -90,6 +89,7 @@ namespace Krys::HTML
     friend class ExtensibilityHooks;
     friend class MutationAlgorithms;
     friend class MutationObserver;
+    friend class TreeQueries;
 
   private:
     NodeFlag _flags : BitCount<NodeFlag>() {NodeFlag::None};
@@ -184,8 +184,6 @@ namespace Krys::HTML
     ExceptionOr<Node &> ReplaceChild(Node &newChild, Node &oldChild) noexcept;
     ExceptionOr<Node &> RemoveChild(Node &child) noexcept;
     ExceptionOr<Node &> AppendChild(Node &newChild) noexcept;
-
-    KRYS_NODISCARD size_t CountChildNodes() const noexcept;
 
 #pragma endregion
 

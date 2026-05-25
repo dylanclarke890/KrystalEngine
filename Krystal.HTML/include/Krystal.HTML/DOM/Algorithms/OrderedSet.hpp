@@ -7,6 +7,7 @@
 
 namespace Krys::HTML
 {
+  /// @brief Implementations of the ordered set algorithms.
   /// @see https://dom.spec.whatwg.org/#ordered-sets
   class OrderedSet
   {

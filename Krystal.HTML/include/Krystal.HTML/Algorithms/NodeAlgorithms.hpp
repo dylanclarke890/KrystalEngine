@@ -32,5 +32,12 @@ namespace Krys::HTML
     KRYS_NODISCARD static Ref<Node>
       CloneSingleNode(const Node &node, Document &document,
                       RawPtr<CustomElementRegistry> fallbackRegistry = nullptr) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#locate-a-namespace-prefix
+    KRYS_NODISCARD static DOMStringAtom LocateNamespacePrefix(const Element &element,
+                                                              DOMStringAtom namespaceURI) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#locate-a-namespace
+    KRYS_NODISCARD static DOMStringAtom LocateNamespace(const Node &node, DOMStringAtom prefix) noexcept;
   };
 }
