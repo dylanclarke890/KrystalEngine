@@ -36,7 +36,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.HTML\Algorithms\ContentAttributeReflection.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\RenderBlocking.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\ElementInternals.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLBodyElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLMetaElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\Abort\AbortController.hpp" />
@@ -51,6 +53,8 @@
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLLinkElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLStyleElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLTitleElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\ShowPopoverOptions.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTMLElement\TogglePopoverOptions.hpp" />
     <ClInclude Include="include\Krystal.HTML\Mixins\ChildNode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\ElementAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\ExtensibilityHooks.hpp" />
@@ -392,6 +396,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="data\HTMLElement\HTMLElement.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\HTMLElement\ElementInternals.idl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
