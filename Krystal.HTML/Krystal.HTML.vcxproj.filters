@@ -450,6 +450,12 @@
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLStyleElement.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Node\Enums\DocumentReadyState.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Node\Enums\DocumentVisibilityState.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -880,6 +886,27 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\HTMLElement\HTMLStyleElement.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\CustomElement\CustomElementRegistry.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Node\Document.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Node\DocumentFragment.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Node\DocumentType.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Node\DOMImplementation.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Node\ShadowRoot.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\Node\ShadowRootInit.idl">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

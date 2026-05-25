@@ -90,6 +90,8 @@
     <ClInclude Include="include\Krystal.HTML\Node\ElementCreationOptions.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Enums\CustomElementState.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLTagName.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\Enums\DocumentReadyState.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Node\Enums\DocumentVisibilityState.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Enums\NodeCollectionLiveness.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Enums\QuirksMode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\ImportNodeOptions.hpp" />
@@ -372,6 +374,17 @@
   <ItemGroup>
     <None Include="data\HTMLElement\HTMLMetaElement.idl" />
     <None Include="data\HTMLElement\HTMLStyleElement.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\CustomElement\CustomElementRegistry.idl" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\Node\Document.idl" />
+    <None Include="data\Node\DocumentFragment.idl" />
+    <None Include="data\Node\DocumentType.idl" />
+    <None Include="data\Node\DOMImplementation.idl" />
+    <None Include="data\Node\ShadowRoot.idl" />
+    <None Include="data\Node\ShadowRootInit.idl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
