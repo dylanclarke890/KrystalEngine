@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/HTMLElement/HTMLTagName.hpp"
+#include "Krystal.HTML/HTMLElement/ShowPopoverOptions.hpp"
+#include "Krystal.HTML/HTMLElement/TogglePopoverOptions.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
 
@@ -20,6 +22,13 @@ namespace Krys::HTML
 
   public:
     HTMLElement(Document &document) noexcept;
+
+    // TODO(impl) POPOVER - HTMLElement methods
+    // The popover API
+    // void ShowPopover(const ShowPopoverOptions &options = {}) noexcept;
+    // void HidePopover() noexcept;
+    // bool TogglePopover(const TogglePopoverOptionsOrBool &options = {}) noexcept;
+    // attribute DOMString? popover;
 
 #pragma region Type Checks
 
