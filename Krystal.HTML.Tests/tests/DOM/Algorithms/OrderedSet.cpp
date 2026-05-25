@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/DOM/_internal/OrderedSet.hpp"
+﻿#include "Krystal.HTML/DOM/Algorithms/OrderedSet.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

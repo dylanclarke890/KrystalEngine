@@ -6,7 +6,7 @@
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"
-#include "Krystal.HTML/DOM/_internal/OrderedSet.hpp"
+#include "Krystal.HTML/DOM/Algorithms/OrderedSet.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"

@@ -2,7 +2,7 @@
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
-#include "Krystal.HTML/DOM/_internal/OrderedSet.hpp"
+#include "Krystal.HTML/DOM/Algorithms/OrderedSet.hpp"
 #include "Krystal.HTML/Infra/StringAlgorithms.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"

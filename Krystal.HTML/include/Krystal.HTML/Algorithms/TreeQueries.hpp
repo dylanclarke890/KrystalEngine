@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/Types/DOMString.hpp"
+#include "Krystal.HTML/Types/DOMStringAtom.hpp"
 #include "Krystal.HTML/Types/SmallNodeList.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
@@ -11,8 +12,6 @@ namespace Krys::HTML
 {
   class ContainerNode;
   class Element;
-  class EventTarget;
-  class HTMLSlotElement;
   class Node;
   class Text;
 

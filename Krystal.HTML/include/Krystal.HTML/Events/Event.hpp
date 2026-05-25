@@ -1,10 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Types/DOMHighResTimeStamp.hpp"
-#include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.HTML/Events/EventInit.hpp"
 #include "Krystal.HTML/Events/EventPath.hpp"
 #include "Krystal.HTML/Events/EventPhaseType.hpp"
+#include "Krystal.HTML/Types/DOMHighResTimeStamp.hpp"
+#include "Krystal.HTML/Types/DOMString.hpp"
+#include "Krystal.HTML/Types/DOMStringAtom.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"

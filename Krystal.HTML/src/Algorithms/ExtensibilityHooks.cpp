@@ -1,9 +1,9 @@
 ﻿#include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/DOM/_internal/OrderedSet.hpp"
 #include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/DOM/Algorithms/OrderedSet.hpp"
 #include "Krystal.HTML/Events/Event.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
@@ -100,7 +100,7 @@ namespace Krys::HTML
                                                    DOMStringAtom namespaceURI) noexcept
   {
     // TODO(perf): optimise by making DOMStringAtom's for each of these attributes
-    
+
     // NOTE: we currently don't need this as we just use the value stored in the attribute. Later, when
     // we optimize we can use this hook to update Element's member variable to skip needing to lookup the
     // attribute. This will be particularly important for a faster implementation of GetElementById.
@@ -145,12 +145,12 @@ namespace Krys::HTML
         {
           return;
         }
-        
+
         if (value.has_value() && value->empty() && !oldValue.has_value())
         {
           return;
         }
-        
+
         auto &slotElement = Downcast<HTMLSlotElement>(element);
         if (!value.has_value() || value->empty())
         {
@@ -160,7 +160,7 @@ namespace Krys::HTML
         {
           slotElement.Name(DOMString(*value));
         }
-        
+
         SlotAlgorithms::AssignSlottablesForTree(TreeQueries::Root(slotElement));
       }
     }

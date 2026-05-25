@@ -1,14 +1,13 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/Types/DOMString.hpp"
+#include "Krystal.HTML/Types/DOMStringAtom.hpp"
 #include "Krystal.HTML/Types/SmallNodeList.hpp"
-#include "Krystal.Lib/Pointers/ReferenceWrapper.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
 
 namespace Krys::HTML
 {
-  class ContainerNode;
   class Node;
 
   class TreeMutationDispatcher
@@ -24,6 +23,5 @@ namespace Krys::HTML
     static void QueueTreeMutationRecord(Node &target, const SmallNodeList &addedNodes,
                                         const SmallNodeList &removedNodes, RefPtr<Node> &&previousSibling,
                                         RefPtr<Node> &&nextSibling) noexcept;
-
   };
 }

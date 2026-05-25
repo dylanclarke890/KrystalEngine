@@ -1,7 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.HTML/Node/Enums/InsertAdjacentWhere.hpp"
+#include "Krystal.HTML/Types/DOMString.hpp"
+#include "Krystal.HTML/Types/DOMStringAtom.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"

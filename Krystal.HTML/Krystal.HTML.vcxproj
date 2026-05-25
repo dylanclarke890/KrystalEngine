@@ -111,6 +111,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\NamedNodeMap.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\XMLDocument.hpp" />
     <ClInclude Include="include\Krystal.HTML\SVGElement\SVGElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Types\DOMStringAtom.hpp" />
     <ClInclude Include="include\Krystal.HTML\Types\NodeOrString.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\RareData\ParentNodeRareData.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\ShadowRoot.hpp" />

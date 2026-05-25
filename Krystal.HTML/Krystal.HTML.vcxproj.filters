@@ -480,6 +480,9 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\OrderedSet.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Types\DOMStringAtom.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
