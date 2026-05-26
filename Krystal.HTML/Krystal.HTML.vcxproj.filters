@@ -162,7 +162,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\ShadowRoot.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Algorithms\EventDispatcher.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\EventDispatcher.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\CustomElement\CustomElementRegistry.hpp">

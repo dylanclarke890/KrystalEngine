@@ -17,6 +17,7 @@ namespace Krys::HTML
       : DocumentFragment(document, flags | NodeFlag::IsShadowRoot),
         _customElementRegistry(Krys::Move(registry))
   {
+    SetEventTargetFlag(EventTargetFlags::IsInShadowTree);
   }
 
   RawPtr<Element> ShadowRoot::Host() const noexcept

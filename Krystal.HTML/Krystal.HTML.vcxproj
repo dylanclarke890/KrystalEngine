@@ -124,7 +124,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\ShadowRootInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Enums\ShadowRootMode.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Enums\SlotAssignmentMode.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Algorithms\EventDispatcher.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\EventDispatcher.hpp" />
     <ClInclude Include="include\Krystal.HTML\Iterator\NodeFilter.hpp" />
     <ClInclude Include="include\Krystal.HTML\Iterator\NodeIterator.hpp" />
     <ClInclude Include="include\Krystal.HTML\Iterator\TreeWalker.hpp" />

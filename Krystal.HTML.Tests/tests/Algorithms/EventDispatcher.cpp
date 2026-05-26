@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Algorithms/EventDispatcher.hpp"
+﻿#include "Krystal.HTML/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/Event/EventListenerCallback.hpp"

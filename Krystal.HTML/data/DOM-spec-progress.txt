@@ -1,21 +1,31 @@
 ﻿Source: https://dom.spec.whatwg.org
 
 2.3. Legacy extensions to the Window interface - https://dom.spec.whatwg.org/#interface-window-extensions
- - 'readonly attribute (Event or undefined) event;' not implemented, as Window interface is not supported.
-   - https://dom.spec.whatwg.org/#dom-window-event
+ - Window interface - readonly attribute (Event or undefined) event; not implemented, as Window interface is not supported.
+     - https://dom.spec.whatwg.org/#dom-window-event
 
 2.5. Constructing events - https://dom.spec.whatwg.org/#constructing-events
  - check this has been implemented fully
 
 2.7. Interface EventTarget - https://dom.spec.whatwg.org/#eventtarget
  - AddEventListener - service workers currently not supported.
-   - https://dom.spec.whatwg.org/#add-an-event-listener
+     - https://dom.spec.whatwg.org/#add-an-event-listener
  - RemoveEventListener - service workers currently not supported.
-   - https://dom.spec.whatwg.org/#remove-an-event-listener
+     - https://dom.spec.whatwg.org/#remove-an-event-listener
 
 2.8. Observing event listeners - https://dom.spec.whatwg.org/#observing-event-listeners
- - 'To legacy-obtain service worker fetch event listener callbacks' algorithm not implemented, as service workers are not supported.
-   - https://dom.spec.whatwg.org/#legacy-obtain-service-worker-fetch-event-listener-callbacks
+ - To legacy-obtain service worker fetch event listener callbacks algorithm not implemented, as service workers are not supported.
+     - https://dom.spec.whatwg.org/#legacy-obtain-service-worker-fetch-event-listener-callbacks
+
+2.9. Dispatching events - https://dom.spec.whatwg.org/#dispatching-events
+ - DispatchToTarget - Let targetOverride be target, if legacy target override flag is not given, and target’s associated Document otherwise. not implemented, as Window interface is not supported.
+     - https://dom.spec.whatwg.org/#concept-event-dispatch
+ - InnerInvoke - Let global be listener callback’s associated realm’s global object not implemented, as it uses the legacy extension to the Window interface, which is not supported.
+ - InnerInvoke - If global is a Window object, then record timing info for event listener given event and listener. not implemented, as Window interface is not supported.
+ - InnerInvoke - Call a user object’s operation with listener’s callback, "handleEvent", « event », and event’s currentTarget attribute value. Not supported as this is a JavaScript concept.
+ - InnerInvoke - Should have some way of logging exceptions potentially thrown by the user’s operation.
+ - InnerInvoke - If global is a Window object, then set global’s current event to currentEvent. Same as above, not implemented, as Window interface is not supported.
+     - https://dom.spec.whatwg.org/#concept-event-listener-inner-invoke
 
 TODO:
 CSS-SELECTORS

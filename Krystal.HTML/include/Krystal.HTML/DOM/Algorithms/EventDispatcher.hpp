@@ -3,7 +3,7 @@
 #include "Krystal.HTML/DOM/Enums/EventPhaseType.hpp"
 #include "Krystal.HTML/DOM/Event/Event.hpp"
 #include "Krystal.HTML/Factories/EventFactory.hpp"
-#include "Krystal.HTML/Types/DOMString.hpp"
+#include "Krystal.HTML/Types/DOMStringAtom.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Types/Func.hpp"
@@ -19,12 +19,10 @@ namespace Krys::HTML
   template <DerivedFrom<Event> TEvent>
   using EventIDLInitializer = Func<void(TEvent &)>;
 
+  /// @see https://dom.spec.whatwg.org/#dispatching-events
   class EventDispatcher
   {
   public:
-    EventDispatcher() = delete;
-    ~EventDispatcher() = delete;
-
     /// @see https://dom.spec.whatwg.org/#concept-event-dispatch
     KRYS_NODISCARD static bool
       DispatchToTarget(Event &event, RawPtr<EventTarget> target, bool legacyTargetOverrideFlag = false,
@@ -41,8 +39,8 @@ namespace Krys::HTML
                        RawPtr<bool> legacyOutputDidListenersThrowFlag) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-event-listener-inner-invoke
-    static bool InnerInvoke(Event &event, SmallList<Ref<EventListener>> &listeners,
-                            EventPhaseType phase, bool invocationTargetInShadowTree,
+    static bool InnerInvoke(Event &event, SmallList<Ref<EventListener>> &listeners, EventPhaseType phase,
+                            bool invocationTargetInShadowTree,
                             RawPtr<bool> legacyOutputDidListenersThrowFlag) noexcept;
 
     /// @brief Fires an event named `e` at `target`. Returns false if the event is

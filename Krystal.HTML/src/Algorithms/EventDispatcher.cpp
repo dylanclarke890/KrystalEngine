@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Algorithms/EventDispatcher.hpp"
+﻿#include "Krystal.HTML/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
@@ -16,6 +16,7 @@
 #include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include <cassert>
 #include <ranges>
 
 namespace Krys::HTML
@@ -33,8 +34,9 @@ namespace Krys::HTML
     if (legacyTargetOverrideFlag) // only used by HTML and only when target is a Window object.
     {
       assert(target->IsWindow());
+
       // SPEC-VIOLATION(DOM, HTML): We don't actually implement Window. Might implement in the future.
-      // if legacy target override flag is given, let targetOverride be target’s associated Document.
+      // If legacy target override flag is given, let targetOverride be target’s associated Document.
       assert(false && "Not implemented");
     }
 
@@ -158,12 +160,8 @@ namespace Krys::HTML
 
         if (!clearTargets)
         {
-          auto touchTargetListEnd = clearTargetStruct->TouchTargetList().end();
-          auto touchTargetWithShadowRoot =
-            std::find_if(clearTargetStruct->TouchTargetList().begin(), touchTargetListEnd,
-                         [&](auto &touchTarget) { return IsNodeWithShadowRoot(touchTarget.get()); });
-
-          if (touchTargetWithShadowRoot != touchTargetListEnd)
+          if (std::ranges::any_of(clearTargetStruct->TouchTargetList(),
+                                  [&](auto &touchTarget) { return IsNodeWithShadowRoot(touchTarget.get()); }))
           {
             clearTargets = true;
           }
@@ -220,7 +218,7 @@ namespace Krys::HTML
     {
       event._target = nullptr;
       event.RelatedTarget(nullptr);
-      event.TouchTargetList().clear();
+      event.TouchTargetList({});
     }
 
     if (activationTarget != nullptr)
@@ -249,7 +247,7 @@ namespace Krys::HTML
 
     if (auto *invocationTargetNode = DynamicDowncast<Node>(invocationTarget))
     {
-      invocationTargetInShadowTree = Is<ShadowRoot>(TreeQueries::Root(*invocationTargetNode));
+      invocationTargetInShadowTree = TreeQueries::IsInShadowTree(*invocationTargetNode);
 
       if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(invocationTargetNode))
       {
@@ -264,17 +262,18 @@ namespace Krys::HTML
   void EventDispatcher::Invoke(EventPathItem &pathStruct, Event &event, EventPhaseType phase,
                                RawPtr<bool> legacyOutputDidListenersThrowFlag) noexcept
   {
-    auto indexOfStruct = std::distance(
-      event._path.rbegin(), std::find_if(event._path.rbegin(), event._path.rend(),
-                                         [&](const EventPathItem &i) { return &i == &pathStruct; }));
+    auto structIt = std::find_if(event._path.begin(), event._path.end(),
+                                 [&](const EventPathItem &i) { return &i == &pathStruct; });
+
+    assert(structIt != event._path.end());
+
     auto lastNonNullShadowAdjustedTarget =
-      std::find_if(event._path.rbegin(), event._path.rbegin() + indexOfStruct,
+      std::find_if(std::make_reverse_iterator(structIt + 1uz), event._path.rend(),
                    [](const EventPathItem &i) { return i.ShadowAdjustedTarget() != nullptr; });
+
     assert(lastNonNullShadowAdjustedTarget != event._path.rend());
 
-    event._target = lastNonNullShadowAdjustedTarget != event._path.rend()
-                      ? ShareRefPtr(lastNonNullShadowAdjustedTarget->ShadowAdjustedTarget())
-                      : nullptr;
+    event._target = ShareRefPtr(lastNonNullShadowAdjustedTarget->ShadowAdjustedTarget());
     event.RelatedTarget(pathStruct.RelatedTarget());
     event.TouchTargetList(pathStruct.TouchTargetList());
 
@@ -285,46 +284,40 @@ namespace Krys::HTML
 
     event._currentTarget = ShareRefPtr(pathStruct.InvocationTarget());
 
-    SmallList<Ref<EventListener>> listeners;
-    for (auto &listener : pathStruct.InvocationTarget()->_eventListenerList)
-    {
-      listeners.push_back(ShareRef(*listener));
-    }
+    SmallList<Ref<EventListener>> listeners = event._currentTarget->_eventListenerList;
 
     bool invocationTargetIsShadowRoot = pathStruct.InvocationTargetInShadowTree();
     bool found =
       InnerInvoke(event, listeners, phase, invocationTargetIsShadowRoot, legacyOutputDidListenersThrowFlag);
 
-    if (found || !event._isTrusted)
+    if (!found && event._isTrusted)
     {
-      return;
-    }
+      auto originalEventType = event.Type();
 
-    auto originalEventType = event.Type();
+      if (event.Type() == EventNames::AnimationEnd)
+      {
+        event._type = EventNames::Legacy::AnimationEnd;
+      }
+      else if (event.Type() == EventNames::AnimationIteration)
+      {
+        event._type = EventNames::Legacy::AnimationIteration;
+      }
+      else if (event.Type() == EventNames::AnimationStart)
+      {
+        event._type = EventNames::Legacy::AnimationStart;
+      }
+      else if (event.Type() == EventNames::TransitionEnd)
+      {
+        event._type = EventNames::Legacy::TransitionEnd;
+      }
+      else
+      {
+        return;
+      }
 
-    if (event.Type() == EventNames::AnimationEnd)
-    {
-      event._type = EventNames::Legacy::AnimationEnd;
+      InnerInvoke(event, listeners, phase, invocationTargetIsShadowRoot, legacyOutputDidListenersThrowFlag);
+      event._type = originalEventType;
     }
-    else if (event.Type() == EventNames::AnimationIteration)
-    {
-      event._type = EventNames::Legacy::AnimationIteration;
-    }
-    else if (event.Type() == EventNames::AnimationStart)
-    {
-      event._type = EventNames::Legacy::AnimationStart;
-    }
-    else if (event.Type() == EventNames::TransitionEnd)
-    {
-      event._type = EventNames::Legacy::TransitionEnd;
-    }
-    else
-    {
-      return;
-    }
-
-    InnerInvoke(event, listeners, phase, invocationTargetIsShadowRoot, legacyOutputDidListenersThrowFlag);
-    event._type = originalEventType;
   }
 
   bool EventDispatcher::InnerInvoke(Event &event, SmallList<Ref<EventListener>> &listeners,
@@ -363,7 +356,7 @@ namespace Krys::HTML
       }
 
       // SPEC-VIOLATION(HTML): realms/global objects currently not supported.
-      // Let global be listener callback’s associated realm’s global object.
+      // Let global be listener callback’s associated realm’s global object. 
       // Let currentEvent be undefined.
       // If global is a Window object :
       //   Set currentEvent to global’s current event.
@@ -374,7 +367,7 @@ namespace Krys::HTML
         event._inPassiveListener = true;
       }
 
-      // SPEC-VIOLATION(HTML): global objects/Window currently not supported.
+      // SPEC-VIOLATION(HTML): window/global objects currently not supported.
       // If global is a Window object, then record timing info for event listener given event and listener.
 
       // SPEC-VIOLATION(WEBIDL): this is javascript-specific and we don't have JS objects or exceptions, so
@@ -387,11 +380,11 @@ namespace Krys::HTML
 
       // TODO(impl): LOGGING - we should probably have some way to report exceptions that occur during event
       // listener invocations, even if we don't have JS objects or realms.
+
       listener->Callback()->HandleEvent(event);
       event._inPassiveListener = false;
 
       // SPEC-VIOLATION(HTML): window/global objects currently not supported.
-      // NOTE: this uses the legacy extensions to the windows interface which exposes an event attribute.
       // If global is a Window object, then set global’s current event to currentEvent.
 
       if (event._stopImmediatePropagation)

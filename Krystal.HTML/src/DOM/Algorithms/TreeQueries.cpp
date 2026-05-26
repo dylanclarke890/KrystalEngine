@@ -118,7 +118,7 @@ namespace Krys::HTML
       return characterData->Length();
     }
 
-    return Count(ConstChildNodeRange(node));
+    return Count(ConstChildNodeRange(Downcast<ContainerNode>(node)));
   }
 
   bool TreeQueries::IsEmpty(const Node &node) noexcept
