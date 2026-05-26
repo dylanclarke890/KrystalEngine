@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/Node/Node.hpp"
-#include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"

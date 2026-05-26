@@ -1,6 +1,6 @@
 ﻿#include "Krystal.HTML/Ranges/BoundaryPoint.hpp"
 #include "Krystal.HTML.Tests/TestContainerNode.hpp"
-#include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"

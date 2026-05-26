@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/Node/HTMLCollection.hpp"
-#include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/Constants/Namespaces.hpp"

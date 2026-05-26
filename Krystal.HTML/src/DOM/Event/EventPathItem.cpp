@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/DOM/Event/EventPathItem.hpp"
-#include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/EventTarget.hpp"
 
 namespace Krys::HTML

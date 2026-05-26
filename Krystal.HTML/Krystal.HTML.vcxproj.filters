@@ -111,7 +111,7 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\EventListenerOptions.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Abort\AbortSignal.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\AbortSignal.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\Event\EventListener.hpp">
@@ -249,7 +249,7 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\EventTargetFlags.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Abort\AbortController.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\AbortController.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLElement.hpp">
@@ -492,6 +492,12 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\EventTargetAlgorithms.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\AbortAlgorithms.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\AbortAlgorithmCallback.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -575,10 +581,10 @@
     <ClCompile Include="src\Ranges\Range.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Abort\AbortController.cpp">
+    <ClCompile Include="src\DOM\AbortController.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Abort\AbortSignal.cpp">
+    <ClCompile Include="src\DOM\AbortSignal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Algorithms\SlotAlgorithms.cpp">
@@ -714,6 +720,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\DOM\Algorithms\EventTargetAlgorithms.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DOM\Algorithms\AbortAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

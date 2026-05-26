@@ -1,6 +1,6 @@
 ﻿#include "Krystal.HTML/Iterator/NodeIterator.hpp"
 #include "Krystal.HTML.Tests/TestElement.hpp"
-#include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Iterator/NodeFilter.hpp"

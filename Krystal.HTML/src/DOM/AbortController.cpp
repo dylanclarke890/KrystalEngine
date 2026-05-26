@@ -1,5 +1,5 @@
-﻿#include "Krystal.HTML/Abort/AbortController.hpp"
-#include "Krystal.HTML/Abort/AbortSignal.hpp"
+﻿#include "Krystal.HTML/DOM/AbortController.hpp"
+#include "Krystal.HTML/DOM/AbortSignal.hpp"
 
 namespace Krys::HTML
 {

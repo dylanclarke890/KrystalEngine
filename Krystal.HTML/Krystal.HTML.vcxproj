@@ -42,6 +42,8 @@
     <ClInclude Include="include\Krystal.HTML\Constants\Keywords.hpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\MIMETypes.hpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\Namespaces.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\AbortAlgorithmCallback.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\AbortAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\EventTargetAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\OrderedSet.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\TextAlgorithms.hpp" />
@@ -53,7 +55,7 @@
     <ClInclude Include="include\Krystal.HTML\HTMLElement\ElementInternals.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLBodyElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLMetaElement.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Abort\AbortController.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\AbortController.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\CustomElementAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\DocumentAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Factories\ElementFactory.hpp" />
@@ -142,7 +144,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\DocumentFragment.hpp" />
     <ClInclude Include="include\Krystal.HTML\Types\DOMHighResTimeStamp.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Element.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Abort\AbortSignal.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\AbortSignal.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Event\CustomEvent.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Event\Event.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Event\EventListenerCallback.hpp" />
@@ -194,6 +196,7 @@
     <ClInclude Include="include\Krystal.HTML\Types\SmallNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Infra\StringAlgorithms.hpp" />
     <ClCompile Include="src\Algorithms\RenderBlocking.cpp" />
+    <ClCompile Include="src\DOM\Algorithms\AbortAlgorithms.cpp" />
     <ClCompile Include="src\DOM\Algorithms\EventTargetAlgorithms.cpp" />
     <ClCompile Include="src\DOM\Algorithms\NameValidation.cpp" />
     <ClCompile Include="src\DOM\Algorithms\OrderedSet.cpp" />
@@ -234,8 +237,8 @@
     <ClCompile Include="src\Algorithms\IteratorAlgorithms.cpp" />
     <ClCompile Include="src\HTMLElement\HTMLSlotElement.cpp" />
     <ClCompile Include="src\Algorithms\SlotAlgorithms.cpp" />
-    <ClCompile Include="src\Abort\AbortSignal.cpp" />
-    <ClCompile Include="src\Abort\AbortController.cpp" />
+    <ClCompile Include="src\DOM\AbortSignal.cpp" />
+    <ClCompile Include="src\DOM\AbortController.cpp" />
     <ClCompile Include="src\Iterator\NodeIterator.cpp" />
     <ClCompile Include="src\Iterator\TreeWalker.cpp" />
     <ClCompile Include="src\MutationObserver\MutationRecord.cpp" />

@@ -1,7 +1,7 @@
 ﻿#include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML.Tests/TestElement.hpp"
 #include "Krystal.HTML.Tests/TestNode.hpp"
-#include "Krystal.HTML/Abort/AbortSignal.hpp"
+#include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/Constants/Namespaces.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"

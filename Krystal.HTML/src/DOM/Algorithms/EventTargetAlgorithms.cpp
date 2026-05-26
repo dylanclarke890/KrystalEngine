@@ -1,7 +1,8 @@
 ﻿#include "Krystal.HTML/DOM/Algorithms/EventTargetAlgorithms.hpp"
-#include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Constants/EventNames.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/DOM/AbortSignal.hpp"
+#include "Krystal.HTML/DOM/Algorithms/AbortAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Event/EventListener.hpp"
 #include "Krystal.HTML/DOM/EventTarget.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLBodyElement.hpp"
@@ -119,19 +120,18 @@ namespace Krys::HTML
 
     if (listener.Signal() != nullptr)
     {
-      auto algorithm =
+      AbortAlgorithms::Add(
         [weakListener = CreateWeakPtr(&listener), weakTarget = CreateWeakPtr(&eventTarget)](Any)
-      {
-        auto strongListener = weakListener.lock();
-        auto strongTarget = weakTarget.lock();
-
-        if (strongListener && strongTarget)
         {
-          RemoveEventListener(*strongTarget, *strongListener);
-        }
-      };
+          auto strongListener = weakListener.lock();
+          auto strongTarget = weakTarget.lock();
 
-      AbortSignal::Add(algorithm, *listener.Signal());
+          if (strongListener && strongTarget)
+          {
+            RemoveEventListener(*strongTarget, *strongListener);
+          }
+        },
+        *listener.Signal());
     }
   }
 
