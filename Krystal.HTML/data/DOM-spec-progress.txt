@@ -33,7 +33,7 @@
  - InnerInvoke - If global is a Window object, then set global’s current event to currentEvent. Same as above, not implemented, as Window interface is not supported.
      - https://dom.spec.whatwg.org/#concept-event-listener-inner-invoke
 
-3.2. Interface AbortSignal
+3.2. Interface AbortSignal - https://dom.spec.whatwg.org/#abortsignal
  - onabort EventHandler attribute; Haven't figured out how to support EventHandler attributes yet, as this is a JavaScript concept.
      - https://dom.spec.whatwg.org/#dom-abortsignal-onabort
  - Timeout - Task queues and timers are required to implement this.
@@ -46,6 +46,10 @@
    or its abort algorithms is non-empty - I don't understand this properly enough to know how to implement it, so this is not implemented.
      - - https://dom.spec.whatwg.org/#garbage-collection
 
+4.2.2.5. Signaling slot change - https://dom.spec.whatwg.org/#signaling-slot-change
+ - Signaling slot change - Append slot to slot’s relevant agent’s signal slots. Don't have 'relevant agents' or 'signal slots'
+ - Signaling slot change - Queue mutation observer microtask. Don't have microtasks or task queues, so this is not implemented.
+     - https://dom.spec.whatwg.org/#signaling-slot-change
 TODO:
 CSS-SELECTORS
   - Separate spec implementation required first, significant work to implement CSS selector parsing and matching.

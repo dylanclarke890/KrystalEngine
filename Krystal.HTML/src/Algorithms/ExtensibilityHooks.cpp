@@ -1,7 +1,7 @@
 ﻿#include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
-#include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/OrderedSet.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
@@ -99,11 +99,12 @@ namespace Krys::HTML
                                                    DOMStringAtom namespaceURI) noexcept
   {
     // TODO(perf): optimise by making DOMStringAtom's for each of these attributes
+    // NOTE: this has been done, just need to include the header that defines them and use them instead of the
+    // string literals.
 
     // NOTE: we currently don't need this as we just use the value stored in the attribute. Later, when
     // we optimize we can use this hook to update Element's member variable to skip needing to lookup the
     // attribute. This will be particularly important for a faster implementation of GetElementById.
-
     // if (localName == u8"id")
     //{
     //   if (namespaceURI == DOMStringAtom::Null())
@@ -118,6 +119,7 @@ namespace Krys::HTML
     //     }
     //   }
     // }
+
     if (localName == u8"class")
     {
       if (namespaceURI == DOMStringAtom::Null())

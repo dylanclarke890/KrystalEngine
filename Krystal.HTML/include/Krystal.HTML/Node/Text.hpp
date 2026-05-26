@@ -19,7 +19,11 @@ namespace Krys::HTML
     friend class SlotAlgorithms;
 
   private:
+    /// @see https://dom.spec.whatwg.org/#slotable-name
+    DOMString _slottableName;
+    /// @see https://dom.spec.whatwg.org/#slotable-assigned-slot
     RefPtr<HTMLSlotElement> _assignedSlot;
+    /// @see https://dom.spec.whatwg.org/#slotable-manual-slot-assignment
     WeakPtr<HTMLSlotElement> _manuallyAssignedSlot;
 
   public:

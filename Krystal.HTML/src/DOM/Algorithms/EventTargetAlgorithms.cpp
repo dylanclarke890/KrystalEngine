@@ -121,7 +121,7 @@ namespace Krys::HTML
     if (listener.Signal() != nullptr)
     {
       AbortAlgorithms::Add(
-        [weakListener = CreateWeakPtr(&listener), weakTarget = CreateWeakPtr(&eventTarget)](Any)
+        [weakListener = CreateWeakPtr(&listener), weakTarget = CreateWeakPtr(&eventTarget)](const Any &)
         {
           auto strongListener = weakListener.lock();
           auto strongTarget = weakTarget.lock();

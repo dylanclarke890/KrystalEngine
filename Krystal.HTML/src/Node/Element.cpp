@@ -5,7 +5,7 @@
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Constants/Namespaces.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"

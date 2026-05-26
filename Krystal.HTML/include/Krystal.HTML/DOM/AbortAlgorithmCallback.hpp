@@ -7,6 +7,7 @@
 
 namespace Krys::HTML
 {
+  /// @see https://dom.spec.whatwg.org/#abortsignal-abort-algorithms
   class AbortAlgorithmCallback
   {
     using AnyCallback = Func<void(const Any &reason)>;
@@ -23,7 +24,7 @@ namespace Krys::HTML
 
     template <typename Callable>
     AbortAlgorithmCallback(Callable &&callback) noexcept
-        : _id(std::rand()), _callback(Krys::Func<void(const Any &)>(Krys::Move(callback)))
+        : _id(std::rand()), _callback(AnyCallback(Krys::Move(callback)))
     {
     }
 

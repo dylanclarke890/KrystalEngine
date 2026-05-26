@@ -1,7 +1,7 @@
 ﻿#include "Krystal.HTML/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/Constants/EventNames.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/Algorithms/EventTargetAlgorithms.hpp"

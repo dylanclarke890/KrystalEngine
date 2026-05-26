@@ -48,10 +48,13 @@ namespace Krys::HTML
     UniquePtr<NamedNodeMap> _namedNodeMap;
     UniquePtr<DOMTokenList> _domTokenList;
     List<Ref<Attr>> _attributes;
-    DOMString _slottableName;
     DOMStringAtom _is {DOMStringAtom::Null()};
     CustomElementState _customElementState {CustomElementState::Undefined};
+    /// @see https://dom.spec.whatwg.org/#slotable-name
+    DOMString _slottableName;
+    /// @see https://dom.spec.whatwg.org/#slotable-assigned-slot
     RefPtr<HTMLSlotElement> _assignedSlot;
+    /// @see https://dom.spec.whatwg.org/#slotable-manual-slot-assignment
     WeakPtr<HTMLSlotElement> _manuallyAssignedSlot;
 
   protected:

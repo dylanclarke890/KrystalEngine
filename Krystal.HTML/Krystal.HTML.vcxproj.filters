@@ -261,7 +261,7 @@
     <ClInclude Include="include\Krystal.HTML\Algorithms\SubtreeRanges.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Algorithms\SlotAlgorithms.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\SlotAlgorithms.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Algorithms\IteratorAlgorithms.hpp">
@@ -587,7 +587,7 @@
     <ClCompile Include="src\DOM\AbortSignal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Algorithms\SlotAlgorithms.cpp">
+    <ClCompile Include="src\DOM\Algorithms\SlotAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\HTMLElement\HTMLSlotElement.cpp">

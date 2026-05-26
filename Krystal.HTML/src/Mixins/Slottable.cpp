@@ -1,6 +1,6 @@
 ﻿#include "Krystal.HTML/Mixins/Slottable.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
-#include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"

@@ -1,13 +1,13 @@
-﻿#include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
+﻿#include "Krystal.HTML/DOM/Algorithms/SlotAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
+#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
-#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 
 namespace Krys::HTML
 {
@@ -120,6 +120,8 @@ namespace Krys::HTML
 
   RawPtr<HTMLSlotElement> SlotAlgorithms::FindSlot(Node &slottable, bool open) noexcept
   {
+    assert(IsSlottable(slottable));
+
     RawPtr<Element> parent = slottable.ParentElement();
 
     if (parent == nullptr)
@@ -129,7 +131,12 @@ namespace Krys::HTML
 
     RefPtr<ShadowRoot> shadow = parent->ShadowRoot();
 
-    if (shadow == nullptr || (open && shadow->Mode() != ShadowRootMode::Open))
+    if (shadow == nullptr)
+    {
+      return nullptr;
+    }
+
+    if (open && shadow->Mode() != ShadowRootMode::Open)
     {
       return nullptr;
     }
@@ -156,11 +163,14 @@ namespace Krys::HTML
       return nullptr;
     }
 
+    auto &slottableName = Is<Element>(slottable) ? Downcast<Element>(slottable)._slottableName
+                                                 : Downcast<Text>(slottable)._slottableName;
+
     for (auto &descendant : DescendantRange(*shadow))
     {
       if (auto *slot = DynamicDowncast<HTMLSlotElement>(descendant))
       {
-        if (slot->Name() == parent->Slot())
+        if (slot->Name() == slottableName)
         {
           return slot;
         }
@@ -187,7 +197,7 @@ namespace Krys::HTML
       {
         if (auto slottable = manuallyAssignedNode.lock())
         {
-          if (slottable->ParentElement() == host)
+          if (slottable->ParentNode() == host)
           {
             result.push_back(ShareRef(*slottable));
           }
@@ -196,14 +206,14 @@ namespace Krys::HTML
     }
     else
     {
-      for (auto &child : ChildNodeRange(host))
+      for (auto &slottable : ChildNodeRange(host))
       {
-        if (IsSlottable(child))
+        if (IsSlottable(slottable))
         {
-          auto *foundSlot = FindSlot(child);
+          auto *foundSlot = FindSlot(slottable);
           if (foundSlot == &slot)
           {
-            result.push_back(ShareRef(child));
+            result.push_back(ShareRef(slottable));
           }
         }
       }
