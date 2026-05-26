@@ -1,10 +1,9 @@
 ﻿#include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
-#include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/Algorithms/OrderedSet.hpp"
-#include "Krystal.HTML/Events/Event.hpp"
+#include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
@@ -28,12 +27,12 @@ namespace Krys::HTML
 
     if (parent->IsConnected())
     {
-      insertedNode.SetEventTargetFlag(EventTargetFlag::IsConnected);
+      insertedNode.SetEventTargetFlag(EventTargetFlags::IsConnected);
     }
 
     if (parent->IsInShadowTree())
     {
-      insertedNode.SetEventTargetFlag(EventTargetFlag::IsInShadowTree);
+      insertedNode.SetEventTargetFlag(EventTargetFlags::IsInShadowTree);
     }
 
     insertedNode.OnInsert();
@@ -61,11 +60,11 @@ namespace Krys::HTML
 
     if (parent->IsInShadowTree())
     {
-      movedNode.SetEventTargetFlag(EventTargetFlag::IsInShadowTree);
+      movedNode.SetEventTargetFlag(EventTargetFlags::IsInShadowTree);
     }
     else
     {
-      movedNode.ClearEventTargetFlag(EventTargetFlag::IsInShadowTree);
+      movedNode.ClearEventTargetFlag(EventTargetFlags::IsInShadowTree);
     }
 
     movedNode.OnMove(isSubtreeRoot, oldAncestor);
@@ -74,8 +73,8 @@ namespace Krys::HTML
   void ExtensibilityHooks::NodeRemoved(Node &removedNode, bool isSubtreeRoot,
                                        ContainerNode &oldAncestor) noexcept
   {
-    removedNode.ClearEventTargetFlag(EventTargetFlag::IsConnected);
-    removedNode.ClearEventTargetFlag(EventTargetFlag::IsInShadowTree);
+    removedNode.ClearEventTargetFlag(EventTargetFlags::IsConnected);
+    removedNode.ClearEventTargetFlag(EventTargetFlags::IsInShadowTree);
 
     removedNode.OnRemove(isSubtreeRoot, oldAncestor);
 

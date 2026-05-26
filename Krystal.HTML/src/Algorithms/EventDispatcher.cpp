@@ -2,11 +2,13 @@
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/SlotAlgorithms.hpp"
-#include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/Constants/EventNames.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/Events/Event.hpp"
-#include "Krystal.HTML/Events/EventNames.hpp"
-#include "Krystal.HTML/Events/EventTarget.hpp"
+#include "Krystal.HTML/DOM/Algorithms/EventTargetAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/DOM/Event/Event.hpp"
+#include "Krystal.HTML/DOM/Event/EventListener.hpp"
+#include "Krystal.HTML/DOM/EventTarget.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
@@ -37,7 +39,7 @@ namespace Krys::HTML
     }
 
     RawPtr<EventTarget> activationTarget = nullptr;
-    RawPtr<EventTarget> relatedTarget = ShadowRootAlgorithms::Retarget(event.RelatedTarget(), *target);
+    RawPtr<EventTarget> relatedTarget = ShadowRootAlgorithms::Retarget(event.RelatedTarget().get(), *target);
     bool clearTargets = false;
 
     if (target != relatedTarget || target == event.RelatedTarget())
@@ -90,7 +92,7 @@ namespace Krys::HTML
           slottable = parent;
         }
 
-        relatedTarget = ShadowRootAlgorithms::Retarget(event.RelatedTarget(), *parent);
+        relatedTarget = ShadowRootAlgorithms::Retarget(event.RelatedTarget().get(), *parent);
 
         touchTargets.clear();
         for (auto &touchTarget : event.TouchTargetList())
@@ -223,7 +225,7 @@ namespace Krys::HTML
 
     if (activationTarget != nullptr)
     {
-      if (!event._cancelled)
+      if (!event._canceled)
       {
         activationTarget->ActivationBehavior(event);
       }
@@ -233,7 +235,7 @@ namespace Krys::HTML
       }
     }
 
-    return !event._cancelled;
+    return !event._canceled;
   }
 
   void EventDispatcher::AppendToEventPath(Event &event, EventTarget &invocationTarget,
@@ -273,7 +275,7 @@ namespace Krys::HTML
     event._target = lastNonNullShadowAdjustedTarget != event._path.rend()
                       ? ShareRefPtr(lastNonNullShadowAdjustedTarget->ShadowAdjustedTarget())
                       : nullptr;
-    event.RelatedTarget(ShareRefPtr(pathStruct.RelatedTarget()));
+    event.RelatedTarget(pathStruct.RelatedTarget());
     event.TouchTargetList(pathStruct.TouchTargetList());
 
     if (event._stopPropagation)
@@ -283,8 +285,8 @@ namespace Krys::HTML
 
     event._currentTarget = ShareRefPtr(pathStruct.InvocationTarget());
 
-    SmallList<Ref<RegisteredEventListener>> listeners;
-    for (auto &listener : pathStruct.InvocationTarget()->_listeners)
+    SmallList<Ref<EventListener>> listeners;
+    for (auto &listener : pathStruct.InvocationTarget()->_eventListenerList)
     {
       listeners.push_back(ShareRef(*listener));
     }
@@ -325,7 +327,7 @@ namespace Krys::HTML
     event._type = originalEventType;
   }
 
-  bool EventDispatcher::InnerInvoke(Event &event, SmallList<Ref<RegisteredEventListener>> &listeners,
+  bool EventDispatcher::InnerInvoke(Event &event, SmallList<Ref<EventListener>> &listeners,
                                     EventPhaseType phase, bool invocationTargetInShadowTree,
                                     RawPtr<bool> legacyOutputDidListenersThrowFlag) noexcept
   {
@@ -357,7 +359,7 @@ namespace Krys::HTML
 
       if (listener->Once())
       {
-        EventTarget::RemoveEventListener(*event._currentTarget, *listener);
+        EventTargetAlgorithms::RemoveEventListener(*event._currentTarget, *listener);
       }
 
       // SPEC-VIOLATION(HTML): realms/global objects currently not supported.
@@ -392,7 +394,7 @@ namespace Krys::HTML
       // NOTE: this uses the legacy extensions to the windows interface which exposes an event attribute.
       // If global is a Window object, then set global’s current event to currentEvent.
 
-      if (event.IsImmediatePropagationStopped())
+      if (event._stopImmediatePropagation)
       {
         break;
       }

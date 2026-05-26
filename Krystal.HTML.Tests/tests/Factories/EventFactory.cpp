@@ -1,8 +1,8 @@
 ﻿#include "Krystal.HTML/Factories/EventFactory.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Events/Event.hpp"
-#include "Krystal.HTML/Events/EventNames.hpp"
-#include "Krystal.HTML/Events/EventTarget.hpp"
+#include "Krystal.HTML/DOM/Event/Event.hpp"
+#include "Krystal.HTML/Constants/EventNames.hpp"
+#include "Krystal.HTML/DOM/EventTarget.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
@@ -29,7 +29,7 @@ namespace Krys::Tests
 
     REQUIRE(event->Type() == u8"test");
     REQUIRE_FALSE(event->Bubbles());
-    REQUIRE_FALSE(event->Cancellable());
+    REQUIRE_FALSE(event->Cancelable());
     REQUIRE_FALSE(event->Composed());
     REQUIRE(event->IsTrusted());
   }

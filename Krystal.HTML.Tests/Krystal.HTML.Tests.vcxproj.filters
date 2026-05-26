@@ -57,10 +57,10 @@
     <ClCompile Include="tests\DOM\Algorithms\OrderedSet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Events\Event.cpp">
+    <ClCompile Include="tests\DOM\Event\Event.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Events\CustomEvent.cpp">
+    <ClCompile Include="tests\DOM\Event\CustomEvent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tests\Algorithms\Mixins.cpp">

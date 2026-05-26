@@ -4,6 +4,7 @@
 
 namespace Krys::HTML
 {
+  /// @see https://dom.spec.whatwg.org/#dom-event-eventphase
   enum class EventPhaseType : uint8
   {
     NONE = 0,

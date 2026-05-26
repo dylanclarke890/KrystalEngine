@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Events/Event.hpp"
+#include "Krystal.HTML/DOM/Event/Event.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 
@@ -21,7 +21,7 @@ namespace Krys::HTML
       {
         auto event = CreateRef<TEvent>(dictionary);
         event->_isTrusted = true;
-
+        event->_initialized = true;
         return event;
       }
       else if constexpr (Constructible<TEvent, DOMStringAtom, const dictionary_type &>)
@@ -29,6 +29,7 @@ namespace Krys::HTML
         // Later steps of the algorithm will set the event's type, so we can pass a null atom here.
         auto event = CreateRef<TEvent>(DOMStringAtom::Null(), dictionary);
         event->_isTrusted = true;
+        event->_initialized = true;
 
         return event;
       }

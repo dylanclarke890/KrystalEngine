@@ -4,7 +4,8 @@
 
 namespace Krys::HTML
 {
-  enum class EventTargetFlag : uint8
+  /// @brief Various flags for optimizing event target checks.
+  enum class EventTargetFlags : uint8
   {
     None = 0,
     IsNode = 1 << 0,
@@ -17,4 +18,4 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::EventTargetFlag, 8u)
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::EventTargetFlags, 8u)

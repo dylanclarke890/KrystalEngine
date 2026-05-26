@@ -1,8 +1,8 @@
 ﻿#include "Krystal.HTML/Algorithms/EventDispatcher.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/Events/EventListener.hpp"
-#include "Krystal.HTML/Events/EventTarget.hpp"
+#include "Krystal.HTML/DOM/Event/EventListenerCallback.hpp"
+#include "Krystal.HTML/DOM/EventTarget.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
@@ -30,11 +30,11 @@ namespace Krys::Tests
       int value = 0;
     };
 
-    struct TestEventListener : public EventListener
+    struct TestEventListener : public EventListenerCallback
     {
       TestTarget &_target;
 
-      TestEventListener(TestTarget &target) noexcept : EventListener(), _target(target)
+      TestEventListener(TestTarget &target) noexcept : EventListenerCallback(), _target(target)
       {
       }
 

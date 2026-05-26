@@ -1,12 +1,13 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Events/CustomEventInit.hpp"
-#include "Krystal.HTML/Events/Event.hpp"
+#include "Krystal.HTML/DOM/Dicts/CustomEventInit.hpp"
+#include "Krystal.HTML/DOM/Event/Event.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
 
 namespace Krys::HTML
 {
+  /// @see https://dom.spec.whatwg.org/#customevent
   template <typename T>
   class CustomEvent : public Event
   {
@@ -20,26 +21,25 @@ namespace Krys::HTML
   public:
 #pragma region CustomEvent - https://dom.spec.whatwg.org/#customevent
 
+    /// @see https://dom.spec.whatwg.org/#dom-customevent-customevent
     CustomEvent(DOMStringAtom type, const CustomEventInit<T> &eventInitDict = {}) noexcept
         : Event(type, eventInitDict), _detail(eventInitDict.Detail)
     {
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-customevent-detail
     KRYS_NODISCARD Maybe<T> &Detail() noexcept
     {
       return _detail;
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-customevent-detail
     KRYS_NODISCARD const Maybe<T> &Detail() const noexcept
     {
       return _detail;
     }
 
-    void Detail(T &&detail) noexcept
-    {
-      _detail = std::move(detail);
-    }
-
+    /// @see https://dom.spec.whatwg.org/#dom-customevent-initcustomevent
     void InitCustomEvent(DOMStringAtom type, bool bubbles = false, bool cancelable = false,
                          Maybe<T> detail = std::nullopt) noexcept
     {
@@ -48,7 +48,7 @@ namespace Krys::HTML
         return;
       }
 
-      InitEvent(type, bubbles, cancelable);
+      Initialize(*this, type, bubbles, cancelable);
 
       _detail = detail;
     }

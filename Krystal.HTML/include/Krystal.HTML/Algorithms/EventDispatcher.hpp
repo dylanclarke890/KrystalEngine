@@ -1,9 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Types/DOMString.hpp"
-#include "Krystal.HTML/Events/Event.hpp"
-#include "Krystal.HTML/Events/EventPhaseType.hpp"
+#include "Krystal.HTML/DOM/Enums/EventPhaseType.hpp"
+#include "Krystal.HTML/DOM/Event/Event.hpp"
 #include "Krystal.HTML/Factories/EventFactory.hpp"
+#include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Types/Func.hpp"
@@ -14,7 +14,7 @@ namespace Krys::HTML
 {
   class EventTarget;
   class EventPathItem;
-  class RegisteredEventListener;
+  class EventListener;
 
   template <DerivedFrom<Event> TEvent>
   using EventIDLInitializer = Func<void(TEvent &)>;
@@ -41,7 +41,7 @@ namespace Krys::HTML
                        RawPtr<bool> legacyOutputDidListenersThrowFlag) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#concept-event-listener-inner-invoke
-    static bool InnerInvoke(Event &event, SmallList<Ref<RegisteredEventListener>> &listeners,
+    static bool InnerInvoke(Event &event, SmallList<Ref<EventListener>> &listeners,
                             EventPhaseType phase, bool invocationTargetInShadowTree,
                             RawPtr<bool> legacyOutputDidListenersThrowFlag) noexcept;
 

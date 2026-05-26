@@ -13,6 +13,7 @@
 #include "Krystal.HTML/DOM/Algorithms/OrderedSet.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/DOM/Event/Event.hpp"
 #include "Krystal.HTML/Factories/ElementFactory.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLBodyElement.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLHeadElement.hpp"
@@ -54,7 +55,7 @@ namespace Krys::HTML
 
   Document::Document() noexcept : ContainerNode(*this, NodeType::DOCUMENT_NODE, NodeFlag::IsContainerNode)
   {
-    SetEventTargetFlag(EventTargetFlag::IsConnected);
+    SetEventTargetFlag(EventTargetFlags::IsConnected);
   }
 
   DOMImplementation &Document::Implementation() noexcept
@@ -324,6 +325,7 @@ namespace Krys::HTML
   Ref<Event> Document::CreateEvent(DOMStringAtom interface) noexcept
   {
     // TODO(impl): EVENTS - create correct event based on 'interface'
+    // TODO(impl): EVENTS - set initialized to true and isTrusted to false.
     return CreateRef<Event>(interface);
   }
 

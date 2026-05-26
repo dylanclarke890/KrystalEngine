@@ -1,6 +1,6 @@
-﻿#include "Krystal.HTML/Events/Event.hpp"
+﻿#include "Krystal.HTML/DOM/Event/Event.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Events/EventTarget.hpp"
+#include "Krystal.HTML/DOM/EventTarget.hpp"
 #include "Krystal.Lib/Time/MonotonicTime.hpp"
 #include <cassert>
 
@@ -8,11 +8,10 @@ namespace Krys::HTML
 {
   Event::Event(DOMStringAtom type, const EventInit &eventInitDict) noexcept
       : _type(type), _timeStamp(MonotonicTime::Now()), _bubbles(eventInitDict.Bubbles),
-        _cancellable(eventInitDict.Cancellable), _composed(eventInitDict.Composed)
+        _cancellable(eventInitDict.Cancelable), _composed(eventInitDict.Composed)
   {
   }
 
-  /// @see https://dom.spec.whatwg.org/#dom-event-composedpath
   List<Ref<EventTarget>> Event::ComposedPath() const noexcept
   {
     List<Ref<EventTarget>> composedPath {};
@@ -22,7 +21,7 @@ namespace Krys::HTML
       return composedPath;
     }
 
-    RawPtr<EventTarget> currentTarget = CurrentTarget();
+    RawPtr<EventTarget> currentTarget = _currentTarget.get();
     assert(currentTarget != nullptr);
     composedPath.emplace_back(ShareRef(*currentTarget));
 
@@ -71,9 +70,9 @@ namespace Krys::HTML
         composedPath.insert(composedPath.begin(), ShareRef(*item.InvocationTarget()));
       }
 
-      if (item.RootOfClosedTree())
+      if (item.SlotInClosedTree())
       {
-        currentHiddenLevel++;
+        currentHiddenLevel--;
         if (currentHiddenLevel < maxHiddenLevel)
         {
           maxHiddenLevel = currentHiddenLevel;
@@ -94,7 +93,7 @@ namespace Krys::HTML
 
       if (item.SlotInClosedTree())
       {
-        currentHiddenLevel--;
+        currentHiddenLevel++;
       }
 
       if (currentHiddenLevel <= maxHiddenLevel)
@@ -102,7 +101,7 @@ namespace Krys::HTML
         composedPath.emplace_back(ShareRef(*item.InvocationTarget()));
       }
 
-      if (item.SlotInClosedTree())
+      if (item.RootOfClosedTree())
       {
         currentHiddenLevel--;
         if (currentHiddenLevel < maxHiddenLevel)
@@ -123,8 +122,19 @@ namespace Krys::HTML
       return;
     }
 
-    _type = type;
-    _bubbles = bubbles;
-    _cancellable = cancelable;
+    Initialize(*this, type, bubbles, cancelable);
+  }
+
+  void Event::Initialize(Event &event, DOMStringAtom type, bool bubbles, bool cancelable) noexcept
+  {
+    event._initialized = true;
+    event._stopPropagation = false;
+    event._stopImmediatePropagation = false;
+    event._canceled = false;
+    event._isTrusted = false;
+    event._target = nullptr;
+    event._type = type;
+    event._bubbles = bubbles;
+    event._cancellable = cancelable;
   }
 }

@@ -1,7 +1,7 @@
-﻿#include "Krystal.HTML/Events/Event.hpp"
+﻿#include "Krystal.HTML/DOM/Event/Event.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Events/EventNames.hpp"
-#include "Krystal.HTML/Events/EventTarget.hpp"
+#include "Krystal.HTML/Constants/EventNames.hpp"
+#include "Krystal.HTML/DOM/EventTarget.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
@@ -73,21 +73,6 @@ namespace Krys::Tests
     REQUIRE(event->CancelBubble() == true);
   }
 
-  TEST_CASE("Event::StopImmediatePropagation/IsImmediatePropagationStopped", "[HTML][Event]")
-  {
-    auto event = CreateRef<Event>(EventNames::Click);
-    REQUIRE(event->IsImmediatePropagationStopped() == false);
-    REQUIRE(event->CancelBubble() == false);
-
-    event->StopImmediatePropagation();
-    REQUIRE(event->IsImmediatePropagationStopped() == true);
-    REQUIRE(event->CancelBubble() == true);
-
-    event->StopImmediatePropagation();
-    REQUIRE(event->IsImmediatePropagationStopped() == true);
-    REQUIRE(event->CancelBubble() == true);
-  }
-
   TEST_CASE("Event::Bubbles", "[HTML][Event]")
   {
     SECTION("Default value")
@@ -105,19 +90,19 @@ namespace Krys::Tests
     }
   }
 
-  TEST_CASE("Event::Cancellable", "[HTML][Event]")
+  TEST_CASE("Event::Cancelable", "[HTML][Event]")
   {
     SECTION("Default value")
     {
       auto event = CreateRef<Event>(EventNames::Click);
-      REQUIRE(event->Cancellable() == false);
+      REQUIRE(event->Cancelable() == false);
     }
     SECTION("Set value")
     {
       EventInit init {};
-      init.Cancellable = true;
+      init.Cancelable = true;
       auto event = CreateRef<Event>(EventNames::Click, init);
-      REQUIRE(event->Cancellable() == true);
+      REQUIRE(event->Cancelable() == true);
     }
   }
 
@@ -130,7 +115,7 @@ namespace Krys::Tests
       REQUIRE(event->DefaultPrevented() == false);
     }
 
-    SECTION("Prevent default on non-cancellable event")
+    SECTION("Prevent default on non-Cancelable event")
     {
       auto event = CreateRef<Event>(EventNames::Click);
       event->PreventDefault();
@@ -138,10 +123,10 @@ namespace Krys::Tests
       REQUIRE(event->DefaultPrevented() == false);
     }
 
-    SECTION("Prevent default on cancellable event")
+    SECTION("Prevent default on Cancelable event")
     {
       EventInit init {};
-      init.Cancellable = true;
+      init.Cancelable = true;
       auto event = CreateRef<Event>(EventNames::Click, init);
       event->PreventDefault();
       REQUIRE(event->ReturnValue() == true);
@@ -179,22 +164,6 @@ namespace Krys::Tests
 
     REQUIRE(event->Type() == EventNames::MouseWheel);
     REQUIRE(event->Bubbles() == true);
-    REQUIRE(event->Cancellable() == true);
-  }
-
-  TEST_CASE("Event::RelatedTarget", "[HTML][Event]")
-  {
-    auto event = CreateRef<Event>(EventNames::Click);
-    REQUIRE(event->RelatedTarget() == nullptr);
-
-    RefPtr<EventTarget> eventTarget = CreateRefPtr<EventTarget>();
-    event->RelatedTarget(ShareRefPtr(eventTarget.get()));
-    REQUIRE(event->RelatedTarget() != eventTarget.get());
-  }
-
-  TEST_CASE("Event::TouchTargetList", "[HTML][Event]")
-  {
-    auto event = CreateRef<Event>(EventNames::Click);
-    REQUIRE(event->TouchTargetList().empty());
+    REQUIRE(event->Cancelable() == true);
   }
 }

@@ -1,5 +1,22 @@
 ﻿Source: https://dom.spec.whatwg.org
 
+2.3. Legacy extensions to the Window interface - https://dom.spec.whatwg.org/#interface-window-extensions
+ - 'readonly attribute (Event or undefined) event;' not implemented, as Window interface is not supported.
+   - https://dom.spec.whatwg.org/#dom-window-event
+
+2.5. Constructing events - https://dom.spec.whatwg.org/#constructing-events
+ - check this has been implemented fully
+
+2.7. Interface EventTarget - https://dom.spec.whatwg.org/#eventtarget
+ - AddEventListener - service workers currently not supported.
+   - https://dom.spec.whatwg.org/#add-an-event-listener
+ - RemoveEventListener - service workers currently not supported.
+   - https://dom.spec.whatwg.org/#remove-an-event-listener
+
+2.8. Observing event listeners - https://dom.spec.whatwg.org/#observing-event-listeners
+ - 'To legacy-obtain service worker fetch event listener callbacks' algorithm not implemented, as service workers are not supported.
+   - https://dom.spec.whatwg.org/#legacy-obtain-service-worker-fetch-event-listener-callbacks
+
 TODO:
 CSS-SELECTORS
   - Separate spec implementation required first, significant work to implement CSS selector parsing and matching.

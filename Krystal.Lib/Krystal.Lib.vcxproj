@@ -181,6 +181,7 @@
     <ClInclude Include="include\Krystal.Lib\Time\Duration.hpp" />
     <ClInclude Include="include\Krystal.Lib\Time\MonotonicTime.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Any.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Types\BoolOr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\Deque.hpp" />
     <ClInclude Include="include\Krystal.Lib\Types\ImmutableBimap.hpp" />
     <ClInclude Include="include\Krystal.Lib\Allocators\Arena.hpp">

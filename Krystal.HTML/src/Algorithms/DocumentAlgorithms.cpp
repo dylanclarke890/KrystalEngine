@@ -4,9 +4,10 @@
 #include "Krystal.HTML/Algorithms/EventDispatcher.hpp"
 #include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
-#include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
+#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
+#include "Krystal.HTML/Constants/EventNames.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/Events/EventNames.hpp"
+#include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/Factories/ElementFactory.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
@@ -14,7 +15,6 @@
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
-#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 
 namespace Krys::HTML
 {

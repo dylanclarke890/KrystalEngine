@@ -1,7 +1,9 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Events/EventTarget.hpp"
+#include "Krystal.HTML/DOM/EventTarget.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Pointers/WeakPtr.hpp"
+#include "Krystal.Lib/Time/Duration.hpp"
 #include "Krystal.Lib/Types/Any.hpp"
 #include "Krystal.Lib/Types/Func.hpp"
 #include "Krystal.Lib/Types/List.hpp"
@@ -15,10 +17,10 @@ namespace Krys::HTML
 
   class AbortSignal : public EventTarget
   {
-    friend class EventTarget;
+    friend class EventTargetAlgorithms;
 
   private:
-    Maybe<::Krys::Any> _reason;
+    Maybe<Krys::Any> _reason;
     List<Pair<size_t, AbortAlgorithm>> _abortAlgorithms;
     Set<WeakPtr<AbortSignal>> _sourceSignals;
     Set<WeakPtr<AbortSignal>> _dependentSignals;
@@ -38,7 +40,7 @@ namespace Krys::HTML
       return _reason.has_value();
     }
 
-    KRYS_NODISCARD const Maybe<::Krys::Any> &Reason() const noexcept
+    KRYS_NODISCARD const Maybe<Krys::Any> &Reason() const noexcept
     {
       return _reason;
     }
@@ -60,7 +62,7 @@ namespace Krys::HTML
     static void Remove(size_t algorithm, Ref<AbortSignal> &signal) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#abortsignal-signal-abort
-    static void SignalAbort(Ref<AbortSignal> &signal, Maybe<::Krys::Any> reason = std::nullopt) noexcept;
+    static void SignalAbort(Ref<AbortSignal> &signal, Maybe<Krys::Any> reason = Null) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#run-the-abort-steps
     static void RunAbortSteps(AbortSignal &signal) noexcept;

@@ -90,40 +90,34 @@
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLCharacterReference.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Events\EventTarget.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\EventTarget.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Events\Event.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Event\Event.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Events\CustomEvent.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Event\CustomEvent.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Events\EventPhaseType.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Events\EventInit.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Enums\EventPhaseType.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Types\DOMHighResTimeStamp.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Events\CustomEventInit.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Event\EventListenerCallback.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Events\EventListener.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Events\EventListenerOptions.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Dicts\EventListenerOptions.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Abort\AbortSignal.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Events\RegisteredEventListener.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Event\EventListener.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Events\EventNames.hpp">
+    <ClInclude Include="include\Krystal.HTML\Constants\EventNames.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Types\Exception.hpp">
@@ -169,9 +163,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Algorithms\EventDispatcher.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Types\BoolOr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\CustomElement\CustomElementRegistry.hpp">
@@ -255,10 +246,7 @@
     <ClInclude Include="include\Krystal.HTML\Infra\StringAlgorithms.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Events\EventPath.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Events\EventTargetFlag.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Enums\EventTargetFlags.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Abort\AbortController.hpp">
@@ -489,6 +477,21 @@
     <ClInclude Include="include\Krystal.HTML\Types\SmallTextNodeList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\Event\EventPathItem.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\Dicts\EventInit.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\Dicts\CustomEventInit.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\Dicts\AddEventListenerOptions.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\EventTargetAlgorithms.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -497,10 +500,10 @@
     <ClCompile Include="src\Node\Node.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Events\Event.cpp">
+    <ClCompile Include="src\DOM\Event\Event.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Events\EventTarget.cpp">
+    <ClCompile Include="src\DOM\EventTarget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\ContainerNode.cpp">
@@ -570,9 +573,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Ranges\Range.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Events\EventPath.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Abort\AbortController.cpp">
@@ -708,6 +708,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\DOM\Algorithms\NameValidation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DOM\Event\EventPathItem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DOM\Algorithms\EventTargetAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

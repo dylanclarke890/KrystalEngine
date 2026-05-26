@@ -28,7 +28,7 @@
 namespace Krys::HTML
 {
   Node::Node(Document &document, HTML::NodeType type, NodeFlag flags) noexcept
-      : EventTarget(EventTargetFlag::IsNode), _nodeType(type), _ownerDocument(ShareRefPtr(&document)),
+      : EventTarget(EventTargetFlags::IsNode), _nodeType(type), _ownerDocument(ShareRefPtr(&document)),
         _parentNode(nullptr), _previousSibling(nullptr), _nextSibling(nullptr)
   {
     _flags = flags;

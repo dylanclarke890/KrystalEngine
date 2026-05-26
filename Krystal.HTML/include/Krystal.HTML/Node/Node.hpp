@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Types/DOMString.hpp"
-#include "Krystal.HTML/Events/EventTarget.hpp"
+#include "Krystal.HTML/DOM/EventTarget.hpp"
 #include "Krystal.HTML/Node/RareData/NodeRareData.hpp"
+#include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
 #include "Krystal.HTML/Types/NodeOrString.hpp"
 #include "Krystal.HTML/Types/SmallNodeList.hpp"
@@ -120,7 +120,7 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#connected
     KRYS_NODISCARD bool IsConnected() const noexcept
     {
-      return HasEventTargetFlag(EventTargetFlag::IsConnected);
+      return HasEventTargetFlag(EventTargetFlags::IsConnected);
     }
 
     KRYS_NODISCARD Document &NodeDocument() const noexcept
@@ -335,7 +335,7 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#concept-shadow-tree
     KRYS_NODISCARD bool IsInShadowTree() const noexcept
     {
-      return HasEventTargetFlag(EventTargetFlag::IsInShadowTree);
+      return HasEventTargetFlag(EventTargetFlags::IsInShadowTree);
     }
 
     /// @see https://dom.spec.whatwg.org/#concept-document-tree

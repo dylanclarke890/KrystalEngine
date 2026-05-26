@@ -140,7 +140,7 @@ namespace Krys::HTML
 
   ExceptionOr<Ref<Text>> TextAlgorithms::Split(Text &node, size_t offset) noexcept
   {
-    auto length = node.Data().size();
+    auto length = node.Length();
     if (offset > length)
     {
       return Exception {ExceptionCode::IndexSizeError};

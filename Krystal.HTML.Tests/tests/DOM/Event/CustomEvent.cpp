@@ -1,7 +1,7 @@
-﻿#include "Krystal.HTML/Events/CustomEvent.hpp"
+﻿#include "Krystal.HTML/DOM/Event/CustomEvent.hpp"
 #include "Krystal.HTML/Abort/AbortSignal.hpp"
-#include "Krystal.HTML/Events/EventNames.hpp"
-#include "Krystal.HTML/Events/EventTarget.hpp"
+#include "Krystal.HTML/Constants/EventNames.hpp"
+#include "Krystal.HTML/DOM/EventTarget.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
@@ -15,9 +15,6 @@ namespace Krys::Tests
     auto event = CreateRef<CustomEvent<uint32>>(EventNames::Click, init);
     REQUIRE_FALSE(event->IsTrusted());
     REQUIRE(event->Detail() == 4u);
-
-    event->Detail(5u);
-    REQUIRE(event->Detail() == 5u);
   }
 
   TEST_CASE("CustomEvent::InitCustomEvent", "[HTML][Event]")
@@ -28,7 +25,7 @@ namespace Krys::Tests
 
     REQUIRE(event->Type() == EventNames::MouseWheel);
     REQUIRE(event->Bubbles() == true);
-    REQUIRE(event->Cancellable() == true);
+    REQUIRE(event->Cancelable() == true);
     REQUIRE(event->Detail() == 6u);
   }
 }
