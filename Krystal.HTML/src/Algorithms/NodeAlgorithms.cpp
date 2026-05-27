@@ -1,34 +1,27 @@
-﻿#include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"
+﻿#include "Krystal.HTML/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
-#include "Krystal.HTML/Algorithms/IteratorAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
-#include "Krystal.HTML/DOM/Algorithms/MutationObserverAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Constants/Namespaces.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
-#include "Krystal.HTML/DOM/Algorithms/SlotAlgorithms.hpp"
-#include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.HTML/DOM/MutationObserver.hpp"
+#include "Krystal.HTML/DOM/Algorithms/OrderedSet.hpp"
+#include "Krystal.HTML/DOM/Collections/LiveHTMLCollection.hpp"
+#include "Krystal.HTML/DOM/Collections/StaticHTMLCollection.hpp"
 #include "Krystal.HTML/Factories/ElementFactory.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Comment.hpp"
-#include "Krystal.HTML/Node/ContainerNode.hpp"
-#include "Krystal.HTML/Node/Document.hpp"
-#include "Krystal.HTML/Node/DocumentFragment.hpp"
 #include "Krystal.HTML/Node/DocumentType.hpp"
-#include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/HTMLDocument.hpp"
-#include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Node/ProcessingInstruction.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/Node/XMLDocument.hpp"
+#include <ranges>
 
 namespace Krys::HTML
 {
@@ -62,20 +55,23 @@ namespace Krys::HTML
 
     if (parent != nullptr)
     {
-      parent->AppendChild(*copy);
+      if (auto append = MutationAlgorithms::Append(*copy, *parent); append.HasException())
+      {
+        return append.ReleaseException();
+      }
     }
 
     if (subtree)
     {
       if (auto *containerNode = DynamicDowncast<ContainerNode>(node))
       {
+        auto *containerCopy = Downcast<ContainerNode>(copy.get());
         for (auto &child : ChildNodeRange(*containerNode))
         {
-          if (auto childCloneResult =
-                CloneNode(child, document, subtree, Downcast<ContainerNode>(copy.get()), fallbackRegistry);
-              childCloneResult.HasException())
+          if (auto clone = CloneNode(child, document, subtree, containerCopy, fallbackRegistry);
+              clone.HasException())
           {
-            return childCloneResult.ReleaseException();
+            return clone.ReleaseException();
           }
         }
       }
@@ -83,10 +79,9 @@ namespace Krys::HTML
 
     if (auto *element = DynamicDowncast<Element>(node))
     {
-      auto *elementCopy = Downcast<Element>(copy.get());
-
       if (auto shadowRoot = element->ShadowRoot(); shadowRoot != nullptr && shadowRoot->Clonable())
       {
+        auto *elementCopy = Downcast<Element>(copy.get());
         assert(elementCopy->ShadowRoot() == nullptr);
 
         auto shadowRootRegistry = shadowRoot->CustomElementRegistry();
@@ -96,13 +91,13 @@ namespace Krys::HTML
             ShareRefPtr(CustomElementAlgorithms::EffectiveGlobalCustomElementRegistry(*document));
         }
 
-        if (auto attachShadowResult = ShadowRootAlgorithms::AttachShadowRoot(
+        if (auto attach = ShadowRootAlgorithms::AttachShadowRoot(
               *elementCopy, shadowRoot->Mode(), Clonable(true), Serializable(shadowRoot->Serializable()),
               DelegatesFocus(shadowRoot->DelegatesFocus()), shadowRoot->SlotAssignment(),
               shadowRootRegistry.get());
-            attachShadowResult.HasException())
+            attach.HasException())
         {
-          return attachShadowResult.ReleaseException();
+          return attach.ReleaseException();
         }
 
         auto shadowRootCopy = elementCopy->ShadowRoot();
@@ -111,10 +106,9 @@ namespace Krys::HTML
 
         for (auto &child : ChildNodeRange(*shadowRoot))
         {
-          if (auto childCloneResult = CloneNode(child, document, subtree, shadowRootCopy.get());
-              childCloneResult.HasException())
+          if (auto clone = CloneNode(child, document, subtree, shadowRootCopy.get()); clone.HasException())
           {
-            return childCloneResult.ReleaseException();
+            return clone.ReleaseException();
           }
         }
       }
@@ -169,6 +163,11 @@ namespace Krys::HTML
       // docCopy._baseURL = doc._baseURL;
       docCopy._quirksMode = doc._quirksMode;
       docCopy._allowDeclarativeShadowRoots = doc._allowDeclarativeShadowRoots;
+
+      if (doc._customElementRegistry->IsScoped())
+      {
+        docCopy._customElementRegistry = doc._customElementRegistry;
+      }
     }
     else if (Is<DocumentType>(node))
     {
@@ -199,6 +198,161 @@ namespace Krys::HTML
 
     assert(copy);
     return copy;
+  }
+
+  bool NodeAlgorithms::Equals(const Node &A, const Node &B) noexcept
+  {
+    if (A.NodeType() != B.NodeType())
+    {
+      return false;
+    }
+
+    switch (A.NodeType())
+    {
+      case HTML::NodeType::DOCUMENT_TYPE_NODE:
+      {
+        auto &thisDocType = Downcast<DocumentType>(A);
+        auto &otherDocType = Downcast<DocumentType>(B);
+
+        if (thisDocType.Name() != otherDocType.Name())
+        {
+          return false;
+        }
+        if (thisDocType.PublicId() != otherDocType.PublicId())
+        {
+          return false;
+        }
+        if (thisDocType.SystemId() != otherDocType.SystemId())
+        {
+          return false;
+        }
+
+        break;
+      }
+      case HTML::NodeType::ELEMENT_NODE:
+      {
+        auto &thisElement = Downcast<Element>(A);
+        auto &otherElement = Downcast<Element>(B);
+
+        if (thisElement.NamespaceURI() != otherElement.NamespaceURI())
+        {
+          return false;
+        }
+
+        if (thisElement.Prefix() != otherElement.Prefix())
+        {
+          return false;
+        }
+
+        if (thisElement.LocalName() != otherElement.LocalName())
+        {
+          return false;
+        }
+
+        for (size_t i = 0uz; i < thisElement._attributes.size(); i++)
+        {
+          if (i >= otherElement._attributes.size())
+          {
+            return false;
+          }
+
+          auto &thisAttribute = thisElement._attributes[i];
+          auto &otherAttribute = otherElement._attributes[i];
+
+          if (thisAttribute->LocalName() != otherAttribute->LocalName())
+          {
+            return false;
+          }
+
+          if (thisAttribute->NamespaceURI() != otherAttribute->NamespaceURI())
+          {
+            return false;
+          }
+
+          if (thisAttribute->Value() != otherAttribute->Value())
+          {
+            return false;
+          }
+        }
+
+        break;
+      }
+      case HTML::NodeType::ATTRIBUTE_NODE:
+      {
+        auto &thisAttribute = Downcast<Attr>(A);
+        auto &otherAttribute = Downcast<Attr>(B);
+
+        if (thisAttribute.LocalName() != otherAttribute.LocalName())
+        {
+          return false;
+        }
+        if (thisAttribute.NamespaceURI() != otherAttribute.NamespaceURI())
+        {
+          return false;
+        }
+        if (thisAttribute.Value() != otherAttribute.Value())
+        {
+          return false;
+        }
+        break;
+      }
+      case HTML::NodeType::PROCESSING_INSTRUCTION_NODE:
+      {
+        auto &thisProcessingInstruction = Downcast<ProcessingInstruction>(A);
+        auto &otherProcessingInstruction = Downcast<ProcessingInstruction>(B);
+
+        if (thisProcessingInstruction.Target() != otherProcessingInstruction.Target())
+        {
+          return false;
+        }
+        if (thisProcessingInstruction.Data() != otherProcessingInstruction.Data())
+        {
+          return false;
+        }
+
+        break;
+      }
+      case HTML::NodeType::CDATA_SECTION_NODE:
+      case HTML::NodeType::TEXT_NODE:
+      case HTML::NodeType::COMMENT_NODE:
+      {
+        auto &thisCharacterData = Downcast<CharacterData>(A);
+        auto &otherCharacterData = Downcast<CharacterData>(B);
+
+        if (thisCharacterData.Data() != otherCharacterData.Data())
+        {
+          return false;
+        }
+
+        break;
+      }
+      case HTML::NodeType::DOCUMENT_NODE:
+      case HTML::NodeType::DOCUMENT_FRAGMENT_NODE: break;
+    }
+
+    if (Is<ContainerNode>(A))
+    {
+      RawPtr<Node> child = A.FirstChild();
+      RawPtr<Node> otherChild = B.FirstChild();
+
+      while (child != nullptr && otherChild != nullptr)
+      {
+        if (!Equals(*child, *otherChild))
+        {
+          return false;
+        }
+
+        child = child->NextSibling();
+        otherChild = otherChild->NextSibling();
+      }
+
+      if (otherChild != nullptr)
+      {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   DOMStringAtom NodeAlgorithms::LocateNamespacePrefix(const Element &element,
@@ -248,19 +402,22 @@ namespace Krys::HTML
           return element.NamespaceURI();
         }
 
-        for (auto &attribute : element._attributes)
+        if (prefix != DOMStringAtom::Null())
         {
-          if (attribute->NamespaceURI() == Namespace::XMLNS && attribute->Prefix() == NamespacePrefix::XMLNS
-              && attribute->LocalName() == prefix)
+          for (auto &attribute : element._attributes)
           {
-            return attribute->Value().empty() ? DOMStringAtom::Null() : attribute->Value();
-          }
+            if (attribute->NamespaceURI() == Namespace::XMLNS && attribute->Prefix() == NamespacePrefix::XMLNS
+                && attribute->LocalName() == prefix)
+            {
+              return attribute->Value().empty() ? DOMStringAtom::Null() : attribute->Value();
+            }
 
-          if (prefix == DOMStringAtom::Null() && attribute->NamespaceURI() == Namespace::XMLNS
-              && attribute->Prefix() == DOMStringAtom::Null()
-              && attribute->LocalName() == NamespacePrefix::XMLNS)
-          {
-            return attribute->Value().empty() ? DOMStringAtom::Null() : attribute->Value();
+            if (prefix == DOMStringAtom::Null() && attribute->NamespaceURI() == Namespace::XMLNS
+                && attribute->Prefix() == DOMStringAtom::Null()
+                && attribute->LocalName() == NamespacePrefix::XMLNS)
+            {
+              return attribute->Value().empty() ? DOMStringAtom::Null() : attribute->Value();
+            }
           }
         }
 
@@ -310,4 +467,117 @@ namespace Krys::HTML
     }
   }
 
+  Ref<HTMLCollection> NodeAlgorithms::GetElementsByTagName(ContainerNode &root,
+                                                        DOMStringAtom qualifiedName) noexcept
+  {
+    if (qualifiedName == u8"*")
+    {
+      return CreateRef<LiveHTMLCollection>(root, [](const Element &) { return true; });
+    }
+
+    if (Is<HTMLDocument>(root.NodeDocument()))
+    {
+      DOMStringAtom qualifiedNameLowercase = ::Krys::Text::ToASCIILowercase(qualifiedName.View());
+      return CreateRef<LiveHTMLCollection>(root,
+                                           [qualifiedName, qualifiedNameLowercase](const Element &element)
+                                           {
+                                             if (element.NamespaceURI() == Namespace::HTML)
+                                             {
+                                               return element._qualifiedName.Name() == qualifiedNameLowercase;
+                                             }
+                                             else
+                                             {
+                                               return element._qualifiedName.Name() == qualifiedName;
+                                             }
+                                           });
+    }
+
+    return CreateRef<LiveHTMLCollection>(root, [qualifiedName](const Element &element)
+                                         { return element._qualifiedName.Name() == qualifiedName; });
+  }
+
+  Ref<HTMLCollection> NodeAlgorithms::GetElementsByTagNameNS(ContainerNode &root, DOMStringAtom namespaceUri,
+                                                          DOMStringAtom localName) noexcept
+  {
+    if (namespaceUri == DOMStringAtom::Empty())
+    {
+      namespaceUri = DOMStringAtom::Null();
+    }
+
+    if (namespaceUri == u8"*" && localName == u8"*")
+    {
+      return CreateRef<LiveHTMLCollection>(root, [](const Element &node) { return true; });
+    }
+
+    if (namespaceUri == u8"*")
+    {
+      return CreateRef<LiveHTMLCollection>(root, [localName](const Element &element)
+                                           { return element.LocalName() == localName; });
+    }
+
+    if (localName == u8"*")
+    {
+      return CreateRef<LiveHTMLCollection>(root, [namespaceUri](const Element &element)
+                                           { return element.NamespaceURI() == namespaceUri; });
+    }
+
+    return CreateRef<LiveHTMLCollection>(
+      root, [namespaceUri, localName](const Element &element)
+      { return element.NamespaceURI() == namespaceUri && element.LocalName() == localName; });
+  }
+
+  Ref<HTMLCollection> NodeAlgorithms::GetElementsByClassName(ContainerNode &root,
+                                                          DOMStringAtom classNames) noexcept
+  {
+    bool isQuirksMode = root.NodeDocument()._quirksMode == QuirksMode::Quirks;
+
+    List<DOMString> classes;
+    if (isQuirksMode)
+    {
+      classes = OrderedSet::Parser(Krys::Text::ToASCIILowercase(classNames.View()));
+    }
+    else
+    {
+      classes = OrderedSet::Parser(classNames.View());
+    }
+
+    if (classes.empty()) // TODO(perf): MINOR - return an empty collection instead.
+    {
+      return CreateRef<StaticHTMLCollection>(SmallElementList {});
+    }
+
+    if (isQuirksMode)
+    {
+      return CreateRef<LiveHTMLCollection>(
+        root,
+        [classesQuery = Krys::Move(classes)](const Element &element)
+        {
+          if (!element.HasAttribute(u8"class"))
+          {
+            return false;
+          }
+
+          // TODO(perf): MINOR - this is terrible for performance but eh, it's quirks mode.
+          auto elementClasses =
+            OrderedSet::Parser(Krys::Text::ToASCIILowercase(*element.GetAttribute(u8"class")));
+          return std::ranges::all_of(classesQuery,
+                                     [elementClasses = Krys::Move(elementClasses)](const DOMString &className)
+                                     { return std::ranges::contains(elementClasses, className); });
+        });
+    }
+
+    return CreateRef<LiveHTMLCollection>(
+      root,
+      [classes = Krys::Move(classes)](const Element &element)
+      {
+        if (!element.HasAttribute(u8"class"))
+        {
+          return false;
+        }
+
+        auto &classList = *element._domTokenList;
+        return std::ranges::all_of(classes,
+                                   [&](const DOMString &className) { return classList.Contains(className); });
+      });
+  }
 }

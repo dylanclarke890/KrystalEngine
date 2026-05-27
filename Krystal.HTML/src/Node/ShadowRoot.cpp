@@ -10,8 +10,8 @@
 namespace Krys::HTML
 {
   ShadowRoot::ShadowRoot(Document &document, RefPtr<Krys::HTML::CustomElementRegistry> &&registry,
-                         NodeFlag flags) noexcept
-      : DocumentFragment(document, flags | NodeFlag::IsShadowRoot),
+                         NodeFlags flags) noexcept
+      : DocumentFragment(document, flags | NodeFlags::IsShadowRoot),
         _customElementRegistry(Krys::Move(registry))
   {
     SetEventTargetFlag(EventTargetFlags::IsInShadowTree);

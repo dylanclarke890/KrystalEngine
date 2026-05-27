@@ -114,7 +114,7 @@ namespace Krys::HTML
     element._attributes.push_back(ShareRef(attribute));
 
     attribute._ownerElement = CreateWeakPtr(&element);
-    attribute._ownerDocument = ShareRefPtr(&element.NodeDocument());
+    attribute._nodeDocument = ShareRefPtr(&element.NodeDocument());
 
     HandleAttributeChanges(attribute, element, {}, attribute._value);
   }
@@ -146,7 +146,7 @@ namespace Krys::HTML
       [&](const Ref<Attr> &attr) { return attr.get() == &oldAttribute; }, ShareRef(newAttribute));
 
     newAttribute._ownerElement = CreateWeakPtr(element.get());
-    newAttribute._ownerDocument = ShareRefPtr(&element->NodeDocument());
+    newAttribute._nodeDocument = ShareRefPtr(&element->NodeDocument());
     oldAttribute._ownerElement.reset();
 
     HandleAttributeChanges(oldAttribute, *element, oldAttribute._value, newAttribute._value);

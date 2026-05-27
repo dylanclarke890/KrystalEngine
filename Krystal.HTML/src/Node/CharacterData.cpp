@@ -14,8 +14,8 @@
 namespace Krys::HTML
 {
   CharacterData::CharacterData(Document &document, DOMString &&data, HTML::NodeType type,
-                               NodeFlag flags) noexcept
-      : Node(document, type, flags | NodeFlag::IsCharacterData), _data {Krys::Move(data)}
+                               NodeFlags flags) noexcept
+      : Node(document, type, flags | NodeFlags::IsCharacterData), _data {Krys::Move(data)}
   {
   }
 

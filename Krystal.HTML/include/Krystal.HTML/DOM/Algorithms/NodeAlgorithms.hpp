@@ -3,7 +3,6 @@
 #include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.HTML/Types/DOMStringAtom.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
-#include "Krystal.HTML/Types/NodeOrString.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
@@ -14,6 +13,7 @@ namespace Krys::HTML
   class CustomElementRegistry;
   class Document;
   class Element;
+  class HTMLCollection;
   class Node;
 
   /// @see https://dom.spec.whatwg.org/#mutation-algorithms
@@ -35,11 +35,27 @@ namespace Krys::HTML
       CloneSingleNode(const Node &node, Document &document,
                       RawPtr<CustomElementRegistry> fallbackRegistry = nullptr) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#concept-node-equals
+    KRYS_NODISCARD static bool Equals(const Node &A, const Node &B) noexcept;
+
     /// @see https://dom.spec.whatwg.org/#locate-a-namespace-prefix
     KRYS_NODISCARD static DOMStringAtom LocateNamespacePrefix(const Element &element,
                                                               DOMStringAtom namespaceURI) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#locate-a-namespace
     KRYS_NODISCARD static DOMStringAtom LocateNamespace(const Node &node, DOMStringAtom prefix) noexcept;
+
+    /// https://dom.spec.whatwg.org/#concept-getelementsbytagname
+    KRYS_NODISCARD static Ref<HTMLCollection> GetElementsByTagName(ContainerNode &root,
+                                                                   DOMStringAtom qualifiedName) noexcept;
+
+    /// https://dom.spec.whatwg.org/#concept-getelementsbytagnamens
+    KRYS_NODISCARD static Ref<HTMLCollection> GetElementsByTagNameNS(ContainerNode &root,
+                                                                     DOMStringAtom namespaceUri,
+                                                                     DOMStringAtom localName) noexcept;
+
+    /// https://dom.spec.whatwg.org/#concept-getelementsbyclassname
+    KRYS_NODISCARD static Ref<HTMLCollection> GetElementsByClassName(ContainerNode &root,
+                                                                     DOMStringAtom classNames) noexcept;
   };
 }

@@ -18,7 +18,7 @@ namespace Krys::HTML
   protected:
     HTMLTagName _tagName {HTMLTagName::Unknown};
 
-    HTMLElement(Document &document, HTMLTagName tag, NodeFlag flags = NodeFlag::None) noexcept;
+    HTMLElement(Document &document, HTMLTagName tag, NodeFlags flags = NodeFlags::None) noexcept;
 
   public:
     HTMLElement(Document &document) noexcept;

@@ -1,7 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Node/ContainerNode.hpp"
-#include "Krystal.HTML/Node/RareData/DocumentFragmentRareData.hpp"
+#include "Krystal.HTML/DOM/RareData/DocumentFragmentRareData.hpp"
+#include "Krystal.HTML/DOM/ContainerNode.hpp"
+#include "Krystal.HTML/Types/NodeOrString.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"
@@ -27,7 +28,7 @@ namespace Krys::HTML
     WeakPtr<Element> _host;
 
   protected:
-    DocumentFragment(Document &document, NodeFlag flags) noexcept;
+    DocumentFragment(Document &document, NodeFlags flags) noexcept;
 
   public:
     DocumentFragment(Document &document) noexcept;

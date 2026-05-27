@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Node/RareData/ParentNodeRareData.hpp"
+#include "Krystal.HTML/DOM/RareData/ParentNodeRareData.hpp"
 
 namespace Krys::HTML
 {

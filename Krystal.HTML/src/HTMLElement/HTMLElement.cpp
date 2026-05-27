@@ -7,8 +7,8 @@
 
 namespace Krys::HTML
 {
-  HTMLElement::HTMLElement(Document &document, HTMLTagName tag, NodeFlag flags) noexcept
-      : Element(document, flags | NodeFlag::IsHTMLElement), _tagName(tag)
+  HTMLElement::HTMLElement(Document &document, HTMLTagName tag, NodeFlags flags) noexcept
+      : Element(document, flags | NodeFlags::IsHTMLElement), _tagName(tag)
   {
   }
 

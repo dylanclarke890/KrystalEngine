@@ -1,68 +1,21 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/DOM/Dicts/GetRootNodeOptions.hpp"
+#include "Krystal.HTML/DOM/Enums/DocumentPosition.hpp"
+#include "Krystal.HTML/DOM/Enums/NodeFlags.hpp"
+#include "Krystal.HTML/DOM/Enums/NodeType.hpp"
 #include "Krystal.HTML/DOM/EventTarget.hpp"
-#include "Krystal.HTML/Node/RareData/NodeRareData.hpp"
+#include "Krystal.HTML/DOM/RareData/NodeRareData.hpp"
 #include "Krystal.HTML/Types/DOMString.hpp"
+#include "Krystal.HTML/Types/DOMStringAtom.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
-#include "Krystal.HTML/Types/NodeOrString.hpp"
-#include "Krystal.HTML/Types/SmallNodeList.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Mixins/CanMakeCheckedPtr.hpp"
 #include "Krystal.Lib/Pointers/CheckedPtr.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
-
-namespace Krys::HTML
-{
-  enum class NodeType : uint8
-  {
-    NONE = 0,
-    ELEMENT_NODE = 1,
-    ATTRIBUTE_NODE = 2,
-    TEXT_NODE = 3,
-    CDATA_SECTION_NODE = 4,
-    ENTITY_REFERENCE_NODE = 5, // legacy
-    ENTITY_NODE = 6,           // legacy
-    PROCESSING_INSTRUCTION_NODE = 7,
-    COMMENT_NODE = 8,
-    DOCUMENT_NODE = 9,
-    DOCUMENT_TYPE_NODE = 10,
-    DOCUMENT_FRAGMENT_NODE = 11,
-    NOTATION_NODE = 12, // legacy
-  };
-
-  enum class DocumentPosition : uint8
-  {
-    DOCUMENT_POSITION_EQUIVALENT = 0x00,
-    DOCUMENT_POSITION_DISCONNECTED = 0x01,
-    DOCUMENT_POSITION_PRECEDING = 0x02,
-    DOCUMENT_POSITION_FOLLOWING = 0x04,
-    DOCUMENT_POSITION_CONTAINS = 0x08,
-    DOCUMENT_POSITION_CONTAINED_BY = 0x10,
-    DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC = 0x20,
-  };
-
-  enum class NodeFlag : uint16
-  {
-    None = 0,
-    IsCharacterData = 1 << 0,
-    IsContainerNode = 1 << 1,
-    IsShadowRoot = 1 << 2,
-    IsUnknownElement = 1 << 3,
-    IsHTMLElement = 1 << 4,
-    IsSVGElement = 1 << 5,
-    IsMathMLElement = 1 << 6,
-    IsHTMLSlotElement = 1 << 7,
-  };
-}
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::NodeType, 13u);
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::DocumentPosition, 7u);
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::NodeFlag, 9u);
 
 namespace Krys::HTML
 {
@@ -70,14 +23,8 @@ namespace Krys::HTML
   class Document;
   class Element;
   class NodeList;
-  class ShadowRoot;
 
-  /// @see https://dom.spec.whatwg.org/#dictdef-getrootnodeoptions
-  struct GetRootNodeOptions
-  {
-    bool Composed = false;
-  };
-
+  /// @see https://dom.spec.whatwg.org/#interface-node
   class Node : public EventTarget, public CanMakeCheckedPtr<Node>
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
@@ -93,106 +40,210 @@ namespace Krys::HTML
     friend class TreeQueries;
 
   private:
-    NodeFlag _flags : BitCount<NodeFlag>() {NodeFlag::None};
+    NodeFlags _flags : BitCount<NodeFlags>() {NodeFlags::None};
     NodeType _nodeType : BitCount<NodeType>() {NodeType::NONE};
-    RefPtr<Document> _ownerDocument;
+    RefPtr<Document> _nodeDocument;
     CheckedPtr<ContainerNode> _parentNode;
     CheckedPtr<Node> _previousSibling;
     CheckedPtr<Node> _nextSibling;
     UniquePtr<NodeRareData> _nodeRareData;
 
   protected:
-    Node(Document &document, NodeType type, NodeFlag flags) noexcept;
+    Node(Document &document, NodeType type, NodeFlags flags) noexcept;
 
   public:
     virtual ~Node() noexcept = default;
 
 #pragma region Node - https://dom.spec.whatwg.org/#node
 
+    /// @see https://dom.spec.whatwg.org/#dom-node-nodetype
     KRYS_NODISCARD NodeType NodeType() const noexcept
     {
       return _nodeType;
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-node-nodename
     KRYS_NODISCARD virtual DOMString NodeName() const noexcept = 0;
 
+    /// @see https://dom.spec.whatwg.org/#dom-node-baseuri
     KRYS_NODISCARD DOMString BaseURI() const noexcept;
 
-    /// @see https://dom.spec.whatwg.org/#connected
+    /// @see https://dom.spec.whatwg.org/#dom-node-isconnected
     KRYS_NODISCARD bool IsConnected() const noexcept
     {
       return HasEventTargetFlag(EventTargetFlags::IsConnected);
     }
 
-    KRYS_NODISCARD Document &NodeDocument() const noexcept
-    {
-      return *_ownerDocument;
-    }
-
+    /// @see https://dom.spec.whatwg.org/#dom-node-ownerdocument
     KRYS_NODISCARD RawPtr<Document> OwnerDocument() const noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#dom-node-getrootnode
     KRYS_NODISCARD Node &GetRootNode(const GetRootNodeOptions &options) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-parentnode
     KRYS_NODISCARD RawPtr<ContainerNode> ParentNode() const noexcept
     {
       return _parentNode.get();
     }
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-parentelement
     KRYS_NODISCARD RawPtr<Element> ParentElement() const noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-haschildnodes
     KRYS_NODISCARD bool HasChildNodes() const noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-childnodes
     KRYS_NODISCARD Ref<NodeList> ChildNodes() noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-firstchild
     KRYS_NODISCARD RawPtr<Node> FirstChild() const noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-lastchild
     KRYS_NODISCARD RawPtr<Node> LastChild() const noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-previoussibling
     KRYS_NODISCARD RawPtr<Node> PreviousSibling() const noexcept
     {
       return _previousSibling.get();
     }
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-nextsibling
     KRYS_NODISCARD RawPtr<Node> NextSibling() const noexcept
     {
       return _nextSibling.get();
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-node-nodevalue
     KRYS_NODISCARD virtual Maybe<DOMString> NodeValue() const noexcept
     {
       return Null;
     }
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-nodevalue
     virtual ExceptionOr<void> NodeValue(DOMString &&value) noexcept
     {
       (void)value; // still want it in the signature
       return {};
     }
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
     KRYS_NODISCARD virtual Maybe<DOMString> TextContent() const noexcept
     {
       return Null;
     }
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
     virtual ExceptionOr<void> TextContent(DOMString &&value) noexcept
     {
       (void)value; // still want it in the signature
       return {};
     }
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-normalize
     ExceptionOr<void> Normalize() noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#dom-node-clonenode
     KRYS_NODISCARD ExceptionOr<Ref<Node>> CloneNode(bool subtree = false) noexcept;
-    KRYS_NODISCARD bool IsEqualNode(RawPtr<const Node> otherNode) const noexcept;
-    KRYS_NODISCARD bool IsSameNode(RawPtr<const Node> otherNode) const noexcept; // legacy alias of ===
 
+    /// @see https://dom.spec.whatwg.org/#dom-node-isequalnode
+    KRYS_NODISCARD bool IsEqualNode(RawPtr<const Node> otherNode) const noexcept;
+
+    /// @note legacy alias of ===
+    /// @see https://dom.spec.whatwg.org/#dom-node-issamenode
+    KRYS_NODISCARD bool IsSameNode(RawPtr<const Node> otherNode) const noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-issamenode
+    KRYS_NODISCARD bool operator==(const Node &otherNode) const noexcept
+    {
+      return this == &otherNode;
+    }
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-issamenode
+    KRYS_NODISCARD bool operator==(RawPtr<const Node> otherNode) const noexcept
+    {
+      return this == otherNode;
+    }
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-issamenode
+    KRYS_NODISCARD bool operator!=(const Node &otherNode) const noexcept
+    {
+      return this != &otherNode;
+    }
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-issamenode
+    KRYS_NODISCARD bool operator!=(RawPtr<const Node> otherNode) const noexcept
+    {
+      return this != otherNode;
+    }
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-comparedocumentposition
     KRYS_NODISCARD DocumentPosition CompareDocumentPosition(const Node &other) const noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-contains
     KRYS_NODISCARD bool Contains(RawPtr<const Node> other) const noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#dom-node-lookupprefix
     KRYS_NODISCARD DOMStringAtom LookupPrefix(DOMStringAtom namespaceURI) const noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-lookupnamespaceuri
     KRYS_NODISCARD DOMStringAtom LookupNamespaceURI(DOMStringAtom prefix) const noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-isdefaultnamespace
     KRYS_NODISCARD bool IsDefaultNamespace(DOMStringAtom namespaceURI) const noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#dom-node-insertbefore
     ExceptionOr<Node &> InsertBefore(Node &newChild, RawPtr<Node> refChild) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-replacechild
     ExceptionOr<Node &> ReplaceChild(Node &newChild, Node &oldChild) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-removechild
     ExceptionOr<Node &> RemoveChild(Node &child) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-appendchild
     ExceptionOr<Node &> AppendChild(Node &newChild) noexcept;
 
 #pragma endregion
+
+    /// @brief Helper function to get the node document of a node. This is the same as OwnerDocument except it
+    /// always returns the document, even for documents themselves.
+    /// @see https://dom.spec.whatwg.org/#concept-node-document
+    KRYS_NODISCARD Document &NodeDocument() const noexcept
+    {
+      return *_nodeDocument;
+    }
 
   protected:
     /// @see https://dom.spec.whatwg.org/#get-the-parent
     KRYS_NODISCARD RawPtr<EventTarget> GetParent(Event &event) const noexcept override;
 
-#pragma region Hooks
+#pragma region Tree Scope
+
+    /// @see https://dom.spec.whatwg.org/#concept-shadow-tree
+    KRYS_NODISCARD bool IsInShadowTree() const noexcept
+    {
+      return HasEventTargetFlag(EventTargetFlags::IsInShadowTree);
+    }
+
+    /// @see https://dom.spec.whatwg.org/#concept-document-tree
+    KRYS_NODISCARD bool IsInDocumentTree() const noexcept
+    {
+      return IsConnected() && !IsInShadowTree();
+    }
+
+#pragma endregion
+
+#pragma region Registered Observers
+
+    /// @see https://dom.spec.whatwg.org/#registered-observer-list
+    KRYS_NODISCARD List<Ref<RegisteredObserver>> &RegisteredObservers() noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#registered-observer-list
+    KRYS_NODISCARD List<Ref<TransientRegisteredObserver>> &TransientRegisteredObservers() noexcept;
+
+#pragma endregion
+
+#pragma region Extension Hooks
 
     virtual void OnInsert() noexcept
     {
@@ -251,7 +302,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool IsContainerNode() const noexcept
     {
-      return HasNodeFlag(NodeFlag::IsContainerNode);
+      return HasNodeFlag(NodeFlags::IsContainerNode);
     }
 
     KRYS_NODISCARD bool IsElementNode() const noexcept
@@ -261,7 +312,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool IsCharacterDataNode() const noexcept
     {
-      return HasNodeFlag(NodeFlag::IsCharacterData);
+      return HasNodeFlag(NodeFlags::IsCharacterData);
     }
 
     KRYS_NODISCARD bool IsTextNode() const noexcept
@@ -286,79 +337,66 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool IsShadowRootNode() const noexcept
     {
-      return HasNodeFlag(NodeFlag::IsShadowRoot);
+      return HasNodeFlag(NodeFlags::IsShadowRoot);
     }
 
     KRYS_NODISCARD bool IsUnknownElement() const noexcept
     {
-      return HasNodeFlag(NodeFlag::IsUnknownElement);
+      return HasNodeFlag(NodeFlags::IsUnknownElement);
     }
 
     KRYS_NODISCARD bool IsHTMLElement() const noexcept
     {
-      return HasNodeFlag(NodeFlag::IsHTMLElement);
+      return HasNodeFlag(NodeFlags::IsHTMLElement);
     }
 
     KRYS_NODISCARD bool IsHTMLSlotElement() const noexcept
     {
-      return HasNodeFlag(NodeFlag::IsHTMLSlotElement);
+      return HasNodeFlag(NodeFlags::IsHTMLSlotElement);
     }
 
     KRYS_NODISCARD bool IsSVGElement() const noexcept
     {
-      return HasNodeFlag(NodeFlag::IsSVGElement);
+      return HasNodeFlag(NodeFlags::IsSVGElement);
     }
 
     KRYS_NODISCARD bool IsMathMLElement() const noexcept
     {
-      return HasNodeFlag(NodeFlag::IsMathMLElement);
+      return HasNodeFlag(NodeFlags::IsMathMLElement);
     }
 
     KRYS_NODISCARD bool IsHTMLUnknownElement() const noexcept
     {
-      return HasNodeFlag(NodeFlag::IsHTMLElement) && HasNodeFlag(NodeFlag::IsUnknownElement);
+      return HasNodeFlag(NodeFlags::IsHTMLElement) && HasNodeFlag(NodeFlags::IsUnknownElement);
     }
 
     KRYS_NODISCARD bool IsSVGUnknownElement() const noexcept
     {
-      return HasNodeFlag(NodeFlag::IsSVGElement) && HasNodeFlag(NodeFlag::IsUnknownElement);
+      return HasNodeFlag(NodeFlags::IsSVGElement) && HasNodeFlag(NodeFlags::IsUnknownElement);
     }
 
     KRYS_NODISCARD bool IsMathMLUnknownElement() const noexcept
     {
-      return HasNodeFlag(NodeFlag::IsMathMLElement) && HasNodeFlag(NodeFlag::IsUnknownElement);
-    }
-
-#pragma endregion
-
-#pragma region Tree Scope
-
-    /// @see https://dom.spec.whatwg.org/#concept-shadow-tree
-    KRYS_NODISCARD bool IsInShadowTree() const noexcept
-    {
-      return HasEventTargetFlag(EventTargetFlags::IsInShadowTree);
-    }
-
-    /// @see https://dom.spec.whatwg.org/#concept-document-tree
-    KRYS_NODISCARD bool IsInDocumentTree() const noexcept
-    {
-      return IsConnected() && !IsInShadowTree();
+      return HasNodeFlag(NodeFlags::IsMathMLElement) && HasNodeFlag(NodeFlags::IsUnknownElement);
     }
 
 #pragma endregion
 
 #pragma region Relationships
 
+    /// @warn Be careful when modifying node relationships. Node constraints are not checked.
     void SetParentNode(RawPtr<ContainerNode> parent) noexcept
     {
       _parentNode = ShareCheckedPtr(parent);
     }
 
+    /// @warn Be careful when modifying node relationships. Node constraints are not checked.
     void SetNextSibling(RawPtr<Node> sibling) noexcept
     {
       _nextSibling = ShareCheckedPtr(sibling);
     }
 
+    /// @warn Be careful when modifying node relationships. Node constraints are not checked.
     void SetPreviousSibling(RawPtr<Node> sibling) noexcept
     {
       _previousSibling = ShareCheckedPtr(sibling);
@@ -368,27 +406,23 @@ namespace Krys::HTML
 
 #pragma region Node Flags
 
-    void SetNodeFlag(NodeFlag flag) noexcept
+    void SetNodeFlag(NodeFlags flag) noexcept
     {
       _flags = _flags | flag;
     }
 
-    void ClearNodeFlag(NodeFlag flag) noexcept
+    void ClearNodeFlag(NodeFlags flag) noexcept
     {
       _flags = _flags & ~flag;
     }
 
-    KRYS_NODISCARD bool HasNodeFlag(NodeFlag flag) const noexcept
+    KRYS_NODISCARD bool HasNodeFlag(NodeFlags flag) const noexcept
     {
       return HasFlag(_flags, flag);
     }
 
 #pragma endregion
-
-    KRYS_NODISCARD List<Ref<RegisteredObserver>> &RegisteredObservers() noexcept;
-
-    KRYS_NODISCARD List<Ref<TransientRegisteredObserver>> &TransientRegisteredObservers() noexcept;
-  };
+};
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::Node)

@@ -1,8 +1,9 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/DOM/Node.hpp"
 #include "Krystal.HTML/Types/DOMString.hpp"
-#include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
+#include "Krystal.HTML/Types/NodeOrString.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 
@@ -19,7 +20,7 @@ namespace Krys::HTML
 
   protected:
     CharacterData(Document &document, DOMString &&data, HTML::NodeType type,
-                  NodeFlag flags = NodeFlag::None) noexcept;
+                  NodeFlags flags = NodeFlags::None) noexcept;
 
   public:
 #pragma region CharacterData - https://dom.spec.whatwg.org/#interface-characterdata

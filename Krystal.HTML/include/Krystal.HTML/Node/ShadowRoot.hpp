@@ -35,7 +35,7 @@ namespace Krys::HTML
 
   public:
     ShadowRoot(Document &document, RefPtr<CustomElementRegistry> &&registry = nullptr,
-               NodeFlag flags = NodeFlag::None) noexcept;
+               NodeFlags flags = NodeFlags::None) noexcept;
 
 #pragma region ShadowRoot
 

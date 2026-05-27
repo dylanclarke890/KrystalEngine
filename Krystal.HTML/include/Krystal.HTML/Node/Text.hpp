@@ -28,7 +28,7 @@ namespace Krys::HTML
 
   public:
     Text(Document &document, DOMString &&data = u8"", HTML::NodeType type = NodeType::TEXT_NODE,
-         NodeFlag flags = NodeFlag::None) noexcept;
+         NodeFlags flags = NodeFlags::None) noexcept;
 
 #pragma region Text
 

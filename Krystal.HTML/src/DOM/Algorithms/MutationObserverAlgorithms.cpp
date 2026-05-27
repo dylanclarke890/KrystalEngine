@@ -8,7 +8,7 @@
 #include "Krystal.HTML/DOM/MutationObserver/ChildListMutationRecord.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/Node/Node.hpp"
+#include "Krystal.HTML/DOM/Node.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include <cassert>
 

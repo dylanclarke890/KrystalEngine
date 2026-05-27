@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Node/Node.hpp"
+﻿#include "Krystal.HTML/DOM/Node.hpp"
 #include "Krystal.HTML.Tests/TestElement.hpp"
 #include "Krystal.HTML.Tests/TestNode.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
@@ -7,7 +7,7 @@
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Comment.hpp"
-#include "Krystal.HTML/Node/ContainerNode.hpp"
+#include "Krystal.HTML/DOM/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/DOM/NodeList.hpp"
 #include "Krystal.HTML/Node/ProcessingInstruction.hpp"
@@ -47,7 +47,7 @@ namespace Krys::Tests
 
     public:
       NamespaceTestElement(Document &document, DOMStringAtom namespacePrefix) noexcept
-          : Element(document, {u8"http://a", namespacePrefix, u8"test-element"}, NodeFlag::None)
+          : Element(document, {u8"http://a", namespacePrefix, u8"test-element"}, NodeFlags::None)
       {
       }
     };

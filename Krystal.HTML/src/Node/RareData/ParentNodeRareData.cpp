@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Node/RareData/ParentNodeRareData.hpp"
+﻿#include "Krystal.HTML/DOM/RareData/ParentNodeRareData.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Collections/LiveHTMLCollection.hpp"

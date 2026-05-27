@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/Node/DocumentFragment.hpp"
-#include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
@@ -14,13 +14,13 @@
 
 namespace Krys::HTML
 {
-  DocumentFragment::DocumentFragment(Document &document, NodeFlag flags) noexcept
+  DocumentFragment::DocumentFragment(Document &document, NodeFlags flags) noexcept
       : ContainerNode(document, NodeType::DOCUMENT_FRAGMENT_NODE, flags)
   {
   }
 
   DocumentFragment::DocumentFragment(Document &document) noexcept
-      : ContainerNode(document, NodeType::DOCUMENT_FRAGMENT_NODE, NodeFlag::None)
+      : ContainerNode(document, NodeType::DOCUMENT_FRAGMENT_NODE, NodeFlags::None)
   {
   }
 

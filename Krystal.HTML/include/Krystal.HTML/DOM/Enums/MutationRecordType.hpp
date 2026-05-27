@@ -4,6 +4,8 @@
 
 namespace Krys::HTML
 {
+  /// @brief The type of a mutation record, which is used to indicate what type of mutation occurred in the
+  /// DOM.
   enum class MutationRecordType : uint8
   {
     ChildList,

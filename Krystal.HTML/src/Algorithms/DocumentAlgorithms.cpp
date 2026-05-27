@@ -83,7 +83,7 @@ namespace Krys::HTML
 
       for (auto &inclusiveDescendant : InclusiveShadowIncludingDescendantRange(node))
       {
-        inclusiveDescendant._ownerDocument = ShareRefPtr(&document);
+        inclusiveDescendant._nodeDocument = ShareRefPtr(&document);
         if (Is<ShadowRoot>(inclusiveDescendant))
         {
           auto &shadowRootInclusiveDescendant = Downcast<ShadowRoot>(inclusiveDescendant);
@@ -102,7 +102,7 @@ namespace Krys::HTML
           auto &elementInclusiveDescendant = Downcast<Element>(inclusiveDescendant);
           for (auto &attr : elementInclusiveDescendant._attributes)
           {
-            attr->_ownerDocument = ShareRefPtr(&document);
+            attr->_nodeDocument = ShareRefPtr(&document);
           }
 
           auto registry = elementInclusiveDescendant.CustomElementRegistry();

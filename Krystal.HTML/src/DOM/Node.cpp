@@ -1,11 +1,11 @@
-﻿#include "Krystal.HTML/Node/Node.hpp"
+﻿#include "Krystal.HTML/DOM/Node.hpp"
 #include "Krystal.HTML/Algorithms/LiveRangeUpdater.hpp"
-#include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
@@ -13,7 +13,7 @@
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CharacterData.hpp"
-#include "Krystal.HTML/Node/ContainerNode.hpp"
+#include "Krystal.HTML/DOM/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/DocumentType.hpp"
 #include "Krystal.HTML/Node/ProcessingInstruction.hpp"
@@ -22,8 +22,8 @@
 
 namespace Krys::HTML
 {
-  Node::Node(Document &document, HTML::NodeType type, NodeFlag flags) noexcept
-      : EventTarget(EventTargetFlags::IsNode), _nodeType(type), _ownerDocument(ShareRefPtr(&document)),
+  Node::Node(Document &document, HTML::NodeType type, NodeFlags flags) noexcept
+      : EventTarget(EventTargetFlags::IsNode), _nodeType(type), _nodeDocument(ShareRefPtr(&document)),
         _parentNode(nullptr), _previousSibling(nullptr), _nextSibling(nullptr)
   {
     _flags = flags;
@@ -159,150 +159,7 @@ namespace Krys::HTML
       return false;
     }
 
-    if (NodeType() != otherNode->NodeType())
-    {
-      return false;
-    }
-
-    switch (NodeType())
-    {
-      case HTML::NodeType::DOCUMENT_TYPE_NODE:
-      {
-        auto &thisDocType = Downcast<DocumentType>(*this);
-        auto &otherDocType = Downcast<DocumentType>(*otherNode);
-
-        if (thisDocType.Name() != otherDocType.Name())
-        {
-          return false;
-        }
-        if (thisDocType.PublicId() != otherDocType.PublicId())
-        {
-          return false;
-        }
-        if (thisDocType.SystemId() != otherDocType.SystemId())
-        {
-          return false;
-        }
-
-        break;
-      }
-      case HTML::NodeType::ELEMENT_NODE:
-      {
-        auto &thisElement = Downcast<Element>(*this);
-        auto &otherElement = Downcast<Element>(*otherNode);
-
-        if (thisElement.NamespaceURI() != otherElement.NamespaceURI())
-        {
-          return false;
-        }
-        if (thisElement.Prefix() != otherElement.Prefix())
-        {
-          return false;
-        }
-        if (thisElement.LocalName() != otherElement.LocalName())
-        {
-          return false;
-        }
-
-        for (size_t i = 0uz; i < thisElement._attributes.size(); i++)
-        {
-          if (i >= otherElement._attributes.size())
-          {
-            return false;
-          }
-
-          auto &thisAttribute = thisElement._attributes[i];
-          auto &otherAttribute = otherElement._attributes[i];
-
-          if (thisAttribute->LocalName() != otherAttribute->LocalName())
-          {
-            return false;
-          }
-          if (thisAttribute->NamespaceURI() != otherAttribute->NamespaceURI())
-          {
-            return false;
-          }
-          if (thisAttribute->Value() != otherAttribute->Value())
-          {
-            return false;
-          }
-        }
-
-        break;
-      }
-      case HTML::NodeType::ATTRIBUTE_NODE:
-      {
-        auto &thisAttribute = Downcast<Attr>(*this);
-        auto &otherAttribute = Downcast<Attr>(*otherNode);
-
-        if (thisAttribute.LocalName() != otherAttribute.LocalName())
-        {
-          return false;
-        }
-        if (thisAttribute.NamespaceURI() != otherAttribute.NamespaceURI())
-        {
-          return false;
-        }
-        if (thisAttribute.Value() != otherAttribute.Value())
-        {
-          return false;
-        }
-        break;
-      }
-      case HTML::NodeType::PROCESSING_INSTRUCTION_NODE:
-      {
-        auto &thisProcessingInstruction = Downcast<ProcessingInstruction>(*this);
-        auto &otherProcessingInstruction = Downcast<ProcessingInstruction>(*otherNode);
-
-        if (thisProcessingInstruction.Target() != otherProcessingInstruction.Target())
-        {
-          return false;
-        }
-        if (thisProcessingInstruction.Data() != otherProcessingInstruction.Data())
-        {
-          return false;
-        }
-
-        break;
-      }
-      case HTML::NodeType::CDATA_SECTION_NODE:
-      case HTML::NodeType::TEXT_NODE:
-      case HTML::NodeType::COMMENT_NODE:
-      {
-        auto &thisCharacterData = Downcast<CharacterData>(*this);
-        auto &otherCharacterData = Downcast<CharacterData>(*otherNode);
-
-        if (thisCharacterData.Data() != otherCharacterData.Data())
-        {
-          return false;
-        }
-
-        break;
-      }
-      case HTML::NodeType::DOCUMENT_NODE:
-      case HTML::NodeType::DOCUMENT_FRAGMENT_NODE: break;
-    }
-
-    RawPtr<Node> child = FirstChild();
-    RawPtr<Node> otherChild = otherNode->FirstChild();
-
-    while (child != nullptr)
-    {
-      if (!child->IsEqualNode(otherChild))
-      {
-        return false;
-      }
-
-      child = child->NextSibling();
-      otherChild = otherChild->NextSibling();
-    }
-
-    if (otherChild != nullptr)
-    {
-      return false;
-    }
-
-    return true;
+    return NodeAlgorithms::Equals(*this, *otherNode);
   }
 
   bool Node::IsSameNode(RawPtr<const Node> otherNode) const noexcept
@@ -341,13 +198,13 @@ namespace Krys::HTML
 
         for (auto &attribute : element2._attributes)
         {
-          if (attribute->IsEqualNode(attr1))
+          if (NodeAlgorithms::Equals(*attribute, *attr1))
           {
             return DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC
                    | DocumentPosition::DOCUMENT_POSITION_PRECEDING;
           }
 
-          if (attribute->IsEqualNode(attr2))
+          if (NodeAlgorithms::Equals(*attribute, *attr2))
           {
             return DocumentPosition::DOCUMENT_POSITION_IMPLEMENTATION_SPECIFIC
                    | DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
@@ -356,7 +213,7 @@ namespace Krys::HTML
       }
     }
 
-    if (node1 == nullptr || node2 == nullptr || &TreeQueries::Root(*node1) != &TreeQueries::Root(*node2))
+    if (node1 == nullptr || node2 == nullptr || !TreeQueries::SameRoot(*node1, *node2))
     {
       auto orderingFlag = node1 < node2 ? DocumentPosition::DOCUMENT_POSITION_PRECEDING
                                         : DocumentPosition::DOCUMENT_POSITION_FOLLOWING;
@@ -470,7 +327,7 @@ namespace Krys::HTML
   {
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
     {
-      return containerNode->InsertBefore(newChild, refChild);
+      return MutationAlgorithms::PreInsert(newChild, *containerNode, refChild);
     }
 
     return Exception {ExceptionCode::HierarchyRequestError};
@@ -480,7 +337,7 @@ namespace Krys::HTML
   {
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
     {
-      return containerNode->ReplaceChild(newChild, oldChild);
+      return MutationAlgorithms::Replace(oldChild, newChild, *containerNode);
     }
 
     return Exception {ExceptionCode::HierarchyRequestError};
@@ -490,7 +347,7 @@ namespace Krys::HTML
   {
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
     {
-      return containerNode->RemoveChild(oldChild);
+      return MutationAlgorithms::PreRemove(oldChild, *containerNode);
     }
 
     return Exception {ExceptionCode::NotFoundError};
@@ -500,7 +357,7 @@ namespace Krys::HTML
   {
     if (auto *containerNode = DynamicDowncast<ContainerNode>(*this))
     {
-      return containerNode->AppendChild(newChild);
+      return MutationAlgorithms::Append(newChild, *containerNode);
     }
 
     return Exception {ExceptionCode::HierarchyRequestError};

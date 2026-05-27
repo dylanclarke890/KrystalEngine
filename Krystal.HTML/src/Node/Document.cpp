@@ -1,8 +1,6 @@
 ﻿#include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/DocumentAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/HTMLCollectionAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Constants/Namespaces.hpp"
@@ -10,6 +8,7 @@
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
+#include "Krystal.HTML/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/OrderedSet.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
@@ -53,7 +52,7 @@ namespace Krys::HTML
 
 #pragma region Document
 
-  Document::Document() noexcept : ContainerNode(*this, NodeType::DOCUMENT_NODE, NodeFlag::IsContainerNode)
+  Document::Document() noexcept : ContainerNode(*this, NodeType::DOCUMENT_NODE, NodeFlags::IsContainerNode)
   {
     SetEventTargetFlag(EventTargetFlags::IsConnected);
   }
@@ -131,18 +130,18 @@ namespace Krys::HTML
 
   Ref<HTMLCollection> Document::GetElementsByTagName(DOMStringAtom qualifiedName) noexcept
   {
-    return HTMLCollectionAlgorithms::ElementsByTagName(*this, qualifiedName);
+    return NodeAlgorithms::GetElementsByTagName(*this, qualifiedName);
   }
 
   Ref<HTMLCollection> Document::GetElementsByTagNameNS(DOMStringAtom namespaceUri,
                                                        DOMStringAtom localName) noexcept
   {
-    return HTMLCollectionAlgorithms::ElementsByTagNameNS(*this, namespaceUri, localName);
+    return NodeAlgorithms::GetElementsByTagNameNS(*this, namespaceUri, localName);
   }
 
   Ref<HTMLCollection> Document::GetElementsByClassName(DOMStringAtom classNames) noexcept
   {
-    return HTMLCollectionAlgorithms::ElementsByClassName(*this, classNames);
+    return NodeAlgorithms::GetElementsByClassName(*this, classNames);
   }
 
   ExceptionOr<Ref<Element>> Document::CreateElement(DOMStringAtom localName,

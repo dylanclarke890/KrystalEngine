@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Node/Node.hpp"
+#include "Krystal.HTML/DOM/Node.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include <compare>
 

@@ -2,6 +2,7 @@
 
 #include "Krystal.HTML/Ranges/AbstractRange.hpp"
 #include "Krystal.HTML/Ranges/BoundaryPoint.hpp"
+#include "Krystal.HTML/Types/SmallNodeList.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 #include <compare>
@@ -79,7 +80,8 @@ namespace Krys::HTML
                                                              Node &endContainer) const noexcept;
     KRYS_NODISCARD RawPtr<Node> LastPartiallyContainedChild(Node &commonAncestor, Node &startContainer,
                                                             Node &endContainer) const noexcept;
-    KRYS_NODISCARD ExceptionOr<SmallNodeList> GetContainedChildren(RawPtr<Node> commonAncestor) const noexcept;
+    KRYS_NODISCARD ExceptionOr<SmallNodeList>
+      GetContainedChildren(RawPtr<Node> commonAncestor) const noexcept;
 
     KRYS_NODISCARD ExceptionOr<void>
       CloneCharacterDataContents(DocumentFragment &fragment, Node &container, size_t offset, size_t length,

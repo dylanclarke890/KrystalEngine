@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/Constants/Namespaces.hpp"
-#include "Krystal.HTML/Node/ContainerNode.hpp"
+#include "Krystal.HTML/DOM/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/QualifiedName.hpp"
@@ -16,7 +16,7 @@ namespace Krys::Tests
 
   public:
     TestContainerNode(Document &document) noexcept
-        : Element(document, {Namespace::HTML, DOMStringAtom::Null(), u8"test-container-node"}, NodeFlag::None)
+        : Element(document, {Namespace::HTML, DOMStringAtom::Null(), u8"test-container-node"}, NodeFlags::None)
     {
     }
   };

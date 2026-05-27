@@ -1,7 +1,6 @@
 ﻿#include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/HTMLCollectionAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/NodeAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/Constants/Namespaces.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
@@ -15,23 +14,23 @@
 #include "Krystal.HTML/DOM/Mixins/ParentNode.hpp"
 #include "Krystal.HTML/DOM/Mixins/Slottable.hpp"
 #include "Krystal.HTML/DOM/NodeList.hpp"
+#include "Krystal.HTML/DOM/RareData/ElementRareData.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/HTMLDocument.hpp"
 #include "Krystal.HTML/Node/NamedNodeMap.hpp"
-#include "Krystal.HTML/Node/RareData/ElementRareData.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include <ranges>
 
 namespace Krys::HTML
 {
-  Element::Element(Document &document, NodeFlag nodeFlags) noexcept
+  Element::Element(Document &document, NodeFlags nodeFlags) noexcept
       : ContainerNode(document, NodeType::ELEMENT_NODE, nodeFlags)
   {
   }
 
-  Element::Element(Document &document, const QualifiedName &name, NodeFlag nodeFlags) noexcept
+  Element::Element(Document &document, const QualifiedName &name, NodeFlags nodeFlags) noexcept
       : ContainerNode(document, NodeType::ELEMENT_NODE, nodeFlags), _qualifiedName(name)
   {
   }
@@ -331,18 +330,18 @@ namespace Krys::HTML
 
   Ref<HTMLCollection> Element::GetElementsByTagName(DOMStringAtom qualifiedName) noexcept
   {
-    return HTMLCollectionAlgorithms::ElementsByTagName(*this, qualifiedName);
+    return NodeAlgorithms::GetElementsByTagName(*this, qualifiedName);
   }
 
   Ref<HTMLCollection> Element::GetElementsByTagNameNS(DOMStringAtom namespaceURI,
                                                       DOMStringAtom localName) noexcept
   {
-    return HTMLCollectionAlgorithms::ElementsByTagNameNS(*this, namespaceURI, localName);
+    return NodeAlgorithms::GetElementsByTagNameNS(*this, namespaceURI, localName);
   }
 
   Ref<HTMLCollection> Element::GetElementsByClassName(DOMStringAtom classNames) noexcept
   {
-    return HTMLCollectionAlgorithms::ElementsByClassName(*this, classNames);
+    return NodeAlgorithms::GetElementsByClassName(*this, classNames);
   }
 
   ExceptionOr<RawPtr<Element>> Element::InsertAdjacentElement(InsertAdjacentWhere where,

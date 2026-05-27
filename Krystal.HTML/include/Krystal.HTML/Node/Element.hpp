@@ -1,12 +1,12 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/DOMTokenList.hpp"
-#include "Krystal.HTML/Node/ContainerNode.hpp"
+#include "Krystal.HTML/DOM/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/Enums/CustomElementState.hpp"
 #include "Krystal.HTML/Node/Enums/InsertAdjacentWhere.hpp"
 #include "Krystal.HTML/Node/NamedNodeMap.hpp"
-#include "Krystal.HTML/Node/RareData/ElementRareData.hpp"
+#include "Krystal.HTML/DOM/RareData/ElementRareData.hpp"
 #include "Krystal.HTML/Node/ShadowRootInit.hpp"
 #include "Krystal.HTML/QualifiedName.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
@@ -58,9 +58,9 @@ namespace Krys::HTML
     WeakPtr<HTMLSlotElement> _manuallyAssignedSlot;
 
   protected:
-    Element(Document &document, NodeFlag nodeFlags) noexcept;
+    Element(Document &document, NodeFlags nodeFlags) noexcept;
 
-    Element(Document &document, const QualifiedName &name, NodeFlag nodeFlags) noexcept;
+    Element(Document &document, const QualifiedName &name, NodeFlags nodeFlags) noexcept;
 
   public:
 #pragma region Element

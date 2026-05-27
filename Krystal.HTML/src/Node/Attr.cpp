@@ -9,7 +9,7 @@
 namespace Krys::HTML
 {
   Attr::Attr(Document &document, const QualifiedName &qualifiedName, DOMString &&value) noexcept
-      : Node(document, NodeType::ATTRIBUTE_NODE, NodeFlag::None), _name {qualifiedName},
+      : Node(document, NodeType::ATTRIBUTE_NODE, NodeFlags::None), _name {qualifiedName},
         _value {Krys::Move(value)}
   {
   }

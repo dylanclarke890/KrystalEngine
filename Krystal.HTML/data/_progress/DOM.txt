@@ -17,7 +17,7 @@
  - RemoveEventListener - service workers currently not supported.
      - https://dom.spec.whatwg.org/#remove-an-event-listener
  - Add/RemoveEventListener - We need a way of passing a lambda instead of a EventListenerCallback as it's awkward to use.
-   The issue to solve is how to compare the lambda to the callback when adding/removing listeners.
+   The issue to solve is how to compare the lambda to the callback when adding/removing listeners. Take a similar approach to AbortAlgorithmCallback
 
 2.8. Observing event listeners - https://dom.spec.whatwg.org/#observing-event-listeners
  - To legacy-obtain service worker fetch event listener callbacks algorithm not implemented, as service workers are not supported.
@@ -87,6 +87,24 @@
  - Queue a mutation record - Append observer to the surrounding agent’s pending mutation observers. Don't have 'surrounding agents' or 'pending mutation observers'.
    - https://dom.spec.whatwg.org/#queue-a-mutation-record
 
+4.4 Interface Node - https://dom.spec.whatwg.org/#interface-node
+ - The baseURI getter steps are to return this’s node document’s document base URL, serialized. URL spec. Unlikely to support this.
+     - https://dom.spec.whatwg.org/#dom-node-baseuri
+ - CloneSingleNode - Encoding is not currently passed to the cloned Document. Needs to
+ - CloneSingleNode - Domain is not currently passed to the cloned Document. Unlikely to support this.
+ - CloneSingleNode - URL is not currently passed to the cloned Document. URL spec. Unlikely to support this.
+     - https://dom.spec.whatwg.org/#clone-a-single-node
+ - GetElementsByTagName/GetElementsByTagNameNS/GetElementsByClassName - implemented but inefficient, it iterates through the entire tree to find matching nodes every time.
+     - https://dom.spec.whatwg.org/#dom-node-getelementsbytagname
+     - https://dom.spec.whatwg.org/#dom-node-getelementsbytagnamens
+     - https://dom.spec.whatwg.org/#dom-node-getelementsbyclassname
+ - LastChild/FirstChild/ParentNode/PreviousSibling/NextSibling - These currently return RawPtr but they should return RefPtr instead for the public API.
+     - https://dom.spec.whatwg.org/#dom-node-lastchild
+
+4.5 Interface Document
+ - DocumentURI - URL spec. Unlikely to support this.
+     - https://dom.spec.whatwg.org/#dom-document-documenturi
+
 TODO:
 CSS-SELECTORS
   - Separate spec implementation required first, significant work to implement CSS selector parsing and matching.
@@ -124,13 +142,6 @@ Section 4.8 Interface ShadowRoot - https://dom.spec.whatwg.org/#interface-shadow
 
 Section 4.9 Interface Element - https://dom.spec.whatwg.org/#interface-element
   - AttachShadow and ShadowRoot missing test cases.
-
-Section 4.5 Interface Document - https://dom.spec.whatwg.org/#interface-document
-  - Needs the encoding used passed to it on creation.
-
-4.4 Interface Node
-
-4.5 Interface Document
 
 4.5.1 Interface DOMImplementation
 

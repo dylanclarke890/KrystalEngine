@@ -55,7 +55,7 @@ namespace Krys::HTML
 
     if (result == nullptr)
     {
-      result = AdoptRefPtr<Element>(new Element(document, name, NodeFlag::None));
+      result = AdoptRefPtr<Element>(new Element(document, name, NodeFlags::None));
     }
 
     result->_qualifiedName = name;

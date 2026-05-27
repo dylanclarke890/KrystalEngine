@@ -10,7 +10,7 @@
 
 namespace Krys::HTML
 {
-  Text::Text(Document &document, DOMString &&data, HTML::NodeType type, NodeFlag flags) noexcept
+  Text::Text(Document &document, DOMString &&data, HTML::NodeType type, NodeFlags flags) noexcept
       : CharacterData(document, Krys::Move(data), type, flags)
   {
   }
