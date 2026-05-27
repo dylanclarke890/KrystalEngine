@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/DOM/Enums/EventPhaseType.hpp"
-#include "Krystal.HTML/DOM/Event/Event.hpp"
+#include "Krystal.HTML/DOM/Event.hpp"
 #include "Krystal.HTML/Factories/EventFactory.hpp"
 #include "Krystal.HTML/Types/DOMStringAtom.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"

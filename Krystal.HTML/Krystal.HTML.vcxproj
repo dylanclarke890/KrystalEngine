@@ -42,7 +42,7 @@
     <ClInclude Include="include\Krystal.HTML\Constants\Keywords.hpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\MIMETypes.hpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\Namespaces.hpp" />
-    <ClInclude Include="include\Krystal.HTML\DOM\AbortAlgorithmCallback.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Callbacks\AbortAlgorithmCallback.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\AbortAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\EventTargetAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\OrderedSet.hpp" />
@@ -153,9 +153,9 @@
     <ClInclude Include="include\Krystal.HTML\Types\DOMHighResTimeStamp.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Element.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\AbortSignal.hpp" />
-    <ClInclude Include="include\Krystal.HTML\DOM\Event\CustomEvent.hpp" />
-    <ClInclude Include="include\Krystal.HTML\DOM\Event\Event.hpp" />
-    <ClInclude Include="include\Krystal.HTML\DOM\Event\EventListenerCallback.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\CustomEvent.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Event.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Callbacks\EventListenerCallback.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\EventListenerOptions.hpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\EventNames.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\EventPhaseType.hpp" />
@@ -261,7 +261,7 @@
     <ClCompile Include="src\Node\NamedNodeMap.cpp" />
     <ClCompile Include="src\DOM\Mixins\NonElementParentNode.cpp" />
     <ClCompile Include="src\Ranges\Range.cpp" />
-    <ClCompile Include="src\MutationObserver\MutationObserver.cpp" />
+    <ClCompile Include="src\DOM\MutationObserver.cpp" />
     <ClCompile Include="src\Node\RareData\ParentNodeRareData.cpp" />
     <ClCompile Include="src\Node\RareData\NodeRareData.cpp" />
     <ClCompile Include="src\DOM\Algorithms\MutationAlgorithms.cpp" />
@@ -279,7 +279,7 @@
     <ClCompile Include="src\Node\Comment.cpp" />
     <ClCompile Include="src\Node\ContainerNode.cpp" />
     <ClCompile Include="src\Context.cpp" />
-    <ClCompile Include="src\DOM\Event\Event.cpp" />
+    <ClCompile Include="src\DOM\Event.cpp" />
     <ClCompile Include="src\DOM\EventTarget.cpp" />
     <ClCompile Include="src\Node\Node.cpp" />
     <ClCompile Include="src\Algorithms\TreeTraversal.cpp" />

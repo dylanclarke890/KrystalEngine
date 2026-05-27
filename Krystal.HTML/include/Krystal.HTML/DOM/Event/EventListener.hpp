@@ -1,7 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/DOM/Callbacks/EventListenerCallback.hpp"
 #include "Krystal.HTML/DOM/Dicts/AddEventListenerOptions.hpp"
-#include "Krystal.HTML/DOM/Event/EventListenerCallback.hpp"
 #include "Krystal.HTML/Types/DOMStringAtom.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Move.hpp"

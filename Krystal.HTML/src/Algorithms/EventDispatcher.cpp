@@ -6,7 +6,7 @@
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.HTML/DOM/Event/Event.hpp"
+#include "Krystal.HTML/DOM/Event.hpp"
 #include "Krystal.HTML/DOM/Event/EventListener.hpp"
 #include "Krystal.HTML/DOM/EventTarget.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"

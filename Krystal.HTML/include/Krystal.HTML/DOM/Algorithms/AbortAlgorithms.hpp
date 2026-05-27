@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/DOM/AbortAlgorithmCallback.hpp"
+#include "Krystal.HTML/DOM/Callbacks/AbortAlgorithmCallback.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Types/Any.hpp"
 #include "Krystal.Lib/Types/List.hpp"

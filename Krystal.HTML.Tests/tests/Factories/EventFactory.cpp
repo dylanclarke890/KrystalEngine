@@ -1,7 +1,7 @@
 ﻿#include "Krystal.HTML/Factories/EventFactory.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
-#include "Krystal.HTML/DOM/Event/Event.hpp"
 #include "Krystal.HTML/Constants/EventNames.hpp"
+#include "Krystal.HTML/DOM/AbortSignal.hpp"
+#include "Krystal.HTML/DOM/Event.hpp"
 #include "Krystal.HTML/DOM/EventTarget.hpp"
 #include <catch_all.hpp>
 

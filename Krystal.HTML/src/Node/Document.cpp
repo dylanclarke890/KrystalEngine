@@ -13,7 +13,7 @@
 #include "Krystal.HTML/DOM/Algorithms/OrderedSet.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.HTML/DOM/Event/Event.hpp"
+#include "Krystal.HTML/DOM/Event.hpp"
 #include "Krystal.HTML/DOM/HTMLCollection.hpp"
 #include "Krystal.HTML/DOM/Mixins/NonElementParentNode.hpp"
 #include "Krystal.HTML/DOM/Mixins/ParentNode.hpp"
