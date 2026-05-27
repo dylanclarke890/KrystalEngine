@@ -80,4 +80,29 @@ namespace Krys::HTML
   {
     return _elements.size();
   }
+
+  List<DOMString> StaticHTMLCollection::SupportedPropertyNames() const noexcept
+  {
+    List<DOMString> supportedNames;
+
+    for (auto &element : _elements)
+    {
+      auto id = element->Id();
+      if (!id.empty() && !std::ranges::contains(supportedNames, id))
+      {
+        supportedNames.push_back(id);
+      }
+
+      if (element->NamespaceURI() == Namespace::HTML)
+      {
+        auto name = ElementAlgorithms::GetAttributeValue(*element, u8"name");
+        if (!name.empty() && !std::ranges::contains(supportedNames, name))
+        {
+          supportedNames.push_back(name);
+        }
+      }
+    }
+
+    return supportedNames;
+  }
 }

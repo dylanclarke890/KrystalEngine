@@ -28,5 +28,8 @@ namespace Krys::HTML
     KRYS_NODISCARD RefPtr<const Element> operator[](DOMStringView name) const noexcept override;
 
     KRYS_NODISCARD size_t Length() const noexcept override;
+
+  protected:
+    KRYS_NODISCARD List<DOMString> SupportedPropertyNames() const noexcept override;
   };
 }

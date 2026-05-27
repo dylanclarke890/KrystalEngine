@@ -7,6 +7,7 @@
 #include "Krystal.HTML/DOM/Collections/StaticHTMLCollection.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
+#include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/HTMLDocument.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.Lib/Pointers/WeakPtr.hpp"
