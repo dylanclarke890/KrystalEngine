@@ -48,10 +48,11 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\OrderedSet.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\TextAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\TreeQueries.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Collections\StaticHTMLCollection.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Collections\LiveHTMLCollection.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\AddEventListenerOptions.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\CustomEventInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\EventInit.hpp" />
-    <ClInclude Include="include\Krystal.HTML\DOM\Enums\LiveCollectionFilter.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Event\EventPathItem.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Collections\LiveNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Collections\StaticNodeList.hpp" />
@@ -208,6 +209,8 @@
     <ClCompile Include="src\DOM\Algorithms\NameValidation.cpp" />
     <ClCompile Include="src\DOM\Algorithms\OrderedSet.cpp" />
     <ClCompile Include="src\DOM\Algorithms\TextAlgorithms.cpp" />
+    <ClCompile Include="src\DOM\Collections\StaticHTMLCollection.cpp" />
+    <ClCompile Include="src\DOM\Collections\LiveHTMLCollection.cpp" />
     <ClCompile Include="src\DOM\Event\EventPathItem.cpp" />
     <ClCompile Include="src\DOM\Collections\LiveNodeList.cpp" />
     <ClCompile Include="src\DOM\Collections\StaticNodeList.cpp" />
@@ -260,7 +263,6 @@
     <ClCompile Include="src\Ranges\Range.cpp" />
     <ClCompile Include="src\MutationObserver\MutationObserver.cpp" />
     <ClCompile Include="src\Node\RareData\ParentNodeRareData.cpp" />
-    <ClCompile Include="src\DOM\HTMLCollection.cpp" />
     <ClCompile Include="src\Node\RareData\NodeRareData.cpp" />
     <ClCompile Include="src\DOM\Algorithms\MutationAlgorithms.cpp" />
     <ClCompile Include="src\DOM\Algorithms\TreeQueries.cpp" />

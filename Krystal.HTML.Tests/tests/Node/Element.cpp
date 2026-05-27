@@ -7,7 +7,6 @@
 #include "Krystal.HTML/DOM/HTMLCollection.hpp"
 #include "Krystal.HTML/Node/HTMLDocument.hpp"
 #include "Krystal.HTML/Node/Node.hpp"
-#include "Krystal.HTML/DOM/NodeList.hpp"
 #include "Krystal.HTML/Node/ProcessingInstruction.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"

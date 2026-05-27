@@ -10,7 +10,7 @@ namespace Krys::HTML
 {
   class Node;
 
-  /// @see https://dom.spec.whatwg.org/#nodelist
+  /// @see https://dom.spec.whatwg.org/#interface-nodelist
   class NodeList : public RefCounted<NodeList>, public CanMakeWeakPtr<NodeList>
   {
     KRYS_TYPE_CAST_TRAITS_ACCESS();
@@ -58,6 +58,8 @@ namespace Krys::HTML
   public:
     virtual ~NodeList() noexcept = default;
 
+#pragma region NodeList - https://dom.spec.whatwg.org/#interface-nodelist
+
     /// @see https://dom.spec.whatwg.org/#dom-nodelist-item
     KRYS_NODISCARD virtual RefPtr<Node> Item(size_t index) noexcept = 0;
 
@@ -92,9 +94,15 @@ namespace Krys::HTML
       return index < Length();
     }
 
+#pragma endregion
+
+#pragma region Type Checks
+
     KRYS_NODISCARD virtual bool IsLiveNodeList() const noexcept
     {
       return false;
     }
+
+#pragma endregion
   };
 }

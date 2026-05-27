@@ -63,6 +63,12 @@
 4.2.6. Mixin ParentNode - https://dom.spec.whatwg.org/#interface-parentnode
  - QuerySelector/QuerySelectorAll - Requires selector parsing and matching.
      - https://dom.spec.whatwg.org/#dom-parentnode-queryselector
+     
+4.2.10.1. Interface NodeList - https://dom.spec.whatwg.org/#interface-nodelist
+ - LiveNodeList - This is implemented but inefficient, it iterates through the entire tree to find matching nodes every time.
+ 
+4.2.10.2. Interface HTMLCollection - https://dom.spec.whatwg.org/#interface-htmlcollection
+ - LiveHTMLCollection - This is implemented but inefficient, it iterates through the entire tree to find matching nodes every time.
 
 TODO:
 CSS-SELECTORS

@@ -7,7 +7,6 @@
 #include "Krystal.HTML/Iterator/NodeIterator.hpp"
 #include "Krystal.HTML/Iterator/TreeWalker.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/DOM/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 

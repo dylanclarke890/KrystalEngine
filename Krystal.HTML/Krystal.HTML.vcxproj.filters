@@ -504,9 +504,6 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Collections\StaticNodeList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\DOM\Enums\LiveCollectionFilter.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\MutationRecord\AttributesMutationRecord.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -517,6 +514,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\MutationRecord\EmptyNodeMutationRecord.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\Collections\LiveHTMLCollection.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\Collections\StaticHTMLCollection.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -585,9 +588,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\RareData\NodeRareData.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\DOM\HTMLCollection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\RareData\ParentNodeRareData.cpp">
@@ -756,6 +756,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\DOM\MutationRecord\ChildListMutationRecord.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DOM\Collections\LiveHTMLCollection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DOM\Collections\StaticHTMLCollection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

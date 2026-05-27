@@ -1,0 +1,83 @@
+﻿#include "Krystal.HTML/DOM/Collections/StaticHTMLCollection.hpp"
+#include "Krystal.HTML/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
+#include "Krystal.HTML/Constants/Namespaces.hpp"
+#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/DOM/AbortSignal.hpp"
+#include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
+#include "Krystal.HTML/Node/Attr.hpp"
+#include "Krystal.HTML/Node/ContainerNode.hpp"
+#include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/Node/Element.hpp"
+#include "Krystal.HTML/Node/ShadowRoot.hpp"
+
+namespace Krys::HTML
+{
+  StaticHTMLCollection::StaticHTMLCollection(SmallElementList &&elements) noexcept
+      : _elements(Krys::Move(elements))
+  {
+  }
+
+  RefPtr<Element> StaticHTMLCollection::Item(size_t index) noexcept
+  {
+    if (index < _elements.size())
+    {
+      return _elements[index];
+    }
+
+    return nullptr;
+  }
+
+  RefPtr<const Element> StaticHTMLCollection::Item(size_t index) const noexcept
+  {
+    return const_cast<StaticHTMLCollection *>(this)->Item(index);
+  }
+
+  RefPtr<Element> StaticHTMLCollection::operator[](size_t index) noexcept
+  {
+    return Item(index);
+  }
+
+  RefPtr<const Element> StaticHTMLCollection::operator[](size_t index) const noexcept
+  {
+    return Item(index);
+  }
+
+  RefPtr<Element> StaticHTMLCollection::NamedItem(DOMStringView name) noexcept
+  {
+    for (auto &element : _elements)
+    {
+      if (element->Id() == name)
+      {
+        return element;
+      }
+      if (element->NamespaceURI() == Namespace::HTML
+          && ElementAlgorithms::GetAttributeValue(*element, u8"name") == name)
+      {
+        return element;
+      }
+    }
+
+    return nullptr;
+  }
+
+  RefPtr<const Element> StaticHTMLCollection::NamedItem(DOMStringView name) const noexcept
+  {
+    return const_cast<StaticHTMLCollection *>(this)->NamedItem(name);
+  }
+
+  RefPtr<Element> StaticHTMLCollection::operator[](DOMStringView name) noexcept
+  {
+    return NamedItem(name);
+  }
+
+  RefPtr<const Element> StaticHTMLCollection::operator[](DOMStringView name) const noexcept
+  {
+    return NamedItem(name);
+  }
+
+  size_t StaticHTMLCollection::Length() const noexcept
+  {
+    return _elements.size();
+  }
+}

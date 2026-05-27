@@ -1,0 +1,102 @@
+﻿#include "Krystal.HTML/DOM/Collections/LiveHTMLCollection.hpp"
+#include "Krystal.HTML/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
+#include "Krystal.HTML/Constants/Namespaces.hpp"
+#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/DOM/AbortSignal.hpp"
+#include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
+#include "Krystal.HTML/Node/Attr.hpp"
+#include "Krystal.HTML/Node/Element.hpp"
+#include "Krystal.HTML/Node/ShadowRoot.hpp"
+
+namespace Krys::HTML
+{
+  LiveHTMLCollection::LiveHTMLCollection(ContainerNode &root, LiveHTMLCollectionFilterFunc &&filter) noexcept
+      : _root(ShareRef(root)), _filter(Krys::Move(filter))
+  {
+  }
+
+  RefPtr<Element> LiveHTMLCollection::Item(size_t index) noexcept
+  {
+    size_t count = 0;
+    for (Node &node : DescendantRange(*_root))
+    {
+      if (auto element = DynamicDowncast<Element>(node))
+      {
+        if (_filter(*element))
+        {
+          ++count;
+        }
+
+        if (count > index)
+        {
+          return ShareRef(*element);
+        }
+      }
+    }
+
+    return nullptr;
+  }
+
+  RefPtr<const Element> LiveHTMLCollection::Item(size_t index) const noexcept
+  {
+    return const_cast<LiveHTMLCollection *>(this)->Item(index);
+  }
+
+  RefPtr<Element> LiveHTMLCollection::operator[](size_t index) noexcept
+  {
+    return Item(index);
+  }
+
+  RefPtr<const Element> LiveHTMLCollection::operator[](size_t index) const noexcept
+  {
+    return Item(index);
+  }
+
+  RefPtr<Element> LiveHTMLCollection::NamedItem(DOMStringView name) noexcept
+  {
+    size_t count = 0;
+    for (Node &node : DescendantRange(*_root))
+    {
+      if (auto element = DynamicDowncast<Element>(node))
+      {
+        if (_filter(*element))
+        {
+          if (element->Id() == name)
+          {
+            return ShareRef(*element);
+          }
+
+          if (element->NamespaceURI() == Namespace::HTML
+              && ElementAlgorithms::GetAttributeValue(*element, u8"name") == name)
+          {
+            return ShareRef(*element);
+          }
+        }
+      }
+    }
+
+    return nullptr;
+  }
+
+  RefPtr<const Element> LiveHTMLCollection::NamedItem(DOMStringView name) const noexcept
+  {
+    return const_cast<LiveHTMLCollection *>(this)->NamedItem(name);
+  }
+
+  RefPtr<Element> LiveHTMLCollection::operator[](DOMStringView name) noexcept
+  {
+    return NamedItem(name);
+  }
+
+  RefPtr<const Element> LiveHTMLCollection::operator[](DOMStringView name) const noexcept
+  {
+    return NamedItem(name);
+  }
+
+  size_t LiveHTMLCollection::Length() const noexcept
+  {
+    return Count(ConstDescendantRange(*_root),
+                 [&](auto &&node) { return Is<Element>(node) && _filter(Downcast<Element>(node)); });
+  }
+}
