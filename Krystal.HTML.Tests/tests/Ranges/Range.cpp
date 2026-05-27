@@ -1,12 +1,12 @@
 ﻿#include "Krystal.HTML/Ranges/Range.hpp"
 #include "Krystal.HTML.Tests/TestContainerNode.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/DOM/AbortSignal.hpp"
+#include "Krystal.HTML/DOM/NodeList.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Comment.hpp"
 #include "Krystal.HTML/Node/HTMLDocument.hpp"
-#include "Krystal.HTML/Node/NodeList.hpp"
 #include "Krystal.HTML/Node/ProcessingInstruction.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include <catch_all.hpp>
@@ -978,7 +978,7 @@ namespace Krys::Tests
       REQUIRE(extractedTextNode);
       REQUIRE(extractedTextNode->NodeType() == NodeType::TEXT_NODE);
 
-      REQUIRE(Downcast<HTML::Text>(extractedTextNode)->Data() == u8"world");
+      REQUIRE(Downcast<HTML::Text>(extractedTextNode.get())->Data() == u8"world");
       REQUIRE(textNode->Data() == u8"Hello, !");
 
       REQUIRE(data.Range->StartContainer() == textNode);
@@ -1055,7 +1055,7 @@ namespace Krys::Tests
       REQUIRE(extractedTextNode);
       REQUIRE(extractedTextNode->NodeType() == NodeType::TEXT_NODE);
 
-      REQUIRE(Downcast<HTML::Text>(extractedTextNode)->Data() == u8"world");
+      REQUIRE(Downcast<HTML::Text>(extractedTextNode.get())->Data() == u8"world");
       REQUIRE(textNode->Data() == u8"Hello, world!");
 
       REQUIRE(data.Range->StartContainer() == textNode);

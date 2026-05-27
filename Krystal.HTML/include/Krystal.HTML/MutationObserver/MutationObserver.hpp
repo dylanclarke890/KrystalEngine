@@ -1,8 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/DOM/MutationRecord.hpp"
 #include "Krystal.HTML/MutationObserver/MutationCallback.hpp"
 #include "Krystal.HTML/MutationObserver/MutationObserverInit.hpp"
-#include "Krystal.HTML/MutationObserver/MutationRecord.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/WeakPtr.hpp"

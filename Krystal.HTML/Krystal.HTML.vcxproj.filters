@@ -129,7 +129,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\DocumentFragment.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\NodeList.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\NodeList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\DocumentType.hpp">
@@ -186,7 +186,7 @@
     <ClInclude Include="include\Krystal.HTML\Ranges\StaticRange.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationRecord.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\MutationRecord.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationObserver.hpp">
@@ -207,7 +207,7 @@
     <ClInclude Include="include\Krystal.HTML\Types\SmallNodeList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\HTMLCollection.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\HTMLCollection.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\RareData\ElementRareData.hpp">
@@ -498,6 +498,27 @@
     <ClInclude Include="include\Krystal.HTML\DOM\AbortAlgorithmCallback.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\Collections\LiveNodeList.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\Collections\StaticNodeList.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\Enums\LiveCollectionFilter.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\MutationRecord\AttributesMutationRecord.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\MutationRecord\CharacterDataMutationRecord.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\MutationRecord\ChildListMutationRecord.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\MutationRecord\EmptyNodeMutationRecord.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -560,16 +581,13 @@
     <ClCompile Include="src\DOM\Algorithms\TreeQueries.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Node\NodeList.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\DOM\Algorithms\MutationAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\RareData\NodeRareData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Node\HTMLCollection.cpp">
+    <ClCompile Include="src\DOM\HTMLCollection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\RareData\ParentNodeRareData.cpp">
@@ -627,9 +645,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Algorithms\NodeAlgorithms.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\MutationObserver\MutationRecord.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Factories\ElementFactory.cpp">
@@ -723,6 +738,24 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\DOM\Algorithms\AbortAlgorithms.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DOM\Collections\StaticNodeList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DOM\Collections\LiveNodeList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DOM\MutationRecord\EmptyNodeMutationRecord.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DOM\MutationRecord\CharacterDataMutationRecord.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DOM\MutationRecord\AttributesMutationRecord.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\DOM\MutationRecord\ChildListMutationRecord.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

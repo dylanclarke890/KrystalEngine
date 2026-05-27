@@ -6,7 +6,7 @@
 #include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/HTMLDocument.hpp"
-#include "Krystal.HTML/Node/NodeList.hpp"
+#include "Krystal.HTML/DOM/NodeList.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include <catch_all.hpp>
