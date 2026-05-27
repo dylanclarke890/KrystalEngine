@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/MutationObserver/MutationObserverInit.hpp"
+#include "Krystal.HTML/DOM/Dicts/MutationObserverInit.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 
@@ -10,7 +10,7 @@ namespace Krys::HTML
 
   class RegisteredObserver : public RefCounted<RegisteredObserver>
   {
-  private:
+  protected:
     Ref<MutationObserver> _observer;
     MutationObserverInit _options;
 
@@ -30,7 +30,7 @@ namespace Krys::HTML
       return _options;
     }
 
-    void SetOptions(const MutationObserverInit &options) noexcept
+    void Options(const MutationObserverInit &options) noexcept
     {
       _options = options;
     }

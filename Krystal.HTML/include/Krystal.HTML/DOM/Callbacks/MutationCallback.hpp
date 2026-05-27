@@ -8,5 +8,6 @@ namespace Krys::HTML
   class MutationRecord;
   class MutationObserver;
 
+  /// @see https://dom.spec.whatwg.org/#callbackdef-mutationcallback
   using MutationCallback = Func<void(const List<MutationRecord> &records, MutationObserver &observer)>;
 }

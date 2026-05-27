@@ -89,6 +89,7 @@ namespace Krys::HTML
     friend class ExtensibilityHooks;
     friend class MutationAlgorithms;
     friend class MutationObserver;
+    friend class MutationObserverAlgorithms;
     friend class TreeQueries;
 
   private:
@@ -384,7 +385,7 @@ namespace Krys::HTML
 
 #pragma endregion
 
-    KRYS_NODISCARD List<Ref<RegisteredObserver>> &RegisteredObserverList() noexcept;
+    KRYS_NODISCARD List<Ref<RegisteredObserver>> &RegisteredObservers() noexcept;
 
     KRYS_NODISCARD List<Ref<TransientRegisteredObserver>> &TransientRegisteredObservers() noexcept;
   };

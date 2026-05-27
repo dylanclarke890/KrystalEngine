@@ -1,7 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/DOM/Enums/MutationRecordType.hpp"
 #include "Krystal.HTML/DOM/MutationRecord.hpp"
-#include "Krystal.HTML/MutationObserver/MutationRecordType.hpp"
 #include "Krystal.HTML/QualifiedName.hpp"
 #include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
@@ -16,13 +16,13 @@ namespace Krys::HTML
     Ref<Node> _target;
     mutable RefPtr<NodeList> _addedNodes;
     mutable RefPtr<NodeList> _removedNodes;
-    DOMString _oldValue;
+    DOMStringAtom _oldValue;
 
   protected:
-    EmptyNodeMutationRecord(MutationRecordType type, Node &target, DOMString &&oldValue) noexcept;
+    EmptyNodeMutationRecord(Ref<Node> &&target, DOMStringAtom oldValue) noexcept;
 
   public:
-    KRYS_NODISCARD RefPtr<Node> Target() const noexcept final
+    KRYS_NODISCARD Ref<Node> Target() const noexcept final
     {
       return _target;
     }
@@ -31,7 +31,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD RefPtr<NodeList> RemovedNodes() const noexcept final;
 
-    KRYS_NODISCARD DOMString OldValue() const noexcept final
+    KRYS_NODISCARD DOMStringAtom OldValue() const noexcept final
     {
       return _oldValue;
     }

@@ -48,7 +48,6 @@ namespace Krys::HTML
     friend class MutationAlgorithms;
     friend class NodeAlgorithms;
     friend class RenderBlocking;
-    friend class TreeMutationDispatcher;
 
   protected:
     enum class Type

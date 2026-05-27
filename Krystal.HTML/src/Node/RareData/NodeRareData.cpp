@@ -2,8 +2,9 @@
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Collections/LiveNodeList.hpp"
+#include "Krystal.HTML/DOM/MutationObserver.hpp"
+#include "Krystal.HTML/DOM/MutationObserver/TransientRegisteredObserver.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
-#include "Krystal.HTML/MutationObserver/MutationObserver.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
@@ -26,23 +27,13 @@ namespace Krys::HTML
     return childNodes;
   }
 
-  List<Ref<RegisteredObserver>> &NodeRareData::RegisteredObserverList() noexcept
+  List<Ref<RegisteredObserver>> &NodeRareData::RegisteredObservers() noexcept
   {
-    if (!_registeredObserverList.has_value())
-    {
-      _registeredObserverList = List<Ref<RegisteredObserver>> {};
-    }
-
-    return _registeredObserverList.value();
+    return _registeredObservers;
   }
 
   List<Ref<TransientRegisteredObserver>> &NodeRareData::TransientRegisteredObservers() noexcept
   {
-    if (!_transientRegisteredObservers.has_value())
-    {
-      _transientRegisteredObservers = List<Ref<TransientRegisteredObserver>> {};
-    }
-
-    return _transientRegisteredObservers.value();
+    return _transientRegisteredObservers;
   }
 }

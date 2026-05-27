@@ -6,20 +6,25 @@ namespace Krys::HTML
 {
   class ContainerNode;
 
-  class ChildListMutationRecord : public MutationRecord
+  class ChildListMutationRecord final : public MutationRecord
   {
   private:
     Ref<Node> _target;
     Ref<NodeList> _addedNodes;
     Ref<NodeList> _removedNodes;
-    Ref<Node> _previousSibling;
-    Ref<Node> _nextSibling;
+    RefPtr<Node> _previousSibling;
+    RefPtr<Node> _nextSibling;
 
   public:
-    ChildListMutationRecord(ContainerNode &target, Ref<NodeList> &&added, Ref<NodeList> &&removed,
+    ChildListMutationRecord(Ref<Node> &&target, Ref<NodeList> &&added, Ref<NodeList> &&removed,
                             RefPtr<Node> &&previousSibling, RefPtr<Node> &&nextSibling) noexcept;
 
-    KRYS_NODISCARD RefPtr<Node> Target() const noexcept override
+    KRYS_NODISCARD DOMStringAtom Type() const noexcept override
+    {
+      return u8"childList";
+    }
+
+    KRYS_NODISCARD Ref<Node> Target() const noexcept override
     {
       return _target;
     }

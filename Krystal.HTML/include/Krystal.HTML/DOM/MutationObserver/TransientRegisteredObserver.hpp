@@ -1,16 +1,18 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Mixins/RefCounted.hpp"
+#include "Krystal.HTML/DOM/MutationObserver/RegisteredObserver.hpp"
 
 namespace Krys::HTML
 {
-  class TransientRegisteredObserver : public RefCounted<TransientRegisteredObserver>
+  class TransientRegisteredObserver : public RegisteredObserver
   {
   private:
     Ref<RegisteredObserver> _source;
 
   public:
-    TransientRegisteredObserver(Ref<RegisteredObserver> source) noexcept : _source(Krys::Move(source))
+    TransientRegisteredObserver(Ref<MutationObserver> &&observer, const MutationObserverInit &options,
+                                Ref<RegisteredObserver> &&source) noexcept
+        : RegisteredObserver(Krys::Move(observer), options), _source(Krys::Move(source))
     {
     }
 

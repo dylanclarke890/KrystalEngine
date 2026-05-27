@@ -6,6 +6,7 @@
 
 namespace Krys::HTML
 {
+  /// @see https://dom.spec.whatwg.org/#dictdef-mutationobserverinit
   struct MutationObserverInit
   {
     bool ChildList {false};

@@ -11,8 +11,6 @@
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/DOM/NodeList.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
-#include "Krystal.HTML/MutationObserver/RegisteredObserver.hpp"
-#include "Krystal.HTML/MutationObserver/TransientRegisteredObserver.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
@@ -520,14 +518,14 @@ namespace Krys::HTML
     return ParentNode();
   }
 
-  List<Ref<RegisteredObserver>> &Node::RegisteredObserverList() noexcept
+  List<Ref<RegisteredObserver>> &Node::RegisteredObservers() noexcept
   {
     if (_nodeRareData == nullptr)
     {
       _nodeRareData = CreateUnique<NodeRareData>();
     }
 
-    return _nodeRareData->RegisteredObserverList();
+    return _nodeRareData->RegisteredObservers();
   }
 
   List<Ref<TransientRegisteredObserver>> &Node::TransientRegisteredObservers() noexcept

@@ -4,9 +4,9 @@
 #include "Krystal.HTML/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
-#include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
+#include "Krystal.HTML/DOM/Algorithms/MutationObserverAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
@@ -191,7 +191,9 @@ namespace Krys::HTML
         }
       }
 
-      TreeMutationDispatcher::QueueTreeMutationRecord(node, {}, nodes, nullptr, nullptr);
+      SmallNodeList nodesCopy = nodes;
+      MutationObserverAlgorithms::QueueTreeMutationRecord(ShareRef(node), {}, Krys::Move(nodesCopy), nullptr,
+                                                          nullptr);
     }
 
     if (child != nullptr)
@@ -296,8 +298,9 @@ namespace Krys::HTML
 
     if (!suppressObservers)
     {
-      TreeMutationDispatcher::QueueTreeMutationRecord(parent, nodes, {}, ShareRefPtr(previousSibling),
-                                                      ShareRefPtr(child));
+      SmallNodeList nodesCopy = nodes;
+      MutationObserverAlgorithms::QueueTreeMutationRecord(ShareRef(parent), Krys::Move(nodesCopy), {},
+                                                          ShareRefPtr(previousSibling), ShareRefPtr(child));
     }
 
     ExtensibilityHooks::NodeChildrenChanged(parent);
@@ -489,11 +492,12 @@ namespace Krys::HTML
       // callback reaction with inclusiveDescendant, callback name "connectedMoveCallback", and « ».
     }
 
-    TreeMutationDispatcher::QueueTreeMutationRecord(
-      oldParent, {}, {ShareRef(node)}, ShareRefPtr(oldPreviousSibling), ShareRefPtr(oldNextSibling));
+    MutationObserverAlgorithms::QueueTreeMutationRecord(ShareRef(oldParent), {}, {ShareRef(node)},
+                                                        ShareRefPtr(oldPreviousSibling),
+                                                        ShareRefPtr(oldNextSibling));
 
-    TreeMutationDispatcher::QueueTreeMutationRecord(newParent, {ShareRef(node)}, {},
-                                                    ShareRefPtr(newPreviousSibling), ShareRefPtr(child));
+    MutationObserverAlgorithms::QueueTreeMutationRecord(ShareRef(newParent), {ShareRef(node)}, {},
+                                                        ShareRefPtr(newPreviousSibling), ShareRefPtr(child));
 
     return {};
   }
@@ -613,8 +617,9 @@ namespace Krys::HTML
       return result.ReleaseException();
     }
 
-    TreeMutationDispatcher::QueueTreeMutationRecord(parent, nodes, removedNodes, ShareRefPtr(previousSibling),
-                                                    ShareRefPtr(referenceChild));
+    MutationObserverAlgorithms::QueueTreeMutationRecord(
+      ShareRef(parent), Krys::Move(nodes), Krys::Move(removedNodes), ShareRefPtr(previousSibling),
+      ShareRefPtr(referenceChild));
 
     return child;
   }
@@ -651,7 +656,8 @@ namespace Krys::HTML
 
     if (!addedNodes.empty() || !removedNodes.empty())
     {
-      TreeMutationDispatcher::QueueTreeMutationRecord(parent, addedNodes, removedNodes, nullptr, nullptr);
+      MutationObserverAlgorithms::QueueTreeMutationRecord(ShareRef(parent), Krys::Move(addedNodes),
+                                                          Krys::Move(removedNodes), nullptr, nullptr);
     }
 
     return {};
@@ -760,9 +766,9 @@ namespace Krys::HTML
 
     if (!suppressObservers)
     {
-      TreeMutationDispatcher::QueueTreeMutationRecord(parent, {}, {Krys::Move(protectedNode)},
-                                                      ShareRefPtr(oldPreviousSibling),
-                                                      ShareRefPtr(oldNextSibling));
+      MutationObserverAlgorithms::QueueTreeMutationRecord(ShareRef(parent), {}, {Krys::Move(protectedNode)},
+                                                          ShareRefPtr(oldPreviousSibling),
+                                                          ShareRefPtr(oldNextSibling));
     }
 
     ExtensibilityHooks::NodeChildrenChanged(parent);

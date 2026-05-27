@@ -1,10 +1,10 @@
 ﻿#include "Krystal.HTML/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
-#include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Constants/Namespaces.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/DOM/AbortSignal.hpp"
+#include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/MutationObserverAlgorithms.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
@@ -88,8 +88,9 @@ namespace Krys::HTML
   void ElementAlgorithms::HandleAttributeChanges(Attr &attribute, Element &element, DOMStringView oldValue,
                                                  DOMStringView newValue) noexcept
   {
-    TreeMutationDispatcher::QueueMutationRecord(u8"attributes", element, attribute.LocalName(),
-                                                attribute.NamespaceURI(), oldValue, {}, {}, nullptr, nullptr);
+    MutationObserverAlgorithms::QueueMutationRecord(MutationRecordType::Attributes, ShareRef(element),
+                                                    attribute.LocalName(), attribute.NamespaceURI(), oldValue,
+                                                    {}, {}, nullptr, nullptr);
 
     // TODO(impl): CUSTOM-ELEMENT
     // If element is custom, then enqueue a custom element callback reaction with element, callback name

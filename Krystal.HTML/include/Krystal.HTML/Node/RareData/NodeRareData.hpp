@@ -1,14 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/MutationObserver/MutationObserver.hpp"
-#include "Krystal.HTML/MutationObserver/RegisteredObserver.hpp"
-#include "Krystal.HTML/MutationObserver/TransientRegisteredObserver.hpp"
+#include "Krystal.HTML/DOM/MutationObserver.hpp"
+#include "Krystal.HTML/DOM/MutationObserver/TransientRegisteredObserver.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Pointers/WeakPtr.hpp"
 #include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/Maybe.hpp"
-#include "Krystal.Lib/Types/Variant.hpp"
 
 namespace Krys::HTML
 {
@@ -19,13 +16,19 @@ namespace Krys::HTML
   {
   private:
     WeakPtr<NodeList> _childNodeList;
-    Maybe<List<Ref<RegisteredObserver>>> _registeredObserverList;
-    Maybe<List<Ref<TransientRegisteredObserver>>> _transientRegisteredObservers;
+
+    /// @see https://dom.spec.whatwg.org/#registered-observer-list
+    List<Ref<RegisteredObserver>> _registeredObservers;
+
+    /// @brief We track transient registered observers separately despite the spec having them in the same
+    /// list as it makes it easier to inspect them later.
+    /// @see https://dom.spec.whatwg.org/#registered-observer-list
+    List<Ref<TransientRegisteredObserver>> _transientRegisteredObservers;
 
   public:
     KRYS_NODISCARD Ref<NodeList> ChildNodes(Node &node) noexcept;
 
-    KRYS_NODISCARD List<Ref<RegisteredObserver>> &RegisteredObserverList() noexcept;
+    KRYS_NODISCARD List<Ref<RegisteredObserver>> &RegisteredObservers() noexcept;
 
     KRYS_NODISCARD List<Ref<TransientRegisteredObserver>> &TransientRegisteredObservers() noexcept;
   };

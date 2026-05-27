@@ -1,7 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/MutationObserver/MutationRecordType.hpp"
-#include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.HTML/Types/DOMStringAtom.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"
@@ -12,52 +10,56 @@ namespace Krys::HTML
   class Node;
   class NodeList;
 
+  /// @see https://dom.spec.whatwg.org/#interface-mutationrecord
   class MutationRecord : public RefCounted<MutationRecord>
   {
-  protected:
-    MutationRecordType _type : BitCount<MutationRecordType>() {};
-
-    MutationRecord(MutationRecordType type) noexcept : _type(type)
-    {
-    }
-
   public:
     virtual ~MutationRecord() noexcept = default;
 
-    KRYS_NODISCARD MutationRecordType Type() const noexcept
-    {
-      return _type;
-    }
+#pragma region MutationRecord - https://dom.spec.whatwg.org/#mutationrecord
 
-    KRYS_NODISCARD virtual RefPtr<Node> Target() const noexcept = 0;
+    /// https://dom.spec.whatwg.org/#dom-mutationrecord-type
+    KRYS_NODISCARD virtual DOMStringAtom Type() const noexcept = 0;
 
+    /// https://dom.spec.whatwg.org/#dom-mutationrecord-target
+    KRYS_NODISCARD virtual Ref<Node> Target() const noexcept = 0;
+
+    /// https://dom.spec.whatwg.org/#dom-mutationrecord-addednodes
     KRYS_NODISCARD virtual RefPtr<NodeList> AddedNodes() const noexcept = 0;
 
+    /// https://dom.spec.whatwg.org/#dom-mutationrecord-removednodes
     KRYS_NODISCARD virtual RefPtr<NodeList> RemovedNodes() const noexcept = 0;
 
+    /// https://dom.spec.whatwg.org/#dom-mutationrecord-previoussibling
     KRYS_NODISCARD virtual RefPtr<Node> PreviousSibling() const noexcept
     {
       return nullptr;
     }
 
+    /// https://dom.spec.whatwg.org/#dom-mutationrecord-nextsibling
     KRYS_NODISCARD virtual RefPtr<Node> NextSibling() const noexcept
     {
       return nullptr;
     }
 
+    /// https://dom.spec.whatwg.org/#dom-mutationrecord-attributename
     KRYS_NODISCARD virtual DOMStringAtom AttributeName() const noexcept
     {
-      return DOMStringAtom::Empty();
+      return DOMStringAtom::Null();
     }
 
+    /// https://dom.spec.whatwg.org/#dom-mutationrecord-attributenamespace
     KRYS_NODISCARD virtual DOMStringAtom AttributeNamespace() const noexcept
     {
-      return DOMStringAtom::Empty();
+      return DOMStringAtom::Null();
     }
 
-    KRYS_NODISCARD virtual DOMString OldValue() const noexcept
+    /// https://dom.spec.whatwg.org/#dom-mutationrecord-oldvalue
+    KRYS_NODISCARD virtual DOMStringAtom OldValue() const noexcept
     {
-      return u8"";
+      return DOMStringAtom::Null();
     }
+
+#pragma endregion
   };
 }

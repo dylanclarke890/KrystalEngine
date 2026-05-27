@@ -1,13 +1,8 @@
-﻿#include "Krystal.HTML/MutationObserver/MutationObserver.hpp"
+﻿#include "Krystal.HTML/DOM/MutationObserver.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
-#include "Krystal.HTML/DOM/MutationRecord.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/Node/ContainerNode.hpp"
-#include "Krystal.HTML/Node/Document.hpp"
-#include "Krystal.HTML/Node/Element.hpp"
-#include "Krystal.HTML/Node/Node.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
 
@@ -37,8 +32,12 @@ namespace Krys::HTML
       return Exception {ExceptionCode::TypeError};
     }
 
-    if ((options.AttributeOldValue == true || options.AttributeFilter.has_value())
-        && !options.Attributes.value_or(false))
+    if (options.AttributeOldValue == true && !options.Attributes.value_or(false))
+    {
+      return Exception {ExceptionCode::TypeError};
+    }
+
+    if (options.AttributeFilter.has_value() && !options.Attributes.value_or(false))
     {
       return Exception {ExceptionCode::TypeError};
     }
@@ -48,27 +47,26 @@ namespace Krys::HTML
       return Exception {ExceptionCode::TypeError};
     }
 
-    for (auto &registered : target.RegisteredObserverList())
+    for (auto &registered : target.RegisteredObservers())
     {
-      if (registered->Observer().get() == this)
+      if (registered->Observer() == this)
       {
         for (auto &n : _nodes)
         {
           if (auto node = n.lock())
           {
-            std::erase_if(node->TransientRegisteredObservers(),
-                          [source = registered.get()](Ref<TransientRegisteredObserver> &observer)
+            std::erase_if(node->TransientRegisteredObservers(), [source = registered.get()](auto &observer)
                           { return observer->Source() == source; });
           }
         }
 
-        registered->SetOptions(options);
+        registered->Options(options);
         return {};
       }
     }
 
-    Ref<RegisteredObserver> registered = CreateRef<RegisteredObserver>(ShareRef(*this), options);
-    target.RegisteredObserverList().emplace_back(Krys::Move(registered));
+    auto registered = CreateRef<RegisteredObserver>(ShareRef(*this), options);
+    target.RegisteredObservers().emplace_back(Krys::Move(registered));
     _nodes.emplace_back(CreateWeakRef(target));
 
     return {};
@@ -80,16 +78,16 @@ namespace Krys::HTML
     {
       if (auto node = n.lock())
       {
-        std::erase_if(node->RegisteredObserverList(), [self = this](Ref<RegisteredObserver> &observer)
+        std::erase_if(node->RegisteredObservers(), [self = this](Ref<RegisteredObserver> &observer)
                       { return observer->Observer() == self; });
       }
     }
     _recordQueue.clear();
   }
 
-  MutationObserver::RecordQueue MutationObserver::TakeRecords() noexcept
+  List<Ref<MutationRecord>> MutationObserver::TakeRecords() noexcept
   {
-    RecordQueue records = _recordQueue;
+    List<Ref<MutationRecord>> records = _recordQueue;
     _recordQueue.clear();
     return records;
   }
