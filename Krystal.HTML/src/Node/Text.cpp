@@ -6,7 +6,7 @@
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
-#include "Krystal.HTML/Mixins/Slottable.hpp"
+#include "Krystal.HTML/DOM/Mixins/Slottable.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
 #include "Krystal.HTML/Node/NodeList.hpp"

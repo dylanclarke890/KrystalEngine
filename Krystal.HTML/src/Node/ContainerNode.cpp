@@ -1,6 +1,6 @@
 ﻿#include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
-#include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"

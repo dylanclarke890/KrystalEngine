@@ -1,17 +1,15 @@
-﻿#include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
+﻿#include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.HTML/Algorithms/IteratorAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
-#include "Krystal.HTML/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
-#include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/DOM/AbortSignal.hpp"
+#include "Krystal.HTML/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
-#include "Krystal.HTML/MutationObserver/MutationObserver.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/ContainerNode.hpp"
 #include "Krystal.HTML/Node/Document.hpp"
@@ -84,7 +82,12 @@ namespace Krys::HTML
       return ExceptionCode::HierarchyRequestError;
     }
 
-    if ((Is<Text>(node) && Is<Document>(parent)) || (Is<DocumentType>(node) && !Is<Document>(parent)))
+    if (Is<Text>(node) && Is<Document>(parent))
+    {
+      return ExceptionCode::HierarchyRequestError;
+    }
+
+    if (Is<DocumentType>(node) && !Is<Document>(parent))
     {
       return ExceptionCode::HierarchyRequestError;
     }
@@ -94,7 +97,7 @@ namespace Krys::HTML
       if (auto *documentFragment = DynamicDowncast<DocumentFragment>(node))
       {
         auto count = documentFragment->ChildElementCount();
-        if (count > 1)
+        if (count > 1uz)
         {
           return ExceptionCode::HierarchyRequestError;
         }
@@ -104,7 +107,7 @@ namespace Krys::HTML
           return ExceptionCode::HierarchyRequestError;
         }
 
-        if (count == 1 && (HasElementChild(parent) || IsDocTypeOrDocTypeFollows(child)))
+        if (count == 1uz && (HasElementChild(parent) || IsDocTypeOrDocTypeFollows(child)))
         {
           return ExceptionCode::HierarchyRequestError;
         }
@@ -174,7 +177,7 @@ namespace Krys::HTML
     }
 
     auto count = nodes.size();
-    if (count == 0)
+    if (count == 0uz)
     {
       return {};
     }

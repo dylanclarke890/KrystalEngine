@@ -50,6 +50,20 @@
  - Signaling slot change - Append slot to slot’s relevant agent’s signal slots. Don't have 'relevant agents' or 'signal slots'
  - Signaling slot change - Queue mutation observer microtask. Don't have microtasks or task queues, so this is not implemented.
      - https://dom.spec.whatwg.org/#signaling-slot-change
+
+4.2.3. Mutation algorithms - https://dom.spec.whatwg.org/#mutation-algorithms
+ - Insert - Custom element reactions and upgrade steps are required.
+     - https://dom.spec.whatwg.org/#concept-node-insert
+ - Move - Custom element reactions are required.
+     - https://dom.spec.whatwg.org/#concept-node-move
+ - Remove - Custom element reactions are required.
+ - Remove - Transient mutation observers are required at the end of this algorithm.
+     - https://dom.spec.whatwg.org/#concept-node-remove
+
+4.2.6. Mixin ParentNode - https://dom.spec.whatwg.org/#interface-parentnode
+ - QuerySelector/QuerySelectorAll - Requires selector parsing and matching.
+     - https://dom.spec.whatwg.org/#dom-parentnode-queryselector
+
 TODO:
 CSS-SELECTORS
   - Separate spec implementation required first, significant work to implement CSS selector parsing and matching.

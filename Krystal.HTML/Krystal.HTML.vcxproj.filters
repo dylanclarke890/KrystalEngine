@@ -192,7 +192,7 @@
     <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationObserver.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Algorithms\MutationAlgorithms.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\MutationAlgorithms.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Iterator\NodeIterator.hpp">
@@ -285,7 +285,7 @@
     <ClInclude Include="include\Krystal.HTML\Types\NodeOrString.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Mixins\ChildNode.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Mixins\ChildNode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\NamedNodeMap.hpp">
@@ -309,10 +309,10 @@
     <ClInclude Include="include\Krystal.HTML\Algorithms\ShadowRootAlgorithms.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Mixins\ParentNode.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Mixins\ParentNode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Mixins\NonElementParentNode.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Mixins\NonElementParentNode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\Enums\NodeCollectionLiveness.hpp">
@@ -399,10 +399,10 @@
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLPreElement.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Mixins\NonDocumentTypeChildNode.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Mixins\NonDocumentTypeChildNode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Mixins\Slottable.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Mixins\Slottable.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLHtmlElement.hpp">
@@ -563,7 +563,7 @@
     <ClCompile Include="src\Node\NodeList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Algorithms\MutationAlgorithms.cpp">
+    <ClCompile Include="src\DOM\Algorithms\MutationAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\RareData\NodeRareData.cpp">
@@ -614,16 +614,16 @@
     <ClCompile Include="src\Algorithms\ShadowRootAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Mixins\ParentNode.cpp">
+    <ClCompile Include="src\DOM\Mixins\ParentNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Mixins\NonElementParentNode.cpp">
+    <ClCompile Include="src\DOM\Mixins\NonElementParentNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Algorithms\ExtensibilityHooks.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Mixins\ChildNode.cpp">
+    <ClCompile Include="src\DOM\Mixins\ChildNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Algorithms\NodeAlgorithms.cpp">
@@ -671,10 +671,10 @@
     <ClCompile Include="src\HTMLElement\HTMLPreElement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Mixins\NonDocumentTypeChildNode.cpp">
+    <ClCompile Include="src\DOM\Mixins\NonDocumentTypeChildNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Mixins\Slottable.cpp">
+    <ClCompile Include="src\DOM\Mixins\Slottable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\HTMLElement\HTMLHeadElement.cpp">

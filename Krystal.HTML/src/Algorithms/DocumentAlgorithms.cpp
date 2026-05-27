@@ -2,7 +2,7 @@
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
-#include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/Constants/EventNames.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"

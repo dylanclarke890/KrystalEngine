@@ -4,7 +4,7 @@
 #include "Krystal.HTML/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.HTML/Algorithms/IteratorAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"

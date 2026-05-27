@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
+﻿#include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML.Tests/TestElement.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"

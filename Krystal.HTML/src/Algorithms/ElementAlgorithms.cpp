@@ -1,7 +1,7 @@
 ﻿#include "Krystal.HTML/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
-#include "Krystal.HTML/Algorithms/MutationAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/TreeMutationDispatcher.hpp"
 #include "Krystal.HTML/Constants/Namespaces.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
