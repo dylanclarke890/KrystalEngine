@@ -15,7 +15,7 @@ namespace Krys::HTML
   struct Context
   {
     /// @brief Provides access to all common codecs for decoding HTML/CSS text resources.
-    Text::CodecRegistry DecoderRegistry;
+    Krys::Text::CodecRegistry DecoderRegistry;
   };
 
   KRYS_NODISCARD Context CreateContext() noexcept;

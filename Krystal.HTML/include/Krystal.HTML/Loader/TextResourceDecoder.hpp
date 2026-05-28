@@ -35,9 +35,9 @@ namespace Krys::HTML
       Tentative,
     };
 
-    ReferenceWrapper<Text::CodecRegistry> _registry;
+    ReferenceWrapper<Krys::Text::CodecRegistry> _registry;
     ContentType _contentType {ContentType::PlainText};
-    Text::ICodec *_decoder {nullptr};
+    Krys::Text::ICodec *_decoder {nullptr};
     EncodingSource _source {EncodingSource::Default};
     Confidence _confidence {Confidence::Tentative};
     bool _useBOMDetection : 1 = true;
@@ -49,7 +49,7 @@ namespace Krys::HTML
     List<byte> _buffer;
 
   public:
-    TextResourceDecoder(Text::CodecRegistry &registry, ContentType contentType,
+    TextResourceDecoder(Krys::Text::CodecRegistry &registry, ContentType contentType,
                         const string &charset) noexcept
         : TextResourceDecoder(registry, contentType)
     {
@@ -64,13 +64,15 @@ namespace Krys::HTML
       }
     }
 
-    TextResourceDecoder(Text::CodecRegistry &registry, const string &mimeType, const string &charset) noexcept
+    TextResourceDecoder(Krys::Text::CodecRegistry &registry, const string &mimeType,
+                        const string &charset) noexcept
         : TextResourceDecoder(registry, DetermineContentType(mimeType), charset)
     {
     }
 
     /// @see https://encoding.spec.whatwg.org/#utf-8-decode
-    KRYS_NODISCARD static utf32_string TextFromUTF8(Text::CodecRegistry &registry, Span<const byte> data)
+    KRYS_NODISCARD static utf32_string TextFromUTF8(Krys::Text::CodecRegistry &registry,
+                                                    Span<const byte> data)
     {
       constexpr Array<byte, 3> byteOrderMarkUTF8 = {byte {0xEF}, byte {0xBB}, byte {0xBF}};
       auto decoder = TextResourceDecoder(registry, "text/plain", "UTF-8");
@@ -127,13 +129,13 @@ namespace Krys::HTML
 
       auto result = _decoder->Decode(_buffer);
 
-      if (result.ErrorCode == Text::EncodingError::OK)
+      if (result.ErrorCode == Krys::Text::EncodingError::OK)
       {
         _buffer.clear();
         return result.Output;
       }
 
-      if (result.ErrorCode == Text::EncodingError::IncompleteSequence)
+      if (result.ErrorCode == Krys::Text::EncodingError::IncompleteSequence)
       {
         if (!isFinal)
         {
@@ -145,19 +147,19 @@ namespace Krys::HTML
         }
 
         // Final chunk: emit replacement and finish
-        result.Output.push_back(Text::Unicode::Replacement<char32>);
+        result.Output.push_back(Krys::Text::Unicode::Replacement<char32>);
 
         ResetForReuse();
 
         return result.Output;
       }
 
-      assert(result.ErrorCode != Text::EncodingError::InsufficientOutputSpace);
+      assert(result.ErrorCode != Krys::Text::EncodingError::InsufficientOutputSpace);
       return result.Output;
     }
 
   private:
-    TextResourceDecoder(Text::CodecRegistry &registry, ContentType contentType) noexcept
+    TextResourceDecoder(Krys::Text::CodecRegistry &registry, ContentType contentType) noexcept
         : _registry(registry), _contentType(contentType)
     {
     }
@@ -195,20 +197,20 @@ namespace Krys::HTML
     {
       using namespace Krys::Text;
 
-      auto bom = Text::BOM::DetectByteOrderMark(_buffer);
+      auto bom = Krys::Text::BOM::DetectByteOrderMark(_buffer);
       size_t bomLength = 0uz;
 
       switch (bom)
       {
-        case Text::EncodingId::utf8:
+        case Krys::Text::EncodingId::utf8:
           _decoder = _registry.get().Find("utf-8"_s);
           bomLength = 3uz;
           break;
-        case Text::EncodingId::utf16le:
+        case Krys::Text::EncodingId::utf16le:
           _decoder = _registry.get().Find("utf-16le"_s);
           bomLength = 2uz;
           break;
-        case Text::EncodingId::utf16be:
+        case Krys::Text::EncodingId::utf16be:
           _decoder = _registry.get().Find("utf-16be"_s);
           bomLength = 2uz;
           break;

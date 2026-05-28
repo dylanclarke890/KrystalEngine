@@ -23,8 +23,8 @@ namespace Krys::HTML
     HTMLEncodingSniffer() = delete;
     ~HTMLEncodingSniffer() = delete;
 
-    KRYS_NODISCARD static Text::ICodec *Detect(Span<const byte> bytes,
-                                               const Text::CodecRegistry &codecRegistry) noexcept
+    KRYS_NODISCARD static Krys::Text::ICodec *Detect(Span<const byte> bytes,
+                                                     const Krys::Text::CodecRegistry &codecRegistry) noexcept
     {
       for (size_t i = 0uz; i < bytes.size(); i++)
       {
@@ -115,11 +115,11 @@ namespace Krys::HTML
             break;
           }
 
-          if (Text::IsASCIIAlpha(bytes[i + 1uz]))
+          if (Krys::Text::IsASCIIAlpha(bytes[i + 1uz]))
           {
             for (i += 2uz; i < bytes.size(); i++)
             {
-              if (Text::IsASCIIWhitespace(bytes[i]) || bytes[i] == byte {'>'})
+              if (Krys::Text::IsASCIIWhitespace(bytes[i]) || bytes[i] == byte {'>'})
               {
                 break;
               }
@@ -185,11 +185,11 @@ namespace Krys::HTML
       }
 
       // case-insensitive "<meta" + space or /
-      return bytes[i + 0uz] == byte {'<'} && Text::ToASCIILower(bytes[i + 1uz]) == byte {'m'}
-             && Text::ToASCIILower(bytes[i + 2uz]) == byte {'e'}
-             && Text::ToASCIILower(bytes[i + 3uz]) == byte {'t'}
-             && Text::ToASCIILower(bytes[i + 4uz]) == byte {'a'}
-             && (Text::IsASCIIWhitespace(bytes[i + 5uz]) || bytes[i + 5uz] == byte {'/'});
+      return bytes[i + 0uz] == byte {'<'} && Krys::Text::ToASCIILower(bytes[i + 1uz]) == byte {'m'}
+             && Krys::Text::ToASCIILower(bytes[i + 2uz]) == byte {'e'}
+             && Krys::Text::ToASCIILower(bytes[i + 3uz]) == byte {'t'}
+             && Krys::Text::ToASCIILower(bytes[i + 4uz]) == byte {'a'}
+             && (Krys::Text::IsASCIIWhitespace(bytes[i + 5uz]) || bytes[i + 5uz] == byte {'/'});
     }
 
     KRYS_NODISCARD static AttributeResult GetAttribute(Span<const byte> bytes, size_t &i)
@@ -197,7 +197,7 @@ namespace Krys::HTML
       string name;
       string value;
 
-      for (; i < bytes.size() && !Text::IsASCIIAlpha(bytes[i]); i++)
+      for (; i < bytes.size() && !Krys::Text::IsASCIIAlpha(bytes[i]); i++)
       {
         // Tag closed before we saw name
         if (bytes[i] == byte {'>'})
@@ -215,11 +215,11 @@ namespace Krys::HTML
       // build up the name
       do
       {
-        name += static_cast<char8>(Text::ToASCIILower(bytes[i]));
+        name += static_cast<char8>(Krys::Text::ToASCIILower(bytes[i]));
         i++;
-      } while (i < bytes.size() && Text::IsASCIIAlpha(bytes[i]));
+      } while (i < bytes.size() && Krys::Text::IsASCIIAlpha(bytes[i]));
 
-      Text::SkipASCIIWhitespace(bytes, i);
+      Krys::Text::SkipASCIIWhitespace(bytes, i);
       if (i >= bytes.size())
       {
         return {name, value};
@@ -232,7 +232,7 @@ namespace Krys::HTML
       }
       i++;
 
-      Text::SkipASCIIWhitespace(bytes, i);
+      Krys::Text::SkipASCIIWhitespace(bytes, i);
       if (i >= bytes.size() || bytes[i] == byte {'/'} || bytes[i] == byte {'>'})
       {
         return {name, value};
@@ -242,9 +242,10 @@ namespace Krys::HTML
       {
         byte closeQuote = bytes[i];
 
-        for (i++; i < bytes.size() && (Text::IsASCIIAlphanumeric(bytes[i]) || bytes[i] == byte {'-'}); i++)
+        for (i++; i < bytes.size() && (Krys::Text::IsASCIIAlphanumeric(bytes[i]) || bytes[i] == byte {'-'});
+             i++)
         {
-          value += static_cast<char8>(Text::ToASCIILower(bytes[i]));
+          value += static_cast<char8>(Krys::Text::ToASCIILower(bytes[i]));
         }
 
         if (i < bytes.size() && bytes[i] == closeQuote)
@@ -257,26 +258,26 @@ namespace Krys::HTML
 
       for (; i < bytes.size(); i++)
       {
-        if (Text::IsASCIIWhitespace(bytes[i]) || bytes[i] == byte {'>'})
+        if (Krys::Text::IsASCIIWhitespace(bytes[i]) || bytes[i] == byte {'>'})
         {
           return {name, value};
         }
 
-        if (Text::IsASCIIAlpha(bytes[i]))
+        if (Krys::Text::IsASCIIAlpha(bytes[i]))
         {
-          value += static_cast<char8>(Text::ToASCIILower(bytes[i]));
+          value += static_cast<char8>(Krys::Text::ToASCIILower(bytes[i]));
         }
       }
 
       return {name, value};
     }
 
-    KRYS_NODISCARD static string ExtractCharacterEncodingFromMeta(string &meta,
-                                                                  const Text::CodecRegistry &codecRegistry)
+    KRYS_NODISCARD static string
+      ExtractCharacterEncodingFromMeta(string &meta, const Krys::Text::CodecRegistry &codecRegistry)
     {
       for (char &ch : meta)
       {
-        ch = Text::ToASCIILower(ch);
+        ch = Krys::Text::ToASCIILower(ch);
       }
 
       const string charset = "charset";
@@ -290,7 +291,7 @@ namespace Krys::HTML
         }
 
         position += indexOfCharset + charset.size();
-        Text::SkipASCIIWhitespace(Span<const char>(meta), position);
+        Krys::Text::SkipASCIIWhitespace(Span<const char>(meta), position);
         if (position >= meta.size())
         {
           return "";
@@ -303,7 +304,7 @@ namespace Krys::HTML
         }
 
         position++;
-        Text::SkipASCIIWhitespace(Span<const char>(meta), position);
+        Krys::Text::SkipASCIIWhitespace(Span<const char>(meta), position);
         break;
       }
 

@@ -328,7 +328,7 @@ namespace Krys::HTML
       _data.push_back(character);
     }
 
-    void AppendToComment(Text::ASCIILiteral characters) noexcept
+    void AppendToComment(Krys::Text::ASCIILiteral characters) noexcept
     {
       assert(_type == Type::Comment);
 

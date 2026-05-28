@@ -170,7 +170,7 @@ namespace Krys::HTML
     };
 
     template <bool CaseInsensitive = true>
-    KRYS_NODISCARD MatchResult AdvancePast(Text::ASCIILiteral characters) noexcept
+    KRYS_NODISCARD MatchResult AdvancePast(Krys::Text::ASCIILiteral characters) noexcept
     {
 #if KRYS_ENV(DEV)
       for (auto character : characters.ToSpan())
@@ -192,8 +192,8 @@ namespace Krys::HTML
 
         if constexpr (CaseInsensitive)
         {
-          inputChar = Text::ToASCIILower(inputChar);
-          matchChar = Text::ToASCIILower(matchChar);
+          inputChar = Krys::Text::ToASCIILower(inputChar);
+          matchChar = Krys::Text::ToASCIILower(matchChar);
         }
 
         if (inputChar != matchChar)

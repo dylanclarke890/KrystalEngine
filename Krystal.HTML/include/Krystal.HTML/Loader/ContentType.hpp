@@ -23,7 +23,7 @@ namespace Krys::HTML
 {
   KRYS_NODISCARD inline ContentType DetermineContentType(const string &mimeType) noexcept
   {
-    string lowerMimeType = Text::ToASCIILowercase(mimeType);
+    string lowerMimeType = Krys::Text::ToASCIILowercase(mimeType);
 
     if (lowerMimeType == "text/css")
     {
