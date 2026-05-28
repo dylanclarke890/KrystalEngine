@@ -2,14 +2,13 @@
 
 #include "Krystal.HTML/Iterator/NodeFilter.hpp"
 #include "Krystal.HTML/Iterator/WhatToShow.hpp"
-#include "Krystal.HTML/DOM/Node.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 
 namespace Krys::HTML
 {
-  class IteratorAlgorithms;
+  class Node;
 
   class IteratorBase
   {

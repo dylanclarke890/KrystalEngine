@@ -12,7 +12,7 @@ namespace Krys::HTML
     return signal;
   }
 
-  Ref<AbortSignal> AbortSignal::Timeout(Milliseconds milliseconds) noexcept
+  Ref<AbortSignal> AbortSignal::Timeout(size_t milliseconds) noexcept
   {
     auto signal = CreateRef<AbortSignal>();
 

@@ -4,11 +4,8 @@
 #include "Krystal.HTML/DOM/EventTarget.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/WeakPtr.hpp"
-#include "Krystal.Lib/Time/Duration.hpp"
 #include "Krystal.Lib/Types/Any.hpp"
 #include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/Pair.hpp"
-#include "Krystal.Lib/Types/Set.hpp"
 
 namespace Krys::HTML
 {
@@ -20,8 +17,8 @@ namespace Krys::HTML
   private:
     Krys::Any _reason;
     List<AbortAlgorithmCallback> _abortAlgorithms;
-    Set<WeakPtr<AbortSignal>> _sourceSignals;
-    Set<WeakPtr<AbortSignal>> _dependentSignals;
+    List<WeakPtr<AbortSignal>> _sourceSignals;
+    List<WeakPtr<AbortSignal>> _dependentSignals;
     bool _dependent {false};
 
   public:
@@ -31,7 +28,7 @@ namespace Krys::HTML
     static Ref<AbortSignal> Abort(Maybe<Any> reason = Null) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-abortsignal-timeout
-    static Ref<AbortSignal> Timeout(Milliseconds milliseconds) noexcept;
+    static Ref<AbortSignal> Timeout(size_t milliseconds) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-abortsignal-any
     static Ref<AbortSignal> Any(const List<Ref<AbortSignal>> &signals) noexcept;

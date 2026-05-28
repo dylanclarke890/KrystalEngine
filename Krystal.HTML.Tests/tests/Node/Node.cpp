@@ -1,15 +1,15 @@
 ﻿#include "Krystal.HTML/DOM/Node.hpp"
 #include "Krystal.HTML.Tests/TestElement.hpp"
 #include "Krystal.HTML.Tests/TestNode.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/Constants/Namespaces.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/DOM/AbortSignal.hpp"
+#include "Krystal.HTML/DOM/Document.hpp"
+#include "Krystal.HTML/DOM/DocumentType.hpp"
+#include "Krystal.HTML/DOM/NodeList.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Comment.hpp"
-#include "Krystal.HTML/DOM/ContainerNode.hpp"
-#include "Krystal.HTML/DOM/Document.hpp"
-#include "Krystal.HTML/DOM/NodeList.hpp"
 #include "Krystal.HTML/Node/ProcessingInstruction.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
@@ -308,7 +308,7 @@ namespace Krys::Tests
 
     SECTION("DocumentType")
     {
-      auto doctype = CreateRef<DocumentType>(*document, u8"html", u8"public-id", u8"system-id");
+      auto doctype = *document->Implementation().CreateDocumentType(u8"html", u8"public-id", u8"system-id");
 
       auto clone = doctype->CloneNode();
       REQUIRE(clone.HasValue());

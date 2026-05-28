@@ -15,6 +15,9 @@ namespace Krys::HTML
   class DocumentAlgorithms
   {
   public:
+    /// @see https://dom.spec.whatwg.org/#xml-document
+    KRYS_NODISCARD static bool IsXMLTypeDocument(const Document &document) noexcept;
+
     /// @see https://dom.spec.whatwg.org/#internal-createelementns-steps
     KRYS_NODISCARD static ExceptionOr<Ref<Element>>
       InternalCreateElementNS(Document &document, DOMStringAtom namespaceUri, DOMStringAtom qualifiedName,

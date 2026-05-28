@@ -4,6 +4,7 @@
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
+#include "Krystal.HTML/DOM/DocumentType.hpp"
 #include "Krystal.HTML/DOM/HTMLDocument.hpp"
 #include "Krystal.HTML/DOM/SVGDocument.hpp"
 #include "Krystal.HTML/DOM/XHTMLDocument.hpp"
@@ -11,7 +12,6 @@
 #include "Krystal.HTML/Factories/ElementFactory.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/Node/DocumentType.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 
@@ -28,7 +28,7 @@ namespace Krys::HTML
         return Exception {ExceptionCode::InvalidCharacterError};
       }
 
-      return CreateRef<DocumentType>(*document, name, publicId, systemId);
+      return AdoptRef<DocumentType>(*new DocumentType(*document, name, publicId, systemId));
     }
 
     return Exception {ExceptionCode::InvalidStateError};
@@ -36,7 +36,7 @@ namespace Krys::HTML
 
   ExceptionOr<Ref<XMLDocument>> DOMImplementation::CreateDocument(DOMStringAtom namespaceUri,
                                                                   DOMStringAtom qualifiedName,
-                                                                  RefPtr<DocumentType> &&docType) noexcept
+                                                                  RawPtr<DocumentType> docType) noexcept
   {
     Ref<XMLDocument> document = [&] -> Ref<XMLDocument>
     {
@@ -99,7 +99,7 @@ namespace Krys::HTML
     Ref<HTMLDocument> document = CreateRef<HTMLDocument>();
     document->_contentType = u8"text/html";
 
-    auto documentType = CreateRef<DocumentType>(*document, u8"html", u8"", u8"");
+    auto documentType = AdoptRef(*new DocumentType(*document, u8"html", u8"", u8""));
     if (auto appendResult = document->AppendChild(*documentType); appendResult.HasException())
     {
       return appendResult.ReleaseException();

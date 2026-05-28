@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Node/DocumentType.hpp"
 #include "Krystal.HTML/Types/DOMString.hpp"
+#include "Krystal.HTML/Types/DOMStringAtom.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
@@ -11,6 +11,7 @@
 namespace Krys::HTML
 {
   class Document;
+  class DocumentType;
   class XMLDocument;
 
   /// @see https://dom.spec.whatwg.org/#interface-domimplementation
@@ -27,6 +28,8 @@ namespace Krys::HTML
     }
 
   public:
+#pragma region DOMImplementation - https://dom.spec.whatwg.org/#dom-domimplementation
+
     /// @brief Returns a doctype, with the given `name`, `publicId`, and `systemId`.
     /// @throws InvalidCharacterError if `name` is not a valid doctype name.
     KRYS_NODISCARD ExceptionOr<Ref<DocumentType>> CreateDocumentType(const DOMString &name,
@@ -40,7 +43,7 @@ namespace Krys::HTML
     /// `namespaceUri` and `qualifiedName`.
     KRYS_NODISCARD ExceptionOr<Ref<XMLDocument>>
       CreateDocument(DOMStringAtom namespaceUri, DOMStringAtom qualifiedName = DOMStringAtom::Null(),
-                     RefPtr<DocumentType> &&doctype = nullptr) noexcept;
+                     RawPtr<DocumentType> doctype = nullptr) noexcept;
 
     /// @brief Returns a document, with a basic tree already constructed including a title element, unless the
     /// `title` is omitted.
@@ -51,5 +54,7 @@ namespace Krys::HTML
     {
       return true;
     }
+
+#pragma endregion
   };
 }

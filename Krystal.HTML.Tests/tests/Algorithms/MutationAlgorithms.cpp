@@ -7,7 +7,7 @@
 #include "Krystal.HTML/Node/Comment.hpp"
 #include "Krystal.HTML/DOM/ContainerNode.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
-#include "Krystal.HTML/Node/DocumentType.hpp"
+#include "Krystal.HTML/DOM/DocumentType.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include <catch_all.hpp>
@@ -88,7 +88,7 @@ namespace Krys::Tests
     SECTION("Inserting a DocumentType node into a non-Document parent returns a "
             "HierarchyRequestError")
     {
-      auto docType = CreateRef<HTML::DocumentType>(*document, u8"html", u8"", u8"");
+      auto docType = document->Implementation().CreateDocumentType(u8"html", u8"", u8"").Value();
 
       auto result = MutationAlgorithms::EnsurePreInsertValidity(*docType, *element, nullptr);
       REQUIRE(result.HasException());
@@ -143,7 +143,7 @@ namespace Krys::Tests
             REQUIRE_FALSE(document->RemoveChild(*element).HasException());
           }
 
-          auto docType = CreateRef<HTML::DocumentType>(*document, u8"html", u8"", u8"");
+          auto docType = document->Implementation().CreateDocumentType(u8"html", u8"", u8"").Value();
 
           SECTION("Ref child is a DocumentType returns a HierarchyRequestError")
           {
@@ -181,7 +181,7 @@ namespace Krys::Tests
       SECTION("with an Element node")
       {
         auto otherElement = CreateRef<TestElement>(*document);
-        auto docType = CreateRef<HTML::DocumentType>(*document, u8"html", u8"", u8"");
+        auto docType = document->Implementation().CreateDocumentType(u8"html", u8"", u8"").Value();
 
         SECTION("Document already has an Element child returns a HierarchyRequestError")
         {
@@ -223,11 +223,12 @@ namespace Krys::Tests
 
       SECTION("with a DocumentType node")
       {
-        auto docType = CreateRef<HTML::DocumentType>(*document, u8"html", u8"", u8"");
+        auto docType = document->Implementation().CreateDocumentType(u8"html", u8"", u8"").Value();
 
         SECTION("Document already has a DocumentType child returns a HierarchyRequestError")
         {
-          auto childDocType = CreateRef<HTML::DocumentType>(*document, u8"html", u8"", u8"");
+          auto docType = document->Implementation().CreateDocumentType(u8"html", u8"", u8"").Value();
+          auto childDocType = document->Implementation().CreateDocumentType(u8"html", u8"", u8"").Value();
 
           REQUIRE_FALSE(document->AppendChild(*childDocType).HasException());
 
@@ -615,14 +616,14 @@ namespace Krys::Tests
 
     SECTION("HierarchyRequestError if newChild is a DocumentType node and parent is not a Document")
     {
-      auto docType = CreateRef<HTML::DocumentType>(*document, u8"html", u8"", u8"");
+      auto docType = document->Implementation().CreateDocumentType(u8"html", u8"", u8"").Value();
       REQUIRE(MutationAlgorithms::Replace(*child1, *docType, *element)
               == ExceptionCode::HierarchyRequestError);
     }
 
     SECTION("HierarchyRequestError if parent is a Document and")
     {
-      auto docType = CreateRef<HTML::DocumentType>(*document, u8"html", u8"", u8"");
+      auto docType = document->Implementation().CreateDocumentType(u8"html", u8"", u8"").Value();
 
       SECTION("newChild is an Element node and parent already has an element child")
       {
@@ -653,7 +654,7 @@ namespace Krys::Tests
       SECTION("newChild is a DocumentType node and parent already has a DocumentType child")
       {
         auto comment = CreateRef<Comment>(*document, u8"comment");
-        auto otherDocType = CreateRef<HTML::DocumentType>(*document, u8"html", u8"", u8"");
+        auto otherDocType = document->Implementation().CreateDocumentType(u8"html", u8"", u8"").Value();
 
         REQUIRE_FALSE(document->InsertBefore(*docType, element.get()).HasException());
         REQUIRE_FALSE(document->AppendChild(*comment).HasException());

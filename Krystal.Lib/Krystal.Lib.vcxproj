@@ -156,6 +156,9 @@
     <ClInclude Include="include\Krystal.Lib\Mixins\NonCopyMovable.hpp" />
     <ClInclude Include="include\Krystal.Lib\Mixins\NonMovable.hpp" />
     <ClInclude Include="include\Krystal.Lib\NativeHandle.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\Concepts.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrFormatter.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\IntrusivePtrHasher.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\RawPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Mixins\CanMakeCheckedPtr.hpp" />
     <ClInclude Include="include\Krystal.Lib\Mixins\CanMakeWeakPtr.hpp" />
@@ -172,6 +175,8 @@
     <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtrFactory.hpp" />
     <ClInclude Include="include\Krystal.Lib\Mixins\RefCounted.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\UniquePtr.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtrFormatter.hpp" />
+    <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtrHasher.hpp" />
     <ClInclude Include="include\Krystal.Lib\Pointers\WeakPtrImpl.hpp" />
     <ClInclude Include="include\Krystal.Lib\Ranges\Algorithm.hpp" />
     <ClInclude Include="include\Krystal.Lib\Ranges\TypeTraits.hpp" />

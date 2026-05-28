@@ -148,7 +148,7 @@
     <ClInclude Include="include\Krystal.HTML\Node\Attr.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\CDATASection.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\CharacterData.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Node\DocumentType.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\DocumentType.hpp" />
     <ClInclude Include="include\Krystal.HTML\Types\DOMString.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Comment.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\ContainerNode.hpp" />
@@ -242,7 +242,6 @@
     <ClCompile Include="src\DOM\Mixins\Slottable.cpp" />
     <ClCompile Include="src\Ranges\BoundaryPoint.cpp" />
     <ClCompile Include="src\Ranges\StaticRange.cpp" />
-    <ClCompile Include="src\DOM\XMLDocument.cpp" />
     <ClCompile Include="src\Algorithms\CustomElementAlgorithms.cpp" />
     <ClCompile Include="src\Algorithms\DocumentAlgorithms.cpp" />
     <ClCompile Include="src\Algorithms\ElementAlgorithms.cpp" />
@@ -279,7 +278,7 @@
     <ClCompile Include="src\Node\CDATASection.cpp" />
     <ClCompile Include="src\Node\CharacterData.cpp" />
     <ClCompile Include="src\Node\DocumentFragment.cpp" />
-    <ClCompile Include="src\Node\DocumentType.cpp" />
+    <ClCompile Include="src\DOM\DocumentType.cpp" />
     <ClCompile Include="src\Node\Comment.cpp" />
     <ClCompile Include="src\DOM\ContainerNode.cpp" />
     <ClCompile Include="src\Context.cpp" />

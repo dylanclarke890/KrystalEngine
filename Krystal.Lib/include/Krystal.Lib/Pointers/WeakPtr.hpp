@@ -1,18 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
-#include "Krystal.Lib/Mixins/RefCounted.hpp"
-#include "Krystal.Lib/Pointers/CheckedPtr.hpp"
-#include "Krystal.Lib/Pointers/CompactRefPtrTuple.hpp"
-#include "Krystal.Lib/Pointers/RawPtr.hpp"
+#include "Krystal.Lib/Pointers/Concepts.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Pointers/WeakPtrImpl.hpp"
-#include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 #include <cassert>
-#include <format>
-#include <utility>
 
 namespace Krys::detail
 {
@@ -217,7 +210,7 @@ namespace Krys::detail
       static_assert(SupportsRefPtr<T> || SupportsCheckedPtr<T>,
                     "Classes that offer weak pointers must also offer RefPtr or CheckedPtr");
       return _impl ? ShareRefPtr(_impl->template get<T>()) : nullptr;
-    } 
+    }
 
   private:
     explicit constexpr IntrusiveWeakPtr(const T *object) noexcept
@@ -323,28 +316,4 @@ namespace Krys
   {
     return WeakRef<T, Impl, PtrTraits>::WithRef(object);
   }
-}
-
-namespace std
-{
-  template <typename T, typename PtrTraits, typename RefPolicy, ::Krys::IsNullable Nullable, typename TChar>
-  struct formatter<::Krys::detail::IntrusiveWeakPtr<T, PtrTraits, RefPolicy, Nullable>, TChar>
-      : public formatter<void *, TChar>
-  {
-    template <typename FormatContext>
-    auto format(const ::Krys::detail::IntrusiveWeakPtr<T, PtrTraits, RefPolicy, Nullable> &ptr,
-                FormatContext &ctx) const -> decltype(ctx.out())
-    {
-      return formatter<void *, TChar>::format(ptr.get(), ctx);
-    }
-  };
-
-  template <typename T, typename Impl, typename PtrTraits, ::Krys::IsNullable Nullable>
-  struct hash<Krys::detail::IntrusiveWeakPtr<T, Impl, PtrTraits, Nullable>>
-  {
-    size_t operator()(const Krys::detail::IntrusiveWeakPtr<T, Impl, PtrTraits, Nullable> &ptr) const noexcept
-    {
-      return hash<::Krys::RawPtr<T>>()(ptr.get());
-    }
-  };
 }

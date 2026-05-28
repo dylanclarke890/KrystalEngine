@@ -9,12 +9,10 @@
 #include "Krystal.HTML/DOM/Enums/DocumentVisibilityState.hpp"
 #include "Krystal.HTML/DOM/Enums/QuirksMode.hpp"
 #include "Krystal.HTML/DOM/RareData/DocumentRareData.hpp"
-#include "Krystal.HTML/Iterator/NodeFilter.hpp"
 #include "Krystal.HTML/Iterator/NodeIterator.hpp"
-#include "Krystal.HTML/Iterator/TreeWalker.hpp"
-#include "Krystal.HTML/Iterator/WhatToShow.hpp"
 #include "Krystal.HTML/Ranges/Range.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
+#include "Krystal.HTML/Types/NodeOrString.hpp"
 #include "Krystal.HTML/URL.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 
@@ -33,7 +31,9 @@ namespace Krys::HTML
   class HTMLTitleElement;
   class ProcessingInstruction;
   class Text;
+  class TreeWalker;
 
+  /// @see https://dom.spec.whatwg.org/#interface-document
   class Document : public ContainerNode
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Document);

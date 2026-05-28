@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Node/DocumentType.hpp"
+﻿#include "Krystal.HTML/DOM/DocumentType.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Mixins/ChildNode.hpp"

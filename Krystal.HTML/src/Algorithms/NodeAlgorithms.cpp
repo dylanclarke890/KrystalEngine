@@ -11,6 +11,7 @@
 #include "Krystal.HTML/DOM/Algorithms/OrderedSet.hpp"
 #include "Krystal.HTML/DOM/Collections/LiveHTMLCollection.hpp"
 #include "Krystal.HTML/DOM/Collections/StaticHTMLCollection.hpp"
+#include "Krystal.HTML/DOM/DocumentType.hpp"
 #include "Krystal.HTML/DOM/HTMLDocument.hpp"
 #include "Krystal.HTML/DOM/SVGDocument.hpp"
 #include "Krystal.HTML/DOM/XHTMLDocument.hpp"
@@ -19,7 +20,6 @@
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Comment.hpp"
-#include "Krystal.HTML/Node/DocumentType.hpp"
 #include "Krystal.HTML/Node/ProcessingInstruction.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
@@ -187,7 +187,7 @@ namespace Krys::HTML
     else if (Is<DocumentType>(node))
     {
       auto &docType = Downcast<const DocumentType>(node);
-      copy = CreateRef<DocumentType>(document, docType.Name(), docType.PublicId(), docType.SystemId());
+      copy = AdoptRef(*new DocumentType(document, docType.Name(), docType.PublicId(), docType.SystemId()));
     }
     else if (Is<Attr>(node))
     {

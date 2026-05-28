@@ -12,7 +12,7 @@
 #include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/Node/Comment.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
-#include "Krystal.HTML/Node/DocumentType.hpp"
+#include "Krystal.HTML/DOM/DocumentType.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/ProcessingInstruction.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"

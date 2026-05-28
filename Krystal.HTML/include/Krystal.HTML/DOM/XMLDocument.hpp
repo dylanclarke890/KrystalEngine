@@ -9,10 +9,14 @@ namespace Krys::HTML
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(XMLDocument);
 
   protected:
-    XMLDocument(DocumentFlags flags) noexcept;
+    XMLDocument(DocumentFlags flags) noexcept : Document(flags | DocumentFlags::IsXMLDocument)
+    {
+    }
 
   public:
-    XMLDocument() noexcept;
+    XMLDocument() noexcept : Document(DocumentFlags::IsXMLDocument)
+    {
+    }
   };
 }
 

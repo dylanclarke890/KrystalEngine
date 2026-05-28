@@ -91,8 +91,16 @@ namespace Krys::HTML
     {
       if (!signal->_dependent)
       {
-        resultSignal->_sourceSignals.insert(CreateWeakRef(*signal));
-        signal->_dependentSignals.insert(CreateWeakRef(*resultSignal));
+        if (!std::ranges::any_of(resultSignal->_sourceSignals,
+                                 [&](auto &s) { return s.get() == signal; }))
+        {
+          resultSignal->_sourceSignals.push_back(CreateWeakRef(*signal));
+        }
+        if (!std::ranges::any_of(signal->_dependentSignals,
+                                 [&](auto &s) { return s.get() == resultSignal; }))
+        {
+          signal->_dependentSignals.push_back(CreateWeakRef(*resultSignal));
+        }
       }
       else
       {
@@ -101,8 +109,17 @@ namespace Krys::HTML
           if (auto srcSignal = sourceSignal.lock())
           {
             assert(!sourceSignal->Aborted() && !sourceSignal->_dependent);
-            resultSignal->_sourceSignals.insert(CreateWeakPtr(sourceSignal.get()));
-            sourceSignal->_dependentSignals.insert(CreateWeakPtr(resultSignal.get()));
+
+            if (!std::ranges::any_of(resultSignal->_sourceSignals,
+                                     [&](auto &s) { return s.get() == signal; }))
+            {
+              resultSignal->_sourceSignals.push_back(CreateWeakRef(*signal));
+            }
+            if (!std::ranges::any_of(signal->_dependentSignals,
+                                     [&](auto &s) { return s.get() == resultSignal; }))
+            {
+              signal->_dependentSignals.push_back(CreateWeakRef(*resultSignal));
+            }
           }
         }
       }

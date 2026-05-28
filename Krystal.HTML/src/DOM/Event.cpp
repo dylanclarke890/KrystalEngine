@@ -7,7 +7,7 @@
 namespace Krys::HTML
 {
   Event::Event(DOMStringAtom type, const EventInit &eventInitDict) noexcept
-      : _type(type), _timeStamp(MonotonicTime::Now()), _bubbles(eventInitDict.Bubbles),
+      : _type(type), _timeStamp(MonotonicTime::Now().count()), _bubbles(eventInitDict.Bubbles),
         _cancellable(eventInitDict.Cancelable), _composed(eventInitDict.Composed)
   {
   }

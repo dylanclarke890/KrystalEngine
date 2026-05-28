@@ -3,36 +3,43 @@
 #include "Krystal.HTML/DOM/Node.hpp"
 #include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.HTML/Types/NodeOrString.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/TypeCast.hpp"
+#include "Krystal.Lib/Types/List.hpp"
 
 namespace Krys::HTML
 {
+  /// @see https://dom.spec.whatwg.org/#interface-documenttype
   class DocumentType final : public Node
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(DocumentType);
+
+    friend class DOMImplementation;
+    friend class NodeAlgorithms;
 
   private:
     DOMString _name;
     DOMString _publicId;
     DOMString _systemId;
 
-  public:
+  protected:
     DocumentType(Document &document, const DOMString &name, const DOMString &publicId,
                  const DOMString &systemId) noexcept;
 
+  public:
 #pragma region DocumentType
 
+    /// @see https://dom.spec.whatwg.org/#dom-documenttype-name
     KRYS_NODISCARD const DOMString &Name() const noexcept
     {
       return _name;
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-documenttype-publicid
     KRYS_NODISCARD const DOMString &PublicId() const noexcept
     {
       return _publicId;
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-documenttype-systemid
     KRYS_NODISCARD const DOMString &SystemId() const noexcept
     {
       return _systemId;
@@ -42,6 +49,7 @@ namespace Krys::HTML
 
 #pragma region Node
 
+    /// @see https://dom.spec.whatwg.org/#dom-node-nodename
     KRYS_NODISCARD DOMString NodeName() const noexcept final
     {
       return _name;

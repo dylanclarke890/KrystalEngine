@@ -1,9 +1,9 @@
-﻿#include "Krystal.HTML/Node/DocumentType.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
+﻿#include "Krystal.HTML/DOM/DocumentType.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/DOM/AbortSignal.hpp"
+#include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include <catch_all.hpp>
@@ -19,7 +19,7 @@ namespace Krys::Tests
 
     CommonTestData(const DOMString &name, const DOMString &publicId, const DOMString &systemId)
         : Document(CreateRef<HTML::Document>()),
-          DocType(CreateRef<DocumentType>(*Document, name, publicId, systemId))
+          DocType(*Document->Implementation().CreateDocumentType(name, publicId, systemId))
     {
     }
   };

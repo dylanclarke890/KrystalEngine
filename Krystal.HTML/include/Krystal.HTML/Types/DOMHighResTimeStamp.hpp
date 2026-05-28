@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Time/Duration.hpp"
+#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys::HTML
 {
-  using DOMHighResTimeStamp = Milliseconds;
+  using DOMHighResTimeStamp = size_t;
 }

@@ -2,10 +2,11 @@
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
+#include "Krystal.HTML/DOM/DocumentType.hpp"
+#include "Krystal.HTML/DOM/HTMLDocument.hpp"
 #include "Krystal.HTML/DOM/XMLDocument.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/DOM/HTMLDocument.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include <catch_all.hpp>
 

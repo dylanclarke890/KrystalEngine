@@ -8,15 +8,24 @@
 #include "Krystal.HTML/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
+#include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/Factories/ElementFactory.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 
 namespace Krys::HTML
 {
+  bool DocumentAlgorithms::IsXMLTypeDocument(const Document &document) noexcept
+  {
+    // We use flags to set the derived document type (i.e a HTMLDocument sets the 'IsHTMLDocument' flag) but
+    // the base Document class also has a public constructor. In that case 'IsXMLDocument' is not set but it
+    // should be treated as an 'xml' doc as per the spec. A 'html' type document will always be created via
+    // the HTMLDocument class.
+    return document.HasDocumentFlag(DocumentFlags::IsXMLDocument) || document._flags == DocumentFlags::None;
+  }
+
   ExceptionOr<ElementCreationOptions>
     DocumentAlgorithms::FlattenElementCreationOptions(const ElementCreationOptionsOrString &options,
                                                       Document &document) noexcept

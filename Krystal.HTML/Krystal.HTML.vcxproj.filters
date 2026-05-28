@@ -132,7 +132,7 @@
     <ClInclude Include="include\Krystal.HTML\DOM\NodeList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\DocumentType.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\DocumentType.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\CharacterData.hpp">
@@ -554,7 +554,7 @@
     <ClCompile Include="src\DOM\ContainerNode.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Node\DocumentType.cpp">
+    <ClCompile Include="src\DOM\DocumentType.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\DocumentFragment.cpp">
@@ -675,9 +675,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Algorithms\LiveRangeUpdater.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\DOM\XMLDocument.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Ranges\StaticRange.cpp">

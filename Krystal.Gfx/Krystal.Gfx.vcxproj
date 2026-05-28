@@ -20,6 +20,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.Gfx\Colour.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\ColourFormatter.hpp" />
+    <ClInclude Include="include\Krystal.Gfx\ColourHasher.hpp" />
     <ClInclude Include="include\Krystal.Gfx\Commands.hpp">
       <SubType>
       </SubType>

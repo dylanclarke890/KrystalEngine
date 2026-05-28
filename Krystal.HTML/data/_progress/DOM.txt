@@ -40,7 +40,8 @@
      - https://dom.spec.whatwg.org/#concept-abortsignal-timeout
  - Let resultSignal be a new object implementing signalInterface using realm. We only have one AbortSignal implementation, so this is not implemented.
      - https://dom.spec.whatwg.org/#create-a-dependent-abort-signal
-
+ - CreateDependentAbortSignal - We used sets but to avoid including <utility> in a common header we use a vector instead but the logic to add to the vector is a little messy.
+     - https://dom.spec.whatwg.org/#create-a-dependent-abort-signal
 3.2.1. Garbage collection - https://dom.spec.whatwg.org/#garbage-collection
  - A non-aborted dependent AbortSignal object must not be garbage collected while its source signals is non-empty and it has registered event listeners for its abort event
    or its abort algorithms is non-empty - I don't understand this properly enough to know how to implement it, so this is not implemented.
@@ -59,6 +60,10 @@
  - Remove - Custom element reactions are required.
  - Remove - Transient mutation observers are required at the end of this algorithm.
      - https://dom.spec.whatwg.org/#concept-node-remove
+
+4.2.4. Mixin NonElementParentNode - https://dom.spec.whatwg.org/#interface-nonelementparentnode
+ - GetElementById - implemented but inefficient, it iterates through the entire tree to find matching nodes every time.
+     - https://dom.spec.whatwg.org/#dom-nonelementparentnode-getelementbyid
 
 4.2.6. Mixin ParentNode - https://dom.spec.whatwg.org/#interface-parentnode
  - QuerySelector/QuerySelectorAll - Requires selector parsing and matching.
@@ -121,17 +126,23 @@
  - CreateEvent - Needs implementing, currently just returns an Event. Has a lot of interfaces from other specs though.
     - https://dom.spec.whatwg.org/#dom-document-createevent
 
+4.5.1 Interface DOMImplementation - https://dom.spec.whatwg.org/#interface-domimplementation
+ - CreateHTMLDocument - docs origin is this’s origin. We don't have origins, so this is not implemented.
+     - https://dom.spec.whatwg.org/#dom-domimplementation-createhtmldocument
+
+4.7. Interface DocumentFragment - https://dom.spec.whatwg.org/#interface-documentfragment
+ - DocumentFragment() constructor - steps are to set this’s node document to current global object’s associated Document.
+   We don't have global objects or associated Documents, so this is not implemented.
+     - https://dom.spec.whatwg.org/#dom-documentfragment-documentfragment
+
+4.8. Interface ShadowRoot - https://dom.spec.whatwg.org/#interface-shadowroot
+
 TODO:
 CSS-SELECTORS
   - Separate spec implementation required first, significant work to implement CSS selector parsing and matching.
   - 1.3 Selectors - https://dom.spec.whatwg.org/#selectors
   - 4.9 Interface Element (Closest/Matches) - https://dom.spec.whatwg.org/#dom-element-closest
   - 4.2.6 Mixin ParentNode (QuerySelector/QuerySelectorAll) - https://dom.spec.whatwg.org/#dom-parentnode-queryselector
-
-URLS
-  - Separate spec implementation required first, fair bit of work to parse and serialize URLs.
-  - 4.4 Interface Node (BaseURI) - https://dom.spec.whatwg.org/#dom-node-baseuri
-  - 4.5 Interface Document (DocumentURI) - https://dom.spec.whatwg.org/#dom-document-documenturi
 
 CUSTOM-ELEMENTS
   - Separate spec implementation required first, significant work required.
@@ -159,7 +170,6 @@ Section 4.8 Interface ShadowRoot - https://dom.spec.whatwg.org/#interface-shadow
 Section 4.9 Interface Element - https://dom.spec.whatwg.org/#interface-element
   - AttachShadow and ShadowRoot missing test cases.
 
-4.5.1 Interface DOMImplementation
 
 4.6 Interface DocumentType
 
