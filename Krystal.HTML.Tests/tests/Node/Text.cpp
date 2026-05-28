@@ -5,7 +5,7 @@
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/DOM/ContainerNode.hpp"
-#include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/DOM/Node.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include <catch_all.hpp>

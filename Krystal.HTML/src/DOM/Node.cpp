@@ -14,7 +14,7 @@
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/DOM/ContainerNode.hpp"
-#include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/Node/DocumentType.hpp"
 #include "Krystal.HTML/Node/ProcessingInstruction.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"

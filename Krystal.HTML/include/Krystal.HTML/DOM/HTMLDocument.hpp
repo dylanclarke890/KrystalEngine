@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/DOM/Document.hpp"
 
 namespace Krys::HTML
 {
@@ -9,7 +9,7 @@ namespace Krys::HTML
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLDocument);
 
   public:
-    HTMLDocument() noexcept : Document(Type::HTML)
+    HTMLDocument() noexcept : Document(DocumentFlags::IsHTMLDocument)
     {
     }
   };

@@ -11,7 +11,7 @@
 #include "Krystal.HTML/DOM/EventTarget.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/DOM/Node.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"

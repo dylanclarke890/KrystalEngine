@@ -1,21 +1,21 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/DOM/ContainerNode.hpp"
+#include "Krystal.HTML/DOM/Dicts/ElementCreationOptions.hpp"
+#include "Krystal.HTML/DOM/Dicts/ImportNodeOptions.hpp"
+#include "Krystal.HTML/DOM/DOMImplementation.hpp"
+#include "Krystal.HTML/DOM/Enums/DocumentFlags.hpp"
+#include "Krystal.HTML/DOM/Enums/DocumentReadyState.hpp"
+#include "Krystal.HTML/DOM/Enums/DocumentVisibilityState.hpp"
+#include "Krystal.HTML/DOM/Enums/QuirksMode.hpp"
+#include "Krystal.HTML/DOM/RareData/DocumentRareData.hpp"
 #include "Krystal.HTML/Iterator/NodeFilter.hpp"
 #include "Krystal.HTML/Iterator/NodeIterator.hpp"
 #include "Krystal.HTML/Iterator/TreeWalker.hpp"
 #include "Krystal.HTML/Iterator/WhatToShow.hpp"
-#include "Krystal.HTML/DOM/ContainerNode.hpp"
-#include "Krystal.HTML/Node/DOMImplementation.hpp"
-#include "Krystal.HTML/Node/ElementCreationOptions.hpp"
-#include "Krystal.HTML/Node/Enums/DocumentReadyState.hpp"
-#include "Krystal.HTML/Node/Enums/DocumentVisibilityState.hpp"
-#include "Krystal.HTML/Node/Enums/QuirksMode.hpp"
-#include "Krystal.HTML/Node/ImportNodeOptions.hpp"
-#include "Krystal.HTML/DOM/RareData/DocumentRareData.hpp"
 #include "Krystal.HTML/Ranges/Range.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
 #include "Krystal.HTML/URL.hpp"
-#include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 
 namespace Krys::HTML
@@ -49,25 +49,19 @@ namespace Krys::HTML
     friend class NodeAlgorithms;
     friend class RenderBlocking;
 
-  protected:
-    enum class Type
-    {
-      XML,
-      HTML
-    };
-
   private:
     UniquePtr<DocumentRareData> _documentRareData;
     UniquePtr<DOMImplementation> _implementation;
     DOMString _contentType {u8"application/xml"};
-    QuirksMode _quirksMode : BitCount<QuirksMode>() {QuirksMode::NoQuirks};
-    Type _documentType {Type::XML};
     List<RawPtr<Range>> _liveRanges;
     List<RawPtr<NodeIterator>> _nodeIterators;
     RefPtr<CustomElementRegistry> _customElementRegistry;
     bool _allowDeclarativeShadowRoots : 1 {false};
+    QuirksMode _quirksMode : BitCount<QuirksMode>() {QuirksMode::NoQuirks};
+    DocumentFlags _flags : BitCount<DocumentFlags>() {DocumentFlags::None};
 
-    // HTML spec extensions
+#pragma region HTML spec
+
     DocumentReadyState _currentDocumentReadiness
         : BitCount<DocumentReadyState>() {DocumentReadyState::Complete};
     DocumentVisibilityState _visibilityState
@@ -75,60 +69,116 @@ namespace Krys::HTML
 
     List<WeakRef<Element>> _renderBlockingElements;
 
+#pragma endregion
+
   protected:
-    Document(Type documentType) noexcept;
+    Document(DocumentFlags flags) noexcept;
 
   public:
-    Document() noexcept;
-
 #pragma region Document - https://dom.spec.whatwg.org/#interface-document
 
+    /// @see https://dom.spec.whatwg.org/#dom-document-document
+    Document() noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-document-implementation
     KRYS_NODISCARD DOMImplementation &Implementation() noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-document-url
     KRYS_NODISCARD DOMString URL() const noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-document-documenturi
     KRYS_NODISCARD DOMString DocumentURI() const noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-document-compatmode
     KRYS_NODISCARD DOMString CompatMode() const noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-document-characterset
     KRYS_NODISCARD DOMString CharacterSet() const noexcept;
-    KRYS_NODISCARD DOMString Charset() const noexcept;       // legacy alias of .characterSet
-    KRYS_NODISCARD DOMString InputEncoding() const noexcept; // legacy alias of .characterSet
+
+    /// @note legacy alias of .characterSet
+    /// @see https://dom.spec.whatwg.org/#dom-document-charset
+    KRYS_NODISCARD DOMString Charset() const noexcept;
+
+    /// @note legacy alias of .characterSet
+    /// @see https://dom.spec.whatwg.org/#dom-document-inputencoding
+    KRYS_NODISCARD DOMString InputEncoding() const noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-document-contenttype
     KRYS_NODISCARD DOMString ContentType() const noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#dom-document-doctype
     KRYS_NODISCARD RefPtr<DocumentType> DocType() noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-document-doctype
     KRYS_NODISCARD RefPtr<const DocumentType> DocType() const noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-document-documentelement
     KRYS_NODISCARD RefPtr<Element> DocumentElement() noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-document-documentelement
     KRYS_NODISCARD RefPtr<const Element> DocumentElement() const noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#dom-document-getelementsbytagname
     KRYS_NODISCARD Ref<HTMLCollection> GetElementsByTagName(DOMStringAtom qualifiedName) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-document-getelementsbytagnamens
     KRYS_NODISCARD Ref<HTMLCollection> GetElementsByTagNameNS(DOMStringAtom namespaceUri,
                                                               DOMStringAtom localName) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-document-getelementsbyclassname
     KRYS_NODISCARD Ref<HTMLCollection> GetElementsByClassName(DOMStringAtom classNames) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#dom-document-createelement
     KRYS_NODISCARD ExceptionOr<Ref<Element>>
       CreateElement(DOMStringAtom localName, const ElementCreationOptionsOrString &options = {}) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-document-createelementns
     KRYS_NODISCARD ExceptionOr<Ref<Element>>
       CreateElementNS(DOMStringAtom namespaceUri, DOMStringAtom qualifiedName,
                       const ElementCreationOptionsOrString &options = {}) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-document-createdocumentfragment
     KRYS_NODISCARD Ref<DocumentFragment> CreateDocumentFragment() noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-document-createtextnode
     KRYS_NODISCARD Ref<Text> CreateTextNode(DOMString &&data) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-document-createcdatasection
     KRYS_NODISCARD ExceptionOr<Ref<CDATASection>> CreateCDATASection(DOMString &&data) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-document-createcomment
     KRYS_NODISCARD Ref<Comment> CreateComment(DOMString &&data) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-document-createprocessinginstruction
     KRYS_NODISCARD ExceptionOr<Ref<ProcessingInstruction>>
       CreateProcessingInstruction(DOMString &&target, DOMString &&data) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#dom-document-importnode
     KRYS_NODISCARD ExceptionOr<Ref<Node>> ImportNode(Node &node,
                                                      const BoolOrImportNodeOptions &options = false) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-document-adoptnode
     KRYS_NODISCARD ExceptionOr<Ref<Node>> AdoptNode(Node &node) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#dom-document-createattribute
     KRYS_NODISCARD ExceptionOr<Ref<Attr>> CreateAttribute(DOMStringAtom localName) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-document-createattributens
     KRYS_NODISCARD ExceptionOr<Ref<Attr>> CreateAttributeNS(DOMStringAtom namespaceUri,
                                                             DOMStringAtom qualifiedName) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#dom-document-createevent
     KRYS_NODISCARD Ref<Event> CreateEvent(DOMStringAtom interface) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#dom-document-createrange
     KRYS_NODISCARD Ref<Range> CreateRange() noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#dom-document-createnodeiterator
     KRYS_NODISCARD Ref<NodeIterator> CreateNodeIterator(Node &root,
                                                         WhatToShow whatToShow = WhatToShow::SHOW_ALL,
                                                         RefPtr<NodeFilter> &&filter = nullptr) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-document-createtreewalker
     KRYS_NODISCARD Ref<TreeWalker> CreateTreeWalker(Node &root, WhatToShow whatToShow = WhatToShow::SHOW_ALL,
                                                     RefPtr<NodeFilter> &&filter = nullptr) noexcept;
 
@@ -136,6 +186,7 @@ namespace Krys::HTML
 
 #pragma region Node - https://dom.spec.whatwg.org/#interface-node
 
+    /// @see https://dom.spec.whatwg.org/#dom-node-nodename
     KRYS_NODISCARD DOMString NodeName() const noexcept final
     {
       return u8"#document";
@@ -218,10 +269,9 @@ namespace Krys::HTML
 
 #pragma region DocumentOrShadowRoot Mixin - https://dom.spec.whatwg.org/#mixin-documentorshadowroot
 
-    RefPtr<CustomElementRegistry> CustomElementRegistry() const noexcept
-    {
-      return _customElementRegistry;
-    }
+    /// @brief Returns node's CustomElementRegistry object, if any; otherwise null.
+    /// @see https://dom.spec.whatwg.org/#dom-documentorshadowroot-customelementregistry
+    RefPtr<CustomElementRegistry> CustomElementRegistry() const noexcept;
 
 #pragma endregion
 
@@ -315,20 +365,6 @@ namespace Krys::HTML
 #pragma endregion
 
   protected:
-#pragma region Type Checks
-
-    KRYS_NODISCARD bool IsHTMLDocument() const noexcept
-    {
-      return _documentType == Type::HTML;
-    }
-
-    KRYS_NODISCARD bool IsXMLDocument() const noexcept
-    {
-      return _documentType == Type::HTML;
-    }
-
-#pragma endregion
-
     /// @see https://dom.spec.whatwg.org/#get-the-parent
     KRYS_NODISCARD RawPtr<EventTarget> GetParent(Event &event) const noexcept override
     {
@@ -339,6 +375,49 @@ namespace Krys::HTML
 
       return nullptr;
     }
+
+#pragma region Type Checks
+
+    KRYS_NODISCARD bool IsHTMLDocument() const noexcept
+    {
+      return HasFlag(_flags, DocumentFlags::IsHTMLDocument);
+    }
+
+    KRYS_NODISCARD bool IsXMLDocument() const noexcept
+    {
+      return HasFlag(_flags, DocumentFlags::IsXMLDocument);
+    }
+
+    KRYS_NODISCARD bool IsXHTMLDocument() const noexcept
+    {
+      return HasFlag(_flags, DocumentFlags::IsXHTMLDocument);
+    }
+
+    KRYS_NODISCARD bool IsSVGDocument() const noexcept
+    {
+      return HasFlag(_flags, DocumentFlags::IsSVGDocument);
+    }
+
+#pragma endregion
+
+#pragma region Document Flags
+
+    KRYS_NODISCARD bool HasDocumentFlag(DocumentFlags flags) const noexcept
+    {
+      return HasFlag(_flags, flags);
+    }
+
+    void SetDocumentFlag(DocumentFlags flags) noexcept
+    {
+      _flags = _flags | flags;
+    }
+
+    void ClearDocumentFlag(DocumentFlags flags) noexcept
+    {
+      _flags = _flags & ~flags;
+    }
+
+#pragma endregion
 
     KRYS_NODISCARD List<RawPtr<Range>> &LiveRanges() noexcept
     {

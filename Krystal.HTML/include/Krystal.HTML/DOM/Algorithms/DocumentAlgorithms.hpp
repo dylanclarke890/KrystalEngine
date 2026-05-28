@@ -1,8 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/DOM/Dicts/ElementCreationOptions.hpp"
+#include "Krystal.HTML/DOM/Enums/DocumentReadyState.hpp"
 #include "Krystal.HTML/Types/DOMString.hpp"
-#include "Krystal.HTML/Node/ElementCreationOptions.hpp"
-#include "Krystal.HTML/Node/Enums/DocumentReadyState.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 

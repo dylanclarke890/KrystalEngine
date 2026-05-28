@@ -6,7 +6,7 @@
 #include "Krystal.HTML/Iterator/NodeFilter.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
-#include "Krystal.HTML/Node/HTMLDocument.hpp"
+#include "Krystal.HTML/DOM/HTMLDocument.hpp"
 #include "Krystal.HTML/DOM/Node.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"

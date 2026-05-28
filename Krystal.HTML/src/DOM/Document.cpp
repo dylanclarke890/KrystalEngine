@@ -1,19 +1,21 @@
-﻿#include "Krystal.HTML/Node/Document.hpp"
+﻿#include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/Algorithms/CustomElementAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/Constants/Namespaces.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
+#include "Krystal.HTML/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/OrderedSet.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/DOM/DOMImplementation.hpp"
 #include "Krystal.HTML/DOM/Event.hpp"
 #include "Krystal.HTML/DOM/HTMLCollection.hpp"
+#include "Krystal.HTML/DOM/HTMLDocument.hpp"
 #include "Krystal.HTML/DOM/Mixins/NonElementParentNode.hpp"
 #include "Krystal.HTML/DOM/Mixins/ParentNode.hpp"
 #include "Krystal.HTML/DOM/NodeList.hpp"
@@ -28,9 +30,7 @@
 #include "Krystal.HTML/Node/Comment.hpp"
 #include "Krystal.HTML/Node/DocumentFragment.hpp"
 #include "Krystal.HTML/Node/DocumentType.hpp"
-#include "Krystal.HTML/Node/DOMImplementation.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
-#include "Krystal.HTML/Node/HTMLDocument.hpp"
 #include "Krystal.HTML/Node/ProcessingInstruction.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
@@ -40,19 +40,15 @@
 
 namespace Krys::HTML
 {
-  Document::Document(Type documentType) noexcept : Document()
+  Document::Document(DocumentFlags flags) noexcept : Document()
   {
-    _documentType = documentType;
-
-    if (documentType == Type::HTML)
-    {
-      _contentType = u8"text/html";
-    }
+    SetDocumentFlag(flags);
   }
 
 #pragma region Document
 
-  Document::Document() noexcept : ContainerNode(*this, NodeType::DOCUMENT_NODE, NodeFlags::IsContainerNode)
+  Document::Document() noexcept
+      : ContainerNode(*this, NodeType::DOCUMENT_NODE, NodeFlags::IsContainerNode), _flags(DocumentFlags::None)
   {
     SetEventTargetFlag(EventTargetFlags::IsConnected);
   }
@@ -300,7 +296,7 @@ namespace Krys::HTML
 
     if (Is<HTMLDocument>(*this))
     {
-      localName = ::Krys::Text::ToASCIILowercase(localName.View());
+      localName = Krys::Text::ToASCIILowercase(localName.View());
     }
 
     QualifiedName qualifiedName {DOMStringAtom::Null(), DOMStringAtom::Null(), localName};
@@ -421,6 +417,15 @@ namespace Krys::HTML
   RefPtr<const Element> Document::GetElementById(DOMStringView elementId) const noexcept
   {
     return Mixins::NonElementParentNode::GetElementById(*this, elementId);
+  }
+
+#pragma endregion
+
+#pragma region DocumentOrShadowRoot Mixin - https://dom.spec.whatwg.org/#mixin-documentorshadowroot
+
+  RefPtr<CustomElementRegistry> Document::CustomElementRegistry() const noexcept
+  {
+    return _customElementRegistry;
   }
 
 #pragma endregion

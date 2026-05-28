@@ -1,17 +1,19 @@
-﻿#include "Krystal.HTML/Node/DOMImplementation.hpp"
-#include "Krystal.HTML/Algorithms/DocumentAlgorithms.hpp"
+﻿#include "Krystal.HTML/DOM/DOMImplementation.hpp"
 #include "Krystal.HTML/Constants/Namespaces.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
+#include "Krystal.HTML/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
+#include "Krystal.HTML/DOM/HTMLDocument.hpp"
+#include "Krystal.HTML/DOM/SVGDocument.hpp"
+#include "Krystal.HTML/DOM/XHTMLDocument.hpp"
+#include "Krystal.HTML/DOM/XMLDocument.hpp"
 #include "Krystal.HTML/Factories/ElementFactory.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/DocumentType.hpp"
-#include "Krystal.HTML/Node/HTMLDocument.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
-#include "Krystal.HTML/Node/XMLDocument.hpp"
 
 namespace Krys::HTML
 {
@@ -36,9 +38,29 @@ namespace Krys::HTML
                                                                   DOMStringAtom qualifiedName,
                                                                   RefPtr<DocumentType> &&docType) noexcept
   {
-    Ref<XMLDocument> document = CreateRef<XMLDocument>();
-    RefPtr<Element> element = nullptr;
+    Ref<XMLDocument> document = [&] -> Ref<XMLDocument>
+    {
+      RefPtr<XMLDocument> doc = nullptr;
+      if (namespaceUri == Namespace::HTML)
+      {
+        doc = CreateRefPtr<XHTMLDocument>();
+        doc->_contentType = u8"application/xhtml+xml";
+      }
+      else if (namespaceUri == Namespace::SVG)
+      {
+        doc = CreateRefPtr<SVGDocument>();
+        doc->_contentType = u8"image/svg+xml";
+      }
+      else
+      {
+        doc = CreateRefPtr<XMLDocument>();
+        doc->_contentType = u8"application/xml";
+      }
 
+      return AdoptRef<XMLDocument>(*doc.release());
+    }();
+
+    RefPtr<Element> element = nullptr;
     if (qualifiedName != DOMStringAtom::Empty())
     {
       auto elementCreateResult =
@@ -67,20 +89,7 @@ namespace Krys::HTML
       }
     }
 
-    // TODO(impl): ORIGIN - doc’s origin is this’s associated document’s origin.
-
-    if (namespaceUri == Namespace::HTML)
-    {
-      document->_contentType = u8"text/html";
-    }
-    else if (namespaceUri == Namespace::SVG)
-    {
-      document->_contentType = u8"image/svg+xml";
-    }
-    else
-    {
-      document->_contentType = u8"application/xml";
-    }
+    // SPEC-VIOLATION(ORIGIN) - doc’s origin is this’s associated document’s origin.
 
     return document;
   }
@@ -90,8 +99,8 @@ namespace Krys::HTML
     Ref<HTMLDocument> document = CreateRef<HTMLDocument>();
     document->_contentType = u8"text/html";
 
-    auto docType = CreateRef<DocumentType>(*document, u8"html", u8"", u8"");
-    if (auto appendResult = document->AppendChild(*docType); appendResult.HasException())
+    auto documentType = CreateRef<DocumentType>(*document, u8"html", u8"", u8"");
+    if (auto appendResult = document->AppendChild(*documentType); appendResult.HasException())
     {
       return appendResult.ReleaseException();
     }

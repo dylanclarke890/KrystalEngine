@@ -9,7 +9,7 @@
 #include "Krystal.HTML/HTMLElement/HTMLTagName.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLUnknownElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.Text/ASCII.hpp"

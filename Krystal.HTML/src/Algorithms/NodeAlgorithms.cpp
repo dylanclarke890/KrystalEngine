@@ -11,16 +11,18 @@
 #include "Krystal.HTML/DOM/Algorithms/OrderedSet.hpp"
 #include "Krystal.HTML/DOM/Collections/LiveHTMLCollection.hpp"
 #include "Krystal.HTML/DOM/Collections/StaticHTMLCollection.hpp"
+#include "Krystal.HTML/DOM/HTMLDocument.hpp"
+#include "Krystal.HTML/DOM/SVGDocument.hpp"
+#include "Krystal.HTML/DOM/XHTMLDocument.hpp"
+#include "Krystal.HTML/DOM/XMLDocument.hpp"
 #include "Krystal.HTML/Factories/ElementFactory.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Comment.hpp"
 #include "Krystal.HTML/Node/DocumentType.hpp"
-#include "Krystal.HTML/Node/HTMLDocument.hpp"
 #include "Krystal.HTML/Node/ProcessingInstruction.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
-#include "Krystal.HTML/Node/XMLDocument.hpp"
 #include <ranges>
 
 namespace Krys::HTML
@@ -150,17 +152,26 @@ namespace Krys::HTML
       {
         copy = CreateRef<HTMLDocument>();
       }
-      else
+      else if (Is<XHTMLDocument>(doc))
+      {
+        copy = CreateRef<XHTMLDocument>();
+      }
+      else if (Is<SVGDocument>(doc))
+      {
+        copy = CreateRef<SVGDocument>();
+      }
+      else if (Is<XMLDocument>(doc))
       {
         copy = CreateRef<XMLDocument>();
       }
+      else
+      {
+        copy = CreateRef<Document>();
+      }
+
       auto &docCopy = Downcast<Document>(*copy);
-
-      // TODO(feat): MINOR - Set copy's encoding and origin.
+      docCopy._flags = doc._flags;
       docCopy._contentType = doc._contentType;
-
-      // TODO(impl): URL - Set the url on the cloned document to the url of the original document.
-      // docCopy._baseURL = doc._baseURL;
       docCopy._quirksMode = doc._quirksMode;
       docCopy._allowDeclarativeShadowRoots = doc._allowDeclarativeShadowRoots;
 
@@ -168,6 +179,10 @@ namespace Krys::HTML
       {
         docCopy._customElementRegistry = doc._customElementRegistry;
       }
+
+      // TODO(feat): DOM - Set copy's encoding
+      // SPEC-VIOLATION(URL): Set the origin on the cloned document to the origin of the original document.
+      // SPEC-VIOLATION(URL): Set the url on the cloned document to the url of the original document.
     }
     else if (Is<DocumentType>(node))
     {
@@ -468,7 +483,7 @@ namespace Krys::HTML
   }
 
   Ref<HTMLCollection> NodeAlgorithms::GetElementsByTagName(ContainerNode &root,
-                                                        DOMStringAtom qualifiedName) noexcept
+                                                           DOMStringAtom qualifiedName) noexcept
   {
     if (qualifiedName == u8"*")
     {
@@ -497,7 +512,7 @@ namespace Krys::HTML
   }
 
   Ref<HTMLCollection> NodeAlgorithms::GetElementsByTagNameNS(ContainerNode &root, DOMStringAtom namespaceUri,
-                                                          DOMStringAtom localName) noexcept
+                                                             DOMStringAtom localName) noexcept
   {
     if (namespaceUri == DOMStringAtom::Empty())
     {
@@ -527,7 +542,7 @@ namespace Krys::HTML
   }
 
   Ref<HTMLCollection> NodeAlgorithms::GetElementsByClassName(ContainerNode &root,
-                                                          DOMStringAtom classNames) noexcept
+                                                             DOMStringAtom classNames) noexcept
   {
     bool isQuirksMode = root.NodeDocument()._quirksMode == QuirksMode::Quirks;
 

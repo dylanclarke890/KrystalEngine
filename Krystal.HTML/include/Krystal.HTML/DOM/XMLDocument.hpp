@@ -1,12 +1,15 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/DOM/Document.hpp"
 
 namespace Krys::HTML
 {
   class XMLDocument : public Document
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(XMLDocument);
+
+  protected:
+    XMLDocument(DocumentFlags flags) noexcept;
 
   public:
     XMLDocument() noexcept;

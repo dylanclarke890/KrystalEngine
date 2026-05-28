@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Algorithms/DocumentAlgorithms.hpp"
+﻿#include "Krystal.HTML/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.HTML/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
@@ -11,7 +11,7 @@
 #include "Krystal.HTML/Factories/ElementFactory.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 

@@ -27,6 +27,11 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#eventtarget-event-listener-list
     SmallList<Ref<EventListener>> _eventListenerList;
 
+  protected:
+    EventTarget(EventTargetFlags flags) noexcept : _flags(flags)
+    {
+    }
+
   public:
     virtual ~EventTarget() noexcept = default;
 
@@ -112,23 +117,19 @@ namespace Krys::HTML
 
 #pragma region EventTarget Flags
 
-    EventTarget(EventTargetFlags flags) noexcept : _flags(flags)
+    KRYS_NODISCARD bool HasEventTargetFlag(EventTargetFlags flags) const noexcept
     {
+      return HasFlag(_flags, flags);
     }
 
-    KRYS_NODISCARD bool HasEventTargetFlag(EventTargetFlags flag) const noexcept
+    void SetEventTargetFlag(EventTargetFlags flags) noexcept
     {
-      return HasFlag(_flags, flag);
+      _flags = _flags | flags;
     }
 
-    void SetEventTargetFlag(EventTargetFlags flag) noexcept
+    void ClearEventTargetFlag(EventTargetFlags flags) noexcept
     {
-      _flags = _flags | flag;
-    }
-
-    void ClearEventTargetFlag(EventTargetFlags flag) noexcept
-    {
-      _flags = _flags & ~flag;
+      _flags = _flags & ~flags;
     }
 
 #pragma endregion

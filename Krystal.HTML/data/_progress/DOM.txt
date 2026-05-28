@@ -101,9 +101,25 @@
  - LastChild/FirstChild/ParentNode/PreviousSibling/NextSibling - These currently return RawPtr but they should return RefPtr instead for the public API.
      - https://dom.spec.whatwg.org/#dom-node-lastchild
 
-4.5 Interface Document
- - DocumentURI - URL spec. Unlikely to support this.
+4.5 Interface Document - https://dom.spec.whatwg.org/#interface-document
+ - Each document has an associated encoding (default UTF-8) - needs to be set when creating a document.
+     - https://dom.spec.whatwg.org/#concept-document-encoding
+ - Each document has an associated domain (default opaque origin) - Unlikely to support this.
+     - https://dom.spec.whatwg.org/#concept-document-domain
+ - Each document has an associated url (default 'about:blank') - URL spec. Unlikely to support this.
+     - https://dom.spec.whatwg.org/#concept-document-domain
+ - Get the parent algorithm - returns null if event’s type attribute value is "load" or document does not have a browsing context;
+   otherwise the document’s relevant global object. We don't have global objects or browsing contexts, so this is not implemented.
+     - https://dom.spec.whatwg.org/#concept-document-no-quirks
+ - Document() constructor - steps are to set this’s origin to the origin of current global object’s associated Document. [HTML]
+   We don't have origins, global objects or associated Documents, so this is not implemented.
+     - https://dom.spec.whatwg.org/#dom-document-document
+ - URL/DocumentURI - URL spec. Unlikely to support this.
      - https://dom.spec.whatwg.org/#dom-document-documenturi
+ - CharacterSet/Charset/InputEncoding Each document has an associated encoding (default UTF-8) - needs to be set when creating a document.
+     - https://dom.spec.whatwg.org/#concept-document-characterset
+ - CreateEvent - Needs implementing, currently just returns an Event. Has a lot of interfaces from other specs though.
+    - https://dom.spec.whatwg.org/#dom-document-createevent
 
 TODO:
 CSS-SELECTORS

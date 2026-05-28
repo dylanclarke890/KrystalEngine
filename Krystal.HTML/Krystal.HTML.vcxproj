@@ -54,9 +54,11 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\CustomEventInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\EventInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\GetRootNodeOptions.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Enums\DocumentFlags.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\DocumentPosition.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\NodeFlags.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\NodeType.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\XHTMLDocument.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Event\EventPathItem.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Collections\LiveNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Collections\StaticNodeList.hpp" />
@@ -69,7 +71,7 @@
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLMetaElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\AbortController.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\CustomElementAlgorithms.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Algorithms\DocumentAlgorithms.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\DocumentAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\Factories\ElementFactory.hpp" />
     <ClInclude Include="include\Krystal.HTML\Algorithms\LiveRangeUpdater.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLBaseElement.hpp" />
@@ -115,20 +117,19 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\NameValidation.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\NodeAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\CustomElement\CustomElementRegistry.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Node\DOMImplementation.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Node\ElementCreationOptions.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\DOMImplementation.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Dicts\ElementCreationOptions.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Enums\CustomElementState.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLTagName.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Node\Enums\DocumentReadyState.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Node\Enums\DocumentVisibilityState.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Node\Enums\NodeCollectionLiveness.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Node\Enums\QuirksMode.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Node\ImportNodeOptions.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Enums\DocumentReadyState.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Enums\DocumentVisibilityState.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Enums\QuirksMode.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Dicts\ImportNodeOptions.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\RareData\DocumentFragmentRareData.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\RareData\DocumentRareData.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Enums\InsertAdjacentWhere.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\NamedNodeMap.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Node\XMLDocument.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\XMLDocument.hpp" />
     <ClInclude Include="include\Krystal.HTML\SVGElement\SVGElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\Types\DOMStringAtom.hpp" />
     <ClInclude Include="include\Krystal.HTML\Types\NodeOrString.hpp" />
@@ -151,7 +152,7 @@
     <ClInclude Include="include\Krystal.HTML\Types\DOMString.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Comment.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\ContainerNode.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Node\Document.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Document.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\DocumentFragment.hpp" />
     <ClInclude Include="include\Krystal.HTML\Types\DOMHighResTimeStamp.hpp" />
     <ClInclude Include="include\Krystal.HTML\Node\Element.hpp" />
@@ -164,7 +165,7 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\EventPhaseType.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\EventTarget.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Event\EventListener.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Node\HTMLDocument.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\HTMLDocument.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\RareData\ElementRareData.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Node.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\NodeList.hpp" />
@@ -229,6 +230,7 @@
     <ClCompile Include="src\HTMLElement\HTMLMetaElement.cpp" />
     <ClCompile Include="src\HTMLElement\HTMLStyleElement.cpp" />
     <ClCompile Include="src\HTMLElement\HTMLTitleElement.cpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\SVGDocument.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Factories\CustomElementFactory.cpp" />
@@ -240,7 +242,7 @@
     <ClCompile Include="src\DOM\Mixins\Slottable.cpp" />
     <ClCompile Include="src\Ranges\BoundaryPoint.cpp" />
     <ClCompile Include="src\Ranges\StaticRange.cpp" />
-    <ClCompile Include="src\Node\XMLDocument.cpp" />
+    <ClCompile Include="src\DOM\XMLDocument.cpp" />
     <ClCompile Include="src\Algorithms\CustomElementAlgorithms.cpp" />
     <ClCompile Include="src\Algorithms\DocumentAlgorithms.cpp" />
     <ClCompile Include="src\Algorithms\ElementAlgorithms.cpp" />
@@ -259,7 +261,7 @@
     <ClCompile Include="src\DOM\AbortController.cpp" />
     <ClCompile Include="src\Iterator\NodeIterator.cpp" />
     <ClCompile Include="src\Iterator\TreeWalker.cpp" />
-    <ClCompile Include="src\Node\DOMImplementation.cpp" />
+    <ClCompile Include="src\DOM\DOMImplementation.cpp" />
     <ClCompile Include="src\Node\NamedNodeMap.cpp" />
     <ClCompile Include="src\DOM\Mixins\NonElementParentNode.cpp" />
     <ClCompile Include="src\Ranges\Range.cpp" />
@@ -270,7 +272,7 @@
     <ClCompile Include="src\DOM\Algorithms\TreeQueries.cpp" />
     <ClCompile Include="src\DOM\Algorithms\MutationObserverAlgorithms.cpp" />
     <ClCompile Include="src\Node\ShadowRoot.cpp" />
-    <ClCompile Include="src\Node\Document.cpp" />
+    <ClCompile Include="src\DOM\Document.cpp" />
     <ClCompile Include="src\Node\Element.cpp" />
     <ClCompile Include="src\Algorithms\EventDispatcher.cpp" />
     <ClCompile Include="src\Node\Attr.cpp" />

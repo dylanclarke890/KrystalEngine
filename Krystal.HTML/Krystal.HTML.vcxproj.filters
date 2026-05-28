@@ -42,7 +42,7 @@
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLDocumentParser.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\HTMLDocument.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\HTMLDocument.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLTokenizer.hpp">
@@ -75,7 +75,7 @@
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLActiveFormattingElementList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\Document.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Document.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Parser\HTMLToken.hpp">
@@ -315,9 +315,6 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Mixins\NonElementParentNode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\Enums\NodeCollectionLiveness.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Algorithms\ExtensibilityHooks.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -342,25 +339,25 @@
     <ClInclude Include="include\Krystal.HTML\CustomElement\ElementDefinitionOptions.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\XMLDocument.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\XMLDocument.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLTagName.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\ElementCreationOptions.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Dicts\ElementCreationOptions.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\ImportNodeOptions.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Dicts\ImportNodeOptions.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\DOMImplementation.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\DOMImplementation.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\Enums\QuirksMode.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Enums\QuirksMode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Algorithms\DocumentAlgorithms.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\DocumentAlgorithms.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Algorithms\CustomElementAlgorithms.hpp">
@@ -423,10 +420,10 @@
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLStyleElement.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\Enums\DocumentReadyState.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Enums\DocumentReadyState.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\Enums\DocumentVisibilityState.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Enums\DocumentVisibilityState.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\HTMLElement\HTMLBodyElement.hpp">
@@ -531,6 +528,15 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\GetRootNodeOptions.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\Enums\DocumentFlags.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\XHTMLDocument.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\DOM\SVGDocument.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -566,7 +572,7 @@
     <ClCompile Include="src\Node\ProcessingInstruction.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Node\Document.cpp">
+    <ClCompile Include="src\DOM\Document.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\Comment.cpp">
@@ -662,7 +668,7 @@
     <ClCompile Include="src\Algorithms\DocumentAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Node\DOMImplementation.cpp">
+    <ClCompile Include="src\DOM\DOMImplementation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Algorithms\CustomElementAlgorithms.cpp">
@@ -671,7 +677,7 @@
     <ClCompile Include="src\Algorithms\LiveRangeUpdater.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Node\XMLDocument.cpp">
+    <ClCompile Include="src\DOM\XMLDocument.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Ranges\StaticRange.cpp">

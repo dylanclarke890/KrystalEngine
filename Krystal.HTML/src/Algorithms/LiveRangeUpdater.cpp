@@ -6,7 +6,7 @@
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/DOM/ContainerNode.hpp"
-#include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include <cassert>

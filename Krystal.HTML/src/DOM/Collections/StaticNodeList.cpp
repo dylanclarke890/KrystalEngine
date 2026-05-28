@@ -2,7 +2,7 @@
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/ContainerNode.hpp"
-#include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
 
 namespace Krys::HTML

@@ -8,7 +8,7 @@
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Comment.hpp"
 #include "Krystal.HTML/DOM/ContainerNode.hpp"
-#include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/DOM/NodeList.hpp"
 #include "Krystal.HTML/Node/ProcessingInstruction.hpp"
 #include "Krystal.HTML/Node/ShadowRoot.hpp"

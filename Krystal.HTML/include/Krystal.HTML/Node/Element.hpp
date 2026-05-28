@@ -2,7 +2,7 @@
 
 #include "Krystal.HTML/DOMTokenList.hpp"
 #include "Krystal.HTML/DOM/ContainerNode.hpp"
-#include "Krystal.HTML/Node/Document.hpp"
+#include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/Node/Enums/CustomElementState.hpp"
 #include "Krystal.HTML/Node/Enums/InsertAdjacentWhere.hpp"
 #include "Krystal.HTML/Node/NamedNodeMap.hpp"
