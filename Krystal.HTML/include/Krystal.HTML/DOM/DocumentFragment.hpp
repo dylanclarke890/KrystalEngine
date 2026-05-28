@@ -1,10 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/DOM/RareData/DocumentFragmentRareData.hpp"
 #include "Krystal.HTML/DOM/ContainerNode.hpp"
+#include "Krystal.HTML/DOM/RareData/DocumentFragmentRareData.hpp"
 #include "Krystal.HTML/Types/NodeOrString.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"
 #include "Krystal.Lib/Pointers/WeakPtr.hpp"
 
@@ -14,6 +12,7 @@ namespace Krys::HTML
   class Element;
   class HTMLCollection;
 
+  /// @see https://dom.spec.whatwg.org/#interface-documentfragment
   class DocumentFragment : public ContainerNode
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(DocumentFragment);
@@ -25,23 +24,32 @@ namespace Krys::HTML
     UniquePtr<DocumentFragmentRareData> _documentFragmentRareData;
 
   protected:
+    /// @see https://dom.spec.whatwg.org/#concept-documentfragment-host
     WeakPtr<Element> _host;
 
   protected:
     DocumentFragment(Document &document, NodeFlags flags) noexcept;
 
   public:
+#pragma region DocumentFragment - https://dom.spec.whatwg.org/#documentfragment
+
+    /// @see https://dom.spec.whatwg.org/#dom-documentfragment-documentfragment
     DocumentFragment(Document &document) noexcept;
 
-#pragma region Node
+#pragma endregion
 
+#pragma region Node - https://dom.spec.whatwg.org/#node
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-nodename
     KRYS_NODISCARD DOMString NodeName() const noexcept final
     {
       return u8"#document-fragment";
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
     KRYS_NODISCARD Maybe<DOMString> TextContent() const noexcept final;
 
+    /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
     ExceptionOr<void> TextContent(DOMString &&value) noexcept final;
 
 #pragma endregion

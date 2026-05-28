@@ -7,7 +7,7 @@
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/DOM/HTMLDocument.hpp"
 #include "Krystal.HTML/DOM/NodeList.hpp"
-#include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include <catch_all.hpp>
 

@@ -10,7 +10,7 @@
 #include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/DOM/Node.hpp"
-#include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.Lib/Ranges/Algorithm.hpp"
 #include <cassert>

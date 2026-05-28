@@ -5,7 +5,7 @@
 #include "Krystal.HTML/DOM/Mixins/Slottable.hpp"
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
 
 namespace Krys::HTML

@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Node/DocumentFragment.hpp"
+﻿#include "Krystal.HTML/DOM/DocumentFragment.hpp"
 #include "Krystal.HTML.Tests/TestElement.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
@@ -6,7 +6,7 @@
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
-#include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include <catch_all.hpp>
 

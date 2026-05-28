@@ -9,7 +9,7 @@
 #include "Krystal.HTML/DOM/DocumentType.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/DOM/Node.hpp"
-#include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include <ranges>
 
 namespace Krys::HTML

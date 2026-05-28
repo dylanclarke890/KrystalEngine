@@ -126,7 +126,7 @@
     <ClInclude Include="include\Krystal.HTML\Types\ExceptionOr.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\DocumentFragment.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\DocumentFragment.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\NodeList.hpp">
@@ -159,7 +159,7 @@
     <ClInclude Include="include\Krystal.HTML\QualifiedName.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\ShadowRoot.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\ShadowRoot.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\EventDispatcher.hpp">
@@ -291,13 +291,13 @@
     <ClInclude Include="include\Krystal.HTML\Node\NamedNodeMap.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\ShadowRootInit.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Dicts\ShadowRootInit.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\Enums\ShadowRootMode.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Enums\ShadowRootMode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Node\Enums\SlotAssignmentMode.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Enums\SlotAssignmentMode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Node\Enums\InsertAdjacentWhere.hpp">
@@ -328,9 +328,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\MutationRecordType.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\MutationObserver\MutationRecordType.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\CustomElement\CustomElementDefinition.hpp">
@@ -537,6 +534,9 @@
     <ClInclude Include="include\Krystal.HTML\DOM\SVGDocument.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="pch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -557,7 +557,7 @@
     <ClCompile Include="src\DOM\DocumentType.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Node\DocumentFragment.cpp">
+    <ClCompile Include="src\DOM\DocumentFragment.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Node\CharacterData.cpp">
@@ -771,6 +771,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\DOM\Collections\StaticHTMLCollection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

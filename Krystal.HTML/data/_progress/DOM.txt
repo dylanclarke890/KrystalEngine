@@ -132,7 +132,7 @@
 
 4.7. Interface DocumentFragment - https://dom.spec.whatwg.org/#interface-documentfragment
  - DocumentFragment() constructor - steps are to set this’s node document to current global object’s associated Document.
-   We don't have global objects or associated Documents, so this is not implemented.
+   We don't have global objects or associated Documents, so this is not implemented and we expose a constructor that takes a Document instead.
      - https://dom.spec.whatwg.org/#dom-documentfragment-documentfragment
 
 4.8. Interface ShadowRoot - https://dom.spec.whatwg.org/#interface-shadowroot

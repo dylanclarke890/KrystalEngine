@@ -1,13 +1,13 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/DOMTokenList.hpp"
 #include "Krystal.HTML/DOM/ContainerNode.hpp"
+#include "Krystal.HTML/DOM/Dicts/ShadowRootInit.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
+#include "Krystal.HTML/DOM/RareData/ElementRareData.hpp"
+#include "Krystal.HTML/DOMTokenList.hpp"
 #include "Krystal.HTML/Node/Enums/CustomElementState.hpp"
 #include "Krystal.HTML/Node/Enums/InsertAdjacentWhere.hpp"
 #include "Krystal.HTML/Node/NamedNodeMap.hpp"
-#include "Krystal.HTML/DOM/RareData/ElementRareData.hpp"
-#include "Krystal.HTML/Node/ShadowRootInit.hpp"
 #include "Krystal.HTML/QualifiedName.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"

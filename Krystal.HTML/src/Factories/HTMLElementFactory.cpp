@@ -11,7 +11,7 @@
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
-#include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.Text/ASCII.hpp"
 
 namespace Krys::HTML

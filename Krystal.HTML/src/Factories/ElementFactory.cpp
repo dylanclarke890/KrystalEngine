@@ -14,7 +14,7 @@
 #include "Krystal.HTML/MathMLElement/MathMLElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
-#include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/SVGElement/SVGElement.hpp"
 
 namespace Krys::HTML

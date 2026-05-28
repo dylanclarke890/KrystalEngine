@@ -12,11 +12,11 @@
 #include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
-#include "Krystal.HTML/Node/DocumentFragment.hpp"
+#include "Krystal.HTML/DOM/DocumentFragment.hpp"
 #include "Krystal.HTML/DOM/DocumentType.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/DOM/Node.hpp"
-#include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.HTML/Types/SmallNodeList.hpp"
 

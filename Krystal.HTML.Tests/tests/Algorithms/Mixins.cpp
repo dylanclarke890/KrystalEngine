@@ -4,10 +4,10 @@
 #include "Krystal.HTML/Node/CharacterData.hpp"
 #include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
-#include "Krystal.HTML/Node/DocumentFragment.hpp"
+#include "Krystal.HTML/DOM/DocumentFragment.hpp"
 #include "Krystal.HTML/DOM/DocumentType.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
-#include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include "Krystal.Lib/Types/SmallList.hpp"
 #include <catch_all.hpp>

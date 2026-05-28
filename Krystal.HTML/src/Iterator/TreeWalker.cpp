@@ -7,7 +7,7 @@
 #include "Krystal.HTML/DOM/ContainerNode.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
-#include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/DOM/ShadowRoot.hpp"
 
 namespace Krys::HTML
 {

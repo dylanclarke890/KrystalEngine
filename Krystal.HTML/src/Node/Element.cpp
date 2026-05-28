@@ -19,7 +19,7 @@
 #include "Krystal.HTML/Node/Attr.hpp"
 #include "Krystal.HTML/DOM/HTMLDocument.hpp"
 #include "Krystal.HTML/Node/NamedNodeMap.hpp"
-#include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 #include <ranges>
 

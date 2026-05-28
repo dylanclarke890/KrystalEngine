@@ -15,7 +15,7 @@
 #include "Krystal.HTML/DOM/DocumentType.hpp"
 #include "Krystal.HTML/Node/Element.hpp"
 #include "Krystal.HTML/Node/ProcessingInstruction.hpp"
-#include "Krystal.HTML/Node/ShadowRoot.hpp"
+#include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/Node/Text.hpp"
 
 namespace Krys::HTML

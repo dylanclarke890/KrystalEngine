@@ -1,13 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Node/DocumentFragment.hpp"
-#include "Krystal.HTML/Node/Enums/ShadowRootMode.hpp"
-#include "Krystal.HTML/Node/Enums/SlotAssignmentMode.hpp"
-#include "Krystal.Lib/Core/Enum.hpp"
-#include "Krystal.Lib/Core/TypeCast.hpp"
-#include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Pointers/RefPtr.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
+#include "Krystal.HTML/DOM/DocumentFragment.hpp"
+#include "Krystal.HTML/DOM/Enums/ShadowRootMode.hpp"
+#include "Krystal.HTML/DOM/Enums/SlotAssignmentMode.hpp"
 
 namespace Krys::HTML
 {
