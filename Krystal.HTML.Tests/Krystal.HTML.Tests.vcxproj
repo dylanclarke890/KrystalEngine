@@ -115,8 +115,9 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp23</LanguageStandard>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <ForcedIncludeFiles>pch.h</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -157,6 +158,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="catch_main.cpp" />
     <ClCompile Include="tests\Algorithms\EventDispatcher.cpp" />
     <ClCompile Include="tests\Algorithms\MutationAlgorithms.cpp" />
@@ -201,6 +205,7 @@
     <ClCompile Include="tests\Ranges\StaticRange.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="pch.h" />
     <ClInclude Include="include\Krystal.HTML.Tests\ParserTestUtils.hpp" />
     <ClInclude Include="include\Krystal.HTML.Tests\TestCharacterData.hpp" />
     <ClInclude Include="include\Krystal.HTML.Tests\TestContainerNode.hpp" />
