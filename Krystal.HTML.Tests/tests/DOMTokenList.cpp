@@ -18,11 +18,11 @@ namespace Krys::Tests
     {
       Ref<Document> Document;
       Ref<Element> Element;
-      DOMTokenList TokenList;
+      DOMTokenList& TokenList;
 
       CommonTestData()
           : Document(CreateRef<HTML::Document>()), Element(Document->CreateElement(u8"div").Value()),
-            TokenList(*Element, u8"test-tokens")
+            TokenList(Element->ClassList())
       {
       }
     };
@@ -107,7 +107,7 @@ namespace Krys::Tests
       REQUIRE(data.TokenList.Length() == 1uz);
       REQUIRE(data.TokenList.Contains(u8"foo"));
       REQUIRE(data.TokenList.Item(0) == u8"foo");
-      REQUIRE(data.Element->GetAttribute(u8"test-tokens") == u8"foo");
+      REQUIRE(data.Element->GetAttribute(u8"class") == u8"foo");
 
       REQUIRE_FALSE(data.TokenList.Add(u8"foo").HasException());
       REQUIRE(data.TokenList.Length() == 1uz);
@@ -115,7 +115,7 @@ namespace Krys::Tests
       REQUIRE_FALSE(data.TokenList.Add(u8"bar").HasException());
       REQUIRE(data.TokenList.Length() == 2uz);
 
-      REQUIRE(data.Element->GetAttribute(u8"test-tokens") == u8"foo bar");
+      REQUIRE(data.Element->GetAttribute(u8"class") == u8"foo bar");
     }
 
     SECTION("Invalid tokens")
@@ -145,7 +145,7 @@ namespace Krys::Tests
       REQUIRE_FALSE(data.TokenList.Remove(u8"foo").HasException());
       REQUIRE(data.TokenList.Length() == 0uz);
       REQUIRE_FALSE(data.TokenList.Contains(u8"foo"));
-      REQUIRE(data.Element->GetAttribute(u8"test-tokens") == u8"");
+      REQUIRE(data.Element->GetAttribute(u8"class") == u8"");
 
       REQUIRE_FALSE(data.TokenList.Remove(u8"foo").HasException());
       REQUIRE(data.TokenList.Length() == 0uz);
@@ -225,14 +225,14 @@ namespace Krys::Tests
       REQUIRE_FALSE(data.TokenList.Add(u8"bar").HasException());
       REQUIRE(data.TokenList.Length() == 2uz);
 
-      REQUIRE(data.Element->GetAttribute(u8"test-tokens") == u8"foo bar");
+      REQUIRE(data.Element->GetAttribute(u8"class") == u8"foo bar");
 
       REQUIRE_FALSE(data.TokenList.Replace(u8"foo", u8"baz").HasException());
       REQUIRE(data.TokenList.Length() == 2uz);
       REQUIRE_FALSE(data.TokenList.Contains(u8"foo"));
       REQUIRE(data.TokenList.Contains(u8"baz"));
 
-      REQUIRE(data.Element->GetAttribute(u8"test-tokens") == u8"baz bar");
+      REQUIRE(data.Element->GetAttribute(u8"class") == u8"baz bar");
     }
 
     SECTION("Invalid tokens")
@@ -269,7 +269,7 @@ namespace Krys::Tests
 
     data.TokenList.Value(u8"baz qux");
     REQUIRE(data.TokenList.Value() == u8"baz qux");
-    REQUIRE(data.Element->GetAttribute(u8"test-tokens") == u8"baz qux");
+    REQUIRE(data.Element->GetAttribute(u8"class") == u8"baz qux");
   }
 
   TEST_CASE("DOMTokenList::Supports", "[HTML][DOMTokenList]")
@@ -279,18 +279,6 @@ namespace Krys::Tests
       CommonTestData data;
       auto supports = data.TokenList.Supports(u8"foo");
       REQUIRE((supports.HasValue() && supports.Value() == true));
-    }
-
-    SECTION("Custom function can be provided")
-    {
-      CommonTestData data;
-      data.TokenList = DOMTokenList(*data.Element, u8"test-tokens",
-                                    [](Document &, DOMStringView token) { return token == u8"foo"; });
-
-      auto supportsFoo = data.TokenList.Supports(u8"foo");
-      REQUIRE((supportsFoo.HasValue() && supportsFoo.Value() == true));
-      auto supportsBar = data.TokenList.Supports(u8"bar");
-      REQUIRE((supportsBar.HasValue() && supportsBar.Value() == false));
     }
   }
 }

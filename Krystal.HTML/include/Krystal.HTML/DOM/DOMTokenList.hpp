@@ -1,8 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/DOM/Internals/QualifiedName.hpp"
 #include "Krystal.HTML/Infra/StringAlgorithms.hpp"
 #include "Krystal.HTML/Types/DOMString.hpp"
-#include "Krystal.HTML/DOM/Internals/QualifiedName.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/CheckedPtr.hpp"
@@ -25,6 +25,7 @@ namespace Krys::HTML
     return true;
   };
 
+  /// @see https://dom.spec.whatwg.org/#interface-domtokenlist
   class DOMTokenList
   {
     friend class Element;
@@ -39,18 +40,23 @@ namespace Krys::HTML
     CheckedRef<Element> _element;
     IsSupportedTokenFunction _isSupportedToken;
 
+  protected:
+    DOMTokenList(Element &element, DOMStringAtom attributeName,
+                 IsSupportedTokenFunction &&isSupportedToken = DefaultIsSupportedTokenFunction) noexcept;
+
   public:
     using iterator = TokenList::iterator;
     using const_iterator = TokenList::const_iterator;
 
-    DOMTokenList(Element &element, DOMStringAtom attributeName,
-                 IsSupportedTokenFunction &&isSupportedToken = DefaultIsSupportedTokenFunction) noexcept;
+#pragma region DOMTokenList - https://dom.spec.whatwg.org/#domtokenlist
 
+    /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-length
     KRYS_NODISCARD size_t Length() const noexcept
     {
       return _tokens.size();
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-item
     KRYS_NODISCARD Maybe<DOMString> Item(size_t index) const noexcept
     {
       if (index >= _tokens.size())
@@ -60,17 +66,20 @@ namespace Krys::HTML
 
       return _tokens[index];
     }
-
+    
+    /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-item
     KRYS_NODISCARD Maybe<DOMString> operator[](size_t index) const noexcept
     {
       return Item(index);
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-contains
     KRYS_NODISCARD bool Contains(const DOMString &token) const noexcept
     {
       return std::ranges::contains(_tokens, token);
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-add
     ExceptionOr<void> Add(const List<DOMString> &tokens) noexcept
     {
       for (auto &token : tokens)
@@ -94,11 +103,13 @@ namespace Krys::HTML
       return {};
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-add
     ExceptionOr<void> Add(const DOMString &token) noexcept
     {
       return Add(List<DOMString> {token});
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-remove
     ExceptionOr<void> Remove(const List<DOMString> &tokens) noexcept
     {
       for (auto &token : tokens)
@@ -118,11 +129,13 @@ namespace Krys::HTML
       return {};
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-remove
     ExceptionOr<void> Remove(const DOMString &token) noexcept
     {
       return Remove(List<DOMString> {token});
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-toggle
     ExceptionOr<bool> Toggle(const DOMString &token, Maybe<bool> force = Null) noexcept
     {
       if (auto result = ValidateToken(token); result.HasException())
@@ -154,6 +167,7 @@ namespace Krys::HTML
       return false;
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-replace
     ExceptionOr<bool> Replace(const DOMString &token, const DOMString &newToken) noexcept
     {
       if (auto result = ValidateToken(token); result.HasException())
@@ -177,39 +191,54 @@ namespace Krys::HTML
       return true;
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-supports
     KRYS_NODISCARD ExceptionOr<bool> Supports(DOMStringView token) const noexcept
     {
       return ValidationSteps(token);
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-value
     KRYS_NODISCARD DOMString Value() const noexcept
     {
       return SerializeSteps();
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-value
     void Value(DOMString &&value) noexcept;
 
+    /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-iterable
     KRYS_NODISCARD iterator begin() noexcept
     {
       return _tokens.begin();
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-iterable
     KRYS_NODISCARD iterator end() noexcept
     {
       return _tokens.end();
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-iterable
     KRYS_NODISCARD const_iterator begin() const noexcept
     {
       return _tokens.begin();
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-iterable
     KRYS_NODISCARD const_iterator end() const noexcept
     {
       return _tokens.end();
     }
 
+#pragma endregion
+
   private:
+    /// @see https://webidl.spec.whatwg.org/#dfn-supported-property-indices
+    KRYS_NODISCARD bool IsSupportedPropertyIndex(size_t index) const noexcept
+    {
+      return index < Length();
+    }
+
     /// @see https://dom.spec.whatwg.org/#concept-domtokenlist-validation
     KRYS_NODISCARD ExceptionOr<bool> ValidationSteps(DOMStringView token) const noexcept;
 
