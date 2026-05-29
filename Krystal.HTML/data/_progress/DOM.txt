@@ -139,39 +139,32 @@
  - attribute EventHandler onslotchange; - Haven't figured out how to support EventHandler attributes yet, as this is a JavaScript concept.
      - https://dom.spec.whatwg.org/#dom-shadowroot-onslotchange
 
+4.8. Interface Element - https://dom.spec.whatwg.org/#interface-element
+ - Element has an associated custom element definition - Not implemented yet.
+     - https://dom.spec.whatwg.org/#concept-element-custom-element-definition
+ - Create Element - Custom element creation is not yet implemented.
+     - https://dom.spec.whatwg.org/#concept-create-element
+ - Handle Attribute Changes - Custom element reactions are not yet implemented.
+     - https://dom.spec.whatwg.org/#handle-attribute-changes
+ - IDL reflect attributes - Need to implement a convenient abstraction for this.
+     - https://dom.spec.whatwg.org/#concept-reflect
+ - SetAttribute/SetAttributeNS - Let verifiedValue be the result of calling get trusted type compliant attribute value with qualifiedName, null, this, and value.
+   We haven't implemented trusted types, so this is not implemented.
+     - https://dom.spec.whatwg.org/#dom-element-setattribute
+ - AttachShadowRoot - Custom element reactions are not yet implemented.
+     - https://dom.spec.whatwg.org/#dom-element-attachshadow
+ - Closest/Matches/WebkitMatchesSelector - Requires CSS selector parsing and matching.
+     - https://dom.spec.whatwg.org/#dom-element-matches
+     - https://dom.spec.whatwg.org/#dom-element-closest
+ - GetElementsByTagName/GetElementsByTagNameNS/GetElementsByClassName - implemented but inefficient, it iterates through the entire tree to find matching nodes every time.
+     - https://dom.spec.whatwg.org/#dom-element-getelementsbytagname
+     - https://dom.spec.whatwg.org/#dom-element-getelementsbytagnamens
+     - https://dom.spec.whatwg.org/#dom-element-getelementsbyclassname
+
 TODO:
 CSS-SELECTORS
   - Separate spec implementation required first, significant work to implement CSS selector parsing and matching.
-  - 1.3 Selectors - https://dom.spec.whatwg.org/#selectors
   - 4.9 Interface Element (Closest/Matches) - https://dom.spec.whatwg.org/#dom-element-closest
-  - 4.2.6 Mixin ParentNode (QuerySelector/QuerySelectorAll) - https://dom.spec.whatwg.org/#dom-parentnode-queryselector
-
-CUSTOM-ELEMENTS
-  - Separate spec implementation required first, significant work required.
-  - 4.2.3 Mutation algorithms (Insert/Remove) - https://dom.spec.whatwg.org/#mutation-algorithms
-    - Custom element reactions and upgrade steps are required.
-
-EVENT-LOOP
-  - 4.3.2 Queuing a mutation record - https://dom.spec.whatwg.org/#mutation-observers
-  - 3.1 Interface AbortController - https://dom.spec.whatwg.org/#interface-abortcontroller
-  - 4.2.2.5 Signaling slot change - https://dom.spec.whatwg.org/#signaling-slot-change
-  
-SLOTTABLES
-  - 4.2.2.1 Slots and 4.2.2.2 Slottables
-    - Slots/Slottable attribute changes (name/slot attribute) missing test cases.
-  - 4.2.2.3 Finding slots and slottables and 4.2.2.4 Assigning slottables and slots
-    - Missing test cases.
-
-MUTATION-OBSERVERS
-  - 4.3.1 Interface MutationObserver - https://dom.spec.whatwg.org/#interface-mutationobserver
-    - Missing test cases for observing attribute changes, character data changes, child list changes, subtree changes, disconnecting observers, and taking records.
-
-Section 4.8 Interface ShadowRoot - https://dom.spec.whatwg.org/#interface-shadowroot
-  - 'onslotchange' event handler and 'slotchange' event support.
-
-Section 4.9 Interface Element - https://dom.spec.whatwg.org/#interface-element
-  - AttachShadow and ShadowRoot missing test cases.
-
 
 4.6 Interface DocumentType
 

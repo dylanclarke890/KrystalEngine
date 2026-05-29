@@ -1,14 +1,15 @@
 ﻿#include "Krystal.HTML/DOM/NamedNodeMap.hpp"
 #include "Krystal.HTML/DOM/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
-#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
-#include "Krystal.HTML/DOM/ShadowRoot.hpp"
+#include "Krystal.HTML/DOM/Element.hpp"
+#include "Krystal.HTML/DOM/HTMLDocument.hpp"
+#include "Krystal.HTML/Infra/Namespaces.hpp"
+#include "Krystal.Text/ASCII.hpp"
+#include <ranges>
 
 namespace Krys::HTML
 {
-  size_t NamedNodeMap::Length() noexcept
+  size_t NamedNodeMap::Length() const noexcept
   {
     return _associatedElement->_attributes.size();
   }
@@ -23,15 +24,31 @@ namespace Krys::HTML
     return nullptr;
   }
 
+  KRYS_NODISCARD RefPtr<const Attr> NamedNodeMap::Item(size_t index) const noexcept
+  {
+    return const_cast<NamedNodeMap *>(this)->Item(index);
+  }
+
   RefPtr<Attr> NamedNodeMap::GetNamedItem(DOMStringAtom qualifiedName) noexcept
   {
     return ShareRefPtr(ElementAlgorithms::GetAttributeByName(qualifiedName, *_associatedElement));
+  }
+
+  KRYS_NODISCARD RefPtr<const Attr> NamedNodeMap::GetNamedItem(DOMStringAtom qualifiedName) const noexcept
+  {
+    return const_cast<NamedNodeMap *>(this)->GetNamedItem(qualifiedName);
   }
 
   RefPtr<Attr> NamedNodeMap::GetNamedItemNS(DOMStringAtom attrNamespace, DOMStringAtom localName) noexcept
   {
     return ShareRefPtr(
       ElementAlgorithms::GetAttributeByNamespace(attrNamespace, localName, *_associatedElement));
+  }
+
+  KRYS_NODISCARD RefPtr<const Attr> NamedNodeMap::GetNamedItemNS(DOMStringAtom attrNamespace,
+                                                                 DOMStringAtom localName) const noexcept
+  {
+    return const_cast<NamedNodeMap *>(this)->GetNamedItemNS(attrNamespace, localName);
   }
 
   ExceptionOr<RefPtr<Attr>> NamedNodeMap::SetNamedItem(Attr &attr) noexcept
@@ -72,8 +89,42 @@ namespace Krys::HTML
     return Item(index);
   }
 
+  KRYS_NODISCARD RefPtr<const Attr> NamedNodeMap::operator[](size_t index) const noexcept
+  {
+    return Item(index);
+  }
+
   RefPtr<Attr> NamedNodeMap::operator[](DOMStringAtom qualifiedName) noexcept
   {
     return GetNamedItem(qualifiedName);
+  }
+
+  RefPtr<const Attr> NamedNodeMap::operator[](DOMStringAtom qualifiedName) const noexcept
+  {
+    return GetNamedItem(qualifiedName);
+  }
+
+  List<DOMString> NamedNodeMap::SupportedPropertyNames() const noexcept
+  {
+    auto names = std::ranges::views::transform(_associatedElement->_attributes,
+                                               [](const Ref<Attr> &attr) { return attr->Name(); })
+                 | std::ranges::to<List<DOMString>>();
+
+    if (_associatedElement->_qualifiedName.NamespaceURI == Namespace::HTML
+        && Is<HTMLDocument>(_associatedElement->NodeDocument()))
+    {
+      List<DOMString> newNames;
+      for (auto &name : names)
+      {
+        if (name == Krys::Text::ToASCIILowercase(name))
+        {
+          newNames.push_back(name);
+        }
+      }
+
+      return newNames;
+    }
+
+    return names;
   }
 }

@@ -1,22 +1,24 @@
 ﻿#include "Krystal.HTML/DOM/Element.hpp"
-#include "Krystal.HTML/Infra/Namespaces.hpp"
-#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TextAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/HTMLCollection.hpp"
 #include "Krystal.HTML/DOM/HTMLDocument.hpp"
+#include "Krystal.HTML/DOM/Internals/RareData/ElementRareData.hpp"
 #include "Krystal.HTML/DOM/Mixins/ChildNode.hpp"
 #include "Krystal.HTML/DOM/Mixins/NonDocumentTypeChildNode.hpp"
 #include "Krystal.HTML/DOM/Mixins/ParentNode.hpp"
 #include "Krystal.HTML/DOM/Mixins/Slottable.hpp"
-#include "Krystal.HTML/DOM/NodeList.hpp"
-#include "Krystal.HTML/DOM/Internals/RareData/ElementRareData.hpp"
 #include "Krystal.HTML/DOM/NamedNodeMap.hpp"
+#include "Krystal.HTML/DOM/NodeList.hpp"
+#include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/DOM/Text.hpp"
+#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/Infra/Namespaces.hpp"
 #include <ranges>
 
 namespace Krys::HTML
@@ -94,7 +96,7 @@ namespace Krys::HTML
   {
     if (_namedNodeMap == nullptr)
     {
-      _namedNodeMap = CreateUnique<NamedNodeMap>(*this);
+      _namedNodeMap = UniquePtr<NamedNodeMap>(new NamedNodeMap(*this));
     }
 
     return *_namedNodeMap;
