@@ -1,41 +1,21 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/DOM/AbstractRange.hpp"
+#include "Krystal.HTML/DOM/Dicts/StaticRangeInit.hpp"
 #include "Krystal.Lib/Utils/StrongOrder.hpp"
 
 namespace Krys::HTML
 {
-  class StaticRangeInit
-  {
-    BoundaryPoint _start;
-    BoundaryPoint _end;
-
-    StaticRangeInit(BoundaryPoint start, BoundaryPoint end) noexcept
-        : _start {Krys::Move(start)}, _end {Krys::Move(end)}
-    {
-    }
-
-  public:
-    static ExceptionOr<StaticRangeInit> Create(BoundaryPoint start, BoundaryPoint end) noexcept;
-
-    KRYS_NODISCARD const BoundaryPoint &Start() const noexcept
-    {
-      return _start;
-    }
-
-    KRYS_NODISCARD const BoundaryPoint &End() const noexcept
-    {
-      return _end;
-    }
-  };
-
+  /// @see https://dom.spec.whatwg.org/#interface-staticrange
   class StaticRange : public AbstractRange
   {
   public:
+    /// @see https://dom.spec.whatwg.org/#staticrange-staticrange
     StaticRange(const StaticRangeInit &init) noexcept : AbstractRange(init.Start(), init.End())
     {
     }
 
+    /// @see https://dom.spec.whatwg.org/#staticrange-valid
     KRYS_NODISCARD bool IsValid() const noexcept;
   };
 }

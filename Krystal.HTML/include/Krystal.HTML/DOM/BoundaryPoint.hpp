@@ -8,6 +8,7 @@ namespace Krys::HTML
 {
   class Node;
 
+  /// @see https://dom.spec.whatwg.org/#boundary-points
   struct BoundaryPoint
   {
     Ref<Node> Container;

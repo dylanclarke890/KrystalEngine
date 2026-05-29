@@ -1,13 +1,11 @@
 ﻿#include "Krystal.HTML/DOM/Range.hpp"
+#include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/LiveRangeUpdater.hpp"
+#include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/SubtreeRanges.hpp"
-#include "Krystal.HTML/DOM/Algorithms/TreeTraversal.hpp"
-#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
-#include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
+#include "Krystal.HTML/DOM/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/CharacterData.hpp"
 #include "Krystal.HTML/DOM/Comment.hpp"
@@ -17,17 +15,21 @@
 #include "Krystal.HTML/DOM/ProcessingInstruction.hpp"
 #include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/DOM/Text.hpp"
+#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 
 namespace Krys::HTML
 {
-  Range::Range(BoundaryPoint start, BoundaryPoint end) noexcept : AbstractRange(start, end)
-  {
-    LiveRangeUpdater::Created(*this);
-  }
-
   Range::~Range() noexcept
   {
     LiveRangeUpdater::Destroyed(*this);
+  }
+
+#pragma region Range
+
+  Range::Range(BoundaryPoint start, BoundaryPoint end) noexcept : AbstractRange(start, end)
+  {
+    LiveRangeUpdater::Created(*this);
   }
 
   RawPtr<Node> Range::CommonAncestorContainer() const noexcept
@@ -55,7 +57,7 @@ namespace Krys::HTML
     RawPtr<Node> parent = node.ParentNode();
     if (parent == nullptr)
     {
-      return Exception(ExceptionCode::InvalidNodeTypeError);
+      return ExceptionCode::InvalidNodeTypeError;
     }
 
     if (auto result = SetStartBoundaryPoint(*parent, TreeQueries::Index(node)); result.HasException())
@@ -71,7 +73,7 @@ namespace Krys::HTML
     RawPtr<Node> parent = node.ParentNode();
     if (parent == nullptr)
     {
-      return Exception(ExceptionCode::InvalidNodeTypeError);
+      return ExceptionCode::InvalidNodeTypeError;
     }
 
     if (auto result = SetStartBoundaryPoint(*parent, TreeQueries::Index(node) + 1uz); result.HasException())
@@ -188,7 +190,7 @@ namespace Krys::HTML
 
   ExceptionOr<void> Range::DeleteContents() noexcept
   {
-    if (IsCollapsed())
+    if (Collapsed())
     {
       return {};
     }
@@ -290,7 +292,7 @@ namespace Krys::HTML
   {
     auto fragment = CreateRef<DocumentFragment>(_start.Container->NodeDocument());
 
-    if (IsCollapsed())
+    if (Collapsed())
     {
       return fragment;
     }
@@ -449,7 +451,7 @@ namespace Krys::HTML
   {
     auto fragment = CreateRef<DocumentFragment>(_start.Container->NodeDocument());
 
-    if (IsCollapsed())
+    if (Collapsed())
     {
       return fragment;
     }
@@ -643,7 +645,7 @@ namespace Krys::HTML
       return preInsert.ReleaseException();
     }
 
-    if (IsCollapsed())
+    if (Collapsed())
     {
       _end = BoundaryPoint {ShareRef(*parent), newOffset};
     }
@@ -838,6 +840,8 @@ namespace Krys::HTML
 
     return string;
   }
+
+#pragma endregion
 
   ExceptionOr<void> Range::SetStartBoundaryPoint(Node &node, uint64 offset) noexcept
   {

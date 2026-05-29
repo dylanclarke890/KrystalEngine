@@ -578,13 +578,13 @@ namespace Krys::Tests
     }
   }
 
-  TEST_CASE("Range::IsCollapsed", "[HMTL][Range]")
+  TEST_CASE("Range::Collapsed", "[HMTL][Range]")
   {
     CommonTestData data;
 
     SECTION("True if the start and end boundary points are the same")
     {
-      REQUIRE(data.Range->IsCollapsed());
+      REQUIRE(data.Range->Collapsed());
     }
 
     SECTION("False if the start and end boundary points are different")
@@ -597,7 +597,7 @@ namespace Krys::Tests
 
       REQUIRE_FALSE(data.Range->SetStart(*child1, 0uz).HasException());
       REQUIRE_FALSE(data.Range->SetEnd(*child2, 0uz).HasException());
-      REQUIRE_FALSE(data.Range->IsCollapsed());
+      REQUIRE_FALSE(data.Range->Collapsed());
 
       REQUIRE_FALSE(data.Node->RemoveChild(*child1).HasException());
       REQUIRE_FALSE(data.Node->RemoveChild(*child2).HasException());
@@ -620,7 +620,7 @@ namespace Krys::Tests
     SECTION("collapses to the start boundary point if the argument is true")
     {
       data.Range->Collapse(true);
-      REQUIRE(data.Range->IsCollapsed());
+      REQUIRE(data.Range->Collapsed());
       REQUIRE(data.Range->StartContainer() == child1);
       REQUIRE(data.Range->StartOffset() == 0uz);
       REQUIRE(data.Range->EndContainer() == child1);
@@ -630,7 +630,7 @@ namespace Krys::Tests
     SECTION("collapses to the end boundary point if the argument is false")
     {
       data.Range->Collapse(false);
-      REQUIRE(data.Range->IsCollapsed());
+      REQUIRE(data.Range->Collapsed());
       REQUIRE(data.Range->StartContainer() == child2);
       REQUIRE(data.Range->StartOffset() == 0uz);
       REQUIRE(data.Range->EndContainer() == child2);

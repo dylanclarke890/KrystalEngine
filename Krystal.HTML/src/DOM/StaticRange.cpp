@@ -10,16 +10,6 @@
 
 namespace Krys::HTML
 {
-  ExceptionOr<StaticRangeInit> StaticRangeInit::Create(BoundaryPoint start, BoundaryPoint end) noexcept
-  {
-    if (IsOneOf<DocumentType, Attr>(*start.Container) || IsOneOf<DocumentType, Attr>(*end.Container))
-    {
-      return Exception {ExceptionCode::InvalidNodeTypeError};
-    }
-
-    return StaticRangeInit {Krys::Move(start), Krys::Move(end)};
-  }
-
   bool StaticRange::IsValid() const noexcept
   {
     Node &startContainer = *this->StartContainer();
