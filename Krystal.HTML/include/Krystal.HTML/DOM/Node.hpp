@@ -5,7 +5,7 @@
 #include "Krystal.HTML/DOM/Enums/NodeFlags.hpp"
 #include "Krystal.HTML/DOM/Enums/NodeType.hpp"
 #include "Krystal.HTML/DOM/EventTarget.hpp"
-#include "Krystal.HTML/DOM/RareData/NodeRareData.hpp"
+#include "Krystal.HTML/DOM/Internals/RareData/NodeRareData.hpp"
 #include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.HTML/Types/DOMStringAtom.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"

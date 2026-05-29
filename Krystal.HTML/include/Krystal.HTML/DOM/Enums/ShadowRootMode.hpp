@@ -4,6 +4,7 @@
 
 namespace Krys::HTML
 {
+  /// @see https://dom.spec.whatwg.org/#enumdef-shadowrootmode
   enum class ShadowRootMode : uint8
   {
     Open,

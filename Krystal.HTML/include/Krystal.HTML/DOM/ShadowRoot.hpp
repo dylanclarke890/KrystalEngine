@@ -6,14 +6,13 @@
 
 namespace Krys::HTML
 {
-  class Element;
-  class CustomElementRegistry;
-
+  /// @see https://dom.spec.whatwg.org/#interface-shadowroot
   class ShadowRoot : public DocumentFragment
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(ShadowRoot);
 
     friend class DocumentAlgorithms;
+    friend class ElementAlgorithms;
     friend class NodeAlgorithms;
     friend class ShadowRootAlgorithms;
 
@@ -32,46 +31,51 @@ namespace Krys::HTML
     ShadowRoot(Document &document, RefPtr<CustomElementRegistry> &&registry = nullptr,
                NodeFlags flags = NodeFlags::None) noexcept;
 
-#pragma region ShadowRoot
+#pragma region ShadowRoot - https://dom.spec.whatwg.org/#shadowroot
 
+    /// @see https://dom.spec.whatwg.org/#dom-shadowroot-mode
     KRYS_NODISCARD ShadowRootMode Mode() const noexcept
     {
       return _mode;
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-shadowroot-delegatesfocus
     KRYS_NODISCARD bool DelegatesFocus() const noexcept
     {
       return _delegatesFocus;
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-shadowroot-slotassignment
     KRYS_NODISCARD SlotAssignmentMode SlotAssignment() const noexcept
     {
       return _slotAssignment;
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-shadowroot-clonable
     KRYS_NODISCARD bool Clonable() const noexcept
     {
       return _clonable;
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-shadowroot-serializable
     KRYS_NODISCARD bool Serializable() const noexcept
     {
       return _serializable;
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-shadowroot-host
     KRYS_NODISCARD RawPtr<Element> Host() const noexcept;
 
-    // TODO(impl): MINOR - The onslotchange attribute is an event handler IDL attribute for the onslotchange
-    // event handler, whose event handler event type is slotchange.
+    // TODO(impl): SHADOW-ROOT - The onslotchange attribute is an event handler IDL attribute for the
+    // onslotchange event handler, whose event handler event type is slotchange.
 
 #pragma endregion
 
 #pragma region DocumentOrShadowRoot Mixin - https://dom.spec.whatwg.org/#mixin-documentorshadowroot
 
-    RefPtr<CustomElementRegistry> CustomElementRegistry() const noexcept
-    {
-      return _customElementRegistry;
-    }
+    /// @brief Returns node's CustomElementRegistry object, if any; otherwise null.
+    /// @see https://dom.spec.whatwg.org/#dom-documentorshadowroot-customelementregistry
+    RefPtr<CustomElementRegistry> CustomElementRegistry() const noexcept;
 
 #pragma endregion
 

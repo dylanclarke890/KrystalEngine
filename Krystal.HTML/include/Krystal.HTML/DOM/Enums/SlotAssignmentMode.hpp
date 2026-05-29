@@ -4,6 +4,7 @@
 
 namespace Krys::HTML
 {
+  /// @see https://dom.spec.whatwg.org/#enumdef-slotassignmentmode
   enum class SlotAssignmentMode : uint8
   {
     Manual,

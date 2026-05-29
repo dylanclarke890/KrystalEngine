@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/QualifiedName.hpp"
+#include "Krystal.HTML/DOM/Internals/QualifiedName.hpp"
 #include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.HTML/Types/DOMStringAtom.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"

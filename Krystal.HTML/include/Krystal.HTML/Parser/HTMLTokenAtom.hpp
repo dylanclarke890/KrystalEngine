@@ -15,7 +15,7 @@ namespace Krys::HTML
 
   private:
     Type _type;
-    StringAtom _name;
+    StringAtom _name {StringAtom::Null()};
     bool _isSelfClosing : 1 {false};
 
   public:
@@ -30,7 +30,7 @@ namespace Krys::HTML
         case Type::StartTag:
         case Type::EndTag:
         {
-          _name = StringAtom(Text::ConvertToUTF8(utf32_stringview {data.begin(), data.end()}));
+          _name = StringAtom(Krys::Text::ConvertToUTF8(utf32_stringview {data.begin(), data.end()}));
           _isSelfClosing = token.IsSelfClosing();
           return;
         }

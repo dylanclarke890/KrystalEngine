@@ -8,12 +8,11 @@
 #include "Krystal.HTML/DOM/Enums/DocumentReadyState.hpp"
 #include "Krystal.HTML/DOM/Enums/DocumentVisibilityState.hpp"
 #include "Krystal.HTML/DOM/Enums/QuirksMode.hpp"
-#include "Krystal.HTML/DOM/RareData/DocumentRareData.hpp"
-#include "Krystal.HTML/Iterator/NodeIterator.hpp"
-#include "Krystal.HTML/Ranges/Range.hpp"
+#include "Krystal.HTML/DOM/Internals/RareData/DocumentRareData.hpp"
+#include "Krystal.HTML/DOM/NodeIterator.hpp"
+#include "Krystal.HTML/DOM/Range.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
 #include "Krystal.HTML/Types/NodeOrString.hpp"
-#include "Krystal.HTML/URL.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 
 namespace Krys::HTML

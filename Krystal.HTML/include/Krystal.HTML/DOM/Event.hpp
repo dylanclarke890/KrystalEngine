@@ -2,7 +2,7 @@
 
 #include "Krystal.HTML/DOM/Dicts/EventInit.hpp"
 #include "Krystal.HTML/DOM/Enums/EventPhaseType.hpp"
-#include "Krystal.HTML/DOM/Event/EventPathItem.hpp"
+#include "Krystal.HTML/DOM/Internals/Event/EventPathItem.hpp"
 #include "Krystal.HTML/Types/DOMHighResTimeStamp.hpp"
 #include "Krystal.HTML/Types/DOMStringAtom.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"

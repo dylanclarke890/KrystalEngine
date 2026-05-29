@@ -1,19 +1,14 @@
 ﻿#include "Krystal.HTML/DOM/DOMImplementation.hpp"
-#include "Krystal.HTML/Constants/Namespaces.hpp"
-#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/DOM/DocumentType.hpp"
 #include "Krystal.HTML/DOM/HTMLDocument.hpp"
-#include "Krystal.HTML/DOM/SVGDocument.hpp"
+#include "Krystal.HTML/DOM/Internals/ElementFactory.hpp"
+#include "Krystal.HTML/DOM/Text.hpp"
 #include "Krystal.HTML/DOM/XHTMLDocument.hpp"
 #include "Krystal.HTML/DOM/XMLDocument.hpp"
-#include "Krystal.HTML/Factories/ElementFactory.hpp"
-#include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
-#include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/DOM/ShadowRoot.hpp"
-#include "Krystal.HTML/Node/Text.hpp"
+#include "Krystal.HTML/Infra/Namespaces.hpp"
+#include "Krystal.HTML/SVG/SVGDocument.hpp"
 
 namespace Krys::HTML
 {

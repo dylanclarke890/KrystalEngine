@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Loader/ContentType.hpp"
-#include "Krystal.HTML/Loader/HTMLEncodingSniffer.hpp"
+#include "Krystal.HTML/Parser/Loader/ContentType.hpp"
+#include "Krystal.HTML/Parser/Loader/HTMLEncodingSniffer.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"

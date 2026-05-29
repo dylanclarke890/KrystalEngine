@@ -1,15 +1,8 @@
 ﻿#include "Krystal.HTML/DOM/Algorithms/MutationObserverAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
-#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
-#include "Krystal.HTML/DOM/Collections/StaticNodeList.hpp"
-#include "Krystal.HTML/DOM/MutationObserver/AttributesMutationRecord.hpp"
-#include "Krystal.HTML/DOM/MutationObserver/CharacterDataMutationRecord.hpp"
-#include "Krystal.HTML/DOM/MutationObserver/ChildListMutationRecord.hpp"
-#include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
-#include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/DOM/Node.hpp"
-#include "Krystal.HTML/DOM/ShadowRoot.hpp"
+#include "Krystal.HTML/DOM/Internals/MutationRecord/AttributesMutationRecord.hpp"
+#include "Krystal.HTML/DOM/Internals/MutationRecord/CharacterDataMutationRecord.hpp"
+#include "Krystal.HTML/DOM/Internals/MutationRecord/ChildListMutationRecord.hpp"
+#include "Krystal.HTML/DOM/Internals/NodeList/StaticNodeList.hpp"
 #include <cassert>
 
 namespace Krys::HTML

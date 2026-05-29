@@ -1,14 +1,14 @@
 ﻿#include "Krystal.HTML/DOM/Algorithms/TextAlgorithms.hpp"
-#include "Krystal.HTML/Algorithms/LiveRangeUpdater.hpp"
-#include "Krystal.HTML/Algorithms/SubtreeRanges.hpp"
-#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
-#include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
-#include "Krystal.HTML/Node/Attr.hpp"
-#include "Krystal.HTML/Node/CDATASection.hpp"
-#include "Krystal.HTML/Node/Element.hpp"
+#include "Krystal.HTML/DOM/Algorithms/LiveRangeUpdater.hpp"
+#include "Krystal.HTML/DOM/Algorithms/SubtreeRanges.hpp"
+#include "Krystal.HTML/DOM/Attr.hpp"
+#include "Krystal.HTML/DOM/CDATASection.hpp"
+#include "Krystal.HTML/DOM/Element.hpp"
 #include "Krystal.HTML/DOM/ShadowRoot.hpp"
-#include "Krystal.HTML/Node/Text.hpp"
+#include "Krystal.HTML/DOM/Text.hpp"
+#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 
 namespace Krys::HTML
 {

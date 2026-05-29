@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
-#include "Krystal.HTML/Constants/Namespaces.hpp"
+#include "Krystal.HTML/Infra/Namespaces.hpp"
 #include "Krystal.HTML/Infra/StringAlgorithms.hpp"
 #include "Krystal.Text/ASCII.hpp"
 #include "Krystal.Text/StringConversion.hpp"

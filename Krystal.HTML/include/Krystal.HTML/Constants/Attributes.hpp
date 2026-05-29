@@ -8,6 +8,4 @@ namespace Krys::HTML::Attribute
   inline DOMStringAtom Name = u8"name";
   inline DOMStringAtom Class = u8"class";
   inline DOMStringAtom Slot = u8"slot";
-  inline DOMStringAtom Disabled = u8"disabled";
-  inline DOMStringAtom Checked = u8"checked";
 }

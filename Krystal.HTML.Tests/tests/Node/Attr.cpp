@@ -1,13 +1,13 @@
-﻿#include "Krystal.HTML/Node/Attr.hpp"
+﻿#include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML.Tests/TestElement.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
-#include "Krystal.HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/HTMLElement/HTMLSlotElement.hpp"
-#include "Krystal.HTML/Node/Element.hpp"
+#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
+#include "Krystal.HTML/DOM/Element.hpp"
 #include "Krystal.HTML/DOM/HTMLDocument.hpp"
 #include "Krystal.HTML/DOM/Node.hpp"
 #include "Krystal.HTML/DOM/ShadowRoot.hpp"
-#include "Krystal.HTML/Node/Text.hpp"
+#include "Krystal.HTML/DOM/Text.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

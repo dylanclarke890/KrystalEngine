@@ -136,6 +136,8 @@
      - https://dom.spec.whatwg.org/#dom-documentfragment-documentfragment
 
 4.8. Interface ShadowRoot - https://dom.spec.whatwg.org/#interface-shadowroot
+ - attribute EventHandler onslotchange; - Haven't figured out how to support EventHandler attributes yet, as this is a JavaScript concept.
+     - https://dom.spec.whatwg.org/#dom-shadowroot-onslotchange
 
 TODO:
 CSS-SELECTORS

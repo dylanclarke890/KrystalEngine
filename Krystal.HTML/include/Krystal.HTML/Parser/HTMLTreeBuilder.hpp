@@ -3,7 +3,6 @@
 #include "Krystal.HTML/Parser/HTMLTokenAtom.hpp"
 #include "Krystal.HTML/Parser/HTMLConstructionSite.hpp"
 #include "Krystal.HTML/Parser/InsertionMode.hpp"
-#include "Krystal.HTML/StronglyTypedValues.hpp"
 #include "Krystal.Lib/Types/Stack.hpp"
 
 namespace Krys::HTML

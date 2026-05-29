@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Loader/TextResourceDecoder.hpp"
+﻿#include "Krystal.HTML/Parser/Loader/TextResourceDecoder.hpp"
 #include "Krystal.Text/Codecs/BasicCodec.hpp"
 #include "Krystal.Text/Codecs/CodecRegistry.hpp"
 #include "Krystal.Text/Encodings/ASCII.hpp"

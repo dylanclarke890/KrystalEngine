@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Loader/HTMLEncodingSniffer.hpp"
+﻿#include "Krystal.HTML/Parser/Loader/HTMLEncodingSniffer.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Text/Codecs/BasicCodec.hpp"
@@ -89,4 +89,3 @@ namespace Krys::Tests
     }
   }
 }
-

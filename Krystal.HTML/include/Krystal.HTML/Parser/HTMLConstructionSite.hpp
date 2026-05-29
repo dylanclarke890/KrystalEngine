@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Document.hpp"
+#include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/Parser/HTMLActiveFormattingElementList.hpp"
 #include "Krystal.HTML/Parser/HTMLElementStackItem.hpp"
 #include "Krystal.HTML/Parser/HTMLOpenElementStack.hpp"

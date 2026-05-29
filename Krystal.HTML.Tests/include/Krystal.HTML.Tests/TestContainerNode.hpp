@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Constants/Namespaces.hpp"
+#include "Krystal.HTML/Infra/Namespaces.hpp"
 #include "Krystal.HTML/DOM/ContainerNode.hpp"
-#include "Krystal.HTML/Node/Element.hpp"
+#include "Krystal.HTML/DOM/Element.hpp"
 #include "Krystal.HTML/DOM/ShadowRoot.hpp"
-#include "Krystal.HTML/QualifiedName.hpp"
+#include "Krystal.HTML/DOM/Internals/QualifiedName.hpp"
 
 namespace Krys::Tests
 {
