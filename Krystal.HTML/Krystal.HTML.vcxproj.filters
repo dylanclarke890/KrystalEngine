@@ -843,49 +843,49 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\EventInterfaces.in" />
-    <None Include="data\Node\Text.idl">
+    <None Include="data\DOM\Text.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Node\CDATASection.idl">
+    <None Include="data\DOM\CDATASection.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Node\CharacterData.idl">
+    <None Include="data\DOM\CharacterData.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Node\Comment.idl">
+    <None Include="data\DOM\Comment.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Node\Node.idl">
+    <None Include="data\DOM\Node.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Node\ProcessingInstruction.idl">
+    <None Include="data\DOM\ProcessingInstruction.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Event\EventTarget.idl">
+    <None Include="data\DOM\EventTarget.idl">
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\Event\AbortSignal.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Event\AddEventListenerOptions.idl">
+    <None Include="data\DOM\AddEventListenerOptions.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Event\CustomEvent.idl">
+    <None Include="data\DOM\CustomEvent.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Event\CustomEventInit.idl">
+    <None Include="data\DOM\CustomEventInit.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Event\Event.idl">
+    <None Include="data\DOM\Event.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Event\EventInit.idl">
+    <None Include="data\DOM\EventInit.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Event\EventListener.idl">
+    <None Include="data\DOM\EventListener.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Event\EventListenerOptions.idl">
+    <None Include="data\DOM\EventListenerOptions.idl">
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\Document\Document.idl">
@@ -900,7 +900,7 @@
     <None Include="data\Document\DocumentType.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Node\Element.idl">
+    <None Include="data\DOM\Element.idl">
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\Document\DOMImplementation.idl">
@@ -909,132 +909,117 @@
     <None Include="data\Document\ShadowRootInit.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Node\NamedNodeMap.idl">
+    <None Include="data\DOM\NamedNodeMap.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Ranges\AbstractRange.idl">
+    <None Include="data\DOM\AbstractRange.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Ranges\StaticRange.idl">
+    <None Include="data\DOM\StaticRange.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Ranges\Range.idl">
+    <None Include="data\DOM\Range.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\MutationObserver\MutationRecord.idl">
+    <None Include="data\DOM\MutationRecord.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\MutationObserver\MutationObserver.idl">
+    <None Include="data\DOM\MutationObserver.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\XSLT\XSLTProcessor.idl">
+    <None Include="data\DOM\TreeWalker.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\XPath\XPathResult.idl">
+    <None Include="data\DOM\NodeIterator.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\XPath\XPathExpression.idl">
+    <None Include="data\DOM\NodeFilter.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\XPath\XPathEvaluatorBase.idl">
+    <None Include="data\DOM\DOMTokenList.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\XPath\XPathEvaluator.idl">
+    <None Include="data\DOM\NodeList.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Iterator\TreeWalker.idl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="data\Iterator\NodeIterator.idl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="data\Iterator\NodeFilter.idl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="data\Node\DOMTokenList.idl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="data\Node\NodeList.idl">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="data\Node\HTMLCollection.idl">
+    <None Include="data\DOM\HTMLCollection.idl">
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\Document\CustomElementRegistry.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Node\Mixin\Slottable.idl">
+    <None Include="data\DOM\Mixins\Slottable.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Node\Mixin\ParentNode.idl">
+    <None Include="data\DOM\Mixins\ParentNode.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Node\Mixin\NonElementParentNode.idl">
+    <None Include="data\DOM\Mixins\NonElementParentNode.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Node\Mixin\NonDocumentTypeChildNode.idl">
+    <None Include="data\DOM\Mixins\NonDocumentTypeChildNode.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Node\Mixin\DocumentOrShadowRoot.idl">
+    <None Include="data\DOM\Mixins\DocumentOrShadowRoot.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Node\Mixin\ChildNode.idl">
+    <None Include="data\DOM\Mixins\ChildNode.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Abort\AbortSignal.idl">
+    <None Include="data\DOM\AbortSignal.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Abort\AbortController.idl">
+    <None Include="data\DOM\AbortController.idl">
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\_progress\DOM.txt" />
-    <None Include="data\HTMLElement\HTMLHeadElement.idl">
+    <None Include="data\HTML\HTMLHeadElement.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\HTMLElement\HTMLTitleElement.idl">
+    <None Include="data\HTML\HTMLTitleElement.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\HTMLElement\HTMLHtmlElement.idl">
+    <None Include="data\HTML\HTMLHtmlElement.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\HTMLElement\HTMLBaseElement.idl">
+    <None Include="data\HTML\HTMLBaseElement.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\HTMLElement\HTMLLinkElement.idl">
+    <None Include="data\HTML\HTMLLinkElement.idl">
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\_progress\HTML.txt" />
-    <None Include="data\HTMLElement\HTMLMetaElement.idl">
+    <None Include="data\HTML\HTMLMetaElement.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\HTMLElement\HTMLStyleElement.idl">
+    <None Include="data\HTML\HTMLStyleElement.idl">
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\CustomElement\CustomElementRegistry.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Node\Document.idl">
+    <None Include="data\DOM\Document.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Node\DocumentFragment.idl">
+    <None Include="data\DOM\DocumentFragment.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Node\DocumentType.idl">
+    <None Include="data\DOM\DocumentType.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Node\DOMImplementation.idl">
+    <None Include="data\DOM\DOMImplementation.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Node\ShadowRoot.idl">
+    <None Include="data\DOM\ShadowRoot.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\Node\ShadowRootInit.idl">
+    <None Include="data\DOM\ShadowRootInit.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\HTMLElement\HTMLElement.idl">
+    <None Include="data\HTML\HTMLElement.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\HTMLElement\ElementInternals.idl">
+    <None Include="data\HTML\ElementInternals.idl">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
