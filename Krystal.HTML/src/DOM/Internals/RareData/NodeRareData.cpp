@@ -1,6 +1,6 @@
 ﻿#include "Krystal.HTML/DOM/Internals/RareData/NodeRareData.hpp"
-#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
+#include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/ContainerNode.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/DOM/Element.hpp"
@@ -9,8 +9,8 @@
 #include "Krystal.HTML/DOM/MutationObserver.hpp"
 #include "Krystal.HTML/DOM/Node.hpp"
 #include "Krystal.HTML/DOM/ShadowRoot.hpp"
+#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
-#include "Krystal.HTML/DOM/Attr.hpp"
 
 namespace Krys::HTML
 {

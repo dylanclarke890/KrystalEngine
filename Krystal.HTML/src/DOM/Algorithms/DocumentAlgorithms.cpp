@@ -4,8 +4,13 @@
 #include "Krystal.HTML/DOM/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
+#include "Krystal.HTML/DOM/Algorithms/SubtreeRanges.hpp"
+#include "Krystal.HTML/DOM/Attr.hpp"
+#include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/DOM/Internals/ElementFactory.hpp"
+#include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/HTML/Algorithms/CustomElementAlgorithms.hpp"
+#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
 
 namespace Krys::HTML
 {

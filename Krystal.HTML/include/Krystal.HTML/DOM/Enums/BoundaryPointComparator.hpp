@@ -4,6 +4,7 @@
 
 namespace Krys::HTML
 {
+  /// @see https://dom.spec.whatwg.org/#dom-range-compareboundarypoints
   enum class BoundaryPointComparator
   {
     StartToStart,

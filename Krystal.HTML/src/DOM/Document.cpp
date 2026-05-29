@@ -3,7 +3,9 @@
 #include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NodeAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TextAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/CDATASection.hpp"
 #include "Krystal.HTML/DOM/Comment.hpp"
 #include "Krystal.HTML/DOM/DocumentFragment.hpp"
@@ -21,6 +23,7 @@
 #include "Krystal.HTML/DOM/Text.hpp"
 #include "Krystal.HTML/DOM/TreeWalker.hpp"
 #include "Krystal.HTML/HTML/Algorithms/CustomElementAlgorithms.hpp"
+#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTML/HTMLBodyElement.hpp"
 #include "Krystal.HTML/HTML/HTMLHeadElement.hpp"
 #include "Krystal.HTML/HTML/HTMLHtmlElement.hpp"
@@ -29,6 +32,7 @@
 #include "Krystal.HTML/Infra/Namespaces.hpp"
 #include "Krystal.Text/ASCII.hpp"
 #include <cassert>
+#include <ranges>
 
 namespace Krys::HTML
 {

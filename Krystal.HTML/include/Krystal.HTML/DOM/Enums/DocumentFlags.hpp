@@ -4,6 +4,7 @@
 
 namespace Krys::HTML
 {
+  /// @brief Various flags used for optimizations in the Document class.
   enum class DocumentFlags : uint16
   {
     None = 0,

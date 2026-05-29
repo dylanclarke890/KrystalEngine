@@ -1,13 +1,13 @@
 ﻿#include "Krystal.HTML/DOM/DOMTokenList.hpp"
-#include "Krystal.HTML/DOM/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
+#include "Krystal.HTML/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/OrderedSet.hpp"
-#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
-#include "Krystal.HTML/Infra/StringAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/Element.hpp"
 #include "Krystal.HTML/DOM/ShadowRoot.hpp"
+#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
+#include "Krystal.HTML/Infra/StringAlgorithms.hpp"
 #include "Krystal.Text/ASCII.hpp"
 
 namespace Krys::HTML

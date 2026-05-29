@@ -1,11 +1,14 @@
 ﻿#include "Krystal.HTML/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/ExtensibilityHooks.hpp"
-#include "Krystal.HTML/Infra/Namespaces.hpp"
 #include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/MutationObserverAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/DOM/Algorithms/ShadowRootAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Attr.hpp"
+#include "Krystal.HTML/DOM/Element.hpp"
 #include "Krystal.HTML/DOM/HTMLDocument.hpp"
+#include "Krystal.HTML/DOM/ShadowRoot.hpp"
+#include "Krystal.HTML/Infra/Namespaces.hpp"
 #include "Krystal.Text/ASCII.hpp"
 
 namespace Krys::HTML

@@ -1,4 +1,5 @@
 ﻿#pragma once
+
 #include "Krystal.HTML/DOM/NodeList.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"

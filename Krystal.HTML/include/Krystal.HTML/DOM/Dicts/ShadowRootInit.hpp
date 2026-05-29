@@ -22,6 +22,7 @@ namespace Krys::HTML
     using Base::Base;
   };
 
+  /// @see https://dom.spec.whatwg.org/#dictdef-shadowrootinit
   struct ShadowRootInit
   {
     ShadowRootMode Mode {ShadowRootMode::Open};

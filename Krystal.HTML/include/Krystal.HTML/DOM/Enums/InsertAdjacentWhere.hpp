@@ -4,6 +4,7 @@
 
 namespace Krys::HTML
 {
+  /// @see https://dom.spec.whatwg.org/#insert-adjacent
   enum class InsertAdjacentWhere : uint8
   {
     BeforeBegin,

@@ -12,7 +12,8 @@
 
 namespace Krys::HTML
 {
-  ExceptionOr<FilterResult> IteratorAlgorithms::FilterNode(TraversalBase &traverser, const Node &node) noexcept
+  ExceptionOr<FilterResult> IteratorAlgorithms::FilterNode(TraversalBase &traverser,
+                                                           const Node &node) noexcept
   {
     if (traverser.IsActive())
     {

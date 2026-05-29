@@ -1,12 +1,14 @@
 ﻿#include "Krystal.HTML/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.HTML/Constants/EventNames.hpp"
-#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/Algorithms/EventTargetAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/DOM/Event.hpp"
 #include "Krystal.HTML/DOM/Internals/Event/EventListener.hpp"
+#include "Krystal.HTML/DOM/Node.hpp"
+#include "Krystal.HTML/DOM/ShadowRoot.hpp"
+#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
 #include <ranges>
 
 namespace Krys::HTML

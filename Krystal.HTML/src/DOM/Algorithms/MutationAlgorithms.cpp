@@ -5,9 +5,13 @@
 #include "Krystal.HTML/DOM/Algorithms/MutationObserverAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/SlotAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/DOM/DocumentType.hpp"
+#include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/DOM/Text.hpp"
+#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 #include "Krystal.HTML/Types/SmallNodeList.hpp"
 
 namespace Krys::HTML

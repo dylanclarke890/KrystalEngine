@@ -1,5 +1,6 @@
 ﻿#include "Krystal.HTML/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
+#include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.HTML/HTML/CustomElement/CustomElementDefinition.hpp"
 #include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"

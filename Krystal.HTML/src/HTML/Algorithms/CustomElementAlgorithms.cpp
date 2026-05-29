@@ -1,4 +1,6 @@
 ﻿#include "Krystal.HTML/HTML/Algorithms/CustomElementAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Document.hpp"
+#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/Infra/Namespaces.hpp"
 
 namespace Krys::HTML

@@ -4,6 +4,7 @@
 
 namespace Krys::HTML
 {
+  /// @see https://dom.spec.whatwg.org/#concept-traversal-filter
   enum class FilterResult : uint8
   {
     FILTER_ACCEPT = 1,

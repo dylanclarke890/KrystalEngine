@@ -66,7 +66,7 @@ namespace Krys::HTML
 
       return _tokens[index];
     }
-    
+
     /// @see https://dom.spec.whatwg.org/#dom-domtokenlist-item
     KRYS_NODISCARD Maybe<DOMString> operator[](size_t index) const noexcept
     {

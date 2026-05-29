@@ -7,6 +7,7 @@ namespace Krys::HTML
 {
   class CustomElementRegistry;
 
+  /// @see https://dom.spec.whatwg.org/#dictdef-importnodeoptions
   struct ImportNodeOptions
   {
     RefPtr<CustomElementRegistry> CustomElementRegistry;

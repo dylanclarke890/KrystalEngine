@@ -3,7 +3,6 @@
 #include "Krystal.HTML/DOM/AbortController.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/EventDispatcher.hpp"
-#include <cassert>
 
 namespace Krys::HTML
 {
@@ -91,13 +90,11 @@ namespace Krys::HTML
     {
       if (!signal->_dependent)
       {
-        if (!std::ranges::any_of(resultSignal->_sourceSignals,
-                                 [&](auto &s) { return s.get() == signal; }))
+        if (!std::ranges::any_of(resultSignal->_sourceSignals, [&](auto &s) { return s.get() == signal; }))
         {
           resultSignal->_sourceSignals.push_back(CreateWeakRef(*signal));
         }
-        if (!std::ranges::any_of(signal->_dependentSignals,
-                                 [&](auto &s) { return s.get() == resultSignal; }))
+        if (!std::ranges::any_of(signal->_dependentSignals, [&](auto &s) { return s.get() == resultSignal; }))
         {
           signal->_dependentSignals.push_back(CreateWeakRef(*resultSignal));
         }

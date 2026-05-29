@@ -4,6 +4,7 @@
 
 namespace Krys::HTML
 {
+  /// @see https://dom.spec.whatwg.org/#concept-document-mode
   enum class QuirksMode : uint8
   {
     NoQuirks,

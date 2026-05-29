@@ -1,15 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/DOM/Algorithms/TreeTraversal.hpp"
-#include "Krystal.HTML/DOM/ContainerNode.hpp"
-#include "Krystal.HTML/DOM/Element.hpp"
-#include "Krystal.HTML/DOM/Node.hpp"
 #include "Krystal.HTML/HTML/HTMLElement.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
-#include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include <ranges>
 
 namespace Krys::HTML::detail

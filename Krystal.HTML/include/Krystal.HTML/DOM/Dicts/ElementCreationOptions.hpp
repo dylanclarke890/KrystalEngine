@@ -9,6 +9,7 @@ namespace Krys::HTML
 {
   class CustomElementRegistry;
 
+  /// @see https://dom.spec.whatwg.org/#dictdef-elementcreationoptions
   struct ElementCreationOptions
   {
     RefPtr<CustomElementRegistry> CustomElementRegistry;

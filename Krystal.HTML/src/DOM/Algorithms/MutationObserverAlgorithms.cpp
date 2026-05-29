@@ -1,8 +1,10 @@
 ﻿#include "Krystal.HTML/DOM/Algorithms/MutationObserverAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/DOM/Internals/MutationRecord/AttributesMutationRecord.hpp"
 #include "Krystal.HTML/DOM/Internals/MutationRecord/CharacterDataMutationRecord.hpp"
 #include "Krystal.HTML/DOM/Internals/MutationRecord/ChildListMutationRecord.hpp"
 #include "Krystal.HTML/DOM/Internals/NodeList/StaticNodeList.hpp"
+#include "Krystal.HTML/DOM/MutationObserver.hpp"
 #include <cassert>
 
 namespace Krys::HTML

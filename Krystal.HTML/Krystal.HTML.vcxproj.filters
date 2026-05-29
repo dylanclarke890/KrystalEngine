@@ -414,10 +414,10 @@
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLStyleElement.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\DOM\Enums\DocumentReadyState.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\DocumentReadyState.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\DOM\Enums\DocumentVisibilityState.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\DocumentVisibilityState.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLBodyElement.hpp">

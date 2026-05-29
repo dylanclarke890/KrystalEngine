@@ -1,7 +1,7 @@
 ﻿#include "Krystal.HTML/DOM/ContainerNode.hpp"
-#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
+#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
 
 namespace Krys::HTML
 {

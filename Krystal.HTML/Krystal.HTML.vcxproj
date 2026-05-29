@@ -123,8 +123,8 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\ElementCreationOptions.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\CustomElementState.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLTagName.hpp" />
-    <ClInclude Include="include\Krystal.HTML\DOM\Enums\DocumentReadyState.hpp" />
-    <ClInclude Include="include\Krystal.HTML\DOM\Enums\DocumentVisibilityState.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\DocumentReadyState.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\DocumentVisibilityState.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\QuirksMode.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\ImportNodeOptions.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Internals\RareData\DocumentFragmentRareData.hpp" />

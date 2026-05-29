@@ -1,7 +1,9 @@
 ﻿#include "Krystal.HTML/DOM/Algorithms/ShadowRootAlgorithms.hpp"
-#include "Krystal.HTML/Infra/Namespaces.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
+#include "Krystal.HTML/DOM/Element.hpp"
+#include "Krystal.HTML/DOM/ShadowRoot.hpp"
+#include "Krystal.HTML/Infra/Namespaces.hpp"
 
 namespace Krys::HTML
 {

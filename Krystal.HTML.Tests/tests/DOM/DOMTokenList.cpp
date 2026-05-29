@@ -1,11 +1,11 @@
 ﻿#include "Krystal.HTML/DOM/DOMTokenList.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
-#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/DOM/Element.hpp"
 #include "Krystal.HTML/DOM/ShadowRoot.hpp"
+#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
@@ -18,7 +18,7 @@ namespace Krys::Tests
     {
       Ref<Document> Document;
       Ref<Element> Element;
-      DOMTokenList& TokenList;
+      DOMTokenList &TokenList;
 
       CommonTestData()
           : Document(CreateRef<HTML::Document>()), Element(Document->CreateElement(u8"div").Value()),

@@ -4,6 +4,7 @@
 
 namespace Krys::HTML
 {
+  /// @see https://dom.spec.whatwg.org/#concept-traversal-whattoshow
   enum class WhatToShow : ulong
   {
     SHOW_ALL = 0xFF'FF'FF'FF,

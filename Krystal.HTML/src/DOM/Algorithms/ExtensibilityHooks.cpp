@@ -1,16 +1,10 @@
 ﻿#include "Krystal.HTML/DOM/Algorithms/ExtensibilityHooks.hpp"
-#include "Krystal.HTML/DOM/Algorithms/SlotAlgorithms.hpp"
-#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/OrderedSet.hpp"
+#include "Krystal.HTML/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
-#include "Krystal.HTML/DOM/ContainerNode.hpp"
-#include "Krystal.HTML/DOM/Document.hpp"
-#include "Krystal.HTML/DOM/Element.hpp"
-#include "Krystal.HTML/DOM/Node.hpp"
 #include "Krystal.HTML/DOM/ShadowRoot.hpp"
+#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 
 namespace Krys::HTML
 {

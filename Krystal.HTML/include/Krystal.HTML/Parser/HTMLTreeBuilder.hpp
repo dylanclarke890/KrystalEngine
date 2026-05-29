@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Parser/HTMLTokenAtom.hpp"
 #include "Krystal.HTML/Parser/HTMLConstructionSite.hpp"
+#include "Krystal.HTML/Parser/HTMLTokenAtom.hpp"
 #include "Krystal.HTML/Parser/InsertionMode.hpp"
 #include "Krystal.Lib/Types/Stack.hpp"
 

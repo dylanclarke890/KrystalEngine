@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/DOM/Node.hpp"
 #include "Krystal.HTML/DOM/Internals/QualifiedName.hpp"
+#include "Krystal.HTML/DOM/Node.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 
