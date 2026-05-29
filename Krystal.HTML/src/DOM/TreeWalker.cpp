@@ -4,7 +4,7 @@
 namespace Krys::HTML
 {
   TreeWalker::TreeWalker(Node &root, HTML::WhatToShow whatToShow, RefPtr<NodeFilter> &&filter) noexcept
-      : IteratorBase(root, whatToShow, Krys::Move(filter)), _currentNode(ShareRef(root))
+      : TraversalBase(root, whatToShow, Krys::Move(filter)), _currentNode(ShareRef(root))
   {
   }
 

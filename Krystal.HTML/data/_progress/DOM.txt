@@ -9,7 +9,8 @@
      - https://dom.spec.whatwg.org/#dom-window-event
 
 2.5. Constructing events - https://dom.spec.whatwg.org/#constructing-events
- - check this has been implemented fully
+ - EventFactory - not yet implemented, as it requires a lot of interfaces from other specs.
+     - https://dom.spec.whatwg.org/#concept-event-factory
 
 2.7. Interface EventTarget - https://dom.spec.whatwg.org/#eventtarget
  - AddEventListener - service workers currently not supported.
@@ -165,38 +166,11 @@
   - Set existing attribute value - We haven't implemented trusted types, so this is not implemented.
      - https://dom.spec.whatwg.org/#set-an-existing-attribute-value
 
-4.12 Interface CDATASection
+6.0 Traversal - https://dom.spec.whatwg.org/#traversal
+  - call a user's object's operation with a callback and a set of arguments - Not supported as this is a JavaScript concept.
+     - https://dom.spec.whatwg.org/#concept-node-filter
 
-4.13 Interface ProcessingInstruction
+6.3 Interface NodeFilter - https://dom.spec.whatwg.org/#interface-nodefilter
+  - Filter - Supported but a bit clunky to use.
+     - https://dom.spec.whatwg.org/#concept-node-filter
 
-4.14 Interface Comment
-
-======================================================================
-5. RANGES
-======================================================================
-
-5.2 Boundary points
-
-5.3 Interface AbstractRange
-
-5.4 Interface StaticRange
-
-5.5 Interface Range
-
-======================================================================
-6. TRAVERSAL
-======================================================================
-
-6.0 Traversal
-
-6.1 Interface NodeIterator
-
-6.2 Interface TreeWalker
-
-6.3 Interface NodeFilter
-
-======================================================================
-7. SETS
-======================================================================
-
-7.1 Interface DOMTokenList

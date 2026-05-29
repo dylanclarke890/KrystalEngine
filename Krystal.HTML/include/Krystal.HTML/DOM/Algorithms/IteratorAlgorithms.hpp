@@ -6,7 +6,7 @@
 
 namespace Krys::HTML
 {
-  class IteratorBase;
+  class TraversalBase;
   class Node;
   class NodeIterator;
   class TreeWalker;
@@ -27,7 +27,7 @@ namespace Krys::HTML
   {
   public:
     /// @see https://dom.spec.whatwg.org/#concept-node-filter
-    KRYS_NODISCARD static ExceptionOr<FilterResult> FilterNode(IteratorBase &traverser,
+    KRYS_NODISCARD static ExceptionOr<FilterResult> FilterNode(TraversalBase &traverser,
                                                                const Node &node) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#nodeiterator-pre-removing-steps

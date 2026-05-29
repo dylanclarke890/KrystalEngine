@@ -10,7 +10,8 @@ namespace Krys::HTML
 {
   class Node;
 
-  class IteratorBase
+  /// @see https://dom.spec.whatwg.org/#traversal
+  class TraversalBase
   {
     friend class IteratorAlgorithms;
 
@@ -20,27 +21,32 @@ namespace Krys::HTML
     WhatToShow _whatToShow {WhatToShow::SHOW_ALL};
     bool _isActive {false};
 
-    IteratorBase(Node &root, WhatToShow whatToShow, RefPtr<NodeFilter> &&filter) noexcept
+  protected:
+    TraversalBase(Node &root, WhatToShow whatToShow, RefPtr<NodeFilter> &&filter) noexcept
         : _root(ShareRef(root)), _filter(Krys::Move(filter)), _whatToShow(whatToShow)
     {
     }
 
   public:
+    /// @see https://dom.spec.whatwg.org/#concept-traversal-root
     KRYS_NODISCARD Node &Root() noexcept
     {
       return *_root;
     }
 
+    /// @see https://dom.spec.whatwg.org/#concept-traversal-root
     KRYS_NODISCARD const Node &Root() const noexcept
     {
       return *_root;
     }
 
+    /// @see https://dom.spec.whatwg.org/#concept-traversal-whattoshow
     KRYS_NODISCARD WhatToShow WhatToShow() const noexcept
     {
       return _whatToShow;
     }
 
+    /// @see https://dom.spec.whatwg.org/#concept-traversal-filter
     KRYS_NODISCARD RawPtr<NodeFilter> Filter() const noexcept
     {
       return _filter.get();

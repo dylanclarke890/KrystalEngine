@@ -270,7 +270,7 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\FilterResult.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\DOM\Internals\IteratorBase.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Internals\TraversalBase.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\DOMTokenList.hpp">
