@@ -161,18 +161,9 @@
      - https://dom.spec.whatwg.org/#dom-element-getelementsbytagnamens
      - https://dom.spec.whatwg.org/#dom-element-getelementsbyclassname
 
-TODO:
-CSS-SELECTORS
-  - Separate spec implementation required first, significant work to implement CSS selector parsing and matching.
-  - 4.9 Interface Element (Closest/Matches) - https://dom.spec.whatwg.org/#dom-element-closest
-
-4.6 Interface DocumentType
-
-4.7 Interface DocumentFragment
-
-4.9.1 Interface NamedNodeMap
-
 4.9.2 Interface Attr
+  - Set existing attribute value - We haven't implemented trusted types, so this is not implemented.
+     - https://dom.spec.whatwg.org/#set-an-existing-attribute-value
 
 4.10 Interface CharacterData
 
