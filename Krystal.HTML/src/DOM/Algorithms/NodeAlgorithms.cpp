@@ -1,14 +1,11 @@
 ﻿#include "Krystal.HTML/DOM/Algorithms/NodeAlgorithms.hpp"
-#include "Krystal.HTML/HTML/Algorithms/CustomElementAlgorithms.hpp"
-#include "Krystal.HTML/DOM/Algorithms/ExtensibilityHooks.hpp"
-#include "Krystal.HTML/DOM/Algorithms/SubtreeRanges.hpp"
-#include "Krystal.HTML/Infra/Namespaces.hpp"
-#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/ElementAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/OrderedSet.hpp"
 #include "Krystal.HTML/DOM/Algorithms/ShadowRootAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/Comment.hpp"
 #include "Krystal.HTML/DOM/DocumentType.hpp"
@@ -21,7 +18,10 @@
 #include "Krystal.HTML/DOM/Text.hpp"
 #include "Krystal.HTML/DOM/XHTMLDocument.hpp"
 #include "Krystal.HTML/DOM/XMLDocument.hpp"
+#include "Krystal.HTML/HTML/Algorithms/CustomElementAlgorithms.hpp"
+#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
+#include "Krystal.HTML/Infra/Namespaces.hpp"
 #include "Krystal.HTML/SVG/SVGDocument.hpp"
 #include <ranges>
 
@@ -207,8 +207,8 @@ namespace Krys::HTML
     else if (Is<ProcessingInstruction>(node))
     {
       auto &instruction = Downcast<const ProcessingInstruction>(node);
-      copy = CreateRef<ProcessingInstruction>(document, DOMString(instruction.Target()),
-                                              DOMString(instruction.Data()));
+      copy = AdoptRef<ProcessingInstruction>(
+        *new ProcessingInstruction(document, DOMString(instruction.Target()), DOMString(instruction.Data())));
     }
 
     assert(copy);

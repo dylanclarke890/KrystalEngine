@@ -211,7 +211,8 @@ namespace Krys::HTML
       return ExceptionCode::InvalidCharacterError;
     }
 
-    return CreateRef<ProcessingInstruction>(*this, Krys::Move(target), Krys::Move(data));
+    return AdoptRef<ProcessingInstruction>(
+      *new ProcessingInstruction(*this, Krys::Move(target), Krys::Move(data)));
   }
 
   ExceptionOr<Ref<Node>> Document::ImportNode(Node &node, const BoolOrImportNodeOptions &options) noexcept

@@ -317,7 +317,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool IsTextNode() const noexcept
     {
-      return _nodeType == NodeType::TEXT_NODE;
+      return _nodeType == NodeType::TEXT_NODE || _nodeType == NodeType::CDATA_SECTION_NODE;
     }
 
     KRYS_NODISCARD bool IsCDATASectionNode() const noexcept
@@ -422,7 +422,7 @@ namespace Krys::HTML
     }
 
 #pragma endregion
-};
+  };
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::Node)

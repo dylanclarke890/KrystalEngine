@@ -165,10 +165,6 @@
   - Set existing attribute value - We haven't implemented trusted types, so this is not implemented.
      - https://dom.spec.whatwg.org/#set-an-existing-attribute-value
 
-4.10 Interface CharacterData
-
-4.11 Interface Text
-
 4.12 Interface CDATASection
 
 4.13 Interface ProcessingInstruction

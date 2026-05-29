@@ -4,16 +4,17 @@
 #include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
 #include "Krystal.HTML/Types/NodeOrString.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/TypeCast.hpp"
 
 namespace Krys::HTML
 {
   class Document;
 
+  /// @see https://dom.spec.whatwg.org/#interface-characterdata
   class CharacterData : public Node
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CharacterData);
+
+    friend class TextAlgorithms;
 
   private:
     DOMString _data;
@@ -23,43 +24,61 @@ namespace Krys::HTML
                   NodeFlags flags = NodeFlags::None) noexcept;
 
   public:
-#pragma region CharacterData - https://dom.spec.whatwg.org/#interface-characterdata
+#pragma region CharacterData - https://dom.spec.whatwg.org/#characterdata
 
+    /// @see https://dom.spec.whatwg.org/#dom-characterdata-data
     KRYS_NODISCARD const DOMString &Data() const noexcept
     {
       return _data;
     }
+
+    /// @see https://dom.spec.whatwg.org/#dom-characterdata-data
     ExceptionOr<void> Data(DOMString &&data) noexcept;
-    size_t Length() const noexcept
+
+    /// @see https://dom.spec.whatwg.org/#dom-characterdata-length
+    KRYS_NODISCARD size_t Length() const noexcept
     {
       return _data.size();
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-characterdata-substringdata
     ExceptionOr<DOMString> SubstringData(size_t offset, size_t count) const noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-characterdata-appenddata
     ExceptionOr<void> AppendData(DOMString &&data) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-characterdata-insertdata
     ExceptionOr<void> InsertData(size_t offset, DOMString &&data) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-characterdata-deletedata
     ExceptionOr<void> DeleteData(size_t offset, size_t count) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#dom-characterdata-replacedata
     ExceptionOr<void> ReplaceData(size_t offset, size_t count, DOMString &&data) noexcept;
 
 #pragma endregion
 
 #pragma region Node
 
+    /// @see https://dom.spec.whatwg.org/#dom-node-nodevalue
     KRYS_NODISCARD Maybe<DOMString> NodeValue() const noexcept final
     {
       return _data;
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-node-nodevalue
     ExceptionOr<void> NodeValue(DOMString &&value) noexcept final
     {
       return Data(Krys::Move(value));
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
     KRYS_NODISCARD Maybe<DOMString> TextContent() const noexcept final
     {
       return _data;
     }
 
+    /// @see https://dom.spec.whatwg.org/#dom-node-textcontent
     ExceptionOr<void> TextContent(DOMString &&value) noexcept final
     {
       return Data(Krys::Move(value));

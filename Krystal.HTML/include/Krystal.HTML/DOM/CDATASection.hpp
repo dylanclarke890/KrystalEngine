@@ -6,15 +6,22 @@
 
 namespace Krys::HTML
 {
+  /// @see https://dom.spec.whatwg.org/#interface-cdatasection
   class CDATASection : public Text
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(CDATASection);
 
   public:
+#pragma region Text - https://dom.spec.whatwg.org/#text
+
+    /// @see https://dom.spec.whatwg.org/#dom-text-text
     CDATASection(Document &document, DOMString &&data = u8"") noexcept;
 
-#pragma region Node
+#pragma endregion
 
+#pragma region Node - https://dom.spec.whatwg.org/#node
+
+    /// @see https://dom.spec.whatwg.org/#dom-node-nodename
     KRYS_NODISCARD DOMString NodeName() const noexcept final
     {
       return u8"#cdata-section";

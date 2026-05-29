@@ -358,7 +358,7 @@ namespace Krys::Tests
 
     SECTION("ProcessingInstruction")
     {
-      auto processingInstruction = CreateRef<HTML::ProcessingInstruction>(*document, u8"target", u8"data");
+      auto processingInstruction = document->CreateProcessingInstruction(u8"target", u8"data");
 
       auto clone = processingInstruction->CloneNode();
       REQUIRE(clone.HasValue());

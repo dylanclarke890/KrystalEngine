@@ -12,6 +12,7 @@ namespace Krys::HTML
   class Document;
   class HTMLSlotElement;
 
+  /// @see https://dom.spec.whatwg.org/#interface-text
   class Text : public CharacterData
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Text);
@@ -26,11 +27,18 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#slotable-manual-slot-assignment
     WeakPtr<HTMLSlotElement> _manuallyAssignedSlot;
 
-  public:
-    Text(Document &document, DOMString &&data = u8"", HTML::NodeType type = NodeType::TEXT_NODE,
-         NodeFlags flags = NodeFlags::None) noexcept;
+  protected:
+    struct CDATAConstructorTag
+    {
+    };
 
-#pragma region Text
+    Text(Document &document, DOMString &&data, CDATAConstructorTag) noexcept;
+
+  public:
+#pragma region Text - https://dom.spec.whatwg.org/#text
+
+    /// @see https://dom.spec.whatwg.org/#dom-text-text
+    Text(Document &document, DOMString &&data = u8"") noexcept;
 
     /// @see https://dom.spec.whatwg.org/#dom-text-splittext
     KRYS_NODISCARD ExceptionOr<Ref<Text>> SplitText(size_t offset) noexcept;
@@ -40,8 +48,9 @@ namespace Krys::HTML
 
 #pragma endregion
 
-#pragma region Node
+#pragma region Node - https://dom.spec.whatwg.org/#node
 
+    /// @see https://dom.spec.whatwg.org/#dom-node-nodename
     KRYS_NODISCARD DOMString NodeName() const noexcept override
     {
       return u8"#text";
@@ -51,6 +60,7 @@ namespace Krys::HTML
 
 #pragma region Slottable Mixin - https://dom.spec.whatwg.org/#slotable
 
+    /// @see https://dom.spec.whatwg.org/#dom-slotable-assignedslot
     KRYS_NODISCARD RefPtr<HTMLSlotElement> AssignedSlot() noexcept;
 
 #pragma endregion

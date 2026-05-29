@@ -1,17 +1,62 @@
 ﻿#include "Krystal.HTML/DOM/Algorithms/TextAlgorithms.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
+#include "Krystal.HTML/DOM/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.HTML/DOM/Algorithms/LiveRangeUpdater.hpp"
+#include "Krystal.HTML/DOM/Algorithms/MutationObserverAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/SubtreeRanges.hpp"
-#include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/CDATASection.hpp"
-#include "Krystal.HTML/DOM/Element.hpp"
-#include "Krystal.HTML/DOM/ShadowRoot.hpp"
+#include "Krystal.HTML/DOM/Enums/MutationRecordType.hpp"
 #include "Krystal.HTML/DOM/Text.hpp"
-#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 
 namespace Krys::HTML
 {
+  ExceptionOr<void> TextAlgorithms::Replace(CharacterData &node, size_t offset, size_t count,
+                                            DOMString &&data) noexcept
+  {
+    auto length = node.Length();
+    if (offset > length)
+    {
+      return ExceptionCode::IndexSizeError;
+    }
+
+    if (offset + count > length)
+    {
+      count = length - offset;
+    }
+
+    MutationObserverAlgorithms::QueueMutationRecord(MutationRecordType::CharacterData, ShareRef(node),
+                                                    DOMStringAtom::Null(), DOMStringAtom::Null(), node._data,
+                                                    {}, {}, nullptr, nullptr);
+    node._data.insert(offset, data);
+    auto deleteOffset = offset + data.size();
+    node._data.erase(deleteOffset, count);
+
+    LiveRangeUpdater::CharacterDataReplaced(node, offset, count, data.size());
+
+    if (auto parent = node.ParentNode())
+    {
+      ExtensibilityHooks::NodeChildrenChanged(*parent);
+    }
+
+    return {};
+  }
+
+  ExceptionOr<DOMString> TextAlgorithms::Substring(const CharacterData &node, size_t offset,
+                                                   size_t count) noexcept
+  {
+    auto length = node.Length();
+    if (offset > length)
+    {
+      return ExceptionCode::IndexSizeError;
+    }
+
+    if (offset + count > length)
+    {
+      return node._data.substr(offset);
+    }
+
+    return node._data.substr(offset, count);
+  }
+
   bool TextAlgorithms::IsExclusiveTextNode(const Node &node) noexcept
   {
     return Is<Text>(node) && !Is<CDATASection>(node);
@@ -143,12 +188,12 @@ namespace Krys::HTML
     auto length = node.Length();
     if (offset > length)
     {
-      return Exception {ExceptionCode::IndexSizeError};
+      return ExceptionCode::IndexSizeError;
     }
 
     auto count = length - offset;
-    // TODO(impl): CHARACTER-DATA: use the character data algorithms instead of using the functions directly.
-    auto newData = node.SubstringData(offset, count);
+    auto newData = Substring(node, offset, count);
+
     if (newData.HasException())
     {
       return newData.ReleaseException();

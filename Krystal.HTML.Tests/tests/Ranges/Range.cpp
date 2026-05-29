@@ -1,15 +1,15 @@
 ﻿#include "Krystal.HTML/DOM/Range.hpp"
 #include "Krystal.HTML.Tests/TestContainerNode.hpp"
-#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
+#include "Krystal.HTML/DOM/Attr.hpp"
+#include "Krystal.HTML/DOM/Comment.hpp"
 #include "Krystal.HTML/DOM/DocumentType.hpp"
 #include "Krystal.HTML/DOM/HTMLDocument.hpp"
 #include "Krystal.HTML/DOM/NodeList.hpp"
-#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
-#include "Krystal.HTML/DOM/Attr.hpp"
-#include "Krystal.HTML/DOM/Comment.hpp"
 #include "Krystal.HTML/DOM/ProcessingInstruction.hpp"
 #include "Krystal.HTML/DOM/Text.hpp"
+#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
@@ -1106,7 +1106,7 @@ namespace Krys::Tests
 
     SECTION("HierarchyRequestError if start container is a ProcessingInstruction node")
     {
-      auto node = CreateRef<ProcessingInstruction>(*data.Document, u8"target", u8"data");
+      auto node = *data.Document->CreateProcessingInstruction(u8"target", u8"data");
       REQUIRE_FALSE(data.Range->SetStart(*node, 0uz).HasException());
       REQUIRE(data.Range->InsertNode(*node) == ExceptionCode::HierarchyRequestError);
     }

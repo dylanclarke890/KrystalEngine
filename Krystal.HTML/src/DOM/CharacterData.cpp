@@ -1,14 +1,10 @@
 ﻿#include "Krystal.HTML/DOM/CharacterData.hpp"
 #include "Krystal.HTML/DOM/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.HTML/DOM/Algorithms/LiveRangeUpdater.hpp"
-#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/MutationObserverAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Mixins/ChildNode.hpp"
 #include "Krystal.HTML/DOM/Mixins/NonDocumentTypeChildNode.hpp"
-#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
-#include "Krystal.HTML/DOM/Attr.hpp"
-#include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
 
 namespace Krys::HTML
@@ -23,70 +19,32 @@ namespace Krys::HTML
 
   ExceptionOr<void> CharacterData::Data(DOMString &&data) noexcept
   {
-    return ReplaceData(0, Length(), Krys::Move(data));
+    return TextAlgorithms::Replace(*this, 0uz, Length(), Krys::Move(data));
   }
 
-  /// @see https://dom.spec.whatwg.org/#concept-cd-substring
   ExceptionOr<DOMString> CharacterData::SubstringData(size_t offset, size_t count) const noexcept
   {
-    auto length = Length();
-    if (offset > length)
-    {
-      return Exception {ExceptionCode::IndexSizeError};
-    }
-
-    if (offset + count > length)
-    {
-      return _data.substr(offset);
-    }
-
-    return _data.substr(offset, count);
+    return TextAlgorithms::Substring(*this, offset, count);
   }
 
   ExceptionOr<void> CharacterData::AppendData(DOMString &&data) noexcept
   {
-    return ReplaceData(_data.size(), 0, Krys::Move(data));
+    return TextAlgorithms::Replace(*this, _data.size(), 0uz, Krys::Move(data));
   }
 
   ExceptionOr<void> CharacterData::InsertData(size_t offset, DOMString &&data) noexcept
   {
-    return ReplaceData(offset, 0, Krys::Move(data));
+    return TextAlgorithms::Replace(*this, offset, 0uz, Krys::Move(data));
   }
 
   ExceptionOr<void> CharacterData::DeleteData(size_t offset, size_t count) noexcept
   {
-    return ReplaceData(offset, count, u8"");
+    return TextAlgorithms::Replace(*this, offset, count, u8"");
   }
 
-  /// @see https://dom.spec.whatwg.org/#concept-cd-replace
   ExceptionOr<void> CharacterData::ReplaceData(size_t offset, size_t count, DOMString &&data) noexcept
   {
-    auto length = Length();
-    if (offset > length)
-    {
-      return Exception {ExceptionCode::IndexSizeError};
-    }
-
-    if (offset + count > length)
-    {
-      count = length - offset;
-    }
-
-    MutationObserverAlgorithms::QueueMutationRecord(MutationRecordType::CharacterData, ShareRef(*this),
-                                                    DOMStringAtom::Null(), DOMStringAtom::Null(), _data, {},
-                                                    {}, nullptr, nullptr);
-    _data.insert(offset, data);
-    auto deleteOffset = offset + data.size();
-    _data.erase(deleteOffset, count);
-
-    LiveRangeUpdater::CharacterDataReplaced(*this, offset, count, data.size());
-
-    if (auto parent = ParentNode())
-    {
-      ExtensibilityHooks::NodeChildrenChanged(*parent);
-    }
-
-    return {};
+    return TextAlgorithms::Replace(*this, offset, count, Krys::Move(data));
   }
 
 #pragma endregion

@@ -6,12 +6,18 @@
 
 namespace Krys::HTML
 {
+  /// @see https://dom.spec.whatwg.org/#interface-comment
   class Comment : public CharacterData
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(Comment);
 
   public:
+#pragma region Comment - https://dom.spec.whatwg.org/#comment
+
+    /// @see https://dom.spec.whatwg.org/#dom-comment-comment
     Comment(Document &document, DOMString &&data = u8"") noexcept;
+
+#pragma endregion
 
 #pragma region Node
 

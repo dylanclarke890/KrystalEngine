@@ -18,6 +18,7 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
+#include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
 #include "Krystal.Lib/Mixins/CanMakeCheckedPtr.hpp"
 #include "Krystal.Lib/Mixins/CanMakeWeakPtr.hpp"

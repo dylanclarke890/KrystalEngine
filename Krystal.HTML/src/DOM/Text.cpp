@@ -1,21 +1,20 @@
 ﻿#include "Krystal.HTML/DOM/Text.hpp"
-#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Mixins/Slottable.hpp"
-#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
-#include "Krystal.HTML/DOM/Attr.hpp"
-#include "Krystal.HTML/DOM/ShadowRoot.hpp"
-#include "Krystal.Lib/Core/Move.hpp"
 
 namespace Krys::HTML
 {
-  Text::Text(Document &document, DOMString &&data, HTML::NodeType type, NodeFlags flags) noexcept
-      : CharacterData(document, Krys::Move(data), type, flags)
+  Text::Text(Document &document, DOMString &&data, CDATAConstructorTag) noexcept
+      : CharacterData(document, Krys::Move(data), HTML::NodeType::CDATA_SECTION_NODE)
   {
   }
 
 #pragma region Text
+
+  Text::Text(Document &document, DOMString &&data) noexcept
+      : CharacterData(document, Krys::Move(data), HTML::NodeType::TEXT_NODE)
+  {
+  }
 
   ExceptionOr<Ref<Text>> Text::SplitText(size_t offset) noexcept
   {
