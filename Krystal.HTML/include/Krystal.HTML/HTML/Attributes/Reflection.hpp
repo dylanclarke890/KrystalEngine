@@ -25,6 +25,9 @@ namespace Krys::HTML::Attributes
     OneOf<T, DOMString, Maybe<DOMString>, USVString, bool, int32, uint32, double, DOMTokenList>;
 
   template <typename T>
+  concept ReflectTypeDOMString = OneOf<T, DOMString, Maybe<DOMString>>;
+
+  template <typename T>
   concept ReflectSetterType = ReflectType<T>;
 
   template <typename T>
@@ -74,11 +77,6 @@ namespace Krys::HTML::Attributes
   };
 
   struct OnlyPositiveNumbersWithFallback : public StronglyTypedBool<OnlyPositiveNumbersWithFallback>
-  {
-    using Base::Base;
-  };
-
-  struct OnlyKnownValues : public StronglyTypedBool<OnlyKnownValues>
   {
     using Base::Base;
   };
@@ -649,37 +647,41 @@ namespace Krys::HTML::Attributes
 
     /// @brief Helper for getting reflected content attributes with 'DOMString' type.
     template <ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<DOMString> ReflectDOMString(Target &target, DOMStringAtom name,
-                                                                  OnlyKnownValues onlyKnownValues) noexcept
+    KRYS_NODISCARD static ExceptionOr<DOMString> ReflectDOMString(Target &target, DOMStringAtom name) noexcept
     {
-      // TODO(CONTENT-ATTRIBUTE-REFLECTION)
-      return ExceptionCode::NotSupportedError;
+      auto contentAttributeValue = GetContentAttribute(target, name);
+      if (contentAttributeValue.has_value())
+      {
+        return *contentAttributeValue;
+      }
+
+      return {};
     }
 
     /// @brief Helper for setting reflected content attributes with 'DOMString' type.
     template <ReflectTarget Target>
     KRYS_NODISCARD static ExceptionOr<void> ReflectDOMString(const Target &target, DOMStringAtom name,
-                                                             DOMString &&value,
-                                                             OnlyKnownValues onlyKnownValues) noexcept
+                                                             DOMString &&value) noexcept
     {
       SetContentAttribute(target, name, Krys::Move(*value));
       return {};
     }
+#pragma endregion
+
+#pragma region ReflectNullableDOMString
 
     /// @brief Helper for getting reflected content attributes with 'DOMString?' type.
     template <ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<Maybe<DOMString>>
-      ReflectNullableDOMString(Target &target, DOMStringAtom name, OnlyKnownValues onlyKnownValues) noexcept
+    KRYS_NODISCARD static ExceptionOr<Maybe<DOMString>> ReflectNullableDOMString(Target &target,
+                                                                                 DOMStringAtom name) noexcept
     {
-      // TODO(CONTENT-ATTRIBUTE-REFLECTION)
-      return ExceptionCode::NotSupportedError;
+      return GetContentAttribute(target, name);
     }
 
     /// @brief Helper for setting reflected content attributes with 'DOMString?' type.
     template <ReflectTarget Target>
     KRYS_NODISCARD static ExceptionOr<void> ReflectNullableDOMString(const Target &target, DOMStringAtom name,
-                                                                     Maybe<DOMString> &&value,
-                                                                     OnlyKnownValues onlyKnownValues) noexcept
+                                                                     Maybe<DOMString> &&value) noexcept
     {
       if (!value.has_value())
       {
