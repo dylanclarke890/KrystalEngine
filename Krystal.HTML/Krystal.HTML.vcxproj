@@ -37,8 +37,13 @@
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\StaticRangeInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\BoundaryPointComparator.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\MicroParsers\MicroParserError.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\MicroParsers\MicroParserResult.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\MicroParsers\Numbers.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Internals\AttributeDefinition.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Types\USVString.hpp" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="include\Krystal.HTML\HTML\Algorithms\ContentAttributeReflection.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Attributes\Reflection.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Algorithms\RenderBlocking.hpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\Attributes.hpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\Keywords.hpp" />

@@ -181,6 +181,7 @@
     <ClInclude Include="include\Krystal.Lib\Ranges\Algorithm.hpp" />
     <ClInclude Include="include\Krystal.Lib\Ranges\TypeTraits.hpp" />
     <ClInclude Include="include\Krystal.Lib\Ranges\Reconstruct.hpp" />
+    <ClInclude Include="include\Krystal.Lib\String\FixedString.hpp" />
     <ClInclude Include="include\Krystal.Lib\String\StringAtom.hpp" />
     <ClInclude Include="include\Krystal.Lib\String\EmptyString.hpp" />
     <ClInclude Include="include\Krystal.Lib\Time\Duration.hpp" />

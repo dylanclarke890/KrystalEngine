@@ -166,6 +166,7 @@
     <ClCompile Include="tests\Pointers\RefPtr.cpp" />
     <ClCompile Include="tests\Pointers\WeakPtr.cpp" />
     <ClCompile Include="tests\Pointers\WeakRef.cpp" />
+    <ClCompile Include="tests\String\FixedString.cpp" />
     <ClCompile Include="tests\String\StringAtom.cpp" />
     <ClCompile Include="tests\Commands\Command.cpp" />
     <ClCompile Include="tests\Core\Bit.cpp" />
@@ -173,6 +174,9 @@
     <ClCompile Include="tests\Types\NullableFloat.cpp" />
     <ClCompile Include="tests\SmallValueBuffer.cpp" />
     <ClCompile Include="tests\String\StringUtils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
