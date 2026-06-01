@@ -73,8 +73,8 @@ namespace Krys::HTML
 
     /// @see https://infra.spec.whatwg.org/#collect-a-sequence-of-code-points
     template <typename TFunc>
-    KRYS_NODISCARD static DOMStringView CollectCodePointSequence(DOMStringView input, position_variable &position,
-                                                             TFunc &&condition) noexcept
+    KRYS_NODISCARD static DOMStringView
+      CollectCodePointSequence(DOMStringView input, position_variable &position, TFunc &&condition) noexcept
     {
       position_variable start = position;
       AdvancePositionWhile(input, position, condition);
@@ -84,7 +84,7 @@ namespace Krys::HTML
     /// @brief Advances 'position' until 'condition' returns false for the current code point.
     template <typename TFunc>
     static void AdvancePositionWhile(DOMStringView input, position_variable &position,
-                                                    TFunc &&condition) noexcept
+                                     TFunc &&condition) noexcept
     {
       // TODO(fix): STRINGS - we're not iterating over code points properly here. we need a way of just
       // iterating over code points in a UTF-8 string instead of having to
@@ -185,6 +185,25 @@ namespace Krys::HTML
       result += tokens.back();
 
       return result;
+    }
+
+    /// @see https://infra.spec.whatwg.org/#ascii-case-insensitive
+    KRYS_NODISCARD static bool ASCIICaseInsensitiveMatch(DOMStringView a, DOMStringView b) noexcept
+    {
+      if (a.length() != b.length())
+      {
+        return false;
+      }
+
+      for (size_t i = 0; i < a.length(); i++)
+      {
+        if (Krys::Text::ToASCIILowerUnchecked(a[i]) != Krys::Text::ToASCIILowerUnchecked(b[i]))
+        {
+          return false;
+        }
+      }
+      
+      return true;
     }
   };
 }

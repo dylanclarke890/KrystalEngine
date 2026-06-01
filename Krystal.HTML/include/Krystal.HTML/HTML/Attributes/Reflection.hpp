@@ -88,7 +88,9 @@ namespace Krys::HTML::Attributes
   concept ReflectAlwaysReturnsExceptionOrT = OneOf<T, USVString, DOMTokenList>;
 
   template <typename T>
-  using reflect_get_return_t = conditional_t<ReflectAlwaysReturnsExceptionOrT<T>, ExceptionOr<T>, T>;
+  using reflect_get_return_t =
+    conditional_t<SameType<T, DOMString>, Maybe<DOMString>,
+                  conditional_t<ReflectAlwaysReturnsExceptionOrT<T>, ExceptionOr<T>, T>>;
 
   template <typename T, OnlyNonNegativeNumbers OnlyNonNegative, OnlyPositiveNumbers OnlyPositive>
   using reflect_set_return_t =
@@ -147,13 +149,9 @@ namespace Krys::HTML::Attributes
     KRYS_NODISCARD static reflect_get_return_t<TValue> Reflect(const Target &target,
                                                                DOMStringAtom name) noexcept
     {
-      if constexpr (SameType<TValue, DOMString>)
+      if constexpr (OneOf<TValue, DOMString, Maybe<DOMString>>)
       {
         return ReflectDOMString(target, name);
-      }
-      else if constexpr (SameType<TValue, Maybe<DOMString>>)
-      {
-        return ReflectNullableDOMString(target, name);
       }
       else if constexpr (SameType<TValue, USVString>)
       {
@@ -193,13 +191,9 @@ namespace Krys::HTML::Attributes
                                                OnlyPositiveNumbers(false)>
       Reflect(Target &target, DOMStringAtom name, TValue &&value) noexcept
     {
-      if constexpr (SameType<TValue, DOMString>)
+      if constexpr (OneOf<TValue, DOMString, Maybe<DOMString>>)
       {
         ReflectDOMString(target, name, Krys::Move(value));
-      }
-      else if constexpr (SameType<TValue, Maybe<DOMString>>)
-      {
-        ReflectNullableDOMString(target, name, Krys::Move(value));
       }
       else if constexpr (SameType<TValue, USVString>)
       {
@@ -241,7 +235,8 @@ namespace Krys::HTML::Attributes
     {
       if constexpr (SameType<TValue, int32>)
       {
-        return ReflectLong<OnlyNonNegativeNumbers(false), MaybeReflectDefault<int32>(DefaultValue)>(target, name);
+        return ReflectLong<OnlyNonNegativeNumbers(false), MaybeReflectDefault<int32>(DefaultValue)>(target,
+                                                                                                    name);
       }
       else if constexpr (SameType<TValue, uint32>)
       {
@@ -250,7 +245,8 @@ namespace Krys::HTML::Attributes
       }
       else if constexpr (SameType<TValue, double>)
       {
-        return ReflectDouble<OnlyPositiveNumbers(false), MaybeReflectDefault<double>(DefaultValue)>(target, name);
+        return ReflectDouble<OnlyPositiveNumbers(false), MaybeReflectDefault<double>(DefaultValue)>(target,
+                                                                                                    name);
       }
       else
       {
@@ -308,7 +304,8 @@ namespace Krys::HTML::Attributes
       if constexpr (SameType<TValue, uint32>)
       {
         return ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(false),
-                                   MaybeReflectDefault<uint32>(DefaultValue), MaybeReflectRange<uint32>(Range)>(target, name);
+                                   MaybeReflectDefault<uint32>(DefaultValue),
+                                   MaybeReflectRange<uint32>(Range)>(target, name);
       }
       else
       {
@@ -400,7 +397,8 @@ namespace Krys::HTML::Attributes
     {
       if constexpr (SameType<TValue, int32>)
       {
-        return ReflectLong<OnlyNonNegativeNumbers(true), MaybeReflectDefault<int32>(DefaultValue)>(target, name);
+        return ReflectLong<OnlyNonNegativeNumbers(true), MaybeReflectDefault<int32>(DefaultValue)>(target,
+                                                                                                   name);
       }
       else
       {
@@ -444,8 +442,7 @@ namespace Krys::HTML::Attributes
       if constexpr (SameType<TValue, uint32>)
       {
         return ReflectUnsignedLong<OnlyPositiveNumbers(true), OnlyPositiveNumbersWithFallback(false),
-                                   NoDefaultValue<uint32>>(
-          target, name, value);
+                                   NoDefaultValue<uint32>>(target, name, value);
       }
       else if constexpr (SameType<TValue, double>)
       {
@@ -472,7 +469,8 @@ namespace Krys::HTML::Attributes
       }
       else if constexpr (SameType<TValue, double>)
       {
-        return ReflectDouble<OnlyPositiveNumbers(true), MaybeReflectDefault<double>(DefaultValue)>(target, name);
+        return ReflectDouble<OnlyPositiveNumbers(true), MaybeReflectDefault<double>(DefaultValue)>(target,
+                                                                                                   name);
       }
       else
       {
@@ -535,8 +533,7 @@ namespace Krys::HTML::Attributes
       if constexpr (SameType<TValue, uint32>)
       {
         return ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(true),
-                                   NoDefaultValue<uint32>>(
-          target, name, value);
+                                   NoDefaultValue<uint32>>(target, name, value);
       }
       else if constexpr (SameType<TValue, double>)
       {
@@ -564,7 +561,8 @@ namespace Krys::HTML::Attributes
       }
       else if constexpr (SameType<TValue, double>)
       {
-        return ReflectDouble<OnlyPositiveNumbers(true), MaybeReflectDefault<double>(DefaultValue)>(target, name);
+        return ReflectDouble<OnlyPositiveNumbers(true), MaybeReflectDefault<double>(DefaultValue)>(target,
+                                                                                                   name);
       }
       else
       {
@@ -594,7 +592,8 @@ namespace Krys::HTML::Attributes
         // for 'OnlyPositiveWithFallback' for 'double' reflected attributes. Here we assume it has the same
         // behavior as 'OnlyPositive' for 'double'.
 
-        return ReflectDouble<OnlyPositiveNumbers(true), MaybeReflectDefault<double>(DefaultValue)>(target, name, value);
+        return ReflectDouble<OnlyPositiveNumbers(true), MaybeReflectDefault<double>(DefaultValue)>(
+          target, name, value);
       }
       else
       {
@@ -675,42 +674,17 @@ namespace Krys::HTML::Attributes
 
 #pragma region ReflectDOMString
 
-    /// @brief Helper for getting reflected content attributes with 'DOMString' type.
+    /// @brief Helper for getting reflected content attributes for 'DOMString/DOMString?' types. The handling
+    /// for returning an empty string for null attributes is handled by the caller.
     template <ReflectTarget Target>
-    KRYS_NODISCARD static DOMString ReflectDOMString(const Target &target, DOMStringAtom name) noexcept
-    {
-      auto contentAttributeValue = GetContentAttribute(target, name);
-      if (contentAttributeValue.has_value())
-      {
-        return *contentAttributeValue;
-      }
-
-      return {};
-    }
-
-    /// @brief Helper for setting reflected content attributes with 'DOMString' type.
-    template <ReflectTarget Target>
-    static void ReflectDOMString(Target &target, DOMStringAtom name, DOMString &&value) noexcept
-    {
-      SetContentAttribute(target, name, Krys::Move(value));
-    }
-
-#pragma endregion
-
-#pragma region ReflectNullableDOMString
-
-    /// @brief Helper for getting reflected content attributes with 'DOMString?' type.
-    template <ReflectTarget Target>
-    KRYS_NODISCARD static Maybe<DOMString> ReflectNullableDOMString(const Target &target,
-                                                                    DOMStringAtom name) noexcept
+    KRYS_NODISCARD static Maybe<DOMString> ReflectDOMString(const Target &target, DOMStringAtom name) noexcept
     {
       return GetContentAttribute(target, name);
     }
 
     /// @brief Helper for setting reflected content attributes with 'DOMString?' type.
     template <ReflectTarget Target>
-    static void ReflectNullableDOMString(Target &target, DOMStringAtom name,
-                                         Maybe<DOMString> &&value) noexcept
+    static void ReflectDOMString(Target &target, DOMStringAtom name, Maybe<DOMString> &&value) noexcept
     {
       if (!value.has_value())
       {
@@ -720,6 +694,13 @@ namespace Krys::HTML::Attributes
       {
         SetContentAttribute(target, name, Krys::Move(*value));
       }
+    }
+
+    /// @brief Helper for setting reflected content attributes with 'DOMString' type.
+    template <ReflectTarget Target>
+    static void ReflectDOMString(Target &target, DOMStringAtom name, DOMString &&value) noexcept
+    {
+      SetContentAttribute(target, name, Krys::Move(value));
     }
 
 #pragma endregion

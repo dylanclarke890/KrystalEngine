@@ -20,8 +20,9 @@ namespace Krys::HTML
   bool RenderBlocking::IsRenderBlocked(const Document &document) noexcept
   {
     return !document._renderBlockingElements.empty() || AllowsAddingRenderBlockingElements(document);
-    // TODO(impl): And if the current high resolution time given document's relevant global object has not
-    // exceeded an implementation-defined timeout value.
+    // TODO(DOCUMENT, RENDER-BLOCKING): And if the current high resolution time given document's relevant
+    // global object has not exceeded an implementation-defined timeout value. -
+    // https://html.spec.whatwg.org/#render-blocked
   }
 
   bool RenderBlocking::IsRenderBlocking(const Element &element, const Document &document) noexcept

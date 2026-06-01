@@ -24,6 +24,8 @@
 #include "Krystal.HTML/DOM/TreeWalker.hpp"
 #include "Krystal.HTML/HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.HTML/HTML/Algorithms/DOMTreeAccessors.hpp"
+#include "Krystal.HTML/HTML/Attributes/EnumeratedAttributes.hpp"
+#include "Krystal.HTML/HTML/Attributes/Reflection.hpp"
 #include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTML/HTMLBodyElement.hpp"
 #include "Krystal.HTML/HTML/HTMLHeadElement.hpp"
@@ -420,6 +422,31 @@ namespace Krys::HTML
     }
 
     return {};
+  }
+
+  DOMString Document::Dir() const noexcept
+  {
+    auto html = DOMTreeAccessors::HTMLHtmlElement(*this);
+    if (html == nullptr)
+    {
+      return {};
+    }
+
+    using namespace Attributes;
+
+    auto value = Reflection::Reflect<DOMString>(*html, u8"dir");
+    return EnumeratedAttribute<"dir", HTMLElement>::ResolveCanonicalKeyword<DOMString>(Krys::Move(value));
+  }
+
+  void Document::Dir(DOMString &&value) noexcept
+  {
+    auto html = DOMTreeAccessors::HTMLHtmlElement(*this);
+    if (html == nullptr)
+    {
+      return;
+    }
+
+    Attributes::Reflection::Reflect<DOMString>(*html, u8"dir", Krys::Move(value));
   }
 
   RefPtr<HTMLBodyElement> Document::Body() noexcept

@@ -570,6 +570,9 @@
     <ClInclude Include="include\Krystal.HTML\SVG\Enums\SVGTagName.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTML\Attributes\EnumeratedAttributes.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -1050,6 +1053,9 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\HTML\ElementInternals.idl">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="data\HTML\Document.idl">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
