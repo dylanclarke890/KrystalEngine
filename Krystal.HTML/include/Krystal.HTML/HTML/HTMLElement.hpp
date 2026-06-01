@@ -30,6 +30,7 @@ namespace Krys::HTML
     // bool TogglePopover(const TogglePopoverOptionsOrBool &options = {}) noexcept;
     // attribute DOMString? popover;
 
+  protected:
 #pragma region Type Checks
 
     KRYS_NODISCARD bool IsHTMLBaseElement() const noexcept
