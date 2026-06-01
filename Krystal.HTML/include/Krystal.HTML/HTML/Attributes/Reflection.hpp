@@ -104,6 +104,10 @@ namespace Krys::HTML::Attributes
 
     MaybeReflectParameter() noexcept = default;
 
+    constexpr MaybeReflectParameter(T parameter) noexcept : Parameter(parameter), HasParameter(true)
+    {
+    }
+
     KRYS_NODISCARD constexpr operator bool() const noexcept
     {
       return HasParameter;
@@ -237,16 +241,16 @@ namespace Krys::HTML::Attributes
     {
       if constexpr (SameType<TValue, int32>)
       {
-        ReflectLong<OnlyNonNegativeNumbers(false), DefaultValue>(target, name);
+        return ReflectLong<OnlyNonNegativeNumbers(false), MaybeReflectDefault<int32>(DefaultValue)>(target, name);
       }
       else if constexpr (SameType<TValue, uint32>)
       {
         return ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(false),
-                                   DefaultValue, NoRange<uint32>>(target, name);
+                                   MaybeReflectDefault<uint32>(DefaultValue), NoRange<uint32>>(target, name);
       }
       else if constexpr (SameType<TValue, double>)
       {
-        return ReflectDouble<OnlyPositiveNumbers(false), DefaultValue>(target, name);
+        return ReflectDouble<OnlyPositiveNumbers(false), MaybeReflectDefault<double>(DefaultValue)>(target, name);
       }
       else
       {
@@ -265,7 +269,7 @@ namespace Krys::HTML::Attributes
       if constexpr (SameType<TValue, uint32>)
       {
         return ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(false),
-                                   DefaultValue, NoRange<uint32>>(target, name, value);
+                                   MaybeReflectDefault<uint32>(DefaultValue)>(target, name, value);
       }
       else
       {
@@ -283,7 +287,7 @@ namespace Krys::HTML::Attributes
       if constexpr (SameType<TValue, uint32>)
       {
         return ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(false),
-                                   NoDefaultValue<uint32>, Range>(target, name);
+                                   NoDefaultValue<uint32>, MaybeReflectRange<uint32>(Range)>(target, name);
       }
       else
       {
@@ -304,7 +308,7 @@ namespace Krys::HTML::Attributes
       if constexpr (SameType<TValue, uint32>)
       {
         return ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(false),
-                                   DefaultValue, Range>(target, name);
+                                   MaybeReflectDefault<uint32>(DefaultValue), MaybeReflectRange<uint32>(Range)>(target, name);
       }
       else
       {
@@ -362,7 +366,7 @@ namespace Krys::HTML::Attributes
     {
       if constexpr (SameType<TValue, int32>)
       {
-        return ReflectLong<OnlyNonNegativeNumbers(true)>(target, name);
+        return ReflectLong<OnlyNonNegativeNumbers(true), NoDefaultValue<int32>>(target, name);
       }
       else
       {
@@ -396,7 +400,7 @@ namespace Krys::HTML::Attributes
     {
       if constexpr (SameType<TValue, int32>)
       {
-        return ReflectLong<OnlyNonNegativeNumbers(true), DefaultValue>(target, name);
+        return ReflectLong<OnlyNonNegativeNumbers(true), MaybeReflectDefault<int32>(DefaultValue)>(target, name);
       }
       else
       {
@@ -422,7 +426,7 @@ namespace Krys::HTML::Attributes
       }
       else if constexpr (SameType<TValue, double>)
       {
-        return ReflectDouble<OnlyPositiveNumbers(true)>(target, name);
+        return ReflectDouble<OnlyPositiveNumbers(true), NoDefaultValue<double>>(target, name);
       }
       else
       {
@@ -439,7 +443,8 @@ namespace Krys::HTML::Attributes
     {
       if constexpr (SameType<TValue, uint32>)
       {
-        return ReflectUnsignedLong<OnlyPositiveNumbers(true), OnlyPositiveNumbersWithFallback(false)>(
+        return ReflectUnsignedLong<OnlyPositiveNumbers(true), OnlyPositiveNumbersWithFallback(false),
+                                   NoDefaultValue<uint32>>(
           target, name, value);
       }
       else if constexpr (SameType<TValue, double>)
@@ -463,11 +468,11 @@ namespace Krys::HTML::Attributes
       if constexpr (SameType<TValue, uint32>)
       {
         return ReflectUnsignedLong<OnlyPositiveNumbers(true), OnlyPositiveNumbersWithFallback(false),
-                                   DefaultValue, NoRange<uint32>>(target, name);
+                                   MaybeReflectDefault<uint32>(DefaultValue), NoRange<uint32>>(target, name);
       }
       else if constexpr (SameType<TValue, double>)
       {
-        return ReflectDouble<OnlyPositiveNumbers(true), DefaultValue>(target, name);
+        return ReflectDouble<OnlyPositiveNumbers(true), MaybeReflectDefault<double>(DefaultValue)>(target, name);
       }
       else
       {
@@ -487,7 +492,7 @@ namespace Krys::HTML::Attributes
       if constexpr (SameType<TValue, uint32>)
       {
         return ReflectUnsignedLong<OnlyPositiveNumbers(true), OnlyPositiveNumbersWithFallback(false),
-                                   DefaultValue>(target, name, value);
+                                   MaybeReflectDefault<uint32>(DefaultValue)>(target, name, value);
       }
       else
       {
@@ -512,7 +517,7 @@ namespace Krys::HTML::Attributes
       }
       else if constexpr (SameType<TValue, double>)
       {
-        return ReflectDouble<OnlyPositiveNumbers(true)>(target, name);
+        return ReflectDouble<OnlyPositiveNumbers(true), NoDefaultValue<double>>(target, name);
       }
       else
       {
@@ -529,7 +534,8 @@ namespace Krys::HTML::Attributes
     {
       if constexpr (SameType<TValue, uint32>)
       {
-        return ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(true)>(
+        return ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(true),
+                                   NoDefaultValue<uint32>>(
           target, name, value);
       }
       else if constexpr (SameType<TValue, double>)
@@ -554,11 +560,11 @@ namespace Krys::HTML::Attributes
       if constexpr (SameType<TValue, uint32>)
       {
         return ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(true),
-                                   DefaultValue, NoRange<uint32>>(target, name);
+                                   MaybeReflectDefault<uint32>(DefaultValue), NoRange<uint32>>(target, name);
       }
       else if constexpr (SameType<TValue, double>)
       {
-        return ReflectDouble<OnlyPositiveNumbers(true), DefaultValue>(target, name);
+        return ReflectDouble<OnlyPositiveNumbers(true), MaybeReflectDefault<double>(DefaultValue)>(target, name);
       }
       else
       {
@@ -580,7 +586,7 @@ namespace Krys::HTML::Attributes
       if constexpr (SameType<TValue, uint32>)
       {
         return ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(true),
-                                   DefaultValue>(target, name, value);
+                                   MaybeReflectDefault<uint32>(DefaultValue)>(target, name, value);
       }
       else if constexpr (SameType<TValue, double>)
       {
@@ -588,7 +594,7 @@ namespace Krys::HTML::Attributes
         // for 'OnlyPositiveWithFallback' for 'double' reflected attributes. Here we assume it has the same
         // behavior as 'OnlyPositive' for 'double'.
 
-        return ReflectDouble<OnlyPositiveNumbers(true), DefaultValue>(target, name, value);
+        return ReflectDouble<OnlyPositiveNumbers(true), MaybeReflectDefault<double>(DefaultValue)>(target, name, value);
       }
       else
       {
