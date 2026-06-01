@@ -23,13 +23,17 @@
 #include "Krystal.HTML/DOM/Text.hpp"
 #include "Krystal.HTML/DOM/TreeWalker.hpp"
 #include "Krystal.HTML/HTML/Algorithms/CustomElementAlgorithms.hpp"
+#include "Krystal.HTML/HTML/Algorithms/DOMTreeAccessors.hpp"
 #include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTML/HTMLBodyElement.hpp"
 #include "Krystal.HTML/HTML/HTMLHeadElement.hpp"
 #include "Krystal.HTML/HTML/HTMLHtmlElement.hpp"
+#include "Krystal.HTML/HTML/HTMLScriptElement.hpp"
 #include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTitleElement.hpp"
 #include "Krystal.HTML/Infra/Namespaces.hpp"
+#include "Krystal.HTML/SVG/SVGElement.hpp"
+#include "Krystal.HTML/SVG/SVGScriptElement.hpp"
 #include "Krystal.Text/ASCII.hpp"
 #include <cassert>
 #include <ranges>
@@ -41,7 +45,7 @@ namespace Krys::HTML
     SetDocumentFlag(flags);
   }
 
-#pragma region Document
+#pragma region Document (DOM)
 
   Document::Document() noexcept
       : ContainerNode(*this, NodeType::DOCUMENT_NODE, NodeFlags::IsContainerNode), _flags(DocumentFlags::None)
@@ -61,7 +65,7 @@ namespace Krys::HTML
 
   DOMString Document::URL() const noexcept
   {
-    // TODO(impl): URL - return the url, serialized.
+    // TODO(DOCUMENT, URL): return the url, serialized.
     return {};
   }
 
@@ -77,7 +81,7 @@ namespace Krys::HTML
 
   DOMString Document::CharacterSet() const noexcept
   {
-    // TODO(impl): MINOR - pass encoding to document
+    // TODO(DOCUMENT, ENCODING): pass encoding to document on creation
     return u8"UTF-8";
   }
 
@@ -316,8 +320,8 @@ namespace Krys::HTML
 
   Ref<Event> Document::CreateEvent(DOMStringAtom interface) noexcept
   {
-    // TODO(impl): EVENTS - create correct event based on 'interface'
-    // TODO(impl): EVENTS - set initialized to true and isTrusted to false.
+    // TODO(DOCUMENT, EVENTS): create correct event based on 'interface'
+    // TODO(DOCUMENT, EVENTS): set initialized to true and isTrusted to false.
     return CreateRef<Event>(interface);
   }
 
@@ -336,6 +340,180 @@ namespace Krys::HTML
                                              RefPtr<NodeFilter> &&filter) noexcept
   {
     return AdoptRef(*new TreeWalker(root, whatToShow, Krys::Move(filter)));
+  }
+
+#pragma endregion
+
+#pragma region Document (HTML)
+
+  ExceptionOr<Ref<Document>> Document::ParseHTMLUnsafe(DOMStringView html) noexcept
+  {
+    // TODO(DOCUMENT, HTML): implement this method.
+    return ExceptionCode::NotSupportedError;
+  }
+
+  ExceptionOr<Ref<Document>> Document::ParseHTML(DOMStringView &html) noexcept
+  {
+    // TODO(DOCUMENT, HTML): implement this method.
+    return ExceptionCode::NotSupportedError;
+  }
+
+  DOMString Document::Title() const noexcept
+  {
+    auto documentElement = DocumentElement();
+    if (Is<SVGElement>(*documentElement))
+    {
+      // TODO(DOCUMENT, SVG): If the document element is an SVG svg element, then let value be the child text
+      // content of the first SVG title element that is a child of the document element.
+      // return StringAlgorithms::StripAndCollapseASCIIWhitespace(TextAlgorithms::ChildTextContent(*title));
+    }
+    else
+    {
+      auto title = DOMTreeAccessors::HTMLTitleElement(*this);
+      if (title == nullptr)
+      {
+        return {};
+      }
+
+      return StringAlgorithms::StripAndCollapseASCIIWhitespace(TextAlgorithms::ChildTextContent(*title));
+    }
+
+    return {};
+  }
+
+  ExceptionOr<void> Document::Title(DOMString &&value) noexcept
+  {
+    auto documentElement = DocumentElement();
+    if (Is<SVGElement>(*documentElement))
+    {
+      // TODO(DOCUMENT, SVG) - If the document element is an SVG svg element
+      // If there is an SVG title element that is a child of the document element, let element be the first
+      // such element. Otherwise:
+      //   Let element be the result of creating an element given the document element's node document,
+      //   "title", and the SVG namespace. Insert element as the first child of the document element.
+      // String replace all with the given value within element.
+    }
+    else if (documentElement->NamespaceURI() == Namespace::HTML)
+    {
+      auto head = Head();
+      auto title = DOMTreeAccessors::HTMLTitleElement(*this);
+
+      if (head == nullptr && title == nullptr)
+      {
+        return {};
+      }
+
+      if (title == nullptr)
+      {
+        title = ElementFactory::Create(*this, {Namespace::HTML, DOMStringAtom::Null(), u8"title"});
+
+        if (auto append = MutationAlgorithms::Append(*documentElement, *title); append.HasException())
+        {
+          return append.ReleaseException();
+        }
+      }
+
+      if (auto replace = NodeAlgorithms::StringReplaceAll(Krys::Move(value), *title); replace.HasException())
+      {
+        return replace.ReleaseException();
+      }
+    }
+
+    return {};
+  }
+
+  RefPtr<HTMLBodyElement> Document::Body() noexcept
+  {
+    return DOMTreeAccessors::HTMLBodyElement(*this);
+  }
+
+  RefPtr<const HTMLBodyElement> Document::Body() const noexcept
+  {
+    return DOMTreeAccessors::HTMLBodyElement(*this);
+  }
+
+  ExceptionOr<void> Document::Body(HTMLBodyElement &body) noexcept
+  {
+    auto currentBody = Body();
+    if (currentBody == &body)
+    {
+      return {};
+    }
+
+    if (currentBody != nullptr)
+    {
+      if (auto replace = MutationAlgorithms::Replace(*currentBody, body, *body.ParentNode());
+          replace.HasException())
+      {
+        return replace.ReleaseException();
+      }
+    }
+    else
+    {
+      auto documentElement = DocumentElement();
+      if (documentElement == nullptr)
+      {
+        return ExceptionCode::HierarchyRequestError;
+      }
+
+      if (auto append = MutationAlgorithms::Append(body, *documentElement); append.HasException())
+      {
+        return append.ReleaseException();
+      }
+    }
+
+    return {};
+  }
+
+  RefPtr<HTMLHeadElement> Document::Head() noexcept
+  {
+    return DOMTreeAccessors::HTMLHeadElement(*this);
+  }
+
+  RefPtr<const HTMLHeadElement> Document::Head() const noexcept
+  {
+    return DOMTreeAccessors::HTMLHeadElement(*this);
+  }
+
+  // TODO(DOCUMENT, HTML): Document::Images
+  // Ref<HTMLCollection> Document::Images() noexcept
+  // {
+  // }
+
+  // TODO(DOCUMENT, HTML): Document::Embeds
+  // Ref<HTMLCollection> Document::Embeds() noexcept
+  // {
+  // }
+
+  // TODO(DOCUMENT, HTML): Document::Plugins
+  // Ref<HTMLCollection> Document::Plugins() noexcept
+  // {
+  // }
+
+  // TODO(DOCUMENT, HTML): Document::Links
+  // Ref<HTMLCollection> Document::Links() noexcept
+  // {
+  // }
+
+  // TODO(DOCUMENT, HTML): Document::Forms
+  // Ref<HTMLCollection> Document::Forms() noexcept
+  // {
+  // }
+
+  // TODO(DOCUMENT, HTML): Document::Scripts
+  // Ref<HTMLCollection> Document::Scripts() noexcept
+  // {
+  // }
+
+  // TODO(DOCUMENT, HTML): GetElementsByName
+  // Ref<NodeList> Document::GetElementsByName(DOMStringView elementName) noexcept
+  //{
+  //}
+
+  HTMLOrSVGScriptElement Document::CurrentScript() noexcept
+  {
+    // TODO(DOCUMENT, HTML): Current running script (will we even support this?)
+    return {};
   }
 
 #pragma endregion
@@ -418,7 +596,7 @@ namespace Krys::HTML
 
 #pragma endregion
 
-#pragma region DocumentOrShadowRoot Mixin - https://dom.spec.whatwg.org/#mixin-documentorshadowroot
+#pragma region DocumentOrShadowRoot Mixin (DOM)
 
   RefPtr<CustomElementRegistry> Document::CustomElementRegistry() const noexcept
   {
@@ -427,197 +605,14 @@ namespace Krys::HTML
 
 #pragma endregion
 
-#pragma region HTML spec extensions
+#pragma region DocumentOrShadowRoot Mixin (HTML)
 
-  DOMString Document::Title() const noexcept
+  RefPtr<Element> Document::ActiveElement() const noexcept
   {
-    // TODO(impl): SVG - If the document element is an SVG svg element, then let value be the child text
-    // content of the first SVG title element that is a child of the document element.
-
-    auto title = GetHTMLTitleElement();
-    if (title == nullptr)
-    {
-      return {};
-    }
-
-    auto value = TextAlgorithms::ChildTextContent(*title);
-
-    // TODO(impl): STRINGS - Strip and collapse ASCII whitespace in value.
-
-    return value;
-  }
-
-  ExceptionOr<void> Document::Title(DOMString &&value) noexcept
-  {
-    // TODO(impl: SVG - If the document element is an SVG svg element
-    // If there is an SVG title element that is a child of the document element, let element be the first such
-    // element. Otherwise:
-    //   Let element be the result of creating an element given the document element's node document,
-    //   "title", and the SVG namespace. Insert element as the first child of the document element.
-    // String replace all with the given value within element.
-
-    auto documentElement = DocumentElement();
-    if (documentElement->NamespaceURI() == Namespace::HTML)
-    {
-      auto head = Head();
-      auto title = GetHTMLTitleElement();
-
-      if (head == nullptr && title == nullptr)
-      {
-        return {};
-      }
-
-      if (title == nullptr)
-      {
-        title = ElementFactory::Create(*this, {Namespace::HTML, DOMStringAtom::Null(), u8"title"});
-
-        if (auto append = MutationAlgorithms::Append(*documentElement, *title); append.HasException())
-        {
-          return append.ReleaseException();
-        }
-      }
-
-      if (auto replace = NodeAlgorithms::StringReplaceAll(Krys::Move(value), *title); replace.HasException())
-      {
-        return replace.ReleaseException();
-      }
-    }
-
-    return {};
-  }
-
-  RefPtr<HTMLBodyElement> Document::Body() noexcept
-  {
-    auto html = GetHTMLHtmlElement();
-    if (html == nullptr)
-    {
-      return nullptr;
-    }
-
-    auto children = ChildHTMLElementRange(*html);
-    auto body = FirstOfType<HTMLBodyElement>(children);
-    return body == std::ranges::end(children) ? nullptr : ShareRefPtr(Downcast<HTMLBodyElement>(&*body));
-  }
-
-  RefPtr<const HTMLBodyElement> Document::Body() const noexcept
-  {
-    auto html = GetHTMLHtmlElement();
-    if (html == nullptr)
-    {
-      return nullptr;
-    }
-
-    auto children = ConstChildHTMLElementRange(*html);
-    auto body = FirstOfType<HTMLBodyElement>(children);
-    return body == std::ranges::end(children) ? nullptr : ShareRefPtr(Downcast<HTMLBodyElement>(&*body));
-  }
-
-  ExceptionOr<void> Document::Body(HTMLBodyElement &body) noexcept
-  {
-    auto currentBody = Body();
-    if (currentBody == &body)
-    {
-      return {};
-    }
-
-    if (currentBody != nullptr)
-    {
-      if (auto replace = MutationAlgorithms::Replace(*currentBody, body, *body.ParentNode());
-          replace.HasException())
-      {
-        return replace.ReleaseException();
-      }
-    }
-    else
-    {
-      auto documentElement = DocumentElement();
-      if (documentElement == nullptr)
-      {
-        return ExceptionCode::HierarchyRequestError;
-      }
-
-      if (auto append = MutationAlgorithms::Append(body, *documentElement); append.HasException())
-      {
-        return append.ReleaseException();
-      }
-    }
-
-    return {};
-  }
-
-  RefPtr<HTMLHeadElement> Document::Head() noexcept
-  {
-    auto html = GetHTMLHtmlElement();
-    if (html == nullptr)
-    {
-      return nullptr;
-    }
-
-    auto children = ChildHTMLElementRange(*html);
-    auto body = FirstOfType<HTMLHeadElement>(children);
-    return body == std::ranges::end(children) ? nullptr : ShareRefPtr(Downcast<HTMLHeadElement>(&*body));
-  }
-
-  RefPtr<const HTMLHeadElement> Document::Head() const noexcept
-  {
-    auto html = GetHTMLHtmlElement();
-    if (html == nullptr)
-    {
-      return nullptr;
-    }
-
-    auto children = ConstChildHTMLElementRange(*html);
-    auto body = FirstOfType<HTMLHeadElement>(children);
-    return body == std::ranges::end(children) ? nullptr : ShareRefPtr(Downcast<HTMLHeadElement>(&*body));
-  }
-
-  RefPtr<HTMLHtmlElement> Document::GetHTMLHtmlElement() noexcept
-  {
-    auto documentElement = DocumentElement();
-
-    if (!Is<HTMLElement>(documentElement))
-    {
-      return nullptr;
-    }
-
-    auto *htmlElement = Downcast<HTMLElement>(documentElement.get());
-    if (!Is<HTMLHtmlElement>(htmlElement))
-    {
-      return nullptr;
-    }
-
-    auto *html = Downcast<HTMLHtmlElement>(htmlElement);
-    return ShareRefPtr(html);
-  }
-
-  RefPtr<const HTMLHtmlElement> Document::GetHTMLHtmlElement() const noexcept
-  {
-    return const_cast<Document *>(this)->GetHTMLHtmlElement();
-  }
-
-  RefPtr<HTMLTitleElement> Document::GetHTMLTitleElement() noexcept
-  {
-    auto *documentElement = DocumentElement().release();
-
-    if (!Is<HTMLElement>(documentElement))
-    {
-      return nullptr;
-    }
-
-    auto *htmlElement = Downcast<HTMLElement>(documentElement);
-    if (!Is<HTMLTitleElement>(htmlElement))
-    {
-      return nullptr;
-    }
-
-    auto *title = Downcast<HTMLTitleElement>(htmlElement);
-    return AdoptRefPtr(title);
-  }
-
-  RefPtr<const HTMLTitleElement> Document::GetHTMLTitleElement() const noexcept
-  {
-    return const_cast<Document *>(this)->GetHTMLTitleElement();
+    // TODO(DOCUMENTORSHADOWROOT, HTML): return the active element.
+    return RefPtr<Element>();
   }
 
 #pragma endregion
+
 }

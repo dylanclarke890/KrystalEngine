@@ -4,6 +4,7 @@
 
 namespace Krys::HTML
 {
+  /// @see https://html.spec.whatwg.org/#documentreadystate
   enum class DocumentReadyState : uint8
   {
     Loading,

@@ -31,6 +31,46 @@ namespace Krys::HTML
       return DOMStringView(start, end);
     }
 
+    /// @see https://infra.spec.whatwg.org/#strip-and-collapse-ascii-whitespace
+    KRYS_NODISCARD static DOMString StripAndCollapseASCIIWhitespace(DOMStringView input) noexcept
+    {
+      size_t writeIndex = 0;
+      bool inWhitespace = false;
+
+      DOMString result = DOMString(input);
+
+      size_t startIndex = 0;
+      while (startIndex < result.length() && Krys::Text::IsASCIIWhitespace(result[startIndex]))
+      {
+        startIndex++;
+      }
+
+      for (size_t i = startIndex; i < result.length(); ++i)
+      {
+        if (Krys::Text::IsASCIIWhitespace(result[i]))
+        {
+          if (!inWhitespace)
+          {
+            result[writeIndex++] = ' ';
+            inWhitespace = true;
+          }
+        }
+        else
+        {
+          result[writeIndex++] = result[i];
+          inWhitespace = false;
+        }
+      }
+
+      if (writeIndex > 0 && Krys::Text::IsASCIIWhitespace(result[writeIndex - 1]))
+      {
+        writeIndex--;
+      }
+
+      result.resize(writeIndex);
+      return result;
+    }
+
     /// @see https://infra.spec.whatwg.org/#collect-a-sequence-of-code-points
     template <typename TFunc>
     KRYS_NODISCARD static DOMStringView CollectCodePointSequence(DOMStringView input, position_variable &position,

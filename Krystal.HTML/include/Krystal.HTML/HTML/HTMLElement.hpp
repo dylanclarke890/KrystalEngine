@@ -75,6 +75,11 @@ namespace Krys::HTML
       return _tagName == HTMLTagName::Style;
     }
 
+    KRYS_NODISCARD bool IsHTMLScriptElement() const noexcept
+    {
+      return _tagName == HTMLTagName::Script;
+    }
+
     KRYS_NODISCARD bool IsHTMLTitleElement() const noexcept
     {
       return _tagName == HTMLTagName::Title;
@@ -87,7 +92,7 @@ namespace Krys::HTML
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::HTMLElement)
-  static bool IsType(const Krys::HTML::Node &target) noexcept
+  KRYS_NODISCARD static bool IsType(const Krys::HTML::Node &target) noexcept
   {
     return target.IsHTMLElement();
   }

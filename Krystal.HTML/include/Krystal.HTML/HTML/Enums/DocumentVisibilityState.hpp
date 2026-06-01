@@ -4,6 +4,7 @@
 
 namespace Krys::HTML
 {
+  /// @see https://html.spec.whatwg.org/#documentvisibilitystate
   enum class DocumentVisibilityState : uint8
   {
     Visible,

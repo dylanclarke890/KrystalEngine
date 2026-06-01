@@ -11,6 +11,7 @@
 #include "Krystal.HTML/DOM/Range.hpp"
 #include "Krystal.HTML/HTML/Enums/DocumentReadyState.hpp"
 #include "Krystal.HTML/HTML/Enums/DocumentVisibilityState.hpp"
+#include "Krystal.HTML/HTML/Types/HTMLOrSVGScriptElement.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
 #include "Krystal.HTML/Types/NodeOrString.hpp"
 #include "Krystal.Lib/Types/List.hpp"
@@ -58,23 +59,17 @@ namespace Krys::HTML
     bool _allowDeclarativeShadowRoots : 1 {false};
     QuirksMode _quirksMode : BitCount<QuirksMode>() {QuirksMode::NoQuirks};
     DocumentFlags _flags : BitCount<DocumentFlags>() {DocumentFlags::None};
-
-#pragma region HTML spec
-
     DocumentReadyState _currentDocumentReadiness
         : BitCount<DocumentReadyState>() {DocumentReadyState::Complete};
     DocumentVisibilityState _visibilityState
         : BitCount<DocumentVisibilityState>() {DocumentVisibilityState::Hidden};
-
     List<WeakRef<Element>> _renderBlockingElements;
-
-#pragma endregion
 
   protected:
     Document(DocumentFlags flags) noexcept;
 
   public:
-#pragma region Document - https://dom.spec.whatwg.org/#interface-document
+#pragma region Document (DOM) - https://dom.spec.whatwg.org/#interface-document
 
     /// @see https://dom.spec.whatwg.org/#dom-document-document
     Document() noexcept;
@@ -183,6 +178,133 @@ namespace Krys::HTML
 
 #pragma endregion
 
+#pragma region Document (HTML) - https://html.spec.whatwg.org/multipage/dom.html#the-document-object
+
+    /// @see https://html.spec.whatwg.org/#dom-parsehtmlunsafe
+    KRYS_NODISCARD static ExceptionOr<Ref<Document>> ParseHTMLUnsafe(DOMStringView html) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-parsehtml
+    KRYS_NODISCARD static ExceptionOr<Ref<Document>> ParseHTML(DOMStringView &html) noexcept;
+
+    // TODO(DOCUMENT, HTML): check - do we need to implement these?
+    // resource metadata management - https://html.spec.whatwg.org/#resource-metadata-management
+
+    /// @see https://html.spec.whatwg.org/#dom-document-location
+    // [ PutForwards = href, LegacyUnforgeable ] readonly attribute Location? location;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-domain
+    // attribute USVString domain;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-referrer
+    // readonly attribute USVString referrer;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-cookie
+    // attribute USVString cookie;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-lastmodified
+    // readonly attribute DOMString lastModified;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-readystate
+    KRYS_NODISCARD DocumentReadyState ReadyState() const noexcept
+    {
+      return _currentDocumentReadiness;
+    }
+
+    // DOM tree accessors - https://html.spec.whatwg.org/#dom-tree-accessors
+
+    // TODO(DOCUMENT, HTML): implement this getter:
+    // getter object (DOMString name);
+
+    /// @see https://html.spec.whatwg.org/#document.title
+    KRYS_NODISCARD DOMString Title() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#document.title
+    ExceptionOr<void> Title(DOMString &&value) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-dir
+    KRYS_NODISCARD DOMString Dir() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-dir
+    void Dir(DOMString &&value) noexcept;
+
+    // NOTE: the HTML spec says that body returns a HTMLElement but that's because it can also return a
+    // HTMLFrameSetElement which is a legacy element that we don't support. In our case, body will always
+    // return an HTMLBodyElement if it exists.
+
+    /// @see https://html.spec.whatwg.org/#dom-document-body
+    KRYS_NODISCARD RefPtr<HTMLBodyElement> Body() noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-body
+    KRYS_NODISCARD RefPtr<const HTMLBodyElement> Body() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-body
+    ExceptionOr<void> Body(HTMLBodyElement &body) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-head
+    KRYS_NODISCARD RefPtr<HTMLHeadElement> Head() noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-head
+    KRYS_NODISCARD RefPtr<const HTMLHeadElement> Head() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-images
+    KRYS_NODISCARD Ref<HTMLCollection> Images() noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-embeds
+    KRYS_NODISCARD Ref<HTMLCollection> Embeds() noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-plugins
+    KRYS_NODISCARD Ref<HTMLCollection> Plugins() noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-links
+    KRYS_NODISCARD Ref<HTMLCollection> Links() noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-forms
+    KRYS_NODISCARD Ref<HTMLCollection> Forms() noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-scripts
+    KRYS_NODISCARD Ref<HTMLCollection> Scripts() noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-getelementsbyname
+    KRYS_NODISCARD Ref<NodeList> GetElementsByName(DOMStringView elementName) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-document-currentscript
+    KRYS_NODISCARD HTMLOrSVGScriptElement CurrentScript() noexcept;
+
+    // dynamic markup insertion
+    // [CEReactions] Document open(optional DOMString unused1, optional DOMString unused2);
+    // WindowProxy? open(USVString url, DOMString name, DOMString features);
+    // [CEReactions] undefined close();
+    // [CEReactions] undefined write((TrustedHTML or DOMString)... text);
+    // [CEReactions] undefined writeln((TrustedHTML or DOMString)... text);
+
+    // user interaction
+    // readonly attribute WindowProxy? defaultView;
+    // boolean hasFocus();
+    // [CEReactions] attribute DOMString designMode;
+    // [CEReactions] boolean execCommand(DOMString commandId, optional boolean showUI = false, optional
+    // DOMString value = "");
+    // boolean queryCommandEnabled(DOMString commandId);
+    // boolean queryCommandIndeterm(DOMString commandId);
+    // boolean queryCommandState(DOMString commandId);
+    // boolean queryCommandSupported(DOMString commandId);
+    // DOMString queryCommandValue(DOMString commandId);
+
+    KRYS_NODISCARD bool Hidden() const noexcept
+    {
+      return _visibilityState == DocumentVisibilityState::Hidden;
+    }
+
+    KRYS_NODISCARD DocumentVisibilityState VisibilityState() const noexcept
+    {
+      return _visibilityState;
+    }
+
+    // special event handler IDL attributes that only apply to Document objects
+    // [LegacyLenientThis] attribute EventHandler onreadystatechange;
+    // attribute EventHandler onvisibilitychange;
+
+#pragma endregion
+
 #pragma region Node - https://dom.spec.whatwg.org/#interface-node
 
     /// @see https://dom.spec.whatwg.org/#dom-node-nodename
@@ -266,7 +388,7 @@ namespace Krys::HTML
 
 #pragma endregion
 
-#pragma region DocumentOrShadowRoot Mixin - https://dom.spec.whatwg.org/#mixin-documentorshadowroot
+#pragma region DocumentOrShadowRoot Mixin (DOM) - https://dom.spec.whatwg.org/#mixin-documentorshadowroot
 
     /// @brief Returns node's CustomElementRegistry object, if any; otherwise null.
     /// @see https://dom.spec.whatwg.org/#dom-documentorshadowroot-customelementregistry
@@ -274,93 +396,12 @@ namespace Krys::HTML
 
 #pragma endregion
 
-#pragma region HTML spec extensions - https://html.spec.whatwg.org/multipage/dom.html#the-document-object
+#pragma region DocumentOrShadowRoot Mixin (HTML) - https://html.spec.whatwg.org/#documentorshadowroot
 
-    KRYS_NODISCARD static Ref<Document> ParseHTMLUnsafe(const DOMString &html) noexcept;
+    /// @brief Returns node's active element, if any; otherwise null.
+    /// @see https://html.spec.whatwg.org/#dom-documentorshadowroot-activeelement
+    RefPtr<Element> ActiveElement() const noexcept;
 
-    // TODO(check): do we need to implement these?
-    // resource metadata management
-    // [ PutForwards = href, LegacyUnforgeable ] readonly attribute Location? location;
-    // attribute USVString domain;
-    // readonly attribute USVString referrer;
-    // attribute USVString cookie;
-    // readonly attribute DOMString lastModified;
-
-    KRYS_NODISCARD DocumentReadyState ReadyState() const noexcept
-    {
-      return _currentDocumentReadiness;
-    }
-
-    // DOM tree accessors
-    // getter object (DOMString name);
-
-    KRYS_NODISCARD DOMString Title() const noexcept;
-    ExceptionOr<void> Title(DOMString &&value) noexcept;
-
-    KRYS_NODISCARD DOMString Dir() const noexcept;
-    void Dir(DOMString &&value) noexcept;
-
-    // NOTE: the HTML spec says that body returns a HTMLElement but that's because it can also return a
-    // HTMLFrameSetElement which is a legacy element that we don't support. In our case, body will always
-    // return an HTMLBodyElement if it exists.
-
-    KRYS_NODISCARD RefPtr<HTMLBodyElement> Body() noexcept;
-    KRYS_NODISCARD RefPtr<const HTMLBodyElement> Body() const noexcept;
-    ExceptionOr<void> Body(HTMLBodyElement &body) noexcept;
-
-    KRYS_NODISCARD RefPtr<HTMLHeadElement> Head() noexcept;
-    KRYS_NODISCARD RefPtr<const HTMLHeadElement> Head() const noexcept;
-
-    // [SameObject] readonly attribute HTMLCollection images;
-    // [SameObject] readonly attribute HTMLCollection embeds;
-    // [SameObject] readonly attribute HTMLCollection plugins;
-    // [SameObject] readonly attribute HTMLCollection links;
-    // [SameObject] readonly attribute HTMLCollection forms;
-    // [SameObject] readonly attribute HTMLCollection scripts;
-    // NodeList getElementsByName(DOMString elementName);
-    // readonly attribute HTMLOrSVGScriptElement? currentScript; // classic scripts in a document tree only
-
-    // dynamic markup insertion
-    // [CEReactions] Document open(optional DOMString unused1, optional DOMString unused2);
-    // WindowProxy? open(USVString url, DOMString name, DOMString features);
-    // [CEReactions] undefined close();
-    // [CEReactions] undefined write((TrustedHTML or DOMString)... text);
-    // [CEReactions] undefined writeln((TrustedHTML or DOMString)... text);
-
-    // user interaction
-    // readonly attribute WindowProxy? defaultView;
-    // boolean hasFocus();
-    // [CEReactions] attribute DOMString designMode;
-    // [CEReactions] boolean execCommand(DOMString commandId, optional boolean showUI = false, optional
-    // DOMString value = "");
-    // boolean queryCommandEnabled(DOMString commandId);
-    // boolean queryCommandIndeterm(DOMString commandId);
-    // boolean queryCommandState(DOMString commandId);
-    // boolean queryCommandSupported(DOMString commandId);
-    // DOMString queryCommandValue(DOMString commandId);
-
-    KRYS_NODISCARD bool Hidden() const noexcept
-    {
-      return _visibilityState == DocumentVisibilityState::Hidden;
-    }
-
-    KRYS_NODISCARD DocumentVisibilityState VisibilityState() const noexcept
-    {
-      return _visibilityState;
-    }
-
-    // special event handler IDL attributes that only apply to Document objects
-    // [LegacyLenientThis] attribute EventHandler onreadystatechange;
-    // attribute EventHandler onvisibilitychange;
-
-  protected:
-    KRYS_NODISCARD RefPtr<HTMLHtmlElement> GetHTMLHtmlElement() noexcept;
-    KRYS_NODISCARD RefPtr<const HTMLHtmlElement> GetHTMLHtmlElement() const noexcept;
-
-    KRYS_NODISCARD RefPtr<HTMLTitleElement> GetHTMLTitleElement() noexcept;
-    KRYS_NODISCARD RefPtr<const HTMLTitleElement> GetHTMLTitleElement() const noexcept;
-
-  public:
 #pragma endregion
 
   protected:

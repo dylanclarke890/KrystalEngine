@@ -13,6 +13,34 @@ namespace Krys::Tests
     REQUIRE(StringAlgorithms::StripLeadingAndTrailingWhitespace(u8"foo bar baz   ") == u8"foo bar baz");
   }
 
+  TEST_CASE("StringAlgorithms::StripAndCollapseASCIIWhitespace", "[HTML][StringAlgorithms]")
+  {
+    // Leading and trailing whitespace is stripped
+    REQUIRE(StringAlgorithms::StripAndCollapseASCIIWhitespace(
+              u8"\t\n  Hello   \t  beautiful   world\n\r  from \t C++   \n")
+            == u8"Hello beautiful world from C++");
+    // No whitespace — unchanged
+    REQUIRE(StringAlgorithms::StripAndCollapseASCIIWhitespace(u8"foo") == u8"foo");
+    // Already single spaces — unchanged
+    REQUIRE(StringAlgorithms::StripAndCollapseASCIIWhitespace(u8"foo bar baz") == u8"foo bar baz");
+    // Multiple spaces between words collapsed to one
+    REQUIRE(StringAlgorithms::StripAndCollapseASCIIWhitespace(u8"foo   bar   baz") == u8"foo bar baz");
+    // Only whitespace — collapses to empty string
+    REQUIRE(StringAlgorithms::StripAndCollapseASCIIWhitespace(u8"   ") == u8"");
+    // Empty string — unchanged
+    REQUIRE(StringAlgorithms::StripAndCollapseASCIIWhitespace(u8"") == u8"");
+    // Mixed whitespace characters collapsed
+    REQUIRE(StringAlgorithms::StripAndCollapseASCIIWhitespace(u8"\t\n\r\f") == u8"");
+    // Leading whitespace stripped
+    REQUIRE(StringAlgorithms::StripAndCollapseASCIIWhitespace(u8"   foo") == u8"foo");
+    // Trailing whitespace stripped
+    REQUIRE(StringAlgorithms::StripAndCollapseASCIIWhitespace(u8"foo   ") == u8"foo");
+    // Internal mixed whitespace collapsed to single space
+    REQUIRE(StringAlgorithms::StripAndCollapseASCIIWhitespace(u8"foo\t\n\r bar") == u8"foo bar");
+    // Single word with surrounding mixed whitespace
+    REQUIRE(StringAlgorithms::StripAndCollapseASCIIWhitespace(u8"\t foo \n") == u8"foo");
+  }
+
   TEST_CASE("StringAlgorithms::CollectCodePointSequence", "[HTML][StringAlgorithms]")
   {
     auto condition = [](char32 current)
