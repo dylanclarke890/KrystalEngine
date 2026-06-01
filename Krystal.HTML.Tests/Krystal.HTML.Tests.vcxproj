@@ -173,6 +173,8 @@
     <ClCompile Include="tests\DOM\Internals\EventFactory.cpp" />
     <ClCompile Include="tests\DOM\NodeIterator.cpp" />
     <ClCompile Include="tests\DOM\TreeWalker.cpp" />
+    <ClCompile Include="tests\HTML\Attributes\Reflection.cpp" />
+    <ClCompile Include="tests\HTML\MicroParsers\Numbers.cpp" />
     <ClCompile Include="tests\Parser\Loader\HTMLEncodingSniffer.cpp" />
     <ClCompile Include="tests\Parser\Loader\TextResourceDecoder.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\NameValidation.cpp" />

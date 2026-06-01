@@ -17,7 +17,7 @@ namespace Krys::HTML::MicroParsers
 
     KRYS_NODISCARD bool Success() const noexcept
     {
-      return Error != MicroParserError::None;
+      return Error == MicroParserError::None;
     }
 
     friend bool operator<=(const MicroParserResult &lhs, const MicroParserResult &rhs) noexcept
@@ -48,6 +48,36 @@ namespace Krys::HTML::MicroParsers
     friend bool operator!=(const MicroParserResult &lhs, const MicroParserResult &rhs) noexcept
     {
       return lhs.Value != rhs.Value;
+    }
+
+    friend bool operator<=(const MicroParserResult &lhs, const T& rhs) noexcept
+    {
+      return lhs.Value <= rhs;
+    }
+
+    friend bool operator<(const MicroParserResult &lhs, const T &rhs) noexcept
+    {
+      return lhs.Value < rhs;
+    }
+
+    friend bool operator>=(const MicroParserResult &lhs, const T &rhs) noexcept
+    {
+      return lhs.Value >= rhs;
+    }
+
+    friend bool operator>(const MicroParserResult &lhs, const T &rhs) noexcept
+    {
+      return lhs.Value > rhs;
+    }
+
+    friend bool operator==(const MicroParserResult &lhs, const T &rhs) noexcept
+    {
+      return lhs.Value == rhs;
+    }
+
+    friend bool operator!=(const MicroParserResult &lhs, const T &rhs) noexcept
+    {
+      return lhs.Value != rhs;
     }
   };
 }

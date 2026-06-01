@@ -19,19 +19,16 @@ namespace Krys::HTML::Attributes
   template <typename T>
   concept ReflectTarget = DerivedFrom<T, HTMLElement> || SameType<T, ElementInternals>;
 
-  // TODO(CONTENT-ATTRIBUTE-REFLECTION): FrozenArray<T>? is also one of the possible types.
-  template <typename T>
-  concept ReflectType =
-    OneOf<T, DOMString, Maybe<DOMString>, USVString, bool, int32, uint32, double, DOMTokenList>;
-
   template <typename T>
   concept ReflectTypeDOMString = OneOf<T, DOMString, Maybe<DOMString>>;
 
   template <typename T>
-  concept ReflectSetterType = ReflectType<T>;
-
-  template <typename T>
   concept ReflectURLType = OneOf<T, USVString>;
+
+  // TODO(CONTENT-ATTRIBUTE-REFLECTION): FrozenArray<T>? is also one of the possible types.
+  template <typename T>
+  concept ReflectType =
+    ReflectTypeDOMString<T> || ReflectURLType<T> || OneOf<T, bool, int32, uint32, double, DOMTokenList>;
 
   template <typename T>
   concept ReflectNonNegativeType = OneOf<T, int32>;
@@ -43,13 +40,13 @@ namespace Krys::HTML::Attributes
   concept ReflectPositiveWithFallbackType = ReflectPositiveType<T>;
 
   template <typename T>
-  concept ReflectDefaultType = OneOf<T, double, int32, uint32>;
+  concept ReflectDefaultGetterType = OneOf<T, double, int32, uint32>;
+
+  template <typename T>
+  concept ReflectDefaultSetterType = OneOf<T, uint32>;
 
   template <typename T>
   concept ReflectRangeType = OneOf<T, uint32>;
-
-  template <typename T>
-  concept ReflectLimitedToKnownValuesType = OneOf<T, DOMString, Maybe<DOMString>>;
 
   template <ReflectRangeType T>
   struct ReflectRange
@@ -58,7 +55,7 @@ namespace Krys::HTML::Attributes
     int32 ClampedMax {0};
   };
 
-  template <ReflectDefaultType T>
+  template <Number T>
   struct ReflectDefault
       : public StronglyTypedNumber<ReflectDefault<T>, conditional_t<SameType<T, double>, double, uint32>>
   {
@@ -86,26 +83,54 @@ namespace Krys::HTML::Attributes
     using Base::Base;
   };
 
-  struct ReflectUnsignedLongOptions
+  /// @brief Types that unconditionally return exceptions during reflection.
+  template <typename T>
+  concept ReflectAlwaysReturnsExceptionOrT = OneOf<T, USVString, DOMTokenList>;
+
+  template <typename T>
+  using reflect_get_return_t = conditional_t<ReflectAlwaysReturnsExceptionOrT<T>, ExceptionOr<T>, T>;
+
+  template <typename T, OnlyNonNegativeNumbers OnlyNonNegative, OnlyPositiveNumbers OnlyPositive>
+  using reflect_set_return_t =
+    conditional_t<ReflectAlwaysReturnsExceptionOrT<T> || (SameType<T, int32> && OnlyNonNegative)
+                    || (SameType<T, uint32> && OnlyPositive),
+                  ExceptionOr<void>, void>;
+
+  template <typename T>
+  struct MaybeReflectParameter
   {
-    Maybe<ReflectDefault<uint32>> DefaultValue {Null};
-    Maybe<ReflectRange<uint32>> ClampedRange {Null};
-    OnlyPositiveNumbers OnlyPositive {false};
-    OnlyPositiveNumbersWithFallback OnlyPositiveWithFallback {false};
+    T Parameter;
+    bool HasParameter {false};
+
+    MaybeReflectParameter() noexcept = default;
+
+    KRYS_NODISCARD constexpr operator bool() const noexcept
+    {
+      return HasParameter;
+    }
+
+    KRYS_NODISCARD constexpr T operator*() const noexcept
+    {
+      return Parameter;
+    }
   };
 
-  struct ReflectLongOptions
-  {
-    Maybe<ReflectDefault<int32>> DefaultValue {Null};
-    OnlyNonNegativeNumbers OnlyNonNegative {false};
-  };
+  template <typename T>
+  using MaybeReflectDefault = MaybeReflectParameter<ReflectDefault<T>>;
 
-  struct ReflectDoubleOptions
-  {
-    Maybe<ReflectDefault<double>> DefaultValue {Null};
-    OnlyPositiveNumbers OnlyPositive {false};
-  };
+  template <typename T>
+  using MaybeReflectRange = MaybeReflectParameter<ReflectRange<T>>;
 
+  template <typename T>
+  constexpr inline MaybeReflectDefault<T> NoDefaultValue = {};
+
+  template <typename T>
+  constexpr inline MaybeReflectRange<T> NoRange = {};
+
+  /// @brief Implements the logic for reflecting content attributes to IDL attributes and vice versa.
+  /// Enumerated attributes and attributes that are limited to a set of known values
+  /// (DOMString/Maybe<DOMString>) are not handled by the generic Reflect functions and need to be handled
+  /// separately by the caller. This includes 'missing', 'default' and 'invalid' value handling.
   /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflect
   class Reflection
   {
@@ -115,7 +140,8 @@ namespace Krys::HTML::Attributes
     /// @brief Represents the `[Reflect]` IDL attribute (getter).
     /// @see https://html.spec.whatwg.org/#xattr-reflect
     template <ReflectType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<TValue> Reflect(const Target &target, DOMStringAtom name) noexcept
+    KRYS_NODISCARD static reflect_get_return_t<TValue> Reflect(const Target &target,
+                                                               DOMStringAtom name) noexcept
     {
       if constexpr (SameType<TValue, DOMString>)
       {
@@ -127,7 +153,7 @@ namespace Krys::HTML::Attributes
       }
       else if constexpr (SameType<TValue, USVString>)
       {
-        return ReflectUSVString(target, name, TreatedAsURL(false));
+        return ReflectUSVString<TreatedAsURL(false)>(target, name);
       }
       else if constexpr (SameType<TValue, bool>)
       {
@@ -135,171 +161,155 @@ namespace Krys::HTML::Attributes
       }
       else if constexpr (SameType<TValue, int32>)
       {
-        return ReflectLong(target, name);
+        return ReflectLong<OnlyNonNegativeNumbers(false), NoDefaultValue<int32>>(target, name);
       }
       else if constexpr (SameType<TValue, uint32>)
       {
-        return ReflectUnsignedLong(target, name);
+        return ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(false),
+                                   NoDefaultValue<uint32>, NoRange<uint32>>(target, name);
       }
       else if constexpr (SameType<TValue, double>)
       {
-        return ReflectDouble(target, name);
+        return ReflectDouble<OnlyPositiveNumbers(false), NoDefaultValue<double>>(target, name);
       }
       else if constexpr (SameType<TValue, DOMTokenList>)
       {
         return ReflectDOMTokenList(target, name);
+      }
+      else
+      {
+        static_assert(DependentFalse<TValue>, "Unknown type for [Reflect] (getter)");
       }
     }
 
     /// @brief Represents the `[Reflect]` IDL attribute (setter).
     /// @see https://html.spec.whatwg.org/#xattr-reflect
     template <ReflectType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<void> Reflect(Target &target, DOMStringAtom name,
-                                                    TValue &&value) noexcept
+    KRYS_NODISCARD static reflect_set_return_t<TValue, OnlyNonNegativeNumbers(false),
+                                               OnlyPositiveNumbers(false)>
+      Reflect(Target &target, DOMStringAtom name, TValue &&value) noexcept
     {
       if constexpr (SameType<TValue, DOMString>)
       {
-        return ReflectDOMString(target, name, Krys::Move(value));
+        ReflectDOMString(target, name, Krys::Move(value));
       }
       else if constexpr (SameType<TValue, Maybe<DOMString>>)
       {
-        return ReflectNullableDOMString(target, name, Krys::Move(value));
+        ReflectNullableDOMString(target, name, Krys::Move(value));
       }
       else if constexpr (SameType<TValue, USVString>)
       {
-        return ReflectUSVString(target, name, Krys::Move(value), TreatedAsURL(false));
+        return ReflectUSVString<TreatedAsURL(false)>(target, name, Krys::Move(value));
       }
       else if constexpr (SameType<TValue, bool>)
       {
-        return ReflectBool(target, name, value);
+        ReflectBool(target, name, value);
       }
       else if constexpr (SameType<TValue, int32>)
       {
-        return ReflectLong(target, name, value);
+        ReflectLong<OnlyNonNegativeNumbers(false)>(target, name, value);
       }
       else if constexpr (SameType<TValue, uint32>)
       {
-        return ReflectUnsignedLong(target, name, value);
+        ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(false),
+                            NoDefaultValue<uint32>>(target, name, value);
       }
       else if constexpr (SameType<TValue, double>)
       {
-        return ReflectDouble(target, name, value);
+        ReflectDouble<OnlyPositiveNumbers(false)>(target, name, value);
       }
       else if constexpr (SameType<TValue, DOMTokenList>)
       {
         return ReflectDOMTokenList(target, name, value);
       }
+      else
+      {
+        static_assert(DependentFalse<TValue>, "Unknown type for [Reflect] (setter)");
+      }
     }
 
-    /// @brief Represents the `[Reflect][ReflectDefault(defaultValue)]` combination of IDL attributes
+    /// @brief Represents the `[Reflect][ReflectDefault]` combination of IDL attributes (getter).
+    /// @see https://html.spec.whatwg.org/#xattr-reflect
+    /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
+    template <ReflectDefaultGetterType TValue, ReflectDefault<TValue> DefaultValue, ReflectTarget Target>
+    KRYS_NODISCARD static reflect_get_return_t<TValue> Reflect(const Target &target,
+                                                               DOMStringAtom name) noexcept
+    {
+      if constexpr (SameType<TValue, int32>)
+      {
+        ReflectLong<OnlyNonNegativeNumbers(false), DefaultValue>(target, name);
+      }
+      else if constexpr (SameType<TValue, uint32>)
+      {
+        return ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(false),
+                                   DefaultValue, NoRange<uint32>>(target, name);
+      }
+      else if constexpr (SameType<TValue, double>)
+      {
+        return ReflectDouble<OnlyPositiveNumbers(false), DefaultValue>(target, name);
+      }
+      else
+      {
+        static_assert(DependentFalse<TValue>, "Unknown type for [Reflect][ReflectDefault] (getter)");
+      }
+    }
+
+    /// @brief Represents the `[Reflect][ReflectDefault]` combination of IDL attributes (setter).
+    /// @see https://html.spec.whatwg.org/#xattr-reflect
+    /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
+    template <ReflectDefaultSetterType TValue, ReflectDefault<TValue> DefaultValue, ReflectTarget Target>
+    KRYS_NODISCARD static reflect_set_return_t<TValue, OnlyNonNegativeNumbers(false),
+                                               OnlyPositiveNumbers(false)>
+      Reflect(Target &target, DOMStringAtom name, TValue value) noexcept
+    {
+      if constexpr (SameType<TValue, uint32>)
+      {
+        return ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(false),
+                                   DefaultValue, NoRange<uint32>>(target, name, value);
+      }
+      else
+      {
+        static_assert(DependentFalse<TValue>, "Unknown type for [Reflect][ReflectDefault] (setter)");
+      }
+    }
+
+    /// @brief Represents the `[Reflect][ReflectRange]` combination of IDL attributes (getter).
+    /// @see https://html.spec.whatwg.org/#xattr-reflect
+    /// @see https://html.spec.whatwg.org/#xattr-reflectrange
+    template <ReflectRangeType TValue, ReflectRange<TValue> Range, ReflectTarget Target>
+    KRYS_NODISCARD static reflect_get_return_t<TValue> Reflect(const Target &target,
+                                                               DOMStringAtom name) noexcept
+    {
+      if constexpr (SameType<TValue, uint32>)
+      {
+        return ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(false),
+                                   NoDefaultValue<uint32>, Range>(target, name);
+      }
+      else
+      {
+        static_assert(DependentFalse<TValue>, "Unknown type for [Reflect][ReflectRange] (getter)");
+      }
+    }
+
+    /// @brief Represents the `[Reflect][ReflectDefault][ReflectRange]` combination of IDL attributes
     /// (getter).
     /// @see https://html.spec.whatwg.org/#xattr-reflect
     /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
-    template <ReflectDefaultType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<TValue> Reflect(const Target &target, DOMStringAtom name,
-                                                      ReflectDefault<TValue> defaultValue) noexcept
-    {
-      if constexpr (SameType<TValue, int32>)
-      {
-        ReflectLongOptions options {.DefaultValue = defaultValue};
-        return ReflectLong(target, name, options);
-      }
-      else if constexpr (SameType<TValue, uint32>)
-      {
-        ReflectUnsignedLongOptions options {.DefaultValue = defaultValue};
-        return ReflectUnsignedLong(target, name, options);
-      }
-      else if constexpr (SameType<TValue, double>)
-      {
-        ReflectDoubleOptions options {.DefaultValue = defaultValue};
-        return ReflectDouble(target, name, options);
-      }
-    }
-
-    /// @brief Represents the `[Reflect][ReflectDefault(defaultValue)]` combination of IDL attributes
-    /// (setter).
-    /// @see https://html.spec.whatwg.org/#xattr-reflect
-    /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
-    template <ReflectDefaultType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<void> Reflect(Target &target, DOMStringAtom name, TValue value,
-                                                    ReflectDefault<TValue> defaultValue) noexcept
-    {
-      if constexpr (SameType<TValue, int32>)
-      {
-        ReflectLongOptions options {.DefaultValue = defaultValue};
-        return ReflectLong(target, name, value, options);
-      }
-      else if constexpr (SameType<TValue, uint32>)
-      {
-        ReflectUnsignedLongOptions options {.DefaultValue = defaultValue};
-        return ReflectUnsignedLong(target, name, value, options);
-      }
-      else if constexpr (SameType<TValue, double>)
-      {
-        ReflectDoubleOptions options {.DefaultValue = defaultValue};
-        return ReflectDouble(target, name, value, options);
-      }
-    }
-
-    /// @brief Represents the `[Reflect][ReflectRange(range)]` combination of IDL attributes (getter).
-    /// @see https://html.spec.whatwg.org/#xattr-reflect
     /// @see https://html.spec.whatwg.org/#xattr-reflectrange
-    template <ReflectRangeType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<TValue> Reflect(const Target &target, DOMStringAtom name,
-                                                      ReflectRange<TValue> range) noexcept
+    template <ReflectRangeType TValue, ReflectDefault<TValue> DefaultValue, ReflectRange<TValue> Range,
+              ReflectTarget Target>
+    KRYS_NODISCARD static reflect_get_return_t<TValue> Reflect(const Target &target,
+                                                               DOMStringAtom name) noexcept
     {
       if constexpr (SameType<TValue, uint32>)
       {
-        ReflectUnsignedLongOptions options {.ClampedRange = range};
-        return ReflectUnsignedLong(target, name, options);
+        return ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(false),
+                                   DefaultValue, Range>(target, name);
       }
-    }
-
-    /// @brief Represents the `[Reflect][ReflectRange(range)]` combination of IDL attributes (setter).
-    /// @see https://html.spec.whatwg.org/#xattr-reflect
-    /// @see https://html.spec.whatwg.org/#xattr-reflectrange
-    template <ReflectRangeType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<void> Reflect(Target &target, DOMStringAtom name, TValue value,
-                                                    ReflectRange<TValue> range) noexcept
-    {
-      if constexpr (SameType<TValue, uint32>)
+      else
       {
-        ReflectUnsignedLongOptions options {.ClampedRange = range};
-        return ReflectUnsignedLong(target, name, value, options);
-      }
-    }
-
-    /// @brief Represents the `[Reflect][ReflectDefault(defaultValue)][ReflectRange(range)]` combination of
-    /// IDL attributes (getter).
-    /// @see https://html.spec.whatwg.org/#xattr-reflect
-    /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
-    /// @see https://html.spec.whatwg.org/#xattr-reflectrange
-    template <ReflectRangeType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<TValue> Reflect(const Target &target, DOMStringAtom name,
-                                                      ReflectRange<TValue> range,
-                                                      ReflectDefault<TValue> defaultValue) noexcept
-    {
-      if constexpr (SameType<TValue, uint32>)
-      {
-        ReflectUnsignedLongOptions options {.DefaultValue = defaultValue, .ClampedRange = range};
-        return ReflectUnsignedLong(target, name, options);
-      }
-    }
-
-    /// @brief Represents the `[Reflect][ReflectDefault(defaultValue)][ReflectRange(range)]` combination of
-    /// IDL attributes (setter).
-    /// @see https://html.spec.whatwg.org/#xattr-reflect
-    /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
-    /// @see https://html.spec.whatwg.org/#xattr-reflectrange
-    template <ReflectRangeType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<void> Reflect(Target &target, DOMStringAtom name, TValue value,
-                                                    ReflectRange<TValue> range,
-                                                    ReflectDefault<TValue> defaultValue) noexcept
-    {
-      if constexpr (SameType<TValue, uint32>)
-      {
-        ReflectUnsignedLongOptions options {.DefaultValue = defaultValue, .ClampedRange = range};
-        return ReflectUnsignedLong(target, name, value, options);
+        static_assert(DependentFalse<TValue>,
+                      "Unknown type for [Reflect][ReflectDefault][ReflectRange] (getter)");
       }
     }
 
@@ -309,9 +319,10 @@ namespace Krys::HTML::Attributes
 
     /// @brief Represents the `[ReflectSetter]` IDL attribute (setter).
     /// @see https://html.spec.whatwg.org/#xattr-reflectsetter
-    template <ReflectSetterType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<void> ReflectSetter(Target &target, DOMStringAtom name,
-                                                          TValue &&value) noexcept
+    template <ReflectType TValue, ReflectTarget Target>
+    KRYS_NODISCARD static reflect_set_return_t<TValue, OnlyNonNegativeNumbers(false),
+                                               OnlyPositiveNumbers(false)>
+      ReflectSetter(Target &target, DOMStringAtom name, TValue &&value) noexcept
     {
       return Reflect(target, name, Krys::Move(value));
     }
@@ -323,18 +334,20 @@ namespace Krys::HTML::Attributes
     /// @brief Represents the `[ReflectURL]` IDL attribute (getter).
     /// @see https://html.spec.whatwg.org/#xattr-reflecturl
     template <ReflectURLType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<TValue> ReflectURL(const Target &target, DOMStringAtom name) noexcept
+    KRYS_NODISCARD static reflect_get_return_t<TValue> ReflectURL(const Target &target,
+                                                                  DOMStringAtom name) noexcept
     {
-      return ReflectUSVString(target, name, TreatedAsURL(true));
+      return ReflectUSVString<TreatedAsURL(true)>(target, name);
     }
 
     /// @brief Represents the `[ReflectURL]` IDL attribute (setter).
     /// @see https://html.spec.whatwg.org/#xattr-reflecturl
     template <ReflectURLType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<void> ReflectURL(Target &target, DOMStringAtom name,
-                                                       TValue &&value) noexcept
+    KRYS_NODISCARD static reflect_set_return_t<TValue, OnlyNonNegativeNumbers(false),
+                                               OnlyPositiveNumbers(false)>
+      ReflectURL(Target &target, DOMStringAtom name, TValue &&value) noexcept
     {
-      return ReflectUSVString(target, name, Krys::Move(value), TreatedAsURL(true));
+      return ReflectUSVString<TreatedAsURL(true)>(target, name, Krys::Move(value));
     }
 
 #pragma endregion
@@ -344,57 +357,52 @@ namespace Krys::HTML::Attributes
     /// @brief Represents the `[ReflectNonNegative]` IDL attribute (getter).
     /// @see https://html.spec.whatwg.org/#xattr-reflectnonnegative
     template <ReflectNonNegativeType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<TValue> ReflectNonNegative(const Target &target,
-                                                                 DOMStringAtom name) noexcept
+    KRYS_NODISCARD static reflect_get_return_t<TValue> ReflectNonNegative(const Target &target,
+                                                                          DOMStringAtom name) noexcept
     {
       if constexpr (SameType<TValue, int32>)
       {
-        ReflectLongOptions options {.OnlyNonNegative = OnlyNonNegativeNumbers {true}};
-        return ReflectLong(target, name, options);
+        return ReflectLong<OnlyNonNegativeNumbers(true)>(target, name);
+      }
+      else
+      {
+        static_assert(DependentFalse<TValue>, "Unknown type for [ReflectNonNegative] (getter)");
       }
     }
 
     /// @brief Represents the `[ReflectNonNegative]` IDL attribute (setter).
     /// @see https://html.spec.whatwg.org/#xattr-reflectnonnegative
     template <ReflectNonNegativeType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<void> ReflectNonNegative(Target &target, DOMStringAtom name,
-                                                               TValue value) noexcept
+    KRYS_NODISCARD static reflect_set_return_t<TValue, OnlyNonNegativeNumbers(true),
+                                               OnlyPositiveNumbers(false)>
+      ReflectNonNegative(Target &target, DOMStringAtom name, TValue value) noexcept
     {
       if constexpr (SameType<TValue, int32>)
       {
-        ReflectLongOptions options {.OnlyNonNegative = OnlyNonNegativeNumbers {true}};
-        return ReflectLong(target, name, value, options);
+        return ReflectLong<OnlyNonNegativeNumbers(true)>(target, name, value);
+      }
+      else
+      {
+        static_assert(DependentFalse<TValue>, "Unknown type for [ReflectNonNegative] (setter)");
       }
     }
 
-    /// @brief Represents the `[ReflectNonNegative][ReflectDefault(defaultValue)]` combination of IDL
-    /// attributes (getter).
+    /// @brief Represents the `[ReflectNonNegative][ReflectDefault]` combination of IDL attributes (getter).
     /// @see https://html.spec.whatwg.org/#xattr-reflectnonnegative
     /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
-    template <ReflectNonNegativeType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<TValue> ReflectNonNegative(const Target &target, DOMStringAtom name,
-                                                                 ReflectDefault<TValue> defaultValue) noexcept
+    template <ReflectNonNegativeType TValue, ReflectDefault<TValue> DefaultValue, ReflectTarget Target>
+    KRYS_NODISCARD static reflect_get_return_t<TValue> ReflectNonNegative(const Target &target,
+                                                                          DOMStringAtom name) noexcept
     {
       if constexpr (SameType<TValue, int32>)
       {
-        ReflectLongOptions options {.DefaultValue = defaultValue,
-                                    .OnlyNonNegative = OnlyNonNegativeNumbers {true}};
-        return ReflectLong(target, name, options);
+        return ReflectLong<OnlyNonNegativeNumbers(true), DefaultValue>(target, name);
       }
-    }
-
-    /// @brief Represents the `[ReflectNonNegative][ReflectDefault(defaultValue)]` combination of IDL
-    /// attributes (setter).
-    /// @see https://html.spec.whatwg.org/#xattr-reflectnonnegative
-    /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
-    template <ReflectNonNegativeType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<void> ReflectNonNegative(Target &target, DOMStringAtom name,
-                                                               TValue value,
-                                                               ReflectDefault<TValue> defaultValue) noexcept
-    {
-      ReflectLongOptions options {.DefaultValue = defaultValue,
-                                  .OnlyNonNegative = OnlyNonNegativeNumbers {true}};
-      return ReflectLong(target, name, value, options);
+      else
+      {
+        static_assert(DependentFalse<TValue>,
+                      "Unknown type for [ReflectNonNegative][ReflectDefault] (getter)");
+      }
     }
 
 #pragma endregion
@@ -404,80 +412,86 @@ namespace Krys::HTML::Attributes
     /// @brief Represents the `[ReflectPositive]` IDL attribute (getter).
     /// @see https://html.spec.whatwg.org/#xattr-reflectpositive
     template <ReflectPositiveType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<TValue> ReflectPositive(const Target &target,
-                                                              DOMStringAtom name) noexcept
+    KRYS_NODISCARD static reflect_get_return_t<TValue> ReflectPositive(const Target &target,
+                                                                       DOMStringAtom name) noexcept
     {
       if constexpr (SameType<TValue, uint32>)
       {
-        ReflectUnsignedLongOptions options {.OnlyPositive = OnlyPositiveNumbers {true}};
-        return ReflectUnsignedLong(target, name, options);
+        return ReflectUnsignedLong<OnlyPositiveNumbers(true), OnlyPositiveNumbersWithFallback(false),
+                                   NoDefaultValue<uint32>, NoRange<uint32>>(target, name);
       }
       else if constexpr (SameType<TValue, double>)
       {
-        ReflectDoubleOptions options {.OnlyPositive = OnlyPositiveNumbers {true}};
-        return ReflectDouble(target, name, options);
+        return ReflectDouble<OnlyPositiveNumbers(true)>(target, name);
+      }
+      else
+      {
+        static_assert(DependentFalse<TValue>, "Unknown type for [ReflectPositive] (getter)");
       }
     }
 
     /// @brief Represents the `[ReflectPositive]` IDL attribute (setter).
     /// @see https://html.spec.whatwg.org/#xattr-reflectpositive
     template <ReflectPositiveType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<void> ReflectPositive(Target &target, DOMStringAtom name,
-                                                            TValue value) noexcept
+    KRYS_NODISCARD static reflect_set_return_t<TValue, OnlyNonNegativeNumbers(false),
+                                               OnlyPositiveNumbers(true)>
+      ReflectPositive(Target &target, DOMStringAtom name, TValue value) noexcept
     {
       if constexpr (SameType<TValue, uint32>)
       {
-        ReflectUnsignedLongOptions options {.OnlyPositive = OnlyPositiveNumbers {true}};
-        return ReflectUnsignedLong(target, name, value, options);
+        return ReflectUnsignedLong<OnlyPositiveNumbers(true), OnlyPositiveNumbersWithFallback(false)>(
+          target, name, value);
       }
       else if constexpr (SameType<TValue, double>)
       {
-        ReflectDoubleOptions options {.OnlyPositive = OnlyPositiveNumbers {true}};
-        return ReflectDouble(target, name, value, options);
+        return ReflectDouble<OnlyPositiveNumbers(true)>(target, name, value);
+      }
+      else
+      {
+        static_assert(DependentFalse<TValue>, "Unknown type for [ReflectPositive] (setter)");
       }
     }
 
-    /// @brief Represents the `[ReflectPositive][ReflectDefault(defaultValue)]` combination of IDL
+    /// @brief Represents the `[ReflectPositive][ReflectDefault]` combination of IDL
     /// attributes (getter).
     /// @see https://html.spec.whatwg.org/#xattr-reflectpositive
     /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
-    template <ReflectPositiveType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<TValue> ReflectPositive(const Target &target, DOMStringAtom name,
-                                                              ReflectDefault<TValue> defaultValue) noexcept
+    template <ReflectPositiveType TValue, ReflectDefault<TValue> DefaultValue, ReflectTarget Target>
+    KRYS_NODISCARD static reflect_get_return_t<TValue> ReflectPositive(const Target &target,
+                                                                       DOMStringAtom name) noexcept
     {
       if constexpr (SameType<TValue, uint32>)
       {
-        ReflectUnsignedLongOptions options {.DefaultValue = defaultValue,
-                                            .OnlyPositive = OnlyPositiveNumbers {true}};
-        return ReflectUnsignedLong(target, name, options);
+        return ReflectUnsignedLong<OnlyPositiveNumbers(true), OnlyPositiveNumbersWithFallback(false),
+                                   DefaultValue, NoRange<uint32>>(target, name);
       }
       else if constexpr (SameType<TValue, double>)
       {
-        ReflectDoubleOptions options {.DefaultValue = defaultValue,
-                                      .OnlyPositive = OnlyPositiveNumbers {true}};
-        return ReflectDouble(target, name, options);
+        return ReflectDouble<OnlyPositiveNumbers(true), DefaultValue>(target, name);
+      }
+      else
+      {
+        static_assert(DependentFalse<TValue>, "Unknown type for [ReflectPositive][ReflectDefault] (getter)");
       }
     }
 
-    /// @brief Represents the `[ReflectPositive][ReflectDefault(defaultValue)]` combination of IDL
+    /// @brief Represents the `[ReflectPositive][ReflectDefault]` combination of IDL
     /// attributes (setter).
     /// @see https://html.spec.whatwg.org/#xattr-reflectpositive
     /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
-    template <ReflectPositiveType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<void> ReflectPositive(Target &target, DOMStringAtom name, TValue value,
-                                                            ReflectDefault<TValue> defaultValue) noexcept
+    template <ReflectPositiveType TValue, ReflectDefault<TValue> DefaultValue, ReflectTarget Target>
+    KRYS_NODISCARD static reflect_set_return_t<TValue, OnlyNonNegativeNumbers(false),
+                                               OnlyPositiveNumbers(true)>
+      ReflectPositive(Target &target, DOMStringAtom name, TValue value) noexcept
     {
       if constexpr (SameType<TValue, uint32>)
       {
-        ReflectUnsignedLongOptions options {.DefaultValue = defaultValue,
-                                            .OnlyPositive = OnlyPositiveNumbers {true}};
-        return ReflectUnsignedLong(target, name, value, options);
+        return ReflectUnsignedLong<OnlyPositiveNumbers(true), OnlyPositiveNumbersWithFallback(false),
+                                   DefaultValue>(target, name, value);
       }
-      else if constexpr (SameType<TValue, double>)
+      else
       {
-        ReflectDoubleOptions options {.DefaultValue = defaultValue,
-                                      .OnlyPositive = OnlyPositiveNumbers {true}};
-        return ReflectDouble(target, name, value, options);
+        static_assert(DependentFalse<TValue>, "Unknown type for [ReflectPositive][ReflectDefault] (setter)");
       }
     }
 
@@ -488,78 +502,85 @@ namespace Krys::HTML::Attributes
     /// @brief Represents the `[ReflectPositiveWithFallback]` IDL attribute (getter).
     /// @see https://html.spec.whatwg.org/#xattr-reflectpositivewithfallback
     template <ReflectPositiveWithFallbackType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<TValue> ReflectPositiveWithFallback(const Target &target,
-                                                                          DOMStringAtom name) noexcept
+    KRYS_NODISCARD static reflect_get_return_t<TValue>
+      ReflectPositiveWithFallback(const Target &target, DOMStringAtom name) noexcept
     {
       if constexpr (SameType<TValue, uint32>)
       {
-        ReflectUnsignedLongOptions options {.OnlyPositiveWithFallback =
-                                              OnlyPositiveNumbersWithFallback {true}};
-        return ReflectUnsignedLong(target, name, options);
+        return ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(true),
+                                   NoDefaultValue<uint32>, NoRange<uint32>>(target, name);
       }
       else if constexpr (SameType<TValue, double>)
       {
-        ReflectDoubleOptions options {.OnlyPositive = OnlyPositiveNumbers {true}};
-        return ReflectDouble(target, name, options);
+        return ReflectDouble<OnlyPositiveNumbers(true)>(target, name);
+      }
+      else
+      {
+        static_assert(DependentFalse<TValue>, "Unknown type for [ReflectPositiveWithFallback] (getter)");
       }
     }
 
     /// @brief Represents the `[ReflectPositiveWithFallback]` IDL attribute (setter).
     /// @see https://html.spec.whatwg.org/#xattr-reflectpositivewithfallback
     template <ReflectPositiveWithFallbackType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<void> ReflectPositiveWithFallback(Target &target, DOMStringAtom name,
-                                                                        TValue value) noexcept
+    KRYS_NODISCARD static reflect_set_return_t<TValue, OnlyNonNegativeNumbers(false),
+                                               OnlyPositiveNumbers(false)>
+      ReflectPositiveWithFallback(Target &target, DOMStringAtom name, TValue value) noexcept
     {
       if constexpr (SameType<TValue, uint32>)
       {
-        ReflectUnsignedLongOptions options {.OnlyPositiveWithFallback =
-                                              OnlyPositiveNumbersWithFallback {true}};
-        return ReflectUnsignedLong(target, name, value, options);
+        return ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(true)>(
+          target, name, value);
       }
       else if constexpr (SameType<TValue, double>)
       {
-        ReflectDoubleOptions options {.OnlyPositive = OnlyPositiveNumbers {true}};
-        return ReflectDouble(target, name, value, options);
+        return ReflectDouble<OnlyPositiveNumbers(true)>(target, name, value);
+      }
+      else
+      {
+        static_assert(DependentFalse<TValue>, "Unknown type for [ReflectPositiveWithFallback] (setter)");
       }
     }
 
-    /// @brief Represents the `[ReflectPositiveWithFallback][ReflectDefault(defaultValue)]` combination of IDL
+    /// @brief Represents the `[ReflectPositiveWithFallback][ReflectDefault]` combination of IDL
     /// attributes (getter).
     /// @see https://html.spec.whatwg.org/#xattr-reflectpositivewithfallback
     /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
-    template <ReflectPositiveWithFallbackType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<TValue>
-      ReflectPositiveWithFallback(const Target &target, DOMStringAtom name,
-                                  ReflectDefault<TValue> defaultValue) noexcept
+    template <ReflectPositiveWithFallbackType TValue, ReflectDefault<TValue> DefaultValue,
+              ReflectTarget Target>
+    KRYS_NODISCARD static reflect_get_return_t<TValue>
+      ReflectPositiveWithFallback(const Target &target, DOMStringAtom name) noexcept
     {
       if constexpr (SameType<TValue, uint32>)
       {
-        ReflectUnsignedLongOptions options {
-          .DefaultValue = defaultValue, .OnlyPositiveWithFallback = OnlyPositiveNumbersWithFallback {true}};
-        return ReflectUnsignedLong(target, name, options);
+        return ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(true),
+                                   DefaultValue, NoRange<uint32>>(target, name);
       }
       else if constexpr (SameType<TValue, double>)
       {
-        ReflectDoubleOptions options {.DefaultValue = defaultValue,
-                                      .OnlyPositive = OnlyPositiveNumbers {true}};
-        return ReflectDouble(target, name, options);
+        return ReflectDouble<OnlyPositiveNumbers(true), DefaultValue>(target, name);
+      }
+      else
+      {
+        static_assert(DependentFalse<TValue>,
+                      "Unknown type for [ReflectPositiveWithFallback][ReflectDefault] (getter)");
       }
     }
 
-    /// @brief Represents the `[ReflectPositiveWithFallback][ReflectDefault(defaultValue)]` combination of IDL
+    /// @brief Represents the `[ReflectPositiveWithFallback][ReflectDefault]` combination of IDL
     /// attributes (setter).
     /// @see https://html.spec.whatwg.org/#xattr-reflectpositivewithfallback
     /// @see https://html.spec.whatwg.org/#xattr-reflectdefault
-    template <ReflectPositiveWithFallbackType TValue, ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<void>
-      ReflectPositiveWithFallback(Target &target, DOMStringAtom name, TValue value,
-                                  ReflectDefault<TValue> defaultValue) noexcept
+    template <ReflectPositiveWithFallbackType TValue, ReflectDefault<TValue> DefaultValue,
+              ReflectTarget Target>
+    KRYS_NODISCARD static reflect_set_return_t<TValue, OnlyNonNegativeNumbers(false),
+                                               OnlyPositiveNumbers(SameType<TValue, double>)>
+      ReflectPositiveWithFallback(Target &target, DOMStringAtom name, TValue value) noexcept
     {
       if constexpr (SameType<TValue, uint32>)
       {
-        ReflectUnsignedLongOptions options {
-          .DefaultValue = defaultValue, .OnlyPositiveWithFallback = OnlyPositiveNumbersWithFallback {true}};
-        return ReflectUnsignedLong(target, name, value, options);
+        return ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(true),
+                                   DefaultValue>(target, name, value);
       }
       else if constexpr (SameType<TValue, double>)
       {
@@ -567,9 +588,12 @@ namespace Krys::HTML::Attributes
         // for 'OnlyPositiveWithFallback' for 'double' reflected attributes. Here we assume it has the same
         // behavior as 'OnlyPositive' for 'double'.
 
-        ReflectDoubleOptions options {.DefaultValue = defaultValue,
-                                      .OnlyPositive = OnlyPositiveNumbers {true}};
-        return ReflectDouble(target, name, value, options);
+        return ReflectDouble<OnlyPositiveNumbers(true), DefaultValue>(target, name, value);
+      }
+      else
+      {
+        static_assert(DependentFalse<TValue>,
+                      "Unknown type for [ReflectPositiveWithFallback][ReflectDefault] (setter)");
       }
     }
 
@@ -647,7 +671,7 @@ namespace Krys::HTML::Attributes
 
     /// @brief Helper for getting reflected content attributes with 'DOMString' type.
     template <ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<DOMString> ReflectDOMString(Target &target, DOMStringAtom name) noexcept
+    KRYS_NODISCARD static DOMString ReflectDOMString(const Target &target, DOMStringAtom name) noexcept
     {
       auto contentAttributeValue = GetContentAttribute(target, name);
       if (contentAttributeValue.has_value())
@@ -660,28 +684,27 @@ namespace Krys::HTML::Attributes
 
     /// @brief Helper for setting reflected content attributes with 'DOMString' type.
     template <ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<void> ReflectDOMString(const Target &target, DOMStringAtom name,
-                                                             DOMString &&value) noexcept
+    static void ReflectDOMString(Target &target, DOMStringAtom name, DOMString &&value) noexcept
     {
-      SetContentAttribute(target, name, Krys::Move(*value));
-      return {};
+      SetContentAttribute(target, name, Krys::Move(value));
     }
+
 #pragma endregion
 
 #pragma region ReflectNullableDOMString
 
     /// @brief Helper for getting reflected content attributes with 'DOMString?' type.
     template <ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<Maybe<DOMString>> ReflectNullableDOMString(Target &target,
-                                                                                 DOMStringAtom name) noexcept
+    KRYS_NODISCARD static Maybe<DOMString> ReflectNullableDOMString(const Target &target,
+                                                                    DOMStringAtom name) noexcept
     {
       return GetContentAttribute(target, name);
     }
 
     /// @brief Helper for setting reflected content attributes with 'DOMString?' type.
     template <ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<void> ReflectNullableDOMString(const Target &target, DOMStringAtom name,
-                                                                     Maybe<DOMString> &&value) noexcept
+    static void ReflectNullableDOMString(Target &target, DOMStringAtom name,
+                                         Maybe<DOMString> &&value) noexcept
     {
       if (!value.has_value())
       {
@@ -691,8 +714,6 @@ namespace Krys::HTML::Attributes
       {
         SetContentAttribute(target, name, Krys::Move(*value));
       }
-
-      return {};
     }
 
 #pragma endregion
@@ -700,17 +721,17 @@ namespace Krys::HTML::Attributes
 #pragma region ReflectUSVString
 
     /// @brief Helper for getting reflected content attributes with 'USVString' type.
-    template <ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<USVString> ReflectUSVString(Target &target, DOMStringAtom name,
-                                                                  TreatedAsURL treatedAsURL) noexcept
+    template <TreatedAsURL AsUrl, ReflectTarget Target>
+    KRYS_NODISCARD static ExceptionOr<USVString> ReflectUSVString(const Target &target,
+                                                                  DOMStringAtom name) noexcept
     {
       // SPEC-VIOLATION(USVString): Not supported.
       return ExceptionCode::NotSupportedError;
     }
 
     /// @brief Helper for setting reflected content attributes with 'USVString' type.
-    template <ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<void> ReflectUSVString(const Target &target, DOMStringAtom name,
+    template <TreatedAsURL AsUrl, ReflectTarget Target>
+    KRYS_NODISCARD static ExceptionOr<void> ReflectUSVString(Target &target, DOMStringAtom name,
                                                              USVString &&value,
                                                              TreatedAsURL treatedAsURL) noexcept
     {
@@ -724,22 +745,15 @@ namespace Krys::HTML::Attributes
 
     /// @brief Helper for getting reflected content attributes with 'bool' type.
     template <ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<bool> ReflectBool(Target &target, DOMStringAtom name) noexcept
+    KRYS_NODISCARD static bool ReflectBool(const Target &target, DOMStringAtom name) noexcept
     {
       auto contentAttributeValue = GetContentAttribute(target, name);
-
-      if (!contentAttributeValue.has_value())
-      {
-        return false;
-      }
-
-      return true;
+      return contentAttributeValue.has_value();
     }
 
     /// @brief Helper for setting reflected content attributes with 'bool' type.
     template <ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<void> ReflectBool(const Target &target, DOMStringAtom name,
-                                                        bool value) noexcept
+    static void ReflectBool(Target &target, DOMStringAtom name, bool value) noexcept
     {
       if (!value)
       {
@@ -749,8 +763,6 @@ namespace Krys::HTML::Attributes
       {
         SetContentAttribute(target, name, DOMString {});
       }
-
-      return {};
     }
 
 #pragma endregion
@@ -758,37 +770,36 @@ namespace Krys::HTML::Attributes
 #pragma region ReflectLong
 
     /// @brief Helper for getting reflected content attributes with 'long' type.
-    template <ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<int32> ReflectLong(Target &target, DOMStringAtom name,
-                                                         ReflectLongOptions options = {}) noexcept
+    template <OnlyNonNegativeNumbers OnlyNonNegative, MaybeReflectDefault<int32> DefaultValue,
+              ReflectTarget Target>
+    KRYS_NODISCARD static int32 ReflectLong(const Target &target, DOMStringAtom name) noexcept
     {
       auto contentAttributeValue = GetContentAttribute(target, name);
       if (contentAttributeValue.has_value())
       {
-        if (options.OnlyNonNegative)
+        if constexpr (OnlyNonNegative)
         {
           auto parsedValue = MicroParsers::Numbers::ParseNonNegativeInteger(*contentAttributeValue);
-          if (parsedValue.Success() && parsedValue <= std::numeric_limits<int32>::max())
+          if (parsedValue.Success() && parsedValue.Value <= std::numeric_limits<int32>::max())
           {
-            return static_cast<int32>(parsedValue);
+            return static_cast<int32>(parsedValue.Value);
           }
         }
         else
         {
           auto parsedValue = MicroParsers::Numbers::ParseInteger(*contentAttributeValue);
-          if (parsedValue.Success() && parsedValue <= std::numeric_limits<int32>::max())
+          if (parsedValue.Success() && parsedValue.Value <= std::numeric_limits<int32>::max())
           {
-            return static_cast<int32>(parsedValue);
+            return static_cast<int32>(parsedValue.Value);
           }
         }
       }
 
-      if (options.DefaultValue.has_value())
+      if constexpr (DefaultValue)
       {
-        return *options.DefaultValue;
+        return *DefaultValue;
       }
-
-      if (options.OnlyNonNegative)
+      else if constexpr (OnlyNonNegative)
       {
         return -1;
       }
@@ -797,18 +808,26 @@ namespace Krys::HTML::Attributes
     }
 
     /// @brief Helper for setting reflected content attributes with 'long' type.
-    template <ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<void> ReflectLong(Target &target, DOMStringAtom name, int32 value,
-                                                        ReflectLongOptions options = {}) noexcept
+    template <OnlyNonNegativeNumbers OnlyNonNegative, ReflectTarget Target>
+    KRYS_NODISCARD static reflect_set_return_t<int32, OnlyNonNegative, OnlyPositiveNumbers(false)>
+      ReflectLong(Target &target, DOMStringAtom name, int32 value) noexcept
     {
-      if (options.OnlyNonNegative && value < 0)
+      if constexpr (OnlyNonNegative)
       {
-        return ExceptionCode::IndexSizeError;
+        if (value < 0)
+        {
+          return ExceptionCode::IndexSizeError;
+        }
       }
 
-      SetContentAttribute(target, name, std::to_string(value));
+      auto newValueStr = std::to_string(value);
+      DOMStringView u8view(reinterpret_cast<const char8 *>(newValueStr.data()), newValueStr.size());
+      SetContentAttribute(target, name, DOMString(u8view));
 
-      return {};
+      if constexpr (OnlyNonNegative)
+      {
+        return {};
+      }
     }
 
 #pragma endregion
@@ -818,31 +837,31 @@ namespace Krys::HTML::Attributes
     constexpr static int32 MaxUnsignedLongValue {2'147'483'647};
 
     /// @brief Helper for getting reflected content attributes with 'unsigned long' type.
-    template <ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<uint32>
-      ReflectUnsignedLong(const Target &target, DOMStringAtom name,
-                          ReflectUnsignedLongOptions options = {}) noexcept
+    template <OnlyPositiveNumbers OnlyPositive, OnlyPositiveNumbersWithFallback OnlyPositiveWithFallback,
+              MaybeReflectDefault<uint32> DefaultValue, MaybeReflectRange<uint32> Range, ReflectTarget Target>
+    KRYS_NODISCARD static uint32 ReflectUnsignedLong(const Target &target, DOMStringAtom name) noexcept
     {
-      assert(!(onlyPositiveNumbers && onlyPositiveNumbersWithFallback));
+      static_assert(!(OnlyPositive && OnlyPositiveWithFallback),
+                    "Cannot be both 'OnlyPositive' and 'OnlyPositiveWithFallback'.");
 
       auto contentAttributeValue = GetContentAttribute(target, name);
 
-      uint32 minimum = 0u;
+      uint64 minimum = 0u;
 
-      if (options.OnlyPositive || options.OnlyPositiveWithFallback)
+      if constexpr (OnlyPositive || OnlyPositiveWithFallback)
       {
         minimum = 1u;
       }
 
-      if (options.ClampedRange.has_value())
+      if (Range)
       {
-        minimum = options.ClampedRange->ClampedMin;
+        minimum = (*Range).ClampedMin;
       }
 
-      uint32 maximum = MaxUnsignedLongValue;
-      if (options.ClampedRange.has_value())
+      uint64 maximum = MaxUnsignedLongValue;
+      if (Range)
       {
-        maximum = options.ClampedRange->ClampedMax;
+        maximum = (*Range).ClampedMax;
       }
 
       if (contentAttributeValue.has_value())
@@ -852,47 +871,51 @@ namespace Krys::HTML::Attributes
         {
           if (parsedValue >= minimum && parsedValue <= maximum)
           {
-            return parsedValue;
+            return static_cast<uint32>(parsedValue.Value);
           }
 
-          if (options.ClampedRange.has_value())
+          if (Range)
           {
-            return std::clamp(parsedValue.Value, minimum, maximum);
+            return static_cast<uint32>(std::clamp(parsedValue.Value, minimum, maximum));
           }
         }
       }
 
-      if (options.DefaultValue.has_value())
+      if constexpr (DefaultValue)
       {
-        return *options.DefaultValue;
+        return *DefaultValue;
       }
 
-      return minimum;
+      return static_cast<uint32>(minimum);
     }
 
     /// @brief Helper for setting reflected content attributes with 'unsigned long' type.
-    template <ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<void>
-      ReflectUnsignedLong(Target &target, DOMStringAtom name, uint32 value,
-                          ReflectUnsignedLongOptions options = {}) noexcept
+    template <OnlyPositiveNumbers OnlyPositive, OnlyPositiveNumbersWithFallback OnlyPositiveWithFallback,
+              MaybeReflectDefault<uint32> DefaultValue, ReflectTarget Target>
+    KRYS_NODISCARD static conditional_t<OnlyPositive, ExceptionOr<void>, void>
+      ReflectUnsignedLong(Target &target, DOMStringAtom name, uint32 value) noexcept
     {
-      assert(!(options.OnlyPositive && options.OnlyPositiveWithFallback));
+      static_assert(!(OnlyPositive && OnlyPositiveWithFallback),
+                    "Cannot be both 'OnlyPositive' and 'OnlyPositiveWithFallback'.");
 
-      if (options.OnlyPositive && value == 0)
+      if constexpr (OnlyPositive)
       {
-        return ExceptionCode::IndexSizeError;
+        if (value == 0)
+        {
+          return ExceptionCode::IndexSizeError;
+        }
       }
 
       uint32 minimum = 0u;
-      if (options.OnlyPositive || options.OnlyPositiveWithFallback)
+      if constexpr (OnlyPositive || OnlyPositiveWithFallback)
       {
         minimum = 1u;
       }
 
       uint32 newValue = minimum;
-      if (options.DefaultValue.has_value())
+      if constexpr (DefaultValue)
       {
-        newValue = *options.DefaultValue;
+        newValue = *DefaultValue;
       }
 
       if (value >= minimum && value <= MaxUnsignedLongValue)
@@ -900,8 +923,14 @@ namespace Krys::HTML::Attributes
         newValue = value;
       }
 
-      SetContentAttribute(target, name, std::to_string(newValue));
-      return {};
+      auto newValueStr = std::to_string(value);
+      DOMStringView u8view(reinterpret_cast<const char8 *>(newValueStr.data()), newValueStr.size());
+      SetContentAttribute(target, name, DOMString(u8view));
+
+      if constexpr (OnlyPositive)
+      {
+        return {};
+      }
     }
 
 #pragma endregion
@@ -909,50 +938,66 @@ namespace Krys::HTML::Attributes
 #pragma region ReflectDouble
 
     /// @brief Helper for getting reflected content attributes with 'double' type.
-    template <ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<double> ReflectDouble(Target &target, DOMStringAtom name,
-                                                            ReflectDoubleOptions options = {}) noexcept
+    template <OnlyPositiveNumbers OnlyPositive, MaybeReflectDefault<double> DefaultValue,
+              ReflectTarget Target>
+    KRYS_NODISCARD static double ReflectDouble(const Target &target, DOMStringAtom name) noexcept
     {
       auto contentAttributeValue = GetContentAttribute(target, name);
-
       if (contentAttributeValue.has_value())
       {
         auto parsedValue = MicroParsers::Numbers::ParseFloatingPoint(*contentAttributeValue);
         if (parsedValue.Success())
         {
+          if constexpr (!OnlyPositive)
+          {
+            return parsedValue.Value;
+          }
+          else if (parsedValue > 0)
+          {
+            return parsedValue.Value;
+          }
         }
       }
 
-      if (options.DefaultValue.has_value())
+      if constexpr (DefaultValue)
       {
-        return *options.DefaultValue;
+        return *DefaultValue;
       }
 
-      return minimum;
+      return 0;
     }
 
     /// @brief Helper for setting reflected content attributes with 'double' type.
-    template <ReflectTarget Target>
-    KRYS_NODISCARD static ExceptionOr<void> ReflectDouble(const Target &target, DOMStringAtom name,
-                                                          double value,
-                                                          ReflectDoubleOptions options = {}) noexcept
+    template <OnlyPositiveNumbers OnlyPositive, ReflectTarget Target>
+    static void ReflectDouble(Target &target, DOMStringAtom name, double value) noexcept
     {
-      if (options.OnlyPositive && value <= 0)
+      if constexpr (OnlyPositive)
       {
-        return {}; // Not an error as per the spec.
+        if (value <= 0)
+        {
+          return; // Not an exception as per the spec.
+        }
       }
 
-      SetContentAttribute(target, name, std::to_string(value));
-      return {};
+      char buffer[64] {};
+      auto [ptr, ec] = std::to_chars(buffer, buffer + sizeof(buffer), value);
+      if (ec != std::errc())
+      {
+        return;
+      }
+
+      DOMStringView u8view(reinterpret_cast<const char8 *>(buffer), ptr - buffer);
+      SetContentAttribute(target, name, DOMString(u8view));
     }
 
 #pragma endregion
 
 #pragma region ReflectDOMTokenList
-    // NOTE: Can only reflect 'HTMLElement' target as per the spec.
+
+    // NOTE: These methods can only reflect 'HTMLElement' target as per the spec.
 
     /// @brief Helper for getting reflected content attributes with 'DOMTokenList' type.
-    KRYS_NODISCARD static ExceptionOr<DOMTokenList &> ReflectDOMTokenList(HTMLElement &target,
+    KRYS_NODISCARD static ExceptionOr<DOMTokenList &> ReflectDOMTokenList(const HTMLElement &target,
                                                                           DOMStringAtom name) noexcept
     {
       // TODO(CONTENT-ATTRIBUTE-REFLECTION)
@@ -960,7 +1005,7 @@ namespace Krys::HTML::Attributes
     }
 
     /// @brief Helper for setting reflected content attributes with 'DOMTokenList' type.
-    KRYS_NODISCARD static ExceptionOr<void> ReflectDOMTokenList(const HTMLElement &target,
+    KRYS_NODISCARD static ExceptionOr<void> ReflectDOMTokenList(HTMLElement &target,
                                                                 DOMTokenList &value) noexcept
     {
       // TODO(CONTENT-ATTRIBUTE-REFLECTION)

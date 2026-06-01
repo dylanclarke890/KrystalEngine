@@ -12,11 +12,11 @@ namespace Krys::HTML
   /// @see https://infra.spec.whatwg.org/#string-algorithms
   class StringAlgorithms
   {
+  public:
     using position_variable = DOMStringView::const_iterator;
 
-  public:
     /// @see https://infra.spec.whatwg.org/#strip-leading-and-trailing-ascii-whitespace
-    KRYS_NODISCARD static DOMString StripLeadingAndTrailingWhitespace(DOMStringView input) noexcept
+    KRYS_NODISCARD static DOMStringView StripLeadingAndTrailingWhitespace(DOMStringView input) noexcept
     {
       auto start = input.begin();
       auto end = input.end();
@@ -28,23 +28,30 @@ namespace Krys::HTML
       {
         --end;
       }
-      return DOMString(start, end);
+      return DOMStringView(start, end);
     }
 
     /// @see https://infra.spec.whatwg.org/#collect-a-sequence-of-code-points
     template <typename TFunc>
-    KRYS_NODISCARD static DOMString CollectCodePointSequence(DOMStringView input, position_variable &position,
+    KRYS_NODISCARD static DOMStringView CollectCodePointSequence(DOMStringView input, position_variable &position,
                                                              TFunc &&condition) noexcept
     {
-      DOMString result;
+      position_variable start = position;
+      AdvancePositionWhile(input, position, condition);
+      return DOMStringView(start, position);
+    }
+
+    /// @brief Advances 'position' until 'condition' returns false for the current code point.
+    template <typename TFunc>
+    static void AdvancePositionWhile(DOMStringView input, position_variable &position,
+                                                    TFunc &&condition) noexcept
+    {
       // TODO(fix): STRINGS - we're not iterating over code points properly here. we need a way of just
       // iterating over code points in a UTF-8 string instead of having to
       while (position != input.end() && condition(*position))
       {
-        result.push_back(*position);
         ++position;
       }
-      return result;
     }
 
     /// @see https://infra.spec.whatwg.org/#ascii-whitespace
@@ -56,10 +63,7 @@ namespace Krys::HTML
     /// @see https://infra.spec.whatwg.org/#skip-ascii-whitespace
     static void SkipWhitespace(DOMStringView input, position_variable &position) noexcept
     {
-      while (position != input.end() && IsASCIIWhitespace(*position))
-      {
-        ++position;
-      }
+      AdvancePositionWhile(input, position, IsASCIIWhitespace);
     }
 
     /// @see https://infra.spec.whatwg.org/#strictly-split
