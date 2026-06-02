@@ -191,6 +191,8 @@ namespace Krys::HTML::Attributes
                                                OnlyPositiveNumbers(false)>
       Reflect(Target &target, DOMStringAtom name, TValue &&value) noexcept
     {
+      static_assert(!IsConst<Target>, "Target cannot be const for [Reflect] setter");
+
       if constexpr (OneOf<TValue, DOMString, Maybe<DOMString>>)
       {
         ReflectDOMString(target, name, Krys::Move(value));
@@ -262,6 +264,8 @@ namespace Krys::HTML::Attributes
                                                OnlyPositiveNumbers(false)>
       Reflect(Target &target, DOMStringAtom name, TValue value) noexcept
     {
+      static_assert(!IsConst<Target>, "Target cannot be const for [Reflect][ReflectDefault] setter");
+
       if constexpr (SameType<TValue, uint32>)
       {
         return ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(false),
@@ -325,6 +329,8 @@ namespace Krys::HTML::Attributes
                                                OnlyPositiveNumbers(false)>
       ReflectSetter(Target &target, DOMStringAtom name, TValue &&value) noexcept
     {
+      static_assert(!IsConst<Target>, "Target cannot be const for [ReflectSetter] setter");
+
       return Reflect(target, name, Krys::Move(value));
     }
 
@@ -348,6 +354,8 @@ namespace Krys::HTML::Attributes
                                                OnlyPositiveNumbers(false)>
       ReflectURL(Target &target, DOMStringAtom name, TValue &&value) noexcept
     {
+      static_assert(!IsConst<Target>, "Target cannot be const for [ReflectURL] setter");
+
       return ReflectUSVString<TreatedAsURL(true)>(target, name, Krys::Move(value));
     }
 
@@ -378,6 +386,8 @@ namespace Krys::HTML::Attributes
                                                OnlyPositiveNumbers(false)>
       ReflectNonNegative(Target &target, DOMStringAtom name, TValue value) noexcept
     {
+      static_assert(!IsConst<Target>, "Target cannot be const for [ReflectNonNegative] setter");
+
       if constexpr (SameType<TValue, int32>)
       {
         return ReflectLong<OnlyNonNegativeNumbers(true)>(target, name, value);
@@ -439,6 +449,8 @@ namespace Krys::HTML::Attributes
                                                OnlyPositiveNumbers(true)>
       ReflectPositive(Target &target, DOMStringAtom name, TValue value) noexcept
     {
+      static_assert(!IsConst<Target>, "Target cannot be const for [ReflectPositive] setter");
+
       if constexpr (SameType<TValue, uint32>)
       {
         return ReflectUnsignedLong<OnlyPositiveNumbers(true), OnlyPositiveNumbersWithFallback(false),
@@ -487,6 +499,8 @@ namespace Krys::HTML::Attributes
                                                OnlyPositiveNumbers(true)>
       ReflectPositive(Target &target, DOMStringAtom name, TValue value) noexcept
     {
+      static_assert(!IsConst<Target>, "Target cannot be const for [ReflectPositive][ReflectDefault] setter");
+
       if constexpr (SameType<TValue, uint32>)
       {
         return ReflectUnsignedLong<OnlyPositiveNumbers(true), OnlyPositiveNumbersWithFallback(false),
@@ -530,6 +544,8 @@ namespace Krys::HTML::Attributes
                                                OnlyPositiveNumbers(false)>
       ReflectPositiveWithFallback(Target &target, DOMStringAtom name, TValue value) noexcept
     {
+      static_assert(!IsConst<Target>, "Target cannot be const for [ReflectPositiveWithFallback] setter");
+
       if constexpr (SameType<TValue, uint32>)
       {
         return ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(true),
@@ -581,6 +597,9 @@ namespace Krys::HTML::Attributes
                                                OnlyPositiveNumbers(SameType<TValue, double>)>
       ReflectPositiveWithFallback(Target &target, DOMStringAtom name, TValue value) noexcept
     {
+      static_assert(!IsConst<Target>,
+                    "Target cannot be const for [ReflectPositiveWithFallback][ReflectDefault] setter");
+
       if constexpr (SameType<TValue, uint32>)
       {
         return ReflectUnsignedLong<OnlyPositiveNumbers(false), OnlyPositiveNumbersWithFallback(true),

@@ -135,18 +135,15 @@ namespace Krys::HTML
 
     /// @see https://html.spec.whatwg.org/#dom-headingoffset
     KRYS_NODISCARD uint32 HeadingOffset() const noexcept;
-    
+
     /// @see https://html.spec.whatwg.org/#dom-headingoffset
-    void HeadingOffset(uint32 value) const noexcept;
+    void HeadingOffset(uint32 value) noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-headingreset
     KRYS_NODISCARD bool HeadingReset() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-headingreset
     void HeadingReset(bool value) noexcept;
-
-    // [CEReactions, Reflect, ReflectRange=(0, 8)] attribute unsigned long headingOffset;
-    // [CEReactions, Reflect] attribute boolean headingReset;
 
 #pragma endregion
 

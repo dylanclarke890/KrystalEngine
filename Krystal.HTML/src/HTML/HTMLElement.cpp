@@ -288,7 +288,7 @@ namespace Krys::HTML
     return Reflection::Reflect<uint32, ReflectRange<uint32>(0u, 8u)>(*this, u8"headingoffset");
   }
 
-  void HTMLElement::HeadingOffset(uint32 value) const noexcept
+  void HTMLElement::HeadingOffset(uint32 value) noexcept
   {
     Reflection::Reflect<uint32>(*this, u8"headingoffset", Krys::Move(value));
   }
