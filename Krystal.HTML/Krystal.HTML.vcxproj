@@ -39,6 +39,7 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\BoundaryPointComparator.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Algorithms\DOMTreeAccessors.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Attributes\EnumeratedAttributes.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\AttributeState.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLScriptElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\MicroParsers\MicroParserError.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\MicroParsers\MicroParserResult.hpp" />

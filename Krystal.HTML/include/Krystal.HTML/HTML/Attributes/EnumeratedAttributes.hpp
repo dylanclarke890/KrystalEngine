@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/HTML/Enums/AttributeState.hpp"
 #include "Krystal.HTML/HTML/HTMLElement.hpp"
 #include "Krystal.HTML/Types/DOMStringAtom.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
@@ -10,56 +11,116 @@
 
 namespace Krys::HTML::Attributes
 {
-  template <IsEnum TEnum>
   struct KeywordStateMapping
   {
-    DOMStringAtom Keyword;
-    TEnum State;
+    DOMStringAtom Keyword = DOMStringAtom::Null();
+    AttributeState State;
   };
+
+  struct StateKeywordMapping
+  {
+    AttributeState State;
+    DOMStringAtom Keyword = DOMStringAtom::Null();
+  };
+
+  KRYS_NODISCARD inline KeywordStateMapping TrueStateMapping() noexcept
+  {
+    return KeywordStateMapping {DOMStringAtom(u8"true"), AttributeState::True};
+  }
+
+  KRYS_NODISCARD inline KeywordStateMapping FalseStateMapping() noexcept
+  {
+    return KeywordStateMapping {DOMStringAtom(u8"false"), AttributeState::False};
+  }
+
+  KRYS_NODISCARD inline KeywordStateMapping YesStateMapping() noexcept
+  {
+    return KeywordStateMapping {DOMStringAtom(u8"yes"), AttributeState::Yes};
+  }
+
+  KRYS_NODISCARD inline KeywordStateMapping NoStateMapping() noexcept
+  {
+    return KeywordStateMapping {DOMStringAtom(u8"no"), AttributeState::No};
+  }
+
+  KRYS_NODISCARD inline KeywordStateMapping OnStateMapping() noexcept
+  {
+    return KeywordStateMapping {DOMStringAtom(u8"on"), AttributeState::On};
+  }
+
+  KRYS_NODISCARD inline KeywordStateMapping OffStateMapping() noexcept
+  {
+    return KeywordStateMapping {DOMStringAtom(u8"off"), AttributeState::Off};
+  }
+
+  KRYS_NODISCARD inline KeywordStateMapping NoneStateMapping() noexcept
+  {
+    return KeywordStateMapping {DOMStringAtom(u8"none"), AttributeState::None};
+  }
+
+  KRYS_NODISCARD inline KeywordStateMapping AutoStateMapping() noexcept
+  {
+    return KeywordStateMapping {DOMStringAtom(u8"auto"), AttributeState::Auto};
+  }
+
+  KRYS_NODISCARD inline KeywordStateMapping DefaultStateMapping() noexcept
+  {
+    return KeywordStateMapping {DOMStringAtom(u8"default"), AttributeState::Default};
+  }
+
+  KRYS_NODISCARD inline KeywordStateMapping InheritStateMapping() noexcept
+  {
+    return KeywordStateMapping {DOMStringAtom(u8"inherit"), AttributeState::Inherit};
+  }
+
+  template <size_t N>
+  using KeywordStateMappingArray = Array<KeywordStateMapping, N>;
+
+  template <size_t N>
+  using StateKeywordMappingArray = Array<StateKeywordMapping, N>;
 
   template <FixedString AttributeName, DerivedFrom<HTMLElement> TElement>
   struct EnumeratedAttributeTraits
   {
-    using StateEnum = void;
-    //
     // Must have:
-    // using StateEnum = TStateEnum;
-    //
-    // Must have:
-    // static inline Array<KeywordStateMapping<StateEnum>, 1> KeywordToStateMappings = { KeywordStateMapping
-    // {u8"ltr", StateEnum::LTR} };
+    // static inline KeywordStateMappingArray<1> StateMappings = { KeywordStateMapping {u8"ltr",
+    // AttributeState::LTR} };
     //
     // As needed:
-    // static inline Array<KeywordStateMapping<StateEnum>, 1> StateToCanonicalKeywordMappings = {
-    // KeywordStateMapping {u8"ltr", StateEnum::LTR} };
+    // static inline KeywordStateMappingArray<1> CanonicalMappings = { KeywordStateMapping {u8"ltr",
+    // AttributeState::LTR} };
     //
     // As needed:
-    // constexpr static StateEnum MissingValueDefault = StateEnum::RTL;
+    // constexpr static AttributeState MissingValueDefault = AttributeState::RTL;
     //
     // As needed:
-    // constexpr static StateEnum InvalidValueDefault = StateEnum::LTR;
+    // constexpr static AttributeState InvalidValueDefault = AttributeState::LTR;
     //
     // As needed:
-    // constexpr static StateEnum EmptyValueDefault = StateEnum::Auto;
+    // constexpr static AttributeState EmptyValueDefault = AttributeState::Auto;
   };
 
   template <typename Traits>
-  concept HasValidEnumeratedAttributeTraits = !Void<typename Traits::StateEnum>;
+  concept HasStateMappings = requires { Traits::StateMappings; };
 
   template <typename Traits>
-  concept HasKeywordToStateMappings = requires { Traits::KeywordToStateMappings; };
+  concept HasValidEnumeratedAttributeTraits = HasStateMappings<Traits>;
 
   template <typename Traits>
   concept HasMissingValueDefault = requires { Traits::MissingValueDefault; };
 
   template <typename Traits>
-  concept HasStateToCanonicalKeywordMappings = requires { Traits::StateToCanonicalKeywordMappings; };
+  concept HasCanonicalMappings = requires { Traits::CanonicalMappings; };
 
   template <typename Traits>
   concept HasInvalidValueDefault = requires { Traits::InvalidValueDefault; };
 
   template <typename Traits>
   concept HasEmptyValueDefault = requires { Traits::EmptyValueDefault; };
+
+  template <typename Traits>
+  concept CanReturnNullResolvedState =
+    !HasMissingValueDefault<Traits> || (!HasInvalidValueDefault<Traits> && !HasEmptyValueDefault<Traits>);
 
   template <FixedString AttributeName, DerivedFrom<HTMLElement> TElement>
   class EnumeratedAttribute
@@ -69,7 +130,7 @@ namespace Krys::HTML::Attributes
     static_assert(HasValidEnumeratedAttributeTraits<Traits>,
                   "Must define 'EnumeratedAttributeTraits' for this AttributeName/TElement.");
 
-    static_assert(HasKeywordToStateMappings<Traits>,
+    static_assert(HasStateMappings<Traits>,
                   "Enumerated attributes must have keyword to state mappings defined.");
 
   public:
@@ -77,19 +138,33 @@ namespace Krys::HTML::Attributes
     KRYS_NODISCARD static TContentAttributeValue ResolveCanonicalKeyword(Maybe<DOMString> &&value) noexcept
     {
       auto state = ResolveState(value);
-      if (state == Null)
+      if constexpr (CanReturnNullResolvedState<Traits>)
       {
-        if constexpr (SameType<TContentAttributeValue, Maybe<DOMString>>)
+        if (state == Null)
         {
-          return Null;
-        }
-        else
-        {
-          return DOMString {};
+          if constexpr (SameType<TContentAttributeValue, Maybe<DOMString>>)
+          {
+            return Null;
+          }
+          else
+          {
+            return DOMString {};
+          }
         }
       }
 
-      auto canonicalKeyword = ResolveCanonicalKeywordForState(*state);
+      auto canonicalKeyword = [&]()
+      {
+        if constexpr (CanReturnNullResolvedState<Traits>)
+        {
+          return ResolveCanonicalKeywordForState(*state);
+        }
+        else
+        {
+          return ResolveCanonicalKeywordForState(state);
+        }
+      }();
+
       if constexpr (SameType<TContentAttributeValue, Maybe<DOMString>>)
       {
         return canonicalKeyword == DOMStringAtom::Null() ? Null : DOMString(canonicalKeyword.View());
@@ -100,8 +175,8 @@ namespace Krys::HTML::Attributes
       }
     }
 
-  private:
-    KRYS_NODISCARD static Maybe<typename Traits::StateEnum>
+    KRYS_NODISCARD static conditional_t<CanReturnNullResolvedState<Traits>, Maybe<AttributeState>,
+                                        AttributeState>
       ResolveState(const Maybe<DOMString> &contentAttributeValue) noexcept
     {
       if (contentAttributeValue == Null)
@@ -111,12 +186,15 @@ namespace Krys::HTML::Attributes
           return Traits::MissingValueDefault;
         }
 
-        return Null;
+        if constexpr (CanReturnNullResolvedState<Traits>)
+        {
+          return Null;
+        }
       }
 
       auto &value = *contentAttributeValue;
 
-      auto keywordMappings = Traits::KeywordToStateMappings;
+      auto keywordMappings = Traits::StateMappings;
 
       auto it =
         std::find_if(keywordMappings.begin(), keywordMappings.end(), [&](auto &mapping)
@@ -140,26 +218,28 @@ namespace Krys::HTML::Attributes
         return Traits::InvalidValueDefault;
       }
 
-      return Null;
+      if constexpr (CanReturnNullResolvedState<Traits>)
+      {
+        return Null;
+      }
     }
 
-    KRYS_NODISCARD static DOMStringAtom
-      ResolveCanonicalKeywordForState(typename Traits::StateEnum state) noexcept
+    KRYS_NODISCARD static DOMStringAtom ResolveCanonicalKeywordForState(AttributeState state) noexcept
     {
-      if constexpr (HasStateToCanonicalKeywordMappings<Traits>)
+      if constexpr (HasCanonicalMappings<Traits>)
       {
-        auto &stateToKeywordMappings = Traits::StateToCanonicalKeywordMappings;
-        auto it = std::find_if(stateToKeywordMappings.begin(), stateToKeywordMappings.end(),
+        auto &canonicalMappings = Traits::CanonicalMappings;
+        auto it = std::find_if(canonicalMappings.begin(), canonicalMappings.end(),
                                [&](auto &mapping) { return mapping.State == state; });
 
-        if (it != stateToKeywordMappings.end())
+        if (it != canonicalMappings.end())
         {
           return it->Keyword;
         }
       }
       else
       {
-        auto &keywordToStateMappings = Traits::KeywordToStateMappings;
+        auto &keywordToStateMappings = Traits::StateMappings;
         auto it = std::find_if(keywordToStateMappings.begin(), keywordToStateMappings.end(),
                                [&](auto &mapping) { return mapping.State == state; });
 
@@ -172,38 +252,100 @@ namespace Krys::HTML::Attributes
       return DOMStringAtom::Null();
     }
   };
-}
-
-#pragma region EnumeratedAttributeTraits
-
-#pragma region Dir Attribute
-
-namespace Krys::HTML::Attributes
-{
-  enum class DirState : uint8
-  {
-    Undefined,
-    LTR,
-    RTL,
-    Auto
-  };
 
   template <>
   struct EnumeratedAttributeTraits<"dir", HTMLElement>
   {
-    using StateEnum = DirState;
+    static inline KeywordStateMappingArray<3> StateMappings = {
+      KeywordStateMapping {u8"ltr", AttributeState::LTR}, KeywordStateMapping {u8"rtl", AttributeState::RTL},
+      AutoStateMapping()};
 
-    static inline Array<KeywordStateMapping<DirState>, 3> KeywordToStateMappings = {
-      KeywordStateMapping {u8"ltr", DirState::LTR}, KeywordStateMapping {u8"rtl", DirState::RTL},
-      KeywordStateMapping {u8"auto", DirState::Auto}};
+    constexpr static AttributeState MissingValueDefault = AttributeState::Undefined;
+    constexpr static AttributeState InvalidValueDefault = AttributeState::Undefined;
+  };
 
-    constexpr static StateEnum MissingValueDefault = StateEnum::Undefined;
-    constexpr static StateEnum InvalidValueDefault = StateEnum::Undefined;
+  template <>
+  struct EnumeratedAttributeTraits<"translate", HTMLElement>
+  {
+    static inline KeywordStateMappingArray<2> StateMappings = {YesStateMapping(), NoStateMapping()};
+
+    constexpr static AttributeState MissingValueDefault = AttributeState::Inherit;
+    constexpr static AttributeState InvalidValueDefault = AttributeState::Inherit;
+    constexpr static AttributeState EmptyValueDefault = AttributeState::Yes;
+  };
+
+  template <>
+  struct EnumeratedAttributeTraits<"hidden", HTMLElement>
+  {
+    static inline KeywordStateMappingArray<2> StateMappings = {
+      KeywordStateMapping {u8"hidden", AttributeState::Hidden},
+      KeywordStateMapping {u8"until-found", AttributeState::UntilFound}};
+
+    constexpr static AttributeState MissingValueDefault = AttributeState::NotHidden;
+    constexpr static AttributeState InvalidValueDefault = AttributeState::Hidden;
+    constexpr static AttributeState EmptyValueDefault = AttributeState::Hidden;
+  };
+
+  template <>
+  struct EnumeratedAttributeTraits<"draggable", HTMLElement>
+  {
+    static inline KeywordStateMappingArray<2> StateMappings = {TrueStateMapping(), FalseStateMapping()};
+
+    constexpr static AttributeState MissingValueDefault = AttributeState::Auto;
+    constexpr static AttributeState InvalidValueDefault = AttributeState::Auto;
+  };
+
+  template <>
+  struct EnumeratedAttributeTraits<"spellcheck", HTMLElement>
+  {
+    static inline KeywordStateMappingArray<2> StateMappings = {TrueStateMapping(), FalseStateMapping()};
+
+    constexpr static AttributeState MissingValueDefault = AttributeState::Default;
+    constexpr static AttributeState InvalidValueDefault = AttributeState::Default;
+    constexpr static AttributeState EmptyValueDefault = AttributeState::True;
+  };
+
+  template <>
+  struct EnumeratedAttributeTraits<"writingsuggestions", HTMLElement>
+  {
+    static inline KeywordStateMappingArray<2> StateMappings = {TrueStateMapping(), FalseStateMapping()};
+
+    constexpr static AttributeState MissingValueDefault = AttributeState::Default;
+    constexpr static AttributeState InvalidValueDefault = AttributeState::Default;
+    constexpr static AttributeState EmptyValueDefault = AttributeState::True;
+  };
+
+  template <>
+  struct EnumeratedAttributeTraits<"autocapitalize", HTMLElement>
+  {
+    static inline KeywordStateMappingArray<6> StateMappings = {
+      KeywordStateMapping {u8"off", AttributeState::None},
+      KeywordStateMapping {u8"none", AttributeState::None},
+      KeywordStateMapping {u8"on", AttributeState::Sentences},
+      KeywordStateMapping {u8"sentences", AttributeState::Sentences},
+      KeywordStateMapping {u8"words", AttributeState::Words},
+      KeywordStateMapping {u8"characters", AttributeState::Characters},
+    };
+
+    static inline StateKeywordMappingArray<5> CanonicalMappings = {
+      StateKeywordMapping {AttributeState::Default, u8""},
+      StateKeywordMapping {AttributeState::None, u8"none"},
+      StateKeywordMapping {AttributeState::Sentences, u8"sentences"},
+      StateKeywordMapping {AttributeState::Words, u8"words"},
+      StateKeywordMapping {AttributeState::Characters, u8"characters"},
+    };
+
+    constexpr static AttributeState MissingValueDefault = AttributeState::Default;
+    constexpr static AttributeState InvalidValueDefault = AttributeState::Sentences;
+  };
+
+  template <>
+  struct EnumeratedAttributeTraits<"autocorrect", HTMLElement>
+  {
+    static inline KeywordStateMappingArray<2> StateMappings = {OnStateMapping(), OffStateMapping()};
+
+    constexpr static AttributeState MissingValueDefault = AttributeState::On;
+    constexpr static AttributeState InvalidValueDefault = AttributeState::On;
+    constexpr static AttributeState EmptyValueDefault = AttributeState::On;
   };
 }
-
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::Attributes::DirState, 4uz);
-
-#pragma endregion
-
-#pragma endregion

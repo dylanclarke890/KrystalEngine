@@ -608,8 +608,7 @@ namespace Krys::HTML::Attributes
 #pragma region HTMLElement ReflectTarget
 
     /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#get-the-element
-    template <DerivedFrom<HTMLElement> TElement>
-    KRYS_NODISCARD static RawPtr<TElement> GetElement(TElement &element) noexcept
+    KRYS_NODISCARD static RawPtr<HTMLElement> GetElement(HTMLElement &element) noexcept
     {
       return &element;
     }

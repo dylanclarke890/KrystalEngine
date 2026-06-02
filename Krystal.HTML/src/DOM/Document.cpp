@@ -432,10 +432,7 @@ namespace Krys::HTML
       return {};
     }
 
-    using namespace Attributes;
-
-    auto value = Reflection::Reflect<DOMString>(*html, u8"dir");
-    return EnumeratedAttribute<"dir", HTMLElement>::ResolveCanonicalKeyword<DOMString>(Krys::Move(value));
+    return html->Dir();
   }
 
   void Document::Dir(DOMString &&value) noexcept
@@ -446,7 +443,7 @@ namespace Krys::HTML
       return;
     }
 
-    Attributes::Reflection::Reflect<DOMString>(*html, u8"dir", Krys::Move(value));
+    html->Dir(Krys::Move(value));
   }
 
   RefPtr<HTMLBodyElement> Document::Body() noexcept
