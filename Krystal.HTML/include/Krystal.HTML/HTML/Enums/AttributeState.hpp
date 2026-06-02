@@ -28,7 +28,9 @@ namespace Krys::HTML::Attributes
     UntilFound,
     Sentences,
     Words,
-    Characters
+    Characters,
+    High,
+    Low,
   };
 }
 

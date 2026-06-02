@@ -135,11 +135,6 @@ namespace Krys::Tests
         REQUIRE_THAT(Reflection::Reflect<double>(*data.Element, TestAttribute),
                      Catch::Matchers::WithinRel(-3.14159265359));
       }
-
-      SECTION("DOMTokenList")
-      {
-        // TODO(DOMTokenList) - implement when DOMTokenList reflection is implemented.
-      }
     }
 
     SECTION("[Reflect][ReflectDefault]")

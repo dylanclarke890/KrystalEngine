@@ -348,4 +348,17 @@ namespace Krys::HTML::Attributes
     constexpr static AttributeState InvalidValueDefault = AttributeState::On;
     constexpr static AttributeState EmptyValueDefault = AttributeState::On;
   };
+
+  template <>
+  struct EnumeratedAttributeTraits<"fetchpriority", HTMLElement>
+  {
+    static inline KeywordStateMappingArray<3> StateMappings = {
+      KeywordStateMapping {u8"low", AttributeState::Low},
+      KeywordStateMapping {u8"high", AttributeState::High},
+      KeywordStateMapping {u8"auto", AttributeState::Auto},
+    };
+
+    constexpr static AttributeState MissingValueDefault = AttributeState::Auto;
+    constexpr static AttributeState InvalidValueDefault = AttributeState::Auto;
+  };
 }

@@ -12,6 +12,9 @@ namespace Krys::HTML
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLLinkElement);
 
   private:
+    UniquePtr<DOMTokenList> _relList;
+    UniquePtr<DOMTokenList> _sizes;
+    UniquePtr<DOMTokenList> _blocking;
     /// @see https://html.spec.whatwg.org/#explicitly-enabled
     bool _explicitlyEnabled {false};
 
@@ -44,9 +47,8 @@ namespace Krys::HTML
     /// @see https://html.spec.whatwg.org/#dom-link-as
     void As(DOMString &&value) noexcept;
 
-    // TODO(HTMLLINKELEMENT, HTML): Implement the rel DOMTokenList method.
     /// @see https://html.spec.whatwg.org/#dom-link-rellist
-    // [SameObject, PutForwards=value, Reflect="rel"] readonly attribute DOMTokenList relList;
+    KRYS_NODISCARD DOMTokenList &RelList() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-media
     KRYS_NODISCARD DOMString Media() const noexcept;
@@ -72,9 +74,8 @@ namespace Krys::HTML
     /// @see https://html.spec.whatwg.org/#dom-link-type
     void Type(DOMString &&value) noexcept;
 
-    // TODO(HTMLLINKELEMENT, HTML): Implement the sizes DOMTokenList method.
     /// @see https://html.spec.whatwg.org/#dom-link-sizes
-    // [SameObject, PutForwards=value, Reflect] readonly attribute DOMTokenList sizes;
+    KRYS_NODISCARD DOMTokenList &Sizes() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-imagesrcset
     KRYS_NODISCARD ExceptionOr<USVString> ImageSrcset() const noexcept;
@@ -94,9 +95,8 @@ namespace Krys::HTML
     /// @see https://html.spec.whatwg.org/#dom-link-referrerpolicy
     void ReferrerPolicy(DOMString &&value) noexcept;
 
-    // TODO(HTMLLINKELEMENT, HTML): Implement the blocking DOMTokenList method.
     /// @see https://html.spec.whatwg.org/#dom-link-blocking
-    // [SameObject, PutForwards=value, Reflect] readonly attribute DOMTokenList blocking;
+    KRYS_NODISCARD DOMTokenList &Blocking() noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-link-disabled
     KRYS_NODISCARD bool Disabled() const noexcept;

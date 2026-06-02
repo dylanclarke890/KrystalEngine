@@ -28,7 +28,7 @@ namespace Krys::HTML
   /// @see https://dom.spec.whatwg.org/#interface-domtokenlist
   class DOMTokenList
   {
-    friend class Element;
+    friend class ElementAlgorithms;
     friend class ExtensibilityHooks;
     friend class HTMLCollectionAlgorithms;
 

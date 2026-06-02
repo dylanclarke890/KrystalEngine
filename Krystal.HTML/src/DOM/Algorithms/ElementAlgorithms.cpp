@@ -325,4 +325,11 @@ namespace Krys::HTML
 
     return {};
   }
+
+  UniquePtr<DOMTokenList>
+    ElementAlgorithms::CreateDOMTokenList(Element &element, DOMStringAtom attributeName,
+                                          IsSupportedTokenFunction &&isSupportedToken) noexcept
+  {
+    return UniquePtr<DOMTokenList>(new DOMTokenList(element, attributeName, Krys::Move(isSupportedToken)));
+  }
 }

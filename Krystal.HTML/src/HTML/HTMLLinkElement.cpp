@@ -1,5 +1,6 @@
 ﻿#include "Krystal.HTML/HTML/HTMLLinkElement.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
+#include "Krystal.HTML/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/HTML/Attributes/Reflection.hpp"
@@ -56,6 +57,16 @@ namespace Krys::HTML
     Attributes::Reflection::Reflect<DOMString>(*this, u8"as", Krys::Move(value));
   }
 
+  KRYS_NODISCARD DOMTokenList &HTMLLinkElement::RelList() noexcept
+  {
+    if (!_relList)
+    {
+      _relList = ElementAlgorithms::CreateDOMTokenList(*this, u8"rellist");
+    }
+
+    return *_relList;
+  }
+
   DOMString HTMLLinkElement::Media() const noexcept
   {
     return Attributes::Reflection::Reflect<DOMString>(*this, u8"media").value_or(u8"");
@@ -96,6 +107,16 @@ namespace Krys::HTML
     Attributes::Reflection::Reflect<DOMString>(*this, u8"type", Krys::Move(value));
   }
 
+  KRYS_NODISCARD DOMTokenList &HTMLLinkElement::Sizes() noexcept
+  {
+    if (!_sizes)
+    {
+      _sizes = ElementAlgorithms::CreateDOMTokenList(*this, u8"sizes");
+    }
+
+    return *_sizes;
+  }
+
   ExceptionOr<USVString> HTMLLinkElement::ImageSrcset() const noexcept
   {
     return Attributes::Reflection::Reflect<USVString>(*this, u8"imagesrcset");
@@ -125,6 +146,16 @@ namespace Krys::HTML
   void HTMLLinkElement::ReferrerPolicy(DOMString &&value) noexcept
   {
     Attributes::Reflection::Reflect<DOMString>(*this, u8"referrerpolicy", Krys::Move(value));
+  }
+
+  KRYS_NODISCARD DOMTokenList &HTMLLinkElement::Blocking() noexcept
+  {
+    if (!_blocking)
+    {
+      _blocking = ElementAlgorithms::CreateDOMTokenList(*this, u8"blocking");
+    }
+
+    return *_blocking;
   }
 
   bool HTMLLinkElement::Disabled() const noexcept

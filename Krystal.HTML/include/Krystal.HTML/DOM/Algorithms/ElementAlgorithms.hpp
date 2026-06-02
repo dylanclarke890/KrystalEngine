@@ -1,6 +1,10 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/DOM/DOMTokenList.hpp"
 #include "Krystal.HTML/DOM/Enums/InsertAdjacentWhere.hpp"
+#include "Krystal.HTML/Types/ExceptionOr.hpp"
+#include "Krystal.Lib/Pointers/RawPtr.hpp"
+#include "Krystal.Lib/Pointers/UniquePtr.hpp"
 
 namespace Krys::HTML
 {
@@ -68,5 +72,11 @@ namespace Krys::HTML
                                                              DelegatesFocus delegatesFocus,
                                                              SlotAssignmentMode slotAssignment,
                                                              RawPtr<CustomElementRegistry> registry) noexcept;
+
+    /// @brief Helper method for creating a new DOMTokenList bound to an element and attribute, optionally
+    /// with a function to filter new values to only supported values.
+    KRYS_NODISCARD static UniquePtr<DOMTokenList> CreateDOMTokenList(
+      Element &element, DOMStringAtom attributeName,
+      IsSupportedTokenFunction &&isSupportedToken = DefaultIsSupportedTokenFunction) noexcept;
   };
 }

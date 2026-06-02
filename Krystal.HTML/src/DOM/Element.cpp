@@ -71,7 +71,7 @@ namespace Krys::HTML
   {
     if (_domTokenList == nullptr)
     {
-      _domTokenList = UniquePtr<DOMTokenList>(new DOMTokenList(*this, u8"class"));
+      _domTokenList = ElementAlgorithms::CreateDOMTokenList(*this, u8"class");
     }
 
     return *_domTokenList;

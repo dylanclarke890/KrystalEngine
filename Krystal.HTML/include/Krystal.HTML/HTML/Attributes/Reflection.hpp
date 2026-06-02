@@ -26,9 +26,10 @@ namespace Krys::HTML::Attributes
   concept ReflectURLType = OneOf<T, USVString>;
 
   // TODO(CONTENT-ATTRIBUTE-REFLECTION, HTML): FrozenArray<T>? is also one of the possible types.
+  // NOTE: DOMTokenList is also a possible type for reflection but it just consists of returning a
+  // DOMTokenList, would be harder to handle here.
   template <typename T>
-  concept ReflectType =
-    ReflectTypeDOMString<T> || ReflectURLType<T> || OneOf<T, bool, int32, uint32, double, DOMTokenList>;
+  concept ReflectType = ReflectTypeDOMString<T> || ReflectURLType<T> || OneOf<T, bool, int32, uint32, double>;
 
   template <typename T>
   concept ReflectNonNegativeType = OneOf<T, int32>;
@@ -85,7 +86,7 @@ namespace Krys::HTML::Attributes
 
   /// @brief Types that unconditionally return exceptions during reflection.
   template <typename T>
-  concept ReflectAlwaysReturnsExceptionOrT = OneOf<T, USVString, DOMTokenList>;
+  concept ReflectAlwaysReturnsExceptionOrT = OneOf<T, USVString>;
 
   template <typename T>
   using reflect_get_return_t =
@@ -174,10 +175,6 @@ namespace Krys::HTML::Attributes
       {
         return ReflectDouble<OnlyPositiveNumbers(false), NoDefaultValue<double>>(target, name);
       }
-      else if constexpr (SameType<TValue, DOMTokenList>)
-      {
-        return ReflectDOMTokenList(target, name);
-      }
       else
       {
         static_assert(DependentFalse<TValue>, "Unknown type for [Reflect] (getter)");
@@ -217,10 +214,6 @@ namespace Krys::HTML::Attributes
       else if constexpr (SameType<TValue, double>)
       {
         ReflectDouble<OnlyPositiveNumbers(false)>(target, name, value);
-      }
-      else if constexpr (SameType<TValue, DOMTokenList>)
-      {
-        return ReflectDOMTokenList(target, name, value);
       }
       else
       {
@@ -992,28 +985,6 @@ namespace Krys::HTML::Attributes
 
       DOMStringView u8view(reinterpret_cast<const char8 *>(buffer), ptr - buffer);
       SetContentAttribute(target, name, DOMString(u8view));
-    }
-
-#pragma endregion
-
-#pragma region ReflectDOMTokenList
-
-    // NOTE: These methods can only reflect 'HTMLElement' target as per the spec.
-
-    /// @brief Helper for getting reflected content attributes with 'DOMTokenList' type.
-    KRYS_NODISCARD static ExceptionOr<DOMTokenList &> ReflectDOMTokenList(const HTMLElement &target,
-                                                                          DOMStringAtom name) noexcept
-    {
-      // TODO(CONTENT-ATTRIBUTE-REFLECTION)
-      return ExceptionCode::NotSupportedError;
-    }
-
-    /// @brief Helper for setting reflected content attributes with 'DOMTokenList' type.
-    KRYS_NODISCARD static ExceptionOr<void> ReflectDOMTokenList(HTMLElement &target,
-                                                                DOMTokenList &value) noexcept
-    {
-      // TODO(CONTENT-ATTRIBUTE-REFLECTION)
-      return ExceptionCode::NotSupportedError;
     }
 
 #pragma endregion
