@@ -4,7 +4,7 @@
 
 namespace Krys::HTML::Attributes
 {
-  /// @see A general-purpose enum for all attribute states defined by the HTML spec.
+  /// @see A general-purpose enum for all attribute states defined by the HTML spec. May split this out later.
   enum class AttributeState : uint8
   {
     // General-purpose states

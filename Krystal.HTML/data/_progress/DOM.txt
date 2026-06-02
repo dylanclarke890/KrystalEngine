@@ -173,4 +173,3 @@
 6.3 Interface NodeFilter - https://dom.spec.whatwg.org/#interface-nodefilter
   - Filter - Supported but a bit clunky to use.
      - https://dom.spec.whatwg.org/#concept-node-filter
-

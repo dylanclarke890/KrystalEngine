@@ -11,6 +11,16 @@ namespace Krys::HTML
 
   public:
     HTMLHtmlElement(Document &document) noexcept;
+
+#pragma region HTMLHtmlElement Obsolete members - https://html.spec.whatwg.org/#HTMLHtmlElement-partial
+
+    /// @see https://html.spec.whatwg.org/#dom-html-version
+    KRYS_NODISCARD DOMString Version() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-html-version
+    void Version(DOMString &&value) noexcept;
+
+#pragma endregion
   };
 }
 
