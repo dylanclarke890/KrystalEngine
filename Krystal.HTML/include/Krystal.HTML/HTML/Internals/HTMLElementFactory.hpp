@@ -14,6 +14,6 @@ namespace Krys::HTML
   class HTMLElementFactory
   {
   public:
-    KRYS_NODISCARD static RefPtr<HTMLElement> TryCreate(Document &document, DOMStringAtom localName) noexcept;
+    KRYS_NODISCARD static Ref<HTMLElement> Create(Document &document, DOMStringAtom localName) noexcept;
   };
 }

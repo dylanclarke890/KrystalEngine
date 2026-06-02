@@ -32,7 +32,7 @@ namespace Krys::HTML
 
       if (result == nullptr)
       {
-        result = HTMLElementFactory::TryCreate(document, name.LocalName);
+        result = HTMLElementFactory::Create(document, name.LocalName);
         if (NameValidation::IsValidCustomElementName(name.LocalName.View()) || is != DOMStringAtom::Null())
         {
           result->_customElementState = CustomElementState::Undefined;

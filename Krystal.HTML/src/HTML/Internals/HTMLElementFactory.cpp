@@ -16,7 +16,7 @@
 
 namespace Krys::HTML
 {
-  RefPtr<HTMLElement> HTMLElementFactory::TryCreate(Document &document, DOMStringAtom localName) noexcept
+  Ref<HTMLElement> HTMLElementFactory::Create(Document &document, DOMStringAtom localName) noexcept
   {
     auto tagName = TryParseHTMLTagName(Krys::Text::ToASCIIUppercase(localName.View()));
 

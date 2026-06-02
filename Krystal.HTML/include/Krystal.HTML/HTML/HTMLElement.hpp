@@ -147,6 +147,11 @@ namespace Krys::HTML
 
 #pragma endregion
 
+    // TODO(HTMLELEMENT, HTML): HTMLElement mixins:
+    // HTMLElement includes GlobalEventHandlers;
+    // HTMLElement includes ElementContentEditable;
+    // HTMLElement includes HTMLOrSVGOrMathMLElement;
+
   protected:
 #pragma region Type Checks
 
