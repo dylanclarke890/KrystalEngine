@@ -12,6 +12,8 @@ namespace Krys::HTML
   {
   }
 
+#pragma region HTMLHtmlElement Obsolete members
+
   DOMString HTMLHtmlElement::Version() const noexcept
   {
     return Attributes::Reflection::Reflect<DOMString>(*this, u8"version").value_or(u8"");
@@ -21,4 +23,6 @@ namespace Krys::HTML
   {
     Attributes::Reflection::Reflect<DOMString>(*this, u8"version", Krys::Move(value));
   }
+
+#pragma endregion
 }

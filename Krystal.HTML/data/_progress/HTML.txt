@@ -25,6 +25,10 @@
 3.2.6.6 Embedding custom non-visible data with the data-* attributes - https://html.spec.whatwg.org/#embedding-custom-non-visible-data-with-the-data-*-attributes
   - Defines the data-* attributes and the DOMStringMap API for accessing them.
 
+4.2.4 The link element
+  - DOMTokenList IDL attributes have not been implemented
+  - some of the attributes of this element are limited to known values but I don't know what they are.
+
 TODO:
 - Whenever a render-blocking element el becomes browsing-context disconnected, or el's blocking attribute's value is changed so that
   el is no longer potentially render-blocking, then unblock rendering on el.

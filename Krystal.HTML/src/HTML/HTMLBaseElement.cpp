@@ -12,6 +12,8 @@ namespace Krys::HTML
   {
   }
 
+#pragma region HTMLBaseElement
+
   USVString HTMLBaseElement::Href() const noexcept
   {
     // TODO(URL, HTML): implement the Href() getter method
@@ -32,4 +34,6 @@ namespace Krys::HTML
   {
     Attributes::Reflection::Reflect<DOMString>(*this, u8"target", Krys::Move(value));
   }
+
+#pragma endregion
 }

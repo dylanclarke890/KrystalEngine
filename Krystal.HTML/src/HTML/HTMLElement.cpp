@@ -12,8 +12,6 @@
 
 namespace Krys::HTML
 {
-  using namespace Attributes;
-
   HTMLElement::HTMLElement(Document &document, HTMLTagName tag, NodeFlags flags) noexcept
       : Element(document, flags | NodeFlags::IsHTMLElement), _tagName(tag)
   {
@@ -27,58 +25,59 @@ namespace Krys::HTML
 
   DOMString HTMLElement::Title() const noexcept
   {
-    return Reflection::Reflect<DOMString>(*this, u8"title").value_or(u8"");
+    return Attributes::Reflection::Reflect<DOMString>(*this, u8"title").value_or(u8"");
   }
 
   void HTMLElement::Title(DOMString &&value) noexcept
   {
-    Reflection::Reflect<DOMString>(*this, u8"title", Krys::Move(value));
+    Attributes::Reflection::Reflect<DOMString>(*this, u8"title", Krys::Move(value));
   }
 
   DOMString HTMLElement::Lang() const noexcept
   {
-    return Reflection::Reflect<DOMString>(*this, u8"lang").value_or(u8"");
+    return Attributes::Reflection::Reflect<DOMString>(*this, u8"lang").value_or(u8"");
   }
 
   void HTMLElement::Lang(DOMString &&value) noexcept
   {
-    Reflection::Reflect<DOMString>(*this, u8"lang", Krys::Move(value));
+    Attributes::Reflection::Reflect<DOMString>(*this, u8"lang", Krys::Move(value));
   }
 
   bool HTMLElement::Translate() const noexcept
   {
-    auto value = Reflection::Reflect<DOMString>(*this, u8"translate");
-    auto state = EnumeratedAttribute<"translate", HTMLElement>::ResolveState(value);
-    return state == AttributeState::Yes;
+    auto value = Attributes::Reflection::Reflect<DOMString>(*this, u8"translate");
+    auto state = Attributes::EnumeratedAttribute<"translate", HTMLElement>::ResolveState(value);
+    return state == Attributes::AttributeState::Yes;
   }
 
   void HTMLElement::Translate(bool value) noexcept
   {
-    Reflection::Reflect<DOMString>(*this, u8"translate", value ? u8"yes" : u8"no");
+    Attributes::Reflection::Reflect<DOMString>(*this, u8"translate", value ? u8"yes" : u8"no");
   }
 
   DOMString HTMLElement::Dir() const noexcept
   {
-    auto value = Reflection::Reflect<DOMString>(*this, u8"dir");
-    return EnumeratedAttribute<"dir", HTMLElement>::ResolveCanonicalKeyword<DOMString>(Krys::Move(value));
+    auto value = Attributes::Reflection::Reflect<DOMString>(*this, u8"dir");
+    return Attributes::EnumeratedAttribute<"dir", HTMLElement>::ResolveCanonicalKeyword<DOMString>(
+      Krys::Move(value));
   }
 
   void HTMLElement::Dir(DOMString &&value) noexcept
   {
-    Reflection::Reflect<DOMString>(*this, u8"dir", Krys::Move(value));
+    Attributes::Reflection::Reflect<DOMString>(*this, u8"dir", Krys::Move(value));
   }
 
   BoolOr<DOMString> HTMLElement::Hidden() const noexcept
   {
-    auto value = Reflection::Reflect<DOMString>(*this, u8"hidden");
+    auto value = Attributes::Reflection::Reflect<DOMString>(*this, u8"hidden");
 
-    auto state = EnumeratedAttribute<"hidden", HTMLElement>::ResolveState(value);
-    if (state == AttributeState::UntilFound)
+    auto state = Attributes::EnumeratedAttribute<"hidden", HTMLElement>::ResolveState(value);
+    if (state == Attributes::AttributeState::UntilFound)
     {
       return u8"until-found";
     }
 
-    return state == AttributeState::Hidden;
+    return state == Attributes::AttributeState::Hidden;
   }
 
   void HTMLElement::Hidden(DOMString &&value) noexcept
@@ -127,12 +126,12 @@ namespace Krys::HTML
 
   bool HTMLElement::Inert() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"inert");
+    return Attributes::Reflection::Reflect<bool>(*this, u8"inert");
   }
 
   void HTMLElement::Inert(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"inert", Krys::Move(value));
+    Attributes::Reflection::Reflect<bool>(*this, u8"inert", Krys::Move(value));
   }
 
   void HTMLElement::Click() noexcept
@@ -147,12 +146,12 @@ namespace Krys::HTML
 
   DOMString HTMLElement::AccessKey() const noexcept
   {
-    return Reflection::Reflect<DOMString>(*this, u8"accesskey").value_or(u8"");
+    return Attributes::Reflection::Reflect<DOMString>(*this, u8"accesskey").value_or(u8"");
   }
 
   void HTMLElement::AccessKey(DOMString &&value) noexcept
   {
-    Reflection::Reflect<DOMString>(*this, u8"accesskey", Krys::Move(value));
+    Attributes::Reflection::Reflect<DOMString>(*this, u8"accesskey", Krys::Move(value));
   }
 
   DOMString HTMLElement::AccessKeyLabel() const noexcept
@@ -163,12 +162,12 @@ namespace Krys::HTML
 
   bool HTMLElement::Draggable() const noexcept
   {
-    auto value = Reflection::Reflect<DOMString>(*this, u8"draggable");
-    switch (EnumeratedAttribute<"draggable", HTMLElement>::ResolveState(value))
+    auto value = Attributes::Reflection::Reflect<DOMString>(*this, u8"draggable");
+    switch (Attributes::EnumeratedAttribute<"draggable", HTMLElement>::ResolveState(value))
     {
-      case AttributeState::True:  return true;
-      case AttributeState::False: return false;
-      case AttributeState::Auto:
+      case Attributes::AttributeState::True: return true;
+      case Attributes::AttributeState::False: return false;
+      case Attributes::AttributeState::Auto:
       {
         // TODO(HTMLELEMENT, DRAGGABLE, HTML): Implement auto behavior for Draggable() getter.
         //  If the element is an img element, an object element that represents an image, or an a element with
@@ -188,12 +187,12 @@ namespace Krys::HTML
 
   bool HTMLElement::SpellCheck() const noexcept
   {
-    auto value = Reflection::Reflect<DOMString>(*this, u8"spellcheck");
-    switch (EnumeratedAttribute<"spellcheck", HTMLElement>::ResolveState(value))
+    auto value = Attributes::Reflection::Reflect<DOMString>(*this, u8"spellcheck");
+    switch (Attributes::EnumeratedAttribute<"spellcheck", HTMLElement>::ResolveState(value))
     {
-      case AttributeState::True:  return true;
-      case AttributeState::False: return false;
-      case AttributeState::Default:
+      case Attributes::AttributeState::True: return true;
+      case Attributes::AttributeState::False: return false;
+      case Attributes::AttributeState::Default:
       {
         // TODO(HTMLELEMENT, SPELLCHECK, HTML): Implement default behavior for SpellCheck() getter.
         // The spellcheck IDL attribute, on getting, must return true if the element's spellcheck content
@@ -223,7 +222,7 @@ namespace Krys::HTML
 
   void HTMLElement::WritingSuggestions(DOMString &&value) noexcept
   {
-    Reflection::ReflectSetter(*this, u8"writingsuggestions", Krys::Move(value));
+    Attributes::Reflection::ReflectSetter(*this, u8"writingsuggestions", Krys::Move(value));
   }
 
   DOMString HTMLElement::Autocapitalize() const noexcept
@@ -239,7 +238,7 @@ namespace Krys::HTML
 
   void HTMLElement::Autocapitalize(DOMString &&value) noexcept
   {
-    Reflection::ReflectSetter(*this, u8"autocapitalize", Krys::Move(value));
+    Attributes::Reflection::ReflectSetter(*this, u8"autocapitalize", Krys::Move(value));
   }
 
   bool HTMLElement::Autocorrect() const noexcept
@@ -285,22 +284,23 @@ namespace Krys::HTML
 
   uint32 HTMLElement::HeadingOffset() const noexcept
   {
-    return Reflection::Reflect<uint32, ReflectRange<uint32>(0u, 8u)>(*this, u8"headingoffset");
+    return Attributes::Reflection::Reflect<uint32, Attributes::ReflectRange<uint32>(0u, 8u)>(
+      *this, u8"headingoffset");
   }
 
   void HTMLElement::HeadingOffset(uint32 value) noexcept
   {
-    Reflection::Reflect<uint32>(*this, u8"headingoffset", Krys::Move(value));
+    Attributes::Reflection::Reflect<uint32>(*this, u8"headingoffset", Krys::Move(value));
   }
 
   bool HTMLElement::HeadingReset() const noexcept
   {
-    return Reflection::Reflect<bool>(*this, u8"headingreset");
+    return Attributes::Reflection::Reflect<bool>(*this, u8"headingreset");
   }
 
   void HTMLElement::HeadingReset(bool value) noexcept
   {
-    Reflection::Reflect<bool>(*this, u8"headingreset", Krys::Move(value));
+    Attributes::Reflection::Reflect<bool>(*this, u8"headingreset", Krys::Move(value));
   }
 
 #pragma endregion

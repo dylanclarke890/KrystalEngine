@@ -25,7 +25,7 @@ namespace Krys::HTML::Attributes
   template <typename T>
   concept ReflectURLType = OneOf<T, USVString>;
 
-  // TODO(CONTENT-ATTRIBUTE-REFLECTION): FrozenArray<T>? is also one of the possible types.
+  // TODO(CONTENT-ATTRIBUTE-REFLECTION, HTML): FrozenArray<T>? is also one of the possible types.
   template <typename T>
   concept ReflectType =
     ReflectTypeDOMString<T> || ReflectURLType<T> || OneOf<T, bool, int32, uint32, double, DOMTokenList>;
