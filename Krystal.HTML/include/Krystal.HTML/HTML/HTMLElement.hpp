@@ -3,7 +3,7 @@
 #include "Krystal.HTML/DOM/Element.hpp"
 #include "Krystal.HTML/HTML/Dicts/ShowPopoverOptions.hpp"
 #include "Krystal.HTML/HTML/Dicts/TogglePopoverOptions.hpp"
-#include "Krystal.HTML/HTML/HTMLTagName.hpp"
+#include "Krystal.HTML/HTML/Enums/DOMInterface.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
 
 namespace Krys::HTML
@@ -18,9 +18,9 @@ namespace Krys::HTML
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLElement);
 
   protected:
-    HTMLTagName _tagName {HTMLTagName::Unknown};
+    DOMInterface _interface {DOMInterface::HTMLElement};
 
-    HTMLElement(Document &document, HTMLTagName tag, NodeFlags flags = NodeFlags::None) noexcept;
+    HTMLElement(Document &document, DOMInterface interface, NodeFlags flags = NodeFlags::None) noexcept;
 
   public:
     HTMLElement(Document &document) noexcept;
@@ -157,54 +157,59 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool IsHTMLBaseElement() const noexcept
     {
-      return _tagName == HTMLTagName::Base;
+      return _interface == DOMInterface::Base;
     }
 
     KRYS_NODISCARD bool IsHTMLBodyElement() const noexcept
     {
-      return _tagName == HTMLTagName::Body;
+      return _interface == DOMInterface::Body;
     }
 
     KRYS_NODISCARD bool IsHTMLHeadElement() const noexcept
     {
-      return _tagName == HTMLTagName::Head;
+      return _interface == DOMInterface::Head;
+    }
+
+    KRYS_NODISCARD bool IsHTMLHeadingElement() const noexcept
+    {
+      return _interface == DOMInterface::Heading;
     }
 
     KRYS_NODISCARD bool IsHTMLHtmlElement() const noexcept
     {
-      return _tagName == HTMLTagName::Html;
+      return _interface == DOMInterface::Html;
     }
 
     KRYS_NODISCARD bool IsHTMLLinkElement() const noexcept
     {
-      return _tagName == HTMLTagName::Link;
+      return _interface == DOMInterface::Link;
     }
 
     KRYS_NODISCARD bool IsHTMLMetaElement() const noexcept
     {
-      return _tagName == HTMLTagName::Meta;
+      return _interface == DOMInterface::Meta;
     }
 
     KRYS_NODISCARD bool IsHTMLPreElement() const noexcept
     {
-      return _tagName == HTMLTagName::Pre;
+      return _interface == DOMInterface::Pre;
     }
 
     // NOTE: HTMLSlotElement type check is not needed here as Node already has it.
 
     KRYS_NODISCARD bool IsHTMLStyleElement() const noexcept
     {
-      return _tagName == HTMLTagName::Style;
+      return _interface == DOMInterface::Style;
     }
 
     KRYS_NODISCARD bool IsHTMLScriptElement() const noexcept
     {
-      return _tagName == HTMLTagName::Script;
+      return _interface == DOMInterface::Script;
     }
 
     KRYS_NODISCARD bool IsHTMLTitleElement() const noexcept
     {
-      return _tagName == HTMLTagName::Title;
+      return _interface == DOMInterface::Title;
     }
 
     // NOTE: HTMLUnknownElement type check is not needed here as Node already has it.

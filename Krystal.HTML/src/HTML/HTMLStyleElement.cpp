@@ -9,7 +9,7 @@
 
 namespace Krys::HTML
 {
-  HTMLStyleElement::HTMLStyleElement(Document &document) noexcept : HTMLElement(document, HTMLTagName::Style)
+  HTMLStyleElement::HTMLStyleElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Style)
   {
   }
 

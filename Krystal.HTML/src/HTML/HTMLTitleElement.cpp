@@ -9,7 +9,7 @@
 
 namespace Krys::HTML
 {
-  HTMLTitleElement::HTMLTitleElement(Document &document) noexcept : HTMLElement(document, HTMLTagName::Title)
+  HTMLTitleElement::HTMLTitleElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Title)
   {
   }
 

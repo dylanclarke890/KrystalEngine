@@ -9,7 +9,7 @@ namespace Krys::HTML
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLScriptElement);
 
   public:
-    HTMLScriptElement(Document &document) noexcept : HTMLElement(document, HTMLTagName::Script)
+    HTMLScriptElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Script)
     {
     }
   };

@@ -7,7 +7,7 @@
 
 namespace Krys::HTML
 {
-  HTMLHeadElement::HTMLHeadElement(Document &document) noexcept : HTMLElement(document, HTMLTagName::Head)
+  HTMLHeadElement::HTMLHeadElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Head)
   {
   }
 }

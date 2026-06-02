@@ -336,7 +336,7 @@
     <ClInclude Include="include\Krystal.HTML\DOM\XMLDocument.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\HTML\HTMLTagName.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\HTMLTagName.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\ElementCreationOptions.hpp">
@@ -574,6 +574,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\AttributeState.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLHeadingElement.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\DOMInterface.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -816,6 +822,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\DOM\Dicts\StaticRangeInit.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HTML\HTMLHeadingElement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

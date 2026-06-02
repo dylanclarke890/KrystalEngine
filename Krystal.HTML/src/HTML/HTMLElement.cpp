@@ -12,12 +12,12 @@
 
 namespace Krys::HTML
 {
-  HTMLElement::HTMLElement(Document &document, HTMLTagName tag, NodeFlags flags) noexcept
-      : Element(document, flags | NodeFlags::IsHTMLElement), _tagName(tag)
+  HTMLElement::HTMLElement(Document &document, DOMInterface interface, NodeFlags flags) noexcept
+      : Element(document, flags | NodeFlags::IsHTMLElement), _interface(interface)
   {
   }
 
-  HTMLElement::HTMLElement(Document &document) noexcept : HTMLElement(document, HTMLTagName::Unknown)
+  HTMLElement::HTMLElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Unknown)
   {
   }
 
@@ -165,7 +165,7 @@ namespace Krys::HTML
     auto value = Attributes::Reflection::Reflect<DOMString>(*this, u8"draggable");
     switch (Attributes::EnumeratedAttribute<"draggable", HTMLElement>::ResolveState(value))
     {
-      case Attributes::AttributeState::True: return true;
+      case Attributes::AttributeState::True:  return true;
       case Attributes::AttributeState::False: return false;
       case Attributes::AttributeState::Auto:
       {
@@ -190,7 +190,7 @@ namespace Krys::HTML
     auto value = Attributes::Reflection::Reflect<DOMString>(*this, u8"spellcheck");
     switch (Attributes::EnumeratedAttribute<"spellcheck", HTMLElement>::ResolveState(value))
     {
-      case Attributes::AttributeState::True: return true;
+      case Attributes::AttributeState::True:  return true;
       case Attributes::AttributeState::False: return false;
       case Attributes::AttributeState::Default:
       {

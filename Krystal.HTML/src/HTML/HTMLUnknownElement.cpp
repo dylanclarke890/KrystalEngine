@@ -8,7 +8,7 @@
 namespace Krys::HTML
 {
   HTMLUnknownElement::HTMLUnknownElement(Document &document) noexcept
-      : HTMLElement(document, HTMLTagName::Unknown)
+      : HTMLElement(document, DOMInterface::Unknown)
   {
   }
 }

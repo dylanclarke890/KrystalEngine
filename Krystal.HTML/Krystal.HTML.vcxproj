@@ -40,6 +40,8 @@
     <ClInclude Include="include\Krystal.HTML\HTML\Algorithms\DOMTreeAccessors.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Attributes\EnumeratedAttributes.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\AttributeState.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\DOMInterface.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLHeadingElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLScriptElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\MicroParsers\MicroParserError.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\MicroParsers\MicroParserResult.hpp" />
@@ -134,7 +136,7 @@
     <ClInclude Include="include\Krystal.HTML\DOM\DOMImplementation.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\ElementCreationOptions.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\CustomElementState.hpp" />
-    <ClInclude Include="include\Krystal.HTML\HTML\HTMLTagName.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\HTMLTagName.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\DocumentReadyState.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\DocumentVisibilityState.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\QuirksMode.hpp" />
@@ -220,6 +222,7 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\SubtreeRanges.hpp" />
     <ClInclude Include="include\Krystal.HTML\Types\SmallNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Infra\StringAlgorithms.hpp" />
+    <ClCompile Include="src\HTML\HTMLHeadingElement.cpp" />
     <ClCompile Include="src\DOM\Dicts\StaticRangeInit.cpp" />
     <ClCompile Include="src\HTML\Algorithms\RenderBlocking.cpp" />
     <ClCompile Include="src\DOM\Algorithms\AbortAlgorithms.cpp" />
