@@ -29,7 +29,10 @@
   - DOMTokenList IDL attributes have not been implemented
   - some of the attributes of this element are limited to known values but I don't know what they are.
 
-TODO:
+4.2.5 The meta element
+  - When the meta element is inserted into a document or certain attribute values are changed certain steps need to be run.
+
+  TODO:
 - Whenever a render-blocking element el becomes browsing-context disconnected, or el's blocking attribute's value is changed so that
   el is no longer potentially render-blocking, then unblock rendering on el.
 
