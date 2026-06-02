@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/HTML/HTMLElement.hpp"
+#include "Krystal.HTML/Types/USVString.hpp"
 
 namespace Krys::HTML
 {
@@ -12,7 +13,21 @@ namespace Krys::HTML
   public:
     HTMLBaseElement(Document &document) noexcept;
 
-    // TODO(impl): URL and Target IDL attributes
+#pragma region HTMLBaseElement - https://html.spec.whatwg.org/#htmlbaseelement
+
+    /// @see https://html.spec.whatwg.org/#dom-base-href
+    KRYS_NODISCARD USVString Href() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-base-href
+    ExceptionOr<void> Href(USVString &&value) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-base-target
+    KRYS_NODISCARD DOMString Target() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-base-target
+    void Target(DOMString &&value) noexcept;
+
+#pragma endregion
   };
 }
 

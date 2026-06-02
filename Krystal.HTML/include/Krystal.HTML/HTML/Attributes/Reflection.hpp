@@ -737,8 +737,7 @@ namespace Krys::HTML::Attributes
     /// @brief Helper for setting reflected content attributes with 'USVString' type.
     template <TreatedAsURL AsUrl, ReflectTarget Target>
     KRYS_NODISCARD static ExceptionOr<void> ReflectUSVString(Target &target, DOMStringAtom name,
-                                                             USVString &&value,
-                                                             TreatedAsURL treatedAsURL) noexcept
+                                                             USVString &&value) noexcept
     {
       // SPEC-VIOLATION(USVString): Not supported.
       return ExceptionCode::NotSupportedError;
