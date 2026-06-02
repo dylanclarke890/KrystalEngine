@@ -5,6 +5,7 @@
 
 namespace Krys::HTML
 {
+  /// @see https://html.spec.whatwg.org/#htmlunknownelement
   class HTMLUnknownElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLUnknownElement);

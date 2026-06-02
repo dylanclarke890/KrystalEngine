@@ -4,23 +4,30 @@
 
 namespace Krys::HTML
 {
-  enum class DOMInterface : uint16
+  enum class DOMInterface : uint8
   {
-    HTMLElement,
+    None,
     Base,
     Body,
     Head,
     Heading,
+    HR,
     Html,
     Link,
+    LI,
+    Menu,
     Meta,
+    OList,
+    Paragraph,
     Pre,
+    Quote,
     Script,
     Slot,
     Style,
     Title,
+    UList,
     Unknown,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 14u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 17u);

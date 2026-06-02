@@ -4,12 +4,23 @@
 
 namespace Krys::HTML
 {
+  /// @see https://html.spec.whatwg.org/#htmlpreelement
   class HTMLPreElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLPreElement);
 
   public:
     HTMLPreElement(Document &document) noexcept;
+
+#pragma region HTMLPreElement Obsolete members - https://html.spec.whatwg.org/#HTMLPreElement-partial
+
+    /// @see https://html.spec.whatwg.org/#dom-pre-width
+    KRYS_NODISCARD int32 Width() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-pre-width
+    void Width(int32 value) noexcept;
+
+#pragma endregion
   };
 }
 

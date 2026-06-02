@@ -4,6 +4,7 @@
 
 namespace Krys::HTML
 {
+  /// @see https://html.spec.whatwg.org/#htmlscriptelement
   class HTMLScriptElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLScriptElement);

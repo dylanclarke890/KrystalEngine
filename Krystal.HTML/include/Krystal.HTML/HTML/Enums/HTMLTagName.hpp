@@ -9,158 +9,158 @@ namespace Krys::HTML
 {
   enum class HTMLTagName : uint16
   {
-    Unknown,
-    A,
-    Abbr,
-    Acronym,
-    Address,
-    Applet,
-    Area,
-    Article,
-    Aside,
-    Attachment,
-    B,
-    Base,
-    Basefont,
-    Bdi,
-    Bdo,
-    Bgsound,
-    Big,
-    Blink,
-    Blockquote,
-    Body,
-    Br,
-    Button,
-    Canvas,
-    Caption,
-    Center,
-    Cite,
-    Code,
-    Col,
-    Colgroup,
-    Data,
-    Datalist,
-    Dd,
-    Del,
-    Details,
-    Dfn,
-    Dialog,
-    Dir,
-    Div,
-    Dl,
-    Dt,
-    Em,
-    Embed,
-    Fieldset,
-    Figcaption,
-    Figure,
-    Font,
-    Footer,
-    Form,
-    Frame,
-    Frameset,
-    H1,
-    H2,
-    H3,
-    H4,
-    H5,
-    H6,
-    Head,
-    Header,
-    Hgroup,
-    Hr,
-    Html,
-    I,
-    Iframe,
-    Image,
-    Img,
-    Input,
-    Ins,
-    Isindex,
-    Kbd,
-    Keygen,
-    Label,
-    Legend,
-    Li,
-    Link,
-    Listing,
-    Main,
-    Map,
-    Mark,
-    Marquee,
-    Menu,
-    Meta,
-    Meter,
-    Model,
-    Multicol,
-    Nav,
-    Nextid,
-    Nobr,
-    Noembed,
-    Noframes,
-    Object,
-    Ol,
-    Optgroup,
-    Option,
-    Output,
-    P,
-    Param,
-    Picture,
-    Plaintext,
-    Pre,
-    Progress,
-    Q,
-    Rb,
-    Rp,
-    Rt,
-    Rtc,
-    Ruby,
-    S,
-    Samp,
-    Script,
-    Search,
-    Section,
-    Select,
-    Selectedcontent,
-    Slot,
-    Small,
-    Source,
-    Spacer,
-    Span,
-    Strike,
-    Strong,
-    Style,
-    Sub,
-    Summary,
-    Sup,
-    Table,
-    Tbody,
-    Td,
-    Template,
-    Textarea,
-    Tfoot,
-    Th,
-    Thead,
-    Time,
-    Title,
-    Tr,
-    Track,
-    Tt,
-    U,
-    Ul,
-    Var,
-    Video,
-    Wbr,
-    Xmp,
-    Noscript,
-    AnnotationXml,
-    ColorProfile,
-    FontFace,
-    FontFaceFormat,
-    FontFaceName,
-    FontFaceSrc,
-    FontFaceUri,
-    MissingGlyph,
+    unknown,
+    a,
+    abbr,
+    acronym,
+    address,
+    applet,
+    area,
+    article,
+    aside,
+    attachment,
+    b,
+    base,
+    basefont,
+    bdi,
+    bdo,
+    bgsound,
+    big,
+    blink,
+    blockquote,
+    body,
+    br,
+    button,
+    canvas,
+    caption,
+    center,
+    cite,
+    code,
+    col,
+    colgroup,
+    data,
+    datalist,
+    dd,
+    del,
+    details,
+    dfn,
+    dialog,
+    dir,
+    div,
+    dl,
+    dt,
+    em,
+    embed,
+    fieldset,
+    figcaption,
+    figure,
+    font,
+    footer,
+    form,
+    frame,
+    frameset,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    head,
+    header,
+    hgroup,
+    hr,
+    html,
+    i,
+    iframe,
+    image,
+    img,
+    input,
+    ins,
+    isindex,
+    kbd,
+    keygen,
+    label,
+    legend,
+    li,
+    link,
+    listing,
+    main,
+    map,
+    mark,
+    marquee,
+    menu,
+    meta,
+    meter,
+    model,
+    multicol,
+    nav,
+    nextid,
+    nobr,
+    noembed,
+    noframes,
+    object,
+    ol,
+    optgroup,
+    option,
+    output,
+    p,
+    param,
+    picture,
+    plaintext,
+    pre,
+    progress,
+    q,
+    rb,
+    rp,
+    rt,
+    rtc,
+    ruby,
+    s,
+    samp,
+    script,
+    search,
+    section,
+    select,
+    selectedcontent,
+    slot,
+    small,
+    source,
+    spacer,
+    span,
+    strike,
+    strong,
+    style,
+    sub,
+    summary,
+    sup,
+    table,
+    tbody,
+    td,
+    template_, // conflicts with template keyword
+    textarea,
+    tfoot,
+    th,
+    thead,
+    time,
+    title,
+    tr,
+    track,
+    tt,
+    u,
+    ul,
+    var,
+    video,
+    wbr,
+    xmp,
+    noscript,
+    annotation_xml,
+    color_profile,
+    font_face,
+    font_face_format,
+    font_face_name,
+    font_face_src,
+    font_face_uri,
+    missing_glyph,
   };
 
   KRYS_NODISCARD constexpr Maybe<HTMLTagName> TryParseHTMLTagName(DOMStringView tagName) noexcept
@@ -178,31 +178,31 @@ namespace Krys::HTML
         {
           case u8'A':
           {
-            return HTMLTagName::A;
+            return HTMLTagName::a;
           }
           case u8'B':
           {
-            return HTMLTagName::B;
+            return HTMLTagName::b;
           }
           case u8'I':
           {
-            return HTMLTagName::I;
+            return HTMLTagName::i;
           }
           case u8'P':
           {
-            return HTMLTagName::P;
+            return HTMLTagName::p;
           }
           case u8'Q':
           {
-            return HTMLTagName::Q;
+            return HTMLTagName::q;
           }
           case u8'S':
           {
-            return HTMLTagName::S;
+            return HTMLTagName::s;
           }
           case u8'U':
           {
-            return HTMLTagName::U;
+            return HTMLTagName::u;
           }
         }
         break;
@@ -211,95 +211,95 @@ namespace Krys::HTML
       {
         if (tagName == u8"BR")
         {
-          return HTMLTagName::Br;
+          return HTMLTagName::br;
         }
         if (tagName == u8"DD")
         {
-          return HTMLTagName::Dd;
+          return HTMLTagName::dd;
         }
         if (tagName == u8"DL")
         {
-          return HTMLTagName::Dl;
+          return HTMLTagName::dl;
         }
         if (tagName == u8"DT")
         {
-          return HTMLTagName::Dt;
+          return HTMLTagName::dt;
         }
         if (tagName == u8"EM")
         {
-          return HTMLTagName::Em;
+          return HTMLTagName::em;
         }
         if (tagName == u8"HR")
         {
-          return HTMLTagName::Hr;
+          return HTMLTagName::hr;
         }
         if (tagName == u8"H1")
         {
-          return HTMLTagName::H1;
+          return HTMLTagName::h1;
         }
         if (tagName == u8"H2")
         {
-          return HTMLTagName::H2;
+          return HTMLTagName::h2;
         }
         if (tagName == u8"H3")
         {
-          return HTMLTagName::H3;
+          return HTMLTagName::h3;
         }
         if (tagName == u8"H4")
         {
-          return HTMLTagName::H4;
+          return HTMLTagName::h4;
         }
         if (tagName == u8"H5")
         {
-          return HTMLTagName::H5;
+          return HTMLTagName::h5;
         }
         if (tagName == u8"H6")
         {
-          return HTMLTagName::H6;
+          return HTMLTagName::h6;
         }
         if (tagName == u8"LI")
         {
-          return HTMLTagName::Li;
+          return HTMLTagName::li;
         }
         if (tagName == u8"OL")
         {
-          return HTMLTagName::Ol;
+          return HTMLTagName::ol;
         }
         if (tagName == u8"UL")
         {
-          return HTMLTagName::Ul;
+          return HTMLTagName::ul;
         }
         if (tagName == u8"RB")
         {
-          return HTMLTagName::Rb;
+          return HTMLTagName::rb;
         }
         if (tagName == u8"RP")
         {
-          return HTMLTagName::Rp;
+          return HTMLTagName::rp;
         }
         if (tagName == u8"RT")
         {
-          return HTMLTagName::Rt;
+          return HTMLTagName::rt;
         }
         if (tagName == u8"TD")
         {
-          return HTMLTagName::Td;
+          return HTMLTagName::td;
         }
         if (tagName == u8"TH")
         {
-          return HTMLTagName::Th;
+          return HTMLTagName::th;
         }
         if (tagName == u8"TR")
         {
-          return HTMLTagName::Tr;
+          return HTMLTagName::tr;
         }
         if (tagName == u8"TT")
         {
-          return HTMLTagName::Tt;
+          return HTMLTagName::tt;
         }
         if (tagName == u8"UL")
         {
-          return HTMLTagName::Ul;
+          return HTMLTagName::ul;
         }
         break;
       }
@@ -307,83 +307,83 @@ namespace Krys::HTML
       {
         if (tagName == u8"BDI")
         {
-          return HTMLTagName::Bdi;
+          return HTMLTagName::bdi;
         }
         if (tagName == u8"BDO")
         {
-          return HTMLTagName::Bdo;
+          return HTMLTagName::bdo;
         }
         if (tagName == u8"BIG")
         {
-          return HTMLTagName::Big;
+          return HTMLTagName::big;
         }
         if (tagName == u8"COL")
         {
-          return HTMLTagName::Col;
+          return HTMLTagName::col;
         }
         if (tagName == u8"DEL")
         {
-          return HTMLTagName::Del;
+          return HTMLTagName::del;
         }
         if (tagName == u8"DFN")
         {
-          return HTMLTagName::Dfn;
+          return HTMLTagName::dfn;
         }
         if (tagName == u8"DIR")
         {
-          return HTMLTagName::Dir;
+          return HTMLTagName::dir;
         }
         if (tagName == u8"DIV")
         {
-          return HTMLTagName::Div;
+          return HTMLTagName::div;
         }
         if (tagName == u8"IMG")
         {
-          return HTMLTagName::Img;
+          return HTMLTagName::img;
         }
         if (tagName == u8"INS")
         {
-          return HTMLTagName::Ins;
+          return HTMLTagName::ins;
         }
         if (tagName == u8"KBD")
         {
-          return HTMLTagName::Kbd;
+          return HTMLTagName::kbd;
         }
         if (tagName == u8"MAP")
         {
-          return HTMLTagName::Map;
+          return HTMLTagName::map;
         }
         if (tagName == u8"NAV")
         {
-          return HTMLTagName::Nav;
+          return HTMLTagName::nav;
         }
         if (tagName == u8"PRE")
         {
-          return HTMLTagName::Pre;
+          return HTMLTagName::pre;
         }
         if (tagName == u8"RTC")
         {
-          return HTMLTagName::Rtc;
+          return HTMLTagName::rtc;
         }
         if (tagName == u8"SUB")
         {
-          return HTMLTagName::Sub;
+          return HTMLTagName::sub;
         }
         if (tagName == u8"SUP")
         {
-          return HTMLTagName::Sup;
+          return HTMLTagName::sup;
         }
         if (tagName == u8"VAR")
         {
-          return HTMLTagName::Var;
+          return HTMLTagName::var;
         }
         if (tagName == u8"WBR")
         {
-          return HTMLTagName::Wbr;
+          return HTMLTagName::wbr;
         }
         if (tagName == u8"XMP")
         {
-          return HTMLTagName::Xmp;
+          return HTMLTagName::xmp;
         }
         break;
       }
@@ -391,91 +391,91 @@ namespace Krys::HTML
       {
         if (tagName == u8"ABBR")
         {
-          return HTMLTagName::Abbr;
+          return HTMLTagName::abbr;
         }
         if (tagName == u8"AREA")
         {
-          return HTMLTagName::Area;
+          return HTMLTagName::area;
         }
         if (tagName == u8"BASE")
         {
-          return HTMLTagName::Base;
+          return HTMLTagName::base;
         }
         if (tagName == u8"BODY")
         {
-          return HTMLTagName::Body;
+          return HTMLTagName::body;
         }
         if (tagName == u8"CITE")
         {
-          return HTMLTagName::Cite;
+          return HTMLTagName::cite;
         }
         if (tagName == u8"CODE")
         {
-          return HTMLTagName::Code;
+          return HTMLTagName::code;
         }
         if (tagName == u8"DATA")
         {
-          return HTMLTagName::Data;
+          return HTMLTagName::data;
         }
         if (tagName == u8"FONT")
         {
-          return HTMLTagName::Font;
+          return HTMLTagName::font;
         }
         if (tagName == u8"FORM")
         {
-          return HTMLTagName::Form;
+          return HTMLTagName::form;
         }
         if (tagName == u8"HEAD")
         {
-          return HTMLTagName::Head;
+          return HTMLTagName::head;
         }
         if (tagName == u8"HTML")
         {
-          return HTMLTagName::Html;
+          return HTMLTagName::html;
         }
         if (tagName == u8"LINK")
         {
-          return HTMLTagName::Link;
+          return HTMLTagName::link;
         }
         if (tagName == u8"MAIN")
         {
-          return HTMLTagName::Main;
+          return HTMLTagName::main;
         }
         if (tagName == u8"MARK")
         {
-          return HTMLTagName::Mark;
+          return HTMLTagName::mark;
         }
         if (tagName == u8"MENU")
         {
-          return HTMLTagName::Menu;
+          return HTMLTagName::menu;
         }
         if (tagName == u8"META")
         {
-          return HTMLTagName::Meta;
+          return HTMLTagName::meta;
         }
         if (tagName == u8"NOBR")
         {
-          return HTMLTagName::Nobr;
+          return HTMLTagName::nobr;
         }
         if (tagName == u8"RUBY")
         {
-          return HTMLTagName::Ruby;
+          return HTMLTagName::ruby;
         }
         if (tagName == u8"SAMP")
         {
-          return HTMLTagName::Samp;
+          return HTMLTagName::samp;
         }
         if (tagName == u8"SLOT")
         {
-          return HTMLTagName::Slot;
+          return HTMLTagName::slot;
         }
         if (tagName == u8"SPAN")
         {
-          return HTMLTagName::Span;
+          return HTMLTagName::span;
         }
         if (tagName == u8"TIME")
         {
-          return HTMLTagName::Time;
+          return HTMLTagName::time;
         }
         break;
       }
@@ -483,79 +483,79 @@ namespace Krys::HTML
       {
         if (tagName == u8"ASIDE")
         {
-          return HTMLTagName::Aside;
+          return HTMLTagName::aside;
         }
         if (tagName == u8"BLINK")
         {
-          return HTMLTagName::Blink;
+          return HTMLTagName::blink;
         }
         if (tagName == u8"EMBED")
         {
-          return HTMLTagName::Embed;
+          return HTMLTagName::embed;
         }
         if (tagName == u8"FRAME")
         {
-          return HTMLTagName::Frame;
+          return HTMLTagName::frame;
         }
         if (tagName == u8"IMAGE")
         {
-          return HTMLTagName::Image;
+          return HTMLTagName::image;
         }
         if (tagName == u8"INPUT")
         {
-          return HTMLTagName::Input;
+          return HTMLTagName::input;
         }
         if (tagName == u8"LABEL")
         {
-          return HTMLTagName::Label;
+          return HTMLTagName::label;
         }
         if (tagName == u8"METER")
         {
-          return HTMLTagName::Meter;
+          return HTMLTagName::meter;
         }
         if (tagName == u8"MODEL")
         {
-          return HTMLTagName::Model;
+          return HTMLTagName::model;
         }
         if (tagName == u8"PARAM")
         {
-          return HTMLTagName::Param;
+          return HTMLTagName::param;
         }
         if (tagName == u8"SMALL")
         {
-          return HTMLTagName::Small;
+          return HTMLTagName::small;
         }
         if (tagName == u8"STYLE")
         {
-          return HTMLTagName::Style;
+          return HTMLTagName::style;
         }
         if (tagName == u8"TABLE")
         {
-          return HTMLTagName::Table;
+          return HTMLTagName::table;
         }
         if (tagName == u8"TBODY")
         {
-          return HTMLTagName::Tbody;
+          return HTMLTagName::tbody;
         }
         if (tagName == u8"TFOOT")
         {
-          return HTMLTagName::Tfoot;
+          return HTMLTagName::tfoot;
         }
         if (tagName == u8"THEAD")
         {
-          return HTMLTagName::Thead;
+          return HTMLTagName::thead;
         }
         if (tagName == u8"TITLE")
         {
-          return HTMLTagName::Title;
+          return HTMLTagName::title;
         }
         if (tagName == u8"TRACK")
         {
-          return HTMLTagName::Track;
+          return HTMLTagName::track;
         }
         if (tagName == u8"VIDEO")
         {
-          return HTMLTagName::Video;
+          return HTMLTagName::video;
         }
         break;
       }
@@ -563,95 +563,95 @@ namespace Krys::HTML
       {
         if (tagName == u8"APPLET")
         {
-          return HTMLTagName::Applet;
+          return HTMLTagName::applet;
         }
         if (tagName == u8"BUTTON")
         {
-          return HTMLTagName::Button;
+          return HTMLTagName::button;
         }
         if (tagName == u8"CANVAS")
         {
-          return HTMLTagName::Canvas;
+          return HTMLTagName::canvas;
         }
         if (tagName == u8"CENTER")
         {
-          return HTMLTagName::Center;
+          return HTMLTagName::center;
         }
         if (tagName == u8"DIALOG")
         {
-          return HTMLTagName::Dialog;
+          return HTMLTagName::dialog;
         }
         if (tagName == u8"FIGURE")
         {
-          return HTMLTagName::Figure;
+          return HTMLTagName::figure;
         }
         if (tagName == u8"FOOTER")
         {
-          return HTMLTagName::Footer;
+          return HTMLTagName::footer;
         }
         if (tagName == u8"HEADER")
         {
-          return HTMLTagName::Header;
+          return HTMLTagName::header;
         }
         if (tagName == u8"HGROUP")
         {
-          return HTMLTagName::Hgroup;
+          return HTMLTagName::hgroup;
         }
         if (tagName == u8"IFRAME")
         {
-          return HTMLTagName::Iframe;
+          return HTMLTagName::iframe;
         }
         if (tagName == u8"KEYGEN")
         {
-          return HTMLTagName::Keygen;
+          return HTMLTagName::keygen;
         }
         if (tagName == u8"LEGEND")
         {
-          return HTMLTagName::Legend;
+          return HTMLTagName::legend;
         }
         if (tagName == u8"NEXTID")
         {
-          return HTMLTagName::Nextid;
+          return HTMLTagName::nextid;
         }
         if (tagName == u8"OBJECT")
         {
-          return HTMLTagName::Object;
+          return HTMLTagName::object;
         }
         if (tagName == u8"OPTION")
         {
-          return HTMLTagName::Option;
+          return HTMLTagName::option;
         }
         if (tagName == u8"OUTPUT")
         {
-          return HTMLTagName::Output;
+          return HTMLTagName::output;
         }
         if (tagName == u8"SCRIPT")
         {
-          return HTMLTagName::Script;
+          return HTMLTagName::script;
         }
         if (tagName == u8"SEARCH")
         {
-          return HTMLTagName::Search;
+          return HTMLTagName::search;
         }
         if (tagName == u8"SELECT")
         {
-          return HTMLTagName::Search;
+          return HTMLTagName::select;
         }
         if (tagName == u8"SOURCE")
         {
-          return HTMLTagName::Source;
+          return HTMLTagName::source;
         }
         if (tagName == u8"SPACER")
         {
-          return HTMLTagName::Spacer;
+          return HTMLTagName::spacer;
         }
         if (tagName == u8"STRIKE")
         {
-          return HTMLTagName::Source;
+          return HTMLTagName::strike;
         }
         if (tagName == u8"STRONG")
         {
-          return HTMLTagName::Source;
+          return HTMLTagName::strong;
         }
         break;
       }
@@ -659,51 +659,51 @@ namespace Krys::HTML
       {
         if (tagName == u8"ACRONYM")
         {
-          return HTMLTagName::Acronym;
+          return HTMLTagName::acronym;
         }
         if (tagName == u8"ADDRESS")
         {
-          return HTMLTagName::Address;
+          return HTMLTagName::address;
         }
         if (tagName == u8"ARTICLE")
         {
-          return HTMLTagName::Article;
+          return HTMLTagName::article;
         }
         if (tagName == u8"BGSOUND")
         {
-          return HTMLTagName::Bgsound;
+          return HTMLTagName::bgsound;
         }
         if (tagName == u8"CAPTION")
         {
-          return HTMLTagName::Caption;
+          return HTMLTagName::caption;
         }
         if (tagName == u8"ISINDEX")
         {
-          return HTMLTagName::Isindex;
+          return HTMLTagName::isindex;
         }
         if (tagName == u8"LISTING")
         {
-          return HTMLTagName::Listing;
+          return HTMLTagName::listing;
         }
         if (tagName == u8"MARQUEE")
         {
-          return HTMLTagName::Marquee;
+          return HTMLTagName::marquee;
         }
         if (tagName == u8"NOEMBED")
         {
-          return HTMLTagName::Noembed;
+          return HTMLTagName::noembed;
         }
         if (tagName == u8"PICTURE")
         {
-          return HTMLTagName::Picture;
+          return HTMLTagName::picture;
         }
         if (tagName == u8"SECTION")
         {
-          return HTMLTagName::Section;
+          return HTMLTagName::section;
         }
         if (tagName == u8"SUMMARY")
         {
-          return HTMLTagName::Section;
+          return HTMLTagName::summary;
         }
         break;
       }
@@ -711,66 +711,66 @@ namespace Krys::HTML
       {
         if (tagName == u8"BASEFONT")
         {
-          return HTMLTagName::Basefont;
+          return HTMLTagName::basefont;
         }
         if (tagName == u8"COLGROUP")
         {
-          return HTMLTagName::Colgroup;
+          return HTMLTagName::colgroup;
         }
         if (tagName == u8"DATALIST")
         {
-          return HTMLTagName::Datalist;
+          return HTMLTagName::datalist;
         }
         if (tagName == u8"DETAILS")
         {
-          return HTMLTagName::Details;
+          return HTMLTagName::details;
         }
         if (tagName == u8"FIELDSET")
         {
-          return HTMLTagName::Fieldset;
+          return HTMLTagName::fieldset;
         }
         if (tagName == u8"FRAMESET")
         {
-          return HTMLTagName::Frameset;
+          return HTMLTagName::frameset;
         }
         if (tagName == u8"MULTICOL")
         {
-          return HTMLTagName::Multicol;
+          return HTMLTagName::multicol;
         }
         if (tagName == u8"NOFRAMES")
         {
-          return HTMLTagName::Noframes;
+          return HTMLTagName::noframes;
         }
         if (tagName == u8"OPTGROUP")
         {
-          return HTMLTagName::Optgroup;
+          return HTMLTagName::optgroup;
         }
         if (tagName == u8"PROGRESS")
         {
-          return HTMLTagName::Progress;
+          return HTMLTagName::progress;
         }
         if (tagName == u8"TEMPLATE")
         {
-          return HTMLTagName::Template;
+          return HTMLTagName::template_;
         }
         if (tagName == u8"TEXTAREA")
         {
-          return HTMLTagName::Textarea;
+          return HTMLTagName::textarea;
         }
         if (tagName == u8"NOSCRIPT")
         {
-          return HTMLTagName::Noscript;
+          return HTMLTagName::noscript;
         }
       }
       case 9:
       {
         if (tagName == u8"PLAINTEXT")
         {
-          return HTMLTagName::Plaintext;
+          return HTMLTagName::plaintext;
         }
         if (tagName == u8"FONT-FACE")
         {
-          return HTMLTagName::FontFace;
+          return HTMLTagName::font_face;
         }
         break;
       }
@@ -778,15 +778,15 @@ namespace Krys::HTML
       {
         if (tagName == u8"ATTACHMENT")
         {
-          return HTMLTagName::Attachment;
+          return HTMLTagName::attachment;
         }
         if (tagName == u8"BLOCKQUOTE")
         {
-          return HTMLTagName::Blockquote;
+          return HTMLTagName::blockquote;
         }
         if (tagName == u8"FIGCAPTION")
         {
-          return HTMLTagName::Figcaption;
+          return HTMLTagName::figcaption;
         }
         break;
       }
@@ -794,44 +794,44 @@ namespace Krys::HTML
       {
         if (tagName == u8"COLOR-PROFILE")
         {
-          return HTMLTagName::ColorProfile;
+          return HTMLTagName::color_profile;
         }
         if (tagName == u8"FONT-FACE-SRC")
         {
-          return HTMLTagName::FontFaceSrc;
+          return HTMLTagName::font_face_src;
         }
         if (tagName == u8"FONT-FACE-URI")
         {
-          return HTMLTagName::FontFaceUri;
+          return HTMLTagName::font_face_uri;
         }
         if (tagName == u8"MISSING-GLYPH")
         {
-          return HTMLTagName::MissingGlyph;
+          return HTMLTagName::missing_glyph;
         }
       }
       case 14:
       {
         if (tagName == u8"FONT-FACE-NAME")
         {
-          return HTMLTagName::FontFaceName;
+          return HTMLTagName::font_face_name;
         }
         if (tagName == u8"ANNOTATION-XML")
         {
-          return HTMLTagName::AnnotationXml;
+          return HTMLTagName::annotation_xml;
         }
       }
       case 15:
       {
         if (tagName == u8"SELECTEDCONTENT")
         {
-          return HTMLTagName::Selectedcontent;
+          return HTMLTagName::selectedcontent;
         }
       }
       case 16:
       {
         if (tagName == u8"FONT-FACE-FORMAT")
         {
-          return HTMLTagName::FontFaceFormat;
+          return HTMLTagName::font_face_format;
         }
         break;
       }

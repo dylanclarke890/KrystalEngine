@@ -4,7 +4,7 @@
 
 namespace Krys::HTML
 {
-  /// @see https://html.spec.whatwg.org/multipage/semantics.html#htmlmetaelement
+  /// @see https://html.spec.whatwg.org/#htmlmetaelement
   class HTMLMetaElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLMetaElement);

@@ -4,7 +4,7 @@
 
 namespace Krys::HTML
 {
-  /// @see https://html.spec.whatwg.org/multipage/semantics.html#htmlstyleelement
+  /// @see https://html.spec.whatwg.org/#htmlstyleelement
   class HTMLStyleElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLStyleElement);

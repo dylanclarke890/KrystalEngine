@@ -6,7 +6,7 @@
 
 namespace Krys::HTML
 {
-  /// @see https://html.spec.whatwg.org/multipage/semantics.html#htmllinkelement
+  /// @see https://html.spec.whatwg.org/#htmllinkelement
   class HTMLLinkElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLLinkElement);

@@ -18,7 +18,7 @@ namespace Krys::HTML
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLElement);
 
   protected:
-    DOMInterface _interface {DOMInterface::HTMLElement};
+    DOMInterface _interface {DOMInterface::None};
 
     HTMLElement(Document &document, DOMInterface interface, NodeFlags flags = NodeFlags::None) noexcept;
 
@@ -175,9 +175,19 @@ namespace Krys::HTML
       return _interface == DOMInterface::Heading;
     }
 
+    KRYS_NODISCARD bool IsHTMLHRElement() const noexcept
+    {
+      return _interface == DOMInterface::HR;
+    }
+
     KRYS_NODISCARD bool IsHTMLHtmlElement() const noexcept
     {
       return _interface == DOMInterface::Html;
+    }
+
+    KRYS_NODISCARD bool IsHTMLLIElement() const noexcept
+    {
+      return _interface == DOMInterface::LI;
     }
 
     KRYS_NODISCARD bool IsHTMLLinkElement() const noexcept
@@ -185,14 +195,34 @@ namespace Krys::HTML
       return _interface == DOMInterface::Link;
     }
 
+    KRYS_NODISCARD bool IsHTMLMenuElement() const noexcept
+    {
+      return _interface == DOMInterface::Menu;
+    }
+
     KRYS_NODISCARD bool IsHTMLMetaElement() const noexcept
     {
       return _interface == DOMInterface::Meta;
     }
 
+    KRYS_NODISCARD bool IsHTMLOListElement() const noexcept
+    {
+      return _interface == DOMInterface::OList;
+    }
+
+    KRYS_NODISCARD bool IsHTMLParagraphElement() const noexcept
+    {
+      return _interface == DOMInterface::Paragraph;
+    }
+
     KRYS_NODISCARD bool IsHTMLPreElement() const noexcept
     {
       return _interface == DOMInterface::Pre;
+    }
+
+    KRYS_NODISCARD bool IsHTMLQuoteElement() const noexcept
+    {
+      return _interface == DOMInterface::Quote;
     }
 
     // NOTE: HTMLSlotElement type check is not needed here as Node already has it.
@@ -210,6 +240,11 @@ namespace Krys::HTML
     KRYS_NODISCARD bool IsHTMLTitleElement() const noexcept
     {
       return _interface == DOMInterface::Title;
+    }
+
+    KRYS_NODISCARD bool IsHTMLUListElement() const noexcept
+    {
+      return _interface == DOMInterface::UList;
     }
 
     // NOTE: HTMLUnknownElement type check is not needed here as Node already has it.

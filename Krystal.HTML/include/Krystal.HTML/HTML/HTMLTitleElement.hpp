@@ -4,7 +4,7 @@
 
 namespace Krys::HTML
 {
-  /// @see https://html.spec.whatwg.org/multipage/semantics.html#htmltitleelement
+  /// @see https://html.spec.whatwg.org/#htmltitleelement
   class HTMLTitleElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTitleElement);
@@ -12,9 +12,13 @@ namespace Krys::HTML
   public:
     HTMLTitleElement(Document &document) noexcept;
 
+#pragma region HTMLTitleElement - https://html.spec.whatwg.org/#htmltitleelement
+
     KRYS_NODISCARD DOMString Text() const noexcept;
 
     ExceptionOr<void> Text(DOMString &&value) noexcept;
+
+#pragma endregion
   };
 }
 

@@ -17,7 +17,7 @@ namespace Krys::HTML
   {
   }
 
-  HTMLElement::HTMLElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Unknown)
+  HTMLElement::HTMLElement(Document &document) noexcept : HTMLElement(document, DOMInterface::None)
   {
   }
 

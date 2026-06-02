@@ -6,6 +6,7 @@
 
 namespace Krys::HTML
 {
+  /// @see https://html.spec.whatwg.org/#htmlslotelement
   class HTMLSlotElement : public HTMLElement
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLSlotElement);
