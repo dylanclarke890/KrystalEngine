@@ -10,6 +10,8 @@
 #include "Krystal.HTML/HTML/Enums/HTMLTagName.hpp"
 #include "Krystal.HTML/HTML/HTMLBaseElement.hpp"
 #include "Krystal.HTML/HTML/HTMLBodyElement.hpp"
+#include "Krystal.HTML/HTML/HTMLDivElement.hpp"
+#include "Krystal.HTML/HTML/HTMLDListElement.hpp"
 #include "Krystal.HTML/HTML/HTMLElement.hpp"
 #include "Krystal.HTML/HTML/HTMLHeadElement.hpp"
 #include "Krystal.HTML/HTML/HTMLHeadingElement.hpp"
@@ -79,10 +81,16 @@ namespace Krys::HTML
         case HTMLTagName::address:
         case HTMLTagName::article:
         case HTMLTagName::aside:
+        case HTMLTagName::dd:
+        case HTMLTagName::dt:
+        case HTMLTagName::figure:
+        case HTMLTagName::figcaption:
         case HTMLTagName::footer:
         case HTMLTagName::hgroup:
         case HTMLTagName::header:
+        case HTMLTagName::main:
         case HTMLTagName::nav:
+        case HTMLTagName::search:
         case HTMLTagName::section:
         {
           return CreateRef<HTMLElement>(document);
@@ -98,6 +106,14 @@ namespace Krys::HTML
         case HTMLTagName::body:
         {
           return CreateRef<HTMLBodyElement>(document);
+        }
+        case HTMLTagName::div:
+        {
+          return CreateRef<HTMLDivElement>(document);
+        }
+        case HTMLTagName::dl:
+        {
+          return CreateRef<HTMLDListElement>(document);
         }
         case HTMLTagName::head:
         {

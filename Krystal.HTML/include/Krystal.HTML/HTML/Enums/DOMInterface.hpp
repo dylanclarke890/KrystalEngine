@@ -9,6 +9,8 @@ namespace Krys::HTML
     None,
     Base,
     Body,
+    Div,
+    DList,
     Head,
     Heading,
     HR,

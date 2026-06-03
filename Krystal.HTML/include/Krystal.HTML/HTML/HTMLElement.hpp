@@ -165,6 +165,16 @@ namespace Krys::HTML
       return _interface == DOMInterface::Body;
     }
 
+    KRYS_NODISCARD bool IsHTMLDivElement() const noexcept
+    {
+      return _interface == DOMInterface::Div;
+    }
+
+    KRYS_NODISCARD bool IsHTMLDListElement() const noexcept
+    {
+      return _interface == DOMInterface::DList;
+    }
+
     KRYS_NODISCARD bool IsHTMLHeadElement() const noexcept
     {
       return _interface == DOMInterface::Head;

@@ -35,12 +35,15 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\HTML\HTMLDivElement.cpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\StaticRangeInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\BoundaryPointComparator.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Algorithms\DOMTreeAccessors.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Attributes\EnumeratedAttributes.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\AttributeState.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\DOMInterface.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLDivElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLDListElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLHeadingElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLLIElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLMenuElement.hpp" />
@@ -228,6 +231,7 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\SubtreeRanges.hpp" />
     <ClInclude Include="include\Krystal.HTML\Types\SmallNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Infra\StringAlgorithms.hpp" />
+    <ClCompile Include="src\HTML\HTMLDListElement.cpp" />
     <ClCompile Include="src\HTML\HTMLLIElement.cpp" />
     <ClCompile Include="src\HTML\HTMLMenuElement.cpp" />
     <ClCompile Include="src\HTML\HTMLOListElement.cpp" />
