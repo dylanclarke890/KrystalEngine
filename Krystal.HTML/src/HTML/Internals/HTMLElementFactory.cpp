@@ -8,8 +8,10 @@
 #include "Krystal.HTML/HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTML/Enums/HTMLTagName.hpp"
+#include "Krystal.HTML/HTML/HTMLAnchorElement.hpp"
 #include "Krystal.HTML/HTML/HTMLBaseElement.hpp"
 #include "Krystal.HTML/HTML/HTMLBodyElement.hpp"
+#include "Krystal.HTML/HTML/HTMLDataElement.hpp"
 #include "Krystal.HTML/HTML/HTMLDivElement.hpp"
 #include "Krystal.HTML/HTML/HTMLDListElement.hpp"
 #include "Krystal.HTML/HTML/HTMLElement.hpp"
@@ -20,6 +22,7 @@
 #include "Krystal.HTML/HTML/HTMLLIElement.hpp"
 #include "Krystal.HTML/HTML/HTMLLinkElement.hpp"
 #include "Krystal.HTML/HTML/HTMLMenuElement.hpp"
+#include "Krystal.HTML/HTML/HTMLModElement.hpp"
 #include "Krystal.HTML/HTML/HTMLMetaElement.hpp"
 #include "Krystal.HTML/HTML/HTMLOListElement.hpp"
 #include "Krystal.HTML/HTML/HTMLParagraphElement.hpp"
@@ -27,6 +30,7 @@
 #include "Krystal.HTML/HTML/HTMLQuoteElement.hpp"
 #include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 #include "Krystal.HTML/HTML/HTMLStyleElement.hpp"
+#include "Krystal.HTML/HTML/HTMLTimeElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTitleElement.hpp"
 #include "Krystal.HTML/HTML/HTMLUListElement.hpp"
 #include "Krystal.HTML/HTML/HTMLUnknownElement.hpp"
@@ -78,34 +82,71 @@ namespace Krys::HTML
 
 #pragma endregion
 
+        case HTMLTagName::abbr:
         case HTMLTagName::address:
         case HTMLTagName::article:
         case HTMLTagName::aside:
+        case HTMLTagName::b:
+        case HTMLTagName::bdi:
+        case HTMLTagName::bdo:
+        case HTMLTagName::cite:
+        case HTMLTagName::code:
         case HTMLTagName::dd:
+        case HTMLTagName::dfn:
         case HTMLTagName::dt:
+        case HTMLTagName::em:
         case HTMLTagName::figure:
         case HTMLTagName::figcaption:
         case HTMLTagName::footer:
         case HTMLTagName::hgroup:
         case HTMLTagName::header:
+        case HTMLTagName::i:
+        case HTMLTagName::kbd:
         case HTMLTagName::main:
+        case HTMLTagName::mark:
         case HTMLTagName::nav:
+        case HTMLTagName::ruby:
+        case HTMLTagName::rp:
+        case HTMLTagName::rt:
+        case HTMLTagName::s:
+        case HTMLTagName::samp:
         case HTMLTagName::search:
         case HTMLTagName::section:
+        case HTMLTagName::small:
+        case HTMLTagName::strong:
+        case HTMLTagName::sub:
+        case HTMLTagName::sup:
+        case HTMLTagName::u:
+        case HTMLTagName::var:
+        case HTMLTagName::wbr:
         {
           return CreateRef<HTMLElement>(document);
+        }
+        case HTMLTagName::a:
+        {
+          return CreateRef<HTMLAnchorElement>(document);
         }
         case HTMLTagName::base:
         {
           return CreateRef<HTMLBaseElement>(document);
         }
         case HTMLTagName::blockquote:
+        case HTMLTagName::q:
         {
           return CreateRef<HTMLQuoteElement>(document);
         }
         case HTMLTagName::body:
         {
           return CreateRef<HTMLBodyElement>(document);
+        }
+        case HTMLTagName::data:
+        {
+          return CreateRef<HTMLDataElement>(document);
+        }
+        case HTMLTagName::ins:
+        case HTMLTagName::del:
+        {
+          return CreateRef<HTMLModElement>(document);
         }
         case HTMLTagName::div:
         {
@@ -176,13 +217,13 @@ namespace Krys::HTML
         {
           return CreateRef<HTMLTitleElement>(document);
         }
+        case HTMLTagName::time:
+        {
+          return CreateRef<HTMLTimeElement>(document);
+        }
         case HTMLTagName::ul:
         {
           return CreateRef<HTMLUListElement>(document);
-        }
-        default:
-        {
-          break; // TODO: remove this once we've finished implementing the various interfaces
         }
       }
     }

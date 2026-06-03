@@ -35,6 +35,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\HTML\HTMLAnchorElement.cpp" />
+    <ClCompile Include="src\HTML\HTMLBRElement.cpp" />
+    <ClCompile Include="src\HTML\HTMLDataElement.cpp" />
     <ClCompile Include="src\HTML\HTMLDivElement.cpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\StaticRangeInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\BoundaryPointComparator.hpp" />
@@ -42,11 +45,15 @@
     <ClInclude Include="include\Krystal.HTML\HTML\Attributes\EnumeratedAttributes.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\AttributeState.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\DOMInterface.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLAnchorElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLBRElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLDataElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLDivElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLDListElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLHeadingElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLLIElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLMenuElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLModElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLOListElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLParagraphElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLQuoteElement.hpp" />
@@ -234,6 +241,7 @@
     <ClCompile Include="src\HTML\HTMLDListElement.cpp" />
     <ClCompile Include="src\HTML\HTMLLIElement.cpp" />
     <ClCompile Include="src\HTML\HTMLMenuElement.cpp" />
+    <ClCompile Include="src\HTML\HTMLModElement.cpp" />
     <ClCompile Include="src\HTML\HTMLOListElement.cpp" />
     <ClCompile Include="src\HTML\HTMLQuoteElement.cpp" />
     <ClCompile Include="src\HTML\HTMLHeadingElement.cpp" />
@@ -261,10 +269,14 @@
     <ClCompile Include="src\HTML\HTMLLinkElement.cpp" />
     <ClCompile Include="src\HTML\HTMLMetaElement.cpp" />
     <ClCompile Include="src\HTML\HTMLParagraphElement.cpp" />
+    <ClCompile Include="src\HTML\HTMLSpanElement.cpp" />
     <ClCompile Include="src\HTML\HTMLStyleElement.cpp" />
+    <ClCompile Include="src\HTML\HTMLTimeElement.cpp" />
     <ClCompile Include="src\HTML\HTMLTitleElement.cpp" />
     <ClInclude Include="include\Krystal.HTML\SVG\SVGDocument.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLHRElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLTimeElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLSpanElement.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\HTML\HTMLUListElement.cpp" />

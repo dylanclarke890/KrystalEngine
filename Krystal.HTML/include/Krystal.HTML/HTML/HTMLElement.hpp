@@ -155,6 +155,11 @@ namespace Krys::HTML
   protected:
 #pragma region Type Checks
 
+    KRYS_NODISCARD bool IsHTMLAnchorElement() const noexcept
+    {
+      return _interface == DOMInterface::Anchor;
+    }
+
     KRYS_NODISCARD bool IsHTMLBaseElement() const noexcept
     {
       return _interface == DOMInterface::Base;
@@ -163,6 +168,16 @@ namespace Krys::HTML
     KRYS_NODISCARD bool IsHTMLBodyElement() const noexcept
     {
       return _interface == DOMInterface::Body;
+    }
+
+    KRYS_NODISCARD bool IsHTMLBRElement() const noexcept
+    {
+      return _interface == DOMInterface::BR;
+    }
+
+    KRYS_NODISCARD bool IsHTMLDataElement() const noexcept
+    {
+      return _interface == DOMInterface::Data;
     }
 
     KRYS_NODISCARD bool IsHTMLDivElement() const noexcept
@@ -235,21 +250,31 @@ namespace Krys::HTML
       return _interface == DOMInterface::Quote;
     }
 
+    KRYS_NODISCARD bool IsHTMLScriptElement() const noexcept
+    {
+      return _interface == DOMInterface::Script;
+    }
+
     // NOTE: HTMLSlotElement type check is not needed here as Node already has it.
+
+    KRYS_NODISCARD bool IsHTMLSpanElement() const noexcept
+    {
+      return _interface == DOMInterface::Span;
+    }
 
     KRYS_NODISCARD bool IsHTMLStyleElement() const noexcept
     {
       return _interface == DOMInterface::Style;
     }
 
-    KRYS_NODISCARD bool IsHTMLScriptElement() const noexcept
-    {
-      return _interface == DOMInterface::Script;
-    }
-
     KRYS_NODISCARD bool IsHTMLTitleElement() const noexcept
     {
       return _interface == DOMInterface::Title;
+    }
+
+    KRYS_NODISCARD bool IsHTMLTimeElement() const noexcept
+    {
+      return _interface == DOMInterface::Time;
     }
 
     KRYS_NODISCARD bool IsHTMLUListElement() const noexcept

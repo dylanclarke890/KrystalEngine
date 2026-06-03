@@ -22,7 +22,7 @@ namespace Krys::HTML
 
   ExceptionOr<void> HTMLBaseElement::Href(USVString &&value) noexcept
   {
-    return Attributes::Reflection::ReflectSetter<USVString>(*this, u8"target", Krys::Move(value));
+    return Attributes::Reflection::ReflectSetter<USVString>(*this, u8"href", Krys::Move(value));
   }
 
   DOMString HTMLBaseElement::Target() const noexcept

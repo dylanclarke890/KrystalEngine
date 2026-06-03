@@ -14,10 +14,10 @@ namespace Krys::HTML
 
 #pragma region HTMLDivElement Obsolete members - https://html.spec.whatwg.org/#HTMLDivElement-partial
 
-    /// @see https://html.spec.whatwg.org/#dom-hr-align
+    /// @see https://html.spec.whatwg.org/#dom-div-align
     KRYS_NODISCARD DOMString Align() const noexcept;
 
-    /// @see https://html.spec.whatwg.org/#dom-hr-align
+    /// @see https://html.spec.whatwg.org/#dom-div-align
     void Align(DOMString &&value) noexcept;
 
 #pragma endregion

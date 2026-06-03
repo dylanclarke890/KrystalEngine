@@ -16,12 +16,12 @@ namespace Krys::HTML
 
   ExceptionOr<USVString> HTMLQuoteElement::Cite() const noexcept
   {
-    return Attributes::Reflection::Reflect<USVString>(*this, u8"width");
+    return Attributes::Reflection::Reflect<USVString>(*this, u8"cite");
   }
 
   ExceptionOr<void> HTMLQuoteElement::Cite(USVString &&value) noexcept
   {
-    return Attributes::Reflection::Reflect<USVString>(*this, u8"width", Krys::Move(value));
+    return Attributes::Reflection::Reflect<USVString>(*this, u8"cite", Krys::Move(value));
   }
 
 #pragma endregion
