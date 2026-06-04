@@ -18,6 +18,7 @@ namespace Krys::HTML
     Heading,
     HR,
     Html,
+    IFrame,
     Image,
     Link,
     LI,

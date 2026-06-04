@@ -51,6 +51,7 @@
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLDivElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLDListElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLHeadingElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLIFrameElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLImageElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLLIElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLMenuElement.hpp" />
@@ -242,6 +243,7 @@
     <ClInclude Include="include\Krystal.HTML\Types\SmallNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Infra\StringAlgorithms.hpp" />
     <ClCompile Include="src\HTML\HTMLDListElement.cpp" />
+    <ClCompile Include="src\HTML\HTMLIFrameElement.cpp" />
     <ClCompile Include="src\HTML\HTMLImageElement.cpp" />
     <ClCompile Include="src\HTML\HTMLLIElement.cpp" />
     <ClCompile Include="src\HTML\HTMLMenuElement.cpp" />
