@@ -25,10 +25,12 @@ namespace Krys::HTML
     Mod,
     OList,
     Paragraph,
+    Picture,
     Pre,
     Quote,
     Script,
     Slot,
+    Source,
     Span,
     Style,
     Title,
@@ -38,4 +40,4 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 29u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 31uz);

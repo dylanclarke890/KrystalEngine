@@ -22,13 +22,16 @@
 #include "Krystal.HTML/HTML/HTMLLIElement.hpp"
 #include "Krystal.HTML/HTML/HTMLLinkElement.hpp"
 #include "Krystal.HTML/HTML/HTMLMenuElement.hpp"
-#include "Krystal.HTML/HTML/HTMLModElement.hpp"
 #include "Krystal.HTML/HTML/HTMLMetaElement.hpp"
+#include "Krystal.HTML/HTML/HTMLModElement.hpp"
 #include "Krystal.HTML/HTML/HTMLOListElement.hpp"
 #include "Krystal.HTML/HTML/HTMLParagraphElement.hpp"
+#include "Krystal.HTML/HTML/HTMLPictureElement.hpp"
 #include "Krystal.HTML/HTML/HTMLPreElement.hpp"
 #include "Krystal.HTML/HTML/HTMLQuoteElement.hpp"
 #include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
+#include "Krystal.HTML/HTML/HTMLSourceElement.hpp"
+#include "Krystal.HTML/HTML/HTMLSpanElement.hpp"
 #include "Krystal.HTML/HTML/HTMLStyleElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTimeElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTitleElement.hpp"
@@ -143,8 +146,8 @@ namespace Krys::HTML
         {
           return CreateRef<HTMLDataElement>(document);
         }
-        case HTMLTagName::ins:
         case HTMLTagName::del:
+        case HTMLTagName::ins:
         {
           return CreateRef<HTMLModElement>(document);
         }
@@ -179,7 +182,7 @@ namespace Krys::HTML
         }
         case HTMLTagName::li:
         {
-          return CreateRef<HTMLLinkElement>(document);
+          return CreateRef<HTMLLIElement>(document);
         }
         case HTMLTagName::link:
         {
@@ -201,6 +204,10 @@ namespace Krys::HTML
         {
           return CreateRef<HTMLParagraphElement>(document);
         }
+        case HTMLTagName::picture:
+        {
+          return CreateRef<HTMLPictureElement>(document);
+        }
         case HTMLTagName::pre:
         {
           return CreateRef<HTMLPreElement>(document);
@@ -208,6 +215,14 @@ namespace Krys::HTML
         case HTMLTagName::slot:
         {
           return CreateRef<HTMLSlotElement>(document);
+        }
+        case HTMLTagName::source:
+        {
+          return CreateRef<HTMLSourceElement>(document);
+        }
+        case HTMLTagName::span:
+        {
+          return CreateRef<HTMLSpanElement>(document);
         }
         case HTMLTagName::style:
         {

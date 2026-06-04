@@ -230,6 +230,11 @@ namespace Krys::HTML
       return _interface == DOMInterface::Meta;
     }
 
+    KRYS_NODISCARD bool IsHTMLModElement() const noexcept
+    {
+      return _interface == DOMInterface::Mod;
+    }
+
     KRYS_NODISCARD bool IsHTMLOListElement() const noexcept
     {
       return _interface == DOMInterface::OList;
@@ -238,6 +243,11 @@ namespace Krys::HTML
     KRYS_NODISCARD bool IsHTMLParagraphElement() const noexcept
     {
       return _interface == DOMInterface::Paragraph;
+    }
+
+    KRYS_NODISCARD bool IsHTMLPictureElement() const noexcept
+    {
+      return _interface == DOMInterface::Pre;
     }
 
     KRYS_NODISCARD bool IsHTMLPreElement() const noexcept
@@ -256,6 +266,11 @@ namespace Krys::HTML
     }
 
     // NOTE: HTMLSlotElement type check is not needed here as Node already has it.
+
+    KRYS_NODISCARD bool IsHTMLSourceElement() const noexcept
+    {
+      return _interface == DOMInterface::Source;
+    }
 
     KRYS_NODISCARD bool IsHTMLSpanElement() const noexcept
     {
