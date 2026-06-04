@@ -19,6 +19,7 @@
 #include "Krystal.HTML/HTML/HTMLHeadingElement.hpp"
 #include "Krystal.HTML/HTML/HTMLHRElement.hpp"
 #include "Krystal.HTML/HTML/HTMLHtmlElement.hpp"
+#include "Krystal.HTML/HTML/HTMLImageElement.hpp"
 #include "Krystal.HTML/HTML/HTMLLIElement.hpp"
 #include "Krystal.HTML/HTML/HTMLLinkElement.hpp"
 #include "Krystal.HTML/HTML/HTMLMenuElement.hpp"
@@ -179,6 +180,10 @@ namespace Krys::HTML
         case HTMLTagName::html:
         {
           return CreateRef<HTMLHtmlElement>(document);
+        }
+        case HTMLTagName::img:
+        {
+          return CreateRef<HTMLImageElement>(document);
         }
         case HTMLTagName::li:
         {

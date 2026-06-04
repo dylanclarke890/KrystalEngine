@@ -18,6 +18,7 @@ namespace Krys::HTML
     Heading,
     HR,
     Html,
+    Image,
     Link,
     LI,
     Menu,
@@ -40,4 +41,4 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 31uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 32u);
