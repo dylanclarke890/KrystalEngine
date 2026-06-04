@@ -190,6 +190,11 @@ namespace Krys::HTML
       return _interface == DOMInterface::DList;
     }
 
+    KRYS_NODISCARD bool IsHTMLEmbedElement() const noexcept
+    {
+      return _interface == DOMInterface::Embed;
+    }
+
     KRYS_NODISCARD bool IsHTMLHeadElement() const noexcept
     {
       return _interface == DOMInterface::Head;
@@ -243,6 +248,11 @@ namespace Krys::HTML
     KRYS_NODISCARD bool IsHTMLModElement() const noexcept
     {
       return _interface == DOMInterface::Mod;
+    }
+
+    KRYS_NODISCARD bool IsHTMLObjectElement() const noexcept
+    {
+      return _interface == DOMInterface::Object;
     }
 
     KRYS_NODISCARD bool IsHTMLOListElement() const noexcept

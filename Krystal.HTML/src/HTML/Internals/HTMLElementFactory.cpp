@@ -15,16 +15,19 @@
 #include "Krystal.HTML/HTML/HTMLDivElement.hpp"
 #include "Krystal.HTML/HTML/HTMLDListElement.hpp"
 #include "Krystal.HTML/HTML/HTMLElement.hpp"
+#include "Krystal.HTML/HTML/HTMLEmbedElement.hpp"
 #include "Krystal.HTML/HTML/HTMLHeadElement.hpp"
 #include "Krystal.HTML/HTML/HTMLHeadingElement.hpp"
 #include "Krystal.HTML/HTML/HTMLHRElement.hpp"
 #include "Krystal.HTML/HTML/HTMLHtmlElement.hpp"
+#include "Krystal.HTML/HTML/HTMLIFrameElement.hpp"
 #include "Krystal.HTML/HTML/HTMLImageElement.hpp"
 #include "Krystal.HTML/HTML/HTMLLIElement.hpp"
 #include "Krystal.HTML/HTML/HTMLLinkElement.hpp"
 #include "Krystal.HTML/HTML/HTMLMenuElement.hpp"
 #include "Krystal.HTML/HTML/HTMLMetaElement.hpp"
 #include "Krystal.HTML/HTML/HTMLModElement.hpp"
+#include "Krystal.HTML/HTML/HTMLObjectElement.hpp"
 #include "Krystal.HTML/HTML/HTMLOListElement.hpp"
 #include "Krystal.HTML/HTML/HTMLParagraphElement.hpp"
 #include "Krystal.HTML/HTML/HTMLPictureElement.hpp"
@@ -160,6 +163,10 @@ namespace Krys::HTML
         {
           return CreateRef<HTMLDListElement>(document);
         }
+        case HTMLTagName::embed:
+        {
+          return CreateRef<HTMLEmbedElement>(document);
+        }
         case HTMLTagName::head:
         {
           return CreateRef<HTMLHeadElement>(document);
@@ -181,6 +188,10 @@ namespace Krys::HTML
         {
           return CreateRef<HTMLHtmlElement>(document);
         }
+        case HTMLTagName::iframe:
+        {
+          return CreateRef<HTMLIFrameElement>(document);
+        }
         case HTMLTagName::img:
         {
           return CreateRef<HTMLImageElement>(document);
@@ -200,6 +211,10 @@ namespace Krys::HTML
         case HTMLTagName::meta:
         {
           return CreateRef<HTMLMetaElement>(document);
+        }
+        case HTMLTagName::object:
+        {
+          return CreateRef<HTMLObjectElement>(document);
         }
         case HTMLTagName::ol:
         {
