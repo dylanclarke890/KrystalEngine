@@ -36,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\HTML\HTMLButtonElement.cpp" />
+    <ClCompile Include="src\HTML\HTMLDataListElement.cpp" />
     <ClCompile Include="src\HTML\HTMLFormElement.cpp" />
     <ClCompile Include="src\HTML\HTMLInputElement.cpp" />
     <ClCompile Include="src\HTML\HTMLLabelElement.cpp" />
@@ -66,6 +67,7 @@
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLBRElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLButtonElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLDataElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLDataListElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLDivElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLDListElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLEmbedElement.hpp" />

@@ -95,3 +95,10 @@ namespace Krys::HTML
 #pragma endregion
   };
 }
+
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::HTMLButtonElement)
+  static bool IsType(const Krys::HTML::HTMLElement &target) noexcept
+  {
+    return target.IsHTMLButtonElement();
+  }
+KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

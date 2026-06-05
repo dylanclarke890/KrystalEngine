@@ -208,9 +208,19 @@ namespace Krys::HTML
       return _interface == DOMInterface::BR;
     }
 
+    KRYS_NODISCARD bool IsHTMLButtonElement() const noexcept
+    {
+      return _interface == DOMInterface::Button;
+    }
+
     KRYS_NODISCARD bool IsHTMLDataElement() const noexcept
     {
       return _interface == DOMInterface::Data;
+    }
+
+    KRYS_NODISCARD bool IsHTMLDataListElement() const noexcept
+    {
+      return _interface == DOMInterface::DataList;
     }
 
     KRYS_NODISCARD bool IsHTMLDivElement() const noexcept
