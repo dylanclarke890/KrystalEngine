@@ -35,6 +35,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\HTML\HTMLTableElement.cpp" />
     <ClCompile Include="src\HTML\HTMLAnchorElement.cpp" />
     <ClCompile Include="src\HTML\HTMLAreaElement.cpp" />
     <ClCompile Include="src\HTML\HTMLAudioElement.cpp" />
@@ -74,6 +75,7 @@
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLQuoteElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLScriptElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLSourceElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLTableElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLTrackElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLUListElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLVideoElement.hpp" />

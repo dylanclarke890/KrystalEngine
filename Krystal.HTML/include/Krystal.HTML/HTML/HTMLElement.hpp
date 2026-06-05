@@ -345,6 +345,11 @@ namespace Krys::HTML
       return _interface == DOMInterface::Style;
     }
 
+    KRYS_NODISCARD bool IsHTMLTableElement() const noexcept
+    {
+      return _interface == DOMInterface::Table;
+    }
+
     KRYS_NODISCARD bool IsHTMLTitleElement() const noexcept
     {
       return _interface == DOMInterface::Title;

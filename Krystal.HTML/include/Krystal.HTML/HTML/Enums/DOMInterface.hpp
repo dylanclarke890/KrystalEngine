@@ -41,6 +41,7 @@ namespace Krys::HTML
     Source,
     Span,
     Style,
+    Table,
     Title,
     Time,
     Track,
@@ -50,4 +51,4 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 39u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 42u);
