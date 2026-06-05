@@ -37,6 +37,7 @@ namespace Krys::HTML
     Mod,
     Object,
     OList,
+    OptGroup,
     Paragraph,
     Picture,
     Pre,

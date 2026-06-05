@@ -328,6 +328,11 @@ namespace Krys::HTML
       return _interface == DOMInterface::OList;
     }
 
+    KRYS_NODISCARD bool IsHTMLOptGroupElement() const noexcept
+    {
+      return _interface == DOMInterface::OptGroup;
+    }
+
     KRYS_NODISCARD bool IsHTMLParagraphElement() const noexcept
     {
       return _interface == DOMInterface::Paragraph;

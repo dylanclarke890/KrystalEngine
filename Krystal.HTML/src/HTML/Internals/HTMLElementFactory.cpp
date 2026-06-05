@@ -46,6 +46,7 @@
 #include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 #include "Krystal.HTML/HTML/HTMLSourceElement.hpp"
 #include "Krystal.HTML/HTML/HTMLSpanElement.hpp"
+#include "Krystal.HTML/HTML/HTMLOptGroupElement.hpp"
 #include "Krystal.HTML/HTML/HTMLStyleElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTableCaptionElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTableCellElement.hpp"
@@ -242,6 +243,10 @@ namespace Krys::HTML
         case HTMLTagName::ol:
         {
           return CreateRef<HTMLOListElement>(document);
+        }
+        case HTMLTagName::optgroup:
+        {
+          return CreateRef<HTMLOptGroupElement>(document);
         }
         case HTMLTagName::p:
         {
