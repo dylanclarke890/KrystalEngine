@@ -4,6 +4,7 @@
 #include "Krystal.HTML/HTML/Dicts/ShowPopoverOptions.hpp"
 #include "Krystal.HTML/HTML/Dicts/TogglePopoverOptions.hpp"
 #include "Krystal.HTML/HTML/Enums/DOMInterface.hpp"
+#include "Krystal.HTML/HTML/Enums/HTMLElementFlags.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
 
 namespace Krys::HTML
@@ -17,10 +18,13 @@ namespace Krys::HTML
     KRYS_TYPE_CAST_TRAITS_ACCESS();
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLElement);
 
-  protected:
-    DOMInterface _interface {DOMInterface::None};
+  private:
+    HTMLElementFlags _flags : BitCount<HTMLElementFlags>() {HTMLElementFlags::None};
+    DOMInterface _interface : BitCount<DOMInterface>() {DOMInterface::None};
 
-    HTMLElement(Document &document, DOMInterface interface, NodeFlags flags = NodeFlags::None) noexcept;
+  protected:
+    HTMLElement(Document &document, DOMInterface interface, HTMLElementFlags flags = HTMLElementFlags::None,
+                NodeFlags nodeFlags = NodeFlags::None) noexcept;
 
   public:
     HTMLElement(Document &document) noexcept;
@@ -153,7 +157,31 @@ namespace Krys::HTML
     // HTMLElement includes HTMLOrSVGOrMathMLElement;
 
   protected:
+#pragma region HTMLElement Flags
+
+    void SetHTMLElement(HTMLElementFlags flag) noexcept
+    {
+      _flags = _flags | flag;
+    }
+
+    void ClearHTMLElement(HTMLElementFlags flag) noexcept
+    {
+      _flags = _flags & ~flag;
+    }
+
+    KRYS_NODISCARD bool HasHTMLElement(HTMLElementFlags flag) const noexcept
+    {
+      return HasFlag(_flags, flag);
+    }
+
+#pragma endregion
+
 #pragma region Type Checks
+
+    KRYS_NODISCARD bool IsHTMLAudioElement() const noexcept
+    {
+      return _interface == DOMInterface::Audio;
+    }
 
     KRYS_NODISCARD bool IsHTMLAnchorElement() const noexcept
     {
@@ -235,6 +263,11 @@ namespace Krys::HTML
       return _interface == DOMInterface::Link;
     }
 
+    KRYS_NODISCARD bool IsHTMLMediaElement() const noexcept
+    {
+      return HasFlag(_flags, HTMLElementFlags::IsMediaElement);
+    }
+
     KRYS_NODISCARD bool IsHTMLMenuElement() const noexcept
     {
       return _interface == DOMInterface::Menu;
@@ -312,12 +345,22 @@ namespace Krys::HTML
       return _interface == DOMInterface::Time;
     }
 
+    KRYS_NODISCARD bool IsHTMLTrackElement() const noexcept
+    {
+      return _interface == DOMInterface::Track;
+    }
+
     KRYS_NODISCARD bool IsHTMLUListElement() const noexcept
     {
       return _interface == DOMInterface::UList;
     }
 
     // NOTE: HTMLUnknownElement type check is not needed here as Node already has it.
+
+    KRYS_NODISCARD bool IsHTMLVideoElement() const noexcept
+    {
+      return _interface == DOMInterface::Video;
+    }
 
 #pragma endregion
   };

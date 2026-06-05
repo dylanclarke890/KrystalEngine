@@ -7,6 +7,7 @@ namespace Krys::HTML
   enum class DOMInterface : uint8
   {
     None,
+    Audio,
     Anchor,
     Base,
     Body,
@@ -23,6 +24,7 @@ namespace Krys::HTML
     Image,
     Link,
     LI,
+    Media,
     Menu,
     Meta,
     Mod,
@@ -39,9 +41,11 @@ namespace Krys::HTML
     Style,
     Title,
     Time,
+    Track,
     UList,
     Unknown,
+    Video,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 32u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 39u);

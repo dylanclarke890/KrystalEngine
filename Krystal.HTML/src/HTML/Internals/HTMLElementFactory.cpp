@@ -9,6 +9,7 @@
 #include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTML/Enums/HTMLTagName.hpp"
 #include "Krystal.HTML/HTML/HTMLAnchorElement.hpp"
+#include "Krystal.HTML/HTML/HTMLAudioElement.hpp"
 #include "Krystal.HTML/HTML/HTMLBaseElement.hpp"
 #include "Krystal.HTML/HTML/HTMLBodyElement.hpp"
 #include "Krystal.HTML/HTML/HTMLDataElement.hpp"
@@ -24,6 +25,7 @@
 #include "Krystal.HTML/HTML/HTMLImageElement.hpp"
 #include "Krystal.HTML/HTML/HTMLLIElement.hpp"
 #include "Krystal.HTML/HTML/HTMLLinkElement.hpp"
+#include "Krystal.HTML/HTML/HTMLMediaElement.hpp"
 #include "Krystal.HTML/HTML/HTMLMenuElement.hpp"
 #include "Krystal.HTML/HTML/HTMLMetaElement.hpp"
 #include "Krystal.HTML/HTML/HTMLModElement.hpp"
@@ -39,8 +41,10 @@
 #include "Krystal.HTML/HTML/HTMLStyleElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTimeElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTitleElement.hpp"
+#include "Krystal.HTML/HTML/HTMLTrackElement.hpp"
 #include "Krystal.HTML/HTML/HTMLUListElement.hpp"
 #include "Krystal.HTML/HTML/HTMLUnknownElement.hpp"
+#include "Krystal.HTML/HTML/HTMLVideoElement.hpp"
 #include "Krystal.Text/ASCII.hpp"
 
 namespace Krys::HTML
@@ -132,6 +136,10 @@ namespace Krys::HTML
         case HTMLTagName::a:
         {
           return CreateRef<HTMLAnchorElement>(document);
+        }
+        case HTMLTagName::audio:
+        {
+          return CreateRef<HTMLAudioElement>(document);
         }
         case HTMLTagName::base:
         {
@@ -256,9 +264,17 @@ namespace Krys::HTML
         {
           return CreateRef<HTMLTimeElement>(document);
         }
+        case HTMLTagName::track:
+        {
+          return CreateRef<HTMLTrackElement>(document);
+        }
         case HTMLTagName::ul:
         {
           return CreateRef<HTMLUListElement>(document);
+        }
+        case HTMLTagName::video:
+        {
+          return CreateRef<HTMLVideoElement>(document);
         }
       }
     }

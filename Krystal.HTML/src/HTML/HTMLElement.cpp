@@ -12,8 +12,9 @@
 
 namespace Krys::HTML
 {
-  HTMLElement::HTMLElement(Document &document, DOMInterface interface, NodeFlags flags) noexcept
-      : Element(document, flags | NodeFlags::IsHTMLElement), _interface(interface)
+  HTMLElement::HTMLElement(Document &document, DOMInterface interface, HTMLElementFlags flags,
+                           NodeFlags nodeFlags) noexcept
+      : Element(document, nodeFlags | NodeFlags::IsHTMLElement), _flags(flags), _interface(interface)
   {
   }
 

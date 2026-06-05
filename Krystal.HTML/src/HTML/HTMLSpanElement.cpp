@@ -1,5 +1,4 @@
-﻿#include "Krystal.HTML/HTML/Attributes/Reflection.hpp"
-#include "Krystal.HTML/HTML/HTMLSpanElement.hpp"
+﻿#include "Krystal.HTML/HTML/HTMLSpanElement.hpp"
 
 namespace Krys::HTML
 {

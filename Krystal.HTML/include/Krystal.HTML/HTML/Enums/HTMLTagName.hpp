@@ -18,6 +18,7 @@ namespace Krys::HTML
     area,
     article,
     aside,
+    audio,
     attachment,
     b,
     base,
@@ -484,6 +485,10 @@ namespace Krys::HTML
         if (tagName == u8"ASIDE")
         {
           return HTMLTagName::aside;
+        }
+        if (tagName == u8"AUDIO")
+        {
+          return HTMLTagName::audio;
         }
         if (tagName == u8"BLINK")
         {
