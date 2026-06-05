@@ -63,6 +63,7 @@ namespace Krys::HTML
     TableCol,
     TableRow,
     TableSection,
+    Template,
     TextArea,
     Title,
     Time,
@@ -73,4 +74,4 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 62u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 65u);

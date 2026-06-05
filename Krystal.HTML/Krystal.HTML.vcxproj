@@ -117,6 +117,7 @@
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLTableElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLTableRowElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLTableSectionElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLTemplateElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLTextAreaElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLTrackElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLUListElement.hpp" />
@@ -343,6 +344,7 @@
     <ClCompile Include="src\HTML\HTMLStyleElement.cpp" />
     <ClCompile Include="src\HTML\HTMLTableRowElement.cpp" />
     <ClCompile Include="src\HTML\HTMLTableSectionElement.cpp" />
+    <ClCompile Include="src\HTML\HTMLTemplateElement.cpp" />
     <ClCompile Include="src\HTML\HTMLTextAreaElement.cpp" />
     <ClCompile Include="src\HTML\HTMLTimeElement.cpp" />
     <ClCompile Include="src\HTML\HTMLTitleElement.cpp" />

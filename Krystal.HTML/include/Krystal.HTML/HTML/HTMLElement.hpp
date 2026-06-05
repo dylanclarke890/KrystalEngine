@@ -455,6 +455,11 @@ namespace Krys::HTML
       return _interface == DOMInterface::TableSection;
     }
 
+    KRYS_NODISCARD bool IsHTMLTemplateElement() const noexcept
+    {
+      return _interface == DOMInterface::Template;
+    }
+
     KRYS_NODISCARD bool IsHTMLTextAreaElement() const noexcept
     {
       return _interface == DOMInterface::TextArea;

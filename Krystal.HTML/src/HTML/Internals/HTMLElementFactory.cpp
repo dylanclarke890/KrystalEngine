@@ -64,6 +64,7 @@
 #include "Krystal.HTML/HTML/HTMLTableElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTableRowElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTableSectionElement.hpp"
+#include "Krystal.HTML/HTML/HTMLTemplateElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTextAreaElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTimeElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTitleElement.hpp"
@@ -347,6 +348,10 @@ namespace Krys::HTML
         case HTMLTagName::th:
         {
           return CreateRef<HTMLTableCellElement>(document);
+        }
+        case HTMLTagName::template_:
+        {
+          return CreateRef<HTMLTemplateElement>(document);
         }
         case HTMLTagName::tr:
         {
