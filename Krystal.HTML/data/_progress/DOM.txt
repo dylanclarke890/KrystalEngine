@@ -1,0 +1,175 @@
+﻿Source: https://dom.spec.whatwg.org
+
+1.3. Selectors - https://dom.spec.whatwg.org/#selectors
+ - scope-match a selectors string - requires CSS selector parsing and matching, which is not yet implemented.
+     - https://dom.spec.whatwg.org/#scope-match-a-selectors-string
+
+2.3. Legacy extensions to the Window interface - https://dom.spec.whatwg.org/#interface-window-extensions
+ - Window interface - readonly attribute (Event or undefined) event; not implemented, as Window interface is not supported.
+     - https://dom.spec.whatwg.org/#dom-window-event
+
+2.5. Constructing events - https://dom.spec.whatwg.org/#constructing-events
+ - EventFactory - not yet implemented, as it requires a lot of interfaces from other specs.
+     - https://dom.spec.whatwg.org/#concept-event-factory
+
+2.7. Interface EventTarget - https://dom.spec.whatwg.org/#eventtarget
+ - AddEventListener - service workers currently not supported.
+     - https://dom.spec.whatwg.org/#add-an-event-listener
+ - RemoveEventListener - service workers currently not supported.
+     - https://dom.spec.whatwg.org/#remove-an-event-listener
+ - Add/RemoveEventListener - We need a way of passing a lambda instead of a EventListenerCallback as it's awkward to use.
+   The issue to solve is how to compare the lambda to the callback when adding/removing listeners. Take a similar approach to AbortAlgorithmCallback
+
+2.8. Observing event listeners - https://dom.spec.whatwg.org/#observing-event-listeners
+ - To legacy-obtain service worker fetch event listener callbacks algorithm not implemented, as service workers are not supported.
+     - https://dom.spec.whatwg.org/#legacy-obtain-service-worker-fetch-event-listener-callbacks
+
+2.9. Dispatching events - https://dom.spec.whatwg.org/#dispatching-events
+ - DispatchToTarget - Let targetOverride be target, if legacy target override flag is not given, and target’s associated Document otherwise. not implemented, as Window interface is not supported.
+     - https://dom.spec.whatwg.org/#concept-event-dispatch
+ - InnerInvoke - Let global be listener callback’s associated realm’s global object not implemented, as it uses the legacy extension to the Window interface, which is not supported.
+ - InnerInvoke - If global is a Window object, then record timing info for event listener given event and listener. not implemented, as Window interface is not supported.
+ - InnerInvoke - Call a user object’s operation with listener’s callback, "handleEvent", « event », and event’s currentTarget attribute value. Not supported as this is a JavaScript concept.
+ - InnerInvoke - Should have some way of logging exceptions potentially thrown by the user’s operation.
+ - InnerInvoke - If global is a Window object, then set global’s current event to currentEvent. Same as above, not implemented, as Window interface is not supported.
+     - https://dom.spec.whatwg.org/#concept-event-listener-inner-invoke
+
+3.2. Interface AbortSignal - https://dom.spec.whatwg.org/#abortsignal
+ - onabort EventHandler attribute; Haven't figured out how to support EventHandler attributes yet, as this is a JavaScript concept.
+     - https://dom.spec.whatwg.org/#dom-abortsignal-onabort
+ - Timeout - Task queues and timers are required to implement this.
+     - https://dom.spec.whatwg.org/#concept-abortsignal-timeout
+ - Let resultSignal be a new object implementing signalInterface using realm. We only have one AbortSignal implementation, so this is not implemented.
+     - https://dom.spec.whatwg.org/#create-a-dependent-abort-signal
+ - CreateDependentAbortSignal - We used sets but to avoid including <utility> in a common header we use a vector instead but the logic to add to the vector is a little messy.
+     - https://dom.spec.whatwg.org/#create-a-dependent-abort-signal
+3.2.1. Garbage collection - https://dom.spec.whatwg.org/#garbage-collection
+ - A non-aborted dependent AbortSignal object must not be garbage collected while its source signals is non-empty and it has registered event listeners for its abort event
+   or its abort algorithms is non-empty - I don't understand this properly enough to know how to implement it, so this is not implemented.
+     - - https://dom.spec.whatwg.org/#garbage-collection
+
+4.2.2.5. Signaling slot change - https://dom.spec.whatwg.org/#signaling-slot-change
+ - Signaling slot change - Append slot to slot’s relevant agent’s signal slots. Don't have 'relevant agents' or 'signal slots'
+ - Signaling slot change - Queue mutation observer microtask. Don't have microtasks or task queues, so this is not implemented.
+     - https://dom.spec.whatwg.org/#signaling-slot-change
+
+4.2.3. Mutation algorithms - https://dom.spec.whatwg.org/#mutation-algorithms
+ - Insert - Custom element reactions and upgrade steps are required.
+     - https://dom.spec.whatwg.org/#concept-node-insert
+ - Move - Custom element reactions are required.
+     - https://dom.spec.whatwg.org/#concept-node-move
+ - Remove - Custom element reactions are required.
+ - Remove - Transient mutation observers are required at the end of this algorithm.
+     - https://dom.spec.whatwg.org/#concept-node-remove
+
+4.2.4. Mixin NonElementParentNode - https://dom.spec.whatwg.org/#interface-nonelementparentnode
+ - GetElementById - implemented but inefficient, it iterates through the entire tree to find matching nodes every time.
+     - https://dom.spec.whatwg.org/#dom-nonelementparentnode-getelementbyid
+
+4.2.6. Mixin ParentNode - https://dom.spec.whatwg.org/#interface-parentnode
+ - QuerySelector/QuerySelectorAll - Requires selector parsing and matching.
+     - https://dom.spec.whatwg.org/#dom-parentnode-queryselector
+     
+4.2.10.1. Interface NodeList - https://dom.spec.whatwg.org/#interface-nodelist
+ - LiveNodeList - This is implemented but inefficient, it iterates through the entire tree to find matching nodes every time.
+ 
+4.2.10.2. Interface HTMLCollection - https://dom.spec.whatwg.org/#interface-htmlcollection
+ - LiveHTMLCollection - This is implemented but inefficient, it iterates through the entire tree to find matching nodes every time.
+
+4.3. Mutation observers - https://dom.spec.whatwg.org/#mutation-observers
+ - Node includes RegisteredObserver/TransientRegisteredObserver/MutationRecord, is there a way to forward declare these to avoid them being included in Node.hpp?
+ - Each similar-origin window agent has a mutation observer microtask queued (a boolean), which is initially false.
+   Not sure how to implement window agent as it's a JavaScript concept.
+      - https://dom.spec.whatwg.org/#mutation-observer-compound-microtask-queued-flag
+ - Each similar-origin window agent also has pending mutation observers (a set of zero or more MutationObserver objects), which is initially empty.
+   Not sure how to implement window agent as it's a JavaScript concept.
+      - https://dom.spec.whatwg.org/#mutation-observer-list
+ - Queuing a mutation record - Requires microtasks and task queues, which are not implemented yet.
+     - https://dom.spec.whatwg.org/#queue-a-mutation-observer-compound-microtask
+ - Notify mutation observers - Requires microtasks and task queues, which are not implemented yet.
+     - https://dom.spec.whatwg.org/#notify-mutation-observers
+
+4.3.2. Queuing a mutation record - https://dom.spec.whatwg.org/#queueing-a-mutation-record
+ - Queue a mutation record - Append observer to the surrounding agent’s pending mutation observers. Don't have 'surrounding agents' or 'pending mutation observers'.
+   - https://dom.spec.whatwg.org/#queue-a-mutation-record
+
+4.4 Interface Node - https://dom.spec.whatwg.org/#interface-node
+ - The baseURI getter steps are to return this’s node document’s document base URL, serialized. URL spec. Unlikely to support this.
+     - https://dom.spec.whatwg.org/#dom-node-baseuri
+ - CloneSingleNode - Encoding is not currently passed to the cloned Document. Needs to
+ - CloneSingleNode - Domain is not currently passed to the cloned Document. Unlikely to support this.
+ - CloneSingleNode - URL is not currently passed to the cloned Document. URL spec. Unlikely to support this.
+     - https://dom.spec.whatwg.org/#clone-a-single-node
+ - GetElementsByTagName/GetElementsByTagNameNS/GetElementsByClassName - implemented but inefficient, it iterates through the entire tree to find matching nodes every time.
+     - https://dom.spec.whatwg.org/#dom-node-getelementsbytagname
+     - https://dom.spec.whatwg.org/#dom-node-getelementsbytagnamens
+     - https://dom.spec.whatwg.org/#dom-node-getelementsbyclassname
+ - LastChild/FirstChild/ParentNode/PreviousSibling/NextSibling - These currently return RawPtr but they should return RefPtr instead for the public API.
+     - https://dom.spec.whatwg.org/#dom-node-lastchild
+
+4.5 Interface Document - https://dom.spec.whatwg.org/#interface-document
+ - Each document has an associated encoding (default UTF-8) - needs to be set when creating a document.
+     - https://dom.spec.whatwg.org/#concept-document-encoding
+ - Each document has an associated domain (default opaque origin) - Unlikely to support this.
+     - https://dom.spec.whatwg.org/#concept-document-domain
+ - Each document has an associated url (default 'about:blank') - URL spec. Unlikely to support this.
+     - https://dom.spec.whatwg.org/#concept-document-domain
+ - Get the parent algorithm - returns null if event’s type attribute value is "load" or document does not have a browsing context;
+   otherwise the document’s relevant global object. We don't have global objects or browsing contexts, so this is not implemented.
+     - https://dom.spec.whatwg.org/#concept-document-no-quirks
+ - Document() constructor - steps are to set this’s origin to the origin of current global object’s associated Document. [HTML]
+   We don't have origins, global objects or associated Documents, so this is not implemented.
+     - https://dom.spec.whatwg.org/#dom-document-document
+ - URL/DocumentURI - URL spec. Unlikely to support this.
+     - https://dom.spec.whatwg.org/#dom-document-documenturi
+ - CharacterSet/Charset/InputEncoding Each document has an associated encoding (default UTF-8) - needs to be set when creating a document.
+     - https://dom.spec.whatwg.org/#concept-document-characterset
+ - CreateEvent - Needs implementing, currently just returns an Event. Has a lot of interfaces from other specs though.
+    - https://dom.spec.whatwg.org/#dom-document-createevent
+
+4.5.1 Interface DOMImplementation - https://dom.spec.whatwg.org/#interface-domimplementation
+ - CreateHTMLDocument - docs origin is this’s origin. We don't have origins, so this is not implemented.
+     - https://dom.spec.whatwg.org/#dom-domimplementation-createhtmldocument
+
+4.7. Interface DocumentFragment - https://dom.spec.whatwg.org/#interface-documentfragment
+ - DocumentFragment() constructor - steps are to set this’s node document to current global object’s associated Document.
+   We don't have global objects or associated Documents, so this is not implemented and we expose a constructor that takes a Document instead.
+     - https://dom.spec.whatwg.org/#dom-documentfragment-documentfragment
+
+4.8. Interface ShadowRoot - https://dom.spec.whatwg.org/#interface-shadowroot
+ - attribute EventHandler onslotchange; - Haven't figured out how to support EventHandler attributes yet, as this is a JavaScript concept.
+     - https://dom.spec.whatwg.org/#dom-shadowroot-onslotchange
+
+4.8. Interface Element - https://dom.spec.whatwg.org/#interface-element
+ - Element has an associated custom element definition - Not implemented yet.
+     - https://dom.spec.whatwg.org/#concept-element-custom-element-definition
+ - Create Element - Custom element creation is not yet implemented.
+     - https://dom.spec.whatwg.org/#concept-create-element
+ - Handle Attribute Changes - Custom element reactions are not yet implemented.
+     - https://dom.spec.whatwg.org/#handle-attribute-changes
+ - IDL reflect attributes - Need to implement a convenient abstraction for this.
+     - https://dom.spec.whatwg.org/#concept-reflect
+ - SetAttribute/SetAttributeNS - Let verifiedValue be the result of calling get trusted type compliant attribute value with qualifiedName, null, this, and value.
+   We haven't implemented trusted types, so this is not implemented.
+     - https://dom.spec.whatwg.org/#dom-element-setattribute
+ - AttachShadowRoot - Custom element reactions are not yet implemented.
+     - https://dom.spec.whatwg.org/#dom-element-attachshadow
+ - Closest/Matches/WebkitMatchesSelector - Requires CSS selector parsing and matching.
+     - https://dom.spec.whatwg.org/#dom-element-matches
+     - https://dom.spec.whatwg.org/#dom-element-closest
+ - GetElementsByTagName/GetElementsByTagNameNS/GetElementsByClassName - implemented but inefficient, it iterates through the entire tree to find matching nodes every time.
+     - https://dom.spec.whatwg.org/#dom-element-getelementsbytagname
+     - https://dom.spec.whatwg.org/#dom-element-getelementsbytagnamens
+     - https://dom.spec.whatwg.org/#dom-element-getelementsbyclassname
+
+4.9.2 Interface Attr
+  - Set existing attribute value - We haven't implemented trusted types, so this is not implemented.
+     - https://dom.spec.whatwg.org/#set-an-existing-attribute-value
+
+6.0 Traversal - https://dom.spec.whatwg.org/#traversal
+  - call a user's object's operation with a callback and a set of arguments - Not supported as this is a JavaScript concept.
+     - https://dom.spec.whatwg.org/#concept-node-filter
+
+6.3 Interface NodeFilter - https://dom.spec.whatwg.org/#interface-nodefilter
+  - Filter - Supported but a bit clunky to use.
+     - https://dom.spec.whatwg.org/#concept-node-filter

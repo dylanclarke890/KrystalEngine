@@ -1,19 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Pointers/Concepts.hpp"
 #include "Krystal.Lib/Pointers/IntrusivePtr.hpp"
-#include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys
 {
-  template <typename T>
-  concept SupportsCheckedPtr = requires(T &value) {
-    { value.AddRefChecked() } -> SameType<void>;
-    { value.SubRefChecked() } -> SameType<void>;
-    { value.GetRefCountChecked() } -> ConvertibleTo<uint32>;
-  };
-
   /// @brief CheckedPtr is used to verify that the object being pointed to outlives the CheckedPtr.
   /// It does not affect the lifetime of the object being pointed to; it simply adds a runtime
   /// check (via assert) that when the object being pointed to is destroyed, there are

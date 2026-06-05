@@ -146,19 +146,19 @@ namespace Krys::Tests
     HTMLInputStream stream;
     stream.Append(ToUTF32("aBcDeF"), IsEOF(true));
 
-    auto result = stream.AdvancePast<false>(Text::ASCIILiteral::From("aBc"));
+    auto result = stream.AdvancePast<false>(Krys::Text::ASCIILiteral::From("aBc"));
     REQUIRE(result == HTMLInputStream::MatchResult::Matched);
     REQUIRE(stream.NextInputCharacter() == U'D');
 
-    result = stream.AdvancePast<>(Text::ASCIILiteral::From("dE"));
+    result = stream.AdvancePast<>(Krys::Text::ASCIILiteral::From("dE"));
     REQUIRE(result == HTMLInputStream::MatchResult::Matched);
     REQUIRE(stream.NextInputCharacter() == U'F');
 
-    result = stream.AdvancePast<>(Text::ASCIILiteral::From("XYZ"));
+    result = stream.AdvancePast<>(Krys::Text::ASCIILiteral::From("XYZ"));
     REQUIRE(result == HTMLInputStream::MatchResult::NotEnoughCharacters);
     REQUIRE(stream.NextInputCharacter() == U'F');
 
-    result = stream.AdvancePast<>(Text::ASCIILiteral::From("G"));
+    result = stream.AdvancePast<>(Krys::Text::ASCIILiteral::From("G"));
     REQUIRE(result == HTMLInputStream::MatchResult::DidNotMatch);
     REQUIRE(stream.NextInputCharacter() == U'F');
   }
@@ -231,7 +231,7 @@ namespace Krys::Tests
     }
 
     stream.Peek();
-    (void)stream.AdvancePast<false>(Text::ASCIILiteral::From("text")); // 'text'
+    (void)stream.AdvancePast<false>(Krys::Text::ASCIILiteral::From("text")); // 'text'
     {
       const auto &loc = stream.GetCurrentLocation();
       REQUIRE(loc.Line == 4uz);

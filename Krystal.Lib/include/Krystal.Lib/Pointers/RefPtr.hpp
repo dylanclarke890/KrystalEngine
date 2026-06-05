@@ -1,20 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Concepts.hpp"
+#include "Krystal.Lib/Pointers/Concepts.hpp"
 #include "Krystal.Lib/Pointers/IntrusivePtr.hpp"
-#include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
 
 namespace Krys
 {
-  template <typename T>
-  concept SupportsRefPtr = requires(T &value) {
-    { value.AddRef() } -> SameType<void>;
-    { value.SubRef() } -> SameType<void>;
-    { value.GetRefCount() } -> ConvertibleTo<uint32>;
-  };
-
   struct StrongRefPolicy
   {
     template <typename T>

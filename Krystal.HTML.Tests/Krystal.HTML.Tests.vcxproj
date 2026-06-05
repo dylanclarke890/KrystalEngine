@@ -115,8 +115,9 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp23</LanguageStandard>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <ForcedIncludeFiles>pch.h</ForcedIncludeFiles>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -157,56 +158,62 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="catch_main.cpp" />
-    <ClCompile Include="tests\Algorithms\EventDispatcher.cpp" />
-    <ClCompile Include="tests\Algorithms\MutationAlgorithms.cpp" />
-    <ClCompile Include="tests\Mixins\ChildNode.cpp" />
-    <ClCompile Include="tests\Mixins\NonDocumentTypeChildNode.cpp" />
-    <ClCompile Include="tests\Algorithms\ShadowRootAlgorithms.cpp" />
-    <ClCompile Include="tests\DOMTokenList.cpp" />
-    <ClCompile Include="tests\Events\CustomEvent.cpp" />
-    <ClCompile Include="tests\Events\Event.cpp" />
-    <ClCompile Include="tests\Factories\EventFactory.cpp" />
-    <ClCompile Include="tests\Iterators\NodeIterator.cpp" />
-    <ClCompile Include="tests\Iterators\TreeWalker.cpp" />
-    <ClCompile Include="tests\Loader\HTMLEncodingSniffer.cpp" />
-    <ClCompile Include="tests\Loader\TextResourceDecoder.cpp" />
-    <ClCompile Include="tests\Algorithms\NameValidation.cpp" />
-    <ClCompile Include="tests\Algorithms\Mixins.cpp" />
-    <ClCompile Include="tests\Mixins\NonElementParentNode.cpp" />
-    <ClCompile Include="tests\Mixins\ParentNode.cpp" />
-    <ClCompile Include="tests\MutationObserver\MutationObserver.cpp" />
-    <ClCompile Include="tests\Node\Attr.cpp" />
-    <ClCompile Include="tests\Node\CDATASection.cpp" />
-    <ClCompile Include="tests\Node\CharacterData.cpp" />
-    <ClCompile Include="tests\Node\Comment.cpp" />
-    <ClCompile Include="tests\Node\ContainerNode.cpp" />
-    <ClCompile Include="tests\Node\DocumentFragment.cpp" />
-    <ClCompile Include="tests\Node\DocumentType.cpp" />
-    <ClCompile Include="tests\Node\DOMImplementation.cpp" />
-    <ClCompile Include="tests\Node\Element.cpp" />
-    <ClCompile Include="tests\Node\HTMLCollection.cpp" />
-    <ClCompile Include="tests\Node\NamedNodeMap.cpp" />
-    <ClCompile Include="tests\Node\Node.cpp" />
-    <ClCompile Include="tests\Node\ProcessingInstruction.cpp" />
-    <ClCompile Include="tests\Node\Text.cpp" />
+    <ClCompile Include="tests\DOM\Algorithms\EventDispatcher.cpp" />
+    <ClCompile Include="tests\DOM\Algorithms\MutationAlgorithms.cpp" />
+    <ClCompile Include="tests\DOM\Mixins\ChildNode.cpp" />
+    <ClCompile Include="tests\DOM\Mixins\NonDocumentTypeChildNode.cpp" />
+    <ClCompile Include="tests\DOM\Algorithms\ShadowRootAlgorithms.cpp" />
+    <ClCompile Include="tests\DOM\DOMTokenList.cpp" />
+    <ClCompile Include="tests\DOM\Internals\Event\CustomEvent.cpp" />
+    <ClCompile Include="tests\DOM\Internals\Event\Event.cpp" />
+    <ClCompile Include="tests\DOM\Internals\EventFactory.cpp" />
+    <ClCompile Include="tests\DOM\NodeIterator.cpp" />
+    <ClCompile Include="tests\DOM\TreeWalker.cpp" />
+    <ClCompile Include="tests\HTML\Attributes\Reflection.cpp" />
+    <ClCompile Include="tests\HTML\MicroParsers\Numbers.cpp" />
+    <ClCompile Include="tests\Parser\Loader\HTMLEncodingSniffer.cpp" />
+    <ClCompile Include="tests\Parser\Loader\TextResourceDecoder.cpp" />
+    <ClCompile Include="tests\DOM\Algorithms\NameValidation.cpp" />
+    <ClCompile Include="tests\DOM\Algorithms\Mixins.cpp" />
+    <ClCompile Include="tests\DOM\Mixins\NonElementParentNode.cpp" />
+    <ClCompile Include="tests\DOM\Mixins\ParentNode.cpp" />
+    <ClCompile Include="tests\DOM\MutationObserver.cpp" />
+    <ClCompile Include="tests\DOM\Attr.cpp" />
+    <ClCompile Include="tests\DOM\CDATASection.cpp" />
+    <ClCompile Include="tests\DOM\CharacterData.cpp" />
+    <ClCompile Include="tests\DOM\Comment.cpp" />
+    <ClCompile Include="tests\DOM\ContainerNode.cpp" />
+    <ClCompile Include="tests\DOM\DocumentFragment.cpp" />
+    <ClCompile Include="tests\DOM\DocumentType.cpp" />
+    <ClCompile Include="tests\DOM\DOMImplementation.cpp" />
+    <ClCompile Include="tests\DOM\Element.cpp" />
+    <ClCompile Include="tests\DOM\HTMLCollection.cpp" />
+    <ClCompile Include="tests\DOM\NamedNodeMap.cpp" />
+    <ClCompile Include="tests\DOM\Node.cpp" />
+    <ClCompile Include="tests\DOM\ProcessingInstruction.cpp" />
+    <ClCompile Include="tests\DOM\Text.cpp" />
     <ClCompile Include="tests\Parser\HTMLCharacterReference.cpp" />
     <ClCompile Include="tests\Parser\HTMLInputStream.cpp" />
     <ClCompile Include="tests\Parser\HTMLTokenizerIntegrationTests.cpp" />
     <ClCompile Include="tests\Parser\HTMLTokenizerStates.cpp" />
-    <ClCompile Include="tests\Algorithms\TreeQueries.cpp" />
-    <ClCompile Include="tests\Algorithms\OrderedSet.cpp" />
-    <ClCompile Include="tests\Algorithms\StringAlgorithms.cpp" />
-    <ClCompile Include="tests\Ranges\Range.cpp" />
-    <ClCompile Include="tests\Ranges\StaticRange.cpp" />
+    <ClCompile Include="tests\DOM\Algorithms\TreeQueries.cpp" />
+    <ClCompile Include="tests\DOM\Algorithms\OrderedSet.cpp" />
+    <ClCompile Include="tests\Infra\StringAlgorithms.cpp" />
+    <ClCompile Include="tests\DOM\Range.cpp" />
+    <ClCompile Include="tests\DOM\StaticRange.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="pch.h" />
     <ClInclude Include="include\Krystal.HTML.Tests\ParserTestUtils.hpp" />
     <ClInclude Include="include\Krystal.HTML.Tests\TestCharacterData.hpp" />
     <ClInclude Include="include\Krystal.HTML.Tests\TestContainerNode.hpp" />
     <ClInclude Include="include\Krystal.HTML.Tests\TestElement.hpp" />
     <ClInclude Include="include\Krystal.HTML.Tests\TestNode.hpp" />
-    <ClCompile Include="tests\Ranges\BoundaryPoint.cpp" />
+    <ClCompile Include="tests\DOM\BoundaryPoint.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

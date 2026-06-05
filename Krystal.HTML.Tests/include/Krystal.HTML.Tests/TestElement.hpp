@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Namespaces.hpp"
-#include "Krystal.HTML/Node/Element.hpp"
-#include "Krystal.HTML/QualifiedName.hpp"
+#include "Krystal.HTML/Infra/Namespaces.hpp"
+#include "Krystal.HTML/DOM/Element.hpp"
+#include "Krystal.HTML/DOM/Internals/QualifiedName.hpp"
 
 namespace Krys::Tests
 {
@@ -14,7 +14,7 @@ namespace Krys::Tests
 
   public:
     TestElement(Document &document) noexcept
-        : Element(document, {Namespaces::HTML, DOMStringAtom::Null(), u8"test-element"}, NodeFlag::None)
+        : Element(document, {Namespace::HTML, DOMStringAtom::Null(), u8"test-element"}, NodeFlags::None)
     {
     }
   };

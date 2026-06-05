@@ -1,0 +1,42 @@
+﻿Important Sections:
+
+2.1.4 DOM Trees - https://html.spec.whatwg.org/multipage/infrastructure.html#dom-trees
+  - Defines HTML Standard extensibility hook steps for inserting, removing, moving etc. any Element within the HTML namespace.
+
+2.5.6 Nonce attribute - https://html.spec.whatwg.org/multipage/urls-and-fetching.html#nonce-attributes
+  - Defines the nonce attribute along with attribute change / cloning steps
+
+2.6.4.1 HTMLAllCollection - https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#the-htmlallcollection-interface
+  - Needed to support document.all. Has special, legacy behavior to keep in mind.
+
+2.6.5 DOMStringList - https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#the-domstringlist-interface
+  - Old legacy API for representing a list of DOMStrings.
+  - Ignoring as it seems to only be used by 'location'/'domain', neither of which we're supporting.
+
+3.2.3 HTML element constructors - https://html.spec.whatwg.org/#html-element-constructors
+  - Ignoring this entire section for now as it seems to be specific to JavaScript.
+
+3.2.6 Global attributes - https://html.spec.whatwg.org/#global-attributes
+  - Defines the global attributes/event handlers that all HTML elements support. Most are covered in the mixins that I still need to implement.
+
+3.2.6.5 The style attribute - https://html.spec.whatwg.org/#the-style-attribute
+  - Style attribute, requires parsing CSS declarations and applying them to the element's style.
+
+3.2.6.6 Embedding custom non-visible data with the data-* attributes - https://html.spec.whatwg.org/#embedding-custom-non-visible-data-with-the-data-*-attributes
+  - Defines the data-* attributes and the DOMStringMap API for accessing them.
+
+4.2.4 The link element
+  - DOMTokenList IDL attributes have not been implemented
+  - some of the attributes of this element are limited to known values but I don't know what they are.
+
+4.2.5 The meta element
+  - When the meta element is inserted into a document or certain attribute values are changed certain steps need to be run.
+
+  TODO:
+- Whenever a render-blocking element el becomes browsing-context disconnected, or el's blocking attribute's value is changed so that
+  el is no longer potentially render-blocking, then unblock rendering on el.
+
+NOTES:
+ - When implementing event handler IDL attributes (on* members), the spec defines an EventHandler as a function that takes an Event and returns any type.
+   The return type is only used to determine whether the event is cancelled. Explore whether using a lambda as the argument to the attribute setter, deducing it's return type
+   using decltype and using that as a way to resolve the return type to a boolean.

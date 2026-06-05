@@ -1,11 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/Core/Hash.hpp"
-#include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Maths/Vector.hpp"
-#include <format>
 
 namespace Krys::Gfx
 {
@@ -49,7 +46,7 @@ namespace Krys::Gfx
     /// @brief Returns the sum of this colour and another. This does not saturate the channels.
     /// @param rhs The colour to add this to.
     /// @return The sum of the two colours.
-    constexpr Type operator+(const Type &rhs) const noexcept
+    KRYS_NODISCARD constexpr Type operator+(const Type &rhs) const noexcept
     {
       return Type(red + rhs.red, green + rhs.green, blue + rhs.blue, alpha + rhs.alpha);
     }
@@ -57,7 +54,7 @@ namespace Krys::Gfx
     /// @brief Returns the result of subtracting another colour from this colour.
     /// @param rhs The colour to subtract from this colour.
     /// @return The result of the subtraction.
-    constexpr Type operator-(const Type &rhs) const noexcept
+    KRYS_NODISCARD constexpr Type operator-(const Type &rhs) const noexcept
     {
       return Type(red - rhs.red, green - rhs.green, blue - rhs.blue, alpha - rhs.alpha);
     }
@@ -65,7 +62,7 @@ namespace Krys::Gfx
     /// @brief Returns the result of multiplying this colour component-wise by a scalar.
     /// @param rhs The scalar value to multiply by.
     /// @return The result of the scale.
-    constexpr Type operator*(float rhs) const noexcept
+    KRYS_NODISCARD constexpr Type operator*(float rhs) const noexcept
     {
       return Type((ColourType)(red * rhs), (ColourType)(green * rhs), (ColourType)(blue * rhs),
                   (ColourType)(alpha * rhs));
@@ -74,7 +71,7 @@ namespace Krys::Gfx
     /// @brief Returns the result of dividing this colour component-wise by a scalar.
     /// @param rhs The scalar value to divide by.
     /// @return The result of the scale.
-    constexpr Type operator/(float rhs) const noexcept
+    KRYS_NODISCARD constexpr Type operator/(float rhs) const noexcept
     {
       return Type((ColourType)(red / rhs), (ColourType)(green / rhs), (ColourType)(blue / rhs),
                   (ColourType)(alpha / rhs));
@@ -120,7 +117,7 @@ namespace Krys::Gfx
     /// @brief Equality operator.
     /// @param rhs The colour to compare this against.
     /// @return True if the two colours are equal, false otherwise.
-    constexpr bool operator==(Colour rhs) const noexcept
+    KRYS_NODISCARD constexpr bool operator==(Colour rhs) const noexcept
     {
       return red == rhs.red && green == rhs.green && blue == rhs.blue && alpha == rhs.alpha;
     }
@@ -128,7 +125,7 @@ namespace Krys::Gfx
     /// @brief Inequality operator.
     /// @param rhs The colour to compare this against.
     /// @return True if the two colours are not equal, false otherwise.
-    constexpr bool operator!=(Colour rhs) const noexcept
+    KRYS_NODISCARD constexpr bool operator!=(Colour rhs) const noexcept
     {
       return !(*this == rhs);
     }
@@ -148,7 +145,7 @@ namespace Krys::Gfx
     }
 
     /// @brief Convert color to premultiplied alpha.
-    constexpr Colour<ColourType, AlphaDefault, true> ToPremultiplied() const noexcept
+    KRYS_NODISCARD constexpr Colour<ColourType, AlphaDefault, true> ToPremultiplied() const noexcept
     requires(!PremultipliedAlpha && SameType<ColourType, uchar>)
     {
       return {
@@ -160,7 +157,8 @@ namespace Krys::Gfx
     }
 
     /// @brief Convert color to premultiplied alpha, after multiplying alpha by opacity.
-    constexpr Colour<ColourType, AlphaDefault, true> ToPremultiplied(float opacity) const noexcept
+    KRYS_NODISCARD constexpr Colour<ColourType, AlphaDefault, true>
+      ToPremultiplied(float opacity) const noexcept
     requires(!PremultipliedAlpha && SameType<ColourType, uchar>)
     {
       const float new_alpha = alpha * opacity;
@@ -173,7 +171,7 @@ namespace Krys::Gfx
     }
 
     /// @brief Convert color to non-premultiplied alpha.
-    constexpr Colour<ColourType, AlphaDefault, false> ToNonPremultiplied() const noexcept
+    KRYS_NODISCARD constexpr Colour<ColourType, AlphaDefault, false> ToNonPremultiplied() const noexcept
     requires(PremultipliedAlpha && SameType<ColourType, uchar>)
     {
       return {
@@ -184,7 +182,7 @@ namespace Krys::Gfx
       };
     }
 
-    constexpr Maths::Vec3 ToVec3() const noexcept
+    KRYS_NODISCARD constexpr Maths::Vec3 ToVec3() const noexcept
     {
       if constexpr (SameType<ColourType, float>)
       {
@@ -196,7 +194,7 @@ namespace Krys::Gfx
       }
     }
 
-    constexpr Maths::Vec4 ToVec4() const noexcept
+    KRYS_NODISCARD constexpr Maths::Vec4 ToVec4() const noexcept
     {
       if constexpr (SameType<ColourType, float>)
       {
@@ -242,82 +240,4 @@ namespace Krys::Gfx
     static constexpr ColourbPremultiplied Beige {245, 245, 220, 255};
     static constexpr ColourbPremultiplied Ivory {255, 255, 240, 255};
   }
-}
-
-namespace std
-{
-  template <>
-  struct hash<Krys::Gfx::Colourf>
-  {
-    size_t operator()(const Krys::Gfx::Colourf &colour) const
-    {
-      return Krys::Hash::Combine(colour.red, colour.green, colour.blue, colour.alpha);
-    }
-  };
-
-  template <>
-  struct formatter<Krys::Gfx::Colourf>
-  {
-    constexpr auto parse(format_parse_context &ctx)
-    {
-      return ctx.begin();
-    }
-
-    template <typename FormatContext>
-    auto format(const Krys::Gfx::Colourf &colour, FormatContext &ctx)
-    {
-      return format_to(ctx.out(), "Colour(r: {}, g: {}, b: {}, a: {})", colour.red, colour.green, colour.blue,
-                       colour.alpha);
-    }
-  };
-
-  template <>
-  struct hash<Krys::Gfx::Colourb>
-  {
-    size_t operator()(const Krys::Gfx::Colourb &colour) const
-    {
-      return Krys::Hash::Combine(colour.red, colour.green, colour.blue, colour.alpha);
-    }
-  };
-
-  template <>
-  struct formatter<Krys::Gfx::Colourb>
-  {
-    constexpr auto parse(format_parse_context &ctx)
-    {
-      return ctx.begin();
-    }
-
-    template <typename FormatContext>
-    auto format(const Krys::Gfx::Colourb &colour, FormatContext &ctx)
-    {
-      return format_to(ctx.out(), "Colour(r: {}, g: {}, b: {}, a: {})", colour.red, colour.green, colour.blue,
-                       colour.alpha);
-    }
-  };
-
-  template <>
-  struct hash<Krys::Gfx::ColourbPremultiplied>
-  {
-    size_t operator()(const Krys::Gfx::ColourbPremultiplied &colour) const
-    {
-      return Krys::Hash::Combine(colour.red, colour.green, colour.blue, colour.alpha);
-    }
-  };
-
-  template <>
-  struct formatter<Krys::Gfx::ColourbPremultiplied>
-  {
-    constexpr auto parse(format_parse_context &ctx)
-    {
-      return ctx.begin();
-    }
-
-    template <typename FormatContext>
-    auto format(const Krys::Gfx::ColourbPremultiplied &colour, FormatContext &ctx)
-    {
-      return format_to(ctx.out(), "Colour(r: {}, g: {}, b: {}, a: {})", colour.red, colour.green, colour.blue,
-                       colour.alpha);
-    }
-  };
 }

@@ -1,0 +1,19 @@
+﻿#pragma once
+
+#include "Krystal.HTML/DOM/Internals/QualifiedName.hpp"
+#include "Krystal.HTML/Types/DOMString.hpp"
+#include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Pointers/RefPtr.hpp"
+
+namespace Krys::HTML
+{
+  class CustomElementRegistry;
+  class Document;
+  class HTMLElement;
+
+  class HTMLElementFactory
+  {
+  public:
+    KRYS_NODISCARD static Ref<HTMLElement> Create(Document &document, DOMStringAtom localName) noexcept;
+  };
+}

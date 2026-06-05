@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Node/Text.hpp"
+#include "Krystal.HTML/DOM/Text.hpp"
 
 namespace Krys::Tests
 {

@@ -54,9 +54,10 @@ namespace Krys::Text
     return ch >= 'A' && ch <= 'Z';
   }
 
-  // Can be used for comparing any input character to a lowercase English character. The
-  // `IsASCIIAlphaCaselessEqual` function should be used for regular comparison of ASCII alpha characters, but
-  // switch statements in the CSS tokenizer, for example, instead make direct use of `ToASCIILowerUnchecked`.
+  /// @brief Can be used for comparing any ASCII input character to a lowercase English character. The
+  /// `IsASCIIAlphaCaselessEqual` function should be used for regular comparison of ASCII alpha characters,
+  /// but switch statements in the CSS tokenizer, for example, instead make direct use of
+  /// `ToASCIILowerUnchecked`.
   template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr TChar ToASCIILowerUnchecked(TChar character) noexcept
   {
@@ -179,6 +180,13 @@ namespace Krys::Text
   {
     auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
     return !IsASCIIWhitespace(ch);
+  }
+
+    template <ASCIIChar TChar>
+  KRYS_NODISCARD constexpr bool ToASCIIDigitUnchecked(TChar character) noexcept
+  {
+    auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
+    return static_cast<TChar>(ch - '0');
   }
 
   /// @brief Different from IsASCIIWhitespace; JSON/HTTP/XML do not accept '\f' as a whitespace.

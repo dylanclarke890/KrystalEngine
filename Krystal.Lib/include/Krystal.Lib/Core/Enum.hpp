@@ -15,7 +15,7 @@ namespace Krys
   struct EnumTraits
   {
     /// @brief Total number of distinct values defined in the enum.
-    constexpr static underlying_t<TEnum> DistinctValues = 0u;
+    constexpr static underlying_t<TEnum> DistinctValues = static_cast<underlying_t<TEnum>>(0uz);
 
     /// @brief True if the enum values are contiguous from 0 to the highest distinct value.
     constexpr static bool Contiguous = false;
@@ -60,7 +60,7 @@ namespace Krys
 
   /// @brief Count of bits needed to store every distinct value of the enum.
   template <typename TEnum>
-  KRYS_NODISCARD constexpr static uint32 BitCount() noexcept
+  KRYS_NODISCARD consteval uint8 BitCount() noexcept
   {
     using Traits = EnumTraits<TEnum>;
     static_assert(Traits::DistinctValues > 0u, "BitCount(): must have EnumTraits::DistinctValues > 0");
@@ -68,11 +68,13 @@ namespace Krys
 
     if constexpr (Traits::BitwiseFlags)
     {
-      return std::bit_width(static_cast<underlying_t<TEnum>>((1u << (Traits::DistinctValues - 1u))));
+      // The number of distinct values in a bitwise flags enum is equal to the number of bits needed plus one
+      // (for the zero value).
+      return Traits::DistinctValues;
     }
     else
     {
-      return std::bit_width(static_cast<underlying_t<TEnum>>((Traits::DistinctValues - 1u)));
+      return std::bit_width(static_cast<underlying_t<TEnum>>((Traits::DistinctValues - 1uz)));
     }
   }
 

@@ -1,13 +1,12 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/HTMLDocument.hpp"
-#include "Krystal.HTML/Loader/TextResourceDecoder.hpp"
+#include "Krystal.HTML/DOM/HTMLDocument.hpp"
 #include "Krystal.HTML/Parser/HTMLInputStream.hpp"
 #include "Krystal.HTML/Parser/HTMLToken.hpp"
 #include "Krystal.HTML/Parser/HTMLTokenAtom.hpp"
 #include "Krystal.HTML/Parser/HTMLTokenizer.hpp"
 #include "Krystal.HTML/Parser/HTMLTreeBuilder.hpp"
-#include "Krystal.HTML/StronglyTypedValues.hpp"
+#include "Krystal.HTML/Parser/Loader/TextResourceDecoder.hpp"
 #include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/Pointers/ReferenceWrapper.hpp"
 
