@@ -13,6 +13,7 @@ namespace Krys::HTML
     Base,
     Body,
     BR,
+    Button,
     Data,
     Div,
     DList,

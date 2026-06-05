@@ -13,6 +13,7 @@
 #include "Krystal.HTML/HTML/HTMLAudioElement.hpp"
 #include "Krystal.HTML/HTML/HTMLBaseElement.hpp"
 #include "Krystal.HTML/HTML/HTMLBodyElement.hpp"
+#include "Krystal.HTML/HTML/HTMLButtonElement.hpp"
 #include "Krystal.HTML/HTML/HTMLDataElement.hpp"
 #include "Krystal.HTML/HTML/HTMLDivElement.hpp"
 #include "Krystal.HTML/HTML/HTMLDListElement.hpp"
@@ -132,6 +133,10 @@ namespace Krys::HTML
         case HTMLTagName::body:
         {
           return CreateRef<HTMLBodyElement>(document);
+        }
+        case HTMLTagName::button:
+        {
+          return CreateRef<HTMLButtonElement>(document);
         }
         case HTMLTagName::caption:
         {
