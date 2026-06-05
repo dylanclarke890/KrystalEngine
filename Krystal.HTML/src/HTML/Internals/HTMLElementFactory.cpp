@@ -17,6 +17,7 @@
 #include "Krystal.HTML/HTML/HTMLDataElement.hpp"
 #include "Krystal.HTML/HTML/HTMLDataListElement.hpp"
 #include "Krystal.HTML/HTML/HTMLDetailsElement.hpp"
+#include "Krystal.HTML/HTML/HTMLDialogElement.hpp"
 #include "Krystal.HTML/HTML/HTMLDivElement.hpp"
 #include "Krystal.HTML/HTML/HTMLDListElement.hpp"
 #include "Krystal.HTML/HTML/HTMLElement.hpp"
@@ -50,6 +51,7 @@
 #include "Krystal.HTML/HTML/HTMLPreElement.hpp"
 #include "Krystal.HTML/HTML/HTMLProgressElement.hpp"
 #include "Krystal.HTML/HTML/HTMLQuoteElement.hpp"
+#include "Krystal.HTML/HTML/HTMLScriptElement.hpp"
 #include "Krystal.HTML/HTML/HTMLSelectedContentElement.hpp"
 #include "Krystal.HTML/HTML/HTMLSelectElement.hpp"
 #include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
@@ -104,6 +106,7 @@ namespace Krys::HTML
         case HTMLTagName::main:
         case HTMLTagName::mark:
         case HTMLTagName::nav:
+        case HTMLTagName::noscript:
         case HTMLTagName::ruby:
         case HTMLTagName::rp:
         case HTMLTagName::rt:
@@ -114,6 +117,7 @@ namespace Krys::HTML
         case HTMLTagName::small:
         case HTMLTagName::strong:
         case HTMLTagName::sub:
+        case HTMLTagName::summary:
         case HTMLTagName::sup:
         case HTMLTagName::u:
         case HTMLTagName::var:
@@ -175,6 +179,10 @@ namespace Krys::HTML
         case HTMLTagName::details:
         {
           return CreateRef<HTMLDetailsElement>(document);
+        }
+        case HTMLTagName::dialog:
+        {
+          return CreateRef<HTMLDialogElement>(document);
         }
         case HTMLTagName::div:
         {
@@ -296,6 +304,10 @@ namespace Krys::HTML
         case HTMLTagName::progress:
         {
           return CreateRef<HTMLProgressElement>(document);
+        }
+        case HTMLTagName::script:
+        {
+          return CreateRef<HTMLScriptElement>(document);
         }
         case HTMLTagName::select:
         {

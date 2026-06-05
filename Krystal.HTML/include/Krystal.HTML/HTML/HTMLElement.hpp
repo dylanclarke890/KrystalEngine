@@ -228,6 +228,11 @@ namespace Krys::HTML
       return _interface == DOMInterface::Details;
     }
 
+    KRYS_NODISCARD bool IsHTMLDialogElement() const noexcept
+    {
+      return _interface == DOMInterface::Dialog;
+    }
+
     KRYS_NODISCARD bool IsHTMLDivElement() const noexcept
     {
       return _interface == DOMInterface::Div;

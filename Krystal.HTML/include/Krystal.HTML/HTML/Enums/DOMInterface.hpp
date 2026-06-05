@@ -17,6 +17,7 @@ namespace Krys::HTML
     Data,
     DataList,
     Details,
+    Dialog,
     Div,
     DList,
     Embed,

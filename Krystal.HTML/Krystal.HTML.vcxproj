@@ -38,6 +38,7 @@
     <ClCompile Include="src\HTML\HTMLButtonElement.cpp" />
     <ClCompile Include="src\HTML\HTMLDataListElement.cpp" />
     <ClCompile Include="src\HTML\HTMLDetailsElement.cpp" />
+    <ClCompile Include="src\HTML\HTMLDialogElement.cpp" />
     <ClCompile Include="src\HTML\HTMLFieldSetElement.cpp" />
     <ClCompile Include="src\HTML\HTMLFormElement.cpp" />
     <ClCompile Include="src\HTML\HTMLInputElement.cpp" />
@@ -48,6 +49,7 @@
     <ClCompile Include="src\HTML\HTMLOptionElement.cpp" />
     <ClCompile Include="src\HTML\HTMLOutputElement.cpp" />
     <ClCompile Include="src\HTML\HTMLProgressElement.cpp" />
+    <ClCompile Include="src\HTML\HTMLScriptElement.cpp" />
     <ClCompile Include="src\HTML\HTMLSelectedContentElement.cpp" />
     <ClCompile Include="src\HTML\HTMLSelectElement.cpp" />
     <ClCompile Include="src\HTML\HTMLTableCaptionElement.cpp" />
@@ -78,6 +80,7 @@
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLDataElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLDataListElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLDetailsElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLDialogElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLDivElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLDListElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLLegendElement.hpp" />
