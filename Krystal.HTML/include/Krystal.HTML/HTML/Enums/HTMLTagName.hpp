@@ -7,7 +7,7 @@
 
 namespace Krys::HTML
 {
-  enum class HTMLTagName : uint16
+  enum class HTMLTagName : uint8
   {
     unknown,
     a,

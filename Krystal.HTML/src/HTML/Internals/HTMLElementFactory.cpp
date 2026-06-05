@@ -41,6 +41,12 @@
 #include "Krystal.HTML/HTML/HTMLSourceElement.hpp"
 #include "Krystal.HTML/HTML/HTMLSpanElement.hpp"
 #include "Krystal.HTML/HTML/HTMLStyleElement.hpp"
+#include "Krystal.HTML/HTML/HTMLTableCaptionElement.hpp"
+#include "Krystal.HTML/HTML/HTMLTableCellElement.hpp"
+#include "Krystal.HTML/HTML/HTMLTableColElement.hpp"
+#include "Krystal.HTML/HTML/HTMLTableElement.hpp"
+#include "Krystal.HTML/HTML/HTMLTableRowElement.hpp"
+#include "Krystal.HTML/HTML/HTMLTableSectionElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTimeElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTitleElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTrackElement.hpp"
@@ -160,6 +166,15 @@ namespace Krys::HTML
         {
           return CreateRef<HTMLBodyElement>(document);
         }
+        case HTMLTagName::caption:
+        {
+          return CreateRef<HTMLTableCaptionElement>(document);
+        }
+        case HTMLTagName::col:
+        case HTMLTagName::colgroup:
+        {
+          return CreateRef<HTMLTableColElement>(document);
+        }
         case HTMLTagName::data:
         {
           return CreateRef<HTMLDataElement>(document);
@@ -265,6 +280,25 @@ namespace Krys::HTML
         case HTMLTagName::style:
         {
           return CreateRef<HTMLStyleElement>(document);
+        }
+        case HTMLTagName::table:
+        {
+          return CreateRef<HTMLTableElement>(document);
+        }
+        case HTMLTagName::tbody:
+        case HTMLTagName::thead:
+        case HTMLTagName::tfoot:
+        {
+          return CreateRef<HTMLTableSectionElement>(document);
+        }
+        case HTMLTagName::td:
+        case HTMLTagName::th:
+        {
+          return CreateRef<HTMLTableCellElement>(document);
+        }
+        case HTMLTagName::tr:
+        {
+          return CreateRef<HTMLTableRowElement>(document);
         }
         case HTMLTagName::title:
         {

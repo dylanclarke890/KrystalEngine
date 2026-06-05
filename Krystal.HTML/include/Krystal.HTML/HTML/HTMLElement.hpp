@@ -350,6 +350,31 @@ namespace Krys::HTML
       return _interface == DOMInterface::Table;
     }
 
+    KRYS_NODISCARD bool IsHTMLTableCaptionElement() const noexcept
+    {
+      return _interface == DOMInterface::TableCaption;
+    }
+
+    KRYS_NODISCARD bool IsHTMLTableCellElement() const noexcept
+    {
+      return _interface == DOMInterface::TableCell;
+    }
+
+    KRYS_NODISCARD bool IsHTMLTableColElement() const noexcept
+    {
+      return _interface == DOMInterface::TableCol;
+    }
+
+    KRYS_NODISCARD bool IsHTMLTableRowElement() const noexcept
+    {
+      return _interface == DOMInterface::TableRow;
+    }
+
+    KRYS_NODISCARD bool IsHTMLTableSectionElement() const noexcept
+    {
+      return _interface == DOMInterface::TableSection;
+    }
+
     KRYS_NODISCARD bool IsHTMLTitleElement() const noexcept
     {
       return _interface == DOMInterface::Title;

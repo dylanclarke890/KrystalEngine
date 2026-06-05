@@ -42,6 +42,11 @@ namespace Krys::HTML
     Span,
     Style,
     Table,
+    TableCaption,
+    TableCell,
+    TableCol,
+    TableRow,
+    TableSection,
     Title,
     Time,
     Track,
@@ -51,4 +56,4 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 42u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 45u);
