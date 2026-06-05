@@ -47,6 +47,7 @@
     <ClCompile Include="src\HTML\HTMLOptionElement.cpp" />
     <ClCompile Include="src\HTML\HTMLOutputElement.cpp" />
     <ClCompile Include="src\HTML\HTMLProgressElement.cpp" />
+    <ClCompile Include="src\HTML\HTMLSelectedContentElement.cpp" />
     <ClCompile Include="src\HTML\HTMLSelectElement.cpp" />
     <ClCompile Include="src\HTML\HTMLTableCaptionElement.cpp" />
     <ClCompile Include="src\HTML\HTMLTableCellElement.cpp" />
@@ -102,6 +103,7 @@
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLProgressElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLQuoteElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLScriptElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLSelectedContentElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLSelectElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLSourceElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLTableCaptionElement.hpp" />

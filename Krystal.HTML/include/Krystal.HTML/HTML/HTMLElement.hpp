@@ -393,6 +393,11 @@ namespace Krys::HTML
       return _interface == DOMInterface::Select;
     }
 
+    KRYS_NODISCARD bool IsHTMLSelectedContentElement() const noexcept
+    {
+      return _interface == DOMInterface::SelectedContent;
+    }
+
     // NOTE: HTMLSlotElement type check is not needed here as Node already has it.
 
     KRYS_NODISCARD bool IsHTMLSourceElement() const noexcept

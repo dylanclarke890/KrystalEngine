@@ -49,6 +49,7 @@
 #include "Krystal.HTML/HTML/HTMLPreElement.hpp"
 #include "Krystal.HTML/HTML/HTMLProgressElement.hpp"
 #include "Krystal.HTML/HTML/HTMLQuoteElement.hpp"
+#include "Krystal.HTML/HTML/HTMLSelectedContentElement.hpp"
 #include "Krystal.HTML/HTML/HTMLSelectElement.hpp"
 #include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 #include "Krystal.HTML/HTML/HTMLSourceElement.hpp"
@@ -294,6 +295,10 @@ namespace Krys::HTML
         case HTMLTagName::select:
         {
           return CreateRef<HTMLSelectElement>(document);
+        }
+        case HTMLTagName::selectedcontent:
+        {
+          return CreateRef<HTMLSelectedContentElement>(document);
         }
         case HTMLTagName::slot:
         {

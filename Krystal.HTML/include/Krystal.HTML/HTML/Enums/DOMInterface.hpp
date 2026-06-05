@@ -50,6 +50,7 @@ namespace Krys::HTML
     Quote,
     Script,
     Select,
+    SelectedContent,
     Slot,
     Source,
     Span,
@@ -70,4 +71,4 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 58u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 62u);
