@@ -9,6 +9,7 @@
 #include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTML/Enums/HTMLTagName.hpp"
 #include "Krystal.HTML/HTML/HTMLAnchorElement.hpp"
+#include "Krystal.HTML/HTML/HTMLAreaElement.hpp"
 #include "Krystal.HTML/HTML/HTMLAudioElement.hpp"
 #include "Krystal.HTML/HTML/HTMLBaseElement.hpp"
 #include "Krystal.HTML/HTML/HTMLBodyElement.hpp"
@@ -25,6 +26,7 @@
 #include "Krystal.HTML/HTML/HTMLImageElement.hpp"
 #include "Krystal.HTML/HTML/HTMLLIElement.hpp"
 #include "Krystal.HTML/HTML/HTMLLinkElement.hpp"
+#include "Krystal.HTML/HTML/HTMLMapElement.hpp"
 #include "Krystal.HTML/HTML/HTMLMediaElement.hpp"
 #include "Krystal.HTML/HTML/HTMLMenuElement.hpp"
 #include "Krystal.HTML/HTML/HTMLMetaElement.hpp"
@@ -137,6 +139,10 @@ namespace Krys::HTML
         {
           return CreateRef<HTMLAnchorElement>(document);
         }
+        case HTMLTagName::area:
+        {
+          return CreateRef<HTMLAreaElement>(document);
+        }
         case HTMLTagName::audio:
         {
           return CreateRef<HTMLAudioElement>(document);
@@ -211,6 +217,10 @@ namespace Krys::HTML
         case HTMLTagName::link:
         {
           return CreateRef<HTMLLinkElement>(document);
+        }
+        case HTMLTagName::map:
+        {
+          return CreateRef<HTMLMapElement>(document);
         }
         case HTMLTagName::menu:
         {

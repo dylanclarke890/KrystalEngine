@@ -7,8 +7,9 @@ namespace Krys::HTML
   enum class DOMInterface : uint8
   {
     None,
-    Audio,
     Anchor,
+    Area,
+    Audio,
     Base,
     Body,
     BR,
@@ -24,6 +25,7 @@ namespace Krys::HTML
     Image,
     Link,
     LI,
+    Map,
     Media,
     Menu,
     Meta,

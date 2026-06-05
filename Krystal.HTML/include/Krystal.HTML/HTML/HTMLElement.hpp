@@ -178,6 +178,11 @@ namespace Krys::HTML
 
 #pragma region Type Checks
 
+    KRYS_NODISCARD bool IsHTMLAreaElement() const noexcept
+    {
+      return _interface == DOMInterface::Area;
+    }
+
     KRYS_NODISCARD bool IsHTMLAudioElement() const noexcept
     {
       return _interface == DOMInterface::Audio;
@@ -261,6 +266,11 @@ namespace Krys::HTML
     KRYS_NODISCARD bool IsHTMLLinkElement() const noexcept
     {
       return _interface == DOMInterface::Link;
+    }
+
+    KRYS_NODISCARD bool IsHTMLMapElement() const noexcept
+    {
+      return _interface == DOMInterface::Map;
     }
 
     KRYS_NODISCARD bool IsHTMLMediaElement() const noexcept

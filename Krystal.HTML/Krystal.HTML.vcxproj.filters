@@ -669,6 +669,12 @@
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\CanPlayTypeResult.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLMapElement.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLAreaElement.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -987,6 +993,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\HTML\HTMLTrackElement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HTML\HTMLMapElement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HTML\HTMLAreaElement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

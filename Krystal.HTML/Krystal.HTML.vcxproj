@@ -36,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\HTML\HTMLAnchorElement.cpp" />
+    <ClCompile Include="src\HTML\HTMLAreaElement.cpp" />
     <ClCompile Include="src\HTML\HTMLAudioElement.cpp" />
     <ClCompile Include="src\HTML\HTMLBRElement.cpp" />
     <ClCompile Include="src\HTML\HTMLDataElement.cpp" />
@@ -51,6 +52,7 @@
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\HTMLElementFlags.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\TrackReadyState.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLAnchorElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLAreaElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLAudioElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLBRElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLDataElement.hpp" />
@@ -61,6 +63,7 @@
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLIFrameElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLImageElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLLIElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLMapElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLMediaElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLMenuElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLModElement.hpp" />
@@ -258,6 +261,7 @@
     <ClCompile Include="src\HTML\HTMLIFrameElement.cpp" />
     <ClCompile Include="src\HTML\HTMLImageElement.cpp" />
     <ClCompile Include="src\HTML\HTMLLIElement.cpp" />
+    <ClCompile Include="src\HTML\HTMLMapElement.cpp" />
     <ClCompile Include="src\HTML\HTMLMediaElement.cpp" />
     <ClCompile Include="src\HTML\HTMLMenuElement.cpp" />
     <ClCompile Include="src\HTML\HTMLModElement.cpp" />
