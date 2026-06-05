@@ -738,6 +738,9 @@
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLSelectedContentElement.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLDetailsElement.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -1125,6 +1128,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\HTML\HTMLSelectedContentElement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HTML\HTMLDetailsElement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

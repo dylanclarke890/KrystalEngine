@@ -16,6 +16,7 @@
 #include "Krystal.HTML/HTML/HTMLButtonElement.hpp"
 #include "Krystal.HTML/HTML/HTMLDataElement.hpp"
 #include "Krystal.HTML/HTML/HTMLDataListElement.hpp"
+#include "Krystal.HTML/HTML/HTMLDetailsElement.hpp"
 #include "Krystal.HTML/HTML/HTMLDivElement.hpp"
 #include "Krystal.HTML/HTML/HTMLDListElement.hpp"
 #include "Krystal.HTML/HTML/HTMLElement.hpp"
@@ -170,6 +171,10 @@ namespace Krys::HTML
         case HTMLTagName::ins:
         {
           return CreateRef<HTMLModElement>(document);
+        }
+        case HTMLTagName::details:
+        {
+          return CreateRef<HTMLDetailsElement>(document);
         }
         case HTMLTagName::div:
         {
