@@ -39,6 +39,7 @@
     <ClCompile Include="src\HTML\HTMLFormElement.cpp" />
     <ClCompile Include="src\HTML\HTMLInputElement.cpp" />
     <ClCompile Include="src\HTML\HTMLLabelElement.cpp" />
+    <ClCompile Include="src\HTML\HTMLSelectElement.cpp" />
     <ClCompile Include="src\HTML\HTMLTableCaptionElement.cpp" />
     <ClCompile Include="src\HTML\HTMLTableCellElement.cpp" />
     <ClCompile Include="src\HTML\HTMLTableColElement.cpp" />
@@ -85,6 +86,7 @@
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLPictureElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLQuoteElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLScriptElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLSelectElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLSourceElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLTableCaptionElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLTableCellElement.hpp" />

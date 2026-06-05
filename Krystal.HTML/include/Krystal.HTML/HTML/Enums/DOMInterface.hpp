@@ -41,6 +41,7 @@ namespace Krys::HTML
     Pre,
     Quote,
     Script,
+    Select,
     Slot,
     Source,
     Span,
