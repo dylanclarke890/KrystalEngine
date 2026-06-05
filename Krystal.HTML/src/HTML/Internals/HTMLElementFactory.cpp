@@ -18,6 +18,7 @@
 #include "Krystal.HTML/HTML/HTMLDListElement.hpp"
 #include "Krystal.HTML/HTML/HTMLElement.hpp"
 #include "Krystal.HTML/HTML/HTMLEmbedElement.hpp"
+#include "Krystal.HTML/HTML/HTMLFormElement.hpp"
 #include "Krystal.HTML/HTML/HTMLHeadElement.hpp"
 #include "Krystal.HTML/HTML/HTMLHeadingElement.hpp"
 #include "Krystal.HTML/HTML/HTMLHRElement.hpp"
@@ -65,42 +66,6 @@ namespace Krys::HTML
     {
       switch (tagName.value())
       {
-#pragma region Obsolete elements
-
-        case HTMLTagName::applet:
-        case HTMLTagName::bgsound:
-        case HTMLTagName::blink:
-        case HTMLTagName::isindex:
-        case HTMLTagName::keygen:
-        case HTMLTagName::multicol:
-        case HTMLTagName::nextid:
-        case HTMLTagName::spacer:
-        {
-          return CreateRef<HTMLUnknownElement>(document);
-        }
-        case HTMLTagName::acronym:
-        case HTMLTagName::basefont:
-        case HTMLTagName::big:
-        case HTMLTagName::center:
-        case HTMLTagName::nobr:
-        case HTMLTagName::noembed:
-        case HTMLTagName::noframes:
-        case HTMLTagName::plaintext:
-        case HTMLTagName::rb:
-        case HTMLTagName::rtc:
-        case HTMLTagName::strike:
-        case HTMLTagName::tt:
-        {
-          return CreateRef<HTMLElement>(document);
-        }
-        case HTMLTagName::listing:
-        case HTMLTagName::xmp:
-        {
-          return CreateRef<HTMLPreElement>(document);
-        }
-
-#pragma endregion
-
         case HTMLTagName::abbr:
         case HTMLTagName::address:
         case HTMLTagName::article:
@@ -195,6 +160,10 @@ namespace Krys::HTML
         case HTMLTagName::embed:
         {
           return CreateRef<HTMLEmbedElement>(document);
+        }
+        case HTMLTagName::form:
+        {
+          return CreateRef<HTMLFormElement>(document);
         }
         case HTMLTagName::head:
         {
@@ -320,6 +289,39 @@ namespace Krys::HTML
         {
           return CreateRef<HTMLVideoElement>(document);
         }
+#pragma region Obsolete elements
+        case HTMLTagName::applet:
+        case HTMLTagName::bgsound:
+        case HTMLTagName::blink:
+        case HTMLTagName::isindex:
+        case HTMLTagName::keygen:
+        case HTMLTagName::multicol:
+        case HTMLTagName::nextid:
+        case HTMLTagName::spacer:
+        {
+          return CreateRef<HTMLUnknownElement>(document);
+        }
+        case HTMLTagName::acronym:
+        case HTMLTagName::basefont:
+        case HTMLTagName::big:
+        case HTMLTagName::center:
+        case HTMLTagName::nobr:
+        case HTMLTagName::noembed:
+        case HTMLTagName::noframes:
+        case HTMLTagName::plaintext:
+        case HTMLTagName::rb:
+        case HTMLTagName::rtc:
+        case HTMLTagName::strike:
+        case HTMLTagName::tt:
+        {
+          return CreateRef<HTMLElement>(document);
+        }
+        case HTMLTagName::listing:
+        case HTMLTagName::xmp:
+        {
+          return CreateRef<HTMLPreElement>(document);
+        }
+#pragma endregion
       }
     }
 

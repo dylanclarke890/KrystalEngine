@@ -17,6 +17,7 @@ namespace Krys::HTML
     Div,
     DList,
     Embed,
+    Form,
     Head,
     Heading,
     HR,

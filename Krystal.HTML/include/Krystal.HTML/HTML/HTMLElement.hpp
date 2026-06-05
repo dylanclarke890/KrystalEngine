@@ -228,6 +228,11 @@ namespace Krys::HTML
       return _interface == DOMInterface::Embed;
     }
 
+    KRYS_NODISCARD bool IsHTMLFormElement() const noexcept
+    {
+      return _interface == DOMInterface::Form;
+    }
+
     KRYS_NODISCARD bool IsHTMLHeadElement() const noexcept
     {
       return _interface == DOMInterface::Head;

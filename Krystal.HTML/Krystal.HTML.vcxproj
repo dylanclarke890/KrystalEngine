@@ -63,6 +63,7 @@
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLDivElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLDListElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLEmbedElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLFormElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLHeadingElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLIFrameElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLImageElement.hpp" />
