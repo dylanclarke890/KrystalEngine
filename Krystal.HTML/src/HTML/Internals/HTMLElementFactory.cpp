@@ -14,6 +14,7 @@
 #include "Krystal.HTML/HTML/HTMLBaseElement.hpp"
 #include "Krystal.HTML/HTML/HTMLBodyElement.hpp"
 #include "Krystal.HTML/HTML/HTMLButtonElement.hpp"
+#include "Krystal.HTML/HTML/HTMLCanvasElement.hpp"
 #include "Krystal.HTML/HTML/HTMLDataElement.hpp"
 #include "Krystal.HTML/HTML/HTMLDataListElement.hpp"
 #include "Krystal.HTML/HTML/HTMLDetailsElement.hpp"
@@ -154,6 +155,10 @@ namespace Krys::HTML
         case HTMLTagName::button:
         {
           return CreateRef<HTMLButtonElement>(document);
+        }
+        case HTMLTagName::canvas:
+        {
+          return CreateRef<HTMLCanvasElement>(document);
         }
         case HTMLTagName::caption:
         {

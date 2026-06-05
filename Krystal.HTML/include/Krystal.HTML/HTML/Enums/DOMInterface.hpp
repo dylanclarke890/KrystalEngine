@@ -14,6 +14,7 @@ namespace Krys::HTML
     Body,
     BR,
     Button,
+    Canvas,
     Data,
     DataList,
     Details,
@@ -74,4 +75,4 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 65u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 66u);

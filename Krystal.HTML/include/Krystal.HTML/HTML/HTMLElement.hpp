@@ -213,6 +213,11 @@ namespace Krys::HTML
       return _interface == DOMInterface::Button;
     }
 
+    KRYS_NODISCARD bool IsHTMLCanvasElement() const noexcept
+    {
+      return _interface == DOMInterface::Canvas;
+    }
+
     KRYS_NODISCARD bool IsHTMLDataElement() const noexcept
     {
       return _interface == DOMInterface::Data;
