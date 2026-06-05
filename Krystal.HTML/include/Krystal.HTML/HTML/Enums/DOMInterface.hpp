@@ -25,6 +25,7 @@ namespace Krys::HTML
     IFrame,
     Image,
     Link,
+    Label,
     LI,
     Map,
     Media,
@@ -57,4 +58,4 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 45u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 49u);

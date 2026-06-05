@@ -263,6 +263,11 @@ namespace Krys::HTML
       return _interface == DOMInterface::Image;
     }
 
+    KRYS_NODISCARD bool IsHTMLLabelElement() const noexcept
+    {
+      return _interface == DOMInterface::Label;
+    }
+
     KRYS_NODISCARD bool IsHTMLLIElement() const noexcept
     {
       return _interface == DOMInterface::LI;

@@ -25,6 +25,7 @@
 #include "Krystal.HTML/HTML/HTMLHtmlElement.hpp"
 #include "Krystal.HTML/HTML/HTMLIFrameElement.hpp"
 #include "Krystal.HTML/HTML/HTMLImageElement.hpp"
+#include "Krystal.HTML/HTML/HTMLLabelElement.hpp"
 #include "Krystal.HTML/HTML/HTMLLIElement.hpp"
 #include "Krystal.HTML/HTML/HTMLLinkElement.hpp"
 #include "Krystal.HTML/HTML/HTMLMapElement.hpp"
@@ -193,6 +194,10 @@ namespace Krys::HTML
         case HTMLTagName::img:
         {
           return CreateRef<HTMLImageElement>(document);
+        }
+        case HTMLTagName::label:
+        {
+          return CreateRef<HTMLLabelElement>(document);
         }
         case HTMLTagName::li:
         {
