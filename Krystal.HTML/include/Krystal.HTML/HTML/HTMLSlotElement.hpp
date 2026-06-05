@@ -15,22 +15,21 @@ namespace Krys::HTML
     friend class SlotAlgorithms;
 
   private:
-    DOMString _name;
     List<Ref<Node>> _assignedNodes;
     List<WeakRef<Node>> _manuallyAssignedNodes;
 
   public:
     HTMLSlotElement(Document &document) noexcept;
 
-    KRYS_NODISCARD const DOMString &Name() const noexcept
-    {
-      return _name;
-    }
+#pragma region HTMLSlotElement - https://html.spec.whatwg.org/#htmlslotelement
 
-    void Name(DOMString &&name) noexcept
-    {
-      _name = Krys::Move(name);
-    }
+    /// @see https://html.spec.whatwg.org/#dom-slot-name
+    KRYS_NODISCARD DOMString Name() const noexcept;
+
+    /// @see https://html.spec.whatwg.org/#dom-slot-name
+    void Name(DOMString &&name) noexcept;
+
+#pragma endregion
   };
 }
 
