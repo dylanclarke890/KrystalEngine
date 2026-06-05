@@ -38,6 +38,7 @@ namespace Krys::HTML
     Object,
     OList,
     OptGroup,
+    Option,
     Paragraph,
     Picture,
     Pre,
@@ -63,4 +64,4 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 49u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 55u);

@@ -38,6 +38,8 @@
 #include "Krystal.HTML/HTML/HTMLModElement.hpp"
 #include "Krystal.HTML/HTML/HTMLObjectElement.hpp"
 #include "Krystal.HTML/HTML/HTMLOListElement.hpp"
+#include "Krystal.HTML/HTML/HTMLOptGroupElement.hpp"
+#include "Krystal.HTML/HTML/HTMLOptionElement.hpp"
 #include "Krystal.HTML/HTML/HTMLParagraphElement.hpp"
 #include "Krystal.HTML/HTML/HTMLPictureElement.hpp"
 #include "Krystal.HTML/HTML/HTMLPreElement.hpp"
@@ -46,7 +48,6 @@
 #include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 #include "Krystal.HTML/HTML/HTMLSourceElement.hpp"
 #include "Krystal.HTML/HTML/HTMLSpanElement.hpp"
-#include "Krystal.HTML/HTML/HTMLOptGroupElement.hpp"
 #include "Krystal.HTML/HTML/HTMLStyleElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTableCaptionElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTableCellElement.hpp"
@@ -247,6 +248,10 @@ namespace Krys::HTML
         case HTMLTagName::optgroup:
         {
           return CreateRef<HTMLOptGroupElement>(document);
+        }
+        case HTMLTagName::option:
+        {
+          return CreateRef<HTMLOptionElement>(document);
         }
         case HTMLTagName::p:
         {

@@ -333,6 +333,11 @@ namespace Krys::HTML
       return _interface == DOMInterface::OptGroup;
     }
 
+    KRYS_NODISCARD bool IsHTMLOptionElement() const noexcept
+    {
+      return _interface == DOMInterface::Option;
+    }
+
     KRYS_NODISCARD bool IsHTMLParagraphElement() const noexcept
     {
       return _interface == DOMInterface::Paragraph;
