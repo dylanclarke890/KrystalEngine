@@ -313,6 +313,11 @@ namespace Krys::HTML
       return _interface == DOMInterface::Meta;
     }
 
+    KRYS_NODISCARD bool IsHTMLMeterElement() const noexcept
+    {
+      return _interface == DOMInterface::Meter;
+    }
+
     KRYS_NODISCARD bool IsHTMLModElement() const noexcept
     {
       return _interface == DOMInterface::Mod;

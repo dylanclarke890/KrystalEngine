@@ -35,6 +35,7 @@
 #include "Krystal.HTML/HTML/HTMLMediaElement.hpp"
 #include "Krystal.HTML/HTML/HTMLMenuElement.hpp"
 #include "Krystal.HTML/HTML/HTMLMetaElement.hpp"
+#include "Krystal.HTML/HTML/HTMLMeterElement.hpp"
 #include "Krystal.HTML/HTML/HTMLModElement.hpp"
 #include "Krystal.HTML/HTML/HTMLObjectElement.hpp"
 #include "Krystal.HTML/HTML/HTMLOListElement.hpp"
@@ -239,6 +240,10 @@ namespace Krys::HTML
         case HTMLTagName::meta:
         {
           return CreateRef<HTMLMetaElement>(document);
+        }
+        case HTMLTagName::meter:
+        {
+          return CreateRef<HTMLMeterElement>(document);
         }
         case HTMLTagName::object:
         {

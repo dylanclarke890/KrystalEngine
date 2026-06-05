@@ -34,6 +34,7 @@ namespace Krys::HTML
     Media,
     Menu,
     Meta,
+    Meter,
     Mod,
     Object,
     OList,

@@ -40,6 +40,7 @@
     <ClCompile Include="src\HTML\HTMLFormElement.cpp" />
     <ClCompile Include="src\HTML\HTMLInputElement.cpp" />
     <ClCompile Include="src\HTML\HTMLLabelElement.cpp" />
+    <ClCompile Include="src\HTML\HTMLMeterElement.cpp" />
     <ClCompile Include="src\HTML\HTMLOptGroupElement.cpp" />
     <ClCompile Include="src\HTML\HTMLOptionElement.cpp" />
     <ClCompile Include="src\HTML\HTMLOutputElement.cpp" />
@@ -85,6 +86,7 @@
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLMapElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLMediaElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLMenuElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLMeterElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLModElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLObjectElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLOListElement.hpp" />

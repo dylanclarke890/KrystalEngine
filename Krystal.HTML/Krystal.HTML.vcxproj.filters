@@ -726,6 +726,9 @@
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLProgressElement.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLMeterElement.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -1101,6 +1104,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\HTML\HTMLProgressElement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HTML\HTMLMeterElement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
