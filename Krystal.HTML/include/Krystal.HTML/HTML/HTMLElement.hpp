@@ -288,6 +288,11 @@ namespace Krys::HTML
       return _interface == DOMInterface::Label;
     }
 
+    KRYS_NODISCARD bool IsHTMLLegendElement() const noexcept
+    {
+      return _interface == DOMInterface::Legend;
+    }
+
     KRYS_NODISCARD bool IsHTMLLIElement() const noexcept
     {
       return _interface == DOMInterface::LI;

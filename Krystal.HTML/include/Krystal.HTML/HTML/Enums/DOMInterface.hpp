@@ -30,6 +30,7 @@ namespace Krys::HTML
     Input,
     Link,
     Label,
+    Legend,
     LI,
     Map,
     Media,

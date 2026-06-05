@@ -41,6 +41,7 @@
     <ClCompile Include="src\HTML\HTMLFormElement.cpp" />
     <ClCompile Include="src\HTML\HTMLInputElement.cpp" />
     <ClCompile Include="src\HTML\HTMLLabelElement.cpp" />
+    <ClCompile Include="src\HTML\HTMLLegendElement.cpp" />
     <ClCompile Include="src\HTML\HTMLMeterElement.cpp" />
     <ClCompile Include="src\HTML\HTMLOptGroupElement.cpp" />
     <ClCompile Include="src\HTML\HTMLOptionElement.cpp" />
@@ -76,6 +77,7 @@
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLDataListElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLDivElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLDListElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLLegendElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLEmbedElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLFieldSetElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLFormElement.hpp" />

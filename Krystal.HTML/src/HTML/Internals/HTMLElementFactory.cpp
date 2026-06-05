@@ -30,6 +30,7 @@
 #include "Krystal.HTML/HTML/HTMLImageElement.hpp"
 #include "Krystal.HTML/HTML/HTMLInputElement.hpp"
 #include "Krystal.HTML/HTML/HTMLLabelElement.hpp"
+#include "Krystal.HTML/HTML/HTMLLegendElement.hpp"
 #include "Krystal.HTML/HTML/HTMLLIElement.hpp"
 #include "Krystal.HTML/HTML/HTMLLinkElement.hpp"
 #include "Krystal.HTML/HTML/HTMLMapElement.hpp"
@@ -225,6 +226,10 @@ namespace Krys::HTML
         case HTMLTagName::label:
         {
           return CreateRef<HTMLLabelElement>(document);
+        }
+        case HTMLTagName::legend:
+        {
+          return CreateRef<HTMLLegendElement>(document);
         }
         case HTMLTagName::li:
         {
