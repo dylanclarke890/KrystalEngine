@@ -36,6 +36,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\HTML\HTMLFormElement.cpp" />
+    <ClCompile Include="src\HTML\HTMLInputElement.cpp" />
     <ClCompile Include="src\HTML\HTMLLabelElement.cpp" />
     <ClCompile Include="src\HTML\HTMLTableCaptionElement.cpp" />
     <ClCompile Include="src\HTML\HTMLTableCellElement.cpp" />
@@ -69,6 +70,7 @@
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLHeadingElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLIFrameElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLImageElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\HTMLInputElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLLabelElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLLIElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLMapElement.hpp" />

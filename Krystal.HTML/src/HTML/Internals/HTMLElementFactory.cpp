@@ -25,6 +25,7 @@
 #include "Krystal.HTML/HTML/HTMLHtmlElement.hpp"
 #include "Krystal.HTML/HTML/HTMLIFrameElement.hpp"
 #include "Krystal.HTML/HTML/HTMLImageElement.hpp"
+#include "Krystal.HTML/HTML/HTMLInputElement.hpp"
 #include "Krystal.HTML/HTML/HTMLLabelElement.hpp"
 #include "Krystal.HTML/HTML/HTMLLIElement.hpp"
 #include "Krystal.HTML/HTML/HTMLLinkElement.hpp"
@@ -190,6 +191,10 @@ namespace Krys::HTML
         case HTMLTagName::iframe:
         {
           return CreateRef<HTMLIFrameElement>(document);
+        }
+        case HTMLTagName::input:
+        {
+          return CreateRef<HTMLInputElement>(document);
         }
         case HTMLTagName::img:
         {

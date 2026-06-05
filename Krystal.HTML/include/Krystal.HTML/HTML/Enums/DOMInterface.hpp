@@ -24,6 +24,7 @@ namespace Krys::HTML
     Html,
     IFrame,
     Image,
+    Input,
     Link,
     Label,
     LI,
