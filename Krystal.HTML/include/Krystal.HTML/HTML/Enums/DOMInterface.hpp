@@ -39,9 +39,11 @@ namespace Krys::HTML
     OList,
     OptGroup,
     Option,
+    Output,
     Paragraph,
     Picture,
     Pre,
+    Progress,
     Quote,
     Script,
     Select,
@@ -55,6 +57,7 @@ namespace Krys::HTML
     TableCol,
     TableRow,
     TableSection,
+    TextArea,
     Title,
     Time,
     Track,
@@ -64,4 +67,4 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 55u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 58u);

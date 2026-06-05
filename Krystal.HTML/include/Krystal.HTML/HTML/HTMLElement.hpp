@@ -338,6 +338,11 @@ namespace Krys::HTML
       return _interface == DOMInterface::Option;
     }
 
+    KRYS_NODISCARD bool IsHTMLOutputElement() const noexcept
+    {
+      return _interface == DOMInterface::Output;
+    }
+
     KRYS_NODISCARD bool IsHTMLParagraphElement() const noexcept
     {
       return _interface == DOMInterface::Paragraph;
@@ -351,6 +356,11 @@ namespace Krys::HTML
     KRYS_NODISCARD bool IsHTMLPreElement() const noexcept
     {
       return _interface == DOMInterface::Pre;
+    }
+
+    KRYS_NODISCARD bool IsHTMLProgressElement() const noexcept
+    {
+      return _interface == DOMInterface::Progress;
     }
 
     KRYS_NODISCARD bool IsHTMLQuoteElement() const noexcept
@@ -413,6 +423,11 @@ namespace Krys::HTML
     KRYS_NODISCARD bool IsHTMLTableSectionElement() const noexcept
     {
       return _interface == DOMInterface::TableSection;
+    }
+
+    KRYS_NODISCARD bool IsHTMLTextAreaElement() const noexcept
+    {
+      return _interface == DOMInterface::TextArea;
     }
 
     KRYS_NODISCARD bool IsHTMLTitleElement() const noexcept

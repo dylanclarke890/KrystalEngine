@@ -40,6 +40,7 @@
 #include "Krystal.HTML/HTML/HTMLOListElement.hpp"
 #include "Krystal.HTML/HTML/HTMLOptGroupElement.hpp"
 #include "Krystal.HTML/HTML/HTMLOptionElement.hpp"
+#include "Krystal.HTML/HTML/HTMLOutputElement.hpp"
 #include "Krystal.HTML/HTML/HTMLParagraphElement.hpp"
 #include "Krystal.HTML/HTML/HTMLPictureElement.hpp"
 #include "Krystal.HTML/HTML/HTMLPreElement.hpp"
@@ -55,6 +56,7 @@
 #include "Krystal.HTML/HTML/HTMLTableElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTableRowElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTableSectionElement.hpp"
+#include "Krystal.HTML/HTML/HTMLTextAreaElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTimeElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTitleElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTrackElement.hpp"
@@ -253,6 +255,10 @@ namespace Krys::HTML
         {
           return CreateRef<HTMLOptionElement>(document);
         }
+        case HTMLTagName::output:
+        {
+          return CreateRef<HTMLOutputElement>(document);
+        }
         case HTMLTagName::p:
         {
           return CreateRef<HTMLParagraphElement>(document);
@@ -303,6 +309,10 @@ namespace Krys::HTML
         case HTMLTagName::tr:
         {
           return CreateRef<HTMLTableRowElement>(document);
+        }
+        case HTMLTagName::textarea:
+        {
+          return CreateRef<HTMLTextAreaElement>(document);
         }
         case HTMLTagName::title:
         {
