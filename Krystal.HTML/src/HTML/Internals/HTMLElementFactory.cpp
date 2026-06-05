@@ -20,6 +20,7 @@
 #include "Krystal.HTML/HTML/HTMLDListElement.hpp"
 #include "Krystal.HTML/HTML/HTMLElement.hpp"
 #include "Krystal.HTML/HTML/HTMLEmbedElement.hpp"
+#include "Krystal.HTML/HTML/HTMLFieldSetElement.hpp"
 #include "Krystal.HTML/HTML/HTMLFormElement.hpp"
 #include "Krystal.HTML/HTML/HTMLHeadElement.hpp"
 #include "Krystal.HTML/HTML/HTMLHeadingElement.hpp"
@@ -179,6 +180,10 @@ namespace Krys::HTML
         case HTMLTagName::embed:
         {
           return CreateRef<HTMLEmbedElement>(document);
+        }
+        case HTMLTagName::fieldset:
+        {
+          return CreateRef<HTMLFieldSetElement>(document);
         }
         case HTMLTagName::form:
         {

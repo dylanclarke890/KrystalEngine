@@ -20,6 +20,7 @@ namespace Krys::HTML
     DList,
     Embed,
     Form,
+    FieldSet,
     Head,
     Heading,
     HR,
