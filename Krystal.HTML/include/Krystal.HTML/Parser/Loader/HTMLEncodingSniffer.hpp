@@ -272,6 +272,7 @@ namespace Krys::HTML
       return {name, value};
     }
 
+    /// @see https://html.spec.whatwg.org/#extracting-character-encodings-from-meta-elements
     KRYS_NODISCARD static string
       ExtractCharacterEncodingFromMeta(string &meta, const Krys::Text::CodecRegistry &codecRegistry)
     {

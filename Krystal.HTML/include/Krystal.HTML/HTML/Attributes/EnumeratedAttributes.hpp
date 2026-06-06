@@ -79,26 +79,27 @@ namespace Krys::HTML::Attributes
   template <size_t N>
   using StateKeywordMappingArray = Array<StateKeywordMapping, N>;
 
+  /// @brief Traits struct that must be specialized for each enumerated attribute on each element it applies
+  /// to (or just for `HTMLElement` in the case of generic enumerated attributes).
+  /// Must have:
+  /// @code
+  /// static inline KeywordStateMappingArray<1> StateMappings = { KeywordStateMapping {u8"ltr",
+  /// AttributeState::LTR} };
+  ///
+  /// As needed:
+  /// static inline KeywordStateMappingArray<1> CanonicalMappings = { KeywordStateMapping {u8"ltr",
+  /// AttributeState::LTR} };
+  ///
+  /// As needed:
+  /// constexpr static AttributeState MissingValueDefault = AttributeState::RTL;
+  ///
+  /// As needed:
+  /// constexpr static AttributeState InvalidValueDefault = AttributeState::LTR;
+  ///
+  /// As needed:
+  /// constexpr static AttributeState EmptyValueDefault = AttributeState::Auto;
   template <FixedString AttributeName, DerivedFrom<HTMLElement> TElement>
-  struct EnumeratedAttributeTraits
-  {
-    // Must have:
-    // static inline KeywordStateMappingArray<1> StateMappings = { KeywordStateMapping {u8"ltr",
-    // AttributeState::LTR} };
-    //
-    // As needed:
-    // static inline KeywordStateMappingArray<1> CanonicalMappings = { KeywordStateMapping {u8"ltr",
-    // AttributeState::LTR} };
-    //
-    // As needed:
-    // constexpr static AttributeState MissingValueDefault = AttributeState::RTL;
-    //
-    // As needed:
-    // constexpr static AttributeState InvalidValueDefault = AttributeState::LTR;
-    //
-    // As needed:
-    // constexpr static AttributeState EmptyValueDefault = AttributeState::Auto;
-  };
+  struct EnumeratedAttributeTraits;
 
   template <typename Traits>
   concept HasStateMappings = requires { Traits::StateMappings; };
@@ -360,5 +361,18 @@ namespace Krys::HTML::Attributes
 
     constexpr static AttributeState MissingValueDefault = AttributeState::Auto;
     constexpr static AttributeState InvalidValueDefault = AttributeState::Auto;
+  };
+
+  template <>
+  struct EnumeratedAttributeTraits<"crossorigin", HTMLElement>
+  {
+    static inline KeywordStateMappingArray<3> StateMappings = {
+      KeywordStateMapping {u8"anonymous", AttributeState::Anonymous},
+      KeywordStateMapping {u8"use-credentials", AttributeState::UseCredentials},
+    };
+
+    constexpr static AttributeState MissingValueDefault = AttributeState::NoCORS;
+    constexpr static AttributeState InvalidValueDefault = AttributeState::Anonymous;
+    constexpr static AttributeState EmptyValueDefault = AttributeState::Anonymous;
   };
 }

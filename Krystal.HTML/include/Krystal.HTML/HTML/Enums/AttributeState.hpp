@@ -31,7 +31,10 @@ namespace Krys::HTML::Attributes
     Characters,
     High,
     Low,
+    NoCORS,
+    Anonymous,
+    UseCredentials,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::Attributes::AttributeState, 13uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::Attributes::AttributeState, 24uz);

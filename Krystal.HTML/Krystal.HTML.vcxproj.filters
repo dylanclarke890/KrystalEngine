@@ -750,6 +750,12 @@
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLCanvasElement.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTML\Attributes\States\CORSSettingsState.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTML\Attributes\States\TranslateState.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">

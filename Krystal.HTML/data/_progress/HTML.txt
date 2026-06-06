@@ -1,17 +1,89 @@
-﻿Important Sections:
+﻿Source: https://html.spec.whatwg.org
 
-2.1.4 DOM Trees - https://html.spec.whatwg.org/multipage/infrastructure.html#dom-trees
+2.1.1 Parallelism - https://html.spec.whatwg.org/#parallelism
+  - Talks about running steps in parallel with the event loop which I don't quite understand yet.
+
+2.1.4 DOM Trees - https://html.spec.whatwg.org/#dom-trees
   - Defines HTML Standard extensibility hook steps for inserting, removing, moving etc. any Element within the HTML namespace.
 
+2.1.9 Dependencies - https://html.spec.whatwg.org/#dependencies
+  - Lists the dependencies of the HTML Standard on other specifications.
+
+2.2 Policy-controlled features - https://html.spec.whatwg.org/#policy-controlled-features
+  - Might be relevant if we care about policies.
+
+2.3 Common microsyntaxes - https://html.spec.whatwg.org/#common-microsyntaxes
+  - The below list needs implementing.
+  - Percentages and Dimensions: https://html.spec.whatwg.org/#percentages-and-dimensions
+  - Non zero percentages and lengths: https://html.spec.whatwg.org/#nonzero-percentages-and-lengths
+  - Lists of floating point numbers: https://html.spec.whatwg.org/#lists-of-floating-point-numbers
+  - Lists of dimensions: https://html.spec.whatwg.org/#lists-of-dimensions
+  - Dates and times: https://html.spec.whatwg.org/#dates-and-times
+  - Legacy colours: https://html.spec.whatwg.org/#colours
+  - References: https://html.spec.whatwg.org/#syntax-references
+  - Unique internal values: https://html.spec.whatwg.org/#unique-values
+
+2.4 Urls - https://html.spec.whatwg.org/#urls
+  - Ignoring this section for now unless urls become relevant.
+
+2.5.4 CORS settings attributes - https://html.spec.whatwg.org/#cors-settings-attributes
+  - Come back to this when we refactor enumerated attributes logic.
+
+2.5.5 Referrer policy attributes - https://html.spec.whatwg.org/#referrer-policy-attributes
+  - Come back to this when we refactor enumerated attributes logic.
+
 2.5.6 Nonce attribute - https://html.spec.whatwg.org/multipage/urls-and-fetching.html#nonce-attributes
-  - Defines the nonce attribute along with attribute change / cloning steps
+  - Would be relevant when if we start supporting security policies.
 
-2.6.4.1 HTMLAllCollection - https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#the-htmlallcollection-interface
-  - Needed to support document.all. Has special, legacy behavior to keep in mind.
+2.5.7 Lazy loading attributes - https://html.spec.whatwg.org/#lazy-loading-attributes
+  - Come back to this when we refactor enumerated attributes logic.
 
-2.6.5 DOMStringList - https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#the-domstringlist-interface
-  - Old legacy API for representing a list of DOMStrings.
-  - Ignoring as it seems to only be used by 'location'/'domain', neither of which we're supporting.
+2.5.8 Blocking attributes - https://html.spec.whatwg.org/#blocking-attributes
+  - Come back to this when we refactor enumerated attributes logic.
+
+2.5.9 Fetch priority attributes - https://html.spec.whatwg.org/#fetch-priority-attributes
+  - Come back to this when we refactor enumerated attributes logic.
+
+2.6.1 Reflecting content attributes in IDL attributes - https://html.spec.whatwg.org/#reflecting-content-attributes-in-idl-attributes
+  - Implemented for HTMLElement but not for ElementInternal.
+
+2.6.4 Collections - https://html.spec.whatwg.org/#collections
+  - The HTMLFormControlsCollection and HTMLOptionsCollection interfaces are collections derived from the HTMLCollection interface.
+    The HTMLAllCollection interface is a collection, but is not so derived.
+  - 2.6.4.1 HTMLAllCollection - https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#the-htmlallcollection-interface
+  - 2.6.4.2 The HTMLFormControlsCollection interface - https://html.spec.whatwg.org/#the-htmlformcontrolscollection-interface
+  - 2.6.4.3 The HTMLOptionsCollection interface - https://html.spec.whatwg.org/#the-htmloptionscollection-interface
+
+2.6.5 DOMStringList - https://html.spec.whatwg.org/#the-domstringlist-interface
+  - Ignoring as it's an old legacy API for representing a list of DOMStrings and seems to only be used by 'location'/'domain', neither of which we're supporting.
+
+3.1.1 The Document object - https://html.spec.whatwg.org/#the-document-object
+  - Has various advanced features such as commands that need to be implemented later. 
+
+3.1.2 The DocumentOrShadowRoot interface - https://html.spec.whatwg.org/#the-documentorshadowroot-interface
+  - activeElement needs to be implemented.
+
+3.1.3 Ancestor origins - https://html.spec.whatwg.org/#ancestor-origins
+  - Ignoring this section for now as it seems to be specific to web security.
+
+3.1.4 Resource metadata management - https://html.spec.whatwg.org/#resource-metadata-management
+  - Ignoring this section for now as it seems to be specific to web security.
+  - lastModified might be worth implementing at some point as it just returns the last modified time of the document's URL.
+
+3.1.5 Reporting document loading status - https://html.spec.whatwg.org/#reporting-document-loading-status
+  - Need to make sure this has been implemented correctly.
+
+3.1.6 Render-blocking mechanism - https://html.spec.whatwg.org/#render-blocking-mechanism
+  - Mostly implemented except for the below.
+  - Whenever a render-blocking element el becomes browsing-context disconnected, or el's blocking attribute's value is changed so that
+    el is no longer potentially render-blocking, then unblock rendering on el.
+
+3.1.7 DOM tree accessors - https://html.spec.whatwg.org/#dom-tree-accessors
+  - Need to implement the HTMLCollections and check const correctness of the accessors.
+
+3.2.2 Elements in the DOM - https://html.spec.whatwg.org/#elements-in-the-dom
+  - Contains the base HTMLElement interface which all HTML elements derive from.
+  - HTMLOrSVGElement - https://html.spec.whatwg.org/#htmlorsvgelement
 
 3.2.3 HTML element constructors - https://html.spec.whatwg.org/#html-element-constructors
   - Ignoring this entire section for now as it seems to be specific to JavaScript.
@@ -31,10 +103,6 @@
 
 4.2.5 The meta element
   - When the meta element is inserted into a document or certain attribute values are changed certain steps need to be run.
-
-  TODO:
-- Whenever a render-blocking element el becomes browsing-context disconnected, or el's blocking attribute's value is changed so that
-  el is no longer potentially render-blocking, then unblock rendering on el.
 
 NOTES:
  - When implementing event handler IDL attributes (on* members), the spec defines an EventHandler as a function that takes an Event and returns any type.

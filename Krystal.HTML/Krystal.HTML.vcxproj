@@ -68,6 +68,8 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\BoundaryPointComparator.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Algorithms\DOMTreeAccessors.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Attributes\EnumeratedAttributes.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Attributes\States\CORSSettingsState.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Attributes\States\TranslateState.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\AttributeState.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\CanPlayTypeResult.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\DOMInterface.hpp" />
