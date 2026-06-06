@@ -201,7 +201,7 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Callbacks\NodeFilter.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Types\SmallNodeList.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Types\SmallNodeList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\HTMLCollection.hpp">
@@ -276,7 +276,7 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\CustomElementState.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Types\NodeOrString.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Types\NodeOrString.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\Mixins\ChildNode.hpp">
@@ -447,16 +447,10 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\OrderedSet.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Types\DOMStringAtom.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\TreeQueries.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\TextAlgorithms.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Types\SmallTextNodeList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\Internals\Event\EventPathItem.hpp">

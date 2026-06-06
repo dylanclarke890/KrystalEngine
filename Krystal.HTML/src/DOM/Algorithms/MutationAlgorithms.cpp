@@ -11,7 +11,7 @@
 #include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/DOM/Text.hpp"
 #include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
-#include "Krystal.HTML/Types/SmallNodeList.hpp"
+#include "Krystal.HTML/DOM/Types/SmallNodeList.hpp"
 
 namespace Krys::HTML
 {

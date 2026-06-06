@@ -4,7 +4,7 @@
 #include "Krystal.HTML/DOM/Enums/EventPhaseType.hpp"
 #include "Krystal.HTML/DOM/Internals/Event/EventPathItem.hpp"
 #include "Krystal.HTML/Types/DOMHighResTimeStamp.hpp"
-#include "Krystal.HTML/Types/DOMStringAtom.hpp"
+#include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"

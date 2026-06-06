@@ -2,7 +2,7 @@
 
 #include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
-#include "Krystal.HTML/Types/SmallTextNodeList.hpp"
+#include "Krystal.HTML/DOM/Types/SmallNodeList.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 

@@ -2,7 +2,7 @@
 
 #include "Krystal.HTML/DOM/Dicts/AddEventListenerOptions.hpp"
 #include "Krystal.HTML/DOM/Dicts/EventListenerOptions.hpp"
-#include "Krystal.HTML/Types/DOMStringAtom.hpp"
+#include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 
 namespace Krys::HTML

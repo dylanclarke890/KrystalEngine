@@ -8,7 +8,7 @@
 #include "Krystal.HTML/DOM/Internals/QualifiedName.hpp"
 #include "Krystal.HTML/DOM/Internals/RareData/ElementRareData.hpp"
 #include "Krystal.HTML/DOM/NamedNodeMap.hpp"
-#include "Krystal.HTML/Types/NodeOrString.hpp"
+#include "Krystal.HTML/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 

@@ -3,7 +3,7 @@
 #include "Krystal.HTML/DOM/AbstractRange.hpp"
 #include "Krystal.HTML/DOM/BoundaryPoint.hpp"
 #include "Krystal.HTML/DOM/Enums/BoundaryPointComparator.hpp"
-#include "Krystal.HTML/Types/SmallNodeList.hpp"
+#include "Krystal.HTML/DOM/Types/SmallNodeList.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
 #include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 #include <compare>

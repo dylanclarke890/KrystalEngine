@@ -228,8 +228,7 @@
     <ClInclude Include="include\Krystal.HTML\DOM\NamedNodeMap.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\XMLDocument.hpp" />
     <ClInclude Include="include\Krystal.HTML\SVG\SVGElement.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Types\DOMStringAtom.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Types\NodeOrString.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Types\NodeOrString.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Internals\RareData\ParentNodeRareData.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\ShadowRoot.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\ShadowRootInit.hpp" />
@@ -296,11 +295,10 @@
     <ClInclude Include="include\Krystal.HTML\DOM\AbstractRange.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Range.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\StaticRange.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Types\SmallTextNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Types\Exception.hpp" />
     <ClInclude Include="include\Krystal.HTML\Types\ExceptionOr.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\SubtreeRanges.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Types\SmallNodeList.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Types\SmallNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Infra\StringAlgorithms.hpp" />
     <ClCompile Include="src\HTML\HTMLDListElement.cpp" />
     <ClCompile Include="src\HTML\HTMLEmbedElement.cpp" />
