@@ -110,6 +110,8 @@ namespace Krys::HTML
     //   }
     // }
 
+    // TODO(fix): the below logic needs reviewing and a better way of doing this needs to be found.
+
     if (localName == Attribute::Class)
     {
       if (namespaceURI == DOMStringAtom::Null())
