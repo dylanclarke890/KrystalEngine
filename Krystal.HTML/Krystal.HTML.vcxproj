@@ -272,7 +272,6 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\MutationAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\MutationObserverAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Internals\RareData\NodeRareData.hpp" />
-    <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\TreeTraversal.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\ProcessingInstruction.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Text.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLTokenAtom.hpp" />
@@ -415,7 +414,6 @@
     <ClCompile Include="src\DOM\Event.cpp" />
     <ClCompile Include="src\DOM\EventTarget.cpp" />
     <ClCompile Include="src\DOM\Node.cpp" />
-    <ClCompile Include="src\DOM\Algorithms\TreeTraversal.cpp" />
     <ClCompile Include="src\DOM\ProcessingInstruction.cpp" />
     <ClCompile Include="src\DOM\Text.cpp" />
   </ItemGroup>

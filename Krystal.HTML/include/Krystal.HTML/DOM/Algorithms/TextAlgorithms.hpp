@@ -27,12 +27,6 @@ namespace Krys::HTML
     KRYS_NODISCARD static ExceptionOr<DOMString> Substring(const CharacterData &node, size_t offset,
                                                            size_t count) noexcept;
 
-    /// @see https://dom.spec.whatwg.org/#exclusive-text-node
-    KRYS_NODISCARD static bool IsExclusiveTextNode(const Node &node) noexcept;
-
-    /// @see https://dom.spec.whatwg.org/#exclusive-text-node
-    KRYS_NODISCARD static bool IsExclusiveTextNode(RawPtr<const Node> node) noexcept;
-
     /// @see https://dom.spec.whatwg.org/#contiguous-text-nodes
     KRYS_NODISCARD static SmallTextNodeList ContiguousTextNodes(Text &node) noexcept;
 

@@ -1,16 +1,13 @@
 ﻿#include "Krystal.HTML/DOM/Mixins/ParentNode.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/SubtreeRanges.hpp"
-#include "Krystal.HTML/DOM/Algorithms/TreeTraversal.hpp"
+#include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/DOM/Element.hpp"
 #include "Krystal.HTML/DOM/NodeList.hpp"
 #include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/DOM/Text.hpp"
-#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 
 namespace Krys::HTML::Mixins
 {
@@ -51,22 +48,22 @@ namespace Krys::HTML::Mixins
 
   RefPtr<Element> ParentNode::FirstElementChild(ContainerNode &node) noexcept
   {
-    return ShareRefPtr(TreeTraversal::FirstElementChild(node));
+    return ShareRefPtr(TreeQueries::FirstElementChild(node));
   }
 
   RefPtr<const Element> ParentNode::FirstElementChild(const ContainerNode &node) noexcept
   {
-    return ShareRefPtr(TreeTraversal::FirstElementChild(node));
+    return ShareRefPtr(TreeQueries::FirstElementChild(node));
   }
 
   RefPtr<Element> ParentNode::LastElementChild(ContainerNode &node) noexcept
   {
-    return ShareRefPtr(TreeTraversal::LastElementChild(node));
+    return ShareRefPtr(TreeQueries::LastElementChild(node));
   }
 
   RefPtr<const Element> ParentNode::LastElementChild(const ContainerNode &node) noexcept
   {
-    return ShareRefPtr(TreeTraversal::LastElementChild(node));
+    return ShareRefPtr(TreeQueries::LastElementChild(node));
   }
 
   size_t ParentNode::ChildElementCount(const ContainerNode &node) noexcept

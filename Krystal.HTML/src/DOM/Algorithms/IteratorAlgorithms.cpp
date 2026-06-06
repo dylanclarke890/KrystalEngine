@@ -2,7 +2,6 @@
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.HTML/DOM/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/NodeIterator.hpp"
 #include "Krystal.HTML/DOM/ShadowRoot.hpp"
@@ -49,7 +48,7 @@ namespace Krys::HTML
 
     if (nodeIterator.PointerBeforeReferenceNode())
     {
-      RawPtr<Node> next = TreeTraversal::NextSkippingChildren(toBeRemovedNode);
+      RawPtr<Node> next = TreeQueries::NextSkippingChildren(toBeRemovedNode);
       if (!next || !TreeQueries::IsInclusiveDescendant(*next, nodeIterator.Root()))
       {
         next = nullptr;
@@ -65,7 +64,7 @@ namespace Krys::HTML
 
     RawPtr<Node> prev = !toBeRemovedNode.PreviousSibling()
                           ? toBeRemovedNode.ParentNode()
-                          : TreeTraversal::DeepLastChild(*toBeRemovedNode.PreviousSibling());
+                          : TreeQueries::DeepLastChild(*toBeRemovedNode.PreviousSibling());
     assert(prev);
     nodeIterator.ReferenceNode(ShareRef(*prev));
   }
@@ -82,7 +81,7 @@ namespace Krys::HTML
       {
         if (!beforeNode)
         {
-          node = TreeTraversal::Next(*node, &iterator.Root());
+          node = TreeQueries::Next(*node, &iterator.Root());
           if (node == nullptr)
           {
             return nullptr;
@@ -95,7 +94,7 @@ namespace Krys::HTML
       {
         if (beforeNode)
         {
-          node = TreeTraversal::Previous(*node, &iterator.Root());
+          node = TreeQueries::Previous(*node, &iterator.Root());
           if (node == nullptr)
           {
             return nullptr;

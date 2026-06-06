@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/DOM/Algorithms/TreeTraversal.hpp"
+#include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/HTML/HTMLElement.hpp"
 #include "Krystal.Lib/Core/TypeTraits.hpp"
 #include <ranges>
@@ -243,13 +243,13 @@ namespace Krys::HTML::detail
 
     ScopedSubtreeRange(match_constness_t<TNode, ContainerNode> &root) noexcept
     requires(!IteratorPolicy::IsInclusive && SameType<match_constness_t<TNode, Element>, TNode>)
-        : _root(&root), _begin(TreeTraversal::FirstElementChild(root))
+        : _root(&root), _begin(TreeQueries::FirstElementChild(root))
     {
     }
 
     ScopedSubtreeRange(RawPtr<match_constness_t<TNode, ContainerNode>> root) noexcept
     requires(!IteratorPolicy::IsInclusive && SameType<match_constness_t<TNode, Element>, TNode>)
-        : _root(root), _begin(TreeTraversal::FirstElementChild(*root))
+        : _root(root), _begin(TreeQueries::FirstElementChild(*root))
     {
     }
 
@@ -284,11 +284,11 @@ namespace Krys::HTML::detail
     {
       if constexpr (SameType<match_constness_t<TNode, HTMLElement>, TNode>)
       {
-        return TreeTraversal::NextHTMLElementSibling(*current);
+        return TreeQueries::NextHTMLElementSibling(*current);
       }
       else if constexpr (SameType<match_constness_t<TNode, Element>, TNode>)
       {
-        return TreeTraversal::NextElementSibling(*current);
+        return TreeQueries::NextElementSibling(*current);
       }
       else
       {
@@ -313,11 +313,11 @@ namespace Krys::HTML::detail
     {
       if constexpr (SameType<match_constness_t<TNode, HTMLElement>, TNode>)
       {
-        return TreeTraversal::PreviousHTMLElementSibling(*current);
+        return TreeQueries::PreviousHTMLElementSibling(*current);
       }
       else if constexpr (SameType<match_constness_t<TNode, Element>, TNode>)
       {
-        return TreeTraversal::PreviousElementSibling(*current);
+        return TreeQueries::PreviousElementSibling(*current);
       }
       else
       {
@@ -352,7 +352,7 @@ namespace Krys::HTML::detail
     KRYS_NODISCARD static RawPtr<TNode> ScopedAdvance(RawPtr<const Node> current,
                                                       RawPtr<const Node> stayWithin) noexcept
     {
-      return TreeTraversal::Next(*current, stayWithin);
+      return TreeQueries::Next(*current, stayWithin);
     }
   };
 
@@ -364,7 +364,7 @@ namespace Krys::HTML::detail
     KRYS_NODISCARD static RawPtr<TNode> ScopedAdvance(RawPtr<const Node> current,
                                                       RawPtr<const Node> stayWithin) noexcept
     {
-      return TreeTraversal::NextShadowIncluding(*current, stayWithin);
+      return TreeQueries::NextShadowIncluding(*current, stayWithin);
     }
   };
 
@@ -375,7 +375,7 @@ namespace Krys::HTML::detail
 
     KRYS_NODISCARD static RawPtr<TNode> Advance(RawPtr<const Node> current) noexcept
     {
-      return TreeTraversal::Previous(*current);
+      return TreeQueries::Previous(*current);
     }
   };
 
@@ -386,7 +386,7 @@ namespace Krys::HTML::detail
 
     KRYS_NODISCARD static RawPtr<TNode> Advance(RawPtr<const Node> current) noexcept
     {
-      return TreeTraversal::Next(*current);
+      return TreeQueries::Next(*current);
     }
   };
 

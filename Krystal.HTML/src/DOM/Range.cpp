@@ -5,7 +5,6 @@
 #include "Krystal.HTML/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.HTML/DOM/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/CharacterData.hpp"
 #include "Krystal.HTML/DOM/Comment.hpp"
@@ -223,11 +222,11 @@ namespace Krys::HTML
       if (IsContained(*current))
       {
         nodesToRemove.emplace_back(ShareRef(*current));
-        current = TreeTraversal::NextSkippingChildren(*current, root);
+        current = TreeQueries::NextSkippingChildren(*current, root);
       }
       else
       {
-        current = TreeTraversal::Next(*current, root);
+        current = TreeQueries::Next(*current, root);
       }
     }
 
@@ -817,8 +816,7 @@ namespace Krys::HTML
     }
 
     auto *root = CommonAncestorContainer();
-    for (auto *node = TreeTraversal::Next(*_start.Container, root); node;
-         node = TreeTraversal::Next(*node, root))
+    for (auto *node = TreeQueries::Next(*_start.Container, root); node; node = TreeQueries::Next(*node, root))
     {
       if (!Is<Text>(node) || !IsContained(*node))
       {
