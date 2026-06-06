@@ -9,10 +9,9 @@ namespace Krys::HTML
 
 #pragma region HTMLBaseElement
 
-  USVString HTMLBaseElement::Href() const noexcept
+  ExceptionOr<USVString> HTMLBaseElement::Href() const noexcept
   {
-    // TODO(URL, HTML): implement the Href() getter method
-    return {};
+    return Attributes::Reflection::Reflect<USVString>(*this, u8"href");
   }
 
   ExceptionOr<void> HTMLBaseElement::Href(USVString &&value) noexcept

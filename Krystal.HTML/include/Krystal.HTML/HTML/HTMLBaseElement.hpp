@@ -16,7 +16,7 @@ namespace Krys::HTML
 #pragma region HTMLBaseElement - https://html.spec.whatwg.org/#htmlbaseelement
 
     /// @see https://html.spec.whatwg.org/#dom-base-href
-    KRYS_NODISCARD USVString Href() const noexcept;
+    KRYS_NODISCARD ExceptionOr<USVString> Href() const noexcept;
 
     /// @see https://html.spec.whatwg.org/#dom-base-href
     ExceptionOr<void> Href(USVString &&value) noexcept;

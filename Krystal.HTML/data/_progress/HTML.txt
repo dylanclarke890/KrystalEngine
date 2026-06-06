@@ -90,6 +90,18 @@
 
 3.2.6 Global attributes - https://html.spec.whatwg.org/#global-attributes
   - Defines the global attributes/event handlers that all HTML elements support. Most are covered in the mixins that I still need to implement.
+  - When implementing event handler IDL attributes (on* members), the spec defines an EventHandler as a function that takes an Event and returns any type.
+    The return type is only used to determine whether the event is cancelled. Explore whether using a lambda as the argument to the attribute setter, deducing it's return type
+    using decltype and using that as a way to resolve the return type to a boolean.
+
+3.2.6.1 The title attribute - https://html.spec.whatwg.org/#the-title-attribute
+  - need to implement the get advisory info algorithm for the title attribute.
+
+3.2.6.2 The lang and xml:lang attributes - https://html.spec.whatwg.org/#the-lang-and-xml:lang-attributes
+  - need to implement the get language algorithm for the lang and xml:lang attributes.
+
+3.2.6.4 The dir attribute - https://html.spec.whatwg.org/#the-dir-attribute
+  - need to implement the directionality algorithms for the dir attribute.
 
 3.2.6.5 The style attribute - https://html.spec.whatwg.org/#the-style-attribute
   - Style attribute, requires parsing CSS declarations and applying them to the element's style.
@@ -97,14 +109,35 @@
 3.2.6.6 Embedding custom non-visible data with the data-* attributes - https://html.spec.whatwg.org/#embedding-custom-non-visible-data-with-the-data-*-attributes
   - Defines the data-* attributes and the DOMStringMap API for accessing them.
 
+3.2.7 The innerText and outerText properties - https://html.spec.whatwg.org/#the-innertext-idl-attribute
+  - innerText and outerText properties need to be implemented.
+
+3.2.8 Requirements relating to the bidirectional algorithm - https://html.spec.whatwg.org/#requirements-relating-to-the-bidirectional-algorithm
+  - contains various requirements relating to the bidirectional algorithm that need to be implemented.
+
+4.2.3 The base element - https://html.spec.whatwg.org/#the-base-element
+  - href attribute is a USVString.
+
 4.2.4 The link element
-  - DOMTokenList IDL attributes have not been implemented
-  - some of the attributes of this element are limited to known values but I don't know what they are.
+  - href attribute is a USVString.
+  - imagesrcset attribute is a USVString.
+  - media attribute requires media query parsing.
+  - has enumerated attributes (as, crossOrigin, referrerPolicy, fetchPriority). 
+  - HTMLLinkElement includes LinkStyle;
+  - explicitly enabled flags need to be updated whenever disabled attribute changes.
+  - blocking attribute is a blocking attribute.
 
 4.2.5 The meta element
-  - When the meta element is inserted into a document or certain attribute values are changed certain steps need to be run.
+  - http-equiv attribute is an enumerated attribute.
+  - When a meta element is inserted into the document, if its http-equiv attribute is present and represents one of the above states, then the user agent must run the algorithm appropriate for that state, as described in the following list:
+  - has a bunch of algorithms that need to be implemented for each http-equiv state.
 
-NOTES:
- - When implementing event handler IDL attributes (on* members), the spec defines an EventHandler as a function that takes an Event and returns any type.
-   The return type is only used to determine whether the event is cancelled. Explore whether using a lambda as the argument to the attribute setter, deducing it's return type
-   using decltype and using that as a way to resolve the return type to a boolean.
+4.2.6 The style element - https://html.spec.whatwg.org/#the-style-element
+  - disabled attribute requires css stylesheets.
+  - media attribute requires media query parsing.
+  - blocking attribute is a blocking attribute.
+  - contains various algorithms to implemenet when we have css parsing.
+  - HTMLStyleElement includes LinkStyle;
+
+4.3.1 The body element - https://html.spec.whatwg.org/#the-body-element
+  -

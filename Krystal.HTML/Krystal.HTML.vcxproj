@@ -63,7 +63,6 @@
     <ClCompile Include="src\HTML\HTMLBRElement.cpp" />
     <ClCompile Include="src\HTML\HTMLDataElement.cpp" />
     <ClCompile Include="src\HTML\HTMLDivElement.cpp" />
-    <ClInclude Include="include\Krystal.HTML\Config.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\StaticRangeInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\BoundaryPointComparator.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Algorithms\DOMTreeAccessors.hpp" />

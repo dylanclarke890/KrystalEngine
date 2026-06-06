@@ -14,8 +14,10 @@ namespace Krys::HTML
 
 #pragma region HTMLTitleElement - https://html.spec.whatwg.org/#htmltitleelement
 
+    /// @see https://html.spec.whatwg.org/#dom-title-text
     KRYS_NODISCARD DOMString Text() const noexcept;
 
+    /// @see https://html.spec.whatwg.org/#dom-title-text
     ExceptionOr<void> Text(DOMString &&value) noexcept;
 
 #pragma endregion

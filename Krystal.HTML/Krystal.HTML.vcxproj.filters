@@ -645,9 +645,6 @@
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLObjectElement.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Config.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLMediaElement.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
