@@ -371,7 +371,7 @@ namespace Krys::HTML
     }
     else
     {
-      auto title = DOMTreeAccessors::HTMLTitleElement(*this);
+      auto title = DOMTreeAccessors::GetTitleElement(*this);
       if (title == nullptr)
       {
         return {};
@@ -398,7 +398,7 @@ namespace Krys::HTML
     else if (documentElement->NamespaceURI() == Namespace::HTML)
     {
       auto head = Head();
-      auto title = DOMTreeAccessors::HTMLTitleElement(*this);
+      auto title = DOMTreeAccessors::GetTitleElement(*this);
 
       if (head == nullptr && title == nullptr)
       {
@@ -426,7 +426,7 @@ namespace Krys::HTML
 
   DOMString Document::Dir() const noexcept
   {
-    auto html = DOMTreeAccessors::HTMLHtmlElement(*this);
+    auto html = DOMTreeAccessors::GetHtmlElement(*this);
     if (html == nullptr)
     {
       return {};
@@ -437,7 +437,7 @@ namespace Krys::HTML
 
   void Document::Dir(DOMString &&value) noexcept
   {
-    auto html = DOMTreeAccessors::HTMLHtmlElement(*this);
+    auto html = DOMTreeAccessors::GetHeadElement(*this);
     if (html == nullptr)
     {
       return;
@@ -448,12 +448,12 @@ namespace Krys::HTML
 
   RefPtr<HTMLBodyElement> Document::Body() noexcept
   {
-    return DOMTreeAccessors::HTMLBodyElement(*this);
+    return DOMTreeAccessors::GetBodyElement(*this);
   }
 
   RefPtr<const HTMLBodyElement> Document::Body() const noexcept
   {
-    return DOMTreeAccessors::HTMLBodyElement(*this);
+    return DOMTreeAccessors::GetBodyElement(*this);
   }
 
   ExceptionOr<void> Document::Body(HTMLBodyElement &body) noexcept
@@ -491,12 +491,12 @@ namespace Krys::HTML
 
   RefPtr<HTMLHeadElement> Document::Head() noexcept
   {
-    return DOMTreeAccessors::HTMLHeadElement(*this);
+    return DOMTreeAccessors::GetHeadElement(*this);
   }
 
   RefPtr<const HTMLHeadElement> Document::Head() const noexcept
   {
-    return DOMTreeAccessors::HTMLHeadElement(*this);
+    return DOMTreeAccessors::GetHeadElement(*this);
   }
 
   // TODO(DOCUMENT, HTML): Document::Images
