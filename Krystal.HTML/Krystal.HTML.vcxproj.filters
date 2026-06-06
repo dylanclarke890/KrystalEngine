@@ -300,9 +300,6 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\ElementAlgorithms.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\ShadowRootAlgorithms.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\Mixins\ParentNode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -852,9 +849,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\DOM\Algorithms\ElementAlgorithms.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src\DOM\Algorithms\ShadowRootAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\DOM\Mixins\ParentNode.cpp">

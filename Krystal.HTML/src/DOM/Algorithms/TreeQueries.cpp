@@ -172,6 +172,114 @@ namespace Krys::HTML
 
 #pragma endregion
 
+#pragma region Shadow Roots
+
+  const Node &TreeQueries::ShadowIncludingRoot(const Node &node) noexcept
+  {
+    auto &root = TreeQueries::Root(node);
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(root))
+    {
+      auto *host = shadowRoot->Host();
+      return host ? ShadowIncludingRoot(*host) : root;
+    }
+
+    return root;
+  }
+
+  Node &TreeQueries::ShadowIncludingRoot(Node &node) noexcept
+  {
+    auto &root = TreeQueries::Root(node);
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(root))
+    {
+      auto *host = shadowRoot->Host();
+      return host ? ShadowIncludingRoot(*host) : root;
+    }
+
+    return root;
+  }
+
+  bool TreeQueries::IsShadowIncludingDescendant(const Node &a, const Node &b) noexcept
+  {
+    if (TreeQueries::IsDescendant(a, b))
+    {
+      return true;
+    }
+
+    if (auto *shadowRoot = DynamicDowncast<ShadowRoot>(TreeQueries::Root(a)))
+    {
+      if (auto *host = shadowRoot->Host())
+      {
+        return IsShadowIncludingDescendant(*host, b);
+      }
+    }
+
+    return false;
+  }
+
+  bool TreeQueries::IsShadowIncludingInclusiveDescendant(const Node &a, const Node &b) noexcept
+  {
+    if (&a == &b)
+    {
+      return true;
+    }
+
+    return IsShadowIncludingDescendant(a, b);
+  }
+
+  bool TreeQueries::IsShadowIncludingAncestor(const Node &a, const Node &b) noexcept
+  {
+    return IsShadowIncludingDescendant(b, a);
+  }
+
+  bool TreeQueries::IsShadowIncludingInclusiveAncestor(const Node &a, const Node &b) noexcept
+  {
+    return IsShadowIncludingInclusiveDescendant(b, a);
+  }
+
+  bool TreeQueries::IsClosedShadowHidden(const Node &a, const Node &b) noexcept
+  {
+    auto &aRoot = TreeQueries::Root(a);
+    auto *aShadowRoot = DynamicDowncast<ShadowRoot>(aRoot);
+    if (aShadowRoot == nullptr)
+    {
+      return false;
+    }
+
+    if (IsShadowIncludingInclusiveAncestor(aRoot, b))
+    {
+      return false;
+    }
+
+    if (aShadowRoot->Mode() == ShadowRootMode::Closed)
+    {
+      return true;
+    }
+
+    if (aShadowRoot->Host() && IsClosedShadowHidden(*aShadowRoot->Host(), b))
+    {
+      return true;
+    }
+
+    return false;
+  }
+
+  bool TreeQueries::IsShadowHost(const Node &node) noexcept
+  {
+    if (!Is<Element>(node))
+    {
+      return false;
+    }
+
+    return IsShadowHost(Downcast<Element>(node));
+  }
+
+  bool TreeQueries::IsShadowHost(const Element &node) noexcept
+  {
+    return node._shadowRoot != nullptr;
+  }
+
+#pragma endregion
+
 #pragma region Tree Order Traversal
 
   namespace

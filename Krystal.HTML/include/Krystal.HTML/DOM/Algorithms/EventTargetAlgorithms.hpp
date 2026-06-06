@@ -35,5 +35,8 @@ namespace Krys::HTML
 
     /// @see https://dom.spec.whatwg.org/#remove-all-event-listeners
     static void RemoveAllEventListeners(EventTarget &eventTarget) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#retarget
+    KRYS_NODISCARD static RawPtr<EventTarget> Retarget(RawPtr<EventTarget> a, EventTarget &b) noexcept;
   };
 }

@@ -3,7 +3,6 @@
 #include "Krystal.HTML/DOM/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NodeAlgorithms.hpp"
-#include "Krystal.HTML/DOM/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
@@ -46,7 +45,7 @@ namespace Krys::HTML
 
   Node &Node::GetRootNode(const GetRootNodeOptions &options) noexcept
   {
-    return options.Composed ? ShadowRootAlgorithms::ShadowIncludingRoot(*this) : TreeQueries::Root(*this);
+    return options.Composed ? TreeQueries::ShadowIncludingRoot(*this) : TreeQueries::Root(*this);
   }
 
   RawPtr<Element> Node::ParentElement() const noexcept

@@ -2,6 +2,7 @@
 #include "Krystal.HTML/Constants/EventNames.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/AbortAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/DOM/Element.hpp"
@@ -157,5 +158,43 @@ namespace Krys::HTML
     {
       RemoveEventListener(eventTarget, *eventTarget._eventListenerList.front().get());
     }
+  }
+
+  RawPtr<EventTarget> EventTargetAlgorithms::Retarget(RawPtr<EventTarget> a, EventTarget &b) noexcept
+  {
+    auto *current = a;
+    auto *bNode = DynamicDowncast<Node>(b);
+    while (true)
+    {
+      if (current == nullptr)
+      {
+        return nullptr;
+      }
+
+      if (!Is<Node>(current))
+      {
+        return current;
+      }
+
+      auto *currentNode = Downcast<Node>(current);
+      auto &currentRoot = TreeQueries::Root(*currentNode);
+      if (!Is<ShadowRoot>(currentNode))
+      {
+        return current;
+      }
+
+      if (bNode != nullptr && !TreeQueries::IsShadowIncludingInclusiveAncestor(currentRoot, *bNode))
+      {
+        return current;
+      }
+
+      auto *host = Downcast<ShadowRoot>(&currentRoot)->Host();
+      current = host;
+    }
+
+    // The spec handles the necessary cases to ensure we never get here, but we need this to satisfy the
+    // compiler that current is always valid.
+    std::unreachable();
+    return current;
   }
 }

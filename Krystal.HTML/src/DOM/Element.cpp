@@ -3,7 +3,6 @@
 #include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NodeAlgorithms.hpp"
-#include "Krystal.HTML/DOM/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/HTMLCollection.hpp"

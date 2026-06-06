@@ -90,9 +90,6 @@
     <ClCompile Include="tests\DOM\DocumentFragment.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\DOM\Algorithms\ShadowRootAlgorithms.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="tests\DOM\Internals\EventFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

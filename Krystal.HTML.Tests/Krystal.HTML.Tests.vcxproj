@@ -166,7 +166,6 @@
     <ClCompile Include="tests\DOM\Algorithms\MutationAlgorithms.cpp" />
     <ClCompile Include="tests\DOM\Mixins\ChildNode.cpp" />
     <ClCompile Include="tests\DOM\Mixins\NonDocumentTypeChildNode.cpp" />
-    <ClCompile Include="tests\DOM\Algorithms\ShadowRootAlgorithms.cpp" />
     <ClCompile Include="tests\DOM\DOMTokenList.cpp" />
     <ClCompile Include="tests\DOM\Internals\Event\CustomEvent.cpp" />
     <ClCompile Include="tests\DOM\Internals\Event\Event.cpp" />

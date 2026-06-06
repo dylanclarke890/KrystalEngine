@@ -3,7 +3,7 @@
 #include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/MutationObserverAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
-#include "Krystal.HTML/DOM/Algorithms/ShadowRootAlgorithms.hpp"
+#include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/Element.hpp"
 #include "Krystal.HTML/DOM/HTMLDocument.hpp"
@@ -285,7 +285,7 @@ namespace Krys::HTML
     //   If definition is non-null and definition’s disable shadow is true, then throw a "NotSupportedError"
     //   DOMException.
 
-    if (ShadowRootAlgorithms::IsShadowHost(element))
+    if (TreeQueries::IsShadowHost(element))
     {
       auto &currentShadowRoot = element._shadowRoot;
       if (!currentShadowRoot->_declarative || currentShadowRoot->Mode() != mode)

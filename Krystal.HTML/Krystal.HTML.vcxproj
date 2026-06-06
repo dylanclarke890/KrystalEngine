@@ -187,7 +187,6 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Mixins\NonDocumentTypeChildNode.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Mixins\NonElementParentNode.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Mixins\ParentNode.hpp" />
-    <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\ShadowRootAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\CustomElement\CustomElementConstructor.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\CustomElement\CustomElementDefinition.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Internals\CustomElementFactory.hpp" />
@@ -380,7 +379,6 @@
     <ClCompile Include="src\DOM\Mixins\ChildNode.cpp" />
     <ClCompile Include="src\DOM\Mixins\ParentNode.cpp" />
     <ClCompile Include="src\DOM\Algorithms\NodeAlgorithms.cpp" />
-    <ClCompile Include="src\DOM\Algorithms\ShadowRootAlgorithms.cpp" />
     <ClCompile Include="src\DOM\DOMTokenList.cpp" />
     <ClCompile Include="src\DOM\Algorithms\IteratorAlgorithms.cpp" />
     <ClCompile Include="src\HTML\HTMLSlotElement.cpp" />
