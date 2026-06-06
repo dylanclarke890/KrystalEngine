@@ -12,12 +12,12 @@ namespace Krys::HTML
 
   ExceptionOr<USVString> HTMLLinkElement::Href() const noexcept
   {
-    return Attributes::Reflection::Reflect<USVString>(*this, u8"href");
+    return Attributes::Reflection::ReflectURL<USVString>(*this, u8"href");
   }
 
   ExceptionOr<void> HTMLLinkElement::Href(USVString &&value) noexcept
   {
-    return Attributes::Reflection::Reflect<USVString>(*this, u8"href", Krys::Move(value));
+    return Attributes::Reflection::ReflectURL<USVString>(*this, u8"href", Krys::Move(value));
   }
 
   Maybe<DOMString> HTMLLinkElement::CrossOrigin() const noexcept

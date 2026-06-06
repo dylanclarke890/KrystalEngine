@@ -25,7 +25,7 @@ namespace Krys::HTML
   uint32 HTMLTableCellElement::RowSpan() const noexcept
   {
     return Attributes::Reflection::Reflect<uint32, Attributes::ReflectDefault<uint32> {1},
-                                           Attributes::ReflectRange<uint32> {1, 1'000}>(*this, u8"rowspan");
+                                           Attributes::ReflectRange<uint32> {1, 65'534}>(*this, u8"rowspan");
   }
 
   void HTMLTableCellElement::RowSpan(uint32 value) noexcept

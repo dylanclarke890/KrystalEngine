@@ -1,5 +1,5 @@
-﻿#include "Krystal.HTML/HTML/Attributes/Reflection.hpp"
-#include "Krystal.HTML/HTML/HTMLModElement.hpp"
+﻿#include "Krystal.HTML/HTML/HTMLModElement.hpp"
+#include "Krystal.HTML/HTML/Attributes/Reflection.hpp"
 
 namespace Krys::HTML
 {
@@ -11,15 +11,14 @@ namespace Krys::HTML
 
   ExceptionOr<USVString> HTMLModElement::Cite() const noexcept
   {
-    return Attributes::Reflection::Reflect<USVString>(*this, u8"cite");
+    return Attributes::Reflection::ReflectURL<USVString>(*this, u8"cite");
   }
 
   ExceptionOr<void> HTMLModElement::Cite(USVString &&value) noexcept
   {
-    return Attributes::Reflection::Reflect<USVString>(*this, u8"cite", Krys::Move(value));
+    return Attributes::Reflection::ReflectURL<USVString>(*this, u8"cite", Krys::Move(value));
   }
 
-  
   DOMString HTMLModElement::DateTime() const noexcept
   {
     return Attributes::Reflection::Reflect<DOMString>(*this, u8"datetime").value_or(u8"");

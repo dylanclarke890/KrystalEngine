@@ -1,10 +1,5 @@
 ﻿#include "Krystal.HTML/HTML/HTMLOListElement.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
-#include "Krystal.HTML/DOM/Attr.hpp"
-#include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/HTML/Attributes/Reflection.hpp"
-#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 
 namespace Krys::HTML
 {
@@ -36,6 +31,7 @@ namespace Krys::HTML
 
   DOMString HTMLOListElement::Type() const noexcept
   {
+    // TODO(HTMLOLISTLEMENT, HTML): Type is an enumerated attribute.
     return Attributes::Reflection::Reflect<DOMString>(*this, u8"type").value_or(u8"");
   }
 
