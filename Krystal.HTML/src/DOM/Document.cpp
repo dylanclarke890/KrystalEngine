@@ -52,7 +52,7 @@ namespace Krys::HTML
   Document::Document() noexcept
       : ContainerNode(*this, NodeType::DOCUMENT_NODE, NodeFlags::IsContainerNode), _flags(DocumentFlags::None)
   {
-    SetEventTargetFlag(EventTargetFlags::IsConnected);
+    SetNodeFlag(NodeFlags::IsConnected);
   }
 
   DOMImplementation &Document::Implementation() noexcept

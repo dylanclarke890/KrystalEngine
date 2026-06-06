@@ -1370,7 +1370,7 @@
     <None Include="data\HTML\HTMLStyleElement.idl">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="data\CustomElement\CustomElementRegistry.idl">
+    <None Include="data\HTML\CustomElement\CustomElementRegistry.idl">
       <Filter>Source Files</Filter>
     </None>
     <None Include="data\DOM\Document.idl">

@@ -21,12 +21,12 @@ namespace Krys::HTML
 
     if (parent->IsConnected())
     {
-      insertedNode.SetEventTargetFlag(EventTargetFlags::IsConnected);
+      insertedNode.SetNodeFlag(NodeFlags::IsConnected);
     }
 
     if (parent->IsInShadowTree())
     {
-      insertedNode.SetEventTargetFlag(EventTargetFlags::IsInShadowTree);
+      insertedNode.SetNodeFlag(NodeFlags::IsInShadowTree);
     }
 
     insertedNode.OnInsert();
@@ -54,11 +54,11 @@ namespace Krys::HTML
 
     if (parent->IsInShadowTree())
     {
-      movedNode.SetEventTargetFlag(EventTargetFlags::IsInShadowTree);
+      movedNode.SetNodeFlag(NodeFlags::IsInShadowTree);
     }
     else
     {
-      movedNode.ClearEventTargetFlag(EventTargetFlags::IsInShadowTree);
+      movedNode.ClearNodeFlag(NodeFlags::IsInShadowTree);
     }
 
     movedNode.OnMove(isSubtreeRoot, oldAncestor);
@@ -67,8 +67,8 @@ namespace Krys::HTML
   void ExtensibilityHooks::NodeRemoved(Node &removedNode, bool isSubtreeRoot,
                                        ContainerNode &oldAncestor) noexcept
   {
-    removedNode.ClearEventTargetFlag(EventTargetFlags::IsConnected);
-    removedNode.ClearEventTargetFlag(EventTargetFlags::IsInShadowTree);
+    removedNode.ClearNodeFlag(NodeFlags::IsConnected);
+    removedNode.ClearNodeFlag(NodeFlags::IsInShadowTree);
 
     removedNode.OnRemove(isSubtreeRoot, oldAncestor);
 

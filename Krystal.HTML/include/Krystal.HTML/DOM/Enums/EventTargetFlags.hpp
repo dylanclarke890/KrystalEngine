@@ -9,13 +9,11 @@ namespace Krys::HTML
   {
     None = 0,
     IsNode = 1 << 0,
-    IsConnected = 1 << 1,
-    IsInShadowTree = 1 << 2,
-    IsWindow = 1 << 3,
-    HasActivationBehavior = 1 << 4,
-    HasLegacyPreActivationBehavior = 1 << 5,
-    HasLegacyCanceledActivationBehavior = 1 << 6,
+    IsWindow = 1 << 1,
+    HasActivationBehavior = 1 << 2,
+    HasLegacyPreActivationBehavior = 1 << 3,
+    HasLegacyCanceledActivationBehavior = 1 << 4,
   };
 }
 
-KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::EventTargetFlags, 8u)
+KRYS_DEFINE_FLAGS_ENUM_TRAITS(Krys::HTML::EventTargetFlags, 6u)

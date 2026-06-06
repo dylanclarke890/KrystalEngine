@@ -539,7 +539,7 @@
     <None Include="data\HTML\HTMLStyleElement.idl" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="data\CustomElement\CustomElementRegistry.idl" />
+    <None Include="data\HTML\CustomElement\CustomElementRegistry.idl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\DOM\Document.idl" />

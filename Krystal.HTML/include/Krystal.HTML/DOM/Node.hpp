@@ -71,7 +71,7 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#dom-node-isconnected
     KRYS_NODISCARD bool IsConnected() const noexcept
     {
-      return HasEventTargetFlag(EventTargetFlags::IsConnected);
+      return HasNodeFlag(NodeFlags::IsConnected);
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-node-ownerdocument
@@ -222,7 +222,7 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#concept-shadow-tree
     KRYS_NODISCARD bool IsInShadowTree() const noexcept
     {
-      return HasEventTargetFlag(EventTargetFlags::IsInShadowTree);
+      return HasNodeFlag(NodeFlags::IsInShadowTree);
     }
 
     /// @see https://dom.spec.whatwg.org/#concept-document-tree
