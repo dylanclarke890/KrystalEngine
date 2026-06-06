@@ -1,10 +1,10 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Parser/HTMLCharacterReference.hpp"
-#include "Krystal.HTML/Parser/HTMLInputStream.hpp"
-#include "Krystal.HTML/Parser/HTMLParseError.hpp"
-#include "Krystal.HTML/Parser/HTMLToken.hpp"
-#include "Krystal.HTML/Parser/TokenizerState.hpp"
+#include "Krystal.HTML/HTML/Parser/HTMLCharacterReference.hpp"
+#include "Krystal.HTML/HTML/Parser/HTMLInputStream.hpp"
+#include "Krystal.HTML/HTML/Parser/HTMLParseError.hpp"
+#include "Krystal.HTML/HTML/Parser/HTMLToken.hpp"
+#include "Krystal.HTML/HTML/Parser/TokenizerState.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/ReferenceWrapper.hpp"

@@ -1,9 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/DOM/Document.hpp"
-#include "Krystal.HTML/Parser/HTMLActiveFormattingElementList.hpp"
-#include "Krystal.HTML/Parser/HTMLElementStackItem.hpp"
-#include "Krystal.HTML/Parser/HTMLOpenElementStack.hpp"
+#include "Krystal.HTML/HTML/Parser/HTMLActiveFormattingElementList.hpp"
+#include "Krystal.HTML/HTML/Parser/HTMLElementStackItem.hpp"
+#include "Krystal.HTML/HTML/Parser/HTMLOpenElementStack.hpp"
 #include "Krystal.Lib/Pointers/WeakPtr.hpp"
 
 namespace Krys::HTML

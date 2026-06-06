@@ -18,40 +18,40 @@
     <Text Include="data\HTMLEntityNames.in" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.HTML\Parser\Loader\HTMLEncodingSniffer.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\Loader\HTMLEncodingSniffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Parser\InsertionMode.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\InsertionMode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Parser\TokenizerState.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\TokenizerState.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Parser\Loader\TextResourceDecoder.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\Loader\TextResourceDecoder.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Parser\Loader\ContentType.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\Loader\ContentType.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Parser\Loader\EncodingSource.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\Loader\EncodingSource.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\Context.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLDocumentParser.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLDocumentParser.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\HTMLDocument.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLTokenizer.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLTokenizer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLTreeBuilder.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLTreeBuilder.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLInputStream.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLInputStream.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\Node.hpp">
@@ -63,31 +63,31 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Element.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLOpenElementStack.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLOpenElementStack.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLElementStackItem.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLElementStackItem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLConstructionSite.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLConstructionSite.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLActiveFormattingElementList.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLActiveFormattingElementList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\Document.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLToken.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLToken.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLTokenAtom.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLTokenAtom.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLParseError.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLParseError.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLCharacterReference.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLCharacterReference.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\EventTarget.hpp">

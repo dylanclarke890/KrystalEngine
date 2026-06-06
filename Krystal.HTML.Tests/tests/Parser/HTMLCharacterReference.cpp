@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Parser/HTMLCharacterReference.hpp"
+﻿#include "Krystal.HTML/HTML/Parser/HTMLCharacterReference.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

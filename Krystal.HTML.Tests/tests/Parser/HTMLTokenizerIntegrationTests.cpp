@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML.Tests/ParserTestUtils.hpp"
-#include "Krystal.HTML/Parser/HTMLTokenizer.hpp"
+#include "Krystal.HTML/HTML/Parser/HTMLTokenizer.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests

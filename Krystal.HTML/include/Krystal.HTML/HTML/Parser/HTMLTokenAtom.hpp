@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Parser/HTMLToken.hpp"
+#include "Krystal.HTML/HTML/Parser/HTMLToken.hpp"
 #include "Krystal.Lib/String/StringAtom.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Text/StringConversion.hpp"

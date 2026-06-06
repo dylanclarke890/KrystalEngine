@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/Parser/HTMLInputStream.hpp"
+﻿#include "Krystal.HTML/HTML/Parser/HTMLInputStream.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
