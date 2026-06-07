@@ -145,7 +145,7 @@ namespace Krys::Tests
 
   inline void CheckDOCTYPE(HTML::HTMLToken &token, const ExpectedDOCTYPE &expected) noexcept
   {
-    CHECK(Compare(token.GetDataBuffer(), expected.Name));
+    CHECK(Compare(token.Data(), expected.Name));
 
     UniquePtr<HTML::DoctypeData> doctypeData = std::move(token.ReleaseDOCTYPEData());
     CHECK(doctypeData->ForceQuirks == expected.ForceQuirks);
@@ -171,29 +171,29 @@ namespace Krys::Tests
 
   inline void CheckCharacter(HTML::HTMLToken &token, const ExpectedCharacter &expected) noexcept
   {
-    CHECK(Compare(token.GetDataBuffer(), expected.Data));
+    CHECK(Compare(token.Data(), expected.Data));
   }
 
   inline void CheckTag(HTML::HTMLToken &token, const ExpectedTag &expected) noexcept
   {
-    CHECK(Compare(token.GetDataBuffer(), expected.Name));
+    CHECK(Compare(token.Data(), expected.Name));
 
-    if (token.GetType() == HTML::HTMLTokenType::StartTag)
+    if (token.Type() == HTML::HTMLTokenType::StartTag)
     {
       CHECK(token.IsSelfClosing() == expected.SelfClosing);
     }
 
-    CHECK(token.GetAttributes().size() == expected.Attributes.size());
+    CHECK(token.Attributes().size() == expected.Attributes.size());
     for (size_t i = 0uz; i < expected.Attributes.size(); ++i)
     {
-      CHECK(Compare(token.GetAttributes()[i].Name, expected.Attributes[i].Name));
-      CHECK(Compare(token.GetAttributes()[i].Value, expected.Attributes[i].Value));
+      CHECK(Compare(token.Attributes()[i].Name, expected.Attributes[i].Name));
+      CHECK(Compare(token.Attributes()[i].Value, expected.Attributes[i].Value));
     }
   }
 
   inline void CheckComment(HTML::HTMLToken &token, const ExpectedComment &expected) noexcept
   {
-    CHECK(Compare(token.GetDataBuffer(), expected.Data));
+    CHECK(Compare(token.Data(), expected.Data));
   }
 
   inline void CheckEOF(HTML::HTMLToken &, const ExpectedEOF &) noexcept
@@ -209,7 +209,7 @@ namespace Krys::Tests
     inputStream.Append(std::move(testCase.Input), IsEOF(true));
 
     HTMLTokenizer tokenizer(inputStream);
-    const auto &errors = tokenizer.GetParseErrors();
+    const auto &errors = tokenizer.ParseErrors();
 
     size_t tokenIndex = 0uz;
     while (true)
@@ -218,7 +218,7 @@ namespace Krys::Tests
       REQUIRE(token);
 
       const auto &expected = testCase.Output[tokenIndex++];
-      REQUIRE(token->GetType() == expected.Type);
+      REQUIRE(token->Type() == expected.Type);
 
       if (const auto *expectedDoctypeToken = std::get_if<ExpectedDOCTYPE>(&expected.Token))
       {
@@ -270,14 +270,14 @@ namespace Krys::Tests
     inputStream.Append(std::move(testCase.Input), IsEOF(testCase.AppendEOF));
 
     HTMLTokenizer tokenizer(inputStream);
-    tokenizer.SetState(testCase.InitialState);
+    tokenizer.State(testCase.InitialState);
 
     if (testCase.Setup)
     {
       testCase.Setup(tokenizer);
     }
 
-    const auto &errors = tokenizer.GetParseErrors();
+    const auto &errors = tokenizer.ParseErrors();
 
     if (!testCase.Output.size())
     {
@@ -292,16 +292,16 @@ namespace Krys::Tests
         CHECK(errors[i].Location.Column == testCase.Errors[i].Column);
       }
 
-      CHECK(tokenizer.GetState() == testCase.ExpectedState);
+      CHECK(tokenizer.State() == testCase.ExpectedState);
       return;
     }
 
-    REQUIRE(tokenizer.GetState() == testCase.InitialState);
+    REQUIRE(tokenizer.State() == testCase.InitialState);
     for (const auto &expected : testCase.Output)
     {
       NextTokenPtr token = tokenizer.NextToken();
       REQUIRE(token);
-      REQUIRE(token->GetType() == expected.Type);
+      REQUIRE(token->Type() == expected.Type);
 
       if (const auto *expectedDoctypeToken = std::get_if<ExpectedDOCTYPE>(&expected.Token))
       {
@@ -336,7 +336,7 @@ namespace Krys::Tests
       FAIL("Unknown expected token type");
     }
 
-    CHECK(tokenizer.GetState() == testCase.ExpectedState);
+    CHECK(tokenizer.State() == testCase.ExpectedState);
 
     REQUIRE(errors.size() == testCase.Errors.size());
     for (size_t i = 0uz; i < errors.size(); ++i)

@@ -52,15 +52,16 @@ namespace Krys::HTML
   public:
     HTMLToken() = default;
 
-    KRYS_NODISCARD HTMLTokenType GetType() const noexcept
+    KRYS_NODISCARD HTMLTokenType Type() const noexcept
     {
       return _type;
     }
 
-    KRYS_NODISCARD utf32_string GetName() const noexcept
+    KRYS_NODISCARD utf32_string Name() const noexcept
     {
       assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag
              || _type == HTMLTokenType::DOCTYPE);
+
       return utf32_string(_data.begin(), _data.end());
     }
 
@@ -77,7 +78,7 @@ namespace Krys::HTML
       _data.clear();
     }
 
-    KRYS_NODISCARD const DataBuffer &GetDataBuffer() const noexcept
+    KRYS_NODISCARD const DataBuffer &Data() const noexcept
     {
       return _data;
     }
@@ -214,19 +215,19 @@ namespace Krys::HTML
 #endif
     }
 
-    KRYS_NODISCARD AttributeList &GetAttributes() noexcept
+    KRYS_NODISCARD AttributeList &Attributes() noexcept
     {
       assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
       return _attributes;
     }
 
-    KRYS_NODISCARD const AttributeList &GetAttributes() const noexcept
+    KRYS_NODISCARD const AttributeList &Attributes() const noexcept
     {
       assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
       return _attributes;
     }
 
-    KRYS_NODISCARD Attribute *GetCurrentAttribute() const noexcept
+    KRYS_NODISCARD Attribute *CurrentAttribute() const noexcept
     {
       assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
       return _currentAttribute;

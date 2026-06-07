@@ -10,15 +10,15 @@ namespace Krys::Tests
 #define SETUP_TEST(initialState)                                                                             \
   HTMLInputStream inputStream;                                                                               \
   HTMLTokenizer tokenizer(inputStream);                                                                      \
-  tokenizer.SetState(initialState);                                                                          \
-  const auto &errors = tokenizer.GetParseErrors();                                                           \
+  tokenizer.State(initialState);                                                                             \
+  const auto &errors = tokenizer.ParseErrors();                                                              \
   size_t expectedErrorCount = 0;                                                                             \
   utf32_string expected = U"";
 
 #define COMMON_TEST_CASES(tokenType)                                                                         \
   REQUIRE(token);                                                                                            \
-  REQUIRE(token->GetType() == tokenType);                                                                    \
-  REQUIRE(Compare(token->GetDataBuffer(), expected));                                                        \
+  REQUIRE(token->Type() == tokenType);                                                                       \
+  REQUIRE(Compare(token->Data(), expected));                                                                 \
   REQUIRE(errors.size() == expectedErrorCount);
 
 #pragma region CharacterReference
@@ -553,13 +553,13 @@ namespace Krys::Tests
       COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
-    tokenizer.SetState(TokenizerState::RCDATA);
+    tokenizer.State(TokenizerState::RCDATA);
 
     // End tag
     {
       NextTokenPtr token = tokenizer.NextToken();
       REQUIRE(!token);
-      REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeName);
+      REQUIRE(tokenizer.State() == TokenizerState::BeforeAttributeName);
     }
   }
 
@@ -577,13 +577,13 @@ namespace Krys::Tests
       COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
-    tokenizer.SetState(TokenizerState::RCDATA);
+    tokenizer.State(TokenizerState::RCDATA);
 
     // End tag
     {
       NextTokenPtr token = tokenizer.NextToken();
       REQUIRE(!token);
-      REQUIRE(tokenizer.GetState() == TokenizerState::SelfClosingStartTag);
+      REQUIRE(tokenizer.State() == TokenizerState::SelfClosingStartTag);
     }
   }
 
@@ -602,7 +602,7 @@ namespace Krys::Tests
       COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
-    tokenizer.SetState(TokenizerState::RCDATA);
+    tokenizer.State(TokenizerState::RCDATA);
 
     // End tag
     {
@@ -671,13 +671,13 @@ namespace Krys::Tests
       COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
-    tokenizer.SetState(TokenizerState::RAWTEXT);
+    tokenizer.State(TokenizerState::RAWTEXT);
 
     // End tag
     {
       NextTokenPtr token = tokenizer.NextToken();
       REQUIRE(!token);
-      REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeName);
+      REQUIRE(tokenizer.State() == TokenizerState::BeforeAttributeName);
     }
   }
 
@@ -695,13 +695,13 @@ namespace Krys::Tests
       COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
-    tokenizer.SetState(TokenizerState::RAWTEXT);
+    tokenizer.State(TokenizerState::RAWTEXT);
 
     // End tag
     {
       NextTokenPtr token = tokenizer.NextToken();
       REQUIRE(!token);
-      REQUIRE(tokenizer.GetState() == TokenizerState::SelfClosingStartTag);
+      REQUIRE(tokenizer.State() == TokenizerState::SelfClosingStartTag);
     }
   }
 
@@ -720,7 +720,7 @@ namespace Krys::Tests
       COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
-    tokenizer.SetState(TokenizerState::RAWTEXT);
+    tokenizer.State(TokenizerState::RAWTEXT);
 
     // End tag
     {
@@ -741,7 +741,7 @@ namespace Krys::Tests
       COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
-    tokenizer.SetState(TokenizerState::RAWTEXT);
+    tokenizer.State(TokenizerState::RAWTEXT);
 
     // End tag
     {
@@ -764,7 +764,7 @@ namespace Krys::Tests
       COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
-    tokenizer.SetState(TokenizerState::RAWTEXT);
+    tokenizer.State(TokenizerState::RAWTEXT);
 
     expected = U"</span©";
     {
@@ -842,13 +842,13 @@ namespace Krys::Tests
       COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
-    tokenizer.SetState(TokenizerState::ScriptData);
+    tokenizer.State(TokenizerState::ScriptData);
 
     // End tag
     {
       NextTokenPtr token = tokenizer.NextToken();
       REQUIRE(!token);
-      REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeName);
+      REQUIRE(tokenizer.State() == TokenizerState::BeforeAttributeName);
     }
   }
 
@@ -866,13 +866,13 @@ namespace Krys::Tests
       COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
-    tokenizer.SetState(TokenizerState::ScriptData);
+    tokenizer.State(TokenizerState::ScriptData);
 
     // End tag
     {
       NextTokenPtr token = tokenizer.NextToken();
       REQUIRE(!token);
-      REQUIRE(tokenizer.GetState() == TokenizerState::SelfClosingStartTag);
+      REQUIRE(tokenizer.State() == TokenizerState::SelfClosingStartTag);
     }
   }
 
@@ -891,7 +891,7 @@ namespace Krys::Tests
       COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
-    tokenizer.SetState(TokenizerState::ScriptData);
+    tokenizer.State(TokenizerState::ScriptData);
 
     // End tag
     {
@@ -912,7 +912,7 @@ namespace Krys::Tests
       COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
-    tokenizer.SetState(TokenizerState::ScriptData);
+    tokenizer.State(TokenizerState::ScriptData);
 
     // End tag
     {
@@ -936,7 +936,7 @@ namespace Krys::Tests
       COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
-    tokenizer.SetState(TokenizerState::ScriptData);
+    tokenizer.State(TokenizerState::ScriptData);
 
     expected = U"</span©";
     {
@@ -1184,13 +1184,13 @@ namespace Krys::Tests
       COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
-    tokenizer.SetState(TokenizerState::ScriptDataEscaped);
+    tokenizer.State(TokenizerState::ScriptDataEscaped);
 
     // End tag
     {
       NextTokenPtr token = tokenizer.NextToken();
       REQUIRE(!token);
-      REQUIRE(tokenizer.GetState() == TokenizerState::BeforeAttributeName);
+      REQUIRE(tokenizer.State() == TokenizerState::BeforeAttributeName);
     }
   }
 
@@ -1208,13 +1208,13 @@ namespace Krys::Tests
       COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
-    tokenizer.SetState(TokenizerState::ScriptDataEscaped);
+    tokenizer.State(TokenizerState::ScriptDataEscaped);
 
     // End tag
     {
       NextTokenPtr token = tokenizer.NextToken();
       REQUIRE(!token);
-      REQUIRE(tokenizer.GetState() == TokenizerState::SelfClosingStartTag);
+      REQUIRE(tokenizer.State() == TokenizerState::SelfClosingStartTag);
     }
   }
 
@@ -1233,7 +1233,7 @@ namespace Krys::Tests
       COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
-    tokenizer.SetState(TokenizerState::ScriptDataEscaped);
+    tokenizer.State(TokenizerState::ScriptDataEscaped);
 
     // End tag
     {
@@ -1254,7 +1254,7 @@ namespace Krys::Tests
       COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
-    tokenizer.SetState(TokenizerState::ScriptDataEscaped);
+    tokenizer.State(TokenizerState::ScriptDataEscaped);
 
     // End tag
     {
@@ -1277,7 +1277,7 @@ namespace Krys::Tests
       COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
-    tokenizer.SetState(TokenizerState::ScriptDataEscaped);
+    tokenizer.State(TokenizerState::ScriptDataEscaped);
 
     expected = U"</span©";
     {
@@ -1956,13 +1956,13 @@ namespace Krys::Tests
                   .Input = U"<![CDATA[",
                   .Setup = [](HTMLTokenizer &tokenizer)
                   {
-                    tokenizer.SetCDATASectionsAllowed(true);
+                    tokenizer.IsCDATAAllowed(true);
                   }}))
 
   TEST("MarkupDeclarationOpen", "Switches to BogusComment when parsing '[CDATA[' and CDATA is not allowed",
        (UnitTest {.ExpectedState = TokenizerState::BogusComment,
                   .Input = U"<![CDATA[",
-                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.SetCDATASectionsAllowed(false); },
+                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.IsCDATAAllowed(false); },
                   .Errors = {{.Error = HTMLParseError::CDATAInHTMLContent, .Line = 1uz, .Column = 10uz}}}))
 
 #pragma endregion
@@ -2744,20 +2744,20 @@ namespace Krys::Tests
                   .Input = U"<![CDATA[]]",
                   .Setup = [](HTMLTokenizer &tokenizer)
                   {
-                    tokenizer.SetCDATASectionsAllowed(true);
+                    tokenizer.IsCDATAAllowed(true);
                   }}))
 
   TEST("CDATASection", "emits EndOfFile with parser error when EOF reached",
        (UnitTest {.Input = U"<![CDATA[A",
                   .AppendEOF = true,
-                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.SetCDATASectionsAllowed(true); },
+                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.IsCDATAAllowed(true); },
                   .Output = {CreateCharacterToken(U"A"), CreateEOFToken()},
                   .Errors = {{.Error = HTMLParseError::EOFInCDATA, .Line = 1uz, .Column = 11uz}}}))
 
   TEST("CDATASection", "emits Character tokens for all characters except RightSquareBracket and EOF",
        (UnitTest {.ExpectedState = TokenizerState::CDATASection,
                   .Input = U"<![CDATA[ABC",
-                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.SetCDATASectionsAllowed(true); },
+                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.IsCDATAAllowed(true); },
                   .Output = {CreateCharacterToken(U"ABC")}}))
 
 #pragma endregion
@@ -2768,7 +2768,7 @@ namespace Krys::Tests
        (UnitTest {
          .ExpectedState = TokenizerState::CDATASectionEnd,
          .Input = U"<![CDATA[]]",
-         .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.SetCDATASectionsAllowed(true); },
+         .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.IsCDATAAllowed(true); },
        }))
 
   TEST("CDATASectionBracket",
@@ -2776,14 +2776,14 @@ namespace Krys::Tests
        "RightSquareBracket or EOF",
        (UnitTest {.ExpectedState = TokenizerState::CDATASection,
                   .Input = U"<![CDATA[]A",
-                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.SetCDATASectionsAllowed(true); },
+                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.IsCDATAAllowed(true); },
                   .Output = {CreateCharacterToken(U"]A")}}))
 
   TEST("CDATASectionBracket",
        "emits Character token for RightSquareBracket and EndOfFile with parser error when EOF reached",
        (UnitTest {.Input = U"<![CDATA[]",
                   .AppendEOF = true,
-                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.SetCDATASectionsAllowed(true); },
+                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.IsCDATAAllowed(true); },
                   .Output = {CreateCharacterToken(U"]"), CreateEOFToken()},
                   .Errors = {{.Error = HTMLParseError::EOFInCDATA, .Line = 1uz, .Column = 11uz}}}))
 
@@ -2794,14 +2794,14 @@ namespace Krys::Tests
   TEST("CDATASectionEnd", "emits RightSquareBracket when parsing RightSquareBracket",
        (UnitTest {.ExpectedState = TokenizerState::CDATASectionEnd,
                   .Input = U"<![CDATA[]]]",
-                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.SetCDATASectionsAllowed(true); },
+                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.IsCDATAAllowed(true); },
                   .Output = {CreateCharacterToken(U"]")}}))
 
   TEST("CDATASectionEnd",
        "emits Character tokens for two RightSquareBrackets and EndOfFile with parser error when EOF reached",
        (UnitTest {.Input = U"<![CDATA[]]]",
                   .AppendEOF = true,
-                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.SetCDATASectionsAllowed(true); },
+                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.IsCDATAAllowed(true); },
                   .Output = {CreateCharacterToken(U"]]]"), CreateEOFToken()},
                   .Errors = {{.Error = HTMLParseError::EOFInCDATA, .Line = 1uz, .Column = 13uz}}}))
 
@@ -2809,7 +2809,7 @@ namespace Krys::Tests
        (UnitTest {.Input = U"<![CDATA[]]>",
                   .Setup = [](HTMLTokenizer &tokenizer)
                   {
-                    tokenizer.SetCDATASectionsAllowed(true);
+                    tokenizer.IsCDATAAllowed(true);
                   }}))
 
   TEST("CDATASectionEnd",
@@ -2817,7 +2817,7 @@ namespace Krys::Tests
        "any character except RightSquareBracket or GreaterThanSign",
        (UnitTest {.ExpectedState = TokenizerState::CDATASection,
                   .Input = U"<![CDATA[]]A",
-                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.SetCDATASectionsAllowed(true); },
+                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.IsCDATAAllowed(true); },
                   .Output = {CreateCharacterToken(U"]]A")}}))
 
 #pragma endregion

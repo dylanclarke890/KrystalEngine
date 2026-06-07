@@ -81,10 +81,10 @@ namespace Krys::HTML
     };
 
   private:
-    TokenizerState _state {TokenizerState::Data};
+    TokenizerState _state : BitCount<TokenizerState>() {TokenizerState::Data};
+    TokenizerState _characterReferenceReturnState : BitCount<TokenizerState>() {TokenizerState::Data};
     HTMLToken _token;
-    TokenizerState _characterReferenceReturnState {TokenizerState::Data};
-    ReferenceWrapper<HTMLInputStream> _input;
+    HTMLInputStream &_input;
     SmallList<char32, 32u> _appropriateEndTagName;
     SmallList<char32, 32u> _bufferedEndTagName;
     bool _isCDATASectionAllowed : 1 {false};
@@ -111,22 +111,22 @@ namespace Krys::HTML
       return NextTokenPtr(ProcessToken() ? &_token : nullptr);
     }
 
-    KRYS_NODISCARD const List<HTMLTokenizerError> &GetParseErrors() const noexcept
-    {
-      return _parseErrors;
-    }
-
-    KRYS_NODISCARD TokenizerState GetState() const noexcept
+    KRYS_NODISCARD TokenizerState State() const noexcept
     {
       return _state;
     }
 
-    void SetState(TokenizerState state) noexcept
+    void State(TokenizerState state) noexcept
     {
       _state = state;
     }
 
-    void SetCDATASectionsAllowed(bool isAllowed) noexcept
+    KRYS_NODISCARD const List<HTMLTokenizerError> &ParseErrors() const noexcept
+    {
+      return _parseErrors;
+    }
+
+    void IsCDATAAllowed(bool isAllowed) noexcept
     {
       _isCDATASectionAllowed = isAllowed;
     }
@@ -134,7 +134,7 @@ namespace Krys::HTML
   private:
     KRYS_NODISCARD bool ProcessToken() noexcept
     {
-      if (!_input.get().Peek())
+      if (!_input.Peek())
       {
         return HasBufferedCharacterToken();
       }
@@ -144,7 +144,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool HasBufferedCharacterToken() const noexcept
     {
-      return _token.GetType() == HTMLTokenType::Character;
+      return _token.Type() == HTMLTokenType::Character;
     }
 
     KRYS_NODISCARD bool IsCDATAAllowed() const noexcept
@@ -193,9 +193,9 @@ namespace Krys::HTML
 
     void EndAttribute()
     {
-      auto &attributes = _token.GetAttributes();
+      auto &attributes = _token.Attributes();
       auto it = std::ranges::find_if(attributes.begin(), attributes.end(), [&](const auto &attribute)
-                                     { return attribute.Name == _token.GetCurrentAttribute()->Name; });
+                                     { return attribute.Name == _token.CurrentAttribute()->Name; });
       if (std::distance(attributes.begin(), it) < static_cast<std::ptrdiff_t>(attributes.size() - 1uz))
       {
         // Duplicate attribute found; remove the last one.
@@ -210,7 +210,7 @@ namespace Krys::HTML
     {
       _parseErrors.push_back(HTMLTokenizerError {
         .Error = error,
-        .Location = _input.get().GetCurrentLocation(),
+        .Location = _input.GetCurrentLocation(),
       });
     }
 
@@ -239,9 +239,9 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool CommitToPartialEndTag(char32 character, TokenizerState state) noexcept
     {
-      assert(_input.get().NextInputCharacter() == character);
+      assert(_input.NextInputCharacter() == character);
       _temporaryBuffer.push_back(character);
-      _input.get().Advance();
+      _input.Advance();
 
       if (HasBufferedCharacterToken())
       {
@@ -256,10 +256,10 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool CommitToCompleteEndTag() noexcept
     {
-      assert(_input.get().NextInputCharacter() == U'>');
+      assert(_input.NextInputCharacter() == U'>');
       _temporaryBuffer.push_back(U'>');
 
-      _input.get().Advance();
+      _input.Advance();
       _state = TokenizerState::Data;
 
       if (HasBufferedCharacterToken())
@@ -299,25 +299,25 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool EmitTagToken() noexcept
     {
-      assert(_token.GetType() == HTMLTokenType::StartTag || _token.GetType() == HTMLTokenType::EndTag);
-      if (_token.GetType() == HTMLTokenType::StartTag)
+      assert(_token.Type() == HTMLTokenType::StartTag || _token.Type() == HTMLTokenType::EndTag);
+      if (_token.Type() == HTMLTokenType::StartTag)
       {
         _appropriateEndTagName.clear();
-        for (const auto &ch : _token.GetName())
+        for (auto ch : _token.Name())
         {
           _appropriateEndTagName.push_back(ch);
         }
       }
 
       _state = TokenizerState::Data;
-      _input.get().Advance();
+      _input.Advance();
 
       return true;
     }
 
     KRYS_NODISCARD bool EmitDOCTYPEToken(bool consumeCurrentCharacter) noexcept
     {
-      assert(_token.GetType() == HTMLTokenType::DOCTYPE);
+      assert(_token.Type() == HTMLTokenType::DOCTYPE);
       _state = TokenizerState::Data;
 
       if (!consumeCurrentCharacter)
@@ -325,13 +325,13 @@ namespace Krys::HTML
         return true;
       }
 
-      _input.get().Advance();
+      _input.Advance();
       return true;
     }
 
     KRYS_NODISCARD bool EmitCommentToken(bool consumeCurrentCharacter) noexcept
     {
-      assert(_token.GetType() == HTMLTokenType::Comment);
+      assert(_token.Type() == HTMLTokenType::Comment);
       _state = TokenizerState::Data;
 
       if (!consumeCurrentCharacter)
@@ -339,7 +339,7 @@ namespace Krys::HTML
         return true;
       }
 
-      _input.get().Advance();
+      _input.Advance();
       return true;
     }
 
@@ -350,7 +350,7 @@ namespace Krys::HTML
       _token.Clear();
       _token.SetAsEOF();
 
-      _input.get().Advance();
+      _input.Advance();
 
       return true;
     }
@@ -395,12 +395,12 @@ namespace Krys::HTML
 #define ADVANCE_TO(newState)                                                                                 \
   do                                                                                                         \
   {                                                                                                          \
-    if (!_input.get().Advance())                                                                             \
+    if (!_input.Advance())                                                                                   \
     {                                                                                                        \
       _state = TokenizerState::newState;                                                                     \
       return HasBufferedCharacterToken();                                                                    \
     }                                                                                                        \
-    character = _input.get().NextInputCharacter();                                                           \
+    character = _input.NextInputCharacter();                                                                 \
     goto newState;                                                                                           \
   } while (false)
 
@@ -408,12 +408,12 @@ namespace Krys::HTML
 #define ADVANCE_PAST_NON_NEWLINE_TO(newState)                                                                \
   do                                                                                                         \
   {                                                                                                          \
-    if (!_input.get().Advance())                                                                             \
+    if (!_input.Advance())                                                                                   \
     {                                                                                                        \
       _state = TokenizerState::newState;                                                                     \
       return HasBufferedCharacterToken();                                                                    \
     }                                                                                                        \
-    character = _input.get().NextInputCharacter();                                                           \
+    character = _input.NextInputCharacter();                                                                 \
     goto newState;                                                                                           \
   } while (false)
 
@@ -421,12 +421,12 @@ namespace Krys::HTML
 #define SWITCH_TO(newState)                                                                                  \
   do                                                                                                         \
   {                                                                                                          \
-    if (!_input.get().Peek())                                                                                \
+    if (!_input.Peek())                                                                                      \
     {                                                                                                        \
       _state = TokenizerState::newState;                                                                     \
       return HasBufferedCharacterToken();                                                                    \
     }                                                                                                        \
-    character = _input.get().NextInputCharacter();                                                           \
+    character = _input.NextInputCharacter();                                                                 \
     goto newState;                                                                                           \
   } while (false)
 
@@ -503,7 +503,7 @@ namespace Krys::HTML
       constexpr char32 EndOfFile = HTMLInputStream::EOFMarker;
       constexpr char32 Replacement = Krys::Text::Unicode::Replacement<char32>;
 
-      char32 character = _input.get().NextInputCharacter();
+      char32 character = _input.NextInputCharacter();
       switch (_state)
       {
         BEGIN_STATE(Data)
@@ -1502,7 +1502,7 @@ namespace Krys::HTML
 
           if (character == HyphenMinus)
           {
-            auto result = _input.get().AdvancePast<false>("--"_s);
+            auto result = _input.AdvancePast<false>("--"_s);
             if (result == HTMLInputStream::MatchResult::Matched)
             {
               _token.BeginComment();
@@ -1515,7 +1515,7 @@ namespace Krys::HTML
           }
           else if (Krys::Text::MatchesASCIINormalizedLiteral(character, 'd'))
           {
-            auto result = _input.get().AdvancePast("doctype"_s);
+            auto result = _input.AdvancePast("doctype"_s);
             if (result == HTMLInputStream::MatchResult::Matched)
             {
               SWITCH_TO(DOCTYPE);
@@ -1527,7 +1527,7 @@ namespace Krys::HTML
           }
           else if (character == '[')
           {
-            auto result = _input.get().AdvancePast<false>("[CDATA[");
+            auto result = _input.AdvancePast<false>("[CDATA[");
             if (result == HTMLInputStream::MatchResult::Matched)
             {
               if (IsCDATAAllowed())
@@ -1829,7 +1829,7 @@ namespace Krys::HTML
           }
           if (Krys::Text::MatchesASCIINormalizedLiteral(character, 'p'))
           {
-            auto result = _input.get().AdvancePast("public"_s);
+            auto result = _input.AdvancePast("public"_s);
             if (result == HTMLInputStream::MatchResult::Matched)
             {
               SWITCH_TO(AfterDOCTYPEPublicKeyword);
@@ -1841,7 +1841,7 @@ namespace Krys::HTML
           }
           if (Krys::Text::MatchesASCIINormalizedLiteral(character, 's'))
           {
-            auto result = _input.get().AdvancePast("system"_s);
+            auto result = _input.AdvancePast("system"_s);
             if (result == HTMLInputStream::MatchResult::Matched)
             {
               SWITCH_TO(AfterDOCTYPESystemKeyword);

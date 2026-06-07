@@ -2321,8 +2321,6 @@ namespace Krys::HTML
     SearchNamedCharacterReferences(Span<const char32> prefix,
                                    Span<const NamedCharacterReferenceEntry> entries) noexcept
   {
-    // TODO(perf): MEDIUM - this is inefficient but making the entries utf32_stringviews would be worse,
-    // figure out a better way to do this
     string stringPrefix;
     for (char32 ch : prefix)
     {

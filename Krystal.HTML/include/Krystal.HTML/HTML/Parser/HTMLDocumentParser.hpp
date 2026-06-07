@@ -6,7 +6,7 @@
 #include "Krystal.HTML/HTML/Parser/HTMLTokenAtom.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLTokenizer.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLTreeBuilder.hpp"
-#include "Krystal.HTML/HTML/Parser/Loader/TextResourceDecoder.hpp"
+#include "Krystal.HTML/HTML/Parser/TextResourceDecoder.hpp"
 #include "Krystal.Lib/Mixins/NonCopyMovable.hpp"
 #include "Krystal.Lib/Pointers/ReferenceWrapper.hpp"
 
@@ -64,8 +64,10 @@ namespace Krys::HTML
       // }
 
       HTMLTokenAtom token(*rawToken);
+
       // Clear the rawToken in case _treeBuilder.ProcessToken synchronously re-enters the parser.
       rawToken.Clear();
+
       _treeBuilder.ProcessToken(std::move(token));
     }
 

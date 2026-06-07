@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/HTML/Enums/HTMLTagName.hpp"
 #include "Krystal.HTML/HTML/Enums/HTMLTokenType.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLToken.hpp"
@@ -10,21 +11,27 @@
 
 namespace Krys::HTML
 {
+  struct IntermediaryAttribute
+  {
+    QualifiedName Name;
+    DOMString Value;
+  };
+
   class HTMLTokenAtom
   {
   private:
     HTMLTokenType _type : BitCount<HTMLTokenType>();
     bool _isSelfClosing : 1 {false};
-    HTMLTagName _tagName : BitCount<HTMLTagName>() {HTMLTagName::Unknown};
     DOMStringAtom _name {DOMStringAtom::Null()};
     UniquePtr<DoctypeData> _doctypeData;
     DOMString _comment;
     DOMStringView _data;
+    List<IntermediaryAttribute> _attributes;
 
   public:
-    explicit HTMLTokenAtom(HTMLToken &token) noexcept : _type(token.GetType())
+    explicit HTMLTokenAtom(HTMLToken &token) noexcept : _type(token.Type())
     {
-      const auto &data = token.GetDataBuffer();
+      const auto &data = token.Data();
 
       switch (_type)
       {
@@ -32,7 +39,7 @@ namespace Krys::HTML
         case HTMLTokenType::EndOfFile:     return;
         case HTMLTokenType::DOCTYPE:
         {
-          _name = DOMStringAtom(Krys::Text::ConvertToUTF8(utf32_stringview {data.begin(), data.end()}));
+          _name = Krys::Text::ConvertToUTF8(utf32_stringview {data.begin(), data.end()});
           _doctypeData = token.ReleaseDOCTYPEData();
           return;
         }
@@ -45,15 +52,15 @@ namespace Krys::HTML
         case HTMLTokenType::StartTag:
         case HTMLTokenType::EndTag:
         {
-          auto name = Krys::Text::ConvertToUTF8(utf32_stringview {data.begin(), data.end()});
-          _tagName = ParseHTMLTagName(name);
+          _name = Krys::Text::ConvertToUTF8(utf32_stringview {data.begin(), data.end()});
+          _isSelfClosing = token.IsSelfClosing();
 
-          if (_tagName == HTMLTagName::Unknown)
+          for (auto &attr : token.Attributes())
           {
-            _name = DOMStringAtom(name);
+            auto name = Krys::Text::ConvertToUTF8(utf32_stringview {attr.Name.begin(), attr.Name.end()});
+            auto value = Krys::Text::ConvertToUTF8(utf32_stringview {attr.Value.begin(), attr.Value.end()});
           }
 
-          _isSelfClosing = token.IsSelfClosing();
           return;
         }
       }
