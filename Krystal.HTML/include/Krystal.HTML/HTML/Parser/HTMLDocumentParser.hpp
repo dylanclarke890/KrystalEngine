@@ -40,6 +40,7 @@ namespace Krys::HTML
         {
           return false;
         }
+
         ConstructTreeFromToken(token);
       }
 
@@ -48,17 +49,18 @@ namespace Krys::HTML
 
     void ConstructTreeFromToken(NextTokenPtr &rawToken) noexcept
     {
+      // TODO(HTML): We can optimise here to avoid copying character data by having a pointer to the
+      // underlying buffer in the HTMLToken. This is because Character tokens can't cause use to re-enter
+      // the parser. This is not straightforward as we need to convert from utf32 to utf8 at some point,
+      // revisit this later.
+      // if (rawToken->GetType() != HTMLTokenType::Character)
+      // {
+      //   rawToken.Clear();
+      // }
+
       HTMLTokenAtom token(*rawToken);
-
-      // Clear the rawToken in case _treeBuilder.ProcessToken synchronously re-enters the parser.
-      // We don't clear the token immediately for Character tokens because the AtomHTMLToken avoids copying
-      // the characters by keeping a pointer to the underlying buffer in the HTMLToken. Fortunately, Character
-      // tokens can't cause us to re-enter the parser.
-      if (rawToken->GetType() != HTMLToken::Type::Character)
-      {
-        rawToken.Clear();
-      }
-
+      rawToken
+        .Clear(); // Clear the rawToken in case _treeBuilder.ProcessToken synchronously re-enters the parser.
       _treeBuilder.ProcessToken(std::move(token));
     }
 

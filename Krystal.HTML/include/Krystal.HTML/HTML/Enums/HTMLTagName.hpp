@@ -9,7 +9,7 @@ namespace Krys::HTML
 {
   enum class HTMLTagName : uint8
   {
-    unknown,
+    Unknown,
     a,
     abbr,
     acronym,
@@ -164,12 +164,9 @@ namespace Krys::HTML
     missing_glyph,
   };
 
-  KRYS_NODISCARD constexpr Maybe<HTMLTagName> TryParseHTMLTagName(DOMStringView tagName) noexcept
+  KRYS_NODISCARD constexpr HTMLTagName ParseHTMLTagName(DOMStringView tagName) noexcept
   {
-    if (tagName.empty())
-    {
-      return Null;
-    }
+    assert(!tagName.empty());
 
     switch (tagName.size())
     {
@@ -842,7 +839,7 @@ namespace Krys::HTML
       }
     }
 
-    return Null;
+    return HTMLTagName::Unknown;
   }
 }
 

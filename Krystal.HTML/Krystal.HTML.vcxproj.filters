@@ -21,10 +21,10 @@
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\Loader\HTMLEncodingSniffer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\HTML\Parser\InsertionMode.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\InsertionMode.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\HTML\Parser\TokenizerState.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\TokenizerState.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\Loader\TextResourceDecoder.hpp">
@@ -84,7 +84,7 @@
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLTokenAtom.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLParseError.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\HTMLParseError.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLCharacterReference.hpp">
@@ -739,6 +739,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\HTML\Attributes\States\TranslateState.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\HTMLTokenType.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

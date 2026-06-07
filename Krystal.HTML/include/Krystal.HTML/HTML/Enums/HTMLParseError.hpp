@@ -1,8 +1,10 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Core/Enum.hpp"
+
 namespace Krys::HTML
 {
-  enum class HTMLParseError
+  enum class HTMLParseError : uint8
   {
     UnexpectedNullCharacter,
     UnexpectedQuestionMarkInsteadOfTagName,
@@ -49,3 +51,5 @@ namespace Krys::HTML
     ControlCharacterReference,
   };
 }
+
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::HTMLParseError, 43uz);

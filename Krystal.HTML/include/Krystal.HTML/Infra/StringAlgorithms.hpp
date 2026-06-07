@@ -20,14 +20,17 @@ namespace Krys::HTML
     {
       auto start = input.begin();
       auto end = input.end();
+
       while (start != end && IsASCIIWhitespace(*start))
       {
         ++start;
       }
+
       while (end != start && IsASCIIWhitespace(*(end - 1)))
       {
         --end;
       }
+
       return DOMStringView(start, end);
     }
 

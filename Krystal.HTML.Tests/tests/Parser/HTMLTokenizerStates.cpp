@@ -550,7 +550,7 @@ namespace Krys::Tests
     expected = U"div";
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+      COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
     tokenizer.SetState(TokenizerState::RCDATA);
@@ -574,7 +574,7 @@ namespace Krys::Tests
     expected = U"div";
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+      COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
     tokenizer.SetState(TokenizerState::RCDATA);
@@ -599,7 +599,7 @@ namespace Krys::Tests
     expected = U"div";
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+      COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
     tokenizer.SetState(TokenizerState::RCDATA);
@@ -607,7 +607,7 @@ namespace Krys::Tests
     // End tag
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndTag);
+      COMMON_TEST_CASES(HTMLTokenType::EndTag);
     }
   }
 
@@ -668,7 +668,7 @@ namespace Krys::Tests
     expected = U"div";
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+      COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
     tokenizer.SetState(TokenizerState::RAWTEXT);
@@ -692,7 +692,7 @@ namespace Krys::Tests
     expected = U"div";
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+      COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
     tokenizer.SetState(TokenizerState::RAWTEXT);
@@ -717,7 +717,7 @@ namespace Krys::Tests
     expected = U"div";
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+      COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
     tokenizer.SetState(TokenizerState::RAWTEXT);
@@ -725,7 +725,7 @@ namespace Krys::Tests
     // End tag
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndTag);
+      COMMON_TEST_CASES(HTMLTokenType::EndTag);
     }
   }
 
@@ -738,7 +738,7 @@ namespace Krys::Tests
     expected = U"div";
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+      COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
     tokenizer.SetState(TokenizerState::RAWTEXT);
@@ -746,7 +746,7 @@ namespace Krys::Tests
     // End tag
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndTag);
+      COMMON_TEST_CASES(HTMLTokenType::EndTag);
     }
   }
 
@@ -761,7 +761,7 @@ namespace Krys::Tests
     expected = U"div";
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+      COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
     tokenizer.SetState(TokenizerState::RAWTEXT);
@@ -769,7 +769,7 @@ namespace Krys::Tests
     expected = U"</span©";
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Character);
+      COMMON_TEST_CASES(HTMLTokenType::Character);
     }
   }
 
@@ -839,7 +839,7 @@ namespace Krys::Tests
     expected = U"script";
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+      COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
     tokenizer.SetState(TokenizerState::ScriptData);
@@ -863,7 +863,7 @@ namespace Krys::Tests
     expected = U"script";
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+      COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
     tokenizer.SetState(TokenizerState::ScriptData);
@@ -888,7 +888,7 @@ namespace Krys::Tests
     expected = U"script";
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+      COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
     tokenizer.SetState(TokenizerState::ScriptData);
@@ -896,7 +896,7 @@ namespace Krys::Tests
     // End tag
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndTag);
+      COMMON_TEST_CASES(HTMLTokenType::EndTag);
     }
   }
 
@@ -909,7 +909,7 @@ namespace Krys::Tests
     expected = U"script";
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+      COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
     tokenizer.SetState(TokenizerState::ScriptData);
@@ -917,7 +917,7 @@ namespace Krys::Tests
     // End tag
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndTag);
+      COMMON_TEST_CASES(HTMLTokenType::EndTag);
     }
   }
 
@@ -933,7 +933,7 @@ namespace Krys::Tests
     expected = U"script";
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+      COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
     tokenizer.SetState(TokenizerState::ScriptData);
@@ -941,7 +941,7 @@ namespace Krys::Tests
     expected = U"</span©";
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Character);
+      COMMON_TEST_CASES(HTMLTokenType::Character);
     }
   }
 
@@ -1181,7 +1181,7 @@ namespace Krys::Tests
     expected = U"script";
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+      COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
     tokenizer.SetState(TokenizerState::ScriptDataEscaped);
@@ -1205,7 +1205,7 @@ namespace Krys::Tests
     expected = U"script";
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+      COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
     tokenizer.SetState(TokenizerState::ScriptDataEscaped);
@@ -1230,7 +1230,7 @@ namespace Krys::Tests
     expected = U"script";
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+      COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
     tokenizer.SetState(TokenizerState::ScriptDataEscaped);
@@ -1238,7 +1238,7 @@ namespace Krys::Tests
     // End tag
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndTag);
+      COMMON_TEST_CASES(HTMLTokenType::EndTag);
     }
   }
 
@@ -1251,7 +1251,7 @@ namespace Krys::Tests
     expected = U"script";
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+      COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
     tokenizer.SetState(TokenizerState::ScriptDataEscaped);
@@ -1259,7 +1259,7 @@ namespace Krys::Tests
     // End tag
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::EndTag);
+      COMMON_TEST_CASES(HTMLTokenType::EndTag);
     }
   }
 
@@ -1274,7 +1274,7 @@ namespace Krys::Tests
     expected = U"script";
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::StartTag);
+      COMMON_TEST_CASES(HTMLTokenType::StartTag);
     }
 
     tokenizer.SetState(TokenizerState::ScriptDataEscaped);
@@ -1282,7 +1282,7 @@ namespace Krys::Tests
     expected = U"</span©";
     {
       NextTokenPtr token = tokenizer.NextToken();
-      COMMON_TEST_CASES(HTMLToken::Type::Character);
+      COMMON_TEST_CASES(HTMLTokenType::Character);
     }
   }
 

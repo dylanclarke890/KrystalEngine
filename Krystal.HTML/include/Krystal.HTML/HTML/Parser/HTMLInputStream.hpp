@@ -57,9 +57,10 @@ namespace Krys::HTML
 
     void Insert(utf32_string &&chunk)
     {
+      assert(_insertionPosition != utf32_string::npos);
+
       if (!chunk.empty())
       {
-        assert(_insertionPosition != utf32_string::npos);
         _data.insert(_insertionPosition, chunk);
         _insertionPosition += chunk.size();
       }

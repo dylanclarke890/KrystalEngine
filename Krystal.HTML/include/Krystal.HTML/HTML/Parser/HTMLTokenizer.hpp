@@ -1,10 +1,10 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/HTML/Enums/HTMLParseError.hpp"
+#include "Krystal.HTML/HTML/Enums/TokenizerState.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLCharacterReference.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLInputStream.hpp"
-#include "Krystal.HTML/HTML/Parser/HTMLParseError.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLToken.hpp"
-#include "Krystal.HTML/HTML/Parser/TokenizerState.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/ReferenceWrapper.hpp"
@@ -145,7 +145,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool HasBufferedCharacterToken() const noexcept
     {
-      return _token.GetType() == HTMLToken::Type::Character;
+      return _token.GetType() == HTMLTokenType::Character;
     }
 
     KRYS_NODISCARD bool IsCDATAAllowed() const noexcept
@@ -300,8 +300,8 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool EmitTagToken() noexcept
     {
-      assert(_token.GetType() == HTMLToken::Type::StartTag || _token.GetType() == HTMLToken::Type::EndTag);
-      if (_token.GetType() == HTMLToken::Type::StartTag)
+      assert(_token.GetType() == HTMLTokenType::StartTag || _token.GetType() == HTMLTokenType::EndTag);
+      if (_token.GetType() == HTMLTokenType::StartTag)
       {
         _appropriateEndTagName.clear();
         for (const auto &ch : _token.GetName())
@@ -318,7 +318,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool EmitDOCTYPEToken(bool consumeCurrentCharacter) noexcept
     {
-      assert(_token.GetType() == HTMLToken::Type::DOCTYPE);
+      assert(_token.GetType() == HTMLTokenType::DOCTYPE);
       _state = TokenizerState::Data;
 
       if (!consumeCurrentCharacter)
@@ -332,7 +332,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool EmitCommentToken(bool consumeCurrentCharacter) noexcept
     {
-      assert(_token.GetType() == HTMLToken::Type::Comment);
+      assert(_token.GetType() == HTMLTokenType::Comment);
       _state = TokenizerState::Data;
 
       if (!consumeCurrentCharacter)
@@ -2475,8 +2475,8 @@ namespace Krys::HTML
       return false;
     }
 
-#undef BeginState
-#undef EndState
+#undef BEGIN_STATE
+#undef END_STATE
 #undef RETURN_IN_CURRENT_STATE
 #undef RECONSUME_IN
 #undef ADVANCE_TO

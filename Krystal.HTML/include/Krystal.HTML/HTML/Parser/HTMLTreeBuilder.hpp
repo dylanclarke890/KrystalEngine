@@ -1,8 +1,8 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/HTML/Enums/InsertionMode.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLConstructionSite.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLTokenAtom.hpp"
-#include "Krystal.HTML/HTML/Parser/InsertionMode.hpp"
 #include "Krystal.Lib/Types/Stack.hpp"
 
 namespace Krys::HTML
@@ -20,6 +20,7 @@ namespace Krys::HTML
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#reset-the-insertion-mode-appropriately
     void ResetInsertionModeAppropriately() noexcept
     {
+      bool last = false;
     }
 
     void ProcessToken(HTMLTokenAtom &&token) noexcept

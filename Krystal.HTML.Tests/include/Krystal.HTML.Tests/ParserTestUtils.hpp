@@ -1,14 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/HTML/Parser/HTMLInputStream.hpp"
-#include "Krystal.HTML/HTML/Parser/HTMLParseError.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLToken.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLTokenizer.hpp"
-#include "Krystal.HTML/HTML/Parser/TokenizerState.hpp"
-#include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types/List.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Variant.hpp"
 #include <catch_all.hpp>
 #include <functional>
@@ -61,7 +55,7 @@ namespace Krys::Tests
     using TokenVariant =
       Variant<ExpectedDOCTYPE, ExpectedCharacter, ExpectedTag, ExpectedComment, ExpectedEOF>;
 
-    HTML::HTMLToken::Type Type;
+    HTML::HTMLTokenType Type;
     TokenVariant Token;
   };
 
@@ -92,32 +86,32 @@ namespace Krys::Tests
 
   KRYS_NODISCARD inline ExpectedToken CreateDOCTYPEToken(const ExpectedDOCTYPE &expected) noexcept
   {
-    return ExpectedToken {.Type = HTML::HTMLToken::Type::DOCTYPE, .Token = expected};
+    return ExpectedToken {.Type = HTML::HTMLTokenType::DOCTYPE, .Token = expected};
   }
 
   KRYS_NODISCARD inline ExpectedToken CreateCharacterToken(const utf32_string &characters) noexcept
   {
-    return ExpectedToken {.Type = HTML::HTMLToken::Type::Character, .Token = ExpectedCharacter {characters}};
+    return ExpectedToken {.Type = HTML::HTMLTokenType::Character, .Token = ExpectedCharacter {characters}};
   }
 
   KRYS_NODISCARD inline ExpectedToken CreateCommentToken(const utf32_string &comment) noexcept
   {
-    return ExpectedToken {.Type = HTML::HTMLToken::Type::Comment, .Token = ExpectedComment {comment}};
+    return ExpectedToken {.Type = HTML::HTMLTokenType::Comment, .Token = ExpectedComment {comment}};
   }
 
   KRYS_NODISCARD inline ExpectedToken CreateStartTagToken(const ExpectedTag &expected) noexcept
   {
-    return ExpectedToken {.Type = HTML::HTMLToken::Type::StartTag, .Token = expected};
+    return ExpectedToken {.Type = HTML::HTMLTokenType::StartTag, .Token = expected};
   }
 
   KRYS_NODISCARD inline ExpectedToken CreateEndTagToken(const ExpectedTag &expected) noexcept
   {
-    return ExpectedToken {.Type = HTML::HTMLToken::Type::EndTag, .Token = expected};
+    return ExpectedToken {.Type = HTML::HTMLTokenType::EndTag, .Token = expected};
   }
 
   KRYS_NODISCARD inline ExpectedToken CreateEOFToken() noexcept
   {
-    return ExpectedToken {.Type = HTML::HTMLToken::Type::EndOfFile, .Token = ExpectedEOF {}};
+    return ExpectedToken {.Type = HTML::HTMLTokenType::EndOfFile, .Token = ExpectedEOF {}};
   }
 
   KRYS_NODISCARD inline bool Compare(const auto &a, const auto &b) noexcept
@@ -184,7 +178,7 @@ namespace Krys::Tests
   {
     CHECK(Compare(token.GetDataBuffer(), expected.Name));
 
-    if (token.GetType() == HTML::HTMLToken::Type::StartTag)
+    if (token.GetType() == HTML::HTMLTokenType::StartTag)
     {
       CHECK(token.IsSelfClosing() == expected.SelfClosing);
     }

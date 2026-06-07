@@ -90,4 +90,4 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::TokenizerState, 30u)
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::TokenizerState, 80u)
