@@ -1,6 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/DOM/Internals/QualifiedName.hpp"
+#include "Krystal.HTML/Constants/ElementNames.hpp"
+#include "Krystal.HTML/Types/QualifiedName.hpp"
 #include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
@@ -14,6 +15,6 @@ namespace Krys::HTML
   class HTMLElementFactory
   {
   public:
-    KRYS_NODISCARD static Ref<HTMLElement> Create(Document &document, DOMStringAtom localName) noexcept;
+    KRYS_NODISCARD static RefPtr<HTMLElement> TryCreate(Document &document, ElementName elementName) noexcept;
   };
 }

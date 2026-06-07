@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/HTML/Enums/HTMLTagName.hpp"
 #include "Krystal.HTML/HTML/HTMLElement.hpp"
 
 namespace Krys::HTML

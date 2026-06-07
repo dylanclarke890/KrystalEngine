@@ -76,6 +76,7 @@ namespace Krys::HTML
     {
       _type = HTMLTokenType::Uninitialized;
       _data.clear();
+      _attributes.clear();
     }
 
     KRYS_NODISCARD const DataBuffer &Data() const noexcept

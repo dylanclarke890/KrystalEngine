@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/Types/DOMString.hpp"
-#include "Krystal.HTML/Types/DOMString.hpp"
 #include <cassert>
 
 namespace Krys::HTML

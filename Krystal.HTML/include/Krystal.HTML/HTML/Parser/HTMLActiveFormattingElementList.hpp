@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/HTML/Parser/HTMLElementStackItem.hpp"
+#include "Krystal.HTML/HTML/Parser/HTMLStackItem.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 
 namespace Krys::HTML
@@ -9,6 +9,6 @@ namespace Krys::HTML
   class HTMLActiveFormattingElementList
   {
   private:
-    List<HTMLElementStackItem> _items;
+    List<HTMLStackItem> _items;
   };
 }

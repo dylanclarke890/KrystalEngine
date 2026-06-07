@@ -1,4 +1,5 @@
 ﻿#include "Krystal.HTML/HTML/Internals/HTMLElementFactory.hpp"
+#include "Krystal.HTML/Constants/ElementNames.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
@@ -7,7 +8,6 @@
 #include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/HTML/Enums/HTMLTagName.hpp"
 #include "Krystal.HTML/HTML/HTMLAnchorElement.hpp"
 #include "Krystal.HTML/HTML/HTMLAreaElement.hpp"
 #include "Krystal.HTML/HTML/HTMLAudioElement.hpp"
@@ -77,353 +77,346 @@
 
 namespace Krys::HTML
 {
-  Ref<HTMLElement> HTMLElementFactory::Create(Document &document, DOMStringAtom localName) noexcept
+  RefPtr<HTMLElement> HTMLElementFactory::TryCreate(Document &document, ElementName elementName) noexcept
   {
-    auto tagName = ParseHTMLTagName(Krys::Text::ToASCIIUppercase(localName.View()));
-
-    switch (tagName)
+    switch (elementName)
     {
-      case HTMLTagName::abbr:
-      case HTMLTagName::address:
-      case HTMLTagName::article:
-      case HTMLTagName::aside:
-      case HTMLTagName::b:
-      case HTMLTagName::bdi:
-      case HTMLTagName::bdo:
-      case HTMLTagName::cite:
-      case HTMLTagName::code:
-      case HTMLTagName::dd:
-      case HTMLTagName::dfn:
-      case HTMLTagName::dt:
-      case HTMLTagName::em:
-      case HTMLTagName::figure:
-      case HTMLTagName::figcaption:
-      case HTMLTagName::footer:
-      case HTMLTagName::hgroup:
-      case HTMLTagName::header:
-      case HTMLTagName::i:
-      case HTMLTagName::kbd:
-      case HTMLTagName::main:
-      case HTMLTagName::mark:
-      case HTMLTagName::nav:
-      case HTMLTagName::noscript:
-      case HTMLTagName::ruby:
-      case HTMLTagName::rp:
-      case HTMLTagName::rt:
-      case HTMLTagName::s:
-      case HTMLTagName::samp:
-      case HTMLTagName::search:
-      case HTMLTagName::section:
-      case HTMLTagName::small:
-      case HTMLTagName::strong:
-      case HTMLTagName::sub:
-      case HTMLTagName::summary:
-      case HTMLTagName::sup:
-      case HTMLTagName::u:
-      case HTMLTagName::var:
-      case HTMLTagName::wbr:
+      case ElementName::abbr:
+      case ElementName::address:
+      case ElementName::article:
+      case ElementName::aside:
+      case ElementName::b:
+      case ElementName::bdi:
+      case ElementName::bdo:
+      case ElementName::cite:
+      case ElementName::code:
+      case ElementName::dd:
+      case ElementName::dfn:
+      case ElementName::dt:
+      case ElementName::em:
+      case ElementName::figure:
+      case ElementName::figcaption:
+      case ElementName::footer:
+      case ElementName::hgroup:
+      case ElementName::header:
+      case ElementName::i:
+      case ElementName::kbd:
+      case ElementName::main:
+      case ElementName::mark:
+      case ElementName::nav:
+      case ElementName::noscript:
+      case ElementName::ruby:
+      case ElementName::rp:
+      case ElementName::rt:
+      case ElementName::s:
+      case ElementName::samp:
+      case ElementName::search:
+      case ElementName::section:
+      case ElementName::small:
+      case ElementName::strong:
+      case ElementName::sub:
+      case ElementName::summary:
+      case ElementName::sup:
+      case ElementName::u:
+      case ElementName::var:
+      case ElementName::wbr:
       {
-        return CreateRef<HTMLElement>(document);
+        return CreateRefPtr<HTMLElement>(document);
       }
-      case HTMLTagName::a:
+      case ElementName::a:
       {
-        return CreateRef<HTMLAnchorElement>(document);
+        return CreateRefPtr<HTMLAnchorElement>(document);
       }
-      case HTMLTagName::area:
+      case ElementName::area:
       {
-        return CreateRef<HTMLAreaElement>(document);
+        return CreateRefPtr<HTMLAreaElement>(document);
       }
-      case HTMLTagName::audio:
+      case ElementName::audio:
       {
-        return CreateRef<HTMLAudioElement>(document);
+        return CreateRefPtr<HTMLAudioElement>(document);
       }
-      case HTMLTagName::base:
+      case ElementName::base:
       {
-        return CreateRef<HTMLBaseElement>(document);
+        return CreateRefPtr<HTMLBaseElement>(document);
       }
-      case HTMLTagName::blockquote:
-      case HTMLTagName::q:
+      case ElementName::blockquote:
+      case ElementName::q:
       {
-        return CreateRef<HTMLQuoteElement>(document);
+        return CreateRefPtr<HTMLQuoteElement>(document);
       }
-      case HTMLTagName::body:
+      case ElementName::body:
       {
-        return CreateRef<HTMLBodyElement>(document);
+        return CreateRefPtr<HTMLBodyElement>(document);
       }
-      case HTMLTagName::button:
+      case ElementName::button:
       {
-        return CreateRef<HTMLButtonElement>(document);
+        return CreateRefPtr<HTMLButtonElement>(document);
       }
-      case HTMLTagName::canvas:
+      case ElementName::canvas:
       {
-        return CreateRef<HTMLCanvasElement>(document);
+        return CreateRefPtr<HTMLCanvasElement>(document);
       }
-      case HTMLTagName::caption:
+      case ElementName::caption:
       {
-        return CreateRef<HTMLTableCaptionElement>(document);
+        return CreateRefPtr<HTMLTableCaptionElement>(document);
       }
-      case HTMLTagName::col:
-      case HTMLTagName::colgroup:
+      case ElementName::col:
+      case ElementName::colgroup:
       {
-        return CreateRef<HTMLTableColElement>(document);
+        return CreateRefPtr<HTMLTableColElement>(document);
       }
-      case HTMLTagName::data:
+      case ElementName::data:
       {
-        return CreateRef<HTMLDataElement>(document);
+        return CreateRefPtr<HTMLDataElement>(document);
       }
-      case HTMLTagName::datalist:
+      case ElementName::datalist:
       {
-        return CreateRef<HTMLDataListElement>(document);
+        return CreateRefPtr<HTMLDataListElement>(document);
       }
-      case HTMLTagName::del:
-      case HTMLTagName::ins:
+      case ElementName::del:
+      case ElementName::ins:
       {
-        return CreateRef<HTMLModElement>(document);
+        return CreateRefPtr<HTMLModElement>(document);
       }
-      case HTMLTagName::details:
+      case ElementName::details:
       {
-        return CreateRef<HTMLDetailsElement>(document);
+        return CreateRefPtr<HTMLDetailsElement>(document);
       }
-      case HTMLTagName::dialog:
+      case ElementName::dialog:
       {
-        return CreateRef<HTMLDialogElement>(document);
+        return CreateRefPtr<HTMLDialogElement>(document);
       }
-      case HTMLTagName::div:
+      case ElementName::div:
       {
-        return CreateRef<HTMLDivElement>(document);
+        return CreateRefPtr<HTMLDivElement>(document);
       }
-      case HTMLTagName::dl:
+      case ElementName::dl:
       {
-        return CreateRef<HTMLDListElement>(document);
+        return CreateRefPtr<HTMLDListElement>(document);
       }
-      case HTMLTagName::embed:
+      case ElementName::embed:
       {
-        return CreateRef<HTMLEmbedElement>(document);
+        return CreateRefPtr<HTMLEmbedElement>(document);
       }
-      case HTMLTagName::fieldset:
+      case ElementName::fieldset:
       {
-        return CreateRef<HTMLFieldSetElement>(document);
+        return CreateRefPtr<HTMLFieldSetElement>(document);
       }
-      case HTMLTagName::form:
+      case ElementName::form:
       {
-        return CreateRef<HTMLFormElement>(document);
+        return CreateRefPtr<HTMLFormElement>(document);
       }
-      case HTMLTagName::head:
+      case ElementName::head:
       {
-        return CreateRef<HTMLHeadElement>(document);
+        return CreateRefPtr<HTMLHeadElement>(document);
       }
-      case HTMLTagName::h1:
-      case HTMLTagName::h2:
-      case HTMLTagName::h3:
-      case HTMLTagName::h4:
-      case HTMLTagName::h5:
-      case HTMLTagName::h6:
+      case ElementName::h1:
+      case ElementName::h2:
+      case ElementName::h3:
+      case ElementName::h4:
+      case ElementName::h5:
+      case ElementName::h6:
       {
-        return CreateRef<HTMLHeadingElement>(document);
+        return CreateRefPtr<HTMLHeadingElement>(document);
       }
-      case HTMLTagName::hr:
+      case ElementName::hr:
       {
-        return CreateRef<HTMLHRElement>(document);
+        return CreateRefPtr<HTMLHRElement>(document);
       }
-      case HTMLTagName::html:
+      case ElementName::html:
       {
-        return CreateRef<HTMLHtmlElement>(document);
+        return CreateRefPtr<HTMLHtmlElement>(document);
       }
-      case HTMLTagName::iframe:
+      case ElementName::iframe:
       {
-        return CreateRef<HTMLIFrameElement>(document);
+        return CreateRefPtr<HTMLIFrameElement>(document);
       }
-      case HTMLTagName::input:
+      case ElementName::input:
       {
-        return CreateRef<HTMLInputElement>(document);
+        return CreateRefPtr<HTMLInputElement>(document);
       }
-      case HTMLTagName::img:
+      case ElementName::img:
       {
-        return CreateRef<HTMLImageElement>(document);
+        return CreateRefPtr<HTMLImageElement>(document);
       }
-      case HTMLTagName::label:
+      case ElementName::label:
       {
-        return CreateRef<HTMLLabelElement>(document);
+        return CreateRefPtr<HTMLLabelElement>(document);
       }
-      case HTMLTagName::legend:
+      case ElementName::legend:
       {
-        return CreateRef<HTMLLegendElement>(document);
+        return CreateRefPtr<HTMLLegendElement>(document);
       }
-      case HTMLTagName::li:
+      case ElementName::li:
       {
-        return CreateRef<HTMLLIElement>(document);
+        return CreateRefPtr<HTMLLIElement>(document);
       }
-      case HTMLTagName::link:
+      case ElementName::link:
       {
-        return CreateRef<HTMLLinkElement>(document);
+        return CreateRefPtr<HTMLLinkElement>(document);
       }
-      case HTMLTagName::map:
+      case ElementName::map:
       {
-        return CreateRef<HTMLMapElement>(document);
+        return CreateRefPtr<HTMLMapElement>(document);
       }
-      case HTMLTagName::menu:
+      case ElementName::menu:
       {
-        return CreateRef<HTMLMenuElement>(document);
+        return CreateRefPtr<HTMLMenuElement>(document);
       }
-      case HTMLTagName::meta:
+      case ElementName::meta:
       {
-        return CreateRef<HTMLMetaElement>(document);
+        return CreateRefPtr<HTMLMetaElement>(document);
       }
-      case HTMLTagName::meter:
+      case ElementName::meter:
       {
-        return CreateRef<HTMLMeterElement>(document);
+        return CreateRefPtr<HTMLMeterElement>(document);
       }
-      case HTMLTagName::object:
+      case ElementName::object:
       {
-        return CreateRef<HTMLObjectElement>(document);
+        return CreateRefPtr<HTMLObjectElement>(document);
       }
-      case HTMLTagName::ol:
+      case ElementName::ol:
       {
-        return CreateRef<HTMLOListElement>(document);
+        return CreateRefPtr<HTMLOListElement>(document);
       }
-      case HTMLTagName::optgroup:
+      case ElementName::optgroup:
       {
-        return CreateRef<HTMLOptGroupElement>(document);
+        return CreateRefPtr<HTMLOptGroupElement>(document);
       }
-      case HTMLTagName::option:
+      case ElementName::option:
       {
-        return CreateRef<HTMLOptionElement>(document);
+        return CreateRefPtr<HTMLOptionElement>(document);
       }
-      case HTMLTagName::output:
+      case ElementName::output:
       {
-        return CreateRef<HTMLOutputElement>(document);
+        return CreateRefPtr<HTMLOutputElement>(document);
       }
-      case HTMLTagName::p:
+      case ElementName::p:
       {
-        return CreateRef<HTMLParagraphElement>(document);
+        return CreateRefPtr<HTMLParagraphElement>(document);
       }
-      case HTMLTagName::picture:
+      case ElementName::picture:
       {
-        return CreateRef<HTMLPictureElement>(document);
+        return CreateRefPtr<HTMLPictureElement>(document);
       }
-      case HTMLTagName::pre:
+      case ElementName::pre:
       {
-        return CreateRef<HTMLPreElement>(document);
+        return CreateRefPtr<HTMLPreElement>(document);
       }
-      case HTMLTagName::progress:
+      case ElementName::progress:
       {
-        return CreateRef<HTMLProgressElement>(document);
+        return CreateRefPtr<HTMLProgressElement>(document);
       }
-      case HTMLTagName::script:
+      case ElementName::script:
       {
-        return CreateRef<HTMLScriptElement>(document);
+        return CreateRefPtr<HTMLScriptElement>(document);
       }
-      case HTMLTagName::select:
+      case ElementName::select:
       {
-        return CreateRef<HTMLSelectElement>(document);
+        return CreateRefPtr<HTMLSelectElement>(document);
       }
-      case HTMLTagName::selectedcontent:
+      case ElementName::selectedcontent:
       {
-        return CreateRef<HTMLSelectedContentElement>(document);
+        return CreateRefPtr<HTMLSelectedContentElement>(document);
       }
-      case HTMLTagName::slot:
+      case ElementName::slot:
       {
-        return CreateRef<HTMLSlotElement>(document);
+        return CreateRefPtr<HTMLSlotElement>(document);
       }
-      case HTMLTagName::source:
+      case ElementName::source:
       {
-        return CreateRef<HTMLSourceElement>(document);
+        return CreateRefPtr<HTMLSourceElement>(document);
       }
-      case HTMLTagName::span:
+      case ElementName::span:
       {
-        return CreateRef<HTMLSpanElement>(document);
+        return CreateRefPtr<HTMLSpanElement>(document);
       }
-      case HTMLTagName::style:
+      case ElementName::style:
       {
-        return CreateRef<HTMLStyleElement>(document);
+        return CreateRefPtr<HTMLStyleElement>(document);
       }
-      case HTMLTagName::table:
+      case ElementName::table:
       {
-        return CreateRef<HTMLTableElement>(document);
+        return CreateRefPtr<HTMLTableElement>(document);
       }
-      case HTMLTagName::tbody:
-      case HTMLTagName::thead:
-      case HTMLTagName::tfoot:
+      case ElementName::tbody:
+      case ElementName::thead:
+      case ElementName::tfoot:
       {
-        return CreateRef<HTMLTableSectionElement>(document);
+        return CreateRefPtr<HTMLTableSectionElement>(document);
       }
-      case HTMLTagName::td:
-      case HTMLTagName::th:
+      case ElementName::td:
+      case ElementName::th:
       {
-        return CreateRef<HTMLTableCellElement>(document);
+        return CreateRefPtr<HTMLTableCellElement>(document);
       }
-      case HTMLTagName::template_:
+      case ElementName::template_:
       {
-        return CreateRef<HTMLTemplateElement>(document);
+        return CreateRefPtr<HTMLTemplateElement>(document);
       }
-      case HTMLTagName::tr:
+      case ElementName::tr:
       {
-        return CreateRef<HTMLTableRowElement>(document);
+        return CreateRefPtr<HTMLTableRowElement>(document);
       }
-      case HTMLTagName::textarea:
+      case ElementName::textarea:
       {
-        return CreateRef<HTMLTextAreaElement>(document);
+        return CreateRefPtr<HTMLTextAreaElement>(document);
       }
-      case HTMLTagName::title:
+      case ElementName::title:
       {
-        return CreateRef<HTMLTitleElement>(document);
+        return CreateRefPtr<HTMLTitleElement>(document);
       }
-      case HTMLTagName::time:
+      case ElementName::time:
       {
-        return CreateRef<HTMLTimeElement>(document);
+        return CreateRefPtr<HTMLTimeElement>(document);
       }
-      case HTMLTagName::track:
+      case ElementName::track:
       {
-        return CreateRef<HTMLTrackElement>(document);
+        return CreateRefPtr<HTMLTrackElement>(document);
       }
-      case HTMLTagName::ul:
+      case ElementName::ul:
       {
-        return CreateRef<HTMLUListElement>(document);
+        return CreateRefPtr<HTMLUListElement>(document);
       }
-      case HTMLTagName::video:
+      case ElementName::video:
       {
-        return CreateRef<HTMLVideoElement>(document);
+        return CreateRefPtr<HTMLVideoElement>(document);
       }
 #pragma region Obsolete elements
-      case HTMLTagName::applet:
-      case HTMLTagName::bgsound:
-      case HTMLTagName::blink:
-      case HTMLTagName::isindex:
-      case HTMLTagName::keygen:
-      case HTMLTagName::multicol:
-      case HTMLTagName::nextid:
-      case HTMLTagName::spacer:
+      case ElementName::applet:
+      case ElementName::bgsound:
+      case ElementName::blink:
+      case ElementName::isindex:
+      case ElementName::keygen:
+      case ElementName::multicol:
+      case ElementName::nextid:
+      case ElementName::spacer:
       {
-        return CreateRef<HTMLUnknownElement>(document);
+        return CreateRefPtr<HTMLUnknownElement>(document);
       }
-      case HTMLTagName::acronym:
-      case HTMLTagName::basefont:
-      case HTMLTagName::big:
-      case HTMLTagName::center:
-      case HTMLTagName::nobr:
-      case HTMLTagName::noembed:
-      case HTMLTagName::noframes:
-      case HTMLTagName::plaintext:
-      case HTMLTagName::rb:
-      case HTMLTagName::rtc:
-      case HTMLTagName::strike:
-      case HTMLTagName::tt:
+      case ElementName::acronym:
+      case ElementName::basefont:
+      case ElementName::big:
+      case ElementName::center:
+      case ElementName::nobr:
+      case ElementName::noembed:
+      case ElementName::noframes:
+      case ElementName::plaintext:
+      case ElementName::rb:
+      case ElementName::rtc:
+      case ElementName::strike:
+      case ElementName::tt:
       {
-        return CreateRef<HTMLElement>(document);
+        return CreateRefPtr<HTMLElement>(document);
       }
-      case HTMLTagName::listing:
-      case HTMLTagName::xmp:
+      case ElementName::listing:
+      case ElementName::xmp:
       {
-        return CreateRef<HTMLPreElement>(document);
+        return CreateRefPtr<HTMLPreElement>(document);
       }
 #pragma endregion
     }
 
-    if (NameValidation::IsValidCustomElementName(localName.View()))
-    {
-      return CreateRef<HTMLElement>(document);
-    }
-
-    return CreateRef<HTMLUnknownElement>(document);
+    return nullptr;
   }
 }

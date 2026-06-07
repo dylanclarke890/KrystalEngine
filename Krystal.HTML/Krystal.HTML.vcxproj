@@ -63,6 +63,8 @@
     <ClCompile Include="src\HTML\HTMLBRElement.cpp" />
     <ClCompile Include="src\HTML\HTMLDataElement.cpp" />
     <ClCompile Include="src\HTML\HTMLDivElement.cpp" />
+    <ClCompile Include="src\HTML\Parser\HTMLTreeBuilder.cpp" />
+    <ClInclude Include="include\Krystal.HTML\Constants\ElementNames.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\StaticRangeInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\BoundaryPointComparator.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Algorithms\DOMTreeAccessors.hpp" />
@@ -218,7 +220,6 @@
     <ClInclude Include="include\Krystal.HTML\DOM\DOMImplementation.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\ElementCreationOptions.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\CustomElementState.hpp" />
-    <ClInclude Include="include\Krystal.HTML\HTML\Enums\HTMLTagName.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\DocumentReadyState.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\DocumentVisibilityState.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\QuirksMode.hpp" />
@@ -282,8 +283,8 @@
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\TextResourceDecoder.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLEncodingSniffer.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLInputStream.hpp" />
-    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLOpenElementStack.hpp" />
-    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLElementStackItem.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLElementStack.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLStackItem.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\HTMLParseError.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLToken.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLTokenizer.hpp" />
@@ -291,7 +292,7 @@
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\InsertionMode.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\TokenizerState.hpp" />
     <ClInclude Include="include\Krystal.HTML\Context.hpp" />
-    <ClInclude Include="include\Krystal.HTML\DOM\Internals\QualifiedName.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Types\QualifiedName.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\AbstractRange.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Range.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\StaticRange.hpp" />

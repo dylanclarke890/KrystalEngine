@@ -14,7 +14,7 @@ namespace Krys::HTML
 {
   class HTMLDocumentParser : NonCopyMovable<HTMLDocumentParser>
   {
-    ReferenceWrapper<HTMLDocument> _document;
+    HTMLDocument &_document;
     HTMLInputStream _input;
     HTMLTokenizer _tokenizer;
     HTMLTreeBuilder _treeBuilder;
@@ -27,7 +27,7 @@ namespace Krys::HTML
 
   public:
     HTMLDocumentParser(HTMLDocument &document) noexcept
-        : _document(document), _input(), _tokenizer(_input), _treeBuilder()
+        : _document(document), _input(), _tokenizer(_input), _treeBuilder(document)
     {
     }
 
@@ -55,9 +55,9 @@ namespace Krys::HTML
     void ConstructTreeFromToken(NextTokenPtr &rawToken) noexcept
     {
       // TODO(HTML): We can optimise here to avoid copying character data by having a pointer to the
-      // underlying buffer in the HTMLToken. This is because Character tokens can't cause use to re-enter
-      // the parser. This is not straightforward as we need to convert from utf32 to utf8 at some point,
-      // revisit this later.
+      // underlying buffer in the HTMLToken. This is because Character tokens can't cause us to re-enter
+      // the parser. This is not straightforward as we currently need to convert from utf32 to utf8 at some
+      // point, revisit this later.
       // if (rawToken->GetType() != HTMLTokenType::Character)
       // {
       //   rawToken.Clear();

@@ -1,9 +1,12 @@
 ﻿#include "Krystal.HTML/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
+#include "Krystal.HTML/DOM/Enums/CustomElementState.hpp"
 #include "Krystal.HTML/HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.HTML/HTML/CustomElement/CustomElementDefinition.hpp"
 #include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
+#include "Krystal.HTML/HTML/HTMLElement.hpp"
+#include "Krystal.HTML/HTML/HTMLUnknownElement.hpp"
 #include "Krystal.HTML/HTML/Internals/CustomElementFactory.hpp"
 #include "Krystal.HTML/HTML/Internals/HTMLElementFactory.hpp"
 #include "Krystal.HTML/Infra/Namespaces.hpp"
@@ -25,6 +28,7 @@ namespace Krys::HTML
       registry = document.CustomElementRegistry();
     }
 
+    auto elementName = ParseElementName(Krys::Text::ToASCIILowercase(name.LocalName.View()));
     if (name.NamespaceURI == Namespace::HTML)
     {
       result = CustomElementFactory::TryCreate(document, name, is, synchronousCustomElements,
@@ -32,11 +36,25 @@ namespace Krys::HTML
 
       if (result == nullptr)
       {
-        result = HTMLElementFactory::Create(document, name.LocalName);
-        if (NameValidation::IsValidCustomElementName(name.LocalName.View()) || is != DOMStringAtom::Null())
+        result = HTMLElementFactory::TryCreate(document, elementName);
+      }
+
+      bool isValidCustomElementName = NameValidation::IsValidCustomElementName(name.LocalName.View());
+      if (result == nullptr)
+      {
+        if (isValidCustomElementName)
         {
-          result->_customElementState = CustomElementState::Undefined;
+          result = CreateRefPtr<HTMLElement>(document);
         }
+        else
+        {
+          result = CreateRefPtr<HTMLUnknownElement>(document);
+        }
+      }
+
+      if (isValidCustomElementName || is != DOMStringAtom::Null())
+      {
+        result->_customElementState = CustomElementState::Undefined;
       }
     }
     else if (name.NamespaceURI == Namespace::SVG)

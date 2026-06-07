@@ -63,10 +63,10 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Element.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLOpenElementStack.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLElementStack.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLElementStackItem.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLStackItem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLActiveFormattingElementList.hpp">
@@ -153,7 +153,7 @@
     <ClInclude Include="include\Krystal.HTML\DOM\ProcessingInstruction.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\DOM\Internals\QualifiedName.hpp">
+    <ClInclude Include="include\Krystal.HTML\Types\QualifiedName.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\ShadowRoot.hpp">
@@ -325,9 +325,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\XMLDocument.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\HTML\Enums\HTMLTagName.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\ElementCreationOptions.hpp">
@@ -741,6 +738,9 @@
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\HTMLTokenType.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\Constants\ElementNames.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -1137,6 +1137,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\HTML\HTMLCanvasElement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HTML\Parser\HTMLTreeBuilder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

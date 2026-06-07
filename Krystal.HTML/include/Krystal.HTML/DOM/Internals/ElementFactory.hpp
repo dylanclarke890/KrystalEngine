@@ -1,7 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/DOM/Enums/CustomElementState.hpp"
-#include "Krystal.HTML/DOM/Internals/QualifiedName.hpp"
+#include "Krystal.HTML/Types/QualifiedName.hpp"
 #include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
