@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/HTML/Parser/Loader/ContentType.hpp"
-#include "Krystal.HTML/HTML/Parser/Loader/EncodingSource.hpp"
-#include "Krystal.HTML/HTML/Parser/Loader/HTMLEncodingSniffer.hpp"
+#include "Krystal.HTML/HTML/Enums/ContentType.hpp"
+#include "Krystal.HTML/HTML/Enums/EncodingSource.hpp"
+#include "Krystal.HTML/HTML/Parser/HTMLEncodingSniffer.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/ReferenceWrapper.hpp"
 #include "Krystal.Lib/Types/List.hpp"

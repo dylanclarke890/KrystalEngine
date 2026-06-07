@@ -277,10 +277,10 @@
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLActiveFormattingElementList.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLCharacterReference.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLDocumentParser.hpp" />
-    <ClInclude Include="include\Krystal.HTML\HTML\Parser\Loader\ContentType.hpp" />
-    <ClInclude Include="include\Krystal.HTML\HTML\Parser\Loader\EncodingSource.hpp" />
-    <ClInclude Include="include\Krystal.HTML\HTML\Parser\Loader\TextResourceDecoder.hpp" />
-    <ClInclude Include="include\Krystal.HTML\HTML\Parser\Loader\HTMLEncodingSniffer.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\ContentType.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\EncodingSource.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\TextResourceDecoder.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLEncodingSniffer.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLInputStream.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLOpenElementStack.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLElementStackItem.hpp" />
@@ -288,7 +288,6 @@
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLToken.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLTokenizer.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLTreeBuilder.hpp" />
-    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLConstructionSite.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\InsertionMode.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\TokenizerState.hpp" />
     <ClInclude Include="include\Krystal.HTML\Context.hpp" />

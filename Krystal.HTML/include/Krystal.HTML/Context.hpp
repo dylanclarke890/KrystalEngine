@@ -1,14 +1,7 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/HTML/Parser/Loader/ContentType.hpp"
-#include "Krystal.HTML/HTML/Parser/Loader/HTMLEncodingSniffer.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
-#include "Krystal.Lib/String/String.hpp"
-#include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Text/ASCII.hpp"
 #include "Krystal.Text/Codecs/CodecRegistry.hpp"
-#include "Krystal.Text/Codecs/ICodec.hpp"
-#include "Krystal.Text/Decode/Decode.hpp"
 
 namespace Krys::HTML
 {

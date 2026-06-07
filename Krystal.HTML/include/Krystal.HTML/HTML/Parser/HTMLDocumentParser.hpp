@@ -18,6 +18,11 @@ namespace Krys::HTML
     HTMLInputStream _input;
     HTMLTokenizer _tokenizer;
     HTMLTreeBuilder _treeBuilder;
+
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#script-nesting-level
+    uint32 _scriptNestingLevel {0u};
+
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#parser-pause-flag
     bool _paused {false};
 
   public:
@@ -59,8 +64,8 @@ namespace Krys::HTML
       // }
 
       HTMLTokenAtom token(*rawToken);
-      rawToken
-        .Clear(); // Clear the rawToken in case _treeBuilder.ProcessToken synchronously re-enters the parser.
+      // Clear the rawToken in case _treeBuilder.ProcessToken synchronously re-enters the parser.
+      rawToken.Clear();
       _treeBuilder.ProcessToken(std::move(token));
     }
 

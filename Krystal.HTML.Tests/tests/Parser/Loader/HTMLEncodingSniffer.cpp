@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/HTML/Parser/Loader/HTMLEncodingSniffer.hpp"
+﻿#include "Krystal.HTML/HTML/Parser/HTMLEncodingSniffer.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Text/Codecs/BasicCodec.hpp"

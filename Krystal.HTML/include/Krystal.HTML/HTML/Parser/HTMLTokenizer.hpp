@@ -33,9 +33,8 @@ namespace Krys::HTML
       }
     }
 
-    NextTokenPtr(NextTokenPtr &&other) noexcept : _token(other._token)
+    NextTokenPtr(NextTokenPtr &&other) noexcept : _token(std::exchange(other._token, nullptr))
     {
-      other._token = nullptr;
     }
 
     void Clear() noexcept
