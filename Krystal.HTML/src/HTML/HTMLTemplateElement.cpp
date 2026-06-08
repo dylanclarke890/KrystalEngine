@@ -1,4 +1,5 @@
 ﻿#include "Krystal.HTML/HTML/HTMLTemplateElement.hpp"
+#include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/HTML/Attributes/Reflection.hpp"
 
 namespace Krys::HTML
@@ -9,6 +10,12 @@ namespace Krys::HTML
   }
 
 #pragma region HTMLTemplateElement
+
+  RefPtr<DocumentFragment> HTMLTemplateElement::Content() const noexcept
+  {
+    assert(!Is<HTML::ShadowRoot>(_content.get()));
+    return _content;
+  }
 
   DOMString HTMLTemplateElement::ShadowRootMode() const noexcept
   {

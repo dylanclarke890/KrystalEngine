@@ -69,7 +69,7 @@
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLStackItem.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLActiveFormattingElementList.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLFormattingElementList.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\Document.hpp">
@@ -741,6 +741,15 @@
     <ClInclude Include="include\Krystal.HTML\Constants\ElementNames.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\ElementName.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\ParserScriptingMode.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\Namespace.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -1140,6 +1149,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\HTML\Parser\HTMLTreeBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\HTML\Parser\HTMLFormattingElementList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

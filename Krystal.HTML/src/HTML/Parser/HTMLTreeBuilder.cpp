@@ -1,289 +1,367 @@
 ﻿#include "Krystal.HTML/HTML/Parser/HTMLTreeBuilder.hpp"
 #include "Krystal.HTML/DOM/HTMLDocument.hpp"
 #include "Krystal.HTML/HTML/Enums/HTMLTokenType.hpp"
+#include "Krystal.HTML/HTML/HTMLTableCellElement.hpp"
+#include "Krystal.HTML/HTML/HTMLTableElement.hpp"
+#include "Krystal.HTML/HTML/HTMLTableRowElement.hpp"
+#include "Krystal.HTML/HTML/HTMLTableSectionElement.hpp"
+#include "Krystal.HTML/HTML/HTMLTemplateElement.hpp"
 #include "Krystal.Text/ASCII.hpp"
 
 namespace Krys::HTML
 {
+  HTMLTreeBuilder::HTMLTreeBuilder(Document &document) noexcept : _document(document)
+  {
+  }
+
+  HTMLTreeBuilder::HTMLTreeBuilder(DocumentFragment &fragment, Element &contextElement) noexcept
+      : _document(fragment.NodeDocument()),
+        _fragmentParsingContext(FragmentParsingContext(fragment, contextElement))
+  {
+  }
+
   void HTMLTreeBuilder::ProcessToken(HTMLTokenAtom &&token) noexcept
   {
-    switch (_insertionMode)
-    {
-      case InsertionMode::Initial:
-        ProcessTokenInInitialMode(token);
-        break;
-      case InsertionMode::BeforeHTML:
-        ProcessTokenInBeforeHTMLMode(token);
-        break;
-      case InsertionMode::BeforeHead:
-        ProcessTokenInBeforeHeadMode(token);
-        break;
-      case InsertionMode::InHead:
-        ProcessTokenInHeadMode(token);
-        break;
-      case InsertionMode::InHeadNoscript:
-        ProcessTokenInInHeadNoscriptMode(token);
-        break;
-      case InsertionMode::AfterHead:
-        ProcessTokenInAfterHeadMode(token);
-        break;
-      case InsertionMode::InBody:
-        ProcessTokenInBodyMode(token);
-        break;
-      case InsertionMode::Text:
-        ProcessTokenInTextMode(token);
-        break;
-      case InsertionMode::InTable:
-        ProcessTokenInTableMode(token);
-        break;
-      default:
-        // Handle other modes as they are implemented
-        break;
-    }
   }
 
-  void HTMLTreeBuilder::ProcessTokenInInitialMode(const HTMLTokenAtom &token) noexcept
+  void HTMLTreeBuilder::ResetInsertionModeAppropriately() noexcept
   {
-    switch (token.Type())
+    bool last = false;
+
+    auto *stackElement = &_openElementStack.Bottom();
+    auto *node = &stackElement->Node();
+
+    while (true)
     {
-      case HTMLTokenType::Character:
+      if (node == &_openElementStack.Top().Node())
       {
-        // Characters that are followed by whitespace or EOF should be ignored
-        auto data = token.Data();
-        bool isWhitespaceOnly = true;
-        for (auto ch : data)
+        last = true;
+
+        if (_fragmentParsingContext.has_value())
         {
-          if (!Krys::Text::IsASCIIWhitespace(ch))
+          node = &_fragmentParsingContext->ContextElement();
+        }
+      }
+
+      if (auto *htmlElement = DynamicDowncast<HTMLElement>(node))
+      {
+        switch (stackElement->Name())
+        {
+          case ElementName::td:
+          case ElementName::th:
           {
-            isWhitespaceOnly = false;
+            if (!last)
+            {
+              _insertionMode = InsertionMode::InCell;
+              return;
+            }
+
+            break;
+          }
+          case ElementName::tr:
+          {
+            _insertionMode = InsertionMode::InRow;
+            return;
+          }
+          case ElementName::tbody:
+          case ElementName::thead:
+          case ElementName::tfoot:
+          {
+            _insertionMode = InsertionMode::InTableBody;
+            return;
+          }
+          case ElementName::caption:
+          {
+            _insertionMode = InsertionMode::InCaption;
+            return;
+          }
+          case ElementName::colgroup:
+          {
+            _insertionMode = InsertionMode::InColumnGroup;
+            return;
+          }
+          case ElementName::table:
+          {
+            _insertionMode = InsertionMode::InTable;
+            return;
+          }
+          case ElementName::template_:
+          {
+            _insertionMode = CurrentTemplateInsertionMode();
+            return;
+          }
+          case ElementName::head:
+          {
+            if (!last)
+            {
+              _insertionMode = InsertionMode::InHead;
+              return;
+            }
+
+            break;
+          }
+          case ElementName::body:
+          {
+            _insertionMode = InsertionMode::InBody;
+            return;
+          }
+          case ElementName::frameset:
+          {
+            _insertionMode = InsertionMode::InFrameset;
+            return;
+          }
+          case ElementName::html:
+          {
+            if (_head == nullptr)
+            {
+              _insertionMode = InsertionMode::BeforeHead;
+            }
+            else
+            {
+              _insertionMode = InsertionMode::AfterHead;
+            }
+            return;
+          }
+          default:
+          {
             break;
           }
         }
-        if (isWhitespaceOnly)
-        {
-          // Ignore whitespace
-          return;
-        }
-        // Non-whitespace character: act as if we received EOF, switch to BeforeHTML mode
-        ChangeInsertionMode(InsertionMode::BeforeHTML);
-        ProcessTokenInBeforeHTMLMode(token);
-        break;
       }
-      case HTMLTokenType::Comment:
-        // Insert comment into document
-        // TODO: Implement comment node creation
-        break;
-      case HTMLTokenType::DOCTYPE:
+
+      if (last)
       {
-        // Create doctype node and append to document
-        // TODO: Implement DOCTYPE node creation
-        ChangeInsertionMode(InsertionMode::BeforeHTML);
-        break;
+        _insertionMode = InsertionMode::InBody;
+        return;
       }
-      case HTMLTokenType::EndOfFile:
-        // Stop parsing
-        break;
-      case HTMLTokenType::StartTag:
-      case HTMLTokenType::EndTag:
-        // Parse error: unexpected token in initial mode
-        ChangeInsertionMode(InsertionMode::BeforeHTML);
-        ProcessTokenInBeforeHTMLMode(token);
-        break;
-      default:
-        break;
+
+      stackElement = _openElementStack.EntryBefore(*node);
+      assert(stackElement != nullptr);
+
+      node = &stackElement->Node();
     }
   }
 
-  void HTMLTreeBuilder::ProcessTokenInBeforeHTMLMode(const HTMLTokenAtom &token) noexcept
+  InsertionMode HTMLTreeBuilder::CurrentTemplateInsertionMode() const noexcept
   {
-    switch (token.Type())
+    assert(!_templateInsertionModes.empty());
+    return _templateInsertionModes.back();
+  }
+
+  ContainerNode &HTMLTreeBuilder::CurrentNode() noexcept
+  {
+    return _openElementStack.Bottom().Node();
+  }
+
+  ContainerNode &HTMLTreeBuilder::AdjustedCurrentNode() noexcept
+  {
+    if (_fragmentParsingContext.has_value() && _openElementStack.Size() == 1)
     {
-      case HTMLTokenType::DOCTYPE:
-        // Parse error: DOCTYPE in BeforeHTML mode
-        break;
-      case HTMLTokenType::Comment:
-        // Insert comment into document
-        // TODO: Implement comment node creation
-        break;
-      case HTMLTokenType::Character:
-      {
-        // Ignore whitespace characters
-        auto data = token.Data();
-        bool isWhitespaceOnly = true;
-        for (auto ch : data)
-        {
-          if (!Krys::Text::IsASCIIWhitespace(ch))
-          {
-            isWhitespaceOnly = false;
-            break;
-          }
-        }
-        if (isWhitespaceOnly)
-        {
-          return;
-        }
-        // Non-whitespace: process as StartTag for <html>
-        ChangeInsertionMode(InsertionMode::BeforeHead);
-        break;
-      }
-      case HTMLTokenType::StartTag:
-      {
-        // Only <html> is special
-        auto name = token.Name();
-        if (name == DOMStringAtom {u8"html"})
-        {
-          // TODO: Create html element and push to stack
-          // TODO: Change to BeforeHead mode
-          ChangeInsertionMode(InsertionMode::BeforeHead);
-        }
-        else
-        {
-          // Other start tags: error, but continue with implicit html
-          ChangeInsertionMode(InsertionMode::BeforeHead);
-          ProcessTokenInBeforeHeadMode(token);
-        }
-        break;
-      }
-      case HTMLTokenType::EndTag:
-        // Parse error: end tag in BeforeHTML mode
-        break;
-      case HTMLTokenType::EndOfFile:
-        // Stop parsing
-        break;
-      default:
-        break;
+      return _fragmentParsingContext->ContextElement();
     }
-  }
-
-  void HTMLTreeBuilder::ProcessTokenInBeforeHeadMode(const HTMLTokenAtom &token) noexcept
-  {
-    switch (token.Type())
+    else
     {
-      case HTMLTokenType::Character:
-      {
-        // Ignore whitespace only
-        auto data = token.Data();
-        bool isWhitespaceOnly = true;
-        for (auto ch : data)
-        {
-          if (!Krys::Text::IsASCIIWhitespace(ch))
-          {
-            isWhitespaceOnly = false;
-            break;
-          }
-        }
-        if (isWhitespaceOnly)
-        {
-          return;
-        }
-        // Non-whitespace: process as start tag
-        ChangeInsertionMode(InsertionMode::InHead);
-        ProcessTokenInHeadMode(token);
-        break;
-      }
-      case HTMLTokenType::Comment:
-        // Insert comment
-        // TODO: Implement comment node creation
-        break;
-      case HTMLTokenType::DOCTYPE:
-        // Parse error
-        break;
-      case HTMLTokenType::StartTag:
-      {
-        auto name = token.Name();
-        if (name == DOMStringAtom {u8"head"})
-        {
-          // TODO: Create head element, push to stack, save as _head, transition to InHead
-          ChangeInsertionMode(InsertionMode::InHead);
-        }
-        else
-        {
-          // Other elements: error, implicitly create head and reprocess
-          ChangeInsertionMode(InsertionMode::InHead);
-          ProcessTokenInHeadMode(token);
-        }
-        break;
-      }
-      case HTMLTokenType::EndTag:
-        // Most end tags are errors in this mode
-        ChangeInsertionMode(InsertionMode::InHead);
-        break;
-      case HTMLTokenType::EndOfFile:
-        // Stop parsing
-        break;
-      default:
-        break;
+      return CurrentNode();
     }
   }
 
-  void HTMLTreeBuilder::ProcessTokenInHeadMode(const HTMLTokenAtom &token) noexcept
+  bool HTMLTreeBuilder::HasElementInScope(ElementName targetNode) const noexcept
   {
-    // TODO: Implement full InHead mode
-    switch (token.Type())
+    auto *node = &_openElementStack.Bottom();
+
+    while (true)
     {
-      case HTMLTokenType::Character:
+      if (node->Name() == targetNode)
       {
-        // Whitespace only: append to current node
-        auto data = token.Data();
-        bool isWhitespaceOnly = true;
-        for (auto ch : data)
-        {
-          if (!Krys::Text::IsASCIIWhitespace(ch))
-          {
-            isWhitespaceOnly = false;
-            break;
-          }
-        }
-        if (isWhitespaceOnly)
-        {
-          // TODO: Insert character data to current node
-          return;
-        }
-        // Non-whitespace: implicitly close head
-        ChangeInsertionMode(InsertionMode::AfterHead);
-        ProcessTokenInAfterHeadMode(token);
-        break;
+        return true;
       }
-      case HTMLTokenType::EndTag:
+
+      switch (node->Name())
       {
-        auto name = token.Name();
-        if (name == DOMStringAtom {u8"head"})
+        case ElementName::applet:
+        case ElementName::caption:
+        case ElementName::html:
+        case ElementName::table:
+        case ElementName::td:
+        case ElementName::th:
+        case ElementName::marquee:
+        case ElementName::object:
+        case ElementName::select:
+        case ElementName::template_:
         {
-          // TODO: Pop head element from stack
-          ChangeInsertionMode(InsertionMode::AfterHead);
+          // TODO(HTMLTREEBUILDER, HTML) also: MathML mi MathML mo MathML mn MathML ms MathML mtext MathML
+          // annotation-xml SVG foreignObject SVG desc SVG title
+          return false;
         }
-        break;
+        default:
+        {
+          break;
+        }
       }
-      case HTMLTokenType::EndOfFile:
-        // Stop parsing
-        break;
-      default:
-        break;
+
+      node = _openElementStack.EntryBefore(node->Node());
     }
+
+    return false;
   }
 
-  void HTMLTreeBuilder::ProcessTokenInInHeadNoscriptMode(const HTMLTokenAtom &token) noexcept
+  bool HTMLTreeBuilder::HasElementInListItemScope(ElementName targetNode) const noexcept
   {
-    // TODO: Implement InHeadNoscript mode
+    auto *node = &_openElementStack.Bottom();
+
+    while (true)
+    {
+      if (node->Name() == targetNode)
+      {
+        return true;
+      }
+
+      switch (node->Name())
+      {
+        case ElementName::applet:
+        case ElementName::caption:
+        case ElementName::html:
+        case ElementName::table:
+        case ElementName::td:
+        case ElementName::th:
+        case ElementName::li:
+        case ElementName::marquee:
+        case ElementName::object:
+        case ElementName::select:
+        case ElementName::template_:
+        case ElementName::ul:
+        {
+          // TODO(HTMLTREEBUILDER, HTML) also: MathML mi MathML mo MathML mn MathML ms MathML mtext MathML
+          // annotation-xml SVG foreignObject SVG desc SVG title
+          return false;
+        }
+        default:
+        {
+          break;
+        }
+      }
+
+      node = _openElementStack.EntryBefore(node->Node());
+    }
+
+    return false;
   }
 
-  void HTMLTreeBuilder::ProcessTokenInAfterHeadMode(const HTMLTokenAtom &token) noexcept
+  bool HTMLTreeBuilder::HasElementInButtonScope(ElementName targetNode) const noexcept
   {
-    // TODO: Implement AfterHead mode
+    auto *node = &_openElementStack.Bottom();
+
+    while (true)
+    {
+      if (node->Name() == targetNode)
+      {
+        return true;
+      }
+
+      switch (node->Name())
+      {
+        case ElementName::applet:
+        case ElementName::button:
+        case ElementName::caption:
+        case ElementName::html:
+        case ElementName::table:
+        case ElementName::td:
+        case ElementName::th:
+        case ElementName::marquee:
+        case ElementName::object:
+        case ElementName::select:
+        case ElementName::template_:
+        {
+          // TODO(HTMLTREEBUILDER, HTML) also: MathML mi MathML mo MathML mn MathML ms MathML mtext MathML
+          // annotation-xml SVG foreignObject SVG desc SVG title
+          return false;
+        }
+        default:
+        {
+          break;
+        }
+      }
+
+      node = _openElementStack.EntryBefore(node->Node());
+    }
+
+    return false;
   }
 
-  void HTMLTreeBuilder::ProcessTokenInBodyMode(const HTMLTokenAtom &token) noexcept
+  bool HTMLTreeBuilder::HasElementInTableScope(ElementName targetNode) const noexcept
   {
-    // TODO: Implement InBody mode
+    auto *node = &_openElementStack.Bottom();
+
+    while (true)
+    {
+      if (node->Name() == targetNode)
+      {
+        return true;
+      }
+
+      switch (node->Name())
+      {
+        case ElementName::html:
+        case ElementName::table:
+        case ElementName::template_:
+        {
+          return false;
+        }
+        default:
+        {
+          break;
+        }
+      }
+
+      node = _openElementStack.EntryBefore(node->Node());
+    }
+
+    return false;
   }
 
-  void HTMLTreeBuilder::ProcessTokenInTextMode(const HTMLTokenAtom &token) noexcept
+  AdjustedInsertionLocation
+    HTMLTreeBuilder::AppropriateInsertionLocation(RawPtr<ContainerNode> targetOverride) noexcept
   {
-    // TODO: Implement Text mode
-  }
+    auto &target = targetOverride ? *targetOverride : CurrentNode();
 
-  void HTMLTreeBuilder::ProcessTokenInTableMode(const HTMLTokenAtom &token) noexcept
-  {
-    // TODO: Implement InTable mode
+    AdjustedInsertionLocation location {};
+
+    auto *targetHTMLElement = DynamicDowncast<HTMLElement>(target);
+    if (_fosterParenting
+        && IsOneOf<HTMLTableElement, HTMLTableSectionElement, HTMLTableRowElement>(targetHTMLElement))
+    {
+      auto [table, template_, elementBeforeTable, isTemplateMostRecent] =
+        _openElementStack.LastTableAndTemplate();
+
+      if (template_ != nullptr && (table == nullptr || isTemplateMostRecent))
+      {
+        location = {.Parent = template_->Content().get()};
+      }
+      else if (table == nullptr)
+      {
+        location = {.Parent = &_openElementStack.Top().Node()}; // should be the html element
+      }
+      else if (table->ParentNode() != nullptr)
+      {
+        location = {.Parent = table->ParentNode(), .BeforeSibling = table};
+      }
+      else
+      {
+        location = {.Parent = elementBeforeTable};
+      }
+    }
+    else
+    {
+      location.Parent = &target;
+      location.BeforeSibling = nullptr;
+    }
+
+    if (auto *template_ = DynamicDowncast<HTMLTemplateElement>(location.Parent))
+    {
+      location.Parent = template_->Content().get();
+      location.BeforeSibling = nullptr;
+    }
+
+    return location;
   }
 }

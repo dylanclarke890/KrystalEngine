@@ -31,12 +31,17 @@ namespace Krys::HTML
     {
     }
 
-    HTMLInputStream &InputStream() noexcept
+    KRYS_NODISCARD HTMLInputStream &InputStream() noexcept
     {
       return _input;
     }
 
-    bool PumpTokenizer() noexcept
+    KRYS_NODISCARD bool IsStopped() const noexcept
+    {
+      return _paused;
+    }
+
+    KRYS_NODISCARD bool PumpTokenizer() noexcept
     {
       while (!IsStopped())
       {
@@ -69,11 +74,6 @@ namespace Krys::HTML
       rawToken.Clear();
 
       _treeBuilder.ProcessToken(std::move(token));
-    }
-
-    KRYS_NODISCARD bool IsStopped() const noexcept
-    {
-      return _paused;
     }
   };
 }

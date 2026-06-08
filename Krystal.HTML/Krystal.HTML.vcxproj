@@ -63,6 +63,7 @@
     <ClCompile Include="src\HTML\HTMLBRElement.cpp" />
     <ClCompile Include="src\HTML\HTMLDataElement.cpp" />
     <ClCompile Include="src\HTML\HTMLDivElement.cpp" />
+    <ClCompile Include="src\HTML\Parser\HTMLFormattingElementList.cpp" />
     <ClCompile Include="src\HTML\Parser\HTMLTreeBuilder.cpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\ElementNames.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\StaticRangeInit.hpp" />
@@ -74,8 +75,11 @@
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\AttributeState.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\CanPlayTypeResult.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\DOMInterface.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\ElementName.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\HTMLElementFlags.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\HTMLTokenType.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\Namespace.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\ParserScriptingMode.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\TrackReadyState.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLAnchorElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLAreaElement.hpp" />
@@ -275,7 +279,7 @@
     <ClInclude Include="include\Krystal.HTML\DOM\ProcessingInstruction.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Text.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLTokenAtom.hpp" />
-    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLActiveFormattingElementList.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLFormattingElementList.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLCharacterReference.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLDocumentParser.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\ContentType.hpp" />

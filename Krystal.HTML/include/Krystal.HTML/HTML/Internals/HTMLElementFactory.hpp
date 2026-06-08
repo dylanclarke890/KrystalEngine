@@ -1,8 +1,8 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Constants/ElementNames.hpp"
-#include "Krystal.HTML/Types/QualifiedName.hpp"
+#include "Krystal.HTML/HTML/Enums/ElementName.hpp"
 #include "Krystal.HTML/Types/DOMString.hpp"
+#include "Krystal.HTML/Types/QualifiedName.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 

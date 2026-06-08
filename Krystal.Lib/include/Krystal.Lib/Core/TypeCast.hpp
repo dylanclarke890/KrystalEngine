@@ -68,8 +68,20 @@ namespace Krys
   }
 
   template <typename... Ts, typename Source>
+  requires(!IsPointer<Source>)
   KRYS_NODISCARD constexpr inline bool IsOneOf(const Source &source) noexcept
   {
+    return (Is<Ts>(source) || ...);
+  }
+
+  template <typename... Ts, typename Source>
+  KRYS_NODISCARD constexpr inline bool IsOneOf(const Source *source) noexcept
+  {
+    if (source == nullptr)
+    {
+      return false;
+    }
+
     return (Is<Ts>(source) || ...);
   }
 

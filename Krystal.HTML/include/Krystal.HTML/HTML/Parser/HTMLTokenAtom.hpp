@@ -12,7 +12,7 @@ namespace Krys::HTML
 {
   struct IntermediaryAttribute
   {
-    DOMString Name;
+    DOMStringAtom Name;
     DOMString Value;
   };
 
@@ -60,7 +60,7 @@ namespace Krys::HTML
           {
             auto name = Krys::Text::ConvertToUTF8(utf32_stringview {attr.Name.begin(), attr.Name.end()});
             auto value = Krys::Text::ConvertToUTF8(utf32_stringview {attr.Value.begin(), attr.Value.end()});
-            _attributes.push_back({std::move(name), std::move(value)});
+            _attributes.push_back({name, Krys::Move(value)});
           }
 
           return;

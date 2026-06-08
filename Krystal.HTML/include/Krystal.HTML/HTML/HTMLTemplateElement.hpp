@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/DOM/DocumentFragment.hpp"
 #include "Krystal.HTML/HTML/HTMLElement.hpp"
 
 namespace Krys::HTML
@@ -9,14 +10,17 @@ namespace Krys::HTML
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLTemplateElement);
 
+  private:
+    RefPtr<DocumentFragment> _content;
+
   public:
     HTMLTemplateElement(Document &document) noexcept;
 
 #pragma region HTMLTemplateElement - https://html.spec.whatwg.org/#htmltemplateelement
 
-    // TODO(HTMLTEMPLATE, HTML): Implement the content attribute and shadow root related attributes.
-    // readonly attribute DocumentFragment content;
-    
+    /// @see https://html.spec.whatwg.org/#dom-template-content
+    RefPtr<DocumentFragment> Content() const noexcept;
+
     /// @see https://html.spec.whatwg.org/#dom-template-shadowrootmode
     KRYS_NODISCARD DOMString ShadowRootMode() const noexcept;
 
@@ -58,8 +62,16 @@ namespace Krys::HTML
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::HTMLTemplateElement)
-  static bool IsType(const Krys::HTML::HTMLElement &target) noexcept
+
+  KRYS_NODISCARD static bool IsType(const Krys::HTML::HTMLElement &target) noexcept
   {
     return target.IsHTMLTemplateElement();
   }
+
+  KRYS_NODISCARD static bool IsType(const Krys::HTML::Node &target) noexcept
+  {
+    return Is<Krys::HTML::HTMLElement>(target)
+           && Downcast<Krys::HTML::HTMLElement>(target).IsHTMLTemplateElement();
+  }
+
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();
