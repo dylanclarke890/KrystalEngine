@@ -9,12 +9,6 @@
 
 namespace Krys::HTML
 {
-  struct IntermediaryAttribute
-  {
-    DOMStringAtom Name;
-    DOMString Value;
-  };
-
   class HTMLTokenAtom
   {
   private:
@@ -24,7 +18,7 @@ namespace Krys::HTML
     UniquePtr<DoctypeData> _doctypeData;
     DOMString _comment;
     DOMStringView _data;
-    List<IntermediaryAttribute> _attributes;
+    ParsedAttributeList _attributes;
 
   public:
     explicit HTMLTokenAtom(HTMLToken &token) noexcept : _type(token.Type())
@@ -37,7 +31,7 @@ namespace Krys::HTML
         case HTMLTokenType::EndOfFile:     return;
         case HTMLTokenType::DOCTYPE:
         {
-          _name = utf8_stringview {data.begin(), data.end()};
+          _name = DOMStringView {data.begin(), data.end()};
           _doctypeData = token.ReleaseDOCTYPEData();
 
           return;
@@ -45,22 +39,17 @@ namespace Krys::HTML
         case HTMLTokenType::Comment:
         case HTMLTokenType::Character:
         {
-          _data = utf8_stringview {data.begin(), data.end()};
+          _data = DOMStringView {data.begin(), data.end()};
 
           return;
         }
         case HTMLTokenType::StartTag:
         case HTMLTokenType::EndTag:
         {
-          _name = utf8_stringview {data.begin(), data.end()};
+          _name = DOMStringView {data.begin(), data.end()};
           _isSelfClosing = token.IsSelfClosing();
 
-          for (auto &attr : token.Attributes())
-          {
-            auto name = utf8_stringview {attr.Name.begin(), attr.Name.end()};
-            auto value = utf8_string {attr.Value.begin(), attr.Value.end()};
-            _attributes.push_back({name, Krys::Move(value)});
-          }
+          _attributes = std::move(token.Attributes());
 
           return;
         }
@@ -86,7 +75,7 @@ namespace Krys::HTML
       return _name;
     }
 
-    KRYS_NODISCARD List<IntermediaryAttribute> &Attributes() noexcept
+    KRYS_NODISCARD ParsedAttributeList &Attributes() noexcept
     {
       assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
       return _attributes;
@@ -110,7 +99,7 @@ namespace Krys::HTML
       return _doctypeData && _doctypeData->ForceQuirks;
     }
 
-    KRYS_NODISCARD const DoctypeData *DOCTYPEData() const noexcept
+    KRYS_NODISCARD RawPtr<const DoctypeData> DOCTYPEData() const noexcept
     {
       assert(_type == HTMLTokenType::DOCTYPE);
       return _doctypeData.get();

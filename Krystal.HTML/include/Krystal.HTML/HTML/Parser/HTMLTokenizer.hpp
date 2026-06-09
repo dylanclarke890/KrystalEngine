@@ -19,12 +19,21 @@ namespace Krys::HTML
 {
   class NextTokenPtr
   {
+    friend class HTMLTokenizer;
+
   private:
     RawPtr<HTMLToken> _token {nullptr};
 
+    explicit NextTokenPtr(RawPtr<HTMLToken> token) noexcept : _token(token)
+    {
+    }
+
   public:
     NextTokenPtr() noexcept = default;
-    NextTokenPtr &operator=(NextTokenPtr &&) = delete;
+
+    NextTokenPtr(NextTokenPtr &&other) noexcept : _token(std::exchange(other._token, nullptr))
+    {
+    }
 
     ~NextTokenPtr() noexcept
     {
@@ -34,9 +43,7 @@ namespace Krys::HTML
       }
     }
 
-    NextTokenPtr(NextTokenPtr &&other) noexcept : _token(std::exchange(other._token, nullptr))
-    {
-    }
+    NextTokenPtr &operator=(NextTokenPtr &&) = delete;
 
     void Clear() noexcept
     {
@@ -52,23 +59,16 @@ namespace Krys::HTML
       return _token != nullptr;
     }
 
-    HTMLToken &operator*() const noexcept
+    KRYS_NODISCARD HTMLToken &operator*() const noexcept
     {
       assert(_token != nullptr);
       return *_token;
     }
 
-    RawPtr<HTMLToken> operator->() const noexcept
+    KRYS_NODISCARD RawPtr<HTMLToken> operator->() const noexcept
     {
       assert(_token != nullptr);
       return _token;
-    }
-
-  private:
-    friend class HTMLTokenizer;
-
-    explicit NextTokenPtr(RawPtr<HTMLToken> token) noexcept : _token(token)
-    {
     }
   };
 
@@ -98,7 +98,7 @@ namespace Krys::HTML
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#named-character-reference-state
     Span<const NamedCharacterReferenceEntry> _namedCharacterReferenceMatchEntries;
-    const NamedCharacterReferenceEntry *_longestCharacterReferenceMatch {nullptr};
+    RawPtr<const NamedCharacterReferenceEntry> _longestCharacterReferenceMatch {nullptr};
 
     List<HTMLTokenizerError> _parseErrors;
 

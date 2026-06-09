@@ -14,7 +14,7 @@ namespace Krys::HTML
     ElementName _name {ElementName::Unknown};
     Namespace _namespace {Namespace::Unknown};
     RefPtr<ContainerNode> _node;
-    List<IntermediaryAttribute> _attributes;
+    ParsedAttributeList _attributes;
 
   public:
     HTMLStackItem() = default;
@@ -34,7 +34,7 @@ namespace Krys::HTML
     {
     }
 
-    HTMLStackItem(Ref<Element> &&element, List<IntermediaryAttribute> &&attributes) noexcept
+    HTMLStackItem(Ref<Element> &&element, ParsedAttributeList &&attributes) noexcept
         : _node(Krys::Move(element)), _attributes(Krys::Move(attributes))
     {
     }
@@ -49,7 +49,7 @@ namespace Krys::HTML
       return Is<DocumentFragment>(_node.get());
     }
 
-    KRYS_NODISCARD const List<IntermediaryAttribute> &Attributes() const noexcept
+    KRYS_NODISCARD const ParsedAttributeList &Attributes() const noexcept
     {
       return _attributes;
     }

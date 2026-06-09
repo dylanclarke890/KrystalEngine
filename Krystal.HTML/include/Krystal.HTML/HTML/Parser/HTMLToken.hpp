@@ -24,16 +24,17 @@ namespace Krys::HTML
     bool ForceQuirks : 1 {false};
   };
 
+  struct ParsedAttribute
+  {
+    SmallList<char8, 32u> Name;
+    SmallList<char8, 64u> Value;
+  };
+
+  using ParsedAttributeList = SmallList<ParsedAttribute, 10u>;
+
   class HTMLToken
   {
   public:
-    struct Attribute
-    {
-      SmallList<char8, 32u> Name;
-      SmallList<char8, 64u> Value;
-    };
-
-    using AttributeList = SmallList<Attribute, 10u>;
     using DataBuffer = SmallList<char8, 128u>;
 
   private:
@@ -41,8 +42,8 @@ namespace Krys::HTML
 
     // For start/end tag tokens.
     bool _selfClosing : 1 {false};
-    AttributeList _attributes;
-    RawPtr<Attribute> _currentAttribute {nullptr};
+    ParsedAttributeList _attributes;
+    RawPtr<ParsedAttribute> _currentAttribute {nullptr};
 
     // For DOCTYPE only
     UniquePtr<DoctypeData> _doctypeData;
@@ -75,7 +76,7 @@ namespace Krys::HTML
     {
       _type = HTMLTokenType::Uninitialized;
       _data.clear();
-      _attributes.clear();
+      _attributes = {};
     }
 
     void AppendToName(char32 character) noexcept
@@ -166,18 +167,7 @@ namespace Krys::HTML
 
     void BeginEndTag(char32 character) noexcept
     {
-      assert(character);
-      assert(_type == HTMLTokenType::Uninitialized);
-
-      _type = HTMLTokenType::EndTag;
-      _selfClosing = false;
-      _attributes.clear();
-
-#if KRYS_ENV(DEV)
-      _currentAttribute = nullptr;
-#endif
-
-      AppendToDataInternal(character);
+      BeginEndTag(Span<char32>(&character, 1));
     }
 
     void BeginEndTag(Span<char32> characters) noexcept
@@ -216,19 +206,19 @@ namespace Krys::HTML
 #endif
     }
 
-    KRYS_NODISCARD AttributeList &Attributes() noexcept
+    KRYS_NODISCARD ParsedAttributeList &Attributes() noexcept
     {
       assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
       return _attributes;
     }
 
-    KRYS_NODISCARD const AttributeList &Attributes() const noexcept
+    KRYS_NODISCARD const ParsedAttributeList &Attributes() const noexcept
     {
       assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
       return _attributes;
     }
 
-    KRYS_NODISCARD RawPtr<Attribute> CurrentAttribute() const noexcept
+    KRYS_NODISCARD RawPtr<ParsedAttribute> CurrentAttribute() const noexcept
     {
       assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
       return _currentAttribute;
@@ -249,7 +239,10 @@ namespace Krys::HTML
     void AppendToCurrentAttributeValue(char32 character) noexcept
     {
       assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
+
+#if KRYS_ENV(DEV)
       assert(_currentAttribute != nullptr);
+#endif
 
       auto converted = Krys::Text::ConvertToUTF8(Span<char32>(&character, 1));
       _currentAttribute->Value.append(converted.begin(), converted.end());
@@ -259,7 +252,10 @@ namespace Krys::HTML
     void AppendToCurrentAttributeValue(Array<char32, N> characters)
     {
       assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
+
+#if KRYS_ENV(DEV)
       assert(_currentAttribute != nullptr);
+#endif
 
       auto converted = Krys::Text::ConvertToUTF8(characters);
       _currentAttribute->Value.append(converted.begin(), converted.end());
@@ -268,7 +264,10 @@ namespace Krys::HTML
     void AppendToCurrentAttributeValue(Span<char32> characters)
     {
       assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
+
+#if KRYS_ENV(DEV)
       assert(_currentAttribute != nullptr);
+#endif
 
       auto converted = Krys::Text::ConvertToUTF8(characters);
       _currentAttribute->Value.append(converted.begin(), converted.end());
@@ -349,17 +348,16 @@ namespace Krys::HTML
   private:
     void AppendToDataInternal(char32 character) noexcept
     {
-      auto converted = Krys::Text::ConvertToUTF8(Span<char32>(&character, 1));
-      _data.append(converted.begin(), converted.end());
+      AppendToDataInternal(Span<char32>(&character, 1));
     }
 
-    void AppendToDataInternal(Span<char32> characters) noexcept
+    void AppendToDataInternal(utf32_stringview characters) noexcept
     {
       auto converted = Krys::Text::ConvertToUTF8(characters);
       _data.append(converted.begin(), converted.end());
     }
 
-    void AppendToDataInternal(utf32_stringview characters) noexcept
+    void AppendToDataInternal(Span<char32> characters) noexcept
     {
       auto converted = Krys::Text::ConvertToUTF8(characters);
       _data.append(converted.begin(), converted.end());
