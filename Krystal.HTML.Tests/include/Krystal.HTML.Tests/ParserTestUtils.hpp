@@ -17,33 +17,33 @@ namespace Krys::Tests
 
   struct Attr
   {
-    utf32_string Name;
-    utf32_string Value;
+    utf8_string Name;
+    utf8_string Value;
   };
 
   struct ExpectedDOCTYPE
   {
-    utf32_string Name;
-    utf32_string PublicIdentifier;
-    utf32_string SystemIdentifier;
+    utf8_string Name;
+    utf8_string PublicIdentifier;
+    utf8_string SystemIdentifier;
     bool ForceQuirks {false};
   };
 
   struct ExpectedCharacter
   {
-    utf32_string Data;
+    utf8_string Data;
   };
 
   struct ExpectedTag
   {
-    utf32_string Name;
+    utf8_string Name;
     List<Attr> Attributes;
     bool SelfClosing {false};
   };
 
   struct ExpectedComment
   {
-    utf32_string Data;
+    utf8_string Data;
   };
 
   struct ExpectedEOF
@@ -89,12 +89,12 @@ namespace Krys::Tests
     return ExpectedToken {.Type = HTML::HTMLTokenType::DOCTYPE, .Token = expected};
   }
 
-  KRYS_NODISCARD inline ExpectedToken CreateCharacterToken(const utf32_string &characters) noexcept
+  KRYS_NODISCARD inline ExpectedToken CreateCharacterToken(const utf8_string &characters) noexcept
   {
     return ExpectedToken {.Type = HTML::HTMLTokenType::Character, .Token = ExpectedCharacter {characters}};
   }
 
-  KRYS_NODISCARD inline ExpectedToken CreateCommentToken(const utf32_string &comment) noexcept
+  KRYS_NODISCARD inline ExpectedToken CreateCommentToken(const utf8_string &comment) noexcept
   {
     return ExpectedToken {.Type = HTML::HTMLTokenType::Comment, .Token = ExpectedComment {comment}};
   }
@@ -136,9 +136,17 @@ namespace Krys::Tests
     return result;
   }
 
-  KRYS_NODISCARD inline utf32_string &&InsertNull(utf32_string &&str, utf32_string &&suffix = U"") noexcept
+  KRYS_NODISCARD inline utf32_string &&InsertUTF32Null(utf32_string &&str,
+                                                       utf32_string &&suffix = U"") noexcept
   {
     str.push_back(U'\0');
+    str.append(std::move(suffix));
+    return std::move(str);
+  }
+
+  KRYS_NODISCARD inline utf8_string &&InsertUTF8Null(utf8_string &&str, utf8_string &&suffix = u8"") noexcept
+  {
+    str.push_back(u8'\0');
     str.append(std::move(suffix));
     return std::move(str);
   }

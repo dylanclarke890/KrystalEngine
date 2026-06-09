@@ -5,7 +5,6 @@
 #include "Krystal.HTML/HTML/Parser/HTMLToken.hpp"
 #include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Text/StringConversion.hpp"
 #include <cassert>
 
 namespace Krys::HTML
@@ -38,7 +37,7 @@ namespace Krys::HTML
         case HTMLTokenType::EndOfFile:     return;
         case HTMLTokenType::DOCTYPE:
         {
-          _name = Krys::Text::ConvertToUTF8(utf32_stringview {data.begin(), data.end()});
+          _name = utf8_stringview {data.begin(), data.end()};
           _doctypeData = token.ReleaseDOCTYPEData();
 
           return;
@@ -46,20 +45,20 @@ namespace Krys::HTML
         case HTMLTokenType::Comment:
         case HTMLTokenType::Character:
         {
-          _data = Krys::Text::ConvertToUTF8(utf32_stringview {data.begin(), data.end()});
+          _data = utf8_stringview {data.begin(), data.end()};
 
           return;
         }
         case HTMLTokenType::StartTag:
         case HTMLTokenType::EndTag:
         {
-          _name = Krys::Text::ConvertToUTF8(utf32_stringview {data.begin(), data.end()});
+          _name = utf8_stringview {data.begin(), data.end()};
           _isSelfClosing = token.IsSelfClosing();
 
           for (auto &attr : token.Attributes())
           {
-            auto name = Krys::Text::ConvertToUTF8(utf32_stringview {attr.Name.begin(), attr.Name.end()});
-            auto value = Krys::Text::ConvertToUTF8(utf32_stringview {attr.Value.begin(), attr.Value.end()});
+            auto name = utf8_stringview {attr.Name.begin(), attr.Name.end()};
+            auto value = utf8_string {attr.Value.begin(), attr.Value.end()};
             _attributes.push_back({name, Krys::Move(value)});
           }
 

@@ -11,6 +11,7 @@
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/SmallList.hpp"
 #include "Krystal.Text/ASCII.hpp"
+#include "Krystal.Text/StringConversion.hpp"
 #include "Krystal.Text/Unicode.hpp"
 #include <ranges>
 
