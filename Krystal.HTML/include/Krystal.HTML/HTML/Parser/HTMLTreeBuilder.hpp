@@ -251,7 +251,5 @@ namespace Krys::HTML
 
     KRYS_NODISCARD AdjustedInsertionLocation
       AppropriateInsertionLocation(RawPtr<ContainerNode> targetOverride = nullptr) noexcept;
-
-  private:
   };
 }

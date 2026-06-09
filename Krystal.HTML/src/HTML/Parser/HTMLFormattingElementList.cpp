@@ -61,14 +61,41 @@ namespace Krys::HTML
     _formattingElements.push_back(FormattingListEntry(Krys::Move(item)));
   }
 
-  void HTMLFormattingElementList::Reconstruct() noexcept
+  void HTMLFormattingElementList::Reconstruct(HTMLElementStack &openElementStack) noexcept
   {
     if (_formattingElements.empty())
     {
       return;
     }
 
+    auto it = _formattingElements.rbegin();
+    if (it->IsMarker() || openElementStack.ContainsElement(it->Item().Node()))
+    {
+      return;
+    }
 
+  rewind:
+    auto next = std::next(it);
+    if (next == _formattingElements.rend())
+    {
+      goto create;
+    }
+
+    it = next;
+
+    if (!it->IsMarker() && !openElementStack.ContainsElement(it->Item().Node()))
+    {
+      goto rewind;
+    }
+
+  advance:
+    it = std::prev(it);
+
+  create:
+    // Insert an HTML element for the token for which the element entry was created, to obtain new element.
+    // Replace the entry for entry in the list with an entry for new element.
+    // If the entry for new element in the list of active formatting elements is not the last entry in the
+    // list, return to the step labeled advance.
   }
 
   void HTMLFormattingElementList::PushMarker() noexcept

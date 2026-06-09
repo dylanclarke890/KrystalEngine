@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/HTML/Parser/HTMLElementStack.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLStackItem.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
@@ -56,7 +57,7 @@ namespace Krys::HTML
     void PushMarker() noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#reconstruct-the-active-formatting-elements
-    void Reconstruct() noexcept;
+    void Reconstruct(HTMLElementStack &openElementStack) noexcept;
 
     /// @brief Pops elements up to and including the last marker.
     /// @see https://html.spec.whatwg.org/#clear-the-list-of-active-formatting-elements-up-to-the-last-marker

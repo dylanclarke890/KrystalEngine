@@ -78,6 +78,12 @@ namespace Krys::HTML
       return _items.size();
     }
 
+    KRYS_NODISCARD bool ContainsElement(const ContainerNode &node) const noexcept
+    {
+      return std::ranges::any_of(_items,
+                                 [&](const auto &item) { return item.IsElement() && &item.Node() == &node; });
+    }
+
     /// @brief Returns the entry for the element immediately before the given node in the stack, if any such
     /// entry exists and is an element entry. Otherwise, returns null.
     /// @note This should always return a non-null entry for the situations in which it's used in the HTML
