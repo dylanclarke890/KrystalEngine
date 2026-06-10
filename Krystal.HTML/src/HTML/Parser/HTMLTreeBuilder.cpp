@@ -22,6 +22,22 @@ namespace Krys::HTML
 
   void HTMLTreeBuilder::ProcessToken(HTMLTokenAtom &&token) noexcept
   {
+    // TODO
+    // If the stack of open elements is empty
+    // If the adjusted current node is an element in the HTML namespace
+    // If the adjusted current node is a MathML text integration point and the token is a start tag whose tag
+    //   name is neither "mglyph" nor "malignmark"
+    // If the adjusted current node is a MathML text integration point and the token is a character token
+    // If the adjusted current node is a MathML annotation-xml element and the token is a start tag whose tag
+    //   name is "svg"
+    // If the adjusted current node is an HTML integration point and the token is a start tag
+    // If the adjusted current node is an HTML integration point and the token is a character token
+    // If the token is an end-of-file token
+    //     Process the token according to the rules given in the section corresponding to the current
+    //     insertion mode in HTML content.
+    // Otherwise
+    //     Process the token according to the rules given in the section for parsing tokens in foreign
+    //     content.
   }
 
   void HTMLTreeBuilder::ResetInsertionModeAppropriately() noexcept

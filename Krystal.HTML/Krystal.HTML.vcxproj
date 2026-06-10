@@ -75,7 +75,7 @@
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\AttributeState.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\CanPlayTypeResult.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\DOMInterface.hpp" />
-    <ClInclude Include="include\Krystal.HTML\HTML\Enums\ElementName.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\TagName.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\HTMLElementFlags.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\HTMLTokenType.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\Namespace.hpp" />

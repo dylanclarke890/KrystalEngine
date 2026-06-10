@@ -2,8 +2,8 @@
 
 #include "Krystal.HTML/DOM/DocumentFragment.hpp"
 #include "Krystal.HTML/DOM/Element.hpp"
-#include "Krystal.HTML/HTML/Enums/ElementName.hpp"
 #include "Krystal.HTML/HTML/Enums/Namespace.hpp"
+#include "Krystal.HTML/HTML/Enums/TagName.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLTokenAtom.hpp"
 
 namespace Krys::HTML
@@ -11,7 +11,7 @@ namespace Krys::HTML
   class HTMLStackItem
   {
   private:
-    ElementName _name {ElementName::Unknown};
+    TagName _name {TagName::Unknown};
     Namespace _namespace {Namespace::Unknown};
     RefPtr<ContainerNode> _node;
     ParsedAttributeList _attributes;
@@ -60,7 +60,7 @@ namespace Krys::HTML
       return *_node;
     }
 
-    KRYS_NODISCARD ElementName Name() const noexcept
+    KRYS_NODISCARD TagName Name() const noexcept
     {
       return _name;
     }

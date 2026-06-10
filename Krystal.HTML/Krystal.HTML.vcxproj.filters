@@ -741,7 +741,7 @@
     <ClInclude Include="include\Krystal.HTML\Constants\ElementNames.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\HTML\Enums\ElementName.hpp">
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\TagName.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\ParserScriptingMode.hpp">

@@ -107,7 +107,7 @@ namespace Krys::HTML
     KRYS_NODISCARD ContainerNode &AdjustedCurrentNode() noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#special
-    KRYS_NODISCARD static bool IsSpecialElement(ElementName name) noexcept
+    KRYS_NODISCARD static bool IsSpecialElement(TagName name) noexcept
     {
       // TODO(HTMLTREEBUILDER, HTML): These are also special elements:
       // MathML mi, MathML mo, MathML mn, MathML ms, MathML mtext, and MathML annotation-xml; and SVG
@@ -115,89 +115,89 @@ namespace Krys::HTML
 
       switch (name)
       {
-        case ElementName::address:
-        case ElementName::applet:
-        case ElementName::area:
-        case ElementName::article:
-        case ElementName::aside:
-        case ElementName::base:
-        case ElementName::basefont:
-        case ElementName::bgsound:
-        case ElementName::blockquote:
-        case ElementName::body:
-        case ElementName::br:
-        case ElementName::button:
-        case ElementName::caption:
-        case ElementName::center:
-        case ElementName::col:
-        case ElementName::colgroup:
-        case ElementName::dd:
-        case ElementName::details:
-        case ElementName::dir:
-        case ElementName::div:
-        case ElementName::dl:
-        case ElementName::dt:
-        case ElementName::embed:
-        case ElementName::fieldset:
-        case ElementName::figcaption:
-        case ElementName::figure:
-        case ElementName::footer:
-        case ElementName::form:
-        case ElementName::frame:
-        case ElementName::frameset:
-        case ElementName::h1:
-        case ElementName::h2:
-        case ElementName::h3:
-        case ElementName::h4:
-        case ElementName::h5:
-        case ElementName::h6:
-        case ElementName::head:
-        case ElementName::header:
-        case ElementName::hgroup:
-        case ElementName::hr:
-        case ElementName::html:
-        case ElementName::iframe:
-        case ElementName::img:
-        case ElementName::input:
-        case ElementName::keygen:
-        case ElementName::li:
-        case ElementName::link:
-        case ElementName::listing:
-        case ElementName::main:
-        case ElementName::marquee:
-        case ElementName::menu:
-        case ElementName::meta:
-        case ElementName::nav:
-        case ElementName::noembed:
-        case ElementName::noframes:
-        case ElementName::noscript:
-        case ElementName::object:
-        case ElementName::ol:
-        case ElementName::p:
-        case ElementName::param:
-        case ElementName::plaintext:
-        case ElementName::pre:
-        case ElementName::script:
-        case ElementName::search:
-        case ElementName::section:
-        case ElementName::select:
-        case ElementName::source:
-        case ElementName::style:
-        case ElementName::summary:
-        case ElementName::table:
-        case ElementName::tbody:
-        case ElementName::td:
-        case ElementName::template_:
-        case ElementName::textarea:
-        case ElementName::tfoot:
-        case ElementName::th:
-        case ElementName::thead:
-        case ElementName::title:
-        case ElementName::tr:
-        case ElementName::track:
-        case ElementName::ul:
-        case ElementName::wbr:
-        case ElementName::xmp:
+        case TagName::address:
+        case TagName::applet:
+        case TagName::area:
+        case TagName::article:
+        case TagName::aside:
+        case TagName::base:
+        case TagName::basefont:
+        case TagName::bgsound:
+        case TagName::blockquote:
+        case TagName::body:
+        case TagName::br:
+        case TagName::button:
+        case TagName::caption:
+        case TagName::center:
+        case TagName::col:
+        case TagName::colgroup:
+        case TagName::dd:
+        case TagName::details:
+        case TagName::dir:
+        case TagName::div:
+        case TagName::dl:
+        case TagName::dt:
+        case TagName::embed:
+        case TagName::fieldset:
+        case TagName::figcaption:
+        case TagName::figure:
+        case TagName::footer:
+        case TagName::form:
+        case TagName::frame:
+        case TagName::frameset:
+        case TagName::h1:
+        case TagName::h2:
+        case TagName::h3:
+        case TagName::h4:
+        case TagName::h5:
+        case TagName::h6:
+        case TagName::head:
+        case TagName::header:
+        case TagName::hgroup:
+        case TagName::hr:
+        case TagName::html:
+        case TagName::iframe:
+        case TagName::img:
+        case TagName::input:
+        case TagName::keygen:
+        case TagName::li:
+        case TagName::link:
+        case TagName::listing:
+        case TagName::main:
+        case TagName::marquee:
+        case TagName::menu:
+        case TagName::meta:
+        case TagName::nav:
+        case TagName::noembed:
+        case TagName::noframes:
+        case TagName::noscript:
+        case TagName::object:
+        case TagName::ol:
+        case TagName::p:
+        case TagName::param:
+        case TagName::plaintext:
+        case TagName::pre:
+        case TagName::script:
+        case TagName::search:
+        case TagName::section:
+        case TagName::select:
+        case TagName::source:
+        case TagName::style:
+        case TagName::summary:
+        case TagName::table:
+        case TagName::tbody:
+        case TagName::td:
+        case TagName::template_:
+        case TagName::textarea:
+        case TagName::tfoot:
+        case TagName::th:
+        case TagName::thead:
+        case TagName::title:
+        case TagName::tr:
+        case TagName::track:
+        case TagName::ul:
+        case TagName::wbr:
+        case TagName::xmp:
         {
           return true;
         }
@@ -209,24 +209,24 @@ namespace Krys::HTML
     }
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#formatting
-    KRYS_NODISCARD static bool IsFormattingElement(ElementName name) noexcept
+    KRYS_NODISCARD static bool IsFormattingElement(TagName name) noexcept
     {
       switch (name)
       {
-        case ElementName::a:
-        case ElementName::b:
-        case ElementName::big:
-        case ElementName::code:
-        case ElementName::em:
-        case ElementName::font:
-        case ElementName::i:
-        case ElementName::nobr:
-        case ElementName::s:
-        case ElementName::small:
-        case ElementName::strike:
-        case ElementName::strong:
-        case ElementName::tt:
-        case ElementName::u:
+        case TagName::a:
+        case TagName::b:
+        case TagName::big:
+        case TagName::code:
+        case TagName::em:
+        case TagName::font:
+        case TagName::i:
+        case TagName::nobr:
+        case TagName::s:
+        case TagName::small:
+        case TagName::strike:
+        case TagName::strong:
+        case TagName::tt:
+        case TagName::u:
         {
           return true;
         }
@@ -238,17 +238,18 @@ namespace Krys::HTML
     }
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#has-an-element-in-scope
-    KRYS_NODISCARD bool HasElementInScope(ElementName targetNode) const noexcept;
+    KRYS_NODISCARD bool HasElementInScope(TagName targetNode) const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#has-an-element-in-list-item-scope
-    KRYS_NODISCARD bool HasElementInListItemScope(ElementName targetNode) const noexcept;
+    KRYS_NODISCARD bool HasElementInListItemScope(TagName targetNode) const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#has-an-element-in-button-scope
-    KRYS_NODISCARD bool HasElementInButtonScope(ElementName targetNode) const noexcept;
+    KRYS_NODISCARD bool HasElementInButtonScope(TagName targetNode) const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#has-an-element-in-table-scope
-    KRYS_NODISCARD bool HasElementInTableScope(ElementName targetNode) const noexcept;
+    KRYS_NODISCARD bool HasElementInTableScope(TagName targetNode) const noexcept;
 
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#appropriate-place-for-inserting-a-node
     KRYS_NODISCARD AdjustedInsertionLocation
       AppropriateInsertionLocation(RawPtr<ContainerNode> targetOverride = nullptr) noexcept;
   };
