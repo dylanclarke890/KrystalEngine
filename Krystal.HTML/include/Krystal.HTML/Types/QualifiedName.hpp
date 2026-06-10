@@ -8,7 +8,7 @@
 namespace Krys::HTML
 {
   /// @see https://dom.spec.whatwg.org/#concept-element-qualified-name
-  class QName
+  class QualifiedName
   {
   private:
     uint64 _hash {0ull};
@@ -21,12 +21,47 @@ namespace Krys::HTML
     DOMStringAtom _localNameUpper {DOMStringAtom::Null()};
 
   public:
-    QName(DOMStringAtom namespaceURI, DOMStringAtom prefix, DOMStringAtom localName) noexcept
+    QualifiedName(DOMStringAtom namespaceURI, DOMStringAtom prefix, DOMStringAtom localName) noexcept
         : _namespaceURI(namespaceURI), _namespacePrefix(prefix), _localName(localName)
     {
       assert(_namespaceURI == DOMStringAtom::Null() || _namespaceURI != DOMStringAtom::Empty());
       assert(_namespacePrefix == DOMStringAtom::Null() || _namespacePrefix != DOMStringAtom::Empty());
       assert(_localName != DOMStringAtom::Null());
+    }
+
+    KRYS_NODISCARD const DOMStringAtom &NamespaceURI() const noexcept
+    {
+      return _namespaceURI;
+    }
+
+    KRYS_NODISCARD const DOMStringAtom &NamespacePrefix() const noexcept
+    {
+      return _namespacePrefix;
+    }
+
+    KRYS_NODISCARD const DOMStringAtom &LocalName() const noexcept
+    {
+      return _localName;
+    }
+
+    KRYS_NODISCARD const DOMStringAtom &LocalNameLower() const noexcept
+    {
+      return _localNameLower;
+    }
+
+    KRYS_NODISCARD const DOMStringAtom &LocalNameUpper() const noexcept
+    {
+      return _localNameLower;
+    }
+
+    KRYS_NODISCARD TagName TagName() const noexcept
+    {
+      return _tagName;
+    }
+
+    KRYS_NODISCARD Namespace Namespace() const noexcept
+    {
+      return _namespace;
     }
 
     /// @see https://dom.spec.whatwg.org/#concept-attribute-qualified-name
@@ -42,50 +77,10 @@ namespace Krys::HTML
       }
     }
 
-    
-    KRYS_NODISCARD friend bool operator==(const QName &a, const QName &b) noexcept
+    KRYS_NODISCARD friend bool operator==(const QualifiedName &a, const QualifiedName &b) noexcept
     {
       return a._namespaceURI == b._namespaceURI && a._namespacePrefix == b._namespacePrefix
              && a._localName == b._localName;
-    }
-
-    KRYS_NODISCARD friend bool operator!=(const QName &a, const QName &b) noexcept
-    {
-      return !(a == b);
-    }
-  };
-
-  /// @see https://dom.spec.whatwg.org/#concept-element-qualified-name
-  struct QualifiedName
-  {
-    DOMStringAtom NamespaceURI {DOMStringAtom::Null()};
-    DOMStringAtom Prefix {DOMStringAtom::Null()};
-    DOMStringAtom LocalName {DOMStringAtom::Null()};
-
-    QualifiedName(DOMStringAtom namespaceURI, DOMStringAtom prefix, DOMStringAtom localName) noexcept
-        : NamespaceURI(namespaceURI), Prefix(prefix), LocalName(localName)
-    {
-      assert(NamespaceURI == DOMStringAtom::Null() || NamespaceURI != DOMStringAtom::Empty());
-      assert(Prefix == DOMStringAtom::Null() || Prefix != DOMStringAtom::Empty());
-      assert(LocalName != DOMStringAtom::Null());
-    }
-
-    /// @see https://dom.spec.whatwg.org/#concept-attribute-qualified-name
-    KRYS_NODISCARD DOMString Name() const noexcept
-    {
-      if (Prefix == DOMStringAtom::Null())
-      {
-        return DOMString(LocalName.View());
-      }
-      else
-      {
-        return DOMString {Prefix.View()} + u8":" + DOMString {LocalName.View()};
-      }
-    }
-
-    KRYS_NODISCARD friend bool operator==(const QualifiedName &a, const QualifiedName &b) noexcept
-    {
-      return a.NamespaceURI == b.NamespaceURI && a.Prefix == b.Prefix && a.LocalName == b.LocalName;
     }
 
     KRYS_NODISCARD friend bool operator!=(const QualifiedName &a, const QualifiedName &b) noexcept

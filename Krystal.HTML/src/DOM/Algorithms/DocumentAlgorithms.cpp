@@ -53,11 +53,11 @@ namespace Krys::HTML
                                                 DOMStringAtom qualifiedName,
                                                 const ElementCreationOptionsOrString &options) noexcept
   {
-    auto name =
+    auto nameResult =
       NameValidation::ValidateAndExtract(namespaceUri, qualifiedName, ValidateAndExtractContext::Element);
-    if (name.HasException())
+    if (nameResult.HasException())
     {
-      return name.ReleaseException();
+      return nameResult.ReleaseException();
     }
 
     auto creationOptions = DocumentAlgorithms::FlattenElementCreationOptions(options, document);
@@ -66,8 +66,9 @@ namespace Krys::HTML
       return creationOptions.ReleaseException();
     }
 
+    auto &qName = *nameResult;
     return ElementFactory::Create(
-      document, {name.Value().NamespaceURI, name.Value().Prefix, name.Value().LocalName},
+      document, {qName.NamespaceURI(), qName.NamespacePrefix(), qName.LocalName()},
       creationOptions.Value().Is, true, creationOptions.Value().CustomElementRegistry);
   }
 

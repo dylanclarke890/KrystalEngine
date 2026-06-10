@@ -62,19 +62,19 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#dom-element-namespaceuri
     KRYS_NODISCARD DOMStringAtom NamespaceURI() const noexcept
     {
-      return _qualifiedName.NamespaceURI;
+      return _qualifiedName.NamespaceURI();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-element-namespaceuri
     KRYS_NODISCARD DOMStringAtom Prefix() const noexcept
     {
-      return _qualifiedName.Prefix;
+      return _qualifiedName.NamespacePrefix();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-element-namespaceuri
     KRYS_NODISCARD DOMStringAtom LocalName() const noexcept
     {
-      return _qualifiedName.LocalName;
+      return _qualifiedName.LocalName();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-element-tagname

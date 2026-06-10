@@ -221,9 +221,9 @@ namespace Krys::Tests
         auto result = NameValidation::ValidateAndExtract(u8"http://www.w3.org/1999/xhtml", u8"foo:bar",
                                                          ValidateAndExtractContext::Attribute);
         REQUIRE_FALSE(result.HasException());
-        REQUIRE(result.Value().NamespaceURI.View() == u8"http://www.w3.org/1999/xhtml");
-        REQUIRE(result.Value().Prefix.View() == u8"foo");
-        REQUIRE(result.Value().LocalName.View() == u8"bar");
+        REQUIRE(result.Value().NamespaceURI().View() == u8"http://www.w3.org/1999/xhtml");
+        REQUIRE(result.Value().NamespacePrefix().View() == u8"foo");
+        REQUIRE(result.Value().LocalName().View() == u8"bar");
       }
     }
 
@@ -250,9 +250,9 @@ namespace Krys::Tests
         auto result = NameValidation::ValidateAndExtract(u8"http://www.w3.org/1999/xhtml", u8"foo:bar",
                                                          ValidateAndExtractContext::Element);
         REQUIRE_FALSE(result.HasException());
-        REQUIRE(result.Value().NamespaceURI.View() == u8"http://www.w3.org/1999/xhtml");
-        REQUIRE(result.Value().Prefix.View() == u8"foo");
-        REQUIRE(result.Value().LocalName.View() == u8"bar");
+        REQUIRE(result.Value().NamespaceURI().View() == u8"http://www.w3.org/1999/xhtml");
+        REQUIRE(result.Value().NamespacePrefix().View() == u8"foo");
+        REQUIRE(result.Value().LocalName().View() == u8"bar");
       }
     }
 
@@ -276,9 +276,9 @@ namespace Krys::Tests
       auto result = NameValidation::ValidateAndExtract(u8"http://www.w3.org/XML/1998/namespace", u8"xml:foo",
                                                        ValidateAndExtractContext::Element);
       REQUIRE_FALSE(result.HasException());
-      REQUIRE(result.Value().NamespaceURI.View() == u8"http://www.w3.org/XML/1998/namespace");
-      REQUIRE(result.Value().Prefix.View() == u8"xml");
-      REQUIRE(result.Value().LocalName.View() == u8"foo");
+      REQUIRE(result.Value().NamespaceURI().View() == u8"http://www.w3.org/XML/1998/namespace");
+      REQUIRE(result.Value().NamespacePrefix().View() == u8"xml");
+      REQUIRE(result.Value().LocalName().View() == u8"foo");
     }
 
     SECTION("xmlns prefix with non xmlns namespace is an error")
@@ -294,9 +294,9 @@ namespace Krys::Tests
       auto result = NameValidation::ValidateAndExtract(u8"http://www.w3.org/2000/xmlns/", u8"xmlns:foo",
                                                        ValidateAndExtractContext::Element);
       REQUIRE_FALSE(result.HasException());
-      REQUIRE(result.Value().NamespaceURI.View() == u8"http://www.w3.org/2000/xmlns/");
-      REQUIRE(result.Value().Prefix.View() == u8"xmlns");
-      REQUIRE(result.Value().LocalName.View() == u8"foo");
+      REQUIRE(result.Value().NamespaceURI().View() == u8"http://www.w3.org/2000/xmlns/");
+      REQUIRE(result.Value().NamespacePrefix().View() == u8"xmlns");
+      REQUIRE(result.Value().LocalName().View() == u8"foo");
     }
   }
 }

@@ -28,8 +28,8 @@ namespace Krys::HTML
       registry = document.CustomElementRegistry();
     }
 
-    auto elementName = ParseTagName(Krys::Text::ToASCIILowercase(name.LocalName.View()));
-    if (name.NamespaceURI == Namespaces::HTML)
+    auto elementName = ParseTagName(Krys::Text::ToASCIILowercase(name.LocalName().View()));
+    if (name.NamespaceURI() == Namespaces::HTML)
     {
       result = CustomElementFactory::TryCreate(document, name, is, synchronousCustomElements,
                                                registry.value().get());
@@ -39,7 +39,7 @@ namespace Krys::HTML
         result = HTMLElementFactory::TryCreate(document, elementName);
       }
 
-      bool isValidCustomElementName = NameValidation::IsValidCustomElementName(name.LocalName.View());
+      bool isValidCustomElementName = NameValidation::IsValidCustomElementName(name.LocalName().View());
       if (result == nullptr)
       {
         if (isValidCustomElementName)
@@ -57,11 +57,11 @@ namespace Krys::HTML
         result->_customElementState = CustomElementState::Undefined;
       }
     }
-    else if (name.NamespaceURI == Namespaces::SVG)
+    else if (name.NamespaceURI() == Namespaces::SVG)
     {
       result = SVGElementFactory::TryCreate(document, name);
     }
-    else if (name.NamespaceURI == Namespaces::MathML)
+    else if (name.NamespaceURI() == Namespaces::MathML)
     {
       result = MathMLElementFactory::TryCreate(document, name);
     }

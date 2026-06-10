@@ -110,7 +110,7 @@ namespace Krys::HTML
                                                [](const Ref<Attr> &attr) { return attr->Name(); })
                  | std::ranges::to<List<DOMString>>();
 
-    if (_associatedElement->_qualifiedName.NamespaceURI == Namespaces::HTML
+    if (_associatedElement->NamespaceURI() == Namespaces::HTML
         && Is<HTMLDocument>(_associatedElement->NodeDocument()))
     {
       List<DOMString> newNames;

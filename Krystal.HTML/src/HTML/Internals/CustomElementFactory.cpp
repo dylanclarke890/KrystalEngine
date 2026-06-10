@@ -20,7 +20,8 @@ namespace Krys::HTML
       registry = document.CustomElementRegistry().get();
     }
 
-    auto definition = CustomElementAlgorithms::LookupCustomElementDefinition(registry, name.NamespaceURI, is);
+    auto definition =
+      CustomElementAlgorithms::LookupCustomElementDefinition(registry, name.NamespaceURI(), is);
     if (definition == nullptr)
     {
       return nullptr;

@@ -309,15 +309,14 @@ namespace Krys::HTML
   ExceptionOr<Ref<Attr>> Document::CreateAttributeNS(DOMStringAtom namespaceUri,
                                                      DOMStringAtom qualifiedName) noexcept
   {
-    auto result =
+    auto nameResult =
       NameValidation::ValidateAndExtract(namespaceUri, qualifiedName, ValidateAndExtractContext::Attribute);
-    if (result.HasException())
+    if (nameResult.HasException())
     {
-      return result.ReleaseException();
+      return nameResult.ReleaseException();
     }
 
-    QualifiedName name {result.Value().NamespaceURI, result.Value().Prefix, result.Value().LocalName};
-    return AdoptRef<Attr>(*new Attr(*this, name));
+    return AdoptRef<Attr>(*new Attr(*this, *nameResult));
   }
 
   Ref<Event> Document::CreateEvent(DOMStringAtom interface) noexcept

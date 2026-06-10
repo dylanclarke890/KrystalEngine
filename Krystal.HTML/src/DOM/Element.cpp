@@ -171,8 +171,8 @@ namespace Krys::HTML
     // attribute value with localName, namespace, this, and value.
 
     const auto &qName = validateAndExtractResult.Value();
-    ElementAlgorithms::SetAttributeValue(*this, qName.LocalName, std::move(value), qName.Prefix,
-                                         qName.NamespaceURI);
+    ElementAlgorithms::SetAttributeValue(*this, qName.LocalName(), std::move(value), qName.NamespacePrefix(),
+                                         qName.NamespaceURI());
 
     return {};
   }
