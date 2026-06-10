@@ -7,6 +7,7 @@
 #include "Krystal.HTML/DOM/Text.hpp"
 #include "Krystal.HTML/DOM/XHTMLDocument.hpp"
 #include "Krystal.HTML/DOM/XMLDocument.hpp"
+#include "Krystal.HTML/HTML/HTMLElement.hpp"
 #include "Krystal.HTML/Infra/Namespaces.hpp"
 #include "Krystal.HTML/SVG/SVGDocument.hpp"
 
@@ -36,12 +37,12 @@ namespace Krys::HTML
     Ref<XMLDocument> document = [&] -> Ref<XMLDocument>
     {
       RefPtr<XMLDocument> doc = nullptr;
-      if (namespaceUri == Namespace::HTML)
+      if (namespaceUri == Namespaces::HTML)
       {
         doc = CreateRefPtr<XHTMLDocument>();
         doc->_contentType = u8"application/xhtml+xml";
       }
-      else if (namespaceUri == Namespace::SVG)
+      else if (namespaceUri == Namespaces::SVG)
       {
         doc = CreateRefPtr<SVGDocument>();
         doc->_contentType = u8"image/svg+xml";
@@ -100,7 +101,7 @@ namespace Krys::HTML
       return appendResult.ReleaseException();
     }
 
-    auto qualifiedName = QualifiedName {Namespace::HTML, DOMStringAtom::Null(), u8"html"};
+    auto qualifiedName = QualifiedName {Namespaces::HTML, DOMStringAtom::Null(), u8"html"};
     auto htmlElement = ElementFactory::Create(*document, qualifiedName);
     if (auto appendResult = document->AppendChild(*htmlElement); appendResult.HasException())
     {

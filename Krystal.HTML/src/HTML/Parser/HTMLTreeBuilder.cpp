@@ -63,8 +63,8 @@ namespace Krys::HTML
       {
         switch (stackElement->Name())
         {
-          case ElementName::td:
-          case ElementName::th:
+          case TagName::td:
+          case TagName::th:
           {
             if (!last)
             {
@@ -74,39 +74,39 @@ namespace Krys::HTML
 
             break;
           }
-          case ElementName::tr:
+          case TagName::tr:
           {
             _insertionMode = InsertionMode::InRow;
             return;
           }
-          case ElementName::tbody:
-          case ElementName::thead:
-          case ElementName::tfoot:
+          case TagName::tbody:
+          case TagName::thead:
+          case TagName::tfoot:
           {
             _insertionMode = InsertionMode::InTableBody;
             return;
           }
-          case ElementName::caption:
+          case TagName::caption:
           {
             _insertionMode = InsertionMode::InCaption;
             return;
           }
-          case ElementName::colgroup:
+          case TagName::colgroup:
           {
             _insertionMode = InsertionMode::InColumnGroup;
             return;
           }
-          case ElementName::table:
+          case TagName::table:
           {
             _insertionMode = InsertionMode::InTable;
             return;
           }
-          case ElementName::template_:
+          case TagName::template_:
           {
             _insertionMode = CurrentTemplateInsertionMode();
             return;
           }
-          case ElementName::head:
+          case TagName::head:
           {
             if (!last)
             {
@@ -116,17 +116,17 @@ namespace Krys::HTML
 
             break;
           }
-          case ElementName::body:
+          case TagName::body:
           {
             _insertionMode = InsertionMode::InBody;
             return;
           }
-          case ElementName::frameset:
+          case TagName::frameset:
           {
             _insertionMode = InsertionMode::InFrameset;
             return;
           }
-          case ElementName::html:
+          case TagName::html:
           {
             if (_head == nullptr)
             {
@@ -181,7 +181,7 @@ namespace Krys::HTML
     }
   }
 
-  bool HTMLTreeBuilder::HasElementInScope(ElementName targetNode) const noexcept
+  bool HTMLTreeBuilder::HasElementInScope(TagName targetNode) const noexcept
   {
     auto *node = &_openElementStack.Bottom();
 
@@ -194,16 +194,16 @@ namespace Krys::HTML
 
       switch (node->Name())
       {
-        case ElementName::applet:
-        case ElementName::caption:
-        case ElementName::html:
-        case ElementName::table:
-        case ElementName::td:
-        case ElementName::th:
-        case ElementName::marquee:
-        case ElementName::object:
-        case ElementName::select:
-        case ElementName::template_:
+        case TagName::applet:
+        case TagName::caption:
+        case TagName::html:
+        case TagName::table:
+        case TagName::td:
+        case TagName::th:
+        case TagName::marquee:
+        case TagName::object:
+        case TagName::select:
+        case TagName::template_:
         {
           // TODO(HTMLTREEBUILDER, HTML) also: MathML mi MathML mo MathML mn MathML ms MathML mtext MathML
           // annotation-xml SVG foreignObject SVG desc SVG title
@@ -221,7 +221,7 @@ namespace Krys::HTML
     return false;
   }
 
-  bool HTMLTreeBuilder::HasElementInListItemScope(ElementName targetNode) const noexcept
+  bool HTMLTreeBuilder::HasElementInListItemScope(TagName targetNode) const noexcept
   {
     auto *node = &_openElementStack.Bottom();
 
@@ -234,18 +234,18 @@ namespace Krys::HTML
 
       switch (node->Name())
       {
-        case ElementName::applet:
-        case ElementName::caption:
-        case ElementName::html:
-        case ElementName::table:
-        case ElementName::td:
-        case ElementName::th:
-        case ElementName::li:
-        case ElementName::marquee:
-        case ElementName::object:
-        case ElementName::select:
-        case ElementName::template_:
-        case ElementName::ul:
+        case TagName::applet:
+        case TagName::caption:
+        case TagName::html:
+        case TagName::table:
+        case TagName::td:
+        case TagName::th:
+        case TagName::li:
+        case TagName::marquee:
+        case TagName::object:
+        case TagName::select:
+        case TagName::template_:
+        case TagName::ul:
         {
           // TODO(HTMLTREEBUILDER, HTML) also: MathML mi MathML mo MathML mn MathML ms MathML mtext MathML
           // annotation-xml SVG foreignObject SVG desc SVG title
@@ -263,7 +263,7 @@ namespace Krys::HTML
     return false;
   }
 
-  bool HTMLTreeBuilder::HasElementInButtonScope(ElementName targetNode) const noexcept
+  bool HTMLTreeBuilder::HasElementInButtonScope(TagName targetNode) const noexcept
   {
     auto *node = &_openElementStack.Bottom();
 
@@ -276,17 +276,17 @@ namespace Krys::HTML
 
       switch (node->Name())
       {
-        case ElementName::applet:
-        case ElementName::button:
-        case ElementName::caption:
-        case ElementName::html:
-        case ElementName::table:
-        case ElementName::td:
-        case ElementName::th:
-        case ElementName::marquee:
-        case ElementName::object:
-        case ElementName::select:
-        case ElementName::template_:
+        case TagName::applet:
+        case TagName::button:
+        case TagName::caption:
+        case TagName::html:
+        case TagName::table:
+        case TagName::td:
+        case TagName::th:
+        case TagName::marquee:
+        case TagName::object:
+        case TagName::select:
+        case TagName::template_:
         {
           // TODO(HTMLTREEBUILDER, HTML) also: MathML mi MathML mo MathML mn MathML ms MathML mtext MathML
           // annotation-xml SVG foreignObject SVG desc SVG title
@@ -304,7 +304,7 @@ namespace Krys::HTML
     return false;
   }
 
-  bool HTMLTreeBuilder::HasElementInTableScope(ElementName targetNode) const noexcept
+  bool HTMLTreeBuilder::HasElementInTableScope(TagName targetNode) const noexcept
   {
     auto *node = &_openElementStack.Bottom();
 
@@ -317,9 +317,9 @@ namespace Krys::HTML
 
       switch (node->Name())
       {
-        case ElementName::html:
-        case ElementName::table:
-        case ElementName::template_:
+        case TagName::html:
+        case TagName::table:
+        case TagName::template_:
         {
           return false;
         }

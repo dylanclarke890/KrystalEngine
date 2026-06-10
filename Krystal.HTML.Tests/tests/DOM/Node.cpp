@@ -321,14 +321,14 @@ namespace Krys::Tests
 
     SECTION("Attr")
     {
-      auto attribute = document->CreateAttributeNS(Namespace::XML, u8"xml:name");
+      auto attribute = document->CreateAttributeNS(Namespaces::XML, u8"xml:name");
       REQUIRE_FALSE(attribute.HasException());
       attribute->Value(u8"value");
 
       auto clone = attribute->CloneNode();
 
       auto &attributeClone = Downcast<Attr>(*clone.Value());
-      REQUIRE(attributeClone.NamespaceURI() == Namespace::XML);
+      REQUIRE(attributeClone.NamespaceURI() == Namespaces::XML);
       REQUIRE(attributeClone.LocalName() == u8"name");
       REQUIRE(attributeClone.Prefix() == u8"xml");
       REQUIRE(attributeClone.Value() == u8"value");
@@ -600,12 +600,12 @@ namespace Krys::Tests
 
       SECTION("returns XML namespace if prefix is 'xml'")
       {
-        REQUIRE(element->LookupNamespaceURI(u8"xml") == Namespace::XML);
+        REQUIRE(element->LookupNamespaceURI(u8"xml") == Namespaces::XML);
       }
 
       SECTION("returns XMLNS namespace if prefix is 'xmlns'")
       {
-        REQUIRE(element->LookupNamespaceURI(u8"xmlns") == Namespace::XMLNS);
+        REQUIRE(element->LookupNamespaceURI(u8"xmlns") == Namespaces::XMLNS);
       }
 
       SECTION("returns it's namespace when non null and it's prefix matches")

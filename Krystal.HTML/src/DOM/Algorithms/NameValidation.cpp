@@ -163,12 +163,12 @@ namespace Krys::HTML
       return Exception {ExceptionCode::NamespaceError};
     }
 
-    if (prefix == NamespacePrefix::XML && namespaceURI != Namespace::XML)
+    if (prefix == NamespacePrefixes::XML && namespaceURI != Namespaces::XML)
     {
       return Exception {ExceptionCode::NamespaceError};
     }
 
-    if (prefix == NamespacePrefix::XMLNS && namespaceURI != Namespace::XMLNS)
+    if (prefix == NamespacePrefixes::XMLNS && namespaceURI != Namespaces::XMLNS)
     {
       return Exception {ExceptionCode::NamespaceError};
     }

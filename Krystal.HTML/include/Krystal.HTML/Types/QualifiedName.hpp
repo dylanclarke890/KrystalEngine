@@ -1,10 +1,28 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/HTML/Enums/Namespace.hpp"
+#include "Krystal.HTML/HTML/Enums/TagName.hpp"
 #include "Krystal.HTML/Types/DOMString.hpp"
 #include <cassert>
 
 namespace Krys::HTML
 {
+  /// @see https://dom.spec.whatwg.org/#concept-element-qualified-name
+  class QName
+  {
+  private:
+    uint64 _hash {0ull};
+    TagName _tagName {TagName::Unknown};
+    Namespace _namespace {Namespace::Unknown};
+    DOMStringAtom _namespaceURI {DOMStringAtom::Null()};
+    DOMStringAtom _namespacePrefix {DOMStringAtom::Null()};
+    DOMStringAtom _localName {DOMStringAtom::Null()};
+    DOMStringAtom _localNameLower {DOMStringAtom::Null()};
+    DOMStringAtom _localNameUpper {DOMStringAtom::Null()};
+
+  public:
+  };
+
   /// @see https://dom.spec.whatwg.org/#concept-element-qualified-name
   struct QualifiedName
   {

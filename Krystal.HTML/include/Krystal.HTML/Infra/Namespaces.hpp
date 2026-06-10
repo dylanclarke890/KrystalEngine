@@ -4,7 +4,7 @@
 
 namespace Krys::HTML
 {
-  namespace Namespace
+  namespace Namespaces
   {
     inline DOMStringAtom XML = u8"http://www.w3.org/XML/1998/namespace";
     inline DOMStringAtom XMLNS = u8"http://www.w3.org/2000/xmlns/";
@@ -14,7 +14,7 @@ namespace Krys::HTML
     inline DOMStringAtom XLink = u8"http://www.w3.org/1999/xlink";
   }
 
-  namespace NamespacePrefix
+  namespace NamespacePrefixes
   {
     inline DOMStringAtom XML = u8"xml";
     inline DOMStringAtom XMLNS = u8"xmlns";

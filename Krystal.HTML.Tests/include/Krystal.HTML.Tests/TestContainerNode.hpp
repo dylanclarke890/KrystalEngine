@@ -16,7 +16,7 @@ namespace Krys::Tests
 
   public:
     TestContainerNode(Document &document) noexcept
-        : Element(document, {Namespace::HTML, DOMStringAtom::Null(), u8"test-container-node"}, NodeFlags::None)
+        : Element(document, {Namespaces::HTML, DOMStringAtom::Null(), u8"test-container-node"}, NodeFlags::None)
     {
     }
   };

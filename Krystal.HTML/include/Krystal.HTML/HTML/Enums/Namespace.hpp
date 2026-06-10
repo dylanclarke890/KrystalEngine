@@ -7,6 +7,7 @@ namespace Krys::HTML
   enum class Namespace : uint8
   {
     Unknown,
+    None,
     HTML,
     SVG,
     MathML,
@@ -16,4 +17,4 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::Namespace, 7uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::Namespace, 8uz);

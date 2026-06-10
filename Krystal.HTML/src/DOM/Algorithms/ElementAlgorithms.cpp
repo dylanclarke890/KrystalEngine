@@ -154,7 +154,7 @@ namespace Krys::HTML
   RawPtr<Attr> ElementAlgorithms::GetAttributeByName(DOMStringAtom qualifiedName,
                                                      const Element &element) noexcept
   {
-    if (element.NamespaceURI() == Namespace::HTML && Is<HTMLDocument>(element.NodeDocument()))
+    if (element.NamespaceURI() == Namespaces::HTML && Is<HTMLDocument>(element.NodeDocument()))
     {
       qualifiedName = Krys::Text::ToASCIILowercase(qualifiedName.View());
     }
@@ -267,7 +267,7 @@ namespace Krys::HTML
                                                         SlotAssignmentMode slotAssignment,
                                                         RawPtr<CustomElementRegistry> registry) noexcept
   {
-    if (element.NamespaceURI() != Namespace::HTML)
+    if (element.NamespaceURI() != Namespaces::HTML)
     {
       return Exception {ExceptionCode::NotSupportedError};
     }

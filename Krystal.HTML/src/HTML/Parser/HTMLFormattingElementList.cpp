@@ -20,7 +20,7 @@ namespace Krys::HTML
 
     auto &itemAttrs = item.Attributes();
     SmallList<decltype(_formattingElements.begin())> matchingElements;
-    for (auto it = begin; it != _formattingElements.end(); ++it)
+    for (auto &it = begin; it != _formattingElements.end(); ++it)
     {
       if (!it->IsFormattingElement())
       {

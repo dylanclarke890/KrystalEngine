@@ -164,7 +164,7 @@ namespace Krys::HTML
     DOMStringAtom namespaceURI = DOMStringAtom::Null();
     if (Is<HTMLDocument>(*this) || _contentType == u8"application/xhtml+xml")
     {
-      namespaceURI = Namespace::HTML;
+      namespaceURI = Namespaces::HTML;
     }
 
     return ElementFactory::Create(*this, {namespaceURI, DOMStringAtom::Null(), localName},
@@ -395,7 +395,7 @@ namespace Krys::HTML
       //   "title", and the SVG namespace. Insert element as the first child of the document element.
       // String replace all with the given value within element.
     }
-    else if (documentElement->NamespaceURI() == Namespace::HTML)
+    else if (documentElement->NamespaceURI() == Namespaces::HTML)
     {
       auto head = Head();
       auto title = DOMTreeAccessors::GetTitleElement(*this);
@@ -407,7 +407,7 @@ namespace Krys::HTML
 
       if (title == nullptr)
       {
-        title = ElementFactory::Create(*this, {Namespace::HTML, DOMStringAtom::Null(), u8"title"});
+        title = ElementFactory::Create(*this, {Namespaces::HTML, DOMStringAtom::Null(), u8"title"});
 
         if (auto append = MutationAlgorithms::Append(*documentElement, *title); append.HasException())
         {
