@@ -137,7 +137,7 @@ namespace Krys::HTML
 
       if (!IsValidNamespacePrefix(prefix.View()))
       {
-        return Exception {ExceptionCode::InvalidCharacterError};
+        return ExceptionCode::InvalidCharacterError;
       }
     }
 
@@ -147,38 +147,33 @@ namespace Krys::HTML
     {
       if (!IsValidAttributeLocalName(localName.View()))
       {
-        return Exception {ExceptionCode::InvalidCharacterError};
+        return ExceptionCode::InvalidCharacterError;
       }
     }
     else if (context == ValidateAndExtractContext::Element)
     {
       if (!IsValidElementLocalName(localName.View()))
       {
-        return Exception {ExceptionCode::InvalidCharacterError};
+        return ExceptionCode::InvalidCharacterError;
       }
     }
 
     if (prefix != DOMStringAtom::Null() && namespaceURI == DOMStringAtom::Null())
     {
-      return Exception {ExceptionCode::NamespaceError};
+      return ExceptionCode::NamespaceError;
     }
 
     if (prefix == NamespacePrefixes::XML && namespaceURI != Namespaces::XML)
     {
-      return Exception {ExceptionCode::NamespaceError};
+      return ExceptionCode::NamespaceError;
     }
 
     if (prefix == NamespacePrefixes::XMLNS && namespaceURI != Namespaces::XMLNS)
     {
-      return Exception {ExceptionCode::NamespaceError};
+      return ExceptionCode::NamespaceError;
     }
 
-    QualifiedName qualifiedNameStruct;
-    qualifiedNameStruct.NamespaceURI = namespaceURI;
-    qualifiedNameStruct.Prefix = prefix;
-    qualifiedNameStruct.LocalName = DOMStringAtom {localName};
-
-    return qualifiedNameStruct;
+    return QualifiedName {namespaceURI, prefix, localName};
   }
 
   bool NameValidation::IsValidShadowHostName(DOMStringView name) noexcept

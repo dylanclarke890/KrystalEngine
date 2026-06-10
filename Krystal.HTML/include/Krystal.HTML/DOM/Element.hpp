@@ -54,8 +54,6 @@ namespace Krys::HTML
     WeakPtr<HTMLSlotElement> _manuallyAssignedSlot;
 
   protected:
-    Element(Document &document, NodeFlags nodeFlags) noexcept;
-
     Element(Document &document, const QualifiedName &name, NodeFlags nodeFlags) noexcept;
 
   public:

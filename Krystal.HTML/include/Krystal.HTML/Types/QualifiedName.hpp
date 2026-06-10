@@ -21,6 +21,38 @@ namespace Krys::HTML
     DOMStringAtom _localNameUpper {DOMStringAtom::Null()};
 
   public:
+    QName(DOMStringAtom namespaceURI, DOMStringAtom prefix, DOMStringAtom localName) noexcept
+        : _namespaceURI(namespaceURI), _namespacePrefix(prefix), _localName(localName)
+    {
+      assert(_namespaceURI == DOMStringAtom::Null() || _namespaceURI != DOMStringAtom::Empty());
+      assert(_namespacePrefix == DOMStringAtom::Null() || _namespacePrefix != DOMStringAtom::Empty());
+      assert(_localName != DOMStringAtom::Null());
+    }
+
+    /// @see https://dom.spec.whatwg.org/#concept-attribute-qualified-name
+    KRYS_NODISCARD DOMString Name() const noexcept
+    {
+      if (_namespacePrefix == DOMStringAtom::Null())
+      {
+        return DOMString(_localName.View());
+      }
+      else
+      {
+        return DOMString {_namespacePrefix.View()} + u8":" + DOMString {_localName.View()};
+      }
+    }
+
+    
+    KRYS_NODISCARD friend bool operator==(const QName &a, const QName &b) noexcept
+    {
+      return a._namespaceURI == b._namespaceURI && a._namespacePrefix == b._namespacePrefix
+             && a._localName == b._localName;
+    }
+
+    KRYS_NODISCARD friend bool operator!=(const QName &a, const QName &b) noexcept
+    {
+      return !(a == b);
+    }
   };
 
   /// @see https://dom.spec.whatwg.org/#concept-element-qualified-name
@@ -30,14 +62,12 @@ namespace Krys::HTML
     DOMStringAtom Prefix {DOMStringAtom::Null()};
     DOMStringAtom LocalName {DOMStringAtom::Null()};
 
-    QualifiedName() noexcept = default;
-
     QualifiedName(DOMStringAtom namespaceURI, DOMStringAtom prefix, DOMStringAtom localName) noexcept
         : NamespaceURI(namespaceURI), Prefix(prefix), LocalName(localName)
     {
       assert(NamespaceURI == DOMStringAtom::Null() || NamespaceURI != DOMStringAtom::Empty());
       assert(Prefix == DOMStringAtom::Null() || Prefix != DOMStringAtom::Empty());
-      assert(LocalName != DOMStringAtom::Null() && Prefix != DOMStringAtom::Empty());
+      assert(LocalName != DOMStringAtom::Null());
     }
 
     /// @see https://dom.spec.whatwg.org/#concept-attribute-qualified-name
@@ -45,7 +75,7 @@ namespace Krys::HTML
     {
       if (Prefix == DOMStringAtom::Null())
       {
-        return LocalName == DOMStringAtom::Null() ? DOMString {} : DOMString {LocalName.View()};
+        return DOMString(LocalName.View());
       }
       else
       {
@@ -63,4 +93,9 @@ namespace Krys::HTML
       return !(a == b);
     }
   };
+
+  KRYS_NODISCARD inline QualifiedName NullQualifiedName() noexcept
+  {
+    return QualifiedName(DOMStringAtom::Null(), DOMStringAtom::Null(), DOMStringAtom::Empty());
+  }
 }

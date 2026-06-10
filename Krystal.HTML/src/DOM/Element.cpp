@@ -22,11 +22,6 @@
 
 namespace Krys::HTML
 {
-  Element::Element(Document &document, NodeFlags nodeFlags) noexcept
-      : ContainerNode(document, NodeType::ELEMENT_NODE, nodeFlags)
-  {
-  }
-
   Element::Element(Document &document, const QualifiedName &name, NodeFlags nodeFlags) noexcept
       : ContainerNode(document, NodeType::ELEMENT_NODE, nodeFlags), _qualifiedName(name)
   {

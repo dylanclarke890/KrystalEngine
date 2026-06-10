@@ -14,7 +14,7 @@ namespace Krys::HTML
     SVGTagName _tagName {SVGTagName::Unknown};
 
     SVGElement(Document &document, SVGTagName tag, NodeFlags flags = NodeFlags::None) noexcept
-        : Element(document, NodeFlags::IsSVGElement | flags), _tagName(tag)
+        : Element(document, NullQualifiedName(), NodeFlags::IsSVGElement | flags), _tagName(tag)
     {
     }
 
