@@ -112,7 +112,7 @@ namespace Krys::HTML
 
     // TODO(fix): the below logic needs reviewing and a better way of doing this needs to be found.
 
-    if (localName == Attribute::Class)
+    if (localName == Attributes::Class)
     {
       if (namespaceURI == DOMStringAtom::Null())
       {
@@ -125,7 +125,7 @@ namespace Krys::HTML
         }
       }
     }
-    else if (localName == Attribute::Name)
+    else if (localName == Attributes::Name)
     {
       if (Is<HTMLSlotElement>(element) && namespaceURI == DOMStringAtom::Null())
       {
@@ -157,7 +157,7 @@ namespace Krys::HTML
         SlotAlgorithms::AssignSlottablesForTree(TreeQueries::Root(slotElement));
       }
     }
-    else if (localName == Attribute::Slot)
+    else if (localName == Attributes::Slot)
     {
       if (namespaceURI == DOMStringAtom::Null())
       {

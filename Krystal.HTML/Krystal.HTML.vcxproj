@@ -66,6 +66,7 @@
     <ClCompile Include="src\HTML\Parser\HTMLFormattingElementList.cpp" />
     <ClCompile Include="src\HTML\Parser\HTMLTreeBuilder.cpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\ElementNames.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Constants\TagNames.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\StaticRangeInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\BoundaryPointComparator.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Algorithms\DOMTreeAccessors.hpp" />

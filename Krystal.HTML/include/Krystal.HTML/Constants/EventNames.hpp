@@ -4,24 +4,24 @@
 
 namespace Krys::HTML::EventNames
 {
-  inline DOMStringAtom ReadyStateChange = u8"readystatechange";
-  inline DOMStringAtom Abort = u8"abort";
-  inline DOMStringAtom Click = u8"click";
-  inline DOMStringAtom TouchStart = u8"touchstart";
-  inline DOMStringAtom TouchMove = u8"touchmove";
-  inline DOMStringAtom Wheel = u8"wheel";
-  inline DOMStringAtom MouseWheel = u8"mousewheel";
-  inline DOMStringAtom BeforeUnload = u8"beforeunload";
-  inline DOMStringAtom AnimationEnd = u8"animationend";
-  inline DOMStringAtom AnimationIteration = u8"animationiteration";
-  inline DOMStringAtom AnimationStart = u8"animationstart";
-  inline DOMStringAtom TransitionEnd = u8"transitionend";
+  constexpr inline DOMStringView ReadyStateChange = u8"readystatechange";
+  constexpr inline DOMStringView Abort = u8"abort";
+  constexpr inline DOMStringView Click = u8"click";
+  constexpr inline DOMStringView TouchStart = u8"touchstart";
+  constexpr inline DOMStringView TouchMove = u8"touchmove";
+  constexpr inline DOMStringView Wheel = u8"wheel";
+  constexpr inline DOMStringView MouseWheel = u8"mousewheel";
+  constexpr inline DOMStringView BeforeUnload = u8"beforeunload";
+  constexpr inline DOMStringView AnimationEnd = u8"animationend";
+  constexpr inline DOMStringView AnimationIteration = u8"animationiteration";
+  constexpr inline DOMStringView AnimationStart = u8"animationstart";
+  constexpr inline DOMStringView TransitionEnd = u8"transitionend";
 
   namespace Legacy
   {
-    inline DOMStringAtom AnimationEnd = u8"webkitAnimationEnd";
-    inline DOMStringAtom AnimationIteration = u8"webkitAnimationIteration";
-    inline DOMStringAtom AnimationStart = u8"webkitAnimationStart";
-    inline DOMStringAtom TransitionEnd = u8"webkitTransitionEnd";
+    constexpr inline DOMStringView AnimationEnd = u8"webkitAnimationEnd";
+    constexpr inline DOMStringView AnimationIteration = u8"webkitAnimationIteration";
+    constexpr inline DOMStringView AnimationStart = u8"webkitAnimationStart";
+    constexpr inline DOMStringView TransitionEnd = u8"webkitTransitionEnd";
   }
 }

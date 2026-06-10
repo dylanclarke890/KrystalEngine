@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/HTML/Internals/HTMLElementFactory.hpp"
-#include "Krystal.HTML/Constants/ElementNames.hpp"
+#include "Krystal.HTML/Constants/TagNames.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"

@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Constants/ElementNames.hpp"
+#include "Krystal.HTML/Constants/TagNames.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/DOM/DocumentFragment.hpp"
 #include "Krystal.HTML/DOM/Element.hpp"
