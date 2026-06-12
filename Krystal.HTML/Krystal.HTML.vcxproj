@@ -65,6 +65,8 @@
     <ClCompile Include="src\HTML\HTMLDivElement.cpp" />
     <ClCompile Include="src\HTML\Parser\HTMLFormattingElementList.cpp" />
     <ClCompile Include="src\HTML\Parser\HTMLTreeBuilder.cpp" />
+    <ClCompile Include="src\QualifiedName.cpp" />
+    <ClCompile Include="src\QualifiedNameCache.cpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\ElementNames.hpp" />
     <ClInclude Include="include\Krystal.HTML\Constants\TagNames.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\StaticRangeInit.hpp" />
@@ -297,7 +299,7 @@
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\InsertionMode.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\TokenizerState.hpp" />
     <ClInclude Include="include\Krystal.HTML\Context.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Types\QualifiedName.hpp" />
+    <ClInclude Include="include\Krystal.HTML\QualifiedName.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\AbstractRange.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Range.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\StaticRange.hpp" />
@@ -357,6 +359,7 @@
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLHRElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLTimeElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLSpanElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\QualifiedNameCache.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\HTML\HTMLTrackElement.cpp" />

@@ -9,10 +9,7 @@ namespace Krys
 {
   struct Hash : NonCopyMovable<Hash>
   {
-    Hash() = delete;
-    ~Hash() = delete;
-
-    template <class... Args>
+    template <typename... Args>
     KRYS_NODISCARD constexpr static size_t Combine(Args... args) noexcept
     {
       size_t seed = 0u;
@@ -27,7 +24,7 @@ namespace Krys
     }
 
   private:
-    template <class Head, class... Tail>
+    template <typename Head, typename... Tail>
     constexpr static void Combine(size_t &seed, const Head &head, Tail... tail) noexcept
     {
       // this algorithm is based on boost::combine_hash and is designed to mix/smear around values

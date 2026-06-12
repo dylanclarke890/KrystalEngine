@@ -4,7 +4,7 @@
 #include "Krystal.HTML/DOM/ContainerNode.hpp"
 #include "Krystal.HTML/DOM/Element.hpp"
 #include "Krystal.HTML/DOM/ShadowRoot.hpp"
-#include "Krystal.HTML/Types/QualifiedName.hpp"
+#include "Krystal.HTML/QualifiedName.hpp"
 
 namespace Krys::Tests
 {

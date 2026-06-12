@@ -153,7 +153,7 @@
     <ClInclude Include="include\Krystal.HTML\DOM\ProcessingInstruction.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Types\QualifiedName.hpp">
+    <ClInclude Include="include\Krystal.HTML\QualifiedName.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\ShadowRoot.hpp">
@@ -753,6 +753,9 @@
     <ClInclude Include="include\Krystal.HTML\Constants\TagNames.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML\QualifiedNameCache.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Context.cpp">
@@ -1155,6 +1158,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\HTML\Parser\HTMLFormattingElementList.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\QualifiedNameCache.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\QualifiedName.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
