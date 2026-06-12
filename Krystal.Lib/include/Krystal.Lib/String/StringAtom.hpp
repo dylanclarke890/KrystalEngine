@@ -166,6 +166,11 @@ namespace std
   {
     constexpr size_t operator()(const Krys::StringAtom &qName) const noexcept
     {
+      if (qName == Krys::StringAtom::Null())
+      {
+        return 0;
+      }
+
       return Krys::Hash::Combine(qName.View().data());
     }
   };

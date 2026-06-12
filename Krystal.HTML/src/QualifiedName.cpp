@@ -8,13 +8,17 @@ namespace Krys::HTML
   QualifiedNameStorage::QualifiedNameStorage(DOMStringAtom namespaceURI, DOMStringAtom prefix,
                                              DOMStringAtom localName, HTML::TagName tagName,
                                              HTML::Namespace tagNamespace) noexcept
-      : _namespaceURI(namespaceURI), _namespacePrefix(prefix), _localName(localName), _tagName(tagName), _namespace(tagNamespace)
+      : _namespaceURI(namespaceURI), _namespacePrefix(prefix), _localName(localName), _tagName(tagName),
+        _namespace(tagNamespace)
   {
     assert(_namespaceURI == DOMStringAtom::Null() || _namespaceURI != DOMStringAtom::Empty());
     assert(_namespacePrefix == DOMStringAtom::Null() || _namespacePrefix != DOMStringAtom::Empty());
     assert(_localName != DOMStringAtom::Null() || _namespacePrefix != DOMStringAtom::Empty());
 
-    _localNameLower = DOMStringAtom(Krys::Text::ToASCIILowercase(_localName.View()));
+    if (_localName != DOMStringAtom::Null())
+    {
+      _localNameLower = DOMStringAtom(Krys::Text::ToASCIILowercase(_localName.View()));
+    }
   }
 
   QualifiedNameStorage::~QualifiedNameStorage() noexcept

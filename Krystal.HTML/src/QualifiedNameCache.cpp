@@ -17,8 +17,9 @@ namespace Krys::HTML
       return ShareRef(**it);
     }
 
-    auto tagName = ParseTagName(localName.View());
-    auto tagNamespace = ParseNamespace(namespaceURI.View());
+    auto tagName = localName == DOMStringAtom::Null() ? TagName::Unknown : ParseTagName(localName.View());
+    auto tagNamespace =
+      namespaceURI == DOMStringAtom::Null() ? Namespace::None : ParseNamespace(namespaceURI.View());
 
     auto storage = CreateRef<QualifiedNameStorage>(namespaceURI, prefix, localName, tagName, tagNamespace);
 
