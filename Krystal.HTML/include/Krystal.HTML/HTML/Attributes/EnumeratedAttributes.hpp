@@ -4,9 +4,9 @@
 #include "Krystal.HTML/HTML/HTMLElement.hpp"
 #include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
-#include "Krystal.Lib/String/FixedString.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
+#include "Krystal.Lib/Types/NTTPString.hpp"
 #include "Krystal.Lib/Types/Span.hpp"
 
 namespace Krys::HTML::Attributes
@@ -98,7 +98,7 @@ namespace Krys::HTML::Attributes
   ///
   /// As needed:
   /// constexpr static AttributeState EmptyValueDefault = AttributeState::Auto;
-  template <FixedString AttributeName, DerivedFrom<HTMLElement> TElement>
+  template <NTTPString AttributeName, DerivedFrom<HTMLElement> TElement>
   struct EnumeratedAttributeTraits;
 
   template <typename Traits>
@@ -123,7 +123,7 @@ namespace Krys::HTML::Attributes
   concept CanReturnNullResolvedState =
     !HasMissingValueDefault<Traits> || (!HasInvalidValueDefault<Traits> && !HasEmptyValueDefault<Traits>);
 
-  template <FixedString AttributeName, DerivedFrom<HTMLElement> TElement>
+  template <NTTPString AttributeName, DerivedFrom<HTMLElement> TElement>
   class EnumeratedAttribute
   {
     using Traits = EnumeratedAttributeTraits<AttributeName, TElement>;

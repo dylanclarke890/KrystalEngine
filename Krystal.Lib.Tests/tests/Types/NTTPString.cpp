@@ -1,17 +1,17 @@
-﻿#include "Krystal.Lib/String/FixedString.hpp"
+﻿#include "Krystal.Lib/Types/NTTPString.hpp"
 #include <catch_all.hpp>
 
 namespace Krys
 {
   namespace
   {
-    template <FixedString Str>
+    template <NTTPString Str>
     struct Template
     {
       static constexpr auto value = Str;
     };
 
-    template <FixedString Str>
+    template <NTTPString Str>
     struct PartialTemplate
     {
       static constexpr uint32 value = 0u;
@@ -24,37 +24,37 @@ namespace Krys
     };
   }
 
-  TEST_CASE("FixedString can be constructed from a string literal", "[FixedString]")
+  TEST_CASE("NTTPString can be constructed from a string literal", "[NTTPString]")
   {
     SECTION("char")
     {
-      constexpr FixedString str {"Hello"};
+      constexpr NTTPString str {"Hello"};
       STATIC_REQUIRE(str == "Hello");
     }
 
     SECTION("char8")
     {
-      constexpr FixedString str {u8"Hello"};
+      constexpr NTTPString str {u8"Hello"};
       STATIC_REQUIRE(str == u8"Hello");
     }
   }
 
-  TEST_CASE("FixedString comparison operators work correctly", "[FixedString]")
+  TEST_CASE("FixedString comparison operators work correctly", "[NTTPString]")
   {
-    constexpr FixedString str1 {"Hello"};
-    constexpr FixedString str2 {"Hello"};
-    constexpr FixedString str3 {"World!"};
+    constexpr NTTPString str1 {"Hello"};
+    constexpr NTTPString str2 {"Hello"};
+    constexpr NTTPString str3 {"World!"};
 
     STATIC_REQUIRE(str1 == str2);
     STATIC_REQUIRE(str1 != str3);
   }
 
-  TEST_CASE("FixedString can be used as a NTTP parameter", "[FixedString]")
+  TEST_CASE("NTTPString can be used as a NTTP parameter", "[NTTPString]")
   {
     STATIC_REQUIRE(Template<"Test">::value == "Test");
   }
 
-  TEST_CASE("FixedString can be used to specialise a template", "[FixedString]")
+  TEST_CASE("NTTPString can be used to specialise a template", "[NTTPString]")
   {
     STATIC_REQUIRE(PartialTemplate<"Hello">::value == 0u);
     STATIC_REQUIRE(PartialTemplate<"Test">::value == 3u);

@@ -6,7 +6,7 @@
 #include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.Lib/Core/Hash.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Set.hpp"
 #include <utility>
 
 namespace Krys::HTML
@@ -81,11 +81,11 @@ namespace Krys::HTML
     KRYS_NODISCARD static QualifiedNameCache &ThreadLocalCache() noexcept;
 
     KRYS_NODISCARD Ref<QualifiedNameStorage> GetOrAdd(DOMStringAtom namespaceURI, DOMStringAtom prefix,
-                                                         DOMStringAtom localName) noexcept;
+                                                      DOMStringAtom localName) noexcept;
 
     KRYS_NODISCARD Ref<QualifiedNameStorage> GetOrAdd(DOMStringAtom namespaceURI, DOMStringAtom prefix,
-                                                         DOMStringAtom localName, TagName tagName,
-                                                         Namespace tagNamespace) noexcept;
+                                                      DOMStringAtom localName, TagName tagName,
+                                                      Namespace tagNamespace) noexcept;
 
     void Remove(QualifiedNameStorage &storage) noexcept;
   };

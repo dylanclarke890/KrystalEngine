@@ -7,30 +7,31 @@
 
 namespace Krys
 {
-  /// @brief A fixed-size string that can be used in compile-time contexts (including as a NTTP). The size
+  /// @brief A fixed-size string that can be used in compile-time contexts (such as as a NTTP). The size
   /// includes the null terminator.
   template <OneOf<char, char8, char16, char32> TChar, size_t N>
-  struct FixedString
+  struct NTTPString
   {
     TChar Data[N] {};
+    size_t Size {N};
 
-    consteval FixedString(const TChar (&str)[N])
+    consteval NTTPString(const TChar (&str)[N]) noexcept
     {
       std::copy_n(str, N, Data);
     }
 
-    KRYS_NODISCARD consteval bool operator==(const FixedString &other) const noexcept
+    KRYS_NODISCARD consteval bool operator==(const NTTPString &other) const noexcept
     {
       return std::equal(std::begin(Data), std::end(Data), std::begin(other.Data));
     }
 
-    KRYS_NODISCARD consteval bool operator!=(const FixedString &other) const noexcept
+    KRYS_NODISCARD consteval bool operator!=(const NTTPString &other) const noexcept
     {
       return !(*this == other);
     }
 
     template <size_t M>
-    KRYS_NODISCARD consteval bool operator==(const FixedString<TChar, M> &other) const noexcept
+    KRYS_NODISCARD consteval bool operator==(const NTTPString<TChar, M> &other) const noexcept
     {
       if (N != M)
       {
@@ -41,7 +42,7 @@ namespace Krys
     }
 
     template <size_t M>
-    KRYS_NODISCARD consteval bool operator!=(const FixedString<TChar, M> &other) const noexcept
+    KRYS_NODISCARD consteval bool operator!=(const NTTPString<TChar, M> &other) const noexcept
     {
       return !(*this == other);
     }

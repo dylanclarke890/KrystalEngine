@@ -10,7 +10,6 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/String/FixedString.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
 #include "Krystal.Lib/Types/NTTPMaybe.hpp"
 #include "Krystal.Lib/Types/StronglyTypedValue.hpp"
