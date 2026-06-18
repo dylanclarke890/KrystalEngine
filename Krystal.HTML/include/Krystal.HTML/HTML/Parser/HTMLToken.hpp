@@ -28,6 +28,16 @@ namespace Krys::HTML
   {
     SmallList<char8, 32u> Name;
     SmallList<char8, 64u> Value;
+
+    DOMStringView NameView() const noexcept
+    {
+      return DOMStringView(Name.begin(), Name.end());
+    }
+
+    DOMStringView ValueView() const noexcept
+    {
+      return DOMStringView(Value.begin(), Value.end());
+    }
   };
 
   using ParsedAttributeList = SmallList<ParsedAttribute, 10u>;
@@ -76,7 +86,7 @@ namespace Krys::HTML
     {
       _type = HTMLTokenType::Uninitialized;
       _data.clear();
-      _attributes = {};
+      _attributes.clear();
     }
 
     void AppendToName(char32 character) noexcept

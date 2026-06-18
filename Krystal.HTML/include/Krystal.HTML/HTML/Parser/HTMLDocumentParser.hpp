@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/DOM/DocumentFragment.hpp"
 #include "Krystal.HTML/DOM/HTMLDocument.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLInputStream.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLToken.hpp"
@@ -12,12 +13,40 @@
 
 namespace Krys::HTML
 {
+  struct FragmentParsingContext
+  {
+  private:
+    RefPtr<DocumentFragment> _fragment;
+    RefPtr<Element> _contextElement;
+
+  public:
+    FragmentParsingContext() noexcept = default;
+
+    FragmentParsingContext(DocumentFragment &fragment, Element &contextElement) noexcept
+        : _fragment(ShareRefPtr(&fragment)), _contextElement(ShareRefPtr(&contextElement))
+    {
+    }
+
+    KRYS_NODISCARD DocumentFragment &Fragment() const noexcept
+    {
+      assert(_fragment);
+      return *_fragment;
+    }
+
+    KRYS_NODISCARD Element &ContextElement() const noexcept
+    {
+      assert(_contextElement);
+      return *_contextElement;
+    }
+  };
+
   class HTMLDocumentParser : NonCopyMovable<HTMLDocumentParser>
   {
     HTMLDocument &_document;
     HTMLInputStream _input;
     HTMLTokenizer _tokenizer;
     HTMLTreeBuilder _treeBuilder;
+    Maybe<FragmentParsingContext> _fragmentParsingContext;
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#script-nesting-level
     uint32 _scriptNestingLevel {0u};
@@ -27,7 +56,13 @@ namespace Krys::HTML
 
   public:
     HTMLDocumentParser(HTMLDocument &document) noexcept
-        : _document(document), _input(), _tokenizer(_input), _treeBuilder(document)
+        : _document(document), _input(), _tokenizer(_input), _treeBuilder(document, _tokenizer)
+    {
+    }
+
+    HTMLDocumentParser(HTMLDocument &document, DocumentFragment &fragment, Element &contextElement) noexcept
+        : _document(document), _input(), _tokenizer(_input), _treeBuilder(document, _tokenizer),
+          _fragmentParsingContext(FragmentParsingContext(fragment, contextElement))
     {
     }
 
@@ -63,7 +98,7 @@ namespace Krys::HTML
 
       // Clear the rawToken in case _treeBuilder.ProcessToken synchronously re-enters the parser.
       // Character tokens can't cause us to re-enter the parser so we can optimise by keeping a pointer to the
-      // data buffer in the token instead of having to copy it.
+      // data buffer in the token instead of needing to copy it.
       if (rawToken->Type() != HTMLTokenType::Character)
       {
         rawToken.Clear();

@@ -48,8 +48,7 @@ namespace Krys::HTML
         {
           _name = DOMStringView {data.begin(), data.end()};
           _isSelfClosing = token.IsSelfClosing();
-
-          _attributes = std::move(token.Attributes());
+          _attributes = Krys::Move(token.Attributes());
 
           return;
         }

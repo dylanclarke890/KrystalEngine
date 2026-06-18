@@ -12,7 +12,7 @@ namespace Krys::HTML
   {
     RawPtr<HTMLTableElement> LastTableElement {nullptr};
     RawPtr<HTMLTemplateElement> LastTemplateElement {nullptr};
-    RawPtr<ContainerNode> ElementBeforeLastTable {nullptr};
+    RawPtr<Element> ElementBeforeLastTable {nullptr};
     bool TemplateIsMostRecent {false};
   };
 
@@ -130,8 +130,41 @@ namespace Krys::HTML
     {
       LastTableAndTemplateResult result;
 
-      // TODO: compute last table, last template, the node entry before last table and whether last template
-      // was added more recently than last table.
+      auto lastTableIt = _items.rend();
+      auto lastTemplateIt = _items.rend();
+
+      for (auto it = _items.rbegin(); it != _items.rend(); ++it)
+      {
+        if (!Is<HTMLElement>(it->Node()))
+        {
+          continue;
+        }
+
+        auto &element = Downcast<HTMLElement>(it->Node());
+        if (result.LastTemplateElement == nullptr && Is<HTMLTemplateElement>(element))
+        {
+          result.LastTemplateElement = &Downcast<HTMLTemplateElement>(element);
+          lastTemplateIt = it;
+        }
+        else if (result.LastTableElement == nullptr && Is<HTMLTableElement>(element))
+        {
+          result.LastTableElement = &Downcast<HTMLTableElement>(element);
+          lastTableIt = it;
+
+          auto next = std::next(it);
+          if (next != _items.rend() && next->IsElement())
+          {
+            result.ElementBeforeLastTable = &Downcast<Element>(next->Node());
+          }
+        }
+
+        if (result.LastTemplateElement != nullptr && result.LastTableElement != nullptr)
+        {
+          break;
+        }
+      }
+
+      result.TemplateIsMostRecent = lastTemplateIt < lastTableIt;
 
       return result;
     }

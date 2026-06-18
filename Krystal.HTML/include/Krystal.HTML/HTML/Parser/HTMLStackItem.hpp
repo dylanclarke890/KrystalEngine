@@ -19,23 +19,10 @@ namespace Krys::HTML
   public:
     HTMLStackItem() = default;
 
-    // Document fragment or element for parsing context.
-    explicit HTMLStackItem(Element &element) noexcept : _node(ShareRef(element))
-    {
-    }
-
-    explicit HTMLStackItem(DocumentFragment &fragment) noexcept : _node(ShareRef(fragment))
-    {
-    }
-
-    // Normal HTMLElementStack and HTMLFormattingElementList items.
-    HTMLStackItem(Ref<Element> &&element, HTMLTokenAtom &&token) noexcept
-        : _node(Krys::Move(element)), _attributes(Krys::Move(token.Attributes()))
-    {
-    }
-
-    HTMLStackItem(Ref<Element> &&element, ParsedAttributeList &&attributes) noexcept
-        : _node(Krys::Move(element)), _attributes(Krys::Move(attributes))
+    HTMLStackItem(TagName tagName, Namespace tagNamespace, Element &element,
+                  ParsedAttributeList &&attributes) noexcept
+        : _name(tagName), _namespace(tagNamespace), _node(ShareRef(element)),
+          _attributes(Krys::Move(attributes))
     {
     }
 
@@ -60,7 +47,7 @@ namespace Krys::HTML
       return *_node;
     }
 
-    KRYS_NODISCARD TagName Name() const noexcept
+    KRYS_NODISCARD TagName TagName() const noexcept
     {
       return _name;
     }

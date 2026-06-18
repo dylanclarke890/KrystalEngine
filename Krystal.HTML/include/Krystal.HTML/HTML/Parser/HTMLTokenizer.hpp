@@ -209,7 +209,7 @@ namespace Krys::HTML
 
     void ParserError(HTMLParseError error) noexcept
     {
-      _parseErrors.push_back(HTMLTokenizerError {
+      _parseErrors.push_back({
         .Error = error,
         .Location = _input.GetCurrentLocation(),
       });
