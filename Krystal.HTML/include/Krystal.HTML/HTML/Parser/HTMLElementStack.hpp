@@ -66,6 +66,16 @@ namespace Krys::HTML
       return _items.front();
     }
 
+    void Remove(const ContainerNode &node) noexcept
+    {
+      auto it = std::ranges::find_if(_items, [&](const auto &item)
+                                     { return item.IsElement() && &item.Node() == &node; });
+      if (it != _items.end())
+      {
+        _items.erase(it);
+      }
+    }
+
     /// @brief Returns true if the stack is empty.
     KRYS_NODISCARD bool IsEmpty() const noexcept
     {
@@ -76,6 +86,36 @@ namespace Krys::HTML
     KRYS_NODISCARD size_t Size() const noexcept
     {
       return _items.size();
+    }
+
+    KRYS_NODISCARD HTMLStackItem &At(size_t index) noexcept
+    {
+      assert(index < _items.size());
+      return _items[index];
+    }
+
+    KRYS_NODISCARD const HTMLStackItem &At(size_t index) const noexcept
+    {
+      assert(index < _items.size());
+      return _items[index];
+    }
+
+    KRYS_NODISCARD HTMLStackItem &At(size_t index) noexcept
+    {
+      assert(index < _items.size());
+      return _items[index];
+    }
+
+    KRYS_NODISCARD HTMLStackItem &operator[](size_t index) noexcept
+    {
+      assert(index < _items.size());
+      return _items[index];
+    }
+
+    KRYS_NODISCARD const HTMLStackItem &operator[](size_t index) const noexcept
+    {
+      assert(index < _items.size());
+      return _items[index];
     }
 
     KRYS_NODISCARD bool ContainsElement(const ContainerNode &node) const noexcept
@@ -103,6 +143,26 @@ namespace Krys::HTML
       }
 
       return nullptr;
+    }
+
+    KRYS_NODISCARD auto begin() noexcept
+    {
+      return _items.begin();
+    }
+
+    KRYS_NODISCARD auto end() const noexcept
+    {
+      return _items.end();
+    }
+
+    KRYS_NODISCARD auto cbegin() const noexcept
+    {
+      return _items.cbegin();
+    }
+
+    KRYS_NODISCARD auto cend() const noexcept
+    {
+      return _items.cend();
     }
 
     /// @brief Returns the entry for the element immediately before the given node in the stack, if any such
@@ -167,6 +227,47 @@ namespace Krys::HTML
       result.TemplateIsMostRecent = lastTemplateIt < lastTableIt;
 
       return result;
+    }
+
+    KRYS_NODISCARD bool ContainsTemplateElement() const noexcept
+    {
+      return std::ranges::any_of(_items, [](const auto &item)
+                                 { return item.IsElement() && Is<HTMLTemplateElement>(item.Node()); });
+    }
+
+    KRYS_NODISCARD bool ContainsInvalidUnclosedElements() const noexcept
+    {
+      return std::ranges::any_of(_items,
+                                 [](const auto &item)
+                                 {
+                                   if (!item.IsElement())
+                                   {
+                                     return false;
+                                   }
+
+                                   switch (item.TagName())
+                                   {
+                                     case TagName::dd:
+                                     case TagName::dt:
+                                     case TagName::li:
+                                     case TagName::optgroup:
+                                     case TagName::option:
+                                     case TagName::p:
+                                     case TagName::rb:
+                                     case TagName::rp:
+                                     case TagName::rt:
+                                     case TagName::rtc:
+                                     case TagName::tbody:
+                                     case TagName::td:
+                                     case TagName::tfoot:
+                                     case TagName::th:
+                                     case TagName::thead:
+                                     case TagName::tr:
+                                     case TagName::body:
+                                     case TagName::html:     return false;
+                                     default:                return true;
+                                   }
+                                 });
     }
   };
 }

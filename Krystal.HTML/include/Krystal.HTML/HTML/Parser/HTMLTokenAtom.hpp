@@ -11,9 +11,12 @@ namespace Krys::HTML
 {
   class HTMLTokenAtom
   {
+    friend class HTMLTreeBuilder;
+
   private:
     HTMLTokenType _type : BitCount<HTMLTokenType>();
     bool _isSelfClosing : 1 {false};
+    bool _selfClosingTagAcknowledged : 1 {false};
     DOMStringAtom _name {DOMStringAtom::Null()};
     UniquePtr<DoctypeData> _doctypeData;
     DOMString _comment;
@@ -66,6 +69,12 @@ namespace Krys::HTML
       return _isSelfClosing;
     }
 
+    void AcknowledgeSelfClosingTag() noexcept
+    {
+      assert(_type == HTMLTokenType::StartTag);
+      _selfClosingTagAcknowledged = true;
+    }
+
     KRYS_NODISCARD DOMStringAtom Name() const noexcept
     {
       assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag
@@ -98,7 +107,7 @@ namespace Krys::HTML
       return _doctypeData && _doctypeData->ForceQuirks;
     }
 
-    KRYS_NODISCARD RawPtr<const DoctypeData> DOCTYPEData() const noexcept
+    KRYS_NODISCARD RawPtr<DoctypeData> DOCTYPEData() const noexcept
     {
       assert(_type == HTMLTokenType::DOCTYPE);
       return _doctypeData.get();

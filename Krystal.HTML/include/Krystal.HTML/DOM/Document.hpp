@@ -44,6 +44,7 @@ namespace Krys::HTML
     friend class DocumentRareData;
     friend class DOMImplementation;
     friend class HTMLCollectionAlgorithms;
+    friend class HTMLTreeBuilder;
     friend class LiveRangeUpdater;
     friend class MutationAlgorithms;
     friend class NodeAlgorithms;
@@ -63,6 +64,10 @@ namespace Krys::HTML
         : BitCount<DocumentReadyState>() {DocumentReadyState::Complete};
     DocumentVisibilityState _visibilityState
         : BitCount<DocumentVisibilityState>() {DocumentVisibilityState::Hidden};
+
+    /// @see https://html.spec.whatwg.org/#parser-cannot-change-the-mode-flag
+    bool _parserCannotChangeTheMode : 1 {false};
+
     List<WeakRef<Element>> _renderBlockingElements;
 
   protected:

@@ -5,6 +5,7 @@
 #include "Krystal.HTML/DOM/DocumentFragment.hpp"
 #include "Krystal.HTML/DOM/Element.hpp"
 #include "Krystal.HTML/HTML/Enums/InsertionMode.hpp"
+#include "Krystal.HTML/HTML/Enums/ParserScriptingMode.hpp"
 #include "Krystal.HTML/HTML/HTMLFormElement.hpp"
 #include "Krystal.HTML/HTML/HTMLHeadElement.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLElementStack.hpp"
@@ -38,6 +39,9 @@ namespace Krys::HTML
 
     /// @see https://html.spec.whatwg.org/multipage/syntax.html#original-insertion-mode
     InsertionMode _originalInsertionMode : BitCount<InsertionMode>() {InsertionMode::Initial};
+
+    /// @see https://html.spec.whatwg.org/#scripting-mode
+    ParserScriptingMode _scriptingMode : BitCount<ParserScriptingMode>() {ParserScriptingMode::Normal};
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#frameset-ok-flag
     bool _framesetOk : 1 {true};
@@ -240,7 +244,7 @@ namespace Krys::HTML
                                                      bool onlyAddToElementStack) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-an-html-element
-    void InsertHTMLElement(HTMLTokenAtom &&token) noexcept;
+    Ref<Element> InsertHTMLElement(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#adjust-math-ml-attributes
     void AdjustMathMLAttributes(HTMLTokenAtom &token) noexcept;
@@ -272,74 +276,88 @@ namespace Krys::HTML
 #pragma region InsertionMode Algorithms
 
     /// @see https://html.spec.whatwg.org/#the-initial-insertion-mode
-    void Initial(HTMLTokenAtom &&token) noexcept;
+    void InitialMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-before-html-insertion-mode
-    void BeforeHTML(HTMLTokenAtom &&token) noexcept;
+    void BeforeHTMLMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-before-head-insertion-mode
-    void BeforeHead(HTMLTokenAtom &&token) noexcept;
+    void BeforeHeadMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-head-insertion-mode
-    void InHead(HTMLTokenAtom &&token) noexcept;
+    void InHeadMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-head-noscript-insertion-mode
-    void InHeadNoscript(HTMLTokenAtom &&token) noexcept;
+    void InHeadNoscriptMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-after-head-insertion-mode
-    void AfterHead(HTMLTokenAtom &&token) noexcept;
+    void AfterHeadMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-body-insertion-mode
-    void InBody(HTMLTokenAtom &&token) noexcept;
+    void InBodyMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-text-insertion-mode
-    void Text(HTMLTokenAtom &&token) noexcept;
+    void TextMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-table-insertion-mode
-    void InTable(HTMLTokenAtom &&token) noexcept;
+    void InTableMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-table-text-insertion-mode
-    void InTableText(HTMLTokenAtom &&token) noexcept;
+    void InTableTextMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-caption-insertion-mode
-    void InCaption(HTMLTokenAtom &&token) noexcept;
+    void InCaptionMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-column-group-insertion-mode
-    void InColumnGroup(HTMLTokenAtom &&token) noexcept;
+    void InColumnGroupMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-table-body-insertion-mode
-    void InTableBody(HTMLTokenAtom &&token) noexcept;
+    void InTableBodyMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-row-insertion-mode
-    void InRow(HTMLTokenAtom &&token) noexcept;
+    void InRowMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-cell-insertion-mode
-    void InCell(HTMLTokenAtom &&token) noexcept;
+    void InCellMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-select-insertion-mode
-    void InSelect(HTMLTokenAtom &&token) noexcept;
+    void InSelectMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-select-in-table-insertion-mode
-    void InSelectInTable(HTMLTokenAtom &&token) noexcept;
+    void InSelectInTableMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-template-insertion-mode
-    void InTemplate(HTMLTokenAtom &&token) noexcept;
+    void InTemplateMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-after-body-insertion-mode
-    void AfterBody(HTMLTokenAtom &&token) noexcept;
+    void AfterBodyMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-frameset-insertion-mode
-    void InFrameset(HTMLTokenAtom &&token) noexcept;
+    void InFramesetMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-after-frameset-insertion-mode
-    void AfterFrameset(HTMLTokenAtom &&token) noexcept;
+    void AfterFramesetMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-after-after-body-insertion-mode
-    void AfterAfterBody(HTMLTokenAtom &&token) noexcept;
+    void AfterAfterBodyMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-after-after-frameset-insertion-mode
-    void AfterAfterFrameset(HTMLTokenAtom &&token) noexcept;
+    void AfterAfterFramesetMode(HTMLTokenAtom &&token) noexcept;
 
 #pragma endregion
+
+    bool IsQuirksModeDOCTYPE(const HTMLTokenAtom &token) const noexcept;
+
+    bool IsLimitedQuirksModeDOCTYPE(const HTMLTokenAtom &token) const noexcept;
+
+    /// @brief Skips whitespace in a character token and returns whether any non-whitespace characters remain.
+    bool SkipCharacterTokenWhitespace(HTMLTokenAtom &token) noexcept;
+
+    /// @brief Inserts leading whitespace in a character token and returns whether any non-whitespace
+    /// characters remain.
+    bool InsertCharacterTokenWhitespace(HTMLTokenAtom &token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#close-a-p-element
+    void ClosePElement() noexcept;
   };
 }

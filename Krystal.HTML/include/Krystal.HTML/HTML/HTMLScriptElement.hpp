@@ -10,8 +10,13 @@ namespace Krys::HTML
   {
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLScriptElement);
 
+    friend class HTMLTreeBuilder;
+
   private:
     UniquePtr<DOMTokenList> _blocking;
+    RawPtr<Document> _parserDocument {nullptr};
+    bool _forceAsync : 1 {true};
+    bool _alreadyStarted : 1 {false};
 
   public:
     HTMLScriptElement(Document &document) noexcept;
@@ -111,6 +116,12 @@ namespace Krys::HTML
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::HTMLScriptElement)
+  KRYS_NODISCARD static bool IsType(const Krys::HTML::Element &target) noexcept
+  {
+    return Is<Krys::HTML::HTMLElement>(target)
+           && Downcast<Krys::HTML::HTMLElement>(target).IsHTMLScriptElement();
+  }
+
   KRYS_NODISCARD static bool IsType(const Krys::HTML::HTMLElement &target) noexcept
   {
     return target.IsHTMLScriptElement();

@@ -28,7 +28,7 @@ namespace Krys::HTML
       }
 
       auto &entryItem = it->Item();
-      if (entryItem.Name() != item.Name() || entryItem.Namespace() != item.Namespace())
+      if (entryItem.TagName() != item.TagName() || entryItem.Namespace() != item.Namespace())
       {
         continue;
       }
