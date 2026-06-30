@@ -240,8 +240,8 @@ namespace Krys::HTML
     void InsertElementAtAdjustedInsertionLocation(Element &element) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-a-foreign-element
-    KRYS_NODISCARD Ref<Element> InsertForeignElement(HTMLTokenAtom &&token, DOMStringAtom namespaceURI,
-                                                     bool onlyAddToElementStack) noexcept;
+    Ref<Element> InsertForeignElement(HTMLTokenAtom &&token, DOMStringAtom namespaceURI,
+                                      bool onlyAddToElementStack) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-an-html-element
     Ref<Element> InsertHTMLElement(HTMLTokenAtom &&token) noexcept;
@@ -359,5 +359,8 @@ namespace Krys::HTML
 
     /// @see https://html.spec.whatwg.org/#close-a-p-element
     void ClosePElement() noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm
+    void RunAdoptionAgency(HTMLTokenAtom &token) noexcept;
   };
 }

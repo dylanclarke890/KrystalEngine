@@ -100,12 +100,6 @@ namespace Krys::HTML
       return _items[index];
     }
 
-    KRYS_NODISCARD HTMLStackItem &At(size_t index) noexcept
-    {
-      assert(index < _items.size());
-      return _items[index];
-    }
-
     KRYS_NODISCARD HTMLStackItem &operator[](size_t index) noexcept
     {
       assert(index < _items.size());

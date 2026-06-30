@@ -10,6 +10,7 @@
 #include "Krystal.HTML/HTML/HTMLBodyElement.hpp"
 #include "Krystal.HTML/HTML/HTMLHtmlElement.hpp"
 #include "Krystal.HTML/HTML/HTMLScriptElement.hpp"
+#include "Krystal.HTML/HTML/HTMLSelectElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTableCellElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTableElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTableRowElement.hpp"
@@ -1574,7 +1575,400 @@ namespace Krys::HTML
 
             return;
           }
-          default: break;
+          case TagName::a:
+          {
+            // If an a element is in the formatting list between the end and the last marker, this is a
+            // parse error; run the adoption agency algorithm, then remove that element from the list and
+            // stack of open elements if the adoption agency algorithm didn't already remove it.
+            if (auto *existing = _activeFormattingElements.FindFormattingElementFromLastMarker(TagName::a))
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+              auto &existingNode = existing->Node();
+              RunAdoptionAgency(token);
+              _activeFormattingElements.RemoveFormattingElement(existingNode);
+              _openElementStack.Remove(existingNode);
+            }
+
+            _activeFormattingElements.Reconstruct(_openElementStack);
+            InsertHTMLElement(Krys::Move(token));
+
+            auto &aOpenItem = _openElementStack.Bottom();
+            ParsedAttributeList aAttrsCopy = aOpenItem.Attributes();
+            _activeFormattingElements.PushElement(HTMLStackItem(aOpenItem.TagName(), aOpenItem.Namespace(),
+                                                                Downcast<Element>(aOpenItem.Node()),
+                                                                Krys::Move(aAttrsCopy)));
+            return;
+          }
+          case TagName::b:
+          case TagName::big:
+          case TagName::code:
+          case TagName::em:
+          case TagName::font:
+          case TagName::i:
+          case TagName::s:
+          case TagName::small:
+          case TagName::strike:
+          case TagName::strong:
+          case TagName::tt:
+          case TagName::u:
+          {
+            _activeFormattingElements.Reconstruct(_openElementStack);
+            InsertHTMLElement(Krys::Move(token));
+
+            auto &fmtOpenItem = _openElementStack.Bottom();
+            ParsedAttributeList fmtAttrsCopy = fmtOpenItem.Attributes();
+            _activeFormattingElements.PushElement(
+              HTMLStackItem(fmtOpenItem.TagName(), fmtOpenItem.Namespace(),
+                            Downcast<Element>(fmtOpenItem.Node()), Krys::Move(fmtAttrsCopy)));
+            return;
+          }
+          case TagName::nobr:
+          {
+            _activeFormattingElements.Reconstruct(_openElementStack);
+
+            if (HasElementInScope(TagName::nobr))
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+              RunAdoptionAgency(token);
+              _activeFormattingElements.Reconstruct(_openElementStack);
+            }
+
+            InsertHTMLElement(Krys::Move(token));
+
+            auto &nobrOpenItem = _openElementStack.Bottom();
+            ParsedAttributeList nobrAttrsCopy = nobrOpenItem.Attributes();
+            _activeFormattingElements.PushElement(
+              HTMLStackItem(nobrOpenItem.TagName(), nobrOpenItem.Namespace(),
+                            Downcast<Element>(nobrOpenItem.Node()), Krys::Move(nobrAttrsCopy)));
+            return;
+          }
+          case TagName::applet:
+          case TagName::marquee:
+          case TagName::object:
+          {
+            _activeFormattingElements.Reconstruct(_openElementStack);
+            InsertHTMLElement(Krys::Move(token));
+            _activeFormattingElements.PushMarker();
+            _framesetOk = false;
+            return;
+          }
+          case TagName::table:
+          {
+            if (_document._quirksMode != QuirksMode::Quirks && HasElementInButtonScope(TagName::p))
+            {
+              ClosePElement();
+            }
+
+            InsertHTMLElement(Krys::Move(token));
+            _framesetOk = false;
+            _insertionMode = InsertionMode::InTable;
+            return;
+          }
+          case TagName::area:
+          case TagName::br:
+          case TagName::embed:
+          case TagName::img:
+          case TagName::keygen:
+          case TagName::wbr:
+          {
+            _activeFormattingElements.Reconstruct(_openElementStack);
+            InsertHTMLElement(Krys::Move(token));
+            _openElementStack.Pop();
+            token.AcknowledgeSelfClosingTag();
+            _framesetOk = false;
+            return;
+          }
+          case TagName::input:
+          {
+            if (_scriptingMode == ParserScriptingMode::Fragment && Is<HTMLSelectElement>(_contextElement))
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+              return; // ignore the token
+            }
+
+            if (HasElementInScope(TagName::select))
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+              while (_openElementStack.Bottom().TagName() != TagName::select)
+              {
+                _openElementStack.Pop();
+              }
+              _openElementStack.Pop();
+            }
+
+            bool hasHiddenType = false;
+            for (const auto &attr : token.Attributes())
+            {
+              if (attr.NameView() == u8"type")
+              {
+                hasHiddenType = StringAlgorithms::ASCIICaseInsensitiveMatch(attr.ValueView(), u8"hidden");
+                break;
+              }
+            }
+
+            _activeFormattingElements.Reconstruct(_openElementStack);
+            InsertHTMLElement(Krys::Move(token));
+            _openElementStack.Pop();
+            token.AcknowledgeSelfClosingTag();
+
+            if (!hasHiddenType)
+            {
+              _framesetOk = false;
+            }
+
+            return;
+          }
+          case TagName::param:
+          case TagName::source:
+          case TagName::track:
+          {
+            InsertHTMLElement(Krys::Move(token));
+            _openElementStack.Pop();
+            token.AcknowledgeSelfClosingTag();
+            return;
+          }
+          case TagName::hr:
+          {
+            if (HasElementInButtonScope(TagName::p))
+            {
+              ClosePElement();
+            }
+
+            if (HasElementInScope(TagName::select))
+            {
+              GenerateImpliedEndTags();
+              if (HasElementInScope(TagName::option) || HasElementInScope(TagName::optgroup))
+              {
+                // TODO(HTMLTREEBUILDER, HTML): parse error
+              }
+            }
+
+            InsertHTMLElement(Krys::Move(token));
+            _openElementStack.Pop();
+            token.AcknowledgeSelfClosingTag();
+            _framesetOk = false;
+            return;
+          }
+          case TagName::image:
+          {
+            // TODO(HTMLTREEBUILDER, HTML): parse error
+            // NOTE: The spec says to treat this as a parse error and then reprocess the token as an img tag.
+            token._name = u8"img";
+            InBodyMode(Krys::Move(token));
+            return;
+          }
+          case TagName::textarea:
+          {
+            InsertHTMLElement(Krys::Move(token));
+
+            // TODO(HTMLTREEBUILDER, HTML): If the next token is a U+000A LINE FEED (LF) character token,
+            // then ignore that token and move on to the next one. (Newlines at the start of textarea
+            // elements are ignored as an authoring convenience.)
+
+            _tokenizer.State(TokenizerState::RCDATA);
+            _originalInsertionMode = _insertionMode;
+            _framesetOk = false;
+            _insertionMode = InsertionMode::Text;
+            return;
+          }
+          case TagName::xmp:
+          {
+            if (HasElementInButtonScope(TagName::p))
+            {
+              ClosePElement();
+            }
+
+            _activeFormattingElements.Reconstruct(_openElementStack);
+            _framesetOk = false;
+            ParseGenericRawTextElement(Krys::Move(token));
+            return;
+          }
+          case TagName::iframe:
+          {
+            _framesetOk = false;
+            ParseGenericRawTextElement(Krys::Move(token));
+            return;
+          }
+          case TagName::noembed:
+          {
+            ParseGenericRawTextElement(Krys::Move(token));
+            return;
+          }
+          case TagName::noscript:
+          {
+            if (_scriptingMode != ParserScriptingMode::Disabled)
+            {
+              ParseGenericRawTextElement(Krys::Move(token));
+              return;
+            }
+
+            // Scripting is disabled: treat as 'any other start tag'.
+            _activeFormattingElements.Reconstruct(_openElementStack);
+            InsertHTMLElement(Krys::Move(token));
+            return;
+          }
+          case TagName::select:
+          {
+            if (_scriptingMode == ParserScriptingMode::Fragment && _contextElement != nullptr
+                && Is<HTMLSelectElement>(_contextElement))
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+              return; // ignore the token
+            }
+
+            if (HasElementInScope(TagName::select))
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+              while (_openElementStack.Bottom().TagName() != TagName::select)
+              {
+                _openElementStack.Pop();
+              }
+              _openElementStack.Pop();
+              return; // ignore the token
+            }
+
+            _activeFormattingElements.Reconstruct(_openElementStack);
+            InsertHTMLElement(Krys::Move(token));
+            _framesetOk = false;
+            return;
+          }
+          case TagName::option:
+          {
+            if (HasElementInScope(TagName::select))
+            {
+              GenerateImpliedEndTags(TagName::optgroup);
+              if (HasElementInScope(TagName::option))
+              {
+                // TODO(HTMLTREEBUILDER, HTML): parse error
+              }
+            }
+            else
+            {
+              if (_openElementStack.Bottom().TagName() == TagName::option)
+              {
+                _openElementStack.Pop();
+              }
+            }
+
+            _activeFormattingElements.Reconstruct(_openElementStack);
+            InsertHTMLElement(Krys::Move(token));
+            return;
+          }
+          case TagName::optgroup:
+          {
+            if (HasElementInScope(TagName::select))
+            {
+              GenerateImpliedEndTags();
+              if (HasElementInScope(TagName::option) || HasElementInScope(TagName::optgroup))
+              {
+                // TODO(HTMLTREEBUILDER, HTML): parse error
+              }
+            }
+            else
+            {
+              if (_openElementStack.Bottom().TagName() == TagName::option)
+              {
+                _openElementStack.Pop();
+              }
+            }
+
+            _activeFormattingElements.Reconstruct(_openElementStack);
+            InsertHTMLElement(Krys::Move(token));
+            return;
+          }
+          case TagName::rb:
+          case TagName::rtc:
+          {
+            if (HasElementInScope(TagName::ruby))
+            {
+              GenerateImpliedEndTags();
+              if (_openElementStack.Bottom().TagName() != TagName::ruby)
+              {
+                // TODO(HTMLTREEBUILDER, HTML): parse error
+              }
+            }
+
+            InsertHTMLElement(Krys::Move(token));
+            return;
+          }
+          case TagName::rp:
+          case TagName::rt:
+          {
+            if (HasElementInScope(TagName::ruby))
+            {
+              GenerateImpliedEndTags(TagName::rtc);
+
+              auto &rtCurrentNode = _openElementStack.Bottom();
+              if (rtCurrentNode.TagName() != TagName::rtc && rtCurrentNode.TagName() != TagName::ruby)
+              {
+                // TODO(HTMLTREEBUILDER, HTML): parse error
+              }
+            }
+
+            InsertHTMLElement(Krys::Move(token));
+            return;
+          }
+          case TagName::caption:
+          case TagName::col:
+          case TagName::colgroup:
+          case TagName::frame:
+          case TagName::head:
+          case TagName::tbody:
+          case TagName::td:
+          case TagName::tfoot:
+          case TagName::th:
+          case TagName::thead:
+          case TagName::tr:
+          {
+            // TODO(HTMLTREEBUILDER, HTML): parse error
+            return; // ignore the token
+          }
+          default:
+          {
+            // TODO(HTMLTREEBUILDER, HTML): add math and svg to the TagName enum and handle them in the switch
+            // statement above.
+            auto nameView = token.Name().View();
+
+            // math and svg require foreign element insertion; handle them here since they are not in
+            // the TagName enum.
+            if (nameView == u8"math")
+            {
+              _activeFormattingElements.Reconstruct(_openElementStack);
+              AdjustMathMLAttributes(token);
+              AdjustForeignAttributes(token);
+              InsertForeignElement(Krys::Move(token), Namespaces::MathML, false);
+
+              if (token.IsSelfClosing())
+              {
+                _openElementStack.Pop();
+                token.AcknowledgeSelfClosingTag();
+              }
+
+              return;
+            }
+
+            if (nameView == u8"svg")
+            {
+              _activeFormattingElements.Reconstruct(_openElementStack);
+              AdjustSVGAttributes(token);
+              AdjustForeignAttributes(token);
+              InsertForeignElement(Krys::Move(token), Namespaces::SVG, false);
+
+              if (token.IsSelfClosing())
+              {
+                _openElementStack.Pop();
+                token.AcknowledgeSelfClosingTag();
+              }
+
+              return;
+            }
+
+            // any other start tag
+
+            _activeFormattingElements.Reconstruct(_openElementStack);
+            InsertHTMLElement(Krys::Move(token));
+            return;
+          }
         }
       }
       case HTMLTokenType::EndTag:
@@ -1718,10 +2112,201 @@ namespace Krys::HTML
             if (!HasElementInButtonScope(TagName::p))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
-              InsertHTMLElement(HTMLTokenAtom(TagName::p));
+              auto pElement = HTMLElementFactory::TryCreate(_document, TagName::p);
+              assert(pElement != nullptr);
+              InsertElementAtAdjustedInsertionLocation(*pElement);
+              _openElementStack.Push({TagName::p, Namespace::HTML, *pElement, {}});
+            }
+
+            ClosePElement();
+            return;
+          }
+          case TagName::li:
+          {
+            if (!HasElementInListItemScope(TagName::li))
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+              return; // ignore the token
+            }
+
+            GenerateImpliedEndTags(TagName::li);
+
+            if (_openElementStack.Bottom().TagName() != TagName::li)
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+            }
+
+            while (_openElementStack.Bottom().TagName() != TagName::li)
+            {
+              _openElementStack.Pop();
+            }
+            _openElementStack.Pop();
+
+            return;
+          }
+          case TagName::dd:
+          case TagName::dt:
+          {
+            if (!HasElementInScope(tagName))
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+              return; // ignore the token
+            }
+
+            GenerateImpliedEndTags(tagName);
+
+            if (_openElementStack.Bottom().TagName() != tagName)
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+            }
+
+            while (_openElementStack.Bottom().TagName() != tagName)
+            {
+              _openElementStack.Pop();
+            }
+            _openElementStack.Pop();
+
+            return;
+          }
+          case TagName::h1:
+          case TagName::h2:
+          case TagName::h3:
+          case TagName::h4:
+          case TagName::h5:
+          case TagName::h6:
+          {
+            if (!HasElementInScope(TagName::h1) && !HasElementInScope(TagName::h2)
+                && !HasElementInScope(TagName::h3) && !HasElementInScope(TagName::h4)
+                && !HasElementInScope(TagName::h5) && !HasElementInScope(TagName::h6))
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+              return; // ignore the token
+            }
+
+            GenerateImpliedEndTags();
+
+            if (_openElementStack.Bottom().TagName() != tagName)
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+            }
+
+            while (true)
+            {
+              auto currentTagName = _openElementStack.Bottom().TagName();
+              _openElementStack.Pop();
+
+              if (currentTagName == TagName::h1 || currentTagName == TagName::h2
+                  || currentTagName == TagName::h3 || currentTagName == TagName::h4
+                  || currentTagName == TagName::h5 || currentTagName == TagName::h6)
+              {
+                break;
+              }
+            }
+
+            return;
+          }
+          case TagName::a:
+          case TagName::b:
+          case TagName::big:
+          case TagName::code:
+          case TagName::em:
+          case TagName::font:
+          case TagName::i:
+          case TagName::nobr:
+          case TagName::s:
+          case TagName::small:
+          case TagName::strike:
+          case TagName::strong:
+          case TagName::tt:
+          case TagName::u:
+          {
+            RunAdoptionAgency(token);
+            return;
+          }
+          case TagName::br:
+          {
+            // TODO(HTMLTREEBUILDER, HTML): parse error
+
+            // NOTE: We drop attributes from the token and act as if this were a "br" start tag with no
+            // attributes.
+            token._attributes.clear();
+            _activeFormattingElements.Reconstruct(_openElementStack);
+            InsertHTMLElement(Krys::Move(token));
+            _openElementStack.Pop();
+            token.AcknowledgeSelfClosingTag();
+
+            _framesetOk = false;
+            return;
+          }
+          case TagName::applet:
+          case TagName::marquee:
+          case TagName::object:
+          {
+            if (!HasElementInScope(tagName))
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+              return; // ignore the token
+            }
+
+            GenerateImpliedEndTags();
+
+            if (_openElementStack.Bottom().TagName() != tagName)
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+            }
+
+            while (_openElementStack.Bottom().TagName() != tagName)
+            {
+              _openElementStack.Pop();
+            }
+            _openElementStack.Pop();
+
+            _activeFormattingElements.ClearUpToLastMarker();
+
+            return;
+          }
+          default:
+          {
+            // Any other end tag: walk the open element stack upward from the current node.
+            auto *nodeEntry = &_openElementStack.Bottom();
+            while (true)
+            {
+              if (Is<HTMLElement>(nodeEntry->Node()) && nodeEntry->TagName() == tagName)
+              {
+                // TODO(HTMLTREEBUILDER, HTML): the spec says to generate implied end tags for HTMLElements with the same tag name,
+                // not just the same tag name. I don't think this is a problem, but it might be worth
+                // checking.
+                GenerateImpliedEndTags(tagName);
+
+                if (nodeEntry != &_openElementStack.Bottom())
+                {
+                  // TODO(HTMLTREEBUILDER, HTML): parse error
+                }
+
+                auto &targetNode = nodeEntry->Node();
+                while (true)
+                {
+                  bool isTarget = (&_openElementStack.Bottom().Node() == &targetNode);
+                  _openElementStack.Pop();
+                  if (isTarget)
+                  {
+                    break;
+                  }
+                }
+
+                return;
+              }
+
+              if (IsSpecialElement(nodeEntry->TagName()))
+              {
+                // TODO(HTMLTREEBUILDER, HTML): parse error
+                return; // ignore the token
+              }
+
+              nodeEntry = _openElementStack.EntryBefore(nodeEntry->Node());
+              assert(nodeEntry != nullptr);
             }
           }
-          default: break;
         }
       }
       case HTMLTokenType::EndOfFile:
@@ -1948,6 +2533,13 @@ namespace Krys::HTML
       _openElementStack.Pop();
     }
     _openElementStack.Pop();
+  }
+
+  void HTMLTreeBuilder::RunAdoptionAgency(HTMLTokenAtom &token) noexcept
+  {
+    // TODO(HTMLTREEBUILDER, HTML): Implement the adoption agency algorithm.
+    // https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm
+    (void)token;
   }
 
 #pragma endregion

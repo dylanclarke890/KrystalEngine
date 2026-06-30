@@ -117,4 +117,37 @@ namespace Krys::HTML
       _formattingElements.clear();
     }
   }
+
+  RawPtr<HTMLStackItem>
+    HTMLFormattingElementList::FindFormattingElementFromLastMarker(TagName name) noexcept
+  {
+    for (auto it = _formattingElements.rbegin(); it != _formattingElements.rend(); ++it)
+    {
+      if (it->IsMarker())
+      {
+        break;
+      }
+
+      if (it->IsFormattingElement() && it->Item().TagName() == name)
+      {
+        return &it->Item();
+      }
+    }
+
+    return nullptr;
+  }
+
+  void HTMLFormattingElementList::RemoveFormattingElement(const ContainerNode &node) noexcept
+  {
+    auto it = std::ranges::find_if(_formattingElements,
+                                   [&](const FormattingListEntry &entry)
+                                   {
+                                     return entry.IsFormattingElement()
+                                            && &entry.Item().Node() == &node;
+                                   });
+    if (it != _formattingElements.end())
+    {
+      _formattingElements.erase(it);
+    }
+  }
 }
