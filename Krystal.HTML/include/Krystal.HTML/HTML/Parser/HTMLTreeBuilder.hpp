@@ -296,6 +296,10 @@ namespace Krys::HTML
     /// @see https://html.spec.whatwg.org/#the-in-body-insertion-mode
     void InBodyMode(HTMLTokenAtom &&token) noexcept;
 
+    void InBodyGenericEndTag(TagName tagName);
+
+    RawPtr<HTMLStackItem> FurthestSpecialElementBlock(const HTMLStackItem &below) noexcept;
+
     /// @see https://html.spec.whatwg.org/#the-text-insertion-mode
     void TextMode(HTMLTokenAtom &&token) noexcept;
 

@@ -65,10 +65,15 @@ namespace Krys::HTML
 
     /// @brief Searches from the end of the list back to the last marker for an element with the given tag
     /// name. Returns a pointer to that stack item, or null if none is found.
-    KRYS_NODISCARD RawPtr<HTMLStackItem>
-      FindFormattingElementFromLastMarker(TagName name) noexcept;
+    KRYS_NODISCARD RawPtr<HTMLStackItem> FindFormattingElementFromLastMarker(TagName name) noexcept;
 
     /// @brief Removes the formatting list entry whose node matches the given node, if present.
     void RemoveFormattingElement(const ContainerNode &node) noexcept;
+
+    bool ContainsFormattingElement(const ContainerNode &node) const noexcept
+    {
+      return std::ranges::any_of(_formattingElements, [&](const FormattingListEntry &entry)
+                                 { return entry.IsFormattingElement() && &entry.Item().Node() == &node; });
+    }
   };
 }

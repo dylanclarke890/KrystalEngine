@@ -2267,45 +2267,8 @@ namespace Krys::HTML
           }
           default:
           {
-            // Any other end tag: walk the open element stack upward from the current node.
-            auto *nodeEntry = &_openElementStack.Bottom();
-            while (true)
-            {
-              if (Is<HTMLElement>(nodeEntry->Node()) && nodeEntry->TagName() == tagName)
-              {
-                // TODO(HTMLTREEBUILDER, HTML): the spec says to generate implied end tags for HTMLElements with the same tag name,
-                // not just the same tag name. I don't think this is a problem, but it might be worth
-                // checking.
-                GenerateImpliedEndTags(tagName);
-
-                if (nodeEntry != &_openElementStack.Bottom())
-                {
-                  // TODO(HTMLTREEBUILDER, HTML): parse error
-                }
-
-                auto &targetNode = nodeEntry->Node();
-                while (true)
-                {
-                  bool isTarget = (&_openElementStack.Bottom().Node() == &targetNode);
-                  _openElementStack.Pop();
-                  if (isTarget)
-                  {
-                    break;
-                  }
-                }
-
-                return;
-              }
-
-              if (IsSpecialElement(nodeEntry->TagName()))
-              {
-                // TODO(HTMLTREEBUILDER, HTML): parse error
-                return; // ignore the token
-              }
-
-              nodeEntry = _openElementStack.EntryBefore(nodeEntry->Node());
-              assert(nodeEntry != nullptr);
-            }
+            InBodyGenericEndTag(tagName);
+            return;
           }
         }
       }
@@ -2328,8 +2291,86 @@ namespace Krys::HTML
     }
   }
 
+  void HTMLTreeBuilder::InBodyGenericEndTag(TagName tagName)
+  {
+    // walk the open element stack upward from the current node.
+    auto *nodeEntry = &_openElementStack.Bottom();
+    while (true)
+    {
+      if (Is<HTMLElement>(nodeEntry->Node()) && nodeEntry->TagName() == tagName)
+      {
+        GenerateImpliedEndTags(tagName);
+
+        if (nodeEntry != &_openElementStack.Bottom())
+        {
+          // TODO(HTMLTREEBUILDER, HTML): parse error
+        }
+
+        auto &targetNode = nodeEntry->Node();
+        while (true)
+        {
+          bool isTarget = (&_openElementStack.Bottom().Node() == &targetNode);
+          _openElementStack.Pop();
+          if (isTarget)
+          {
+            break;
+          }
+        }
+
+        return;
+      }
+
+      if (IsSpecialElement(nodeEntry->TagName()))
+      {
+        // TODO(HTMLTREEBUILDER, HTML): parse error
+        return; // ignore the token
+      }
+
+      nodeEntry = _openElementStack.EntryBefore(nodeEntry->Node());
+      assert(nodeEntry != nullptr);
+    }
+  }
+
   void HTMLTreeBuilder::TextMode(HTMLTokenAtom &&token) noexcept
   {
+    switch (token.Type())
+    {
+      case HTMLTokenType::Character:
+      {
+        InsertCharacter(DOMString(token.Data()));
+        return;
+      }
+      case HTMLTokenType::EndOfFile:
+      {
+        // TODO(HTMLTREEBUILDER, HTML): parse error
+
+        if (_openElementStack.Bottom().TagName() == TagName::script)
+        {
+          auto &scriptElement = Downcast<HTMLScriptElement>(_openElementStack.Bottom().Node());
+          scriptElement._alreadyStarted = true;
+          _openElementStack.Pop();
+        }
+
+        _insertionMode = _originalInsertionMode;
+        ProcessToken(Krys::Move(token));
+        return;
+      }
+      case HTMLTokenType::EndTag:
+      {
+        if (token.Name().View() == u8"script")
+        {
+          // TODO(HTMLTREEBUILDER, HTML): HTMLScriptElement end tag handling
+          _openElementStack.Pop();
+          _insertionMode = _originalInsertionMode;
+        }
+        else
+        {
+          _openElementStack.Pop();
+          _insertionMode = _originalInsertionMode;
+        }
+        return;
+      }
+    }
   }
 
   void HTMLTreeBuilder::InTableMode(HTMLTokenAtom &&token) noexcept
@@ -2537,9 +2578,74 @@ namespace Krys::HTML
 
   void HTMLTreeBuilder::RunAdoptionAgency(HTMLTokenAtom &token) noexcept
   {
-    // TODO(HTMLTREEBUILDER, HTML): Implement the adoption agency algorithm.
-    // https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm
-    (void)token;
+    auto subject = ParseTagName(token.Name().View());
+
+    auto &bottom = _openElementStack.Bottom();
+    if (Is<HTMLElement>(bottom.Node()) && bottom.TagName() == subject
+        && !_activeFormattingElements.ContainsFormattingElement(bottom.Node()))
+    {
+      _openElementStack.Pop();
+      return;
+    }
+
+    size_t outerLoopCounter = 0uz;
+    while (true)
+    {
+      if (outerLoopCounter >= 8uz)
+      {
+        return;
+      }
+
+      outerLoopCounter++;
+
+      auto *formattingElement = _activeFormattingElements.FindFormattingElementFromLastMarker(subject);
+      if (formattingElement == nullptr)
+      {
+        InBodyGenericEndTag(subject);
+        return;
+      }
+
+      if (!_openElementStack.ContainsElement(formattingElement->Node()))
+      {
+        // TODO(HTMLTREEBUILDER, HTML): parse error
+        _activeFormattingElements.RemoveFormattingElement(formattingElement->Node());
+        return;
+      }
+
+      if (!HasElementInScope(formattingElement->TagName()))
+      {
+        // TODO(HTMLTREEBUILDER, HTML): parse error
+        return;
+      }
+
+      if (&_openElementStack.Bottom() != formattingElement)
+      {
+        // TODO(HTMLTREEBUILDER, HTML): parse error
+        // NOTE: do not return; continue with the algorithm.
+      }
+
+      auto *furthestBlock = FurthestSpecialElementBlock(*formattingElement);
+      if (furthestBlock == nullptr)
+      {
+        while (&_openElementStack.Bottom() != formattingElement)
+        {
+          _openElementStack.Pop();
+        }
+        _openElementStack.Pop();
+        _activeFormattingElements.RemoveFormattingElement(formattingElement->Node());
+        return;
+      }
+
+      auto *commonAncestor = _openElementStack.EntryBefore(formattingElement->Node());
+    }
+  }
+
+  RawPtr<HTMLStackItem> HTMLTreeBuilder::FurthestSpecialElementBlock(const HTMLStackItem &below) noexcept
+  {
+    // TODO(HTMLTREEBUILDER, HTML):
+    // Let furthestBlock be the topmost node in the stack of open elements that is lower in the stack than
+    // formattingElement, and is an element in the special category. There might not be one.
+    return nullptr;
   }
 
 #pragma endregion
