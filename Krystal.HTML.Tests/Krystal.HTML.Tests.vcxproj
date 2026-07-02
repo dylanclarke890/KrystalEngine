@@ -175,8 +175,8 @@
     <ClCompile Include="tests\DOM\TreeWalker.cpp" />
     <ClCompile Include="tests\HTML\Attributes\Reflection.cpp" />
     <ClCompile Include="tests\HTML\MicroParsers\Numbers.cpp" />
-    <ClCompile Include="tests\Parser\Loader\HTMLEncodingSniffer.cpp" />
-    <ClCompile Include="tests\Parser\Loader\TextResourceDecoder.cpp" />
+    <ClCompile Include="tests\HTML\Parser\Loader\HTMLEncodingSniffer.cpp" />
+    <ClCompile Include="tests\HTML\Parser\Loader\TextResourceDecoder.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\NameValidation.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\Mixins.cpp" />
     <ClCompile Include="tests\DOM\Mixins\NonElementParentNode.cpp" />
@@ -196,10 +196,10 @@
     <ClCompile Include="tests\DOM\Node.cpp" />
     <ClCompile Include="tests\DOM\ProcessingInstruction.cpp" />
     <ClCompile Include="tests\DOM\Text.cpp" />
-    <ClCompile Include="tests\Parser\HTMLCharacterReference.cpp" />
-    <ClCompile Include="tests\Parser\HTMLInputStream.cpp" />
-    <ClCompile Include="tests\Parser\HTMLTokenizerIntegrationTests.cpp" />
-    <ClCompile Include="tests\Parser\HTMLTokenizerStates.cpp" />
+    <ClCompile Include="tests\HTML\Parser\HTMLCharacterReference.cpp" />
+    <ClCompile Include="tests\HTML\Parser\HTMLInputStream.cpp" />
+    <ClCompile Include="tests\HTML\Parser\HTMLTokenizerIntegrationTests.cpp" />
+    <ClCompile Include="tests\HTML\Parser\HTMLTokenizerStates.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\TreeQueries.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\OrderedSet.cpp" />
     <ClCompile Include="tests\Infra\StringAlgorithms.cpp" />

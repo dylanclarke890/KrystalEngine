@@ -18,22 +18,22 @@
     <ClCompile Include="catch_main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Parser\Loader\HTMLEncodingSniffer.cpp">
+    <ClCompile Include="tests\HTML\Parser\Loader\HTMLEncodingSniffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Parser\Loader\TextResourceDecoder.cpp">
+    <ClCompile Include="tests\HTML\Parser\Loader\TextResourceDecoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Parser\HTMLInputStream.cpp">
+    <ClCompile Include="tests\HTML\Parser\HTMLInputStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Parser\HTMLCharacterReference.cpp">
+    <ClCompile Include="tests\HTML\Parser\HTMLCharacterReference.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Parser\HTMLTokenizerStates.cpp">
+    <ClCompile Include="tests\HTML\Parser\HTMLTokenizerStates.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Parser\HTMLTokenizerIntegrationTests.cpp">
+    <ClCompile Include="tests\HTML\Parser\HTMLTokenizerIntegrationTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tests\DOM\ContainerNode.cpp">
