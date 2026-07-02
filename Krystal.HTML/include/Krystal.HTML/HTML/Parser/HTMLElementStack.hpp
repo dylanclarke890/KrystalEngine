@@ -40,6 +40,36 @@ namespace Krys::HTML
       _items.pop_back();
     }
 
+    /// @brief Pops elements off the stack until the given node itself has been popped.
+    void PopUntilPopped(const ContainerNode &node) noexcept
+    {
+      while (true)
+      {
+        bool isTarget = (&Bottom().Node() == &node);
+        Pop();
+
+        if (isTarget)
+        {
+          break;
+        }
+      }
+    }
+
+    /// @brief Pops elements off the stack until the given tagname itself has been popped.
+    void PopUntilPopped(TagName tagName) noexcept
+    {
+      while (true)
+      {
+        bool isTarget = (Bottom().TagName() == tagName);
+        Pop();
+
+        if (isTarget)
+        {
+          break;
+        }
+      }
+    }
+
     /// @brief Get the first element added to the stack (typically the html element).
     KRYS_NODISCARD HTMLStackItem &Top() noexcept
     {
@@ -79,8 +109,7 @@ namespace Krys::HTML
     /// @brief Returns a pointer to the stack entry whose node matches the given node, or null.
     KRYS_NODISCARD RawPtr<HTMLStackItem> Find(const ContainerNode &node) noexcept
     {
-      auto it = std::ranges::find_if(_items,
-                                     [&](const auto &item)
+      auto it = std::ranges::find_if(_items, [&](const auto &item)
                                      { return item.IsElement() && &item.Node() == &node; });
       return it != _items.end() ? &*it : nullptr;
     }
@@ -92,18 +121,6 @@ namespace Krys::HTML
       auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item == &reference; });
       assert(it != _items.end());
       _items.insert(std::next(it), Krys::Move(newItem));
-    }
-
-    /// @brief Pops elements off the stack until the given node itself has been popped.
-    void PopUntilPopped(const ContainerNode &node) noexcept
-    {
-      while (true)
-      {
-        bool isTarget = (&Bottom().Node() == &node);
-        Pop();
-        if (isTarget)
-          break;
-      }
     }
 
     /// @brief Returns true if the stack is empty.
