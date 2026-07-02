@@ -40,6 +40,11 @@ namespace Krys::HTML
     {
       return _item.has_value();
     }
+
+    void ReplaceItem(HTMLStackItem newItem) noexcept
+    {
+      _item = Krys::Move(newItem);
+    }
   };
 
   /// @see https://html.spec.whatwg.org/multipage/parsing.html#the-list-of-active-formatting-elements
@@ -49,6 +54,12 @@ namespace Krys::HTML
     List<FormattingListEntry> _formattingElements;
 
   public:
+    /// @brief Tracks a position in the list for use in the adoption agency algorithm.
+    struct Bookmark
+    {
+      size_t index {0};
+    };
+
     /// @see https://html.spec.whatwg.org/push-onto-the-list-of-active-formatting-elements
     void PushElement(HTMLStackItem &&item) noexcept;
 
@@ -66,6 +77,23 @@ namespace Krys::HTML
     /// @brief Searches from the end of the list back to the last marker for an element with the given tag
     /// name. Returns a pointer to that stack item, or null if none is found.
     KRYS_NODISCARD RawPtr<HTMLStackItem> FindFormattingElementFromLastMarker(TagName name) noexcept;
+
+    /// @brief Returns a pointer to the formatting entry whose node matches the given node, or null.
+    KRYS_NODISCARD RawPtr<FormattingListEntry> Find(const ContainerNode &node) noexcept;
+
+    /// @brief Returns a bookmark positioned at the entry for the given node.
+    KRYS_NODISCARD Bookmark BookmarkFor(const ContainerNode &node) noexcept;
+
+    /// @brief Moves the bookmark to the position immediately after the given entry.
+    void MoveBookmarkAfter(Bookmark &bookmark, const FormattingListEntry &entry) noexcept;
+
+    /// @brief Removes the entry for node and adjusts bookmark if it falls at or after the removed entry.
+    void RemoveAndUpdateBookmark(const ContainerNode &node, Bookmark &bookmark) noexcept;
+
+    /// @brief Removes oldElement from the list and inserts newItem at the bookmark position.
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm step 18
+    void SwapTo(const ContainerNode &oldElement, HTMLStackItem newItem,
+                const Bookmark &bookmark) noexcept;
 
     /// @brief Removes the formatting list entry whose node matches the given node, if present.
     void RemoveFormattingElement(const ContainerNode &node) noexcept;

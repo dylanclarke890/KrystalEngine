@@ -66,6 +66,9 @@ namespace Krys::HTML
 
     RawPtr<Element> _contextElement;
 
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#pending-table-character-tokens
+    List<DOMString> _pendingTableCharacterTokens;
+
   public:
     HTMLTreeBuilder(Document &document, HTMLTokenizer &tokenizer,
                     RawPtr<Element> contextElement = nullptr) noexcept;
@@ -324,12 +327,6 @@ namespace Krys::HTML
     /// @see https://html.spec.whatwg.org/#the-in-cell-insertion-mode
     void InCellMode(HTMLTokenAtom &&token) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#the-in-select-insertion-mode
-    void InSelectMode(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#the-in-select-in-table-insertion-mode
-    void InSelectInTableMode(HTMLTokenAtom &&token) noexcept;
-
     /// @see https://html.spec.whatwg.org/#the-in-template-insertion-mode
     void InTemplateMode(HTMLTokenAtom &&token) noexcept;
 
@@ -366,5 +363,14 @@ namespace Krys::HTML
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm
     void RunAdoptionAgency(HTMLTokenAtom &token) noexcept;
+
+    /// @brief Creates a new element by duplicating the tag name, namespace, and attributes from a saved
+    /// stack item. Used by the adoption agency algorithm.
+    /// @see https://html.spec.whatwg.org/#create-an-element-for-the-token
+    KRYS_NODISCARD Ref<Element> CreateElementFromSavedItem(const HTMLStackItem &item) noexcept;
+
+    /// @brief Moves all children of oldParent to newParent, then appends newParent to oldParent.
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm steps 16–17
+    void TakeAllChildrenAndReparent(Ref<Element> newParent, HTMLStackItem &oldParent) noexcept;
   };
 }

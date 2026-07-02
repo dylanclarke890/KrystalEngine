@@ -21,8 +21,6 @@ namespace Krys::HTML
     InTableBody,
     InRow,
     InCell,
-    InSelect,
-    InSelectInTable,
     InTemplate,
     AfterBody,
     InFrameset,
@@ -32,4 +30,4 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::InsertionMode, 23u)
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::InsertionMode, 21u)

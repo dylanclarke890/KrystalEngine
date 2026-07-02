@@ -64,8 +64,6 @@ namespace Krys::HTML
       case InsertionMode::InTableBody:        InTableBodyMode(Krys::Move(token)); break;
       case InsertionMode::InRow:              InRowMode(Krys::Move(token)); break;
       case InsertionMode::InCell:             InCellMode(Krys::Move(token)); break;
-      case InsertionMode::InSelect:           InSelectMode(Krys::Move(token)); break;
-      case InsertionMode::InSelectInTable:    InSelectInTableMode(Krys::Move(token)); break;
       case InsertionMode::InTemplate:         InTemplateMode(Krys::Move(token)); break;
       case InsertionMode::AfterBody:          AfterBodyMode(Krys::Move(token)); break;
       case InsertionMode::InFrameset:         InFramesetMode(Krys::Move(token)); break;
@@ -2375,62 +2373,1208 @@ namespace Krys::HTML
 
   void HTMLTreeBuilder::InTableMode(HTMLTokenAtom &&token) noexcept
   {
+    auto clearStackBackToTableContext = [&]()
+    {
+      while (true)
+      {
+        auto tagName = _openElementStack.Bottom().TagName();
+        if (tagName == TagName::table || tagName == TagName::template_ || tagName == TagName::html)
+        {
+          break;
+        }
+        _openElementStack.Pop();
+      }
+    };
+
+    switch (token.Type())
+    {
+      case HTMLTokenType::Character:
+      {
+        switch (_openElementStack.Bottom().TagName())
+        {
+          case TagName::table:
+          case TagName::tbody:
+          case TagName::template_:
+          case TagName::tfoot:
+          case TagName::thead:
+          case TagName::tr:
+          {
+            _pendingTableCharacterTokens.clear();
+            _originalInsertionMode = _insertionMode;
+            _insertionMode = InsertionMode::InTableText;
+            ProcessToken(Krys::Move(token));
+            return;
+          }
+          default: break;
+        }
+        break; // fall through to "anything else"
+      }
+      case HTMLTokenType::Comment:
+      {
+        InsertComment(DOMString(token.Data()));
+        return;
+      }
+      case HTMLTokenType::DOCTYPE:
+      {
+        // TODO(HTMLTREEBUILDER, HTML): parse error
+        return; // ignore the token
+      }
+      case HTMLTokenType::StartTag:
+      {
+        auto tagName = ParseTagName(token.Name().View());
+        switch (tagName)
+        {
+          case TagName::caption:
+          {
+            clearStackBackToTableContext();
+            _activeFormattingElements.PushMarker();
+            InsertHTMLElement(Krys::Move(token));
+            _insertionMode = InsertionMode::InCaption;
+            return;
+          }
+          case TagName::colgroup:
+          {
+            clearStackBackToTableContext();
+            InsertHTMLElement(Krys::Move(token));
+            _insertionMode = InsertionMode::InColumnGroup;
+            return;
+          }
+          case TagName::col:
+          {
+            clearStackBackToTableContext();
+            auto colgroup = HTMLElementFactory::TryCreate(_document, TagName::colgroup);
+            assert(colgroup != nullptr);
+            InsertElementAtAdjustedInsertionLocation(*colgroup);
+            _openElementStack.Push({TagName::colgroup, Namespace::HTML, *colgroup, {}});
+            _insertionMode = InsertionMode::InColumnGroup;
+            ProcessToken(Krys::Move(token));
+            return;
+          }
+          case TagName::tbody:
+          case TagName::tfoot:
+          case TagName::thead:
+          {
+            clearStackBackToTableContext();
+            InsertHTMLElement(Krys::Move(token));
+            _insertionMode = InsertionMode::InTableBody;
+            return;
+          }
+          case TagName::td:
+          case TagName::th:
+          case TagName::tr:
+          {
+            clearStackBackToTableContext();
+            auto tbody = HTMLElementFactory::TryCreate(_document, TagName::tbody);
+            assert(tbody != nullptr);
+            InsertElementAtAdjustedInsertionLocation(*tbody);
+            _openElementStack.Push({TagName::tbody, Namespace::HTML, *tbody, {}});
+            _insertionMode = InsertionMode::InTableBody;
+            ProcessToken(Krys::Move(token));
+            return;
+          }
+          case TagName::table:
+          {
+            // TODO(HTMLTREEBUILDER, HTML): parse error
+            if (!HasElementInTableScope(TagName::table))
+            {
+              return; // ignore the token
+            }
+            while (_openElementStack.Bottom().TagName() != TagName::table)
+            {
+              _openElementStack.Pop();
+            }
+            _openElementStack.Pop();
+            ResetInsertionModeAppropriately();
+            ProcessToken(Krys::Move(token));
+            return;
+          }
+          case TagName::style:
+          case TagName::script:
+          case TagName::template_:
+          {
+            InHeadMode(Krys::Move(token));
+            return;
+          }
+          case TagName::input:
+          {
+            auto typeIt = std::ranges::find_if(token.Attributes(), [](const ParsedAttribute &attr)
+                                               { return attr.NameView() == u8"type"; });
+            if (typeIt == token.Attributes().end()
+                || !StringAlgorithms::ASCIICaseInsensitiveMatch(typeIt->ValueView(), u8"hidden"))
+            {
+              break; // fall through to "anything else"
+            }
+            // TODO(HTMLTREEBUILDER, HTML): parse error
+            InsertHTMLElement(Krys::Move(token));
+            _openElementStack.Pop();
+            token.AcknowledgeSelfClosingTag();
+            return;
+          }
+          case TagName::form:
+          {
+            // TODO(HTMLTREEBUILDER, HTML): parse error
+            if (_openElementStack.ContainsTemplateElement() || _form != nullptr)
+            {
+              return; // ignore the token
+            }
+            auto element = InsertHTMLElement(Krys::Move(token));
+            _form = Krys::Move(element);
+            _openElementStack.Pop();
+            return;
+          }
+          default:
+          {
+            break;
+          }
+        }
+        break; // fall through to "anything else"
+      }
+      case HTMLTokenType::EndTag:
+      {
+        auto tagName = ParseTagName(token.Name().View());
+        switch (tagName)
+        {
+          case TagName::table:
+          {
+            if (!HasElementInTableScope(TagName::table))
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+              return; // ignore the token
+            }
+            while (_openElementStack.Bottom().TagName() != TagName::table)
+              _openElementStack.Pop();
+            _openElementStack.Pop();
+            ResetInsertionModeAppropriately();
+            return;
+          }
+          case TagName::body:
+          case TagName::caption:
+          case TagName::col:
+          case TagName::colgroup:
+          case TagName::html:
+          case TagName::tbody:
+          case TagName::td:
+          case TagName::tfoot:
+          case TagName::th:
+          case TagName::thead:
+          case TagName::tr:
+          {
+            // TODO(HTMLTREEBUILDER, HTML): parse error
+            return; // ignore the token
+          }
+          case TagName::template_:
+          {
+            InHeadMode(Krys::Move(token));
+            return;
+          }
+          default: break;
+        }
+        break; // fall through to "anything else"
+      }
+      case HTMLTokenType::EndOfFile:
+      {
+        InBodyMode(Krys::Move(token));
+        return;
+      }
+      default: break;
+    }
+
+    // Anything else: parse error, enable foster parenting, process with in body, then disable
+    // TODO(HTMLTREEBUILDER, HTML): parse error
+    _fosterParenting = true;
+    InBodyMode(Krys::Move(token));
+    _fosterParenting = false;
   }
 
   void HTMLTreeBuilder::InTableTextMode(HTMLTokenAtom &&token) noexcept
   {
+    if (token.Type() == HTMLTokenType::Character)
+    {
+      // A character token that is U+0000 NULL: parse error, ignore.
+      // TODO(HTMLTREEBUILDER, HTML): this only checks the first character of the token, but the spec says to
+      // check each character. This is a bug.
+      if (!token.Data().empty() && token.Data().front() == u8'\0')
+      {
+        // TODO(HTMLTREEBUILDER, HTML): parse error
+        return;
+      }
+      _pendingTableCharacterTokens.emplace_back(token.Data());
+      return;
+    }
+
+    // Anything else: check if any pending token contains non-ASCII-whitespace.
+    bool hasNonWhitespace = false;
+    for (const auto &chars : _pendingTableCharacterTokens)
+    {
+      if (hasNonWhitespace =
+            std::ranges::any_of(chars, [](char8 ch) { return !StringAlgorithms::IsASCIIWhitespace(ch); }))
+      {
+        break;
+      }
+    }
+
+    if (hasNonWhitespace)
+    {
+      // TODO(HTMLTREEBUILDER, HTML): parse error
+      // Reprocess each pending character token using the "anything else" entry in the "in table" mode.
+      for (auto &chars : _pendingTableCharacterTokens)
+      {
+        _fosterParenting = true;
+        InsertCharacter(DOMString(chars));
+        _fosterParenting = false;
+      }
+    }
+    else
+    {
+      for (auto &chars : _pendingTableCharacterTokens)
+        InsertCharacter(DOMString(chars));
+    }
+
+    _pendingTableCharacterTokens.clear();
+    _insertionMode = _originalInsertionMode;
+    ProcessToken(Krys::Move(token));
   }
 
   void HTMLTreeBuilder::InCaptionMode(HTMLTokenAtom &&token) noexcept
   {
+    // Shared logic: close the caption and optionally reprocess the token.
+    auto closeCaption = [&](bool reprocess) -> bool
+    {
+      if (!HasElementInTableScope(TagName::caption))
+      {
+        // TODO(HTMLTREEBUILDER, HTML): parse error
+        return false; // fragment case — ignore
+      }
+      GenerateImpliedEndTags();
+      if (_openElementStack.Bottom().TagName() != TagName::caption)
+      {
+        // TODO(HTMLTREEBUILDER, HTML): parse error
+      }
+      while (_openElementStack.Bottom().TagName() != TagName::caption)
+        _openElementStack.Pop();
+      _openElementStack.Pop();
+      _activeFormattingElements.ClearUpToLastMarker();
+      _insertionMode = InsertionMode::InTable;
+      return true;
+    };
+
+    if (token.Type() == HTMLTokenType::EndTag && token.Name() == u8"caption")
+    {
+      closeCaption(false);
+      return;
+    }
+
+    if (token.Type() == HTMLTokenType::EndTag && token.Name() == u8"table")
+    {
+      if (closeCaption(false))
+      {
+        ProcessToken(Krys::Move(token));
+      }
+      return;
+    }
+
+    if (token.Type() == HTMLTokenType::StartTag)
+    {
+      auto tagName = ParseTagName(token.Name().View());
+      switch (tagName)
+      {
+        case TagName::caption:
+        case TagName::col:
+        case TagName::colgroup:
+        case TagName::tbody:
+        case TagName::td:
+        case TagName::tfoot:
+        case TagName::th:
+        case TagName::thead:
+        case TagName::tr:
+        {
+          if (closeCaption(false))
+          {
+            ProcessToken(Krys::Move(token));
+          }
+          return;
+        }
+        default: break;
+      }
+    }
+
+    if (token.Type() == HTMLTokenType::EndTag)
+    {
+      auto tagName = ParseTagName(token.Name().View());
+      switch (tagName)
+      {
+        case TagName::body:
+        case TagName::col:
+        case TagName::colgroup:
+        case TagName::html:
+        case TagName::tbody:
+        case TagName::td:
+        case TagName::tfoot:
+        case TagName::th:
+        case TagName::thead:
+        case TagName::tr:
+        {
+          // TODO(HTMLTREEBUILDER, HTML): parse error
+          return; // ignore the token
+        }
+        default: break;
+      }
+    }
+
+    InBodyMode(Krys::Move(token));
   }
 
   void HTMLTreeBuilder::InColumnGroupMode(HTMLTokenAtom &&token) noexcept
   {
+    switch (token.Type())
+    {
+      case HTMLTokenType::Character:
+      {
+        if (InsertCharacterTokenWhitespace(token))
+        {
+          break; // has non-whitespace remaining — fall through to "anything else"
+        }
+        return;
+      }
+      case HTMLTokenType::Comment:
+      {
+        InsertComment(DOMString(token.Data()));
+        return;
+      }
+      case HTMLTokenType::DOCTYPE:
+      {
+        // TODO(HTMLTREEBUILDER, HTML): parse error
+        return; // ignore the token
+      }
+      case HTMLTokenType::StartTag:
+      {
+        auto tagName = ParseTagName(token.Name().View());
+        switch (tagName)
+        {
+          case TagName::html:
+          {
+            InBodyMode(Krys::Move(token));
+            return;
+          }
+          case TagName::col:
+          {
+            InsertHTMLElement(Krys::Move(token));
+            _openElementStack.Pop();
+            token.AcknowledgeSelfClosingTag();
+            return;
+          }
+          case TagName::template_:
+          {
+            InHeadMode(Krys::Move(token));
+            return;
+          }
+          default: break;
+        }
+        break; // fall through to "anything else"
+      }
+      case HTMLTokenType::EndTag:
+      {
+        auto tagName = ParseTagName(token.Name().View());
+        switch (tagName)
+        {
+          case TagName::colgroup:
+          {
+            if (_openElementStack.Bottom().TagName() != TagName::colgroup)
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+              return; // ignore the token
+            }
+            _openElementStack.Pop();
+            _insertionMode = InsertionMode::InTable;
+            return;
+          }
+          case TagName::col:
+          {
+            // TODO(HTMLTREEBUILDER, HTML): parse error
+            return; // ignore the token
+          }
+          case TagName::template_:
+          {
+            InHeadMode(Krys::Move(token));
+            return;
+          }
+          default: break;
+        }
+        break; // fall through to "anything else"
+      }
+      case HTMLTokenType::EndOfFile:
+      {
+        InBodyMode(Krys::Move(token));
+        return;
+      }
+      default: break;
+    }
+
+    // Anything else: if current node is not a colgroup element, parse error and ignore.
+    if (_openElementStack.Bottom().TagName() != TagName::colgroup)
+    {
+      // TODO(HTMLTREEBUILDER, HTML): parse error
+      return; // ignore the token
+    }
+    _openElementStack.Pop();
+    _insertionMode = InsertionMode::InTable;
+    ProcessToken(Krys::Move(token));
   }
 
   void HTMLTreeBuilder::InTableBodyMode(HTMLTokenAtom &&token) noexcept
   {
+    auto clearStackBackToTableBodyContext = [&]()
+    {
+      while (true)
+      {
+        auto tagName = _openElementStack.Bottom().TagName();
+        if (tagName == TagName::tbody || tagName == TagName::tfoot || tagName == TagName::thead
+            || tagName == TagName::template_ || tagName == TagName::html)
+          break;
+        _openElementStack.Pop();
+      }
+    };
+
+    switch (token.Type())
+    {
+      case HTMLTokenType::StartTag:
+      {
+        auto tagName = ParseTagName(token.Name().View());
+        switch (tagName)
+        {
+          case TagName::tr:
+          {
+            clearStackBackToTableBodyContext();
+            InsertHTMLElement(Krys::Move(token));
+            _insertionMode = InsertionMode::InRow;
+            return;
+          }
+          case TagName::th:
+          case TagName::td:
+          {
+            // TODO(HTMLTREEBUILDER, HTML): parse error
+            clearStackBackToTableBodyContext();
+            auto tr = HTMLElementFactory::TryCreate(_document, TagName::tr);
+            assert(tr != nullptr);
+            InsertElementAtAdjustedInsertionLocation(*tr);
+            _openElementStack.Push({TagName::tr, Namespace::HTML, *tr, {}});
+            _insertionMode = InsertionMode::InRow;
+            ProcessToken(Krys::Move(token));
+            return;
+          }
+          case TagName::caption:
+          case TagName::col:
+          case TagName::colgroup:
+          case TagName::tbody:
+          case TagName::tfoot:
+          case TagName::thead:
+          {
+            if (!HasElementInTableScope(TagName::tbody) && !HasElementInTableScope(TagName::thead)
+                && !HasElementInTableScope(TagName::tfoot))
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+              return; // ignore the token
+            }
+            clearStackBackToTableBodyContext();
+            _openElementStack.Pop();
+            _insertionMode = InsertionMode::InTable;
+            ProcessToken(Krys::Move(token));
+            return;
+          }
+          default: break;
+        }
+        break;
+      }
+      case HTMLTokenType::EndTag:
+      {
+        auto tagName = ParseTagName(token.Name().View());
+        switch (tagName)
+        {
+          case TagName::tbody:
+          case TagName::tfoot:
+          case TagName::thead:
+          {
+            if (!HasElementInTableScope(tagName))
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+              return; // ignore the token
+            }
+            clearStackBackToTableBodyContext();
+            _openElementStack.Pop();
+            _insertionMode = InsertionMode::InTable;
+            return;
+          }
+          case TagName::table:
+          {
+            if (!HasElementInTableScope(TagName::tbody) && !HasElementInTableScope(TagName::thead)
+                && !HasElementInTableScope(TagName::tfoot))
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+              return; // ignore the token
+            }
+            clearStackBackToTableBodyContext();
+            _openElementStack.Pop();
+            _insertionMode = InsertionMode::InTable;
+            ProcessToken(Krys::Move(token));
+            return;
+          }
+          case TagName::body:
+          case TagName::caption:
+          case TagName::col:
+          case TagName::colgroup:
+          case TagName::html:
+          case TagName::td:
+          case TagName::th:
+          case TagName::tr:
+          {
+            // TODO(HTMLTREEBUILDER, HTML): parse error
+            return; // ignore the token
+          }
+          default: break;
+        }
+        break;
+      }
+      default: break;
+    }
+
+    InTableMode(Krys::Move(token));
   }
 
   void HTMLTreeBuilder::InRowMode(HTMLTokenAtom &&token) noexcept
   {
+    auto clearStackBackToTableRowContext = [&]()
+    {
+      while (true)
+      {
+        auto tagName = _openElementStack.Bottom().TagName();
+        if (tagName == TagName::tr || tagName == TagName::template_ || tagName == TagName::html)
+          break;
+        _openElementStack.Pop();
+      }
+    };
+
+    switch (token.Type())
+    {
+      case HTMLTokenType::StartTag:
+      {
+        auto tagName = ParseTagName(token.Name().View());
+        switch (tagName)
+        {
+          case TagName::th:
+          case TagName::td:
+          {
+            clearStackBackToTableRowContext();
+            InsertHTMLElement(Krys::Move(token));
+            _insertionMode = InsertionMode::InCell;
+            _activeFormattingElements.PushMarker();
+            return;
+          }
+          case TagName::caption:
+          case TagName::col:
+          case TagName::colgroup:
+          case TagName::tbody:
+          case TagName::tfoot:
+          case TagName::thead:
+          case TagName::tr:
+          {
+            if (!HasElementInTableScope(TagName::tr))
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+              return; // ignore the token
+            }
+            clearStackBackToTableRowContext();
+            _openElementStack.Pop();
+            _insertionMode = InsertionMode::InTableBody;
+            ProcessToken(Krys::Move(token));
+            return;
+          }
+          default: break;
+        }
+        break;
+      }
+      case HTMLTokenType::EndTag:
+      {
+        auto tagName = ParseTagName(token.Name().View());
+        switch (tagName)
+        {
+          case TagName::tr:
+          {
+            if (!HasElementInTableScope(TagName::tr))
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+              return; // ignore the token
+            }
+            clearStackBackToTableRowContext();
+            _openElementStack.Pop();
+            _insertionMode = InsertionMode::InTableBody;
+            return;
+          }
+          case TagName::table:
+          {
+            if (!HasElementInTableScope(TagName::tr))
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+              return; // ignore the token
+            }
+            clearStackBackToTableRowContext();
+            _openElementStack.Pop();
+            _insertionMode = InsertionMode::InTableBody;
+            ProcessToken(Krys::Move(token));
+            return;
+          }
+          case TagName::tbody:
+          case TagName::tfoot:
+          case TagName::thead:
+          {
+            if (!HasElementInTableScope(tagName))
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+              return; // ignore the token
+            }
+            if (!HasElementInTableScope(TagName::tr))
+              return; // ignore the token
+            clearStackBackToTableRowContext();
+            _openElementStack.Pop();
+            _insertionMode = InsertionMode::InTableBody;
+            ProcessToken(Krys::Move(token));
+            return;
+          }
+          case TagName::body:
+          case TagName::caption:
+          case TagName::col:
+          case TagName::colgroup:
+          case TagName::html:
+          case TagName::td:
+          case TagName::th:
+          {
+            // TODO(HTMLTREEBUILDER, HTML): parse error
+            return; // ignore the token
+          }
+          default: break;
+        }
+        break;
+      }
+      default: break;
+    }
+
+    InTableMode(Krys::Move(token));
   }
 
   void HTMLTreeBuilder::InCellMode(HTMLTokenAtom &&token) noexcept
   {
-  }
+    auto closeTheCell = [&]()
+    {
+      GenerateImpliedEndTags();
+      auto &current = _openElementStack.Bottom();
+      if (current.TagName() != TagName::td && current.TagName() != TagName::th)
+      {
+        // TODO(HTMLTREEBUILDER, HTML): parse error
+      }
+      while (_openElementStack.Bottom().TagName() != TagName::td
+             && _openElementStack.Bottom().TagName() != TagName::th)
+      {
+        _openElementStack.Pop();
+      }
+      _openElementStack.Pop();
+      _activeFormattingElements.ClearUpToLastMarker();
+      _insertionMode = InsertionMode::InRow;
+    };
 
-  void HTMLTreeBuilder::InSelectMode(HTMLTokenAtom &&token) noexcept
-  {
-  }
+    switch (token.Type())
+    {
+      case HTMLTokenType::EndTag:
+      {
+        auto tagName = ParseTagName(token.Name().View());
+        switch (tagName)
+        {
+          case TagName::td:
+          case TagName::th:
+          {
+            if (!HasElementInTableScope(tagName))
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+              return; // ignore the token
+            }
+            GenerateImpliedEndTags();
+            if (_openElementStack.Bottom().TagName() != tagName)
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+            }
+            while (_openElementStack.Bottom().TagName() != tagName)
+              _openElementStack.Pop();
+            _openElementStack.Pop();
+            _activeFormattingElements.ClearUpToLastMarker();
+            _insertionMode = InsertionMode::InRow;
+            return;
+          }
+          case TagName::body:
+          case TagName::caption:
+          case TagName::col:
+          case TagName::colgroup:
+          case TagName::html:
+          {
+            // TODO(HTMLTREEBUILDER, HTML): parse error
+            return; // ignore the token
+          }
+          case TagName::table:
+          case TagName::tbody:
+          case TagName::tfoot:
+          case TagName::thead:
+          case TagName::tr:
+          {
+            if (!HasElementInTableScope(tagName))
+            {
+              // TODO(HTMLTREEBUILDER, HTML): parse error
+              return; // ignore the token
+            }
+            closeTheCell();
+            ProcessToken(Krys::Move(token));
+            return;
+          }
+          default: break;
+        }
+        break;
+      }
+      case HTMLTokenType::StartTag:
+      {
+        auto tagName = ParseTagName(token.Name().View());
+        switch (tagName)
+        {
+          case TagName::caption:
+          case TagName::col:
+          case TagName::colgroup:
+          case TagName::tbody:
+          case TagName::td:
+          case TagName::tfoot:
+          case TagName::th:
+          case TagName::thead:
+          case TagName::tr:
+          {
+            // Assert: the stack has a td or th in table scope.
+            closeTheCell();
+            ProcessToken(Krys::Move(token));
+            return;
+          }
+          default: break;
+        }
+        break;
+      }
+      default: break;
+    }
 
-  void HTMLTreeBuilder::InSelectInTableMode(HTMLTokenAtom &&token) noexcept
-  {
+    InBodyMode(Krys::Move(token));
   }
 
   void HTMLTreeBuilder::InTemplateMode(HTMLTokenAtom &&token) noexcept
   {
+    switch (token.Type())
+    {
+      case HTMLTokenType::Character:
+      case HTMLTokenType::Comment:
+      case HTMLTokenType::DOCTYPE:
+      {
+        InBodyMode(Krys::Move(token));
+        return;
+      }
+      case HTMLTokenType::StartTag:
+      {
+        auto tagName = ParseTagName(token.Name().View());
+        switch (tagName)
+        {
+          case TagName::base:
+          case TagName::basefont:
+          case TagName::bgsound:
+          case TagName::link:
+          case TagName::meta:
+          case TagName::noframes:
+          case TagName::script:
+          case TagName::style:
+          case TagName::template_:
+          case TagName::title:
+          {
+            InHeadMode(Krys::Move(token));
+            return;
+          }
+          case TagName::caption:
+          case TagName::colgroup:
+          case TagName::tbody:
+          case TagName::tfoot:
+          case TagName::thead:
+          {
+            _templateInsertionModes.pop_back();
+            _templateInsertionModes.push_back(InsertionMode::InTable);
+            _insertionMode = InsertionMode::InTable;
+            ProcessToken(Krys::Move(token));
+            return;
+          }
+          case TagName::col:
+          {
+            _templateInsertionModes.pop_back();
+            _templateInsertionModes.push_back(InsertionMode::InColumnGroup);
+            _insertionMode = InsertionMode::InColumnGroup;
+            ProcessToken(Krys::Move(token));
+            return;
+          }
+          case TagName::tr:
+          {
+            _templateInsertionModes.pop_back();
+            _templateInsertionModes.push_back(InsertionMode::InTableBody);
+            _insertionMode = InsertionMode::InTableBody;
+            ProcessToken(Krys::Move(token));
+            return;
+          }
+          case TagName::td:
+          case TagName::th:
+          {
+            _templateInsertionModes.pop_back();
+            _templateInsertionModes.push_back(InsertionMode::InRow);
+            _insertionMode = InsertionMode::InRow;
+            ProcessToken(Krys::Move(token));
+            return;
+          }
+          default:
+          {
+            _templateInsertionModes.pop_back();
+            _templateInsertionModes.push_back(InsertionMode::InBody);
+            _insertionMode = InsertionMode::InBody;
+            ProcessToken(Krys::Move(token));
+            return;
+          }
+        }
+      }
+      case HTMLTokenType::EndTag:
+      {
+        if (token.Name() == u8"template")
+        {
+          InHeadMode(Krys::Move(token));
+          return;
+        }
+        // TODO(HTMLTREEBUILDER, HTML): parse error
+        return; // ignore the token
+      }
+      case HTMLTokenType::EndOfFile:
+      {
+        if (!_openElementStack.ContainsTemplateElement())
+        {
+          // TODO(HTMLTREEBUILDER, HTML): Stop parsing. (fragment case)
+          return;
+        }
+        // TODO(HTMLTREEBUILDER, HTML): parse error
+        while (_openElementStack.Bottom().TagName() != TagName::template_)
+          _openElementStack.Pop();
+        _openElementStack.Pop();
+        _activeFormattingElements.ClearUpToLastMarker();
+        _templateInsertionModes.pop_back();
+        ResetInsertionModeAppropriately();
+        ProcessToken(Krys::Move(token));
+        return;
+      }
+      default: break;
+    }
   }
 
   void HTMLTreeBuilder::AfterBodyMode(HTMLTokenAtom &&token) noexcept
   {
+    switch (token.Type())
+    {
+      case HTMLTokenType::Character:
+      {
+        if (!InsertCharacterTokenWhitespace(token))
+          return;
+        // Non-whitespace remains — fall through to "anything else"
+        break;
+      }
+      case HTMLTokenType::Comment:
+      {
+        // Insert as the last child of the html element (first element on the stack).
+        InsertComment(DOMString(token.Data()),
+                      AdjustedInsertionLocation {&_openElementStack.Top().Node(), nullptr});
+        return;
+      }
+      case HTMLTokenType::DOCTYPE:
+      {
+        // TODO(HTMLTREEBUILDER, HTML): parse error
+        return; // ignore the token
+      }
+      case HTMLTokenType::StartTag:
+      {
+        if (token.Name() == u8"html")
+        {
+          InBodyMode(Krys::Move(token));
+          return;
+        }
+        break; // fall through to "anything else"
+      }
+      case HTMLTokenType::EndTag:
+      {
+        if (token.Name() == u8"html")
+        {
+          if (_contextElement != nullptr)
+          {
+            // TODO(HTMLTREEBUILDER, HTML): parse error — fragment case, ignore
+            return;
+          }
+          _insertionMode = InsertionMode::AfterAfterBody;
+          return;
+        }
+        break; // fall through to "anything else"
+      }
+      case HTMLTokenType::EndOfFile:
+      {
+        // TODO(HTMLTREEBUILDER, HTML): Stop parsing.
+        return;
+      }
+      default: break;
+    }
+
+    // Anything else: parse error, switch to "in body", reprocess.
+    // TODO(HTMLTREEBUILDER, HTML): parse error
+    _insertionMode = InsertionMode::InBody;
+    ProcessToken(Krys::Move(token));
   }
 
   void HTMLTreeBuilder::InFramesetMode(HTMLTokenAtom &&token) noexcept
   {
+    switch (token.Type())
+    {
+      case HTMLTokenType::Character:
+      {
+        if (InsertCharacterTokenWhitespace(token))
+          break; // non-whitespace remaining — fall through to "anything else"
+        return;
+      }
+      case HTMLTokenType::Comment:
+      {
+        InsertComment(DOMString(token.Data()));
+        return;
+      }
+      case HTMLTokenType::DOCTYPE:
+      {
+        // TODO(HTMLTREEBUILDER, HTML): parse error
+        return; // ignore the token
+      }
+      case HTMLTokenType::StartTag:
+      {
+        auto tagName = ParseTagName(token.Name().View());
+        switch (tagName)
+        {
+          case TagName::html:
+          {
+            InBodyMode(Krys::Move(token));
+            return;
+          }
+          case TagName::frameset:
+          {
+            InsertHTMLElement(Krys::Move(token));
+            return;
+          }
+          case TagName::frame:
+          {
+            InsertHTMLElement(Krys::Move(token));
+            _openElementStack.Pop();
+            token.AcknowledgeSelfClosingTag();
+            return;
+          }
+          case TagName::noframes:
+          {
+            InHeadMode(Krys::Move(token));
+            return;
+          }
+          default: break;
+        }
+        break; // fall through to "anything else"
+      }
+      case HTMLTokenType::EndTag:
+      {
+        if (token.Name() == u8"frameset")
+        {
+          if (&_openElementStack.Bottom().Node() == &_openElementStack.Top().Node())
+          {
+            // TODO(HTMLTREEBUILDER, HTML): parse error — fragment case, ignore
+            return;
+          }
+          _openElementStack.Pop();
+          if (_contextElement == nullptr && _openElementStack.Bottom().TagName() != TagName::frameset)
+          {
+            _insertionMode = InsertionMode::AfterFrameset;
+          }
+          return;
+        }
+        break; // fall through to "anything else"
+      }
+      case HTMLTokenType::EndOfFile:
+      {
+        if (&_openElementStack.Bottom().Node() != &_openElementStack.Top().Node())
+        {
+          // TODO(HTMLTREEBUILDER, HTML): parse error
+        }
+        // TODO(HTMLTREEBUILDER, HTML): Stop parsing.
+        return;
+      }
+      default: break;
+    }
+
+    // Anything else: parse error, ignore.
+    // TODO(HTMLTREEBUILDER, HTML): parse error
   }
 
   void HTMLTreeBuilder::AfterFramesetMode(HTMLTokenAtom &&token) noexcept
   {
+    switch (token.Type())
+    {
+      case HTMLTokenType::Character:
+      {
+        if (InsertCharacterTokenWhitespace(token))
+          break; // non-whitespace remaining — fall through to "anything else"
+        return;
+      }
+      case HTMLTokenType::Comment:
+      {
+        InsertComment(DOMString(token.Data()));
+        return;
+      }
+      case HTMLTokenType::DOCTYPE:
+      {
+        // TODO(HTMLTREEBUILDER, HTML): parse error
+        return; // ignore the token
+      }
+      case HTMLTokenType::StartTag:
+      {
+        auto tagName = ParseTagName(token.Name().View());
+        switch (tagName)
+        {
+          case TagName::html:
+          {
+            InBodyMode(Krys::Move(token));
+            return;
+          }
+          case TagName::noframes:
+          {
+            InHeadMode(Krys::Move(token));
+            return;
+          }
+          default: break;
+        }
+        break; // fall through to "anything else"
+      }
+      case HTMLTokenType::EndTag:
+      {
+        if (token.Name() == u8"html")
+        {
+          _insertionMode = InsertionMode::AfterAfterFrameset;
+          return;
+        }
+        break; // fall through to "anything else"
+      }
+      case HTMLTokenType::EndOfFile:
+      {
+        // TODO(HTMLTREEBUILDER, HTML): Stop parsing.
+        return;
+      }
+      default: break;
+    }
+
+    // Anything else: parse error, ignore.
+    // TODO(HTMLTREEBUILDER, HTML): parse error
   }
 
   void HTMLTreeBuilder::AfterAfterBodyMode(HTMLTokenAtom &&token) noexcept
   {
+    switch (token.Type())
+    {
+      case HTMLTokenType::Comment:
+      {
+        InsertComment(DOMString(token.Data()), AdjustedInsertionLocation {&_document, nullptr});
+        return;
+      }
+      case HTMLTokenType::DOCTYPE:
+      case HTMLTokenType::Character:
+      {
+        // DOCTYPE and whitespace characters: process using the rules for "in body".
+        if (token.Type() == HTMLTokenType::Character)
+        {
+          if (!InsertCharacterTokenWhitespace(token))
+            return;
+          // Non-whitespace remains — fall through to "anything else"
+          break;
+        }
+        InBodyMode(Krys::Move(token));
+        return;
+      }
+      case HTMLTokenType::StartTag:
+      {
+        if (token.Name() == u8"html")
+        {
+          InBodyMode(Krys::Move(token));
+          return;
+        }
+        break; // fall through to "anything else"
+      }
+      case HTMLTokenType::EndOfFile:
+      {
+        // TODO(HTMLTREEBUILDER, HTML): Stop parsing.
+        return;
+      }
+      default: break;
+    }
+
+    // Anything else: parse error, switch to "in body", reprocess.
+    // TODO(HTMLTREEBUILDER, HTML): parse error
+    _insertionMode = InsertionMode::InBody;
+    ProcessToken(Krys::Move(token));
   }
 
   void HTMLTreeBuilder::AfterAfterFramesetMode(HTMLTokenAtom &&token) noexcept
   {
+    switch (token.Type())
+    {
+      case HTMLTokenType::Comment:
+      {
+        InsertComment(DOMString(token.Data()), AdjustedInsertionLocation {&_document, nullptr});
+        return;
+      }
+      case HTMLTokenType::DOCTYPE:
+      case HTMLTokenType::Character:
+      {
+        if (token.Type() == HTMLTokenType::Character)
+        {
+          if (!InsertCharacterTokenWhitespace(token))
+            return;
+          // Non-whitespace remains — fall through to "anything else"
+          break;
+        }
+        InBodyMode(Krys::Move(token));
+        return;
+      }
+      case HTMLTokenType::StartTag:
+      {
+        auto tagName = ParseTagName(token.Name().View());
+        switch (tagName)
+        {
+          case TagName::html:
+          {
+            InBodyMode(Krys::Move(token));
+            return;
+          }
+          case TagName::noframes:
+          {
+            InHeadMode(Krys::Move(token));
+            return;
+          }
+          default: break;
+        }
+        break; // fall through to "anything else"
+      }
+      case HTMLTokenType::EndOfFile:
+      {
+        // TODO(HTMLTREEBUILDER, HTML): Stop parsing.
+        return;
+      }
+      default: break;
+    }
+
+    // Anything else: parse error, ignore.
+    // TODO(HTMLTREEBUILDER, HTML): parse error
   }
 
   bool HTMLTreeBuilder::IsQuirksModeDOCTYPE(const HTMLTokenAtom &token) const noexcept
@@ -2627,24 +3771,182 @@ namespace Krys::HTML
       auto *furthestBlock = FurthestSpecialElementBlock(*formattingElement);
       if (furthestBlock == nullptr)
       {
-        while (&_openElementStack.Bottom() != formattingElement)
-        {
-          _openElementStack.Pop();
-        }
-        _openElementStack.Pop();
+        _openElementStack.PopUntilPopped(formattingElement->Node());
         _activeFormattingElements.RemoveFormattingElement(formattingElement->Node());
         return;
       }
 
       auto *commonAncestor = _openElementStack.EntryBefore(formattingElement->Node());
+      assert(commonAncestor != nullptr);
+
+      // TODO(HTMLTREEBUILDER, HTML): Check the rest of the logic for the AdoptionAgency algorithm.
+
+      // Step 4.10: Bookmark positioned at the formatting element in the active formatting list.
+      auto bookmark = _activeFormattingElements.BookmarkFor(formattingElement->Node());
+
+      // Step 4.11: node and lastNode both start at furthestBlock. Use stable DOM pointers to survive
+      // vector reallocation caused by Remove() inside the inner loop.
+      ContainerNode *nodeDOMNode = &furthestBlock->Node();
+      ContainerNode *lastDOMNode = nodeDOMNode;
+
+      auto entryBefore = [&](ContainerNode &node) -> ContainerNode *
+      {
+        auto *entry = _openElementStack.EntryBefore(node);
+        return entry ? &entry->Node() : nullptr;
+      };
+
+      ContainerNode *nextDOMNode = entryBefore(*nodeDOMNode);
+
+      // Step 4.13: Inner loop – walk from furthestBlock toward formattingElement.
+      // The inner loop counter is used only to limit formatting-list membership removal (spec limit: 3).
+      size_t innerLoopCounter = 0uz;
+      while (true)
+      {
+        ++innerLoopCounter;
+
+        // Step 4.13.2: Advance node; save the next pointer before any removal.
+        nodeDOMNode = nextDOMNode;
+        assert(nodeDOMNode != nullptr);
+        nextDOMNode = entryBefore(*nodeDOMNode);
+
+        // Step 4.13.3: Stop when we reach the formatting element.
+        if (nodeDOMNode == &formattingElement->Node())
+          break;
+
+        // Step 4.13.4: If we have gone more than 3 steps and node is in the formatting list, remove it.
+        bool nodeInFormattingList = _activeFormattingElements.ContainsFormattingElement(*nodeDOMNode);
+        if (innerLoopCounter > 3uz && nodeInFormattingList)
+        {
+          _activeFormattingElements.RemoveAndUpdateBookmark(*nodeDOMNode, bookmark);
+          nodeInFormattingList = false;
+        }
+
+        // Step 4.13.5: If node is not in the active formatting list, remove it from the open elements
+        // stack and skip to the next iteration.
+        auto *formattingEntry = _activeFormattingElements.Find(*nodeDOMNode);
+        if (formattingEntry == nullptr)
+        {
+          _openElementStack.Remove(*nodeDOMNode);
+          continue;
+        }
+
+        // Step 4.13.6: Create a new element from the saved token data.
+        auto *stackEntry = _openElementStack.Find(*nodeDOMNode);
+        assert(stackEntry != nullptr);
+
+        auto newElement = CreateElementFromSavedItem(*stackEntry);
+
+        // Replace the entry in the formatting list with one referencing the new element.
+        formattingEntry->ReplaceItem(HTMLStackItem(stackEntry->TagName(), stackEntry->Namespace(),
+                                                   *newElement, stackEntry->Attributes()));
+
+        // Update the open elements stack entry to reference the new element.
+        stackEntry->UpdateElement(*newElement);
+
+        // nodeDOMNode now refers to the new element.
+        nodeDOMNode = &stackEntry->Node();
+
+        // Step 4.13.7: If lastNode is furthestBlock, move the bookmark to after this entry.
+        if (lastDOMNode == &furthestBlock->Node())
+        {
+          _activeFormattingElements.MoveBookmarkAfter(bookmark, *formattingEntry);
+        }
+
+        // Step 4.13.8: Append lastNode as a child of node (reparent in the DOM tree).
+        (void)MutationAlgorithms::Append(*lastDOMNode, *nodeDOMNode);
+
+        // Step 4.13.9: lastNode = node.
+        lastDOMNode = nodeDOMNode;
+      }
+
+      // Step 14: Insert lastNode at the appropriate location in the common ancestor.
+      {
+        auto location = AppropriateInsertionLocation(&commonAncestor->Node());
+        if (location.Parent != nullptr)
+          (void)MutationAlgorithms::Insert(*lastDOMNode, *location.Parent, location.BeforeSibling);
+      }
+
+      // Step 15: Create a new element from the formatting element's saved token data.
+      auto newElement = CreateElementFromSavedItem(*formattingElement);
+
+      // Steps 16–17: Move all children of furthestBlock to newElement, then append newElement to
+      // furthestBlock.
+      TakeAllChildrenAndReparent(newElement, *furthestBlock);
+
+      // Step 16 (open elements): Insert newElement immediately above furthestBlock in the stack.
+      _openElementStack.InsertAbove(HTMLStackItem(formattingElement->TagName(),
+                                                  formattingElement->Namespace(), *newElement,
+                                                  formattingElement->Attributes()),
+                                    *furthestBlock);
+
+      // Step 18: Replace the formatting element in the active formatting list with newElement at the
+      // bookmark position.
+      _activeFormattingElements.SwapTo(formattingElement->Node(),
+                                       HTMLStackItem(formattingElement->TagName(),
+                                                     formattingElement->Namespace(), *newElement,
+                                                     formattingElement->Attributes()),
+                                       bookmark);
+
+      // Step 19: Remove the original formatting element from the open elements stack.
+      _openElementStack.Remove(formattingElement->Node());
     }
   }
 
-  RawPtr<HTMLStackItem> HTMLTreeBuilder::FurthestSpecialElementBlock(const HTMLStackItem &below) noexcept
+  Ref<Element> HTMLTreeBuilder::CreateElementFromSavedItem(const HTMLStackItem &item) noexcept
   {
-    // TODO(HTMLTREEBUILDER, HTML):
-    // Let furthestBlock be the topmost node in the stack of open elements that is lower in the stack than
-    // formattingElement, and is an element in the special category. There might not be one.
+    assert(item.IsElement());
+    auto &sourceElement = Downcast<Element>(item.Node());
+    auto element =
+      ElementFactory::Create(sourceElement.NodeDocument(),
+                             {sourceElement.NamespaceURI(), DOMStringAtom::Null(), sourceElement.LocalName()},
+                             DOMStringAtom::Null(), false, nullptr);
+    for (auto &attr : item.Attributes())
+      ElementAlgorithms::SetAttributeValue(*element, attr.NameView(), DOMString(attr.ValueView()));
+    return element;
+  }
+
+  void HTMLTreeBuilder::TakeAllChildrenAndReparent(Ref<Element> newParent, HTMLStackItem &oldParent) noexcept
+  {
+    auto &oldNode = Downcast<ContainerNode>(oldParent.Node());
+
+    while (auto *child = oldNode.FirstChild())
+    {
+      (void)MutationAlgorithms::Append(*child, *newParent);
+    }
+
+    (void)MutationAlgorithms::Append(*newParent, oldNode);
+  }
+
+  RawPtr<HTMLStackItem>
+    HTMLTreeBuilder::FurthestSpecialElementBlock(const HTMLStackItem &formattingElement) noexcept
+  {
+    // Find the index of the formatting element in the open element stack.
+    size_t formattingIndex = _openElementStack.Size();
+    for (size_t i = 0uz; i < _openElementStack.Size(); ++i)
+    {
+      if (&_openElementStack[i] == &formattingElement)
+      {
+        formattingIndex = i;
+        break;
+      }
+    }
+
+    if (formattingIndex == _openElementStack.Size())
+    {
+      return nullptr;
+    }
+
+    // Scan from the formatting element toward the current element (increasing index).
+    // Return the first (= closest to formattingElement) special element found.
+    for (size_t i = formattingIndex + 1uz; i < _openElementStack.Size(); ++i)
+    {
+      auto &item = _openElementStack[i];
+      if (item.IsElement() && IsSpecialElement(item.TagName()))
+      {
+        return &item;
+      }
+    }
+
     return nullptr;
   }
 

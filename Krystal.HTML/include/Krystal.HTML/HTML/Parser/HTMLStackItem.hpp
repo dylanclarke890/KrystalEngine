@@ -26,6 +26,12 @@ namespace Krys::HTML
     {
     }
 
+    HTMLStackItem(TagName tagName, Namespace tagNamespace, Element &element,
+                  const ParsedAttributeList &attributes) noexcept
+        : _name(tagName), _namespace(tagNamespace), _node(ShareRef(element)), _attributes(attributes)
+    {
+    }
+
     KRYS_NODISCARD bool IsElement() const noexcept
     {
       return Is<Element>(_node.get());
@@ -55,6 +61,12 @@ namespace Krys::HTML
     KRYS_NODISCARD Namespace Namespace() const noexcept
     {
       return _namespace;
+    }
+
+    /// @brief Replaces the DOM element reference stored in this item while keeping the tag metadata.
+    void UpdateElement(Element &newElement) noexcept
+    {
+      _node = ShareRef(newElement);
     }
   };
 }

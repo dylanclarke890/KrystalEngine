@@ -40,30 +40,30 @@ namespace Krys::HTML
       _items.pop_back();
     }
 
-    /// @brief Get the first element added to the stack.
+    /// @brief Get the first element added to the stack (typically the html element).
     KRYS_NODISCARD HTMLStackItem &Top() noexcept
     {
       assert(!_items.empty());
-      return _items.back();
+      return _items.front();
     }
 
     KRYS_NODISCARD const HTMLStackItem &Top() const noexcept
     {
       assert(!_items.empty());
-      return _items.back();
+      return _items.front();
     }
 
-    /// @brief Get the the element most recently added to the stack.
+    /// @brief Get the most recently added element (the current element).
     KRYS_NODISCARD HTMLStackItem &Bottom() noexcept
     {
       assert(!_items.empty());
-      return _items.front();
+      return _items.back();
     }
 
     KRYS_NODISCARD const HTMLStackItem &Bottom() const noexcept
     {
       assert(!_items.empty());
-      return _items.front();
+      return _items.back();
     }
 
     void Remove(const ContainerNode &node) noexcept
@@ -73,6 +73,36 @@ namespace Krys::HTML
       if (it != _items.end())
       {
         _items.erase(it);
+      }
+    }
+
+    /// @brief Returns a pointer to the stack entry whose node matches the given node, or null.
+    KRYS_NODISCARD RawPtr<HTMLStackItem> Find(const ContainerNode &node) noexcept
+    {
+      auto it = std::ranges::find_if(_items,
+                                     [&](const auto &item)
+                                     { return item.IsElement() && &item.Node() == &node; });
+      return it != _items.end() ? &*it : nullptr;
+    }
+
+    /// @brief Inserts newItem immediately above (toward the current element) the reference entry.
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm
+    void InsertAbove(HTMLStackItem newItem, const HTMLStackItem &reference) noexcept
+    {
+      auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item == &reference; });
+      assert(it != _items.end());
+      _items.insert(std::next(it), Krys::Move(newItem));
+    }
+
+    /// @brief Pops elements off the stack until the given node itself has been popped.
+    void PopUntilPopped(const ContainerNode &node) noexcept
+    {
+      while (true)
+      {
+        bool isTarget = (&Bottom().Node() == &node);
+        Pop();
+        if (isTarget)
+          break;
       }
     }
 
