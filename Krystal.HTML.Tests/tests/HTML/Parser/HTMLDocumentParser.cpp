@@ -29,7 +29,11 @@ namespace Krys::HTML::Tests
       INFO(string(reinterpret_cast<const char *>(input.data()), input.size()));
       INFO(string(reinterpret_cast<const char *>(expectedDocument.data()), expectedDocument.size()));
 
-      CHECK(Dump(*document) == test.ExpectedDocument);
+      auto dumpedDocument = Dump(*document);
+      auto actualDocument = u8"Actual Document:\n" + dumpedDocument;
+      INFO(string(reinterpret_cast<const char *>(actualDocument.data()), actualDocument.size()));
+
+      CHECK(dumpedDocument == test.ExpectedDocument);
     }
 
     void DoTreeConstructionTests(const List<TreeConstructionTest> &tests) noexcept
