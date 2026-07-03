@@ -3849,7 +3849,7 @@ namespace Krys::HTML
 
   void HTMLTreeBuilder::TakeAllChildrenAndReparent(Ref<Element> newParent, HTMLStackItem &oldParent) noexcept
   {
-    auto &oldNode = Downcast<ContainerNode>(oldParent.Node());
+    auto &oldNode = oldParent.Node();
 
     while (auto *child = oldNode.FirstChild())
     {

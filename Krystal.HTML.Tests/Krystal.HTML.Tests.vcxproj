@@ -175,6 +175,7 @@
     <ClCompile Include="tests\DOM\TreeWalker.cpp" />
     <ClCompile Include="tests\HTML\Attributes\Reflection.cpp" />
     <ClCompile Include="tests\HTML\MicroParsers\Numbers.cpp" />
+    <ClCompile Include="tests\HTML\Parser\HTMLTreeBuilder.cpp" />
     <ClCompile Include="tests\HTML\Parser\Loader\HTMLEncodingSniffer.cpp" />
     <ClCompile Include="tests\HTML\Parser\Loader\TextResourceDecoder.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\NameValidation.cpp" />
@@ -205,8 +206,10 @@
     <ClCompile Include="tests\Infra\StringAlgorithms.cpp" />
     <ClCompile Include="tests\DOM\Range.cpp" />
     <ClCompile Include="tests\DOM\StaticRange.cpp" />
+    <ClCompile Include="tests\TreeSerializer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.HTML.Tests\TreeSerializer.hpp" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="include\Krystal.HTML.Tests\ParserTestUtils.hpp" />
     <ClInclude Include="include\Krystal.HTML.Tests\TestCharacterData.hpp" />
@@ -214,6 +217,9 @@
     <ClInclude Include="include\Krystal.HTML.Tests\TestElement.hpp" />
     <ClInclude Include="include\Krystal.HTML.Tests\TestNode.hpp" />
     <ClCompile Include="tests\DOM\BoundaryPoint.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\html5-basic-tests.dat" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
