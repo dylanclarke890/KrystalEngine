@@ -7,6 +7,8 @@ namespace Krys::HTML
 {
   class SVGElement : public Element
   {
+    friend class SVGElementFactory;
+
     KRYS_TYPE_CAST_TRAITS_ACCESS();
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGElement);
 
@@ -28,7 +30,7 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool IsSVGScriptElement() const noexcept
     {
-      return _tagName == SVGTagName::Script;
+      return _tagName == SVGTagName::script;
     }
 
     // NOTE: SVGUnknownElement type check is not needed here as Node already has it.

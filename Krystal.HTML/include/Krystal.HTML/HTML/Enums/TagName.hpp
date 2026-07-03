@@ -134,6 +134,7 @@ namespace Krys::HTML
     sub,
     summary,
     sup,
+    svg,
     table,
     tbody,
     td,
@@ -165,7 +166,7 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::TagName, 153u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::TagName, 154u);
 
 namespace Krys::HTML
 {
@@ -375,6 +376,10 @@ namespace Krys::HTML
         if (name == u8"sup")
         {
           return TagName::sup;
+        }
+        if (name == u8"sup")
+        {
+          return TagName::svg;
         }
         if (name == u8"var")
         {

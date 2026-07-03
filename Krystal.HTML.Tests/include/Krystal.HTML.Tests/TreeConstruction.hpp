@@ -38,7 +38,29 @@ namespace Krys::HTML::Tests
         auto &element = Downcast<Element>(node);
 
         Indent(output, depth);
-        output += u8"<" + DOMString(element.LocalName().View()) + u8">\n";
+
+        auto localName = DOMString(element.LocalName().View());
+        auto namespaceName = [&] -> DOMString
+        {
+          if (element.NamespaceURI() == Namespaces::HTML)
+          {
+            return u8"";
+          }
+          else if (element.NamespaceURI() == Namespaces::SVG)
+          {
+            return u8"svg ";
+          }
+          else if (element.NamespaceURI() == Namespaces::MathML)
+          {
+            return u8"math ";
+          }
+          else
+          {
+            return u8"";
+          }
+        }();
+
+        output += u8"<" + namespaceName + localName + u8">\n";
 
         auto attributeNames = element.GetAttributeNames();
         std::sort(attributeNames.begin(), attributeNames.end(), std::ranges::lexicographical_compare);

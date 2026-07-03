@@ -7,8 +7,9 @@ namespace Krys::HTML
   enum class SVGTagName : uint8
   {
     Unknown,
-    Script,
+    script,
+    svg,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::SVGTagName, 2uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::SVGTagName, 3uz);

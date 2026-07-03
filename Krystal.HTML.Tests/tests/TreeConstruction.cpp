@@ -1,4 +1,6 @@
 ﻿#include "Krystal.HTML.Tests/TreeConstruction.hpp"
+#include "Krystal.HTML/SVG/Internals/SVGElementFactory.hpp"
+#include "Krystal.HTML/SVG/SVGElement.hpp"
 #include <catch_all.hpp>
 #include <sstream>
 
@@ -9,6 +11,13 @@ namespace Krys::HTML::Tests
     Ref<Element> CreateElement(Document &document, const DOMString &tagName)
     {
       auto element = document.CreateElement(tagName);
+      REQUIRE(element.HasValue());
+      return *element;
+    }
+
+    Ref<SVGElement> CreateSVGElement(Document &document, const DOMString &tagName) noexcept
+    {
+      auto element = document.CreateElementNS(Namespaces::SVG, tagName);
       REQUIRE(element.HasValue());
       return *element;
     }
@@ -61,6 +70,9 @@ namespace Krys::HTML::Tests
     auto divText = document->CreateTextNode(u8"Testing serializer");
     REQUIRE_FALSE(div->AppendChild(*divText).HasException());
 
+    auto svg = CreateSVGElement(*document, u8"svg");
+    REQUIRE_FALSE(body->AppendChild(*svg).HasException());
+
     DOMString output = Dump(*document);
 
     DOMString expectedOutput = u8R"(#document
@@ -75,6 +87,7 @@ namespace Krys::HTML::Tests
 |       id="main"
 |       <!--  This is a comment  -->
 |       "Testing serializer"
+|     <svg svg>
 )";
 
     REQUIRE(output == expectedOutput);

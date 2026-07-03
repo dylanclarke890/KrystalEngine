@@ -59,7 +59,7 @@ namespace Krys::HTML
     }
     else if (name.NamespaceURI() == Namespaces::SVG)
     {
-      result = SVGElementFactory::TryCreate(document, name);
+      result = SVGElementFactory::TryCreate(document, elementName);
     }
     else if (name.NamespaceURI() == Namespaces::MathML)
     {

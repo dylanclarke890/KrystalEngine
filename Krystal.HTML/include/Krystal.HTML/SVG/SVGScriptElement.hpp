@@ -9,7 +9,7 @@ namespace Krys::HTML
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(SVGScriptElement);
 
   public:
-    SVGScriptElement(Document &document) noexcept : SVGElement(document, SVGTagName::Script)
+    SVGScriptElement(Document &document) noexcept : SVGElement(document, SVGTagName::script)
     {
     }
   };
