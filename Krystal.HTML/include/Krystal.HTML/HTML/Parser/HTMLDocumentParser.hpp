@@ -40,7 +40,7 @@ namespace Krys::HTML
     }
   };
 
-  class HTMLDocumentParser : NonCopyMovable<HTMLDocumentParser>
+  class HTMLDocumentParser : public RefCounted<HTMLDocumentParser>
   {
     HTMLDocument &_document;
     HTMLInputStream _input;

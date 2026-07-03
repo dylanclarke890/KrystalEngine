@@ -2,6 +2,7 @@
 
 #include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
 #include "Krystal.Text/StringConversion.hpp"
 #include <fstream>
 #include <sstream>
@@ -102,11 +103,13 @@ namespace Krys::HTML::Tests
     return tests;
   }
 
-  inline List<TreeConstructionTest> ParseTreeConstructionTests(const std::string &filePath) noexcept
+  inline Maybe<List<TreeConstructionTest>> ParseTreeConstructionTests(const string &filePath) noexcept
   {
     std::ifstream file(filePath);
     if (!file.is_open())
+    {
       return {};
+    }
 
     return ParseTreeConstructionTests(file);
   }

@@ -9,7 +9,7 @@
 
 namespace Krys::HTML::Tests
 {
-  void Indent(DOMString &output, size_t depth) noexcept
+  inline void Indent(DOMString &output, size_t depth) noexcept
   {
     output += u8"| ";
 
@@ -19,7 +19,7 @@ namespace Krys::HTML::Tests
     }
   }
 
-  void DumpNode(const Node &node, DOMString &output, size_t depth) noexcept
+  inline void DumpNode(const Node &node, DOMString &output, size_t depth) noexcept
   {
     switch (node.NodeType())
     {
@@ -65,7 +65,7 @@ namespace Krys::HTML::Tests
     }
   }
 
-  DOMString Dump(const Document &document) noexcept
+  inline DOMString Dump(const Document &document) noexcept
   {
     DOMString output = u8"#document\n";
     for (auto &child : ConstChildNodeRange(document))
@@ -75,7 +75,7 @@ namespace Krys::HTML::Tests
     return output;
   }
 
-  DOMString Dump(const DocumentFragment &fragment) noexcept
+  inline DOMString Dump(const DocumentFragment &fragment) noexcept
   {
     DOMString output = u8"#document-fragment\n";
     for (auto &child : ConstChildNodeRange(fragment))
