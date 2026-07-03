@@ -43,7 +43,7 @@ namespace Krys::HTML::Tests
     }
   }
 
-  TEST_CASE("HTMLDocumentParser(basic test cases)", "[HTML][HTMLDocumentParser]")
+  TEST_CASE("HTMLDocumentParser(html5-basic-tests.dat)", "[HTML][HTMLDocumentParser]")
   {
     auto tests = ParseTreeConstructionTests("data/html5-basic-tests.dat");
     REQUIRE(tests.has_value());
