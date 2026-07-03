@@ -16,7 +16,6 @@
 #include "Krystal.HTML/HTML/HTMLTableRowElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTableSectionElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTemplateElement.hpp"
-#include "Krystal.HTML/HTML/Internals/HTMLElementFactory.hpp"
 #include "Krystal.HTML/Infra/StringAlgorithms.hpp"
 #include "Krystal.Text/ASCII.hpp"
 
@@ -785,7 +784,8 @@ namespace Krys::HTML
       default: break;
     }
 
-    auto html = HTMLElementFactory::TryCreate(_document, TagName::html);
+    auto html = ElementFactory::Create(_document, QualifiedName(Namespaces::HTML, DOMStringAtom::Null(),
+                                                                u8"html", TagName::html, Namespace::HTML));
     assert(html != nullptr);
     _document.AppendChild(*html);
     _openElementStack.Push({TagName::html, Namespace::HTML, *html, {}});
@@ -851,9 +851,9 @@ namespace Krys::HTML
       default: break;
     }
 
-    _head = HTMLElementFactory::TryCreate(_document, TagName::head);
-    assert(_head != nullptr);
-    _document.AppendChild(*_head);
+    _head = ElementFactory::Create(_document, QualifiedName(Namespaces::HTML, DOMStringAtom::Null(), u8"head",
+                                                            TagName::head, Namespace::HTML));
+    InsertElementAtAdjustedInsertionLocation(*_head);
     _openElementStack.Push({TagName::head, Namespace::HTML, *_head, {}});
 
     _insertionMode = InsertionMode::InHead;
@@ -1180,8 +1180,8 @@ namespace Krys::HTML
             // TODO(HTMLTREEBUILDER, HTML): parse error
             return; // ignore the token
           }
-          default: break;
         }
+        break;
       }
       case HTMLTokenType::EndTag:
       {
@@ -1202,7 +1202,8 @@ namespace Krys::HTML
       default: break;
     }
 
-    auto body = HTMLElementFactory::TryCreate(_document, TagName::body);
+    auto body = ElementFactory::Create(_document, QualifiedName(Namespaces::HTML, DOMStringAtom::Null(),
+                                                                u8"body", TagName::body, Namespace::HTML));
     assert(body != nullptr);
 
     InsertElementAtAdjustedInsertionLocation(*body);
@@ -2076,7 +2077,9 @@ namespace Krys::HTML
             if (!HasElementInButtonScope(TagName::p))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
-              auto pElement = HTMLElementFactory::TryCreate(_document, TagName::p);
+              auto pElement =
+                ElementFactory::Create(_document, QualifiedName(Namespaces::HTML, DOMStringAtom::Null(),
+                                                                u8"p", TagName::p, Namespace::HTML));
               assert(pElement != nullptr);
               InsertElementAtAdjustedInsertionLocation(*pElement);
               _openElementStack.Push({TagName::p, Namespace::HTML, *pElement, {}});
@@ -2393,7 +2396,9 @@ namespace Krys::HTML
           case TagName::col:
           {
             clearStackBackToTableContext();
-            auto colgroup = HTMLElementFactory::TryCreate(_document, TagName::colgroup);
+            auto colgroup = ElementFactory::Create(
+              _document, QualifiedName(Namespaces::HTML, DOMStringAtom::Null(), u8"colgroup",
+                                       TagName::colgroup, Namespace::HTML));
             assert(colgroup != nullptr);
             InsertElementAtAdjustedInsertionLocation(*colgroup);
             _openElementStack.Push({TagName::colgroup, Namespace::HTML, *colgroup, {}});
@@ -2415,7 +2420,9 @@ namespace Krys::HTML
           case TagName::tr:
           {
             clearStackBackToTableContext();
-            auto tbody = HTMLElementFactory::TryCreate(_document, TagName::tbody);
+            auto tbody =
+              ElementFactory::Create(_document, QualifiedName(Namespaces::HTML, DOMStringAtom::Null(),
+                                                              u8"tbody", TagName::tbody, Namespace::HTML));
             assert(tbody != nullptr);
             InsertElementAtAdjustedInsertionLocation(*tbody);
             _openElementStack.Push({TagName::tbody, Namespace::HTML, *tbody, {}});
@@ -2801,7 +2808,8 @@ namespace Krys::HTML
           {
             // TODO(HTMLTREEBUILDER, HTML): parse error
             clearStackBackToTableBodyContext();
-            auto tr = HTMLElementFactory::TryCreate(_document, TagName::tr);
+            auto tr = ElementFactory::Create(_document, QualifiedName(Namespaces::HTML, DOMStringAtom::Null(),
+                                                                      u8"tr", TagName::tr, Namespace::HTML));
             assert(tr != nullptr);
             InsertElementAtAdjustedInsertionLocation(*tr);
             _openElementStack.Push({TagName::tr, Namespace::HTML, *tr, {}});
@@ -3624,7 +3632,7 @@ namespace Krys::HTML
       return false;
     }
 
-    token._data = DOMString(position, token.Data().end());
+    token._data = DOMStringView(position, token.Data().end());
     return true;
   }
 
@@ -3637,6 +3645,7 @@ namespace Krys::HTML
 
     if (position == token.Data().begin())
     {
+      auto data = token.Data();
       return !token.Data().empty();
     }
 

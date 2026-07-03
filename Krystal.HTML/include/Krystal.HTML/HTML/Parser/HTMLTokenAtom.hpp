@@ -47,10 +47,16 @@ namespace Krys::HTML
           return;
         }
         case HTMLTokenType::StartTag:
-        case HTMLTokenType::EndTag:
         {
           _name = DOMStringView {data.begin(), data.end()};
           _isSelfClosing = token.IsSelfClosing();
+          _attributes = Krys::Move(token.Attributes());
+
+          return;
+        }
+        case HTMLTokenType::EndTag:
+        {
+          _name = DOMStringView {data.begin(), data.end()};
           _attributes = Krys::Move(token.Attributes());
 
           return;

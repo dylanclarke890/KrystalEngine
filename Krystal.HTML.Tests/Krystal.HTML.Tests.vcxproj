@@ -124,6 +124,12 @@
       </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y /I /E /F "$(ProjectDir)data" "$(TargetDir)data"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy data directory</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -206,12 +212,10 @@
     <ClCompile Include="tests\Infra\StringAlgorithms.cpp" />
     <ClCompile Include="tests\DOM\Range.cpp" />
     <ClCompile Include="tests\DOM\StaticRange.cpp" />
-    <ClCompile Include="tests\DumpTree.cpp" />
-    <ClCompile Include="tests\TreeConstructionTestParser.cpp" />
+    <ClCompile Include="tests\TreeConstruction.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.HTML.Tests\DumpTree.hpp" />
-    <ClInclude Include="include\Krystal.HTML.Tests\TreeConstructionTestParser.hpp" />
+    <ClInclude Include="include\Krystal.HTML.Tests\TreeConstruction.hpp" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="include\Krystal.HTML.Tests\ParserTestUtils.hpp" />
     <ClInclude Include="include\Krystal.HTML.Tests\TestCharacterData.hpp" />
@@ -223,12 +227,6 @@
   <ItemGroup>
     <None Include="data\html5-basic-tests.dat" />
   </ItemGroup>
-  <Target Name="CopyDataDirectory" AfterTargets="Build">
-    <ItemGroup>
-      <DataFiles Include="data\**\*.dat" />
-    </ItemGroup>
-    <Copy SourceFiles="@(DataFiles)" DestinationFiles="@(DataFiles->'$(OutputPath)data\%(RecursiveDir)%(Filename)%(Extension)')" />
-  </Target>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
