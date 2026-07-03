@@ -156,7 +156,7 @@
     <ClCompile Include="tests\HTML\Parser\HTMLTreeBuilder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\TreeSerializer.cpp">
+    <ClCompile Include="tests\DumpTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -179,7 +179,7 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML.Tests\TreeSerializer.hpp">
+    <ClInclude Include="include\Krystal.HTML.Tests\DumpTree.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

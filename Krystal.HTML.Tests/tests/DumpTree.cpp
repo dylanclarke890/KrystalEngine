@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML.Tests/TreeSerializer.hpp"
+﻿#include "Krystal.HTML.Tests/DumpTree.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::HTML::Tests
@@ -37,12 +37,13 @@ namespace Krys::HTML::Tests
     REQUIRE_FALSE(html->RemoveChild(*body).HasException());
     REQUIRE_FALSE(document->RemoveChild(*html).HasException());
 
-    DOMString expectedOutput = u8"#document\n"
-                               u8"| <html>\n"
-                               u8"|   <head>\n"
-                               u8"|     <title>\n"
-                               u8"|       \"Hello, World!\"\n"
-                               u8"|   <body>\n";
+    DOMString expectedOutput = u8R"(#document
+| <html>
+|   <head>
+|     <title>
+|       "Hello, World!"
+|   <body>
+)";
 
     REQUIRE(output == expectedOutput);
   }
