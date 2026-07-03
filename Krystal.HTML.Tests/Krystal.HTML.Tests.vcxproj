@@ -176,7 +176,6 @@
     <ClCompile Include="tests\HTML\Attributes\Reflection.cpp" />
     <ClCompile Include="tests\HTML\MicroParsers\Numbers.cpp" />
     <ClCompile Include="tests\HTML\Parser\HTMLDocumentParser.cpp" />
-    <ClCompile Include="tests\HTML\Parser\HTMLTreeBuilder.cpp" />
     <ClCompile Include="tests\HTML\Parser\Loader\HTMLEncodingSniffer.cpp" />
     <ClCompile Include="tests\HTML\Parser\Loader\TextResourceDecoder.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\NameValidation.cpp" />

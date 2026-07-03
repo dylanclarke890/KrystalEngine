@@ -153,9 +153,6 @@
     <ClCompile Include="tests\DOM\Internals\QualifiedNameCache.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\HTML\Parser\HTMLTreeBuilder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="tests\DumpTree.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
