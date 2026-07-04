@@ -17,10 +17,10 @@ namespace Krys::HTML::Tests
 
     void DoTreeConstructionTest(const TreeConstructionTest &test) noexcept
     {
-      auto input = u8"Input:\n" + Krys::Text::ConvertToUTF8(utf32_stringview(test.Input));
+      auto input = u8"\n--- INPUT ---\n" + Krys::Text::ConvertToUTF8(utf32_stringview(test.Input));
       INFO(string(reinterpret_cast<const char *>(input.data()), input.size()));
 
-      auto expected = u8"Expected:\n" + test.Expected;
+      auto expected = u8"\n--- EXPECTED OUTPUT ---\n" + test.Expected;
       INFO(string(reinterpret_cast<const char *>(expected.data()), expected.size()));
 
       auto document = CreateRef<HTMLDocument>();
@@ -28,7 +28,7 @@ namespace Krys::HTML::Tests
       (void)parser->PumpTokenizer();
 
       auto dumped = Dump(*document);
-      auto actual = u8"Actual:\n" + dumped;
+      auto actual = u8"\n--- ACTUAL OUTPUT ---\n" + dumped;
       INFO(string(reinterpret_cast<const char *>(actual.data()), actual.size()));
 
       CHECK(dumped == test.Expected);
@@ -51,11 +51,10 @@ namespace Krys::HTML::Tests
     DoTreeConstructionTests(*tests);                                                                         \
   }
 
-  PARSER_TEST_CASE("basic-01.dat");
-  PARSER_TEST_CASE("basic-02.dat");
-  PARSER_TEST_CASE("basic-03.dat");
-
-  PARSER_TEST_CASE("inbody-01.dat");
-
-  PARSER_TEST_CASE("isindex.dat");
+  PARSER_TEST_CASE("tree-construction/basic-01.dat");
+  PARSER_TEST_CASE("tree-construction/basic-02.dat");
+  PARSER_TEST_CASE("tree-construction/basic-03.dat");
+  PARSER_TEST_CASE("tree-construction/inbody-01.dat");
+  PARSER_TEST_CASE("tree-construction/isindex.dat");
+  PARSER_TEST_CASE("tree-construction/comments-01.dat");
 }

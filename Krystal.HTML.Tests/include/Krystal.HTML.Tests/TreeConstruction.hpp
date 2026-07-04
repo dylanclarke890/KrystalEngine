@@ -123,20 +123,24 @@ namespace Krys::HTML::Tests
   inline DOMString Dump(const Document &document) noexcept
   {
     DOMString output = u8"#document\n";
+
     for (auto &child : ConstChildNodeRange(document))
     {
       DumpNode(child, output, 0uz);
     }
+
     return output;
   }
 
   inline DOMString Dump(const DocumentFragment &fragment) noexcept
   {
     DOMString output = u8"#document-fragment\n";
+
     for (auto &child : ConstChildNodeRange(fragment))
     {
       DumpNode(child, output, 0uz);
     }
+
     return output;
   }
 

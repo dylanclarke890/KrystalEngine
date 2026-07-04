@@ -678,7 +678,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Data()), AdjustedInsertionLocation {&_document, nullptr});
+        InsertComment(DOMString(token.Comment()), AdjustedInsertionLocation {&_document, nullptr});
         return;
       }
       case HTMLTokenType::DOCTYPE:
@@ -744,7 +744,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Data()), AdjustedInsertionLocation {&_document, nullptr});
+        InsertComment(DOMString(token.Comment()), AdjustedInsertionLocation {&_document, nullptr});
         return;
       }
       case HTMLTokenType::Character:
@@ -809,7 +809,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Data()));
+        InsertComment(DOMString(token.Comment()));
         return;
       }
       case HTMLTokenType::DOCTYPE:
@@ -876,7 +876,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Data()));
+        InsertComment(DOMString(token.Comment()));
         return;
       }
       case HTMLTokenType::DOCTYPE:
@@ -1124,7 +1124,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Data()));
+        InsertComment(DOMString(token.Comment()));
         return;
       }
       case HTMLTokenType::DOCTYPE:
@@ -1234,7 +1234,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Data()));
+        InsertComment(DOMString(token.Comment()));
         return;
       }
       case HTMLTokenType::DOCTYPE:
@@ -2299,13 +2299,13 @@ namespace Krys::HTML
 
         if (_openElementStack.Bottom().TagName() == TagName::script)
         {
-          auto &scriptElement = Downcast<HTMLScriptElement>(_openElementStack.Bottom().Node());
-          scriptElement._alreadyStarted = true;
-          _openElementStack.Pop();
+          Downcast<HTMLScriptElement>(_openElementStack.Bottom().Node())._alreadyStarted = true;
         }
 
+        _openElementStack.Pop();
         _insertionMode = _originalInsertionMode;
         ProcessToken(Krys::Move(token));
+
         return;
       }
       case HTMLTokenType::EndTag:
@@ -2366,7 +2366,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Data()));
+        InsertComment(DOMString(token.Comment()));
         return;
       }
       case HTMLTokenType::DOCTYPE:
@@ -2693,7 +2693,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Data()));
+        InsertComment(DOMString(token.Comment()));
         return;
       }
       case HTMLTokenType::DOCTYPE:
@@ -3243,7 +3243,7 @@ namespace Krys::HTML
       case HTMLTokenType::Comment:
       {
         // Insert as the last child of the html element (first element on the stack).
-        InsertComment(DOMString(token.Data()),
+        InsertComment(DOMString(token.Comment()),
                       AdjustedInsertionLocation {&_openElementStack.Top().Node(), nullptr});
         return;
       }
@@ -3301,7 +3301,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Data()));
+        InsertComment(DOMString(token.Comment()));
         return;
       }
       case HTMLTokenType::DOCTYPE:
@@ -3386,7 +3386,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Data()));
+        InsertComment(DOMString(token.Comment()));
         return;
       }
       case HTMLTokenType::DOCTYPE:
@@ -3440,7 +3440,7 @@ namespace Krys::HTML
     {
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Data()), AdjustedInsertionLocation {&_document, nullptr});
+        InsertComment(DOMString(token.Comment()), AdjustedInsertionLocation {&_document, nullptr});
         return;
       }
       case HTMLTokenType::DOCTYPE:
@@ -3486,7 +3486,7 @@ namespace Krys::HTML
     {
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Data()), AdjustedInsertionLocation {&_document, nullptr});
+        InsertComment(DOMString(token.Comment()), AdjustedInsertionLocation {&_document, nullptr});
         return;
       }
       case HTMLTokenType::DOCTYPE:

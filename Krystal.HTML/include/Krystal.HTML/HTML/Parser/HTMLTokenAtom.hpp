@@ -40,6 +40,11 @@ namespace Krys::HTML
           return;
         }
         case HTMLTokenType::Comment:
+        {
+          _comment = DOMString {data.begin(), data.end()};
+
+          return;
+        }
         case HTMLTokenType::Character:
         {
           _data = DOMStringView {data.begin(), data.end()};

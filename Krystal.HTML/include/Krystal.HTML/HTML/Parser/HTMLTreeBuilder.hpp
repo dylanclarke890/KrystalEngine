@@ -287,7 +287,7 @@ namespace Krys::HTML
     /// @see https://html.spec.whatwg.org/#the-before-head-insertion-mode
     void BeforeHeadMode(HTMLTokenAtom &&token) noexcept;
 
-    /// @see https://html.spec.whatwg.org/#the-in-head-insertion-mode
+    /// @see https://html.spec.whatwg.org/#parsing-main-inhead
     void InHeadMode(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-in-head-noscript-insertion-mode
