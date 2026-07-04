@@ -54,8 +54,14 @@ namespace Krys::HTML::Tests
   PARSER_TEST_CASE("tree-construction/basic-01.dat");
   PARSER_TEST_CASE("tree-construction/basic-02.dat");
   PARSER_TEST_CASE("tree-construction/basic-03.dat");
-  PARSER_TEST_CASE("tree-construction/inbody-01.dat");
-  PARSER_TEST_CASE("tree-construction/isindex.dat");
+
   PARSER_TEST_CASE("tree-construction/comments-01.dat");
+
   PARSER_TEST_CASE("tree-construction/doctype-01.dat");
+
+  PARSER_TEST_CASE("tree-construction/ruby-01.dat");
+
+  PARSER_TEST_CASE("tree-construction/isindex-01.dat");
+
+  PARSER_TEST_CASE("tree-construction/inbody-01.dat");
 }

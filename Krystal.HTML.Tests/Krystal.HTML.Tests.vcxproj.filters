@@ -189,7 +189,8 @@
     <None Include="data\tree-construction\basic-03.dat" />
     <None Include="data\tree-construction\comments-01.dat" />
     <None Include="data\tree-construction\inbody-01.dat" />
-    <None Include="data\tree-construction\isindex.dat" />
     <None Include="data\tree-construction\doctype-01.dat" />
+    <None Include="data\tree-construction\ruby-01.dat" />
+    <None Include="data\tree-construction\isindex-01.dat" />
   </ItemGroup>
 </Project>
