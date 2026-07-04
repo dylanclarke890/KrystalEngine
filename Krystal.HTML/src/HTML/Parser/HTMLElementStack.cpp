@@ -169,6 +169,77 @@ namespace Krys::HTML
     }
   }
 
+  void HTMLElementStack::GenerateImpliedEndTags(Maybe<TagName> except) noexcept
+  {
+    while (true)
+    {
+      auto &currentNode = Bottom();
+      switch (currentNode.TagName())
+      {
+        case TagName::dd:
+        case TagName::dt:
+        case TagName::li:
+        case TagName::optgroup:
+        case TagName::option:
+        case TagName::p:
+        case TagName::rb:
+        case TagName::rp:
+        case TagName::rt:
+        case TagName::rtc:
+        {
+          if (except.has_value() && currentNode.TagName() == except.value())
+          {
+            return;
+          }
+
+          Pop();
+          break;
+        }
+        default:
+        {
+          return;
+        }
+      }
+    }
+  }
+
+  void HTMLElementStack::GenerateImpliedEndTagsThoroughly() noexcept
+  {
+    while (true)
+    {
+      auto &currentNode = Bottom();
+      switch (currentNode.TagName())
+      {
+        case TagName::caption:
+        case TagName::colgroup:
+        case TagName::dd:
+        case TagName::dt:
+        case TagName::li:
+        case TagName::optgroup:
+        case TagName::option:
+        case TagName::p:
+        case TagName::rb:
+        case TagName::rp:
+        case TagName::rt:
+        case TagName::rtc:
+        case TagName::tbody:
+        case TagName::td:
+        case TagName::tfoot:
+        case TagName::th:
+        case TagName::thead:
+        case TagName::tr:
+        {
+          Pop();
+          break;
+        }
+        default:
+        {
+          return;
+        }
+      }
+    }
+  }
+
 #pragma endregion
 
 #pragma region InScope

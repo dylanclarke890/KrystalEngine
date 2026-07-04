@@ -72,6 +72,25 @@ namespace Krys::HTML
     }
   }
 
+  ContainerNode &HTMLTreeBuilder::CurrentNode() noexcept
+  {
+    return _openElementStack.Bottom().Node();
+  }
+
+  ContainerNode &HTMLTreeBuilder::AdjustedCurrentNode() noexcept
+  {
+    if (_contextElement != nullptr && _openElementStack.Size() == 1)
+    {
+      return *_contextElement;
+    }
+    else
+    {
+      return CurrentNode();
+    }
+  }
+
+#pragma region InsertionMode Algorithms
+
   void HTMLTreeBuilder::ResetInsertionModeAppropriately() noexcept
   {
     bool last = false;
@@ -195,385 +214,6 @@ namespace Krys::HTML
     assert(!_templateInsertionModes.empty());
     return _templateInsertionModes.back();
   }
-
-  ContainerNode &HTMLTreeBuilder::CurrentNode() noexcept
-  {
-    return _openElementStack.Bottom().Node();
-  }
-
-  ContainerNode &HTMLTreeBuilder::AdjustedCurrentNode() noexcept
-  {
-    if (_contextElement != nullptr && _openElementStack.Size() == 1)
-    {
-      return *_contextElement;
-    }
-    else
-    {
-      return CurrentNode();
-    }
-  }
-
-  AdjustedInsertionLocation
-    HTMLTreeBuilder::AppropriateInsertionLocation(RawPtr<ContainerNode> targetOverride) noexcept
-  {
-    auto &target = targetOverride ? *targetOverride : CurrentNode();
-
-    AdjustedInsertionLocation location {};
-
-    auto *targetHTMLElement = DynamicDowncast<HTMLElement>(target);
-    if (_fosterParenting
-        && IsOneOf<HTMLTableElement, HTMLTableSectionElement, HTMLTableRowElement>(targetHTMLElement))
-    {
-      auto [tableElement, templateElement, elementBeforeTable, isTemplateMostRecent] =
-        _openElementStack.LastTableAndTemplate();
-
-      if (templateElement != nullptr && (tableElement == nullptr || isTemplateMostRecent))
-      {
-        location = {.Parent = templateElement->Content().get()};
-      }
-      else if (tableElement == nullptr)
-      {
-        location = {.Parent = &_openElementStack.Top().Node()}; // should be the html element
-      }
-      else if (tableElement->ParentNode() != nullptr)
-      {
-        location = {.Parent = tableElement->ParentNode(), .BeforeSibling = tableElement};
-      }
-      else
-      {
-        location = {.Parent = elementBeforeTable};
-      }
-    }
-    else
-    {
-      location.Parent = &target;
-      location.BeforeSibling = nullptr;
-    }
-
-    if (auto *templateElement = DynamicDowncast<HTMLTemplateElement>(location.Parent))
-    {
-      location.Parent = templateElement->Content().get();
-      location.BeforeSibling = nullptr;
-    }
-
-    return location;
-  }
-
-  Ref<Element> HTMLTreeBuilder::CreateElement(HTMLTokenAtom &token, DOMStringAtom namespaceURI,
-                                              ContainerNode &intendedParent) noexcept
-  {
-    auto &document = intendedParent.NodeDocument();
-    auto localName = token.Name();
-    auto is = [&]() -> DOMStringAtom
-    {
-      auto it = std::ranges::find_if(token.Attributes(),
-                                     [](const ParsedAttribute &attr) { return attr.NameView() == u8"is"; });
-      return it != std::ranges::end(token.Attributes()) ? it->NameView() : DOMStringAtom::Null();
-    }();
-
-    // TODO(HTMLTREEBUILDER, CUSTOMELEMENTS, HTML): Let registry be the result of looking up a custom element
-    // registry given intendedParent.
-    // Let definition be the result of looking up a custom element definition given registry, namespace,
-    // localName, and is.
-    // Let willExecuteScript be true if definition is non-null and the parser was not created as part of the
-    // HTML fragment parsing algorithm; otherwise false.
-    // If willExecuteScript is true:
-    // Increment document's throw-on-dynamic-markup-insertion counter.
-    // If the JavaScript execution context stack is empty, then perform a microtask checkpoint.
-    // Push a new element queue onto document's relevant agent's custom element reactions stack.
-    RefPtr<CustomElementRegistry> registry = nullptr;
-    bool willExecuteScript = false;
-
-    auto element = ElementFactory::Create(document, {namespaceURI, DOMStringAtom::Null(), localName}, is,
-                                          willExecuteScript, registry);
-    for (auto &attr : token.Attributes())
-    {
-      ElementAlgorithms::SetAttributeValue(*element, attr.NameView(), DOMString(attr.ValueView()));
-    }
-
-    // TODO(HTMLTREEBUILDER, CUSTOMELEMENTS, HTML):
-    // If willExecuteScript is true:
-    //     Let queue be the result of popping from document's relevant agent's custom element reactions stack.
-    //     (This will be the same element queue as was pushed above.)
-    //     Invoke custom element reactions in queue.
-    //     Decrement document's throw-on-dynamic-markup-insertion counter.
-    //
-    // TODO(HTMLTREEBUILDER, HTML):
-    // If element has an xmlns attribute in the XMLNS namespace whose value is not exactly the same as the
-    // element's namespace, that is a parse error. Similarly, if element has an xmlns:xlink attribute in the
-    // XMLNS namespace whose value is not the XLink Namespace, that is a parse error.
-    //
-    // TODO(HTMLTREEBUILDER, HTML):
-    // If element is a resettable element and not a form-associated custom element, then invoke its reset
-    // algorithm. (This initializes the element's value and checkedness based on the element's attributes.)
-    //
-    // TODO(HTMLTREEBUILDER, HTML):
-    // If element is a form-associated element and not a form-associated custom element, the form element
-    // pointer is not null, there is no template element on the stack of open elements, element is either not
-    // listed or doesn't have a form attribute, and the intendedParent is in the same tree as the element
-    // pointed to by the form element pointer, then associate element with the form element pointed to by the
-    // form element pointer and set element's parser inserted flag.
-
-    return element;
-  }
-
-  void HTMLTreeBuilder::InsertElementAtAdjustedInsertionLocation(Element &element) noexcept
-  {
-    auto [parent, beforeSibling] = AppropriateInsertionLocation();
-
-    if (auto result = MutationAlgorithms::EnsurePreInsertValidity(element, *parent, beforeSibling);
-        result.HasException())
-    {
-      return;
-    }
-
-    // TODO(HTMLTREEBUILDER, CUSTOMELEMENTS, HTML):
-    // If the parser was not created as part of the HTML fragment parsing algorithm, then push a new element
-    // queue onto element's relevant agent's custom element reactions stack.
-
-    // NOTE: We purposely ignore the error here if it happens.
-    (void)MutationAlgorithms::Insert(element, *parent, beforeSibling);
-
-    // TODO(HTMLTREEBUILDER, CUSTOMELEMENTS, HTML):
-    // If the parser was not created as part of the HTML fragment parsing algorithm, then pop the element
-    // queue from element's relevant agent's custom element reactions stack, and invoke custom element
-    // reactions in that queue.
-  }
-
-  Ref<Element> HTMLTreeBuilder::InsertForeignElement(HTMLTokenAtom &&token, DOMStringAtom namespaceURI,
-                                                     bool onlyAddToElementStack) noexcept
-  {
-    auto [parent, beforeSibling] = AppropriateInsertionLocation();
-    auto element = CreateElement(token, namespaceURI, *parent);
-
-    if (!onlyAddToElementStack)
-    {
-      InsertElementAtAdjustedInsertionLocation(*element);
-    }
-
-    auto tagName = ParseTagName(token.Name().View());
-    auto tagNamespace = ParseNamespace(namespaceURI.View());
-    HTMLStackItem stackItem(tagName, tagNamespace, *element, Krys::Move(token.Attributes()));
-
-    _openElementStack.Push(Krys::Move(stackItem));
-
-    return element;
-  }
-
-  Ref<Element> HTMLTreeBuilder::InsertHTMLElement(HTMLTokenAtom &&token) noexcept
-  {
-    return InsertForeignElement(Krys::Move(token), Namespaces::HTML, false);
-  }
-
-  void HTMLTreeBuilder::ReconstructActiveFormattingElements() noexcept
-  {
-    // If there are no entries in the list of active formatting elements, then there is nothing to
-    // reconstruct; stop this algorithm.
-    if (_activeFormattingElements.IsEmpty())
-    {
-      return;
-    }
-
-    // Let entry be the last (most recently added) element in the list of active formatting elements.
-    auto entry = _activeFormattingElements.Last();
-
-    // If the last (most recently added) entry in the list of active formatting elements is a marker, or if it
-    // is an element that is in the stack of open elements, then there is nothing to reconstruct; stop this
-    // algorithm.
-    if (entry->IsMarker() || _openElementStack.Contains(entry->Item().AsElement()))
-    {
-      return;
-    }
-
-    // Rewind: If there are no entries before entry in the list of active formatting elements, then jump to
-    // the step labeled create.
-    // Let entry be the entry one earlier than entry in the list of active formatting elements.
-    // If entry is neither a marker nor an element that is also in the stack of open elements, go to the step
-    // labeled rewind.
-    while (true)
-    {
-      if (entry == _activeFormattingElements.begin())
-      {
-        break;
-      }
-
-      auto previous = std::prev(entry);
-      if (previous->IsMarker() || _openElementStack.Contains(entry->Item().AsElement()))
-      {
-        break;
-      }
-
-      entry = previous;
-    }
-
-    // Advance: Let entry be the element one later than entry in the list of active formatting elements.
-    // Create: Insert an HTML element for the token for which the element entry was created, to obtain new
-    // element.
-    // Replace the entry for entry in the list with an entry for new element.
-    // If the entry for new element in the list of active formatting elements is not the last entry in the
-    // list, return to the step labeled advance.
-    while (true)
-    {
-      if (entry->IsMarker() || _openElementStack.Contains(entry->Item().AsElement()))
-      {
-        ++entry;
-      }
-
-      // auto newElement = CreateElementFromSavedItem(entry->Item());
-      // entry->ReplaceItem(HTMLStackItem(ParseTagName(newElement->TagName()),
-      //                                  ParseNamespace(newElement->NamespaceURI().View()), *newElement,
-      //                                  ParsedAttributeList(entry->Item().Attributes())));
-
-      if (++entry == _activeFormattingElements.end())
-      {
-        break;
-      }
-    }
-  }
-
-  void HTMLTreeBuilder::AdjustMathMLAttributes(HTMLTokenAtom &token) noexcept
-  {
-    // TODO(HTMLTREEBUILDER, HTML): Adjust attributes for mathml elements.
-  }
-
-  void HTMLTreeBuilder::AdjustSVGAttributes(HTMLTokenAtom &token) noexcept
-  {
-    // TODO(HTMLTREEBUILDER, HTML): Adjust attributes for svg elements.
-  }
-
-  void HTMLTreeBuilder::AdjustForeignAttributes(HTMLTokenAtom &token) noexcept
-  {
-    // TODO(HTMLTREEBUILDER, HTML): Adjust attributes for foreign elements.
-  }
-
-  void HTMLTreeBuilder::InsertCharacter(DOMString &&data) noexcept
-  {
-    // TODO(HTMLTREEBUILDER, HTML): parse error if it contains a null character; skip them.
-
-    auto [parent, beforeSibling] = AppropriateInsertionLocation();
-
-    if (Is<Document>(parent))
-    {
-      return;
-    }
-
-    auto previousSibling = beforeSibling;
-    if (previousSibling == nullptr)
-    {
-      previousSibling = parent->LastChild();
-    }
-
-    if (Is<HTML::Text>(previousSibling))
-    {
-      auto &textNode = Downcast<HTML::Text>(*previousSibling);
-      textNode.AppendData(Krys::Move(data));
-    }
-    else
-    {
-      auto textNode = CreateRef<HTML::Text>(parent->NodeDocument(), Krys::Move(data));
-
-      // NOTE: We purposely ignore the error here if it happens.
-      (void)MutationAlgorithms::Insert(*textNode, *parent, beforeSibling);
-    }
-  }
-
-  void HTMLTreeBuilder::InsertComment(DOMString &&data, Maybe<AdjustedInsertionLocation> position) noexcept
-  {
-    auto [parent, beforeSibling] = position.has_value() ? *position : AppropriateInsertionLocation();
-    auto commentNode = CreateRef<Comment>(parent->NodeDocument(), Krys::Move(data));
-
-    // NOTE: We purposely ignore the error here if it happens.
-    (void)MutationAlgorithms::Insert(*commentNode, *parent, beforeSibling);
-  }
-
-  void HTMLTreeBuilder::ParseGenericRawTextElement(HTMLTokenAtom &&token) noexcept
-  {
-    InsertHTMLElement(Krys::Move(token));
-    _tokenizer.State(TokenizerState::RAWTEXT);
-    _originalInsertionMode = _insertionMode;
-    _insertionMode = InsertionMode::Text;
-  }
-
-  void HTMLTreeBuilder::ParseGenericRCDATATextElement(HTMLTokenAtom &&token) noexcept
-  {
-    InsertHTMLElement(Krys::Move(token));
-    _tokenizer.State(TokenizerState::RCDATA);
-    _originalInsertionMode = _insertionMode;
-    _insertionMode = InsertionMode::Text;
-  }
-
-  void HTMLTreeBuilder::GenerateImpliedEndTags(Maybe<TagName> exception) noexcept
-  {
-    while (true)
-    {
-      auto &currentNode = _openElementStack.Bottom();
-      switch (currentNode.TagName())
-      {
-        case TagName::dd:
-        case TagName::dt:
-        case TagName::li:
-        case TagName::optgroup:
-        case TagName::option:
-        case TagName::p:
-        case TagName::rb:
-        case TagName::rp:
-        case TagName::rt:
-        case TagName::rtc:
-        {
-          if (exception.has_value() && currentNode.TagName() == exception.value())
-          {
-            return;
-          }
-
-          _openElementStack.Pop();
-          break;
-        }
-        default:
-        {
-          return;
-        }
-      }
-    }
-  }
-
-  void HTMLTreeBuilder::GenerateImpliedEndTagsThoroughly() noexcept
-  {
-    while (true)
-    {
-      auto &currentNode = _openElementStack.Bottom();
-      switch (currentNode.TagName())
-      {
-        case TagName::caption:
-        case TagName::colgroup:
-        case TagName::dd:
-        case TagName::dt:
-        case TagName::li:
-        case TagName::optgroup:
-        case TagName::option:
-        case TagName::p:
-        case TagName::rb:
-        case TagName::rp:
-        case TagName::rt:
-        case TagName::rtc:
-        case TagName::tbody:
-        case TagName::td:
-        case TagName::tfoot:
-        case TagName::th:
-        case TagName::thead:
-        case TagName::tr:
-        {
-          _openElementStack.Pop();
-          break;
-        }
-        default:
-        {
-          return;
-        }
-      }
-    }
-  }
-
-#pragma region InsertionMode Algorithms
 
   void HTMLTreeBuilder::InitialMode(HTMLTokenAtom &&token) noexcept
   {
@@ -1353,7 +993,7 @@ namespace Krys::HTML
           body_li_loop:
             if (node->TagName() == TagName::li)
             {
-              GenerateImpliedEndTags(TagName::li);
+              _openElementStack.GenerateImpliedEndTags(TagName::li);
 
               if (_openElementStack.Bottom().TagName() != TagName::li)
               {
@@ -1393,7 +1033,7 @@ namespace Krys::HTML
           body_dd_loop:
             if (node->TagName() == TagName::dd)
             {
-              GenerateImpliedEndTags(TagName::dd);
+              _openElementStack.GenerateImpliedEndTags(TagName::dd);
 
               if (_openElementStack.Bottom().TagName() != TagName::dd)
               {
@@ -1407,7 +1047,7 @@ namespace Krys::HTML
 
             if (node->TagName() == TagName::dt)
             {
-              GenerateImpliedEndTags(TagName::dt);
+              _openElementStack.GenerateImpliedEndTags(TagName::dt);
 
               // TODO: this needs to be the current node, not the bottom of the stack.
               if (_openElementStack.Bottom().TagName() != TagName::dt)
@@ -1628,7 +1268,7 @@ namespace Krys::HTML
 
             if (_openElementStack.HasElementInScope(TagName::select))
             {
-              GenerateImpliedEndTags();
+              _openElementStack.GenerateImpliedEndTags();
               if (_openElementStack.HasElementInScope(TagName::option)
                   || _openElementStack.HasElementInScope(TagName::optgroup))
               {
@@ -1725,7 +1365,7 @@ namespace Krys::HTML
           {
             if (_openElementStack.HasElementInScope(TagName::select))
             {
-              GenerateImpliedEndTags(TagName::optgroup);
+              _openElementStack.GenerateImpliedEndTags(TagName::optgroup);
               if (_openElementStack.HasElementInScope(TagName::option))
               {
                 // TODO(HTMLTREEBUILDER, HTML): parse error
@@ -1747,7 +1387,7 @@ namespace Krys::HTML
           {
             if (_openElementStack.HasElementInScope(TagName::select))
             {
-              GenerateImpliedEndTags();
+              _openElementStack.GenerateImpliedEndTags();
               if (_openElementStack.HasElementInScope(TagName::option)
                   || _openElementStack.HasElementInScope(TagName::optgroup))
               {
@@ -1771,7 +1411,7 @@ namespace Krys::HTML
           {
             if (_openElementStack.HasElementInScope(TagName::ruby))
             {
-              GenerateImpliedEndTags();
+              _openElementStack.GenerateImpliedEndTags();
               if (_openElementStack.Bottom().TagName() != TagName::ruby)
               {
                 // TODO(HTMLTREEBUILDER, HTML): parse error
@@ -1786,7 +1426,7 @@ namespace Krys::HTML
           {
             if (_openElementStack.HasElementInScope(TagName::ruby))
             {
-              GenerateImpliedEndTags(TagName::rtc);
+              _openElementStack.GenerateImpliedEndTags(TagName::rtc);
 
               auto &rtCurrentNode = _openElementStack.Bottom();
               if (rtCurrentNode.TagName() != TagName::rtc && rtCurrentNode.TagName() != TagName::ruby)
@@ -1936,7 +1576,7 @@ namespace Krys::HTML
               return; // ignore the token
             }
 
-            GenerateImpliedEndTags();
+            _openElementStack.GenerateImpliedEndTags();
 
             if (_openElementStack.Bottom().TagName() != tagName)
             {
@@ -1959,7 +1599,7 @@ namespace Krys::HTML
                 return; // ignore the token
               }
 
-              GenerateImpliedEndTags();
+              _openElementStack.GenerateImpliedEndTags();
 
               if (_openElementStack.Bottom().Node() != form.get())
               {
@@ -1976,7 +1616,7 @@ namespace Krys::HTML
                 return; // ignore the token
               }
 
-              GenerateImpliedEndTags();
+              _openElementStack.GenerateImpliedEndTags();
 
               if (_openElementStack.Bottom().TagName() != TagName::form)
               {
@@ -2012,7 +1652,7 @@ namespace Krys::HTML
               return; // ignore the token
             }
 
-            GenerateImpliedEndTags(TagName::li);
+            _openElementStack.GenerateImpliedEndTags(TagName::li);
 
             if (_openElementStack.Bottom().TagName() != TagName::li)
             {
@@ -2031,7 +1671,7 @@ namespace Krys::HTML
               return; // ignore the token
             }
 
-            GenerateImpliedEndTags(tagName);
+            _openElementStack.GenerateImpliedEndTags(tagName);
 
             if (_openElementStack.Bottom().TagName() != tagName)
             {
@@ -2059,7 +1699,7 @@ namespace Krys::HTML
               return; // ignore the token
             }
 
-            GenerateImpliedEndTags();
+            _openElementStack.GenerateImpliedEndTags();
 
             if (_openElementStack.Bottom().TagName() != tagName)
             {
@@ -2123,7 +1763,7 @@ namespace Krys::HTML
               return; // ignore the token
             }
 
-            GenerateImpliedEndTags();
+            _openElementStack.GenerateImpliedEndTags();
 
             if (_openElementStack.Bottom().TagName() != tagName)
             {
@@ -2158,46 +1798,6 @@ namespace Krys::HTML
         // TODO(HTMLTREEBUILDER, HTML): Stop parsing.
         return;
       }
-    }
-  }
-
-  void HTMLTreeBuilder::InBodyGenericEndTag(TagName tagName)
-  {
-    // walk the open element stack upward from the current node.
-    auto *nodeEntry = &_openElementStack.Bottom();
-    while (true)
-    {
-      if (Is<HTMLElement>(nodeEntry->Node()) && nodeEntry->TagName() == tagName)
-      {
-        GenerateImpliedEndTags(tagName);
-
-        if (nodeEntry != &_openElementStack.Bottom())
-        {
-          // TODO(HTMLTREEBUILDER, HTML): parse error
-        }
-
-        auto &targetNode = nodeEntry->Node();
-        while (true)
-        {
-          bool isTarget = (&_openElementStack.Bottom().Node() == &targetNode);
-          _openElementStack.Pop();
-          if (isTarget)
-          {
-            break;
-          }
-        }
-
-        return;
-      }
-
-      if (IsSpecialElement(nodeEntry->TagName()))
-      {
-        // TODO(HTMLTREEBUILDER, HTML): parse error
-        return; // ignore the token
-      }
-
-      nodeEntry = _openElementStack.EntryBefore(nodeEntry->Node());
-      assert(nodeEntry != nullptr);
     }
   }
 
@@ -2505,7 +2105,7 @@ namespace Krys::HTML
         // TODO(HTMLTREEBUILDER, HTML): parse error
         return false; // fragment case — ignore
       }
-      GenerateImpliedEndTags();
+      _openElementStack.GenerateImpliedEndTags();
       if (_openElementStack.Bottom().TagName() != TagName::caption)
       {
         // TODO(HTMLTREEBUILDER, HTML): parse error
@@ -2921,7 +2521,7 @@ namespace Krys::HTML
   {
     auto closeTheCell = [&]()
     {
-      GenerateImpliedEndTags();
+      _openElementStack.GenerateImpliedEndTags();
       auto &current = _openElementStack.Bottom();
       if (current.TagName() != TagName::td && current.TagName() != TagName::th)
       {
@@ -2953,7 +2553,7 @@ namespace Krys::HTML
               return; // ignore the token
             }
 
-            GenerateImpliedEndTags();
+            _openElementStack.GenerateImpliedEndTags();
 
             if (_openElementStack.Bottom().TagName() != tagName)
             {
@@ -3434,6 +3034,225 @@ namespace Krys::HTML
     // TODO(HTMLTREEBUILDER, HTML): parse error
   }
 
+#pragma endregion
+
+#pragma region Insertion Algorithms
+
+  AdjustedInsertionLocation
+    HTMLTreeBuilder::AppropriateInsertionLocation(RawPtr<ContainerNode> targetOverride) noexcept
+  {
+    auto &target = targetOverride ? *targetOverride : CurrentNode();
+
+    AdjustedInsertionLocation location {};
+
+    auto *targetHTMLElement = DynamicDowncast<HTMLElement>(target);
+    if (_fosterParenting
+        && IsOneOf<HTMLTableElement, HTMLTableSectionElement, HTMLTableRowElement>(targetHTMLElement))
+    {
+      auto [tableElement, templateElement, elementBeforeTable, isTemplateMostRecent] =
+        _openElementStack.LastTableAndTemplate();
+
+      if (templateElement != nullptr && (tableElement == nullptr || isTemplateMostRecent))
+      {
+        location = {.Parent = templateElement->Content().get()};
+      }
+      else if (tableElement == nullptr)
+      {
+        location = {.Parent = &_openElementStack.Top().Node()}; // should be the html element
+      }
+      else if (tableElement->ParentNode() != nullptr)
+      {
+        location = {.Parent = tableElement->ParentNode(), .BeforeSibling = tableElement};
+      }
+      else
+      {
+        location = {.Parent = elementBeforeTable};
+      }
+    }
+    else
+    {
+      location.Parent = &target;
+      location.BeforeSibling = nullptr;
+    }
+
+    if (auto *templateElement = DynamicDowncast<HTMLTemplateElement>(location.Parent))
+    {
+      location.Parent = templateElement->Content().get();
+      location.BeforeSibling = nullptr;
+    }
+
+    return location;
+  }
+
+  void HTMLTreeBuilder::InsertElementAtAdjustedInsertionLocation(Element &element) noexcept
+  {
+    auto [parent, beforeSibling] = AppropriateInsertionLocation();
+
+    if (auto result = MutationAlgorithms::EnsurePreInsertValidity(element, *parent, beforeSibling);
+        result.HasException())
+    {
+      return;
+    }
+
+    // TODO(HTMLTREEBUILDER, CUSTOMELEMENTS, HTML):
+    // If the parser was not created as part of the HTML fragment parsing algorithm, then push a new element
+    // queue onto element's relevant agent's custom element reactions stack.
+
+    // NOTE: We purposely ignore the error here if it happens.
+    (void)MutationAlgorithms::Insert(element, *parent, beforeSibling);
+
+    // TODO(HTMLTREEBUILDER, CUSTOMELEMENTS, HTML):
+    // If the parser was not created as part of the HTML fragment parsing algorithm, then pop the element
+    // queue from element's relevant agent's custom element reactions stack, and invoke custom element
+    // reactions in that queue.
+  }
+
+  Ref<Element> HTMLTreeBuilder::InsertForeignElement(HTMLTokenAtom &&token, DOMStringAtom namespaceURI,
+                                                     bool onlyAddToElementStack) noexcept
+  {
+    auto [parent, beforeSibling] = AppropriateInsertionLocation();
+    auto element = CreateElement(token, namespaceURI, *parent);
+
+    if (!onlyAddToElementStack)
+    {
+      InsertElementAtAdjustedInsertionLocation(*element);
+    }
+
+    auto tagName = ParseTagName(token.Name().View());
+    auto tagNamespace = ParseNamespace(namespaceURI.View());
+    HTMLStackItem stackItem(tagName, tagNamespace, *element, Krys::Move(token.Attributes()));
+
+    _openElementStack.Push(Krys::Move(stackItem));
+
+    return element;
+  }
+
+  Ref<Element> HTMLTreeBuilder::InsertHTMLElement(HTMLTokenAtom &&token) noexcept
+  {
+    return InsertForeignElement(Krys::Move(token), Namespaces::HTML, false);
+  }
+
+  void HTMLTreeBuilder::InsertCharacter(DOMString &&data) noexcept
+  {
+    // TODO(HTMLTREEBUILDER, HTML): parse error if it contains a null character; skip them.
+
+    auto [parent, beforeSibling] = AppropriateInsertionLocation();
+
+    if (Is<Document>(parent))
+    {
+      return;
+    }
+
+    auto previousSibling = beforeSibling;
+    if (previousSibling == nullptr)
+    {
+      previousSibling = parent->LastChild();
+    }
+
+    if (Is<HTML::Text>(previousSibling))
+    {
+      auto &textNode = Downcast<HTML::Text>(*previousSibling);
+      textNode.AppendData(Krys::Move(data));
+    }
+    else
+    {
+      auto textNode = CreateRef<HTML::Text>(parent->NodeDocument(), Krys::Move(data));
+
+      // NOTE: We purposely ignore the error here if it happens.
+      (void)MutationAlgorithms::Insert(*textNode, *parent, beforeSibling);
+    }
+  }
+
+  bool HTMLTreeBuilder::SkipCharacterTokenWhitespace(HTMLTokenAtom &token) noexcept
+  {
+    assert(token.Type() == HTMLTokenType::Character);
+
+    auto position = token.Data().begin();
+    StringAlgorithms::SkipWhitespace(token.Data(), position);
+
+    if (position == token.Data().end())
+    {
+      return false;
+    }
+
+    token._data = DOMStringView(position, token.Data().end());
+    return true;
+  }
+
+  bool HTMLTreeBuilder::InsertCharacterTokenWhitespace(HTMLTokenAtom &token) noexcept
+  {
+    assert(token.Type() == HTMLTokenType::Character);
+
+    auto position = token.Data().begin();
+    StringAlgorithms::SkipWhitespace(token.Data(), position);
+
+    if (position == token.Data().begin())
+    {
+      auto data = token.Data();
+      return !token.Data().empty();
+    }
+
+    InsertCharacter(DOMString(token.Data().begin(), position));
+
+    if (position == token.Data().end())
+    {
+      return false;
+    }
+
+    token._data = DOMString(position, token.Data().end());
+    return true;
+  }
+
+  void HTMLTreeBuilder::InsertComment(DOMString &&data, Maybe<AdjustedInsertionLocation> position) noexcept
+  {
+    auto [parent, beforeSibling] = position.has_value() ? *position : AppropriateInsertionLocation();
+    auto commentNode = CreateRef<Comment>(parent->NodeDocument(), Krys::Move(data));
+
+    // NOTE: We purposely ignore the error here if it happens.
+    (void)MutationAlgorithms::Insert(*commentNode, *parent, beforeSibling);
+  }
+
+  void HTMLTreeBuilder::ParseGenericRawTextElement(HTMLTokenAtom &&token) noexcept
+  {
+    InsertHTMLElement(Krys::Move(token));
+
+    _tokenizer.State(TokenizerState::RAWTEXT);
+    _originalInsertionMode = _insertionMode;
+    _insertionMode = InsertionMode::Text;
+  }
+
+  void HTMLTreeBuilder::ParseGenericRCDATATextElement(HTMLTokenAtom &&token) noexcept
+  {
+    InsertHTMLElement(Krys::Move(token));
+
+    _tokenizer.State(TokenizerState::RCDATA);
+    _originalInsertionMode = _insertionMode;
+    _insertionMode = InsertionMode::Text;
+  }
+
+#pragma endregion
+
+#pragma region Adjust Attribute Algorithms
+
+  void HTMLTreeBuilder::AdjustForeignAttributes(HTMLTokenAtom &token) noexcept
+  {
+    // TODO(HTMLTREEBUILDER, HTML): Adjust attributes for foreign elements.
+  }
+
+  void HTMLTreeBuilder::AdjustSVGAttributes(HTMLTokenAtom &token) noexcept
+  {
+    // TODO(HTMLTREEBUILDER, HTML): Adjust attributes for svg elements.
+  }
+
+  void HTMLTreeBuilder::AdjustMathMLAttributes(HTMLTokenAtom &token) noexcept
+  {
+    // TODO(HTMLTREEBUILDER, HTML): Adjust attributes for mathml elements.
+  }
+
+#pragma endregion
+
+#pragma region Quirks Mode Algorithms
+
   bool HTMLTreeBuilder::IsQuirksModeDOCTYPE(const HTMLTokenAtom &token) const noexcept
   {
     assert(token.Type() == HTMLTokenType::DOCTYPE);
@@ -3522,56 +3341,9 @@ namespace Krys::HTML
     return false;
   }
 
-  bool HTMLTreeBuilder::SkipCharacterTokenWhitespace(HTMLTokenAtom &token) noexcept
-  {
-    assert(token.Type() == HTMLTokenType::Character);
+#pragma endregion
 
-    auto position = token.Data().begin();
-    StringAlgorithms::SkipWhitespace(token.Data(), position);
-
-    if (position == token.Data().end())
-    {
-      return false;
-    }
-
-    token._data = DOMStringView(position, token.Data().end());
-    return true;
-  }
-
-  bool HTMLTreeBuilder::InsertCharacterTokenWhitespace(HTMLTokenAtom &token) noexcept
-  {
-    assert(token.Type() == HTMLTokenType::Character);
-
-    auto position = token.Data().begin();
-    StringAlgorithms::SkipWhitespace(token.Data(), position);
-
-    if (position == token.Data().begin())
-    {
-      auto data = token.Data();
-      return !token.Data().empty();
-    }
-
-    InsertCharacter(DOMString(token.Data().begin(), position));
-
-    if (position == token.Data().end())
-    {
-      return false;
-    }
-
-    token._data = DOMString(position, token.Data().end());
-    return true;
-  }
-
-  void HTMLTreeBuilder::ClosePElement() noexcept
-  {
-    GenerateImpliedEndTags(TagName::p);
-
-    if (_openElementStack.Bottom().TagName() != TagName::p)
-    {
-      // TODO(HTMLTREEBUILDER, HTML): parse error
-    }
-    _openElementStack.PopUntilPopped(TagName::p);
-  }
+#pragma region Adoption Agency Algorithms
 
   void HTMLTreeBuilder::RunAdoptionAgency(HTMLTokenAtom &token) noexcept
   {
@@ -3687,7 +3459,7 @@ namespace Krys::HTML
         auto *stackEntry = _openElementStack.Find(*nodeDOMNode);
         assert(stackEntry != nullptr);
 
-        auto newElement = CreateElementFromSavedItem(*stackEntry);
+        auto newElement = CreateElement(*stackEntry);
 
         // Replace the entry in the formatting list with one referencing the new element.
         formattingEntry->ReplaceItem(HTMLStackItem(stackEntry->TagName(), stackEntry->Namespace(),
@@ -3720,7 +3492,7 @@ namespace Krys::HTML
       }
 
       // Step 15: Create a new element from the formatting element's saved token data.
-      auto newElement = CreateElementFromSavedItem(*formattingElement);
+      auto newElement = CreateElement(*formattingElement);
 
       // Steps 16–17: Move all children of furthestBlock to newElement, then append newElement to
       // furthestBlock.
@@ -3745,7 +3517,79 @@ namespace Krys::HTML
     }
   }
 
-  Ref<Element> HTMLTreeBuilder::CreateElementFromSavedItem(const HTMLStackItem &item) noexcept
+  void HTMLTreeBuilder::TakeAllChildrenAndReparent(Ref<Element> newParent, HTMLStackItem &oldParent) noexcept
+  {
+    auto &oldNode = oldParent.Node();
+
+    while (auto *child = oldNode.FirstChild())
+    {
+      (void)MutationAlgorithms::Append(*child, *newParent);
+    }
+
+    (void)MutationAlgorithms::Append(*newParent, oldNode);
+  }
+
+#pragma endregion
+
+  Ref<Element> HTMLTreeBuilder::CreateElement(HTMLTokenAtom &token, DOMStringAtom namespaceURI,
+                                              ContainerNode &intendedParent) noexcept
+  {
+    auto &document = intendedParent.NodeDocument();
+    auto localName = token.Name();
+    auto is = [&]() -> DOMStringAtom
+    {
+      auto it = std::ranges::find_if(token.Attributes(),
+                                     [](const ParsedAttribute &attr) { return attr.NameView() == u8"is"; });
+      return it != std::ranges::end(token.Attributes()) ? it->NameView() : DOMStringAtom::Null();
+    }();
+
+    // TODO(HTMLTREEBUILDER, CUSTOMELEMENTS, HTML): Let registry be the result of looking up a custom element
+    // registry given intendedParent.
+    // Let definition be the result of looking up a custom element definition given registry, namespace,
+    // localName, and is.
+    // Let willExecuteScript be true if definition is non-null and the parser was not created as part of the
+    // HTML fragment parsing algorithm; otherwise false.
+    // If willExecuteScript is true:
+    // Increment document's throw-on-dynamic-markup-insertion counter.
+    // If the JavaScript execution context stack is empty, then perform a microtask checkpoint.
+    // Push a new element queue onto document's relevant agent's custom element reactions stack.
+    RefPtr<CustomElementRegistry> registry = nullptr;
+    bool willExecuteScript = false;
+
+    auto element = ElementFactory::Create(document, {namespaceURI, DOMStringAtom::Null(), localName}, is,
+                                          willExecuteScript, registry);
+    for (auto &attr : token.Attributes())
+    {
+      ElementAlgorithms::SetAttributeValue(*element, attr.NameView(), DOMString(attr.ValueView()));
+    }
+
+    // TODO(HTMLTREEBUILDER, CUSTOMELEMENTS, HTML):
+    // If willExecuteScript is true:
+    //     Let queue be the result of popping from document's relevant agent's custom element reactions stack.
+    //     (This will be the same element queue as was pushed above.)
+    //     Invoke custom element reactions in queue.
+    //     Decrement document's throw-on-dynamic-markup-insertion counter.
+    //
+    // TODO(HTMLTREEBUILDER, HTML):
+    // If element has an xmlns attribute in the XMLNS namespace whose value is not exactly the same as the
+    // element's namespace, that is a parse error. Similarly, if element has an xmlns:xlink attribute in the
+    // XMLNS namespace whose value is not the XLink Namespace, that is a parse error.
+    //
+    // TODO(HTMLTREEBUILDER, HTML):
+    // If element is a resettable element and not a form-associated custom element, then invoke its reset
+    // algorithm. (This initializes the element's value and checkedness based on the element's attributes.)
+    //
+    // TODO(HTMLTREEBUILDER, HTML):
+    // If element is a form-associated element and not a form-associated custom element, the form element
+    // pointer is not null, there is no template element on the stack of open elements, element is either not
+    // listed or doesn't have a form attribute, and the intendedParent is in the same tree as the element
+    // pointed to by the form element pointer, then associate element with the form element pointed to by the
+    // form element pointer and set element's parser inserted flag.
+
+    return element;
+  }
+
+  Ref<Element> HTMLTreeBuilder::CreateElement(const HTMLStackItem &item) noexcept
   {
     assert(item.IsElement());
 
@@ -3763,16 +3607,122 @@ namespace Krys::HTML
     return element;
   }
 
-  void HTMLTreeBuilder::TakeAllChildrenAndReparent(Ref<Element> newParent, HTMLStackItem &oldParent) noexcept
+  void HTMLTreeBuilder::ReconstructActiveFormattingElements() noexcept
   {
-    auto &oldNode = oldParent.Node();
-
-    while (auto *child = oldNode.FirstChild())
+    // If there are no entries in the list of active formatting elements, then there is nothing to
+    // reconstruct; stop this algorithm.
+    if (_activeFormattingElements.IsEmpty())
     {
-      (void)MutationAlgorithms::Append(*child, *newParent);
+      return;
     }
 
-    (void)MutationAlgorithms::Append(*newParent, oldNode);
+    // Let entry be the last (most recently added) element in the list of active formatting elements.
+    auto entry = _activeFormattingElements.Last();
+
+    // If the last (most recently added) entry in the list of active formatting elements is a marker, or if it
+    // is an element that is in the stack of open elements, then there is nothing to reconstruct; stop this
+    // algorithm.
+    if (entry->IsMarker() || _openElementStack.Contains(entry->Item().AsElement()))
+    {
+      return;
+    }
+
+    // Rewind: If there are no entries before entry in the list of active formatting elements, then jump to
+    // the step labeled create.
+    // Let entry be the entry one earlier than entry in the list of active formatting elements.
+    // If entry is neither a marker nor an element that is also in the stack of open elements, go to the step
+    // labeled rewind.
+    while (true)
+    {
+      if (entry == _activeFormattingElements.begin())
+      {
+        break;
+      }
+
+      auto previous = std::prev(entry);
+      if (previous->IsMarker() || _openElementStack.Contains(entry->Item().AsElement()))
+      {
+        break;
+      }
+
+      entry = previous;
+    }
+
+    // Advance: Let entry be the element one later than entry in the list of active formatting elements.
+    // Create: Insert an HTML element for the token for which the element entry was created, to obtain new
+    // element.
+    // Replace the entry for entry in the list with an entry for new element.
+    // If the entry for new element in the list of active formatting elements is not the last entry in the
+    // list, return to the step labeled advance.
+    while (true)
+    {
+      if (entry->IsMarker() || _openElementStack.Contains(entry->Item().AsElement()))
+      {
+        ++entry;
+      }
+
+      // auto newElement = CreateElementFromSavedItem(entry->Item());
+      // entry->ReplaceItem(HTMLStackItem(ParseTagName(newElement->TagName()),
+      //                                  ParseNamespace(newElement->NamespaceURI().View()), *newElement,
+      //                                  ParsedAttributeList(entry->Item().Attributes())));
+
+      if (++entry == _activeFormattingElements.end())
+      {
+        break;
+      }
+    }
+  }
+
+  void HTMLTreeBuilder::ClosePElement() noexcept
+  {
+    _openElementStack.GenerateImpliedEndTags(TagName::p);
+
+    if (_openElementStack.Bottom().TagName() != TagName::p)
+    {
+      // TODO(HTMLTREEBUILDER, HTML): parse error
+    }
+
+    _openElementStack.PopUntilPopped(TagName::p);
+  }
+
+  void HTMLTreeBuilder::InBodyGenericEndTag(TagName tagName)
+  {
+    // walk the open element stack upward from the current node.
+    auto *nodeEntry = &_openElementStack.Bottom();
+    while (true)
+    {
+      if (Is<HTMLElement>(nodeEntry->Node()) && nodeEntry->TagName() == tagName)
+      {
+        _openElementStack.GenerateImpliedEndTags(tagName);
+
+        if (nodeEntry != &_openElementStack.Bottom())
+        {
+          // TODO(HTMLTREEBUILDER, HTML): parse error
+        }
+
+        auto &targetNode = nodeEntry->Node();
+        while (true)
+        {
+          bool isTarget = (&_openElementStack.Bottom().Node() == &targetNode);
+          _openElementStack.Pop();
+          if (isTarget)
+          {
+            break;
+          }
+        }
+
+        return;
+      }
+
+      if (IsSpecialElement(nodeEntry->TagName()))
+      {
+        // TODO(HTMLTREEBUILDER, HTML): parse error
+        return; // ignore the token
+      }
+
+      nodeEntry = _openElementStack.EntryBefore(nodeEntry->Node());
+      assert(nodeEntry != nullptr);
+    }
   }
 
   RawPtr<HTMLStackItem>
@@ -3807,6 +3757,4 @@ namespace Krys::HTML
 
     return nullptr;
   }
-
-#pragma endregion
 }

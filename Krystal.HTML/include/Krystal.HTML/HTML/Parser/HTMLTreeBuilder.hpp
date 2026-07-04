@@ -32,6 +32,7 @@ namespace Krys::HTML
   {
   private:
     Document &_document;
+
     HTMLTokenizer &_tokenizer;
 
     /// @see https://html.spec.whatwg.org/multipage/syntax.html#insertion-mode
@@ -75,17 +76,145 @@ namespace Krys::HTML
 
     void ProcessToken(HTMLTokenAtom &&token) noexcept;
 
+  private:
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#current-node
+    KRYS_NODISCARD ContainerNode &CurrentNode() noexcept;
+
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#adjusted-current-node
+    KRYS_NODISCARD ContainerNode &AdjustedCurrentNode() noexcept;
+
+#pragma region InsertionMode Algorithms
+
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#current-template-insertion-mode
     KRYS_NODISCARD InsertionMode CurrentTemplateInsertionMode() const noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#reset-the-insertion-mode-appropriately
     void ResetInsertionModeAppropriately() noexcept;
 
-    /// @see https://html.spec.whatwg.org/multipage/parsing.html#current-node
-    KRYS_NODISCARD ContainerNode &CurrentNode() noexcept;
+    /// @see https://html.spec.whatwg.org/#the-initial-insertion-mode
+    void InitialMode(HTMLTokenAtom &&token) noexcept;
 
-    /// @see https://html.spec.whatwg.org/multipage/parsing.html#adjusted-current-node
-    KRYS_NODISCARD ContainerNode &AdjustedCurrentNode() noexcept;
+    /// @see https://html.spec.whatwg.org/#the-before-html-insertion-mode
+    void BeforeHTMLMode(HTMLTokenAtom &&token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#the-before-head-insertion-mode
+    void BeforeHeadMode(HTMLTokenAtom &&token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#parsing-main-inhead
+    void InHeadMode(HTMLTokenAtom &&token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#the-in-head-noscript-insertion-mode
+    void InHeadNoscriptMode(HTMLTokenAtom &&token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#the-after-head-insertion-mode
+    void AfterHeadMode(HTMLTokenAtom &&token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#the-in-body-insertion-mode
+    void InBodyMode(HTMLTokenAtom &&token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#the-text-insertion-mode
+    void TextMode(HTMLTokenAtom &&token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#the-in-table-insertion-mode
+    void InTableMode(HTMLTokenAtom &&token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#the-in-table-text-insertion-mode
+    void InTableTextMode(HTMLTokenAtom &&token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#the-in-caption-insertion-mode
+    void InCaptionMode(HTMLTokenAtom &&token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#the-in-column-group-insertion-mode
+    void InColumnGroupMode(HTMLTokenAtom &&token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#the-in-table-body-insertion-mode
+    void InTableBodyMode(HTMLTokenAtom &&token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#the-in-row-insertion-mode
+    void InRowMode(HTMLTokenAtom &&token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#the-in-cell-insertion-mode
+    void InCellMode(HTMLTokenAtom &&token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#the-in-template-insertion-mode
+    void InTemplateMode(HTMLTokenAtom &&token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#the-after-body-insertion-mode
+    void AfterBodyMode(HTMLTokenAtom &&token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#the-in-frameset-insertion-mode
+    void InFramesetMode(HTMLTokenAtom &&token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#the-after-frameset-insertion-mode
+    void AfterFramesetMode(HTMLTokenAtom &&token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#the-after-after-body-insertion-mode
+    void AfterAfterBodyMode(HTMLTokenAtom &&token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#the-after-after-frameset-insertion-mode
+    void AfterAfterFramesetMode(HTMLTokenAtom &&token) noexcept;
+
+#pragma endregion
+
+#pragma region Insertion Algorithms
+
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#appropriate-place-for-inserting-a-node
+    KRYS_NODISCARD AdjustedInsertionLocation
+      AppropriateInsertionLocation(RawPtr<ContainerNode> targetOverride = nullptr) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#insert-an-element-at-the-adjusted-insertion-location
+    void InsertElementAtAdjustedInsertionLocation(Element &element) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#insert-a-foreign-element
+    Ref<Element> InsertForeignElement(HTMLTokenAtom &&token, DOMStringAtom namespaceURI,
+                                      bool onlyAddToElementStack) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#insert-an-html-element
+    Ref<Element> InsertHTMLElement(HTMLTokenAtom &&token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#insert-a-character
+    void InsertCharacter(DOMString &&data) noexcept;
+
+    /// @brief Skips whitespace in a character token and returns whether any non-whitespace characters remain.
+    bool SkipCharacterTokenWhitespace(HTMLTokenAtom &token) noexcept;
+
+    /// @brief Inserts leading whitespace in a character token and returns whether any non-whitespace
+    /// characters remain.
+    bool InsertCharacterTokenWhitespace(HTMLTokenAtom &token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#insert-a-comment
+    void InsertComment(DOMString &&data, Maybe<AdjustedInsertionLocation> position = Null) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#generic-raw-text-element-parsing-algorithm
+    void ParseGenericRawTextElement(HTMLTokenAtom &&token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#generic-rcdata-text-element-parsing-algorithm
+    void ParseGenericRCDATATextElement(HTMLTokenAtom &&token) noexcept;
+
+#pragma endregion
+
+#pragma region Adjust Attribute Algorithms
+
+    /// @see https://html.spec.whatwg.org/#adjust-foreign-attributes
+    void AdjustForeignAttributes(HTMLTokenAtom &token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#adjust-svg-attributes
+    void AdjustSVGAttributes(HTMLTokenAtom &token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#adjust-math-ml-attributes
+    void AdjustMathMLAttributes(HTMLTokenAtom &token) noexcept;
+
+#pragma endregion
+
+#pragma region Quirks Mode Algorithms
+
+    bool IsQuirksModeDOCTYPE(const HTMLTokenAtom &token) const noexcept;
+
+    bool IsLimitedQuirksModeDOCTYPE(const HTMLTokenAtom &token) const noexcept;
+
+#pragma endregion
+
+#pragma region Element Category Algorithms
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#special
     KRYS_NODISCARD static bool IsSpecialElement(TagName name) noexcept
@@ -218,149 +347,35 @@ namespace Krys::HTML
       }
     }
 
-    /// @see https://html.spec.whatwg.org/multipage/parsing.html#appropriate-place-for-inserting-a-node
-    KRYS_NODISCARD AdjustedInsertionLocation
-      AppropriateInsertionLocation(RawPtr<ContainerNode> targetOverride = nullptr) noexcept;
-
-  private:
-    /// @see https://html.spec.whatwg.org/#create-an-element-for-the-token
-    KRYS_NODISCARD Ref<Element> CreateElement(HTMLTokenAtom &token, DOMStringAtom namespaceURI,
-                                              ContainerNode &intendedParent) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#insert-an-element-at-the-adjusted-insertion-location
-    void InsertElementAtAdjustedInsertionLocation(Element &element) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#insert-a-foreign-element
-    Ref<Element> InsertForeignElement(HTMLTokenAtom &&token, DOMStringAtom namespaceURI,
-                                      bool onlyAddToElementStack) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#insert-an-html-element
-    Ref<Element> InsertHTMLElement(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#adjust-math-ml-attributes
-    void AdjustMathMLAttributes(HTMLTokenAtom &token) noexcept;
-
-    void ReconstructActiveFormattingElements() noexcept;
-
-    /// @see https://html.spec.whatwg.org/#adjust-svg-attributes
-    void AdjustSVGAttributes(HTMLTokenAtom &token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#adjust-foreign-attributes
-    void AdjustForeignAttributes(HTMLTokenAtom &token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#insert-a-character
-    void InsertCharacter(DOMString &&data) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#insert-a-comment
-    void InsertComment(DOMString &&data, Maybe<AdjustedInsertionLocation> position = Null) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#generic-raw-text-element-parsing-algorithm
-    void ParseGenericRawTextElement(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#generic-rcdata-text-element-parsing-algorithm
-    void ParseGenericRCDATATextElement(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#generate-implied-end-tags
-    void GenerateImpliedEndTags(Maybe<TagName> exception = Null) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#generate-implied-end-tags-thoroughly
-    void GenerateImpliedEndTagsThoroughly() noexcept;
-
-#pragma region InsertionMode Algorithms
-
-    /// @see https://html.spec.whatwg.org/#the-initial-insertion-mode
-    void InitialMode(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#the-before-html-insertion-mode
-    void BeforeHTMLMode(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#the-before-head-insertion-mode
-    void BeforeHeadMode(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#parsing-main-inhead
-    void InHeadMode(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#the-in-head-noscript-insertion-mode
-    void InHeadNoscriptMode(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#the-after-head-insertion-mode
-    void AfterHeadMode(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#the-in-body-insertion-mode
-    void InBodyMode(HTMLTokenAtom &&token) noexcept;
-
-    void InBodyGenericEndTag(TagName tagName);
-
-    RawPtr<HTMLStackItem> FurthestSpecialElementBlock(const HTMLStackItem &below) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#the-text-insertion-mode
-    void TextMode(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#the-in-table-insertion-mode
-    void InTableMode(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#the-in-table-text-insertion-mode
-    void InTableTextMode(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#the-in-caption-insertion-mode
-    void InCaptionMode(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#the-in-column-group-insertion-mode
-    void InColumnGroupMode(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#the-in-table-body-insertion-mode
-    void InTableBodyMode(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#the-in-row-insertion-mode
-    void InRowMode(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#the-in-cell-insertion-mode
-    void InCellMode(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#the-in-template-insertion-mode
-    void InTemplateMode(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#the-after-body-insertion-mode
-    void AfterBodyMode(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#the-in-frameset-insertion-mode
-    void InFramesetMode(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#the-after-frameset-insertion-mode
-    void AfterFramesetMode(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#the-after-after-body-insertion-mode
-    void AfterAfterBodyMode(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#the-after-after-frameset-insertion-mode
-    void AfterAfterFramesetMode(HTMLTokenAtom &&token) noexcept;
-
 #pragma endregion
 
-    bool IsQuirksModeDOCTYPE(const HTMLTokenAtom &token) const noexcept;
-
-    bool IsLimitedQuirksModeDOCTYPE(const HTMLTokenAtom &token) const noexcept;
-
-    /// @brief Skips whitespace in a character token and returns whether any non-whitespace characters remain.
-    bool SkipCharacterTokenWhitespace(HTMLTokenAtom &token) noexcept;
-
-    /// @brief Inserts leading whitespace in a character token and returns whether any non-whitespace
-    /// characters remain.
-    bool InsertCharacterTokenWhitespace(HTMLTokenAtom &token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#close-a-p-element
-    void ClosePElement() noexcept;
+#pragma region Adoption Agency Algorithms
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm
     void RunAdoptionAgency(HTMLTokenAtom &token) noexcept;
 
-    /// @brief Creates a new element by duplicating the tag name, namespace, and attributes from a saved
-    /// stack item. Used by the adoption agency algorithm.
-    /// @see https://html.spec.whatwg.org/#create-an-element-for-the-token
-    KRYS_NODISCARD Ref<Element> CreateElementFromSavedItem(const HTMLStackItem &item) noexcept;
-
     /// @brief Moves all children of oldParent to newParent, then appends newParent to oldParent.
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm steps 16–17
     void TakeAllChildrenAndReparent(Ref<Element> newParent, HTMLStackItem &oldParent) noexcept;
+
+#pragma endregion
+
+    /// @see https://html.spec.whatwg.org/#create-an-element-for-the-token
+    KRYS_NODISCARD Ref<Element> CreateElement(HTMLTokenAtom &token, DOMStringAtom namespaceURI,
+                                              ContainerNode &intendedParent) noexcept;
+
+    /// @brief Creates a new element by duplicating the tag name, namespace, and attributes from a saved
+    /// stack item.
+    /// @see https://html.spec.whatwg.org/#create-an-element-for-the-token
+    KRYS_NODISCARD Ref<Element> CreateElement(const HTMLStackItem &item) noexcept;
+
+    void ReconstructActiveFormattingElements() noexcept;
+
+    /// @see https://html.spec.whatwg.org/#close-a-p-element
+    void ClosePElement() noexcept;
+
+    void InBodyGenericEndTag(TagName tagName);
+
+    RawPtr<HTMLStackItem> FurthestSpecialElementBlock(const HTMLStackItem &below) noexcept;
   };
 }

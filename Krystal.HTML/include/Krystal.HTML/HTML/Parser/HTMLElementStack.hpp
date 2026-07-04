@@ -79,6 +79,12 @@ namespace Krys::HTML
 
     void PopAll() noexcept;
 
+    /// @see https://html.spec.whatwg.org/#generate-implied-end-tags
+    void GenerateImpliedEndTags(Maybe<TagName> exception = Null) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#generate-implied-end-tags-thoroughly
+    void GenerateImpliedEndTagsThoroughly() noexcept;
+
 #pragma endregion
 
 #pragma region InScope
