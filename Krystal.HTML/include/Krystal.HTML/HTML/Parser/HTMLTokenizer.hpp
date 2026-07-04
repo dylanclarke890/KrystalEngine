@@ -135,6 +135,20 @@ namespace Krys::HTML
   private:
     KRYS_NODISCARD bool ProcessToken() noexcept
     {
+      if (!_bufferedEndTagName.empty() && !IsInEndTagBufferingState())
+      {
+        // We are back here after emitting a character token that came just before an end tag.
+        // To continue parsing the end tag we need to move the buffered tag name into the token.
+        FlushBufferedEndTag();
+
+        // If we are in the data state, the end tag is already complete and we should emit it
+        // now, otherwise, we want to resume parsing the partial end tag.
+        if (_state == TokenizerState::Data)
+        {
+          return true;
+        }
+      }
+
       if (!_input.Peek())
       {
         return HasBufferedCharacterToken();
@@ -146,6 +160,22 @@ namespace Krys::HTML
     KRYS_NODISCARD bool HasBufferedCharacterToken() const noexcept
     {
       return _token.Type() == HTMLTokenType::Character;
+    }
+
+    bool IsInEndTagBufferingState() const
+    {
+      switch (_state)
+      {
+        case TokenizerState::RCDATAEndTagOpen:
+        case TokenizerState::RCDATAEndTagName:
+        case TokenizerState::RAWTEXTEndTagOpen:
+        case TokenizerState::RAWTEXTEndTagName:
+        case TokenizerState::ScriptDataEndTagOpen:
+        case TokenizerState::ScriptDataEndTagName:
+        case TokenizerState::ScriptDataEscapedEndTagOpen:
+        case TokenizerState::ScriptDataEscapedEndTagName: return true;
+        default:                                          return false;
+      }
     }
 
     KRYS_NODISCARD bool IsCDATAAllowed() const noexcept
@@ -230,7 +260,7 @@ namespace Krys::HTML
       _bufferedEndTagName.push_back(character);
     }
 
-    void BeginEndTagUsingBuffer() noexcept
+    void FlushBufferedEndTag() noexcept
     {
       _token.BeginEndTag(_bufferedEndTagName);
       _bufferedEndTagName.clear();
@@ -251,7 +281,7 @@ namespace Krys::HTML
         return true;
       }
 
-      BeginEndTagUsingBuffer();
+      FlushBufferedEndTag();
       return false;
     }
 
@@ -269,7 +299,7 @@ namespace Krys::HTML
         return true;
       }
 
-      BeginEndTagUsingBuffer();
+      FlushBufferedEndTag();
       return true;
     }
 

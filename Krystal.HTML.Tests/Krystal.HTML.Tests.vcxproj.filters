@@ -184,13 +184,12 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="data\tree-construction\basic-01.dat" />
-    <None Include="data\tree-construction\basic-02.dat" />
-    <None Include="data\tree-construction\basic-03.dat" />
+    <None Include="data\tree-construction\html5test-com.dat" />
     <None Include="data\tree-construction\comments-01.dat" />
     <None Include="data\tree-construction\inbody-01.dat" />
     <None Include="data\tree-construction\doctype-01.dat" />
     <None Include="data\tree-construction\ruby-01.dat" />
     <None Include="data\tree-construction\isindex-01.dat" />
+    <None Include="data\tree-construction\tests-01.dat" />
   </ItemGroup>
 </Project>

@@ -31,14 +31,16 @@ namespace Krys::HTML::Tests
       auto actual = u8"\n--- ACTUAL OUTPUT ---\n" + dumped;
       INFO(string(reinterpret_cast<const char *>(actual.data()), actual.size()));
 
-      CHECK(dumped == test.Expected);
+      bool equal = (dumped == test.Expected);
+      CHECK(equal);
     }
 
     void DoTreeConstructionTests(const List<TreeConstructionTest> &tests) noexcept
     {
-      for (const auto &test : tests)
+      for (size_t i = 0; i < tests.size(); ++i)
       {
-        DoTreeConstructionTest(test);
+        INFO("Test case " + std::to_string(i + 1) + " of " + std::to_string(tests.size()));
+        DoTreeConstructionTest(tests[i]);
       }
     }
   }
@@ -51,17 +53,17 @@ namespace Krys::HTML::Tests
     DoTreeConstructionTests(*tests);                                                                         \
   }
 
-  PARSER_TEST_CASE("tree-construction/basic-01.dat");
-  PARSER_TEST_CASE("tree-construction/basic-02.dat");
-  PARSER_TEST_CASE("tree-construction/basic-03.dat");
-
   PARSER_TEST_CASE("tree-construction/comments-01.dat");
 
   PARSER_TEST_CASE("tree-construction/doctype-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/ruby-01.dat");
+  PARSER_TEST_CASE("tree-construction/html5test-com.dat");
+
+  PARSER_TEST_CASE("tree-construction/inbody-01.dat");
 
   PARSER_TEST_CASE("tree-construction/isindex-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/inbody-01.dat");
+  PARSER_TEST_CASE("tree-construction/ruby-01.dat");
+
+  PARSER_TEST_CASE("tree-construction/tests-01.dat");
 }

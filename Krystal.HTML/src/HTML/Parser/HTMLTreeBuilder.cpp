@@ -2191,7 +2191,6 @@ namespace Krys::HTML
             _activeFormattingElements.Reconstruct(_openElementStack);
             InsertHTMLElement(Krys::Move(token));
             _openElementStack.Pop();
-            token.AcknowledgeSelfClosingTag();
 
             _framesetOk = false;
             return;
