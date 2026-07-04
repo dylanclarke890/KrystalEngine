@@ -89,6 +89,11 @@ namespace Krys::HTML
     }
   }
 
+  void HTMLTreeBuilder::ParseError(const HTMLTokenAtom &) noexcept
+  {
+    // TODO(HTMLTREEBUILDER, HTML): Implement parse error handling/logging.
+  }
+
 #pragma region InsertionMode Algorithms
 
   void HTMLTreeBuilder::ResetInsertionModeAppropriately() noexcept
@@ -291,7 +296,7 @@ namespace Krys::HTML
     {
       case HTMLTokenType::DOCTYPE:
       {
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         return; // ignore the token
       }
       case HTMLTokenType::Comment:
@@ -330,7 +335,7 @@ namespace Krys::HTML
           break; // treat as the 'default' case below.
         }
 
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         return; // ignore the token
       }
       default: break;
@@ -366,7 +371,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::DOCTYPE:
       {
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         return; // ignore the token
       }
       case HTMLTokenType::StartTag:
@@ -398,7 +403,7 @@ namespace Krys::HTML
           break; // treat as the 'default' case below.
         }
 
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         return; // ignore the token
       }
       default: break;
@@ -433,7 +438,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::DOCTYPE:
       {
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         return; // ignore the token
       }
       case HTMLTokenType::StartTag:
@@ -539,7 +544,7 @@ namespace Krys::HTML
           }
           case TagName::head:
           {
-            // TODO(HTMLTREEBUILDER, HTML): parse error
+            ParseError(token);
             return; // ignore the token
           }
           default: break;
@@ -572,7 +577,7 @@ namespace Krys::HTML
           default: break;
         }
 
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         return; // ignore the token
       }
       default: break;
@@ -589,7 +594,7 @@ namespace Krys::HTML
     {
       case HTMLTokenType::DOCTYPE:
       {
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         return; // ignore the token
       }
       case HTMLTokenType::Character:
@@ -629,7 +634,7 @@ namespace Krys::HTML
           case TagName::head:
           case TagName::noscript:
           {
-            // TODO(HTMLTREEBUILDER, HTML): parse error
+            ParseError(token);
             return; // ignore the token
           }
           default: break;
@@ -649,13 +654,13 @@ namespace Krys::HTML
           break;
         }
 
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         return; // ignore the token
       }
       default: break;
     }
 
-    // TODO(HTMLTREEBUILDER, HTML): parse error
+    ParseError(token);
     _openElementStack.Pop();
     _insertionMode = InsertionMode::InHead;
     InHeadMode(Krys::Move(token));
@@ -681,7 +686,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::DOCTYPE:
       {
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         return; // ignore the token
       }
       case HTMLTokenType::StartTag:
@@ -718,7 +723,7 @@ namespace Krys::HTML
           case TagName::template_:
           case TagName::title:
           {
-            // TODO(HTMLTREEBUILDER, HTML): parse error
+            ParseError(token);
 
             _openElementStack.Push({TagName::html, Namespace::HTML, *_head, {}});
             InHeadMode(Krys::Move(token));
@@ -730,7 +735,7 @@ namespace Krys::HTML
           }
           case TagName::head:
           {
-            // TODO(HTMLTREEBUILDER, HTML): parse error
+            ParseError(token);
             return; // ignore the token
           }
         }
@@ -749,7 +754,7 @@ namespace Krys::HTML
           break;
         }
 
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         return; // ignore the token
       }
       default: break;
@@ -791,7 +796,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::DOCTYPE:
       {
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         return; // ignore the token
       }
       case HTMLTokenType::StartTag:
@@ -801,7 +806,7 @@ namespace Krys::HTML
         {
           case TagName::html:
           {
-            // TODO(HTMLTREEBUILDER, HTML): parse error
+            ParseError(token);
 
             if (_openElementStack.ContainsTemplateElement())
             {
@@ -837,7 +842,7 @@ namespace Krys::HTML
           }
           case TagName::body:
           {
-            // TODO(HTMLTREEBUILDER, HTML): parse error
+            ParseError(token);
 
             if (_openElementStack.Size() == 1 || _openElementStack[1].TagName() != TagName::body
                 || _openElementStack.ContainsTemplateElement())
@@ -862,7 +867,7 @@ namespace Krys::HTML
           }
           case TagName::frameset:
           {
-            // TODO(HTMLTREEBUILDER, HTML): parse error
+            ParseError(token);
 
             if (_openElementStack.Size() == 1 || _openElementStack[1].TagName() != TagName::body
                 || _openElementStack.ContainsTemplateElement())
@@ -916,7 +921,7 @@ namespace Krys::HTML
           {
             if (_openElementStack.HasElementInButtonScope(TagName::p))
             {
-              ClosePElement();
+              ClosePElement(token);
             }
 
             InsertHTMLElement(Krys::Move(token));
@@ -931,7 +936,7 @@ namespace Krys::HTML
           {
             if (_openElementStack.HasElementInButtonScope(TagName::p))
             {
-              ClosePElement();
+              ClosePElement(token);
             }
 
             auto &currentNode = _openElementStack.Bottom();
@@ -939,7 +944,7 @@ namespace Krys::HTML
                 || currentNode.TagName() == TagName::h3 || currentNode.TagName() == TagName::h4
                 || currentNode.TagName() == TagName::h5 || currentNode.TagName() == TagName::h6)
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               _openElementStack.Pop();
             }
 
@@ -951,7 +956,7 @@ namespace Krys::HTML
           {
             if (_openElementStack.HasElementInButtonScope(TagName::p))
             {
-              ClosePElement();
+              ClosePElement(token);
             }
 
             InsertHTMLElement(Krys::Move(token));
@@ -968,13 +973,13 @@ namespace Krys::HTML
             auto containsTemplateElement = _openElementStack.ContainsTemplateElement();
             if (_form != nullptr && !containsTemplateElement)
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               return; // ignore the token
             }
 
             if (_openElementStack.HasElementInButtonScope(TagName::p))
             {
-              ClosePElement();
+              ClosePElement(token);
             }
 
             auto element = InsertHTMLElement(Krys::Move(token));
@@ -997,7 +1002,7 @@ namespace Krys::HTML
 
               if (_openElementStack.Bottom().TagName() != TagName::li)
               {
-                // TODO(HTMLTREEBUILDER, HTML): parse error
+                ParseError(token);
               }
 
               _openElementStack.PopUntilPopped(TagName::li);
@@ -1018,7 +1023,7 @@ namespace Krys::HTML
           body_li_done:
             if (_openElementStack.HasElementInButtonScope(TagName::p))
             {
-              ClosePElement();
+              ClosePElement(token);
             }
 
             InsertHTMLElement(Krys::Move(token));
@@ -1037,7 +1042,7 @@ namespace Krys::HTML
 
               if (_openElementStack.Bottom().TagName() != TagName::dd)
               {
-                // TODO(HTMLTREEBUILDER, HTML): parse error
+                ParseError(token);
               }
 
               _openElementStack.PopUntilPopped(TagName::dd);
@@ -1052,7 +1057,7 @@ namespace Krys::HTML
               // TODO: this needs to be the current node, not the bottom of the stack.
               if (_openElementStack.Bottom().TagName() != TagName::dt)
               {
-                // TODO(HTMLTREEBUILDER, HTML): parse error
+                ParseError(token);
               }
 
               _openElementStack.PopUntilPopped(TagName::dt);
@@ -1073,7 +1078,7 @@ namespace Krys::HTML
           body_dd_done:
             if (_openElementStack.HasElementInButtonScope(TagName::p))
             {
-              ClosePElement();
+              ClosePElement(token);
             }
 
             InsertHTMLElement(Krys::Move(token));
@@ -1083,7 +1088,7 @@ namespace Krys::HTML
           {
             if (_openElementStack.HasElementInButtonScope(TagName::p))
             {
-              ClosePElement();
+              ClosePElement(token);
             }
 
             InsertHTMLElement(Krys::Move(token));
@@ -1096,8 +1101,8 @@ namespace Krys::HTML
           {
             if (_openElementStack.HasElementInButtonScope(TagName::button))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
-              ClosePElement();
+              ParseError(token);
+              ClosePElement(token);
 
               _openElementStack.PopUntilPopped(TagName::button);
             }
@@ -1117,7 +1122,7 @@ namespace Krys::HTML
             // stack of open elements if the adoption agency algorithm didn't already remove it.
             if (auto *existing = _activeFormattingElements.FindFormattingElementFromLastMarker(TagName::a))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               auto &existingNode = existing->Node();
               RunAdoptionAgency(token);
               _activeFormattingElements.RemoveFormattingElement(existingNode);
@@ -1163,7 +1168,7 @@ namespace Krys::HTML
 
             if (_openElementStack.HasElementInScope(TagName::nobr))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               RunAdoptionAgency(token);
               ReconstructActiveFormattingElements();
             }
@@ -1192,7 +1197,7 @@ namespace Krys::HTML
             if (_document._quirksMode != QuirksMode::Quirks
                 && _openElementStack.HasElementInButtonScope(TagName::p))
             {
-              ClosePElement();
+              ClosePElement(token);
             }
 
             InsertHTMLElement(Krys::Move(token));
@@ -1218,13 +1223,13 @@ namespace Krys::HTML
           {
             if (_scriptingMode == ParserScriptingMode::Fragment && Is<HTMLSelectElement>(_contextElement))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               return; // ignore the token
             }
 
             if (_openElementStack.HasElementInScope(TagName::select))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               _openElementStack.PopUntilPopped(TagName::select);
             }
 
@@ -1263,7 +1268,7 @@ namespace Krys::HTML
           {
             if (_openElementStack.HasElementInButtonScope(TagName::p))
             {
-              ClosePElement();
+              ClosePElement(token);
             }
 
             if (_openElementStack.HasElementInScope(TagName::select))
@@ -1272,7 +1277,7 @@ namespace Krys::HTML
               if (_openElementStack.HasElementInScope(TagName::option)
                   || _openElementStack.HasElementInScope(TagName::optgroup))
               {
-                // TODO(HTMLTREEBUILDER, HTML): parse error
+                ParseError(token);
               }
             }
 
@@ -1284,7 +1289,7 @@ namespace Krys::HTML
           }
           case TagName::image:
           {
-            // TODO(HTMLTREEBUILDER, HTML): parse error
+            ParseError(token);
             // NOTE: The spec says to treat this as a parse error and then reprocess the token as an img tag.
             token._name = u8"img";
             InBodyMode(Krys::Move(token));
@@ -1308,7 +1313,7 @@ namespace Krys::HTML
           {
             if (_openElementStack.HasElementInButtonScope(TagName::p))
             {
-              ClosePElement();
+              ClosePElement(token);
             }
 
             ReconstructActiveFormattingElements();
@@ -1345,13 +1350,13 @@ namespace Krys::HTML
             if (_scriptingMode == ParserScriptingMode::Fragment && _contextElement != nullptr
                 && Is<HTMLSelectElement>(_contextElement))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               return; // ignore the token
             }
 
             if (_openElementStack.HasElementInScope(TagName::select))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               _openElementStack.PopUntilPopped(TagName::select);
               return; // ignore the token
             }
@@ -1368,7 +1373,7 @@ namespace Krys::HTML
               _openElementStack.GenerateImpliedEndTags(TagName::optgroup);
               if (_openElementStack.HasElementInScope(TagName::option))
               {
-                // TODO(HTMLTREEBUILDER, HTML): parse error
+                ParseError(token);
               }
             }
             else
@@ -1391,7 +1396,7 @@ namespace Krys::HTML
               if (_openElementStack.HasElementInScope(TagName::option)
                   || _openElementStack.HasElementInScope(TagName::optgroup))
               {
-                // TODO(HTMLTREEBUILDER, HTML): parse error
+                ParseError(token);
               }
             }
             else
@@ -1414,7 +1419,7 @@ namespace Krys::HTML
               _openElementStack.GenerateImpliedEndTags();
               if (_openElementStack.Bottom().TagName() != TagName::ruby)
               {
-                // TODO(HTMLTREEBUILDER, HTML): parse error
+                ParseError(token);
               }
             }
 
@@ -1431,7 +1436,7 @@ namespace Krys::HTML
               auto &rtCurrentNode = _openElementStack.Bottom();
               if (rtCurrentNode.TagName() != TagName::rtc && rtCurrentNode.TagName() != TagName::ruby)
               {
-                // TODO(HTMLTREEBUILDER, HTML): parse error
+                ParseError(token);
               }
             }
 
@@ -1450,7 +1455,7 @@ namespace Krys::HTML
           case TagName::thead:
           case TagName::tr:
           {
-            // TODO(HTMLTREEBUILDER, HTML): parse error
+            ParseError(token);
             return; // ignore the token
           }
           default:
@@ -1515,13 +1520,13 @@ namespace Krys::HTML
           {
             if (!_openElementStack.HasElementInScope(TagName::body))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               return; // ignore the token
             }
 
             if (_openElementStack.ContainsInvalidUnclosedElements())
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
             }
 
             _insertionMode = InsertionMode::AfterBody;
@@ -1532,13 +1537,13 @@ namespace Krys::HTML
           {
             if (!_openElementStack.HasElementInScope(TagName::body))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               return; // ignore the token
             }
 
             if (_openElementStack.ContainsInvalidUnclosedElements())
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
             }
 
             _insertionMode = InsertionMode::AfterBody;
@@ -1580,7 +1585,7 @@ namespace Krys::HTML
 
             if (_openElementStack.Bottom().TagName() != tagName)
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
             }
 
             _openElementStack.PopUntilPopped(tagName);
@@ -1595,7 +1600,7 @@ namespace Krys::HTML
 
               if (form == nullptr || !_openElementStack.HasElementInScope(TagName::form))
               {
-                // TODO(HTMLTREEBUILDER, HTML): parse error
+                ParseError(token);
                 return; // ignore the token
               }
 
@@ -1603,7 +1608,7 @@ namespace Krys::HTML
 
               if (_openElementStack.Bottom().Node() != form.get())
               {
-                // TODO(HTMLTREEBUILDER, HTML): parse error
+                ParseError(token);
               }
 
               _openElementStack.Remove(*form);
@@ -1612,7 +1617,7 @@ namespace Krys::HTML
             {
               if (!_openElementStack.HasElementInScope(TagName::form))
               {
-                // TODO(HTMLTREEBUILDER, HTML): parse error
+                ParseError(token);
                 return; // ignore the token
               }
 
@@ -1620,7 +1625,7 @@ namespace Krys::HTML
 
               if (_openElementStack.Bottom().TagName() != TagName::form)
               {
-                // TODO(HTMLTREEBUILDER, HTML): parse error
+                ParseError(token);
               }
 
               _openElementStack.PopUntilPopped(TagName::form);
@@ -1632,7 +1637,7 @@ namespace Krys::HTML
           {
             if (!_openElementStack.HasElementInButtonScope(TagName::p))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               auto pElement =
                 ElementFactory::Create(_document, QualifiedName(Namespaces::HTML, DOMStringAtom::Null(),
                                                                 u8"p", TagName::p, Namespace::HTML));
@@ -1641,14 +1646,14 @@ namespace Krys::HTML
               _openElementStack.Push({TagName::p, Namespace::HTML, *pElement, {}});
             }
 
-            ClosePElement();
+            ClosePElement(token);
             return;
           }
           case TagName::li:
           {
             if (!_openElementStack.HasElementInListItemScope(TagName::li))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               return; // ignore the token
             }
 
@@ -1656,7 +1661,7 @@ namespace Krys::HTML
 
             if (_openElementStack.Bottom().TagName() != TagName::li)
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
             }
 
             _openElementStack.PopUntilPopped(TagName::li);
@@ -1667,7 +1672,7 @@ namespace Krys::HTML
           {
             if (!_openElementStack.HasElementInScope(tagName))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               return; // ignore the token
             }
 
@@ -1675,7 +1680,7 @@ namespace Krys::HTML
 
             if (_openElementStack.Bottom().TagName() != tagName)
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
             }
 
             _openElementStack.PopUntilPopped(tagName);
@@ -1695,7 +1700,7 @@ namespace Krys::HTML
                 && !_openElementStack.HasElementInScope(TagName::h5)
                 && !_openElementStack.HasElementInScope(TagName::h6))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               return; // ignore the token
             }
 
@@ -1703,7 +1708,7 @@ namespace Krys::HTML
 
             if (_openElementStack.Bottom().TagName() != tagName)
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
             }
 
             while (true)
@@ -1741,7 +1746,7 @@ namespace Krys::HTML
           }
           case TagName::br:
           {
-            // TODO(HTMLTREEBUILDER, HTML): parse error
+            ParseError(token);
 
             // NOTE: We drop attributes from the token and act as if this were a "br" start tag with no
             // attributes.
@@ -1759,7 +1764,7 @@ namespace Krys::HTML
           {
             if (!_openElementStack.HasElementInScope(tagName))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               return; // ignore the token
             }
 
@@ -1767,7 +1772,7 @@ namespace Krys::HTML
 
             if (_openElementStack.Bottom().TagName() != tagName)
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
             }
 
             _openElementStack.PopUntilPopped(tagName);
@@ -1777,7 +1782,7 @@ namespace Krys::HTML
           }
           default:
           {
-            InBodyGenericEndTag(tagName);
+            InBodyGenericEndTag(token, tagName);
             return;
           }
         }
@@ -1792,7 +1797,7 @@ namespace Krys::HTML
 
         if (_openElementStack.ContainsInvalidUnclosedElements())
         {
-          // TODO(HTMLTREEBUILDER, HTML): parse error
+          ParseError(token);
         }
 
         // TODO(HTMLTREEBUILDER, HTML): Stop parsing.
@@ -1812,7 +1817,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::EndOfFile:
       {
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
 
         if (_openElementStack.Bottom().TagName() == TagName::script)
         {
@@ -1875,7 +1880,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::DOCTYPE:
       {
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         return; // ignore the token
       }
       case HTMLTokenType::StartTag:
@@ -1937,7 +1942,7 @@ namespace Krys::HTML
           }
           case TagName::table:
           {
-            // TODO(HTMLTREEBUILDER, HTML): parse error
+            ParseError(token);
             if (!_openElementStack.HasElementInTableScope(TagName::table))
             {
               return; // ignore the token
@@ -1964,7 +1969,7 @@ namespace Krys::HTML
             {
               break; // fall through to "anything else"
             }
-            // TODO(HTMLTREEBUILDER, HTML): parse error
+            ParseError(token);
             InsertHTMLElement(Krys::Move(token));
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
@@ -1972,7 +1977,7 @@ namespace Krys::HTML
           }
           case TagName::form:
           {
-            // TODO(HTMLTREEBUILDER, HTML): parse error
+            ParseError(token);
             if (_openElementStack.ContainsTemplateElement() || _form != nullptr)
             {
               return; // ignore the token
@@ -1998,7 +2003,7 @@ namespace Krys::HTML
           {
             if (!_openElementStack.HasElementInTableScope(TagName::table))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               return; // ignore the token
             }
 
@@ -2019,7 +2024,7 @@ namespace Krys::HTML
           case TagName::thead:
           case TagName::tr:
           {
-            // TODO(HTMLTREEBUILDER, HTML): parse error
+            ParseError(token);
             return; // ignore the token
           }
           case TagName::template_:
@@ -2040,7 +2045,7 @@ namespace Krys::HTML
     }
 
     // Anything else: parse error, enable foster parenting, process with in body, then disable
-    // TODO(HTMLTREEBUILDER, HTML): parse error
+    ParseError(token);
     _fosterParenting = true;
     InBodyMode(Krys::Move(token));
     _fosterParenting = false;
@@ -2055,7 +2060,7 @@ namespace Krys::HTML
       // check each character. This is a bug.
       if (!token.Data().empty() && token.Data().front() == u8'\0')
       {
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         return;
       }
       _pendingTableCharacterTokens.emplace_back(token.Data());
@@ -2075,7 +2080,7 @@ namespace Krys::HTML
 
     if (hasNonWhitespace)
     {
-      // TODO(HTMLTREEBUILDER, HTML): parse error
+      ParseError(token);
       // Reprocess each pending character token using the "anything else" entry in the "in table" mode.
       for (auto &chars : _pendingTableCharacterTokens)
       {
@@ -2102,13 +2107,13 @@ namespace Krys::HTML
     {
       if (!_openElementStack.HasElementInTableScope(TagName::caption))
       {
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         return false; // fragment case — ignore
       }
       _openElementStack.GenerateImpliedEndTags();
       if (_openElementStack.Bottom().TagName() != TagName::caption)
       {
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
       }
 
       _openElementStack.PopUntilPopped(TagName::caption);
@@ -2173,7 +2178,7 @@ namespace Krys::HTML
         case TagName::thead:
         case TagName::tr:
         {
-          // TODO(HTMLTREEBUILDER, HTML): parse error
+          ParseError(token);
           return; // ignore the token
         }
         default: break;
@@ -2202,7 +2207,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::DOCTYPE:
       {
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         return; // ignore the token
       }
       case HTMLTokenType::StartTag:
@@ -2240,7 +2245,7 @@ namespace Krys::HTML
           {
             if (_openElementStack.Bottom().TagName() != TagName::colgroup)
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               return; // ignore the token
             }
             _openElementStack.Pop();
@@ -2249,7 +2254,7 @@ namespace Krys::HTML
           }
           case TagName::col:
           {
-            // TODO(HTMLTREEBUILDER, HTML): parse error
+            ParseError(token);
             return; // ignore the token
           }
           case TagName::template_:
@@ -2272,7 +2277,7 @@ namespace Krys::HTML
     // Anything else: if current node is not a colgroup element, parse error and ignore.
     if (_openElementStack.Bottom().TagName() != TagName::colgroup)
     {
-      // TODO(HTMLTREEBUILDER, HTML): parse error
+      ParseError(token);
       return; // ignore the token
     }
     _openElementStack.Pop();
@@ -2299,7 +2304,7 @@ namespace Krys::HTML
           case TagName::th:
           case TagName::td:
           {
-            // TODO(HTMLTREEBUILDER, HTML): parse error
+            ParseError(token);
             _openElementStack.PopUntilTableBodyContext();
             auto tr = ElementFactory::Create(_document, QualifiedName(Namespaces::HTML, DOMStringAtom::Null(),
                                                                       u8"tr", TagName::tr, Namespace::HTML));
@@ -2321,7 +2326,7 @@ namespace Krys::HTML
                 && !_openElementStack.HasElementInTableScope(TagName::thead)
                 && !_openElementStack.HasElementInTableScope(TagName::tfoot))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               return; // ignore the token
             }
             _openElementStack.PopUntilTableBodyContext();
@@ -2345,7 +2350,7 @@ namespace Krys::HTML
           {
             if (!_openElementStack.HasElementInTableScope(tagName))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               return; // ignore the token
             }
             _openElementStack.PopUntilTableBodyContext();
@@ -2359,7 +2364,7 @@ namespace Krys::HTML
                 && !_openElementStack.HasElementInTableScope(TagName::thead)
                 && !_openElementStack.HasElementInTableScope(TagName::tfoot))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               return; // ignore the token
             }
 
@@ -2378,7 +2383,7 @@ namespace Krys::HTML
           case TagName::th:
           case TagName::tr:
           {
-            // TODO(HTMLTREEBUILDER, HTML): parse error
+            ParseError(token);
             return; // ignore the token
           }
           default: break;
@@ -2422,7 +2427,7 @@ namespace Krys::HTML
           {
             if (!_openElementStack.HasElementInTableScope(TagName::tr))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               return; // ignore the token
             }
 
@@ -2447,7 +2452,7 @@ namespace Krys::HTML
           {
             if (!_openElementStack.HasElementInTableScope(TagName::tr))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               return; // ignore the token
             }
 
@@ -2461,7 +2466,7 @@ namespace Krys::HTML
           {
             if (!_openElementStack.HasElementInTableScope(TagName::tr))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               return; // ignore the token
             }
 
@@ -2479,7 +2484,7 @@ namespace Krys::HTML
           {
             if (!_openElementStack.HasElementInTableScope(tagName))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               return; // ignore the token
             }
 
@@ -2504,7 +2509,7 @@ namespace Krys::HTML
           case TagName::td:
           case TagName::th:
           {
-            // TODO(HTMLTREEBUILDER, HTML): parse error
+            ParseError(token);
             return; // ignore the token
           }
           default: break;
@@ -2525,7 +2530,7 @@ namespace Krys::HTML
       auto &current = _openElementStack.Bottom();
       if (current.TagName() != TagName::td && current.TagName() != TagName::th)
       {
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
       }
       while (_openElementStack.Bottom().TagName() != TagName::td
              && _openElementStack.Bottom().TagName() != TagName::th)
@@ -2549,7 +2554,7 @@ namespace Krys::HTML
           {
             if (!_openElementStack.HasElementInTableScope(tagName))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               return; // ignore the token
             }
 
@@ -2557,7 +2562,7 @@ namespace Krys::HTML
 
             if (_openElementStack.Bottom().TagName() != tagName)
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
             }
             _openElementStack.PopUntilPopped(tagName);
 
@@ -2572,7 +2577,7 @@ namespace Krys::HTML
           case TagName::colgroup:
           case TagName::html:
           {
-            // TODO(HTMLTREEBUILDER, HTML): parse error
+            ParseError(token);
             return; // ignore the token
           }
           case TagName::table:
@@ -2583,7 +2588,7 @@ namespace Krys::HTML
           {
             if (!_openElementStack.HasElementInTableScope(tagName))
             {
-              // TODO(HTMLTREEBUILDER, HTML): parse error
+              ParseError(token);
               return; // ignore the token
             }
             closeTheCell();
@@ -2708,7 +2713,7 @@ namespace Krys::HTML
           InHeadMode(Krys::Move(token));
           return;
         }
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         return; // ignore the token
       }
       case HTMLTokenType::EndOfFile:
@@ -2718,7 +2723,7 @@ namespace Krys::HTML
           // TODO(HTMLTREEBUILDER, HTML): Stop parsing. (fragment case)
           return;
         }
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         _openElementStack.PopUntilPopped(TagName::template_);
         _activeFormattingElements.ClearUpToLastMarker();
         _templateInsertionModes.pop_back();
@@ -2750,7 +2755,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::DOCTYPE:
       {
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         return; // ignore the token
       }
       case HTMLTokenType::StartTag:
@@ -2768,7 +2773,7 @@ namespace Krys::HTML
         {
           if (_contextElement != nullptr)
           {
-            // TODO(HTMLTREEBUILDER, HTML): parse error — fragment case, ignore
+            ParseError(token); // fragment case, ignore
             return;
           }
           _insertionMode = InsertionMode::AfterAfterBody;
@@ -2785,7 +2790,7 @@ namespace Krys::HTML
     }
 
     // Anything else: parse error, switch to "in body", reprocess.
-    // TODO(HTMLTREEBUILDER, HTML): parse error
+    ParseError(token);
     _insertionMode = InsertionMode::InBody;
     ProcessToken(Krys::Move(token));
   }
@@ -2807,7 +2812,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::DOCTYPE:
       {
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         return; // ignore the token
       }
       case HTMLTokenType::StartTag:
@@ -2847,8 +2852,8 @@ namespace Krys::HTML
         {
           if (&_openElementStack.Bottom().Node() == &_openElementStack.Top().Node())
           {
-            // TODO(HTMLTREEBUILDER, HTML): parse error — fragment case, ignore
-            return;
+            ParseError(token);
+            return; // fragment case, ignore
           }
           _openElementStack.Pop();
           if (_contextElement == nullptr && _openElementStack.Bottom().TagName() != TagName::frameset)
@@ -2863,7 +2868,7 @@ namespace Krys::HTML
       {
         if (&_openElementStack.Bottom().Node() != &_openElementStack.Top().Node())
         {
-          // TODO(HTMLTREEBUILDER, HTML): parse error
+          ParseError(token);
         }
         // TODO(HTMLTREEBUILDER, HTML): Stop parsing.
         return;
@@ -2872,7 +2877,7 @@ namespace Krys::HTML
     }
 
     // Anything else: parse error, ignore.
-    // TODO(HTMLTREEBUILDER, HTML): parse error
+    ParseError(token);
   }
 
   void HTMLTreeBuilder::AfterFramesetMode(HTMLTokenAtom &&token) noexcept
@@ -2892,7 +2897,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::DOCTYPE:
       {
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         return; // ignore the token
       }
       case HTMLTokenType::StartTag:
@@ -2932,7 +2937,7 @@ namespace Krys::HTML
     }
 
     // Anything else: parse error, ignore.
-    // TODO(HTMLTREEBUILDER, HTML): parse error
+    ParseError(token);
   }
 
   void HTMLTreeBuilder::AfterAfterBodyMode(HTMLTokenAtom &&token) noexcept
@@ -2976,7 +2981,7 @@ namespace Krys::HTML
     }
 
     // Anything else: parse error, switch to "in body", reprocess.
-    // TODO(HTMLTREEBUILDER, HTML): parse error
+    ParseError(token);
     _insertionMode = InsertionMode::InBody;
     ProcessToken(Krys::Move(token));
   }
@@ -3031,7 +3036,7 @@ namespace Krys::HTML
     }
 
     // Anything else: parse error, ignore.
-    // TODO(HTMLTREEBUILDER, HTML): parse error
+    ParseError(token);
   }
 
 #pragma endregion
@@ -3370,26 +3375,26 @@ namespace Krys::HTML
       auto *formattingElement = _activeFormattingElements.FindFormattingElementFromLastMarker(subject);
       if (formattingElement == nullptr)
       {
-        InBodyGenericEndTag(subject);
+        InBodyGenericEndTag(token, subject);
         return;
       }
 
       if (!_openElementStack.Contains(formattingElement->AsElement()))
       {
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         _activeFormattingElements.RemoveFormattingElement(formattingElement->Node());
         return;
       }
 
       if (!_openElementStack.HasElementInScope(formattingElement->TagName()))
       {
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         return;
       }
 
       if (&_openElementStack.Bottom() != formattingElement)
       {
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         // NOTE: do not return; continue with the algorithm.
       }
 
@@ -3673,19 +3678,19 @@ namespace Krys::HTML
     }
   }
 
-  void HTMLTreeBuilder::ClosePElement() noexcept
+  void HTMLTreeBuilder::ClosePElement(const HTMLTokenAtom &token) noexcept
   {
     _openElementStack.GenerateImpliedEndTags(TagName::p);
 
     if (_openElementStack.Bottom().TagName() != TagName::p)
     {
-      // TODO(HTMLTREEBUILDER, HTML): parse error
+      ParseError(token);
     }
 
     _openElementStack.PopUntilPopped(TagName::p);
   }
 
-  void HTMLTreeBuilder::InBodyGenericEndTag(TagName tagName)
+  void HTMLTreeBuilder::InBodyGenericEndTag(const HTMLTokenAtom &token, TagName tagName)
   {
     // walk the open element stack upward from the current node.
     auto *nodeEntry = &_openElementStack.Bottom();
@@ -3697,7 +3702,7 @@ namespace Krys::HTML
 
         if (nodeEntry != &_openElementStack.Bottom())
         {
-          // TODO(HTMLTREEBUILDER, HTML): parse error
+          ParseError(token);
         }
 
         auto &targetNode = nodeEntry->Node();
@@ -3716,7 +3721,7 @@ namespace Krys::HTML
 
       if (IsSpecialElement(nodeEntry->TagName()))
       {
-        // TODO(HTMLTREEBUILDER, HTML): parse error
+        ParseError(token);
         return; // ignore the token
       }
 

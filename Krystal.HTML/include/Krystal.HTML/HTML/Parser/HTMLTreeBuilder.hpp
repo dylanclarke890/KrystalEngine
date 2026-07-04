@@ -83,6 +83,8 @@ namespace Krys::HTML
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#adjusted-current-node
     KRYS_NODISCARD ContainerNode &AdjustedCurrentNode() noexcept;
 
+    void ParseError(const HTMLTokenAtom & token) noexcept;
+
 #pragma region InsertionMode Algorithms
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#current-template-insertion-mode
@@ -372,9 +374,9 @@ namespace Krys::HTML
     void ReconstructActiveFormattingElements() noexcept;
 
     /// @see https://html.spec.whatwg.org/#close-a-p-element
-    void ClosePElement() noexcept;
+    void ClosePElement(const HTMLTokenAtom &token) noexcept;
 
-    void InBodyGenericEndTag(TagName tagName);
+    void InBodyGenericEndTag(const HTMLTokenAtom & token, TagName tagName);
 
     RawPtr<HTMLStackItem> FurthestSpecialElementBlock(const HTMLStackItem &below) noexcept;
   };
