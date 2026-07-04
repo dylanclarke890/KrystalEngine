@@ -37,9 +37,9 @@ namespace Krys::HTML::Tests
 
     void DoTreeConstructionTests(const List<TreeConstructionTest> &tests) noexcept
     {
-      for (size_t i = 0; i < tests.size(); ++i)
+      for (size_t i = 0uz; i < tests.size(); ++i)
       {
-        INFO("Test case " + std::to_string(i + 1) + " of " + std::to_string(tests.size()));
+        INFO("Test case " + std::to_string(i + 1uz) + " of " + std::to_string(tests.size()));
         DoTreeConstructionTest(tests[i]);
       }
     }

@@ -1166,6 +1166,9 @@
     <ClCompile Include="src\QualifiedName.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\HTML\Parser\HTMLElementStack.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\HTMLTagNames.in" />

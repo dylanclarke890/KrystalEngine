@@ -23,104 +23,94 @@ namespace Krys::HTML
     List<HTMLStackItem> _items;
 
   public:
+#pragma region Accessors
+
+    /// @brief Get the first stack item added to the stack.
+    KRYS_NODISCARD HTMLStackItem &Top() noexcept;
+
+    /// @brief Get the stack item immediately below the top of the stack, or null if there is no such item.
+    KRYS_NODISCARD RawPtr<HTMLStackItem> OneBelowTop() noexcept;
+
+    /// @brief Get the most recently added element (the current element).
+    KRYS_NODISCARD HTMLStackItem &Bottom() noexcept;
+
+    /// @brief Get the most recently added element (the current element).
+    KRYS_NODISCARD const HTMLStackItem &Bottom() const noexcept;
+
+    /// @brief Get the stack item at the given index.
+    KRYS_NODISCARD HTMLStackItem &operator[](size_t index) noexcept;
+
+#pragma endregion
+
+#pragma region Push
+
     /// @brief Add an element to the top of the stack.
     void Push(HTMLStackItem &&item) noexcept
     {
       _items.push_back(Krys::Move(item));
     }
 
+#pragma endregion
+
+#pragma region Pop
+
     /// @brief Remove the most recently added element from the stack.
-    void Pop() noexcept
-    {
-      assert(!_items.empty());
+    void Pop() noexcept;
 
-      // TODO(HTMLTREEBUILDER, HTML): When the current node is removed from the stack of open elements,
-      // process internal resource links given the current node's node document.
+    /// @brief Pops elements off the stack until the given node has been encountered. The given node is not
+    /// popped.
+    void PopUntil(const ContainerNode &node) noexcept;
 
-      _items.pop_back();
-    }
+    /// @brief Pops elements off the stack until the given tagname has been encountered. The given tagname is
+    /// not popped.
+    void PopUntil(TagName tagName) noexcept;
 
     /// @brief Pops elements off the stack until the given node itself has been popped.
-    void PopUntilPopped(const ContainerNode &node) noexcept
-    {
-      while (true)
-      {
-        bool isTarget = (&Bottom().Node() == &node);
-        Pop();
-
-        if (isTarget)
-        {
-          break;
-        }
-      }
-    }
+    void PopUntilPopped(const ContainerNode &node) noexcept;
 
     /// @brief Pops elements off the stack until the given tagname itself has been popped.
-    void PopUntilPopped(TagName tagName) noexcept
-    {
-      while (true)
-      {
-        bool isTarget = (Bottom().TagName() == tagName);
-        Pop();
+    void PopUntilPopped(TagName tagName) noexcept;
 
-        if (isTarget)
-        {
-          break;
-        }
-      }
+    void PopUntilTableContext() noexcept;
+
+    void PopUntilTableBodyContext() noexcept;
+
+    void PopUntilTableRowContext() noexcept;
+
+    void PopAll() noexcept;
+
+#pragma endregion
+
+#pragma region InScope
+
+    KRYS_NODISCARD bool HasElementInScope(TagName targetNode) const noexcept;
+
+    KRYS_NODISCARD bool HasElementInListItemScope(TagName targetNode) const noexcept;
+
+    KRYS_NODISCARD bool HasElementInButtonScope(TagName targetNode) const noexcept;
+
+    KRYS_NODISCARD bool HasElementInTableScope(TagName targetNode) const noexcept;
+
+#pragma endregion
+
+    KRYS_NODISCARD auto begin() noexcept
+    {
+      return _items.begin();
     }
 
-    /// @brief Get the first element added to the stack (typically the html element).
-    KRYS_NODISCARD HTMLStackItem &Top() noexcept
+    KRYS_NODISCARD auto end() const noexcept
     {
-      assert(!_items.empty());
-      return _items.front();
+      return _items.end();
     }
 
-    KRYS_NODISCARD const HTMLStackItem &Top() const noexcept
+    KRYS_NODISCARD auto cbegin() const noexcept
     {
-      assert(!_items.empty());
-      return _items.front();
+      return _items.cbegin();
     }
 
-    /// @brief Get the most recently added element (the current element).
-    KRYS_NODISCARD HTMLStackItem &Bottom() noexcept
+    KRYS_NODISCARD auto cend() const noexcept
     {
-      assert(!_items.empty());
-      return _items.back();
-    }
-
-    KRYS_NODISCARD const HTMLStackItem &Bottom() const noexcept
-    {
-      assert(!_items.empty());
-      return _items.back();
-    }
-
-    void Remove(const ContainerNode &node) noexcept
-    {
-      auto it = std::ranges::find_if(_items, [&](const auto &item)
-                                     { return item.IsElement() && &item.Node() == &node; });
-      if (it != _items.end())
-      {
-        _items.erase(it);
-      }
-    }
-
-    /// @brief Returns a pointer to the stack entry whose node matches the given node, or null.
-    KRYS_NODISCARD RawPtr<HTMLStackItem> Find(const ContainerNode &node) noexcept
-    {
-      auto it = std::ranges::find_if(_items, [&](const auto &item)
-                                     { return item.IsElement() && &item.Node() == &node; });
-      return it != _items.end() ? &*it : nullptr;
-    }
-
-    /// @brief Inserts newItem immediately above (toward the current element) the reference entry.
-    /// @see https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm
-    void InsertAbove(HTMLStackItem newItem, const HTMLStackItem &reference) noexcept
-    {
-      auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item == &reference; });
-      assert(it != _items.end());
-      _items.insert(std::next(it), Krys::Move(newItem));
+      return _items.cend();
     }
 
     /// @brief Returns true if the stack is empty.
@@ -135,34 +125,31 @@ namespace Krys::HTML
       return _items.size();
     }
 
-    KRYS_NODISCARD HTMLStackItem &At(size_t index) noexcept
+    void Remove(const ContainerNode &node) noexcept
     {
-      assert(index < _items.size());
-      return _items[index];
+      auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item.Node() == &node; });
+      if (it != _items.end())
+      {
+        _items.erase(it);
+      }
     }
 
-    KRYS_NODISCARD const HTMLStackItem &At(size_t index) const noexcept
+    KRYS_NODISCARD bool Contains(const Element &node) const noexcept;
+
+    /// @brief Returns a pointer to the stack entry whose node matches the given node, or null.
+    KRYS_NODISCARD RawPtr<HTMLStackItem> Find(const ContainerNode &node) noexcept
     {
-      assert(index < _items.size());
-      return _items[index];
+      auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item.Node() == &node; });
+      return it != _items.end() ? &*it : nullptr;
     }
 
-    KRYS_NODISCARD HTMLStackItem &operator[](size_t index) noexcept
+    /// @brief Inserts newItem immediately above (toward the current element) the reference entry.
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm
+    void InsertAbove(HTMLStackItem newItem, const HTMLStackItem &reference) noexcept
     {
-      assert(index < _items.size());
-      return _items[index];
-    }
-
-    KRYS_NODISCARD const HTMLStackItem &operator[](size_t index) const noexcept
-    {
-      assert(index < _items.size());
-      return _items[index];
-    }
-
-    KRYS_NODISCARD bool ContainsElement(const ContainerNode &node) const noexcept
-    {
-      return std::ranges::any_of(_items,
-                                 [&](const auto &item) { return item.IsElement() && &item.Node() == &node; });
+      auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item == &reference; });
+      assert(it != _items.end());
+      _items.insert(std::next(it), Krys::Move(newItem));
     }
 
     /// @brief Returns the entry for the element immediately before the given node in the stack, if any such
@@ -184,26 +171,6 @@ namespace Krys::HTML
       }
 
       return nullptr;
-    }
-
-    KRYS_NODISCARD auto begin() noexcept
-    {
-      return _items.begin();
-    }
-
-    KRYS_NODISCARD auto end() const noexcept
-    {
-      return _items.end();
-    }
-
-    KRYS_NODISCARD auto cbegin() const noexcept
-    {
-      return _items.cbegin();
-    }
-
-    KRYS_NODISCARD auto cend() const noexcept
-    {
-      return _items.cend();
     }
 
     /// @brief Returns the entry for the element immediately before the given node in the stack, if any such
@@ -305,8 +272,14 @@ namespace Krys::HTML
                                      case TagName::thead:
                                      case TagName::tr:
                                      case TagName::body:
-                                     case TagName::html:     return false;
-                                     default:                return true;
+                                     case TagName::html:
+                                     {
+                                       return false;
+                                     }
+                                     default:
+                                     {
+                                       return true;
+                                     }
                                    }
                                  });
     }

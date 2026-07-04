@@ -37,13 +37,26 @@ namespace Krys::HTML
       return Is<Element>(_node.get());
     }
 
+    KRYS_NODISCARD Element &AsElement() const noexcept
+    {
+      assert(IsElement());
+      return Downcast<Element>(*_node);
+    }
+
     KRYS_NODISCARD bool IsFragment() const noexcept
     {
       return Is<DocumentFragment>(_node.get());
     }
 
+    KRYS_NODISCARD DocumentFragment &AsFragment() const noexcept
+    {
+      assert(IsFragment());
+      return Downcast<DocumentFragment>(*_node);
+    }
+
     KRYS_NODISCARD const ParsedAttributeList &Attributes() const noexcept
     {
+      assert(IsElement());
       return _attributes;
     }
 

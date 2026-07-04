@@ -67,9 +67,6 @@ namespace Krys::HTML
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#concept-parser-marker
     void PushMarker() noexcept;
 
-    /// @see https://html.spec.whatwg.org/multipage/parsing.html#reconstruct-the-active-formatting-elements
-    void Reconstruct(HTMLElementStack &openElementStack) noexcept;
-
     /// @brief Pops elements up to and including the last marker.
     /// @see https://html.spec.whatwg.org/#clear-the-list-of-active-formatting-elements-up-to-the-last-marker
     void ClearUpToLastMarker() noexcept;
@@ -92,8 +89,7 @@ namespace Krys::HTML
 
     /// @brief Removes oldElement from the list and inserts newItem at the bookmark position.
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm step 18
-    void SwapTo(const ContainerNode &oldElement, HTMLStackItem newItem,
-                const Bookmark &bookmark) noexcept;
+    void SwapTo(const ContainerNode &oldElement, HTMLStackItem newItem, const Bookmark &bookmark) noexcept;
 
     /// @brief Removes the formatting list entry whose node matches the given node, if present.
     void RemoveFormattingElement(const ContainerNode &node) noexcept;
@@ -102,6 +98,31 @@ namespace Krys::HTML
     {
       return std::ranges::any_of(_formattingElements, [&](const FormattingListEntry &entry)
                                  { return entry.IsFormattingElement() && &entry.Item().Node() == &node; });
+    }
+
+    bool IsEmpty() const noexcept
+    {
+      return _formattingElements.empty();
+    }
+
+    auto begin() noexcept
+    {
+      return _formattingElements.begin();
+    }
+
+    auto end() noexcept
+    {
+      return _formattingElements.end();
+    }
+
+    auto Last() noexcept
+    {
+      if (_formattingElements.empty())
+      {
+        return _formattingElements.end();
+      }
+
+      return std::prev(_formattingElements.end());
     }
   };
 }

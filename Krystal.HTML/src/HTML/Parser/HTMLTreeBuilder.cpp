@@ -213,160 +213,6 @@ namespace Krys::HTML
     }
   }
 
-  bool HTMLTreeBuilder::HasElementInScope(TagName targetNode) const noexcept
-  {
-    auto *node = &_openElementStack.Bottom();
-
-    while (true)
-    {
-      if (node->TagName() == targetNode)
-      {
-        return true;
-      }
-
-      switch (node->TagName())
-      {
-        case TagName::applet:
-        case TagName::caption:
-        case TagName::html:
-        case TagName::table:
-        case TagName::td:
-        case TagName::th:
-        case TagName::marquee:
-        case TagName::object:
-        case TagName::select:
-        case TagName::template_:
-        {
-          // TODO(HTMLTREEBUILDER, HTML) also: MathML mi MathML mo MathML mn MathML ms MathML mtext MathML
-          // annotation-xml SVG foreignObject SVG desc SVG title
-          return false;
-        }
-        default:
-        {
-          break;
-        }
-      }
-
-      node = _openElementStack.EntryBefore(node->Node());
-    }
-
-    return false;
-  }
-
-  bool HTMLTreeBuilder::HasElementInListItemScope(TagName targetNode) const noexcept
-  {
-    auto *node = &_openElementStack.Bottom();
-
-    while (true)
-    {
-      if (node->TagName() == targetNode)
-      {
-        return true;
-      }
-
-      switch (node->TagName())
-      {
-        case TagName::applet:
-        case TagName::caption:
-        case TagName::html:
-        case TagName::table:
-        case TagName::td:
-        case TagName::th:
-        case TagName::li:
-        case TagName::marquee:
-        case TagName::object:
-        case TagName::select:
-        case TagName::template_:
-        case TagName::ul:
-        {
-          // TODO(HTMLTREEBUILDER, HTML) also: MathML mi MathML mo MathML mn MathML ms MathML mtext MathML
-          // annotation-xml SVG foreignObject SVG desc SVG title
-          return false;
-        }
-        default:
-        {
-          break;
-        }
-      }
-
-      node = _openElementStack.EntryBefore(node->Node());
-    }
-
-    return false;
-  }
-
-  bool HTMLTreeBuilder::HasElementInButtonScope(TagName targetNode) const noexcept
-  {
-    auto *node = &_openElementStack.Bottom();
-
-    while (true)
-    {
-      if (node->TagName() == targetNode)
-      {
-        return true;
-      }
-
-      switch (node->TagName())
-      {
-        case TagName::applet:
-        case TagName::button:
-        case TagName::caption:
-        case TagName::html:
-        case TagName::table:
-        case TagName::td:
-        case TagName::th:
-        case TagName::marquee:
-        case TagName::object:
-        case TagName::select:
-        case TagName::template_:
-        {
-          // TODO(HTMLTREEBUILDER, HTML) also: MathML mi MathML mo MathML mn MathML ms MathML mtext MathML
-          // annotation-xml SVG foreignObject SVG desc SVG title
-          return false;
-        }
-        default:
-        {
-          break;
-        }
-      }
-
-      node = _openElementStack.EntryBefore(node->Node());
-    }
-
-    return false;
-  }
-
-  bool HTMLTreeBuilder::HasElementInTableScope(TagName targetNode) const noexcept
-  {
-    auto *node = &_openElementStack.Bottom();
-
-    while (true)
-    {
-      if (node->TagName() == targetNode)
-      {
-        return true;
-      }
-
-      switch (node->TagName())
-      {
-        case TagName::html:
-        case TagName::table:
-        case TagName::template_:
-        {
-          return false;
-        }
-        default:
-        {
-          break;
-        }
-      }
-
-      node = _openElementStack.EntryBefore(node->Node());
-    }
-
-    return false;
-  }
-
   AdjustedInsertionLocation
     HTMLTreeBuilder::AppropriateInsertionLocation(RawPtr<ContainerNode> targetOverride) noexcept
   {
@@ -517,6 +363,72 @@ namespace Krys::HTML
   Ref<Element> HTMLTreeBuilder::InsertHTMLElement(HTMLTokenAtom &&token) noexcept
   {
     return InsertForeignElement(Krys::Move(token), Namespaces::HTML, false);
+  }
+
+  void HTMLTreeBuilder::ReconstructActiveFormattingElements() noexcept
+  {
+    // If there are no entries in the list of active formatting elements, then there is nothing to
+    // reconstruct; stop this algorithm.
+    if (_activeFormattingElements.IsEmpty())
+    {
+      return;
+    }
+
+    // Let entry be the last (most recently added) element in the list of active formatting elements.
+    auto entry = _activeFormattingElements.Last();
+
+    // If the last (most recently added) entry in the list of active formatting elements is a marker, or if it
+    // is an element that is in the stack of open elements, then there is nothing to reconstruct; stop this
+    // algorithm.
+    if (entry->IsMarker() || _openElementStack.Contains(entry->Item().AsElement()))
+    {
+      return;
+    }
+
+    // Rewind: If there are no entries before entry in the list of active formatting elements, then jump to
+    // the step labeled create.
+    // Let entry be the entry one earlier than entry in the list of active formatting elements.
+    // If entry is neither a marker nor an element that is also in the stack of open elements, go to the step
+    // labeled rewind.
+    while (true)
+    {
+      if (entry == _activeFormattingElements.begin())
+      {
+        break;
+      }
+
+      auto previous = std::prev(entry);
+      if (previous->IsMarker() || _openElementStack.Contains(entry->Item().AsElement()))
+      {
+        break;
+      }
+
+      entry = previous;
+    }
+
+    // Advance: Let entry be the element one later than entry in the list of active formatting elements.
+    // Create: Insert an HTML element for the token for which the element entry was created, to obtain new
+    // element.
+    // Replace the entry for entry in the list with an entry for new element.
+    // If the entry for new element in the list of active formatting elements is not the last entry in the
+    // list, return to the step labeled advance.
+    while (true)
+    {
+      if (entry->IsMarker() || _openElementStack.Contains(entry->Item().AsElement()))
+      {
+        ++entry;
+      }
+
+      // auto newElement = CreateElementFromSavedItem(entry->Item());
+      // entry->ReplaceItem(HTMLStackItem(ParseTagName(newElement->TagName()),
+      //                                  ParseNamespace(newElement->NamespaceURI().View()), *newElement,
+      //                                  ParsedAttributeList(entry->Item().Attributes())));
+
+      if (++entry == _activeFormattingElements.end())
+      {
+        break;
+      }
+    }
   }
 
   void HTMLTreeBuilder::AdjustMathMLAttributes(HTMLTokenAtom &token) noexcept
@@ -1220,7 +1132,7 @@ namespace Krys::HTML
     {
       case HTMLTokenType::Character:
       {
-        _activeFormattingElements.Reconstruct(_openElementStack);
+        ReconstructActiveFormattingElements();
 
         if (!InsertCharacterTokenWhitespace(token))
         {
@@ -1362,7 +1274,7 @@ namespace Krys::HTML
           case TagName::summary:
           case TagName::ul:
           {
-            if (HasElementInButtonScope(TagName::p))
+            if (_openElementStack.HasElementInButtonScope(TagName::p))
             {
               ClosePElement();
             }
@@ -1377,7 +1289,7 @@ namespace Krys::HTML
           case TagName::h5:
           case TagName::h6:
           {
-            if (HasElementInButtonScope(TagName::p))
+            if (_openElementStack.HasElementInButtonScope(TagName::p))
             {
               ClosePElement();
             }
@@ -1397,7 +1309,7 @@ namespace Krys::HTML
           case TagName::pre:
           case TagName::listing:
           {
-            if (HasElementInButtonScope(TagName::p))
+            if (_openElementStack.HasElementInButtonScope(TagName::p))
             {
               ClosePElement();
             }
@@ -1420,7 +1332,7 @@ namespace Krys::HTML
               return; // ignore the token
             }
 
-            if (HasElementInButtonScope(TagName::p))
+            if (_openElementStack.HasElementInButtonScope(TagName::p))
             {
               ClosePElement();
             }
@@ -1464,7 +1376,7 @@ namespace Krys::HTML
             goto body_li_loop;
 
           body_li_done:
-            if (HasElementInButtonScope(TagName::p))
+            if (_openElementStack.HasElementInButtonScope(TagName::p))
             {
               ClosePElement();
             }
@@ -1519,7 +1431,7 @@ namespace Krys::HTML
             goto body_dd_loop;
 
           body_dd_done:
-            if (HasElementInButtonScope(TagName::p))
+            if (_openElementStack.HasElementInButtonScope(TagName::p))
             {
               ClosePElement();
             }
@@ -1529,7 +1441,7 @@ namespace Krys::HTML
           }
           case TagName::plaintext:
           {
-            if (HasElementInButtonScope(TagName::p))
+            if (_openElementStack.HasElementInButtonScope(TagName::p))
             {
               ClosePElement();
             }
@@ -1542,7 +1454,7 @@ namespace Krys::HTML
           }
           case TagName::button:
           {
-            if (HasElementInButtonScope(TagName::button))
+            if (_openElementStack.HasElementInButtonScope(TagName::button))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
               ClosePElement();
@@ -1550,7 +1462,7 @@ namespace Krys::HTML
               _openElementStack.PopUntilPopped(TagName::button);
             }
 
-            _activeFormattingElements.Reconstruct(_openElementStack);
+            ReconstructActiveFormattingElements();
 
             InsertHTMLElement(Krys::Move(token));
 
@@ -1572,7 +1484,7 @@ namespace Krys::HTML
               _openElementStack.Remove(existingNode);
             }
 
-            _activeFormattingElements.Reconstruct(_openElementStack);
+            ReconstructActiveFormattingElements();
             InsertHTMLElement(Krys::Move(token));
 
             auto &aOpenItem = _openElementStack.Bottom();
@@ -1595,7 +1507,7 @@ namespace Krys::HTML
           case TagName::tt:
           case TagName::u:
           {
-            _activeFormattingElements.Reconstruct(_openElementStack);
+            ReconstructActiveFormattingElements();
             InsertHTMLElement(Krys::Move(token));
 
             auto &fmtOpenItem = _openElementStack.Bottom();
@@ -1607,13 +1519,13 @@ namespace Krys::HTML
           }
           case TagName::nobr:
           {
-            _activeFormattingElements.Reconstruct(_openElementStack);
+            ReconstructActiveFormattingElements();
 
-            if (HasElementInScope(TagName::nobr))
+            if (_openElementStack.HasElementInScope(TagName::nobr))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
               RunAdoptionAgency(token);
-              _activeFormattingElements.Reconstruct(_openElementStack);
+              ReconstructActiveFormattingElements();
             }
 
             InsertHTMLElement(Krys::Move(token));
@@ -1629,7 +1541,7 @@ namespace Krys::HTML
           case TagName::marquee:
           case TagName::object:
           {
-            _activeFormattingElements.Reconstruct(_openElementStack);
+            ReconstructActiveFormattingElements();
             InsertHTMLElement(Krys::Move(token));
             _activeFormattingElements.PushMarker();
             _framesetOk = false;
@@ -1637,7 +1549,8 @@ namespace Krys::HTML
           }
           case TagName::table:
           {
-            if (_document._quirksMode != QuirksMode::Quirks && HasElementInButtonScope(TagName::p))
+            if (_document._quirksMode != QuirksMode::Quirks
+                && _openElementStack.HasElementInButtonScope(TagName::p))
             {
               ClosePElement();
             }
@@ -1654,7 +1567,7 @@ namespace Krys::HTML
           case TagName::keygen:
           case TagName::wbr:
           {
-            _activeFormattingElements.Reconstruct(_openElementStack);
+            ReconstructActiveFormattingElements();
             InsertHTMLElement(Krys::Move(token));
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
@@ -1669,7 +1582,7 @@ namespace Krys::HTML
               return; // ignore the token
             }
 
-            if (HasElementInScope(TagName::select))
+            if (_openElementStack.HasElementInScope(TagName::select))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
               _openElementStack.PopUntilPopped(TagName::select);
@@ -1685,7 +1598,7 @@ namespace Krys::HTML
               }
             }
 
-            _activeFormattingElements.Reconstruct(_openElementStack);
+            ReconstructActiveFormattingElements();
             InsertHTMLElement(Krys::Move(token));
             _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
@@ -1708,15 +1621,16 @@ namespace Krys::HTML
           }
           case TagName::hr:
           {
-            if (HasElementInButtonScope(TagName::p))
+            if (_openElementStack.HasElementInButtonScope(TagName::p))
             {
               ClosePElement();
             }
 
-            if (HasElementInScope(TagName::select))
+            if (_openElementStack.HasElementInScope(TagName::select))
             {
               GenerateImpliedEndTags();
-              if (HasElementInScope(TagName::option) || HasElementInScope(TagName::optgroup))
+              if (_openElementStack.HasElementInScope(TagName::option)
+                  || _openElementStack.HasElementInScope(TagName::optgroup))
               {
                 // TODO(HTMLTREEBUILDER, HTML): parse error
               }
@@ -1752,12 +1666,12 @@ namespace Krys::HTML
           }
           case TagName::xmp:
           {
-            if (HasElementInButtonScope(TagName::p))
+            if (_openElementStack.HasElementInButtonScope(TagName::p))
             {
               ClosePElement();
             }
 
-            _activeFormattingElements.Reconstruct(_openElementStack);
+            ReconstructActiveFormattingElements();
             _framesetOk = false;
             ParseGenericRawTextElement(Krys::Move(token));
             return;
@@ -1782,7 +1696,7 @@ namespace Krys::HTML
             }
 
             // Scripting is disabled: treat as 'any other start tag'.
-            _activeFormattingElements.Reconstruct(_openElementStack);
+            ReconstructActiveFormattingElements();
             InsertHTMLElement(Krys::Move(token));
             return;
           }
@@ -1795,24 +1709,24 @@ namespace Krys::HTML
               return; // ignore the token
             }
 
-            if (HasElementInScope(TagName::select))
+            if (_openElementStack.HasElementInScope(TagName::select))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
               _openElementStack.PopUntilPopped(TagName::select);
               return; // ignore the token
             }
 
-            _activeFormattingElements.Reconstruct(_openElementStack);
+            ReconstructActiveFormattingElements();
             InsertHTMLElement(Krys::Move(token));
             _framesetOk = false;
             return;
           }
           case TagName::option:
           {
-            if (HasElementInScope(TagName::select))
+            if (_openElementStack.HasElementInScope(TagName::select))
             {
               GenerateImpliedEndTags(TagName::optgroup);
-              if (HasElementInScope(TagName::option))
+              if (_openElementStack.HasElementInScope(TagName::option))
               {
                 // TODO(HTMLTREEBUILDER, HTML): parse error
               }
@@ -1825,16 +1739,17 @@ namespace Krys::HTML
               }
             }
 
-            _activeFormattingElements.Reconstruct(_openElementStack);
+            ReconstructActiveFormattingElements();
             InsertHTMLElement(Krys::Move(token));
             return;
           }
           case TagName::optgroup:
           {
-            if (HasElementInScope(TagName::select))
+            if (_openElementStack.HasElementInScope(TagName::select))
             {
               GenerateImpliedEndTags();
-              if (HasElementInScope(TagName::option) || HasElementInScope(TagName::optgroup))
+              if (_openElementStack.HasElementInScope(TagName::option)
+                  || _openElementStack.HasElementInScope(TagName::optgroup))
               {
                 // TODO(HTMLTREEBUILDER, HTML): parse error
               }
@@ -1847,14 +1762,14 @@ namespace Krys::HTML
               }
             }
 
-            _activeFormattingElements.Reconstruct(_openElementStack);
+            ReconstructActiveFormattingElements();
             InsertHTMLElement(Krys::Move(token));
             return;
           }
           case TagName::rb:
           case TagName::rtc:
           {
-            if (HasElementInScope(TagName::ruby))
+            if (_openElementStack.HasElementInScope(TagName::ruby))
             {
               GenerateImpliedEndTags();
               if (_openElementStack.Bottom().TagName() != TagName::ruby)
@@ -1869,7 +1784,7 @@ namespace Krys::HTML
           case TagName::rp:
           case TagName::rt:
           {
-            if (HasElementInScope(TagName::ruby))
+            if (_openElementStack.HasElementInScope(TagName::ruby))
             {
               GenerateImpliedEndTags(TagName::rtc);
 
@@ -1908,7 +1823,7 @@ namespace Krys::HTML
             // the TagName enum.
             if (nameView == u8"math")
             {
-              _activeFormattingElements.Reconstruct(_openElementStack);
+              ReconstructActiveFormattingElements();
               AdjustMathMLAttributes(token);
               AdjustForeignAttributes(token);
               InsertForeignElement(Krys::Move(token), Namespaces::MathML, false);
@@ -1924,7 +1839,7 @@ namespace Krys::HTML
 
             if (nameView == u8"svg")
             {
-              _activeFormattingElements.Reconstruct(_openElementStack);
+              ReconstructActiveFormattingElements();
               AdjustSVGAttributes(token);
               AdjustForeignAttributes(token);
               InsertForeignElement(Krys::Move(token), Namespaces::SVG, false);
@@ -1940,7 +1855,7 @@ namespace Krys::HTML
 
             // any other start tag
 
-            _activeFormattingElements.Reconstruct(_openElementStack);
+            ReconstructActiveFormattingElements();
             InsertHTMLElement(Krys::Move(token));
             return;
           }
@@ -1958,7 +1873,7 @@ namespace Krys::HTML
           }
           case TagName::body:
           {
-            if (!HasElementInScope(TagName::body))
+            if (!_openElementStack.HasElementInScope(TagName::body))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
               return; // ignore the token
@@ -1975,7 +1890,7 @@ namespace Krys::HTML
           }
           case TagName::html:
           {
-            if (!HasElementInScope(TagName::body))
+            if (!_openElementStack.HasElementInScope(TagName::body))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
               return; // ignore the token
@@ -2016,7 +1931,7 @@ namespace Krys::HTML
           case TagName::summary:
           case TagName::ul:
           {
-            if (!HasElementInScope(tagName))
+            if (!_openElementStack.HasElementInScope(tagName))
             {
               return; // ignore the token
             }
@@ -2038,7 +1953,7 @@ namespace Krys::HTML
               RefPtr<HTMLFormElement> form = Krys::Move(_form);
               _form = nullptr;
 
-              if (form == nullptr || !HasElementInScope(TagName::form))
+              if (form == nullptr || !_openElementStack.HasElementInScope(TagName::form))
               {
                 // TODO(HTMLTREEBUILDER, HTML): parse error
                 return; // ignore the token
@@ -2055,7 +1970,7 @@ namespace Krys::HTML
             }
             else
             {
-              if (!HasElementInScope(TagName::form))
+              if (!_openElementStack.HasElementInScope(TagName::form))
               {
                 // TODO(HTMLTREEBUILDER, HTML): parse error
                 return; // ignore the token
@@ -2075,7 +1990,7 @@ namespace Krys::HTML
           }
           case TagName::p:
           {
-            if (!HasElementInButtonScope(TagName::p))
+            if (!_openElementStack.HasElementInButtonScope(TagName::p))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
               auto pElement =
@@ -2091,7 +2006,7 @@ namespace Krys::HTML
           }
           case TagName::li:
           {
-            if (!HasElementInListItemScope(TagName::li))
+            if (!_openElementStack.HasElementInListItemScope(TagName::li))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
               return; // ignore the token
@@ -2110,7 +2025,7 @@ namespace Krys::HTML
           case TagName::dd:
           case TagName::dt:
           {
-            if (!HasElementInScope(tagName))
+            if (!_openElementStack.HasElementInScope(tagName))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
               return; // ignore the token
@@ -2133,9 +2048,12 @@ namespace Krys::HTML
           case TagName::h5:
           case TagName::h6:
           {
-            if (!HasElementInScope(TagName::h1) && !HasElementInScope(TagName::h2)
-                && !HasElementInScope(TagName::h3) && !HasElementInScope(TagName::h4)
-                && !HasElementInScope(TagName::h5) && !HasElementInScope(TagName::h6))
+            if (!_openElementStack.HasElementInScope(TagName::h1)
+                && !_openElementStack.HasElementInScope(TagName::h2)
+                && !_openElementStack.HasElementInScope(TagName::h3)
+                && !_openElementStack.HasElementInScope(TagName::h4)
+                && !_openElementStack.HasElementInScope(TagName::h5)
+                && !_openElementStack.HasElementInScope(TagName::h6))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
               return; // ignore the token
@@ -2188,7 +2106,7 @@ namespace Krys::HTML
             // NOTE: We drop attributes from the token and act as if this were a "br" start tag with no
             // attributes.
             token._attributes.clear();
-            _activeFormattingElements.Reconstruct(_openElementStack);
+            ReconstructActiveFormattingElements();
             InsertHTMLElement(Krys::Move(token));
             _openElementStack.Pop();
 
@@ -2199,7 +2117,7 @@ namespace Krys::HTML
           case TagName::marquee:
           case TagName::object:
           {
-            if (!HasElementInScope(tagName))
+            if (!_openElementStack.HasElementInScope(tagName))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
               return; // ignore the token
@@ -2327,19 +2245,6 @@ namespace Krys::HTML
 
   void HTMLTreeBuilder::InTableMode(HTMLTokenAtom &&token) noexcept
   {
-    auto clearStackBackToTableContext = [&]()
-    {
-      while (true)
-      {
-        auto tagName = _openElementStack.Bottom().TagName();
-        if (tagName == TagName::table || tagName == TagName::template_ || tagName == TagName::html)
-        {
-          break;
-        }
-        _openElementStack.Pop();
-      }
-    };
-
     switch (token.Type())
     {
       case HTMLTokenType::Character:
@@ -2380,7 +2285,7 @@ namespace Krys::HTML
         {
           case TagName::caption:
           {
-            clearStackBackToTableContext();
+            _openElementStack.PopUntilTableContext();
             _activeFormattingElements.PushMarker();
             InsertHTMLElement(Krys::Move(token));
             _insertionMode = InsertionMode::InCaption;
@@ -2388,14 +2293,14 @@ namespace Krys::HTML
           }
           case TagName::colgroup:
           {
-            clearStackBackToTableContext();
+            _openElementStack.PopUntilTableContext();
             InsertHTMLElement(Krys::Move(token));
             _insertionMode = InsertionMode::InColumnGroup;
             return;
           }
           case TagName::col:
           {
-            clearStackBackToTableContext();
+            _openElementStack.PopUntilTableContext();
             auto colgroup = ElementFactory::Create(
               _document, QualifiedName(Namespaces::HTML, DOMStringAtom::Null(), u8"colgroup",
                                        TagName::colgroup, Namespace::HTML));
@@ -2410,7 +2315,7 @@ namespace Krys::HTML
           case TagName::tfoot:
           case TagName::thead:
           {
-            clearStackBackToTableContext();
+            _openElementStack.PopUntilTableContext();
             InsertHTMLElement(Krys::Move(token));
             _insertionMode = InsertionMode::InTableBody;
             return;
@@ -2419,7 +2324,7 @@ namespace Krys::HTML
           case TagName::th:
           case TagName::tr:
           {
-            clearStackBackToTableContext();
+            _openElementStack.PopUntilTableContext();
             auto tbody =
               ElementFactory::Create(_document, QualifiedName(Namespaces::HTML, DOMStringAtom::Null(),
                                                               u8"tbody", TagName::tbody, Namespace::HTML));
@@ -2433,7 +2338,7 @@ namespace Krys::HTML
           case TagName::table:
           {
             // TODO(HTMLTREEBUILDER, HTML): parse error
-            if (!HasElementInTableScope(TagName::table))
+            if (!_openElementStack.HasElementInTableScope(TagName::table))
             {
               return; // ignore the token
             }
@@ -2491,7 +2396,7 @@ namespace Krys::HTML
         {
           case TagName::table:
           {
-            if (!HasElementInTableScope(TagName::table))
+            if (!_openElementStack.HasElementInTableScope(TagName::table))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
               return; // ignore the token
@@ -2595,7 +2500,7 @@ namespace Krys::HTML
     // Shared logic: close the caption and optionally reprocess the token.
     auto closeCaption = [&](bool reprocess) -> bool
     {
-      if (!HasElementInTableScope(TagName::caption))
+      if (!_openElementStack.HasElementInTableScope(TagName::caption))
       {
         // TODO(HTMLTREEBUILDER, HTML): parse error
         return false; // fragment case — ignore
@@ -2777,18 +2682,6 @@ namespace Krys::HTML
 
   void HTMLTreeBuilder::InTableBodyMode(HTMLTokenAtom &&token) noexcept
   {
-    auto clearStackBackToTableBodyContext = [&]()
-    {
-      while (true)
-      {
-        auto tagName = _openElementStack.Bottom().TagName();
-        if (tagName == TagName::tbody || tagName == TagName::tfoot || tagName == TagName::thead
-            || tagName == TagName::template_ || tagName == TagName::html)
-          break;
-        _openElementStack.Pop();
-      }
-    };
-
     switch (token.Type())
     {
       case HTMLTokenType::StartTag:
@@ -2798,7 +2691,7 @@ namespace Krys::HTML
         {
           case TagName::tr:
           {
-            clearStackBackToTableBodyContext();
+            _openElementStack.PopUntilTableBodyContext();
             InsertHTMLElement(Krys::Move(token));
             _insertionMode = InsertionMode::InRow;
             return;
@@ -2807,7 +2700,7 @@ namespace Krys::HTML
           case TagName::td:
           {
             // TODO(HTMLTREEBUILDER, HTML): parse error
-            clearStackBackToTableBodyContext();
+            _openElementStack.PopUntilTableBodyContext();
             auto tr = ElementFactory::Create(_document, QualifiedName(Namespaces::HTML, DOMStringAtom::Null(),
                                                                       u8"tr", TagName::tr, Namespace::HTML));
             assert(tr != nullptr);
@@ -2824,13 +2717,14 @@ namespace Krys::HTML
           case TagName::tfoot:
           case TagName::thead:
           {
-            if (!HasElementInTableScope(TagName::tbody) && !HasElementInTableScope(TagName::thead)
-                && !HasElementInTableScope(TagName::tfoot))
+            if (!_openElementStack.HasElementInTableScope(TagName::tbody)
+                && !_openElementStack.HasElementInTableScope(TagName::thead)
+                && !_openElementStack.HasElementInTableScope(TagName::tfoot))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
               return; // ignore the token
             }
-            clearStackBackToTableBodyContext();
+            _openElementStack.PopUntilTableBodyContext();
             _openElementStack.Pop();
             _insertionMode = InsertionMode::InTable;
             ProcessToken(Krys::Move(token));
@@ -2849,25 +2743,27 @@ namespace Krys::HTML
           case TagName::tfoot:
           case TagName::thead:
           {
-            if (!HasElementInTableScope(tagName))
+            if (!_openElementStack.HasElementInTableScope(tagName))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
               return; // ignore the token
             }
-            clearStackBackToTableBodyContext();
+            _openElementStack.PopUntilTableBodyContext();
             _openElementStack.Pop();
             _insertionMode = InsertionMode::InTable;
             return;
           }
           case TagName::table:
           {
-            if (!HasElementInTableScope(TagName::tbody) && !HasElementInTableScope(TagName::thead)
-                && !HasElementInTableScope(TagName::tfoot))
+            if (!_openElementStack.HasElementInTableScope(TagName::tbody)
+                && !_openElementStack.HasElementInTableScope(TagName::thead)
+                && !_openElementStack.HasElementInTableScope(TagName::tfoot))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
               return; // ignore the token
             }
-            clearStackBackToTableBodyContext();
+
+            _openElementStack.PopUntilTableBodyContext();
             _openElementStack.Pop();
             _insertionMode = InsertionMode::InTable;
             ProcessToken(Krys::Move(token));
@@ -2897,17 +2793,6 @@ namespace Krys::HTML
 
   void HTMLTreeBuilder::InRowMode(HTMLTokenAtom &&token) noexcept
   {
-    auto clearStackBackToTableRowContext = [&]()
-    {
-      while (true)
-      {
-        auto tagName = _openElementStack.Bottom().TagName();
-        if (tagName == TagName::tr || tagName == TagName::template_ || tagName == TagName::html)
-          break;
-        _openElementStack.Pop();
-      }
-    };
-
     switch (token.Type())
     {
       case HTMLTokenType::StartTag:
@@ -2918,10 +2803,13 @@ namespace Krys::HTML
           case TagName::th:
           case TagName::td:
           {
-            clearStackBackToTableRowContext();
+            _openElementStack.PopUntilTableRowContext();
+
             InsertHTMLElement(Krys::Move(token));
+
             _insertionMode = InsertionMode::InCell;
             _activeFormattingElements.PushMarker();
+
             return;
           }
           case TagName::caption:
@@ -2932,15 +2820,18 @@ namespace Krys::HTML
           case TagName::thead:
           case TagName::tr:
           {
-            if (!HasElementInTableScope(TagName::tr))
+            if (!_openElementStack.HasElementInTableScope(TagName::tr))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
               return; // ignore the token
             }
-            clearStackBackToTableRowContext();
+
+            _openElementStack.PopUntilTableRowContext();
             _openElementStack.Pop();
+
             _insertionMode = InsertionMode::InTableBody;
             ProcessToken(Krys::Move(token));
+
             return;
           }
           default: break;
@@ -2954,44 +2845,55 @@ namespace Krys::HTML
         {
           case TagName::tr:
           {
-            if (!HasElementInTableScope(TagName::tr))
+            if (!_openElementStack.HasElementInTableScope(TagName::tr))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
               return; // ignore the token
             }
-            clearStackBackToTableRowContext();
+
+            _openElementStack.PopUntilTableRowContext();
             _openElementStack.Pop();
+
             _insertionMode = InsertionMode::InTableBody;
             return;
           }
           case TagName::table:
           {
-            if (!HasElementInTableScope(TagName::tr))
+            if (!_openElementStack.HasElementInTableScope(TagName::tr))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
               return; // ignore the token
             }
-            clearStackBackToTableRowContext();
+
+            _openElementStack.PopUntilTableRowContext();
             _openElementStack.Pop();
+
             _insertionMode = InsertionMode::InTableBody;
             ProcessToken(Krys::Move(token));
+
             return;
           }
           case TagName::tbody:
           case TagName::tfoot:
           case TagName::thead:
           {
-            if (!HasElementInTableScope(tagName))
+            if (!_openElementStack.HasElementInTableScope(tagName))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
               return; // ignore the token
             }
-            if (!HasElementInTableScope(TagName::tr))
+
+            if (!_openElementStack.HasElementInTableScope(TagName::tr))
+            {
               return; // ignore the token
-            clearStackBackToTableRowContext();
+            }
+
+            _openElementStack.PopUntilTableRowContext();
             _openElementStack.Pop();
+
             _insertionMode = InsertionMode::InTableBody;
             ProcessToken(Krys::Move(token));
+
             return;
           }
           case TagName::body:
@@ -3045,7 +2947,7 @@ namespace Krys::HTML
           case TagName::td:
           case TagName::th:
           {
-            if (!HasElementInTableScope(tagName))
+            if (!_openElementStack.HasElementInTableScope(tagName))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
               return; // ignore the token
@@ -3079,7 +2981,7 @@ namespace Krys::HTML
           case TagName::thead:
           case TagName::tr:
           {
-            if (!HasElementInTableScope(tagName))
+            if (!_openElementStack.HasElementInTableScope(tagName))
             {
               // TODO(HTMLTREEBUILDER, HTML): parse error
               return; // ignore the token
@@ -3700,14 +3602,14 @@ namespace Krys::HTML
         return;
       }
 
-      if (!_openElementStack.ContainsElement(formattingElement->Node()))
+      if (!_openElementStack.Contains(formattingElement->AsElement()))
       {
         // TODO(HTMLTREEBUILDER, HTML): parse error
         _activeFormattingElements.RemoveFormattingElement(formattingElement->Node());
         return;
       }
 
-      if (!HasElementInScope(formattingElement->TagName()))
+      if (!_openElementStack.HasElementInScope(formattingElement->TagName()))
       {
         // TODO(HTMLTREEBUILDER, HTML): parse error
         return;
@@ -3846,13 +3748,18 @@ namespace Krys::HTML
   Ref<Element> HTMLTreeBuilder::CreateElementFromSavedItem(const HTMLStackItem &item) noexcept
   {
     assert(item.IsElement());
+
     auto &sourceElement = Downcast<Element>(item.Node());
     auto element =
       ElementFactory::Create(sourceElement.NodeDocument(),
                              {sourceElement.NamespaceURI(), DOMStringAtom::Null(), sourceElement.LocalName()},
                              DOMStringAtom::Null(), false, nullptr);
+
     for (auto &attr : item.Attributes())
+    {
       ElementAlgorithms::SetAttributeValue(*element, attr.NameView(), DOMString(attr.ValueView()));
+    }
+
     return element;
   }
 

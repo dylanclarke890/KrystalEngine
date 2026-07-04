@@ -218,18 +218,6 @@ namespace Krys::HTML
       }
     }
 
-    /// @see https://html.spec.whatwg.org/multipage/parsing.html#has-an-element-in-scope
-    KRYS_NODISCARD bool HasElementInScope(TagName targetNode) const noexcept;
-
-    /// @see https://html.spec.whatwg.org/multipage/parsing.html#has-an-element-in-list-item-scope
-    KRYS_NODISCARD bool HasElementInListItemScope(TagName targetNode) const noexcept;
-
-    /// @see https://html.spec.whatwg.org/multipage/parsing.html#has-an-element-in-button-scope
-    KRYS_NODISCARD bool HasElementInButtonScope(TagName targetNode) const noexcept;
-
-    /// @see https://html.spec.whatwg.org/multipage/parsing.html#has-an-element-in-table-scope
-    KRYS_NODISCARD bool HasElementInTableScope(TagName targetNode) const noexcept;
-
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#appropriate-place-for-inserting-a-node
     KRYS_NODISCARD AdjustedInsertionLocation
       AppropriateInsertionLocation(RawPtr<ContainerNode> targetOverride = nullptr) noexcept;
@@ -251,6 +239,8 @@ namespace Krys::HTML
 
     /// @see https://html.spec.whatwg.org/#adjust-math-ml-attributes
     void AdjustMathMLAttributes(HTMLTokenAtom &token) noexcept;
+
+    void ReconstructActiveFormattingElements() noexcept;
 
     /// @see https://html.spec.whatwg.org/#adjust-svg-attributes
     void AdjustSVGAttributes(HTMLTokenAtom &token) noexcept;
