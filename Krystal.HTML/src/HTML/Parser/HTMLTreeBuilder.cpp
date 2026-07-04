@@ -1,4 +1,5 @@
 ﻿#include "Krystal.HTML/HTML/Parser/HTMLTreeBuilder.hpp"
+#include "Krystal.HTML/DOM/Algorithms/DocumentAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/ElementAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Comment.hpp"
@@ -17,6 +18,7 @@
 #include "Krystal.HTML/HTML/HTMLTableSectionElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTemplateElement.hpp"
 #include "Krystal.HTML/Infra/StringAlgorithms.hpp"
+#include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Text/ASCII.hpp"
 
 namespace Krys::HTML
@@ -29,23 +31,71 @@ namespace Krys::HTML
 
   void HTMLTreeBuilder::ProcessToken(HTMLTokenAtom &&token) noexcept
   {
-    // TODO
-    // If the stack of open elements is empty
-    // If the adjusted current node is an element in the HTML namespace
-    // If the adjusted current node is a MathML text integration point and the token is a start tag whose tag
-    //   name is neither "mglyph" nor "malignmark"
-    // If the adjusted current node is a MathML text integration point and the token is a character token
-    // If the adjusted current node is a MathML annotation-xml element and the token is a start tag whose tag
-    //   name is "svg"
-    // If the adjusted current node is an HTML integration point and the token is a start tag
-    // If the adjusted current node is an HTML integration point and the token is a character token
-    // If the token is an end-of-file token
-    //     Process the token according to the rules given in the section corresponding to the current
-    //     insertion mode in HTML content.
-    // Otherwise
-    //     Process the token according to the rules given in the section for parsing tokens in foreign
-    //     content.
+    if (ShouldProcessAccordingToRulesForHTMLContent(token))
+    {
+      ProcessAccordingToRulesForHTMLContent(Krys::Move(token));
+    }
+    else
+    {
+      ProcessAccordingToRulesForForeignContent(Krys::Move(token));
+    }
+  }
 
+  bool HTMLTreeBuilder::ShouldProcessAccordingToRulesForHTMLContent(const HTMLTokenAtom &token) noexcept
+  {
+    if (_openElementStack.IsEmpty())
+    {
+      return true;
+    }
+
+    auto &adjustedCurrentNode = AdjustedCurrentNode();
+    if (auto *adjustedCurrentElement = DynamicDowncast<Element>(adjustedCurrentNode))
+    {
+      if (adjustedCurrentElement->NamespaceURI() == Namespaces::HTML)
+      {
+        return true;
+      }
+
+      if (IsMathMLTextIntegrationPoint(*adjustedCurrentElement))
+      {
+        if (token.Type() == HTMLTokenType::StartTag)
+        {
+          auto tagName = token.Name();
+          if (tagName != u8"mglyph" && tagName != u8"malignmark")
+          {
+            return true;
+          }
+        }
+        else if (token.Type() == HTMLTokenType::Character)
+        {
+          return true;
+        }
+      }
+
+      if (adjustedCurrentElement->NamespaceURI() == Namespaces::MathML
+          && adjustedCurrentElement->LocalName() == u8"annotation-xml"
+          && token.Type() == HTMLTokenType::StartTag && token.Name() == u8"svg")
+      {
+        return true;
+      }
+
+      if (IsHTMLIntegrationPoint(*adjustedCurrentElement)
+          && (token.Type() == HTMLTokenType::StartTag || token.Type() == HTMLTokenType::Character))
+      {
+        return true;
+      }
+    }
+
+    if (token.Type() == HTMLTokenType::EndOfFile)
+    {
+      return true;
+    }
+
+    return false;
+  }
+
+  void HTMLTreeBuilder::ProcessAccordingToRulesForHTMLContent(HTMLTokenAtom &&token) noexcept
+  {
     switch (_insertionMode)
     {
       case InsertionMode::Initial:            InitialMode(Krys::Move(token)); break;
@@ -72,6 +122,11 @@ namespace Krys::HTML
     }
   }
 
+  void HTMLTreeBuilder::ProcessAccordingToRulesForForeignContent(HTMLTokenAtom &&token) noexcept
+  {
+    // TODO(HTMLTREEBUILDER, HTML): Implement foreign content parsing.
+  }
+
   ContainerNode &HTMLTreeBuilder::CurrentNode() noexcept
   {
     return _openElementStack.Bottom().Node();
@@ -79,7 +134,7 @@ namespace Krys::HTML
 
   ContainerNode &HTMLTreeBuilder::AdjustedCurrentNode() noexcept
   {
-    if (_contextElement != nullptr && _openElementStack.Size() == 1)
+    if (_contextElement != nullptr && _openElementStack.Size() == 1uz)
     {
       return *_contextElement;
     }
@@ -89,9 +144,10 @@ namespace Krys::HTML
     }
   }
 
-  void HTMLTreeBuilder::ParseError(const HTMLTokenAtom &) noexcept
+  void HTMLTreeBuilder::ParseError(const HTMLTokenAtom &token) noexcept
   {
     // TODO(HTMLTREEBUILDER, HTML): Implement parse error handling/logging.
+    (void)token;
   }
 
 #pragma region InsertionMode Algorithms
@@ -235,22 +291,33 @@ namespace Krys::HTML
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Comment()), AdjustedInsertionLocation {&_document, nullptr});
+        AppendCommentToDocument(DOMString(token.Comment()));
         return;
       }
       case HTMLTokenType::DOCTYPE:
       {
         auto &docTypeData = *token.DOCTYPEData();
 
-        // TODO(HTMLTREEBUILDER, HTML): If the DOCTYPE token's name is not "html", or the token's public
-        // identifier is not missing, or the token's system identifier is neither missing nor
-        // "about:legacy-compat", then there is a parse error.
-
         auto name = DOMString(token.Name().View());
+        if (name != u8"html")
+        {
+          ParseError(token);
+        }
+
         auto publicIdentifier =
           DOMString(docTypeData.PublicIdentifier.begin(), docTypeData.PublicIdentifier.end());
+        if (docTypeData.HasPublicIdentifier && !publicIdentifier.empty())
+        {
+          ParseError(token);
+        }
+
         auto systemIdentifier =
           DOMString(docTypeData.SystemIdentifier.begin(), docTypeData.SystemIdentifier.end());
+        if (docTypeData.HasSystemIdentifier && !systemIdentifier.empty()
+            && systemIdentifier != u8"about:legacy-compat")
+        {
+          ParseError(token);
+        }
 
         auto doctype =
           _document.Implementation().CreateDocumentType(name, publicIdentifier, systemIdentifier);
@@ -259,8 +326,7 @@ namespace Krys::HTML
           _document.AppendChild(**doctype);
         }
 
-        // TODO(HTMLTREEBUILDER, HTML): Then, if the document is not an iframe srcdoc document &&
-        if (!_document._parserCannotChangeTheMode)
+        if (!DocumentAlgorithms::IsIFrameSrcdocDocument(_document) && !_document._parserCannotChangeTheMode)
         {
           if (IsQuirksModeDOCTYPE(token))
           {
@@ -275,11 +341,12 @@ namespace Krys::HTML
         _insertionMode = InsertionMode::BeforeHTML;
         return;
       }
-      default: break;
     }
 
-    // TODO(HTMLTREEBUILDER, HTML): If the document is not an iframe srcdoc document, then this is a parse
-    // error
+    if (!DocumentAlgorithms::IsIFrameSrcdocDocument(_document))
+    {
+      ParseError(token);
+    }
 
     if (!_document._parserCannotChangeTheMode)
     {
@@ -301,7 +368,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Comment()), AdjustedInsertionLocation {&_document, nullptr});
+        AppendCommentToDocument(DOMString(token.Comment()));
         return;
       }
       case HTMLTokenType::Character:
@@ -315,35 +382,33 @@ namespace Krys::HTML
       }
       case HTMLTokenType::StartTag:
       {
-        if (token.Name() != u8"html")
+        if (token.Name() == u8"html")
         {
-          break;
+          auto html = CreateElement(token, Namespaces::HTML, _document);
+          _document.AppendChild(*html);
+          _openElementStack.Push({TagName::html, Namespace::HTML, *html, Krys::Move(token.Attributes())});
+          _insertionMode = InsertionMode::BeforeHead;
+
+          return;
         }
 
-        auto html = CreateElement(token, Namespaces::HTML, _document);
-        _document.AppendChild(*html);
-        _openElementStack.Push({TagName::html, Namespace::HTML, *html, Krys::Move(token.Attributes())});
-        _insertionMode = InsertionMode::BeforeHead;
-
-        return;
+        break;
       }
       case HTMLTokenType::EndTag:
       {
         if (token.Name() == u8"head" || token.Name() == u8"body" || token.Name() == u8"html"
             || token.Name() == u8"br")
         {
-          break; // treat as the 'default' case below.
+          break;
         }
 
         ParseError(token);
         return; // ignore the token
       }
-      default: break;
     }
 
     auto html = ElementFactory::Create(_document, QualifiedName(Namespaces::HTML, DOMStringAtom::Null(),
                                                                 u8"html", TagName::html, Namespace::HTML));
-    assert(html != nullptr);
     _document.AppendChild(*html);
     _openElementStack.Push({TagName::html, Namespace::HTML, *html, {}});
     _insertionMode = InsertionMode::BeforeHead;
@@ -361,7 +426,6 @@ namespace Krys::HTML
         {
           break; // Reprocess remaining characters in the InHead insertion mode.
         }
-
         return;
       }
       case HTMLTokenType::Comment:
@@ -389,7 +453,6 @@ namespace Krys::HTML
           InsertElementAtAdjustedInsertionLocation(*_head);
           _openElementStack.Push({TagName::head, Namespace::HTML, *_head, Krys::Move(token.Attributes())});
           _insertionMode = InsertionMode::InHead;
-
           return;
         }
 
@@ -400,13 +463,12 @@ namespace Krys::HTML
         if (token.Name() == u8"head" || token.Name() == u8"body" || token.Name() == u8"html"
             || token.Name() == u8"br")
         {
-          break; // treat as the 'default' case below.
+          break;
         }
 
         ParseError(token);
         return; // ignore the token
       }
-      default: break;
     }
 
     _head = ElementFactory::Create(_document, QualifiedName(Namespaces::HTML, DOMStringAtom::Null(), u8"head",
@@ -762,8 +824,6 @@ namespace Krys::HTML
 
     auto body = ElementFactory::Create(_document, QualifiedName(Namespaces::HTML, DOMStringAtom::Null(),
                                                                 u8"body", TagName::body, Namespace::HTML));
-    assert(body != nullptr);
-
     InsertElementAtAdjustedInsertionLocation(*body);
     _openElementStack.Push({TagName::body, Namespace::HTML, *body, {}});
     _insertionMode = InsertionMode::InBody;
@@ -1054,7 +1114,6 @@ namespace Krys::HTML
             {
               _openElementStack.GenerateImpliedEndTags(TagName::dt);
 
-              // TODO: this needs to be the current node, not the bottom of the stack.
               if (_openElementStack.Bottom().TagName() != TagName::dt)
               {
                 ParseError(token);
@@ -2946,7 +3005,7 @@ namespace Krys::HTML
     {
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Comment()), AdjustedInsertionLocation {&_document, nullptr});
+        AppendCommentToDocument(DOMString(token.Comment()));
         return;
       }
       case HTMLTokenType::DOCTYPE:
@@ -2992,7 +3051,7 @@ namespace Krys::HTML
     {
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Comment()), AdjustedInsertionLocation {&_document, nullptr});
+        AppendCommentToDocument(DOMString(token.Comment()));
         return;
       }
       case HTMLTokenType::DOCTYPE:
@@ -3217,6 +3276,11 @@ namespace Krys::HTML
     (void)MutationAlgorithms::Insert(*commentNode, *parent, beforeSibling);
   }
 
+  void HTMLTreeBuilder::AppendCommentToDocument(DOMString &&data) noexcept
+  {
+    InsertComment(Krys::Move(data), AdjustedInsertionLocation {&_document, nullptr});
+  }
+
   void HTMLTreeBuilder::ParseGenericRawTextElement(HTMLTokenAtom &&token) noexcept
   {
     InsertHTMLElement(Krys::Move(token));
@@ -3246,12 +3310,91 @@ namespace Krys::HTML
 
   void HTMLTreeBuilder::AdjustSVGAttributes(HTMLTokenAtom &token) noexcept
   {
-    // TODO(HTMLTREEBUILDER, HTML): Adjust attributes for svg elements.
+    constexpr static Array<Array<DOMStringView, 2uz>, 58uz> attributesToAdjust = {
+      Array<DOMStringView, 2> {u8"attributename", u8"attributeName"},
+      Array<DOMStringView, 2> {u8"attributetype", u8"attributeType"},
+      Array<DOMStringView, 2> {u8"basefrequency", u8"baseFrequency"},
+      Array<DOMStringView, 2> {u8"baseprofile", u8"baseProfile"},
+      Array<DOMStringView, 2> {u8"calcmode", u8"calcMode"},
+      Array<DOMStringView, 2> {u8"clippathunits", u8"clipPathUnits"},
+      Array<DOMStringView, 2> {u8"diffuseconstant", u8"diffuseConstant"},
+      Array<DOMStringView, 2> {u8"edgemode", u8"edgeMode"},
+      Array<DOMStringView, 2> {u8"filterunits", u8"filterUnits"},
+      Array<DOMStringView, 2> {u8"glyphref", u8"glyphRef"},
+      Array<DOMStringView, 2> {u8"gradienttransform", u8"gradientTransform"},
+      Array<DOMStringView, 2> {u8"gradientunits", u8"gradientUnits"},
+      Array<DOMStringView, 2> {u8"kernelmatrix", u8"kernelMatrix"},
+      Array<DOMStringView, 2> {u8"kernelunitlength", u8"kernelUnitLength"},
+      Array<DOMStringView, 2> {u8"keypoints", u8"keyPoints"},
+      Array<DOMStringView, 2> {u8"keysplines", u8"keySplines"},
+      Array<DOMStringView, 2> {u8"keytimes", u8"keyTimes"},
+      Array<DOMStringView, 2> {u8"lengthadjust", u8"lengthAdjust"},
+      Array<DOMStringView, 2> {u8"limitingconeangle", u8"limitingConeAngle"},
+      Array<DOMStringView, 2> {u8"markerheight", u8"markerHeight"},
+      Array<DOMStringView, 2> {u8"markerunits", u8"markerUnits"},
+      Array<DOMStringView, 2> {u8"markerwidth", u8"markerWidth"},
+      Array<DOMStringView, 2> {u8"maskcontentunits", u8"maskContentUnits"},
+      Array<DOMStringView, 2> {u8"maskunits", u8"maskUnits"},
+      Array<DOMStringView, 2> {u8"numoctaves", u8"numOctaves"},
+      Array<DOMStringView, 2> {u8"pathlength", u8"pathLength"},
+      Array<DOMStringView, 2> {u8"patterncontentunits", u8"patternContentUnits"},
+      Array<DOMStringView, 2> {u8"patterntransform", u8"patternTransform"},
+      Array<DOMStringView, 2> {u8"patternunits", u8"patternUnits"},
+      Array<DOMStringView, 2> {u8"pointsatx", u8"pointsAtX"},
+      Array<DOMStringView, 2> {u8"pointsaty", u8"pointsAtY"},
+      Array<DOMStringView, 2> {u8"pointsatz", u8"pointsAtZ"},
+      Array<DOMStringView, 2> {u8"preservealpha", u8"preserveAlpha"},
+      Array<DOMStringView, 2> {u8"preserveaspectratio", u8"preserveAspectRatio"},
+      Array<DOMStringView, 2> {u8"primitiveunits", u8"primitiveUnits"},
+      Array<DOMStringView, 2> {u8"refx", u8"refX"},
+      Array<DOMStringView, 2> {u8"refy", u8"refY"},
+      Array<DOMStringView, 2> {u8"repeatcount", u8"repeatCount"},
+      Array<DOMStringView, 2> {u8"repeatdur", u8"repeatDur"},
+      Array<DOMStringView, 2> {u8"requiredextensions", u8"requiredExtensions"},
+      Array<DOMStringView, 2> {u8"requiredfeatures", u8"requiredFeatures"},
+      Array<DOMStringView, 2> {u8"specularconstant", u8"specularConstant"},
+      Array<DOMStringView, 2> {u8"specularexponent", u8"specularExponent"},
+      Array<DOMStringView, 2> {u8"spreadmethod", u8"spreadMethod"},
+      Array<DOMStringView, 2> {u8"startoffset", u8"startOffset"},
+      Array<DOMStringView, 2> {u8"stddeviation", u8"stdDeviation"},
+      Array<DOMStringView, 2> {u8"stitchtiles", u8"stitchTiles"},
+      Array<DOMStringView, 2> {u8"surfacescale", u8"surfaceScale"},
+      Array<DOMStringView, 2> {u8"systemlanguage", u8"systemLanguage"},
+      Array<DOMStringView, 2> {u8"tablevalues", u8"tableValues"},
+      Array<DOMStringView, 2> {u8"targetx", u8"targetX"},
+      Array<DOMStringView, 2> {u8"targety", u8"targetY"},
+      Array<DOMStringView, 2> {u8"textlength", u8"textLength"},
+      Array<DOMStringView, 2> {u8"viewbox", u8"viewBox"},
+      Array<DOMStringView, 2> {u8"viewtarget", u8"viewTarget"},
+      Array<DOMStringView, 2> {u8"xchannelselector", u8"xChannelSelector"},
+      Array<DOMStringView, 2> {u8"ychannelselector", u8"yChannelSelector"},
+      Array<DOMStringView, 2> {u8"zoomandpan", u8"zoomAndPan"},
+    };
+
+    auto &attributes = token.Attributes();
+    for (auto &[attrName, adjustedAttrName] : attributesToAdjust)
+    {
+      auto attrIt = std::ranges::find_if(attributes, [attrName](const auto &attr)
+                                         { return attr.NameView() == attrName; });
+
+      if (attrIt != attributes.end())
+      {
+        attrIt->SetName(adjustedAttrName);
+      }
+    }
   }
 
   void HTMLTreeBuilder::AdjustMathMLAttributes(HTMLTokenAtom &token) noexcept
   {
-    // TODO(HTMLTREEBUILDER, HTML): Adjust attributes for mathml elements.
+    auto &attributes = token.Attributes();
+
+    auto attrIt =
+      std::ranges::find_if(attributes, [](const auto &attr) { return attr.NameView() == u8"definitionurl"; });
+
+    if (attrIt != attributes.end())
+    {
+      attrIt->SetName(u8"definitionURL");
+    }
   }
 
 #pragma endregion
@@ -3532,6 +3675,37 @@ namespace Krys::HTML
     }
 
     (void)MutationAlgorithms::Append(*newParent, oldNode);
+  }
+
+#pragma endregion
+
+#pragma region IntegrationPoint Algorithms
+
+  bool HTMLTreeBuilder::IsMathMLTextIntegrationPoint(const Element &element) const noexcept
+  {
+    if (element.NamespaceURI() == Namespaces::MathML)
+    {
+      auto name = ParseTagName(element.LocalName().View());
+      switch (name)
+      {
+        case TagName::mi:
+        case TagName::mo:
+        case TagName::mn:
+        case TagName::ms:
+        case TagName::mtext:
+        {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  bool HTMLTreeBuilder::IsHTMLIntegrationPoint(const Element &element) const noexcept
+  {
+    // TODO(HTMLTREEBUILDER, HTML): return true if element is an HTML integration point.
+    return false;
   }
 
 #pragma endregion

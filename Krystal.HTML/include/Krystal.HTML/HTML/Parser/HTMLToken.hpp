@@ -38,6 +38,12 @@ namespace Krys::HTML
     {
       return DOMStringView(Value.begin(), Value.end());
     }
+
+    void SetName(DOMStringView characters) noexcept
+    {
+      Name.clear();
+      Name.append(characters.begin(), characters.end());
+    }
   };
 
   using ParsedAttributeList = SmallList<ParsedAttribute, 10u>;

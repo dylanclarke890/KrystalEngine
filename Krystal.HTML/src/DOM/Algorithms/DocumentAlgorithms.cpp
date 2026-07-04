@@ -153,4 +153,10 @@ namespace Krys::HTML
 
     EventDispatcher::FireEvent(EventNames::ReadyStateChange, document);
   }
+
+  bool DocumentAlgorithms::IsIFrameSrcdocDocument(const Document &document) noexcept
+  {
+    // TODO(impl): DOCUMENT - this is a Document whose URL matches about:srcdoc.
+    return false;
+  }
 }

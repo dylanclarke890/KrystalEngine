@@ -30,6 +30,7 @@ namespace Krys::HTML
     friend class ExtensibilityHooks;
     friend class SlotAlgorithms;
     friend class HTMLCollectionAlgorithms;
+    friend class HTMLStackItem;
     friend class Node;
     friend class NodeAlgorithms;
     friend class NamedNodeMap;
@@ -322,7 +323,7 @@ namespace Krys::HTML
     KRYS_NODISCARD RefPtr<HTMLSlotElement> AssignedSlot() noexcept;
 
 #pragma endregion
-  };
+};
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::Element)

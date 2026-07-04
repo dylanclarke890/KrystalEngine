@@ -93,6 +93,11 @@ namespace Krys::HTML
     meta,
     meter,
     model,
+    mi,
+    mo,
+    mn,
+    ms,
+    mtext,
     multicol,
     nav,
     nextid,
@@ -166,7 +171,7 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::TagName, 154u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::TagName, 159u);
 
 namespace Krys::HTML
 {
@@ -264,6 +269,22 @@ namespace Krys::HTML
         if (name == u8"li")
         {
           return TagName::li;
+        }
+        if (name == u8"mi")
+        {
+          return TagName::mi;
+        }
+        if (name == u8"mo")
+        {
+          return TagName::mo;
+        }
+        if (name == u8"mn")
+        {
+          return TagName::mn;
+        }
+        if (name == u8"ms")
+        {
+          return TagName::ms;
         }
         if (name == u8"ol")
         {
@@ -528,6 +549,10 @@ namespace Krys::HTML
         if (name == u8"model")
         {
           return TagName::model;
+        }
+        if (name == u8"mtext")
+        {
+          return TagName::mtext;
         }
         if (name == u8"param")
         {

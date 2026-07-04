@@ -77,13 +77,19 @@ namespace Krys::HTML
     void ProcessToken(HTMLTokenAtom &&token) noexcept;
 
   private:
+    bool ShouldProcessAccordingToRulesForHTMLContent(const HTMLTokenAtom &token) noexcept;
+
+    void ProcessAccordingToRulesForHTMLContent(HTMLTokenAtom &&token) noexcept;
+
+    void ProcessAccordingToRulesForForeignContent(HTMLTokenAtom &&token) noexcept;
+
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#current-node
     KRYS_NODISCARD ContainerNode &CurrentNode() noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#adjusted-current-node
     KRYS_NODISCARD ContainerNode &AdjustedCurrentNode() noexcept;
 
-    void ParseError(const HTMLTokenAtom & token) noexcept;
+    void ParseError(const HTMLTokenAtom &token) noexcept;
 
 #pragma region InsertionMode Algorithms
 
@@ -176,6 +182,9 @@ namespace Krys::HTML
 
     /// @see https://html.spec.whatwg.org/#insert-a-character
     void InsertCharacter(DOMString &&data) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#insert-a-character
+    void AppendCommentToDocument(DOMString &&data) noexcept;
 
     /// @brief Skips whitespace in a character token and returns whether any non-whitespace characters remain.
     bool SkipCharacterTokenWhitespace(HTMLTokenAtom &token) noexcept;
@@ -362,6 +371,14 @@ namespace Krys::HTML
 
 #pragma endregion
 
+#pragma region IntegrationPoint Algorithms
+
+    KRYS_NODISCARD bool IsMathMLTextIntegrationPoint(const Element &element) const noexcept;
+
+    KRYS_NODISCARD bool IsHTMLIntegrationPoint(const Element &element) const noexcept;
+
+#pragma endregion
+
     /// @see https://html.spec.whatwg.org/#create-an-element-for-the-token
     KRYS_NODISCARD Ref<Element> CreateElement(HTMLTokenAtom &token, DOMStringAtom namespaceURI,
                                               ContainerNode &intendedParent) noexcept;
@@ -376,7 +393,7 @@ namespace Krys::HTML
     /// @see https://html.spec.whatwg.org/#close-a-p-element
     void ClosePElement(const HTMLTokenAtom &token) noexcept;
 
-    void InBodyGenericEndTag(const HTMLTokenAtom & token, TagName tagName);
+    void InBodyGenericEndTag(const HTMLTokenAtom &token, TagName tagName);
 
     RawPtr<HTMLStackItem> FurthestSpecialElementBlock(const HTMLStackItem &below) noexcept;
   };
