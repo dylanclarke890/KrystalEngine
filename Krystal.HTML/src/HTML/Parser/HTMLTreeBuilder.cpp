@@ -3773,10 +3773,9 @@ namespace Krys::HTML
     assert(item.IsElement());
 
     auto &sourceElement = Downcast<Element>(item.Node());
-    auto element =
-      ElementFactory::Create(sourceElement.NodeDocument(),
-                             {sourceElement.NamespaceURI(), DOMStringAtom::Null(), sourceElement.LocalName()},
-                             DOMStringAtom::Null(), false, nullptr);
+    auto element = ElementFactory::Create(
+      sourceElement.NodeDocument(),
+      {sourceElement.NamespaceURI(), sourceElement.Prefix(), sourceElement.LocalName()}, sourceElement._is);
 
     for (auto &attr : item.Attributes())
     {
@@ -3819,12 +3818,13 @@ namespace Krys::HTML
       }
 
       auto previous = std::prev(entry);
-      if (previous->IsMarker() || _openElementStack.Contains(entry->Item().AsElement()))
+      if (!previous->IsMarker() && !_openElementStack.Contains(previous->Item().AsElement()))
       {
-        break;
+        entry = previous;
+        continue;
       }
 
-      entry = previous;
+      break;
     }
 
     // Advance: Let entry be the element one later than entry in the list of active formatting elements.
@@ -3837,15 +3837,18 @@ namespace Krys::HTML
     {
       if (entry->IsMarker() || _openElementStack.Contains(entry->Item().AsElement()))
       {
-        ++entry;
+        entry = std::next(entry);
       }
 
-      // auto newElement = CreateElementFromSavedItem(entry->Item());
-      // entry->ReplaceItem(HTMLStackItem(ParseTagName(newElement->TagName()),
-      //                                  ParseNamespace(newElement->NamespaceURI().View()), *newElement,
-      //                                  ParsedAttributeList(entry->Item().Attributes())));
+      auto &entryStackItem = entry->Item();
+      auto newElement = CreateElement(entryStackItem);
+      InsertElementAtAdjustedInsertionLocation(*newElement);
+      _openElementStack.Push({entryStackItem.TagName(), entryStackItem.Namespace(), *newElement,
+                              ParsedAttributeList(entryStackItem.Attributes())});
+      entry->ReplaceItem(_openElementStack.Bottom());
 
-      if (++entry == _activeFormattingElements.end())
+      entry = std::next(entry);
+      if (entry == _activeFormattingElements.end())
       {
         break;
       }
@@ -3911,7 +3914,7 @@ namespace Krys::HTML
     size_t formattingIndex = _openElementStack.Size();
     for (size_t i = 0uz; i < _openElementStack.Size(); ++i)
     {
-      if (&_openElementStack[i] == &formattingElement)
+      if (&_openElementStack[i].Node() == &formattingElement.Node())
       {
         formattingIndex = i;
         break;

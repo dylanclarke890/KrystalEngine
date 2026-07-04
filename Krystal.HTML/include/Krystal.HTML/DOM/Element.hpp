@@ -31,6 +31,7 @@ namespace Krys::HTML
     friend class SlotAlgorithms;
     friend class HTMLCollectionAlgorithms;
     friend class HTMLStackItem;
+    friend class HTMLTreeBuilder;
     friend class Node;
     friend class NodeAlgorithms;
     friend class NamedNodeMap;
