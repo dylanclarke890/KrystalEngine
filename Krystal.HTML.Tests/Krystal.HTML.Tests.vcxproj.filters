@@ -184,6 +184,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="data\html5-basic-tests.dat" />
+    <None Include="data\isindex.dat" />
+    <None Include="data\basic-01.dat" />
+    <None Include="data\inbody-01.dat" />
+    <None Include="data\basic-02.dat" />
+    <None Include="data\basic-03.dat" />
   </ItemGroup>
 </Project>

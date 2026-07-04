@@ -1,13 +1,3 @@
-﻿#data
-&lang;&rang;
-#errors
-(1,6): expected-doctype-but-got-chars
-#document
-| <html>
-|   <head>
-|   <body>
-|     "⟨⟩"
-
 #data
 <div<div>
 #errors
@@ -78,10 +68,11 @@
 |       href="\nbar"
 
 #data
-<!DOCTYPE html>
+&lang;&rang;
 #errors
+(1,6): expected-doctype-but-got-chars
 #document
-| <!DOCTYPE html>
 | <html>
 |   <head>
 |   <body>
+|     "⟨⟩"

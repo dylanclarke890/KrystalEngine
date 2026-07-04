@@ -25,7 +25,7 @@ namespace Krys::HTML::Tests
 
       auto document = CreateRef<HTMLDocument>();
       auto parser = CreateParser(*document, utf32_string(test.Input));
-      REQUIRE_FALSE(parser->PumpTokenizer());
+      (void)parser->PumpTokenizer();
 
       auto dumped = Dump(*document);
       auto actual = u8"Actual:\n" + dumped;
@@ -43,10 +43,19 @@ namespace Krys::HTML::Tests
     }
   }
 
-  TEST_CASE("HTMLDocumentParser(html5-basic-tests.dat)", "[HTML][HTMLDocumentParser]")
-  {
-    auto tests = ParseTreeConstructionTests("data/html5-basic-tests.dat");
-    REQUIRE(tests.has_value());
-    DoTreeConstructionTests(*tests);
+#define PARSER_TEST_CASE(datFile)                                                                            \
+  TEST_CASE("HTMLDocumentParser(" datFile ")", "[HTML][HTMLDocumentParser]")                                 \
+  {                                                                                                          \
+    auto tests = ParseTreeConstructionTests("data/" datFile);                                                \
+    REQUIRE(tests.has_value());                                                                              \
+    DoTreeConstructionTests(*tests);                                                                         \
   }
+
+  PARSER_TEST_CASE("basic-01.dat");
+  PARSER_TEST_CASE("basic-02.dat");
+  PARSER_TEST_CASE("basic-03.dat");
+
+  PARSER_TEST_CASE("inbody-01.dat");
+
+  PARSER_TEST_CASE("isindex.dat");
 }

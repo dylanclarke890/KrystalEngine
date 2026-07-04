@@ -829,6 +829,7 @@ namespace Krys::HTML
         if (token.Name() == u8"head")
         {
           _head = CreateElement(token, Namespaces::HTML, _document);
+          InsertElementAtAdjustedInsertionLocation(*_head);
           _openElementStack.Push({TagName::head, Namespace::HTML, *_head, Krys::Move(token.Attributes())});
           _insertionMode = InsertionMode::InHead;
 

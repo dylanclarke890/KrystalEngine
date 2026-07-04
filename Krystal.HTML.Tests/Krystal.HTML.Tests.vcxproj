@@ -225,7 +225,11 @@
     <ClCompile Include="tests\DOM\BoundaryPoint.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="data\html5-basic-tests.dat" />
+    <None Include="data\basic-01.dat" />
+    <None Include="data\basic-02.dat" />
+    <None Include="data\basic-03.dat" />
+    <None Include="data\inbody-01.dat" />
+    <None Include="data\isindex.dat" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
