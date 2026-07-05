@@ -294,12 +294,13 @@ namespace Krys::HTML
         AppendCommentToDocument(DOMString(token.Comment()));
         return;
       }
+      // TODO(HTMLTREEBUILDER): ProcessingInstruction token type?
       case HTMLTokenType::DOCTYPE:
       {
         auto &docTypeData = *token.DOCTYPEData();
 
         auto name = DOMString(token.Name().View());
-        if (name != u8"html")
+        if (name != TagNames::HTML::html)
         {
           ParseError(token);
         }
@@ -371,6 +372,7 @@ namespace Krys::HTML
         AppendCommentToDocument(DOMString(token.Comment()));
         return;
       }
+      // TODO(HTMLTREEBUILDER): ProcessingInstruction token type?
       case HTMLTokenType::Character:
       {
         if (SkipCharacterTokenWhitespace(token))
@@ -382,13 +384,13 @@ namespace Krys::HTML
       }
       case HTMLTokenType::StartTag:
       {
-        if (token.Name() == u8"html")
+        if (token.Name() == TagNames::HTML::html)
         {
           auto html = CreateElement(token, Namespaces::HTML, _document);
           _document.AppendChild(*html);
           _openElementStack.Push({TagName::html, Namespace::HTML, *html, Krys::Move(token.Attributes())});
-          _insertionMode = InsertionMode::BeforeHead;
 
+          _insertionMode = InsertionMode::BeforeHead;
           return;
         }
 
@@ -396,8 +398,8 @@ namespace Krys::HTML
       }
       case HTMLTokenType::EndTag:
       {
-        if (token.Name() == u8"head" || token.Name() == u8"body" || token.Name() == u8"html"
-            || token.Name() == u8"br")
+        if (token.Name() == TagNames::HTML::head || token.Name() == TagNames::HTML::body
+            || token.Name() == TagNames::HTML::html || token.Name() == TagNames::HTML::br)
         {
           break;
         }
@@ -411,8 +413,8 @@ namespace Krys::HTML
                                                                 u8"html", TagName::html, Namespace::HTML));
     _document.AppendChild(*html);
     _openElementStack.Push({TagName::html, Namespace::HTML, *html, {}});
-    _insertionMode = InsertionMode::BeforeHead;
 
+    _insertionMode = InsertionMode::BeforeHead;
     BeforeHeadMode(Krys::Move(token));
   }
 
@@ -433,6 +435,7 @@ namespace Krys::HTML
         InsertComment(DOMString(token.Comment()));
         return;
       }
+      // TODO(HTMLTREEBUILDER): ProcessingInstruction token type?
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -440,18 +443,16 @@ namespace Krys::HTML
       }
       case HTMLTokenType::StartTag:
       {
-        if (token.Name() == u8"html")
+        if (token.Name() == TagNames::HTML::html)
         {
           // Process the token using the rules for the "in body" insertion mode.
           InBodyMode(Krys::Move(token));
           return;
         }
 
-        if (token.Name() == u8"head")
+        if (token.Name() == TagNames::HTML::head)
         {
-          _head = CreateElement(token, Namespaces::HTML, _document);
-          InsertElementAtAdjustedInsertionLocation(*_head);
-          _openElementStack.Push({TagName::head, Namespace::HTML, *_head, Krys::Move(token.Attributes())});
+          _head = InsertHTMLElement(Krys::Move(token));
           _insertionMode = InsertionMode::InHead;
           return;
         }
@@ -460,8 +461,8 @@ namespace Krys::HTML
       }
       case HTMLTokenType::EndTag:
       {
-        if (token.Name() == u8"head" || token.Name() == u8"body" || token.Name() == u8"html"
-            || token.Name() == u8"br")
+        if (token.Name() == TagNames::HTML::head || token.Name() == TagNames::HTML::body
+            || token.Name() == TagNames::HTML::html || token.Name() == TagNames::HTML::br)
         {
           break;
         }
@@ -471,8 +472,9 @@ namespace Krys::HTML
       }
     }
 
-    _head = ElementFactory::Create(_document, QualifiedName(Namespaces::HTML, DOMStringAtom::Null(), u8"head",
-                                                            TagName::head, Namespace::HTML));
+    _head =
+      ElementFactory::Create(_document, QualifiedName(Namespaces::HTML, DOMStringAtom::Null(),
+                                                      TagNames::HTML::head, TagName::head, Namespace::HTML));
     InsertElementAtAdjustedInsertionLocation(*_head);
     _openElementStack.Push({TagName::head, Namespace::HTML, *_head, {}});
 
@@ -498,6 +500,7 @@ namespace Krys::HTML
         InsertComment(DOMString(token.Comment()));
         return;
       }
+      // TODO(HTMLTREEBUILDER): ProcessingInstruction token type?
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -596,7 +599,6 @@ namespace Krys::HTML
             _tokenizer.State(TokenizerState::ScriptData);
             _originalInsertionMode = _insertionMode;
             _insertionMode = InsertionMode::Text;
-
             return;
           }
           case TagName::template_:
@@ -609,7 +611,6 @@ namespace Krys::HTML
             ParseError(token);
             return; // ignore the token
           }
-          default: break;
         }
 
         break;
@@ -636,13 +637,11 @@ namespace Krys::HTML
             // TODO(HTMLTREEBUILDER, HTML): handle template end tag in the head insertion mode.
             return;
           }
-          default: break;
         }
 
         ParseError(token);
         return; // ignore the token
       }
-      default: break;
     }
 
     _openElementStack.Pop();
@@ -699,19 +698,18 @@ namespace Krys::HTML
             ParseError(token);
             return; // ignore the token
           }
-          default: break;
         }
       }
       case HTMLTokenType::EndTag:
       {
-        if (token.Name() == u8"noscript")
+        if (token.Name() == TagNames::HTML::noscript)
         {
           _openElementStack.Pop();
           _insertionMode = InsertionMode::InHead;
           return;
         }
 
-        if (token.Name() == u8"br")
+        if (token.Name() == TagNames::HTML::br)
         {
           break;
         }
@@ -719,7 +717,6 @@ namespace Krys::HTML
         ParseError(token);
         return; // ignore the token
       }
-      default: break;
     }
 
     ParseError(token);
@@ -746,6 +743,7 @@ namespace Krys::HTML
         InsertComment(DOMString(token.Comment()));
         return;
       }
+      // TODO(HTMLTREEBUILDER): ProcessingInstruction token type?
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -765,12 +763,14 @@ namespace Krys::HTML
           {
             InsertHTMLElement(Krys::Move(token));
             _framesetOk = false;
+
             _insertionMode = InsertionMode::InBody;
             return;
           }
           case TagName::frameset:
           {
             InsertHTMLElement(Krys::Move(token));
+
             _insertionMode = InsertionMode::InFrameset;
             return;
           }
@@ -789,9 +789,7 @@ namespace Krys::HTML
 
             _openElementStack.Push({TagName::html, Namespace::HTML, *_head, {}});
             InHeadMode(Krys::Move(token));
-
-            // TODO(HTMLTREEBUILDER, HTML): Remove the node pointed to by the head element pointer from the
-            // stack of open elements. (It might not be the current node at this point.)
+            _openElementStack.Remove(*_head);
 
             return;
           }
@@ -805,13 +803,14 @@ namespace Krys::HTML
       }
       case HTMLTokenType::EndTag:
       {
-        if (token.Name() == u8"template")
+        if (token.Name() == TagNames::HTML::template_)
         {
           InHeadMode(Krys::Move(token));
           return;
         }
 
-        if (token.Name() == u8"body" || token.Name() == u8"html" || token.Name() == u8"br")
+        if (token.Name() == TagNames::HTML::body || token.Name() == TagNames::HTML::html
+            || token.Name() == TagNames::HTML::br)
         {
           break;
         }
@@ -819,15 +818,15 @@ namespace Krys::HTML
         ParseError(token);
         return; // ignore the token
       }
-      default: break;
     }
 
-    auto body = ElementFactory::Create(_document, QualifiedName(Namespaces::HTML, DOMStringAtom::Null(),
-                                                                u8"body", TagName::body, Namespace::HTML));
+    auto body =
+      ElementFactory::Create(_document, QualifiedName(Namespaces::HTML, DOMStringAtom::Null(),
+                                                      TagNames::HTML::body, TagName::body, Namespace::HTML));
     InsertElementAtAdjustedInsertionLocation(*body);
     _openElementStack.Push({TagName::body, Namespace::HTML, *body, {}});
-    _insertionMode = InsertionMode::InBody;
 
+    _insertionMode = InsertionMode::InBody;
     InBodyMode(Krys::Move(token));
   }
 
@@ -3736,7 +3735,7 @@ namespace Krys::HTML
         ParseError(token);
         // NOTE: do not return; continue with the algorithm.
       }
-      
+
       auto *furthestBlock = FurthestSpecialElementBlock(*formattingElement);
       if (furthestBlock == nullptr)
       {
