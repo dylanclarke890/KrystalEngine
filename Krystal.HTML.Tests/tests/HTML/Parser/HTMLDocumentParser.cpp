@@ -68,4 +68,6 @@ namespace Krys::HTML::Tests
   PARSER_TEST_CASE("tree-construction/tests-01.dat");
 
   PARSER_TEST_CASE("tree-construction/adoption-01.dat");
+
+  PARSER_TEST_CASE("tree-construction/formatting-elements-01.dat");
 }

@@ -1193,9 +1193,8 @@ namespace Krys::HTML
 
             auto &aOpenItem = _openElementStack.Bottom();
             ParsedAttributeList aAttrsCopy = aOpenItem.Attributes();
-            _activeFormattingElements.PushElement(HTMLStackItem(aOpenItem.TagName(), aOpenItem.Namespace(),
-                                                                Downcast<Element>(aOpenItem.Node()),
-                                                                Krys::Move(aAttrsCopy)));
+            _activeFormattingElements.PushElement(HTMLStackItem(
+              aOpenItem.TagName(), aOpenItem.Namespace(), aOpenItem.AsElement(), Krys::Move(aAttrsCopy)));
             return;
           }
           case TagName::b:
@@ -1217,8 +1216,8 @@ namespace Krys::HTML
             auto &fmtOpenItem = _openElementStack.Bottom();
             ParsedAttributeList fmtAttrsCopy = fmtOpenItem.Attributes();
             _activeFormattingElements.PushElement(
-              HTMLStackItem(fmtOpenItem.TagName(), fmtOpenItem.Namespace(),
-                            Downcast<Element>(fmtOpenItem.Node()), Krys::Move(fmtAttrsCopy)));
+              HTMLStackItem(fmtOpenItem.TagName(), fmtOpenItem.Namespace(), fmtOpenItem.AsElement(),
+                            Krys::Move(fmtAttrsCopy)));
             return;
           }
           case TagName::nobr:
@@ -1237,8 +1236,8 @@ namespace Krys::HTML
             auto &nobrOpenItem = _openElementStack.Bottom();
             ParsedAttributeList nobrAttrsCopy = nobrOpenItem.Attributes();
             _activeFormattingElements.PushElement(
-              HTMLStackItem(nobrOpenItem.TagName(), nobrOpenItem.Namespace(),
-                            Downcast<Element>(nobrOpenItem.Node()), Krys::Move(nobrAttrsCopy)));
+              HTMLStackItem(nobrOpenItem.TagName(), nobrOpenItem.Namespace(), nobrOpenItem.AsElement(),
+                            Krys::Move(nobrAttrsCopy)));
             return;
           }
           case TagName::applet:

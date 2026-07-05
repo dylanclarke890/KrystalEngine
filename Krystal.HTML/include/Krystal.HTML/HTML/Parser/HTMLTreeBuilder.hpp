@@ -338,11 +338,9 @@ namespace Krys::HTML
         {
           return true;
         }
-        default:
-        {
-          return false;
-        }
       }
+
+      return false;
     }
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#formatting

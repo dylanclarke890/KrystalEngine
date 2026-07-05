@@ -226,6 +226,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="data\tree-construction\adoption-01.dat" />
+    <None Include="data\tree-construction\formatting-elements-01.dat" />
     <None Include="data\tree-construction\html5test-com.dat" />
     <None Include="data\tree-construction\comments-01.dat" />
     <None Include="data\tree-construction\doctype-01.dat" />
