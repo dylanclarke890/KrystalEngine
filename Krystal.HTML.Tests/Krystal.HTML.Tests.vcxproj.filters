@@ -193,5 +193,24 @@
     <None Include="data\tree-construction\tests-01.dat" />
     <None Include="data\tree-construction\adoption-01.dat" />
     <None Include="data\tree-construction\formatting-elements-01.dat" />
+    <None Include="data\tree-construction\foster-parenting-01.dat" />
+    <None Include="data\tree-construction\entities-01.dat" />
+    <None Include="data\tree-construction\entities-02.dat" />
+    <None Include="data\tree-construction\blocks-01.dat" />
+    <None Include="data\tree-construction\adoption-02.dat" />
+    <None Include="data\tree-construction\main-element-01.dat" />
+    <None Include="data\tree-construction\math-01.dat" />
+    <None Include="data\tree-construction\menuitem-element-01.dat" />
+    <None Include="data\tree-construction\namespace-sensitivity-01.dat" />
+    <None Include="data\tree-construction\noscript-01.dat" />
+    <None Include="data\tree-construction\plain-text-unsafe-01.dat" />
+    <None Include="data\tree-construction\quirks-01.dat" />
+    <None Include="data\tree-construction\script-data-01.dat" />
+    <None Include="data\tree-construction\search-element-01.dat" />
+    <None Include="data\tree-construction\svg-01.dat" />
+    <None Include="data\tree-construction\tables-01.dat" />
+    <None Include="data\tree-construction\template-01.dat" />
+    <None Include="data\tree-construction\tricky-01.dat" />
+    <None Include="data\tree-construction\void-in-phrasing-01.dat" />
   </ItemGroup>
 </Project>

@@ -226,14 +226,33 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="data\tree-construction\adoption-01.dat" />
+    <None Include="data\tree-construction\adoption-02.dat" />
+    <None Include="data\tree-construction\blocks-01.dat" />
+    <None Include="data\tree-construction\entities-01.dat" />
+    <None Include="data\tree-construction\entities-02.dat" />
     <None Include="data\tree-construction\formatting-elements-01.dat" />
+    <None Include="data\tree-construction\foster-parenting-01.dat" />
     <None Include="data\tree-construction\html5test-com.dat" />
     <None Include="data\tree-construction\comments-01.dat" />
     <None Include="data\tree-construction\doctype-01.dat" />
     <None Include="data\tree-construction\inbody-01.dat" />
     <None Include="data\tree-construction\isindex-01.dat" />
+    <None Include="data\tree-construction\main-element-01.dat" />
+    <None Include="data\tree-construction\math-01.dat" />
+    <None Include="data\tree-construction\menuitem-element-01.dat" />
+    <None Include="data\tree-construction\namespace-sensitivity-01.dat" />
+    <None Include="data\tree-construction\noscript-01.dat" />
+    <None Include="data\tree-construction\plain-text-unsafe-01.dat" />
+    <None Include="data\tree-construction\quirks-01.dat" />
     <None Include="data\tree-construction\ruby-01.dat" />
+    <None Include="data\tree-construction\script-data-01.dat" />
+    <None Include="data\tree-construction\search-element-01.dat" />
+    <None Include="data\tree-construction\svg-01.dat" />
+    <None Include="data\tree-construction\tables-01.dat" />
+    <None Include="data\tree-construction\template-01.dat" />
     <None Include="data\tree-construction\tests-01.dat" />
+    <None Include="data\tree-construction\tricky-01.dat" />
+    <None Include="data\tree-construction\void-in-phrasing-01.dat" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

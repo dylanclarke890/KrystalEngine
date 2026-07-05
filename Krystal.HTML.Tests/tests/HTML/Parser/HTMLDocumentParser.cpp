@@ -53,21 +53,56 @@ namespace Krys::HTML::Tests
     DoTreeConstructionTests(*tests);                                                                         \
   }
 
+  // PARSER_TEST_CASE("tree-construction/adoption-01.dat");
+
+  PARSER_TEST_CASE("tree-construction/blocks-01.dat");
+
   PARSER_TEST_CASE("tree-construction/comments-01.dat");
 
   PARSER_TEST_CASE("tree-construction/doctype-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/html5test-com.dat");
+  PARSER_TEST_CASE("tree-construction/entities-01.dat");
+  PARSER_TEST_CASE("tree-construction/entities-02.dat");
+
+  PARSER_TEST_CASE("tree-construction/formatting-elements-01.dat");
+
+  // PARSER_TEST_CASE("tree-construction/foster-parenting-01.dat");
+
+  // PARSER_TEST_CASE("tree-construction/html5test-com.dat");
 
   PARSER_TEST_CASE("tree-construction/inbody-01.dat");
 
   PARSER_TEST_CASE("tree-construction/isindex-01.dat");
 
+  PARSER_TEST_CASE("tree-construction/main-element-01.dat");
+
+  PARSER_TEST_CASE("tree-construction/math-01.dat");
+
+  PARSER_TEST_CASE("tree-construction/menuitem-element-01.dat");
+
+  PARSER_TEST_CASE("tree-construction/namespace-sensitivity-01.dat");
+
+  PARSER_TEST_CASE("tree-construction/noscript-01.dat");
+
+  PARSER_TEST_CASE("tree-construction/plain-text-unsafe-01.dat");
+
+  PARSER_TEST_CASE("tree-construction/quirks-01.dat");
+
   PARSER_TEST_CASE("tree-construction/ruby-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/tests-01.dat");
+  PARSER_TEST_CASE("tree-construction/script-data-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/adoption-01.dat");
+  PARSER_TEST_CASE("tree-construction/search-element-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/formatting-elements-01.dat");
+  PARSER_TEST_CASE("tree-construction/svg-01.dat");
+
+  PARSER_TEST_CASE("tree-construction/tables-01.dat");
+
+  PARSER_TEST_CASE("tree-construction/template-01.dat");
+
+  // PARSER_TEST_CASE("tree-construction/tests-01.dat");
+
+  PARSER_TEST_CASE("tree-construction/tricky-01.dat");
+
+  PARSER_TEST_CASE("tree-construction/void-in-phrasing-01.dat");
 }
