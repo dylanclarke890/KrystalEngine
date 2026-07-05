@@ -3736,7 +3736,7 @@ namespace Krys::HTML
         ParseError(token);
         // NOTE: do not return; continue with the algorithm.
       }
-
+      
       auto *furthestBlock = FurthestSpecialElementBlock(*formattingElement);
       if (furthestBlock == nullptr)
       {
@@ -3748,7 +3748,8 @@ namespace Krys::HTML
       auto *commonAncestor = _openElementStack.EntryBefore(formattingElement->Node());
       assert(commonAncestor != nullptr);
 
-      // TODO(HTMLTREEBUILDER, HTML): Check the rest of the logic for the AdoptionAgency algorithm.
+      // ----------------------------------------------------------------------------------------
+      // TODO(HTMLTREEBUILDER, HTML): Check the following logic for the AdoptionAgency algorithm.
 
       // Step 4.10: Bookmark positioned at the formatting element in the active formatting list.
       auto bookmark = _activeFormattingElements.BookmarkFor(formattingElement->Node());
