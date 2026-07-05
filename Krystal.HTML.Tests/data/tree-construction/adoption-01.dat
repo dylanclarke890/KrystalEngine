@@ -1,3 +1,16 @@
+﻿#data
+<a><p></a>
+#errors
+(1,3): expected-doctype-but-got-start-tag
+(1,10): adoption-agency-1.3
+#document
+| <html>
+|   <head>
+|   <body>
+|     <a>
+|     <p>
+|       <a>
+
 #data
 <a><p></a></p>
 #errors
@@ -10,6 +23,20 @@
 |     <a>
 |     <p>
 |       <a>
+
+#data
+<!DOCTYPE html><em><p>X</em>Y</p>
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <em>
+|     <p>
+|       <em>
+|         "X"
+|       "Y"
 
 #data
 <a>1<p>2</a>3</p>
