@@ -162,6 +162,8 @@ namespace Krys::HTML
     /// @see https://html.spec.whatwg.org/#the-after-after-frameset-insertion-mode
     void AfterAfterFramesetMode(HTMLTokenAtom &&token) noexcept;
 
+    void InBodyGenericEndTag(const HTMLTokenAtom &token, TagName tagName);
+
 #pragma endregion
 
 #pragma region Insertion Algorithms
@@ -201,6 +203,20 @@ namespace Krys::HTML
 
     /// @see https://html.spec.whatwg.org/#generic-rcdata-text-element-parsing-algorithm
     void ParseGenericRCDATATextElement(HTMLTokenAtom &&token) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#create-an-element-for-the-token
+    KRYS_NODISCARD Ref<Element> CreateElement(HTMLTokenAtom &token, DOMStringAtom namespaceURI,
+                                              ContainerNode &intendedParent) noexcept;
+
+    /// @brief Creates a new element by duplicating the tag name, namespace, and attributes from a saved
+    /// stack item.
+    /// @see https://html.spec.whatwg.org/#create-an-element-for-the-token
+    KRYS_NODISCARD Ref<Element> CreateElement(const HTMLStackItem &item) noexcept;
+
+    void ReconstructActiveFormattingElements() noexcept;
+
+    /// @see https://html.spec.whatwg.org/#close-a-p-element
+    void ClosePElement(const HTMLTokenAtom &token) noexcept;
 
 #pragma endregion
 
@@ -369,6 +385,8 @@ namespace Krys::HTML
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm steps 16–17
     void TakeAllChildrenAndReparent(Ref<Element> newParent, HTMLStackItem &oldParent) noexcept;
 
+    RawPtr<HTMLStackItem> FurthestSpecialElementBlock(const HTMLStackItem &below) noexcept;
+
 #pragma endregion
 
 #pragma region IntegrationPoint Algorithms
@@ -378,23 +396,5 @@ namespace Krys::HTML
     KRYS_NODISCARD bool IsHTMLIntegrationPoint(const Element &element) const noexcept;
 
 #pragma endregion
-
-    /// @see https://html.spec.whatwg.org/#create-an-element-for-the-token
-    KRYS_NODISCARD Ref<Element> CreateElement(HTMLTokenAtom &token, DOMStringAtom namespaceURI,
-                                              ContainerNode &intendedParent) noexcept;
-
-    /// @brief Creates a new element by duplicating the tag name, namespace, and attributes from a saved
-    /// stack item.
-    /// @see https://html.spec.whatwg.org/#create-an-element-for-the-token
-    KRYS_NODISCARD Ref<Element> CreateElement(const HTMLStackItem &item) noexcept;
-
-    void ReconstructActiveFormattingElements() noexcept;
-
-    /// @see https://html.spec.whatwg.org/#close-a-p-element
-    void ClosePElement(const HTMLTokenAtom &token) noexcept;
-
-    void InBodyGenericEndTag(const HTMLTokenAtom &token, TagName tagName);
-
-    RawPtr<HTMLStackItem> FurthestSpecialElementBlock(const HTMLStackItem &below) noexcept;
   };
 }

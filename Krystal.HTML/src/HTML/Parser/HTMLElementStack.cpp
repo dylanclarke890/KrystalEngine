@@ -244,157 +244,227 @@ namespace Krys::HTML
 
 #pragma region InScope
 
+  bool HTMLElementStack::IsScopeMarker(const HTMLStackItem &item) const noexcept
+  {
+    switch (item.Namespace())
+    {
+      case Namespace::HTML:
+      {
+        switch (item.TagName())
+        {
+          case TagName::applet:
+          case TagName::caption:
+          case TagName::marquee:
+          case TagName::object:
+          case TagName::select:
+          case TagName::table:
+          case TagName::td:
+          case TagName::th:
+          case TagName::template_:
+          {
+            return true;
+          }
+        }
+        break;
+      }
+      case Namespace::MathML:
+      {
+        switch (item.TagName())
+        {
+          case TagName::mi:
+          case TagName::mo:
+          case TagName::mn:
+          case TagName::ms:
+          case TagName::mtext:
+          case TagName::annotation_xml:
+          {
+            return true;
+          }
+        }
+        break;
+      }
+      case Namespace::SVG:
+      {
+        switch (item.TagName())
+        {
+          case TagName::foreignObject:
+          case TagName::desc:
+          case TagName::title:
+          {
+            return true;
+          }
+        }
+        break;
+      }
+    }
+
+    return item.IsRootNode();
+  }
+
+  bool HTMLElementStack::IsListItemScopeMarker(const HTMLStackItem &item) const noexcept
+  {
+    if (IsScopeMarker(item))
+    {
+      return true;
+    }
+
+    return item.Namespace() == Namespace::HTML
+           && (item.TagName() == TagName::ol || item.TagName() == TagName::ul);
+  }
+
+  bool HTMLElementStack::IsTableScopeMarker(const HTMLStackItem &item) const noexcept
+  {
+    if (item.Namespace() != Namespace::HTML)
+    {
+      return item.IsRootNode();
+    }
+
+    return item.TagName() == TagName::table || item.TagName() == TagName::template_ || item.IsRootNode();
+  }
+
+  bool HTMLElementStack::IsTableBodyScopeMarker(const HTMLStackItem &item) const noexcept
+  {
+    if (item.Namespace() != Namespace::HTML)
+    {
+      return item.IsRootNode();
+    }
+
+    return item.TagName() == TagName::tbody || item.TagName() == TagName::tfoot
+           || item.TagName() == TagName::thead || item.TagName() == TagName::template_ || item.IsRootNode();
+  }
+
+  bool HTMLElementStack::IsTableRowScopeMarker(const HTMLStackItem &item) const noexcept
+  {
+    if (item.Namespace() != Namespace::HTML)
+    {
+      return item.IsRootNode();
+    }
+
+    return item.TagName() == TagName::tr || item.TagName() == TagName::template_ || item.IsRootNode();
+  }
+
+  bool HTMLElementStack::IsButtonScopeMarker(const HTMLStackItem &item) const noexcept
+  {
+    if (IsScopeMarker(item))
+    {
+      return true;
+    }
+
+    return item.Namespace() == Namespace::HTML && item.TagName() == TagName::button;
+  }
+
+  bool HTMLElementStack::IsSelectScopeMarker(const HTMLStackItem &item) const noexcept
+  {
+    if (item.Namespace() != Namespace::HTML)
+    {
+      return false;
+    }
+
+    return item.TagName() != TagName::optgroup && item.TagName() != TagName::option;
+  }
+
   bool HTMLElementStack::HasElementInScope(TagName targetNode) const noexcept
   {
-    auto *node = &Bottom();
-
-    while (true)
+    auto it = _items.rbegin();
+    while (it != _items.rend())
     {
-      if (node->TagName() == targetNode)
+      auto &item = *it;
+      if (item.TagName() == targetNode)
       {
         return true;
       }
-
-      switch (node->TagName())
+      if (IsScopeMarker(item))
       {
-        case TagName::applet:
-        case TagName::caption:
-        case TagName::html:
-        case TagName::table:
-        case TagName::td:
-        case TagName::th:
-        case TagName::marquee:
-        case TagName::object:
-        case TagName::select:
-        case TagName::template_:
-        {
-          // TODO(HTMLTREEBUILDER, HTML) also: MathML mi MathML mo MathML mn MathML ms MathML mtext MathML
-          // annotation-xml SVG foreignObject SVG desc SVG title
-          return false;
-        }
-        default:
-        {
-          break;
-        }
+        return false;
       }
-
-      node = EntryBefore(node->Node());
+      ++it;
     }
 
+    std::unreachable();
+    return false;
+  }
+
+  bool HTMLElementStack::HasElementInScope(const Element &element) const noexcept
+  {
+    auto it = _items.rbegin();
+    while (it != _items.rend())
+    {
+      auto &item = *it;
+      if (&item.Node() == &element)
+      {
+        return true;
+      }
+      if (IsScopeMarker(item))
+      {
+        return false;
+      }
+      ++it;
+    }
+
+    std::unreachable();
     return false;
   }
 
   bool HTMLElementStack::HasElementInListItemScope(TagName targetNode) const noexcept
   {
-    auto *node = &Bottom();
-
-    while (true)
+    auto it = _items.rbegin();
+    while (it != _items.rend())
     {
-      if (node->TagName() == targetNode)
+      auto &item = *it;
+      if (item.TagName() == targetNode)
       {
         return true;
       }
-
-      switch (node->TagName())
+      if (IsListItemScopeMarker(item))
       {
-        case TagName::applet:
-        case TagName::caption:
-        case TagName::html:
-        case TagName::table:
-        case TagName::td:
-        case TagName::th:
-        case TagName::li:
-        case TagName::marquee:
-        case TagName::object:
-        case TagName::select:
-        case TagName::template_:
-        case TagName::ul:
-        {
-          // TODO(HTMLTREEBUILDER, HTML) also: MathML mi MathML mo MathML mn MathML ms MathML mtext MathML
-          // annotation-xml SVG foreignObject SVG desc SVG title
-          return false;
-        }
-        default:
-        {
-          break;
-        }
+        return false;
       }
-
-      node = EntryBefore(node->Node());
+      ++it;
     }
 
+    std::unreachable();
     return false;
   }
 
   bool HTMLElementStack::HasElementInButtonScope(TagName targetNode) const noexcept
   {
-    auto *node = &Bottom();
-
-    while (true)
+    auto it = _items.rbegin();
+    while (it != _items.rend())
     {
-      if (node->TagName() == targetNode)
+      auto &item = *it;
+      if (item.TagName() == targetNode)
       {
         return true;
       }
-
-      switch (node->TagName())
+      if (IsButtonScopeMarker(item))
       {
-        case TagName::applet:
-        case TagName::button:
-        case TagName::caption:
-        case TagName::html:
-        case TagName::table:
-        case TagName::td:
-        case TagName::th:
-        case TagName::marquee:
-        case TagName::object:
-        case TagName::select:
-        case TagName::template_:
-        {
-          // TODO(HTMLTREEBUILDER, HTML) also: MathML mi MathML mo MathML mn MathML ms MathML mtext MathML
-          // annotation-xml SVG foreignObject SVG desc SVG title
-          return false;
-        }
-        default:
-        {
-          break;
-        }
+        return false;
       }
-
-      node = EntryBefore(node->Node());
+      ++it;
     }
 
+    std::unreachable();
     return false;
   }
 
   bool HTMLElementStack::HasElementInTableScope(TagName targetNode) const noexcept
   {
-    auto *node = &Bottom();
-
-    while (true)
+    auto it = _items.rbegin();
+    while (it != _items.rend())
     {
-      if (node->TagName() == targetNode)
+      auto &item = *it;
+      if (item.TagName() == targetNode)
       {
         return true;
       }
-
-      switch (node->TagName())
+      if (IsTableScopeMarker(item))
       {
-        case TagName::html:
-        case TagName::table:
-        case TagName::template_:
-        {
-          return false;
-        }
-        default:
-        {
-          break;
-        }
+        return false;
       }
-
-      node = EntryBefore(node->Node());
+      ++it;
     }
 
+    std::unreachable();
     return false;
   }
 

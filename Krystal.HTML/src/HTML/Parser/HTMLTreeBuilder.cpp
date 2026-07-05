@@ -3098,6 +3098,46 @@ namespace Krys::HTML
     ParseError(token);
   }
 
+  void HTMLTreeBuilder::InBodyGenericEndTag(const HTMLTokenAtom &token, TagName tagName)
+  {
+    // walk the open element stack upward from the current node.
+    auto *nodeEntry = &_openElementStack.Bottom();
+    while (true)
+    {
+      if (Is<HTMLElement>(nodeEntry->Node()) && nodeEntry->TagName() == tagName)
+      {
+        _openElementStack.GenerateImpliedEndTags(tagName);
+
+        if (nodeEntry != &_openElementStack.Bottom())
+        {
+          ParseError(token);
+        }
+
+        auto &targetNode = nodeEntry->Node();
+        while (true)
+        {
+          bool isTarget = (&_openElementStack.Bottom().Node() == &targetNode);
+          _openElementStack.Pop();
+          if (isTarget)
+          {
+            break;
+          }
+        }
+
+        return;
+      }
+
+      if (IsSpecialElement(nodeEntry->TagName()))
+      {
+        ParseError(token);
+        return; // ignore the token
+      }
+
+      nodeEntry = _openElementStack.EntryBefore(nodeEntry->Node());
+      assert(nodeEntry != nullptr);
+    }
+  }
+
 #pragma endregion
 
 #pragma region Insertion Algorithms
@@ -3297,6 +3337,163 @@ namespace Krys::HTML
     _tokenizer.State(TokenizerState::RCDATA);
     _originalInsertionMode = _insertionMode;
     _insertionMode = InsertionMode::Text;
+  }
+
+  Ref<Element> HTMLTreeBuilder::CreateElement(HTMLTokenAtom &token, DOMStringAtom namespaceURI,
+                                              ContainerNode &intendedParent) noexcept
+  {
+    auto &document = intendedParent.NodeDocument();
+    auto localName = token.Name();
+    auto is = [&]() -> DOMStringAtom
+    {
+      auto it = std::ranges::find_if(token.Attributes(),
+                                     [](const ParsedAttribute &attr) { return attr.NameView() == u8"is"; });
+      return it != std::ranges::end(token.Attributes()) ? it->NameView() : DOMStringAtom::Null();
+    }();
+
+    // TODO(HTMLTREEBUILDER, CUSTOMELEMENTS, HTML): Let registry be the result of looking up a custom element
+    // registry given intendedParent.
+    // Let definition be the result of looking up a custom element definition given registry, namespace,
+    // localName, and is.
+    // Let willExecuteScript be true if definition is non-null and the parser was not created as part of the
+    // HTML fragment parsing algorithm; otherwise false.
+    // If willExecuteScript is true:
+    // Increment document's throw-on-dynamic-markup-insertion counter.
+    // If the JavaScript execution context stack is empty, then perform a microtask checkpoint.
+    // Push a new element queue onto document's relevant agent's custom element reactions stack.
+    RefPtr<CustomElementRegistry> registry = nullptr;
+    bool willExecuteScript = false;
+
+    auto element = ElementFactory::Create(document, {namespaceURI, DOMStringAtom::Null(), localName}, is,
+                                          willExecuteScript, registry);
+    for (auto &attr : token.Attributes())
+    {
+      ElementAlgorithms::SetAttributeValue(*element, attr.NameView(), DOMString(attr.ValueView()));
+    }
+
+    // TODO(HTMLTREEBUILDER, CUSTOMELEMENTS, HTML):
+    // If willExecuteScript is true:
+    //     Let queue be the result of popping from document's relevant agent's custom element reactions stack.
+    //     (This will be the same element queue as was pushed above.)
+    //     Invoke custom element reactions in queue.
+    //     Decrement document's throw-on-dynamic-markup-insertion counter.
+    //
+    // TODO(HTMLTREEBUILDER, HTML):
+    // If element has an xmlns attribute in the XMLNS namespace whose value is not exactly the same as the
+    // element's namespace, that is a parse error. Similarly, if element has an xmlns:xlink attribute in the
+    // XMLNS namespace whose value is not the XLink Namespace, that is a parse error.
+    //
+    // TODO(HTMLTREEBUILDER, HTML):
+    // If element is a resettable element and not a form-associated custom element, then invoke its reset
+    // algorithm. (This initializes the element's value and checkedness based on the element's attributes.)
+    //
+    // TODO(HTMLTREEBUILDER, HTML):
+    // If element is a form-associated element and not a form-associated custom element, the form element
+    // pointer is not null, there is no template element on the stack of open elements, element is either not
+    // listed or doesn't have a form attribute, and the intendedParent is in the same tree as the element
+    // pointed to by the form element pointer, then associate element with the form element pointed to by the
+    // form element pointer and set element's parser inserted flag.
+
+    return element;
+  }
+
+  Ref<Element> HTMLTreeBuilder::CreateElement(const HTMLStackItem &item) noexcept
+  {
+    assert(item.IsElement());
+
+    auto &sourceElement = Downcast<Element>(item.Node());
+    auto element = ElementFactory::Create(
+      sourceElement.NodeDocument(),
+      {sourceElement.NamespaceURI(), sourceElement.Prefix(), sourceElement.LocalName()}, sourceElement._is);
+
+    for (auto &attr : item.Attributes())
+    {
+      ElementAlgorithms::SetAttributeValue(*element, attr.NameView(), DOMString(attr.ValueView()));
+    }
+
+    return element;
+  }
+
+  void HTMLTreeBuilder::ReconstructActiveFormattingElements() noexcept
+  {
+    // If there are no entries in the list of active formatting elements, then there is nothing to
+    // reconstruct; stop this algorithm.
+    if (_activeFormattingElements.IsEmpty())
+    {
+      return;
+    }
+
+    // Let entry be the last (most recently added) element in the list of active formatting elements.
+    auto entry = _activeFormattingElements.Last();
+
+    // If the last (most recently added) entry in the list of active formatting elements is a marker, or if it
+    // is an element that is in the stack of open elements, then there is nothing to reconstruct; stop this
+    // algorithm.
+    if (entry->IsMarker() || _openElementStack.Contains(entry->Item().AsElement()))
+    {
+      return;
+    }
+
+    // Rewind: If there are no entries before entry in the list of active formatting elements, then jump to
+    // the step labeled create.
+    // Let entry be the entry one earlier than entry in the list of active formatting elements.
+    // If entry is neither a marker nor an element that is also in the stack of open elements, go to the step
+    // labeled rewind.
+    while (true)
+    {
+      if (entry == _activeFormattingElements.begin())
+      {
+        break;
+      }
+
+      auto previous = std::prev(entry);
+      if (!previous->IsMarker() && !_openElementStack.Contains(previous->Item().AsElement()))
+      {
+        entry = previous;
+        continue;
+      }
+
+      break;
+    }
+
+    // Advance: Let entry be the element one later than entry in the list of active formatting elements.
+    // Create: Insert an HTML element for the token for which the element entry was created, to obtain new
+    // element.
+    // Replace the entry for entry in the list with an entry for new element.
+    // If the entry for new element in the list of active formatting elements is not the last entry in the
+    // list, return to the step labeled advance.
+    while (true)
+    {
+      if (entry->IsMarker() || _openElementStack.Contains(entry->Item().AsElement()))
+      {
+        entry = std::next(entry);
+      }
+
+      auto &entryStackItem = entry->Item();
+      auto newElement = CreateElement(entryStackItem);
+      InsertElementAtAdjustedInsertionLocation(*newElement);
+      _openElementStack.Push({entryStackItem.TagName(), entryStackItem.Namespace(), *newElement,
+                              ParsedAttributeList(entryStackItem.Attributes())});
+      entry->ReplaceItem(_openElementStack.Bottom());
+
+      entry = std::next(entry);
+      if (entry == _activeFormattingElements.end())
+      {
+        break;
+      }
+    }
+  }
+
+  void HTMLTreeBuilder::ClosePElement(const HTMLTokenAtom &token) noexcept
+  {
+    _openElementStack.GenerateImpliedEndTags(TagName::p);
+
+    if (_openElementStack.Bottom().TagName() != TagName::p)
+    {
+      ParseError(token);
+    }
+
+    _openElementStack.PopUntilPopped(TagName::p);
   }
 
 #pragma endregion
@@ -3529,7 +3726,7 @@ namespace Krys::HTML
         return;
       }
 
-      if (!_openElementStack.HasElementInScope(formattingElement->TagName()))
+      if (!_openElementStack.HasElementInScope(formattingElement->AsElement()))
       {
         ParseError(token);
         return;
@@ -3636,7 +3833,9 @@ namespace Krys::HTML
       {
         auto location = AppropriateInsertionLocation(&commonAncestor->Node());
         if (location.Parent != nullptr)
+        {
           (void)MutationAlgorithms::Insert(*lastDOMNode, *location.Parent, location.BeforeSibling);
+        }
       }
 
       // Step 15: Create a new element from the formatting element's saved token data.
@@ -3677,236 +3876,6 @@ namespace Krys::HTML
     (void)MutationAlgorithms::Append(*newParent, oldNode);
   }
 
-#pragma endregion
-
-#pragma region IntegrationPoint Algorithms
-
-  bool HTMLTreeBuilder::IsMathMLTextIntegrationPoint(const Element &element) const noexcept
-  {
-    if (element.NamespaceURI() == Namespaces::MathML)
-    {
-      auto name = ParseTagName(element.LocalName().View());
-      switch (name)
-      {
-        case TagName::mi:
-        case TagName::mo:
-        case TagName::mn:
-        case TagName::ms:
-        case TagName::mtext:
-        {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
-
-  bool HTMLTreeBuilder::IsHTMLIntegrationPoint(const Element &element) const noexcept
-  {
-    // TODO(HTMLTREEBUILDER, HTML): return true if element is an HTML integration point.
-    return false;
-  }
-
-#pragma endregion
-
-  Ref<Element> HTMLTreeBuilder::CreateElement(HTMLTokenAtom &token, DOMStringAtom namespaceURI,
-                                              ContainerNode &intendedParent) noexcept
-  {
-    auto &document = intendedParent.NodeDocument();
-    auto localName = token.Name();
-    auto is = [&]() -> DOMStringAtom
-    {
-      auto it = std::ranges::find_if(token.Attributes(),
-                                     [](const ParsedAttribute &attr) { return attr.NameView() == u8"is"; });
-      return it != std::ranges::end(token.Attributes()) ? it->NameView() : DOMStringAtom::Null();
-    }();
-
-    // TODO(HTMLTREEBUILDER, CUSTOMELEMENTS, HTML): Let registry be the result of looking up a custom element
-    // registry given intendedParent.
-    // Let definition be the result of looking up a custom element definition given registry, namespace,
-    // localName, and is.
-    // Let willExecuteScript be true if definition is non-null and the parser was not created as part of the
-    // HTML fragment parsing algorithm; otherwise false.
-    // If willExecuteScript is true:
-    // Increment document's throw-on-dynamic-markup-insertion counter.
-    // If the JavaScript execution context stack is empty, then perform a microtask checkpoint.
-    // Push a new element queue onto document's relevant agent's custom element reactions stack.
-    RefPtr<CustomElementRegistry> registry = nullptr;
-    bool willExecuteScript = false;
-
-    auto element = ElementFactory::Create(document, {namespaceURI, DOMStringAtom::Null(), localName}, is,
-                                          willExecuteScript, registry);
-    for (auto &attr : token.Attributes())
-    {
-      ElementAlgorithms::SetAttributeValue(*element, attr.NameView(), DOMString(attr.ValueView()));
-    }
-
-    // TODO(HTMLTREEBUILDER, CUSTOMELEMENTS, HTML):
-    // If willExecuteScript is true:
-    //     Let queue be the result of popping from document's relevant agent's custom element reactions stack.
-    //     (This will be the same element queue as was pushed above.)
-    //     Invoke custom element reactions in queue.
-    //     Decrement document's throw-on-dynamic-markup-insertion counter.
-    //
-    // TODO(HTMLTREEBUILDER, HTML):
-    // If element has an xmlns attribute in the XMLNS namespace whose value is not exactly the same as the
-    // element's namespace, that is a parse error. Similarly, if element has an xmlns:xlink attribute in the
-    // XMLNS namespace whose value is not the XLink Namespace, that is a parse error.
-    //
-    // TODO(HTMLTREEBUILDER, HTML):
-    // If element is a resettable element and not a form-associated custom element, then invoke its reset
-    // algorithm. (This initializes the element's value and checkedness based on the element's attributes.)
-    //
-    // TODO(HTMLTREEBUILDER, HTML):
-    // If element is a form-associated element and not a form-associated custom element, the form element
-    // pointer is not null, there is no template element on the stack of open elements, element is either not
-    // listed or doesn't have a form attribute, and the intendedParent is in the same tree as the element
-    // pointed to by the form element pointer, then associate element with the form element pointed to by the
-    // form element pointer and set element's parser inserted flag.
-
-    return element;
-  }
-
-  Ref<Element> HTMLTreeBuilder::CreateElement(const HTMLStackItem &item) noexcept
-  {
-    assert(item.IsElement());
-
-    auto &sourceElement = Downcast<Element>(item.Node());
-    auto element = ElementFactory::Create(
-      sourceElement.NodeDocument(),
-      {sourceElement.NamespaceURI(), sourceElement.Prefix(), sourceElement.LocalName()}, sourceElement._is);
-
-    for (auto &attr : item.Attributes())
-    {
-      ElementAlgorithms::SetAttributeValue(*element, attr.NameView(), DOMString(attr.ValueView()));
-    }
-
-    return element;
-  }
-
-  void HTMLTreeBuilder::ReconstructActiveFormattingElements() noexcept
-  {
-    // If there are no entries in the list of active formatting elements, then there is nothing to
-    // reconstruct; stop this algorithm.
-    if (_activeFormattingElements.IsEmpty())
-    {
-      return;
-    }
-
-    // Let entry be the last (most recently added) element in the list of active formatting elements.
-    auto entry = _activeFormattingElements.Last();
-
-    // If the last (most recently added) entry in the list of active formatting elements is a marker, or if it
-    // is an element that is in the stack of open elements, then there is nothing to reconstruct; stop this
-    // algorithm.
-    if (entry->IsMarker() || _openElementStack.Contains(entry->Item().AsElement()))
-    {
-      return;
-    }
-
-    // Rewind: If there are no entries before entry in the list of active formatting elements, then jump to
-    // the step labeled create.
-    // Let entry be the entry one earlier than entry in the list of active formatting elements.
-    // If entry is neither a marker nor an element that is also in the stack of open elements, go to the step
-    // labeled rewind.
-    while (true)
-    {
-      if (entry == _activeFormattingElements.begin())
-      {
-        break;
-      }
-
-      auto previous = std::prev(entry);
-      if (!previous->IsMarker() && !_openElementStack.Contains(previous->Item().AsElement()))
-      {
-        entry = previous;
-        continue;
-      }
-
-      break;
-    }
-
-    // Advance: Let entry be the element one later than entry in the list of active formatting elements.
-    // Create: Insert an HTML element for the token for which the element entry was created, to obtain new
-    // element.
-    // Replace the entry for entry in the list with an entry for new element.
-    // If the entry for new element in the list of active formatting elements is not the last entry in the
-    // list, return to the step labeled advance.
-    while (true)
-    {
-      if (entry->IsMarker() || _openElementStack.Contains(entry->Item().AsElement()))
-      {
-        entry = std::next(entry);
-      }
-
-      auto &entryStackItem = entry->Item();
-      auto newElement = CreateElement(entryStackItem);
-      InsertElementAtAdjustedInsertionLocation(*newElement);
-      _openElementStack.Push({entryStackItem.TagName(), entryStackItem.Namespace(), *newElement,
-                              ParsedAttributeList(entryStackItem.Attributes())});
-      entry->ReplaceItem(_openElementStack.Bottom());
-
-      entry = std::next(entry);
-      if (entry == _activeFormattingElements.end())
-      {
-        break;
-      }
-    }
-  }
-
-  void HTMLTreeBuilder::ClosePElement(const HTMLTokenAtom &token) noexcept
-  {
-    _openElementStack.GenerateImpliedEndTags(TagName::p);
-
-    if (_openElementStack.Bottom().TagName() != TagName::p)
-    {
-      ParseError(token);
-    }
-
-    _openElementStack.PopUntilPopped(TagName::p);
-  }
-
-  void HTMLTreeBuilder::InBodyGenericEndTag(const HTMLTokenAtom &token, TagName tagName)
-  {
-    // walk the open element stack upward from the current node.
-    auto *nodeEntry = &_openElementStack.Bottom();
-    while (true)
-    {
-      if (Is<HTMLElement>(nodeEntry->Node()) && nodeEntry->TagName() == tagName)
-      {
-        _openElementStack.GenerateImpliedEndTags(tagName);
-
-        if (nodeEntry != &_openElementStack.Bottom())
-        {
-          ParseError(token);
-        }
-
-        auto &targetNode = nodeEntry->Node();
-        while (true)
-        {
-          bool isTarget = (&_openElementStack.Bottom().Node() == &targetNode);
-          _openElementStack.Pop();
-          if (isTarget)
-          {
-            break;
-          }
-        }
-
-        return;
-      }
-
-      if (IsSpecialElement(nodeEntry->TagName()))
-      {
-        ParseError(token);
-        return; // ignore the token
-      }
-
-      nodeEntry = _openElementStack.EntryBefore(nodeEntry->Node());
-      assert(nodeEntry != nullptr);
-    }
-  }
-
   RawPtr<HTMLStackItem>
     HTMLTreeBuilder::FurthestSpecialElementBlock(const HTMLStackItem &formattingElement) noexcept
   {
@@ -3939,4 +3908,37 @@ namespace Krys::HTML
 
     return nullptr;
   }
+
+#pragma endregion
+
+#pragma region IntegrationPoint Algorithms
+
+  bool HTMLTreeBuilder::IsMathMLTextIntegrationPoint(const Element &element) const noexcept
+  {
+    if (element.NamespaceURI() == Namespaces::MathML)
+    {
+      auto name = ParseTagName(element.LocalName().View());
+      switch (name)
+      {
+        case TagName::mi:
+        case TagName::mo:
+        case TagName::mn:
+        case TagName::ms:
+        case TagName::mtext:
+        {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  bool HTMLTreeBuilder::IsHTMLIntegrationPoint(const Element &element) const noexcept
+  {
+    // TODO(HTMLTREEBUILDER, HTML): return true if element is an HTML integration point.
+    return false;
+  }
+
+#pragma endregion
 }

@@ -44,6 +44,7 @@ namespace Krys::HTML
     dd,
     del,
     details,
+    desc,
     dfn,
     dialog,
     dir,
@@ -57,6 +58,7 @@ namespace Krys::HTML
     figure,
     font,
     footer,
+    foreignObject,
     form,
     frame,
     frameset,
@@ -171,7 +173,7 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::TagName, 159u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::TagName, 161u);
 
 namespace Krys::HTML
 {
@@ -445,6 +447,10 @@ namespace Krys::HTML
         if (name == u8"data")
         {
           return TagName::data;
+        }
+        if (name == u8"desc")
+        {
+          return TagName::desc;
         }
         if (name == u8"font")
         {
@@ -844,6 +850,10 @@ namespace Krys::HTML
         if (name == u8"missing-glyph")
         {
           return TagName::missing_glyph;
+        }
+        if (name == u8"foreignobject")
+        {
+          return TagName::foreignObject;
         }
       }
       case 14:

@@ -104,5 +104,10 @@ namespace Krys::HTML
     {
       _node = ShareRef(newElement);
     }
+
+    KRYS_NODISCARD bool IsRootNode() const noexcept
+    {
+      return IsDocumentFragment() || TagName() == TagName::html;
+    }
   };
 }

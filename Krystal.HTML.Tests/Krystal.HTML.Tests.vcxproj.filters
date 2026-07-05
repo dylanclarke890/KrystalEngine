@@ -191,5 +191,6 @@
     <None Include="data\tree-construction\ruby-01.dat" />
     <None Include="data\tree-construction\isindex-01.dat" />
     <None Include="data\tree-construction\tests-01.dat" />
+    <None Include="data\tree-construction\adoption-01.dat" />
   </ItemGroup>
 </Project>

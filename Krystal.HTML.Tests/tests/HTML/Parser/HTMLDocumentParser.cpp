@@ -66,4 +66,6 @@ namespace Krys::HTML::Tests
   PARSER_TEST_CASE("tree-construction/ruby-01.dat");
 
   PARSER_TEST_CASE("tree-construction/tests-01.dat");
+
+  PARSER_TEST_CASE("tree-construction/adoption-01.dat");
 }
