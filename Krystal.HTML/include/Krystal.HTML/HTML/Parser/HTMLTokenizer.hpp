@@ -1495,7 +1495,11 @@ namespace Krys::HTML
         BEGIN_STATE(SelfClosingStartTag)
           if (character == GreaterThanSign)
           {
-            _token.SetSelfClosingFlag();
+            // TODO: check that checking this token is a start tag is correct.
+            if (_token.Type() == HTMLTokenType::StartTag)
+            {
+              _token.SetSelfClosingFlag();
+            }
             return EmitTagToken();
           }
           if (character == EndOfFile) KRYS_UNLIKELY

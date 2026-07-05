@@ -25,6 +25,19 @@ namespace Krys::HTML::Tests
 
       auto document = CreateRef<HTMLDocument>();
       auto parser = CreateParser(*document, utf32_string(test.Input));
+
+      if (test.ScriptingEnabled.has_value())
+      {
+        if (*test.ScriptingEnabled)
+        {
+          parser->EnableScripting();
+        }
+        else
+        {
+          parser->DisableScripting();
+        }
+      }
+
       (void)parser->PumpTokenizer();
 
       auto dumped = Dump(*document);

@@ -58,12 +58,14 @@ namespace Krys::HTML
     HTMLDocumentParser(HTMLDocument &document) noexcept
         : _document(document), _input(), _tokenizer(_input), _treeBuilder(document, _tokenizer)
     {
+      _treeBuilder.SetScriptingMode(ParserScriptingMode::Normal);
     }
 
     HTMLDocumentParser(HTMLDocument &document, DocumentFragment &fragment, Element &contextElement) noexcept
         : _document(document), _input(), _tokenizer(_input), _treeBuilder(document, _tokenizer),
           _fragmentParsingContext(FragmentParsingContext(fragment, contextElement))
     {
+      _treeBuilder.SetScriptingMode(ParserScriptingMode::Fragment);
     }
 
     KRYS_NODISCARD HTMLInputStream &InputStream() noexcept
@@ -74,6 +76,16 @@ namespace Krys::HTML
     KRYS_NODISCARD bool IsStopped() const noexcept
     {
       return _paused;
+    }
+
+    void DisableScripting() noexcept
+    {
+      _treeBuilder.SetScriptingMode(ParserScriptingMode::Disabled);
+    }
+
+    void EnableScripting() noexcept
+    {
+      _treeBuilder.SetScriptingMode(ParserScriptingMode::Normal);
     }
 
     KRYS_NODISCARD bool PumpTokenizer() noexcept

@@ -76,6 +76,11 @@ namespace Krys::HTML
 
     void ProcessToken(HTMLTokenAtom &&token) noexcept;
 
+    void SetScriptingMode(ParserScriptingMode mode) noexcept
+    {
+      _scriptingMode = mode;
+    }
+
   private:
     bool ShouldProcessAccordingToRulesForHTMLContent(const HTMLTokenAtom &token) noexcept;
 
