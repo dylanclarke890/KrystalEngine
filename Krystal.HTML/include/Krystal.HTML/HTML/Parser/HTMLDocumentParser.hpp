@@ -85,7 +85,14 @@ namespace Krys::HTML
 
     void EnableScripting() noexcept
     {
-      _treeBuilder.SetScriptingMode(ParserScriptingMode::Normal);
+      if (_fragmentParsingContext.has_value())
+      {
+        _treeBuilder.SetScriptingMode(ParserScriptingMode::Fragment);
+      }
+      else
+      {
+        _treeBuilder.SetScriptingMode(ParserScriptingMode::Normal);
+      }
     }
 
     KRYS_NODISCARD bool PumpTokenizer() noexcept
