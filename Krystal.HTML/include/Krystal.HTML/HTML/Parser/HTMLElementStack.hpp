@@ -106,7 +106,7 @@ namespace Krys::HTML
   public:
     KRYS_NODISCARD bool HasElementInScope(TagName targetNode) const noexcept;
 
-    KRYS_NODISCARD bool HasElementInScope(const Element& element) const noexcept;
+    KRYS_NODISCARD bool HasElementInScope(const Element &element) const noexcept;
 
     KRYS_NODISCARD bool HasElementInListItemScope(TagName targetNode) const noexcept;
 
@@ -134,6 +134,16 @@ namespace Krys::HTML
     KRYS_NODISCARD auto cend() const noexcept
     {
       return _items.cend();
+    }
+
+    KRYS_NODISCARD auto rbegin() const noexcept
+    {
+      return _items.rbegin();
+    }
+
+    KRYS_NODISCARD auto rend() const noexcept
+    {
+      return _items.rend();
     }
 
     /// @brief Returns true if the stack is empty.
@@ -168,9 +178,9 @@ namespace Krys::HTML
 
     /// @brief Inserts newItem immediately above (toward the current element) the reference entry.
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm
-    void InsertAbove(HTMLStackItem newItem, const HTMLStackItem &reference) noexcept
+    void InsertAbove(HTMLStackItem newItem, const ContainerNode &reference) noexcept
     {
-      auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item == &reference; });
+      auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item.Node() == &reference; });
       assert(it != _items.end());
       _items.insert(std::next(it), Krys::Move(newItem));
     }

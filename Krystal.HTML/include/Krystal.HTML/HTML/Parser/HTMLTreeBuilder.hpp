@@ -169,6 +169,8 @@ namespace Krys::HTML
 
     void InBodyGenericEndTag(const HTMLTokenAtom &token, TagName tagName);
 
+    void StopParsing() noexcept;
+
 #pragma endregion
 
 #pragma region Insertion Algorithms
@@ -386,7 +388,7 @@ namespace Krys::HTML
 
     /// @brief Moves all children of oldParent to newParent, then appends newParent to oldParent.
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm steps 16–17
-    void TakeAllChildrenAndReparent(Ref<Element> newParent, HTMLStackItem &oldParent) noexcept;
+    void TakeAllChildrenAndReparent(Ref<Element> newParent, ContainerNode &oldParent) noexcept;
 
     RawPtr<HTMLStackItem> FurthestSpecialElementBlock(const HTMLStackItem &below) noexcept;
 

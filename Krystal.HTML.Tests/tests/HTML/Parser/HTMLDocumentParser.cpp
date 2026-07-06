@@ -66,7 +66,7 @@ namespace Krys::HTML::Tests
     DoTreeConstructionTests(*tests);                                                                         \
   }
 
-  // PARSER_TEST_CASE("tree-construction/adoption-01.dat");
+   PARSER_TEST_CASE("tree-construction/adoption-01.dat");
   PARSER_TEST_CASE("tree-construction/adoption-02.dat");
 
   PARSER_TEST_CASE("tree-construction/blocks-01.dat");
@@ -114,9 +114,9 @@ namespace Krys::HTML::Tests
 
   PARSER_TEST_CASE("tree-construction/template-01.dat");
 
-  // PARSER_TEST_CASE("tree-construction/tests-01.dat");
+   PARSER_TEST_CASE("tree-construction/tests-01.dat");
 
-  // PARSER_TEST_CASE("tree-construction/tricky-01.dat");
+   PARSER_TEST_CASE("tree-construction/tricky-01.dat");
 
   PARSER_TEST_CASE("tree-construction/void-in-phrasing-01.dat");
 }

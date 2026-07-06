@@ -91,6 +91,7 @@ namespace Krys::HTML
     map,
     mark,
     marquee,
+    math,
     menu,
     meta,
     meter,
@@ -173,7 +174,7 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::TagName, 161u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::TagName, 162u);
 
 namespace Krys::HTML
 {
@@ -479,6 +480,10 @@ namespace Krys::HTML
         if (name == u8"mark")
         {
           return TagName::mark;
+        }
+        if (name == u8"math")
+        {
+          return TagName::math;
         }
         if (name == u8"menu")
         {
