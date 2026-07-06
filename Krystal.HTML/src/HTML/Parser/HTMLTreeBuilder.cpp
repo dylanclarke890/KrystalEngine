@@ -18,6 +18,7 @@
 #include "Krystal.HTML/HTML/HTMLTableSectionElement.hpp"
 #include "Krystal.HTML/HTML/HTMLTemplateElement.hpp"
 #include "Krystal.HTML/Infra/StringAlgorithms.hpp"
+#include "Krystal.HTML/SVG/SVGScriptElement.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Text/ASCII.hpp"
 
@@ -124,7 +125,281 @@ namespace Krys::HTML
 
   void HTMLTreeBuilder::ProcessAccordingToRulesForForeignContent(HTMLTokenAtom &&token) noexcept
   {
-    // TODO(HTMLTREEBUILDER, HTML): Implement foreign content parsing.
+    auto InvalidTag = [&]()
+    {
+      ParseError(token);
+
+      while (true)
+      {
+        auto &currentNode = CurrentNode();
+        if (!Is<Element>(currentNode))
+        {
+          _openElementStack.Pop();
+          continue;
+        }
+        auto &currentElement = Downcast<Element>(currentNode);
+
+        if (!IsMathMLTextIntegrationPoint(currentElement) && !IsHTMLIntegrationPoint(currentElement)
+            && currentElement.NamespaceURI() != Namespaces::HTML)
+        {
+          _openElementStack.Pop();
+          continue;
+        }
+
+        break;
+      }
+
+      ProcessAccordingToRulesForHTMLContent(Krys::Move(token));
+    };
+
+    auto ScriptTag = [&]()
+    {
+      _openElementStack.Pop();
+
+      // TODO(HTMLTREEBUILDER, SVG): Implement the following steps from the HTML specification:
+      // Let the old insertion point have the same value as the current insertion point. Let the insertion
+      // point be just before the next input character.
+      //
+      // Increment the parser's script nesting level by one. Set the parser pause flag to true.
+      //
+      // If the active speculative HTML parser is null and the user agent supports SVG, then Process the SVG
+      // script element according to the SVG rules. [SVG]
+      //
+      // Even if this causes new characters to be inserted into the tokenizer, the parser will not be executed
+      // reentrantly, since the parser pause flag is true.
+      //
+      // Decrement the parser's script nesting level by one. If the parser's script nesting level is zero,
+      // then set the parser pause flag to false.
+      //
+      // Let the insertion point have the value of the old insertion point. (In other words, restore the
+      // insertion point to its previous value. This value might be the "undefined" value.)
+    };
+
+    switch (token.Type())
+    {
+      case HTMLTokenType::Character:
+      {
+        // TODO(HTMLTREEBUILDER): parse error and replacement char for null character tokens in token data.
+
+        if (!InsertCharacterTokenWhitespace(token))
+        {
+          return;
+        }
+
+        InsertCharacter(DOMString(token.Data()));
+        _framesetOk = false;
+
+        return;
+      }
+      case HTMLTokenType::Comment:
+      {
+        InsertComment(DOMString(token.Comment()));
+        return;
+      }
+      // TODO(HTMLTREEBUILDER): ProcessingInstruction token type?
+      case HTMLTokenType::DOCTYPE:
+      {
+        ParseError(token);
+        return; // ignore the token
+      }
+      case HTMLTokenType::StartTag:
+      {
+        auto tagName = ParseTagName(token.Name().View());
+        switch (tagName)
+        {
+          case TagName::b:
+          case TagName::big:
+          case TagName::blockquote:
+          case TagName::body:
+          case TagName::br:
+          case TagName::center:
+          case TagName::code:
+          case TagName::dd:
+          case TagName::div:
+          case TagName::dl:
+          case TagName::dt:
+          case TagName::em:
+          case TagName::embed:
+          case TagName::h1:
+          case TagName::h2:
+          case TagName::h3:
+          case TagName::h4:
+          case TagName::h5:
+          case TagName::h6:
+          case TagName::head:
+          case TagName::hr:
+          case TagName::i:
+          case TagName::img:
+          case TagName::li:
+          case TagName::listing:
+          case TagName::menu:
+          case TagName::meta:
+          case TagName::nobr:
+          case TagName::ol:
+          case TagName::p:
+          case TagName::pre:
+          case TagName::ruby:
+          case TagName::s:
+          case TagName::small:
+          case TagName::span:
+          case TagName::strong:
+          case TagName::strike:
+          case TagName::sub:
+          case TagName::sup:
+          case TagName::table:
+          case TagName::tt:
+          case TagName::u:
+          case TagName::ul:
+          case TagName::var:
+          {
+            InvalidTag();
+            return;
+          }
+          case TagName::font:
+          {
+            if (std::ranges::any_of(token.Attributes(),
+                                    [](const auto &attr)
+                                    {
+                                      return attr.NameView() == u8"color" || attr.NameView() == u8"face"
+                                             || attr.NameView() == u8"size";
+                                    }))
+            {
+              InvalidTag();
+              return;
+            }
+
+            break;
+          }
+        }
+
+        auto &adjustedCurrentNode = AdjustedCurrentNode();
+        if (Is<Element>(adjustedCurrentNode))
+        {
+          auto &adjustedCurrentElement = Downcast<Element>(adjustedCurrentNode);
+
+          if (adjustedCurrentElement.NamespaceURI() == Namespaces::MathML)
+          {
+            AdjustMathMLAttributes(token);
+          }
+          else if (adjustedCurrentElement.NamespaceURI() == Namespaces::SVG)
+          {
+            constexpr static Array<Array<DOMStringView, 2uz>, 37uz> svgTagNameAdjustments = {
+              Array<DOMStringView, 2uz> {u8"altglyph", u8"altGlyph"},
+              Array<DOMStringView, 2uz> {u8"altglyphdef", u8"altGlyphDef"},
+              Array<DOMStringView, 2uz> {u8"altglyphitem", u8"altGlyphItem"},
+              Array<DOMStringView, 2uz> {u8"animatecolor", u8"animateColor"},
+              Array<DOMStringView, 2uz> {u8"animatemotion", u8"animateMotion"},
+              Array<DOMStringView, 2uz> {u8"animatetransform", u8"animateTransform"},
+              Array<DOMStringView, 2uz> {u8"clippath", u8"clipPath"},
+              Array<DOMStringView, 2uz> {u8"feblend", u8"feBlend"},
+              Array<DOMStringView, 2uz> {u8"fecolormatrix", u8"feColorMatrix"},
+              Array<DOMStringView, 2uz> {u8"fecomponenttransfer", u8"feComponentTransfer"},
+              Array<DOMStringView, 2uz> {u8"fecomposite", u8"feComposite"},
+              Array<DOMStringView, 2uz> {u8"feconvolvematrix", u8"feConvolveMatrix"},
+              Array<DOMStringView, 2uz> {u8"fediffuselighting", u8"feDiffuseLighting"},
+              Array<DOMStringView, 2uz> {u8"fedisplacementmap", u8"feDisplacementMap"},
+              Array<DOMStringView, 2uz> {u8"fedistantlight", u8"feDistantLight"},
+              Array<DOMStringView, 2uz> {u8"fedropshadow", u8"feDropShadow"},
+              Array<DOMStringView, 2uz> {u8"feflood", u8"feFlood"},
+              Array<DOMStringView, 2uz> {u8"fefunca", u8"feFuncA"},
+              Array<DOMStringView, 2uz> {u8"fefuncb", u8"feFuncB"},
+              Array<DOMStringView, 2uz> {u8"fefuncg", u8"feFuncG"},
+              Array<DOMStringView, 2uz> {u8"fefuncr", u8"feFuncR"},
+              Array<DOMStringView, 2uz> {u8"fegaussianblur", u8"feGaussianBlur"},
+              Array<DOMStringView, 2uz> {u8"feimage", u8"feImage"},
+              Array<DOMStringView, 2uz> {u8"femerge", u8"feMerge"},
+              Array<DOMStringView, 2uz> {u8"femergenode", u8"feMergeNode"},
+              Array<DOMStringView, 2uz> {u8"femorphology", u8"feMorphology"},
+              Array<DOMStringView, 2uz> {u8"feoffset", u8"feOffset"},
+              Array<DOMStringView, 2uz> {u8"fepointlight", u8"fePointLight"},
+              Array<DOMStringView, 2uz> {u8"fespecularlighting", u8"feSpecularLighting"},
+              Array<DOMStringView, 2uz> {u8"fespotlight", u8"feSpotLight"},
+              Array<DOMStringView, 2uz> {u8"fetile", u8"feTile"},
+              Array<DOMStringView, 2uz> {u8"feturbulence", u8"feTurbulence"},
+              Array<DOMStringView, 2uz> {u8"foreignobject", u8"foreignObject"},
+              Array<DOMStringView, 2uz> {u8"glyphref", u8"glyphRef"},
+              Array<DOMStringView, 2uz> {u8"lineargradient", u8"linearGradient"},
+              Array<DOMStringView, 2uz> {u8"radialgradient", u8"radialGradient"},
+              Array<DOMStringView, 2uz> {u8"textpath", u8"textPath"},
+            };
+
+            auto adjustedNameIt =
+              std::find_if(svgTagNameAdjustments.begin(), svgTagNameAdjustments.end(),
+                           [&](const auto &pair) { return pair[0] == token.Name().View(); });
+            if (adjustedNameIt != svgTagNameAdjustments.end())
+            {
+              token._name = (*adjustedNameIt)[1];
+            }
+
+            AdjustSVGAttributes(token);
+          }
+
+          AdjustForeignAttributes(token);
+          InsertForeignElement(Krys::Move(token), adjustedCurrentElement.NamespaceURI(), false);
+
+          if (token.IsSelfClosing())
+          {
+            auto &newCurrentNode = _openElementStack.Bottom();
+            if (newCurrentNode.TagName() == TagName::script && newCurrentNode.Namespace() == Namespace::SVG)
+            {
+              token.AcknowledgeSelfClosingTag();
+              ScriptTag();
+              return;
+            }
+
+            _openElementStack.Pop();
+            token.AcknowledgeSelfClosingTag();
+            return;
+          }
+        }
+      }
+      case HTMLTokenType::EndTag:
+      {
+        if (token.Name() == TagNames::HTML::br || token.Name() == TagNames::HTML::p)
+        {
+          InvalidTag();
+          return;
+        }
+
+        if (token.Name() == TagNames::HTML::script && Is<SVGScriptElement>(CurrentNode()))
+        {
+          ScriptTag();
+          return;
+        }
+
+        auto tokenTagName = ParseTagName(token.Name().View());
+        if (_openElementStack.Bottom().TagName() != tokenTagName)
+        {
+          ParseError(token);
+        }
+
+        for (auto nodeIt = _openElementStack.rbegin(); nodeIt != _openElementStack.rend(); ++nodeIt)
+        {
+          auto &node = *nodeIt;
+
+          if (&node.Node() == &_openElementStack.Top().Node())
+          {
+            return;
+          }
+
+          if (node.TagName() == tokenTagName)
+          {
+            _openElementStack.PopUntilPopped(node.Node());
+            return;
+          }
+
+          if (node.IsElement() && node.AsElement().NamespaceURI() != Namespaces::HTML)
+          {
+            continue;
+          }
+
+          ProcessAccordingToRulesForHTMLContent(Krys::Move(token));
+          return;
+        }
+
+        break;
+      }
+    }
   }
 
   ContainerNode &HTMLTreeBuilder::CurrentNode() noexcept
@@ -3436,23 +3711,23 @@ namespace Krys::HTML
       ElementAlgorithms::SetAttributeValue(*element, attr.NameView(), DOMString(attr.ValueView()));
     }
 
-    // TODO(HTMLTREEBUILDER, CUSTOMELEMENTS, HTML):
+    // TODO(HTMLTREEBUILDER, CUSTOMELEMENTS, HTML): HTMLScriptElement handling
     // If willExecuteScript is true:
     //     Let queue be the result of popping from document's relevant agent's custom element reactions stack.
     //     (This will be the same element queue as was pushed above.)
     //     Invoke custom element reactions in queue.
     //     Decrement document's throw-on-dynamic-markup-insertion counter.
     //
-    // TODO(HTMLTREEBUILDER, HTML):
+    // TODO(HTMLTREEBUILDER, HTML): HTMLScriptElement handling
     // If element has an xmlns attribute in the XMLNS namespace whose value is not exactly the same as the
     // element's namespace, that is a parse error. Similarly, if element has an xmlns:xlink attribute in the
     // XMLNS namespace whose value is not the XLink Namespace, that is a parse error.
     //
-    // TODO(HTMLTREEBUILDER, HTML):
+    // TODO(HTMLTREEBUILDER, HTML): HTMLScriptElement handling
     // If element is a resettable element and not a form-associated custom element, then invoke its reset
     // algorithm. (This initializes the element's value and checkedness based on the element's attributes.)
     //
-    // TODO(HTMLTREEBUILDER, HTML):
+    // TODO(HTMLTREEBUILDER, HTML): HTMLScriptElement handling
     // If element is a form-associated element and not a form-associated custom element, the form element
     // pointer is not null, there is no template element on the stack of open elements, element is either not
     // listed or doesn't have a form attribute, and the intendedParent is in the same tree as the element
