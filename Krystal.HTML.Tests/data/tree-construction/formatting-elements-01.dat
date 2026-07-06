@@ -67,3 +67,50 @@
 |                 <i>
 |                   class=""
 |                   "Who am I?"
+
+#data
+<!DOCTYPE html><p><b class=x><b class=x><b><b class=x><b class=x><b>X<p>X<p><b><b class=x><b>X<p></b></b></b></b></b></b>X
+#errors
+#document
+| <!DOCTYPE html>
+| <html>
+|   <head>
+|   <body>
+|     <p>
+|       <b>
+|         class="x"
+|         <b>
+|           class="x"
+|           <b>
+|             <b>
+|               class="x"
+|               <b>
+|                 class="x"
+|                 <b>
+|                   "X"
+|     <p>
+|       <b>
+|         class="x"
+|         <b>
+|           <b>
+|             class="x"
+|             <b>
+|               class="x"
+|               <b>
+|                 "X"
+|     <p>
+|       <b>
+|         class="x"
+|         <b>
+|           <b>
+|             class="x"
+|             <b>
+|               class="x"
+|               <b>
+|                 <b>
+|                   <b>
+|                     class="x"
+|                     <b>
+|                       "X"
+|     <p>
+|       "X"

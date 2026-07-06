@@ -55,6 +55,8 @@ namespace Krys::HTML::Tests
         INFO("Test case " + std::to_string(i + 1uz) + " of " + std::to_string(tests.size()));
         DoTreeConstructionTest(tests[i]);
       }
+
+      SUCCEED("All " + std::to_string(tests.size()) + " test cases passed.");
     }
   }
 
