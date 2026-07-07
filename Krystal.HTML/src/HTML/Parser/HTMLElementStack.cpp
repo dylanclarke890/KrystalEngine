@@ -198,7 +198,7 @@ namespace Krys::HTML
           }
 
           Pop();
-          break;
+          continue;
         }
       }
 

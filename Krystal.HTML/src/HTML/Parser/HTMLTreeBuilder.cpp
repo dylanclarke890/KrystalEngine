@@ -3455,6 +3455,8 @@ namespace Krys::HTML
     for (auto nodeIt = _openElementStack.rbegin(); nodeIt != _openElementStack.rend(); ++nodeIt)
     {
       auto &nodeEntry = *nodeIt;
+      // NOTE: this part of the spec ensures misnested end tags are properly closed. We check the local name
+      // instead of the parsed tag name to avoid issues with foreign/unknown elements.
       if (nodeEntry.Namespace() == Namespace::HTML && nodeEntry.IsElement()
           && nodeEntry.AsElement().LocalName() == token.Name())
       {
