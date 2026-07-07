@@ -3944,86 +3944,144 @@ namespace Krys::HTML
   {
     assert(token.Type() == HTMLTokenType::DOCTYPE);
 
-    // TODO(HTMLTREEBUILDER, HTML): return true if any of the following conditions are met:
-    // The name is not "html".
-    // The public identifier is set to: "-//W3O//DTD W3 HTML Strict 3.0//EN//"
-    // The public identifier is set to: "-/W3C/DTD HTML 4.0 Transitional/EN"
-    // The public identifier is set to: "HTML"
-    // The system identifier is set to: "http://www.ibm.com/data/dtd/v11/ibmxhtml1-transitional.dtd"
-    // The public identifier starts with: "+//Silmaril//dtd html Pro v0r11 19970101//"
-    // The public identifier starts with: "-//AS//DTD HTML 3.0 asWedit + extensions//"
-    // The public identifier starts with: "-//AdvaSoft Ltd//DTD HTML 3.0 asWedit + extensions//"
-    // The public identifier starts with: "-//IETF//DTD HTML 2.0 Level 1//"
-    // The public identifier starts with: "-//IETF//DTD HTML 2.0 Level 2//"
-    // The public identifier starts with: "-//IETF//DTD HTML 2.0 Strict Level 1//"
-    // The public identifier starts with: "-//IETF//DTD HTML 2.0 Strict Level 2//"
-    // The public identifier starts with: "-//IETF//DTD HTML 2.0 Strict//"
-    // The public identifier starts with: "-//IETF//DTD HTML 2.0//"
-    // The public identifier starts with: "-//IETF//DTD HTML 2.1E//"
-    // The public identifier starts with: "-//IETF//DTD HTML 3.0//"
-    // The public identifier starts with: "-//IETF//DTD HTML 3.2 Final//"
-    // The public identifier starts with: "-//IETF//DTD HTML 3.2//"
-    // The public identifier starts with: "-//IETF//DTD HTML 3//"
-    // The public identifier starts with: "-//IETF//DTD HTML Level 0//"
-    // The public identifier starts with: "-//IETF//DTD HTML Level 1//"
-    // The public identifier starts with: "-//IETF//DTD HTML Level 2//"
-    // The public identifier starts with: "-//IETF//DTD HTML Level 3//"
-    // The public identifier starts with: "-//IETF//DTD HTML Strict Level 0//"
-    // The public identifier starts with: "-//IETF//DTD HTML Strict Level 1//"
-    // The public identifier starts with: "-//IETF//DTD HTML Strict Level 2//"
-    // The public identifier starts with: "-//IETF//DTD HTML Strict Level 3//"
-    // The public identifier starts with: "-//IETF//DTD HTML Strict//"
-    // The public identifier starts with: "-//IETF//DTD HTML//"
-    // The public identifier starts with: "-//Metrius//DTD Metrius Presentational//"
-    // The public identifier starts with: "-//Microsoft//DTD Internet Explorer 2.0 HTML Strict//"
-    // The public identifier starts with: "-//Microsoft//DTD Internet Explorer 2.0 HTML//"
-    // The public identifier starts with: "-//Microsoft//DTD Internet Explorer 2.0 Tables//"
-    // The public identifier starts with: "-//Microsoft//DTD Internet Explorer 3.0 HTML Strict//"
-    // The public identifier starts with: "-//Microsoft//DTD Internet Explorer 3.0 HTML//"
-    // The public identifier starts with: "-//Microsoft//DTD Internet Explorer 3.0 Tables//"
-    // The public identifier starts with: "-//Netscape Comm. Corp.//DTD HTML//"
-    // The public identifier starts with: "-//Netscape Comm. Corp.//DTD Strict HTML//"
-    // The public identifier starts with: "-//O'Reilly and Associates//DTD HTML 2.0//"
-    // The public identifier starts with: "-//O'Reilly and Associates//DTD HTML Extended 1.0//"
-    // The public identifier starts with: "-//O'Reilly and Associates//DTD HTML Extended Relaxed 1.0//"
-    // The public identifier starts with: "-//SQ//DTD HTML 2.0 HoTMetaL + extensions//"
-    // The public identifier starts with: "-//SoftQuad Software//DTD HoTMetaL PRO 6.0::19990601::extensions to
-    // HTML 4.0//"
-    // The public identifier starts with: "-//SoftQuad//DTD HoTMetaL PRO 4.0::19971010::extensions to
-    // HTML 4.0//"
-    // The public identifier starts with: "-//Spyglass//DTD HTML 2.0 Extended//"
-    // The public identifier starts with: "-//Sun Microsystems Corp.//DTD HotJava HTML//"
-    // The public identifier starts with: "-//Sun Microsystems Corp.//DTD HotJava Strict HTML//"
-    // The public identifier starts with: "-//W3C//DTD HTML 3 1995-03-24//"
-    // The public identifier starts with: "-//W3C//DTD HTML 3.2 Draft//"
-    // The public identifier starts with: "-//W3C//DTD HTML 3.2 Final//"
-    // The public identifier starts with: "-//W3C//DTD HTML 3.2//"
-    // The public identifier starts with: "-//W3C//DTD HTML 3.2S Draft//"
-    // The public identifier starts with: "-//W3C//DTD HTML 4.0 Frameset//"
-    // The public identifier starts with: "-//W3C//DTD HTML 4.0 Transitional//"
-    // The public identifier starts with: "-//W3C//DTD HTML Experimental 19960712//"
-    // The public identifier starts with: "-//W3C//DTD HTML Experimental 970421//"
-    // The public identifier starts with: "-//W3C//DTD W3 HTML//"
-    // The public identifier starts with: "-//W3O//DTD W3 HTML 3.0//"
-    // The public identifier starts with: "-//WebTechs//DTD Mozilla HTML 2.0//"
-    // The public identifier starts with: "-//WebTechs//DTD Mozilla HTML//"
-    // The system identifier is missing or the empty string, and the public identifier starts with:
-    // "-//W3C//DTD HTML 4.01 Frameset//"
-    // The system identifier is missing or the empty string, and the public identifier starts with:
-    // "-//W3C//DTD HTML 4.01 Transitional//"
+    if (token.IsForceQuirks() || token.Name() != u8"html")
+    {
+      return true;
+    }
 
-    return token.IsForceQuirks();
+    auto &data = *token.DOCTYPEData();
+
+    if (data.HasSystemIdentifier)
+    {
+      auto systemIdentifier = DOMStringView(data.SystemIdentifier.begin(), data.SystemIdentifier.end());
+      if (StringAlgorithms::ASCIICaseInsensitiveMatch(
+            systemIdentifier, u8"http://www.ibm.com/data/dtd/v11/ibmxhtml1-transitional.dtd"))
+      {
+        return true;
+      }
+    }
+
+    if (data.HasPublicIdentifier)
+    {
+      auto publicIdentifier = DOMStringView(data.PublicIdentifier.begin(), data.PublicIdentifier.end());
+
+      auto Matches = [publicIdentifier](DOMStringView identifier)
+      {
+        return StringAlgorithms::ASCIICaseInsensitiveMatch(publicIdentifier, identifier);
+      };
+
+      auto StartsWith = [publicIdentifier](DOMStringView identifier)
+      {
+        if (publicIdentifier.size() < identifier.size())
+        {
+          return false;
+        }
+
+        auto publicIdentifierPrefix = publicIdentifier.substr(0uz, identifier.size());
+        return StringAlgorithms::ASCIICaseInsensitiveMatch(publicIdentifierPrefix, identifier);
+      };
+
+      if (Matches(u8"-//W3O//DTD W3 HTML Strict 3.0//EN//") || Matches(u8"-/W3C/DTD HTML 4.0 Transitional/EN")
+          || Matches(u8"HTML"))
+      {
+        return true;
+      }
+
+      if (StartsWith(u8"+//Silmaril//dtd html Pro v0r11 19970101//")
+          || StartsWith(u8"-//AS//DTD HTML 3.0 asWedit + extensions//")
+          || StartsWith(u8"-//AdvaSoft Ltd//DTD HTML 3.0 asWedit + extensions//")
+          || StartsWith(u8"-//IETF//DTD HTML 2.0 Level 1//")
+          || StartsWith(u8"-//IETF//DTD HTML 2.0 Level 2//")
+          || StartsWith(u8"-//IETF//DTD HTML 2.0 Strict Level 1//")
+          || StartsWith(u8"-//IETF//DTD HTML 2.0 Strict Level 2//")
+          || StartsWith(u8"-//IETF//DTD HTML 2.0 Strict//") || StartsWith(u8"-//IETF//DTD HTML 2.0//")
+          || StartsWith(u8"-//IETF//DTD HTML 2.1E//") || StartsWith(u8"-//IETF//DTD HTML 3.0//")
+          || StartsWith(u8"-//IETF//DTD HTML 3.2 Final//") || StartsWith(u8"-//IETF//DTD HTML 3.2//")
+          || StartsWith(u8"-//IETF//DTD HTML 3//") || StartsWith(u8"-//IETF//DTD HTML Level 0//")
+          || StartsWith(u8"-//IETF//DTD HTML Level 1//") || StartsWith(u8"-//IETF//DTD HTML Level 2//")
+          || StartsWith(u8"-//IETF//DTD HTML Level 3//") || StartsWith(u8"-//IETF//DTD HTML Strict Level 0//")
+          || StartsWith(u8"-//IETF//DTD HTML Strict Level 1//")
+          || StartsWith(u8"-//IETF//DTD HTML Strict Level 2//")
+          || StartsWith(u8"-//IETF//DTD HTML Strict Level 3//") || StartsWith(u8"-//IETF//DTD HTML Strict//")
+          || StartsWith(u8"-//IETF//DTD HTML//") || StartsWith(u8"-//Metrius//DTD Metrius Presentational//")
+          || StartsWith(u8"-//Microsoft//DTD Internet Explorer 2.0 HTML Strict//")
+          || StartsWith(u8"-//Microsoft//DTD Internet Explorer 2.0 HTML//")
+          || StartsWith(u8"-//Microsoft//DTD Internet Explorer 2.0 Tables//")
+          || StartsWith(u8"-//Microsoft//DTD Internet Explorer 3.0 HTML Strict//")
+          || StartsWith(u8"-//Microsoft//DTD Internet Explorer 3.0 HTML//")
+          || StartsWith(u8"-//Microsoft//DTD Internet Explorer 3.0 Tables//")
+          || StartsWith(u8"-//Netscape Comm. Corp.//DTD HTML//")
+          || StartsWith(u8"-//Netscape Comm. Corp.//DTD Strict HTML//")
+          || StartsWith(u8"-//O'Reilly and Associates//DTD HTML 2.0//")
+          || StartsWith(u8"-//O'Reilly and Associates//DTD HTML Extended 1.0//")
+          || StartsWith(u8"-//O'Reilly and Associates//DTD HTML Extended Relaxed 1.0//")
+          || StartsWith(u8"-//SQ//DTD HTML 2.0 HoTMetaL + extensions//")
+          || StartsWith(u8"-//SoftQuad Software//DTD HoTMetaL PRO 6.0::19990601::extensions to HTML 4.0//")
+          || StartsWith(u8"-//SoftQuad//DTD HoTMetaL PRO 4.0::19971010::extensions to HTML 4.0//")
+          || StartsWith(u8"-//Spyglass//DTD HTML 2.0 Extended//")
+          || StartsWith(u8"-//Sun Microsystems Corp.//DTD HotJava HTML//")
+          || StartsWith(u8"-//Sun Microsystems Corp.//DTD HotJava Strict HTML//")
+          || StartsWith(u8"-//W3C//DTD HTML 3 1995-03-24//") || StartsWith(u8"-//W3C//DTD HTML 3.2 Draft//")
+          || StartsWith(u8"-//W3C//DTD HTML 3.2 Final//") || StartsWith(u8"-//W3C//DTD HTML 3.2//")
+          || StartsWith(u8"-//W3C//DTD HTML 3.2S Draft//") || StartsWith(u8"-//W3C//DTD HTML 4.0 Frameset//")
+          || StartsWith(u8"-//W3C//DTD HTML 4.0 Transitional//")
+          || StartsWith(u8"-//W3C//DTD HTML Experimental 19960712//")
+          || StartsWith(u8"-//W3C//DTD HTML Experimental 970421//") || StartsWith(u8"-//W3C//DTD W3 HTML//")
+          || StartsWith(u8"-//W3O//DTD W3 HTML 3.0//") || StartsWith(u8"-//WebTechs//DTD Mozilla HTML 2.0//")
+          || StartsWith(u8"-//WebTechs//DTD Mozilla HTML//"))
+      {
+        return true;
+      }
+
+      if (!data.HasSystemIdentifier || data.SystemIdentifier.empty())
+      {
+        if (StartsWith(u8"-//W3C//DTD HTML 4.01 Frameset//EN")
+            || StartsWith(u8"-//W3C//DTD HTML 4.01 Transitional//EN"))
+        {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   bool HTMLTreeBuilder::IsLimitedQuirksModeDOCTYPE(const HTMLTokenAtom &token) const noexcept
   {
-    // TODO(HTMLTREEBUILDER, HTML): return true if any of the following conditions are met:
-    // The public identifier starts with: "-//W3C//DTD XHTML 1.0 Frameset//"
-    // The public identifier starts with: "-//W3C//DTD XHTML 1.0 Transitional//"
-    // The system identifier is neither missing nor the empty string, and the public identifier starts with:
-    // "-//W3C//DTD HTML 4.01 Frameset//"
-    // The system identifier is neither missing nor the empty string, and the public identifier starts with:
-    // "-//W3C//DTD HTML 4.01 Transitional//"
+    assert(token.Type() == HTMLTokenType::DOCTYPE);
+
+    auto &data = *token.DOCTYPEData();
+
+    if (data.HasPublicIdentifier)
+    {
+      auto publicIdentifier = DOMStringView(data.PublicIdentifier.begin(), data.PublicIdentifier.end());
+
+      auto StartsWith = [publicIdentifier](DOMStringView identifier)
+      {
+        if (publicIdentifier.size() < identifier.size())
+        {
+          return false;
+        }
+
+        auto publicIdentifierPrefix = publicIdentifier.substr(0uz, identifier.size());
+        return StringAlgorithms::ASCIICaseInsensitiveMatch(publicIdentifierPrefix, identifier);
+      };
+
+      if (StartsWith(u8"-//W3C//DTD XHTML 1.0 Frameset//")
+          || StartsWith(u8"-//W3C//DTD XHTML 1.0 Transitional//"))
+      {
+        return true;
+      }
+
+      if (data.HasSystemIdentifier && !data.SystemIdentifier.empty())
+      {
+        if (StartsWith(u8"-//W3C//DTD HTML 4.01 Frameset//")
+            || StartsWith(u8"-//W3C//DTD HTML 4.01 Transitional//"))
+        {
+          return true;
+        }
+      }
+    }
 
     return false;
   }
