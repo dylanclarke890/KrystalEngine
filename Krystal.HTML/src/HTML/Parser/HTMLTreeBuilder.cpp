@@ -3592,7 +3592,7 @@ namespace Krys::HTML
       return;
     }
 
-    auto previousSibling = beforeSibling;
+    auto previousSibling = beforeSibling ? beforeSibling->PreviousSibling() : nullptr;
     if (previousSibling == nullptr)
     {
       previousSibling = parent->LastChild();
