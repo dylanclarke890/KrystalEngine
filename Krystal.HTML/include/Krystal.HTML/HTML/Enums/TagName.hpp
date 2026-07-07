@@ -729,6 +729,10 @@ namespace Krys::HTML
         {
           return TagName::caption;
         }
+        if (name == u8"details")
+        {
+          return TagName::details;
+        }
         if (name == u8"isindex")
         {
           return TagName::isindex;
@@ -772,10 +776,6 @@ namespace Krys::HTML
         if (name == u8"datalist")
         {
           return TagName::datalist;
-        }
-        if (name == u8"details")
-        {
-          return TagName::details;
         }
         if (name == u8"fieldset")
         {
