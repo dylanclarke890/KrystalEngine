@@ -7,6 +7,7 @@
 #include "Krystal.HTML/DOM/DocumentType.hpp"
 #include "Krystal.HTML/DOM/Element.hpp"
 #include "Krystal.HTML/DOM/Text.hpp"
+#include "Krystal.HTML/HTML/HTMLTemplateElement.hpp"
 #include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Types/List.hpp"
@@ -36,8 +37,6 @@ namespace Krys::HTML::Tests
       case NodeType::ELEMENT_NODE:
       {
         auto &element = Downcast<Element>(node);
-
-        // TODO: handle template elements
 
         Indent(output, depth);
 
@@ -75,6 +74,17 @@ namespace Krys::HTML::Tests
           {
             Indent(output, depth + 1uz);
             output += name + u8"=\"" + *value + u8"\"\n";
+          }
+        }
+
+        if (element.NamespaceURI() == Namespaces::HTML && element.LocalName() == u8"template")
+        {
+          Indent(output, depth + 1uz);
+          output += u8"content\n";
+
+          for (auto &child : ConstChildNodeRange(*Downcast<HTMLTemplateElement>(element).Content()))
+          {
+            DumpNode(child, output, depth + 2uz);
           }
         }
         break;
@@ -216,9 +226,16 @@ namespace Krys::HTML::Tests
         continue;
       }
 
-      if (line == "#errors" || line == "#new-errors")
+      if (line == "#errors" || line == "#new-errors" || line == "#errors-new")
       {
         section = Section::Errors;
+        continue;
+      }
+
+      if (line.starts_with("#document-fragment"))
+      {
+        section = Section::ExpectedOutput;
+        expected = "#document-fragment\n";
         continue;
       }
 
@@ -226,13 +243,6 @@ namespace Krys::HTML::Tests
       {
         section = Section::ExpectedOutput;
         expected = "#document\n";
-        continue;
-      }
-
-      if (line == "#document-fragment")
-      {
-        section = Section::ExpectedOutput;
-        expected = "#document-fragment\n";
         continue;
       }
 
