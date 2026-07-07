@@ -4,7 +4,7 @@
 namespace Krys::HTML
 {
   HTMLVideoElement::HTMLVideoElement(Document &document) noexcept
-      : HTMLMediaElement(document, DOMInterface::Video)
+      : HTMLMediaElement(document, HTMLElementInterface::Video)
   {
   }
 

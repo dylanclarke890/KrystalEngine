@@ -5,7 +5,7 @@
 namespace Krys::HTML
 {
   HTMLScriptElement::HTMLScriptElement(Document &document) noexcept
-      : HTMLElement(document, DOMInterface::Script)
+      : HTMLElement(document, HTMLElementInterface::Script)
   {
   }
 

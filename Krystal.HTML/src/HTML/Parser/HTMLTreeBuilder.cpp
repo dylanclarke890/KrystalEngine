@@ -3483,15 +3483,16 @@ namespace Krys::HTML
 #pragma region Insertion Algorithms
 
   AdjustedInsertionLocation
-    HTMLTreeBuilder::AppropriateInsertionLocation(RawPtr<ContainerNode> targetOverride) noexcept
+    HTMLTreeBuilder::AppropriateInsertionLocation(RawPtr<HTMLStackItem> targetOverride) noexcept
   {
-    auto &target = targetOverride ? *targetOverride : CurrentNode();
+    auto &target = targetOverride ? *targetOverride : _openElementStack.Bottom();
 
     AdjustedInsertionLocation location {};
 
-    auto *targetHTMLElement = DynamicDowncast<HTMLElement>(target);
-    if (_fosterParenting
-        && IsOneOf<HTMLTableElement, HTMLTableSectionElement, HTMLTableRowElement>(targetHTMLElement))
+    if (_fosterParenting && target.Namespace() == Namespace::HTML
+        && (target.TagName() == TagName::table || target.TagName() == TagName::tbody
+            || target.TagName() == TagName::tfoot || target.TagName() == TagName::thead
+            || target.TagName() == TagName::tr))
     {
       auto [tableElement, templateElement, elementBeforeTable, isTemplateMostRecent] =
         _openElementStack.LastTableAndTemplate();
@@ -3515,7 +3516,7 @@ namespace Krys::HTML
     }
     else
     {
-      location.Parent = &target;
+      location.Parent = &target.Node();
       location.BeforeSibling = nullptr;
     }
 
@@ -4173,7 +4174,7 @@ namespace Krys::HTML
 
       // Step 14: Insert lastNode at the appropriate location in the common ancestor.
       {
-        auto location = AppropriateInsertionLocation(&commonAncestor->Node());
+        auto location = AppropriateInsertionLocation(commonAncestor);
         if (location.Parent != nullptr)
         {
           (void)MutationAlgorithms::Insert(*lastDOMNode, *location.Parent, location.BeforeSibling);

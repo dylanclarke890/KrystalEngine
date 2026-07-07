@@ -4,7 +4,7 @@
 namespace Krys::HTML
 {
   HTMLProgressElement::HTMLProgressElement(Document &document) noexcept
-      : HTMLElement(document, DOMInterface::Progress)
+      : HTMLElement(document, HTMLElementInterface::Progress)
   {
   }
 

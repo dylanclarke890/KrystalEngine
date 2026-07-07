@@ -4,7 +4,7 @@
 
 namespace Krys::HTML
 {
-  HTMLFormElement::HTMLFormElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Form)
+  HTMLFormElement::HTMLFormElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Form)
   {
   }
 

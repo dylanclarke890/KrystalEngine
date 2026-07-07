@@ -4,7 +4,7 @@
 namespace Krys::HTML
 {
   HTMLButtonElement::HTMLButtonElement(Document &document) noexcept
-      : HTMLElement(document, DOMInterface::Button)
+      : HTMLElement(document, HTMLElementInterface::Button)
   {
   }
 

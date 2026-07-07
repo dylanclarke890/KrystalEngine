@@ -3,7 +3,7 @@
 
 namespace Krys::HTML
 {
-  HTMLBodyElement::HTMLBodyElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Body)
+  HTMLBodyElement::HTMLBodyElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Body)
   {
   }
 

@@ -4,7 +4,7 @@
 namespace Krys::HTML
 {
   HTMLLegendElement::HTMLLegendElement(Document &document) noexcept
-      : HTMLElement(document, DOMInterface::Legend)
+      : HTMLElement(document, HTMLElementInterface::Legend)
   {
   }
 

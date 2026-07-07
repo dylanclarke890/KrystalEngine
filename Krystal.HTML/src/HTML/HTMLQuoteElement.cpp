@@ -3,7 +3,7 @@
 
 namespace Krys::HTML
 {
-  HTMLQuoteElement::HTMLQuoteElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Quote)
+  HTMLQuoteElement::HTMLQuoteElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Quote)
   {
   }
 

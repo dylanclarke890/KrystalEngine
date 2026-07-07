@@ -4,7 +4,7 @@
 namespace Krys::HTML
 {
   HTMLOptGroupElement::HTMLOptGroupElement(Document &document) noexcept
-      : HTMLElement(document, DOMInterface::OptGroup)
+      : HTMLElement(document, HTMLElementInterface::OptGroup)
   {
   }
 

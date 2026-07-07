@@ -2,7 +2,7 @@
 
 namespace Krys::HTML
 {
-  HTMLSpanElement::HTMLSpanElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Span)
+  HTMLSpanElement::HTMLSpanElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Span)
   {
   }
 }

@@ -405,6 +405,10 @@ namespace Krys::HTML
         {
           return TagName::svg;
         }
+        if (name == u8"svg")
+        {
+          return TagName::svg;
+        }
         if (name == u8"var")
         {
           return TagName::var;

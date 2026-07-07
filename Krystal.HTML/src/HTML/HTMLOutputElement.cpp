@@ -5,7 +5,7 @@
 namespace Krys::HTML
 {
   HTMLOutputElement::HTMLOutputElement(Document &document) noexcept
-      : HTMLElement(document, DOMInterface::Output)
+      : HTMLElement(document, HTMLElementInterface::Output)
   {
   }
 

@@ -3,7 +3,7 @@
 
 namespace Krys::HTML
 {
-  HTMLModElement::HTMLModElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Mod)
+  HTMLModElement::HTMLModElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Mod)
   {
   }
 

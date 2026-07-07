@@ -4,7 +4,7 @@
 namespace Krys::HTML
 {
   HTMLSlotElement::HTMLSlotElement(Document &document) noexcept
-      : HTMLElement(document, DOMInterface::Slot, HTMLElementFlags::None, NodeFlags::IsHTMLSlotElement)
+      : HTMLElement(document, HTMLElementInterface::Slot, HTMLElementFlags::None, NodeFlags::IsHTMLSlotElement)
   {
   }
 

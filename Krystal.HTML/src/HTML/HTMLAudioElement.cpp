@@ -4,7 +4,7 @@
 namespace Krys::HTML
 {
   HTMLAudioElement::HTMLAudioElement(Document &document) noexcept
-      : HTMLMediaElement(document, DOMInterface::Audio)
+      : HTMLMediaElement(document, HTMLElementInterface::Audio)
   {
   }
 }

@@ -4,7 +4,7 @@
 
 namespace Krys::HTML
 {
-  HTMLLinkElement::HTMLLinkElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Link)
+  HTMLLinkElement::HTMLLinkElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Link)
   {
   }
 

@@ -3,7 +3,7 @@
 
 namespace Krys::HTML
 {
-  HTMLTrackElement::HTMLTrackElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Track)
+  HTMLTrackElement::HTMLTrackElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Track)
   {
   }
 

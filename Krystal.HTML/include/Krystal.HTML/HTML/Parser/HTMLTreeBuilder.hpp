@@ -177,7 +177,7 @@ namespace Krys::HTML
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#appropriate-place-for-inserting-a-node
     KRYS_NODISCARD AdjustedInsertionLocation
-      AppropriateInsertionLocation(RawPtr<ContainerNode> targetOverride = nullptr) noexcept;
+      AppropriateInsertionLocation(RawPtr<HTMLStackItem> targetOverride = nullptr) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-an-element-at-the-adjusted-insertion-location
     void InsertElementAtAdjustedInsertionLocation(Element &element) noexcept;

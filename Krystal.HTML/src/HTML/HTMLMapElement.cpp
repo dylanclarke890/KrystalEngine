@@ -3,7 +3,7 @@
 
 namespace Krys::HTML
 {
-  HTMLMapElement::HTMLMapElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Map)
+  HTMLMapElement::HTMLMapElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Map)
   {
   }
 

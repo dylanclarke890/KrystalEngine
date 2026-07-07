@@ -3,7 +3,7 @@
 namespace Krys::HTML
 {
   HTMLSelectedContentElement::HTMLSelectedContentElement(Document &document) noexcept
-      : HTMLElement(document, DOMInterface::SelectedContent)
+      : HTMLElement(document, HTMLElementInterface::SelectedContent)
   {
   }
 }

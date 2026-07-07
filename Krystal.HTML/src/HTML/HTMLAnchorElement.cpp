@@ -7,7 +7,7 @@
 namespace Krys::HTML
 {
   HTMLAnchorElement::HTMLAnchorElement(Document &document) noexcept
-      : HTMLElement(document, DOMInterface::Anchor)
+      : HTMLElement(document, HTMLElementInterface::Anchor)
   {
   }
 

@@ -4,7 +4,7 @@
 namespace Krys::HTML
 {
   HTMLOptionElement::HTMLOptionElement(Document &document) noexcept
-      : HTMLElement(document, DOMInterface::Option)
+      : HTMLElement(document, HTMLElementInterface::Option)
   {
   }
 #pragma region HTMLOptionElement

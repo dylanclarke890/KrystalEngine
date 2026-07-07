@@ -3,13 +3,13 @@
 
 namespace Krys::HTML
 {
-  HTMLMediaElement::HTMLMediaElement(Document &document, DOMInterface interface) noexcept
+  HTMLMediaElement::HTMLMediaElement(Document &document, HTMLElementInterface interface) noexcept
       : HTMLElement(document, interface, HTMLElementFlags::IsMediaElement)
   {
   }
 
   HTMLMediaElement::HTMLMediaElement(Document &document) noexcept
-      : HTMLMediaElement(document, DOMInterface::Media)
+      : HTMLMediaElement(document, HTMLElementInterface::Media)
   {
   }
 }

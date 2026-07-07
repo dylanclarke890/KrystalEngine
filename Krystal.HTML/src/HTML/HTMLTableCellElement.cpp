@@ -4,7 +4,7 @@
 namespace Krys::HTML
 {
   HTMLTableCellElement::HTMLTableCellElement(Document &document) noexcept
-      : HTMLElement(document, DOMInterface::TableCell)
+      : HTMLElement(document, HTMLElementInterface::TableCell)
   {
   }
 

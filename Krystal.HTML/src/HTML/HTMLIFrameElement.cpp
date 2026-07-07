@@ -5,7 +5,7 @@
 namespace Krys::HTML
 {
   HTMLIFrameElement::HTMLIFrameElement(Document &document) noexcept
-      : HTMLElement(document, DOMInterface::IFrame)
+      : HTMLElement(document, HTMLElementInterface::IFrame)
   {
   }
 

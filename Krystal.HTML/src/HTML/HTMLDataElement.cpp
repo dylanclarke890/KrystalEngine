@@ -3,7 +3,7 @@
 
 namespace Krys::HTML
 {
-  HTMLDataElement::HTMLDataElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Data)
+  HTMLDataElement::HTMLDataElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Data)
   {
   }
 

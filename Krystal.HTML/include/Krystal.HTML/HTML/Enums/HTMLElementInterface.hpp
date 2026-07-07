@@ -4,7 +4,7 @@
 
 namespace Krys::HTML
 {
-  enum class DOMInterface : uint8
+  enum class HTMLElementInterface : uint8
   {
     None,
     Anchor,
@@ -75,4 +75,4 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::DOMInterface, 66u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::HTMLElementInterface, 66u);

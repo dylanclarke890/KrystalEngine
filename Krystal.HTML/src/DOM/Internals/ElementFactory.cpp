@@ -14,6 +14,7 @@
 #include "Krystal.HTML/MathML/MathMLElement.hpp"
 #include "Krystal.HTML/SVG/Internals/SVGElementFactory.hpp"
 #include "Krystal.HTML/SVG/SVGElement.hpp"
+#include "Krystal.HTML/SVG/SVGUnknownElement.hpp"
 
 namespace Krys::HTML
 {
@@ -60,6 +61,11 @@ namespace Krys::HTML
     else if (name.NamespaceURI() == Namespaces::SVG)
     {
       result = SVGElementFactory::TryCreate(document, elementName);
+
+      if (result == nullptr)
+      {
+        result = CreateRefPtr<SVGUnknownElement>(document);
+      }
     }
     else if (name.NamespaceURI() == Namespaces::MathML)
     {
