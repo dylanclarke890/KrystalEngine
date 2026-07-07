@@ -4275,7 +4275,38 @@ namespace Krys::HTML
 
   bool HTMLTreeBuilder::IsHTMLIntegrationPoint(const Element &element) const noexcept
   {
-    // TODO(HTMLTREEBUILDER, HTML): return true if element is an HTML integration point.
+    if (element.NamespaceURI() == Namespaces::SVG)
+    {
+      if (element.LocalName() == u8"annotation-xml")
+      {
+        auto attr = element.GetAttribute(u8"encoding");
+        if (attr.has_value())
+        {
+          auto &encoding = attr.value();
+          if (StringAlgorithms::ASCIICaseInsensitiveMatch(encoding, u8"text/html")
+              || StringAlgorithms::ASCIICaseInsensitiveMatch(encoding, u8"application/xhtml+xml"))
+          {
+            return true;
+          }
+        }
+
+        return false;
+      }
+    }
+    else if (element.NamespaceURI() == Namespaces::SVG)
+    {
+      auto name = ParseTagName(element.LocalName().View());
+      switch (name)
+      {
+        case TagName::desc:
+        case TagName::title:
+        case TagName::foreignObject:
+        {
+          return true;
+        }
+      }
+    }
+
     return false;
   }
 
