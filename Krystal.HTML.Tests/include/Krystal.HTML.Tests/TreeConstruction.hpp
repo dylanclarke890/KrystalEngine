@@ -37,6 +37,8 @@ namespace Krys::HTML::Tests
       {
         auto &element = Downcast<Element>(node);
 
+        // TODO: handle template elements
+
         Indent(output, depth);
 
         auto localName = DOMString(element.LocalName().View());
@@ -62,6 +64,7 @@ namespace Krys::HTML::Tests
 
         output += u8"<" + namespaceName + localName + u8">\n";
 
+        // TODO: handle namespaces and prefixes.
         auto attributeNames = element.GetAttributeNames();
         std::sort(attributeNames.begin(), attributeNames.end(), std::ranges::lexicographical_compare);
 
