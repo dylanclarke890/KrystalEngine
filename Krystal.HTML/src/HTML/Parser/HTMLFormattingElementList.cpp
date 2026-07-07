@@ -81,7 +81,7 @@ namespace Krys::HTML
     }
   }
 
-  RawPtr<HTMLStackItem> HTMLFormattingElementList::FindFormattingElementFromLastMarker(TagName name) noexcept
+  RawPtr<HTMLStackItem> HTMLFormattingElementList::FindFromLastMarker(TagName name) noexcept
   {
     for (auto it = _formattingElements.rbegin(); it != _formattingElements.rend(); ++it)
     {
@@ -99,7 +99,7 @@ namespace Krys::HTML
     return nullptr;
   }
 
-  void HTMLFormattingElementList::RemoveFormattingElement(const ContainerNode &node) noexcept
+  void HTMLFormattingElementList::Remove(const ContainerNode &node) noexcept
   {
     auto it = std::ranges::find_if(_formattingElements, [&](const FormattingListEntry &entry)
                                    { return entry.IsFormattingElement() && &entry.Item().Node() == &node; });
@@ -119,25 +119,27 @@ namespace Krys::HTML
   HTMLFormattingElementList::Bookmark
     HTMLFormattingElementList::BookmarkFor(const ContainerNode &node) noexcept
   {
-    for (size_t i = 0; i < _formattingElements.size(); ++i)
+    for (size_t i = 0uz; i < _formattingElements.size(); ++i)
     {
       const auto &entry = _formattingElements[i];
       if (entry.IsFormattingElement() && &entry.Item().Node() == &node)
-        return {i};
+      {
+        return Bookmark {i};
+      }
     }
 
     assert(false && "node not found in formatting list");
-    return {0};
+    return Bookmark {0uz};
   }
 
   void HTMLFormattingElementList::MoveBookmarkAfter(Bookmark &bookmark,
                                                     const FormattingListEntry &entry) noexcept
   {
-    for (size_t i = 0; i < _formattingElements.size(); ++i)
+    for (size_t i = 0uz; i < _formattingElements.size(); ++i)
     {
       if (&_formattingElements[i] == &entry)
       {
-        bookmark.index = i + 1;
+        bookmark.index = i + 1uz;
         return;
       }
     }
@@ -150,7 +152,9 @@ namespace Krys::HTML
                                    { return entry.IsFormattingElement() && &entry.Item().Node() == &node; });
 
     if (it == _formattingElements.end())
+    {
       return;
+    }
 
     auto removeIndex = static_cast<size_t>(std::distance(_formattingElements.begin(), it));
 
@@ -158,11 +162,11 @@ namespace Krys::HTML
 
     if (removeIndex < bookmark.index)
     {
-      --bookmark.index;
+      bookmark.index -= 1uz;
     }
   }
 
-  void HTMLFormattingElementList::SwapTo(const ContainerNode &oldElement, HTMLStackItem newItem,
+  void HTMLFormattingElementList::SwapTo(const ContainerNode &oldElement, HTMLStackItem &&newItem,
                                          const Bookmark &bookmark) noexcept
   {
     auto it =
@@ -177,7 +181,9 @@ namespace Krys::HTML
       _formattingElements.erase(it);
 
       if (removeIndex < insertIndex)
+      {
         --insertIndex;
+      }
     }
 
     auto insertIt = std::next(_formattingElements.begin(), static_cast<ptrdiff_t>(insertIndex));
