@@ -36,6 +36,7 @@ namespace Krys::HTML
     caption,
     center,
     cite,
+    circle,
     code,
     col,
     colgroup,
@@ -62,6 +63,7 @@ namespace Krys::HTML
     form,
     frame,
     frameset,
+    g,
     h1,
     h2,
     h3,
@@ -161,6 +163,7 @@ namespace Krys::HTML
     var,
     video,
     wbr,
+    x,
     xmp,
     noscript,
     color_profile,
@@ -174,7 +177,7 @@ namespace Krys::HTML
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::TagName, 162u);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::TagName, 164u);
 
 namespace Krys::HTML
 {
@@ -196,6 +199,10 @@ namespace Krys::HTML
           {
             return TagName::b;
           }
+          case u8'g':
+          {
+            return TagName::g;
+          }
           case u8'i':
           {
             return TagName::i;
@@ -215,6 +222,10 @@ namespace Krys::HTML
           case u8'u':
           {
             return TagName::u;
+          }
+          case u8'x':
+          {
+            return TagName::x;
           }
         }
         break;
@@ -629,6 +640,10 @@ namespace Krys::HTML
         {
           return TagName::center;
         }
+        if (name == u8"circle")
+        {
+          return TagName::circle;
+        }
         if (name == u8"dialog")
         {
           return TagName::dialog;
@@ -860,7 +875,7 @@ namespace Krys::HTML
         {
           return TagName::missing_glyph;
         }
-        if (name == u8"foreignobject")
+        if (name == u8"foreignobject" || name == u8"foreignObject")
         {
           return TagName::foreignObject;
         }
