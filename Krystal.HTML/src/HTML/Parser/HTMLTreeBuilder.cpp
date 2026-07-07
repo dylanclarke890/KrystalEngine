@@ -905,17 +905,19 @@ namespace Krys::HTML
           case TagName::html:
           case TagName::br:
           {
-            break;
+            break; // treat as "anything else"
           }
           case TagName::template_:
           {
             // TODO(HTMLTREEBUILDER, HTML): handle template end tag in the head insertion mode.
             return;
           }
+          default:
+          {
+            ParseError(token);
+            return; // ignore the token
+          }
         }
-
-        ParseError(token);
-        return; // ignore the token
       }
     }
 
@@ -974,6 +976,8 @@ namespace Krys::HTML
             return; // ignore the token
           }
         }
+
+        break;
       }
       case HTMLTokenType::EndTag:
       {

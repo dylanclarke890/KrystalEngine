@@ -174,6 +174,11 @@ namespace Krys::HTML
     while (true)
     {
       auto &currentNode = Bottom();
+      if (currentNode.Namespace() != Namespace::HTML)
+      {
+        return;
+      }
+
       switch (currentNode.TagName())
       {
         case TagName::dd:
@@ -195,11 +200,9 @@ namespace Krys::HTML
           Pop();
           break;
         }
-        default:
-        {
-          return;
-        }
       }
+
+      return;
     }
   }
 
@@ -208,6 +211,11 @@ namespace Krys::HTML
     while (true)
     {
       auto &currentNode = Bottom();
+      if (currentNode.Namespace() != Namespace::HTML)
+      {
+        return;
+      }
+
       switch (currentNode.TagName())
       {
         case TagName::caption:
@@ -232,11 +240,9 @@ namespace Krys::HTML
           Pop();
           break;
         }
-        default:
-        {
-          return;
-        }
       }
+
+      return;
     }
   }
 
