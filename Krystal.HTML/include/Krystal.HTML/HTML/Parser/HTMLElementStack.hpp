@@ -176,9 +176,9 @@ namespace Krys::HTML
       return it != _items.end() ? &*it : nullptr;
     }
 
-    /// @brief Inserts newItem immediately above (toward the current element) the reference entry.
-    /// @see https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm
-    void InsertAbove(HTMLStackItem newItem, const ContainerNode &reference) noexcept
+    /// @brief Inserts the new element into the stack of open elements immediately below the position of
+    /// reference.
+    void InsertBelow(HTMLStackItem &&newItem, const ContainerNode &reference) noexcept
     {
       auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item.Node() == &reference; });
       assert(it != _items.end());

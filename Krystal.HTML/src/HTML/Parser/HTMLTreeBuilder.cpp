@@ -4288,21 +4288,23 @@ namespace Krys::HTML
       // AAA(4.17): Append that new element to furthestBlock.
       (void)MutationAlgorithms::Append(*newElement, furthestBlockNode);
 
+      auto newTagName = formattingElement->TagName();
+      auto newTagNamespace = formattingElement->Namespace();
+      auto newTagAttributes = ParsedAttributeList(formattingElement->Attributes());
+      auto newFormattingElementItem =
+        HTMLStackItem(newTagName, newTagNamespace, *newElement, newTagAttributes);
+      auto newStackItem =
+        HTMLStackItem(newTagName, newTagNamespace, *newElement, Krys::Move(newTagAttributes));
+
       // AAA(4.18): Remove formattingElement from the list of active formatting elements, and insert the new
       // element into the list of active formatting elements at the position of the aforementioned bookmark.
-      _activeFormattingElements.SwapTo(formattingElementNode,
-                                       HTMLStackItem(formattingElement->TagName(),
-                                                     formattingElement->Namespace(), *newElement,
-                                                     formattingElement->Attributes()),
-                                       bookmark);
+      _activeFormattingElements.RemoveAndUpdateBookmark(formattingElementNode, bookmark);
+      _activeFormattingElements.Insert(Krys::Move(newFormattingElementItem), bookmark);
 
       /// AAA(4.19): Remove formattingElement from the stack of open elements, and insert the new element into
       /// the stack of open elements immediately below the position of furthestBlock in that stack.
       _openElementStack.Remove(formattingElementNode);
-      _openElementStack.InsertAbove(HTMLStackItem(formattingElement->TagName(),
-                                                  formattingElement->Namespace(), *newElement,
-                                                  formattingElement->Attributes()),
-                                    furthestBlockNode);
+      _openElementStack.InsertBelow(Krys::Move(newStackItem), furthestBlockNode);
     }
   }
 

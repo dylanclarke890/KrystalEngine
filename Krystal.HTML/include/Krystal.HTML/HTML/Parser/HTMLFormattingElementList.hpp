@@ -84,15 +84,14 @@ namespace Krys::HTML
     /// @brief Moves the bookmark to the position immediately after the given entry.
     void MoveBookmarkAfter(Bookmark &bookmark, const FormattingListEntry &entry) noexcept;
 
-    /// @brief Removes the entry for node and adjusts bookmark if it falls at or after the removed entry.
-    void RemoveAndUpdateBookmark(const ContainerNode &node, Bookmark &bookmark) noexcept;
-
-    /// @brief Removes oldElement from the list and inserts newItem at the bookmark position.
-    /// @see https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm step 18
-    void SwapTo(const ContainerNode &oldElement, HTMLStackItem &&newItem, const Bookmark &bookmark) noexcept;
+    /// @brief Inserts newItem at the bookmark position.
+    void Insert(HTMLStackItem &&newItem, const Bookmark &bookmark) noexcept;
 
     /// @brief Removes the formatting list entry whose node matches the given node, if present.
     void Remove(const ContainerNode &node) noexcept;
+
+    /// @brief Removes the entry for node and adjusts bookmark if it falls at or after the removed entry.
+    void RemoveAndUpdateBookmark(const ContainerNode &node, Bookmark &bookmark) noexcept;
 
     bool Contains(const ContainerNode &node) const noexcept
     {

@@ -103,9 +103,31 @@ namespace Krys::HTML
   {
     auto it = std::ranges::find_if(_formattingElements, [&](const FormattingListEntry &entry)
                                    { return entry.IsFormattingElement() && &entry.Item().Node() == &node; });
+    
     if (it != _formattingElements.end())
     {
       _formattingElements.erase(it);
+    }
+  }
+
+  void HTMLFormattingElementList::RemoveAndUpdateBookmark(const ContainerNode &node,
+                                                          Bookmark &bookmark) noexcept
+  {
+    auto it = std::ranges::find_if(_formattingElements, [&](const FormattingListEntry &entry)
+                                   { return entry.IsFormattingElement() && &entry.Item().Node() == &node; });
+
+    if (it == _formattingElements.end())
+    {
+      return;
+    }
+
+    auto removeIndex = static_cast<size_t>(std::distance(_formattingElements.begin(), it));
+
+    _formattingElements.erase(it);
+
+    if (removeIndex < bookmark.index)
+    {
+      bookmark.index -= 1uz;
     }
   }
 
@@ -145,47 +167,9 @@ namespace Krys::HTML
     }
   }
 
-  void HTMLFormattingElementList::RemoveAndUpdateBookmark(const ContainerNode &node,
-                                                          Bookmark &bookmark) noexcept
+  void HTMLFormattingElementList::Insert(HTMLStackItem &&newItem, const Bookmark &bookmark) noexcept
   {
-    auto it = std::ranges::find_if(_formattingElements, [&](const FormattingListEntry &entry)
-                                   { return entry.IsFormattingElement() && &entry.Item().Node() == &node; });
-
-    if (it == _formattingElements.end())
-    {
-      return;
-    }
-
-    auto removeIndex = static_cast<size_t>(std::distance(_formattingElements.begin(), it));
-
-    _formattingElements.erase(it);
-
-    if (removeIndex < bookmark.index)
-    {
-      bookmark.index -= 1uz;
-    }
-  }
-
-  void HTMLFormattingElementList::SwapTo(const ContainerNode &oldElement, HTMLStackItem &&newItem,
-                                         const Bookmark &bookmark) noexcept
-  {
-    auto it =
-      std::ranges::find_if(_formattingElements, [&](const FormattingListEntry &entry)
-                           { return entry.IsFormattingElement() && &entry.Item().Node() == &oldElement; });
-
     size_t insertIndex = bookmark.index;
-
-    if (it != _formattingElements.end())
-    {
-      auto removeIndex = static_cast<size_t>(std::distance(_formattingElements.begin(), it));
-      _formattingElements.erase(it);
-
-      if (removeIndex < insertIndex)
-      {
-        --insertIndex;
-      }
-    }
-
     auto insertIt = std::next(_formattingElements.begin(), static_cast<ptrdiff_t>(insertIndex));
     _formattingElements.insert(insertIt, FormattingListEntry(Krys::Move(newItem)));
   }
