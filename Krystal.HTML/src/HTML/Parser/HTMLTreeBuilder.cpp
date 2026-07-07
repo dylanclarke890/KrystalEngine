@@ -1354,7 +1354,7 @@ namespace Krys::HTML
                 break;
               }
 
-              if (IsSpecialElement(node.TagName()) && node.TagName() != TagName::address
+              if (IsSpecialElement(node.TagName(), node.Namespace()) && node.TagName() != TagName::address
                   && node.TagName() != TagName::div && node.TagName() != TagName::p)
               {
                 break;
@@ -1404,7 +1404,7 @@ namespace Krys::HTML
                 break;
               }
 
-              if (IsSpecialElement(node.TagName()) && node.TagName() != TagName::address
+              if (IsSpecialElement(node.TagName(), node.Namespace()) && node.TagName() != TagName::address
                   && node.TagName() != TagName::div && node.TagName() != TagName::p)
               {
                 break;
@@ -3468,7 +3468,7 @@ namespace Krys::HTML
         return;
       }
 
-      if (IsSpecialElement(nodeEntry.TagName()))
+      if (IsSpecialElement(nodeEntry.TagName(), nodeEntry.Namespace()))
       {
         ParseError(token);
         return; // ignore the token
@@ -4250,7 +4250,7 @@ namespace Krys::HTML
     for (size_t i = formattingIndex + 1uz; i < _openElementStack.Size(); ++i)
     {
       auto &item = _openElementStack[i];
-      if (IsSpecialElement(item.TagName()))
+      if (IsSpecialElement(item.TagName(), item.Namespace()))
       {
         return &item;
       }

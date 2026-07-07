@@ -18,6 +18,173 @@
 
 namespace Krys::HTML
 {
+  /// @see https://html.spec.whatwg.org/multipage/parsing.html#special
+  KRYS_NODISCARD constexpr bool IsSpecialElement(TagName tagName, Namespace tagNamespace) noexcept
+  {
+    switch (tagNamespace)
+    {
+      case Namespace::HTML:
+      {
+        switch (tagName)
+        {
+          case TagName::address:
+          case TagName::applet:
+          case TagName::area:
+          case TagName::article:
+          case TagName::aside:
+          case TagName::base:
+          case TagName::basefont:
+          case TagName::bgsound:
+          case TagName::blockquote:
+          case TagName::body:
+          case TagName::br:
+          case TagName::button:
+          case TagName::caption:
+          case TagName::center:
+          case TagName::col:
+          case TagName::colgroup:
+          case TagName::dd:
+          case TagName::details:
+          case TagName::dir:
+          case TagName::div:
+          case TagName::dl:
+          case TagName::dt:
+          case TagName::embed:
+          case TagName::fieldset:
+          case TagName::figcaption:
+          case TagName::figure:
+          case TagName::footer:
+          case TagName::form:
+          case TagName::frame:
+          case TagName::frameset:
+          case TagName::h1:
+          case TagName::h2:
+          case TagName::h3:
+          case TagName::h4:
+          case TagName::h5:
+          case TagName::h6:
+          case TagName::head:
+          case TagName::header:
+          case TagName::hgroup:
+          case TagName::hr:
+          case TagName::html:
+          case TagName::iframe:
+          case TagName::img:
+          case TagName::input:
+          case TagName::keygen:
+          case TagName::li:
+          case TagName::link:
+          case TagName::listing:
+          case TagName::main:
+          case TagName::marquee:
+          case TagName::menu:
+          case TagName::meta:
+          case TagName::nav:
+          case TagName::noembed:
+          case TagName::noframes:
+          case TagName::noscript:
+          case TagName::object:
+          case TagName::ol:
+          case TagName::p:
+          case TagName::param:
+          case TagName::plaintext:
+          case TagName::pre:
+          case TagName::script:
+          case TagName::search:
+          case TagName::section:
+          case TagName::select:
+          case TagName::source:
+          case TagName::style:
+          case TagName::summary:
+          case TagName::table:
+          case TagName::tbody:
+          case TagName::td:
+          case TagName::template_:
+          case TagName::textarea:
+          case TagName::tfoot:
+          case TagName::th:
+          case TagName::thead:
+          case TagName::title:
+          case TagName::tr:
+          case TagName::track:
+          case TagName::ul:
+          case TagName::wbr:
+          case TagName::xmp:
+          {
+            return true;
+          }
+        }
+
+        return false;
+      }
+      case Namespace::MathML:
+      {
+        switch (tagName)
+        {
+          case TagName::mi:
+          case TagName::mo:
+          case TagName::mn:
+          case TagName::ms:
+          case TagName::mtext:
+          case TagName::annotation_xml:
+          {
+            return true;
+          }
+        }
+
+        return false;
+      }
+      case Namespace::SVG:
+      {
+        switch (tagName)
+        {
+          case TagName::foreignObject:
+          case TagName::desc:
+          case TagName::title:
+          {
+            return true;
+          }
+        }
+
+        return false;
+      }
+    }
+
+    return false;
+  }
+
+  /// @see https://html.spec.whatwg.org/multipage/parsing.html#formatting
+  KRYS_NODISCARD constexpr bool IsFormattingElement(TagName tagName, Namespace tagNamespace) noexcept
+  {
+    if (tagNamespace != Namespace::HTML)
+    {
+      return false;
+    }
+
+    switch (tagName)
+    {
+      case TagName::a:
+      case TagName::b:
+      case TagName::big:
+      case TagName::code:
+      case TagName::em:
+      case TagName::font:
+      case TagName::i:
+      case TagName::nobr:
+      case TagName::s:
+      case TagName::small:
+      case TagName::strike:
+      case TagName::strong:
+      case TagName::tt:
+      case TagName::u:
+      {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
   struct AdjustedInsertionLocation
   {
     /// @brief The parent into which the new node should be inserted.
@@ -244,139 +411,6 @@ namespace Krys::HTML
     bool IsQuirksModeDOCTYPE(const HTMLTokenAtom &token) const noexcept;
 
     bool IsLimitedQuirksModeDOCTYPE(const HTMLTokenAtom &token) const noexcept;
-
-#pragma endregion
-
-#pragma region Element Category Algorithms
-
-    /// @see https://html.spec.whatwg.org/multipage/parsing.html#special
-    KRYS_NODISCARD static bool IsSpecialElement(TagName name) noexcept
-    {
-      // TODO(HTMLTREEBUILDER, HTML): These are also special elements:
-      // MathML mi, MathML mo, MathML mn, MathML ms, MathML mtext, and MathML annotation-xml; and SVG
-      // foreignObject, SVG desc, and SVG title.
-
-      switch (name)
-      {
-        case TagName::address:
-        case TagName::applet:
-        case TagName::area:
-        case TagName::article:
-        case TagName::aside:
-        case TagName::base:
-        case TagName::basefont:
-        case TagName::bgsound:
-        case TagName::blockquote:
-        case TagName::body:
-        case TagName::br:
-        case TagName::button:
-        case TagName::caption:
-        case TagName::center:
-        case TagName::col:
-        case TagName::colgroup:
-        case TagName::dd:
-        case TagName::details:
-        case TagName::dir:
-        case TagName::div:
-        case TagName::dl:
-        case TagName::dt:
-        case TagName::embed:
-        case TagName::fieldset:
-        case TagName::figcaption:
-        case TagName::figure:
-        case TagName::footer:
-        case TagName::form:
-        case TagName::frame:
-        case TagName::frameset:
-        case TagName::h1:
-        case TagName::h2:
-        case TagName::h3:
-        case TagName::h4:
-        case TagName::h5:
-        case TagName::h6:
-        case TagName::head:
-        case TagName::header:
-        case TagName::hgroup:
-        case TagName::hr:
-        case TagName::html:
-        case TagName::iframe:
-        case TagName::img:
-        case TagName::input:
-        case TagName::keygen:
-        case TagName::li:
-        case TagName::link:
-        case TagName::listing:
-        case TagName::main:
-        case TagName::marquee:
-        case TagName::menu:
-        case TagName::meta:
-        case TagName::nav:
-        case TagName::noembed:
-        case TagName::noframes:
-        case TagName::noscript:
-        case TagName::object:
-        case TagName::ol:
-        case TagName::p:
-        case TagName::param:
-        case TagName::plaintext:
-        case TagName::pre:
-        case TagName::script:
-        case TagName::search:
-        case TagName::section:
-        case TagName::select:
-        case TagName::source:
-        case TagName::style:
-        case TagName::summary:
-        case TagName::table:
-        case TagName::tbody:
-        case TagName::td:
-        case TagName::template_:
-        case TagName::textarea:
-        case TagName::tfoot:
-        case TagName::th:
-        case TagName::thead:
-        case TagName::title:
-        case TagName::tr:
-        case TagName::track:
-        case TagName::ul:
-        case TagName::wbr:
-        case TagName::xmp:
-        {
-          return true;
-        }
-      }
-
-      return false;
-    }
-
-    /// @see https://html.spec.whatwg.org/multipage/parsing.html#formatting
-    KRYS_NODISCARD static bool IsFormattingElement(TagName name) noexcept
-    {
-      switch (name)
-      {
-        case TagName::a:
-        case TagName::b:
-        case TagName::big:
-        case TagName::code:
-        case TagName::em:
-        case TagName::font:
-        case TagName::i:
-        case TagName::nobr:
-        case TagName::s:
-        case TagName::small:
-        case TagName::strike:
-        case TagName::strong:
-        case TagName::tt:
-        case TagName::u:
-        {
-          return true;
-        }
-        default:
-        {
-          return false;
-        }
-      }
-    }
 
 #pragma endregion
 
