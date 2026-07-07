@@ -370,7 +370,9 @@ namespace Krys::HTML
         }
 
         auto *currentNode = DynamicDowncast<Element>(CurrentNode());
-        if (currentNode == nullptr || currentNode->LocalName() != token.Name())
+        if (currentNode == nullptr
+            || StringAlgorithms::ASCIICaseInsensitiveMatch(currentNode->LocalName().View(),
+                                                           token.Name().View()))
         {
           ParseError(token);
         }
@@ -386,7 +388,8 @@ namespace Krys::HTML
 
           if (node.IsElement())
           {
-            if (node.AsElement().LocalName() == token.Name())
+            if (StringAlgorithms::ASCIICaseInsensitiveMatch(node.AsElement().LocalName().View(),
+                                                            token.Name().View()))
             {
               _openElementStack.PopUntilPopped(node.Node());
               return;
