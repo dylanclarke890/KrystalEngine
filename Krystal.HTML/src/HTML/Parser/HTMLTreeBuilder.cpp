@@ -661,7 +661,7 @@ namespace Krys::HTML
       {
         if (token.Name() == TagNames::HTML::html)
         {
-          auto html = CreateElement(token, Namespaces::HTML, _document);
+          auto html = CreateElement(token.Name(), Namespaces::HTML, token.Attributes(), _document);
           _document.AppendChild(*html);
           _openElementStack.Push({TagName::html, Namespace::HTML, *html, Krys::Move(token.Attributes())});
 
@@ -847,7 +847,7 @@ namespace Krys::HTML
           {
             auto [parent, beforeSibling] = AppropriateInsertionLocation();
 
-            auto element = CreateElement(token, Namespaces::HTML, *parent);
+            auto element = CreateElement(token.Name(), Namespaces::HTML, token.Attributes(), *parent);
             auto &script = Downcast<HTMLScriptElement>(*element);
 
             if (_scriptingMode != ParserScriptingMode::Fragment)
@@ -1452,7 +1452,7 @@ namespace Krys::HTML
             // If an a element is in the formatting list between the end and the last marker, this is a
             // parse error; run the adoption agency algorithm, then remove that element from the list and
             // stack of open elements if the adoption agency algorithm didn't already remove it.
-            if (auto *existing = _activeFormattingElements.FindFormattingElementFromLastMarker(TagName::a))
+            if (auto *existing = _activeFormattingElements.FindFromLastMarker(TagName::a))
             {
               ParseError(token);
 
@@ -1461,7 +1461,7 @@ namespace Krys::HTML
 
               RunAdoptionAgency(token);
 
-              _activeFormattingElements.RemoveFormattingElement(existingNode);
+              _activeFormattingElements.Remove(existingNode);
               _openElementStack.Remove(existingNode);
             }
 
@@ -3560,7 +3560,7 @@ namespace Krys::HTML
                                                      bool onlyAddToElementStack) noexcept
   {
     auto [parent, beforeSibling] = AppropriateInsertionLocation();
-    auto element = CreateElement(token, namespaceURI, *parent);
+    auto element = CreateElement(token.Name(), namespaceURI, token.Attributes(), *parent);
 
     if (!onlyAddToElementStack)
     {
@@ -3684,16 +3684,17 @@ namespace Krys::HTML
     _insertionMode = InsertionMode::Text;
   }
 
-  Ref<Element> HTMLTreeBuilder::CreateElement(HTMLTokenAtom &token, DOMStringAtom namespaceURI,
+  Ref<Element> HTMLTreeBuilder::CreateElement(DOMStringAtom name, DOMStringAtom namespaceURI,
+                                              const ParsedAttributeList &attributes,
                                               ContainerNode &intendedParent) noexcept
   {
     auto &document = intendedParent.NodeDocument();
-    auto localName = token.Name();
     auto is = [&]() -> DOMStringAtom
     {
-      auto it = std::ranges::find_if(token.Attributes(),
+      auto it = std::ranges::find_if(attributes,
                                      [](const ParsedAttribute &attr) { return attr.NameView() == u8"is"; });
-      return it != std::ranges::end(token.Attributes()) ? it->NameView() : DOMStringAtom::Null();
+
+      return it != std::ranges::end(attributes) ? it->NameView() : DOMStringAtom::Null();
     }();
 
     // TODO(HTMLTREEBUILDER, CUSTOMELEMENTS, HTML): Let registry be the result of looking up a custom element
@@ -3709,9 +3710,9 @@ namespace Krys::HTML
     RefPtr<CustomElementRegistry> registry = nullptr;
     bool willExecuteScript = false;
 
-    auto element = ElementFactory::Create(document, {namespaceURI, DOMStringAtom::Null(), localName}, is,
+    auto element = ElementFactory::Create(document, {namespaceURI, DOMStringAtom::Null(), name}, is,
                                           willExecuteScript, registry);
-    for (auto &attr : token.Attributes())
+    for (auto &attr : attributes)
     {
       ElementAlgorithms::SetAttributeValue(*element, attr.NameView(), DOMString(attr.ValueView()));
     }
@@ -3723,16 +3724,16 @@ namespace Krys::HTML
     //     Invoke custom element reactions in queue.
     //     Decrement document's throw-on-dynamic-markup-insertion counter.
     //
-    // TODO(HTMLTREEBUILDER, HTML): HTMLScriptElement handling
+    // TODO(HTMLTREEBUILDER, HTML):create element parse error
     // If element has an xmlns attribute in the XMLNS namespace whose value is not exactly the same as the
     // element's namespace, that is a parse error. Similarly, if element has an xmlns:xlink attribute in the
     // XMLNS namespace whose value is not the XLink Namespace, that is a parse error.
     //
-    // TODO(HTMLTREEBUILDER, HTML): HTMLScriptElement handling
+    // TODO(HTMLTREEBUILDER, HTML): create element resettable element
     // If element is a resettable element and not a form-associated custom element, then invoke its reset
     // algorithm. (This initializes the element's value and checkedness based on the element's attributes.)
     //
-    // TODO(HTMLTREEBUILDER, HTML): HTMLScriptElement handling
+    // TODO(HTMLTREEBUILDER, HTML): create element form-associated element
     // If element is a form-associated element and not a form-associated custom element, the form element
     // pointer is not null, there is no template element on the stack of open elements, element is either not
     // listed or doesn't have a form attribute, and the intendedParent is in the same tree as the element
@@ -3742,22 +3743,15 @@ namespace Krys::HTML
     return element;
   }
 
-  Ref<Element> HTMLTreeBuilder::CreateElement(const HTMLStackItem &item) noexcept
+  Ref<Element> HTMLTreeBuilder::CreateElement(const HTMLStackItem &item,
+                                              RawPtr<ContainerNode> intendedParent) noexcept
   {
     assert(item.IsElement());
 
-    auto &sourceElement = Downcast<Element>(item.Node());
-    auto element = ElementFactory::Create(
-      sourceElement.NodeDocument(),
-      {sourceElement.NamespaceURI(), sourceElement.Prefix(), sourceElement.LocalName()}, sourceElement._is);
-
-    for (auto &attr : item.Attributes())
-    {
-      ElementAlgorithms::SetAttributeValue(*element, attr.NameView(), DOMString(attr.ValueView()));
+    auto &node = item.AsElement();
+    auto &parent = intendedParent != nullptr ? *intendedParent : *node.ParentNode();
+    return CreateElement(node.LocalName(), node.NamespaceURI(), item.Attributes(), parent);
     }
-
-    return element;
-  }
 
   void HTMLTreeBuilder::ReconstructActiveFormattingElements() noexcept
   {
