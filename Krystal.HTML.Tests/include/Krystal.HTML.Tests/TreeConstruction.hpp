@@ -161,7 +161,7 @@ namespace Krys::HTML::Tests
       None,
       Data,
       Errors,
-      Document
+      ExpectedOutput
     };
 
     List<TreeConstructionTest> tests;
@@ -169,7 +169,7 @@ namespace Krys::HTML::Tests
     string expected;
     Maybe<bool> scriptingEnabled;
 
-    auto finalizeTest = [&]()
+    auto FinishParsingTest = [&]()
     {
       auto ToUTF8 = [](const string &s) -> DOMString
       {
@@ -210,7 +210,7 @@ namespace Krys::HTML::Tests
       {
         if (!input.empty() && !expected.empty())
         {
-          finalizeTest();
+          FinishParsingTest();
         }
         section = Section::Data;
         continue;
@@ -224,8 +224,15 @@ namespace Krys::HTML::Tests
 
       if (line == "#document")
       {
-        section = Section::Document;
+        section = Section::ExpectedOutput;
         expected = "#document\n";
+        continue;
+      }
+
+      if (line == "#document-fragment")
+      {
+        section = Section::ExpectedOutput;
+        expected = "#document-fragment\n";
         continue;
       }
 
@@ -254,7 +261,7 @@ namespace Krys::HTML::Tests
         continue;
       }
 
-      if (section == Section::Document)
+      if (section == Section::ExpectedOutput)
       {
         expected += line;
         expected += '\n';
@@ -266,9 +273,9 @@ namespace Krys::HTML::Tests
       }
     }
 
-    if (section == Section::Document)
+    if (section == Section::ExpectedOutput)
     {
-      finalizeTest();
+      FinishParsingTest();
     }
 
     return tests;

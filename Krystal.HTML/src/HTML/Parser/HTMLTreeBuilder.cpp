@@ -352,6 +352,8 @@ namespace Krys::HTML
             return;
           }
         }
+
+        break;
       }
       case HTMLTokenType::EndTag:
       {
@@ -367,8 +369,8 @@ namespace Krys::HTML
           return;
         }
 
-        auto tokenTagName = ParseTagName(token.Name().View());
-        if (_openElementStack.Bottom().TagName() != tokenTagName)
+        auto *currentNode = DynamicDowncast<Element>(CurrentNode());
+        if (currentNode == nullptr || currentNode->LocalName() != token.Name())
         {
           ParseError(token);
         }
@@ -382,15 +384,18 @@ namespace Krys::HTML
             return;
           }
 
-          if (node.TagName() == tokenTagName)
+          if (node.IsElement())
           {
-            _openElementStack.PopUntilPopped(node.Node());
-            return;
-          }
+            if (node.AsElement().LocalName() == token.Name())
+            {
+              _openElementStack.PopUntilPopped(node.Node());
+              return;
+            }
 
-          if (node.IsElement() && node.AsElement().NamespaceURI() != Namespaces::HTML)
-          {
-            continue;
+            if (node.AsElement().NamespaceURI() != Namespaces::HTML)
+            {
+              continue;
+            }
           }
 
           ProcessAccordingToRulesForHTMLContent(Krys::Move(token));
