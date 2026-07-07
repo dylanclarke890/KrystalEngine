@@ -3751,7 +3751,7 @@ namespace Krys::HTML
     auto &node = item.AsElement();
     auto &parent = intendedParent != nullptr ? *intendedParent : *node.ParentNode();
     return CreateElement(node.LocalName(), node.NamespaceURI(), item.Attributes(), parent);
-    }
+  }
 
   void HTMLTreeBuilder::ReconstructActiveFormattingElements() noexcept
   {
@@ -4031,215 +4031,226 @@ namespace Krys::HTML
 
   void HTMLTreeBuilder::RunAdoptionAgency(HTMLTokenAtom &token) noexcept
   {
+    // AAA(1): Let subject be token's tag name.
     auto subject = ParseTagName(token.Name().View());
 
-    auto &bottom = _openElementStack.Bottom();
-    if (Is<HTMLElement>(bottom.Node()) && bottom.TagName() == subject
-        && !_activeFormattingElements.ContainsFormattingElement(bottom.Node()))
+    // AAA(2): If the current node is an HTML element whose tag name is subject, and the current node is not
+    // in the list of active formatting elements, then pop the current node off the stack of open elements and
+    // return.
+    auto &currentNode = _openElementStack.Bottom();
+    if (currentNode.Namespace() == Namespace::HTML && currentNode.TagName() == subject
+        && !_activeFormattingElements.Contains(currentNode.Node()))
     {
       _openElementStack.Pop();
       return;
     }
 
+    // AAA(3): Let outerLoopCounter be 0.
     size_t outerLoopCounter = 0uz;
+
+    // AAA(4): While true:
     while (true)
     {
+      // AAA(4.1): If outerLoopCounter is greater than or equal to 8, then return.
       if (outerLoopCounter >= 8uz)
       {
         return;
       }
 
+      // AAA(4.2): Increment outerLoopCounter by 1.
       outerLoopCounter++;
 
-      auto *formattingElement = _activeFormattingElements.FindFormattingElementFromLastMarker(subject);
+      // AAA(4.3): Let formattingElement be the last element in the list of active formatting elements that:
+      //     - is between the end of the list and the last marker in the list, if any, or the start of the
+      //       list otherwise
+      //     - has the tag name subject.
+      // If there is no such element, then act as described in the "any other end tag" entry above and return.
+      RawPtr<HTMLStackItem> formattingElement = _activeFormattingElements.FindFromLastMarker(subject);
       if (formattingElement == nullptr)
       {
         InBodyGenericEndTag(token, subject);
         return;
       }
 
-      if (!_openElementStack.Contains(formattingElement->AsElement()))
+      // NOTE: This is just for convenience; the stack item will only be destroyed right before the function
+      // returns so the reference will remain valid regardless.
+      auto &formattingElementNode = formattingElement->AsElement();
+
+      // AAA(4.4): If formattingElement is not in the stack of open elements, then this is a parse error;
+      // remove the element from the list, and return.
+      if (!_openElementStack.Contains(formattingElementNode))
       {
         ParseError(token);
-        _activeFormattingElements.RemoveFormattingElement(formattingElement->Node());
+        _activeFormattingElements.Remove(formattingElementNode);
         return;
       }
 
-      if (!_openElementStack.HasElementInScope(formattingElement->AsElement()))
+      // AAA(4.5): If formattingElement is in the stack of open elements, but the element is not in scope,
+      // then this is a parse error; return.
+      if (!_openElementStack.HasElementInScope(formattingElementNode))
       {
         ParseError(token);
         return;
       }
 
-      if (&_openElementStack.Bottom() != formattingElement)
+      // AAA(4.6): If formattingElement is not the current node, this is a parse error. (But do not return.)
+      if (&_openElementStack.Bottom().Node() != &formattingElementNode)
       {
         ParseError(token);
-        // do not return; continue with the algorithm.
       }
 
-      auto *furthestBlock = FurthestSpecialElementBlock(*formattingElement);
+      // AAA(4.7): Let furthestBlock be the topmost node in the stack of open elements that is lower in the
+      // stack than formattingElement, and is an element in the special category. There might not be one.
+      RawPtr<HTMLStackItem> furthestBlock = FurthestSpecialElementBlock(formattingElementNode);
+
+      // AAA(4.8) - If there is no furthestBlock, then the UA must first pop all the nodes from the bottom of
+      // the stack of open elements, from the current node up to and including formattingElement, then remove
+      // formattingElement from the list of active formatting elements, and finally return.
       if (furthestBlock == nullptr)
       {
-        _openElementStack.PopUntilPopped(formattingElement->Node());
-        _activeFormattingElements.RemoveFormattingElement(formattingElement->Node());
+        _openElementStack.PopUntilPopped(formattingElementNode);
+        _activeFormattingElements.Remove(formattingElementNode);
         return;
       }
+
+      // NOTE: Save a reference to the node now in case the stack item gets destroyed. The node will still be
+      // alive.
       auto &furthestBlockNode = furthestBlock->Node();
 
-      auto *commonAncestor = _openElementStack.EntryBefore(formattingElement->Node());
-      assert(commonAncestor != nullptr);
+      // AAA(4.9): Let commonAncestor be the element immediately above formattingElement in the stack of open
+      // elements.
+      RawPtr<HTMLStackItem> commonAncestor = _openElementStack.EntryBefore(formattingElementNode);
 
-      // ----------------------------------------------------------------------------------------
-      // TODO(HTMLTREEBUILDER, HTML): Check the following logic for the AdoptionAgency algorithm.
+      // AAA(4.10): Let a bookmark note the position of formattingElement in the list of active formatting
+      // elements relative to the elements on either side of it in the list.
+      auto bookmark = _activeFormattingElements.BookmarkFor(formattingElementNode);
 
-      // Step 4.10: Bookmark positioned at the formatting element in the active formatting list.
-      auto bookmark = _activeFormattingElements.BookmarkFor(formattingElement->Node());
+      // AAA(4.11): Let node and lastNode be furthestBlock.
+      RawPtr<ContainerNode> node = &furthestBlockNode;
+      RawPtr<ContainerNode> lastNode = node;
 
-      // Step 4.11: node and lastNode both start at furthestBlock. Use stable DOM pointers to survive
-      // vector reallocation caused by Remove() inside the inner loop.
-      ContainerNode *nodeDOMNode = &furthestBlock->Node();
-      ContainerNode *lastDOMNode = nodeDOMNode;
-
-      auto entryBefore = [&](ContainerNode &node) -> ContainerNode *
-      {
-        auto *entry = _openElementStack.EntryBefore(node);
-        return entry ? &entry->Node() : nullptr;
-      };
-
-      ContainerNode *nextDOMNode = entryBefore(*nodeDOMNode);
-
-      // Step 4.13: Inner loop – walk from furthestBlock toward formattingElement.
-      // The inner loop counter is used only to limit formatting-list membership removal (spec limit: 3).
+      // AAA(4.12): Let innerLoopCounter be 0.
       size_t innerLoopCounter = 0uz;
+
+      auto ElementAbove = [&](ContainerNode &node) -> RawPtr<ContainerNode>
+      {
+        RawPtr<HTMLStackItem> entry = _openElementStack.EntryBefore(node);
+        return entry != nullptr ? &entry->Node() : nullptr;
+      };
+      RawPtr<ContainerNode> immediatelyAbove = ElementAbove(*node);
+
+      // AAA(4.13): While true:
       while (true)
       {
+        // AAA(4.13.1): Increment innerLoopCounter by 1.
         ++innerLoopCounter;
 
-        // Step 4.13.2: Advance node; save the next pointer before any removal.
-        nodeDOMNode = nextDOMNode;
-        assert(nodeDOMNode != nullptr);
-        nextDOMNode = entryBefore(*nodeDOMNode);
+        // AAA(4.13.2): Let node be the element immediately above node in the stack of open elements, or if
+        // node is no longer in the stack of open elements (e.g. because it got removed by this algorithm),
+        // the element that was immediately above node in the stack of open elements before node was removed.
+        node = immediatelyAbove;
+        assert(node != nullptr);
 
-        // Step 4.13.3: Stop when we reach the formatting element.
-        if (nodeDOMNode == &formattingElement->Node())
-          break;
+        // NOTE: Fetch the next node now in case the stack item gets destroyed.
+        immediatelyAbove = ElementAbove(*node);
 
-        // Step 4.13.4: If we have gone more than 3 steps and node is in the formatting list, remove it.
-        bool nodeInFormattingList = _activeFormattingElements.ContainsFormattingElement(*nodeDOMNode);
-        if (innerLoopCounter > 3uz && nodeInFormattingList)
+        // AAA(4.13.3): If node is formattingElement, then break.
+        if (node == &formattingElementNode)
         {
-          _activeFormattingElements.RemoveAndUpdateBookmark(*nodeDOMNode, bookmark);
-          nodeInFormattingList = false;
+          break;
         }
 
-        // Step 4.13.5: If node is not in the active formatting list, remove it from the open elements
-        // stack and skip to the next iteration.
-        auto *formattingEntry = _activeFormattingElements.Find(*nodeDOMNode);
-        if (formattingEntry == nullptr)
+        // AAA(4.13.4): If innerLoopCounter is greater than 3 and node is in the list of active formatting
+        // elements, then remove node from the list of active formatting elements.
+        if (innerLoopCounter > 3uz && _activeFormattingElements.Contains(*node))
         {
-          _openElementStack.Remove(*nodeDOMNode);
+          _activeFormattingElements.RemoveAndUpdateBookmark(*node, bookmark);
+        }
+
+        // AAA(4.13.5): If node is not in the list of active formatting elements, then remove node from the
+        // stack of open elements and continue.
+        // NOTE: We retrieve the entry for node here in case the previous step removes it.
+        RawPtr<FormattingListEntry> nodeFormattingEntry = _activeFormattingElements.Find(*node);
+        if (nodeFormattingEntry == nullptr)
+        {
+          _openElementStack.Remove(*node);
           continue;
         }
 
-        // Step 4.13.6: Create a new element from the saved token data.
-        auto *stackEntry = _openElementStack.Find(*nodeDOMNode);
-        assert(stackEntry != nullptr);
+        // AAA(4.13.6): Create an element for the token for which the element node was created, in the HTML
+        // namespace, with commonAncestor as the intended parent; replace the entry for node in the list of
+        // active formatting elements with an entry for the new element, replace the entry for node in the
+        // stack of open elements with an entry for the new element, and let node be the new element.
+        auto newElement = CreateElement(nodeFormattingEntry->Item(), &commonAncestor->Node());
+        nodeFormattingEntry->Item().UpdateElement(*newElement);
+        _openElementStack.Find(*node)->UpdateElement(*newElement);
+        node = newElement.get();
 
-        auto newElement = CreateElement(*stackEntry);
-
-        // Replace the entry in the formatting list with one referencing the new element.
-        formattingEntry->ReplaceItem(HTMLStackItem(stackEntry->TagName(), stackEntry->Namespace(),
-                                                   *newElement, stackEntry->Attributes()));
-
-        // Update the open elements stack entry to reference the new element.
-        stackEntry->UpdateElement(*newElement);
-
-        // nodeDOMNode now refers to the new element.
-        nodeDOMNode = &stackEntry->Node();
-
-        // Step 4.13.7: If lastNode is furthestBlock, move the bookmark to after this entry.
-        if (lastDOMNode == &furthestBlockNode)
+        // AAA(4.13.7): If lastNode is furthestBlock, then move the aforementioned bookmark to be immediately
+        // after the new node in the list of active formatting elements.
+        if (lastNode == &furthestBlockNode)
         {
-          _activeFormattingElements.MoveBookmarkAfter(bookmark, *formattingEntry);
+          _activeFormattingElements.MoveBookmarkAfter(bookmark, *nodeFormattingEntry);
         }
 
-        // Step 4.13.8: Append lastNode as a child of node (reparent in the DOM tree).
-        (void)MutationAlgorithms::Append(*lastDOMNode, *nodeDOMNode);
+        // AAA(4.13.8): Append lastNode to node.
+        (void)MutationAlgorithms::Append(*lastNode, *node);
 
-        // Step 4.13.9: lastNode = node.
-        lastDOMNode = nodeDOMNode;
+        // AAA(4.13.9): Set lastNode to node.
+        lastNode = node;
       }
 
-      // Step 14: Insert lastNode at the appropriate location in the common ancestor.
+      // AAA(4.14): Insert whatever lastNode ended up being in the previous step at the appropriate place for
+      // inserting a node, but using commonAncestor as the override target.
+      auto location = AppropriateInsertionLocation(commonAncestor);
+      (void)MutationAlgorithms::Insert(*lastNode, *location.Parent, location.BeforeSibling);
+
+      // AAA(4.15): Create an element for the token for which formattingElement was created, in the HTML
+      // namespace, with furthestBlock as the intended parent.
+      auto newElement = CreateElement(*formattingElement, &furthestBlockNode);
+
+      // AAA(4.16): Take all of the child nodes of furthestBlock and append them to the element created in the
+      // last step.
+      while (auto *child = furthestBlockNode.FirstChild())
       {
-        auto location = AppropriateInsertionLocation(commonAncestor);
-        if (location.Parent != nullptr)
-        {
-          (void)MutationAlgorithms::Insert(*lastDOMNode, *location.Parent, location.BeforeSibling);
-        }
+        (void)MutationAlgorithms::Append(*child, *newElement);
       }
 
-      // Step 15: Create a new element from the formatting element's saved token data.
-      auto newElement = CreateElement(*formattingElement);
+      // AAA(4.17): Append that new element to furthestBlock.
+      (void)MutationAlgorithms::Append(*newElement, furthestBlockNode);
 
-      // Steps 16–17: Move all children of furthestBlock to newElement, then append newElement to
-      // furthestBlock.
-      TakeAllChildrenAndReparent(newElement, furthestBlockNode);
-
-      // Step 16 (open elements): Insert newElement immediately above furthestBlock in the stack.
-      _openElementStack.InsertAbove(HTMLStackItem(formattingElement->TagName(),
-                                                  formattingElement->Namespace(), *newElement,
-                                                  formattingElement->Attributes()),
-                                    furthestBlockNode);
-
-      // Step 18: Replace the formatting element in the active formatting list with newElement at the
-      // bookmark position.
-      _activeFormattingElements.SwapTo(formattingElement->Node(),
+      // AAA(4.18): Remove formattingElement from the list of active formatting elements, and insert the new
+      // element into the list of active formatting elements at the position of the aforementioned bookmark.
+      _activeFormattingElements.SwapTo(formattingElementNode,
                                        HTMLStackItem(formattingElement->TagName(),
                                                      formattingElement->Namespace(), *newElement,
                                                      formattingElement->Attributes()),
                                        bookmark);
 
-      // Step 19: Remove the original formatting element from the open elements stack.
-      _openElementStack.Remove(formattingElement->Node());
+      /// AAA(4.19): Remove formattingElement from the stack of open elements, and insert the new element into
+      /// the stack of open elements immediately below the position of furthestBlock in that stack.
+      _openElementStack.Remove(formattingElementNode);
+      _openElementStack.InsertAbove(HTMLStackItem(formattingElement->TagName(),
+                                                  formattingElement->Namespace(), *newElement,
+                                                  formattingElement->Attributes()),
+                                    furthestBlockNode);
     }
-  }
-
-  void HTMLTreeBuilder::TakeAllChildrenAndReparent(Ref<Element> newParent, ContainerNode &oldParent) noexcept
-  {
-    while (auto *child = oldParent.FirstChild())
-    {
-      (void)MutationAlgorithms::Append(*child, *newParent);
-    }
-
-    (void)MutationAlgorithms::Append(*newParent, oldParent);
   }
 
   RawPtr<HTMLStackItem>
-    HTMLTreeBuilder::FurthestSpecialElementBlock(const HTMLStackItem &formattingElement) noexcept
+    HTMLTreeBuilder::FurthestSpecialElementBlock(const Element &formattingElement) noexcept
   {
-    // Find the index of the formatting element in the open element stack.
-    size_t formattingIndex = _openElementStack.Size();
-    for (size_t i = 0uz; i < _openElementStack.Size(); ++i)
-    {
-      if (&_openElementStack[i].Node() == &formattingElement.Node())
-      {
-        formattingIndex = i;
-        break;
-      }
-    }
+    // Get the index of the formatting element in the open element stack.
+    size_t formattingIndex = std::distance(
+      _openElementStack.begin(), std::ranges::find_if(_openElementStack, [&](const auto &item)
+                                                      { return &item.Node() == &formattingElement; }));
 
-    if (formattingIndex == _openElementStack.Size())
-    {
-      return nullptr;
-    }
-
-    // Scan from the formatting element toward the current element (increasing index).
-    // Return the first (= closest to formattingElement) special element found.
+    // Look for the topmost special element in the stack of open elements that is below the formatting
+    // element.
     for (size_t i = formattingIndex + 1uz; i < _openElementStack.Size(); ++i)
     {
       auto &item = _openElementStack[i];
-      if (item.IsElement() && IsSpecialElement(item.TagName()))
+      if (IsSpecialElement(item.TagName()))
       {
         return &item;
       }

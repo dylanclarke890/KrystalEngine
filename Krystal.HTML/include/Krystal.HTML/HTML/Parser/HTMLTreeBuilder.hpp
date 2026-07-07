@@ -212,13 +212,12 @@ namespace Krys::HTML
     void ParseGenericRCDATATextElement(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#create-an-element-for-the-token
-    KRYS_NODISCARD Ref<Element> CreateElement(HTMLTokenAtom &token, DOMStringAtom namespaceURI,
+    KRYS_NODISCARD Ref<Element> CreateElement(DOMStringAtom name, DOMStringAtom namespaceURI,
+                                              const ParsedAttributeList &attributes,
                                               ContainerNode &intendedParent) noexcept;
 
-    /// @brief Creates a new element by duplicating the tag name, namespace, and attributes from a saved
-    /// stack item.
-    /// @see https://html.spec.whatwg.org/#create-an-element-for-the-token
-    KRYS_NODISCARD Ref<Element> CreateElement(const HTMLStackItem &item) noexcept;
+    KRYS_NODISCARD Ref<Element> CreateElement(const HTMLStackItem &item,
+                                              RawPtr<ContainerNode> intendedParent = nullptr) noexcept;
 
     void ReconstructActiveFormattingElements() noexcept;
 
@@ -386,11 +385,7 @@ namespace Krys::HTML
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm
     void RunAdoptionAgency(HTMLTokenAtom &token) noexcept;
 
-    /// @brief Moves all children of oldParent to newParent, then appends newParent to oldParent.
-    /// @see https://html.spec.whatwg.org/multipage/parsing.html#adoption-agency-algorithm steps 16–17
-    void TakeAllChildrenAndReparent(Ref<Element> newParent, ContainerNode &oldParent) noexcept;
-
-    RawPtr<HTMLStackItem> FurthestSpecialElementBlock(const HTMLStackItem &below) noexcept;
+    RawPtr<HTMLStackItem> FurthestSpecialElementBlock(const Element &formattingElement) noexcept;
 
 #pragma endregion
 
