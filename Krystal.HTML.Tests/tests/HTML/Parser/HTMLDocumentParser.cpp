@@ -20,6 +20,14 @@ namespace Krys::HTML::Tests
       auto input = u8"\n--- INPUT ---\n" + Krys::Text::ConvertToUTF8(utf32_stringview(test.Input));
       INFO(string(reinterpret_cast<const char *>(input.data()), input.size()));
 
+      // if (test.FragmentContext.has_value())
+      //{
+      //   auto fragmentContext = u8"#document-fragment\n" + *test.FragmentContext;
+      //   INFO(
+      //     string(reinterpret_cast<const char *>(test.FragmentContext->data()),
+      //     test.FragmentContext->size()));
+      // }
+
       auto expected = u8"\n--- EXPECTED OUTPUT ---\n" + test.Expected;
       INFO(string(reinterpret_cast<const char *>(expected.data()), expected.size()));
 
@@ -52,11 +60,9 @@ namespace Krys::HTML::Tests
     {
       for (size_t i = 0uz; i < tests.size(); ++i)
       {
-        INFO("Test case " + std::to_string(i + 1uz) + " of " + std::to_string(tests.size()));
+        INFO("--- TEST " + std::to_string(i + 1uz) + " OF " + std::to_string(tests.size()) + " ---");
         DoTreeConstructionTest(tests[i]);
       }
-
-      SUCCEED("All " + std::to_string(tests.size()) + " test cases passed.");
     }
   }
 
