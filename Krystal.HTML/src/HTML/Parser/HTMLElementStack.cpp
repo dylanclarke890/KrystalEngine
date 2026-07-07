@@ -314,8 +314,12 @@ namespace Krys::HTML
       return true;
     }
 
-    return item.Namespace() == Namespace::HTML
-           && (item.TagName() == TagName::ol || item.TagName() == TagName::ul);
+    if (item.Namespace() != Namespace::HTML)
+    {
+      return false;
+    }
+
+    return item.TagName() == TagName::ol || item.TagName() == TagName::ul;
   }
 
   bool HTMLElementStack::IsTableScopeMarker(const HTMLStackItem &item) const noexcept
@@ -356,7 +360,12 @@ namespace Krys::HTML
       return true;
     }
 
-    return item.Namespace() == Namespace::HTML && item.TagName() == TagName::button;
+    if (item.Namespace() != Namespace::HTML)
+    {
+      return false;
+    }
+
+    return item.TagName() == TagName::button;
   }
 
   bool HTMLElementStack::IsSelectScopeMarker(const HTMLStackItem &item) const noexcept
@@ -375,14 +384,17 @@ namespace Krys::HTML
     while (it != _items.rend())
     {
       auto &item = *it;
-      if (item.TagName() == targetNode)
+
+      if (item.Namespace() == Namespace::HTML && item.TagName() == targetNode)
       {
         return true;
       }
+
       if (IsScopeMarker(item))
       {
         return false;
       }
+
       ++it;
     }
 
@@ -400,10 +412,12 @@ namespace Krys::HTML
       {
         return true;
       }
+
       if (IsScopeMarker(item))
       {
         return false;
       }
+
       ++it;
     }
 
@@ -417,7 +431,7 @@ namespace Krys::HTML
     while (it != _items.rend())
     {
       auto &item = *it;
-      if (item.TagName() == targetNode)
+      if (item.Namespace() == Namespace::HTML && item.TagName() == targetNode)
       {
         return true;
       }
@@ -438,14 +452,16 @@ namespace Krys::HTML
     while (it != _items.rend())
     {
       auto &item = *it;
-      if (item.TagName() == targetNode)
+      if (item.Namespace() == Namespace::HTML && item.TagName() == targetNode)
       {
         return true;
       }
+
       if (IsButtonScopeMarker(item))
       {
         return false;
       }
+
       ++it;
     }
 
@@ -459,14 +475,17 @@ namespace Krys::HTML
     while (it != _items.rend())
     {
       auto &item = *it;
-      if (item.TagName() == targetNode)
+
+      if (item.Namespace() == Namespace::HTML && item.TagName() == targetNode)
       {
         return true;
       }
+
       if (IsTableScopeMarker(item))
       {
         return false;
       }
+
       ++it;
     }
 
