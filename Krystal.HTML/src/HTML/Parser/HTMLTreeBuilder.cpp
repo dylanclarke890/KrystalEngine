@@ -3455,7 +3455,8 @@ namespace Krys::HTML
     for (auto nodeIt = _openElementStack.rbegin(); nodeIt != _openElementStack.rend(); ++nodeIt)
     {
       auto &nodeEntry = *nodeIt;
-      if (Is<HTMLElement>(nodeEntry.Node()) && nodeEntry.TagName() == tagName)
+      if (nodeEntry.Namespace() == Namespace::HTML && nodeEntry.IsElement()
+          && nodeEntry.AsElement().LocalName() == token.Name())
       {
         _openElementStack.GenerateImpliedEndTags(tagName);
 
