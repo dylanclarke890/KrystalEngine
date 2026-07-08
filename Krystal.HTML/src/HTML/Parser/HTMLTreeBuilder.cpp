@@ -3643,23 +3643,24 @@ namespace Krys::HTML
   {
     assert(token.Type() == HTMLTokenType::Character);
 
-    auto position = token.Data().begin();
-    StringAlgorithms::SkipWhitespace(token.Data(), position);
+    auto data = token.Data();
 
-    if (position == token.Data().begin())
+    auto position = data.begin();
+    StringAlgorithms::SkipWhitespace(data, position);
+
+    if (position == data.begin())
     {
-      auto data = token.Data();
-      return !token.Data().empty();
+      return !data.empty();
     }
 
-    InsertCharacter(DOMString(token.Data().begin(), position));
+    InsertCharacter(DOMString(data.begin(), position));
 
-    if (position == token.Data().end())
+    if (position == data.end())
     {
       return false;
     }
 
-    token._data = DOMString(position, token.Data().end());
+    token._data = DOMStringView(position, data.end());
     return true;
   }
 
