@@ -2537,9 +2537,9 @@ namespace Krys::HTML
 
       _fosterParenting = true;
 
-      ReconstructActiveFormattingElements();
       for (auto &chars : _pendingTableCharacterTokens)
       {
+        ReconstructActiveFormattingElements();
         InsertCharacter(token, DOMString(chars));
       }
       _pendingTableCharacterTokens.clear();
@@ -3937,71 +3937,88 @@ namespace Krys::HTML
 
   void HTMLTreeBuilder::ReconstructActiveFormattingElements() noexcept
   {
-    // If there are no entries in the list of active formatting elements, then there is nothing to
+    // RAFE(1): If there are no entries in the list of active formatting elements, then there is nothing to
     // reconstruct; stop this algorithm.
     if (_activeFormattingElements.IsEmpty())
     {
       return;
     }
 
-    // Let entry be the last (most recently added) element in the list of active formatting elements.
-    auto entry = _activeFormattingElements.Last();
-
-    // If the last (most recently added) entry in the list of active formatting elements is a marker, or if it
-    // is an element that is in the stack of open elements, then there is nothing to reconstruct; stop this
-    // algorithm.
-    if (entry->IsMarker() || _openElementStack.Contains(entry->Item().AsElement()))
+    // RAFE(2): If the last (most recently added) entry in the list of active formatting elements is a marker,
+    // or if it is an element that is in the stack of open elements, then there is nothing to reconstruct;
+    // stop this algorithm.
+    auto last = _activeFormattingElements.Last();
+    if (last->IsMarker() || _openElementStack.Contains(last->Item().AsElement()))
     {
       return;
     }
 
-    // Rewind: If there are no entries before entry in the list of active formatting elements, then jump to
-    // the step labeled create.
-    // Let entry be the entry one earlier than entry in the list of active formatting elements.
-    // If entry is neither a marker nor an element that is also in the stack of open elements, go to the step
-    // labeled rewind.
+    // RAFE(3): Let entry be the last (most recently added) element in the list of active formatting elements.
+    decltype(last) entry = last;
+
+    // Only follows the Create steps of the initial Advance loop if true.
+    bool skipInitialAdvance = false;
+
+    // Rewind
     while (true)
     {
+      // RAFE(4): Rewind: If there are no entries before entry in the list of active formatting elements, then
+      // jump to the step labeled create.
       if (entry == _activeFormattingElements.begin())
+      {
+        skipInitialAdvance = true;
+        break;
+      }
+
+      // RAFE(5): Let entry be the entry one earlier than entry in the list of active formatting elements.
+      entry = std::prev(entry);
+
+      // RAFE(6): If entry is neither a marker nor an element that is also in the stack of open elements, go
+      // to the step labeled rewind.
+      if (!entry->IsMarker() && !_openElementStack.Contains(entry->Item().AsElement()))
+      {
+        continue;
+      }
+
+      skipInitialAdvance = true;
+      break;
+    }
+
+    // Advance
+    auto end = std::next(last);
+    while (true)
+    {
+      // RAFE(7): Advance: Let entry be the element one later than entry in the list of active formatting
+      // elements.
+      if (!skipInitialAdvance || entry->IsMarker())
+      {
+        entry = std::next(entry);
+      }
+      skipInitialAdvance = false;
+
+      if (entry == end) // NOTE: fail-safe check, should not happen
       {
         break;
       }
 
-      auto previous = std::prev(entry);
-      if (!previous->IsMarker() && !_openElementStack.Contains(previous->Item().AsElement()))
+      // RAFE(8): Create: Insert an HTML element for the token for which the element entry was created, to
+      // obtain new element.
+      auto &item = entry->Item();
+      auto newElement = CreateElement(item);
+      InsertElementAtAdjustedInsertionLocation(*newElement);
+      _openElementStack.Push({item.TagName(), item.Namespace(), *newElement, item.Attributes()});
+
+      // RAFE(9): Replace the entry for entry in the list with an entry for new element.
+      entry->ReplaceItem(_openElementStack.Bottom());
+
+      // RAFE(10): If the entry for new element in the list of active formatting elements is not the last
+      // entry in the list, return to the step labeled advance.
+      if (entry != last)
       {
-        entry = previous;
         continue;
       }
 
       break;
-    }
-
-    // Advance: Let entry be the element one later than entry in the list of active formatting elements.
-    // Create: Insert an HTML element for the token for which the element entry was created, to obtain new
-    // element.
-    // Replace the entry for entry in the list with an entry for new element.
-    // If the entry for new element in the list of active formatting elements is not the last entry in the
-    // list, return to the step labeled advance.
-    while (true)
-    {
-      if (entry->IsMarker() || _openElementStack.Contains(entry->Item().AsElement()))
-      {
-        entry = std::next(entry);
-      }
-
-      auto &entryStackItem = entry->Item();
-      auto newElement = CreateElement(entryStackItem);
-      InsertElementAtAdjustedInsertionLocation(*newElement);
-      _openElementStack.Push({entryStackItem.TagName(), entryStackItem.Namespace(), *newElement,
-                              ParsedAttributeList(entryStackItem.Attributes())});
-      entry->ReplaceItem(_openElementStack.Bottom());
-
-      entry = std::next(entry);
-      if (entry == _activeFormattingElements.end())
-      {
-        break;
-      }
     }
   }
 
@@ -4472,7 +4489,7 @@ namespace Krys::HTML
       // AAA(4.18): Remove formattingElement from the list of active formatting elements, and insert the new
       // element into the list of active formatting elements at the position of the aforementioned bookmark.
       _activeFormattingElements.RemoveAndUpdateBookmark(formattingElementNode, bookmark);
-      _activeFormattingElements.Insert(Krys::Move(newFormattingElementItem), bookmark);
+      _activeFormattingElements.InsertAtBookmark(Krys::Move(newFormattingElementItem), bookmark);
 
       /// AAA(4.19): Remove formattingElement from the stack of open elements, and insert the new element into
       /// the stack of open elements immediately below the position of furthestBlock in that stack.

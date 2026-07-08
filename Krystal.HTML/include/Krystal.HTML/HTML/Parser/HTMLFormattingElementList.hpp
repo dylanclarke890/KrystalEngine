@@ -54,23 +54,62 @@ namespace Krys::HTML
     List<FormattingListEntry> _formattingElements;
 
   public:
-    /// @see https://html.spec.whatwg.org/push-onto-the-list-of-active-formatting-elements
-    void PushElement(HTMLStackItem &&item) noexcept;
-
     /// @brief Pushes a marker onto the list of active formatting elements.
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#concept-parser-marker
     void PushMarker() noexcept;
 
-    /// @brief Pops elements up to and including the last marker.
-    /// @see https://html.spec.whatwg.org/#clear-the-list-of-active-formatting-elements-up-to-the-last-marker
-    void ClearUpToLastMarker() noexcept;
+    /// @brief Pushes an element onto the list of active formatting elements.
+    /// @see https://html.spec.whatwg.org/push-onto-the-list-of-active-formatting-elements
+    void PushElement(HTMLStackItem &&item) noexcept;
 
     /// @brief Searches from the end of the list back to the last marker for an element with the given tag
     /// name. Returns a pointer to that stack item, or null if none is found.
     KRYS_NODISCARD RawPtr<HTMLStackItem> FindFromLastMarker(TagName tagName, Namespace tagNamespace) noexcept;
 
-    /// @brief Returns a pointer to the formatting entry whose node matches the given node, or null.
+    /// @brief Returns a pointer to the formatting entry whose node matches the given node, or nullptr if it
+    /// wasn't found.
     KRYS_NODISCARD RawPtr<FormattingListEntry> Find(const ContainerNode &node) noexcept;
+
+    /// @brief Returns true if the list contains a formatting entry whose node matches the given node.
+    KRYS_NODISCARD bool Contains(const ContainerNode &node) const noexcept;
+
+    /// @brief Removes the formatting list entry whose node matches the given node, if present.
+    void Remove(const ContainerNode &node) noexcept;
+
+    /// @brief Pops elements up to and including the last marker.
+    /// @see https://html.spec.whatwg.org/#clear-the-list-of-active-formatting-elements-up-to-the-last-marker
+    void ClearUpToLastMarker() noexcept;
+
+    /// @brief Returns true if the list is empty.
+    KRYS_NODISCARD bool IsEmpty() const noexcept
+    {
+      return _formattingElements.empty();
+    }
+
+    /// @brief Returns an iterator to the last entry in the list, or end() if the list is empty.
+    KRYS_NODISCARD auto Last() noexcept
+    {
+      if (_formattingElements.empty())
+      {
+        return _formattingElements.end();
+      }
+
+      return std::prev(_formattingElements.end());
+    }
+
+    /// @brief Returns an iterator to the first entry in the list.
+    KRYS_NODISCARD auto begin() noexcept
+    {
+      return _formattingElements.begin();
+    }
+
+    /// @brief Returns an iterator to the end of the list.
+    KRYS_NODISCARD auto end() noexcept
+    {
+      return _formattingElements.end();
+    }
+
+#pragma region Bookmark
 
     /// @brief Tracks a position in the list for use in the adoption agency algorithm.
     struct Bookmark
@@ -84,44 +123,12 @@ namespace Krys::HTML
     /// @brief Moves the bookmark to the position immediately after the given entry.
     void MoveBookmarkAfter(Bookmark &bookmark, const FormattingListEntry &entry) noexcept;
 
-    /// @brief Inserts newItem at the bookmark position.
-    void Insert(HTMLStackItem &&newItem, const Bookmark &bookmark) noexcept;
-
-    /// @brief Removes the formatting list entry whose node matches the given node, if present.
-    void Remove(const ContainerNode &node) noexcept;
-
     /// @brief Removes the entry for node and adjusts bookmark if it falls at or after the removed entry.
     void RemoveAndUpdateBookmark(const ContainerNode &node, Bookmark &bookmark) noexcept;
 
-    bool Contains(const ContainerNode &node) const noexcept
-    {
-      return std::ranges::any_of(_formattingElements, [&](const FormattingListEntry &entry)
-                                 { return entry.IsFormattingElement() && &entry.Item().Node() == &node; });
-    }
+    /// @brief Inserts newItem at the bookmark position.
+    void InsertAtBookmark(HTMLStackItem &&newItem, const Bookmark &bookmark) noexcept;
 
-    bool IsEmpty() const noexcept
-    {
-      return _formattingElements.empty();
-    }
-
-    auto begin() noexcept
-    {
-      return _formattingElements.begin();
-    }
-
-    auto end() noexcept
-    {
-      return _formattingElements.end();
-    }
-
-    auto Last() noexcept
-    {
-      if (_formattingElements.empty())
-      {
-        return _formattingElements.end();
-      }
-
-      return std::prev(_formattingElements.end());
-    }
+#pragma endregion
   };
 }
