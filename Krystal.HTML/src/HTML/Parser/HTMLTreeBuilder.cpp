@@ -1556,10 +1556,9 @@ namespace Krys::HTML
             ReconstructActiveFormattingElements();
             InsertHTMLElement(Krys::Move(token));
 
-            auto &aOpenItem = _openElementStack.Bottom();
-            ParsedAttributeList aAttrsCopy = aOpenItem.Attributes();
-            _activeFormattingElements.PushElement(HTMLStackItem(
-              aOpenItem.TagName(), aOpenItem.Namespace(), aOpenItem.AsElement(), Krys::Move(aAttrsCopy)));
+            auto &a = _openElementStack.Bottom();
+            _activeFormattingElements.PushElement(
+              HTMLStackItem(a.TagName(), a.Namespace(), a.AsElement(), a.Attributes()));
 
             return;
           }
@@ -3596,8 +3595,45 @@ namespace Krys::HTML
             || target.TagName() == TagName::tfoot || target.TagName() == TagName::thead
             || target.TagName() == TagName::tr))
     {
-      auto [tableElement, templateElement, elementBeforeTable, isTemplateMostRecent] =
-        _openElementStack.LastTableAndTemplate();
+      LastTableAndTemplateResult result;
+
+      auto lastTableIt = _openElementStack.rend();
+      auto lastTemplateIt = _openElementStack.rend();
+
+      for (auto it = _openElementStack.rbegin(); it != _openElementStack.rend(); ++it)
+      {
+        if (!Is<HTMLElement>(it->Node()))
+        {
+          continue;
+        }
+
+        auto &element = Downcast<HTMLElement>(it->Node());
+        if (result.LastTemplateElement == nullptr && Is<HTMLTemplateElement>(element))
+        {
+          result.LastTemplateElement = &Downcast<HTMLTemplateElement>(element);
+          lastTemplateIt = it;
+        }
+        else if (result.LastTableElement == nullptr && Is<HTMLTableElement>(element))
+        {
+          result.LastTableElement = &Downcast<HTMLTableElement>(element);
+          lastTableIt = it;
+
+          auto next = std::next(it);
+          if (next != _openElementStack.rend() && next->IsElement())
+          {
+            result.ElementBeforeLastTable = &Downcast<Element>(next->Node());
+          }
+        }
+
+        if (result.LastTemplateElement != nullptr && result.LastTableElement != nullptr)
+        {
+          break;
+        }
+      }
+
+      result.TemplateIsMostRecent = lastTemplateIt < lastTableIt;
+
+      auto [tableElement, templateElement, elementBeforeTable, isTemplateMostRecent] = result;
 
       if (templateElement != nullptr && (tableElement == nullptr || isTemplateMostRecent))
       {

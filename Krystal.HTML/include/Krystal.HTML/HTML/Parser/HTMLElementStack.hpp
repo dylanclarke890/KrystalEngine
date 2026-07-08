@@ -227,49 +227,6 @@ namespace Krys::HTML
       return nullptr;
     }
 
-    KRYS_NODISCARD LastTableAndTemplateResult LastTableAndTemplate() const noexcept
-    {
-      LastTableAndTemplateResult result;
-
-      auto lastTableIt = _items.rend();
-      auto lastTemplateIt = _items.rend();
-
-      for (auto it = _items.rbegin(); it != _items.rend(); ++it)
-      {
-        if (!Is<HTMLElement>(it->Node()))
-        {
-          continue;
-        }
-
-        auto &element = Downcast<HTMLElement>(it->Node());
-        if (result.LastTemplateElement == nullptr && Is<HTMLTemplateElement>(element))
-        {
-          result.LastTemplateElement = &Downcast<HTMLTemplateElement>(element);
-          lastTemplateIt = it;
-        }
-        else if (result.LastTableElement == nullptr && Is<HTMLTableElement>(element))
-        {
-          result.LastTableElement = &Downcast<HTMLTableElement>(element);
-          lastTableIt = it;
-
-          auto next = std::next(it);
-          if (next != _items.rend() && next->IsElement())
-          {
-            result.ElementBeforeLastTable = &Downcast<Element>(next->Node());
-          }
-        }
-
-        if (result.LastTemplateElement != nullptr && result.LastTableElement != nullptr)
-        {
-          break;
-        }
-      }
-
-      result.TemplateIsMostRecent = lastTemplateIt < lastTableIt;
-
-      return result;
-    }
-
     KRYS_NODISCARD bool ContainsTemplateElement() const noexcept
     {
       return std::ranges::any_of(_items, [](const auto &item)
