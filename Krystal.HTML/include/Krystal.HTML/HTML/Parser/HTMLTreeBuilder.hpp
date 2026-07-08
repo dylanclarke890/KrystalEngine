@@ -237,6 +237,8 @@ namespace Krys::HTML
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#pending-table-character-tokens
     List<DOMString> _pendingTableCharacterTokens;
 
+    bool _ignoreNextNewline : 1 {false};
+
   public:
     HTMLTreeBuilder(Document &document, HTMLTokenizer &tokenizer,
                     RawPtr<Element> contextElement = nullptr) noexcept;
