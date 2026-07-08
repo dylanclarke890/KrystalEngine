@@ -186,7 +186,7 @@ namespace Krys::HTML
           return;
         }
 
-        InsertCharacter(DOMString(token.Data()));
+        InsertCharacter(token, DOMString(token.Data()));
         _framesetOk = false;
 
         return;
@@ -1132,7 +1132,7 @@ namespace Krys::HTML
           return;
         }
 
-        InsertCharacter(DOMString(token.Data()));
+        InsertCharacter(token, DOMString(token.Data()));
         _framesetOk = false;
 
         return;
@@ -2169,7 +2169,7 @@ namespace Krys::HTML
     {
       case HTMLTokenType::Character:
       {
-        InsertCharacter(DOMString(token.Data()));
+        InsertCharacter(token, DOMString(token.Data()));
         return;
       }
       case HTMLTokenType::EndOfFile:
@@ -2454,7 +2454,7 @@ namespace Krys::HTML
       ReconstructActiveFormattingElements();
       for (auto &chars : _pendingTableCharacterTokens)
       {
-        InsertCharacter(DOMString(chars));
+        InsertCharacter(token, DOMString(chars));
       }
       _pendingTableCharacterTokens.clear();
 
@@ -2465,7 +2465,7 @@ namespace Krys::HTML
     {
       for (auto &chars : _pendingTableCharacterTokens)
       {
-        InsertCharacter(DOMString(chars));
+        InsertCharacter(token, DOMString(chars));
       }
       _pendingTableCharacterTokens.clear();
     }
@@ -3592,9 +3592,15 @@ namespace Krys::HTML
     return InsertForeignElement(Krys::Move(token), Namespaces::HTML, false);
   }
 
-  void HTMLTreeBuilder::InsertCharacter(DOMString &&data) noexcept
+  void HTMLTreeBuilder::InsertCharacter(HTMLTokenAtom &token, DOMString &&data) noexcept
   {
-    // TODO(HTMLTREEBUILDER, HTML): parse error if it contains a null character; skip them.
+    assert(token.Type() == HTMLTokenType::Character || _insertionMode == InsertionMode::InTableText);
+
+    auto removedNullCharacters = std::erase_if(data, [](char8 c) { return c == 0; });
+    if (removedNullCharacters > 0)
+    {
+      ParseError(token);
+    }
 
     auto [parent, beforeSibling] = AppropriateInsertionLocation();
 
@@ -3653,7 +3659,7 @@ namespace Krys::HTML
       return !data.empty();
     }
 
-    InsertCharacter(DOMString(data.begin(), position));
+    InsertCharacter(token, DOMString(data.begin(), position));
 
     if (position == data.end())
     {

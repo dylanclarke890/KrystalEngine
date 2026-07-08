@@ -357,7 +357,7 @@ namespace Krys::HTML
     Ref<Element> InsertHTMLElement(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-a-character
-    void InsertCharacter(DOMString &&data) noexcept;
+    void InsertCharacter(HTMLTokenAtom& token, DOMString &&data) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-a-character
     void AppendCommentToDocument(DOMString &&data) noexcept;
