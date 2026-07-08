@@ -893,10 +893,11 @@ namespace Krys::HTML
               script._alreadyStarted = true;
             }
 
-            // If the parser was invoked via the document.write() or document.writeln() methods, then
-            // optionally set the script element's already started to true. (For example, the user agent might
-            // use this clause to prevent execution of cross-origin scripts inserted via document.write()
-            // under slow network conditions, or when the page has already taken a long time to load.)
+            // NOTE: If the parser was invoked via the document.write() or document.writeln() methods, then
+            // we can optionally set the script element's already started to true. (For example, the user
+            // agent might use this clause to prevent execution of cross-origin scripts inserted via
+            // document.write() under slow network conditions, or when the page has already taken a long time
+            // to load.)
 
             (void)MutationAlgorithms::PreInsert(script, *parent, beforeSibling);
             _openElementStack.Push(
