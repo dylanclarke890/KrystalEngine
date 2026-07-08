@@ -179,7 +179,13 @@ namespace Krys::Tests
 
   inline void CheckCharacter(HTML::HTMLToken &token, const ExpectedCharacter &expected) noexcept
   {
-    CHECK(Compare(token.Data(), expected.Data));
+    if (!Compare(token.Data(), expected.Data))
+    {
+      INFO("Expected:\n"
+           + string(reinterpret_cast<const char *>(expected.Data.data()), expected.Data.size()));
+      INFO("Actual:\n" + string(reinterpret_cast<const char *>(token.Data().data()), token.Data().size()));
+      CHECK(("CheckCharacter" && false));
+    }
   }
 
   inline void CheckTag(HTML::HTMLToken &token, const ExpectedTag &expected) noexcept
