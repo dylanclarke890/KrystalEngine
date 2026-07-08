@@ -67,7 +67,7 @@ namespace Krys::HTML
 
     /// @brief Searches from the end of the list back to the last marker for an element with the given tag
     /// name. Returns a pointer to that stack item, or null if none is found.
-    KRYS_NODISCARD RawPtr<HTMLStackItem> FindFromLastMarker(TagName name) noexcept;
+    KRYS_NODISCARD RawPtr<HTMLStackItem> FindFromLastMarker(TagName tagName, Namespace tagNamespace) noexcept;
 
     /// @brief Returns a pointer to the formatting entry whose node matches the given node, or null.
     KRYS_NODISCARD RawPtr<FormattingListEntry> Find(const ContainerNode &node) noexcept;

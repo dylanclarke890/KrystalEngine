@@ -1540,7 +1540,7 @@ namespace Krys::HTML
             // If an a element is in the formatting list between the end and the last marker, this is a
             // parse error; run the adoption agency algorithm, then remove that element from the list and
             // stack of open elements if the adoption agency algorithm didn't already remove it.
-            if (auto *existing = _activeFormattingElements.FindFromLastMarker(TagName::a))
+            if (auto *existing = _activeFormattingElements.FindFromLastMarker(TagName::a, Namespace::HTML))
             {
               ParseError(token);
 
@@ -4305,7 +4305,9 @@ namespace Krys::HTML
       //       list otherwise
       //     - has the tag name subject.
       // If there is no such element, then act as described in the "any other end tag" entry above and return.
-      RawPtr<HTMLStackItem> formattingElement = _activeFormattingElements.FindFromLastMarker(subject);
+      RawPtr<HTMLStackItem> formattingElement =
+        _activeFormattingElements.FindFromLastMarker(subject, Namespace::HTML);
+
       if (formattingElement == nullptr)
       {
         InBodyGenericEndTag(token, subject);

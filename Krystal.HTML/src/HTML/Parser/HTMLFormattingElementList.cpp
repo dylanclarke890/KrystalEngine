@@ -8,19 +8,13 @@ namespace Krys::HTML
 
     auto lastMarkerIt = std::find_if(_formattingElements.rbegin(), _formattingElements.rend(),
                                      [](const auto &entry) { return entry.IsMarker(); });
-    if (lastMarkerIt != _formattingElements.rend())
-    {
-      lastMarkerIt = std::next(lastMarkerIt);
-    }
+    auto lastMarkerIndex =
+      (lastMarkerIt != _formattingElements.rend())
+        ? static_cast<size_t>(std::distance(lastMarkerIt, _formattingElements.rend())) - 1uz
+        : 0uz;
 
-    // TODO: test that this correctly positions the begin iterator to the item after the last marker, or the
-    // beginning of the list if there is no marker.
-    auto begin =
-      (lastMarkerIt != _formattingElements.rend()) ? lastMarkerIt.base() : _formattingElements.begin();
-
-    auto &itemAttrs = item.Attributes();
-    SmallList<decltype(_formattingElements.begin())> matchingElements;
-    for (auto &it = begin; it != _formattingElements.end(); ++it)
+    SmallList<decltype(_formattingElements.begin())> identicalFormattingElements;
+    for (auto it = _formattingElements.begin() + lastMarkerIndex; it != _formattingElements.end(); ++it)
     {
       if (!it->IsFormattingElement())
       {
@@ -34,36 +28,40 @@ namespace Krys::HTML
       }
 
       auto &entryAttrs = entryItem.Attributes();
-      if (itemAttrs.size() != entryAttrs.size())
+      if (item.Attributes().size() != entryAttrs.size())
       {
         continue;
       }
 
-      if (!std::ranges::all_of(entryAttrs,
-                               [&](const auto &attr)
-                               {
-                                 return std::ranges::any_of(
-                                   itemAttrs, [&](const auto &a)
-                                   { return a.Name == attr.Name && a.Value == attr.Value; });
-                               }))
+      if (entryAttrs.empty() && item.Attributes().empty())
       {
+        identicalFormattingElements.push_back(it);
         continue;
       }
 
-      matchingElements.push_back(it);
+      if (std::ranges::all_of(entryAttrs,
+                              [&](const auto &attr)
+                              {
+                                return std::ranges::any_of(
+                                  item.Attributes(), [&](const auto &a)
+                                  { return a.Name == attr.Name && a.Value == attr.Value; });
+                              }))
+      {
+        identicalFormattingElements.push_back(it);
+      }
     }
 
-    if (matchingElements.size() == 3)
+    if (identicalFormattingElements.size() == 3)
     {
-      _formattingElements.erase(matchingElements.front());
+      _formattingElements.erase(identicalFormattingElements.front());
     }
 
-    _formattingElements.push_back(FormattingListEntry(Krys::Move(item)));
+    _formattingElements.emplace_back(FormattingListEntry(Krys::Move(item)));
   }
 
   void HTMLFormattingElementList::PushMarker() noexcept
   {
-    _formattingElements.push_back(FormattingListEntry {});
+    _formattingElements.emplace_back(FormattingListEntry {});
   }
 
   void HTMLFormattingElementList::ClearUpToLastMarker() noexcept
@@ -81,7 +79,8 @@ namespace Krys::HTML
     }
   }
 
-  RawPtr<HTMLStackItem> HTMLFormattingElementList::FindFromLastMarker(TagName name) noexcept
+  RawPtr<HTMLStackItem> HTMLFormattingElementList::FindFromLastMarker(TagName tagName,
+                                                                      Namespace tagNamespace) noexcept
   {
     for (auto it = _formattingElements.rbegin(); it != _formattingElements.rend(); ++it)
     {
@@ -90,7 +89,9 @@ namespace Krys::HTML
         break;
       }
 
-      if (it->IsFormattingElement() && it->Item().TagName() == name)
+      auto &item = it->Item();
+
+      if (item.TagName() == tagName && item.Namespace() == tagNamespace)
       {
         return &it->Item();
       }
@@ -103,7 +104,7 @@ namespace Krys::HTML
   {
     auto it = std::ranges::find_if(_formattingElements, [&](const FormattingListEntry &entry)
                                    { return entry.IsFormattingElement() && &entry.Item().Node() == &node; });
-    
+
     if (it != _formattingElements.end())
     {
       _formattingElements.erase(it);
