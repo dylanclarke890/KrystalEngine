@@ -60,9 +60,9 @@ namespace Krys::HTML
     }
   }
 
-  void HTMLElementStack::PopUntil(TagName tagName) noexcept
+  void HTMLElementStack::PopUntil(TagName tagName, Namespace tagNamespace) noexcept
   {
-    while (Bottom().TagName() != tagName)
+    while (!(Bottom().Namespace() == tagNamespace && Bottom().TagName() == tagName))
     {
       Pop();
     }
@@ -82,11 +82,11 @@ namespace Krys::HTML
     }
   }
 
-  void HTMLElementStack::PopUntilPopped(TagName tagName) noexcept
+  void HTMLElementStack::PopUntilPopped(TagName tagName, Namespace tagNamespace) noexcept
   {
     while (true)
     {
-      bool isTarget = (Bottom().TagName() == tagName);
+      bool isTarget = (Bottom().Namespace() == tagNamespace && Bottom().TagName() == tagName);
       Pop();
 
       if (isTarget)
@@ -106,14 +106,15 @@ namespace Krys::HTML
         case TagName::template_:
         case TagName::html:
         {
-          return;
-        }
-        default:
-        {
-          Pop();
-          continue;
+          if (Bottom().Namespace() == Namespace::HTML)
+          {
+            return;
+          }
+          break;
         }
       }
+
+      Pop();
     }
   }
 
@@ -129,14 +130,16 @@ namespace Krys::HTML
         case TagName::template_:
         case TagName::html:
         {
-          return;
-        }
-        default:
-        {
-          Pop();
-          continue;
+          if (Bottom().Namespace() == Namespace::HTML)
+          {
+            return;
+          }
+
+          break;
         }
       }
+
+      Pop();
     }
   }
 
@@ -150,14 +153,16 @@ namespace Krys::HTML
         case TagName::template_:
         case TagName::html:
         {
-          return;
-        }
-        default:
-        {
-          Pop();
-          continue;
+          if (Bottom().Namespace() == Namespace::HTML)
+          {
+            return;
+          }
+
+          break;
         }
       }
+
+      Pop();
     }
   }
 
@@ -174,6 +179,7 @@ namespace Krys::HTML
     while (true)
     {
       auto &currentNode = Bottom();
+
       if (currentNode.Namespace() != Namespace::HTML)
       {
         return;
@@ -211,6 +217,7 @@ namespace Krys::HTML
     while (true)
     {
       auto &currentNode = Bottom();
+
       if (currentNode.Namespace() != Namespace::HTML)
       {
         return;
@@ -408,6 +415,7 @@ namespace Krys::HTML
     while (it != _items.rend())
     {
       auto &item = *it;
+
       if (&item.Node() == &element)
       {
         return true;
@@ -431,14 +439,17 @@ namespace Krys::HTML
     while (it != _items.rend())
     {
       auto &item = *it;
+
       if (item.Namespace() == Namespace::HTML && item.TagName() == targetNode)
       {
         return true;
       }
+
       if (IsListItemScopeMarker(item))
       {
         return false;
       }
+
       ++it;
     }
 
@@ -452,6 +463,7 @@ namespace Krys::HTML
     while (it != _items.rend())
     {
       auto &item = *it;
+
       if (item.Namespace() == Namespace::HTML && item.TagName() == targetNode)
       {
         return true;

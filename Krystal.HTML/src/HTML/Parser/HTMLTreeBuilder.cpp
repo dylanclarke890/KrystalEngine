@@ -1358,7 +1358,7 @@ namespace Krys::HTML
                   ParseError(token);
                 }
 
-                _openElementStack.PopUntilPopped(TagName::li);
+                _openElementStack.PopUntilPopped(TagName::li, Namespace::HTML);
                 break;
               }
 
@@ -1395,7 +1395,7 @@ namespace Krys::HTML
                   ParseError(token);
                 }
 
-                _openElementStack.PopUntilPopped(TagName::dd);
+                _openElementStack.PopUntilPopped(TagName::dd, Namespace::HTML);
                 break;
               }
 
@@ -1408,7 +1408,7 @@ namespace Krys::HTML
                   ParseError(token);
                 }
 
-                _openElementStack.PopUntilPopped(TagName::dt);
+                _openElementStack.PopUntilPopped(TagName::dt, Namespace::HTML);
                 break;
               }
 
@@ -1445,7 +1445,7 @@ namespace Krys::HTML
             {
               ParseError(token);
               ClosePElement(token);
-              _openElementStack.PopUntilPopped(TagName::button);
+              _openElementStack.PopUntilPopped(TagName::button, Namespace::HTML);
             }
 
             ReconstructActiveFormattingElements();
@@ -1579,7 +1579,7 @@ namespace Krys::HTML
             if (_openElementStack.HasElementInScope(TagName::select))
             {
               ParseError(token);
-              _openElementStack.PopUntilPopped(TagName::select);
+              _openElementStack.PopUntilPopped(TagName::select, Namespace::HTML);
             }
 
             bool hasHiddenType = false;
@@ -1710,7 +1710,7 @@ namespace Krys::HTML
             if (_openElementStack.HasElementInScope(TagName::select))
             {
               ParseError(token);
-              _openElementStack.PopUntilPopped(TagName::select);
+              _openElementStack.PopUntilPopped(TagName::select, Namespace::HTML);
               return; // ignore the token
             }
 
@@ -1938,7 +1938,7 @@ namespace Krys::HTML
               ParseError(token);
             }
 
-            _openElementStack.PopUntilPopped(tagName);
+            _openElementStack.PopUntilPopped(tagName, Namespace::HTML);
             return;
           }
           case TagName::form:
@@ -1978,7 +1978,7 @@ namespace Krys::HTML
                 ParseError(token);
               }
 
-              _openElementStack.PopUntilPopped(TagName::form);
+              _openElementStack.PopUntilPopped(TagName::form, Namespace::HTML);
             }
 
             return;
@@ -2013,7 +2013,7 @@ namespace Krys::HTML
               ParseError(token);
             }
 
-            _openElementStack.PopUntilPopped(TagName::li);
+            _openElementStack.PopUntilPopped(TagName::li, Namespace::HTML);
             return;
           }
           case TagName::dd:
@@ -2035,7 +2035,7 @@ namespace Krys::HTML
               ParseError(token);
             }
 
-            _openElementStack.PopUntilPopped(tagName);
+            _openElementStack.PopUntilPopped(tagName, Namespace::HTML);
             return;
           }
           case TagName::h1:
@@ -2132,7 +2132,7 @@ namespace Krys::HTML
               ParseError(token);
             }
 
-            _openElementStack.PopUntilPopped(tagName);
+            _openElementStack.PopUntilPopped(tagName, Namespace::HTML);
             _activeFormattingElements.ClearUpToLastMarker();
 
             return;
@@ -2314,7 +2314,7 @@ namespace Krys::HTML
               return; // ignore the token
             }
 
-            _openElementStack.PopUntilPopped(TagName::table);
+            _openElementStack.PopUntilPopped(TagName::table, Namespace::HTML);
             ResetInsertionModeAppropriately();
 
             ProcessToken(Krys::Move(token));
@@ -2380,7 +2380,7 @@ namespace Krys::HTML
               return; // ignore the token
             }
 
-            _openElementStack.PopUntilPopped(TagName::table);
+            _openElementStack.PopUntilPopped(TagName::table, Namespace::HTML);
             ResetInsertionModeAppropriately();
 
             return;
@@ -2490,7 +2490,7 @@ namespace Krys::HTML
         ParseError(token);
       }
 
-      _openElementStack.PopUntilPopped(TagName::caption);
+      _openElementStack.PopUntilPopped(TagName::caption, Namespace::HTML);
       _activeFormattingElements.ClearUpToLastMarker();
 
       _insertionMode = InsertionMode::InTable;
@@ -2980,7 +2980,7 @@ namespace Krys::HTML
               ParseError(token);
             }
 
-            _openElementStack.PopUntilPopped(tagName);
+            _openElementStack.PopUntilPopped(tagName, Namespace::HTML);
             _activeFormattingElements.ClearUpToLastMarker();
 
             _insertionMode = InsertionMode::InRow;
@@ -3128,7 +3128,7 @@ namespace Krys::HTML
 
         ParseError(token);
 
-        _openElementStack.PopUntilPopped(TagName::template_);
+        _openElementStack.PopUntilPopped(TagName::template_, Namespace::HTML);
         _activeFormattingElements.ClearUpToLastMarker();
 
         _templateInsertionModes.pop_back();
@@ -3850,7 +3850,7 @@ namespace Krys::HTML
       ParseError(token);
     }
 
-    _openElementStack.PopUntilPopped(TagName::p);
+    _openElementStack.PopUntilPopped(TagName::p, Namespace::HTML);
   }
 
 #pragma endregion

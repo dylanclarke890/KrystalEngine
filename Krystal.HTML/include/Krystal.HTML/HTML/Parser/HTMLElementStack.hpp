@@ -63,13 +63,13 @@ namespace Krys::HTML
 
     /// @brief Pops elements off the stack until the given tagname has been encountered. The given tagname is
     /// not popped.
-    void PopUntil(TagName tagName) noexcept;
+    void PopUntil(TagName tagName, Namespace tagNamespace) noexcept;
 
     /// @brief Pops elements off the stack until the given node itself has been popped.
     void PopUntilPopped(const ContainerNode &node) noexcept;
 
     /// @brief Pops elements off the stack until the given tagname itself has been popped.
-    void PopUntilPopped(TagName tagName) noexcept;
+    void PopUntilPopped(TagName tagName, Namespace tagNamespace) noexcept;
 
     void PopUntilTableContext() noexcept;
 
