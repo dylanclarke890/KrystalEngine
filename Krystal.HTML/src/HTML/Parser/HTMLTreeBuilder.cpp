@@ -4364,7 +4364,7 @@ namespace Krys::HTML
 
   bool HTMLTreeBuilder::IsHTMLIntegrationPoint(const Element &element) const noexcept
   {
-    if (element.NamespaceURI() == Namespaces::SVG)
+    if (element.NamespaceURI() == Namespaces::MathML)
     {
       if (element.LocalName() == u8"annotation-xml")
       {
