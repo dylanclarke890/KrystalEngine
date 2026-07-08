@@ -166,6 +166,11 @@ namespace Krys::HTML::Tests
 
   inline List<TreeConstructionTest> ParseTreeConstructionTests(std::istream &stream) noexcept
   {
+    auto ToUTF8 = [](const string &s) -> DOMString
+    {
+      return DOMString(reinterpret_cast<const char8_t *>(s.data()), s.size());
+    };
+
     enum class Section
     {
       None,
@@ -181,11 +186,6 @@ namespace Krys::HTML::Tests
 
     auto FinishParsingTest = [&]()
     {
-      auto ToUTF8 = [](const string &s) -> DOMString
-      {
-        return DOMString(reinterpret_cast<const char8_t *>(s.data()), s.size());
-      };
-
       auto data = Krys::Text::ConvertToUTF32(utf8_stringview(ToUTF8(input)));
       if (!data.empty() && data.back() == U'\n')
       {
@@ -283,7 +283,7 @@ namespace Krys::HTML::Tests
       }
     }
 
-    if (section == Section::ExpectedOutput)
+    if (section != Section::None)
     {
       FinishParsingTest();
     }
