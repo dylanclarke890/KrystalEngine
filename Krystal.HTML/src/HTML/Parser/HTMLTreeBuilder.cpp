@@ -910,7 +910,37 @@ namespace Krys::HTML
           }
           case TagName::template_:
           {
-            // TODO(HTMLTREEBUILDER, HTML): handle template start tag in the head insertion mode.
+            auto &templateStartTag = token;
+
+            _activeFormattingElements.PushMarker();
+            _framesetOk = false;
+
+            _insertionMode = InsertionMode::InTemplate;
+            _templateInsertionModes.push_back(InsertionMode::InTemplate);
+
+            auto [intendedParent, beforeSibling] = AppropriateInsertionLocation();
+
+            auto &document = intendedParent->NodeDocument();
+
+            bool shadowrootmodeIsNone = std::ranges::any_of(
+              templateStartTag.Attributes(),
+              [](const auto &attr)
+              {
+                auto value = attr.ValueView();
+                return attr.NameView() == u8"shadowrootmode" && (value != u8"open" && value != u8"closed");
+              });
+
+            auto &adjustedCurrentNode = AdjustedCurrentNode();
+
+            if (shadowrootmodeIsNone || !document._allowDeclarativeShadowRoots
+                || _openElementStack.Top().Node() == adjustedCurrentNode)
+            {
+              InsertHTMLElement(Krys::Move(templateStartTag));
+              return;
+            }
+
+            // TODO(HTMLTREEBUILDER): InHeadMode - Rest of logic for <template> start tags.
+
             return;
           }
           case TagName::head:
@@ -941,7 +971,26 @@ namespace Krys::HTML
           }
           case TagName::template_:
           {
-            // TODO(HTMLTREEBUILDER, HTML): handle template end tag in the head insertion mode.
+            if (!_openElementStack.ContainsTemplateElement())
+            {
+              ParseError(token);
+              return; // ignore the token
+            }
+
+            _openElementStack.GenerateImpliedEndTagsThoroughly();
+
+            auto &currentNode = _openElementStack.Bottom();
+            if (!(currentNode.Namespace() == Namespace::HTML && currentNode.TagName() == TagName::template_))
+            {
+              ParseError(token);
+            }
+
+            _openElementStack.PopUntilPopped(TagName::template_, Namespace::HTML);
+            _activeFormattingElements.ClearUpToLastMarker();
+
+            _templateInsertionModes.pop_back();
+            ResetInsertionModeAppropriately();
+
             return;
           }
           default:
