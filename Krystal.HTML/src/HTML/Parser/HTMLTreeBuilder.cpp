@@ -20,6 +20,7 @@
 #include "Krystal.HTML/Infra/StringAlgorithms.hpp"
 #include "Krystal.HTML/SVG/SVGScriptElement.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
+#include "Krystal.Lib/Types/Pair.hpp"
 #include "Krystal.Text/ASCII.hpp"
 
 namespace Krys::HTML
@@ -3894,7 +3895,45 @@ namespace Krys::HTML
                                           willExecuteScript, registry);
     for (auto &attr : attributes)
     {
-      ElementAlgorithms::SetAttributeValue(*element, attr.NameView(), DOMString(attr.ValueView()));
+      if (attr.Flags == ParsedAttributeFlags::None)
+      {
+        ElementAlgorithms::SetAttributeValue(*element, attr.NameView(), DOMString(attr.ValueView()));
+      }
+      else
+      {
+        auto namespaceUri = DOMStringAtom::Null();
+        auto prefix = DOMStringAtom::Null();
+        size_t prefixLength = 0uz;
+
+        if (HasFlag(attr.Flags, ParsedAttributeFlags::IsXML))
+        {
+          namespaceUri = Namespaces::XML;
+          prefix = NamespacePrefixes::XML;
+          prefixLength = 4uz; // xml + :
+        }
+
+        if (HasFlag(attr.Flags, ParsedAttributeFlags::IsXLink))
+        {
+          namespaceUri = Namespaces::XLink;
+          prefix = NamespacePrefixes::XLink;
+          prefixLength = 5uz; // xlink + :
+        }
+
+        if (HasFlag(attr.Flags, ParsedAttributeFlags::IsXMLNS))
+        {
+          namespaceUri = Namespaces::XMLNS;
+          prefix = NamespacePrefixes::XMLNS;
+
+          if (HasFlag(attr.Flags, ParsedAttributeFlags::HasPrefix))
+          {
+            prefixLength = 6uz; // xmlns + :
+          }
+        }
+
+        auto localName = attr.NameView().substr(prefixLength, attr.NameView().size() - prefixLength);
+        ElementAlgorithms::SetAttributeValue(*element, localName, DOMString(attr.ValueView()), prefix,
+                                             namespaceUri);
+      }
     }
 
     if (willExecuteScript)
@@ -4040,7 +4079,31 @@ namespace Krys::HTML
 
   void HTMLTreeBuilder::AdjustForeignAttributes(HTMLTokenAtom &token) noexcept
   {
-    // TODO(HTMLTREEBUILDER): AdjustForeignAttributes
+    constexpr static Array<Pair<DOMStringView, ParsedAttributeFlags>, 11uz> attributesToAdjust = {
+      Pair {u8"xlink:actuate", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXLink},
+      Pair {u8"xlink:arcrole", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXLink},
+      Pair {u8"xlink:href", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXLink},
+      Pair {u8"xlink:role", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXLink},
+      Pair {u8"xlink:show", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXLink},
+      Pair {u8"xlink:title", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXLink},
+      Pair {u8"xlink:type", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXLink},
+      Pair {u8"xml:lang", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXML},
+      Pair {u8"xml:space", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXML},
+      Pair {u8"xmlns", ParsedAttributeFlags::IsXMLNS},
+      Pair {u8"xmlns:xlink", ParsedAttributeFlags::HasPrefix | ParsedAttributeFlags::IsXMLNS},
+    };
+
+    for (auto &attr : token.Attributes())
+    {
+      for (auto &[name, flags] : attributesToAdjust)
+      {
+        if (attr.NameView() == name)
+        {
+          attr.Flags = flags;
+          break;
+        }
+      }
+    }
   }
 
   void HTMLTreeBuilder::AdjustSVGAttributes(HTMLTokenAtom &token) noexcept
@@ -4108,12 +4171,13 @@ namespace Krys::HTML
 
     for (auto &attr : token.Attributes())
     {
-      auto adjustedAttrIt = std::ranges::find_if(attributesToAdjust, [&](const auto &attrPair)
-                                                 { return attr.NameView() == attrPair[0]; });
-
-      if (adjustedAttrIt != attributesToAdjust.end())
+      for (auto &[name, adjustedName] : attributesToAdjust)
       {
-        attr.SetName((*adjustedAttrIt)[1]);
+        if (attr.NameView() == name)
+        {
+          attr.SetName(adjustedName);
+          break;
+        }
       }
     }
   }

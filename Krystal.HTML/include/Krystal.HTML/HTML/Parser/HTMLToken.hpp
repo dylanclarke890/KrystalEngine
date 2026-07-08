@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/HTML/Enums/HTMLTokenType.hpp"
+#include "Krystal.HTML/HTML/Enums/ParsedAttributeFlags.hpp"
 #include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
@@ -28,6 +29,9 @@ namespace Krys::HTML
   {
     SmallList<char8, 32u> Name;
     SmallList<char8, 64u> Value;
+    /// @brief Flags for the attribute, such as whether it is a foreign attribute or has a prefix. Set during
+    /// AdjustForeignAttributes() in the tree builder, checked when creating elements.
+    ParsedAttributeFlags Flags {ParsedAttributeFlags::None};
 
     DOMStringView NameView() const noexcept
     {
