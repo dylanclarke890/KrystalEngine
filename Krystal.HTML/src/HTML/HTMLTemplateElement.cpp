@@ -4,8 +4,10 @@
 
 namespace Krys::HTML
 {
+  // TODO(HTMLTemplateElement): Implement the HTMLTemplateElement constructor in a spec compliant way.
+
   HTMLTemplateElement::HTMLTemplateElement(Document &document) noexcept
-      : HTMLElement(document, HTMLElementInterface::Template)
+      : HTMLElement(document, HTMLElementInterface::Template), _content(CreateRef<DocumentFragment>(document))
   {
   }
 
