@@ -1057,8 +1057,8 @@ namespace Krys::HTML
           if (Krys::Text::IsASCIIAlpha(character))
           {
             _temporaryBuffer.clear();
-            BufferCharacters(Array {LessThanSign, character});
-            ADVANCE_PAST_NON_NEWLINE_TO(ScriptDataDoubleEscapeStart);
+            BufferCharacter(LessThanSign);
+            RECONSUME_IN(ScriptDataDoubleEscapeStart);
           }
 
           BufferCharacter(LessThanSign);
