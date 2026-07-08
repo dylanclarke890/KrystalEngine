@@ -2096,9 +2096,6 @@ namespace Krys::HTML
           case TagName::dd:
           case TagName::dt:
           {
-            // TODO(HTMLTREEBUILDER): the spec specifies these steps as specific to HTMLElements, check that
-            // this approach is acceptable.
-
             if (!_openElementStack.HasElementInScope(tagName))
             {
               ParseError(token);
@@ -2107,7 +2104,8 @@ namespace Krys::HTML
 
             _openElementStack.GenerateImpliedEndTags(tagName);
 
-            if (_openElementStack.Bottom().TagName() != tagName)
+            auto &currentNode = _openElementStack.Bottom();
+            if (currentNode.Namespace() != Namespace::HTML || currentNode.TagName() != tagName)
             {
               ParseError(token);
             }
@@ -2122,9 +2120,6 @@ namespace Krys::HTML
           case TagName::h5:
           case TagName::h6:
           {
-            // TODO(HTMLTREEBUILDER): the spec specifies these steps as specific to HTMLElements, check that
-            // this approach is acceptable.
-
             if (!_openElementStack.HasElementInScope(TagName::h1)
                 && !_openElementStack.HasElementInScope(TagName::h2)
                 && !_openElementStack.HasElementInScope(TagName::h3)
@@ -2138,19 +2133,22 @@ namespace Krys::HTML
 
             _openElementStack.GenerateImpliedEndTags();
 
-            if (_openElementStack.Bottom().TagName() != tagName)
+            auto &currentNode = _openElementStack.Bottom();
+            if (currentNode.Namespace() != Namespace::HTML || currentNode.TagName() != tagName)
             {
               ParseError(token);
             }
 
             while (true)
             {
-              auto currentTagName = _openElementStack.Bottom().TagName();
+              auto tag = _openElementStack.Bottom().TagName();
+              auto ns = _openElementStack.Bottom().Namespace();
+
               _openElementStack.Pop();
 
-              if (currentTagName == TagName::h1 || currentTagName == TagName::h2
-                  || currentTagName == TagName::h3 || currentTagName == TagName::h4
-                  || currentTagName == TagName::h5 || currentTagName == TagName::h6)
+              if (ns == Namespace::HTML
+                  && (tag == TagName::h1 || tag == TagName::h2 || tag == TagName::h3 || tag == TagName::h4
+                      || tag == TagName::h5 || tag == TagName::h6))
               {
                 break;
               }
@@ -2193,9 +2191,6 @@ namespace Krys::HTML
           case TagName::marquee:
           case TagName::object:
           {
-            // TODO(HTMLTREEBUILDER): the spec specifies these steps as specific to HTMLElements, check that
-            // this approach is acceptable.
-
             if (!_openElementStack.HasElementInScope(tagName))
             {
               ParseError(token);
@@ -2204,7 +2199,8 @@ namespace Krys::HTML
 
             _openElementStack.GenerateImpliedEndTags();
 
-            if (_openElementStack.Bottom().TagName() != tagName)
+            auto &bottom = _openElementStack.Bottom();
+            if (bottom.Namespace() != Namespace::HTML || bottom.TagName() != tagName)
             {
               ParseError(token);
             }
@@ -2817,9 +2813,6 @@ namespace Krys::HTML
           case TagName::tfoot:
           case TagName::thead:
           {
-            // TODO(HTMLTREEBUILDER): the spec specifies these steps as specific to HTMLElements, check that
-            // this approach is acceptable.
-
             if (!_openElementStack.HasElementInTableScope(tagName))
             {
               ParseError(token);
@@ -2909,7 +2902,7 @@ namespace Krys::HTML
             _openElementStack.Pop();
 
             _insertionMode = InsertionMode::InTableBody;
-            ProcessToken(Krys::Move(token));
+            InTableBodyMode(Krys::Move(token));
 
             return;
           }
@@ -2955,9 +2948,6 @@ namespace Krys::HTML
           case TagName::tfoot:
           case TagName::thead:
           {
-            // TODO(HTMLTREEBUILDER): the spec specifies these steps as specific to HTMLElements, check that
-            // this approach is acceptable.
-
             if (!_openElementStack.HasElementInTableScope(tagName))
             {
               ParseError(token);
@@ -2973,7 +2963,7 @@ namespace Krys::HTML
             _openElementStack.Pop();
 
             _insertionMode = InsertionMode::InTableBody;
-            ProcessToken(Krys::Move(token));
+            InTableBodyMode(Krys::Move(token));
 
             return;
           }
