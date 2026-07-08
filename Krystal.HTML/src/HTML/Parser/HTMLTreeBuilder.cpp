@@ -219,7 +219,7 @@ namespace Krys::HTML
         InsertComment(DOMString(token.Comment()));
         return;
       }
-      // TODO(HTMLTREEBUILDER): ProcessingInstruction token type?
+      // NOTE: new ProcessingInstruction token type would go here.
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -600,7 +600,7 @@ namespace Krys::HTML
         AppendCommentToDocument(DOMString(token.Comment()));
         return;
       }
-      // TODO(HTMLTREEBUILDER): ProcessingInstruction token type?
+      // NOTE: new ProcessingInstruction token type would go here.
       case HTMLTokenType::DOCTYPE:
       {
         auto &docTypeData = *token.DOCTYPEData();
@@ -678,7 +678,7 @@ namespace Krys::HTML
         AppendCommentToDocument(DOMString(token.Comment()));
         return;
       }
-      // TODO(HTMLTREEBUILDER): ProcessingInstruction token type?
+      // NOTE: new ProcessingInstruction token type would go here.
       case HTMLTokenType::Character:
       {
         if (SkipCharacterTokenWhitespace(token))
@@ -741,7 +741,7 @@ namespace Krys::HTML
         InsertComment(DOMString(token.Comment()));
         return;
       }
-      // TODO(HTMLTREEBUILDER): ProcessingInstruction token type?
+      // NOTE: new ProcessingInstruction token type would go here.
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -806,7 +806,7 @@ namespace Krys::HTML
         InsertComment(DOMString(token.Comment()));
         return;
       }
-      // TODO(HTMLTREEBUILDER): ProcessingInstruction token type?
+      // NOTE: new ProcessingInstruction token type would go here.
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -1053,7 +1053,7 @@ namespace Krys::HTML
         InsertComment(DOMString(token.Comment()));
         return;
       }
-      // TODO(HTMLTREEBUILDER): ProcessingInstruction token type?
+      // NOTE: new ProcessingInstruction token type would go here.
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -1175,7 +1175,7 @@ namespace Krys::HTML
         InsertComment(DOMString(token.Comment()));
         return;
       }
-      // TODO(HTMLTREEBUILDER): ProcessingInstruction token type?
+      // NOTE: new ProcessingInstruction token type would go here.
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -2262,7 +2262,7 @@ namespace Krys::HTML
         InsertComment(DOMString(token.Comment()));
         return;
       }
-      // TODO(HTMLTREEBUILDER): ProcessingInstruction token type?
+      // NOTE: new ProcessingInstruction token type would go here.
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -2616,7 +2616,7 @@ namespace Krys::HTML
         InsertComment(DOMString(token.Comment()));
         return;
       }
-      // TODO(HTMLTREEBUILDER): ProcessingInstruction token type?
+      // NOTE: new ProcessingInstruction token type would go here.
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -3197,7 +3197,7 @@ namespace Krys::HTML
                       AdjustedInsertionLocation {&_openElementStack.Top().Node(), nullptr});
         return;
       }
-      // TODO(HTMLTREEBUILDER): ProcessingInstruction token type?
+      // NOTE: new ProcessingInstruction token type would go here.
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -3258,7 +3258,7 @@ namespace Krys::HTML
         InsertComment(DOMString(token.Comment()));
         return;
       }
-      // TODO(HTMLTREEBUILDER): ProcessingInstruction token type?
+      // NOTE: new ProcessingInstruction token type would go here.
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -3350,7 +3350,7 @@ namespace Krys::HTML
         InsertComment(DOMString(token.Comment()));
         return;
       }
-      // TODO(HTMLTREEBUILDER): ProcessingInstruction token type?
+      // NOTE: new ProcessingInstruction token type would go here.
       case HTMLTokenType::DOCTYPE:
       {
         ParseError(token);
@@ -3403,7 +3403,7 @@ namespace Krys::HTML
         AppendCommentToDocument(DOMString(token.Comment()));
         return;
       }
-      // TODO(HTMLTREEBUILDER): ProcessingInstruction token type?
+      // NOTE: new ProcessingInstruction token type would go here.
       case HTMLTokenType::DOCTYPE:
       {
         InBodyMode(Krys::Move(token));
@@ -3451,7 +3451,7 @@ namespace Krys::HTML
         AppendCommentToDocument(DOMString(token.Comment()));
         return;
       }
-      // TODO(HTMLTREEBUILDER): ProcessingInstruction token type?
+      // NOTE: new ProcessingInstruction token type would go here.
       case HTMLTokenType::DOCTYPE:
       {
         InBodyMode(Krys::Move(token));
