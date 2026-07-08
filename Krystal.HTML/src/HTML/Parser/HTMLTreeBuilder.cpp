@@ -192,14 +192,24 @@ namespace Krys::HTML
     {
       case HTMLTokenType::Character:
       {
-        // TODO(HTMLTREEBUILDER): parse error and replacement char for null character tokens in token data.
+        auto data = DOMString(token.Data());
+
+        if (HandlePotentialNullCharacters(data, true))
+        {
+          ParseError(token);
+        }
+
+        if (data.empty())
+        {
+          return; // ignore the token
+        }
 
         if (!InsertCharacterTokenWhitespace(token))
         {
           return;
         }
 
-        InsertCharacter(token, DOMString(token.Data()));
+        InsertCharacter(token, Krys::Move(data));
         _framesetOk = false;
 
         return;
@@ -1136,7 +1146,17 @@ namespace Krys::HTML
     {
       case HTMLTokenType::Character:
       {
-        // TODO(HTMLTREEBUILDER): ignore null characters.
+        auto data = DOMString(token.Data());
+
+        if (HandlePotentialNullCharacters(data, false))
+        {
+          ParseError(token);
+        }
+
+        if (data.empty())
+        {
+          return; // ignore the token
+        }
 
         ReconstructActiveFormattingElements();
 
@@ -2433,9 +2453,19 @@ namespace Krys::HTML
   {
     if (token.Type() == HTMLTokenType::Character)
     {
-      // TODO(HTMLTREEBUILDER): parse error for null characters
+      auto data = DOMString(token.Data());
 
-      _pendingTableCharacterTokens.emplace_back(token.Data());
+      if (HandlePotentialNullCharacters(data, false))
+      {
+        ParseError(token);
+      }
+
+      if (data.empty())
+      {
+        return; // ignore the token
+      }
+
+      _pendingTableCharacterTokens.emplace_back(Krys::Move(data));
       return;
     }
 
@@ -3603,10 +3633,14 @@ namespace Krys::HTML
   {
     assert(token.Type() == HTMLTokenType::Character || _insertionMode == InsertionMode::InTableText);
 
-    auto removedNullCharacters = std::erase_if(data, [](char8 c) { return c == 0; });
-    if (removedNullCharacters > 0)
+    if (HandlePotentialNullCharacters(data, false))
     {
       ParseError(token);
+    }
+
+    if (data.empty())
+    {
+      return; // ignore the token
     }
 
     auto [parent, beforeSibling] = AppropriateInsertionLocation();
@@ -3675,6 +3709,33 @@ namespace Krys::HTML
 
     token._data = DOMStringView(position, data.end());
     return true;
+  }
+
+  bool HTMLTreeBuilder::HandlePotentialNullCharacters(DOMString &data, bool replace) noexcept
+  {
+    if (!replace)
+    {
+      auto removedNullCharacters = std::erase_if(data, [](char8 c) { return c == u8'\0'; });
+      return removedNullCharacters > 0uz;
+    }
+
+    auto &&pos = data.find(u8"\0", size_t {});
+    size_t found = 0uz;
+
+    DOMString from = u8"a";
+    from[0] = u8'\0';
+
+    DOMString to = u8"\uFDDD";
+
+    while (pos != std::string::npos)
+    {
+      found++;
+      data.replace(pos, from.length(), to);
+      // easy to forget to add to.length()
+      pos = data.find(from, pos + to.length());
+    }
+
+    return found > 0uz;
   }
 
   void HTMLTreeBuilder::InsertComment(DOMString &&data, Maybe<AdjustedInsertionLocation> position) noexcept
