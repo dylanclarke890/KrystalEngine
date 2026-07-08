@@ -3589,7 +3589,7 @@ namespace Krys::HTML
   {
     auto &target = targetOverride ? *targetOverride : _openElementStack.Bottom();
 
-    AdjustedInsertionLocation location {};
+    AdjustedInsertionLocation location;
 
     if (_fosterParenting && target.Namespace() == Namespace::HTML
         && (target.TagName() == TagName::table || target.TagName() == TagName::tbody
@@ -3618,14 +3618,12 @@ namespace Krys::HTML
     }
     else
     {
-      location.Parent = &target.Node();
-      location.BeforeSibling = nullptr;
+      location = {.Parent = &target.Node(), .BeforeSibling = nullptr};
     }
 
     if (auto *templateElement = DynamicDowncast<HTMLTemplateElement>(location.Parent))
     {
-      location.Parent = templateElement->Content().get();
-      location.BeforeSibling = nullptr;
+      location = {.Parent = templateElement->Content().get(), .BeforeSibling = nullptr};
     }
 
     return location;
