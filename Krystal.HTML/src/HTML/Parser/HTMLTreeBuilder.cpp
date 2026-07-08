@@ -4106,15 +4106,14 @@ namespace Krys::HTML
       Array<DOMStringView, 2> {u8"zoomandpan", u8"zoomAndPan"},
     };
 
-    auto &attributes = token.Attributes();
-    for (auto &[attrName, adjustedAttrName] : attributesToAdjust)
+    for (auto &attr : token.Attributes())
     {
-      auto attrIt = std::ranges::find_if(attributes, [attrName](const auto &attr)
-                                         { return attr.NameView() == attrName; });
+      auto adjustedAttrIt = std::ranges::find_if(attributesToAdjust, [&](const auto &attrPair)
+                                                 { return attr.NameView() == attrPair[0]; });
 
-      if (attrIt != attributes.end())
+      if (adjustedAttrIt != attributesToAdjust.end())
       {
-        attrIt->SetName(adjustedAttrName);
+        attr.SetName((*adjustedAttrIt)[1]);
       }
     }
   }
