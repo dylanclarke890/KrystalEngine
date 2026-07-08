@@ -2219,7 +2219,7 @@ namespace Krys::HTML
       {
         if (token.Name().View() == u8"script")
         {
-          // TODO(HTMLTREEBUILDER, HTML): HTMLScriptElement end tag handling
+          // TODO(HTMLTREEBUILDER): TextMode - HTMLScriptElement end tag handling
         }
 
         _openElementStack.Pop();
@@ -3526,7 +3526,7 @@ namespace Krys::HTML
 
   void HTMLTreeBuilder::StopParsing() noexcept
   {
-    // TODO(HTMLTREEBUILDER, HTML): Stop parsing.
+    // TODO(HTMLTREEBUILDER): StopParsing - implement required steps.
     _openElementStack.PopAll();
   }
 
@@ -3591,17 +3591,22 @@ namespace Krys::HTML
       return;
     }
 
-    // TODO(HTMLTREEBUILDER, CUSTOMELEMENTS, HTML):
-    // If the parser was not created as part of the HTML fragment parsing algorithm, then push a new element
-    // queue onto element's relevant agent's custom element reactions stack.
+    // If the parser was not created as part of the HTML fragment parsing algorithm
+    if (_contextElement == nullptr)
+    {
+      // TODO(CUSTOMELEMENTS): InsertElementAtAdjustedInsertionLocation - push a new element queue onto
+      // element's relevant agent's custom element reactions stack.
+    }
 
     // NOTE: We purposely ignore the error here if it happens.
     (void)MutationAlgorithms::Insert(element, *parent, beforeSibling);
 
-    // TODO(HTMLTREEBUILDER, CUSTOMELEMENTS, HTML):
-    // If the parser was not created as part of the HTML fragment parsing algorithm, then pop the element
-    // queue from element's relevant agent's custom element reactions stack, and invoke custom element
-    // reactions in that queue.
+    // If the parser was not created as part of the HTML fragment parsing algorithm
+    if (_contextElement == nullptr)
+    {
+      // TODO(CUSTOMELEMENTS): InsertElementAtAdjustedInsertionLocation - pop the element queue from element's
+      // relevant agent's custom element reactions stack, and invoke custom element reactions in that queue.
+    }
   }
 
   Ref<Element> HTMLTreeBuilder::InsertForeignElement(HTMLTokenAtom &&token, DOMStringAtom namespaceURI,
@@ -3783,18 +3788,23 @@ namespace Krys::HTML
       return it != std::ranges::end(attributes) ? it->NameView() : DOMStringAtom::Null();
     }();
 
-    // TODO(HTMLTREEBUILDER, CUSTOMELEMENTS, HTML): Let registry be the result of looking up a custom element
+    RefPtr<CustomElementRegistry> registry = nullptr;
+    bool willExecuteScript = false;
+
+    // TODO(CUSTOMELEMENTS): CreateElement - Let registry be the result of looking up a custom element
     // registry given intendedParent.
     // Let definition be the result of looking up a custom element definition given registry, namespace,
     // localName, and is.
     // Let willExecuteScript be true if definition is non-null and the parser was not created as part of the
     // HTML fragment parsing algorithm; otherwise false.
-    // If willExecuteScript is true:
-    // Increment document's throw-on-dynamic-markup-insertion counter.
-    // If the JavaScript execution context stack is empty, then perform a microtask checkpoint.
-    // Push a new element queue onto document's relevant agent's custom element reactions stack.
-    RefPtr<CustomElementRegistry> registry = nullptr;
-    bool willExecuteScript = false;
+
+    if (willExecuteScript)
+    {
+      // TODO(HTMLTREEBUILDER, SCRIPTING): CreateElement - If willExecuteScript is true:
+      // Increment document's throw-on-dynamic-markup-insertion counter.
+      // If the JavaScript execution context stack is empty, then perform a microtask checkpoint.
+      // Push a new element queue onto document's relevant agent's custom element reactions stack.
+    }
 
     auto element = ElementFactory::Create(document, {namespaceURI, DOMStringAtom::Null(), name}, is,
                                           willExecuteScript, registry);
@@ -3803,23 +3813,25 @@ namespace Krys::HTML
       ElementAlgorithms::SetAttributeValue(*element, attr.NameView(), DOMString(attr.ValueView()));
     }
 
-    // TODO(HTMLTREEBUILDER, CUSTOMELEMENTS, HTML): HTMLScriptElement handling
-    // If willExecuteScript is true:
-    //     Let queue be the result of popping from document's relevant agent's custom element reactions stack.
-    //     (This will be the same element queue as was pushed above.)
-    //     Invoke custom element reactions in queue.
-    //     Decrement document's throw-on-dynamic-markup-insertion counter.
-    //
-    // TODO(HTMLTREEBUILDER, HTML):create element parse error
+    if (willExecuteScript)
+    {
+      // TODO(HTMLTREEBUILDER, SCRIPTING): CreateElement - If willExecuteScript is true:
+      // Let queue be the result of popping from document's relevant agent's custom element reactions stack.
+      // (This will be the same element queue as was pushed above.)
+      // Invoke custom element reactions in queue.
+      // Decrement document's throw-on-dynamic-markup-insertion counter.
+    }
+
+    // TODO(HTMLTREEBUILDER): CreateElement - xmlns attribute parse error
     // If element has an xmlns attribute in the XMLNS namespace whose value is not exactly the same as the
     // element's namespace, that is a parse error. Similarly, if element has an xmlns:xlink attribute in the
     // XMLNS namespace whose value is not the XLink Namespace, that is a parse error.
     //
-    // TODO(HTMLTREEBUILDER, HTML): create element resettable element
+    // TODO(HTMLTREEBUILDER): CreateElement - resettable element
     // If element is a resettable element and not a form-associated custom element, then invoke its reset
     // algorithm. (This initializes the element's value and checkedness based on the element's attributes.)
     //
-    // TODO(HTMLTREEBUILDER, HTML): create element form-associated element
+    // TODO(HTMLTREEBUILDER): CreateElement - form-associated element
     // If element is a form-associated element and not a form-associated custom element, the form element
     // pointer is not null, there is no template element on the stack of open elements, element is either not
     // listed or doesn't have a form attribute, and the intendedParent is in the same tree as the element
@@ -3927,7 +3939,7 @@ namespace Krys::HTML
 
   void HTMLTreeBuilder::AdjustForeignAttributes(HTMLTokenAtom &token) noexcept
   {
-    // TODO(HTMLTREEBUILDER, HTML): Adjust attributes for foreign elements.
+    // TODO(HTMLTREEBUILDER): AdjustForeignAttributes
   }
 
   void HTMLTreeBuilder::AdjustSVGAttributes(HTMLTokenAtom &token) noexcept
