@@ -201,7 +201,7 @@ namespace Krys::HTML
           token._data = data;
         }
 
-        if (data.empty())
+        if (token.Data().empty())
         {
           return; // ignore the token
         }
@@ -211,7 +211,7 @@ namespace Krys::HTML
           return;
         }
 
-        InsertCharacter(token, data);
+        InsertCharacter(token.Data());
         _framesetOk = false;
 
         return;
@@ -1204,15 +1204,15 @@ namespace Krys::HTML
         if (HandlePotentialNullCharacters(data, false))
         {
           ParseError(token);
-          token._data = data;
 
           // Reprocess the token to ensure subsequent characters are handled correctly.
+          token._data = data;
           ProcessToken(Krys::Move(token));
 
           return;
         }
 
-        if (data.empty())
+        if (token.Data().empty())
         {
           return; // ignore the token
         }
@@ -1224,7 +1224,7 @@ namespace Krys::HTML
           return;
         }
 
-        InsertCharacter(token, data);
+        InsertCharacter(token.Data());
         _framesetOk = false;
 
         return;
@@ -2250,7 +2250,7 @@ namespace Krys::HTML
     {
       case HTMLTokenType::Character:
       {
-        InsertCharacter(token, token.Data());
+        InsertCharacter(token.Data());
         return;
       }
       case HTMLTokenType::EndOfFile:
@@ -2538,28 +2538,26 @@ namespace Krys::HTML
     {
       ParseError(token);
 
-      // Reprocess each pending character token using the "anything else" entry in the "in table" mode.
-
       _fosterParenting = true;
-
-      for (auto &chars : _pendingTableCharacterTokens)
       {
-        ReconstructActiveFormattingElements();
-        InsertCharacter(token, chars);
+        for (auto &chars : _pendingTableCharacterTokens)
+        {
+          ReconstructActiveFormattingElements();
+          InsertCharacter(chars);
+        }
       }
-      _pendingTableCharacterTokens.clear();
+      _fosterParenting = false;
 
       _framesetOk = false;
-      _fosterParenting = false;
     }
     else
     {
       for (auto &chars : _pendingTableCharacterTokens)
       {
-        InsertCharacter(token, chars);
+        InsertCharacter(chars);
       }
-      _pendingTableCharacterTokens.clear();
     }
+    _pendingTableCharacterTokens.clear();
 
     _insertionMode = _originalInsertionMode;
     ProcessToken(Krys::Move(token));
@@ -3716,22 +3714,8 @@ namespace Krys::HTML
     return InsertForeignElement(Krys::Move(token), Namespaces::HTML, false);
   }
 
-  void HTMLTreeBuilder::InsertCharacter(HTMLTokenAtom &token, DOMStringView characters) noexcept
+  void HTMLTreeBuilder::InsertCharacter(DOMStringView data) noexcept
   {
-    assert(token.Type() == HTMLTokenType::Character || _insertionMode == InsertionMode::InTableText);
-
-    DOMString data = DOMString(characters);
-
-    if (HandlePotentialNullCharacters(data, false))
-    {
-      ParseError(token);
-    }
-
-    if (data.empty())
-    {
-      return; // ignore the token
-    }
-
     auto [parent, beforeSibling] = AppropriateInsertionLocation();
 
     if (Is<Document>(parent))
@@ -3748,12 +3732,11 @@ namespace Krys::HTML
     if (Is<HTML::Text>(previousSibling))
     {
       auto &textNode = Downcast<HTML::Text>(*previousSibling);
-      textNode.AppendData(Krys::Move(data));
+      textNode.AppendData(DOMString(data));
     }
     else
     {
-      auto textNode = CreateRef<HTML::Text>(parent->NodeDocument(), Krys::Move(data));
-
+      auto textNode = CreateRef<HTML::Text>(parent->NodeDocument(), DOMString(data));
       // NOTE: We purposely ignore the error here if it happens.
       (void)MutationAlgorithms::Insert(*textNode, *parent, beforeSibling);
     }
@@ -3789,7 +3772,7 @@ namespace Krys::HTML
       return !data.empty();
     }
 
-    InsertCharacter(token, DOMStringView(data.begin(), position));
+    InsertCharacter(DOMStringView(data.begin(), position));
 
     if (position == data.end())
     {
