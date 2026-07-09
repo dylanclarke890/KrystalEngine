@@ -3724,9 +3724,8 @@ namespace Krys::HTML
     auto begin = token.Data().begin();
     auto position = token.Data().begin();
     StringAlgorithms::AdvancePositionWhile(token.Data(), position, [](char8 ch) { return ch == '\0'; });
-    
-    auto nullSkipCount = std::distance(begin, position);
-    if (nullSkipCount > 0uz)
+
+    if (position != begin)
     {
       ParseError(token);
       token._data = DOMStringView(position, token.Data().end());
@@ -3739,19 +3738,23 @@ namespace Krys::HTML
   {
     assert(token.Type() == HTMLTokenType::Character);
 
+    constexpr static DOMStringView Replacement = u8"\uFFFD";
+
     auto begin = token.Data().begin();
     auto position = begin;
     StringAlgorithms::AdvancePositionWhile(token.Data(), position, [](char8 ch) { return ch == '\0'; });
 
-    auto nullSkipCount = std::distance(begin, position);
-    if (nullSkipCount > 0uz)
+    if (position != begin)
     {
       ParseError(token);
       token._data = DOMStringView(position, token.Data().end());
 
       DOMString data;
 
-      for (ptrdiff_t i = 0uz; i < nullSkipCount; ++i)
+      auto count = static_cast<size_t>(std::distance(begin, position));
+      data.reserve(count * Replacement.length());
+
+      for (size_t i = 0uz; i < count; ++i)
       {
         data += u8"\uFFFD";
       }
@@ -3777,17 +3780,16 @@ namespace Krys::HTML
   {
     assert(token.Type() == HTMLTokenType::Character);
 
-    auto position = token.Data().begin();
+    auto begin = token.Data().begin();
+    auto position = begin;
     StringAlgorithms::SkipWhitespace(token.Data(), position);
 
-    if (position == token.Data().begin())
+    if (position != begin)
     {
-      return !token.Data().empty();
+      InsertCharacters(DOMStringView(token.Data().begin(), position));
+      token._data = DOMStringView(position, token.Data().end());
     }
 
-    InsertCharacters(DOMStringView(token.Data().begin(), position));
-
-    token._data = DOMStringView(position, token.Data().end());
     return !token.Data().empty();
   }
 
