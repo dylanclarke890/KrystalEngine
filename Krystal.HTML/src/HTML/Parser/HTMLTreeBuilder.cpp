@@ -194,17 +194,12 @@ namespace Krys::HTML
     {
       case HTMLTokenType::Character:
       {
-        if (!InsertReplacementsForLeadingNulls(token))
+        if (!InsertLeadingWhitespaceAndNulls(token))
         {
           return;
         }
 
-        if (!InsertLeadingWhitespace(token))
-        {
-          return;
-        }
-
-        InsertCharacters(token.Characters());
+        InsertCharacters(token.ReleaseCharacters());
         _framesetOk = false;
 
         return;
@@ -1192,9 +1187,9 @@ namespace Krys::HTML
     {
       case HTMLTokenType::Character:
       {
-        if (!SkipLeadingNulls(token))
+        if (!RemoveNulls(token))
         {
-          return; // ignore the token
+          return;
         }
 
         ReconstructActiveFormattingElements();
@@ -1204,7 +1199,7 @@ namespace Krys::HTML
           return;
         }
 
-        InsertCharacters(token.Characters());
+        InsertCharacters(token.ReleaseCharacters());
         _framesetOk = false;
 
         return;
@@ -2230,7 +2225,7 @@ namespace Krys::HTML
     {
       case HTMLTokenType::Character:
       {
-        InsertCharacters(token.Characters());
+        InsertCharacters(token.ReleaseCharacters());
         return;
       }
       case HTMLTokenType::EndOfFile:
@@ -2487,8 +2482,7 @@ namespace Krys::HTML
   {
     if (token.Type() == HTMLTokenType::Character)
     {
-      // TODO: this only skips leading nulls, we need to strip them completely here instead.
-      if (!SkipLeadingNulls(token))
+      if (!RemoveNulls(token))
       {
         return; // ignore the token
       }
@@ -2517,7 +2511,7 @@ namespace Krys::HTML
         for (auto &chars : _pendingTableCharacterTokens)
         {
           ReconstructActiveFormattingElements();
-          InsertCharacters(chars);
+          InsertCharacters(Krys::Move(chars));
         }
       }
       _fosterParenting = false;
@@ -2528,7 +2522,7 @@ namespace Krys::HTML
     {
       for (auto &chars : _pendingTableCharacterTokens)
       {
-        InsertCharacters(chars);
+        InsertCharacters(Krys::Move(chars));
       }
     }
     _pendingTableCharacterTokens.clear();
@@ -3205,12 +3199,12 @@ namespace Krys::HTML
       {
         ReconstructActiveFormattingElements();
 
-        if (!InsertLeadingWhitespace(token))
+        if (InsertLeadingWhitespace(token))
         {
-          return;
+          break;
         }
 
-        break;
+        return;
       }
       case HTMLTokenType::Comment:
       {
@@ -3553,6 +3547,119 @@ namespace Krys::HTML
 
 #pragma endregion
 
+#pragma region Character Insertion
+
+  void HTMLTreeBuilder::InsertCharacters(DOMString &&data) noexcept
+  {
+    auto [parent, beforeSibling] = AppropriateInsertionLocation();
+
+    if (Is<Document>(parent))
+    {
+      return;
+    }
+
+    auto previousSibling = beforeSibling ? beforeSibling->PreviousSibling() : nullptr;
+    if (previousSibling == nullptr)
+    {
+      previousSibling = parent->LastChild();
+    }
+
+    if (Is<HTML::Text>(previousSibling))
+    {
+      auto &textNode = Downcast<HTML::Text>(*previousSibling);
+      textNode.AppendData(Krys::Move(data));
+    }
+    else
+    {
+      auto textNode = CreateRef<HTML::Text>(parent->NodeDocument(), Krys::Move(data));
+      // NOTE: We purposely ignore the error here if it happens.
+      (void)MutationAlgorithms::Insert(*textNode, *parent, beforeSibling);
+    }
+  }
+
+  bool HTMLTreeBuilder::RemoveNulls(HTMLTokenAtom &token) noexcept
+  {
+    assert(token.Type() == HTMLTokenType::Character);
+
+    auto removed = std::erase_if(token._data, [](char8 ch) { return ch == '\0'; });
+    if (removed > 0uz)
+    {
+      ParseError(token);
+    }
+
+    return !token.Characters().empty();
+  }
+
+  bool HTMLTreeBuilder::SkipLeadingWhitespace(HTMLTokenAtom &token) noexcept
+  {
+    assert(token.Type() == HTMLTokenType::Character);
+
+    auto begin = token.Characters().begin();
+    auto position = begin;
+    StringAlgorithms::SkipWhitespace(token.Characters(), position);
+
+    token._data.erase(0uz, std::distance(begin, position));
+    return !token.Characters().empty();
+  }
+
+  bool HTMLTreeBuilder::InsertLeadingWhitespace(HTMLTokenAtom &token) noexcept
+  {
+    assert(token.Type() == HTMLTokenType::Character);
+
+    auto begin = token.Characters().begin();
+    auto position = begin;
+    StringAlgorithms::SkipWhitespace(token.Characters(), position);
+
+    if (position != begin)
+    {
+      InsertCharacters(DOMString(begin, position));
+      token._data.erase(0uz, std::distance(begin, position));
+    }
+
+    return !token.Characters().empty();
+  }
+
+  bool HTMLTreeBuilder::InsertLeadingWhitespaceAndNulls(HTMLTokenAtom &token) noexcept
+  {
+    assert(token.Type() == HTMLTokenType::Character);
+
+    constexpr static DOMStringView Replacement = u8"\uFFFD";
+
+    auto ReplaceNulls = [&](DOMString &str)
+    {
+      auto pos = str.find(u8'\0');
+      while (pos != DOMString::npos)
+      {
+        ParseError(token);
+        str.replace(pos, 1uz, Replacement);
+        pos = str.find(u8'\0', pos + Replacement.length());
+      }
+    };
+
+    auto begin = token.Characters().begin();
+    auto position = begin;
+    StringAlgorithms::AdvancePositionWhile(token.Characters(), position, [](char8 ch)
+                                           { return ch == '\0' || StringAlgorithms::IsASCIIWhitespace(ch); });
+
+    if (position != begin)
+    {
+      auto leadingData = DOMString(begin, position);
+      ReplaceNulls(leadingData);
+      InsertCharacters(Krys::Move(leadingData));
+      token._data.erase(0uz, std::distance(begin, position));
+    }
+
+    if (token.Characters().empty())
+    {
+      return false;
+    }
+
+    ReplaceNulls(token._data);
+    return true;
+  }
+
+#pragma endregion
+
 #pragma region Insertion Algorithms
 
   AdjustedInsertionLocation
@@ -3688,110 +3795,6 @@ namespace Krys::HTML
   Ref<Element> HTMLTreeBuilder::InsertHTMLElement(HTMLTokenAtom &&token) noexcept
   {
     return InsertForeignElement(Krys::Move(token), Namespaces::HTML, false);
-  }
-
-  void HTMLTreeBuilder::InsertCharacters(DOMStringView data) noexcept
-  {
-    auto [parent, beforeSibling] = AppropriateInsertionLocation();
-
-    if (Is<Document>(parent))
-    {
-      return;
-    }
-
-    auto previousSibling = beforeSibling ? beforeSibling->PreviousSibling() : nullptr;
-    if (previousSibling == nullptr)
-    {
-      previousSibling = parent->LastChild();
-    }
-
-    if (Is<HTML::Text>(previousSibling))
-    {
-      auto &textNode = Downcast<HTML::Text>(*previousSibling);
-      textNode.AppendData(DOMString(data));
-    }
-    else
-    {
-      auto textNode = CreateRef<HTML::Text>(parent->NodeDocument(), DOMString(data));
-      // NOTE: We purposely ignore the error here if it happens.
-      (void)MutationAlgorithms::Insert(*textNode, *parent, beforeSibling);
-    }
-  }
-
-  bool HTMLTreeBuilder::SkipLeadingNulls(HTMLTokenAtom &token) noexcept
-  {
-    assert(token.Type() == HTMLTokenType::Character);
-
-    auto begin = token.Characters().begin();
-    auto position = begin;
-    StringAlgorithms::AdvancePositionWhile(token.Characters(), position, [](char8 ch) { return ch == '\0'; });
-
-    if (position != begin)
-    {
-      ParseError(token);
-      token._data = DOMString(position, token.Characters().end());
-    }
-
-    return !token.Characters().empty();
-  }
-
-  bool HTMLTreeBuilder::InsertReplacementsForLeadingNulls(HTMLTokenAtom &token) noexcept
-  {
-    assert(token.Type() == HTMLTokenType::Character);
-
-    constexpr static DOMStringView Replacement = u8"\uFFFD";
-
-    auto begin = token.Characters().begin();
-    auto position = begin;
-    StringAlgorithms::AdvancePositionWhile(token.Characters(), position, [](char8 ch) { return ch == '\0'; });
-
-    if (position != begin)
-    {
-      ParseError(token);
-      token._data = DOMString(position, token.Characters().end());
-
-      DOMString data;
-
-      auto count = static_cast<size_t>(std::distance(begin, position));
-      data.reserve(count * Replacement.length());
-
-      for (size_t i = 0uz; i < count; ++i)
-      {
-        data += u8"\uFFFD";
-      }
-
-      InsertCharacters(data);
-    }
-
-    return !token.Characters().empty();
-  }
-
-  bool HTMLTreeBuilder::SkipLeadingWhitespace(HTMLTokenAtom &token) noexcept
-  {
-    assert(token.Type() == HTMLTokenType::Character);
-
-    auto position = token.Characters().begin();
-    StringAlgorithms::SkipWhitespace(token.Characters(), position);
-
-    token._data = DOMString(position, token.Characters().end());
-    return !token.Characters().empty();
-  }
-
-  bool HTMLTreeBuilder::InsertLeadingWhitespace(HTMLTokenAtom &token) noexcept
-  {
-    assert(token.Type() == HTMLTokenType::Character);
-
-    auto begin = token.Characters().begin();
-    auto position = begin;
-    StringAlgorithms::SkipWhitespace(token.Characters(), position);
-
-    if (position != begin)
-    {
-      InsertCharacters(DOMString(token.Characters().begin(), position));
-      token._data = DOMString(position, token.Characters().end());
-    }
-
-    return !token.Characters().empty();
   }
 
   void HTMLTreeBuilder::InsertComment(DOMStringView data, Maybe<AdjustedInsertionLocation> position) noexcept

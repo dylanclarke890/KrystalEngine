@@ -342,6 +342,27 @@ namespace Krys::HTML
 
 #pragma endregion
 
+#pragma region Character Insertion
+
+    /// @see https://html.spec.whatwg.org/#insert-a-character
+    void InsertCharacters(DOMString &&data) noexcept;
+
+    /// @brief Removes null characters in a character token and returns whether any characters remain.
+    bool RemoveNulls(HTMLTokenAtom &token) noexcept;
+
+    /// @brief Skips leading whitespace in a character token and returns whether any characters remain.
+    bool SkipLeadingWhitespace(HTMLTokenAtom &token) noexcept;
+
+    /// @brief Inserts leading whitespace in a character token and returns whether any characters remain.
+    bool InsertLeadingWhitespace(HTMLTokenAtom &token) noexcept;
+
+    /// @brief Inserts leading whitespace and null characters (replacing them with U+FFFD beforehand) in a
+    /// character token and returns whether any characters remain. Will also replace any other nulls in the
+    /// string so that InsertCharacters can be called safely afterwards.
+    bool InsertLeadingWhitespaceAndNulls(HTMLTokenAtom &token) noexcept;
+
+#pragma endregion
+
 #pragma region Insertion Algorithms
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#appropriate-place-for-inserting-a-node
@@ -357,25 +378,6 @@ namespace Krys::HTML
 
     /// @see https://html.spec.whatwg.org/#insert-an-html-element
     Ref<Element> InsertHTMLElement(HTMLTokenAtom &&token) noexcept;
-
-    /// @see https://html.spec.whatwg.org/#insert-a-character
-    void InsertCharacters(DOMStringView data) noexcept;
-
-    /// @brief Skips leading null characters in a character token and returns whether any non-null characters
-    /// remain.
-    bool SkipLeadingNulls(HTMLTokenAtom &token) noexcept;
-
-    /// @brief Inserts replacement characters (U+FFFD) for leading null characters in a character token and
-    /// returns whether any non-null characters remain.
-    bool InsertReplacementsForLeadingNulls(HTMLTokenAtom &token) noexcept;
-
-    /// @brief Skips leading whitespace in a character token and returns whether any non-whitespace characters
-    /// remain.
-    bool SkipLeadingWhitespace(HTMLTokenAtom &token) noexcept;
-
-    /// @brief Inserts leading whitespace in a character token and returns whether any non-whitespace
-    /// characters remain.
-    bool InsertLeadingWhitespace(HTMLTokenAtom &token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-a-comment
     void InsertComment(DOMStringView data, Maybe<AdjustedInsertionLocation> position = Null) noexcept;
