@@ -88,7 +88,7 @@ namespace Krys::HTML
     HTMLInputStream &_input;
     SmallList<char32, 32u> _appropriateEndTagName;
     SmallList<char32, 32u> _bufferedEndTagName;
-    bool _isCDATASectionAllowed : 1 {false};
+    Func<bool()> _isCDATASectionAllowed {nullptr};
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#character-reference-code
     int64 _characterReferenceCode {0};
@@ -103,7 +103,8 @@ namespace Krys::HTML
     List<HTMLTokenizerError> _parseErrors;
 
   public:
-    HTMLTokenizer(HTMLInputStream &input) noexcept : _input(input)
+    HTMLTokenizer(HTMLInputStream &input, Func<bool()> &&isCDATASectionAllowed) noexcept
+        : _input(input), _isCDATASectionAllowed(Krys::Move(isCDATASectionAllowed))
     {
     }
 
@@ -125,11 +126,6 @@ namespace Krys::HTML
     KRYS_NODISCARD const List<HTMLTokenizerError> &ParseErrors() const noexcept
     {
       return _parseErrors;
-    }
-
-    void IsCDATAAllowed(bool isAllowed) noexcept
-    {
-      _isCDATASectionAllowed = isAllowed;
     }
 
   private:
@@ -176,11 +172,6 @@ namespace Krys::HTML
         case TokenizerState::ScriptDataEscapedEndTagName: return true;
         default:                                          return false;
       }
-    }
-
-    KRYS_NODISCARD bool IsCDATAAllowed() const noexcept
-    {
-      return _isCDATASectionAllowed;
     }
 
     void AppendToTemporaryBuffer(const auto &characters)
@@ -1565,7 +1556,7 @@ namespace Krys::HTML
             auto result = _input.AdvancePast<false>("[CDATA[");
             if (result == HTMLInputStream::MatchResult::Matched)
             {
-              if (IsCDATAAllowed())
+              if (_isCDATASectionAllowed())
               {
                 SWITCH_TO(CDATASection);
               }

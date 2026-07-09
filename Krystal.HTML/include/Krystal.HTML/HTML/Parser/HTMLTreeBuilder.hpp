@@ -250,6 +250,22 @@ namespace Krys::HTML
       _scriptingMode = mode;
     }
 
+    bool IsCDATASectionAllowedInCurrentContext() noexcept
+    {
+      if (_openElementStack.IsEmpty())
+      {
+        return false;
+      }
+
+      auto &adjustedCurrentNode = AdjustedCurrentNode();
+      if (auto *element = DynamicDowncast<HTML::Element>(&adjustedCurrentNode))
+      {
+        return element->NamespaceURI() != Namespaces::HTML;
+      }
+
+      return false;
+    }
+
   private:
     bool ShouldProcessAccordingToRulesForHTMLContent(const HTMLTokenAtom &token) noexcept;
 

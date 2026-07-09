@@ -9,7 +9,7 @@ namespace Krys::Tests
 
 #define SETUP_TEST(initialState)                                                                             \
   HTMLInputStream inputStream;                                                                               \
-  HTMLTokenizer tokenizer(inputStream);                                                                      \
+  HTMLTokenizer tokenizer(inputStream, []() { return false; });                                              \
   tokenizer.State(initialState);                                                                             \
   const auto &errors = tokenizer.ParseErrors();                                                              \
   size_t expectedErrorCount = 0;                                                                             \
@@ -1956,17 +1956,12 @@ namespace Krys::Tests
          .Errors = {{.Error = HTMLParseError::IncorrectlyOpenedComment, .Line = 1uz, .Column = 3uz}}}))
 
   TEST("MarkupDeclarationOpen", "Switches to CDATASection when parsing '[CDATA[' and CDATA is allowed",
-       (UnitTest {.ExpectedState = TokenizerState::CDATASection,
-                  .Input = U"<![CDATA[",
-                  .Setup = [](HTMLTokenizer &tokenizer)
-                  {
-                    tokenizer.IsCDATAAllowed(true);
-                  }}))
+       (UnitTest {
+         .ExpectedState = TokenizerState::CDATASection, .Input = U"<![CDATA[", .CDATASectionAllowed = true}))
 
   TEST("MarkupDeclarationOpen", "Switches to BogusComment when parsing '[CDATA[' and CDATA is not allowed",
        (UnitTest {.ExpectedState = TokenizerState::BogusComment,
                   .Input = U"<![CDATA[",
-                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.IsCDATAAllowed(false); },
                   .Errors = {{.Error = HTMLParseError::CDATAInHTMLContent, .Line = 1uz, .Column = 10uz}}}))
 
 #pragma endregion
@@ -2746,22 +2741,19 @@ namespace Krys::Tests
   TEST("CDATASection", "switches to CDATASectionEnd when parsing RightSquareBracket",
        (UnitTest {.ExpectedState = TokenizerState::CDATASectionEnd,
                   .Input = U"<![CDATA[]]",
-                  .Setup = [](HTMLTokenizer &tokenizer)
-                  {
-                    tokenizer.IsCDATAAllowed(true);
-                  }}))
+                  .CDATASectionAllowed = true}))
 
   TEST("CDATASection", "emits EndOfFile with parser error when EOF reached",
        (UnitTest {.Input = U"<![CDATA[A",
                   .AppendEOF = true,
-                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.IsCDATAAllowed(true); },
+                  .CDATASectionAllowed = true,
                   .Output = {CreateCharacterToken(u8"A"), CreateEOFToken()},
                   .Errors = {{.Error = HTMLParseError::EOFInCDATA, .Line = 1uz, .Column = 11uz}}}))
 
   TEST("CDATASection", "emits Character tokens for all characters except RightSquareBracket and EOF",
        (UnitTest {.ExpectedState = TokenizerState::CDATASection,
                   .Input = U"<![CDATA[ABC",
-                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.IsCDATAAllowed(true); },
+                  .CDATASectionAllowed = true,
                   .Output = {CreateCharacterToken(u8"ABC")}}))
 
 #pragma endregion
@@ -2772,7 +2764,7 @@ namespace Krys::Tests
        (UnitTest {
          .ExpectedState = TokenizerState::CDATASectionEnd,
          .Input = U"<![CDATA[]]",
-         .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.IsCDATAAllowed(true); },
+         .CDATASectionAllowed = true,
        }))
 
   TEST("CDATASectionBracket",
@@ -2780,14 +2772,14 @@ namespace Krys::Tests
        "RightSquareBracket or EOF",
        (UnitTest {.ExpectedState = TokenizerState::CDATASection,
                   .Input = U"<![CDATA[]A",
-                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.IsCDATAAllowed(true); },
+                  .CDATASectionAllowed = true,
                   .Output = {CreateCharacterToken(u8"]A")}}))
 
   TEST("CDATASectionBracket",
        "emits Character token for RightSquareBracket and EndOfFile with parser error when EOF reached",
        (UnitTest {.Input = U"<![CDATA[]",
                   .AppendEOF = true,
-                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.IsCDATAAllowed(true); },
+                  .CDATASectionAllowed = true,
                   .Output = {CreateCharacterToken(u8"]"), CreateEOFToken()},
                   .Errors = {{.Error = HTMLParseError::EOFInCDATA, .Line = 1uz, .Column = 11uz}}}))
 
@@ -2798,30 +2790,26 @@ namespace Krys::Tests
   TEST("CDATASectionEnd", "emits RightSquareBracket when parsing RightSquareBracket",
        (UnitTest {.ExpectedState = TokenizerState::CDATASectionEnd,
                   .Input = U"<![CDATA[]]]",
-                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.IsCDATAAllowed(true); },
+                  .CDATASectionAllowed = true,
                   .Output = {CreateCharacterToken(u8"]")}}))
 
   TEST("CDATASectionEnd",
        "emits Character tokens for two RightSquareBrackets and EndOfFile with parser error when EOF reached",
        (UnitTest {.Input = U"<![CDATA[]]]",
                   .AppendEOF = true,
-                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.IsCDATAAllowed(true); },
+                  .CDATASectionAllowed = true,
                   .Output = {CreateCharacterToken(u8"]]]"), CreateEOFToken()},
                   .Errors = {{.Error = HTMLParseError::EOFInCDATA, .Line = 1uz, .Column = 13uz}}}))
 
   TEST("CDATASectionEnd", "switches to Data when parsing GreaterThanSign",
-       (UnitTest {.Input = U"<![CDATA[]]>",
-                  .Setup = [](HTMLTokenizer &tokenizer)
-                  {
-                    tokenizer.IsCDATAAllowed(true);
-                  }}))
+       (UnitTest {.Input = U"<![CDATA[]]>", .CDATASectionAllowed = true}))
 
   TEST("CDATASectionEnd",
        "emits Character tokens for two RightSquareBrackets and switches back to CDATASection when parsing "
        "any character except RightSquareBracket or GreaterThanSign",
        (UnitTest {.ExpectedState = TokenizerState::CDATASection,
                   .Input = U"<![CDATA[]]A",
-                  .Setup = [](HTMLTokenizer &tokenizer) { tokenizer.IsCDATAAllowed(true); },
+                  .CDATASectionAllowed = true,
                   .Output = {CreateCharacterToken(u8"]]A")}}))
 
 #pragma endregion

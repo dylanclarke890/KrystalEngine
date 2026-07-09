@@ -346,4 +346,26 @@ namespace Krys::HTML::Tests
              u8"|     <div>\n"
              u8"|       bar=\"ZZ>YY\"");
   }
+
+  TEST_CASE("ParseTreeConstructionTests - #document-fragment sets fragment context", "[HTML][TreeConstruction]")
+  {
+    auto tests = Parse("#data\n"
+                       "<li>Item</li>\n"
+                       "#document-fragment\n"
+                       "ul\n"
+                       "#errors\n"
+                       "(1,1): expected-doctype-but-got-start-tag\n"
+                       "#document\n"
+                       "| <html>\n"
+                       "|   <head>\n"
+                       "|   <body>\n"
+                       "|     <ul>\n"
+                       "|       <li>\n"
+                       "|         \"Item\"\n");
+
+    REQUIRE(tests.size() == 1);
+    CHECK(tests[0].Input == U"<li>Item</li>");
+    CHECK(tests[0].FragmentContext.has_value());
+    CHECK(tests[0].FragmentContext.value() == u8"ul");
+  }
 }

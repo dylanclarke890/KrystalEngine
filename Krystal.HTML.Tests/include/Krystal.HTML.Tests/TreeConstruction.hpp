@@ -24,6 +24,7 @@ namespace Krys::HTML::Tests
   {
     utf32_string Input;
     DOMString Expected;
+    Maybe<DOMString> FragmentContext;
     Maybe<bool> ScriptingEnabled;
   };
 
@@ -186,6 +187,7 @@ namespace Krys::HTML::Tests
 
     string input;
     string expected;
+    Maybe<string> fragmentContext;
     Maybe<bool> scriptingEnabled;
 
     auto FinishParsingTest = [&]()
@@ -193,14 +195,21 @@ namespace Krys::HTML::Tests
       NormaliseData(input);
       NormaliseData(expected);
 
+      if (fragmentContext.has_value())
+      {
+        NormaliseData(*fragmentContext);
+      }
+
       tests.push_back({
         .Input = Krys::Text::ConvertToUTF32(utf8_stringview(ToUTF8(input))),
         .Expected = ToUTF8(expected),
+        .FragmentContext = fragmentContext.has_value() ? ToUTF8(*fragmentContext) : Maybe<DOMString>(Null),
         .ScriptingEnabled = scriptingEnabled,
       });
 
       input.clear();
       expected.clear();
+      fragmentContext.reset();
       scriptingEnabled.reset();
     };
 
@@ -263,22 +272,42 @@ namespace Krys::HTML::Tests
         continue; // Ignore unknown sections
       }
 
-      if (section == TreeConstructionTestSection::Data)
+      switch (section)
       {
-        input += line;
-        input += '\n';
-        continue;
-      }
-
-      if (section == TreeConstructionTestSection::ExpectedOutput)
-      {
-        expected += line;
-        expected += '\n';
-        continue;
-      }
-
-      if (section == TreeConstructionTestSection::Errors)
-      {
+        case TreeConstructionTestSection::None:
+        {
+          continue;
+        }
+        case TreeConstructionTestSection::Data:
+        {
+          input += line;
+          input += '\n';
+          continue;
+        }
+        case TreeConstructionTestSection::ExpectedOutput:
+        {
+          expected += line;
+          expected += '\n';
+          continue;
+        }
+        case TreeConstructionTestSection::FragmentContext:
+        {
+          if (!fragmentContext.has_value())
+          {
+            fragmentContext = line;
+          }
+          else
+          {
+            *fragmentContext += '\n';
+            *fragmentContext += line;
+          }
+          continue;
+        }
+        case TreeConstructionTestSection::Errors:
+        {
+          // TODO: parse errors
+          continue;
+        }
       }
     }
 

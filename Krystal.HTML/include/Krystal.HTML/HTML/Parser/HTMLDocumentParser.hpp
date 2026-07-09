@@ -56,13 +56,17 @@ namespace Krys::HTML
 
   public:
     HTMLDocumentParser(HTMLDocument &document) noexcept
-        : _document(document), _input(), _tokenizer(_input), _treeBuilder(document, _tokenizer)
+        : _document(document), _input(),
+          _tokenizer(_input, [&]() { return _treeBuilder.IsCDATASectionAllowedInCurrentContext(); }),
+          _treeBuilder(document, _tokenizer)
     {
       _treeBuilder.SetScriptingMode(ParserScriptingMode::Normal);
     }
 
     HTMLDocumentParser(HTMLDocument &document, DocumentFragment &fragment, Element &contextElement) noexcept
-        : _document(document), _input(), _tokenizer(_input), _treeBuilder(document, _tokenizer),
+        : _document(document), _input(),
+          _tokenizer(_input, [&]() { return _treeBuilder.IsCDATASectionAllowedInCurrentContext(); }),
+          _treeBuilder(document, _tokenizer),
           _fragmentParsingContext(FragmentParsingContext(fragment, contextElement))
     {
       _treeBuilder.SetScriptingMode(ParserScriptingMode::Fragment);

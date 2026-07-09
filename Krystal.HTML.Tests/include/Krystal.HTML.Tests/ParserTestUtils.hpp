@@ -79,7 +79,7 @@ namespace Krys::Tests
     HTML::TokenizerState ExpectedState {HTML::TokenizerState::Data};
     utf32_string Input;
     bool AppendEOF {false};
-    std::function<void(HTML::HTMLTokenizer &tokenizer)> Setup = nullptr;
+    bool CDATASectionAllowed {false};
     List<ExpectedToken> Output {};
     List<ExpectedError> Errors {};
   };
@@ -222,7 +222,7 @@ namespace Krys::Tests
     HTMLInputStream inputStream;
     inputStream.Append(std::move(testCase.Input), IsEOF(true));
 
-    HTMLTokenizer tokenizer(inputStream);
+    HTMLTokenizer tokenizer(inputStream, []() { return false; });
     const auto &errors = tokenizer.ParseErrors();
 
     size_t tokenIndex = 0uz;
@@ -283,13 +283,8 @@ namespace Krys::Tests
     HTMLInputStream inputStream;
     inputStream.Append(std::move(testCase.Input), IsEOF(testCase.AppendEOF));
 
-    HTMLTokenizer tokenizer(inputStream);
+    HTMLTokenizer tokenizer(inputStream, [allowed = testCase.CDATASectionAllowed]() { return allowed; });
     tokenizer.State(testCase.InitialState);
-
-    if (testCase.Setup)
-    {
-      testCase.Setup(tokenizer);
-    }
 
     const auto &errors = tokenizer.ParseErrors();
 

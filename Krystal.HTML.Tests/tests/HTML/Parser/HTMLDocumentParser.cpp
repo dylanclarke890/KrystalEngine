@@ -15,20 +15,23 @@ namespace Krys::HTML::Tests
       return parser;
     }
 
-    void DoTreeConstructionTest(const TreeConstructionTest &test) noexcept
+    utf8_string ToUTF8String(size_t number) noexcept
     {
-      auto input = u8"\n--- INPUT ---\n" + Krys::Text::ConvertToUTF8(utf32_stringview(test.Input));
+      auto str = std::to_string(number);
+      return utf8_string(str.begin(), str.end());
+    }
+
+    void DoTreeConstructionTest(const TreeConstructionTest &test, size_t number, size_t total) noexcept
+    {
+      auto input = u8"--- TEST " + ToUTF8String(number) + u8" OF " + ToUTF8String(total) + u8" ---\n"
+                   + Krys::Text::ConvertToUTF8(utf32_stringview(test.Input));
       INFO(string(reinterpret_cast<const char *>(input.data()), input.size()));
 
-      // if (test.FragmentContext.has_value())
-      // {
-      //   auto fragmentContext = u8"#document-fragment\n" + *test.FragmentContext;
-      //   INFO(
-      //     string(reinterpret_cast<const char *>(test.FragmentContext->data()),
-      //     test.FragmentContext->size()));
-      // }
+      auto fragmentContext =
+        u8"--- CONTEXT ---\n#document-fragment\n" + test.FragmentContext.value_or(u8"none");
+      INFO(string(reinterpret_cast<const char *>(fragmentContext.data()), fragmentContext.size()));
 
-      auto expected = u8"\n--- EXPECTED OUTPUT ---\n" + test.Expected;
+      auto expected = u8"--- EXPECTED OUTPUT ---\n" + test.Expected;
       INFO(string(reinterpret_cast<const char *>(expected.data()), expected.size()));
 
       auto document = CreateRef<HTMLDocument>();
@@ -60,8 +63,7 @@ namespace Krys::HTML::Tests
     {
       for (size_t i = 0uz; i < tests.size(); ++i)
       {
-        INFO("--- TEST " + std::to_string(i + 1uz) + " OF " + std::to_string(tests.size()) + " ---");
-        DoTreeConstructionTest(tests[i]);
+        DoTreeConstructionTest(tests[i], i, tests.size());
       }
     }
   }
