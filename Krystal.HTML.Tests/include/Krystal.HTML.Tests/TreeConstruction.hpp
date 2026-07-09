@@ -142,16 +142,9 @@ namespace Krys::HTML::Tests
       DumpNode(child, output, 0uz);
     }
 
-    return output;
-  }
-
-  inline DOMString Dump(const DocumentFragment &fragment) noexcept
-  {
-    DOMString output = u8"#document-fragment\n";
-
-    for (auto &child : ConstChildNodeRange(fragment))
+    if (!output.empty() && output.back() == u8'\n')
     {
-      DumpNode(child, output, 0uz);
+      output.pop_back();
     }
 
     return output;
@@ -176,6 +169,7 @@ namespace Krys::HTML::Tests
       None,
       Data,
       Errors,
+      FragmentContext,
       ExpectedOutput
     };
 
@@ -186,15 +180,21 @@ namespace Krys::HTML::Tests
 
     auto FinishParsingTest = [&]()
     {
-      auto data = Krys::Text::ConvertToUTF32(utf8_stringview(ToUTF8(input)));
-      if (!data.empty() && data.back() == U'\n')
+      auto finalInput = Krys::Text::ConvertToUTF32(utf8_stringview(ToUTF8(input)));
+      if (!finalInput.empty() && finalInput.back() == U'\n')
       {
-        data.pop_back(); // Remove the trailing newline from the input
+        finalInput.pop_back();
+      }
+
+      auto finalExpected = ToUTF8(expected);
+      if (!finalExpected.empty() && finalExpected.back() == U'\n')
+      {
+        finalExpected.pop_back();
       }
 
       tests.push_back({
-        .Input = Krys::Move(data),
-        .Expected = ToUTF8(expected),
+        .Input = Krys::Move(finalInput),
+        .Expected = Krys::Move(finalExpected),
         .ScriptingEnabled = scriptingEnabled,
       });
 
@@ -211,13 +211,13 @@ namespace Krys::HTML::Tests
         line.pop_back();
       }
 
-      if (line.empty())
-      {
-        continue;
-      }
-
       if (line == "#data")
       {
+        if (!expected.empty() && expected.back() == U'\n')
+        {
+          expected.pop_back();
+        }
+
         if (!input.empty() && !expected.empty())
         {
           FinishParsingTest();
@@ -234,8 +234,7 @@ namespace Krys::HTML::Tests
 
       if (line.starts_with("#document-fragment"))
       {
-        section = Section::ExpectedOutput;
-        expected = "#document-fragment\n";
+        section = Section::FragmentContext;
         continue;
       }
 

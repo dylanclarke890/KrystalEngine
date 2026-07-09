@@ -1205,6 +1205,11 @@ namespace Krys::HTML
         {
           ParseError(token);
 
+          if (data.empty())
+          {
+            return; // ignore the token
+          }
+
           // Reprocess the token to ensure subsequent characters are handled correctly.
           token._data = data;
           ProcessToken(Krys::Move(token));

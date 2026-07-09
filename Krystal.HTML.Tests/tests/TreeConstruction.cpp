@@ -87,8 +87,7 @@ namespace Krys::HTML::Tests
 |       id="main"
 |       <!--  This is a comment  -->
 |       "Testing serializer"
-|     <svg svg>
-)";
+|     <svg svg>)";
 
     REQUIRE(output == expectedOutput);
   }
@@ -103,7 +102,7 @@ namespace Krys::HTML::Tests
                        "| <html>\n"
                        "|   <head>\n"
                        "|   <body>\n"
-                       "|     <div>\n");
+                       "|     <div>");
 
     REQUIRE(tests.size() == 1);
 
@@ -113,7 +112,7 @@ namespace Krys::HTML::Tests
              u8"| <html>\n"
              u8"|   <head>\n"
              u8"|   <body>\n"
-             u8"|     <div>\n");
+             u8"|     <div>");
   }
 
   TEST_CASE("ParseTreeConstructionTests - errors section may be empty", "[HTML][TreeConstruction]")
@@ -135,7 +134,7 @@ namespace Krys::HTML::Tests
              u8"| <!DOCTYPE html>\n"
              u8"| <html>\n"
              u8"|   <head>\n"
-             u8"|   <body>\n");
+             u8"|   <body>");
   }
 
   TEST_CASE("ParseTreeConstructionTests - #new-errors section is skipped", "[HTML][TreeConstruction]")
@@ -162,7 +161,7 @@ namespace Krys::HTML::Tests
              u8"|   <head>\n"
              u8"|   <body>\n"
              u8"|     <div>\n"
-             u8"|       foo=\"`bar`\"\n");
+             u8"|       foo=\"`bar`\"");
   }
 
   TEST_CASE("ParseTreeConstructionTests - unknown # keyword is skipped", "[HTML][TreeConstruction]")
@@ -177,7 +176,7 @@ namespace Krys::HTML::Tests
                        "|   <head>\n"
                        "|   <body>\n"
                        "|     <p>\n"
-                       "|       \"hello\"\n");
+                       "|       \"hello\"");
 
     REQUIRE(tests.size() == 1);
 
@@ -188,7 +187,7 @@ namespace Krys::HTML::Tests
              u8"|   <head>\n"
              u8"|   <body>\n"
              u8"|     <p>\n"
-             u8"|       \"hello\"\n");
+             u8"|       \"hello\"");
   }
 
   TEST_CASE("ParseTreeConstructionTests - multiple test cases separated by blank lines",
@@ -202,7 +201,7 @@ namespace Krys::HTML::Tests
                        "|   <head>\n"
                        "|   <body>\n"
                        "|     <p>\n"
-                       "|       \"one\"\n"
+                       "|       \"one\""
                        "\n"
                        "#data\n"
                        "<p>two</p>\n"
@@ -212,7 +211,7 @@ namespace Krys::HTML::Tests
                        "|   <head>\n"
                        "|   <body>\n"
                        "|     <p>\n"
-                       "|       \"two\"\n");
+                       "|       \"two\"");
 
     REQUIRE(tests.size() == 2);
 
@@ -223,7 +222,7 @@ namespace Krys::HTML::Tests
              u8"|   <head>\n"
              u8"|   <body>\n"
              u8"|     <p>\n"
-             u8"|       \"one\"\n");
+             u8"|       \"one\"");
 
     CHECK(tests[1].Input == U"<p>two</p>");
     CHECK(tests[1].Expected
@@ -232,7 +231,7 @@ namespace Krys::HTML::Tests
              u8"|   <head>\n"
              u8"|   <body>\n"
              u8"|     <p>\n"
-             u8"|       \"two\"\n");
+             u8"|       \"two\"");
   }
 
   TEST_CASE("ParseTreeConstructionTests - last test case without trailing blank line",
@@ -255,7 +254,7 @@ namespace Krys::HTML::Tests
              u8"| <html>\n"
              u8"|   <head>\n"
              u8"|   <body>\n"
-             u8"|     <span>\n");
+             u8"|     <span>");
   }
 
   TEST_CASE("ParseTreeConstructionTests - multi-line data is preserved", "[HTML][TreeConstruction]")
@@ -345,6 +344,6 @@ namespace Krys::HTML::Tests
              u8"|   <head>\n"
              u8"|   <body>\n"
              u8"|     <div>\n"
-             u8"|       bar=\"ZZ>YY\"\n");
+             u8"|       bar=\"ZZ>YY\"");
   }
 }
