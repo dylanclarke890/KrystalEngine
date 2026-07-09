@@ -36,10 +36,11 @@ namespace Krys::HTML
     if (_ignoreNextNewline)
     {
       _ignoreNextNewline = false;
-      if (token.Type() == HTMLTokenType::Character && !token.Data().empty() && token.Data()[0uz] == u8'\n')
+      if (token.Type() == HTMLTokenType::Character && !token.Characters().empty()
+          && token.Characters().front() == u8'\n')
       {
         token._data = token._data.substr(1uz);
-        if (token.Data().empty())
+        if (token.Characters().empty())
         {
           return;
         }
@@ -203,7 +204,7 @@ namespace Krys::HTML
           return;
         }
 
-        InsertCharacters(token.Data());
+        InsertCharacters(token.Characters());
         _framesetOk = false;
 
         return;
@@ -1203,7 +1204,7 @@ namespace Krys::HTML
           return;
         }
 
-        InsertCharacters(token.Data());
+        InsertCharacters(token.Characters());
         _framesetOk = false;
 
         return;
@@ -2229,7 +2230,7 @@ namespace Krys::HTML
     {
       case HTMLTokenType::Character:
       {
-        InsertCharacters(token.Data());
+        InsertCharacters(token.Characters());
         return;
       }
       case HTMLTokenType::EndOfFile:
@@ -2492,7 +2493,7 @@ namespace Krys::HTML
         return; // ignore the token
       }
 
-      _pendingTableCharacterTokens.emplace_back(DOMString(token.Data()));
+      _pendingTableCharacterTokens.emplace_back(token.ReleaseCharacters());
       return;
     }
 
@@ -3721,17 +3722,17 @@ namespace Krys::HTML
   {
     assert(token.Type() == HTMLTokenType::Character);
 
-    auto begin = token.Data().begin();
-    auto position = token.Data().begin();
-    StringAlgorithms::AdvancePositionWhile(token.Data(), position, [](char8 ch) { return ch == '\0'; });
+    auto begin = token.Characters().begin();
+    auto position = begin;
+    StringAlgorithms::AdvancePositionWhile(token.Characters(), position, [](char8 ch) { return ch == '\0'; });
 
     if (position != begin)
     {
       ParseError(token);
-      token._data = DOMStringView(position, token.Data().end());
+      token._data = DOMString(position, token.Characters().end());
     }
 
-    return !token.Data().empty();
+    return !token.Characters().empty();
   }
 
   bool HTMLTreeBuilder::InsertReplacementsForLeadingNulls(HTMLTokenAtom &token) noexcept
@@ -3740,14 +3741,14 @@ namespace Krys::HTML
 
     constexpr static DOMStringView Replacement = u8"\uFFFD";
 
-    auto begin = token.Data().begin();
+    auto begin = token.Characters().begin();
     auto position = begin;
-    StringAlgorithms::AdvancePositionWhile(token.Data(), position, [](char8 ch) { return ch == '\0'; });
+    StringAlgorithms::AdvancePositionWhile(token.Characters(), position, [](char8 ch) { return ch == '\0'; });
 
     if (position != begin)
     {
       ParseError(token);
-      token._data = DOMStringView(position, token.Data().end());
+      token._data = DOMString(position, token.Characters().end());
 
       DOMString data;
 
@@ -3762,35 +3763,35 @@ namespace Krys::HTML
       InsertCharacters(data);
     }
 
-    return !token.Data().empty();
+    return !token.Characters().empty();
   }
 
   bool HTMLTreeBuilder::SkipLeadingWhitespace(HTMLTokenAtom &token) noexcept
   {
     assert(token.Type() == HTMLTokenType::Character);
 
-    auto position = token.Data().begin();
-    StringAlgorithms::SkipWhitespace(token.Data(), position);
+    auto position = token.Characters().begin();
+    StringAlgorithms::SkipWhitespace(token.Characters(), position);
 
-    token._data = DOMStringView(position, token.Data().end());
-    return !token.Data().empty();
+    token._data = DOMString(position, token.Characters().end());
+    return !token.Characters().empty();
   }
 
   bool HTMLTreeBuilder::InsertLeadingWhitespace(HTMLTokenAtom &token) noexcept
   {
     assert(token.Type() == HTMLTokenType::Character);
 
-    auto begin = token.Data().begin();
+    auto begin = token.Characters().begin();
     auto position = begin;
-    StringAlgorithms::SkipWhitespace(token.Data(), position);
+    StringAlgorithms::SkipWhitespace(token.Characters(), position);
 
     if (position != begin)
     {
-      InsertCharacters(DOMStringView(token.Data().begin(), position));
-      token._data = DOMStringView(position, token.Data().end());
+      InsertCharacters(DOMString(token.Characters().begin(), position));
+      token._data = DOMString(position, token.Characters().end());
     }
 
-    return !token.Data().empty();
+    return !token.Characters().empty();
   }
 
   void HTMLTreeBuilder::InsertComment(DOMStringView data, Maybe<AdjustedInsertionLocation> position) noexcept

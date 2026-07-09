@@ -105,25 +105,11 @@ namespace Krys::HTML
           return false;
         }
 
-        ConstructTreeFromToken(token);
+        HTMLTokenAtom tokenAtom(*token);
+        _treeBuilder.ProcessToken(Krys::Move(tokenAtom));
       }
 
       return false;
-    }
-
-    void ConstructTreeFromToken(NextTokenPtr &rawToken) noexcept
-    {
-      HTMLTokenAtom token(*rawToken);
-
-      // Clear the rawToken in case _treeBuilder.ProcessToken synchronously re-enters the parser.
-      // Character tokens can't cause us to re-enter the parser so we can optimise by keeping a pointer to the
-      // data buffer in the token instead of needing to copy it.
-      if (rawToken->Type() != HTMLTokenType::Character)
-      {
-        rawToken.Clear();
-      }
-
-      _treeBuilder.ProcessToken(Krys::Move(token));
     }
   };
 }

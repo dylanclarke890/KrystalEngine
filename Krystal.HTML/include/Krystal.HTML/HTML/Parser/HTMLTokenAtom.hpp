@@ -17,10 +17,10 @@ namespace Krys::HTML
     HTMLTokenType _type : BitCount<HTMLTokenType>();
     bool _isSelfClosing : 1 {false};
     bool _selfClosingTagAcknowledged : 1 {false};
+    bool _dataReleased : 1 {false};
     DOMStringAtom _name {DOMStringAtom::Null()};
     UniquePtr<DoctypeData> _doctypeData;
-    DOMString _comment;
-    DOMStringView _data;
+    DOMString _data;
     ParsedAttributeList _attributes;
 
   public:
@@ -30,43 +30,45 @@ namespace Krys::HTML
 
       switch (_type)
       {
-        case HTMLTokenType::Uninitialized: assert(false); return;
-        case HTMLTokenType::EndOfFile:     return;
+        case HTMLTokenType::Uninitialized:
+        {
+          assert(false);
+          return;
+        }
+        case HTMLTokenType::EndOfFile:
+        {
+          return;
+        }
         case HTMLTokenType::DOCTYPE:
         {
-          _name = DOMStringView {data.begin(), data.end()};
+          _name = DOMString {data.begin(), data.end()};
           _doctypeData = token.ReleaseDOCTYPEData();
 
-          return;
+          break;
         }
         case HTMLTokenType::Comment:
-        {
-          _comment = DOMString {data.begin(), data.end()};
-
-          return;
-        }
         case HTMLTokenType::Character:
         {
-          _data = DOMStringView {data.begin(), data.end()};
+          _data = DOMString {data.begin(), data.end()};
 
-          return;
+          break;
         }
         case HTMLTokenType::StartTag:
-        {
-          _name = DOMStringView {data.begin(), data.end()};
-          _isSelfClosing = token.IsSelfClosing();
-          _attributes = Krys::Move(token.Attributes());
-
-          return;
-        }
         case HTMLTokenType::EndTag:
         {
-          _name = DOMStringView {data.begin(), data.end()};
+          _name = DOMString {data.begin(), data.end()};
           _attributes = Krys::Move(token.Attributes());
 
-          return;
+          if (_type == HTMLTokenType::StartTag)
+          {
+            _isSelfClosing = token.IsSelfClosing();
+          }
+
+          break;
         }
       }
+
+      token.Clear();
     }
 
     KRYS_NODISCARD HTMLTokenType Type() const noexcept
@@ -103,13 +105,35 @@ namespace Krys::HTML
     KRYS_NODISCARD DOMStringView Comment() const noexcept
     {
       assert(_type == HTMLTokenType::Comment);
-      return _comment;
+      assert(!_dataReleased);
+
+      return _data;
     }
 
-    KRYS_NODISCARD DOMStringView Data() const noexcept
+    KRYS_NODISCARD DOMString ReleaseComment() noexcept
+    {
+      assert(_type == HTMLTokenType::Comment);
+      assert(!_dataReleased);
+
+      _dataReleased = true;
+      return std::move(_data);
+    }
+
+    KRYS_NODISCARD DOMStringView Characters() const noexcept
     {
       assert(_type == HTMLTokenType::Character);
+      assert(!_dataReleased);
+
       return _data;
+    }
+
+    KRYS_NODISCARD DOMString ReleaseCharacters() noexcept
+    {
+      assert(_type == HTMLTokenType::Character);
+      assert(!_dataReleased);
+
+      _dataReleased = true;
+      return std::move(_data);
     }
 
     KRYS_NODISCARD bool IsForceQuirks() const noexcept
