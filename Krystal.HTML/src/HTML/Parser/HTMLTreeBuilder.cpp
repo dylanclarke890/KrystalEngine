@@ -198,6 +198,7 @@ namespace Krys::HTML
         if (HandlePotentialNullCharacters(data, true))
         {
           ParseError(token);
+          token._data = data;
         }
 
         if (data.empty())
@@ -210,14 +211,14 @@ namespace Krys::HTML
           return;
         }
 
-        InsertCharacter(token, Krys::Move(data));
+        InsertCharacter(token, data);
         _framesetOk = false;
 
         return;
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Comment()));
+        InsertComment(token.Comment());
         return;
       }
       // NOTE: new ProcessingInstruction token type would go here.
@@ -598,7 +599,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::Comment:
       {
-        AppendCommentToDocument(DOMString(token.Comment()));
+        AppendCommentToDocument(token.Comment());
         return;
       }
       // NOTE: new ProcessingInstruction token type would go here.
@@ -676,7 +677,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::Comment:
       {
-        AppendCommentToDocument(DOMString(token.Comment()));
+        AppendCommentToDocument(token.Comment());
         return;
       }
       // NOTE: new ProcessingInstruction token type would go here.
@@ -735,11 +736,12 @@ namespace Krys::HTML
         {
           break; // Reprocess remaining characters in the InHead insertion mode.
         }
+
         return;
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Comment()));
+        InsertComment(token.Comment());
         return;
       }
       // NOTE: new ProcessingInstruction token type would go here.
@@ -797,14 +799,14 @@ namespace Krys::HTML
       {
         if (InsertCharacterTokenWhitespace(token))
         {
-          break;
+          break; // Reprocess remaining characters in the AfterHead insertion mode.
         }
 
         return;
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Comment()));
+        InsertComment(token.Comment());
         return;
       }
       // NOTE: new ProcessingInstruction token type would go here.
@@ -1021,7 +1023,7 @@ namespace Krys::HTML
       {
         if (InsertCharacterTokenWhitespace(token))
         {
-          break;
+          break; // Reprocess remaining characters in the InHead insertion mode.
         }
 
         return;
@@ -1094,14 +1096,14 @@ namespace Krys::HTML
       {
         if (InsertCharacterTokenWhitespace(token))
         {
-          break;
+          break; // Reprocess remaining characters in the InBody insertion mode.
         }
 
         return;
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Comment()));
+        InsertComment(token.Comment());
         return;
       }
       // NOTE: new ProcessingInstruction token type would go here.
@@ -1202,6 +1204,12 @@ namespace Krys::HTML
         if (HandlePotentialNullCharacters(data, false))
         {
           ParseError(token);
+          token._data = data;
+
+          // Reprocess the token to ensure subsequent characters are handled correctly.
+          ProcessToken(Krys::Move(token));
+
+          return;
         }
 
         if (data.empty())
@@ -1216,14 +1224,14 @@ namespace Krys::HTML
           return;
         }
 
-        InsertCharacter(token, DOMString(token.Data()));
+        InsertCharacter(token, data);
         _framesetOk = false;
 
         return;
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Comment()));
+        InsertComment(token.Comment());
         return;
       }
       // NOTE: new ProcessingInstruction token type would go here.
@@ -2242,7 +2250,7 @@ namespace Krys::HTML
     {
       case HTMLTokenType::Character:
       {
-        InsertCharacter(token, DOMString(token.Data()));
+        InsertCharacter(token, token.Data());
         return;
       }
       case HTMLTokenType::EndOfFile:
@@ -2305,7 +2313,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Comment()));
+        InsertComment(token.Comment());
         return;
       }
       // NOTE: new ProcessingInstruction token type would go here.
@@ -2537,7 +2545,7 @@ namespace Krys::HTML
       for (auto &chars : _pendingTableCharacterTokens)
       {
         ReconstructActiveFormattingElements();
-        InsertCharacter(token, DOMString(chars));
+        InsertCharacter(token, chars);
       }
       _pendingTableCharacterTokens.clear();
 
@@ -2548,7 +2556,7 @@ namespace Krys::HTML
     {
       for (auto &chars : _pendingTableCharacterTokens)
       {
-        InsertCharacter(token, DOMString(chars));
+        InsertCharacter(token, chars);
       }
       _pendingTableCharacterTokens.clear();
     }
@@ -2659,7 +2667,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Comment()));
+        InsertComment(token.Comment());
         return;
       }
       // NOTE: new ProcessingInstruction token type would go here.
@@ -3233,8 +3241,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Comment()),
-                      AdjustedInsertionLocation {&_openElementStack.Top().Node(), nullptr});
+        InsertComment(token.Comment(), AdjustedInsertionLocation {&_openElementStack.Top().Node(), nullptr});
         return;
       }
       // NOTE: new ProcessingInstruction token type would go here.
@@ -3295,7 +3302,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Comment()));
+        InsertComment(token.Comment());
         return;
       }
       // NOTE: new ProcessingInstruction token type would go here.
@@ -3387,7 +3394,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(DOMString(token.Comment()));
+        InsertComment(token.Comment());
         return;
       }
       // NOTE: new ProcessingInstruction token type would go here.
@@ -3440,7 +3447,7 @@ namespace Krys::HTML
     {
       case HTMLTokenType::Comment:
       {
-        AppendCommentToDocument(DOMString(token.Comment()));
+        AppendCommentToDocument(token.Comment());
         return;
       }
       // NOTE: new ProcessingInstruction token type would go here.
@@ -3488,7 +3495,7 @@ namespace Krys::HTML
     {
       case HTMLTokenType::Comment:
       {
-        AppendCommentToDocument(DOMString(token.Comment()));
+        AppendCommentToDocument(token.Comment());
         return;
       }
       // NOTE: new ProcessingInstruction token type would go here.
@@ -3709,9 +3716,11 @@ namespace Krys::HTML
     return InsertForeignElement(Krys::Move(token), Namespaces::HTML, false);
   }
 
-  void HTMLTreeBuilder::InsertCharacter(HTMLTokenAtom &token, DOMString &&data) noexcept
+  void HTMLTreeBuilder::InsertCharacter(HTMLTokenAtom &token, DOMStringView characters) noexcept
   {
     assert(token.Type() == HTMLTokenType::Character || _insertionMode == InsertionMode::InTableText);
+
+    DOMString data = DOMString(characters);
 
     if (HandlePotentialNullCharacters(data, false))
     {
@@ -3780,7 +3789,7 @@ namespace Krys::HTML
       return !data.empty();
     }
 
-    InsertCharacter(token, DOMString(data.begin(), position));
+    InsertCharacter(token, DOMStringView(data.begin(), position));
 
     if (position == data.end())
     {
@@ -3805,7 +3814,7 @@ namespace Krys::HTML
     DOMString from = u8"a";
     from[0] = u8'\0';
 
-    DOMString to = u8"\uFDDD";
+    DOMString to = u8"\uFFFD";
 
     while (pos != std::string::npos)
     {
@@ -3818,18 +3827,18 @@ namespace Krys::HTML
     return found > 0uz;
   }
 
-  void HTMLTreeBuilder::InsertComment(DOMString &&data, Maybe<AdjustedInsertionLocation> position) noexcept
+  void HTMLTreeBuilder::InsertComment(DOMStringView data, Maybe<AdjustedInsertionLocation> position) noexcept
   {
     auto [parent, beforeSibling] = position.has_value() ? *position : AppropriateInsertionLocation();
-    auto commentNode = CreateRef<Comment>(parent->NodeDocument(), Krys::Move(data));
+    auto commentNode = CreateRef<Comment>(parent->NodeDocument(), DOMString(data));
 
     // NOTE: We purposely ignore the error here if it happens.
     (void)MutationAlgorithms::Insert(*commentNode, *parent, beforeSibling);
   }
 
-  void HTMLTreeBuilder::AppendCommentToDocument(DOMString &&data) noexcept
+  void HTMLTreeBuilder::AppendCommentToDocument(DOMStringView data) noexcept
   {
-    InsertComment(Krys::Move(data), AdjustedInsertionLocation {&_document, nullptr});
+    InsertComment(data, AdjustedInsertionLocation {&_document, nullptr});
   }
 
   void HTMLTreeBuilder::ParseGenericRawTextElement(HTMLTokenAtom &&token) noexcept

@@ -359,10 +359,10 @@ namespace Krys::HTML
     Ref<Element> InsertHTMLElement(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-a-character
-    void InsertCharacter(HTMLTokenAtom &token, DOMString &&data) noexcept;
+    void InsertCharacter(HTMLTokenAtom &token, DOMStringView data) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-a-character
-    void AppendCommentToDocument(DOMString &&data) noexcept;
+    void AppendCommentToDocument(DOMStringView data) noexcept;
 
     /// @brief Skips whitespace in a character token and returns whether any non-whitespace characters remain.
     bool SkipCharacterTokenWhitespace(HTMLTokenAtom &token) noexcept;
@@ -377,7 +377,7 @@ namespace Krys::HTML
     bool HandlePotentialNullCharacters(DOMString &data, bool replace) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-a-comment
-    void InsertComment(DOMString &&data, Maybe<AdjustedInsertionLocation> position = Null) noexcept;
+    void InsertComment(DOMStringView data, Maybe<AdjustedInsertionLocation> position = Null) noexcept;
 
     /// @see https://html.spec.whatwg.org/#generic-raw-text-element-parsing-algorithm
     void ParseGenericRawTextElement(HTMLTokenAtom &&token) noexcept;
