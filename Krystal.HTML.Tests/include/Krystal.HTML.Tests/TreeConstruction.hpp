@@ -20,6 +20,36 @@
 
 namespace Krys::HTML::Tests
 {
+  struct TreeConstructionTest
+  {
+    utf32_string Input;
+    DOMString Expected;
+    Maybe<bool> ScriptingEnabled;
+  };
+
+  enum class TreeConstructionTestSection
+  {
+    None,
+    Data,
+    Errors,
+    FragmentContext,
+    ExpectedOutput
+  };
+
+  inline DOMString ToUTF8(const string &s) noexcept
+  {
+    return DOMString(reinterpret_cast<const char8_t *>(s.data()), s.size());
+  };
+
+  template <typename T>
+  inline void NormaliseData(T &str) noexcept
+  {
+    if (!str.empty() && str.back() == U'\n')
+    {
+      str.pop_back();
+    }
+  }
+
   inline void Indent(DOMString &output, size_t depth) noexcept
   {
     output += u8"| ";
@@ -105,7 +135,7 @@ namespace Krys::HTML::Tests
       {
         auto &documentType = Downcast<DocumentType>(node);
 
-        Indent(output, depth);
+        Krys::HTML::Tests::Indent(output, depth);
 
         output += u8"<!DOCTYPE ";
         output += documentType.Name();
@@ -150,60 +180,32 @@ namespace Krys::HTML::Tests
     return output;
   }
 
-  struct TreeConstructionTest
-  {
-    utf32_string Input;
-    DOMString Expected;
-    Maybe<bool> ScriptingEnabled;
-  };
-
   inline List<TreeConstructionTest> ParseTreeConstructionTests(std::istream &stream) noexcept
   {
-    auto ToUTF8 = [](const string &s) -> DOMString
-    {
-      return DOMString(reinterpret_cast<const char8_t *>(s.data()), s.size());
-    };
-
-    enum class Section
-    {
-      None,
-      Data,
-      Errors,
-      FragmentContext,
-      ExpectedOutput
-    };
-
     List<TreeConstructionTest> tests;
+
     string input;
     string expected;
     Maybe<bool> scriptingEnabled;
 
     auto FinishParsingTest = [&]()
     {
-      auto finalInput = Krys::Text::ConvertToUTF32(utf8_stringview(ToUTF8(input)));
-      if (!finalInput.empty() && finalInput.back() == U'\n')
-      {
-        finalInput.pop_back();
-      }
-
-      auto finalExpected = ToUTF8(expected);
-      if (!finalExpected.empty() && finalExpected.back() == U'\n')
-      {
-        finalExpected.pop_back();
-      }
+      NormaliseData(input);
+      NormaliseData(expected);
 
       tests.push_back({
-        .Input = Krys::Move(finalInput),
-        .Expected = Krys::Move(finalExpected),
+        .Input = Krys::Text::ConvertToUTF32(utf8_stringview(ToUTF8(input))),
+        .Expected = ToUTF8(expected),
         .ScriptingEnabled = scriptingEnabled,
       });
 
       input.clear();
       expected.clear();
+      scriptingEnabled.reset();
     };
 
-    Section section = Section::None;
     string line;
+    TreeConstructionTestSection section = TreeConstructionTestSection::None;
     while (std::getline(stream, line))
     {
       if (!line.empty() && line.back() == '\r')
@@ -213,34 +215,32 @@ namespace Krys::HTML::Tests
 
       if (line == "#data")
       {
-        if (!expected.empty() && expected.back() == U'\n')
-        {
-          expected.pop_back();
-        }
+        NormaliseData(expected);
 
         if (!input.empty() && !expected.empty())
         {
           FinishParsingTest();
         }
-        section = Section::Data;
+
+        section = TreeConstructionTestSection::Data;
         continue;
       }
 
       if (line == "#errors" || line == "#new-errors" || line == "#errors-new")
       {
-        section = Section::Errors;
+        section = TreeConstructionTestSection::Errors;
         continue;
       }
 
       if (line.starts_with("#document-fragment"))
       {
-        section = Section::FragmentContext;
+        section = TreeConstructionTestSection::FragmentContext;
         continue;
       }
 
       if (line == "#document")
       {
-        section = Section::ExpectedOutput;
+        section = TreeConstructionTestSection::ExpectedOutput;
         expected = "#document\n";
         continue;
       }
@@ -259,30 +259,30 @@ namespace Krys::HTML::Tests
 
       if (line[0] == '#')
       {
-        section = Section::None;
+        section = TreeConstructionTestSection::None;
         continue; // Ignore unknown sections
       }
 
-      if (section == Section::Data)
+      if (section == TreeConstructionTestSection::Data)
       {
         input += line;
         input += '\n';
         continue;
       }
 
-      if (section == Section::ExpectedOutput)
+      if (section == TreeConstructionTestSection::ExpectedOutput)
       {
         expected += line;
         expected += '\n';
         continue;
       }
 
-      if (section == Section::Errors)
+      if (section == TreeConstructionTestSection::Errors)
       {
       }
     }
 
-    if (section != Section::None)
+    if (section != TreeConstructionTestSection::None)
     {
       FinishParsingTest();
     }
