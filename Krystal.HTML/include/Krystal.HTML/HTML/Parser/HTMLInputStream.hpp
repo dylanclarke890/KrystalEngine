@@ -26,10 +26,9 @@ namespace Krys::HTML
     };
 
   private:
-    // TODO(perf): MEDIUM - a lot of text is just plain ASCII, we need to optimize for that case.
-    // One idea I've had is to use the last bit in each 4 bytes to indicate if the next 4 bytes are ASCII or
-    // UTF-32. We can then have a fast path for ASCII chunks. We'd need to change the way we store data, not
-    // exactly a hard task though.
+    // TODO(perf): a lot of text is just plain ASCII, we should optimize for that case. One idea I've had is
+    // to use the last bit in each 4 bytes to indicate if the next 4 bytes are ASCII or UTF-32. We can then
+    // have a fast path for ASCII chunks.
     utf32_string _data;
     size_t _readPosition {0uz};
     size_t _insertionPosition = utf32_string::npos;

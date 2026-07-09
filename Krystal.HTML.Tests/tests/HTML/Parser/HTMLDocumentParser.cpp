@@ -21,7 +21,7 @@ namespace Krys::HTML::Tests
       INFO(string(reinterpret_cast<const char *>(input.data()), input.size()));
 
       // if (test.FragmentContext.has_value())
-      //{
+      // {
       //   auto fragmentContext = u8"#document-fragment\n" + *test.FragmentContext;
       //   INFO(
       //     string(reinterpret_cast<const char *>(test.FragmentContext->data()),
