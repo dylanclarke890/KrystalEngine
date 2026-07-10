@@ -7,6 +7,7 @@
 #include "Krystal.HTML/DOM/DocumentType.hpp"
 #include "Krystal.HTML/DOM/Element.hpp"
 #include "Krystal.HTML/DOM/Text.hpp"
+#include "Krystal.HTML/HTML/Enums/ParserScriptingMode.hpp"
 #include "Krystal.HTML/HTML/HTMLTemplateElement.hpp"
 #include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
@@ -25,7 +26,7 @@ namespace Krys::HTML::Tests
     utf32_string Input;
     DOMString Expected;
     Maybe<DOMString> FragmentContext;
-    Maybe<bool> ScriptingEnabled;
+    Maybe<ParserScriptingMode> ScriptingMode;
   };
 
   enum class TreeConstructionTestSection
@@ -188,7 +189,7 @@ namespace Krys::HTML::Tests
     string input;
     string expected;
     Maybe<string> fragmentContext;
-    Maybe<bool> scriptingEnabled;
+    Maybe<ParserScriptingMode> scriptingMode;
 
     auto FinishParsingTest = [&]()
     {
@@ -204,13 +205,13 @@ namespace Krys::HTML::Tests
         .Input = Krys::Text::ConvertToUTF32(utf8_stringview(ToUTF8(input))),
         .Expected = ToUTF8(expected),
         .FragmentContext = fragmentContext.has_value() ? ToUTF8(*fragmentContext) : Maybe<DOMString>(Null),
-        .ScriptingEnabled = scriptingEnabled,
+        .ScriptingMode = scriptingMode,
       });
 
       input.clear();
       expected.clear();
       fragmentContext.reset();
-      scriptingEnabled.reset();
+      scriptingMode.reset();
     };
 
     string line;
@@ -256,13 +257,21 @@ namespace Krys::HTML::Tests
 
       if (line == "#script-on")
       {
-        scriptingEnabled = true;
+        if (!fragmentContext.has_value())
+        {
+          scriptingMode = ParserScriptingMode::Normal;
+        }
+
         continue;
       }
 
       if (line == "#script-off")
       {
-        scriptingEnabled = false;
+        if (!fragmentContext.has_value())
+        {
+          scriptingMode = ParserScriptingMode::Disabled;
+        }
+
         continue;
       }
 

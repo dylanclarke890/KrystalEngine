@@ -298,8 +298,8 @@ namespace Krys::HTML::Tests
                          "|     <div>\n");
 
       REQUIRE(tests.size() == 1);
-      CHECK(tests[0].ScriptingEnabled.has_value());
-      CHECK(tests[0].ScriptingEnabled.value() == true);
+      CHECK(tests[0].ScriptingMode.has_value());
+      CHECK(tests[0].ScriptingMode.value() == ParserScriptingMode::Normal);
     }
 
     SECTION("ScriptingEnabled is false when #script-off is present")
@@ -316,8 +316,8 @@ namespace Krys::HTML::Tests
                          "|     <div>\n");
 
       REQUIRE(tests.size() == 1);
-      CHECK(tests[0].ScriptingEnabled.has_value());
-      CHECK(tests[0].ScriptingEnabled.value() == false);
+      CHECK(tests[0].ScriptingMode.has_value());
+      CHECK(tests[0].ScriptingMode.value() == ParserScriptingMode::Disabled);
     }
   }
 
