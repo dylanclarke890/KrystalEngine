@@ -2,6 +2,7 @@
 
 #include "Krystal.HTML/DOM/DocumentFragment.hpp"
 #include "Krystal.HTML/DOM/HTMLDocument.hpp"
+#include "Krystal.HTML/HTML/Parser/HTMLElementStack.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLInputStream.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLToken.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLTokenAtom.hpp"
@@ -13,40 +14,13 @@
 
 namespace Krys::HTML
 {
-  struct FragmentParsingContext
-  {
-  private:
-    RefPtr<DocumentFragment> _fragment;
-    RefPtr<Element> _contextElement;
-
-  public:
-    FragmentParsingContext() noexcept = default;
-
-    FragmentParsingContext(DocumentFragment &fragment, Element &contextElement) noexcept
-        : _fragment(ShareRefPtr(&fragment)), _contextElement(ShareRefPtr(&contextElement))
-    {
-    }
-
-    KRYS_NODISCARD DocumentFragment &Fragment() const noexcept
-    {
-      assert(_fragment);
-      return *_fragment;
-    }
-
-    KRYS_NODISCARD Element &ContextElement() const noexcept
-    {
-      assert(_contextElement);
-      return *_contextElement;
-    }
-  };
-
   class HTMLDocumentParser : public RefCounted<HTMLDocumentParser>
   {
     HTMLDocument &_document;
     HTMLInputStream _input;
     HTMLTokenizer _tokenizer;
     HTMLTreeBuilder _treeBuilder;
-    Maybe<FragmentParsingContext> _fragmentParsingContext;
+    Maybe<HTMLStackItem> _fragmentParsingContext;
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#script-nesting-level
     uint32 _scriptNestingLevel {0u};
@@ -55,22 +29,14 @@ namespace Krys::HTML
     bool _paused {false};
 
   public:
-    HTMLDocumentParser(HTMLDocument &document) noexcept
-        : _document(document), _input(),
-          _tokenizer(_input, [&]() { return _treeBuilder.IsCDATASectionAllowedInCurrentContext(); }),
-          _treeBuilder(document, _tokenizer)
-    {
-      _treeBuilder.SetScriptingMode(ParserScriptingMode::Normal);
-    }
+    HTMLDocumentParser(HTMLDocument &document) noexcept;
 
-    HTMLDocumentParser(HTMLDocument &document, DocumentFragment &fragment, Element &contextElement) noexcept
-        : _document(document), _input(),
-          _tokenizer(_input, [&]() { return _treeBuilder.IsCDATASectionAllowedInCurrentContext(); }),
-          _treeBuilder(document, _tokenizer),
-          _fragmentParsingContext(FragmentParsingContext(fragment, contextElement))
-    {
-      _treeBuilder.SetScriptingMode(ParserScriptingMode::Fragment);
-    }
+    /// @see https://html.spec.whatwg.org/#html-fragment-parsing-algorithm
+    KRYS_NODISCARD static SmallNodeList
+      ParseFragment(Element &contextElement, utf32_string &&input, bool allowDeclarativeShadowRoots = false,
+                    ParserScriptingMode scriptingMode = ParserScriptingMode::Inert) noexcept;
+
+    void PumpTokenizer() noexcept;
 
     KRYS_NODISCARD HTMLInputStream &InputStream() noexcept
     {
@@ -82,26 +48,34 @@ namespace Krys::HTML
       return _paused;
     }
 
-    void SetScriptingMode(ParserScriptingMode scriptingMode) noexcept
+    void ScriptingMode(ParserScriptingMode scriptingMode) noexcept
     {
-      _treeBuilder.SetScriptingMode(scriptingMode);
+      _treeBuilder.ScriptingMode(scriptingMode);
     }
 
-    KRYS_NODISCARD bool PumpTokenizer() noexcept
+    ParserScriptingMode ScriptingMode() const noexcept
     {
-      while (!IsStopped())
-      {
-        NextTokenPtr token = _tokenizer.NextToken();
-        if (!token)
-        {
-          return false;
-        }
+      return _treeBuilder.ScriptingMode();
+    }
 
-        HTMLTokenAtom tokenAtom(*token);
-        _treeBuilder.ProcessToken(Krys::Move(tokenAtom));
-      }
+    void TokenizerState(TokenizerState state) noexcept
+    {
+      _tokenizer.State(state);
+    }
 
-      return false;
+    void FormElement(HTMLFormElement &form) noexcept
+    {
+      _treeBuilder.FormElement(form);
+    }
+
+    KRYS_NODISCARD HTMLElementStack &OpenElementStack() noexcept
+    {
+      return _treeBuilder.OpenElementStack();
+    }
+
+    void ResetInsertionModeAppropriately() noexcept
+    {
+      _treeBuilder.ResetInsertionModeAppropriately();
     }
   };
 }

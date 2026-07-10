@@ -13,74 +13,23 @@ namespace Krys::HTML
   private:
     TagName _name {TagName::Unknown};
     Namespace _namespace {Namespace::Unknown};
-    RefPtr<ContainerNode> _node;
+    RefPtr<Element> _element;
     ParsedAttributeList _attributes;
 
   public:
-    HTMLStackItem() = default;
-
-#pragma region HTMLElementStack/ActiveFormattingList Constructors
+    HTMLStackItem() noexcept = default;
 
     HTMLStackItem(TagName tagName, Namespace tagNamespace, Element &element,
                   ParsedAttributeList &&attributes) noexcept
-        : _name(tagName), _namespace(tagNamespace), _node(ShareRef(element)),
+        : _name(tagName), _namespace(tagNamespace), _element(ShareRef(element)),
           _attributes(Krys::Move(attributes))
     {
     }
 
     HTMLStackItem(TagName tagName, Namespace tagNamespace, Element &element,
                   const ParsedAttributeList &attributes) noexcept
-        : _name(tagName), _namespace(tagNamespace), _node(ShareRef(element)), _attributes(attributes)
+        : _name(tagName), _namespace(tagNamespace), _element(ShareRef(element)), _attributes(attributes)
     {
-    }
-
-#pragma endregion
-
-#pragma region Fragment Constructors
-
-    HTMLStackItem(Element &element) noexcept
-        : _name(element._qualifiedName.TagName()), _namespace(element._qualifiedName.Namespace()),
-          _node(ShareRefPtr(&element))
-    {
-    }
-
-    HTMLStackItem(DocumentFragment &fragment) noexcept : _node(ShareRefPtr(&fragment))
-    {
-    }
-
-#pragma endregion
-
-    KRYS_NODISCARD bool IsElement() const noexcept
-    {
-      return Is<Element>(_node.get());
-    }
-
-    KRYS_NODISCARD bool IsDocumentFragment() const noexcept
-    {
-      return Is<DocumentFragment>(_node.get());
-    }
-
-    KRYS_NODISCARD bool IsNull() const noexcept
-    {
-      return _node == nullptr;
-    }
-
-    KRYS_NODISCARD ContainerNode &Node() const noexcept
-    {
-      assert(_node);
-      return *_node;
-    }
-
-    KRYS_NODISCARD Element &AsElement() const noexcept
-    {
-      assert(IsElement());
-      return Downcast<Element>(*_node);
-    }
-
-    KRYS_NODISCARD DocumentFragment &AsDocumentFragment() const noexcept
-    {
-      assert(IsDocumentFragment());
-      return Downcast<DocumentFragment>(*_node);
     }
 
     KRYS_NODISCARD TagName TagName() const noexcept
@@ -93,21 +42,20 @@ namespace Krys::HTML
       return _namespace;
     }
 
+    KRYS_NODISCARD Element &Element() const noexcept
+    {
+      return *_element;
+    }
+
     KRYS_NODISCARD const ParsedAttributeList &Attributes() const noexcept
     {
-      assert(IsElement());
       return _attributes;
     }
 
     /// @brief Replaces the DOM element reference stored in this item while keeping the tag metadata.
-    void UpdateElement(Element &newElement) noexcept
+    void UpdateElement(HTML::Element &newElement) noexcept
     {
-      _node = ShareRef(newElement);
-    }
-
-    KRYS_NODISCARD bool IsRootNode() const noexcept
-    {
-      return IsDocumentFragment() || TagName() == TagName::html;
+      _element = ShareRef(newElement);
     }
   };
 }

@@ -9,8 +9,6 @@ namespace Krys::HTML
 
   void HTMLFormattingElementList::PushElement(HTMLStackItem &&item) noexcept
   {
-    assert(item.IsElement());
-
     // NOTE: The spec's algorithm goes as follows:
     // If there are already three elements in the list of active formatting elements after the last marker, if
     // any, or anywhere in the list if there are no markers, that have the same tag name, namespace, and
@@ -93,24 +91,26 @@ namespace Krys::HTML
     return nullptr;
   }
 
-  bool HTMLFormattingElementList::Contains(const ContainerNode &node) const noexcept
+  bool HTMLFormattingElementList::Contains(const Element &node) const noexcept
   {
     return std::ranges::any_of(_formattingElements, [&](const FormattingListEntry &entry)
-                               { return entry.IsFormattingElement() && &entry.Item().Node() == &node; });
+                               { return entry.IsFormattingElement() && &entry.Item().Element() == &node; });
   }
 
-  RawPtr<FormattingListEntry> HTMLFormattingElementList::Find(const ContainerNode &node) noexcept
+  RawPtr<FormattingListEntry> HTMLFormattingElementList::Find(const Element &node) noexcept
   {
-    auto it = std::ranges::find_if(_formattingElements, [&](const FormattingListEntry &entry)
-                                   { return entry.IsFormattingElement() && &entry.Item().Node() == &node; });
+    auto it =
+      std::ranges::find_if(_formattingElements, [&](const FormattingListEntry &entry)
+                           { return entry.IsFormattingElement() && &entry.Item().Element() == &node; });
 
     return it != _formattingElements.end() ? &*it : nullptr;
   }
 
-  void HTMLFormattingElementList::Remove(const ContainerNode &node) noexcept
+  void HTMLFormattingElementList::Remove(const Element &node) noexcept
   {
-    auto it = std::ranges::find_if(_formattingElements, [&](const FormattingListEntry &entry)
-                                   { return entry.IsFormattingElement() && &entry.Item().Node() == &node; });
+    auto it =
+      std::ranges::find_if(_formattingElements, [&](const FormattingListEntry &entry)
+                           { return entry.IsFormattingElement() && &entry.Item().Element() == &node; });
 
     if (it != _formattingElements.end())
     {
@@ -139,13 +139,12 @@ namespace Krys::HTML
 
 #pragma region Bookmark
 
-  HTMLFormattingElementList::Bookmark
-    HTMLFormattingElementList::BookmarkFor(const ContainerNode &node) noexcept
+  HTMLFormattingElementList::Bookmark HTMLFormattingElementList::BookmarkFor(const Element &node) noexcept
   {
     for (size_t i = 0uz; i < _formattingElements.size(); ++i)
     {
       const auto &entry = _formattingElements[i];
-      if (entry.IsFormattingElement() && &entry.Item().Node() == &node)
+      if (entry.IsFormattingElement() && &entry.Item().Element() == &node)
       {
         return Bookmark {i};
       }
@@ -168,11 +167,11 @@ namespace Krys::HTML
     }
   }
 
-  void HTMLFormattingElementList::RemoveAndUpdateBookmark(const ContainerNode &node,
-                                                          Bookmark &bookmark) noexcept
+  void HTMLFormattingElementList::RemoveAndUpdateBookmark(const Element &node, Bookmark &bookmark) noexcept
   {
-    auto it = std::ranges::find_if(_formattingElements, [&](const FormattingListEntry &entry)
-                                   { return entry.IsFormattingElement() && &entry.Item().Node() == &node; });
+    auto it =
+      std::ranges::find_if(_formattingElements, [&](const FormattingListEntry &entry)
+                           { return entry.IsFormattingElement() && &entry.Item().Element() == &node; });
 
     if (it == _formattingElements.end())
     {

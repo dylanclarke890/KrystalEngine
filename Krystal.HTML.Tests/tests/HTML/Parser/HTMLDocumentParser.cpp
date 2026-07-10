@@ -27,7 +27,7 @@ namespace Krys::HTML::Tests
 
       if (test.ScriptingMode.has_value())
       {
-        parser->SetScriptingMode(*test.ScriptingMode);
+        parser->ScriptingMode(*test.ScriptingMode);
       }
 
       (void)parser->PumpTokenizer();

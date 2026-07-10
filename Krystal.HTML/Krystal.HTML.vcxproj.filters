@@ -1307,6 +1307,9 @@
     <ClCompile Include="src\SVG\SVGScriptElement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\HTML\Parser\HTMLDocumentParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="data\HTMLTagNames.in" />

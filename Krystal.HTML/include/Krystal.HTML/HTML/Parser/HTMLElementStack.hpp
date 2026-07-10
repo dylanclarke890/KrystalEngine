@@ -59,14 +59,14 @@ namespace Krys::HTML
 
     /// @brief Pops elements off the stack until the given node has been encountered. The given node is not
     /// popped.
-    void PopUntil(const ContainerNode &node) noexcept;
+    void PopUntil(const Element &node) noexcept;
 
     /// @brief Pops elements off the stack until the given tagname has been encountered. The given tagname is
     /// not popped.
     void PopUntil(TagName tagName, Namespace tagNamespace) noexcept;
 
     /// @brief Pops elements off the stack until the given node itself has been popped.
-    void PopUntilPopped(const ContainerNode &node) noexcept;
+    void PopUntilPopped(const Element &node) noexcept;
 
     /// @brief Pops elements off the stack until the given tagname itself has been popped.
     void PopUntilPopped(TagName tagName, Namespace tagNamespace) noexcept;
@@ -93,15 +93,13 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool IsListItemScopeMarker(const HTMLStackItem &item) const noexcept;
 
+    KRYS_NODISCARD bool IsButtonScopeMarker(const HTMLStackItem &item) const noexcept;
+
     KRYS_NODISCARD bool IsTableScopeMarker(const HTMLStackItem &item) const noexcept;
 
     KRYS_NODISCARD bool IsTableBodyScopeMarker(const HTMLStackItem &item) const noexcept;
 
     KRYS_NODISCARD bool IsTableRowScopeMarker(const HTMLStackItem &item) const noexcept;
-
-    KRYS_NODISCARD bool IsButtonScopeMarker(const HTMLStackItem &item) const noexcept;
-
-    KRYS_NODISCARD bool IsSelectScopeMarker(const HTMLStackItem &item) const noexcept;
 
   public:
     KRYS_NODISCARD bool HasElementInScope(TagName targetNode) const noexcept;
@@ -158,9 +156,9 @@ namespace Krys::HTML
       return _items.size();
     }
 
-    void Remove(const ContainerNode &node) noexcept
+    void Remove(const Element &node) noexcept
     {
-      auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item.Node() == &node; });
+      auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item.Element() == &node; });
       if (it != _items.end())
       {
         _items.erase(it);
@@ -172,15 +170,15 @@ namespace Krys::HTML
     /// @brief Returns a pointer to the stack entry whose node matches the given node, or null.
     KRYS_NODISCARD RawPtr<HTMLStackItem> Find(const ContainerNode &node) noexcept
     {
-      auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item.Node() == &node; });
+      auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item.Element() == &node; });
       return it != _items.end() ? &*it : nullptr;
     }
 
     /// @brief Inserts the new element into the stack of open elements immediately below the position of
     /// reference.
-    void InsertBelow(HTMLStackItem &&newItem, const ContainerNode &reference) noexcept
+    void InsertBelow(HTMLStackItem &&newItem, const Element &reference) noexcept
     {
-      auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item.Node() == &reference; });
+      auto it = std::ranges::find_if(_items, [&](const auto &item) { return &item.Element() == &reference; });
       assert(it != _items.end());
       _items.insert(std::next(it), Krys::Move(newItem));
     }
@@ -189,17 +187,20 @@ namespace Krys::HTML
     /// entry exists and is an element entry. Otherwise, returns null.
     /// @note This should always return a non-null entry for the situations in which it's used in the HTML
     /// tree builder algorithms.
-    KRYS_NODISCARD RawPtr<HTMLStackItem> EntryBefore(ContainerNode &node) noexcept
+    KRYS_NODISCARD RawPtr<HTMLStackItem> EntryBefore(Element &node) noexcept
     {
       for (auto it = _items.rbegin(); it != _items.rend(); ++it)
       {
-        if (it->IsElement() && &it->Node() == &node)
+        if (&it->Element() == &node)
         {
           auto nextIt = std::next(it);
-          if (nextIt != _items.rend() && nextIt->IsElement())
+
+          if (nextIt != _items.rend())
           {
             return &*nextIt;
           }
+
+          return nullptr;
         }
       }
 
@@ -210,17 +211,19 @@ namespace Krys::HTML
     /// entry exists and is an element entry. Otherwise, returns null.
     /// @note This should always return a non-null entry for the situations in which it's used in the HTML
     /// tree builder algorithms.
-    KRYS_NODISCARD RawPtr<const HTMLStackItem> EntryBefore(ContainerNode &node) const noexcept
+    KRYS_NODISCARD RawPtr<const HTMLStackItem> EntryBefore(Element &node) const noexcept
     {
       for (auto it = _items.rbegin(); it != _items.rend(); ++it)
       {
-        if (it->IsElement() && &it->Node() == &node)
+        if (&it->Element() == &node)
         {
           auto nextIt = std::next(it);
-          if (nextIt != _items.rend() && nextIt->IsElement())
+          if (nextIt != _items.rend())
           {
             return &*nextIt;
           }
+
+          return nullptr;
         }
       }
 
@@ -229,8 +232,8 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool ContainsTemplateElement() const noexcept
     {
-      return std::ranges::any_of(_items, [](const auto &item)
-                                 { return item.IsElement() && Is<HTMLTemplateElement>(item.Node()); });
+      return std::ranges::any_of(_items,
+                                 [](const auto &item) { return Is<HTMLTemplateElement>(item.Element()); });
     }
 
     KRYS_NODISCARD bool ContainsInvalidUnclosedElements() const noexcept
@@ -238,11 +241,6 @@ namespace Krys::HTML
       return std::ranges::any_of(_items,
                                  [](const auto &item)
                                  {
-                                   if (!item.IsElement())
-                                   {
-                                     return false;
-                                   }
-
                                    switch (item.TagName())
                                    {
                                      case TagName::dd:
@@ -264,13 +262,11 @@ namespace Krys::HTML
                                      case TagName::body:
                                      case TagName::html:
                                      {
-                                       return false;
-                                     }
-                                     default:
-                                     {
-                                       return true;
+                                       return item.Namespace() != Namespace::HTML;
                                      }
                                    }
+
+                                   return true;
                                  });
     }
   };

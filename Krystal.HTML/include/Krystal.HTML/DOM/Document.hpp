@@ -9,11 +9,11 @@
 #include "Krystal.HTML/DOM/Internals/RareData/DocumentRareData.hpp"
 #include "Krystal.HTML/DOM/NodeIterator.hpp"
 #include "Krystal.HTML/DOM/Range.hpp"
+#include "Krystal.HTML/DOM/Types/NodeOrString.hpp"
 #include "Krystal.HTML/HTML/Enums/DocumentReadyState.hpp"
 #include "Krystal.HTML/HTML/Enums/DocumentVisibilityState.hpp"
 #include "Krystal.HTML/HTML/Types/HTMLOrSVGScriptElement.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
-#include "Krystal.HTML/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 
 namespace Krys::HTML
@@ -44,6 +44,7 @@ namespace Krys::HTML
     friend class DocumentRareData;
     friend class DOMImplementation;
     friend class HTMLCollectionAlgorithms;
+    friend class HTMLDocumentParser;
     friend class HTMLTreeBuilder;
     friend class LiveRangeUpdater;
     friend class MutationAlgorithms;
@@ -61,9 +62,9 @@ namespace Krys::HTML
     QuirksMode _quirksMode : BitCount<QuirksMode>() {QuirksMode::NoQuirks};
     DocumentFlags _flags : BitCount<DocumentFlags>() {DocumentFlags::None};
     DocumentReadyState _currentDocumentReadiness
-        : BitCount<DocumentReadyState>() {DocumentReadyState::Complete};
+      : BitCount<DocumentReadyState>() {DocumentReadyState::Complete};
     DocumentVisibilityState _visibilityState
-        : BitCount<DocumentVisibilityState>() {DocumentVisibilityState::Hidden};
+      : BitCount<DocumentVisibilityState>() {DocumentVisibilityState::Hidden};
 
     /// @see https://html.spec.whatwg.org/#parser-cannot-change-the-mode-flag
     bool _parserCannotChangeTheMode : 1 {false};
@@ -419,6 +420,14 @@ namespace Krys::HTML
       // relevant global object.
 
       return nullptr;
+    }
+
+    KRYS_NODISCARD bool IsScriptingDisabled() const noexcept
+    {
+      // SPEC-VIOLATION(HTML, DOM): We don't have global objects or JavaScript so we'll always return true
+      // here. A document is scripting-disabled if the document does not have a browsing context.
+
+      return true;
     }
 
 #pragma region Type Checks

@@ -26,8 +26,8 @@
 namespace Krys::HTML
 {
   HTMLTreeBuilder::HTMLTreeBuilder(Document &document, HTMLTokenizer &tokenizer,
-                                   RawPtr<Element> contextElement) noexcept
-      : _document(document), _tokenizer(tokenizer), _contextElement(contextElement)
+                                   Maybe<HTMLStackItem> &context) noexcept
+      : _document(document), _tokenizer(tokenizer), _context(context)
   {
   }
 
@@ -57,6 +57,11 @@ namespace Krys::HTML
     }
   }
 
+  void HTMLTreeBuilder::PushTemplateInsertionMode(InsertionMode mode) noexcept
+  {
+    _templateInsertionModes.push_back(mode);
+  }
+
   bool HTMLTreeBuilder::ShouldProcessAccordingToRulesForHTMLContent(const HTMLTokenAtom &token) noexcept
   {
     if (_openElementStack.IsEmpty())
@@ -65,41 +70,38 @@ namespace Krys::HTML
     }
 
     auto &adjustedCurrentNode = AdjustedCurrentNode();
-    if (auto *adjustedCurrentElement = DynamicDowncast<Element>(adjustedCurrentNode))
+    if (adjustedCurrentNode.NamespaceURI() == Namespaces::HTML)
     {
-      if (adjustedCurrentElement->NamespaceURI() == Namespaces::HTML)
-      {
-        return true;
-      }
+      return true;
+    }
 
-      if (IsMathMLTextIntegrationPoint(*adjustedCurrentElement))
+    if (IsMathMLTextIntegrationPoint(adjustedCurrentNode))
+    {
+      if (token.Type() == HTMLTokenType::StartTag)
       {
-        if (token.Type() == HTMLTokenType::StartTag)
-        {
-          auto tagName = token.Name();
-          if (tagName != u8"mglyph" && tagName != u8"malignmark")
-          {
-            return true;
-          }
-        }
-        else if (token.Type() == HTMLTokenType::Character)
+        auto tagName = token.Name();
+        if (tagName != u8"mglyph" && tagName != u8"malignmark")
         {
           return true;
         }
       }
-
-      if (adjustedCurrentElement->NamespaceURI() == Namespaces::MathML
-          && adjustedCurrentElement->LocalName() == u8"annotation-xml"
-          && token.Type() == HTMLTokenType::StartTag && token.Name() == u8"svg")
+      else if (token.Type() == HTMLTokenType::Character)
       {
         return true;
       }
+    }
 
-      if (IsHTMLIntegrationPoint(*adjustedCurrentElement)
-          && (token.Type() == HTMLTokenType::StartTag || token.Type() == HTMLTokenType::Character))
-      {
-        return true;
-      }
+    if (adjustedCurrentNode.NamespaceURI() == Namespaces::MathML
+        && adjustedCurrentNode.LocalName() == u8"annotation-xml" && token.Type() == HTMLTokenType::StartTag
+        && token.Name() == u8"svg")
+    {
+      return true;
+    }
+
+    if (IsHTMLIntegrationPoint(adjustedCurrentNode)
+        && (token.Type() == HTMLTokenType::StartTag || token.Type() == HTMLTokenType::Character))
+    {
+      return true;
     }
 
     if (token.Type() == HTMLTokenType::EndOfFile)
@@ -152,10 +154,9 @@ namespace Krys::HTML
           _openElementStack.Pop();
           continue;
         }
-        auto &currentElement = Downcast<Element>(currentNode);
 
-        if (!IsMathMLTextIntegrationPoint(currentElement) && !IsHTMLIntegrationPoint(currentElement)
-            && currentElement.NamespaceURI() != Namespaces::HTML)
+        if (!IsMathMLTextIntegrationPoint(currentNode) && !IsHTMLIntegrationPoint(currentNode)
+            && currentNode.NamespaceURI() != Namespaces::HTML)
         {
           _openElementStack.Pop();
           continue;
@@ -286,84 +287,79 @@ namespace Krys::HTML
         }
 
         auto &adjustedCurrentNode = AdjustedCurrentNode();
-        if (Is<Element>(adjustedCurrentNode))
+        if (adjustedCurrentNode.NamespaceURI() == Namespaces::MathML)
         {
-          auto &adjustedCurrentElement = Downcast<Element>(adjustedCurrentNode);
+          AdjustMathMLAttributes(token);
+        }
+        else if (adjustedCurrentNode.NamespaceURI() == Namespaces::SVG)
+        {
+          constexpr static Array<Array<DOMStringView, 2uz>, 37uz> svgTagNameAdjustments = {
+            Array<DOMStringView, 2uz> {u8"altglyph", u8"altGlyph"},
+            Array<DOMStringView, 2uz> {u8"altglyphdef", u8"altGlyphDef"},
+            Array<DOMStringView, 2uz> {u8"altglyphitem", u8"altGlyphItem"},
+            Array<DOMStringView, 2uz> {u8"animatecolor", u8"animateColor"},
+            Array<DOMStringView, 2uz> {u8"animatemotion", u8"animateMotion"},
+            Array<DOMStringView, 2uz> {u8"animatetransform", u8"animateTransform"},
+            Array<DOMStringView, 2uz> {u8"clippath", u8"clipPath"},
+            Array<DOMStringView, 2uz> {u8"feblend", u8"feBlend"},
+            Array<DOMStringView, 2uz> {u8"fecolormatrix", u8"feColorMatrix"},
+            Array<DOMStringView, 2uz> {u8"fecomponenttransfer", u8"feComponentTransfer"},
+            Array<DOMStringView, 2uz> {u8"fecomposite", u8"feComposite"},
+            Array<DOMStringView, 2uz> {u8"feconvolvematrix", u8"feConvolveMatrix"},
+            Array<DOMStringView, 2uz> {u8"fediffuselighting", u8"feDiffuseLighting"},
+            Array<DOMStringView, 2uz> {u8"fedisplacementmap", u8"feDisplacementMap"},
+            Array<DOMStringView, 2uz> {u8"fedistantlight", u8"feDistantLight"},
+            Array<DOMStringView, 2uz> {u8"fedropshadow", u8"feDropShadow"},
+            Array<DOMStringView, 2uz> {u8"feflood", u8"feFlood"},
+            Array<DOMStringView, 2uz> {u8"fefunca", u8"feFuncA"},
+            Array<DOMStringView, 2uz> {u8"fefuncb", u8"feFuncB"},
+            Array<DOMStringView, 2uz> {u8"fefuncg", u8"feFuncG"},
+            Array<DOMStringView, 2uz> {u8"fefuncr", u8"feFuncR"},
+            Array<DOMStringView, 2uz> {u8"fegaussianblur", u8"feGaussianBlur"},
+            Array<DOMStringView, 2uz> {u8"feimage", u8"feImage"},
+            Array<DOMStringView, 2uz> {u8"femerge", u8"feMerge"},
+            Array<DOMStringView, 2uz> {u8"femergenode", u8"feMergeNode"},
+            Array<DOMStringView, 2uz> {u8"femorphology", u8"feMorphology"},
+            Array<DOMStringView, 2uz> {u8"feoffset", u8"feOffset"},
+            Array<DOMStringView, 2uz> {u8"fepointlight", u8"fePointLight"},
+            Array<DOMStringView, 2uz> {u8"fespecularlighting", u8"feSpecularLighting"},
+            Array<DOMStringView, 2uz> {u8"fespotlight", u8"feSpotLight"},
+            Array<DOMStringView, 2uz> {u8"fetile", u8"feTile"},
+            Array<DOMStringView, 2uz> {u8"feturbulence", u8"feTurbulence"},
+            Array<DOMStringView, 2uz> {u8"foreignobject", u8"foreignObject"},
+            Array<DOMStringView, 2uz> {u8"glyphref", u8"glyphRef"},
+            Array<DOMStringView, 2uz> {u8"lineargradient", u8"linearGradient"},
+            Array<DOMStringView, 2uz> {u8"radialgradient", u8"radialGradient"},
+            Array<DOMStringView, 2uz> {u8"textpath", u8"textPath"},
+          };
 
-          if (adjustedCurrentElement.NamespaceURI() == Namespaces::MathML)
+          auto adjustedNameIt =
+            std::find_if(svgTagNameAdjustments.begin(), svgTagNameAdjustments.end(),
+                         [&](const auto &pair) { return pair[0] == token.Name().View(); });
+          if (adjustedNameIt != svgTagNameAdjustments.end())
           {
-            AdjustMathMLAttributes(token);
-          }
-          else if (adjustedCurrentElement.NamespaceURI() == Namespaces::SVG)
-          {
-            constexpr static Array<Array<DOMStringView, 2uz>, 37uz> svgTagNameAdjustments = {
-              Array<DOMStringView, 2uz> {u8"altglyph", u8"altGlyph"},
-              Array<DOMStringView, 2uz> {u8"altglyphdef", u8"altGlyphDef"},
-              Array<DOMStringView, 2uz> {u8"altglyphitem", u8"altGlyphItem"},
-              Array<DOMStringView, 2uz> {u8"animatecolor", u8"animateColor"},
-              Array<DOMStringView, 2uz> {u8"animatemotion", u8"animateMotion"},
-              Array<DOMStringView, 2uz> {u8"animatetransform", u8"animateTransform"},
-              Array<DOMStringView, 2uz> {u8"clippath", u8"clipPath"},
-              Array<DOMStringView, 2uz> {u8"feblend", u8"feBlend"},
-              Array<DOMStringView, 2uz> {u8"fecolormatrix", u8"feColorMatrix"},
-              Array<DOMStringView, 2uz> {u8"fecomponenttransfer", u8"feComponentTransfer"},
-              Array<DOMStringView, 2uz> {u8"fecomposite", u8"feComposite"},
-              Array<DOMStringView, 2uz> {u8"feconvolvematrix", u8"feConvolveMatrix"},
-              Array<DOMStringView, 2uz> {u8"fediffuselighting", u8"feDiffuseLighting"},
-              Array<DOMStringView, 2uz> {u8"fedisplacementmap", u8"feDisplacementMap"},
-              Array<DOMStringView, 2uz> {u8"fedistantlight", u8"feDistantLight"},
-              Array<DOMStringView, 2uz> {u8"fedropshadow", u8"feDropShadow"},
-              Array<DOMStringView, 2uz> {u8"feflood", u8"feFlood"},
-              Array<DOMStringView, 2uz> {u8"fefunca", u8"feFuncA"},
-              Array<DOMStringView, 2uz> {u8"fefuncb", u8"feFuncB"},
-              Array<DOMStringView, 2uz> {u8"fefuncg", u8"feFuncG"},
-              Array<DOMStringView, 2uz> {u8"fefuncr", u8"feFuncR"},
-              Array<DOMStringView, 2uz> {u8"fegaussianblur", u8"feGaussianBlur"},
-              Array<DOMStringView, 2uz> {u8"feimage", u8"feImage"},
-              Array<DOMStringView, 2uz> {u8"femerge", u8"feMerge"},
-              Array<DOMStringView, 2uz> {u8"femergenode", u8"feMergeNode"},
-              Array<DOMStringView, 2uz> {u8"femorphology", u8"feMorphology"},
-              Array<DOMStringView, 2uz> {u8"feoffset", u8"feOffset"},
-              Array<DOMStringView, 2uz> {u8"fepointlight", u8"fePointLight"},
-              Array<DOMStringView, 2uz> {u8"fespecularlighting", u8"feSpecularLighting"},
-              Array<DOMStringView, 2uz> {u8"fespotlight", u8"feSpotLight"},
-              Array<DOMStringView, 2uz> {u8"fetile", u8"feTile"},
-              Array<DOMStringView, 2uz> {u8"feturbulence", u8"feTurbulence"},
-              Array<DOMStringView, 2uz> {u8"foreignobject", u8"foreignObject"},
-              Array<DOMStringView, 2uz> {u8"glyphref", u8"glyphRef"},
-              Array<DOMStringView, 2uz> {u8"lineargradient", u8"linearGradient"},
-              Array<DOMStringView, 2uz> {u8"radialgradient", u8"radialGradient"},
-              Array<DOMStringView, 2uz> {u8"textpath", u8"textPath"},
-            };
-
-            auto adjustedNameIt =
-              std::find_if(svgTagNameAdjustments.begin(), svgTagNameAdjustments.end(),
-                           [&](const auto &pair) { return pair[0] == token.Name().View(); });
-            if (adjustedNameIt != svgTagNameAdjustments.end())
-            {
-              token._name = (*adjustedNameIt)[1];
-            }
-
-            AdjustSVGAttributes(token);
+            token._name = (*adjustedNameIt)[1];
           }
 
-          AdjustForeignAttributes(token);
-          InsertForeignElement(Krys::Move(token), adjustedCurrentElement.NamespaceURI(), false);
+          AdjustSVGAttributes(token);
+        }
 
-          if (token.IsSelfClosing())
+        AdjustForeignAttributes(token);
+        InsertForeignElement(Krys::Move(token), adjustedCurrentNode.NamespaceURI(), false);
+
+        if (token.IsSelfClosing())
+        {
+          auto &newCurrentNode = _openElementStack.Bottom();
+          if (newCurrentNode.TagName() == TagName::script && newCurrentNode.Namespace() == Namespace::SVG)
           {
-            auto &newCurrentNode = _openElementStack.Bottom();
-            if (newCurrentNode.TagName() == TagName::script && newCurrentNode.Namespace() == Namespace::SVG)
-            {
-              token.AcknowledgeSelfClosingTag();
-              ScriptTag();
-              return;
-            }
-
-            _openElementStack.Pop();
             token.AcknowledgeSelfClosingTag();
+            ScriptTag();
             return;
           }
+
+          _openElementStack.Pop();
+          token.AcknowledgeSelfClosingTag();
+          return;
         }
 
         break;
@@ -382,10 +378,8 @@ namespace Krys::HTML
           return;
         }
 
-        auto *currentNode = DynamicDowncast<Element>(CurrentNode());
-        if (currentNode == nullptr
-            || StringAlgorithms::ASCIICaseInsensitiveMatch(currentNode->LocalName().View(),
-                                                           token.Name().View()))
+        if (StringAlgorithms::ASCIICaseInsensitiveMatch(CurrentNode().LocalName().View(),
+                                                        token.Name().View()))
         {
           ParseError(token);
         }
@@ -394,24 +388,21 @@ namespace Krys::HTML
         {
           auto &node = *nodeIt;
 
-          if (&node.Node() == &_openElementStack.Top().Node())
+          if (&node.Element() == &_openElementStack.Top().Element())
           {
             return;
           }
 
-          if (node.IsElement())
+          if (StringAlgorithms::ASCIICaseInsensitiveMatch(node.Element().LocalName().View(),
+                                                          token.Name().View()))
           {
-            if (StringAlgorithms::ASCIICaseInsensitiveMatch(node.AsElement().LocalName().View(),
-                                                            token.Name().View()))
-            {
-              _openElementStack.PopUntilPopped(node.Node());
-              return;
-            }
+            _openElementStack.PopUntilPopped(node.Element());
+            return;
+          }
 
-            if (node.AsElement().NamespaceURI() != Namespaces::HTML)
-            {
-              continue;
-            }
+          if (node.Element().NamespaceURI() != Namespaces::HTML)
+          {
+            continue;
           }
 
           ProcessAccordingToRulesForHTMLContent(Krys::Move(token));
@@ -423,16 +414,16 @@ namespace Krys::HTML
     }
   }
 
-  ContainerNode &HTMLTreeBuilder::CurrentNode() noexcept
+  Element &HTMLTreeBuilder::CurrentNode() noexcept
   {
-    return _openElementStack.Bottom().Node();
+    return _openElementStack.Bottom().Element();
   }
 
-  ContainerNode &HTMLTreeBuilder::AdjustedCurrentNode() noexcept
+  Element &HTMLTreeBuilder::AdjustedCurrentNode() noexcept
   {
-    if (_contextElement != nullptr && _openElementStack.Size() == 1uz)
+    if (_context.has_value() && _openElementStack.Size() == 1uz)
     {
-      return *_contextElement;
+      return _context->Element();
     }
     else
     {
@@ -453,17 +444,17 @@ namespace Krys::HTML
     bool last = false;
 
     auto *stackElement = &_openElementStack.Bottom();
-    auto *node = &stackElement->Node();
+    auto *node = &stackElement->Element();
 
     while (true)
     {
-      if (node == &_openElementStack.Top().Node())
+      if (node == &_openElementStack.Top().Element())
       {
         last = true;
 
-        if (_contextElement != nullptr)
+        if (_context.has_value())
         {
-          node = _contextElement;
+          node = &_context->Element();
         }
       }
 
@@ -562,7 +553,7 @@ namespace Krys::HTML
       stackElement = _openElementStack.EntryBefore(*node);
       assert(stackElement != nullptr);
 
-      node = &stackElement->Node();
+      node = &stackElement->Element();
     }
   }
 
@@ -924,7 +915,7 @@ namespace Krys::HTML
             auto &adjustedCurrentNode = AdjustedCurrentNode();
 
             if (shadowrootmodeIsNone || !document._allowDeclarativeShadowRoots
-                || _openElementStack.Top().Node() == adjustedCurrentNode)
+                || _openElementStack.Top().Element() == adjustedCurrentNode)
             {
               InsertHTMLElement(Krys::Move(templateStartTag));
               return;
@@ -1229,8 +1220,8 @@ namespace Krys::HTML
               return; // ignore the token
             }
 
-            assert(Is<HTMLHtmlElement>(_openElementStack.Top().Node()));
-            auto &htmlElement = Downcast<HTMLHtmlElement>(_openElementStack.Top().Node());
+            assert(Is<HTMLHtmlElement>(_openElementStack.Top().Element()));
+            auto &htmlElement = Downcast<HTMLHtmlElement>(_openElementStack.Top().Element());
 
             for (auto &attr : token.Attributes())
             {
@@ -1268,8 +1259,8 @@ namespace Krys::HTML
 
             _framesetOk = false;
 
-            assert(Is<HTMLBodyElement>(_openElementStack[1].Node()));
-            auto &bodyElement = Downcast<HTMLBodyElement>(_openElementStack[1].Node());
+            assert(Is<HTMLBodyElement>(_openElementStack[1].Element()));
+            auto &bodyElement = Downcast<HTMLBodyElement>(_openElementStack[1].Element());
 
             for (auto &attr : token.Attributes())
             {
@@ -1296,9 +1287,9 @@ namespace Krys::HTML
               return; // ignore the token
             }
 
-            auto &bodyElement = Downcast<HTMLBodyElement>(_openElementStack[1].Node());
+            auto &bodyElement = Downcast<HTMLBodyElement>(_openElementStack[1].Element());
             (void)MutationAlgorithms::Remove(bodyElement);
-            _openElementStack.PopUntil(_openElementStack.Top().Node());
+            _openElementStack.PopUntil(_openElementStack.Top().Element());
             InsertHTMLElement(Krys::Move(token));
 
             _insertionMode = InsertionMode::InFrameset;
@@ -1529,7 +1520,7 @@ namespace Krys::HTML
               ParseError(token);
 
               // Stack item might be removed by AAA so we need to keep a reference to the node here.
-              auto &existingNode = existing->Node();
+              auto &existingNode = existing->Element();
 
               RunAdoptionAgency(token);
 
@@ -1542,7 +1533,7 @@ namespace Krys::HTML
 
             auto &a = _openElementStack.Bottom();
             _activeFormattingElements.PushElement(
-              HTMLStackItem(a.TagName(), a.Namespace(), a.AsElement(), a.Attributes()));
+              HTMLStackItem(a.TagName(), a.Namespace(), a.Element(), a.Attributes()));
 
             return;
           }
@@ -1565,7 +1556,7 @@ namespace Krys::HTML
             auto &fmtOpenItem = _openElementStack.Bottom();
             ParsedAttributeList fmtAttrsCopy = fmtOpenItem.Attributes();
             _activeFormattingElements.PushElement(
-              HTMLStackItem(fmtOpenItem.TagName(), fmtOpenItem.Namespace(), fmtOpenItem.AsElement(),
+              HTMLStackItem(fmtOpenItem.TagName(), fmtOpenItem.Namespace(), fmtOpenItem.Element(),
                             Krys::Move(fmtAttrsCopy)));
 
             return;
@@ -1586,7 +1577,7 @@ namespace Krys::HTML
             auto &nobrOpenItem = _openElementStack.Bottom();
             ParsedAttributeList nobrAttrsCopy = nobrOpenItem.Attributes();
             _activeFormattingElements.PushElement(
-              HTMLStackItem(nobrOpenItem.TagName(), nobrOpenItem.Namespace(), nobrOpenItem.AsElement(),
+              HTMLStackItem(nobrOpenItem.TagName(), nobrOpenItem.Namespace(), nobrOpenItem.Element(),
                             Krys::Move(nobrAttrsCopy)));
 
             return;
@@ -1633,7 +1624,7 @@ namespace Krys::HTML
           }
           case TagName::input:
           {
-            if (_scriptingMode == ParserScriptingMode::Fragment && Is<HTMLSelectElement>(_contextElement))
+            if (_scriptingMode == ParserScriptingMode::Fragment && Is<HTMLSelectElement>(_context->Element()))
             {
               ParseError(token);
               return; // ignore the token
@@ -1761,7 +1752,7 @@ namespace Krys::HTML
           }
           case TagName::select:
           {
-            if (_scriptingMode == ParserScriptingMode::Fragment && Is<HTMLSelectElement>(_contextElement))
+            if (_scriptingMode == ParserScriptingMode::Fragment && Is<HTMLSelectElement>(_context->Element()))
             {
               ParseError(token);
               return; // ignore the token
@@ -2234,7 +2225,7 @@ namespace Krys::HTML
 
         if (_openElementStack.Bottom().TagName() == TagName::script)
         {
-          Downcast<HTMLScriptElement>(_openElementStack.Bottom().Node())._alreadyStarted = true;
+          Downcast<HTMLScriptElement>(_openElementStack.Bottom().Element())._alreadyStarted = true;
         }
 
         _openElementStack.Pop();
@@ -3208,7 +3199,8 @@ namespace Krys::HTML
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(token.Comment(), AdjustedInsertionLocation {&_openElementStack.Top().Node(), nullptr});
+        InsertComment(token.Comment(),
+                      AdjustedInsertionLocation {&_openElementStack.Top().Element(), nullptr});
         return;
       }
       // NOTE: new ProcessingInstruction token type would go here.
@@ -3230,7 +3222,7 @@ namespace Krys::HTML
       {
         if (token.Name() == u8"html")
         {
-          if (_contextElement != nullptr)
+          if (_context.has_value())
           {
             ParseError(token); // fragment case, ignore
             return;
@@ -3313,7 +3305,7 @@ namespace Krys::HTML
       {
         if (token.Name() == u8"frameset")
         {
-          if (&_openElementStack.Bottom().Node() == &_openElementStack.Top().Node())
+          if (&_openElementStack.Bottom() == &_openElementStack.Top())
           {
             ParseError(token);
             return; // fragment case, ignore
@@ -3321,7 +3313,7 @@ namespace Krys::HTML
 
           _openElementStack.Pop();
 
-          if (_contextElement == nullptr && _openElementStack.Bottom().TagName() != TagName::frameset)
+          if (_context.has_value() && _openElementStack.Bottom().TagName() != TagName::frameset)
           {
             _insertionMode = InsertionMode::AfterFrameset;
           }
@@ -3333,7 +3325,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::EndOfFile:
       {
-        if (&_openElementStack.Bottom().Node() != &_openElementStack.Top().Node())
+        if (&_openElementStack.Bottom() != &_openElementStack.Top())
         {
           ParseError(token);
         }
@@ -3517,8 +3509,7 @@ namespace Krys::HTML
       auto &nodeEntry = *nodeIt;
       // NOTE: this part of the spec ensures misnested end tags are properly closed. We check the local name
       // instead of the parsed tag name to avoid issues with foreign/unknown elements.
-      if (nodeEntry.Namespace() == Namespace::HTML && nodeEntry.IsElement()
-          && nodeEntry.AsElement().LocalName() == token.Name())
+      if (nodeEntry.Namespace() == Namespace::HTML && nodeEntry.Element().LocalName() == token.Name())
       {
         _openElementStack.GenerateImpliedEndTags(tagName);
 
@@ -3527,7 +3518,7 @@ namespace Krys::HTML
           ParseError(token);
         }
 
-        _openElementStack.PopUntilPopped(nodeEntry.Node());
+        _openElementStack.PopUntilPopped(nodeEntry.Element());
         return;
       }
 
@@ -3681,12 +3672,12 @@ namespace Krys::HTML
 
       for (auto it = _openElementStack.rbegin(); it != _openElementStack.rend(); ++it)
       {
-        if (!Is<HTMLElement>(it->Node()))
+        if (!Is<HTMLElement>(it->Element()))
         {
           continue;
         }
 
-        auto &element = Downcast<HTMLElement>(it->Node());
+        auto &element = Downcast<HTMLElement>(it->Element());
         if (result.LastTemplateElement == nullptr && Is<HTMLTemplateElement>(element))
         {
           result.LastTemplateElement = &Downcast<HTMLTemplateElement>(element);
@@ -3698,9 +3689,9 @@ namespace Krys::HTML
           lastTableIt = it;
 
           auto next = std::next(it);
-          if (next != _openElementStack.rend() && next->IsElement())
+          if (next != _openElementStack.rend())
           {
-            result.ElementBeforeLastTable = &Downcast<Element>(next->Node());
+            result.ElementBeforeLastTable = &next->Element();
           }
         }
 
@@ -3720,7 +3711,7 @@ namespace Krys::HTML
       }
       else if (tableElement == nullptr)
       {
-        location = {.Parent = &_openElementStack.Top().Node()}; // should be the html element
+        location = {.Parent = &_openElementStack.Top().Element()}; // should be the html element
       }
       else if (tableElement->ParentNode() != nullptr)
       {
@@ -3733,7 +3724,7 @@ namespace Krys::HTML
     }
     else
     {
-      location = {.Parent = &target.Node(), .BeforeSibling = nullptr};
+      location = {.Parent = &target.Element(), .BeforeSibling = nullptr};
     }
 
     if (auto *templateElement = DynamicDowncast<HTMLTemplateElement>(location.Parent))
@@ -3755,7 +3746,7 @@ namespace Krys::HTML
     }
 
     // If the parser was not created as part of the HTML fragment parsing algorithm
-    if (_contextElement == nullptr)
+    if (!_context.has_value())
     {
       // TODO(CUSTOMELEMENTS): InsertElementAtAdjustedInsertionLocation - push a new element queue onto
       // element's relevant agent's custom element reactions stack.
@@ -3765,7 +3756,7 @@ namespace Krys::HTML
     (void)MutationAlgorithms::Insert(element, *parent, beforeSibling);
 
     // If the parser was not created as part of the HTML fragment parsing algorithm
-    if (_contextElement == nullptr)
+    if (!_context.has_value())
     {
       // TODO(CUSTOMELEMENTS): InsertElementAtAdjustedInsertionLocation - pop the element queue from element's
       // relevant agent's custom element reactions stack, and invoke custom element reactions in that queue.
@@ -3936,9 +3927,7 @@ namespace Krys::HTML
   Ref<Element> HTMLTreeBuilder::CreateElement(const HTMLStackItem &item,
                                               RawPtr<ContainerNode> intendedParent) noexcept
   {
-    assert(item.IsElement());
-
-    auto &node = item.AsElement();
+    auto &node = item.Element();
     auto &parent = intendedParent != nullptr ? *intendedParent : *node.ParentNode();
     return CreateElement(node.LocalName(), node.NamespaceURI(), item.Attributes(), parent);
   }
@@ -3956,7 +3945,7 @@ namespace Krys::HTML
     // or if it is an element that is in the stack of open elements, then there is nothing to reconstruct;
     // stop this algorithm.
     auto last = _activeFormattingElements.Last();
-    if (last->IsMarker() || _openElementStack.Contains(last->Item().AsElement()))
+    if (last->IsMarker() || _openElementStack.Contains(last->Item().Element()))
     {
       return;
     }
@@ -3983,7 +3972,7 @@ namespace Krys::HTML
 
       // RAFE(6): If entry is neither a marker nor an element that is also in the stack of open elements, go
       // to the step labeled rewind.
-      if (!entry->IsMarker() && !_openElementStack.Contains(entry->Item().AsElement()))
+      if (!entry->IsMarker() && !_openElementStack.Contains(entry->Item().Element()))
       {
         continue;
       }
@@ -4328,7 +4317,7 @@ namespace Krys::HTML
     // return.
     auto &currentNode = _openElementStack.Bottom();
     if (currentNode.Namespace() == Namespace::HTML && currentNode.TagName() == subject
-        && !_activeFormattingElements.Contains(currentNode.Node()))
+        && !_activeFormattingElements.Contains(currentNode.Element()))
     {
       _openElementStack.Pop();
       return;
@@ -4365,7 +4354,7 @@ namespace Krys::HTML
 
       // NOTE: This is just for convenience; the stack item will only be destroyed right before the function
       // returns so the reference will remain valid regardless.
-      auto &formattingElementNode = formattingElement->AsElement();
+      auto &formattingElementNode = formattingElement->Element();
 
       // AAA(4.4): If formattingElement is not in the stack of open elements, then this is a parse error;
       // remove the element from the list, and return.
@@ -4385,7 +4374,7 @@ namespace Krys::HTML
       }
 
       // AAA(4.6): If formattingElement is not the current node, this is a parse error. (But do not return.)
-      if (&_openElementStack.Bottom().Node() != &formattingElementNode)
+      if (&_openElementStack.Bottom().Element() != &formattingElementNode)
       {
         ParseError(token);
       }
@@ -4406,7 +4395,7 @@ namespace Krys::HTML
 
       // NOTE: Save a reference to the node now in case the stack item gets destroyed. The node will still be
       // alive.
-      auto &furthestBlockNode = furthestBlock->Node();
+      auto &furthestBlockNode = furthestBlock->Element();
 
       // AAA(4.9): Let commonAncestor be the element immediately above formattingElement in the stack of open
       // elements.
@@ -4417,18 +4406,18 @@ namespace Krys::HTML
       auto bookmark = _activeFormattingElements.BookmarkFor(formattingElementNode);
 
       // AAA(4.11): Let node and lastNode be furthestBlock.
-      RawPtr<ContainerNode> node = &furthestBlockNode;
-      RawPtr<ContainerNode> lastNode = node;
+      RawPtr<Element> node = &furthestBlockNode;
+      RawPtr<Element> lastNode = node;
 
       // AAA(4.12): Let innerLoopCounter be 0.
       size_t innerLoopCounter = 0uz;
 
-      auto ElementAbove = [&](ContainerNode &node) -> RawPtr<ContainerNode>
+      auto ElementAbove = [&](Element &node) -> RawPtr<Element>
       {
         RawPtr<HTMLStackItem> entry = _openElementStack.EntryBefore(node);
-        return entry != nullptr ? &entry->Node() : nullptr;
+        return entry != nullptr ? &entry->Element() : nullptr;
       };
-      RawPtr<ContainerNode> immediatelyAbove = ElementAbove(*node);
+      RawPtr<Element> immediatelyAbove = ElementAbove(*node);
 
       // AAA(4.13): While true:
       while (true)
@@ -4472,7 +4461,7 @@ namespace Krys::HTML
         // namespace, with commonAncestor as the intended parent; replace the entry for node in the list of
         // active formatting elements with an entry for the new element, replace the entry for node in the
         // stack of open elements with an entry for the new element, and let node be the new element.
-        auto newElement = CreateElement(nodeFormattingEntry->Item(), &commonAncestor->Node());
+        auto newElement = CreateElement(nodeFormattingEntry->Item(), &commonAncestor->Element());
         nodeFormattingEntry->Item().UpdateElement(*newElement);
         _openElementStack.Find(*node)->UpdateElement(*newElement);
         node = newElement.get();
@@ -4536,7 +4525,7 @@ namespace Krys::HTML
     // Get the index of the formatting element in the open element stack.
     size_t formattingIndex = std::distance(
       _openElementStack.begin(), std::ranges::find_if(_openElementStack, [&](const auto &item)
-                                                      { return &item.Node() == &formattingElement; }));
+                                                      { return &item.Element() == &formattingElement; }));
 
     // Look for the topmost special element in the stack of open elements that is below the formatting
     // element.

@@ -52,9 +52,9 @@ namespace Krys::HTML
     _items.pop_back();
   }
 
-  void HTMLElementStack::PopUntil(const ContainerNode &node) noexcept
+  void HTMLElementStack::PopUntil(const Element &node) noexcept
   {
-    while (&Bottom().Node() != &node)
+    while (&Bottom().Element() != &node)
     {
       Pop();
     }
@@ -68,11 +68,11 @@ namespace Krys::HTML
     }
   }
 
-  void HTMLElementStack::PopUntilPopped(const ContainerNode &node) noexcept
+  void HTMLElementStack::PopUntilPopped(const Element &node) noexcept
   {
     while (true)
     {
-      bool isTarget = (&Bottom().Node() == &node);
+      bool isTarget = (&Bottom().Element() == &node);
       Pop();
 
       if (isTarget)
@@ -267,6 +267,7 @@ namespace Krys::HTML
         {
           case TagName::applet:
           case TagName::caption:
+          case TagName::html:
           case TagName::marquee:
           case TagName::object:
           case TagName::select:
@@ -278,7 +279,8 @@ namespace Krys::HTML
             return true;
           }
         }
-        break;
+
+        return false;
       }
       case Namespace::MathML:
       {
@@ -294,7 +296,8 @@ namespace Krys::HTML
             return true;
           }
         }
-        break;
+
+        return false;
       }
       case Namespace::SVG:
       {
@@ -307,11 +310,12 @@ namespace Krys::HTML
             return true;
           }
         }
-        break;
+
+        return false;
       }
     }
 
-    return item.IsRootNode();
+    return false;
   }
 
   bool HTMLElementStack::IsListItemScopeMarker(const HTMLStackItem &item) const noexcept
@@ -329,37 +333,6 @@ namespace Krys::HTML
     return item.TagName() == TagName::ol || item.TagName() == TagName::ul;
   }
 
-  bool HTMLElementStack::IsTableScopeMarker(const HTMLStackItem &item) const noexcept
-  {
-    if (item.Namespace() != Namespace::HTML)
-    {
-      return item.IsRootNode();
-    }
-
-    return item.TagName() == TagName::table || item.TagName() == TagName::template_ || item.IsRootNode();
-  }
-
-  bool HTMLElementStack::IsTableBodyScopeMarker(const HTMLStackItem &item) const noexcept
-  {
-    if (item.Namespace() != Namespace::HTML)
-    {
-      return item.IsRootNode();
-    }
-
-    return item.TagName() == TagName::tbody || item.TagName() == TagName::tfoot
-           || item.TagName() == TagName::thead || item.TagName() == TagName::template_ || item.IsRootNode();
-  }
-
-  bool HTMLElementStack::IsTableRowScopeMarker(const HTMLStackItem &item) const noexcept
-  {
-    if (item.Namespace() != Namespace::HTML)
-    {
-      return item.IsRootNode();
-    }
-
-    return item.TagName() == TagName::tr || item.TagName() == TagName::template_ || item.IsRootNode();
-  }
-
   bool HTMLElementStack::IsButtonScopeMarker(const HTMLStackItem &item) const noexcept
   {
     if (IsScopeMarker(item))
@@ -367,22 +340,41 @@ namespace Krys::HTML
       return true;
     }
 
-    if (item.Namespace() != Namespace::HTML)
-    {
-      return false;
-    }
-
-    return item.TagName() == TagName::button;
+    return item.Namespace() == Namespace::HTML && item.TagName() == TagName::button;
   }
 
-  bool HTMLElementStack::IsSelectScopeMarker(const HTMLStackItem &item) const noexcept
+  bool HTMLElementStack::IsTableScopeMarker(const HTMLStackItem &item) const noexcept
   {
     if (item.Namespace() != Namespace::HTML)
     {
       return false;
     }
 
-    return item.TagName() != TagName::optgroup && item.TagName() != TagName::option;
+    return item.TagName() == TagName::table || item.TagName() == TagName::template_
+           || item.TagName() == TagName::html;
+  }
+
+  bool HTMLElementStack::IsTableBodyScopeMarker(const HTMLStackItem &item) const noexcept
+  {
+    if (item.Namespace() != Namespace::HTML)
+    {
+      return false;
+    }
+
+    return item.TagName() == TagName::tbody || item.TagName() == TagName::tfoot
+           || item.TagName() == TagName::thead || item.TagName() == TagName::template_
+           || item.TagName() == TagName::html;
+  }
+
+  bool HTMLElementStack::IsTableRowScopeMarker(const HTMLStackItem &item) const noexcept
+  {
+    if (item.Namespace() != Namespace::HTML)
+    {
+      return false;
+    }
+
+    return item.TagName() == TagName::tr || item.TagName() == TagName::template_
+           || item.TagName() == TagName::html;
   }
 
   bool HTMLElementStack::HasElementInScope(TagName targetNode) const noexcept
@@ -416,7 +408,7 @@ namespace Krys::HTML
     {
       auto &item = *it;
 
-      if (&item.Node() == &element)
+      if (&item.Element() == &element)
       {
         return true;
       }
@@ -509,7 +501,6 @@ namespace Krys::HTML
 
   bool HTMLElementStack::Contains(const Element &node) const noexcept
   {
-    return std::ranges::any_of(_items,
-                               [&](const auto &item) { return item.IsElement() && &item.Node() == &node; });
+    return std::ranges::any_of(_items, [&](const auto &item) { return &item.Element() == &node; });
   }
 }

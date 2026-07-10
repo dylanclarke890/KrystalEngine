@@ -232,7 +232,7 @@ namespace Krys::HTML
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#form-element-pointer
     RefPtr<HTMLFormElement> _form;
 
-    RawPtr<Element> _contextElement;
+    Maybe<HTMLStackItem> &_context;
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#pending-table-character-tokens
     List<DOMString> _pendingTableCharacterTokens;
@@ -240,14 +240,23 @@ namespace Krys::HTML
     bool _ignoreNextNewline : 1 {false};
 
   public:
-    HTMLTreeBuilder(Document &document, HTMLTokenizer &tokenizer,
-                    RawPtr<Element> contextElement = nullptr) noexcept;
+    HTMLTreeBuilder(Document &document, HTMLTokenizer &tokenizer, Maybe<HTMLStackItem> &context) noexcept;
 
     void ProcessToken(HTMLTokenAtom &&token) noexcept;
 
-    void SetScriptingMode(ParserScriptingMode mode) noexcept
+    void ScriptingMode(ParserScriptingMode mode) noexcept
     {
       _scriptingMode = mode;
+    }
+
+    ParserScriptingMode ScriptingMode() const noexcept
+    {
+      return _scriptingMode;
+    }
+
+    void FormElement(HTMLFormElement &form) noexcept
+    {
+      _form = ShareRefPtr(&form);
     }
 
     bool IsCDATASectionAllowedInCurrentContext() noexcept
@@ -258,13 +267,18 @@ namespace Krys::HTML
       }
 
       auto &adjustedCurrentNode = AdjustedCurrentNode();
-      if (auto *element = DynamicDowncast<HTML::Element>(&adjustedCurrentNode))
-      {
-        return element->NamespaceURI() != Namespaces::HTML;
-      }
-
-      return false;
+      return adjustedCurrentNode.NamespaceURI() != Namespaces::HTML;
     }
+
+    /// @see https://html.spec.whatwg.org/multipage/parsing.html#reset-the-insertion-mode-appropriately
+    void ResetInsertionModeAppropriately() noexcept;
+
+    KRYS_NODISCARD HTMLElementStack &OpenElementStack() noexcept
+    {
+      return _openElementStack;
+    }
+
+    void PushTemplateInsertionMode(InsertionMode mode) noexcept;
 
   private:
     bool ShouldProcessAccordingToRulesForHTMLContent(const HTMLTokenAtom &token) noexcept;
@@ -274,10 +288,10 @@ namespace Krys::HTML
     void ProcessAccordingToRulesForForeignContent(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#current-node
-    KRYS_NODISCARD ContainerNode &CurrentNode() noexcept;
+    KRYS_NODISCARD Element &CurrentNode() noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#adjusted-current-node
-    KRYS_NODISCARD ContainerNode &AdjustedCurrentNode() noexcept;
+    KRYS_NODISCARD Element &AdjustedCurrentNode() noexcept;
 
     void ParseError(const HTMLTokenAtom &token) noexcept;
 
@@ -285,9 +299,6 @@ namespace Krys::HTML
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#current-template-insertion-mode
     KRYS_NODISCARD InsertionMode CurrentTemplateInsertionMode() const noexcept;
-
-    /// @see https://html.spec.whatwg.org/multipage/parsing.html#reset-the-insertion-mode-appropriately
-    void ResetInsertionModeAppropriately() noexcept;
 
     /// @see https://html.spec.whatwg.org/#the-initial-insertion-mode
     void InitialMode(HTMLTokenAtom &&token) noexcept;
