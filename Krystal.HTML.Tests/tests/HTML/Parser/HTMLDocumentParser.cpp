@@ -1,5 +1,6 @@
 ﻿#include "Krystal.HTML/HTML/Parser/HTMLDocumentParser.hpp"
 #include "Krystal.HTML.Tests/TreeConstruction.hpp"
+#include "Krystal.HTML/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLTokenizer.hpp"
 #include <catch_all.hpp>
 #include <filesystem>
@@ -34,21 +35,45 @@ namespace Krys::HTML::Tests
       auto expected = u8"--- EXPECTED OUTPUT ---\n" + test.Expected;
       INFO(string(reinterpret_cast<const char *>(expected.data()), expected.size()));
 
-      auto document = CreateRef<HTMLDocument>();
-      auto parser = CreateParser(*document, utf32_string(test.Input));
-
-      if (test.ScriptingMode.has_value())
+      DOMString output;
+      if (test.FragmentContext.has_value())
       {
-        parser->ScriptingMode(*test.ScriptingMode);
+        auto document = CreateRef<Document>();
+        TagName fragmentTagName = ParseTagName(*test.FragmentContext);
+        QualifiedName qName = QualifiedName {Namespaces::HTML, DOMStringAtom::Null(),
+                                             test.FragmentContext.value(), fragmentTagName, Namespace::HTML};
+        auto element = ElementFactory::Create(*document, qName, DOMStringAtom::Null());
+        auto result = HTMLDocumentParser::ParseFragment(
+          *element, utf32_string(test.Input), false, test.ScriptingMode.value_or(ParserScriptingMode::Inert));
+
+        auto documentFragment = CreateRef<DocumentFragment>(*document);
+
+        output = u8"#document\n";
+        for (auto &child : result)
+        {
+          DumpNode(*child, output, 0uz);
+        }
+        NormaliseData(output);
+      }
+      else
+      {
+        auto document = CreateRef<HTMLDocument>();
+        auto parser = CreateParser(*document, utf32_string(test.Input));
+
+        if (test.ScriptingMode.has_value())
+        {
+          parser->ScriptingMode(*test.ScriptingMode);
+        }
+
+        (void)parser->PumpTokenizer();
+
+        output = Dump(*document);
       }
 
-      (void)parser->PumpTokenizer();
-
-      auto dumped = Dump(*document);
-      auto actual = u8"\n--- ACTUAL OUTPUT ---\n" + dumped;
+      auto actual = u8"\n--- ACTUAL OUTPUT ---\n" + output;
       INFO(string(reinterpret_cast<const char *>(actual.data()), actual.size()));
 
-      bool equal = (dumped == test.Expected);
+      bool equal = (output == test.Expected);
       CHECK(equal);
     }
 

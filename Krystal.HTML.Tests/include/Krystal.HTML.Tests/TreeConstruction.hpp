@@ -174,11 +174,7 @@ namespace Krys::HTML::Tests
       DumpNode(child, output, 0uz);
     }
 
-    if (!output.empty() && output.back() == u8'\n')
-    {
-      output.pop_back();
-    }
-
+    NormaliseData(output);
     return output;
   }
 
