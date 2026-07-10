@@ -21,18 +21,6 @@ namespace Krys::HTML::Tests
       return utf8_string(str.begin(), str.end());
     }
 
-    void ParseDocument(HTMLDocument &document, const TreeConstructionTest &test) noexcept
-    {
-      auto parser = CreateParser(document, utf32_string(test.Input));
-
-      if (test.ScriptingMode.has_value())
-      {
-        parser->ScriptingMode(*test.ScriptingMode);
-      }
-
-      (void)parser->PumpTokenizer();
-    }
-
     void DoTreeConstructionTest(const TreeConstructionTest &test, size_t number, size_t total) noexcept
     {
       auto input = u8"--- TEST " + ToUTF8String(number) + u8" OF " + ToUTF8String(total) + u8" ---\n"
@@ -47,7 +35,14 @@ namespace Krys::HTML::Tests
       INFO(string(reinterpret_cast<const char *>(expected.data()), expected.size()));
 
       auto document = CreateRef<HTMLDocument>();
-      ParseDocument(*document, test);
+      auto parser = CreateParser(*document, utf32_string(test.Input));
+
+      if (test.ScriptingMode.has_value())
+      {
+        parser->ScriptingMode(*test.ScriptingMode);
+      }
+
+      (void)parser->PumpTokenizer();
 
       auto dumped = Dump(*document);
       auto actual = u8"\n--- ACTUAL OUTPUT ---\n" + dumped;
