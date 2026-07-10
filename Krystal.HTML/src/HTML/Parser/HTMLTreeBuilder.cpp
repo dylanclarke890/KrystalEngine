@@ -1496,7 +1496,7 @@ namespace Krys::HTML
             if (_openElementStack.HasElementInButtonScope(TagName::button))
             {
               ParseError(token);
-              ClosePElement(token);
+              _openElementStack.GenerateImpliedEndTags();
               _openElementStack.PopUntilPopped(TagName::button, Namespace::HTML);
             }
 
