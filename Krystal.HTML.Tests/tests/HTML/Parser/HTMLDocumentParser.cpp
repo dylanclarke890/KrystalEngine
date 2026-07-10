@@ -143,8 +143,34 @@ namespace Krys::HTML::Tests
   PARSER_TEST_CASE("tree-construction/template-01.dat");
 
   PARSER_TEST_CASE("tree-construction/tests-01.dat");
+  PARSER_TEST_CASE("tree-construction/tests-02.dat");
+  PARSER_TEST_CASE("tree-construction/tests-03.dat");
+  PARSER_TEST_CASE("tree-construction/tests-04.dat");
+  PARSER_TEST_CASE("tree-construction/tests-05.dat");
+  PARSER_TEST_CASE("tree-construction/tests-06.dat");
+  PARSER_TEST_CASE("tree-construction/tests-07.dat");
+  PARSER_TEST_CASE("tree-construction/tests-08.dat");
+  PARSER_TEST_CASE("tree-construction/tests-09.dat");
+  PARSER_TEST_CASE("tree-construction/tests-11.dat");
+  PARSER_TEST_CASE("tree-construction/tests-12.dat");
+  PARSER_TEST_CASE("tree-construction/tests-14.dat");
+  PARSER_TEST_CASE("tree-construction/tests-15.dat");
+  PARSER_TEST_CASE("tree-construction/tests-16.dat");
+  PARSER_TEST_CASE("tree-construction/tests-17.dat");
+  PARSER_TEST_CASE("tree-construction/tests-18.dat");
+  PARSER_TEST_CASE("tree-construction/tests-19.dat");
+  PARSER_TEST_CASE("tree-construction/tests-20.dat");
+  PARSER_TEST_CASE("tree-construction/tests-21.dat");
+  PARSER_TEST_CASE("tree-construction/tests-22.dat");
+  PARSER_TEST_CASE("tree-construction/tests-23.dat");
+  PARSER_TEST_CASE("tree-construction/tests-24.dat");
+  PARSER_TEST_CASE("tree-construction/tests-25.dat");
+  PARSER_TEST_CASE("tree-construction/tests-26.dat");
 
   PARSER_TEST_CASE("tree-construction/tricky-01.dat");
 
   PARSER_TEST_CASE("tree-construction/void-in-phrasing-01.dat");
+  
+  PARSER_TEST_CASE("tree-construction/webkit-01.dat");
+  PARSER_TEST_CASE("tree-construction/webkit-02.dat");
 }

@@ -212,5 +212,32 @@
     <None Include="data\tree-construction\template-01.dat" />
     <None Include="data\tree-construction\tricky-01.dat" />
     <None Include="data\tree-construction\void-in-phrasing-01.dat" />
+    <None Include="data\tree-construction\foreign-fragment-01.dat" />
+    <None Include="data\tree-construction\tests-02.dat" />
+    <None Include="data\tree-construction\tests-03.dat" />
+    <None Include="data\tree-construction\tests-04.dat" />
+    <None Include="data\tree-construction\tests-05.dat" />
+    <None Include="data\tree-construction\tests-06.dat" />
+    <None Include="data\tree-construction\tests-07.dat" />
+    <None Include="data\tree-construction\tests-08.dat" />
+    <None Include="data\tree-construction\tests-09.dat" />
+    <None Include="data\tree-construction\tests-10.dat" />
+    <None Include="data\tree-construction\tests-11.dat" />
+    <None Include="data\tree-construction\tests-12.dat" />
+    <None Include="data\tree-construction\tests-14.dat" />
+    <None Include="data\tree-construction\tests-15.dat" />
+    <None Include="data\tree-construction\tests-16.dat" />
+    <None Include="data\tree-construction\tests-17.dat" />
+    <None Include="data\tree-construction\tests-18.dat" />
+    <None Include="data\tree-construction\tests-19.dat" />
+    <None Include="data\tree-construction\tests-20.dat" />
+    <None Include="data\tree-construction\tests-21.dat" />
+    <None Include="data\tree-construction\tests-22.dat" />
+    <None Include="data\tree-construction\tests-23.dat" />
+    <None Include="data\tree-construction\tests-24.dat" />
+    <None Include="data\tree-construction\tests-25.dat" />
+    <None Include="data\tree-construction\tests-26.dat" />
+    <None Include="data\tree-construction\webkit-01.dat" />
+    <None Include="data\tree-construction\webkit-02.dat" />
   </ItemGroup>
 </Project>
