@@ -176,11 +176,9 @@ namespace Krys::HTML
 
       _type = HTMLTokenType::StartTag;
       _selfClosing = false;
+      
       _attributes.clear();
-
-#if KRYS_ENV(DEV)
       _currentAttribute = nullptr;
-#endif
 
       AppendToDataInternal(character);
     }
@@ -196,21 +194,17 @@ namespace Krys::HTML
 
       _type = HTMLTokenType::EndTag;
       _selfClosing = false;
+      
       _attributes.clear();
-
-#if KRYS_ENV(DEV)
       _currentAttribute = nullptr;
-#endif
 
       AppendToDataInternal(characters);
     }
 
     void BeginAttribute() noexcept
     {
-#if KRYS_ENV(DEV)
-      assert(_currentAttribute == nullptr);
-#endif
       assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
+      assert(_currentAttribute == nullptr);
 
       _attributes.emplace_back();
       _currentAttribute = &_attributes.back();
@@ -219,11 +213,8 @@ namespace Krys::HTML
     void EndAttribute() noexcept
     {
       assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
-
-#if KRYS_ENV(DEV)
       assert(_currentAttribute != nullptr);
       _currentAttribute = nullptr;
-#endif
     }
 
     KRYS_NODISCARD ParsedAttributeList &Attributes() noexcept
@@ -247,10 +238,7 @@ namespace Krys::HTML
     void AppendToCurrentAttributeName(char32 character) noexcept
     {
       assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
-
-#if KRYS_ENV(DEV)
       assert(_currentAttribute != nullptr);
-#endif
 
       auto converted = Krys::Text::ConvertToUTF8(Span<char32>(&character, 1));
       _currentAttribute->Name.append(converted.begin(), converted.end());
@@ -259,10 +247,7 @@ namespace Krys::HTML
     void AppendToCurrentAttributeValue(char32 character) noexcept
     {
       assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
-
-#if KRYS_ENV(DEV)
       assert(_currentAttribute != nullptr);
-#endif
 
       auto converted = Krys::Text::ConvertToUTF8(Span<char32>(&character, 1));
       _currentAttribute->Value.append(converted.begin(), converted.end());
@@ -272,10 +257,7 @@ namespace Krys::HTML
     void AppendToCurrentAttributeValue(Array<char32, N> characters)
     {
       assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
-
-#if KRYS_ENV(DEV)
       assert(_currentAttribute != nullptr);
-#endif
 
       auto converted = Krys::Text::ConvertToUTF8(characters);
       _currentAttribute->Value.append(converted.begin(), converted.end());
@@ -284,10 +266,7 @@ namespace Krys::HTML
     void AppendToCurrentAttributeValue(Span<char32> characters)
     {
       assert(_type == HTMLTokenType::StartTag || _type == HTMLTokenType::EndTag);
-
-#if KRYS_ENV(DEV)
       assert(_currentAttribute != nullptr);
-#endif
 
       auto converted = Krys::Text::ConvertToUTF8(characters);
       _currentAttribute->Value.append(converted.begin(), converted.end());

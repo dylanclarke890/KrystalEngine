@@ -1500,6 +1500,11 @@ namespace Krys::HTML
           }
 
           ParserError(HTMLParseError::UnexpectedSolidusInTag);
+
+          if (_token.CurrentAttribute() != nullptr)
+          {
+            EndAttribute();
+          }
           RECONSUME_IN(BeforeAttributeName);
         END_STATE()
 
