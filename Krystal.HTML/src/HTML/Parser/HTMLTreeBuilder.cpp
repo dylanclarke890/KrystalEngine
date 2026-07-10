@@ -454,11 +454,12 @@ namespace Krys::HTML
 
         if (_context.has_value())
         {
+          stackElement = &*_context;
           node = &_context->Element();
         }
       }
 
-      if (auto *htmlElement = DynamicDowncast<HTMLElement>(node))
+      if (stackElement->Namespace() == Namespace::HTML)
       {
         switch (stackElement->TagName())
         {
@@ -536,10 +537,6 @@ namespace Krys::HTML
               _insertionMode = InsertionMode::AfterHead;
             }
             return;
-          }
-          default:
-          {
-            break;
           }
         }
       }
