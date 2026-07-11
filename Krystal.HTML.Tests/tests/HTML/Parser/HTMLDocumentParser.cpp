@@ -24,7 +24,7 @@ namespace Krys::HTML::Tests
 
     void DoTreeConstructionTest(const TreeConstructionTest &test, size_t number, size_t total) noexcept
     {
-      auto input = u8"--- TEST " + ToUTF8String(number) + u8" OF " + ToUTF8String(total) + u8" ---\n"
+      auto input = u8"--- TEST " + ToUTF8String(number + 1uz) + u8" OF " + ToUTF8String(total) + u8" ---\n"
                    + Krys::Text::ConvertToUTF8(utf32_stringview(test.Input));
       INFO(string(reinterpret_cast<const char *>(input.data()), input.size()));
 
