@@ -3253,10 +3253,13 @@ namespace Krys::HTML
     {
       case HTMLTokenType::Character:
       {
-        if (InsertLeadingWhitespace(token))
+        if (!RemoveNonWhitespace(token))
         {
-          break;
+          return;
         }
+
+        InsertLeadingWhitespace(token);
+        assert(token._data.empty()); // should have been removed or inserted already
 
         return;
       }
@@ -3345,10 +3348,13 @@ namespace Krys::HTML
     {
       case HTMLTokenType::Character:
       {
-        if (InsertLeadingWhitespace(token))
+        if (!RemoveNonWhitespace(token))
         {
-          break;
+          return;
         }
+
+        InsertLeadingWhitespace(token);
+        assert(token._data.empty()); // should have been removed or inserted already
 
         return;
       }
@@ -3447,7 +3453,7 @@ namespace Krys::HTML
     ParseError(token);
 
     _insertionMode = InsertionMode::InBody;
-    ProcessToken(Krys::Move(token));
+    InBodyMode(Krys::Move(token));
   }
 
   void HTMLTreeBuilder::AfterAfterFramesetMode(HTMLTokenAtom &&token) noexcept
@@ -3574,6 +3580,20 @@ namespace Krys::HTML
     assert(token.Type() == HTMLTokenType::Character);
 
     auto removed = std::erase_if(token._data, [](char8 ch) { return ch == '\0'; });
+    if (removed > 0uz)
+    {
+      ParseError(token);
+    }
+
+    return !token.Characters().empty();
+  }
+
+  bool HTMLTreeBuilder::RemoveNonWhitespace(HTMLTokenAtom &token) noexcept
+  {
+    assert(token.Type() == HTMLTokenType::Character);
+
+    auto removed =
+      std::erase_if(token._data, [](char8 ch) { return !StringAlgorithms::IsASCIIWhitespace(ch); });
     if (removed > 0uz)
     {
       ParseError(token);

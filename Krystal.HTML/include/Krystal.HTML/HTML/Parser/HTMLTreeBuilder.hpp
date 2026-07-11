@@ -377,6 +377,10 @@ namespace Krys::HTML
     /// @brief Removes null characters in a character token and returns whether any characters remain.
     bool RemoveNulls(HTMLTokenAtom &token) noexcept;
 
+    /// @brief Removes non whitespace characters in a character token and returns whether any characters
+    /// remain.
+    bool RemoveNonWhitespace(HTMLTokenAtom &token) noexcept;
+
     /// @brief Skips leading whitespace in a character token and returns whether any characters remain.
     bool SkipLeadingWhitespace(HTMLTokenAtom &token) noexcept;
 
