@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/DOM/Algorithms/SubtreeRanges.hpp"
+#include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/Comment.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/DOM/DocumentFragment.hpp"
@@ -13,6 +14,7 @@
 #include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
+#include "Krystal.Lib/Types/Pair.hpp"
 #include "Krystal.Text/StringConversion.hpp"
 #include <fstream>
 #include <ranges>
@@ -62,7 +64,7 @@ namespace Krys::HTML::Tests
     }
   }
 
-  inline void DumpNode(const Node &node, DOMString &output, size_t depth) noexcept
+  inline void DumpNode(Node &node, DOMString &output, size_t depth) noexcept
   {
     switch (node.NodeType())
     {
@@ -95,18 +97,47 @@ namespace Krys::HTML::Tests
 
         output += u8"<" + namespaceName + localName + u8">\n";
 
-        // TODO: handle namespaces and prefixes.
-        auto attributeNames = element.GetAttributeNames();
-        std::sort(attributeNames.begin(), attributeNames.end(), std::ranges::lexicographical_compare);
-
-        for (auto &name : attributeNames)
+        List<Pair<DOMString, DOMString>> attributes;
+        for (size_t i = 0; i < element.Attributes().Length(); ++i)
         {
-          auto value = element.GetAttribute(name);
-          if (value.has_value())
+          auto attr = element.Attributes().Item(i);
+          auto localName = DOMString(attr->LocalName().View());
+          auto namespaceName = [&] -> DOMString
           {
-            Indent(output, depth + 1uz);
-            output += name + u8"=\"" + *value + u8"\"\n";
-          }
+            if (attr->NamespaceURI() == Namespaces::HTML)
+            {
+              return u8"";
+            }
+            else if (attr->NamespaceURI() == Namespaces::XML)
+            {
+              return u8"xml ";
+            }
+            else if (attr->NamespaceURI() == Namespaces::XMLNS)
+            {
+              return u8"xmlns ";
+            }
+            else if (attr->NamespaceURI() == Namespaces::XLink)
+            {
+              return u8"xlink ";
+            }
+            else
+            {
+              return u8"";
+            }
+          }();
+
+          auto &value = attr->Value();
+
+          attributes.push_back({namespaceName + localName, value});
+        }
+
+        std::sort(attributes.begin(), attributes.end(),
+                  [](const auto &a, const auto &b) { return a.first < b.first; });
+
+        for (auto &[name, value] : attributes)
+        {
+          Indent(output, depth + 1uz);
+          output += name + u8"=\"" + value + u8"\"\n";
         }
 
         if (element.NamespaceURI() == Namespaces::HTML && element.LocalName() == u8"template")
@@ -114,7 +145,7 @@ namespace Krys::HTML::Tests
           Indent(output, depth + 1uz);
           output += u8"content\n";
 
-          for (auto &child : ConstChildNodeRange(*Downcast<HTMLTemplateElement>(element).Content()))
+          for (auto &child : ChildNodeRange(*Downcast<HTMLTemplateElement>(element).Content()))
           {
             DumpNode(child, output, depth + 2uz);
           }
@@ -158,18 +189,18 @@ namespace Krys::HTML::Tests
 
     if (auto *containerNode = DynamicDowncast<ContainerNode>(node))
     {
-      for (auto &child : ConstChildNodeRange(*containerNode))
+      for (auto &child : ChildNodeRange(*containerNode))
       {
         DumpNode(child, output, depth + 1uz);
       }
     }
   }
 
-  inline DOMString Dump(const Document &document) noexcept
+  inline DOMString Dump(Document &document) noexcept
   {
     DOMString output = u8"#document\n";
 
-    for (auto &child : ConstChildNodeRange(document))
+    for (auto &child : ChildNodeRange(document))
     {
       DumpNode(child, output, 0uz);
     }
