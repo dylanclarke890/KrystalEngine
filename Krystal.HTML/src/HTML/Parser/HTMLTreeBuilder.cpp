@@ -2566,6 +2566,8 @@ namespace Krys::HTML
             return;
           }
         }
+
+        break;
       }
       case HTMLTokenType::EndTag:
       {
@@ -2600,6 +2602,8 @@ namespace Krys::HTML
             return; // ignore the token
           }
         }
+
+        break;
       }
     }
 
