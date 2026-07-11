@@ -3310,7 +3310,7 @@ namespace Krys::HTML
 
           _openElementStack.Pop();
 
-          if (_context.has_value() && _openElementStack.Bottom().TagName() != TagName::frameset)
+          if (!_context.has_value() && _openElementStack.Bottom().TagName() != TagName::frameset)
           {
             _insertionMode = InsertionMode::AfterFrameset;
           }
