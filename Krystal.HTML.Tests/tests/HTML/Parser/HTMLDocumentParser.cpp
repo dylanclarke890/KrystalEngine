@@ -114,6 +114,8 @@ namespace Krys::HTML::Tests
 
   PARSER_TEST_CASE("tree-construction/inbody-01.dat");
 
+  PARSER_TEST_CASE("tree-construction/inner-html-01.dat");
+
   PARSER_TEST_CASE("tree-construction/isindex-01.dat");
 
   PARSER_TEST_CASE("tree-construction/main-element-01.dat");
