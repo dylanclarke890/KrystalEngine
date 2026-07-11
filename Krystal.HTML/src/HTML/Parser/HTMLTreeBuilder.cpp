@@ -3873,7 +3873,7 @@ namespace Krys::HTML
         {
           namespaceUri = Namespaces::XLink;
           prefix = NamespacePrefixes::XLink;
-          prefixLength = 5uz; // xlink + :
+          prefixLength = 6uz; // xlink + :
         }
 
         if (HasFlag(attr.Flags, ParsedAttributeFlags::IsXMLNS))
