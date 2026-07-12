@@ -1,14 +1,10 @@
-﻿#include "Krystal.HTML/DOM/AbortSignal.hpp"
-#include "Krystal.HTML/DOM/Attr.hpp"
-#include "Krystal.HTML/DOM/ShadowRoot.hpp"
+﻿#include "Krystal.HTML/HTML/HTMLParagraphElement.hpp"
 #include "Krystal.HTML/HTML/Attributes/Reflection.hpp"
-#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/HTML/HTMLParagraphElement.hpp"
 
 namespace Krys::HTML
 {
   HTMLParagraphElement::HTMLParagraphElement(Document &document) noexcept
-      : HTMLElement(document, DOMInterface::Heading)
+      : HTMLElement(document, HTMLElementInterface::Heading)
   {
   }
 

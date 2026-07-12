@@ -2,7 +2,7 @@
 
 #include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
-#include "Krystal.HTML/Types/SmallTextNodeList.hpp"
+#include "Krystal.HTML/DOM/Types/SmallNodeList.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 
@@ -26,12 +26,6 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#concept-cd-substring
     KRYS_NODISCARD static ExceptionOr<DOMString> Substring(const CharacterData &node, size_t offset,
                                                            size_t count) noexcept;
-
-    /// @see https://dom.spec.whatwg.org/#exclusive-text-node
-    KRYS_NODISCARD static bool IsExclusiveTextNode(const Node &node) noexcept;
-
-    /// @see https://dom.spec.whatwg.org/#exclusive-text-node
-    KRYS_NODISCARD static bool IsExclusiveTextNode(RawPtr<const Node> node) noexcept;
 
     /// @see https://dom.spec.whatwg.org/#contiguous-text-nodes
     KRYS_NODISCARD static SmallTextNodeList ContiguousTextNodes(Text &node) noexcept;

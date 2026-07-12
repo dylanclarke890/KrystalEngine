@@ -4,7 +4,7 @@
 
 namespace Krys::HTML
 {
-  HTMLAreaElement::HTMLAreaElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Area)
+  HTMLAreaElement::HTMLAreaElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Area)
   {
   }
 

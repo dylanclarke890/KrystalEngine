@@ -589,4 +589,36 @@ namespace Krys::Tests
   }
 
 #pragma endregion
+
+#pragma region Shadow Roots
+
+  TEST_CASE("TreeQueries::ShadowIncludingRoot", "[HTML][TreeQueries]")
+  {
+    auto doc = CreateRef<Document>();
+    auto parent = CreateRef<TestNode>(*doc);
+    auto child = CreateRef<TestNode>(*doc);
+
+    REQUIRE(&TreeQueries::ShadowIncludingRoot(*doc) == doc.get());
+    REQUIRE(&TreeQueries::ShadowIncludingRoot(*parent) == parent.get());
+    REQUIRE(&TreeQueries::ShadowIncludingRoot(*child) == child.get());
+
+    REQUIRE_FALSE(parent->AppendChild(*child).HasException());
+
+    REQUIRE(&TreeQueries::ShadowIncludingRoot(*doc) == doc.get());
+    REQUIRE(&TreeQueries::ShadowIncludingRoot(*parent) == parent.get());
+    REQUIRE(&TreeQueries::ShadowIncludingRoot(*child) == parent.get());
+
+    REQUIRE_FALSE(doc->AppendChild(*parent).HasException());
+
+    REQUIRE(&TreeQueries::ShadowIncludingRoot(*doc) == doc.get());
+    REQUIRE(&TreeQueries::ShadowIncludingRoot(*parent) == doc.get());
+    REQUIRE(&TreeQueries::ShadowIncludingRoot(*child) == doc.get());
+
+    // TODO(test): Test with ShadowRoot when implemented
+
+    REQUIRE_FALSE(parent->RemoveChild(*child).HasException());
+    REQUIRE_FALSE(doc->RemoveChild(*parent).HasException());
+  }
+
+#pragma endregion
 }

@@ -4,7 +4,7 @@
 namespace Krys::HTML
 {
   HTMLFieldSetElement::HTMLFieldSetElement(Document &document) noexcept
-      : HTMLElement(document, DOMInterface::FieldSet)
+      : HTMLElement(document, HTMLElementInterface::FieldSet)
   {
   }
 

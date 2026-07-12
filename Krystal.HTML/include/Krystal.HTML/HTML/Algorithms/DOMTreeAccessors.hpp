@@ -18,109 +18,111 @@ namespace Krys::HTML
   {
   public:
     /// @see https://html.spec.whatwg.org/#the-html-element-2
-    KRYS_NODISCARD static RefPtr<HTML::HTMLHtmlElement> HTMLHtmlElement(Document &document) noexcept
+    KRYS_NODISCARD static RefPtr<HTMLHtmlElement> GetHtmlElement(Document &document) noexcept
     {
       auto documentElement = document.DocumentElement();
-
-      if (!Is<HTMLElement>(documentElement))
+      if (!Is<HTMLHtmlElement>(documentElement))
       {
         return nullptr;
       }
 
-      auto *htmlElement = Downcast<HTMLElement>(documentElement.get());
-      if (!Is<HTML::HTMLHtmlElement>(htmlElement))
-      {
-        return nullptr;
-      }
-
-      auto *html = Downcast<HTML::HTMLHtmlElement>(htmlElement);
-      return ShareRefPtr(html);
+      return ShareRefPtr(&Downcast<HTMLHtmlElement>(*documentElement));
     }
 
     /// @see https://html.spec.whatwg.org/#the-html-element-2
-    KRYS_NODISCARD static RefPtr<const HTML::HTMLHtmlElement>
-      HTMLHtmlElement(const Document &document) noexcept
+    KRYS_NODISCARD static RefPtr<const HTMLHtmlElement> GetHtmlElement(const Document &document) noexcept
     {
-      return HTMLHtmlElement(const_cast<Document &>(document));
-    }
-
-    /// @see https://html.spec.whatwg.org/#the-head-element-2
-    KRYS_NODISCARD static RefPtr<HTML::HTMLHeadElement> HTMLHeadElement(Document &document) noexcept
-    {
-      auto HTML = HTMLHtmlElement(document);
-      if (HTML == nullptr)
+      auto documentElement = document.DocumentElement();
+      if (!Is<HTMLHtmlElement>(documentElement))
       {
         return nullptr;
       }
 
-      auto children = ChildHTMLElementRange(*HTML);
-      auto body = FirstOfType<HTML::HTMLHeadElement>(children);
-      return body == std::ranges::end(children) ? nullptr
-                                                : ShareRefPtr(Downcast<HTML::HTMLHeadElement>(&*body));
+      return ShareRefPtr(&Downcast<HTMLHtmlElement>(*documentElement));
     }
 
     /// @see https://html.spec.whatwg.org/#the-head-element-2
-    KRYS_NODISCARD static RefPtr<const HTML::HTMLHeadElement>
-      HTMLHeadElement(const Document &document) noexcept
+    KRYS_NODISCARD static RefPtr<HTMLHeadElement> GetHeadElement(Document &document) noexcept
     {
-      return HTMLHeadElement(const_cast<Document &>(document));
-    }
-
-    /// @see https://html.spec.whatwg.org/#the-title-element-2
-    KRYS_NODISCARD static RefPtr<HTML::HTMLTitleElement> HTMLTitleElement(Document &document) noexcept
-    {
-      auto head = HTMLHeadElement(document);
-      if (head == nullptr)
-      {
-        return nullptr;
-      }
-
-      for (auto &child : ChildElementRange(*head))
-      {
-        if (!Is<HTMLElement>(child))
-        {
-          continue;
-        }
-
-        auto &htmlElement = Downcast<HTMLElement>(child);
-        if (!Is<HTML::HTMLTitleElement>(htmlElement))
-        {
-          continue;
-        }
-
-        return ShareRefPtr(&Downcast<HTML::HTMLTitleElement>(htmlElement));
-      }
-
-      return nullptr;
-    }
-
-    /// @see https://html.spec.whatwg.org/#the-title-element-2
-    KRYS_NODISCARD static RefPtr<const HTML::HTMLTitleElement>
-      HTMLTitleElement(const Document &document) noexcept
-    {
-      return HTMLTitleElement(const_cast<Document &>(document));
-    }
-
-    /// @see https://html.spec.whatwg.org/#the-body-element-2
-    KRYS_NODISCARD static RefPtr<HTML::HTMLBodyElement> HTMLBodyElement(Document &document) noexcept
-    {
-      auto html = HTMLHtmlElement(document);
+      auto html = GetHtmlElement(document);
       if (html == nullptr)
       {
         return nullptr;
       }
 
       auto children = ChildHTMLElementRange(*html);
-      auto body = FirstOfType<HTML::HTMLBodyElement>(children);
-      return body == std::ranges::end(children) ? nullptr
-                                                : ShareRefPtr(Downcast<HTML::HTMLBodyElement>(&*body));
+      auto body = FirstOfType<HTMLHeadElement>(children);
+      return body == std::ranges::end(children) ? nullptr : ShareRefPtr(Downcast<HTMLHeadElement>(&*body));
+    }
+
+    /// @see https://html.spec.whatwg.org/#the-head-element-2
+    KRYS_NODISCARD static RefPtr<const HTMLHeadElement> GetHeadElement(const Document &document) noexcept
+    {
+      auto html = GetHtmlElement(document);
+      if (html == nullptr)
+      {
+        return nullptr;
+      }
+
+      auto children = ConstChildNodeRange(*html);
+      auto body = FirstOfType<HTMLHeadElement>(children);
+      return body == std::ranges::end(children) ? nullptr : ShareRefPtr(Downcast<HTMLHeadElement>(&*body));
+    }
+
+    /// @see https://html.spec.whatwg.org/#the-title-element-2
+    KRYS_NODISCARD static RefPtr<HTMLTitleElement> GetTitleElement(Document &document) noexcept
+    {
+      auto head = GetHeadElement(document);
+      if (head == nullptr)
+      {
+        return nullptr;
+      }
+
+      auto children = ChildHTMLElementRange(*head);
+      auto body = FirstOfType<HTMLTitleElement>(children);
+      return body == std::ranges::end(children) ? nullptr : ShareRefPtr(Downcast<HTMLTitleElement>(&*body));
+    }
+
+    /// @see https://html.spec.whatwg.org/#the-title-element-2
+    KRYS_NODISCARD static RefPtr<const HTMLTitleElement> GetTitleElement(const Document &document) noexcept
+    {
+      auto head = GetHeadElement(document);
+      if (head == nullptr)
+      {
+        return nullptr;
+      }
+
+      auto children = ConstChildNodeRange(*head);
+      auto body = FirstOfType<HTMLTitleElement>(children);
+      return body == std::ranges::end(children) ? nullptr : ShareRefPtr(Downcast<HTMLTitleElement>(&*body));
     }
 
     /// @see https://html.spec.whatwg.org/#the-body-element-2
-    KRYS_NODISCARD static RefPtr<const HTML::HTMLBodyElement>
-      HTMLBodyElement(const Document &document) noexcept
+    KRYS_NODISCARD static RefPtr<HTMLBodyElement> GetBodyElement(Document &document) noexcept
     {
-      return HTMLBodyElement(const_cast<Document &>(document));
+      auto html = GetHtmlElement(document);
+      if (html == nullptr)
+      {
+        return nullptr;
+      }
+
+      auto children = ChildNodeRange(*html);
+      auto body = FirstOfType<HTMLBodyElement>(children);
+      return body == std::ranges::end(children) ? nullptr : ShareRefPtr(Downcast<HTMLBodyElement>(&*body));
+    }
+
+    /// @see https://html.spec.whatwg.org/#the-body-element-2
+    KRYS_NODISCARD static RefPtr<const HTMLBodyElement> GetBodyElement(const Document &document) noexcept
+    {
+      auto html = GetHtmlElement(document);
+      if (html == nullptr)
+      {
+        return nullptr;
+      }
+
+      auto children = ConstChildNodeRange(*html);
+      auto body = FirstOfType<HTMLBodyElement>(children);
+      return body == std::ranges::end(children) ? nullptr : ShareRefPtr(Downcast<HTMLBodyElement>(&*body));
     }
   };
 }

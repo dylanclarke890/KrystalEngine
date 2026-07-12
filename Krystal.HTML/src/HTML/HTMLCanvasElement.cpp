@@ -4,7 +4,7 @@
 namespace Krys::HTML
 {
   HTMLCanvasElement::HTMLCanvasElement(Document &document) noexcept
-      : HTMLElement(document, DOMInterface::Canvas)
+      : HTMLElement(document, HTMLElementInterface::Canvas)
   {
   }
 

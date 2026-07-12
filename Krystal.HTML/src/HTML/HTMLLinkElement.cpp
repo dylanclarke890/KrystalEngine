@@ -1,15 +1,10 @@
 ﻿#include "Krystal.HTML/HTML/HTMLLinkElement.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/ElementAlgorithms.hpp"
-#include "Krystal.HTML/DOM/Attr.hpp"
-#include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/HTML/Attributes/Reflection.hpp"
-#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 
 namespace Krys::HTML
 {
-  HTMLLinkElement::HTMLLinkElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Link)
+  HTMLLinkElement::HTMLLinkElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Link)
   {
   }
 
@@ -17,12 +12,12 @@ namespace Krys::HTML
 
   ExceptionOr<USVString> HTMLLinkElement::Href() const noexcept
   {
-    return Attributes::Reflection::Reflect<USVString>(*this, u8"href");
+    return Attributes::Reflection::ReflectURL<USVString>(*this, u8"href");
   }
 
   ExceptionOr<void> HTMLLinkElement::Href(USVString &&value) noexcept
   {
-    return Attributes::Reflection::Reflect<USVString>(*this, u8"href", Krys::Move(value));
+    return Attributes::Reflection::ReflectURL<USVString>(*this, u8"href", Krys::Move(value));
   }
 
   Maybe<DOMString> HTMLLinkElement::CrossOrigin() const noexcept

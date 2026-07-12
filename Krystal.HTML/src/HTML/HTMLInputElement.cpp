@@ -3,7 +3,7 @@
 
 namespace Krys::HTML
 {
-  HTMLInputElement::HTMLInputElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Input)
+  HTMLInputElement::HTMLInputElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Input)
   {
   }
 

@@ -52,7 +52,7 @@ namespace Krys::HTML
   Document::Document() noexcept
       : ContainerNode(*this, NodeType::DOCUMENT_NODE, NodeFlags::IsContainerNode), _flags(DocumentFlags::None)
   {
-    SetEventTargetFlag(EventTargetFlags::IsConnected);
+    SetNodeFlag(NodeFlags::IsConnected);
   }
 
   DOMImplementation &Document::Implementation() noexcept
@@ -164,7 +164,7 @@ namespace Krys::HTML
     DOMStringAtom namespaceURI = DOMStringAtom::Null();
     if (Is<HTMLDocument>(*this) || _contentType == u8"application/xhtml+xml")
     {
-      namespaceURI = Namespace::HTML;
+      namespaceURI = Namespaces::HTML;
     }
 
     return ElementFactory::Create(*this, {namespaceURI, DOMStringAtom::Null(), localName},
@@ -309,15 +309,14 @@ namespace Krys::HTML
   ExceptionOr<Ref<Attr>> Document::CreateAttributeNS(DOMStringAtom namespaceUri,
                                                      DOMStringAtom qualifiedName) noexcept
   {
-    auto result =
+    auto nameResult =
       NameValidation::ValidateAndExtract(namespaceUri, qualifiedName, ValidateAndExtractContext::Attribute);
-    if (result.HasException())
+    if (nameResult.HasException())
     {
-      return result.ReleaseException();
+      return nameResult.ReleaseException();
     }
 
-    QualifiedName name {result.Value().NamespaceURI, result.Value().Prefix, result.Value().LocalName};
-    return AdoptRef<Attr>(*new Attr(*this, name));
+    return AdoptRef<Attr>(*new Attr(*this, *nameResult));
   }
 
   Ref<Event> Document::CreateEvent(DOMStringAtom interface) noexcept
@@ -371,7 +370,7 @@ namespace Krys::HTML
     }
     else
     {
-      auto title = DOMTreeAccessors::HTMLTitleElement(*this);
+      auto title = DOMTreeAccessors::GetTitleElement(*this);
       if (title == nullptr)
       {
         return {};
@@ -395,10 +394,10 @@ namespace Krys::HTML
       //   "title", and the SVG namespace. Insert element as the first child of the document element.
       // String replace all with the given value within element.
     }
-    else if (documentElement->NamespaceURI() == Namespace::HTML)
+    else if (documentElement->NamespaceURI() == Namespaces::HTML)
     {
       auto head = Head();
-      auto title = DOMTreeAccessors::HTMLTitleElement(*this);
+      auto title = DOMTreeAccessors::GetTitleElement(*this);
 
       if (head == nullptr && title == nullptr)
       {
@@ -407,7 +406,7 @@ namespace Krys::HTML
 
       if (title == nullptr)
       {
-        title = ElementFactory::Create(*this, {Namespace::HTML, DOMStringAtom::Null(), u8"title"});
+        title = ElementFactory::Create(*this, {Namespaces::HTML, DOMStringAtom::Null(), u8"title"});
 
         if (auto append = MutationAlgorithms::Append(*documentElement, *title); append.HasException())
         {
@@ -426,7 +425,7 @@ namespace Krys::HTML
 
   DOMString Document::Dir() const noexcept
   {
-    auto html = DOMTreeAccessors::HTMLHtmlElement(*this);
+    auto html = DOMTreeAccessors::GetHtmlElement(*this);
     if (html == nullptr)
     {
       return {};
@@ -437,7 +436,7 @@ namespace Krys::HTML
 
   void Document::Dir(DOMString &&value) noexcept
   {
-    auto html = DOMTreeAccessors::HTMLHtmlElement(*this);
+    auto html = DOMTreeAccessors::GetHeadElement(*this);
     if (html == nullptr)
     {
       return;
@@ -448,12 +447,12 @@ namespace Krys::HTML
 
   RefPtr<HTMLBodyElement> Document::Body() noexcept
   {
-    return DOMTreeAccessors::HTMLBodyElement(*this);
+    return DOMTreeAccessors::GetBodyElement(*this);
   }
 
   RefPtr<const HTMLBodyElement> Document::Body() const noexcept
   {
-    return DOMTreeAccessors::HTMLBodyElement(*this);
+    return DOMTreeAccessors::GetBodyElement(*this);
   }
 
   ExceptionOr<void> Document::Body(HTMLBodyElement &body) noexcept
@@ -491,12 +490,12 @@ namespace Krys::HTML
 
   RefPtr<HTMLHeadElement> Document::Head() noexcept
   {
-    return DOMTreeAccessors::HTMLHeadElement(*this);
+    return DOMTreeAccessors::GetHeadElement(*this);
   }
 
   RefPtr<const HTMLHeadElement> Document::Head() const noexcept
   {
-    return DOMTreeAccessors::HTMLHeadElement(*this);
+    return DOMTreeAccessors::GetHeadElement(*this);
   }
 
   // TODO(DOCUMENT, HTML): Document::Images

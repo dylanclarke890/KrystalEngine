@@ -3,11 +3,9 @@
 #include "Krystal.HTML/DOM/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NodeAlgorithms.hpp"
-#include "Krystal.HTML/DOM/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.HTML/DOM/Algorithms/TreeTraversal.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/CharacterData.hpp"
 #include "Krystal.HTML/DOM/ContainerNode.hpp"
@@ -47,7 +45,7 @@ namespace Krys::HTML
 
   Node &Node::GetRootNode(const GetRootNodeOptions &options) noexcept
   {
-    return options.Composed ? ShadowRootAlgorithms::ShadowIncludingRoot(*this) : TreeQueries::Root(*this);
+    return options.Composed ? TreeQueries::ShadowIncludingRoot(*this) : TreeQueries::Root(*this);
   }
 
   RawPtr<Element> Node::ParentElement() const noexcept
@@ -92,8 +90,8 @@ namespace Krys::HTML
 
   ExceptionOr<void> Node::Normalize() noexcept
   {
-    for (auto *node = TreeTraversal::NextExclusiveTextNode(*this, this); node != nullptr;
-         node = TreeTraversal::NextExclusiveTextNode(*node, this))
+    for (auto *node = TreeQueries::NextExclusiveTextNode(*this, this); node != nullptr;
+         node = TreeQueries::NextExclusiveTextNode(*node, this))
     {
       auto length = node->Data().size();
       if (length == 0uz)
@@ -109,7 +107,7 @@ namespace Krys::HTML
       DOMString data {};
 
       RawPtr<const Node> current = node->NextSibling();
-      while (current != nullptr && TextAlgorithms::IsExclusiveTextNode(*current))
+      while (TreeQueries::IsExclusiveTextNode(current))
       {
         data += *Downcast<Text>(current)->TextContent();
         current = current->NextSibling();
@@ -121,7 +119,7 @@ namespace Krys::HTML
       }
 
       RawPtr<Node> currentNode = node->NextSibling();
-      while (currentNode != nullptr && TextAlgorithms::IsExclusiveTextNode(*currentNode))
+      while (TreeQueries::IsExclusiveTextNode(currentNode))
       {
         auto &currentTextNode = Downcast<Text>(*currentNode);
         LiveRangeUpdater::NodeNormalized(*this, currentTextNode, length);
@@ -130,7 +128,7 @@ namespace Krys::HTML
         currentNode = currentTextNode.NextSibling();
       }
 
-      while (node->NextSibling() != nullptr && TextAlgorithms::IsExclusiveTextNode(*node->NextSibling()))
+      while (TreeQueries::IsExclusiveTextNode(node->NextSibling()))
       {
         if (auto removeResult = MutationAlgorithms::Remove(*node->NextSibling()); removeResult.HasException())
         {

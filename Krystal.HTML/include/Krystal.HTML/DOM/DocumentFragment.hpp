@@ -2,7 +2,7 @@
 
 #include "Krystal.HTML/DOM/ContainerNode.hpp"
 #include "Krystal.HTML/DOM/Internals/RareData/DocumentFragmentRareData.hpp"
-#include "Krystal.HTML/Types/NodeOrString.hpp"
+#include "Krystal.HTML/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"
 #include "Krystal.Lib/Pointers/WeakPtr.hpp"
 

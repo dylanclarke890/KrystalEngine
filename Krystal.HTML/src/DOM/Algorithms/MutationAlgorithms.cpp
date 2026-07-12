@@ -3,7 +3,6 @@
 #include "Krystal.HTML/DOM/Algorithms/IteratorAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.HTML/DOM/Algorithms/MutationObserverAlgorithms.hpp"
-#include "Krystal.HTML/DOM/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
@@ -12,7 +11,7 @@
 #include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/DOM/Text.hpp"
 #include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
-#include "Krystal.HTML/Types/SmallNodeList.hpp"
+#include "Krystal.HTML/DOM/Types/SmallNodeList.hpp"
 
 namespace Krys::HTML
 {
@@ -198,7 +197,7 @@ namespace Krys::HTML
     auto *previousSibling = child != nullptr ? child->PreviousSibling() : parent.LastChild();
 
     bool isParentNamedShadowHost =
-      ShadowRootAlgorithms::IsShadowHost(parent)
+      TreeQueries::IsShadowHost(parent)
       && Downcast<Element>(parent).ShadowRoot()->SlotAssignment() == SlotAssignmentMode::Named;
     bool isParentRootShadowRoot = Is<ShadowRoot>(TreeQueries::Root(parent));
 
@@ -327,7 +326,7 @@ namespace Krys::HTML
   ExceptionOr<void> MutationAlgorithms::Move(Node &node, ContainerNode &newParent,
                                              RawPtr<Node> child) noexcept
   {
-    if (!ShadowRootAlgorithms::HasSameShadowIncludingRoot(newParent, node))
+    if (&TreeQueries::ShadowIncludingRoot(newParent) != &TreeQueries::ShadowIncludingRoot(node))
     {
       return ExceptionCode::HierarchyRequestError;
     }

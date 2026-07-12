@@ -4,7 +4,7 @@
 namespace Krys::HTML
 {
   HTMLTableSectionElement::HTMLTableSectionElement(Document &document) noexcept
-      : HTMLElement(document, DOMInterface::TableSection)
+      : HTMLElement(document, HTMLElementInterface::TableSection)
   {
   }
 

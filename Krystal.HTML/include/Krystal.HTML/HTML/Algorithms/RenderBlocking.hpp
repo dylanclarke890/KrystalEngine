@@ -26,5 +26,4 @@ namespace Krys::HTML
     /// @see https://html.spec.whatwg.org/multipage/dom.html#unblock-rendering
     KRYS_NODISCARD static void UnblockRendering(Element &element) noexcept;
   };
-
 }

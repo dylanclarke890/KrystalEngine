@@ -1,7 +1,6 @@
 ﻿#include "Krystal.HTML/DOM/Algorithms/EventDispatcher.hpp"
 #include "Krystal.HTML/Constants/EventNames.hpp"
 #include "Krystal.HTML/DOM/Algorithms/EventTargetAlgorithms.hpp"
-#include "Krystal.HTML/DOM/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/SlotAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/DOM/Event.hpp"
@@ -33,7 +32,7 @@ namespace Krys::HTML
     }
 
     RawPtr<EventTarget> activationTarget = nullptr;
-    RawPtr<EventTarget> relatedTarget = ShadowRootAlgorithms::Retarget(event.RelatedTarget().get(), *target);
+    RawPtr<EventTarget> relatedTarget = EventTargetAlgorithms::Retarget(event.RelatedTarget().get(), *target);
     bool clearTargets = false;
 
     if (target != relatedTarget || target == event.RelatedTarget())
@@ -41,7 +40,7 @@ namespace Krys::HTML
       List<Ref<EventTarget>> touchTargets;
       for (auto &touchTarget : event.TouchTargetList())
       {
-        touchTargets.push_back(ShareRef(*ShadowRootAlgorithms::Retarget(touchTarget.get(), *target)));
+        touchTargets.push_back(ShareRef(*EventTargetAlgorithms::Retarget(touchTarget.get(), *target)));
       }
 
       AppendToEventPath(event, *target, targetOverride, relatedTarget, touchTargets, false);
@@ -86,12 +85,12 @@ namespace Krys::HTML
           slottable = parent;
         }
 
-        relatedTarget = ShadowRootAlgorithms::Retarget(event.RelatedTarget().get(), *parent);
+        relatedTarget = EventTargetAlgorithms::Retarget(event.RelatedTarget().get(), *parent);
 
         touchTargets.clear();
         for (auto &touchTarget : event.TouchTargetList())
         {
-          touchTargets.push_back(ShareRef(*ShadowRootAlgorithms::Retarget(touchTarget.get(), *parent)));
+          touchTargets.push_back(ShareRef(*EventTargetAlgorithms::Retarget(touchTarget.get(), *parent)));
         }
 
         RawPtr<Node> targetRoot =
@@ -99,7 +98,7 @@ namespace Krys::HTML
 
         if (parent->IsWindow()
             || (Is<Node>(parent)
-                && ShadowRootAlgorithms::IsShadowIncludingInclusiveAncestor(*targetRoot, *nodeParent)))
+                && TreeQueries::IsShadowIncludingInclusiveAncestor(*targetRoot, *nodeParent)))
         {
           if (isActivationEvent && event.Bubbles() && activationTarget == nullptr
               && parent->HasActivationBehavior())
@@ -141,7 +140,7 @@ namespace Krys::HTML
         {
           if (auto *node = DynamicDowncast<Node>(target))
           {
-            return Is<ShadowRoot>(ShadowRootAlgorithms::ShadowIncludingRoot(*node));
+            return Is<ShadowRoot>(TreeQueries::ShadowIncludingRoot(*node));
           }
 
           return false;

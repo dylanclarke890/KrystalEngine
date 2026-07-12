@@ -4,7 +4,7 @@
 namespace Krys::HTML
 {
   HTMLTableCaptionElement::HTMLTableCaptionElement(Document &document) noexcept
-      : HTMLElement(document, DOMInterface::TableCaption)
+      : HTMLElement(document, HTMLElementInterface::TableCaption)
   {
   }
 

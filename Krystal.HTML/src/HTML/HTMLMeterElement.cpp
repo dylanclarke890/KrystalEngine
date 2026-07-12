@@ -3,7 +3,7 @@
 
 namespace Krys::HTML
 {
-  HTMLMeterElement::HTMLMeterElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Meter)
+  HTMLMeterElement::HTMLMeterElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Meter)
   {
   }
 

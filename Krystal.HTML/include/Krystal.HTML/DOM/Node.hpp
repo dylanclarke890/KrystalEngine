@@ -7,7 +7,6 @@
 #include "Krystal.HTML/DOM/EventTarget.hpp"
 #include "Krystal.HTML/DOM/Internals/RareData/NodeRareData.hpp"
 #include "Krystal.HTML/Types/DOMString.hpp"
-#include "Krystal.HTML/Types/DOMStringAtom.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
@@ -71,7 +70,7 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#dom-node-isconnected
     KRYS_NODISCARD bool IsConnected() const noexcept
     {
-      return HasEventTargetFlag(EventTargetFlags::IsConnected);
+      return HasNodeFlag(NodeFlags::IsConnected);
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-node-ownerdocument
@@ -222,7 +221,7 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#concept-shadow-tree
     KRYS_NODISCARD bool IsInShadowTree() const noexcept
     {
-      return HasEventTargetFlag(EventTargetFlags::IsInShadowTree);
+      return HasNodeFlag(NodeFlags::IsInShadowTree);
     }
 
     /// @see https://dom.spec.whatwg.org/#concept-document-tree
@@ -249,13 +248,13 @@ namespace Krys::HTML
     {
     }
 
-    virtual void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
+    virtual void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
     {
       (void)isSubtreeRoot;
       (void)oldAncestor;
     }
 
-    virtual void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
+    virtual void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
     {
       (void)isSubtreeRoot;
       (void)oldAncestor;

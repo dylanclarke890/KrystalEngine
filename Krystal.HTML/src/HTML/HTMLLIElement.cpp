@@ -3,7 +3,7 @@
 
 namespace Krys::HTML
 {
-  HTMLLIElement::HTMLLIElement(Document &document) noexcept : HTMLElement(document, DOMInterface::LI)
+  HTMLLIElement::HTMLLIElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::LI)
   {
   }
 

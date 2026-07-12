@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -166,11 +166,11 @@
     <ClCompile Include="tests\Pointers\RefPtr.cpp" />
     <ClCompile Include="tests\Pointers\WeakPtr.cpp" />
     <ClCompile Include="tests\Pointers\WeakRef.cpp" />
-    <ClCompile Include="tests\String\FixedString.cpp" />
     <ClCompile Include="tests\String\StringAtom.cpp" />
     <ClCompile Include="tests\Commands\Command.cpp" />
     <ClCompile Include="tests\Core\Bit.cpp" />
     <ClCompile Include="tests\Ranges\Reconstruct.cpp" />
+    <ClCompile Include="tests\Types\NTTPString.cpp" />
     <ClCompile Include="tests\Types\NullableFloat.cpp" />
     <ClCompile Include="tests\SmallValueBuffer.cpp" />
     <ClCompile Include="tests\String\StringUtils.cpp" />

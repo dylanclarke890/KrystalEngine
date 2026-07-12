@@ -4,7 +4,7 @@
 namespace Krys::HTML
 {
   HTMLObjectElement::HTMLObjectElement(Document &document) noexcept
-      : HTMLElement(document, DOMInterface::Object)
+      : HTMLElement(document, HTMLElementInterface::Object)
   {
   }
 #pragma region HTMLObjectElement

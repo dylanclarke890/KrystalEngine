@@ -3,6 +3,7 @@
 #include "Krystal.HTML/DOM/Algorithms/LiveRangeUpdater.hpp"
 #include "Krystal.HTML/DOM/Algorithms/MutationObserverAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/SubtreeRanges.hpp"
+#include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/DOM/CDATASection.hpp"
 #include "Krystal.HTML/DOM/Enums/MutationRecordType.hpp"
 #include "Krystal.HTML/DOM/Text.hpp"
@@ -57,16 +58,6 @@ namespace Krys::HTML
     return node._data.substr(offset, count);
   }
 
-  bool TextAlgorithms::IsExclusiveTextNode(const Node &node) noexcept
-  {
-    return Is<Text>(node) && !Is<CDATASection>(node);
-  }
-
-  bool TextAlgorithms::IsExclusiveTextNode(RawPtr<const Node> node) noexcept
-  {
-    return Is<Text>(node) && !Is<CDATASection>(node);
-  }
-
   SmallTextNodeList TextAlgorithms::ContiguousTextNodes(Text &node) noexcept
   {
     RawPtr<Node> start = &node;
@@ -116,7 +107,7 @@ namespace Krys::HTML
     RawPtr<Node> start = &node;
     while (auto *prev = start->PreviousSibling())
     {
-      if (!IsExclusiveTextNode(*prev))
+      if (!TreeQueries::IsExclusiveTextNode(*prev))
       {
         break;
       }
@@ -125,7 +116,7 @@ namespace Krys::HTML
     }
 
     SmallTextNodeList nodes;
-    for (auto *current = start; IsExclusiveTextNode(current); current = current->NextSibling())
+    for (auto *current = start; TreeQueries::IsExclusiveTextNode(current); current = current->NextSibling())
     {
       nodes.push_back(ShareRef(*Downcast<Text>(current)));
     }
@@ -138,7 +129,7 @@ namespace Krys::HTML
     RawPtr<const Node> start = &node;
     while (auto *prev = start->PreviousSibling())
     {
-      if (!IsExclusiveTextNode(*prev))
+      if (!TreeQueries::IsExclusiveTextNode(*prev))
       {
         break;
       }
@@ -147,7 +138,7 @@ namespace Krys::HTML
     }
 
     SmallConstTextNodeList nodes;
-    for (auto *current = start; IsExclusiveTextNode(current); current = current->NextSibling())
+    for (auto *current = start; TreeQueries::IsExclusiveTextNode(current); current = current->NextSibling())
     {
       nodes.push_back(ShareRef(*Downcast<Text>(current)));
     }

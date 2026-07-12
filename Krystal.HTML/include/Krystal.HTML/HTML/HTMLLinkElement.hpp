@@ -15,6 +15,7 @@ namespace Krys::HTML
     UniquePtr<DOMTokenList> _relList;
     UniquePtr<DOMTokenList> _sizes;
     UniquePtr<DOMTokenList> _blocking;
+
     /// @see https://html.spec.whatwg.org/#explicitly-enabled
     bool _explicitlyEnabled {false};
 

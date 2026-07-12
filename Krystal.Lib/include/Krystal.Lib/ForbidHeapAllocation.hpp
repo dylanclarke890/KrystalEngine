@@ -1,14 +1,7 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Core/Tags.hpp"
 #include <cassert>
-
-namespace Krys
-{
-  enum NotNullTag
-  {
-    NotNull
-  };
-}
 
 inline void *operator new(size_t, Krys::NotNullTag, void *location)
 {

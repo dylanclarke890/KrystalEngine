@@ -3,7 +3,7 @@
 
 namespace Krys::HTML
 {
-  HTMLLabelElement::HTMLLabelElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Label)
+  HTMLLabelElement::HTMLLabelElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Label)
   {
   }
 

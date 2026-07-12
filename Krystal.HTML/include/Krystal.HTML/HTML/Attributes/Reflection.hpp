@@ -10,8 +10,8 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
-#include "Krystal.Lib/String/FixedString.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
+#include "Krystal.Lib/Types/NTTPMaybe.hpp"
 #include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 
 namespace Krys::HTML::Attributes
@@ -40,6 +40,10 @@ namespace Krys::HTML::Attributes
   template <typename T>
   concept ReflectPositiveWithFallbackType = ReflectPositiveType<T>;
 
+  /// @brief Types that unconditionally return exceptions during reflection.
+  template <typename T>
+  concept ReflectAlwaysReturnsExceptionOrT = OneOf<T, USVString>;
+
   template <typename T>
   concept ReflectDefaultGetterType = OneOf<T, double, int32, uint32>;
 
@@ -64,76 +68,6 @@ namespace Krys::HTML::Attributes
                               conditional_t<SameType<T, double>, double, uint32>>::StronglyTypedNumber;
   };
 
-  struct OnlyNonNegativeNumbers : public StronglyTypedBool<OnlyNonNegativeNumbers>
-  {
-    using Base::Base;
-  };
-
-  struct OnlyPositiveNumbers : public StronglyTypedBool<OnlyPositiveNumbers>
-  {
-    using Base::Base;
-  };
-
-  struct OnlyPositiveNumbersWithFallback : public StronglyTypedBool<OnlyPositiveNumbersWithFallback>
-  {
-    using Base::Base;
-  };
-
-  struct TreatedAsURL : public StronglyTypedBool<TreatedAsURL>
-  {
-    using Base::Base;
-  };
-
-  /// @brief Types that unconditionally return exceptions during reflection.
-  template <typename T>
-  concept ReflectAlwaysReturnsExceptionOrT = OneOf<T, USVString>;
-
-  template <typename T>
-  using reflect_get_return_t =
-    conditional_t<SameType<T, DOMString>, Maybe<DOMString>,
-                  conditional_t<ReflectAlwaysReturnsExceptionOrT<T>, ExceptionOr<T>, T>>;
-
-  template <typename T, OnlyNonNegativeNumbers OnlyNonNegative, OnlyPositiveNumbers OnlyPositive>
-  using reflect_set_return_t =
-    conditional_t<ReflectAlwaysReturnsExceptionOrT<T> || (SameType<T, int32> && OnlyNonNegative)
-                    || (SameType<T, uint32> && OnlyPositive),
-                  ExceptionOr<void>, void>;
-
-  template <typename T>
-  struct MaybeReflectParameter
-  {
-    T Parameter;
-    bool HasParameter {false};
-
-    MaybeReflectParameter() noexcept = default;
-
-    constexpr MaybeReflectParameter(T parameter) noexcept : Parameter(parameter), HasParameter(true)
-    {
-    }
-
-    KRYS_NODISCARD constexpr operator bool() const noexcept
-    {
-      return HasParameter;
-    }
-
-    KRYS_NODISCARD constexpr T operator*() const noexcept
-    {
-      return Parameter;
-    }
-  };
-
-  template <typename T>
-  using MaybeReflectDefault = MaybeReflectParameter<ReflectDefault<T>>;
-
-  template <typename T>
-  using MaybeReflectRange = MaybeReflectParameter<ReflectRange<T>>;
-
-  template <typename T>
-  constexpr inline MaybeReflectDefault<T> NoDefaultValue = {};
-
-  template <typename T>
-  constexpr inline MaybeReflectRange<T> NoRange = {};
-
   /// @brief Implements the logic for reflecting content attributes to IDL attributes and vice versa.
   /// Enumerated attributes and attributes that are limited to a set of known values
   /// (DOMString/Maybe<DOMString>) are not handled by the generic Reflect functions and need to be handled
@@ -141,6 +75,53 @@ namespace Krys::HTML::Attributes
   /// @see https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#reflect
   class Reflection
   {
+#pragma region Types and Constants
+
+    template <typename T>
+    using MaybeReflectDefault = NTTPMaybe<ReflectDefault<T>>;
+
+    template <typename T>
+    using MaybeReflectRange = NTTPMaybe<ReflectRange<T>>;
+
+    template <typename T>
+    constexpr static inline MaybeReflectDefault<T> NoDefaultValue = {};
+
+    template <typename T>
+    constexpr static inline MaybeReflectRange<T> NoRange = {};
+
+    struct OnlyNonNegativeNumbers : public StronglyTypedBool<OnlyNonNegativeNumbers>
+    {
+      using Base::Base;
+    };
+
+    struct OnlyPositiveNumbers : public StronglyTypedBool<OnlyPositiveNumbers>
+    {
+      using Base::Base;
+    };
+
+    struct OnlyPositiveNumbersWithFallback : public StronglyTypedBool<OnlyPositiveNumbersWithFallback>
+    {
+      using Base::Base;
+    };
+
+    struct TreatedAsURL : public StronglyTypedBool<TreatedAsURL>
+    {
+      using Base::Base;
+    };
+
+    template <typename T>
+    using reflect_get_return_t =
+      conditional_t<SameType<T, DOMString>, Maybe<DOMString>,
+                    conditional_t<ReflectAlwaysReturnsExceptionOrT<T>, ExceptionOr<T>, T>>;
+
+    template <typename T, OnlyNonNegativeNumbers OnlyNonNegative, OnlyPositiveNumbers OnlyPositive>
+    using reflect_set_return_t =
+      conditional_t<ReflectAlwaysReturnsExceptionOrT<T> || (SameType<T, int32> && OnlyNonNegative)
+                      || (SameType<T, uint32> && OnlyPositive),
+                    ExceptionOr<void>, void>;
+
+#pragma endregion
+
   public:
 #pragma region Reflect
 

@@ -7,6 +7,7 @@
 #include "Krystal.HTML/DOM/Text.hpp"
 #include "Krystal.HTML/DOM/XHTMLDocument.hpp"
 #include "Krystal.HTML/DOM/XMLDocument.hpp"
+#include "Krystal.HTML/HTML/HTMLElement.hpp"
 #include "Krystal.HTML/Infra/Namespaces.hpp"
 #include "Krystal.HTML/SVG/SVGDocument.hpp"
 
@@ -36,12 +37,12 @@ namespace Krys::HTML
     Ref<XMLDocument> document = [&] -> Ref<XMLDocument>
     {
       RefPtr<XMLDocument> doc = nullptr;
-      if (namespaceUri == Namespace::HTML)
+      if (namespaceUri == Namespaces::HTML)
       {
         doc = CreateRefPtr<XHTMLDocument>();
         doc->_contentType = u8"application/xhtml+xml";
       }
-      else if (namespaceUri == Namespace::SVG)
+      else if (namespaceUri == Namespaces::SVG)
       {
         doc = CreateRefPtr<SVGDocument>();
         doc->_contentType = u8"image/svg+xml";
@@ -100,15 +101,13 @@ namespace Krys::HTML
       return appendResult.ReleaseException();
     }
 
-    auto qualifiedName = QualifiedName {Namespace::HTML, DOMStringAtom::Null(), u8"html"};
-    auto htmlElement = ElementFactory::Create(*document, qualifiedName);
+    auto htmlElement = ElementFactory::Create(*document, {Namespaces::HTML, DOMStringAtom::Null(), u8"html"});
     if (auto appendResult = document->AppendChild(*htmlElement); appendResult.HasException())
     {
       return appendResult.ReleaseException();
     }
 
-    qualifiedName.LocalName = u8"head";
-    auto headElement = ElementFactory::Create(*document, qualifiedName);
+    auto headElement = ElementFactory::Create(*document, {Namespaces::HTML, DOMStringAtom::Null(), u8"head"});
     if (auto appendResult = document->AppendChild(*headElement); appendResult.HasException())
     {
       return appendResult.ReleaseException();
@@ -116,8 +115,8 @@ namespace Krys::HTML
 
     if (title.has_value())
     {
-      qualifiedName.LocalName = u8"title";
-      auto titleElement = ElementFactory::Create(*document, qualifiedName);
+      auto titleElement =
+        ElementFactory::Create(*document, {Namespaces::HTML, DOMStringAtom::Null(), u8"title"});
       if (auto appendResult = headElement->AppendChild(*titleElement); appendResult.HasException())
       {
         return appendResult.ReleaseException();
@@ -131,8 +130,7 @@ namespace Krys::HTML
       }
     }
 
-    qualifiedName.LocalName = u8"body";
-    auto bodyElement = ElementFactory::Create(*document, qualifiedName);
+    auto bodyElement = ElementFactory::Create(*document, {Namespaces::HTML, DOMStringAtom::Null(), u8"body"});
     if (auto appendResult = document->AppendChild(*bodyElement); appendResult.HasException())
     {
       return appendResult.ReleaseException();

@@ -3,8 +3,8 @@
 #include "Krystal.HTML/DOM/Element.hpp"
 #include "Krystal.HTML/HTML/Dicts/ShowPopoverOptions.hpp"
 #include "Krystal.HTML/HTML/Dicts/TogglePopoverOptions.hpp"
-#include "Krystal.HTML/HTML/Enums/DOMInterface.hpp"
 #include "Krystal.HTML/HTML/Enums/HTMLElementFlags.hpp"
+#include "Krystal.HTML/HTML/Enums/HTMLElementInterface.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
 
 namespace Krys::HTML
@@ -20,10 +20,11 @@ namespace Krys::HTML
 
   private:
     HTMLElementFlags _flags : BitCount<HTMLElementFlags>() {HTMLElementFlags::None};
-    DOMInterface _interface : BitCount<DOMInterface>() {DOMInterface::None};
+    HTMLElementInterface _interface : BitCount<HTMLElementInterface>() {HTMLElementInterface::None};
 
   protected:
-    HTMLElement(Document &document, DOMInterface interface, HTMLElementFlags flags = HTMLElementFlags::None,
+    HTMLElement(Document &document, HTMLElementInterface interface,
+                HTMLElementFlags flags = HTMLElementFlags::None,
                 NodeFlags nodeFlags = NodeFlags::None) noexcept;
 
   public:
@@ -159,19 +160,70 @@ namespace Krys::HTML
   protected:
 #pragma region HTMLElement Flags
 
-    void SetHTMLElement(HTMLElementFlags flag) noexcept
+    void SetHTMLElementFlag(HTMLElementFlags flag) noexcept
     {
       _flags = _flags | flag;
     }
 
-    void ClearHTMLElement(HTMLElementFlags flag) noexcept
+    void ClearHTMLElementFlag(HTMLElementFlags flag) noexcept
     {
       _flags = _flags & ~flag;
     }
 
-    KRYS_NODISCARD bool HasHTMLElement(HTMLElementFlags flag) const noexcept
+    KRYS_NODISCARD bool HasHTMLElementFlag(HTMLElementFlags flag) const noexcept
     {
       return HasFlag(_flags, flag);
+    }
+
+#pragma endregion
+
+#pragma region Extensibility Hooks
+
+    void OnInsert() noexcept override
+    {
+      // TODO(HTMLELEMENT): Implement the insertion steps for an HTMLElement.
+      // If insertedNode is a form-associated element or the ancestor of a form-associated element:
+      // - If the form-associated element's parser inserted flag is set, then return.
+      // - Reset the form owner of the form-associated element.
+      //
+      // If insertedNode is an Element that is not on the stack of open elements of an HTML parser, then
+      // process internal resource links given insertedNode's node document.
+    }
+
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override
+    {
+      // TODO(HTMLELEMENT): Implement the removal steps for an HTMLElement.
+
+      // Let document be removedNode's node document.
+
+      // If document's focused area is removedNode, then set document's focused area to document's viewport,
+      // and set document's relevant global object's navigation API's focus changed during ongoing navigation
+      // to false.
+      //
+      // This does not perform the unfocusing steps, focusing steps, or focus update steps, and thus no blur
+      // or change events are fired.
+      //
+      // If removedNode is an element whose namespace is the HTML namespace, and this standard defines HTML
+      // element removing steps for removedNode's local name, then run the corresponding HTML element removing
+      // steps given removedNode, isSubtreeRoot, and oldAncestor.
+      //
+      // If removedNode is a form-associated element with a non-null form owner and removedNode and its form
+      // owner are no longer in the same tree, then reset the form owner of removedNode.
+      //
+      // If removedNode's popover attribute is not in the No Popover state, then run the hide popover
+      // algorithm given removedNode, false, false, false, and null.
+    }
+
+    void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override
+    {
+      // TODO(HTMLELEMENT): Implement the move steps for an HTMLElement.
+
+      // If movedNode is an element whose namespace is the HTML namespace, and this standard defines HTML
+      // element moving steps for movedNode's local name, then run the corresponding HTML element moving steps
+      // given movedNode, isSubtreeRoot, and oldAncestor.
+
+      // If movedNode is a form-associated element with a non-null form owner and movedNode and its form owner
+      // are no longer in the same tree, then reset the form owner of movedNode.
     }
 
 #pragma endregion
@@ -180,147 +232,147 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool IsHTMLAreaElement() const noexcept
     {
-      return _interface == DOMInterface::Area;
+      return _interface == HTMLElementInterface::Area;
     }
 
     KRYS_NODISCARD bool IsHTMLAudioElement() const noexcept
     {
-      return _interface == DOMInterface::Audio;
+      return _interface == HTMLElementInterface::Audio;
     }
 
     KRYS_NODISCARD bool IsHTMLAnchorElement() const noexcept
     {
-      return _interface == DOMInterface::Anchor;
+      return _interface == HTMLElementInterface::Anchor;
     }
 
     KRYS_NODISCARD bool IsHTMLBaseElement() const noexcept
     {
-      return _interface == DOMInterface::Base;
+      return _interface == HTMLElementInterface::Base;
     }
 
     KRYS_NODISCARD bool IsHTMLBodyElement() const noexcept
     {
-      return _interface == DOMInterface::Body;
+      return _interface == HTMLElementInterface::Body;
     }
 
     KRYS_NODISCARD bool IsHTMLBRElement() const noexcept
     {
-      return _interface == DOMInterface::BR;
+      return _interface == HTMLElementInterface::BR;
     }
 
     KRYS_NODISCARD bool IsHTMLButtonElement() const noexcept
     {
-      return _interface == DOMInterface::Button;
+      return _interface == HTMLElementInterface::Button;
     }
 
     KRYS_NODISCARD bool IsHTMLCanvasElement() const noexcept
     {
-      return _interface == DOMInterface::Canvas;
+      return _interface == HTMLElementInterface::Canvas;
     }
 
     KRYS_NODISCARD bool IsHTMLDataElement() const noexcept
     {
-      return _interface == DOMInterface::Data;
+      return _interface == HTMLElementInterface::Data;
     }
 
     KRYS_NODISCARD bool IsHTMLDataListElement() const noexcept
     {
-      return _interface == DOMInterface::DataList;
+      return _interface == HTMLElementInterface::DataList;
     }
 
     KRYS_NODISCARD bool IsHTMLDetailsElement() const noexcept
     {
-      return _interface == DOMInterface::Details;
+      return _interface == HTMLElementInterface::Details;
     }
 
     KRYS_NODISCARD bool IsHTMLDialogElement() const noexcept
     {
-      return _interface == DOMInterface::Dialog;
+      return _interface == HTMLElementInterface::Dialog;
     }
 
     KRYS_NODISCARD bool IsHTMLDivElement() const noexcept
     {
-      return _interface == DOMInterface::Div;
+      return _interface == HTMLElementInterface::Div;
     }
 
     KRYS_NODISCARD bool IsHTMLDListElement() const noexcept
     {
-      return _interface == DOMInterface::DList;
+      return _interface == HTMLElementInterface::DList;
     }
 
     KRYS_NODISCARD bool IsHTMLEmbedElement() const noexcept
     {
-      return _interface == DOMInterface::Embed;
+      return _interface == HTMLElementInterface::Embed;
     }
 
     KRYS_NODISCARD bool IsHTMLFieldSetElement() const noexcept
     {
-      return _interface == DOMInterface::FieldSet;
+      return _interface == HTMLElementInterface::FieldSet;
     }
 
     KRYS_NODISCARD bool IsHTMLFormElement() const noexcept
     {
-      return _interface == DOMInterface::Form;
+      return _interface == HTMLElementInterface::Form;
     }
 
     KRYS_NODISCARD bool IsHTMLHeadElement() const noexcept
     {
-      return _interface == DOMInterface::Head;
+      return _interface == HTMLElementInterface::Head;
     }
 
     KRYS_NODISCARD bool IsHTMLHeadingElement() const noexcept
     {
-      return _interface == DOMInterface::Heading;
+      return _interface == HTMLElementInterface::Heading;
     }
 
     KRYS_NODISCARD bool IsHTMLHRElement() const noexcept
     {
-      return _interface == DOMInterface::HR;
+      return _interface == HTMLElementInterface::HR;
     }
 
     KRYS_NODISCARD bool IsHTMLHtmlElement() const noexcept
     {
-      return _interface == DOMInterface::Html;
+      return _interface == HTMLElementInterface::Html;
     }
 
     KRYS_NODISCARD bool IsHTMLIFrameElement() const noexcept
     {
-      return _interface == DOMInterface::IFrame;
+      return _interface == HTMLElementInterface::IFrame;
     }
 
     KRYS_NODISCARD bool IsHTMLImageElement() const noexcept
     {
-      return _interface == DOMInterface::Image;
+      return _interface == HTMLElementInterface::Image;
     }
 
     KRYS_NODISCARD bool IsHTMLInputElement() const noexcept
     {
-      return _interface == DOMInterface::Input;
+      return _interface == HTMLElementInterface::Input;
     }
 
     KRYS_NODISCARD bool IsHTMLLabelElement() const noexcept
     {
-      return _interface == DOMInterface::Label;
+      return _interface == HTMLElementInterface::Label;
     }
 
     KRYS_NODISCARD bool IsHTMLLegendElement() const noexcept
     {
-      return _interface == DOMInterface::Legend;
+      return _interface == HTMLElementInterface::Legend;
     }
 
     KRYS_NODISCARD bool IsHTMLLIElement() const noexcept
     {
-      return _interface == DOMInterface::LI;
+      return _interface == HTMLElementInterface::LI;
     }
 
     KRYS_NODISCARD bool IsHTMLLinkElement() const noexcept
     {
-      return _interface == DOMInterface::Link;
+      return _interface == HTMLElementInterface::Link;
     }
 
     KRYS_NODISCARD bool IsHTMLMapElement() const noexcept
     {
-      return _interface == DOMInterface::Map;
+      return _interface == HTMLElementInterface::Map;
     }
 
     KRYS_NODISCARD bool IsHTMLMediaElement() const noexcept
@@ -330,171 +382,171 @@ namespace Krys::HTML
 
     KRYS_NODISCARD bool IsHTMLMenuElement() const noexcept
     {
-      return _interface == DOMInterface::Menu;
+      return _interface == HTMLElementInterface::Menu;
     }
 
     KRYS_NODISCARD bool IsHTMLMetaElement() const noexcept
     {
-      return _interface == DOMInterface::Meta;
+      return _interface == HTMLElementInterface::Meta;
     }
 
     KRYS_NODISCARD bool IsHTMLMeterElement() const noexcept
     {
-      return _interface == DOMInterface::Meter;
+      return _interface == HTMLElementInterface::Meter;
     }
 
     KRYS_NODISCARD bool IsHTMLModElement() const noexcept
     {
-      return _interface == DOMInterface::Mod;
+      return _interface == HTMLElementInterface::Mod;
     }
 
     KRYS_NODISCARD bool IsHTMLObjectElement() const noexcept
     {
-      return _interface == DOMInterface::Object;
+      return _interface == HTMLElementInterface::Object;
     }
 
     KRYS_NODISCARD bool IsHTMLOListElement() const noexcept
     {
-      return _interface == DOMInterface::OList;
+      return _interface == HTMLElementInterface::OList;
     }
 
     KRYS_NODISCARD bool IsHTMLOptGroupElement() const noexcept
     {
-      return _interface == DOMInterface::OptGroup;
+      return _interface == HTMLElementInterface::OptGroup;
     }
 
     KRYS_NODISCARD bool IsHTMLOptionElement() const noexcept
     {
-      return _interface == DOMInterface::Option;
+      return _interface == HTMLElementInterface::Option;
     }
 
     KRYS_NODISCARD bool IsHTMLOutputElement() const noexcept
     {
-      return _interface == DOMInterface::Output;
+      return _interface == HTMLElementInterface::Output;
     }
 
     KRYS_NODISCARD bool IsHTMLParagraphElement() const noexcept
     {
-      return _interface == DOMInterface::Paragraph;
+      return _interface == HTMLElementInterface::Paragraph;
     }
 
     KRYS_NODISCARD bool IsHTMLPictureElement() const noexcept
     {
-      return _interface == DOMInterface::Pre;
+      return _interface == HTMLElementInterface::Pre;
     }
 
     KRYS_NODISCARD bool IsHTMLPreElement() const noexcept
     {
-      return _interface == DOMInterface::Pre;
+      return _interface == HTMLElementInterface::Pre;
     }
 
     KRYS_NODISCARD bool IsHTMLProgressElement() const noexcept
     {
-      return _interface == DOMInterface::Progress;
+      return _interface == HTMLElementInterface::Progress;
     }
 
     KRYS_NODISCARD bool IsHTMLQuoteElement() const noexcept
     {
-      return _interface == DOMInterface::Quote;
+      return _interface == HTMLElementInterface::Quote;
     }
 
     KRYS_NODISCARD bool IsHTMLScriptElement() const noexcept
     {
-      return _interface == DOMInterface::Script;
+      return _interface == HTMLElementInterface::Script;
     }
 
     KRYS_NODISCARD bool IsHTMLSelectElement() const noexcept
     {
-      return _interface == DOMInterface::Select;
+      return _interface == HTMLElementInterface::Select;
     }
 
     KRYS_NODISCARD bool IsHTMLSelectedContentElement() const noexcept
     {
-      return _interface == DOMInterface::SelectedContent;
+      return _interface == HTMLElementInterface::SelectedContent;
     }
 
     // NOTE: HTMLSlotElement type check is not needed here as Node already has it.
 
     KRYS_NODISCARD bool IsHTMLSourceElement() const noexcept
     {
-      return _interface == DOMInterface::Source;
+      return _interface == HTMLElementInterface::Source;
     }
 
     KRYS_NODISCARD bool IsHTMLSpanElement() const noexcept
     {
-      return _interface == DOMInterface::Span;
+      return _interface == HTMLElementInterface::Span;
     }
 
     KRYS_NODISCARD bool IsHTMLStyleElement() const noexcept
     {
-      return _interface == DOMInterface::Style;
+      return _interface == HTMLElementInterface::Style;
     }
 
     KRYS_NODISCARD bool IsHTMLTableElement() const noexcept
     {
-      return _interface == DOMInterface::Table;
+      return _interface == HTMLElementInterface::Table;
     }
 
     KRYS_NODISCARD bool IsHTMLTableCaptionElement() const noexcept
     {
-      return _interface == DOMInterface::TableCaption;
+      return _interface == HTMLElementInterface::TableCaption;
     }
 
     KRYS_NODISCARD bool IsHTMLTableCellElement() const noexcept
     {
-      return _interface == DOMInterface::TableCell;
+      return _interface == HTMLElementInterface::TableCell;
     }
 
     KRYS_NODISCARD bool IsHTMLTableColElement() const noexcept
     {
-      return _interface == DOMInterface::TableCol;
+      return _interface == HTMLElementInterface::TableCol;
     }
 
     KRYS_NODISCARD bool IsHTMLTableRowElement() const noexcept
     {
-      return _interface == DOMInterface::TableRow;
+      return _interface == HTMLElementInterface::TableRow;
     }
 
     KRYS_NODISCARD bool IsHTMLTableSectionElement() const noexcept
     {
-      return _interface == DOMInterface::TableSection;
+      return _interface == HTMLElementInterface::TableSection;
     }
 
     KRYS_NODISCARD bool IsHTMLTemplateElement() const noexcept
     {
-      return _interface == DOMInterface::Template;
+      return _interface == HTMLElementInterface::Template;
     }
 
     KRYS_NODISCARD bool IsHTMLTextAreaElement() const noexcept
     {
-      return _interface == DOMInterface::TextArea;
+      return _interface == HTMLElementInterface::TextArea;
     }
 
     KRYS_NODISCARD bool IsHTMLTitleElement() const noexcept
     {
-      return _interface == DOMInterface::Title;
+      return _interface == HTMLElementInterface::Title;
     }
 
     KRYS_NODISCARD bool IsHTMLTimeElement() const noexcept
     {
-      return _interface == DOMInterface::Time;
+      return _interface == HTMLElementInterface::Time;
     }
 
     KRYS_NODISCARD bool IsHTMLTrackElement() const noexcept
     {
-      return _interface == DOMInterface::Track;
+      return _interface == HTMLElementInterface::Track;
     }
 
     KRYS_NODISCARD bool IsHTMLUListElement() const noexcept
     {
-      return _interface == DOMInterface::UList;
+      return _interface == HTMLElementInterface::UList;
     }
 
     // NOTE: HTMLUnknownElement type check is not needed here as Node already has it.
 
     KRYS_NODISCARD bool IsHTMLVideoElement() const noexcept
     {
-      return _interface == DOMInterface::Video;
+      return _interface == HTMLElementInterface::Video;
     }
 
 #pragma endregion

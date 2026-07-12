@@ -3,7 +3,7 @@
 
 namespace Krys::HTML
 {
-  HTMLMenuElement::HTMLMenuElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Menu)
+  HTMLMenuElement::HTMLMenuElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Menu)
   {
   }
 

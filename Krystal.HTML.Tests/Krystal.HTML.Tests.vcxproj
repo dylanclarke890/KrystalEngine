@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -124,6 +124,12 @@
       </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy /Y /I /E /F "$(ProjectDir)data" "$(TargetDir)data"</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy data directory</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -164,9 +170,9 @@
     <ClCompile Include="catch_main.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\EventDispatcher.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\MutationAlgorithms.cpp" />
+    <ClCompile Include="tests\DOM\Internals\QualifiedNameCache.cpp" />
     <ClCompile Include="tests\DOM\Mixins\ChildNode.cpp" />
     <ClCompile Include="tests\DOM\Mixins\NonDocumentTypeChildNode.cpp" />
-    <ClCompile Include="tests\DOM\Algorithms\ShadowRootAlgorithms.cpp" />
     <ClCompile Include="tests\DOM\DOMTokenList.cpp" />
     <ClCompile Include="tests\DOM\Internals\Event\CustomEvent.cpp" />
     <ClCompile Include="tests\DOM\Internals\Event\Event.cpp" />
@@ -175,8 +181,9 @@
     <ClCompile Include="tests\DOM\TreeWalker.cpp" />
     <ClCompile Include="tests\HTML\Attributes\Reflection.cpp" />
     <ClCompile Include="tests\HTML\MicroParsers\Numbers.cpp" />
-    <ClCompile Include="tests\Parser\Loader\HTMLEncodingSniffer.cpp" />
-    <ClCompile Include="tests\Parser\Loader\TextResourceDecoder.cpp" />
+    <ClCompile Include="tests\HTML\Parser\HTMLDocumentParser.cpp" />
+    <ClCompile Include="tests\HTML\Parser\Loader\HTMLEncodingSniffer.cpp" />
+    <ClCompile Include="tests\HTML\Parser\Loader\TextResourceDecoder.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\NameValidation.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\Mixins.cpp" />
     <ClCompile Include="tests\DOM\Mixins\NonElementParentNode.cpp" />
@@ -196,17 +203,19 @@
     <ClCompile Include="tests\DOM\Node.cpp" />
     <ClCompile Include="tests\DOM\ProcessingInstruction.cpp" />
     <ClCompile Include="tests\DOM\Text.cpp" />
-    <ClCompile Include="tests\Parser\HTMLCharacterReference.cpp" />
-    <ClCompile Include="tests\Parser\HTMLInputStream.cpp" />
-    <ClCompile Include="tests\Parser\HTMLTokenizerIntegrationTests.cpp" />
-    <ClCompile Include="tests\Parser\HTMLTokenizerStates.cpp" />
+    <ClCompile Include="tests\HTML\Parser\HTMLCharacterReference.cpp" />
+    <ClCompile Include="tests\HTML\Parser\HTMLInputStream.cpp" />
+    <ClCompile Include="tests\HTML\Parser\HTMLTokenizerIntegrationTests.cpp" />
+    <ClCompile Include="tests\HTML\Parser\HTMLTokenizerStates.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\TreeQueries.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\OrderedSet.cpp" />
     <ClCompile Include="tests\Infra\StringAlgorithms.cpp" />
     <ClCompile Include="tests\DOM\Range.cpp" />
     <ClCompile Include="tests\DOM\StaticRange.cpp" />
+    <ClCompile Include="tests\TreeConstruction.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\Krystal.HTML.Tests\TreeConstruction.hpp" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="include\Krystal.HTML.Tests\ParserTestUtils.hpp" />
     <ClInclude Include="include\Krystal.HTML.Tests\TestCharacterData.hpp" />
@@ -214,6 +223,63 @@
     <ClInclude Include="include\Krystal.HTML.Tests\TestElement.hpp" />
     <ClInclude Include="include\Krystal.HTML.Tests\TestNode.hpp" />
     <ClCompile Include="tests\DOM\BoundaryPoint.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\tree-construction\adoption-01.dat" />
+    <None Include="data\tree-construction\adoption-02.dat" />
+    <None Include="data\tree-construction\blocks-01.dat" />
+    <None Include="data\tree-construction\entities-01.dat" />
+    <None Include="data\tree-construction\entities-02.dat" />
+    <None Include="data\tree-construction\foreign-fragment-01.dat" />
+    <None Include="data\tree-construction\formatting-elements-01.dat" />
+    <None Include="data\tree-construction\foster-parenting-01.dat" />
+    <None Include="data\tree-construction\html5test-com.dat" />
+    <None Include="data\tree-construction\comments-01.dat" />
+    <None Include="data\tree-construction\doctype-01.dat" />
+    <None Include="data\tree-construction\inbody-01.dat" />
+    <None Include="data\tree-construction\isindex-01.dat" />
+    <None Include="data\tree-construction\main-element-01.dat" />
+    <None Include="data\tree-construction\math-01.dat" />
+    <None Include="data\tree-construction\menuitem-element-01.dat" />
+    <None Include="data\tree-construction\namespace-sensitivity-01.dat" />
+    <None Include="data\tree-construction\noscript-01.dat" />
+    <None Include="data\tree-construction\plain-text-unsafe-01.dat" />
+    <None Include="data\tree-construction\quirks-01.dat" />
+    <None Include="data\tree-construction\ruby-01.dat" />
+    <None Include="data\tree-construction\script-data-01.dat" />
+    <None Include="data\tree-construction\search-element-01.dat" />
+    <None Include="data\tree-construction\svg-01.dat" />
+    <None Include="data\tree-construction\tables-01.dat" />
+    <None Include="data\tree-construction\template-01.dat" />
+    <None Include="data\tree-construction\tests-01.dat" />
+    <None Include="data\tree-construction\tests-02.dat" />
+    <None Include="data\tree-construction\tests-03.dat" />
+    <None Include="data\tree-construction\tests-04.dat" />
+    <None Include="data\tree-construction\tests-05.dat" />
+    <None Include="data\tree-construction\tests-06.dat" />
+    <None Include="data\tree-construction\tests-07.dat" />
+    <None Include="data\tree-construction\tests-08.dat" />
+    <None Include="data\tree-construction\tests-09.dat" />
+    <None Include="data\tree-construction\tests-10.dat" />
+    <None Include="data\tree-construction\tests-11.dat" />
+    <None Include="data\tree-construction\tests-12.dat" />
+    <None Include="data\tree-construction\tests-14.dat" />
+    <None Include="data\tree-construction\tests-15.dat" />
+    <None Include="data\tree-construction\tests-16.dat" />
+    <None Include="data\tree-construction\tests-17.dat" />
+    <None Include="data\tree-construction\tests-18.dat" />
+    <None Include="data\tree-construction\tests-19.dat" />
+    <None Include="data\tree-construction\tests-20.dat" />
+    <None Include="data\tree-construction\tests-21.dat" />
+    <None Include="data\tree-construction\tests-22.dat" />
+    <None Include="data\tree-construction\tests-23.dat" />
+    <None Include="data\tree-construction\tests-24.dat" />
+    <None Include="data\tree-construction\tests-25.dat" />
+    <None Include="data\tree-construction\tests-26.dat" />
+    <None Include="data\tree-construction\tricky-01.dat" />
+    <None Include="data\tree-construction\void-in-phrasing-01.dat" />
+    <None Include="data\tree-construction\webkit-01.dat" />
+    <None Include="data\tree-construction\webkit-02.dat" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

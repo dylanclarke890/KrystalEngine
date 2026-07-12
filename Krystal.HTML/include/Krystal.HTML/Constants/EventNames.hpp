@@ -1,27 +1,27 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Types/DOMStringAtom.hpp"
+#include "Krystal.HTML/Types/DOMString.hpp"
 
 namespace Krys::HTML::EventNames
 {
-  inline static DOMStringAtom ReadyStateChange = u8"readystatechange";
-  inline static DOMStringAtom Abort = u8"abort";
-  inline static DOMStringAtom Click = u8"click";
-  inline static DOMStringAtom TouchStart = u8"touchstart";
-  inline static DOMStringAtom TouchMove = u8"touchmove";
-  inline static DOMStringAtom Wheel = u8"wheel";
-  inline static DOMStringAtom MouseWheel = u8"mousewheel";
-  inline static DOMStringAtom BeforeUnload = u8"beforeunload";
-  inline static DOMStringAtom AnimationEnd = u8"animationend";
-  inline static DOMStringAtom AnimationIteration = u8"animationiteration";
-  inline static DOMStringAtom AnimationStart = u8"animationstart";
-  inline static DOMStringAtom TransitionEnd = u8"transitionend";
+  constexpr inline DOMStringView ReadyStateChange = u8"readystatechange";
+  constexpr inline DOMStringView Abort = u8"abort";
+  constexpr inline DOMStringView Click = u8"click";
+  constexpr inline DOMStringView TouchStart = u8"touchstart";
+  constexpr inline DOMStringView TouchMove = u8"touchmove";
+  constexpr inline DOMStringView Wheel = u8"wheel";
+  constexpr inline DOMStringView MouseWheel = u8"mousewheel";
+  constexpr inline DOMStringView BeforeUnload = u8"beforeunload";
+  constexpr inline DOMStringView AnimationEnd = u8"animationend";
+  constexpr inline DOMStringView AnimationIteration = u8"animationiteration";
+  constexpr inline DOMStringView AnimationStart = u8"animationstart";
+  constexpr inline DOMStringView TransitionEnd = u8"transitionend";
 
   namespace Legacy
   {
-    inline static DOMStringAtom AnimationEnd = u8"webkitAnimationEnd";
-    inline static DOMStringAtom AnimationIteration = u8"webkitAnimationIteration";
-    inline static DOMStringAtom AnimationStart = u8"webkitAnimationStart";
-    inline static DOMStringAtom TransitionEnd = u8"webkitTransitionEnd";
+    constexpr inline DOMStringView AnimationEnd = u8"webkitAnimationEnd";
+    constexpr inline DOMStringView AnimationIteration = u8"webkitAnimationIteration";
+    constexpr inline DOMStringView AnimationStart = u8"webkitAnimationStart";
+    constexpr inline DOMStringView TransitionEnd = u8"webkitTransitionEnd";
   }
 }

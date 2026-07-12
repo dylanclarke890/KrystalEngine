@@ -3,7 +3,7 @@
 
 namespace Krys::HTML
 {
-  HTMLImageElement::HTMLImageElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Image)
+  HTMLImageElement::HTMLImageElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Image)
   {
   }
 

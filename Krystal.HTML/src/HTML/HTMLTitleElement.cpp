@@ -1,17 +1,14 @@
 ﻿#include "Krystal.HTML/HTML/HTMLTitleElement.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NodeAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TextAlgorithms.hpp"
-#include "Krystal.HTML/DOM/Attr.hpp"
-#include "Krystal.HTML/DOM/ShadowRoot.hpp"
-#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 
 namespace Krys::HTML
 {
-  HTMLTitleElement::HTMLTitleElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Title)
+  HTMLTitleElement::HTMLTitleElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Title)
   {
   }
+
+#pragma region HTMLTitleElement
 
   DOMString HTMLTitleElement::Text() const noexcept
   {
@@ -22,4 +19,6 @@ namespace Krys::HTML
   {
     return NodeAlgorithms::StringReplaceAll(std::move(value), *this);
   }
+
+#pragma endregion
 }

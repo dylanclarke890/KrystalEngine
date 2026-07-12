@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/DOM/HTMLCollection.hpp"
-#include "Krystal.HTML/Types/SmallNodeList.hpp"
+#include "Krystal.HTML/DOM/Types/SmallNodeList.hpp"
 
 namespace Krys::HTML
 {

@@ -1,9 +1,11 @@
 ﻿#pragma once
 
 #include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Hash.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/Set.hpp"
+#include <xutility>
 
 namespace Krys
 {
@@ -153,6 +155,23 @@ namespace Krys
     KRYS_NODISCARD utf8_stringview View() const noexcept
     {
       return *_ptr;
+    }
+  };
+}
+
+namespace std
+{
+  template <>
+  struct hash<Krys::StringAtom>
+  {
+    constexpr size_t operator()(const Krys::StringAtom &qName) const noexcept
+    {
+      if (qName == Krys::StringAtom::Null())
+      {
+        return 0;
+      }
+
+      return Krys::Hash::Combine(qName.View().data());
     }
   };
 }

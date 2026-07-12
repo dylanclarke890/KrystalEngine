@@ -3,7 +3,6 @@
 #include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NodeAlgorithms.hpp"
-#include "Krystal.HTML/DOM/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/TextAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/HTMLCollection.hpp"
@@ -23,11 +22,6 @@
 
 namespace Krys::HTML
 {
-  Element::Element(Document &document, NodeFlags nodeFlags) noexcept
-      : ContainerNode(document, NodeType::ELEMENT_NODE, nodeFlags)
-  {
-  }
-
   Element::Element(Document &document, const QualifiedName &name, NodeFlags nodeFlags) noexcept
       : ContainerNode(document, NodeType::ELEMENT_NODE, nodeFlags), _qualifiedName(name)
   {
@@ -39,7 +33,7 @@ namespace Krys::HTML
   {
     auto qualifiedName = _qualifiedName.Name();
 
-    if (NamespaceURI() == Namespace::HTML && Is<HTMLDocument>(NodeDocument()))
+    if (NamespaceURI() == Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
       qualifiedName = Krys::Text::ToASCIIUppercase(qualifiedName);
     }
@@ -137,7 +131,7 @@ namespace Krys::HTML
       return Exception {ExceptionCode::InvalidCharacterError};
     }
 
-    if (NamespaceURI() == Namespace::HTML && Is<HTMLDocument>(NodeDocument()))
+    if (NamespaceURI() == Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
       qualifiedName = Krys::Text::ToASCIILowercase(qualifiedName.View());
     }
@@ -177,8 +171,8 @@ namespace Krys::HTML
     // attribute value with localName, namespace, this, and value.
 
     const auto &qName = validateAndExtractResult.Value();
-    ElementAlgorithms::SetAttributeValue(*this, qName.LocalName, std::move(value), qName.Prefix,
-                                         qName.NamespaceURI);
+    ElementAlgorithms::SetAttributeValue(*this, qName.LocalName(), std::move(value), qName.NamespacePrefix(),
+                                         qName.NamespaceURI());
 
     return {};
   }
@@ -200,7 +194,7 @@ namespace Krys::HTML
       return Exception {ExceptionCode::InvalidCharacterError};
     }
 
-    if (NamespaceURI() == Namespace::HTML && Is<HTMLDocument>(NodeDocument()))
+    if (NamespaceURI() == Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
       qualifiedName = Krys::Text::ToASCIILowercase(qualifiedName.View());
     }
@@ -232,7 +226,7 @@ namespace Krys::HTML
 
   bool Element::HasAttribute(DOMStringAtom qualifiedName) const noexcept
   {
-    if (NamespaceURI() == Namespace::HTML && Is<HTMLDocument>(NodeDocument()))
+    if (NamespaceURI() == Namespaces::HTML && Is<HTMLDocument>(NodeDocument()))
     {
       qualifiedName = Krys::Text::ToASCIILowercase(qualifiedName.View());
     }

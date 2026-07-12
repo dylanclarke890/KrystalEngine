@@ -32,6 +32,9 @@ namespace Krys::HTML
     KRYS_NODISCARD static ExceptionOr<void> AdoptNode(Node &node, Document &document) noexcept;
 
     /// @see https://html.spec.whatwg.org/multipage/dom.html#update-the-current-document-readiness
-    void UpdateCurrentDocumentReadiness(Document &document, DocumentReadyState readiness) noexcept;
+    static void UpdateCurrentDocumentReadiness(Document &document, DocumentReadyState readiness) noexcept;
+  
+    /// @see https://html.spec.whatwg.org/#an-iframe-srcdoc-document
+    KRYS_NODISCARD static bool IsIFrameSrcdocDocument(const Document &document) noexcept;
   };
 }

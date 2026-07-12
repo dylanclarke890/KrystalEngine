@@ -4,7 +4,7 @@
 namespace Krys::HTML
 {
   HTMLSelectElement::HTMLSelectElement(Document &document) noexcept
-      : HTMLElement(document, DOMInterface::Select)
+      : HTMLElement(document, HTMLElementInterface::Select)
   {
   }
 

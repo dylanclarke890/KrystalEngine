@@ -35,6 +35,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\HTML\Algorithms\FormControlAlgorithms.cpp" />
+    <ClCompile Include="src\HTML\Parser\HTMLDocumentParser.cpp" />
+    <ClCompile Include="src\SVG\SVGCircleElement.cpp" />
+    <ClCompile Include="src\SVG\SVGDefsElement.cpp" />
+    <ClCompile Include="src\SVG\SVGDescElement.cpp" />
+    <ClCompile Include="src\SVG\SVGElement.cpp" />
     <ClCompile Include="src\HTML\HTMLButtonElement.cpp" />
     <ClCompile Include="src\HTML\HTMLCanvasElement.cpp" />
     <ClCompile Include="src\HTML\HTMLDataListElement.cpp" />
@@ -63,15 +69,48 @@
     <ClCompile Include="src\HTML\HTMLBRElement.cpp" />
     <ClCompile Include="src\HTML\HTMLDataElement.cpp" />
     <ClCompile Include="src\HTML\HTMLDivElement.cpp" />
-    <ClInclude Include="include\Krystal.HTML\Config.hpp" />
+    <ClCompile Include="src\HTML\Parser\HTMLElementStack.cpp" />
+    <ClCompile Include="src\HTML\Parser\HTMLFormattingElementList.cpp" />
+    <ClCompile Include="src\HTML\Parser\HTMLTreeBuilder.cpp" />
+    <ClCompile Include="src\QualifiedName.cpp" />
+    <ClCompile Include="src\QualifiedNameCache.cpp" />
+    <ClCompile Include="src\SVG\SVGEllipseElement.cpp" />
+    <ClCompile Include="src\SVG\SVGForeignObjectElement.cpp" />
+    <ClCompile Include="src\SVG\SVGGElement.cpp" />
+    <ClCompile Include="src\SVG\SVGGeometryElement.cpp" />
+    <ClCompile Include="src\SVG\SVGGraphicsElement.cpp" />
+    <ClCompile Include="src\SVG\SVGImageElement.cpp" />
+    <ClCompile Include="src\SVG\SVGLineElement.cpp" />
+    <ClCompile Include="src\SVG\SVGMetadataElement.cpp" />
+    <ClCompile Include="src\SVG\SVGPolygonElement.cpp" />
+    <ClCompile Include="src\SVG\SVGPolylineElement.cpp" />
+    <ClCompile Include="src\SVG\SVGRectElement.cpp" />
+    <ClCompile Include="src\SVG\SVGScriptElement.cpp" />
+    <ClCompile Include="src\SVG\SVGStyleElement.cpp" />
+    <ClCompile Include="src\SVG\SVGSvgElement.cpp" />
+    <ClCompile Include="src\SVG\SVGSwitchElement.cpp" />
+    <ClCompile Include="src\SVG\SVGSymbolElement.cpp" />
+    <ClCompile Include="src\SVG\SVGTitleElement.cpp" />
+    <ClCompile Include="src\SVG\SVGUnknownElement.cpp" />
+    <ClCompile Include="src\SVG\SVGUseElement.cpp" />
+    <ClInclude Include="include\Krystal.HTML\Constants\ElementNames.hpp" />
+    <ClInclude Include="include\Krystal.HTML\Constants\TagNames.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\StaticRangeInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\BoundaryPointComparator.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Algorithms\DOMTreeAccessors.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Algorithms\FormControlAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Attributes\EnumeratedAttributes.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Attributes\States\CORSSettingsState.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Attributes\States\TranslateState.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\AttributeState.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\CanPlayTypeResult.hpp" />
-    <ClInclude Include="include\Krystal.HTML\HTML\Enums\DOMInterface.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\HTMLElementInterface.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\ParsedAttributeFlags.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\TagName.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\HTMLElementFlags.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\HTMLTokenType.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\Namespace.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\ParserScriptingMode.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\TrackReadyState.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLAnchorElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLAreaElement.hpp" />
@@ -129,8 +168,30 @@
     <ClInclude Include="include\Krystal.HTML\HTML\MicroParsers\Numbers.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Internals\AttributeDefinition.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Types\HTMLOrSVGScriptElement.hpp" />
-    <ClInclude Include="include\Krystal.HTML\SVG\Enums\SVGTagName.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\Enums\SVGElementFlags.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\Enums\SVGElementInterface.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\SVGCircleElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\SVGDefsElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\SVGDescElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\SVGEllipseElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\SVGForeignObjectElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\SVGGElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\SVGGeometryElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\SVGGraphicsElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\SVGImageElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\SVGLineElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\SVGMetadataElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\SVGPolygonElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\SVGPolylineElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\SVGRectElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\SVG\SVGScriptElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\SVGStyleElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\SVGSvgElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\SVGSwitchElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\SVGSymbolElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\SVGTitleElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\SVGUnknownElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\SVG\SVGUseElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\Types\USVString.hpp" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="include\Krystal.HTML\HTML\Attributes\Reflection.hpp" />
@@ -186,7 +247,6 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Mixins\NonDocumentTypeChildNode.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Mixins\NonElementParentNode.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Mixins\ParentNode.hpp" />
-    <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\ShadowRootAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\CustomElement\CustomElementConstructor.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\CustomElement\CustomElementDefinition.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Internals\CustomElementFactory.hpp" />
@@ -217,7 +277,6 @@
     <ClInclude Include="include\Krystal.HTML\DOM\DOMImplementation.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\ElementCreationOptions.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\CustomElementState.hpp" />
-    <ClInclude Include="include\Krystal.HTML\HTML\Enums\HTMLTagName.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\DocumentReadyState.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Enums\DocumentVisibilityState.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\QuirksMode.hpp" />
@@ -228,8 +287,7 @@
     <ClInclude Include="include\Krystal.HTML\DOM\NamedNodeMap.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\XMLDocument.hpp" />
     <ClInclude Include="include\Krystal.HTML\SVG\SVGElement.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Types\DOMStringAtom.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Types\NodeOrString.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Types\NodeOrString.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Internals\RareData\ParentNodeRareData.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\ShadowRoot.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\ShadowRootInit.hpp" />
@@ -271,37 +329,34 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\MutationAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\MutationObserverAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Internals\RareData\NodeRareData.hpp" />
-    <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\TreeTraversal.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\ProcessingInstruction.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Text.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLTokenAtom.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLActiveFormattingElementList.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLCharacterReference.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLDocumentParser.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Parser\Loader\ContentType.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Parser\Loader\EncodingSource.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Parser\Loader\TextResourceDecoder.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Parser\Loader\HTMLEncodingSniffer.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLInputStream.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLOpenElementStack.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLElementStackItem.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLParseError.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLToken.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLTokenizer.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLTreeBuilder.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Parser\HTMLConstructionSite.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Parser\InsertionMode.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Parser\TokenizerState.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLTokenAtom.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLFormattingElementList.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLCharacterReference.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLDocumentParser.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\ContentType.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\EncodingSource.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\TextResourceDecoder.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLEncodingSniffer.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLInputStream.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLElementStack.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLStackItem.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\HTMLParseError.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLToken.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLTokenizer.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Parser\HTMLTreeBuilder.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\InsertionMode.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Enums\TokenizerState.hpp" />
     <ClInclude Include="include\Krystal.HTML\Context.hpp" />
-    <ClInclude Include="include\Krystal.HTML\DOM\Internals\QualifiedName.hpp" />
+    <ClInclude Include="include\Krystal.HTML\QualifiedName.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\AbstractRange.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Range.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\StaticRange.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Types\SmallTextNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Types\Exception.hpp" />
     <ClInclude Include="include\Krystal.HTML\Types\ExceptionOr.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\SubtreeRanges.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Types\SmallNodeList.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Types\SmallNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Infra\StringAlgorithms.hpp" />
     <ClCompile Include="src\HTML\HTMLDListElement.cpp" />
     <ClCompile Include="src\HTML\HTMLEmbedElement.cpp" />
@@ -354,6 +409,7 @@
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLHRElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLTimeElement.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\HTMLSpanElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML\QualifiedNameCache.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\HTML\HTMLTrackElement.cpp" />
@@ -380,7 +436,6 @@
     <ClCompile Include="src\DOM\Mixins\ChildNode.cpp" />
     <ClCompile Include="src\DOM\Mixins\ParentNode.cpp" />
     <ClCompile Include="src\DOM\Algorithms\NodeAlgorithms.cpp" />
-    <ClCompile Include="src\DOM\Algorithms\ShadowRootAlgorithms.cpp" />
     <ClCompile Include="src\DOM\DOMTokenList.cpp" />
     <ClCompile Include="src\DOM\Algorithms\IteratorAlgorithms.cpp" />
     <ClCompile Include="src\HTML\HTMLSlotElement.cpp" />
@@ -414,7 +469,6 @@
     <ClCompile Include="src\DOM\Event.cpp" />
     <ClCompile Include="src\DOM\EventTarget.cpp" />
     <ClCompile Include="src\DOM\Node.cpp" />
-    <ClCompile Include="src\DOM\Algorithms\TreeTraversal.cpp" />
     <ClCompile Include="src\DOM\ProcessingInstruction.cpp" />
     <ClCompile Include="src\DOM\Text.cpp" />
   </ItemGroup>
@@ -538,7 +592,7 @@
     <None Include="data\HTML\HTMLStyleElement.idl" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="data\CustomElement\CustomElementRegistry.idl" />
+    <None Include="data\HTML\CustomElement\CustomElementRegistry.idl" />
   </ItemGroup>
   <ItemGroup>
     <None Include="data\DOM\Document.idl" />

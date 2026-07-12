@@ -4,10 +4,21 @@
 
 namespace Krys::HTML
 {
+  class HTMLSelectElement;
+
   /// @see https://html.spec.whatwg.org/#htmloptionelement
   class HTMLOptionElement : public HTMLElement
   {
+    friend class FormControlAlgorithms;
+
     KRYS_OVERRIDE_DELETE_FOR_CHECKED_PTR(HTMLOptionElement);
+
+  private:
+    /// @see https://html.spec.whatwg.org/#cached-nearest-ancestor-select-element
+    RawPtr<HTMLSelectElement> _cachedNearestSelectElement {nullptr};
+
+    /// @see https://html.spec.whatwg.org/#concept-option-selectedness
+    bool _selectedness {false};
 
   public:
     HTMLOptionElement(Document &document) noexcept;
@@ -57,10 +68,24 @@ namespace Krys::HTML
     // readonly attribute long index;
 
 #pragma endregion
+
+#pragma region Extension Hooks
+
+    void OnInsert() noexcept override;
+
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
+
+    void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override;
+
+#pragma endregion
   };
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::HTMLOptionElement)
+  static bool IsType(const Krys::HTML::Node &target) noexcept
+  {
+    return target.IsHTMLElement() && Downcast<Krys::HTML::HTMLElement>(target).IsHTMLOptionElement();
+  }
   static bool IsType(const Krys::HTML::HTMLElement &target) noexcept
   {
     return target.IsHTMLOptionElement();

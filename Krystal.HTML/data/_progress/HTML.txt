@@ -1,23 +1,107 @@
-﻿Important Sections:
+﻿Source: https://html.spec.whatwg.org
 
-2.1.4 DOM Trees - https://html.spec.whatwg.org/multipage/infrastructure.html#dom-trees
+2.1.1 Parallelism - https://html.spec.whatwg.org/#parallelism
+  - Talks about running steps in parallel with the event loop which I don't quite understand yet.
+
+2.1.4 DOM Trees - https://html.spec.whatwg.org/#dom-trees
   - Defines HTML Standard extensibility hook steps for inserting, removing, moving etc. any Element within the HTML namespace.
 
+2.1.9 Dependencies - https://html.spec.whatwg.org/#dependencies
+  - Lists the dependencies of the HTML Standard on other specifications.
+
+2.2 Policy-controlled features - https://html.spec.whatwg.org/#policy-controlled-features
+  - Might be relevant if we care about policies.
+
+2.3 Common microsyntaxes - https://html.spec.whatwg.org/#common-microsyntaxes
+  - The below list needs implementing.
+  - Percentages and Dimensions: https://html.spec.whatwg.org/#percentages-and-dimensions
+  - Non zero percentages and lengths: https://html.spec.whatwg.org/#nonzero-percentages-and-lengths
+  - Lists of floating point numbers: https://html.spec.whatwg.org/#lists-of-floating-point-numbers
+  - Lists of dimensions: https://html.spec.whatwg.org/#lists-of-dimensions
+  - Dates and times: https://html.spec.whatwg.org/#dates-and-times
+  - Legacy colours: https://html.spec.whatwg.org/#colours
+  - References: https://html.spec.whatwg.org/#syntax-references
+  - Unique internal values: https://html.spec.whatwg.org/#unique-values
+
+2.4 Urls - https://html.spec.whatwg.org/#urls
+  - Ignoring this section for now unless urls become relevant.
+
+2.5.4 CORS settings attributes - https://html.spec.whatwg.org/#cors-settings-attributes
+  - Come back to this when we refactor enumerated attributes logic.
+
+2.5.5 Referrer policy attributes - https://html.spec.whatwg.org/#referrer-policy-attributes
+  - Come back to this when we refactor enumerated attributes logic.
+
 2.5.6 Nonce attribute - https://html.spec.whatwg.org/multipage/urls-and-fetching.html#nonce-attributes
-  - Defines the nonce attribute along with attribute change / cloning steps
+  - Would be relevant when if we start supporting security policies.
 
-2.6.4.1 HTMLAllCollection - https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#the-htmlallcollection-interface
-  - Needed to support document.all. Has special, legacy behavior to keep in mind.
+2.5.7 Lazy loading attributes - https://html.spec.whatwg.org/#lazy-loading-attributes
+  - Come back to this when we refactor enumerated attributes logic.
 
-2.6.5 DOMStringList - https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#the-domstringlist-interface
-  - Old legacy API for representing a list of DOMStrings.
-  - Ignoring as it seems to only be used by 'location'/'domain', neither of which we're supporting.
+2.5.8 Blocking attributes - https://html.spec.whatwg.org/#blocking-attributes
+  - Come back to this when we refactor enumerated attributes logic.
+
+2.5.9 Fetch priority attributes - https://html.spec.whatwg.org/#fetch-priority-attributes
+  - Come back to this when we refactor enumerated attributes logic.
+
+2.6.1 Reflecting content attributes in IDL attributes - https://html.spec.whatwg.org/#reflecting-content-attributes-in-idl-attributes
+  - Implemented for HTMLElement but not for ElementInternal.
+
+2.6.4 Collections - https://html.spec.whatwg.org/#collections
+  - The HTMLFormControlsCollection and HTMLOptionsCollection interfaces are collections derived from the HTMLCollection interface.
+    The HTMLAllCollection interface is a collection, but is not so derived.
+  - 2.6.4.1 HTMLAllCollection - https://html.spec.whatwg.org/multipage/common-dom-interfaces.html#the-htmlallcollection-interface
+  - 2.6.4.2 The HTMLFormControlsCollection interface - https://html.spec.whatwg.org/#the-htmlformcontrolscollection-interface
+  - 2.6.4.3 The HTMLOptionsCollection interface - https://html.spec.whatwg.org/#the-htmloptionscollection-interface
+
+2.6.5 DOMStringList - https://html.spec.whatwg.org/#the-domstringlist-interface
+  - Ignoring as it's an old legacy API for representing a list of DOMStrings and seems to only be used by 'location'/'domain', neither of which we're supporting.
+
+3.1.1 The Document object - https://html.spec.whatwg.org/#the-document-object
+  - Has various advanced features such as commands that need to be implemented later. 
+
+3.1.2 The DocumentOrShadowRoot interface - https://html.spec.whatwg.org/#the-documentorshadowroot-interface
+  - activeElement needs to be implemented.
+
+3.1.3 Ancestor origins - https://html.spec.whatwg.org/#ancestor-origins
+  - Ignoring this section for now as it seems to be specific to web security.
+
+3.1.4 Resource metadata management - https://html.spec.whatwg.org/#resource-metadata-management
+  - Ignoring this section for now as it seems to be specific to web security.
+  - lastModified might be worth implementing at some point as it just returns the last modified time of the document's URL.
+
+3.1.5 Reporting document loading status - https://html.spec.whatwg.org/#reporting-document-loading-status
+  - Need to make sure this has been implemented correctly.
+
+3.1.6 Render-blocking mechanism - https://html.spec.whatwg.org/#render-blocking-mechanism
+  - Mostly implemented except for the below.
+  - Whenever a render-blocking element el becomes browsing-context disconnected, or el's blocking attribute's value is changed so that
+    el is no longer potentially render-blocking, then unblock rendering on el.
+
+3.1.7 DOM tree accessors - https://html.spec.whatwg.org/#dom-tree-accessors
+  - Need to implement the HTMLCollections and check const correctness of the accessors.
+
+3.2.2 Elements in the DOM - https://html.spec.whatwg.org/#elements-in-the-dom
+  - Contains the base HTMLElement interface which all HTML elements derive from.
+  - HTMLOrSVGElement - https://html.spec.whatwg.org/#htmlorsvgelement
 
 3.2.3 HTML element constructors - https://html.spec.whatwg.org/#html-element-constructors
   - Ignoring this entire section for now as it seems to be specific to JavaScript.
 
 3.2.6 Global attributes - https://html.spec.whatwg.org/#global-attributes
   - Defines the global attributes/event handlers that all HTML elements support. Most are covered in the mixins that I still need to implement.
+  - When implementing event handler IDL attributes (on* members), the spec defines an EventHandler as a function that takes an Event and returns any type.
+    The return type is only used to determine whether the event is cancelled. Explore whether using a lambda as the argument to the attribute setter, deducing it's return type
+    using decltype and using that as a way to resolve the return type to a boolean.
+
+3.2.6.1 The title attribute - https://html.spec.whatwg.org/#the-title-attribute
+  - need to implement the get advisory info algorithm for the title attribute.
+
+3.2.6.2 The lang and xml:lang attributes - https://html.spec.whatwg.org/#the-lang-and-xml:lang-attributes
+  - need to implement the get language algorithm for the lang and xml:lang attributes.
+
+3.2.6.4 The dir attribute - https://html.spec.whatwg.org/#the-dir-attribute
+  - need to implement the directionality algorithms for the dir attribute.
 
 3.2.6.5 The style attribute - https://html.spec.whatwg.org/#the-style-attribute
   - Style attribute, requires parsing CSS declarations and applying them to the element's style.
@@ -25,18 +109,150 @@
 3.2.6.6 Embedding custom non-visible data with the data-* attributes - https://html.spec.whatwg.org/#embedding-custom-non-visible-data-with-the-data-*-attributes
   - Defines the data-* attributes and the DOMStringMap API for accessing them.
 
+3.2.7 The innerText and outerText properties - https://html.spec.whatwg.org/#the-innertext-idl-attribute
+  - innerText and outerText properties need to be implemented.
+
+3.2.8 Requirements relating to the bidirectional algorithm - https://html.spec.whatwg.org/#requirements-relating-to-the-bidirectional-algorithm
+  - contains various requirements relating to the bidirectional algorithm that need to be implemented.
+
+4.2.3 The base element - https://html.spec.whatwg.org/#the-base-element
+  - href attribute is a USVString.
+  - href getter has a separate algorithm that needs to be implemented.
+
 4.2.4 The link element
-  - DOMTokenList IDL attributes have not been implemented
-  - some of the attributes of this element are limited to known values but I don't know what they are.
+  - href attribute is a USVString.
+  - imagesrcset attribute is a USVString.
+  - media attribute requires media query parsing.
+  - has enumerated attributes (as, crossOrigin, referrerPolicy, fetchPriority). 
+  - HTMLLinkElement includes LinkStyle;
+  - explicitly enabled flags need to be updated whenever disabled attribute changes.
+  - blocking attribute is a blocking attribute.
 
 4.2.5 The meta element
-  - When the meta element is inserted into a document or certain attribute values are changed certain steps need to be run.
+  - http-equiv attribute is an enumerated attribute.
+  - When a meta element is inserted into the document, if its http-equiv attribute is present and represents one of the above states, then the user agent must run the algorithm appropriate for that state, as described in the following list:
+  - has a bunch of algorithms that need to be implemented for each http-equiv state.
 
-  TODO:
-- Whenever a render-blocking element el becomes browsing-context disconnected, or el's blocking attribute's value is changed so that
-  el is no longer potentially render-blocking, then unblock rendering on el.
+4.2.6 The style element - https://html.spec.whatwg.org/#the-style-element
+  - disabled attribute requires css stylesheets.
+  - media attribute requires media query parsing.
+  - blocking attribute is a blocking attribute.
+  - contains various algorithms to implemenet when we have css parsing.
+  - HTMLStyleElement includes LinkStyle;
 
-NOTES:
- - When implementing event handler IDL attributes (on* members), the spec defines an EventHandler as a function that takes an Event and returns any type.
-   The return type is only used to determine whether the event is cancelled. Explore whether using a lambda as the argument to the attribute setter, deducing it's return type
-   using decltype and using that as a way to resolve the return type to a boolean.
+4.3.1 The body element - https://html.spec.whatwg.org/#the-body-element
+  - HTMLBodyElement includes WindowEventHandlers;
+  - The event handlers of the Window object named by the Window-reflecting body element event handler set, exposed on the body element, replace the generic event handlers with the same names normally supported by HTML elements.
+
+4.3.11.1 Heading levels & offsets - https://html.spec.whatwg.org/#heading-levels-&-offsets
+  - Defines the heading levels and offsets algorithms for the h1-h6 elements and heading-offset/heading-reset attributes.
+
+4.4.5 The ol element - https://html.spec.whatwg.org/#the-ol-element
+  - type attribute is an enumerated attribute.
+  - has a starting value algorithm.
+
+4.4.8 The li element - https://html.spec.whatwg.org/#the-li-element
+  - has list owner/ordinal value algorithms.
+
+4.5.1 The a element - https://html.spec.whatwg.org/#the-a-element
+  - ping attribute is a USVString.
+  - has enumerated attributes (referrerpolicy).
+  - HTMLAnchorElement includes HyperlinkElementUtils;
+  - HTMLAnchorElement includes HTMLHyperlinkElementUtils;
+
+4.6.2 Links created by a and area elements - https://html.spec.whatwg.org/#links-created-by-a-and-area-elements
+  - has activation behavior for a and area elements that needs to be implemented.
+
+4.6.3 API for hyperlink elements - https://html.spec.whatwg.org/#api-for-hyperlink-elements
+  - defines the HyperlinkElementUtils mixin which is included by various elements that create hyperlinks (a, area, link) and includes various algorithms for resolving URLs and handling hyperlink activation.
+
+4.6.4 API for a and area elements - https://html.spec.whatwg.org/#api-for-a-and-area-elements
+  - defines the HTMLHyperlinkElementUtils mixin which is included by a and area elements and includes various algorithms for handling hyperlink activation and pinging.
+
+4.6.8 Link types - https://html.spec.whatwg.org/#link-types
+  - defines the link types and the rel attribute which is a set of space-separated tokens that can include any of the link types.
+
+4.8.2 The source element - https://html.spec.whatwg.org/#the-source-element
+  - src attribute is a USVString.
+  - srcset attribute is a USVString.
+  - media attribute requires media query parsing.
+  - has insertion, removal and move steps.
+
+4.8.3 The img element - https://html.spec.whatwg.org/#the-img-element
+  - src attribute is a USVString.
+  - srcset attribute is a USVString.
+  - currentSrc is a USVString.
+  - has insertion, removal and move steps.
+  - has enumerated attributes (as, crossOrigin, referrerPolicy, fetchPriority etc). 
+  - has other algorithms to implement.
+
+4.8.4.2 Attributes common to source, img, and link elements - https://html.spec.whatwg.org/#attributes-common-to-source-img-and-link-elements
+4.8.4.3.2 Reacting to DOM mutations - https://html.spec.whatwg.org/#reacting-to-dom-mutations
+
+4.8.5 The iframe element - https://html.spec.whatwg.org/#the-iframe-element
+4.8.6 The embed element - https://html.spec.whatwg.org/#the-embed-element
+4.8.7 The object element - https://html.spec.whatwg.org/#the-object-element
+4.8.8 The video element - https://html.spec.whatwg.org/#the-video-element
+4.8.9 The audio element - https://html.spec.whatwg.org/#the-audio-element
+4.8.10 The track element - https://html.spec.whatwg.org/#the-track-element
+4.8.11 Media elements - https://html.spec.whatwg.org/#media-elements
+  - not paying much attention to these for now as they're too complicated.
+
+4.8.12 The map element - https://html.spec.whatwg.org/#the-map-element
+  - has a HTMLCollection of area elements that needs to be implemented.
+
+4.8.13 The area element - https://html.spec.whatwg.org/#the-area-element
+  - has enumerated attributes (referrerPolicy, shape).
+  - HTMLAreaElement includes HyperlinkElementUtils;
+  - HTMLAreaElement includes HTMLHyperlinkElementUtils;
+
+4.9.1 The table element - https://html.spec.whatwg.org/#the-table-element
+4.9.5 The tbody element - https://html.spec.whatwg.org/#the-tbody-element
+4.9.8 The tr element - https://html.spec.whatwg.org/#the-tr-element
+4.9.9 The td element - https://html.spec.whatwg.org/#the-td-element
+  - has various algorithms to implement.
+
+4.9.10 The th element - https://html.spec.whatwg.org/#the-th-element
+  - scope attribute is an enumerated attribute.
+
+4.10.3 The form element - https://html.spec.whatwg.org/#the-form-element
+4.10.4 The label element - https://html.spec.whatwg.org/#the-label-element
+4.10.5 The input element - https://html.spec.whatwg.org/#the-input-element
+4.10.6 The button element - https://html.spec.whatwg.org/#the-button-element
+4.10.7 The select element - https://html.spec.whatwg.org/#the-select-element
+4.10.9 The optgroup element - https://html.spec.whatwg.org/#the-optgroup-element
+4.10.10 The option element - https://html.spec.whatwg.org/#the-option-element
+4.10.11 The textarea element - https://html.spec.whatwg.org/#the-textarea-element
+4.10.12 The output element - https://html.spec.whatwg.org/#the-output-element
+4.10.13 The progress element - https://html.spec.whatwg.org/#the-progress-element
+4.10.14 The meter element - https://html.spec.whatwg.org/#the-meter-element
+4.10.15 The fieldset element - https://html.spec.whatwg.org/#the-fieldset-element
+4.10.16 The legend element - https://html.spec.whatwg.org/#the-legend-element
+4.10.17 The selectedcontent element - https://html.spec.whatwg.org/#the-selectedcontent-element
+  - has various algorithms to implement.
+
+4.10.8 The datalist element - https://html.spec.whatwg.org/#the-datalist-element
+  - has a HTMLCollection of option elements that needs to be implemented.
+
+4.10.22.10 The SubmitEvent interface - https://html.spec.whatwg.org/#the-submitevent-interface
+4.10.22.11 The FormDataEvent interface - https://html.spec.whatwg.org/#the-formdataevent-interface
+  - needs implementing when we implement form submission.
+
+4.11.1 The details element - https://html.spec.whatwg.org/#the-details-element
+4.11.2 The summary element - https://html.spec.whatwg.org/#the-summary-element
+4.11.4 The dialog element - https://html.spec.whatwg.org/#the-dialog-element
+  - has various algorithms to implement when we implement dialog elements/the command API.
+
+4.11.3 Commands - https://html.spec.whatwg.org/#commands
+  - defines the command API which is used for implementing various features such as the details/summary elements and the dialog element.
+
+4.12.3 The template element - https://html.spec.whatwg.org/#the-template-element
+  - complicated element with various algorithms to implement.
+
+4.12.4 The slot element - https://html.spec.whatwg.org/#the-slot-element
+  - has various algorithms to implement when we implement the shadow DOM.
+
+4.12.5 The canvas element - https://html.spec.whatwg.org/#the-canvas-element
+  - has various algorithms to implement when we implement the canvas API.
+
+4.13 Custom elements - https://html.spec.whatwg.org/#custom-elements

@@ -2,7 +2,7 @@
 
 #include "Krystal.HTML/DOM/Dicts/AddEventListenerOptions.hpp"
 #include "Krystal.HTML/DOM/Dicts/EventListenerOptions.hpp"
-#include "Krystal.HTML/Types/DOMStringAtom.hpp"
+#include "Krystal.HTML/Types/DOMString.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 
 namespace Krys::HTML
@@ -35,5 +35,8 @@ namespace Krys::HTML
 
     /// @see https://dom.spec.whatwg.org/#remove-all-event-listeners
     static void RemoveAllEventListeners(EventTarget &eventTarget) noexcept;
+
+    /// @see https://dom.spec.whatwg.org/#retarget
+    KRYS_NODISCARD static RawPtr<EventTarget> Retarget(RawPtr<EventTarget> a, EventTarget &b) noexcept;
   };
 }

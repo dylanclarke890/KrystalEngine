@@ -4,7 +4,7 @@
 #include "Krystal.HTML/Infra/Namespaces.hpp"
 #include "Krystal.HTML/DOM/Element.hpp"
 #include "Krystal.HTML/DOM/Node.hpp"
-#include "Krystal.HTML/DOM/Internals/QualifiedName.hpp"
+#include "Krystal.HTML/QualifiedName.hpp"
 
 namespace Krys::Tests
 {
@@ -16,7 +16,7 @@ namespace Krys::Tests
 
   public:
     TestNode(Document &document) noexcept
-        : Element(document, {Namespace::HTML, DOMStringAtom::Null(), u8"test-element"}, NodeFlags::None)
+        : Element(document, {Namespaces::HTML, DOMStringAtom::Null(), u8"test-element"}, NodeFlags::None)
     {
     }
   };

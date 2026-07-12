@@ -18,22 +18,22 @@
     <ClCompile Include="catch_main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Parser\Loader\HTMLEncodingSniffer.cpp">
+    <ClCompile Include="tests\HTML\Parser\Loader\HTMLEncodingSniffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Parser\Loader\TextResourceDecoder.cpp">
+    <ClCompile Include="tests\HTML\Parser\Loader\TextResourceDecoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Parser\HTMLInputStream.cpp">
+    <ClCompile Include="tests\HTML\Parser\HTMLInputStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Parser\HTMLCharacterReference.cpp">
+    <ClCompile Include="tests\HTML\Parser\HTMLCharacterReference.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Parser\HTMLTokenizerStates.cpp">
+    <ClCompile Include="tests\HTML\Parser\HTMLTokenizerStates.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\Parser\HTMLTokenizerIntegrationTests.cpp">
+    <ClCompile Include="tests\HTML\Parser\HTMLTokenizerIntegrationTests.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tests\DOM\ContainerNode.cpp">
@@ -88,9 +88,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tests\DOM\DocumentFragment.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="tests\DOM\Algorithms\ShadowRootAlgorithms.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tests\DOM\Internals\EventFactory.cpp">
@@ -153,6 +150,15 @@
     <ClCompile Include="tests\HTML\Attributes\Reflection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tests\DOM\Internals\QualifiedNameCache.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\TreeConstruction.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="tests\HTML\Parser\HTMLDocumentParser.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML.Tests\ParserTestUtils.hpp">
@@ -173,5 +179,65 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="include\Krystal.HTML.Tests\TreeConstruction.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="data\tree-construction\html5test-com.dat" />
+    <None Include="data\tree-construction\comments-01.dat" />
+    <None Include="data\tree-construction\inbody-01.dat" />
+    <None Include="data\tree-construction\doctype-01.dat" />
+    <None Include="data\tree-construction\ruby-01.dat" />
+    <None Include="data\tree-construction\isindex-01.dat" />
+    <None Include="data\tree-construction\tests-01.dat" />
+    <None Include="data\tree-construction\adoption-01.dat" />
+    <None Include="data\tree-construction\formatting-elements-01.dat" />
+    <None Include="data\tree-construction\foster-parenting-01.dat" />
+    <None Include="data\tree-construction\entities-01.dat" />
+    <None Include="data\tree-construction\entities-02.dat" />
+    <None Include="data\tree-construction\blocks-01.dat" />
+    <None Include="data\tree-construction\adoption-02.dat" />
+    <None Include="data\tree-construction\main-element-01.dat" />
+    <None Include="data\tree-construction\math-01.dat" />
+    <None Include="data\tree-construction\menuitem-element-01.dat" />
+    <None Include="data\tree-construction\namespace-sensitivity-01.dat" />
+    <None Include="data\tree-construction\noscript-01.dat" />
+    <None Include="data\tree-construction\plain-text-unsafe-01.dat" />
+    <None Include="data\tree-construction\quirks-01.dat" />
+    <None Include="data\tree-construction\script-data-01.dat" />
+    <None Include="data\tree-construction\search-element-01.dat" />
+    <None Include="data\tree-construction\svg-01.dat" />
+    <None Include="data\tree-construction\tables-01.dat" />
+    <None Include="data\tree-construction\template-01.dat" />
+    <None Include="data\tree-construction\tricky-01.dat" />
+    <None Include="data\tree-construction\void-in-phrasing-01.dat" />
+    <None Include="data\tree-construction\foreign-fragment-01.dat" />
+    <None Include="data\tree-construction\tests-02.dat" />
+    <None Include="data\tree-construction\tests-03.dat" />
+    <None Include="data\tree-construction\tests-04.dat" />
+    <None Include="data\tree-construction\tests-05.dat" />
+    <None Include="data\tree-construction\tests-06.dat" />
+    <None Include="data\tree-construction\tests-07.dat" />
+    <None Include="data\tree-construction\tests-08.dat" />
+    <None Include="data\tree-construction\tests-09.dat" />
+    <None Include="data\tree-construction\tests-10.dat" />
+    <None Include="data\tree-construction\tests-11.dat" />
+    <None Include="data\tree-construction\tests-12.dat" />
+    <None Include="data\tree-construction\tests-14.dat" />
+    <None Include="data\tree-construction\tests-15.dat" />
+    <None Include="data\tree-construction\tests-16.dat" />
+    <None Include="data\tree-construction\tests-17.dat" />
+    <None Include="data\tree-construction\tests-18.dat" />
+    <None Include="data\tree-construction\tests-19.dat" />
+    <None Include="data\tree-construction\tests-20.dat" />
+    <None Include="data\tree-construction\tests-21.dat" />
+    <None Include="data\tree-construction\tests-22.dat" />
+    <None Include="data\tree-construction\tests-23.dat" />
+    <None Include="data\tree-construction\tests-24.dat" />
+    <None Include="data\tree-construction\tests-25.dat" />
+    <None Include="data\tree-construction\tests-26.dat" />
+    <None Include="data\tree-construction\webkit-01.dat" />
+    <None Include="data\tree-construction\webkit-02.dat" />
   </ItemGroup>
 </Project>

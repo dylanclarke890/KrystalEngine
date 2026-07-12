@@ -91,8 +91,15 @@ namespace Krys::HTML
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::HTMLSelectElement)
+  static bool IsType(const Krys::HTML::Node &target) noexcept
+  {
+    return Is<Krys::HTML::HTMLElement>(target)
+           && Downcast<Krys::HTML::HTMLElement>(target).IsHTMLSelectElement();
+  }
+
   static bool IsType(const Krys::HTML::HTMLElement &target) noexcept
   {
     return target.IsHTMLSelectElement();
   }
+
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_END();

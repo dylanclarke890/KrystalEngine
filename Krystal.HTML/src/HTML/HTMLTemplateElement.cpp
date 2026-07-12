@@ -1,14 +1,23 @@
 ﻿#include "Krystal.HTML/HTML/HTMLTemplateElement.hpp"
+#include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/HTML/Attributes/Reflection.hpp"
 
 namespace Krys::HTML
 {
+  // TODO(HTMLTemplateElement): Implement the HTMLTemplateElement constructor in a spec compliant way.
+
   HTMLTemplateElement::HTMLTemplateElement(Document &document) noexcept
-      : HTMLElement(document, DOMInterface::Template)
+      : HTMLElement(document, HTMLElementInterface::Template), _content(CreateRef<DocumentFragment>(document))
   {
   }
 
 #pragma region HTMLTemplateElement
+
+  RefPtr<DocumentFragment> HTMLTemplateElement::Content() const noexcept
+  {
+    assert(!Is<HTML::ShadowRoot>(_content.get()));
+    return _content;
+  }
 
   DOMString HTMLTemplateElement::ShadowRootMode() const noexcept
   {

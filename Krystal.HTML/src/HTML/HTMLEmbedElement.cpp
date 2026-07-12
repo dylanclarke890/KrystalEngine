@@ -5,7 +5,7 @@ namespace Krys::HTML
 {
 #pragma region HTMLEmbedElement
 
-  HTMLEmbedElement::HTMLEmbedElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Embed)
+  HTMLEmbedElement::HTMLEmbedElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Embed)
   {
   }
 

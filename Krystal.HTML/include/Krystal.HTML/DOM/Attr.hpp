@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/DOM/Internals/QualifiedName.hpp"
+#include "Krystal.HTML/QualifiedName.hpp"
 #include "Krystal.HTML/DOM/Node.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Core/TypeCast.hpp"
@@ -34,19 +34,19 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#dom-attr-namespaceuri
     KRYS_NODISCARD DOMStringAtom NamespaceURI() const noexcept
     {
-      return _name.NamespaceURI;
+      return _name.NamespaceURI();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-attr-prefix
     KRYS_NODISCARD DOMStringAtom Prefix() const noexcept
     {
-      return _name.Prefix;
+      return _name.NamespacePrefix();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-attr-localname
     KRYS_NODISCARD DOMStringAtom LocalName() const noexcept
     {
-      return _name.LocalName;
+      return _name.LocalName();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-attr-name

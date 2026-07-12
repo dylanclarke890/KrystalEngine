@@ -33,8 +33,8 @@
 #include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 
 #include "Krystal.HTML/Types/DOMString.hpp"
-#include "Krystal.HTML/Types/DOMStringAtom.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
+#include "Krystal.HTML/Types/USVString.hpp"
 
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/SubtreeRanges.hpp"

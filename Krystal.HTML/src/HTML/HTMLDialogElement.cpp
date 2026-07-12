@@ -4,7 +4,7 @@
 namespace Krys::HTML
 {
   HTMLDialogElement::HTMLDialogElement(Document &document) noexcept
-      : HTMLElement(document, DOMInterface::Dialog)
+      : HTMLElement(document, HTMLElementInterface::Dialog)
   {
   }
 

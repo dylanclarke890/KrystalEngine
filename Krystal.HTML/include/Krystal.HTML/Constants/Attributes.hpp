@@ -1,11 +1,11 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Types/DOMStringAtom.hpp"
+#include "Krystal.HTML/Types/DOMString.hpp"
 
-namespace Krys::HTML::Attribute
+namespace Krys::HTML::Attributes
 {
-  inline DOMStringAtom Id = u8"id";
-  inline DOMStringAtom Name = u8"name";
-  inline DOMStringAtom Class = u8"class";
-  inline DOMStringAtom Slot = u8"slot";
+  constexpr inline DOMStringView Id = u8"id";
+  constexpr inline DOMStringView Name = u8"name";
+  constexpr inline DOMStringView Class = u8"class";
+  constexpr inline DOMStringView Slot = u8"slot";
 }

@@ -9,10 +9,7 @@ namespace Krys
 {
   struct Hash : NonCopyMovable<Hash>
   {
-    Hash() = delete;
-    ~Hash() = delete;
-
-    template <class... Args>
+    template <typename... Args>
     KRYS_NODISCARD constexpr static size_t Combine(Args... args) noexcept
     {
       size_t seed = 0u;
@@ -26,8 +23,14 @@ namespace Krys
       return ((count ? fnv1a_32(s, count - 1) : 2'166'136'261u) ^ s[count]) * 16'777'619u;
     }
 
+    /// @brief FNV-1a 32bit hashing algorithm.
+    KRYS_NODISCARD static constexpr uint32 fnv1a_32(char8 const *s, size_t count) noexcept
+    {
+      return ((count ? fnv1a_32(s, count - 1) : 2'166'136'261u) ^ s[count]) * 16'777'619u;
+    }
+
   private:
-    template <class Head, class... Tail>
+    template <typename Head, typename... Tail>
     constexpr static void Combine(size_t &seed, const Head &head, Tail... tail) noexcept
     {
       // this algorithm is based on boost::combine_hash and is designed to mix/smear around values

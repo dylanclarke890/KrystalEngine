@@ -10,7 +10,7 @@ namespace Krys::HTML
 {
 #pragma region HTMLMetaElement
 
-  HTMLMetaElement::HTMLMetaElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Meta)
+  HTMLMetaElement::HTMLMetaElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Meta)
   {
   }
 

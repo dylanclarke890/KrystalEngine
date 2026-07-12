@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/DOM/NodeList.hpp"
-#include "Krystal.HTML/Types/SmallNodeList.hpp"
+#include "Krystal.HTML/DOM/Types/SmallNodeList.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 

@@ -3,7 +3,7 @@
 
 namespace Krys::HTML
 {
-  HTMLDListElement::HTMLDListElement(Document &document) noexcept : HTMLElement(document, DOMInterface::DList)
+  HTMLDListElement::HTMLDListElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::DList)
   {
   }
 

@@ -1,4 +1,5 @@
 ﻿#include "Krystal.HTML/HTML/Internals/HTMLElementFactory.hpp"
+#include "Krystal.HTML/Constants/TagNames.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
@@ -7,7 +8,6 @@
 #include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/HTML/Algorithms/CustomElementAlgorithms.hpp"
 #include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/HTML/Enums/HTMLTagName.hpp"
 #include "Krystal.HTML/HTML/HTMLAnchorElement.hpp"
 #include "Krystal.HTML/HTML/HTMLAreaElement.hpp"
 #include "Krystal.HTML/HTML/HTMLAudioElement.hpp"
@@ -77,356 +77,346 @@
 
 namespace Krys::HTML
 {
-  Ref<HTMLElement> HTMLElementFactory::Create(Document &document, DOMStringAtom localName) noexcept
+  RefPtr<HTMLElement> HTMLElementFactory::TryCreate(Document &document, TagName elementName) noexcept
   {
-    auto tagName = TryParseHTMLTagName(Krys::Text::ToASCIIUppercase(localName.View()));
-
-    if (tagName.has_value())
+    switch (elementName)
     {
-      switch (tagName.value())
+      case TagName::abbr:
+      case TagName::address:
+      case TagName::article:
+      case TagName::aside:
+      case TagName::b:
+      case TagName::bdi:
+      case TagName::bdo:
+      case TagName::cite:
+      case TagName::code:
+      case TagName::dd:
+      case TagName::dfn:
+      case TagName::dt:
+      case TagName::em:
+      case TagName::figure:
+      case TagName::figcaption:
+      case TagName::footer:
+      case TagName::hgroup:
+      case TagName::header:
+      case TagName::i:
+      case TagName::kbd:
+      case TagName::main:
+      case TagName::mark:
+      case TagName::nav:
+      case TagName::noscript:
+      case TagName::ruby:
+      case TagName::rp:
+      case TagName::rt:
+      case TagName::s:
+      case TagName::samp:
+      case TagName::search:
+      case TagName::section:
+      case TagName::small:
+      case TagName::strong:
+      case TagName::sub:
+      case TagName::summary:
+      case TagName::sup:
+      case TagName::u:
+      case TagName::var:
+      case TagName::wbr:
       {
-        case HTMLTagName::abbr:
-        case HTMLTagName::address:
-        case HTMLTagName::article:
-        case HTMLTagName::aside:
-        case HTMLTagName::b:
-        case HTMLTagName::bdi:
-        case HTMLTagName::bdo:
-        case HTMLTagName::cite:
-        case HTMLTagName::code:
-        case HTMLTagName::dd:
-        case HTMLTagName::dfn:
-        case HTMLTagName::dt:
-        case HTMLTagName::em:
-        case HTMLTagName::figure:
-        case HTMLTagName::figcaption:
-        case HTMLTagName::footer:
-        case HTMLTagName::hgroup:
-        case HTMLTagName::header:
-        case HTMLTagName::i:
-        case HTMLTagName::kbd:
-        case HTMLTagName::main:
-        case HTMLTagName::mark:
-        case HTMLTagName::nav:
-        case HTMLTagName::noscript:
-        case HTMLTagName::ruby:
-        case HTMLTagName::rp:
-        case HTMLTagName::rt:
-        case HTMLTagName::s:
-        case HTMLTagName::samp:
-        case HTMLTagName::search:
-        case HTMLTagName::section:
-        case HTMLTagName::small:
-        case HTMLTagName::strong:
-        case HTMLTagName::sub:
-        case HTMLTagName::summary:
-        case HTMLTagName::sup:
-        case HTMLTagName::u:
-        case HTMLTagName::var:
-        case HTMLTagName::wbr:
-        {
-          return CreateRef<HTMLElement>(document);
-        }
-        case HTMLTagName::a:
-        {
-          return CreateRef<HTMLAnchorElement>(document);
-        }
-        case HTMLTagName::area:
-        {
-          return CreateRef<HTMLAreaElement>(document);
-        }
-        case HTMLTagName::audio:
-        {
-          return CreateRef<HTMLAudioElement>(document);
-        }
-        case HTMLTagName::base:
-        {
-          return CreateRef<HTMLBaseElement>(document);
-        }
-        case HTMLTagName::blockquote:
-        case HTMLTagName::q:
-        {
-          return CreateRef<HTMLQuoteElement>(document);
-        }
-        case HTMLTagName::body:
-        {
-          return CreateRef<HTMLBodyElement>(document);
-        }
-        case HTMLTagName::button:
-        {
-          return CreateRef<HTMLButtonElement>(document);
-        }
-        case HTMLTagName::canvas:
-        {
-          return CreateRef<HTMLCanvasElement>(document);
-        }
-        case HTMLTagName::caption:
-        {
-          return CreateRef<HTMLTableCaptionElement>(document);
-        }
-        case HTMLTagName::col:
-        case HTMLTagName::colgroup:
-        {
-          return CreateRef<HTMLTableColElement>(document);
-        }
-        case HTMLTagName::data:
-        {
-          return CreateRef<HTMLDataElement>(document);
-        }
-        case HTMLTagName::datalist:
-        {
-          return CreateRef<HTMLDataListElement>(document);
-        }
-        case HTMLTagName::del:
-        case HTMLTagName::ins:
-        {
-          return CreateRef<HTMLModElement>(document);
-        }
-        case HTMLTagName::details:
-        {
-          return CreateRef<HTMLDetailsElement>(document);
-        }
-        case HTMLTagName::dialog:
-        {
-          return CreateRef<HTMLDialogElement>(document);
-        }
-        case HTMLTagName::div:
-        {
-          return CreateRef<HTMLDivElement>(document);
-        }
-        case HTMLTagName::dl:
-        {
-          return CreateRef<HTMLDListElement>(document);
-        }
-        case HTMLTagName::embed:
-        {
-          return CreateRef<HTMLEmbedElement>(document);
-        }
-        case HTMLTagName::fieldset:
-        {
-          return CreateRef<HTMLFieldSetElement>(document);
-        }
-        case HTMLTagName::form:
-        {
-          return CreateRef<HTMLFormElement>(document);
-        }
-        case HTMLTagName::head:
-        {
-          return CreateRef<HTMLHeadElement>(document);
-        }
-        case HTMLTagName::h1:
-        case HTMLTagName::h2:
-        case HTMLTagName::h3:
-        case HTMLTagName::h4:
-        case HTMLTagName::h5:
-        case HTMLTagName::h6:
-        {
-          return CreateRef<HTMLHeadingElement>(document);
-        }
-        case HTMLTagName::hr:
-        {
-          return CreateRef<HTMLHRElement>(document);
-        }
-        case HTMLTagName::html:
-        {
-          return CreateRef<HTMLHtmlElement>(document);
-        }
-        case HTMLTagName::iframe:
-        {
-          return CreateRef<HTMLIFrameElement>(document);
-        }
-        case HTMLTagName::input:
-        {
-          return CreateRef<HTMLInputElement>(document);
-        }
-        case HTMLTagName::img:
-        {
-          return CreateRef<HTMLImageElement>(document);
-        }
-        case HTMLTagName::label:
-        {
-          return CreateRef<HTMLLabelElement>(document);
-        }
-        case HTMLTagName::legend:
-        {
-          return CreateRef<HTMLLegendElement>(document);
-        }
-        case HTMLTagName::li:
-        {
-          return CreateRef<HTMLLIElement>(document);
-        }
-        case HTMLTagName::link:
-        {
-          return CreateRef<HTMLLinkElement>(document);
-        }
-        case HTMLTagName::map:
-        {
-          return CreateRef<HTMLMapElement>(document);
-        }
-        case HTMLTagName::menu:
-        {
-          return CreateRef<HTMLMenuElement>(document);
-        }
-        case HTMLTagName::meta:
-        {
-          return CreateRef<HTMLMetaElement>(document);
-        }
-        case HTMLTagName::meter:
-        {
-          return CreateRef<HTMLMeterElement>(document);
-        }
-        case HTMLTagName::object:
-        {
-          return CreateRef<HTMLObjectElement>(document);
-        }
-        case HTMLTagName::ol:
-        {
-          return CreateRef<HTMLOListElement>(document);
-        }
-        case HTMLTagName::optgroup:
-        {
-          return CreateRef<HTMLOptGroupElement>(document);
-        }
-        case HTMLTagName::option:
-        {
-          return CreateRef<HTMLOptionElement>(document);
-        }
-        case HTMLTagName::output:
-        {
-          return CreateRef<HTMLOutputElement>(document);
-        }
-        case HTMLTagName::p:
-        {
-          return CreateRef<HTMLParagraphElement>(document);
-        }
-        case HTMLTagName::picture:
-        {
-          return CreateRef<HTMLPictureElement>(document);
-        }
-        case HTMLTagName::pre:
-        {
-          return CreateRef<HTMLPreElement>(document);
-        }
-        case HTMLTagName::progress:
-        {
-          return CreateRef<HTMLProgressElement>(document);
-        }
-        case HTMLTagName::script:
-        {
-          return CreateRef<HTMLScriptElement>(document);
-        }
-        case HTMLTagName::select:
-        {
-          return CreateRef<HTMLSelectElement>(document);
-        }
-        case HTMLTagName::selectedcontent:
-        {
-          return CreateRef<HTMLSelectedContentElement>(document);
-        }
-        case HTMLTagName::slot:
-        {
-          return CreateRef<HTMLSlotElement>(document);
-        }
-        case HTMLTagName::source:
-        {
-          return CreateRef<HTMLSourceElement>(document);
-        }
-        case HTMLTagName::span:
-        {
-          return CreateRef<HTMLSpanElement>(document);
-        }
-        case HTMLTagName::style:
-        {
-          return CreateRef<HTMLStyleElement>(document);
-        }
-        case HTMLTagName::table:
-        {
-          return CreateRef<HTMLTableElement>(document);
-        }
-        case HTMLTagName::tbody:
-        case HTMLTagName::thead:
-        case HTMLTagName::tfoot:
-        {
-          return CreateRef<HTMLTableSectionElement>(document);
-        }
-        case HTMLTagName::td:
-        case HTMLTagName::th:
-        {
-          return CreateRef<HTMLTableCellElement>(document);
-        }
-        case HTMLTagName::template_:
-        {
-          return CreateRef<HTMLTemplateElement>(document);
-        }
-        case HTMLTagName::tr:
-        {
-          return CreateRef<HTMLTableRowElement>(document);
-        }
-        case HTMLTagName::textarea:
-        {
-          return CreateRef<HTMLTextAreaElement>(document);
-        }
-        case HTMLTagName::title:
-        {
-          return CreateRef<HTMLTitleElement>(document);
-        }
-        case HTMLTagName::time:
-        {
-          return CreateRef<HTMLTimeElement>(document);
-        }
-        case HTMLTagName::track:
-        {
-          return CreateRef<HTMLTrackElement>(document);
-        }
-        case HTMLTagName::ul:
-        {
-          return CreateRef<HTMLUListElement>(document);
-        }
-        case HTMLTagName::video:
-        {
-          return CreateRef<HTMLVideoElement>(document);
-        }
-#pragma region Obsolete elements
-        case HTMLTagName::applet:
-        case HTMLTagName::bgsound:
-        case HTMLTagName::blink:
-        case HTMLTagName::isindex:
-        case HTMLTagName::keygen:
-        case HTMLTagName::multicol:
-        case HTMLTagName::nextid:
-        case HTMLTagName::spacer:
-        {
-          return CreateRef<HTMLUnknownElement>(document);
-        }
-        case HTMLTagName::acronym:
-        case HTMLTagName::basefont:
-        case HTMLTagName::big:
-        case HTMLTagName::center:
-        case HTMLTagName::nobr:
-        case HTMLTagName::noembed:
-        case HTMLTagName::noframes:
-        case HTMLTagName::plaintext:
-        case HTMLTagName::rb:
-        case HTMLTagName::rtc:
-        case HTMLTagName::strike:
-        case HTMLTagName::tt:
-        {
-          return CreateRef<HTMLElement>(document);
-        }
-        case HTMLTagName::listing:
-        case HTMLTagName::xmp:
-        {
-          return CreateRef<HTMLPreElement>(document);
-        }
-#pragma endregion
+        return CreateRefPtr<HTMLElement>(document);
       }
+      case TagName::a:
+      {
+        return CreateRefPtr<HTMLAnchorElement>(document);
+      }
+      case TagName::area:
+      {
+        return CreateRefPtr<HTMLAreaElement>(document);
+      }
+      case TagName::audio:
+      {
+        return CreateRefPtr<HTMLAudioElement>(document);
+      }
+      case TagName::base:
+      {
+        return CreateRefPtr<HTMLBaseElement>(document);
+      }
+      case TagName::blockquote:
+      case TagName::q:
+      {
+        return CreateRefPtr<HTMLQuoteElement>(document);
+      }
+      case TagName::body:
+      {
+        return CreateRefPtr<HTMLBodyElement>(document);
+      }
+      case TagName::button:
+      {
+        return CreateRefPtr<HTMLButtonElement>(document);
+      }
+      case TagName::canvas:
+      {
+        return CreateRefPtr<HTMLCanvasElement>(document);
+      }
+      case TagName::caption:
+      {
+        return CreateRefPtr<HTMLTableCaptionElement>(document);
+      }
+      case TagName::col:
+      case TagName::colgroup:
+      {
+        return CreateRefPtr<HTMLTableColElement>(document);
+      }
+      case TagName::data:
+      {
+        return CreateRefPtr<HTMLDataElement>(document);
+      }
+      case TagName::datalist:
+      {
+        return CreateRefPtr<HTMLDataListElement>(document);
+      }
+      case TagName::del:
+      case TagName::ins:
+      {
+        return CreateRefPtr<HTMLModElement>(document);
+      }
+      case TagName::details:
+      {
+        return CreateRefPtr<HTMLDetailsElement>(document);
+      }
+      case TagName::dialog:
+      {
+        return CreateRefPtr<HTMLDialogElement>(document);
+      }
+      case TagName::div:
+      {
+        return CreateRefPtr<HTMLDivElement>(document);
+      }
+      case TagName::dl:
+      {
+        return CreateRefPtr<HTMLDListElement>(document);
+      }
+      case TagName::embed:
+      {
+        return CreateRefPtr<HTMLEmbedElement>(document);
+      }
+      case TagName::fieldset:
+      {
+        return CreateRefPtr<HTMLFieldSetElement>(document);
+      }
+      case TagName::form:
+      {
+        return CreateRefPtr<HTMLFormElement>(document);
+      }
+      case TagName::head:
+      {
+        return CreateRefPtr<HTMLHeadElement>(document);
+      }
+      case TagName::h1:
+      case TagName::h2:
+      case TagName::h3:
+      case TagName::h4:
+      case TagName::h5:
+      case TagName::h6:
+      {
+        return CreateRefPtr<HTMLHeadingElement>(document);
+      }
+      case TagName::hr:
+      {
+        return CreateRefPtr<HTMLHRElement>(document);
+      }
+      case TagName::html:
+      {
+        return CreateRefPtr<HTMLHtmlElement>(document);
+      }
+      case TagName::iframe:
+      {
+        return CreateRefPtr<HTMLIFrameElement>(document);
+      }
+      case TagName::input:
+      {
+        return CreateRefPtr<HTMLInputElement>(document);
+      }
+      case TagName::img:
+      {
+        return CreateRefPtr<HTMLImageElement>(document);
+      }
+      case TagName::label:
+      {
+        return CreateRefPtr<HTMLLabelElement>(document);
+      }
+      case TagName::legend:
+      {
+        return CreateRefPtr<HTMLLegendElement>(document);
+      }
+      case TagName::li:
+      {
+        return CreateRefPtr<HTMLLIElement>(document);
+      }
+      case TagName::link:
+      {
+        return CreateRefPtr<HTMLLinkElement>(document);
+      }
+      case TagName::map:
+      {
+        return CreateRefPtr<HTMLMapElement>(document);
+      }
+      case TagName::menu:
+      {
+        return CreateRefPtr<HTMLMenuElement>(document);
+      }
+      case TagName::meta:
+      {
+        return CreateRefPtr<HTMLMetaElement>(document);
+      }
+      case TagName::meter:
+      {
+        return CreateRefPtr<HTMLMeterElement>(document);
+      }
+      case TagName::object:
+      {
+        return CreateRefPtr<HTMLObjectElement>(document);
+      }
+      case TagName::ol:
+      {
+        return CreateRefPtr<HTMLOListElement>(document);
+      }
+      case TagName::optgroup:
+      {
+        return CreateRefPtr<HTMLOptGroupElement>(document);
+      }
+      case TagName::option:
+      {
+        return CreateRefPtr<HTMLOptionElement>(document);
+      }
+      case TagName::output:
+      {
+        return CreateRefPtr<HTMLOutputElement>(document);
+      }
+      case TagName::p:
+      {
+        return CreateRefPtr<HTMLParagraphElement>(document);
+      }
+      case TagName::picture:
+      {
+        return CreateRefPtr<HTMLPictureElement>(document);
+      }
+      case TagName::pre:
+      {
+        return CreateRefPtr<HTMLPreElement>(document);
+      }
+      case TagName::progress:
+      {
+        return CreateRefPtr<HTMLProgressElement>(document);
+      }
+      case TagName::script:
+      {
+        return CreateRefPtr<HTMLScriptElement>(document);
+      }
+      case TagName::select:
+      {
+        return CreateRefPtr<HTMLSelectElement>(document);
+      }
+      case TagName::selectedcontent:
+      {
+        return CreateRefPtr<HTMLSelectedContentElement>(document);
+      }
+      case TagName::slot:
+      {
+        return CreateRefPtr<HTMLSlotElement>(document);
+      }
+      case TagName::source:
+      {
+        return CreateRefPtr<HTMLSourceElement>(document);
+      }
+      case TagName::span:
+      {
+        return CreateRefPtr<HTMLSpanElement>(document);
+      }
+      case TagName::style:
+      {
+        return CreateRefPtr<HTMLStyleElement>(document);
+      }
+      case TagName::table:
+      {
+        return CreateRefPtr<HTMLTableElement>(document);
+      }
+      case TagName::tbody:
+      case TagName::thead:
+      case TagName::tfoot:
+      {
+        return CreateRefPtr<HTMLTableSectionElement>(document);
+      }
+      case TagName::td:
+      case TagName::th:
+      {
+        return CreateRefPtr<HTMLTableCellElement>(document);
+      }
+      case TagName::template_:
+      {
+        return CreateRefPtr<HTMLTemplateElement>(document);
+      }
+      case TagName::tr:
+      {
+        return CreateRefPtr<HTMLTableRowElement>(document);
+      }
+      case TagName::textarea:
+      {
+        return CreateRefPtr<HTMLTextAreaElement>(document);
+      }
+      case TagName::title:
+      {
+        return CreateRefPtr<HTMLTitleElement>(document);
+      }
+      case TagName::time:
+      {
+        return CreateRefPtr<HTMLTimeElement>(document);
+      }
+      case TagName::track:
+      {
+        return CreateRefPtr<HTMLTrackElement>(document);
+      }
+      case TagName::ul:
+      {
+        return CreateRefPtr<HTMLUListElement>(document);
+      }
+      case TagName::video:
+      {
+        return CreateRefPtr<HTMLVideoElement>(document);
+      }
+#pragma region Obsolete elements
+      case TagName::applet:
+      case TagName::bgsound:
+      case TagName::blink:
+      case TagName::isindex:
+      case TagName::keygen:
+      case TagName::multicol:
+      case TagName::nextid:
+      case TagName::spacer:
+      {
+        return CreateRefPtr<HTMLUnknownElement>(document);
+      }
+      case TagName::acronym:
+      case TagName::basefont:
+      case TagName::big:
+      case TagName::center:
+      case TagName::nobr:
+      case TagName::noembed:
+      case TagName::noframes:
+      case TagName::plaintext:
+      case TagName::rb:
+      case TagName::rtc:
+      case TagName::strike:
+      case TagName::tt:
+      {
+        return CreateRefPtr<HTMLElement>(document);
+      }
+      case TagName::listing:
+      case TagName::xmp:
+      {
+        return CreateRefPtr<HTMLPreElement>(document);
+      }
+#pragma endregion
     }
 
-    if (NameValidation::IsValidCustomElementName(localName.View()))
-    {
-      return CreateRef<HTMLElement>(document);
-    }
-
-    return CreateRef<HTMLUnknownElement>(document);
+    return nullptr;
   }
 }

@@ -3,7 +3,7 @@
 
 namespace Krys::HTML
 {
-  HTMLTimeElement::HTMLTimeElement(Document &document) noexcept : HTMLElement(document, DOMInterface::Time)
+  HTMLTimeElement::HTMLTimeElement(Document &document) noexcept : HTMLElement(document, HTMLElementInterface::Time)
   {
   }
 

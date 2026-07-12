@@ -30,7 +30,7 @@ namespace Krys::HTML
       return nullptr;
     }
 
-    if (namespaceURI != Namespace::HTML)
+    if (namespaceURI != Namespaces::HTML)
     {
       return nullptr;
     }

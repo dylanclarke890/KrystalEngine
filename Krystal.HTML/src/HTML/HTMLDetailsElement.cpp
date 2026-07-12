@@ -4,7 +4,7 @@
 namespace Krys::HTML
 {
   HTMLDetailsElement::HTMLDetailsElement(Document &document) noexcept
-      : HTMLElement(document, DOMInterface::Details)
+      : HTMLElement(document, HTMLElementInterface::Details)
   {
   }
 

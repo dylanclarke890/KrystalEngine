@@ -4,8 +4,8 @@
 #include "Krystal.HTML/DOM/Algorithms/ExtensibilityHooks.hpp"
 #include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/OrderedSet.hpp"
-#include "Krystal.HTML/DOM/Algorithms/ShadowRootAlgorithms.hpp"
 #include "Krystal.HTML/DOM/Algorithms/SubtreeRanges.hpp"
+#include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/Comment.hpp"
 #include "Krystal.HTML/DOM/DocumentType.hpp"
@@ -380,7 +380,7 @@ namespace Krys::HTML
 
     for (auto &attribute : element._attributes)
     {
-      if (attribute->Prefix() == NamespacePrefix::XMLNS && attribute->Value() == namespaceURI)
+      if (attribute->Prefix() == NamespacePrefixes::XMLNS && attribute->Value() == namespaceURI)
       {
         return attribute->LocalName();
       }
@@ -401,14 +401,14 @@ namespace Krys::HTML
     {
       case NodeType::ELEMENT_NODE:
       {
-        if (prefix == NamespacePrefix::XML)
+        if (prefix == NamespacePrefixes::XML)
         {
-          return Namespace::XML;
+          return Namespaces::XML;
         }
 
-        if (prefix == NamespacePrefix::XMLNS)
+        if (prefix == NamespacePrefixes::XMLNS)
         {
-          return Namespace::XMLNS;
+          return Namespaces::XMLNS;
         }
 
         auto &element = Downcast<Element>(node);
@@ -421,15 +421,15 @@ namespace Krys::HTML
         {
           for (auto &attribute : element._attributes)
           {
-            if (attribute->NamespaceURI() == Namespace::XMLNS && attribute->Prefix() == NamespacePrefix::XMLNS
-                && attribute->LocalName() == prefix)
+            if (attribute->NamespaceURI() == Namespaces::XMLNS
+                && attribute->Prefix() == NamespacePrefixes::XMLNS && attribute->LocalName() == prefix)
             {
               return attribute->Value().empty() ? DOMStringAtom::Null() : attribute->Value();
             }
 
-            if (prefix == DOMStringAtom::Null() && attribute->NamespaceURI() == Namespace::XMLNS
+            if (prefix == DOMStringAtom::Null() && attribute->NamespaceURI() == Namespaces::XMLNS
                 && attribute->Prefix() == DOMStringAtom::Null()
-                && attribute->LocalName() == NamespacePrefix::XMLNS)
+                && attribute->LocalName() == NamespacePrefixes::XMLNS)
             {
               return attribute->Value().empty() ? DOMStringAtom::Null() : attribute->Value();
             }
@@ -496,7 +496,7 @@ namespace Krys::HTML
       return CreateRef<LiveHTMLCollection>(root,
                                            [qualifiedName, qualifiedNameLowercase](const Element &element)
                                            {
-                                             if (element.NamespaceURI() == Namespace::HTML)
+                                             if (element.NamespaceURI() == Namespaces::HTML)
                                              {
                                                return element._qualifiedName.Name() == qualifiedNameLowercase;
                                              }

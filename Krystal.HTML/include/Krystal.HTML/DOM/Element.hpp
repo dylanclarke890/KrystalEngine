@@ -5,10 +5,10 @@
 #include "Krystal.HTML/DOM/DOMTokenList.hpp"
 #include "Krystal.HTML/DOM/Enums/CustomElementState.hpp"
 #include "Krystal.HTML/DOM/Enums/InsertAdjacentWhere.hpp"
-#include "Krystal.HTML/DOM/Internals/QualifiedName.hpp"
+#include "Krystal.HTML/QualifiedName.hpp"
 #include "Krystal.HTML/DOM/Internals/RareData/ElementRareData.hpp"
 #include "Krystal.HTML/DOM/NamedNodeMap.hpp"
-#include "Krystal.HTML/Types/NodeOrString.hpp"
+#include "Krystal.HTML/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 
@@ -28,9 +28,10 @@ namespace Krys::HTML
     friend class DocumentAlgorithms;
     friend class ElementAlgorithms;
     friend class ExtensibilityHooks;
-    friend class ShadowRootAlgorithms;
     friend class SlotAlgorithms;
     friend class HTMLCollectionAlgorithms;
+    friend class HTMLStackItem;
+    friend class HTMLTreeBuilder;
     friend class Node;
     friend class NodeAlgorithms;
     friend class NamedNodeMap;
@@ -55,8 +56,6 @@ namespace Krys::HTML
     WeakPtr<HTMLSlotElement> _manuallyAssignedSlot;
 
   protected:
-    Element(Document &document, NodeFlags nodeFlags) noexcept;
-
     Element(Document &document, const QualifiedName &name, NodeFlags nodeFlags) noexcept;
 
   public:
@@ -65,19 +64,19 @@ namespace Krys::HTML
     /// @see https://dom.spec.whatwg.org/#dom-element-namespaceuri
     KRYS_NODISCARD DOMStringAtom NamespaceURI() const noexcept
     {
-      return _qualifiedName.NamespaceURI;
+      return _qualifiedName.NamespaceURI();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-element-namespaceuri
     KRYS_NODISCARD DOMStringAtom Prefix() const noexcept
     {
-      return _qualifiedName.Prefix;
+      return _qualifiedName.NamespacePrefix();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-element-namespaceuri
     KRYS_NODISCARD DOMStringAtom LocalName() const noexcept
     {
-      return _qualifiedName.LocalName;
+      return _qualifiedName.LocalName();
     }
 
     /// @see https://dom.spec.whatwg.org/#dom-element-tagname
@@ -325,7 +324,7 @@ namespace Krys::HTML
     KRYS_NODISCARD RefPtr<HTMLSlotElement> AssignedSlot() noexcept;
 
 #pragma endregion
-  };
+};
 }
 
 KRYS_SPECIALIZE_TYPE_CAST_TRAITS_BEGIN(Krys::HTML::Element)
