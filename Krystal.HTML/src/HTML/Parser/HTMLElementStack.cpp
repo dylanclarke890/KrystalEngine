@@ -1,4 +1,6 @@
 ﻿#include "Krystal.HTML/HTML/Parser/HTMLElementStack.hpp"
+#include "Krystal.HTML/HTML/Algorithms/FormControlAlgorithms.hpp"
+#include "Krystal.HTML/HTML/HTMLOptionElement.hpp"
 
 namespace Krys::HTML
 {
@@ -49,7 +51,15 @@ namespace Krys::HTML
     // TODO(HTMLTREEBUILDER, HTML): When the current node is removed from the stack of open elements,
     // process internal resource links given the current node's node document.
 
+    auto &back = Bottom().Element();
     _items.pop_back();
+
+    // When an option element is popped off the stack of open elements of an HTML parser or XML parser, the
+    // user agent must run maybe clone an option into selectedcontent given the option element.
+    if (auto *option = DynamicDowncast<HTMLOptionElement>(back))
+    {
+      FormControlAlgorithms::MaybeCloneOptionIntoSelectedContent(*option);
+    }
   }
 
   void HTMLElementStack::PopUntil(const Element &node) noexcept

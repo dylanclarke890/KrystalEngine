@@ -35,6 +35,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\HTML\Algorithms\FormControlAlgorithms.cpp" />
     <ClCompile Include="src\HTML\Parser\HTMLDocumentParser.cpp" />
     <ClCompile Include="src\SVG\SVGCircleElement.cpp" />
     <ClCompile Include="src\SVG\SVGDefsElement.cpp" />
@@ -97,6 +98,7 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\StaticRangeInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\BoundaryPointComparator.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Algorithms\DOMTreeAccessors.hpp" />
+    <ClInclude Include="include\Krystal.HTML\HTML\Algorithms\FormControlAlgorithms.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Attributes\EnumeratedAttributes.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Attributes\States\CORSSettingsState.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Attributes\States\TranslateState.hpp" />

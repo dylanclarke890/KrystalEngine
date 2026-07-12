@@ -1,4 +1,5 @@
 ﻿#include "Krystal.HTML/HTML/HTMLOptionElement.hpp"
+#include "Krystal.HTML/HTML/Algorithms/FormControlAlgorithms.hpp"
 #include "Krystal.HTML/HTML/Attributes/Reflection.hpp"
 
 namespace Krys::HTML
@@ -67,6 +68,28 @@ namespace Krys::HTML
   void HTMLOptionElement::Text(DOMString &&value) noexcept
   {
     Attributes::Reflection::Reflect<DOMString>(*this, u8"text", Krys::Move(value));
+  }
+
+#pragma endregion
+
+#pragma region Extension Hooks
+
+  void HTMLOptionElement::OnInsert() noexcept
+  {
+    HTMLElement::OnInsert();
+    FormControlAlgorithms::UpdateNearestAncestorSelect(*this);
+  }
+
+  void HTMLOptionElement::OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
+  {
+    HTMLElement::OnRemove(isSubtreeRoot, oldAncestor);
+    FormControlAlgorithms::UpdateNearestAncestorSelect(*this);
+  }
+
+  void HTMLOptionElement::OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
+  {
+    HTMLElement::OnMove(isSubtreeRoot, oldAncestor);
+    FormControlAlgorithms::UpdateNearestAncestorSelect(*this);
   }
 
 #pragma endregion

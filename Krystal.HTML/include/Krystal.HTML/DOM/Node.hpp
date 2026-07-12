@@ -248,13 +248,13 @@ namespace Krys::HTML
     {
     }
 
-    virtual void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
+    virtual void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
     {
       (void)isSubtreeRoot;
       (void)oldAncestor;
     }
 
-    virtual void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
+    virtual void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept
     {
       (void)isSubtreeRoot;
       (void)oldAncestor;

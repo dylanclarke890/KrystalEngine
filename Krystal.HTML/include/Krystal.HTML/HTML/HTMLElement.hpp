@@ -3,8 +3,8 @@
 #include "Krystal.HTML/DOM/Element.hpp"
 #include "Krystal.HTML/HTML/Dicts/ShowPopoverOptions.hpp"
 #include "Krystal.HTML/HTML/Dicts/TogglePopoverOptions.hpp"
-#include "Krystal.HTML/HTML/Enums/HTMLElementInterface.hpp"
 #include "Krystal.HTML/HTML/Enums/HTMLElementFlags.hpp"
+#include "Krystal.HTML/HTML/Enums/HTMLElementInterface.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
 
 namespace Krys::HTML
@@ -23,7 +23,8 @@ namespace Krys::HTML
     HTMLElementInterface _interface : BitCount<HTMLElementInterface>() {HTMLElementInterface::None};
 
   protected:
-    HTMLElement(Document &document, HTMLElementInterface interface, HTMLElementFlags flags = HTMLElementFlags::None,
+    HTMLElement(Document &document, HTMLElementInterface interface,
+                HTMLElementFlags flags = HTMLElementFlags::None,
                 NodeFlags nodeFlags = NodeFlags::None) noexcept;
 
   public:
@@ -159,19 +160,70 @@ namespace Krys::HTML
   protected:
 #pragma region HTMLElement Flags
 
-    void SetHTMLElement(HTMLElementFlags flag) noexcept
+    void SetHTMLElementFlag(HTMLElementFlags flag) noexcept
     {
       _flags = _flags | flag;
     }
 
-    void ClearHTMLElement(HTMLElementFlags flag) noexcept
+    void ClearHTMLElementFlag(HTMLElementFlags flag) noexcept
     {
       _flags = _flags & ~flag;
     }
 
-    KRYS_NODISCARD bool HasHTMLElement(HTMLElementFlags flag) const noexcept
+    KRYS_NODISCARD bool HasHTMLElementFlag(HTMLElementFlags flag) const noexcept
     {
       return HasFlag(_flags, flag);
+    }
+
+#pragma endregion
+
+#pragma region Extensibility Hooks
+
+    void OnInsert() noexcept override
+    {
+      // TODO(HTMLELEMENT): Implement the insertion steps for an HTMLElement.
+      // If insertedNode is a form-associated element or the ancestor of a form-associated element:
+      // - If the form-associated element's parser inserted flag is set, then return.
+      // - Reset the form owner of the form-associated element.
+      //
+      // If insertedNode is an Element that is not on the stack of open elements of an HTML parser, then
+      // process internal resource links given insertedNode's node document.
+    }
+
+    void OnRemove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override
+    {
+      // TODO(HTMLELEMENT): Implement the removal steps for an HTMLElement.
+
+      // Let document be removedNode's node document.
+
+      // If document's focused area is removedNode, then set document's focused area to document's viewport,
+      // and set document's relevant global object's navigation API's focus changed during ongoing navigation
+      // to false.
+      //
+      // This does not perform the unfocusing steps, focusing steps, or focus update steps, and thus no blur
+      // or change events are fired.
+      //
+      // If removedNode is an element whose namespace is the HTML namespace, and this standard defines HTML
+      // element removing steps for removedNode's local name, then run the corresponding HTML element removing
+      // steps given removedNode, isSubtreeRoot, and oldAncestor.
+      //
+      // If removedNode is a form-associated element with a non-null form owner and removedNode and its form
+      // owner are no longer in the same tree, then reset the form owner of removedNode.
+      //
+      // If removedNode's popover attribute is not in the No Popover state, then run the hide popover
+      // algorithm given removedNode, false, false, false, and null.
+    }
+
+    void OnMove(bool isSubtreeRoot, ContainerNode &oldAncestor) noexcept override
+    {
+      // TODO(HTMLELEMENT): Implement the move steps for an HTMLElement.
+
+      // If movedNode is an element whose namespace is the HTML namespace, and this standard defines HTML
+      // element moving steps for movedNode's local name, then run the corresponding HTML element moving steps
+      // given movedNode, isSubtreeRoot, and oldAncestor.
+
+      // If movedNode is a form-associated element with a non-null form owner and movedNode and its form owner
+      // are no longer in the same tree, then reset the form owner of movedNode.
     }
 
 #pragma endregion
