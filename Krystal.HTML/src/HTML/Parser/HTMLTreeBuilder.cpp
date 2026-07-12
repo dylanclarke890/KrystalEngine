@@ -855,9 +855,10 @@ namespace Krys::HTML
           }
           case TagName::script:
           {
-            auto [parent, beforeSibling] = AppropriateInsertionLocation();
+            auto adjustedInsertionLocation = AppropriatePlaceToInsertNode();
 
-            auto element = CreateElement(token.Name(), Namespaces::HTML, token.Attributes(), *parent);
+            auto element = CreateElement(token.Name(), Namespaces::HTML, token.Attributes(),
+                                         *adjustedInsertionLocation.Parent);
             auto &script = Downcast<HTMLScriptElement>(*element);
 
             if (_scriptingMode != ParserScriptingMode::Fragment)
@@ -878,7 +879,7 @@ namespace Krys::HTML
             // document.write() under slow network conditions, or when the page has already taken a long time
             // to load.)
 
-            (void)MutationAlgorithms::PreInsert(script, *parent, beforeSibling);
+            InsertElementAtAdjustedInsertionLocation(script, adjustedInsertionLocation);
             _openElementStack.Push(
               {TagName::script, Namespace::HTML, script, Krys::Move(token.Attributes())});
 
@@ -897,7 +898,7 @@ namespace Krys::HTML
             _insertionMode = InsertionMode::InTemplate;
             _templateInsertionModes.push_back(InsertionMode::InTemplate);
 
-            auto [intendedParent, beforeSibling] = AppropriateInsertionLocation();
+            auto [intendedParent, _] = AppropriatePlaceToInsertNode();
 
             auto &document = intendedParent->NodeDocument();
 
@@ -3200,8 +3201,7 @@ namespace Krys::HTML
       }
       case HTMLTokenType::Comment:
       {
-        InsertComment(token.Comment(),
-                      AdjustedInsertionLocation {&_openElementStack.Top().Element(), nullptr});
+        InsertComment(token.Comment(), InsertionLocation {&_openElementStack.Top().Element(), nullptr});
         return;
       }
       // NOTE: new ProcessingInstruction token type would go here.
@@ -3549,7 +3549,7 @@ namespace Krys::HTML
 
   void HTMLTreeBuilder::InsertCharacters(DOMString &&data) noexcept
   {
-    auto [parent, beforeSibling] = AppropriateInsertionLocation();
+    auto [parent, beforeSibling] = AdjustedInsertionLocation();
 
     if (Is<Document>(parent))
     {
@@ -3674,22 +3674,47 @@ namespace Krys::HTML
 
 #pragma region Insertion Algorithms
 
-  AdjustedInsertionLocation
-    HTMLTreeBuilder::AppropriateInsertionLocation(RawPtr<HTMLStackItem> targetOverride) noexcept
+  InsertionLocation
+    HTMLTreeBuilder::AppropriatePlaceToInsertNode(RawPtr<ContainerNode> targetOverride) noexcept
   {
-    auto &target = targetOverride ? *targetOverride : _openElementStack.Bottom();
+    // SPEC(1): If there was an override target specified, then let target be the override target.
+    // Otherwise, let target be the current node.
+    auto &target = targetOverride ? *targetOverride : CurrentNode();
 
-    AdjustedInsertionLocation location;
-
-    if (_fosterParenting && target.Namespace() == Namespace::HTML
-        && (target.TagName() == TagName::table || target.TagName() == TagName::tbody
-            || target.TagName() == TagName::tfoot || target.TagName() == TagName::thead
-            || target.TagName() == TagName::tr))
+    // NOTE: early exit if the target is not an HTML element, since we don't need to do any special handling
+    // in that case.
+    if (!Is<HTMLElement>(target))
     {
-      LastTableAndTemplateResult result;
+      return {.Parent = &target, .BeforeSibling = nullptr};
+    }
 
-      auto lastTableIt = _openElementStack.rend();
+    auto &htmlTarget = Downcast<HTMLElement>(target);
+    // TODO(HTMLTREEBUILDER): AppropriatePlaceToInsertNode - we have the parsed tag name already, just need a
+    // way to get it from the element.
+    auto tagName = ParseTagName(htmlTarget.LocalName().View());
+
+    // SPEC(2): Determine the adjusted insertion location using the first matching steps from the following
+    // list:
+    InsertionLocation adjustedInsertionLocation;
+
+    // SPEC(2): If foster parenting is enabled and target is a table, tbody, tfoot, thead, or tr element:
+    if (_fosterParenting
+        && (tagName == TagName::table || tagName == TagName::tbody || tagName == TagName::tfoot
+            || tagName == TagName::thead || tagName == TagName::tr))
+    {
+      // SPEC(2.1): Let last template be the last template element in the stack of open elements, if any.
       auto lastTemplateIt = _openElementStack.rend();
+      auto HasTemplate = [&]()
+      {
+        return lastTemplateIt != _openElementStack.rend();
+      };
+
+      // SPEC(2.2): Let last table be the last table element in the stack of open elements, if any.
+      auto lastTableIt = _openElementStack.rend();
+      auto HasTable = [&]()
+      {
+        return lastTableIt != _openElementStack.rend();
+      };
 
       for (auto it = _openElementStack.rbegin(); it != _openElementStack.rend(); ++it)
       {
@@ -3699,84 +3724,124 @@ namespace Krys::HTML
         }
 
         auto &element = Downcast<HTMLElement>(it->Element());
-        if (result.LastTemplateElement == nullptr && Is<HTMLTemplateElement>(element))
+
+        if (!HasTemplate() && Is<HTMLTemplateElement>(element))
         {
-          result.LastTemplateElement = &Downcast<HTMLTemplateElement>(element);
           lastTemplateIt = it;
         }
-        else if (result.LastTableElement == nullptr && Is<HTMLTableElement>(element))
-        {
-          result.LastTableElement = &Downcast<HTMLTableElement>(element);
-          lastTableIt = it;
 
-          auto next = std::next(it);
-          if (next != _openElementStack.rend())
-          {
-            result.ElementBeforeLastTable = &next->Element();
-          }
+        if (!HasTable() && Is<HTMLTableElement>(element))
+        {
+          lastTableIt = it;
         }
 
-        if (result.LastTemplateElement != nullptr && result.LastTableElement != nullptr)
+        if (HasTable() && HasTemplate())
         {
           break;
         }
       }
 
-      result.TemplateIsMostRecent = lastTemplateIt < lastTableIt;
+      // SPEC(2.3): If there is a last template and either there is no last table, or there is one, but last
+      // template is lower (more recently added) than last table in the stack of open elements, then let
+      // adjusted insertion location be inside last template's template contents, after its last child (if
+      // any), and abort these steps.
+      if (HasTemplate() && (!HasTable() || lastTemplateIt < lastTableIt))
+      {
+        return {.Parent = Downcast<HTMLTemplateElement>(lastTemplateIt->Element()).Content().get()};
+      }
 
-      auto [tableElement, templateElement, elementBeforeTable, isTemplateMostRecent] = result;
+      // SPEC(2.4): If there is no last table, then let adjusted insertion location be inside the first
+      // element in the stack of open elements (the html element), after its last child (if any), and abort
+      // these steps. (fragment case)
+      if (!HasTable())
+      {
+        return {.Parent = &_openElementStack.Top().Element()};
+      }
 
-      if (templateElement != nullptr && (tableElement == nullptr || isTemplateMostRecent))
+      // SPEC(2.5): If last table has a parent node, then let adjusted insertion location be inside last
+      // table's parent node, immediately before last table, and abort these steps.
+      if (lastTableIt->Element().ParentNode() != nullptr)
       {
-        location = {.Parent = templateElement->Content().get()};
+        return {.Parent = lastTableIt->Element().ParentNode(), .BeforeSibling = &lastTableIt->Element()};
       }
-      else if (tableElement == nullptr)
-      {
-        location = {.Parent = &_openElementStack.Top().Element()}; // should be the html element
-      }
-      else if (tableElement->ParentNode() != nullptr)
-      {
-        location = {.Parent = tableElement->ParentNode(), .BeforeSibling = tableElement};
-      }
-      else
-      {
-        location = {.Parent = elementBeforeTable};
-      }
+
+      // SPEC(2.6): Let previous element be the element immediately above last table in the stack of open
+      // elements.
+      auto previousElement = std::next(lastTableIt);
+      assert(previousElement != _openElementStack.rend());
+
+      // SPEC(2.7): Let adjusted insertion location be inside previous element, after its last child (if any).
+      adjustedInsertionLocation =
+        InsertionLocation {.Parent = &previousElement->Element(), .BeforeSibling = nullptr};
     }
     else
     {
-      location = {.Parent = &target.Element(), .BeforeSibling = nullptr};
+      // SPEC(2): Otherwise let adjusted insertion location be inside target, after its last child (if any).
+      adjustedInsertionLocation = {.Parent = &target, .BeforeSibling = nullptr};
     }
 
-    if (auto *templateElement = DynamicDowncast<HTMLTemplateElement>(location.Parent))
+    // SPEC(3): If the adjusted insertion location is inside a template element, let it instead be inside the
+    // template element's template contents, after its last child (if any).
+    if (auto *templateElement = DynamicDowncast<HTMLTemplateElement>(adjustedInsertionLocation.Parent))
     {
-      location = {.Parent = templateElement->Content().get(), .BeforeSibling = nullptr};
+      adjustedInsertionLocation = {.Parent = templateElement->Content().get(), .BeforeSibling = nullptr};
     }
 
-    return location;
+    // SPEC(4): Return the adjusted insertion location.
+    return adjustedInsertionLocation;
   }
 
-  void HTMLTreeBuilder::InsertElementAtAdjustedInsertionLocation(Element &element) noexcept
+  InsertionLocation HTMLTreeBuilder::AdjustedInsertionLocation(Maybe<InsertionLocation> location) noexcept
   {
-    auto [parent, beforeSibling] = AppropriateInsertionLocation();
+    // SPEC(1): Let overrideTarget be null if insertionLocation is null; otherwise the node in which
+    // insertionLocation finds itself.
+    auto *overrideTarget = location.has_value() ? location->Parent : nullptr;
 
+    // SPEC(2): Let the adjustedInsertionLocation be the appropriate place for inserting a node given
+    // overrideTarget.
+    auto adjustedInsertionLocation = AppropriatePlaceToInsertNode(overrideTarget);
+
+    // SPEC(3): If the node in which the adjustedInsertionLocation finds itself is the first element in the
+    // stack of open elements and the parser's root insertion target is non-null, then set the
+    // adjustedInsertionLocation to the parser's root insertion target, after its last child (if any).
+    if (!_openElementStack.IsEmpty()
+        && adjustedInsertionLocation.Parent == &_openElementStack.Top().Element())
+    {
+      // TODO(HTMLTREEBUILDER): Implement root insertion target.
+    }
+
+    // SPEC(4): Return the adjustedInsertionLocation.
+    return adjustedInsertionLocation;
+  }
+
+  void HTMLTreeBuilder::InsertElementAtAdjustedInsertionLocation(Element &element,
+                                                                 Maybe<InsertionLocation> location) noexcept
+  {
+    // SPEC(1): Let insertionLocation be the adjusted insertion location.
+    auto [parent, beforeSibling] = AdjustedInsertionLocation(location);
+
+    // SPEC(2): If it is not possible to insert element at insertionLocation, abort these steps.
     if (auto result = MutationAlgorithms::EnsurePreInsertValidity(element, *parent, beforeSibling);
         result.HasException())
     {
       return;
     }
 
-    // If the parser was not created as part of the HTML fragment parsing algorithm
+    // SPEC(3): If the parser was not created as part of the HTML fragment parsing algorithm, then push a new
+    // element queue onto element's relevant agent's custom element reactions stack.
     if (!_context.has_value())
     {
       // TODO(CUSTOMELEMENTS): InsertElementAtAdjustedInsertionLocation - push a new element queue onto
       // element's relevant agent's custom element reactions stack.
     }
 
+    // SPEC(4): Insert element at insertionLocation.
     // NOTE: We purposely ignore the error here if it happens.
     (void)MutationAlgorithms::Insert(element, *parent, beforeSibling);
 
-    // If the parser was not created as part of the HTML fragment parsing algorithm
+    // SPEC(5): If the parser was not created as part of the HTML fragment parsing algorithm, then pop the
+    // element queue from element's relevant agent's custom element reactions stack, and invoke custom element
+    // reactions in that queue.
     if (!_context.has_value())
     {
       // TODO(CUSTOMELEMENTS): InsertElementAtAdjustedInsertionLocation - pop the element queue from element's
@@ -3787,7 +3852,7 @@ namespace Krys::HTML
   Ref<Element> HTMLTreeBuilder::InsertForeignElement(HTMLTokenAtom &&token, DOMStringAtom namespaceURI,
                                                      bool onlyAddToElementStack) noexcept
   {
-    auto [parent, beforeSibling] = AppropriateInsertionLocation();
+    auto [parent, beforeSibling] = AppropriatePlaceToInsertNode();
     auto element = CreateElement(token.Name(), namespaceURI, token.Attributes(), *parent);
 
     if (!onlyAddToElementStack)
@@ -3809,9 +3874,9 @@ namespace Krys::HTML
     return InsertForeignElement(Krys::Move(token), Namespaces::HTML, false);
   }
 
-  void HTMLTreeBuilder::InsertComment(DOMStringView data, Maybe<AdjustedInsertionLocation> position) noexcept
+  void HTMLTreeBuilder::InsertComment(DOMStringView data, Maybe<InsertionLocation> position) noexcept
   {
-    auto [parent, beforeSibling] = position.has_value() ? *position : AppropriateInsertionLocation();
+    auto [parent, beforeSibling] = AdjustedInsertionLocation(position);
     auto commentNode = CreateRef<Comment>(parent->NodeDocument(), DOMString(data));
 
     // NOTE: We purposely ignore the error here if it happens.
@@ -3820,7 +3885,7 @@ namespace Krys::HTML
 
   void HTMLTreeBuilder::AppendCommentToDocument(DOMStringView data) noexcept
   {
-    InsertComment(data, AdjustedInsertionLocation {&_document, nullptr});
+    InsertComment(data, InsertionLocation {&_document, nullptr});
   }
 
   void HTMLTreeBuilder::ParseGenericRawTextElement(HTMLTokenAtom &&token) noexcept
@@ -3955,14 +4020,14 @@ namespace Krys::HTML
 
   void HTMLTreeBuilder::ReconstructActiveFormattingElements() noexcept
   {
-    // RAFE(1): If there are no entries in the list of active formatting elements, then there is nothing to
+    // SPEC(1): If there are no entries in the list of active formatting elements, then there is nothing to
     // reconstruct; stop this algorithm.
     if (_activeFormattingElements.IsEmpty())
     {
       return;
     }
 
-    // RAFE(2): If the last (most recently added) entry in the list of active formatting elements is a marker,
+    // SPEC(2): If the last (most recently added) entry in the list of active formatting elements is a marker,
     // or if it is an element that is in the stack of open elements, then there is nothing to reconstruct;
     // stop this algorithm.
     auto last = _activeFormattingElements.Last();
@@ -3971,7 +4036,7 @@ namespace Krys::HTML
       return;
     }
 
-    // RAFE(3): Let entry be the last (most recently added) element in the list of active formatting elements.
+    // SPEC(3): Let entry be the last (most recently added) element in the list of active formatting elements.
     decltype(last) entry = last;
 
     // Only follows the Create steps of the initial Advance loop if true.
@@ -3980,7 +4045,7 @@ namespace Krys::HTML
     // Rewind
     while (true)
     {
-      // RAFE(4): Rewind: If there are no entries before entry in the list of active formatting elements, then
+      // SPEC(4): Rewind: If there are no entries before entry in the list of active formatting elements, then
       // jump to the step labeled create.
       if (entry == _activeFormattingElements.begin())
       {
@@ -3988,25 +4053,23 @@ namespace Krys::HTML
         break;
       }
 
-      // RAFE(5): Let entry be the entry one earlier than entry in the list of active formatting elements.
+      // SPEC(5): Let entry be the entry one earlier than entry in the list of active formatting elements.
       entry = std::prev(entry);
 
-      // RAFE(6): If entry is neither a marker nor an element that is also in the stack of open elements, go
+      // SPEC(6): If entry is neither a marker nor an element that is also in the stack of open elements, go
       // to the step labeled rewind.
       if (!entry->IsMarker() && !_openElementStack.Contains(entry->Item().Element()))
       {
         continue;
       }
 
-      skipInitialAdvance = true;
       break;
     }
 
     // Advance
-    auto end = std::next(last);
     while (true)
     {
-      // RAFE(7): Advance: Let entry be the element one later than entry in the list of active formatting
+      // SPEC(7): Advance: Let entry be the element one later than entry in the list of active formatting
       // elements.
       if (!skipInitialAdvance || entry->IsMarker())
       {
@@ -4014,22 +4077,17 @@ namespace Krys::HTML
       }
       skipInitialAdvance = false;
 
-      if (entry == end) // NOTE: fail-safe check, should not happen
-      {
-        break;
-      }
-
-      // RAFE(8): Create: Insert an HTML element for the token for which the element entry was created, to
+      // SPEC(8): Create: Insert an HTML element for the token for which the element entry was created, to
       // obtain new element.
       auto &item = entry->Item();
       auto newElement = CreateElement(item);
       InsertElementAtAdjustedInsertionLocation(*newElement);
       _openElementStack.Push({item.TagName(), item.Namespace(), *newElement, item.Attributes()});
 
-      // RAFE(9): Replace the entry for entry in the list with an entry for new element.
+      // SPEC(9): Replace the entry for entry in the list with an entry for new element.
       entry->ReplaceItem(_openElementStack.Bottom());
 
-      // RAFE(10): If the entry for new element in the list of active formatting elements is not the last
+      // SPEC(10): If the entry for new element in the list of active formatting elements is not the last
       // entry in the list, return to the step labeled advance.
       if (entry != last)
       {
@@ -4330,10 +4388,10 @@ namespace Krys::HTML
 
   void HTMLTreeBuilder::RunAdoptionAgency(HTMLTokenAtom &token) noexcept
   {
-    // AAA(1): Let subject be token's tag name.
+    // SPEC(1): Let subject be token's tag name.
     auto subject = ParseTagName(token.Name().View());
 
-    // AAA(2): If the current node is an HTML element whose tag name is subject, and the current node is not
+    // SPEC(2): If the current node is an HTML element whose tag name is subject, and the current node is not
     // in the list of active formatting elements, then pop the current node off the stack of open elements and
     // return.
     auto &currentNode = _openElementStack.Bottom();
@@ -4344,22 +4402,22 @@ namespace Krys::HTML
       return;
     }
 
-    // AAA(3): Let outerLoopCounter be 0.
+    // SPEC(3): Let outerLoopCounter be 0.
     size_t outerLoopCounter = 0uz;
 
-    // AAA(4): While true:
+    // SPEC(4): While true:
     while (true)
     {
-      // AAA(4.1): If outerLoopCounter is greater than or equal to 8, then return.
+      // SPEC(4.1): If outerLoopCounter is greater than or equal to 8, then return.
       if (outerLoopCounter >= 8uz)
       {
         return;
       }
 
-      // AAA(4.2): Increment outerLoopCounter by 1.
+      // SPEC(4.2): Increment outerLoopCounter by 1.
       outerLoopCounter++;
 
-      // AAA(4.3): Let formattingElement be the last element in the list of active formatting elements that:
+      // SPEC(4.3): Let formattingElement be the last element in the list of active formatting elements that:
       //     - is between the end of the list and the last marker in the list, if any, or the start of the
       //       list otherwise
       //     - has the tag name subject.
@@ -4377,7 +4435,7 @@ namespace Krys::HTML
       // returns so the reference will remain valid regardless.
       auto &formattingElementNode = formattingElement->Element();
 
-      // AAA(4.4): If formattingElement is not in the stack of open elements, then this is a parse error;
+      // SPEC(4.4): If formattingElement is not in the stack of open elements, then this is a parse error;
       // remove the element from the list, and return.
       if (!_openElementStack.Contains(formattingElementNode))
       {
@@ -4386,7 +4444,7 @@ namespace Krys::HTML
         return;
       }
 
-      // AAA(4.5): If formattingElement is in the stack of open elements, but the element is not in scope,
+      // SPEC(4.5): If formattingElement is in the stack of open elements, but the element is not in scope,
       // then this is a parse error; return.
       if (!_openElementStack.HasElementInScope(formattingElementNode))
       {
@@ -4394,17 +4452,17 @@ namespace Krys::HTML
         return;
       }
 
-      // AAA(4.6): If formattingElement is not the current node, this is a parse error. (But do not return.)
+      // SPEC(4.6): If formattingElement is not the current node, this is a parse error. (But do not return.)
       if (&_openElementStack.Bottom().Element() != &formattingElementNode)
       {
         ParseError(token);
       }
 
-      // AAA(4.7): Let furthestBlock be the topmost node in the stack of open elements that is lower in the
+      // SPEC(4.7): Let furthestBlock be the topmost node in the stack of open elements that is lower in the
       // stack than formattingElement, and is an element in the special category. There might not be one.
       RawPtr<HTMLStackItem> furthestBlock = FurthestSpecialElementBlock(formattingElementNode);
 
-      // AAA(4.8) - If there is no furthestBlock, then the UA must first pop all the nodes from the bottom of
+      // SPEC(4.8) - If there is no furthestBlock, then the UA must first pop all the nodes from the bottom of
       // the stack of open elements, from the current node up to and including formattingElement, then remove
       // formattingElement from the list of active formatting elements, and finally return.
       if (furthestBlock == nullptr)
@@ -4418,19 +4476,19 @@ namespace Krys::HTML
       // alive.
       auto &furthestBlockNode = furthestBlock->Element();
 
-      // AAA(4.9): Let commonAncestor be the element immediately above formattingElement in the stack of open
+      // SPEC(4.9): Let commonAncestor be the element immediately above formattingElement in the stack of open
       // elements.
       RawPtr<HTMLStackItem> commonAncestor = _openElementStack.EntryBefore(formattingElementNode);
 
-      // AAA(4.10): Let a bookmark note the position of formattingElement in the list of active formatting
+      // SPEC(4.10): Let a bookmark note the position of formattingElement in the list of active formatting
       // elements relative to the elements on either side of it in the list.
       auto bookmark = _activeFormattingElements.BookmarkFor(formattingElementNode);
 
-      // AAA(4.11): Let node and lastNode be furthestBlock.
+      // SPEC(4.11): Let node and lastNode be furthestBlock.
       RawPtr<Element> node = &furthestBlockNode;
       RawPtr<Element> lastNode = node;
 
-      // AAA(4.12): Let innerLoopCounter be 0.
+      // SPEC(4.12): Let innerLoopCounter be 0.
       size_t innerLoopCounter = 0uz;
 
       auto ElementAbove = [&](Element &node) -> RawPtr<Element>
@@ -4440,13 +4498,13 @@ namespace Krys::HTML
       };
       RawPtr<Element> immediatelyAbove = ElementAbove(*node);
 
-      // AAA(4.13): While true:
+      // SPEC(4.13): While true:
       while (true)
       {
-        // AAA(4.13.1): Increment innerLoopCounter by 1.
+        // SPEC(4.13.1): Increment innerLoopCounter by 1.
         ++innerLoopCounter;
 
-        // AAA(4.13.2): Let node be the element immediately above node in the stack of open elements, or if
+        // SPEC(4.13.2): Let node be the element immediately above node in the stack of open elements, or if
         // node is no longer in the stack of open elements (e.g. because it got removed by this algorithm),
         // the element that was immediately above node in the stack of open elements before node was removed.
         node = immediatelyAbove;
@@ -4455,20 +4513,20 @@ namespace Krys::HTML
         // NOTE: Fetch the next node now in case the stack item gets destroyed.
         immediatelyAbove = ElementAbove(*node);
 
-        // AAA(4.13.3): If node is formattingElement, then break.
+        // SPEC(4.13.3): If node is formattingElement, then break.
         if (node == &formattingElementNode)
         {
           break;
         }
 
-        // AAA(4.13.4): If innerLoopCounter is greater than 3 and node is in the list of active formatting
+        // SPEC(4.13.4): If innerLoopCounter is greater than 3 and node is in the list of active formatting
         // elements, then remove node from the list of active formatting elements.
         if (innerLoopCounter > 3uz && _activeFormattingElements.Contains(*node))
         {
           _activeFormattingElements.RemoveAndUpdateBookmark(*node, bookmark);
         }
 
-        // AAA(4.13.5): If node is not in the list of active formatting elements, then remove node from the
+        // SPEC(4.13.5): If node is not in the list of active formatting elements, then remove node from the
         // stack of open elements and continue.
         // NOTE: We retrieve the entry for node here in case the previous step removes it.
         RawPtr<FormattingListEntry> nodeFormattingEntry = _activeFormattingElements.Find(*node);
@@ -4478,7 +4536,7 @@ namespace Krys::HTML
           continue;
         }
 
-        // AAA(4.13.6): Create an element for the token for which the element node was created, in the HTML
+        // SPEC(4.13.6): Create an element for the token for which the element node was created, in the HTML
         // namespace, with commonAncestor as the intended parent; replace the entry for node in the list of
         // active formatting elements with an entry for the new element, replace the entry for node in the
         // stack of open elements with an entry for the new element, and let node be the new element.
@@ -4487,37 +4545,37 @@ namespace Krys::HTML
         _openElementStack.Find(*node)->UpdateElement(*newElement);
         node = newElement.get();
 
-        // AAA(4.13.7): If lastNode is furthestBlock, then move the aforementioned bookmark to be immediately
+        // SPEC(4.13.7): If lastNode is furthestBlock, then move the aforementioned bookmark to be immediately
         // after the new node in the list of active formatting elements.
         if (lastNode == &furthestBlockNode)
         {
           _activeFormattingElements.MoveBookmarkAfter(bookmark, *nodeFormattingEntry);
         }
 
-        // AAA(4.13.8): Append lastNode to node.
+        // SPEC(4.13.8): Append lastNode to node.
         (void)MutationAlgorithms::Append(*lastNode, *node);
 
-        // AAA(4.13.9): Set lastNode to node.
+        // SPEC(4.13.9): Set lastNode to node.
         lastNode = node;
       }
 
-      // AAA(4.14): Insert whatever lastNode ended up being in the previous step at the appropriate place for
+      // SPEC(4.14): Insert whatever lastNode ended up being in the previous step at the appropriate place for
       // inserting a node, but using commonAncestor as the override target.
-      auto location = AppropriateInsertionLocation(commonAncestor);
+      auto location = AppropriatePlaceToInsertNode(&commonAncestor->Element());
       (void)MutationAlgorithms::Insert(*lastNode, *location.Parent, location.BeforeSibling);
 
-      // AAA(4.15): Create an element for the token for which formattingElement was created, in the HTML
+      // SPEC(4.15): Create an element for the token for which formattingElement was created, in the HTML
       // namespace, with furthestBlock as the intended parent.
       auto newElement = CreateElement(*formattingElement, &furthestBlockNode);
 
-      // AAA(4.16): Take all of the child nodes of furthestBlock and append them to the element created in the
-      // last step.
+      // SPEC(4.16): Take all of the child nodes of furthestBlock and append them to the element created in
+      // the last step.
       while (auto *child = furthestBlockNode.FirstChild())
       {
         (void)MutationAlgorithms::Append(*child, *newElement);
       }
 
-      // AAA(4.17): Append that new element to furthestBlock.
+      // SPEC(4.17): Append that new element to furthestBlock.
       (void)MutationAlgorithms::Append(*newElement, furthestBlockNode);
 
       auto newTagName = formattingElement->TagName();
@@ -4528,13 +4586,13 @@ namespace Krys::HTML
       auto newStackItem =
         HTMLStackItem(newTagName, newTagNamespace, *newElement, Krys::Move(newTagAttributes));
 
-      // AAA(4.18): Remove formattingElement from the list of active formatting elements, and insert the new
+      // SPEC(4.18): Remove formattingElement from the list of active formatting elements, and insert the new
       // element into the list of active formatting elements at the position of the aforementioned bookmark.
       _activeFormattingElements.RemoveAndUpdateBookmark(formattingElementNode, bookmark);
       _activeFormattingElements.InsertAtBookmark(Krys::Move(newFormattingElementItem), bookmark);
 
-      /// AAA(4.19): Remove formattingElement from the stack of open elements, and insert the new element into
-      /// the stack of open elements immediately below the position of furthestBlock in that stack.
+      /// SPEC(4.19): Remove formattingElement from the stack of open elements, and insert the new element
+      /// into the stack of open elements immediately below the position of furthestBlock in that stack.
       _openElementStack.Remove(formattingElementNode);
       _openElementStack.InsertBelow(Krys::Move(newStackItem), furthestBlockNode);
     }

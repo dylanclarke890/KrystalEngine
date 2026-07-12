@@ -185,7 +185,7 @@ namespace Krys::HTML
     return false;
   }
 
-  struct AdjustedInsertionLocation
+  struct InsertionLocation
   {
     /// @brief The parent into which the new node should be inserted.
     RawPtr<ContainerNode> Parent;
@@ -397,11 +397,16 @@ namespace Krys::HTML
 #pragma region Insertion Algorithms
 
     /// @see https://html.spec.whatwg.org/multipage/parsing.html#appropriate-place-for-inserting-a-node
-    KRYS_NODISCARD AdjustedInsertionLocation
-      AppropriateInsertionLocation(RawPtr<HTMLStackItem> targetOverride = nullptr) noexcept;
+    KRYS_NODISCARD InsertionLocation
+      AppropriatePlaceToInsertNode(RawPtr<ContainerNode> targetOverride = nullptr) noexcept;
+
+    /// @see https://html.spec.whatwg.org/#adjusted-insertion-location
+    KRYS_NODISCARD InsertionLocation
+      AdjustedInsertionLocation(Maybe<InsertionLocation> location = Null) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-an-element-at-the-adjusted-insertion-location
-    void InsertElementAtAdjustedInsertionLocation(Element &element) noexcept;
+    void InsertElementAtAdjustedInsertionLocation(Element &element,
+                                                  Maybe<InsertionLocation> location = Null) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-a-foreign-element
     Ref<Element> InsertForeignElement(HTMLTokenAtom &&token, DOMStringAtom namespaceURI,
@@ -411,7 +416,7 @@ namespace Krys::HTML
     Ref<Element> InsertHTMLElement(HTMLTokenAtom &&token) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-a-comment
-    void InsertComment(DOMStringView data, Maybe<AdjustedInsertionLocation> position = Null) noexcept;
+    void InsertComment(DOMStringView data, Maybe<InsertionLocation> location = Null) noexcept;
 
     /// @see https://html.spec.whatwg.org/#insert-a-character
     void AppendCommentToDocument(DOMStringView data) noexcept;

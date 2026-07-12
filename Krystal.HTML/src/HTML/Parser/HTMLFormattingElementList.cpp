@@ -190,8 +190,7 @@ namespace Krys::HTML
 
   void HTMLFormattingElementList::InsertAtBookmark(HTMLStackItem &&newItem, const Bookmark &bookmark) noexcept
   {
-    size_t insertIndex = bookmark.index;
-    auto insertIt = std::next(_formattingElements.begin(), static_cast<ptrdiff_t>(insertIndex));
+    auto insertIt = _formattingElements.begin() + static_cast<ptrdiff_t>(bookmark.index);
     _formattingElements.insert(insertIt, FormattingListEntry(Krys::Move(newItem)));
   }
 

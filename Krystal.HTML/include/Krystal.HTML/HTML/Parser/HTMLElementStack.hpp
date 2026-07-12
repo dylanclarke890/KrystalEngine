@@ -8,14 +8,6 @@
 
 namespace Krys::HTML
 {
-  struct LastTableAndTemplateResult
-  {
-    RawPtr<HTMLTableElement> LastTableElement {nullptr};
-    RawPtr<HTMLTemplateElement> LastTemplateElement {nullptr};
-    RawPtr<Element> ElementBeforeLastTable {nullptr};
-    bool TemplateIsMostRecent {false};
-  };
-
   /// @see https://html.spec.whatwg.org/multipage/parsing.html#stack-of-open-elements
   class HTMLElementStack
   {
