@@ -237,6 +237,7 @@
     <None Include="data\tree-construction\comments-01.dat" />
     <None Include="data\tree-construction\doctype-01.dat" />
     <None Include="data\tree-construction\inbody-01.dat" />
+    <None Include="data\tree-construction\inner-html-01.dat" />
     <None Include="data\tree-construction\isindex-01.dat" />
     <None Include="data\tree-construction\main-element-01.dat" />
     <None Include="data\tree-construction\math-01.dat" />

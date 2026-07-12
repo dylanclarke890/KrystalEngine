@@ -239,5 +239,6 @@
     <None Include="data\tree-construction\tests-26.dat" />
     <None Include="data\tree-construction\webkit-01.dat" />
     <None Include="data\tree-construction\webkit-02.dat" />
+    <None Include="data\tree-construction\inner-html-01.dat" />
   </ItemGroup>
 </Project>
