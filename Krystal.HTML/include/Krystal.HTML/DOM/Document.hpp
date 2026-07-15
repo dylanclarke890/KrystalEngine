@@ -13,7 +13,7 @@
 #include "Krystal.HTML/HTML/Enums/DocumentReadyState.hpp"
 #include "Krystal.HTML/HTML/Enums/DocumentVisibilityState.hpp"
 #include "Krystal.HTML/HTML/Types/HTMLOrSVGScriptElement.hpp"
-#include "Krystal.HTML/Types/ExceptionOr.hpp"
+#include "Krystal.HTML/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 
 namespace Krys::HTML

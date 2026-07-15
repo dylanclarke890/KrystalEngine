@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/DOM/Enums/FilterResult.hpp"
-#include "Krystal.HTML/Types/ExceptionOr.hpp"
+#include "Krystal.HTML/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"

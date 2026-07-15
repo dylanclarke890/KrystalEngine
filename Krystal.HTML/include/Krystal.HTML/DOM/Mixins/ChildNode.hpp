@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Types/ExceptionOr.hpp"
+#include "Krystal.HTML/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.HTML/DOM/Types/NodeOrString.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 

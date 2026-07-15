@@ -2,7 +2,7 @@
 
 #include "Krystal.HTML/DOM/Node.hpp"
 #include "Krystal.HTML/DOM/Types/DOMString.hpp"
-#include "Krystal.HTML/Types/ExceptionOr.hpp"
+#include "Krystal.HTML/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.HTML/DOM/Types/NodeOrString.hpp"
 
 namespace Krys::HTML

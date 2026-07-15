@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/Types/Exception.hpp"
+#include "Krystal.HTML/DOM/Types/Exception.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Detection/Environment.hpp"

@@ -2,7 +2,7 @@
 
 #include "Krystal.HTML/DOM/DOMTokenList.hpp"
 #include "Krystal.HTML/DOM/Enums/InsertAdjacentWhere.hpp"
-#include "Krystal.HTML/Types/ExceptionOr.hpp"
+#include "Krystal.HTML/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"
 

@@ -102,6 +102,7 @@
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSParseError.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Enums\CSSTokenType.hpp" />
     <ClInclude Include="include\Krystal.HTML\CSS\Parser\Types\ParsedInt64OrDouble.hpp" />
+    <ClInclude Include="include\Krystal.HTML\CSS\Types\CSSOMString.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Dicts\StaticRangeInit.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\BoundaryPointComparator.hpp" />
     <ClInclude Include="include\Krystal.HTML\HTML\Algorithms\DOMTreeAccessors.hpp" />
@@ -362,8 +363,8 @@
     <ClInclude Include="include\Krystal.HTML\DOM\AbstractRange.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Range.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\StaticRange.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Types\Exception.hpp" />
-    <ClInclude Include="include\Krystal.HTML\Types\ExceptionOr.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Types\Exception.hpp" />
+    <ClInclude Include="include\Krystal.HTML\DOM\Types\ExceptionOr.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Algorithms\SubtreeRanges.hpp" />
     <ClInclude Include="include\Krystal.HTML\DOM\Types\SmallNodeList.hpp" />
     <ClInclude Include="include\Krystal.HTML\Infra\StringAlgorithms.hpp" />

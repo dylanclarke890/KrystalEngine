@@ -3,7 +3,7 @@
 #include "Krystal.HTML/DOM/Dicts/ElementCreationOptions.hpp"
 #include "Krystal.HTML/HTML/Enums/DocumentReadyState.hpp"
 #include "Krystal.HTML/DOM/Types/DOMString.hpp"
-#include "Krystal.HTML/Types/ExceptionOr.hpp"
+#include "Krystal.HTML/DOM/Types/ExceptionOr.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 
 namespace Krys::HTML
