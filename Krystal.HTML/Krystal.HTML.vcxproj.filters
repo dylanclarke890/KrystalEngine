@@ -1259,10 +1259,10 @@
     <ClCompile Include="src\HTML\Parser\HTMLFormattingElementList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\QualifiedNameCache.cpp">
+    <ClCompile Include="src\DOM\Internals\QualifiedNameCache.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\QualifiedName.cpp">
+    <ClCompile Include="src\DOM\Types\QualifiedName.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\HTML\Parser\HTMLElementStack.cpp">

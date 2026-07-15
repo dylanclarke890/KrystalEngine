@@ -73,8 +73,8 @@
     <ClCompile Include="src\HTML\Parser\HTMLElementStack.cpp" />
     <ClCompile Include="src\HTML\Parser\HTMLFormattingElementList.cpp" />
     <ClCompile Include="src\HTML\Parser\HTMLTreeBuilder.cpp" />
-    <ClCompile Include="src\QualifiedName.cpp" />
-    <ClCompile Include="src\QualifiedNameCache.cpp" />
+    <ClCompile Include="src\DOM\Types\QualifiedName.cpp" />
+    <ClCompile Include="src\DOM\Internals\QualifiedNameCache.cpp" />
     <ClCompile Include="src\SVG\SVGEllipseElement.cpp" />
     <ClCompile Include="src\SVG\SVGForeignObjectElement.cpp" />
     <ClCompile Include="src\SVG\SVGGElement.cpp" />
