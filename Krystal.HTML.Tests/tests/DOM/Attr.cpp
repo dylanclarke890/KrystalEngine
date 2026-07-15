@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/DOM/Attr.hpp"
-#include "Krystal.HTML.Tests/TestElement.hpp"
+#include "Krystal.HTML.Tests/HTML/TestElement.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Element.hpp"
 #include "Krystal.HTML/DOM/HTMLDocument.hpp"

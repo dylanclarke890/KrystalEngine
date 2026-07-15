@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/DOM/ContainerNode.hpp"
-#include "Krystal.HTML.Tests/TestContainerNode.hpp"
+#include "Krystal.HTML.Tests/HTML/TestElement.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
@@ -16,10 +16,10 @@ namespace Krys::Tests
   TEST_CASE("ContainerNode::HasChildNodes", "[ContainerNode]")
   {
     Ref<Document> doc = CreateRef<Document>();
-    auto container = CreateRef<TestContainerNode>(*doc);
+    auto container = CreateRef<TestElement>(*doc);
     REQUIRE_FALSE(container->HasChildNodes());
 
-    auto child = CreateRef<TestContainerNode>(*doc);
+    auto child = CreateRef<TestElement>(*doc);
     auto appendResult = container->AppendChild(*child);
     REQUIRE_FALSE(appendResult.HasException());
     REQUIRE(container->HasChildNodes());
@@ -30,9 +30,9 @@ namespace Krys::Tests
   TEST_CASE("ContainerNode::ChildNodes", "[ContainerNode]")
   {
     Ref<Document> doc = CreateRef<Document>();
-    auto container = CreateRef<TestContainerNode>(*doc);
-    auto childA = CreateRef<TestContainerNode>(*doc);
-    auto childB = CreateRef<TestContainerNode>(*doc);
+    auto container = CreateRef<TestElement>(*doc);
+    auto childA = CreateRef<TestElement>(*doc);
+    auto childB = CreateRef<TestElement>(*doc);
 
     auto result = container->AppendChild(*childA);
     REQUIRE_FALSE(result.HasException());
@@ -52,9 +52,9 @@ namespace Krys::Tests
   TEST_CASE("ContainerNode::FirstChild", "[ContainerNode]")
   {
     Ref<Document> doc = CreateRef<Document>();
-    auto container = CreateRef<TestContainerNode>(*doc);
-    auto childA = CreateRef<TestContainerNode>(*doc);
-    auto childB = CreateRef<TestContainerNode>(*doc);
+    auto container = CreateRef<TestElement>(*doc);
+    auto childA = CreateRef<TestElement>(*doc);
+    auto childB = CreateRef<TestElement>(*doc);
 
     auto result = container->AppendChild(*childA);
     REQUIRE_FALSE(result.HasException());
@@ -71,9 +71,9 @@ namespace Krys::Tests
   TEST_CASE("ContainerNode::LastChild", "[ContainerNode]")
   {
     Ref<Document> doc = CreateRef<Document>();
-    auto container = CreateRef<TestContainerNode>(*doc);
-    auto childA = CreateRef<TestContainerNode>(*doc);
-    auto childB = CreateRef<TestContainerNode>(*doc);
+    auto container = CreateRef<TestElement>(*doc);
+    auto childA = CreateRef<TestElement>(*doc);
+    auto childB = CreateRef<TestElement>(*doc);
 
     auto result = container->AppendChild(*childA);
     REQUIRE_FALSE(result.HasException());
@@ -90,9 +90,9 @@ namespace Krys::Tests
   TEST_CASE("ContainerNode::AppendChild/RemoveChild", "[ContainerNode]")
   {
     Ref<Document> doc = CreateRef<Document>();
-    auto parent = CreateRef<TestContainerNode>(*doc);
-    auto childA = CreateRef<TestContainerNode>(*doc);
-    auto childB = CreateRef<TestContainerNode>(*doc);
+    auto parent = CreateRef<TestElement>(*doc);
+    auto childA = CreateRef<TestElement>(*doc);
+    auto childB = CreateRef<TestElement>(*doc);
 
     // Append childA
     {
@@ -156,10 +156,10 @@ namespace Krys::Tests
   TEST_CASE("ContainerNode::InsertBefore", "[ContainerNode]")
   {
     Ref<Document> doc = CreateRef<Document>();
-    auto parent = CreateRef<TestContainerNode>(*doc);
-    auto childA = CreateRef<TestContainerNode>(*doc);
-    auto childB = CreateRef<TestContainerNode>(*doc);
-    auto childC = CreateRef<TestContainerNode>(*doc);
+    auto parent = CreateRef<TestElement>(*doc);
+    auto childA = CreateRef<TestElement>(*doc);
+    auto childB = CreateRef<TestElement>(*doc);
+    auto childC = CreateRef<TestElement>(*doc);
 
     auto result = parent->AppendChild(*childA);
     REQUIRE(!result.HasException());
@@ -215,9 +215,9 @@ namespace Krys::Tests
   TEST_CASE("ContainerNode::ReplaceChild", "[ContainerNode]")
   {
     Ref<Document> doc = CreateRef<Document>();
-    auto parent = CreateRef<TestContainerNode>(*doc);
-    auto childA = CreateRef<TestContainerNode>(*doc);
-    auto childB = CreateRef<TestContainerNode>(*doc);
+    auto parent = CreateRef<TestElement>(*doc);
+    auto childA = CreateRef<TestElement>(*doc);
+    auto childB = CreateRef<TestElement>(*doc);
 
     auto result = parent->AppendChild(*childA);
     REQUIRE(!result.HasException());

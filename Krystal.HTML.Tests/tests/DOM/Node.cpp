@@ -1,6 +1,5 @@
 ﻿#include "Krystal.HTML/DOM/Node.hpp"
-#include "Krystal.HTML.Tests/TestElement.hpp"
-#include "Krystal.HTML.Tests/TestNode.hpp"
+#include "Krystal.HTML.Tests/HTML/TestElement.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/Comment.hpp"
@@ -24,10 +23,10 @@ namespace Krys::Tests
     struct CommonTestData
     {
       Ref<Document> Document;
-      Ref<TestNode> Node;
+      Ref<TestElement> Node;
 
       CommonTestData(bool appendChild = false)
-          : Document(CreateRef<HTML::Document>()), Node(CreateRef<TestNode>(*Document))
+          : Document(CreateRef<HTML::Document>()), Node(CreateRef<TestElement>(*Document))
       {
         if (appendChild)
         {
@@ -112,7 +111,7 @@ namespace Krys::Tests
     REQUIRE_FALSE(data.Document->AppendChild(*data.Node).HasException());
     REQUIRE(data.Node->ParentNode() == data.Document.get());
 
-    auto div = CreateRef<TestNode>(*data.Document);
+    auto div = CreateRef<TestElement>(*data.Document);
     REQUIRE_FALSE(data.Node->AppendChild(*div).HasException());
     REQUIRE(div->ParentNode() == data.Node.get());
 
@@ -127,7 +126,7 @@ namespace Krys::Tests
     REQUIRE_FALSE(data.Document->AppendChild(*data.Node).HasException());
     REQUIRE(data.Node->ParentElement() == nullptr);
 
-    auto div = CreateRef<TestNode>(*data.Document);
+    auto div = CreateRef<TestElement>(*data.Document);
     REQUIRE_FALSE(data.Node->AppendChild(*div).HasException());
     REQUIRE(div->ParentElement() == data.Node.get());
 
@@ -140,7 +139,7 @@ namespace Krys::Tests
     REQUIRE_FALSE(data.Node->HasChildNodes());
     REQUIRE(data.Document->HasChildNodes());
 
-    auto child = CreateRef<TestNode>(*data.Document);
+    auto child = CreateRef<TestElement>(*data.Document);
 
     REQUIRE_FALSE(data.Node->AppendChild(*child).HasException());
     REQUIRE(data.Node->HasChildNodes());
@@ -152,9 +151,9 @@ namespace Krys::Tests
   TEST_CASE("Node::ChildNodes", "[HTML][Node]")
   {
     CommonTestData data {true};
-    auto childA = CreateRef<TestNode>(*data.Document);
-    auto childB = CreateRef<TestNode>(*data.Document);
-    auto childC = CreateRef<TestNode>(*data.Document);
+    auto childA = CreateRef<TestElement>(*data.Document);
+    auto childB = CreateRef<TestElement>(*data.Document);
+    auto childC = CreateRef<TestElement>(*data.Document);
 
     Ref<NodeList> childNodes = data.Node->ChildNodes();
 
@@ -189,7 +188,7 @@ namespace Krys::Tests
   TEST_CASE("Node::FirstChild", "[HTML][Node]")
   {
     CommonTestData data {true};
-    auto child = CreateRef<TestNode>(*data.Document);
+    auto child = CreateRef<TestElement>(*data.Document);
 
     REQUIRE(data.Node->FirstChild() == nullptr);
 
@@ -203,7 +202,7 @@ namespace Krys::Tests
   TEST_CASE("Node::LastChild", "[HTML][Node]")
   {
     CommonTestData data {true};
-    auto child = CreateRef<TestNode>(*data.Document);
+    auto child = CreateRef<TestElement>(*data.Document);
 
     REQUIRE(data.Node->LastChild() == nullptr);
 
@@ -217,8 +216,8 @@ namespace Krys::Tests
   TEST_CASE("Node::NextSibling/PreviousSibling", "[HTML][Node]")
   {
     CommonTestData data {true};
-    auto sibling1 = CreateRef<TestNode>(*data.Document);
-    auto sibling2 = CreateRef<TestNode>(*data.Document);
+    auto sibling1 = CreateRef<TestElement>(*data.Document);
+    auto sibling2 = CreateRef<TestElement>(*data.Document);
 
     REQUIRE(sibling1->NextSibling() == nullptr);
     REQUIRE(sibling1->PreviousSibling() == nullptr);
@@ -374,7 +373,7 @@ namespace Krys::Tests
   TEST_CASE("Node::IsEqualNode", "[HTML][Node]")
   {
     CommonTestData data {};
-    auto equalNode = CreateRef<TestNode>(*data.Document);
+    auto equalNode = CreateRef<TestElement>(*data.Document);
 
     REQUIRE_FALSE(data.Node->IsEqualNode(nullptr));
     REQUIRE(data.Node->IsEqualNode(data.Node.get()));
@@ -405,7 +404,7 @@ namespace Krys::Tests
     {
       CommonTestData data {true};
 
-      auto disconnectedNode = CreateRef<TestNode>(*data.Document);
+      auto disconnectedNode = CreateRef<TestElement>(*data.Document);
       auto position = data.Node->CompareDocumentPosition(*disconnectedNode);
 
       REQUIRE(HasFlag(position, DocumentPosition::DOCUMENT_POSITION_DISCONNECTED));
@@ -433,8 +432,8 @@ namespace Krys::Tests
     SECTION("nodes in same document")
     {
       CommonTestData data {true};
-      auto sibling1 = CreateRef<TestNode>(*data.Document);
-      auto sibling2 = CreateRef<TestNode>(*data.Document);
+      auto sibling1 = CreateRef<TestElement>(*data.Document);
+      auto sibling2 = CreateRef<TestElement>(*data.Document);
 
       auto appendResult = data.Node->AppendChild(*sibling1);
       REQUIRE_FALSE(appendResult.HasException());
@@ -475,7 +474,7 @@ namespace Krys::Tests
   TEST_CASE("Node::Contains", "[HTML][Node]")
   {
     CommonTestData data {};
-    auto grandchild = CreateRef<TestNode>(*data.Document);
+    auto grandchild = CreateRef<TestElement>(*data.Document);
 
     REQUIRE_FALSE(data.Node->Contains(nullptr));
     REQUIRE_FALSE(data.Node->Contains(data.Document.get()));
@@ -719,7 +718,7 @@ namespace Krys::Tests
   TEST_CASE("Node::InsertBefore", "[HTML][Node]")
   {
     CommonTestData data {true};
-    auto child = CreateRef<TestNode>(*data.Document);
+    auto child = CreateRef<TestElement>(*data.Document);
 
     REQUIRE(data.Node->FirstChild() == nullptr);
     REQUIRE(data.Node->LastChild() == nullptr);
@@ -738,8 +737,8 @@ namespace Krys::Tests
   TEST_CASE("Node::ReplaceChild", "[HTML][Node]")
   {
     CommonTestData data {true};
-    auto child1 = CreateRef<TestNode>(*data.Document);
-    auto child2 = CreateRef<TestNode>(*data.Document);
+    auto child1 = CreateRef<TestElement>(*data.Document);
+    auto child2 = CreateRef<TestElement>(*data.Document);
 
     auto appendResult = data.Node->AppendChild(*child1);
     REQUIRE_FALSE(appendResult.HasException());
@@ -761,7 +760,7 @@ namespace Krys::Tests
   TEST_CASE("Node::RemoveChild", "[HTML][Node]")
   {
     CommonTestData data {true};
-    auto child = CreateRef<TestNode>(*data.Document);
+    auto child = CreateRef<TestElement>(*data.Document);
 
     auto appendResult = data.Node->AppendChild(*child);
     REQUIRE_FALSE(appendResult.HasException());
@@ -779,7 +778,7 @@ namespace Krys::Tests
   TEST_CASE("Node::AppendChild", "[HTML][Node]")
   {
     CommonTestData data {true};
-    auto child = CreateRef<TestNode>(*data.Document);
+    auto child = CreateRef<TestElement>(*data.Document);
 
     REQUIRE(data.Node->FirstChild() == nullptr);
     REQUIRE(data.Node->LastChild() == nullptr);

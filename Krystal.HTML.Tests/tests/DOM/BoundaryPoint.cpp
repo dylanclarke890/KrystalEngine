@@ -1,12 +1,6 @@
 ﻿#include "Krystal.HTML/DOM/BoundaryPoint.hpp"
-#include "Krystal.HTML.Tests/TestContainerNode.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
-#include "Krystal.HTML/DOM/Attr.hpp"
+#include "Krystal.HTML.Tests/HTML/TestElement.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
-#include "Krystal.HTML/DOM/Element.hpp"
-#include "Krystal.HTML/DOM/ShadowRoot.hpp"
-#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
@@ -16,9 +10,9 @@ namespace Krys::Tests
   TEST_CASE("BoundaryPoint::ComparePositionTo", "[HTML][BoundaryPoint]")
   {
     auto document = CreateRef<Document>();
-    auto parent = CreateRef<TestContainerNode>(*document);
-    auto childA = CreateRef<TestContainerNode>(*document);
-    auto childB = CreateRef<TestContainerNode>(*document);
+    auto parent = CreateRef<TestElement>(*document);
+    auto childA = CreateRef<TestElement>(*document);
+    auto childB = CreateRef<TestElement>(*document);
 
     REQUIRE_FALSE(parent->AppendChild(*childA).HasException());
     REQUIRE_FALSE(parent->AppendChild(*childB).HasException());

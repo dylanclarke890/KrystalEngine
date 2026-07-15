@@ -1,15 +1,12 @@
 ﻿#include "Krystal.HTML/DOM/Range.hpp"
-#include "Krystal.HTML.Tests/TestContainerNode.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
-#include "Krystal.HTML/DOM/Attr.hpp"
+#include "Krystal.HTML.Tests/HTML/TestElement.hpp"
 #include "Krystal.HTML/DOM/Comment.hpp"
 #include "Krystal.HTML/DOM/DocumentType.hpp"
+#include "Krystal.HTML/DOM/DocumentFragment.hpp"
 #include "Krystal.HTML/DOM/HTMLDocument.hpp"
 #include "Krystal.HTML/DOM/NodeList.hpp"
 #include "Krystal.HTML/DOM/ProcessingInstruction.hpp"
 #include "Krystal.HTML/DOM/Text.hpp"
-#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
@@ -21,11 +18,11 @@ namespace Krys::Tests
     struct CommonTestData
     {
       Ref<Document> Document;
-      Ref<TestContainerNode> Node;
+      Ref<TestElement> Node;
       Ref<Range> Range;
 
       CommonTestData()
-          : Document(CreateRef<HTMLDocument>()), Node(CreateRef<TestContainerNode>(*Document)),
+          : Document(CreateRef<HTMLDocument>()), Node(CreateRef<TestElement>(*Document)),
             Range(Document->CreateRange())
       {
       }
@@ -589,8 +586,8 @@ namespace Krys::Tests
 
     SECTION("False if the start and end boundary points are different")
     {
-      auto child1 = CreateRef<TestContainerNode>(*data.Document);
-      auto child2 = CreateRef<TestContainerNode>(*data.Document);
+      auto child1 = CreateRef<TestElement>(*data.Document);
+      auto child2 = CreateRef<TestElement>(*data.Document);
 
       REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
       REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());
@@ -608,8 +605,8 @@ namespace Krys::Tests
   {
     CommonTestData data;
 
-    auto child1 = CreateRef<TestContainerNode>(*data.Document);
-    auto child2 = CreateRef<TestContainerNode>(*data.Document);
+    auto child1 = CreateRef<TestElement>(*data.Document);
+    auto child2 = CreateRef<TestElement>(*data.Document);
 
     REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
     REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());
@@ -666,7 +663,7 @@ namespace Krys::Tests
 
     SECTION("Selects the given node")
     {
-      auto child = CreateRef<TestContainerNode>(*data.Document);
+      auto child = CreateRef<TestElement>(*data.Document);
       REQUIRE_FALSE(data.Node->AppendChild(*child).HasException());
 
       auto result = data.Range->SelectNode(*child);
@@ -696,8 +693,8 @@ namespace Krys::Tests
 
     SECTION("Selects the contents of the given node")
     {
-      auto child1 = CreateRef<TestContainerNode>(*data.Document);
-      auto child2 = CreateRef<TestContainerNode>(*data.Document);
+      auto child1 = CreateRef<TestElement>(*data.Document);
+      auto child2 = CreateRef<TestElement>(*data.Document);
 
       REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
       REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());
@@ -737,9 +734,9 @@ namespace Krys::Tests
 
     auto otherRange = data.Document->CreateRange();
 
-    auto child1 = CreateRef<TestContainerNode>(*data.Document);
-    auto child2 = CreateRef<TestContainerNode>(*data.Document);
-    auto child3 = CreateRef<TestContainerNode>(*data.Document);
+    auto child1 = CreateRef<TestElement>(*data.Document);
+    auto child2 = CreateRef<TestElement>(*data.Document);
+    auto child3 = CreateRef<TestElement>(*data.Document);
 
     REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
     REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());
@@ -925,9 +922,9 @@ namespace Krys::Tests
 
     SECTION("Deletes the content between the start and end boundary points")
     {
-      auto child1 = CreateRef<TestContainerNode>(*data.Document);
-      auto child2 = CreateRef<TestContainerNode>(*data.Document);
-      auto child3 = CreateRef<TestContainerNode>(*data.Document);
+      auto child1 = CreateRef<TestElement>(*data.Document);
+      auto child2 = CreateRef<TestElement>(*data.Document);
+      auto child3 = CreateRef<TestElement>(*data.Document);
 
       REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
       REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());
@@ -990,9 +987,9 @@ namespace Krys::Tests
 
     SECTION("Extracts the content between the start and end boundary points into a document fragment")
     {
-      auto child1 = CreateRef<TestContainerNode>(*data.Document);
-      auto child2 = CreateRef<TestContainerNode>(*data.Document);
-      auto child3 = CreateRef<TestContainerNode>(*data.Document);
+      auto child1 = CreateRef<TestElement>(*data.Document);
+      auto child2 = CreateRef<TestElement>(*data.Document);
+      auto child3 = CreateRef<TestElement>(*data.Document);
 
       REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
       REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());
@@ -1067,9 +1064,9 @@ namespace Krys::Tests
 
     SECTION("Clones the content between the start and end boundary points into a document fragment")
     {
-      auto child1 = CreateRef<TestContainerNode>(*data.Document);
-      auto child2 = CreateRef<TestContainerNode>(*data.Document);
-      auto child3 = CreateRef<TestContainerNode>(*data.Document);
+      auto child1 = CreateRef<TestElement>(*data.Document);
+      auto child2 = CreateRef<TestElement>(*data.Document);
+      auto child3 = CreateRef<TestElement>(*data.Document);
 
       REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
       REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());
@@ -1102,7 +1099,7 @@ namespace Krys::Tests
   TEST_CASE("Range::InsertNode", "[HMTL][Range]")
   {
     CommonTestData data;
-    auto newNode = CreateRef<TestContainerNode>(*data.Document);
+    auto newNode = CreateRef<TestElement>(*data.Document);
 
     SECTION("HierarchyRequestError if start container is a ProcessingInstruction node")
     {
@@ -1151,12 +1148,12 @@ namespace Krys::Tests
   TEST_CASE("Range::SurroundContents", "[HMTL][Range]")
   {
     CommonTestData data;
-    auto newNode = CreateRef<TestContainerNode>(*data.Document);
+    auto newNode = CreateRef<TestElement>(*data.Document);
 
     SECTION("InvalidStateError if range partially contains a non-Text node")
     {
       auto comment = CreateRef<Comment>(*data.Document, u8"Hello, world!");
-      auto otherChild = CreateRef<TestContainerNode>(*data.Document);
+      auto otherChild = CreateRef<TestElement>(*data.Document);
 
       REQUIRE_FALSE(data.Node->AppendChild(*comment).HasException());
       REQUIRE_FALSE(data.Node->AppendChild(*otherChild).HasException());
@@ -1184,8 +1181,8 @@ namespace Krys::Tests
 
     SECTION("Surrounds the contents of the range with the given node")
     {
-      auto child1 = CreateRef<TestContainerNode>(*data.Document);
-      auto child2 = CreateRef<TestContainerNode>(*data.Document);
+      auto child1 = CreateRef<TestElement>(*data.Document);
+      auto child2 = CreateRef<TestElement>(*data.Document);
 
       REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
       REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());
@@ -1215,8 +1212,8 @@ namespace Krys::Tests
 
     SECTION("newParent's children are replaced with the contents of the range")
     {
-      auto child1 = CreateRef<TestContainerNode>(*data.Document);
-      auto child2 = CreateRef<TestContainerNode>(*data.Document);
+      auto child1 = CreateRef<TestElement>(*data.Document);
+      auto child2 = CreateRef<TestElement>(*data.Document);
 
       REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
       REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());
@@ -1224,8 +1221,8 @@ namespace Krys::Tests
       REQUIRE_FALSE(data.Range->SetStart(*data.Node, 0uz).HasException());
       REQUIRE_FALSE(data.Range->SetEnd(*data.Node, 2uz).HasException());
 
-      auto newNodeChild1 = CreateRef<TestContainerNode>(*data.Document);
-      auto newNodeChild2 = CreateRef<TestContainerNode>(*data.Document);
+      auto newNodeChild1 = CreateRef<TestElement>(*data.Document);
+      auto newNodeChild2 = CreateRef<TestElement>(*data.Document);
 
       REQUIRE_FALSE(newNode->AppendChild(*newNodeChild1).HasException());
       REQUIRE_FALSE(newNode->AppendChild(*newNodeChild2).HasException());
@@ -1255,9 +1252,9 @@ namespace Krys::Tests
   {
     CommonTestData data;
 
-    auto child1 = CreateRef<TestContainerNode>(*data.Document);
-    auto child2 = CreateRef<TestContainerNode>(*data.Document);
-    auto child3 = CreateRef<TestContainerNode>(*data.Document);
+    auto child1 = CreateRef<TestElement>(*data.Document);
+    auto child2 = CreateRef<TestElement>(*data.Document);
+    auto child3 = CreateRef<TestElement>(*data.Document);
 
     REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
     REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());
@@ -1296,11 +1293,11 @@ namespace Krys::Tests
   {
     CommonTestData data;
 
-    auto child1 = CreateRef<TestContainerNode>(*data.Document);
-    auto child2 = CreateRef<TestContainerNode>(*data.Document);
-    auto child3 = CreateRef<TestContainerNode>(*data.Document);
-    auto child4 = CreateRef<TestContainerNode>(*data.Document);
-    auto child5 = CreateRef<TestContainerNode>(*data.Document);
+    auto child1 = CreateRef<TestElement>(*data.Document);
+    auto child2 = CreateRef<TestElement>(*data.Document);
+    auto child3 = CreateRef<TestElement>(*data.Document);
+    auto child4 = CreateRef<TestElement>(*data.Document);
+    auto child5 = CreateRef<TestElement>(*data.Document);
 
     REQUIRE_FALSE(data.Document->AppendChild(*data.Node).HasException());
     REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
@@ -1312,7 +1309,7 @@ namespace Krys::Tests
     SECTION("WrongDocumentError if node is from a different document")
     {
       auto otherDocument = CreateRef<HTMLDocument>();
-      auto otherNode = CreateRef<TestContainerNode>(*otherDocument);
+      auto otherNode = CreateRef<TestElement>(*otherDocument);
       auto result = data.Range->IsPointInRange(*otherNode, 0uz);
       REQUIRE(result.HasException());
       REQUIRE(result.GetException().Code() == ExceptionCode::WrongDocumentError);
@@ -1375,11 +1372,11 @@ namespace Krys::Tests
   {
     CommonTestData data;
 
-    auto child1 = CreateRef<TestContainerNode>(*data.Document);
-    auto child2 = CreateRef<TestContainerNode>(*data.Document);
-    auto child3 = CreateRef<TestContainerNode>(*data.Document);
-    auto child4 = CreateRef<TestContainerNode>(*data.Document);
-    auto child5 = CreateRef<TestContainerNode>(*data.Document);
+    auto child1 = CreateRef<TestElement>(*data.Document);
+    auto child2 = CreateRef<TestElement>(*data.Document);
+    auto child3 = CreateRef<TestElement>(*data.Document);
+    auto child4 = CreateRef<TestElement>(*data.Document);
+    auto child5 = CreateRef<TestElement>(*data.Document);
 
     REQUIRE_FALSE(data.Document->AppendChild(*data.Node).HasException());
     REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
@@ -1391,7 +1388,7 @@ namespace Krys::Tests
     SECTION("WrongDocumentError if node is from a different document")
     {
       auto otherDocument = CreateRef<HTMLDocument>();
-      auto otherNode = CreateRef<TestContainerNode>(*otherDocument);
+      auto otherNode = CreateRef<TestElement>(*otherDocument);
       auto result = data.Range->ComparePoint(*otherNode, 0uz);
 
       REQUIRE(result.HasException());
@@ -1455,9 +1452,9 @@ namespace Krys::Tests
   {
     CommonTestData data;
 
-    auto child1 = CreateRef<TestContainerNode>(*data.Document);
-    auto child2 = CreateRef<TestContainerNode>(*data.Document);
-    auto child3 = CreateRef<TestContainerNode>(*data.Document);
+    auto child1 = CreateRef<TestElement>(*data.Document);
+    auto child2 = CreateRef<TestElement>(*data.Document);
+    auto child3 = CreateRef<TestElement>(*data.Document);
 
     REQUIRE_FALSE(data.Node->AppendChild(*child1).HasException());
     REQUIRE_FALSE(data.Node->AppendChild(*child2).HasException());

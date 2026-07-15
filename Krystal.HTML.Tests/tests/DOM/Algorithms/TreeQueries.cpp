@@ -1,13 +1,8 @@
 ﻿#include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.HTML.Tests/TestNode.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
-#include "Krystal.HTML/DOM/Attr.hpp"
-#include "Krystal.HTML/DOM/ContainerNode.hpp"
+#include "Krystal.HTML.Tests/HTML/TestElement.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/DOM/Text.hpp"
-#include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
-#include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
@@ -19,8 +14,8 @@ namespace Krys::Tests
   TEST_CASE("TreeQueries::Length", "[HTML][TreeQueries]")
   {
     auto doc = CreateRef<Document>();
-    auto parent = CreateRef<TestNode>(*doc);
-    auto child = CreateRef<TestNode>(*doc);
+    auto parent = CreateRef<TestElement>(*doc);
+    auto child = CreateRef<TestElement>(*doc);
     auto textNode = CreateRef<HTML::Text>(*doc, u8"Hello, world!");
 
     REQUIRE(TreeQueries::Length(*parent) == 0);
@@ -45,8 +40,8 @@ namespace Krys::Tests
   TEST_CASE("TreeQueries::IsEmpty", "[HTML][TreeQueries]")
   {
     auto doc = CreateRef<Document>();
-    auto parent = CreateRef<TestNode>(*doc);
-    auto child = CreateRef<TestNode>(*doc);
+    auto parent = CreateRef<TestElement>(*doc);
+    auto child = CreateRef<TestElement>(*doc);
     auto textNode = CreateRef<HTML::Text>(*doc, u8"Hello, world!");
 
     REQUIRE(TreeQueries::IsEmpty(*parent));
@@ -75,8 +70,8 @@ namespace Krys::Tests
   TEST_CASE("TreeQueries::IsInDocumentTree", "[HTML][TreeQueries]")
   {
     auto doc = CreateRef<Document>();
-    auto parent = CreateRef<TestNode>(*doc);
-    auto child = CreateRef<TestNode>(*doc);
+    auto parent = CreateRef<TestElement>(*doc);
+    auto child = CreateRef<TestElement>(*doc);
 
     REQUIRE_FALSE(TreeQueries::IsInDocumentTree(*parent));
     REQUIRE_FALSE(TreeQueries::IsInDocumentTree(*child));
@@ -98,8 +93,8 @@ namespace Krys::Tests
   TEST_CASE("TreeQueries::DocumentElement", "[HTML][TreeQueries]")
   {
     auto doc = CreateRef<Document>();
-    auto parent = CreateRef<TestNode>(*doc);
-    auto child = CreateRef<TestNode>(*doc);
+    auto parent = CreateRef<TestElement>(*doc);
+    auto child = CreateRef<TestElement>(*doc);
 
     REQUIRE(TreeQueries::DocumentElement(*doc) == nullptr);
 
@@ -120,7 +115,7 @@ namespace Krys::Tests
   TEST_CASE("TreeQueries::IsInShadowTree", "[HTML][TreeQueries]")
   {
     auto doc = CreateRef<Document>();
-    auto docChild = CreateRef<TestNode>(*doc);
+    auto docChild = CreateRef<TestElement>(*doc);
 
     REQUIRE_FALSE(TreeQueries::IsInShadowTree(*docChild));
 
@@ -129,7 +124,7 @@ namespace Krys::Tests
     REQUIRE_FALSE(TreeQueries::IsInShadowTree(*docChild));
 
     auto shadowRoot = CreateRef<ShadowRoot>(*doc, nullptr);
-    auto shadowChild = CreateRef<TestNode>(*doc);
+    auto shadowChild = CreateRef<TestElement>(*doc);
 
     REQUIRE_FALSE(TreeQueries::IsInShadowTree(*shadowChild));
 
@@ -148,8 +143,8 @@ namespace Krys::Tests
   TEST_CASE("TreeQueries::IsParent", "[TreeQueries]")
   {
     auto doc = CreateRef<Document>();
-    auto parent = CreateRef<TestNode>(*doc);
-    auto child = CreateRef<TestNode>(*doc);
+    auto parent = CreateRef<TestElement>(*doc);
+    auto child = CreateRef<TestElement>(*doc);
 
     REQUIRE_FALSE(TreeQueries::IsParent(*parent, *child));
     REQUIRE_FALSE(TreeQueries::IsParent(*child, *parent));
@@ -165,8 +160,8 @@ namespace Krys::Tests
   TEST_CASE("TreeQueries::IsChild", "[TreeQueries]")
   {
     auto doc = CreateRef<Document>();
-    auto parent = CreateRef<TestNode>(*doc);
-    auto child = CreateRef<TestNode>(*doc);
+    auto parent = CreateRef<TestElement>(*doc);
+    auto child = CreateRef<TestElement>(*doc);
 
     REQUIRE_FALSE(TreeQueries::IsChild(*parent, *child));
     REQUIRE_FALSE(TreeQueries::IsChild(*child, *parent));
@@ -182,8 +177,8 @@ namespace Krys::Tests
   TEST_CASE("TreeQueries::Root", "[TreeQueries]")
   {
     auto doc = CreateRef<Document>();
-    auto parent = CreateRef<TestNode>(*doc);
-    auto child = CreateRef<TestNode>(*doc);
+    auto parent = CreateRef<TestElement>(*doc);
+    auto child = CreateRef<TestElement>(*doc);
 
     REQUIRE(&TreeQueries::Root(*doc) == doc.get());
     REQUIRE(&TreeQueries::Root(*parent) == parent.get());
@@ -208,9 +203,9 @@ namespace Krys::Tests
   TEST_CASE("TreeQueries::IsDescendant", "[TreeQueries]")
   {
     auto doc = CreateRef<Document>();
-    auto parent = CreateRef<TestNode>(*doc);
-    auto child = CreateRef<TestNode>(*doc);
-    auto grandchild = CreateRef<TestNode>(*doc);
+    auto parent = CreateRef<TestElement>(*doc);
+    auto child = CreateRef<TestElement>(*doc);
+    auto grandchild = CreateRef<TestElement>(*doc);
 
     REQUIRE_FALSE(TreeQueries::IsDescendant(*child, *parent));
     REQUIRE_FALSE(TreeQueries::IsDescendant(*parent, *child));
@@ -243,9 +238,9 @@ namespace Krys::Tests
   TEST_CASE("TreeQueries::IsInclusiveDescendant", "[TreeQueries]")
   {
     auto doc = CreateRef<Document>();
-    auto parent = CreateRef<TestNode>(*doc);
-    auto child = CreateRef<TestNode>(*doc);
-    auto grandchild = CreateRef<TestNode>(*doc);
+    auto parent = CreateRef<TestElement>(*doc);
+    auto child = CreateRef<TestElement>(*doc);
+    auto grandchild = CreateRef<TestElement>(*doc);
 
     REQUIRE_FALSE(TreeQueries::IsInclusiveDescendant(*child, *parent));
     REQUIRE_FALSE(TreeQueries::IsInclusiveDescendant(*parent, *child));
@@ -278,9 +273,9 @@ namespace Krys::Tests
   TEST_CASE("TreeQueries::IsAncestor", "[TreeQueries]")
   {
     auto doc = CreateRef<Document>();
-    auto parent = CreateRef<TestNode>(*doc);
-    auto child = CreateRef<TestNode>(*doc);
-    auto grandchild = CreateRef<TestNode>(*doc);
+    auto parent = CreateRef<TestElement>(*doc);
+    auto child = CreateRef<TestElement>(*doc);
+    auto grandchild = CreateRef<TestElement>(*doc);
 
     REQUIRE_FALSE(TreeQueries::IsAncestor(*parent, *child));
     REQUIRE_FALSE(TreeQueries::IsAncestor(*child, *parent));
@@ -313,9 +308,9 @@ namespace Krys::Tests
   TEST_CASE("TreeQueries::IsInclusiveAncestor", "[TreeQueries]")
   {
     auto doc = CreateRef<Document>();
-    auto parent = CreateRef<TestNode>(*doc);
-    auto child = CreateRef<TestNode>(*doc);
-    auto grandchild = CreateRef<TestNode>(*doc);
+    auto parent = CreateRef<TestElement>(*doc);
+    auto child = CreateRef<TestElement>(*doc);
+    auto grandchild = CreateRef<TestElement>(*doc);
 
     REQUIRE_FALSE(TreeQueries::IsInclusiveAncestor(*parent, *child));
     REQUIRE_FALSE(TreeQueries::IsInclusiveAncestor(*child, *parent));
@@ -348,10 +343,10 @@ namespace Krys::Tests
   TEST_CASE("TreeQueries::IsSibling", "[TreeQueries]")
   {
     auto doc = CreateRef<Document>();
-    auto parent = CreateRef<TestNode>(*doc);
-    auto childA = CreateRef<TestNode>(*doc);
-    auto childB = CreateRef<TestNode>(*doc);
-    auto childC = CreateRef<TestNode>(*doc);
+    auto parent = CreateRef<TestElement>(*doc);
+    auto childA = CreateRef<TestElement>(*doc);
+    auto childB = CreateRef<TestElement>(*doc);
+    auto childC = CreateRef<TestElement>(*doc);
 
     REQUIRE_FALSE(TreeQueries::IsSibling(*childA, *childB));
     REQUIRE_FALSE(TreeQueries::IsSibling(*childB, *childA));
@@ -387,10 +382,10 @@ namespace Krys::Tests
   TEST_CASE("TreeQueries::IsInclusiveSibling", "[TreeQueries]")
   {
     auto doc = CreateRef<Document>();
-    auto parent = CreateRef<TestNode>(*doc);
-    auto childA = CreateRef<TestNode>(*doc);
-    auto childB = CreateRef<TestNode>(*doc);
-    auto childC = CreateRef<TestNode>(*doc);
+    auto parent = CreateRef<TestElement>(*doc);
+    auto childA = CreateRef<TestElement>(*doc);
+    auto childB = CreateRef<TestElement>(*doc);
+    auto childC = CreateRef<TestElement>(*doc);
 
     REQUIRE_FALSE(TreeQueries::IsInclusiveSibling(*childA, *childB));
     REQUIRE_FALSE(TreeQueries::IsInclusiveSibling(*childB, *childA));
@@ -426,13 +421,13 @@ namespace Krys::Tests
   TEST_CASE("TreeQueries::IsPreceding", "[TreeQueries]")
   {
     auto doc = CreateRef<Document>();
-    auto parent = CreateRef<TestNode>(*doc);
-    auto childA = CreateRef<TestNode>(*doc);
-    auto childB = CreateRef<TestNode>(*doc);
-    auto childC = CreateRef<TestNode>(*doc);
-    auto grandchildA = CreateRef<TestNode>(*doc);
-    auto grandchildB = CreateRef<TestNode>(*doc);
-    auto grandchildC = CreateRef<TestNode>(*doc);
+    auto parent = CreateRef<TestElement>(*doc);
+    auto childA = CreateRef<TestElement>(*doc);
+    auto childB = CreateRef<TestElement>(*doc);
+    auto childC = CreateRef<TestElement>(*doc);
+    auto grandchildA = CreateRef<TestElement>(*doc);
+    auto grandchildB = CreateRef<TestElement>(*doc);
+    auto grandchildC = CreateRef<TestElement>(*doc);
 
     REQUIRE_FALSE(TreeQueries::IsPreceding(*childA, *childB));
     REQUIRE_FALSE(TreeQueries::IsPreceding(*childB, *childA));
@@ -482,13 +477,13 @@ namespace Krys::Tests
   TEST_CASE("TreeQueries::IsFollowing", "[TreeQueries]")
   {
     auto doc = CreateRef<Document>();
-    auto parent = CreateRef<TestNode>(*doc);
-    auto childA = CreateRef<TestNode>(*doc);
-    auto childB = CreateRef<TestNode>(*doc);
-    auto childC = CreateRef<TestNode>(*doc);
-    auto grandchildA = CreateRef<TestNode>(*doc);
-    auto grandchildB = CreateRef<TestNode>(*doc);
-    auto grandchildC = CreateRef<TestNode>(*doc);
+    auto parent = CreateRef<TestElement>(*doc);
+    auto childA = CreateRef<TestElement>(*doc);
+    auto childB = CreateRef<TestElement>(*doc);
+    auto childC = CreateRef<TestElement>(*doc);
+    auto grandchildA = CreateRef<TestElement>(*doc);
+    auto grandchildB = CreateRef<TestElement>(*doc);
+    auto grandchildC = CreateRef<TestElement>(*doc);
 
     REQUIRE_FALSE(TreeQueries::IsFollowing(*childA, *childB));
     REQUIRE_FALSE(TreeQueries::IsFollowing(*childB, *childA));
@@ -538,13 +533,13 @@ namespace Krys::Tests
   TEST_CASE("TreeQueries::Index", "[TreeQueries]")
   {
     auto doc = CreateRef<Document>();
-    auto parent = CreateRef<TestNode>(*doc);
-    auto childA = CreateRef<TestNode>(*doc);
-    auto childB = CreateRef<TestNode>(*doc);
-    auto childC = CreateRef<TestNode>(*doc);
-    auto grandchildA = CreateRef<TestNode>(*doc);
-    auto grandchildB = CreateRef<TestNode>(*doc);
-    auto grandchildC = CreateRef<TestNode>(*doc);
+    auto parent = CreateRef<TestElement>(*doc);
+    auto childA = CreateRef<TestElement>(*doc);
+    auto childB = CreateRef<TestElement>(*doc);
+    auto childC = CreateRef<TestElement>(*doc);
+    auto grandchildA = CreateRef<TestElement>(*doc);
+    auto grandchildB = CreateRef<TestElement>(*doc);
+    auto grandchildC = CreateRef<TestElement>(*doc);
 
     REQUIRE(TreeQueries::Index(*doc) == 0);
     REQUIRE(TreeQueries::Index(*parent) == 0);
@@ -595,8 +590,8 @@ namespace Krys::Tests
   TEST_CASE("TreeQueries::ShadowIncludingRoot", "[HTML][TreeQueries]")
   {
     auto doc = CreateRef<Document>();
-    auto parent = CreateRef<TestNode>(*doc);
-    auto child = CreateRef<TestNode>(*doc);
+    auto parent = CreateRef<TestElement>(*doc);
+    auto child = CreateRef<TestElement>(*doc);
 
     REQUIRE(&TreeQueries::ShadowIncludingRoot(*doc) == doc.get());
     REQUIRE(&TreeQueries::ShadowIncludingRoot(*parent) == parent.get());

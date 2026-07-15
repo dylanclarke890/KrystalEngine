@@ -1,28 +1,29 @@
-﻿#include "Krystal.HTML.Tests/TestCharacterData.hpp"
-#include "Krystal.HTML/DOM/AbortSignal.hpp"
+﻿#include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/DOM/Element.hpp"
 #include "Krystal.HTML/DOM/Range.hpp"
 #include "Krystal.HTML/DOM/ShadowRoot.hpp"
+#include "Krystal.HTML/DOM/Text.hpp"
 #include "Krystal.HTML/HTML/CustomElement/CustomElementRegistry.hpp"
 #include "Krystal.HTML/HTML/HTMLSlotElement.hpp"
 #include <catch_all.hpp>
 
 namespace Krys::Tests
 {
+  using namespace Krys::HTML;
+
   namespace
   {
     struct CommonTestData
     {
       Ref<Document> Document;
-      Ref<TestCharacterData> Node;
+      Ref<HTML::Text> Node;
       Ref<Range> FullRange;
       Ref<Range> PartialRange;
 
       CommonTestData()
-          : Document(CreateRef<HTML::Document>()),
-            Node(CreateRef<TestCharacterData>(*Document, u8"Hello, world!")),
+          : Document(CreateRef<HTML::Document>()), Node(CreateRef<HTML::Text>(*Document, u8"Hello, world!")),
             FullRange(Document->CreateRange()), PartialRange(Document->CreateRange())
       {
         FullRange->SetStart(*Node, 0uz);

@@ -218,10 +218,7 @@
     <ClInclude Include="include\Krystal.HTML.Tests\TestDataParsers\HTMLTreeBuilderTestDataParser.hpp" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="include\Krystal.HTML.Tests\ParserTestUtils.hpp" />
-    <ClInclude Include="include\Krystal.HTML.Tests\TestCharacterData.hpp" />
-    <ClInclude Include="include\Krystal.HTML.Tests\TestContainerNode.hpp" />
-    <ClInclude Include="include\Krystal.HTML.Tests\TestElement.hpp" />
-    <ClInclude Include="include\Krystal.HTML.Tests\TestNode.hpp" />
+    <ClInclude Include="include\Krystal.HTML.Tests\HTML\TestElement.hpp" />
     <ClCompile Include="tests\DOM\BoundaryPoint.cpp" />
   </ItemGroup>
   <ItemGroup>

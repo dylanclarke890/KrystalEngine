@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/DOM/Text.hpp"
-#include "Krystal.HTML.Tests/TestContainerNode.hpp"
+#include "Krystal.HTML.Tests/HTML/TestElement.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/ContainerNode.hpp"
@@ -42,7 +42,7 @@ namespace Krys::Tests
   TEST_CASE("Text::SplitText updates live ranges", "[HTML][Text]")
   {
     auto document = CreateRef<Document>();
-    auto parent = CreateRef<TestContainerNode>(*document);
+    auto parent = CreateRef<TestElement>(*document);
     auto text = CreateRef<HTML::Text>(*document, u8"Hello, world!");
 
     REQUIRE_FALSE(parent->AppendChild(*text).HasException());
@@ -110,11 +110,11 @@ namespace Krys::Tests
   TEST_CASE("Text::WholeText", "[HTML][Text]")
   {
     auto doc = CreateRef<Document>();
-    auto parent = CreateRef<TestContainerNode>(*doc);
+    auto parent = CreateRef<TestElement>(*doc);
     auto textNodeA = CreateRef<Krys::HTML::Text>(*doc, u8"Hello,");
     auto textNodeB = CreateRef<Krys::HTML::Text>(*doc, u8" ");
     auto textNodeC = CreateRef<Krys::HTML::Text>(*doc, u8"world!");
-    auto childNode = CreateRef<TestContainerNode>(*doc);
+    auto childNode = CreateRef<TestElement>(*doc);
 
     REQUIRE_FALSE(parent->AppendChild(*textNodeA).HasException());
     REQUIRE_FALSE(parent->AppendChild(*textNodeB).HasException());

@@ -164,16 +164,7 @@
     <ClInclude Include="include\Krystal.HTML.Tests\ParserTestUtils.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML.Tests\TestNode.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.HTML.Tests\TestContainerNode.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.HTML.Tests\TestCharacterData.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\Krystal.HTML.Tests\TestElement.hpp">
+    <ClInclude Include="include\Krystal.HTML.Tests\HTML\TestElement.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="pch.h">
