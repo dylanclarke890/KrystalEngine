@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/HTML/Parser/HTMLDocumentParser.hpp"
-#include "Krystal.HTML.Tests/TreeConstruction.hpp"
+#include "Krystal.HTML.Tests/TestDataParsers/HTMLTreeBuilderTestDataParser.hpp"
 #include "Krystal.HTML/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLTokenizer.hpp"
 #include <catch_all.hpp>
@@ -94,85 +94,85 @@ namespace Krys::HTML::Tests
     DoTreeConstructionTests(*tests);                                                                         \
   }
 
-  PARSER_TEST_CASE("tree-construction/adoption-01.dat");
-  PARSER_TEST_CASE("tree-construction/adoption-02.dat");
+  PARSER_TEST_CASE("html-tree-builder/adoption-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/adoption-02.dat");
 
-  PARSER_TEST_CASE("tree-construction/blocks-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/blocks-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/comments-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/comments-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/doctype-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/doctype-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/entities-01.dat");
-  PARSER_TEST_CASE("tree-construction/entities-02.dat");
+  PARSER_TEST_CASE("html-tree-builder/entities-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/entities-02.dat");
 
-  PARSER_TEST_CASE("tree-construction/formatting-elements-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/formatting-elements-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/foster-parenting-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/foster-parenting-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/html5test-com.dat");
+  PARSER_TEST_CASE("html-tree-builder/html5test-com.dat");
 
-  PARSER_TEST_CASE("tree-construction/inbody-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/inbody-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/inner-html-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/inner-html-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/isindex-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/isindex-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/main-element-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/main-element-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/math-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/math-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/menuitem-element-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/menuitem-element-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/namespace-sensitivity-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/namespace-sensitivity-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/noscript-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/noscript-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/plain-text-unsafe-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/plain-text-unsafe-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/quirks-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/quirks-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/ruby-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/ruby-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/script-data-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/script-data-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/search-element-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/search-element-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/svg-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/svg-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/tables-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/tables-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/template-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/template-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/tests-01.dat");
-  PARSER_TEST_CASE("tree-construction/tests-02.dat");
-  PARSER_TEST_CASE("tree-construction/tests-03.dat");
-  PARSER_TEST_CASE("tree-construction/tests-04.dat");
-  PARSER_TEST_CASE("tree-construction/tests-05.dat");
-  PARSER_TEST_CASE("tree-construction/tests-06.dat");
-  PARSER_TEST_CASE("tree-construction/tests-07.dat");
-  PARSER_TEST_CASE("tree-construction/tests-08.dat");
-  PARSER_TEST_CASE("tree-construction/tests-09.dat");
-  PARSER_TEST_CASE("tree-construction/tests-11.dat");
-  PARSER_TEST_CASE("tree-construction/tests-12.dat");
-  PARSER_TEST_CASE("tree-construction/tests-14.dat");
-  PARSER_TEST_CASE("tree-construction/tests-15.dat");
-  PARSER_TEST_CASE("tree-construction/tests-16.dat");
-  PARSER_TEST_CASE("tree-construction/tests-17.dat");
-  PARSER_TEST_CASE("tree-construction/tests-18.dat");
-  PARSER_TEST_CASE("tree-construction/tests-19.dat");
-  PARSER_TEST_CASE("tree-construction/tests-20.dat");
-  PARSER_TEST_CASE("tree-construction/tests-21.dat");
-  PARSER_TEST_CASE("tree-construction/tests-22.dat");
-  PARSER_TEST_CASE("tree-construction/tests-23.dat");
-  PARSER_TEST_CASE("tree-construction/tests-24.dat");
-  PARSER_TEST_CASE("tree-construction/tests-25.dat");
-  PARSER_TEST_CASE("tree-construction/tests-26.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-02.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-03.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-04.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-05.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-06.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-07.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-08.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-09.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-11.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-12.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-14.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-15.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-16.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-17.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-18.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-19.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-20.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-21.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-22.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-23.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-24.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-25.dat");
+  PARSER_TEST_CASE("html-tree-builder/tests-26.dat");
 
-  PARSER_TEST_CASE("tree-construction/tricky-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/tricky-01.dat");
 
-  PARSER_TEST_CASE("tree-construction/void-in-phrasing-01.dat");
-  
-  PARSER_TEST_CASE("tree-construction/webkit-01.dat");
-  PARSER_TEST_CASE("tree-construction/webkit-02.dat");
+  PARSER_TEST_CASE("html-tree-builder/void-in-phrasing-01.dat");
+
+  PARSER_TEST_CASE("html-tree-builder/webkit-01.dat");
+  PARSER_TEST_CASE("html-tree-builder/webkit-02.dat");
 }
