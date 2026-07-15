@@ -182,7 +182,7 @@ namespace Krys::Text
     return !IsASCIIWhitespace(ch);
   }
 
-    template <ASCIIChar TChar>
+  template <ASCIIChar TChar>
   KRYS_NODISCARD constexpr bool ToASCIIDigitUnchecked(TChar character) noexcept
   {
     auto ch = static_cast<conditional_t<SameType<TChar, byte>, char, TChar>>(character);
@@ -303,5 +303,23 @@ namespace Krys::Text
     }
 
     return result;
+  }
+
+  KRYS_NODISCARD constexpr bool ASCIICaseInsensitiveMatch(utf32_stringview a, utf32_stringview b) noexcept
+  {
+    if (a.length() != b.length())
+    {
+      return false;
+    }
+
+    for (size_t i = 0; i < a.length(); i++)
+    {
+      if (ToASCIILowerUnchecked(a[i]) != ToASCIILowerUnchecked(b[i]))
+      {
+        return false;
+      }
+    }
+
+    return true;
   }
 }

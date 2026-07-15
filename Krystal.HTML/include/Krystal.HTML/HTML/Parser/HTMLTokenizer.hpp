@@ -8,6 +8,7 @@
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/ReferenceWrapper.hpp"
+#include "Krystal.Lib/Types/Func.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/SmallList.hpp"
 #include "Krystal.Text/ASCII.hpp"
@@ -78,7 +79,7 @@ namespace Krys::HTML
     struct HTMLTokenizerError
     {
       HTMLParseError Error;
-      HTMLInputStream::SourceLocation Location {};
+      SourceLocation Location {};
     };
 
   private:
@@ -181,7 +182,7 @@ namespace Krys::HTML
 
     void BufferCharacter(char32 character) noexcept
     {
-      assert(character != HTMLInputStream::EOFMarker);
+      assert(character != EOFMarker);
       _token.AppendToCharacters(character);
     }
 
@@ -191,7 +192,7 @@ namespace Krys::HTML
 #if KRYS_ENV(DEV)
       for (auto character : characters)
       {
-        assert(character != HTMLInputStream::EOFMarker);
+        assert(character != EOFMarker);
       }
 #endif
       _token.AppendToCharacters(characters);
@@ -202,7 +203,7 @@ namespace Krys::HTML
 #if KRYS_ENV(DEV)
       for (auto character : characters)
       {
-        assert(character != HTMLInputStream::EOFMarker);
+        assert(character != EOFMarker);
       }
 #endif
       _token.AppendToCharacters(characters);
@@ -522,7 +523,7 @@ namespace Krys::HTML
       constexpr char32 RightSquareBracket = U']';
       constexpr char32 NumberSign = U'#';
       constexpr char32 Semicolon = U';';
-      constexpr char32 EndOfFile = HTMLInputStream::EOFMarker;
+      constexpr char32 EndOfFile = EOFMarker;
       constexpr char32 Replacement = Krys::Text::Unicode::Replacement<char32>;
 
       char32 character = _input.NextInputCharacter();

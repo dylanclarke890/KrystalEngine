@@ -1,9 +1,10 @@
 ﻿#pragma once
 
+#include "Krystal.HTML/Types/IsEOF.hpp"
+#include "Krystal.HTML/Types/SourceLocation.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/String/String.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
-#include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 #include "Krystal.Text/ASCII.hpp"
 #include "Krystal.Text/ASCIILiteral.hpp"
 #include "Krystal.Text/Unicode.hpp"
@@ -11,24 +12,10 @@
 
 namespace Krys::HTML
 {
-  struct IsEOF : StronglyTypedBool<IsEOF>
-  {
-    using StronglyTypedBool::StronglyTypedBool;
-  };
-
   class HTMLInputStream
   {
-  public:
-    struct SourceLocation
-    {
-      size_t Line {1uz};
-      size_t Column {1uz};
-    };
-
   private:
-    // TODO(perf): a lot of text is just plain ASCII, we should optimize for that case. One idea I've had is
-    // to use the last bit in each 4 bytes to indicate if the next 4 bytes are ASCII or UTF-32. We can then
-    // have a fast path for ASCII chunks.
+    // TODO(perf): a lot of text is just plain ASCII, we should optimize for that case.
     utf32_string _data;
     size_t _readPosition {0uz};
     size_t _insertionPosition = utf32_string::npos;
@@ -37,9 +24,7 @@ namespace Krys::HTML
     SourceLocation _currentLocation;
 
   public:
-    constexpr static inline char32 EOFMarker = U'\uFFFF';
-
-    void Append(utf32_string &&chunk, IsEOF isEOF = IsEOF(false))
+    void Append(utf32_string &&chunk, IsEOF isEOF = IsEOF(false)) noexcept
     {
       assert(_data.empty() || _data.back() != EOFMarker);
 
@@ -54,7 +39,7 @@ namespace Krys::HTML
       }
     }
 
-    void Insert(utf32_string &&chunk)
+    void Insert(utf32_string &&chunk) noexcept
     {
       assert(_insertionPosition != utf32_string::npos);
 
@@ -81,7 +66,7 @@ namespace Krys::HTML
     }
 
     /// @brief Peek the next input character without consuming it.
-    bool Peek()
+    bool Peek() noexcept
     {
       if (IsEmpty()) KRYS_UNLIKELY
       {
@@ -122,7 +107,7 @@ namespace Krys::HTML
     }
 
     /// @brief Advance to the next input character.
-    bool Advance()
+    bool Advance() noexcept
     {
       if (IsEmpty()) KRYS_UNLIKELY
       {
@@ -154,12 +139,8 @@ namespace Krys::HTML
       {
         return 0uz;
       }
-      return _data.size() - _readPosition;
-    }
 
-    KRYS_NODISCARD bool IsAtEOF() const noexcept
-    {
-      return _data[_readPosition] == EOFMarker;
+      return (_data.size() - _readPosition) - (_data.back() == EOFMarker ? 1uz : 0uz);
     }
 
     enum class MatchResult : uint8

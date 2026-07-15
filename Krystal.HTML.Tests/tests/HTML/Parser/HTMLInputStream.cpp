@@ -31,8 +31,7 @@ namespace Krys::Tests
 
     stream.Advance();
     REQUIRE(stream.Peek());
-    REQUIRE(stream.NextInputCharacter() == HTMLInputStream::EOFMarker);
-    REQUIRE(stream.IsAtEOF());
+    REQUIRE(stream.NextInputCharacter() == EOFMarker);
   }
 
   TEST_CASE("HTMLInputStream: CR normalizes to LF", "[HTML][InputStream]")
@@ -111,20 +110,6 @@ namespace Krys::Tests
     REQUIRE(stream.NextInputCharacter() == U'd');
   }
 
-  TEST_CASE("HTMLInputStream: EOF only after final chunk", "[HTML][InputStream]")
-  {
-    HTMLInputStream stream;
-    stream.Append(ToUTF32("a"));
-
-    REQUIRE(stream.Peek());
-    stream.Advance();
-
-    REQUIRE_FALSE(stream.IsAtEOF());
-
-    stream.Append({}, IsEOF(true));
-    REQUIRE(stream.IsAtEOF());
-  }
-
   TEST_CASE("HTMLInputStream: Peek does not consume", "[HTML][InputStream]")
   {
     HTMLInputStream stream;
@@ -138,7 +123,7 @@ namespace Krys::Tests
 
     stream.Advance();
     REQUIRE(stream.Peek());
-    REQUIRE(stream.NextInputCharacter() == HTMLInputStream::EOFMarker);
+    REQUIRE(stream.NextInputCharacter() == EOFMarker);
   }
 
   TEST_CASE("HTMLInputStream: Advance past advances the correct amount of characters", "[HTML][InputStream]")
