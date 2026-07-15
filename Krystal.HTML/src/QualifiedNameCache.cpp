@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML/QualifiedNameCache.hpp"
+﻿#include "Krystal.HTML/DOM/Internals/QualifiedNameCache.hpp"
 
 namespace Krys::HTML
 {

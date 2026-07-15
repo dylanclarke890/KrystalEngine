@@ -32,9 +32,9 @@
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 
-#include "Krystal.HTML/Types/DOMString.hpp"
+#include "Krystal.HTML/DOM/Types/DOMString.hpp"
+#include "Krystal.HTML/DOM/Types/USVString.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
-#include "Krystal.HTML/Types/USVString.hpp"
 
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Algorithms/SubtreeRanges.hpp"

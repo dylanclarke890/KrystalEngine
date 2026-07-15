@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/DOM/Enums/MutationRecordType.hpp"
-#include "Krystal.HTML/Types/DOMString.hpp"
-#include "Krystal.HTML/Types/DOMString.hpp"
+#include "Krystal.HTML/DOM/Types/DOMString.hpp"
+#include "Krystal.HTML/DOM/Types/DOMString.hpp"
 #include "Krystal.HTML/DOM/Types/SmallNodeList.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"

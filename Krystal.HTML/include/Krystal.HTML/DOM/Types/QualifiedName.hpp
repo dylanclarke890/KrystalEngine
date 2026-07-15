@@ -2,7 +2,7 @@
 
 #include "Krystal.HTML/HTML/Enums/Namespace.hpp"
 #include "Krystal.HTML/HTML/Enums/TagName.hpp"
-#include "Krystal.HTML/Types/DOMString.hpp"
+#include "Krystal.HTML/DOM/Types/DOMString.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"
 #include "Krystal.Lib/Pointers/RefPtr.hpp"
 

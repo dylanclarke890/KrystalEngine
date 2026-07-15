@@ -3,7 +3,7 @@
 #include "Krystal.HTML/DOM/Algorithms/NameValidation.hpp"
 #include "Krystal.HTML/HTML/Enums/HTMLTokenType.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLToken.hpp"
-#include "Krystal.HTML/Types/DOMString.hpp"
+#include "Krystal.HTML/DOM/Types/DOMString.hpp"
 #include "Krystal.Lib/Types/Numeric.hpp"
 #include <cassert>
 

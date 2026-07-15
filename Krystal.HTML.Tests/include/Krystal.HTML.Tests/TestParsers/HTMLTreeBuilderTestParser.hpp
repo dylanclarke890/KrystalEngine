@@ -10,7 +10,7 @@
 #include "Krystal.HTML/DOM/Text.hpp"
 #include "Krystal.HTML/HTML/Enums/ParserScriptingMode.hpp"
 #include "Krystal.HTML/HTML/HTMLTemplateElement.hpp"
-#include "Krystal.HTML/Types/DOMString.hpp"
+#include "Krystal.HTML/DOM/Types/DOMString.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"

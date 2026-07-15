@@ -2,7 +2,7 @@
 
 #include "Krystal.HTML/DOM/DOMTokenList.hpp"
 #include "Krystal.HTML/HTML/HTMLElement.hpp"
-#include "Krystal.HTML/Types/USVString.hpp"
+#include "Krystal.HTML/DOM/Types/USVString.hpp"
 
 namespace Krys::HTML
 {

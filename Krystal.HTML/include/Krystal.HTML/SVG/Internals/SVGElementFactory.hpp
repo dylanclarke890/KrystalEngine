@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "Krystal.HTML/QualifiedName.hpp"
+#include "Krystal.HTML/DOM/Types/QualifiedName.hpp"
 #include "Krystal.HTML/SVG/SVGCircleElement.hpp"
 #include "Krystal.HTML/SVG/SVGDefsElement.hpp"
 #include "Krystal.HTML/SVG/SVGDescElement.hpp"

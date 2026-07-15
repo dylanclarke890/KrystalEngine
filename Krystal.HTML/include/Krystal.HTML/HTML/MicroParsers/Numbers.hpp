@@ -2,7 +2,7 @@
 
 #include "Krystal.HTML/HTML/MicroParsers/MicroParserResult.hpp"
 #include "Krystal.HTML/Infra/StringAlgorithms.hpp"
-#include "Krystal.HTML/Types/DOMString.hpp"
+#include "Krystal.HTML/DOM/Types/DOMString.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Text/ASCII.hpp"
 #include <charconv>

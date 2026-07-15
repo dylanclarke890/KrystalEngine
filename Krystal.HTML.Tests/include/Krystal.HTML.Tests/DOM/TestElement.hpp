@@ -2,7 +2,7 @@
 
 #include "Krystal.HTML/Infra/Namespaces.hpp"
 #include "Krystal.HTML/DOM/Element.hpp"
-#include "Krystal.HTML/QualifiedName.hpp"
+#include "Krystal.HTML/DOM/Types/QualifiedName.hpp"
 
 namespace Krys::Tests
 {

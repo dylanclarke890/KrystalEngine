@@ -4,7 +4,7 @@
 #include "Krystal.HTML/DOM/Dicts/EventListenerOptions.hpp"
 #include "Krystal.HTML/DOM/Enums/EventTargetFlags.hpp"
 #include "Krystal.HTML/DOM/Internals/Event/EventListener.hpp"
-#include "Krystal.HTML/Types/DOMString.hpp"
+#include "Krystal.HTML/DOM/Types/DOMString.hpp"
 #include "Krystal.HTML/Types/ExceptionOr.hpp"
 #include "Krystal.Lib/Mixins/CanMakeWeakPtr.hpp"
 #include "Krystal.Lib/Mixins/RefCounted.hpp"

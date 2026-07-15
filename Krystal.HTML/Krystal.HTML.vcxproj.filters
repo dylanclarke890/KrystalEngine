@@ -99,7 +99,7 @@
     <ClInclude Include="include\Krystal.HTML\DOM\Enums\EventPhaseType.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Types\DOMHighResTimeStamp.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Types\DOMHighResTimeStamp.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\Callbacks\EventListenerCallback.hpp">
@@ -135,7 +135,7 @@
     <ClInclude Include="include\Krystal.HTML\DOM\CharacterData.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Types\DOMString.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Types\DOMString.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\Attr.hpp">
@@ -153,7 +153,7 @@
     <ClInclude Include="include\Krystal.HTML\DOM\ProcessingInstruction.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\QualifiedName.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Types\QualifiedName.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\DOM\ShadowRoot.hpp">
@@ -534,7 +534,7 @@
     <ClInclude Include="include\Krystal.HTML\HTML\MicroParsers\MicroParserResult.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\Types\USVString.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Types\USVString.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\HTML\Algorithms\DOMTreeAccessors.hpp">
@@ -750,7 +750,7 @@
     <ClInclude Include="include\Krystal.HTML\Constants\TagNames.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML\QualifiedNameCache.hpp">
+    <ClInclude Include="include\Krystal.HTML\DOM\Internals\QualifiedNameCache.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML\SVG\Enums\SVGElementInterface.hpp">

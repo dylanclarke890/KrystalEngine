@@ -5,7 +5,7 @@
 #include "Krystal.HTML/DOM/DOMTokenList.hpp"
 #include "Krystal.HTML/DOM/Enums/CustomElementState.hpp"
 #include "Krystal.HTML/DOM/Enums/InsertAdjacentWhere.hpp"
-#include "Krystal.HTML/QualifiedName.hpp"
+#include "Krystal.HTML/DOM/Types/QualifiedName.hpp"
 #include "Krystal.HTML/DOM/Internals/RareData/ElementRareData.hpp"
 #include "Krystal.HTML/DOM/NamedNodeMap.hpp"
 #include "Krystal.HTML/DOM/Types/NodeOrString.hpp"

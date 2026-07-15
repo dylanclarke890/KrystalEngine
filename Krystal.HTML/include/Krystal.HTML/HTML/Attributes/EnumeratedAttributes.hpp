@@ -2,7 +2,7 @@
 
 #include "Krystal.HTML/HTML/Enums/AttributeState.hpp"
 #include "Krystal.HTML/HTML/HTMLElement.hpp"
-#include "Krystal.HTML/Types/DOMString.hpp"
+#include "Krystal.HTML/DOM/Types/DOMString.hpp"
 #include "Krystal.Lib/Core/Concepts.hpp"
 #include "Krystal.Lib/Types/Array.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"

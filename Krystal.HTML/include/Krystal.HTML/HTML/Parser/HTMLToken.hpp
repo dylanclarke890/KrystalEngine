@@ -2,7 +2,7 @@
 
 #include "Krystal.HTML/HTML/Enums/HTMLTokenType.hpp"
 #include "Krystal.HTML/HTML/Enums/ParsedAttributeFlags.hpp"
-#include "Krystal.HTML/Types/DOMString.hpp"
+#include "Krystal.HTML/DOM/Types/DOMString.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/UniquePtr.hpp"

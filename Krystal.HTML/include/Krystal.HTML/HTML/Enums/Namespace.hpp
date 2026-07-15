@@ -2,7 +2,7 @@
 
 #include "Krystal.HTML/Infra/Namespaces.hpp"
 #include "Krystal.HTML/Infra/StringAlgorithms.hpp"
-#include "Krystal.HTML/Types/DOMString.hpp"
+#include "Krystal.HTML/DOM/Types/DOMString.hpp"
 #include "Krystal.Lib/Core/Enum.hpp"
 
 namespace Krys::HTML

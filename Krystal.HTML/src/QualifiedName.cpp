@@ -1,5 +1,5 @@
-﻿#include "Krystal.HTML/QualifiedName.hpp"
-#include "Krystal.HTML/QualifiedNameCache.hpp"
+﻿#include "Krystal.HTML/DOM/Types/QualifiedName.hpp"
+#include "Krystal.HTML/DOM/Internals/QualifiedNameCache.hpp"
 #include "Krystal.Text/ASCII.hpp"
 #include <cassert>
 

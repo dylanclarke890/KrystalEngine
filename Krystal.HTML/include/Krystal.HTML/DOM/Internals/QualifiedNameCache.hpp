@@ -2,8 +2,8 @@
 
 #include "Krystal.HTML/HTML/Enums/Namespace.hpp"
 #include "Krystal.HTML/HTML/Enums/TagName.hpp"
-#include "Krystal.HTML/QualifiedName.hpp"
-#include "Krystal.HTML/Types/DOMString.hpp"
+#include "Krystal.HTML/DOM/Types/QualifiedName.hpp"
+#include "Krystal.HTML/DOM/Types/DOMString.hpp"
 #include "Krystal.Lib/Core/Hash.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Types/Set.hpp"
