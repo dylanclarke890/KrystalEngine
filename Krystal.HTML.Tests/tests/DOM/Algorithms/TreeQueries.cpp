@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/DOM/Algorithms/TreeQueries.hpp"
-#include "Krystal.HTML.Tests/HTML/TestElement.hpp"
+#include "Krystal.HTML.Tests/DOM/TestElement.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/DOM/ShadowRoot.hpp"
 #include "Krystal.HTML/DOM/Text.hpp"

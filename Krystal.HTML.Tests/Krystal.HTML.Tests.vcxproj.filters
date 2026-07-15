@@ -153,7 +153,7 @@
     <ClCompile Include="tests\DOM\Internals\QualifiedNameCache.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tests\TestDataParsers\HTMLTreeBuilderTestDataParser.cpp">
+    <ClCompile Include="tests\TestParsers\HTMLTreeBuilderTestParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="tests\HTML\Parser\HTMLDocumentParser.cpp">
@@ -164,13 +164,13 @@
     <ClInclude Include="include\Krystal.HTML.Tests\ParserTestUtils.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML.Tests\HTML\TestElement.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\Krystal.HTML.Tests\TestDataParsers\HTMLTreeBuilderTestDataParser.hpp">
+    <ClInclude Include="include\Krystal.HTML.Tests\TestParsers\HTMLTreeBuilderTestParser.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML.Tests\DOM\TestElement.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

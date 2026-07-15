@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/DOM/StaticRange.hpp"
-#include "Krystal.HTML.Tests/HTML/TestElement.hpp"
+#include "Krystal.HTML.Tests/DOM/TestElement.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
 #include "Krystal.HTML/DOM/DocumentType.hpp"
 #include <catch_all.hpp>

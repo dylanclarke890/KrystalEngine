@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/DOM/BoundaryPoint.hpp"
-#include "Krystal.HTML.Tests/HTML/TestElement.hpp"
+#include "Krystal.HTML.Tests/DOM/TestElement.hpp"
 #include "Krystal.HTML/DOM/Document.hpp"
 #include <catch_all.hpp>
 

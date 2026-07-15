@@ -1,4 +1,4 @@
-﻿#include "Krystal.HTML.Tests/TestDataParsers/HTMLTreeBuilderTestDataParser.hpp"
+﻿#include "Krystal.HTML.Tests/TestParsers/HTMLTreeBuilderTestParser.hpp"
 #include "Krystal.HTML/SVG/Internals/SVGElementFactory.hpp"
 #include "Krystal.HTML/SVG/SVGElement.hpp"
 #include <catch_all.hpp>
@@ -30,10 +30,10 @@ namespace Krys::HTML::Tests
       return *element;
     }
 
-    List<TreeConstructionTest> Parse(const char *dat) noexcept
+    List<HTMLTreeBuilderTest> Parse(const char *dat) noexcept
     {
       std::istringstream stream(dat);
-      return ParseTreeConstructionTests(stream);
+      return ParseHTMLTreeBuilderTests(stream);
     }
   }
 
@@ -73,7 +73,7 @@ namespace Krys::HTML::Tests
     auto svg = CreateSVGElement(*document, u8"svg");
     REQUIRE_FALSE(body->AppendChild(*svg).HasException());
 
-    DOMString output = Dump(*document);
+    DOMString output = SerializeDocument(*document);
 
     DOMString expectedOutput = u8R"(#document
 | <!DOCTYPE html>

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/HTML/Parser/HTMLDocumentParser.hpp"
-#include "Krystal.HTML.Tests/TestDataParsers/HTMLTreeBuilderTestDataParser.hpp"
+#include "Krystal.HTML.Tests/TestParsers/HTMLTreeBuilderTestParser.hpp"
 #include "Krystal.HTML/DOM/Internals/ElementFactory.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLTokenizer.hpp"
 #include <catch_all.hpp>
@@ -22,7 +22,7 @@ namespace Krys::HTML::Tests
       return utf8_string(str.begin(), str.end());
     }
 
-    void DoTreeConstructionTest(const TreeConstructionTest &test, size_t number, size_t total) noexcept
+    void DoHTMLTreeBuilderTest(const HTMLTreeBuilderTest &test, size_t number, size_t total) noexcept
     {
       auto input = u8"--- TEST " + ToUTF8String(number + 1uz) + u8" OF " + ToUTF8String(total) + u8" ---\n"
                    + Krys::Text::ConvertToUTF8(utf32_stringview(test.Input));
@@ -46,12 +46,10 @@ namespace Krys::HTML::Tests
         auto result = HTMLDocumentParser::ParseFragment(
           *element, utf32_string(test.Input), false, test.ScriptingMode.value_or(ParserScriptingMode::Inert));
 
-        auto documentFragment = CreateRef<DocumentFragment>(*document);
-
         output = u8"#document\n";
         for (auto &child : result)
         {
-          DumpNode(*child, output, 0uz);
+          SerializeNode(*child, output, 0uz);
         }
         NormaliseData(output);
       }
@@ -67,7 +65,7 @@ namespace Krys::HTML::Tests
 
         (void)parser->PumpTokenizer();
 
-        output = Dump(*document);
+        output = SerializeDocument(*document);
       }
 
       auto actual = u8"\n--- ACTUAL OUTPUT ---\n" + output;
@@ -77,11 +75,11 @@ namespace Krys::HTML::Tests
       CHECK(equal);
     }
 
-    void DoTreeConstructionTests(const List<TreeConstructionTest> &tests) noexcept
+    void DoHTMLTreeBuilderTests(const List<HTMLTreeBuilderTest> &tests) noexcept
     {
       for (size_t i = 0uz; i < tests.size(); ++i)
       {
-        DoTreeConstructionTest(tests[i], i, tests.size());
+        DoHTMLTreeBuilderTest(tests[i], i, tests.size());
       }
     }
   }
@@ -89,9 +87,9 @@ namespace Krys::HTML::Tests
 #define PARSER_TEST_CASE(datFile)                                                                            \
   TEST_CASE("HTMLDocumentParser(" datFile ")", "[HTML][HTMLDocumentParser]")                                 \
   {                                                                                                          \
-    auto tests = ParseTreeConstructionTests("data/" datFile);                                                \
+    auto tests = ParseHTMLTreeBuilderTests("data/" datFile);                                                 \
     REQUIRE(tests.has_value());                                                                              \
-    DoTreeConstructionTests(*tests);                                                                         \
+    DoHTMLTreeBuilderTests(*tests);                                                                          \
   }
 
   PARSER_TEST_CASE("html-tree-builder/adoption-01.dat");

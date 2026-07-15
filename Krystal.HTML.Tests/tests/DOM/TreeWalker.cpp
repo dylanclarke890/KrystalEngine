@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/DOM/TreeWalker.hpp"
-#include "Krystal.HTML.Tests/HTML/TestElement.hpp"
+#include "Krystal.HTML.Tests/DOM/TestElement.hpp"
 #include "Krystal.HTML/DOM/Callbacks/NodeFilter.hpp"
 #include "Krystal.HTML/DOM/HTMLDocument.hpp"
 #include "Krystal.HTML/DOM/Text.hpp"

@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/DOM/Range.hpp"
-#include "Krystal.HTML.Tests/HTML/TestElement.hpp"
+#include "Krystal.HTML.Tests/DOM/TestElement.hpp"
 #include "Krystal.HTML/DOM/Comment.hpp"
 #include "Krystal.HTML/DOM/DocumentType.hpp"
 #include "Krystal.HTML/DOM/DocumentFragment.hpp"

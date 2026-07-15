@@ -1,5 +1,5 @@
 ﻿#include "Krystal.HTML/DOM/Algorithms/MutationAlgorithms.hpp"
-#include "Krystal.HTML.Tests/HTML/TestElement.hpp"
+#include "Krystal.HTML.Tests/DOM/TestElement.hpp"
 #include "Krystal.HTML/DOM/AbortSignal.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/Comment.hpp"

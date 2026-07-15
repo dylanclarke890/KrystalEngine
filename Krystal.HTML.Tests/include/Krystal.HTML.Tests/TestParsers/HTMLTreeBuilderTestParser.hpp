@@ -23,7 +23,7 @@
 
 namespace Krys::HTML::Tests
 {
-  struct TreeConstructionTest
+  struct HTMLTreeBuilderTest
   {
     utf32_string Input;
     DOMString Expected;
@@ -31,7 +31,7 @@ namespace Krys::HTML::Tests
     Maybe<ParserScriptingMode> ScriptingMode;
   };
 
-  enum class TreeConstructionTestSection
+  enum class HTMLTreeBuilderTestSection
   {
     None,
     Data,
@@ -40,31 +40,34 @@ namespace Krys::HTML::Tests
     ExpectedOutput
   };
 
-  inline DOMString ToUTF8(const string &s) noexcept
+  namespace
   {
-    return DOMString(reinterpret_cast<const char8_t *>(s.data()), s.size());
-  };
-
-  template <typename T>
-  inline void NormaliseData(T &str) noexcept
-  {
-    if (!str.empty() && str.back() == U'\n')
+    DOMString ToUTF8(const string &s) noexcept
     {
-      str.pop_back();
+      return DOMString(reinterpret_cast<const char8_t *>(s.data()), s.size());
+    };
+
+    template <typename T>
+    void NormaliseData(T &str) noexcept
+    {
+      if (!str.empty() && str.back() == U'\n')
+      {
+        str.pop_back();
+      }
+    }
+
+    void Indent(DOMString &output, size_t depth) noexcept
+    {
+      output += u8"| ";
+
+      for (size_t i = 0uz; i < depth; ++i)
+      {
+        output += u8"  ";
+      }
     }
   }
 
-  inline void Indent(DOMString &output, size_t depth) noexcept
-  {
-    output += u8"| ";
-
-    for (size_t i = 0uz; i < depth; ++i)
-    {
-      output += u8"  ";
-    }
-  }
-
-  inline void DumpNode(Node &node, DOMString &output, size_t depth) noexcept
+  inline void SerializeNode(Node &node, DOMString &output, size_t depth) noexcept
   {
     switch (node.NodeType())
     {
@@ -147,7 +150,7 @@ namespace Krys::HTML::Tests
 
           for (auto &child : ChildNodeRange(*Downcast<HTMLTemplateElement>(element).Content()))
           {
-            DumpNode(child, output, depth + 2uz);
+            SerializeNode(child, output, depth + 2uz);
           }
         }
         break;
@@ -191,27 +194,27 @@ namespace Krys::HTML::Tests
     {
       for (auto &child : ChildNodeRange(*containerNode))
       {
-        DumpNode(child, output, depth + 1uz);
+        SerializeNode(child, output, depth + 1uz);
       }
     }
   }
 
-  inline DOMString Dump(Document &document) noexcept
+  inline DOMString SerializeDocument(Document &document) noexcept
   {
     DOMString output = u8"#document\n";
 
     for (auto &child : ChildNodeRange(document))
     {
-      DumpNode(child, output, 0uz);
+      SerializeNode(child, output, 0uz);
     }
 
     NormaliseData(output);
     return output;
   }
 
-  inline List<TreeConstructionTest> ParseTreeConstructionTests(std::istream &stream) noexcept
+  inline List<HTMLTreeBuilderTest> ParseHTMLTreeBuilderTests(std::istream &stream) noexcept
   {
-    List<TreeConstructionTest> tests;
+    List<HTMLTreeBuilderTest> tests;
 
     string input;
     string expected;
@@ -242,7 +245,7 @@ namespace Krys::HTML::Tests
     };
 
     string line;
-    TreeConstructionTestSection section = TreeConstructionTestSection::None;
+    HTMLTreeBuilderTestSection section = HTMLTreeBuilderTestSection::None;
     while (std::getline(stream, line))
     {
       if (!line.empty() && line.back() == '\r')
@@ -259,25 +262,25 @@ namespace Krys::HTML::Tests
           FinishParsingTest();
         }
 
-        section = TreeConstructionTestSection::Data;
+        section = HTMLTreeBuilderTestSection::Data;
         continue;
       }
 
       if (line == "#errors" || line == "#new-errors" || line == "#errors-new")
       {
-        section = TreeConstructionTestSection::Errors;
+        section = HTMLTreeBuilderTestSection::Errors;
         continue;
       }
 
       if (line.starts_with("#document-fragment"))
       {
-        section = TreeConstructionTestSection::FragmentContext;
+        section = HTMLTreeBuilderTestSection::FragmentContext;
         continue;
       }
 
       if (line == "#document")
       {
-        section = TreeConstructionTestSection::ExpectedOutput;
+        section = HTMLTreeBuilderTestSection::ExpectedOutput;
         expected = "#document\n";
         continue;
       }
@@ -304,29 +307,29 @@ namespace Krys::HTML::Tests
 
       if (line[0] == '#')
       {
-        section = TreeConstructionTestSection::None;
+        section = HTMLTreeBuilderTestSection::None;
         continue; // Ignore unknown sections
       }
 
       switch (section)
       {
-        case TreeConstructionTestSection::None:
+        case HTMLTreeBuilderTestSection::None:
         {
           continue;
         }
-        case TreeConstructionTestSection::Data:
+        case HTMLTreeBuilderTestSection::Data:
         {
           input += line;
           input += '\n';
           continue;
         }
-        case TreeConstructionTestSection::ExpectedOutput:
+        case HTMLTreeBuilderTestSection::ExpectedOutput:
         {
           expected += line;
           expected += '\n';
           continue;
         }
-        case TreeConstructionTestSection::FragmentContext:
+        case HTMLTreeBuilderTestSection::FragmentContext:
         {
           if (!fragmentContext.has_value())
           {
@@ -339,7 +342,7 @@ namespace Krys::HTML::Tests
           }
           continue;
         }
-        case TreeConstructionTestSection::Errors:
+        case HTMLTreeBuilderTestSection::Errors:
         {
           // TODO: parse errors
           continue;
@@ -347,7 +350,7 @@ namespace Krys::HTML::Tests
       }
     }
 
-    if (section != TreeConstructionTestSection::None)
+    if (section != HTMLTreeBuilderTestSection::None)
     {
       FinishParsingTest();
     }
@@ -355,7 +358,7 @@ namespace Krys::HTML::Tests
     return tests;
   }
 
-  inline Maybe<List<TreeConstructionTest>> ParseTreeConstructionTests(const string &filePath) noexcept
+  inline Maybe<List<HTMLTreeBuilderTest>> ParseHTMLTreeBuilderTests(const string &filePath) noexcept
   {
     std::ifstream file(filePath, std::ios::binary);
     if (!file.is_open())
@@ -378,6 +381,6 @@ namespace Krys::HTML::Tests
       file.seekg(0); // rewind to beginning
     }
 
-    return ParseTreeConstructionTests(file);
+    return ParseHTMLTreeBuilderTests(file);
   }
 }

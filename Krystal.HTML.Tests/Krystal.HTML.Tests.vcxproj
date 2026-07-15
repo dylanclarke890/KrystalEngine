@@ -212,13 +212,13 @@
     <ClCompile Include="tests\Infra\StringAlgorithms.cpp" />
     <ClCompile Include="tests\DOM\Range.cpp" />
     <ClCompile Include="tests\DOM\StaticRange.cpp" />
-    <ClCompile Include="tests\TestDataParsers\HTMLTreeBuilderTestDataParser.cpp" />
+    <ClCompile Include="tests\TestParsers\HTMLTreeBuilderTestParser.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="include\Krystal.HTML.Tests\TestDataParsers\HTMLTreeBuilderTestDataParser.hpp" />
+    <ClInclude Include="include\Krystal.HTML.Tests\DOM\TestElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML.Tests\TestParsers\HTMLTreeBuilderTestParser.hpp" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="include\Krystal.HTML.Tests\ParserTestUtils.hpp" />
-    <ClInclude Include="include\Krystal.HTML.Tests\HTML\TestElement.hpp" />
     <ClCompile Include="tests\DOM\BoundaryPoint.cpp" />
   </ItemGroup>
   <ItemGroup>
