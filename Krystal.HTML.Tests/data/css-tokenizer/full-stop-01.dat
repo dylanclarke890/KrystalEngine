@@ -1,0 +1,15 @@
+#data
+.
+#tokens
+Delim(.)
+
+#data
+.a
+#tokens
+Delim(.)
+Ident(a)
+
+#data
+.1
+#tokens
+Number(0.1)

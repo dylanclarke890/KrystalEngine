@@ -12,8 +12,9 @@ namespace Krys::HTML
     UnexpectedNewlineInString,
     UnexpectedEOFInUrl,
     InvalidCharacterInUrl,
-    UnexpectedEOFInEscapeSequence
+    UnexpectedEOFInEscapeSequence,
+    InvalidEscapeSequence,
   };
 }
 
-KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSParseError, 7uz);
+KRYS_DEFINE_CONTIGUOUS_ENUM_TRAITS(Krys::HTML::CSSParseError, 8uz);

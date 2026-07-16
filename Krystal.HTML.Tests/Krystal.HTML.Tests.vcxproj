@@ -226,6 +226,31 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="data\css-tokenizer\at-keyword-01.dat" />
+    <None Include="data\css-tokenizer\bad-string-01.dat" />
+    <None Include="data\css-tokenizer\bad-url-01.dat" />
+    <None Include="data\css-tokenizer\close-curly-01.dat" />
+    <None Include="data\css-tokenizer\close-paren-01.dat" />
+    <None Include="data\css-tokenizer\close-square-01.dat" />
+    <None Include="data\css-tokenizer\colon-01.dat" />
+    <None Include="data\css-tokenizer\comma-01.dat" />
+    <None Include="data\css-tokenizer\digit-01.dat" />
+    <None Include="data\css-tokenizer\dimension-01.dat" />
+    <None Include="data\css-tokenizer\full-stop-01.dat" />
+    <None Include="data\css-tokenizer\hash-01.dat" />
+    <None Include="data\css-tokenizer\hyphen-minus-01.dat" />
+    <None Include="data\css-tokenizer\ident-01.dat" />
+    <None Include="data\css-tokenizer\ident-like-01.dat" />
+    <None Include="data\css-tokenizer\less-than-01.dat" />
+    <None Include="data\css-tokenizer\number-01.dat" />
+    <None Include="data\css-tokenizer\numeric-01.dat" />
+    <None Include="data\css-tokenizer\open-curly-01.dat" />
+    <None Include="data\css-tokenizer\open-paren-01.dat" />
+    <None Include="data\css-tokenizer\open-square-01.dat" />
+    <None Include="data\css-tokenizer\plus-01.dat" />
+    <None Include="data\css-tokenizer\reverse-solidus-01.dat" />
+    <None Include="data\css-tokenizer\semicolon-01.dat" />
+    <None Include="data\css-tokenizer\string-01.dat" />
+    <None Include="data\css-tokenizer\url-01.dat" />
     <None Include="data\html-tree-builder\adoption-01.dat" />
     <None Include="data\html-tree-builder\adoption-02.dat" />
     <None Include="data\html-tree-builder\blocks-01.dat" />

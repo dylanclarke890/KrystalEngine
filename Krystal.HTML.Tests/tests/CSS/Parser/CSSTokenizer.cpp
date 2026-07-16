@@ -6,7 +6,7 @@ namespace Krys::HTML::Tests
 {
   namespace
   {
-    KRYS_NODISCARD List<CSSToken> ParseCSSTokens(utf32_string&& css) noexcept
+    KRYS_NODISCARD List<CSSToken> ParseCSSTokens(utf32_string &&css) noexcept
     {
       CSSInputStream inputStream(Krys::Move(css));
       CSSTokenizer tokenizer(inputStream);
@@ -63,4 +63,54 @@ namespace Krys::HTML::Tests
   }
 
   CSS_TOKENIZER_TEST_CASE("at-keyword-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("bad-string-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("bad-url-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("close-curly-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("close-paren-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("close-square-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("colon-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("comma-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("digit-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("dimension-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("full-stop-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("hash-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("hyphen-minus-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("ident-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("ident-like-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("less-than-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("number-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("numeric-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("open-curly-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("open-paren-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("open-square-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("plus-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("reverse-solidus-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("semicolon-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("string-01.dat");
+
+  CSS_TOKENIZER_TEST_CASE("url-01.dat");
 }

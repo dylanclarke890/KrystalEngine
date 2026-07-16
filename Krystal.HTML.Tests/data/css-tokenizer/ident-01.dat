@@ -1,0 +1,4 @@
+#data
+foo
+#tokens
+Ident(foo)

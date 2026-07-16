@@ -44,7 +44,7 @@ namespace Krys::HTML
         return EOFMarker;
       }
 
-      return _data[_readPosition];
+      return _data[_readPosition + n];
     }
 
     /// @brief Consumes the next character.

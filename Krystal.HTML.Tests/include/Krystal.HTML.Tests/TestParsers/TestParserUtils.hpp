@@ -1,8 +1,9 @@
 ﻿#pragma once
 
 #include "Krystal.HTML/DOM/Types/DOMString.hpp"
-#include <fstream>
 #include <catch_all.hpp>
+#include <format>
+#include <fstream>
 
 namespace Krys::HTML::Tests
 {
@@ -14,7 +15,7 @@ namespace Krys::HTML::Tests
   template <Number T>
   KRYS_NODISCARD utf8_string ToUTF8(T number) noexcept
   {
-    auto str = std::to_string(number);
+    auto str = std::format("{}", number);
     return utf8_string(str.begin(), str.end());
   }
 
@@ -60,5 +61,5 @@ namespace Krys::HTML::Tests
     INFO(string(reinterpret_cast<const char *>(str.data()), str.size()));
   }
 
-  #define UTF8_INFO(str) INFO(string(reinterpret_cast<const char *>(str.data()), str.size()));
+#define UTF8_INFO(str) INFO(string(reinterpret_cast<const char *>(str.data()), str.size()));
 }

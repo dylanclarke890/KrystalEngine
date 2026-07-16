@@ -1,0 +1,7 @@
+#data
+"foo"
+'foo'
+#tokens
+String(foo)
+Whitespace
+String(foo)

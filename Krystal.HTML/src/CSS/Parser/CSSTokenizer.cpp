@@ -166,12 +166,12 @@ namespace Krys::HTML
 
     if (current == U'{')
     {
-      return CSSToken {CSSTokenType::OpenSquare};
+      return CSSToken {CSSTokenType::OpenCurly};
     }
 
     if (current == U'}')
     {
-      return CSSToken {CSSTokenType::CloseSquare};
+      return CSSToken {CSSTokenType::CloseCurly};
     }
 
     if (IsDigit(current))
@@ -313,6 +313,7 @@ namespace Krys::HTML
       if (current == U'\n')
       {
         ParseError(CSSParseError::UnexpectedNewlineInString);
+        _inputStream.Reconsume(current);
         return CSSToken {CSSTokenType::BadString};
       }
 
@@ -320,7 +321,8 @@ namespace Krys::HTML
       {
         if (next == EOFMarker)
         {
-          continue;
+          ParseError(CSSParseError::UnexpectedEOFInString);
+          return CSSToken {CSSTokenType::BadString};
         }
 
         if (next == U'\n')
@@ -422,10 +424,23 @@ namespace Krys::HTML
         current = _inputStream.NextInputCharacter();
         _inputStream.Consume();
 
+        if (IsWhitespace(_inputStream.NextInputCharacter()))
+        {
+          _inputStream.Consume();
+        }
+
         value <<= 4u;
         value |= Krys::Text::ToASCIIHexValue(current);
         ++digits;
       }
+
+      if (value == 0u || value > 0x10FFFFu || Krys::Text::Unicode::IsSurrogate(value))
+      {
+        ParseError(CSSParseError::InvalidEscapeSequence);
+        return 0xFFFD;
+      }
+
+      return value;
     }
 
     if (current == EOFMarker)
@@ -444,7 +459,7 @@ namespace Krys::HTML
       return false;
     }
 
-    if (IsNewline(second))
+    if (second == EOFMarker || IsNewline(second))
     {
       return false;
     }

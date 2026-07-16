@@ -118,6 +118,7 @@ namespace Krys::HTML::Tests
       {
         output += u8"Dimension(";
         SerializeNumericValue(token, output);
+        output += u8", ";
         output += Krys::Text::ConvertToUTF8(token.Unit());
         output += u8")\n";
         break;
@@ -251,12 +252,6 @@ namespace Krys::HTML::Tests
       {
         section = CSSTokenizerTestSection::Tokens;
         continue;
-      }
-
-      if (line[0] == '#')
-      {
-        section = CSSTokenizerTestSection::None;
-        continue; // Ignore unknown sections
       }
 
       switch (section)
