@@ -162,6 +162,9 @@
     <ClCompile Include="tests\CSS\Parser\CSSTokenizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="tests\HTML\Parser\HTMLTokenizer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML.Tests\ParserTestUtils.hpp">
@@ -180,6 +183,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Krystal.HTML.Tests\TestParsers\TestParserUtils.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Krystal.HTML.Tests\TestParsers\HTMLTokenizerTestParser.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -266,5 +272,6 @@
     <None Include="data\css-tokenizer\semicolon-01.dat" />
     <None Include="data\css-tokenizer\string-01.dat" />
     <None Include="data\css-tokenizer\url-01.dat" />
+    <None Include="data\html-tokenizer\character-reference-01.dat" />
   </ItemGroup>
 </Project>

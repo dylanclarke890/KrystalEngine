@@ -183,6 +183,7 @@
     <ClCompile Include="tests\HTML\Attributes\Reflection.cpp" />
     <ClCompile Include="tests\HTML\MicroParsers\Numbers.cpp" />
     <ClCompile Include="tests\HTML\Parser\HTMLDocumentParser.cpp" />
+    <ClCompile Include="tests\HTML\Parser\HTMLTokenizer.cpp" />
     <ClCompile Include="tests\HTML\Parser\Loader\HTMLEncodingSniffer.cpp" />
     <ClCompile Include="tests\HTML\Parser\Loader\TextResourceDecoder.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\NameValidation.cpp" />
@@ -218,6 +219,7 @@
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML.Tests\DOM\TestElement.hpp" />
     <ClInclude Include="include\Krystal.HTML.Tests\TestParsers\CSSTokenizerTestParser.hpp" />
+    <ClInclude Include="include\Krystal.HTML.Tests\TestParsers\HTMLTokenizerTestParser.hpp" />
     <ClInclude Include="include\Krystal.HTML.Tests\TestParsers\HTMLTreeBuilderTestParser.hpp" />
     <ClInclude Include="include\Krystal.HTML.Tests\TestParsers\TestParserUtils.hpp" />
     <ClInclude Include="pch.h" />
@@ -251,6 +253,7 @@
     <None Include="data\css-tokenizer\semicolon-01.dat" />
     <None Include="data\css-tokenizer\string-01.dat" />
     <None Include="data\css-tokenizer\url-01.dat" />
+    <None Include="data\html-tokenizer\character-reference-01.dat" />
     <None Include="data\html-tree-builder\adoption-01.dat" />
     <None Include="data\html-tree-builder\adoption-02.dat" />
     <None Include="data\html-tree-builder\blocks-01.dat" />

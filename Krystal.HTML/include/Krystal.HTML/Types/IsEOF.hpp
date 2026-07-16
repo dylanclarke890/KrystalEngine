@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.Lib/Types/Numeric.hpp"
 #include "Krystal.Lib/Types/StronglyTypedValue.hpp"
 
 namespace Krys::HTML

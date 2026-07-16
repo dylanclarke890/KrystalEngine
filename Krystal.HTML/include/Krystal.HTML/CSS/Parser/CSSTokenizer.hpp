@@ -10,15 +10,14 @@
 
 namespace Krys::HTML
 {
+  struct CSSTokenizerError
+  {
+    CSSParseError Error;
+    SourceLocation Location {};
+  };
+
   class CSSTokenizer
   {
-  public:
-    struct CSSTokenizerError
-    {
-      CSSParseError Error;
-      SourceLocation Location {};
-    };
-
   private:
     CSSInputStream _inputStream;
     List<CSSTokenizerError> _parseErrors;

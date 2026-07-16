@@ -2,6 +2,7 @@
 
 #include "Krystal.HTML.Tests/TestParsers/TestParserUtils.hpp"
 #include "Krystal.HTML/CSS/Parser/CSSToken.hpp"
+#include "Krystal.HTML/CSS/Parser/CSSTokenizer.hpp"
 #include "Krystal.HTML/CSS/Parser/Enums/CSSParseError.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
@@ -13,7 +14,7 @@ namespace Krys::HTML::Tests
   {
     utf32_string Css;
     utf8_string Tokens;
-    List<CSSParseError> Errors;
+    List<CSSTokenizerError> Errors;
   };
 
   enum class CSSTokenizerTestSection

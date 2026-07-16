@@ -5,7 +5,9 @@
 #include "Krystal.HTML/HTML/Parser/HTMLCharacterReference.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLInputStream.hpp"
 #include "Krystal.HTML/HTML/Parser/HTMLToken.hpp"
+#include "Krystal.HTML/Types/IsEOF.hpp"
 #include "Krystal.Lib/Core/Attributes.hpp"
+#include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Pointers/ReferenceWrapper.hpp"
 #include "Krystal.Lib/Types/Func.hpp"
@@ -73,15 +75,14 @@ namespace Krys::HTML
     }
   };
 
+  struct HTMLTokenizerError
+  {
+    HTMLParseError Error;
+    SourceLocation Location {};
+  };
+
   class HTMLTokenizer
   {
-  public:
-    struct HTMLTokenizerError
-    {
-      HTMLParseError Error;
-      SourceLocation Location {};
-    };
-
   private:
     TokenizerState _state : BitCount<TokenizerState>() {TokenizerState::Data};
     TokenizerState _characterReferenceReturnState : BitCount<TokenizerState>() {TokenizerState::Data};
