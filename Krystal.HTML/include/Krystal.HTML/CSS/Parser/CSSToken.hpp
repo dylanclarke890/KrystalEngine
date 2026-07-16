@@ -36,22 +36,42 @@ namespace Krys::HTML
       _codePoints.assign(codePoints.begin(), codePoints.end());
     }
 
-    void SetHashType(HashTokenType hashType) noexcept
+    KRYS_NODISCARD CSSTokenType Type() const noexcept
+    {
+      return _type;
+    }
+
+    KRYS_NODISCARD HashTokenType HashType() const noexcept
     {
       assert(_type == CSSTokenType::Hash);
+      return _hashType;
+    }
 
+    void HashType(HashTokenType hashType) noexcept
+    {
+      assert(_type == CSSTokenType::Hash);
       _hashType = hashType;
     }
 
-    void SetIdentCodePoints(utf32_stringview codePoints) noexcept
+    KRYS_NODISCARD utf32_stringview IdentCodePoints() const noexcept
     {
       assert(_type == CSSTokenType::Ident || _type == CSSTokenType::Function
-             || _type == CSSTokenType::AtKeyword);
+             || _type == CSSTokenType::AtKeyword || _type == CSSTokenType::Hash
+             || _type == CSSTokenType::String || _type == CSSTokenType::Url);
+
+      return utf32_stringview {_codePoints.data(), _codePoints.size()};
+    }
+
+    void IdentCodePoints(utf32_stringview codePoints) noexcept
+    {
+      assert(_type == CSSTokenType::Ident || _type == CSSTokenType::Function
+             || _type == CSSTokenType::AtKeyword || _type == CSSTokenType::Hash
+             || _type == CSSTokenType::String || _type == CSSTokenType::Url);
 
       _codePoints.assign(codePoints.begin(), codePoints.end());
     }
 
-    void SetNumericValue(ParsedInt64OrDouble value) noexcept
+    void NumericValue(ParsedInt64OrDouble value) noexcept
     {
       assert(_type == CSSTokenType::Number || _type == CSSTokenType::Percentage
              || _type == CSSTokenType::Dimension);
@@ -60,11 +80,32 @@ namespace Krys::HTML
       _numericTokenType = value.Type;
     }
 
-    void SetUnit(utf32_stringview unit) noexcept
+    KRYS_NODISCARD Int64OrDouble NumericValue() const noexcept
+    {
+      assert(_type == CSSTokenType::Number || _type == CSSTokenType::Percentage
+             || _type == CSSTokenType::Dimension);
+
+      return _numericValue;
+    }
+
+    KRYS_NODISCARD NumericTokenType NumericTokenType() const noexcept
+    {
+      assert(_type == CSSTokenType::Number || _type == CSSTokenType::Percentage
+             || _type == CSSTokenType::Dimension);
+
+      return _numericTokenType;
+    }
+
+    void Unit(utf32_stringview unit) noexcept
     {
       assert(_type == CSSTokenType::Dimension);
-
       _codePoints.assign(unit.begin(), unit.end());
+    }
+
+    KRYS_NODISCARD utf32_stringview Unit() const noexcept
+    {
+      assert(_type == CSSTokenType::Dimension);
+      return utf32_stringview {_codePoints.data(), _codePoints.size()};
     }
   };
 }

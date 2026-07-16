@@ -168,6 +168,7 @@
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="catch_main.cpp" />
+    <ClCompile Include="tests\CSS\Parser\CSSTokenizer.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\EventDispatcher.cpp" />
     <ClCompile Include="tests\DOM\Algorithms\MutationAlgorithms.cpp" />
     <ClCompile Include="tests\DOM\Internals\QualifiedNameCache.cpp" />
@@ -216,12 +217,15 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Krystal.HTML.Tests\DOM\TestElement.hpp" />
+    <ClInclude Include="include\Krystal.HTML.Tests\TestParsers\CSSTokenizerTestParser.hpp" />
     <ClInclude Include="include\Krystal.HTML.Tests\TestParsers\HTMLTreeBuilderTestParser.hpp" />
+    <ClInclude Include="include\Krystal.HTML.Tests\TestParsers\TestParserUtils.hpp" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="include\Krystal.HTML.Tests\ParserTestUtils.hpp" />
     <ClCompile Include="tests\DOM\BoundaryPoint.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="data\css-tokenizer\at-keyword-01.dat" />
     <None Include="data\html-tree-builder\adoption-01.dat" />
     <None Include="data\html-tree-builder\adoption-02.dat" />
     <None Include="data\html-tree-builder\blocks-01.dat" />

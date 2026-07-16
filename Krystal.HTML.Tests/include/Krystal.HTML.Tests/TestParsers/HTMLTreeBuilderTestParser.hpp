@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include "Krystal.HTML.Tests/TestParsers/TestParserUtils.hpp"
 #include "Krystal.HTML/DOM/Algorithms/SubtreeRanges.hpp"
 #include "Krystal.HTML/DOM/Attr.hpp"
 #include "Krystal.HTML/DOM/Comment.hpp"
@@ -8,15 +9,14 @@
 #include "Krystal.HTML/DOM/DocumentType.hpp"
 #include "Krystal.HTML/DOM/Element.hpp"
 #include "Krystal.HTML/DOM/Text.hpp"
+#include "Krystal.HTML/DOM/Types/DOMString.hpp"
 #include "Krystal.HTML/HTML/Enums/ParserScriptingMode.hpp"
 #include "Krystal.HTML/HTML/HTMLTemplateElement.hpp"
-#include "Krystal.HTML/DOM/Types/DOMString.hpp"
 #include "Krystal.Lib/Core/Move.hpp"
 #include "Krystal.Lib/Types/List.hpp"
 #include "Krystal.Lib/Types/Maybe.hpp"
 #include "Krystal.Lib/Types/Pair.hpp"
 #include "Krystal.Text/StringConversion.hpp"
-#include <fstream>
 #include <ranges>
 #include <sstream>
 #include <string>
@@ -39,33 +39,6 @@ namespace Krys::HTML::Tests
     FragmentContext,
     ExpectedOutput
   };
-
-  namespace
-  {
-    DOMString ToUTF8(const string &s) noexcept
-    {
-      return DOMString(reinterpret_cast<const char8_t *>(s.data()), s.size());
-    };
-
-    template <typename T>
-    void NormaliseData(T &str) noexcept
-    {
-      if (!str.empty() && str.back() == U'\n')
-      {
-        str.pop_back();
-      }
-    }
-
-    void Indent(DOMString &output, size_t depth) noexcept
-    {
-      output += u8"| ";
-
-      for (size_t i = 0uz; i < depth; ++i)
-      {
-        output += u8"  ";
-      }
-    }
-  }
 
   inline void SerializeNode(Node &node, DOMString &output, size_t depth) noexcept
   {
@@ -199,7 +172,7 @@ namespace Krys::HTML::Tests
     }
   }
 
-  inline DOMString SerializeDocument(Document &document) noexcept
+  KRYS_NODISCARD inline DOMString SerializeDocument(Document &document) noexcept
   {
     DOMString output = u8"#document\n";
 
@@ -212,7 +185,7 @@ namespace Krys::HTML::Tests
     return output;
   }
 
-  inline List<HTMLTreeBuilderTest> ParseHTMLTreeBuilderTests(std::istream &stream) noexcept
+  KRYS_NODISCARD inline List<HTMLTreeBuilderTest> ParseHTMLTreeBuilderTests(std::istream &stream) noexcept
   {
     List<HTMLTreeBuilderTest> tests;
 
@@ -358,7 +331,8 @@ namespace Krys::HTML::Tests
     return tests;
   }
 
-  inline Maybe<List<HTMLTreeBuilderTest>> ParseHTMLTreeBuilderTests(const string &filePath) noexcept
+  KRYS_NODISCARD inline Maybe<List<HTMLTreeBuilderTest>>
+    ParseHTMLTreeBuilderTests(const string &filePath) noexcept
   {
     std::ifstream file(filePath, std::ios::binary);
     if (!file.is_open())
@@ -366,21 +340,7 @@ namespace Krys::HTML::Tests
       return {};
     }
 
-    char bom[3];
-
-    file.read(bom, 3);
-
-    if (file.gcount() == 3 && static_cast<unsigned char>(bom[0]) == 0xEF
-        && static_cast<unsigned char>(bom[1]) == 0xBB && static_cast<unsigned char>(bom[2]) == 0xBF)
-    {
-      // BOM consumed; continue reading
-    }
-    else
-    {
-      file.clear();  // clear eof/fail if we hit it
-      file.seekg(0); // rewind to beginning
-    }
-
+    SkipUTF8FileBOM(file);
     return ParseHTMLTreeBuilderTests(file);
   }
 }

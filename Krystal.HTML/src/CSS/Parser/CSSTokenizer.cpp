@@ -34,10 +34,10 @@ namespace Krys::HTML
 
         if (WouldStartIdentifier(current, next, _inputStream.Peek(1uz)))
         {
-          token.SetHashType(HashTokenType::Id);
+          token.HashType(HashTokenType::Id);
         }
 
-        token.SetIdentCodePoints(ConsumeIdentSequence());
+        token.IdentCodePoints(ConsumeIdentSequence());
         return token;
       }
 
@@ -135,7 +135,7 @@ namespace Krys::HTML
       if (WouldStartIdentifier(next, _inputStream.Peek(1uz), _inputStream.Peek(2uz)))
       {
         auto token = CSSToken {CSSTokenType::AtKeyword};
-        token.SetIdentCodePoints(ConsumeIdentSequence());
+        token.IdentCodePoints(ConsumeIdentSequence());
         return token;
       }
 
@@ -200,12 +200,12 @@ namespace Krys::HTML
     {
       if (_inputStream.NextInputCharacter() != U'/')
       {
-        break;
+        return;
       }
 
       if (_inputStream.Peek(1uz) != U'*')
       {
-        break;
+        return;
       }
       _inputStream.Consume(2uz);
 
@@ -236,8 +236,8 @@ namespace Krys::HTML
                              _inputStream.Peek(2uz)))
     {
       auto token = CSSToken {CSSTokenType::Dimension};
-      token.SetUnit(ConsumeIdentSequence());
-      token.SetNumericValue(number);
+      token.Unit(ConsumeIdentSequence());
+      token.NumericValue(number);
 
       return token;
     }
@@ -247,13 +247,13 @@ namespace Krys::HTML
       _inputStream.Consume();
 
       auto token = CSSToken {CSSTokenType::Percentage};
-      token.SetNumericValue(number);
+      token.NumericValue(number);
 
       return token;
     }
 
     auto token = CSSToken {CSSTokenType::Number};
-    token.SetNumericValue(number);
+    token.NumericValue(number);
 
     return token;
   }
