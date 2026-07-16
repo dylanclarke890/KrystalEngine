@@ -59,4 +59,6 @@ namespace Krys::HTML::Tests
   {
     INFO(string(reinterpret_cast<const char *>(str.data()), str.size()));
   }
+
+  #define UTF8_INFO(str) INFO(string(reinterpret_cast<const char *>(str.data()), str.size()));
 }

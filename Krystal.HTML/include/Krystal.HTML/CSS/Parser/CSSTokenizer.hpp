@@ -114,7 +114,7 @@ namespace Krys::HTML
     /// @see https://www.w3.org/TR/css-syntax-3/#non-ascii-code-point
     KRYS_NODISCARD static bool IsNonASCIICodePoint(char32 codePoint) noexcept
     {
-      return codePoint >= 0x80;
+      return codePoint >= 0x80 && codePoint != EOFMarker;
     }
 
     /// @see https://www.w3.org/TR/css-syntax-3/#ident-start-code-point

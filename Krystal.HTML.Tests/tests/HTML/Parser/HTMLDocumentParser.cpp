@@ -51,20 +51,21 @@ namespace Krys::HTML::Tests
         output = SerializeDocument(*document);
       }
 
-      if (output != test.Expected)
-      {
-        UTF8Info(u8"--- TEST " + ToUTF8(number + 1uz) + u8" OF " + ToUTF8(total) + u8" ---\n"
-                 + Krys::Text::ConvertToUTF8(utf32_stringview(test.Input)));
+      utf8_string str = u8"--- TEST " + ToUTF8(number + 1uz) + u8" OF " + ToUTF8(total) + u8" ---\n"
+                        + Krys::Text::ConvertToUTF8(utf32_stringview(test.Input));
+      UTF8_INFO(str);
 
-        UTF8Info(u8"--- FRAGMENT CONTEXT ---\n#document-fragment\n"
-                 + test.FragmentContext.value_or(u8"none"));
+      str = u8"--- FRAGMENT CONTEXT ---\n#document-fragment\n" + test.FragmentContext.value_or(u8"none");
+      UTF8_INFO(str);
 
-        UTF8Info(u8"--- EXPECTED OUTPUT ---\n" + test.Expected);
+      str = u8"--- EXPECTED OUTPUT ---\n" + test.Expected;
+      UTF8_INFO(str);
 
-        UTF8Info(u8"\n--- ACTUAL OUTPUT ---\n" + output);
+      str = u8"--- ACTUAL OUTPUT ---\n" + output;
+      UTF8_INFO(str);
 
-        CHECK(false);
-      }
+      bool equal = output == test.Expected;
+      CHECK(equal);
     }
 
     void DoHTMLTreeBuilderTests(const List<HTMLTreeBuilderTest> &tests) noexcept

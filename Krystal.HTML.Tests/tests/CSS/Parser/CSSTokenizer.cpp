@@ -6,12 +6,12 @@ namespace Krys::HTML::Tests
 {
   namespace
   {
-    void DoCSSTokenizerTest(const CSSTokenizerTest &test, size_t number, size_t total) noexcept
+    KRYS_NODISCARD List<CSSToken> ParseCSSTokens(utf32_string&& css) noexcept
     {
-      CSSInputStream inputStream(utf32_string(test.Css));
+      CSSInputStream inputStream(Krys::Move(css));
       CSSTokenizer tokenizer(inputStream);
 
-      DOMString tokens;
+      List<CSSToken> tokens;
       while (true)
       {
         auto token = tokenizer.ConsumeToken();
@@ -20,20 +20,29 @@ namespace Krys::HTML::Tests
           break;
         }
 
-        SerializeCSSToken(*token, tokens);
+        tokens.push_back(*token);
       }
 
-      if (tokens != test.Tokens)
-      {
-        UTF8Info(u8"--- TEST " + ToUTF8(number + 1uz) + u8" OF " + ToUTF8(total) + u8" ---\n"
-                 + Krys::Text::ConvertToUTF8(utf32_stringview(test.Css)));
+      return tokens;
+    }
 
-        UTF8Info(u8"--- EXPECTED TOKENS ---\n" + test.Tokens);
+    void DoCSSTokenizerTest(const CSSTokenizerTest &test, size_t number, size_t total) noexcept
+    {
+      auto tokens = ParseCSSTokens(utf32_string(test.Css));
+      auto actual = SerializeCSSTokens(tokens);
 
-        UTF8Info(u8"\n--- ACTUAL TOKENS ---\n" + tokens);
+      utf8_string str = u8"--- TEST " + ToUTF8(number + 1uz) + u8" OF " + ToUTF8(total) + u8" ---\n"
+                        + Krys::Text::ConvertToUTF8(utf32_stringview(test.Css));
+      UTF8_INFO(str);
 
-        CHECK(false);
-      }
+      str = u8"--- EXPECTED TOKENS ---\n" + test.Tokens;
+      UTF8_INFO(str);
+
+      str = u8"\n--- ACTUAL TOKENS ---\n" + actual;
+      UTF8_INFO(str);
+
+      bool equal = actual == test.Tokens;
+      CHECK(equal);
     }
 
     void DoCSSTokenizerTests(const List<CSSTokenizerTest> &tests) noexcept

@@ -185,6 +185,19 @@ namespace Krys::HTML::Tests
     }
   }
 
+  KRYS_NODISCARD inline DOMString SerializeCSSTokens(List<CSSToken> &tokens) noexcept
+  {
+    DOMString output;
+
+    for (auto &token : tokens)
+    {
+      SerializeCSSToken(token, output);
+    }
+
+    NormaliseData(output);
+    return output;
+  }
+
   KRYS_NODISCARD inline List<CSSTokenizerTest> ParseCSSTokenizerTests(std::istream &stream) noexcept
   {
     List<CSSTokenizerTest> tests;
@@ -217,7 +230,7 @@ namespace Krys::HTML::Tests
 
       if (line == "#data")
       {
-        NormaliseData(css);
+        NormaliseData(tokens);
 
         if (!css.empty() && !tokens.empty())
         {

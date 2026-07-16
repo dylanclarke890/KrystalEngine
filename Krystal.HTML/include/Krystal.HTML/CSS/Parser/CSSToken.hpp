@@ -57,7 +57,7 @@ namespace Krys::HTML
     {
       assert(_type == CSSTokenType::Ident || _type == CSSTokenType::Function
              || _type == CSSTokenType::AtKeyword || _type == CSSTokenType::Hash
-             || _type == CSSTokenType::String || _type == CSSTokenType::Url);
+             || _type == CSSTokenType::String || _type == CSSTokenType::Url || _type == CSSTokenType::Delim);
 
       return utf32_stringview {_codePoints.data(), _codePoints.size()};
     }
@@ -66,7 +66,7 @@ namespace Krys::HTML
     {
       assert(_type == CSSTokenType::Ident || _type == CSSTokenType::Function
              || _type == CSSTokenType::AtKeyword || _type == CSSTokenType::Hash
-             || _type == CSSTokenType::String || _type == CSSTokenType::Url);
+             || _type == CSSTokenType::String || _type == CSSTokenType::Url || _type == CSSTokenType::Delim);
 
       _codePoints.assign(codePoints.begin(), codePoints.end());
     }
