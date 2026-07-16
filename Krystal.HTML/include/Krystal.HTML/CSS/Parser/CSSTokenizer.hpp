@@ -6,6 +6,7 @@
 #include "Krystal.HTML/CSS/Parser/Types/ParsedInt64OrDouble.hpp"
 #include "Krystal.Lib/Pointers/RawPtr.hpp"
 #include "Krystal.Lib/Types/List.hpp"
+#include "Krystal.Lib/Types/Maybe.hpp"
 
 namespace Krys::HTML
 {
@@ -26,7 +27,7 @@ namespace Krys::HTML
     explicit CSSTokenizer(CSSInputStream &inputStream) noexcept;
 
     /// @see https://www.w3.org/TR/css-syntax-3/#consume-token
-    KRYS_NODISCARD CSSToken ConsumeToken() noexcept;
+    KRYS_NODISCARD Maybe<CSSToken> ConsumeToken() noexcept;
 
     KRYS_NODISCARD const List<CSSTokenizerError> ParseErrors() noexcept
     {

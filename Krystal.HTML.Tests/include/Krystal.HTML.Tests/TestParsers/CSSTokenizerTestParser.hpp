@@ -182,11 +182,6 @@ namespace Krys::HTML::Tests
         output += u8"CloseCurly\n";
         break;
       }
-      case CSSTokenType::EndOfFile:
-      {
-        output += u8"EndOfFile\n";
-        break;
-      }
     }
   }
 

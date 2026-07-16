@@ -15,12 +15,12 @@ namespace Krys::HTML::Tests
       while (true)
       {
         auto token = tokenizer.ConsumeToken();
-        if (token.Type() == CSSTokenType::EndOfFile)
+        if (!token.has_value())
         {
           break;
         }
 
-        SerializeCSSToken(token, tokens);
+        SerializeCSSToken(*token, tokens);
       }
 
       if (tokens != test.Tokens)

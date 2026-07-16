@@ -31,7 +31,6 @@ namespace Krys::HTML
     CloseParen,
     OpenCurly,
     CloseCurly,
-    EndOfFile
   };
 
   enum class HashTokenType : uint8

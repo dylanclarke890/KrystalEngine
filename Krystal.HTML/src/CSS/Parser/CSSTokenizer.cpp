@@ -7,7 +7,7 @@ namespace Krys::HTML
   {
   }
 
-  CSSToken CSSTokenizer::ConsumeToken() noexcept
+  Maybe<CSSToken> CSSTokenizer::ConsumeToken() noexcept
   {
     ConsumeComments();
 
@@ -188,7 +188,7 @@ namespace Krys::HTML
 
     if (current == EOFMarker)
     {
-      return CSSToken {CSSTokenType::EndOfFile};
+      return Null;
     }
 
     return CSSToken {CSSTokenType::Delim, current};
