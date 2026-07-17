@@ -1,4 +1,6 @@
-﻿#data
+#name
+ignores whitespace and stays in the same state when parsing whitespace
+#data
    
 
 #initial-state
@@ -7,18 +9,24 @@ BeforeAttributeValue
 BeforeAttributeValue
 #tokens
 
+#name
+switches to AttributeValueDoubleQuoted when parsing QuotationMark
 #data
 <div a="
 #expected-state
 AttributeValueDoubleQuoted
 #tokens
 
+#name
+switches to AttributeValueSingleQuoted when parsing Apostrophe
 #data
 <div a='
 #expected-state
 AttributeValueSingleQuoted
 #tokens
 
+#name
+emits current tag token and switches to Data with parser error when parsing GreaterThanSign
 #data
 <div a=>
 #tokens
@@ -26,12 +34,16 @@ StartTag(div, a="", SelfClosing=false)
 #errors
 1:8 MissingAttributeValue
 
+#name
+switches to AttributeValueUnquoted when parsing any other character
 #data
 <div a=value
 #expected-state
 AttributeValueUnquoted
 #tokens
 
+#name
+emits EOF token if EOF is reached
 #data
 <div a=
 #append-eof

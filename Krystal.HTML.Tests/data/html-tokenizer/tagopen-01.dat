@@ -1,4 +1,6 @@
-﻿#data
+#name
+Switches to MarkupDeclarationOpen after parsing ExclamationMark
+#data
 !
 #initial-state
 TagOpen
@@ -6,6 +8,8 @@ TagOpen
 MarkupDeclarationOpen
 #tokens
 
+#name
+Switches to EndTagOpen after parsing Solidus
 #data
 /
 #initial-state
@@ -14,6 +18,8 @@ TagOpen
 EndTagOpen
 #tokens
 
+#name
+Switches to TagName after parsing valid tag name start
 #data
 div
 #initial-state
@@ -22,6 +28,8 @@ TagOpen
 TagName
 #tokens
 
+#name
+Switches to TagName after parsing valid tag name start, mixed case
 #data
 DiV
 #initial-state
@@ -30,6 +38,8 @@ TagOpen
 TagName
 #tokens
 
+#name
+Switches to BogusComment after parsing QuestionMark
 #data
 ?
 #initial-state
@@ -39,3 +49,14 @@ BogusComment
 #tokens
 #errors
 1:1 UnexpectedQuestionMarkInsteadOfTagName
+
+#name
+Emits LessThanSign if first character invalid
+#data
+*
+#initial-state
+TagOpen
+#tokens
+Character(<*)
+#errors
+1:1 InvalidFirstCharacterOfTagName

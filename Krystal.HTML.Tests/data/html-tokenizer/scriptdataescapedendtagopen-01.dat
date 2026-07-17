@@ -1,4 +1,6 @@
-﻿#data
+#name
+Switches to ScriptDataEscapedEndTagName after parsing alpha
+#data
 a
 #initial-state
 ScriptDataEscapedEndTagOpen
@@ -6,6 +8,8 @@ ScriptDataEscapedEndTagOpen
 ScriptDataEscapedEndTagName
 #tokens
 
+#name
+emits less than sign and solidus after parsing non alpha
 #data
 ©
 #initial-state
@@ -15,6 +19,8 @@ ScriptDataEscaped
 #tokens
 Character(</©)
 
+#name
+emits less than sign and solidus if EOF reached
 #data
 </
 #initial-state

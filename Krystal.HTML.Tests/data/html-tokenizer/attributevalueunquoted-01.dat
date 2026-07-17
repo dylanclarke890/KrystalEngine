@@ -1,8 +1,12 @@
-﻿#data
+﻿#name
+Replaces null character with U+FFFD
+#data
 <div a=value>
 #tokens
 StartTag(div, a="value", SelfClosing=false)
 
+#name
+treats QuotationMark as anything else but with parse error
 #data
 <div a=value
 >
@@ -11,6 +15,8 @@ StartTag(div, a="value)
 #errors
 1:13 UnexpectedNullCharacter
 
+#name
+treats Apostrophe as anything else but with parse error
 #data
 <div a=val"ue>
 #tokens
@@ -18,6 +24,8 @@ StartTag(div, a="val\"ue", SelfClosing=false)
 #errors
 1:11 UnexpectedCharacterInUnquotedAttributeValue
 
+#name
+treats LessThanSign as anything else but with parse error
 #data
 <div a=val'ue>
 #tokens
@@ -25,6 +33,8 @@ StartTag(div, a="val'ue", SelfClosing=false)
 #errors
 1:11 UnexpectedCharacterInUnquotedAttributeValue
 
+#name
+treats EqualsSign as anything else but with parse error
 #data
 <div a=val<ue>
 #tokens
@@ -32,6 +42,8 @@ StartTag(div, a="val<ue", SelfClosing=false)
 #errors
 1:11 UnexpectedCharacterInUnquotedAttributeValue
 
+#name
+treats GraveAccent as anything else but with parse error
 #data
 <div a=val=ue>
 #tokens
@@ -39,6 +51,8 @@ StartTag(div, a="val=ue", SelfClosing=false)
 #errors
 1:11 UnexpectedCharacterInUnquotedAttributeValue
 
+#name
+switches to BeforeAttributeName when parsing whitespace
 #data
 <div a=val\ue>
 #tokens
@@ -46,18 +60,24 @@ StartTag(div, a="val\ue", SelfClosing=false)
 #errors
 1:11 UnexpectedCharacterInUnquotedAttributeValue
 
+#name
+switches to CharacterReference when parsing Ampersand
 #data
 <div a=value 
 #expected-state
 BeforeAttributeName
 #tokens
 
+#name
+Emits EOF instead of tag if EOF reached
 #data
 <div a=value&
 #expected-state
 CharacterReference
 #tokens
 
+#name
+Batches characters and preserves content up to EOF
 #data
 <div a=value
 #append-eof

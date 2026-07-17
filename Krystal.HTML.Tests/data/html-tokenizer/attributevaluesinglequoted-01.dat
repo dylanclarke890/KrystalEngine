@@ -1,15 +1,21 @@
-ï»¿#data
+#name
+switches to AfterAttributeValueQuoted when parsing Apostrophe
+#data
 <div a='value'
 #expected-state
 AfterAttributeValueQuoted
 #tokens
 
+#name
+switches to CharacterReference when parsing Ampersand
 #data
 <div a='value&
 #expected-state
 CharacterReference
 #tokens
 
+#name
+Replaces null character with U+FFFD
 #data
 <div a='value
 value'>
@@ -18,6 +24,8 @@ StartTag(div, a="value)
 #errors
 1:14 UnexpectedNullCharacter
 
+#name
+Emits EOF instead of tag if EOF reached
 #data
 <div a='value
 #append-eof
@@ -26,7 +34,9 @@ EndOfFile
 #errors
 1:14 EOFInTag
 
+#name
+Batches characters and preserves non-ASCII content
 #data
-<div a='valÃºe'>
+<div a='valúe'>
 #tokens
-StartTag(div, a="valÃºe", SelfClosing=false)
+StartTag(div, a="valúe", SelfClosing=false)

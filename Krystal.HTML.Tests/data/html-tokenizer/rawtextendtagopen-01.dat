@@ -1,4 +1,6 @@
-﻿#data
+#name
+Switches to RAWTEXTEndTagName after parsing valid tag name start
+#data
 a
 #initial-state
 RAWTEXTEndTagOpen
@@ -6,6 +8,8 @@ RAWTEXTEndTagOpen
 RAWTEXTEndTagName
 #tokens
 
+#name
+emits less than sign and solidus after parsing invalid tag name start
 #data
 ©
 #initial-state
@@ -15,6 +19,8 @@ RAWTEXT
 #tokens
 Character(</©)
 
+#name
+emits less than sign and solidus if EOF reached
 #data
 </
 #initial-state

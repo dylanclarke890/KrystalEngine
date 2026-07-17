@@ -1,8 +1,12 @@
-﻿#data
+#name
+switches to Data and emits the current tag as self-closing when parsing GreaterThanSign
+#data
 <div />
 #tokens
 StartTag(div, SelfClosing=true)
 
+#name
+Emits EOF instead of tag if EOF reached
 #data
 <div /
 #append-eof

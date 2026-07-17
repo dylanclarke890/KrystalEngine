@@ -1,4 +1,6 @@
-﻿#data
+#name
+Switches to ScriptDataEndTagOpen after parsing solidus
+#data
 /
 #initial-state
 ScriptDataLessThanSign
@@ -6,6 +8,8 @@ ScriptDataLessThanSign
 ScriptDataEndTagOpen
 #tokens
 
+#name
+emits LessThanSign after parsing non solidus
 #data
 ©
 #initial-state
@@ -15,6 +19,8 @@ ScriptData
 #tokens
 Character(<©)
 
+#name
+Emits LessThanSign if EOF reached
 #data
 <
 #initial-state
@@ -24,6 +30,8 @@ ScriptData
 Character(<)
 EndOfFile
 
+#name
+Switches to ScriptDataEscapeStart after parsing ExclamationMark and emits LessThanSign and ExclamationMark
 #data
 !
 #initial-state

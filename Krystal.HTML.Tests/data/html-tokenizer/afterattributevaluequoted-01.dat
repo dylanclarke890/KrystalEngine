@@ -1,8 +1,12 @@
-﻿#data
+#name
+switches to Data and emits the current tag when parsing GreaterThanSign
+#data
 <div a="value">
 #tokens
 StartTag(div, a="value", SelfClosing=false)
 
+#name
+ignores whitespace and switches to BeforeAttributeName when parsing whitespace
 #data
 <div a="value"   
 
@@ -10,12 +14,16 @@ StartTag(div, a="value", SelfClosing=false)
 BeforeAttributeName
 #tokens
 
+#name
+switches to SelfClosingStartTag when parsing Solidus
 #data
 <div a="value"/
 #expected-state
 SelfClosingStartTag
 #tokens
 
+#name
+Emits EOF instead of tag if EOF reached
 #data
 <div a="value"
 #append-eof
@@ -24,6 +32,8 @@ EndOfFile
 #errors
 1:15 EOFInTag
 
+#name
+Treats anything else as missing whitespace and switches to AttributeName
 #data
 <div a="value"b
 #expected-state

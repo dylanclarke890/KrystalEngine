@@ -1,21 +1,29 @@
-﻿#data
+#name
+switches to CommentStart when parsing DoubleHyphen
+#data
 <!--
 #expected-state
 CommentStart
 #tokens
 
+#name
+switches to DOCTYPE when parsing 'DOCTYPE'
 #data
 <!DOCTYPE
 #expected-state
 DOCTYPE
 #tokens
 
+#name
+switches to DOCTYPE when parsing 'DOCTYPE', mixed case
 #data
 <!DoCtYpe
 #expected-state
 DOCTYPE
 #tokens
 
+#name
+switches to BogusComment with parser error when parsing anything else
 #data
 <!comment
 #expected-state
@@ -24,6 +32,8 @@ BogusComment
 #errors
 1:3 IncorrectlyOpenedComment
 
+#name
+Switches to CDATASection when parsing '[CDATA[' and CDATA is allowed
 #data
 <![CDATA[
 #cdata-allowed
@@ -31,6 +41,8 @@ BogusComment
 CDATASection
 #tokens
 
+#name
+Switches to BogusComment when parsing '[CDATA[' and CDATA is not allowed
 #data
 <![CDATA[
 #expected-state

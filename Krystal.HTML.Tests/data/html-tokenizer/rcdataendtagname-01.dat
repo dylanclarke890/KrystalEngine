@@ -1,4 +1,6 @@
-﻿#data
+#name
+Emits less than sign, solidus, and characters when tag name doesn't match
+#data
 span©
 #initial-state
 RCDATAEndTagName
@@ -7,6 +9,8 @@ RCDATA
 #tokens
 Character(</span©)
 
+#name
+Emits less than sign, solidus, and characters when EOF reached
 #data
 di
 #initial-state
@@ -16,6 +20,8 @@ RCDATAEndTagName
 Character(</di)
 EndOfFile
 
+#name
+Emits less than sign, solidus, and characters when invalid tag name character encountered
 #data
 d!v>
 #initial-state

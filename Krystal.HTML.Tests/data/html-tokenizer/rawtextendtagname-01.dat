@@ -1,4 +1,6 @@
-﻿#data
+#name
+Emits end tag characters when tag name doesn't match
+#data
 </span©
 #initial-state
 Data

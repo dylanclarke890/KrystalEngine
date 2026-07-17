@@ -1,4 +1,6 @@
-﻿#data
+#name
+Switches to RCDATAEndTagName after parsing alpha
+#data
 a
 #initial-state
 RCDATAEndTagOpen
@@ -6,6 +8,8 @@ RCDATAEndTagOpen
 RCDATAEndTagName
 #tokens
 
+#name
+emits less than sign and solidus after parsing non alpha
 #data
 ©
 #initial-state
@@ -15,6 +19,8 @@ RCDATA
 #tokens
 Character(</©)
 
+#name
+emits less than sign and solidus if EOF reached
 #data
 </
 #initial-state

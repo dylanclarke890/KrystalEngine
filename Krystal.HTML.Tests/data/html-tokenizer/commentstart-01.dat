@@ -1,9 +1,13 @@
-﻿#data
+#name
+switches to CommentStartDash when parsing HyphenMinus
+#data
 <!---
 #expected-state
 CommentStartDash
 #tokens
 
+#name
+switches to Data and emits comment with parser error when parsing GreaterThanSign
 #data
 <!-->
 #tokens
@@ -11,6 +15,8 @@ Comment()
 #errors
 1:5 AbruptClosingOfEmptyComment
 
+#name
+reconsumes in Comment for anything else
 #data
 <!--c
 #expected-state

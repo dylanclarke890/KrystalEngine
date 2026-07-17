@@ -1,4 +1,6 @@
-﻿#data
+#name
+Switches to RCDATAEndTagOpen after parsing solidus
+#data
 /
 #initial-state
 RCDATALessThanSign
@@ -6,6 +8,8 @@ RCDATALessThanSign
 RCDATAEndTagOpen
 #tokens
 
+#name
+emits less than sign after parsing non solidus
 #data
 ©
 #initial-state
@@ -15,6 +19,8 @@ RCDATA
 #tokens
 Character(<©)
 
+#name
+emits less than sign if EOF reached
 #data
 <
 #initial-state
