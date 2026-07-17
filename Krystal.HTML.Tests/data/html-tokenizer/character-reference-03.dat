@@ -1,0 +1,92 @@
+﻿#name
+happy path
+#data
+&#8482;
+#tokens
+Character(™)
+
+#name
+lookup table
+#data
+&#128;
+#tokens
+Character(€)
+
+#name
+leading zeros
+#data
+&#00008482;
+#tokens
+Character(™)
+
+#name
+missing semicolon
+#data
+&#00008482;
+#append-eof
+#tokens
+Character(™)
+EndOfFile
+#errors
+1:7 MissingSemicolonAfterCharacterReference
+
+#name
+no numbers provided after #
+#data
+&#;
+#tokens
+Character(&#;)
+#errors
+1:3 AbsenceOfDigitsInNumericCharacterReference
+
+#name
+mixed with non-digit characters
+#data
+&#123abc;
+#tokens
+Character({abc;)
+#errors
+1:6 MissingSemicolonAfterCharacterReference
+
+#name
+stops at semicolon
+#data
+&#65;BC
+#tokens
+Character(ABC)
+
+#name
+stops at non-digit character
+#data
+&#65BC;
+#tokens
+Character(ABC;)
+#errors
+1:5 MissingSemicolonAfterCharacterReference
+
+#name
+null character reference
+#data
+&#0;
+#tokens
+Character(�)
+#errors
+1:4 NullCharacterReference
+
+#name
+character reference outside unicode range
+#data
+&#1114112;
+#tokens
+Character(�)
+#errors
+1:10 CharacterReferenceOutsideUnicodeRange
+
+#name
+surrogate
+#data
+&#55296;
+#tokens
+Character(�)
+#errors
+1:8 SurrogateCharacterReference

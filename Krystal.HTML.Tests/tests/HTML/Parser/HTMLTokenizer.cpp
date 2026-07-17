@@ -33,7 +33,10 @@ namespace Krys::HTML::Tests
       NormaliseData(tokens);
 
       utf8_string str = u8"--- TEST " + ToUTF8(number + 1uz) + u8" OF " + ToUTF8(total) + u8" ---\n"
-                        + Krys::Text::ConvertToUTF8(utf32_stringview(test.Html));
+                        + ToUTF8(test.Name.empty() ? "Unnamed Test" : test.Name);
+      UTF8_INFO(str);
+
+      str = u8"\n--- INPUT ---\n" + Krys::Text::ConvertToUTF8(utf32_stringview(test.Html));
       UTF8_INFO(str);
 
       str = u8"--- EXPECTED TOKENS ---\n" + test.Tokens;
@@ -87,4 +90,50 @@ namespace Krys::HTML::Tests
   }
 
   HTML_TOKENIZER_TEST_CASE("character-reference-01.dat");
+  HTML_TOKENIZER_TEST_CASE("character-reference-02.dat");
+  HTML_TOKENIZER_TEST_CASE("character-reference-03.dat");
+  HTML_TOKENIZER_TEST_CASE("character-reference-04.dat");
+
+  HTML_TOKENIZER_TEST_CASE("data-01.dat");
+
+  // HTML_TOKENIZER_TEST_CASE("rcdata-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("rawtext-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("scriptdata-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("plaintext-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("tagopen-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("endtagopen-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("tagname-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("rcdatalessthan-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("rcdataendtagopen-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("rcdataendtagname-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("rawtextlessthan-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("rawtextendtagopen-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("rawtextendtagname-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("scriptdatalessthan-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("scriptdataendtagopen-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("scriptdataescapestart-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("scriptdataescaped-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("scriptdataescapeddash-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("scriptdataescapeddashdash-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("scriptdataescapedlessthan-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("scriptdataescapedendtagopen-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("scriptdatadoubleescapestart-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("scriptdatadoubleescaped-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("scriptdatadoubleescapeddash-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("scriptdatadoubleescapeddashdash-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("scriptdatadoubleescapedlessthan-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("scriptdatadoubleescapeend-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("beforeattributename-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("attributename-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("afterattributename-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("beforeattributevalue-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("attributevaluedoublequoted-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("attributevaluesinglequoted-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("attributevalueunquoted-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("afterattributevaluequoted-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("selfclosingstartag-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("boguscomment-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("markupdeclarationopen-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("commentstart-01.dat");
+  // HTML_TOKENIZER_TEST_CASE("comment-01.dat");
 }

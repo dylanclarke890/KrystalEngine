@@ -1,0 +1,27 @@
+﻿#data
+a
+#initial-state
+ScriptDataEscapedEndTagOpen
+#expected-state
+ScriptDataEscapedEndTagName
+#tokens
+
+#data
+©
+#initial-state
+ScriptDataEscapedEndTagOpen
+#expected-state
+ScriptDataEscaped
+#tokens
+Character(</©)
+
+#data
+</
+#initial-state
+ScriptDataEscaped
+#append-eof
+#tokens
+Character(</)
+EndOfFile
+#errors
+1:3 EOFInScriptHTMLCommentLikeText

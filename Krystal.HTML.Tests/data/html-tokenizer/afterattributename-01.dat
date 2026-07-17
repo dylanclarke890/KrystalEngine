@@ -1,0 +1,43 @@
+﻿#data
+   
+
+#initial-state
+AfterAttributeName
+#expected-state
+AfterAttributeName
+#tokens
+
+#data
+/
+#initial-state
+AfterAttributeName
+#expected-state
+SelfClosingStartTag
+#tokens
+
+#data
+<a b=
+#initial-state
+Data
+#expected-state
+BeforeAttributeValue
+#tokens
+
+#data
+<div b>
+#tokens
+StartTag(div, b="", SelfClosing=false)
+
+#data
+<div b 
+#append-eof
+#tokens
+EndOfFile
+#errors
+1:8 EOFInTag
+
+#data
+<div a b
+#expected-state
+AttributeName
+#tokens

@@ -1,0 +1,12 @@
+﻿#data
+<div />
+#tokens
+StartTag(div, SelfClosing=true)
+
+#data
+<div /
+#append-eof
+#tokens
+EndOfFile
+#errors
+1:7 EOFInTag

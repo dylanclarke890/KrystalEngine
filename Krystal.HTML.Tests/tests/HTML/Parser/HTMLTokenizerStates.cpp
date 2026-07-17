@@ -21,113 +21,7 @@ namespace Krys::Tests
   REQUIRE(Compare(token->Data(), expected));                                                                 \
   REQUIRE(errors.size() == expectedErrorCount);
 
-#pragma region CharacterReference
-
-  TEST("CharacterReference", "Non-character reference",
-       (UnitTest {.Input = U"&_", .Output = {CreateCharacterToken(u8"&_")}}))
-
-#pragma region NamedCharacterReference
-
-  TEST("NamedCharacterReference", "Basic named character reference",
-       (UnitTest {.Input = U"&copy;", .Output = {CreateCharacterToken(u8"©")}}))
-
-  TEST("NamedCharacterReference", "missing semicolon",
-       (UnitTest {
-         .Input = U"&Agrave",
-         .AppendEOF = true,
-         .Output = {CreateCharacterToken(u8"À"), CreateEOFToken()},
-         .Errors = {
-           {.Error = HTMLParseError::MissingSemicolonAfterCharacterReference, .Line = 1uz, .Column = 8uz}}}))
-
-  TEST("NamedCharacterReference", "no match, incomplete reference",
-       (UnitTest {.ExpectedState = HTML::TokenizerState::AmbiguousAmpersand,
-                  .Input = U"&nonentity",
-                  .Output = {CreateCharacterToken(u8"&nonentity")}}))
-
-  TEST("NamedCharacterReference", "no match, ends in semicolon",
-       (UnitTest {
-         .Input = U"&nonentity;",
-         .Output = {CreateCharacterToken(u8"&nonentity;")},
-         .Errors = {{.Error = HTMLParseError::UnknownNamedCharacterReference, .Line = 1uz, .Column = 11uz}}}))
-
-  TEST("NamedCharacterReference", "mixed case reference",
-       (UnitTest {.Input = U"&vsupnE;", .Output = {CreateCharacterToken(u8"⫌︀")}}))
-
-  TEST("NamedCharacterReference", "partial match with valid prefix",
-       (UnitTest {
-         .Input = U"&notit;",
-         .Output = {CreateCharacterToken(u8"¬it;")},
-         .Errors = {
-           {.Error = HTMLParseError::MissingSemicolonAfterCharacterReference, .Line = 1uz, .Column = 6uz}}}))
-
-  TEST("NamedCharacterReference", "EOF in middle of otherwise valid reference",
-       (UnitTest {
-         .Input = U"&co", .AppendEOF = true, .Output = {CreateCharacterToken(u8"&co"), CreateEOFToken()}}))
-
-  // TODO(test): test cases for when character references are consumed as part of attributes
-
-#pragma endregion
-
 #pragma region DecimalCharacterReference
-
-  TEST("DecimalCharacterReference", "happy path",
-       (UnitTest {.Input = U"&#8482;", .Output = {CreateCharacterToken(u8"™")}}))
-
-  TEST("DecimalCharacterReference", "lookup table",
-       (UnitTest {.Input = U"&#128;", .Output = {CreateCharacterToken(u8"€")}}))
-
-  TEST("DecimalCharacterReference", "leading zeros",
-       (UnitTest {.Input = U"&#00008482;", .Output = {CreateCharacterToken(u8"™")}}))
-
-  TEST("DecimalCharacterReference", "missing semicolon",
-       (UnitTest {
-         .Input = U"&#8482",
-         .AppendEOF = true,
-         .Output = {CreateCharacterToken(u8"™"), CreateEOFToken()},
-         .Errors = {
-           {.Error = HTMLParseError::MissingSemicolonAfterCharacterReference, .Line = 1uz, .Column = 7uz}}}))
-
-  TEST("DecimalCharacterReference", "no numbers provided after #",
-       (UnitTest {.Input = U"&#;",
-                  .Output = {CreateCharacterToken(u8"&#;")},
-                  .Errors = {{.Error = HTMLParseError::AbsenceOfDigitsInNumericCharacterReference,
-                              .Line = 1uz,
-                              .Column = 3uz}}}))
-
-  TEST("DecimalCharacterReference", "mixed with non-digit characters",
-       (UnitTest {
-         .Input = U"&#123abc;",
-         .Output = {CreateCharacterToken(u8"{abc;")},
-         .Errors = {
-           {.Error = HTMLParseError::MissingSemicolonAfterCharacterReference, .Line = 1uz, .Column = 6uz}}}))
-
-  TEST("DecimalCharacterReference", "stops at semicolon",
-       (UnitTest {.Input = U"&#65;BC", .Output = {CreateCharacterToken(u8"ABC")}}))
-
-  TEST("DecimalCharacterReference", "stops at non-digit character",
-       (UnitTest {
-         .Input = U"&#65BC;",
-         .Output = {CreateCharacterToken(u8"ABC;")},
-         .Errors = {
-           {.Error = HTMLParseError::MissingSemicolonAfterCharacterReference, .Line = 1uz, .Column = 5uz}}}))
-
-  TEST("DecimalCharacterReference", "null character reference",
-       (UnitTest {.Input = U"&#0;",
-                  .Output = {CreateCharacterToken(u8"\uFFFD")},
-                  .Errors = {{.Error = HTMLParseError::NullCharacterReference, .Line = 1uz, .Column = 4uz}}}))
-
-  TEST("DecimalCharacterReference", "character reference outside unicode range",
-       (UnitTest {
-         .Input = U"&#1114112;",
-         .Output = {CreateCharacterToken(u8"\uFFFD")},
-         .Errors = {
-           {.Error = HTMLParseError::CharacterReferenceOutsideUnicodeRange, .Line = 1uz, .Column = 10uz}}}))
-
-  TEST("DecimalCharacterReference", "surrogate",
-       (UnitTest {
-         .Input = U"&#55296;",
-         .Output = {CreateCharacterToken(u8"\uFFFD")},
-         .Errors = {{.Error = HTMLParseError::SurrogateCharacterReference, .Line = 1uz, .Column = 8uz}}}))
 
   TEST("DecimalCharacterReference", "non character",
        (UnitTest {
@@ -145,51 +39,6 @@ namespace Krys::Tests
 
 #pragma region HexadecimalCharacterReference
 
-  TEST("HexadecimalCharacterReference", "happy path",
-       (UnitTest {.Input = U"&#x152;", .Output = {CreateCharacterToken(u8"Œ")}}))
-
-  TEST("HexadecimalCharacterReference", "lookup table",
-       (UnitTest {.Input = U"&#x80;", .Output = {CreateCharacterToken(u8"€")}}))
-
-  TEST("HexadecimalCharacterReference", "mixed case hex digits",
-       (UnitTest {.Input = U"&#x20Ac;", .Output = {CreateCharacterToken(u8"€")}}))
-
-  TEST("HexadecimalCharacterReference", "uppercase X",
-       (UnitTest {.Input = U"&#X152;", .Output = {CreateCharacterToken(u8"Œ")}}))
-
-  TEST("HexadecimalCharacterReference", "missing semicolon",
-       (UnitTest {
-         .Input = U"&#X152",
-         .AppendEOF = true,
-         .Output = {CreateCharacterToken(u8"Œ"), CreateEOFToken()},
-         .Errors = {
-           {.Error = HTMLParseError::MissingSemicolonAfterCharacterReference, .Line = 1uz, .Column = 7uz}}}))
-
-  TEST("HexadecimalCharacterReference", "no numbers provided after #X",
-       (UnitTest {.Input = U"&#X;",
-                  .Output = {CreateCharacterToken(u8"&#X;")},
-                  .Errors = {{.Error = HTMLParseError::AbsenceOfDigitsInNumericCharacterReference,
-                              .Line = 1uz,
-                              .Column = 4uz}}}))
-
-  TEST("HexadecimalCharacterReference", "null character reference",
-       (UnitTest {.Input = U"&#x00;",
-                  .Output = {CreateCharacterToken(u8"\uFFFD")},
-                  .Errors = {{.Error = HTMLParseError::NullCharacterReference, .Line = 1uz, .Column = 6uz}}}))
-
-  TEST("HexadecimalCharacterReference", "character reference outside unicode range",
-       (UnitTest {
-         .Input = U"&#x110000;",
-         .Output = {CreateCharacterToken(u8"\uFFFD")},
-         .Errors = {
-           {.Error = HTMLParseError::CharacterReferenceOutsideUnicodeRange, .Line = 1uz, .Column = 10uz}}}))
-
-  TEST("HexadecimalCharacterReference", "surrogate",
-       (UnitTest {
-         .Input = U"&#xD800;",
-         .Output = {CreateCharacterToken(u8"\uFFFD")},
-         .Errors = {{.Error = HTMLParseError::SurrogateCharacterReference, .Line = 1uz, .Column = 8uz}}}))
-
   TEST("HexadecimalCharacterReference", "non character",
        (UnitTest {
          .Input = U"&#xFFFE;",
@@ -201,46 +50,6 @@ namespace Krys::Tests
          .Input = U"&#x0D;",
          .Output = {CreateCharacterToken(u8"\x0D")},
          .Errors = {{.Error = HTMLParseError::ControlCharacterReference, .Line = 1uz, .Column = 6uz}}}))
-
-#pragma endregion
-
-  TEST("CharacterReference", "Multiple character references",
-       (UnitTest {
-         .Input = U"&copy;&Agrave&#128;&#X152;&a;",
-         .Output = {CreateCharacterToken(u8"©À€Œ&a;")},
-         .Errors = {
-           {.Error = HTMLParseError::MissingSemicolonAfterCharacterReference, .Line = 1uz, .Column = 14uz},
-           {.Error = HTMLParseError::UnknownNamedCharacterReference, .Line = 1uz, .Column = 29uz}}}))
-
-#pragma endregion
-
-#pragma region Data
-
-  TEST("Data", "Batches characters ",
-       (UnitTest {.Input = U"a string of characters; 123145",
-                  .Output = {CreateCharacterToken(u8"a string of characters; 123145")}}))
-
-  TEST("Data", "Replaces character references",
-       (UnitTest {.Input = U"Some data &copy; some more data",
-                  .Output = {CreateCharacterToken(u8"Some data © some more data")}}))
-
-  TEST("Data", "switches to TagOpen when parsing LessThanSign",
-       (UnitTest {.ExpectedState = TokenizerState::TagOpen, .Input = U"<", .Output = {}}))
-
-  TEST("Data", "Batches characters up to less than sign",
-       (UnitTest {.Input = U"a string of characters; 123145<",
-                  .Output = {CreateCharacterToken(u8"a string of characters; 123145")}}))
-
-  TEST("Data", "Batches characters up to EOF then emits EOF",
-       (UnitTest {.Input = U"a string of characters; 123145",
-                  .AppendEOF = true,
-                  .Output = {CreateCharacterToken(u8"a string of characters; 123145"), CreateEOFToken()}}))
-
-  TEST("Data", "Emits null character as-is with parse error",
-       (UnitTest {
-         .Input = InsertUTF32Null(U"1234"),
-         .Output = {CreateCharacterToken(InsertUTF8Null(u8"1234"))},
-         .Errors = {{.Error = HTMLParseError::UnexpectedNullCharacter, .Line = 1uz, .Column = 5uz}}}))
 
 #pragma endregion
 
@@ -1594,67 +1403,6 @@ namespace Krys::Tests
        (UnitTest {.InitialState = TokenizerState::Data,
                   .ExpectedState = TokenizerState::AttributeName,
                   .Input = U"<a b"}))
-
-#pragma endregion
-
-#pragma region AttributeName
-
-  TEST("AttributeName", "switches to Data and emits the current tag when parsing GreaterThanSign",
-       (UnitTest {
-         .Input = U"<div b>",
-         .Output = {CreateStartTagToken({.Name = u8"div", .Attributes = {{.Name = u8"b", .Value = u8""}}})}}))
-
-  TEST("AttributeName", "switches to Data and emits EOF when EOF reached",
-       (UnitTest {.Input = U"<div b",
-                  .AppendEOF = true,
-                  .Output = {CreateEOFToken()},
-                  .Errors = {{.Error = HTMLParseError::EOFInTag, .Line = 1uz, .Column = 7uz}}}))
-
-  TEST("AttributeName",
-       "switches to Data and emits the current tag with parser error when parsing Solidus GreaterThanSign",
-       (UnitTest {.Input = U"<div b/>",
-                  .Output = {CreateStartTagToken({.Name = u8"div",
-                                                  .Attributes = {{.Name = u8"b", .Value = u8""}},
-                                                  .SelfClosing = true})}}))
-
-  TEST("AttributeName", "ignores whitespace and switches to AfterAttributeName when parsing whitespace",
-       (UnitTest {.ExpectedState = TokenizerState::AfterAttributeName, .Input = U"<div b   \t\n\r"}))
-
-  TEST("AttributeName", "switches to SelfClosingStartTag when parsing Solidus",
-       (UnitTest {.ExpectedState = TokenizerState::SelfClosingStartTag, .Input = U"<div b/"}))
-
-  TEST("AttributeName", "parses attribute name and switches to BeforeAttributeValue when parsing EqualsSign",
-       (UnitTest {.ExpectedState = TokenizerState::BeforeAttributeValue, .Input = U"<div b="}))
-
-  TEST("AttributeName", "appends to attribute name when parsing valid attribute name characters",
-       (UnitTest {.ExpectedState = TokenizerState::BeforeAttributeValue, .Input = U"<div data-value="}))
-
-  TEST("AttributeName", "Replaces null character with U+FFFD in attribute name",
-       (UnitTest {
-         .ExpectedState = TokenizerState::BeforeAttributeValue,
-         .Input = InsertUTF32Null(U"<div data", U"value="),
-         .Errors = {{.Error = HTMLParseError::UnexpectedNullCharacter, .Line = 1uz, .Column = 10uz}}}))
-
-  TEST("AttributeName", "Treats QuotationMark as anything else but with parse error",
-       (UnitTest {
-         .ExpectedState = TokenizerState::BeforeAttributeValue,
-         .Input = U"<div data\"value=",
-         .Errors = {
-           {.Error = HTMLParseError::UnexpectedCharacterInAttributeName, .Line = 1uz, .Column = 10uz}}}))
-
-  TEST("AttributeName", "Treats Apostrophe as anything else but with parse error",
-       (UnitTest {
-         .ExpectedState = TokenizerState::BeforeAttributeValue,
-         .Input = U"<div data'value=",
-         .Errors = {
-           {.Error = HTMLParseError::UnexpectedCharacterInAttributeName, .Line = 1uz, .Column = 10uz}}}))
-
-  TEST("AttributeName", "Treats LessThanSign as anything else but with parse error",
-       (UnitTest {
-         .ExpectedState = TokenizerState::BeforeAttributeValue,
-         .Input = U"<div data<value=",
-         .Errors = {
-           {.Error = HTMLParseError::UnexpectedCharacterInAttributeName, .Line = 1uz, .Column = 10uz}}}))
 
 #pragma endregion
 

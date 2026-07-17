@@ -1,0 +1,38 @@
+﻿#data
+div
+#initial-state
+EndTagOpen
+#expected-state
+TagName
+#tokens
+
+#data
+>
+#initial-state
+EndTagOpen
+#expected-state
+Data
+#tokens
+#errors
+1:1 MissingEndTagName
+
+#data
+/
+#initial-state
+TagOpen
+#append-eof
+#tokens
+Character(</)
+EndOfFile
+#errors
+1:2 EOFBeforeTagName
+
+#data
+*
+#initial-state
+EndTagOpen
+#expected-state
+BogusComment
+#tokens
+#errors
+1:1 InvalidFirstCharacterOfTagName

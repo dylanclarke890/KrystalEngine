@@ -1,0 +1,18 @@
+﻿#data
+<!---
+#expected-state
+CommentStartDash
+#tokens
+
+#data
+<!-->
+#tokens
+Comment()
+#errors
+1:5 AbruptClosingOfEmptyComment
+
+#data
+<!--c
+#expected-state
+Comment
+#tokens

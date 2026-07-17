@@ -1,8 +1,12 @@
+#name
+Non-character reference
 #data
 &_
 #tokens
 Character(&_)
 
+#name
+Multiple character references
 #data
 &copy;&Agrave&#128;&#X152;&a;
 #tokens

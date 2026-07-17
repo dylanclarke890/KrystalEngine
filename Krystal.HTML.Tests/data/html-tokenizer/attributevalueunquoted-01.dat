@@ -1,0 +1,67 @@
+﻿#data
+<div a=value>
+#tokens
+StartTag(div, a="value", SelfClosing=false)
+
+#data
+<div a=value
+>
+#tokens
+StartTag(div, a="value)
+#errors
+1:13 UnexpectedNullCharacter
+
+#data
+<div a=val"ue>
+#tokens
+StartTag(div, a="val\"ue", SelfClosing=false)
+#errors
+1:11 UnexpectedCharacterInUnquotedAttributeValue
+
+#data
+<div a=val'ue>
+#tokens
+StartTag(div, a="val'ue", SelfClosing=false)
+#errors
+1:11 UnexpectedCharacterInUnquotedAttributeValue
+
+#data
+<div a=val<ue>
+#tokens
+StartTag(div, a="val<ue", SelfClosing=false)
+#errors
+1:11 UnexpectedCharacterInUnquotedAttributeValue
+
+#data
+<div a=val=ue>
+#tokens
+StartTag(div, a="val=ue", SelfClosing=false)
+#errors
+1:11 UnexpectedCharacterInUnquotedAttributeValue
+
+#data
+<div a=val\ue>
+#tokens
+StartTag(div, a="val\ue", SelfClosing=false)
+#errors
+1:11 UnexpectedCharacterInUnquotedAttributeValue
+
+#data
+<div a=value 
+#expected-state
+BeforeAttributeName
+#tokens
+
+#data
+<div a=value&
+#expected-state
+CharacterReference
+#tokens
+
+#data
+<div a=value
+#append-eof
+#tokens
+EndOfFile
+#errors
+1:13 EOFInTag

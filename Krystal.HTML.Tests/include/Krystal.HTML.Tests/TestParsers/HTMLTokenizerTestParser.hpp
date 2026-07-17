@@ -14,6 +14,7 @@ namespace Krys::HTML::Tests
 {
   struct HTMLTokenizerTest
   {
+    string Name;
     utf32_string Html;
     utf8_string Tokens;
     TokenizerState InitialState {TokenizerState::Data};
@@ -26,6 +27,7 @@ namespace Krys::HTML::Tests
   enum class HTMLTokenizerTestSection
   {
     None,
+    Name,
     Data,
     InitialState,
     ExpectedState,
@@ -110,6 +112,7 @@ namespace Krys::HTML::Tests
   {
     List<HTMLTokenizerTest> tests;
 
+    string name;
     string html;
     string tokens;
     TokenizerState initialState {TokenizerState::Data};
@@ -120,10 +123,12 @@ namespace Krys::HTML::Tests
 
     auto FinishParsingTest = [&]()
     {
+      NormaliseData(name);
       NormaliseData(html);
       NormaliseData(tokens);
 
       tests.push_back({
+        .Name = name,
         .Html = Krys::Text::ConvertToUTF32(utf8_stringview(ToUTF8(html))),
         .Tokens = ToUTF8(tokens),
         .InitialState = initialState,
@@ -149,16 +154,17 @@ namespace Krys::HTML::Tests
       {
         line.pop_back();
       }
+      if (line == "#name")
+      {
+        NormaliseData(tokens);
+        FinishParsingTest();
+
+        section = HTMLTokenizerTestSection::Name;
+        continue;
+      }
 
       if (line == "#data")
       {
-        NormaliseData(tokens);
-
-        if (!html.empty() && !tokens.empty())
-        {
-          FinishParsingTest();
-        }
-
         section = HTMLTokenizerTestSection::Data;
         continue;
       }
@@ -203,6 +209,11 @@ namespace Krys::HTML::Tests
       {
         case HTMLTokenizerTestSection::None:
         {
+          continue;
+        }
+        case HTMLTokenizerTestSection::Name:
+        {
+          name = line;
           continue;
         }
         case HTMLTokenizerTestSection::Data:
@@ -273,7 +284,7 @@ namespace Krys::HTML::Tests
       }
     }
 
-    if (!html.empty() && !tokens.empty())
+    if (!html.empty())
     {
       FinishParsingTest();
     }

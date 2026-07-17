@@ -1,0 +1,33 @@
+﻿#data
+<div a="value">
+#tokens
+StartTag(div, a="value", SelfClosing=false)
+
+#data
+<div a="value"   
+
+#expected-state
+BeforeAttributeName
+#tokens
+
+#data
+<div a="value"/
+#expected-state
+SelfClosingStartTag
+#tokens
+
+#data
+<div a="value"
+#append-eof
+#tokens
+EndOfFile
+#errors
+1:15 EOFInTag
+
+#data
+<div a="value"b
+#expected-state
+AttributeName
+#tokens
+#errors
+1:15 MissingWhitespaceBetweenAttributes

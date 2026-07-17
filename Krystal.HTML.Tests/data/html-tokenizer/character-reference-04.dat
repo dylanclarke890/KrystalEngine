@@ -1,0 +1,74 @@
+#name
+happy path
+#data
+&#x152;
+#tokens
+Character(Œ)
+
+#name
+lookup table
+#data
+&#x80;
+#tokens
+Character(€)
+
+#name
+mixed case hex digits
+#data
+&#x20Ac;
+#tokens
+Character(€)
+
+#name
+uppercase X
+#data
+&#X152;
+#tokens
+Character(Œ)
+
+#name
+missing semicolon
+#data
+&#X152
+#append-eof
+#tokens
+Character(Œ)
+EndOfFile
+#errors
+1:7 MissingSemicolonAfterCharacterReference
+
+#name
+no numbers provided after #X
+#data
+&#X;
+#tokens
+Character(&#X;)
+#errors
+1:4 AbsenceOfDigitsInNumericCharacterReference
+
+#name
+null character reference
+#data
+&#x00;
+#tokens
+Character(�)
+#errors
+1:6 NullCharacterReference
+
+#name
+character reference outside unicode range
+#data
+&#x110000;
+#tokens
+Character(�)
+#errors
+1:10 CharacterReferenceOutsideUnicodeRange
+
+#name
+surrogate
+#data
+&#xD800;
+#tokens
+Character(�)
+#errors
+1:8 SurrogateCharacterReference

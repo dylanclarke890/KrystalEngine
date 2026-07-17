@@ -1,0 +1,51 @@
+﻿#data
+   
+
+#initial-state
+BeforeAttributeName
+#expected-state
+BeforeAttributeName
+#tokens
+
+#data
+/
+#initial-state
+BeforeAttributeName
+#expected-state
+SelfClosingStartTag
+#tokens
+
+#data
+<div >
+#initial-state
+Data
+#tokens
+StartTag(div, SelfClosing=false)
+
+#data
+<div 
+#initial-state
+Data
+#append-eof
+#tokens
+EndOfFile
+#errors
+1:6 EOFInTag
+
+#data
+<a =
+#initial-state
+Data
+#expected-state
+AttributeName
+#tokens
+#errors
+1:4 UnexpectedEqualsSignBeforeAttributeName
+
+#data
+<a b
+#initial-state
+Data
+#expected-state
+AttributeName
+#tokens

@@ -1,0 +1,41 @@
+﻿#data
+   
+
+#initial-state
+BeforeAttributeValue
+#expected-state
+BeforeAttributeValue
+#tokens
+
+#data
+<div a="
+#expected-state
+AttributeValueDoubleQuoted
+#tokens
+
+#data
+<div a='
+#expected-state
+AttributeValueSingleQuoted
+#tokens
+
+#data
+<div a=>
+#tokens
+StartTag(div, a="", SelfClosing=false)
+#errors
+1:8 MissingAttributeValue
+
+#data
+<div a=value
+#expected-state
+AttributeValueUnquoted
+#tokens
+
+#data
+<div a=
+#append-eof
+#tokens
+EndOfFile
+#errors
+1:8 EOFInTag
